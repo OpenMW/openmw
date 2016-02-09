@@ -14,8 +14,6 @@ namespace SceneUtil
 namespace Terrain
 {
 
-    class GridElement;
-
     /// @brief Simple terrain implementation that loads cells in a grid, with no LOD
     class TerrainGrid : public Terrain::World
     {
@@ -38,7 +36,7 @@ namespace Terrain
         typedef std::map<std::string, osg::ref_ptr<osg::Texture2D> >  TextureCache;
         TextureCache mTextureCache;
 
-        typedef std::map<std::pair<int, int>, GridElement*> Grid;
+        typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node> > Grid;
         Grid mGrid;
 
         osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;

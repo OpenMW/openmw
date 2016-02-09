@@ -63,12 +63,6 @@ TerrainGrid::~TerrainGrid()
     }
 }
 
-class GridElement
-{
-public:
-    osg::ref_ptr<osg::Node> mNode;
-};
-
 osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter)
 {
     if (chunkSize * mNumSplits > 1.f)
@@ -208,11 +202,9 @@ void TerrainGrid::loadCell(int x, int y)
     if (!terrainNode)
         return; // no terrain defined
 
-    std::auto_ptr<GridElement> element (new GridElement);
-    element->mNode = terrainNode;
-    mTerrainRoot->addChild(element->mNode);
+    mTerrainRoot->addChild(terrainNode);
 
-    mGrid[std::make_pair(x,y)] = element.release();
+    mGrid[std::make_pair(x,y)] = terrainNode;
 }
 
 void TerrainGrid::unloadCell(int x, int y)
@@ -221,13 +213,11 @@ void TerrainGrid::unloadCell(int x, int y)
     if (it == mGrid.end())
         return;
 
-    GridElement* element = it->second;
-    mTerrainRoot->removeChild(element->mNode);
+    osg::Node* terrainNode = it->second;
+    mTerrainRoot->removeChild(terrainNode);
 
     if (mUnrefQueue.get())
-        mUnrefQueue->push(element->mNode);
-
-    delete element;
+        mUnrefQueue->push(terrainNode);
 
     mGrid.erase(it);
 }
