@@ -457,6 +457,9 @@ namespace MWWorld
     , mCellLoadingThreshold(1024.f)
     , mPreloadDistance(Settings::Manager::getInt("preload distance", "Cells"))
     , mPreloadEnabled(Settings::Manager::getBool("preload enabled", "Cells"))
+    , mPreloadExteriorGrid(Settings::Manager::getBool("preload exterior grid", "Cells"))
+    , mPreloadDoors(Settings::Manager::getBool("preload doors", "Cells"))
+    , mPreloadFastTravel(Settings::Manager::getBool("preload fast travel", "Cells"))
     {
         mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager()));
         mPreloader->setWorkQueue(mRendering.getWorkQueue());
@@ -631,9 +634,12 @@ namespace MWWorld
 
     void Scene::preloadCells()
     {
-        preloadTeleportDoorDestinations();
-        preloadExteriorGrid();
-        preloadFastTravelDestinations();
+        if (mPreloadDoors)
+            preloadTeleportDoorDestinations();
+        if (mPreloadExteriorGrid)
+            preloadExteriorGrid();
+        if (mPreloadFastTravel)
+            preloadFastTravelDestinations();
     }
 
     void Scene::preloadTeleportDoorDestinations()
