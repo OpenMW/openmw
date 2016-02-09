@@ -261,22 +261,22 @@ void TerrainGrid::unloadCell(int x, int y)
 void TerrainGrid::updateCache()
 {
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mTextureCacheMutex);
-        for (TextureCache::iterator it = mTextureCache.begin(); it != mTextureCache.end();)
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
+        for (Grid::iterator it = mGridCache.begin(); it != mGridCache.end();)
         {
             if (it->second->referenceCount() <= 1)
-                mTextureCache.erase(it++);
+                mGridCache.erase(it++);
             else
                 ++it;
         }
     }
 
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
-        for (Grid::iterator it = mGridCache.begin(); it != mGridCache.end();)
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mTextureCacheMutex);
+        for (TextureCache::iterator it = mTextureCache.begin(); it != mTextureCache.end();)
         {
             if (it->second->referenceCount() <= 1)
-                mGridCache.erase(it++);
+                mTextureCache.erase(it++);
             else
                 ++it;
         }
