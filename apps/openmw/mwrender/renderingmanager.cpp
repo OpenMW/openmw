@@ -127,6 +127,29 @@ namespace MWRender
         bool mWireframe;
     };
 
+    class PreloadCommonAssetsWorkItem : public SceneUtil::WorkItem
+    {
+    public:
+        PreloadCommonAssetsWorkItem(Resource::ResourceSystem* resourceSystem)
+            : mResourceSystem(resourceSystem)
+        {
+        }
+
+        virtual void doWork()
+        {
+            for (std::vector<std::string>::const_iterator it = mModels.begin(); it != mModels.end(); ++it)
+                mResourceSystem->getSceneManager()->getTemplate(*it);
+            for (std::vector<std::string>::const_iterator it = mTextures.begin(); it != mTextures.end(); ++it)
+                mResourceSystem->getImageManager()->getImage(*it);
+        }
+
+        std::vector<std::string> mModels;
+        std::vector<std::string> mTextures;
+
+    private:
+        Resource::ResourceSystem* mResourceSystem;
+    };
+
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem,
                                        const Fallback::Map* fallback, const std::string& resourcePath)
         : mViewer(viewer)
@@ -236,6 +259,17 @@ namespace MWRender
     SceneUtil::WorkQueue *RenderingManager::getWorkQueue()
     {
         return mWorkQueue.get();
+    }
+
+    void RenderingManager::preloadCommonAssets()
+    {
+        osg::ref_ptr<PreloadCommonAssetsWorkItem> workItem (new PreloadCommonAssetsWorkItem(mResourceSystem));
+        mSky->listAssetsToPreload(workItem->mModels, workItem->mTextures);
+        mWater->listAssetsToPreload(workItem->mTextures);
+
+        workItem->mTextures.push_back("textures/_land_default.dds");
+
+        mWorkQueue->addWorkItem(workItem);
     }
 
     void RenderingManager::clearCache()

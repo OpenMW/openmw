@@ -649,6 +649,18 @@ Water::~Water()
     }
 }
 
+void Water::listAssetsToPreload(std::vector<std::string> &textures)
+{
+    int frameCount = mFallback->getFallbackInt("Water_SurfaceFrameCount");
+    std::string texture = mFallback->getFallbackString("Water_SurfaceTexture");
+    for (int i=0; i<frameCount; ++i)
+    {
+        std::ostringstream texname;
+        texname << "textures/water/" << texture << std::setw(2) << std::setfill('0') << i << ".dds";
+        textures.push_back(texname.str());
+    }
+}
+
 void Water::setEnabled(bool enabled)
 {
     mEnabled = enabled;

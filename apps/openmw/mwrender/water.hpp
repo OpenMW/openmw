@@ -2,6 +2,7 @@
 #define OPENMW_MWRENDER_WATER_H
 
 #include <memory>
+#include <vector>
 
 #include <osg/ref_ptr>
 #include <osg/Vec3f>
@@ -84,6 +85,8 @@ namespace MWRender
               Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, const Fallback::Map* fallback,
               const std::string& resourcePath);
         ~Water();
+
+        void listAssetsToPreload(std::vector<std::string>& textures);
 
         void setEnabled(bool enabled);
 

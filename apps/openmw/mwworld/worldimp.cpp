@@ -3216,4 +3216,9 @@ namespace MWWorld
         return mPhysics->getHitDistance(weaponPos, target);
     }
 
+    void World::preloadCommonAssets()
+    {
+        mRendering->preloadCommonAssets();
+    }
+
 }

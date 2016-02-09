@@ -1694,6 +1694,46 @@ void SkyManager::setWaterHeight(float height)
     mUnderwaterSwitch->setWaterLevel(height);
 }
 
+void SkyManager::listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures)
+{
+    models.push_back("meshes/sky_atmosphere.nif");
+    if (mSceneManager->getVFS()->exists("meshes/sky_night_02.nif"))
+        models.push_back("meshes/sky_night_02.nif");
+    models.push_back("meshes/sky_night_01.nif");
+    models.push_back("meshes/sky_clouds_01.nif");
+
+    models.push_back("meshes\\ashcloud.nif");
+    models.push_back("meshes\\blightcloud.nif");
+    models.push_back("meshes\\snow.nif");
+    models.push_back("meshes\\blizzard.nif");
+
+    textures.push_back("textures/tx_mooncircle_full_s.dds");
+    textures.push_back("textures/tx_mooncircle_full_m.dds");
+
+    textures.push_back("textures/tx_masser_new.dds");
+    textures.push_back("textures/tx_masser_one_wax.dds");
+    textures.push_back("textures/tx_masser_half_wax.dds");
+    textures.push_back("textures/tx_masser_three_wax.dds");
+    textures.push_back("textures/tx_masser_one_wan.dds");
+    textures.push_back("textures/tx_masser_half_wan.dds");
+    textures.push_back("textures/tx_masser_three_wan.dds");
+    textures.push_back("textures/tx_masser_full.dds");
+
+    textures.push_back("textures/tx_secunda_new.dds");
+    textures.push_back("textures/tx_secunda_one_wax.dds");
+    textures.push_back("textures/tx_secunda_half_wax.dds");
+    textures.push_back("textures/tx_secunda_three_wax.dds");
+    textures.push_back("textures/tx_secunda_one_wan.dds");
+    textures.push_back("textures/tx_secunda_half_wan.dds");
+    textures.push_back("textures/tx_secunda_three_wan.dds");
+    textures.push_back("textures/tx_secunda_full.dds");
+
+    textures.push_back("textures/tx_sun_05.dds");
+    textures.push_back("textures/tx_sun_flash_grey_05.dds");
+
+    textures.push_back("textures/tx_raindrop_01.dds");
+}
+
 void SkyManager::setWaterEnabled(bool enabled)
 {
     mUnderwaterSwitch->setEnabled(enabled);

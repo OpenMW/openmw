@@ -72,6 +72,8 @@ namespace MWRender
 
         SceneUtil::WorkQueue* getWorkQueue();
 
+        void preloadCommonAssets();
+
         void clearCache();
 
         double getReferenceTime() const;
