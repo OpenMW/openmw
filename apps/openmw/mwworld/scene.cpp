@@ -2,7 +2,6 @@
 
 #include <limits>
 #include <iostream>
-#include <osg/Timer>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -332,7 +331,6 @@ namespace MWWorld
 
     void Scene::changeCellGrid (int X, int Y)
     {
-        osg::Timer timer;
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
 
@@ -416,8 +414,6 @@ namespace MWWorld
         mCellChanged = true;
 
         mPreloader->updateCache(mRendering.getReferenceTime());
-
-        std::cout << "changeCellGrid took " << timer.time_m() << std::endl;
     }
 
     void Scene::changePlayerCell(CellStore *cell, const ESM::Position &pos, bool adjustPlayerPos)
@@ -488,7 +484,6 @@ namespace MWWorld
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
-        osg::Timer timer;
         CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
         bool loadcell = (mCurrentCell == NULL);
         if(!loadcell)
@@ -548,8 +543,6 @@ namespace MWWorld
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
 
         mPreloader->updateCache(mRendering.getReferenceTime());
-
-        std::cout << "change to interior took " << timer.time_m() << std::endl;
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos)

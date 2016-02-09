@@ -17,7 +17,6 @@
 #include <osg/Texture2D>
 #include <osg/ref_ptr>
 
-#include <osg/Timer>
 #include <osg/StateSet>
 #include <osg/NodeCallback>
 #include <osg/Drawable>

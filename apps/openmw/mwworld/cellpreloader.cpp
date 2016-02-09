@@ -54,7 +54,6 @@ namespace MWWorld
             , mKeyframeManager(keyframeManager)
             , mTerrain(terrain)
         {
-            osg::Timer timer;
             ListModelsVisitor visitor (mMeshes);
             if (cell->getState() == MWWorld::CellStore::State_Loaded)
             {
@@ -73,23 +72,17 @@ namespace MWWorld
                         mMeshes.push_back(model);
                 }
             }
-            std::cout << "listed models in " << timer.time_m() << std::endl;
         }
 
         /// Preload work to be called from the worker thread.
         virtual void doWork()
         {
-            // TODO: make CellStore::loadRefs thread safe so we can call it from here
-
-            osg::Timer preloadTimer;
             for (MeshList::const_iterator it = mMeshes.begin(); it != mMeshes.end(); ++it)
             {
                 try
                 {
                     std::string mesh  = *it;
                     mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mSceneManager->getVFS());
-
-                    //std::cout << "preloading " << mesh << std::endl;
 
                     mPreloadedObjects.push_back(mSceneManager->cacheInstance(mesh));
                     mPreloadedObjects.push_back(mBulletShapeManager->cacheInstance(mesh));
@@ -127,8 +120,6 @@ namespace MWWorld
                 {
                 }
             }
-
-            std::cout << "preloaded " << mPreloadedObjects.size() << " objects in " << preloadTimer.time_m() << std::endl;
         }
 
     private:
@@ -159,11 +150,9 @@ namespace MWWorld
 
         virtual void doWork()
         {
-            osg::Timer timer;
             mResourceSystem->updateCache(mReferenceTime);
 
             mTerrain->updateCache();
-            std::cout << "cleared cache in " << timer.time_m() << std::endl;
         }
 
     private:

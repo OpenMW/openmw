@@ -366,8 +366,6 @@ namespace Resource
             if (mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);
 
-            //std::cout << "loading " << normalized  << std::endl;
-
             mCache->addEntryToObjectCache(normalized, loaded);
             return loaded;
         }
