@@ -46,7 +46,7 @@ add_component_dir (resource
 
 add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry lightcontroller
-    lightmanager lightutil positionattitudetransform workqueue
+    lightmanager lightutil positionattitudetransform workqueue unrefqueue
     )
 
 add_component_dir (nif

@@ -27,6 +27,7 @@
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/workqueue.hpp>
+#include <components/sceneutil/unrefqueue.hpp>
 
 #include <components/terrain/terraingrid.hpp>
 
@@ -156,6 +157,7 @@ namespace MWRender
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
         , mWorkQueue(new SceneUtil::WorkQueue)
+        , mUnrefQueue(new SceneUtil::UnrefQueue)
         , mFogDepth(0.f)
         , mUnderwaterColor(fallback->getFallbackColour("Water_UnderwaterColor"))
         , mUnderwaterWeight(fallback->getFallbackFloat("Water_UnderwaterColorWeight"))
@@ -176,7 +178,7 @@ namespace MWRender
 
         mPathgrid.reset(new Pathgrid(mRootNode));
 
-        mObjects.reset(new Objects(mResourceSystem, lightRoot));
+        mObjects.reset(new Objects(mResourceSystem, lightRoot, mUnrefQueue.get()));
 
         mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
 
@@ -187,7 +189,7 @@ namespace MWRender
         mWater.reset(new Water(mRootNode, lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
 
         mTerrain.reset(new Terrain::TerrainGrid(lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(),
-                                                new TerrainStorage(mResourceSystem->getVFS(), false), Mask_Terrain));
+                                                new TerrainStorage(mResourceSystem->getVFS(), false), Mask_Terrain, mUnrefQueue.get()));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 
@@ -437,6 +439,8 @@ namespace MWRender
 
     void RenderingManager::update(float dt, bool paused)
     {
+        mUnrefQueue->flush(mWorkQueue.get());
+
         if (!paused)
         {
             mEffectManager->update(dt);

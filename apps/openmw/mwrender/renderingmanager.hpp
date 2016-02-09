@@ -45,6 +45,7 @@ namespace Fallback
 namespace SceneUtil
 {
     class WorkQueue;
+    class UnrefQueue;
 }
 
 namespace MWRender
@@ -200,6 +201,7 @@ namespace MWRender
         Resource::ResourceSystem* mResourceSystem;
 
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
+        osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
         osg::ref_ptr<osg::Light> mSunLight;
 

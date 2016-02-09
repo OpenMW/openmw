@@ -6,9 +6,9 @@
 #include "world.hpp"
 #include "material.hpp"
 
-namespace osg
+namespace SceneUtil
 {
-    class KdTreeBuilder;
+    class UnrefQueue;
 }
 
 namespace Terrain
@@ -20,8 +20,7 @@ namespace Terrain
     class TerrainGrid : public Terrain::World
     {
     public:
-        TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
-              Storage* storage, int nodeMask);
+        TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, SceneUtil::UnrefQueue* unrefQueue = NULL);
         ~TerrainGrid();
 
         virtual void loadCell(int x, int y);
@@ -42,7 +41,7 @@ namespace Terrain
         typedef std::map<std::pair<int, int>, GridElement*> Grid;
         Grid mGrid;
 
-        osg::ref_ptr<osg::KdTreeBuilder> mKdTreeBuilder;
+        osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
     };
 
 }

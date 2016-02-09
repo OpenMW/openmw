@@ -8,6 +8,7 @@
 
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/unrefqueue.hpp>
 
 #include <components/esm/loadland.hpp>
 
@@ -46,11 +47,10 @@ namespace
 namespace Terrain
 {
 
-TerrainGrid::TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
-                         Storage* storage, int nodeMask)
+TerrainGrid::TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, SceneUtil::UnrefQueue* unrefQueue)
     : Terrain::World(parent, resourceSystem, ico, storage, nodeMask)
     , mNumSplits(4)
-    , mKdTreeBuilder(new osg::KdTreeBuilder)
+    , mUnrefQueue(unrefQueue)
 {
     mCache = BufferCache((storage->getCellVertices()-1)/static_cast<float>(mNumSplits) + 1);
 }
@@ -212,13 +212,6 @@ void TerrainGrid::loadCell(int x, int y)
     element->mNode = terrainNode;
     mTerrainRoot->addChild(element->mNode);
 
-    // kdtree probably not needed with mNumSplits=4
-    /*
-    // build a kdtree to speed up intersection tests with the terrain
-    // Note, the build could be optimized using a custom kdtree builder, since we know that the terrain can be represented by a quadtree
-    geode->accept(*mKdTreeBuilder);
-    */
-
     mGrid[std::make_pair(x,y)] = element.release();
 }
 
@@ -230,6 +223,10 @@ void TerrainGrid::unloadCell(int x, int y)
 
     GridElement* element = it->second;
     mTerrainRoot->removeChild(element->mNode);
+
+    if (mUnrefQueue.get())
+        mUnrefQueue->push(element->mNode);
+
     delete element;
 
     mGrid.erase(it);
@@ -240,7 +237,11 @@ void TerrainGrid::clearCache()
     for (TextureCache::iterator it = mTextureCache.begin(); it != mTextureCache.end();)
     {
         if (it->second->referenceCount() <= 1)
+        {
+            if (mUnrefQueue.get())
+                mUnrefQueue->push(it->second);
             mTextureCache.erase(it++);
+        }
         else
             ++it;
     }
