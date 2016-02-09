@@ -87,7 +87,7 @@ namespace MWWorld
                     //std::cout << "preloading " << mesh << std::endl;
 
                     mPreloadedNodes.push_back(mSceneManager->cacheInstance(mesh));
-                    mPreloadedShapes.push_back(mBulletShapeManager->getShape(mesh));
+                    mPreloadedShapes.push_back(mBulletShapeManager->cacheInstance(mesh));
 
                     size_t slashpos = mesh.find_last_of("/\\");
                     if (slashpos != std::string::npos && slashpos != mesh.size()-1)
@@ -123,7 +123,7 @@ namespace MWWorld
 
         // keep a ref to the loaded object to make sure it stays loaded as long as this cell is in the preloaded state
         std::vector<osg::ref_ptr<const osg::Node> > mPreloadedNodes;
-        std::vector<osg::ref_ptr<const Resource::BulletShape> > mPreloadedShapes;
+        std::vector<osg::ref_ptr<const Resource::BulletShapeInstance> > mPreloadedShapes;
         std::vector<osg::ref_ptr<const NifOsg::KeyframeHolder> > mPreloadedKeyframes;
     };
 

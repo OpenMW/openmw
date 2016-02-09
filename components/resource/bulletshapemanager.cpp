@@ -14,7 +14,7 @@
 #include "scenemanager.hpp"
 #include "niffilemanager.hpp"
 #include "objectcache.hpp"
-
+#include "multiobjectcache.hpp"
 
 namespace Resource
 {
@@ -98,6 +98,7 @@ private:
 
 BulletShapeManager::BulletShapeManager(const VFS::Manager* vfs, SceneManager* sceneMgr, NifFileManager* nifFileManager)
     : ResourceManager(vfs)
+    , mInstanceCache(new MultiObjectCache)
     , mSceneManager(sceneMgr)
     , mNifFileManager(nifFileManager)
 {
@@ -151,6 +152,28 @@ osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &
     return shape;
 }
 
+osg::ref_ptr<BulletShapeInstance> BulletShapeManager::cacheInstance(const std::string &name)
+{
+    std::string normalized = name;
+    mVFS->normalizeFilename(normalized);
+
+    osg::ref_ptr<BulletShapeInstance> instance = createInstance(normalized);
+    mInstanceCache->addEntryToObjectCache(normalized, instance.get());
+    return instance;
+}
+
+osg::ref_ptr<BulletShapeInstance> BulletShapeManager::getInstance(const std::string &name)
+{
+    std::string normalized = name;
+    mVFS->normalizeFilename(normalized);
+
+    osg::ref_ptr<osg::Object> obj = mInstanceCache->takeFromObjectCache(normalized);
+    if (obj.get())
+        return static_cast<BulletShapeInstance*>(obj.get());
+    else
+        return createInstance(normalized);
+}
+
 osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::string &name)
 {
     osg::ref_ptr<const BulletShape> shape = getShape(name);
@@ -158,6 +181,13 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
         return shape->makeInstance();
     else
         return osg::ref_ptr<BulletShapeInstance>();
+}
+
+void BulletShapeManager::updateCache(double referenceTime)
+{
+    ResourceManager::updateCache(referenceTime);
+
+    mInstanceCache->removeUnreferencedObjectsInCache();
 }
 
 }
