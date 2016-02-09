@@ -22,6 +22,7 @@
 
 #include <components/esm/loadgmst.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/unrefqueue.hpp>
 
 #include <components/nifosg/particle.hpp> // FindRecIndexVisitor
 
@@ -533,6 +534,11 @@ namespace MWPhysics
             setOrigin(btVector3(pos[0], pos[1], pos[2]));
         }
 
+        const Resource::BulletShapeInstance* getShapeInstance() const
+        {
+            return mShapeInstance.get();
+        }
+
         void setScale(float scale)
         {
             mShapeInstance->getCollisionShape()->setLocalScaling(btVector3(scale,scale,scale));
@@ -688,6 +694,11 @@ namespace MWPhysics
         delete mCollisionConfiguration;
         delete mDispatcher;
         delete mBroadphase;
+    }
+
+    void PhysicsSystem::setUnrefQueue(SceneUtil::UnrefQueue *unrefQueue)
+    {
+        mUnrefQueue = unrefQueue;
     }
 
     Resource::BulletShapeManager *PhysicsSystem::getShapeManager()
@@ -1108,6 +1119,9 @@ namespace MWPhysics
         if (found != mObjects.end())
         {
             mCollisionWorld->removeCollisionObject(found->second->getCollisionObject());
+
+            if (mUnrefQueue.get())
+                mUnrefQueue->push(found->second->getShapeInstance());
 
             mAnimatedObjects.erase(found->second);
 

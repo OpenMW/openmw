@@ -263,6 +263,11 @@ namespace MWRender
         return mWorkQueue.get();
     }
 
+    SceneUtil::UnrefQueue *RenderingManager::getUnrefQueue()
+    {
+        return mUnrefQueue.get();
+    }
+
     void RenderingManager::preloadCommonAssets()
     {
         osg::ref_ptr<PreloadCommonAssetsWorkItem> workItem (new PreloadCommonAssetsWorkItem(mResourceSystem));

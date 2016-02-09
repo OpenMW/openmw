@@ -72,6 +72,7 @@ namespace MWRender
         Resource::ResourceSystem* getResourceSystem();
 
         SceneUtil::WorkQueue* getWorkQueue();
+        SceneUtil::UnrefQueue* getUnrefQueue();
 
         void preloadCommonAssets();
 

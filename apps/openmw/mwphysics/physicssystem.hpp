@@ -25,11 +25,12 @@ namespace MWRender
 namespace Resource
 {
     class BulletShapeManager;
+    class ResourceSystem;
 }
 
-namespace Resource
+namespace SceneUtil
 {
-    class ResourceSystem;
+    class UnrefQueue;
 }
 
 class btCollisionWorld;
@@ -52,6 +53,8 @@ namespace MWPhysics
         public:
             PhysicsSystem (Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode);
             ~PhysicsSystem ();
+
+            void setUnrefQueue(SceneUtil::UnrefQueue* unrefQueue);
 
             Resource::BulletShapeManager* getShapeManager();
 
@@ -164,6 +167,8 @@ namespace MWPhysics
         private:
 
             void updateWater();
+
+            osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
             btBroadphaseInterface* mBroadphase;
             btDefaultCollisionConfiguration* mCollisionConfiguration;
