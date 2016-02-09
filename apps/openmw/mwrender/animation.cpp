@@ -95,7 +95,12 @@ namespace
     class NodeMapVisitor : public osg::NodeVisitor
     {
     public:
-        NodeMapVisitor() : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN) {}
+        typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
+
+        NodeMapVisitor(NodeMap& map)
+            : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+            , mMap(map)
+        {}
 
         void apply(osg::MatrixTransform& trans)
         {
@@ -103,15 +108,8 @@ namespace
             traverse(trans);
         }
 
-        typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
-
-        const NodeMap& getNodeMap() const
-        {
-            return mMap;
-        }
-
     private:
-        NodeMap mMap;
+        NodeMap& mMap;
     };
 
     NifOsg::TextKeyMap::const_iterator findGroupStart(const NifOsg::TextKeyMap &keys, const std::string &groupname)
@@ -312,6 +310,7 @@ namespace MWRender
     Animation::Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
         : mInsert(parentNode)
         , mSkeleton(NULL)
+        , mNodeMapCreated(false)
         , mPtr(ptr)
         , mResourceSystem(resourceSystem)
         , mAccumulate(1.f, 1.f, 0.f)
@@ -407,12 +406,14 @@ namespace MWRender
         if (!animsrc->mKeyframes || animsrc->mKeyframes->mTextKeys.empty() || animsrc->mKeyframes->mKeyframeControllers.empty())
             return;
 
+        const NodeMap& nodeMap = getNodeMap();
+
         for (NifOsg::KeyframeHolder::KeyframeControllerMap::const_iterator it = animsrc->mKeyframes->mKeyframeControllers.begin();
              it != animsrc->mKeyframes->mKeyframeControllers.end(); ++it)
         {
             std::string bonename = Misc::StringUtils::lowerCase(it->first);
-            NodeMap::const_iterator found = mNodeMap.find(bonename);
-            if (found == mNodeMap.end())
+            NodeMap::const_iterator found = nodeMap.find(bonename);
+            if (found == nodeMap.end())
             {
                 std::cerr << "addAnimSource: can't find bone '" + bonename << "' in " << model << " (referenced by " << kfname << ")" << std::endl;
                 continue;
@@ -436,11 +437,11 @@ namespace MWRender
 
         if (!mAccumRoot)
         {
-            NodeMap::const_iterator found = mNodeMap.find("root bone");
-            if (found == mNodeMap.end())
-                found = mNodeMap.find("bip01");
+            NodeMap::const_iterator found = nodeMap.find("root bone");
+            if (found == nodeMap.end())
+                found = nodeMap.find("bip01");
 
-            if (found != mNodeMap.end())
+            if (found != nodeMap.end())
                 mAccumRoot = found->second;
         }
     }
@@ -690,6 +691,17 @@ namespace MWRender
         mTextKeyListener = listener;
     }
 
+    const Animation::NodeMap &Animation::getNodeMap() const
+    {
+        if (!mNodeMapCreated && mObjectRoot)
+        {
+            NodeMapVisitor visitor(mNodeMap);
+            mObjectRoot->accept(visitor);
+            mNodeMapCreated = true;
+        }
+        return mNodeMap;
+    }
+
     void Animation::resetActiveGroups()
     {
         // remove all previous external controllers from the scene graph
@@ -729,7 +741,7 @@ namespace MWRender
 
                 for (AnimSource::ControllerMap::iterator it = animsrc->mControllerMap[blendMask].begin(); it != animsrc->mControllerMap[blendMask].end(); ++it)
                 {
-                    osg::ref_ptr<osg::Node> node = mNodeMap.at(it->first); // this should not throw, we already checked for the node existing in addAnimSource
+                    osg::ref_ptr<osg::Node> node = getNodeMap().at(it->first); // this should not throw, we already checked for the node existing in addAnimSource
 
                     node->addUpdateCallback(it->second);
                     mActiveControllers.insert(std::make_pair(node, it->second));
@@ -978,6 +990,7 @@ namespace MWRender
         mSkeleton = NULL;
 
         mNodeMap.clear();
+        mNodeMapCreated = false;
         mActiveControllers.clear();
         mAccumRoot = NULL;
         mAccumCtrl = NULL;
@@ -1024,10 +1037,6 @@ namespace MWRender
             mObjectRoot->accept(removeTriBipVisitor);
             removeTriBipVisitor.remove();
         }
-
-        NodeMapVisitor visitor;
-        mObjectRoot->accept(visitor);
-        mNodeMap = visitor.getNodeMap();
 
         mObjectRoot->addCullCallback(new SceneUtil::LightListCallback);
     }
@@ -1121,8 +1130,8 @@ namespace MWRender
             parentNode = mInsert;
         else
         {
-            NodeMap::iterator found = mNodeMap.find(Misc::StringUtils::lowerCase(bonename));
-            if (found == mNodeMap.end())
+            NodeMap::const_iterator found = getNodeMap().find(Misc::StringUtils::lowerCase(bonename));
+            if (found == getNodeMap().end())
                 throw std::runtime_error("Can't find bone " + bonename);
 
             parentNode = found->second;
@@ -1222,8 +1231,8 @@ namespace MWRender
     const osg::Node* Animation::getNode(const std::string &name) const
     {
         std::string lowerName = Misc::StringUtils::lowerCase(name);
-        NodeMap::const_iterator found = mNodeMap.find(lowerName);
-        if (found == mNodeMap.end())
+        NodeMap::const_iterator found = getNodeMap().find(lowerName);
+        if (found == getNodeMap().end())
             return NULL;
         else
             return found->second;
@@ -1317,8 +1326,8 @@ namespace MWRender
 
         if (mPtr.getClass().isBipedal(mPtr))
         {
-            NodeMap::iterator found = mNodeMap.find("bip01 head");
-            if (found != mNodeMap.end() && dynamic_cast<osg::MatrixTransform*>(found->second.get()))
+            NodeMap::const_iterator found = getNodeMap().find("bip01 head");
+            if (found != getNodeMap().end() && dynamic_cast<osg::MatrixTransform*>(found->second.get()))
             {
                 osg::Node* node = found->second;
                 mHeadController = new RotateController(mObjectRoot.get());
