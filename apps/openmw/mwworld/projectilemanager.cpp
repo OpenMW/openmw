@@ -92,7 +92,7 @@ namespace MWWorld
             attachTo = rotateNode;
         }
 
-        mResourceSystem->getSceneManager()->createInstance(model, attachTo);
+        mResourceSystem->getSceneManager()->getInstance(model, attachTo);
 
         SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
         state.mNode->accept(disableFreezeOnCullVisitor);

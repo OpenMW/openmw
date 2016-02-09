@@ -24,6 +24,8 @@ namespace MWWorld
         /// @note The cell itself must be in State_Loaded or State_Preloaded.
         void preload(MWWorld::CellStore* cell, double timestamp);
 
+        void notifyLoaded(MWWorld::CellStore* cell);
+
         /// Removes preloaded cells that have not had a preload request for a while.
         void updateCache(double timestamp);
 

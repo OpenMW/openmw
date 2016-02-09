@@ -28,6 +28,7 @@
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
 #include "objectcache.hpp"
+#include "multiobjectcache.hpp"
 
 namespace
 {
@@ -233,6 +234,7 @@ namespace Resource
 
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
         : ResourceManager(vfs)
+        , mInstanceCache(new MultiObjectCache)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
         , mMinFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
@@ -246,7 +248,6 @@ namespace Resource
     SceneManager::~SceneManager()
     {
         // this has to be defined in the .cpp file as we can't delete incomplete types
-
     }
 
     /// @brief Callback to read image files from the VFS.
@@ -372,7 +373,17 @@ namespace Resource
         }
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string &name)
+    osg::ref_ptr<osg::Node> SceneManager::cacheInstance(const std::string &name)
+    {
+        std::string normalized = name;
+        mVFS->normalizeFilename(normalized);
+
+        osg::ref_ptr<osg::Node> node = createInstance(normalized);
+        mInstanceCache->addEntryToObjectCache(normalized, node.get());
+        return node;
+    }
+
+    osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string& name)
     {
         osg::ref_ptr<const osg::Node> scene = getTemplate(name);
         osg::ref_ptr<osg::Node> cloned = osg::clone(scene.get(), SceneUtil::CopyOp());
@@ -383,9 +394,22 @@ namespace Resource
         return cloned;
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string &name, osg::Group* parentNode)
+    osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name)
     {
-        osg::ref_ptr<osg::Node> cloned = createInstance(name);
+        std::string normalized = name;
+        mVFS->normalizeFilename(normalized);
+
+        osg::ref_ptr<osg::Object> obj = mInstanceCache->takeFromObjectCache(normalized);
+        if (obj.get())
+            return static_cast<osg::Node*>(obj.get());
+
+        return createInstance(normalized);
+
+    }
+
+    osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name, osg::Group* parentNode)
+    {
+        osg::ref_ptr<osg::Node> cloned = getInstance(name);
         attachTo(cloned, parentNode);
         return cloned;
     }
@@ -485,6 +509,13 @@ namespace Resource
     void SceneManager::setUnRefImageDataAfterApply(bool unref)
     {
         mUnRefImageDataAfterApply = unref;
+    }
+
+    void SceneManager::updateCache(double referenceTime)
+    {
+        ResourceManager::updateCache(referenceTime);
+
+        mInstanceCache->removeUnreferencedObjectsInCache();
     }
 
 }

@@ -997,7 +997,7 @@ namespace MWRender
 
         if (!forceskeleton)
         {
-            osg::ref_ptr<osg::Node> created = mResourceSystem->getSceneManager()->createInstance(model, mInsert);
+            osg::ref_ptr<osg::Node> created = mResourceSystem->getSceneManager()->getInstance(model, mInsert);
             mObjectRoot = created->asGroup();
             if (!mObjectRoot)
             {
@@ -1009,7 +1009,7 @@ namespace MWRender
         }
         else
         {
-            osg::ref_ptr<osg::Node> created = mResourceSystem->getSceneManager()->createInstance(model);
+            osg::ref_ptr<osg::Node> created = mResourceSystem->getSceneManager()->getInstance(model);
             osg::ref_ptr<SceneUtil::Skeleton> skel = dynamic_cast<SceneUtil::Skeleton*>(created.get());
             if (!skel)
             {
@@ -1136,7 +1136,7 @@ namespace MWRender
 
             parentNode = found->second;
         }
-        osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->createInstance(model, parentNode);
+        osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model, parentNode);
 
         node->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 

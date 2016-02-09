@@ -296,6 +296,8 @@ namespace MWWorld
             if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
                 mRendering.configureAmbient(cell->getCell());
         }
+
+        mPreloader->notifyLoaded(cell);
     }
 
     void Scene::changeToVoid()

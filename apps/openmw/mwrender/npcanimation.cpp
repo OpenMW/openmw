@@ -647,7 +647,7 @@ void NpcAnimation::updateParts()
 
 PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor)
 {
-    osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->createInstance(model);
+    osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->getInstance(model);
     osg::ref_ptr<osg::Node> attached = SceneUtil::attach(instance, mObjectRoot, bonefilter, bonename);
     mResourceSystem->getSceneManager()->notifyAttached(attached);
     if (enchantedGlow)

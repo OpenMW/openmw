@@ -84,7 +84,7 @@ void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
             return;
         std::string model = ammo->getClass().getModel(*ammo);
 
-        osg::ref_ptr<osg::Node> arrow = getResourceSystem()->getSceneManager()->createInstance(model, parent);
+        osg::ref_ptr<osg::Node> arrow = getResourceSystem()->getSceneManager()->getInstance(model, parent);
 
         mAmmunition = PartHolderPtr(new PartHolder(arrow));
     }

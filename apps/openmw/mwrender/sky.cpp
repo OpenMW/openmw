@@ -1146,7 +1146,7 @@ void SkyManager::create()
 {
     assert(!mCreated);
 
-    mAtmosphereDay = mSceneManager->createInstance("meshes/sky_atmosphere.nif", mEarlyRenderBinRoot);
+    mAtmosphereDay = mSceneManager->getInstance("meshes/sky_atmosphere.nif", mEarlyRenderBinRoot);
     ModVertexAlphaVisitor modAtmosphere(0);
     mAtmosphereDay->accept(modAtmosphere);
 
@@ -1159,9 +1159,9 @@ void SkyManager::create()
 
     osg::ref_ptr<osg::Node> atmosphereNight;
     if (mSceneManager->getVFS()->exists("meshes/sky_night_02.nif"))
-        atmosphereNight = mSceneManager->createInstance("meshes/sky_night_02.nif", mAtmosphereNightNode);
+        atmosphereNight = mSceneManager->getInstance("meshes/sky_night_02.nif", mAtmosphereNightNode);
     else
-        atmosphereNight = mSceneManager->createInstance("meshes/sky_night_01.nif", mAtmosphereNightNode);
+        atmosphereNight = mSceneManager->getInstance("meshes/sky_night_01.nif", mAtmosphereNightNode);
     atmosphereNight->getOrCreateStateSet()->setAttributeAndModes(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     ModVertexAlphaVisitor modStars(2);
     atmosphereNight->accept(modStars);
@@ -1176,14 +1176,14 @@ void SkyManager::create()
 
     mCloudNode = new osg::PositionAttitudeTransform;
     mEarlyRenderBinRoot->addChild(mCloudNode);
-    mCloudMesh = mSceneManager->createInstance("meshes/sky_clouds_01.nif", mCloudNode);
+    mCloudMesh = mSceneManager->getInstance("meshes/sky_clouds_01.nif", mCloudNode);
     ModVertexAlphaVisitor modClouds(1);
     mCloudMesh->accept(modClouds);
     mCloudUpdater = new CloudUpdater;
     mCloudUpdater->setOpacity(1.f);
     mCloudMesh->addUpdateCallback(mCloudUpdater);
 
-    mCloudMesh2 = mSceneManager->createInstance("meshes/sky_clouds_01.nif", mCloudNode);
+    mCloudMesh2 = mSceneManager->getInstance("meshes/sky_clouds_01.nif", mCloudNode);
     mCloudMesh2->accept(modClouds);
     mCloudUpdater2 = new CloudUpdater;
     mCloudUpdater2->setOpacity(0.f);
@@ -1537,7 +1537,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
                 mParticleNode->setNodeMask(Mask_WeatherParticles);
                 mRootNode->addChild(mParticleNode);
             }
-            mParticleEffect = mSceneManager->createInstance(mCurrentParticleEffect, mParticleNode);
+            mParticleEffect = mSceneManager->getInstance(mCurrentParticleEffect, mParticleNode);
 
             SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
             mParticleEffect->accept(assignVisitor);

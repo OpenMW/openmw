@@ -29,6 +29,8 @@ namespace osgViewer
 namespace Resource
 {
 
+    class MultiObjectCache;
+
     /// @brief Handles loading and caching of scenes, e.g. .nif files or .osg files
     /// @note Some methods of the scene manager can be used from any thread, see the methods documentation for more details.
     class SceneManager : public ResourceManager
@@ -43,15 +45,21 @@ namespace Resource
         /// @note Thread safe.
         osg::ref_ptr<const osg::Node> getTemplate(const std::string& name);
 
-        /// Create an instance of the given scene template
+        /// Create an instance of the given scene template and cache it for later use, so that future calls to getInstance() can simply
+        /// return this cached object instead of creating a new one.
+        /// @note The returned ref_ptr may be kept around by the caller to ensure that the object stays in cache for as long as needed.
+        /// @note Thread safe.
+        osg::ref_ptr<osg::Node> cacheInstance(const std::string& name);
+
+        /// Get an instance of the given scene template
         /// @see getTemplate
         /// @note Thread safe.
-        osg::ref_ptr<osg::Node> createInstance(const std::string& name);
+        osg::ref_ptr<osg::Node> getInstance(const std::string& name);
 
-        /// Create an instance of the given scene template and immediately attach it to a parent node
+        /// Get an instance of the given scene template and immediately attach it to a parent node
         /// @see getTemplate
         /// @note Not thread safe, unless parentNode is not part of the main scene graph yet.
-        osg::ref_ptr<osg::Node> createInstance(const std::string& name, osg::Group* parentNode);
+        osg::ref_ptr<osg::Node> getInstance(const std::string& name, osg::Group* parentNode);
 
         /// Attach the given scene instance to the given parent node
         /// @note You should have the parentNode in its intended position before calling this method,
@@ -88,7 +96,15 @@ namespace Resource
         /// otherwise should be disabled to reduce memory usage.
         void setUnRefImageDataAfterApply(bool unref);
 
+        /// @see ResourceManager::updateCache
+        virtual void updateCache(double referenceTime);
+
     private:
+
+        osg::ref_ptr<osg::Node> createInstance(const std::string& name);
+
+        osg::ref_ptr<MultiObjectCache> mInstanceCache;
+
         OpenThreads::Mutex mSharedStateMutex;
 
         Resource::ImageManager* mImageManager;

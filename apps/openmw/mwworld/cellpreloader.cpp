@@ -86,7 +86,7 @@ namespace MWWorld
 
                     //std::cout << "preloading " << mesh << std::endl;
 
-                    mPreloadedNodes.push_back(mSceneManager->getTemplate(mesh));
+                    mPreloadedNodes.push_back(mSceneManager->cacheInstance(mesh));
                     mPreloadedShapes.push_back(mBulletShapeManager->getShape(mesh));
 
                     size_t slashpos = mesh.find_last_of("/\\");
@@ -104,8 +104,6 @@ namespace MWWorld
 
                         }
                     }
-
-                    // TODO: do a createInstance() and hold on to it since we can make use of it when the cell goes active
                 }
                 catch (std::exception& e)
                 {
@@ -183,6 +181,11 @@ namespace MWWorld
         mWorkQueue->addWorkItem(item);
 
         mPreloadCells[cell] = PreloadEntry(timestamp, item);
+    }
+
+    void CellPreloader::notifyLoaded(CellStore *cell)
+    {
+        mPreloadCells.erase(cell);
     }
 
     void CellPreloader::updateCache(double timestamp)
