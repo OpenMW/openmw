@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+#include <OpenThreads/ScopedLock>
+
 #include <osg/PrimitiveSet>
 
 #include "defs.hpp"
@@ -178,6 +180,7 @@ namespace Terrain
 
     osg::ref_ptr<osg::Vec2Array> BufferCache::getUVBuffer()
     {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mUvBufferMutex);
         if (mUvBufferMap.find(mNumVerts) != mUvBufferMap.end())
         {
             return mUvBufferMap[mNumVerts];
@@ -206,6 +209,7 @@ namespace Terrain
 
     osg::ref_ptr<osg::DrawElements> BufferCache::getIndexBuffer(unsigned int flags)
     {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mIndexBufferMutex);
         unsigned int verts = mNumVerts;
 
         if (mIndexBufferMap.find(flags) != mIndexBufferMap.end())

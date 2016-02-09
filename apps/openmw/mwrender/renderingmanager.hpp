@@ -73,10 +73,9 @@ namespace MWRender
 
         SceneUtil::WorkQueue* getWorkQueue();
         SceneUtil::UnrefQueue* getUnrefQueue();
+        Terrain::World* getTerrain();
 
         void preloadCommonAssets();
-
-        void clearCache();
 
         double getReferenceTime() const;
 

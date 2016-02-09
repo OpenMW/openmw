@@ -416,7 +416,6 @@ namespace MWWorld
         mCellChanged = true;
 
         mPreloader->updateCache(mRendering.getReferenceTime());
-        mRendering.clearCache();
 
         std::cout << "changeCellGrid took " << timer.time_m() << std::endl;
     }
@@ -463,7 +462,7 @@ namespace MWWorld
     , mPreloadDoors(Settings::Manager::getBool("preload doors", "Cells"))
     , mPreloadFastTravel(Settings::Manager::getBool("preload fast travel", "Cells"))
     {
-        mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager()));
+        mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager(), rendering.getTerrain()));
         mPreloader->setWorkQueue(mRendering.getWorkQueue());
 
         mPhysics->setUnrefQueue(rendering.getUnrefQueue());
@@ -549,7 +548,6 @@ namespace MWWorld
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
 
         mPreloader->updateCache(mRendering.getReferenceTime());
-        mRendering.clearCache();
 
         std::cout << "change to interior took " << timer.time_m() << std::endl;
     }

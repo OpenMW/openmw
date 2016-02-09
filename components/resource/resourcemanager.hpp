@@ -22,9 +22,6 @@ namespace Resource
         /// Clear cache entries that have not been referenced for longer than expiryDelay.
         virtual void updateCache(double referenceTime);
 
-        /// Clear all cache entries regardless of having external references.
-        virtual void clearCache();
-
         /// How long to keep objects in cache after no longer being referenced.
         void setExpiryDelay (double expiryDelay);
 

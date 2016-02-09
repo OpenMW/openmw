@@ -258,14 +258,19 @@ namespace MWRender
         return mResourceSystem;
     }
 
-    SceneUtil::WorkQueue *RenderingManager::getWorkQueue()
+    SceneUtil::WorkQueue* RenderingManager::getWorkQueue()
     {
         return mWorkQueue.get();
     }
 
-    SceneUtil::UnrefQueue *RenderingManager::getUnrefQueue()
+    SceneUtil::UnrefQueue* RenderingManager::getUnrefQueue()
     {
         return mUnrefQueue.get();
+    }
+
+    Terrain::World* RenderingManager::getTerrain()
+    {
+        return mTerrain.get();
     }
 
     void RenderingManager::preloadCommonAssets()
@@ -277,12 +282,6 @@ namespace MWRender
         workItem->mTextures.push_back("textures/_land_default.dds");
 
         mWorkQueue->addWorkItem(workItem);
-    }
-
-    void RenderingManager::clearCache()
-    {
-        if (mTerrain.get())
-            mTerrain->clearCache();
     }
 
     double RenderingManager::getReferenceTime() const
@@ -838,7 +837,7 @@ namespace MWRender
     void RenderingManager::updateTextureFiltering()
     {
         if (mTerrain.get())
-            mTerrain->clearCache();
+            mTerrain->updateCache();
 
         mResourceSystem->getSceneManager()->setFilterSettings(
             Settings::Manager::getString("texture mag filter", "General"),

@@ -8,6 +8,7 @@
 #include <components/resource/keyframemanager.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/nifosg/nifloader.hpp>
+#include <components/terrain/world.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -44,10 +45,14 @@ namespace MWWorld
     {
     public:
         /// Constructor to be called from the main thread.
-        PreloadItem(MWWorld::CellStore* cell, Resource::SceneManager* sceneManager, Resource::BulletShapeManager* bulletShapeManager, Resource::KeyframeManager* keyframeManager)
-            : mSceneManager(sceneManager)
+        PreloadItem(MWWorld::CellStore* cell, Resource::SceneManager* sceneManager, Resource::BulletShapeManager* bulletShapeManager, Resource::KeyframeManager* keyframeManager, Terrain::World* terrain)
+            : mIsExterior(cell->getCell()->isExterior())
+            , mX(cell->getCell()->getGridX())
+            , mY(cell->getCell()->getGridY())
+            , mSceneManager(sceneManager)
             , mBulletShapeManager(bulletShapeManager)
             , mKeyframeManager(keyframeManager)
+            , mTerrain(terrain)
         {
             osg::Timer timer;
             ListModelsVisitor visitor (mMeshes);
@@ -86,8 +91,8 @@ namespace MWWorld
 
                     //std::cout << "preloading " << mesh << std::endl;
 
-                    mPreloadedNodes.push_back(mSceneManager->cacheInstance(mesh));
-                    mPreloadedShapes.push_back(mBulletShapeManager->cacheInstance(mesh));
+                    mPreloadedObjects.push_back(mSceneManager->cacheInstance(mesh));
+                    mPreloadedObjects.push_back(mBulletShapeManager->cacheInstance(mesh));
 
                     size_t slashpos = mesh.find_last_of("/\\");
                     if (slashpos != std::string::npos && slashpos != mesh.size()-1)
@@ -99,7 +104,7 @@ namespace MWWorld
                             if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
                             {
                                 kfname.replace(kfname.size()-4, 4, ".kf");
-                                mPreloadedKeyframes.push_back(mKeyframeManager->get(kfname));
+                                mPreloadedObjects.push_back(mKeyframeManager->get(kfname));
                             }
 
                         }
@@ -111,29 +116,44 @@ namespace MWWorld
                     // error will be shown when visiting the cell
                 }
             }
-            std::cout << "preloaded " << mPreloadedNodes.size() << " nodes in " << preloadTimer.time_m() << std::endl;
+
+            if (mIsExterior)
+            {
+                try
+                {
+                    mPreloadedObjects.push_back(mTerrain->cacheCell(mX, mY));
+                }
+                catch(std::exception& e)
+                {
+                }
+            }
+
+            std::cout << "preloaded " << mPreloadedObjects.size() << " objects in " << preloadTimer.time_m() << std::endl;
         }
 
     private:
         typedef std::vector<std::string> MeshList;
+        bool mIsExterior;
+        int mX;
+        int mY;
         MeshList mMeshes;
         Resource::SceneManager* mSceneManager;
         Resource::BulletShapeManager* mBulletShapeManager;
         Resource::KeyframeManager* mKeyframeManager;
+        Terrain::World* mTerrain;
 
-        // keep a ref to the loaded object to make sure it stays loaded as long as this cell is in the preloaded state
-        std::vector<osg::ref_ptr<const osg::Node> > mPreloadedNodes;
-        std::vector<osg::ref_ptr<const Resource::BulletShapeInstance> > mPreloadedShapes;
-        std::vector<osg::ref_ptr<const NifOsg::KeyframeHolder> > mPreloadedKeyframes;
+        // keep a ref to the loaded objects to make sure it stays loaded as long as this cell is in the preloaded state
+        std::vector<osg::ref_ptr<const osg::Object> > mPreloadedObjects;
     };
 
     /// Worker thread item: update the resource system's cache, effectively deleting unused entries.
     class UpdateCacheItem : public SceneUtil::WorkItem
     {
     public:
-        UpdateCacheItem(Resource::ResourceSystem* resourceSystem, double referenceTime)
+        UpdateCacheItem(Resource::ResourceSystem* resourceSystem, Terrain::World* terrain, double referenceTime)
             : mReferenceTime(referenceTime)
             , mResourceSystem(resourceSystem)
+            , mTerrain(terrain)
         {
         }
 
@@ -141,17 +161,21 @@ namespace MWWorld
         {
             osg::Timer timer;
             mResourceSystem->updateCache(mReferenceTime);
+
+            mTerrain->updateCache();
             std::cout << "cleared cache in " << timer.time_m() << std::endl;
         }
 
     private:
         double mReferenceTime;
         Resource::ResourceSystem* mResourceSystem;
+        Terrain::World* mTerrain;
     };
 
-    CellPreloader::CellPreloader(Resource::ResourceSystem* resourceSystem, Resource::BulletShapeManager* bulletShapeManager)
+    CellPreloader::CellPreloader(Resource::ResourceSystem* resourceSystem, Resource::BulletShapeManager* bulletShapeManager, Terrain::World* terrain)
         : mResourceSystem(resourceSystem)
         , mBulletShapeManager(bulletShapeManager)
+        , mTerrain(terrain)
         , mExpiryDelay(0.0)
     {
     }
@@ -177,7 +201,7 @@ namespace MWWorld
             return;
         }
 
-        osg::ref_ptr<PreloadItem> item (new PreloadItem(cell, mResourceSystem->getSceneManager(), mBulletShapeManager, mResourceSystem->getKeyframeManager()));
+        osg::ref_ptr<PreloadItem> item (new PreloadItem(cell, mResourceSystem->getSceneManager(), mBulletShapeManager, mResourceSystem->getKeyframeManager(), mTerrain));
         mWorkQueue->addWorkItem(item);
 
         mPreloadCells[cell] = PreloadEntry(timestamp, item);
@@ -201,7 +225,7 @@ namespace MWWorld
         }
 
         // the resource cache is cleared from the worker thread so that we're not holding up the main thread with delete operations
-        mWorkQueue->addWorkItem(new UpdateCacheItem(mResourceSystem, timestamp));
+        mWorkQueue->addWorkItem(new UpdateCacheItem(mResourceSystem, mTerrain, timestamp));
     }
 
     void CellPreloader::setExpiryDelay(double expiryDelay)

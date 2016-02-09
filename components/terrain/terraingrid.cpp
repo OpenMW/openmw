@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <OpenThreads/ScopedLock>
+
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -50,9 +52,9 @@ namespace Terrain
 TerrainGrid::TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, SceneUtil::UnrefQueue* unrefQueue)
     : Terrain::World(parent, resourceSystem, ico, storage, nodeMask)
     , mNumSplits(4)
+    , mCache((storage->getCellVertices()-1)/static_cast<float>(mNumSplits) + 1)
     , mUnrefQueue(unrefQueue)
 {
-    mCache = BufferCache((storage->getCellVertices()-1)/static_cast<float>(mNumSplits) + 1);
 }
 
 TerrainGrid::~TerrainGrid()
@@ -61,6 +63,21 @@ TerrainGrid::~TerrainGrid()
     {
         unloadCell(mGrid.begin()->first.first, mGrid.begin()->first.second);
     }
+}
+
+osg::ref_ptr<osg::Node> TerrainGrid::cacheCell(int x, int y)
+{
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
+        Grid::iterator found = mGridCache.find(std::make_pair(x,y));
+        if (found != mGridCache.end())
+            return found->second;
+    }
+    osg::ref_ptr<osg::Node> node = buildTerrain(NULL, 1.f, osg::Vec2f(x+0.5, y+0.5));
+
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
+    mGridCache.insert(std::make_pair(std::make_pair(x,y), node));
+    return node;
 }
 
 osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter)
@@ -131,19 +148,22 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         unsigned int dummyTextureCounter = 0;
 
         std::vector<osg::ref_ptr<osg::Texture2D> > layerTextures;
-        for (std::vector<LayerInfo>::const_iterator it = layerList.begin(); it != layerList.end(); ++it)
         {
-            osg::ref_ptr<osg::Texture2D> texture = mTextureCache[it->mDiffuseMap];
-            if (!texture)
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mTextureCacheMutex);
+            for (std::vector<LayerInfo>::const_iterator it = layerList.begin(); it != layerList.end(); ++it)
             {
-                texture = new osg::Texture2D(mResourceSystem->getImageManager()->getImage(it->mDiffuseMap));
-                texture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
-                texture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
-                mResourceSystem->getSceneManager()->applyFilterSettings(texture);
-                mTextureCache[it->mDiffuseMap] = texture;
+                osg::ref_ptr<osg::Texture2D> texture = mTextureCache[it->mDiffuseMap];
+                if (!texture)
+                {
+                    texture = new osg::Texture2D(mResourceSystem->getImageManager()->getImage(it->mDiffuseMap));
+                    texture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+                    texture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+                    mResourceSystem->getSceneManager()->applyFilterSettings(texture);
+                    mTextureCache[it->mDiffuseMap] = texture;
+                }
+                layerTextures.push_back(texture);
+                textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, layerTextures.back());
             }
-            layerTextures.push_back(texture);
-            textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, layerTextures.back());
         }
 
         std::vector<osg::ref_ptr<osg::Texture2D> > blendmapTextures;
@@ -196,11 +216,27 @@ void TerrainGrid::loadCell(int x, int y)
     if (mGrid.find(std::make_pair(x, y)) != mGrid.end())
         return; // already loaded
 
-    osg::Vec2f center(x+0.5f, y+0.5f);
+    // try to get it from the cache
+    osg::ref_ptr<osg::Node> terrainNode;
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
+        Grid::const_iterator found = mGridCache.find(std::make_pair(x,y));
+        if (found != mGridCache.end())
+        {
+            terrainNode = found->second;
+            if (!terrainNode)
+                return; // no terrain defined
+        }
+    }
 
-    osg::ref_ptr<osg::Node> terrainNode = buildTerrain(NULL, 1.f, center);
+    // didn't find in cache, build it
     if (!terrainNode)
-        return; // no terrain defined
+    {
+        osg::Vec2f center(x+0.5f, y+0.5f);
+        terrainNode = buildTerrain(NULL, 1.f, center);
+        if (!terrainNode)
+            return; // no terrain defined
+    }
 
     mTerrainRoot->addChild(terrainNode);
 
@@ -213,7 +249,7 @@ void TerrainGrid::unloadCell(int x, int y)
     if (it == mGrid.end())
         return;
 
-    osg::Node* terrainNode = it->second;
+    osg::ref_ptr<osg::Node> terrainNode = it->second;
     mTerrainRoot->removeChild(terrainNode);
 
     if (mUnrefQueue.get())
@@ -222,18 +258,28 @@ void TerrainGrid::unloadCell(int x, int y)
     mGrid.erase(it);
 }
 
-void TerrainGrid::clearCache()
+void TerrainGrid::updateCache()
 {
-    for (TextureCache::iterator it = mTextureCache.begin(); it != mTextureCache.end();)
     {
-        if (it->second->referenceCount() <= 1)
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mTextureCacheMutex);
+        for (TextureCache::iterator it = mTextureCache.begin(); it != mTextureCache.end();)
         {
-            if (mUnrefQueue.get())
-                mUnrefQueue->push(it->second);
-            mTextureCache.erase(it++);
+            if (it->second->referenceCount() <= 1)
+                mTextureCache.erase(it++);
+            else
+                ++it;
         }
-        else
-            ++it;
+    }
+
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
+        for (Grid::iterator it = mGridCache.begin(); it != mGridCache.end();)
+        {
+            if (it->second->referenceCount() <= 1)
+                mGridCache.erase(it++);
+            else
+                ++it;
+        }
     }
 }
 

@@ -11,7 +11,6 @@ namespace Terrain
 World::World(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
              Storage* storage, int nodeMask)
     : mStorage(storage)
-    , mCache(storage->getCellVertices())
     , mParent(parent)
     , mResourceSystem(resourceSystem)
     , mIncrementalCompileOperation(ico)
