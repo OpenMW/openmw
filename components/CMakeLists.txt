@@ -41,14 +41,12 @@ add_component_dir (vfs
     )
 
 add_component_dir (resource
-    scenemanager keyframemanager texturemanager resourcesystem bulletshapemanager bulletshape niffilemanager objectcache
+    scenemanager keyframemanager imagemanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem resourcemanager
     )
 
 add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry lightcontroller
-    lightmanager lightutil positionattitudetransform
-    # not used yet
-    #workqueue
+    lightmanager lightutil positionattitudetransform workqueue unrefqueue
     )
 
 add_component_dir (nif

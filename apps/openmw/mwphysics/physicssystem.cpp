@@ -22,6 +22,7 @@
 
 #include <components/esm/loadgmst.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/unrefqueue.hpp>
 
 #include <components/nifosg/particle.hpp> // FindRecIndexVisitor
 
@@ -533,6 +534,11 @@ namespace MWPhysics
             setOrigin(btVector3(pos[0], pos[1], pos[2]));
         }
 
+        const Resource::BulletShapeInstance* getShapeInstance() const
+        {
+            return mShapeInstance.get();
+        }
+
         void setScale(float scale)
         {
             mShapeInstance->getCollisionShape()->setLocalScaling(btVector3(scale,scale,scale));
@@ -640,12 +646,15 @@ namespace MWPhysics
 
     PhysicsSystem::PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode)
         : mShapeManager(new Resource::BulletShapeManager(resourceSystem->getVFS(), resourceSystem->getSceneManager(), resourceSystem->getNifFileManager()))
+        , mResourceSystem(resourceSystem)
         , mDebugDrawEnabled(false)
         , mTimeAccum(0.0f)
         , mWaterHeight(0)
         , mWaterEnabled(false)
         , mParentNode(parentNode)
     {
+        mResourceSystem->addResourceManager(mShapeManager.get());
+
         mCollisionConfiguration = new btDefaultCollisionConfiguration();
         mDispatcher = new btCollisionDispatcher(mCollisionConfiguration);
         mBroadphase = new btDbvtBroadphase();
@@ -659,6 +668,8 @@ namespace MWPhysics
 
     PhysicsSystem::~PhysicsSystem()
     {
+        mResourceSystem->removeResourceManager(mShapeManager.get());
+
         if (mWaterCollisionObject.get())
             mCollisionWorld->removeCollisionObject(mWaterCollisionObject.get());
 
@@ -683,6 +694,16 @@ namespace MWPhysics
         delete mCollisionConfiguration;
         delete mDispatcher;
         delete mBroadphase;
+    }
+
+    void PhysicsSystem::setUnrefQueue(SceneUtil::UnrefQueue *unrefQueue)
+    {
+        mUnrefQueue = unrefQueue;
+    }
+
+    Resource::BulletShapeManager *PhysicsSystem::getShapeManager()
+    {
+        return mShapeManager.get();
     }
 
     bool PhysicsSystem::toggleDebugRendering()
@@ -1078,7 +1099,7 @@ namespace MWPhysics
 
     void PhysicsSystem::addObject (const MWWorld::Ptr& ptr, const std::string& mesh, int collisionType)
     {
-        osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->createInstance(mesh);
+        osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(mesh);
         if (!shapeInstance || !shapeInstance->getCollisionShape())
             return;
 
@@ -1098,6 +1119,9 @@ namespace MWPhysics
         if (found != mObjects.end())
         {
             mCollisionWorld->removeCollisionObject(found->second->getCollisionObject());
+
+            if (mUnrefQueue.get())
+                mUnrefQueue->push(found->second->getShapeInstance());
 
             mAnimatedObjects.erase(found->second);
 
@@ -1224,11 +1248,11 @@ namespace MWPhysics
     }
 
     void PhysicsSystem::addActor (const MWWorld::Ptr& ptr, const std::string& mesh) {
-        osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->createInstance(mesh);
-        if (!shapeInstance)
+        osg::ref_ptr<const Resource::BulletShape> shape = mShapeManager->getShape(mesh);
+        if (!shape)
             return;
 
-        Actor* actor = new Actor(ptr, shapeInstance, mCollisionWorld);
+        Actor* actor = new Actor(ptr, shape, mCollisionWorld);
         mActors.insert(std::make_pair(ptr, actor));
     }
 

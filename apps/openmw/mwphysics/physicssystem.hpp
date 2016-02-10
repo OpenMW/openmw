@@ -25,11 +25,12 @@ namespace MWRender
 namespace Resource
 {
     class BulletShapeManager;
+    class ResourceSystem;
 }
 
-namespace Resource
+namespace SceneUtil
 {
-    class ResourceSystem;
+    class UnrefQueue;
 }
 
 class btCollisionWorld;
@@ -52,6 +53,10 @@ namespace MWPhysics
         public:
             PhysicsSystem (Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode);
             ~PhysicsSystem ();
+
+            void setUnrefQueue(SceneUtil::UnrefQueue* unrefQueue);
+
+            Resource::BulletShapeManager* getShapeManager();
 
             void enableWater(float height);
             void setWaterHeight(float height);
@@ -163,12 +168,15 @@ namespace MWPhysics
 
             void updateWater();
 
+            osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
+
             btBroadphaseInterface* mBroadphase;
             btDefaultCollisionConfiguration* mCollisionConfiguration;
             btCollisionDispatcher* mDispatcher;
             btCollisionWorld* mCollisionWorld;
 
             std::auto_ptr<Resource::BulletShapeManager> mShapeManager;
+            Resource::ResourceSystem* mResourceSystem;
 
             typedef std::map<MWWorld::ConstPtr, Object*> ObjectMap;
             ObjectMap mObjects;

@@ -31,7 +31,7 @@
 #include <components/misc/resourcehelpers.hpp>
 
 #include <components/resource/scenemanager.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 
 #include <components/vfs/manager.hpp>
 #include <components/fallback/fallback.hpp>
@@ -134,10 +134,10 @@ private:
 class AtmosphereNightUpdater : public SceneUtil::StateSetUpdater
 {
 public:
-    AtmosphereNightUpdater(Resource::TextureManager* textureManager)
+    AtmosphereNightUpdater(Resource::ImageManager* imageManager)
     {
         // we just need a texture, its contents don't really matter
-        mTexture = textureManager->getWarningTexture();
+        mTexture = new osg::Texture2D(imageManager->getWarningImage());
     }
 
     void setFade(const float fade)
@@ -469,16 +469,16 @@ const float CelestialBody::mDistance = 1000.0f;
 class Sun : public CelestialBody
 {
 public:
-    Sun(osg::Group* parentNode, Resource::TextureManager& textureManager)
+    Sun(osg::Group* parentNode, Resource::ImageManager& imageManager)
         : CelestialBody(parentNode, 1.0f, 1)
         , mUpdater(new Updater)
     {
         mTransform->addUpdateCallback(mUpdater);
         mTransform->setNodeMask(Mask_Sun);
 
-        osg::ref_ptr<osg::Texture2D> sunTex = textureManager.getTexture2D("textures/tx_sun_05.dds",
-                                                                        osg::Texture::CLAMP,
-                                                                        osg::Texture::CLAMP);
+        osg::ref_ptr<osg::Texture2D> sunTex (new osg::Texture2D(imageManager.getImage("textures/tx_sun_05.dds")));
+        sunTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        sunTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
         mGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex, osg::StateAttribute::ON);
 
@@ -498,7 +498,7 @@ public:
         mOcclusionQueryVisiblePixels = createOcclusionQueryNode(queryNode, true);
         mOcclusionQueryTotalPixels = createOcclusionQueryNode(queryNode, false);
 
-        createSunFlash(textureManager);
+        createSunFlash(imageManager);
         createSunGlare();
     }
 
@@ -602,11 +602,11 @@ private:
         return oqn;
     }
 
-    void createSunFlash(Resource::TextureManager& textureManager)
+    void createSunFlash(Resource::ImageManager& imageManager)
     {
-        osg::ref_ptr<osg::Texture2D> tex = textureManager.getTexture2D("textures/tx_sun_flash_grey_05.dds",
-                                                                        osg::Texture::CLAMP,
-                                                                        osg::Texture::CLAMP);
+        osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(imageManager.getImage("textures/tx_sun_flash_grey_05.dds")));
+        tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
         osg::ref_ptr<osg::PositionAttitudeTransform> transform (new osg::PositionAttitudeTransform);
         const float scale = 2.6f;
@@ -932,11 +932,11 @@ public:
         Type_Secunda
     };
 
-    Moon(osg::Group* parentNode, Resource::TextureManager& textureManager, float scaleFactor, Type type)
+    Moon(osg::Group* parentNode, Resource::ImageManager& imageManager, float scaleFactor, Type type)
         : CelestialBody(parentNode, scaleFactor, 2)
         , mType(type)
         , mPhase(MoonState::Phase_Unspecified)
-        , mUpdater(new Updater(textureManager))
+        , mUpdater(new Updater(imageManager))
     {
         setPhase(MoonState::Phase_Full);
         setVisible(true);
@@ -1001,7 +1001,7 @@ public:
 private:
     struct Updater : public SceneUtil::StateSetUpdater
     {
-        Resource::TextureManager& mTextureManager;
+        Resource::ImageManager& mImageManager;
         osg::ref_ptr<osg::Texture2D> mPhaseTex;
         osg::ref_ptr<osg::Texture2D> mCircleTex;
         float mTransparency;
@@ -1009,8 +1009,8 @@ private:
         osg::Vec4f mAtmosphereColor;
         osg::Vec4f mMoonColor;
 
-        Updater(Resource::TextureManager& textureManager)
-            : mTextureManager(textureManager)
+        Updater(Resource::ImageManager& imageManager)
+            : mImageManager(imageManager)
             , mPhaseTex()
             , mCircleTex()
             , mTransparency(1.0f)
@@ -1055,8 +1055,12 @@ private:
 
         void setTextures(const std::string& phaseTex, const std::string& circleTex)
         {
-            mPhaseTex = mTextureManager.getTexture2D(phaseTex, osg::Texture::CLAMP, osg::Texture::CLAMP);
-            mCircleTex = mTextureManager.getTexture2D(circleTex, osg::Texture::CLAMP, osg::Texture::CLAMP);
+            mPhaseTex = new osg::Texture2D(mImageManager.getImage(phaseTex));
+            mPhaseTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            mPhaseTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+            mCircleTex = new osg::Texture2D(mImageManager.getImage(circleTex));
+            mCircleTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            mCircleTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
             reset();
         }
@@ -1142,7 +1146,7 @@ void SkyManager::create()
 {
     assert(!mCreated);
 
-    mAtmosphereDay = mSceneManager->createInstance("meshes/sky_atmosphere.nif", mEarlyRenderBinRoot);
+    mAtmosphereDay = mSceneManager->getInstance("meshes/sky_atmosphere.nif", mEarlyRenderBinRoot);
     ModVertexAlphaVisitor modAtmosphere(0);
     mAtmosphereDay->accept(modAtmosphere);
 
@@ -1155,31 +1159,31 @@ void SkyManager::create()
 
     osg::ref_ptr<osg::Node> atmosphereNight;
     if (mSceneManager->getVFS()->exists("meshes/sky_night_02.nif"))
-        atmosphereNight = mSceneManager->createInstance("meshes/sky_night_02.nif", mAtmosphereNightNode);
+        atmosphereNight = mSceneManager->getInstance("meshes/sky_night_02.nif", mAtmosphereNightNode);
     else
-        atmosphereNight = mSceneManager->createInstance("meshes/sky_night_01.nif", mAtmosphereNightNode);
+        atmosphereNight = mSceneManager->getInstance("meshes/sky_night_01.nif", mAtmosphereNightNode);
     atmosphereNight->getOrCreateStateSet()->setAttributeAndModes(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     ModVertexAlphaVisitor modStars(2);
     atmosphereNight->accept(modStars);
-    mAtmosphereNightUpdater = new AtmosphereNightUpdater(mSceneManager->getTextureManager());
+    mAtmosphereNightUpdater = new AtmosphereNightUpdater(mSceneManager->getImageManager());
     atmosphereNight->addUpdateCallback(mAtmosphereNightUpdater);
 
-    mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager->getTextureManager()));
+    mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager->getImageManager()));
 
     const Fallback::Map* fallback=MWBase::Environment::get().getWorld()->getFallback();
-    mMasser.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getTextureManager(), fallback->getFallbackFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
-    mSecunda.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getTextureManager(), fallback->getFallbackFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
+    mMasser.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), fallback->getFallbackFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
+    mSecunda.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), fallback->getFallbackFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
 
     mCloudNode = new osg::PositionAttitudeTransform;
     mEarlyRenderBinRoot->addChild(mCloudNode);
-    mCloudMesh = mSceneManager->createInstance("meshes/sky_clouds_01.nif", mCloudNode);
+    mCloudMesh = mSceneManager->getInstance("meshes/sky_clouds_01.nif", mCloudNode);
     ModVertexAlphaVisitor modClouds(1);
     mCloudMesh->accept(modClouds);
     mCloudUpdater = new CloudUpdater;
     mCloudUpdater->setOpacity(1.f);
     mCloudMesh->addUpdateCallback(mCloudUpdater);
 
-    mCloudMesh2 = mSceneManager->createInstance("meshes/sky_clouds_01.nif", mCloudNode);
+    mCloudMesh2 = mSceneManager->getInstance("meshes/sky_clouds_01.nif", mCloudNode);
     mCloudMesh2->accept(modClouds);
     mCloudUpdater2 = new CloudUpdater;
     mCloudUpdater2->setOpacity(0.f);
@@ -1342,8 +1346,12 @@ void SkyManager::createRain()
     mRainParticleSystem->setAlignVectorY(osg::Vec3f(0,0,-1));
 
     osg::ref_ptr<osg::StateSet> stateset (mRainParticleSystem->getOrCreateStateSet());
-    stateset->setTextureAttributeAndModes(0, mSceneManager->getTextureManager()->getTexture2D("textures/tx_raindrop_01.dds",
-        osg::Texture::CLAMP, osg::Texture::CLAMP), osg::StateAttribute::ON);
+
+    osg::ref_ptr<osg::Texture2D> raindropTex (new osg::Texture2D(mSceneManager->getImageManager()->getImage("textures/tx_raindrop_01.dds")));
+    raindropTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+    raindropTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+
+    stateset->setTextureAttributeAndModes(0, raindropTex, osg::StateAttribute::ON);
     stateset->setNestRenderBins(false);
     stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
     stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
@@ -1529,7 +1537,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
                 mParticleNode->setNodeMask(Mask_WeatherParticles);
                 mRootNode->addChild(mParticleNode);
             }
-            mParticleEffect = mSceneManager->createInstance(mCurrentParticleEffect, mParticleNode);
+            mParticleEffect = mSceneManager->getInstance(mCurrentParticleEffect, mParticleNode);
 
             SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
             mParticleEffect->accept(assignVisitor);
@@ -1549,8 +1557,11 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
         std::string texture = Misc::ResourceHelpers::correctTexturePath(mClouds, mSceneManager->getVFS());
 
-        mCloudUpdater->setTexture(mSceneManager->getTextureManager()->getTexture2D(texture,
-                                                                                   osg::Texture::REPEAT, osg::Texture::REPEAT));
+        osg::ref_ptr<osg::Texture2D> cloudTex (new osg::Texture2D(mSceneManager->getImageManager()->getImage(texture)));
+        cloudTex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+        cloudTex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+
+        mCloudUpdater->setTexture(cloudTex);
     }
 
     if (mNextClouds != weather.mNextCloudTexture)
@@ -1561,8 +1572,11 @@ void SkyManager::setWeather(const WeatherResult& weather)
         {
             std::string texture = Misc::ResourceHelpers::correctTexturePath(mNextClouds, mSceneManager->getVFS());
 
-            mCloudUpdater2->setTexture(mSceneManager->getTextureManager()->getTexture2D(texture,
-                                                                                       osg::Texture::REPEAT, osg::Texture::REPEAT));
+            osg::ref_ptr<osg::Texture2D> cloudTex (new osg::Texture2D(mSceneManager->getImageManager()->getImage(texture)));
+            cloudTex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+            cloudTex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+
+            mCloudUpdater2->setTexture(cloudTex);
         }
     }
 
@@ -1678,6 +1692,46 @@ void SkyManager::setGlareTimeOfDayFade(float val)
 void SkyManager::setWaterHeight(float height)
 {
     mUnderwaterSwitch->setWaterLevel(height);
+}
+
+void SkyManager::listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures)
+{
+    models.push_back("meshes/sky_atmosphere.nif");
+    if (mSceneManager->getVFS()->exists("meshes/sky_night_02.nif"))
+        models.push_back("meshes/sky_night_02.nif");
+    models.push_back("meshes/sky_night_01.nif");
+    models.push_back("meshes/sky_clouds_01.nif");
+
+    models.push_back("meshes\\ashcloud.nif");
+    models.push_back("meshes\\blightcloud.nif");
+    models.push_back("meshes\\snow.nif");
+    models.push_back("meshes\\blizzard.nif");
+
+    textures.push_back("textures/tx_mooncircle_full_s.dds");
+    textures.push_back("textures/tx_mooncircle_full_m.dds");
+
+    textures.push_back("textures/tx_masser_new.dds");
+    textures.push_back("textures/tx_masser_one_wax.dds");
+    textures.push_back("textures/tx_masser_half_wax.dds");
+    textures.push_back("textures/tx_masser_three_wax.dds");
+    textures.push_back("textures/tx_masser_one_wan.dds");
+    textures.push_back("textures/tx_masser_half_wan.dds");
+    textures.push_back("textures/tx_masser_three_wan.dds");
+    textures.push_back("textures/tx_masser_full.dds");
+
+    textures.push_back("textures/tx_secunda_new.dds");
+    textures.push_back("textures/tx_secunda_one_wax.dds");
+    textures.push_back("textures/tx_secunda_half_wax.dds");
+    textures.push_back("textures/tx_secunda_three_wax.dds");
+    textures.push_back("textures/tx_secunda_one_wan.dds");
+    textures.push_back("textures/tx_secunda_half_wan.dds");
+    textures.push_back("textures/tx_secunda_three_wan.dds");
+    textures.push_back("textures/tx_secunda_full.dds");
+
+    textures.push_back("textures/tx_sun_05.dds");
+    textures.push_back("textures/tx_sun_flash_grey_05.dds");
+
+    textures.push_back("textures/tx_raindrop_01.dds");
 }
 
 void SkyManager::setWaterEnabled(bool enabled)

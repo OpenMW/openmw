@@ -10,6 +10,7 @@
 namespace ESM
 {
     struct NPC;
+    struct BodyPart;
 }
 
 namespace MWRender
@@ -150,6 +151,10 @@ public:
     void setFirstPersonOffset(const osg::Vec3f& offset);
 
     virtual void updatePtr(const MWWorld::Ptr& updated);
+
+    /// Get a list of body parts that may be used by an NPC of given race and gender.
+    /// @note This is a fixed size list, one list item for each ESM::PartReferenceType, may contain NULL body parts.
+    static const std::vector<const ESM::BodyPart*>& getBodyParts(const std::string& raceId, bool female, bool firstperson, bool werewolf);
 };
 
 }

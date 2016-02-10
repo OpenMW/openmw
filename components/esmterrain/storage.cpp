@@ -3,6 +3,8 @@
 #include <set>
 #include <iostream>
 
+#include <OpenThreads/ScopedLock>
+
 #include <osg/Image>
 #include <osg/Plane>
 
@@ -399,9 +401,9 @@ namespace ESMTerrain
                     int channel = pack ? std::max(0, (layerIndex-1) % 4) : 0;
 
                     if (blendIndex == i)
-                        pData[y*blendmapSize*channels + x*channels + channel] = 255;
+                        pData[(blendmapSize - y - 1)*blendmapSize*channels + x*channels + channel] = 255;
                     else
-                        pData[y*blendmapSize*channels + x*channels + channel] = 0;
+                        pData[(blendmapSize - y - 1)*blendmapSize*channels + x*channels + channel] = 0;
                 }
             }
 
@@ -498,6 +500,8 @@ namespace ESMTerrain
 
     Terrain::LayerInfo Storage::getLayerInfo(const std::string& texture)
     {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mLayerInfoMutex);
+
         // Already have this cached?
         std::map<std::string, Terrain::LayerInfo>::iterator found = mLayerInfoMap.find(texture);
         if (found != mLayerInfoMap.end())

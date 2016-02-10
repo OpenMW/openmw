@@ -55,6 +55,9 @@ public:
 
     ~PartHolder();
 
+    /// Unreferences mNode *without* detaching it from the graph. Only use if you know what you are doing.
+    void unlink();
+
     osg::ref_ptr<osg::Node> getNode()
     {
         return mNode;
@@ -229,7 +232,8 @@ protected:
 
     // Stored in all lowercase for a case-insensitive lookup
     typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
-    NodeMap mNodeMap;
+    mutable NodeMap mNodeMap;
+    mutable bool mNodeMapCreated;
 
     MWWorld::Ptr mPtr;
 
@@ -259,6 +263,8 @@ protected:
     osg::ref_ptr<SceneUtil::LightSource> mGlowLight;
 
     float mAlpha;
+
+    const NodeMap& getNodeMap() const;
 
     /* Sets the appropriate animations on the bone groups based on priority.
      */

@@ -67,6 +67,7 @@ add_openmw_dir (mwworld
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     store esmstore recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
     contentloader esmloader actiontrap cellreflist cellref physicssystem weather projectilemanager
+    cellpreloader
     )
 
 add_openmw_dir (mwphysics

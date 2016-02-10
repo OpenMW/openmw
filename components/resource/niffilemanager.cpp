@@ -1,5 +1,7 @@
 #include "niffilemanager.hpp"
 
+#include <osg/Object>
+
 #include <components/vfs/manager.hpp>
 
 #include "objectcache.hpp"
@@ -29,9 +31,8 @@ namespace Resource
     };
 
     NifFileManager::NifFileManager(const VFS::Manager *vfs)
-        : mVFS(vfs)
+        : ResourceManager(vfs)
     {
-        mCache = new osgDB::ObjectCache;
     }
 
     NifFileManager::~NifFileManager()
@@ -39,12 +40,6 @@ namespace Resource
 
     }
 
-    void NifFileManager::clearCache()
-    {
-        // NIF files aren't needed any more when the converted objects are cached in SceneManager / BulletShapeManager,
-        // so we'll simply drop all nif files here, unlikely to need them again
-        mCache->clear();
-    }
 
     Nif::NIFFilePtr NifFileManager::get(const std::string &name)
     {

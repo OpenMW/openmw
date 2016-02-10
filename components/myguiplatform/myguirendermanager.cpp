@@ -9,12 +9,13 @@
 #include <osg/Geode>
 #include <osg/BlendFunc>
 #include <osg/Texture2D>
+#include <osg/TexMat>
 
 #include <osgViewer/Viewer>
 
 #include <osgGA/GUIEventHandler>
 
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 
 #include "myguitexture.hpp"
 
@@ -189,6 +190,12 @@ public:
         mStateSet->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
         mStateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
         mStateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+
+        // need to flip tex coords since MyGUI uses DirectX convention of top left image origin
+        osg::Matrix flipMat;
+        flipMat.preMultTranslate(osg::Vec3f(0,1,0));
+        flipMat.preMultScale(osg::Vec3f(1,-1,1));
+        mStateSet->setTextureAttribute(0, new osg::TexMat(flipMat), osg::StateAttribute::ON);
     }
     Drawable(const Drawable &copy, const osg::CopyOp &copyop=osg::CopyOp::SHALLOW_COPY)
         : osg::Drawable(copy, copyop)
@@ -346,10 +353,10 @@ void OSGVertexBuffer::create()
 
 // ---------------------------------------------------------------------------
 
-RenderManager::RenderManager(osgViewer::Viewer *viewer, osg::Group *sceneroot, Resource::TextureManager* textureManager, float scalingFactor)
+RenderManager::RenderManager(osgViewer::Viewer *viewer, osg::Group *sceneroot, Resource::ImageManager* imageManager, float scalingFactor)
   : mViewer(viewer)
   , mSceneRoot(sceneroot)
-  , mTextureManager(textureManager)
+  , mImageManager(imageManager)
   , mUpdate(false)
   , mIsInitialise(false)
   , mInvScalingFactor(1.f)
@@ -516,7 +523,7 @@ MyGUI::ITexture* RenderManager::createTexture(const std::string &name)
         mTextures.erase(item);
     }
 
-    OSGTexture* texture = new OSGTexture(name, mTextureManager);
+    OSGTexture* texture = new OSGTexture(name, mImageManager);
     mTextures.insert(std::make_pair(name, texture));
     return texture;
 }

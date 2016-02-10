@@ -2,6 +2,8 @@
 
 #include <utility>
 
+#include <OpenThreads/ScopedLock>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
@@ -60,7 +62,6 @@ namespace ESM
         , mX(0)
         , mY(0)
         , mPlugin(0)
-        , mEsm(NULL)
         , mDataTypes(0)
         , mDataLoaded(false)
         , mLandData(NULL)
@@ -86,8 +87,7 @@ namespace ESM
     {
         isDeleted = false;
 
-        mEsm = &esm;
-        mPlugin = mEsm->getIndex();
+        mPlugin = esm.getIndex();
 
         bool hasLocation = false;
         bool isLoaded = false;
@@ -180,6 +180,8 @@ namespace ESM
 
     void Land::loadData(int flags) const
     {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+
         // Try to load only available data
         flags = flags & mDataTypes;
         // Return if all required data is loaded
@@ -191,15 +193,17 @@ namespace ESM
             mLandData = new LandData;
             mLandData->mDataTypes = mDataTypes;
         }
-        mEsm->restoreContext(mContext);
 
-        if (mEsm->isNextSub("VNML")) {
-            condLoad(flags, DATA_VNML, mLandData->mNormals, sizeof(mLandData->mNormals));
+        ESM::ESMReader reader;
+        reader.restoreContext(mContext);
+
+        if (reader.isNextSub("VNML")) {
+            condLoad(reader, flags, DATA_VNML, mLandData->mNormals, sizeof(mLandData->mNormals));
         }
 
-        if (mEsm->isNextSub("VHGT")) {
+        if (reader.isNextSub("VHGT")) {
             static VHGT vhgt;
-            if (condLoad(flags, DATA_VHGT, &vhgt, sizeof(vhgt))) {
+            if (condLoad(reader, flags, DATA_VHGT, &vhgt, sizeof(vhgt))) {
                 float rowOffset = vhgt.mHeightOffset;
                 for (int y = 0; y < LAND_SIZE; y++) {
                     rowOffset += vhgt.mHeightData[y * LAND_SIZE];
@@ -217,14 +221,14 @@ namespace ESM
             }
         }
 
-        if (mEsm->isNextSub("WNAM")) {
-            condLoad(flags, DATA_WNAM, mLandData->mWnam, 81);
+        if (reader.isNextSub("WNAM")) {
+            condLoad(reader, flags, DATA_WNAM, mLandData->mWnam, 81);
         }
-        if (mEsm->isNextSub("VCLR"))
-            condLoad(flags, DATA_VCLR, mLandData->mColours, 3 * LAND_NUM_VERTS);
-        if (mEsm->isNextSub("VTEX")) {
+        if (reader.isNextSub("VCLR"))
+            condLoad(reader, flags, DATA_VCLR, mLandData->mColours, 3 * LAND_NUM_VERTS);
+        if (reader.isNextSub("VTEX")) {
             static uint16_t vtex[LAND_NUM_TEXTURES];
-            if (condLoad(flags, DATA_VTEX, vtex, sizeof(vtex))) {
+            if (condLoad(reader, flags, DATA_VTEX, vtex, sizeof(vtex))) {
                 LandData::transposeTextureData(vtex, mLandData->mTextures);
             }
         }
@@ -240,25 +244,26 @@ namespace ESM
         }
     }
 
-    bool Land::condLoad(int flags, int dataFlag, void *ptr, unsigned int size) const
+    bool Land::condLoad(ESM::ESMReader& reader, int flags, int dataFlag, void *ptr, unsigned int size) const
     {
         if ((mDataLoaded & dataFlag) == 0 && (flags & dataFlag) != 0) {
-            mEsm->getHExact(ptr, size);
+            reader.getHExact(ptr, size);
             mDataLoaded |= dataFlag;
             return true;
         }
-        mEsm->skipHSubSize(size);
+        reader.skipHSubSize(size);
         return false;
     }
 
     bool Land::isDataLoaded(int flags) const
     {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
         return (mDataLoaded & flags) == (flags & mDataTypes);
     }
 
     Land::Land (const Land& land)
     : mFlags (land.mFlags), mX (land.mX), mY (land.mY), mPlugin (land.mPlugin),
-      mEsm (land.mEsm), mContext (land.mContext), mDataTypes (land.mDataTypes),
+      mContext (land.mContext), mDataTypes (land.mDataTypes),
       mDataLoaded (land.mDataLoaded),
       mLandData (land.mLandData ? new LandData (*land.mLandData) : 0)
     {}
@@ -275,7 +280,6 @@ namespace ESM
         std::swap (mX, land.mX);
         std::swap (mY, land.mY);
         std::swap (mPlugin, land.mPlugin);
-        std::swap (mEsm, land.mEsm);
         std::swap (mContext, land.mContext);
         std::swap (mDataTypes, land.mDataTypes);
         std::swap (mDataLoaded, land.mDataLoaded);

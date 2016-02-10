@@ -5,14 +5,14 @@
 
 #include <osg/Texture2D>
 
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 
 namespace osgMyGUI
 {
 
-    OSGTexture::OSGTexture(const std::string &name, Resource::TextureManager* textureManager)
+    OSGTexture::OSGTexture(const std::string &name, Resource::ImageManager* imageManager)
       : mName(name)
-      , mTextureManager(textureManager)
+      , mImageManager(imageManager)
       , mFormat(MyGUI::PixelFormat::Unknow)
       , mUsage(MyGUI::TextureUsage::Default)
       , mNumElemBytes(0)
@@ -20,7 +20,7 @@ namespace osgMyGUI
     }
 
     OSGTexture::OSGTexture(osg::Texture2D *texture)
-        : mTextureManager(NULL)
+        : mImageManager(NULL)
         , mTexture(texture)
         , mFormat(MyGUI::PixelFormat::Unknow)
         , mUsage(MyGUI::TextureUsage::Default)
@@ -83,10 +83,12 @@ namespace osgMyGUI
 
     void OSGTexture::loadFromFile(const std::string &fname)
     {
-        if (!mTextureManager)
-            throw std::runtime_error("No texturemanager set");
+        if (!mImageManager)
+            throw std::runtime_error("No imagemanager set");
 
-        mTexture = mTextureManager->getTexture2D(fname, osg::Texture2D::CLAMP_TO_EDGE, osg::Texture2D::CLAMP_TO_EDGE);
+        mTexture = new osg::Texture2D(mImageManager->getImage(fname));
+        mTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        mTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
         // disable mip-maps
         mTexture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
 
@@ -142,6 +144,8 @@ namespace osgMyGUI
     {
         if (!mLockedImage.valid())
             throw std::runtime_error("Texture not locked");
+
+        mLockedImage->flipVertical();
 
         // mTexture might be in use by the draw thread, so create a new texture instead and use that.
         osg::ref_ptr<osg::Texture2D> newTexture = new osg::Texture2D;

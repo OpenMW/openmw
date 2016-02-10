@@ -20,7 +20,7 @@
 #include <components/sdlutil/imagetosurface.hpp>
 
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include <components/compiler/extensions0.hpp>
 
@@ -448,8 +448,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true);
 
     mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
-    mResourceSystem->getTextureManager()->setUnRefImageDataAfterApply(true);
-    mResourceSystem->getTextureManager()->setFilterSettings(
+    mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(false); // keep to Off for now to allow better state sharing
+    mResourceSystem->getSceneManager()->setFilterSettings(
         Settings::Manager::getString("texture mag filter", "General"),
         Settings::Manager::getString("texture min filter", "General"),
         Settings::Manager::getString("texture mipmap", "General"),
@@ -651,6 +651,8 @@ void OMW::Engine::go()
     }
     else if (!mSkipMenu)
     {
+        mEnvironment.getWorld()->preloadCommonAssets();
+
         // start in main menu
         mEnvironment.getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         try

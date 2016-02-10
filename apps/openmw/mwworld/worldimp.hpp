@@ -183,6 +183,8 @@ namespace MWWorld
             virtual void startNewGame (bool bypass);
             ///< \param bypass Bypass regular game start.
 
+            virtual void preloadCommonAssets();
+
             virtual void clear();
 
             virtual int countSavedGameRecords() const;

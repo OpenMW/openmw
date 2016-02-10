@@ -27,7 +27,7 @@ EffectManager::~EffectManager()
 
 void EffectManager::addEffect(const std::string &model, const std::string& textureOverride, const osg::Vec3f &worldPosition, float scale)
 {
-    osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->createInstance(model);
+    osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model);
 
     node->setNodeMask(Mask_Effect);
 

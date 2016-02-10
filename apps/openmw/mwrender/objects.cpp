@@ -14,6 +14,7 @@
 
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/unrefqueue.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
@@ -85,9 +86,10 @@ namespace
 namespace MWRender
 {
 
-Objects::Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode)
+Objects::Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue)
     : mRootNode(rootNode)
     , mResourceSystem(resourceSystem)
+    , mUnrefQueue(unrefQueue)
 {
 }
 
@@ -186,7 +188,11 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
         delete iter->second;
         mObjects.erase(iter);
 
+        if (mUnrefQueue.get())
+            mUnrefQueue->push(ptr.getRefData().getBaseNode());
+
         ptr.getRefData().getBaseNode()->getParent(0)->removeChild(ptr.getRefData().getBaseNode());
+
         ptr.getRefData().setBaseNode(NULL);
         return true;
     }
@@ -200,6 +206,8 @@ void Objects::removeCell(const MWWorld::CellStore* store)
     {
         if(iter->first.getCell() == store)
         {
+            if (mUnrefQueue.get())
+                mUnrefQueue->push(iter->second->getObjectRoot());
             delete iter->second;
             mObjects.erase(iter++);
         }
@@ -211,6 +219,8 @@ void Objects::removeCell(const MWWorld::CellStore* store)
     if(cell != mCellSceneNodes.end())
     {
         cell->second->getParent(0)->removeChild(cell->second);
+        if (mUnrefQueue.get())
+            mUnrefQueue->push(cell->second);
         mCellSceneNodes.erase(cell);
     }
 }

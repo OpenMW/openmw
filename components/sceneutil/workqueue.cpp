@@ -1,9 +1,11 @@
 #include "workqueue.hpp"
 
+#include <iostream>
+
 namespace SceneUtil
 {
 
-void WorkTicket::waitTillDone()
+void WorkItem::waitTillDone()
 {
     if (mDone > 0)
         return;
@@ -15,7 +17,7 @@ void WorkTicket::waitTillDone()
     }
 }
 
-void WorkTicket::signalDone()
+void WorkItem::signalDone()
 {
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
@@ -25,23 +27,16 @@ void WorkTicket::signalDone()
 }
 
 WorkItem::WorkItem()
-    : mTicket(new WorkTicket)
 {
-    mTicket->setThreadSafeRefUnref(true);
 }
 
 WorkItem::~WorkItem()
 {
 }
 
-void WorkItem::doWork()
+bool WorkItem::isDone() const
 {
-    mTicket->signalDone();
-}
-
-osg::ref_ptr<WorkTicket> WorkItem::getTicket()
-{
-    return mTicket;
+    return (mDone > 0);
 }
 
 WorkQueue::WorkQueue(int workerThreads)
@@ -60,11 +55,7 @@ WorkQueue::~WorkQueue()
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
         while (!mQueue.empty())
-        {
-            WorkItem* item = mQueue.front();
-            delete item;
             mQueue.pop();
-        }
         mIsReleased = true;
         mCondition.broadcast();
     }
@@ -76,16 +67,20 @@ WorkQueue::~WorkQueue()
     }
 }
 
-osg::ref_ptr<WorkTicket> WorkQueue::addWorkItem(WorkItem *item)
+void WorkQueue::addWorkItem(osg::ref_ptr<WorkItem> item)
 {
-    osg::ref_ptr<WorkTicket> ticket = item->getTicket();
+    if (item->isDone())
+    {
+        std::cerr << "warning, trying to add a work item that is already completed" << std::endl;
+        return;
+    }
+
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
     mQueue.push(item);
     mCondition.signal();
-    return ticket;
 }
 
-WorkItem *WorkQueue::removeWorkItem()
+osg::ref_ptr<WorkItem> WorkQueue::removeWorkItem()
 {
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
     while (mQueue.empty() && !mIsReleased)
@@ -94,7 +89,7 @@ WorkItem *WorkQueue::removeWorkItem()
     }
     if (mQueue.size())
     {
-        WorkItem* item = mQueue.front();
+        osg::ref_ptr<WorkItem> item = mQueue.front();
         mQueue.pop();
         return item;
     }
@@ -111,11 +106,11 @@ void WorkThread::run()
 {
     while (true)
     {
-        WorkItem* item = mWorkQueue->removeWorkItem();
+        osg::ref_ptr<WorkItem> item = mWorkQueue->removeWorkItem();
         if (!item)
             return;
         item->doWork();
-        delete item;
+        item->signalDone();
     }
 }
 

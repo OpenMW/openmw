@@ -7,7 +7,7 @@
 
 namespace Resource
 {
-    class TextureManager;
+    class ImageManager;
 }
 
 namespace osgViewer
@@ -33,7 +33,7 @@ class RenderManager : public MyGUI::RenderManager, public MyGUI::IRenderTarget
     osg::ref_ptr<osgViewer::Viewer> mViewer;
     osg::ref_ptr<osg::Group> mSceneRoot;
     osg::ref_ptr<Drawable> mDrawable;
-    Resource::TextureManager* mTextureManager;
+    Resource::ImageManager* mImageManager;
 
     MyGUI::IntSize mViewSize;
     bool mUpdate;
@@ -54,7 +54,7 @@ class RenderManager : public MyGUI::RenderManager, public MyGUI::IRenderTarget
     void destroyAllResources();
 
 public:
-    RenderManager(osgViewer::Viewer *viewer, osg::Group *sceneroot, Resource::TextureManager* textureManager, float scalingFactor);
+    RenderManager(osgViewer::Viewer *viewer, osg::Group *sceneroot, Resource::ImageManager* imageManager, float scalingFactor);
     virtual ~RenderManager();
 
     void initialise();

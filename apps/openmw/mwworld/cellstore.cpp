@@ -333,6 +333,11 @@ namespace MWWorld
         return mState;
     }
 
+    const std::vector<std::string> &CellStore::getPreloadedIds() const
+    {
+        return mIds;
+    }
+
     bool CellStore::hasState() const
     {
         return mHasState;

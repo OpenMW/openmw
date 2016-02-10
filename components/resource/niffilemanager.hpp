@@ -5,39 +5,23 @@
 
 #include <components/nif/niffile.hpp>
 
-namespace VFS
-{
-    class Manager;
-}
-
-namespace osgDB
-{
-    class ObjectCache;
-}
+#include "resourcemanager.hpp"
 
 namespace Resource
 {
 
     /// @brief Handles caching of NIFFiles.
-    /// @note The NifFileManager is completely thread safe.
-    class NifFileManager
+    /// @note May be used from any thread.
+    class NifFileManager : public ResourceManager
     {
     public:
         NifFileManager(const VFS::Manager* vfs);
         ~NifFileManager();
 
-        void clearCache();
-
         /// Retrieve a NIF file from the cache, or load it from the VFS if not cached yet.
         /// @note For performance reasons the NifFileManager does not handle case folding, needs
         /// to be done in advance by other managers accessing the NifFileManager.
         Nif::NIFFilePtr get(const std::string& name);
-
-    private:
-        // Use the osgDB::ObjectCache so objects are retrieved in thread safe way
-        osg::ref_ptr<osgDB::ObjectCache> mCache;
-
-        const VFS::Manager* mVFS;
     };
 
 }

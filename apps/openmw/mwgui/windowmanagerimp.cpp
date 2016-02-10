@@ -28,7 +28,7 @@
 #include <components/fontloader/fontloader.hpp>
 
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 
 #include <components/translation/translation.hpp>
 
@@ -194,7 +194,7 @@ namespace MWGui
       , mVersionDescription(versionDescription)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
-        mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getTextureManager(), uiScale);
+        mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getImageManager(), uiScale);
         mGuiPlatform->initialise(resourcePath, logpath);
 
         mGui = new MyGUI::Gui;
@@ -2015,9 +2015,9 @@ namespace MWGui
                 continue;
             std::string tex_name = imgSetPointer->getImageSet()->getIndexInfo(0,0).texture;
 
-            osg::ref_ptr<osg::Texture2D> tex = mResourceSystem->getTextureManager()->getTexture2D(tex_name, osg::Texture::CLAMP, osg::Texture::CLAMP);
+            osg::ref_ptr<osg::Image> image = mResourceSystem->getImageManager()->getImage(tex_name);
 
-            if(tex.valid())
+            if(image.valid())
             {
                 //everything looks good, send it to the cursor manager
                 Uint8 size_x = imgSetPointer->getSize().width;
@@ -2026,7 +2026,7 @@ namespace MWGui
                 Uint8 hotspot_y = imgSetPointer->getHotSpot().top;
                 int rotation = imgSetPointer->getRotation();
 
-                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, tex->getImage(), size_x, size_y, hotspot_x, hotspot_y);
+                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, image, size_x, size_y, hotspot_x, hotspot_y);
             }
         }
     }

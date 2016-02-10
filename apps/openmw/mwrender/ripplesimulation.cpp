@@ -13,8 +13,9 @@
 
 #include <components/misc/rng.hpp>
 #include <components/nifosg/controller.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 #include <components/fallback/fallback.hpp>
 
 #include "vismask.hpp"
@@ -39,7 +40,11 @@ namespace
         {
             std::ostringstream texname;
             texname << "textures/water/" << tex << std::setw(2) << std::setfill('0') << i << ".dds";
-            textures.push_back(resourceSystem->getTextureManager()->getTexture2D(texname.str(), osg::Texture::REPEAT, osg::Texture::REPEAT));
+            osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(resourceSystem->getImageManager()->getImage(texname.str())));
+            tex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+            tex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+            resourceSystem->getSceneManager()->applyFilterSettings(tex);
+            textures.push_back(tex);
         }
 
         osg::ref_ptr<NifOsg::FlipController> controller (new NifOsg::FlipController(0, 0.3f/rippleFrameCount, textures));

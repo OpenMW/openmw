@@ -17,7 +17,7 @@
 #include <osgViewer/Viewer>
 
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 
 #include <components/settings/settings.hpp>
@@ -26,6 +26,8 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/workqueue.hpp>
+#include <components/sceneutil/unrefqueue.hpp>
 
 #include <components/terrain/terraingrid.hpp>
 
@@ -126,11 +128,36 @@ namespace MWRender
         bool mWireframe;
     };
 
+    class PreloadCommonAssetsWorkItem : public SceneUtil::WorkItem
+    {
+    public:
+        PreloadCommonAssetsWorkItem(Resource::ResourceSystem* resourceSystem)
+            : mResourceSystem(resourceSystem)
+        {
+        }
+
+        virtual void doWork()
+        {
+            for (std::vector<std::string>::const_iterator it = mModels.begin(); it != mModels.end(); ++it)
+                mResourceSystem->getSceneManager()->getTemplate(*it);
+            for (std::vector<std::string>::const_iterator it = mTextures.begin(); it != mTextures.end(); ++it)
+                mResourceSystem->getImageManager()->getImage(*it);
+        }
+
+        std::vector<std::string> mModels;
+        std::vector<std::string> mTextures;
+
+    private:
+        Resource::ResourceSystem* mResourceSystem;
+    };
+
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem,
                                        const Fallback::Map* fallback, const std::string& resourcePath)
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
+        , mWorkQueue(new SceneUtil::WorkQueue)
+        , mUnrefQueue(new SceneUtil::UnrefQueue)
         , mFogDepth(0.f)
         , mUnderwaterColor(fallback->getFallbackColour("Water_UnderwaterColor"))
         , mUnderwaterWeight(fallback->getFallbackFloat("Water_UnderwaterColorWeight"))
@@ -151,7 +178,7 @@ namespace MWRender
 
         mPathgrid.reset(new Pathgrid(mRootNode));
 
-        mObjects.reset(new Objects(mResourceSystem, lightRoot));
+        mObjects.reset(new Objects(mResourceSystem, lightRoot, mUnrefQueue.get()));
 
         mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
 
@@ -162,7 +189,7 @@ namespace MWRender
         mWater.reset(new Water(mRootNode, lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
 
         mTerrain.reset(new Terrain::TerrainGrid(lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(),
-                                                new TerrainStorage(mResourceSystem->getVFS(), false), Mask_Terrain));
+                                                new TerrainStorage(mResourceSystem->getVFS(), false), Mask_Terrain, mUnrefQueue.get()));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 
@@ -229,6 +256,37 @@ namespace MWRender
     Resource::ResourceSystem* RenderingManager::getResourceSystem()
     {
         return mResourceSystem;
+    }
+
+    SceneUtil::WorkQueue* RenderingManager::getWorkQueue()
+    {
+        return mWorkQueue.get();
+    }
+
+    SceneUtil::UnrefQueue* RenderingManager::getUnrefQueue()
+    {
+        return mUnrefQueue.get();
+    }
+
+    Terrain::World* RenderingManager::getTerrain()
+    {
+        return mTerrain.get();
+    }
+
+    void RenderingManager::preloadCommonAssets()
+    {
+        osg::ref_ptr<PreloadCommonAssetsWorkItem> workItem (new PreloadCommonAssetsWorkItem(mResourceSystem));
+        mSky->listAssetsToPreload(workItem->mModels, workItem->mTextures);
+        mWater->listAssetsToPreload(workItem->mTextures);
+
+        workItem->mTextures.push_back("textures/_land_default.dds");
+
+        mWorkQueue->addWorkItem(workItem);
+    }
+
+    double RenderingManager::getReferenceTime() const
+    {
+        return mViewer->getFrameStamp()->getReferenceTime();
     }
 
     osg::Group* RenderingManager::getLightRoot()
@@ -385,6 +443,8 @@ namespace MWRender
 
     void RenderingManager::update(float dt, bool paused)
     {
+        mUnrefQueue->flush(mWorkQueue.get());
+
         if (!paused)
         {
             mEffectManager->update(dt);
@@ -776,7 +836,10 @@ namespace MWRender
 
     void RenderingManager::updateTextureFiltering()
     {
-        mResourceSystem->getTextureManager()->setFilterSettings(
+        if (mTerrain.get())
+            mTerrain->updateCache();
+
+        mResourceSystem->getSceneManager()->setFilterSettings(
             Settings::Manager::getString("texture mag filter", "General"),
             Settings::Manager::getString("texture min filter", "General"),
             Settings::Manager::getString("texture mipmap", "General"),

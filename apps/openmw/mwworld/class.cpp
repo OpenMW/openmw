@@ -291,6 +291,13 @@ namespace MWWorld
         return "";
     }
 
+    void Class::getModelsToPreload(const Ptr &ptr, std::vector<std::string> &models) const
+    {
+        std::string model = getModel(ptr);
+        if (!model.empty())
+            models.push_back(model);
+    }
+
     std::string Class::applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         throw std::runtime_error ("class can't be enchanted");

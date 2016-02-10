@@ -100,7 +100,7 @@ void CSVRender::Object::update()
         {
             std::string path = "meshes\\" + model;
 
-            mResourceSystem->getSceneManager()->createInstance(path, mBaseNode);
+            mResourceSystem->getSceneManager()->getInstance(path, mBaseNode);
         }
         catch (std::exception& e)
         {

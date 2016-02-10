@@ -1,3 +1,6 @@
+// Resource ObjectCache for OpenMW, forked from osgDB ObjectCache by Robert Osfield, see copyright notice below.
+// The main change from the upstream version is that removeExpiredObjectsInCache no longer keeps a lock while the unref happens.
+
 /* -*-c++-*- OpenSceneGraph - Copyright (C) 1998-2006 Robert Osfield
  *
  * This library is open source and may be redistributed and/or modified under
@@ -11,28 +14,24 @@
  * OpenSceneGraph Public License for more details.
 */
 
-// Wrapper for osgDB/ObjectCache. Works around ObjectCache not being available in old OSG 3.2.
-// Use "#include objectcache.hpp" in place of "#include <osgDB/ObjectCache".
+#ifndef OPENMW_COMPONENTS_RESOURCE_OBJECTCACHE
+#define OPENMW_COMPONENTS_RESOURCE_OBJECTCACHE
 
-#ifndef OSGDB_OBJECTCACHE_WRAPPER
-#define OSGDB_OBJECTCACHE_WRAPPER 1
+#include <osg/Referenced>
+#include <osg/ref_ptr>
 
-#include <osg/Version>
-
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
-#include <osgDB/ObjectCache>
-#else
-
-#include <osg/Node>
-
-#include <osgDB/ReaderWriter>
-#include <osgDB/DatabaseRevisions>
-
+#include <string>
 #include <map>
 
-namespace osgDB {
+namespace osg
+{
+    class Object;
+    class State;
+}
 
-class /*OSGDB_EXPORT*/ ObjectCache : public osg::Referenced
+namespace Resource {
+
+class ObjectCache : public osg::Referenced
 {
     public:
 
@@ -55,22 +54,16 @@ class /*OSGDB_EXPORT*/ ObjectCache : public osg::Referenced
         /** Remove all objects in the cache regardless of having external references or expiry times.*/
         void clear();
 
-        /** Add contents of specified ObjectCache to this object cache.*/
-        void addObjectCache(ObjectCache* object);
-
         /** Add a filename,object,timestamp triple to the Registry::ObjectCache.*/
         void addEntryToObjectCache(const std::string& filename, osg::Object* object, double timestamp = 0.0);
 
         /** Remove Object from cache.*/
         void removeFromObjectCache(const std::string& fileName);
 
-        /** Get an Object from the object cache*/
-        osg::Object* getFromObjectCache(const std::string& fileName);
-
         /** Get an ref_ptr<Object> from the object cache*/
         osg::ref_ptr<osg::Object> getRefFromObjectCache(const std::string& fileName);
 
-        /** call rleaseGLObjects on all objects attached to the object cache.*/
+        /** call releaseGLObjects on all objects attached to the object cache.*/
         void releaseGLObjects(osg::State* state);
 
     protected:
@@ -86,7 +79,5 @@ class /*OSGDB_EXPORT*/ ObjectCache : public osg::Referenced
 };
 
 }
-
-#endif
 
 #endif

@@ -224,8 +224,6 @@ void CSMTools::MergeLandStage::perform (int stage, CSMDoc::Messages& messages)
 
         CSMWorld::Land newLand (land);
 
-        newLand.mEsm = 0; // avoid potential dangling pointer (ESMReader isn't needed anyway,
-                          // because record is already fully loaded)
         newLand.mPlugin = 0;
 
         if (land.mDataTypes & ESM::Land::DATA_VTEX)

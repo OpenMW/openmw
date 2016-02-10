@@ -15,6 +15,7 @@
 #include <osg/FrontFace>
 #include <osg/Shader>
 #include <osg/GLExtensions>
+#include <osg/UserDataContainer>
 
 #include <osgDB/ReadFile>
 
@@ -25,7 +26,7 @@
 #include <osgUtil/CullVisitor>
 
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 
 #include <components/nifosg/controller.hpp>
 #include <components/sceneutil/controller.hpp>
@@ -317,6 +318,7 @@ public:
         mRefractionTexture->setInternalFormat(GL_RGB);
         mRefractionTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mRefractionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        mRefractionTexture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
 
         attach(osg::Camera::COLOR_BUFFER, mRefractionTexture);
 
@@ -328,6 +330,7 @@ public:
         mRefractionDepthTexture->setSourceType(GL_UNSIGNED_INT);
         mRefractionDepthTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mRefractionDepthTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        mRefractionDepthTexture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
 
         attach(osg::Camera::DEPTH_BUFFER, mRefractionDepthTexture);
     }
@@ -388,6 +391,7 @@ public:
         mReflectionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
         mReflectionTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         mReflectionTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        mReflectionTexture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
 
         attach(osg::Camera::COLOR_BUFFER, mReflectionTexture);
 
@@ -553,7 +557,10 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
     {
         std::ostringstream texname;
         texname << "textures/water/" << texture << std::setw(2) << std::setfill('0') << i << ".dds";
-        textures.push_back(mResourceSystem->getTextureManager()->getTexture2D(texname.str(), osg::Texture::REPEAT, osg::Texture::REPEAT));
+        osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(mResourceSystem->getImageManager()->getImage(texname.str())));
+        tex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+        tex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+        textures.push_back(tex);
     }
 
     if (!textures.size())
@@ -640,6 +647,18 @@ Water::~Water()
     {
         mParent->removeChild(mRefraction);
         mRefraction = NULL;
+    }
+}
+
+void Water::listAssetsToPreload(std::vector<std::string> &textures)
+{
+    int frameCount = mFallback->getFallbackInt("Water_SurfaceFrameCount");
+    std::string texture = mFallback->getFallbackString("Water_SurfaceTexture");
+    for (int i=0; i<frameCount; ++i)
+    {
+        std::ostringstream texname;
+        texname << "textures/water/" << texture << std::setw(2) << std::setfill('0') << i << ".dds";
+        textures.push_back(texname.str());
     }
 }
 

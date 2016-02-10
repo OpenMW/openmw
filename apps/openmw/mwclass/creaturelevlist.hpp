@@ -17,6 +17,9 @@ namespace MWClass
 
             static void registerSelf();
 
+            virtual void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const;
+            ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation: list getModel().
+
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 

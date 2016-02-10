@@ -1,13 +1,17 @@
 #include "scenemanager.hpp"
 
+#include <iostream>
 #include <osg/Node>
 #include <osg/Geode>
 #include <osg/UserDataContainer>
 #include <osg/Version>
 
 #include <osgParticle/ParticleSystem>
+#include <osgFX/Effect>
 
 #include <osgUtil/IncrementalCompileOperation>
+
+#include <osgViewer/Viewer>
 
 #include <osgDB/SharedStateManager>
 #include <osgDB/Registry>
@@ -19,13 +23,17 @@
 
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/sceneutil/controller.hpp>
 
-#include "texturemanager.hpp"
+#include "imagemanager.hpp"
 #include "niffilemanager.hpp"
+#include "objectcache.hpp"
+#include "multiobjectcache.hpp"
 
 namespace
 {
 
+    /// @todo Do this in updateCallback so that animations are accounted for.
     class InitWorldSpaceParticlesVisitor : public osg::NodeVisitor
     {
     public:
@@ -105,10 +113,134 @@ namespace
 namespace Resource
 {
 
-    SceneManager::SceneManager(const VFS::Manager *vfs, Resource::TextureManager* textureManager, Resource::NifFileManager* nifFileManager)
-        : mVFS(vfs)
-        , mTextureManager(textureManager)
+    /// Set texture filtering settings on textures contained in a FlipController.
+    class SetFilterSettingsControllerVisitor : public SceneUtil::ControllerVisitor
+    {
+    public:
+        SetFilterSettingsControllerVisitor(osg::Texture::FilterMode minFilter, osg::Texture::FilterMode magFilter, int maxAnisotropy)
+            : mMinFilter(minFilter)
+            , mMagFilter(magFilter)
+            , mMaxAnisotropy(maxAnisotropy)
+        {
+        }
+
+        virtual void visit(osg::Node& node, SceneUtil::Controller& ctrl)
+        {
+            if (NifOsg::FlipController* flipctrl = dynamic_cast<NifOsg::FlipController*>(&ctrl))
+            {
+                for (std::vector<osg::ref_ptr<osg::Texture2D> >::iterator it = flipctrl->getTextures().begin(); it != flipctrl->getTextures().end(); ++it)
+                {
+                    osg::Texture* tex = *it;
+                    tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
+                    tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
+                    tex->setMaxAnisotropy(mMaxAnisotropy);
+                }
+            }
+        }
+
+    private:
+        osg::Texture::FilterMode mMinFilter;
+        osg::Texture::FilterMode mMagFilter;
+        int mMaxAnisotropy;
+    };
+
+    /// Set texture filtering settings on textures contained in StateSets.
+    class SetFilterSettingsVisitor : public osg::NodeVisitor
+    {
+    public:
+        SetFilterSettingsVisitor(osg::Texture::FilterMode minFilter, osg::Texture::FilterMode magFilter, int maxAnisotropy)
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mMinFilter(minFilter)
+            , mMagFilter(magFilter)
+            , mMaxAnisotropy(maxAnisotropy)
+        {
+        }
+
+        virtual void apply(osg::Node& node)
+        {
+            if (osgFX::Effect* effect = dynamic_cast<osgFX::Effect*>(&node))
+                apply(*effect);
+
+            osg::StateSet* stateset = node.getStateSet();
+            if (stateset)
+                apply(stateset);
+
+            traverse(node);
+        }
+
+        void apply(osgFX::Effect& effect)
+        {
+            for (int i =0; i<effect.getNumTechniques(); ++i)
+            {
+                osgFX::Technique* tech = effect.getTechnique(i);
+                for (int pass=0; pass<tech->getNumPasses(); ++pass)
+                {
+                    if (tech->getPassStateSet(pass))
+                        apply(tech->getPassStateSet(pass));
+                }
+            }
+        }
+
+        virtual void apply(osg::Geode& geode)
+        {
+            osg::StateSet* stateset = geode.getStateSet();
+            if (stateset)
+                apply(stateset);
+
+            for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
+            {
+                osg::Drawable* drw = geode.getDrawable(i);
+                stateset = drw->getStateSet();
+                if (stateset)
+                    apply(stateset);
+            }
+        }
+
+        void apply(osg::StateSet* stateset)
+        {
+            const osg::StateSet::TextureAttributeList& texAttributes = stateset->getTextureAttributeList();
+            for(unsigned int unit=0;unit<texAttributes.size();++unit)
+            {
+                osg::StateAttribute *texture = stateset->getTextureAttribute(unit, osg::StateAttribute::TEXTURE);
+                if (texture)
+                    apply(texture);
+            }
+        }
+
+        void apply(osg::StateAttribute* attr)
+        {
+            osg::Texture* tex = attr->asTexture();
+            if (tex)
+            {
+                if (tex->getUserDataContainer())
+                {
+                    const std::vector<std::string>& descriptions = tex->getUserDataContainer()->getDescriptions();
+                    if (std::find(descriptions.begin(), descriptions.end(), "dont_override_filter") != descriptions.end())
+                        return;
+                }
+
+                tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
+                tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
+                tex->setMaxAnisotropy(mMaxAnisotropy);
+            }
+        }
+    private:
+        osg::Texture::FilterMode mMinFilter;
+        osg::Texture::FilterMode mMagFilter;
+        int mMaxAnisotropy;
+    };
+
+
+
+    SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
+        : ResourceManager(vfs)
+        , mInstanceCache(new MultiObjectCache)
+        , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
+        , mMinFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
+        , mMagFilter(osg::Texture::LINEAR)
+        , mMaxAnisotropy(1)
+        , mUnRefImageDataAfterApply(false)
         , mParticleSystemMask(~0u)
     {
     }
@@ -116,15 +248,14 @@ namespace Resource
     SceneManager::~SceneManager()
     {
         // this has to be defined in the .cpp file as we can't delete incomplete types
-
     }
 
     /// @brief Callback to read image files from the VFS.
     class ImageReadCallback : public osgDB::ReadFileCallback
     {
     public:
-        ImageReadCallback(Resource::TextureManager* textureMgr)
-            : mTextureManager(textureMgr)
+        ImageReadCallback(Resource::ImageManager* imageMgr)
+            : mImageManager(imageMgr)
         {
         }
 
@@ -132,7 +263,7 @@ namespace Resource
         {
             try
             {
-                return osgDB::ReaderWriter::ReadResult(mTextureManager->getImage(filename), osgDB::ReaderWriter::ReadResult::FILE_LOADED);
+                return osgDB::ReaderWriter::ReadResult(mImageManager->getImage(filename), osgDB::ReaderWriter::ReadResult::FILE_LOADED);
             }
             catch (std::exception& e)
             {
@@ -141,7 +272,7 @@ namespace Resource
         }
 
     private:
-        Resource::TextureManager* mTextureManager;
+        Resource::ImageManager* mImageManager;
     };
 
     std::string getFileExtension(const std::string& file)
@@ -152,11 +283,11 @@ namespace Resource
         return std::string();
     }
 
-    osg::ref_ptr<osg::Node> load (Files::IStreamPtr file, const std::string& normalizedFilename, Resource::TextureManager* textureMgr, Resource::NifFileManager* nifFileManager)
+    osg::ref_ptr<osg::Node> load (Files::IStreamPtr file, const std::string& normalizedFilename, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
     {
         std::string ext = getFileExtension(normalizedFilename);
         if (ext == "nif")
-            return NifOsg::Loader::load(nifFileManager->get(normalizedFilename), textureMgr);
+            return NifOsg::Loader::load(nifFileManager->get(normalizedFilename), imageManager);
         else
         {
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
@@ -171,7 +302,7 @@ namespace Resource
             // Set a ReadFileCallback so that image files referenced in the model are read from our virtual file system instead of the osgDB.
             // Note, for some formats (.obj/.mtl) that reference other (non-image) files a findFileCallback would be necessary.
             // but findFileCallback does not support virtual files, so we can't implement it.
-            options->setReadFileCallback(new ImageReadCallback(textureMgr));
+            options->setReadFileCallback(new ImageReadCallback(imageManager));
 
             osgDB::ReaderWriter::ReadResult result = reader->readNode(*file, options);
             if (!result.success())
@@ -189,15 +320,17 @@ namespace Resource
         std::string normalized = name;
         mVFS->normalizeFilename(normalized);
 
-        Index::iterator it = mIndex.find(normalized);
-        if (it == mIndex.end())
+        osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
+        if (obj)
+            return osg::ref_ptr<const osg::Node>(static_cast<osg::Node*>(obj.get()));
+        else
         {
             osg::ref_ptr<osg::Node> loaded;
             try
             {
                 Files::IStreamPtr file = mVFS->get(normalized);
 
-                loaded = load(file, normalized, mTextureManager, mNifFileManager);
+                loaded = load(file, normalized, mImageManager, mNifFileManager);
             }
             catch (std::exception& e)
             {
@@ -210,7 +343,7 @@ namespace Resource
                     {
                         std::cerr << "Failed to load '" << name << "': " << e.what() << ", using marker_error." << sMeshTypes[i] << " instead" << std::endl;
                         Files::IStreamPtr file = mVFS->get(normalized);
-                        loaded = load(file, normalized, mTextureManager, mNifFileManager);
+                        loaded = load(file, normalized, mImageManager, mNifFileManager);
                         break;
                     }
                 }
@@ -219,28 +352,62 @@ namespace Resource
                     throw;
             }
 
+            // set filtering settings
+            SetFilterSettingsVisitor setFilterSettingsVisitor(mMinFilter, mMagFilter, mMaxAnisotropy);
+            loaded->accept(setFilterSettingsVisitor);
+            SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor(mMinFilter, mMagFilter, mMaxAnisotropy);
+            loaded->accept(setFilterSettingsControllerVisitor);
+
+            // share state
+            mSharedStateMutex.lock();
             osgDB::Registry::instance()->getOrCreateSharedStateManager()->share(loaded.get());
+            mSharedStateMutex.unlock();
 
             if (mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);
 
-            mIndex[normalized] = loaded;
+            mCache->addEntryToObjectCache(normalized, loaded);
             return loaded;
         }
-        else
-            return it->second;
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string &name)
+    osg::ref_ptr<osg::Node> SceneManager::cacheInstance(const std::string &name)
+    {
+        std::string normalized = name;
+        mVFS->normalizeFilename(normalized);
+
+        osg::ref_ptr<osg::Node> node = createInstance(normalized);
+        mInstanceCache->addEntryToObjectCache(normalized, node.get());
+        return node;
+    }
+
+    osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string& name)
     {
         osg::ref_ptr<const osg::Node> scene = getTemplate(name);
         osg::ref_ptr<osg::Node> cloned = osg::clone(scene.get(), SceneUtil::CopyOp());
+
+        // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
+        cloned->getOrCreateUserDataContainer()->addUserObject(const_cast<osg::Node*>(scene.get()));
+
         return cloned;
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string &name, osg::Group* parentNode)
+    osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name)
     {
-        osg::ref_ptr<osg::Node> cloned = createInstance(name);
+        std::string normalized = name;
+        mVFS->normalizeFilename(normalized);
+
+        osg::ref_ptr<osg::Object> obj = mInstanceCache->takeFromObjectCache(normalized);
+        if (obj.get())
+            return static_cast<osg::Node*>(obj.get());
+
+        return createInstance(normalized);
+
+    }
+
+    osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string &name, osg::Group* parentNode)
+    {
+        osg::ref_ptr<osg::Node> cloned = getInstance(name);
         attachTo(cloned, parentNode);
         return cloned;
     }
@@ -253,10 +420,7 @@ namespace Resource
 
     void SceneManager::releaseGLObjects(osg::State *state)
     {
-        for (Index::iterator it = mIndex.begin(); it != mIndex.end(); ++it)
-        {
-            it->second->releaseGLObjects(state);
-        }
+        mCache->releaseGLObjects(state);
     }
 
     void SceneManager::setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation *ico)
@@ -270,19 +434,86 @@ namespace Resource
         node->accept(visitor);
     }
 
-    const VFS::Manager* SceneManager::getVFS() const
+    Resource::ImageManager* SceneManager::getImageManager()
     {
-        return mVFS;
-    }
-
-    Resource::TextureManager* SceneManager::getTextureManager()
-    {
-        return mTextureManager;
+        return mImageManager;
     }
 
     void SceneManager::setParticleSystemMask(unsigned int mask)
     {
         mParticleSystemMask = mask;
+    }
+
+    void SceneManager::setFilterSettings(const std::string &magfilter, const std::string &minfilter,
+                                           const std::string &mipmap, int maxAnisotropy,
+                                           osgViewer::Viewer *viewer)
+    {
+        osg::Texture::FilterMode min = osg::Texture::LINEAR;
+        osg::Texture::FilterMode mag = osg::Texture::LINEAR;
+
+        if(magfilter == "nearest")
+            mag = osg::Texture::NEAREST;
+        else if(magfilter != "linear")
+            std::cerr<< "Invalid texture mag filter: "<<magfilter <<std::endl;
+
+        if(minfilter == "nearest")
+            min = osg::Texture::NEAREST;
+        else if(minfilter != "linear")
+            std::cerr<< "Invalid texture min filter: "<<minfilter <<std::endl;
+
+        if(mipmap == "nearest")
+        {
+            if(min == osg::Texture::NEAREST)
+                min = osg::Texture::NEAREST_MIPMAP_NEAREST;
+            else if(min == osg::Texture::LINEAR)
+                min = osg::Texture::LINEAR_MIPMAP_NEAREST;
+        }
+        else if(mipmap != "none")
+        {
+            if(mipmap != "linear")
+                std::cerr<< "Invalid texture mipmap: "<<mipmap <<std::endl;
+            if(min == osg::Texture::NEAREST)
+                min = osg::Texture::NEAREST_MIPMAP_LINEAR;
+            else if(min == osg::Texture::LINEAR)
+                min = osg::Texture::LINEAR_MIPMAP_LINEAR;
+        }
+
+        if(viewer) viewer->stopThreading();
+
+        mMinFilter = min;
+        mMagFilter = mag;
+        mMaxAnisotropy = std::max(1, maxAnisotropy);
+
+        mCache->clear();
+
+        SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor (mMinFilter, mMagFilter, mMaxAnisotropy);
+        SetFilterSettingsVisitor setFilterSettingsVisitor (mMinFilter, mMagFilter, mMaxAnisotropy);
+        if (viewer && viewer->getSceneData())
+        {
+            viewer->getSceneData()->accept(setFilterSettingsControllerVisitor);
+            viewer->getSceneData()->accept(setFilterSettingsVisitor);
+        }
+
+        if(viewer) viewer->startThreading();
+    }
+
+    void SceneManager::applyFilterSettings(osg::Texture *tex)
+    {
+        tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
+        tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
+        tex->setMaxAnisotropy(mMaxAnisotropy);
+    }
+
+    void SceneManager::setUnRefImageDataAfterApply(bool unref)
+    {
+        mUnRefImageDataAfterApply = unref;
+    }
+
+    void SceneManager::updateCache(double referenceTime)
+    {
+        ResourceManager::updateCache(referenceTime);
+
+        mInstanceCache->removeUnreferencedObjectsInCache();
     }
 
 }

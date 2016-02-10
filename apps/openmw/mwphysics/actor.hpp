@@ -15,7 +15,7 @@ class btCollisionObject;
 
 namespace Resource
 {
-    class BulletShapeInstance;
+    class BulletShape;
 }
 
 namespace MWPhysics
@@ -48,7 +48,7 @@ namespace MWPhysics
     class Actor : public PtrHolder
     {
     public:
-        Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shape, btCollisionWorld* world);
+        Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> shape, btCollisionWorld* world);
         ~Actor();
 
         /**

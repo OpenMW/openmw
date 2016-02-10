@@ -153,6 +153,8 @@ namespace MWRender
         /// Set height of water plane (used to remove underwater weather particles)
         void setWaterHeight(float height);
 
+        void listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures);
+
     private:
         void create();
         ///< no need to call this, automatically done on first enable()

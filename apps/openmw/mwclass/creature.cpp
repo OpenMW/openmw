@@ -182,6 +182,29 @@ namespace MWClass
         return "";
     }
 
+    void Creature::getModelsToPreload(const MWWorld::Ptr &ptr, std::vector<std::string> &models) const
+    {
+        std::string model = getModel(ptr);
+        if (!model.empty())
+            models.push_back(model);
+
+        // FIXME: use const version of InventoryStore functions once they are available
+        if (ptr.getClass().hasInventoryStore(ptr))
+        {
+            MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
+            for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+            {
+                MWWorld::ContainerStoreIterator equipped = invStore.getSlot(slot);
+                if (equipped != invStore.end())
+                {
+                    model = equipped->getClass().getModel(*equipped);
+                    if (!model.empty())
+                        models.push_back(model);
+                }
+            }
+        }
+    }
+
     std::string Creature::getName (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();

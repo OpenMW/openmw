@@ -42,6 +42,12 @@ namespace Fallback
     class Map;
 }
 
+namespace SceneUtil
+{
+    class WorkQueue;
+    class UnrefQueue;
+}
+
 namespace MWRender
 {
 
@@ -64,6 +70,14 @@ namespace MWRender
         MWRender::Objects& getObjects();
 
         Resource::ResourceSystem* getResourceSystem();
+
+        SceneUtil::WorkQueue* getWorkQueue();
+        SceneUtil::UnrefQueue* getUnrefQueue();
+        Terrain::World* getTerrain();
+
+        void preloadCommonAssets();
+
+        double getReferenceTime() const;
 
         osg::Group* getLightRoot();
 
@@ -185,6 +199,9 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Group> mLightRoot;
         Resource::ResourceSystem* mResourceSystem;
+
+        osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
+        osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
         osg::ref_ptr<osg::Light> mSunLight;
 

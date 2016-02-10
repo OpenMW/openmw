@@ -16,7 +16,7 @@ namespace MWPhysics
 {
 
 
-Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shape, btCollisionWorld* world)
+Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> shape, btCollisionWorld* world)
   : mCanWaterWalk(false), mWalkingOnWater(false)
   , mCollisionObject(0), mForce(0.f, 0.f, 0.f), mOnGround(false)
   , mInternalCollisionMode(true)

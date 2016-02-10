@@ -62,6 +62,9 @@ namespace MWRender
         const int flags = ESM::Land::DATA_VCLR|ESM::Land::DATA_VHGT|ESM::Land::DATA_VNML|ESM::Land::DATA_VTEX;
         if (!land->isDataLoaded(flags))
             land->loadData(flags);
+
+        // TODO: unload land data when it's no longer needed
+
         return land;
     }
 

@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include <osg/Referenced>
+#include <osg/Object>
 #include <osg/ref_ptr>
 #include <osg/Vec3f>
 
@@ -15,11 +15,14 @@ namespace Resource
 {
 
     class BulletShapeInstance;
-    class BulletShape : public osg::Referenced
+    class BulletShape : public osg::Object
     {
     public:
         BulletShape();
+        BulletShape(const BulletShape& copy, const osg::CopyOp& copyop);
         virtual ~BulletShape();
+
+        META_Object(Resource, BulletShape)
 
         btCollisionShape* mCollisionShape;
 
@@ -35,13 +38,14 @@ namespace Resource
         // we store the node's record index mapped to the child index of the shape in the btCompoundShape.
         std::map<int, int> mAnimatedShapes;
 
-        osg::ref_ptr<BulletShapeInstance> makeInstance();
+        osg::ref_ptr<BulletShapeInstance> makeInstance() const;
 
-        btCollisionShape* duplicateCollisionShape(btCollisionShape* shape) const;
+        btCollisionShape* duplicateCollisionShape(const btCollisionShape* shape) const;
 
         btCollisionShape* getCollisionShape();
 
     private:
+
         void deleteShape(btCollisionShape* shape);
     };
 
@@ -51,10 +55,10 @@ namespace Resource
     class BulletShapeInstance : public BulletShape
     {
     public:
-        BulletShapeInstance(osg::ref_ptr<BulletShape> source);
+        BulletShapeInstance(osg::ref_ptr<const BulletShape> source);
 
     private:
-        osg::ref_ptr<BulletShape> mSource;
+        osg::ref_ptr<const BulletShape> mSource;
     };
 
     // Subclass btBhvTriangleMeshShape to auto-delete the meshInterface
