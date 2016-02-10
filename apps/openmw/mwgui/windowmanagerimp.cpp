@@ -110,6 +110,10 @@
 #include "controllers.hpp"
 #include "jailscreen.hpp"
 
+#ifdef ANDROID
+#include "components/android/androidtouchcamerahelper.hpp"
+#endif
+
 namespace MWGui
 {
 
@@ -1118,6 +1122,9 @@ namespace MWGui
     void WindowManager::setCursorVisible(bool visible)
     {
         mCursorVisible = visible;
+#ifdef ANDROID
+        AndroidTouchCameraHelper::hideTouchCamera(visible);
+#endif
     }
 
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
