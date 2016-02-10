@@ -24,6 +24,7 @@ namespace MWWorld
     {
     public:
         CellPreloader(Resource::ResourceSystem* resourceSystem, Resource::BulletShapeManager* bulletShapeManager, Terrain::World* terrain);
+        ~CellPreloader();
 
         /// Ask a background thread to preload rendering meshes and collision shapes for objects in this cell.
         /// @note The cell itself must be in State_Loaded or State_Preloaded.

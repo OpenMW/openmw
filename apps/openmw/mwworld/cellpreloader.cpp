@@ -169,6 +169,13 @@ namespace MWWorld
     {
     }
 
+    CellPreloader::~CellPreloader()
+    {
+        for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end();++it)
+            it->second.mWorkItem->waitTillDone();
+        mPreloadCells.clear();
+    }
+
     void CellPreloader::preload(CellStore *cell, double timestamp)
     {
         if (!mWorkQueue)
