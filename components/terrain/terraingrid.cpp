@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <osg/UserDataContainer>
+
 #include <OpenThreads/ScopedLock>
 
 #include <components/resource/resourcesystem.hpp>
