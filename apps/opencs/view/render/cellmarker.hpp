@@ -1,6 +1,8 @@
 #ifndef OPENCS_VIEW_CELLMARKER_H
 #define OPENCS_VIEW_CELLMARKER_H
 
+#include "tagbase.hpp"
+
 #include <osg/ref_ptr>
 
 #include "../../model/world/cellcoordinates.hpp"
@@ -13,6 +15,21 @@ namespace osg
 
 namespace CSVRender
 {
+    class CellMarker;
+
+    class CellMarkerTag : public TagBase
+    {
+        private:
+
+            CellMarker *mMarker;
+
+        public:
+
+            CellMarkerTag(CellMarker *marker);
+
+            CellMarker *getCellMarker() const;
+    };
+
     /// \brief Marker to display cell coordinates.
     class CellMarker
     {

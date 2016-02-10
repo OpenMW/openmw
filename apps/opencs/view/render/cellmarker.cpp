@@ -7,6 +7,17 @@
 #include <osg/Group>
 #include <osgText/Text>
 
+#include "mask.hpp"
+
+CSVRender::CellMarkerTag::CellMarkerTag(CellMarker *marker)
+: TagBase(Mask_CellMarker), mMarker(marker)
+{}
+
+CSVRender::CellMarker *CSVRender::CellMarkerTag::getCellMarker() const
+{
+    return mMarker;
+}
+
 void CSVRender::CellMarker::buildMarker()
 {
     const int characterSize = 20;
@@ -49,6 +60,9 @@ CSVRender::CellMarker::CellMarker(
     mMarkerNode->setAutoRotateMode(osg::AutoTransform::ROTATE_TO_SCREEN);
     mMarkerNode->setAutoScaleToScreen(true);
     mMarkerNode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+
+    mMarkerNode->setUserData(new CellMarkerTag(this));
+    mMarkerNode->setNodeMask(Mask_CellMarker);
 
     mCellNode->addChild(mMarkerNode);
 
