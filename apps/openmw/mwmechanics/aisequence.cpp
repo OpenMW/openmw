@@ -351,60 +351,64 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
     for (std::vector<ESM::AiSequence::AiPackageContainer>::const_iterator it = sequence.mPackages.begin();
          it != sequence.mPackages.end(); ++it)
     {
+        MWMechanics::AiPackage* package = NULL;
         switch (it->mType)
         {
         case ESM::AiSequence::Ai_Wander:
         {
-            MWMechanics::AiWander* wander = new AiWander(
-                        static_cast<ESM::AiSequence::AiWander*>(it->mPackage));
-            mPackages.push_back(wander);
+            package = new AiWander(static_cast<ESM::AiSequence::AiWander*>(it->mPackage));
             break;
         }
         case ESM::AiSequence::Ai_Travel:
         {
-            MWMechanics::AiTravel* travel = new AiTravel(
-                        static_cast<ESM::AiSequence::AiTravel*>(it->mPackage));
-            mPackages.push_back(travel);
+            package = new AiTravel(static_cast<ESM::AiSequence::AiTravel*>(it->mPackage));
             break;
         }
         case ESM::AiSequence::Ai_Escort:
         {
-            MWMechanics::AiEscort* escort = new AiEscort(
-                        static_cast<ESM::AiSequence::AiEscort*>(it->mPackage));
-            mPackages.push_back(escort);
+            package = new AiEscort(static_cast<ESM::AiSequence::AiEscort*>(it->mPackage));
             break;
         }
         case ESM::AiSequence::Ai_Follow:
         {
-            MWMechanics::AiFollow* follow = new AiFollow(
-                        static_cast<ESM::AiSequence::AiFollow*>(it->mPackage));
-            mPackages.push_back(follow);
+            package = new AiFollow(static_cast<ESM::AiSequence::AiFollow*>(it->mPackage));
             break;
         }
         case ESM::AiSequence::Ai_Activate:
         {
-            MWMechanics::AiActivate* activate = new AiActivate(
-                        static_cast<ESM::AiSequence::AiActivate*>(it->mPackage));
-            mPackages.push_back(activate);
+            package = new AiActivate(static_cast<ESM::AiSequence::AiActivate*>(it->mPackage));
             break;
         }
         case ESM::AiSequence::Ai_Combat:
         {
-            MWMechanics::AiCombat* combat = new AiCombat(
-                        static_cast<ESM::AiSequence::AiCombat*>(it->mPackage));
-            mPackages.push_back(combat);
+            package = new AiCombat(static_cast<ESM::AiSequence::AiCombat*>(it->mPackage));
             break;
         }
         case ESM::AiSequence::Ai_Pursue:
         {
-            MWMechanics::AiPursue* pursue = new AiPursue(
-                        static_cast<ESM::AiSequence::AiPursue*>(it->mPackage));
-            mPackages.push_back(pursue);
+            package = new AiPursue(static_cast<ESM::AiSequence::AiPursue*>(it->mPackage));
             break;
         }
         default:
             break;
         }
+
+        if (!package)
+            continue;
+
+        // remove previous packages if required
+        if (package->shouldCancelPreviousAi())
+        {
+            for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end();)
+            {
+                if((*it)->canCancel())
+                    it = mPackages.erase(it);
+                else
+                    ++it;
+            }
+        }
+
+        mPackages.push_back(package);
     }
 }
 
