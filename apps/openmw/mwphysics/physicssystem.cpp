@@ -400,7 +400,9 @@ namespace MWPhysics
             }
 
             bool isOnGround = false;
-            if (!(inertia.z() > 0.f) && !(newPosition.z() < swimlevel))
+            const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
+            if (!(inertia.z() > 0.f) && (!(newPosition.z() < swimlevel) ||
+                       effects.get(ESM::MagicEffect::WaterWalking).getMagnitude() ))
             {
                 osg::Vec3f from = newPosition;
                 osg::Vec3f to = newPosition - (physicActor->getOnGround() ?
@@ -1316,9 +1318,7 @@ namespace MWPhysics
 
                 bool waterCollision = false;
                 if (effects.get(ESM::MagicEffect::WaterWalking).getMagnitude()
-                        && cell->getCell()->hasWater()
-                        && !world->isUnderwater(iter->first.getCell(),
-                                               osg::Vec3f(iter->first.getRefData().getPosition().asVec3())))
+                        && cell->getCell()->hasWater())
                     waterCollision = true;
 
                 ActorMap::iterator foundActor = mActors.find(iter->first);
