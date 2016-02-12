@@ -52,23 +52,6 @@ namespace
                     && partsys->getUserDataContainer()->getDescriptions()[0] == "worldspace");
         }
 
-        void apply(osg::Geode& geode)
-        {
-            for (unsigned int i=0;i<geode.getNumDrawables();++i)
-            {
-                if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(geode.getDrawable(i)))
-                {
-                    if (isWorldSpaceParticleSystem(partsys))
-                    {
-                        // HACK: Ignore the InverseWorldMatrix transform the geode is attached to
-                        if (geode.getNumParents() && geode.getParent(0)->getNumParents())
-                            transformInitialParticles(partsys, geode.getParent(0)->getParent(0));
-                    }
-                    geode.setNodeMask(mMask);
-                }
-            }
-        }
-
 #if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
         // in OSG 3.3 and up Drawables can be directly in the scene graph without a Geode decorating them.
         void apply(osg::Drawable& drw)
