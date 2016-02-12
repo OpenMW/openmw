@@ -10,7 +10,6 @@
 #include <osg/Geode>
 #include <osg/BlendFunc>
 #include <osg/Material>
-#include <osg/Version>
 
 #include <osgParticle/ParticleSystem>
 

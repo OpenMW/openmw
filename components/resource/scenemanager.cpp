@@ -4,7 +4,6 @@
 #include <osg/Node>
 #include <osg/Geode>
 #include <osg/UserDataContainer>
-#include <osg/Version>
 
 #include <osgParticle/ParticleSystem>
 #include <osgFX/Effect>
@@ -52,7 +51,6 @@ namespace
                     && partsys->getUserDataContainer()->getDescriptions()[0] == "worldspace");
         }
 
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
         // in OSG 3.3 and up Drawables can be directly in the scene graph without a Geode decorating them.
         void apply(osg::Drawable& drw)
         {
@@ -67,7 +65,6 @@ namespace
                 partsys->setNodeMask(mMask);
             }
         }
-#endif
 
         void transformInitialParticles(osgParticle::ParticleSystem* partsys, osg::Node* node)
         {

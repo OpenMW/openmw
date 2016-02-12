@@ -2,8 +2,6 @@
 
 #include <SDL_video.h>
 
-#include <osg/Version>
-
 namespace SDLUtil
 {
 

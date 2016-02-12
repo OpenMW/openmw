@@ -5,7 +5,6 @@
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Array>
-#include <osg/Version>
 #include <osg/LOD>
 
 // resource

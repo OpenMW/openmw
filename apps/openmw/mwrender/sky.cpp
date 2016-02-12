@@ -11,7 +11,6 @@
 #include <osg/Material>
 #include <osg/TexEnvCombine>
 #include <osg/TexMat>
-#include <osg/Version>
 #include <osg/OcclusionQueryNode>
 #include <osg/ColorMask>
 #include <osg/MatrixTransform>

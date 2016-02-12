@@ -19,7 +19,6 @@
 #include <osg/Geometry>
 #include <osg/Geode>
 #include <osg/KdTree>
-#include <osg/Version>
 
 #include <osgFX/Effect>
 

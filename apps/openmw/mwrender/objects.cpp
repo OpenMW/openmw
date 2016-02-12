@@ -5,7 +5,6 @@
 #include <osg/Group>
 #include <osg/Geode>
 #include <osg/UserDataContainer>
-#include <osg/Version>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleProcessor>

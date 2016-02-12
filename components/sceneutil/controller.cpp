@@ -5,7 +5,6 @@
 #include <osg/Drawable>
 #include <osg/Geode>
 #include <osg/NodeCallback>
-#include <osg/Version>
 
 namespace SceneUtil
 {
