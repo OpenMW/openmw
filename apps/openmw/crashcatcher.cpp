@@ -149,7 +149,7 @@ static void gdb_info(pid_t pid)
                 "info registers\n"
                 "shell echo \"\"\n"
                 "shell echo \"* Backtrace\"\n"
-                "thread apply all backtrace full\n"
+                "thread apply all backtrace full 1000\n"
                 "detach\n"
                 "quit\n", pid);
         fclose(f);
