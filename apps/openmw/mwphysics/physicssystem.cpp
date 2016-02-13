@@ -234,13 +234,11 @@ namespace MWPhysics
             }
         }
 
-        static osg::Vec3f move(const MWWorld::Ptr &ptr, Actor* physicActor, const osg::Vec3f &movement, float time,
+        static osg::Vec3f move(osg::Vec3f position, const MWWorld::Ptr &ptr, Actor* physicActor, const osg::Vec3f &movement, float time,
                                   bool isFlying, float waterlevel, float slowFall, btCollisionWorld* collisionWorld,
                                std::map<MWWorld::Ptr, MWWorld::Ptr>& standingCollisionTracker)
         {
             const ESM::Position& refpos = ptr.getRefData().getPosition();
-            osg::Vec3f position(refpos.asVec3());
-
             // Early-out for totally static creatures
             // (Not sure if gravity should still apply?)
             if (!ptr.getClass().isMobile(ptr))
@@ -944,8 +942,8 @@ namespace MWPhysics
         if (!physactor1 || !physactor2)
             return false;
 
-        osg::Vec3f pos1 (physactor1->getPosition() + osg::Vec3f(0,0,physactor1->getHalfExtents().z() * 0.8)); // eye level
-        osg::Vec3f pos2 (physactor2->getPosition() + osg::Vec3f(0,0,physactor2->getHalfExtents().z() * 0.8));
+        osg::Vec3f pos1 (physactor1->getCollisionObjectPosition() + osg::Vec3f(0,0,physactor1->getHalfExtents().z() * 0.8)); // eye level
+        osg::Vec3f pos2 (physactor2->getCollisionObjectPosition() + osg::Vec3f(0,0,physactor2->getHalfExtents().z() * 0.8));
 
         RayResult result = castRay(pos1, pos2, MWWorld::Ptr(), CollisionType_World|CollisionType_HeightMap|CollisionType_Door);
 
@@ -1007,11 +1005,11 @@ namespace MWPhysics
             return osg::Vec3f();
     }
 
-    osg::Vec3f PhysicsSystem::getPosition(const MWWorld::ConstPtr &actor) const
+    osg::Vec3f PhysicsSystem::getCollisionObjectPosition(const MWWorld::ConstPtr &actor) const
     {
         const Actor* physactor = getActor(actor);
         if (physactor)
-            return physactor->getPosition();
+            return physactor->getCollisionObjectPosition();
         else
             return osg::Vec3f();
     }
@@ -1296,54 +1294,65 @@ namespace MWPhysics
         mMovementResults.clear();
 
         mTimeAccum += dt;
-        if(mTimeAccum >= 1.0f/60.0f)
+        const float physicsDt = 1.f/60.0f;
+        int numSteps = mTimeAccum / (physicsDt);
+        mTimeAccum -= numSteps * physicsDt;
+
+        if (numSteps)
         {
             // Collision events should be available on every frame
             mStandingCollisions.clear();
+        }
 
-            const MWBase::World *world = MWBase::Environment::get().getWorld();
-            PtrVelocityList::iterator iter = mMovementQueue.begin();
-            for(;iter != mMovementQueue.end();++iter)
+        const MWBase::World *world = MWBase::Environment::get().getWorld();
+        PtrVelocityList::iterator iter = mMovementQueue.begin();
+        for(;iter != mMovementQueue.end();++iter)
+        {
+            float waterlevel = -std::numeric_limits<float>::max();
+            const MWWorld::CellStore *cell = iter->first.getCell();
+            if(cell->getCell()->hasWater())
+                waterlevel = cell->getWaterLevel();
+
+
+            const MWMechanics::MagicEffects& effects = iter->first.getClass().getCreatureStats(iter->first).getMagicEffects();
+
+            bool waterCollision = false;
+            if (effects.get(ESM::MagicEffect::WaterWalking).getMagnitude()
+                    && cell->getCell()->hasWater()
+                    && !world->isUnderwater(iter->first.getCell(),
+                                           osg::Vec3f(iter->first.getRefData().getPosition().asVec3())))
+                waterCollision = true;
+
+            ActorMap::iterator foundActor = mActors.find(iter->first);
+            if (foundActor == mActors.end()) // actor was already removed from the scene
+                continue;
+            Actor* physicActor = foundActor->second;
+            physicActor->setCanWaterWalk(waterCollision);
+
+            // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
+            float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
+
+            osg::Vec3f position = physicActor->getPosition();
+            float oldHeight = position.z();
+            for (int i=0; i<numSteps; ++i)
             {
-                float waterlevel = -std::numeric_limits<float>::max();
-                const MWWorld::CellStore *cell = iter->first.getCell();
-                if(cell->getCell()->hasWater())
-                    waterlevel = cell->getWaterLevel();
-
-                float oldHeight = iter->first.getRefData().getPosition().pos[2];
-
-                const MWMechanics::MagicEffects& effects = iter->first.getClass().getCreatureStats(iter->first).getMagicEffects();
-
-                bool waterCollision = false;
-                if (effects.get(ESM::MagicEffect::WaterWalking).getMagnitude()
-                        && cell->getCell()->hasWater()
-                        && !world->isUnderwater(iter->first.getCell(),
-                                               osg::Vec3f(iter->first.getRefData().getPosition().asVec3())))
-                    waterCollision = true;
-
-                ActorMap::iterator foundActor = mActors.find(iter->first);
-                if (foundActor == mActors.end()) // actor was already removed from the scene
-                    continue;
-                Actor* physicActor = foundActor->second;
-                physicActor->setCanWaterWalk(waterCollision);
-
-                // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
-                float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
-
-                osg::Vec3f newpos = MovementSolver::move(physicActor->getPtr(), physicActor, iter->second, mTimeAccum,
-                                                            world->isFlying(iter->first),
-                                                            waterlevel, slowFall, mCollisionWorld, mStandingCollisions);
-
-                float heightDiff = newpos.z() - oldHeight;
-
-                if (heightDiff < 0)
-                    iter->first.getClass().getCreatureStats(iter->first).addToFallHeight(-heightDiff);
-
-                mMovementResults.push_back(std::make_pair(iter->first, newpos));
+                position = MovementSolver::move(position, physicActor->getPtr(), physicActor, iter->second, physicsDt,
+                                                world->isFlying(iter->first),
+                                                waterlevel, slowFall, mCollisionWorld, mStandingCollisions);
+                physicActor->setPosition(position);
             }
 
-            mTimeAccum = 0.0f;
+            float interpolationFactor = mTimeAccum / physicsDt;
+            osg::Vec3f interpolated = position * interpolationFactor + physicActor->getPreviousPosition() * (1.f - interpolationFactor);
+
+            float heightDiff = position.z() - oldHeight;
+
+            if (heightDiff < 0)
+                iter->first.getClass().getCreatureStats(iter->first).addToFallHeight(-heightDiff);
+
+            mMovementResults.push_back(std::make_pair(iter->first, interpolated));
         }
+
         mMovementQueue.clear();
 
         return mMovementResults;

@@ -1113,7 +1113,7 @@ namespace MWWorld
         }
     }
 
-    MWWorld::Ptr World::moveObject(const Ptr &ptr, CellStore* newCell, float x, float y, float z)
+    MWWorld::Ptr World::moveObject(const Ptr &ptr, CellStore* newCell, float x, float y, float z, bool movePhysics)
     {
         ESM::Position pos = ptr.getRefData().getPosition();
 
@@ -1201,7 +1201,8 @@ namespace MWWorld
         if (haveToMove && newPtr.getRefData().getBaseNode())
         {
             mRendering->moveObject(newPtr, vec);
-            mPhysics->updatePosition(newPtr);
+            if (movePhysics)
+                mPhysics->updatePosition(newPtr);
         }
         if (isPlayer)
         {
@@ -1210,7 +1211,7 @@ namespace MWWorld
         return newPtr;
     }
 
-    MWWorld::Ptr World::moveObjectImp(const Ptr& ptr, float x, float y, float z)
+    MWWorld::Ptr World::moveObjectImp(const Ptr& ptr, float x, float y, float z, bool movePhysics)
     {
         CellStore *cell = ptr.getCell();
 
@@ -1221,7 +1222,7 @@ namespace MWWorld
             cell = getExterior(cellX, cellY);
         }
 
-        return moveObject(ptr, cell, x, y, z);
+        return moveObject(ptr, cell, x, y, z, movePhysics);
     }
 
     MWWorld::Ptr World::moveObject (const Ptr& ptr, float x, float y, float z)
@@ -1373,10 +1374,10 @@ namespace MWWorld
                 player = iter;
                 continue;
             }
-            moveObjectImp(iter->first, iter->second.x(), iter->second.y(), iter->second.z());
+            moveObjectImp(iter->first, iter->second.x(), iter->second.y(), iter->second.z(), false);
         }
         if(player != results.end())
-            moveObjectImp(player->first, player->second.x(), player->second.y(), player->second.z());
+            moveObjectImp(player->first, player->second.x(), player->second.y(), player->second.z(), false);
 
         mPhysics->debugDraw();
     }
@@ -3206,7 +3207,7 @@ namespace MWWorld
     osg::Vec3f World::aimToTarget(const ConstPtr &actor, const MWWorld::ConstPtr& target)
     {
         osg::Vec3f weaponPos = getActorHeadTransform(actor).getTrans();
-        osg::Vec3f targetPos = mPhysics->getPosition(target);
+        osg::Vec3f targetPos = mPhysics->getCollisionObjectPosition(target);
         return (targetPos - weaponPos);
     }
 
