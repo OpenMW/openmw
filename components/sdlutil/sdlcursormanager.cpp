@@ -239,8 +239,6 @@ namespace SDLUtil
 
         //clean up
         SDL_FreeSurface(surf);
-
-        _setGUICursor(name);
     }
 
 }
