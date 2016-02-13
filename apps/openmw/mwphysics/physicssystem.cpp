@@ -1295,7 +1295,11 @@ namespace MWPhysics
 
         mTimeAccum += dt;
         const float physicsDt = 1.f/60.0f;
+
+        const int maxAllowedSteps = 20;
         int numSteps = mTimeAccum / (physicsDt);
+        numSteps = std::min(numSteps, maxAllowedSteps);
+
         mTimeAccum -= numSteps * physicsDt;
 
         if (numSteps)
