@@ -68,7 +68,14 @@ namespace MWPhysics
 
         void updateScale();
         void updateRotation();
+
+        /**
+         * Set mPosition and mPreviousPosition to the position in the Ptr's RefData. This should be used
+         * when an object is "instantly" moved/teleported as opposed to being moved by the physics simulation.
+         */
         void updatePosition();
+
+        void updateCollisionObjectPosition();
 
         /**
          * Returns the half extents of the collision body (scaled according to collision scale)
@@ -79,7 +86,16 @@ namespace MWPhysics
          * Returns the position of the collision body
          * @note The collision shape's origin is in its center, so the position returned can be described as center of the actor collision box in world space.
          */
+        osg::Vec3f getCollisionObjectPosition() const;
+
+        /**
+          * Store the current position into mPreviousPosition, then move to this position.
+          */
+        void setPosition(const osg::Vec3f& position);
+
         osg::Vec3f getPosition() const;
+
+        osg::Vec3f getPreviousPosition() const;
 
         /**
          * Returns the half extents of the collision body (scaled according to rendering scale)
@@ -138,6 +154,7 @@ namespace MWPhysics
         osg::Vec3f mScale;
         osg::Vec3f mRenderingScale;
         osg::Vec3f mPosition;
+        osg::Vec3f mPreviousPosition;
 
         osg::Vec3f mForce;
         bool mOnGround;
