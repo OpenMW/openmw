@@ -2020,13 +2020,11 @@ namespace MWGui
             if(image.valid())
             {
                 //everything looks good, send it to the cursor manager
-                Uint8 size_x = imgSetPointer->getSize().width;
-                Uint8 size_y = imgSetPointer->getSize().height;
                 Uint8 hotspot_x = imgSetPointer->getHotSpot().left;
                 Uint8 hotspot_y = imgSetPointer->getHotSpot().top;
                 int rotation = imgSetPointer->getRotation();
 
-                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, image, size_x, size_y, hotspot_x, hotspot_y);
+                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, image, hotspot_x, hotspot_y);
             }
         }
     }
