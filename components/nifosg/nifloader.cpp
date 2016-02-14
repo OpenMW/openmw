@@ -1390,8 +1390,8 @@ namespace NifOsg
 
                         boundTextures.push_back(tex.uvSet);
                     }
-                    handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
                 }
+                handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
                 break;
             }
             // unused by mw
