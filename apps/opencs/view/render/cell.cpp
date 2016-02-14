@@ -70,6 +70,8 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
     mCellNode = new osg::Group;
     rootNode->addChild(mCellNode);
 
+    setCellMarker();
+
     if (!mDeleted)
     {
         CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
@@ -301,6 +303,17 @@ void CSVRender::Cell::setCellArrows (int mask)
                 mCellArrows[i].reset (0);
         }
     }
+}
+
+void CSVRender::Cell::setCellMarker()
+{
+    bool cellExists = false;
+    int cellIndex = mData.getCells().searchId(mId);
+    if (cellIndex > -1)
+    {
+        cellExists = !mData.getCells().getRecord(cellIndex).isDeleted();
+    }
+    mCellMarker.reset(new CellMarker(mCellNode, mCoordinates, cellExists));
 }
 
 CSMWorld::CellCoordinates CSVRender::Cell::getCoordinates() const
