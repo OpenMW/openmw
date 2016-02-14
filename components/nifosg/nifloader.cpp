@@ -1316,6 +1316,27 @@ namespace NifOsg
                         stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                     }
 
+                    switch (i)
+                    {
+                    case Nif::NiTexturingProperty::BaseTexture:
+                        texture2d->setName("diffuseMap");
+                        break;
+                    case Nif::NiTexturingProperty::BumpTexture:
+                        texture2d->setName("normalMap");
+                        break;
+                    case Nif::NiTexturingProperty::GlowTexture:
+                        texture2d->setName("emissiveMap");
+                        break;
+                    case Nif::NiTexturingProperty::DarkTexture:
+                        texture2d->setName("darkMap");
+                        break;
+                    case Nif::NiTexturingProperty::DetailTexture:
+                        texture2d->setName("detailMap");
+                        break;
+                    default:
+                        break;
+                    }
+
                     boundTextures.push_back(tex.uvSet);
                 }
             }
