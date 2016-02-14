@@ -5,7 +5,6 @@
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Array>
-#include <osg/Version>
 #include <osg/LOD>
 
 // resource
@@ -934,13 +933,7 @@ namespace NifOsg
             updater->addParticleSystem(partsys);
             parentNode->addChild(updater);
 
-#if OSG_VERSION_LESS_THAN(3,3,3)
-            osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-            geode->addDrawable(partsys);
-            osg::Node* toAttach = geode.get();
-#else
             osg::Node* toAttach = partsys.get();
-#endif
 
             if (rf == osgParticle::ParticleProcessor::RELATIVE_RF)
                 parentNode->addChild(toAttach);
@@ -1017,11 +1010,6 @@ namespace NifOsg
                 triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
             }
 
-#if OSG_VERSION_LESS_THAN(3,3,3)
-            osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-            geode->addDrawable(geometry);
-#endif
-
             if (geometry->getDataVariance() == osg::Object::DYNAMIC)
             {
                 // Add a copy, we will alternate between the two copies every other frame using the FrameSwitch
@@ -1029,24 +1017,14 @@ namespace NifOsg
                 geometry->setDataVariance(osg::Object::STATIC);
                 osg::ref_ptr<FrameSwitch> frameswitch = new FrameSwitch;
 
-#if OSG_VERSION_LESS_THAN(3,3,3)
-                osg::ref_ptr<osg::Geode> geode2 = static_cast<osg::Geode*>(osg::clone(geode.get(), osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES));
-                frameswitch->addChild(geode);
-                frameswitch->addChild(geode2);
-#else
                 osg::ref_ptr<osg::Geometry> geom2 = static_cast<osg::Geometry*>(osg::clone(geometry.get(), osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES));
                 frameswitch->addChild(geometry);
                 frameswitch->addChild(geom2);
-#endif
 
                 parentNode->addChild(frameswitch);
             }
             else
-#if OSG_VERSION_LESS_THAN(3,3,3)
-                parentNode->addChild(geode);
-#else
                 parentNode->addChild(geometry);
-#endif
         }
 
         osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher, const Nif::NiTriShape *triShape, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
@@ -1151,21 +1129,10 @@ namespace NifOsg
 
             osg::ref_ptr<FrameSwitch> frameswitch = new FrameSwitch;
 
-#if OSG_VERSION_LESS_THAN(3,3,3)
-            osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-            geode->addDrawable(rig);
-
-            osg::Geode* geode2 = static_cast<osg::Geode*>(osg::clone(geode.get(), osg::CopyOp::DEEP_COPY_NODES|
-                                                                     osg::CopyOp::DEEP_COPY_DRAWABLES));
-
-            frameswitch->addChild(geode);
-            frameswitch->addChild(geode2);
-#else
             SceneUtil::RigGeometry* rig2 = static_cast<SceneUtil::RigGeometry*>(osg::clone(rig.get(), osg::CopyOp::DEEP_COPY_NODES|
                                                                                            osg::CopyOp::DEEP_COPY_DRAWABLES));
             frameswitch->addChild(rig);
             frameswitch->addChild(rig2);
-#endif
 
             parentNode->addChild(frameswitch);
         }

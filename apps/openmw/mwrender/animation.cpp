@@ -10,7 +10,6 @@
 #include <osg/Geode>
 #include <osg/BlendFunc>
 #include <osg/Material>
-#include <osg/Version>
 
 #include <osgParticle/ParticleSystem>
 
@@ -201,17 +200,10 @@ namespace
     class RemoveDrawableVisitor : public RemoveVisitor
     {
     public:
-        virtual void apply(osg::Geode &geode)
-        {
-            applyImpl(geode);
-        }
-
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
         virtual void apply(osg::Drawable& drw)
         {
             applyImpl(drw);
         }
-#endif
 
         void applyImpl(osg::Node& node)
         {
@@ -239,17 +231,10 @@ namespace
     class RemoveTriBipVisitor : public RemoveVisitor
     {
     public:
-        virtual void apply(osg::Geode &node)
-        {
-            applyImpl(node);
-        }
-
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
         virtual void apply(osg::Drawable& drw)
         {
             applyImpl(drw);
         }
-#endif
 
         void applyImpl(osg::Node& node)
         {

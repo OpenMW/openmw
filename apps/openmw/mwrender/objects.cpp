@@ -5,7 +5,6 @@
 #include <osg/Group>
 #include <osg/Geode>
 #include <osg/UserDataContainer>
-#include <osg/Version>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleProcessor>
@@ -43,26 +42,11 @@ namespace
             traverse(node);
         }
 
-        virtual void apply(osg::Geode& geode)
-        {
-            std::vector<osgParticle::ParticleSystem*> partsysVector;
-            for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
-            {
-                osg::Drawable* drw = geode.getDrawable(i);
-                if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(drw))
-                    partsysVector.push_back(partsys);
-            }
-
-            for (std::vector<osgParticle::ParticleSystem*>::iterator it = partsysVector.begin(); it != partsysVector.end(); ++it)
-                geode.removeDrawable(*it);
-        }
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
         virtual void apply(osg::Drawable& drw)
         {
             if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
                 mToRemove.push_back(partsys);
         }
-#endif
 
         void remove()
         {

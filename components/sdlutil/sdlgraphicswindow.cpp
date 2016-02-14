@@ -2,8 +2,6 @@
 
 #include <SDL_video.h>
 
-#include <osg/Version>
-
 namespace SDLUtil
 {
 
@@ -112,11 +110,7 @@ void GraphicsWindowSDL2::init()
 
     mValid = true;
 
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,4)
     getEventQueue()->syncWindowRectangleWithGraphicsContext();
-#else
-    getEventQueue()->syncWindowRectangleWithGraphcisContext();
-#endif
 }
 
 
@@ -133,11 +127,7 @@ bool GraphicsWindowSDL2::realizeImplementation()
 
     SDL_ShowWindow(mWindow);
 
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,4)
     getEventQueue()->syncWindowRectangleWithGraphicsContext();
-#else
-    getEventQueue()->syncWindowRectangleWithGraphcisContext();
-#endif
 
     mRealized = true;
 

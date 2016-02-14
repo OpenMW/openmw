@@ -19,7 +19,6 @@
 #include <osg/Geometry>
 #include <osg/Geode>
 #include <osg/KdTree>
-#include <osg/Version>
 
 #include <osgFX/Effect>
 
@@ -193,13 +192,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
 
         transform->addChild(effect);
 
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
         osg::Node* toAttach = geometry.get();
-#else
-        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-        geode->addDrawable(geometry);
-        osg::Node* toAttach = geode.get();
-#endif
 
         effect->addChild(toAttach);
 

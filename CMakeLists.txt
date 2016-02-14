@@ -233,7 +233,7 @@ if (USE_QT)
     set (OSG_QT osgQt)
 endif()
 
-find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle ${OSG_QT} osgUtil osgFX)
+find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle ${OSG_QT} osgUtil osgFX)
 
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 

@@ -11,7 +11,6 @@
 #include <osg/Material>
 #include <osg/TexEnvCombine>
 #include <osg/TexMat>
-#include <osg/Version>
 #include <osg/OcclusionQueryNode>
 #include <osg/ColorMask>
 #include <osg/MatrixTransform>
@@ -1282,11 +1281,7 @@ public:
                 if (stateset->getAttribute(osg::StateAttribute::MATERIAL))
                 {
                     SceneUtil::CompositeStateSetUpdater* composite = NULL;
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
                     osg::Callback* callback = node.getUpdateCallback();
-#else
-                    osg::NodeCallback* callback = node.getUpdateCallback();
-#endif
                     while (callback)
                     {
                         if ((composite = dynamic_cast<SceneUtil::CompositeStateSetUpdater*>(callback)))

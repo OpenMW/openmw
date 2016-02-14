@@ -81,11 +81,6 @@ namespace SceneUtil
 #endif
 
             osg::Drawable* cloned = osg::clone(drawable, copyop);
-#if OSG_VERSION_LESS_THAN(3,3,3)
-            // work around OSG 3.2 not respecting the DEEP_COPY_CALLBACK flag
-            if (cloned->getUpdateCallback())
-                cloned->setUpdateCallback(osg::clone(cloned->getUpdateCallback(), *this));
-#endif
             return cloned;
         }
         if (dynamic_cast<const SceneUtil::RigGeometry*>(drawable))
