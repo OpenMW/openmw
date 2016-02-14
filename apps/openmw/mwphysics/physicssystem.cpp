@@ -765,18 +765,11 @@ namespace MWPhysics
             mLeastDistSqr(std::numeric_limits<float>::max())
         { }
 
-#if BT_BULLET_VERSION >= 281
         virtual btScalar addSingleResult(btManifoldPoint& cp,
                                          const btCollisionObjectWrapper* col0Wrap,int partId0,int index0,
                                          const btCollisionObjectWrapper* col1Wrap,int partId1,int index1)
         {
             const btCollisionObject* collisionObject = col1Wrap->m_collisionObject;
-#else
-        virtual btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObject* col0, int partId0, int index0,
-                                         const btCollisionObject* col1, int partId1, int index1)
-        {
-            const btCollisionObject* collisionObject = col1;
-#endif
             if (collisionObject != mMe)
             {
                 btScalar distsqr = mOrigin.distance2(cp.getPositionWorldOnA());
@@ -1026,7 +1019,6 @@ namespace MWPhysics
 
         std::vector<MWWorld::Ptr> mResult;
 
-#if BT_BULLET_VERSION >= 281
         virtual btScalar addSingleResult(btManifoldPoint& cp,
                                          const btCollisionObjectWrapper* col0Wrap,int partId0,int index0,
                                          const btCollisionObjectWrapper* col1Wrap,int partId1,int index1)
@@ -1034,14 +1026,6 @@ namespace MWPhysics
             const btCollisionObject* collisionObject = col0Wrap->m_collisionObject;
             if (collisionObject == mTestedAgainst)
                 collisionObject = col1Wrap->m_collisionObject;
-#else
-        virtual btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObject* col0, int partId0, int index0,
-                                         const btCollisionObject* col1, int partId1, int index1)
-        {
-            const btCollisionObject* collisionObject = col0;
-            if (collisionObject == mTestedAgainst)
-                collisionObject = col1;
-#endif
             PtrHolder* holder = static_cast<PtrHolder*>(collisionObject->getUserPointer());
             if (holder)
                 mResult.push_back(holder->getPtr());
