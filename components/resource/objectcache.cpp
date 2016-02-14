@@ -14,6 +14,7 @@
 #include "objectcache.hpp"
 
 #include <osg/Object>
+#include <osg/Node>
 
 namespace Resource
 {
@@ -116,6 +117,21 @@ void ObjectCache::releaseGLObjects(osg::State* state)
     {
         osg::Object* object = itr->second.first.get();
         object->releaseGLObjects(state);
+    }
+}
+
+void ObjectCache::accept(osg::NodeVisitor &nv)
+{
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_objectCacheMutex);
+
+    for(ObjectCacheMap::iterator itr = _objectCache.begin();
+        itr != _objectCache.end();
+        ++itr)
+    {
+        osg::Object* object = itr->second.first.get();
+        osg::Node* node = object->asNode();
+        if (node)
+            node->accept(nv);
     }
 }
 

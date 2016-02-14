@@ -836,16 +836,18 @@ namespace MWRender
 
     void RenderingManager::updateTextureFiltering()
     {
-        if (mTerrain.get())
-            mTerrain->updateCache();
+        mViewer->stopThreading();
 
         mResourceSystem->getSceneManager()->setFilterSettings(
             Settings::Manager::getString("texture mag filter", "General"),
             Settings::Manager::getString("texture min filter", "General"),
             Settings::Manager::getString("texture mipmap", "General"),
-            Settings::Manager::getInt("anisotropy", "General"),
-            mViewer
+            Settings::Manager::getInt("anisotropy", "General")
         );
+
+        mTerrain->updateTextureFiltering();
+
+        mViewer->startThreading();
     }
 
     void RenderingManager::updateAmbient()

@@ -10,8 +10,6 @@
 
 #include <osgUtil/IncrementalCompileOperation>
 
-#include <osgViewer/Viewer>
-
 #include <osgDB/SharedStateManager>
 #include <osgDB/Registry>
 
@@ -192,13 +190,6 @@ namespace Resource
             osg::Texture* tex = attr->asTexture();
             if (tex)
             {
-                if (tex->getUserDataContainer())
-                {
-                    const std::vector<std::string>& descriptions = tex->getUserDataContainer()->getDescriptions();
-                    if (std::find(descriptions.begin(), descriptions.end(), "dont_override_filter") != descriptions.end())
-                        return;
-                }
-
                 tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
                 tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
                 tex->setMaxAnisotropy(mMaxAnisotropy);
@@ -425,8 +416,7 @@ namespace Resource
     }
 
     void SceneManager::setFilterSettings(const std::string &magfilter, const std::string &minfilter,
-                                           const std::string &mipmap, int maxAnisotropy,
-                                           osgViewer::Viewer *viewer)
+                                           const std::string &mipmap, int maxAnisotropy)
     {
         osg::Texture::FilterMode min = osg::Texture::LINEAR;
         osg::Texture::FilterMode mag = osg::Texture::LINEAR;
@@ -458,23 +448,15 @@ namespace Resource
                 min = osg::Texture::LINEAR_MIPMAP_LINEAR;
         }
 
-        if(viewer) viewer->stopThreading();
-
         mMinFilter = min;
         mMagFilter = mag;
         mMaxAnisotropy = std::max(1, maxAnisotropy);
 
-        mCache->clear();
-
         SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor (mMinFilter, mMagFilter, mMaxAnisotropy);
         SetFilterSettingsVisitor setFilterSettingsVisitor (mMinFilter, mMagFilter, mMaxAnisotropy);
-        if (viewer && viewer->getSceneData())
-        {
-            viewer->getSceneData()->accept(setFilterSettingsControllerVisitor);
-            viewer->getSceneData()->accept(setFilterSettingsVisitor);
-        }
 
-        if(viewer) viewer->startThreading();
+        mCache->accept(setFilterSettingsVisitor);
+        mCache->accept(setFilterSettingsControllerVisitor);
     }
 
     void SceneManager::applyFilterSettings(osg::Texture *tex)

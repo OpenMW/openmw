@@ -21,11 +21,6 @@ namespace osgUtil
     class IncrementalCompileOperation;
 }
 
-namespace osgViewer
-{
-    class Viewer;
-}
-
 namespace Resource
 {
 
@@ -83,10 +78,9 @@ namespace Resource
         /// @param mask The node mask to apply to loaded particle system nodes.
         void setParticleSystemMask(unsigned int mask);
 
-        /// @param viewer used to apply the new filter settings to the existing scene graph. If there is no scene yet, you can pass a NULL viewer.
+        /// @warning It is unsafe to call this method while the draw thread is using textures! call Viewer::stopThreading first.
         void setFilterSettings(const std::string &magfilter, const std::string &minfilter,
-                               const std::string &mipmap, int maxAnisotropy,
-                               osgViewer::Viewer *viewer);
+                               const std::string &mipmap, int maxAnisotropy);
 
         /// Apply filter settings to the given texture. Note, when loading an object through this scene manager (i.e. calling getTemplate or createInstance)
         /// the filter settings are applied automatically. This method is provided for textures that were created outside of the SceneManager.

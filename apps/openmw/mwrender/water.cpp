@@ -318,7 +318,6 @@ public:
         mRefractionTexture->setInternalFormat(GL_RGB);
         mRefractionTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mRefractionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-        mRefractionTexture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
 
         attach(osg::Camera::COLOR_BUFFER, mRefractionTexture);
 
@@ -330,7 +329,6 @@ public:
         mRefractionDepthTexture->setSourceType(GL_UNSIGNED_INT);
         mRefractionDepthTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mRefractionDepthTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-        mRefractionDepthTexture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
 
         attach(osg::Camera::DEPTH_BUFFER, mRefractionDepthTexture);
     }
@@ -393,7 +391,6 @@ public:
         mReflectionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
         mReflectionTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         mReflectionTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-        mReflectionTexture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
 
         attach(osg::Camera::COLOR_BUFFER, mReflectionTexture);
 

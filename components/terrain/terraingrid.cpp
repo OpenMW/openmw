@@ -175,7 +175,6 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
             texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
             texture->setResizeNonPowerOfTwoHint(false);
-            texture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
             blendmapTextures.push_back(texture);
 
             textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, blendmapTextures.back());
@@ -276,6 +275,13 @@ void TerrainGrid::updateCache()
                 ++it;
         }
     }
+}
+
+void TerrainGrid::updateTextureFiltering()
+{
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mTextureCacheMutex);
+    for (TextureCache::iterator it = mTextureCache.begin(); it != mTextureCache.end(); ++it)
+        mResourceSystem->getSceneManager()->applyFilterSettings(it->second);
 }
 
 }

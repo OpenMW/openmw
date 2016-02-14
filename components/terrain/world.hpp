@@ -39,6 +39,8 @@ namespace Terrain
               Storage* storage, int nodeMask);
         virtual ~World();
 
+        virtual void updateTextureFiltering() {}
+
         virtual void updateCache() {}
 
         float getHeightAt (const osg::Vec3f& worldPos);
