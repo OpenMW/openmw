@@ -1230,16 +1230,12 @@ namespace NifOsg
                         case Nif::NiTexturingProperty::BaseTexture:
                         case Nif::NiTexturingProperty::GlowTexture:
                         case Nif::NiTexturingProperty::DarkTexture:
+                        case Nif::NiTexturingProperty::BumpTexture:
                         case Nif::NiTexturingProperty::DetailTexture:
                             break;
                         case Nif::NiTexturingProperty::GlossTexture:
                         {
                             std::cerr << "NiTexturingProperty::GlossTexture in " << mFilename << " not currently used." << std::endl;
-                            continue;
-                        }
-                        case Nif::NiTexturingProperty::BumpTexture:
-                        {
-                            std::cerr << "NiTexturingProperty::BumpTexture in " << mFilename << " not currently used." << std::endl;
                             continue;
                         }
                         case Nif::NiTexturingProperty::DecalTexture:
@@ -1314,6 +1310,11 @@ namespace NifOsg
                         texEnv->setSource0_RGB(GL_PREVIOUS_ARB);
                         texEnv->setSource1_RGB(GL_TEXTURE);
                         stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
+                    }
+                    else if (i == Nif::NiTexturingProperty::BumpTexture)
+                    {
+                        // Set this texture to Off by default since we can't render it with the fixed-function pipeline
+                        stateset->setTextureMode(texUnit, GL_TEXTURE_2D, osg::StateAttribute::OFF);
                     }
 
                     switch (i)
