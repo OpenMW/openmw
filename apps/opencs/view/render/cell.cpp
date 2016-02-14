@@ -307,7 +307,13 @@ void CSVRender::Cell::setCellArrows (int mask)
 
 void CSVRender::Cell::setCellMarker()
 {
-    mCellMarker.reset(new CellMarker(mCellNode, mCoordinates));
+    bool cellExists = false;
+    int cellIndex = mData.getCells().searchId(mId);
+    if (cellIndex > -1)
+    {
+        cellExists = !mData.getCells().getRecord(cellIndex).isDeleted();
+    }
+    mCellMarker.reset(new CellMarker(mCellNode, mCoordinates, cellExists));
 }
 
 CSMWorld::CellCoordinates CSVRender::Cell::getCoordinates() const

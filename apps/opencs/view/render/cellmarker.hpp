@@ -38,6 +38,7 @@ namespace CSVRender
             osg::Group* mCellNode;
             osg::ref_ptr<osg::AutoTransform> mMarkerNode;
             CSMWorld::CellCoordinates mCoordinates;
+            bool mExists;
 
             // Not implemented.
             CellMarker(const CellMarker&);
@@ -46,7 +47,7 @@ namespace CSVRender
             /// \brief Build marker containing cell's coordinates.
             void buildMarker();
 
-            /// \brief Position marker above center of cell.
+            /// \brief Position marker at center of cell.
             void positionMarker();
 
         public:
@@ -54,9 +55,11 @@ namespace CSVRender
             /// \brief Constructor.
             /// \param cellNode Cell to create marker for.
             /// \param coordinates Coordinates of cell.
+            /// \param cellExists Whether or not cell exists.
             CellMarker(
                 osg::Group *cellNode,
-                const CSMWorld::CellCoordinates& coordinates);
+                const CSMWorld::CellCoordinates& coordinates,
+                const bool cellExists);
 
             ~CellMarker();
     };

@@ -22,14 +22,27 @@ void CSVRender::CellMarker::buildMarker()
 {
     const int characterSize = 20;
 
-    // Set up marker text containing cell's coordinates.
+    // Set up attributes of marker text.
     osg::ref_ptr<osgText::Text> markerText (new osgText::Text);
-    markerText->setBackdropType(osgText::Text::OUTLINE);
     markerText->setLayout(osgText::Text::LEFT_TO_RIGHT);
     markerText->setCharacterSize(characterSize);
+    markerText->setAlignment(osgText::Text::CENTER_CENTER);
+    markerText->setDrawMode(osgText::Text::TEXT | osgText::Text::FILLEDBOUNDINGBOX);
+
+    // If cell exists then show black bounding box otherwise show red.
+    if (mExists)
+    {
+        markerText->setBoundingBoxColor(osg::Vec4f(0.0f, 0.0f, 0.0f, 1.0f));
+    }
+    else
+    {
+        markerText->setBoundingBoxColor(osg::Vec4f(1.0f, 0.0f, 0.0f, 1.0f));
+    }
+
+    // Add text containing cell's coordinates.
     std::string coordinatesText =
-        "#" + boost::lexical_cast<std::string>(mCoordinates.getX()) +
-        " " + boost::lexical_cast<std::string>(mCoordinates.getY());
+        boost::lexical_cast<std::string>(mCoordinates.getX()) + "," +
+        boost::lexical_cast<std::string>(mCoordinates.getY());
     markerText->setText(coordinatesText);
 
     // Add text to marker node.
@@ -51,9 +64,11 @@ void CSVRender::CellMarker::positionMarker()
 
 CSVRender::CellMarker::CellMarker(
     osg::Group *cellNode,
-    const CSMWorld::CellCoordinates& coordinates
+    const CSMWorld::CellCoordinates& coordinates,
+    const bool cellExists
 ) : mCellNode(cellNode),
-    mCoordinates(coordinates)
+    mCoordinates(coordinates),
+    mExists(cellExists)
 {
     // Set up node for cell marker.
     mMarkerNode = new osg::AutoTransform();
