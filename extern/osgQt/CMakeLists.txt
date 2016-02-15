@@ -6,7 +6,6 @@ set(OSGQT_SOURCE_FILES
     GraphicsWindowQt.cpp
 )
 
-include_directories(${FFMPEG_INCLUDE_DIRS})
 add_library(${OSGQT_LIBRARY} STATIC ${OSGQT_SOURCE_FILES})
 
 if (DESIRED_QT_VERSION MATCHES 4)
