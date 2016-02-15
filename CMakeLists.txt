@@ -229,11 +229,7 @@ IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)
 endif()
 
-if (USE_QT)
-    set (OSG_QT osgQt)
-endif()
-
-find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle ${OSG_QT} osgUtil osgFX)
+find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgUtil osgFX)
 
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
@@ -304,6 +300,9 @@ find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
+if (NOT BULLET_FOUND OR BULLET_VERSION VERSION_LESS 283)
+    message(FATAL_ERROR "OpenMW requires Bullet version 2.83 or later")
+endif()
 
 include_directories("."
     SYSTEM
@@ -567,6 +566,7 @@ endif(WIN32)
 # Extern
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
+add_subdirectory (extern/osgQt)
 
 # Components
 add_subdirectory (components)

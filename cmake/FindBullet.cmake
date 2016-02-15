@@ -14,10 +14,13 @@
 #
 
 # Copyright (c) 2009, Philip Lowman <philip at yhbt.com>
+# Modified for OpenMW to parse BT_BULLET_VERSION.
 #
 # Redistribution AND use is allowed according to the terms of the New
 # BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+
+include(PreprocessorUtils)
 
 set(BULLET_ROOT $ENV{BULLET_ROOT})
 
@@ -75,4 +78,9 @@ if(BULLET_FOUND)
    #_BULLET_APPEND_LIBRARIES(BULLET_LIBRARIES BULLET_DYNAMICS_LIBRARY)
    _BULLET_APPEND_LIBRARIES(BULLET_LIBRARIES BULLET_COLLISION_LIBRARY)
    _BULLET_APPEND_LIBRARIES(BULLET_LIBRARIES BULLET_MATH_LIBRARY)
+
+    find_file(BULLET_BTSCALAR_FILE NAMES btScalar.h PATHS "${BULLET_INCLUDE_DIR}/LinearMath")
+    file(READ ${BULLET_BTSCALAR_FILE} BULLET_BTSCALAR_CONTENT)
+    get_preprocessor_entry(BULLET_BTSCALAR_CONTENT BT_BULLET_VERSION BULLET_VERSION)
+    message(STATUS "Bullet version: ${BULLET_VERSION}")
 endif()

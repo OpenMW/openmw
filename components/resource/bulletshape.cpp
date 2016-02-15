@@ -65,21 +65,7 @@ btCollisionShape* BulletShape::duplicateCollisionShape(const btCollisionShape *s
 
     if(const btBvhTriangleMeshShape* trishape = dynamic_cast<const btBvhTriangleMeshShape*>(shape))
     {
-#if BT_BULLET_VERSION >= 283
         btScaledBvhTriangleMeshShape* newShape = new btScaledBvhTriangleMeshShape(const_cast<btBvhTriangleMeshShape*>(trishape), btVector3(1.f, 1.f, 1.f));
-#else
-        // work around btScaledBvhTriangleMeshShape bug ( https://code.google.com/p/bullet/issues/detail?id=371 ) in older bullet versions
-        const btTriangleMesh* oldMesh = static_cast<const btTriangleMesh*>(trishape->getMeshInterface());
-        btTriangleMesh* newMesh = new btTriangleMesh(*oldMesh);
-
-        // Do not build a new bvh (not needed, since it's the same as the original shape's bvh)
-        btOptimizedBvh* bvh = const_cast<btBvhTriangleMeshShape*>(trishape)->getOptimizedBvh();
-        TriangleMeshShape* newShape = new TriangleMeshShape(newMesh, true, bvh == NULL);
-        // Set original shape's bvh via pointer
-        // The pointer is safe because the BulletShapeInstance keeps a ref_ptr to the original BulletShape
-        if (bvh)
-            newShape->setOptimizedBvh(bvh);
-#endif
         return newShape;
     }
 
