@@ -197,7 +197,7 @@ target_link_libraries(openmw-cs
     ${OSGVIEWER_LIBRARIES}
     ${OSGGA_LIBRARIES}
     ${OSGFX_LIBRARIES}
-    ${OSGQT_LIBRARIES}
+    ${EXTERN_OSGQT_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}

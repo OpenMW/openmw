@@ -6,7 +6,7 @@
 #include <QShortcut>
 #include <QLayout>
 
-#include <osgQt/GraphicsWindowQt>
+#include <extern/osgQt/GraphicsWindowQt>
 #include <osg/GraphicsContext>
 #include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>

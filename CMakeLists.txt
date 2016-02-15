@@ -229,11 +229,7 @@ IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)
 endif()
 
-if (USE_QT)
-    set (OSG_QT osgQt)
-endif()
-
-find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle ${OSG_QT} osgUtil osgFX)
+find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgUtil osgFX)
 
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
@@ -570,6 +566,7 @@ endif(WIN32)
 # Extern
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
+add_subdirectory (extern/osgQt)
 
 # Components
 add_subdirectory (components)
