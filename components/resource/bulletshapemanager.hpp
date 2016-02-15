@@ -6,14 +6,8 @@
 
 #include <osg/ref_ptr>
 
-#include <LinearMath/btScalar.h>
-
 #include "bulletshape.hpp"
 #include "resourcemanager.hpp"
-
-#if BT_BULLET_VERSION < 283
-#error "OpenMW requires Bullet version 2.83 or later"
-#endif
 
 namespace Resource
 {

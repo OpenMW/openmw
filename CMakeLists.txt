@@ -304,6 +304,9 @@ find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
+if (NOT BULLET_FOUND OR BULLET_VERSION VERSION_LESS 283)
+    message(FATAL_ERROR "OpenMW requires Bullet version 2.83 or later")
+endif()
 
 include_directories("."
     SYSTEM
