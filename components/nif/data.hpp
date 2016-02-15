@@ -105,8 +105,29 @@ public:
 class NiPixelData : public Record
 {
 public:
+    enum Format
+    {
+        NIPXFMT_RGB8,
+        NIPXFMT_RGBA8,
+        NIPXFMT_PAL8,
+        NIPXFMT_DXT1,
+        NIPXFMT_DXT3,
+        NIPXFMT_DXT5,
+        NIPXFMT_DXT5_ALT
+    };
+    Format fmt;
+
     unsigned int rmask, gmask, bmask, amask;
     int bpp, mips;
+
+    struct Mipmap
+    {
+        int width, height;
+        int dataOffset;
+    };
+    std::vector<Mipmap> mipmaps;
+
+    std::vector<unsigned char> data;
 
     void read(NIFStream *nif);
 };
