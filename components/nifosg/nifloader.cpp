@@ -1210,6 +1210,68 @@ namespace NifOsg
             }
         }
 
+        osg::ref_ptr<osg::Image> handleInternalTexture(const Nif::NiPixelData* pixelData)
+        {
+            osg::ref_ptr<osg::Image> image (new osg::Image);
+
+            GLenum pixelformat = 0;
+            switch (pixelData->fmt)
+            {
+            case Nif::NiPixelData::NIPXFMT_RGB8:
+                pixelformat = GL_RGB;
+                break;
+            case Nif::NiPixelData::NIPXFMT_RGBA8:
+                pixelformat = GL_RGBA;
+                break;
+            default:
+                std::cerr << "Unhandled internal pixel format " << pixelData->fmt << " in " << mFilename << std::endl;
+                return NULL;
+            }
+
+            if (!pixelData->mipmaps.size())
+                return NULL;
+
+            unsigned char* data = new unsigned char[pixelData->data.size()];
+            memcpy(data, &pixelData->data[0], pixelData->data.size());
+            unsigned int width = 0;
+            unsigned int height = 0;
+
+            std::vector<unsigned int> mipmapVector;
+            for (unsigned int i=0; i<pixelData->mipmaps.size()-3; ++i)
+            {
+                const Nif::NiPixelData::Mipmap& mip = pixelData->mipmaps[i];
+
+                size_t mipSize = mip.height * mip.width * pixelData->bpp / 8;
+                if (mipSize + mip.dataOffset > pixelData->data.size())
+                {
+                    std::cerr << "Internal texture's mipmap data out of bounds" << std::endl;
+                    delete data;
+                    return NULL;
+                }
+
+                if (i != 0)
+                    mipmapVector.push_back(mip.dataOffset);
+                else
+                {
+                    width = mip.width;
+                    height = mip.height;
+                }
+            }
+
+            if (width <= 0 || height <= 0)
+            {
+                std::cerr << "Width and height must be non zero " << std::endl;
+                delete data;
+                return NULL;
+            }
+
+            image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE);
+            image->setMipmapLevels(mipmapVector);
+            image->flipVertical();
+
+            return image;
+        }
+
         void handleTextureProperty(const Nif::NiTexturingProperty* texprop, osg::StateSet* stateset, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<int>& boundTextures, int animflags)
         {
             if (boundTextures.size())
@@ -1256,21 +1318,24 @@ namespace NifOsg
                         std::cerr << "Warning: texture layer " << i << " is in use but empty in " << mFilename << std::endl;
                         continue;
                     }
+                    osg::ref_ptr<osg::Image> image;
                     const Nif::NiSourceTexture *st = tex.texture.getPtr();
-                    if (!st->external)
+                    if (!st->external && !st->data.empty())
                     {
-                        std::cerr << "Warning: unhandled internal texture in " << mFilename << std::endl;
-                        continue;
+                        image = handleInternalTexture(st->data.getPtr());
                     }
-
-                    std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, imageManager->getVFS());
+                    else
+                    {
+                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, imageManager->getVFS());
+                        image = imageManager->getImage(filename);
+                    }
 
                     unsigned int clamp = static_cast<unsigned int>(tex.clamp);
                     int wrapT = (clamp) & 0x1;
                     int wrapS = (clamp >> 1) & 0x1;
 
                     // create a new texture, will later attempt to share using the SharedStateManager
-                    osg::ref_ptr<osg::Texture2D> texture2d (new osg::Texture2D(imageManager->getImage(filename)));
+                    osg::ref_ptr<osg::Texture2D> texture2d (new osg::Texture2D(image));
                     texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP);
                     texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
 

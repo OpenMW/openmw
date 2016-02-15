@@ -175,9 +175,9 @@ void NiPixelData::read(NIFStream *nif)
     {
         // Image size and offset in the following data field
         Mipmap m;
-        m.width = nif->getInt();
-        m.height = nif->getInt();
-        m.dataOffset = nif->getInt();
+        m.width = nif->getUInt();
+        m.height = nif->getUInt();
+        m.dataOffset = nif->getUInt();
         mipmaps.push_back(m);
     }
 
