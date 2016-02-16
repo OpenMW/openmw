@@ -56,18 +56,6 @@ namespace SceneUtil
             }
 
             state.applyModelViewMatrix(modelViewMatrix);
-
-            /*
-            for (int i=0; i<8; ++i)
-            {
-                osg::ref_ptr<osg::Light> defaultLight (new osg::Light(i));
-                defaultLight->setAmbient(osg::Vec4());
-                defaultLight->setDiffuse(osg::Vec4());
-                defaultLight->setSpecular(osg::Vec4());
-                defaultLight->setConstantAttenuation(0.f);
-                state.setGlobalDefaultAttribute(defaultLight);
-            }
-            */
         }
 
     private:
@@ -204,18 +192,18 @@ namespace SceneUtil
             return found->second;
         else
         {
-
-            std::vector<osg::ref_ptr<osg::Light> > lights;
-            for (unsigned int i=0; i<lightList.size();++i)
-                lights.push_back(lightList[i]->mLightSource->getLight(frameNum));
-
-            osg::ref_ptr<LightStateAttribute> attr = new LightStateAttribute(mStartLight, lights);
-
             osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
 
-            // don't use setAttributeAndModes, that does not support light indices!
-            stateset->setAttribute(attr, osg::StateAttribute::ON);
-            stateset->setAssociatedModes(attr, osg::StateAttribute::ON);
+            for (unsigned int i=0; i<lightList.size();++i)
+            {
+                std::vector<osg::ref_ptr<osg::Light> > lights;
+                lights.push_back(lightList[i]->mLightSource->getLight(frameNum));
+                osg::ref_ptr<LightStateAttribute> attr = new LightStateAttribute(mStartLight+i, lights);
+                // don't use setAttributeAndModes, that does not support light indices!
+                stateset->setAttribute(attr, osg::StateAttribute::ON);
+                stateset->setAssociatedModes(attr, osg::StateAttribute::ON);
+
+            }
 
             stateSetCache.insert(std::make_pair(hash, stateset));
             return stateset;
@@ -254,6 +242,17 @@ namespace SceneUtil
     void LightManager::setStartLight(int start)
     {
         mStartLight = start;
+
+        // Set default light state to zero
+        for (int i=start; i<8; ++i)
+        {
+            osg::ref_ptr<osg::Light> defaultLight (new osg::Light(i));
+            defaultLight->setAmbient(osg::Vec4());
+            defaultLight->setDiffuse(osg::Vec4());
+            defaultLight->setSpecular(osg::Vec4());
+            defaultLight->setConstantAttenuation(0.f);
+            getOrCreateStateSet()->setAttributeAndModes(defaultLight, osg::StateAttribute::OFF);
+        }
     }
 
     int LightManager::getStartLight() const
