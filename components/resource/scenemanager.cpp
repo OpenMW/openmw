@@ -139,16 +139,16 @@ namespace Resource
         virtual void apply(osg::Node& node)
         {
             if (osgFX::Effect* effect = dynamic_cast<osgFX::Effect*>(&node))
-                apply(*effect);
+                applyEffect(*effect);
 
             osg::StateSet* stateset = node.getStateSet();
             if (stateset)
-                apply(stateset);
+                applyStateSet(stateset);
 
             traverse(node);
         }
 
-        void apply(osgFX::Effect& effect)
+        void applyEffect(osgFX::Effect& effect)
         {
             for (int i =0; i<effect.getNumTechniques(); ++i)
             {
@@ -156,7 +156,7 @@ namespace Resource
                 for (int pass=0; pass<tech->getNumPasses(); ++pass)
                 {
                     if (tech->getPassStateSet(pass))
-                        apply(tech->getPassStateSet(pass));
+                        applyStateSet(tech->getPassStateSet(pass));
                 }
             }
         }
@@ -165,29 +165,29 @@ namespace Resource
         {
             osg::StateSet* stateset = geode.getStateSet();
             if (stateset)
-                apply(stateset);
+                applyStateSet(stateset);
 
             for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
             {
                 osg::Drawable* drw = geode.getDrawable(i);
                 stateset = drw->getStateSet();
                 if (stateset)
-                    apply(stateset);
+                    applyStateSet(stateset);
             }
         }
 
-        void apply(osg::StateSet* stateset)
+        void applyStateSet(osg::StateSet* stateset)
         {
             const osg::StateSet::TextureAttributeList& texAttributes = stateset->getTextureAttributeList();
             for(unsigned int unit=0;unit<texAttributes.size();++unit)
             {
                 osg::StateAttribute *texture = stateset->getTextureAttribute(unit, osg::StateAttribute::TEXTURE);
                 if (texture)
-                    apply(texture);
+                    applyStateAttribute(texture);
             }
         }
 
-        void apply(osg::StateAttribute* attr)
+        void applyStateAttribute(osg::StateAttribute* attr)
         {
             osg::Texture* tex = attr->asTexture();
             if (tex)

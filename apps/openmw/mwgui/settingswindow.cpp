@@ -27,13 +27,6 @@
 
 namespace
 {
-    std::string fpsLevelToStr(int level)
-    {
-        if (level == 0)
-            return "#{sOff}";
-        else //if (level == 1)
-            return "#{sOn}";
-    }
 
     std::string textureMipmappingToStr(const std::string& val)
     {

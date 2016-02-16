@@ -62,13 +62,6 @@ namespace
         }
     }
 
-    void applyDynamicStatsEffect(int attribute, const MWWorld::Ptr& target, float magnitude)
-    {
-        MWMechanics::DynamicStat<float> value = target.getClass().getCreatureStats(target).getDynamic(attribute);
-        value.setCurrent(value.getCurrent()+magnitude, attribute == 2);
-        target.getClass().getCreatureStats(target).setDynamic(attribute, value);
-    }
-
 }
 
 namespace MWMechanics

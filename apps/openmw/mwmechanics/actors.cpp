@@ -1377,7 +1377,7 @@ namespace MWMechanics
             {
                 if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
                 {
-                    MWWorld::Ptr followTarget = static_cast<MWMechanics::AiFollow*>(*it)->getTarget();
+                    MWWorld::Ptr followTarget = (*it)->getTarget();
                     if (followTarget.isEmpty())
                         continue;
                     if (followTarget == actor)

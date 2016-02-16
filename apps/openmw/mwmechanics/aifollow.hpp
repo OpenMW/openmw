@@ -31,7 +31,7 @@ namespace MWMechanics
 
             AiFollow(const ESM::AiSequence::AiFollow* follow);
 
-            MWWorld::Ptr getTarget();
+            MWWorld::Ptr getTarget() const;
             virtual bool sideWithTarget() const { return true; }
             virtual bool followTargetThroughDoors() const { return true; }
 
@@ -60,7 +60,7 @@ namespace MWMechanics
             float mY;
             float mZ;
             std::string mActorRefId;
-            int mActorId;
+            mutable int mActorId;
             std::string mCellId;
             bool mActive; // have we spotted the target?
             int mFollowIndex;

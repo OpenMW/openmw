@@ -8,7 +8,7 @@ namespace osg
 
 namespace ESM
 {
-    class Light;
+    struct Light;
 }
 
 namespace SceneUtil

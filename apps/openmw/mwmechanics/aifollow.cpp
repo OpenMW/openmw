@@ -200,7 +200,7 @@ void AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) const
     sequence.mPackages.push_back(package);
 }
 
-MWWorld::Ptr AiFollow::getTarget()
+MWWorld::Ptr AiFollow::getTarget() const
 {
     if (mActorId == -2)
         return MWWorld::Ptr();

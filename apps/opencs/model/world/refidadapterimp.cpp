@@ -108,7 +108,7 @@ void CSMWorld::IngredEffectRefIdAdapter::setNestedTable (const RefIdColumn* colu
     ESM::Ingredient ingredient = record.get();
 
     ingredient.mData =
-        static_cast<const NestedTableWrapper<std::vector<typename ESM::Ingredient::IRDTstruct> >&>(nestedTable).mNestedTable.at(0);
+        static_cast<const NestedTableWrapper<std::vector<ESM::Ingredient::IRDTstruct> >&>(nestedTable).mNestedTable.at(0);
 
     record.setModified (ingredient);
 }
@@ -120,11 +120,11 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::IngredEffectRefIdAdapter::nestedTabl
         static_cast<const Record<ESM::Ingredient>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
     // return the whole struct
-    std::vector<typename ESM::Ingredient::IRDTstruct> wrap;
+    std::vector<ESM::Ingredient::IRDTstruct> wrap;
     wrap.push_back(record.get().mData);
 
     // deleted by dtor of NestedTableStoring
-    return new NestedTableWrapper<std::vector<typename ESM::Ingredient::IRDTstruct> >(wrap);
+    return new NestedTableWrapper<std::vector<ESM::Ingredient::IRDTstruct> >(wrap);
 }
 
 QVariant CSMWorld::IngredEffectRefIdAdapter::getNestedData (const RefIdColumn *column,
@@ -1129,7 +1129,7 @@ void CSMWorld::CreatureAttributesRefIdAdapter::setNestedTable (const RefIdColumn
 
     // store the whole struct
     creature.mData =
-        static_cast<const NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> > &>(nestedTable).mNestedTable.at(0);
+        static_cast<const NestedTableWrapper<std::vector<ESM::Creature::NPDTstruct> > &>(nestedTable).mNestedTable.at(0);
 
     record.setModified (creature);
 }
@@ -1141,10 +1141,10 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::CreatureAttributesRefIdAdapter::nest
         static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
     // return the whole struct
-    std::vector<typename ESM::Creature::NPDTstruct> wrap;
+    std::vector<ESM::Creature::NPDTstruct> wrap;
     wrap.push_back(record.get().mData);
     // deleted by dtor of NestedTableStoring
-    return new NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> >(wrap);
+    return new NestedTableWrapper<std::vector<ESM::Creature::NPDTstruct> >(wrap);
 }
 
 QVariant CSMWorld::CreatureAttributesRefIdAdapter::getNestedData (const RefIdColumn *column,
@@ -1235,7 +1235,7 @@ void CSMWorld::CreatureAttackRefIdAdapter::setNestedTable (const RefIdColumn* co
 
     // store the whole struct
     creature.mData =
-        static_cast<const NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> > &>(nestedTable).mNestedTable.at(0);
+        static_cast<const NestedTableWrapper<std::vector<ESM::Creature::NPDTstruct> > &>(nestedTable).mNestedTable.at(0);
 
     record.setModified (creature);
 }
@@ -1247,10 +1247,10 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::CreatureAttackRefIdAdapter::nestedTa
         static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
     // return the whole struct
-    std::vector<typename ESM::Creature::NPDTstruct> wrap;
+    std::vector<ESM::Creature::NPDTstruct> wrap;
     wrap.push_back(record.get().mData);
     // deleted by dtor of NestedTableStoring
-    return new NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> >(wrap);
+    return new NestedTableWrapper<std::vector<ESM::Creature::NPDTstruct> >(wrap);
 }
 
 QVariant CSMWorld::CreatureAttackRefIdAdapter::getNestedData (const RefIdColumn *column,

@@ -1330,7 +1330,7 @@ namespace MWMechanics
         {
             if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
             {
-                MWWorld::Ptr target = static_cast<AiCombat*>(*it)->getTarget();
+                MWWorld::Ptr target = (*it)->getTarget();
                 if (!target.isEmpty() && target.getClass().isNpc())
                     isFightingNpc = true;
             }

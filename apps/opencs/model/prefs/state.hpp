@@ -1,4 +1,4 @@
-#ifndef CSV_PREFS_STATE_H
+#ifndef CSM_PREFS_STATE_H
 #define CSM_PREFS_STATE_H
 
 #include <map>

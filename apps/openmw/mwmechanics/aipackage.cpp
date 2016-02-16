@@ -20,7 +20,7 @@
 
 MWMechanics::AiPackage::~AiPackage() {}
 
-MWWorld::Ptr MWMechanics::AiPackage::getTarget()
+MWWorld::Ptr MWMechanics::AiPackage::getTarget() const
 {
     return MWWorld::Ptr();
 }
