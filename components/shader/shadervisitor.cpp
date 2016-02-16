@@ -79,6 +79,7 @@ namespace Shader
             if (it->first.first == osg::StateAttribute::MATERIAL)
             {
                 const osg::Material* mat = static_cast<const osg::Material*>(it->second.first.get());
+                mRequirements.back().mColorMaterial = (mat->getColorMode() != osg::Material::OFF);
                 mRequirements.back().mVertexColorMode = mat->getColorMode();
             }
         }

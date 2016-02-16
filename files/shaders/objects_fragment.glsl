@@ -7,6 +7,8 @@ varying vec2 diffuseMapUV;
 
 varying float depth;
 
+varying vec3 lighting;
+
 void main()
 {
 #if @diffuseMap
@@ -14,6 +16,8 @@ void main()
 #else
     gl_FragData[0] = vec4(1.0, 1.0, 1.0, 1.0);
 #endif
+
+    gl_FragData[0].xyz *= lighting;
 
     float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);

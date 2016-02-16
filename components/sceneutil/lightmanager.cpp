@@ -56,6 +56,18 @@ namespace SceneUtil
             }
 
             state.applyModelViewMatrix(modelViewMatrix);
+
+            /*
+            for (int i=0; i<8; ++i)
+            {
+                osg::ref_ptr<osg::Light> defaultLight (new osg::Light(i));
+                defaultLight->setAmbient(osg::Vec4());
+                defaultLight->setDiffuse(osg::Vec4());
+                defaultLight->setSpecular(osg::Vec4());
+                defaultLight->setConstantAttenuation(0.f);
+                state.setGlobalDefaultAttribute(defaultLight);
+            }
+            */
         }
 
     private:

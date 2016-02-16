@@ -1063,6 +1063,9 @@ namespace MWRender
 
         osg::ref_ptr<GlowUpdater> glowupdater (new GlowUpdater(glowColor, textures));
         node->addUpdateCallback(glowupdater);
+
+        // TODO: regenerate shader
+        // allowedToModifyStatesets = false
     }
 
     // TODO: Should not be here
@@ -1242,6 +1245,8 @@ namespace MWRender
             material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,alpha));
             material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
             stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+            // FIXME: regenerate shader (mVertexColorMode)
 
             mObjectRoot->setStateSet(stateset);
         }
