@@ -26,13 +26,14 @@ namespace Interpreter{
         return a.length() > b.length();
     }
 
-    std::string fixDefinesReal(std::string text, char eschar, bool isBook, Context& context)
+    std::string fixDefinesReal(std::string text, bool dialogue, Context& context)
     {
         unsigned int start = 0;
         std::ostringstream retval;
         for(unsigned int i = 0; i < text.length(); i++)
         {
-            if(text[i] == eschar)
+            char eschar = text[i];
+            if(eschar == '%' || eschar == '^')
             {
                 retval << text.substr(start, i - start);
                 std::string temp = Misc::StringUtils::lowerCase(text.substr(i+1, 100));
@@ -113,7 +114,7 @@ namespace Interpreter{
                         retval << context.getCurrentCellName();
                     }
 
-                    else if(eschar == '%' && !isBook) { // In Dialogue, not messagebox
+                    else if(!dialogue) { // In Dialogue, not messagebox
                         if(     (found = check(temp, "faction", &i, &start))){
                             retval << context.getNPCFaction();
                         }
@@ -207,15 +208,15 @@ namespace Interpreter{
         return retval.str ();
     }
 
-    std::string fixDefinesDialog(std::string text, Context& context){
-        return fixDefinesReal(text, '%', false, context);
+    std::string fixDefinesDialog(const std::string& text, Context& context){
+        return fixDefinesReal(text, true, context);
     }
 
-    std::string fixDefinesMsgBox(std::string text, Context& context){
-        return fixDefinesReal(text, '^', false, context);
+    std::string fixDefinesMsgBox(const std::string& text, Context& context){
+        return fixDefinesReal(text, false, context);
     }
 
-    std::string fixDefinesBook(std::string text, Context& context){
-        return fixDefinesReal(text, '%', true, context);
+    std::string fixDefinesBook(const std::string& text, Context& context){
+        return fixDefinesReal(text, false, context);
     }
 }
