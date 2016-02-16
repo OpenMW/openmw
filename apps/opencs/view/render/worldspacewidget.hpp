@@ -152,6 +152,9 @@ namespace CSVRender
             virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
                 const = 0;
 
+            virtual std::vector<osg::ref_ptr<TagBase> > getEdited (unsigned int elementMask)
+                const = 0;
+
         protected:
 
             /// Visual elements in a scene

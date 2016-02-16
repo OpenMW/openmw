@@ -18,10 +18,11 @@
 #include "worldspacewidget.hpp"
 #include "pagedworldspacewidget.hpp"
 #include "instanceselectionmode.hpp"
+#include "instancemovemode.hpp"
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":placeholder"), Mask_Reference, "Instance editing",
-  parent), mSubMode (0), mSelectionMode (0)
+  parent), mSubMode (0), mSelectionMode (0), mDragMode (DragMode_None)
 {
 }
 
@@ -30,12 +31,7 @@ void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
     if (!mSubMode)
     {
         mSubMode = new CSVWidget::SceneToolMode (toolbar, "Edit Sub-Mode");
-        mSubMode->addButton (":placeholder", "move",
-            "Move selected instances"
-            "<ul><li>Use primary edit to move instances around freely</li>"
-            "<li>Use secondary edit to move instances around within the grid</li>"
-            "</ul>"
-            "<font color=Red>Not implemented yet</font color>");
+        mSubMode->addButton (new InstanceMoveMode (this), "move");
         mSubMode->addButton (":placeholder", "rotate",
             "Rotate selected instances"
             "<ul><li>Use primary edit to rotate instances freely</li>"
@@ -52,6 +48,8 @@ void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
 
     if (!mSelectionMode)
         mSelectionMode = new InstanceSelectionMode (toolbar, getWorldspaceWidget());
+
+    mDragMode = DragMode_None;
 
     EditMode::activate (toolbar);
 
@@ -116,6 +114,154 @@ void CSVRender::InstanceMode::secondarySelectPressed (osg::ref_ptr<TagBase> tag)
             CSVRender::Object* object = objectTag->mObject;
             object->setSelected (!object->getSelected());
             return;
+        }
+    }
+}
+
+bool CSVRender::InstanceMode::primaryEditStartDrag (osg::ref_ptr<TagBase> tag)
+{
+    if (mDragMode!=DragMode_None)
+        return false;
+
+    if (tag && CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
+    {
+        getWorldspaceWidget().clearSelection (Mask_Reference);
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+        {
+            CSVRender::Object* object = objectTag->mObject;
+            object->setSelected (true);
+        }
+    }
+
+    std::vector<osg::ref_ptr<TagBase> > selection =
+        getWorldspaceWidget().getSelection (Mask_Reference);
+
+    if (selection.empty())
+        return false;
+
+    // \todo check for sub-mode
+
+    for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin());
+        iter!=selection.end(); ++iter)
+    {
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (iter->get()))
+        {
+            objectTag->mObject->setEdited (Object::Override_Position);
+        }
+    }
+
+    mDragMode = DragMode_Move;
+
+    return true;
+}
+
+bool CSVRender::InstanceMode::secondaryEditStartDrag (osg::ref_ptr<TagBase> tag)
+{
+
+    return false;
+}
+
+void CSVRender::InstanceMode::drag (int diffX, int diffY, double speedFactor)
+{
+    switch (mDragMode)
+    {
+        case DragMode_Move:
+        {
+            osg::Vec3f eye;
+            osg::Vec3f centre;
+            osg::Vec3f up;
+
+            getWorldspaceWidget().getCamera()->getViewMatrix().getLookAt (eye, centre, up);
+
+            osg::Vec3f offset;
+
+            if (diffY)
+                offset += up * diffY * speedFactor;
+
+            if (diffX)
+                offset += ((centre-eye) ^ up) * diffX * speedFactor;
+
+            std::vector<osg::ref_ptr<TagBase> > selection =
+                getWorldspaceWidget().getEdited (Mask_Reference);
+
+            for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin());
+                iter!=selection.end(); ++iter)
+            {
+                if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (iter->get()))
+                {
+                    ESM::Position position = objectTag->mObject->getPosition();
+                    for (int i=0; i<3; ++i)
+                        position.pos[i] += offset[i];
+                    objectTag->mObject->setPosition (position.pos);
+                }
+            }
+
+            break;
+        }
+
+        case DragMode_None: break;
+    }
+}
+
+void CSVRender::InstanceMode::dragCompleted()
+{
+    std::vector<osg::ref_ptr<TagBase> > selection =
+        getWorldspaceWidget().getEdited (Mask_Reference);
+
+    QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
+
+    QString description;
+
+    switch (mDragMode)
+    {
+        case DragMode_Move: description = "Move Instances"; break;
+
+        case DragMode_None: break;
+    }
+
+    undoStack.beginMacro (description);
+
+    for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin());
+        iter!=selection.end(); ++iter)
+    {
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (iter->get()))
+        {
+            objectTag->mObject->apply (undoStack);
+        }
+    }
+
+    undoStack.endMacro();
+
+    mDragMode = DragMode_None;
+}
+
+void CSVRender::InstanceMode::dragWheel (int diff, double speedFactor)
+{
+    if (mDragMode==DragMode_Move)
+    {
+        osg::Vec3f eye;
+        osg::Vec3f centre;
+        osg::Vec3f up;
+
+        getWorldspaceWidget().getCamera()->getViewMatrix().getLookAt (eye, centre, up);
+
+        osg::Vec3f offset = centre - eye;
+        offset.normalize();
+        offset *= diff * speedFactor;
+
+        std::vector<osg::ref_ptr<TagBase> > selection =
+            getWorldspaceWidget().getEdited (Mask_Reference);
+
+        for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin());
+            iter!=selection.end(); ++iter)
+        {
+            if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (iter->get()))
+            {
+                ESM::Position position = objectTag->mObject->getPosition();
+                for (int i=0; i<3; ++i)
+                    position.pos[i] += offset[i];
+                objectTag->mObject->setPosition (position.pos);
+            }
         }
     }
 }

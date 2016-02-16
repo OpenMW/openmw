@@ -116,6 +116,8 @@ namespace CSVRender
             bool isDeleted() const;
 
             std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask) const;
+
+            std::vector<osg::ref_ptr<TagBase> > getEdited (unsigned int elementMask) const;
     };
 }
 

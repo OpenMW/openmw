@@ -338,3 +338,16 @@ std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::Cell::getSelection (un
 
     return result;
 }
+
+std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::Cell::getEdited (unsigned int elementMask) const
+{
+    std::vector<osg::ref_ptr<TagBase> > result;
+
+    if (elementMask & Mask_Reference)
+        for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+            iter!=mObjects.end(); ++iter)
+            if (iter->second->isEdited())
+                result.push_back (iter->second->getTag());
+
+    return result;
+}

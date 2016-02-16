@@ -15,6 +15,8 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/ref.hpp"
 #include "../../model/world/refidcollection.hpp"
+#include "../../model/world/commands.hpp"
+#include "../../model/world/universalid.hpp"
 
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
@@ -130,18 +132,20 @@ void CSVRender::Object::adjustTransform()
     if (mReferenceId.empty())
         return;
 
-    const CSMWorld::CellRef& reference = getReference();
+    ESM::Position position = getPosition();
 
     // position
-    mBaseNode->setPosition(mForceBaseToZero ? osg::Vec3() : osg::Vec3f(reference.mPos.pos[0], reference.mPos.pos[1], reference.mPos.pos[2]));
+    mBaseNode->setPosition(mForceBaseToZero ? osg::Vec3() : osg::Vec3f(position.pos[0], position.pos[1], position.pos[2]));
 
     // orientation
-    osg::Quat xr (-reference.mPos.rot[0], osg::Vec3f(1,0,0));
-    osg::Quat yr (-reference.mPos.rot[1], osg::Vec3f(0,1,0));
-    osg::Quat zr (-reference.mPos.rot[2], osg::Vec3f(0,0,1));
+    osg::Quat xr (-position.rot[0], osg::Vec3f(1,0,0));
+    osg::Quat yr (-position.rot[1], osg::Vec3f(0,1,0));
+    osg::Quat zr (-position.rot[2], osg::Vec3f(0,0,1));
     mBaseNode->setAttitude(zr*yr*xr);
 
-    mBaseNode->setScale(osg::Vec3(reference.mScale, reference.mScale, reference.mScale));
+    float scale = getScale();
+
+    mBaseNode->setScale(osg::Vec3(scale, scale, scale));
 }
 
 const CSMWorld::CellRef& CSVRender::Object::getReference() const
@@ -154,7 +158,8 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
 
 CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
     const std::string& id, bool referenceable, bool forceBaseToZero)
-: mData (data), mBaseNode(0), mSelected(false), mParentNode(parentNode), mResourceSystem(data.getResourceSystem().get()), mForceBaseToZero (forceBaseToZero)
+: mData (data), mBaseNode(0), mSelected(false), mParentNode(parentNode), mResourceSystem(data.getResourceSystem().get()), mForceBaseToZero (forceBaseToZero),
+  mScaleOverride (1), mOverrideFlags (0)
 {
     mBaseNode = new osg::PositionAttitudeTransform;
     mBaseNode->addCullCallback(new SceneUtil::LightListCallback);
@@ -289,4 +294,122 @@ std::string CSVRender::Object::getReferenceableId() const
 osg::ref_ptr<CSVRender::TagBase> CSVRender::Object::getTag() const
 {
     return static_cast<CSVRender::TagBase *> (mBaseNode->getUserData());
+}
+
+bool CSVRender::Object::isEdited() const
+{
+    return mOverrideFlags;
+}
+
+void CSVRender::Object::setEdited (int flags)
+{
+    bool discard = mOverrideFlags & ~flags;
+    int added = flags & ~mOverrideFlags;
+
+    mOverrideFlags = flags;
+
+    if (added & Override_Position)
+        for (int i=0; i<3; ++i)
+            mPositionOverride.pos[i] = getReference().mPos.pos[i];
+
+    if (added & Override_Rotation)
+        for (int i=0; i<3; ++i)
+            mPositionOverride.rot[i] = getReference().mPos.rot[i];
+
+    if (added & Override_Scale)
+        mScaleOverride = getReference().mScale;
+
+    if (discard)
+        adjustTransform();
+}
+
+ESM::Position CSVRender::Object::getPosition() const
+{
+    ESM::Position position = getReference().mPos;
+
+    if (mOverrideFlags & Override_Position)
+        for (int i=0; i<3; ++i)
+            position.pos[i] = mPositionOverride.pos[i];
+
+    if (mOverrideFlags & Override_Rotation)
+        for (int i=0; i<3; ++i)
+            position.rot[i] = mPositionOverride.rot[i];
+
+    return position;
+}
+
+float CSVRender::Object::getScale() const
+{
+    return mOverrideFlags & Override_Scale ? mScaleOverride : getReference().mScale;
+}
+
+void CSVRender::Object::setPosition (const float position[3])
+{
+    mOverrideFlags |= Override_Position;
+
+    for (int i=0; i<3; ++i)
+        mPositionOverride.pos[i] = position[i];
+
+    adjustTransform();
+}
+
+void CSVRender::Object::setRotation (const float rotation[3])
+{
+    mOverrideFlags |= Override_Rotation;
+
+    for (int i=0; i<3; ++i)
+        mPositionOverride.rot[i] = rotation[i];
+
+    adjustTransform();
+}
+
+void CSVRender::Object::setScale (float scale)
+{
+    mOverrideFlags |= Override_Scale;
+
+    mScaleOverride = scale;
+
+    adjustTransform();
+}
+
+void CSVRender::Object::apply (QUndoStack& undoStack)
+{
+    const CSMWorld::RefCollection& collection = mData.getReferences();
+    QAbstractItemModel *model = mData.getTableModel (CSMWorld::UniversalId::Type_References);
+
+    int recordIndex = collection.getIndex (mReferenceId);
+
+    if (mOverrideFlags & Override_Position)
+    {
+        for (int i=0; i<3; ++i)
+        {
+            int column = collection.findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (
+                CSMWorld::Columns::ColumnId_PositionXPos+i));
+
+            undoStack.push (new CSMWorld::ModifyCommand (*model,
+                model->index (recordIndex, column), mPositionOverride.pos[i]));
+        }
+    }
+
+    if (mOverrideFlags & Override_Rotation)
+    {
+        for (int i=0; i<3; ++i)
+        {
+            int column = collection.findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (
+                CSMWorld::Columns::ColumnId_PositionXRot+i));
+
+            undoStack.push (new CSMWorld::ModifyCommand (*model,
+                model->index (recordIndex, column), mPositionOverride.rot[i]));
+        }
+    }
+
+    if (mOverrideFlags & Override_Scale)
+    {
+        int column = collection.findColumnIndex (CSMWorld::Columns::ColumnId_Scale);
+
+        undoStack.push (new CSMWorld::ModifyCommand (*model,
+            model->index (recordIndex, column), mScaleOverride));
+    }
+
+    mOverrideFlags = 0;
 }
