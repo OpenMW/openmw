@@ -22,6 +22,9 @@
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/controller.hpp>
 
+#include <components/shader/shadervisitor.hpp>
+#include <components/shader/shadermanager.hpp>
+
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
 #include "objectcache.hpp"
@@ -205,6 +208,7 @@ namespace Resource
 
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
         : ResourceManager(vfs)
+        , mShaderManager(new Shader::ShaderManager)
         , mInstanceCache(new MultiObjectCache)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
@@ -219,6 +223,11 @@ namespace Resource
     SceneManager::~SceneManager()
     {
         // this has to be defined in the .cpp file as we can't delete incomplete types
+    }
+
+    void SceneManager::setShaderPath(const std::string &path)
+    {
+        mShaderManager->setShaderPath(path);
     }
 
     /// @brief Callback to read image files from the VFS.
@@ -328,6 +337,9 @@ namespace Resource
             loaded->accept(setFilterSettingsVisitor);
             SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor(mMinFilter, mMagFilter, mMaxAnisotropy);
             loaded->accept(setFilterSettingsControllerVisitor);
+
+            Shader::ShaderVisitor shaderVisitor(*mShaderManager.get(), "objects_vertex.glsl", "objects_fragment.glsl");
+            loaded->accept(shaderVisitor);
 
             // share state
             mSharedStateMutex.lock();

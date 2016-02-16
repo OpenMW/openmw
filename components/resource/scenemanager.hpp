@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
 #include <osg/ref_ptr>
 #include <osg/Node>
@@ -21,6 +22,11 @@ namespace osgUtil
     class IncrementalCompileOperation;
 }
 
+namespace Shader
+{
+    class ShaderManager;
+}
+
 namespace Resource
 {
 
@@ -33,6 +39,8 @@ namespace Resource
     public:
         SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager);
         ~SceneManager();
+
+        void setShaderPath(const std::string& path);
 
         /// Get a read-only copy of this scene "template"
         /// @note If the given filename does not exist or fails to load, an error marker mesh will be used instead.
@@ -97,6 +105,7 @@ namespace Resource
 
         osg::ref_ptr<osg::Node> createInstance(const std::string& name);
 
+        std::auto_ptr<Shader::ShaderManager> mShaderManager;
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 
         OpenThreads::Mutex mSharedStateMutex;

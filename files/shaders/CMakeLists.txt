@@ -6,6 +6,8 @@ set(SHADER_FILES
     water_vertex.glsl
     water_fragment.glsl
     water_nm.png
+    objects_vertex.glsl
+    objects_fragment.glsl
 )
 
 copy_all_files(${CMAKE_CURRENT_SOURCE_DIR} ${DDIR} "${SHADER_FILES}")

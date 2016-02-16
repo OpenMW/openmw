@@ -168,6 +168,7 @@ namespace MWRender
         , mFieldOfViewOverridden(false)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
+        resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
 
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager;
         sceneRoot->setLightingMask(Mask_Lighting);
