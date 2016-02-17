@@ -3,6 +3,8 @@
 #include <fstream>
 #include <iostream>
 
+#include <osg/Program>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -76,6 +78,20 @@ namespace Shader
             shaderIt = mShaders.insert(std::make_pair(std::make_pair(shaderTemplate, defines), shader)).first;
         }
         return shaderIt->second;
+    }
+
+    osg::ref_ptr<osg::Program> ShaderManager::getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader)
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+        ProgramMap::iterator found = mPrograms.find(std::make_pair(vertexShader, fragmentShader));
+        if (found == mPrograms.end())
+        {
+            osg::ref_ptr<osg::Program> program (new osg::Program);
+            program->addShader(vertexShader);
+            program->addShader(fragmentShader);
+            found = mPrograms.insert(std::make_pair(std::make_pair(vertexShader, fragmentShader), program)).first;
+        }
+        return found->second;
     }
 
 }

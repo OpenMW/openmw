@@ -30,6 +30,9 @@ namespace Shader
         /// @note Thread safe.
         osg::ref_ptr<osg::Shader> getShader(const std::string& shaderTemplate, const DefineMap& defines, osg::Shader::Type shaderType);
 
+        osg::ref_ptr<osg::Program> getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader);
+
+
     private:
         std::string mPath;
 
@@ -40,6 +43,9 @@ namespace Shader
         typedef std::pair<std::string, DefineMap> MapKey;
         typedef std::map<MapKey, osg::ref_ptr<osg::Shader> > ShaderMap;
         ShaderMap mShaders;
+
+        typedef std::map<std::pair<osg::ref_ptr<osg::Shader>, osg::ref_ptr<osg::Shader> >, osg::ref_ptr<osg::Program> > ProgramMap;
+        ProgramMap mPrograms;
 
         OpenThreads::Mutex mMutex;
     };

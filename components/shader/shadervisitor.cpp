@@ -131,11 +131,7 @@ namespace Shader
 
         if (vertexShader && fragmentShader)
         {
-            osg::ref_ptr<osg::Program> program (new osg::Program);
-            program->addShader(vertexShader);
-            program->addShader(fragmentShader);
-
-            stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
+            stateset->setAttributeAndModes(mShaderManager.getProgram(vertexShader, fragmentShader), osg::StateAttribute::ON);
 
             for (std::map<int, std::string>::const_iterator texIt = reqs.mTextures.begin(); texIt != reqs.mTextures.end(); ++texIt)
             {
