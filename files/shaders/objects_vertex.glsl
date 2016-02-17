@@ -16,9 +16,14 @@ varying vec2 detailMapUV;
 varying vec2 emissiveMapUV;
 #endif
 
+#if @normalMap
+varying vec2 normalMapUV;
+varying vec3 viewTangent;
+#endif
+
 varying float depth;
 
-#define PER_PIXEL_LIGHTING 0
+#define PER_PIXEL_LIGHTING @normalMap
 
 #if !PER_PIXEL_LIGHTING
 varying vec4 lighting;
@@ -53,6 +58,11 @@ void main(void)
 
 #if @emissiveMap
     emissiveMapUV = (gl_TextureMatrix[@emissiveMapUV] * gl_MultiTexCoord@emissiveMapUV).xy;
+#endif
+
+#if @normalMap
+    normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
+    viewTangent = normalize(gl_NormalMatrix * gl_MultiTexCoord7.xyz);
 #endif
 
 #if !PER_PIXEL_LIGHTING

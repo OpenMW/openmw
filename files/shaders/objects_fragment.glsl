@@ -20,9 +20,15 @@ uniform sampler2D emissiveMap;
 varying vec2 emissiveMapUV;
 #endif
 
+#if @normalMap
+uniform sampler2D normalMap;
+varying vec2 normalMapUV;
+varying vec3 viewTangent;
+#endif
+
 varying float depth;
 
-#define PER_PIXEL_LIGHTING 0
+#define PER_PIXEL_LIGHTING @normalMap
 
 #if !PER_PIXEL_LIGHTING
 varying vec4 lighting;
@@ -50,11 +56,21 @@ void main()
     gl_FragData[0].xyz *= texture2D(darkMap, darkMapUV).xyz;
 #endif
 
+#if @normalMap
+    vec3 viewNormal = passViewNormal;
+    vec3 normalTex = texture2D(normalMap, normalMapUV).xyz;
+
+    vec3 viewBinormal = cross(viewTangent, viewNormal);
+    mat3 tbn = mat3(viewTangent, viewBinormal, viewNormal);
+
+    viewNormal = normalize(tbn * (normalTex * 2.0 - 1.0));
+#endif
+
 
 #if !PER_PIXEL_LIGHTING
     gl_FragData[0] *= lighting;
 #else
-    gl_FragData[0] *= doLighting(passViewPos, passViewNormal, passColour);
+    gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColour);
 #endif
 
 #if @emissiveMap
