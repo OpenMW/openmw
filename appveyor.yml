@@ -10,7 +10,7 @@ platform:
     - Win32
 #    - x64
 
-configuration: RelWithDebInfo
+configuration: MinSizeRel
 
 matrix:
     fast_finish: true
