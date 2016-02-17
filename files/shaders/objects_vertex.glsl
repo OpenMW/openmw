@@ -51,7 +51,7 @@ void main(void)
     vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
 
 #if @diffuseMap
-    diffuseMapUV = gl_MultiTexCoord@diffuseMapUV.xy;
+    diffuseMapUV = (gl_TextureMatrix[@diffuseMapUV] * gl_MultiTexCoord@diffuseMapUV).xy;
 #endif
 
     lighting = doLighting(viewPos.xyz, viewNormal, gl_Color.xyz);
