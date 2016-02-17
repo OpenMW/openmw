@@ -120,7 +120,7 @@ namespace Shader
             case GL_AMBIENT_AND_DIFFUSE:
                 defineMap["colorMode"] = "2";
                 break;
-            case GL_AMBIENT:
+            case GL_EMISSION:
                 defineMap["colorMode"] = "1";
                 break;
             }

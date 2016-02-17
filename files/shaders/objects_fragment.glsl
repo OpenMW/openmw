@@ -22,7 +22,7 @@ varying vec2 emissiveMapUV;
 
 varying float depth;
 
-varying vec3 lighting;
+varying vec4 lighting;
 
 void main()
 {
@@ -40,7 +40,7 @@ void main()
     gl_FragData[0].xyz *= texture2D(darkMap, darkMapUV).xyz;
 #endif
 
-    gl_FragData[0].xyz *= lighting;
+    gl_FragData[0] *= lighting;
 
 #if @emissiveMap
     gl_FragData[0].xyz += texture2D(emissiveMap, emissiveMapUV).xyz;
