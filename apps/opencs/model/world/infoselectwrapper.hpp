@@ -164,6 +164,8 @@ namespace CSMWorld
         bool variantTypeIsValid() const;
 
         const ESM::Variant& getVariant() const;
+        
+        std::string toString() const;
 
     protected:
 

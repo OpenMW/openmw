@@ -226,13 +226,46 @@ bool CSMWorld::ConstInfoSelectWrapper::conditionIsNeverTrue() const
 
 bool CSMWorld::ConstInfoSelectWrapper::variantTypeIsValid() const
 {
-    return (mConstSelect.mValue.getType() == ESM::VT_Int || mConstSelect.mValue.getType() == ESM::VT_Short ||
-        mConstSelect.mValue.getType() == ESM::VT_Long || mConstSelect.mValue.getType() == ESM::VT_Float);
+    return (mConstSelect.mValue.getType() == ESM::VT_Int || mConstSelect.mValue.getType() == ESM::VT_Float);
 }
 
 const ESM::Variant& CSMWorld::ConstInfoSelectWrapper::getVariant() const
 {
     return mConstSelect.mValue;
+}
+
+std::string CSMWorld::ConstInfoSelectWrapper::toString() const
+{
+    std::ostringstream stream;
+    stream << convertToString(mFunctionName) << " ";
+    
+    if (mHasVariable)
+        stream << mVariableName << " ";
+    
+    stream << convertToString(mRelationType) << " ";
+    
+    switch (mConstSelect.mValue.getType())
+    {
+        case ESM::VT_Short:
+        case ESM::VT_Long:
+        case ESM::VT_Int:
+            stream << mConstSelect.mValue.getInteger();
+            break;
+            
+        case ESM::VT_Float:
+            stream << mConstSelect.mValue.getFloat();
+            break;
+            
+        case ESM::VT_String:
+            stream << mConstSelect.mValue.getString();
+            break;
+            
+        default:
+            stream << "(Invalid value type)";
+            break;
+    }
+    
+    return stream.str();
 }
 
 void CSMWorld::ConstInfoSelectWrapper::readRule()
@@ -554,9 +587,9 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getValidIntRange() const
         case Function_RankHigh:
         case Function_Reputation:
         case Function_PcReputation:
+        case Function_Journal:
             return std::pair<int, int>(IntMin, IntMax);
 
-        case Function_Journal:
         case Function_Item:
         case Function_Dead:
         case Function_PcLevel:
@@ -736,7 +769,7 @@ bool CSMWorld::ConstInfoSelectWrapper::conditionIsNeverTrue(std::pair<T1,T1> con
 
         case Relation_NotEqual:
             // If the value is the only value withing the range, it will never be true
-            return rangesOverlap(conditionRange, validRange);
+            return rangesMatch(conditionRange, validRange);
 
         default:
             throw std::logic_error("InfoCondition: operator can not be used to compare");
