@@ -33,5 +33,9 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor)
     lightResult.xyz += gl_FrontMaterial.emission.xyz;
 #endif
 
+    // TODO: make clamp configurable
+    // the following produces fixed-function compatible lighting, w/o clamp arguably looks better
+    //lightResult = clamp(lightResult, vec4(0.0, 0.0, 0.0, 0.0), vec4(1.0, 1.0, 1.0, 1.0));
+
     return lightResult;
 }

@@ -22,7 +22,17 @@ varying vec2 emissiveMapUV;
 
 varying float depth;
 
+#define PER_PIXEL_LIGHTING 0
+
+#if !PER_PIXEL_LIGHTING
 varying vec4 lighting;
+#else
+varying vec3 passViewPos;
+varying vec3 passViewNormal;
+varying vec4 passColour;
+#endif
+
+#include "lighting.glsl"
 
 void main()
 {
@@ -40,7 +50,12 @@ void main()
     gl_FragData[0].xyz *= texture2D(darkMap, darkMapUV).xyz;
 #endif
 
+
+#if !PER_PIXEL_LIGHTING
     gl_FragData[0] *= lighting;
+#else
+    gl_FragData[0] *= doLighting(passViewPos, passViewNormal, passColour);
+#endif
 
 #if @emissiveMap
     gl_FragData[0].xyz += texture2D(emissiveMap, emissiveMapUV).xyz;

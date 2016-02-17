@@ -18,7 +18,15 @@ varying vec2 emissiveMapUV;
 
 varying float depth;
 
+#define PER_PIXEL_LIGHTING 0
+
+#if !PER_PIXEL_LIGHTING
 varying vec4 lighting;
+#else
+varying vec3 passViewPos;
+varying vec3 passViewNormal;
+varying vec4 passColour;
+#endif
 
 #include "lighting.glsl"
 
@@ -47,9 +55,11 @@ void main(void)
     emissiveMapUV = (gl_TextureMatrix[@emissiveMapUV] * gl_MultiTexCoord@emissiveMapUV).xy;
 #endif
 
+#if !PER_PIXEL_LIGHTING
     lighting = doLighting(viewPos.xyz, viewNormal, gl_Color);
-
-    // TODO: make clamp configurable
-    // the following produces fixed-function compatible lighting, w/o clamp arguably looks better
-    //lighting = clamp(lighting, vec4(0.0, 0.0, 0.0, 0.0), vec4(1.0, 1.0, 1.0, 1.0));
+#else
+    passViewPos = viewPos.xyz;
+    passViewNormal = viewNormal;
+    passColour = gl_Color;
+#endif
 }
