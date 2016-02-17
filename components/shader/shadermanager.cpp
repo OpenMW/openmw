@@ -19,6 +19,73 @@ namespace Shader
         mPath = path;
     }
 
+    bool parseIncludes(boost::filesystem::path shaderPath, std::string& source)
+    {
+        std::set<boost::filesystem::path> includedFiles;
+        size_t foundPos = 0;
+        while ((foundPos = source.find("#include")) != std::string::npos)
+        {
+            size_t start = source.find('"', foundPos);
+            if (start == std::string::npos || start == source.size()-1)
+            {
+                std::cerr << "Invalid #include " << std::endl;
+                return false;
+            }
+            size_t end = source.find('"', start+1);
+            if (end == std::string::npos)
+            {
+                std::cerr << "Invalid #include " << std::endl;
+                return false;
+            }
+            std::string includeFilename = source.substr(start+1, end-(start+1));
+            boost::filesystem::path includePath = shaderPath / includeFilename;
+            boost::filesystem::ifstream includeFstream;
+            includeFstream.open(includePath);
+            if (includeFstream.fail())
+            {
+                std::cerr << "Failed to open " << includePath.string() << std::endl;
+                return false;
+            }
+            std::stringstream buffer;
+            buffer << includeFstream.rdbuf();
+            source.replace(foundPos, (end-foundPos+1), buffer.str());
+
+            if (includedFiles.insert(includePath).second == false)
+            {
+                std::cerr << "Detected cyclic #includes" << std::endl;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool parseDefines(std::string& source, const ShaderManager::DefineMap& defines)
+    {
+        const char escapeCharacter = '@';
+        size_t foundPos = 0;
+        while ((foundPos = source.find(escapeCharacter)) != std::string::npos)
+        {
+            size_t endPos = source.find_first_of(" \n\r()[].;", foundPos);
+            if (endPos == std::string::npos)
+            {
+                std::cerr << "Unexpected EOF" << std::endl;
+                return false;
+            }
+            std::string define = source.substr(foundPos+1, endPos - (foundPos+1));
+            ShaderManager::DefineMap::const_iterator defineFound = defines.find(define);
+            if (defineFound == defines.end())
+            {
+                std::cerr << "Undefined " << define << std::endl;
+                return false;
+            }
+            else
+            {
+                source.replace(foundPos, endPos-foundPos, defineFound->second);
+            }
+        }
+        return true;
+    }
+
     osg::ref_ptr<osg::Shader> ShaderManager::getShader(const std::string &shaderTemplate, const ShaderManager::DefineMap &defines, osg::Shader::Type shaderType)
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
@@ -38,36 +105,20 @@ namespace Shader
             std::stringstream buffer;
             buffer << stream.rdbuf();
 
-            templateIt = mShaderTemplates.insert(std::make_pair(shaderTemplate, buffer.str())).first;
+            // parse includes
+            std::string source = buffer.str();
+            if (!parseIncludes(boost::filesystem::path(mPath), source))
+                return NULL;
+
+            templateIt = mShaderTemplates.insert(std::make_pair(shaderTemplate, source)).first;
         }
 
         ShaderMap::iterator shaderIt = mShaders.find(std::make_pair(shaderTemplate, defines));
         if (shaderIt == mShaders.end())
         {
             std::string shaderSource = templateIt->second;
-
-            const char escapeCharacter = '@';
-            size_t foundPos = 0;
-            while ((foundPos = shaderSource.find(escapeCharacter)) != std::string::npos)
-            {
-                size_t endPos = shaderSource.find_first_of(" \n\r()[].;", foundPos);
-                if (endPos == std::string::npos)
-                {
-                    std::cerr << "Unexpected EOF" << std::endl;
-                    return NULL;
-                }
-                std::string define = shaderSource.substr(foundPos+1, endPos - (foundPos+1));
-                DefineMap::const_iterator defineFound = defines.find(define);
-                if (defineFound == defines.end())
-                {
-                    std::cerr << "Undefined " << define << " in shader " << shaderTemplate << std::endl;
-                    return NULL;
-                }
-                else
-                {
-                    shaderSource.replace(foundPos, endPos-foundPos, defineFound->second);
-                }
-            }
+            if (!parseDefines(shaderSource, defines))
+                return NULL;
 
             osg::ref_ptr<osg::Shader> shader (new osg::Shader(shaderType));
             shader->setShaderSource(shaderSource);
