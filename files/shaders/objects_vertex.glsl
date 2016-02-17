@@ -4,6 +4,18 @@
 varying vec2 diffuseMapUV;
 #endif
 
+#if @darkMap
+varying vec2 darkMapUV;
+#endif
+
+#if @detailMap
+varying vec2 detailMapUV;
+#endif
+
+#if @emissiveMap
+varying vec2 emissiveMapUV;
+#endif
+
 varying float depth;
 
 varying vec3 lighting;
@@ -52,6 +64,18 @@ void main(void)
 
 #if @diffuseMap
     diffuseMapUV = (gl_TextureMatrix[@diffuseMapUV] * gl_MultiTexCoord@diffuseMapUV).xy;
+#endif
+
+#if @darkMap
+    darkMapUV = (gl_TextureMatrix[@darkMapUV] * gl_MultiTexCoord@darkMapUV).xy;
+#endif
+
+#if @detailMap
+    detailMapUV = (gl_TextureMatrix[@detailMap] * gl_MultiTexCoord@detailMap).xy;
+#endif
+
+#if @emissiveMap
+    emissiveMapUV = (gl_TextureMatrix[@emissiveMapUV] * gl_MultiTexCoord@emissiveMapUV).xy;
 #endif
 
     lighting = doLighting(viewPos.xyz, viewNormal, gl_Color.xyz);
