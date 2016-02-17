@@ -3,6 +3,7 @@
 #include <components/misc/stringops.hpp>
 
 #include "universalid.hpp"
+#include "infoselectwrapper.hpp"
 
 namespace CSMWorld
 {
@@ -273,9 +274,9 @@ namespace CSMWorld
             { ColumnId_InfoList, "Info List" },
             { ColumnId_InfoCondition, "Info Conditions" },
             { ColumnId_InfoCondFunc, "Function" },
-            { ColumnId_InfoCondVar, "Func/Variable" },
-            { ColumnId_InfoCondComp, "Comp" },
-            { ColumnId_InfoCondValue, "Values" },
+            { ColumnId_InfoCondVar, "Name" },
+            { ColumnId_InfoCondComp, "Relation" },
+            { ColumnId_InfoCondValue, "Value" },
             { ColumnId_OriginalCell, "Original Cell" },
 
             { ColumnId_NpcAttributes, "NPC Attributes" },
@@ -546,18 +547,6 @@ namespace
         "AI Wander", "AI Travel", "AI Follow", "AI Escort", "AI Activate", 0
     };
 
-    static const char *sInfoCondFunc[] =
-    {
-        " ", "Function", "Global", "Local", "Journal",
-        "Item", "Dead", "Not ID", "Not Faction", "Not Class",
-        "Not Race", "Not Cell", "Not Local", 0
-    };
-
-    static const char *sInfoCondComp[] =
-    {
-        "!=", "<", "<=", "=", ">", ">=", 0
-    };
-
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -585,10 +574,8 @@ namespace
             case CSMWorld::Columns::ColumnId_EffectId: return sEffectId;
             case CSMWorld::Columns::ColumnId_PartRefType: return sPartRefType;
             case CSMWorld::Columns::ColumnId_AiPackageType: return sAiPackageType;
-            case CSMWorld::Columns::ColumnId_InfoCondFunc: return sInfoCondFunc;
-            // FIXME: don't have dynamic value enum delegate, use Display_String for now
-            //case CSMWorld::Columns::ColumnId_InfoCond: return sInfoCond;
-            case CSMWorld::Columns::ColumnId_InfoCondComp: return sInfoCondComp;
+            case CSMWorld::Columns::ColumnId_InfoCondFunc: return CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings;
+            case CSMWorld::Columns::ColumnId_InfoCondComp: return CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings;
 
             default: return 0;
         }
