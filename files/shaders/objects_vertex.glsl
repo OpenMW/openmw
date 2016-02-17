@@ -10,10 +10,8 @@ varying vec3 lighting;
 
 #define MAX_LIGHTS 8
 
-vec3 doLighting(vec4 vertex, vec3 normal, vec3 vertexColor)
+vec3 doLighting(vec3 viewPos, vec3 viewNormal, vec3 vertexColor)
 {
-    vec3 viewPos = (gl_ModelViewMatrix * vertex).xyz;
-    vec3 viewNormal = normalize((gl_NormalMatrix * normal).xyz);
     vec3 lightDir;
     float d;
 
@@ -28,7 +26,7 @@ vec3 doLighting(vec4 vertex, vec3 normal, vec3 vertexColor)
     vec3 lightResult = vec3(0.0, 0.0, 0.0);
     for (int i=0; i<MAX_LIGHTS; ++i)
     {
-        lightDir = gl_LightSource[i].position.xyz - (viewPos * gl_LightSource[i].position.w);
+        lightDir = gl_LightSource[i].position.xyz - (viewPos.xyz * gl_LightSource[i].position.w);
         d = length(lightDir);
         lightDir = normalize(lightDir);
 
@@ -48,10 +46,14 @@ void main(void)
     gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
     depth = gl_Position.z;
 
+    vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
+    gl_ClipVertex = viewPos;
+    vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
+
 #if @diffuseMap
     diffuseMapUV = gl_MultiTexCoord@diffuseMapUV.xy;
 #endif
 
-    lighting = doLighting(gl_Vertex, gl_Normal.xyz, gl_Color.xyz);
+    lighting = doLighting(viewPos.xyz, viewNormal, gl_Color.xyz);
     lighting = clamp(lighting, vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
 }
