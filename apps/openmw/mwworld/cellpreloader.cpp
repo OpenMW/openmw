@@ -166,6 +166,8 @@ namespace MWWorld
         , mBulletShapeManager(bulletShapeManager)
         , mTerrain(terrain)
         , mExpiryDelay(0.0)
+        , mMinCacheSize(0)
+        , mMaxCacheSize(0)
     {
     }
 
@@ -197,6 +199,23 @@ namespace MWWorld
             return;
         }
 
+        while (mPreloadCells.size() >= mMaxCacheSize)
+        {
+            // throw out oldest cell to make room
+            PreloadMap::iterator oldestCell = mPreloadCells.begin();
+            double oldestTimestamp = DBL_MAX;
+            for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end(); ++it)
+            {
+                if (it->second.mTimeStamp < oldestTimestamp)
+                {
+                    oldestTimestamp = it->second.mTimeStamp;
+                    oldestCell = it;
+                }
+            }
+
+            mPreloadCells.erase(oldestCell);
+        }
+
         osg::ref_ptr<PreloadItem> item (new PreloadItem(cell, mResourceSystem->getSceneManager(), mBulletShapeManager, mResourceSystem->getKeyframeManager(), mTerrain));
         mWorkQueue->addWorkItem(item);
 
@@ -210,11 +229,9 @@ namespace MWWorld
 
     void CellPreloader::updateCache(double timestamp)
     {
-        // TODO: add settings for a minimum/maximum size of the cache
-
         for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end();)
         {
-            if (it->second.mTimeStamp < timestamp - mExpiryDelay)
+            if (mPreloadCells.size() >= mMinCacheSize && it->second.mTimeStamp < timestamp - mExpiryDelay)
                 mPreloadCells.erase(it++);
             else
                 ++it;
@@ -227,6 +244,16 @@ namespace MWWorld
     void CellPreloader::setExpiryDelay(double expiryDelay)
     {
         mExpiryDelay = expiryDelay;
+    }
+
+    void CellPreloader::setMinCacheSize(unsigned int num)
+    {
+        mMinCacheSize = num;
+    }
+
+    void CellPreloader::setMaxCacheSize(unsigned int num)
+    {
+        mMaxCacheSize = num;
     }
 
     void CellPreloader::setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue)

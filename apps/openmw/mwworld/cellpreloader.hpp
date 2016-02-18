@@ -38,6 +38,12 @@ namespace MWWorld
         /// How long to keep a preloaded cell in cache after it's no longer requested.
         void setExpiryDelay(double expiryDelay);
 
+        /// The minimum number of preloaded cells before unused cells get thrown out.
+        void setMinCacheSize(unsigned int num);
+
+        /// The maximum number of preloaded cells.
+        void setMaxCacheSize(unsigned int num);
+
         void setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue);
 
     private:
@@ -46,6 +52,8 @@ namespace MWWorld
         Terrain::World* mTerrain;
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
         double mExpiryDelay;
+        unsigned int mMinCacheSize;
+        unsigned int mMaxCacheSize;
 
         struct PreloadEntry
         {

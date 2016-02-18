@@ -463,9 +463,11 @@ namespace MWWorld
 
         mPhysics->setUnrefQueue(rendering.getUnrefQueue());
 
-        float cacheExpiryDelay = Settings::Manager::getFloat("cache expiry delay", "Cells");
-        rendering.getResourceSystem()->setExpiryDelay(cacheExpiryDelay);
-        mPreloader->setExpiryDelay(cacheExpiryDelay);
+        rendering.getResourceSystem()->setExpiryDelay(Settings::Manager::getFloat("cache expiry delay", "Cells"));
+
+        mPreloader->setExpiryDelay(Settings::Manager::getFloat("preload cell expiry delay", "Cells"));
+        mPreloader->setMinCacheSize(Settings::Manager::getInt("preload cell cache min", "Cells"));
+        mPreloader->setMaxCacheSize(Settings::Manager::getInt("preload cell cache max", "Cells"));
     }
 
     Scene::~Scene()
