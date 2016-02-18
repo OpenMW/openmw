@@ -25,12 +25,17 @@ namespace Shader
         /// Setting force = true will cause all shaders to use per-pixel lighting, regardless of having a bump map.
         void setForcePerPixelLighting(bool force);
 
+        /// Set if we are allowed to modify StateSets encountered in the graph (default true).
+        /// @par If set to false, then instead of modifying, the StateSet will be cloned and this new StateSet will be assigned to the node.
+        /// @par This option is useful when the ShaderVisitor is run on a "live" subgraph that may have already been submitted for rendering.
+        void setAllowedToModifyStateSets(bool allowed);
+
         virtual void apply(osg::Node& node);
 
         virtual void apply(osg::Drawable& drawable);
         virtual void apply(osg::Geometry& geometry);
 
-        void applyStateSet(osg::StateSet* stateset);
+        void applyStateSet(osg::ref_ptr<osg::StateSet> stateset, osg::Node& node);
 
         void pushRequirements();
         void popRequirements();
@@ -39,6 +44,7 @@ namespace Shader
         bool mForceShaders;
         bool mClampLighting;
         bool mForcePerPixelLighting;
+        bool mAllowedToModifyStateSets;
 
         ShaderManager& mShaderManager;
 
@@ -54,6 +60,7 @@ namespace Shader
             bool mColorMaterial;
             // osg::Material::ColorMode
             int mVertexColorMode;
+            bool mMaterialOverridden;
 
             // -1 == no tangents required
             int mTexStageRequiringTangents;
@@ -63,7 +70,7 @@ namespace Shader
         std::string mDefaultVsTemplate;
         std::string mDefaultFsTemplate;
 
-        void createProgram(const ShaderRequirements& reqs, osg::StateSet* stateset);
+        void createProgram(const ShaderRequirements& reqs, osg::Node& node);
     };
 
 }

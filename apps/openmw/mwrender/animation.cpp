@@ -1246,13 +1246,15 @@ namespace MWRender
             material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
             stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
-            // FIXME: regenerate shader (mVertexColorMode)
-
             mObjectRoot->setStateSet(stateset);
+
+            mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
         }
         else
         {
             mObjectRoot->setStateSet(NULL);
+
+            mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
         }
 
         setRenderBin();

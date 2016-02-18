@@ -19,6 +19,7 @@ namespace Shader
         : mHasNormalMap(false)
         , mColorMaterial(false)
         , mVertexColorMode(GL_AMBIENT_AND_DIFFUSE)
+        , mMaterialOverridden(false)
         , mTexStageRequiringTangents(-1)
     {
     }
@@ -28,6 +29,7 @@ namespace Shader
         , mForceShaders(false)
         , mClampLighting(false)
         , mForcePerPixelLighting(false)
+        , mAllowedToModifyStateSets(true)
         , mShaderManager(shaderManager)
         , mDefaultVsTemplate(defaultVsTemplate)
         , mDefaultFsTemplate(defaultFsTemplate)
@@ -55,7 +57,7 @@ namespace Shader
         if (node.getStateSet())
         {
             pushRequirements();
-            applyStateSet(node.getStateSet());
+            applyStateSet(node.getStateSet(), node);
             traverse(node);
             popRequirements();
         }
@@ -63,8 +65,21 @@ namespace Shader
             traverse(node);
     }
 
-    void ShaderVisitor::applyStateSet(osg::StateSet* stateset)
+    osg::StateSet* getWritableStateSet(osg::Node& node)
     {
+        if (!node.getStateSet())
+            return node.getOrCreateStateSet();
+
+        osg::ref_ptr<osg::StateSet> newStateSet = osg::clone(node.getStateSet(), osg::CopyOp::SHALLOW_COPY);
+        node.setStateSet(newStateSet);
+        return newStateSet.get();
+    }
+
+    void ShaderVisitor::applyStateSet(osg::ref_ptr<osg::StateSet> stateset, osg::Node& node)
+    {
+        osg::StateSet* writableStateSet = NULL;
+        if (mAllowedToModifyStateSets)
+            writableStateSet = node.getStateSet();
         const osg::StateSet::TextureAttributeList& texAttributes = stateset->getTextureAttributeList();
         for(unsigned int unit=0;unit<texAttributes.size();++unit)
         {
@@ -81,8 +96,10 @@ namespace Shader
                         {
                             mRequirements.back().mTexStageRequiringTangents = unit;
                             mRequirements.back().mHasNormalMap = true;
+                            if (!writableStateSet)
+                                writableStateSet = getWritableStateSet(node);
                             // normal maps are by default off since the FFP can't render them, now that we'll use shaders switch to On
-                            stateset->setTextureMode(unit, GL_TEXTURE_2D, osg::StateAttribute::ON);
+                            writableStateSet->setTextureMode(unit, GL_TEXTURE_2D, osg::StateAttribute::ON);
                         }
                     }
                     else
@@ -90,7 +107,12 @@ namespace Shader
                 }
             }
             // remove state that has no effect when rendering with shaders
-            stateset->removeTextureAttribute(unit, osg::StateAttribute::TEXENV);
+            if (stateset->getTextureAttribute(unit, osg::StateAttribute::TEXENV))
+            {
+                if (!writableStateSet)
+                    writableStateSet = getWritableStateSet(node);
+                writableStateSet->removeTextureAttribute(unit, osg::StateAttribute::TEXENV);
+            }
         }
 
         const osg::StateSet::AttributeList& attributes = stateset->getAttributeList();
@@ -98,9 +120,15 @@ namespace Shader
         {
             if (it->first.first == osg::StateAttribute::MATERIAL)
             {
-                const osg::Material* mat = static_cast<const osg::Material*>(it->second.first.get());
-                mRequirements.back().mColorMaterial = (mat->getColorMode() != osg::Material::OFF);
-                mRequirements.back().mVertexColorMode = mat->getColorMode();
+                if (!mRequirements.back().mMaterialOverridden || it->second.second & osg::StateAttribute::PROTECTED)
+                {
+                    if (it->second.second & osg::StateAttribute::OVERRIDE)
+                        mRequirements.back().mMaterialOverridden = true;
+
+                    const osg::Material* mat = static_cast<const osg::Material*>(it->second.first.get());
+                    mRequirements.back().mColorMaterial = (mat->getColorMode() != osg::Material::OFF);
+                    mRequirements.back().mVertexColorMode = mat->getColorMode();
+                }
             }
         }
     }
@@ -115,8 +143,14 @@ namespace Shader
         mRequirements.pop_back();
     }
 
-    void ShaderVisitor::createProgram(const ShaderRequirements &reqs, osg::StateSet *stateset)
+    void ShaderVisitor::createProgram(const ShaderRequirements &reqs, osg::Node& node)
     {
+        osg::StateSet* writableStateSet = NULL;
+        if (mAllowedToModifyStateSets)
+            writableStateSet = node.getOrCreateStateSet();
+        else
+            writableStateSet = getWritableStateSet(node);
+
         ShaderManager::DefineMap defineMap;
         const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap" };
         for (unsigned int i=0; i<sizeof(defaultTextures)/sizeof(defaultTextures[0]); ++i)
@@ -154,11 +188,11 @@ namespace Shader
 
         if (vertexShader && fragmentShader)
         {
-            stateset->setAttributeAndModes(mShaderManager.getProgram(vertexShader, fragmentShader), osg::StateAttribute::ON);
+            writableStateSet->setAttributeAndModes(mShaderManager.getProgram(vertexShader, fragmentShader), osg::StateAttribute::ON);
 
             for (std::map<int, std::string>::const_iterator texIt = reqs.mTextures.begin(); texIt != reqs.mTextures.end(); ++texIt)
             {
-                stateset->addUniform(new osg::Uniform(texIt->second.c_str(), texIt->first), osg::StateAttribute::ON);
+                writableStateSet->addUniform(new osg::Uniform(texIt->second.c_str(), texIt->first), osg::StateAttribute::ON);
             }
         }
     }
@@ -169,7 +203,7 @@ namespace Shader
         if (geometry.getStateSet())
         {
             pushRequirements();
-            applyStateSet(geometry.getStateSet());
+            applyStateSet(geometry.getStateSet(), geometry);
         }
 
         if (!mRequirements.empty())
@@ -185,7 +219,7 @@ namespace Shader
 
             // TODO: find a better place for the stateset
             if (reqs.mHasNormalMap || mForceShaders)
-                createProgram(reqs, geometry.getOrCreateStateSet());
+                createProgram(reqs, geometry);
         }
 
         if (needPop)
@@ -200,7 +234,7 @@ namespace Shader
         if (drawable.getStateSet())
         {
             pushRequirements();
-            applyStateSet(drawable.getStateSet());
+            applyStateSet(drawable.getStateSet(), drawable);
         }
 
         if (!mRequirements.empty())
@@ -208,11 +242,16 @@ namespace Shader
             const ShaderRequirements& reqs = mRequirements.back();
             // TODO: find a better place for the stateset
             if (reqs.mHasNormalMap || mForceShaders)
-                createProgram(reqs, drawable.getOrCreateStateSet());
+                createProgram(reqs, drawable);
         }
 
         if (needPop)
             popRequirements();
+    }
+
+    void ShaderVisitor::setAllowedToModifyStateSets(bool allowed)
+    {
+        mAllowedToModifyStateSets = allowed;
     }
 
 }

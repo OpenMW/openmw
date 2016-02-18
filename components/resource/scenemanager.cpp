@@ -228,6 +228,16 @@ namespace Resource
         mForceShaders = force;
     }
 
+    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node)
+    {
+        Shader::ShaderVisitor shaderVisitor(*mShaderManager.get(), "objects_vertex.glsl", "objects_fragment.glsl");
+        shaderVisitor.setForceShaders(mForceShaders);
+        shaderVisitor.setClampLighting(mClampLighting);
+        shaderVisitor.setForcePerPixelLighting(mForcePerPixelLighting);
+        shaderVisitor.setAllowedToModifyStateSets(false);
+        node->accept(shaderVisitor);
+    }
+
     void SceneManager::setClampLighting(bool clamp)
     {
         mClampLighting = clamp;
