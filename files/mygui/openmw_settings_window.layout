@@ -396,6 +396,16 @@
                                     <Property key="Caption" value="Texture quality"/>
                                 </Widget>
                             </Widget>
+                            <Widget type="HBox" skin="" position="4 56 350 24">
+                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
+                                    <UserString key="SettingCategory" value="Water"/>
+                                    <UserString key="SettingName" value="reflect actors"/>
+                                    <UserString key="SettingType" value="CheckButton"/>
+                                </Widget>
+                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 79 16" align="Left Top">
+                                    <Property key="Caption" value="Reflect actors"/>
+                                </Widget>
+                            </Widget>
                         </Widget>
 
                     </Widget>
