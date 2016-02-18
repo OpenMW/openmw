@@ -1041,6 +1041,25 @@ namespace MWRender
         return mObjectRoot.get();
     }
 
+    class FindLowestUnusedTexUnitVisitor : public osg::NodeVisitor
+    {
+    public:
+        FindLowestUnusedTexUnitVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mLowestUnusedTexUnit(0)
+        {
+        }
+
+        virtual void apply(osg::Node& node)
+        {
+            if (osg::StateSet* stateset = node.getStateSet())
+                mLowestUnusedTexUnit = std::max(mLowestUnusedTexUnit, int(stateset->getTextureAttributeList().size()));
+
+            traverse(node);
+        }
+        int mLowestUnusedTexUnit;
+    };
+
     void Animation::addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor)
     {
         std::vector<osg::ref_ptr<osg::Texture2D> > textures;
@@ -1062,7 +1081,9 @@ namespace MWRender
             textures.push_back(tex);
         }
 
-        int texUnit = 1; // FIXME: might not always be 1
+        FindLowestUnusedTexUnitVisitor findLowestUnusedTexUnitVisitor;
+        node->accept(findLowestUnusedTexUnitVisitor);
+        int texUnit = findLowestUnusedTexUnitVisitor.mLowestUnusedTexUnit;
         osg::ref_ptr<GlowUpdater> glowupdater (new GlowUpdater(texUnit, glowColor, textures));
         node->addUpdateCallback(glowupdater);
 
