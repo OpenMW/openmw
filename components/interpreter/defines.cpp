@@ -114,7 +114,7 @@ namespace Interpreter{
                         retval << context.getCurrentCellName();
                     }
 
-                    else if(!dialogue) { // In Dialogue, not messagebox
+                    else if(dialogue) { // In Dialogue, not messagebox
                         if(     (found = check(temp, "faction", &i, &start))){
                             retval << context.getNPCFaction();
                         }
