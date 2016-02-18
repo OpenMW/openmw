@@ -23,7 +23,7 @@ varying vec3 viewTangent;
 
 varying float depth;
 
-#define PER_PIXEL_LIGHTING @normalMap
+#define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
 varying vec4 lighting;

@@ -40,6 +40,15 @@ namespace Resource
         SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager);
         ~SceneManager();
 
+        /// @see ShaderVisitor::setForceShaders
+        void setForceShaders(bool force);
+
+        /// @see ShaderVisitor::setClampLighting
+        void setClampLighting(bool clamp);
+
+        /// @see ShaderVisitor::setForcePerPixelLighting
+        void setForcePerPixelLighting(bool force);
+
         void setShaderPath(const std::string& path);
 
         /// Get a read-only copy of this scene "template"
@@ -106,6 +115,10 @@ namespace Resource
         osg::ref_ptr<osg::Node> createInstance(const std::string& name);
 
         std::auto_ptr<Shader::ShaderManager> mShaderManager;
+        bool mForceShaders;
+        bool mClampLighting;
+        bool mForcePerPixelLighting;
+
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 
         OpenThreads::Mutex mSharedStateMutex;

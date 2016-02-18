@@ -209,6 +209,9 @@ namespace Resource
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
         : ResourceManager(vfs)
         , mShaderManager(new Shader::ShaderManager)
+        , mForceShaders(false)
+        , mClampLighting(false)
+        , mForcePerPixelLighting(false)
         , mInstanceCache(new MultiObjectCache)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
@@ -218,6 +221,21 @@ namespace Resource
         , mUnRefImageDataAfterApply(false)
         , mParticleSystemMask(~0u)
     {
+    }
+
+    void SceneManager::setForceShaders(bool force)
+    {
+        mForceShaders = force;
+    }
+
+    void SceneManager::setClampLighting(bool clamp)
+    {
+        mClampLighting = clamp;
+    }
+
+    void SceneManager::setForcePerPixelLighting(bool force)
+    {
+        mForcePerPixelLighting = force;
     }
 
     SceneManager::~SceneManager()
@@ -339,6 +357,9 @@ namespace Resource
             loaded->accept(setFilterSettingsControllerVisitor);
 
             Shader::ShaderVisitor shaderVisitor(*mShaderManager.get(), "objects_vertex.glsl", "objects_fragment.glsl");
+            shaderVisitor.setForceShaders(mForceShaders);
+            shaderVisitor.setClampLighting(mClampLighting);
+            shaderVisitor.setForcePerPixelLighting(mForcePerPixelLighting);
             loaded->accept(shaderVisitor);
 
             // share state

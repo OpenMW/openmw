@@ -16,7 +16,8 @@ namespace Shader
 {
 
     ShaderVisitor::ShaderRequirements::ShaderRequirements()
-        : mColorMaterial(false)
+        : mHasNormalMap(false)
+        , mColorMaterial(false)
         , mVertexColorMode(GL_AMBIENT_AND_DIFFUSE)
         , mTexStageRequiringTangents(-1)
     {
@@ -24,11 +25,29 @@ namespace Shader
 
     ShaderVisitor::ShaderVisitor(ShaderManager& shaderManager, const std::string &defaultVsTemplate, const std::string &defaultFsTemplate)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        , mForceShaders(false)
+        , mClampLighting(false)
+        , mForcePerPixelLighting(false)
         , mShaderManager(shaderManager)
         , mDefaultVsTemplate(defaultVsTemplate)
         , mDefaultFsTemplate(defaultFsTemplate)
     {
         mRequirements.push_back(ShaderRequirements());
+    }
+
+    void ShaderVisitor::setForceShaders(bool force)
+    {
+        mForceShaders = force;
+    }
+
+    void ShaderVisitor::setClampLighting(bool clamp)
+    {
+        mClampLighting = clamp;
+    }
+
+    void ShaderVisitor::setForcePerPixelLighting(bool force)
+    {
+        mForcePerPixelLighting = force;
     }
 
     void ShaderVisitor::apply(osg::Node& node)
@@ -61,6 +80,7 @@ namespace Shader
                         if (texture->getName() == "normalMap")
                         {
                             mRequirements.back().mTexStageRequiringTangents = unit;
+                            mRequirements.back().mHasNormalMap = true;
                             // normal maps are by default off since the FFP can't render them, now that we'll use shaders switch to On
                             stateset->setTextureMode(unit, GL_TEXTURE_2D, osg::StateAttribute::ON);
                         }
@@ -126,6 +146,9 @@ namespace Shader
             }
         }
 
+        defineMap["forcePPL"] = mForcePerPixelLighting ? "1" : "0";
+        defineMap["clamp"] = mClampLighting ? "1" : "0";
+
         osg::ref_ptr<osg::Shader> vertexShader (mShaderManager.getShader(mDefaultVsTemplate, defineMap, osg::Shader::VERTEX));
         osg::ref_ptr<osg::Shader> fragmentShader (mShaderManager.getShader(mDefaultFsTemplate, defineMap, osg::Shader::FRAGMENT));
 
@@ -161,7 +184,8 @@ namespace Shader
             }
 
             // TODO: find a better place for the stateset
-            createProgram(reqs, geometry.getOrCreateStateSet());
+            if (reqs.mHasNormalMap || mForceShaders)
+                createProgram(reqs, geometry.getOrCreateStateSet());
         }
 
         if (needPop)
@@ -181,8 +205,10 @@ namespace Shader
 
         if (!mRequirements.empty())
         {
+            const ShaderRequirements& reqs = mRequirements.back();
             // TODO: find a better place for the stateset
-            createProgram(mRequirements.back(), drawable.getOrCreateStateSet());
+            if (reqs.mHasNormalMap || mForceShaders)
+                createProgram(reqs, drawable.getOrCreateStateSet());
         }
 
         if (needPop)

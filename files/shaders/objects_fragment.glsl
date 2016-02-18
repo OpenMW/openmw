@@ -28,7 +28,7 @@ varying vec3 viewTangent;
 
 varying float depth;
 
-#define PER_PIXEL_LIGHTING @normalMap
+#define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
 varying vec4 lighting;
@@ -56,8 +56,11 @@ void main()
     gl_FragData[0].xyz *= texture2D(darkMap, darkMapUV).xyz;
 #endif
 
-#if @normalMap
+#if PER_PIXEL_LIGHTING
     vec3 viewNormal = passViewNormal;
+#endif
+
+#if @normalMap
     vec3 normalTex = texture2D(normalMap, normalMapUV).xyz;
 
     vec3 viewBinormal = cross(viewTangent, viewNormal);

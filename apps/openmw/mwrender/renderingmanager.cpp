@@ -169,6 +169,9 @@ namespace MWRender
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
+        resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders"));
+        resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
+        resourceSystem->getSceneManager()->setForcePerPixelLighting(Settings::Manager::getBool("force per pixel lighting", "Shaders"));
 
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager;
         sceneRoot->setLightingMask(Mask_Lighting);
