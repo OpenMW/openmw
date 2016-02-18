@@ -257,18 +257,6 @@
                                 <Property key="Caption" value="Window border"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" skin="" position="182 124 300 24">
-                            <Property key="Visible" value="false"/>
-                            <UserString key="Hidden" value="true"/>
-                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ShadersButton">
-                                <UserString key="SettingCategory" value="Objects"/>
-                                <UserString key="SettingName" value="shaders"/>
-                                <UserString key="SettingType" value="CheckButton"/>
-                            </Widget>
-                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 108 16" align="Left Top">
-                                <Property key="Caption" value="Object shaders"/>
-                            </Widget>
-                        </Widget>
 
                         <Widget type="TextBox" skin="SandText" position="182 94 300 32" align="Left Top">
                             <Property key="MultiLine" value="true"/>
@@ -411,7 +399,6 @@
                     </Widget>
                     <!--
                     <Widget type="TabItem" skin="" position="0 28 352 268">
-                    -->
                     <Widget type="Widget" skin="" position="0 28 352 268">
                         <Property key="Visible" value="false"/>
                         <Property key="Caption" value="  Shadows  "/>
@@ -489,6 +476,7 @@
                             </Widget>
                         </Widget>
                     </Widget>
+                    -->
                 </Widget>
             </Widget>
         </Widget>
