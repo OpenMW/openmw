@@ -26,6 +26,12 @@ varying vec2 normalMapUV;
 varying vec3 viewTangent;
 #endif
 
+#if @envMap
+uniform sampler2D envMap;
+varying vec2 envMapUV;
+uniform vec4 envMapColor;
+#endif
+
 varying float depth;
 
 #define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
@@ -35,7 +41,7 @@ varying vec4 lighting;
 #else
 varying vec3 passViewPos;
 varying vec3 passViewNormal;
-varying vec4 passColour;
+varying vec4 passColor;
 #endif
 
 #include "lighting.glsl"
@@ -73,11 +79,15 @@ void main()
 #if !PER_PIXEL_LIGHTING
     gl_FragData[0] *= lighting;
 #else
-    gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColour);
+    gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor);
 #endif
 
 #if @emissiveMap
     gl_FragData[0].xyz += texture2D(emissiveMap, emissiveMapUV).xyz;
+#endif
+
+#if @envMap
+    gl_FragData[0].xyz += texture2D(envMap, envMapUV).xyz * envMapColor.xyz;
 #endif
 
     float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);

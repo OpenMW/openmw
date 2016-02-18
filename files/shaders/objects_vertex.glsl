@@ -21,6 +21,10 @@ varying vec2 normalMapUV;
 varying vec3 viewTangent;
 #endif
 
+#if @envMap
+varying vec2 envMapUV;
+#endif
+
 varying float depth;
 
 #define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
@@ -30,7 +34,7 @@ varying vec4 lighting;
 #else
 varying vec3 passViewPos;
 varying vec3 passViewNormal;
-varying vec4 passColour;
+varying vec4 passColor;
 #endif
 
 #include "lighting.glsl"
@@ -43,6 +47,13 @@ void main(void)
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
     gl_ClipVertex = viewPos;
     vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
+
+#if @envMap
+    vec3 viewVec = normalize(viewPos.xyz);
+    vec3 r = reflect( viewVec, viewNormal );
+    float m = 2.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) );
+    envMapUV = vec2(r.x/m + 0.5, r.y/m + 0.5);
+#endif
 
 #if @diffuseMap
     diffuseMapUV = (gl_TextureMatrix[@diffuseMapUV] * gl_MultiTexCoord@diffuseMapUV).xy;
@@ -70,6 +81,6 @@ void main(void)
 #else
     passViewPos = viewPos.xyz;
     passViewNormal = viewNormal;
-    passColour = gl_Color;
+    passColor = gl_Color;
 #endif
 }

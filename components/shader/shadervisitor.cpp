@@ -152,7 +152,7 @@ namespace Shader
             writableStateSet = getWritableStateSet(node);
 
         ShaderManager::DefineMap defineMap;
-        const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap" };
+        const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap", "envMap" };
         for (unsigned int i=0; i<sizeof(defaultTextures)/sizeof(defaultTextures[0]); ++i)
         {
             defineMap[defaultTextures[i]] = "0";
