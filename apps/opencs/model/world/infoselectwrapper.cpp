@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <sstream>
+#include <stdexcept>
 
 const size_t CSMWorld::ConstInfoSelectWrapper::RuleMinSize = 5;
 
