@@ -274,9 +274,9 @@ namespace CSMWorld
             { ColumnId_InfoList, "Info List" },
             { ColumnId_InfoCondition, "Info Conditions" },
             { ColumnId_InfoCondFunc, "Function" },
-            { ColumnId_InfoCondVar, "Name" },
+            { ColumnId_InfoCondVar, "Variable/Object" },
             { ColumnId_InfoCondComp, "Relation" },
-            { ColumnId_InfoCondValue, "Value" },
+            { ColumnId_InfoCondValue, "Values" },
             { ColumnId_OriginalCell, "Original Cell" },
 
             { ColumnId_NpcAttributes, "NPC Attributes" },

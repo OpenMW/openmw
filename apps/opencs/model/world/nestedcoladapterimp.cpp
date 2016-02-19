@@ -674,7 +674,8 @@ namespace CSMWorld
                 {
                     case ConstInfoSelectWrapper::Comparison_Numeric:
                     {
-                        if (value.toInt(&conversionResult) && conversionResult)
+                        // QVariant seems to have issues converting 0
+                        if ((value.toInt(&conversionResult) && conversionResult) || value.toString().compare("0") == 0)
                         {
                             infoSelectWrapper.getVariant().setType(ESM::VT_Int);
                             infoSelectWrapper.getVariant().setInteger(value.toInt());
@@ -689,7 +690,7 @@ namespace CSMWorld
                     case ConstInfoSelectWrapper::Comparison_Boolean:
                     case ConstInfoSelectWrapper::Comparison_Integer:
                     {
-                        if (value.toInt(&conversionResult) && conversionResult)
+                        if ((value.toInt(&conversionResult) && conversionResult) || value.toString().compare("0") == 0)
                         {
                             infoSelectWrapper.getVariant().setType(ESM::VT_Int);
                             infoSelectWrapper.getVariant().setInteger(value.toInt());
