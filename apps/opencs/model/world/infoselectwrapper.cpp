@@ -46,7 +46,7 @@ const char* CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings[] =
     "PC Sneak",
     "PC Acrobatics",
     "PC Light Armor",
-    "PC Shorth Blade",
+    "PC Short Blade",
     "PC Marksman",
     "PC Merchantile",
     "PC Speechcraft",
@@ -74,8 +74,8 @@ const char* CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings[] =
     "PC Corpus",
     "Weather",
     "PC Vampire",
-    "PC Level",
-    "PC Attacked",
+    "Level",
+    "Attacked",
     "Talked to PC",
     "PC Health",
     "Creature Target",
@@ -239,33 +239,27 @@ std::string CSMWorld::ConstInfoSelectWrapper::toString() const
 {
     std::ostringstream stream;
     stream << convertToString(mFunctionName) << " ";
-    
+
     if (mHasVariable)
         stream << mVariableName << " ";
-    
+
     stream << convertToString(mRelationType) << " ";
-    
+
     switch (mConstSelect.mValue.getType())
     {
-        case ESM::VT_Short:
-        case ESM::VT_Long:
         case ESM::VT_Int:
             stream << mConstSelect.mValue.getInteger();
             break;
-            
+
         case ESM::VT_Float:
             stream << mConstSelect.mValue.getFloat();
             break;
-            
-        case ESM::VT_String:
-            stream << mConstSelect.mValue.getString();
-            break;
-            
+
         default:
             stream << "(Invalid value type)";
             break;
     }
-    
+
     return stream.str();
 }
 
@@ -377,6 +371,7 @@ void CSMWorld::ConstInfoSelectWrapper::updateComparisonType()
         case Function_NotClass:
         case Function_NotRace:
         case Function_NotCell:
+        case Function_NotLocal:
         case Function_PcExpelled:
         case Function_PcCommonDisease:
         case Function_PcBlightDisease:
@@ -459,7 +454,7 @@ void CSMWorld::ConstInfoSelectWrapper::updateComparisonType()
         // Numeric
         case Function_Global:
         case Function_Local:
-        case Function_NotLocal:
+
         case Function_Health_Percent:
         case Function_PcHealthPercent:
         case Function_PcMagicka:
@@ -559,14 +554,13 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getValidIntRange() const
 
     switch (mFunctionName)
     {
-        // TODO these need to be checked
-
         // Boolean
         case Function_NotId:
         case Function_NotFaction:
         case Function_NotClass:
         case Function_NotRace:
         case Function_NotCell:
+        case Function_NotLocal:
         case Function_PcExpelled:
         case Function_PcCommonDisease:
         case Function_PcBlightDisease:
@@ -581,7 +575,7 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getValidIntRange() const
         case Function_TalkedToPc:
         case Function_ShouldAttack:
         case Function_Werewolf:
-            return std::pair<int, int>(0,1);
+            return std::pair<int, int>(0, 1);
 
         // Integer
         case Function_RankLow:
@@ -633,27 +627,29 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getValidIntRange() const
         case Function_PcPersonality:
         case Function_PcLuck:
         case Function_Level:
+        case Function_PcWerewolfKills:
+            return std::pair<int, int>(0, IntMax);
+
         case Function_Fight:
         case Function_Hello:
         case Function_Alarm:
         case Function_Flee:
-        case Function_PcWerewolfKills:
-            return std::pair<int, int>(0, IntMax);
+            return std::pair<int, int>(0, 100);
 
         case Function_Weather:
             return std::pair<int, int>(0, 9);
 
         case Function_FriendHit:
-            return std::pair<int, int>(0,4);
+            return std::pair<int, int>(0, 4);
 
         case Function_RankRequirement:
             return std::pair<int, int>(0, 3);
 
         case Function_CreatureTarget:
-            return std::pair<int, int>(0,2);
+            return std::pair<int, int>(0, 2);
 
         case Function_PcGender:
-            return std::pair<int, int>(0,1);
+            return std::pair<int, int>(0, 1);
 
         case Function_FactionRankDifference:
             return std::pair<int, int>(-9, 9);
@@ -661,17 +657,16 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getValidIntRange() const
         // Numeric
         case Function_Global:
         case Function_Local:
-        case Function_NotLocal:
             return std::pair<int, int>(IntMin, IntMax);
-
-        case Function_Health_Percent:
-        case Function_PcHealthPercent:
-            return std::pair<int, int>(0, 100);
 
         case Function_PcMagicka:
         case Function_PcFatigue:
         case Function_PcHealth:
-            return std::pair<int, int>(0,0);
+            return std::pair<int, int>(0, IntMax);
+
+        case Function_Health_Percent:
+        case Function_PcHealthPercent:
+            return std::pair<int, int>(0, 100);
 
         default:
             throw std::runtime_error("InfoSelectWrapper: function does not exist");
@@ -691,14 +686,14 @@ std::pair<float, float> CSMWorld::ConstInfoSelectWrapper::getValidFloatRange() c
         case Function_NotLocal:
             return std::pair<float, float>(FloatMin, FloatMax);
 
-        case Function_Health_Percent:
-        case Function_PcHealthPercent:
-            return std::pair<float, float>(0, 100);
-
         case Function_PcMagicka:
         case Function_PcFatigue:
         case Function_PcHealth:
-            return std::pair<float, float>(0,0);
+            return std::pair<float, float>(0, FloatMax);
+
+        case Function_Health_Percent:
+        case Function_PcHealthPercent:
+            return std::pair<float, float>(0, 100);
 
         default:
             throw std::runtime_error("InfoSelectWrapper: function does not exist or is not numeric");
@@ -839,7 +834,7 @@ void CSMWorld::InfoSelectWrapper::update()
     // Write Function
 
     bool writeIndex = false;
-    int functionIndex = static_cast<int>(mFunctionName);
+    size_t functionIndex = static_cast<size_t>(mFunctionName);
 
     switch (mFunctionName)
     {
