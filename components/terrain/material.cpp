@@ -154,10 +154,6 @@ namespace Terrain
         , mBlendmapScale(blendmapScale)
         , mLayerTileSize(layerTileSize)
     {
-        osg::ref_ptr<osg::Material> material (new osg::Material);
-        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
-        getOrCreateStateSet()->setAttributeAndModes(material, osg::StateAttribute::ON);
-
         selectTechnique(0);
     }
 

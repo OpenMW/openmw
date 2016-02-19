@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <osg/UserDataContainer>
+#include <osg/Material>
 
 #include <OpenThreads/ScopedLock>
 
@@ -56,6 +57,9 @@ TerrainGrid::TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceS
     , mCache((storage->getCellVertices()-1)/static_cast<float>(mNumSplits) + 1)
     , mUnrefQueue(unrefQueue)
 {
+    osg::ref_ptr<osg::Material> material (new osg::Material);
+    material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+    mTerrainRoot->getOrCreateStateSet()->setAttributeAndModes(material, osg::StateAttribute::ON);
 }
 
 TerrainGrid::~TerrainGrid()
