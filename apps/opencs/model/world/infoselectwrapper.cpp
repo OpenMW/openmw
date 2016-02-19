@@ -707,6 +707,13 @@ bool CSMWorld::ConstInfoSelectWrapper::rangeContains(T1 value, std::pair<T2,T2> 
 }
 
 template <typename T1, typename T2>
+bool CSMWorld::ConstInfoSelectWrapper::rangeFullyContains(std::pair<T1,T1> containingRange,
+    std::pair<T2,T2> testRange) const
+{
+    return (containingRange.first <= testRange.first) && (testRange.second <= containingRange.second);
+}
+
+template <typename T1, typename T2>
 bool CSMWorld::ConstInfoSelectWrapper::rangesOverlap(std::pair<T1,T1> range1, std::pair<T2,T2> range2) const
 {
     // One of the bounds of either range should fall within the other range
@@ -727,20 +734,21 @@ template <typename T1, typename T2>
 bool CSMWorld::ConstInfoSelectWrapper::conditionIsAlwaysTrue(std::pair<T1,T1> conditionRange,
     std::pair<T2,T2> validRange) const
 {
-
     switch (mRelationType)
     {
         case Relation_Equal:
-        case Relation_Greater:
-        case Relation_GreaterOrEqual:
-        case Relation_Less:
-        case Relation_LessOrEqual:
-            // If ranges are same, it will always be true
-            return rangesMatch(conditionRange, validRange);
+            return false;
 
         case Relation_NotEqual:
             // If value is not within range, it will always be true
             return !rangeContains(conditionRange.first, validRange);
+
+        case Relation_Greater:
+        case Relation_GreaterOrEqual:
+        case Relation_Less:
+        case Relation_LessOrEqual:
+            // If the valid range is completely within the condition range, it will always be true
+            return rangeFullyContains(conditionRange, validRange);
 
         default:
             throw std::logic_error("InfoCondition: operator can not be used to compare");
@@ -756,16 +764,17 @@ bool CSMWorld::ConstInfoSelectWrapper::conditionIsNeverTrue(std::pair<T1,T1> con
     switch (mRelationType)
     {
         case Relation_Equal:
+            return !rangeContains(conditionRange.first, validRange);
+
+        case Relation_NotEqual:
+            return false;
+
         case Relation_Greater:
         case Relation_GreaterOrEqual:
         case Relation_Less:
         case Relation_LessOrEqual:
             // If ranges do not overlap, it will never be true
             return !rangesOverlap(conditionRange, validRange);
-
-        case Relation_NotEqual:
-            // If the value is the only value withing the range, it will never be true
-            return rangesMatch(conditionRange, validRange);
 
         default:
             throw std::logic_error("InfoCondition: operator can not be used to compare");

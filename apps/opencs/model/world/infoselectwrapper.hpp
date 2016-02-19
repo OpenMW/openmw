@@ -164,7 +164,7 @@ namespace CSMWorld
         bool variantTypeIsValid() const;
 
         const ESM::Variant& getVariant() const;
-        
+
         std::string toString() const;
 
     protected:
@@ -187,6 +187,9 @@ namespace CSMWorld
 
         template <typename Type1, typename Type2>
         bool rangesOverlap(std::pair<Type1,Type1> range1, std::pair<Type2,Type2> range2) const;
+
+        template <typename Type1, typename Type2>
+        bool rangeFullyContains(std::pair<Type1,Type1> containing, std::pair<Type2,Type2> test) const;
 
         template <typename Type1, typename Type2>
         bool rangesMatch(std::pair<Type1,Type1> range1, std::pair<Type2,Type2> range2) const;
