@@ -143,7 +143,7 @@ namespace Terrain
         }
     }
 
-    Effect::Effect(bool useShaders, bool forcePerPixelLighting, bool clampLighting, Shader::ShaderManager& shaderManager, const std::vector<TextureLayer> &layers, const std::vector<osg::ref_ptr<osg::Texture2D> > &blendmaps,
+    Effect::Effect(bool useShaders, bool forcePerPixelLighting, bool clampLighting, Shader::ShaderManager* shaderManager, const std::vector<TextureLayer> &layers, const std::vector<osg::ref_ptr<osg::Texture2D> > &blendmaps,
                    int blendmapScale, float layerTileSize)
         : mShaderManager(shaderManager)
         , mUseShaders(useShaders)
@@ -161,8 +161,8 @@ namespace Terrain
     {
         try
         {
-            if (mUseShaders)
-                addTechnique(new ShaderTechnique(mShaderManager, mForcePerPixelLighting, mClampLighting, mLayers, mBlendmaps, mBlendmapScale, mLayerTileSize));
+            if (mUseShaders && mShaderManager)
+                addTechnique(new ShaderTechnique(*mShaderManager, mForcePerPixelLighting, mClampLighting, mLayers, mBlendmaps, mBlendmapScale, mLayerTileSize));
             else
                 addTechnique(new FixedFunctionTechnique(mLayers, mBlendmaps, mBlendmapScale, mLayerTileSize));
         }

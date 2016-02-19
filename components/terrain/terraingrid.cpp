@@ -51,11 +51,12 @@ namespace
 namespace Terrain
 {
 
-TerrainGrid::TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, SceneUtil::UnrefQueue* unrefQueue)
+TerrainGrid::TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, Shader::ShaderManager* shaderManager, SceneUtil::UnrefQueue* unrefQueue)
     : Terrain::World(parent, resourceSystem, ico, storage, nodeMask)
     , mNumSplits(4)
     , mCache((storage->getCellVertices()-1)/static_cast<float>(mNumSplits) + 1)
     , mUnrefQueue(unrefQueue)
+    , mShaderManager(shaderManager)
 {
     osg::ref_ptr<osg::Material> material (new osg::Material);
     material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
@@ -211,8 +212,8 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             geometry->setTexCoordArray(i, mCache.getUVBuffer());
 
         float blendmapScale = ESM::Land::LAND_TEXTURE_SIZE*chunkSize;
-        osg::ref_ptr<osgFX::Effect> effect (new Terrain::Effect(useShaders, mResourceSystem->getSceneManager()->getForcePerPixelLighting(), mResourceSystem->getSceneManager()->getClampLighting(),
-                                                                mResourceSystem->getSceneManager()->getShaderManager(), layers, blendmapTextures, blendmapScale, blendmapScale));
+        osg::ref_ptr<osgFX::Effect> effect (new Terrain::Effect(mShaderManager ? useShaders : false, mResourceSystem->getSceneManager()->getForcePerPixelLighting(), mResourceSystem->getSceneManager()->getClampLighting(),
+                                                                mShaderManager, layers, blendmapTextures, blendmapScale, blendmapScale));
 
         effect->addCullCallback(new SceneUtil::LightListCallback);
 

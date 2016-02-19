@@ -50,7 +50,7 @@ namespace Terrain
     class Effect : public osgFX::Effect
     {
     public:
-        Effect(bool useShaders, bool forcePerPixelLighting, bool clampLighting, Shader::ShaderManager& shaderManager,
+        Effect(bool useShaders, bool forcePerPixelLighting, bool clampLighting, Shader::ShaderManager* shaderManager,
                 const std::vector<TextureLayer>& layers,
                 const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps, int blendmapScale, float layerTileSize);
 
@@ -70,7 +70,7 @@ namespace Terrain
         }
 
     private:
-        Shader::ShaderManager& mShaderManager;
+        Shader::ShaderManager* mShaderManager;
         bool mUseShaders;
         bool mForcePerPixelLighting;
         bool mClampLighting;
