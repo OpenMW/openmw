@@ -8,6 +8,8 @@ set(SHADER_FILES
     water_nm.png
     objects_vertex.glsl
     objects_fragment.glsl
+    terrain_vertex.glsl
+    terrain_fragment.glsl
     lighting.glsl
 )
 

@@ -228,6 +228,11 @@ namespace Resource
         mForceShaders = force;
     }
 
+    bool SceneManager::getForceShaders() const
+    {
+        return mForceShaders;
+    }
+
     void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node)
     {
         Shader::ShaderVisitor shaderVisitor(*mShaderManager.get(), "objects_vertex.glsl", "objects_fragment.glsl");
@@ -243,14 +248,29 @@ namespace Resource
         mClampLighting = clamp;
     }
 
+    bool SceneManager::getClampLighting() const
+    {
+        return mClampLighting;
+    }
+
     void SceneManager::setForcePerPixelLighting(bool force)
     {
         mForcePerPixelLighting = force;
     }
 
+    bool SceneManager::getForcePerPixelLighting() const
+    {
+        return mForcePerPixelLighting;
+    }
+
     SceneManager::~SceneManager()
     {
         // this has to be defined in the .cpp file as we can't delete incomplete types
+    }
+
+    Shader::ShaderManager &SceneManager::getShaderManager()
+    {
+        return *mShaderManager.get();
     }
 
     void SceneManager::setShaderPath(const std::string &path)

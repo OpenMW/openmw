@@ -40,17 +40,22 @@ namespace Resource
         SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager);
         ~SceneManager();
 
+        Shader::ShaderManager& getShaderManager();
+
         /// Re-create shaders for this node, need to call this if texture stages or vertex color mode have changed.
         void recreateShaders(osg::ref_ptr<osg::Node> node);
 
         /// @see ShaderVisitor::setForceShaders
         void setForceShaders(bool force);
+        bool getForceShaders() const;
 
         /// @see ShaderVisitor::setClampLighting
         void setClampLighting(bool clamp);
+        bool getClampLighting() const;
 
         /// @see ShaderVisitor::setForcePerPixelLighting
         void setForcePerPixelLighting(bool force);
+        bool getForcePerPixelLighting() const;
 
         void setShaderPath(const std::string& path);
 

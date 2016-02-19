@@ -148,11 +148,15 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         osg::ref_ptr<osg::Node> textureCompileDummy (new osg::Node);
         unsigned int dummyTextureCounter = 0;
 
-        std::vector<osg::ref_ptr<osg::Texture2D> > layerTextures;
+        bool useShaders = mResourceSystem->getSceneManager()->getForceShaders();
+        if (!mResourceSystem->getSceneManager()->getClampLighting())
+            useShaders = true; // always use shaders when lighting is unclamped, this is to avoid lighting seams between a terrain chunk with normal maps and one without normal maps
+        std::vector<TextureLayer> layers;
         {
             OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mTextureCacheMutex);
             for (std::vector<LayerInfo>::const_iterator it = layerList.begin(); it != layerList.end(); ++it)
             {
+                TextureLayer textureLayer;
                 osg::ref_ptr<osg::Texture2D> texture = mTextureCache[it->mDiffuseMap];
                 if (!texture)
                 {
@@ -162,8 +166,26 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
                     mResourceSystem->getSceneManager()->applyFilterSettings(texture);
                     mTextureCache[it->mDiffuseMap] = texture;
                 }
-                layerTextures.push_back(texture);
-                textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, layerTextures.back());
+                textureLayer.mDiffuseMap = texture;
+                textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, texture);
+
+                if (!it->mNormalMap.empty())
+                {
+                    texture = mTextureCache[it->mNormalMap];
+                    if (!texture)
+                    {
+                        texture = new osg::Texture2D(mResourceSystem->getImageManager()->getImage(it->mNormalMap));
+                        texture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+                        texture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+                        mResourceSystem->getSceneManager()->applyFilterSettings(texture);
+                        mTextureCache[it->mNormalMap] = texture;
+                    }
+                    textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, texture);
+                    textureLayer.mNormalMap = texture;
+                    useShaders = true;
+                }
+
+                layers.push_back(textureLayer);
             }
         }
 
@@ -185,7 +207,8 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             geometry->setTexCoordArray(i, mCache.getUVBuffer());
 
         float blendmapScale = ESM::Land::LAND_TEXTURE_SIZE*chunkSize;
-        osg::ref_ptr<osgFX::Effect> effect (new Terrain::Effect(layerTextures, blendmapTextures, blendmapScale, blendmapScale));
+        osg::ref_ptr<osgFX::Effect> effect (new Terrain::Effect(useShaders, mResourceSystem->getSceneManager()->getForcePerPixelLighting(), mResourceSystem->getSceneManager()->getClampLighting(),
+                                                                mResourceSystem->getSceneManager()->getShaderManager(), layers, blendmapTextures, blendmapScale, blendmapScale));
 
         effect->addCullCallback(new SceneUtil::LightListCallback);
 
