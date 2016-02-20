@@ -167,7 +167,6 @@ namespace Shader
                 boost::replace_last(specularMap, ".", mSpecularMapPattern + ".");
                 if (mImageManager.getVFS()->exists(specularMap))
                 {
-                    std::cout << "using specmap " << specularMap << std::endl;
                     osg::ref_ptr<osg::Texture2D> specularMapTex (new osg::Texture2D(mImageManager.getImage(specularMap)));
                     specularMapTex->setWrap(osg::Texture::WRAP_S, diffuseMap->getWrap(osg::Texture::WRAP_S));
                     specularMapTex->setWrap(osg::Texture::WRAP_T, diffuseMap->getWrap(osg::Texture::WRAP_T));

@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include <osg/UserDataContainer>
 #include <osg/Material>
 
 #include <OpenThreads/ScopedLock>

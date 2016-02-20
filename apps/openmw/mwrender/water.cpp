@@ -15,7 +15,6 @@
 #include <osg/FrontFace>
 #include <osg/Shader>
 #include <osg/GLExtensions>
-#include <osg/UserDataContainer>
 
 #include <osgDB/ReadFile>
 
