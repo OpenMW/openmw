@@ -210,7 +210,7 @@ namespace Resource
         : ResourceManager(vfs)
         , mShaderManager(new Shader::ShaderManager)
         , mForceShaders(false)
-        , mClampLighting(false)
+        , mClampLighting(true)
         , mForcePerPixelLighting(false)
         , mAutoUseNormalMaps(false)
         , mInstanceCache(new MultiObjectCache)

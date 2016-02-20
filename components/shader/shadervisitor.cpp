@@ -37,7 +37,7 @@ namespace Shader
     ShaderVisitor::ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager, const std::string &defaultVsTemplate, const std::string &defaultFsTemplate)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mForceShaders(false)
-        , mClampLighting(false)
+        , mClampLighting(true)
         , mForcePerPixelLighting(false)
         , mAllowedToModifyStateSets(true)
         , mAutoUseNormalMaps(false)
