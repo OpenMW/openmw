@@ -480,6 +480,7 @@ namespace Resource
     void SceneManager::releaseGLObjects(osg::State *state)
     {
         mCache->releaseGLObjects(state);
+        mInstanceCache->releaseGLObjects(state);
     }
 
     void SceneManager::setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation *ico)
