@@ -25,6 +25,10 @@ varying vec3 viewTangent;
 varying vec2 envMapUV;
 #endif
 
+#if @specularMap
+varying vec2 specularMapUV;
+#endif
+
 varying float depth;
 
 #define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
@@ -32,10 +36,10 @@ varying float depth;
 #if !PER_PIXEL_LIGHTING
 varying vec4 lighting;
 #else
-varying vec3 passViewPos;
-varying vec3 passViewNormal;
 varying vec4 passColor;
 #endif
+varying vec3 passViewPos;
+varying vec3 passViewNormal;
 
 #include "lighting.glsl"
 
@@ -76,11 +80,15 @@ void main(void)
     viewTangent = normalize(gl_NormalMatrix * gl_MultiTexCoord7.xyz);
 #endif
 
+#if @specularMap
+    specularMapUV = (gl_TextureMatrix[@specularMapUV] * gl_MultiTexCoord@specularMapUV).xy;
+#endif
+
 #if !PER_PIXEL_LIGHTING
     lighting = doLighting(viewPos.xyz, viewNormal, gl_Color);
 #else
-    passViewPos = viewPos.xyz;
-    passViewNormal = viewNormal;
     passColor = gl_Color;
 #endif
+    passViewPos = viewPos.xyz;
+    passViewNormal = viewNormal;
 }

@@ -63,6 +63,10 @@ namespace Resource
         /// @see ShaderVisitor::setNormalMapPattern
         void setNormalMapPattern(const std::string& pattern);
 
+        void setAutoUseSpecularMaps(bool use);
+
+        void setSpecularMapPattern(const std::string& pattern);
+
         void setShaderPath(const std::string& path);
 
         /// Get a read-only copy of this scene "template"
@@ -134,6 +138,8 @@ namespace Resource
         bool mForcePerPixelLighting;
         bool mAutoUseNormalMaps;
         std::string mNormalMapPattern;
+        bool mAutoUseSpecularMaps;
+        std::string mSpecularMapPattern;
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 

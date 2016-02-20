@@ -40,6 +40,10 @@ namespace Shader
 
         void setNormalMapPattern(const std::string& pattern);
 
+        void setAutoUseSpecularMaps(bool use);
+
+        void setSpecularMapPattern(const std::string& pattern);
+
         virtual void apply(osg::Node& node);
 
         virtual void apply(osg::Drawable& drawable);
@@ -59,6 +63,9 @@ namespace Shader
         bool mAutoUseNormalMaps;
         std::string mNormalMapPattern;
 
+        bool mAutoUseSpecularMaps;
+        std::string mSpecularMapPattern;
+
         ShaderManager& mShaderManager;
         Resource::ImageManager& mImageManager;
 
@@ -72,7 +79,7 @@ namespace Shader
 
             osg::ref_ptr<osg::Texture> mDiffuseMap;
 
-            bool mHasNormalMap;
+            bool mShaderRequired;
 
             bool mColorMaterial;
             // osg::Material::ColorMode

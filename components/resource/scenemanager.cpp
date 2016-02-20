@@ -274,6 +274,16 @@ namespace Resource
         mNormalMapPattern = pattern;
     }
 
+    void SceneManager::setAutoUseSpecularMaps(bool use)
+    {
+        mAutoUseSpecularMaps = use;
+    }
+
+    void SceneManager::setSpecularMapPattern(const std::string &pattern)
+    {
+        mSpecularMapPattern = pattern;
+    }
+
     SceneManager::~SceneManager()
     {
         // this has to be defined in the .cpp file as we can't delete incomplete types
@@ -403,6 +413,8 @@ namespace Resource
             shaderVisitor.setForcePerPixelLighting(mForcePerPixelLighting);
             shaderVisitor.setAutoUseNormalMaps(mAutoUseNormalMaps);
             shaderVisitor.setNormalMapPattern(mNormalMapPattern);
+            shaderVisitor.setAutoUseSpecularMaps(mAutoUseSpecularMaps);
+            shaderVisitor.setSpecularMapPattern(mSpecularMapPattern);
             loaded->accept(shaderVisitor);
 
             // share state

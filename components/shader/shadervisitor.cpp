@@ -21,7 +21,7 @@ namespace Shader
 {
 
     ShaderVisitor::ShaderRequirements::ShaderRequirements()
-        : mHasNormalMap(false)
+        : mShaderRequired(false)
         , mColorMaterial(false)
         , mVertexColorMode(GL_AMBIENT_AND_DIFFUSE)
         , mMaterialOverridden(false)
@@ -41,6 +41,7 @@ namespace Shader
         , mForcePerPixelLighting(false)
         , mAllowedToModifyStateSets(true)
         , mAutoUseNormalMaps(false)
+        , mAutoUseSpecularMaps(false)
         , mShaderManager(shaderManager)
         , mImageManager(imageManager)
         , mDefaultVsTemplate(defaultVsTemplate)
@@ -97,6 +98,7 @@ namespace Shader
         {
             const osg::Texture* diffuseMap = NULL;
             const osg::Texture* normalMap = NULL;
+            const osg::Texture* specularMap = NULL;
             for(unsigned int unit=0;unit<texAttributes.size();++unit)
             {
                 const osg::StateAttribute *attr = stateset->getTextureAttribute(unit, osg::StateAttribute::TEXTURE);
@@ -111,7 +113,7 @@ namespace Shader
                             if (texture->getName() == "normalMap")
                             {
                                 mRequirements.back().mTexStageRequiringTangents = unit;
-                                mRequirements.back().mHasNormalMap = true;
+                                mRequirements.back().mShaderRequired = true;
                                 if (!writableStateSet)
                                     writableStateSet = getWritableStateSet(node);
                                 // normal maps are by default off since the FFP can't render them, now that we'll use shaders switch to On
@@ -120,6 +122,8 @@ namespace Shader
                             }
                             if (texture->getName() == "diffuseMap")
                                 diffuseMap = texture;
+                            if (texture->getName() == "specularMap")
+                                specularMap = texture;
                         }
                         else
                             std::cerr << "ShaderVisitor encountered unknown texture " << texture << std::endl;
@@ -154,7 +158,30 @@ namespace Shader
                     writableStateSet->setTextureAttributeAndModes(unit, normalMapTex, osg::StateAttribute::ON);
                     mRequirements.back().mTextures[unit] = "normalMap";
                     mRequirements.back().mTexStageRequiringTangents = unit;
-                    mRequirements.back().mHasNormalMap = true;
+                    mRequirements.back().mShaderRequired = true;
+                }
+            }
+            if (mAutoUseSpecularMaps && diffuseMap != NULL && specularMap == NULL)
+            {
+                std::string specularMap = diffuseMap->getImage(0)->getFileName();
+                boost::replace_last(specularMap, ".", mSpecularMapPattern + ".");
+                if (mImageManager.getVFS()->exists(specularMap))
+                {
+                    std::cout << "using specmap " << specularMap << std::endl;
+                    osg::ref_ptr<osg::Texture2D> specularMapTex (new osg::Texture2D(mImageManager.getImage(specularMap)));
+                    specularMapTex->setWrap(osg::Texture::WRAP_S, diffuseMap->getWrap(osg::Texture::WRAP_S));
+                    specularMapTex->setWrap(osg::Texture::WRAP_T, diffuseMap->getWrap(osg::Texture::WRAP_T));
+                    specularMapTex->setFilter(osg::Texture::MIN_FILTER, diffuseMap->getFilter(osg::Texture::MIN_FILTER));
+                    specularMapTex->setFilter(osg::Texture::MAG_FILTER, diffuseMap->getFilter(osg::Texture::MAG_FILTER));
+                    specularMapTex->setMaxAnisotropy(diffuseMap->getMaxAnisotropy());
+                    specularMapTex->setName("specularMap");
+
+                    int unit = texAttributes.size();
+                    if (!writableStateSet)
+                        writableStateSet = getWritableStateSet(node);
+                    writableStateSet->setTextureAttributeAndModes(unit, specularMapTex, osg::StateAttribute::ON);
+                    mRequirements.back().mTextures[unit] = "specularMap";
+                    mRequirements.back().mShaderRequired = true;
                 }
             }
         }
@@ -196,7 +223,7 @@ namespace Shader
             writableStateSet = getWritableStateSet(node);
 
         ShaderManager::DefineMap defineMap;
-        const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap", "envMap" };
+        const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap", "envMap", "specularMap" };
         for (unsigned int i=0; i<sizeof(defaultTextures)/sizeof(defaultTextures[0]); ++i)
         {
             defineMap[defaultTextures[i]] = "0";
@@ -253,12 +280,19 @@ namespace Shader
         if (!mRequirements.empty())
         {
             const ShaderRequirements& reqs = mRequirements.back();
+
+            if (mAllowedToModifyStateSets)
+            {
+                // make sure that all UV sets are there
+                for (std::map<int, std::string>::const_iterator it = reqs.mTextures.begin(); it != reqs.mTextures.end(); ++it)
+                {
+                    if (geometry.getTexCoordArray(it->first) == NULL)
+                        geometry.setTexCoordArray(it->first, geometry.getTexCoordArray(0));
+                }
+            }
+
             if (reqs.mTexStageRequiringTangents != -1 && mAllowedToModifyStateSets)
             {
-                if (geometry.getTexCoordArray(reqs.mTexStageRequiringTangents) == NULL) // assign tex coord array for normal map if necessary
-                                                                                        // the normal-map may be assigned on-the-fly in applyStateSet() when mAutoUseNormalMaps is true
-                    geometry.setTexCoordArray(reqs.mTexStageRequiringTangents, geometry.getTexCoordArray(0));
-
                 osg::ref_ptr<osgUtil::TangentSpaceGenerator> generator (new osgUtil::TangentSpaceGenerator);
                 generator->generate(&geometry, reqs.mTexStageRequiringTangents);
 
@@ -266,7 +300,7 @@ namespace Shader
             }
 
             // TODO: find a better place for the stateset
-            if (reqs.mHasNormalMap || mForceShaders)
+            if (reqs.mShaderRequired || mForceShaders)
                 createProgram(reqs, geometry);
         }
 
@@ -289,7 +323,7 @@ namespace Shader
         {
             const ShaderRequirements& reqs = mRequirements.back();
             // TODO: find a better place for the stateset
-            if (reqs.mHasNormalMap || mForceShaders)
+            if (reqs.mShaderRequired || mForceShaders)
                 createProgram(reqs, drawable);
         }
 
@@ -310,6 +344,16 @@ namespace Shader
     void ShaderVisitor::setNormalMapPattern(const std::string &pattern)
     {
         mNormalMapPattern = pattern;
+    }
+
+    void ShaderVisitor::setAutoUseSpecularMaps(bool use)
+    {
+        mAutoUseSpecularMaps = use;
+    }
+
+    void ShaderVisitor::setSpecularMapPattern(const std::string &pattern)
+    {
+        mSpecularMapPattern = pattern;
     }
 
 }

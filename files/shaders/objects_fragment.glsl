@@ -32,6 +32,11 @@ varying vec2 envMapUV;
 uniform vec4 envMapColor;
 #endif
 
+#if @specularMap
+uniform sampler2D specularMap;
+varying vec2 specularMapUV;
+#endif
+
 varying float depth;
 
 #define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
@@ -39,10 +44,10 @@ varying float depth;
 #if !PER_PIXEL_LIGHTING
 varying vec4 lighting;
 #else
-varying vec3 passViewPos;
-varying vec3 passViewNormal;
 varying vec4 passColor;
 #endif
+varying vec3 passViewPos;
+varying vec3 passViewNormal;
 
 #include "lighting.glsl"
 
@@ -62,9 +67,7 @@ void main()
     gl_FragData[0].xyz *= texture2D(darkMap, darkMapUV).xyz;
 #endif
 
-#if PER_PIXEL_LIGHTING
     vec3 viewNormal = passViewNormal;
-#endif
 
 #if @normalMap
     vec3 normalTex = texture2D(normalMap, normalMapUV).xyz;
@@ -89,6 +92,17 @@ void main()
 #if @envMap
     gl_FragData[0].xyz += texture2D(envMap, envMapUV).xyz * envMapColor.xyz;
 #endif
+
+#if @specularMap
+    vec4 specTex = texture2D(specularMap, specularMapUV);
+    float shininess = specTex.a * 255;
+    vec3 matSpec = specTex.xyz;
+#else
+    float shininess = gl_FrontMaterial.shininess;
+    vec3 matSpec = gl_FrontMaterial.specular.xyz;
+#endif
+
+    gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos.xyz), shininess, matSpec);
 
     float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
