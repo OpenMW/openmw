@@ -18,8 +18,10 @@ namespace ESMTerrain
 
     const float defaultHeight = -2048;
 
-    Storage::Storage(const VFS::Manager *vfs)
+    Storage::Storage(const VFS::Manager *vfs, const std::string& normalMapPattern, bool autoUseNormalMaps)
         : mVFS(vfs)
+        , mNormalMapPattern(normalMapPattern)
+        , mAutoUseNormalMaps(autoUseNormalMaps)
     {
     }
 
@@ -511,6 +513,8 @@ namespace ESMTerrain
         info.mParallax = false;
         info.mSpecular = false;
         info.mDiffuseMap = texture;
+
+        /*
         std::string texture_ = texture;
         boost::replace_last(texture_, ".", "_nh.");
 
@@ -519,21 +523,26 @@ namespace ESMTerrain
             info.mNormalMap = texture_;
             info.mParallax = true;
         }
-        else
+        */
+        if (mAutoUseNormalMaps)
         {
-            texture_ = texture;
-            boost::replace_last(texture_, ".", "_n.");
+            std::string texture_ = texture;
+            boost::replace_last(texture_, ".", mNormalMapPattern + ".");
             if (mVFS->exists(texture_))
                 info.mNormalMap = texture_;
         }
 
-        texture_ = texture;
-        boost::replace_last(texture_, ".", "_diffusespec.");
-        if (mVFS->exists(texture_))
+        /*
         {
-            info.mDiffuseMap = texture_;
-            info.mSpecular = true;
+            std::string texture_ = texture;
+            boost::replace_last(texture_, ".", "_diffusespec.");
+            if (mVFS->exists(texture_))
+            {
+                info.mDiffuseMap = texture_;
+                info.mSpecular = true;
+            }
         }
+        */
 
         mLayerInfoMap[texture] = info;
 

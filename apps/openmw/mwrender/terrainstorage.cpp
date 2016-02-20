@@ -9,21 +9,9 @@
 namespace MWRender
 {
 
-    TerrainStorage::TerrainStorage(const VFS::Manager* vfs, bool preload)
-        : ESMTerrain::Storage(vfs)
+    TerrainStorage::TerrainStorage(const VFS::Manager* vfs, const std::string& normalMapPattern, bool autoUseNormalMaps)
+        : ESMTerrain::Storage(vfs, normalMapPattern, autoUseNormalMaps)
     {
-        if (preload)
-        {
-            const MWWorld::ESMStore &esmStore =
-                MWBase::Environment::get().getWorld()->getStore();
-
-            MWWorld::Store<ESM::Land>::iterator it = esmStore.get<ESM::Land>().begin();
-            for (; it != esmStore.get<ESM::Land>().end(); ++it)
-            {
-                const ESM::Land* land = &*it;
-                land->loadData(ESM::Land::DATA_VCLR|ESM::Land::DATA_VHGT|ESM::Land::DATA_VNML|ESM::Land::DATA_VTEX);
-            }
-        }
     }
 
     void TerrainStorage::getBounds(float& minX, float& maxX, float& minY, float& maxY)

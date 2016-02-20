@@ -121,6 +121,7 @@ namespace Resource
             }
 
             osg::Image* image = result.getImage();
+            image->setFileName(normalized);
             if (!checkSupported(image, filename))
             {
                 mCache->addEntryToObjectCache(normalized, mWarningImage);

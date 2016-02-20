@@ -172,6 +172,8 @@ namespace MWRender
         resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders"));
         resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
         resourceSystem->getSceneManager()->setForcePerPixelLighting(Settings::Manager::getBool("force per pixel lighting", "Shaders"));
+        resourceSystem->getSceneManager()->setAutoUseNormalMaps(Settings::Manager::getBool("auto use object normal maps", "Shaders"));
+        resourceSystem->getSceneManager()->setNormalMapPattern(Settings::Manager::getString("normal map pattern", "Shaders"));
 
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager;
         sceneRoot->setLightingMask(Mask_Lighting);
@@ -193,7 +195,8 @@ namespace MWRender
         mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
 
         mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(),
-                                                new TerrainStorage(mResourceSystem->getVFS(), false), Mask_Terrain, &mResourceSystem->getSceneManager()->getShaderManager(), mUnrefQueue.get()));
+                                                new TerrainStorage(mResourceSystem->getVFS(), Settings::Manager::getString("normal map pattern", "Shaders"), Settings::Manager::getBool("auto use terrain normal maps", "Shaders")),
+                                                    Mask_Terrain, &mResourceSystem->getSceneManager()->getShaderManager(), mUnrefQueue.get()));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 

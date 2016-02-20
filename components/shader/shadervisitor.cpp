@@ -5,10 +5,15 @@
 #include <osg/Texture>
 #include <osg/Material>
 #include <osg/Geometry>
+#include <osg/Image>
 
 #include <osgUtil/TangentSpaceGenerator>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
+
+#include <components/resource/imagemanager.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "shadermanager.hpp"
 
@@ -24,13 +29,20 @@ namespace Shader
     {
     }
 
-    ShaderVisitor::ShaderVisitor(ShaderManager& shaderManager, const std::string &defaultVsTemplate, const std::string &defaultFsTemplate)
+    ShaderVisitor::ShaderRequirements::~ShaderRequirements()
+    {
+
+    }
+
+    ShaderVisitor::ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager, const std::string &defaultVsTemplate, const std::string &defaultFsTemplate)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mForceShaders(false)
         , mClampLighting(false)
         , mForcePerPixelLighting(false)
         , mAllowedToModifyStateSets(true)
+        , mAutoUseNormalMaps(false)
         , mShaderManager(shaderManager)
+        , mImageManager(imageManager)
         , mDefaultVsTemplate(defaultVsTemplate)
         , mDefaultFsTemplate(defaultFsTemplate)
     {
@@ -81,37 +93,69 @@ namespace Shader
         if (mAllowedToModifyStateSets)
             writableStateSet = node.getStateSet();
         const osg::StateSet::TextureAttributeList& texAttributes = stateset->getTextureAttributeList();
-        for(unsigned int unit=0;unit<texAttributes.size();++unit)
+        if (texAttributes.size())
         {
-            const osg::StateAttribute *attr = stateset->getTextureAttribute(unit, osg::StateAttribute::TEXTURE);
-            if (attr)
+            const osg::Texture* diffuseMap = NULL;
+            const osg::Texture* normalMap = NULL;
+            for(unsigned int unit=0;unit<texAttributes.size();++unit)
             {
-                const osg::Texture* texture = attr->asTexture();
-                if (texture)
+                const osg::StateAttribute *attr = stateset->getTextureAttribute(unit, osg::StateAttribute::TEXTURE);
+                if (attr)
                 {
-                    if (!texture->getName().empty())
+                    const osg::Texture* texture = attr->asTexture();
+                    if (texture)
                     {
-                        mRequirements.back().mTextures[unit] = texture->getName();
-                        if (texture->getName() == "normalMap")
+                        if (!texture->getName().empty())
                         {
-                            mRequirements.back().mTexStageRequiringTangents = unit;
-                            mRequirements.back().mHasNormalMap = true;
-                            if (!writableStateSet)
-                                writableStateSet = getWritableStateSet(node);
-                            // normal maps are by default off since the FFP can't render them, now that we'll use shaders switch to On
-                            writableStateSet->setTextureMode(unit, GL_TEXTURE_2D, osg::StateAttribute::ON);
+                            mRequirements.back().mTextures[unit] = texture->getName();
+                            if (texture->getName() == "normalMap")
+                            {
+                                mRequirements.back().mTexStageRequiringTangents = unit;
+                                mRequirements.back().mHasNormalMap = true;
+                                if (!writableStateSet)
+                                    writableStateSet = getWritableStateSet(node);
+                                // normal maps are by default off since the FFP can't render them, now that we'll use shaders switch to On
+                                writableStateSet->setTextureMode(unit, GL_TEXTURE_2D, osg::StateAttribute::ON);
+                                normalMap = texture;
+                            }
+                            if (texture->getName() == "diffuseMap")
+                                diffuseMap = texture;
                         }
+                        else
+                            std::cerr << "ShaderVisitor encountered unknown texture " << texture << std::endl;
                     }
-                    else
-                        std::cerr << "ShaderVisitor encountered unknown texture " << texture << std::endl;
+                }
+                // remove state that has no effect when rendering with shaders
+                if (stateset->getTextureAttribute(unit, osg::StateAttribute::TEXENV))
+                {
+                    if (!writableStateSet)
+                        writableStateSet = getWritableStateSet(node);
+                    writableStateSet->removeTextureAttribute(unit, osg::StateAttribute::TEXENV);
                 }
             }
-            // remove state that has no effect when rendering with shaders
-            if (stateset->getTextureAttribute(unit, osg::StateAttribute::TEXENV))
+
+            if (mAutoUseNormalMaps && diffuseMap != NULL && normalMap == NULL)
             {
-                if (!writableStateSet)
-                    writableStateSet = getWritableStateSet(node);
-                writableStateSet->removeTextureAttribute(unit, osg::StateAttribute::TEXENV);
+                std::string normalMap = diffuseMap->getImage(0)->getFileName();
+                boost::replace_last(normalMap, ".", mNormalMapPattern + ".");
+                if (mImageManager.getVFS()->exists(normalMap))
+                {
+                    osg::ref_ptr<osg::Texture2D> normalMapTex (new osg::Texture2D(mImageManager.getImage(normalMap)));
+                    normalMapTex->setWrap(osg::Texture::WRAP_S, diffuseMap->getWrap(osg::Texture::WRAP_S));
+                    normalMapTex->setWrap(osg::Texture::WRAP_T, diffuseMap->getWrap(osg::Texture::WRAP_T));
+                    normalMapTex->setFilter(osg::Texture::MIN_FILTER, diffuseMap->getFilter(osg::Texture::MIN_FILTER));
+                    normalMapTex->setFilter(osg::Texture::MAG_FILTER, diffuseMap->getFilter(osg::Texture::MAG_FILTER));
+                    normalMapTex->setMaxAnisotropy(diffuseMap->getMaxAnisotropy());
+                    normalMapTex->setName("normalMap");
+
+                    int unit = texAttributes.size();
+                    if (!writableStateSet)
+                        writableStateSet = getWritableStateSet(node);
+                    writableStateSet->setTextureAttributeAndModes(unit, normalMapTex, osg::StateAttribute::ON);
+                    mRequirements.back().mTextures[unit] = "normalMap";
+                    mRequirements.back().mTexStageRequiringTangents = unit;
+                    mRequirements.back().mHasNormalMap = true;
+                }
             }
         }
 
@@ -209,8 +253,12 @@ namespace Shader
         if (!mRequirements.empty())
         {
             const ShaderRequirements& reqs = mRequirements.back();
-            if (reqs.mTexStageRequiringTangents != -1)
+            if (reqs.mTexStageRequiringTangents != -1 && mAllowedToModifyStateSets)
             {
+                if (geometry.getTexCoordArray(reqs.mTexStageRequiringTangents) == NULL) // assign tex coord array for normal map if necessary
+                                                                                        // the normal-map may be assigned on-the-fly in applyStateSet() when mAutoUseNormalMaps is true
+                    geometry.setTexCoordArray(reqs.mTexStageRequiringTangents, geometry.getTexCoordArray(0));
+
                 osg::ref_ptr<osgUtil::TangentSpaceGenerator> generator (new osgUtil::TangentSpaceGenerator);
                 generator->generate(&geometry, reqs.mTexStageRequiringTangents);
 
@@ -252,6 +300,16 @@ namespace Shader
     void ShaderVisitor::setAllowedToModifyStateSets(bool allowed)
     {
         mAllowedToModifyStateSets = allowed;
+    }
+
+    void ShaderVisitor::setAutoUseNormalMaps(bool use)
+    {
+        mAutoUseNormalMaps = use;
+    }
+
+    void ShaderVisitor::setNormalMapPattern(const std::string &pattern)
+    {
+        mNormalMapPattern = pattern;
     }
 
 }

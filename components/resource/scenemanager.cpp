@@ -212,6 +212,7 @@ namespace Resource
         , mForceShaders(false)
         , mClampLighting(false)
         , mForcePerPixelLighting(false)
+        , mAutoUseNormalMaps(false)
         , mInstanceCache(new MultiObjectCache)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
@@ -235,7 +236,7 @@ namespace Resource
 
     void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node)
     {
-        Shader::ShaderVisitor shaderVisitor(*mShaderManager.get(), "objects_vertex.glsl", "objects_fragment.glsl");
+        Shader::ShaderVisitor shaderVisitor(*mShaderManager.get(), *mImageManager, "objects_vertex.glsl", "objects_fragment.glsl");
         shaderVisitor.setForceShaders(mForceShaders);
         shaderVisitor.setClampLighting(mClampLighting);
         shaderVisitor.setForcePerPixelLighting(mForcePerPixelLighting);
@@ -261,6 +262,16 @@ namespace Resource
     bool SceneManager::getForcePerPixelLighting() const
     {
         return mForcePerPixelLighting;
+    }
+
+    void SceneManager::setAutoUseNormalMaps(bool use)
+    {
+        mAutoUseNormalMaps = use;
+    }
+
+    void SceneManager::setNormalMapPattern(const std::string &pattern)
+    {
+        mNormalMapPattern = pattern;
     }
 
     SceneManager::~SceneManager()
@@ -386,10 +397,12 @@ namespace Resource
             SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor(mMinFilter, mMagFilter, mMaxAnisotropy);
             loaded->accept(setFilterSettingsControllerVisitor);
 
-            Shader::ShaderVisitor shaderVisitor(*mShaderManager.get(), "objects_vertex.glsl", "objects_fragment.glsl");
+            Shader::ShaderVisitor shaderVisitor(*mShaderManager.get(), *mImageManager, "objects_vertex.glsl", "objects_fragment.glsl");
             shaderVisitor.setForceShaders(mForceShaders);
             shaderVisitor.setClampLighting(mClampLighting);
             shaderVisitor.setForcePerPixelLighting(mForcePerPixelLighting);
+            shaderVisitor.setAutoUseNormalMaps(mAutoUseNormalMaps);
+            shaderVisitor.setNormalMapPattern(mNormalMapPattern);
             loaded->accept(shaderVisitor);
 
             // share state

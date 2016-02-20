@@ -3,6 +3,11 @@
 
 #include <osg/NodeVisitor>
 
+namespace Resource
+{
+    class ImageManager;
+}
+
 namespace Shader
 {
 
@@ -12,7 +17,7 @@ namespace Shader
     class ShaderVisitor : public osg::NodeVisitor
     {
     public:
-        ShaderVisitor(ShaderManager& shaderManager, const std::string& defaultVsTemplate, const std::string& defaultFsTemplate);
+        ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager, const std::string& defaultVsTemplate, const std::string& defaultFsTemplate);
 
         /// By default, only bump mapped objects will have a shader added to them.
         /// Setting force = true will cause all objects to render using shaders, regardless of having a bump map.
@@ -30,6 +35,11 @@ namespace Shader
         /// @par This option is useful when the ShaderVisitor is run on a "live" subgraph that may have already been submitted for rendering.
         void setAllowedToModifyStateSets(bool allowed);
 
+        /// Automatically use normal maps if a file with suitable name exists (see normal map pattern).
+        void setAutoUseNormalMaps(bool use);
+
+        void setNormalMapPattern(const std::string& pattern);
+
         virtual void apply(osg::Node& node);
 
         virtual void apply(osg::Drawable& drawable);
@@ -46,14 +56,21 @@ namespace Shader
         bool mForcePerPixelLighting;
         bool mAllowedToModifyStateSets;
 
+        bool mAutoUseNormalMaps;
+        std::string mNormalMapPattern;
+
         ShaderManager& mShaderManager;
+        Resource::ImageManager& mImageManager;
 
         struct ShaderRequirements
         {
             ShaderRequirements();
+            ~ShaderRequirements();
 
             // <texture stage, texture name>
             std::map<int, std::string> mTextures;
+
+            osg::ref_ptr<osg::Texture> mDiffuseMap;
 
             bool mHasNormalMap;
 

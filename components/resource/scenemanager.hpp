@@ -57,6 +57,12 @@ namespace Resource
         void setForcePerPixelLighting(bool force);
         bool getForcePerPixelLighting() const;
 
+        /// @see ShaderVisitor::setAutoUseNormalMaps
+        void setAutoUseNormalMaps(bool use);
+
+        /// @see ShaderVisitor::setNormalMapPattern
+        void setNormalMapPattern(const std::string& pattern);
+
         void setShaderPath(const std::string& path);
 
         /// Get a read-only copy of this scene "template"
@@ -126,6 +132,8 @@ namespace Resource
         bool mForceShaders;
         bool mClampLighting;
         bool mForcePerPixelLighting;
+        bool mAutoUseNormalMaps;
+        std::string mNormalMapPattern;
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 
