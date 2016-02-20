@@ -9,8 +9,8 @@
 namespace MWRender
 {
 
-    TerrainStorage::TerrainStorage(const VFS::Manager* vfs, const std::string& normalMapPattern, bool autoUseNormalMaps)
-        : ESMTerrain::Storage(vfs, normalMapPattern, autoUseNormalMaps)
+    TerrainStorage::TerrainStorage(const VFS::Manager* vfs, const std::string& normalMapPattern, bool autoUseNormalMaps, const std::string& specularMapPattern, bool autoUseSpecularMaps)
+        : ESMTerrain::Storage(vfs, normalMapPattern, autoUseNormalMaps, specularMapPattern, autoUseSpecularMaps)
     {
     }
 

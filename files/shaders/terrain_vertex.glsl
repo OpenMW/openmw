@@ -8,10 +8,10 @@ varying float depth;
 #if !PER_PIXEL_LIGHTING
 varying vec4 lighting;
 #else
-varying vec3 passViewPos;
-varying vec3 passViewNormal;
 varying vec4 passColor;
 #endif
+varying vec3 passViewPos;
+varying vec3 passViewNormal;
 
 #include "lighting.glsl"
 
@@ -27,10 +27,10 @@ void main(void)
 #if !PER_PIXEL_LIGHTING
     lighting = doLighting(viewPos.xyz, viewNormal, gl_Color);
 #else
-    passViewPos = viewPos.xyz;
-    passViewNormal = viewNormal;
     passColor = gl_Color;
 #endif
+    passViewNormal = viewNormal;
+    passViewPos = viewPos.xyz;
 
     uv = gl_MultiTexCoord0.xy;
 }

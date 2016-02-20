@@ -162,6 +162,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             for (std::vector<LayerInfo>::const_iterator it = layerList.begin(); it != layerList.end(); ++it)
             {
                 TextureLayer textureLayer;
+                textureLayer.mSpecular = it->mSpecular;
                 osg::ref_ptr<osg::Texture2D> texture = mTextureCache[it->mDiffuseMap];
                 if (!texture)
                 {
@@ -187,8 +188,10 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
                     }
                     textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, texture);
                     textureLayer.mNormalMap = texture;
-                    useShaders = true;
                 }
+
+                if (it->requiresShaders())
+                    useShaders = true;
 
                 layers.push_back(textureLayer);
             }

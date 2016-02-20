@@ -19,10 +19,10 @@ varying float depth;
 #if !PER_PIXEL_LIGHTING
 varying vec4 lighting;
 #else
-varying vec3 passViewPos;
-varying vec3 passViewNormal;
 varying vec4 passColor;
 #endif
+varying vec3 passViewPos;
+varying vec3 passViewNormal;
 
 #include "lighting.glsl"
 
@@ -30,16 +30,15 @@ void main()
 {
     vec2 diffuseMapUV = (gl_TextureMatrix[0] * vec4(uv, 0.0, 1.0)).xy;
 
-    gl_FragData[0] = vec4(texture2D(diffuseMap, diffuseMapUV).xyz, 1.0);
+    vec4 diffuseTex = texture2D(diffuseMap, diffuseMapUV);
+    gl_FragData[0] = vec4(diffuseTex.xyz, 1.0);
 
 #if @blendMap
     vec2 blendMapUV = (gl_TextureMatrix[1] * vec4(uv, 0.0, 1.0)).xy;
     gl_FragData[0].a *= texture2D(blendMap, blendMapUV).a;
 #endif
 
-#if PER_PIXEL_LIGHTING
     vec3 viewNormal = passViewNormal;
-#endif
 
 #if @normalMap
     vec3 normalTex = texture2D(normalMap, diffuseMapUV).xyz;
@@ -58,6 +57,16 @@ void main()
 #else
     gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor);
 #endif
+
+#if @specularMap
+    float shininess = 128; // TODO: make configurable
+    vec3 matSpec = vec3(diffuseTex.a, diffuseTex.a, diffuseTex.a);
+#else
+    float shininess = gl_FrontMaterial.shininess;
+    vec3 matSpec = gl_FrontMaterial.specular.xyz;
+#endif
+
+    gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos), shininess, matSpec);
 
     float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);

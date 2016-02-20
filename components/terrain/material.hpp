@@ -23,6 +23,7 @@ namespace Terrain
     {
         osg::ref_ptr<osg::Texture2D> mDiffuseMap;
         osg::ref_ptr<osg::Texture2D> mNormalMap; // optional
+        bool mSpecular;
     };
 
     class FixedFunctionTechnique : public osgFX::Technique

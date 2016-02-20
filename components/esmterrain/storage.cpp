@@ -18,10 +18,12 @@ namespace ESMTerrain
 
     const float defaultHeight = -2048;
 
-    Storage::Storage(const VFS::Manager *vfs, const std::string& normalMapPattern, bool autoUseNormalMaps)
+    Storage::Storage(const VFS::Manager *vfs, const std::string& normalMapPattern, bool autoUseNormalMaps, const std::string& specularMapPattern, bool autoUseSpecularMaps)
         : mVFS(vfs)
         , mNormalMapPattern(normalMapPattern)
         , mAutoUseNormalMaps(autoUseNormalMaps)
+        , mSpecularMapPattern(specularMapPattern)
+        , mAutoUseSpecularMaps(autoUseSpecularMaps)
     {
     }
 
@@ -510,7 +512,7 @@ namespace ESMTerrain
             return found->second;
 
         Terrain::LayerInfo info;
-        info.mParallax = false;
+        //info.mParallax = false;
         info.mSpecular = false;
         info.mDiffuseMap = texture;
 
@@ -532,17 +534,16 @@ namespace ESMTerrain
                 info.mNormalMap = texture_;
         }
 
-        /*
+        if (mAutoUseSpecularMaps)
         {
             std::string texture_ = texture;
-            boost::replace_last(texture_, ".", "_diffusespec.");
+            boost::replace_last(texture_, ".", mSpecularMapPattern + ".");
             if (mVFS->exists(texture_))
             {
                 info.mDiffuseMap = texture_;
                 info.mSpecular = true;
             }
         }
-        */
 
         mLayerInfoMap[texture] = info;
 
@@ -553,7 +554,7 @@ namespace ESMTerrain
     {
         Terrain::LayerInfo info;
         info.mDiffuseMap = "textures\\_land_default.dds";
-        info.mParallax = false;
+        //info.mParallax = false;
         info.mSpecular = false;
         return info;
     }

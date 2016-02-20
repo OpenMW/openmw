@@ -27,7 +27,7 @@ namespace ESMTerrain
         virtual const ESM::LandTexture* getLandTexture(int index, short plugin) = 0;
 
     public:
-        Storage(const VFS::Manager* vfs, const std::string& normalMapPattern = "", bool autoUseNormalMaps = false);
+        Storage(const VFS::Manager* vfs, const std::string& normalMapPattern = "", bool autoUseNormalMaps = false, const std::string& specularMapPattern = "", bool autoUseSpecularMaps = false);
 
         /// Data is loaded first, if necessary. Will return a 0-pointer if there is no data for
         /// any of the data types specified via \a flags. Will also return a 0-pointer if there
@@ -111,6 +111,9 @@ namespace ESMTerrain
 
         std::string mNormalMapPattern;
         bool mAutoUseNormalMaps;
+
+        std::string mSpecularMapPattern;
+        bool mAutoUseSpecularMaps;
 
         Terrain::LayerInfo getLayerInfo(const std::string& texture);
     };
