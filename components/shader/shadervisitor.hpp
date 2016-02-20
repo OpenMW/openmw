@@ -77,8 +77,6 @@ namespace Shader
             // <texture stage, texture name>
             std::map<int, std::string> mTextures;
 
-            osg::ref_ptr<osg::Texture> mDiffuseMap;
-
             bool mShaderRequired;
 
             bool mColorMaterial;
