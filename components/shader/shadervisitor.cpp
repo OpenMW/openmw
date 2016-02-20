@@ -88,6 +88,15 @@ namespace Shader
         return newStateSet.get();
     }
 
+    const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap", "envMap", "specularMap" };
+    bool isTextureNameRecognized(const std::string& name)
+    {
+        for (unsigned int i=0; i<sizeof(defaultTextures)/sizeof(defaultTextures[0]); ++i)
+            if (name.c_str() == defaultTextures[i])
+                return true;
+        return false;
+    }
+
     void ShaderVisitor::applyStateSet(osg::ref_ptr<osg::StateSet> stateset, osg::Node& node)
     {
         osg::StateSet* writableStateSet = NULL;
@@ -107,10 +116,14 @@ namespace Shader
                     const osg::Texture* texture = attr->asTexture();
                     if (texture)
                     {
-                        if (!texture->getName().empty())
+                        std::string texName = texture->getName();
+                        if ((texName.empty() || !isTextureNameRecognized(texName)) && unit == 0)
+                            texName = "diffuseMap";
+
+                        if (!texName.empty())
                         {
-                            mRequirements.back().mTextures[unit] = texture->getName();
-                            if (texture->getName() == "normalMap")
+                            mRequirements.back().mTextures[unit] = texName;
+                            if (texName == "normalMap")
                             {
                                 mRequirements.back().mTexStageRequiringTangents = unit;
                                 mRequirements.back().mShaderRequired = true;
@@ -120,9 +133,9 @@ namespace Shader
                                 writableStateSet->setTextureMode(unit, GL_TEXTURE_2D, osg::StateAttribute::ON);
                                 normalMap = texture;
                             }
-                            if (texture->getName() == "diffuseMap")
+                            if (texName == "diffuseMap")
                                 diffuseMap = texture;
-                            if (texture->getName() == "specularMap")
+                            if (texName == "specularMap")
                                 specularMap = texture;
                         }
                         else
@@ -222,7 +235,6 @@ namespace Shader
             writableStateSet = getWritableStateSet(node);
 
         ShaderManager::DefineMap defineMap;
-        const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap", "envMap", "specularMap" };
         for (unsigned int i=0; i<sizeof(defaultTextures)/sizeof(defaultTextures[0]); ++i)
         {
             defineMap[defaultTextures[i]] = "0";
