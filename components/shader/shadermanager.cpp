@@ -2,12 +2,14 @@
 
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 #include <osg/Program>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <OpenThreads/ScopedLock>
 
@@ -21,8 +23,11 @@ namespace Shader
 
     bool parseIncludes(boost::filesystem::path shaderPath, std::string& source)
     {
+        boost::replace_all(source, "\r\n", "\n");
+
         std::set<boost::filesystem::path> includedFiles;
         size_t foundPos = 0;
+        int fileNumber = 1;
         while ((foundPos = source.find("#include")) != std::string::npos)
         {
             size_t start = source.find('"', foundPos);
@@ -46,9 +51,19 @@ namespace Shader
                 std::cerr << "Failed to open " << includePath.string() << std::endl;
                 return false;
             }
+
             std::stringstream buffer;
             buffer << includeFstream.rdbuf();
-            source.replace(foundPos, (end-foundPos+1), buffer.str());
+
+            // insert #line directives so we get correct line numbers in compiler errors
+            int includedFileNumber = fileNumber++;
+
+            int lineNumber = std::count(source.begin(), source.begin() + foundPos, '\n');
+
+            std::stringstream toInsert;
+            toInsert << "#line 0 " << includedFileNumber << "\n" << buffer.str() << "\n#line " << lineNumber << " 0\n";
+
+            source.replace(foundPos, (end-foundPos+1), toInsert.str());
 
             if (includedFiles.insert(includePath).second == false)
             {
