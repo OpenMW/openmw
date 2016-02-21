@@ -70,6 +70,7 @@ namespace CSVRender
             CSMWorld::Data& mData;
             std::string mReferenceId;
             std::string mReferenceableId;
+            osg::ref_ptr<osg::PositionAttitudeTransform> mRootNode;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
             osg::ref_ptr<osgFX::Scribe> mOutline;
             bool mSelected;

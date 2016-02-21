@@ -135,7 +135,7 @@ void CSVRender::Object::adjustTransform()
     ESM::Position position = getPosition();
 
     // position
-    mBaseNode->setPosition(mForceBaseToZero ? osg::Vec3() : osg::Vec3f(position.pos[0], position.pos[1], position.pos[2]));
+    mRootNode->setPosition(mForceBaseToZero ? osg::Vec3() : osg::Vec3f(position.pos[0], position.pos[1], position.pos[2]));
 
     // orientation
     osg::Quat xr (-position.rot[0], osg::Vec3f(1,0,0));
@@ -161,6 +161,8 @@ CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
 : mData (data), mBaseNode(0), mSelected(false), mParentNode(parentNode), mResourceSystem(data.getResourceSystem().get()), mForceBaseToZero (forceBaseToZero),
   mScaleOverride (1), mOverrideFlags (0)
 {
+    mRootNode = new osg::PositionAttitudeTransform;
+
     mBaseNode = new osg::PositionAttitudeTransform;
     mBaseNode->addCullCallback(new SceneUtil::LightListCallback);
 
@@ -169,9 +171,11 @@ CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
 
     mBaseNode->setUserData(new ObjectTag(this));
 
-    parentNode->addChild(mBaseNode);
+    mRootNode->addChild (mBaseNode);
 
-    mBaseNode->setNodeMask(Mask_Reference);
+    parentNode->addChild (mRootNode);
+
+    mRootNode->setNodeMask(Mask_Reference);
 
     if (referenceable)
     {
@@ -191,20 +195,19 @@ CSVRender::Object::~Object()
 {
     clear();
 
-    mParentNode->removeChild(mBaseNode);
-    mParentNode->removeChild(mOutline);
+    mParentNode->removeChild (mRootNode);
 }
 
 void CSVRender::Object::setSelected(bool selected)
 {
     mSelected = selected;
 
-    mParentNode->removeChild(mOutline);
-    mParentNode->removeChild(mBaseNode);
+    mRootNode->removeChild(mOutline);
+    mRootNode->removeChild(mBaseNode);
     if (selected)
-        mParentNode->addChild(mOutline);
+        mRootNode->addChild(mOutline);
     else
-        mParentNode->addChild(mBaseNode);
+        mRootNode->addChild(mBaseNode);
 }
 
 bool CSVRender::Object::getSelected() const
