@@ -213,6 +213,7 @@ namespace Resource
         , mClampLighting(true)
         , mForcePerPixelLighting(false)
         , mAutoUseNormalMaps(false)
+        , mAutoUseSpecularMaps(false)
         , mInstanceCache(new MultiObjectCache)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
