@@ -42,12 +42,12 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor)
 }
 
 
-vec3 getSpecular(vec3 viewNormal, vec3 viewPos, float shininess, vec3 matSpec)
+vec3 getSpecular(vec3 viewNormal, vec3 viewDirection, float shininess, vec3 matSpec)
 {
     vec3 lightDir = normalize(gl_LightSource[0].position.xyz);
     float NdotL = max(dot(viewNormal, lightDir), 0.0);
     if (NdotL < 0)
         return vec3(0,0,0);
-    vec3 halfVec = normalize(lightDir - viewPos);
+    vec3 halfVec = normalize(lightDir - viewDirection);
     return pow(max(dot(viewNormal, halfVec), 0.0), 128) * gl_LightSource[0].specular.xyz * matSpec;
 }
