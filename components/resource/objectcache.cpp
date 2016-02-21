@@ -129,9 +129,12 @@ void ObjectCache::accept(osg::NodeVisitor &nv)
         ++itr)
     {
         osg::Object* object = itr->second.first.get();
-        osg::Node* node = object->asNode();
-        if (node)
-            node->accept(nv);
+        if (object)
+        {
+            osg::Node* node = dynamic_cast<osg::Node*>(object);
+            if (node)
+                node->accept(nv);
+        }
     }
 }
 
