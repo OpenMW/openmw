@@ -266,6 +266,11 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
     if (!shape->skin.empty())
         isAnimated = false;
 
+    if (shape->data.empty())
+        return;
+    if (shape->data->triangles->empty())
+        return;
+
     if (isAnimated)
     {
         if (!mCompoundShape)
