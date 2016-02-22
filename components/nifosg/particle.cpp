@@ -267,8 +267,6 @@ void Emitter::emitParticles(double dt)
         const osg::Matrix psToWorld = worldMats[0];
         worldToPs = osg::Matrix::inverse(psToWorld);
     }
-    if (worldMats.size() > 1)
-        std::cerr << "Found multiple parent node paths in particle emitter, this is not correctly supported " << std::endl;
 
     const osg::Matrix& ltw = getLocalToWorldMatrix();
     osg::Matrix emitterToPs = ltw * worldToPs;
