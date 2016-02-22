@@ -2155,7 +2155,7 @@ void CharacterController::updateHeadTracking(float duration)
             if (node != NULL)
             {
                 osg::NodePathList nodepaths = node->getParentalNodePaths();
-                if (nodepaths.size())
+                if (!nodepaths.empty())
                     direction = osg::computeLocalToWorld(nodepaths[0]).getTrans() - headPos;
             }
             else

@@ -962,7 +962,7 @@ namespace NifOsg
                 if (uvSet >= (int)data->uvlist.size())
                 {
                     std::cerr << "Warning: out of bounds UV set " << uvSet << " on TriShape \"" << triShape->name << "\" in " << mFilename << std::endl;
-                    if (data->uvlist.size())
+                    if (!data->uvlist.empty())
                         geometry->setTexCoordArray(textureStage, data->uvlist[0]);
                     continue;
                 }
@@ -1040,7 +1040,7 @@ namespace NifOsg
             triShapeToGeometry(triShape, morphGeom, parentNode, composite, boundTextures, animflags);
 
             const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
-            if (!morphs.size())
+            if (morphs.empty())
                 return morphGeom;
             // Note we are not interested in morph 0, which just contains the original vertices
             for (unsigned int i = 1; i < morphs.size(); ++i)
@@ -1228,7 +1228,7 @@ namespace NifOsg
                 return NULL;
             }
 
-            if (!pixelData->mipmaps.size())
+            if (pixelData->mipmaps.empty())
                 return NULL;
 
             unsigned char* data = new unsigned char[pixelData->data.size()];
@@ -1274,7 +1274,7 @@ namespace NifOsg
 
         void handleTextureProperty(const Nif::NiTexturingProperty* texprop, osg::StateSet* stateset, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<int>& boundTextures, int animflags)
         {
-            if (boundTextures.size())
+            if (!boundTextures.empty())
             {
                 // overriding a parent NiTexturingProperty, so remove what was previously bound
                 for (unsigned int i=0; i<boundTextures.size(); ++i)

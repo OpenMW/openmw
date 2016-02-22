@@ -103,7 +103,7 @@ namespace Shader
         if (mAllowedToModifyStateSets)
             writableStateSet = node.getStateSet();
         const osg::StateSet::TextureAttributeList& texAttributes = stateset->getTextureAttributeList();
-        if (texAttributes.size())
+        if (!texAttributes.empty())
         {
             const osg::Texture* diffuseMap = NULL;
             const osg::Texture* normalMap = NULL;

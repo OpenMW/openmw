@@ -262,7 +262,7 @@ void Emitter::emitParticles(double dt)
 
     // maybe this could be optimized by halting at the lowest common ancestor of the particle and emitter nodes
     osg::NodePathList partsysNodePaths = getParticleSystem()->getParentalNodePaths();
-    if (partsysNodePaths.size())
+    if (!partsysNodePaths.empty())
     {
         osg::Matrix psToWorld = osg::computeLocalToWorld(partsysNodePaths[0]);
         worldToPs = osg::Matrix::inverse(psToWorld);

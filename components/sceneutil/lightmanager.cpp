@@ -351,7 +351,7 @@ namespace SceneUtil
                     mLightList.push_back(&l);
             }
         }
-        if (mLightList.size())
+        if (!mLightList.empty())
         {
             unsigned int maxLights = static_cast<unsigned int> (8 - mLightManager->getStartLight());
 

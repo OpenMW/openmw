@@ -366,7 +366,7 @@ namespace MWSound
         else
             filelist = mMusicFiles[mCurrentPlaylist];
 
-        if(!filelist.size())
+        if(filelist.empty())
             return;
 
         int i = Misc::Rng::rollDice(filelist.size());

@@ -366,7 +366,7 @@ namespace MWRender
 
             // Now update camera utilizing the updated head position
             osg::NodePathList nodepaths = mNodeToFollow->getParentalNodePaths();
-            if (!nodepaths.size())
+            if (nodepaths.empty())
                 return;
             osg::Matrix worldMat = osg::computeLocalToWorld(nodepaths[0]);
             osg::Vec3 headOffset = worldMat.getTrans();
