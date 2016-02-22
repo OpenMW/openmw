@@ -1051,9 +1051,9 @@ namespace MWWorld
             if(!node) node = anim->getNode("Bip01 Head");
             if(node)
             {
-                osg::MatrixList mats = node->getWorldMatrices();
-                if(!mats.empty())
-                    return mats[0];
+                osg::NodePathList nodepaths = node->getParentalNodePaths();
+                if(!nodepaths.empty())
+                    return osg::computeLocalToWorld(nodepaths[0]);
             }
         }
         return osg::Matrixf::translate(actor.getRefData().getPosition().asVec3());

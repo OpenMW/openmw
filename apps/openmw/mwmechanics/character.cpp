@@ -2140,10 +2140,10 @@ void CharacterController::updateHeadTracking(float duration)
 
     if (!mHeadTrackTarget.isEmpty())
     {
-        osg::MatrixList mats = head->getWorldMatrices();
-        if (mats.empty())
+        osg::NodePathList nodepaths = head->getParentalNodePaths();
+        if (nodepaths.empty())
             return;
-        osg::Matrixf mat = mats[0];
+        osg::Matrixf mat = osg::computeLocalToWorld(nodepaths[0]);
         osg::Vec3f headPos = mat.getTrans();
 
         osg::Vec3f direction;
@@ -2154,9 +2154,9 @@ void CharacterController::updateHeadTracking(float duration)
                 node = anim->getNode("Bip01 Head");
             if (node != NULL)
             {
-                osg::MatrixList mats = node->getWorldMatrices();
-                if (mats.size())
-                    direction = mats[0].getTrans() - headPos;
+                osg::NodePathList nodepaths = node->getParentalNodePaths();
+                if (nodepaths.size())
+                    direction = osg::computeLocalToWorld(nodepaths[0]).getTrans() - headPos;
             }
             else
                 // no head node to look at, fall back to look at center of collision box
