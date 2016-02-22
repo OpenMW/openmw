@@ -31,6 +31,7 @@
 #include "mergeoperation.hpp"
 #include "gmstcheck.hpp"
 #include "topicinfocheck.hpp"
+#include "journalcheck.hpp"
 
 CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
 {
@@ -127,6 +128,8 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
                                                                   mData.getTopics(),
                                                                   mData.getReferenceables().getDataSet(),
                                                                   mData.getResources (CSMWorld::UniversalId::Type_SoundsRes)));
+
+        mVerifierOperation->appendStage (new JournalCheckStage(mData.getJournals(), mData.getJournalInfos()));
 
         mVerifier.setOperation (mVerifierOperation);
     }
