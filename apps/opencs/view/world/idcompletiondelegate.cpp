@@ -1,6 +1,7 @@
 #include "idcompletiondelegate.hpp"
 
 #include "../../model/world/idcompletionmanager.hpp"
+#include "../../model/world/infoselectwrapper.hpp"
 
 #include "../widget/droplineedit.hpp"
 
@@ -25,6 +26,56 @@ QWidget *CSVWorld::IdCompletionDelegate::createEditor(QWidget *parent,
     if (!index.data(Qt::EditRole).isValid() && !index.data(Qt::DisplayRole).isValid())
     {
         return NULL;
+    }
+
+    // The completer for InfoCondVar needs to return a completer based on the first column
+    if (display == CSMWorld::ColumnBase::Display_InfoCondVar)
+    {
+        QModelIndex sibling = index.sibling(index.row(), 0);
+        int conditionFunction = sibling.model()->data(sibling, Qt::EditRole).toInt();
+
+        switch (conditionFunction)
+        {
+            case CSMWorld::ConstInfoSelectWrapper::Function_Global:
+            {
+                return createEditor (parent, option, index, CSMWorld::ColumnBase::Display_GlobalVariable);
+            }
+            case CSMWorld::ConstInfoSelectWrapper::Function_Journal:
+            {
+                return createEditor (parent, option, index, CSMWorld::ColumnBase::Display_Journal);
+            }
+            case CSMWorld::ConstInfoSelectWrapper::Function_Item:
+            {
+                return createEditor (parent, option, index, CSMWorld::ColumnBase::Display_Referenceable);
+            }
+            case CSMWorld::ConstInfoSelectWrapper::Function_Dead:
+            case CSMWorld::ConstInfoSelectWrapper::Function_NotId:
+            {
+                return createEditor (parent, option, index, CSMWorld::ColumnBase::Display_Referenceable);
+            }
+            case CSMWorld::ConstInfoSelectWrapper::Function_NotFaction:
+            {
+                return createEditor (parent, option, index, CSMWorld::ColumnBase::Display_Faction);
+            }
+            case CSMWorld::ConstInfoSelectWrapper::Function_NotClass:
+            {
+                return createEditor (parent, option, index, CSMWorld::ColumnBase::Display_Class);
+            }
+            case CSMWorld::ConstInfoSelectWrapper::Function_NotRace:
+            {
+                return createEditor (parent, option, index, CSMWorld::ColumnBase::Display_Race);
+            }
+            case CSMWorld::ConstInfoSelectWrapper::Function_NotCell:
+            {
+                return createEditor (parent, option, index, CSMWorld::ColumnBase::Display_Cell);
+            }
+            case CSMWorld::ConstInfoSelectWrapper::Function_Local:
+            case CSMWorld::ConstInfoSelectWrapper::Function_NotLocal:
+            {
+                return new CSVWidget::DropLineEdit(display, parent);
+            }
+            default: return 0; // The rest of them can't be edited anyway
+        }
     }
 
     CSMWorld::IdCompletionManager &completionManager = getDocument().getIdCompletionManager();

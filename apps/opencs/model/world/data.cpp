@@ -271,7 +271,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         new NestedChildColumn (Columns::ColumnId_InfoCondFunc, ColumnBase::Display_InfoCondFunc));
     // FIXME: don't have dynamic value enum delegate, use Display_String for now
     mTopicInfos.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_InfoCondVar, ColumnBase::Display_String));
+        new NestedChildColumn (Columns::ColumnId_InfoCondVar, ColumnBase::Display_InfoCondVar));
     mTopicInfos.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_InfoCondComp, ColumnBase::Display_InfoCondComp));
     mTopicInfos.getNestableColumn(index)->addColumn(
