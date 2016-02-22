@@ -29,28 +29,28 @@ float signedAngleRadians (const osg::Vec3f& v1, const osg::Vec3f& v2, const osg:
     return std::atan2((normal * (v1 ^ v2)), (v1 * v2));
 }
 
-bool applyEnchantment (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object, const osg::Vec3f& hitPosition)
-{
-    std::string enchantmentName = !object.isEmpty() ? object.getClass().getEnchantment(object) : "";
-    if (!enchantmentName.empty())
-    {
-        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
-                    enchantmentName);
-        if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
-        {
-            MWMechanics::CastSpell cast(attacker, victim);
-            cast.mHitPosition = hitPosition;
-            cast.cast(object);
-            return true;
-        }
-    }
-    return false;
-}
-
 }
 
 namespace MWMechanics
 {
+
+    bool applyOnStrikeEnchantment (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object, const osg::Vec3f& hitPosition)
+    {
+        std::string enchantmentName = !object.isEmpty() ? object.getClass().getEnchantment(object) : "";
+        if (!enchantmentName.empty())
+        {
+            const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
+                        enchantmentName);
+            if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
+            {
+                MWMechanics::CastSpell cast(attacker, victim);
+                cast.mHitPosition = hitPosition;
+                cast.cast(object, false);
+                return true;
+            }
+        }
+        return false;
+    }
 
     bool blockMeleeAttack(const MWWorld::Ptr &attacker, const MWWorld::Ptr &blocker, const MWWorld::Ptr &weapon, float damage, float attackStrength)
     {
@@ -215,9 +215,9 @@ namespace MWMechanics
             damage *= gmst.find("fCombatKODamageMult")->getFloat();
 
         // Apply "On hit" effect of the weapon
-        bool appliedEnchantment = applyEnchantment(attacker, victim, weapon, hitPosition);
+        bool appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, weapon, hitPosition);
         if (weapon != projectile)
-            appliedEnchantment = applyEnchantment(attacker, victim, projectile, hitPosition);
+            appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, projectile, hitPosition);
 
         if (damage > 0)
             MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
