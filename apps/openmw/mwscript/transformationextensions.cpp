@@ -318,8 +318,8 @@ namespace MWScript
                         ptr = MWBase::Environment::get().getWorld()->moveObject(ptr,store,x,y,z);
                         dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(base,ptr);
 
-                        float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
-                        float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
+                        float ax = ptr.getRefData().getPosition().rot[0];
+                        float ay = ptr.getRefData().getPosition().rot[1];
                         // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
                         // except for when you position the player, then degrees must be used.
                         // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
@@ -374,14 +374,14 @@ namespace MWScript
                     }
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(base,ptr);
 
-                    float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
-                    float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
+                    float ax = ptr.getRefData().getPosition().rot[0];
+                    float ay = ptr.getRefData().getPosition().rot[1];
                     // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
                     // except for when you position the player, then degrees must be used.
                     // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
                     if(ptr != MWMechanics::getPlayer())
                         zRot = zRot/60.0f;
-                    MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+                    MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,osg::DegreesToRadians(zRot));
                     ptr.getClass().adjustPosition(ptr, false);
                 }
         };
