@@ -142,13 +142,6 @@ namespace Shader
                             std::cerr << "ShaderVisitor encountered unknown texture " << texture << std::endl;
                     }
                 }
-                // remove state that has no effect when rendering with shaders
-                if (stateset->getTextureAttribute(unit, osg::StateAttribute::TEXENV))
-                {
-                    if (!writableStateSet)
-                        writableStateSet = getWritableStateSet(node);
-                    writableStateSet->removeTextureAttribute(unit, osg::StateAttribute::TEXENV);
-                }
             }
 
             if (mAutoUseNormalMaps && diffuseMap != NULL && normalMap == NULL)
