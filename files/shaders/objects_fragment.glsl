@@ -89,8 +89,20 @@ void main()
     gl_FragData[0].xyz += texture2D(emissiveMap, emissiveMapUV).xyz;
 #endif
 
+
 #if @envMap
+
+#if @normalMap
+    // if using normal map + env map, take advantage of per-pixel normals for texCoordGen
+    vec3 viewVec = normalize(passViewPos.xyz);
+    vec3 r = reflect( viewVec, viewNormal );
+    float m = 2.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) );
+    vec2 texCoordGen = vec2(r.x/m + 0.5, r.y/m + 0.5);
+    gl_FragData[0].xyz += texture2D(envMap, texCoordGen).xyz * envMapColor.xyz;
+#else
     gl_FragData[0].xyz += texture2D(envMap, envMapUV).xyz * envMapColor.xyz;
+#endif
+
 #endif
 
 #if @specularMap
