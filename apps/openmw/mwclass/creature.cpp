@@ -306,18 +306,7 @@ namespace MWClass
             }
 
             // Apply "On hit" enchanted weapons
-            std::string enchantmentName = !weapon.isEmpty() ? weapon.getClass().getEnchantment(weapon) : "";
-            if (!enchantmentName.empty())
-            {
-                const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
-                            enchantmentName);
-                if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
-                {
-                    MWMechanics::CastSpell cast(ptr, victim);
-                    cast.mHitPosition = hitPosition;
-                    cast.cast(weapon);
-                }
-            }
+            MWMechanics::applyOnStrikeEnchantment(ptr, victim, weapon, hitPosition);
         }
         else if (isBipedal(ptr))
         {

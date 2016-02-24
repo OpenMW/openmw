@@ -69,10 +69,10 @@ namespace
 
         void transformInitialParticles(osgParticle::ParticleSystem* partsys, osg::Node* node)
         {
-            osg::MatrixList mats = node->getWorldMatrices();
-            if (mats.empty())
+            osg::NodePathList nodepaths = node->getParentalNodePaths();
+            if (nodepaths.empty())
                 return;
-            osg::Matrixf worldMat = mats[0];
+            osg::Matrixf worldMat = osg::computeLocalToWorld(nodepaths[0]);
             worldMat.orthoNormalize(worldMat); // scale is already applied on the particle node
             for (int i=0; i<partsys->numParticles(); ++i)
             {

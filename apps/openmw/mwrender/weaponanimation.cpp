@@ -114,10 +114,10 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor, float attackStrength)
         osg::Node* weaponNode = getWeaponNode();
         if (!weaponNode)
             return;
-        osg::MatrixList mats = weaponNode->getWorldMatrices();
-        if (mats.empty())
+        osg::NodePathList nodepaths = weaponNode->getParentalNodePaths();
+        if (nodepaths.empty())
             return;
-        osg::Vec3f launchPos = mats[0].getTrans();
+        osg::Vec3f launchPos = osg::computeLocalToWorld(nodepaths[0]).getTrans();
 
         float fThrownWeaponMinSpeed = gmst.find("fThrownWeaponMinSpeed")->getFloat();
         float fThrownWeaponMaxSpeed = gmst.find("fThrownWeaponMaxSpeed")->getFloat();
@@ -140,10 +140,10 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor, float attackStrength)
             return;
 
         osg::ref_ptr<osg::Node> ammoNode = mAmmunition->getNode();
-        osg::MatrixList mats = ammoNode->getWorldMatrices();
-        if (mats.empty())
+        osg::NodePathList nodepaths = ammoNode->getParentalNodePaths();
+        if (nodepaths.empty())
             return;
-        osg::Vec3f launchPos = mats[0].getTrans();
+        osg::Vec3f launchPos = osg::computeLocalToWorld(nodepaths[0]).getTrans();
 
         float fProjectileMinSpeed = gmst.find("fProjectileMinSpeed")->getFloat();
         float fProjectileMaxSpeed = gmst.find("fProjectileMaxSpeed")->getFloat();

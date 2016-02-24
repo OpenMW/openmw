@@ -160,7 +160,6 @@ CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
     mBaseNode->addCullCallback(new SceneUtil::LightListCallback);
 
     mOutline = new osgFX::Scribe;
-    mOutline->addChild(mBaseNode);
 
     mBaseNode->setUserData(new ObjectTag(this));
 
@@ -194,10 +193,14 @@ void CSVRender::Object::setSelected(bool selected)
 {
     mSelected = selected;
 
+    mOutline->removeChild(mBaseNode);
     mParentNode->removeChild(mOutline);
     mParentNode->removeChild(mBaseNode);
     if (selected)
+    {
+        mOutline->addChild(mBaseNode);
         mParentNode->addChild(mOutline);
+    }
     else
         mParentNode->addChild(mBaseNode);
 }

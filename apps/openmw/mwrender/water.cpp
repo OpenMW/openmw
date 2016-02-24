@@ -566,7 +566,7 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
         textures.push_back(tex);
     }
 
-    if (!textures.size())
+    if (textures.empty())
         return;
 
     float fps = mFallback->getFallbackFloat("Water_SurfaceFPS");

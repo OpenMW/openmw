@@ -56,8 +56,9 @@ namespace MWClass
 
     void CreatureLevList::getModelsToPreload(const MWWorld::Ptr &ptr, std::vector<std::string> &models) const
     {
+        // disable for now, too many false positives
+        /*
         const MWWorld::LiveCellRef<ESM::CreatureLevList> *ref = ptr.get<ESM::CreatureLevList>();
-
         for (std::vector<ESM::LevelledListBase::LevelItem>::const_iterator it = ref->mBase->mList.begin(); it != ref->mBase->mList.end(); ++it)
         {
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -68,6 +69,7 @@ namespace MWClass
             MWWorld::ManualRef ref(store, it->mId);
             ref.getPtr().getClass().getModelsToPreload(ref.getPtr(), models);
         }
+        */
     }
 
     void CreatureLevList::insertObjectRendering(const MWWorld::Ptr &ptr, const std::string& model, MWRender::RenderingInterface &renderingInterface) const

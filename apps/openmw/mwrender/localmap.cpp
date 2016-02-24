@@ -632,7 +632,7 @@ void LocalMap::MapSegment::initFogOfWar()
 void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
 {
     const std::vector<char>& data = esm.mImageData;
-    if (!data.size())
+    if (data.empty())
     {
         initFogOfWar();
         return;

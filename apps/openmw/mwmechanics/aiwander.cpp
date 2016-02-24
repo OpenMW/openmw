@@ -255,7 +255,7 @@ namespace MWMechanics
             // Construct a new path if there isn't one
             if(!storage.mPathFinder.isPathConstructed())
             {
-                if (mAllowedNodes.size())
+                if (!mAllowedNodes.empty())
                 {
                     setPathToAnAllowedNode(actor, storage, pos);
                 }

@@ -44,11 +44,11 @@ void RotateController::operator()(osg::Node *node, osg::NodeVisitor *nv)
 osg::Quat RotateController::getWorldOrientation(osg::Node *node)
 {
     // this could be optimized later, we just need the world orientation, not the full matrix
-    osg::MatrixList worldMats = node->getWorldMatrices(mRelativeTo);
+    osg::NodePathList nodepaths = node->getParentalNodePaths(mRelativeTo);
     osg::Quat worldOrient;
-    if (!worldMats.empty())
+    if (!nodepaths.empty())
     {
-        osg::Matrixf worldMat = worldMats[0];
+        osg::Matrixf worldMat = osg::computeLocalToWorld(nodepaths[0]);
         worldOrient = worldMat.getRotate();
     }
     return worldOrient;

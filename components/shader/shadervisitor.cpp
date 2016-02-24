@@ -103,7 +103,7 @@ namespace Shader
         if (mAllowedToModifyStateSets)
             writableStateSet = node.getStateSet();
         const osg::StateSet::TextureAttributeList& texAttributes = stateset->getTextureAttributeList();
-        if (texAttributes.size())
+        if (!texAttributes.empty())
         {
             const osg::Texture* diffuseMap = NULL;
             const osg::Texture* normalMap = NULL;
@@ -141,13 +141,6 @@ namespace Shader
                         else
                             std::cerr << "ShaderVisitor encountered unknown texture " << texture << std::endl;
                     }
-                }
-                // remove state that has no effect when rendering with shaders
-                if (stateset->getTextureAttribute(unit, osg::StateAttribute::TEXENV))
-                {
-                    if (!writableStateSet)
-                        writableStateSet = getWritableStateSet(node);
-                    writableStateSet->removeTextureAttribute(unit, osg::StateAttribute::TEXENV);
                 }
             }
 

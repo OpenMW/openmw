@@ -240,7 +240,7 @@ namespace MWGui
             mCommandLine->setCaption(newCaption);
 
             // List candidates if repeatedly pressing tab
-            if (oldCaption == newCaption && matches.size())
+            if (oldCaption == newCaption && !matches.empty())
             {
                 int i = 0;
                 printOK("");

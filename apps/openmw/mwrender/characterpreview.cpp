@@ -365,10 +365,10 @@ namespace MWRender
             traverse(node, nv);
 
             // Now update camera utilizing the updated head position
-            osg::MatrixList mats = mNodeToFollow->getWorldMatrices();
-            if (!mats.size())
+            osg::NodePathList nodepaths = mNodeToFollow->getParentalNodePaths();
+            if (nodepaths.empty())
                 return;
-            osg::Matrix worldMat = mats[0];
+            osg::Matrix worldMat = osg::computeLocalToWorld(nodepaths[0]);
             osg::Vec3 headOffset = worldMat.getTrans();
 
             cam->setViewMatrixAsLookAt(headOffset + mPosOffset, headOffset + mLookAtOffset, osg::Vec3(0,0,1));

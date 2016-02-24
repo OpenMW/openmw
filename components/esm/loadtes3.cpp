@@ -53,14 +53,14 @@ void ESM::Header::load (ESMReader &esm)
     {
         esm.getSubHeader();
         mSCRD.resize(esm.getSubSize());
-        if (mSCRD.size())
+        if (!mSCRD.empty())
             esm.getExact(&mSCRD[0], mSCRD.size());
     }
     if (esm.isNextSub("SCRS"))
     {
         esm.getSubHeader();
         mSCRS.resize(esm.getSubSize());
-        if (mSCRS.size())
+        if (!mSCRS.empty())
             esm.getExact(&mSCRS[0], mSCRS.size());
     }
 }

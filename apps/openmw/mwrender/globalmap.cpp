@@ -402,7 +402,7 @@ namespace MWRender
                 || bounds.mMinY > bounds.mMaxY)
             throw std::runtime_error("invalid map bounds");
 
-        if (!map.mImageData.size())
+        if (map.mImageData.empty())
             return;
 
         Files::IMemStream istream(&map.mImageData[0], map.mImageData.size());
