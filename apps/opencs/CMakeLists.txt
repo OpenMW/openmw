@@ -26,7 +26,7 @@ opencs_units_noqt (model/world
     universalid record commands columnbase columnimp scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
     pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
-    idcompletionmanager metadata defaultgmsts
+    idcompletionmanager metadata defaultgmsts infoselectwrapper
     )
 
 opencs_hdrs_noqt (model/world
@@ -42,7 +42,7 @@ opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
     startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
-    mergestages gmstcheck
+    mergestages gmstcheck topicinfocheck journalcheck
     )
 
 opencs_hdrs_noqt (model/tools

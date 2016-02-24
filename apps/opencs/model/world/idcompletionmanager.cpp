@@ -60,6 +60,10 @@ std::vector<CSMWorld::ColumnBase::Display> CSMWorld::IdCompletionManager::getDis
     {
         types.push_back(current->first);
     }
+
+    // Hack for Display_InfoCondVar
+    types.push_back(CSMWorld::ColumnBase::Display_InfoCondVar);
+
     return types;
 }
 
@@ -104,7 +108,7 @@ void CSMWorld::IdCompletionManager::generateCompleters(CSMWorld::Data &data)
                 QAbstractItemView *popup = new CSVWidget::CompleterPopup();
                 completer->setPopup(popup); // The completer takes ownership of the popup
                 completer->setMaxVisibleItems(10);
-                
+
                 mCompleters[current->first] = completer;
             }
         }
