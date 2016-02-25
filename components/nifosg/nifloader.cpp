@@ -1312,8 +1312,6 @@ namespace NifOsg
             if (pixelData->mipmaps.empty())
                 return NULL;
 
-            unsigned char* data = new unsigned char[pixelData->data.size()];
-            memcpy(data, &pixelData->data[0], pixelData->data.size());
             unsigned int width = 0;
             unsigned int height = 0;
 
@@ -1326,7 +1324,6 @@ namespace NifOsg
                 if (mipSize + mip.dataOffset > pixelData->data.size())
                 {
                     std::cerr << "Internal texture's mipmap data out of bounds" << std::endl;
-                    delete data;
                     return NULL;
                 }
 
@@ -1342,9 +1339,11 @@ namespace NifOsg
             if (width <= 0 || height <= 0)
             {
                 std::cerr << "Width and height must be non zero " << std::endl;
-                delete data;
                 return NULL;
             }
+
+            unsigned char* data = new unsigned char[pixelData->data.size()];
+            memcpy(data, &pixelData->data[0], pixelData->data.size());
 
             image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE);
             image->setMipmapLevels(mipmapVector);
