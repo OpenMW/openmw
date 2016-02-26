@@ -142,7 +142,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = context.getReference();
 
-                    runtime.push (context.hasBeenActivated (ptr));
+                    runtime.push (ptr.getRefData().onActivate());
                 }
         };
 
@@ -158,7 +158,8 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    context.executeActivation(ptr, MWMechanics::getPlayer());
+                    if (ptr.getRefData().activateByScript())
+                        context.executeActivation(ptr, MWMechanics::getPlayer());
                 }
         };
 

@@ -50,6 +50,8 @@ namespace MWWorld
 
             bool mChanged;
 
+            unsigned int mFlags;
+
         public:
 
             RefData();
@@ -121,6 +123,12 @@ namespace MWWorld
             ///< May return a 0-pointer. The ownership of the return data object is not transferred.
 
             const CustomData *getCustomData() const;
+
+            bool activate();
+
+            bool onActivate();
+
+            bool activateByScript();
 
             bool hasChanged() const;
             ///< Has this RefData changed since it was originally loaded?
