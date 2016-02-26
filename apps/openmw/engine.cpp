@@ -76,8 +76,6 @@ void OMW::Engine::executeLocalScripts()
             &script.second.getRefData().getLocals(), script.second);
         mEnvironment.getScriptManager()->run (script.first, interpreterContext);
     }
-
-    localScripts.setIgnore (MWWorld::Ptr());
 }
 
 void OMW::Engine::frame(float frametime)

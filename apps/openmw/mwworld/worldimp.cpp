@@ -3148,25 +3148,16 @@ namespace MWWorld
 
     void World::activate(const Ptr &object, const Ptr &actor)
     {
-        MWScript::InterpreterContext interpreterContext (&object.getRefData().getLocals(), object);
-        interpreterContext.activate (object);
-
-        std::string script = object.getClass().getScript (object);
-
         breakInvisibility(actor);
 
         if (mScriptsEnabled)
         {
-            if (!script.empty())
+            if (object.getRefData().activate())
             {
-                getLocalScripts().setIgnore (object);
-                MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
+                boost::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
+                action->execute (actor);
             }
-            if (!interpreterContext.hasActivationBeenHandled())
-                interpreterContext.executeActivation(object, actor);
         }
-        else
-            interpreterContext.executeActivation(object, actor);
     }
 
     struct ResetActorsVisitor
