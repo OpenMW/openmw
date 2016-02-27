@@ -449,5 +449,7 @@ op 0x2000300: EnableLevelupMenu
 op 0x2000301: ToggleScripts
 op 0x2000302: Fixme
 op 0x2000303: Fixme, explicit
+op 0x2000304: Show
+op 0x2000305: Show, explicit
 
 opcodes 0x2000304-0x3ffffff unused

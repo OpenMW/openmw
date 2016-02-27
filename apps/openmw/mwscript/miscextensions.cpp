@@ -850,6 +850,70 @@ namespace MWScript
         };
 
         template <class R>
+        class OpShow : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWWorld::Ptr ptr = R()(runtime, false);
+                std::string var = runtime.getStringLiteral(runtime[0].mInteger);
+                runtime.pop();
+
+                std::stringstream output;
+
+                if (!ptr.isEmpty())
+                {
+                    const std::string& script = ptr.getClass().getScript(ptr);
+                    if (script.empty())
+                    {
+                        output << ptr.getCellRef().getRefId() << " has no script " << std::endl;
+                    }
+                    else
+                    {
+                        const Compiler::Locals& locals =
+                            MWBase::Environment::get().getScriptManager()->getLocals(script);
+                        char type = locals.getType(var);
+                        switch (type)
+                        {
+                        case 'l':
+                        case 's':
+                            output << ptr.getCellRef().getRefId() << "." << var << ": " << ptr.getRefData().getLocals().getIntVar(script, var);
+                            break;
+                        case 'f':
+                            output << ptr.getCellRef().getRefId() << "." << var << ": " << ptr.getRefData().getLocals().getFloatVar(script, var);
+                            break;
+                        default:
+                            output << "unknown local '" << var << "' for '" << ptr.getCellRef().getRefId() << "'";
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+                    char type = world->getGlobalVariableType (var);
+
+                    switch (type)
+                    {
+                    case 's':
+                        output << runtime.getContext().getGlobalShort (var);
+                        break;
+                    case 'l':
+                        output << runtime.getContext().getGlobalLong (var);
+                        break;
+                    case 'f':
+                        output << runtime.getContext().getGlobalFloat (var);
+                        break;
+                    default:
+                        output << "unknown global variable";
+                    }
+                }
+                runtime.getContext().report(output.str());
+            }
+        };
+
+        template <class R>
         class OpShowVars : public Interpreter::Opcode0
         {
             void printLocalVars(Interpreter::Runtime &runtime, const MWWorld::Ptr &ptr)
@@ -1266,6 +1330,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeEnableTeleporting, new OpEnableTeleporting<true>);
             interpreter.installSegment5 (Compiler::Misc::opcodeShowVars, new OpShowVars<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeShowVarsExplicit, new OpShowVars<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeShow, new OpShow<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeShowExplicit, new OpShow<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleGodMode, new OpToggleGodMode);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleScripts, new OpToggleScripts);
             interpreter.installSegment5 (Compiler::Misc::opcodeDisableLevitation, new OpEnableLevitation<false>);

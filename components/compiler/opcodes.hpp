@@ -277,6 +277,8 @@ namespace Compiler
         const int opcodeEnableTeleporting = 0x2000216;
         const int opcodeShowVars = 0x200021d;
         const int opcodeShowVarsExplicit = 0x200021e;
+        const int opcodeShow = 0x2000304;
+        const int opcodeShowExplicit = 0x2000305;
         const int opcodeToggleGodMode = 0x200021f;
         const int opcodeToggleScripts = 0x2000301;
         const int opcodeDisableLevitation = 0x2000220;
