@@ -902,21 +902,22 @@ namespace MWWorld
                     Ptr ptr (&*it, this);
                     ptr.getClass().respawn(ptr);
                 }
-                for (CellRefList<ESM::Creature>::List::iterator it (mCreatures.mList.begin()); it!=mCreatures.mList.end(); ++it)
-                {
-                    Ptr ptr (&*it, this);
-                    ptr.getClass().respawn(ptr);
-                }
-                for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
-                {
-                    Ptr ptr (&*it, this);
-                    ptr.getClass().respawn(ptr);
-                }
-                for (CellRefList<ESM::CreatureLevList>::List::iterator it (mCreatureLists.mList.begin()); it!=mCreatureLists.mList.end(); ++it)
-                {
-                    Ptr ptr (&*it, this);
-                    ptr.getClass().respawn(ptr);
-                }
+            }
+
+            for (CellRefList<ESM::Creature>::List::iterator it (mCreatures.mList.begin()); it!=mCreatures.mList.end(); ++it)
+            {
+                Ptr ptr (&*it, this);
+                ptr.getClass().respawn(ptr);
+            }
+            for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
+            {
+                Ptr ptr (&*it, this);
+                ptr.getClass().respawn(ptr);
+            }
+            for (CellRefList<ESM::CreatureLevList>::List::iterator it (mCreatureLists.mList.begin()); it!=mCreatureLists.mList.end(); ++it)
+            {
+                Ptr ptr (&*it, this);
+                ptr.getClass().respawn(ptr);
             }
         }
     }

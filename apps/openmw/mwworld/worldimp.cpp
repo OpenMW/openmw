@@ -962,11 +962,11 @@ namespace MWWorld
         return mTimeScale->getFloat();
     }
 
-    void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
+    void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool changeEvent)
     {
         mPhysics->clearQueuedMovement();
 
-        if (mCurrentWorldSpace != cellName)
+        if (changeEvent && mCurrentWorldSpace != cellName)
         {
             // changed worldspace
             mProjectileManager->clear();
@@ -976,34 +976,34 @@ namespace MWWorld
         }
 
         removeContainerScripts(getPlayerPtr());
-        mWorldScene->changeToInteriorCell(cellName, position);
+        mWorldScene->changeToInteriorCell(cellName, position, changeEvent);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
     }
 
-    void World::changeToExteriorCell (const ESM::Position& position)
+    void World::changeToExteriorCell (const ESM::Position& position, bool changeEvent)
     {
         mPhysics->clearQueuedMovement();
 
-        if (mCurrentWorldSpace != "sys::default") // FIXME
+        if (changeEvent && mCurrentWorldSpace != "sys::default") // FIXME
         {
             // changed worldspace
             mProjectileManager->clear();
             mRendering->notifyWorldSpaceChanged();
         }
         removeContainerScripts(getPlayerPtr());
-        mWorldScene->changeToExteriorCell(position, true);
+        mWorldScene->changeToExteriorCell(position, true, changeEvent);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
     }
 
-    void World::changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool detectWorldSpaceChange)
+    void World::changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool changeEvent)
     {
-        if (!detectWorldSpaceChange)
+        if (!changeEvent)
             mCurrentWorldSpace = cellId.mWorldspace;
 
         if (cellId.mPaged)
-            changeToExteriorCell (position);
+            changeToExteriorCell (position, changeEvent);
         else
-            changeToInteriorCell (cellId.mWorldspace, position);
+            changeToInteriorCell (cellId.mWorldspace, position, changeEvent);
     }
 
     void World::markCellAsUnchanged()

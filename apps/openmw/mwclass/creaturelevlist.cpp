@@ -44,7 +44,28 @@ namespace MWClass
         ensureCustomData(ptr);
 
         CreatureLevListCustomData& customData = ptr.getRefData().getCustomData()->asCreatureLevListCustomData();
-        customData.mSpawn = true;
+        if (customData.mSpawn)
+            return;
+
+        MWWorld::Ptr creature = (customData.mSpawnActorId == -1) ? MWWorld::Ptr() : MWBase::Environment::get().getWorld()->searchPtrViaActorId(customData.mSpawnActorId);
+        if (!creature.isEmpty())
+        {
+            const MWMechanics::CreatureStats& creatureStats = creature.getClass().getCreatureStats(creature);
+            if (creature.getRefData().getCount() == 0)
+                customData.mSpawn = true;
+            else if (creatureStats.isDead())
+            {
+                const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+                static const float fCorpseRespawnDelay = gmst.find("fCorpseRespawnDelay")->getFloat();
+                static const float fCorpseClearDelay = gmst.find("fCorpseClearDelay")->getFloat();
+
+                float delay = std::min(fCorpseRespawnDelay, fCorpseClearDelay);
+                if (creatureStats.getTimeOfDeath() + delay <= MWBase::Environment::get().getWorld()->getTimeStamp())
+                    customData.mSpawn = true;
+            }
+        }
+        else
+            customData.mSpawn = true;
     }
 
     void CreatureLevList::registerSelf()

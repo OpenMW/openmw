@@ -57,6 +57,7 @@ namespace ESM
         bool mRecalcDynamicStats;
         int mDrawState;
         unsigned char mDeathAnimation;
+        ESM::TimeStamp mTimeOfDeath;
 
         int mLevel;
 

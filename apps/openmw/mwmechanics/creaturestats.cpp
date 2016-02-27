@@ -187,6 +187,9 @@ namespace MWMechanics
 
         if (index==0 && mDynamic[index].getCurrent()<1)
         {
+            if (!mDead)
+                mTimeOfDeath = MWBase::Environment::get().getWorld()->getTimeStamp();
+
             mDead = true;
 
             mDynamic[index].setModifier(0);
@@ -503,6 +506,7 @@ namespace MWMechanics
         state.mLevel = mLevel;
         state.mActorId = mActorId;
         state.mDeathAnimation = mDeathAnimation;
+        state.mTimeOfDeath = mTimeOfDeath.toEsm();
 
         mSpells.writeState(state.mSpells);
         mActiveSpells.writeState(state.mActiveSpells);
@@ -549,6 +553,7 @@ namespace MWMechanics
         mLevel = state.mLevel;
         mActorId = state.mActorId;
         mDeathAnimation = state.mDeathAnimation;
+        mTimeOfDeath = MWWorld::TimeStamp(state.mTimeOfDeath);
 
         mSpells.readState(state.mSpells);
         mActiveSpells.readState(state.mActiveSpells);
@@ -620,6 +625,11 @@ namespace MWMechanics
     void CreatureStats::setDeathAnimation(unsigned char index)
     {
         mDeathAnimation = index;
+    }
+
+    MWWorld::TimeStamp CreatureStats::getTimeOfDeath() const
+    {
+        return mTimeOfDeath;
     }
 
     std::map<CreatureStats::SummonKey, int>& CreatureStats::getSummonedCreatureMap()
