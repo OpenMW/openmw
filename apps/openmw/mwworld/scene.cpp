@@ -271,7 +271,7 @@ namespace MWWorld
                 else
                 {
                     static std::vector<float> defaultHeight;
-                    defaultHeight.resize(verts*verts, -2048.f);
+                    defaultHeight.resize(verts*verts, ESM::Land::DEFAULT_HEIGHT);
                     mPhysics->addHeightField (&defaultHeight[0], cell->getCell()->getGridX(), cell->getCell()->getGridY(),
                             worldsize / (verts-1), verts);
                 }
