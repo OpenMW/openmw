@@ -231,15 +231,16 @@ namespace MWBase
 
             virtual float getTimeScaleFactor() const = 0;
 
-            virtual void changeToInteriorCell (const std::string& cellName,
-                const ESM::Position& position) = 0;
+            virtual void changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool changeEvent=true) = 0;
             ///< Move to interior cell.
+            ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-            virtual void changeToExteriorCell (const ESM::Position& position) = 0;
+            virtual void changeToExteriorCell (const ESM::Position& position, bool changeEvent=true) = 0;
             ///< Move to exterior cell.
+            ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool detectWorldSpaceChange=true) = 0;
-            ///< @param detectWorldSpaceChange if true, clean up worldspace-specific data when the world space changes
+            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool changeEvent=true) = 0;
+            ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
             virtual const ESM::Cell *getExterior (const std::string& cellName) const = 0;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.

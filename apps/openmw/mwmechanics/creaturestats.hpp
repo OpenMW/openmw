@@ -65,6 +65,8 @@ namespace MWMechanics
         // The index of the death animation that was played
         unsigned char mDeathAnimation;
 
+        MWWorld::TimeStamp mTimeOfDeath;
+
     public:
         typedef std::pair<int, std::string> SummonKey; // <ESM::MagicEffect index, spell ID>
     private:
@@ -258,6 +260,8 @@ namespace MWMechanics
 
         unsigned char getDeathAnimation() const;
         void setDeathAnimation(unsigned char index);
+
+        MWWorld::TimeStamp getTimeOfDeath() const;
 
         int getActorId();
         ///< Will generate an actor ID, if the actor does not have one yet.

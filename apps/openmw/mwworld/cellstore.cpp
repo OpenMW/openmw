@@ -889,11 +889,19 @@ namespace MWWorld
         return mFogState.get();
     }
 
+    void clearCorpse(const MWWorld::Ptr& ptr)
+    {
+        const MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
+        static const float fCorpseClearDelay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCorpseClearDelay")->getFloat();
+        if (!ptr.getClass().isPersistent(ptr) && creatureStats.getTimeOfDeath() + fCorpseClearDelay <= MWBase::Environment::get().getWorld()->getTimeStamp())
+            MWBase::Environment::get().getWorld()->deleteObject(ptr);
+    }
+
     void CellStore::respawn()
     {
         if (mState == State_Loaded)
         {
-            static int iMonthsToRespawn = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iMonthsToRespawn")->getInt();
+            static const int iMonthsToRespawn = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iMonthsToRespawn")->getInt();
             if (MWBase::Environment::get().getWorld()->getTimeStamp() - mLastRespawn > 24*30*iMonthsToRespawn)
             {
                 mLastRespawn = MWBase::Environment::get().getWorld()->getTimeStamp();
@@ -902,21 +910,25 @@ namespace MWWorld
                     Ptr ptr (&*it, this);
                     ptr.getClass().respawn(ptr);
                 }
-                for (CellRefList<ESM::Creature>::List::iterator it (mCreatures.mList.begin()); it!=mCreatures.mList.end(); ++it)
-                {
-                    Ptr ptr (&*it, this);
-                    ptr.getClass().respawn(ptr);
-                }
-                for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
-                {
-                    Ptr ptr (&*it, this);
-                    ptr.getClass().respawn(ptr);
-                }
-                for (CellRefList<ESM::CreatureLevList>::List::iterator it (mCreatureLists.mList.begin()); it!=mCreatureLists.mList.end(); ++it)
-                {
-                    Ptr ptr (&*it, this);
-                    ptr.getClass().respawn(ptr);
-                }
+            }
+
+            for (CellRefList<ESM::Creature>::List::iterator it (mCreatures.mList.begin()); it!=mCreatures.mList.end(); ++it)
+            {
+                Ptr ptr (&*it, this);
+                clearCorpse(ptr);
+                ptr.getClass().respawn(ptr);
+            }
+            for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
+            {
+                Ptr ptr (&*it, this);
+                clearCorpse(ptr);
+                ptr.getClass().respawn(ptr);
+            }
+            for (CellRefList<ESM::CreatureLevList>::List::iterator it (mCreatureLists.mList.begin()); it!=mCreatureLists.mList.end(); ++it)
+            {
+                Ptr ptr (&*it, this);
+                // no need to clearCorpse, handled as part of mCreatures
+                ptr.getClass().respawn(ptr);
             }
         }
     }
