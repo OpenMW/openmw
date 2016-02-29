@@ -1336,8 +1336,11 @@ namespace MWWorld
         osg::Vec3f pos(ipos.asVec3());
         osg::Quat orientation(ipos.rot[2], osg::Vec3f(0,0,-1));
 
+        int fallbackDirections[4] = {direction, (direction+3)%4, (direction+2)%4, (direction+1)%4};
+
         for (int i=0; i<4; ++i)
         {
+            direction = fallbackDirections[i];
             // check if spawn point is safe, fall back to another direction if not
             osg::Vec3f spawnPoint = pos;
             if (direction == 0) spawnPoint = pos + (orientation * osg::Vec3f(0,1,0)) * distance;
@@ -1355,7 +1358,6 @@ namespace MWWorld
                 ipos.pos[2] = spawnPoint.z();
                 break;
             }
-            direction = (direction+1) % 4;
         }
 
         ipos.rot[0] = referenceObject.getRefData().getPosition().rot[0];
