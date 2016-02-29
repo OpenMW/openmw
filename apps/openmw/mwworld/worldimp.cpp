@@ -3064,23 +3064,9 @@ namespace MWWorld
             if (selectedCreature.empty())
                 return;
 
-            ESM::Position ipos = mPlayer->getPlayer().getRefData().getPosition();
-            osg::Vec3f pos(ipos.asVec3());
-            osg::Quat rot(-ipos.rot[2], osg::Vec3f(0,0,1));
-            const float distance = 50;
-            pos = pos + (rot * osg::Vec3f(0,1,0)) * distance;
-            ipos.pos[0] = pos.x();
-            ipos.pos[1] = pos.y();
-            ipos.pos[2] = pos.z();
-            ipos.rot[0] = 0;
-            ipos.rot[1] = 0;
-            ipos.rot[2] = 0;
-
-            MWWorld::CellStore* cell = mPlayer->getPlayer().getCell();
             MWWorld::ManualRef ref(getStore(), selectedCreature, 1);
-            ref.getPtr().getCellRef().setPosition(ipos);
 
-            placeObject(ref.getPtr(), cell, ipos);
+            safePlaceObject(ref.getPtr(), getPlayerPtr(), getPlayerPtr().getCell(), 0, 220.f);
         }
     }
 
