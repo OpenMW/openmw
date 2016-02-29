@@ -147,7 +147,7 @@ namespace MWMechanics
                         summonedCreatureStats.getAiSequence().stack(package, ref.getPtr());
                         creatureActorId = summonedCreatureStats.getActorId();
 
-                        MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
+                        MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(),store,ipos);
 
                         MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(placed);
                         if (anim)

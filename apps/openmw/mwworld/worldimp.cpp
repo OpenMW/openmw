@@ -1325,7 +1325,7 @@ namespace MWWorld
         rotateObjectImp(ptr, osg::Vec3f(x, y, z), adjust);
     }
 
-    MWWorld::Ptr World::safePlaceObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos)
+    MWWorld::Ptr World::placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos)
     {
         return copyObjectToCell(ptr,cell,pos,ptr.getRefData().getCount(),false);
     }
@@ -3041,7 +3041,7 @@ namespace MWWorld
             MWWorld::ManualRef ref(getStore(), selectedCreature, 1);
             ref.getPtr().getCellRef().setPosition(ipos);
 
-            safePlaceObject(ref.getPtr(), cell, ipos);
+            placeObject(ref.getPtr(), cell, ipos);
         }
     }
 

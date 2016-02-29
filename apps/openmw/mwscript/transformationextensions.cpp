@@ -434,7 +434,7 @@ namespace MWScript
                         pos.rot[2] = osg::DegreesToRadians(zRotDegrees);
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
                         ref.getPtr().getCellRef().setPosition(pos);
-                        MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
+                        MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(),store,pos);
                         placed.getClass().adjustPosition(placed, true);
                     }
                 }
@@ -482,7 +482,7 @@ namespace MWScript
                     pos.rot[2] = osg::DegreesToRadians(zRotDegrees);
                     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
                     ref.getPtr().getCellRef().setPosition(pos);
-                    MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
+                    MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(),store,pos);
                     placed.getClass().adjustPosition(placed, true);
                 }
         };
@@ -567,7 +567,7 @@ namespace MWScript
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, 1);
                         ref.getPtr().getCellRef().setPosition(ipos);
 
-                        MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
+                        MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(),store,ipos);
                         placed.getClass().adjustPosition(placed, true); // snap to ground
                     }
                 }
