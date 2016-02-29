@@ -1353,9 +1353,24 @@ namespace MWRender
             if (found != getNodeMap().end())
             {
                 osg::MatrixTransform* node = found->second;
-                mHeadController = new RotateController(mObjectRoot.get());
-                node->addUpdateCallback(mHeadController);
-                mActiveControllers.insert(std::make_pair(node, mHeadController));
+
+                bool foundKeyframeCtrl = false;
+                osg::Callback* cb = node->getUpdateCallback();
+                while (cb)
+                {
+                    if (dynamic_cast<NifOsg::KeyframeController*>(cb))
+                    {
+                        foundKeyframeCtrl = true;
+                        break;
+                    }
+                }
+
+                if (foundKeyframeCtrl)
+                {
+                    mHeadController = new RotateController(mObjectRoot.get());
+                    node->addUpdateCallback(mHeadController);
+                    mActiveControllers.insert(std::make_pair(node, mHeadController));
+                }
             }
         }
     }
