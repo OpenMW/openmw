@@ -56,9 +56,18 @@ namespace SceneUtil
             CopyRigVisitor copyVisitor(handle, filter);
             toAttach->accept(copyVisitor);
 
-            master->asGroup()->addChild(handle);
-
-            return handle;
+            if (handle->getNumChildren() == 1)
+            {
+                osg::ref_ptr<osg::Node> newHandle = handle->getChild(0);
+                handle->removeChild(newHandle);
+                master->asGroup()->addChild(newHandle);
+                return newHandle;
+            }
+            else
+            {
+                master->asGroup()->addChild(handle);
+                return handle;
+            }
         }
         else
         {
