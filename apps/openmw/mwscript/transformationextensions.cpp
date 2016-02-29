@@ -492,6 +492,15 @@ namespace MWScript
         {
             public:
 
+                osg::Vec3f getSpawnPosition(const osg::Vec3f& origin, const osg::Quat& orientation, int direction, float distance)
+                {
+                    if(direction == 0) return origin + (orientation * osg::Vec3f(0,1,0)) * distance;
+                    else if(direction == 1) return origin - (orientation * osg::Vec3f(0,1,0)) * distance;
+                    else if(direction == 2) return origin - (orientation * osg::Vec3f(1,0,0)) * distance;
+                    else if(direction == 3) return origin + (orientation * osg::Vec3f(1,0,0)) * distance;
+                    else return origin;
+                }
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr actor = pc
@@ -514,40 +523,52 @@ namespace MWScript
                     if (!actor.isInCell())
                         throw std::runtime_error ("actor is not in a cell");
 
+                    ESM::Position ipos = actor.getRefData().getPosition();
+                    osg::Vec3f pos(ipos.asVec3());
+                    osg::Quat rot(ipos.rot[2], osg::Vec3f(0,0,-1));
+
+                    for (int i=0; i<4; ++i)
+                    {
+                        // check if spawn point is safe, fall back to another direction if not
+                        osg::Vec3f spawnPoint = getSpawnPosition(ipos.asVec3(), rot, direction, distance);
+                        spawnPoint.z() += 30; // move up a little to account for slopes, will snap down later
+
+                        if (!MWBase::Environment::get().getWorld()->castRay(spawnPoint.x(), spawnPoint.y(), spawnPoint.z(),
+                                                                           pos.x(), pos.y(), pos.z() + 20))
+                        {
+                            // safe
+                            ipos.pos[0] = spawnPoint.x();
+                            ipos.pos[1] = spawnPoint.y();
+                            ipos.pos[2] = spawnPoint.z();
+                            break;
+                        }
+                        direction = (direction+1) % 4;
+                    }
+
+                    if (actor.getClass().isActor())
+                    {
+                        // TODO: should this depend on the 'direction' parameter?
+                        ipos.rot[0] = 0;
+                        ipos.rot[1] = 0;
+                        ipos.rot[2] = 0;
+                    }
+                    else
+                    {
+                        ipos.rot[0] = actor.getRefData().getPosition().rot[0];
+                        ipos.rot[1] = actor.getRefData().getPosition().rot[1];
+                        ipos.rot[2] = actor.getRefData().getPosition().rot[2];
+                    }
+
+
                     for (int i=0; i<count; ++i)
                     {
-                        ESM::Position ipos = actor.getRefData().getPosition();
-                        osg::Vec3f pos(ipos.asVec3());
-                        osg::Quat rot(ipos.rot[2], osg::Vec3f(0,0,-1));
-                        if(direction == 0) pos = pos + (rot * osg::Vec3f(0,1,0)) * distance;
-                        else if(direction == 1) pos = pos - (rot * osg::Vec3f(0,1,0)) * distance;
-                        else if(direction == 2) pos = pos - (rot * osg::Vec3f(1,0,0)) * distance;
-                        else if(direction == 3) pos = pos + (rot * osg::Vec3f(1,0,0)) * distance;
-                        else throw std::runtime_error ("direction must be 0,1,2 or 3");
-
-                        ipos.pos[0] = pos.x();
-                        ipos.pos[1] = pos.y();
-                        ipos.pos[2] = pos.z();
-
-                        if (actor.getClass().isActor())
-                        {
-                            // TODO: should this depend on the 'direction' parameter?
-                            ipos.rot[0] = 0;
-                            ipos.rot[1] = 0;
-                            ipos.rot[2] = 0;
-                        }
-                        else
-                        {
-                            ipos.rot[0] = actor.getRefData().getPosition().rot[0];
-                            ipos.rot[1] = actor.getRefData().getPosition().rot[1];
-                            ipos.rot[2] = actor.getRefData().getPosition().rot[2];
-                        }
                         // create item
                         MWWorld::CellStore* store = actor.getCell();
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, 1);
                         ref.getPtr().getCellRef().setPosition(ipos);
 
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
+                        MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
+                        placed.getClass().adjustPosition(placed, true); // snap to ground
                     }
                 }
         };
