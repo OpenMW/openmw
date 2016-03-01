@@ -470,7 +470,7 @@ namespace NifOsg
             const Nif::NiTextureEffect* textureEffect = static_cast<const Nif::NiTextureEffect*>(nifNode);
             if (textureEffect->textureType != Nif::NiTextureEffect::Environment_Map)
             {
-                std::cerr << "Unhandled NiTextureEffect type " << textureEffect->textureType << std::endl;
+                std::cerr << "Unhandled NiTextureEffect type " << textureEffect->textureType << " in " << mFilename << std::endl;
                 return;
             }
 
@@ -487,7 +487,7 @@ namespace NifOsg
                 texGen->setMode(osg::TexGen::SPHERE_MAP);
                 break;
             default:
-                std::cerr << "Unhandled NiTextureEffect coordGenType " << textureEffect->coordGenType << std::endl;
+                std::cerr << "Unhandled NiTextureEffect coordGenType " << textureEffect->coordGenType << " in " << mFilename << std::endl;
                 return;
             }
 
