@@ -68,7 +68,7 @@ void main(void)
 #endif
 
 #if @detailMap
-    detailMapUV = (gl_TextureMatrix[@detailMap] * gl_MultiTexCoord@detailMap).xy;
+    detailMapUV = (gl_TextureMatrix[@detailMapUV] * gl_MultiTexCoord@detailMapUV).xy;
 #endif
 
 #if @emissiveMap
