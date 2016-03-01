@@ -138,8 +138,7 @@ namespace MWScript
 
     InterpreterContext::InterpreterContext (
         MWScript::Locals *locals, MWWorld::Ptr reference, const std::string& targetId)
-    : mLocals (locals), mReference (reference),
-      mActivationHandled (false), mTargetId (targetId)
+    : mLocals (locals), mReference (reference), mTargetId (targetId)
     {
         // If we run on a reference (local script, dialogue script or console with object
         // selected), store the ID of that reference store it so it can be inherited by
@@ -477,37 +476,10 @@ namespace MWScript
         return static_cast<float>(std::sqrt(diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2]));
     }
 
-    bool InterpreterContext::hasBeenActivated (const MWWorld::Ptr& ptr)
-    {
-        if (!mActivated.isEmpty() && mActivated==ptr)
-        {
-            mActivationHandled = true;
-            return true;
-        }
-
-        return false;
-    }
-
-    bool InterpreterContext::hasActivationBeenHandled() const
-    {
-        return mActivationHandled;
-    }
-
-    void InterpreterContext::activate (const MWWorld::Ptr& ptr)
-    {
-        mActivated = ptr;
-        mActivationHandled = false;
-    }
-
     void InterpreterContext::executeActivation(MWWorld::Ptr ptr, MWWorld::Ptr actor)
     {
         boost::shared_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, actor));
         action->execute (actor);
-        if (mActivated == ptr)
-        {
-            mActivationHandled = true;
-            mActivated = MWWorld::Ptr();
-        }
     }
 
     float InterpreterContext::getSecondsPassed() const

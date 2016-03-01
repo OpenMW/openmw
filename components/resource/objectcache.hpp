@@ -27,6 +27,7 @@ namespace osg
 {
     class Object;
     class State;
+    class NodeVisitor;
 }
 
 namespace Resource {
@@ -65,6 +66,9 @@ class ObjectCache : public osg::Referenced
 
         /** call releaseGLObjects on all objects attached to the object cache.*/
         void releaseGLObjects(osg::State* state);
+
+        /** call node->accept(nv); for all nodes in the objectCache. */
+        void accept(osg::NodeVisitor& nv);
 
     protected:
 

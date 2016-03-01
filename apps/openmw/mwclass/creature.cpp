@@ -306,18 +306,7 @@ namespace MWClass
             }
 
             // Apply "On hit" enchanted weapons
-            std::string enchantmentName = !weapon.isEmpty() ? weapon.getClass().getEnchantment(weapon) : "";
-            if (!enchantmentName.empty())
-            {
-                const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
-                            enchantmentName);
-                if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
-                {
-                    MWMechanics::CastSpell cast(ptr, victim);
-                    cast.mHitPosition = hitPosition;
-                    cast.cast(weapon);
-                }
-            }
+            MWMechanics::applyOnStrikeEnchantment(ptr, victim, weapon, hitPosition);
         }
         else if (isBipedal(ptr))
         {
@@ -770,7 +759,18 @@ namespace MWClass
 
     void Creature::respawn(const MWWorld::Ptr &ptr) const
     {
-        if (isFlagBitSet(ptr, ESM::Creature::Respawn))
+        const MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
+        if (ptr.getRefData().getCount() > 0 && !creatureStats.isDead())
+            return;
+
+        const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        static const float fCorpseRespawnDelay = gmst.find("fCorpseRespawnDelay")->getFloat();
+        static const float fCorpseClearDelay = gmst.find("fCorpseClearDelay")->getFloat();
+
+        float delay = ptr.getRefData().getCount() == 0 ? fCorpseClearDelay : std::min(fCorpseRespawnDelay, fCorpseClearDelay);
+
+        if (isFlagBitSet(ptr, ESM::Creature::Respawn)
+                && creatureStats.getTimeOfDeath() + delay <= MWBase::Environment::get().getWorld()->getTimeStamp())
         {
             if (ptr.getCellRef().hasContentFile())
             {

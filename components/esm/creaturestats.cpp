@@ -87,6 +87,10 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mDeathAnimation = 0;
     esm.getHNOT (mDeathAnimation, "DANM");
 
+    mTimeOfDeath.mDay = 0;
+    mTimeOfDeath.mHour = 0;
+    esm.getHNOT (mTimeOfDeath, "DTIM");
+
     mSpells.load(esm);
     mActiveSpells.load(esm);
     mAiSequence.load(esm);
@@ -192,6 +196,9 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
 
     if (mDeathAnimation)
         esm.writeHNT ("DANM", mDeathAnimation);
+
+    if (mTimeOfDeath.mHour != 0 && mTimeOfDeath.mDay != 0)
+        esm.writeHNT ("DTIM", mTimeOfDeath);
 
     mSpells.save(esm);
     mActiveSpells.save(esm);

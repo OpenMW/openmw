@@ -66,11 +66,6 @@ MWWorld::LocalScripts::LocalScripts (const MWWorld::ESMStore& store) : mStore (s
     mIter = mScripts.end();
 }
 
-void MWWorld::LocalScripts::setIgnore (const ConstPtr& ptr)
-{
-    mIgnore = ptr;
-}
-
 void MWWorld::LocalScripts::startIteration()
 {
     mIter = mScripts.begin();
@@ -81,11 +76,8 @@ bool MWWorld::LocalScripts::getNext(std::pair<std::string, Ptr>& script)
     while (mIter!=mScripts.end())
     {
         std::list<std::pair<std::string, Ptr> >::iterator iter = mIter++;
-        if (mIgnore.isEmpty() || iter->second!=mIgnore)
-        {
-            script = *iter;
-            return true;
-        }
+        script = *iter;
+        return true;
     }
     return false;
 }

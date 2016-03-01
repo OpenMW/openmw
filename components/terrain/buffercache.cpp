@@ -219,7 +219,7 @@ namespace Terrain
 
         osg::ref_ptr<osg::DrawElements> buffer;
 
-        if (verts*verts > (0xffffu))
+        if (verts*verts <= (0xffffu))
             buffer = createIndexBuffer<osg::DrawElementsUShort>(flags, verts);
         else
             buffer = createIndexBuffer<osg::DrawElementsUInt>(flags, verts);

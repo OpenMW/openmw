@@ -4,11 +4,20 @@
 #include <osg/Vec2f>
 
 #include "world.hpp"
-#include "material.hpp"
 
 namespace SceneUtil
 {
     class UnrefQueue;
+}
+
+namespace Shader
+{
+    class ShaderManager;
+}
+
+namespace osg
+{
+    class Texture2D;
 }
 
 namespace Terrain
@@ -18,7 +27,7 @@ namespace Terrain
     class TerrainGrid : public Terrain::World
     {
     public:
-        TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, SceneUtil::UnrefQueue* unrefQueue = NULL);
+        TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, Shader::ShaderManager* shaderManager = NULL, SceneUtil::UnrefQueue* unrefQueue = NULL);
         ~TerrainGrid();
 
         /// Load a terrain cell and store it in cache for later use.
@@ -35,6 +44,10 @@ namespace Terrain
         /// Clear cached objects that are no longer referenced
         /// @note Thread safe.
         void updateCache();
+
+        /// Apply the scene manager's texture filtering settings to all cached textures.
+        /// @note Thread safe.
+        void updateTextureFiltering();
 
     private:
         osg::ref_ptr<osg::Node> buildTerrain (osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter);
@@ -55,6 +68,8 @@ namespace Terrain
         BufferCache mCache;
 
         osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
+
+        Shader::ShaderManager* mShaderManager;
     };
 
 }

@@ -10,8 +10,6 @@
 
 #include <osgUtil/IncrementalCompileOperation>
 
-#include <osgViewer/Viewer>
-
 #include <osgDB/SharedStateManager>
 #include <osgDB/Registry>
 
@@ -23,6 +21,9 @@
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/controller.hpp>
+
+#include <components/shader/shadervisitor.hpp>
+#include <components/shader/shadermanager.hpp>
 
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
@@ -68,10 +69,10 @@ namespace
 
         void transformInitialParticles(osgParticle::ParticleSystem* partsys, osg::Node* node)
         {
-            osg::MatrixList mats = node->getWorldMatrices();
-            if (mats.empty())
+            osg::NodePathList nodepaths = node->getParentalNodePaths();
+            if (nodepaths.empty())
                 return;
-            osg::Matrixf worldMat = mats[0];
+            osg::Matrixf worldMat = osg::computeLocalToWorld(nodepaths[0]);
             worldMat.orthoNormalize(worldMat); // scale is already applied on the particle node
             for (int i=0; i<partsys->numParticles(); ++i)
             {
@@ -139,16 +140,16 @@ namespace Resource
         virtual void apply(osg::Node& node)
         {
             if (osgFX::Effect* effect = dynamic_cast<osgFX::Effect*>(&node))
-                apply(*effect);
+                applyEffect(*effect);
 
             osg::StateSet* stateset = node.getStateSet();
             if (stateset)
-                apply(stateset);
+                applyStateSet(stateset);
 
             traverse(node);
         }
 
-        void apply(osgFX::Effect& effect)
+        void applyEffect(osgFX::Effect& effect)
         {
             for (int i =0; i<effect.getNumTechniques(); ++i)
             {
@@ -156,7 +157,7 @@ namespace Resource
                 for (int pass=0; pass<tech->getNumPasses(); ++pass)
                 {
                     if (tech->getPassStateSet(pass))
-                        apply(tech->getPassStateSet(pass));
+                        applyStateSet(tech->getPassStateSet(pass));
                 }
             }
         }
@@ -165,40 +166,33 @@ namespace Resource
         {
             osg::StateSet* stateset = geode.getStateSet();
             if (stateset)
-                apply(stateset);
+                applyStateSet(stateset);
 
             for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
             {
                 osg::Drawable* drw = geode.getDrawable(i);
                 stateset = drw->getStateSet();
                 if (stateset)
-                    apply(stateset);
+                    applyStateSet(stateset);
             }
         }
 
-        void apply(osg::StateSet* stateset)
+        void applyStateSet(osg::StateSet* stateset)
         {
             const osg::StateSet::TextureAttributeList& texAttributes = stateset->getTextureAttributeList();
             for(unsigned int unit=0;unit<texAttributes.size();++unit)
             {
                 osg::StateAttribute *texture = stateset->getTextureAttribute(unit, osg::StateAttribute::TEXTURE);
                 if (texture)
-                    apply(texture);
+                    applyStateAttribute(texture);
             }
         }
 
-        void apply(osg::StateAttribute* attr)
+        void applyStateAttribute(osg::StateAttribute* attr)
         {
             osg::Texture* tex = attr->asTexture();
             if (tex)
             {
-                if (tex->getUserDataContainer())
-                {
-                    const std::vector<std::string>& descriptions = tex->getUserDataContainer()->getDescriptions();
-                    if (std::find(descriptions.begin(), descriptions.end(), "dont_override_filter") != descriptions.end())
-                        return;
-                }
-
                 tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
                 tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
                 tex->setMaxAnisotropy(mMaxAnisotropy);
@@ -214,6 +208,12 @@ namespace Resource
 
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
         : ResourceManager(vfs)
+        , mShaderManager(new Shader::ShaderManager)
+        , mForceShaders(false)
+        , mClampLighting(true)
+        , mForcePerPixelLighting(false)
+        , mAutoUseNormalMaps(false)
+        , mAutoUseSpecularMaps(false)
         , mInstanceCache(new MultiObjectCache)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
@@ -225,9 +225,79 @@ namespace Resource
     {
     }
 
+    void SceneManager::setForceShaders(bool force)
+    {
+        mForceShaders = force;
+    }
+
+    bool SceneManager::getForceShaders() const
+    {
+        return mForceShaders;
+    }
+
+    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node)
+    {
+        Shader::ShaderVisitor shaderVisitor(*mShaderManager.get(), *mImageManager, "objects_vertex.glsl", "objects_fragment.glsl");
+        shaderVisitor.setForceShaders(mForceShaders);
+        shaderVisitor.setClampLighting(mClampLighting);
+        shaderVisitor.setForcePerPixelLighting(mForcePerPixelLighting);
+        shaderVisitor.setAllowedToModifyStateSets(false);
+        node->accept(shaderVisitor);
+    }
+
+    void SceneManager::setClampLighting(bool clamp)
+    {
+        mClampLighting = clamp;
+    }
+
+    bool SceneManager::getClampLighting() const
+    {
+        return mClampLighting;
+    }
+
+    void SceneManager::setForcePerPixelLighting(bool force)
+    {
+        mForcePerPixelLighting = force;
+    }
+
+    bool SceneManager::getForcePerPixelLighting() const
+    {
+        return mForcePerPixelLighting;
+    }
+
+    void SceneManager::setAutoUseNormalMaps(bool use)
+    {
+        mAutoUseNormalMaps = use;
+    }
+
+    void SceneManager::setNormalMapPattern(const std::string &pattern)
+    {
+        mNormalMapPattern = pattern;
+    }
+
+    void SceneManager::setAutoUseSpecularMaps(bool use)
+    {
+        mAutoUseSpecularMaps = use;
+    }
+
+    void SceneManager::setSpecularMapPattern(const std::string &pattern)
+    {
+        mSpecularMapPattern = pattern;
+    }
+
     SceneManager::~SceneManager()
     {
         // this has to be defined in the .cpp file as we can't delete incomplete types
+    }
+
+    Shader::ShaderManager &SceneManager::getShaderManager()
+    {
+        return *mShaderManager.get();
+    }
+
+    void SceneManager::setShaderPath(const std::string &path)
+    {
+        mShaderManager->setShaderPath(path);
     }
 
     /// @brief Callback to read image files from the VFS.
@@ -338,6 +408,16 @@ namespace Resource
             SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor(mMinFilter, mMagFilter, mMaxAnisotropy);
             loaded->accept(setFilterSettingsControllerVisitor);
 
+            Shader::ShaderVisitor shaderVisitor(*mShaderManager.get(), *mImageManager, "objects_vertex.glsl", "objects_fragment.glsl");
+            shaderVisitor.setForceShaders(mForceShaders);
+            shaderVisitor.setClampLighting(mClampLighting);
+            shaderVisitor.setForcePerPixelLighting(mForcePerPixelLighting);
+            shaderVisitor.setAutoUseNormalMaps(mAutoUseNormalMaps);
+            shaderVisitor.setNormalMapPattern(mNormalMapPattern);
+            shaderVisitor.setAutoUseSpecularMaps(mAutoUseSpecularMaps);
+            shaderVisitor.setSpecularMapPattern(mSpecularMapPattern);
+            loaded->accept(shaderVisitor);
+
             // share state
             mSharedStateMutex.lock();
             osgDB::Registry::instance()->getOrCreateSharedStateManager()->share(loaded.get());
@@ -401,6 +481,7 @@ namespace Resource
     void SceneManager::releaseGLObjects(osg::State *state)
     {
         mCache->releaseGLObjects(state);
+        mInstanceCache->releaseGLObjects(state);
     }
 
     void SceneManager::setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation *ico)
@@ -425,8 +506,7 @@ namespace Resource
     }
 
     void SceneManager::setFilterSettings(const std::string &magfilter, const std::string &minfilter,
-                                           const std::string &mipmap, int maxAnisotropy,
-                                           osgViewer::Viewer *viewer)
+                                           const std::string &mipmap, int maxAnisotropy)
     {
         osg::Texture::FilterMode min = osg::Texture::LINEAR;
         osg::Texture::FilterMode mag = osg::Texture::LINEAR;
@@ -458,23 +538,15 @@ namespace Resource
                 min = osg::Texture::LINEAR_MIPMAP_LINEAR;
         }
 
-        if(viewer) viewer->stopThreading();
-
         mMinFilter = min;
         mMagFilter = mag;
         mMaxAnisotropy = std::max(1, maxAnisotropy);
 
-        mCache->clear();
-
         SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor (mMinFilter, mMagFilter, mMaxAnisotropy);
         SetFilterSettingsVisitor setFilterSettingsVisitor (mMinFilter, mMagFilter, mMaxAnisotropy);
-        if (viewer && viewer->getSceneData())
-        {
-            viewer->getSceneData()->accept(setFilterSettingsControllerVisitor);
-            viewer->getSceneData()->accept(setFilterSettingsVisitor);
-        }
 
-        if(viewer) viewer->startThreading();
+        mCache->accept(setFilterSettingsVisitor);
+        mCache->accept(setFilterSettingsControllerVisitor);
     }
 
     void SceneManager::applyFilterSettings(osg::Texture *tex)

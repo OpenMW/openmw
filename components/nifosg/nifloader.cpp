@@ -6,6 +6,7 @@
 #include <osg/Geometry>
 #include <osg/Array>
 #include <osg/LOD>
+#include <osg/TexGen>
 
 // resource
 #include <components/misc/stringops.hpp>
@@ -36,6 +37,7 @@
 #include <osg/TexEnvCombine>
 
 #include <components/nif/node.hpp>
+#include <components/nif/effect.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/riggeometry.hpp>
@@ -439,6 +441,81 @@ namespace NifOsg
             return lod;
         }
 
+        osg::ref_ptr<osg::Image> handleSourceTexture(const Nif::NiSourceTexture* st, Resource::ImageManager* imageManager)
+        {
+            if (!st)
+                return NULL;
+
+            osg::ref_ptr<osg::Image> image;
+            if (!st->external && !st->data.empty())
+            {
+                image = handleInternalTexture(st->data.getPtr());
+            }
+            else
+            {
+                std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, imageManager->getVFS());
+                image = imageManager->getImage(filename);
+            }
+            return image;
+        }
+
+        void handleEffect(const Nif::Node* nifNode, osg::Node* node, Resource::ImageManager* imageManager)
+        {
+            if (nifNode->recType != Nif::RC_NiTextureEffect)
+            {
+                std::cerr << "Unhandled effect " << nifNode->recName << " in " << mFilename << std::endl;
+                return;
+            }
+
+            const Nif::NiTextureEffect* textureEffect = static_cast<const Nif::NiTextureEffect*>(nifNode);
+            if (textureEffect->textureType != Nif::NiTextureEffect::Environment_Map)
+            {
+                std::cerr << "Unhandled NiTextureEffect type " << textureEffect->textureType << std::endl;
+                return;
+            }
+
+            osg::ref_ptr<osg::TexGen> texGen (new osg::TexGen);
+            switch (textureEffect->coordGenType)
+            {
+            case Nif::NiTextureEffect::World_Parallel:
+                texGen->setMode(osg::TexGen::OBJECT_LINEAR);
+                break;
+            case Nif::NiTextureEffect::World_Perspective:
+                texGen->setMode(osg::TexGen::EYE_LINEAR);
+                break;
+            case Nif::NiTextureEffect::Sphere_Map:
+                texGen->setMode(osg::TexGen::SPHERE_MAP);
+                break;
+            default:
+                std::cerr << "Unhandled NiTextureEffect coordGenType " << textureEffect->coordGenType << std::endl;
+                return;
+            }
+
+            osg::ref_ptr<osg::Texture2D> texture2d (new osg::Texture2D(handleSourceTexture(textureEffect->texture.getPtr(), imageManager)));
+            texture2d->setName("envMap");
+            unsigned int clamp = static_cast<unsigned int>(textureEffect->clamp);
+            int wrapT = (clamp) & 0x1;
+            int wrapS = (clamp >> 1) & 0x1;
+            texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP);
+            texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
+
+            osg::ref_ptr<osg::TexEnvCombine> texEnv = new osg::TexEnvCombine;
+            texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+            texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+            texEnv->setCombine_RGB(osg::TexEnvCombine::ADD);
+            texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+            texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
+
+            int texUnit = 3; // FIXME
+
+            osg::StateSet* stateset = node->getOrCreateStateSet();
+            stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
+            stateset->setTextureAttributeAndModes(texUnit, texGen, osg::StateAttribute::ON);
+            stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
+
+            stateset->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1,1,1,1)));
+        }
+
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
                                 std::vector<int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
@@ -582,13 +659,18 @@ namespace NifOsg
             const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
             if(ninode)
             {
+                const Nif::NodeList &effects = ninode->effects;
+                for (size_t i = 0; i < effects.length(); ++i)
+                {
+                    if (!effects[i].empty())
+                        handleEffect(effects[i].getPtr(), node, imageManager);
+                }
+
                 const Nif::NodeList &children = ninode->children;
                 for(size_t i = 0;i < children.length();++i)
                 {
                     if(!children[i].empty())
-                    {
                         handleNode(children[i].getPtr(), node, imageManager, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode);
-                    }
                 }
             }
 
@@ -707,8 +789,7 @@ namespace NifOsg
                             wrapT = inherit->getWrap(osg::Texture2D::WRAP_T);
                         }
 
-                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, imageManager->getVFS());
-                        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D(imageManager->getImage(filename)));
+                        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D(handleSourceTexture(st.getPtr(), imageManager)));
                         texture->setWrap(osg::Texture::WRAP_S, wrapS);
                         texture->setWrap(osg::Texture::WRAP_T, wrapT);
                         textures.push_back(texture);
@@ -962,7 +1043,7 @@ namespace NifOsg
                 if (uvSet >= (int)data->uvlist.size())
                 {
                     std::cerr << "Warning: out of bounds UV set " << uvSet << " on TriShape \"" << triShape->name << "\" in " << mFilename << std::endl;
-                    if (data->uvlist.size())
+                    if (!data->uvlist.empty())
                         geometry->setTexCoordArray(textureStage, data->uvlist[0]);
                     continue;
                 }
@@ -1040,7 +1121,7 @@ namespace NifOsg
             triShapeToGeometry(triShape, morphGeom, parentNode, composite, boundTextures, animflags);
 
             const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
-            if (!morphs.size())
+            if (morphs.empty())
                 return morphGeom;
             // Note we are not interested in morph 0, which just contains the original vertices
             for (unsigned int i = 1; i < morphs.size(); ++i)
@@ -1210,6 +1291,195 @@ namespace NifOsg
             }
         }
 
+        osg::ref_ptr<osg::Image> handleInternalTexture(const Nif::NiPixelData* pixelData)
+        {
+            osg::ref_ptr<osg::Image> image (new osg::Image);
+
+            GLenum pixelformat = 0;
+            switch (pixelData->fmt)
+            {
+            case Nif::NiPixelData::NIPXFMT_RGB8:
+                pixelformat = GL_RGB;
+                break;
+            case Nif::NiPixelData::NIPXFMT_RGBA8:
+                pixelformat = GL_RGBA;
+                break;
+            default:
+                std::cerr << "Unhandled internal pixel format " << pixelData->fmt << " in " << mFilename << std::endl;
+                return NULL;
+            }
+
+            if (pixelData->mipmaps.empty())
+                return NULL;
+
+            unsigned int width = 0;
+            unsigned int height = 0;
+
+            std::vector<unsigned int> mipmapVector;
+            for (unsigned int i=0; i<pixelData->mipmaps.size()-3; ++i)
+            {
+                const Nif::NiPixelData::Mipmap& mip = pixelData->mipmaps[i];
+
+                size_t mipSize = mip.height * mip.width * pixelData->bpp / 8;
+                if (mipSize + mip.dataOffset > pixelData->data.size())
+                {
+                    std::cerr << "Internal texture's mipmap data out of bounds" << std::endl;
+                    return NULL;
+                }
+
+                if (i != 0)
+                    mipmapVector.push_back(mip.dataOffset);
+                else
+                {
+                    width = mip.width;
+                    height = mip.height;
+                }
+            }
+
+            if (width <= 0 || height <= 0)
+            {
+                std::cerr << "Width and height must be non zero " << std::endl;
+                return NULL;
+            }
+
+            unsigned char* data = new unsigned char[pixelData->data.size()];
+            memcpy(data, &pixelData->data[0], pixelData->data.size());
+
+            image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE);
+            image->setMipmapLevels(mipmapVector);
+            image->flipVertical();
+
+            return image;
+        }
+
+        void handleTextureProperty(const Nif::NiTexturingProperty* texprop, osg::StateSet* stateset, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<int>& boundTextures, int animflags)
+        {
+            if (!boundTextures.empty())
+            {
+                // overriding a parent NiTexturingProperty, so remove what was previously bound
+                for (unsigned int i=0; i<boundTextures.size(); ++i)
+                    stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
+                boundTextures.clear();
+            }
+
+            for (int i=0; i<Nif::NiTexturingProperty::NumTextures; ++i)
+            {
+                if (texprop->textures[i].inUse)
+                {
+                    switch(i)
+                    {
+                        //These are handled later on
+                        case Nif::NiTexturingProperty::BaseTexture:
+                        case Nif::NiTexturingProperty::GlowTexture:
+                        case Nif::NiTexturingProperty::DarkTexture:
+                        case Nif::NiTexturingProperty::BumpTexture:
+                        case Nif::NiTexturingProperty::DetailTexture:
+                            break;
+                        case Nif::NiTexturingProperty::GlossTexture:
+                        {
+                            std::cerr << "NiTexturingProperty::GlossTexture in " << mFilename << " not currently used." << std::endl;
+                            continue;
+                        }
+                        case Nif::NiTexturingProperty::DecalTexture:
+                        {
+                            std::cerr << "NiTexturingProperty::DecalTexture in " << mFilename << " not currently used." << std::endl;
+                            continue;
+                        }
+                        default:
+                        {
+                            std::cerr << "Warning: unhandled texture stage " << i << " in " << mFilename << std::endl;
+                            continue;
+                        }
+                    }
+
+                    const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
+                    if(tex.texture.empty())
+                    {
+                        std::cerr << "Warning: texture layer " << i << " is in use but empty in " << mFilename << std::endl;
+                        continue;
+                    }
+                    const Nif::NiSourceTexture *st = tex.texture.getPtr();
+                    osg::ref_ptr<osg::Image> image = handleSourceTexture(st, imageManager);
+
+                    unsigned int clamp = static_cast<unsigned int>(tex.clamp);
+                    int wrapT = (clamp) & 0x1;
+                    int wrapS = (clamp >> 1) & 0x1;
+
+                    // create a new texture, will later attempt to share using the SharedStateManager
+                    osg::ref_ptr<osg::Texture2D> texture2d (new osg::Texture2D(image));
+                    texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP);
+                    texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
+
+                    int texUnit = boundTextures.size();
+
+                    stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
+
+                    if (i == Nif::NiTexturingProperty::GlowTexture)
+                    {
+                        osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
+                        texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+                        texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+                        texEnv->setCombine_RGB(osg::TexEnvCombine::ADD);
+                        texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+                        texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
+
+                        stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
+                    }
+                    else if (i == Nif::NiTexturingProperty::DarkTexture)
+                    {
+                        osg::TexEnv* texEnv = new osg::TexEnv;
+                        texEnv->setMode(osg::TexEnv::MODULATE);
+                        stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
+                    }
+                    else if (i == Nif::NiTexturingProperty::DetailTexture)
+                    {
+                        osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
+                        texEnv->setScale_RGB(2.f);
+                        texEnv->setCombine_Alpha(GL_MODULATE);
+                        texEnv->setOperand0_Alpha(GL_SRC_ALPHA);
+                        texEnv->setOperand1_Alpha(GL_SRC_ALPHA);
+                        texEnv->setSource0_Alpha(GL_PREVIOUS_ARB);
+                        texEnv->setSource1_Alpha(GL_TEXTURE);
+                        texEnv->setCombine_RGB(GL_MODULATE);
+                        texEnv->setOperand0_RGB(GL_SRC_COLOR);
+                        texEnv->setOperand1_RGB(GL_SRC_COLOR);
+                        texEnv->setSource0_RGB(GL_PREVIOUS_ARB);
+                        texEnv->setSource1_RGB(GL_TEXTURE);
+                        stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
+                    }
+                    else if (i == Nif::NiTexturingProperty::BumpTexture)
+                    {
+                        // Set this texture to Off by default since we can't render it with the fixed-function pipeline
+                        stateset->setTextureMode(texUnit, GL_TEXTURE_2D, osg::StateAttribute::OFF);
+                    }
+
+                    switch (i)
+                    {
+                    case Nif::NiTexturingProperty::BaseTexture:
+                        texture2d->setName("diffuseMap");
+                        break;
+                    case Nif::NiTexturingProperty::BumpTexture:
+                        texture2d->setName("normalMap");
+                        break;
+                    case Nif::NiTexturingProperty::GlowTexture:
+                        texture2d->setName("emissiveMap");
+                        break;
+                    case Nif::NiTexturingProperty::DarkTexture:
+                        texture2d->setName("darkMap");
+                        break;
+                    case Nif::NiTexturingProperty::DetailTexture:
+                        texture2d->setName("detailMap");
+                        break;
+                    default:
+                        break;
+                    }
+
+                    boundTextures.push_back(tex.uvSet);
+                }
+            }
+            handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+        }
+
         void handleProperty(const Nif::Property *property,
                             osg::Node *node, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<int>& boundTextures, int animflags)
         {
@@ -1283,115 +1553,7 @@ namespace NifOsg
             {
                 const Nif::NiTexturingProperty* texprop = static_cast<const Nif::NiTexturingProperty*>(property);
                 osg::StateSet* stateset = node->getOrCreateStateSet();
-
-                if (boundTextures.size())
-                {
-                    // overriding a parent NiTexturingProperty, so remove what was previously bound
-                    for (unsigned int i=0; i<boundTextures.size(); ++i)
-                        stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
-                    boundTextures.clear();
-                }
-
-                for (int i=0; i<Nif::NiTexturingProperty::NumTextures; ++i)
-                {
-                    if (texprop->textures[i].inUse)
-                    {
-                        switch(i)
-                        {
-                            //These are handled later on
-                            case Nif::NiTexturingProperty::BaseTexture:
-                            case Nif::NiTexturingProperty::GlowTexture:
-                            case Nif::NiTexturingProperty::DarkTexture:
-                            case Nif::NiTexturingProperty::DetailTexture:
-                                break;
-                            case Nif::NiTexturingProperty::GlossTexture:
-                            {
-                                std::cerr << "NiTexturingProperty::GlossTexture in " << mFilename << " not currently used." << std::endl;
-                                continue;
-                            }
-                            case Nif::NiTexturingProperty::BumpTexture:
-                            {
-                                std::cerr << "NiTexturingProperty::BumpTexture in " << mFilename << " not currently used." << std::endl;
-                                continue;
-                            }
-                            case Nif::NiTexturingProperty::DecalTexture:
-                            {
-                                std::cerr << "NiTexturingProperty::DecalTexture in " << mFilename << " not currently used." << std::endl;
-                                continue;
-                            }
-                            default:
-                            {
-                                std::cerr << "Warning: unhandled texture stage " << i << " in " << mFilename << std::endl;
-                                continue;
-                            }
-                        }
-
-                        const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
-                        if(tex.texture.empty())
-                        {
-                            std::cerr << "Warning: texture layer " << i << " is in use but empty in " << mFilename << std::endl;
-                            continue;
-                        }
-                        const Nif::NiSourceTexture *st = tex.texture.getPtr();
-                        if (!st->external)
-                        {
-                            std::cerr << "Warning: unhandled internal texture in " << mFilename << std::endl;
-                            continue;
-                        }
-
-                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, imageManager->getVFS());
-
-                        unsigned int clamp = static_cast<unsigned int>(tex.clamp);
-                        int wrapT = (clamp) & 0x1;
-                        int wrapS = (clamp >> 1) & 0x1;
-
-                        // create a new texture, will later attempt to share using the SharedStateManager
-                        osg::ref_ptr<osg::Texture2D> texture2d (new osg::Texture2D(imageManager->getImage(filename)));
-                        texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP);
-                        texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
-
-                        int texUnit = boundTextures.size();
-
-                        stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
-
-                        if (i == Nif::NiTexturingProperty::GlowTexture)
-                        {
-                            osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
-                            texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
-                            texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
-                            texEnv->setCombine_RGB(osg::TexEnvCombine::ADD);
-                            texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
-                            texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
-
-                            stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
-                        }
-                        else if (i == Nif::NiTexturingProperty::DarkTexture)
-                        {
-                            osg::TexEnv* texEnv = new osg::TexEnv;
-                            texEnv->setMode(osg::TexEnv::MODULATE);
-                            stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
-                        }
-                        else if (i == Nif::NiTexturingProperty::DetailTexture)
-                        {
-                            osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
-                            texEnv->setScale_RGB(2.f);
-                            texEnv->setCombine_Alpha(GL_MODULATE);
-                            texEnv->setOperand0_Alpha(GL_SRC_ALPHA);
-                            texEnv->setOperand1_Alpha(GL_SRC_ALPHA);
-                            texEnv->setSource0_Alpha(GL_PREVIOUS_ARB);
-                            texEnv->setSource1_Alpha(GL_TEXTURE);
-                            texEnv->setCombine_RGB(GL_MODULATE);
-                            texEnv->setOperand0_RGB(GL_SRC_COLOR);
-                            texEnv->setOperand1_RGB(GL_SRC_COLOR);
-                            texEnv->setSource0_RGB(GL_PREVIOUS_ARB);
-                            texEnv->setSource1_RGB(GL_TEXTURE);
-                            stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
-                        }
-
-                        boundTextures.push_back(tex.uvSet);
-                    }
-                    handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
-                }
+                handleTextureProperty(texprop, stateset, composite, imageManager, boundTextures, animflags);
                 break;
             }
             // unused by mw

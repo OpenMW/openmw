@@ -149,6 +149,21 @@ void CSMWorld::IdTable::addRecord (const std::string& id, UniversalId::Type type
     endInsertRows();
 }
 
+void CSMWorld::IdTable::addRecordWithData (const std::string& id,
+    const std::map<int, QVariant>& data, UniversalId::Type type)
+{
+    int index = mIdCollection->getAppendIndex (id, type);
+
+    beginInsertRows (QModelIndex(), index, index);
+
+    mIdCollection->appendBlankRecord (id, type);
+
+    for (std::map<int, QVariant>::const_iterator iter (data.begin()); iter!=data.end(); ++iter)
+        mIdCollection->setData (index, iter->first, iter->second);
+
+    endInsertRows();
+}
+
 void CSMWorld::IdTable::cloneRecord(const std::string& origin,
                                     const std::string& destination,
                                     CSMWorld::UniversalId::Type type)

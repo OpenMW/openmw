@@ -76,8 +76,6 @@ void OMW::Engine::executeLocalScripts()
             &script.second.getRefData().getLocals(), script.second);
         mEnvironment.getScriptManager()->run (script.first, interpreterContext);
     }
-
-    localScripts.setIgnore (MWWorld::Ptr());
 }
 
 void OMW::Engine::frame(float frametime)
@@ -453,8 +451,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         Settings::Manager::getString("texture mag filter", "General"),
         Settings::Manager::getString("texture min filter", "General"),
         Settings::Manager::getString("texture mipmap", "General"),
-        Settings::Manager::getInt("anisotropy", "General"),
-        NULL
+        Settings::Manager::getInt("anisotropy", "General")
     );
 
     // Create input and UI first to set up a bootstrapping environment for

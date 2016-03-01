@@ -7,7 +7,6 @@
 #include <osgParticle/ModularEmitter>
 
 #include <osg/NodeCallback>
-#include <osg/UserDataContainer>
 
 #include <components/nif/nifkey.hpp>
 #include <components/nif/data.hpp>

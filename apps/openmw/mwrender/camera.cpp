@@ -88,10 +88,10 @@ namespace MWRender
         const osg::Node* trackNode = mTrackingNode;
         if (!trackNode)
             return osg::Vec3d();
-        osg::MatrixList mats = trackNode->getWorldMatrices();
-        if (!mats.size())
+        osg::NodePathList nodepaths = trackNode->getParentalNodePaths();
+        if (nodepaths.empty())
             return osg::Vec3d();
-        const osg::Matrix& worldMat = mats[0];
+        osg::Matrix worldMat = osg::computeLocalToWorld(nodepaths[0]);
 
         osg::Vec3d position = worldMat.getTrans();
         if (!isFirstPerson())

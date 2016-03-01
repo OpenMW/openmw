@@ -3,6 +3,7 @@
 #include <osg/Group>
 
 #include <components/misc/stringops.hpp>
+#include <components/esm/loadcell.hpp>
 #include <components/esm/loadland.hpp>
 
 #include "../../model/world/idtable.hpp"
@@ -308,12 +309,19 @@ void CSVRender::Cell::setCellArrows (int mask)
 void CSVRender::Cell::setCellMarker()
 {
     bool cellExists = false;
+    bool isInteriorCell = false;
+
     int cellIndex = mData.getCells().searchId(mId);
     if (cellIndex > -1)
     {
-        cellExists = !mData.getCells().getRecord(cellIndex).isDeleted();
+        const CSMWorld::Record<CSMWorld::Cell>& cellRecord = mData.getCells().getRecord(cellIndex);
+        cellExists = !cellRecord.isDeleted();
+        isInteriorCell = cellRecord.get().mData.mFlags & ESM::Cell::Interior;
     }
-    mCellMarker.reset(new CellMarker(mCellNode, mCoordinates, cellExists));
+
+    if (!isInteriorCell) {
+        mCellMarker.reset(new CellMarker(mCellNode, mCoordinates, cellExists));
+    }
 }
 
 CSMWorld::CellCoordinates CSVRender::Cell::getCoordinates() const

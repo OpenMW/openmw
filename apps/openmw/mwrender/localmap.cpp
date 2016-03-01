@@ -180,7 +180,12 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
     stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
     stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
-    stateset->setMode(GL_FOG, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
+    // assign large value to effectively turn off fog
+    // shaders don't respect glDisable(GL_FOG)
+    osg::ref_ptr<osg::Fog> fog (new osg::Fog);
+    fog->setStart(10000000);
+    fog->setEnd(10000000);
+    stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
 
     osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
     lightmodel->setAmbientIntensity(osg::Vec4(0.3f, 0.3f, 0.3f, 1.f));
@@ -627,7 +632,7 @@ void LocalMap::MapSegment::initFogOfWar()
 void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
 {
     const std::vector<char>& data = esm.mImageData;
-    if (!data.size())
+    if (data.empty())
     {
         initFogOfWar();
         return;

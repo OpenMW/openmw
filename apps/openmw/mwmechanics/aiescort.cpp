@@ -119,7 +119,7 @@ namespace MWMechanics
         return TypeIdEscort;
     }
 
-    MWWorld::Ptr AiEscort::getTarget()
+    MWWorld::Ptr AiEscort::getTarget() const
     {
         return MWBase::Environment::get().getWorld()->getPtr(mActorId, false);
     }

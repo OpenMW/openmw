@@ -318,8 +318,8 @@ namespace MWScript
                         ptr = MWBase::Environment::get().getWorld()->moveObject(ptr,store,x,y,z);
                         dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(base,ptr);
 
-                        float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
-                        float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
+                        float ax = ptr.getRefData().getPosition().rot[0];
+                        float ay = ptr.getRefData().getPosition().rot[1];
                         // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
                         // except for when you position the player, then degrees must be used.
                         // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
@@ -374,14 +374,14 @@ namespace MWScript
                     }
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(base,ptr);
 
-                    float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
-                    float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
+                    float ax = ptr.getRefData().getPosition().rot[0];
+                    float ay = ptr.getRefData().getPosition().rot[1];
                     // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
                     // except for when you position the player, then degrees must be used.
                     // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
                     if(ptr != MWMechanics::getPlayer())
                         zRot = zRot/60.0f;
-                    MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+                    MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,osg::DegreesToRadians(zRot));
                     ptr.getClass().adjustPosition(ptr, false);
                 }
         };
@@ -434,7 +434,7 @@ namespace MWScript
                         pos.rot[2] = osg::DegreesToRadians(zRotDegrees);
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
                         ref.getPtr().getCellRef().setPosition(pos);
-                        MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
+                        MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(),store,pos);
                         placed.getClass().adjustPosition(placed, true);
                     }
                 }
@@ -482,7 +482,7 @@ namespace MWScript
                     pos.rot[2] = osg::DegreesToRadians(zRotDegrees);
                     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
                     ref.getPtr().getCellRef().setPosition(pos);
-                    MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
+                    MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(),store,pos);
                     placed.getClass().adjustPosition(placed, true);
                 }
         };
@@ -516,38 +516,10 @@ namespace MWScript
 
                     for (int i=0; i<count; ++i)
                     {
-                        ESM::Position ipos = actor.getRefData().getPosition();
-                        osg::Vec3f pos(ipos.asVec3());
-                        osg::Quat rot(ipos.rot[2], osg::Vec3f(0,0,-1));
-                        if(direction == 0) pos = pos + (rot * osg::Vec3f(0,1,0)) * distance;
-                        else if(direction == 1) pos = pos - (rot * osg::Vec3f(0,1,0)) * distance;
-                        else if(direction == 2) pos = pos - (rot * osg::Vec3f(1,0,0)) * distance;
-                        else if(direction == 3) pos = pos + (rot * osg::Vec3f(1,0,0)) * distance;
-                        else throw std::runtime_error ("direction must be 0,1,2 or 3");
-
-                        ipos.pos[0] = pos.x();
-                        ipos.pos[1] = pos.y();
-                        ipos.pos[2] = pos.z();
-
-                        if (actor.getClass().isActor())
-                        {
-                            // TODO: should this depend on the 'direction' parameter?
-                            ipos.rot[0] = 0;
-                            ipos.rot[1] = 0;
-                            ipos.rot[2] = 0;
-                        }
-                        else
-                        {
-                            ipos.rot[0] = actor.getRefData().getPosition().rot[0];
-                            ipos.rot[1] = actor.getRefData().getPosition().rot[1];
-                            ipos.rot[2] = actor.getRefData().getPosition().rot[2];
-                        }
                         // create item
-                        MWWorld::CellStore* store = actor.getCell();
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, 1);
-                        ref.getPtr().getCellRef().setPosition(ipos);
 
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
+                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(), actor, actor.getCell(), direction, distance);
                     }
                 }
         };

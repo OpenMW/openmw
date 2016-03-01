@@ -18,6 +18,7 @@ void overrideTexture(const std::string &texture, Resource::ResourceSystem *resou
     osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D(resourceSystem->getImageManager()->getImage(correctedTexture));
     tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
     tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+    tex->setName("diffuseMap");
 
     osg::ref_ptr<osg::StateSet> stateset;
     if (node->getStateSet())

@@ -24,6 +24,7 @@ namespace ESM
         unsigned char mEnabled;
         int mCount;
         ESM::Position mPosition;
+        unsigned int mFlags;
 
         // Is there any class-specific state following the ObjectState
         bool mHasCustomState;

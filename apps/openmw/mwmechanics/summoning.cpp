@@ -114,31 +114,16 @@ namespace MWMechanics
             bool found = creatureMap.find(std::make_pair(it->first, it->second)) != creatureMap.end();
             if (!found)
             {
-                ESM::Position ipos = mActor.getRefData().getPosition();
-                osg::Vec3f pos(ipos.asVec3());
-
-                osg::Quat rot (-ipos.rot[2], osg::Vec3f(0,0,1));
-                const float distance = 50;
-                pos = pos + (rot * osg::Vec3f(0,1,0)) * distance;
-                ipos.pos[0] = pos.x();
-                ipos.pos[1] = pos.y();
-                ipos.pos[2] = pos.z();
-                ipos.rot[0] = 0;
-                ipos.rot[1] = 0;
-                ipos.rot[2] = 0;
-
                 const std::string& creatureGmst = summonMap[it->first];
                 std::string creatureID =
                         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(creatureGmst)->getString();
 
                 if (!creatureID.empty())
                 {
-                    MWWorld::CellStore* store = mActor.getCell();
                     int creatureActorId = -1;
                     try
                     {
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), creatureID, 1);
-                        ref.getPtr().getCellRef().setPosition(ipos);
 
                         MWMechanics::CreatureStats& summonedCreatureStats = ref.getPtr().getClass().getCreatureStats(ref.getPtr());
 
@@ -147,7 +132,7 @@ namespace MWMechanics
                         summonedCreatureStats.getAiSequence().stack(package, ref.getPtr());
                         creatureActorId = summonedCreatureStats.getActorId();
 
-                        MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
+                        MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(), mActor, mActor.getCell(), 0, 120.f);
 
                         MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(placed);
                         if (anim)

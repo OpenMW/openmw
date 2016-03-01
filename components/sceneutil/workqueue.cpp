@@ -87,7 +87,7 @@ osg::ref_ptr<WorkItem> WorkQueue::removeWorkItem()
     {
         mCondition.wait(&mMutex);
     }
-    if (mQueue.size())
+    if (!mQueue.empty())
     {
         osg::ref_ptr<WorkItem> item = mQueue.front();
         mQueue.pop();

@@ -9,13 +9,11 @@
 #include <osg/Geometry>
 #include <osg/Material>
 #include <osg/PositionAttitudeTransform>
-#include <osg/Depth>
 #include <osg/ClipNode>
 #include <osg/MatrixTransform>
 #include <osg/FrontFace>
 #include <osg/Shader>
 #include <osg/GLExtensions>
-#include <osg/UserDataContainer>
 
 #include <osgDB/ReadFile>
 
@@ -306,7 +304,12 @@ public:
         setUpdateCallback(new NoTraverseCallback);
 
         // No need for fog here, we are already applying fog on the water surface itself as well as underwater fog
-        getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
+        // assign large value to effectively turn off fog
+        // shaders don't respect glDisable(GL_FOG)
+        osg::ref_ptr<osg::Fog> fog (new osg::Fog);
+        fog->setStart(10000000);
+        fog->setEnd(10000000);
+        getOrCreateStateSet()->setAttributeAndModes(fog, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
 
         mClipCullNode = new ClipCullNode;
         addChild(mClipCullNode);
@@ -318,7 +321,6 @@ public:
         mRefractionTexture->setInternalFormat(GL_RGB);
         mRefractionTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mRefractionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-        mRefractionTexture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
 
         attach(osg::Camera::COLOR_BUFFER, mRefractionTexture);
 
@@ -330,7 +332,6 @@ public:
         mRefractionDepthTexture->setSourceType(GL_UNSIGNED_INT);
         mRefractionDepthTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mRefractionDepthTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-        mRefractionDepthTexture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
 
         attach(osg::Camera::DEPTH_BUFFER, mRefractionDepthTexture);
     }
@@ -375,7 +376,9 @@ public:
         setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         setReferenceFrame(osg::Camera::RELATIVE_RF);
 
-        setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Player|Mask_Lighting);
+        bool reflectActors = Settings::Manager::getBool("reflect actors", "Water");
+
+        setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_ParticleSystem|Mask_Sky|Mask_Player|Mask_Lighting|(reflectActors ? Mask_Actor : 0));
         setNodeMask(Mask_RenderToTexture);
 
         unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");
@@ -391,7 +394,6 @@ public:
         mReflectionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
         mReflectionTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         mReflectionTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-        mReflectionTexture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
 
         attach(osg::Camera::COLOR_BUFFER, mReflectionTexture);
 
@@ -563,7 +565,7 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
         textures.push_back(tex);
     }
 
-    if (!textures.size())
+    if (textures.empty())
         return;
 
     float fps = mFallback->getFallbackFloat("Water_SurfaceFPS");

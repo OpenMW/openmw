@@ -16,10 +16,14 @@
 namespace ESMTerrain
 {
 
-    const float defaultHeight = -2048;
+    const float defaultHeight = ESM::Land::DEFAULT_HEIGHT;
 
-    Storage::Storage(const VFS::Manager *vfs)
+    Storage::Storage(const VFS::Manager *vfs, const std::string& normalMapPattern, bool autoUseNormalMaps, const std::string& specularMapPattern, bool autoUseSpecularMaps)
         : mVFS(vfs)
+        , mNormalMapPattern(normalMapPattern)
+        , mAutoUseNormalMaps(autoUseNormalMaps)
+        , mSpecularMapPattern(specularMapPattern)
+        , mAutoUseSpecularMaps(autoUseSpecularMaps)
     {
     }
 
@@ -508,9 +512,11 @@ namespace ESMTerrain
             return found->second;
 
         Terrain::LayerInfo info;
-        info.mParallax = false;
+        //info.mParallax = false;
         info.mSpecular = false;
         info.mDiffuseMap = texture;
+
+        /*
         std::string texture_ = texture;
         boost::replace_last(texture_, ".", "_nh.");
 
@@ -519,20 +525,24 @@ namespace ESMTerrain
             info.mNormalMap = texture_;
             info.mParallax = true;
         }
-        else
+        */
+        if (mAutoUseNormalMaps)
         {
-            texture_ = texture;
-            boost::replace_last(texture_, ".", "_n.");
+            std::string texture_ = texture;
+            boost::replace_last(texture_, ".", mNormalMapPattern + ".");
             if (mVFS->exists(texture_))
                 info.mNormalMap = texture_;
         }
 
-        texture_ = texture;
-        boost::replace_last(texture_, ".", "_diffusespec.");
-        if (mVFS->exists(texture_))
+        if (mAutoUseSpecularMaps)
         {
-            info.mDiffuseMap = texture_;
-            info.mSpecular = true;
+            std::string texture_ = texture;
+            boost::replace_last(texture_, ".", mSpecularMapPattern + ".");
+            if (mVFS->exists(texture_))
+            {
+                info.mDiffuseMap = texture_;
+                info.mSpecular = true;
+            }
         }
 
         mLayerInfoMap[texture] = info;
@@ -544,7 +554,7 @@ namespace ESMTerrain
     {
         Terrain::LayerInfo info;
         info.mDiffuseMap = "textures\\_land_default.dds";
-        info.mParallax = false;
+        //info.mParallax = false;
         info.mSpecular = false;
         return info;
     }

@@ -6,6 +6,7 @@
 #include "idcollection.hpp"
 #include "pathgrid.hpp"
 #include "info.hpp"
+#include "infoselectwrapper.hpp"
 
 namespace CSMWorld
 {
@@ -529,16 +530,6 @@ namespace CSMWorld
         return 1; // fixed at size 1
     }
 
-    // ESM::DialInfo::SelectStruct.mSelectRule
-    // 012345...
-    // ^^^ ^^
-    // ||| ||
-    // ||| |+------------- condition variable string
-    // ||| +-------------- comparison type, ['0'..'5']; e.g. !=, <, >=, etc
-    // ||+---------------- function index (encoded, where function == '1')
-    // |+----------------- function, ['1'..'C']; e.g. Global, Local, Not ID, etc
-    // +------------------ unknown
-    //
     InfoConditionAdapter::InfoConditionAdapter () {}
 
     void InfoConditionAdapter::addRow(Record<Info>& record, int position) const
@@ -547,11 +538,11 @@ namespace CSMWorld
 
         std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
 
-        // blank row
+        // default row
         ESM::DialInfo::SelectStruct condStruct;
-        condStruct.mSelectRule = "00000";
+        condStruct.mSelectRule = "01000";
         condStruct.mValue = ESM::Variant();
-        condStruct.mValue.setType(ESM::VT_Int); // default to ints
+        condStruct.mValue.setType(ESM::VT_Int);
 
         conditions.insert(conditions.begin()+position, condStruct);
 
@@ -589,89 +580,6 @@ namespace CSMWorld
         return new NestedTableWrapper<std::vector<ESM::DialInfo::SelectStruct> >(record.get().mSelects);
     }
 
-    // See the mappings in MWDialogue::SelectWrapper::getArgument
-    // from ESM::Attribute, ESM::Skill and MWMechanics::CreatureStats (for AI)
-    static std::map<const std::string, std::string> populateEncToInfoFunc()
-    {
-        std::map<const std::string, std::string> funcMap;
-        funcMap["00"] = "Rank Low";
-        funcMap["01"] = "Rank High";
-        funcMap["02"] = "Rank Requirement";
-        funcMap["03"] = "Reputation";
-        funcMap["04"] = "Health Percent";
-        funcMap["05"] = "PC Reputation";
-        funcMap["06"] = "PC Level";
-        funcMap["07"] = "PC Health Percent";
-        funcMap["08"] = "PC Magicka";
-        funcMap["09"] = "PC Fatigue";
-        funcMap["10"] = "PC Strength";
-        funcMap["11"] = "PC Block";
-        funcMap["12"] = "PC Armorer";
-        funcMap["13"] = "PC Medium Armor";
-        funcMap["14"] = "PC Heavy Armor";
-        funcMap["15"] = "PC Blunt Weapon";
-        funcMap["16"] = "PC Long Blade";
-        funcMap["17"] = "PC Axe";
-        funcMap["18"] = "PC Spear";
-        funcMap["19"] = "PC Athletics";
-        funcMap["20"] = "PC Enchant";
-        funcMap["21"] = "PC Destruction";
-        funcMap["22"] = "PC Alteration";
-        funcMap["23"] = "PC Illusion";
-        funcMap["24"] = "PC Conjuration";
-        funcMap["25"] = "PC Mysticism";
-        funcMap["26"] = "PC Restoration";
-        funcMap["27"] = "PC Alchemy";
-        funcMap["28"] = "PC Unarmored";
-        funcMap["29"] = "PC Security";
-        funcMap["30"] = "PC Sneak";
-        funcMap["31"] = "PC Acrobatics";
-        funcMap["32"] = "PC Light Armor";
-        funcMap["33"] = "PC Short Blade";
-        funcMap["34"] = "PC Marksman";
-        funcMap["35"] = "PC Merchantile";
-        funcMap["36"] = "PC Speechcraft";
-        funcMap["37"] = "PC Hand To Hand";
-        funcMap["38"] = "PC Sex";
-        funcMap["39"] = "PC Expelled";
-        funcMap["40"] = "PC Common Disease";
-        funcMap["41"] = "PC Blight Disease";
-        funcMap["42"] = "PC Clothing Modifier";
-        funcMap["43"] = "PC Crime Level";
-        funcMap["44"] = "Same Sex";
-        funcMap["45"] = "Same Race";
-        funcMap["46"] = "Same Faction";
-        funcMap["47"] = "Faction Rank Difference";
-        funcMap["48"] = "Detected";
-        funcMap["49"] = "Alarmed";
-        funcMap["50"] = "Choice";
-        funcMap["51"] = "PC Intelligence";
-        funcMap["52"] = "PC Willpower";
-        funcMap["53"] = "PC Agility";
-        funcMap["54"] = "PC Speed";
-        funcMap["55"] = "PC Endurance";
-        funcMap["56"] = "PC Personality";
-        funcMap["57"] = "PC Luck";
-        funcMap["58"] = "PC Corpus";
-        funcMap["59"] = "Weather";
-        funcMap["60"] = "PC Vampire";
-        funcMap["61"] = "Level";
-        funcMap["62"] = "Attacked";
-        funcMap["63"] = "Talked To PC";
-        funcMap["64"] = "PC Health";
-        funcMap["65"] = "Creature Target";
-        funcMap["66"] = "Friend Hit";
-        funcMap["67"] = "Fight";
-        funcMap["68"] = "Hello";
-        funcMap["69"] = "Alarm";
-        funcMap["70"] = "Flee";
-        funcMap["71"] = "Should Attack";
-        funcMap["72"] = "Werewolf";
-        funcMap["73"] = "PC Werewolf Kills";
-        return funcMap;
-    }
-    static const std::map<const std::string, std::string> sEncToInfoFunc = populateEncToInfoFunc();
-
     QVariant InfoConditionAdapter::getData(const Record<Info>& record,
             int subRowIndex, int subColIndex) const
     {
@@ -682,70 +590,36 @@ namespace CSMWorld
         if (subRowIndex < 0 || subRowIndex >= static_cast<int> (conditions.size()))
             throw std::runtime_error ("index out of range");
 
+        ConstInfoSelectWrapper infoSelectWrapper(conditions[subRowIndex]);
+
         switch (subColIndex)
         {
             case 0:
             {
-                char condType = conditions[subRowIndex].mSelectRule[1];
-                switch (condType)
-                {
-                    case '0': return 0;  // blank space
-                    case '1': return 1;  // Function
-                    case '2': return 2;  // Global
-                    case '3': return 3;  // Local
-                    case '4': return 4;  // Journal
-                    case '5': return 5;  // Item
-                    case '6': return 6;  // Dead
-                    case '7': return 7;  // Not ID
-                    case '8': return 8;  // Not Factio
-                    case '9': return 9;  // Not Class
-                    case 'A': return 10; // Not Race
-                    case 'B': return 11; // Not Cell
-                    case 'C': return 12; // Not Local
-                    default: return QVariant(); // TODO: log an error?
-                }
+                return infoSelectWrapper.getFunctionName();
             }
             case 1:
             {
-                if (conditions[subRowIndex].mSelectRule[1] == '1')
-                {
-                    // throws an exception if the encoding is not found
-                    return sEncToInfoFunc.at(conditions[subRowIndex].mSelectRule.substr(2, 2)).c_str();
-                }
+                if (infoSelectWrapper.hasVariable())
+                    return QString(infoSelectWrapper.getVariableName().c_str());
                 else
-                    return QString(conditions[subRowIndex].mSelectRule.substr(5).c_str());
+                    return "";
             }
             case 2:
             {
-                char compType = conditions[subRowIndex].mSelectRule[4];
-                switch (compType)
-                {
-                    case '0': return 3; // =
-                    case '1': return 0; // !=
-                    case '2': return 4; // >
-                    case '3': return 5; // >=
-                    case '4': return 1; // <
-                    case '5': return 2; // <=
-                    default: return QVariant(); // TODO: log an error?
-                }
+                return infoSelectWrapper.getRelationType();
             }
             case 3:
             {
-                switch (conditions[subRowIndex].mValue.getType())
+                switch (infoSelectWrapper.getVariant().getType())
                 {
-                    case ESM::VT_String:
-                    {
-                        return QString::fromUtf8 (conditions[subRowIndex].mValue.getString().c_str());
-                    }
                     case ESM::VT_Int:
-                    case ESM::VT_Short:
-                    case ESM::VT_Long:
                     {
-                        return conditions[subRowIndex].mValue.getInteger();
+                        return infoSelectWrapper.getVariant().getInteger();
                     }
                     case ESM::VT_Float:
                     {
-                        return conditions[subRowIndex].mValue.getFloat();
+                        return infoSelectWrapper.getVariant().getFloat();
                     }
                     default: return QVariant();
                 }
@@ -764,101 +638,63 @@ namespace CSMWorld
         if (subRowIndex < 0 || subRowIndex >= static_cast<int> (conditions.size()))
             throw std::runtime_error ("index out of range");
 
+        InfoSelectWrapper infoSelectWrapper(conditions[subRowIndex]);
+        bool conversionResult = false;
+
         switch (subColIndex)
         {
-            case 0:
+            case 0: // Function
             {
-                // See sInfoCondFunc in columns.cpp for the enum values
-                switch (value.toInt())
-                {
-                    // FIXME: when these change the values of the other columns need to change
-                    // correspondingly (and automatically)
-                    case 1:
-                    {
-                        conditions[subRowIndex].mSelectRule[1] = '1';             // Function
-                        // default to "Rank Low"
-                        conditions[subRowIndex].mSelectRule[2] = '0';
-                        conditions[subRowIndex].mSelectRule[3] = '0';
-                        break;
-                    }
-                    case 2:  conditions[subRowIndex].mSelectRule[1] = '2'; break; // Global
-                    case 3:  conditions[subRowIndex].mSelectRule[1] = '3'; break; // Local
-                    case 4:  conditions[subRowIndex].mSelectRule[1] = '4'; break; // Journal
-                    case 5:  conditions[subRowIndex].mSelectRule[1] = '5'; break; // Item
-                    case 6:  conditions[subRowIndex].mSelectRule[1] = '6'; break; // Dead
-                    case 7:  conditions[subRowIndex].mSelectRule[1] = '7'; break; // Not ID
-                    case 8:  conditions[subRowIndex].mSelectRule[1] = '8'; break; // Not Faction
-                    case 9:  conditions[subRowIndex].mSelectRule[1] = '9'; break; // Not Class
-                    case 10: conditions[subRowIndex].mSelectRule[1] = 'A'; break; // Not Race
-                    case 11: conditions[subRowIndex].mSelectRule[1] = 'B'; break; // Not Cell
-                    case 12: conditions[subRowIndex].mSelectRule[1] = 'C'; break; // Not Local
-                    default: return; // return without saving
-                }
-                break;
-            }
-            case 1:
-            {
-                if (conditions[subRowIndex].mSelectRule[1] == '1')
-                {
-                    std::map<const std::string, std::string>::const_iterator it = sEncToInfoFunc.begin();
-                    for (;it != sEncToInfoFunc.end(); ++it)
-                    {
-                        if (it->second == value.toString().toUtf8().constData())
-                        {
-                            std::string rule = conditions[subRowIndex].mSelectRule.substr(0, 2);
-                            rule.append(it->first);
-                            // leave old values for undo (NOTE: may not be vanilla's behaviour)
-                            rule.append(conditions[subRowIndex].mSelectRule.substr(4));
-                            conditions[subRowIndex].mSelectRule = rule;
-                            break;
-                        }
-                    }
+                infoSelectWrapper.setFunctionName(static_cast<ConstInfoSelectWrapper::FunctionName>(value.toInt()));
 
-                    if (it == sEncToInfoFunc.end())
-                        return; // return without saving; TODO: maybe log an error here
-                }
-                else
+                if (infoSelectWrapper.getComparisonType() != ConstInfoSelectWrapper::Comparison_Numeric &&
+                    infoSelectWrapper.getVariant().getType() != ESM::VT_Int)
                 {
-                    // FIXME: validate the string values before saving, based on the current function
-                    std::string rule = conditions[subRowIndex].mSelectRule.substr(0, 5);
-                    conditions[subRowIndex].mSelectRule = rule.append(value.toString().toUtf8().constData());
+                    infoSelectWrapper.getVariant().setType(ESM::VT_Int);
                 }
+
+                infoSelectWrapper.update();
                 break;
             }
-            case 2:
+            case 1: // Variable
             {
-                // See sInfoCondComp in columns.cpp for the enum values
-                switch (value.toInt())
-                {
-                    case 0: conditions[subRowIndex].mSelectRule[4] = '1'; break; // !=
-                    case 1: conditions[subRowIndex].mSelectRule[4] = '4'; break; // <
-                    case 2: conditions[subRowIndex].mSelectRule[4] = '5'; break; // <=
-                    case 3: conditions[subRowIndex].mSelectRule[4] = '0'; break; // =
-                    case 4: conditions[subRowIndex].mSelectRule[4] = '2'; break; // >
-                    case 5: conditions[subRowIndex].mSelectRule[4] = '3'; break; // >=
-                    default: return; // return without saving
-                }
+                infoSelectWrapper.setVariableName(value.toString().toUtf8().constData());
+                infoSelectWrapper.update();
                 break;
             }
-            case 3:
+            case 2: // Relation
             {
-                switch (conditions[subRowIndex].mValue.getType())
+                infoSelectWrapper.setRelationType(static_cast<ConstInfoSelectWrapper::RelationType>(value.toInt()));
+                infoSelectWrapper.update();
+                break;
+            }
+            case 3: // Value
+            {
+                switch (infoSelectWrapper.getComparisonType())
                 {
-                    case ESM::VT_String:
+                    case ConstInfoSelectWrapper::Comparison_Numeric:
                     {
-                        conditions[subRowIndex].mValue.setString (value.toString().toUtf8().constData());
+                        // QVariant seems to have issues converting 0
+                        if ((value.toInt(&conversionResult) && conversionResult) || value.toString().compare("0") == 0)
+                        {
+                            infoSelectWrapper.getVariant().setType(ESM::VT_Int);
+                            infoSelectWrapper.getVariant().setInteger(value.toInt());
+                        }
+                        else if (value.toFloat(&conversionResult) && conversionResult)
+                        {
+                            infoSelectWrapper.getVariant().setType(ESM::VT_Float);
+                            infoSelectWrapper.getVariant().setFloat(value.toFloat());
+                        }
                         break;
                     }
-                    case ESM::VT_Int:
-                    case ESM::VT_Short:
-                    case ESM::VT_Long:
+                    case ConstInfoSelectWrapper::Comparison_Boolean:
+                    case ConstInfoSelectWrapper::Comparison_Integer:
                     {
-                        conditions[subRowIndex].mValue.setInteger (value.toInt());
-                        break;
-                    }
-                    case ESM::VT_Float:
-                    {
-                        conditions[subRowIndex].mValue.setFloat (value.toFloat());
+                        if ((value.toInt(&conversionResult) && conversionResult) || value.toString().compare("0") == 0)
+                        {
+                            infoSelectWrapper.getVariant().setType(ESM::VT_Int);
+                            infoSelectWrapper.getVariant().setInteger(value.toInt());
+                        }
                         break;
                     }
                     default: break;

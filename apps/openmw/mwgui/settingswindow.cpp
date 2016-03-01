@@ -27,13 +27,6 @@
 
 namespace
 {
-    std::string fpsLevelToStr(int level)
-    {
-        if (level == 0)
-            return "#{sOff}";
-        else //if (level == 1)
-            return "#{sOn}";
-    }
 
     std::string textureMipmappingToStr(const std::string& val)
     {
@@ -182,13 +175,9 @@ namespace MWGui
         getWidget(mOkButton, "OkButton");
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mFullscreenButton, "FullscreenButton");
-        getWidget(mVSyncButton, "VSyncButton");
         getWidget(mWindowBorderButton, "WindowBorderButton");
         getWidget(mTextureFilteringButton, "TextureFilteringButton");
         getWidget(mAnisotropyBox, "AnisotropyBox");
-        getWidget(mShadersButton, "ShadersButton");
-        getWidget(mShadowsEnabledButton, "ShadowsEnabledButton");
-        getWidget(mShadowsTextureSize, "ShadowsTextureSize");
         getWidget(mControlsBox, "ControlsBox");
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mKeyboardSwitch, "KeyboardButton");
@@ -217,8 +206,6 @@ namespace MWGui
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
 
         mWaterTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterTextureSizeChanged);
-
-        mShadowsTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onShadowTextureSizeChanged);
 
         mKeyboardSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onKeyboardSwitchClicked);
         mControllerSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onControllerSwitchClicked);
@@ -259,13 +246,6 @@ namespace MWGui
             mWaterTextureSize->setIndexSelected(1);
         if (waterTextureSize >= 2048)
             mWaterTextureSize->setIndexSelected(2);
-
-        mShadowsTextureSize->setCaption (Settings::Manager::getString ("texture size", "Shadows"));
-
-        if (!Settings::Manager::getBool("shaders", "Objects"))
-        {
-            mShadowsEnabledButton->setEnabled(false);
-        }
 
         mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
 
@@ -346,12 +326,6 @@ namespace MWGui
         apply();
     }
 
-    void SettingsWindow::onShadowTextureSizeChanged(MyGUI::ComboBox *_sender, size_t pos)
-    {
-        Settings::Manager::setString("texture size", "Shadows", _sender->getItemNameAt(pos));
-        apply();
-    }
-
     void SettingsWindow::onButtonToggled(MyGUI::Widget* _sender)
     {
         std::string on = MWBase::Environment::get().getWindowManager()->getGameSettingString("sOn", "On");
@@ -366,21 +340,6 @@ namespace MWGui
         {
             _sender->castType<MyGUI::Button>()->setCaption(on);
             newState = true;
-        }
-
-        if (_sender == mShadersButton)
-        {
-            if (newState == false)
-            {
-                // shadows not supported
-                mShadowsEnabledButton->setEnabled(false);
-                mShadowsEnabledButton->setCaptionWithReplacing("#{sOff}");
-                Settings::Manager::setBool("enabled", "Shadows", false);
-            }
-            else
-            {
-                mShadowsEnabledButton->setEnabled(true);
-            }
         }
 
         if (_sender == mFullscreenButton)

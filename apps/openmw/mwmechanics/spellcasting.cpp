@@ -62,13 +62,6 @@ namespace
         }
     }
 
-    void applyDynamicStatsEffect(int attribute, const MWWorld::Ptr& target, float magnitude)
-    {
-        MWMechanics::DynamicStat<float> value = target.getClass().getCreatureStats(target).getDynamic(attribute);
-        value.setCurrent(value.getCurrent()+magnitude, attribute == 2);
-        target.getClass().getCreatureStats(target).setDynamic(attribute, value);
-    }
-
 }
 
 namespace MWMechanics
@@ -694,7 +687,7 @@ namespace MWMechanics
         throw std::runtime_error("ID type cannot be casted");
     }
 
-    bool CastSpell::cast(const MWWorld::Ptr &item)
+    bool CastSpell::cast(const MWWorld::Ptr &item, bool launchProjectile)
     {
         std::string enchantmentName = item.getClass().getEnchantment(item);
         if (enchantmentName.empty())
@@ -761,15 +754,20 @@ namespace MWMechanics
             inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Touch);
         }
 
-        std::string projectileModel;
-        std::string sound;
-        float speed = 0;
-        getProjectileInfo(enchantment->mEffects, projectileModel, sound, speed);
-        if (!projectileModel.empty())
-            MWBase::Environment::get().getWorld()->launchMagicBolt(projectileModel, sound, mId, speed,
-                                                               false, enchantment->mEffects, mCaster, mSourceName,
-                                                                   // Not needed, enchantments can only be cast by actors
-                                                                   osg::Vec3f(1,0,0));
+        if (launchProjectile)
+        {
+            std::string projectileModel;
+            std::string sound;
+            float speed = 0;
+            getProjectileInfo(enchantment->mEffects, projectileModel, sound, speed);
+            if (!projectileModel.empty())
+                MWBase::Environment::get().getWorld()->launchMagicBolt(projectileModel, sound, mId, speed,
+                                                                   false, enchantment->mEffects, mCaster, mSourceName,
+                                                                       // Not needed, enchantments can only be cast by actors
+                                                                       osg::Vec3f(1,0,0));
+        }
+        else if (!mTarget.isEmpty())
+            inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Target);
 
         return true;
     }

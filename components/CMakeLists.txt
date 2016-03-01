@@ -44,6 +44,10 @@ add_component_dir (resource
     scenemanager keyframemanager imagemanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem resourcemanager
     )
 
+add_component_dir (shader
+    shadermanager shadervisitor
+    )
+
 add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry lightcontroller
     lightmanager lightutil positionattitudetransform workqueue unrefqueue

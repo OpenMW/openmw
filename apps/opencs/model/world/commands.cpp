@@ -68,9 +68,6 @@ void CSMWorld::ModifyCommand::undo()
 
 void CSMWorld::CreateCommand::applyModifications()
 {
-    for (std::map<int, QVariant>::const_iterator iter (mValues.begin()); iter!=mValues.end(); ++iter)
-        mModel.setData (mModel.getModelIndex (mId, iter->first), iter->second);
-
     if (!mNestedValues.empty())
     {
         CSMWorld::IdTree *tree = dynamic_cast<CSMWorld::IdTree *>(&mModel);
@@ -114,7 +111,7 @@ void CSMWorld::CreateCommand::setType (UniversalId::Type type)
 
 void CSMWorld::CreateCommand::redo()
 {
-    mModel.addRecord (mId, mType);
+    mModel.addRecordWithData (mId, mValues, mType);
     applyModifications();
 }
 

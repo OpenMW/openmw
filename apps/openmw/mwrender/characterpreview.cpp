@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include <osg/Fog>
 #include <osg/Texture2D>
 #include <osg/Camera>
 #include <osg/PositionAttitudeTransform>
@@ -98,10 +99,16 @@ namespace MWRender
 
         osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager;
         lightManager->setStartLight(1);
-        osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+        osg::ref_ptr<osg::StateSet> stateset = lightManager->getOrCreateStateSet();
         stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
         stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+        // assign large value to effectively turn off fog
+        // shaders don't respect glDisable(GL_FOG)
+        osg::ref_ptr<osg::Fog> fog (new osg::Fog);
+        fog->setStart(10000000);
+        fog->setEnd(10000000);
+        stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
 
         osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
         lightmodel->setAmbientIntensity(osg::Vec4(0.25, 0.25, 0.25, 1.0));
@@ -123,7 +130,6 @@ namespace MWRender
 
         lightSource->setStateSetModes(*stateset, osg::StateAttribute::ON);
 
-        lightManager->setStateSet(stateset);
         lightManager->addChild(lightSource);
 
         mCamera->addChild(lightManager);
@@ -359,10 +365,10 @@ namespace MWRender
             traverse(node, nv);
 
             // Now update camera utilizing the updated head position
-            osg::MatrixList mats = mNodeToFollow->getWorldMatrices();
-            if (!mats.size())
+            osg::NodePathList nodepaths = mNodeToFollow->getParentalNodePaths();
+            if (nodepaths.empty())
                 return;
-            osg::Matrix worldMat = mats[0];
+            osg::Matrix worldMat = osg::computeLocalToWorld(nodepaths[0]);
             osg::Vec3 headOffset = worldMat.getTrans();
 
             cam->setViewMatrixAsLookAt(headOffset + mPosOffset, headOffset + mLookAtOffset, osg::Vec3(0,0,1));

@@ -154,7 +154,7 @@ void NiFloatData::read(NIFStream *nif)
 
 void NiPixelData::read(NIFStream *nif)
 {
-    nif->getInt(); // always 0 or 1
+    fmt = (Format)nif->getUInt();
 
     rmask = nif->getInt(); // usually 0xff
     gmask = nif->getInt(); // usually 0xff00
@@ -169,19 +169,23 @@ void NiPixelData::read(NIFStream *nif)
     mips = nif->getInt();
 
     // Bytes per pixel, should be bpp * 8
-    /*int bytes =*/ nif->getInt();
+    /* int bytes = */ nif->getInt();
 
     for(int i=0; i<mips; i++)
     {
         // Image size and offset in the following data field
-        /*int x =*/ nif->getInt();
-        /*int y =*/ nif->getInt();
-        /*int offset =*/ nif->getInt();
+        Mipmap m;
+        m.width = nif->getUInt();
+        m.height = nif->getUInt();
+        m.dataOffset = nif->getUInt();
+        mipmaps.push_back(m);
     }
 
-    // Skip the data
+    // Read the data
     unsigned int dataSize = nif->getInt();
-    nif->skip(dataSize);
+    data.reserve(dataSize);
+    for (unsigned i=0; i<dataSize; ++i)
+        data.push_back((unsigned char)nif->getChar());
 }
 
 void NiColorData::read(NIFStream *nif)

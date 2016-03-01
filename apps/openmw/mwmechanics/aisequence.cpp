@@ -68,9 +68,8 @@ bool AiSequence::getCombatTarget(MWWorld::Ptr &targetActor) const
 {
     if (getTypeId() != AiPackage::TypeIdCombat)
         return false;
-    const AiCombat *combat = static_cast<const AiCombat *>(mPackages.front());
     
-    targetActor = combat->getTarget();
+    targetActor = mPackages.front()->getTarget();
 
     return !targetActor.isEmpty();
 }
@@ -114,8 +113,7 @@ bool AiSequence::isInCombat(const MWWorld::Ptr &actor) const
     {
         if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
         {
-            const AiCombat *combat = static_cast<const AiCombat *>(*it);
-            if (combat->getTarget() == actor)
+            if ((*it)->getTarget() == actor)
                 return true;
         }
     }
@@ -255,7 +253,7 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
         for (std::list<AiPackage *>::const_iterator iter (mPackages.begin()); iter!=mPackages.end(); ++iter)
         {
             if((*iter)->getTypeId() == AiPackage::TypeIdCombat && package.getTypeId() == AiPackage::TypeIdCombat
-                && static_cast<const AiCombat*>(*iter)->getTarget() == static_cast<const AiCombat*>(&package)->getTarget())
+                && (*iter)->getTarget() == (&package)->getTarget())
             {
                 return; // already in combat with this actor
             }

@@ -45,6 +45,8 @@ namespace SceneUtil
 
         virtual void apply(osg::State& state) const
         {
+            if (mLights.empty())
+                return;
             osg::Matrix modelViewMatrix = state.getModelViewMatrix();
 
             state.applyModelViewMatrix(state.getInitialViewMatrix());
@@ -192,18 +194,27 @@ namespace SceneUtil
             return found->second;
         else
         {
-
+            osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
             std::vector<osg::ref_ptr<osg::Light> > lights;
             for (unsigned int i=0; i<lightList.size();++i)
+            {
                 lights.push_back(lightList[i]->mLightSource->getLight(frameNum));
+            }
 
+            // the first light state attribute handles the actual state setting for all lights
+            // it's best to batch these up so that we don't need to touch the modelView matrix more than necessary
             osg::ref_ptr<LightStateAttribute> attr = new LightStateAttribute(mStartLight, lights);
-
-            osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
-
             // don't use setAttributeAndModes, that does not support light indices!
             stateset->setAttribute(attr, osg::StateAttribute::ON);
             stateset->setAssociatedModes(attr, osg::StateAttribute::ON);
+
+            // need to push some dummy attributes to ensure proper state tracking
+            // lights need to reset to their default when the StateSet is popped
+            for (unsigned int i=1; i<lightList.size(); ++i)
+            {
+                osg::ref_ptr<LightStateAttribute> dummy = new LightStateAttribute(mStartLight+i, std::vector<osg::ref_ptr<osg::Light> >());
+                stateset->setAttribute(dummy, osg::StateAttribute::ON);
+            }
 
             stateSetCache.insert(std::make_pair(hash, stateset));
             return stateset;
@@ -242,6 +253,17 @@ namespace SceneUtil
     void LightManager::setStartLight(int start)
     {
         mStartLight = start;
+
+        // Set default light state to zero
+        for (int i=start; i<8; ++i)
+        {
+            osg::ref_ptr<osg::Light> defaultLight (new osg::Light(i));
+            defaultLight->setAmbient(osg::Vec4());
+            defaultLight->setDiffuse(osg::Vec4());
+            defaultLight->setSpecular(osg::Vec4());
+            defaultLight->setConstantAttenuation(0.f);
+            getOrCreateStateSet()->setAttributeAndModes(defaultLight, osg::StateAttribute::OFF);
+        }
     }
 
     int LightManager::getStartLight() const
@@ -329,7 +351,7 @@ namespace SceneUtil
                     mLightList.push_back(&l);
             }
         }
-        if (mLightList.size())
+        if (!mLightList.empty())
         {
             unsigned int maxLights = static_cast<unsigned int> (8 - mLightManager->getStartLight());
 

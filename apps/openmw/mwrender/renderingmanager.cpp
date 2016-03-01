@@ -168,6 +168,14 @@ namespace MWRender
         , mFieldOfViewOverridden(false)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
+        resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
+        resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders"));
+        resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
+        resourceSystem->getSceneManager()->setForcePerPixelLighting(Settings::Manager::getBool("force per pixel lighting", "Shaders"));
+        resourceSystem->getSceneManager()->setAutoUseNormalMaps(Settings::Manager::getBool("auto use object normal maps", "Shaders"));
+        resourceSystem->getSceneManager()->setNormalMapPattern(Settings::Manager::getString("normal map pattern", "Shaders"));
+        resourceSystem->getSceneManager()->setAutoUseSpecularMaps(Settings::Manager::getBool("auto use object specular maps", "Shaders"));
+        resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::Manager::getString("specular map pattern", "Shaders"));
 
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager;
         sceneRoot->setLightingMask(Mask_Lighting);
@@ -189,7 +197,9 @@ namespace MWRender
         mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
 
         mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(),
-                                                new TerrainStorage(mResourceSystem->getVFS(), false), Mask_Terrain, mUnrefQueue.get()));
+                                                new TerrainStorage(mResourceSystem->getVFS(), Settings::Manager::getString("normal map pattern", "Shaders"), Settings::Manager::getBool("auto use terrain normal maps", "Shaders"),
+                                                     Settings::Manager::getString("terrain specular map pattern", "Shaders"), Settings::Manager::getBool("auto use terrain specular maps", "Shaders")),
+                                                 Mask_Terrain, &mResourceSystem->getSceneManager()->getShaderManager(), mUnrefQueue.get()));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 
@@ -333,7 +343,9 @@ namespace MWRender
     {
         setAmbientColour(SceneUtil::colourFromRGB(cell->mAmbi.mAmbient));
 
-        mSunLight->setDiffuse(SceneUtil::colourFromRGB(cell->mAmbi.mSunlight));
+        osg::Vec4f diffuse = SceneUtil::colourFromRGB(cell->mAmbi.mSunlight);
+        mSunLight->setDiffuse(diffuse);
+        mSunLight->setSpecular(diffuse);
         mSunLight->setDirection(osg::Vec3f(1.f,-1.f,-1.f));
     }
 
@@ -836,16 +848,18 @@ namespace MWRender
 
     void RenderingManager::updateTextureFiltering()
     {
-        if (mTerrain.get())
-            mTerrain->updateCache();
+        mViewer->stopThreading();
 
         mResourceSystem->getSceneManager()->setFilterSettings(
             Settings::Manager::getString("texture mag filter", "General"),
             Settings::Manager::getString("texture min filter", "General"),
             Settings::Manager::getString("texture mipmap", "General"),
-            Settings::Manager::getInt("anisotropy", "General"),
-            mViewer
+            Settings::Manager::getInt("anisotropy", "General")
         );
+
+        mTerrain->updateTextureFiltering();
+
+        mViewer->startThreading();
     }
 
     void RenderingManager::updateAmbient()

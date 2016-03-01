@@ -71,7 +71,7 @@ namespace MWWorld
             void insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener);
 
             // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center
-            void changeCellGrid (int X, int Y);
+            void changeCellGrid (int X, int Y, bool changeEvent = true);
 
             void getGridCenter(int& cellX, int& cellY);
 
@@ -90,7 +90,7 @@ namespace MWWorld
 
             void unloadCell (CellStoreCollection::iterator iter);
 
-            void loadCell (CellStore *cell, Loading::Listener* loadingListener);
+            void loadCell (CellStore *cell, Loading::Listener* loadingListener, bool respawn);
 
             void playerMoved (const osg::Vec3f& pos);
 
@@ -103,11 +103,13 @@ namespace MWWorld
             bool hasCellChanged() const;
             ///< Has the set of active cells changed, since the last frame?
 
-            void changeToInteriorCell (const std::string& cellName, const ESM::Position& position);
+            void changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool changeEvent=true);
             ///< Move to interior cell.
+            /// @param changeEvent Set cellChanged flag?
 
-            void changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos);
+            void changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true);
             ///< Move to exterior cell.
+            /// @param changeEvent Set cellChanged flag?
 
             void changeToVoid();
             ///< Change into a void

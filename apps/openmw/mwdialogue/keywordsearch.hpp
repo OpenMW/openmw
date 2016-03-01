@@ -158,7 +158,7 @@ public:
         }
 
         // resolve overlapping keywords
-        while (matches.size())
+        while (!matches.empty())
         {
             int longestKeywordSize = 0;
             typename std::vector<Match>::iterator longestKeyword = matches.begin();

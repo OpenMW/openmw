@@ -493,7 +493,8 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         // but some mods may be using it as a reload detector.
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
 
-        // Do not trigger erroneous cellChanged events
+        // Since we passed "changeEvent=false" to changeCell, we shouldn't have triggered the cell change flag.
+        // But make sure the flag is cleared anyway in case it was set from an earlier game.
         MWBase::Environment::get().getWorld()->markCellAsUnchanged();
     }
     catch (const std::exception& e)

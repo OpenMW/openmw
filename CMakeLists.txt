@@ -190,10 +190,6 @@ if (WIN32)
     add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
 endif()
 
-if (ANDROID)
-    set(OPENGL_ES TRUE CACHE BOOL "enable opengl es support for android" FORCE)
-endif (ANDROID)
-
 option(OPENGL_ES "enable opengl es support" FALSE )
 
 if (OPENGL_ES)
@@ -377,7 +373,7 @@ endif()
 
 # CXX Compiler settings
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -std=c++98 -pedantic -Wno-long-long")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wundef -Wno-unused-parameter -std=c++98 -pedantic -Wno-long-long")
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT APPLE)
         execute_process(COMMAND ${CMAKE_C_COMPILER} --version OUTPUT_VARIABLE CLANG_VERSION)
@@ -566,7 +562,9 @@ endif(WIN32)
 # Extern
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
-add_subdirectory (extern/osgQt)
+if (USE_QT)
+    add_subdirectory (extern/osgQt)
+endif()
 
 # Components
 add_subdirectory (components)

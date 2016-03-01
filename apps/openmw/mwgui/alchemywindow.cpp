@@ -67,46 +67,29 @@ namespace MWGui
     {
         MWMechanics::Alchemy::Result result = mAlchemy->create (mNameEdit->getCaption ());
 
-        if (result == MWMechanics::Alchemy::Result_NoName)
+        switch (result)
         {
+        case MWMechanics::Alchemy::Result_NoName:
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage37}");
-            return;
-        }
-
-        // check if mortar & pestle is available (always needed)
-        if (result == MWMechanics::Alchemy::Result_NoMortarAndPestle)
-        {
+            break;
+        case MWMechanics::Alchemy::Result_NoMortarAndPestle:
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage45}");
-            return;
-        }
-
-        // make sure 2 or more ingredients were selected
-        if (result == MWMechanics::Alchemy::Result_LessThanTwoIngredients)
-        {
+            break;
+        case MWMechanics::Alchemy::Result_LessThanTwoIngredients:
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage6a}");
-            return;
-        }
-
-        if (result == MWMechanics::Alchemy::Result_NoEffects)
-        {
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage8}");
-            MWBase::Environment::get().getSoundManager()->playSound("potion fail", 1.f, 1.f);
-            return;
-        }
-
-        if (result == MWMechanics::Alchemy::Result_Success)
-        {
+            break;
+        case MWMechanics::Alchemy::Result_Success:
             MWBase::Environment::get().getWindowManager()->messageBox("#{sPotionSuccess}");
             MWBase::Environment::get().getSoundManager()->playSound("potion success", 1.f, 1.f);
-        }
-        else if (result == MWMechanics::Alchemy::Result_RandomFailure)
-        {
-            // potion failed
+            break;
+        case MWMechanics::Alchemy::Result_NoEffects:
+        case MWMechanics::Alchemy::Result_RandomFailure:
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage8}");
             MWBase::Environment::get().getSoundManager()->playSound("potion fail", 1.f, 1.f);
+            break;
         }
 
-        // reduce count of the ingredients
+        // remove ingredient slots that have been fully used up
         for (int i=0; i<4; ++i)
             if (mIngredients[i]->isUserString("ToolTipType"))
             {

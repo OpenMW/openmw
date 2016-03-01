@@ -3,6 +3,7 @@
 
 #include <osg/ref_ptr>
 #include <osg/Array>
+#include <osg/PrimitiveSet>
 
 #include <map>
 

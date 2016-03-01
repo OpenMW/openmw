@@ -52,8 +52,8 @@ namespace
     class GlowUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        GlowUpdater(osg::Vec4f color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures)
-            : mTexUnit(1) // FIXME: might not always be 1
+        GlowUpdater(int texUnit, osg::Vec4f color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures)
+            : mTexUnit(texUnit)
             , mColor(color)
             , mTextures(textures)
         {
@@ -1041,6 +1041,25 @@ namespace MWRender
         return mObjectRoot.get();
     }
 
+    class FindLowestUnusedTexUnitVisitor : public osg::NodeVisitor
+    {
+    public:
+        FindLowestUnusedTexUnitVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mLowestUnusedTexUnit(0)
+        {
+        }
+
+        virtual void apply(osg::Node& node)
+        {
+            if (osg::StateSet* stateset = node.getStateSet())
+                mLowestUnusedTexUnit = std::max(mLowestUnusedTexUnit, int(stateset->getTextureAttributeList().size()));
+
+            traverse(node);
+        }
+        int mLowestUnusedTexUnit;
+    };
+
     void Animation::addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor)
     {
         std::vector<osg::ref_ptr<osg::Texture2D> > textures;
@@ -1055,14 +1074,29 @@ namespace MWRender
 
             osg::ref_ptr<osg::Image> image = mResourceSystem->getImageManager()->getImage(stream.str());
             osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(image));
+            tex->setName("envMap");
             tex->setWrap(osg::Texture::WRAP_S, osg::Texture2D::REPEAT);
             tex->setWrap(osg::Texture::WRAP_T, osg::Texture2D::REPEAT);
             mResourceSystem->getSceneManager()->applyFilterSettings(tex);
             textures.push_back(tex);
         }
 
-        osg::ref_ptr<GlowUpdater> glowupdater (new GlowUpdater(glowColor, textures));
+        FindLowestUnusedTexUnitVisitor findLowestUnusedTexUnitVisitor;
+        node->accept(findLowestUnusedTexUnitVisitor);
+        int texUnit = findLowestUnusedTexUnitVisitor.mLowestUnusedTexUnit;
+        osg::ref_ptr<GlowUpdater> glowupdater (new GlowUpdater(texUnit, glowColor, textures));
         node->addUpdateCallback(glowupdater);
+
+        // set a texture now so that the ShaderVisitor can find it
+        osg::ref_ptr<osg::StateSet> writableStateSet = NULL;
+        if (!node->getStateSet())
+            writableStateSet = node->getOrCreateStateSet();
+        else
+            writableStateSet = osg::clone(node->getStateSet(), osg::CopyOp::SHALLOW_COPY);
+        writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
+        writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
+
+        mResourceSystem->getSceneManager()->recreateShaders(node);
     }
 
     // TODO: Should not be here
@@ -1244,10 +1278,14 @@ namespace MWRender
             stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
             mObjectRoot->setStateSet(stateset);
+
+            mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
         }
         else
         {
             mObjectRoot->setStateSet(NULL);
+
+            mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
         }
 
         setRenderBin();
@@ -1315,9 +1353,24 @@ namespace MWRender
             if (found != getNodeMap().end())
             {
                 osg::MatrixTransform* node = found->second;
-                mHeadController = new RotateController(mObjectRoot.get());
-                node->addUpdateCallback(mHeadController);
-                mActiveControllers.insert(std::make_pair(node, mHeadController));
+
+                bool foundKeyframeCtrl = false;
+                osg::Callback* cb = node->getUpdateCallback();
+                while (cb)
+                {
+                    if (dynamic_cast<NifOsg::KeyframeController*>(cb))
+                    {
+                        foundKeyframeCtrl = true;
+                        break;
+                    }
+                }
+
+                if (foundKeyframeCtrl)
+                {
+                    mHeadController = new RotateController(mObjectRoot.get());
+                    node->addUpdateCallback(mHeadController);
+                    mActiveControllers.insert(std::make_pair(node, mHeadController));
+                }
             }
         }
     }
