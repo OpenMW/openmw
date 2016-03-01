@@ -1377,6 +1377,8 @@ namespace NifOsg
                             break;
                         case Nif::NiTexturingProperty::GlossTexture:
                         {
+                            // Not used by the vanilla engine. MCP (Morrowind Code Patch) adds an option to use Gloss maps:
+                            // "- Gloss map fix. Morrowind removed gloss map entries from model files after loading them. This stops Morrowind from removing them."
                             std::cerr << "NiTexturingProperty::GlossTexture in " << mFilename << " not currently used." << std::endl;
                             continue;
                         }
