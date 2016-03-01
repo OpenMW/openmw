@@ -63,6 +63,8 @@ namespace CSVRender
             virtual std::vector<osg::ref_ptr<TagBase> > getEdited (unsigned int elementMask)
                 const;
 
+            virtual void setSubMode (int subMode, unsigned int elementMask);
+
         private:
 
             virtual void referenceableDataChanged (const QModelIndex& topLeft,

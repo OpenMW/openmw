@@ -20,6 +20,11 @@
 #include "instanceselectionmode.hpp"
 #include "instancemovemode.hpp"
 
+int CSVRender::InstanceMode::getSubModeFromId (const std::string& id) const
+{
+    return id=="move" ? 0 : (id=="rotate" ? 1 : 2);
+}
+
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":placeholder"), Mask_Reference, "Instance editing",
   parent), mSubMode (0), mSelectionMode (0), mDragMode (DragMode_None)
@@ -44,6 +49,9 @@ void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
             "<li>Use secondary edit to scale instances along the grid</li>"
             "</ul>"
             "<font color=Red>Not implemented yet</font color>");
+
+        connect (mSubMode, SIGNAL (modeChanged (const std::string&)),
+            this, SLOT (subModeChanged (const std::string&)));
     }
 
     if (!mSelectionMode)
@@ -55,6 +63,10 @@ void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
 
     toolbar->addTool (mSubMode);
     toolbar->addTool (mSelectionMode);
+
+    std::string subMode = mSubMode->getCurrentId();
+
+    getWorldspaceWidget().setSubMode (getSubModeFromId (subMode), Mask_Reference);
 }
 
 void CSVRender::InstanceMode::deactivate (CSVWidget::SceneToolbar *toolbar)
@@ -401,4 +413,14 @@ void CSVRender::InstanceMode::dropEvent (QDropEvent* event)
         if (dropped)
             event->accept();
     }
+}
+
+int CSVRender::InstanceMode::getSubMode() const
+{
+    return mSubMode ? getSubModeFromId (mSubMode->getCurrentId()) : 0;
+}
+
+void CSVRender::InstanceMode::subModeChanged (const std::string& id)
+{
+    getWorldspaceWidget().setSubMode (getSubModeFromId (id), Mask_Reference);
 }

@@ -9,6 +9,8 @@
 #include <osg/ShapeDrawable>
 #include <osg/Shape>
 #include <osg/Geode>
+#include <osg/Geometry>
+#include <osg/PrimitiveSet>
 
 #include <osgFX/Scribe>
 
@@ -50,6 +52,11 @@ QString CSVRender::ObjectTag::getToolTip (bool hideBasics) const
 {
     return QString::fromUtf8 (mObject->getReferenceableId().c_str());
 }
+
+
+CSVRender::ObjectMarkerTag::ObjectMarkerTag (Object* object, int axis)
+: TagBase (Mask_Reference), mObject (object), mAxis (axis)
+{}
 
 
 void CSVRender::Object::clear()
@@ -156,10 +163,144 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
     return mData.getReferences().getRecord (mReferenceId).get();
 }
 
+void CSVRender::Object::updateMarker()
+{
+    for (int i=0; i<3; ++i)
+    {
+        if (mMarker[i])
+        {
+            mRootNode->removeChild (mMarker[i]);
+            mMarker[i] = osg::ref_ptr<osg::Node>();
+        }
+
+        if (mSelected)
+        {
+            if (mSubMode==0)
+            {
+                mMarker[i] = makeMarker (i);
+                mMarker[i]->setUserData(new ObjectMarkerTag (this, i));
+
+                mRootNode->addChild (mMarker[i]);
+            }
+        }
+    }
+}
+
+osg::ref_ptr<osg::Node> CSVRender::Object::makeMarker (int axis)
+{
+    osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
+
+    const float shaftWidth = 10;
+    const float shaftBaseLength = 50;
+    const float headWidth = 30;
+    const float headLength = 30;
+
+    float shaftLength = shaftBaseLength + mBaseNode->getBound().radius();
+
+    // shaft
+    osg::Vec3Array *vertices = new osg::Vec3Array;
+
+    for (int i=0; i<2; ++i)
+    {
+        float length = i ? shaftLength : 0;
+
+        vertices->push_back (getMarkerPosition (-shaftWidth/2, -shaftWidth/2, length, axis));
+        vertices->push_back (getMarkerPosition (-shaftWidth/2, shaftWidth/2, length, axis));
+        vertices->push_back (getMarkerPosition (shaftWidth/2, shaftWidth/2, length, axis));
+        vertices->push_back (getMarkerPosition (shaftWidth/2, -shaftWidth/2, length, axis));
+    }
+
+    // head backside
+    vertices->push_back (getMarkerPosition (-headWidth/2, -headWidth/2, shaftLength, axis));
+    vertices->push_back (getMarkerPosition (-headWidth/2, headWidth/2, shaftLength, axis));
+    vertices->push_back (getMarkerPosition (headWidth/2, headWidth/2, shaftLength, axis));
+    vertices->push_back (getMarkerPosition (headWidth/2, -headWidth/2, shaftLength, axis));
+
+    // head
+    vertices->push_back (getMarkerPosition (0, 0, shaftLength+headLength, axis));
+
+    geometry->setVertexArray (vertices);
+
+    osg::DrawElementsUShort *primitives = new osg::DrawElementsUShort (osg::PrimitiveSet::TRIANGLES, 0);
+
+    // shaft
+    for (int i=0; i<4; ++i)
+    {
+        int i2 = i==3 ? 0 : i+1;
+        primitives->push_back (i);
+        primitives->push_back (4+i);
+        primitives->push_back (i2);
+
+        primitives->push_back (4+i);
+        primitives->push_back (4+i2);
+        primitives->push_back (i2);
+    }
+
+    // cap
+    primitives->push_back (0);
+    primitives->push_back (1);
+    primitives->push_back (2);
+
+    primitives->push_back (2);
+    primitives->push_back (3);
+    primitives->push_back (0);
+
+    // head, backside
+    primitives->push_back (0+8);
+    primitives->push_back (1+8);
+    primitives->push_back (2+8);
+
+    primitives->push_back (2+8);
+    primitives->push_back (3+8);
+    primitives->push_back (0+8);
+
+    for (int i=0; i<4; ++i)
+    {
+        primitives->push_back (12);
+        primitives->push_back (8+(i==3 ? 0 : i+1));
+        primitives->push_back (8+i);
+    }
+
+    geometry->addPrimitiveSet (primitives);
+
+    osg::Vec4Array *colours = new osg::Vec4Array;
+
+    for (int i=0; i<8; ++i)
+        colours->push_back (osg::Vec4f (axis==0 ? 1.0f : 0.2f, axis==1 ? 1.0f : 0.2f,
+            axis==2 ? 1.0f : 0.2f, 1.0f));
+
+    for (int i=8; i<8+4+1; ++i)
+        colours->push_back (osg::Vec4f (axis==0 ? 1.0f : 0.0f, axis==1 ? 1.0f : 0.0f,
+            axis==2 ? 1.0f : 0.0f, 1.0f));
+
+    geometry->setColorArray (colours, osg::Array::BIND_PER_VERTEX);
+
+    geometry->getOrCreateStateSet()->setMode (GL_LIGHTING, osg::StateAttribute::OFF);
+
+    osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+    geode->addDrawable (geometry);
+
+    return geode;
+}
+
+osg::Vec3f CSVRender::Object::getMarkerPosition (float x, float y, float z, int axis)
+{
+    switch (axis)
+    {
+        case 0: return osg::Vec3f (x, y, z);
+        case 1: return osg::Vec3f (z, x, y);
+        case 2: return osg::Vec3f (y, z, x);
+
+        default:
+
+            throw std::logic_error ("invalid axis for marker geometry");
+    }
+}
+
 CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
     const std::string& id, bool referenceable, bool forceBaseToZero)
 : mData (data), mBaseNode(0), mSelected(false), mParentNode(parentNode), mResourceSystem(data.getResourceSystem().get()), mForceBaseToZero (forceBaseToZero),
-  mScaleOverride (1), mOverrideFlags (0)
+  mScaleOverride (1), mOverrideFlags (0), mSubMode (-1)
 {
     mRootNode = new osg::PositionAttitudeTransform;
 
@@ -188,6 +329,7 @@ CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
 
     adjustTransform();
     update();
+    updateMarker();
 }
 
 CSVRender::Object::~Object()
@@ -211,6 +353,8 @@ void CSVRender::Object::setSelected(bool selected)
     }
     else
         mRootNode->addChild(mBaseNode);
+
+    updateMarker();
 }
 
 bool CSVRender::Object::getSelected() const
@@ -229,6 +373,7 @@ bool CSVRender::Object::referenceableDataChanged (const QModelIndex& topLeft,
     {
         adjustTransform();
         update();
+        updateMarker();
         return true;
     }
 
@@ -279,6 +424,7 @@ bool CSVRender::Object::referenceDataChanged (const QModelIndex& topLeft,
                 references.getData (index, columnIndex).toString().toUtf8().constData();
 
             update();
+            updateMarker();
         }
 
         return true;
@@ -418,4 +564,13 @@ void CSVRender::Object::apply (QUndoStack& undoStack)
     }
 
     mOverrideFlags = 0;
+}
+
+void CSVRender::Object::setSubMode (int subMode)
+{
+    if (subMode!=mSubMode)
+    {
+        mSubMode = subMode;
+        updateMarker();
+    }
 }

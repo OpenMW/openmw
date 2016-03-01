@@ -51,7 +51,12 @@ bool CSVRender::Cell::addObjects (int start, int end)
         {
             std::string id = Misc::StringUtils::lowerCase (collection.getRecord (i).get().mId);
 
-            mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false)));
+            std::auto_ptr<Object> object (new Object (mData, mCellNode, id, false));
+
+            if (mSubModeElementMask & Mask_Reference)
+                object->setSubMode (mSubMode);
+
+            mObjects.insert (std::make_pair (id, object.release()));
             modified = true;
         }
     }
@@ -61,7 +66,8 @@ bool CSVRender::Cell::addObjects (int start, int end)
 
 CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,
     bool deleted)
-: mData (data), mId (Misc::StringUtils::lowerCase (id)), mDeleted (deleted)
+: mData (data), mId (Misc::StringUtils::lowerCase (id)), mDeleted (deleted), mSubMode (0),
+  mSubModeElementMask (0)
 {
     std::pair<CSMWorld::CellCoordinates, bool> result = CSMWorld::CellCoordinates::fromId (id);
 
@@ -358,4 +364,15 @@ std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::Cell::getEdited (unsig
                 result.push_back (iter->second->getTag());
 
     return result;
+}
+
+void CSVRender::Cell::setSubMode (int subMode, unsigned int elementMask)
+{
+    mSubMode = subMode;
+    mSubModeElementMask = elementMask;
+
+    if (elementMask & Mask_Reference)
+        for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+            iter!=mObjects.end(); ++iter)
+                iter->second->setSubMode (subMode);
 }

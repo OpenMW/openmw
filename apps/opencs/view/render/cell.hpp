@@ -45,6 +45,8 @@ namespace CSVRender
             std::auto_ptr<CellArrow> mCellArrows[4];
             std::auto_ptr<CellMarker> mCellMarker;
             bool mDeleted;
+            int mSubMode;
+            unsigned int mSubModeElementMask;
 
             /// Ignored if cell does not have an object with the given ID.
             ///
@@ -118,6 +120,8 @@ namespace CSVRender
             std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask) const;
 
             std::vector<osg::ref_ptr<TagBase> > getEdited (unsigned int elementMask) const;
+
+            void setSubMode (int subMode, unsigned int elementMask);
     };
 }
 

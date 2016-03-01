@@ -27,6 +27,8 @@ namespace CSVRender
             InstanceSelectionMode *mSelectionMode;
             DragMode mDragMode;
 
+            int getSubModeFromId (const std::string& id) const;
+
         public:
 
             InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent = 0);
@@ -56,6 +58,12 @@ namespace CSVRender
             virtual void dragEnterEvent (QDragEnterEvent *event);
 
             virtual void dropEvent (QDropEvent* event);
+
+            virtual int getSubMode() const;
+
+        private slots:
+
+            void subModeChanged (const std::string& id);
     };
 }
 

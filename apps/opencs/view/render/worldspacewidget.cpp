@@ -761,3 +761,8 @@ void CSVRender::WorldspaceWidget::handleMouseClick (osg::ref_ptr<TagBase> tag, c
     else if (button=="s-select")
         editMode.secondarySelectPressed (tag);
 }
+
+CSVRender::EditMode *CSVRender::WorldspaceWidget::getEditMode()
+{
+    return dynamic_cast<CSVRender::EditMode *> (mEditMode->getCurrent());
+}

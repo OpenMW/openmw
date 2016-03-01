@@ -19,6 +19,8 @@ namespace osg
 {
     class PositionAttitudeTransform;
     class Group;
+    class Node;
+    class Geode;
 }
 
 namespace osgFX
@@ -53,6 +55,15 @@ namespace CSVRender
             virtual QString getToolTip (bool hideBasics) const;
     };
 
+    class ObjectMarkerTag : public TagBase
+    {
+        public:
+
+            ObjectMarkerTag (Object* object, int axis);
+
+            Object* mObject;
+            int mAxis;
+    };
 
     class Object
     {
@@ -80,6 +91,8 @@ namespace CSVRender
             ESM::Position mPositionOverride;
             int mScaleOverride;
             int mOverrideFlags;
+            osg::ref_ptr<osg::Node> mMarker[3];
+            int mSubMode;
 
             /// Not implemented
             Object (const Object&);
@@ -99,6 +112,12 @@ namespace CSVRender
 
             /// Throws an exception if *this was constructed with referenceable
             const CSMWorld::CellRef& getReference() const;
+
+            void updateMarker();
+
+            osg::ref_ptr<osg::Node> makeMarker (int axis);
+
+            osg::Vec3f getMarkerPosition (float x, float y, float z, int axis);
 
         public:
 
@@ -155,6 +174,8 @@ namespace CSVRender
 
             /// Apply override changes via command and end edit mode
             void apply (QUndoStack& undoStack);
+
+            void setSubMode (int subMode);
     };
 }
 

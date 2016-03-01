@@ -115,6 +115,8 @@ namespace CSVRender
             virtual std::vector<osg::ref_ptr<TagBase> > getEdited (unsigned int elementMask)
                 const;
 
+            virtual void setSubMode (int subMode, unsigned int elementMask);
+
         protected:
 
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);

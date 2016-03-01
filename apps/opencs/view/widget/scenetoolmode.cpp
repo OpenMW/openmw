@@ -96,6 +96,11 @@ CSVWidget::ModeButton *CSVWidget::SceneToolMode::getCurrent()
     return mCurrent;
 }
 
+std::string CSVWidget::SceneToolMode::getCurrentId() const
+{
+    return mButtons.find (mCurrent)->second;
+}
+
 void CSVWidget::SceneToolMode::selected()
 {
     std::map<ModeButton *, std::string>::const_iterator iter =

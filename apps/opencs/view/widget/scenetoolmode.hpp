@@ -56,6 +56,9 @@ namespace CSVWidget
             /// Will return a 0-pointer only if the mode does not have any buttons yet.
             ModeButton *getCurrent();
 
+            /// Must not be called if there aren't any buttons yet.
+            std::string getCurrentId() const;
+
         signals:
 
             void modeChanged (const std::string& id);

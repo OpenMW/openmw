@@ -137,6 +137,11 @@ std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::UnpagedWorldspaceWidge
     return mCell->getEdited (elementMask);
 }
 
+void  CSVRender::UnpagedWorldspaceWidget::setSubMode (int subMode, unsigned int elementMask)
+{
+    mCell->setSubMode (subMode, elementMask);
+}
+
 void CSVRender::UnpagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
