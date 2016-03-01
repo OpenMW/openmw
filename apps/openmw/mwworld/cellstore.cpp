@@ -893,7 +893,7 @@ namespace MWWorld
     {
         const MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
         static const float fCorpseClearDelay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCorpseClearDelay")->getFloat();
-        if (!ptr.getClass().isPersistent(ptr) && creatureStats.getTimeOfDeath() + fCorpseClearDelay <= MWBase::Environment::get().getWorld()->getTimeStamp())
+        if (creatureStats.isDead() && !ptr.getClass().isPersistent(ptr) && creatureStats.getTimeOfDeath() + fCorpseClearDelay <= MWBase::Environment::get().getWorld()->getTimeStamp())
             MWBase::Environment::get().getWorld()->deleteObject(ptr);
     }
 
