@@ -87,6 +87,8 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mDeathAnimation = 0;
     esm.getHNOT (mDeathAnimation, "DANM");
 
+    mTimeOfDeath.mDay = 0;
+    mTimeOfDeath.mHour = 0;
     esm.getHNOT (mTimeOfDeath, "DTIM");
 
     mSpells.load(esm);
