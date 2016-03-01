@@ -16,7 +16,7 @@
 namespace ESMTerrain
 {
 
-    const float defaultHeight = -2048;
+    const float defaultHeight = ESM::Land::DEFAULT_HEIGHT;
 
     Storage::Storage(const VFS::Manager *vfs, const std::string& normalMapPattern, bool autoUseNormalMaps, const std::string& specularMapPattern, bool autoUseSpecularMaps)
         : mVFS(vfs)

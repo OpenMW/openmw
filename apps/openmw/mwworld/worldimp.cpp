@@ -1325,9 +1325,48 @@ namespace MWWorld
         rotateObjectImp(ptr, osg::Vec3f(x, y, z), adjust);
     }
 
-    MWWorld::Ptr World::safePlaceObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos)
+    MWWorld::Ptr World::placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos)
     {
         return copyObjectToCell(ptr,cell,pos,ptr.getRefData().getCount(),false);
+    }
+
+    MWWorld::Ptr World::safePlaceObject(const ConstPtr &ptr, const ConstPtr &referenceObject, MWWorld::CellStore* referenceCell, int direction, float distance)
+    {
+        ESM::Position ipos = referenceObject.getRefData().getPosition();
+        osg::Vec3f pos(ipos.asVec3());
+        osg::Quat orientation(ipos.rot[2], osg::Vec3f(0,0,-1));
+
+        int fallbackDirections[4] = {direction, (direction+3)%4, (direction+2)%4, (direction+1)%4};
+
+        for (int i=0; i<4; ++i)
+        {
+            direction = fallbackDirections[i];
+            // check if spawn point is safe, fall back to another direction if not
+            osg::Vec3f spawnPoint = pos;
+            if (direction == 0) spawnPoint = pos + (orientation * osg::Vec3f(0,1,0)) * distance;
+            else if(direction == 1) spawnPoint = pos - (orientation * osg::Vec3f(0,1,0)) * distance;
+            else if(direction == 2) spawnPoint = pos - (orientation * osg::Vec3f(1,0,0)) * distance;
+            else if(direction == 3) spawnPoint = pos + (orientation * osg::Vec3f(1,0,0)) * distance;
+            spawnPoint.z() += 30; // move up a little to account for slopes, will snap down later
+
+            if (!castRay(spawnPoint.x(), spawnPoint.y(), spawnPoint.z(),
+                                                               pos.x(), pos.y(), pos.z() + 20))
+            {
+                // safe
+                ipos.pos[0] = spawnPoint.x();
+                ipos.pos[1] = spawnPoint.y();
+                ipos.pos[2] = spawnPoint.z();
+                break;
+            }
+        }
+
+        ipos.rot[0] = referenceObject.getRefData().getPosition().rot[0];
+        ipos.rot[1] = referenceObject.getRefData().getPosition().rot[1];
+        ipos.rot[2] = referenceObject.getRefData().getPosition().rot[2];
+
+        MWWorld::Ptr placed = copyObjectToCell(ptr, referenceCell, ipos, ptr.getRefData().getCount(), false);
+        placed.getClass().adjustPosition(placed, true); // snap to ground
+        return placed;
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
@@ -3025,23 +3064,9 @@ namespace MWWorld
             if (selectedCreature.empty())
                 return;
 
-            ESM::Position ipos = mPlayer->getPlayer().getRefData().getPosition();
-            osg::Vec3f pos(ipos.asVec3());
-            osg::Quat rot(-ipos.rot[2], osg::Vec3f(0,0,1));
-            const float distance = 50;
-            pos = pos + (rot * osg::Vec3f(0,1,0)) * distance;
-            ipos.pos[0] = pos.x();
-            ipos.pos[1] = pos.y();
-            ipos.pos[2] = pos.z();
-            ipos.rot[0] = 0;
-            ipos.rot[1] = 0;
-            ipos.rot[2] = 0;
-
-            MWWorld::CellStore* cell = mPlayer->getPlayer().getCell();
             MWWorld::ManualRef ref(getStore(), selectedCreature, 1);
-            ref.getPtr().getCellRef().setPosition(ipos);
 
-            safePlaceObject(ref.getPtr(), cell, ipos);
+            safePlaceObject(ref.getPtr(), getPlayerPtr(), getPlayerPtr().getCell(), 0, 220.f);
         }
     }
 

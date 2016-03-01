@@ -46,6 +46,9 @@ struct Land
         DATA_VTEX = 16
     };
 
+    // default height to use in case there is no Land record
+    static const int DEFAULT_HEIGHT = -2048;
+
     // number of vertices per side
     static const int LAND_SIZE = 65;
 

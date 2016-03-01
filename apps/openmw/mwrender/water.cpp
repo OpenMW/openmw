@@ -9,7 +9,6 @@
 #include <osg/Geometry>
 #include <osg/Material>
 #include <osg/PositionAttitudeTransform>
-#include <osg/Depth>
 #include <osg/ClipNode>
 #include <osg/MatrixTransform>
 #include <osg/FrontFace>
