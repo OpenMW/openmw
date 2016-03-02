@@ -93,6 +93,9 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
                 mTerrain.reset(new Terrain::TerrainGrid(mCellNode, data.getResourceSystem().get(), NULL, new TerrainStorage(mData), Mask_Terrain));
                 mTerrain->loadCell(esmLand.mX,
                                    esmLand.mY);
+
+                mCellBorder.reset(new CellBorder(mCellNode, mCoordinates));
+                mCellBorder->buildShape(esmLand);
             }
         }
     }
