@@ -65,8 +65,7 @@ void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
     osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
     colors->push_back(osg::Vec4f(0.f, 0.5f, 0.f, 1.f));
 
-    geometry->setColorArray(colors);
-    geometry->setColorBinding(osg::Geometry::BIND_PER_PRIMITIVE_SET);
+    geometry->setColorArray(colors, osg::Array::BIND_PER_PRIMITIVE_SET);
 
     // Primitive
     osg::ref_ptr<osg::DrawElementsUShort> primitives =
