@@ -1363,6 +1363,7 @@ namespace MWRender
                         foundKeyframeCtrl = true;
                         break;
                     }
+                    cb = cb->getNestedCallback();
                 }
 
                 if (foundKeyframeCtrl)
