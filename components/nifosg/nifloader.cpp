@@ -1433,16 +1433,16 @@ namespace NifOsg
                     {
                         osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
                         texEnv->setScale_RGB(2.f);
-                        texEnv->setCombine_Alpha(GL_MODULATE);
-                        texEnv->setOperand0_Alpha(GL_SRC_ALPHA);
-                        texEnv->setOperand1_Alpha(GL_SRC_ALPHA);
-                        texEnv->setSource0_Alpha(GL_PREVIOUS_ARB);
-                        texEnv->setSource1_Alpha(GL_TEXTURE);
-                        texEnv->setCombine_RGB(GL_MODULATE);
-                        texEnv->setOperand0_RGB(GL_SRC_COLOR);
-                        texEnv->setOperand1_RGB(GL_SRC_COLOR);
-                        texEnv->setSource0_RGB(GL_PREVIOUS_ARB);
-                        texEnv->setSource1_RGB(GL_TEXTURE);
+                        texEnv->setCombine_Alpha(osg::TexEnvCombine::MODULATE);
+                        texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
+                        texEnv->setOperand1_Alpha(osg::TexEnvCombine::SRC_ALPHA);
+                        texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+                        texEnv->setSource1_Alpha(osg::TexEnvCombine::TEXTURE);
+                        texEnv->setCombine_RGB(osg::TexEnvCombine::MODULATE);
+                        texEnv->setOperand0_RGB(osg::TexEnvCombine::SRC_COLOR);
+                        texEnv->setOperand1_RGB(osg::TexEnvCombine::SRC_COLOR);
+                        texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+                        texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
                         stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                     }
                     else if (i == Nif::NiTexturingProperty::BumpTexture)
@@ -1453,16 +1453,16 @@ namespace NifOsg
                     else if (i == Nif::NiTexturingProperty::DecalTexture)
                     {
                          osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
-                         texEnv->setCombine_RGB(GL_INTERPOLATE);
-                         texEnv->setSource0_RGB(GL_TEXTURE);
-                         texEnv->setOperand0_RGB(GL_SRC_COLOR);
-                         texEnv->setSource1_RGB(GL_PREVIOUS_ARB);
-                         texEnv->setOperand1_RGB(GL_SRC_COLOR);
-                         texEnv->setSource2_RGB(GL_TEXTURE);
-                         texEnv->setOperand2_RGB(GL_SRC_ALPHA);
-                         texEnv->setCombine_Alpha(GL_REPLACE);
-                         texEnv->setSource0_Alpha(GL_PREVIOUS);
-                         texEnv->setOperand0_Alpha(GL_SRC_ALPHA);
+                         texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
+                         texEnv->setSource0_RGB(osg::TexEnvCombine::TEXTURE);
+                         texEnv->setOperand0_RGB(osg::TexEnvCombine::SRC_COLOR);
+                         texEnv->setSource1_RGB(osg::TexEnvCombine::PREVIOUS);
+                         texEnv->setOperand1_RGB(osg::TexEnvCombine::SRC_COLOR);
+                         texEnv->setSource2_RGB(osg::TexEnvCombine::TEXTURE);
+                         texEnv->setOperand2_RGB(osg::TexEnvCombine::SRC_ALPHA);
+                         texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+                         texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+                         texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
                          stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                     }
 
