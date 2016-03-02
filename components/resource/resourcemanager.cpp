@@ -13,6 +13,10 @@ namespace Resource
 
     }
 
+    ResourceManager::~ResourceManager()
+    {
+    }
+
     void ResourceManager::updateCache(double referenceTime)
     {
         mCache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime);
