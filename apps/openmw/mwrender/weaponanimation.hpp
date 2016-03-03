@@ -52,6 +52,9 @@ namespace MWRender
 
         osg::ref_ptr<RotateController> mSpineControllers[2];
 
+        void setControllerRotate(const osg::Quat& rotate);
+        void setControllerEnabled(bool enabled);
+
         virtual osg::Group* getArrowBone() = 0;
         virtual osg::Node* getWeaponNode() = 0;
         virtual Resource::ResourceSystem* getResourceSystem() = 0;

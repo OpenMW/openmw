@@ -12,6 +12,10 @@ varying vec2 darkMapUV;
 varying vec2 detailMapUV;
 #endif
 
+#if @decalMap
+varying vec2 decalMapUV;
+#endif
+
 #if @emissiveMap
 varying vec2 emissiveMapUV;
 #endif
@@ -68,7 +72,11 @@ void main(void)
 #endif
 
 #if @detailMap
-    detailMapUV = (gl_TextureMatrix[@detailMap] * gl_MultiTexCoord@detailMap).xy;
+    detailMapUV = (gl_TextureMatrix[@detailMapUV] * gl_MultiTexCoord@detailMapUV).xy;
+#endif
+
+#if @decalMap
+    decalMapUV = (gl_TextureMatrix[@decalMapUV] * gl_MultiTexCoord@decalMapUV).xy;
 #endif
 
 #if @emissiveMap

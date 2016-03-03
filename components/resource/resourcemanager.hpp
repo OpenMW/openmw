@@ -18,6 +18,7 @@ namespace Resource
     {
     public:
         ResourceManager(const VFS::Manager* vfs);
+        virtual ~ResourceManager();
 
         /// Clear cache entries that have not been referenced for longer than expiryDelay.
         virtual void updateCache(double referenceTime);
