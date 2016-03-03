@@ -16,6 +16,7 @@
 #include "object.hpp"
 #include "cellarrow.hpp"
 #include "cellmarker.hpp"
+#include "cellborder.hpp"
 
 class QModelIndex;
 
@@ -44,6 +45,7 @@ namespace CSVRender
             CSMWorld::CellCoordinates mCoordinates;
             std::auto_ptr<CellArrow> mCellArrows[4];
             std::auto_ptr<CellMarker> mCellMarker;
+            std::auto_ptr<CellBorder> mCellBorder;
             bool mDeleted;
 
             /// Ignored if cell does not have an object with the given ID.

@@ -80,6 +80,8 @@
         <file alias="free-camera">flying eye.png</file>
         <file alias="orbiting-camera">orbit2.png</file>
         <file alias="play">scene-play.png</file>
+        <file alias="grid">grid-view.png</file>
+        <file alias="grid-small">grid-view-small.png</file>
         <file alias="scene-view-1">scene-view-references.png</file>
         <file alias="scene-view-16">scene-view-terrain.png</file>
         <file alias="scene-view-4">scene-view-water.png</file>
