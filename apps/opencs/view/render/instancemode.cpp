@@ -259,6 +259,12 @@ void CSVRender::InstanceMode::dragCompleted()
     mDragMode = DragMode_None;
 }
 
+void CSVRender::InstanceMode::dragAborted()
+{
+    getWorldspaceWidget().reset (Mask_Reference);
+    mDragMode = DragMode_None;
+}
+
 void CSVRender::InstanceMode::dragWheel (int diff, double speedFactor)
 {
     if (mDragMode==DragMode_Move)

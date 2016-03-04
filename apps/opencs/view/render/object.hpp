@@ -175,6 +175,10 @@ namespace CSVRender
             void apply (QUndoStack& undoStack);
 
             void setSubMode (int subMode);
+
+            /// Erase all overrides and restore the visual representation of the object to its
+            /// true state.
+            void reset();
     };
 }
 

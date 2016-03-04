@@ -122,6 +122,10 @@ namespace CSVRender
             std::vector<osg::ref_ptr<TagBase> > getEdited (unsigned int elementMask) const;
 
             void setSubMode (int subMode, unsigned int elementMask);
+
+            /// Erase all overrides and restore the visual representation of the cell to its
+            /// true state.
+            void reset (unsigned int elementMask);
     };
 }
 

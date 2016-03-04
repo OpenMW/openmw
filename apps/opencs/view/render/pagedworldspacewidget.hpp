@@ -117,6 +117,9 @@ namespace CSVRender
 
             virtual void setSubMode (int subMode, unsigned int elementMask);
 
+            /// Erase all overrides and restore the visual representation to its true state.
+            virtual void reset (unsigned int elementMask);
+
         protected:
 
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);

@@ -158,6 +158,9 @@ namespace CSVRender
 
             virtual void setSubMode (int subMode, unsigned int elementMask) = 0;
 
+            /// Erase all overrides and restore the visual representation to its true state.
+            virtual void reset (unsigned int elementMask) = 0;
+
         protected:
 
             /// Visual elements in a scene

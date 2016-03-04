@@ -574,3 +574,10 @@ void CSVRender::Object::setSubMode (int subMode)
         updateMarker();
     }
 }
+
+void CSVRender::Object::reset()
+{
+    mOverrideFlags = 0;
+    adjustTransform();
+    updateMarker();
+}

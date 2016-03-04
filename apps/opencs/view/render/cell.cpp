@@ -376,3 +376,11 @@ void CSVRender::Cell::setSubMode (int subMode, unsigned int elementMask)
             iter!=mObjects.end(); ++iter)
                 iter->second->setSubMode (subMode);
 }
+
+void CSVRender::Cell::reset (unsigned int elementMask)
+{
+    if (elementMask & Mask_Reference)
+        for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+            iter!=mObjects.end(); ++iter)
+            iter->second->reset();
+}

@@ -582,6 +582,13 @@ void CSVRender::PagedWorldspaceWidget::setSubMode (int subMode, unsigned int ele
         iter->second->setSubMode (subMode, elementMask);
 }
 
+void CSVRender::PagedWorldspaceWidget::reset (unsigned int elementMask)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::const_iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+        iter->second->reset (elementMask);
+}
+
 CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (
     CSVWidget::SceneToolbar *parent)
 {

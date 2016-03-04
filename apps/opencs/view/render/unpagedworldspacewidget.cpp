@@ -142,6 +142,11 @@ void  CSVRender::UnpagedWorldspaceWidget::setSubMode (int subMode, unsigned int 
     mCell->setSubMode (subMode, elementMask);
 }
 
+void CSVRender::UnpagedWorldspaceWidget::reset (unsigned int elementMask)
+{
+    mCell->reset (elementMask);
+}
+
 void CSVRender::UnpagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {

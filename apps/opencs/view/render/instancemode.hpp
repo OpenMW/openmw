@@ -53,6 +53,10 @@ namespace CSVRender
 
             virtual void dragCompleted();
 
+            /// \note dragAborted will not be called, if the drag is aborted via changing
+            /// editing mode
+            virtual void dragAborted();
+
             virtual void dragWheel (int diff, double speedFactor);
 
             virtual void dragEnterEvent (QDragEnterEvent *event);
