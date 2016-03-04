@@ -27,7 +27,7 @@ int CSVRender::InstanceMode::getSubModeFromId (const std::string& id) const
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":placeholder"), Mask_Reference, "Instance editing",
-  parent), mSubMode (0), mSelectionMode (0), mDragMode (DragMode_None), mDragAxis (0)
+  parent), mSubMode (0), mSelectionMode (0), mDragMode (DragMode_None), mDragAxis (-1)
 {
 }
 
@@ -165,10 +165,11 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (osg::ref_ptr<TagBase> tag)
     if (CSVRender::ObjectMarkerTag *objectTag = dynamic_cast<CSVRender::ObjectMarkerTag *> (tag.get()))
     {
         mDragAxis = objectTag->mAxis;
-        mDragMode = DragMode_MoveAxis;
     }
     else
-        mDragMode = DragMode_Move;
+        mDragAxis = -1;
+
+    mDragMode = DragMode_Move;
 
     return true;
 }
@@ -197,17 +198,12 @@ void CSVRender::InstanceMode::drag (int diffX, int diffY, double speedFactor)
 
     switch (mDragMode)
     {
-        case DragMode_MoveAxis:
-        {
-            for (int i=0; i<3; ++i)
-                if (i!=mDragAxis)
-                    offset[i] = 0;
-
-            // Fall through
-        }
-
         case DragMode_Move:
         {
+            if (mDragAxis!=-1)
+                for (int i=0; i<3; ++i)
+                    if (i!=mDragAxis)
+                        offset[i] = 0;
 
             std::vector<osg::ref_ptr<TagBase> > selection =
                 getWorldspaceWidget().getEdited (Mask_Reference);
@@ -242,10 +238,7 @@ void CSVRender::InstanceMode::dragCompleted()
 
     switch (mDragMode)
     {
-        case DragMode_Move:
-        case DragMode_MoveAxis:
-
-            description = "Move Instances"; break;
+        case DragMode_Move: description = "Move Instances"; break;
 
         case DragMode_None: break;
     }

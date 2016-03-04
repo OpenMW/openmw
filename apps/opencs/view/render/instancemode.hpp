@@ -19,9 +19,7 @@ namespace CSVRender
             enum DragMode
             {
                 DragMode_None,
-                DragMode_Move,
-                DragMode_MoveAxis
-
+                DragMode_Move
             };
 
             CSVWidget::SceneToolMode *mSubMode;
