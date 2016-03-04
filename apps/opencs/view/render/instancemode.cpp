@@ -72,6 +72,7 @@ void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
 
 void CSVRender::InstanceMode::deactivate (CSVWidget::SceneToolbar *toolbar)
 {
+    mDragMode = DragMode_None;
     getWorldspaceWidget().reset (Mask_Reference);
 
     if (mSelectionMode)
@@ -451,6 +452,7 @@ int CSVRender::InstanceMode::getSubMode() const
 
 void CSVRender::InstanceMode::subModeChanged (const std::string& id)
 {
+    mDragMode = DragMode_None;
     getWorldspaceWidget().reset (Mask_Reference);
     getWorldspaceWidget().setSubMode (getSubModeFromId (id), Mask_Reference);
 }
