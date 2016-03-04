@@ -343,7 +343,7 @@ void CSVDoc::View::updateTitle()
     setWindowTitle (QString::fromUtf8(stream.str().c_str()));
 }
 
-void CSVDoc::View::updateSubViewIndicies(SubView *view)
+void CSVDoc::View::updateSubViewIndices(SubView *view)
 {
     CSMPrefs::Category& windows = CSMPrefs::State::get()["Windows"];
 
@@ -373,7 +373,7 @@ void CSVDoc::View::updateSubViewIndicies(SubView *view)
             else
             {
                 delete subView->titleBarWidget();
-                subView->setTitleBarWidget (0);
+                subView->setTitleBarWidget (NULL);
             }
         }
     }
@@ -402,7 +402,7 @@ void CSVDoc::View::updateActions()
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
-      mViewTotal (totalViews), mScroll(0), mScrollbarOnly(false)
+      mViewTotal (totalViews), mScroll(NULL), mScrollbarOnly(false)
 {
     CSMPrefs::Category& windows = CSMPrefs::State::get()["Windows"];
 
@@ -419,10 +419,7 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     }
     else
     {
-        mScroll = new QScrollArea(this);
-        mScroll->setWidgetResizable(true);
-        mScroll->setWidget(&mSubViewWindow);
-        setCentralWidget(mScroll);
+        createScrollArea();
     }
 
     mOperations = new Operations;
@@ -570,36 +567,11 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     //
     mScrollbarOnly = windows["mainwindow-scrollbar"].toString() == "Scrollbar Only";
 
-    QDesktopWidget *dw = QApplication::desktop();
-    QRect rect;
-    if (windows["grow-limit"].isTrue())
-        rect = dw->screenGeometry(this);
-    else
-        rect = dw->screenGeometry(dw->screen(dw->screenNumber(this)));
-
-    if (!mScrollbarOnly && mScroll && mSubViews.size() > 1)
-    {
-        int newWidth = width()+minWidth;
-        int frameWidth = frameGeometry().width() - width();
-        if (newWidth+frameWidth <= rect.width())
-        {
-            resize(newWidth, height());
-            // WARNING: below code assumes that new subviews are added to the right
-            if (x() > rect.width()-(newWidth+frameWidth))
-                move(rect.width()-(newWidth+frameWidth), y()); // shift left to stay within the screen
-        }
-        else
-        {
-            // full width
-            resize(rect.width()-frameWidth, height());
-            mSubViewWindow.setMinimumWidth(mSubViewWindow.width()+minWidth);
-            move(0, y());
-        }
-    }
+    updateWidth(windows["grow-limit"].isTrue(), minWidth);
 
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
-    updateSubViewIndicies();
+    updateSubViewIndices();
 
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&, const std::string&)));
@@ -608,8 +580,8 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
 
     connect (view, SIGNAL (updateTitle()), this, SLOT (updateTitle()));
 
-    connect (view, SIGNAL (updateSubViewIndicies (SubView *)),
-        this, SLOT (updateSubViewIndicies (SubView *)));
+    connect (view, SIGNAL (updateSubViewIndices (SubView *)),
+        this, SLOT (updateSubViewIndices (SubView *)));
 
     view->show();
 
@@ -631,7 +603,7 @@ void CSVDoc::View::moveScrollBarToEnd(int min, int max)
 void CSVDoc::View::settingChanged (const CSMPrefs::Setting *setting)
 {
     if (*setting=="Windows/hide-subview")
-        updateSubViewIndicies (0);
+        updateSubViewIndices (NULL);
     else if (*setting=="Windows/mainwindow-scrollbar")
     {
         if (setting->toString()!="Grow Only")
@@ -651,10 +623,7 @@ void CSVDoc::View::settingChanged (const CSMPrefs::Setting *setting)
             }
             else
             {
-                mScroll = new QScrollArea(this);
-                mScroll->setWidgetResizable(true);
-                mScroll->setWidget(&mSubViewWindow);
-                setCentralWidget(mScroll);
+                createScrollArea();
             }
         }
         else  if (mScroll)
@@ -662,7 +631,7 @@ void CSVDoc::View::settingChanged (const CSMPrefs::Setting *setting)
             mScroll->takeWidget();
             setCentralWidget (&mSubViewWindow);
             mScroll->deleteLater();
-            mScroll = 0;
+            mScroll = NULL;
         }
     }
 }
@@ -958,4 +927,42 @@ void CSVDoc::View::updateScrollbar()
 void CSVDoc::View::merge()
 {
     emit mergeDocument (mDocument);
+}
+
+void CSVDoc::View::updateWidth(bool isGrowLimit, int minSubViewWidth)
+{
+    QDesktopWidget *dw = QApplication::desktop();
+    QRect rect;
+    if (isGrowLimit)
+        rect = dw->screenGeometry(this);
+    else
+        rect = dw->screenGeometry(dw->screen(dw->screenNumber(this)));
+
+    if (!mScrollbarOnly && mScroll && mSubViews.size() > 1)
+    {
+        int newWidth = width()+minSubViewWidth;
+        int frameWidth = frameGeometry().width() - width();
+        if (newWidth+frameWidth <= rect.width())
+        {
+            resize(newWidth, height());
+            // WARNING: below code assumes that new subviews are added to the right
+            if (x() > rect.width()-(newWidth+frameWidth))
+                move(rect.width()-(newWidth+frameWidth), y()); // shift left to stay within the screen
+        }
+        else
+        {
+            // full width
+            resize(rect.width()-frameWidth, height());
+            mSubViewWindow.setMinimumWidth(mSubViewWindow.width()+minSubViewWidth);
+            move(0, y());
+        }
+    }
+}
+
+void CSVDoc::View::createScrollArea()
+{
+    mScroll = new QScrollArea(this);
+    mScroll->setWidgetResizable(true);
+    mScroll->setWidget(&mSubViewWindow);
+    setCentralWidget(mScroll);
 }
