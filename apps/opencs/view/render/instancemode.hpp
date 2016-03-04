@@ -19,13 +19,15 @@ namespace CSVRender
             enum DragMode
             {
                 DragMode_None,
-                DragMode_Move
+                DragMode_Move,
+                DragMode_MoveAxis
 
             };
 
             CSVWidget::SceneToolMode *mSubMode;
             InstanceSelectionMode *mSelectionMode;
             DragMode mDragMode;
+            int mDragAxis;
 
             int getSubModeFromId (const std::string& id) const;
 

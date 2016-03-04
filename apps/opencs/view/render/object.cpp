@@ -55,7 +55,7 @@ QString CSVRender::ObjectTag::getToolTip (bool hideBasics) const
 
 
 CSVRender::ObjectMarkerTag::ObjectMarkerTag (Object* object, int axis)
-: TagBase (Mask_Reference), mObject (object), mAxis (axis)
+: ObjectTag (object), mAxis (axis)
 {}
 
 
@@ -287,9 +287,9 @@ osg::Vec3f CSVRender::Object::getMarkerPosition (float x, float y, float z, int 
 {
     switch (axis)
     {
-        case 0: return osg::Vec3f (x, y, z);
-        case 1: return osg::Vec3f (z, x, y);
-        case 2: return osg::Vec3f (y, z, x);
+        case 2: return osg::Vec3f (x, y, z);
+        case 0: return osg::Vec3f (z, x, y);
+        case 1: return osg::Vec3f (y, z, x);
 
         default:
 

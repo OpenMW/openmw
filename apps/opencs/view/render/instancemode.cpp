@@ -27,7 +27,7 @@ int CSVRender::InstanceMode::getSubModeFromId (const std::string& id) const
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":placeholder"), Mask_Reference, "Instance editing",
-  parent), mSubMode (0), mSelectionMode (0), mDragMode (DragMode_None)
+  parent), mSubMode (0), mSelectionMode (0), mDragMode (DragMode_None), mDragAxis (0)
 {
 }
 
@@ -151,8 +151,6 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (osg::ref_ptr<TagBase> tag)
     if (selection.empty())
         return false;
 
-    // \todo check for sub-mode
-
     for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin());
         iter!=selection.end(); ++iter)
     {
@@ -162,7 +160,15 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (osg::ref_ptr<TagBase> tag)
         }
     }
 
-    mDragMode = DragMode_Move;
+    // \todo check for sub-mode
+
+    if (CSVRender::ObjectMarkerTag *objectTag = dynamic_cast<CSVRender::ObjectMarkerTag *> (tag.get()))
+    {
+        mDragAxis = objectTag->mAxis;
+        mDragMode = DragMode_MoveAxis;
+    }
+    else
+        mDragMode = DragMode_Move;
 
     return true;
 }
@@ -175,23 +181,33 @@ bool CSVRender::InstanceMode::secondaryEditStartDrag (osg::ref_ptr<TagBase> tag)
 
 void CSVRender::InstanceMode::drag (int diffX, int diffY, double speedFactor)
 {
+    osg::Vec3f eye;
+    osg::Vec3f centre;
+    osg::Vec3f up;
+
+    getWorldspaceWidget().getCamera()->getViewMatrix().getLookAt (eye, centre, up);
+
+    osg::Vec3f offset;
+
+    if (diffY)
+        offset += up * diffY * speedFactor;
+
+    if (diffX)
+        offset += ((centre-eye) ^ up) * diffX * speedFactor;
+
     switch (mDragMode)
     {
+        case DragMode_MoveAxis:
+        {
+            for (int i=0; i<3; ++i)
+                if (i!=mDragAxis)
+                    offset[i] = 0;
+
+            // Fall through
+        }
+
         case DragMode_Move:
         {
-            osg::Vec3f eye;
-            osg::Vec3f centre;
-            osg::Vec3f up;
-
-            getWorldspaceWidget().getCamera()->getViewMatrix().getLookAt (eye, centre, up);
-
-            osg::Vec3f offset;
-
-            if (diffY)
-                offset += up * diffY * speedFactor;
-
-            if (diffX)
-                offset += ((centre-eye) ^ up) * diffX * speedFactor;
 
             std::vector<osg::ref_ptr<TagBase> > selection =
                 getWorldspaceWidget().getEdited (Mask_Reference);
@@ -226,7 +242,10 @@ void CSVRender::InstanceMode::dragCompleted()
 
     switch (mDragMode)
     {
-        case DragMode_Move: description = "Move Instances"; break;
+        case DragMode_Move:
+        case DragMode_MoveAxis:
+
+            description = "Move Instances"; break;
 
         case DragMode_None: break;
     }

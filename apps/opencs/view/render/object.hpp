@@ -55,13 +55,12 @@ namespace CSVRender
             virtual QString getToolTip (bool hideBasics) const;
     };
 
-    class ObjectMarkerTag : public TagBase
+    class ObjectMarkerTag : public ObjectTag
     {
         public:
 
             ObjectMarkerTag (Object* object, int axis);
 
-            Object* mObject;
             int mAxis;
     };
 
