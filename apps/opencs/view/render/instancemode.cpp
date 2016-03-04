@@ -440,5 +440,6 @@ int CSVRender::InstanceMode::getSubMode() const
 
 void CSVRender::InstanceMode::subModeChanged (const std::string& id)
 {
+    getWorldspaceWidget().reset (Mask_Reference);
     getWorldspaceWidget().setSubMode (getSubModeFromId (id), Mask_Reference);
 }
