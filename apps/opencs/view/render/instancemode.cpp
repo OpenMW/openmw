@@ -71,6 +71,8 @@ void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
 
 void CSVRender::InstanceMode::deactivate (CSVWidget::SceneToolbar *toolbar)
 {
+    getWorldspaceWidget().reset (Mask_Reference);
+
     if (mSelectionMode)
     {
         toolbar->removeTool (mSelectionMode);
