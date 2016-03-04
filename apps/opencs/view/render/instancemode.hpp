@@ -26,6 +26,7 @@ namespace CSVRender
             InstanceSelectionMode *mSelectionMode;
             DragMode mDragMode;
             int mDragAxis;
+            bool mLocked;
 
             int getSubModeFromId (const std::string& id) const;
 
@@ -36,6 +37,8 @@ namespace CSVRender
             virtual void activate (CSVWidget::SceneToolbar *toolbar);
 
             virtual void deactivate (CSVWidget::SceneToolbar *toolbar);
+
+            virtual void setEditLock (bool locked);
 
             virtual void primaryEditPressed (osg::ref_ptr<TagBase> tag);
 

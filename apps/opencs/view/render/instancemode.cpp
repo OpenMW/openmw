@@ -27,7 +27,8 @@ int CSVRender::InstanceMode::getSubModeFromId (const std::string& id) const
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":placeholder"), Mask_Reference, "Instance editing",
-  parent), mSubMode (0), mSelectionMode (0), mDragMode (DragMode_None), mDragAxis (-1)
+  parent), mSubMode (0), mSelectionMode (0), mDragMode (DragMode_None), mDragAxis (-1),
+  mLocked (false)
 {
 }
 
@@ -90,6 +91,12 @@ void CSVRender::InstanceMode::deactivate (CSVWidget::SceneToolbar *toolbar)
     EditMode::deactivate (toolbar);
 }
 
+void CSVRender::InstanceMode::setEditLock (bool locked)
+{
+    mLocked = locked;
+
+}
+
 void CSVRender::InstanceMode::primaryEditPressed (osg::ref_ptr<TagBase> tag)
 {
     if (CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
@@ -134,7 +141,7 @@ void CSVRender::InstanceMode::secondarySelectPressed (osg::ref_ptr<TagBase> tag)
 
 bool CSVRender::InstanceMode::primaryEditStartDrag (osg::ref_ptr<TagBase> tag)
 {
-    if (mDragMode!=DragMode_None)
+    if (mDragMode!=DragMode_None || mLocked)
         return false;
 
     if (tag && CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
@@ -178,6 +185,8 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (osg::ref_ptr<TagBase> tag)
 
 bool CSVRender::InstanceMode::secondaryEditStartDrag (osg::ref_ptr<TagBase> tag)
 {
+    if (mLocked)
+        return false;
 
     return false;
 }
