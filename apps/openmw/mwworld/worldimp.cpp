@@ -1360,8 +1360,16 @@ namespace MWWorld
             }
         }
 
-        ipos.rot[0] = referenceObject.getRefData().getPosition().rot[0];
-        ipos.rot[1] = referenceObject.getRefData().getPosition().rot[1];
+        if (!referenceObject.getClass().isActor())
+        {
+            ipos.rot[0] = referenceObject.getRefData().getPosition().rot[0];
+            ipos.rot[1] = referenceObject.getRefData().getPosition().rot[1];
+        }
+        else
+        {
+            ipos.rot[0] = 0;
+            ipos.rot[1] = 0;
+        }
         ipos.rot[2] = referenceObject.getRefData().getPosition().rot[2];
 
         MWWorld::Ptr placed = copyObjectToCell(ptr, referenceCell, ipos, ptr.getRefData().getCount(), false);
