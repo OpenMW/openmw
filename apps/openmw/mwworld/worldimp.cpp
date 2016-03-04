@@ -1341,12 +1341,16 @@ namespace MWWorld
         for (int i=0; i<4; ++i)
         {
             direction = fallbackDirections[i];
-            // check if spawn point is safe, fall back to another direction if not
             osg::Vec3f spawnPoint = pos;
             if (direction == 0) spawnPoint = pos + (orientation * osg::Vec3f(0,1,0)) * distance;
             else if(direction == 1) spawnPoint = pos - (orientation * osg::Vec3f(0,1,0)) * distance;
             else if(direction == 2) spawnPoint = pos - (orientation * osg::Vec3f(1,0,0)) * distance;
             else if(direction == 3) spawnPoint = pos + (orientation * osg::Vec3f(1,0,0)) * distance;
+
+            if (!ptr.getClass().isActor())
+                break;
+
+            // check if spawn point is safe, fall back to another direction if not
             spawnPoint.z() += 30; // move up a little to account for slopes, will snap down later
 
             if (!castRay(spawnPoint.x(), spawnPoint.y(), spawnPoint.z(),
