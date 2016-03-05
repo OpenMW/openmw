@@ -117,7 +117,11 @@ namespace MWWorld
                                             const ESM::EffectList &effects, const Ptr &caster, const std::string &sourceName,
                                             const osg::Vec3f& fallbackDirection)
     {
-        osg::Vec3f pos = mPhysics->getCollisionObjectPosition(caster) + osg::Vec3f(0,0,mPhysics->getHalfExtents(caster).z() * 0.5); // Spawn at 0.75 * ActorHeight
+        osg::Vec3f pos;
+        if (caster.getClass().isActor())
+            pos = mPhysics->getCollisionObjectPosition(caster) + osg::Vec3f(0,0,mPhysics->getHalfExtents(caster).z() * 0.5); // Spawn at 0.75 * ActorHeight
+        else
+            pos = caster.getRefData().getPosition().asVec3();
 
         if (MWBase::Environment::get().getWorld()->isUnderwater(caster.getCell(), pos)) // Underwater casting not possible
             return;
