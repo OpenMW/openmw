@@ -41,6 +41,8 @@ namespace CSVWidget
             /// items to be added, the function must return true anyway.
             virtual bool createContextMenu (QMenu *menu);
 
+            void setButton (std::map<ModeButton *, std::string>::iterator iter);
+
         public:
 
             SceneToolMode (SceneToolbar *parent, const QString& toolTip);
@@ -58,6 +60,9 @@ namespace CSVWidget
 
             /// Must not be called if there aren't any buttons yet.
             std::string getCurrentId() const;
+
+            /// Manually change the current mode
+            void setButton (const std::string& id);
 
         signals:
 

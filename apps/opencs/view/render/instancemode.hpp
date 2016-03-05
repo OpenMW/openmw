@@ -23,6 +23,7 @@ namespace CSVRender
             };
 
             CSVWidget::SceneToolMode *mSubMode;
+            std::string mSubModeId;
             InstanceSelectionMode *mSelectionMode;
             DragMode mDragMode;
             int mDragAxis;

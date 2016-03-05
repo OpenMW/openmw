@@ -27,8 +27,8 @@ int CSVRender::InstanceMode::getSubModeFromId (const std::string& id) const
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":placeholder"), Mask_Reference, "Instance editing",
-  parent), mSubMode (0), mSelectionMode (0), mDragMode (DragMode_None), mDragAxis (-1),
-  mLocked (false)
+  parent), mSubMode (0), mSubModeId ("move"), mSelectionMode (0), mDragMode (DragMode_None),
+  mDragAxis (-1), mLocked (false)
 {
 }
 
@@ -50,6 +50,8 @@ void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
             "<li>Use secondary edit to scale instances along the grid</li>"
             "</ul>"
             "<font color=Red>Not implemented yet</font color>");
+
+        mSubMode->setButton (mSubModeId);
 
         connect (mSubMode, SIGNAL (modeChanged (const std::string&)),
             this, SLOT (subModeChanged (const std::string&)));
@@ -454,6 +456,7 @@ int CSVRender::InstanceMode::getSubMode() const
 
 void CSVRender::InstanceMode::subModeChanged (const std::string& id)
 {
+    mSubModeId = id;
     getWorldspaceWidget().abortDrag();
     getWorldspaceWidget().setSubMode (getSubModeFromId (id), Mask_Reference);
 }
