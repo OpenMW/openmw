@@ -96,6 +96,11 @@ void CSVRender::InstanceMode::setEditLock (bool locked)
 {
     mLocked = locked;
 
+    if (mLocked)
+    {
+        mDragMode = DragMode_None;
+        getWorldspaceWidget().reset (Mask_Reference);
+    }
 }
 
 void CSVRender::InstanceMode::primaryEditPressed (osg::ref_ptr<TagBase> tag)
