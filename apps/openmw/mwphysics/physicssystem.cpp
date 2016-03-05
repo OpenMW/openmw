@@ -585,7 +585,7 @@ namespace MWPhysics
 
             assert (mShapeInstance->getCollisionShape()->isCompound());
 
-            btCompoundShape* compound = dynamic_cast<btCompoundShape*>(mShapeInstance->getCollisionShape());
+            btCompoundShape* compound = static_cast<btCompoundShape*>(mShapeInstance->getCollisionShape());
 
             for (std::map<int, int>::iterator it = mShapeInstance->mAnimatedShapes.begin(); it != mShapeInstance->mAnimatedShapes.end();)
             {
