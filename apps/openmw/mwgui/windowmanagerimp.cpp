@@ -1635,9 +1635,7 @@ namespace MWGui
         layout->mMainWidget->setPosition(pos);
         layout->mMainWidget->setSize(size);
 
-        MyGUI::Window* window = dynamic_cast<MyGUI::Window*>(layout->mMainWidget);
-        if (!window)
-            throw std::runtime_error("Attempting to track size of a non-resizable window");
+        MyGUI::Window* window = layout->mMainWidget->castType<MyGUI::Window>();
         window->eventWindowChangeCoord += MyGUI::newDelegate(this, &WindowManager::onWindowChangeCoord);
         mTrackedWindows[window] = name;
     }
@@ -2010,7 +2008,7 @@ namespace MWGui
         while (enumerator.next())
         {
             MyGUI::IResource* resource = enumerator.current().second;
-            ResourceImageSetPointerFix* imgSetPointer = dynamic_cast<ResourceImageSetPointerFix*>(resource);
+            ResourceImageSetPointerFix* imgSetPointer = resource->castType<ResourceImageSetPointerFix>(false);
             if (!imgSetPointer)
                 continue;
             std::string tex_name = imgSetPointer->getImageSet()->getIndexInfo(0,0).texture;
