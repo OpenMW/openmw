@@ -68,8 +68,8 @@ namespace MWPhysics
             return osg::RadiansToDegrees(std::acos(normal * osg::Vec3f(0.f, 0.f, 1.f)));
         }
 
-        static bool stepMove(btCollisionObject *colobj, osg::Vec3f &position,
-                             const osg::Vec3f &toMove, float &remainingTime, btCollisionWorld* collisionWorld)
+        static bool stepMove(const btCollisionObject *colobj, osg::Vec3f &position,
+                             const osg::Vec3f &toMove, float &remainingTime, const btCollisionWorld* collisionWorld)
         {
             /*
              * Slide up an incline or set of stairs.  Should be called only after a
@@ -235,7 +235,7 @@ namespace MWPhysics
         }
 
         static osg::Vec3f move(osg::Vec3f position, const MWWorld::Ptr &ptr, Actor* physicActor, const osg::Vec3f &movement, float time,
-                                  bool isFlying, float waterlevel, float slowFall, btCollisionWorld* collisionWorld,
+                                  bool isFlying, float waterlevel, float slowFall, const btCollisionWorld* collisionWorld,
                                std::map<MWWorld::Ptr, MWWorld::Ptr>& standingCollisionTracker)
         {
             const ESM::Position& refpos = ptr.getRefData().getPosition();
@@ -254,7 +254,7 @@ namespace MWPhysics
                                     ) * movement * time;
             }
 
-            btCollisionObject *colobj = physicActor->getCollisionObject();
+            const btCollisionObject *colobj = physicActor->getCollisionObject();
             osg::Vec3f halfExtents = physicActor->getHalfExtents();
 
             // NOTE: here we don't account for the collision box translation (i.e. physicActor->getPosition() - refpos.pos).
