@@ -47,6 +47,8 @@ namespace CSVRender
             std::auto_ptr<CellMarker> mCellMarker;
             std::auto_ptr<CellBorder> mCellBorder;
             bool mDeleted;
+            int mSubMode;
+            unsigned int mSubModeElementMask;
 
             /// Ignored if cell does not have an object with the given ID.
             ///
@@ -118,6 +120,14 @@ namespace CSVRender
             bool isDeleted() const;
 
             std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask) const;
+
+            std::vector<osg::ref_ptr<TagBase> > getEdited (unsigned int elementMask) const;
+
+            void setSubMode (int subMode, unsigned int elementMask);
+
+            /// Erase all overrides and restore the visual representation of the cell to its
+            /// true state.
+            void reset (unsigned int elementMask);
     };
 }
 

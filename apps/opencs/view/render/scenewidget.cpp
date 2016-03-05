@@ -120,6 +120,12 @@ bool RenderWidget::eventFilter(QObject* obj, QEvent* event)
     return QObject::eventFilter(obj, event);
 }
 
+osg::Camera *RenderWidget::getCamera()
+{
+    return mView->getCamera();
+}
+
+
 // --------------------------------------------------
 
 CompositeViewer::CompositeViewer()
