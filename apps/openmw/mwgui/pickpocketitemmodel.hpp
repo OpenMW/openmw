@@ -15,6 +15,7 @@ namespace MWGui
         virtual size_t getItemCount();
         virtual void update();
         virtual void removeItem (const ItemStack& item, size_t count);
+        virtual bool allowedToInsertItems() const;
 
     private:
         std::vector<ItemStack> mHiddenItems;

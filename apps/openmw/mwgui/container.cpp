@@ -57,7 +57,7 @@ namespace MWGui
     {
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
-            if (!dynamic_cast<PickpocketItemModel*>(mModel))
+            if (mModel && mModel->allowedToInsertItems())
                 dropItem();
             return;
         }
@@ -126,7 +126,7 @@ namespace MWGui
 
     void ContainerWindow::onBackgroundSelected()
     {
-        if (mDragAndDrop->mIsOnDragAndDrop && !dynamic_cast<PickpocketItemModel*>(mModel))
+        if (mDragAndDrop->mIsOnDragAndDrop && mModel && mModel->allowedToInsertItems())
             dropItem();
     }
 

@@ -64,4 +64,10 @@ namespace MWGui
         /// \todo check if player is detected
     }
 
+    bool PickpocketItemModel::allowedToInsertItems() const
+    {
+        // don't allow "reverse pickpocket" (yet)
+        return false;
+    }
+
 }
