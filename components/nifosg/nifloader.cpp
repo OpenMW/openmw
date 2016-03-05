@@ -132,31 +132,27 @@ namespace
 
         virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
-            osgUtil::CullVisitor* cv = dynamic_cast<osgUtil::CullVisitor*>(nv);
-            if (node && cv)
+            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+
+            osg::Matrix modelView = *cv->getModelViewMatrix();
+
+            // attempt to preserve scale
+            float mag[3];
+            for (int i=0;i<3;++i)
             {
-                osg::Matrix modelView = *cv->getModelViewMatrix();
-
-                // attempt to preserve scale
-                float mag[3];
-                for (int i=0;i<3;++i)
-                {
-                    mag[i] = std::sqrt(modelView(0,i) * modelView(0,i) + modelView(1,i) * modelView(1,i) + modelView(2,i) * modelView(2,i));
-                }
-
-                modelView.setRotate(osg::Quat());
-                modelView(0,0) = mag[0];
-                modelView(1,1) = mag[1];
-                modelView(2,2) = mag[2];
-
-                cv->pushModelViewMatrix(new osg::RefMatrix(modelView), osg::Transform::RELATIVE_RF);
-
-                traverse(node, nv);
-
-                cv->popModelViewMatrix();
+                mag[i] = std::sqrt(modelView(0,i) * modelView(0,i) + modelView(1,i) * modelView(1,i) + modelView(2,i) * modelView(2,i));
             }
-            else
-                traverse(node, nv);
+
+            modelView.setRotate(osg::Quat());
+            modelView(0,0) = mag[0];
+            modelView(1,1) = mag[1];
+            modelView(2,2) = mag[2];
+
+            cv->pushModelViewMatrix(new osg::RefMatrix(modelView), osg::Transform::RELATIVE_RF);
+
+            traverse(node, nv);
+
+            cv->popModelViewMatrix();
         }
     };
 
