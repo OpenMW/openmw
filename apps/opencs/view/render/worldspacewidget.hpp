@@ -161,6 +161,12 @@ namespace CSVRender
             /// Erase all overrides and restore the visual representation to its true state.
             virtual void reset (unsigned int elementMask) = 0;
 
+            /// \note Drags will be automatically aborted when the aborting is triggered
+            /// (either explicitly or implicitly) from within this class. This function only
+            /// needs to be called, when the drag abort is triggered externally (e.g. from
+            /// an edit mode).
+            void abortDrag();
+
         protected:
 
             /// Visual elements in a scene

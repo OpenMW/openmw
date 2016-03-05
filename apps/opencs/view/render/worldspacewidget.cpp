@@ -364,6 +364,17 @@ osg::Vec3f CSVRender::WorldspaceWidget::getIntersectionPoint (const QPoint& loca
     return start + direction * CSMPrefs::get()["Scene Drops"]["distance"].toInt();
 }
 
+void CSVRender::WorldspaceWidget::abortDrag()
+{
+    if (mDragging)
+    {
+        EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+        editMode.dragAborted();
+        mDragging = false;
+    }
+}
+
 void CSVRender::WorldspaceWidget::dragEnterEvent (QDragEnterEvent* event)
 {
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
@@ -736,13 +747,7 @@ void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Escape)
     {
-        if (mDragging)
-        {
-            EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
-
-            editMode.dragAborted();
-            mDragging = false;
-        }
+        abortDrag();
     }
     else
         RenderWidget::keyPressEvent(event);

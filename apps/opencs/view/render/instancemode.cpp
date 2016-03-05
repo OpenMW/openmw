@@ -97,10 +97,7 @@ void CSVRender::InstanceMode::setEditLock (bool locked)
     mLocked = locked;
 
     if (mLocked)
-    {
-        mDragMode = DragMode_None;
-        getWorldspaceWidget().reset (Mask_Reference);
-    }
+        getWorldspaceWidget().abortDrag();
 }
 
 void CSVRender::InstanceMode::primaryEditPressed (osg::ref_ptr<TagBase> tag)
@@ -457,7 +454,6 @@ int CSVRender::InstanceMode::getSubMode() const
 
 void CSVRender::InstanceMode::subModeChanged (const std::string& id)
 {
-    mDragMode = DragMode_None;
-    getWorldspaceWidget().reset (Mask_Reference);
+    getWorldspaceWidget().abortDrag();
     getWorldspaceWidget().setSubMode (getSubModeFromId (id), Mask_Reference);
 }
