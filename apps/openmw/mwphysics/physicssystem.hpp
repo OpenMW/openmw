@@ -70,6 +70,8 @@ namespace MWPhysics
             Actor* getActor(const MWWorld::Ptr& ptr);
             const Actor* getActor(const MWWorld::ConstPtr& ptr) const;
 
+            const Object* getObject(const MWWorld::ConstPtr& ptr) const;
+
             // Object or Actor
             void remove (const MWWorld::Ptr& ptr);
 

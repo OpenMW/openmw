@@ -557,6 +557,11 @@ namespace MWPhysics
             return mCollisionObject.get();
         }
 
+        const btCollisionObject* getCollisionObject() const
+        {
+            return mCollisionObject.get();
+        }
+
         /// Return solid flag. Not used by the object itself, true by default.
         bool isSolid() const
         {
@@ -883,6 +888,12 @@ namespace MWPhysics
             const Actor* actor = getActor(ignore);
             if (actor)
                 me = actor->getCollisionObject();
+            else
+            {
+                const Object* object = getObject(ignore);
+                if (object)
+                    me = object->getCollisionObject();
+            }
         }
 
         ClosestNotMeRayResultCallback resultCallback(me, btFrom, btTo);
@@ -1170,6 +1181,14 @@ namespace MWPhysics
     {
         ActorMap::const_iterator found = mActors.find(ptr);
         if (found != mActors.end())
+            return found->second;
+        return NULL;
+    }
+
+    const Object* PhysicsSystem::getObject(const MWWorld::ConstPtr &ptr) const
+    {
+        ObjectMap::const_iterator found = mObjects.find(ptr);
+        if (found != mObjects.end())
             return found->second;
         return NULL;
     }
