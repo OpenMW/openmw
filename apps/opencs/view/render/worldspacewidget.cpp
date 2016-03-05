@@ -372,6 +372,7 @@ void CSVRender::WorldspaceWidget::abortDrag()
 
         editMode.dragAborted();
         mDragging = false;
+        mDragMode.clear();
     }
 }
 
@@ -584,6 +585,7 @@ void CSVRender::WorldspaceWidget::editModeChanged (const std::string& id)
 {
     dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).setEditLock (mLocked);
     mDragging = false;
+    mDragMode.clear();
 }
 
 void CSVRender::WorldspaceWidget::showToolTip()
