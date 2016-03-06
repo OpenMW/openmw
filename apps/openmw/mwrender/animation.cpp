@@ -1457,6 +1457,9 @@ namespace MWRender
 
     PartHolder::~PartHolder()
     {
+        if (mNode.get() && !mNode->getNumParents())
+            std::cerr << "Warning: part has no parents " << std::endl;
+
         if (mNode.get() && mNode->getNumParents())
         {
             if (mNode->getNumParents() > 1)

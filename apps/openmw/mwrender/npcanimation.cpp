@@ -422,6 +422,8 @@ int NpcAnimation::getSlot(const osg::NodePath &path) const
 void NpcAnimation::updateNpcBase()
 {
     clearAnimSources();
+    for(size_t i = 0;i < ESM::PRT_Count;i++)
+        removeIndividualPart((ESM::PartReferenceType)i);
 
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
@@ -501,8 +503,6 @@ void NpcAnimation::updateNpcBase()
         }
     }
 
-    for(size_t i = 0;i < ESM::PRT_Count;i++)
-        removeIndividualPart((ESM::PartReferenceType)i);
     updateParts();
 
     mWeaponAnimationTime->updateStartTime();
