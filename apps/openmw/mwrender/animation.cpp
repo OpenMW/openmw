@@ -1458,7 +1458,11 @@ namespace MWRender
     PartHolder::~PartHolder()
     {
         if (mNode.get() && mNode->getNumParents())
+        {
+            if (mNode->getNumParents() > 1)
+                std::cerr << "Warning: part has multiple parents " << mNode->getNumParents() << " " << mNode.get() << std::endl;
             mNode->getParent(0)->removeChild(mNode);
+        }
     }
 
     void PartHolder::unlink()

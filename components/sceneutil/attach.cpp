@@ -1,6 +1,7 @@
 #include "attach.hpp"
 
 #include <stdexcept>
+#include <iostream>
 
 #include <osg/NodeVisitor>
 #include <osg/Group>
@@ -34,14 +35,30 @@ namespace SceneUtil
             std::string lowerName = Misc::StringUtils::lowerCase(node.getName());
             if ((lowerName.size() >= mFilter.size() && lowerName.compare(0, mFilter.size(), mFilter) == 0)
                     || (lowerName.size() >= mFilter2.size() && lowerName.compare(0, mFilter2.size(), mFilter2) == 0))
-            {
-                mParent->addChild(&node);
-            }
+                mToCopy.push_back(&node);
             else
                 traverse(node);
         }
 
+        void doCopy()
+        {
+            for (std::vector<osg::ref_ptr<osg::Node> >::iterator it = mToCopy.begin(); it != mToCopy.end(); ++it)
+            {
+                osg::ref_ptr<osg::Node> node = *it;
+                if (node->getNumParents() > 1)
+                    std::cerr << "CopyRigVisitor warning: node has multiple parents" << std::endl;
+                while (node->getNumParents())
+                    node->getParent(0)->removeChild(node);
+
+                mParent->addChild(node);
+            }
+            mToCopy.clear();
+        }
+
     private:
+        typedef std::vector<osg::ref_ptr<osg::Node> > NodeVector;
+        NodeVector mToCopy;
+
         osg::ref_ptr<osg::Group> mParent;
         std::string mFilter;
         std::string mFilter2;
@@ -55,6 +72,7 @@ namespace SceneUtil
 
             CopyRigVisitor copyVisitor(handle, filter);
             toAttach->accept(copyVisitor);
+            copyVisitor.doCopy();
 
             if (handle->getNumChildren() == 1)
             {
