@@ -145,7 +145,7 @@ bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info, bool invert
     if (isCreature)
         return true;
 
-    int actorDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor)
+    int actorDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor, false)
             + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange();
     // For service refusal, the disposition check is inverted. However, a value of 0 still means "always succeed".
     return invert ? (info.mData.mDisposition == 0 || actorDisposition < info.mData.mDisposition)
