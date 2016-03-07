@@ -463,27 +463,34 @@ namespace MWWorld
         // Load references from all plugins that do something with this cell.
         for (size_t i = 0; i < mCell->mContextList.size(); i++)
         {
-            // Reopen the ESM reader and seek to the right position.
-            int index = mCell->mContextList.at(i).index;
-            mCell->restore (esm[index], i);
-
-            ESM::CellRef ref;
-
-            // Get each reference in turn
-            bool deleted = false;
-            while (mCell->getNextRef (esm[index], ref, deleted))
+            try
             {
-                if (deleted)
-                    continue;
+                // Reopen the ESM reader and seek to the right position.
+                int index = mCell->mContextList.at(i).index;
+                mCell->restore (esm[index], i);
 
-                // Don't list reference if it was moved to a different cell.
-                ESM::MovedCellRefTracker::const_iterator iter =
-                    std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefNum);
-                if (iter != mCell->mMovedRefs.end()) {
-                    continue;
+                ESM::CellRef ref;
+
+                // Get each reference in turn
+                bool deleted = false;
+                while (mCell->getNextRef (esm[index], ref, deleted))
+                {
+                    if (deleted)
+                        continue;
+
+                    // Don't list reference if it was moved to a different cell.
+                    ESM::MovedCellRefTracker::const_iterator iter =
+                        std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefNum);
+                    if (iter != mCell->mMovedRefs.end()) {
+                        continue;
+                    }
+
+                    mIds.push_back (Misc::StringUtils::lowerCase (ref.mRefID));
                 }
-
-                mIds.push_back (Misc::StringUtils::lowerCase (ref.mRefID));
+            }
+            catch (std::exception& e)
+            {
+                std::cerr << "An error occured listing references for cell " << getCell()->getDescription() << ": " << e.what() << std::endl;
             }
         }
 
@@ -510,25 +517,32 @@ namespace MWWorld
         // Load references from all plugins that do something with this cell.
         for (size_t i = 0; i < mCell->mContextList.size(); i++)
         {
-            // Reopen the ESM reader and seek to the right position.
-            int index = mCell->mContextList.at(i).index;
-            mCell->restore (esm[index], i);
-
-            ESM::CellRef ref;
-            ref.mRefNum.mContentFile = ESM::RefNum::RefNum_NoContentFile;
-
-            // Get each reference in turn
-            bool deleted = false;
-            while(mCell->getNextRef(esm[index], ref, deleted))
+            try
             {
-                // Don't load reference if it was moved to a different cell.
-                ESM::MovedCellRefTracker::const_iterator iter =
-                    std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefNum);
-                if (iter != mCell->mMovedRefs.end()) {
-                    continue;
-                }
+                // Reopen the ESM reader and seek to the right position.
+                int index = mCell->mContextList.at(i).index;
+                mCell->restore (esm[index], i);
 
-                loadRef (ref, deleted);
+                ESM::CellRef ref;
+                ref.mRefNum.mContentFile = ESM::RefNum::RefNum_NoContentFile;
+
+                // Get each reference in turn
+                bool deleted = false;
+                while(mCell->getNextRef(esm[index], ref, deleted))
+                {
+                    // Don't load reference if it was moved to a different cell.
+                    ESM::MovedCellRefTracker::const_iterator iter =
+                        std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefNum);
+                    if (iter != mCell->mMovedRefs.end()) {
+                        continue;
+                    }
+
+                    loadRef (ref, deleted);
+                }
+            }
+            catch (std::exception& e)
+            {
+                std::cerr << "An error occured loading references for cell " << getCell()->getDescription() << ": " << e.what() << std::endl;
             }
         }
 
