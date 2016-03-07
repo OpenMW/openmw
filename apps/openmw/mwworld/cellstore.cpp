@@ -194,7 +194,7 @@ namespace MWWorld
         else
         {
             std::cerr
-                << "Error: could not resolve cell reference " << ref.mRefID
+                << "Error: could not resolve cell reference '" << ref.mRefID << "'"
                 << " (dropping reference)" << std::endl;
         }
     }
@@ -612,7 +612,7 @@ namespace MWWorld
             case ESM::REC_WEAP: mWeapons.load(ref, deleted, store); break;
             case ESM::REC_BODY: mBodyParts.load(ref, deleted, store); break;
 
-            case 0: std::cerr << "Cell reference " + ref.mRefID + " not found!\n"; break;
+            case 0: std::cerr << "Cell reference '" + ref.mRefID + "' not found!\n"; break;
 
             default:
                 std::cerr
