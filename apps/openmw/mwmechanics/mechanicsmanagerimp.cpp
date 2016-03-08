@@ -581,7 +581,7 @@ namespace MWMechanics
         mUpdatePlayer = true;
     }
 
-    int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr, bool bounded /* = true */)
+    int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr)
     {
         const MWMechanics::NpcStats& npcSkill = ptr.getClass().getNpcStats(ptr);
         float x = static_cast<float>(npcSkill.getBaseDisposition());
@@ -653,7 +653,7 @@ namespace MWMechanics
 
         x += ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Charm).getMagnitude();
 
-        int effective_disposition = std::max(0,std::min(int(x), (bounded ? 100 : std::numeric_limits<int>::max()) )); // clamped to [0..100] unless !bounded
+        int effective_disposition = std::max(0,std::min(int(x),100));//, normally clamped to [0..100] when used
         return effective_disposition;
     }
 
