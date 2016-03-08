@@ -11,6 +11,7 @@
 #include "record.hpp"
 #include "commands.hpp"
 #include "idtableproxymodel.hpp"
+#include "commandmacro.hpp"
 
 std::vector<std::string> CSMWorld::CommandDispatcher::getDeletableRecords() const
 {
@@ -171,10 +172,9 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, cons
 
     if (modifyCell.get())
     {
-        mDocument.getUndoStack().beginMacro (modifyData->text());
-        mDocument.getUndoStack().push (modifyData.release());
-        mDocument.getUndoStack().push (modifyCell.release());
-        mDocument.getUndoStack().endMacro();
+        CommandMacro macro (mDocument.getUndoStack());
+        macro.push (modifyData.release());
+        macro.push (modifyCell.release());
     }
     else
         mDocument.getUndoStack().push (modifyData.release());
@@ -194,9 +194,7 @@ void CSMWorld::CommandDispatcher::executeDelete()
 
     int columnIndex = model.findColumnIndex (Columns::ColumnId_Id);
 
-    if (rows.size()>1)
-        mDocument.getUndoStack().beginMacro (tr ("Delete multiple records"));
-
+    CommandMacro macro (mDocument.getUndoStack(), rows.size()>1 ? "Delete multiple records" : "");
     for (std::vector<std::string>::const_iterator iter (rows.begin()); iter!=rows.end(); ++iter)
     {
         std::string id = model.data (model.getModelIndex (*iter, columnIndex)).
@@ -204,7 +202,7 @@ void CSMWorld::CommandDispatcher::executeDelete()
 
         if (mId.getType() == UniversalId::Type_Referenceables)
         {
-            mDocument.getUndoStack().push ( new CSMWorld::DeleteCommand (model, id,
+            macro.push (new CSMWorld::DeleteCommand (model, id,
                 static_cast<CSMWorld::UniversalId::Type>(model.data (model.index (
                     model.getModelIndex (id, columnIndex).row(),
                     model.findColumnIndex (CSMWorld::Columns::ColumnId_RecordType))).toInt())));
@@ -212,9 +210,6 @@ void CSMWorld::CommandDispatcher::executeDelete()
         else
             mDocument.getUndoStack().push (new CSMWorld::DeleteCommand (model, id));
     }
-
-    if (rows.size()>1)
-        mDocument.getUndoStack().endMacro();
 }
 
 void CSMWorld::CommandDispatcher::executeRevert()
@@ -231,25 +226,19 @@ void CSMWorld::CommandDispatcher::executeRevert()
 
     int columnIndex = model.findColumnIndex (Columns::ColumnId_Id);
 
-    if (rows.size()>1)
-        mDocument.getUndoStack().beginMacro (tr ("Revert multiple records"));
-
+    CommandMacro macro (mDocument.getUndoStack(), rows.size()>1 ? "Revert multiple records" : "");
     for (std::vector<std::string>::const_iterator iter (rows.begin()); iter!=rows.end(); ++iter)
     {
         std::string id = model.data (model.getModelIndex (*iter, columnIndex)).
             toString().toUtf8().constData();
 
-        mDocument.getUndoStack().push (new CSMWorld::RevertCommand (model, id));
+        macro.push (new CSMWorld::RevertCommand (model, id));
     }
-
-    if (rows.size()>1)
-        mDocument.getUndoStack().endMacro();
 }
 
 void CSMWorld::CommandDispatcher::executeExtendedDelete()
 {
-    if (mExtendedTypes.size()>1)
-        mDocument.getUndoStack().beginMacro (tr ("Extended delete of multiple records"));
+    CommandMacro macro (mDocument.getUndoStack(), mExtendedTypes.size()>1 ? tr ("Extended delete of multiple records") : "");
 
     for (std::vector<UniversalId>::const_iterator iter (mExtendedTypes.begin());
         iter!=mExtendedTypes.end(); ++iter)
@@ -276,20 +265,15 @@ void CSMWorld::CommandDispatcher::executeExtendedDelete()
                     Misc::StringUtils::lowerCase (record.get().mCell)))
                     continue;
 
-                mDocument.getUndoStack().push (
-                    new CSMWorld::DeleteCommand (model, record.get().mId));
+                macro.push (new CSMWorld::DeleteCommand (model, record.get().mId));
             }
         }
     }
-
-    if (mExtendedTypes.size()>1)
-        mDocument.getUndoStack().endMacro();
 }
 
 void CSMWorld::CommandDispatcher::executeExtendedRevert()
 {
-    if (mExtendedTypes.size()>1)
-        mDocument.getUndoStack().beginMacro (tr ("Extended revert of multiple records"));
+    CommandMacro macro (mDocument.getUndoStack(), mExtendedTypes.size()>1 ? tr ("Extended revert of multiple records") : "");
 
     for (std::vector<UniversalId>::const_iterator iter (mExtendedTypes.begin());
         iter!=mExtendedTypes.end(); ++iter)
@@ -313,12 +297,8 @@ void CSMWorld::CommandDispatcher::executeExtendedRevert()
                     Misc::StringUtils::lowerCase (record.get().mCell)))
                     continue;
 
-                mDocument.getUndoStack().push (
-                    new CSMWorld::RevertCommand (model, record.get().mId));
+                macro.push (new CSMWorld::RevertCommand (model, record.get().mId));
             }
         }
     }
-
-    if (mExtendedTypes.size()>1)
-        mDocument.getUndoStack().endMacro();
 }

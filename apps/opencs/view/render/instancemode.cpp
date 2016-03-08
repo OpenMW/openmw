@@ -8,6 +8,7 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/idtree.hpp"
 #include "../../model/world/commands.hpp"
+#include "../../model/world/commandmacro.hpp"
 
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
@@ -259,7 +260,8 @@ void CSVRender::InstanceMode::dragCompleted()
         case DragMode_None: break;
     }
 
-    undoStack.beginMacro (description);
+
+    CSMWorld::CommandMacro macro (undoStack, description);
 
     for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin());
         iter!=selection.end(); ++iter)
@@ -269,8 +271,6 @@ void CSVRender::InstanceMode::dragCompleted()
             objectTag->mObject->apply (undoStack);
         }
     }
-
-    undoStack.endMacro();
 
     mDragMode = DragMode_None;
 }
@@ -435,11 +435,10 @@ void CSVRender::InstanceMode::dropEvent (QDropEvent* event)
                         new CSMWorld::ModifyCommand (cellTable, countIndex, count+1));
                 }
 
-                document.getUndoStack().beginMacro (createCommand->text());
-                document.getUndoStack().push (createCommand.release());
+                CSMWorld::CommandMacro macro (document.getUndoStack());
+                macro.push (createCommand.release());
                 if (incrementCommand.get())
-                    document.getUndoStack().push (incrementCommand.release());
-                document.getUndoStack().endMacro();
+                    macro.push (incrementCommand.release());
 
                 dropped = true;
             }
