@@ -100,26 +100,6 @@ void RenderWidget::setVisibilityMask(int mask)
     mView->getCamera()->setCullMask(mask | Mask_ParticleSystem | Mask_Lighting);
 }
 
-bool RenderWidget::eventFilter(QObject* obj, QEvent* event)
-{
-    // handle event in this widget, is there a better way to do this?
-    if (event->type() == QEvent::MouseButtonPress)
-        mousePressEvent(static_cast<QMouseEvent*>(event));
-    if (event->type() == QEvent::MouseButtonRelease)
-        mouseReleaseEvent(static_cast<QMouseEvent*>(event));
-    if (event->type() == QEvent::MouseMove)
-        mouseMoveEvent(static_cast<QMouseEvent*>(event));
-    if (event->type() == QEvent::KeyPress)
-        keyPressEvent(static_cast<QKeyEvent*>(event));
-    if (event->type() == QEvent::KeyRelease)
-        keyReleaseEvent(static_cast<QKeyEvent*>(event));
-    if (event->type() == QEvent::Wheel)
-        wheelEvent(static_cast<QWheelEvent *>(event));
-
-    // Always pass the event on to GLWidget, i.e. to OSG event queue
-    return QObject::eventFilter(obj, event);
-}
-
 osg::Camera *RenderWidget::getCamera()
 {
     return mView->getCamera();

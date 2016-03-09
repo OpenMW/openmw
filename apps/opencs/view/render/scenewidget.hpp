@@ -46,8 +46,6 @@ namespace CSVRender
 
         void setVisibilityMask(int mask);
 
-        bool eventFilter(QObject *, QEvent *);
-
         osg::Camera *getCamera();
 
     protected:
