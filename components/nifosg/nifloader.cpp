@@ -992,16 +992,7 @@ namespace NifOsg
 
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(nifNode, drawableProps);
-            applyDrawableProperties(parentNode, drawableProps, composite, true, animflags);
-
-            // Particles don't have normals, so can't be diffuse lit.
-            osg::Material* mat = static_cast<osg::Material*>(parentNode->getStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
-            if (mat)
-            {
-                // NB ignoring diffuse.a()
-                mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
-                mat->setColorMode(osg::Material::AMBIENT);
-            }
+            applyDrawableProperties(parentNode, drawableProps, composite, true, animflags, true);
 
             // particle system updater (after the emitters and affectors in the scene graph)
             // I think for correct culling needs to be *before* the ParticleSystem, though osg examples do it the other way
@@ -1058,7 +1049,7 @@ namespace NifOsg
             //   above the actual renderable would be tedious.
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(triShape, drawableProps);
-            applyDrawableProperties(parentNode, drawableProps, composite, !data->colors->empty(), animflags);
+            applyDrawableProperties(parentNode, drawableProps, composite, !data->colors->empty(), animflags, false);
         }
 
         void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
@@ -1580,8 +1571,26 @@ namespace NifOsg
             }
         }
 
+        struct CompareMaterial
+        {
+            bool operator() (const osg::ref_ptr<osg::Material>& left, const osg::ref_ptr<osg::Material>& right) const
+            {
+                return left->compare(*right) < 0;
+            }
+        };
+
+        osg::Material* shareMaterial(osg::Material* mat)
+        {
+            typedef std::set<osg::ref_ptr<osg::Material>, CompareMaterial> MatCache;
+            static MatCache mats;
+            MatCache::iterator found = mats.find(mat);
+            if (found == mats.end())
+                found = mats.insert(mat).first;
+            return *found;
+        }
+
         void applyDrawableProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties, SceneUtil::CompositeStateSetUpdater* composite,
-                                             bool hasVertexColors, int animflags)
+                                             bool hasVertexColors, int animflags, bool particleMaterial)
         {
             osg::StateSet* stateset = node->getOrCreateStateSet();
 
@@ -1677,6 +1686,18 @@ namespace NifOsg
 
             if (specFlags == 0)
                 mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f,0.f,0.f,0.f));
+
+            // Particles don't have normals, so can't be diffuse lit.
+            if (particleMaterial)
+            {
+                // NB ignoring diffuse.a()
+                mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
+                mat->setColorMode(osg::Material::AMBIENT);
+            }
+
+            // TODO: this could be replaced by a more generic mechanism of sharing any type of State Attribute
+            // apply only for Materials for now
+            mat = shareMaterial(mat);
 
             stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
         }
