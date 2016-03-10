@@ -358,7 +358,9 @@ namespace NifOsg
                 skel->addChild(created);
                 created = skel;
             }
-            created->getOrCreateUserDataContainer()->addUserObject(textkeys);
+
+            if (!textkeys->mTextKeys.empty())
+                created->getOrCreateUserDataContainer()->addUserObject(textkeys);
 
             return created;
         }
