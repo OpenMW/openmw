@@ -19,7 +19,6 @@
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
 #include <osgParticle/ConstantRateCounter>
-#include <osgParticle/ModularEmitter>
 #include <osgParticle/Shooter>
 #include <osgParticle/BoxPlacer>
 #include <osgParticle/ModularProgram>
@@ -37,7 +36,6 @@
 
 #include <components/nif/node.hpp>
 #include <components/nif/effect.hpp>
-#include <components/sceneutil/util.hpp>
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 
