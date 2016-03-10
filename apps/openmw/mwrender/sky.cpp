@@ -15,6 +15,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/BlendFunc>
 #include <osg/AlphaFunc>
+#include <osg/PolygonOffset>
 #include <osg/observer_ptr>
 
 #include <osgParticle/ParticleSystem>
@@ -472,14 +473,20 @@ public:
 
         osg::ref_ptr<osg::Group> queryNode (new osg::Group);
         // Need to render after the world geometry so we can correctly test for occlusions
-        queryNode->getOrCreateStateSet()->setRenderBinDetails(RenderBin_OcclusionQuery, "RenderBin");
-        queryNode->getOrCreateStateSet()->setNestRenderBins(false);
+        osg::StateSet* stateset = queryNode->getOrCreateStateSet();
+        stateset->setRenderBinDetails(RenderBin_OcclusionQuery, "RenderBin");
+        stateset->setNestRenderBins(false);
         // Set up alpha testing on the occlusion testing subgraph, that way we can get the occlusion tested fragments to match the circular shape of the sun
         osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc);
         alphaFunc->setFunction(osg::AlphaFunc::GREATER, 0.8);
-        queryNode->getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
-        queryNode->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex, osg::StateAttribute::ON);
-        queryNode->getOrCreateStateSet()->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON);
+        stateset->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+        stateset->setTextureAttributeAndModes(0, sunTex, osg::StateAttribute::ON);
+        stateset->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON);
+        // Disable writing to the color buffer. We are using this geometry for visibility tests only.
+        osg::ref_ptr<osg::ColorMask> colormask (new osg::ColorMask(0, 0, 0, 0));
+        stateset->setAttributeAndModes(colormask, osg::StateAttribute::ON);
+        osg::ref_ptr<osg::PolygonOffset> po (new osg::PolygonOffset( -1., -1. ));
+        stateset->setAttributeAndModes(po, osg::StateAttribute::ON);
 
         mTransform->addChild(queryNode);
 
@@ -543,14 +550,7 @@ private:
         oqn->getQueryGeometry()->setDataVariance(osg::Object::STATIC);
 
         osg::ref_ptr<osg::Geometry> queryGeom = osg::clone(mGeom.get(), osg::CopyOp::DEEP_COPY_ALL);
-        // Disable writing to the color buffer. We are using this geometry for visibility tests only.
-        osg::ref_ptr<osg::ColorMask> colormask (new osg::ColorMask(0, 0, 0, 0));
-        queryGeom->getOrCreateStateSet()->setAttributeAndModes(colormask, osg::StateAttribute::ON);
-
         oqn->addChild(queryGeom);
-
-        // Remove the default OFF|PROTECTED setting for texturing. We *want* to enable texturing for alpha testing purposes
-        oqn->getQueryStateSet()->removeTextureMode(0, GL_TEXTURE_2D);
 
         // Need to add texture coordinates so that texturing works. A bit ugly, relies on the vertex ordering
         // used within OcclusionQueryNode.
@@ -569,6 +569,7 @@ private:
 
         oqn->getQueryGeometry()->setTexCoordArray(0, texCoordArray, osg::Array::BIND_PER_VERTEX);
 
+        osg::StateSet* queryStateSet = new osg::StateSet;
         if (queryVisible)
         {
             osg::ref_ptr<osg::Depth> depth (new osg::Depth);
@@ -578,12 +579,14 @@ private:
             // We want the sun glare to be "infinitely" far away.
             depth->setZNear(1.0);
             depth->setZFar(1.0);
-            oqn->getQueryStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
+            depth->setWriteMask(false);
+            queryStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON);
         }
         else
         {
-            oqn->getQueryStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+            queryStateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
         }
+        oqn->setQueryStateSet(queryStateSet);
 
         parent->addChild(oqn);
 
