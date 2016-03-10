@@ -537,6 +537,12 @@ public:
     }
 
 private:
+    class DummyComputeBoundCallback : public osg::Node::ComputeBoundingSphereCallback
+    {
+    public:
+        virtual osg::BoundingSphere computeBound(const osg::Node& node) const { return osg::BoundingSphere(); }
+    };
+
     /// @param queryVisible If true, queries the amount of visible pixels. If false, queries the total amount of pixels.
     osg::ref_ptr<osg::OcclusionQueryNode> createOcclusionQueryNode(osg::Group* parent, bool queryVisible)
     {
@@ -549,25 +555,19 @@ private:
         // Note the debug geometry setDebugDisplay(true) is always DYNAMIC and that can't be changed, not a big deal.
         oqn->getQueryGeometry()->setDataVariance(osg::Object::STATIC);
 
-        osg::ref_ptr<osg::Geometry> queryGeom = osg::clone(mGeom.get(), osg::CopyOp::DEEP_COPY_ALL);
-        oqn->addChild(queryGeom);
+        // Set up the query geometry to match the actual sun's rendering shape. osg::OcclusionQueryNode wasn't originally intended to allow this,
+        // normally it would automatically adjust the query geometry to match the sub graph's bounding box. The below hack is needed to
+        // circumvent this.
+        osg::Geometry* queryGeom = oqn->getQueryGeometry();
+        queryGeom->setVertexArray(mGeom->getVertexArray());
+        queryGeom->setTexCoordArray(0, mGeom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
+        queryGeom->removePrimitiveSet(0, oqn->getQueryGeometry()->getNumPrimitiveSets());
+        queryGeom->addPrimitiveSet(mGeom->getPrimitiveSet(0));
 
-        // Need to add texture coordinates so that texturing works. A bit ugly, relies on the vertex ordering
-        // used within OcclusionQueryNode.
-        osg::ref_ptr<osg::Vec2Array> texCoordArray (new osg::Vec2Array);
-        for (int i=0; i<8; ++i)
-        {
-            texCoordArray->push_back(osg::Vec2(0,0));
-            texCoordArray->push_back(osg::Vec2(1,0));
-            texCoordArray->push_back(osg::Vec2(0,0));
-            texCoordArray->push_back(osg::Vec2(1,0));
-            texCoordArray->push_back(osg::Vec2(1,1));
-            texCoordArray->push_back(osg::Vec2(0,1));
-            texCoordArray->push_back(osg::Vec2(0,1));
-            texCoordArray->push_back(osg::Vec2(1,1));
-        }
-
-        oqn->getQueryGeometry()->setTexCoordArray(0, texCoordArray, osg::Array::BIND_PER_VERTEX);
+        // Hack to disable unwanted awful code inside OcclusionQueryNode::computeBound.
+        oqn->setComputeBoundingSphereCallback(new DummyComputeBoundCallback);
+        // Still need a proper bounding sphere.
+        oqn->setInitialBound(queryGeom->getBound());
 
         osg::StateSet* queryStateSet = new osg::StateSet;
         if (queryVisible)
