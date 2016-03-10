@@ -1,6 +1,8 @@
 #ifndef OPENCS_VIEW_SCENEWIDGET_H
 #define OPENCS_VIEW_SCENEWIDGET_H
 
+#include <map>
+
 #include <QWidget>
 #include <QTimer>
 
@@ -28,6 +30,11 @@ namespace CSVWidget
 {
     class SceneToolMode;
     class SceneToolbar;
+}
+
+namespace CSMPrefs
+{
+    class Setting;
 }
 
 namespace CSVRender
@@ -62,7 +69,8 @@ namespace CSVRender
     {
         Q_OBJECT
     public:
-        SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget* parent = 0, Qt::WindowFlags f = 0);
+        SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget* parent = 0,
+                Qt::WindowFlags f = 0, bool retrieveInput = true);
         virtual ~SceneWidget();
 
         CSVWidget::SceneToolMode *makeLightingSelector (CSVWidget::SceneToolbar *parent);
@@ -78,6 +86,14 @@ namespace CSVRender
 
         void setAmbient(const osg::Vec4f& ambient);
 
+        virtual void mousePressEvent (QMouseEvent *event);
+        virtual void mouseReleaseEvent (QMouseEvent *event);
+
+        /// \return Is \a key a button mapping setting? (ignored otherwise)
+        virtual bool storeMappingSetting (const CSMPrefs::Setting *setting);
+
+        std::string mapButton (QMouseEvent *event);
+
         boost::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 
         Lighting* mLighting;
@@ -87,6 +103,12 @@ namespace CSVRender
         LightingDay mLightingDay;
         LightingNight mLightingNight;
         LightingBright mLightingBright;
+
+        std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
+
+    protected slots:
+
+        virtual void settingChanged (const CSMPrefs::Setting *setting);
 
     private slots:
 
