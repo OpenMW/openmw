@@ -91,6 +91,8 @@ std::list<AiPackage*>::const_iterator AiSequence::erase(std::list<AiPackage*>::c
     {
         if (package == it)
         {
+            AiPackage* package = *it;
+            delete package;
             return mPackages.erase(it);
         }
     }
@@ -125,7 +127,10 @@ void AiSequence::stopCombat()
     for(std::list<AiPackage*>::iterator it = mPackages.begin(); it != mPackages.end(); )
     {
         if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
+        {
+            delete *it;
             it = mPackages.erase(it);
+        }
         else
             ++it;
     }
@@ -136,7 +141,10 @@ void AiSequence::stopPursuit()
     for(std::list<AiPackage*>::iterator it = mPackages.begin(); it != mPackages.end(); )
     {
         if ((*it)->getTypeId() == AiPackage::TypeIdPursue)
+        {
+            delete *it;
             it = mPackages.erase(it);
+        }
         else
             ++it;
     }
@@ -268,7 +276,10 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
         for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end();)
         {
             if((*it)->canCancel())
+            {
+                delete *it;
                 it = mPackages.erase(it);
+            }
             else
                 ++it;
         }
@@ -349,49 +360,49 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
     for (std::vector<ESM::AiSequence::AiPackageContainer>::const_iterator it = sequence.mPackages.begin();
          it != sequence.mPackages.end(); ++it)
     {
-        MWMechanics::AiPackage* package = NULL;
+        std::auto_ptr<MWMechanics::AiPackage> package (NULL);
         switch (it->mType)
         {
         case ESM::AiSequence::Ai_Wander:
         {
-            package = new AiWander(static_cast<ESM::AiSequence::AiWander*>(it->mPackage));
+            package.reset(new AiWander(static_cast<ESM::AiSequence::AiWander*>(it->mPackage)));
             break;
         }
         case ESM::AiSequence::Ai_Travel:
         {
-            package = new AiTravel(static_cast<ESM::AiSequence::AiTravel*>(it->mPackage));
+            package.reset(new AiTravel(static_cast<ESM::AiSequence::AiTravel*>(it->mPackage)));
             break;
         }
         case ESM::AiSequence::Ai_Escort:
         {
-            package = new AiEscort(static_cast<ESM::AiSequence::AiEscort*>(it->mPackage));
+            package.reset(new AiEscort(static_cast<ESM::AiSequence::AiEscort*>(it->mPackage)));
             break;
         }
         case ESM::AiSequence::Ai_Follow:
         {
-            package = new AiFollow(static_cast<ESM::AiSequence::AiFollow*>(it->mPackage));
+            package.reset(new AiFollow(static_cast<ESM::AiSequence::AiFollow*>(it->mPackage)));
             break;
         }
         case ESM::AiSequence::Ai_Activate:
         {
-            package = new AiActivate(static_cast<ESM::AiSequence::AiActivate*>(it->mPackage));
+            package.reset(new AiActivate(static_cast<ESM::AiSequence::AiActivate*>(it->mPackage)));
             break;
         }
         case ESM::AiSequence::Ai_Combat:
         {
-            package = new AiCombat(static_cast<ESM::AiSequence::AiCombat*>(it->mPackage));
+            package.reset(new AiCombat(static_cast<ESM::AiSequence::AiCombat*>(it->mPackage)));
             break;
         }
         case ESM::AiSequence::Ai_Pursue:
         {
-            package = new AiPursue(static_cast<ESM::AiSequence::AiPursue*>(it->mPackage));
+            package.reset(new AiPursue(static_cast<ESM::AiSequence::AiPursue*>(it->mPackage)));
             break;
         }
         default:
             break;
         }
 
-        if (!package)
+        if (!package.get())
             continue;
 
         // remove previous packages if required
@@ -400,13 +411,16 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
             for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end();)
             {
                 if((*it)->canCancel())
+                {
+                    delete *it;
                     it = mPackages.erase(it);
+                }
                 else
                     ++it;
             }
         }
 
-        mPackages.push_back(package);
+        mPackages.push_back(package.release());
     }
 }
 
