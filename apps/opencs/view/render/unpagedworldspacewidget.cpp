@@ -51,7 +51,7 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
 
     mCell.reset (new Cell (document.getData(), mRootNode, mCellId));
 
-    mView->setCameraManipulator(new osgGA::TrackballManipulator);
+    selectNavigationMode("trackball");
 }
 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,

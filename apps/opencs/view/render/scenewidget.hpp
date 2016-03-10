@@ -110,6 +110,8 @@ namespace CSVRender
 
         virtual void settingChanged (const CSMPrefs::Setting *setting);
 
+        void selectNavigationMode (const std::string& mode);
+
     private slots:
 
         void selectLightingMode (const std::string& mode);
