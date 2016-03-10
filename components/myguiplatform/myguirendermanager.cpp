@@ -6,7 +6,6 @@
 #include <MyGUI_Timer.h>
 
 #include <osg/Drawable>
-#include <osg/Geode>
 #include <osg/BlendFunc>
 #include <osg/Texture2D>
 #include <osg/TexMat>
@@ -394,9 +393,6 @@ void RenderManager::initialise()
 
     mDrawable = new Drawable(this);
 
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-    geode->addDrawable(mDrawable.get());
-
     osg::ref_ptr<osg::Camera> camera = new osg::Camera();
     camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
     camera->setProjectionResizePolicy(osg::Camera::FIXED);
@@ -404,8 +400,8 @@ void RenderManager::initialise()
     camera->setViewMatrix(osg::Matrix::identity());
     camera->setRenderOrder(osg::Camera::POST_RENDER);
     camera->setClearMask(GL_NONE);
-    geode->setCullingActive(false);
-    camera->addChild(geode.get());
+    mDrawable->setCullingActive(false);
+    camera->addChild(mDrawable.get());
 
     mGuiRoot = camera;
     mSceneRoot->addChild(mGuiRoot.get());

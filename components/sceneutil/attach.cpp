@@ -5,7 +5,6 @@
 
 #include <osg/NodeVisitor>
 #include <osg/Group>
-#include <osg/Geode>
 #include <osg/FrontFace>
 #include <osg/PositionAttitudeTransform>
 #include <osg/MatrixTransform>

@@ -3,7 +3,6 @@
 #include <cmath>
 
 #include <osg/Group>
-#include <osg/Geode>
 #include <osg/UserDataContainer>
 
 #include <osgParticle/ParticleSystem>

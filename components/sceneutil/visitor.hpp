@@ -34,7 +34,6 @@ namespace SceneUtil
         {
         }
 
-        virtual void apply(osg::Geode &geode);
         virtual void apply(osg::Drawable& drw);
     };
 

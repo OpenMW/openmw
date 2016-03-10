@@ -4,7 +4,6 @@
 
 #include <osg/Geometry>
 #include <osg/PositionAttitudeTransform>
-#include <osg/Geode>
 #include <osg/Group>
 
 #include <components/esm/loadstat.hpp>
@@ -213,16 +212,12 @@ void Pathgrid::enableCellPathgrid(const MWWorld::CellStore *store)
     osg::ref_ptr<osg::PositionAttitudeTransform> cellPathGrid = new osg::PositionAttitudeTransform;
     cellPathGrid->setPosition(cellPathGridPos);
 
-    osg::ref_ptr<osg::Geode> lineGeode = new osg::Geode;
     osg::ref_ptr<osg::Geometry> lines = createPathgridLines(pathgrid);
-    lineGeode->addDrawable(lines);
 
-    osg::ref_ptr<osg::Geode> pointGeode = new osg::Geode;
     osg::ref_ptr<osg::Geometry> points = createPathgridPoints(pathgrid);
-    pointGeode->addDrawable(points);
 
-    cellPathGrid->addChild(lineGeode);
-    cellPathGrid->addChild(pointGeode);
+    cellPathGrid->addChild(lines);
+    cellPathGrid->addChild(points);
 
     mPathGridRoot->addChild(cellPathGrid);
 

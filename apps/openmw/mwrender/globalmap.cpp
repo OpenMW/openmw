@@ -6,7 +6,6 @@
 #include <osg/Texture2D>
 #include <osg/Group>
 #include <osg/Geometry>
-#include <osg/Geode>
 #include <osg/Depth>
 
 #include <osgDB/WriteFile>
@@ -296,9 +295,7 @@ namespace MWRender
             stateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
             stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
             stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-            osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-            geode->addDrawable(geom);
-            camera->addChild(geode);
+            camera->addChild(geom);
         }
 
         mRoot->addChild(camera);

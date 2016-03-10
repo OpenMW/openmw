@@ -3,7 +3,6 @@
 #include <stdexcept>
 
 #include <osg/NodeVisitor>
-#include <osg/Geode>
 
 #include <osgUtil/CullVisitor>
 

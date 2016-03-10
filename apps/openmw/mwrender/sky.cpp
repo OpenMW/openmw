@@ -5,7 +5,6 @@
 #include <osg/ClipPlane>
 #include <osg/Fog>
 #include <osg/Transform>
-#include <osg/Geode>
 #include <osg/Depth>
 #include <osg/Geometry>
 #include <osg/Material>
@@ -347,14 +346,6 @@ public:
     {
     }
 
-    void apply(osg::Geode &geode)
-    {
-        for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
-        {
-            osg::Drawable* drw = geode.getDrawable(i);
-            apply(*drw);
-        }
-    }
     void apply(osg::Drawable& drw)
     {
         osg::Geometry* geom = drw.asGeometry();
@@ -438,12 +429,10 @@ class CelestialBody
 public:
     CelestialBody(osg::Group* parentNode, float scaleFactor, int numUvSets)
     {
-        mGeode = new osg::Geode;
-        osg::ref_ptr<osg::Geometry> geom = createTexturedQuad(numUvSets);
-        mGeode->addDrawable(geom);
+        mGeom = createTexturedQuad(numUvSets);
         mTransform = new osg::PositionAttitudeTransform;
         mTransform->setScale(osg::Vec3f(450,450,450) * scaleFactor);
-        mTransform->addChild(mGeode);
+        mTransform->addChild(mGeom);
 
         parentNode->addChild(mTransform);
     }
@@ -460,7 +449,7 @@ public:
 protected:
     static const float mDistance;
     osg::ref_ptr<osg::PositionAttitudeTransform> mTransform;
-    osg::ref_ptr<osg::Geode> mGeode;
+    osg::ref_ptr<osg::Geometry> mGeom;
 };
 
 const float CelestialBody::mDistance = 1000.0f;
@@ -479,7 +468,7 @@ public:
         sunTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         sunTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
-        mGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex, osg::StateAttribute::ON);
+        mGeom->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex, osg::StateAttribute::ON);
 
         osg::ref_ptr<osg::Group> queryNode (new osg::Group);
         // Need to render after the world geometry so we can correctly test for occlusions
@@ -553,12 +542,12 @@ private:
         // Note the debug geometry setDebugDisplay(true) is always DYNAMIC and that can't be changed, not a big deal.
         oqn->getQueryGeometry()->setDataVariance(osg::Object::STATIC);
 
-        osg::ref_ptr<osg::Geode> queryGeode = osg::clone(mGeode.get(), osg::CopyOp::DEEP_COPY_ALL);
-        // Disable writing to the color buffer. We are using this geode for visibility tests only.
+        osg::ref_ptr<osg::Geometry> queryGeom = osg::clone(mGeom.get(), osg::CopyOp::DEEP_COPY_ALL);
+        // Disable writing to the color buffer. We are using this geometry for visibility tests only.
         osg::ref_ptr<osg::ColorMask> colormask (new osg::ColorMask(0, 0, 0, 0));
-        queryGeode->getOrCreateStateSet()->setAttributeAndModes(colormask, osg::StateAttribute::ON);
+        queryGeom->getOrCreateStateSet()->setAttributeAndModes(colormask, osg::StateAttribute::ON);
 
-        oqn->addChild(queryGeode);
+        oqn->addChild(queryGeom);
 
         // Remove the default OFF|PROTECTED setting for texturing. We *want* to enable texturing for alpha testing purposes
         oqn->getQueryStateSet()->removeTextureMode(0, GL_TEXTURE_2D);
@@ -613,12 +602,10 @@ private:
 
         mTransform->addChild(transform);
 
-        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-        transform->addChild(geode);
+        osg::ref_ptr<osg::Geometry> geom = createTexturedQuad();
+        transform->addChild(geom);
 
-        geode->addDrawable(createTexturedQuad());
-
-        osg::StateSet* stateset = geode->getOrCreateStateSet();
+        osg::StateSet* stateset = geom->getOrCreateStateSet();
 
         stateset->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
         stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
@@ -649,11 +636,9 @@ private:
         camera->setRenderOrder(osg::Camera::NESTED_RENDER);
         camera->setAllowEventFocus(false);
 
-        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
         osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3f(-1,-1,0), osg::Vec3f(2,0,0), osg::Vec3f(0,2,0));
-        geode->addDrawable(geom);
 
-        camera->addChild(geode);
+        camera->addChild(geom);
 
         osg::StateSet* stateset = geom->getOrCreateStateSet();
 
@@ -940,12 +925,12 @@ public:
         setPhase(MoonState::Phase_Full);
         setVisible(true);
 
-        mGeode->addUpdateCallback(mUpdater);
+        mGeom->addUpdateCallback(mUpdater);
     }
 
     ~Moon()
     {
-        mGeode->removeUpdateCallback(mUpdater);
+        mGeom->removeUpdateCallback(mUpdater);
     }
 
     virtual void adjustTransparency(const float ratio)
@@ -1380,11 +1365,8 @@ void SkyManager::createRain()
     osg::ref_ptr<osgParticle::ParticleSystemUpdater> updater (new osgParticle::ParticleSystemUpdater);
     updater->addParticleSystem(mRainParticleSystem);
 
-    osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-    geode->addDrawable(mRainParticleSystem);
-
     mRainNode->addChild(emitter);
-    mRainNode->addChild(geode);
+    mRainNode->addChild(mRainParticleSystem);
     mRainNode->addChild(updater);
 
     mRainFader = new RainFader;

@@ -13,7 +13,7 @@ namespace osg
 {
     class Group;
     class PositionAttitudeTransform;
-    class Geode;
+    class Geometry;
     class Node;
 }
 
@@ -53,7 +53,7 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mSceneRoot;
         osg::ref_ptr<osg::PositionAttitudeTransform> mWaterNode;
-        osg::ref_ptr<osg::Geode> mWaterGeode;
+        osg::ref_ptr<osg::Geometry> mWaterGeom;
         Resource::ResourceSystem* mResourceSystem;
         const Fallback::Map* mFallback;
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;

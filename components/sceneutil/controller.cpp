@@ -3,7 +3,6 @@
 #include "statesetupdater.hpp"
 
 #include <osg/Drawable>
-#include <osg/Geode>
 #include <osg/NodeCallback>
 
 namespace SceneUtil
@@ -83,21 +82,6 @@ namespace SceneUtil
         }
 
         traverse(node);
-    }
-
-    void ControllerVisitor::apply(osg::Geode &geode)
-    {
-        for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
-        {
-            osg::Drawable* drw = geode.getDrawable(i);
-
-            osg::Callback* callback = drw->getUpdateCallback();
-
-            if (Controller* ctrl = dynamic_cast<Controller*>(callback))
-                visit(geode, *ctrl);
-        }
-
-        apply(static_cast<osg::Node&>(geode));
     }
 
     AssignControllerSourcesVisitor::AssignControllerSourcesVisitor()

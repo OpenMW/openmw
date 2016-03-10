@@ -3,7 +3,6 @@
 #include <iomanip>
 
 #include <osg/PolygonOffset>
-#include <osg/Geode>
 #include <osg/Texture2D>
 #include <osg/Material>
 #include <osg/Depth>
@@ -85,10 +84,7 @@ namespace MWRender
 RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem* resourceSystem, const Fallback::Map* fallback)
     : mParent(parent)
 {
-    osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-
     mParticleSystem = new osgParticle::ParticleSystem;
-    geode->addDrawable(mParticleSystem);
 
     mParticleSystem->setParticleAlignment(osgParticle::ParticleSystem::FIXED);
     mParticleSystem->setAlignVectorX(osg::Vec3f(1,0,0));
@@ -106,7 +102,7 @@ RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem*
 
     mParticleNode = new osg::PositionAttitudeTransform;
     mParticleNode->addChild(updater);
-    mParticleNode->addChild(geode);
+    mParticleNode->addChild(mParticleSystem);
     mParticleNode->setNodeMask(Mask_Effect);
 
     createWaterRippleStateSet(resourceSystem, fallback, mParticleNode);

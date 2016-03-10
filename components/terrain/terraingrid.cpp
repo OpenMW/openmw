@@ -17,7 +17,6 @@
 #include <components/esm/loadland.hpp>
 
 #include <osg/Geometry>
-#include <osg/Geode>
 #include <osg/KdTree>
 
 #include <osgFX/Effect>

@@ -5,7 +5,6 @@
 #include <osg/Fog>
 #include <osg/Depth>
 #include <osg/Group>
-#include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Material>
 #include <osg/PositionAttitudeTransform>
@@ -466,25 +465,22 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 {
     mSimulation.reset(new RippleSimulation(parent, resourceSystem, fallback));
 
-    osg::ref_ptr<osg::Geometry> waterGeom = createWaterGeometry(CELL_SIZE*150, 40, 900);
-    waterGeom->setDrawCallback(new DepthClampCallback);
-
-    mWaterGeode = new osg::Geode;
-    mWaterGeode->addDrawable(waterGeom);
-    mWaterGeode->setNodeMask(Mask_Water);
+    mWaterGeom = createWaterGeometry(CELL_SIZE*150, 40, 900);
+    mWaterGeom->setDrawCallback(new DepthClampCallback);
+    mWaterGeom->setNodeMask(Mask_Water);
 
     if (ico)
-        ico->add(mWaterGeode);
+        ico->add(mWaterGeom);
 
     mWaterNode = new osg::PositionAttitudeTransform;
-    mWaterNode->addChild(mWaterGeode);
+    mWaterNode->addChild(mWaterGeom);
     mWaterNode->addCullCallback(new FudgeCallback);
 
     // simple water fallback for the local map
-    osg::ref_ptr<osg::Geode> geode2 (osg::clone(mWaterGeode.get(), osg::CopyOp::DEEP_COPY_NODES));
-    createSimpleWaterStateSet(geode2, mFallback->getFallbackFloat("Water_Map_Alpha"));
-    geode2->setNodeMask(Mask_SimpleWater);
-    mWaterNode->addChild(geode2);
+    osg::ref_ptr<osg::Geometry> geom2 (osg::clone(mWaterGeom.get(), osg::CopyOp::DEEP_COPY_NODES));
+    createSimpleWaterStateSet(geom2, mFallback->getFallbackFloat("Water_Map_Alpha"));
+    geom2->setNodeMask(Mask_SimpleWater);
+    mWaterNode->addChild(geom2);
 
     mSceneRoot->addChild(mWaterNode);
 
@@ -521,10 +517,10 @@ void Water::updateWaterMaterial()
             mParent->addChild(mRefraction);
         }
 
-        createShaderWaterStateSet(mWaterGeode, mReflection, mRefraction);
+        createShaderWaterStateSet(mWaterGeom, mReflection, mRefraction);
     }
     else
-        createSimpleWaterStateSet(mWaterGeode, mFallback->getFallbackFloat("Water_World_Alpha"));
+        createSimpleWaterStateSet(mWaterGeom, mFallback->getFallbackFloat("Water_World_Alpha"));
 
     updateVisible();
 }

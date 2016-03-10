@@ -2,7 +2,6 @@
 
 #include <osg/Matrixf>
 #include <osg/MatrixTransform>
-#include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Array>
 #include <osg/LOD>
