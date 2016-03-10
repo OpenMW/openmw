@@ -3,11 +3,9 @@
 #include <iomanip>
 #include <limits>
 
-#include <osg/PositionAttitudeTransform>
 #include <osg/TexGen>
 #include <osg/TexEnvCombine>
 #include <osg/MatrixTransform>
-#include <osg/Geode>
 #include <osg/BlendFunc>
 #include <osg/Material>
 

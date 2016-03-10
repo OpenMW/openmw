@@ -13,7 +13,7 @@
 #include <osg/TexMat>
 #include <osg/OcclusionQueryNode>
 #include <osg/ColorMask>
-#include <osg/MatrixTransform>
+#include <osg/PositionAttitudeTransform>
 #include <osg/BlendFunc>
 #include <osg/AlphaFunc>
 #include <osg/observer_ptr>

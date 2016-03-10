@@ -10,7 +10,6 @@
 #include <osg/Material>
 #include <osg/PositionAttitudeTransform>
 #include <osg/ClipNode>
-#include <osg/MatrixTransform>
 #include <osg/FrontFace>
 #include <osg/Shader>
 #include <osg/GLExtensions>

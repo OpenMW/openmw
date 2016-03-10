@@ -4,8 +4,6 @@
 #include <iostream>
 #include <cstdlib>
 
-#include <osg/MatrixTransform>
-
 #include "skeleton.hpp"
 #include "util.hpp"
 

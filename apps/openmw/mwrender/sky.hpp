@@ -3,16 +3,17 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 #include <osg/ref_ptr>
 #include <osg/Vec4f>
-#include <osg/PositionAttitudeTransform>
 
 namespace osg
 {
     class Group;
     class Node;
     class Material;
+    class PositionAttitudeTransform;
 }
 
 namespace osgParticle
