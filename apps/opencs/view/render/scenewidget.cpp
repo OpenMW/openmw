@@ -12,6 +12,9 @@
 #include <osgViewer/ViewerEventHandlers>
 #include <osg/LightModel>
 
+#include <osgGA/TrackballManipulator>
+#include <osgGA/FirstPersonManipulator>
+
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/sceneutil/lightmanager.hpp>
@@ -280,6 +283,18 @@ void SceneWidget::mouseReleaseEvent (QMouseEvent *event)
 void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
 {
     storeMappingSetting(setting);
+}
+
+void SceneWidget::selectNavigationMode (const std::string& mode)
+{
+    if (mode=="1st")
+        mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
+    else if (mode=="free")
+        mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
+    else if (mode=="orbit")
+        mView->setCameraManipulator(new osgGA::OrbitManipulator);
+    else if (mode=="trackball")
+        mView->setCameraManipulator(new osgGA::TrackballManipulator);
 }
 
 bool SceneWidget::storeMappingSetting (const CSMPrefs::Setting *setting)

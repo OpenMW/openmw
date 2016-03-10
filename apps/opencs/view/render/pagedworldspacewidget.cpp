@@ -6,8 +6,6 @@
 #include <QMouseEvent>
 #include <QApplication>
 
-#include <osgGA/TrackballManipulator>
-
 #include <components/esm/loadland.hpp>
 
 #include "../../model/world/tablemimedata.hpp"
@@ -117,7 +115,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     /// \todo do not overwrite manipulator object
     /// \todo move code to useViewHint function
     if (modified && wasEmpty)
-        mView->setCameraManipulator(new osgGA::TrackballManipulator);
+        selectNavigationMode("trackball");
 
     return modified;
 }

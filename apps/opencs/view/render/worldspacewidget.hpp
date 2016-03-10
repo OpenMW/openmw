@@ -213,8 +213,6 @@ namespace CSVRender
 
         private slots:
 
-            void selectNavigationMode (const std::string& mode);
-
             virtual void referenceableDataChanged (const QModelIndex& topLeft,
                 const QModelIndex& bottomRight) = 0;
 

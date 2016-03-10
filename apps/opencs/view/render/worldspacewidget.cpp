@@ -12,9 +12,6 @@
 #include <QApplication>
 #include <QToolTip>
 
-#include <osgGA/TrackballManipulator>
-#include <osgGA/FirstPersonManipulator>
-
 #include <osgUtil/LineSegmentIntersector>
 
 #include "../../model/world/universalid.hpp"
@@ -94,21 +91,12 @@ void CSVRender::WorldspaceWidget::settingChanged (const CSMPrefs::Setting *setti
         SceneWidget::settingChanged(setting);
 }
 
-void CSVRender::WorldspaceWidget::selectNavigationMode (const std::string& mode)
-{
-    if (mode=="1st")
-        mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
-    else if (mode=="free")
-        mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
-    else if (mode=="orbit")
-        mView->setCameraManipulator(new osgGA::OrbitManipulator);
-}
 
 void CSVRender::WorldspaceWidget::useViewHint (const std::string& hint) {}
 
 void CSVRender::WorldspaceWidget::selectDefaultNavigationMode()
 {
-    mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
+    selectNavigationMode("1st");
 }
 
 CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
