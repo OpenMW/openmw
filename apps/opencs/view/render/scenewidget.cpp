@@ -57,9 +57,6 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     layout->addWidget(window->getGLWidget());
     setLayout(layout);
 
-    // Pass events through this widget first
-    window->getGLWidget()->installEventFilter(this);
-
     mView->getCamera()->setGraphicsContext(window);
     mView->getCamera()->setClearColor( osg::Vec4(0.2, 0.2, 0.6, 1.0) );
     mView->getCamera()->setViewport( new osg::Viewport(0, 0, traits->width, traits->height) );
