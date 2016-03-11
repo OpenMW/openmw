@@ -71,6 +71,7 @@ RigGeometry::RigGeometry()
     setCullCallback(new UpdateRigGeometry);
     setUpdateCallback(new UpdateRigBounds);
     setSupportsDisplayList(false);
+    setUseVertexBufferObjects(true);
     setComputeBoundingBoxCallback(new DummyComputeBoundCallback);
 }
 
