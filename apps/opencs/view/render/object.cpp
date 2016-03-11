@@ -19,6 +19,7 @@
 #include "../../model/world/refidcollection.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/universalid.hpp"
+#include "../../model/world/commandmacro.hpp"
 
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
@@ -524,7 +525,7 @@ void CSVRender::Object::setScale (float scale)
     adjustTransform();
 }
 
-void CSVRender::Object::apply (QUndoStack& undoStack)
+void CSVRender::Object::apply (CSMWorld::CommandMacro& commands)
 {
     const CSMWorld::RefCollection& collection = mData.getReferences();
     QAbstractItemModel *model = mData.getTableModel (CSMWorld::UniversalId::Type_References);
@@ -538,7 +539,7 @@ void CSVRender::Object::apply (QUndoStack& undoStack)
             int column = collection.findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (
                 CSMWorld::Columns::ColumnId_PositionXPos+i));
 
-            undoStack.push (new CSMWorld::ModifyCommand (*model,
+            commands.push (new CSMWorld::ModifyCommand (*model,
                 model->index (recordIndex, column), mPositionOverride.pos[i]));
         }
     }
@@ -550,7 +551,7 @@ void CSVRender::Object::apply (QUndoStack& undoStack)
             int column = collection.findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (
                 CSMWorld::Columns::ColumnId_PositionXRot+i));
 
-            undoStack.push (new CSMWorld::ModifyCommand (*model,
+            commands.push (new CSMWorld::ModifyCommand (*model,
                 model->index (recordIndex, column), mPositionOverride.rot[i]));
         }
     }
@@ -559,7 +560,7 @@ void CSVRender::Object::apply (QUndoStack& undoStack)
     {
         int column = collection.findColumnIndex (CSMWorld::Columns::ColumnId_Scale);
 
-        undoStack.push (new CSMWorld::ModifyCommand (*model,
+        commands.push (new CSMWorld::ModifyCommand (*model,
             model->index (recordIndex, column), mScaleOverride));
     }
 

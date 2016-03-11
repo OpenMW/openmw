@@ -37,6 +37,7 @@ namespace CSMWorld
 {
     class Data;
     struct CellRef;
+    class CommandMacro;
 }
 
 namespace CSVRender
@@ -172,7 +173,7 @@ namespace CSVRender
             void setScale (float scale);
 
             /// Apply override changes via command and end edit mode
-            void apply (QUndoStack& undoStack);
+            void apply (CSMWorld::CommandMacro& commands);
 
             void setSubMode (int subMode);
 

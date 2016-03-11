@@ -268,7 +268,7 @@ void CSVRender::InstanceMode::dragCompleted()
     {
         if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (iter->get()))
         {
-            objectTag->mObject->apply (undoStack);
+            objectTag->mObject->apply (macro);
         }
     }
 
