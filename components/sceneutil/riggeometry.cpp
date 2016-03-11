@@ -72,6 +72,7 @@ RigGeometry::RigGeometry()
     setUpdateCallback(new UpdateRigBounds);
     setSupportsDisplayList(false);
     setUseVertexBufferObjects(true);
+    getOrCreateVertexBufferObject()->setUsage(GL_DYNAMIC_DRAW_ARB);
     setComputeBoundingBoxCallback(new DummyComputeBoundCallback);
 }
 
