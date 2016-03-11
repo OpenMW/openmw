@@ -15,6 +15,49 @@
 namespace Terrain
 {
 
+    osg::ref_ptr<osg::TexMat> getBlendmapTexMat(int blendmapScale)
+    {
+        static std::map<int, osg::ref_ptr<osg::TexMat> > texMatMap;
+        osg::ref_ptr<osg::TexMat> texMat = texMatMap[blendmapScale];
+        if (!texMat)
+        {
+            texMat = new osg::TexMat;
+            osg::Matrixf matrix;
+            float scale = (blendmapScale/(static_cast<float>(blendmapScale)+1.f));
+            matrix.preMultTranslate(osg::Vec3f(0.5f, 0.5f, 0.f));
+            matrix.preMultScale(osg::Vec3f(scale, scale, 1.f));
+            matrix.preMultTranslate(osg::Vec3f(-0.5f, -0.5f, 0.f));
+
+            texMatMap[blendmapScale] = texMat;
+        }
+        return texMat;
+    }
+
+    osg::ref_ptr<osg::TexMat> getLayerTexMat(float layerTileSize)
+    {
+        static std::map<float, osg::ref_ptr<osg::TexMat> > texMatMap;
+        osg::ref_ptr<osg::TexMat> texMat = texMatMap[layerTileSize];
+        if (!texMat)
+        {
+            texMat = new osg::TexMat;
+            texMat->setMatrix(osg::Matrix::scale(osg::Vec3f(layerTileSize,layerTileSize,1.f)));
+
+            texMatMap[layerTileSize] = texMat;
+        }
+        return texMat;
+    }
+
+    osg::ref_ptr<osg::Depth> getEqualDepth()
+    {
+        static osg::ref_ptr<osg::Depth> depth;
+        if (!depth)
+        {
+            depth = new osg::Depth;
+            depth->setFunction(osg::Depth::EQUAL);
+        }
+        return depth;
+    }
+
     FixedFunctionTechnique::FixedFunctionTechnique(const std::vector<TextureLayer>& layers,
                                                    const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps, int blendmapScale, float layerTileSize)
     {
@@ -27,9 +70,8 @@ namespace Terrain
             if (!firstLayer)
             {
                 stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
-                osg::ref_ptr<osg::Depth> depth (new osg::Depth);
-                depth->setFunction(osg::Depth::EQUAL);
-                stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+
+                stateset->setAttributeAndModes(getEqualDepth(), osg::StateAttribute::ON);
             }
 
             int texunit = 0;
@@ -40,17 +82,15 @@ namespace Terrain
                 stateset->setTextureAttributeAndModes(texunit, blendmap.get());
 
                 // This is to map corner vertices directly to the center of a blendmap texel.
-                osg::Matrixf texMat;
-                float scale = (blendmapScale/(static_cast<float>(blendmapScale)+1.f));
-                texMat.preMultTranslate(osg::Vec3f(0.5f, 0.5f, 0.f));
-                texMat.preMultScale(osg::Vec3f(scale, scale, 1.f));
-                texMat.preMultTranslate(osg::Vec3f(-0.5f, -0.5f, 0.f));
+                stateset->setTextureAttributeAndModes(texunit, getBlendmapTexMat(blendmapScale));
 
-                stateset->setTextureAttributeAndModes(texunit, new osg::TexMat(texMat));
-
-                osg::ref_ptr<osg::TexEnvCombine> texEnvCombine (new osg::TexEnvCombine);
-                texEnvCombine->setCombine_RGB(osg::TexEnvCombine::REPLACE);
-                texEnvCombine->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+                static osg::ref_ptr<osg::TexEnvCombine> texEnvCombine;
+                if (!texEnvCombine)
+                {
+                    texEnvCombine = new osg::TexEnvCombine;
+                    texEnvCombine->setCombine_RGB(osg::TexEnvCombine::REPLACE);
+                    texEnvCombine->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+                }
 
                 stateset->setTextureAttributeAndModes(texunit, texEnvCombine, osg::StateAttribute::ON);
 
@@ -61,9 +101,7 @@ namespace Terrain
             osg::ref_ptr<osg::Texture2D> tex = it->mDiffuseMap;
             stateset->setTextureAttributeAndModes(texunit, tex.get());
 
-            osg::ref_ptr<osg::TexMat> texMat (new osg::TexMat);
-            texMat->setMatrix(osg::Matrix::scale(osg::Vec3f(layerTileSize,layerTileSize,1.f)));
-            stateset->setTextureAttributeAndModes(texunit, texMat, osg::StateAttribute::ON);
+            stateset->setTextureAttributeAndModes(texunit, getLayerTexMat(layerTileSize), osg::StateAttribute::ON);
 
             firstLayer = false;
 
@@ -83,18 +121,14 @@ namespace Terrain
             if (!firstLayer)
             {
                 stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
-                osg::ref_ptr<osg::Depth> depth (new osg::Depth);
-                depth->setFunction(osg::Depth::EQUAL);
-                stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+                stateset->setAttributeAndModes(getEqualDepth(), osg::StateAttribute::ON);
             }
 
             int texunit = 0;
 
             stateset->setTextureAttributeAndModes(texunit, it->mDiffuseMap);
 
-            osg::ref_ptr<osg::TexMat> texMat (new osg::TexMat);
-            texMat->setMatrix(osg::Matrix::scale(osg::Vec3f(layerTileSize,layerTileSize,1.f)));
-            stateset->setTextureAttributeAndModes(texunit, texMat, osg::StateAttribute::ON);
+            stateset->setTextureAttributeAndModes(texunit, getLayerTexMat(layerTileSize), osg::StateAttribute::ON);
 
             stateset->addUniform(new osg::Uniform("diffuseMap", texunit));
 
@@ -105,14 +139,7 @@ namespace Terrain
 
                 stateset->setTextureAttributeAndModes(texunit, blendmap.get());
 
-                // This is to map corner vertices directly to the center of a blendmap texel.
-                osg::Matrixf texMat;
-                float scale = (blendmapScale/(static_cast<float>(blendmapScale)+1.f));
-                texMat.preMultTranslate(osg::Vec3f(0.5f, 0.5f, 0.f));
-                texMat.preMultScale(osg::Vec3f(scale, scale, 1.f));
-                texMat.preMultTranslate(osg::Vec3f(-0.5f, -0.5f, 0.f));
-
-                stateset->setTextureAttributeAndModes(texunit, new osg::TexMat(texMat));
+                stateset->setTextureAttributeAndModes(texunit, getBlendmapTexMat(blendmapScale));
                 stateset->addUniform(new osg::Uniform("blendMap", texunit));
             }
 
