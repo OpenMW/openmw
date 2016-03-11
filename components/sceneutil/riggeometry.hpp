@@ -36,6 +36,8 @@ namespace SceneUtil
 
         void setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap);
 
+        /// Initialize this geometry from the source geometry.
+        /// @note The source geometry will not be modified.
         void setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom);
 
         // Called automatically by our CullCallback

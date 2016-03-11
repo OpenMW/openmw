@@ -94,33 +94,16 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
     if (from.getStateSet())
         setStateSet(from.getStateSet());
 
-    // copy over primitive sets.
+    // shallow copy primitive sets & vertex attributes that we will not modify
     getPrimitiveSetList() = from.getPrimitiveSetList();
+    setColorArray(from.getColorArray());
+    setSecondaryColorArray(from.getSecondaryColorArray());
+    setFogCoordArray(from.getFogCoordArray());
+    setTexCoordArrayList(from.getTexCoordArrayList());
+    setVertexAttribArrayList(from.getVertexAttribArrayList());
 
-    if (from.getColorArray())
-        setColorArray(from.getColorArray());
-
-    if (from.getSecondaryColorArray())
-        setSecondaryColorArray(from.getSecondaryColorArray());
-
-    if (from.getFogCoordArray())
-        setFogCoordArray(from.getFogCoordArray());
-
-    for(unsigned int ti=0;ti<from.getNumTexCoordArrays();++ti)
-    {
-        if (from.getTexCoordArray(ti))
-            setTexCoordArray(ti,from.getTexCoordArray(ti));
-    }
-
-    osg::Geometry::ArrayList& arrayList = from.getVertexAttribArrayList();
-    for(unsigned int vi=0;vi< arrayList.size();++vi)
-    {
-        osg::Array* array = arrayList[vi].get();
-        if (array)
-            setVertexAttribArray(vi,array);
-    }
-
-
+    // vertices and normals are modified every frame, so we need to deep copy them.
+    // assign a dedicated VBO to make sure that modifications don't interfere with source geometry's VBO.
     osg::ref_ptr<osg::VertexBufferObject> vbo (new osg::VertexBufferObject);
     vbo->setUsage(GL_DYNAMIC_DRAW_ARB);
 
