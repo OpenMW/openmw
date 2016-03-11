@@ -51,12 +51,25 @@ namespace SceneUtil
             state.applyModelViewMatrix(state.getInitialViewMatrix());
 
             for (unsigned int i=0; i<mLights.size(); ++i)
-            {
-                mLights[i]->setLightNum(i+mIndex);
-                mLights[i]->apply(state);
-            }
+                applyLight((GLenum)((int)GL_LIGHT0 + i + mIndex), mLights[i].get());
 
             state.applyModelViewMatrix(modelViewMatrix);
+        }
+
+        void applyLight(GLenum lightNum, const osg::Light* light) const
+        {
+            glLightfv( lightNum, GL_AMBIENT,               light->getAmbient().ptr() );
+            glLightfv( lightNum, GL_DIFFUSE,               light->getDiffuse().ptr() );
+            glLightfv( lightNum, GL_SPECULAR,              light->getSpecular().ptr() );
+            glLightfv( lightNum, GL_POSITION,              light->getPosition().ptr() );
+            // TODO: enable this once spot lights are supported
+            // need to transform SPOT_DIRECTION by the world matrix?
+            //glLightfv( lightNum, GL_SPOT_DIRECTION,        light->getDirection().ptr() );
+            //glLightf ( lightNum, GL_SPOT_EXPONENT,         light->getSpotExponent() );
+            //glLightf ( lightNum, GL_SPOT_CUTOFF,           light->getSpotCutoff() );
+            glLightf ( lightNum, GL_CONSTANT_ATTENUATION,  light->getConstantAttenuation() );
+            glLightf ( lightNum, GL_LINEAR_ATTENUATION,    light->getLinearAttenuation() );
+            glLightf ( lightNum, GL_QUADRATIC_ATTENUATION, light->getQuadraticAttenuation() );
         }
 
     private:
