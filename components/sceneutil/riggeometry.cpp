@@ -71,8 +71,7 @@ RigGeometry::RigGeometry()
     setCullCallback(new UpdateRigGeometry);
     setUpdateCallback(new UpdateRigBounds);
     setSupportsDisplayList(false);
-    //setUseVertexBufferObjects(true);
-    //getOrCreateVertexBufferObject()->setUsage(GL_DYNAMIC_DRAW_ARB);
+    setUseVertexBufferObjects(true);
     setComputeBoundingBoxCallback(new DummyComputeBoundCallback);
 }
 
@@ -121,8 +120,23 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
             setVertexAttribArray(vi,array);
     }
 
-    setVertexArray(dynamic_cast<osg::Array*>(from.getVertexArray()->clone(osg::CopyOp::DEEP_COPY_ALL)));
-    setNormalArray(dynamic_cast<osg::Array*>(from.getNormalArray()->clone(osg::CopyOp::DEEP_COPY_ALL)), osg::Array::BIND_PER_VERTEX);
+
+    osg::ref_ptr<osg::VertexBufferObject> vbo (new osg::VertexBufferObject);
+    vbo->setUsage(GL_DYNAMIC_DRAW_ARB);
+
+    osg::ref_ptr<osg::Array> vertexArray = osg::clone(from.getVertexArray(), osg::CopyOp::DEEP_COPY_ALL);
+    if (vertexArray)
+    {
+        vertexArray->setVertexBufferObject(vbo);
+        setVertexArray(vertexArray);
+    }
+
+    osg::ref_ptr<osg::Array> normalArray = osg::clone(from.getNormalArray(), osg::CopyOp::DEEP_COPY_ALL);
+    if (normalArray)
+    {
+        normalArray->setVertexBufferObject(vbo);
+        setNormalArray(normalArray, osg::Array::BIND_PER_VERTEX);
+    }
 }
 
 bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
