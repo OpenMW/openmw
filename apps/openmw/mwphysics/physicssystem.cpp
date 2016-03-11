@@ -221,7 +221,7 @@ namespace MWPhysics
                 collisionWorld->rayTest(from, to, resultCallback1);
 
                 if (resultCallback1.hasHit() &&
-                        ( (toOsg(resultCallback1.m_hitPointWorld) - tracer.mEndPos).length() > 30
+                        ( (toOsg(resultCallback1.m_hitPointWorld) - tracer.mEndPos).length() > 35
                         || getSlope(tracer.mPlaneNormal) > sMaxSlope))
                 {
                     actor->setOnGround(getSlope(toOsg(resultCallback1.m_hitNormalWorld)) <= sMaxSlope);
