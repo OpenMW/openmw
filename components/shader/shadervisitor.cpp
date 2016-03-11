@@ -88,11 +88,11 @@ namespace Shader
         return newStateSet.get();
     }
 
-    const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap", "envMap", "specularMap" };
+    const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap", "envMap", "specularMap", "decalMap" };
     bool isTextureNameRecognized(const std::string& name)
     {
         for (unsigned int i=0; i<sizeof(defaultTextures)/sizeof(defaultTextures[0]); ++i)
-            if (name.c_str() == defaultTextures[i])
+            if (name == defaultTextures[i])
                 return true;
         return false;
     }

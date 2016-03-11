@@ -15,6 +15,11 @@ uniform sampler2D detailMap;
 varying vec2 detailMapUV;
 #endif
 
+#if @decalMap
+uniform sampler2D decalMap;
+varying vec2 decalMapUV;
+#endif
+
 #if @emissiveMap
 uniform sampler2D emissiveMap;
 varying vec2 emissiveMapUV;
@@ -65,6 +70,11 @@ void main()
 
 #if @darkMap
     gl_FragData[0].xyz *= texture2D(darkMap, darkMapUV).xyz;
+#endif
+
+#if @decalMap
+    vec4 decalTex = texture2D(decalMap, decalMapUV);
+    gl_FragData[0].xyz = mix(gl_FragData[0].xyz, decalTex.xyz, decalTex.a);
 #endif
 
     vec3 viewNormal = passViewNormal;

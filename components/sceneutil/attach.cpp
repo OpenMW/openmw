@@ -102,9 +102,15 @@ namespace SceneUtil
                 // Need to invert culling because of the negative scale
                 // Note: for absolute correctness we would need to check the current front face for every mesh then invert it
                 // However MW isn't doing this either, so don't. Assuming all meshes are using backface culling is more efficient.
-                osg::FrontFace* frontFace = new osg::FrontFace;
-                frontFace->setMode(osg::FrontFace::CLOCKWISE);
-                trans->getOrCreateStateSet()->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
+                static osg::ref_ptr<osg::StateSet> frontFaceStateSet;
+                if (!frontFaceStateSet)
+                {
+                    frontFaceStateSet = new osg::StateSet;
+                    osg::FrontFace* frontFace = new osg::FrontFace;
+                    frontFace->setMode(osg::FrontFace::CLOCKWISE);
+                    frontFaceStateSet->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
+                }
+                trans->setStateSet(frontFaceStateSet);
             }
 
             if (trans)

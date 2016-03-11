@@ -94,6 +94,7 @@ Programmers
     Nolan Poe (nopoe)
     Paul Cercueil (pcercuei)
     Paul McElroy (Greendogo)
+    Pi03k
     Pieter van der Kloet (pvdk)
     pkubik
     Radu-Marius Popovici (rpopovici)

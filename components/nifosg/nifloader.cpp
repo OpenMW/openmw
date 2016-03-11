@@ -470,7 +470,7 @@ namespace NifOsg
             const Nif::NiTextureEffect* textureEffect = static_cast<const Nif::NiTextureEffect*>(nifNode);
             if (textureEffect->textureType != Nif::NiTextureEffect::Environment_Map)
             {
-                std::cerr << "Unhandled NiTextureEffect type " << textureEffect->textureType << std::endl;
+                std::cerr << "Unhandled NiTextureEffect type " << textureEffect->textureType << " in " << mFilename << std::endl;
                 return;
             }
 
@@ -487,7 +487,7 @@ namespace NifOsg
                 texGen->setMode(osg::TexGen::SPHERE_MAP);
                 break;
             default:
-                std::cerr << "Unhandled NiTextureEffect coordGenType " << textureEffect->coordGenType << std::endl;
+                std::cerr << "Unhandled NiTextureEffect coordGenType " << textureEffect->coordGenType << " in " << mFilename << std::endl;
                 return;
             }
 
@@ -1374,15 +1374,13 @@ namespace NifOsg
                         case Nif::NiTexturingProperty::DarkTexture:
                         case Nif::NiTexturingProperty::BumpTexture:
                         case Nif::NiTexturingProperty::DetailTexture:
+                        case Nif::NiTexturingProperty::DecalTexture:
                             break;
                         case Nif::NiTexturingProperty::GlossTexture:
                         {
+                            // Not used by the vanilla engine. MCP (Morrowind Code Patch) adds an option to use Gloss maps:
+                            // "- Gloss map fix. Morrowind removed gloss map entries from model files after loading them. This stops Morrowind from removing them."
                             std::cerr << "NiTexturingProperty::GlossTexture in " << mFilename << " not currently used." << std::endl;
-                            continue;
-                        }
-                        case Nif::NiTexturingProperty::DecalTexture:
-                        {
-                            std::cerr << "NiTexturingProperty::DecalTexture in " << mFilename << " not currently used." << std::endl;
                             continue;
                         }
                         default:
@@ -1435,22 +1433,37 @@ namespace NifOsg
                     {
                         osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
                         texEnv->setScale_RGB(2.f);
-                        texEnv->setCombine_Alpha(GL_MODULATE);
-                        texEnv->setOperand0_Alpha(GL_SRC_ALPHA);
-                        texEnv->setOperand1_Alpha(GL_SRC_ALPHA);
-                        texEnv->setSource0_Alpha(GL_PREVIOUS_ARB);
-                        texEnv->setSource1_Alpha(GL_TEXTURE);
-                        texEnv->setCombine_RGB(GL_MODULATE);
-                        texEnv->setOperand0_RGB(GL_SRC_COLOR);
-                        texEnv->setOperand1_RGB(GL_SRC_COLOR);
-                        texEnv->setSource0_RGB(GL_PREVIOUS_ARB);
-                        texEnv->setSource1_RGB(GL_TEXTURE);
+                        texEnv->setCombine_Alpha(osg::TexEnvCombine::MODULATE);
+                        texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
+                        texEnv->setOperand1_Alpha(osg::TexEnvCombine::SRC_ALPHA);
+                        texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+                        texEnv->setSource1_Alpha(osg::TexEnvCombine::TEXTURE);
+                        texEnv->setCombine_RGB(osg::TexEnvCombine::MODULATE);
+                        texEnv->setOperand0_RGB(osg::TexEnvCombine::SRC_COLOR);
+                        texEnv->setOperand1_RGB(osg::TexEnvCombine::SRC_COLOR);
+                        texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+                        texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
                         stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                     }
                     else if (i == Nif::NiTexturingProperty::BumpTexture)
                     {
                         // Set this texture to Off by default since we can't render it with the fixed-function pipeline
                         stateset->setTextureMode(texUnit, GL_TEXTURE_2D, osg::StateAttribute::OFF);
+                    }
+                    else if (i == Nif::NiTexturingProperty::DecalTexture)
+                    {
+                         osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
+                         texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
+                         texEnv->setSource0_RGB(osg::TexEnvCombine::TEXTURE);
+                         texEnv->setOperand0_RGB(osg::TexEnvCombine::SRC_COLOR);
+                         texEnv->setSource1_RGB(osg::TexEnvCombine::PREVIOUS);
+                         texEnv->setOperand1_RGB(osg::TexEnvCombine::SRC_COLOR);
+                         texEnv->setSource2_RGB(osg::TexEnvCombine::TEXTURE);
+                         texEnv->setOperand2_RGB(osg::TexEnvCombine::SRC_ALPHA);
+                         texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+                         texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+                         texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
+                         stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                     }
 
                     switch (i)
@@ -1469,6 +1482,9 @@ namespace NifOsg
                         break;
                     case Nif::NiTexturingProperty::DetailTexture:
                         texture2d->setName("detailMap");
+                        break;
+                    case Nif::NiTexturingProperty::DecalTexture:
+                        texture2d->setName("decalMap");
                         break;
                     default:
                         break;

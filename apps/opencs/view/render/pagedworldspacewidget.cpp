@@ -598,7 +598,7 @@ CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibil
     mControlElements->addButton (":placeholder", Mask_CellMarker, ":placeholder",
         "Cell marker");
     mControlElements->addButton (":placeholder", Mask_CellArrow, ":placeholder", "Cell arrows");
-    mControlElements->addButton (":placeholder", Mask_CellBorder, ":placeholder", "Cell border");
+    mControlElements->addButton (":scenetoolbar/grid", Mask_CellBorder, ":scenetoolbar/grid-small", "Cell border");
 
     mControlElements->setSelectionMask (0xffffffff);
 

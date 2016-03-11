@@ -182,23 +182,30 @@ void WeaponAnimation::deleteControllers()
 
 void WeaponAnimation::configureControllers(float characterPitchRadians)
 {
-    if (!mSpineControllers[0])
-        return;
-
     if (mPitchFactor == 0.f || characterPitchRadians == 0.f)
     {
-        for (int i=0; i<2; ++i)
-            mSpineControllers[i]->setEnabled(false);
+        setControllerEnabled(false);
         return;
     }
 
     float pitch = characterPitchRadians * mPitchFactor;
     osg::Quat rotate (pitch/2, osg::Vec3f(-1,0,0));
+    setControllerRotate(rotate);
+    setControllerEnabled(true);
+}
+
+void WeaponAnimation::setControllerRotate(const osg::Quat& rotate)
+{
     for (int i=0; i<2; ++i)
-    {
-        mSpineControllers[i]->setRotate(rotate);
-        mSpineControllers[i]->setEnabled(true);
-    }
+        if (mSpineControllers[i])
+            mSpineControllers[i]->setRotate(rotate);
+}
+
+void WeaponAnimation::setControllerEnabled(bool enabled)
+{
+    for (int i=0; i<2; ++i)
+        if (mSpineControllers[i])
+            mSpineControllers[i]->setEnabled(enabled);
 }
 
 }
