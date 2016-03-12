@@ -21,6 +21,7 @@ namespace Resource
 namespace osg
 {
     class Group;
+    class Camera;
 }
 
 namespace CSVWidget
@@ -46,6 +47,8 @@ namespace CSVRender
         void setVisibilityMask(int mask);
 
         bool eventFilter(QObject *, QEvent *);
+
+        osg::Camera *getCamera();
 
     protected:
 

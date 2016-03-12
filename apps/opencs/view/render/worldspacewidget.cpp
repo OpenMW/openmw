@@ -364,6 +364,18 @@ osg::Vec3f CSVRender::WorldspaceWidget::getIntersectionPoint (const QPoint& loca
     return start + direction * CSMPrefs::get()["Scene Drops"]["distance"].toInt();
 }
 
+void CSVRender::WorldspaceWidget::abortDrag()
+{
+    if (mDragging)
+    {
+        EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+        editMode.dragAborted();
+        mDragging = false;
+        mDragMode.clear();
+    }
+}
+
 void CSVRender::WorldspaceWidget::dragEnterEvent (QDragEnterEvent* event)
 {
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
@@ -573,6 +585,7 @@ void CSVRender::WorldspaceWidget::editModeChanged (const std::string& id)
 {
     dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).setEditLock (mLocked);
     mDragging = false;
+    mDragMode.clear();
 }
 
 void CSVRender::WorldspaceWidget::showToolTip()
@@ -736,13 +749,7 @@ void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Escape)
     {
-        if (mDragging)
-        {
-            EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
-
-            editMode.dragAborted();
-            mDragging = false;
-        }
+        abortDrag();
     }
     else
         RenderWidget::keyPressEvent(event);
@@ -760,4 +767,9 @@ void CSVRender::WorldspaceWidget::handleMouseClick (osg::ref_ptr<TagBase> tag, c
         editMode.primarySelectPressed (tag);
     else if (button=="s-select")
         editMode.secondarySelectPressed (tag);
+}
+
+CSVRender::EditMode *CSVRender::WorldspaceWidget::getEditMode()
+{
+    return dynamic_cast<CSVRender::EditMode *> (mEditMode->getCurrent());
 }

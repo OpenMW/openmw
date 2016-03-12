@@ -9,6 +9,7 @@
 #include "../../model/world/columns.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/idcompletionmanager.hpp"
+#include "../../model/world/commandmacro.hpp"
 
 #include "../widget/droplineedit.hpp"
 
@@ -53,10 +54,9 @@ void CSVWorld::ReferenceCreator::pushCommand (std::auto_ptr<CSMWorld::CreateComm
     std::auto_ptr<CSMWorld::ModifyCommand> increment (new CSMWorld::ModifyCommand
         (cellTable, countIndex, count+1));
 
-    getUndoStack().beginMacro (command->text());
+    CSMWorld::CommandMacro macro (getUndoStack(), command->text());
     GenericCreator::pushCommand (command, id);
-    getUndoStack().push (increment.release());
-    getUndoStack().endMacro();
+    macro.push (increment.release());
 }
 
 int CSVWorld::ReferenceCreator::getRefNumCount() const
@@ -147,11 +147,11 @@ void CSVWorld::ReferenceCreator::cloneMode(const std::string& originId,
     cellChanged(); //otherwise ok button will remain disabled
 }
 
-CSVWorld::Creator *CSVWorld::ReferenceCreatorFactory::makeCreator (CSMDoc::Document& document, 
+CSVWorld::Creator *CSVWorld::ReferenceCreatorFactory::makeCreator (CSMDoc::Document& document,
                                                                    const CSMWorld::UniversalId& id) const
 {
-    return new ReferenceCreator(document.getData(), 
-                                document.getUndoStack(), 
+    return new ReferenceCreator(document.getData(),
+                                document.getUndoStack(),
                                 id,
                                 document.getIdCompletionManager());
 }

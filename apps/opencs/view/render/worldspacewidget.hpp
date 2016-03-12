@@ -35,6 +35,7 @@ namespace CSVRender
 {
     class TagBase;
     class CellArrow;
+    class EditMode;
 
     class WorldspaceWidget : public SceneWidget
     {
@@ -152,6 +153,20 @@ namespace CSVRender
             virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
                 const = 0;
 
+            virtual std::vector<osg::ref_ptr<TagBase> > getEdited (unsigned int elementMask)
+                const = 0;
+
+            virtual void setSubMode (int subMode, unsigned int elementMask) = 0;
+
+            /// Erase all overrides and restore the visual representation to its true state.
+            virtual void reset (unsigned int elementMask) = 0;
+
+            /// \note Drags will be automatically aborted when the aborting is triggered
+            /// (either explicitly or implicitly) from within this class. This function only
+            /// needs to be called, when the drag abort is triggered externally (e.g. from
+            /// an edit mode).
+            void abortDrag();
+
         protected:
 
             /// Visual elements in a scene
@@ -180,6 +195,8 @@ namespace CSVRender
 
             virtual void handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button,
                 bool shift);
+
+            EditMode *getEditMode();
 
         private:
 

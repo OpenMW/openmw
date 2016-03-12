@@ -3,6 +3,7 @@
 
 #include <iosfwd>
 #include <string>
+#include <utility>
 
 #include <QMetaType>
 
@@ -19,6 +20,8 @@ namespace CSMWorld
 
             CellCoordinates (int x, int y);
 
+            CellCoordinates (const std::pair<int, int>& coordinates);
+
             int getX() const;
 
             int getY() const;
@@ -34,6 +37,8 @@ namespace CSMWorld
             ///
             /// \note The worldspace part of \a id is ignored
             static std::pair<CellCoordinates, bool> fromId (const std::string& id);
+
+            static std::pair<int, int> coordinatesToCellIndex (float x, float y);
     };
 
     bool operator== (const CellCoordinates& left, const CellCoordinates& right);

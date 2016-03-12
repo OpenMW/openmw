@@ -26,7 +26,7 @@ opencs_units_noqt (model/world
     universalid record commands columnbase columnimp scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
     pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
-    idcompletionmanager metadata defaultgmsts infoselectwrapper
+    idcompletionmanager metadata defaultgmsts infoselectwrapper commandmacro
     )
 
 opencs_hdrs_noqt (model/world
@@ -85,7 +85,7 @@ opencs_units (view/widget
 
 opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
-    previewwidget editmode instancemode instanceselectionmode
+    previewwidget editmode instancemode instanceselectionmode instancemovemode
     )
 
 opencs_units_noqt (view/render
