@@ -915,7 +915,7 @@ namespace CSMWorld
                     cell.mAmbi.mFogDensity : QVariant(QVariant::UserType);
             case 5:
             {
-                if (isInterior && !behaveLikeExterior && interiorWater)
+                if (isInterior && interiorWater)
                     return cell.mWater;
                 else
                     return QVariant(QVariant::UserType);
@@ -981,7 +981,7 @@ namespace CSMWorld
             }
             case 5:
             {
-                if (isInterior && !behaveLikeExterior && interiorWater)
+                if (isInterior && interiorWater)
                     cell.mWater = value.toFloat();
                 else
                     return; // return without saving
