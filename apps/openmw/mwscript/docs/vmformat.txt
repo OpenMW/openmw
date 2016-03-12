@@ -364,7 +364,7 @@ op 0x2000221: EnableLevitation
 op 0x2000222: GetLineOfSight
 op 0x2000223: GetLineOfSightExplicit
 op 0x2000224: ToggleAI
-op 0x2000225: ToggleAIExplicit
+op 0x2000225: unused
 op 0x2000226: COE
 op 0x2000227: Cast
 op 0x2000228: Cast, explicit

@@ -59,8 +59,8 @@ namespace Compiler
             extensions.registerInstruction ("modfight", "l", opcodeModFight, opcodeModFightExplicit);
             extensions.registerInstruction ("modflee", "l", opcodeModFlee, opcodeModFleeExplicit);
             extensions.registerInstruction ("modalarm", "l", opcodeModAlarm, opcodeModAlarmExplicit);
-            extensions.registerInstruction ("toggleai", "", opcodeToggleAI, opcodeToggleAI);
-            extensions.registerInstruction ("tai", "", opcodeToggleAI, opcodeToggleAI);
+            extensions.registerInstruction ("toggleai", "", opcodeToggleAI);
+            extensions.registerInstruction ("tai", "", opcodeToggleAI);
             extensions.registerInstruction("startcombat", "c", opcodeStartCombat, opcodeStartCombatExplicit);
             extensions.registerInstruction("stopcombat", "x", opcodeStopCombat, opcodeStopCombatExplicit);
             extensions.registerFunction ("gethello", 'l', "", opcodeGetHello, opcodeGetHelloExplicit);

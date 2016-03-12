@@ -52,7 +52,6 @@ namespace Compiler
         const int opcodeGetLineOfSight = 0x2000222;
         const int opcodeGetLineOfSightExplicit = 0x2000223;
         const int opcodeToggleAI = 0x2000224;
-        const int opcodeToggleAIExplicit = 0x2000225;
         const int opcodeGetTarget = 0x2000238;
         const int opcodeGetTargetExplicit = 0x2000239;
         const int opcodeStartCombat = 0x200023a;
