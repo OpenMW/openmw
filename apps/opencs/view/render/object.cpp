@@ -20,6 +20,7 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/commandmacro.hpp"
+#include "../../model/world/cellcoordinates.hpp"
 
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
@@ -542,6 +543,17 @@ void CSVRender::Object::apply (CSMWorld::CommandMacro& commands)
             commands.push (new CSMWorld::ModifyCommand (*model,
                 model->index (recordIndex, column), mPositionOverride.pos[i]));
         }
+
+        int column = collection.findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (
+            CSMWorld::Columns::ColumnId_Cell));
+
+        std::pair<int, int> cellIndex = collection.getRecord (recordIndex).get().getCellIndex();
+
+        /// \todo figure out worldspace (not important until multiple worldspaces are supported)
+        std::string cellId = CSMWorld::CellCoordinates (cellIndex).getId ("");
+
+        commands.push (new CSMWorld::ModifyCommand (*model,
+            model->index (recordIndex, column), QString::fromUtf8 (cellId.c_str())));
     }
 
     if (mOverrideFlags & Override_Rotation)
