@@ -309,10 +309,13 @@ void CSVRender::PagedWorldspaceWidget::addCellToScene (
     bool deleted = index==-1 ||
         cells.getRecord (index).mState==CSMWorld::RecordBase::State_Deleted;
 
-    Cell *cell = new Cell (mDocument.getData(), mRootNode, coordinates.getId (mWorldspace),
-        deleted);
+    std::auto_ptr<Cell> cell (
+        new Cell (mDocument.getData(), mRootNode, coordinates.getId (mWorldspace),
+        deleted));
+    EditMode *editMode = getEditMode();
+    cell->setSubMode (editMode->getSubMode(), editMode->getInteractionMask());
 
-    mCells.insert (std::make_pair (coordinates, cell));
+    mCells.insert (std::make_pair (coordinates, cell.release()));
 }
 
 void CSVRender::PagedWorldspaceWidget::removeCellFromScene (
@@ -553,6 +556,37 @@ std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::PagedWorldspaceWidget:
     }
 
     return result;
+}
+
+std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::PagedWorldspaceWidget::getEdited (
+    unsigned int elementMask) const
+{
+    std::vector<osg::ref_ptr<CSVRender::TagBase> > result;
+
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::const_iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+    {
+        std::vector<osg::ref_ptr<CSVRender::TagBase> > cellResult =
+            iter->second->getEdited (elementMask);
+
+        result.insert (result.end(), cellResult.begin(), cellResult.end());
+    }
+
+    return result;
+}
+
+void CSVRender::PagedWorldspaceWidget::setSubMode (int subMode, unsigned int elementMask)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::const_iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+        iter->second->setSubMode (subMode, elementMask);
+}
+
+void CSVRender::PagedWorldspaceWidget::reset (unsigned int elementMask)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::const_iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+        iter->second->reset (elementMask);
 }
 
 CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (

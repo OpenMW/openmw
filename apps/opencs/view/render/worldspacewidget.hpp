@@ -1,8 +1,6 @@
 #ifndef OPENCS_VIEW_WORLDSPACEWIDGET_H
 #define OPENCS_VIEW_WORLDSPACEWIDGET_H
 
-#include <map>
-
 #include <boost/shared_ptr.hpp>
 
 #include <QTimer>
@@ -35,6 +33,7 @@ namespace CSVRender
 {
     class TagBase;
     class CellArrow;
+    class EditMode;
 
     class WorldspaceWidget : public SceneWidget
     {
@@ -44,7 +43,6 @@ namespace CSVRender
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
             unsigned int mInteractionMask;
-            std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
             CSVWidget::SceneToolMode *mEditMode;
             bool mLocked;
             std::string mDragMode;
@@ -152,6 +150,20 @@ namespace CSVRender
             virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
                 const = 0;
 
+            virtual std::vector<osg::ref_ptr<TagBase> > getEdited (unsigned int elementMask)
+                const = 0;
+
+            virtual void setSubMode (int subMode, unsigned int elementMask) = 0;
+
+            /// Erase all overrides and restore the visual representation to its true state.
+            virtual void reset (unsigned int elementMask) = 0;
+
+            /// \note Drags will be automatically aborted when the aborting is triggered
+            /// (either explicitly or implicitly) from within this class. This function only
+            /// needs to be called, when the drag abort is triggered externally (e.g. from
+            /// an edit mode).
+            void abortDrag();
+
         protected:
 
             /// Visual elements in a scene
@@ -174,12 +186,18 @@ namespace CSVRender
             virtual void mouseMoveEvent (QMouseEvent *event);
             virtual void mousePressEvent (QMouseEvent *event);
             virtual void mouseReleaseEvent (QMouseEvent *event);
-            virtual void mouseDoubleClickEvent (QMouseEvent *event);
             virtual void wheelEvent (QWheelEvent *event);
             virtual void keyPressEvent (QKeyEvent *event);
 
             virtual void handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button,
                 bool shift);
+
+             /// \return Is \a key a button mapping setting? (ignored otherwise)
+            virtual bool storeMappingSetting (const CSMPrefs::Setting *setting);
+
+            virtual void settingChanged (const CSMPrefs::Setting *setting);
+
+            EditMode *getEditMode();
 
         private:
 
@@ -189,18 +207,11 @@ namespace CSVRender
 
             void dragMoveEvent(QDragMoveEvent *event);
 
-            /// \return Is \a key a button mapping setting? (ignored otherwise)
-            bool storeMappingSetting (const CSMPrefs::Setting *setting);
-
             osg::ref_ptr<TagBase> mousePick (const QPoint& localPos);
-
-            std::string mapButton (QMouseEvent *event);
 
             virtual std::string getStartupInstruction() = 0;
 
         private slots:
-
-            void settingChanged (const CSMPrefs::Setting *setting);
 
             void selectNavigationMode (const std::string& mode);
 
