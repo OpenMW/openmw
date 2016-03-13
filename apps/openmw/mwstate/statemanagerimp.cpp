@@ -174,17 +174,18 @@ void MWState::StateManager::endGame()
 void MWState::StateManager::saveGame (const std::string& description, const Slot *slot)
 {
     MWState::Character* character = getCurrentCharacter();
-    if (!character)
-    {
-        MWWorld::ConstPtr player = MWMechanics::getPlayer();
-        std::string name = player.get<ESM::NPC>()->mBase->mName;
-
-        character = mCharacterManager.createCharacter(name);
-        mCharacterManager.setCurrentCharacter(character);
-    }
 
     try
     {
+        if (!character)
+        {
+            MWWorld::ConstPtr player = MWMechanics::getPlayer();
+            std::string name = player.get<ESM::NPC>()->mBase->mName;
+
+            character = mCharacterManager.createCharacter(name);
+            mCharacterManager.setCurrentCharacter(character);
+        }
+
         ESM::SavedGame profile;
 
         MWBase::World& world = *MWBase::Environment::get().getWorld();
@@ -299,7 +300,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
 
         // If no file was written, clean up the slot
-        if (slot && !boost::filesystem::exists(slot->mPath))
+        if (character && slot && !boost::filesystem::exists(slot->mPath))
         {
             character->deleteSlot(slot);
             character->cleanup();
