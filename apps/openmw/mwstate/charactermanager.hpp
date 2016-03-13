@@ -43,8 +43,6 @@ namespace MWState
 
             void setCurrentCharacter (const Character *character);
 
-            void clearCurrentCharacter();
-
             std::list<Character>::const_iterator begin() const;
 
             std::list<Character>::const_iterator end() const;

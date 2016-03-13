@@ -101,15 +101,16 @@ std::list<MWState::Character>::iterator MWState::CharacterManager::findCharacter
 
 void MWState::CharacterManager::setCurrentCharacter (const Character *character)
 {
-    std::list<Character>::iterator it = findCharacter(character);
+    if (!character)
+        mCurrent = NULL;
+    else
+    {
+        std::list<Character>::iterator it = findCharacter(character);
 
-    mCurrent = &*it;
+        mCurrent = &*it;
+    }
 }
 
-void MWState::CharacterManager::clearCurrentCharacter()
-{
-    mCurrent = 0;
-}
 
 std::list<MWState::Character>::const_iterator MWState::CharacterManager::begin() const
 {

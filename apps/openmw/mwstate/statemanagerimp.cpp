@@ -54,7 +54,7 @@ void MWState::StateManager::cleanup (bool force)
         MWBase::Environment::get().getMechanicsManager()->clear();
 
         mState = State_NoGame;
-        mCharacterManager.clearCurrentCharacter();
+        mCharacterManager.setCurrentCharacter(NULL);
         mTimePlayed = 0;
 
         MWMechanics::CreatureStats::cleanup();
@@ -333,19 +333,8 @@ void MWState::StateManager::loadGame(const std::string& filepath)
         }
     }
 
-    // have to peek into the save file to get the player name
-    ESM::ESMReader reader;
-    reader.open (filepath);
-    if (reader.getRecName()!=ESM::REC_SAVE)
-        return; // invalid save file -> ignore
-    reader.getRecHeader();
-    ESM::SavedGame profile;
-    profile.load (reader);
-    reader.close();
-
-    MWState::Character* character = mCharacterManager.getCurrentCharacter(true, profile.mPlayerName);
+    MWState::Character* character = getCurrentCharacter(false);
     loadGame(character, filepath);
-    mTimePlayed = profile.mTimePlayed;
 }
 
 void MWState::StateManager::loadGame (const Character *character, const std::string& filepath)
@@ -470,7 +459,8 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
         mState = State_Running;
 
-        Settings::Manager::setString ("character", "Saves",
+        if (character)
+            Settings::Manager::setString ("character", "Saves",
                                       character->getPath().filename().string());
 
         MWBase::Environment::get().getWindowManager()->setNewGame(false);
