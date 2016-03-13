@@ -204,9 +204,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         writeScreenshot(profile.mScreenshot);
 
         if (!slot)
-            slot = getCurrentCharacter()->createSlot (profile);
+            slot = getCurrentCharacter(true)->createSlot (profile);
         else
-            slot = getCurrentCharacter()->updateSlot (slot, profile);
+            slot = getCurrentCharacter(true)->updateSlot (slot, profile);
 
         // Write to a memory stream first. If there is an exception during the save process, we don't want to trash the
         // existing save file we are overwriting.
@@ -290,7 +290,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         // If no file was written, clean up the slot
         if (slot && !boost::filesystem::exists(slot->mPath))
-            getCurrentCharacter()->deleteSlot(slot);
+            getCurrentCharacter(true)->deleteSlot(slot);
     }
 }
 
@@ -506,11 +506,11 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
 void MWState::StateManager::quickLoad()
 {
-    if (Character* mCurrentCharacter = getCurrentCharacter (false))
+    if (Character* currentCharacter = getCurrentCharacter (false))
     {
-        if (mCurrentCharacter->begin() == mCurrentCharacter->end())
+        if (currentCharacter->begin() == currentCharacter->end())
             return;
-        loadGame (mCurrentCharacter, mCurrentCharacter->begin()->mPath.string()); //Get newest save
+        loadGame (currentCharacter, currentCharacter->begin()->mPath.string()); //Get newest save
     }
 }
 
