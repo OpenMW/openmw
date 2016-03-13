@@ -1,8 +1,9 @@
 #include "bulletshapemanager.hpp"
 
 #include <osg/NodeVisitor>
-#include <osg/Geode>
 #include <osg/TriangleFunctor>
+#include <osg/Transform>
+#include <osg/Drawable>
 
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
@@ -60,12 +61,6 @@ public:
         , mTriangleMesh(NULL)
     {
 
-    }
-
-    virtual void apply(osg::Geode& geode)
-    {
-        for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
-            apply(*geode.getDrawable(i));
     }
 
     virtual void apply(osg::Drawable &drawable)

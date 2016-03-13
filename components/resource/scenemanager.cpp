@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <osg/Node>
-#include <osg/Geode>
 #include <osg/UserDataContainer>
 
 #include <osgParticle/ParticleSystem>
@@ -51,7 +50,6 @@ namespace
                     && partsys->getUserDataContainer()->getDescriptions()[0] == "worldspace");
         }
 
-        // in OSG 3.3 and up Drawables can be directly in the scene graph without a Geode decorating them.
         void apply(osg::Drawable& drw)
         {
             if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
@@ -143,21 +141,6 @@ namespace Resource
                 applyStateSet(stateset);
 
             traverse(node);
-        }
-
-        virtual void apply(osg::Geode& geode)
-        {
-            osg::StateSet* stateset = geode.getStateSet();
-            if (stateset)
-                applyStateSet(stateset);
-
-            for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
-            {
-                osg::Drawable* drw = geode.getDrawable(i);
-                stateset = drw->getStateSet();
-                if (stateset)
-                    applyStateSet(stateset);
-            }
         }
 
         void applyStateSet(osg::StateSet* stateset)
