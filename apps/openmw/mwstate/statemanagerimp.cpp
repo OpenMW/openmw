@@ -109,13 +109,14 @@ void MWState::StateManager::askLoadRecent()
 
     if( !mAskLoadRecent )
     {
-        if(getCurrentCharacter()->begin() == getCurrentCharacter()->end() )//no saves
+        const MWState::Character* character = getCurrentCharacter(false);
+        if(!character || character->begin() == character->end())//no saves
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         }
         else
         {
-            MWState::Slot lastSave = *getCurrentCharacter()->begin();
+            MWState::Slot lastSave = *character->begin();
             std::vector<std::string> buttons;
             buttons.push_back("#{sYes}");
             buttons.push_back("#{sNo}");
