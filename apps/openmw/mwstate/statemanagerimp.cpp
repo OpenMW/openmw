@@ -109,7 +109,7 @@ void MWState::StateManager::askLoadRecent()
 
     if( !mAskLoadRecent )
     {
-        const MWState::Character* character = getCurrentCharacter(false);
+        const MWState::Character* character = getCurrentCharacter();
         if(!character || character->begin() == character->end())//no saves
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
@@ -173,6 +173,16 @@ void MWState::StateManager::endGame()
 
 void MWState::StateManager::saveGame (const std::string& description, const Slot *slot)
 {
+    MWState::Character* character = getCurrentCharacter();
+    if (!character)
+    {
+        MWWorld::ConstPtr player = MWMechanics::getPlayer();
+        std::string name = player.get<ESM::NPC>()->mBase->mName;
+
+        character = mCharacterManager.createCharacter(name);
+        mCharacterManager.setCurrentCharacter(character);
+    }
+
     try
     {
         ESM::SavedGame profile;
@@ -204,9 +214,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         writeScreenshot(profile.mScreenshot);
 
         if (!slot)
-            slot = getCurrentCharacter(true)->createSlot (profile);
+            slot = character->createSlot (profile);
         else
-            slot = getCurrentCharacter(true)->updateSlot (slot, profile);
+            slot = character->updateSlot (slot, profile);
 
         // Write to a memory stream first. If there is an exception during the save process, we don't want to trash the
         // existing save file we are overwriting.
@@ -290,7 +300,10 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         // If no file was written, clean up the slot
         if (slot && !boost::filesystem::exists(slot->mPath))
-            getCurrentCharacter(true)->deleteSlot(slot);
+        {
+            character->deleteSlot(slot);
+            character->cleanup();
+        }
     }
 }
 
@@ -306,13 +319,16 @@ void MWState::StateManager::quickSave (std::string name)
     }
 
     const Slot* slot = NULL;
-    Character* mCurrentCharacter = getCurrentCharacter(true); //Get current character
+    Character* currentCharacter = getCurrentCharacter(); //Get current character
 
     //Find quicksave slot
-    for (Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it)
+    if (currentCharacter)
     {
-        if (it->mProfile.mDescription == name)
-            slot = &*it;
+        for (Character::SlotIterator it = currentCharacter->begin(); it != currentCharacter->end(); ++it)
+        {
+            if (it->mProfile.mDescription == name)
+                slot = &*it;
+        }
     }
 
     saveGame(name, slot);
@@ -334,7 +350,7 @@ void MWState::StateManager::loadGame(const std::string& filepath)
         }
     }
 
-    MWState::Character* character = getCurrentCharacter(false);
+    MWState::Character* character = getCurrentCharacter();
     loadGame(character, filepath);
 }
 
@@ -506,7 +522,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
 void MWState::StateManager::quickLoad()
 {
-    if (Character* currentCharacter = getCurrentCharacter (false))
+    if (Character* currentCharacter = getCurrentCharacter ())
     {
         if (currentCharacter->begin() == currentCharacter->end())
             return;
@@ -519,12 +535,9 @@ void MWState::StateManager::deleteGame(const MWState::Character *character, cons
     mCharacterManager.deleteSlot(character, slot);
 }
 
-MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
+MWState::Character *MWState::StateManager::getCurrentCharacter ()
 {
-    MWWorld::ConstPtr player = MWMechanics::getPlayer();
-    std::string name = player.get<ESM::NPC>()->mBase->mName;
-
-    return mCharacterManager.getCurrentCharacter (create, name);
+    return mCharacterManager.getCurrentCharacter();
 }
 
 MWState::StateManager::CharacterIterator MWState::StateManager::characterBegin()
@@ -545,7 +558,7 @@ void MWState::StateManager::update (float duration)
     if (mAskLoadRecent)
     {
         int iButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
-        MWState::Character *curCharacter = getCurrentCharacter(false);
+        MWState::Character *curCharacter = getCurrentCharacter();
         if(iButton==0 && curCharacter)
         {
             mAskLoadRecent = false;

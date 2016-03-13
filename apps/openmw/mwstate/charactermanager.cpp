@@ -32,11 +32,8 @@ MWState::CharacterManager::CharacterManager (const boost::filesystem::path& save
     }
 }
 
-MWState::Character *MWState::CharacterManager::getCurrentCharacter (bool create, const std::string& name)
+MWState::Character *MWState::CharacterManager::getCurrentCharacter ()
 {
-    if (!mCurrent && create)
-        createCharacter(name);
-
     return mCurrent;
 }
 
@@ -56,7 +53,7 @@ void MWState::CharacterManager::deleteSlot(const MWState::Character *character, 
     }
 }
 
-void MWState::CharacterManager::createCharacter(const std::string& name)
+MWState::Character* MWState::CharacterManager::createCharacter(const std::string& name)
 {
     std::ostringstream stream;
 
@@ -82,8 +79,7 @@ void MWState::CharacterManager::createCharacter(const std::string& name)
     }
 
     mCharacters.push_back (Character (path, mGame));
-
-    mCurrent = &mCharacters.back();
+    return &mCharacters.back();
 }
 
 std::list<MWState::Character>::iterator MWState::CharacterManager::findCharacter(const MWState::Character* character)

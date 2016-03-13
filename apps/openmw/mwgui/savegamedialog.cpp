@@ -132,7 +132,7 @@ namespace MWGui
         if (mgr->characterBegin() == mgr->characterEnd())
             return;
 
-        mCurrentCharacter = mgr->getCurrentCharacter (false);
+        mCurrentCharacter = mgr->getCurrentCharacter();
 
         std::string directory =
             Misc::StringUtils::lowerCase (Settings::Manager::getString ("character", "Saves"));
@@ -202,7 +202,7 @@ namespace MWGui
 
         if (!load)
         {
-            mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter (false);
+            mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter();
         }
 
         center();
