@@ -6,7 +6,6 @@
 #include <osg/UserDataContainer>
 
 #include <osgParticle/ParticleSystem>
-#include <osgFX/Effect>
 
 #include <osgUtil/IncrementalCompileOperation>
 
@@ -139,27 +138,11 @@ namespace Resource
 
         virtual void apply(osg::Node& node)
         {
-            if (osgFX::Effect* effect = dynamic_cast<osgFX::Effect*>(&node))
-                applyEffect(*effect);
-
             osg::StateSet* stateset = node.getStateSet();
             if (stateset)
                 applyStateSet(stateset);
 
             traverse(node);
-        }
-
-        void applyEffect(osgFX::Effect& effect)
-        {
-            for (int i =0; i<effect.getNumTechniques(); ++i)
-            {
-                osgFX::Technique* tech = effect.getTechnique(i);
-                for (int pass=0; pass<tech->getNumPasses(); ++pass)
-                {
-                    if (tech->getPassStateSet(pass))
-                        applyStateSet(tech->getPassStateSet(pass));
-                }
-            }
         }
 
         virtual void apply(osg::Geode& geode)
