@@ -708,7 +708,7 @@ void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
         abortDrag();
     }
     else
-        RenderWidget::keyPressEvent(event);
+        SceneWidget::keyPressEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button, bool shift)
