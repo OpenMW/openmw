@@ -50,8 +50,6 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
     update();
 
     mCell.reset (new Cell (document.getData(), mRootNode, mCellId));
-
-    selectNavigationMode("trackball");
 }
 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,
