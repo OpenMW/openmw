@@ -133,9 +133,9 @@ namespace CSVRender
 
         void selectLightingMode (const std::string& mode);
 
-    signals:
+        signals:
 
-         void focusToolbarRequest();
+             void focusToolbarRequest();
     };
 
 
