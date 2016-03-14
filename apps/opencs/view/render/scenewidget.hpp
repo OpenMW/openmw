@@ -2,6 +2,7 @@
 #define OPENCS_VIEW_SCENEWIDGET_H
 
 #include <map>
+#include <memory>
 
 #include <QWidget>
 #include <QTimer>
@@ -39,6 +40,9 @@ namespace CSMPrefs
 
 namespace CSVRender
 {
+    class CameraController;
+    class FreeCameraController;
+    class OrbitCameraController;
     class Lighting;
 
     class RenderWidget : public QWidget
@@ -88,6 +92,10 @@ namespace CSVRender
 
         virtual void mousePressEvent (QMouseEvent *event);
         virtual void mouseReleaseEvent (QMouseEvent *event);
+        virtual void mouseMoveEvent (QMouseEvent *event);
+        virtual void wheelEvent (QWheelEvent *event);
+        virtual void keyPressEvent (QKeyEvent *event);
+        virtual void keyReleaseEvent (QKeyEvent *event);
 
         /// \return Is \a key a button mapping setting? (ignored otherwise)
         virtual bool storeMappingSetting (const CSMPrefs::Setting *setting);
@@ -104,7 +112,16 @@ namespace CSVRender
         LightingNight mLightingNight;
         LightingBright mLightingBright;
 
+        int mPrevMouseX, mPrevMouseY;
+        std::string mMouseMode;
+        std::auto_ptr<FreeCameraController> mFreeCamControl;
+        std::auto_ptr<OrbitCameraController> mOrbitCamControl;
+        CameraController* mCurrentCamControl;
+
         std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
+
+    public slots:
+        void update(double dt);
 
     protected slots:
 
@@ -139,6 +156,9 @@ namespace CSVRender
 
     public slots:
         void update();
+
+    signals:
+        void simulationUpdated(double dt);
     };
 
 }
