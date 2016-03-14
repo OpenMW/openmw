@@ -25,6 +25,7 @@
 
 #include "lighting.hpp"
 #include "mask.hpp"
+#include "cameracontroller.hpp"
 
 namespace CSVRender
 {
@@ -141,8 +142,12 @@ CompositeViewer &CompositeViewer::get()
 
 void CompositeViewer::update()
 {
-    mSimulationTime += mFrameTimer.time_s();
+    double dt = mFrameTimer.time_s();
     mFrameTimer.setStartTick();
+
+    emit simulationUpdated(dt);
+
+    mSimulationTime += dt;
     frame(mSimulationTime);
 }
 
@@ -154,7 +159,14 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
     , mResourceSystem(resourceSystem)
     , mLighting(NULL)
     , mHasDefaultAmbient(false)
+    , mPrevMouseX(0)
+    , mPrevMouseY(0)
+    , mFreeCamControl(new FreeCameraController())
+    , mOrbitCamControl(new OrbitCameraController())
+    , mCurrentCamControl(mFreeCamControl.get())
 {
+    selectNavigationMode("free");
+
     // we handle lighting manually
     mView->setLightingMode(osgViewer::View::NO_LIGHT);
 
@@ -175,6 +187,8 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
         CSMPrefs::get()["3D Scene Input"].update();
         CSMPrefs::get()["Tooltips"].update();
     }
+
+    connect (&CompositeViewer::get(), SIGNAL (simulationUpdated(double)), this, SLOT (update(double)));
 }
 
 SceneWidget::~SceneWidget()
@@ -256,28 +270,43 @@ void SceneWidget::setDefaultAmbient (const osg::Vec4f& colour)
 
 void SceneWidget::mousePressEvent (QMouseEvent *event)
 {
-    std::string button = mapButton(event);
+    mMouseMode = mapButton(event);
 
-    // TODO placeholders
-    if (button == "p-navi")
-    {
-    }
-    else if (button == "s-navi")
-    {
-    }
+    mPrevMouseX = event->x();
+    mPrevMouseY = event->y();
 }
 
 void SceneWidget::mouseReleaseEvent (QMouseEvent *event)
 {
-    std::string button = mapButton(event);
+    mMouseMode = "";
+}
 
-    // TODO placeholders
-    if (button == "p-navi")
-    {
-    }
-    else if (button == "s-navi")
-    {
-    }
+void SceneWidget::mouseMoveEvent (QMouseEvent *event)
+{
+    mCurrentCamControl->handleMouseMoveEvent(mMouseMode, event->x() - mPrevMouseX, event->y() - mPrevMouseY);
+
+    mPrevMouseX = event->x();
+    mPrevMouseY = event->y();
+}
+
+void SceneWidget::wheelEvent(QWheelEvent *event)
+{
+    mCurrentCamControl->handleMouseMoveEvent("t-navi", event->delta(), 0);
+}
+
+void SceneWidget::keyPressEvent (QKeyEvent *event)
+{
+    mCurrentCamControl->handleKeyEvent(event, true);
+}
+
+void SceneWidget::keyReleaseEvent (QKeyEvent *event)
+{
+    mCurrentCamControl->handleKeyEvent(event, false);
+}
+
+void SceneWidget::update(double dt)
+{
+    mCurrentCamControl->update(dt);
 }
 
 void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
@@ -288,13 +317,31 @@ void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
 void SceneWidget::selectNavigationMode (const std::string& mode)
 {
     if (mode=="1st")
-        mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
+    {
+        mCurrentCamControl->setCamera(NULL);
+        mCurrentCamControl = mFreeCamControl.get();
+        mCurrentCamControl->setCamera(getCamera());
+        mFreeCamControl->fixUpAxis(osg::Vec3d(0,0,1));
+    }
     else if (mode=="free")
-        mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
+    {
+        mCurrentCamControl->setCamera(NULL);
+        mCurrentCamControl = mFreeCamControl.get();
+        mCurrentCamControl->setCamera(getCamera());
+        mFreeCamControl->unfixUpAxis();
+    }
     else if (mode=="orbit")
-        mView->setCameraManipulator(new osgGA::OrbitManipulator);
+    {
+        mCurrentCamControl->setCamera(NULL);
+        mCurrentCamControl = mOrbitCamControl.get();
+        mCurrentCamControl->setCamera(getCamera());
+    }
     else if (mode=="trackball")
-        mView->setCameraManipulator(new osgGA::TrackballManipulator);
+    {
+        mCurrentCamControl->setCamera(NULL);
+        mCurrentCamControl = mOrbitCamControl.get();
+        mCurrentCamControl->setCamera(getCamera());
+    }
 }
 
 bool SceneWidget::storeMappingSetting (const CSMPrefs::Setting *setting)
