@@ -112,11 +112,6 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
         }
     }
 
-    /// \todo do not overwrite manipulator object
-    /// \todo move code to useViewHint function
-    if (modified && wasEmpty)
-        selectNavigationMode("trackball");
-
     return modified;
 }
 
