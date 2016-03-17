@@ -639,8 +639,7 @@ namespace MWGui
     {
         if(mMainWidget->getVisible() && mEnabled && mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
-            int disp = std::max(0, std::min(100,
-                MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)));
+            int disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr);
             mDispositionBar->setProgressRange(100);
             mDispositionBar->setProgressPosition(disp);
             mDispositionText->setCaption(MyGUI::utility::toString(disp)+std::string("/100"));

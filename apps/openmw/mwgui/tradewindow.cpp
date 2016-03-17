@@ -346,7 +346,7 @@ namespace MWGui
             else
                 d = int(100 * (b - a) / a);
 
-            int clampedDisposition = std::max(0, std::min(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr),100));
+            int clampedDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr);
 
             const MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
             const MWMechanics::CreatureStats &playerStats = player.getClass().getCreatureStats(player);
