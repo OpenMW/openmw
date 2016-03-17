@@ -99,7 +99,6 @@ namespace MWMechanics
             ///< Return the number of deaths for actors with the given ID.
 
             virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type, bool& success, float& tempChange, float& permChange);
-            void toLower(std::string npcFaction);
             ///< Perform a persuasion action on NPC
 
             /// Check if \a observer is potentially aware of \a ptr. Does not do a line of sight check!
