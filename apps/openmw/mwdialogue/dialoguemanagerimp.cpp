@@ -535,7 +535,7 @@ namespace MWDialogue
         mPermanentDispositionChange += perm;
 
         // change temp disposition so that final disposition is between 0...100
-        float curDisp = static_cast<float>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor));
+        float curDisp = static_cast<float>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor, false));
         if (curDisp + mTemporaryDispositionChange < 0)
             mTemporaryDispositionChange = -curDisp;
         else if (curDisp + mTemporaryDispositionChange > 100)

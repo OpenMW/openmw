@@ -581,7 +581,7 @@ namespace MWMechanics
         mUpdatePlayer = true;
     }
 
-    int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr, bool addTemporaryDispositionChange/* = false */)
+    int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr, bool addTemporaryDispositionChange)
     {
         const MWMechanics::NpcStats& npcSkill = ptr.getClass().getNpcStats(ptr);
         float x = static_cast<float>(npcSkill.getBaseDisposition());
@@ -672,7 +672,7 @@ namespace MWMechanics
 
         // I suppose the temporary disposition change (second param to getDerivedDisposition()) _has_ to be considered here,
         // otherwise one would get different prices when exiting and re-entering the dialogue window...
-        int clampedDisposition = std::max(0, std::min(getDerivedDisposition(ptr, true),100));
+        int clampedDisposition = std::max(0, std::min(getDerivedDisposition(ptr),100));
         float a = static_cast<float>(std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100));
         float b = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float c = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
@@ -719,7 +719,7 @@ namespace MWMechanics
         float playerRating1, playerRating2, playerRating3;
         getPersuasionRatings(playerStats, playerRating1, playerRating2, playerRating3, true);
 
-        int currentDisposition = std::min(100, std::max(0, int(getDerivedDisposition(npc) + currentTemporaryDispositionDelta)));
+        int currentDisposition = std::min(100, std::max(0, int(getDerivedDisposition(npc, false) + currentTemporaryDispositionDelta)));
 
         float d = 1 - 0.02f * abs(currentDisposition - 50);
         float target1 = d * (playerRating1 - npcRating1 + 50);
@@ -1547,7 +1547,7 @@ namespace MWMechanics
     {
         int disposition = 50;
         if (ptr.getClass().isNpc())
-            disposition = getDerivedDisposition(ptr);
+            disposition = getDerivedDisposition(ptr, false);
 
         int fight = std::max(0, ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified()
                 + static_cast<int>(getFightDistanceBias(ptr, target) + getFightDispositionBias(static_cast<float>(disposition))));
