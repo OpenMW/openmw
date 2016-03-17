@@ -474,7 +474,12 @@ void NpcAnimation::updateNpcBase()
 
     if(mViewMode != VM_FirstPerson)
     {
+        const std::string base = "meshes\\xbase_anim.nif";
+        if (smodel != base)
+            addAnimSource(base);
+
         addAnimSource(smodel);
+
         if(!isWerewolf)
         {
             if(Misc::StringUtils::lowerCase(mNpc->mRace).find("argonian") != std::string::npos)
