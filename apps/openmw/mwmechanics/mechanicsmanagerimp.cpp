@@ -702,8 +702,7 @@ namespace MWMechanics
         return mActors.countDeaths (id);
     }
 
-    void MechanicsManager::getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
-        float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange)
+    void MechanicsManager::getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type, bool& success, float& tempChange, float& permChange)
     {
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -719,7 +718,7 @@ namespace MWMechanics
         float playerRating1, playerRating2, playerRating3;
         getPersuasionRatings(playerStats, playerRating1, playerRating2, playerRating3, true);
 
-        int currentDisposition = std::min(100, std::max(0, int(getDerivedDisposition(npc, false) + currentTemporaryDispositionDelta)));
+        int currentDisposition = getDerivedDisposition(npc);
 
         float d = 1 - 0.02f * abs(currentDisposition - 50);
         float target1 = d * (playerRating1 - npcRating1 + 50);

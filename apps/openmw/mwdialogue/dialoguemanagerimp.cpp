@@ -529,7 +529,7 @@ namespace MWDialogue
         bool success;
         float temp, perm;
         MWBase::Environment::get().getMechanicsManager()->getPersuasionDispositionChange(
-                    mActor, MWBase::MechanicsManager::PersuasionType(type), mTemporaryDispositionChange,
+                    mActor, MWBase::MechanicsManager::PersuasionType(type),
                     success, temp, perm);
         mTemporaryDispositionChange += temp;
         mPermanentDispositionChange += perm;
