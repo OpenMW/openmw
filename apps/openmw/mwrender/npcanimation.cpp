@@ -461,13 +461,32 @@ void NpcAnimation::updateNpcBase()
     }
 
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
-    std::string smodel = (mViewMode != VM_FirstPerson) ?
-                         (!isWerewolf ? !isBeast ? "meshes\\base_anim.nif"
-                                                 : "meshes\\base_animkna.nif"
-                                      : "meshes\\wolf\\skin.nif") :
-                         (!isWerewolf ? !isBeast ? "meshes\\base_anim.1st.nif"
-                                                 : "meshes\\base_animkna.1st.nif"
-                                      : "meshes\\wolf\\skin.1st.nif");
+    bool isFemale = !mNpc->isMale();
+
+    std::string smodel;
+    if (mViewMode != VM_FirstPerson)
+    {
+        if (isWerewolf)
+            smodel = "meshes\\wolf\\skin.nif";
+        else if (isBeast)
+            smodel = "meshes\\base_animkna.nif";
+        else if (isFemale)
+            smodel = "meshes\\base_anim_female.nif";
+        else
+            smodel = "meshes\\base_anim.nif";
+    }
+    else
+    {
+        if (isWerewolf)
+            smodel = "meshes\\wolf\\skin.1st.nif";
+        else if (isBeast)
+            smodel = "meshes\\base_animkna.1st.nif";
+        else if (isFemale)
+            smodel = "meshes\\base_anim_female.1st.nif";
+        else
+            smodel = "meshes\\base_anim.1st.nif";
+    }
+
     smodel = Misc::ResourceHelpers::correctActorModelPath(smodel, mResourceSystem->getVFS());
 
     setObjectRoot(smodel, true, true, false);
@@ -484,28 +503,20 @@ void NpcAnimation::updateNpcBase()
         {
             if(Misc::StringUtils::lowerCase(mNpc->mRace).find("argonian") != std::string::npos)
                 addAnimSource("meshes\\xargonian_swimkna.nif");
-            else if(!mNpc->isMale() && !isBeast)
-                addAnimSource("meshes\\xbase_anim_female.nif");
             if(mNpc->mModel.length() > 0)
                 addAnimSource(Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS()));
         }
     }
     else
     {
+        const std::string base = "meshes\\xbase_anim.1st.nif";
+        if (smodel != base)
+            addAnimSource(base);
+
+        addAnimSource(smodel);
+
         mObjectRoot->setNodeMask(Mask_FirstPerson);
         mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));
-        if(isWerewolf)
-            addAnimSource(smodel);
-        else
-        {
-            // A bit counter-intuitive, but unlike third-person anims, it seems
-            // beast races get both base_anim.1st.nif and base_animkna.1st.nif.
-            addAnimSource("meshes\\xbase_anim.1st.nif");
-            if(isBeast)
-                addAnimSource("meshes\\xbase_animkna.1st.nif");
-            if(!mNpc->isMale() && !isBeast)
-                addAnimSource("meshes\\xbase_anim_female.1st.nif");
-        }
     }
 
     updateParts();
