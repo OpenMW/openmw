@@ -708,7 +708,7 @@ void HeartBeat::init( osgViewer::ViewerBase *viewer )
 }
 
 
-void HeartBeat::timerEvent( QTimerEvent */*event*/ )
+void HeartBeat::timerEvent( QTimerEvent * /*event*/ )
 {
     osg::ref_ptr< osgViewer::ViewerBase > viewer;
     if( !_viewer.lock( viewer ) )
