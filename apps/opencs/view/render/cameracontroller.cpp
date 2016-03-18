@@ -3,12 +3,8 @@
 #include <QKeyEvent>
 
 #include <osg/Camera>
-#include <osg/Geode>
-#include <osg/Group>
 #include <osg/Matrixd>
 #include <osg/Quat>
-#include <osg/Shape>
-#include <osg/ShapeDrawable>
 
 namespace CSVRender
 {
@@ -265,7 +261,7 @@ namespace CSVRender
     Orbit Camera Controller
     */
 
-    OrbitCameraController::OrbitCameraController(osg::Group* group)
+    OrbitCameraController::OrbitCameraController()
         : mInitialized(false)
         , mFast(false)
         , mLeft(false)
@@ -276,10 +272,7 @@ namespace CSVRender
         , mRollRight(false)
         , mCenter(0,0,0)
         , mDistance(0)
-        , mCenterNode(new osg::PositionAttitudeTransform())
     {
-        group->addChild(mCenterNode);
-        createShape();
     }
 
     bool OrbitCameraController::handleKeyEvent(QKeyEvent* event, bool pressed)
@@ -391,8 +384,6 @@ namespace CSVRender
         if (mRollRight)
             roll(rotDist);
 
-        mCenterNode->setPosition(mCenter);
-
         // Normalize the matrix to counter drift
         getCamera()->getViewMatrix().orthoNormal(getCamera()->getViewMatrix());
 
@@ -414,19 +405,6 @@ namespace CSVRender
         mDistance = DefaultStartDistance;
 
         mInitialized = true;
-    }
-
-    void OrbitCameraController::createShape()
-    {
-        const float boxWidth = 100;
-
-        osg::ref_ptr<osg::Box> box = new osg::Box(osg::Vec3f(0, 0, 0), boxWidth);
-        osg::ref_ptr<osg::ShapeDrawable> drawable = new osg::ShapeDrawable(box);
-        drawable->setColor(osg::Vec4f(0.f, 0.9f, 0.f, 1.f));
-
-        osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-        geode->addChild(drawable);
-        mCenterNode->addChild(geode);
     }
 
     void OrbitCameraController::rotateHorizontal(double value)

@@ -164,7 +164,7 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
     , mPrevMouseX(0)
     , mPrevMouseY(0)
     , mFreeCamControl(new FreeCameraController())
-    , mOrbitCamControl(new OrbitCameraController(mRootNode))
+    , mOrbitCamControl(new OrbitCameraController())
     , mCurrentCamControl(mFreeCamControl.get())
     , mCamPositionSet(false)
 {

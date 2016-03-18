@@ -4,7 +4,6 @@
 #include <string>
 
 #include <osg/BoundingBox>
-#include <osg/PositionAttitudeTransform>
 #include <osg/ref_ptr>
 #include <osg/Vec3d>
 
@@ -13,7 +12,6 @@ class QKeyEvent;
 namespace osg
 {
     class Camera;
-    class Group;
 }
 
 namespace CSVRender
@@ -99,7 +97,7 @@ namespace CSVRender
     {
         public:
 
-            OrbitCameraController(osg::Group* group);
+            OrbitCameraController();
 
             bool handleKeyEvent(QKeyEvent* event, bool pressed);
             bool handleMouseMoveEvent(std::string mode, int x, int y);
@@ -111,7 +109,6 @@ namespace CSVRender
             void onActivate();
 
             void initialize();
-            void createShape();
 
             void rotateHorizontal(double value);
             void rotateVertical(double value);
@@ -123,8 +120,6 @@ namespace CSVRender
             bool mFast, mLeft, mRight, mUp, mDown, mRollLeft, mRollRight;
             osg::Vec3d mCenter;
             double mDistance;
-
-            osg::ref_ptr<osg::PositionAttitudeTransform> mCenterNode;
     };
 }
 
