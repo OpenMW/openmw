@@ -108,6 +108,7 @@ namespace CSVRender
     {
         mLockUpright = true;
         mUp = up;
+        setModified();
     }
 
     void FreeCameraController::unfixUpAxis()
