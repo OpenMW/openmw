@@ -119,11 +119,10 @@ namespace CSVRender
             void translate(const osg::Vec3d& offset);
             void zoom(double value);
 
-            void lookAtCenter();
-
             bool mInitialized;
             bool mFast, mLeft, mRight, mUp, mDown, mRollLeft, mRollRight;
             osg::Vec3d mCenter;
+            double mDistance;
 
             osg::ref_ptr<osg::PositionAttitudeTransform> mCenterNode;
     };

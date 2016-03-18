@@ -275,6 +275,7 @@ namespace CSVRender
         , mRollLeft(false)
         , mRollRight(false)
         , mCenter(0,0,0)
+        , mDistance(0)
         , mCenterNode(new osg::PositionAttitudeTransform())
     {
         group->addChild(mCenterNode);
@@ -343,7 +344,7 @@ namespace CSVRender
         if (mode == "p-navi")
         {
             rotateHorizontal(x * getMouseScalar());
-            rotateVertical(y * getMouseScalar());
+            rotateVertical(-y * getMouseScalar());
             setModified();
         }
         else if (mode == "s-navi")
@@ -353,7 +354,7 @@ namespace CSVRender
         }
         else if (mode == "t-navi")
         {
-            zoom(x * (mFast ? SpeedMultiplier : 1));
+            zoom(-x * (mFast ? SpeedMultiplier : 1));
         }
         else
         {
@@ -392,8 +393,6 @@ namespace CSVRender
 
         mCenterNode->setPosition(mCenter);
 
-        lookAtCenter();
-
         // Normalize the matrix to counter drift
         getCamera()->getViewMatrix().orthoNormal(getCamera()->getViewMatrix());
 
@@ -411,6 +410,8 @@ namespace CSVRender
 
         osg::Vec3d eye, up;
         getCamera()->getViewMatrixAsLookAt(eye, mCenter, up, DefaultStartDistance);
+
+        mDistance = DefaultStartDistance;
 
         mInitialized = true;
     }
@@ -430,26 +431,27 @@ namespace CSVRender
 
     void OrbitCameraController::rotateHorizontal(double value)
     {
-        osg::Vec3d position = getCamera()->getViewMatrix().getTrans();
-        osg::Vec3d offset = position - mCenter;
-        osg::Quat rotation = getCamera()->getViewMatrix().getRotate();
+        osg::Vec3d eye, center, up;
+        getCamera()->getViewMatrixAsLookAt(eye, center, up);
 
-        osg::Quat offsetRotation = osg::Quat(value, LocalUp);
-        osg::Vec3d newOffset = (rotation * offsetRotation) * (rotation.inverse() * offset);
+        osg::Quat rotation = osg::Quat(value, up);
+        osg::Vec3d oldOffset = eye - mCenter;
+        osg::Vec3d newOffset = rotation * oldOffset;
 
-        getCamera()->getViewMatrix().setTrans(mCenter + newOffset);
+        getCamera()->setViewMatrixAsLookAt(mCenter + newOffset, mCenter, up);
     }
 
     void OrbitCameraController::rotateVertical(double value)
     {
-        osg::Vec3d position = getCamera()->getViewMatrix().getTrans();
-        osg::Vec3d offset = position - mCenter;
-        osg::Quat rotation = getCamera()->getViewMatrix().getRotate();
+        osg::Vec3d eye, center, up;
+        getCamera()->getViewMatrixAsLookAt(eye, center, up);
 
-        osg::Quat offsetRotation = osg::Quat(value, LocalLeft);
-        osg::Vec3d newOffset = (rotation * offsetRotation) * (rotation.inverse() * offset);
+        osg::Vec3d forward = center - eye;
+        osg::Quat rotation = osg::Quat(value, up ^ forward);
+        osg::Vec3d oldOffset = eye - mCenter;
+        osg::Vec3d newOffset = rotation * oldOffset;
 
-        getCamera()->getViewMatrix().setTrans(mCenter + newOffset);
+        getCamera()->setViewMatrixAsLookAt(mCenter + newOffset, mCenter, up);
     }
 
     void OrbitCameraController::roll(double value)
@@ -465,24 +467,13 @@ namespace CSVRender
 
     void OrbitCameraController::zoom(double value)
     {
-        osg::Vec3d dir = mCenter - getCamera()->getViewMatrix().getTrans();
-        double distance = dir.normalize();
+        mDistance = std::max(10., mDistance + value);
 
-        if (distance > 1 || value < 0)
-        {
-            getCamera()->getViewMatrix() *= osg::Matrixd::translate(dir * value);
-        }
-    }
+        osg::Vec3d eye, center, up;
+        getCamera()->getViewMatrixAsLookAt(eye, center, up, 1.f);
 
-    void OrbitCameraController::lookAtCenter()
-    {
-        osg::Vec3d position = getCamera()->getViewMatrix().getTrans();
-        osg::Vec3d offset = mCenter - position;
-        osg::Quat rotation = getCamera()->getViewMatrix().getRotate();
+        osg::Vec3d offset = (eye - center) * mDistance;
 
-        osg::Quat newRotation;
-        newRotation.makeRotate(LocalForward, offset);
-
-        getCamera()->getViewMatrix().setRotate(newRotation);
+        getCamera()->setViewMatrixAsLookAt(mCenter + offset, mCenter, up);
     }
 }
