@@ -409,11 +409,8 @@ namespace CSVRender
     {
         static const int DefaultStartDistance = 10000.f;
 
-        osg::Quat rotation = getCamera()->getViewMatrix().getRotate();
-        osg::Vec3d position = getCamera()->getViewMatrix().getTrans();
-        osg::Vec3d offset = rotation * (LocalForward * DefaultStartDistance);
-
-        mCenter = position + offset;
+        osg::Vec3d eye, up;
+        getCamera()->getViewMatrixAsLookAt(eye, mCenter, up, DefaultStartDistance);
 
         mInitialized = true;
     }
