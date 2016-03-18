@@ -21,7 +21,6 @@
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
     bool modified = false;
-    bool wasEmpty = mCells.empty();
 
     const CSMWorld::IdCollection<CSMWorld::Cell>& cells = mDocument.getData().getCells();
 
