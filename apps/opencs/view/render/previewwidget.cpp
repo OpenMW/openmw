@@ -7,7 +7,7 @@ CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
     const std::string& id, bool referenceable, QWidget *parent)
 : SceneWidget (data.getResourceSystem(), parent), mData (data), mObject(data, mRootNode, id, referenceable)
 {
-    selectNavigationMode("trackball");
+    selectNavigationMode("orbit");
 
     QAbstractItemModel *referenceables =
         mData.getTableModel (CSMWorld::UniversalId::Type_Referenceables);

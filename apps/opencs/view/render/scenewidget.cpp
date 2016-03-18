@@ -353,12 +353,6 @@ void SceneWidget::selectNavigationMode (const std::string& mode)
         mCurrentCamControl = mOrbitCamControl.get();
         mCurrentCamControl->setCamera(getCamera());
     }
-    else if (mode=="trackball")
-    {
-        mCurrentCamControl->setCamera(NULL);
-        mCurrentCamControl = mOrbitCamControl.get();
-        mCurrentCamControl->setCamera(getCamera());
-    }
 }
 
 bool SceneWidget::storeMappingSetting (const CSMPrefs::Setting *setting)
