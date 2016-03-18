@@ -26,7 +26,7 @@ namespace CSVRender
     CameraController::CameraController()
         : mActive(false)
         , mModified(false)
-        , mMouseScalar(-1/350.f)
+        , mMouseScalar(-1/700.f)
         , mCamera(NULL)
     {
     }
