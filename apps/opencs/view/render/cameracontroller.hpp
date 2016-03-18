@@ -19,6 +19,8 @@ namespace CSVRender
     {
         public:
 
+            static const osg::Vec3d WorldUp;
+
             static const osg::Vec3d LocalUp;
             static const osg::Vec3d LocalLeft;
             static const osg::Vec3d LocalForward;

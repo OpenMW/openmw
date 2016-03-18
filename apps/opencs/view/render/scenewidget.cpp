@@ -321,7 +321,7 @@ void SceneWidget::selectNavigationMode (const std::string& mode)
         mCurrentCamControl->setCamera(NULL);
         mCurrentCamControl = mFreeCamControl.get();
         mCurrentCamControl->setCamera(getCamera());
-        mFreeCamControl->fixUpAxis(osg::Vec3d(0,0,1));
+        mFreeCamControl->fixUpAxis(CameraController::WorldUp);
     }
     else if (mode=="free")
     {

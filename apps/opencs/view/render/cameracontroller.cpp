@@ -13,6 +13,8 @@ namespace CSVRender
     Camera Controller
     */
 
+    const osg::Vec3d CameraController::WorldUp = osg::Vec3d(0, 0, 1);
+
     const osg::Vec3d CameraController::LocalUp = osg::Vec3d(0, 1, 0);
     const osg::Vec3d CameraController::LocalLeft = osg::Vec3d(1, 0, 0);
     const osg::Vec3d CameraController::LocalForward = osg::Vec3d(0, 0, 1);
