@@ -324,7 +324,9 @@ void CSVWorld::ScriptSubView::switchToRow (int row)
     std::string id = mModel->data (mModel->index (row, idColumn)).toString().toUtf8().constData();
     setUniversalId (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Script, id));
 
-    mEditor->setPlainText (mModel->data (mModel->index (row, mColumn)).toString());
+    bool oldSignalsState =  mEditor->blockSignals( true );
+    mEditor->setPlainText( mModel->data(mModel->index(row, mColumn)).toString() );
+    mEditor->blockSignals( oldSignalsState );
 
     std::vector<std::string> selection (1, id);
     mCommandDispatcher.setSelection (selection);
