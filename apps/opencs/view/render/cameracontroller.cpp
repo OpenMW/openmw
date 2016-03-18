@@ -69,6 +69,14 @@ namespace CSVRender
         mMouseScalar = value;
     }
 
+    void CameraController::setSceneBounds(const osg::BoundingBox& bounds, const osg::Vec3d& up)
+    {
+        osg::Vec3d eye = osg::Vec3d(bounds.xMax(), bounds.yMax(), bounds.zMax());
+        osg::Vec3d center = bounds.center();
+
+        getCamera()->setViewMatrixAsLookAt(eye, center, up);
+    }
+
     void CameraController::setModified()
     {
         mModified = true;

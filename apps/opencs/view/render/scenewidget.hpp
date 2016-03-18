@@ -120,6 +120,9 @@ namespace CSVRender
 
             std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
 
+        private:
+            bool mCamPositionSet;
+
         public slots:
             void update(double dt);
 

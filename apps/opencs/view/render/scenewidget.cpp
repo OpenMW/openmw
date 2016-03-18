@@ -11,6 +11,8 @@
 #include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osg/LightModel>
+#include <osg/BoundingBox>
+#include <osg/ComputeBoundsVisitor>
 
 #include <osgGA/TrackballManipulator>
 #include <osgGA/FirstPersonManipulator>
@@ -164,6 +166,7 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
     , mFreeCamControl(new FreeCameraController())
     , mOrbitCamControl(new OrbitCameraController())
     , mCurrentCamControl(mFreeCamControl.get())
+    , mCamPositionSet(false)
 {
     selectNavigationMode("free");
 
@@ -306,7 +309,21 @@ void SceneWidget::keyReleaseEvent (QKeyEvent *event)
 
 void SceneWidget::update(double dt)
 {
-    mCurrentCamControl->update(dt);
+    if (mCamPositionSet)
+    {
+        mCurrentCamControl->update(dt);
+    }
+    else
+    {
+        osg::ComputeBoundsVisitor boundsVisitor;
+        osg::BoundingBox &boundingBox(boundsVisitor.getBoundingBox());
+
+        mRootNode->accept(boundsVisitor);
+
+        mCurrentCamControl->setSceneBounds(boundingBox, CameraController::WorldUp);
+
+        mCamPositionSet = true;
+    }
 }
 
 void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
