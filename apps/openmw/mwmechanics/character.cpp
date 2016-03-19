@@ -1281,14 +1281,19 @@ bool CharacterController::updateWeaponState()
                     mAttackType = "shoot";
                 else
                 {
-                    if(isWeapon && mPtr == getPlayer() &&
-                            Settings::Manager::getBool("best attack", "Game"))
+                    if (isWeapon)
                     {
-                        MWWorld::ContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                        mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
+                        if(mPtr == getPlayer() &&
+                                Settings::Manager::getBool("best attack", "Game"))
+                        {
+                            MWWorld::ContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                            mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
+                        }
+                        else
+                            setAttackTypeBasedOnMovement();
                     }
                     else
-                        determineAttackType();
+                        setAttackTypeRandomly();
                 }
 
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
@@ -2061,7 +2066,18 @@ void CharacterController::updateMagicEffects()
     mAnimation->setLightEffect(light);
 }
 
-void CharacterController::determineAttackType()
+void CharacterController::setAttackTypeRandomly()
+{
+    float random = Misc::Rng::rollProbability();
+    if (random >= 2/3.f)
+        mAttackType = "thrust";
+    else if (random >= 1/3.f)
+        mAttackType = "slash";
+    else
+        mAttackType = "chop";
+}
+
+void CharacterController::setAttackTypeBasedOnMovement()
 {
     float *move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
 
