@@ -199,6 +199,9 @@ namespace MWGui
             if (!playable) // Only display playable classes
                 continue;
 
+            if (store.get<ESM::Class>().isDynamic(it->mId))
+                continue; // custom-made class not relevant for this dialog
+
             items.push_back(std::make_pair(it->mId, it->mName));
         }
         std::sort(items.begin(), items.end(), sortClasses);
