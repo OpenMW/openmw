@@ -177,7 +177,7 @@ namespace MWGui
                     mPickClassDialog = 0;
                     mPickClassDialog = new PickClassDialog();
                     mPickClassDialog->setNextButtonShow(mCreationStage >= CSE_ClassChosen);
-                    mPickClassDialog->setClassId(mPlayerClass.mName);
+                    mPickClassDialog->setClassId(mPlayerClass.mId);
                     mPickClassDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onPickClassDialogDone);
                     mPickClassDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onPickClassDialogBack);
                     mPickClassDialog->setVisible(true);
