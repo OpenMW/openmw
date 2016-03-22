@@ -18,7 +18,7 @@ namespace Terrain
     {
         std::string mDiffuseMap;
         std::string mNormalMap;
-        //bool mParallax; // Height info in normal map alpha channel?
+        bool mParallax; // Height info in normal map alpha channel?
         bool mSpecular; // Specular info in diffuse map alpha channel?
 
         bool requiresShaders() const { return !mNormalMap.empty() || mSpecular; }

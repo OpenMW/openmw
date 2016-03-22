@@ -241,6 +241,11 @@ namespace Resource
         mNormalMapPattern = pattern;
     }
 
+    void SceneManager::setNormalHeightMapPattern(const std::string &pattern)
+    {
+        mNormalHeightMapPattern = pattern;
+    }
+
     void SceneManager::setAutoUseSpecularMaps(bool use)
     {
         mAutoUseSpecularMaps = use;

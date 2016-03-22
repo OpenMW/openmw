@@ -160,6 +160,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             for (std::vector<LayerInfo>::const_iterator it = layerList.begin(); it != layerList.end(); ++it)
             {
                 TextureLayer textureLayer;
+                textureLayer.mParallax = it->mParallax;
                 textureLayer.mSpecular = it->mSpecular;
                 osg::ref_ptr<osg::Texture2D> texture = mTextureCache[it->mDiffuseMap];
                 if (!texture)

@@ -63,6 +63,9 @@ namespace Resource
         /// @see ShaderVisitor::setNormalMapPattern
         void setNormalMapPattern(const std::string& pattern);
 
+        /// @see ShaderVisitor::setNormalHeightMapPattern
+        void setNormalHeightMapPattern(const std::string& pattern);
+
         void setAutoUseSpecularMaps(bool use);
 
         void setSpecularMapPattern(const std::string& pattern);
@@ -138,6 +141,7 @@ namespace Resource
         bool mForcePerPixelLighting;
         bool mAutoUseNormalMaps;
         std::string mNormalMapPattern;
+        std::string mNormalHeightMapPattern;
         bool mAutoUseSpecularMaps;
         std::string mSpecularMapPattern;
 

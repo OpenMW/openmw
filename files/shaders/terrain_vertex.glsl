@@ -11,7 +11,7 @@ varying vec4 lighting;
 varying vec4 passColor;
 #endif
 varying vec3 passViewPos;
-varying vec3 passViewNormal;
+varying vec3 passNormal;
 
 #include "lighting.glsl"
 
@@ -22,14 +22,14 @@ void main(void)
 
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
     gl_ClipVertex = viewPos;
-    vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
 
 #if !PER_PIXEL_LIGHTING
+    vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
     lighting = doLighting(viewPos.xyz, viewNormal, gl_Color);
 #else
     passColor = gl_Color;
 #endif
-    passViewNormal = viewNormal;
+    passNormal = gl_Normal.xyz;
     passViewPos = viewPos.xyz;
 
     uv = gl_MultiTexCoord0.xy;

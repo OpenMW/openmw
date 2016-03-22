@@ -157,6 +157,7 @@ namespace Terrain
             defineMap["blendMap"] = !firstLayer ? "1" : "0";
             defineMap["colorMode"] = "2";
             defineMap["specularMap"] = it->mSpecular ? "1" : "0";
+            defineMap["parallax"] = (it->mNormalMap && it->mParallax) ? "1" : "0";
 
             osg::ref_ptr<osg::Shader> vertexShader = shaderManager.getShader("terrain_vertex.glsl", defineMap, osg::Shader::VERTEX);
             osg::ref_ptr<osg::Shader> fragmentShader = shaderManager.getShader("terrain_fragment.glsl", defineMap, osg::Shader::FRAGMENT);

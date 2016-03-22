@@ -22,35 +22,53 @@ varying vec4 lighting;
 varying vec4 passColor;
 #endif
 varying vec3 passViewPos;
-varying vec3 passViewNormal;
+varying vec3 passNormal;
+
+#if @parallax
+#define PARALLAX_SCALE 0.04
+#define PARALLAX_BIAS -0.02
+uniform mat4 osg_ViewMatrixInverse;
+#endif
 
 #include "lighting.glsl"
 
 void main()
 {
-    vec2 diffuseMapUV = (gl_TextureMatrix[0] * vec4(uv, 0.0, 1.0)).xy;
+    vec2 adjustedUV = (gl_TextureMatrix[0] * vec4(uv, 0.0, 1.0)).xy;
 
-    vec4 diffuseTex = texture2D(diffuseMap, diffuseMapUV);
+#if @normalMap
+    vec4 normalTex = texture2D(normalMap, adjustedUV);
+
+    vec3 normalizedNormal = normalize(passNormal);
+    vec3 tangent = vec3(1.0, 0.0, 0.0);
+    vec3 binormal = normalize(cross(tangent, normalizedNormal));
+    tangent = normalize(cross(normalizedNormal, binormal)); // note, now we need to re-cross to derive tangent again because it wasn't orthonormal
+    mat3 tbn = mat3(tangent, binormal, normalizedNormal);
+
+    vec3 viewNormal = normalize(gl_NormalMatrix * (tbn * (normalTex.xyz * 2.0 - 1.0)));
+#else
+    vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
+#endif
+
+#if @parallax
+    vec3 cameraPos = osg_ViewMatrixInverse[3].xyz;
+    vec3 eyeDir = normalize(cameraPos - (osg_ViewMatrixInverse * vec4(passViewPos, 1)).xyz);
+    vec3 TSeyeDir = normalize((vec4(normalize(tbn * eyeDir),0)).xyz);
+
+    adjustedUV += TSeyeDir.xy * ( normalTex.a * PARALLAX_SCALE + PARALLAX_BIAS );
+
+    // update normal using new coordinates
+    normalTex = texture2D(normalMap, adjustedUV);
+    viewNormal = normalize(gl_NormalMatrix * (tbn * (normalTex.xyz * 2.0 - 1.0)));
+#endif
+
+    vec4 diffuseTex = texture2D(diffuseMap, adjustedUV);
     gl_FragData[0] = vec4(diffuseTex.xyz, 1.0);
 
 #if @blendMap
     vec2 blendMapUV = (gl_TextureMatrix[1] * vec4(uv, 0.0, 1.0)).xy;
     gl_FragData[0].a *= texture2D(blendMap, blendMapUV).a;
 #endif
-
-    vec3 viewNormal = passViewNormal;
-
-#if @normalMap
-    vec3 normalTex = texture2D(normalMap, diffuseMapUV).xyz;
-
-    vec3 viewTangent = (gl_ModelViewMatrix * vec4(1.0, 0.0, 0.0, 0.0)).xyz;
-    vec3 viewBinormal = normalize(cross(viewTangent, viewNormal));
-    viewTangent = normalize(cross(viewNormal, viewBinormal)); // note, now we need to re-cross to derive tangent again because it wasn't orthonormal
-    mat3 tbn = mat3(viewTangent, viewBinormal, viewNormal);
-
-    viewNormal = normalize(tbn * (normalTex * 2.0 - 1.0));
-#endif
-
 
 #if !PER_PIXEL_LIGHTING
     gl_FragData[0] *= lighting;
