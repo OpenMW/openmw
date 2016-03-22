@@ -11,6 +11,7 @@ set(SHADER_FILES
     terrain_vertex.glsl
     terrain_fragment.glsl
     lighting.glsl
+    parallax.glsl
 )
 
 copy_all_files(${CMAKE_CURRENT_SOURCE_DIR} ${DDIR} "${SHADER_FILES}")

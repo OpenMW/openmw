@@ -25,12 +25,11 @@ varying vec3 passViewPos;
 varying vec3 passNormal;
 
 #if @parallax
-#define PARALLAX_SCALE 0.04
-#define PARALLAX_BIAS -0.02
 uniform mat4 osg_ViewMatrixInverse;
 #endif
 
 #include "lighting.glsl"
+#include "parallax.glsl"
 
 void main()
 {
@@ -53,9 +52,7 @@ void main()
 #if @parallax
     vec3 cameraPos = osg_ViewMatrixInverse[3].xyz;
     vec3 eyeDir = normalize(cameraPos - (osg_ViewMatrixInverse * vec4(passViewPos, 1)).xyz);
-    vec3 TSeyeDir = normalize((vec4(normalize(tbn * eyeDir),0)).xyz);
-
-    adjustedUV += TSeyeDir.xy * ( normalTex.a * PARALLAX_SCALE + PARALLAX_BIAS );
+    adjustedUV += getParallaxOffset(eyeDir, tbn, normalTex.a);
 
     // update normal using new coordinates
     normalTex = texture2D(normalMap, adjustedUV);
