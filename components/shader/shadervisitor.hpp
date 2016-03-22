@@ -39,6 +39,7 @@ namespace Shader
         void setAutoUseNormalMaps(bool use);
 
         void setNormalMapPattern(const std::string& pattern);
+        void setNormalHeightMapPattern(const std::string& pattern);
 
         void setAutoUseSpecularMaps(bool use);
 
@@ -62,6 +63,7 @@ namespace Shader
 
         bool mAutoUseNormalMaps;
         std::string mNormalMapPattern;
+        std::string mNormalHeightMapPattern;
 
         bool mAutoUseSpecularMaps;
         std::string mSpecularMapPattern;
@@ -83,6 +85,7 @@ namespace Shader
             // osg::Material::ColorMode
             int mVertexColorMode;
             bool mMaterialOverridden;
+            bool mNormalHeight; // true if normal map has height info in alpha channel
 
             // -1 == no tangents required
             int mTexStageRequiringTangents;

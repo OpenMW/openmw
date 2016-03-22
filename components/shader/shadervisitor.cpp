@@ -25,6 +25,7 @@ namespace Shader
         , mColorMaterial(false)
         , mVertexColorMode(GL_AMBIENT_AND_DIFFUSE)
         , mMaterialOverridden(false)
+        , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
     {
     }
@@ -120,6 +121,12 @@ namespace Shader
                         if ((texName.empty() || !isTextureNameRecognized(texName)) && unit == 0)
                             texName = "diffuseMap";
 
+                        if (texName == "normalHeightMap")
+                        {
+                            mRequirements.back().mNormalHeight = true;
+                            texName = "normalMap";
+                        }
+
                         if (!texName.empty())
                         {
                             mRequirements.back().mTextures[unit] = texName;
@@ -133,9 +140,9 @@ namespace Shader
                                 writableStateSet->setTextureMode(unit, GL_TEXTURE_2D, osg::StateAttribute::ON);
                                 normalMap = texture;
                             }
-                            if (texName == "diffuseMap")
+                            else if (texName == "diffuseMap")
                                 diffuseMap = texture;
-                            if (texName == "specularMap")
+                            else if (texName == "specularMap")
                                 specularMap = texture;
                         }
                         else
@@ -147,10 +154,28 @@ namespace Shader
             if (mAutoUseNormalMaps && diffuseMap != NULL && normalMap == NULL)
             {
                 std::string normalMap = diffuseMap->getImage(0)->getFileName();
-                boost::replace_last(normalMap, ".", mNormalMapPattern + ".");
-                if (mImageManager.getVFS()->exists(normalMap))
+
+                osg::ref_ptr<osg::Image> image;
+                bool normalHeight = false;
+                std::string normalHeightMap = normalMap;
+                boost::replace_last(normalHeightMap, ".", mNormalHeightMapPattern + ".");
+                if (mImageManager.getVFS()->exists(normalHeightMap))
                 {
-                    osg::ref_ptr<osg::Texture2D> normalMapTex (new osg::Texture2D(mImageManager.getImage(normalMap)));
+                    image = mImageManager.getImage(normalHeightMap);
+                    normalHeight = true;
+                }
+                else
+                {
+                    boost::replace_last(normalMap, ".", mNormalMapPattern + ".");
+                    if (mImageManager.getVFS()->exists(normalMap))
+                    {
+                        image = mImageManager.getImage(normalMap);
+                    }
+                }
+
+                if (image)
+                {
+                    osg::ref_ptr<osg::Texture2D> normalMapTex (new osg::Texture2D(image));
                     normalMapTex->setWrap(osg::Texture::WRAP_S, diffuseMap->getWrap(osg::Texture::WRAP_S));
                     normalMapTex->setWrap(osg::Texture::WRAP_T, diffuseMap->getWrap(osg::Texture::WRAP_T));
                     normalMapTex->setFilter(osg::Texture::MIN_FILTER, diffuseMap->getFilter(osg::Texture::MIN_FILTER));
@@ -165,6 +190,7 @@ namespace Shader
                     mRequirements.back().mTextures[unit] = "normalMap";
                     mRequirements.back().mTexStageRequiringTangents = unit;
                     mRequirements.back().mShaderRequired = true;
+                    mRequirements.back().mNormalHeight = normalHeight;
                 }
             }
             if (mAutoUseSpecularMaps && diffuseMap != NULL && specularMap == NULL)
