@@ -385,6 +385,7 @@ namespace Resource
             shaderVisitor.setForcePerPixelLighting(mForcePerPixelLighting);
             shaderVisitor.setAutoUseNormalMaps(mAutoUseNormalMaps);
             shaderVisitor.setNormalMapPattern(mNormalMapPattern);
+            shaderVisitor.setNormalHeightMapPattern(mNormalHeightMapPattern);
             shaderVisitor.setAutoUseSpecularMaps(mAutoUseSpecularMaps);
             shaderVisitor.setSpecularMapPattern(mSpecularMapPattern);
             loaded->accept(shaderVisitor);

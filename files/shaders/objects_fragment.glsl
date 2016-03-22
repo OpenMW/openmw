@@ -54,12 +54,46 @@ varying vec4 passColor;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
+#if @parallax
+uniform mat4 osg_ViewMatrixInverse;
+#endif
+
 #include "lighting.glsl"
+#include "parallax.glsl"
 
 void main()
 {
+    vec2 adjustedDiffuseUV = diffuseMapUV;
+
+#if @normalMap
+    vec4 normalTex = texture2D(normalMap, normalMapUV);
+
+    vec3 normalizedNormal = normalize(passNormal);
+    vec3 normalizedTangent = normalize(passTangent);
+    vec3 binormal = cross(normalizedTangent, normalizedNormal);
+    mat3 tbn = mat3(normalizedTangent, binormal, normalizedNormal);
+
+    vec3 viewNormal = gl_NormalMatrix * normalize(tbn * (normalTex.xyz * 2.0 - 1.0));
+#else
+    vec3 viewNormal = gl_NormalMatrix * normalize(passNormal);
+#endif
+
+#if @parallax
+    vec3 cameraPos = osg_ViewMatrixInverse[3].xyz;
+    vec3 eyeDir = normalize(cameraPos - (osg_ViewMatrixInverse * vec4(passViewPos, 1)).xyz);
+    vec2 offset = getParallaxOffset(eyeDir, tbn, normalTex.a);
+    adjustedDiffuseUV += offset; // only offset diffuse for now, other textures are more likely to be using a completely different UV set
+
+#if @diffuseMapUV == @normalMapUV
+    // fetch a new normal using updated coordinates
+    normalTex = texture2D(normalMap, adjustedDiffuseUV);
+    viewNormal = gl_NormalMatrix * normalize(tbn * (normalTex.xyz * 2.0 - 1.0));
+#endif
+
+#endif
+
 #if @diffuseMap
-    gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
+    gl_FragData[0] = texture2D(diffuseMap, adjustedDiffuseUV);
 #else
     gl_FragData[0] = vec4(1.0, 1.0, 1.0, 1.0);
 #endif
@@ -76,20 +110,6 @@ void main()
     vec4 decalTex = texture2D(decalMap, decalMapUV);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, decalTex.xyz, decalTex.a);
 #endif
-
-#if @normalMap
-    vec3 normalTex = texture2D(normalMap, normalMapUV).xyz;
-
-    vec3 normalizedNormal = normalize(passNormal);
-    vec3 normalizedTangent = normalize(passTangent);
-    vec3 binormal = cross(normalizedTangent, normalizedNormal);
-    mat3 tbn = mat3(normalizedTangent, binormal, normalizedNormal);
-
-    vec3 viewNormal = gl_NormalMatrix * normalize(tbn * (normalTex * 2.0 - 1.0));
-#else
-    vec3 viewNormal = gl_NormalMatrix * normalize(passNormal);
-#endif
-
 
 #if !PER_PIXEL_LIGHTING
     gl_FragData[0] *= lighting;

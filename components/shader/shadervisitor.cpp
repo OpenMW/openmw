@@ -284,6 +284,8 @@ namespace Shader
         defineMap["forcePPL"] = mForcePerPixelLighting ? "1" : "0";
         defineMap["clamp"] = mClampLighting ? "1" : "0";
 
+        defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
+
         osg::ref_ptr<osg::Shader> vertexShader (mShaderManager.getShader(mDefaultVsTemplate, defineMap, osg::Shader::VERTEX));
         osg::ref_ptr<osg::Shader> fragmentShader (mShaderManager.getShader(mDefaultFsTemplate, defineMap, osg::Shader::FRAGMENT));
 
@@ -374,6 +376,11 @@ namespace Shader
     void ShaderVisitor::setNormalMapPattern(const std::string &pattern)
     {
         mNormalMapPattern = pattern;
+    }
+
+    void ShaderVisitor::setNormalHeightMapPattern(const std::string &pattern)
+    {
+        mNormalHeightMapPattern = pattern;
     }
 
     void ShaderVisitor::setAutoUseSpecularMaps(bool use)
