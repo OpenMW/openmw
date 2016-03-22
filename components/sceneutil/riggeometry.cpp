@@ -95,7 +95,7 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
         setStateSet(from.getStateSet());
 
     // shallow copy primitive sets & vertex attributes that we will not modify
-    getPrimitiveSetList() = from.getPrimitiveSetList();
+    setPrimitiveSetList(from.getPrimitiveSetList());
     setColorArray(from.getColorArray());
     setSecondaryColorArray(from.getSecondaryColorArray());
     setFogCoordArray(from.getFogCoordArray());
