@@ -384,7 +384,7 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
         thisLayerUV += TSeyeDir.xy * ( normalTex.a * PARALLAX_SCALE + PARALLAX_BIAS );
 #endif
 
-        diffuseTex = shSample(diffuseMap@shIterator, layerUV);
+        diffuseTex = shSample(diffuseMap@shIterator, thisLayerUV);
 #if !@shPropertyBool(use_specular_@shIterator)
         diffuseTex.a = 0.0;
 #endif
