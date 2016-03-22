@@ -41,6 +41,7 @@ namespace SceneUtil
 
         /// Initialize this geometry from the source geometry.
         /// @note The source geometry will not be modified.
+        /// @note The source geometry's normal and vertex arrays must be an osg::Vec3Array.
         void setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom);
 
         // Called automatically by our CullCallback
@@ -50,7 +51,8 @@ namespace SceneUtil
         void updateBounds(osg::NodeVisitor* nv);
 
     private:
-        osg::ref_ptr<osg::Geometry> mSourceGeometry;
+        osg::ref_ptr<osg::Vec3Array> mSourceVertices;
+        osg::ref_ptr<osg::Vec3Array> mSourceNormals;
         Skeleton* mSkeleton;
 
         osg::NodePath mSkelToGeomPath;
