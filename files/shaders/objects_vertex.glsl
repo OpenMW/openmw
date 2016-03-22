@@ -22,7 +22,7 @@ varying vec2 emissiveMapUV;
 
 #if @normalMap
 varying vec2 normalMapUV;
-varying vec3 viewTangent;
+varying vec3 passTangent;
 #endif
 
 #if @envMap
@@ -43,7 +43,7 @@ varying vec4 lighting;
 varying vec4 passColor;
 #endif
 varying vec3 passViewPos;
-varying vec3 passViewNormal;
+varying vec3 passNormal;
 
 #include "lighting.glsl"
 
@@ -85,7 +85,7 @@ void main(void)
 
 #if @normalMap
     normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
-    viewTangent = normalize(gl_NormalMatrix * gl_MultiTexCoord7.xyz);
+    passTangent = gl_MultiTexCoord7.xyz;
 #endif
 
 #if @specularMap
@@ -98,5 +98,5 @@ void main(void)
     passColor = gl_Color;
 #endif
     passViewPos = viewPos.xyz;
-    passViewNormal = viewNormal;
+    passNormal = gl_Normal.xyz;
 }

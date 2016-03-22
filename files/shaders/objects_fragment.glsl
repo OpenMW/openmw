@@ -28,7 +28,7 @@ varying vec2 emissiveMapUV;
 #if @normalMap
 uniform sampler2D normalMap;
 varying vec2 normalMapUV;
-varying vec3 viewTangent;
+varying vec3 passTangent;
 #endif
 
 #if @envMap
@@ -52,7 +52,7 @@ varying vec4 lighting;
 varying vec4 passColor;
 #endif
 varying vec3 passViewPos;
-varying vec3 passViewNormal;
+varying vec3 passNormal;
 
 #include "lighting.glsl"
 
@@ -77,15 +77,17 @@ void main()
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, decalTex.xyz, decalTex.a);
 #endif
 
-    vec3 viewNormal = passViewNormal;
-
 #if @normalMap
     vec3 normalTex = texture2D(normalMap, normalMapUV).xyz;
 
-    vec3 viewBinormal = cross(viewTangent, viewNormal);
-    mat3 tbn = mat3(viewTangent, viewBinormal, viewNormal);
+    vec3 normalizedNormal = normalize(passNormal);
+    vec3 normalizedTangent = normalize(passTangent);
+    vec3 binormal = cross(normalizedTangent, normalizedNormal);
+    mat3 tbn = mat3(normalizedTangent, binormal, normalizedNormal);
 
-    viewNormal = normalize(tbn * (normalTex * 2.0 - 1.0));
+    vec3 viewNormal = gl_NormalMatrix * normalize(tbn * (normalTex * 2.0 - 1.0));
+#else
+    vec3 viewNormal = gl_NormalMatrix * normalize(passNormal);
 #endif
 
 
