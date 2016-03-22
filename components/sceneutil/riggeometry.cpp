@@ -82,14 +82,12 @@ RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
     , mLastFrameNumber(0)
     , mBoundsFirstFrame(true)
 {
-    mSourceVertices = copy.mSourceVertices;
-    mSourceNormals = copy.mSourceNormals;
+    setSourceGeometry(copy.mSourceGeometry);
 }
 
 void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
 {
-    mSourceVertices = static_cast<osg::Vec3Array*>(sourceGeometry->getVertexArray());
-    mSourceNormals = static_cast<osg::Vec3Array*>(sourceGeometry->getNormalArray());
+    mSourceGeometry = sourceGeometry;
 
     osg::Geometry& from = *sourceGeometry;
 
@@ -225,8 +223,8 @@ void RigGeometry::update(osg::NodeVisitor* nv)
     mSkeleton->updateBoneMatrices(nv);
 
     // skinning
-    osg::Vec3Array* positionSrc = mSourceVertices;
-    osg::Vec3Array* normalSrc = mSourceNormals;
+    osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
+    osg::Vec3Array* normalSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getNormalArray());
 
     osg::Vec3Array* positionDst = static_cast<osg::Vec3Array*>(getVertexArray());
     osg::Vec3Array* normalDst = static_cast<osg::Vec3Array*>(getNormalArray());
