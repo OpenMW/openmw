@@ -84,12 +84,14 @@ RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
 {
     mSourceVertices = copy.mSourceVertices;
     mSourceNormals = copy.mSourceNormals;
+    mSourceTangents = copy.mSourceTangents;
 }
 
 void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
 {
     mSourceVertices = static_cast<osg::Vec3Array*>(sourceGeometry->getVertexArray());
     mSourceNormals = static_cast<osg::Vec3Array*>(sourceGeometry->getNormalArray());
+    mSourceTangents = static_cast<osg::Vec4Array*>(sourceGeometry->getTexCoordArray(7));
 
     osg::Geometry& from = *sourceGeometry;
 
@@ -227,9 +229,18 @@ void RigGeometry::update(osg::NodeVisitor* nv)
     // skinning
     osg::Vec3Array* positionSrc = mSourceVertices;
     osg::Vec3Array* normalSrc = mSourceNormals;
+    osg::Vec4Array* tangentSrc = mSourceTangents;
 
     osg::Vec3Array* positionDst = static_cast<osg::Vec3Array*>(getVertexArray());
     osg::Vec3Array* normalDst = static_cast<osg::Vec3Array*>(getNormalArray());
+    osg::Vec4Array* tangentDst = static_cast<osg::Vec4Array*>(getTexCoordArray(7));
+
+    if (tangentDst && !tangentSrc)
+    {
+        // tangents may be set by the ShaderVisitor so may not have existed yet at the time the source geometry was set
+        tangentSrc = osg::clone(tangentDst, osg::CopyOp::DEEP_COPY_ALL);
+        mSourceTangents = tangentSrc;
+    }
 
     for (Bone2VertexMap::const_iterator it = mBone2VertexMap.begin(); it != mBone2VertexMap.end(); ++it)
     {
@@ -253,11 +264,19 @@ void RigGeometry::update(osg::NodeVisitor* nv)
             unsigned short vertex = *vertexIt;
             (*positionDst)[vertex] = resultMat.preMult((*positionSrc)[vertex]);
             (*normalDst)[vertex] = osg::Matrix::transform3x3((*normalSrc)[vertex], resultMat);
+            if (tangentDst)
+            {
+                osg::Vec4f srcTangent = (*tangentSrc)[vertex];
+                osg::Vec3f transformedTangent = osg::Matrix::transform3x3(osg::Vec3f(srcTangent.x(), srcTangent.y(), srcTangent.z()), resultMat);
+                (*tangentDst)[vertex] = osg::Vec4f(transformedTangent, srcTangent.w());
+            }
         }
     }
 
     positionDst->dirty();
     normalDst->dirty();
+    if (tangentDst)
+        tangentDst->dirty();
 }
 
 void RigGeometry::updateBounds(osg::NodeVisitor *nv)
