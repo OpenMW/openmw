@@ -53,7 +53,6 @@ namespace SceneUtil
     private:
         osg::ref_ptr<osg::Vec3Array> mSourceVertices;
         osg::ref_ptr<osg::Vec3Array> mSourceNormals;
-        osg::ref_ptr<osg::Vec4Array> mSourceTangents;
         Skeleton* mSkeleton;
 
         osg::NodePath mSkelToGeomPath;
