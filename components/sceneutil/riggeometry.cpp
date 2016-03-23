@@ -106,7 +106,6 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
         if (texCoordList[i])
             setTexCoordArray(i, texCoordList[i], osg::Array::BIND_PER_VERTEX);
 
-    setTexCoordArrayList(from.getTexCoordArrayList());
     setVertexAttribArrayList(from.getVertexAttribArrayList());
 
     // vertices and normals are modified every frame, so we need to deep copy them.
