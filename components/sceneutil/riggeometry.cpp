@@ -99,6 +99,13 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
     setColorArray(from.getColorArray());
     setSecondaryColorArray(from.getSecondaryColorArray());
     setFogCoordArray(from.getFogCoordArray());
+
+    // need to copy over texcoord list manually due to a missing null pointer check in setTexCoordArrayList(), this has been fixed in OSG 3.5
+    osg::Geometry::ArrayList& texCoordList = from.getTexCoordArrayList();
+    for (unsigned int i=0; i<texCoordList.size(); ++i)
+        if (texCoordList[i])
+            setTexCoordArray(i, texCoordList[i], osg::Array::BIND_PER_VERTEX);
+
     setTexCoordArrayList(from.getTexCoordArrayList());
     setVertexAttribArrayList(from.getVertexAttribArrayList());
 
@@ -120,6 +127,19 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
         normalArray->setVertexBufferObject(vbo);
         setNormalArray(normalArray, osg::Array::BIND_PER_VERTEX);
     }
+
+    if (from.getTexCoordArray(7) && dynamic_cast<osg::Vec4Array*>(from.getTexCoordArray(7)))
+    {
+        // tangents
+        osg::ref_ptr<osg::Array> tangentArray = osg::clone(from.getTexCoordArray(7), osg::CopyOp::DEEP_COPY_ALL);
+        tangentArray->setVertexBufferObject(vbo);
+        setTexCoordArray(7, tangentArray, osg::Array::BIND_PER_VERTEX);
+    }
+}
+
+osg::ref_ptr<osg::Geometry> RigGeometry::getSourceGeometry()
+{
+    return mSourceGeometry;
 }
 
 bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
@@ -225,9 +245,11 @@ void RigGeometry::update(osg::NodeVisitor* nv)
     // skinning
     osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
     osg::Vec3Array* normalSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getNormalArray());
+    osg::Vec4Array* tangentSrc = static_cast<osg::Vec4Array*>(mSourceGeometry->getTexCoordArray(7));
 
     osg::Vec3Array* positionDst = static_cast<osg::Vec3Array*>(getVertexArray());
     osg::Vec3Array* normalDst = static_cast<osg::Vec3Array*>(getNormalArray());
+    osg::Vec4Array* tangentDst = static_cast<osg::Vec4Array*>(getTexCoordArray(7));
 
     for (Bone2VertexMap::const_iterator it = mBone2VertexMap.begin(); it != mBone2VertexMap.end(); ++it)
     {
@@ -251,11 +273,19 @@ void RigGeometry::update(osg::NodeVisitor* nv)
             unsigned short vertex = *vertexIt;
             (*positionDst)[vertex] = resultMat.preMult((*positionSrc)[vertex]);
             (*normalDst)[vertex] = osg::Matrix::transform3x3((*normalSrc)[vertex], resultMat);
+            if (tangentDst)
+            {
+                osg::Vec4f srcTangent = (*tangentSrc)[vertex];
+                osg::Vec3f transformedTangent = osg::Matrix::transform3x3(osg::Vec3f(srcTangent.x(), srcTangent.y(), srcTangent.z()), resultMat);
+                (*tangentDst)[vertex] = osg::Vec4f(transformedTangent, srcTangent.w());
+            }
         }
     }
 
     positionDst->dirty();
     normalDst->dirty();
+    if (tangentDst)
+        tangentDst->dirty();
 }
 
 void RigGeometry::updateBounds(osg::NodeVisitor *nv)

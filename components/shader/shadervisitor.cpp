@@ -14,6 +14,7 @@
 
 #include <components/resource/imagemanager.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/sceneutil/riggeometry.hpp>
 
 #include "shadermanager.hpp"
 
@@ -313,23 +314,31 @@ namespace Shader
         {
             const ShaderRequirements& reqs = mRequirements.back();
 
+            osg::ref_ptr<osg::Geometry> sourceGeometry = &geometry;
+            SceneUtil::RigGeometry* rig = dynamic_cast<SceneUtil::RigGeometry*>(&geometry);
+            if (rig)
+                sourceGeometry = rig->getSourceGeometry();
+
             if (mAllowedToModifyStateSets)
             {
                 // make sure that all UV sets are there
                 for (std::map<int, std::string>::const_iterator it = reqs.mTextures.begin(); it != reqs.mTextures.end(); ++it)
                 {
-                    if (geometry.getTexCoordArray(it->first) == NULL)
-                        geometry.setTexCoordArray(it->first, geometry.getTexCoordArray(0));
+                    if (sourceGeometry->getTexCoordArray(it->first) == NULL)
+                        sourceGeometry->setTexCoordArray(it->first, sourceGeometry->getTexCoordArray(0));
                 }
             }
 
             if (reqs.mTexStageRequiringTangents != -1 && mAllowedToModifyStateSets)
             {
                 osg::ref_ptr<osgUtil::TangentSpaceGenerator> generator (new osgUtil::TangentSpaceGenerator);
-                generator->generate(&geometry, reqs.mTexStageRequiringTangents);
+                generator->generate(sourceGeometry, reqs.mTexStageRequiringTangents);
 
-                geometry.setTexCoordArray(7, generator->getTangentArray(), osg::Array::BIND_PER_VERTEX);
+                sourceGeometry->setTexCoordArray(7, generator->getTangentArray(), osg::Array::BIND_PER_VERTEX);
             }
+
+            if (rig)
+                rig->setSourceGeometry(sourceGeometry);
 
             // TODO: find a better place for the stateset
             if (reqs.mShaderRequired || mForceShaders)

@@ -43,6 +43,8 @@ namespace SceneUtil
         /// @note The source geometry will not be modified.
         void setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom);
 
+        osg::ref_ptr<osg::Geometry> getSourceGeometry();
+
         // Called automatically by our CullCallback
         void update(osg::NodeVisitor* nv);
 
