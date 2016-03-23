@@ -53,6 +53,7 @@ namespace SceneUtil
 
     private:
         osg::ref_ptr<osg::Geometry> mSourceGeometry;
+        osg::ref_ptr<osg::Vec4Array> mSourceTangents;
         Skeleton* mSkeleton;
 
         osg::NodePath mSkelToGeomPath;

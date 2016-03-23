@@ -128,13 +128,15 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
         setNormalArray(normalArray, osg::Array::BIND_PER_VERTEX);
     }
 
-    if (from.getTexCoordArray(7) && dynamic_cast<osg::Vec4Array*>(from.getTexCoordArray(7)))
+    if (osg::Vec4Array* tangents = dynamic_cast<osg::Vec4Array*>(from.getTexCoordArray(7)))
     {
-        // tangents
-        osg::ref_ptr<osg::Array> tangentArray = osg::clone(from.getTexCoordArray(7), osg::CopyOp::DEEP_COPY_ALL);
+        mSourceTangents = tangents;
+        osg::ref_ptr<osg::Array> tangentArray = osg::clone(tangents, osg::CopyOp::DEEP_COPY_ALL);
         tangentArray->setVertexBufferObject(vbo);
         setTexCoordArray(7, tangentArray, osg::Array::BIND_PER_VERTEX);
     }
+    else
+        mSourceTangents = NULL;
 }
 
 osg::ref_ptr<osg::Geometry> RigGeometry::getSourceGeometry()
@@ -245,7 +247,7 @@ void RigGeometry::update(osg::NodeVisitor* nv)
     // skinning
     osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
     osg::Vec3Array* normalSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getNormalArray());
-    osg::Vec4Array* tangentSrc = static_cast<osg::Vec4Array*>(mSourceGeometry->getTexCoordArray(7));
+    osg::Vec4Array* tangentSrc = mSourceTangents;
 
     osg::Vec3Array* positionDst = static_cast<osg::Vec3Array*>(getVertexArray());
     osg::Vec3Array* normalDst = static_cast<osg::Vec3Array*>(getNormalArray());
