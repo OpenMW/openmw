@@ -251,13 +251,13 @@ namespace MWWorld
 
             if (findExteriorPosition (mStartCell, pos))
             {
-                changeToExteriorCell (pos);
+                changeToExteriorCell (pos, true);
                 fixPosition(getPlayerPtr());
             }
             else
             {
                 findInteriorPosition (mStartCell, pos);
-                changeToInteriorCell (mStartCell, pos);
+                changeToInteriorCell (mStartCell, pos, true);
             }
         }
         else
@@ -962,7 +962,7 @@ namespace MWWorld
         return mTimeScale->getFloat();
     }
 
-    void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool changeEvent)
+    void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         mPhysics->clearQueuedMovement();
 
@@ -976,11 +976,11 @@ namespace MWWorld
         }
 
         removeContainerScripts(getPlayerPtr());
-        mWorldScene->changeToInteriorCell(cellName, position, changeEvent);
+        mWorldScene->changeToInteriorCell(cellName, position, adjustPlayerPos, changeEvent);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
     }
 
-    void World::changeToExteriorCell (const ESM::Position& position, bool changeEvent)
+    void World::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         mPhysics->clearQueuedMovement();
 
@@ -991,17 +991,17 @@ namespace MWWorld
             mRendering->notifyWorldSpaceChanged();
         }
         removeContainerScripts(getPlayerPtr());
-        mWorldScene->changeToExteriorCell(position, true, changeEvent);
+        mWorldScene->changeToExteriorCell(position, adjustPlayerPos, changeEvent);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
     }
 
-    void World::changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool changeEvent)
+    void World::changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         if (!changeEvent)
             mCurrentWorldSpace = cellId.mWorldspace;
 
         if (cellId.mPaged)
-            changeToExteriorCell (position, changeEvent);
+            changeToExteriorCell (position, adjustPlayerPos, changeEvent);
         else
             changeToInteriorCell (cellId.mWorldspace, position, changeEvent);
     }
@@ -1137,7 +1137,7 @@ namespace MWWorld
             if (isPlayer)
             {
                 if (!newCell->isExterior())
-                    changeToInteriorCell(Misc::StringUtils::lowerCase(newCell->getCell()->mName), pos);
+                    changeToInteriorCell(Misc::StringUtils::lowerCase(newCell->getCell()->mName), pos, false);
                 else
                 {
                     if (mWorldScene->isCellActive(*newCell))

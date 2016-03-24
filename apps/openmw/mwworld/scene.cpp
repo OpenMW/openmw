@@ -444,7 +444,8 @@ namespace MWWorld
             float z = pos.rot[2];
             world->rotateObject(player, x, y, z);
 
-            player.getClass().adjustPosition(player, true);
+            if (adjustPlayerPos)
+                player.getClass().adjustPosition(player, true);
         }
 
         MWBase::MechanicsManager *mechMgr =
@@ -493,7 +494,7 @@ namespace MWWorld
         return mActiveCells;
     }
 
-    void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool changeEvent)
+    void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
         bool loadcell = (mCurrentCell == NULL);
@@ -519,7 +520,8 @@ namespace MWWorld
             float z = position.rot[2];
             world->rotateObject(world->getPlayerPtr(), x, y, z);
 
-            world->getPlayerPtr().getClass().adjustPosition(world->getPlayerPtr(), true);
+            if (adjustPlayerPos)
+                world->getPlayerPtr().getClass().adjustPosition(world->getPlayerPtr(), true);
             MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
             return;
         }
