@@ -19,6 +19,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
     Cell& cell2 = base ? cell.mBase : cell.mModified;
 
     CellRef ref;
+    ref.mNew = false;
     ESM::MovedCellRef mref;
     bool isDeleted = false;
 
