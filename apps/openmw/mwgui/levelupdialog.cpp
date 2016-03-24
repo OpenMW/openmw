@@ -19,6 +19,8 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
+#include "class.hpp"
+
 namespace MWGui
 {
     const unsigned int LevelupDialog::sMaxCoins = 3;
@@ -154,7 +156,7 @@ namespace MWGui
                 cls = &*it;
         }
 
-        mClassImage->setImageTexture ("textures\\levelup\\" + cls->mId + ".dds");
+        setClassImage(mClassImage, cls->mId);
 
         int level = creatureStats.getLevel ()+1;
         mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + MyGUI::utility::toString(level));

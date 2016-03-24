@@ -2002,6 +2002,12 @@ namespace MWGui
         return Misc::ResourceHelpers::correctTexturePath(path, mResourceSystem->getVFS());
     }
 
+    bool WindowManager::textureExists(const std::string &path)
+    {
+        std::string corrected = Misc::ResourceHelpers::correctTexturePath(path, mResourceSystem->getVFS());
+        return mResourceSystem->getVFS()->exists(corrected);
+    }
+
     void WindowManager::createCursors()
     {
         MyGUI::ResourceManager::EnumeratorPtr enumerator = MyGUI::ResourceManager::getInstance().getEnumerator();
