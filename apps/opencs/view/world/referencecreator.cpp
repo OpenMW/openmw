@@ -87,6 +87,7 @@ CSVWorld::ReferenceCreator::ReferenceCreator (CSMWorld::Data& data, QUndoStack& 
     setManualEditing (false);
 
     connect (mCell, SIGNAL (textChanged (const QString&)), this, SLOT (cellChanged()));
+    connect (mCell, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
 }
 
 void CSVWorld::ReferenceCreator::reset()

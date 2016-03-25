@@ -60,6 +60,7 @@ CSVWorld::InfoCreator::InfoCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     setManualEditing (false);
 
     connect (mTopic, SIGNAL (textChanged (const QString&)), this, SLOT (topicChanged()));
+    connect (mTopic, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
 }
 
 void CSVWorld::InfoCreator::cloneMode (const std::string& originId,
@@ -110,7 +111,7 @@ void CSVWorld::InfoCreator::topicChanged()
     update();
 }
 
-CSVWorld::Creator *CSVWorld::InfoCreatorFactory::makeCreator(CSMDoc::Document& document, 
+CSVWorld::Creator *CSVWorld::InfoCreatorFactory::makeCreator(CSMDoc::Document& document,
                                                              const CSMWorld::UniversalId& id) const
 {
     return new InfoCreator(document.getData(),
