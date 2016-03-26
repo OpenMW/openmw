@@ -27,7 +27,7 @@ namespace CSVRender
     CameraController::CameraController()
         : mActive(false)
         , mModified(false)
-        , mCameraSensitivity(-1/700.f)
+        , mCameraSensitivity(1/650.f)
         , mSecondaryMoveMult(50)
         , mWheelMoveMult(8)
         , mCamera(NULL)
