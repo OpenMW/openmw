@@ -9,6 +9,7 @@ namespace CSMPrefs
     {
             Q_OBJECT
 
+            int mPrecision;
             double mMin;
             double mMax;
             std::string mTooltip;
@@ -21,6 +22,8 @@ namespace CSMPrefs
                 double default_);
 
             // defaults to [0, std::numeric_limits<double>::max()]
+            DoubleSetting& setPrecision (int precision);
+
             DoubleSetting& setRange (double min, double max);
 
             DoubleSetting& setMin (double min);

@@ -172,7 +172,7 @@ void CSMPrefs::State::declare()
     inputButtons.add (left).add (cLeft).add (right).add (cRight).add (middle).add (cMiddle);
     declareEnum ("p-navi", "Primary Camera Navigation Button", left).addValues (inputButtons);
     declareEnum ("s-navi", "Secondary Camera Navigation Button", cLeft).addValues (inputButtons);
-    declareDouble ("p-navi-sensitivity", "Camera Sensitivity", 1/650.).setRange(-2.0, 2.0);
+    declareDouble ("p-navi-sensitivity", "Camera Sensitivity", 1/650.).setPrecision(4).setRange(-2.0, 2.0);
     declareDouble ("s-navi-sensitivity", "Secondary Camera Movement Sensitivity", 50.0).setRange(-1000.0, 1000.0);
     declareDouble ("navi-wheel-factor", "Camera Zoom Sensitivity", 8).setRange(-100.0, 100.0);
     declareDouble ("navi-free-lin-speed", "Free Camera Linear Speed", 1000.0).setRange(1.0, 10000.0);
