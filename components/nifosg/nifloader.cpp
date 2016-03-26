@@ -333,7 +333,10 @@ namespace NifOsg
                 osg::ref_ptr<NifOsg::KeyframeController> callback(new NifOsg::KeyframeController(key->data.getPtr()));
                 callback->setFunction(boost::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key)));
 
-                target.mKeyframeControllers[strdata->string] = callback;
+                if (target.mKeyframeControllers.find(strdata->string) != target.mKeyframeControllers.end())
+                    std::cerr << "Warning: controller " << strdata->string << " present more than once in " << nif->getFilename() << ", ignoring later version" << std::endl;
+                else
+                    target.mKeyframeControllers[strdata->string] = callback;
             }
         }
 
