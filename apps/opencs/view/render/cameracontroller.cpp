@@ -7,6 +7,10 @@
 #include <osg/Matrixd>
 #include <osg/Quat>
 
+#include <osgUtil/LineSegmentIntersector>
+
+#include "mask.hpp"
+
 namespace CSVRender
 {
 
@@ -481,10 +485,30 @@ namespace CSVRender
     {
         static const int DefaultStartDistance = 10000.f;
 
-        osg::Vec3d eye, up;
-        getCamera()->getViewMatrixAsLookAt(eye, mCenter, up, DefaultStartDistance);
+        // Try to intelligently pick focus object
+        osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(
+            osgUtil::Intersector::PROJECTION, osg::Vec3d(0, 0, 0), LocalForward));
 
-        mDistance = DefaultStartDistance;
+        intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_NEAREST);
+        osgUtil::IntersectionVisitor visitor(intersector);
+
+        visitor.setTraversalMask(Mask_Reference | Mask_Terrain);
+
+        getCamera()->accept(visitor);
+
+        osg::Vec3d eye, center, up;
+        getCamera()->getViewMatrixAsLookAt(eye, center, up, DefaultStartDistance);
+
+        if (intersector->getIntersections().begin() != intersector->getIntersections().end())
+        {
+            mCenter = intersector->getIntersections().begin()->getWorldIntersectPoint();
+            mDistance = (eye - center).length();
+        }
+        else
+        {
+            mCenter = center;
+            mDistance = DefaultStartDistance;
+        }
 
         mInitialized = true;
     }
