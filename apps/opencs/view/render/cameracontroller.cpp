@@ -19,14 +19,12 @@ namespace CSVRender
     const osg::Vec3d CameraController::LocalLeft = osg::Vec3d(1, 0, 0);
     const osg::Vec3d CameraController::LocalForward = osg::Vec3d(0, 0, 1);
 
-    const double CameraController::LinearSpeed = 1000;
-    const double CameraController::RotationalSpeed = osg::PI / 2.f;
-    const double CameraController::SpeedMultiplier = 8;
-
     CameraController::CameraController()
         : mActive(false)
         , mModified(false)
-        , mMouseScalar(-1/700.f)
+        , mCameraSensitivity(-1/700.f)
+        , mSecondaryMoveMult(50)
+        , mWheelMoveMult(8)
         , mCamera(NULL)
     {
     }
@@ -50,9 +48,19 @@ namespace CSVRender
         return mCamera;
     }
 
-    double CameraController::getMouseScalar() const
+    double CameraController::getCameraSensitivity() const
     {
-        return mMouseScalar;
+        return mCameraSensitivity;
+    }
+
+    double CameraController::getSecondaryMovementMultiplier() const
+    {
+        return mSecondaryMoveMult;
+    }
+
+    double CameraController::getWheelMovementMultiplier() const
+    {
+        return mWheelMoveMult;
     }
 
     void CameraController::setCamera(osg::Camera* camera)
@@ -64,9 +72,19 @@ namespace CSVRender
             onActivate();
     }
 
-    void CameraController::setMouseScalar(double value)
+    void CameraController::setCameraSensitivity(double value)
     {
-        mMouseScalar = value;
+        mCameraSensitivity = value;
+    }
+
+    void CameraController::setSecondaryMovementMultiplier(double value)
+    {
+        mSecondaryMoveMult = value;
+    }
+
+    void CameraController::setWheelMovementMultiplier(double value)
+    {
+        mWheelMoveMult = value;
     }
 
     void CameraController::setSceneBounds(const osg::BoundingBox& bounds, const osg::Vec3d& up)
@@ -101,7 +119,40 @@ namespace CSVRender
         , mRollLeft(false)
         , mRollRight(false)
         , mUp(LocalUp)
+        , mLinSpeed(1000)
+        , mRotSpeed(osg::PI / 2)
+        , mSpeedMult(8)
     {
+    }
+
+    double FreeCameraController::getLinearSpeed() const
+    {
+        return mLinSpeed;
+    }
+
+    double FreeCameraController::getRotationalSpeed() const
+    {
+        return mRotSpeed;
+    }
+
+    double FreeCameraController::getSpeedMultiplier() const
+    {
+        return mSpeedMult;
+    }
+
+    void FreeCameraController::setLinearSpeed(double value)
+    {
+        mLinSpeed = value;
+    }
+
+    void FreeCameraController::setRotationalSpeed(double value)
+    {
+        mRotSpeed = value;
+    }
+
+    void FreeCameraController::setSpeedMultiplier(double value)
+    {
+        mSpeedMult = value;
     }
 
     void FreeCameraController::fixUpAxis(const osg::Vec3d& up)
@@ -171,18 +222,22 @@ namespace CSVRender
 
         if (mode == "p-navi")
         {
-            yaw(x * getMouseScalar());
-            pitch(y * getMouseScalar());
+            yaw(x * getCameraSensitivity());
+            pitch(y * getCameraSensitivity());
             setModified();
         }
         else if (mode == "s-navi")
         {
-            translate(LocalLeft * x + LocalUp * -y);
+            osg::Vec3d movement;
+            movement += LocalLeft * -x * getSecondaryMovementMultiplier();
+            movement += LocalUp * y * getSecondaryMovementMultiplier();
+
+            translate(movement);
             setModified();
         }
         else if (mode == "t-navi")
         {
-            translate(LocalForward * x * (mFast ? SpeedMultiplier : 1));
+            translate(LocalForward * x * (mFast ? getWheelMovementMultiplier() : 1));
         }
         else
         {
@@ -197,11 +252,11 @@ namespace CSVRender
         if (!isActive())
             return;
 
-        double linDist = LinearSpeed * dt;
-        double rotDist = RotationalSpeed * dt;
+        double linDist = mLinSpeed * dt;
+        double rotDist = mRotSpeed * dt;
 
         if (mFast)
-            linDist *= SpeedMultiplier;
+            linDist *= mSpeedMult;
 
         if (mLeft)
             translate(LocalLeft * linDist);
@@ -272,7 +327,29 @@ namespace CSVRender
         , mRollRight(false)
         , mCenter(0,0,0)
         , mDistance(0)
+        , mOrbitSpeed(osg::PI / 4)
+        , mOrbitSpeedMult(4)
     {
+    }
+
+    double OrbitCameraController::getOrbitSpeed() const
+    {
+        return mOrbitSpeed;
+    }
+
+    double OrbitCameraController::getOrbitSpeedMultiplier() const
+    {
+        return mOrbitSpeedMult;
+    }
+
+    void OrbitCameraController::setOrbitSpeed(double value)
+    {
+        mOrbitSpeed = value;
+    }
+
+    void OrbitCameraController::setOrbitSpeedMultiplier(double value)
+    {
+        mOrbitSpeedMult = value;
     }
 
     bool OrbitCameraController::handleKeyEvent(QKeyEvent* event, bool pressed)
@@ -336,18 +413,22 @@ namespace CSVRender
 
         if (mode == "p-navi")
         {
-            rotateHorizontal(x * getMouseScalar());
-            rotateVertical(-y * getMouseScalar());
+            rotateHorizontal(x * getCameraSensitivity());
+            rotateVertical(-y * getCameraSensitivity());
             setModified();
         }
         else if (mode == "s-navi")
         {
-            translate(LocalLeft * x + LocalUp * -y);
+            osg::Vec3d movement;
+            movement += LocalLeft * x * getSecondaryMovementMultiplier();
+            movement += LocalUp * -y * getSecondaryMovementMultiplier();
+
+            translate(movement);
             setModified();
         }
         else if (mode == "t-navi")
         {
-            zoom(-x * (mFast ? SpeedMultiplier : 1));
+            zoom(-x * (mFast ? getWheelMovementMultiplier() : 1));
         }
         else
         {
@@ -365,10 +446,10 @@ namespace CSVRender
         if (!mInitialized)
             initialize();
 
-        double rotDist = RotationalSpeed * dt;
+        double rotDist = mOrbitSpeed * dt;
 
         if (mFast)
-            rotDist *= SpeedMultiplier;
+            rotDist *= mOrbitSpeedMult;
 
         if (mLeft)
             rotateHorizontal(-rotDist);

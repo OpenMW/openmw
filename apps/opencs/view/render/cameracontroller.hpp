@@ -26,10 +26,6 @@ namespace CSVRender
             static const osg::Vec3d LocalLeft;
             static const osg::Vec3d LocalForward;
 
-            static const double LinearSpeed;
-            static const double RotationalSpeed;
-            static const double SpeedMultiplier;
-
             CameraController();
             virtual ~CameraController();
 
@@ -37,10 +33,14 @@ namespace CSVRender
             bool isModified() const;
 
             osg::Camera* getCamera() const;
-            double getMouseScalar() const;
+            double getCameraSensitivity() const;
+            double getSecondaryMovementMultiplier() const;
+            double getWheelMovementMultiplier() const;
 
             void setCamera(osg::Camera*);
-            void setMouseScalar(double value);
+            void setCameraSensitivity(double value);
+            void setSecondaryMovementMultiplier(double value);
+            void setWheelMovementMultiplier(double value);
 
             // moves the camera to an intelligent position
             void setSceneBounds(const osg::BoundingBox& bounds, const osg::Vec3d& up);
@@ -60,7 +60,9 @@ namespace CSVRender
         private:
 
             bool mActive, mModified;
-            double mMouseScalar;
+            double mCameraSensitivity;
+            double mSecondaryMoveMult;
+            double mWheelMoveMult;
 
             osg::Camera* mCamera;
     };
@@ -70,6 +72,14 @@ namespace CSVRender
         public:
 
             FreeCameraController();
+
+            double getLinearSpeed() const;
+            double getRotationalSpeed() const;
+            double getSpeedMultiplier() const;
+
+            void setLinearSpeed(double value);
+            void setRotationalSpeed(double value);
+            void setSpeedMultiplier(double value);
 
             void fixUpAxis(const osg::Vec3d& up);
             void unfixUpAxis();
@@ -91,6 +101,10 @@ namespace CSVRender
             bool mLockUpright;
             bool mFast, mLeft, mRight, mForward, mBackward, mRollLeft, mRollRight;
             osg::Vec3d mUp;
+
+            double mLinSpeed;
+            double mRotSpeed;
+            double mSpeedMult;
     };
 
     class OrbitCameraController : public CameraController
@@ -98,6 +112,12 @@ namespace CSVRender
         public:
 
             OrbitCameraController();
+
+            double getOrbitSpeed() const;
+            double getOrbitSpeedMultiplier() const;
+
+            void setOrbitSpeed(double value);
+            void setOrbitSpeedMultiplier(double value);
 
             bool handleKeyEvent(QKeyEvent* event, bool pressed);
             bool handleMouseMoveEvent(std::string mode, int x, int y);
@@ -120,6 +140,9 @@ namespace CSVRender
             bool mFast, mLeft, mRight, mUp, mDown, mRollLeft, mRollRight;
             osg::Vec3d mCenter;
             double mDistance;
+
+            double mOrbitSpeed;
+            double mOrbitSpeedMult;
     };
 }
 
