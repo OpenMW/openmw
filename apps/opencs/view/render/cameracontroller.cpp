@@ -3,6 +3,7 @@
 #include <QKeyEvent>
 
 #include <osg/Camera>
+#include <osg/Drawable>
 #include <osg/Matrixd>
 #include <osg/Quat>
 
@@ -540,5 +541,32 @@ namespace CSVRender
         osg::Vec3d offset = (eye - center) * mDistance;
 
         getCamera()->setViewMatrixAsLookAt(mCenter + offset, mCenter, up);
+    }
+
+    CameraComputeBoundsVisitor::CameraComputeBoundsVisitor(unsigned int mask)
+        : mMask(mask)
+    {
+    }
+
+    unsigned int CameraComputeBoundsVisitor::getMask() const
+    {
+        return mMask;
+    }
+
+    void CameraComputeBoundsVisitor::setMask(unsigned int value)
+    {
+        mMask = value;
+    }
+
+    void CameraComputeBoundsVisitor::apply(osg::Drawable& drawable)
+    {
+        if (drawable.getNodeMask() & mMask)
+            ComputeBoundsVisitor::apply(drawable);
+    }
+
+    void CameraComputeBoundsVisitor::apply(osg::Transform& transform)
+    {
+        if (transform.getNodeMask() & mMask)
+            ComputeBoundsVisitor::apply(transform);
     }
 }

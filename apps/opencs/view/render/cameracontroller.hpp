@@ -4,6 +4,7 @@
 #include <string>
 
 #include <osg/BoundingBox>
+#include <osg/ComputeBoundsVisitor>
 #include <osg/ref_ptr>
 #include <osg/Vec3d>
 
@@ -143,6 +144,21 @@ namespace CSVRender
 
             double mOrbitSpeed;
             double mOrbitSpeedMult;
+    };
+
+    class CameraComputeBoundsVisitor : public osg::ComputeBoundsVisitor
+    {
+    public:
+        CameraComputeBoundsVisitor(unsigned int mask);
+
+        unsigned int getMask() const;
+        void setMask(unsigned int mask);
+
+        void apply(osg::Drawable& drawable);
+        void apply(osg::Transform& transform);
+
+    private:
+        unsigned int mMask;
     };
 }
 
