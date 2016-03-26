@@ -502,7 +502,7 @@ namespace CSVRender
         if (intersector->getIntersections().begin() != intersector->getIntersections().end())
         {
             mCenter = intersector->getIntersections().begin()->getWorldIntersectPoint();
-            mDistance = (eye - center).length();
+            mDistance = (eye - mCenter).length();
         }
         else
         {
