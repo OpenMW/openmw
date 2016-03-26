@@ -174,6 +174,7 @@ CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undo
     connect (mCreate, SIGNAL (clicked (bool)), this, SLOT (create()));
 
     connect (mId, SIGNAL (textChanged (const QString&)), this, SLOT (textChanged (const QString&)));
+    connect (mId, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
 
     connect (&mData, SIGNAL (idListChanged()), this, SLOT (dataIdListChanged()));
 }
@@ -207,6 +208,14 @@ std::string CSVWorld::GenericCreator::getErrors() const
 void CSVWorld::GenericCreator::textChanged (const QString& text)
 {
     update();
+}
+
+void CSVWorld::GenericCreator::inputReturnPressed()
+{
+    if (mCreate->isEnabled())
+    {
+        create();
+    }
 }
 
 void CSVWorld::GenericCreator::create()

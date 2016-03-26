@@ -116,6 +116,9 @@ namespace CSVWorld
 
             void textChanged (const QString& text);
 
+            /// \brief Create record if able to after Return key is pressed on input.
+            void inputReturnPressed();
+
             void create();
 
             void scopeChanged (int index);
