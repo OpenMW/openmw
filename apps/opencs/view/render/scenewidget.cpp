@@ -328,7 +328,45 @@ void SceneWidget::update(double dt)
 
 void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
 {
-    storeMappingSetting(setting);
+    if (*setting=="3D Scene Input/p-navi-sensitivity")
+    {
+        mFreeCamControl->setCameraSensitivity(setting->toDouble());
+        mOrbitCamControl->setCameraSensitivity(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/s-navi-sensitivity")
+    {
+        mFreeCamControl->setSecondaryMovementMultiplier(setting->toDouble());
+        mOrbitCamControl->setSecondaryMovementMultiplier(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-wheel-factor")
+    {
+        mFreeCamControl->setWheelMovementMultiplier(setting->toDouble());
+        mOrbitCamControl->setWheelMovementMultiplier(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-free-lin-speed")
+    {
+        mFreeCamControl->setLinearSpeed(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-free-rot-speed")
+    {
+        mFreeCamControl->setRotationalSpeed(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-free-speed-mult")
+    {
+        mFreeCamControl->setSpeedMultiplier(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-orbit-rot-speed")
+    {
+        mOrbitCamControl->setOrbitSpeed(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-orbit-speed-mult")
+    {
+        mOrbitCamControl->setOrbitSpeedMultiplier(setting->toDouble());
+    }
+    else
+    {
+        storeMappingSetting(setting);
+    }
 }
 
 void SceneWidget::selectNavigationMode (const std::string& mode)
