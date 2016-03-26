@@ -520,8 +520,14 @@ namespace CSVRender
 
     void OrbitCameraController::translate(const osg::Vec3d& offset)
     {
-        mCenter += offset;
-        getCamera()->getViewMatrix() *= osg::Matrixd::translate(offset);
+        osg::Vec3d eye, center, up;
+        getCamera()->getViewMatrixAsLookAt(eye, center, up);
+
+        osg::Vec3d newOffset = getCamera()->getViewMatrix().getRotate().inverse() * offset;
+        mCenter += newOffset;
+        eye += newOffset;
+
+        getCamera()->setViewMatrixAsLookAt(eye, mCenter, up);
     }
 
     void OrbitCameraController::zoom(double value)
