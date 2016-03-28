@@ -87,6 +87,7 @@ namespace MWGui
         MWBase::Environment::get().getStateManager()->deleteGame (mCurrentCharacter, mCurrentSlot);
         mSaveList->removeItemAt(mSaveList->getIndexSelected());
         onSlotSelected(mSaveList, mSaveList->getIndexSelected());
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
 
         if (mSaveList->getItemCount() == 0)
         {
