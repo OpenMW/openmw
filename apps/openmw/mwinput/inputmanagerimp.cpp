@@ -1326,10 +1326,12 @@ namespace MWInput
 
         ICS::Control* c = mInputBinder->getChannel (action)->getAttachedControls ().front().control;
 
-        if (mInputBinder->getKeyBinding (c, ICS::Control::INCREASE) != SDL_SCANCODE_UNKNOWN)
-            return mInputBinder->scancodeToString (mInputBinder->getKeyBinding (c, ICS::Control::INCREASE));
-        else if (mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
-            return "#{sMouse} " + boost::lexical_cast<std::string>(mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE));
+        SDL_Scancode key = mInputBinder->getKeyBinding (c, ICS::Control::INCREASE);
+        unsigned int mouse = mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE);
+        if (key != SDL_SCANCODE_UNKNOWN)
+            return MyGUI::TextIterator::toTagsString(mInputBinder->scancodeToString (key));
+        else if (mouse != ICS_MAX_DEVICE_BUTTONS)
+            return "#{sMouse} " + boost::lexical_cast<std::string>(mouse);
         else
             return "#{sNone}";
     }
