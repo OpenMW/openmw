@@ -260,6 +260,11 @@ namespace MWWorld
         mMaxCacheSize = num;
     }
 
+    unsigned int CellPreloader::getMaxCacheSize() const
+    {
+        return mMaxCacheSize;
+    }
+
     void CellPreloader::setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue)
     {
         mWorkQueue = workQueue;

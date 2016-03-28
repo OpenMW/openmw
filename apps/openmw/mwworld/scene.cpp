@@ -737,11 +737,14 @@ namespace MWWorld
         {
             int x = cell->getCell()->getGridX();
             int y = cell->getCell()->getGridY();
+            unsigned int numpreloaded = 0;
             for (int dx = -mHalfGridSize; dx <= mHalfGridSize; ++dx)
             {
                 for (int dy = -mHalfGridSize; dy <= mHalfGridSize; ++dy)
                 {
                     mPreloader->preload(MWBase::Environment::get().getWorld()->getExterior(x+dx, y+dy), mRendering.getReferenceTime());
+                    if (++numpreloaded >= mPreloader->getMaxCacheSize())
+                        break;
                 }
             }
         }

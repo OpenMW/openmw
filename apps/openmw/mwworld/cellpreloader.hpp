@@ -44,6 +44,8 @@ namespace MWWorld
         /// The maximum number of preloaded cells.
         void setMaxCacheSize(unsigned int num);
 
+        unsigned int getMaxCacheSize() const;
+
         void setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue);
 
     private:
