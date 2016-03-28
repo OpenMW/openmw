@@ -86,16 +86,19 @@ namespace MWGui
     {
         MWBase::Environment::get().getStateManager()->deleteGame (mCurrentCharacter, mCurrentSlot);
         mSaveList->removeItemAt(mSaveList->getIndexSelected());
-        onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
+        onSlotSelected(mSaveList, mSaveList->getIndexSelected());
 
-        // The character might be deleted now
-        size_t previousIndex = mCharacterSelection->getIndexSelected();
-        open();
-        if (mCharacterSelection->getItemCount())
+        if (mSaveList->getItemCount() == 0)
         {
-            size_t nextCharacter = std::min(previousIndex, mCharacterSelection->getItemCount()-1);
-            mCharacterSelection->setIndexSelected(nextCharacter);
-            onCharacterSelected(mCharacterSelection, nextCharacter);
+            // The character might be deleted now
+            size_t previousIndex = mCharacterSelection->getIndexSelected();
+            open();
+            if (mCharacterSelection->getItemCount())
+            {
+                size_t nextCharacter = std::min(previousIndex, mCharacterSelection->getItemCount()-1);
+                mCharacterSelection->setIndexSelected(nextCharacter);
+                onCharacterSelected(mCharacterSelection, nextCharacter);
+            }
         }
     }
 
