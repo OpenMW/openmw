@@ -40,7 +40,7 @@ namespace SceneUtil
         if (mWorkItem->mObjects.empty())
             return;
 
-        workQueue->addWorkItem(mWorkItem);
+        workQueue->addWorkItem(mWorkItem, true);
 
         mWorkItem = new UnrefWorkItem;
     }

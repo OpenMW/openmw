@@ -238,7 +238,7 @@ namespace MWWorld
         }
 
         // the resource cache is cleared from the worker thread so that we're not holding up the main thread with delete operations
-        mWorkQueue->addWorkItem(new UpdateCacheItem(mResourceSystem, mTerrain, timestamp));
+        mWorkQueue->addWorkItem(new UpdateCacheItem(mResourceSystem, mTerrain, timestamp), true);
     }
 
     void CellPreloader::setExpiryDelay(double expiryDelay)
