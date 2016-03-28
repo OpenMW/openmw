@@ -204,6 +204,7 @@ namespace MWWorld
             // throw out oldest cell to make room
             PreloadMap::iterator oldestCell = mPreloadCells.begin();
             double oldestTimestamp = DBL_MAX;
+            double threshold = 1.0; // seconds
             for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end(); ++it)
             {
                 if (it->second.mTimeStamp < oldestTimestamp)
@@ -213,7 +214,10 @@ namespace MWWorld
                 }
             }
 
-            mPreloadCells.erase(oldestCell);
+            if (oldestTimestamp + threshold < timestamp)
+                mPreloadCells.erase(oldestCell);
+            else
+                return;
         }
 
         osg::ref_ptr<PreloadItem> item (new PreloadItem(cell, mResourceSystem->getSceneManager(), mBulletShapeManager, mResourceSystem->getKeyframeManager(), mTerrain));
