@@ -204,6 +204,8 @@ namespace MWWorld
         }
 
         mRendering.update (duration, paused);
+
+        mPreloader->updateCache(mRendering.getReferenceTime());
     }
 
     void Scene::unloadCell (CellStoreCollection::iterator iter)
@@ -421,8 +423,6 @@ namespace MWWorld
 
         if (changeEvent)
             mCellChanged = true;
-
-        mPreloader->updateCache(mRendering.getReferenceTime());
     }
 
     void Scene::changePlayerCell(CellStore *cell, const ESM::Position &pos, bool adjustPlayerPos)
@@ -557,8 +557,6 @@ namespace MWWorld
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
-
-        mPreloader->updateCache(mRendering.getReferenceTime());
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
