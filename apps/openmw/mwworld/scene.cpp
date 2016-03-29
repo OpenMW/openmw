@@ -544,7 +544,7 @@ namespace MWWorld
         // Load cell.
         loadCell (cell, loadingListener, changeEvent);
 
-        changePlayerCell(cell, position, true);
+        changePlayerCell(cell, position, adjustPlayerPos);
 
         // adjust fog
         mRendering.configureFog(mCurrentCell->getCell());
