@@ -44,6 +44,9 @@ namespace MWWorld
         /// The maximum number of preloaded cells.
         void setMaxCacheSize(unsigned int num);
 
+        /// Enables the creation of instances in the preloading thread.
+        void setPreloadInstances(bool preload);
+
         unsigned int getMaxCacheSize() const;
 
         void setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue);
@@ -56,6 +59,7 @@ namespace MWWorld
         double mExpiryDelay;
         unsigned int mMinCacheSize;
         unsigned int mMaxCacheSize;
+        bool mPreloadInstances;
 
         struct PreloadEntry
         {

@@ -45,7 +45,7 @@ namespace MWWorld
     {
     public:
         /// Constructor to be called from the main thread.
-        PreloadItem(MWWorld::CellStore* cell, Resource::SceneManager* sceneManager, Resource::BulletShapeManager* bulletShapeManager, Resource::KeyframeManager* keyframeManager, Terrain::World* terrain)
+        PreloadItem(MWWorld::CellStore* cell, Resource::SceneManager* sceneManager, Resource::BulletShapeManager* bulletShapeManager, Resource::KeyframeManager* keyframeManager, Terrain::World* terrain, bool preloadInstances)
             : mIsExterior(cell->getCell()->isExterior())
             , mX(cell->getCell()->getGridX())
             , mY(cell->getCell()->getGridY())
@@ -53,6 +53,7 @@ namespace MWWorld
             , mBulletShapeManager(bulletShapeManager)
             , mKeyframeManager(keyframeManager)
             , mTerrain(terrain)
+            , mPreloadInstances(preloadInstances)
         {
             ListModelsVisitor visitor (mMeshes);
             if (cell->getState() == MWWorld::CellStore::State_Loaded)
@@ -84,8 +85,16 @@ namespace MWWorld
                     std::string mesh  = *it;
                     mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mSceneManager->getVFS());
 
-                    mPreloadedObjects.push_back(mSceneManager->cacheInstance(mesh));
-                    mPreloadedObjects.push_back(mBulletShapeManager->cacheInstance(mesh));
+                    if (mPreloadInstances)
+                    {
+                        mPreloadedObjects.push_back(mSceneManager->cacheInstance(mesh));
+                        mPreloadedObjects.push_back(mBulletShapeManager->cacheInstance(mesh));
+                    }
+                    else
+                    {
+                        mPreloadedObjects.push_back(mSceneManager->getTemplate(mesh));
+                        mPreloadedObjects.push_back(mBulletShapeManager->getShape(mesh));
+                    }
 
                     size_t slashpos = mesh.find_last_of("/\\");
                     if (slashpos != std::string::npos && slashpos != mesh.size()-1)
@@ -132,6 +141,7 @@ namespace MWWorld
         Resource::BulletShapeManager* mBulletShapeManager;
         Resource::KeyframeManager* mKeyframeManager;
         Terrain::World* mTerrain;
+        bool mPreloadInstances;
 
         // keep a ref to the loaded objects to make sure it stays loaded as long as this cell is in the preloaded state
         std::vector<osg::ref_ptr<const osg::Object> > mPreloadedObjects;
@@ -168,6 +178,7 @@ namespace MWWorld
         , mExpiryDelay(0.0)
         , mMinCacheSize(0)
         , mMaxCacheSize(0)
+        , mPreloadInstances(true)
     {
     }
 
@@ -220,7 +231,7 @@ namespace MWWorld
                 return;
         }
 
-        osg::ref_ptr<PreloadItem> item (new PreloadItem(cell, mResourceSystem->getSceneManager(), mBulletShapeManager, mResourceSystem->getKeyframeManager(), mTerrain));
+        osg::ref_ptr<PreloadItem> item (new PreloadItem(cell, mResourceSystem->getSceneManager(), mBulletShapeManager, mResourceSystem->getKeyframeManager(), mTerrain, mPreloadInstances));
         mWorkQueue->addWorkItem(item);
 
         mPreloadCells[cell] = PreloadEntry(timestamp, item);
@@ -258,6 +269,11 @@ namespace MWWorld
     void CellPreloader::setMaxCacheSize(unsigned int num)
     {
         mMaxCacheSize = num;
+    }
+
+    void CellPreloader::setPreloadInstances(bool preload)
+    {
+        mPreloadInstances = preload;
     }
 
     unsigned int CellPreloader::getMaxCacheSize() const

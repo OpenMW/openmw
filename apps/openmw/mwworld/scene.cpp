@@ -478,6 +478,7 @@ namespace MWWorld
         mPreloader->setExpiryDelay(Settings::Manager::getFloat("preload cell expiry delay", "Cells"));
         mPreloader->setMinCacheSize(Settings::Manager::getInt("preload cell cache min", "Cells"));
         mPreloader->setMaxCacheSize(Settings::Manager::getInt("preload cell cache max", "Cells"));
+        mPreloader->setPreloadInstances(Settings::Manager::getBool("preload instances", "Cells"));
     }
 
     Scene::~Scene()
