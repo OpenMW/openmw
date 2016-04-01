@@ -12,6 +12,8 @@
 #include "aisequence.hpp"
 #include "drawstate.hpp"
 
+#include "../mwworld/class.hpp"
+
 namespace ESM
 {
     struct CreatureStats;
@@ -219,6 +221,7 @@ namespace MWMechanics
 
         std::map<SummonKey, int>& getSummonedCreatureMap(); // <SummonKey, ActorId of summoned creature>
         std::vector<int>& getSummonedCreatureGraveyard(); // ActorIds
+        bool hasSummonedCreature(const MWWorld::Ptr &actor);
 
         enum Flag
         {

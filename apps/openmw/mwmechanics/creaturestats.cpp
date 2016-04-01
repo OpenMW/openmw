@@ -656,4 +656,18 @@ namespace MWMechanics
     {
         return mSummonGraveyard;
     }
+
+    bool CreatureStats::hasSummonedCreature(const MWWorld::Ptr& actor) {
+        const std::map<CreatureStats::SummonKey, int> summonedCreatures = this->getSummonedCreatureMap();
+
+        typedef std::map<CreatureStats::SummonKey, int>::const_iterator it_type;
+        for (it_type it = summonedCreatures.begin(); it != summonedCreatures.end(); ++it)
+        {
+            const CreatureStats& actorCreatureStats = actor.getClass().getCreatureStats(actor);
+            if (actorCreatureStats.matchesActorId(it->second))
+                return true;
+        }
+
+        return false;
+    }
 }

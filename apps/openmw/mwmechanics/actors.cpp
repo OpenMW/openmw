@@ -642,23 +642,26 @@ namespace MWMechanics
                         ESM::MagicEffect::SunDamage, ESM::MagicEffect::DamageHealth, ESM::MagicEffect::AbsorbHealth
                     };
 
-                    for (unsigned int i=0; i<sizeof(damageEffects)/sizeof(int); ++i)
+                    for (unsigned int i=0; i < sizeof(damageEffects) / sizeof(int); ++i)
                     {
                         if (damageEffects[i] == effectId)
                             isDamageEffect = true;
                     }
 
                     MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.mCasterActorId);
-                    if (isDamageEffect && caster == player)
-                        killedByPlayer = true;
+                    if (isDamageEffect)
+                    {
+                        if (caster == player)
+                            killedByPlayer = true;
+
+                        MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, caster);
+                    }
                 }
             }
-            if (killedByPlayer)
-            {
-                MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, player);
-                if (player.getClass().getNpcStats(player).isWerewolf())
-                    player.getClass().getNpcStats(player).addWerewolfKill();
-            }
+
+            // TODO: Should actors siding with the player or siding actor or player summon also add werewolf kill?
+            if (killedByPlayer && player.getClass().getNpcStats(player).isWerewolf())
+                player.getClass().getNpcStats(player).addWerewolfKill();
         }
 
         // TODO: dirty flag for magic effects to avoid some unnecessary work below?
