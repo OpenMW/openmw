@@ -94,7 +94,13 @@ namespace CSVRender
 
     void CameraController::setSceneBounds(const osg::BoundingBox& bounds, const osg::Vec3d& up)
     {
-        osg::Vec3d eye = osg::Vec3d(bounds.xMax(), bounds.yMax(), bounds.zMax());
+        osg::Vec3d minBounds = bounds.corner(0) - bounds.center();
+        osg::Vec3d maxBounds = bounds.corner(7) - bounds.center();
+
+        osg::Vec3d camOffset = up * maxBounds > 0 ? maxBounds : minBounds;
+        camOffset *= 2;
+
+        osg::Vec3d eye = camOffset + bounds.center();
         osg::Vec3d center = bounds.center();
 
         getCamera()->setViewMatrixAsLookAt(eye, center, up);
