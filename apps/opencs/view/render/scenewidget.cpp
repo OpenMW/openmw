@@ -319,6 +319,20 @@ void SceneWidget::update(double dt)
 
         mRootNode->accept(boundsVisitor);
 
+        // Remove mask if nothing is found
+        if (!boundingBox.valid())
+        {
+            boundsVisitor.reset();
+            boundsVisitor.setMask(~0);
+            mRootNode->accept(boundsVisitor);
+        }
+
+        // Set a default if there is still nothing found
+        if (!boundingBox.valid())
+        {
+            boundingBox.set(-1, -1, -1, 1, 1, 1);
+        }
+
         mCurrentCamControl->setSceneBounds(boundingBox, CameraController::WorldUp);
 
         mCamPositionSet = true;
