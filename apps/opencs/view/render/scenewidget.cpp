@@ -12,6 +12,7 @@
 #include <osgViewer/ViewerEventHandlers>
 #include <osg/LightModel>
 #include <osg/BoundingBox>
+#include <osg/ComputeBoundsVisitor>
 
 #include <osgGA/TrackballManipulator>
 #include <osgGA/FirstPersonManipulator>
@@ -314,8 +315,9 @@ void SceneWidget::update(double dt)
     }
     else
     {
-        CameraComputeBoundsVisitor boundsVisitor(Mask_Reference | Mask_Terrain);
+        osg::ComputeBoundsVisitor boundsVisitor;
         osg::BoundingBox &boundingBox(boundsVisitor.getBoundingBox());
+        boundsVisitor.setNodeMaskOverride(Mask_Reference | Mask_Terrain);
 
         mRootNode->accept(boundsVisitor);
 
@@ -323,7 +325,7 @@ void SceneWidget::update(double dt)
         if (!boundingBox.valid())
         {
             boundsVisitor.reset();
-            boundsVisitor.setMask(~0);
+            boundsVisitor.setNodeMaskOverride(~0);
             mRootNode->accept(boundsVisitor);
         }
 

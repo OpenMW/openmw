@@ -572,31 +572,4 @@ namespace CSVRender
 
         getCamera()->setViewMatrixAsLookAt(mCenter + offset, mCenter, up);
     }
-
-    CameraComputeBoundsVisitor::CameraComputeBoundsVisitor(unsigned int mask)
-        : mMask(mask)
-    {
-    }
-
-    unsigned int CameraComputeBoundsVisitor::getMask() const
-    {
-        return mMask;
-    }
-
-    void CameraComputeBoundsVisitor::setMask(unsigned int value)
-    {
-        mMask = value;
-    }
-
-    void CameraComputeBoundsVisitor::apply(osg::Drawable& drawable)
-    {
-        if (drawable.getNodeMask() & mMask)
-            ComputeBoundsVisitor::apply(drawable);
-    }
-
-    void CameraComputeBoundsVisitor::apply(osg::Transform& transform)
-    {
-        if (transform.getNodeMask() & mMask)
-            ComputeBoundsVisitor::apply(transform);
-    }
 }
