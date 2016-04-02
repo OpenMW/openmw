@@ -167,6 +167,7 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
     , mCurrentCamControl(mFreeCamControl.get())
     , mCamPositionSet(false)
 {
+    mOrbitCamControl->setPickingMask(Mask_Reference | Mask_Terrain);
     selectNavigationMode("free");
 
     // we handle lighting manually

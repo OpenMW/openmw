@@ -12,8 +12,6 @@
 
 #include <osgUtil/LineSegmentIntersector>
 
-#include "mask.hpp"
-
 namespace CSVRender
 {
 
@@ -361,6 +359,7 @@ namespace CSVRender
         , mDown(false)
         , mRollLeft(false)
         , mRollRight(false)
+        , mPickingMask(~0)
         , mCenter(0,0,0)
         , mDistance(0)
         , mOrbitSpeed(osg::PI / 4)
@@ -378,6 +377,11 @@ namespace CSVRender
         return mOrbitSpeedMult;
     }
 
+    unsigned int OrbitCameraController::getPickingMask() const
+    {
+        return mPickingMask;
+    }
+
     void OrbitCameraController::setOrbitSpeed(double value)
     {
         mOrbitSpeed = value;
@@ -386,6 +390,11 @@ namespace CSVRender
     void OrbitCameraController::setOrbitSpeedMultiplier(double value)
     {
         mOrbitSpeedMult = value;
+    }
+
+    void OrbitCameraController::setPickingMask(unsigned int value)
+    {
+        mPickingMask = value;
     }
 
     bool OrbitCameraController::handleKeyEvent(QKeyEvent* event, bool pressed)
@@ -523,7 +532,7 @@ namespace CSVRender
         intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_NEAREST);
         osgUtil::IntersectionVisitor visitor(intersector);
 
-        visitor.setTraversalMask(Mask_Reference | Mask_Terrain);
+        visitor.setTraversalMask(mPickingMask);
 
         getCamera()->accept(visitor);
 

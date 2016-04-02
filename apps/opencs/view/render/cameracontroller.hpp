@@ -115,9 +115,11 @@ namespace CSVRender
 
             double getOrbitSpeed() const;
             double getOrbitSpeedMultiplier() const;
+            unsigned int getPickingMask() const;
 
             void setOrbitSpeed(double value);
             void setOrbitSpeedMultiplier(double value);
+            void setPickingMask(unsigned int value);
 
             bool handleKeyEvent(QKeyEvent* event, bool pressed);
             bool handleMouseMoveEvent(std::string mode, int x, int y);
@@ -138,6 +140,7 @@ namespace CSVRender
 
             bool mInitialized;
             bool mFast, mLeft, mRight, mUp, mDown, mRollLeft, mRollRight;
+            unsigned int mPickingMask;
             osg::Vec3d mCenter;
             double mDistance;
 
