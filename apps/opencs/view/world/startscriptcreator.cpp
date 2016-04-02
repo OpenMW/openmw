@@ -53,6 +53,7 @@ CSVWorld::StartScriptCreator::StartScriptCreator(
     insertBeforeButtons(mScript, true);
 
     connect(mScript, SIGNAL (textChanged(const QString&)), this, SLOT (scriptChanged()));
+    connect(mScript, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
 }
 
 void CSVWorld::StartScriptCreator::cloneMode(

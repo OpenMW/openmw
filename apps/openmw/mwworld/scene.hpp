@@ -103,7 +103,7 @@ namespace MWWorld
             bool hasCellChanged() const;
             ///< Has the set of active cells changed, since the last frame?
 
-            void changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool changeEvent=true);
+            void changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true);
             ///< Move to interior cell.
             /// @param changeEvent Set cellChanged flag?
 

@@ -29,11 +29,6 @@ namespace CSVWorld
 
             virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
 
-            virtual void pushCommand (std::auto_ptr<CSMWorld::CreateCommand> command,
-                const std::string& id);
-
-            int getRefNumCount() const;
-
         public:
 
             ReferenceCreator (CSMWorld::Data& data, QUndoStack& undoStack,
@@ -50,7 +45,7 @@ namespace CSVWorld
 
             /// Focus main input widget
             virtual void focus();
- 
+
         private slots:
 
             void cellChanged();

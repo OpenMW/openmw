@@ -55,7 +55,7 @@ WorkQueue::~WorkQueue()
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
         while (!mQueue.empty())
-            mQueue.pop();
+            mQueue.pop_back();
         mIsReleased = true;
         mCondition.broadcast();
     }
@@ -67,7 +67,7 @@ WorkQueue::~WorkQueue()
     }
 }
 
-void WorkQueue::addWorkItem(osg::ref_ptr<WorkItem> item)
+void WorkQueue::addWorkItem(osg::ref_ptr<WorkItem> item, bool front)
 {
     if (item->isDone())
     {
@@ -76,7 +76,10 @@ void WorkQueue::addWorkItem(osg::ref_ptr<WorkItem> item)
     }
 
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
-    mQueue.push(item);
+    if (front)
+        mQueue.push_front(item);
+    else
+        mQueue.push_back(item);
     mCondition.signal();
 }
 
@@ -90,7 +93,7 @@ osg::ref_ptr<WorkItem> WorkQueue::removeWorkItem()
     if (!mQueue.empty())
     {
         osg::ref_ptr<WorkItem> item = mQueue.front();
-        mQueue.pop();
+        mQueue.pop_front();
         return item;
     }
     else

@@ -495,7 +495,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         const ESM::CellId& cellId = ptr.getCell()->getCell()->getCellId();
 
         // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
-        MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false);
+        MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false, false);
 
         // Vanilla MW will restart startup scripts when a save game is loaded. This is unintuitive,
         // but some mods may be using it as a reload detector.

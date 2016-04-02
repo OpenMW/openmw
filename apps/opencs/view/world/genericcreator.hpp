@@ -33,6 +33,7 @@ namespace CSVWorld
             QUndoStack& mUndoStack;
             CSMWorld::UniversalId mListId;
             QPushButton *mCreate;
+            QPushButton *mCancel;
             QLineEdit *mId;
             std::string mErrors;
             QHBoxLayout *mLayout;
@@ -56,6 +57,9 @@ namespace CSVWorld
 
             void insertAtBeginning (QWidget *widget, bool stretched);
 
+            /// \brief Insert given widget before Create and Cancel buttons.
+            /// \param widget Widget to add to layout.
+            /// \param stretched Whether widget should be streched or not.
             void insertBeforeButtons (QWidget *widget, bool stretched);
 
             virtual std::string getId() const;
@@ -111,6 +115,9 @@ namespace CSVWorld
         private slots:
 
             void textChanged (const QString& text);
+
+            /// \brief Create record if able to after Return key is pressed on input.
+            void inputReturnPressed();
 
             void create();
 

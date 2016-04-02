@@ -99,6 +99,7 @@ void CSMTools::MergeReferencesStage::perform (int stage, CSMDoc::Messages& messa
 
         ref.mRefNum.mIndex = mIndex[Misc::StringUtils::lowerCase (ref.mCell)]++;
         ref.mRefNum.mContentFile = 0;
+        ref.mNew = false;
 
         CSMWorld::Record<CSMWorld::CellRef> newRecord (
             CSMWorld::RecordBase::State_ModifiedOnly, 0, &ref);

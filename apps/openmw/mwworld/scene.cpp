@@ -204,6 +204,8 @@ namespace MWWorld
         }
 
         mRendering.update (duration, paused);
+
+        mPreloader->updateCache(mRendering.getReferenceTime());
     }
 
     void Scene::unloadCell (CellStoreCollection::iterator iter)
@@ -421,8 +423,6 @@ namespace MWWorld
 
         if (changeEvent)
             mCellChanged = true;
-
-        mPreloader->updateCache(mRendering.getReferenceTime());
     }
 
     void Scene::changePlayerCell(CellStore *cell, const ESM::Position &pos, bool adjustPlayerPos)
@@ -444,7 +444,8 @@ namespace MWWorld
             float z = pos.rot[2];
             world->rotateObject(player, x, y, z);
 
-            player.getClass().adjustPosition(player, true);
+            if (adjustPlayerPos)
+                player.getClass().adjustPosition(player, true);
         }
 
         MWBase::MechanicsManager *mechMgr =
@@ -477,6 +478,7 @@ namespace MWWorld
         mPreloader->setExpiryDelay(Settings::Manager::getFloat("preload cell expiry delay", "Cells"));
         mPreloader->setMinCacheSize(Settings::Manager::getInt("preload cell cache min", "Cells"));
         mPreloader->setMaxCacheSize(Settings::Manager::getInt("preload cell cache max", "Cells"));
+        mPreloader->setPreloadInstances(Settings::Manager::getBool("preload instances", "Cells"));
     }
 
     Scene::~Scene()
@@ -493,7 +495,7 @@ namespace MWWorld
         return mActiveCells;
     }
 
-    void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool changeEvent)
+    void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
         bool loadcell = (mCurrentCell == NULL);
@@ -519,7 +521,8 @@ namespace MWWorld
             float z = position.rot[2];
             world->rotateObject(world->getPlayerPtr(), x, y, z);
 
-            world->getPlayerPtr().getClass().adjustPosition(world->getPlayerPtr(), true);
+            if (adjustPlayerPos)
+                world->getPlayerPtr().getClass().adjustPosition(world->getPlayerPtr(), true);
             MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
             return;
         }
@@ -541,7 +544,7 @@ namespace MWWorld
         // Load cell.
         loadCell (cell, loadingListener, changeEvent);
 
-        changePlayerCell(cell, position, true);
+        changePlayerCell(cell, position, adjustPlayerPos);
 
         // adjust fog
         mRendering.configureFog(mCurrentCell->getCell());
@@ -555,8 +558,6 @@ namespace MWWorld
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
-
-        mPreloader->updateCache(mRendering.getReferenceTime());
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
@@ -737,11 +738,14 @@ namespace MWWorld
         {
             int x = cell->getCell()->getGridX();
             int y = cell->getCell()->getGridY();
+            unsigned int numpreloaded = 0;
             for (int dx = -mHalfGridSize; dx <= mHalfGridSize; ++dx)
             {
                 for (int dy = -mHalfGridSize; dy <= mHalfGridSize; ++dy)
                 {
                     mPreloader->preload(MWBase::Environment::get().getWorld()->getExterior(x+dx, y+dy), mRendering.getReferenceTime());
+                    if (++numpreloaded >= mPreloader->getMaxCacheSize())
+                        break;
                 }
             }
         }

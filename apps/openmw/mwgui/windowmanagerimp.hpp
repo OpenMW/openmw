@@ -374,6 +374,7 @@ namespace MWGui
     virtual std::string correctIconPath(const std::string& path);
     virtual std::string correctBookartPath(const std::string& path, int width, int height);
     virtual std::string correctTexturePath(const std::string& path);
+    virtual bool textureExists(const std::string& path);
 
     void removeCell(MWWorld::CellStore* cell);
     void writeFog(MWWorld::CellStore* cell);

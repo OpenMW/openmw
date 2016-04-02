@@ -324,15 +324,15 @@ namespace MWWorld
 
             virtual float getTimeScaleFactor() const;
 
-            virtual void changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool changeEvent = true);
+            virtual void changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true);
             ///< Move to interior cell.
             ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-            virtual void changeToExteriorCell (const ESM::Position& position, bool changeEvent = true);
+            virtual void changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true);
             ///< Move to exterior cell.
             ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool changeEvent=true);
+            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true);
             ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
             virtual const ESM::Cell *getExterior (const std::string& cellName) const;

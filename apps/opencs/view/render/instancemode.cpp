@@ -421,24 +421,7 @@ void CSVRender::InstanceMode::dropEvent (QDropEvent* event)
                      CSMWorld::Columns::ColumnId_ReferenceableId),
                      QString::fromUtf8 (iter->getId().c_str()));
 
-                std::auto_ptr<CSMWorld::ModifyCommand> incrementCommand;
-
-                if (!noCell)
-                {
-                    // increase reference count in cell
-                    QModelIndex countIndex = cellTable.getModelIndex (cellId,
-                        cellTable.findColumnIndex (CSMWorld::Columns::ColumnId_RefNumCounter));
-
-                    int count = cellTable.data (countIndex).toInt();
-
-                    incrementCommand.reset (
-                        new CSMWorld::ModifyCommand (cellTable, countIndex, count+1));
-                }
-
-                CSMWorld::CommandMacro macro (document.getUndoStack());
-                macro.push (createCommand.release());
-                if (incrementCommand.get())
-                    macro.push (incrementCommand.release());
+                document.getUndoStack().push (createCommand.release());
 
                 dropped = true;
             }

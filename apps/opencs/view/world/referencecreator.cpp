@@ -26,51 +26,6 @@ void CSVWorld::ReferenceCreator::configureCreateCommand (CSMWorld::CreateCommand
         findColumnIndex (CSMWorld::Columns::ColumnId_Cell);
 
     command.addValue (cellIdColumn, mCell->text());
-
-    // Set RefNum
-    int refNumColumn = dynamic_cast<CSMWorld::IdTable&> (
-        *getData().getTableModel (CSMWorld::UniversalId::Type_References)).
-        findColumnIndex (CSMWorld::Columns::ColumnId_RefNum);
-
-    command.addValue (refNumColumn, getRefNumCount());
-}
-
-void CSVWorld::ReferenceCreator::pushCommand (std::auto_ptr<CSMWorld::CreateCommand> command,
-    const std::string& id)
-{
-    // get the old count
-    std::string cellId = mCell->text().toUtf8().constData();
-
-    CSMWorld::IdTable& cellTable = dynamic_cast<CSMWorld::IdTable&> (
-        *getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
-
-    int countColumn = cellTable.findColumnIndex (CSMWorld::Columns::ColumnId_RefNumCounter);
-
-    QModelIndex countIndex = cellTable.getModelIndex (cellId, countColumn);
-
-    int count = cellTable.data (countIndex).toInt();
-
-    // command for incrementing counter
-    std::auto_ptr<CSMWorld::ModifyCommand> increment (new CSMWorld::ModifyCommand
-        (cellTable, countIndex, count+1));
-
-    CSMWorld::CommandMacro macro (getUndoStack(), command->text());
-    GenericCreator::pushCommand (command, id);
-    macro.push (increment.release());
-}
-
-int CSVWorld::ReferenceCreator::getRefNumCount() const
-{
-    std::string cellId = mCell->text().toUtf8().constData();
-
-    CSMWorld::IdTable& cellTable = dynamic_cast<CSMWorld::IdTable&> (
-        *getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
-
-    int countColumn = cellTable.findColumnIndex (CSMWorld::Columns::ColumnId_RefNumCounter);
-
-    QModelIndex countIndex = cellTable.getModelIndex (cellId, countColumn);
-
-    return cellTable.data (countIndex).toInt();
 }
 
 CSVWorld::ReferenceCreator::ReferenceCreator (CSMWorld::Data& data, QUndoStack& undoStack,
@@ -87,6 +42,7 @@ CSVWorld::ReferenceCreator::ReferenceCreator (CSMWorld::Data& data, QUndoStack& 
     setManualEditing (false);
 
     connect (mCell, SIGNAL (textChanged (const QString&)), this, SLOT (cellChanged()));
+    connect (mCell, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
 }
 
 void CSVWorld::ReferenceCreator::reset()
