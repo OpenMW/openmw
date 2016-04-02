@@ -2,8 +2,11 @@
 
 #include <QKeyEvent>
 
+#include <osg/BoundingBox>
 #include <osg/Camera>
+#include <osg/ComputeBoundsVisitor>
 #include <osg/Drawable>
+#include <osg/Group>
 #include <osg/Matrixd>
 #include <osg/Quat>
 
@@ -92,16 +95,38 @@ namespace CSVRender
         mWheelMoveMult = value;
     }
 
-    void CameraController::setSceneBounds(const osg::BoundingBox& bounds, const osg::Vec3d& up)
+    void CameraController::setup(osg::Group* root, unsigned int mask, const osg::Vec3d& up)
     {
-        osg::Vec3d minBounds = bounds.corner(0) - bounds.center();
-        osg::Vec3d maxBounds = bounds.corner(7) - bounds.center();
+        // Find World bounds
+        osg::ComputeBoundsVisitor boundsVisitor;
+        osg::BoundingBox& boundingBox = boundsVisitor.getBoundingBox();
+
+        boundsVisitor.setNodeMaskOverride(mask);
+        root->accept(boundsVisitor);
+
+        if (!boundingBox.valid())
+        {
+            // Try again without any mask
+            boundsVisitor.reset();
+            boundsVisitor.setNodeMaskOverride(~0);
+            root->accept(boundsVisitor);
+
+            // Last resort, set a default
+            if (!boundingBox.valid())
+            {
+                boundingBox.set(-1, -1, -1, 1, 1, 1);
+            }
+        }
+
+        // Calculate a good starting position
+        osg::Vec3d minBounds = boundingBox.corner(0) - boundingBox.center();
+        osg::Vec3d maxBounds = boundingBox.corner(7) - boundingBox.center();
 
         osg::Vec3d camOffset = up * maxBounds > 0 ? maxBounds : minBounds;
         camOffset *= 2;
 
-        osg::Vec3d eye = camOffset + bounds.center();
-        osg::Vec3d center = bounds.center();
+        osg::Vec3d eye = camOffset + boundingBox.center();
+        osg::Vec3d center = boundingBox.center();
 
         getCamera()->setViewMatrixAsLookAt(eye, center, up);
     }

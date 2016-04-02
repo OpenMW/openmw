@@ -3,7 +3,6 @@
 
 #include <string>
 
-#include <osg/BoundingBox>
 #include <osg/ref_ptr>
 #include <osg/Vec3d>
 
@@ -12,6 +11,7 @@ class QKeyEvent;
 namespace osg
 {
     class Camera;
+    class Group;
 }
 
 namespace CSVRender
@@ -43,7 +43,7 @@ namespace CSVRender
             void setWheelMovementMultiplier(double value);
 
             // moves the camera to an intelligent position
-            void setSceneBounds(const osg::BoundingBox& bounds, const osg::Vec3d& up);
+            void setup(osg::Group* root, unsigned int mask, const osg::Vec3d& up);
 
             virtual bool handleKeyEvent(QKeyEvent* event, bool pressed) = 0;
             virtual bool handleMouseMoveEvent(std::string mode, int x, int y) = 0;
