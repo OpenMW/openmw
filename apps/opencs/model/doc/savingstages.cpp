@@ -11,6 +11,7 @@
 #include <components/misc/stringops.hpp>
 
 #include "../world/infocollection.hpp"
+#include "../world/cellcoordinates.hpp"
 
 #include "document.hpp"
 #include "savingstate.hpp"
@@ -238,7 +239,7 @@ void CSMDoc::CollectionReferencesStage::perform (int stage, Messages& messages)
             // An empty mOriginalCell is meant to indicate that it is the same as
             // the current cell.  It is possible that a moved ref is moved again.
             if ((record.get().mOriginalCell.empty() ?
-                    record.get().mCell : record.get().mOriginalCell) != stream.str() && !interior)
+                    record.get().mCell : record.get().mOriginalCell) != stream.str() && !interior && record.mState!=CSMWorld::RecordBase::State_ModifiedOnly && !record.get().mNew)
                 indices.push_back (i);
             else
                 indices.push_front (i);
@@ -283,7 +284,10 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                 const CSMWorld::Record<CSMWorld::CellRef>& ref =
                     mDocument.getData().getReferences().getRecord (*iter);
 
-                if (ref.get().mNew)
+                if (ref.get().mNew ||
+                    (!interior && ref.mState==CSMWorld::RecordBase::State_ModifiedOnly &&
+                    /// \todo consider worldspace
+                    CSMWorld::CellCoordinates (ref.get().getCellIndex()).getId("")!=ref.get().mCell))
                     ++cellRecord.mRefNumCounter;
             }
         }
@@ -325,7 +329,9 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                         stream << "#" << index.first << " " << index.second;
                     }
 
-                    if (refRecord.mNew)
+                    if (refRecord.mNew ||
+                        (!interior && ref.mState==CSMWorld::RecordBase::State_ModifiedOnly &&
+                        refRecord.mCell!=stream.str()))
                     {
                         refRecord.mRefNum.mIndex = newRefNum++;
                     }
