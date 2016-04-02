@@ -13,6 +13,7 @@ namespace CSMWorld
         std::string mId;
         std::string mCell;
         std::string mOriginalCell;
+        bool mNew; // new reference, not counted yet, ref num not assigned yet
 
         CellRef();
 
