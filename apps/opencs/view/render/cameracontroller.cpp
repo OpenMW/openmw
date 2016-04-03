@@ -93,14 +93,14 @@ namespace CSVRender
         osg::ComputeBoundsVisitor boundsVisitor;
         osg::BoundingBox& boundingBox = boundsVisitor.getBoundingBox();
 
-        boundsVisitor.setNodeMaskOverride(mask);
+        boundsVisitor.setTraversalMask(mask);
         root->accept(boundsVisitor);
 
         if (!boundingBox.valid())
         {
             // Try again without any mask
             boundsVisitor.reset();
-            boundsVisitor.setNodeMaskOverride(~0);
+            boundsVisitor.setTraversalMask(~0);
             root->accept(boundsVisitor);
 
             // Last resort, set a default
