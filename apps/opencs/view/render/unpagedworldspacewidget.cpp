@@ -2,8 +2,6 @@
 
 #include <sstream>
 
-#include <osgGA/TrackballManipulator>
-
 #include <QEvent>
 
 #include <components/sceneutil/util.hpp>

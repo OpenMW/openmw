@@ -11,10 +11,6 @@
 #include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osg/LightModel>
-#include <osg/BoundingBox>
-
-#include <osgGA/TrackballManipulator>
-#include <osgGA/FirstPersonManipulator>
 
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
