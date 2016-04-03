@@ -27,7 +27,6 @@ namespace CSVRender
 
     CameraController::CameraController()
         : mActive(false)
-        , mModified(false)
         , mCameraSensitivity(1/650.f)
         , mSecondaryMoveMult(50)
         , mWheelMoveMult(8)
@@ -42,11 +41,6 @@ namespace CSVRender
     bool CameraController::isActive() const
     {
         return mActive;
-    }
-
-    bool CameraController::isModified() const
-    {
-        return mModified;
     }
 
     osg::Camera* CameraController::getCamera() const
@@ -129,22 +123,13 @@ namespace CSVRender
         getCamera()->setViewMatrixAsLookAt(eye, center, up);
     }
 
-    void CameraController::setModified()
-    {
-        mModified = true;
-    }
-
-    void CameraController::resetModified()
-    {
-        mModified = false;
-    }
-
     /*
     Free Camera Controller
     */
 
     FreeCameraController::FreeCameraController()
         : mLockUpright(false)
+        , mModified(false)
         , mFast(false)
         , mLeft(false)
         , mRight(false)
@@ -193,7 +178,7 @@ namespace CSVRender
     {
         mLockUpright = true;
         mUp = up;
-        setModified();
+        mModified = true;
     }
 
     void FreeCameraController::unfixUpAxis()
@@ -209,37 +194,30 @@ namespace CSVRender
         if (event->key() == Qt::Key_Q)
         {
             mRollLeft = pressed;
-            setModified();
         }
         else if (event->key() == Qt::Key_E)
         {
             mRollRight = pressed;
-            setModified();
         }
         else if (event->key() == Qt::Key_A)
         {
             mLeft = pressed;
-            setModified();
         }
         else if (event->key() == Qt::Key_D)
         {
             mRight = pressed;
-            setModified();
         }
         else if (event->key() == Qt::Key_W)
         {
             mForward = pressed;
-            setModified();
         }
         else if (event->key() == Qt::Key_S)
         {
             mBackward = pressed;
-            setModified();
         }
         else if (event->key() == Qt::Key_Shift)
         {
             mFast = pressed;
-            setModified();
         }
         else
         {
@@ -258,7 +236,6 @@ namespace CSVRender
         {
             yaw(x * getCameraSensitivity());
             pitch(y * getCameraSensitivity());
-            setModified();
         }
         else if (mode == "s-navi")
         {
@@ -267,7 +244,6 @@ namespace CSVRender
             movement += LocalUp * y * getSecondaryMovementMultiplier();
 
             translate(movement);
-            setModified();
         }
         else if (mode == "t-navi")
         {
@@ -308,35 +284,38 @@ namespace CSVRender
             if (mRollRight)
                 roll(rotDist);
         }
-        else if(isModified())
+        else if(mModified)
         {
             stabilize();
+            mModified = false;
         }
 
         // Normalize the matrix to counter drift
         getCamera()->getViewMatrix().orthoNormal(getCamera()->getViewMatrix());
-
-        resetModified();
     }
 
     void FreeCameraController::yaw(double value)
     {
         getCamera()->getViewMatrix() *= osg::Matrixd::rotate(value, LocalUp);
+        mModified = true;
     }
 
     void FreeCameraController::pitch(double value)
     {
         getCamera()->getViewMatrix() *= osg::Matrixd::rotate(value, LocalLeft);
+        mModified = true;
     }
 
     void FreeCameraController::roll(double value)
     {
         getCamera()->getViewMatrix() *= osg::Matrixd::rotate(value, LocalForward);
+        mModified = true;
     }
 
     void FreeCameraController::translate(const osg::Vec3d& offset)
     {
         getCamera()->getViewMatrix() *= osg::Matrixd::translate(offset);
+        mModified = true;
     }
 
     void FreeCameraController::stabilize()
@@ -426,37 +405,30 @@ namespace CSVRender
         if (event->key() == Qt::Key_Q)
         {
             mRollLeft = pressed;
-            setModified();
         }
         else if (event->key() == Qt::Key_E)
         {
             mRollRight = pressed;
-            setModified();
         }
         else if (event->key() == Qt::Key_A)
         {
             mLeft = pressed;
-            setModified();
         }
         else if (event->key() == Qt::Key_D)
         {
             mRight = pressed;
-            setModified();
         }
         else if (event->key() == Qt::Key_W)
         {
             mUp = pressed;
-            setModified();
         }
         else if (event->key() == Qt::Key_S)
         {
             mDown = pressed;
-            setModified();
         }
         else if (event->key() == Qt::Key_Shift)
         {
             mFast = pressed;
-            setModified();
         }
         else
         {
@@ -478,7 +450,6 @@ namespace CSVRender
         {
             rotateHorizontal(x * getCameraSensitivity());
             rotateVertical(-y * getCameraSensitivity());
-            setModified();
         }
         else if (mode == "s-navi")
         {
@@ -487,7 +458,6 @@ namespace CSVRender
             movement += LocalUp * -y * getSecondaryMovementMultiplier();
 
             translate(movement);
-            setModified();
         }
         else if (mode == "t-navi")
         {
@@ -530,8 +500,6 @@ namespace CSVRender
 
         // Normalize the matrix to counter drift
         getCamera()->getViewMatrix().orthoNormal(getCamera()->getViewMatrix());
-
-        resetModified();
     }
 
     void OrbitCameraController::onActivate()

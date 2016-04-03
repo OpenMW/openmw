@@ -30,7 +30,6 @@ namespace CSVRender
             virtual ~CameraController();
 
             bool isActive() const;
-            bool isModified() const;
 
             osg::Camera* getCamera() const;
             double getCameraSensitivity() const;
@@ -52,14 +51,11 @@ namespace CSVRender
 
         protected:
 
-            void setModified();
-            void resetModified();
-
             virtual void onActivate(){}
 
         private:
 
-            bool mActive, mModified;
+            bool mActive;
             double mCameraSensitivity;
             double mSecondaryMoveMult;
             double mWheelMoveMult;
@@ -98,7 +94,7 @@ namespace CSVRender
 
             void stabilize();
 
-            bool mLockUpright;
+            bool mLockUpright, mModified;
             bool mFast, mLeft, mRight, mForward, mBackward, mRollLeft, mRollRight;
             osg::Vec3d mUp;
 
