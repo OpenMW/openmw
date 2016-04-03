@@ -113,10 +113,12 @@ namespace CSVRender
 
             OrbitCameraController();
 
+            osg::Vec3d getCenter() const;
             double getOrbitSpeed() const;
             double getOrbitSpeedMultiplier() const;
             unsigned int getPickingMask() const;
 
+            void setCenter(const osg::Vec3d& center);
             void setOrbitSpeed(double value);
             void setOrbitSpeedMultiplier(double value);
             void setPickingMask(unsigned int value);

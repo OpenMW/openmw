@@ -367,6 +367,11 @@ namespace CSVRender
     {
     }
 
+    osg::Vec3d OrbitCameraController::getCenter() const
+    {
+        return mCenter;
+    }
+
     double OrbitCameraController::getOrbitSpeed() const
     {
         return mOrbitSpeed;
@@ -380,6 +385,19 @@ namespace CSVRender
     unsigned int OrbitCameraController::getPickingMask() const
     {
         return mPickingMask;
+    }
+
+    void OrbitCameraController::setCenter(const osg::Vec3d& value)
+    {
+        osg::Vec3d eye, center, up;
+        getCamera()->getViewMatrixAsLookAt(eye, center, up);
+
+        mCenter = value;
+        mDistance = (eye - mCenter).length();
+
+        getCamera()->setViewMatrixAsLookAt(eye, mCenter, up);
+
+        mInitialized = true;
     }
 
     void OrbitCameraController::setOrbitSpeed(double value)
