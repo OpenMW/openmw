@@ -97,6 +97,8 @@ namespace CSVRender
 
             void selectDefaultNavigationMode();
 
+            void centerOrbitCameraOnSelection();
+
             static DropType getDropType(const std::vector<CSMWorld::UniversalId>& data);
 
             virtual dropRequirments getDropRequirements(DropType type) const;

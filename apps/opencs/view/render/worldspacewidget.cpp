@@ -19,6 +19,8 @@
 
 #include "../../model/prefs/state.hpp"
 
+#include "../render/orbitcameramode.hpp"
+
 #include "../widget/scenetoolmode.hpp"
 #include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolrun.hpp"
@@ -27,6 +29,7 @@
 #include "mask.hpp"
 #include "editmode.hpp"
 #include "instancemode.hpp"
+#include "cameracontroller.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
 : SceneWidget (document.getData().getResourceSystem(), parent, 0, false), mSceneElements(0), mRun(0), mDocument(document),
@@ -99,6 +102,19 @@ void CSVRender::WorldspaceWidget::selectDefaultNavigationMode()
     selectNavigationMode("1st");
 }
 
+void CSVRender::WorldspaceWidget::centerOrbitCameraOnSelection()
+{
+    std::vector<osg::ref_ptr<TagBase> > selection = getSelection(~0);
+
+    for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it!=selection.end(); ++it)
+    {
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag*> (it->get()))
+        {
+            mOrbitCamControl->setCenter(objectTag->mObject->getPosition().asVec3());
+        }
+    }
+}
+
 CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
     CSVWidget::SceneToolbar *parent)
 {
@@ -123,15 +139,17 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
         "<li>Roll camera with Q and E keys</li>"
         "<li>Hold shift to speed up movement</li>"
         "</ul>");
-    tool->addButton (":scenetoolbar/orbiting-camera", "orbit",
-        "Orbiting Camera"
-        "<ul><li>Always facing the centre point</li>"
-        "<li>Rotate around the centre point via WASD or by moving the mouse while holding the left button</li>"
-        "<li>Mouse wheel moves camera away or towards centre point but can not pass through it</li>"
-        "<li>Roll camera with Q and E keys</li>"
-        "<li>Strafing (also vertically) by holding the left mouse button and control (includes relocation of the centre point)</li>"
-        "<li>Hold shift to speed up movement</li>"
-        "</ul>");
+    tool->addButton(
+        new CSVRender::OrbitCameraMode(this, QIcon(":scenetoolbar/orbiting-camera"),
+            "Orbiting Camera"
+            "<ul><li>Always facing the centre point</li>"
+            "<li>Rotate around the centre point via WASD or by moving the mouse while holding the left button</li>"
+            "<li>Mouse wheel moves camera away or towards centre point but can not pass through it</li>"
+            "<li>Roll camera with Q and E keys</li>"
+            "<li>Strafing (also vertically) by holding the left mouse button and control (includes relocation of the centre point)</li>"
+            "<li>Hold shift to speed up movement</li>"
+            "</ul>", tool),
+        "orbit");
 
     connect (tool, SIGNAL (modeChanged (const std::string&)),
         this, SLOT (selectNavigationMode (const std::string&)));
