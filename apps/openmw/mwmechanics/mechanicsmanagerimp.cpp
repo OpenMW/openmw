@@ -1540,6 +1540,8 @@ namespace MWMechanics
     {
         mActors.clear();
         mStolenItems.clear();
+        mClassSelected = false;
+        mRaceSelected = false;
     }
 
     bool MechanicsManager::isAggressive(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
