@@ -27,6 +27,7 @@ namespace CSVRender
 
     CameraController::CameraController()
         : mActive(false)
+        , mInverted(false)
         , mCameraSensitivity(1/650.f)
         , mSecondaryMoveMult(50)
         , mWheelMoveMult(8)
@@ -53,6 +54,11 @@ namespace CSVRender
         return mCameraSensitivity;
     }
 
+    bool CameraController::getInverted() const
+    {
+        return mInverted;
+    }
+
     double CameraController::getSecondaryMovementMultiplier() const
     {
         return mSecondaryMoveMult;
@@ -75,6 +81,11 @@ namespace CSVRender
     void CameraController::setCameraSensitivity(double value)
     {
         mCameraSensitivity = value;
+    }
+
+    void CameraController::setInverted(bool value)
+    {
+        mInverted = value;
     }
 
     void CameraController::setSecondaryMovementMultiplier(double value)
@@ -234,8 +245,9 @@ namespace CSVRender
 
         if (mode == "p-navi")
         {
-            yaw(x * getCameraSensitivity());
-            pitch(y * getCameraSensitivity());
+            double scalar = getCameraSensitivity() * (getInverted() ? -1.0 : 1.0);
+            yaw(x * scalar);
+            pitch(y * scalar);
         }
         else if (mode == "s-navi")
         {
@@ -448,8 +460,9 @@ namespace CSVRender
 
         if (mode == "p-navi")
         {
-            rotateHorizontal(x * getCameraSensitivity());
-            rotateVertical(-y * getCameraSensitivity());
+            double scalar = getCameraSensitivity() * (getInverted() ? -1.0 : 1.0);
+            rotateHorizontal(x * scalar);
+            rotateVertical(-y * scalar);
         }
         else if (mode == "s-navi")
         {

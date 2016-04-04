@@ -33,11 +33,13 @@ namespace CSVRender
 
             osg::Camera* getCamera() const;
             double getCameraSensitivity() const;
+            bool getInverted() const;
             double getSecondaryMovementMultiplier() const;
             double getWheelMovementMultiplier() const;
 
             void setCamera(osg::Camera*);
             void setCameraSensitivity(double value);
+            void setInverted(bool value);
             void setSecondaryMovementMultiplier(double value);
             void setWheelMovementMultiplier(double value);
 
@@ -55,7 +57,7 @@ namespace CSVRender
 
         private:
 
-            bool mActive;
+            bool mActive, mInverted;
             double mCameraSensitivity;
             double mSecondaryMoveMult;
             double mWheelMoveMult;

@@ -318,10 +318,21 @@ void SceneWidget::update(double dt)
 
 void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
 {
-    if (*setting=="3D Scene Input/p-navi-sensitivity")
+    if (*setting=="3D Scene Input/p-navi-free-sensitivity")
     {
         mFreeCamControl->setCameraSensitivity(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/p-navi-orbit-sensitivity")
+    {
         mOrbitCamControl->setCameraSensitivity(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/p-navi-free-invert")
+    {
+        mFreeCamControl->setInverted(setting->isTrue());
+    }
+    else if (*setting=="3D Scene Input/p-navi-orbit-invert")
+    {
+        mOrbitCamControl->setInverted(setting->isTrue());
     }
     else if (*setting=="3D Scene Input/s-navi-sensitivity")
     {
