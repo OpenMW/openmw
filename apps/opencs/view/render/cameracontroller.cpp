@@ -1,5 +1,7 @@
 #include "cameracontroller.hpp"
 
+#include <cmath>
+
 #include <QKeyEvent>
 
 #include <osg/BoundingBox>
@@ -314,6 +316,24 @@ namespace CSVRender
 
     void FreeCameraController::pitch(double value)
     {
+        const double Constraint = osg::PI / 2 - 0.1;
+
+        if (mLockUpright)
+        {
+            osg::Vec3d eye, center, up;
+            getCamera()->getViewMatrixAsLookAt(eye, center, up);
+
+            osg::Vec3d forward = center - eye;
+            osg::Vec3d left = up ^ forward;
+
+            double pitchAngle = std::acos(up * mUp);
+            if ((mUp ^ up) * left < 0)
+                pitchAngle *= -1;
+
+            if (std::abs(pitchAngle + value) > Constraint)
+                value = (pitchAngle > 0 ? 1 : -1) * Constraint - pitchAngle;
+        }
+
         getCamera()->getViewMatrix() *= osg::Matrixd::rotate(value, LocalLeft);
         mModified = true;
     }
