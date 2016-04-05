@@ -9,6 +9,7 @@ namespace CSMPrefs
     {
             Q_OBJECT
 
+            int mPrecision;
             double mMin;
             double mMax;
             std::string mTooltip;
@@ -19,6 +20,8 @@ namespace CSMPrefs
             DoubleSetting (Category *parent, Settings::Manager *values,
                 QMutex *mutex, const std::string& key, const std::string& label,
                 double default_);
+
+            DoubleSetting& setPrecision (int precision);
 
             // defaults to [0, std::numeric_limits<double>::max()]
             DoubleSetting& setRange (double min, double max);

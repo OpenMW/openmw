@@ -56,31 +56,14 @@ class GLWidget : public QGLWidget
 
 public:
 
-    GLWidget( QWidget* parent = NULL, const QGLWidget* shareWidget = NULL, Qt::WindowFlags f = 0, bool forwardKeyEvents = false );
-    GLWidget( QGLContext* context, QWidget* parent = NULL, const QGLWidget* shareWidget = NULL, Qt::WindowFlags f = 0, bool forwardKeyEvents = false );
-    GLWidget( const QGLFormat& format, QWidget* parent = NULL, const QGLWidget* shareWidget = NULL, Qt::WindowFlags f = 0, bool forwardKeyEvents = false );
+    GLWidget( QWidget* parent = NULL, const QGLWidget* shareWidget = NULL, Qt::WindowFlags f = 0);
+    GLWidget( QGLContext* context, QWidget* parent = NULL, const QGLWidget* shareWidget = NULL, Qt::WindowFlags f = 0);
+    GLWidget( const QGLFormat& format, QWidget* parent = NULL, const QGLWidget* shareWidget = NULL, Qt::WindowFlags f = 0);
     virtual ~GLWidget();
 
     inline void setGraphicsWindow( GraphicsWindowQt* gw ) { _gw = gw; }
     inline GraphicsWindowQt* getGraphicsWindow() { return _gw; }
     inline const GraphicsWindowQt* getGraphicsWindow() const { return _gw; }
-
-    inline bool getForwardKeyEvents() const { return _forwardKeyEvents; }
-    virtual void setForwardKeyEvents( bool f ) { _forwardKeyEvents = f; }
-    
-    inline bool getTouchEventsEnabled() const { return _touchEventsEnabled; }
-    void setTouchEventsEnabled( bool e );
-
-    void setKeyboardModifiers( QInputEvent* event );
-
-    virtual void keyPressEvent( QKeyEvent* event );
-    virtual void keyReleaseEvent( QKeyEvent* event );
-    virtual void mousePressEvent( QMouseEvent* event );
-    virtual void mouseReleaseEvent( QMouseEvent* event );
-    virtual void mouseDoubleClickEvent( QMouseEvent* event );
-    virtual void mouseMoveEvent( QMouseEvent* event );
-    virtual void wheelEvent( QWheelEvent* event );
-    virtual bool gestureEvent( QGestureEvent* event );
 
 protected:
 
@@ -114,9 +97,6 @@ protected:
     QQueue<QEvent::Type> _deferredEventQueue;
     QSet<QEvent::Type> _eventCompressor;
 
-    bool _touchEventsEnabled;
-
-    bool _forwardKeyEvents;
     qreal _devicePixelRatio;
 
     virtual void resizeEvent( QResizeEvent* event );
@@ -164,9 +144,6 @@ public:
     virtual std::string getWindowName();
     virtual void useCursor( bool cursorOn );
     virtual void setCursor( MouseCursor cursor );
-    inline bool getTouchEventsEnabled() const { return _widget->getTouchEventsEnabled(); }
-    virtual void setTouchEventsEnabled( bool e ) { _widget->setTouchEventsEnabled(e); }
-
 
     virtual bool valid() const;
     virtual bool realizeImplementation();

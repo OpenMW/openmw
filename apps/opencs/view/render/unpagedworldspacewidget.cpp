@@ -2,8 +2,6 @@
 
 #include <sstream>
 
-#include <osgGA/TrackballManipulator>
-
 #include <QEvent>
 
 #include <components/sceneutil/util.hpp>
@@ -50,8 +48,6 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
     update();
 
     mCell.reset (new Cell (document.getData(), mRootNode, mCellId));
-
-    mView->setCameraManipulator(new osgGA::TrackballManipulator);
 }
 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,

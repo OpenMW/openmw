@@ -6,8 +6,6 @@
 #include <QMouseEvent>
 #include <QApplication>
 
-#include <osgGA/TrackballManipulator>
-
 #include <components/esm/loadland.hpp>
 
 #include "../../model/world/tablemimedata.hpp"
@@ -23,7 +21,6 @@
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
     bool modified = false;
-    bool wasEmpty = mCells.empty();
 
     const CSMWorld::IdCollection<CSMWorld::Cell>& cells = mDocument.getData().getCells();
 
@@ -113,11 +110,6 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             iter->second->setCellArrows (mask);
         }
     }
-
-    /// \todo do not overwrite manipulator object
-    /// \todo move code to useViewHint function
-    if (modified && wasEmpty)
-        mView->setCameraManipulator(new osgGA::TrackballManipulator);
 
     return modified;
 }

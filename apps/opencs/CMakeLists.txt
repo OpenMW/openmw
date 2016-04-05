@@ -86,11 +86,12 @@ opencs_units (view/widget
 opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
     previewwidget editmode instancemode instanceselectionmode instancemovemode
+    orbitcameramode
     )
 
 opencs_units_noqt (view/render
-    lighting lightingday lightingnight
-    lightingbright object cell terrainstorage tagbase cellarrow cellmarker cellborder
+    lighting lightingday lightingnight lightingbright object cell terrainstorage tagbase
+    cellarrow cellmarker cellborder cameracontroller
     )
 
 opencs_hdrs_noqt (view/render

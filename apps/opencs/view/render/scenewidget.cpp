@@ -18,8 +18,11 @@
 
 #include "../widget/scenetoolmode.hpp"
 
+#include "../../model/prefs/state.hpp"
+
 #include "lighting.hpp"
 #include "mask.hpp"
+#include "cameracontroller.hpp"
 
 namespace CSVRender
 {
@@ -56,9 +59,6 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(window->getGLWidget());
     setLayout(layout);
-
-    // Pass events through this widget first
-    window->getGLWidget()->installEventFilter(this);
 
     mView->getCamera()->setGraphicsContext(window);
     mView->getCamera()->setClearColor( osg::Vec4(0.2, 0.2, 0.6, 1.0) );
@@ -100,26 +100,6 @@ void RenderWidget::setVisibilityMask(int mask)
     mView->getCamera()->setCullMask(mask | Mask_ParticleSystem | Mask_Lighting);
 }
 
-bool RenderWidget::eventFilter(QObject* obj, QEvent* event)
-{
-    // handle event in this widget, is there a better way to do this?
-    if (event->type() == QEvent::MouseButtonPress)
-        mousePressEvent(static_cast<QMouseEvent*>(event));
-    if (event->type() == QEvent::MouseButtonRelease)
-        mouseReleaseEvent(static_cast<QMouseEvent*>(event));
-    if (event->type() == QEvent::MouseMove)
-        mouseMoveEvent(static_cast<QMouseEvent*>(event));
-    if (event->type() == QEvent::KeyPress)
-        keyPressEvent(static_cast<QKeyEvent*>(event));
-    if (event->type() == QEvent::KeyRelease)
-        keyReleaseEvent(static_cast<QKeyEvent*>(event));
-    if (event->type() == QEvent::Wheel)
-        wheelEvent(static_cast<QWheelEvent *>(event));
-
-    // Always pass the event on to GLWidget, i.e. to OSG event queue
-    return QObject::eventFilter(obj, event);
-}
-
 osg::Camera *RenderWidget::getCamera()
 {
     return mView->getCamera();
@@ -159,19 +139,33 @@ CompositeViewer &CompositeViewer::get()
 
 void CompositeViewer::update()
 {
-    mSimulationTime += mFrameTimer.time_s();
+    double dt = mFrameTimer.time_s();
     mFrameTimer.setStartTick();
+
+    emit simulationUpdated(dt);
+
+    mSimulationTime += dt;
     frame(mSimulationTime);
 }
 
 // ---------------------------------------------------
 
-SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget *parent, Qt::WindowFlags f)
+SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget *parent, Qt::WindowFlags f,
+    bool retrieveInput)
     : RenderWidget(parent, f)
     , mResourceSystem(resourceSystem)
     , mLighting(NULL)
     , mHasDefaultAmbient(false)
+    , mPrevMouseX(0)
+    , mPrevMouseY(0)
+    , mFreeCamControl(new FreeCameraController())
+    , mOrbitCamControl(new OrbitCameraController())
+    , mCurrentCamControl(mFreeCamControl.get())
+    , mCamPositionSet(false)
 {
+    mOrbitCamControl->setPickingMask(Mask_Reference | Mask_Terrain);
+    selectNavigationMode("free");
+
     // we handle lighting manually
     mView->setLightingMode(osgViewer::View::NO_LIGHT);
 
@@ -182,6 +176,18 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
     /// \todo make shortcut configurable
     QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
     connect (focusToolbar, SIGNAL (activated()), this, SIGNAL (focusToolbarRequest()));
+
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+
+    // TODO update this outside of the constructor where virtual methods can be used
+    if (retrieveInput)
+    {
+        CSMPrefs::get()["3D Scene Input"].update();
+        CSMPrefs::get()["Tooltips"].update();
+    }
+
+    connect (&CompositeViewer::get(), SIGNAL (simulationUpdated(double)), this, SLOT (update(double)));
 }
 
 SceneWidget::~SceneWidget()
@@ -259,6 +265,183 @@ void SceneWidget::setDefaultAmbient (const osg::Vec4f& colour)
     mHasDefaultAmbient = true;
 
     setAmbient(mLighting->getAmbientColour(&mDefaultAmbient));
+}
+
+void SceneWidget::mousePressEvent (QMouseEvent *event)
+{
+    mMouseMode = mapButton(event);
+
+    mPrevMouseX = event->x();
+    mPrevMouseY = event->y();
+}
+
+void SceneWidget::mouseReleaseEvent (QMouseEvent *event)
+{
+    mMouseMode = "";
+}
+
+void SceneWidget::mouseMoveEvent (QMouseEvent *event)
+{
+    mCurrentCamControl->handleMouseMoveEvent(mMouseMode, event->x() - mPrevMouseX, event->y() - mPrevMouseY);
+
+    mPrevMouseX = event->x();
+    mPrevMouseY = event->y();
+}
+
+void SceneWidget::wheelEvent(QWheelEvent *event)
+{
+    mCurrentCamControl->handleMouseMoveEvent("t-navi", event->delta(), 0);
+}
+
+void SceneWidget::keyPressEvent (QKeyEvent *event)
+{
+    mCurrentCamControl->handleKeyEvent(event, true);
+}
+
+void SceneWidget::keyReleaseEvent (QKeyEvent *event)
+{
+    mCurrentCamControl->handleKeyEvent(event, false);
+}
+
+void SceneWidget::update(double dt)
+{
+    if (mCamPositionSet)
+    {
+        mCurrentCamControl->update(dt);
+    }
+    else
+    {
+        mCurrentCamControl->setup(mRootNode, Mask_Reference | Mask_Terrain, CameraController::WorldUp);
+        mCamPositionSet = true;
+    }
+}
+
+void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
+{
+    if (*setting=="3D Scene Input/p-navi-free-sensitivity")
+    {
+        mFreeCamControl->setCameraSensitivity(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/p-navi-orbit-sensitivity")
+    {
+        mOrbitCamControl->setCameraSensitivity(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/p-navi-free-invert")
+    {
+        mFreeCamControl->setInverted(setting->isTrue());
+    }
+    else if (*setting=="3D Scene Input/p-navi-orbit-invert")
+    {
+        mOrbitCamControl->setInverted(setting->isTrue());
+    }
+    else if (*setting=="3D Scene Input/s-navi-sensitivity")
+    {
+        mFreeCamControl->setSecondaryMovementMultiplier(setting->toDouble());
+        mOrbitCamControl->setSecondaryMovementMultiplier(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-wheel-factor")
+    {
+        mFreeCamControl->setWheelMovementMultiplier(setting->toDouble());
+        mOrbitCamControl->setWheelMovementMultiplier(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-free-lin-speed")
+    {
+        mFreeCamControl->setLinearSpeed(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-free-rot-speed")
+    {
+        mFreeCamControl->setRotationalSpeed(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-free-speed-mult")
+    {
+        mFreeCamControl->setSpeedMultiplier(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-orbit-rot-speed")
+    {
+        mOrbitCamControl->setOrbitSpeed(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-orbit-speed-mult")
+    {
+        mOrbitCamControl->setOrbitSpeedMultiplier(setting->toDouble());
+    }
+    else
+    {
+        storeMappingSetting(setting);
+    }
+}
+
+void SceneWidget::selectNavigationMode (const std::string& mode)
+{
+    if (mode=="1st")
+    {
+        mCurrentCamControl->setCamera(NULL);
+        mCurrentCamControl = mFreeCamControl.get();
+        mCurrentCamControl->setCamera(getCamera());
+        mFreeCamControl->fixUpAxis(CameraController::WorldUp);
+    }
+    else if (mode=="free")
+    {
+        mCurrentCamControl->setCamera(NULL);
+        mCurrentCamControl = mFreeCamControl.get();
+        mCurrentCamControl->setCamera(getCamera());
+        mFreeCamControl->unfixUpAxis();
+    }
+    else if (mode=="orbit")
+    {
+        mCurrentCamControl->setCamera(NULL);
+        mCurrentCamControl = mOrbitCamControl.get();
+        mCurrentCamControl->setCamera(getCamera());
+    }
+}
+
+bool SceneWidget::storeMappingSetting (const CSMPrefs::Setting *setting)
+{
+    if (setting->getParent()->getKey()!="3D Scene Input")
+        return false;
+
+    static const char * const sMappingSettings[] =
+    {
+        "p-navi", "s-navi",
+        0
+    };
+
+    for (int i=0; sMappingSettings[i]; ++i)
+        if (setting->getKey()==sMappingSettings[i])
+        {
+            QString value = QString::fromUtf8 (setting->toString().c_str());
+
+            Qt::MouseButton button = Qt::NoButton;
+
+            if (value.endsWith ("Left Mouse-Button"))
+                button = Qt::LeftButton;
+            else if (value.endsWith ("Right Mouse-Button"))
+                button = Qt::RightButton;
+            else if (value.endsWith ("Middle Mouse-Button"))
+                button = Qt::MiddleButton;
+            else
+                return false;
+
+            bool ctrl = value.startsWith ("Ctrl-");
+
+            mButtonMapping[std::make_pair (button, ctrl)] = sMappingSettings[i];
+            return true;
+        }
+
+    return false;
+}
+
+std::string SceneWidget::mapButton (QMouseEvent *event)
+{
+    std::pair<Qt::MouseButton, bool> phyiscal (
+        event->button(), event->modifiers() & Qt::ControlModifier);
+
+    std::map<std::pair<Qt::MouseButton, bool>, std::string>::const_iterator iter =
+        mButtonMapping.find (phyiscal);
+
+    if (iter!=mButtonMapping.end())
+        return iter->second;
+
+    return "";
 }
 
 }
