@@ -1027,4 +1027,105 @@ namespace CSMWorld
     {
         return 1; // fixed at size 1
     }
+
+    RegionWeatherAdapter::RegionWeatherAdapter () {}
+
+    void RegionWeatherAdapter::addRow(Record<ESM::Region>& record, int position) const
+    {
+        throw std::logic_error ("cannot add a row to a fixed table");
+    }
+
+    void RegionWeatherAdapter::removeRow(Record<ESM::Region>& record, int rowToRemove) const
+    {
+        throw std::logic_error ("cannot remove a row from a fixed table");
+    }
+
+    void RegionWeatherAdapter::setTable(Record<ESM::Region>& record, const NestedTableWrapperBase& nestedTable) const
+    {
+        throw std::logic_error ("table operation not supported");
+    }
+
+    NestedTableWrapperBase* RegionWeatherAdapter::table(const Record<ESM::Region>& record) const
+    {
+        throw std::logic_error ("table operation not supported");
+    }
+
+    QVariant RegionWeatherAdapter::getData(const Record<ESM::Region>& record, int subRowIndex, int subColIndex) const
+    {
+        const char* WeatherNames[] = {
+            "Clear",
+            "Cloudy",
+            "Fog",
+            "Overcast",
+            "Rain",
+            "Thunder",
+            "Ash",
+            "Blight",
+            "Snow",
+            "Blizzard"
+        };
+
+        const ESM::Region& region = record.get();
+
+        if (subColIndex == 0 && subRowIndex >= 0 && subRowIndex < 10)
+        {
+            return WeatherNames[subRowIndex];
+        }
+        else if (subColIndex == 1)
+        {
+            switch (subRowIndex)
+            {
+                case 0: return region.mData.mClear;
+                case 1: return region.mData.mCloudy;
+                case 2: return region.mData.mFoggy;
+                case 3: return region.mData.mOvercast;
+                case 4: return region.mData.mRain;
+                case 5: return region.mData.mThunder;
+                case 6: return region.mData.mAsh;
+                case 7: return region.mData.mBlight;
+                case 8: return region.mData.mA; // Snow
+                case 9: return region.mData.mB; // Blizzard
+                default: break;
+            }
+        }
+
+        throw std::runtime_error("index out of range");
+    }
+
+    void RegionWeatherAdapter::setData(Record<ESM::Region>& record, const QVariant& value, int subRowIndex,
+        int subColIndex) const
+    {
+        ESM::Region region = record.get();
+        unsigned char chance = static_cast<unsigned char>(value.toInt());
+
+        if (subColIndex == 1)
+        {
+            switch (subRowIndex)
+            {
+                case 0: region.mData.mClear = chance; break;
+                case 1: region.mData.mCloudy = chance; break;
+                case 2: region.mData.mFoggy = chance; break;
+                case 3: region.mData.mOvercast = chance; break;
+                case 4: region.mData.mRain = chance; break;
+                case 5: region.mData.mThunder = chance; break;
+                case 6: region.mData.mAsh = chance; break;
+                case 7: region.mData.mBlight = chance; break;
+                case 8: region.mData.mA = chance; break;
+                case 9: region.mData.mB = chance; break;
+                default: throw std::runtime_error("index out of range");
+            }
+
+            record.setModified (region);
+        }
+    }
+
+    int RegionWeatherAdapter::getColumnsCount(const Record<ESM::Region>& record) const
+    {
+        return 2;
+    }
+
+    int RegionWeatherAdapter::getRowsCount(const Record<ESM::Region>& record) const
+    {
+        return 10;
+    }
 }

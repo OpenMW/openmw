@@ -540,6 +540,31 @@ namespace CSMWorld
 
         virtual int getRowsCount(const Record<CSMWorld::Cell>& record) const;
     };
+
+    class RegionWeatherAdapter : public NestedColumnAdapter<ESM::Region>
+    {
+    public:
+        RegionWeatherAdapter ();
+
+        virtual void addRow(Record<ESM::Region>& record, int position) const;
+
+        virtual void removeRow(Record<ESM::Region>& record, int rowToRemove) const;
+
+        virtual void setTable(Record<ESM::Region>& record,
+                const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* table(const Record<ESM::Region>& record) const;
+
+        virtual QVariant getData(const Record<ESM::Region>& record,
+                int subRowIndex, int subColIndex) const;
+
+        virtual void setData(Record<ESM::Region>& record,
+                const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getColumnsCount(const Record<ESM::Region>& record) const;
+
+        virtual int getRowsCount(const Record<ESM::Region>& record) const;
+    };
 }
 
 #endif // CSM_WOLRD_NESTEDCOLADAPTERIMP_H

@@ -326,6 +326,10 @@ namespace CSMWorld
             { ColumnId_Idle7, "Idle 7" },
             { ColumnId_Idle8, "Idle 8" },
 
+            { ColumnId_RegionWeather, "Weather" },
+            { ColumnId_WeatherName, "Type" },
+            { ColumnId_WeatherChance, "Clear" },
+
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
             { ColumnId_UseValue3, "Use value 3" },

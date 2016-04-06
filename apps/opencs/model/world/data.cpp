@@ -177,6 +177,14 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRegions.addColumn (new NameColumn<ESM::Region>);
     mRegions.addColumn (new MapColourColumn<ESM::Region>);
     mRegions.addColumn (new SleepListColumn<ESM::Region>);
+    // Region Weather
+    mRegions.addColumn (new NestedParentColumn<ESM::Region> (Columns::ColumnId_RegionWeather));
+    index = mRegions.getColumns()-1;
+    mRegions.addAdapter (std::make_pair(&mRegions.getColumn(index), new RegionWeatherAdapter ()));
+    mRegions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_WeatherName, ColumnBase::Display_String, false));
+    mRegions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_WeatherChance, ColumnBase::Display_UnsignedInteger8));
     // Region Sounds
     mRegions.addColumn (new NestedParentColumn<ESM::Region> (Columns::ColumnId_RegionSounds));
     index = mRegions.getColumns()-1;
@@ -1046,7 +1054,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
                 else
                 {
                     mTopics.load (record, mBase);
-                    mDialogue = &mTopics.getRecord (record.mId).get();   
+                    mDialogue = &mTopics.getRecord (record.mId).get();
                 }
             }
 

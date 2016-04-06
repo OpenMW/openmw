@@ -325,6 +325,10 @@ namespace CSMWorld
             ColumnId_Idle7 = 292,
             ColumnId_Idle8 = 293,
 
+            ColumnId_RegionWeather = 294,
+            ColumnId_WeatherName = 295,
+            ColumnId_WeatherChance = 296,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,
