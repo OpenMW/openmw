@@ -42,6 +42,7 @@
     Bug #3146: Potion effect showing when ingredient effects are not known
     Bug #3155: When executing chop attack with a spear, hands turn partly invisible
     Bug #3161: Fast travel from Silt Strider or Boat Ride will break save files made afterwards
+    Bug #3163: Editor: Objects dropped to scene do not always save
     Bug #3173: Game Crashes After Casting Recall Spell
     Bug #3174: Constant effect enchantments play spell animation on dead bodies
     Bug #3175: Spell effects do not wear down when caster dies
