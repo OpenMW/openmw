@@ -29,7 +29,7 @@ void CSMTools::RegionCheckStage::perform (int stage, CSMDoc::Messages& messages)
 
     // test for empty name
     if (region.mName.empty())
-        messages.push_back (std::make_pair (id, region.mId + " has an empty name"));
+        messages.add(id, region.mId + " has an empty name", "", CSMDoc::Message::Severity_Error);
 
     /// \todo test that the ID in mSleeplist exists
 
