@@ -528,7 +528,7 @@ void VideoState::decode_thread_loop(VideoState *self)
         }
     }
     catch(std::exception& e) {
-        std::cerr << "An error occured playing the video: " << e.what () << std::endl;
+        std::cerr << "An error occurred playing the video: " << e.what () << std::endl;
     }
 
     self->mQuit = true;
