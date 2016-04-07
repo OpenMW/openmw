@@ -91,6 +91,9 @@ namespace CSVWorld
 
             bool stringNeedsQuote(const std::string& id) const;
 
+            /// \brief Set tab width for script editor.
+            void setTabWidth();
+
             /// \brief Turn line wrapping in script editor on or off.
             /// \param wrap Whether or not to wrap lines.
             void wrapLines(bool wrap);

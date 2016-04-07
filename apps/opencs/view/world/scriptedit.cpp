@@ -52,7 +52,7 @@ CSVWorld::ScriptEdit::ScriptEdit(
     mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive)
 {
     wrapLines(false);
-    setTabStopWidth (4);
+    setTabWidth();
     setUndoRedoEnabled (false); // we use OpenCS-wide undo/redo instead
 
     mAllowedTypes <<CSMWorld::UniversalId::Type_Journal
@@ -192,6 +192,13 @@ bool CSVWorld::ScriptEdit::stringNeedsQuote (const std::string& id) const
     const QString string(QString::fromUtf8(id.c_str())); //<regex> is only for c++11, so let's use qregexp for now.
     //I'm not quite sure when do we need to put quotes. To be safe we will use quotes for anything other than…
     return !(string.contains(mWhiteListQoutes));
+}
+
+void CSVWorld::ScriptEdit::setTabWidth()
+{
+    const int numCharacters = 4;
+    QFontMetrics metrics(mMonoFont);
+    setTabStopWidth(numCharacters * metrics.width(' '));
 }
 
 void CSVWorld::ScriptEdit::wrapLines(bool wrap)
