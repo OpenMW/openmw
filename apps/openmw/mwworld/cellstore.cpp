@@ -490,7 +490,7 @@ namespace MWWorld
             }
             catch (std::exception& e)
             {
-                std::cerr << "An error occured listing references for cell " << getCell()->getDescription() << ": " << e.what() << std::endl;
+                std::cerr << "An error occurred listing references for cell " << getCell()->getDescription() << ": " << e.what() << std::endl;
             }
         }
 
@@ -542,7 +542,7 @@ namespace MWWorld
             }
             catch (std::exception& e)
             {
-                std::cerr << "An error occured loading references for cell " << getCell()->getDescription() << ": " << e.what() << std::endl;
+                std::cerr << "An error occurred loading references for cell " << getCell()->getDescription() << ": " << e.what() << std::endl;
             }
         }
 
