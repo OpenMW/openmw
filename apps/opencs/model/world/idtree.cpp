@@ -264,7 +264,7 @@ void CSMWorld::IdTree::setNestedTable(const QModelIndex& index, const CSMWorld::
 CSMWorld::NestedTableWrapperBase* CSMWorld::IdTree::nestedTable(const QModelIndex& index) const
 {
     if (!hasChildren(index))
-        throw std::logic_error("Tried to retrive nested table, but index has no children");
+        throw std::logic_error("Tried to retrieve nested table, but index has no children");
 
     return mNestedCollection->nestedTable(index.row(), index.column());
 }
