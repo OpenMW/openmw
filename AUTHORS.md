@@ -24,6 +24,7 @@ Programmers
     artemutin
     Arthur Moore (EmperorArthur)
     athile
+    Ben Shealy (bentsherman)
     Bret Curtis (psi29a)
     Britt Mathis (galdor557)
     cc9cii
