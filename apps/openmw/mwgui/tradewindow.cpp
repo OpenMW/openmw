@@ -476,15 +476,15 @@ namespace MWGui
         // prevent overflows, and prevent entering INT_MIN since abs(INT_MIN) is undefined
         if (mCurrentBalance == INT_MAX || mCurrentBalance == INT_MIN+1)
             return;
-        if(mCurrentBalance<=-1) mCurrentBalance -= 1;
-        if(mCurrentBalance>=1) mCurrentBalance += 1;
+        if (mCurrentBalance < 0) mCurrentBalance -= 1;
+        else mCurrentBalance += 1;
         updateLabels();
     }
 
     void TradeWindow::onDecreaseButtonTriggered()
     {
-        if(mCurrentBalance<-1) mCurrentBalance += 1;
-        if(mCurrentBalance>1) mCurrentBalance -= 1;
+        if (mCurrentBalance < 0) mCurrentBalance += 1;
+        else mCurrentBalance -= 1;
         updateLabels();
     }
 
@@ -495,13 +495,13 @@ namespace MWGui
 
         mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + MyGUI::utility::toString(playerGold));
 
-        if (mCurrentBalance > 0)
+        if (mCurrentBalance < 0)
         {
-            mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalSold}");
+            mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalCost}");
         }
         else
         {
-            mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalCost}");
+            mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalSold}");
         }
 
         mTotalBalance->setValue(std::abs(mCurrentBalance));
