@@ -57,8 +57,10 @@ namespace MWGui
         , mSortModel(NULL)
         , mTradeModel(NULL)
         , mItemToSell(-1)
-        , mCurrentBalance(0)
-        , mCurrentMerchantOffer(0)
+        , mIsPlayerSelling(false)
+        , mIsMerchantBuying(false)
+        , mPlayerOffer(0)
+        , mMerchantOffer(0)
     {
         getWidget(mFilterAll, "AllButton");
         getWidget(mFilterWeapon, "WeaponButton");
@@ -97,7 +99,6 @@ namespace MWGui
         mDecreaseButton->eventMouseButtonReleased += MyGUI::newDelegate(this, &TradeWindow::onBalanceButtonReleased);
 
         mTotalBalance->eventValueChanged += MyGUI::newDelegate(this, &TradeWindow::onBalanceValueChanged);
-        mTotalBalance->setMinValue(INT_MIN+1); // disallow INT_MIN since abs(INT_MIN) is undefined
 
         setCoord(400, 0, 400, 300);
     }
@@ -120,8 +121,10 @@ namespace MWGui
     {
         mPtr = actor;
 
-        mCurrentBalance = 0;
-        mCurrentMerchantOffer = 0;
+        mIsPlayerSelling = false;
+        mIsMerchantBuying = false;
+        mPlayerOffer = 0;
+        mMerchantOffer = 0;
 
         restock();
 
@@ -272,33 +275,28 @@ namespace MWGui
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        // were there any items traded at all?
+        // notify if no items were traded
         std::vector<ItemStack> playerBought = playerItemModel->getItemsBorrowedToUs();
         std::vector<ItemStack> merchantBought = mTradeModel->getItemsBorrowedToUs();
-        if (playerBought.empty() && merchantBought.empty())
-        {
-            // user notification
+
+        if ( playerBought.empty() && merchantBought.empty() ) {
             MWBase::Environment::get().getWindowManager()->
                 messageBox("#{sBarterDialog11}");
             return;
         }
 
+        // notify if the player cannot afford to buy
         MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-        // check if the player can afford this
-        if (mCurrentBalance < 0 && playerGold < std::abs(mCurrentBalance))
-        {
-            // user notification
+        if ( !mIsPlayerSelling && playerGold < mPlayerOffer ) {
             MWBase::Environment::get().getWindowManager()->
                 messageBox("#{sBarterDialog1}");
             return;
         }
 
-        // check if the merchant can afford this
-        if (mCurrentBalance > 0 && getMerchantGold() < mCurrentBalance)
-        {
-            // user notification
+        // notify if the merchant cannot afford to buy
+        if ( mIsPlayerSelling && getMerchantGold() < mPlayerOffer ) {
             MWBase::Environment::get().getWindowManager()->
                 messageBox("#{sBarterDialog2}");
             return;
@@ -323,28 +321,24 @@ namespace MWGui
             }
         }
 
-        // TODO: move to mwmechanics
+        // TODO: move haggling code to mwmechanics
 
-        // Is the player buying?
-        bool buying = (mCurrentMerchantOffer < 0);
+        // haggle if player's offer is better for player than merchant's offer
+        int playerOffer = mPlayerOffer * (mIsPlayerSelling ? 1 : -1);
+        int merchantOffer = mMerchantOffer * (mIsMerchantBuying ? 1 : -1);
 
-        if(mCurrentBalance > mCurrentMerchantOffer)
-        {
-            //if npc is a creature: reject (no haggle)
-            if (mPtr.getTypeName() != typeid(ESM::NPC).name())
-            {
+        if ( playerOffer > merchantOffer ) {
+            // don't haggle if npc is a creature
+            if ( mPtr.getTypeName() != typeid(ESM::NPC).name() ) {
                 MWBase::Environment::get().getWindowManager()->
                     messageBox("#{sNotifyMessage9}");
                 return;
             }
 
-            int a = abs(mCurrentMerchantOffer);
-            int b = abs(mCurrentBalance);
-            int d = 0;
-            if (buying)
-                d = int(100 * (a - b) / a);
-            else
-                d = int(100 * (b - a) / a);
+            // note: haggle formula is invalid if player tries to buy items and receive gold
+            int m = mMerchantOffer;
+            int p = mPlayerOffer;
+            int percentDiff = int(100.f * std::abs(p - m) / m);
 
             int clampedDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr);
 
@@ -361,15 +355,15 @@ namespace MWGui
             float dispositionTerm = gmst.find("fDispositionMod")->getFloat() * (clampedDisposition - 50);
             float pcTerm = (dispositionTerm - 50 + a1 + b1 + c1) * playerStats.getFatigueTerm();
             float npcTerm = (d1 + e1 + f1) * sellerStats.getFatigueTerm();
-            float x = gmst.find("fBargainOfferMulti")->getFloat() * d + gmst.find("fBargainOfferBase")->getFloat();
-            if (buying)
-                x += abs(int(pcTerm - npcTerm));
-            else
-                x += abs(int(npcTerm - pcTerm));
+            float x = gmst.find("fBargainOfferMulti")->getFloat() * percentDiff
+                    + gmst.find("fBargainOfferBase")->getFloat()
+                    + std::abs(int(npcTerm - pcTerm));
 
+            // notify and decrease merchant disposition on haggle failure
+            // note: haggle auto-fails if player tries to buy items and receive gold (see above)
             int roll = Misc::Rng::rollDice(100) + 1;
-            if(roll > x || (mCurrentMerchantOffer < 0) != (mCurrentBalance < 0)) //trade refused
-            {
+
+            if ( x < roll || (mIsPlayerSelling && !mIsMerchantBuying) ) {
                 MWBase::Environment::get().getWindowManager()->
                     messageBox("#{sNotifyMessage9}");
 
@@ -379,40 +373,42 @@ namespace MWGui
                 return;
             }
 
-            //skill use!
+            // apply skill gain on haggle success
             float skillGain = 0.f;
-            int finalPrice = std::abs(mCurrentBalance);
-            int initialMerchantOffer = std::abs(mCurrentMerchantOffer);
-            if (!buying && (finalPrice > initialMerchantOffer) && finalPrice > 0)
-                skillGain = floor(100 * (finalPrice - initialMerchantOffer) / float(finalPrice));
-            else if (buying && (finalPrice < initialMerchantOffer) && initialMerchantOffer > 0)
-                skillGain = floor(100 * (initialMerchantOffer - finalPrice) / float(initialMerchantOffer));
+
+            if ( mIsPlayerSelling && p > m && p != 0 ) {
+                skillGain = std::floor(100.f * (p - m) / p);
+            }
+            else if ( !mIsPlayerSelling && p < m && m != 0 ) {
+                skillGain = std::floor(100.f * (m - p) / m);
+            }
 
             player.getClass().skillUsageSucceeded(player, ESM::Skill::Mercantile, 0, skillGain);
         }
 
+        // increase merchant's disposition
         int iBarterSuccessDisposition = gmst.find("iBarterSuccessDisposition")->getInt();
         if (mPtr.getClass().isNpc())
             MWBase::Environment::get().getDialogueManager()->applyDispositionChange(iBarterSuccessDisposition);
 
-        // make the item transfer
+        // transfer the items
         mTradeModel->transferItems();
         playerItemModel->transferItems();
 
         // transfer the gold
-        if (mCurrentBalance != 0)
-        {
-            addOrRemoveGold(mCurrentBalance, player);
-            mPtr.getClass().getCreatureStats(mPtr).setGoldPool(
-                        mPtr.getClass().getCreatureStats(mPtr).getGoldPool() - mCurrentBalance );
-        }
+        addOrRemoveGold(playerOffer, player);
+        mPtr.getClass().getCreatureStats(mPtr).setGoldPool(
+                    mPtr.getClass().getCreatureStats(mPtr).getGoldPool() - playerOffer);
 
+        // print barter response to dialogue
         MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addResponse(
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sBarterDialog5")->getString());
 
+        // play barter sound
         std::string sound = "Item Gold Up";
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
+        // exit trade window
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
     }
 
@@ -423,7 +419,8 @@ namespace MWGui
 
     void TradeWindow::onMaxSaleButtonClicked(MyGUI::Widget* _sender)
     {
-        mCurrentBalance = getMerchantGold();
+        mIsPlayerSelling = true;
+        mPlayerOffer = getMerchantGold();
         updateLabels();
     }
 
@@ -463,29 +460,29 @@ namespace MWGui
 
     void TradeWindow::onBalanceValueChanged(int value)
     {
-        // Entering a "-" sign inverts the buying/selling state
-        mCurrentBalance = (mCurrentBalance >= 0 ? 1 : -1) * value;
-        updateLabels();
+        // a negative value inverts the buying/selling state
+        if ( value < 0 ) {
+            mIsPlayerSelling = !mIsPlayerSelling;
+        }
 
-        if (value != std::abs(value))
-            mTotalBalance->setValue(std::abs(value));
+        mPlayerOffer = std::abs(value);
+        updateLabels();
     }
 
     void TradeWindow::onIncreaseButtonTriggered()
     {
-        // prevent overflows, and prevent entering INT_MIN since abs(INT_MIN) is undefined
-        if (mCurrentBalance == INT_MAX || mCurrentBalance == INT_MIN+1)
-            return;
-        if(mCurrentBalance<=-1) mCurrentBalance -= 1;
-        if(mCurrentBalance>=1) mCurrentBalance += 1;
-        updateLabels();
+        if ( mPlayerOffer < INT_MAX ) {
+            mPlayerOffer++;
+            updateLabels();
+        }
     }
 
     void TradeWindow::onDecreaseButtonTriggered()
     {
-        if(mCurrentBalance<-1) mCurrentBalance += 1;
-        if(mCurrentBalance>1) mCurrentBalance -= 1;
-        updateLabels();
+        if ( mPlayerOffer > 0 ) {
+            mPlayerOffer--;
+            updateLabels();
+        }
     }
 
     void TradeWindow::updateLabels()
@@ -494,23 +491,20 @@ namespace MWGui
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
         mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + MyGUI::utility::toString(playerGold));
+        mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + MyGUI::utility::toString(getMerchantGold()));
 
-        if (mCurrentBalance > 0)
-        {
+        if ( mIsPlayerSelling ) {
             mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalSold}");
         }
-        else
-        {
+        else {
             mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalCost}");
         }
-
-        mTotalBalance->setValue(std::abs(mCurrentBalance));
-
-        mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + MyGUI::utility::toString(getMerchantGold()));
+        mTotalBalance->setValue(mPlayerOffer);
     }
 
     void TradeWindow::updateOffer()
     {
+        // get the merchant's offer for all traded items
         TradeItemModel* playerTradeModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel();
 
         int merchantOffer = 0;
@@ -527,9 +521,10 @@ namespace MWGui
             merchantOffer += MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(it->mBase, it->mCount), false);
         }
 
-        int diff = merchantOffer - mCurrentMerchantOffer;
-        mCurrentMerchantOffer = merchantOffer;
-        mCurrentBalance += diff;
+        // apply the merchant's new offer
+        mIsPlayerSelling = mIsMerchantBuying = (merchantOffer > 0);
+        mPlayerOffer = mMerchantOffer = std::abs(merchantOffer);
+
         updateLabels();
     }
 
