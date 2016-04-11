@@ -39,6 +39,33 @@ namespace MWMechanics
     // distance must be long enough that NPC will need to move to get there.
     static const int MINIMUM_WANDER_DISTANCE = DESTINATION_TOLERANCE * 2;
 
+    float distanceSquared(ESM::Pathgrid::Point point, const osg::Vec3f& pos)
+    {
+        return (MWMechanics::PathFinder::MakeOsgVec3(point) - pos).length2();
+    }
+    
+    int getClosestPoint(const ESM::Pathgrid* grid, const osg::Vec3f& pos)
+    {
+        assert(grid && !grid->mPoints.empty());
+
+        float distanceBetween = distanceSquared(grid->mPoints[0], pos);
+        int closestIndex = 0;
+
+        // TODO: if this full scan causes performance problems mapping pathgrid
+        //       points to a quadtree may help
+        for(unsigned int counter = 1; counter < grid->mPoints.size(); counter++)
+        {
+            float potentialDistBetween = distanceSquared(grid->mPoints[counter], pos);
+            if(potentialDistBetween < distanceBetween)
+            {
+                distanceBetween = potentialDistBetween;
+                closestIndex = counter;
+            }
+        }
+
+        return closestIndex;
+    }
+
     const std::string AiWander::sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1] =
     {
         std::string("idle2"),
@@ -729,6 +756,7 @@ namespace MWMechanics
         // infrequently used, therefore no benefit in caching it as a member
         const ESM::Pathgrid *
             pathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell);
+        const MWWorld::CellStore* cellStore = actor.getCell();
 
         mAllowedNodes.clear();
 
@@ -749,14 +777,19 @@ namespace MWMechanics
             // get NPC's position in local (i.e. cell) co-ordinates
             osg::Vec3f npcPos(mInitialActorPosition);
             CoordinateConverter(cell).toLocal(npcPos);
+            
+            // Find closest pathgrid point
+            int closestPointIndex = getClosestPoint(pathgrid, npcPos);
 
             // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
+            // and if the point is connected to the closest current point
             // NOTE: mPoints and mAllowedNodes are in local co-ordinates
             int pointIndex = 0;
             for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
             {
                 osg::Vec3f nodePos(PathFinder::MakeOsgVec3(pathgrid->mPoints[counter]));
-                if((npcPos - nodePos).length2() <= mDistance * mDistance)
+                if((npcPos - nodePos).length2() <= mDistance * mDistance &&
+                   cellStore->isPointConnected(closestPointIndex, counter))
                 {
                     mAllowedNodes.push_back(pathgrid->mPoints[counter]);
                     pointIndex = counter;
