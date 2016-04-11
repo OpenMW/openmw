@@ -729,6 +729,7 @@ namespace MWMechanics
         // infrequently used, therefore no benefit in caching it as a member
         const ESM::Pathgrid *
             pathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell);
+        const MWWorld::CellStore* cellStore = actor.getCell();
 
         mAllowedNodes.clear();
 
@@ -749,14 +750,19 @@ namespace MWMechanics
             // get NPC's position in local (i.e. cell) co-ordinates
             osg::Vec3f npcPos(mInitialActorPosition);
             CoordinateConverter(cell).toLocal(npcPos);
+            
+            // Find closest pathgrid point
+            int closestPointIndex = PathFinder::GetClosestPoint(pathgrid, npcPos);
 
             // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
+            // and if the point is connected to the closest current point
             // NOTE: mPoints and mAllowedNodes are in local co-ordinates
             int pointIndex = 0;
             for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
             {
                 osg::Vec3f nodePos(PathFinder::MakeOsgVec3(pathgrid->mPoints[counter]));
-                if((npcPos - nodePos).length2() <= mDistance * mDistance)
+                if((npcPos - nodePos).length2() <= mDistance * mDistance &&
+                   cellStore->isPointConnected(closestPointIndex, counter))
                 {
                     mAllowedNodes.push_back(pathgrid->mPoints[counter]);
                     pointIndex = counter;

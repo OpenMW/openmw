@@ -10,43 +10,6 @@
 
 namespace
 {
-    // Slightly cheaper version for comparisons.
-    // Caller needs to be careful for very short distances (i.e. less than 1)
-    // or when accumuating the results i.e. (a + b)^2 != a^2 + b^2
-    //
-    float distanceSquared(ESM::Pathgrid::Point point, const osg::Vec3f& pos)
-    {
-        return (MWMechanics::PathFinder::MakeOsgVec3(point) - pos).length2();
-    }
-
-    // Return the closest pathgrid point index from the specified position co
-    // -ordinates.  NOTE: Does not check if there is a sensible way to get there
-    // (e.g. a cliff in front).
-    //
-    // NOTE: pos is expected to be in local co-ordinates, as is grid->mPoints
-    //
-    int getClosestPoint(const ESM::Pathgrid* grid, const osg::Vec3f& pos)
-    {
-        assert(grid && !grid->mPoints.empty());
-
-        float distanceBetween = distanceSquared(grid->mPoints[0], pos);
-        int closestIndex = 0;
-
-        // TODO: if this full scan causes performance problems mapping pathgrid
-        //       points to a quadtree may help
-        for(unsigned int counter = 1; counter < grid->mPoints.size(); counter++)
-        {
-            float potentialDistBetween = distanceSquared(grid->mPoints[counter], pos);
-            if(potentialDistBetween < distanceBetween)
-            {
-                distanceBetween = potentialDistBetween;
-                closestIndex = counter;
-            }
-        }
-
-        return closestIndex;
-    }
-
     // Chooses a reachable end pathgrid point.  start is assumed reachable.
     std::pair<int, bool> getClosestReachablePoint(const ESM::Pathgrid* grid,
                                                   const MWWorld::CellStore *cell,
@@ -62,7 +25,7 @@ namespace
         //       points to a quadtree may help
         for(unsigned int counter = 0; counter < grid->mPoints.size(); counter++)
         {
-            float potentialDistBetween = distanceSquared(grid->mPoints[counter], pos);
+            float potentialDistBetween = MWMechanics::PathFinder::DistanceSquared(grid->mPoints[counter], pos);
             if (potentialDistBetween < closestDistanceReachable)
             {
                 // found a closer one
@@ -146,7 +109,7 @@ namespace MWMechanics
      * pathgrid point (e.g. wander) then it may be worth while to call
      * pop_back() to remove the redundant entry.
      *
-     * NOTE: co-ordinates must be converted prior to calling getClosestPoint()
+     * NOTE: co-ordinates must be converted prior to calling GetClosestPoint()
      *
      *    |
      *    |       cell
@@ -199,16 +162,16 @@ namespace MWMechanics
             return;
         }
 
-        // NOTE: getClosestPoint expects local co-ordinates
+        // NOTE: GetClosestPoint expects local co-ordinates
         CoordinateConverter converter(mCell->getCell());
 
-        // NOTE: It is possible that getClosestPoint returns a pathgrind point index
+        // NOTE: It is possible that GetClosestPoint returns a pathgrind point index
         //       that is unreachable in some situations. e.g. actor is standing
         //       outside an area enclosed by walls, but there is a pathgrid
         //       point right behind the wall that is closer than any pathgrid
         //       point outside the wall
         osg::Vec3f startPointInLocalCoords(converter.toLocalVec3(startPoint));
-        int startNode = getClosestPoint(mPathgrid, startPointInLocalCoords);
+        int startNode = GetClosestPoint(mPathgrid, startPointInLocalCoords);
 
         osg::Vec3f endPointInLocalCoords(converter.toLocalVec3(endPoint));
         std::pair<int, bool> endNode = getClosestReachablePoint(mPathgrid, cell,
@@ -218,8 +181,8 @@ namespace MWMechanics
         // if it's shorter for actor to travel from start to end, than to travel from either
         // start or end to nearest pathgrid point, just travel from start to end.
         float startToEndLength2 = (endPointInLocalCoords - startPointInLocalCoords).length2();
-        float endTolastNodeLength2 = distanceSquared(mPathgrid->mPoints[endNode.first], endPointInLocalCoords);
-        float startTo1stNodeLength2 = distanceSquared(mPathgrid->mPoints[startNode], startPointInLocalCoords);
+        float endTolastNodeLength2 = DistanceSquared(mPathgrid->mPoints[endNode.first], endPointInLocalCoords);
+        float startTo1stNodeLength2 = DistanceSquared(mPathgrid->mPoints[startNode], startPointInLocalCoords);
         if ((startToEndLength2 < startTo1stNodeLength2) || (startToEndLength2 < endTolastNodeLength2))
         {
             mPath.push_back(endPoint);
