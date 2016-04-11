@@ -4,6 +4,7 @@
 #include <components/esm/defs.hpp>
 #include <components/esm/loadpgrd.hpp>
 #include <list>
+#include <cassert>
 
 namespace MWWorld
 {
@@ -88,6 +89,43 @@ namespace MWMechanics
             static osg::Vec3f MakeOsgVec3(const ESM::Pathgrid::Point& p)
             {
                 return osg::Vec3f(static_cast<float>(p.mX), static_cast<float>(p.mY), static_cast<float>(p.mZ));
+            }
+            
+            // Slightly cheaper version for comparisons.
+            // Caller needs to be careful for very short distances (i.e. less than 1)
+            // or when accumuating the results i.e. (a + b)^2 != a^2 + b^2
+            //
+            static float DistanceSquared(ESM::Pathgrid::Point point, const osg::Vec3f& pos)
+            {
+                return (MWMechanics::PathFinder::MakeOsgVec3(point) - pos).length2();
+            }
+
+            // Return the closest pathgrid point index from the specified position co
+            // -ordinates.  NOTE: Does not check if there is a sensible way to get there
+            // (e.g. a cliff in front).
+            //
+            // NOTE: pos is expected to be in local co-ordinates, as is grid->mPoints
+            //
+            static int GetClosestPoint(const ESM::Pathgrid* grid, const osg::Vec3f& pos)
+            {
+                assert(grid && !grid->mPoints.empty());
+
+                float distanceBetween = DistanceSquared(grid->mPoints[0], pos);
+                int closestIndex = 0;
+
+                // TODO: if this full scan causes performance problems mapping pathgrid
+                //       points to a quadtree may help
+                for(unsigned int counter = 1; counter < grid->mPoints.size(); counter++)
+                {
+                    float potentialDistBetween = DistanceSquared(grid->mPoints[counter], pos);
+                    if(potentialDistBetween < distanceBetween)
+                    {
+                        distanceBetween = potentialDistBetween;
+                        closestIndex = counter;
+                    }
+                }
+
+                return closestIndex;
             }
 
         private:

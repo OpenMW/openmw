@@ -39,33 +39,6 @@ namespace MWMechanics
     // distance must be long enough that NPC will need to move to get there.
     static const int MINIMUM_WANDER_DISTANCE = DESTINATION_TOLERANCE * 2;
 
-    float distanceSquared(ESM::Pathgrid::Point point, const osg::Vec3f& pos)
-    {
-        return (MWMechanics::PathFinder::MakeOsgVec3(point) - pos).length2();
-    }
-    
-    int getClosestPoint(const ESM::Pathgrid* grid, const osg::Vec3f& pos)
-    {
-        assert(grid && !grid->mPoints.empty());
-
-        float distanceBetween = distanceSquared(grid->mPoints[0], pos);
-        int closestIndex = 0;
-
-        // TODO: if this full scan causes performance problems mapping pathgrid
-        //       points to a quadtree may help
-        for(unsigned int counter = 1; counter < grid->mPoints.size(); counter++)
-        {
-            float potentialDistBetween = distanceSquared(grid->mPoints[counter], pos);
-            if(potentialDistBetween < distanceBetween)
-            {
-                distanceBetween = potentialDistBetween;
-                closestIndex = counter;
-            }
-        }
-
-        return closestIndex;
-    }
-
     const std::string AiWander::sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1] =
     {
         std::string("idle2"),
@@ -779,7 +752,7 @@ namespace MWMechanics
             CoordinateConverter(cell).toLocal(npcPos);
             
             // Find closest pathgrid point
-            int closestPointIndex = getClosestPoint(pathgrid, npcPos);
+            int closestPointIndex = PathFinder::GetClosestPoint(pathgrid, npcPos);
 
             // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
             // and if the point is connected to the closest current point
