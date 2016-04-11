@@ -20,6 +20,7 @@ Programmers
     Alex McKibben (WeirdSexy)
     Alexander Nadeau (wareya)
     Alexander Olofsson (Ace)
+    Austin Salgat (Salgat)
     Artem Kotsynyak (greye)
     artemutin
     Arthur Moore (EmperorArthur)
