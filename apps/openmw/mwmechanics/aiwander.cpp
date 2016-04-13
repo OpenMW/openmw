@@ -67,6 +67,11 @@ namespace MWMechanics
 
         // AiWander states
         AiWander::WanderState mState;
+
+        // Wandering near spawn logic
+        bool mIsWanderingManually;
+        ESM::Pathgrid::Point mPreviousWanderingNearSpawnLocation;
+        int mStuckTimer;
         
         unsigned short mIdleAnimation;
         std::vector<unsigned short> mBadIdles; // Idle animations that when called cause errors
@@ -81,9 +86,16 @@ namespace MWMechanics
             mGreetingTimer(0),
             mCell(NULL),
             mState(AiWander::Wander_ChooseAction),
+            mIsWanderingManually(false),
+            mStuckTimer(0),
             mIdleAnimation(0),
             mBadIdles()
             {};
+
+        void setState(const AiWander::WanderState wanderState, const bool isManualWander = false) {
+            mState = wanderState;
+            mIsWanderingManually = isManualWander;
+        }
     };
     
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
@@ -227,8 +239,20 @@ namespace MWMechanics
         }
 
         // Actor becomes stationary - see above URL's for previous research
-        if(mAllowedNodes.empty())
+        // If not an NPC and no pathgrid is available, randomly idle or wander around near spawn point
+        if(mAllowedNodes.empty() && !actor.getBase()->mClass->isNpc() && !storage.mIsWanderingManually) {
+            // Typically want to idle for a short time before the next wander
+            if (Misc::Rng::rollDice(100) >= 96) {
+                wanderNearSpawn(actor, storage);
+            }
+        } else if (mAllowedNodes.empty() && !storage.mIsWanderingManually) {
             mDistance = 0;
+        }
+
+        // Detect obstacles if wandering manually
+        if (storage.mIsWanderingManually) {
+            detectManualWanderingObstacles(actor, storage);
+        }
 
         // Don't try to move if you are in a new cell (ie: positioncell command called) but still play idles.
         if(mDistance && cellChange)
@@ -303,8 +327,51 @@ namespace MWMechanics
 
             if (storage.mPathFinder.isPathConstructed())
             {
-                storage.mState = Wander_Walking;
+                storage.setState(Wander_Walking);
             }
+        }
+    }
+
+    /*
+     * Commands actor to walk to a random location near original spawn location.
+     */
+    void AiWander::wanderNearSpawn(const MWWorld::Ptr& actor, AiWanderStorage& storage) {
+        const ESM::Pathgrid::Point currentPosition = actor.getRefData().getPosition().pos;
+        const ESM::Pathgrid::Point originalPosition = actor.getCellRef().getPosition().pos;
+
+        // Determine a random location within radius of original position
+        const float pi = 3.14159265359f;
+        const float randomRadius = Misc::Rng::rollClosedProbability() * MINIMUM_WANDER_DISTANCE * 14.0f;
+        const float randomDirection = Misc::Rng::rollClosedProbability() * 2.0f * pi;
+        const float destinationX = originalPosition.mX + randomRadius * std::cos(randomDirection);
+        const float destinationY = originalPosition.mY + randomRadius * std::sin(randomDirection);
+        ESM::Pathgrid::Point destinationPosition = ESM::Pathgrid::Point(destinationX, destinationY, originalPosition.mZ);
+
+        storage.mPathFinder.buildSyncedPath(currentPosition, destinationPosition, actor.getCell(), true);
+        storage.mPathFinder.addPointToPath(destinationPosition);
+        storage.mPreviousWanderingNearSpawnLocation = currentPosition;
+        storage.mStuckTimer = 0;
+        storage.setState(Wander_Walking, true);
+    }
+
+    /*
+     * Detects if a manually wandering actor has spent too much time at one spot (stuck by an obstacle)
+     * and stops wandering when that occurs. Uses the unit's speed to help determine how long they should
+     * not be in one spot.
+     */
+    void AiWander::detectManualWanderingObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage) {
+        const ESM::Pathgrid::Point currentPosition = actor.getRefData().getPosition().pos;
+        const float actorSpeed = actor.getClass().getSpeed(actor);
+        const float minimumDistanceTraveled = actorSpeed / 5.0f;
+        if (distanceApart2d(storage.mPreviousWanderingNearSpawnLocation, currentPosition) < minimumDistanceTraveled) {
+            // Hit an obstacle and haven't moved much
+            if (++(storage.mStuckTimer) > 10) {
+                // Stuck too long, stop wandering
+                storage.setState(Wander_ChooseAction);
+                mDistance = 0;
+            }
+        } else {
+            storage.mPreviousWanderingNearSpawnLocation = currentPosition;
         }
     }
 
@@ -344,7 +411,7 @@ namespace MWMechanics
             if (mDistance &&            // actor is not intended to be stationary
                 proximityToDoor(actor, MIN_DIST_TO_DOOR_SQUARED*1.6f*1.6f)) // NOTE: checks interior cells only
             {
-                storage.mState = Wander_MoveNow;
+                storage.setState(Wander_MoveNow);
                 mTrimCurrentNode = false; // just in case
                 return;
             }
@@ -364,7 +431,7 @@ namespace MWMechanics
         GreetingState& greetingState = storage.mSaidGreeting;
         if (!checkIdle(actor, storage.mIdleAnimation) && (greetingState == Greet_Done || greetingState == Greet_None))
         {
-            storage.mState = Wander_ChooseAction;
+            storage.setState(Wander_ChooseAction);
         }
     }
 
@@ -375,7 +442,7 @@ namespace MWMechanics
         if (storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DESTINATION_TOLERANCE))
         {
             stopWalking(actor, storage);
-            storage.mState = Wander_ChooseAction;
+            storage.setState(Wander_ChooseAction);
             mHasReturnPosition = false;
         }
         else
@@ -393,7 +460,7 @@ namespace MWMechanics
 
         if (!idleAnimation && mDistance)
         {
-            storage.mState = Wander_MoveNow;
+            storage.setState(Wander_MoveNow);
             return;
         }
         if(idleAnimation)
@@ -403,14 +470,14 @@ namespace MWMechanics
                 if(!playIdle(actor, idleAnimation))
                 {
                     storage.mBadIdles.push_back(idleAnimation);
-                    storage.mState = Wander_ChooseAction;
+                    storage.setState(Wander_ChooseAction);
                     return;
                 }
             }
         }
         // Recreate vanilla (broken?) behavior of resetting start time of AIWander:
         mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
-        storage.mState = Wander_IdleNow;
+        storage.setState(Wander_IdleNow);
     }
 
     void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration, ESM::Position& pos)
@@ -429,7 +496,7 @@ namespace MWMechanics
                 trimAllowedNodes(mAllowedNodes, storage.mPathFinder);
                 mObstacleCheck.clear();
                 storage.mPathFinder.clearPath();
-                storage.mState = Wander_MoveNow;
+                storage.setState(Wander_MoveNow);
             }
             else // probably walking into another NPC
             {
@@ -451,7 +518,7 @@ namespace MWMechanics
             mObstacleCheck.clear();
 
             stopWalking(actor, storage);
-            storage.mState = Wander_ChooseAction;
+            storage.setState(Wander_ChooseAction);
             mStuckCount = 0;
         }
     }
@@ -526,7 +593,7 @@ namespace MWMechanics
             {
                 stopWalking(actor, storage);
                 mObstacleCheck.clear();
-                storage.mState = Wander_IdleNow;
+                storage.setState(Wander_IdleNow);
             }
 
             turnActorToFacePlayer(actorPos, playerPos, storage);
@@ -579,7 +646,7 @@ namespace MWMechanics
                 mAllowedNodes.push_back(mCurrentNode);
             mCurrentNode = temp;
 
-            storage.mState = Wander_Walking;
+            storage.setState(Wander_Walking);
         }
         // Choose a different node and delete this one from possible nodes because it is uncreachable:
         else
