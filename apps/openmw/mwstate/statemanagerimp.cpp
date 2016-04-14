@@ -492,10 +492,28 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
         MWWorld::ConstPtr ptr = MWMechanics::getPlayer();
 
-        const ESM::CellId& cellId = ptr.getCell()->getCell()->getCellId();
+        if (ptr.isInCell())
+        {
+            const ESM::CellId& cellId = ptr.getCell()->getCell()->getCellId();
 
-        // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
-        MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false, false);
+            // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
+            MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false, false);
+        }
+        else
+        {
+            // Cell no longer exists (i.e. changed game files), choose a default cell
+            MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(0,0);
+            float x,y;
+            MWBase::Environment::get().getWorld()->indexToPosition(0,0,x,y,false);
+            ESM::Position pos;
+            pos.pos[0] = x;
+            pos.pos[1] = y;
+            pos.pos[2] = 0; // should be adjusted automatically (adjustPlayerPos=true)
+            pos.rot[0] = 0;
+            pos.rot[1] = 0;
+            pos.rot[2] = 0;
+            MWBase::Environment::get().getWorld()->changeToCell(cell->getCell()->getCellId(), pos, true, false);
+        }
 
         // Vanilla MW will restart startup scripts when a save game is loaded. This is unintuitive,
         // but some mods may be using it as a reload detector.
