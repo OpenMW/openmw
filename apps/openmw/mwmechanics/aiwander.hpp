@@ -94,7 +94,7 @@ namespace MWMechanics
                 const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos);
             bool isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void returnToStartLocation(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos);
-            void wanderNearSpawn(const MWWorld::Ptr& actor, AiWanderStorage& storage);
+            void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance, bool isNpc);
             void detectManualWanderingObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage);
 
             int mDistance; // how far the actor can wander from the spawn point

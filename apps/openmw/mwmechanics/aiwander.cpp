@@ -232,6 +232,12 @@ namespace MWMechanics
             return true;
         }
 
+        if (!mStoredInitialActorPosition)
+        {
+            mInitialActorPosition = actor.getRefData().getPosition().asVec3();
+            mStoredInitialActorPosition = true;
+        }
+
         // Initialization to discover & store allowed node points for this actor.
         if (mPopulateAvailableNodes)
         {
@@ -239,11 +245,12 @@ namespace MWMechanics
         }
 
         // Actor becomes stationary - see above URL's for previous research
-        // If not an NPC and no pathgrid is available, randomly idle or wander around near spawn point
-        if(mAllowedNodes.empty() && !actor.getBase()->mClass->isNpc() && !storage.mIsWanderingManually) {
+        // If a creature or an NPC with a wander distance and no pathgrid is available,
+        // randomly idle or wander around near spawn point
+        if(mAllowedNodes.empty() && (mDistance > 0 || !actor.getClass().isNpc()) && !storage.mIsWanderingManually) {
             // Typically want to idle for a short time before the next wander
             if (Misc::Rng::rollDice(100) >= 96) {
-                wanderNearSpawn(actor, storage);
+                wanderNearStart(actor, storage, mDistance, actor.getClass().isNpc());
             }
         } else if (mAllowedNodes.empty() && !storage.mIsWanderingManually) {
             mDistance = 0;
@@ -334,18 +341,22 @@ namespace MWMechanics
 
     /*
      * Commands actor to walk to a random location near original spawn location.
+     *
+     * Creatures simply wander a certain distance from their starting location, while NPCs wander a scripted
+     * distance (mDistance) from the position where they started the wander package.
+     * http://www.uesp.net/wiki/Tes3Mod:AIWander
      */
-    void AiWander::wanderNearSpawn(const MWWorld::Ptr& actor, AiWanderStorage& storage) {
+    void AiWander::wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance, bool isNpc) {
         const ESM::Pathgrid::Point currentPosition = actor.getRefData().getPosition().pos;
-        const ESM::Pathgrid::Point originalPosition = actor.getCellRef().getPosition().pos;
 
         // Determine a random location within radius of original position
         const float pi = 3.14159265359f;
-        const float randomRadius = Misc::Rng::rollClosedProbability() * MINIMUM_WANDER_DISTANCE * 14.0f;
+        const float maxWanderDistance = isNpc ? wanderDistance : MINIMUM_WANDER_DISTANCE * 14.0f;
+        const float wanderRadius = Misc::Rng::rollClosedProbability() * maxWanderDistance;
         const float randomDirection = Misc::Rng::rollClosedProbability() * 2.0f * pi;
-        const float destinationX = originalPosition.mX + randomRadius * std::cos(randomDirection);
-        const float destinationY = originalPosition.mY + randomRadius * std::sin(randomDirection);
-        ESM::Pathgrid::Point destinationPosition = ESM::Pathgrid::Point(destinationX, destinationY, originalPosition.mZ);
+        const float destinationX = mInitialActorPosition.x() + wanderRadius * std::cos(randomDirection);
+        const float destinationY = mInitialActorPosition.y() + wanderRadius * std::sin(randomDirection);
+        ESM::Pathgrid::Point destinationPosition = ESM::Pathgrid::Point(destinationX, destinationY, mInitialActorPosition.z());
 
         storage.mPathFinder.buildSyncedPath(currentPosition, destinationPosition, actor.getCell(), true);
         storage.mPathFinder.addPointToPath(destinationPosition);
@@ -787,12 +798,6 @@ namespace MWMechanics
 
     void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell)
     {
-        if (!mStoredInitialActorPosition)
-        {
-            mInitialActorPosition = actor.getRefData().getPosition().asVec3();
-            mStoredInitialActorPosition = true;
-        }
-
         // infrequently used, therefore no benefit in caching it as a member
         const ESM::Pathgrid *
             pathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell);
