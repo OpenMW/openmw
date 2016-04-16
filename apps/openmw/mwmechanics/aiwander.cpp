@@ -16,6 +16,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/customdata.hpp"
 
 #include "creaturestats.hpp"
 #include "steering.hpp"
@@ -72,6 +73,8 @@ namespace MWMechanics
         bool mIsWanderingManually;
         ESM::Pathgrid::Point mPreviousWanderingNearSpawnLocation;
         int mStuckTimer;
+
+        bool mCanWanderAlongPathGrid;
         
         unsigned short mIdleAnimation;
         std::vector<unsigned short> mBadIdles; // Idle animations that when called cause errors
@@ -88,6 +91,7 @@ namespace MWMechanics
             mState(AiWander::Wander_ChooseAction),
             mIsWanderingManually(false),
             mStuckTimer(0),
+            mCanWanderAlongPathGrid(true),
             mIdleAnimation(0),
             mBadIdles()
             {};
@@ -227,6 +231,9 @@ namespace MWMechanics
     bool AiWander::reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
         const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos)
     {
+        if (mDistance <= 0)
+            storage.mCanWanderAlongPathGrid = false;
+
         if (isPackageCompleted(actor, storage))
         {
             return true;
@@ -241,19 +248,19 @@ namespace MWMechanics
         // Initialization to discover & store allowed node points for this actor.
         if (mPopulateAvailableNodes)
         {
-            getAllowedNodes(actor, currentCell->getCell());
+            getAllowedNodes(actor, currentCell->getCell(), storage);
         }
 
         // Actor becomes stationary - see above URL's for previous research
         // If a creature or an NPC with a wander distance and no pathgrid is available,
         // randomly idle or wander around near spawn point
-        if(mAllowedNodes.empty() && (mDistance > 0 || !actor.getClass().isNpc()) && !storage.mIsWanderingManually) {
+        if(mAllowedNodes.empty() && mDistance > 0 && !storage.mIsWanderingManually) {
             // Typically want to idle for a short time before the next wander
             if (Misc::Rng::rollDice(100) >= 96) {
-                wanderNearStart(actor, storage, mDistance, actor.getClass().isNpc());
+                wanderNearStart(actor, storage, mDistance);
             }
         } else if (mAllowedNodes.empty() && !storage.mIsWanderingManually) {
-            mDistance = 0;
+            storage.mCanWanderAlongPathGrid = false;
         }
 
         // Detect obstacles if wandering manually
@@ -281,7 +288,7 @@ namespace MWMechanics
             playGreetingIfPlayerGetsTooClose(actor, storage);
         }
 
-        if ((wanderState == Wander_MoveNow) && mDistance)
+        if ((wanderState == Wander_MoveNow) && storage.mCanWanderAlongPathGrid)
         {
             // Construct a new path if there isn't one
             if(!storage.mPathFinder.isPathConstructed())
@@ -346,13 +353,12 @@ namespace MWMechanics
      * distance (mDistance) from the position where they started the wander package.
      * http://www.uesp.net/wiki/Tes3Mod:AIWander
      */
-    void AiWander::wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance, bool isNpc) {
+    void AiWander::wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance) {
         const ESM::Pathgrid::Point currentPosition = actor.getRefData().getPosition().pos;
 
         // Determine a random location within radius of original position
         const float pi = 3.14159265359f;
-        const float maxWanderDistance = isNpc ? wanderDistance : MINIMUM_WANDER_DISTANCE * 14.0f;
-        const float wanderRadius = Misc::Rng::rollClosedProbability() * maxWanderDistance;
+        const float wanderRadius = Misc::Rng::rollClosedProbability() * wanderDistance;
         const float randomDirection = Misc::Rng::rollClosedProbability() * 2.0f * pi;
         const float destinationX = mInitialActorPosition.x() + wanderRadius * std::cos(randomDirection);
         const float destinationY = mInitialActorPosition.y() + wanderRadius * std::sin(randomDirection);
@@ -376,10 +382,10 @@ namespace MWMechanics
         const float minimumDistanceTraveled = actorSpeed / 5.0f;
         if (distanceApart2d(storage.mPreviousWanderingNearSpawnLocation, currentPosition) < minimumDistanceTraveled) {
             // Hit an obstacle and haven't moved much
-            if (++(storage.mStuckTimer) > 10) {
-                // Stuck too long, stop wandering
+            if (++(storage.mStuckTimer) > 8) {
+                // Stuck too long, wander elsewhere
                 storage.setState(Wander_ChooseAction);
-                mDistance = 0;
+                wanderNearStart(actor, storage, mDistance);
             }
         } else {
             storage.mPreviousWanderingNearSpawnLocation = currentPosition;
@@ -769,7 +775,7 @@ namespace MWMechanics
             return;
 
         if (mPopulateAvailableNodes)
-            getAllowedNodes(actor, actor.getCell()->getCell());
+            getAllowedNodes(actor, actor.getCell()->getCell(), state.get<AiWanderStorage>());
 
         if (mAllowedNodes.empty())
             return;
@@ -796,7 +802,7 @@ namespace MWMechanics
         return static_cast<int>(DESTINATION_TOLERANCE * (Misc::Rng::rollProbability() * 2.0f - 1.0f));
     }
 
-    void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell)
+    void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell, AiWanderStorage& storage)
     {
         // infrequently used, therefore no benefit in caching it as a member
         const ESM::Pathgrid *
@@ -810,14 +816,14 @@ namespace MWMechanics
         // http://www.fliggerty.com/phpBB3/viewtopic.php?f=30&t=5833
         // Note: In order to wander, need at least two points.
         if(!pathgrid || (pathgrid->mPoints.size() < 2))
-            mDistance = 0;
+            storage.mCanWanderAlongPathGrid = false;
 
         // A distance value passed into the constructor indicates how far the
         // actor can  wander from the spawn position.  AiWander assumes that
         // pathgrid points are available, and uses them to randomly select wander
         // destinations within the allowed set of pathgrid points (nodes).
         // ... pathgrids don't usually include water, so swimmers ignore them
-        if (mDistance && !actor.getClass().isPureWaterCreature(actor))
+        if (mDistance && storage.mCanWanderAlongPathGrid && !actor.getClass().isPureWaterCreature(actor))
         {
             // get NPC's position in local (i.e. cell) co-ordinates
             osg::Vec3f npcPos(mInitialActorPosition);

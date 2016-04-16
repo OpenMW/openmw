@@ -94,7 +94,7 @@ namespace MWMechanics
                 const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos);
             bool isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void returnToStartLocation(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos);
-            void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance, bool isNpc);
+            void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance);
             void detectManualWanderingObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage);
 
             int mDistance; // how far the actor can wander from the spawn point
@@ -126,7 +126,7 @@ namespace MWMechanics
             // FIXME: move to AiWanderStorage
             std::vector<ESM::Pathgrid::Point> mAllowedNodes;
 
-            void getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell);
+            void getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell, AiWanderStorage& storage);
 
             // FIXME: move to AiWanderStorage
             ESM::Pathgrid::Point mCurrentNode;
