@@ -69,11 +69,7 @@ namespace MWMechanics
         // AiWander states
         AiWander::WanderState mState;
 
-        // Wandering near spawn logic
         bool mIsWanderingManually;
-        ESM::Pathgrid::Point mPreviousWanderingNearSpawnLocation;
-        int mStuckTimer;
-
         bool mCanWanderAlongPathGrid;
         
         unsigned short mIdleAnimation;
@@ -90,7 +86,6 @@ namespace MWMechanics
             mCell(NULL),
             mState(AiWander::Wander_ChooseAction),
             mIsWanderingManually(false),
-            mStuckTimer(0),
             mCanWanderAlongPathGrid(true),
             mIdleAnimation(0),
             mBadIdles()
@@ -222,14 +217,14 @@ namespace MWMechanics
         if (REACTION_INTERVAL <= lastReaction)
         {
             lastReaction = 0;
-            return reactionTimeActions(actor, storage, currentCell, cellChange, pos);
+            return reactionTimeActions(actor, storage, currentCell, cellChange, pos, duration);
         }
         else
             return false;
     }
 
     bool AiWander::reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
-        const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos)
+        const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos, float duration)
     {
         if (mDistance <= 0)
             storage.mCanWanderAlongPathGrid = false;
@@ -263,9 +258,9 @@ namespace MWMechanics
             storage.mCanWanderAlongPathGrid = false;
         }
 
-        // Detect obstacles if wandering manually
-        if (storage.mIsWanderingManually) {
-            detectManualWanderingObstacles(actor, storage);
+        // If Wandering manually and hit an obstacle, stop
+        if (storage.mIsWanderingManually && mObstacleCheck.check(actor, duration*10.0f, 2.5f)) {
+            stopWalking(actor, storage);
         }
 
         // Don't try to move if you are in a new cell (ie: positioncell command called) but still play idles.
@@ -348,10 +343,6 @@ namespace MWMechanics
 
     /*
      * Commands actor to walk to a random location near original spawn location.
-     *
-     * Creatures simply wander a certain distance from their starting location, while NPCs wander a scripted
-     * distance (mDistance) from the position where they started the wander package.
-     * http://www.uesp.net/wiki/Tes3Mod:AIWander
      */
     void AiWander::wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance) {
         const ESM::Pathgrid::Point currentPosition = actor.getRefData().getPosition().pos;
@@ -366,30 +357,7 @@ namespace MWMechanics
 
         storage.mPathFinder.buildSyncedPath(currentPosition, destinationPosition, actor.getCell(), true);
         storage.mPathFinder.addPointToPath(destinationPosition);
-        storage.mPreviousWanderingNearSpawnLocation = currentPosition;
-        storage.mStuckTimer = 0;
         storage.setState(Wander_Walking, true);
-    }
-
-    /*
-     * Detects if a manually wandering actor has spent too much time at one spot (stuck by an obstacle)
-     * and stops wandering when that occurs. Uses the unit's speed to help determine how long they should
-     * not be in one spot.
-     */
-    void AiWander::detectManualWanderingObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage) {
-        const ESM::Pathgrid::Point currentPosition = actor.getRefData().getPosition().pos;
-        const float actorSpeed = actor.getClass().getSpeed(actor);
-        const float minimumDistanceTraveled = actorSpeed / 5.0f;
-        if (distanceApart2d(storage.mPreviousWanderingNearSpawnLocation, currentPosition) < minimumDistanceTraveled) {
-            // Hit an obstacle and haven't moved much
-            if (++(storage.mStuckTimer) > 8) {
-                // Stuck too long, wander elsewhere
-                storage.setState(Wander_ChooseAction);
-                wanderNearStart(actor, storage, mDistance);
-            }
-        } else {
-            storage.mPreviousWanderingNearSpawnLocation = currentPosition;
-        }
     }
 
     void AiWander::doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos)

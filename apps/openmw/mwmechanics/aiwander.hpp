@@ -91,11 +91,10 @@ namespace MWMechanics
             void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos);
             void onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
-                const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos);
+                const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos, float duration);
             bool isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void returnToStartLocation(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos);
             void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance);
-            void detectManualWanderingObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
@@ -160,12 +159,6 @@ namespace MWMechanics
             static const std::string sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1];
 
             static int OffsetToPreventOvercrowding();
-
-            float distanceApart2d(const ESM::Pathgrid::Point& first, const ESM::Pathgrid::Point& second) {
-                const float deltaX = second.mX - first.mX;
-                const float deltaY = second.mY - first.mY;
-                return std::sqrt(deltaX*deltaX + deltaY*deltaY);
-            }
     };
     
     
