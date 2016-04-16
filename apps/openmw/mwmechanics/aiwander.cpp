@@ -346,18 +346,50 @@ namespace MWMechanics
      */
     void AiWander::wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance) {
         const ESM::Pathgrid::Point currentPosition = actor.getRefData().getPosition().pos;
+        const osg::Vec3f currentPositionVec3f = osg::Vec3f(currentPosition.mX, currentPosition.mY, currentPosition.mZ);
 
-        // Determine a random location within radius of original position
-        const float pi = 3.14159265359f;
-        const float wanderRadius = Misc::Rng::rollClosedProbability() * wanderDistance;
-        const float randomDirection = Misc::Rng::rollClosedProbability() * 2.0f * pi;
-        const float destinationX = mInitialActorPosition.x() + wanderRadius * std::cos(randomDirection);
-        const float destinationY = mInitialActorPosition.y() + wanderRadius * std::sin(randomDirection);
-        ESM::Pathgrid::Point destinationPosition = ESM::Pathgrid::Point(destinationX, destinationY, mInitialActorPosition.z());
+        std::size_t attempts = 10; // If a unit can't wander out of water, don't want to hang here
+        osg::Vec3f destination;
+        ESM::Pathgrid::Point destinationPosition;
+        bool isWaterCreature = actor.getClass().isPureWaterCreature(actor);
+        do {
+            // Determine a random location within radius of original position
+            const float pi = 3.14159265359f;
+            const float wanderRadius = Misc::Rng::rollClosedProbability() * wanderDistance;
+            const float randomDirection = Misc::Rng::rollClosedProbability() * 2.0f * pi;
+            const float destinationX = mInitialActorPosition.x() + wanderRadius * std::cos(randomDirection);
+            const float destinationY = mInitialActorPosition.y() + wanderRadius * std::sin(randomDirection);
+            const float destinationZ = mInitialActorPosition.z();
+            destinationPosition = ESM::Pathgrid::Point(destinationX, destinationY, destinationZ);
+            destination = osg::Vec3f(destinationX, destinationY, destinationZ);
 
-        storage.mPathFinder.buildSyncedPath(currentPosition, destinationPosition, actor.getCell(), true);
-        storage.mPathFinder.addPointToPath(destinationPosition);
-        storage.setState(Wander_Walking, true);
+            // Check if land creature will walk onto water or if water creature will swim onto land
+            if ((!isWaterCreature && !destinationIsAtWater(actor, destination)) ||
+                (isWaterCreature && destinationThroughGround(currentPositionVec3f, destination))) {
+                storage.mPathFinder.buildSyncedPath(currentPosition, destinationPosition, actor.getCell(), true);
+                storage.mPathFinder.addPointToPath(destinationPosition);
+                storage.setState(Wander_Walking, true);
+                return;
+            }
+        } while (attempts--);
+    }
+
+    /*
+     * Returns true if the position provided is above water.
+     */
+    bool AiWander::destinationIsAtWater(const MWWorld::Ptr &actor, const osg::Vec3f& destination) {
+        float heightToGroundOrWater = destination.z() - MWBase::Environment::get().getWorld()->getDistToNearestRayHit(destination, osg::Vec3f(0,0,-1), 1000.0, true);
+        osg::Vec3f positionBelowSurface = destination;
+        positionBelowSurface[2] = positionBelowSurface[2] - heightToGroundOrWater - DESTINATION_TOLERANCE;
+        return MWBase::Environment::get().getWorld()->isUnderwater(actor.getCell(), positionBelowSurface);
+    }
+
+    /*
+     * Returns true if the start to end point travels through a collision point (land).
+     */
+    bool AiWander::destinationThroughGround(const osg::Vec3f& startPoint, const osg::Vec3f& destination) {
+        return MWBase::Environment::get().getWorld()->castRay(startPoint.x(), startPoint.y(), startPoint.z(),
+                                                              destination.x(), destination.y(), destination.z());
     }
 
     void AiWander::doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos)
