@@ -371,7 +371,7 @@ namespace MWMechanics
                 storage.setState(Wander_Walking, true);
                 return;
             }
-        } while (attempts--);
+        } while (--attempts);
     }
 
     /*
