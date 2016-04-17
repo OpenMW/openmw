@@ -381,9 +381,9 @@ namespace MWMechanics
      * Returns true if the position provided is above water.
      */
     bool AiWander::destinationIsAtWater(const MWWorld::Ptr &actor, const osg::Vec3f& destination) {
-        float heightToGroundOrWater = destination.z() - MWBase::Environment::get().getWorld()->getDistToNearestRayHit(destination, osg::Vec3f(0,0,-1), 1000.0, true);
+        float heightToGroundOrWater = MWBase::Environment::get().getWorld()->getDistToNearestRayHit(destination, osg::Vec3f(0,0,-1), 1000.0, true);
         osg::Vec3f positionBelowSurface = destination;
-        positionBelowSurface[2] = positionBelowSurface[2] - heightToGroundOrWater - DESTINATION_TOLERANCE;
+        positionBelowSurface[2] = positionBelowSurface[2] - heightToGroundOrWater - 1.0f;
         return MWBase::Environment::get().getWorld()->isUnderwater(actor.getCell(), positionBelowSurface);
     }
 
