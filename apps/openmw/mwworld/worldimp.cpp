@@ -2389,14 +2389,17 @@ namespace MWWorld
         return mPhysics->getLineOfSight(actor, targetActor);
     }
 
-    float World::getDistToNearestRayHit(const osg::Vec3f& from, const osg::Vec3f& dir, float maxDist)
+    float World::getDistToNearestRayHit(const osg::Vec3f& from, const osg::Vec3f& dir, float maxDist, bool includeWater)
     {
         osg::Vec3f to (dir);
         to.normalize();
         to = from + (to * maxDist);
 
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(from, to, MWWorld::Ptr(),
-            MWPhysics::CollisionType_World|MWPhysics::CollisionType_HeightMap|MWPhysics::CollisionType_Door);
+        int collisionTypes = MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Door;
+        if (includeWater) {
+            collisionTypes |= MWPhysics::CollisionType_Water;
+        }
+        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(from, to, MWWorld::Ptr(), collisionTypes);
 
         if (!result.mHit)
             return maxDist;

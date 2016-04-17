@@ -91,9 +91,13 @@ namespace MWMechanics
             void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos);
             void onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
-                const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos);
+                const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos, float duration);
             bool isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void returnToStartLocation(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos);
+            void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance);
+            bool destinationIsAtWater(const MWWorld::Ptr &actor, const osg::Vec3f& destination);
+            bool destinationThroughGround(const osg::Vec3f& startPoint, const osg::Vec3f& destination);
+            void completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
@@ -124,7 +128,7 @@ namespace MWMechanics
             // FIXME: move to AiWanderStorage
             std::vector<ESM::Pathgrid::Point> mAllowedNodes;
 
-            void getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell);
+            void getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell, AiWanderStorage& storage);
 
             // FIXME: move to AiWanderStorage
             ESM::Pathgrid::Point mCurrentNode;
