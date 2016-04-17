@@ -16,7 +16,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/customdata.hpp"
 
 #include "creaturestats.hpp"
 #include "steering.hpp"
@@ -253,14 +252,16 @@ namespace MWMechanics
             // Typically want to idle for a short time before the next wander
             if (Misc::Rng::rollDice(100) >= 96) {
                 wanderNearStart(actor, storage, mDistance);
+            } else {
+                storage.setState(Wander_IdleNow);
             }
         } else if (mAllowedNodes.empty() && !storage.mIsWanderingManually) {
             storage.mCanWanderAlongPathGrid = false;
         }
 
         // If Wandering manually and hit an obstacle, stop
-        if (storage.mIsWanderingManually && mObstacleCheck.check(actor, duration*10.0f, 2.5f)) {
-            stopWalking(actor, storage);
+        if (storage.mIsWanderingManually && mObstacleCheck.check(actor, duration, 2.0f)) {
+            completeManualWalking(actor, storage);
         }
 
         // Don't try to move if you are in a new cell (ie: positioncell command called) but still play idles.
@@ -293,6 +294,8 @@ namespace MWMechanics
                     setPathToAnAllowedNode(actor, storage, pos);
                 }
             } 
+        } else if (storage.mIsWanderingManually && storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DESTINATION_TOLERANCE)) {
+            completeManualWalking(actor, storage);
         }
 
         return false; // AiWander package not yet completed
@@ -365,7 +368,7 @@ namespace MWMechanics
 
             // Check if land creature will walk onto water or if water creature will swim onto land
             if ((!isWaterCreature && !destinationIsAtWater(actor, destination)) ||
-                (isWaterCreature && destinationThroughGround(currentPositionVec3f, destination))) {
+                (isWaterCreature && !destinationThroughGround(currentPositionVec3f, destination))) {
                 storage.mPathFinder.buildSyncedPath(currentPosition, destinationPosition, actor.getCell(), true);
                 storage.mPathFinder.addPointToPath(destinationPosition);
                 storage.setState(Wander_Walking, true);
@@ -390,6 +393,12 @@ namespace MWMechanics
     bool AiWander::destinationThroughGround(const osg::Vec3f& startPoint, const osg::Vec3f& destination) {
         return MWBase::Environment::get().getWorld()->castRay(startPoint.x(), startPoint.y(), startPoint.z(),
                                                               destination.x(), destination.y(), destination.z());
+    }
+
+    void AiWander::completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage) {
+        stopWalking(actor, storage);
+        mObstacleCheck.clear();
+        storage.setState(Wander_IdleNow);
     }
 
     void AiWander::doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos)

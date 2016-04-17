@@ -97,6 +97,7 @@ namespace MWMechanics
             void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance);
             bool destinationIsAtWater(const MWWorld::Ptr &actor, const osg::Vec3f& destination);
             bool destinationThroughGround(const osg::Vec3f& startPoint, const osg::Vec3f& destination);
+            void completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
