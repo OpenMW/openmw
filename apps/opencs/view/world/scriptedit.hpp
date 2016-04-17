@@ -72,7 +72,6 @@ namespace CSVWorld
             void lineNumberAreaPaintEvent(QPaintEvent *event);
             int lineNumberAreaWidth();
             void showLineNum(bool show);
-            void setMonoFont(bool show);
 
         protected:
 

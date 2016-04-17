@@ -121,14 +121,6 @@ void CSVWorld::ScriptEdit::showLineNum(bool show)
     }
 }
 
-void CSVWorld::ScriptEdit::setMonoFont(bool show)
-{
-    if(show)
-        setFont(mMonoFont);
-    else
-        setFont(mDefaultFont);
-}
-
 bool CSVWorld::ScriptEdit::isChangeLocked() const
 {
     return mChangeLocked!=0;
