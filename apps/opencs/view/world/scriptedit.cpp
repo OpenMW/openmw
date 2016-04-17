@@ -52,7 +52,7 @@ CSVWorld::ScriptEdit::ScriptEdit(
     mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive)
 {
     wrapLines(false);
-    setTabWidth();
+    setTabWidth(4);
     setUndoRedoEnabled (false); // we use OpenCS-wide undo/redo instead
 
     mAllowedTypes <<CSMWorld::UniversalId::Type_Journal
@@ -194,9 +194,8 @@ bool CSVWorld::ScriptEdit::stringNeedsQuote (const std::string& id) const
     return !(string.contains(mWhiteListQoutes));
 }
 
-void CSVWorld::ScriptEdit::setTabWidth()
+void CSVWorld::ScriptEdit::setTabWidth(const int numCharacters)
 {
-    const int numCharacters = 4;
     QFontMetrics metrics(mMonoFont);
     setTabStopWidth(numCharacters * metrics.width(' '));
 }
@@ -231,6 +230,10 @@ void CSVWorld::ScriptEdit::settingChanged(const CSMPrefs::Setting *setting)
     else if (*setting == "Scripts/wrap-lines")
     {
         wrapLines(setting->isTrue());
+    }
+    else if (*setting == "Scripts/tab-width")
+    {
+        setTabWidth(setting->toInt());
     }
 }
 
