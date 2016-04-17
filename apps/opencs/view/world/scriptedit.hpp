@@ -53,6 +53,7 @@ namespace CSVWorld
             LineNumberArea *mLineNumberArea;
             QFont mDefaultFont;
             QFont mMonoFont;
+            int mTabCharCount;
 
         protected:
 
@@ -92,8 +93,7 @@ namespace CSVWorld
             bool stringNeedsQuote(const std::string& id) const;
 
             /// \brief Set tab width for script editor.
-            /// \param numCharacters Number of characters for tab width.
-            void setTabWidth(const int numCharacters);
+            void setTabWidth();
 
             /// \brief Turn line wrapping in script editor on or off.
             /// \param wrap Whether or not to wrap lines.
