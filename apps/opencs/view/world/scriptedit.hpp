@@ -53,6 +53,7 @@ namespace CSVWorld
             LineNumberArea *mLineNumberArea;
             QFont mDefaultFont;
             QFont mMonoFont;
+            int mTabCharCount;
 
         protected:
 
@@ -71,7 +72,6 @@ namespace CSVWorld
             void lineNumberAreaPaintEvent(QPaintEvent *event);
             int lineNumberAreaWidth();
             void showLineNum(bool show);
-            void setMonoFont(bool show);
 
         protected:
 
@@ -90,6 +90,9 @@ namespace CSVWorld
             void dragMoveEvent (QDragMoveEvent* event);
 
             bool stringNeedsQuote(const std::string& id) const;
+
+            /// \brief Set tab width for script editor.
+            void setTabWidth();
 
             /// \brief Turn line wrapping in script editor on or off.
             /// \param wrap Whether or not to wrap lines.

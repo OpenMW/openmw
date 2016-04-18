@@ -48,11 +48,12 @@ CSVWorld::ScriptEdit::ScriptEdit(
     mLineNumberArea(0),
     mDefaultFont(font()),
     mMonoFont(QFont("Monospace")),
+    mTabCharCount(4),
     mDocument(document),
     mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive)
 {
     wrapLines(false);
-    setTabStopWidth (4);
+    setTabWidth();
     setUndoRedoEnabled (false); // we use OpenCS-wide undo/redo instead
 
     mAllowedTypes <<CSMWorld::UniversalId::Type_Journal
@@ -118,14 +119,6 @@ void CSVWorld::ScriptEdit::showLineNum(bool show)
         mShowLineNum = show;
         updateLineNumberAreaWidth(0);
     }
-}
-
-void CSVWorld::ScriptEdit::setMonoFont(bool show)
-{
-    if(show)
-        setFont(mMonoFont);
-    else
-        setFont(mDefaultFont);
 }
 
 bool CSVWorld::ScriptEdit::isChangeLocked() const
@@ -194,6 +187,12 @@ bool CSVWorld::ScriptEdit::stringNeedsQuote (const std::string& id) const
     return !(string.contains(mWhiteListQoutes));
 }
 
+void CSVWorld::ScriptEdit::setTabWidth()
+{
+    // Set tab width to specified number of characters using current font.
+    setTabStopWidth(mTabCharCount * fontMetrics().width(' '));
+}
+
 void CSVWorld::ScriptEdit::wrapLines(bool wrap)
 {
     if (wrap)
@@ -216,6 +215,7 @@ void CSVWorld::ScriptEdit::settingChanged(const CSMPrefs::Setting *setting)
     else if (*setting == "Scripts/mono-font")
     {
         setFont(setting->isTrue() ? mMonoFont : mDefaultFont);
+        setTabWidth();
     }
     else if (*setting == "Scripts/show-linenum")
     {
@@ -224,6 +224,11 @@ void CSVWorld::ScriptEdit::settingChanged(const CSMPrefs::Setting *setting)
     else if (*setting == "Scripts/wrap-lines")
     {
         wrapLines(setting->isTrue());
+    }
+    else if (*setting == "Scripts/tab-width")
+    {
+        mTabCharCount = setting->toInt();
+        setTabWidth();
     }
 }
 

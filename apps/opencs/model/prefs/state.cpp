@@ -136,6 +136,9 @@ void CSMPrefs::State::declare()
     declareBool ("wrap-lines", "Wrap Lines", false).
         setTooltip ("Wrap lines longer than width of script editor.");
     declareBool ("mono-font", "Use monospace font", true);
+    declareInt ("tab-width", "Tab Width", 4).
+        setTooltip ("Number of characters for tab width").
+        setRange (1, 10);
     EnumValue warningsNormal ("Normal", "Report warnings as warning");
     declareEnum ("warnings", "Warning Mode", warningsNormal).
         addValue ("Ignore", "Do not report warning").
