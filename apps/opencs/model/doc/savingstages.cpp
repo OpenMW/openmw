@@ -15,6 +15,7 @@
 
 #include "document.hpp"
 #include "savingstate.hpp"
+#include <apps/opencs/model/world/land.hpp>
 
 CSMDoc::OpenSaveStage::OpenSaveStage (Document& document, SavingState& state, bool projectFile)
 : mDocument (document), mState (state), mProjectFile (projectFile)
@@ -399,32 +400,20 @@ void CSMDoc::WritePathgridCollectionStage::perform (int stage, Messages& message
     }
 }
 
-
-CSMDoc::WriteLandCollectionStage::WriteLandCollectionStage (Document& document,
-    SavingState& state)
-: mDocument (document), mState (state)
-{}
-
-int CSMDoc::WriteLandCollectionStage::setup()
-{
-    return mDocument.getData().getLand().getSize();
-}
-
-void CSMDoc::WriteLandCollectionStage::perform (int stage, Messages& messages)
+template <>
+void CSMDoc::WriteCollectionStage<CSMWorld::IdCollection<CSMWorld::Land> >::perform(int stage,
+                                                                       Messages& messages)
 {
     ESM::ESMWriter& writer = mState.getWriter();
-    const CSMWorld::Record<CSMWorld::Land>& land =
-        mDocument.getData().getLand().getRecord (stage);
+    const CSMWorld::Record<CSMWorld::Land>& land = mCollection.getRecord(stage);
 
-    if (land.isModified() || land.mState == CSMWorld::RecordBase::State_Deleted)
-    {
+    if (land.isModified() || land.mState == CSMWorld::RecordBase::State_Deleted) {
         CSMWorld::Land record = land.get();
-        writer.startRecord (record.sRecordId);
-        record.save (writer, land.mState == CSMWorld::RecordBase::State_Deleted);
-        writer.endRecord (record.sRecordId);
+        writer.startRecord(record.sRecordId);
+        record.save(writer, land.mState == CSMWorld::RecordBase::State_Deleted);
+        writer.endRecord(record.sRecordId);
     }
 }
-
 
 CSMDoc::WriteLandTextureCollectionStage::WriteLandTextureCollectionStage (Document& document,
     SavingState& state)
