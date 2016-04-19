@@ -103,7 +103,7 @@ namespace CSMWorld
             InfoCollection mJournalInfos;
             NestedIdCollection<Cell> mCells;
             IdCollection<LandTexture> mLandTextures;
-            IdCollection<Land> mLand;
+            IdCollection<Land> mLands;
             RefIdCollection mReferenceables;
             RefCollection mRefs;
             IdCollection<ESM::Filter> mFilters;
