@@ -808,7 +808,7 @@ namespace MWMechanics
 
     int AiWander::OffsetToPreventOvercrowding()
     {
-        return static_cast<int>(DESTINATION_TOLERANCE * (Misc::Rng::rollProbability() * 2.0f - 1.0f));
+        return static_cast<int>(20 * (Misc::Rng::rollProbability() * 2.0f - 1.0f));
     }
 
     void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell, AiWanderStorage& storage)
