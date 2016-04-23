@@ -11,7 +11,7 @@
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
 
-#include "../widget/scenetooltoggle.hpp"
+#include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolmode.hpp"
 #include "../widget/scenetooltoggle2.hpp"
 
@@ -581,16 +581,15 @@ void CSVRender::PagedWorldspaceWidget::reset (unsigned int elementMask)
         iter->second->reset (elementMask);
 }
 
-CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (
+CSVWidget::SceneToolToggle2 *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (
     CSVWidget::SceneToolbar *parent)
 {
-    mControlElements = new CSVWidget::SceneToolToggle (parent,
-        "Controls & Guides Visibility", ":placeholder");
+    mControlElements = new CSVWidget::SceneToolToggle2 (parent,
+        "Controls & Guides Visibility", ":scenetoolbar/scene-view-marker-c", ":scenetoolbar/scene-view-marker-");
 
-    mControlElements->addButton (":placeholder", Mask_CellMarker, ":placeholder",
-        "Cell marker");
-    mControlElements->addButton (":placeholder", Mask_CellArrow, ":placeholder", "Cell arrows");
-    mControlElements->addButton (":scenetoolbar/grid", Mask_CellBorder, ":scenetoolbar/grid-small", "Cell border");
+    mControlElements->addButton (1, Mask_CellMarker, "Cell Marker");
+    mControlElements->addButton (2, Mask_CellArrow, "Cell Arrows");
+    mControlElements->addButton (4, Mask_CellBorder, "Cell Border");
 
     mControlElements->setSelectionMask (0xffffffff);
 

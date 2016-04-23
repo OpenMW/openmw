@@ -112,7 +112,7 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
 
     if (type==widget_Paged)
     {
-        CSVWidget::SceneToolToggle *controlVisibilityTool =
+        CSVWidget::SceneToolToggle2 *controlVisibilityTool =
             dynamic_cast<CSVRender::PagedWorldspaceWidget&> (*widget).
             makeControlVisibilitySelector (toolbar);
 

@@ -11,6 +11,7 @@
 namespace CSVWidget
 {
    class SceneToolToggle;
+   class SceneToolToggle2;
 }
 
 namespace CSVRender
@@ -26,7 +27,7 @@ namespace CSVRender
             CSMWorld::CellSelection mSelection;
             std::map<CSMWorld::CellCoordinates, Cell *> mCells;
             std::string mWorldspace;
-            CSVWidget::SceneToolToggle *mControlElements;
+            CSVWidget::SceneToolToggle2 *mControlElements;
             bool mDisplayCellCoord;
 
         private:
@@ -90,7 +91,7 @@ namespace CSVRender
 
             /// \attention The created tool is not added to the toolbar (via addTool). Doing
             /// that is the responsibility of the calling function.
-            virtual CSVWidget::SceneToolToggle *makeControlVisibilitySelector (
+            virtual CSVWidget::SceneToolToggle2 *makeControlVisibilitySelector (
                 CSVWidget::SceneToolbar *parent);
 
             virtual unsigned int getVisibilityMask() const;
