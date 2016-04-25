@@ -442,12 +442,8 @@ int clone(Arguments& info)
     size_t recordCount = info.data.mRecords.size();
 
     int digitCount = 1; // For a nicer output
-    if (recordCount > 9) ++digitCount;
-    if (recordCount > 99) ++digitCount;
-    if (recordCount > 999) ++digitCount;
-    if (recordCount > 9999) ++digitCount;
-    if (recordCount > 99999) ++digitCount;
-    if (recordCount > 999999) ++digitCount;
+    if (recordCount > 0)
+        digitCount = (int)log10(recordCount) + 1;
 
     std::cout << "Loaded " << recordCount << " records:" << std::endl << std::endl;
 
