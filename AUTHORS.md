@@ -18,6 +18,7 @@ Programmers
     Aleksandar Jovanov
     Alex Haddad (rainChu)
     Alex McKibben (WeirdSexy)
+    alexanderkjall
     Alexander Nadeau (wareya)
     Alexander Olofsson (Ace)
     Austin Salgat (Salgat)
