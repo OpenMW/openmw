@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <fstream>
+#include <cmath>
 
 #include <boost/program_options.hpp>
 
@@ -354,7 +355,7 @@ int load(Arguments& info)
             esm.getRecHeader(flags);
 
             EsmTool::RecordBase *record = EsmTool::RecordBase::create(n);
-            if (record == 0) 
+            if (record == 0)
             {
                 if (std::find(skipped.begin(), skipped.end(), n.val) == skipped.end())
                 {
@@ -391,16 +392,16 @@ int load(Arguments& info)
                 record->print();
             }
 
-            if (record->getType().val == ESM::REC_CELL && loadCells && interested) 
+            if (record->getType().val == ESM::REC_CELL && loadCells && interested)
             {
                 loadCell(record->cast<ESM::Cell>()->get(), esm, info);
             }
 
-            if (save) 
+            if (save)
             {
                 info.data.mRecords.push_back(record);
-            } 
-            else 
+            }
+            else
             {
                 delete record;
             }
@@ -443,7 +444,7 @@ int clone(Arguments& info)
 
     int digitCount = 1; // For a nicer output
     if (recordCount > 0)
-        digitCount = (int)log10(recordCount) + 1;
+        digitCount = (int)std::log10(recordCount) + 1;
 
     std::cout << "Loaded " << recordCount << " records:" << std::endl << std::endl;
 
