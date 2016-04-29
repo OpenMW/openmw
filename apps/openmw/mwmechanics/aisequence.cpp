@@ -166,10 +166,15 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
         }
 
         MWMechanics::AiPackage* package = mPackages.front();
-        mLastAiPackage = package->getTypeId();
+        int packageTypeId = package->getTypeId();
+        // workaround ai packages not being handled as in the vanilla engine
+        if (packageTypeId != AiPackage::TypeIdCombat
+                       && packageTypeId != AiPackage::TypeIdPursue
+                       && packageTypeId != AiPackage::TypeIdAvoidDoor)
+            mLastAiPackage = packageTypeId;
 
         // if active package is combat one, choose nearest target
-        if (mLastAiPackage == AiPackage::TypeIdCombat)
+        if (packageTypeId == AiPackage::TypeIdCombat)
         {
             std::list<AiPackage *>::iterator itActualCombat;
 
@@ -216,7 +221,6 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
                 }
 
                 package = mPackages.front();
-                mLastAiPackage = package->getTypeId();
             }
             else
             {

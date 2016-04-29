@@ -41,6 +41,7 @@ namespace MWMechanics
                 TypeIdActivate = 4,
 
                 // These 3 are not really handled as Ai Packages in the MW engine
+                // For compatibility do *not* return these in the getCurrentAiPackage script function..
                 TypeIdCombat = 5,
                 TypeIdPursue = 6,
                 TypeIdAvoidDoor = 7
