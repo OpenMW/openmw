@@ -62,7 +62,15 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
     }
 
     // NPC faction
-    if (!info.mFaction.empty())
+    if (info.mFactionLess)
+    {
+        if (isCreature)
+            return true;
+
+        if (!mActor.getClass().getPrimaryFaction(mActor).empty())
+            return false;
+    }
+    else if (!info.mFaction.empty())
     {
         if (isCreature)
             return true;
