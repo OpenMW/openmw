@@ -1139,7 +1139,8 @@ bool CSMWorld::Data::hasId (const std::string& id) const
         getBodyParts().searchId (id)!=-1 ||
         getSoundGens().searchId (id)!=-1 ||
         getMagicEffects().searchId (id)!=-1 ||
-        getReferenceables().searchId (id)!=-1;
+        getReferenceables().searchId (id)!=-1 ||
+        getPathgrids().searchId (id)!=-1;
 }
 
 int CSMWorld::Data::count (RecordBase::State state) const
