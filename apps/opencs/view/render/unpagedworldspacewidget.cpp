@@ -32,7 +32,7 @@ void CSVRender::UnpagedWorldspaceWidget::update()
 }
 
 CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document, QWidget* parent)
-: WorldspaceWidget (document, parent), mCellId (cellId)
+: WorldspaceWidget (document, parent), mDocument(document), mCellId (cellId)
 {
     mCellsModel = &dynamic_cast<CSMWorld::IdTable&> (
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
@@ -195,6 +195,81 @@ void CSVRender::UnpagedWorldspaceWidget::referenceAdded (const QModelIndex& pare
     if (mCell.get())
         if (mCell.get()->referenceAdded (parent, start, end))
             flagAsModified();
+}
+
+void CSVRender::UnpagedWorldspaceWidget::pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
+
+    if (topLeft.parent().isValid())
+    {
+        int row = topLeft.parent().row();
+
+        const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
+        if (mCellId == pathgrid.mId && mCell->pathgridDataChanged(topLeft, bottomRight))
+            flagAsModified();
+    }
+}
+
+void CSVRender::UnpagedWorldspaceWidget::pathgridAboutToBeRemoved (const QModelIndex& parent, int start, int end)
+{
+    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
+
+    if (!parent.isValid())
+    {
+        // Pathgrid going to be deleted
+        for (int row = start; row <= end; ++row)
+        {
+            const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
+            if (mCellId == pathgrid.mId)
+            {
+                mCell->pathgridRemoved();
+                flagAsModified();
+            }
+        }
+    }
+    else
+    {
+        // Pathgrid data was modified
+        int row = parent.row();
+
+        const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
+        if (mCellId == pathgrid.mId)
+        {
+            mCell->pathgridRowAboutToBeRemoved(parent, start, end);
+            flagAsModified();
+        }
+    }
+}
+
+void CSVRender::UnpagedWorldspaceWidget::pathgridAdded (const QModelIndex& parent, int start, int end)
+{
+    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
+
+    if (!parent.isValid())
+    {
+        // Pathgrid added theoretically, unable to test until it is possible to add pathgrids
+        for (int row = start; row <= end; ++row)
+        {
+            const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
+            if (mCellId == pathgrid.mId)
+            {
+                mCell->pathgridAdded(pathgrid);
+            }
+        }
+    }
+    else
+    {
+        // Pathgrid data was modified
+        int row = parent.row();
+
+        const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
+        if (mCellId == pathgrid.mId)
+        {
+            mCell->pathgridRowAdded(parent, start, end);
+            flagAsModified();
+        }
+    }
 }
 
 void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (

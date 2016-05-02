@@ -29,11 +29,14 @@ namespace CSMWorld
 {
     class Data;
     class CellCoordinates;
+    class Pathgrid;
 }
 
 namespace CSVRender
 {
     class TagBase;
+
+    class Pathgrid;
 
     class Cell
     {
@@ -46,6 +49,7 @@ namespace CSVRender
             std::auto_ptr<CellArrow> mCellArrows[4];
             std::auto_ptr<CellMarker> mCellMarker;
             std::auto_ptr<CellBorder> mCellBorder;
+            std::auto_ptr<Pathgrid> mPathgrid;
             bool mDeleted;
             int mSubMode;
             unsigned int mSubModeElementMask;
@@ -102,6 +106,16 @@ namespace CSVRender
             /// \return Did this call result in a modification of the visual representation of
             /// this cell?
             bool referenceAdded (const QModelIndex& parent, int start, int end);
+
+            void pathgridAdded(const CSMWorld::Pathgrid& pathgrid);
+
+            void pathgridRemoved();
+
+            bool pathgridDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            bool pathgridRowAboutToBeRemoved(const QModelIndex& parent, int start, int end);
+
+            bool pathgridRowAdded(const QModelIndex& parent, int start, int end);
 
             void setSelection (int elementMask, Selection mode);
 

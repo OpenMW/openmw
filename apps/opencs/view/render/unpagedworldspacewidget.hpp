@@ -25,6 +25,7 @@ namespace CSVRender
     {
             Q_OBJECT
 
+            CSMDoc::Document& mDocument;
             std::string mCellId;
             CSMWorld::IdTable *mCellsModel;
             CSMWorld::IdTable *mReferenceablesModel;
@@ -82,6 +83,12 @@ namespace CSVRender
             virtual void referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
             virtual void referenceAdded (const QModelIndex& index, int start, int end);
+
+            virtual void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            virtual void pathgridAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+            virtual void pathgridAdded (const QModelIndex& parent, int start, int end);
 
             virtual std::string getStartupInstruction();
 
