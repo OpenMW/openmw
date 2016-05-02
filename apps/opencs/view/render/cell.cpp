@@ -14,7 +14,6 @@
 
 #include "mask.hpp"
 #include "terrainstorage.hpp"
-#include "pathgrid.hpp"
 
 bool CSVRender::Cell::removeObject (const std::string& id)
 {
@@ -105,11 +104,6 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
                 mCellBorder->buildShape(esmLand);
             }
         }
-
-        const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mData.getPathgrids();
-        int pathgridIndex = pathgrids.searchId(mId);
-        if (pathgridIndex != -1)
-            mPathgrid.reset(new Pathgrid(mCellNode, pathgrids.getRecord(pathgridIndex).get(), mCoordinates));
     }
 }
 
@@ -258,46 +252,6 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
         return false;
 
     return addObjects (start, end);
-}
-
-void CSVRender::Cell::pathgridAdded(const CSMWorld::Pathgrid& pathgrid)
-{
-    mPathgrid.reset(new Pathgrid(mCellNode, pathgrid, mCoordinates));
-}
-
-void CSVRender::Cell::pathgridRemoved()
-{
-    mPathgrid.reset();
-}
-
-bool CSVRender::Cell::pathgridDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
-{
-    if (mPathgrid.get() != 0)
-    {
-        return mPathgrid->dataChanged(topLeft, bottomRight);
-    }
-
-    return false;
-}
-
-bool CSVRender::Cell::pathgridRowAboutToBeRemoved(const QModelIndex& parent, int start, int end)
-{
-    if (mPathgrid.get() != 0)
-    {
-        return mPathgrid->rowAboutToBeRemoved(parent, start, end);
-    }
-
-    return false;
-}
-
-bool CSVRender::Cell::pathgridRowAdded(const QModelIndex& parent, int start, int end)
-{
-    if (mPathgrid.get() != 0)
-    {
-        return mPathgrid->rowAdded(parent, start, end);
-    }
-
-    return false;
 }
 
 void CSVRender::Cell::setSelection (int elementMask, Selection mode)

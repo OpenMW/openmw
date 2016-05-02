@@ -59,15 +59,6 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     connect (references, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (referenceAdded (const QModelIndex&, int, int)));
 
-    QAbstractItemModel *pathgrids = document.getData().getTableModel (CSMWorld::UniversalId::Type_Pathgrids);
-
-    connect (pathgrids, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (pathgridDataChanged (const QModelIndex&, const QModelIndex&)));
-    connect (pathgrids, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        this, SLOT (pathgridAboutToBeRemoved (const QModelIndex&, int, int)));
-    connect (pathgrids, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (pathgridAdded (const QModelIndex&, int, int)));
-
     QAbstractItemModel *debugProfiles =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_DebugProfiles);
 
