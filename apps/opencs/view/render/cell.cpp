@@ -84,6 +84,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
     osg::ref_ptr<osg::PositionAttitudeTransform> pathgridTransform = new osg::PositionAttitudeTransform();
     pathgridTransform->setPosition(osg::Vec3f(mCoordinates.getX() * ESM::Land::REAL_SIZE,
         mCoordinates.getY() * ESM::Land::REAL_SIZE, 0));
+    pathgridTransform->setNodeMask(Mask_Pathgrid);
     mCellNode->addChild(pathgridTransform);
 
     mPathgridGeode = new osg::Geode();
