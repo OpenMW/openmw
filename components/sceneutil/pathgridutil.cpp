@@ -9,6 +9,11 @@ namespace SceneUtil
 {
     const unsigned short DiamondVertexCount = 6;
     const unsigned short DiamondIndexCount = 24;
+
+    const unsigned short DiamondConnectorVertexCount = 4;
+
+    const unsigned short DiamondTotalVertexCount = DiamondVertexCount + DiamondConnectorVertexCount;
+
     const float DiamondHalfHeight = 40.f;
     const float DiamondHalfWidth = 16.f;
 
@@ -34,6 +39,11 @@ namespace SceneUtil
         5, 2, 4
     };
 
+    const unsigned short DiamondConnectorVertices[DiamondConnectorVertexCount] =
+    {
+        1, 2, 3, 4
+    };
+
     const osg::Vec4f DiamondColors[DiamondVertexCount] =
     {
         osg::Vec4f(0.f, 0.f, 1.f, 1.f),
@@ -44,12 +54,14 @@ namespace SceneUtil
         osg::Vec4f(0.f, .25f, 9.f, 1.f)
     };
 
+    const osg::Vec4f DiamondEdgeColor = osg::Vec4f(0.5f, 1.f, 1.f, 1.f);
+
     osg::ref_ptr<osg::Geometry> PathgridGeometryFactory::create(const ESM::Pathgrid& pathgrid)
     {
         const unsigned short PointCount = static_cast<unsigned short>(pathgrid.mPoints.size());
         const size_t EdgeCount = pathgrid.mEdges.size();
 
-        const unsigned short VertexCount = PointCount * DiamondVertexCount;
+        const unsigned short VertexCount = PointCount * DiamondTotalVertexCount;
         const unsigned short ColorCount = VertexCount;
         const size_t PointIndexCount = PointCount * DiamondIndexCount;
         const size_t EdgeIndexCount = EdgeCount * 2;
@@ -64,15 +76,15 @@ namespace SceneUtil
             new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, EdgeIndexCount);
 
         // Add each point/node
-
-
         for (unsigned short pointIndex = 0; pointIndex < PointCount; ++pointIndex)
         {
             const ESM::Pathgrid::Point& point = pathgrid.mPoints[pointIndex];
             osg::Vec3f position = osg::Vec3f(point.mX, point.mY, point.mZ);
 
-            unsigned short vertexOffset = pointIndex * DiamondVertexCount;
+            unsigned short vertexOffset = pointIndex * DiamondTotalVertexCount;
             unsigned short indexOffset = pointIndex * DiamondIndexCount;
+
+            // Point
             for (unsigned short i = 0; i < DiamondVertexCount; ++i)
             {
                 (*vertices)[vertexOffset + i] = position + DiamondPoints[i];
@@ -82,6 +94,14 @@ namespace SceneUtil
             for (unsigned short i = 0; i < DiamondIndexCount; ++i)
             {
                 pointIndices->setElement(indexOffset + i, vertexOffset + DiamondIndices[i]);
+            }
+
+            // Connectors
+            vertexOffset += DiamondVertexCount;
+            for (unsigned short i = 0; i < DiamondConnectorVertexCount; ++i)
+            {
+                (*vertices)[vertexOffset + i] = position + DiamondPoints[DiamondConnectorVertices[i]];
+                (*colors)[vertexOffset + i] = DiamondEdgeColor;
             }
         }
 
@@ -108,21 +128,21 @@ namespace SceneUtil
 
             unsigned short diamondIndex = 0;
             if (dir.isNaN())
-                diamondIndex = 1;
+                diamondIndex = 0;
             else if (dir.y() >= 0 && dir.x() > 0)
-                diamondIndex = 4;
-            else if (dir.x() <= 0 && dir.y() > 0)
-                diamondIndex = 2;
-            else if (dir.y() <= 0 && dir.x() < 0)
-                diamondIndex = 1;
-            else if (dir.x() >= 0 && dir.y() < 0)
                 diamondIndex = 3;
+            else if (dir.x() <= 0 && dir.y() > 0)
+                diamondIndex = 1;
+            else if (dir.y() <= 0 && dir.x() < 0)
+                diamondIndex = 0;
+            else if (dir.x() >= 0 && dir.y() < 0)
+                diamondIndex = 2;
 
             unsigned short fromIndex = static_cast<unsigned short>(edge->mV0);
             unsigned short toIndex = static_cast<unsigned short>(edge->mV1);
 
-            lineIndices->setElement(lineIndex++, fromIndex * DiamondVertexCount + diamondIndex);
-            lineIndices->setElement(lineIndex++, toIndex * DiamondVertexCount + diamondIndex);
+            lineIndices->setElement(lineIndex++, fromIndex * DiamondTotalVertexCount + DiamondVertexCount + diamondIndex);
+            lineIndices->setElement(lineIndex++, toIndex * DiamondTotalVertexCount + DiamondVertexCount + diamondIndex);
         }
 
         lineIndices->resize(lineIndex);
