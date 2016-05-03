@@ -9,8 +9,8 @@ namespace SceneUtil
 {
     const unsigned short DiamondVertexCount = 6;
     const unsigned short DiamondIndexCount = 24;
-    const float DiamondHalfHeight = 25.f;
-    const float DiamondHalfWidth = 10.f;
+    const float DiamondHalfHeight = 40.f;
+    const float DiamondHalfWidth = 16.f;
 
     const osg::Vec3f DiamondPoints[DiamondVertexCount] =
     {
@@ -36,12 +36,12 @@ namespace SceneUtil
 
     const osg::Vec4f DiamondColors[DiamondVertexCount] =
     {
-        osg::Vec4f(1.f, 0.f, 0.f, 1.f),
-        osg::Vec4f(.9f, .1f, 0.f, 1.f),
-        osg::Vec4f(.9f, .2f, 0.f, 1.f),
-        osg::Vec4f(.9f, .3f, 0.f, 1.f),
-        osg::Vec4f(.9f, .4f, 0.f, 1.f),
-        osg::Vec4f(.8f, .5f, 0.f, 1.f)
+        osg::Vec4f(0.f, 0.f, 1.f, 1.f),
+        osg::Vec4f(0.f, .05f, .95f, 1.f),
+        osg::Vec4f(0.f, .1f, .95f, 1.f),
+        osg::Vec4f(0.f, .15f, .95f, 1.f),
+        osg::Vec4f(0.f, .2f, .95f, 1.f),
+        osg::Vec4f(0.f, .25f, 9.f, 1.f)
     };
 
     osg::ref_ptr<osg::Geometry> PathgridGeometryFactory::create(const ESM::Pathgrid& pathgrid)
