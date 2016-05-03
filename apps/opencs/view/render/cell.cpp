@@ -254,6 +254,26 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
     return addObjects (start, end);
 }
 
+void CSVRender::Cell::pathgridAdded(const CSMWorld::Pathgrid& pathgrid)
+{
+}
+
+void CSVRender::Cell::pathgridRemoved()
+{
+}
+
+void CSVRender::Cell::pathgridDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+}
+
+void CSVRender::Cell::pathgridRowRemoved(const QModelIndex& parent, int start, int end)
+{
+}
+
+void CSVRender::Cell::pathgridRowAdded(const QModelIndex& parent, int start, int end)
+{
+}
+
 void CSVRender::Cell::setSelection (int elementMask, Selection mode)
 {
     if (elementMask & Mask_Reference)
