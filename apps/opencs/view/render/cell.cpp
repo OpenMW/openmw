@@ -68,6 +68,19 @@ bool CSVRender::Cell::addObjects (int start, int end)
     return modified;
 }
 
+void CSVRender::Cell::recreatePathgrid()
+{
+    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mData.getPathgrids();
+    int pathgridIndex = pathgrids.searchId(mId);
+    if (pathgridIndex != -1)
+    {
+        mPathgridGeode->removeDrawable(mPathgridGeometry);
+        mPathgridGeometry = SceneUtil::PathgridGeometryFactory::get().create(
+            pathgrids.getRecord(pathgridIndex).get());
+        mPathgridGeode->addDrawable(mPathgridGeometry);
+    }
+}
+
 CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,
     bool deleted)
 : mData (data), mId (Misc::StringUtils::lowerCase (id)), mDeleted (deleted), mSubMode (0),
@@ -120,14 +133,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
             }
         }
 
-        const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mData.getPathgrids();
-        int pathgridIndex = pathgrids.searchId(mId);
-        if (pathgridIndex != -1)
-        {
-            mPathgridGeometry = SceneUtil::PathgridGeometryFactory::get().create(
-                pathgrids.getRecord(pathgridIndex).get());
-            mPathgridGeode->addDrawable(mPathgridGeometry);
-        }
+        recreatePathgrid();
     }
 }
 
@@ -280,9 +286,7 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
 
 void CSVRender::Cell::pathgridAdded(const CSMWorld::Pathgrid& pathgrid)
 {
-    mPathgridGeode->removeDrawable(mPathgridGeometry);
-    mPathgridGeometry = SceneUtil::PathgridGeometryFactory::get().create(pathgrid);
-    mPathgridGeode->addDrawable(mPathgridGeometry);
+    recreatePathgrid();
 }
 
 void CSVRender::Cell::pathgridRemoved()
@@ -292,41 +296,17 @@ void CSVRender::Cell::pathgridRemoved()
 
 void CSVRender::Cell::pathgridDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
-    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mData.getPathgrids();
-    int pathgridIndex = pathgrids.searchId(mId);
-    if (pathgridIndex != -1)
-    {
-        mPathgridGeode->removeDrawable(mPathgridGeometry);
-        mPathgridGeometry = SceneUtil::PathgridGeometryFactory::get().create(
-            pathgrids.getRecord(pathgridIndex).get());
-        mPathgridGeode->addDrawable(mPathgridGeometry);
-    }
+    recreatePathgrid();
 }
 
 void CSVRender::Cell::pathgridRowRemoved(const QModelIndex& parent, int start, int end)
 {
-    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mData.getPathgrids();
-    int pathgridIndex = pathgrids.searchId(mId);
-    if (pathgridIndex != -1)
-    {
-        mPathgridGeode->removeDrawable(mPathgridGeometry);
-        mPathgridGeometry = SceneUtil::PathgridGeometryFactory::get().create(
-            pathgrids.getRecord(pathgridIndex).get());
-        mPathgridGeode->addDrawable(mPathgridGeometry);
-    }
+    recreatePathgrid();
 }
 
 void CSVRender::Cell::pathgridRowAdded(const QModelIndex& parent, int start, int end)
 {
-    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mData.getPathgrids();
-    int pathgridIndex = pathgrids.searchId(mId);
-    if (pathgridIndex != -1)
-    {
-        mPathgridGeode->removeDrawable(mPathgridGeometry);
-        mPathgridGeometry = SceneUtil::PathgridGeometryFactory::get().create(
-            pathgrids.getRecord(pathgridIndex).get());
-        mPathgridGeode->addDrawable(mPathgridGeometry);
-    }
+    recreatePathgrid();
 }
 
 void CSVRender::Cell::setSelection (int elementMask, Selection mode)

@@ -69,6 +69,8 @@ namespace CSVRender
             /// \return Have any objects been added?
             bool addObjects (int start, int end);
 
+            void recreatePathgrid();
+
         public:
 
             enum Selection
