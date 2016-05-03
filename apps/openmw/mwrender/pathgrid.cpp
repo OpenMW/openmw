@@ -112,7 +112,7 @@ void Pathgrid::enableCellPathgrid(const MWWorld::CellStore *store)
     osg::ref_ptr<osg::PositionAttitudeTransform> cellPathGrid = new osg::PositionAttitudeTransform;
     cellPathGrid->setPosition(cellPathGridPos);
 
-    osg::ref_ptr<osg::Geometry> geometry = SceneUtil::PathgridGeometryFactory::get().create(*pathgrid);
+    osg::ref_ptr<osg::Geometry> geometry = SceneUtil::createPathgridGeometry(*pathgrid);
 
     cellPathGrid->addChild(geometry);
 

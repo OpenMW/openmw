@@ -11,22 +11,7 @@ namespace ESM
 
 namespace SceneUtil
 {
-
-    class PathgridGeometryFactory
-    {
-        public:
-
-            osg::ref_ptr<osg::Geometry> create(const ESM::Pathgrid& pathgrid);
-            static PathgridGeometryFactory& get();
-
-        private:
-
-            PathgridGeometryFactory();
-
-            // Not implemented
-            PathgridGeometryFactory(const PathgridGeometryFactory&);
-            PathgridGeometryFactory& operator=(const PathgridGeometryFactory&);
-    };
+    osg::ref_ptr<osg::Geometry> createPathgridGeometry(const ESM::Pathgrid& pathgrid);
 }
 
 #endif

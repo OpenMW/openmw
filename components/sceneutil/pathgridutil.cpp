@@ -56,7 +56,7 @@ namespace SceneUtil
 
     const osg::Vec4f DiamondEdgeColor = osg::Vec4f(0.5f, 1.f, 1.f, 1.f);
 
-    osg::ref_ptr<osg::Geometry> PathgridGeometryFactory::create(const ESM::Pathgrid& pathgrid)
+    osg::ref_ptr<osg::Geometry> createPathgridGeometry(const ESM::Pathgrid& pathgrid)
     {
         const unsigned short PointCount = static_cast<unsigned short>(pathgrid.mPoints.size());
         const size_t EdgeCount = pathgrid.mEdges.size();
@@ -154,15 +154,5 @@ namespace SceneUtil
         gridGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
         return gridGeometry;
-    }
-
-    PathgridGeometryFactory& PathgridGeometryFactory::get()
-    {
-        static PathgridGeometryFactory instance;
-        return instance;
-    }
-
-    PathgridGeometryFactory::PathgridGeometryFactory()
-    {
     }
 }

@@ -75,8 +75,7 @@ void CSVRender::Cell::recreatePathgrid()
     if (pathgridIndex != -1)
     {
         mPathgridGeode->removeDrawable(mPathgridGeometry);
-        mPathgridGeometry = SceneUtil::PathgridGeometryFactory::get().create(
-            pathgrids.getRecord(pathgridIndex).get());
+        mPathgridGeometry = SceneUtil::createPathgridGeometry(pathgrids.getRecord(pathgridIndex).get());
         mPathgridGeode->addDrawable(mPathgridGeometry);
     }
 }
