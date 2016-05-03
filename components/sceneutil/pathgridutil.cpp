@@ -34,7 +34,15 @@ namespace SceneUtil
         5, 2, 4
     };
 
-    const osg::Vec4f DiamondColor = osg::Vec4f(1.f, 0.f, 0.f, 1.f);
+    const osg::Vec4f DiamondColors[DiamondVertexCount] =
+    {
+        osg::Vec4f(1.f, 0.f, 0.f, 1.f),
+        osg::Vec4f(.9f, .1f, 0.f, 1.f),
+        osg::Vec4f(.9f, .2f, 0.f, 1.f),
+        osg::Vec4f(.9f, .3f, 0.f, 1.f),
+        osg::Vec4f(.9f, .4f, 0.f, 1.f),
+        osg::Vec4f(.8f, .5f, 0.f, 1.f)
+    };
 
     osg::ref_ptr<osg::Geometry> PathgridGeometryFactory::create(const ESM::Pathgrid& pathgrid)
     {
@@ -42,7 +50,7 @@ namespace SceneUtil
         const size_t EdgeCount = pathgrid.mEdges.size();
 
         const unsigned short VertexCount = PointCount * DiamondVertexCount;
-        const unsigned short ColorCount = 1;
+        const unsigned short ColorCount = VertexCount;
         const size_t PointIndexCount = PointCount * DiamondIndexCount;
         const size_t EdgeIndexCount = EdgeCount * 2;
 
@@ -68,6 +76,7 @@ namespace SceneUtil
             for (unsigned short i = 0; i < DiamondVertexCount; ++i)
             {
                 (*vertices)[vertexOffset + i] = position + DiamondPoints[i];
+                (*colors)[vertexOffset + i] = DiamondColors[i];
             }
 
             for (unsigned short i = 0; i < DiamondIndexCount; ++i)
@@ -118,10 +127,8 @@ namespace SceneUtil
 
         lineIndices->resize(lineIndex);
 
-        (*colors)[0] = DiamondColor;
-
         gridGeometry->setVertexArray(vertices);
-        gridGeometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+        gridGeometry->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
         gridGeometry->addPrimitiveSet(pointIndices);
         gridGeometry->addPrimitiveSet(lineIndices);
         gridGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
