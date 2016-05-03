@@ -23,6 +23,8 @@ class QModelIndex;
 namespace osg
 {
     class Group;
+    class Geometry;
+    class Geode;
 }
 
 namespace CSMWorld
@@ -41,6 +43,8 @@ namespace CSVRender
             CSMWorld::Data& mData;
             std::string mId;
             osg::ref_ptr<osg::Group> mCellNode;
+            osg::ref_ptr<osg::Geode> mPathgridGeode;
+            osg::ref_ptr<osg::Geometry> mPathgridGeometry;
             std::map<std::string, Object *> mObjects;
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
             CSMWorld::CellCoordinates mCoordinates;
