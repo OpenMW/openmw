@@ -102,9 +102,9 @@ Programmers
     Pieter van der Kloet (pvdk)
     pkubik
     Radu-Marius Popovici (rpopovici)
-    rcutmore
     rdimesio
     riothamus
+    Rob Cutmore (rcutmore)
     Robert MacGregor (Ragora)
     Rohit Nirmal
     Roman Melnik (Kromgart)
