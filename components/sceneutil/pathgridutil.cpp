@@ -7,11 +7,12 @@
 
 namespace SceneUtil
 {
-    const unsigned short DiamondVertexCount = 24;
+    const unsigned short DiamondVertexCount = 6;
+    const unsigned short DiamondIndexCount = 24;
     const float DiamondHalfHeight = 25.f;
     const float DiamondHalfWidth = 10.f;
 
-    const osg::Vec3f DiamondPoints[6] =
+    const osg::Vec3f DiamondPoints[DiamondVertexCount] =
     {
         osg::Vec3f( 0.f, 0.f, DiamondHalfHeight * 2.f),
         osg::Vec3f(-DiamondHalfWidth, -DiamondHalfWidth,  DiamondHalfHeight),
@@ -21,7 +22,7 @@ namespace SceneUtil
         osg::Vec3f( 0.f, 0.f, 0.f)
     };
 
-    const unsigned short DiamondIndices[DiamondVertexCount] =
+    const unsigned short DiamondIndices[DiamondIndexCount] =
     {
         0, 2, 1,
         0, 1, 3,
@@ -41,24 +42,38 @@ namespace SceneUtil
         const size_t EdgeCount = pathgrid.mEdges.size();
 
         const unsigned short VertexCount = PointCount * DiamondVertexCount;
+        const unsigned short ColorCount = 1;
+        const size_t PointIndexCount = PointCount * DiamondIndexCount;
+        const size_t EdgeIndexCount = EdgeCount * 2;
 
         osg::ref_ptr<osg::Geometry> gridGeometry = new osg::Geometry();
 
         osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(VertexCount);
-        osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array(VertexCount);
-        osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(1);
+        osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(ColorCount);
         osg::ref_ptr<osg::DrawElementsUShort> pointIndices =
-            new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, VertexCount);
+            new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, PointIndexCount);
         osg::ref_ptr<osg::DrawElementsUShort> lineIndices =
-            new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, EdgeCount * 2);
+            new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, EdgeIndexCount);
 
         // Add each point/node
-        for (unsigned short i = 0; i < PointCount; ++i)
+
+
+        for (unsigned short pointIndex = 0; pointIndex < PointCount; ++pointIndex)
         {
-            const ESM::Pathgrid::Point& point = pathgrid.mPoints[i];
+            const ESM::Pathgrid::Point& point = pathgrid.mPoints[pointIndex];
             osg::Vec3f position = osg::Vec3f(point.mX, point.mY, point.mZ);
 
-            addPoint(i * DiamondVertexCount, position, vertices, normals, pointIndices);
+            unsigned short vertexOffset = pointIndex * DiamondVertexCount;
+            unsigned short indexOffset = pointIndex * DiamondIndexCount;
+            for (unsigned short i = 0; i < DiamondVertexCount; ++i)
+            {
+                (*vertices)[vertexOffset + i] = position + DiamondPoints[i];
+            }
+
+            for (unsigned short i = 0; i < DiamondIndexCount; ++i)
+            {
+                pointIndices->setElement(indexOffset + i, vertexOffset + DiamondIndices[i]);
+            }
         }
 
         // Add edges
@@ -84,15 +99,15 @@ namespace SceneUtil
 
             unsigned short diamondIndex = 0;
             if (dir.isNaN())
-                diamondIndex = 2;
+                diamondIndex = 1;
             else if (dir.y() >= 0 && dir.x() > 0)
-                diamondIndex = 8;
+                diamondIndex = 4;
             else if (dir.x() <= 0 && dir.y() > 0)
-                diamondIndex = 11;
-            else if (dir.y() <= 0 && dir.x() < 0)
                 diamondIndex = 2;
+            else if (dir.y() <= 0 && dir.x() < 0)
+                diamondIndex = 1;
             else if (dir.x() >= 0 && dir.y() < 0)
-                diamondIndex = 5;
+                diamondIndex = 3;
 
             unsigned short fromIndex = static_cast<unsigned short>(edge->mV0);
             unsigned short toIndex = static_cast<unsigned short>(edge->mV1);
@@ -106,10 +121,10 @@ namespace SceneUtil
         (*colors)[0] = DiamondColor;
 
         gridGeometry->setVertexArray(vertices);
-        gridGeometry->setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
         gridGeometry->setColorArray(colors, osg::Array::BIND_OVERALL);
         gridGeometry->addPrimitiveSet(pointIndices);
         gridGeometry->addPrimitiveSet(lineIndices);
+        gridGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
         return gridGeometry;
     }
@@ -122,34 +137,5 @@ namespace SceneUtil
 
     PathgridGeometryFactory::PathgridGeometryFactory()
     {
-        generateNormals();
-    }
-
-    void PathgridGeometryFactory::generateNormals()
-    {
-        mGeneratedNormals.resize(DiamondVertexCount);
-
-        for (unsigned short i = 0; i < DiamondVertexCount; i += 3)
-        {
-            osg::Vec3f v1 = DiamondPoints[DiamondIndices[i + 1]] - DiamondPoints[DiamondIndices[i]];
-            osg::Vec3f v2 = DiamondPoints[DiamondIndices[i + 2]] - DiamondPoints[DiamondIndices[i]];
-
-            osg::Vec3f normal = v1 ^ v2;
-
-            mGeneratedNormals[i] = normal;
-            mGeneratedNormals[i + 1] = normal;
-            mGeneratedNormals[i + 2] = normal;
-        }
-    }
-
-    void PathgridGeometryFactory::addPoint(unsigned short offset, const osg::Vec3f& position, osg::Vec3Array* vertices,
-                osg::Vec3Array* normals, osg::DrawElementsUShort* indices)
-    {
-        for (unsigned short i = 0; i < DiamondVertexCount; ++i)
-        {
-            (*vertices)[i + offset] = position + DiamondPoints[DiamondIndices[i]];
-            (*normals)[i + offset] = mGeneratedNormals[i];
-            indices->setElement(i + offset, i + offset);
-        }
     }
 }

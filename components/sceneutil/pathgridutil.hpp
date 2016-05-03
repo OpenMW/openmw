@@ -23,16 +23,9 @@ namespace SceneUtil
 
             PathgridGeometryFactory();
 
-            void generateNormals();
-
-            void addPoint(unsigned short offset, const osg::Vec3f& position, osg::Vec3Array* vertices,
-                osg::Vec3Array* normals, osg::DrawElementsUShort* indices);
-
             // Not implemented
             PathgridGeometryFactory(const PathgridGeometryFactory&);
             PathgridGeometryFactory& operator=(const PathgridGeometryFactory&);
-
-            std::vector<osg::Vec3f> mGeneratedNormals;
     };
 }
 
