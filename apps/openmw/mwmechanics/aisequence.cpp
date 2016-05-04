@@ -299,7 +299,7 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
         }
     }
 
-    mPackages.push_front (package.clone());
+    mPackages.push_back (package.clone());
 }
 
 AiPackage* MWMechanics::AiSequence::getActivePackage()
