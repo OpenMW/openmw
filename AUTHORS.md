@@ -87,6 +87,7 @@ Programmers
     Michael Mc Donnell
     Michael Papageorgiou (werdanith)
     Michał Bień (Glorf)
+    Michał Moroz (dragonee)
     Miroslav Puda (pakanek)
     MiroslavR
     naclander
