@@ -322,6 +322,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     bool windowBorder = settings.getBool("window border", "Video");
     bool vsync = settings.getBool("vsync", "Video");
     int antialiasing = settings.getInt("antialiasing", "Video");
+    int depthBufferSize = 24;
 
     int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(screen),
         pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
@@ -346,7 +347,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0));
-    checkSDLError(SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24));
+    checkSDLError(SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depthBufferSize));
 
     if (antialiasing > 0)
     {
@@ -366,6 +367,13 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
                 antialiasing /= 2;
                 Settings::Manager::setInt("antialiasing", "Video", antialiasing);
                 checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
+                continue;
+            }
+            else if (depthBufferSize == 24)
+            {
+                std::cout << "Note: " << depthBufferSize << "depth buffer size equals 24 not supported, trying 16 " << std::endl;
+                depthBufferSize = 16;
+                checkSDLError(SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depthBufferSize));
                 continue;
             }
             else
