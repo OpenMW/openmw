@@ -159,7 +159,11 @@ void CSMWorld::IdTable::addRecordWithData (const std::string& id,
     mIdCollection->appendBlankRecord (id, type);
 
     for (std::map<int, QVariant>::const_iterator iter (data.begin()); iter!=data.end(); ++iter)
-        mIdCollection->setData (index, iter->first, iter->second);
+    {
+        int columnIndex = getModelIndex(id, iter->first).column();
+        if (mIdCollection->getColumn(columnIndex).isEditable())
+            mIdCollection->setData(index, iter->first, iter->second);
+    }
 
     endInsertRows();
 }
