@@ -16,7 +16,7 @@ namespace ESM
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            switch (esm.retSubName().val)
+            switch (esm.retSubName().intval)
             {
                 case ESM::SREC_NAME:
                     mId = esm.getHString();
@@ -61,10 +61,12 @@ namespace ESM
                     esm.getHT(mMapColor);
                     break;
                 case ESM::FourCC<'S','N','A','M'>::value:
+                {
                     SoundRef sr;
                     esm.getHT(sr, 33);
                     mSoundList.push_back(sr);
                     break;
+                }
                 case ESM::SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;

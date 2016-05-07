@@ -94,7 +94,7 @@ namespace ESM
         while (!isLoaded && esm.hasMoreSubs())
         {
             esm.getSubName();
-            switch (esm.retSubName().val)
+            switch (esm.retSubName().intval)
             {
                 case ESM::FourCC<'I','N','T','V'>::value:
                     esm.getSubHeaderIs(8);
@@ -125,7 +125,7 @@ namespace ESM
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            switch (esm.retSubName().val)
+            switch (esm.retSubName().intval)
             {
                 case ESM::FourCC<'V','N','M','L'>::value:
                     esm.skipHSub();

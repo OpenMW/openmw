@@ -69,7 +69,7 @@ namespace ESM
         while (!isLoaded && esm.hasMoreSubs())
         {
             esm.getSubName();
-            switch (esm.retSubName().val)
+            switch (esm.retSubName().intval)
             {
                 case ESM::SREC_NAME:
                     mName = esm.getHString();
@@ -114,7 +114,7 @@ namespace ESM
         while (!isLoaded && esm.hasMoreSubs())
         {
             esm.getSubName();
-            switch (esm.retSubName().val)
+            switch (esm.retSubName().intval)
             {
                 case ESM::FourCC<'I','N','T','V'>::value:
                     int waterl;

@@ -1187,7 +1187,7 @@ namespace CSMWorld
 
             std::vector<ESM::ContItem>& list = container.mInventory.mList;
 
-            ESM::ContItem newRow = {0, {""}};
+            ESM::ContItem newRow = ESM::ContItem();
 
             if (position >= (int)list.size())
                 list.push_back(newRow);

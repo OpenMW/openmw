@@ -357,10 +357,10 @@ int load(Arguments& info)
             EsmTool::RecordBase *record = EsmTool::RecordBase::create(n);
             if (record == 0)
             {
-                if (std::find(skipped.begin(), skipped.end(), n.val) == skipped.end())
+                if (std::find(skipped.begin(), skipped.end(), n.intval) == skipped.end())
                 {
                     std::cout << "Skipping " << n.toString() << " records." << std::endl;
-                    skipped.push_back(n.val);
+                    skipped.push_back(n.intval);
                 }
 
                 esm.skipRecord();
@@ -392,7 +392,7 @@ int load(Arguments& info)
                 record->print();
             }
 
-            if (record->getType().val == ESM::REC_CELL && loadCells && interested)
+            if (record->getType().intval == ESM::REC_CELL && loadCells && interested)
             {
                 loadCell(record->cast<ESM::Cell>()->get(), esm, info);
             }
@@ -405,7 +405,7 @@ int load(Arguments& info)
             {
                 delete record;
             }
-            ++info.data.mRecordStats[n.val];
+            ++info.data.mRecordStats[n.intval];
         }
 
     } catch(std::exception &e) {
@@ -448,14 +448,13 @@ int clone(Arguments& info)
 
     std::cout << "Loaded " << recordCount << " records:" << std::endl << std::endl;
 
-    ESM::NAME name;
-
     int i = 0;
     typedef std::map<int, int> Stats;
     Stats &stats = info.data.mRecordStats;
     for (Stats::iterator it = stats.begin(); it != stats.end(); ++it)
     {
-        name.val = it->first;
+        ESM::NAME name;
+        name.intval = it->first;
         int amount = it->second;
         std::cout << std::setw(digitCount) << amount << " " << name.toString() << "  ";
 
@@ -488,12 +487,12 @@ int clone(Arguments& info)
     for (Records::iterator it = records.begin(); it != records.end() && i > 0; ++it)
     {
         EsmTool::RecordBase *record = *it;
-        name.val = record->getType().val;
+        const ESM::NAME& typeName = record->getType();
 
-        esm.startRecord(name.toString(), record->getFlags());
+        esm.startRecord(typeName.toString(), record->getFlags());
 
         record->save(esm);
-        if (name.val == ESM::REC_CELL) {
+        if (typeName.intval == ESM::REC_CELL) {
             ESM::Cell *ptr = &record->cast<ESM::Cell>()->get();
             if (!info.data.mCellRefs[ptr].empty()) {
                 typedef std::deque<std::pair<ESM::CellRef, bool> > RefList;
@@ -505,7 +504,7 @@ int clone(Arguments& info)
             }
         }
 
-        esm.endRecord(name.toString());
+        esm.endRecord(typeName.toString());
 
         saved++;
         int perc = (int)((saved / (float)recordCount)*100);
