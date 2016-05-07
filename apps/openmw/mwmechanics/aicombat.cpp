@@ -107,6 +107,7 @@ namespace MWMechanics
         mActionCooldown(0),
         mStrength(),
         mForceNoShortcut(false),
+        mShortcutFailPos(),
         mLastActorPos(0,0,0),
         mMovement(){}    
 
