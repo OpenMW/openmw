@@ -1003,7 +1003,7 @@ namespace MWWorld
         if (cellId.mPaged)
             changeToExteriorCell (position, adjustPlayerPos, changeEvent);
         else
-            changeToInteriorCell (cellId.mWorldspace, position, changeEvent);
+            changeToInteriorCell (cellId.mWorldspace, position, adjustPlayerPos, changeEvent);
     }
 
     void World::markCellAsUnchanged()
