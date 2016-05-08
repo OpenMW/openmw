@@ -35,7 +35,7 @@ namespace ESM
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            switch (esm.retSubName().val)
+            switch (esm.retSubName().intval)
             {
                 case ESM::FourCC<'D','A','T','A'>::value:
                     esm.getHT(mData, 12);

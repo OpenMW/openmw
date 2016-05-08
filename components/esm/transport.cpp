@@ -8,13 +8,13 @@ namespace ESM
 
     void Transport::add(ESMReader &esm)
     {
-        if (esm.retSubName().val == ESM::FourCC<'D','O','D','T'>::value)
+        if (esm.retSubName().intval == ESM::FourCC<'D','O','D','T'>::value)
         {
             Dest dodt;
             esm.getHExact(&dodt.mPos, 24);
             mList.push_back(dodt);
         }
-        else if (esm.retSubName().val == ESM::FourCC<'D','N','A','M'>::value)
+        else if (esm.retSubName().intval == ESM::FourCC<'D','N','A','M'>::value)
         {
             mList.back().mCellName = esm.getHString();
         }

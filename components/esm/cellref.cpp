@@ -62,7 +62,7 @@ void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
     while (!isLoaded && esm.hasMoreSubs())
     {
         esm.getSubName();
-        switch (esm.retSubName().val)
+        switch (esm.retSubName().intval)
         {
             case ESM::FourCC<'U','N','A','M'>::value:
                 esm.getHT(mReferenceBlocked);

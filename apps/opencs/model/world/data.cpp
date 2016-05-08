@@ -942,7 +942,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
     bool unhandledRecord = false;
 
-    switch (n.val)
+    switch (n.intval)
     {
         case ESM::REC_GLOB: mGlobals.load (*mReader, mBase); break;
         case ESM::REC_GMST: mGmsts.load (*mReader, mBase); break;

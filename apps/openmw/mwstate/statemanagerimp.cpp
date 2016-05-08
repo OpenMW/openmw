@@ -385,7 +385,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
             ESM::NAME n = reader.getRecName();
             reader.getRecHeader();
 
-            switch (n.val)
+            switch (n.intval)
             {
                 case ESM::REC_SAVE:
                     {
@@ -405,12 +405,12 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 case ESM::REC_JOUR_LEGACY:
                 case ESM::REC_QUES:
 
-                    MWBase::Environment::get().getJournal()->readRecord (reader, n.val);
+                    MWBase::Environment::get().getJournal()->readRecord (reader, n.intval);
                     break;
 
                 case ESM::REC_DIAS:
 
-                    MWBase::Environment::get().getDialogueManager()->readRecord (reader, n.val);
+                    MWBase::Environment::get().getDialogueManager()->readRecord (reader, n.intval);
                     break;
 
                 case ESM::REC_ALCH:
@@ -433,7 +433,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 case ESM::REC_ENAB:
                 case ESM::REC_LEVC:
                 case ESM::REC_LEVI:
-                    MWBase::Environment::get().getWorld()->readRecord(reader, n.val, contentFileMap);
+                    MWBase::Environment::get().getWorld()->readRecord(reader, n.intval, contentFileMap);
                     break;
 
                 case ESM::REC_CAM_:
@@ -442,7 +442,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
                 case ESM::REC_GSCR:
 
-                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().readRecord (reader, n.val);
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().readRecord (reader, n.intval);
                     break;
 
                 case ESM::REC_GMAP:
@@ -450,13 +450,13 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 case ESM::REC_ASPL:
                 case ESM::REC_MARK:
 
-                    MWBase::Environment::get().getWindowManager()->readRecord(reader, n.val);
+                    MWBase::Environment::get().getWindowManager()->readRecord(reader, n.intval);
                     break;
 
                 case ESM::REC_DCOU:
                 case ESM::REC_STLN:
 
-                    MWBase::Environment::get().getMechanicsManager()->readRecord(reader, n.val);
+                    MWBase::Environment::get().getMechanicsManager()->readRecord(reader, n.intval);
                     break;
 
                 default:
