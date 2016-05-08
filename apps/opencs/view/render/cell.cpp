@@ -1,10 +1,14 @@
 #include "cell.hpp"
 
+#include <osg/PositionAttitudeTransform>
+#include <osg/Geode>
+#include <osg/Geometry>
 #include <osg/Group>
 
 #include <components/misc/stringops.hpp>
 #include <components/esm/loadcell.hpp>
 #include <components/esm/loadland.hpp>
+#include <components/sceneutil/pathgridutil.hpp>
 
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/columns.hpp"
@@ -64,6 +68,18 @@ bool CSVRender::Cell::addObjects (int start, int end)
     return modified;
 }
 
+void CSVRender::Cell::recreatePathgrid()
+{
+    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mData.getPathgrids();
+    int pathgridIndex = pathgrids.searchId(mId);
+    if (pathgridIndex != -1)
+    {
+        mPathgridGeode->removeDrawable(mPathgridGeometry);
+        mPathgridGeometry = SceneUtil::createPathgridGeometry(pathgrids.getRecord(pathgridIndex).get());
+        mPathgridGeode->addDrawable(mPathgridGeometry);
+    }
+}
+
 CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,
     bool deleted)
 : mData (data), mId (Misc::StringUtils::lowerCase (id)), mDeleted (deleted), mSubMode (0),
@@ -76,6 +92,17 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
 
     mCellNode = new osg::Group;
     rootNode->addChild(mCellNode);
+
+    osg::ref_ptr<osg::PositionAttitudeTransform> pathgridTransform = new osg::PositionAttitudeTransform();
+    pathgridTransform->setPosition(osg::Vec3f(mCoordinates.getX() * ESM::Land::REAL_SIZE,
+        mCoordinates.getY() * ESM::Land::REAL_SIZE, 0));
+    pathgridTransform->setNodeMask(Mask_Pathgrid);
+    mCellNode->addChild(pathgridTransform);
+
+    mPathgridGeode = new osg::Geode();
+    pathgridTransform->addChild(mPathgridGeode);
+
+    mPathgridGeometry = 0;
 
     setCellMarker();
 
@@ -104,6 +131,8 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
                 mCellBorder->buildShape(esmLand);
             }
         }
+
+        recreatePathgrid();
     }
 }
 
@@ -252,6 +281,31 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
         return false;
 
     return addObjects (start, end);
+}
+
+void CSVRender::Cell::pathgridAdded(const CSMWorld::Pathgrid& pathgrid)
+{
+    recreatePathgrid();
+}
+
+void CSVRender::Cell::pathgridRemoved()
+{
+    mPathgridGeode->removeDrawable(mPathgridGeometry);
+}
+
+void CSVRender::Cell::pathgridDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    recreatePathgrid();
+}
+
+void CSVRender::Cell::pathgridRowRemoved(const QModelIndex& parent, int start, int end)
+{
+    recreatePathgrid();
+}
+
+void CSVRender::Cell::pathgridRowAdded(const QModelIndex& parent, int start, int end)
+{
+    recreatePathgrid();
 }
 
 void CSVRender::Cell::setSelection (int elementMask, Selection mode)

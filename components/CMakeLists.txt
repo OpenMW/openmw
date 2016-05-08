@@ -22,7 +22,7 @@ endif (GIT_CHECKOUT)
 
 if (OPENGL_ES)
     find_package(OpenGLES REQUIRED)
-else()    
+else()
     find_package(OpenGL REQUIRED)
 endif()
 
@@ -50,7 +50,7 @@ add_component_dir (shader
 
 add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry lightcontroller
-    lightmanager lightutil positionattitudetransform workqueue unrefqueue
+    lightmanager lightutil positionattitudetransform workqueue unrefqueue pathgridutil
     )
 
 add_component_dir (nif
@@ -191,7 +191,7 @@ else()
     set(GL_LIB ${OPENGL_gl_LIBRARY})
 endif()
 
-target_link_libraries(components 
+target_link_libraries(components
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_THREAD_LIBRARY}
