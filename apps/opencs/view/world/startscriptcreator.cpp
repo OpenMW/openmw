@@ -24,15 +24,6 @@ CSMWorld::IdTable& CSVWorld::StartScriptCreator::getStartScriptsTable() const
     );
 }
 
-void CSVWorld::StartScriptCreator::configureCreateCommand(CSMWorld::CreateCommand& command) const
-{
-    CSMWorld::IdTable& table = getStartScriptsTable();
-    int column = table.findColumnIndex(CSMWorld::Columns::ColumnId_Id);
-
-    // Set script ID to be added to start scripts table.
-    command.addValue(column, mScript->text());
-}
-
 CSVWorld::StartScriptCreator::StartScriptCreator(
     CSMWorld::Data &data,
     QUndoStack &undoStack,

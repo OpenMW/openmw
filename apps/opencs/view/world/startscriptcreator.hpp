@@ -31,10 +31,6 @@ namespace CSVWorld
             /// \return reference to table containing start scripts.
             CSMWorld::IdTable& getStartScriptsTable() const;
 
-            /// \brief Add user input to command for creating start script.
-            /// \param command Creation command to configure.
-            virtual void configureCreateCommand(CSMWorld::CreateCommand& command) const;
-
         public:
 
             StartScriptCreator(
