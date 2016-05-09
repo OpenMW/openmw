@@ -376,12 +376,7 @@ printf "Bullet 2.83.5... "
 		mv Bullet-2.83.5-win$BITS Bullet
 	fi
 
-	BULLET_SDK="`real_pwd`/Bullet"
-	add_cmake_opts -DBULLET_INCLUDE_DIR="$BULLET_SDK/include/bullet" \
-		-DBULLET_COLLISION_LIBRARY="$BULLET_SDK/lib/BulletCollision.lib" \
-		-DBULLET_COLLISION_LIBRARY_DEBUG="$BULLET_SDK/lib/BulletCollision_Debug.lib" \
-		-DBULLET_MATH_LIBRARY="$BULLET_SDK/lib/LinearMath.lib" \
-		-DBULLET_MATH_LIBRARY_DEBUG="$BULLET_SDK/lib/LinearMath_Debug.lib"
+	export BULLET_ROOT="`real_pwd`/Bullet"
 
 	echo Done.
 }
