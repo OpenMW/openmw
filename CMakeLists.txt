@@ -149,15 +149,7 @@ else()
 endif()
 
 # Sound setup
-unset(FFMPEG_LIBRARIES CACHE)
-
-find_package(FFmpeg REQUIRED)
-
-set (FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES} ${SWSCALE_LIBRARY} ${SWRESAMPLE_LIBRARIES})
-
-if ( NOT AVCODEC_FOUND OR NOT AVFORMAT_FOUND OR NOT AVUTIL_FOUND OR NOT SWSCALE_FOUND OR NOT SWRESAMPLE_FOUND)
-    message(FATAL_ERROR "FFmpeg component required, but not found!")
-endif()
+find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)
 # Required for building the FFmpeg headers
 add_definitions(-D__STDC_CONSTANT_MACROS)
 

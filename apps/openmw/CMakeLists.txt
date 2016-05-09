@@ -115,7 +115,7 @@ endif ()
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.
 include_directories(
-    ${FFMPEG_INCLUDE_DIRS}
+    ${FFmpeg_INCLUDE_DIRS}
 )
 
 target_link_libraries(openmw
@@ -131,7 +131,7 @@ target_link_libraries(openmw
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${OPENAL_LIBRARY}
-    ${FFMPEG_LIBRARIES}
+    ${FFmpeg_LIBRARIES}
     ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
@@ -183,7 +183,7 @@ if(APPLE)
     find_library(IOKIT_FRAMEWORK IOKit)
     target_link_libraries(openmw ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
 
-    if (FFMPEG_FOUND)
+    if (FFmpeg_FOUND)
         find_library(COREVIDEO_FRAMEWORK CoreVideo)
         find_library(VDA_FRAMEWORK VideoDecodeAcceleration)
         target_link_libraries(openmw ${COREVIDEO_FRAMEWORK} ${VDA_FRAMEWORK})
