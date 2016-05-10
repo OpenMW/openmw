@@ -405,22 +405,7 @@ printf "FFmpeg 2.5.2... "
 		rm -rf ffmpeg-2.5.2-win$BITS-dev
 	fi
 
-	FFMPEG_SDK="`real_pwd`/FFmpeg"
-	add_cmake_opts -DAVCODEC_INCLUDE_DIRS="$FFMPEG_SDK/include" \
-		-DAVCODEC_LIBRARIES="$FFMPEG_SDK/lib/avcodec.lib" \
-		-DAVDEVICE_INCLUDE_DIRS="$FFMPEG_SDK/include" \
-		-DAVDEVICE_LIBRARIES="$FFMPEG_SDK/lib/avdevice.lib" \
-		-DAVFORMAT_INCLUDE_DIRS="$FFMPEG_SDK/include" \
-		-DAVFORMAT_LIBRARIES="$FFMPEG_SDK/lib/avformat.lib" \
-		-DAVUTIL_INCLUDE_DIRS="$FFMPEG_SDK/include" \
-		-DAVUTIL_LIBRARIES="$FFMPEG_SDK/lib/avutil.lib" \
-		-DPOSTPROC_INCLUDE_DIRS="$FFMPEG_SDK/include" \
-		-DPOSTPROC_LIBRARIES="$FFMPEG_SDK/lib/postproc.lib" \
-		-DSWRESAMPLE_INCLUDE_DIRS="$FFMPEG_SDK/include" \
-		-DSWRESAMPLE_LIBRARIES="$FFMPEG_SDK/lib/swresample.lib" \
-		-DSWSCALE_INCLUDE_DIRS="$FFMPEG_SDK/include" \
-		-DSWSCALE_LIBRARIES="$FFMPEG_SDK/lib/swscale.lib"
-
+	export FFMPEG_SDK="`real_pwd`/FFmpeg"
 	add_runtime_dlls `pwd`/FFmpeg/bin/{avcodec-56,avformat-56,avutil-54,swresample-1,swscale-3}.dll
 
 	if [ $BITS -eq 32 ]; then

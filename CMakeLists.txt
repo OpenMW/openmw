@@ -141,23 +141,15 @@ if (USE_QT)
 endif()
 
 if (USE_QT AND DESIRED_QT_VERSION MATCHES 5)
-	# 2.8.11+ is required to make Qt5 happy and allow linking QtMain on Windows.
-	cmake_minimum_required(VERSION 2.8.11)
+    # 2.8.11+ is required to make Qt5 happy and allow linking QtMain on Windows.
+    cmake_minimum_required(VERSION 2.8.11)
 else()
-	# We probably support older versions than this.
-	cmake_minimum_required(VERSION 2.6)
+    # We probably support older versions than this.
+    cmake_minimum_required(VERSION 2.6)
 endif()
 
 # Sound setup
-unset(FFMPEG_LIBRARIES CACHE)
-
-find_package(FFmpeg REQUIRED)
-
-set (FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES} ${SWSCALE_LIBRARY} ${SWRESAMPLE_LIBRARIES})
-
-if ( NOT AVCODEC_FOUND OR NOT AVFORMAT_FOUND OR NOT AVUTIL_FOUND OR NOT SWSCALE_FOUND OR NOT SWRESAMPLE_FOUND)
-    message(FATAL_ERROR "FFmpeg component required, but not found!")
-endif()
+find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)
 # Required for building the FFmpeg headers
 add_definitions(-D__STDC_CONSTANT_MACROS)
 
@@ -246,12 +238,6 @@ if(OSG_STATIC)
       set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${PLUGIN_NAME}_LIBRARY})
    endmacro()
 
-   macro(use_static_osg_plugin_dep DEPENDENCY)
-      find_package(${DEPENDENCY} REQUIRED)
-
-      set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${DEPENDENCY}_LIBRARIES})
-   endmacro()
-
    add_definitions(-DOSG_LIBRARY_STATIC)
 
    set(PLUGIN_LIST
@@ -272,6 +258,11 @@ if(OSG_STATIC)
        JPEG # needed by osgdb_jpeg
        )
 
+   macro(use_static_osg_plugin_dep DEPENDENCY)
+      find_package(${DEPENDENCY} REQUIRED)
+
+      set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${DEPENDENCY}_LIBRARIES})
+   endmacro()
    foreach(DEPENDENCY ${PLUGIN_DEPS_LIST})
       use_static_osg_plugin_dep(${DEPENDENCY})
    endforeach()
@@ -376,18 +367,14 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wundef -Wno-unused-parameter -std=c++98 -pedantic -Wno-long-long")
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT APPLE)
-        execute_process(COMMAND ${CMAKE_C_COMPILER} --version OUTPUT_VARIABLE CLANG_VERSION)
-        string(REGEX REPLACE ".*version ([0-9\\.]*).*" "\\1" CLANG_VERSION ${CLANG_VERSION})
-        if ("${CLANG_VERSION}" VERSION_GREATER 3.6 OR "${CLANG_VERSION}" VERSION_EQUAL 3.6)
+        if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 3.6 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 3.6)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-potentially-evaluated-expression")
-        endif ("${CLANG_VERSION}" VERSION_GREATER 3.6 OR "${CLANG_VERSION}" VERSION_EQUAL 3.6)
-    endif(CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT APPLE)
+        endif ()
+    endif()
 
-    execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
-                OUTPUT_VARIABLE GCC_VERSION)
-    if (CMAKE_CXX_COMPILER_ID STREQUAL GNU AND "${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL GNU AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.6 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.6)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-but-set-parameter")
-    endif(CMAKE_CXX_COMPILER_ID STREQUAL GNU AND "${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
+    endif()
 elseif (MSVC)
     # Enable link-time code generation globally for all linking
     if (OPENMW_LTO_BUILD)
