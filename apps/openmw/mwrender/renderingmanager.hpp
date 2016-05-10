@@ -91,7 +91,7 @@ namespace MWRender
         void skySetMoonColour(bool red);
 
         void setSunDirection(const osg::Vec3f& direction);
-        void setSunColour(const osg::Vec4f& colour);
+        void setSunColour(const osg::Vec4f& diffuse, const osg::Vec4f& specular);
 
         void configureAmbient(const ESM::Cell* cell);
         void configureFog(const ESM::Cell* cell);

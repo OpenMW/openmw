@@ -722,7 +722,7 @@ void WeatherManager::update(float duration, bool paused)
 
     mRendering.configureFog(mResult.mFogDepth, underwaterFog, mResult.mFogColor);
     mRendering.setAmbientColour(mResult.mAmbientColor);
-    mRendering.setSunColour(mResult.mSunColor);
+    mRendering.setSunColour(mResult.mSunColor, mResult.mSunColor * mResult.mGlareView);
 
     mRendering.getSkyManager()->setWeather(mResult);
 

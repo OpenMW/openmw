@@ -351,11 +351,11 @@ namespace MWRender
         mSunLight->setDirection(osg::Vec3f(1.f,-1.f,-1.f));
     }
 
-    void RenderingManager::setSunColour(const osg::Vec4f &colour)
+    void RenderingManager::setSunColour(const osg::Vec4f& diffuse, const osg::Vec4f& specular)
     {
         // need to wrap this in a StateUpdater?
-        mSunLight->setDiffuse(colour);
-        mSunLight->setSpecular(colour);
+        mSunLight->setDiffuse(diffuse);
+        mSunLight->setSpecular(specular);
     }
 
     void RenderingManager::setSunDirection(const osg::Vec3f &direction)
