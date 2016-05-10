@@ -6,7 +6,7 @@
 
 namespace ESM
 {
-    class Pathgrid;
+    struct Pathgrid;
 }
 
 namespace SceneUtil
