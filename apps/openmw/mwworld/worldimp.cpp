@@ -1,13 +1,5 @@
 #include "worldimp.hpp"
 
-#if defined(_WIN32) && !defined(__MINGW32__)
-#include <boost/tr1/tr1/unordered_map>
-#elif defined HAVE_UNORDERED_MAP
-#include <unordered_map>
-#else
-#include <tr1/unordered_map>
-#endif
-
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
 
@@ -108,11 +100,7 @@ namespace MWWorld
         }
 
         private:
-#ifdef HAVE_UNORDERED_MAP
-          typedef std::unordered_map<std::string, ContentLoader*> LoadersContainer;
-#else
-          typedef std::tr1::unordered_map<std::string, ContentLoader*> LoadersContainer;
-#endif
+          typedef std::map<std::string, ContentLoader*> LoadersContainer;
           LoadersContainer mLoaders;
     };
 
