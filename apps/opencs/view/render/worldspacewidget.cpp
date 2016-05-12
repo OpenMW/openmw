@@ -27,8 +27,8 @@
 
 #include "object.hpp"
 #include "mask.hpp"
-#include "editmode.hpp"
 #include "instancemode.hpp"
+#include "pathgridmode.hpp"
 #include "cameracontroller.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
@@ -295,7 +295,7 @@ unsigned int CSVRender::WorldspaceWidget::getVisibilityMask() const
 
 void CSVRender::WorldspaceWidget::setInteractionMask (unsigned int mask)
 {
-    mInteractionMask = mask | Mask_CellMarker | Mask_CellArrow;
+    mInteractionMask = mask | Mask_CellMarker | Mask_CellArrow | Mask_Pathgrid | Mask_Terrain;
 }
 
 unsigned int CSVRender::WorldspaceWidget::getInteractionMask() const
@@ -320,9 +320,7 @@ void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneTo
 {
     /// \todo replace EditMode with suitable subclasses
     tool->addButton (new InstanceMode (this, tool), "object");
-    tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Mask_Pathgrid, "Pathgrid editing"),
-        "pathgrid");
+    tool->addButton (new PathgridMode (this, tool), "pathgrid");
 }
 
 CSMDoc::Document& CSVRender::WorldspaceWidget::getDocument()

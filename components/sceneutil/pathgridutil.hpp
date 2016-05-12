@@ -12,6 +12,11 @@ namespace ESM
 namespace SceneUtil
 {
     osg::ref_ptr<osg::Geometry> createPathgridGeometry(const ESM::Pathgrid& pathgrid);
+
+    osg::ref_ptr<osg::Geometry> createPathgridSelectedWireframe(const ESM::Pathgrid& pathgrid,
+        const std::vector<unsigned short>& selected);
+
+    unsigned short getPathgridNode(unsigned short vertexIndex);
 }
 
 #endif

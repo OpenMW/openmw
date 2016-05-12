@@ -36,6 +36,7 @@ namespace CSMWorld
 
 namespace CSVRender
 {
+    class Pathgrid;
     class TagBase;
 
     class Cell
@@ -43,14 +44,13 @@ namespace CSVRender
             CSMWorld::Data& mData;
             std::string mId;
             osg::ref_ptr<osg::Group> mCellNode;
-            osg::ref_ptr<osg::Geode> mPathgridGeode;
-            osg::ref_ptr<osg::Geometry> mPathgridGeometry;
             std::map<std::string, Object *> mObjects;
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
             CSMWorld::CellCoordinates mCoordinates;
             std::auto_ptr<CellArrow> mCellArrows[4];
             std::auto_ptr<CellMarker> mCellMarker;
             std::auto_ptr<CellBorder> mCellBorder;
+            std::auto_ptr<Pathgrid> mPathgrid;
             bool mDeleted;
             int mSubMode;
             unsigned int mSubModeElementMask;
@@ -68,8 +68,6 @@ namespace CSVRender
             ///
             /// \return Have any objects been added?
             bool addObjects (int start, int end);
-
-            void recreatePathgrid();
 
         public:
 
