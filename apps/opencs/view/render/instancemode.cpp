@@ -103,25 +103,25 @@ void CSVRender::InstanceMode::setEditLock (bool locked)
         getWorldspaceWidget().abortDrag();
 }
 
-void CSVRender::InstanceMode::primaryEditPressed (osg::ref_ptr<TagBase> tag)
+void CSVRender::InstanceMode::primaryEditPressed (const WorldspaceHitResult& hit)
 {
     if (CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
-        primarySelectPressed (tag);
+        primarySelectPressed (hit);
 }
 
-void CSVRender::InstanceMode::secondaryEditPressed (osg::ref_ptr<TagBase> tag)
+void CSVRender::InstanceMode::secondaryEditPressed (const WorldspaceHitResult& hit)
 {
     if (CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
-        secondarySelectPressed (tag);
+        secondarySelectPressed (hit);
 }
 
-void CSVRender::InstanceMode::primarySelectPressed (osg::ref_ptr<TagBase> tag)
+void CSVRender::InstanceMode::primarySelectPressed (const WorldspaceHitResult& hit)
 {
     getWorldspaceWidget().clearSelection (Mask_Reference);
 
-    if (tag)
+    if (hit.tag)
     {
-        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (hit.tag.get()))
         {
             // hit an Object, select it
             CSVRender::Object* object = objectTag->mObject;
@@ -131,11 +131,11 @@ void CSVRender::InstanceMode::primarySelectPressed (osg::ref_ptr<TagBase> tag)
     }
 }
 
-void CSVRender::InstanceMode::secondarySelectPressed (osg::ref_ptr<TagBase> tag)
+void CSVRender::InstanceMode::secondarySelectPressed (const WorldspaceHitResult& hit)
 {
-    if (tag)
+    if (hit.tag)
     {
-        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (hit.tag.get()))
         {
             // hit an Object, toggle its selection state
             CSVRender::Object* object = objectTag->mObject;
@@ -145,15 +145,15 @@ void CSVRender::InstanceMode::secondarySelectPressed (osg::ref_ptr<TagBase> tag)
     }
 }
 
-bool CSVRender::InstanceMode::primaryEditStartDrag (osg::ref_ptr<TagBase> tag)
+bool CSVRender::InstanceMode::primaryEditStartDrag (const WorldspaceHitResult& hit)
 {
     if (mDragMode!=DragMode_None || mLocked)
         return false;
 
-    if (tag && CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
+    if (hit.tag && CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
     {
         getWorldspaceWidget().clearSelection (Mask_Reference);
-        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (hit.tag.get()))
         {
             CSVRender::Object* object = objectTag->mObject;
             object->setSelected (true);
@@ -177,7 +177,7 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (osg::ref_ptr<TagBase> tag)
 
     // \todo check for sub-mode
 
-    if (CSVRender::ObjectMarkerTag *objectTag = dynamic_cast<CSVRender::ObjectMarkerTag *> (tag.get()))
+    if (CSVRender::ObjectMarkerTag *objectTag = dynamic_cast<CSVRender::ObjectMarkerTag *> (hit.tag.get()))
     {
         mDragAxis = objectTag->mAxis;
     }
@@ -189,7 +189,7 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (osg::ref_ptr<TagBase> tag)
     return true;
 }
 
-bool CSVRender::InstanceMode::secondaryEditStartDrag (osg::ref_ptr<TagBase> tag)
+bool CSVRender::InstanceMode::secondaryEditStartDrag (const WorldspaceHitResult& hit)
 {
     if (mLocked)
         return false;

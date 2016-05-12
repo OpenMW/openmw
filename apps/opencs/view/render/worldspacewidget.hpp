@@ -4,6 +4,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <QTimer>
+#include <osg/Vec3>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
@@ -34,6 +35,14 @@ namespace CSVRender
     class TagBase;
     class CellArrow;
     class EditMode;
+
+    struct WorldspaceHitResult
+    {
+        bool hit;
+        osg::ref_ptr<TagBase> tag;
+        unsigned int i0, i1, i2;
+        osg::Vec3d worldPos;
+    };
 
     class WorldspaceWidget : public SceneWidget
     {
@@ -191,7 +200,7 @@ namespace CSVRender
             virtual void wheelEvent (QWheelEvent *event);
             virtual void keyPressEvent (QKeyEvent *event);
 
-            virtual void handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button,
+            virtual void handleMouseClick (const WorldspaceHitResult& hit, const std::string& button,
                 bool shift);
 
              /// \return Is \a key a button mapping setting? (ignored otherwise)
@@ -209,7 +218,7 @@ namespace CSVRender
 
             void dragMoveEvent(QDragMoveEvent *event);
 
-            osg::ref_ptr<TagBase> mousePick (const QPoint& localPos);
+            WorldspaceHitResult mousePick (const QPoint& localPos);
 
             virtual std::string getStartupInstruction() = 0;
 

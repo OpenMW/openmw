@@ -12,6 +12,7 @@ class QDragMoveEvent;
 namespace CSVRender
 {
     class WorldspaceWidget;
+    struct WorldspaceHitResult;
     class TagBase;
 
     class EditMode : public CSVWidget::ModeButton
@@ -38,36 +39,36 @@ namespace CSVRender
             virtual void setEditLock (bool locked);
 
             /// Default-implementation: Ignored.
-            virtual void primaryEditPressed (osg::ref_ptr<TagBase> tag);
+            virtual void primaryEditPressed (const WorldspaceHitResult& hit);
 
             /// Default-implementation: Ignored.
-            virtual void secondaryEditPressed (osg::ref_ptr<TagBase> tag);
+            virtual void secondaryEditPressed (const WorldspaceHitResult& hit);
 
             /// Default-implementation: Ignored.
-            virtual void primarySelectPressed (osg::ref_ptr<TagBase> tag);
+            virtual void primarySelectPressed (const WorldspaceHitResult& hit);
 
             /// Default-implementation: Ignored.
-            virtual void secondarySelectPressed (osg::ref_ptr<TagBase> tag);
+            virtual void secondarySelectPressed (const WorldspaceHitResult& hit);
 
             /// Default-implementation: ignore and return false
             ///
             /// \return Drag accepted?
-            virtual bool primaryEditStartDrag (osg::ref_ptr<TagBase> tag);
+            virtual bool primaryEditStartDrag (const WorldspaceHitResult& hit);
 
             /// Default-implementation: ignore and return false
             ///
             /// \return Drag accepted?
-            virtual bool secondaryEditStartDrag (osg::ref_ptr<TagBase> tag);
+            virtual bool secondaryEditStartDrag (const WorldspaceHitResult& hit);
 
             /// Default-implementation: ignore and return false
             ///
             /// \return Drag accepted?
-            virtual bool primarySelectStartDrag (osg::ref_ptr<TagBase> tag);
+            virtual bool primarySelectStartDrag (const WorldspaceHitResult& hit);
 
             /// Default-implementation: ignore and return false
             ///
             /// \return Drag accepted?
-            virtual bool secondarySelectStartDrag (osg::ref_ptr<TagBase> tag);
+            virtual bool secondarySelectStartDrag (const WorldspaceHitResult& hit);
 
             /// Default-implementation: ignored
             virtual void drag (int diffX, int diffY, double speedFactor);

@@ -41,17 +41,17 @@ namespace CSVRender
 
             virtual void setEditLock (bool locked);
 
-            virtual void primaryEditPressed (osg::ref_ptr<TagBase> tag);
+            virtual void primaryEditPressed (const WorldspaceHitResult& hit);
 
-            virtual void secondaryEditPressed (osg::ref_ptr<TagBase> tag);
+            virtual void secondaryEditPressed (const WorldspaceHitResult& hit);
 
-            virtual void primarySelectPressed (osg::ref_ptr<TagBase> tag);
+            virtual void primarySelectPressed (const WorldspaceHitResult& hit);
 
-            virtual void secondarySelectPressed (osg::ref_ptr<TagBase> tag);
+            virtual void secondarySelectPressed (const WorldspaceHitResult& hit);
 
-            virtual bool primaryEditStartDrag (osg::ref_ptr<TagBase> tag);
+            virtual bool primaryEditStartDrag (const WorldspaceHitResult& hit);
 
-            virtual bool secondaryEditStartDrag (osg::ref_ptr<TagBase> tag);
+            virtual bool secondaryEditStartDrag (const WorldspaceHitResult& hit);
 
             virtual void drag (int diffX, int diffY, double speedFactor);
 

@@ -29,30 +29,30 @@ void CSVRender::EditMode::setEditLock (bool locked)
 
 }
 
-void CSVRender::EditMode::primaryEditPressed (osg::ref_ptr<TagBase> tag) {}
+void CSVRender::EditMode::primaryEditPressed (const WorldspaceHitResult& hit) {}
 
-void CSVRender::EditMode::secondaryEditPressed (osg::ref_ptr<TagBase> tag) {}
+void CSVRender::EditMode::secondaryEditPressed (const WorldspaceHitResult& hit) {}
 
-void CSVRender::EditMode::primarySelectPressed (osg::ref_ptr<TagBase> tag) {}
+void CSVRender::EditMode::primarySelectPressed (const WorldspaceHitResult& hit) {}
 
-void CSVRender::EditMode::secondarySelectPressed (osg::ref_ptr<TagBase> tag) {}
+void CSVRender::EditMode::secondarySelectPressed (const WorldspaceHitResult& hit) {}
 
-bool CSVRender::EditMode::primaryEditStartDrag (osg::ref_ptr<TagBase> tag)
+bool CSVRender::EditMode::primaryEditStartDrag (const WorldspaceHitResult& hit)
 {
     return false;
 }
 
-bool CSVRender::EditMode::secondaryEditStartDrag (osg::ref_ptr<TagBase> tag)
+bool CSVRender::EditMode::secondaryEditStartDrag (const WorldspaceHitResult& hit)
 {
     return false;
 }
 
-bool CSVRender::EditMode::primarySelectStartDrag (osg::ref_ptr<TagBase> tag)
+bool CSVRender::EditMode::primarySelectStartDrag (const WorldspaceHitResult& hit)
 {
     return false;
 }
 
-bool CSVRender::EditMode::secondarySelectStartDrag (osg::ref_ptr<TagBase> tag)
+bool CSVRender::EditMode::secondarySelectStartDrag (const WorldspaceHitResult& hit)
 {
     return false;
 }

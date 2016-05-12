@@ -142,14 +142,15 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
         "terrain-move");
 }
 
-void CSVRender::PagedWorldspaceWidget::handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button, bool shift)
+void CSVRender::PagedWorldspaceWidget::handleMouseClick (const WorldspaceHitResult& hit, const std::string& button,
+    bool shift)
 {
-    if (tag && tag->getMask()==Mask_CellArrow)
+    if (hit.tag && hit.tag->getMask()==Mask_CellArrow)
     {
         if (button=="p-edit" || button=="s-edit")
         {
             if (CellArrowTag *cellArrowTag =
-                dynamic_cast<CSVRender::CellArrowTag *> (tag.get()))
+                dynamic_cast<CSVRender::CellArrowTag *> (hit.tag.get()))
             {
                 CellArrow *arrow = cellArrowTag->getCellArrow();
 
@@ -209,7 +210,7 @@ void CSVRender::PagedWorldspaceWidget::handleMouseClick (osg::ref_ptr<TagBase> t
         }
     }
 
-    WorldspaceWidget::handleMouseClick (tag, button, shift);
+    WorldspaceWidget::handleMouseClick (hit, button, shift);
 }
 
 void CSVRender::PagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
