@@ -36,7 +36,7 @@ namespace CSVRender
         {
             if (PathgridTag* tag = dynamic_cast<PathgridTag*>(hit.tag.get()))
             {
-                unsigned short node = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.i0));
+                unsigned short node = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
                 tag->getPathgrid()->toggleSelected(node);
             }
         }
@@ -54,7 +54,7 @@ namespace CSVRender
                     mLastId = tag->getPathgrid()->getId();
                 }
 
-                unsigned short node = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.i0));
+                unsigned short node = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
                 tag->getPathgrid()->toggleSelected(node);
 
                 return;
@@ -86,7 +86,7 @@ namespace CSVRender
             if (PathgridTag* tag = dynamic_cast<PathgridTag*>(hit.tag.get()))
             {
                 mDragMode = DragMode_Edge;
-                mFromNode = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.i0));
+                mFromNode = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
                 return true;
             }
         }

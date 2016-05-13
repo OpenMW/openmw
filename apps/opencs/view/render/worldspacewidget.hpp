@@ -40,7 +40,7 @@ namespace CSVRender
     {
         bool hit;
         osg::ref_ptr<TagBase> tag;
-        unsigned int i0, i1, i2;
+        unsigned int index0, index1, index2; // indices of mesh vertices
         osg::Vec3d worldPos;
     };
 

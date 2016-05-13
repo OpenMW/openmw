@@ -501,9 +501,9 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick (const QPo
                 WorldspaceHitResult hit = { true, tag, 0, 0, 0, intersection.getWorldIntersectPoint() };
                 if (intersection.indexList.size() >= 3)
                 {
-                    hit.i0 = intersection.indexList[0];
-                    hit.i1 = intersection.indexList[1];
-                    hit.i2 = intersection.indexList[2];
+                    hit.index0 = intersection.indexList[0];
+                    hit.index1 = intersection.indexList[1];
+                    hit.index2 = intersection.indexList[2];
                 }
                 return hit;
             }
@@ -513,9 +513,9 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick (const QPo
         WorldspaceHitResult hit = { true, 0, 0, 0, 0, intersection.getWorldIntersectPoint() };
         if (intersection.indexList.size() >= 3)
         {
-            hit.i0 = intersection.indexList[0];
-            hit.i1 = intersection.indexList[1];
-            hit.i2 = intersection.indexList[2];
+            hit.index0 = intersection.indexList[0];
+            hit.index1 = intersection.indexList[1];
+            hit.index2 = intersection.indexList[2];
         }
         return hit;
     }
