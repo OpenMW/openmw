@@ -439,12 +439,15 @@ ParticleSystemController::ParticleSystemController(const ParticleSystemControlle
 
 void ParticleSystemController::operator() (osg::Node* node, osg::NodeVisitor* nv)
 {
+    osgParticle::ParticleProcessor* emitter = static_cast<osgParticle::ParticleProcessor*>(node);
     if (hasInput())
     {
-        osgParticle::ParticleSystem* partsys = static_cast<osgParticle::ParticleSystem*>(node);
         float time = getInputValue(nv);
-        partsys->setFrozen(!(time >= mEmitStart && time < mEmitStop));
+        emitter->getParticleSystem()->setFrozen(false);
+        emitter->setEnabled(time >= mEmitStart && time < mEmitStop);
     }
+    else
+        emitter->getParticleSystem()->setFrozen(true);
     traverse(node, nv);
 }
 

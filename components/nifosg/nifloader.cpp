@@ -994,7 +994,7 @@ namespace NifOsg
 
                 osg::ref_ptr<ParticleSystemController> callback(new ParticleSystemController(partctrl));
                 setupParticleController(partctrl, callback, particleflags);
-                partsys->setUpdateCallback(callback);
+                emitter->setUpdateCallback(callback);
 
                 if (!(particleflags & Nif::NiNode::ParticleFlag_AutoPlay))
                 {
