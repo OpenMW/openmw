@@ -995,6 +995,14 @@ namespace NifOsg
                 osg::ref_ptr<ParticleSystemController> callback(new ParticleSystemController(partctrl));
                 setupParticleController(partctrl, callback, particleflags);
                 partsys->setUpdateCallback(callback);
+
+                if (!(particleflags & Nif::NiNode::ParticleFlag_AutoPlay))
+                {
+                    partsys->setFrozen(true);
+                    // HACK: particle system will not render in Frozen state if there was no update
+                    osg::NodeVisitor nv;
+                    partsys->update(0.0, nv);
+                }
             }
 
             // affectors must be attached *after* the emitter in the scene graph for correct update order
