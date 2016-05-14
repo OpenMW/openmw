@@ -155,6 +155,13 @@ bool AiSequence::isPackageDone() const
     return mDone;
 }
 
+bool isActualAiPackage(int packageTypeId)
+{
+    return (packageTypeId != AiPackage::TypeIdCombat
+                   && packageTypeId != AiPackage::TypeIdPursue
+                   && packageTypeId != AiPackage::TypeIdAvoidDoor);
+}
+
 void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
     if(actor != getPlayer())
@@ -168,11 +175,8 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
         MWMechanics::AiPackage* package = mPackages.front();
         int packageTypeId = package->getTypeId();
         // workaround ai packages not being handled as in the vanilla engine
-        if (packageTypeId != AiPackage::TypeIdCombat
-                       && packageTypeId != AiPackage::TypeIdPursue
-                       && packageTypeId != AiPackage::TypeIdAvoidDoor)
+        if (isActualAiPackage(packageTypeId))
             mLastAiPackage = packageTypeId;
-
         // if active package is combat one, choose nearest target
         if (packageTypeId == AiPackage::TypeIdCombat)
         {
@@ -222,11 +226,6 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
 
                 package = mPackages.front();
             }
-            else
-            {
-                mDone = true;
-                return;
-            }
         }
 
         if (package->execute (actor,characterController,state,duration))
@@ -237,7 +236,8 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
                     std::find(mPackages.begin(), mPackages.end(), package);
             mPackages.erase(toRemove);
             delete package;
-            mDone = true;
+            if (isActualAiPackage(packageTypeId))
+                mDone = true;
         }
         else
         {
