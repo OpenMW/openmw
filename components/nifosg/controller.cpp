@@ -441,9 +441,9 @@ void ParticleSystemController::operator() (osg::Node* node, osg::NodeVisitor* nv
 {
     if (hasInput())
     {
-        osgParticle::ParticleProcessor* emitter = static_cast<osgParticle::ParticleProcessor*>(node);
+        osgParticle::ParticleSystem* partsys = static_cast<osgParticle::ParticleSystem*>(node);
         float time = getInputValue(nv);
-        emitter->setEnabled(time >= mEmitStart && time < mEmitStop);
+        partsys->setFrozen(!(time >= mEmitStart && time < mEmitStop));
     }
     traverse(node, nv);
 }

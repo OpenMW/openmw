@@ -994,7 +994,7 @@ namespace NifOsg
 
                 osg::ref_ptr<ParticleSystemController> callback(new ParticleSystemController(partctrl));
                 setupParticleController(partctrl, callback, particleflags);
-                emitter->setUpdateCallback(callback);
+                partsys->setUpdateCallback(callback);
             }
 
             // affectors must be attached *after* the emitter in the scene graph for correct update order
