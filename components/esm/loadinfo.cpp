@@ -10,17 +10,8 @@ namespace ESM
 
     void DialInfo::load(ESMReader &esm, bool &isDeleted)
     {
-        loadId(esm);
-        loadData(esm, isDeleted);
-    }
-
-    void DialInfo::loadId(ESMReader &esm)
-    {
         mId = esm.getHNString("INAM");
-    }
 
-    void DialInfo::loadData(ESMReader &esm, bool &isDeleted)
-    {
         isDeleted = false;
 
         mQuestStatus = QS_None;

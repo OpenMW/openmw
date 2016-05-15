@@ -77,9 +77,8 @@ namespace ESM
     void Dialogue::readInfo(ESMReader &esm, bool merge)
     {
         ESM::DialInfo info;
-        info.loadId(esm);
         bool isDeleted = false;
-        info.loadData(esm, isDeleted);
+        info.load(esm, isDeleted);
 
         if (!merge || mInfo.empty())
         {

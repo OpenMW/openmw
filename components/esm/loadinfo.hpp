@@ -106,11 +106,7 @@ struct DialInfo
     };
 
     void load(ESMReader &esm, bool &isDeleted);
-    ///< Loads all sub-records of Info record
-    void loadId(ESMReader &esm);
-    ///< Loads only Id of Info record (INAM sub-record)
-    void loadData(ESMReader &esm, bool &isDeleted);
-    ///< Loads all sub-records of Info record, except INAM sub-record
+    ///< Loads Info record
 
     void save(ESMWriter &esm, bool isDeleted = false) const;
 
