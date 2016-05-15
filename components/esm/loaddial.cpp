@@ -78,13 +78,12 @@ namespace ESM
     {
         ESM::DialInfo info;
         info.loadId(esm);
-
         bool isDeleted = false;
+        info.loadData(esm, isDeleted);
+
         if (!merge || mInfo.empty())
         {
-            info.loadData(esm, isDeleted);
             mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.end(), info), isDeleted);
-
             return;
         }
 
@@ -96,19 +95,9 @@ namespace ESM
         if (lookup != mLookup.end())
         {
             it = lookup->second.first;
-
-            // Merge with existing record. Only the subrecords that are present in
-            // the new record will be overwritten.
-            it->loadData(esm, isDeleted);
-            info = *it;
-
-            // Since the record merging may have changed the next/prev linked list connection, we need to re-insert the record
+            // Since the new version of this record may have changed the next/prev linked list connection, we need to re-insert the record
             mInfo.erase(it);
             mLookup.erase(lookup);
-        }
-        else
-        {
-            info.loadData(esm, isDeleted);
         }
 
         if (info.mNext.empty())
