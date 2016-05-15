@@ -29,9 +29,6 @@ namespace ESM
         mPrev = esm.getHNString("PNAM");
         mNext = esm.getHNString("NNAM");
 
-        // Since there's no way to mark selects as "deleted", we have to clear the SelectStructs from all previous loadings
-        mSelects.clear();
-
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
