@@ -137,6 +137,9 @@ namespace CSVRender
             virtual void clearSelection (int elementMask) = 0;
 
             /// \param elementMask Elements to be affected by the select operation
+            virtual void invertSelection (int elementMask) = 0;
+
+            /// \param elementMask Elements to be affected by the select operation
             virtual void selectAll (int elementMask) = 0;
 
             // Select everything that references the same ID as at least one of the elements

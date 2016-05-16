@@ -104,6 +104,12 @@ void CSVRender::UnpagedWorldspaceWidget::clearSelection (int elementMask)
     flagAsModified();
 }
 
+void CSVRender::UnpagedWorldspaceWidget::invertSelection (int elementMask)
+{
+    mCell->setSelection (elementMask, Cell::Selection_Invert);
+    flagAsModified();
+}
+
 void CSVRender::UnpagedWorldspaceWidget::selectAll (int elementMask)
 {
     mCell->setSelection (elementMask, Cell::Selection_All);

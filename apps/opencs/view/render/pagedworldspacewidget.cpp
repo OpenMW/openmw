@@ -606,6 +606,15 @@ void CSVRender::PagedWorldspaceWidget::clearSelection (int elementMask)
     flagAsModified();
 }
 
+void CSVRender::PagedWorldspaceWidget::invertSelection (int elementMask)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+        iter->second->setSelection (elementMask, Cell::Selection_Invert);
+
+    flagAsModified();
+}
+
 void CSVRender::PagedWorldspaceWidget::selectAll (int elementMask)
 {
     for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter = mCells.begin();
