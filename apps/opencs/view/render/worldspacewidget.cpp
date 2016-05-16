@@ -295,7 +295,7 @@ unsigned int CSVRender::WorldspaceWidget::getVisibilityMask() const
 
 void CSVRender::WorldspaceWidget::setInteractionMask (unsigned int mask)
 {
-    mInteractionMask = mask | Mask_CellMarker | Mask_CellArrow | Mask_Pathgrid | Mask_Terrain;
+    mInteractionMask = mask | Mask_CellMarker | Mask_CellArrow;
 }
 
 unsigned int CSVRender::WorldspaceWidget::getInteractionMask() const
