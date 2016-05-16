@@ -33,6 +33,7 @@ namespace CSVWidget
 namespace CSVRender
 {
     class TagBase;
+    class Cell;
     class CellArrow;
     class EditMode;
 
@@ -160,6 +161,9 @@ namespace CSVRender
                 bool ignoreHidden = false) const;
 
             virtual std::string getCellId (const osg::Vec3f& point) const = 0;
+
+            /// \note Returns the cell if it exists, otherwise a null pointer
+            virtual Cell* getCell(const osg::Vec3d& point) const = 0;
 
             virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
                 const = 0;

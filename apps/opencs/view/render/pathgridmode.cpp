@@ -9,6 +9,7 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/idtree.hpp"
 
+#include "cell.hpp"
 #include "mask.hpp"
 #include "pathgrid.hpp"
 #include "worldspacewidget.hpp"
@@ -66,6 +67,37 @@ namespace CSVRender
     }
 
     void PathgridMode::primaryEditPressed(const WorldspaceHitResult& hitResult)
+    {
+        // Determine placement
+        osg::Vec3d position;
+
+        if (hitResult.hit)
+        {
+            position = hitResult.worldPos;
+        }
+        else
+        {
+            const double DefaultDistance = 500.f;
+
+            osg::Vec3d eye, center, up, offset;
+            getWorldspaceWidget().getCamera()->getViewMatrix().getLookAt (eye, center, up);
+
+            osg::Vec3d direction = center - eye;
+            direction.normalize();
+            position = eye + direction * DefaultDistance;
+        }
+
+        // Get pathgrid cell
+        Cell* cell = getWorldspaceWidget().getCell (position);
+        if (cell)
+        {
+            // Add node
+            QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
+            QString description = "Connect node to selected nodes";
+
+            CSMWorld::CommandMacro macro(undoStack, description);
+            cell->getPathgrid()->applyPoint(macro, position);
+        }
     }
 
     void PathgridMode::secondaryEditPressed(const WorldspaceHitResult& hit)

@@ -644,6 +644,21 @@ std::string CSVRender::PagedWorldspaceWidget::getCellId (const osg::Vec3f& point
     return cellCoordinates.getId (mWorldspace);
 }
 
+CSVRender::Cell* CSVRender::PagedWorldspaceWidget::getCell(const osg::Vec3d& point) const
+{
+    const int cellSize = 8192;
+
+    CSMWorld::CellCoordinates coords(
+        static_cast<int> (std::floor (point.x()/cellSize)),
+        static_cast<int> (std::floor (point.y()/cellSize)));
+
+    std::map<CSMWorld::CellCoordinates, Cell*>::const_iterator searchResult = mCells.find(coords);
+    if (searchResult != mCells.end())
+        return searchResult->second;
+    else
+        return 0;
+}
+
 std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::PagedWorldspaceWidget::getSelection (
     unsigned int elementMask) const
 {

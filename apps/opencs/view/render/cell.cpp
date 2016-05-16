@@ -123,6 +123,11 @@ CSVRender::Cell::~Cell()
     mCellNode->getParent(0)->removeChild(mCellNode);
 }
 
+CSVRender::Pathgrid* CSVRender::Cell::getPathgrid() const
+{
+    return mPathgrid.get();
+}
+
 bool CSVRender::Cell::referenceableDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {

@@ -127,6 +127,11 @@ std::string CSVRender::UnpagedWorldspaceWidget::getCellId (const osg::Vec3f& poi
     return mCellId;
 }
 
+CSVRender::Cell* CSVRender::UnpagedWorldspaceWidget::getCell(const osg::Vec3d& point) const
+{
+    return mCell.get();
+}
+
 std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::UnpagedWorldspaceWidget::getSelection (
     unsigned int elementMask) const
 {

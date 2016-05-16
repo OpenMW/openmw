@@ -87,6 +87,9 @@ namespace CSVRender
 
             ~Cell();
 
+            /// \note Returns the pathgrid representation which will exist as long as the cell exists
+            Pathgrid* getPathgrid() const;
+
             /// \return Did this call result in a modification of the visual representation of
             /// this cell?
             bool referenceableDataChanged (const QModelIndex& topLeft,

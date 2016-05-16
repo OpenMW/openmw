@@ -13,6 +13,7 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/commandmacro.hpp"
 #include "../../model/world/data.hpp"
+#include "../../model/world/idtree.hpp"
 
 namespace CSVRender
 {
@@ -163,6 +164,47 @@ namespace CSVRender
     void Pathgrid::resetMove()
     {
         mSelectedNode->setPosition(osg::Vec3f(0,0,0));
+    }
+
+    void Pathgrid::applyPoint(CSMWorld::CommandMacro& commands, const osg::Vec3d& worldPos)
+    {
+        const CSMWorld::Pathgrid* source = getPathgridSource();
+        if (source)
+        {
+            osg::Vec3d localCoords = worldPos - mBaseNode->getPosition();
+
+            int posX = static_cast<int>(localCoords.x());
+            int posY = static_cast<int>(localCoords.y());
+            int posZ = static_cast<int>(localCoords.z());
+
+            CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
+                CSMWorld::UniversalId::Type_Pathgrids));
+
+            int recordIndex = mPathgridCollection.getIndex (mId);
+            int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridPoints);
+
+            int posXColumn = mPathgridCollection.searchNestedColumnIndex(parentColumn,
+                CSMWorld::Columns::ColumnId_PathgridPosX);
+
+            int posYColumn = mPathgridCollection.searchNestedColumnIndex(parentColumn,
+                CSMWorld::Columns::ColumnId_PathgridPosY);
+
+            int posZColumn = mPathgridCollection.searchNestedColumnIndex(parentColumn,
+                CSMWorld::Columns::ColumnId_PathgridPosZ);
+
+            QModelIndex parent = model->index(recordIndex, parentColumn);
+            int row = static_cast<int>(source->mPoints.size());
+
+            // Add node
+            commands.push (new CSMWorld::AddNestedCommand(*model, mId, row, parentColumn));
+            commands.push (new CSMWorld::ModifyCommand(*model, model->index(row, posXColumn, parent), posX));
+            commands.push (new CSMWorld::ModifyCommand(*model, model->index(row, posYColumn, parent), posY));
+            commands.push (new CSMWorld::ModifyCommand(*model, model->index(row, posZColumn, parent), posZ));
+        }
+        else
+        {
+            // Create pathgrid TODO
+        }
     }
 
     void Pathgrid::applyPosition(CSMWorld::CommandMacro& commands)

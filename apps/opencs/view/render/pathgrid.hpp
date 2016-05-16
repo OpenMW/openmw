@@ -71,6 +71,7 @@ namespace CSVRender
             void moveSelected(const osg::Vec3d& offset);
             void resetMove();
 
+            void applyPoint(CSMWorld::CommandMacro& commands, const osg::Vec3d& worldPos);
             void applyPosition(CSMWorld::CommandMacro& commands);
             void applyEdge(CSMWorld::CommandMacro& commands, unsigned short node1, unsigned short node2);
             void applyEdges(CSMWorld::CommandMacro& commands, unsigned short node);
