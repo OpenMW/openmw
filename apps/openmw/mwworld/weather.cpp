@@ -892,8 +892,7 @@ inline void WeatherManager::regionalWeatherChanged(const std::string& regionID, 
     MWWorld::ConstPtr player = MWMechanics::getPlayer();
     if(player.isInCell())
     {
-        std::string playerRegion = Misc::StringUtils::lowerCase(player.getCell()->getCell()->mRegion);
-        if(!playerRegion.empty() && (playerRegion == regionID))
+        if(Misc::StringUtils::ciEqual(regionID, mCurrentRegion))
         {
             addWeatherTransition(region.getWeather());
         }
