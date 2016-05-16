@@ -15,6 +15,10 @@ namespace CSVRender
 
             PathgridMode(WorldspaceWidget* worldspace, QWidget* parent=0);
 
+            virtual void activate(CSVWidget::SceneToolbar* toolbar);
+
+            virtual bool createContextMenu(QMenu* menu);
+
             virtual void primaryEditPressed(const WorldspaceHitResult& hit);
 
             virtual void secondaryEditPressed(const WorldspaceHitResult& hit);
@@ -47,8 +51,22 @@ namespace CSVRender
             std::string mLastId;
             DragMode mDragMode;
             unsigned short mFromNode;
+
+            QAction* mSelectAll;
+            QAction* mInvertSelection;
+            QAction* mClearSelection;
+            QAction* mRemoveSelected;
+            QAction* mRemoveSelectedEdges;
+
             QString getTooltip();
 
+        private slots:
+
+            void selectAll();
+            void invertSelection();
+            void clearSelection();
+            void removeSelected();
+            void removeSelectedEdges();
     };
 }
 

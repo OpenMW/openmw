@@ -1,5 +1,7 @@
 #include "pathgridmode.hpp"
 
+#include <QMenu>
+
 #include <components/sceneutil/pathgridutil.hpp>
 
 #include "../../model/world/commands.hpp"
@@ -31,8 +33,39 @@ namespace CSVRender
             "<li>Other operations may be done with the context menu</li>"
             "</ul><p>Note: Only a single cell's pathgrid may be edited at a time");
     }
-    void PathgridMode::primaryEditPressed(const WorldspaceHitResult& hit)
+
+    void PathgridMode::activate(CSVWidget::SceneToolbar* toolbar)
     {
+        mSelectAll = new QAction("Select all other nodes in cell", this);
+        mInvertSelection = new QAction("Invert selection", this);
+        mClearSelection = new QAction("Clear selection", this);
+        mRemoveSelected = new QAction("Remove selected nodes", this);
+        mRemoveSelectedEdges = new QAction("Remove edges between selected nodes", this);
+
+        connect(mSelectAll, SIGNAL(triggered()), this, SLOT(selectAll()));
+        connect(mInvertSelection, SIGNAL(triggered()), this, SLOT(invertSelection()));
+        connect(mClearSelection, SIGNAL(triggered()), this, SLOT(clearSelection()));
+        connect(mRemoveSelected, SIGNAL(triggered()), this, SLOT(removeSelected()));
+        connect(mRemoveSelectedEdges, SIGNAL(triggered()), this, SLOT(removeSelectedEdges()));
+
+        EditMode::activate(toolbar);
+    }
+
+    bool PathgridMode::createContextMenu(QMenu* menu)
+    {
+        if (menu)
+        {
+            menu->addAction(mSelectAll);
+            menu->addAction(mInvertSelection);
+            menu->addAction(mClearSelection);
+            menu->addAction(mRemoveSelected);
+            menu->addAction(mRemoveSelectedEdges);
+        }
+
+        return true;
+    }
+
+    void PathgridMode::primaryEditPressed(const WorldspaceHitResult& hitResult)
     }
 
     void PathgridMode::secondaryEditPressed(const WorldspaceHitResult& hit)
@@ -159,5 +192,29 @@ namespace CSVRender
     void PathgridMode::dragAborted()
     {
         getWorldspaceWidget().reset(Mask_Pathgrid);
+    }
+
+    void PathgridMode::selectAll()
+    {
+        // Select rest of nodes in selected cell
+        getWorldspaceWidget().selectAll(Mask_Pathgrid);
+    }
+
+    void PathgridMode::invertSelection()
+    {
+        getWorldspaceWidget().invertSelection(Mask_Pathgrid);
+    }
+
+    void PathgridMode::clearSelection()
+    {
+        getWorldspaceWidget().clearSelection(Mask_Pathgrid);
+    }
+
+    void PathgridMode::removeSelected()
+    {
+    }
+
+    void PathgridMode::removeSelectedEdges()
+    {
     }
 }
