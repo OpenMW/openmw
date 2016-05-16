@@ -7,6 +7,8 @@
 #include <osg/ref_ptr>
 
 #include "../../model/world/cellcoordinates.hpp"
+#include "../../model/world/idcollection.hpp"
+#include "../../model/world/subcellcollection.hpp"
 
 #include "tagbase.hpp"
 
@@ -80,6 +82,7 @@ namespace CSVRender
         private:
 
             CSMWorld::Data& mData;
+            CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& mPathgridCollection;
             std::string mId;
             CSMWorld::CellCoordinates mCoords;
 
@@ -99,6 +102,9 @@ namespace CSVRender
             void recreateSelectedGeometry(const CSMWorld::Pathgrid& source);
             void removePathgridGeometry();
             void removeSelectedGeometry();
+
+            const CSMWorld::Pathgrid* getPathgridSource();
+
     };
 }
 

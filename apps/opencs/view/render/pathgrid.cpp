@@ -41,6 +41,7 @@ namespace CSVRender
     Pathgrid::Pathgrid(CSMWorld::Data& data, osg::Group* parent, const std::string& pathgridId,
         const CSMWorld::CellCoordinates& coordinates)
         : mData(data)
+        , mPathgridCollection(mData.getPathgrids())
         , mId(pathgridId)
         , mCoords(coordinates)
         , mParent(parent)
@@ -97,15 +98,13 @@ namespace CSVRender
     {
         mSelected.clear();
 
-        const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mData.getPathgrids();
-        int pathgridIndex = pathgrids.searchId(mId);
-        if (pathgridIndex != -1)
+        const CSMWorld::Pathgrid* source = getPathgridSource();
+        if (source)
         {
-            const CSMWorld::Pathgrid& source = pathgrids.getRecord(pathgridIndex).get();
-            for (unsigned short i = 0; i < static_cast<unsigned short>(source.mPoints.size()); ++i)
+            for (unsigned short i = 0; i < static_cast<unsigned short>(source->mPoints.size()); ++i)
                 mSelected.push_back(i);
 
-            recreateSelectedGeometry(source);
+            recreateSelectedGeometry(*source);
         }
         else
         {
@@ -130,21 +129,19 @@ namespace CSVRender
 
     void Pathgrid::invertSelected()
     {
-        NodeList temp = NodeList(mSelected.begin(), mSelected.end());
+        NodeList temp = NodeList(mSelected);
         mSelected.clear();
 
-        const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mData.getPathgrids();
-        int pathgridIndex = pathgrids.searchId(mId);
-        if (pathgridIndex != -1)
+        const CSMWorld::Pathgrid* source = getPathgridSource();
+        if (source)
         {
-            const CSMWorld::Pathgrid& source = pathgrids.getRecord(pathgridIndex).get();
-            for (unsigned short i = 0; i < static_cast<unsigned short>(source.mPoints.size()); ++i)
+            for (unsigned short i = 0; i < static_cast<unsigned short>(source->mPoints.size()); ++i)
             {
                 if (std::find(temp.begin(), temp.end(), i) == temp.end())
                     mSelected.push_back(i);
             }
 
-            recreateSelectedGeometry(source);
+            recreateSelectedGeometry(*source);
         }
         else
         {
@@ -170,41 +167,44 @@ namespace CSVRender
 
     void Pathgrid::applyPosition(CSMWorld::CommandMacro& commands)
     {
-        const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mData.getPathgrids();
-        int pathgridIndex = pathgrids.searchId(mId);
-        if (pathgridIndex != -1)
+        const CSMWorld::Pathgrid* source = getPathgridSource();
+        if (source)
         {
-            const CSMWorld::Pathgrid& source = pathgrids.getRecord(pathgridIndex).get();
             osg::Vec3d localCoords = mSelectedNode->getPosition();
 
-            int oX = static_cast<int>(localCoords.x());
-            int oY = static_cast<int>(localCoords.y());
-            int oZ = static_cast<int>(localCoords.z());
+            int offsetX = static_cast<int>(localCoords.x());
+            int offsetY = static_cast<int>(localCoords.y());
+            int offsetZ = static_cast<int>(localCoords.z());
 
-            CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& collection = mData.getPathgrids();
-            QAbstractItemModel* model = mData.getTableModel (CSMWorld::UniversalId::Type_Pathgrids);
+            QAbstractItemModel* model = mData.getTableModel(CSMWorld::UniversalId::Type_Pathgrids);
 
-            int recordIndex = collection.getIndex (mId);
-            int parentColumn = collection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridPoints);
+            int recordIndex = mPathgridCollection.getIndex(mId);
+            int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridPoints);
+
+            int posXColumn = mPathgridCollection.searchNestedColumnIndex(parentColumn,
+                CSMWorld::Columns::ColumnId_PathgridPosX);
+
+            int posYColumn = mPathgridCollection.searchNestedColumnIndex(parentColumn,
+                CSMWorld::Columns::ColumnId_PathgridPosY);
+
+            int posZColumn = mPathgridCollection.searchNestedColumnIndex(parentColumn,
+                CSMWorld::Columns::ColumnId_PathgridPosZ);
 
             QModelIndex parent = model->index(recordIndex, parentColumn);
 
             for (size_t i = 0; i < mSelected.size(); ++i)
             {
-                const CSMWorld::Pathgrid::Point& point = source.mPoints[mSelected[i]];
-                int row = mSelected[i];
+                const CSMWorld::Pathgrid::Point& point = source->mPoints[mSelected[i]];
+                int row = static_cast<int>(mSelected[i]);
 
-                // X
-                int column = collection.searchNestedColumnIndex(parentColumn, CSMWorld::Columns::ColumnId_PathgridPosX);
-                commands.push (new CSMWorld::ModifyCommand(*model, model->index(row, column, parent), point.mX + oX));
+                commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posXColumn, parent),
+                    point.mX + offsetX));
 
-                // Y
-                column = collection.searchNestedColumnIndex(parentColumn, CSMWorld::Columns::ColumnId_PathgridPosY);
-                commands.push (new CSMWorld::ModifyCommand(*model, model->index(row, column, parent), point.mY + oY));
+                commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posYColumn, parent),
+                    point.mY + offsetY));
 
-                // Z
-                column = collection.searchNestedColumnIndex(parentColumn, CSMWorld::Columns::ColumnId_PathgridPosZ);
-                commands.push (new CSMWorld::ModifyCommand(*model, model->index(row, column, parent), point.mZ + oZ));
+                commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posZColumn, parent),
+                    point.mZ + offsetZ));
             }
         }
 
@@ -228,30 +228,29 @@ namespace CSVRender
 
     void Pathgrid::recreateGeometry()
     {
-        removePathgridGeometry();
-        removeSelectedGeometry();
-
         // Make new
-        const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mData.getPathgrids();
-        int pathgridIndex = pathgrids.searchId(mId);
-        if (pathgridIndex != -1)
+        const CSMWorld::Pathgrid* source = getPathgridSource();
+        if (source)
         {
-            const CSMWorld::Pathgrid& source = pathgrids.getRecord(pathgridIndex).get();
-            mPathgridGeometry = SceneUtil::createPathgridGeometry(source);
+            removePathgridGeometry();
+            mPathgridGeometry = SceneUtil::createPathgridGeometry(*source);
             mPathgridGeode->addDrawable(mPathgridGeometry);
 
-            recreateSelectedGeometry(source);
+            recreateSelectedGeometry(*source);
+        }
+        else
+        {
+            removePathgridGeometry();
+            removeSelectedGeometry();
         }
     }
 
     void Pathgrid::recreateSelectedGeometry()
     {
-        const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mData.getPathgrids();
-        int pathgridIndex = pathgrids.searchId(mId);
-        if (pathgridIndex != -1)
+        const CSMWorld::Pathgrid* source = getPathgridSource();
+        if (source)
         {
-            const CSMWorld::Pathgrid& source = pathgrids.getRecord(pathgridIndex).get();
-            recreateSelectedGeometry(source);
+            recreateSelectedGeometry(*source);
         }
         else
         {
@@ -282,5 +281,16 @@ namespace CSVRender
             mSelectedGeode->removeDrawable(mSelectedGeometry);
             mSelectedGeometry.release();
         }
+    }
+
+    const CSMWorld::Pathgrid* Pathgrid::getPathgridSource()
+    {
+        int index = mPathgridCollection.searchId(mId);
+        if (index != -1)
+        {
+            return &mPathgridCollection.getRecord(index).get();
+        }
+
+        return 0;
     }
 }
