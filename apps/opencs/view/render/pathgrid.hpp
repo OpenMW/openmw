@@ -90,6 +90,7 @@ namespace CSVRender
             CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& mPathgridCollection;
             std::string mId;
             CSMWorld::CellCoordinates mCoords;
+            bool mInterior;
 
             NodeList mSelected;
             bool mConnectionIndicator;
@@ -117,6 +118,8 @@ namespace CSVRender
                 unsigned short node2);
             void removeEdge(CSMWorld::CommandMacro& commands, const CSMWorld::Pathgrid& source, unsigned short node1,
                 unsigned short node2);
+
+            int clampToCell(int v);
     };
 }
 

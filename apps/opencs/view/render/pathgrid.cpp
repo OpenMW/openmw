@@ -10,6 +10,7 @@
 
 #include <components/sceneutil/pathgridutil.hpp>
 
+#include "../../model/world/cell.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/commandmacro.hpp"
 #include "../../model/world/data.hpp"
@@ -45,6 +46,7 @@ namespace CSVRender
         , mPathgridCollection(mData.getPathgrids())
         , mId(pathgridId)
         , mCoords(coordinates)
+        , mInterior(false)
         , mConnectionIndicator(false)
         , mConnectionNode(0)
         , mParent(parent)
@@ -70,6 +72,13 @@ namespace CSVRender
         mSelectedNode->addChild(mSelectedGeode);
 
         recreateGeometry();
+
+        int index = mData.getCells().searchId(mId);
+        if (index != -1)
+        {
+            const CSMWorld::Cell& cell = mData.getCells().getRecord(index).get();
+            mInterior = cell.mData.mFlags & ESM::Cell::Interior;
+        }
     }
 
     Pathgrid::~Pathgrid()
@@ -187,9 +196,9 @@ namespace CSVRender
         {
             osg::Vec3d localCoords = worldPos - mBaseNode->getPosition();
 
-            int posX = static_cast<int>(localCoords.x());
-            int posY = static_cast<int>(localCoords.y());
-            int posZ = static_cast<int>(localCoords.z());
+            int posX = clampToCell(static_cast<int>(localCoords.x()));
+            int posY = clampToCell(static_cast<int>(localCoords.y()));
+            int posZ = clampToCell(static_cast<int>(localCoords.z()));
 
             CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
                 CSMWorld::UniversalId::Type_Pathgrids));
@@ -254,13 +263,13 @@ namespace CSVRender
                 int row = static_cast<int>(mSelected[i]);
 
                 commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posXColumn, parent),
-                    point.mX + offsetX));
+                    clampToCell(point.mX + offsetX)));
 
                 commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posYColumn, parent),
-                    point.mY + offsetY));
+                    clampToCell(point.mY + offsetY)));
 
                 commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posZColumn, parent),
-                    point.mZ + offsetZ));
+                    clampToCell(point.mZ + offsetZ)));
             }
         }
     }
@@ -480,5 +489,19 @@ namespace CSVRender
             commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, edge0Column, parent), node2));
             commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, edge1Column, parent), node1));
         }
+    }
+
+    int Pathgrid::clampToCell(int v)
+    {
+        const int CellExtent = ESM::Land::REAL_SIZE;
+
+        if (mInterior)
+            return v;
+        else if (v > CellExtent)
+            return CellExtent;
+        else if (v < 0)
+            return 0;
+        else
+            return v;
     }
 }
