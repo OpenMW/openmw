@@ -47,6 +47,8 @@ namespace CSVRender
             std::string mLastId;
             DragMode mDragMode;
             unsigned short mFromNode;
+            QString getTooltip();
+
     };
 }
 

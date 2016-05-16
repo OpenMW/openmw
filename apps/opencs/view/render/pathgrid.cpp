@@ -33,7 +33,6 @@ namespace CSVRender
 
         if (!hideBasics)
         {
-            text += "<p>Only one pathgrid may be edited at a time.";
         }
 
         return text;

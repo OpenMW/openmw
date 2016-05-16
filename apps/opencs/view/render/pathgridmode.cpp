@@ -14,12 +14,23 @@
 namespace CSVRender
 {
     PathgridMode::PathgridMode(WorldspaceWidget* worldspaceWidget, QWidget* parent)
-        : EditMode(worldspaceWidget, QIcon(":placeholder"), Mask_Pathgrid, "Pathgrid editing", parent)
+        : EditMode(worldspaceWidget, QIcon(":placeholder"), Mask_Pathgrid, getTooltip(), parent)
         , mDragMode(DragMode_None)
         , mFromNode(0)
     {
     }
 
+    QString PathgridMode::getTooltip()
+    {
+        return QString(
+            "Pathgrid editing"
+            "<ul><li>Primary edit: Add node to scene</li>"
+            "<li>Secondary edit: Connect selected nodes to node</li>"
+            "<li>Primary drag: Move selected nodes</li>"
+            "<li>Secondary drag: Connect one node to another</li>"
+            "<li>Other operations may be done with the context menu</li>"
+            "</ul><p>Note: Only a single cell's pathgrid may be edited at a time");
+    }
     void PathgridMode::primaryEditPressed(const WorldspaceHitResult& hit)
     {
     }
