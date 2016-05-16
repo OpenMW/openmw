@@ -307,11 +307,23 @@ void CSVRender::Cell::setSelection (int elementMask, Selection mode)
     }
     if (elementMask & Mask_Pathgrid)
     {
+        // Only one pathgrid may be selected, so some operations will only have an effect
+        // if the pathgrid is already focused
         switch (mode)
         {
-            case Selection_Clear: mPathgrid->clearSelected(); break;
-            case Selection_All: mPathgrid->selectAll(); break;
-            case Selection_Invert: mPathgrid->invertSelected(); break;
+            case Selection_Clear:
+                mPathgrid->clearSelected();
+                break;
+
+            case Selection_All:
+                if (mPathgrid->isSelected())
+                    mPathgrid->selectAll();
+                break;
+
+            case Selection_Invert:
+                if (mPathgrid->isSelected())
+                    mPathgrid->invertSelected();
+                break;
         }
     }
 }
