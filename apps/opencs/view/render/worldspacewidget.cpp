@@ -712,8 +712,9 @@ void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
         if (mDragging)
         {
             EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+            WorldspaceHitResult hit = mousePick (event->pos());
 
-            editMode.dragCompleted();
+            editMode.dragCompleted(hit);
             mDragging = false;
         }
         else

@@ -74,7 +74,7 @@ namespace CSVRender
             virtual void drag (int diffX, int diffY, double speedFactor);
 
             /// Default-implementation: ignored
-            virtual void dragCompleted();
+            virtual void dragCompleted(const WorldspaceHitResult& hit);
 
             /// Default-implementation: ignored
             ///

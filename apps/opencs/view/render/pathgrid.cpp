@@ -45,6 +45,8 @@ namespace CSVRender
         , mPathgridCollection(mData.getPathgrids())
         , mId(pathgridId)
         , mCoords(coordinates)
+        , mConnectionIndicator(false)
+        , mConnectionNode(0)
         , mParent(parent)
         , mPathgridGeometry(0)
         , mSelectedGeometry(0)
@@ -161,9 +163,21 @@ namespace CSVRender
         mSelectedNode->setPosition(mSelectedNode->getPosition() + offset);
     }
 
+    void Pathgrid::setupConnectionIndicator(unsigned short node)
+    {
+        mConnectionIndicator = true;
+        mConnectionNode = node;
+        recreateSelectedGeometry();
+    }
+
     void Pathgrid::resetMove()
     {
         mSelectedNode->setPosition(osg::Vec3f(0,0,0));
+        if (mConnectionIndicator)
+        {
+            mConnectionIndicator = false;
+            recreateSelectedGeometry();
+        }
     }
 
     void Pathgrid::applyPoint(CSMWorld::CommandMacro& commands, const osg::Vec3d& worldPos)
@@ -249,18 +263,88 @@ namespace CSVRender
                     point.mZ + offsetZ));
             }
         }
-
-        resetMove();
     }
 
     void Pathgrid::applyEdge(CSMWorld::CommandMacro& commands, unsigned short node1, unsigned short node2)
     {
-        // TODO
+        const CSMWorld::Pathgrid* source = getPathgridSource();
+        if (source)
+        {
+            addEdge(commands, *source, node1, node2);
+        }
     }
 
     void Pathgrid::applyEdges(CSMWorld::CommandMacro& commands, unsigned short node)
     {
-        // TODO
+        const CSMWorld::Pathgrid* source = getPathgridSource();
+        if (source)
+        {
+            for (size_t i = 0; i < mSelected.size(); ++i)
+            {
+                addEdge(commands, *source, node, mSelected[i]);
+            }
+        }
+    }
+
+    void Pathgrid::applyRemoveNodes(CSMWorld::CommandMacro& commands)
+    {
+        // Source is aquired here to ensure a pathgrid exists
+        const CSMWorld::Pathgrid* source = getPathgridSource();
+        if (source)
+        {
+            // Want to remove from end of row first
+            std::sort(mSelected.begin(), mSelected.end(), std::greater<int>());
+
+            CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
+                CSMWorld::UniversalId::Type_Pathgrids));
+
+            int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridPoints);
+
+            for (std::vector<unsigned short>::iterator row = mSelected.begin(); row != mSelected.end(); ++row)
+            {
+                commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, static_cast<int>(*row), parentColumn));
+            }
+        }
+
+        clearSelected();
+    }
+
+    void Pathgrid::applyRemoveEdges(CSMWorld::CommandMacro& commands)
+    {
+        const CSMWorld::Pathgrid* source = getPathgridSource();
+        if (source)
+        {
+            // Want to remove from end of row first
+            std::set<int, std::greater<int> > rowsToRemove;
+            for (size_t i = 0; i <= mSelected.size(); ++i)
+            {
+                for (size_t j = i + 1; j < mSelected.size(); ++j)
+                {
+                    int row = edgeExists(*source, mSelected[i], mSelected[j]);
+                    if (row != -1)
+                    {
+                        rowsToRemove.insert(row);
+                    }
+
+                    row = edgeExists(*source, mSelected[j], mSelected[i]);
+                    if (row != -1)
+                    {
+                        rowsToRemove.insert(row);
+                    }
+                }
+            }
+
+            CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
+                CSMWorld::UniversalId::Type_Pathgrids));
+
+            int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridEdges);
+
+            std::set<int, std::greater<int> >::iterator row;
+            for (row = rowsToRemove.begin(); row != rowsToRemove.end(); ++row)
+            {
+                commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, *row, parentColumn));
+            }
+        }
     }
 
     osg::ref_ptr<PathgridTag> Pathgrid::getTag() const
@@ -303,8 +387,25 @@ namespace CSVRender
     void Pathgrid::recreateSelectedGeometry(const CSMWorld::Pathgrid& source)
     {
         removeSelectedGeometry();
-        mSelectedGeometry = SceneUtil::createPathgridSelectedWireframe(source, mSelected);
-        mSelectedGeode->addDrawable(mSelectedGeometry);
+
+        if (mConnectionIndicator)
+        {
+            NodeList tempList = NodeList(mSelected);
+
+            NodeList::iterator searchResult = std::find(tempList.begin(), tempList.end(), mConnectionNode);
+            if (searchResult != tempList.end())
+                tempList.erase(searchResult);
+
+            tempList.push_back(mConnectionNode);
+
+            mSelectedGeometry = SceneUtil::createPathgridSelectedWireframe(source, tempList);
+            mSelectedGeode->addDrawable(mSelectedGeometry);
+        }
+        else
+        {
+            mSelectedGeometry = SceneUtil::createPathgridSelectedWireframe(source, mSelected);
+            mSelectedGeode->addDrawable(mSelectedGeometry);
+        }
     }
 
     void Pathgrid::removePathgridGeometry()
@@ -334,5 +435,50 @@ namespace CSVRender
         }
 
         return 0;
+    }
+
+    int Pathgrid::edgeExists(const CSMWorld::Pathgrid& source, unsigned short node1, unsigned short node2)
+    {
+        for (size_t i = 0; i < source.mEdges.size(); ++i)
+        {
+            if (source.mEdges[i].mV0 == node1 && source.mEdges[i].mV1 == node2)
+                return static_cast<int>(i);
+        }
+
+        return -1;
+    }
+
+    void Pathgrid::addEdge(CSMWorld::CommandMacro& commands, const CSMWorld::Pathgrid& source, unsigned short node1,
+        unsigned short node2)
+    {
+        CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
+            CSMWorld::UniversalId::Type_Pathgrids));
+
+        int recordIndex = mPathgridCollection.getIndex(mId);
+        int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridEdges);
+
+        int edge0Column = mPathgridCollection.searchNestedColumnIndex(parentColumn,
+            CSMWorld::Columns::ColumnId_PathgridEdge0);
+
+        int edge1Column = mPathgridCollection.searchNestedColumnIndex(parentColumn,
+            CSMWorld::Columns::ColumnId_PathgridEdge1);
+
+        QModelIndex parent = model->index(recordIndex, parentColumn);
+        int row = static_cast<int>(source.mEdges.size());
+
+        if (edgeExists(source, node1, node2) == -1)
+        {
+            commands.push(new CSMWorld::AddNestedCommand(*model, mId, row, parentColumn));
+            commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, edge0Column, parent), node1));
+            commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, edge1Column, parent), node2));
+            ++row;
+        }
+
+        if (edgeExists(source, node2, node1) == -1)
+        {
+            commands.push(new CSMWorld::AddNestedCommand(*model, mId, row, parentColumn));
+            commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, edge0Column, parent), node2));
+            commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, edge1Column, parent), node1));
+        }
     }
 }

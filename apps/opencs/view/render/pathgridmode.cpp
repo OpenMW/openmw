@@ -102,6 +102,22 @@ namespace CSVRender
 
     void PathgridMode::secondaryEditPressed(const WorldspaceHitResult& hit)
     {
+        if (hit.tag)
+        {
+            if (PathgridTag* tag = dynamic_cast<PathgridTag*>(hit.tag.get()))
+            {
+                if (tag->getPathgrid()->isSelected())
+                {
+                    unsigned short node = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
+
+                    QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
+                    QString description = "Connect node to selected nodes";
+
+                    CSMWorld::CommandMacro macro(undoStack, description);
+                    tag->getPathgrid()->applyEdges(macro, node);
+                }
+            }
+        }
     }
 
     void PathgridMode::primarySelectPressed(const WorldspaceHitResult& hit)
@@ -112,6 +128,7 @@ namespace CSVRender
         {
             if (PathgridTag* tag = dynamic_cast<PathgridTag*>(hit.tag.get()))
             {
+                mLastId = tag->getPathgrid()->getId();
                 unsigned short node = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
                 tag->getPathgrid()->toggleSelected(node);
             }
@@ -147,12 +164,9 @@ namespace CSVRender
         if (!selection.empty())
         {
             mDragMode = DragMode_Move;
-            return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return true;
     }
 
     bool PathgridMode::secondaryEditStartDrag(const WorldspaceHitResult& hit)
@@ -162,12 +176,14 @@ namespace CSVRender
             if (PathgridTag* tag = dynamic_cast<PathgridTag*>(hit.tag.get()))
             {
                 mDragMode = DragMode_Edge;
+                mEdgeId = tag->getPathgrid()->getId();
                 mFromNode = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
-                return true;
+
+                tag->getPathgrid()->setupConnectionIndicator(mFromNode);
             }
         }
 
-        return false;
+        return true;
     }
 
     void PathgridMode::drag(int diffX, int diffY, double speedFactor)
@@ -189,21 +205,20 @@ namespace CSVRender
                 }
                 else if (mDragMode == DragMode_Edge)
                 {
-                    // TODO make indicators
+                    // TODO Add indicator, need raytrace
                 }
             }
         }
     }
 
-    void PathgridMode::dragCompleted()
+    void PathgridMode::dragCompleted(const WorldspaceHitResult& hit)
     {
-        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
-
-        for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it != selection.end(); ++it)
+        if (mDragMode == DragMode_Move)
         {
-            if (PathgridTag* tag = dynamic_cast<PathgridTag*>(it->get()))
+            std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
+            for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it != selection.end(); ++it)
             {
-                if (mDragMode == DragMode_Move)
+                if (PathgridTag* tag = dynamic_cast<PathgridTag*>(it->get()))
                 {
                     QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
                     QString description = "Move pathgrid node(s)";
@@ -211,14 +226,33 @@ namespace CSVRender
                     CSMWorld::CommandMacro macro(undoStack, description);
                     tag->getPathgrid()->applyPosition(macro);
                 }
-                else if (mDragMode == DragMode_Edge)
+            }
+        }
+        else if (mDragMode == DragMode_Edge)
+        {
+            if (hit.tag)
+            {
+                if (PathgridTag* tag = dynamic_cast<PathgridTag*>(hit.tag.get()))
                 {
-                    // TODO raycast for other node and apply if needed with mFromNode
+                    if (tag->getPathgrid()->getId() == mEdgeId)
+                    {
+                        unsigned short toNode = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
+
+                        QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
+                        QString description = "Add edge between nodes";
+
+                        CSMWorld::CommandMacro macro(undoStack, description);
+                        tag->getPathgrid()->applyEdge(macro, mFromNode, toNode);
+                    }
                 }
             }
+
+            mEdgeId.clear();
+            mFromNode = 0;
         }
 
         mDragMode = DragMode_None;
+        getWorldspaceWidget().reset(Mask_Pathgrid);
     }
 
     void PathgridMode::dragAborted()
@@ -244,9 +278,35 @@ namespace CSVRender
 
     void PathgridMode::removeSelected()
     {
+        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
+
+        for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it != selection.end(); ++it)
+        {
+            if (PathgridTag* tag = dynamic_cast<PathgridTag*>(it->get()))
+            {
+                QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
+                QString description = "Remove selected nodes";
+
+                CSMWorld::CommandMacro macro(undoStack, description);
+                tag->getPathgrid()->applyRemoveNodes(macro);
+            }
+        }
     }
 
     void PathgridMode::removeSelectedEdges()
     {
+        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
+
+        for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it != selection.end(); ++it)
+        {
+            if (PathgridTag* tag = dynamic_cast<PathgridTag*>(it->get()))
+            {
+                QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
+                QString description = "Remove edges between selected nodes";
+
+                CSMWorld::CommandMacro macro(undoStack, description);
+                tag->getPathgrid()->applyRemoveEdges(macro);
+            }
+        }
     }
 }

@@ -71,10 +71,14 @@ namespace CSVRender
             void moveSelected(const osg::Vec3d& offset);
             void resetMove();
 
+            void setupConnectionIndicator(unsigned short node);
+
             void applyPoint(CSMWorld::CommandMacro& commands, const osg::Vec3d& worldPos);
             void applyPosition(CSMWorld::CommandMacro& commands);
             void applyEdge(CSMWorld::CommandMacro& commands, unsigned short node1, unsigned short node2);
             void applyEdges(CSMWorld::CommandMacro& commands, unsigned short node);
+            void applyRemoveNodes(CSMWorld::CommandMacro& commands);
+            void applyRemoveEdges(CSMWorld::CommandMacro& commands);
 
             osg::ref_ptr<PathgridTag> getTag() const;
 
@@ -88,6 +92,8 @@ namespace CSVRender
             CSMWorld::CellCoordinates mCoords;
 
             NodeList mSelected;
+            bool mConnectionIndicator;
+            unsigned short mConnectionNode;
 
             osg::Group* mParent;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
@@ -106,6 +112,11 @@ namespace CSVRender
 
             const CSMWorld::Pathgrid* getPathgridSource();
 
+            int edgeExists(const CSMWorld::Pathgrid& source, unsigned short node1, unsigned short node2);
+            void addEdge(CSMWorld::CommandMacro& commands, const CSMWorld::Pathgrid& source, unsigned short node1,
+                unsigned short node2);
+            void removeEdge(CSMWorld::CommandMacro& commands, const CSMWorld::Pathgrid& source, unsigned short node1,
+                unsigned short node2);
     };
 }
 

@@ -59,7 +59,7 @@ bool CSVRender::EditMode::secondarySelectStartDrag (const WorldspaceHitResult& h
 
 void CSVRender::EditMode::drag (int diffX, int diffY, double speedFactor) {}
 
-void CSVRender::EditMode::dragCompleted() {}
+void CSVRender::EditMode::dragCompleted(const WorldspaceHitResult& hit) {}
 
 void CSVRender::EditMode::dragAborted() {}
 

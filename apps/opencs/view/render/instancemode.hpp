@@ -55,7 +55,7 @@ namespace CSVRender
 
             virtual void drag (int diffX, int diffY, double speedFactor);
 
-            virtual void dragCompleted();
+            virtual void dragCompleted(const WorldspaceHitResult& hit);
 
             /// \note dragAborted will not be called, if the drag is aborted via changing
             /// editing mode

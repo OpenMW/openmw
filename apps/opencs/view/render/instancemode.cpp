@@ -244,7 +244,7 @@ void CSVRender::InstanceMode::drag (int diffX, int diffY, double speedFactor)
     }
 }
 
-void CSVRender::InstanceMode::dragCompleted()
+void CSVRender::InstanceMode::dragCompleted(const WorldspaceHitResult& hit)
 {
     std::vector<osg::ref_ptr<TagBase> > selection =
         getWorldspaceWidget().getEdited (Mask_Reference);
