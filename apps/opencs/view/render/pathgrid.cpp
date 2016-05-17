@@ -24,7 +24,7 @@ namespace CSVRender
 
             virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
             {
-                PathgridTag* tag = dynamic_cast<PathgridTag*>(node->getUserData());
+                PathgridTag* tag = static_cast<PathgridTag*>(node->getUserData());
                 tag->getPathgrid()->update();
             }
     };
@@ -43,10 +43,6 @@ namespace CSVRender
     {
         QString text("Pathgrid: ");
         text += mPathgrid->getId().c_str();
-
-        if (!hideBasics)
-        {
-        }
 
         return text;
     }
@@ -462,7 +458,7 @@ namespace CSVRender
         if (mPathgridGeometry)
         {
             mPathgridGeode->removeDrawable(mPathgridGeometry);
-            mPathgridGeometry.release();
+            mPathgridGeometry = 0;
         }
     }
 
@@ -471,7 +467,7 @@ namespace CSVRender
         if (mSelectedGeometry)
         {
             mSelectedGeode->removeDrawable(mSelectedGeometry);
-            mSelectedGeometry.release();
+            mSelectedGeometry = 0;
         }
     }
 
