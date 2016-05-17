@@ -111,15 +111,9 @@ namespace CSVRender
             /// this cell?
             bool referenceAdded (const QModelIndex& parent, int start, int end);
 
-            void pathgridAdded(const CSMWorld::Pathgrid& pathgrid);
+            void pathgridModified();
 
             void pathgridRemoved();
-
-            void pathgridDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
-            void pathgridRowRemoved(const QModelIndex& parent, int start, int end);
-
-            void pathgridRowAdded(const QModelIndex& parent, int start, int end);
 
             void setSelection (int elementMask, Selection mode);
 

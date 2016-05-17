@@ -280,38 +280,29 @@ void CSVRender::PagedWorldspaceWidget::pathgridDataChanged (const QModelIndex& t
 {
     const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
 
+    int rowStart = -1;
+    int rowEnd = -1;
+
     if (topLeft.parent().isValid())
     {
-        int row = topLeft.parent().row();
-
-        const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
-        CSMWorld::CellCoordinates coords = CSMWorld::CellCoordinates(pathgrid.mData.mX, pathgrid.mData.mY);
-
-        std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
-        if (searchResult != mCells.end())
-        {
-            searchResult->second->pathgridDataChanged(topLeft, bottomRight);
-            flagAsModified();
-        }
+        rowStart = topLeft.parent().row();
+        rowEnd = bottomRight.parent().row();
     }
-}
-
-void CSVRender::PagedWorldspaceWidget::pathgridRemoved (const QModelIndex& parent, int start, int end)
-{
-    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
-
-    if (parent.isValid())
+    else
     {
-        // Pathgrid data was modified
-        int row = parent.row();
+        rowStart = topLeft.row();
+        rowEnd = bottomRight.row();
+    }
 
+    for (int row = rowStart; row <= rowEnd; ++row)
+    {
         const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
         CSMWorld::CellCoordinates coords = CSMWorld::CellCoordinates(pathgrid.mData.mX, pathgrid.mData.mY);
 
         std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
         if (searchResult != mCells.end())
         {
-            searchResult->second->pathgridRowRemoved(parent, start, end);
+            searchResult->second->pathgridModified();
             flagAsModified();
         }
     }
@@ -341,11 +332,10 @@ void CSVRender::PagedWorldspaceWidget::pathgridAboutToBeRemoved (const QModelInd
 
 void CSVRender::PagedWorldspaceWidget::pathgridAdded(const QModelIndex& parent, int start, int end)
 {
-    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
+   const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
 
     if (!parent.isValid())
     {
-        // Pathgrid added theoretically, unable to test until it is possible to add pathgrids
         for (int row = start; row <= end; ++row)
         {
             const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
@@ -354,24 +344,9 @@ void CSVRender::PagedWorldspaceWidget::pathgridAdded(const QModelIndex& parent, 
             std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
             if (searchResult != mCells.end())
             {
-                searchResult->second->pathgridAdded(pathgrid);
+                searchResult->second->pathgridModified();
                 flagAsModified();
             }
-        }
-    }
-    else
-    {
-        // Pathgrid data was modified
-        int row = parent.row();
-
-        const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
-        CSMWorld::CellCoordinates coords = CSMWorld::CellCoordinates(pathgrid.mData.mX, pathgrid.mData.mY);
-
-        std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
-        if (searchResult != mCells.end())
-        {
-            searchResult->second->pathgridRowAdded(parent, start, end);
-            flagAsModified();
         }
     }
 }

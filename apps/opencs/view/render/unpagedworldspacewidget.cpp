@@ -212,32 +212,28 @@ void CSVRender::UnpagedWorldspaceWidget::pathgridDataChanged (const QModelIndex&
 {
     const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
 
+    int rowStart = -1;
+    int rowEnd = -1;
+
     if (topLeft.parent().isValid())
     {
-        int row = topLeft.parent().row();
-
-        const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
-        if (mCellId == pathgrid.mId)
-        {
-            mCell->pathgridDataChanged(topLeft, bottomRight);
-            flagAsModified();
-        }
+        rowStart = topLeft.parent().row();
+        rowEnd = bottomRight.parent().row();
     }
-}
+    else
+    {
+        rowStart = topLeft.row();
+        rowEnd = bottomRight.row();
+    }
 
-void CSVRender::UnpagedWorldspaceWidget::pathgridRemoved (const QModelIndex& parent, int start, int end)
-{
-    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
-
-    if (parent.isValid()){
-        // Pathgrid data was modified
-        int row = parent.row();
-
+    for (int row = rowStart; row <= rowEnd; ++row)
+    {
         const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
         if (mCellId == pathgrid.mId)
         {
-            mCell->pathgridRowRemoved(parent, start, end);
+            mCell->pathgridModified();
             flagAsModified();
+            return;
         }
     }
 }
@@ -256,6 +252,7 @@ void CSVRender::UnpagedWorldspaceWidget::pathgridAboutToBeRemoved (const QModelI
             {
                 mCell->pathgridRemoved();
                 flagAsModified();
+                return;
             }
         }
     }
@@ -267,27 +264,15 @@ void CSVRender::UnpagedWorldspaceWidget::pathgridAdded (const QModelIndex& paren
 
     if (!parent.isValid())
     {
-        // Pathgrid added theoretically, unable to test until it is possible to add pathgrids
         for (int row = start; row <= end; ++row)
         {
             const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
             if (mCellId == pathgrid.mId)
             {
-                mCell->pathgridAdded(pathgrid);
+                mCell->pathgridModified();
                 flagAsModified();
+                return;
             }
-        }
-    }
-    else
-    {
-        // Pathgrid data was modified
-        int row = parent.row();
-
-        const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
-        if (mCellId == pathgrid.mId)
-        {
-            mCell->pathgridRowAdded(parent, start, end);
-            flagAsModified();
         }
     }
 }

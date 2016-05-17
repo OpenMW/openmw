@@ -83,6 +83,9 @@ namespace CSVRender
             osg::ref_ptr<PathgridTag> getTag() const;
 
             void recreateGeometry();
+            void removeGeometry();
+
+            void update();
 
         private:
 
@@ -96,6 +99,9 @@ namespace CSVRender
             bool mConnectionIndicator;
             unsigned short mConnectionNode;
 
+            bool mChangeGeometry;
+            bool mRemoveGeometry;
+
             osg::Group* mParent;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
             osg::ref_ptr<osg::PositionAttitudeTransform> mSelectedNode;
@@ -106,8 +112,9 @@ namespace CSVRender
 
             osg::ref_ptr<PathgridTag> mTag;
 
-            void recreateSelectedGeometry();
-            void recreateSelectedGeometry(const CSMWorld::Pathgrid& source);
+            void createGeometry();
+            void createSelectedGeometry();
+            void createSelectedGeometry(const CSMWorld::Pathgrid& source);
             void removePathgridGeometry();
             void removeSelectedGeometry();
 

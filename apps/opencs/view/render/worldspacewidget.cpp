@@ -63,8 +63,6 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
 
     connect (pathgrids, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
         this, SLOT (pathgridDataChanged (const QModelIndex&, const QModelIndex&)));
-    connect (pathgrids, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
-        this, SLOT (pathgridRemoved (const QModelIndex&, int, int)));
     connect (pathgrids, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (pathgridAboutToBeRemoved (const QModelIndex&, int, int)));
     connect (pathgrids, SIGNAL (rowsInserted (const QModelIndex&, int, int)),

@@ -266,29 +266,14 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
     return addObjects (start, end);
 }
 
-void CSVRender::Cell::pathgridAdded(const CSMWorld::Pathgrid& pathgrid)
+void CSVRender::Cell::pathgridModified()
 {
     mPathgrid->recreateGeometry();
 }
 
 void CSVRender::Cell::pathgridRemoved()
 {
-    mPathgrid->recreateGeometry();
-}
-
-void CSVRender::Cell::pathgridDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
-{
-    mPathgrid->recreateGeometry();
-}
-
-void CSVRender::Cell::pathgridRowRemoved(const QModelIndex& parent, int start, int end)
-{
-    mPathgrid->recreateGeometry();
-}
-
-void CSVRender::Cell::pathgridRowAdded(const QModelIndex& parent, int start, int end)
-{
-    mPathgrid->recreateGeometry();
+    mPathgrid->removeGeometry();
 }
 
 void CSVRender::Cell::setSelection (int elementMask, Selection mode)

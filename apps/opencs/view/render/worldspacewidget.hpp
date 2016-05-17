@@ -246,8 +246,6 @@ namespace CSVRender
 
             virtual void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight) = 0;
 
-            virtual void pathgridRemoved (const QModelIndex& parent, int start, int end) = 0;
-
             virtual void pathgridAboutToBeRemoved (const QModelIndex& parent, int start, int end) = 0;
 
             virtual void pathgridAdded (const QModelIndex& parent, int start, int end) = 0;

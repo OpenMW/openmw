@@ -18,6 +18,17 @@
 
 namespace CSVRender
 {
+    class PathgridNodeCallback : public osg::NodeCallback
+    {
+        public:
+
+            virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+            {
+                PathgridTag* tag = dynamic_cast<PathgridTag*>(node->getUserData());
+                tag->getPathgrid()->update();
+            }
+    };
+
     PathgridTag::PathgridTag(Pathgrid* pathgrid)
         : TagBase(Mask_Pathgrid), mPathgrid(pathgrid)
     {
@@ -49,6 +60,8 @@ namespace CSVRender
         , mInterior(false)
         , mConnectionIndicator(false)
         , mConnectionNode(0)
+        , mChangeGeometry(true)
+        , mRemoveGeometry(false)
         , mParent(parent)
         , mPathgridGeometry(0)
         , mSelectedGeometry(0)
@@ -59,6 +72,7 @@ namespace CSVRender
         mBaseNode = new osg::PositionAttitudeTransform ();
         mBaseNode->setPosition(osg::Vec3f(mCoords.getX() * CoordScalar, mCoords.getY() * CoordScalar, 0.f));
         mBaseNode->setUserData(mTag);
+        mBaseNode->setUpdateCallback(new PathgridNodeCallback());
         mBaseNode->setNodeMask(Mask_Pathgrid);
         mParent->addChild(mBaseNode);
 
@@ -116,7 +130,7 @@ namespace CSVRender
             for (unsigned short i = 0; i < static_cast<unsigned short>(source->mPoints.size()); ++i)
                 mSelected.push_back(i);
 
-            recreateSelectedGeometry(*source);
+            createSelectedGeometry(*source);
         }
         else
         {
@@ -136,7 +150,7 @@ namespace CSVRender
             mSelected.push_back(node);
         }
 
-        recreateSelectedGeometry();
+        createSelectedGeometry();
     }
 
     void Pathgrid::invertSelected()
@@ -153,7 +167,7 @@ namespace CSVRender
                     mSelected.push_back(i);
             }
 
-            recreateSelectedGeometry(*source);
+            createSelectedGeometry(*source);
         }
         else
         {
@@ -176,7 +190,7 @@ namespace CSVRender
     {
         mConnectionIndicator = true;
         mConnectionNode = node;
-        recreateSelectedGeometry();
+        createSelectedGeometry();
     }
 
     void Pathgrid::resetMove()
@@ -185,7 +199,7 @@ namespace CSVRender
         if (mConnectionIndicator)
         {
             mConnectionIndicator = false;
-            recreateSelectedGeometry();
+            createSelectedGeometry();
         }
     }
 
@@ -363,7 +377,34 @@ namespace CSVRender
 
     void Pathgrid::recreateGeometry()
     {
-        // Make new
+        mChangeGeometry = true;
+    }
+
+    void Pathgrid::removeGeometry()
+    {
+        mRemoveGeometry = true;
+
+
+    }
+
+    void Pathgrid::update()
+    {
+        if (mRemoveGeometry)
+        {
+            removePathgridGeometry();
+            removeSelectedGeometry();
+        }
+        else if (mChangeGeometry)
+        {
+            createGeometry();
+        }
+
+        mChangeGeometry = false;
+        mRemoveGeometry = false;
+    }
+
+    void Pathgrid::createGeometry()
+    {
         const CSMWorld::Pathgrid* source = getPathgridSource();
         if (source)
         {
@@ -371,21 +412,20 @@ namespace CSVRender
             mPathgridGeometry = SceneUtil::createPathgridGeometry(*source);
             mPathgridGeode->addDrawable(mPathgridGeometry);
 
-            recreateSelectedGeometry(*source);
+            createSelectedGeometry(*source);
         }
         else
         {
-            removePathgridGeometry();
-            removeSelectedGeometry();
+            removeGeometry();
         }
     }
 
-    void Pathgrid::recreateSelectedGeometry()
+    void Pathgrid::createSelectedGeometry()
     {
         const CSMWorld::Pathgrid* source = getPathgridSource();
         if (source)
         {
-            recreateSelectedGeometry(*source);
+            createSelectedGeometry(*source);
         }
         else
         {
@@ -393,7 +433,7 @@ namespace CSVRender
         }
     }
 
-    void Pathgrid::recreateSelectedGeometry(const CSMWorld::Pathgrid& source)
+    void Pathgrid::createSelectedGeometry(const CSMWorld::Pathgrid& source)
     {
         removeSelectedGeometry();
 
@@ -438,7 +478,7 @@ namespace CSVRender
     const CSMWorld::Pathgrid* Pathgrid::getPathgridSource()
     {
         int index = mPathgridCollection.searchId(mId);
-        if (index != -1)
+        if (index != -1 && !mPathgridCollection.getRecord(index).isDeleted())
         {
             return &mPathgridCollection.getRecord(index).get();
         }
