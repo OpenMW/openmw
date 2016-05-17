@@ -25,7 +25,7 @@ namespace CSMWorld
 {
     class CommandMacro;
     class Data;
-    class Pathgrid;
+    struct Pathgrid;
 }
 
 namespace CSVRender
