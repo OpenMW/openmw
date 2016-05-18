@@ -1,6 +1,7 @@
 #include "pathgridmode.hpp"
 
 #include <QMenu>
+#include <QPoint>
 
 #include <components/sceneutil/pathgridutil.hpp>
 
@@ -69,27 +70,8 @@ namespace CSVRender
 
     void PathgridMode::primaryEditPressed(const WorldspaceHitResult& hitResult)
     {
-        // Determine placement
-        osg::Vec3d position;
-
-        if (hitResult.hit)
-        {
-            position = hitResult.worldPos;
-        }
-        else
-        {
-            const double DefaultDistance = 500.f;
-
-            osg::Vec3d eye, center, up, offset;
-            getWorldspaceWidget().getCamera()->getViewMatrix().getLookAt (eye, center, up);
-
-            osg::Vec3d direction = center - eye;
-            direction.normalize();
-            position = eye + direction * DefaultDistance;
-        }
-
         // Get pathgrid cell
-        Cell* cell = getWorldspaceWidget().getCell (position);
+        Cell* cell = getWorldspaceWidget().getCell (hitResult.worldPos);
         if (cell)
         {
             // Add node
@@ -97,7 +79,7 @@ namespace CSVRender
             QString description = "Connect node to selected nodes";
 
             CSMWorld::CommandMacro macro(undoStack, description);
-            cell->getPathgrid()->applyPoint(macro, position);
+            cell->getPathgrid()->applyPoint(macro, hitResult.worldPos);
         }
     }
 
@@ -158,7 +140,7 @@ namespace CSVRender
         getWorldspaceWidget().clearSelection(Mask_Pathgrid);
     }
 
-    bool PathgridMode::primaryEditStartDrag(const WorldspaceHitResult& hit)
+    bool PathgridMode::primaryEditStartDrag(const QPoint& pos)
     {
         std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
 
@@ -170,8 +152,9 @@ namespace CSVRender
         return true;
     }
 
-    bool PathgridMode::secondaryEditStartDrag(const WorldspaceHitResult& hit)
+    bool PathgridMode::secondaryEditStartDrag(const QPoint& pos)
     {
+        WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
         if (hit.tag)
         {
             if (PathgridTag* tag = dynamic_cast<PathgridTag*>(hit.tag.get()))
@@ -187,7 +170,7 @@ namespace CSVRender
         return true;
     }
 
-    void PathgridMode::drag(int diffX, int diffY, double speedFactor)
+    void PathgridMode::drag(const QPoint& pos, int diffX, int diffY, double speedFactor)
     {
         std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
 
@@ -212,7 +195,7 @@ namespace CSVRender
         }
     }
 
-    void PathgridMode::dragCompleted(const WorldspaceHitResult& hit)
+    void PathgridMode::dragCompleted(const QPoint& pos)
     {
         if (mDragMode == DragMode_Move)
         {
@@ -231,6 +214,8 @@ namespace CSVRender
         }
         else if (mDragMode == DragMode_Edge)
         {
+            WorldspaceHitResult hit = getWorldspaceWidget().mousePick(pos, getWorldspaceWidget().getInteractionMask());
+
             if (hit.tag)
             {
                 if (PathgridTag* tag = dynamic_cast<PathgridTag*>(hit.tag.get()))

@@ -326,39 +326,64 @@ CSMDoc::Document& CSVRender::WorldspaceWidget::getDocument()
     return mDocument;
 }
 
-osg::Vec3f CSVRender::WorldspaceWidget::getIntersectionPoint (const QPoint& localPos,
-    unsigned int interactionMask, bool ignoreHidden) const
+CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick (const QPoint& localPos,
+    unsigned int interactionMask) const
 {
     // (0,0) is considered the lower left corner of an OpenGL window
     int x = localPos.x();
     int y = height() - localPos.y();
 
-    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (
-        new osgUtil::LineSegmentIntersector (osgUtil::Intersector::WINDOW, x, y));
+    // Get intersection
+    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(
+        osgUtil::Intersector::WINDOW, x, y));
 
-    intersector->setIntersectionLimit (osgUtil::LineSegmentIntersector::NO_LIMIT);
-    osgUtil::IntersectionVisitor visitor (intersector);
+    intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
+    osgUtil::IntersectionVisitor visitor(intersector);
 
-    unsigned int mask = interactionMask;
+    visitor.setTraversalMask(interactionMask);
 
-    if (ignoreHidden)
-        mask &= getVisibilityMask();
+    mView->getCamera()->accept(visitor);
 
-    visitor.setTraversalMask (mask);
-
-    mView->getCamera()->accept (visitor);
-
-    for (osgUtil::LineSegmentIntersector::Intersections::iterator iter = intersector->getIntersections().begin();
-         iter!=intersector->getIntersections().end(); ++iter)
+    // Get relevant data
+    for (osgUtil::LineSegmentIntersector::Intersections::iterator it = intersector->getIntersections().begin();
+         it != intersector->getIntersections().end(); ++it)
     {
-        // reject back-facing polygons
-        osg::Vec3f normal = osg::Matrix::transform3x3 (
-            iter->getWorldIntersectNormal(), mView->getCamera()->getViewMatrix());
+        osgUtil::LineSegmentIntersector::Intersection intersection = *it;
 
-        if (normal.z()>=0)
-            return iter->getWorldIntersectPoint();
+        // reject back-facing polygons
+        osg::Vec3f normal = intersection.getWorldIntersectNormal();
+        normal = osg::Matrix::transform3x3(normal, mView->getCamera()->getViewMatrix());
+        if (normal.z() < 0)
+            continue;
+
+        for (std::vector<osg::Node*>::iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
+        {
+            osg::Node* node = *it;
+            if (osg::ref_ptr<CSVRender::TagBase> tag = dynamic_cast<CSVRender::TagBase *>(node->getUserData()))
+            {
+                WorldspaceHitResult hit = { true, tag, 0, 0, 0, intersection.getWorldIntersectPoint() };
+                if (intersection.indexList.size() >= 3)
+                {
+                    hit.index0 = intersection.indexList[0];
+                    hit.index1 = intersection.indexList[1];
+                    hit.index2 = intersection.indexList[2];
+                }
+                return hit;
+            }
+        }
+
+        // Something untagged, probably terrain
+        WorldspaceHitResult hit = { true, 0, 0, 0, 0, intersection.getWorldIntersectPoint() };
+        if (intersection.indexList.size() >= 3)
+        {
+            hit.index0 = intersection.indexList[0];
+            hit.index1 = intersection.indexList[1];
+            hit.index2 = intersection.indexList[2];
+        }
+        return hit;
     }
 
+    // Default placement
     osg::Matrixd matrix;
     matrix.preMult (mView->getCamera()->getViewport()->computeWindowMatrix());
     matrix.preMult (mView->getCamera()->getProjectionMatrix());
@@ -368,10 +393,12 @@ osg::Vec3f CSVRender::WorldspaceWidget::getIntersectionPoint (const QPoint& loca
     osg::Vec3d start = matrix.preMult (intersector->getStart());
     osg::Vec3d end = matrix.preMult (intersector->getEnd());
 
-    osg::Vec3d direction = end-start;
+    osg::Vec3d direction = end - start;
     direction.normalize();
+    direction *= CSMPrefs::get()["Scene Drops"]["distance"].toInt();
 
-    return start + direction * CSMPrefs::get()["Scene Drops"]["distance"].toInt();
+    WorldspaceHitResult hit = { false, 0, 0, 0, 0, start + direction };
+    return hit;
 }
 
 void CSVRender::WorldspaceWidget::abortDrag()
@@ -465,63 +492,6 @@ bool CSVRender::WorldspaceWidget::storeMappingSetting (const CSMPrefs::Setting *
     return SceneWidget::storeMappingSetting(setting);
 }
 
-CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick (const QPoint& localPos)
-{
-    // (0,0) is considered the lower left corner of an OpenGL window
-    int x = localPos.x();
-    int y = height() - localPos.y();
-
-    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, x, y));
-
-    intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
-    osgUtil::IntersectionVisitor visitor(intersector);
-
-    visitor.setTraversalMask(getInteractionMask());
-
-    mView->getCamera()->accept(visitor);
-
-    for (osgUtil::LineSegmentIntersector::Intersections::iterator it = intersector->getIntersections().begin();
-         it != intersector->getIntersections().end(); ++it)
-    {
-        osgUtil::LineSegmentIntersector::Intersection intersection = *it;
-
-        // reject back-facing polygons
-        osg::Vec3f normal = intersection.getWorldIntersectNormal();
-        normal = osg::Matrix::transform3x3(normal, mView->getCamera()->getViewMatrix());
-        if (normal.z() < 0)
-            continue;
-
-        for (std::vector<osg::Node*>::iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
-        {
-            osg::Node* node = *it;
-            if (osg::ref_ptr<CSVRender::TagBase> tag = dynamic_cast<CSVRender::TagBase *>(node->getUserData()))
-            {
-                WorldspaceHitResult hit = { true, tag, 0, 0, 0, intersection.getWorldIntersectPoint() };
-                if (intersection.indexList.size() >= 3)
-                {
-                    hit.index0 = intersection.indexList[0];
-                    hit.index1 = intersection.indexList[1];
-                    hit.index2 = intersection.indexList[2];
-                }
-                return hit;
-            }
-        }
-
-        // Something untagged, probably terrain
-        WorldspaceHitResult hit = { true, 0, 0, 0, 0, intersection.getWorldIntersectPoint() };
-        if (intersection.indexList.size() >= 3)
-        {
-            hit.index0 = intersection.indexList[0];
-            hit.index1 = intersection.indexList[1];
-            hit.index2 = intersection.indexList[2];
-        }
-        return hit;
-    }
-
-    WorldspaceHitResult hit = { false, 0, 0, 0, 0, osg::Vec3d() };
-    return hit;
-}
-
 void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
 {
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
@@ -606,7 +576,7 @@ void CSVRender::WorldspaceWidget::showToolTip()
     {
         QPoint pos = QCursor::pos();
 
-        WorldspaceHitResult hit = mousePick (mapFromGlobal (pos));
+        WorldspaceHitResult hit = mousePick (mapFromGlobal (pos), getInteractionMask());
         if (hit.tag)
         {
             bool hideBasics = CSMPrefs::get()["Tooltips"]["scene-hide-basic"].isTrue();
@@ -643,22 +613,20 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 
         EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
 
-        editMode.drag (diffX, diffY, factor);
+        editMode.drag (event->pos(), diffX, diffY, factor);
     }
     else if (mDragMode=="p-edit" || mDragMode=="s-edit" || mDragMode=="p-select" || mDragMode=="s-select")
     {
-        WorldspaceHitResult hit = mousePick (event->pos());
-
         EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
 
         if (mDragMode=="p-edit")
-            mDragging = editMode.primaryEditStartDrag (hit);
+            mDragging = editMode.primaryEditStartDrag (event->pos());
         else if (mDragMode=="s-edit")
-            mDragging = editMode.secondaryEditStartDrag (hit);
+            mDragging = editMode.secondaryEditStartDrag (event->pos());
         else if (mDragMode=="p-select")
-            mDragging = editMode.primarySelectStartDrag (hit);
+            mDragging = editMode.primarySelectStartDrag (event->pos());
         else if (mDragMode=="s-select")
-            mDragging = editMode.secondarySelectStartDrag (hit);
+            mDragging = editMode.secondarySelectStartDrag (event->pos());
 
         if (mDragging)
         {
@@ -710,14 +678,13 @@ void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
         if (mDragging)
         {
             EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
-            WorldspaceHitResult hit = mousePick (event->pos());
 
-            editMode.dragCompleted(hit);
+            editMode.dragCompleted(event->pos());
             mDragging = false;
         }
         else
         {
-            WorldspaceHitResult hit = mousePick (event->pos());
+            WorldspaceHitResult hit = mousePick(event->pos(), getInteractionMask());
 
             handleMouseClick (hit, button, event->modifiers() & Qt::ShiftModifier);
         }

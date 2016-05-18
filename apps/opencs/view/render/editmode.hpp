@@ -8,6 +8,7 @@
 class QDragEnterEvent;
 class QDropEvent;
 class QDragMoveEvent;
+class QPoint;
 
 namespace CSVRender
 {
@@ -53,28 +54,28 @@ namespace CSVRender
             /// Default-implementation: ignore and return false
             ///
             /// \return Drag accepted?
-            virtual bool primaryEditStartDrag (const WorldspaceHitResult& hit);
+            virtual bool primaryEditStartDrag (const QPoint& pos);
 
             /// Default-implementation: ignore and return false
             ///
             /// \return Drag accepted?
-            virtual bool secondaryEditStartDrag (const WorldspaceHitResult& hit);
+            virtual bool secondaryEditStartDrag (const QPoint& pos);
 
             /// Default-implementation: ignore and return false
             ///
             /// \return Drag accepted?
-            virtual bool primarySelectStartDrag (const WorldspaceHitResult& hit);
+            virtual bool primarySelectStartDrag (const QPoint& pos);
 
             /// Default-implementation: ignore and return false
             ///
             /// \return Drag accepted?
-            virtual bool secondarySelectStartDrag (const WorldspaceHitResult& hit);
+            virtual bool secondarySelectStartDrag (const QPoint& pos);
 
             /// Default-implementation: ignored
-            virtual void drag (int diffX, int diffY, double speedFactor);
+            virtual void drag (const QPoint& pos, int diffX, int diffY, double speedFactor);
 
             /// Default-implementation: ignored
-            virtual void dragCompleted(const WorldspaceHitResult& hit);
+            virtual void dragCompleted(const QPoint& pos);
 
             /// Default-implementation: ignored
             ///
@@ -89,7 +90,7 @@ namespace CSVRender
             virtual void dragEnterEvent (QDragEnterEvent *event);
 
             /// Default-implementation: ignored
-            virtual void dropEvent (QDropEvent* event);
+            virtual void dropEvent (QDropEvent *event);
 
             /// Default-implementation: ignored
             virtual void dragMoveEvent (QDragMoveEvent *event);

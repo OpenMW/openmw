@@ -49,13 +49,13 @@ namespace CSVRender
 
             virtual void secondarySelectPressed (const WorldspaceHitResult& hit);
 
-            virtual bool primaryEditStartDrag (const WorldspaceHitResult& hit);
+            virtual bool primaryEditStartDrag (const QPoint& pos);
 
-            virtual bool secondaryEditStartDrag (const WorldspaceHitResult& hit);
+            virtual bool secondaryEditStartDrag (const QPoint& pos);
 
-            virtual void drag (int diffX, int diffY, double speedFactor);
+            virtual void drag (const QPoint& pos, int diffX, int diffY, double speedFactor);
 
-            virtual void dragCompleted(const WorldspaceHitResult& hit);
+            virtual void dragCompleted(const QPoint& pos);
 
             /// \note dragAborted will not be called, if the drag is aborted via changing
             /// editing mode
@@ -65,7 +65,7 @@ namespace CSVRender
 
             virtual void dragEnterEvent (QDragEnterEvent *event);
 
-            virtual void dropEvent (QDropEvent* event);
+            virtual void dropEvent (QDropEvent *event);
 
             virtual int getSubMode() const;
 

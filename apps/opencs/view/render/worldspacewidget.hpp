@@ -149,16 +149,11 @@ namespace CSVRender
             /// \param elementMask Elements to be affected by the select operation
             virtual void selectAllWithSameParentId (int elementMask) = 0;
 
-            /// Return the next intersection point with scene elements matched by
+            /// Return the next intersection with scene elements matched by
             /// \a interactionMask based on \a localPos and the camera vector.
-            /// If there is no such point, instead a point "in front" of \a localPos will be
+            /// If there is no such intersection, instead a point "in front" of \a localPos will be
             /// returned.
-            ///
-            /// \param ignoreHidden ignore elements specified in interactionMask that are
-            /// flagged as not visible.
-            osg::Vec3f getIntersectionPoint (const QPoint& localPos,
-                unsigned int interactionMask = Mask_Reference | Mask_Terrain,
-                bool ignoreHidden = false) const;
+            WorldspaceHitResult mousePick (const QPoint& localPos, unsigned int interactionMask) const;
 
             virtual std::string getCellId (const osg::Vec3f& point) const = 0;
 
@@ -224,8 +219,6 @@ namespace CSVRender
             void dropEvent(QDropEvent* event);
 
             void dragMoveEvent(QDragMoveEvent *event);
-
-            WorldspaceHitResult mousePick (const QPoint& localPos);
 
             virtual std::string getStartupInstruction() = 0;
 

@@ -2,6 +2,7 @@
 #include "instancemode.hpp"
 
 #include <QDragEnterEvent>
+#include <QPoint>
 
 #include "../../model/prefs/state.hpp"
 
@@ -145,11 +146,12 @@ void CSVRender::InstanceMode::secondarySelectPressed (const WorldspaceHitResult&
     }
 }
 
-bool CSVRender::InstanceMode::primaryEditStartDrag (const WorldspaceHitResult& hit)
+bool CSVRender::InstanceMode::primaryEditStartDrag (const QPoint& pos)
 {
     if (mDragMode!=DragMode_None || mLocked)
         return false;
 
+    WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
     if (hit.tag && CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
     {
         getWorldspaceWidget().clearSelection (Mask_Reference);
@@ -189,7 +191,7 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (const WorldspaceHitResult& h
     return true;
 }
 
-bool CSVRender::InstanceMode::secondaryEditStartDrag (const WorldspaceHitResult& hit)
+bool CSVRender::InstanceMode::secondaryEditStartDrag (const QPoint& pos)
 {
     if (mLocked)
         return false;
@@ -197,7 +199,7 @@ bool CSVRender::InstanceMode::secondaryEditStartDrag (const WorldspaceHitResult&
     return false;
 }
 
-void CSVRender::InstanceMode::drag (int diffX, int diffY, double speedFactor)
+void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, double speedFactor)
 {
     osg::Vec3f eye;
     osg::Vec3f centre;
@@ -244,7 +246,7 @@ void CSVRender::InstanceMode::drag (int diffX, int diffY, double speedFactor)
     }
 }
 
-void CSVRender::InstanceMode::dragCompleted(const WorldspaceHitResult& hit)
+void CSVRender::InstanceMode::dragCompleted(const QPoint& pos)
 {
     std::vector<osg::ref_ptr<TagBase> > selection =
         getWorldspaceWidget().getEdited (Mask_Reference);
@@ -333,9 +335,9 @@ void CSVRender::InstanceMode::dropEvent (QDropEvent* event)
         if (!mime->fromDocument (document))
             return;
 
-        osg::Vec3f insertPoint = getWorldspaceWidget().getIntersectionPoint (event->pos());
+        WorldspaceHitResult hit = getWorldspaceWidget().mousePick (event->pos(), getWorldspaceWidget().getInteractionMask());
 
-        std::string cellId = getWorldspaceWidget().getCellId (insertPoint);
+        std::string cellId = getWorldspaceWidget().getCellId (hit.worldPos);
 
         CSMWorld::IdTree& cellTable = dynamic_cast<CSMWorld::IdTree&> (
             *document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
@@ -412,11 +414,11 @@ void CSVRender::InstanceMode::dropEvent (QDropEvent* event)
                  createCommand->addValue (referencesTable.findColumnIndex (
                      CSMWorld::Columns::ColumnId_Cell), QString::fromUtf8 (cellId.c_str()));
                  createCommand->addValue (referencesTable.findColumnIndex (
-                     CSMWorld::Columns::ColumnId_PositionXPos), insertPoint.x());
+                     CSMWorld::Columns::ColumnId_PositionXPos), hit.worldPos.x());
                  createCommand->addValue (referencesTable.findColumnIndex (
-                     CSMWorld::Columns::ColumnId_PositionYPos), insertPoint.y());
+                     CSMWorld::Columns::ColumnId_PositionYPos), hit.worldPos.y());
                  createCommand->addValue (referencesTable.findColumnIndex (
-                     CSMWorld::Columns::ColumnId_PositionZPos), insertPoint.z());
+                     CSMWorld::Columns::ColumnId_PositionZPos), hit.worldPos.z());
                  createCommand->addValue (referencesTable.findColumnIndex (
                      CSMWorld::Columns::ColumnId_ReferenceableId),
                      QString::fromUtf8 (iter->getId().c_str()));
