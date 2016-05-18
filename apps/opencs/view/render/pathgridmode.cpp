@@ -156,13 +156,13 @@ namespace CSVRender
 
     void PathgridMode::drag(const QPoint& pos, int diffX, int diffY, double speedFactor)
     {
-        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
-
-        for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it != selection.end(); ++it)
+        if (mDragMode == DragMode_Move)
         {
-            if (PathgridTag* tag = dynamic_cast<PathgridTag*>(it->get()))
+            std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection(Mask_Pathgrid);
+
+            for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it != selection.end(); ++it)
             {
-                if (mDragMode == DragMode_Move)
+                if (PathgridTag* tag = dynamic_cast<PathgridTag*>(it->get()))
                 {
                     osg::Vec3d eye, center, up, offset;
                     getWorldspaceWidget().getCamera()->getViewMatrix().getLookAt (eye, center, up);
@@ -171,10 +171,26 @@ namespace CSVRender
 
                     tag->getPathgrid()->moveSelected(offset);
                 }
-                else if (mDragMode == DragMode_Edge)
+            }
+        }
+        else if (mDragMode == DragMode_Edge)
+        {
+            WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
+
+            Cell* cell = getWorldspaceWidget().getCell(hit.worldPos);
+            if (cell)
+            {
+                PathgridTag* tag = 0;
+                if (hit.tag && (tag = dynamic_cast<PathgridTag*>(hit.tag.get())) && tag->getPathgrid()->getId() == mEdgeId)
                 {
-                    // TODO Add indicator, need raytrace
+                    unsigned short node = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
+                    cell->getPathgrid()->adjustConnectionIndicator(node);
                 }
+                else
+                {
+                    cell->getPathgrid()->adjustConnectionIndicator(hit.worldPos);
+                }
+
             }
         }
     }

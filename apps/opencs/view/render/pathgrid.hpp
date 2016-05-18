@@ -69,9 +69,11 @@ namespace CSVRender
             void clearSelected();
 
             void moveSelected(const osg::Vec3d& offset);
-            void resetMove();
-
             void setupConnectionIndicator(unsigned short node);
+            void adjustConnectionIndicator(unsigned short node);
+            void adjustConnectionIndicator(const osg::Vec3d& pos);
+
+            void resetIndicators();
 
             void applyPoint(CSMWorld::CommandMacro& commands, const osg::Vec3d& worldPos);
             void applyPosition(CSMWorld::CommandMacro& commands);
@@ -109,6 +111,7 @@ namespace CSVRender
             osg::ref_ptr<osg::Geode> mSelectedGeode;
             osg::ref_ptr<osg::Geometry> mPathgridGeometry;
             osg::ref_ptr<osg::Geometry> mSelectedGeometry;
+            osg::ref_ptr<osg::Geometry> mConnectionGeometry;
 
             osg::ref_ptr<PathgridTag> mTag;
 
@@ -117,6 +120,8 @@ namespace CSVRender
             void createSelectedGeometry(const CSMWorld::Pathgrid& source);
             void removePathgridGeometry();
             void removeSelectedGeometry();
+
+            void createConnectionGeometry(const osg::Vec3f& start, const osg::Vec3f& end);
 
             const CSMWorld::Pathgrid* getPathgridSource();
 

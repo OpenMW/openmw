@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include <osg/Array>
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Group>
@@ -61,6 +62,7 @@ namespace CSVRender
         , mParent(parent)
         , mPathgridGeometry(0)
         , mSelectedGeometry(0)
+        , mConnectionGeometry(0)
         , mTag(new PathgridTag(this))
     {
         const float CoordScalar = ESM::Land::REAL_SIZE;
@@ -189,12 +191,50 @@ namespace CSVRender
         createSelectedGeometry();
     }
 
-    void Pathgrid::resetMove()
+    void Pathgrid::adjustConnectionIndicator(unsigned short node)
+    {
+        if (mConnectionIndicator)
+        {
+            const CSMWorld::Pathgrid* source = getPathgridSource();
+            if (source)
+            {
+                const CSMWorld::Pathgrid::Point& pointA = source->mPoints[mConnectionNode];
+                const CSMWorld::Pathgrid::Point& pointB = source->mPoints[node];
+
+                osg::Vec3f start = osg::Vec3f(pointA.mX, pointA.mY, pointA.mZ + SceneUtil::DiamondHalfHeight);
+                osg::Vec3f end = osg::Vec3f(pointB.mX, pointB.mY, pointB.mZ + SceneUtil::DiamondHalfHeight);
+
+                createConnectionGeometry(start, end);
+            }
+        }
+    }
+
+    void Pathgrid::adjustConnectionIndicator(const osg::Vec3d& pos)
+    {
+        if (mConnectionIndicator)
+        {
+            const CSMWorld::Pathgrid* source = getPathgridSource();
+            if (source)
+            {
+                const CSMWorld::Pathgrid::Point& point = source->mPoints[mConnectionNode];
+
+                osg::Vec3f start = osg::Vec3f(point.mX, point.mY, point.mZ + SceneUtil::DiamondHalfHeight);
+                osg::Vec3f end = pos - mBaseNode->getPosition();
+                createConnectionGeometry(start, end);
+            }
+        }
+    }
+
+    void Pathgrid::resetIndicators()
     {
         mSelectedNode->setPosition(osg::Vec3f(0,0,0));
         if (mConnectionIndicator)
         {
             mConnectionIndicator = false;
+
+            mPathgridGeode->removeDrawable(mConnectionGeometry);
+            mConnectionGeometry = 0;
+
             createSelectedGeometry();
         }
     }
@@ -379,8 +419,6 @@ namespace CSVRender
     void Pathgrid::removeGeometry()
     {
         mRemoveGeometry = true;
-
-
     }
 
     void Pathgrid::update()
@@ -469,6 +507,31 @@ namespace CSVRender
             mSelectedGeode->removeDrawable(mSelectedGeometry);
             mSelectedGeometry = 0;
         }
+    }
+
+    void Pathgrid::createConnectionGeometry(const osg::Vec3f& start, const osg::Vec3f& end)
+    {
+        if (mConnectionGeometry)
+            mPathgridGeode->removeDrawable(mConnectionGeometry);
+
+        mConnectionGeometry = new osg::Geometry();
+
+        osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(2);
+        osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(1);
+        osg::ref_ptr<osg::DrawElementsUShort> indices = new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, 2);
+
+        (*vertices)[0] = start;
+        (*vertices)[1] = end;
+        (*colors)[0] = osg::Vec4f(0.4f, 1.f, 0.4f, 1.f);
+        indices->setElement(0, 0);
+        indices->setElement(1, 1);
+
+        mConnectionGeometry->setVertexArray(vertices);
+        mConnectionGeometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+        mConnectionGeometry->addPrimitiveSet(indices);
+        mConnectionGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
+        mPathgridGeode->addDrawable(mConnectionGeometry);
     }
 
     const CSMWorld::Pathgrid* Pathgrid::getPathgridSource()

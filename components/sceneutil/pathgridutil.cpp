@@ -15,8 +15,6 @@ namespace SceneUtil
 
     const unsigned short DiamondTotalVertexCount = DiamondVertexCount + DiamondConnectorVertexCount;
 
-    const float DiamondHalfHeight = 40.f;
-    const float DiamondHalfWidth = 16.f;
     const float DiamondWireframeScalar = 1.1f;
 
     const osg::Vec3f DiamondPoints[DiamondVertexCount] =

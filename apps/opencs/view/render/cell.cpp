@@ -433,5 +433,5 @@ void CSVRender::Cell::reset (unsigned int elementMask)
             iter!=mObjects.end(); ++iter)
             iter->second->reset();
     if (elementMask & Mask_Pathgrid)
-        mPathgrid->resetMove();
+        mPathgrid->resetIndicators();
 }

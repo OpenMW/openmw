@@ -11,6 +11,9 @@ namespace ESM
 
 namespace SceneUtil
 {
+    const float DiamondHalfHeight = 40.f;
+    const float DiamondHalfWidth = 16.f;
+
     osg::ref_ptr<osg::Geometry> createPathgridGeometry(const ESM::Pathgrid& pathgrid);
 
     osg::ref_ptr<osg::Geometry> createPathgridSelectedWireframe(const ESM::Pathgrid& pathgrid,
