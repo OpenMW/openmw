@@ -1,17 +1,17 @@
-#ifndef CSV_RENDER_INSTANCE_SELECTION_MODE_H
-#define CSV_RENDER_INSTANCE_SELECTION_MODE_H
+#ifndef CSV_RENDER_PATHGRID_SELECTION_MODE_H
+#define CSV_RENDER_PATHGRID_SELECTION_MODE_H
 
 #include "selectionmode.hpp"
 
 namespace CSVRender
 {
-    class InstanceSelectionMode : public SelectionMode
+    class PathgridSelectionMode : public SelectionMode
     {
             Q_OBJECT
 
         public:
 
-            InstanceSelectionMode(CSVWidget::SceneToolbar* parent, WorldspaceWidget& worldspaceWidget);
+            PathgridSelectionMode(CSVWidget::SceneToolbar* parent, WorldspaceWidget& worldspaceWidget);
 
         protected:
 
@@ -25,13 +25,13 @@ namespace CSVRender
 
         private:
 
-            QAction* mDeleteSelection;
-            QAction* mSelectSame;
+            QAction* mRemoveSelectedNodes;
+            QAction* mRemoveSelectedEdges;
 
         private slots:
 
-            void deleteSelection();
-            void selectSame();
+            void removeSelectedNodes();
+            void removeSelectedEdges();
     };
 }
 

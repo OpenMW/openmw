@@ -1,4 +1,3 @@
-
 #include "instanceselectionmode.hpp"
 
 #include <QMenu>
@@ -10,84 +9,49 @@
 #include "worldspacewidget.hpp"
 #include "object.hpp"
 
-bool CSVRender::InstanceSelectionMode::createContextMenu (QMenu *menu)
+namespace CSVRender
 {
-    if (menu)
+    InstanceSelectionMode::InstanceSelectionMode(CSVWidget::SceneToolbar* parent, WorldspaceWidget& worldspaceWidget)
+        : SelectionMode(parent, worldspaceWidget, Mask_Reference)
     {
-        menu->addAction (mSelectAll);
-        menu->addAction (mDeselectAll);
-        menu->addAction (mSelectSame);
-        menu->addAction (mDeleteSelection);
+        mSelectSame = new QAction("Extend selection to instances with same object ID", this);
+        mDeleteSelection = new QAction("Delete selected instances", this);
+
+        connect(mSelectSame, SIGNAL(triggered()), this, SLOT(selectSame()));
+        connect(mDeleteSelection, SIGNAL(triggered()), this, SLOT(deleteSelection()));
     }
 
-    return true;
-}
-
-CSVRender::InstanceSelectionMode::InstanceSelectionMode (CSVWidget::SceneToolbar *parent,
-    WorldspaceWidget& worldspaceWidget)
-: CSVWidget::SceneToolMode (parent, "Selection Mode"), mWorldspaceWidget (worldspaceWidget)
-{
-    addButton (":placeholder", "cube-centre",
-        "Centred cube"
-        "<ul><li>Drag with primary (make instances the selection) or secondary (invert selection state) select button from the centre of the selection cube outwards</li>"
-        "<li>The selection cube is aligned to the word space axis</li>"
-        "<li>If context selection mode is enabled, a drag with primary/secondary edit not starting on an instance will have the same effect</li>"
-        "</ul>"
-        "<font color=Red>Not implemented yet</font color>");
-    addButton (":placeholder", "cube-corner",
-        "Cube corner to corner"
-        "<ul><li>Drag with primary (make instances the selection) or secondary (invert selection state) select button from one corner of the selection cube to the opposite corner</li>"
-        "<li>The selection cube is aligned to the word space axis</li>"
-        "<li>If context selection mode is enabled, a drag with primary/secondary edit not starting on an instance will have the same effect</li>"
-        "</ul>"
-        "<font color=Red>Not implemented yet</font color>");
-    addButton (":placeholder", "sphere",
-        "Centred sphere"
-        "<ul><li>Drag with primary (make instances the selection) or secondary (invert selection state) select button from the centre of the selection sphere outwards</li>"
-        "<li>If context selection mode is enabled, a drag with primary/secondary edit not starting on an instance will have the same effect</li>"
-        "</ul>"
-        "<font color=Red>Not implemented yet</font color>");
-
-    mSelectAll = new QAction ("Select all instances", this);
-    mDeselectAll = new QAction ("Clear selection", this);
-    mDeleteSelection = new QAction ("Delete selected instances", this);
-    mSelectSame = new QAction ("Extend selection to instances with same object ID", this);
-    connect (mSelectAll, SIGNAL (triggered ()), this, SLOT (selectAll()));
-    connect (mDeselectAll, SIGNAL (triggered ()), this, SLOT (clearSelection()));
-    connect (mDeleteSelection, SIGNAL (triggered ()), this, SLOT (deleteSelection()));
-    connect (mSelectSame, SIGNAL (triggered ()), this, SLOT (selectSame()));
-}
-
-void CSVRender::InstanceSelectionMode::selectAll()
-{
-    mWorldspaceWidget.selectAll (Mask_Reference);
-}
-
-void CSVRender::InstanceSelectionMode::clearSelection()
-{
-    mWorldspaceWidget.clearSelection (Mask_Reference);
-}
-
-void CSVRender::InstanceSelectionMode::deleteSelection()
-{
-    std::vector<osg::ref_ptr<TagBase> > selection =
-        mWorldspaceWidget.getSelection (Mask_Reference);
-
-    CSMWorld::IdTable& referencesTable =
-            dynamic_cast<CSMWorld::IdTable&> (*mWorldspaceWidget.getDocument().getData().
-            getTableModel (CSMWorld::UniversalId::Type_References));
-
-    for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin());
-        iter!=selection.end(); ++iter)
+    bool InstanceSelectionMode::createContextMenu(QMenu* menu)
     {
-        CSMWorld::DeleteCommand *command = new CSMWorld::DeleteCommand (referencesTable,
-            static_cast<ObjectTag *> (iter->get())->mObject->getReferenceId());
+        if (menu)
+        {
+            SelectionMode::createContextMenu(menu);
 
-        mWorldspaceWidget.getDocument().getUndoStack().push (command);
+            menu->addAction(mSelectSame);
+            menu->addAction(mDeleteSelection);
+        }
+
+        return true;
     }
-}
 
-void CSVRender::InstanceSelectionMode::selectSame()
-{
-    mWorldspaceWidget.selectAllWithSameParentId (Mask_Reference);
+    void InstanceSelectionMode::selectSame()
+    {
+        getWorldspaceWidget().selectAllWithSameParentId(Mask_Reference);
+    }
+
+    void InstanceSelectionMode::deleteSelection()
+    {
+        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection(Mask_Reference);
+
+        CSMWorld::IdTable& referencesTable = dynamic_cast<CSMWorld::IdTable&>(
+            *getWorldspaceWidget().getDocument().getData().getTableModel(CSMWorld::UniversalId::Type_References));
+
+        for (std::vector<osg::ref_ptr<TagBase> >::iterator iter = selection.begin(); iter != selection.end(); ++iter)
+        {
+            CSMWorld::DeleteCommand* command = new CSMWorld::DeleteCommand(referencesTable,
+                static_cast<ObjectTag*>(iter->get())->mObject->getReferenceId());
+
+            getWorldspaceWidget().getDocument().getUndoStack().push(command);
+        }
+    }
 }

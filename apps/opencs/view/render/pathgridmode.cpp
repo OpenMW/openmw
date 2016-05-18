@@ -10,9 +10,12 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/idtree.hpp"
 
+#include "../widget/scenetoolbar.hpp"
+
 #include "cell.hpp"
 #include "mask.hpp"
 #include "pathgrid.hpp"
+#include "pathgridselectionmode.hpp"
 #include "worldspacewidget.hpp"
 
 namespace CSVRender
@@ -22,6 +25,7 @@ namespace CSVRender
             getTooltip(), parent)
         , mDragMode(DragMode_None)
         , mFromNode(0)
+        , mSelectionMode(0)
     {
     }
 
@@ -39,33 +43,13 @@ namespace CSVRender
 
     void PathgridMode::activate(CSVWidget::SceneToolbar* toolbar)
     {
-        mSelectAll = new QAction("Select all other nodes in cell", this);
-        mInvertSelection = new QAction("Invert selection", this);
-        mClearSelection = new QAction("Clear selection", this);
-        mRemoveSelected = new QAction("Remove selected nodes", this);
-        mRemoveSelectedEdges = new QAction("Remove edges between selected nodes", this);
-
-        connect(mSelectAll, SIGNAL(triggered()), this, SLOT(selectAll()));
-        connect(mInvertSelection, SIGNAL(triggered()), this, SLOT(invertSelection()));
-        connect(mClearSelection, SIGNAL(triggered()), this, SLOT(clearSelection()));
-        connect(mRemoveSelected, SIGNAL(triggered()), this, SLOT(removeSelected()));
-        connect(mRemoveSelectedEdges, SIGNAL(triggered()), this, SLOT(removeSelectedEdges()));
-
-        EditMode::activate(toolbar);
-    }
-
-    bool PathgridMode::createContextMenu(QMenu* menu)
-    {
-        if (menu)
+        if (!mSelectionMode)
         {
-            menu->addAction(mSelectAll);
-            menu->addAction(mInvertSelection);
-            menu->addAction(mClearSelection);
-            menu->addAction(mRemoveSelected);
-            menu->addAction(mRemoveSelectedEdges);
+            mSelectionMode = new PathgridSelectionMode(toolbar, getWorldspaceWidget());
         }
 
-        return true;
+        EditMode::activate(toolbar);
+        toolbar->addTool(mSelectionMode);
     }
 
     void PathgridMode::primaryEditPressed(const WorldspaceHitResult& hitResult)
@@ -244,55 +228,5 @@ namespace CSVRender
     void PathgridMode::dragAborted()
     {
         getWorldspaceWidget().reset(Mask_Pathgrid);
-    }
-
-    void PathgridMode::selectAll()
-    {
-        // Select rest of nodes in selected cell
-        getWorldspaceWidget().selectAll(Mask_Pathgrid);
-    }
-
-    void PathgridMode::invertSelection()
-    {
-        getWorldspaceWidget().invertSelection(Mask_Pathgrid);
-    }
-
-    void PathgridMode::clearSelection()
-    {
-        getWorldspaceWidget().clearSelection(Mask_Pathgrid);
-    }
-
-    void PathgridMode::removeSelected()
-    {
-        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
-
-        for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it != selection.end(); ++it)
-        {
-            if (PathgridTag* tag = dynamic_cast<PathgridTag*>(it->get()))
-            {
-                QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
-                QString description = "Remove selected nodes";
-
-                CSMWorld::CommandMacro macro(undoStack, description);
-                tag->getPathgrid()->applyRemoveNodes(macro);
-            }
-        }
-    }
-
-    void PathgridMode::removeSelectedEdges()
-    {
-        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
-
-        for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it != selection.end(); ++it)
-        {
-            if (PathgridTag* tag = dynamic_cast<PathgridTag*>(it->get()))
-            {
-                QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
-                QString description = "Remove edges between selected nodes";
-
-                CSMWorld::CommandMacro macro(undoStack, description);
-                tag->getPathgrid()->applyRemoveEdges(macro);
-            }
-        }
     }
 }

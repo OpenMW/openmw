@@ -86,7 +86,7 @@ opencs_units (view/widget
 opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
     previewwidget editmode instancemode instanceselectionmode instancemovemode
-    orbitcameramode pathgridmode
+    orbitcameramode pathgridmode selectionmode pathgridselectionmode
     )
 
 opencs_units_noqt (view/render
