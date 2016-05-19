@@ -10,6 +10,8 @@
 #include <components/esm/loadglob.hpp>
 #include <components/esm/cellref.hpp>
 
+#include <components/resource/scenemanager.hpp>
+
 #include "idtable.hpp"
 #include "idtree.hpp"
 #include "columnimp.hpp"
@@ -59,11 +61,13 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
     return number;
 }
 
-CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager, const Fallback::Map* fallback)
+CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
   mResourcesManager (resourcesManager), mFallbackMap(fallback),
   mReader (0), mDialogue (0), mReaderIndex(0), mResourceSystem(new Resource::ResourceSystem(resourcesManager.getVFS()))
 {
+    mResourceSystem->getSceneManager()->setShaderPath((resDir / "shaders").string());
+
     int index = 0;
 
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);

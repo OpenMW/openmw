@@ -138,7 +138,7 @@ namespace CSMWorld
 
         public:
 
-            Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager, const Fallback::Map* fallback);
+            Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir);
 
             virtual ~Data();
 
