@@ -8,9 +8,11 @@
 #include <QAbstractItemModel>
 #include <QAbstractProxyModel>
 
+#include "idcollection.hpp"
 #include "idtable.hpp"
 #include "idtree.hpp"
 #include "nestedtablewrapper.hpp"
+#include "pathgrid.hpp"
 
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
                                         const QVariant& new_, QUndoCommand* parent)
@@ -235,6 +237,35 @@ void CSMWorld::CloneCommand::undo()
     mModel.removeRow (mModel.getModelIndex (mId, 0).row());
 }
 
+CSMWorld::CreatePathgridCommand::CreatePathgridCommand(IdTable& model, const std::string& id, QUndoCommand *parent)
+    : CreateCommand(model, id, parent)
+{
+    setType(UniversalId::Type_Pathgrid);
+}
+
+void CSMWorld::CreatePathgridCommand::redo()
+{
+    CreateCommand::redo();
+
+    Record<Pathgrid> record = static_cast<const Record<Pathgrid>& >(mModel.getRecord(mId));
+    record.get().blank();
+    record.get().mCell = mId;
+
+    if (!mId.empty() && mId[0]=='#')
+    {
+        int x, y;
+        char ignore;
+
+        std::istringstream stream (mId);
+        if (stream >> ignore >> x >> y)
+        {
+            record.get().mData.mX = x;
+            record.get().mData.mY = y;
+        }
+    }
+
+    mModel.setRecord(mId, record, mType);
+}
 
 CSMWorld::UpdateCellCommand::UpdateCellCommand (IdTable& model, int row, QUndoCommand *parent)
 : QUndoCommand (parent), mModel (model), mRow (row)

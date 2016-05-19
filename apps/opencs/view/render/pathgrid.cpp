@@ -241,6 +241,10 @@ namespace CSVRender
 
     void Pathgrid::applyPoint(CSMWorld::CommandMacro& commands, const osg::Vec3d& worldPos)
     {
+
+        CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
+                CSMWorld::UniversalId::Type_Pathgrids));
+
         const CSMWorld::Pathgrid* source = getPathgridSource();
         if (source)
         {
@@ -249,9 +253,6 @@ namespace CSVRender
             int posX = clampToCell(static_cast<int>(localCoords.x()));
             int posY = clampToCell(static_cast<int>(localCoords.y()));
             int posZ = clampToCell(static_cast<int>(localCoords.z()));
-
-            CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
-                CSMWorld::UniversalId::Type_Pathgrids));
 
             int recordIndex = mPathgridCollection.getIndex (mId);
             int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridPoints);
@@ -269,14 +270,15 @@ namespace CSVRender
             int row = static_cast<int>(source->mPoints.size());
 
             // Add node
-            commands.push (new CSMWorld::AddNestedCommand(*model, mId, row, parentColumn));
-            commands.push (new CSMWorld::ModifyCommand(*model, model->index(row, posXColumn, parent), posX));
-            commands.push (new CSMWorld::ModifyCommand(*model, model->index(row, posYColumn, parent), posY));
-            commands.push (new CSMWorld::ModifyCommand(*model, model->index(row, posZColumn, parent), posZ));
+            commands.push(new CSMWorld::AddNestedCommand(*model, mId, row, parentColumn));
+            commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posXColumn, parent), posX));
+            commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posYColumn, parent), posY));
+            commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posZColumn, parent), posZ));
         }
         else
         {
-            // Create pathgrid TODO
+            CSMWorld::CreatePathgridCommand* createCmd = new CSMWorld::CreatePathgridCommand(*model, mId);
+            commands.push(createCmd);
         }
     }
 
