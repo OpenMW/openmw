@@ -10,6 +10,7 @@
 #include <osg/Material>
 
 #include <osgParticle/ParticleSystem>
+#include <osgParticle/ParticleProcessor>
 
 #include <components/nifosg/nifloader.hpp>
 
@@ -46,6 +47,44 @@
 
 namespace
 {
+
+    /// Removes all particle systems and related nodes in a subgraph.
+    class RemoveParticlesVisitor : public osg::NodeVisitor
+    {
+    public:
+        RemoveParticlesVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        { }
+
+        virtual void apply(osg::Node &node)
+        {
+            if (dynamic_cast<osgParticle::ParticleProcessor*>(&node))
+                mToRemove.push_back(&node);
+
+            traverse(node);
+        }
+
+        virtual void apply(osg::Drawable& drw)
+        {
+            if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
+                mToRemove.push_back(partsys);
+        }
+
+        void remove()
+        {
+            for (std::vector<osg::ref_ptr<osg::Node> >::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
+            {
+                // FIXME: a Drawable might have more than one parent
+                osg::Node* node = *it;
+                if (node->getNumParents())
+                    node->getParent(0)->removeChild(node);
+            }
+            mToRemove.clear();
+        }
+
+    private:
+        std::vector<osg::ref_ptr<osg::Node> > mToRemove;
+    };
 
     class GlowUpdater : public SceneUtil::StateSetUpdater
     {
@@ -1439,6 +1478,13 @@ namespace MWRender
         }
         if (ptr.getTypeName() == typeid(ESM::Light).name() && allowLight)
             addExtraLight(getOrCreateObjectRoot(), ptr.get<ESM::Light>()->mBase);
+
+        if (!allowLight)
+        {
+            RemoveParticlesVisitor visitor;
+            mObjectRoot->accept(visitor);
+            visitor.remove();
+        }
     }
 
     Animation::AnimState::~AnimState()

@@ -5,12 +5,6 @@
 #include <osg/Group>
 #include <osg/UserDataContainer>
 
-#include <osgParticle/ParticleSystem>
-#include <osgParticle/ParticleProcessor>
-
-#include <components/resource/scenemanager.hpp>
-
-#include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 
@@ -21,49 +15,6 @@
 #include "npcanimation.hpp"
 #include "creatureanimation.hpp"
 #include "vismask.hpp"
-
-namespace
-{
-
-    /// Removes all particle systems and related nodes in a subgraph.
-    class RemoveParticlesVisitor : public osg::NodeVisitor
-    {
-    public:
-        RemoveParticlesVisitor()
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-        { }
-
-        virtual void apply(osg::Node &node)
-        {
-            if (dynamic_cast<osgParticle::ParticleProcessor*>(&node))
-                mToRemove.push_back(&node);
-
-            traverse(node);
-        }
-
-        virtual void apply(osg::Drawable& drw)
-        {
-            if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
-                mToRemove.push_back(partsys);
-        }
-
-        void remove()
-        {
-            for (std::vector<osg::ref_ptr<osg::Node> >::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
-            {
-                // FIXME: a Drawable might have more than one parent
-                osg::Node* node = *it;
-                if (node->getNumParents())
-                    node->getParent(0)->removeChild(node);
-            }
-            mToRemove.clear();
-        }
-
-    private:
-        std::vector<osg::ref_ptr<osg::Node> > mToRemove;
-    };
-
-}
 
 
 namespace MWRender
@@ -123,13 +74,6 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
     insertBegin(ptr);
 
     std::auto_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
-
-    if (!allowLight)
-    {
-        RemoveParticlesVisitor visitor;
-        anim->getObjectRoot()->accept(visitor);
-        visitor.remove();
-    }
 
     mObjects.insert(std::make_pair(ptr, anim.release()));
 }
