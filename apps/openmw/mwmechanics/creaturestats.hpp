@@ -62,8 +62,8 @@ namespace MWMechanics
 
         int mActorId;
 
-        // The index of the death animation that was played
-        unsigned char mDeathAnimation;
+        // The index of the death animation that was played, or -1 if none played
+        signed char mDeathAnimation;
 
         MWWorld::TimeStamp mTimeOfDeath;
 
@@ -258,8 +258,8 @@ namespace MWMechanics
         void setGoldPool(int pool);
         int getGoldPool() const;
 
-        unsigned char getDeathAnimation() const;
-        void setDeathAnimation(unsigned char index);
+        signed char getDeathAnimation() const; // -1 means not decided
+        void setDeathAnimation(signed char index);
 
         MWWorld::TimeStamp getTimeOfDeath() const;
 

@@ -629,6 +629,13 @@ void CharacterController::playDeath(float startpoint, CharacterState death)
                     false, 1.0f, "start", "stop", startpoint, 0);
 }
 
+CharacterState CharacterController::chooseRandomDeathState()
+{
+    int selected=0;
+    chooseRandomGroup("death", &selected);
+    return static_cast<CharacterState>(CharState_Death1 + (selected-1));
+}
+
 void CharacterController::playRandomDeath(float startpoint)
 {
     if (mPtr == getPlayer())
@@ -652,9 +659,7 @@ void CharacterController::playRandomDeath(float startpoint)
     }
     else
     {
-        int selected=0;
-        chooseRandomGroup("death", &selected);
-        mDeathState = static_cast<CharacterState>(CharState_Death1 + (selected-1));
+        mDeathState = chooseRandomDeathState();
     }
     playDeath(startpoint, mDeathState);
 }
@@ -716,7 +721,12 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         {
             // Set the death state, but don't play it yet
             // We will play it in the first frame, but only if no script set the skipAnim flag
-            mDeathState = static_cast<CharacterState>(CharState_Death1 + mPtr.getClass().getCreatureStats(mPtr).getDeathAnimation());
+            signed char deathanim = mPtr.getClass().getCreatureStats(mPtr).getDeathAnimation();
+            if (deathanim == -1)
+                mDeathState = chooseRandomDeathState();
+            else
+                mDeathState = static_cast<CharacterState>(CharState_Death1 + deathanim);
+
             mFloatToSurface = false;
         }
     }

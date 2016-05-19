@@ -84,7 +84,7 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mActorId = -1;
     esm.getHNOT (mActorId, "ACID");
 
-    mDeathAnimation = 0;
+    mDeathAnimation = -1;
     esm.getHNOT (mDeathAnimation, "DANM");
 
     mTimeOfDeath.mDay = 0;
@@ -194,7 +194,7 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mActorId != -1)
         esm.writeHNT ("ACID", mActorId);
 
-    if (mDeathAnimation)
+    if (mDeathAnimation != -1)
         esm.writeHNT ("DANM", mDeathAnimation);
 
     if (mTimeOfDeath.mHour != 0 && mTimeOfDeath.mDay != 0)
@@ -247,6 +247,6 @@ void ESM::CreatureStats::blank()
     mFallHeight = 0.f;
     mRecalcDynamicStats = false;
     mDrawState = 0;
-    mDeathAnimation = 0;
+    mDeathAnimation = -1;
     mLevel = 1;
 }

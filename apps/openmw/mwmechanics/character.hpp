@@ -207,6 +207,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     void updateMagicEffects();
 
     void playDeath(float startpoint, CharacterState death);
+    CharacterState chooseRandomDeathState();
     void playRandomDeath(float startpoint = 0.0f);
 
     /// choose a random animation group with \a prefix and numeric suffix

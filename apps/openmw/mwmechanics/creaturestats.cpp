@@ -22,7 +22,7 @@ namespace MWMechanics
           mKnockdown(false), mKnockdownOneFrame(false), mKnockdownOverOneFrame(false),
           mHitRecovery(false), mBlock(false), mMovementFlags(0),
           mFallHeight(0), mRecalcMagicka(false), mLastRestock(0,0), mGoldPool(0), mActorId(-1),
-          mDeathAnimation(0), mTimeOfDeath(), mLevel (0)
+          mDeathAnimation(-1), mTimeOfDeath(), mLevel (0)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -617,12 +617,12 @@ namespace MWMechanics
         esm.getHNT(sActorId, "COUN");
     }
 
-    unsigned char CreatureStats::getDeathAnimation() const
+    signed char CreatureStats::getDeathAnimation() const
     {
         return mDeathAnimation;
     }
 
-    void CreatureStats::setDeathAnimation(unsigned char index)
+    void CreatureStats::setDeathAnimation(signed char index)
     {
         mDeathAnimation = index;
     }
