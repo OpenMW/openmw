@@ -270,7 +270,7 @@ protected:
      */
     void resetActiveGroups();
 
-    size_t detectBlendMask(osg::Node* node);
+    size_t detectBlendMask(const osg::Node* node) const;
 
     /* Updates the position of the accum root node for the given time, and
      * returns the wanted movement vector from the previous time. */
@@ -315,7 +315,7 @@ protected:
      */
     virtual void addControllers();
 
-    osg::Vec4f getEnchantmentColor(MWWorld::Ptr item);
+    osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
 
     void addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor);
 
@@ -327,7 +327,7 @@ public:
     Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem);
     virtual ~Animation();
 
-    MWWorld::Ptr getPtr();
+    MWWorld::ConstPtr getPtr() const;
 
     /// Set active flag on the object skeleton, if one exists.
     /// @see SceneUtil::Skeleton::setActive
@@ -349,11 +349,11 @@ public:
      */
     void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", std::string texture = "");
     void removeEffect (int effectId);
-    void getLoopingEffects (std::vector<int>& out);
+    void getLoopingEffects (std::vector<int>& out) const;
 
     virtual void updatePtr(const MWWorld::Ptr &ptr);
 
-    bool hasAnimation(const std::string &anim);
+    bool hasAnimation(const std::string &anim) const;
 
     // Specifies the axis' to accumulate on. Non-accumulated axis will just
     // move visually, but not affect the actual movement. Each x/y/z value

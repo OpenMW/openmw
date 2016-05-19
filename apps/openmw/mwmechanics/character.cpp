@@ -227,7 +227,7 @@ public:
     { return weap.type == type; }
 };
 
-std::string CharacterController::chooseRandomGroup (const std::string& prefix, int* num)
+std::string CharacterController::chooseRandomGroup (const std::string& prefix, int* num) const
 {
     int numAnims=0;
     while (mAnimation->hasAnimation(prefix + toString(numAnims+1)))
@@ -629,7 +629,7 @@ void CharacterController::playDeath(float startpoint, CharacterState death)
                     false, 1.0f, "start", "stop", startpoint, 0);
 }
 
-CharacterState CharacterController::chooseRandomDeathState()
+CharacterState CharacterController::chooseRandomDeathState() const
 {
     int selected=0;
     chooseRandomGroup("death", &selected);

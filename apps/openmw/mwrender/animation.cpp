@@ -259,7 +259,7 @@ namespace MWRender
 
         ControllerMap mControllerMap[Animation::sNumBlendMasks];
 
-        const std::multimap<float, std::string>& getTextKeys();
+        const std::multimap<float, std::string>& getTextKeys() const;
     };
 
     class ResetAccumRootCallback : public osg::NodeCallback
@@ -314,7 +314,7 @@ namespace MWRender
             mInsert->removeChild(mObjectRoot);
     }
 
-    MWWorld::Ptr Animation::getPtr()
+    MWWorld::ConstPtr Animation::getPtr() const
     {
         return mPtr;
     }
@@ -338,7 +338,7 @@ namespace MWRender
             mResetAccumRootCallback->setAccumulate(mAccumulate);
     }
 
-    size_t Animation::detectBlendMask(osg::Node* node)
+    size_t Animation::detectBlendMask(const osg::Node* node) const
     {
         static const char sBlendMaskRoots[sNumBlendMasks][32] = {
             "", /* Lower body / character root */
@@ -364,7 +364,7 @@ namespace MWRender
         return 0;
     }
 
-    const std::multimap<float, std::string> &Animation::AnimSource::getTextKeys()
+    const std::multimap<float, std::string> &Animation::AnimSource::getTextKeys() const
     {
         return mKeyframes->mTextKeys;
     }
@@ -441,7 +441,7 @@ namespace MWRender
         mAnimSources.clear();
     }
 
-    bool Animation::hasAnimation(const std::string &anim)
+    bool Animation::hasAnimation(const std::string &anim) const
     {
         AnimSourceList::const_iterator iter(mAnimSources.begin());
         for(;iter != mAnimSources.end();++iter)
@@ -1098,7 +1098,7 @@ namespace MWRender
     }
 
     // TODO: Should not be here
-    osg::Vec4f Animation::getEnchantmentColor(MWWorld::Ptr item)
+    osg::Vec4f Animation::getEnchantmentColor(const MWWorld::ConstPtr& item) const
     {
         osg::Vec4f result(1,1,1,1);
         std::string enchantmentName = item.getClass().getEnchantment(item);
@@ -1198,9 +1198,9 @@ namespace MWRender
         }
     }
 
-    void Animation::getLoopingEffects(std::vector<int> &out)
+    void Animation::getLoopingEffects(std::vector<int> &out) const
     {
-        for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+        for (std::vector<EffectParams>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
             if (it->mLoop)
                 out.push_back(it->mEffectId);

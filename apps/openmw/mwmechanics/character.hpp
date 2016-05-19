@@ -207,12 +207,12 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     void updateMagicEffects();
 
     void playDeath(float startpoint, CharacterState death);
-    CharacterState chooseRandomDeathState();
+    CharacterState chooseRandomDeathState() const;
     void playRandomDeath(float startpoint = 0.0f);
 
     /// choose a random animation group with \a prefix and numeric suffix
     /// @param num if non-NULL, the chosen animation number will be written here
-    std::string chooseRandomGroup (const std::string& prefix, int* num = NULL);
+    std::string chooseRandomGroup (const std::string& prefix, int* num = NULL) const;
 
     bool updateCarriedLeftVisible(WeaponType weaptype) const;
 
