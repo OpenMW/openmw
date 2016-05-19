@@ -1479,7 +1479,7 @@ namespace MWRender
         if (ptr.getTypeName() == typeid(ESM::Light).name() && allowLight)
             addExtraLight(getOrCreateObjectRoot(), ptr.get<ESM::Light>()->mBase);
 
-        if (!allowLight)
+        if (!allowLight && mObjectRoot)
         {
             RemoveParticlesVisitor visitor;
             mObjectRoot->accept(visitor);
