@@ -60,7 +60,7 @@ namespace CSVRender
         {
             // Add node
             QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
-            QString description = "Connect node to selected nodes";
+            QString description = "Add node";
 
             CSMWorld::CommandMacro macro(undoStack, description);
             cell->getPathgrid()->applyPoint(macro, hitResult.worldPos);

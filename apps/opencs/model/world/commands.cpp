@@ -8,6 +8,7 @@
 #include <QAbstractItemModel>
 #include <QAbstractProxyModel>
 
+#include "cellcoordinates.hpp"
 #include "idcollection.hpp"
 #include "idtable.hpp"
 #include "idtree.hpp"
@@ -251,17 +252,11 @@ void CSMWorld::CreatePathgridCommand::redo()
     record.get().blank();
     record.get().mCell = mId;
 
-    if (!mId.empty() && mId[0]=='#')
+    std::pair<CellCoordinates, bool> coords = CellCoordinates::fromId(mId);
+    if (coords.second)
     {
-        int x, y;
-        char ignore;
-
-        std::istringstream stream (mId);
-        if (stream >> ignore >> x >> y)
-        {
-            record.get().mData.mX = x;
-            record.get().mData.mY = y;
-        }
+        record.get().mData.mX = coords.first.getX();
+        record.get().mData.mY = coords.first.getY();
     }
 
     mModel.setRecord(mId, record, mType);
