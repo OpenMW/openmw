@@ -17,7 +17,13 @@
 
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
                                         const QVariant& new_, QUndoCommand* parent)
-    : QUndoCommand (parent), mModel (&model), mIndex (index), mNew (new_), mHasRecordState(false), mOldRecordState(CSMWorld::RecordBase::State_BaseOnly)
+    : QUndoCommand (parent)
+    , mModel (&model)
+    , mIndex (index)
+    , mNew (new_)
+    , mHasRecordState(false)
+    , mOldRecordState(CSMWorld::RecordBase::State_BaseOnly)
+    , mModifyNestedCommand(0)
 {
     if (QAbstractProxyModel *proxy = dynamic_cast<QAbstractProxyModel *> (&model))
     {
@@ -28,40 +34,57 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
 
     if (mIndex.parent().isValid())
     {
-        setText ("Modify " + dynamic_cast<CSMWorld::IdTree*>(mModel)->nestedHeaderData (
-                    mIndex.parent().column(), mIndex.column(), Qt::Horizontal, Qt::DisplayRole).toString());
+        IdTree& tree = static_cast<CSMWorld::IdTree&>(*mModel);
+
+        mModifyNestedCommand = new ModifyNestedCommand(tree, mIndex, new_, this);
+        setText(mModifyNestedCommand->text());
     }
     else
     {
         setText ("Modify " + mModel->headerData (mIndex.column(), Qt::Horizontal, Qt::DisplayRole).toString());
-    }
 
-    // Remember record state before the modification
-    if (CSMWorld::IdTable *table = dynamic_cast<IdTable *>(mModel))
-    {
-        mHasRecordState = true;
-        int stateColumnIndex = table->findColumnIndex(Columns::ColumnId_Modification);
-
-        int rowIndex = mIndex.row();
-        if (mIndex.parent().isValid())
+        // Remember record state before the modification
+        if (CSMWorld::IdTable *table = dynamic_cast<IdTable *>(mModel))
         {
-            rowIndex = mIndex.parent().row();
-        }
+            mHasRecordState = true;
+            int stateColumnIndex = table->findColumnIndex(Columns::ColumnId_Modification);
 
-        mRecordStateIndex = table->index(rowIndex, stateColumnIndex);
-        mOldRecordState = static_cast<CSMWorld::RecordBase::State>(table->data(mRecordStateIndex).toInt());
+            int rowIndex = mIndex.row();
+            if (mIndex.parent().isValid())
+            {
+                rowIndex = mIndex.parent().row();
+            }
+
+            mRecordStateIndex = table->index(rowIndex, stateColumnIndex);
+            mOldRecordState = static_cast<CSMWorld::RecordBase::State>(table->data(mRecordStateIndex).toInt());
+        }
     }
 }
 
 void CSMWorld::ModifyCommand::redo()
 {
-    mOld = mModel->data (mIndex, Qt::EditRole);
-    mModel->setData (mIndex, mNew);
+    if (mModifyNestedCommand)
+    {
+        mModifyNestedCommand->redo();
+    }
+    else
+    {
+        mOld = mModel->data (mIndex, Qt::EditRole);
+        mModel->setData (mIndex, mNew);
+    }
 }
 
 void CSMWorld::ModifyCommand::undo()
 {
-    mModel->setData (mIndex, mOld);
+    if (mModifyNestedCommand)
+    {
+        mModifyNestedCommand->undo();
+    }
+    else
+    {
+        mModel->setData (mIndex, mOld);
+    }
+
     if (mHasRecordState)
     {
         mModel->setData(mRecordStateIndex, mOldRecordState);
@@ -301,37 +324,29 @@ void CSMWorld::UpdateCellCommand::undo()
     mModel.setData (mIndex, mOld);
 }
 
-CSMWorld::ModifyNestedCommand::ModifyNestedCommand (IdTree& model, const std::string& id, int nestedRow,
-    int nestedColumn, int parentColumn, const QVariant& new_, QUndoCommand* parent)
+CSMWorld::ModifyNestedCommand::ModifyNestedCommand (IdTree& model, const QModelIndex& index, const QVariant& new_,
+    QUndoCommand* parent)
     : QUndoCommand(parent)
-    , NestedTableStoring(model, id, parentColumn)
+    , NestedTableStoring(model, index.parent())
     , mModel(model)
-    , mId(id)
-    , mNestedRow(nestedRow)
-    , mNestedColumn(nestedColumn)
-    , mParentColumn(parentColumn)
+    , mIndex(index)
     , mNew(new_)
 {
-    std::string title = model.headerData(parentColumn, Qt::Horizontal, Qt::DisplayRole).toString().toUtf8().constData();
-    setText (("Modify " + title + " sub-table of " + mId).c_str());
+    setText("Modify " + model.nestedHeaderData(mIndex.parent().column(), mIndex.column(), Qt::Horizontal,
+        Qt::DisplayRole).toString());
 
-    QModelIndex parentIndex = mModel.getModelIndex(mId, mParentColumn);
-    mModifyParentCommand = new ModifyCommand(mModel, parentIndex, parentIndex.data(Qt::EditRole), this);
+    mModifyParentCommand = new ModifyCommand(mModel, mIndex.parent(), mIndex.parent().data(Qt::EditRole), this);
 }
 
 void CSMWorld::ModifyNestedCommand::redo()
 {
-    QModelIndex parentIndex = mModel.getModelIndex(mId, mParentColumn);
-    QModelIndex nestedIndex = mModel.index(mNestedRow, mNestedColumn, parentIndex);
-    mModel.setData(nestedIndex, mNew);
+    mModel.setData(mIndex, mNew);
     mModifyParentCommand->redo();
 }
 
-
 void CSMWorld::ModifyNestedCommand::undo()
 {
-    QModelIndex parentIndex = mModel.getModelIndex(mId, mParentColumn);
-    mModel.setNestedTable(parentIndex, getOld());
+    mModel.setNestedTable(mIndex.parent(), getOld());
     mModifyParentCommand->undo();
 }
 
@@ -402,7 +417,14 @@ void CSMWorld::AddNestedCommand::undo()
 }
 
 CSMWorld::NestedTableStoring::NestedTableStoring(const IdTree& model, const std::string& id, int parentColumn)
-    : mOld(model.nestedTable(model.getModelIndex(id, parentColumn))) {}
+    : mOld(model.nestedTable(model.getModelIndex(id, parentColumn)))
+{
+}
+
+CSMWorld::NestedTableStoring::NestedTableStoring(const IdTree& model, const QModelIndex& parentIndex)
+    : mOld(model.nestedTable(parentIndex))
+{
+}
 
 CSMWorld::NestedTableStoring::~NestedTableStoring()
 {
