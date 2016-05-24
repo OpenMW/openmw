@@ -221,6 +221,7 @@ if(OSG_STATIC)
 
       # For now, users wishing to do a static build will need to pass the path to where the plugins reside
       # More clever logic would need to deduce the path, probably installed under <OpenSceneGraph>/lib/osgPlugins-<X.X.X>
+      include(FindPkgMacros)
       find_library(${PLUGIN_NAME}_LIBRARY_REL NAMES ${PLUGIN_NAME} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
       find_library(${PLUGIN_NAME}_LIBRARY_DBG NAMES ${PLUGIN_NAME_DBG} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
       make_library_set(${PLUGIN_NAME}_LIBRARY)
