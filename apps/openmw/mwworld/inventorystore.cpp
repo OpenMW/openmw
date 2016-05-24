@@ -255,6 +255,9 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 // Equipping weapons is handled by AiCombat. Anything else (lockpicks, probes) can't be used by NPCs anyway (yet)
                 continue;
 
+            if (iter.getType() == MWWorld::ContainerStore::Type_Weapon)
+                continue;
+
             if (slots_.at (*iter2)!=end())
             {
                 Ptr old = *slots_.at (*iter2);
