@@ -1,7 +1,6 @@
 #include "worldspacewidget.hpp"
 
 #include <algorithm>
-#include <iostream>
 
 #include <QEvent>
 #include <QDragEnterEvent>
@@ -333,9 +332,20 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick (const QPo
     int x = localPos.x();
     int y = height() - localPos.y();
 
+    // Convert from screen space to world space
+    osg::Matrixd wpvMat;
+    wpvMat.preMult (mView->getCamera()->getViewport()->computeWindowMatrix());
+    wpvMat.preMult (mView->getCamera()->getProjectionMatrix());
+    wpvMat.preMult (mView->getCamera()->getViewMatrix());
+    wpvMat = osg::Matrixd::inverse (wpvMat);
+
+    osg::Vec3d start = wpvMat.preMult (osg::Vec3d(x, y, 0));
+    osg::Vec3d end = wpvMat.preMult (osg::Vec3d(x, y, 1));
+    osg::Vec3d direction = end - start;
+
     // Get intersection
     osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(
-        osgUtil::Intersector::WINDOW, x, y));
+        osgUtil::Intersector::MODEL, start, end));
 
     intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
     osgUtil::IntersectionVisitor visitor(intersector);
@@ -351,10 +361,10 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick (const QPo
         osgUtil::LineSegmentIntersector::Intersection intersection = *it;
 
         // reject back-facing polygons
-        osg::Vec3f normal = intersection.getWorldIntersectNormal();
-        normal = osg::Matrix::transform3x3(normal, mView->getCamera()->getViewMatrix());
-        if (normal.z() < 0)
+        if (direction * intersection.getWorldIntersectNormal() > 0)
+        {
             continue;
+        }
 
         for (std::vector<osg::Node*>::iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
         {
@@ -384,16 +394,6 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick (const QPo
     }
 
     // Default placement
-    osg::Matrixd matrix;
-    matrix.preMult (mView->getCamera()->getViewport()->computeWindowMatrix());
-    matrix.preMult (mView->getCamera()->getProjectionMatrix());
-    matrix.preMult (mView->getCamera()->getViewMatrix());
-    matrix = osg::Matrixd::inverse (matrix);
-
-    osg::Vec3d start = matrix.preMult (intersector->getStart());
-    osg::Vec3d end = matrix.preMult (intersector->getEnd());
-
-    osg::Vec3d direction = end - start;
     direction.normalize();
     direction *= CSMPrefs::get()["Scene Drops"]["distance"].toInt();
 
