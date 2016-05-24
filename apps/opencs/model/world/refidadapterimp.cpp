@@ -1440,26 +1440,28 @@ void CSMWorld::WeaponRefIdAdapter::setData (const RefIdColumn *column, RefIdData
     Record<ESM::Weapon>& record = static_cast<Record<ESM::Weapon>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Weapon)));
 
+    ESM::Weapon weapon = record.get();
+
     if (column==mColumns.mType)
-        record.get().mData.mType = value.toInt();
+        weapon.mData.mType = value.toInt();
     else if (column==mColumns.mHealth)
-        record.get().mData.mHealth = value.toInt();
+        weapon.mData.mHealth = value.toInt();
     else if (column==mColumns.mSpeed)
-        record.get().mData.mSpeed = value.toFloat();
+        weapon.mData.mSpeed = value.toFloat();
     else if (column==mColumns.mReach)
-        record.get().mData.mReach = value.toFloat();
+        weapon.mData.mReach = value.toFloat();
     else if (column==mColumns.mChop[0])
-        record.get().mData.mChop[0] = value.toInt();
+        weapon.mData.mChop[0] = value.toInt();
     else if (column==mColumns.mChop[1])
-        record.get().mData.mChop[1] = value.toInt();
+        weapon.mData.mChop[1] = value.toInt();
     else if (column==mColumns.mSlash[0])
-        record.get().mData.mSlash[0] = value.toInt();
+        weapon.mData.mSlash[0] = value.toInt();
     else if (column==mColumns.mSlash[1])
-        record.get().mData.mSlash[1] = value.toInt();
+        weapon.mData.mSlash[1] = value.toInt();
     else if (column==mColumns.mThrust[0])
-        record.get().mData.mThrust[0] = value.toInt();
+        weapon.mData.mThrust[0] = value.toInt();
     else if (column==mColumns.mThrust[1])
-        record.get().mData.mThrust[1] = value.toInt();
+        weapon.mData.mThrust[1] = value.toInt();
     else
     {
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
@@ -1468,11 +1470,16 @@ void CSMWorld::WeaponRefIdAdapter::setData (const RefIdColumn *column, RefIdData
         if (iter!=mColumns.mFlags.end())
         {
             if (value.toInt()!=0)
-                record.get().mData.mFlags |= iter->second;
+                weapon.mData.mFlags |= iter->second;
             else
-                record.get().mData.mFlags &= ~iter->second;
+                weapon.mData.mFlags &= ~iter->second;
         }
         else
+        {
             EnchantableRefIdAdapter<ESM::Weapon>::setData (column, data, index, value);
+            return; // Don't overwrite changes made by base class
+        }
     }
+
+    record.setModified(weapon);
 }
