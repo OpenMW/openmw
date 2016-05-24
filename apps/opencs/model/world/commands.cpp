@@ -36,6 +36,7 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
     {
         IdTree& tree = static_cast<CSMWorld::IdTree&>(*mModel);
 
+        // ModifyNestedCommand will add its own command to change the modify status if needed
         mModifyNestedCommand = new ModifyNestedCommand(tree, mIndex, new_, this);
         setText(mModifyNestedCommand->text());
     }
@@ -48,12 +49,7 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
         {
             mHasRecordState = true;
             int stateColumnIndex = table->findColumnIndex(Columns::ColumnId_Modification);
-
             int rowIndex = mIndex.row();
-            if (mIndex.parent().isValid())
-            {
-                rowIndex = mIndex.parent().row();
-            }
 
             mRecordStateIndex = table->index(rowIndex, stateColumnIndex);
             mOldRecordState = static_cast<CSMWorld::RecordBase::State>(table->data(mRecordStateIndex).toInt());

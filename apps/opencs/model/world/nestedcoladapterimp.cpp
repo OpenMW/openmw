@@ -265,6 +265,7 @@ namespace CSMWorld
             case 0: return; // return without saving
             case 1:
             {
+                // Remove current and add new while adjusting each points connection count
                 edges.erase(edges.begin()+subRowIndex);
 
                 if (static_cast<size_t>(edge.mV0) < points.size())
@@ -272,10 +273,10 @@ namespace CSMWorld
 
                 edge.mV0 = value.toInt();
 
-                // Place in correct order
                 if (static_cast<size_t>(edge.mV0) < points.size())
                     ++points[edge.mV0].mConnectionNum;
 
+                // Place in correct order
                 ESM::Pathgrid::EdgeList::iterator it = edges.begin();
                 for (; it != edges.end(); ++it)
                 {
