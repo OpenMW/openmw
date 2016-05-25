@@ -3178,13 +3178,10 @@ namespace MWWorld
     {
         breakInvisibility(actor);
 
-        if (mScriptsEnabled)
+        if (object.getRefData().activate())
         {
-            if (object.getRefData().activate())
-            {
-                boost::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
-                action->execute (actor);
-            }
+            boost::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
+            action->execute (actor);
         }
     }
 
