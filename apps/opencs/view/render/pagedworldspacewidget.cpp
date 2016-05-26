@@ -332,7 +332,7 @@ void CSVRender::PagedWorldspaceWidget::pathgridAboutToBeRemoved (const QModelInd
 
 void CSVRender::PagedWorldspaceWidget::pathgridAdded(const QModelIndex& parent, int start, int end)
 {
-    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
+   const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
 
     if (!parent.isValid())
     {
