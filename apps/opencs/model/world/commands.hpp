@@ -23,7 +23,6 @@ namespace CSMWorld
     class IdTree;
     struct RecordBase;
     struct NestedTableWrapperBase;
-    class ModifyNestedCommand;
 
     class ModifyCommand : public QUndoCommand
     {
@@ -35,8 +34,6 @@ namespace CSMWorld
             bool mHasRecordState;
             QModelIndex mRecordStateIndex;
             CSMWorld::RecordBase::State mOldRecordState;
-
-            ModifyNestedCommand* mModifyNestedCommand;
 
         public:
 
@@ -194,7 +191,6 @@ namespace CSMWorld
 
     public:
         NestedTableStoring(const IdTree& model, const std::string& id, int parentColumn);
-        NestedTableStoring(const IdTree& model, const QModelIndex& parentIndex);
 
         ~NestedTableStoring();
 
@@ -207,7 +203,13 @@ namespace CSMWorld
     {
             IdTree& mModel;
 
-            QModelIndex mIndex;
+            std::string mId;
+
+            int mNestedRow;
+
+            int mNestedColumn;
+
+            int mParentColumn;
 
             QVariant mNew;
 
@@ -216,7 +218,8 @@ namespace CSMWorld
 
         public:
 
-            ModifyNestedCommand (IdTree& model, const QModelIndex& index, const QVariant& new_, QUndoCommand* parent = 0);
+            ModifyNestedCommand (IdTree& model, const std::string& id, int nestedRow, int nestedColumn,
+                int parentColumn, const QVariant& new_, QUndoCommand* parent = 0);
 
             virtual void redo();
 
