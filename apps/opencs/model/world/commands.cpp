@@ -301,40 +301,6 @@ void CSMWorld::UpdateCellCommand::undo()
     mModel.setData (mIndex, mOld);
 }
 
-CSMWorld::ModifyNestedCommand::ModifyNestedCommand (IdTree& model, const std::string& id, int nestedRow,
-    int nestedColumn, int parentColumn, const QVariant& new_, QUndoCommand* parent)
-    : QUndoCommand(parent)
-    , NestedTableStoring(model, id, parentColumn)
-    , mModel(model)
-    , mId(id)
-    , mNestedRow(nestedRow)
-    , mNestedColumn(nestedColumn)
-    , mParentColumn(parentColumn)
-    , mNew(new_)
-{
-    std::string title = model.headerData(parentColumn, Qt::Horizontal, Qt::DisplayRole).toString().toUtf8().constData();
-    setText (("Modify " + title + " sub-table of " + mId).c_str());
-
-    QModelIndex parentIndex = mModel.getModelIndex(mId, mParentColumn);
-    mModifyParentCommand = new ModifyCommand(mModel, parentIndex, parentIndex.data(Qt::EditRole), this);
-}
-
-void CSMWorld::ModifyNestedCommand::redo()
-{
-    QModelIndex parentIndex = mModel.getModelIndex(mId, mParentColumn);
-    QModelIndex nestedIndex = mModel.index(mNestedRow, mNestedColumn, parentIndex);
-    mModel.setData(nestedIndex, mNew);
-    mModifyParentCommand->redo();
-}
-
-
-void CSMWorld::ModifyNestedCommand::undo()
-{
-    QModelIndex parentIndex = mModel.getModelIndex(mId, mParentColumn);
-    mModel.setNestedTable(parentIndex, getOld());
-    mModifyParentCommand->undo();
-}
-
 
 CSMWorld::DeleteNestedCommand::DeleteNestedCommand (IdTree& model,
                                                     const std::string& id,

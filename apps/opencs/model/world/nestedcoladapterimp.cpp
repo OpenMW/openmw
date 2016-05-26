@@ -33,10 +33,10 @@ namespace CSMWorld
         std::vector<ESM::Pathgrid::Edge>::iterator iter = pathgrid.mEdges.begin();
         for (;iter != pathgrid.mEdges.end(); ++iter)
         {
-            if (iter->mV0 >= position)
-                ++iter->mV0;
-            if (iter->mV1 >= position)
-                ++iter->mV1;
+            if ((*iter).mV0 >= position)
+                (*iter).mV0++;
+            if ((*iter).mV1 >= position)
+                (*iter).mV1++;
         }
 
         points.insert(points.begin()+position, point);
@@ -61,20 +61,15 @@ namespace CSMWorld
         std::vector<ESM::Pathgrid::Edge>::iterator iter = pathgrid.mEdges.begin();
         for (; iter != pathgrid.mEdges.end();)
         {
-            if (iter->mV0 == rowToRemove || iter->mV1 == rowToRemove)
-            {
-                if (static_cast<size_t>(iter->mV0) < points.size())
-                    --points[iter->mV0].mConnectionNum;
-
+            if (((*iter).mV0 == rowToRemove) || ((*iter).mV1 == rowToRemove))
                 iter = pathgrid.mEdges.erase(iter);
-            }
             else
             {
-                if (iter->mV0 > rowToRemove)
-                    --iter->mV0;
+                if ((*iter).mV0 > rowToRemove)
+                    (*iter).mV0--;
 
-                if (iter->mV1 > rowToRemove)
-                    --iter->mV1;
+                if ((*iter).mV1 > rowToRemove)
+                    (*iter).mV1--;
 
                 ++iter;
             }
@@ -157,12 +152,7 @@ namespace CSMWorld
     {
         Pathgrid pathgrid = record.get();
 
-        ESM::Pathgrid::PointList& points = pathgrid.mPoints;
         ESM::Pathgrid::EdgeList& edges = pathgrid.mEdges;
-
-        // Can only add valid point indices
-        if (points.empty())
-            return;
 
         // blank row
         ESM::Pathgrid::Edge edge;
@@ -174,12 +164,7 @@ namespace CSMWorld
         //
         // Currently the code assumes that the end user to know what he/she is doing.
         // e.g. Edges come in pairs, from points a->b and b->a
-
-        // Even edges between the same node and itself need to be counted
-        ++points[edge.mV0].mConnectionNum;
-
-        // Edge needs to be ordered, since edge.mV0 is 0, add at start
-        edges.insert(edges.begin(), edge);
+        edges.insert(edges.begin()+position, edge);
 
         record.setModified (pathgrid);
     }
@@ -188,15 +173,10 @@ namespace CSMWorld
     {
         Pathgrid pathgrid = record.get();
 
-        ESM::Pathgrid::PointList& points = pathgrid.mPoints;
         ESM::Pathgrid::EdgeList& edges = pathgrid.mEdges;
 
         if (rowToRemove < 0 || rowToRemove >= static_cast<int> (edges.size()))
             throw std::runtime_error ("index out of range");
-
-        ESM::Pathgrid::Edge& edge = edges[rowToRemove];
-        if (static_cast<size_t>(edge.mV0) < points.size())
-            --pathgrid.mPoints[edge.mV0].mConnectionNum;
 
         edges.erase(edges.begin()+rowToRemove);
 
@@ -208,13 +188,8 @@ namespace CSMWorld
     {
         Pathgrid pathgrid = record.get();
 
-        // Set points because point data (edge count) is tied to edges
-        pathgrid.mPoints =
-            static_cast<const PathgridPointsWrap &>(nestedTable).mRecord.mPoints;
-        pathgrid.mData.mS2 =
-            static_cast<const PathgridPointsWrap &>(nestedTable).mRecord.mData.mS2;
         pathgrid.mEdges =
-            static_cast<const PathgridPointsWrap &>(nestedTable).mRecord.mEdges;
+            static_cast<const NestedTableWrapper<ESM::Pathgrid::EdgeList> &>(nestedTable).mNestedTable;
 
         record.setModified (pathgrid);
     }
@@ -222,7 +197,7 @@ namespace CSMWorld
     NestedTableWrapperBase* PathgridEdgeListAdapter::table(const Record<Pathgrid>& record) const
     {
         // deleted by dtor of NestedTableStoring
-        return new PathgridPointsWrap(record.get());
+        return new NestedTableWrapper<ESM::Pathgrid::EdgeList>(record.get().mEdges);
     }
 
     QVariant PathgridEdgeListAdapter::getData(const Record<Pathgrid>& record,
@@ -249,56 +224,19 @@ namespace CSMWorld
     {
         Pathgrid pathgrid = record.get();
 
-        ESM::Pathgrid::PointList& points = pathgrid.mPoints;
-        ESM::Pathgrid::EdgeList& edges = pathgrid.mEdges;
-
-        if (subRowIndex < 0 || subRowIndex >= static_cast<int> (edges.size()))
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int> (pathgrid.mEdges.size()))
             throw std::runtime_error ("index out of range");
-
-        // Point indices must exist
-        if (value.toInt() < 0 || value.toUInt() >= points.size())
-            return;
 
         ESM::Pathgrid::Edge edge = pathgrid.mEdges[subRowIndex];
         switch (subColIndex)
         {
             case 0: return; // return without saving
-            case 1:
-            {
-                edges.erase(edges.begin()+subRowIndex);
-
-                if (static_cast<size_t>(edge.mV0) < points.size())
-                    --points[edge.mV0].mConnectionNum;
-
-                edge.mV0 = value.toInt();
-
-                // Place in correct order
-                if (static_cast<size_t>(edge.mV0) < points.size())
-                    ++points[edge.mV0].mConnectionNum;
-
-                ESM::Pathgrid::EdgeList::iterator it = edges.begin();
-                for (; it != edges.end(); ++it)
-                {
-                    if (edge.mV0 <= it->mV0)
-                    {
-                        edges.insert(it, edge);
-                        break;
-                    }
-                }
-
-                if (it == edges.end())
-                    edges.push_back(edge);
-
-                break;
-            }
-            case 2:
-
-                edge.mV1 = value.toInt();
-                edges[subRowIndex] = edge;
-                break;
-
+            case 1: edge.mV0 = value.toInt(); break;
+            case 2: edge.mV1 = value.toInt(); break;
             default: throw std::runtime_error("Pathgrid edge subcolumn index out of range");
         }
+
+        pathgrid.mEdges[subRowIndex] = edge;
 
         record.setModified (pathgrid);
     }

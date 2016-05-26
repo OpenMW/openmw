@@ -254,6 +254,7 @@ namespace CSVRender
             int posY = clampToCell(static_cast<int>(localCoords.y()));
             int posZ = clampToCell(static_cast<int>(localCoords.z()));
 
+            int recordIndex = mPathgridCollection.getIndex (mId);
             int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridPoints);
 
             int posXColumn = mPathgridCollection.searchNestedColumnIndex(parentColumn,
@@ -265,13 +266,14 @@ namespace CSVRender
             int posZColumn = mPathgridCollection.searchNestedColumnIndex(parentColumn,
                 CSMWorld::Columns::ColumnId_PathgridPosZ);
 
+            QModelIndex parent = model->index(recordIndex, parentColumn);
             int row = static_cast<int>(source->mPoints.size());
 
             // Add node
             commands.push(new CSMWorld::AddNestedCommand(*model, mId, row, parentColumn));
-            commands.push(new CSMWorld::ModifyNestedCommand(*model, mId, row, posXColumn, parentColumn, posX));
-            commands.push(new CSMWorld::ModifyNestedCommand(*model, mId, row, posYColumn, parentColumn, posY));
-            commands.push(new CSMWorld::ModifyNestedCommand(*model, mId, row, posZColumn, parentColumn, posZ));
+            commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posXColumn, parent), posX));
+            commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posYColumn, parent), posY));
+            commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posZColumn, parent), posZ));
         }
         else
         {
@@ -291,9 +293,9 @@ namespace CSVRender
             int offsetY = static_cast<int>(localCoords.y());
             int offsetZ = static_cast<int>(localCoords.z());
 
-            CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
-                CSMWorld::UniversalId::Type_Pathgrids));
+            QAbstractItemModel* model = mData.getTableModel(CSMWorld::UniversalId::Type_Pathgrids);
 
+            int recordIndex = mPathgridCollection.getIndex(mId);
             int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridPoints);
 
             int posXColumn = mPathgridCollection.searchNestedColumnIndex(parentColumn,
@@ -305,18 +307,20 @@ namespace CSVRender
             int posZColumn = mPathgridCollection.searchNestedColumnIndex(parentColumn,
                 CSMWorld::Columns::ColumnId_PathgridPosZ);
 
+            QModelIndex parent = model->index(recordIndex, parentColumn);
+
             for (size_t i = 0; i < mSelected.size(); ++i)
             {
                 const CSMWorld::Pathgrid::Point& point = source->mPoints[mSelected[i]];
                 int row = static_cast<int>(mSelected[i]);
 
-                commands.push(new CSMWorld::ModifyNestedCommand(*model, mId, row, posXColumn, parentColumn,
+                commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posXColumn, parent),
                     clampToCell(point.mX + offsetX)));
 
-                commands.push(new CSMWorld::ModifyNestedCommand(*model, mId, row, posYColumn, parentColumn,
+                commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posYColumn, parent),
                     clampToCell(point.mY + offsetY)));
 
-                commands.push(new CSMWorld::ModifyNestedCommand(*model, mId, row, posZColumn, parentColumn,
+                commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posZColumn, parent),
                     clampToCell(point.mZ + offsetZ)));
             }
         }
@@ -560,6 +564,7 @@ namespace CSVRender
         CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
             CSMWorld::UniversalId::Type_Pathgrids));
 
+        int recordIndex = mPathgridCollection.getIndex(mId);
         int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridEdges);
 
         int edge0Column = mPathgridCollection.searchNestedColumnIndex(parentColumn,
@@ -568,19 +573,22 @@ namespace CSVRender
         int edge1Column = mPathgridCollection.searchNestedColumnIndex(parentColumn,
             CSMWorld::Columns::ColumnId_PathgridEdge1);
 
+        QModelIndex parent = model->index(recordIndex, parentColumn);
+        int row = static_cast<int>(source.mEdges.size());
+
         if (edgeExists(source, node1, node2) == -1)
         {
-            // Set first edge last since that reorders the edge list
-            commands.push(new CSMWorld::AddNestedCommand(*model, mId, 0, parentColumn));
-            commands.push(new CSMWorld::ModifyNestedCommand(*model, mId, 0, edge1Column, parentColumn, node2));
-            commands.push(new CSMWorld::ModifyNestedCommand(*model, mId, 0, edge0Column, parentColumn, node1));
+            commands.push(new CSMWorld::AddNestedCommand(*model, mId, row, parentColumn));
+            commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, edge0Column, parent), node1));
+            commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, edge1Column, parent), node2));
+            ++row;
         }
 
         if (edgeExists(source, node2, node1) == -1)
         {
-            commands.push(new CSMWorld::AddNestedCommand(*model, mId, 0, parentColumn));
-            commands.push(new CSMWorld::ModifyNestedCommand(*model, mId, 0, edge1Column, parentColumn, node1));
-            commands.push(new CSMWorld::ModifyNestedCommand(*model, mId, 0, edge0Column, parentColumn, node2));
+            commands.push(new CSMWorld::AddNestedCommand(*model, mId, row, parentColumn));
+            commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, edge0Column, parent), node2));
+            commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, edge1Column, parent), node1));
         }
     }
 

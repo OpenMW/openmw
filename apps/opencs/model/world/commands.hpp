@@ -199,33 +199,6 @@ namespace CSMWorld
         const NestedTableWrapperBase& getOld() const;
     };
 
-    class ModifyNestedCommand : public QUndoCommand, private NestedTableStoring
-    {
-            IdTree& mModel;
-
-            std::string mId;
-
-            int mNestedRow;
-
-            int mNestedColumn;
-
-            int mParentColumn;
-
-            QVariant mNew;
-
-            // The command to redo/undo the Modified status of a record
-            ModifyCommand *mModifyParentCommand;
-
-        public:
-
-            ModifyNestedCommand (IdTree& model, const std::string& id, int nestedRow, int nestedColumn,
-                int parentColumn, const QVariant& new_, QUndoCommand* parent = 0);
-
-            virtual void redo();
-
-            virtual void undo();
-    };
-
     class DeleteNestedCommand : public QUndoCommand, private NestedTableStoring
     {
             IdTree& mModel;
