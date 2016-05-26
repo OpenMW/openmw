@@ -131,9 +131,10 @@ namespace CSVRender
         if (!selection.empty())
         {
             mDragMode = DragMode_Move;
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     bool PathgridMode::secondaryEditStartDrag(const QPoint& pos)
@@ -148,10 +149,11 @@ namespace CSVRender
                 mFromNode = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
 
                 tag->getPathgrid()->setupConnectionIndicator(mFromNode);
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     void PathgridMode::drag(const QPoint& pos, int diffX, int diffY, double speedFactor)
