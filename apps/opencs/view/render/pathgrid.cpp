@@ -269,7 +269,7 @@ namespace CSVRender
             QModelIndex parent = model->index(recordIndex, parentColumn);
             int row = static_cast<int>(source->mPoints.size());
 
-            // Add node
+            // Add node to end of list
             commands.push(new CSMWorld::AddNestedCommand(*model, mId, row, parentColumn));
             commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posXColumn, parent), posX));
             commands.push(new CSMWorld::ModifyCommand(*model, model->index(row, posYColumn, parent), posY));
@@ -349,21 +349,79 @@ namespace CSVRender
 
     void Pathgrid::applyRemoveNodes(CSMWorld::CommandMacro& commands)
     {
-        // Source is aquired here to ensure a pathgrid exists
         const CSMWorld::Pathgrid* source = getPathgridSource();
         if (source)
         {
-            // Want to remove from end of row first
-            std::sort(mSelected.begin(), mSelected.end(), std::greater<int>());
-
             CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
                 CSMWorld::UniversalId::Type_Pathgrids));
 
+            // Want to remove nodes from end of list first
+            std::sort(mSelected.begin(), mSelected.end(), std::greater<int>());
+
+            int recordIndex = mPathgridCollection.getIndex(mId);
             int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridPoints);
 
             for (std::vector<unsigned short>::iterator row = mSelected.begin(); row != mSelected.end(); ++row)
             {
                 commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, static_cast<int>(*row), parentColumn));
+            }
+
+            // Fix/remove edges
+            std::set<int, std::greater<int> > edgeRowsToRemove;
+
+            parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridEdges);
+
+            int edge0Column = mPathgridCollection.searchNestedColumnIndex(parentColumn,
+                CSMWorld::Columns::ColumnId_PathgridEdge0);
+
+            int edge1Column = mPathgridCollection.searchNestedColumnIndex(parentColumn,
+                CSMWorld::Columns::ColumnId_PathgridEdge1);
+
+            QModelIndex parent = model->index(recordIndex, parentColumn);
+
+            for (size_t edge = 0; edge < source->mEdges.size(); ++edge)
+            {
+                int adjustment0 = 0;
+                int adjustment1 = 0;
+
+                // Determine necessary adjustment
+                for (std::vector<unsigned short>::iterator point = mSelected.begin(); point != mSelected.end(); ++point)
+                {
+                    if (source->mEdges[edge].mV0 == *point || source->mEdges[edge].mV1 == *point)
+                    {
+                        edgeRowsToRemove.insert(static_cast<int>(edge));
+
+                        adjustment0 = 0; // No need to adjust, its getting removed
+                        adjustment1 = 0;
+                        break;
+                    }
+
+                    if (source->mEdges[edge].mV0 > *point)
+                        --adjustment0;
+
+                    if (source->mEdges[edge].mV1 > *point)
+                        --adjustment1;
+                }
+
+                if (adjustment0 != 0)
+                {
+                    int adjustedEdge = source->mEdges[edge].mV0 + adjustment0;
+                    commands.push(new CSMWorld::ModifyCommand(*model, model->index(edge, edge0Column, parent),
+                        adjustedEdge));
+                }
+
+                if (adjustment1 != 0)
+                {
+                    int adjustedEdge = source->mEdges[edge].mV1 + adjustment1;
+                    commands.push(new CSMWorld::ModifyCommand(*model, model->index(edge, edge1Column, parent),
+                        adjustedEdge));
+                }
+            }
+
+            std::set<int, std::greater<int> >::iterator row;
+            for (row = edgeRowsToRemove.begin(); row != edgeRowsToRemove.end(); ++row)
+            {
+                commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, *row, parentColumn));
             }
         }
 
