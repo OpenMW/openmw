@@ -25,21 +25,6 @@ namespace CSMWorld
     struct Pathgrid;
     struct Info;
 
-    struct PathgridPointsWrap : public NestedTableWrapperBase
-    {
-        ESM::Pathgrid mRecord;
-
-        PathgridPointsWrap(ESM::Pathgrid pathgrid)
-            : mRecord(pathgrid) {}
-
-        virtual ~PathgridPointsWrap() {}
-
-        virtual int size() const
-        {
-            return mRecord.mPoints.size(); // used in IdTree::setNestedTable()
-        }
-    };
-
     class PathgridPointListAdapter : public NestedColumnAdapter<Pathgrid>
     {
     public:
