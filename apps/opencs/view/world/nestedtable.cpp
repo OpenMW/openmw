@@ -119,9 +119,14 @@ void CSVWorld::NestedTable::removeRowActionTriggered()
 
 void CSVWorld::NestedTable::addNewRowActionTriggered()
 {
+    int row = 0;
+
+    if (!selectionModel()->selectedRows().empty())
+        row = selectionModel()->selectedRows().back().row() + 1;
+
     mDocument.getUndoStack().push(new CSMWorld::AddNestedCommand(*(mModel->model()),
                                                                  mModel->getParentId(),
-                                                                 selectionModel()->selectedRows().size(),
+                                                                 row,
                                                                  mModel->getParentColumn()));
 }
 
