@@ -70,20 +70,6 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
 
     for (unsigned int i = 0; i < pathgrid.mPoints.size(); ++i)
     {
-        // check the connection number for each point matches the edge connections
-        if (pathgrid.mPoints[i].mConnectionNum > pointList[i].mConnectionNum)
-        {
-            std::ostringstream ss;
-            ss << " has has less edges than expected for point " << i;
-            messages.add (id, pathgrid.mId + ss.str(), "", CSMDoc::Message::Severity_Error);
-        }
-        else if (pathgrid.mPoints[i].mConnectionNum < pointList[i].mConnectionNum)
-        {
-            std::ostringstream ss;
-            ss << " has has more edges than expected for point " << i;
-            messages.add (id, pathgrid.mId + ss.str(), "", CSMDoc::Message::Severity_Error);
-        }
-
         // check that edges are bidirectional
         bool foundReverse = false;
         for (unsigned int j = 0; j < pointList[i].mOtherIndex.size(); ++j)
