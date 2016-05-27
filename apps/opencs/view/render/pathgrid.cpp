@@ -277,8 +277,31 @@ namespace CSVRender
         }
         else
         {
-            CSMWorld::CreatePathgridCommand* createCmd = new CSMWorld::CreatePathgridCommand(*model, mId);
-            commands.push(createCmd);
+            int index = mPathgridCollection.searchId(mId);
+            if (index == -1)
+            {
+                // Does not exist
+                commands.push(new CSMWorld::CreatePathgridCommand(*model, mId));
+            }
+            else
+            {
+                source = &mPathgridCollection.getRecord(index).get();
+
+                // Deleted, so revert and remove all data
+                commands.push(new CSMWorld::RevertCommand(*model, mId));
+
+                int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridPoints);
+                for (int row = source->mPoints.size() - 1; row >= 0; --row)
+                {
+                    commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, row, parentColumn));
+                }
+
+                parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridEdges);
+                for (int row = source->mEdges.size() - 1; row >= 0; --row)
+                {
+                    commands.push(new CSMWorld::DeleteNestedCommand(*model, mId, row, parentColumn));
+                }
+            }
         }
     }
 
@@ -510,7 +533,8 @@ namespace CSVRender
         }
         else
         {
-            removeGeometry();
+            removePathgridGeometry();
+            removeSelectedGeometry();
         }
     }
 
