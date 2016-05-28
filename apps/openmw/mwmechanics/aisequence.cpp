@@ -409,21 +409,6 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
         if (!package.get())
             continue;
 
-        // remove previous packages if required
-        if (package->shouldCancelPreviousAi())
-        {
-            for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end();)
-            {
-                if((*it)->canCancel())
-                {
-                    delete *it;
-                    it = mPackages.erase(it);
-                }
-                else
-                    ++it;
-            }
-        }
-
         mPackages.push_back(package.release());
     }
 }
