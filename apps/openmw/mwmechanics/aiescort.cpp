@@ -72,7 +72,11 @@ namespace MWMechanics
         {
             mRemainingDuration -= duration;
             if (duration <= 0)
+            {
+                // Reset mStarted to false so that package can be repeated again
+                mStarted = false;
                 return true;
+            }
         }
 
         if (!mCellId.empty() && mCellId != actor.getCell()->getCell()->getCellId().mWorldspace)
@@ -100,7 +104,11 @@ namespace MWMechanics
             point.mConnectionNum = 0;
             point.mUnknown = 0;
             if(pathTo(actor,point,duration)) //Returns true on path complete
+            {
+                // Reset mStarted to false so that package can be repeated again
+                mStarted = false;
                 return true;
+            }
             mMaxDist = 450;
         }
         else
