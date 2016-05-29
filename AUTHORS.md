@@ -109,9 +109,8 @@ Programmers
     Rob Cutmore (rcutmore)
     Robert MacGregor (Ragora)
     Rohit Nirmal
-    Roman (kpp)
     Roman Melnik (Kromgart)
-    Roman Proskuryakov (humbug)
+    Roman Proskuryakov (kpp)
     Sandy Carter (bwrsandman)
     Scott Howard
     Sebastian Wick (swick)
