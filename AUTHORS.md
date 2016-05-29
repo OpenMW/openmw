@@ -21,6 +21,7 @@ Programmers
     alexanderkjall
     Alexander Nadeau (wareya)
     Alexander Olofsson (Ace)
+    Allofich
     Austin Salgat (Salgat)
     Artem Kotsynyak (greye)
     artemutin
@@ -108,6 +109,7 @@ Programmers
     Rob Cutmore (rcutmore)
     Robert MacGregor (Ragora)
     Rohit Nirmal
+    Roman (kpp)
     Roman Melnik (Kromgart)
     Roman Proskuryakov (humbug)
     Sandy Carter (bwrsandman)
