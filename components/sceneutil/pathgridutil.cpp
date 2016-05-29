@@ -71,8 +71,8 @@ namespace SceneUtil
     };
 
     const osg::Vec4f DiamondEdgeColor = osg::Vec4f(0.5f, 1.f, 1.f, 1.f);
-    const osg::Vec4f DiamondWireColor = osg::Vec4f(0.8f, 1.f, 0.9f, 1.f);
-    const osg::Vec4f DiamondFocusWireColor = osg::Vec4f(0.4f, 1.f, 0.4f, 1.f);
+    const osg::Vec4f DiamondWireColor = osg::Vec4f(0.72f, 0.f, 0.96f, 1.f);
+    const osg::Vec4f DiamondFocusWireColor = osg::Vec4f(0.91f, 0.66f, 1.f, 1.f);
 
     osg::ref_ptr<osg::Geometry> createPathgridGeometry(const ESM::Pathgrid& pathgrid)
     {

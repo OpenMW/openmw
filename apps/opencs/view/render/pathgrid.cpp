@@ -204,7 +204,7 @@ namespace CSVRender
                 osg::Vec3f start = osg::Vec3f(pointA.mX, pointA.mY, pointA.mZ + SceneUtil::DiamondHalfHeight);
                 osg::Vec3f end = osg::Vec3f(pointB.mX, pointB.mY, pointB.mZ + SceneUtil::DiamondHalfHeight);
 
-                createConnectionGeometry(start, end);
+                createConnectionGeometry(start, end, true);
             }
         }
     }
@@ -220,7 +220,7 @@ namespace CSVRender
 
                 osg::Vec3f start = osg::Vec3f(point.mX, point.mY, point.mZ + SceneUtil::DiamondHalfHeight);
                 osg::Vec3f end = pos - mBaseNode->getPosition();
-                createConnectionGeometry(start, end);
+                createConnectionGeometry(start, end, false);
             }
         }
     }
@@ -593,7 +593,7 @@ namespace CSVRender
         }
     }
 
-    void Pathgrid::createConnectionGeometry(const osg::Vec3f& start, const osg::Vec3f& end)
+    void Pathgrid::createConnectionGeometry(const osg::Vec3f& start, const osg::Vec3f& end, bool valid)
     {
         if (mConnectionGeometry)
             mPathgridGeode->removeDrawable(mConnectionGeometry);
@@ -606,7 +606,16 @@ namespace CSVRender
 
         (*vertices)[0] = start;
         (*vertices)[1] = end;
-        (*colors)[0] = osg::Vec4f(0.4f, 1.f, 0.4f, 1.f);
+
+        if (valid)
+        {
+            (*colors)[0] = osg::Vec4f(0.91f, 0.66f, 1.f, 1.f);
+        }
+        else
+        {
+            (*colors)[0] = osg::Vec4f(1.f, 0.f, 0.f, 1.f);
+        }
+
         indices->setElement(0, 0);
         indices->setElement(1, 1);
 

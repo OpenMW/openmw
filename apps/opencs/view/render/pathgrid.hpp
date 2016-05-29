@@ -121,7 +121,7 @@ namespace CSVRender
             void removePathgridGeometry();
             void removeSelectedGeometry();
 
-            void createConnectionGeometry(const osg::Vec3f& start, const osg::Vec3f& end);
+            void createConnectionGeometry(const osg::Vec3f& start, const osg::Vec3f& end, bool valid);
 
             const CSMWorld::Pathgrid* getPathgridSource();
 

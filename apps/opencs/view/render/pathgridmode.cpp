@@ -37,7 +37,6 @@ namespace CSVRender
             "<li>Secondary edit: Connect selected nodes to node</li>"
             "<li>Primary drag: Move selected nodes</li>"
             "<li>Secondary drag: Connect one node to another</li>"
-            "<li>Other operations may be done with the context menu</li>"
             "</ul><p>Note: Only a single cell's pathgrid may be edited at a time");
     }
 
