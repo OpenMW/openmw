@@ -3178,13 +3178,10 @@ namespace MWWorld
     {
         breakInvisibility(actor);
 
-        if (mScriptsEnabled)
+        if (object.getRefData().activate())
         {
-            if (object.getRefData().activate())
-            {
-                boost::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
-                action->execute (actor);
-            }
+            boost::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
+            action->execute (actor);
         }
     }
 
@@ -3192,8 +3189,6 @@ namespace MWWorld
     {
         bool operator() (Ptr ptr)
         {
-            // Can't reset actors that were moved to a different cell, because we don't know what cell they came from.
-            // This could be fixed once we properly track actor cell changes, but may not be desirable behaviour anyhow.
             if (ptr.getClass().isActor() && ptr.getCellRef().hasContentFile())
             {
                 const ESM::Position& origPos = ptr.getCellRef().getPosition();
