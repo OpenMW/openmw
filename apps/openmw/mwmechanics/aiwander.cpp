@@ -123,8 +123,6 @@ namespace MWMechanics
         if(mDuration == 0)
             mTimeOfDay = 0;
 
-        mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
-
         mPopulateAvailableNodes = true;
 
     }
@@ -202,6 +200,13 @@ namespace MWMechanics
             mPopulateAvailableNodes = true;
         }
 
+        if (!mStarted)
+        {
+            // Set mStartTime once this package starts being executed
+            mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
+            mStarted = true;
+        }
+
         cStats.setDrawState(DrawState_Nothing);
         cStats.setMovementFlag(CreatureStats::Flag_Run, false);
 
@@ -230,6 +235,8 @@ namespace MWMechanics
 
         if (isPackageCompleted(actor, storage))
         {
+            // Reset mStarted so that package will get a new mStarttime when it repeats
+            mStarted = false;
             return true;
         }
 
@@ -301,6 +308,11 @@ namespace MWMechanics
         return false; // AiWander package not yet completed
     }
 
+    bool AiWander::getRepeat() const
+    { 
+         return mRepeat; 
+    }
+
     bool AiWander::isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage)
     {
         if (mDuration)
@@ -310,15 +322,8 @@ namespace MWMechanics
             if ((currentTime.getHour() >= mStartTime.getHour() + mDuration) ||
                 (int(currentTime.getHour()) == 0 && currentTime.getDay() != mStartTime.getDay()))
             {
-                if (!mRepeat)
-                {
                     stopWalking(actor, storage);
                     return true;
-                }
-                else
-                {
-                    mStartTime = currentTime;
-                }
             }
         }
         // if get here, not yet completed
@@ -501,8 +506,7 @@ namespace MWMechanics
                 }
             }
         }
-        // Recreate vanilla (broken?) behavior of resetting start time of AIWander:
-        mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
+
         storage.setState(Wander_IdleNow);
     }
 

@@ -58,9 +58,13 @@ namespace MWMechanics
         if (!isWithinMaxRange(osg::Vec3f(mX, mY, mZ), pos.asVec3()))
             return false;
 
+        if (!mStarted)
+            mStarted = true;
+
         if (pathTo(actor, ESM::Pathgrid::Point(static_cast<int>(mX), static_cast<int>(mY), static_cast<int>(mZ)), duration))
         {
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+            mStarted = false;
             return true;
         }
         return false;

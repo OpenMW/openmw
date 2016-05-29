@@ -58,6 +58,8 @@ namespace MWMechanics
 
             virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
             
+            bool getRepeat() const;
+            
             enum GreetingState {
                 Greet_None,
                 Greet_InProgress,

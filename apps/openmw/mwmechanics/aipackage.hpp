@@ -87,6 +87,10 @@ namespace MWMechanics
             /// Upon adding this Ai package, should the Ai Sequence attempt to cancel previous Ai packages (default true)?
             virtual bool shouldCancelPreviousAi() const;
 
+            /// Return true if this package should repeat. Can only be false for AIWander, if AIWander is assigned
+            /// assigned through the console or script.
+            virtual bool getRepeat() const;
+
             bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
 
         protected:
@@ -103,6 +107,9 @@ namespace MWMechanics
             ObstacleCheck mObstacleCheck;
 
             float mTimer;
+
+            // Set to true once package starts actually being executed
+            bool mStarted;
 
             ESM::Pathgrid::Point mPrevDest;
 

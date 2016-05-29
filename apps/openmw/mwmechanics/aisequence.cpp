@@ -230,6 +230,11 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
 
         if (package->execute (actor,characterController,state,duration))
         {
+            // Put repeating noncombat AI packages on the end of the stack so they can be used again
+            if (isActualAiPackage(packageTypeId) && package->getRepeat())
+            {
+                mPackages.push_back(package->clone());
+            }
             // To account for the rare case where AiPackage::execute() queued another AI package
             // (e.g. AiPursue executing a dialogue script that uses startCombat)
             std::list<MWMechanics::AiPackage*>::iterator toRemove =
