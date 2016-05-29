@@ -6,9 +6,9 @@
 
         <Widget type="Widget" skin="" name="LeftPane" position="0 0 220 342">
 
-            <!-- Player health stats -->
-            <Widget type="Widget" skin="MW_Box" position="8 8 212 62" align="Left Top HStretch">
-                <!-- Health -->
+
+            <Widget type="Widget" skin="MW_Box" position="8 8 212 62" name="HealthMagickaFatigueBorder" align="Left Top HStretch">
+                
                 <Widget type="Widget" skin="" position="4 4 204 18" name="Health" align="Left Top HStretch">
                     <Property key="NeedMouse" value="true"/>
                     <UserString key="ToolTipType" value="Layout"/>
@@ -25,8 +25,6 @@
                         <Property key="NeedMouse" value="false"/>
                     </Widget>
                 </Widget>
-
-                <!-- Magicka -->
                 <Widget type="Widget" skin="" position="4 22 204 18" name="Magicka" align="Left Top HStretch">
                     <Property key="NeedMouse" value="true"/>
                     <UserString key="ToolTipType" value="Layout"/>
@@ -46,8 +44,6 @@
                         <Property key="NeedMouse" value="false"/>
                     </Widget>
                 </Widget>
-
-                <!-- Fatigue -->
                 <Widget type="Widget" skin="" position="4 40 204 18" name="Fatigue" align="Left Top HStretch">
                     <Property key="NeedMouse" value="true"/>
                     <UserString key="ToolTipType" value="Layout"/>
@@ -69,14 +65,14 @@
             </Widget>
 
             <!-- Player level, race and class -->
-            <Widget type="Widget" skin="MW_Box" position="8 78 212 62" align="Top HStretch">
-                <Widget type="HBox" position="4 4 204 18" align="Top HStretch">
+			<Widget type="Widget" skin="MW_Box" position="8 78 212 62" name="LevelRaceClassBorder" align="Top HStretch">
+                <Widget type="HBox" position="4 4 204 18" name="Level" align="Top HStretch">
                     <Widget type="AutoSizedTextBox" skin="NormalText" position="0 0 200 18" name="Level_str" align="Left Top">
                         <Property key="Caption" value="#{sLevel}"/>
                         <UserString key="ToolTipType" value="Layout"/>
                         <UserString key="ToolTipLayout" value="LevelToolTip"/>
                     </Widget>
-                    <Widget type="TextBox" skin="SandTextRight" position="200 0 40 18" name="LevelText" align="Right Top">
+                    <Widget type="AutoSizedTextBox" skin="SandTextRight" position="200 0 40 18" name="LevelText" align="Right Top">
                         <Property key="TextAlign" value="Right Top"/>
                         <UserString key="ToolTipType" value="Layout"/>
                         <UserString key="ToolTipLayout" value="LevelToolTip"/>
@@ -84,26 +80,26 @@
                     </Widget>
 
                 </Widget>
-                <Widget type="HBox" position="4 24 204 18" align="Top HStretch">
+                <Widget type="HBox" position="4 24 204 18" name="Race" align="Top HStretch">
                     <Widget type="AutoSizedTextBox" skin="NormalText" position="0 0 95 18" name="Race_str" align="Left Top">
                         <Property key="Caption" value="#{sRace}"/>
                         <UserString key="ToolTipType" value="Layout"/>
                         <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
                     </Widget>
-                    <Widget type="TextBox" skin="SandTextRight" position="104 0 200 18" name="RaceText" align="Left Top">
+                    <Widget type="AutoSizedTextBox" skin="SandTextRight" position="104 0 200 18" name="RaceText" align="Left Top">
                         <Property key="TextAlign" value="Right Top"/>
                         <UserString key="ToolTipType" value="Layout"/>
                         <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
                         <UserString key="HStretch" value="true"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" position="4 42 204 18" align="Top HStretch">
+                <Widget type="HBox" position="4 42 204 18" name="Class" align="Top HStretch">
                     <Widget type="AutoSizedTextBox" skin="NormalText" position="0 0 95 18" name="Class_str" align="Left Top">
                         <Property key="Caption" value="#{sClass}"/>
                         <UserString key="ToolTipType" value="Layout"/>
                         <UserString key="ToolTipLayout" value="ClassToolTip"/>
                     </Widget>
-                    <Widget type="TextBox" skin="SandTextRight" position="104 0 200 18" name="ClassText" align="Left Top">
+                    <Widget type="AutoSizedTextBox" skin="SandTextRight" position="104 0 200 18" name="ClassText" align="Left Top">
                         <Property key="TextAlign" value="Right Top"/>
                         <UserString key="ToolTipType" value="Layout"/>
                         <UserString key="ToolTipLayout" value="ClassToolTip"/>
@@ -112,7 +108,7 @@
                 </Widget>
             </Widget>
 
-            <Widget type="Widget" skin="MW_Box" position="8 148 212 152" align="Left Top Stretch">
+            <Widget type="Widget" skin="MW_Box" position="8 148 212 152" name="AttributeBorder" align="Left Top Stretch">
             <!-- TODO: this should be a scroll view -->
             <Widget type="Widget" skin="" position="4 4 204 144" align="Left Top Stretch">
                 <Widget type="Button" skin="" position="0 0 204 18" name="Attrib1Box" align="Left Top HStretch">
@@ -227,7 +223,7 @@
                     </Widget>
                 </Widget>
             </Widget>
-            </Widget>
+        </Widget>
 
         </Widget>
 

@@ -6,6 +6,14 @@
 
 #include <components/esm/loadskil.hpp>
 
+namespace MWBase {
+	class World;
+}
+
+namespace MWWorld {
+	class ESMStore;
+}
+
 namespace MWGui
 {
     class WindowManager;
@@ -35,7 +43,14 @@ namespace MWGui
             void configureSkills (const SkillList& major, const SkillList& minor);
             void setReputation (int reputation) { if (reputation != mReputation) mChanged = true; this->mReputation = reputation; }
             void setBounty (int bounty) { if (bounty != mBounty) mChanged = true; this->mBounty = bounty; }
-            void updateSkillArea();
+
+			void updateHealthMagickaFatigue(MWBase::World *world);
+
+			void updateLevelRaceClass(MWBase::World *world);
+			void resizeWidgetToLineHeight(MyGUI::Widget * widget);
+			void moveWidgetToLine(MyGUI::Widget * widget, int lineNumber);
+			void updateAttributes();
+			void updateSkillArea();
 
             virtual void open() { onWindowResize(mMainWidget->castType<MyGUI::Window>()); }
 
@@ -53,7 +68,9 @@ namespace MWGui
             void onWindowResize(MyGUI::Window* window);
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
-            static const int sLineHeight;
+            static int sLineHeight;
+			const static int sVerticalPadding = 4; // distance between the MW_Box border and the child widgets
+			const static int sVerticalMargin = 8; // distance between MW_Box widgets
 
             MyGUI::Widget* mLeftPane;
             MyGUI::Widget* mRightPane;
