@@ -5,6 +5,8 @@
 
 #include <components/sceneutil/pathgridutil.hpp>
 
+#include "../../model/prefs/state.hpp"
+
 #include "../../model/world/commands.hpp"
 #include "../../model/world/commandmacro.hpp"
 #include "../../model/world/idtable.hpp"
@@ -53,9 +55,12 @@ namespace CSVRender
 
     void PathgridMode::primaryEditPressed(const WorldspaceHitResult& hitResult)
     {
-        // Get pathgrid cell
-        Cell* cell = getWorldspaceWidget().getCell (hitResult.worldPos);
-        if (cell)
+        if (CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue() &&
+            dynamic_cast<PathgridTag*>(hitResult.tag.get()))
+        {
+            primarySelectPressed(hitResult);
+        }
+        else if (Cell* cell = getWorldspaceWidget().getCell (hitResult.worldPos))
         {
             // Add node
             QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
@@ -126,6 +131,17 @@ namespace CSVRender
     bool PathgridMode::primaryEditStartDrag(const QPoint& pos)
     {
         std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
+
+        if (CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
+        {
+            WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
+
+            if (dynamic_cast<PathgridTag*>(hit.tag.get()))
+            {
+                primarySelectPressed(hit);
+                selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
+            }
+        }
 
         if (!selection.empty())
         {
