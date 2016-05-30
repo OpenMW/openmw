@@ -356,7 +356,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             mCurrentJump.clear();
             if (mAnimation->hasAnimation("jump"))
                 mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, true,
-                             1.0f, "loop stop", "stop", 0.0f, 0);
+                             1.0f, "loop stop", "stop", 0.3f, 0);
         }
     }
 
