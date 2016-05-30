@@ -405,7 +405,7 @@ printf "FFmpeg 2.5.2... "
 		rm -rf ffmpeg-2.5.2-win$BITS-dev
 	fi
 
-	export FFMPEG_SDK="`real_pwd`/FFmpeg"
+	export FFMPEG_HOME="`real_pwd`/FFmpeg"
 	add_runtime_dlls `pwd`/FFmpeg/bin/{avcodec-56,avformat-56,avutil-54,swresample-1,swscale-3}.dll
 
 	if [ $BITS -eq 32 ]; then

@@ -2,7 +2,7 @@
 # - Try to find the required ffmpeg components
 #
 # This module accepts the following env variable
-#  FFMPEG_SDK - Can be set to custom install path
+#  FFMPEG_HOME - Can be set to custom install path
 #
 # Once done this will define
 #  FFmpeg_FOUND         - System has the all required components.
@@ -42,10 +42,11 @@ macro(_internal_find_component _component _pkgconfig _library _header)
     set(_package_component FFmpeg_${_component})
     libfind_pkg_detect(${_package_component} ${_pkgconfig}
         FIND_PATH ${_header}
-            HINTS $ENV{FFMPEG_SDK}/include
-            PATH_SUFFIXES ffmpeg
+            HINTS $ENV{FFMPEG_HOME}
+            PATH_SUFFIXES include ffmpeg
         FIND_LIBRARY ${_library}
-            HINTS $ENV{FFMPEG_SDK}/lib
+            HINTS $ENV{FFMPEG_HOME}
+            PATH_SUFFIXES lib
     )
     set(${_package_component}_DEFINITIONS  ${${_package_component}_PKGCONF_CFLAGS_OTHER})
     set(${_package_component}_VERSION      ${${_package_component}_PKGCONF_VERSION})

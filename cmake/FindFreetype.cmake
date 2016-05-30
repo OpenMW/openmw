@@ -10,7 +10,7 @@
 # - Try to find FreeType
 #
 # This module accepts the following env variable
-#  FREETYPE_SDK - Can be set to custom install path
+#  FREETYPE_DIR - Can be set to custom install path
 #
 # Once done, this will define
 #
@@ -62,11 +62,11 @@ set(_REGULAR_INSTALL_PATHS
 
 libfind_pkg_detect(Freetype freetype2
     FIND_PATH ft2build.h
-        HINTS $ENV{FREETYPE_SDK}
+        HINTS $ENV{FREETYPE_DIR}
         PATHS ${_REGULAR_INSTALL_PATHS}
         PATH_SUFFIXES include freetype2
     FIND_LIBRARY freetype freetype2311 freetype239 freetype238 freetype235 freetype219
-        HINTS $ENV{FREETYPE_SDK}
+        HINTS $ENV{FREETYPE_DIR}
         PATHS ${_REGULAR_INSTALL_PATHS}
         PATH_SUFFIXES lib
 )
