@@ -7,11 +7,11 @@
 #include <components/esm/loadskil.hpp>
 
 namespace MWBase {
-	class World;
+    class World;
 }
 
 namespace MWWorld {
-	class ESMStore;
+    class ESMStore;
 }
 
 namespace MWGui
@@ -44,13 +44,13 @@ namespace MWGui
             void setReputation (int reputation) { if (reputation != mReputation) mChanged = true; this->mReputation = reputation; }
             void setBounty (int bounty) { if (bounty != mBounty) mChanged = true; this->mBounty = bounty; }
 
-			void updateHealthMagickaFatigue(MWBase::World *world);
+            void updateHealthMagickaFatigue(MWBase::World *world);
 
-			void updateLevelRaceClass(MWBase::World *world);
-			void resizeWidgetToLineHeight(MyGUI::Widget * widget);
-			void moveWidgetToLine(MyGUI::Widget * widget, int lineNumber);
-			void updateAttributes();
-			void updateSkillArea();
+            void updateLevelRaceClass(MWBase::World *world);
+            void resizeWidgetToLineHeight(MyGUI::Widget * widget);
+            void moveWidgetToLine(MyGUI::Widget * widget, int lineNumber);
+            void updateAttributes();
+            void updateSkillArea();
 
             virtual void open() { onWindowResize(mMainWidget->castType<MyGUI::Window>()); }
 
@@ -69,8 +69,8 @@ namespace MWGui
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
             static int sLineHeight;
-			const static int sVerticalPadding = 4; // distance between the MW_Box border and the child widgets
-			const static int sVerticalMargin = 8; // distance between MW_Box widgets
+            const static int sVerticalPadding = 4; // distance between the MW_Box border and the child widgets
+            const static int sVerticalMargin = 8; // distance between MW_Box widgets
 
             MyGUI::Widget* mLeftPane;
             MyGUI::Widget* mRightPane;

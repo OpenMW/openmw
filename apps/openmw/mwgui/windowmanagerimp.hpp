@@ -499,6 +499,10 @@ namespace MWGui
 
     std::string mVersionDescription;
 
+    // these handle*Tag methods are called inside onRetrieveTag. They return true if they successfully handle the tag.
+    bool handleCellReferenceTag(std::string tag, MyGUI::UString & _result);
+    bool handleScaleTextTag(std::string tag, MyGUI::UString & _result);
+    bool handleSettingsConfigTag(std::string tag, MyGUI::UString & _result);
     /**
      * Called when MyGUI tries to retrieve a tag's value. Tags must be denoted in #{tag} notation and will be replaced upon setting a user visible text/property.
      * Supported syntax:
