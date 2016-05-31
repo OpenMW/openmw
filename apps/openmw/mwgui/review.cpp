@@ -12,6 +12,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "tooltips.hpp"
+#include "textsizeutil.hpp"
 
 namespace
 {
@@ -25,9 +26,6 @@ namespace
 
 namespace MWGui
 {
-
-    const int ReviewDialog::sLineHeight = 18;
-
     ReviewDialog::ReviewDialog()
         : WindowModal("openmw_chargen_review.layout")
     {
@@ -232,8 +230,8 @@ namespace MWGui
         groupWidget->setCaption(label);
         mSkillWidgets.push_back(groupWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        coord1.top += TextSizeUtil::getLineHeight();
+        coord2.top += TextSizeUtil::getLineHeight();
     }
 
     MyGUI::TextBox* ReviewDialog::addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
@@ -253,8 +251,8 @@ namespace MWGui
         mSkillWidgets.push_back(skillNameWidget);
         mSkillWidgets.push_back(skillValueWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        coord1.top += TextSizeUtil::getLineHeight();
+        coord2.top += TextSizeUtil::getLineHeight();
 
         return skillValueWidget;
     }
@@ -269,8 +267,8 @@ namespace MWGui
 
         mSkillWidgets.push_back(skillNameWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        coord1.top += TextSizeUtil::getLineHeight();
+        coord2.top += TextSizeUtil::getLineHeight();
     }
 
     void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)

@@ -20,11 +20,10 @@
 
 #include "tooltips.hpp"
 #include <components/settings/settings.hpp>
+#include "textsizeutil.hpp"
 
 namespace MWGui
 {
-    int StatsWindow::sLineHeight = 18;
-
     StatsWindow::StatsWindow (DragAndDrop* drag)
       : WindowPinnableBase("openmw_stats_window.layout")
       , NoDrop(drag, mMainWidget)
@@ -42,9 +41,6 @@ namespace MWGui
       , mSkillWidgets()
       , mChanged(true)
     {
-        MyGUI::FontManager& fontMgr = MyGUI::FontManager::getInstance();
-        sLineHeight = fontMgr.getByName(fontMgr.getDefaultFont())->getDefaultHeight();
-
         setCoord(0,0,498, 342);
 
         const char *names[][2] =
@@ -316,8 +312,8 @@ namespace MWGui
         groupWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
         mSkillWidgets.push_back(groupWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        coord1.top += TextSizeUtil::getLineHeight();
+        coord2.top += TextSizeUtil::getLineHeight();
     }
 
     MyGUI::TextBox* StatsWindow::addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
@@ -341,8 +337,8 @@ namespace MWGui
         mSkillWidgets.push_back(skillNameWidget);
         mSkillWidgets.push_back(skillValueWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        coord1.top += TextSizeUtil::getLineHeight();
+        coord2.top += TextSizeUtil::getLineHeight();
 
         return skillValueWidget;
     }
@@ -361,8 +357,8 @@ namespace MWGui
 
         mSkillWidgets.push_back(skillNameWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        coord1.top += TextSizeUtil::getLineHeight();
+        coord2.top += TextSizeUtil::getLineHeight();
 
         return skillNameWidget;
     }
@@ -448,7 +444,7 @@ namespace MWGui
         }
     }
 
-	void StatsWindow::updateHealthMagickaFatigue(MWBase::World *world)
+    void StatsWindow::updateHealthMagickaFatigue(MWBase::World *world)
     {
         static const char *HealthMagickaFatigueRowWidgets[] = { "Health", "Magicka", "Fatigue", NULL };
         static const char *widgetsToResize[] = { "Health", "Health_str", "HBar", "HBarT", "Magicka", "Magicka_str", "MBar", "MBarT",  "Fatigue", "Fatigue_str", "FBar", "FBarT", NULL };
@@ -459,13 +455,13 @@ namespace MWGui
         for(iResize = 0; widgetsToResize[iResize] != NULL; ++iResize)
         {
             getWidget(pWidget, widgetsToResize[iResize]);
-            resizeWidgetToLineHeight(pWidget);
+            TextSizeUtil::resizeWidgetToLineHeight(pWidget);
         }
 
         for (line = 0; HealthMagickaFatigueRowWidgets[line] != NULL; ++line)
         {
             getWidget(pWidget, HealthMagickaFatigueRowWidgets[line]);
-            moveWidgetToLine(pWidget, line);
+            TextSizeUtil::moveWidgetToLine(pWidget, line, sVerticalPadding);
             borderHeight += pWidget->getCoord().height;
         }
         borderHeight += (2 * sVerticalPadding);
@@ -493,18 +489,18 @@ namespace MWGui
         for(iResize = 0; widgetsToResize[iResize] != NULL; ++iResize)
         {
             getWidget(pWidget, widgetsToResize[iResize]);
-            resizeWidgetToLineHeight(pWidget);
+            TextSizeUtil::resizeWidgetToLineHeight(pWidget);
         }
 
         for (line = 0; LevelRaceClassRowWidgets[line] != NULL; ++line)
         {
             getWidget(pWidget, LevelRaceClassRowWidgets[line]);
-            moveWidgetToLine(pWidget, line);
+            TextSizeUtil::moveWidgetToLine(pWidget, line, sVerticalPadding);
             borderHeight += pWidget->getCoord().height;
         }
 
         borderHeight += (2 * sVerticalPadding);
-		
+
         getWidget(pWidget, "RaceText");
         ToolTips::createRaceToolTip(pWidget, playerRace);
         getWidget(pWidget, "Race_str");
@@ -534,17 +530,18 @@ namespace MWGui
 
         int line = 0, iWidget = 0;
 
-        for (line = 0; AttributeRowWidgets[line] != NULL; ++line)
-        {
-            getWidget(pWidget, AttributeRowWidgets[line]);
-            moveWidgetToLine(pWidget, line);
-        }
-
         for (iWidget = 0; widgetsToResize[iWidget] != NULL; ++iWidget)
         {
             getWidget(pWidget, widgetsToResize[iWidget]);
-            resizeWidgetToLineHeight(pWidget);
+            TextSizeUtil::resizeWidgetToLineHeight(pWidget);
         }
+
+        for (line = 0; AttributeRowWidgets[line] != NULL; ++line)
+        {
+            getWidget(pWidget, AttributeRowWidgets[line]);
+            TextSizeUtil::moveWidgetToLine(pWidget, line, sVerticalPadding);
+        }
+
         const MyGUI::IntCoord &attribCoord = pAttributeWidget->getCoord();
         int top = pHealthMagickaStaminaWidget->getCoord().height + pLevelRaceClassWidget->getCoord().height + (3 * sVerticalMargin);
         int heightDiff = top - attribCoord.top;
@@ -552,24 +549,9 @@ namespace MWGui
         pAttributeWidget->setCoord(attribCoord.left, top, attribCoord.width, attribCoord.height - heightDiff);
     }
 
-    void StatsWindow::resizeWidgetToLineHeight(MyGUI::Widget *widget)
-    {
-        if (widget == NULL) return;
-        const MyGUI::IntCoord &baseCoordinates = widget->getCoord();
+    
 
-        widget->setCoord(baseCoordinates.left, baseCoordinates.top, baseCoordinates.width, sLineHeight);
-    }
-
-    void StatsWindow::moveWidgetToLine(MyGUI::Widget *widget, int lineNumber)
-    {
-        if (widget == NULL) return;
-
-        int top = 0;
-        const MyGUI::IntCoord &baseCoordinates = widget->getCoord();
-        top = (lineNumber*sLineHeight) + sVerticalPadding;
-
-        widget->setCoord(baseCoordinates.left, top, baseCoordinates.width, baseCoordinates.height);
-    }
+    
 
     void StatsWindow::updateSkillArea()
     {
@@ -582,8 +564,8 @@ namespace MWGui
         mSkillWidgets.clear();
 
         const int valueSize = 40;
-        MyGUI::IntCoord coord1(10, 0, mSkillView->getWidth() - (10 + valueSize) - 24, sLineHeight);
-        MyGUI::IntCoord coord2(coord1.left + coord1.width, coord1.top, valueSize, sLineHeight);
+        MyGUI::IntCoord coord1(10, 0, mSkillView->getWidth() - (10 + valueSize) - 24, TextSizeUtil::getLineHeight());
+        MyGUI::IntCoord coord2(coord1.left + coord1.width, coord1.top, valueSize, TextSizeUtil::getLineHeight());
 
         if (!mMajorSkills.empty())
             addSkills(mMajorSkills, "sSkillClassMajor", "Major Skills", coord1, coord2);

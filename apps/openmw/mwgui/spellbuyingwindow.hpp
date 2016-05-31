@@ -42,8 +42,6 @@ namespace MWGui
             void clearSpells();
             int mLastPos,mCurrentY;
 
-            static const int sLineHeight;
-
             void updateLabels();
 
             virtual void onReferenceUnavailable();

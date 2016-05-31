@@ -410,11 +410,11 @@
     </Resource>
 
     <Resource type="ResourceSkin" name="HB_ALL" size="260 20">
-        <Child type="Widget" skin="HB_MID" offset="2 2 256 16" align="Top Left HStretch"/>
+        <Child type="Widget" skin="HB_MID" offset="2 2 256 16" align="Top Left Stretch"/>
         <Child type="Widget" skin="HB_TOP" offset="2 0 256 2" align="Top HStretch HStretch"/>
         <Child type="Widget" skin="HB_BOTTOM" offset="2 18 256 2" align="Bottom HStretch"/>
-        <Child type="Widget" skin="HB_LEFT" offset="0 2 2 16" align="Top Left"/>
-        <Child type="Widget" skin="HB_RIGHT" offset="258 2 2 16" align="Top Right"/>
+        <Child type="Widget" skin="HB_LEFT" offset="0 2 2 16" align="Left VStretch"/>
+        <Child type="Widget" skin="HB_RIGHT" offset="258 2 2 16" align="Right VStretch"/>
         <Child type="Widget" skin="HB_TR" offset="258 0 2 2" align="Top Right"/>
         <Child type="Widget" skin="HB_TL" offset="0 0 2 2" align="Top Left"/>
         <Child type="Widget" skin="HB_BR" offset="258 18 2 2" align="Bottom Right"/>
@@ -430,6 +430,21 @@
         <Child type="Widget" skin="HB_ALL" offset="0 0 30 20" align="Default" name="Left"/>
         <Child type="TextBox" skin="SandText" offset="30 0 28 20" align="Left VStretch" name="Client"/>
         <Child type="Widget" skin="HB_ALL" offset="0 0 30 20" align="Right" name="Right"/>
+    </Resource>
+
+    <!-- Same as MW_Caption, but reserves some free space on the right for the Pin button -
+       i.e. not allowing the caption label to stretch there, but still showing the tiling background. -->
+    <Resource type="ResourceLayout" name="MW_Caption_Pin" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 88 20" name="Root">
+            <Widget type="Widget" skin="HB_ALL" position="0 0 30 20" align="Left" name="Left"/>
+            <Widget type="Widget" skin="" position="0 0 69 20" align="Stretch">
+                <Widget type="TextBox" skin="SandText" position="30 0 28 20" align="Left VStretch" name="Client">
+                    <Property key="FontName" value="Default"/>
+                    <Property key="TextAlign" value="Center"/>
+                </Widget>
+            </Widget>
+            <Widget type="Widget" skin="HB_ALL" position="0 0 30 20" align="Right" name="Right"/>
+        </Widget>
     </Resource>
 
 <!-- ----------------------------------------------------

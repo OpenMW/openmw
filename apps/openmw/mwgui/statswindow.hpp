@@ -45,10 +45,7 @@ namespace MWGui
             void setBounty (int bounty) { if (bounty != mBounty) mChanged = true; this->mBounty = bounty; }
 
             void updateHealthMagickaFatigue(MWBase::World *world);
-
             void updateLevelRaceClass(MWBase::World *world);
-            void resizeWidgetToLineHeight(MyGUI::Widget * widget);
-            void moveWidgetToLine(MyGUI::Widget * widget, int lineNumber);
             void updateAttributes();
             void updateSkillArea();
 
@@ -68,7 +65,6 @@ namespace MWGui
             void onWindowResize(MyGUI::Window* window);
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
-            static int sLineHeight;
             const static int sVerticalPadding = 4; // distance between the MW_Box border and the child widgets
             const static int sVerticalMargin = 8; // distance between MW_Box widgets
 
