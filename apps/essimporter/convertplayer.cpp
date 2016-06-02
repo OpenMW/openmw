@@ -28,7 +28,7 @@ namespace ESSImport
         if (pcdt.mPNAM.mDrawState & PCDT::DrawState_Spell)
             out.mObject.mCreatureStats.mDrawState = 2;
 
-        firstPersonCam = (pcdt.mPNAM.mCameraState == PCDT::CameraState_FirstPerson);
+        firstPersonCam = !(pcdt.mPNAM.mCameraFlags & PCDT::CameraFlag_ThirdPerson);
 
         for (std::vector<std::string>::const_iterator it = pcdt.mKnownDialogueTopics.begin();
              it != pcdt.mKnownDialogueTopics.end(); ++it)
