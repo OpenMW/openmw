@@ -508,6 +508,9 @@ namespace MWScript
                     Interpreter::Type_Integer direction = runtime[0].mInteger;
                     runtime.pop();
 
+                    if (direction < 0 || direction > 3)
+                        throw std::runtime_error ("invalid direction");
+
                     if (count<0)
                         throw std::runtime_error ("count must be non-negative");
 
