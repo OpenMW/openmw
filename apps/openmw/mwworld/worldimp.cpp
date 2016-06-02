@@ -1326,10 +1326,11 @@ namespace MWWorld
 
         int fallbackDirections[4] = {direction, (direction+3)%4, (direction+2)%4, (direction+1)%4};
 
+        osg::Vec3f spawnPoint = pos;
+
         for (int i=0; i<4; ++i)
         {
             direction = fallbackDirections[i];
-            osg::Vec3f spawnPoint = pos;
             if (direction == 0) spawnPoint = pos + (orientation * osg::Vec3f(0,1,0)) * distance;
             else if(direction == 1) spawnPoint = pos - (orientation * osg::Vec3f(0,1,0)) * distance;
             else if(direction == 2) spawnPoint = pos - (orientation * osg::Vec3f(1,0,0)) * distance;
@@ -1345,12 +1346,12 @@ namespace MWWorld
                                                                pos.x(), pos.y(), pos.z() + 20))
             {
                 // safe
-                ipos.pos[0] = spawnPoint.x();
-                ipos.pos[1] = spawnPoint.y();
-                ipos.pos[2] = spawnPoint.z();
                 break;
             }
         }
+        ipos.pos[0] = spawnPoint.x();
+        ipos.pos[1] = spawnPoint.y();
+        ipos.pos[2] = spawnPoint.z();
 
         if (!referenceObject.getClass().isActor())
         {
