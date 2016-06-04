@@ -55,14 +55,13 @@ namespace CSVRender
         , mId(pathgridId)
         , mCoords(coordinates)
         , mInterior(false)
-        , mConnectionIndicator(false)
-        , mConnectionNode(0)
+        , mDragOrigin(0)
         , mChangeGeometry(true)
         , mRemoveGeometry(false)
+        , mUseOffset(true)
         , mParent(parent)
         , mPathgridGeometry(0)
-        , mSelectedGeometry(0)
-        , mConnectionGeometry(0)
+        , mDragGeometry(0)
         , mTag(new PathgridTag(this))
     {
         const float CoordScalar = ESM::Land::REAL_SIZE;
@@ -74,14 +73,8 @@ namespace CSVRender
         mBaseNode->setNodeMask(Mask_Pathgrid);
         mParent->addChild(mBaseNode);
 
-        mSelectedNode = new osg::PositionAttitudeTransform();
-        mBaseNode->addChild(mSelectedNode);
-
         mPathgridGeode = new osg::Geode();
         mBaseNode->addChild(mPathgridGeode);
-
-        mSelectedGeode = new osg::Geode();
-        mSelectedNode->addChild(mSelectedGeode);
 
         recreateGeometry();
 
@@ -181,67 +174,56 @@ namespace CSVRender
 
     void Pathgrid::moveSelected(const osg::Vec3d& offset)
     {
-        mSelectedNode->setPosition(mSelectedNode->getPosition() + offset);
+        mUseOffset = true;
+        mMoveOffset += offset;
+
+        recreateGeometry();
     }
 
-    void Pathgrid::setupConnectionIndicator(unsigned short node)
+    void Pathgrid::setDragOrigin(unsigned short node)
     {
-        mConnectionIndicator = true;
-        mConnectionNode = node;
-        createSelectedGeometry();
+        mDragOrigin = node;
     }
 
-    void Pathgrid::adjustConnectionIndicator(unsigned short node)
+    void Pathgrid::setDragEndpoint(unsigned short node)
     {
-        if (mConnectionIndicator)
+        const CSMWorld::Pathgrid* source = getPathgridSource();
+        if (source)
         {
-            const CSMWorld::Pathgrid* source = getPathgridSource();
-            if (source)
-            {
-                const CSMWorld::Pathgrid::Point& pointA = source->mPoints[mConnectionNode];
-                const CSMWorld::Pathgrid::Point& pointB = source->mPoints[node];
+            const CSMWorld::Pathgrid::Point& pointA = source->mPoints[mDragOrigin];
+            const CSMWorld::Pathgrid::Point& pointB = source->mPoints[node];
 
-                osg::Vec3f start = osg::Vec3f(pointA.mX, pointA.mY, pointA.mZ + SceneUtil::DiamondHalfHeight);
-                osg::Vec3f end = osg::Vec3f(pointB.mX, pointB.mY, pointB.mZ + SceneUtil::DiamondHalfHeight);
+            osg::Vec3f start = osg::Vec3f(pointA.mX, pointA.mY, pointA.mZ + SceneUtil::DiamondHalfHeight);
+            osg::Vec3f end = osg::Vec3f(pointB.mX, pointB.mY, pointB.mZ + SceneUtil::DiamondHalfHeight);
 
-                createConnectionGeometry(start, end, true);
-            }
+            createDragGeometry(start, end, true);
         }
     }
 
-    void Pathgrid::adjustConnectionIndicator(const osg::Vec3d& pos)
+    void Pathgrid::setDragEndpoint(const osg::Vec3d& pos)
     {
-        if (mConnectionIndicator)
+        const CSMWorld::Pathgrid* source = getPathgridSource();
+        if (source)
         {
-            const CSMWorld::Pathgrid* source = getPathgridSource();
-            if (source)
-            {
-                const CSMWorld::Pathgrid::Point& point = source->mPoints[mConnectionNode];
+            const CSMWorld::Pathgrid::Point& point = source->mPoints[mDragOrigin];
 
-                osg::Vec3f start = osg::Vec3f(point.mX, point.mY, point.mZ + SceneUtil::DiamondHalfHeight);
-                osg::Vec3f end = pos - mBaseNode->getPosition();
-                createConnectionGeometry(start, end, false);
-            }
+            osg::Vec3f start = osg::Vec3f(point.mX, point.mY, point.mZ + SceneUtil::DiamondHalfHeight);
+            osg::Vec3f end = pos - mBaseNode->getPosition();
+            createDragGeometry(start, end, false);
         }
     }
 
     void Pathgrid::resetIndicators()
     {
-        mSelectedNode->setPosition(osg::Vec3f(0,0,0));
-        if (mConnectionIndicator)
-        {
-            mConnectionIndicator = false;
+        mUseOffset = false;
+        mMoveOffset.set(0, 0, 0);
 
-            mPathgridGeode->removeDrawable(mConnectionGeometry);
-            mConnectionGeometry = 0;
-
-            createSelectedGeometry();
-        }
+        mPathgridGeode->removeDrawable(mDragGeometry);
+        mDragGeometry = 0;
     }
 
     void Pathgrid::applyPoint(CSMWorld::CommandMacro& commands, const osg::Vec3d& worldPos)
     {
-
         CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
                 CSMWorld::UniversalId::Type_Pathgrids));
 
@@ -310,7 +292,7 @@ namespace CSVRender
         const CSMWorld::Pathgrid* source = getPathgridSource();
         if (source)
         {
-            osg::Vec3d localCoords = mSelectedNode->getPosition();
+            osg::Vec3d localCoords = mMoveOffset;
 
             int offsetX = static_cast<int>(localCoords.x());
             int offsetY = static_cast<int>(localCoords.y());
@@ -525,6 +507,21 @@ namespace CSVRender
         const CSMWorld::Pathgrid* source = getPathgridSource();
         if (source)
         {
+            CSMWorld::Pathgrid temp;
+            if (mUseOffset)
+            {
+                temp = *source;
+
+                for (NodeList::iterator it = mSelected.begin(); it != mSelected.end(); ++it)
+                {
+                    temp.mPoints[*it].mX += mMoveOffset.x();
+                    temp.mPoints[*it].mY += mMoveOffset.y();
+                    temp.mPoints[*it].mZ += mMoveOffset.z();
+                }
+
+                source = &temp;
+            }
+
             removePathgridGeometry();
             mPathgridGeometry = SceneUtil::createPathgridGeometry(*source);
             mPathgridGeode->addDrawable(mPathgridGeometry);
@@ -555,24 +552,8 @@ namespace CSVRender
     {
         removeSelectedGeometry();
 
-        if (mConnectionIndicator)
-        {
-            NodeList tempList = NodeList(mSelected);
-
-            NodeList::iterator searchResult = std::find(tempList.begin(), tempList.end(), mConnectionNode);
-            if (searchResult != tempList.end())
-                tempList.erase(searchResult);
-
-            tempList.push_back(mConnectionNode);
-
-            mSelectedGeometry = SceneUtil::createPathgridSelectedWireframe(source, tempList);
-            mSelectedGeode->addDrawable(mSelectedGeometry);
-        }
-        else
-        {
-            mSelectedGeometry = SceneUtil::createPathgridSelectedWireframe(source, mSelected);
-            mSelectedGeode->addDrawable(mSelectedGeometry);
-        }
+        mSelectedGeometry = SceneUtil::createPathgridSelectedWireframe(source, mSelected);
+        mPathgridGeode->addDrawable(mSelectedGeometry);
     }
 
     void Pathgrid::removePathgridGeometry()
@@ -588,17 +569,17 @@ namespace CSVRender
     {
         if (mSelectedGeometry)
         {
-            mSelectedGeode->removeDrawable(mSelectedGeometry);
+            mPathgridGeode->removeDrawable(mSelectedGeometry);
             mSelectedGeometry = 0;
         }
     }
 
-    void Pathgrid::createConnectionGeometry(const osg::Vec3f& start, const osg::Vec3f& end, bool valid)
+    void Pathgrid::createDragGeometry(const osg::Vec3f& start, const osg::Vec3f& end, bool valid)
     {
-        if (mConnectionGeometry)
-            mPathgridGeode->removeDrawable(mConnectionGeometry);
+        if (mDragGeometry)
+            mPathgridGeode->removeDrawable(mDragGeometry);
 
-        mConnectionGeometry = new osg::Geometry();
+        mDragGeometry = new osg::Geometry();
 
         osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(2);
         osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(1);
@@ -619,12 +600,12 @@ namespace CSVRender
         indices->setElement(0, 0);
         indices->setElement(1, 1);
 
-        mConnectionGeometry->setVertexArray(vertices);
-        mConnectionGeometry->setColorArray(colors, osg::Array::BIND_OVERALL);
-        mConnectionGeometry->addPrimitiveSet(indices);
-        mConnectionGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+        mDragGeometry->setVertexArray(vertices);
+        mDragGeometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+        mDragGeometry->addPrimitiveSet(indices);
+        mDragGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
-        mPathgridGeode->addDrawable(mConnectionGeometry);
+        mPathgridGeode->addDrawable(mDragGeometry);
     }
 
     const CSMWorld::Pathgrid* Pathgrid::getPathgridSource()

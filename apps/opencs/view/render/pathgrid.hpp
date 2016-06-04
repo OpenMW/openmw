@@ -5,6 +5,7 @@
 
 #include <QString>
 #include <osg/ref_ptr>
+#include <osg/Vec3d>
 
 #include "../../model/world/cellcoordinates.hpp"
 #include "../../model/world/idcollection.hpp"
@@ -18,7 +19,6 @@ namespace osg
     class Geometry;
     class Group;
     class PositionAttitudeTransform;
-    class Vec3d;
 }
 
 namespace CSMWorld
@@ -69,9 +69,9 @@ namespace CSVRender
             void clearSelected();
 
             void moveSelected(const osg::Vec3d& offset);
-            void setupConnectionIndicator(unsigned short node);
-            void adjustConnectionIndicator(unsigned short node);
-            void adjustConnectionIndicator(const osg::Vec3d& pos);
+            void setDragOrigin(unsigned short node);
+            void setDragEndpoint(unsigned short node);
+            void setDragEndpoint(const osg::Vec3d& pos);
 
             void resetIndicators();
 
@@ -98,20 +98,19 @@ namespace CSVRender
             bool mInterior;
 
             NodeList mSelected;
-            bool mConnectionIndicator;
-            unsigned short mConnectionNode;
+            osg::Vec3d mMoveOffset;
+            unsigned short mDragOrigin;
 
             bool mChangeGeometry;
             bool mRemoveGeometry;
+            bool mUseOffset;
 
             osg::Group* mParent;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
-            osg::ref_ptr<osg::PositionAttitudeTransform> mSelectedNode;
             osg::ref_ptr<osg::Geode> mPathgridGeode;
-            osg::ref_ptr<osg::Geode> mSelectedGeode;
             osg::ref_ptr<osg::Geometry> mPathgridGeometry;
             osg::ref_ptr<osg::Geometry> mSelectedGeometry;
-            osg::ref_ptr<osg::Geometry> mConnectionGeometry;
+            osg::ref_ptr<osg::Geometry> mDragGeometry;
 
             osg::ref_ptr<PathgridTag> mTag;
 
@@ -121,7 +120,7 @@ namespace CSVRender
             void removePathgridGeometry();
             void removeSelectedGeometry();
 
-            void createConnectionGeometry(const osg::Vec3f& start, const osg::Vec3f& end, bool valid);
+            void createDragGeometry(const osg::Vec3f& start, const osg::Vec3f& end, bool valid);
 
             const CSMWorld::Pathgrid* getPathgridSource();
 

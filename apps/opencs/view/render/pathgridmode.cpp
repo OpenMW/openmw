@@ -163,7 +163,7 @@ namespace CSVRender
                 mEdgeId = tag->getPathgrid()->getId();
                 mFromNode = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
 
-                tag->getPathgrid()->setupConnectionIndicator(mFromNode);
+                tag->getPathgrid()->setDragOrigin(mFromNode);
                 return true;
             }
         }
@@ -201,11 +201,11 @@ namespace CSVRender
                 if (hit.tag && (tag = dynamic_cast<PathgridTag*>(hit.tag.get())) && tag->getPathgrid()->getId() == mEdgeId)
                 {
                     unsigned short node = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
-                    cell->getPathgrid()->adjustConnectionIndicator(node);
+                    cell->getPathgrid()->setDragEndpoint(node);
                 }
                 else
                 {
-                    cell->getPathgrid()->adjustConnectionIndicator(hit.worldPos);
+                    cell->getPathgrid()->setDragEndpoint(hit.worldPos);
                 }
 
             }
