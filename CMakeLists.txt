@@ -281,10 +281,7 @@ endif()
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
-find_package(Bullet REQUIRED)
-if (NOT BULLET_FOUND OR BULLET_VERSION VERSION_LESS 283)
-    message(FATAL_ERROR "OpenMW requires Bullet version 2.83 or later")
-endif()
+find_package(Bullet 283 REQUIRED COMPONENTS BulletCollision LinearMath)
 
 include_directories("."
     SYSTEM
@@ -292,7 +289,7 @@ include_directories("."
     ${Boost_INCLUDE_DIR}
     ${MYGUI_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
-    ${BULLET_INCLUDE_DIRS}
+    ${Bullet_INCLUDE_DIRS}
 )
 
 link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${MYGUI_LIB_DIR})

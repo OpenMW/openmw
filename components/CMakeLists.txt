@@ -181,7 +181,7 @@ if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     endif()
 endif ()
 
-include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${Bullet_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
@@ -205,7 +205,7 @@ target_link_libraries(components
     ${OSGGA_LIBRARIES}
     ${OSGFX_LIBRARIES}
     ${OSGANIMATION_LIBRARIES}
-    ${BULLET_LIBRARIES}
+    ${Bullet_LIBRARIES}
     ${SDL2_LIBRARY}
     # For MyGUI platform
     ${GL_LIB}

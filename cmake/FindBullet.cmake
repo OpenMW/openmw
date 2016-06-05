@@ -1,18 +1,20 @@
 # - Try to find the Bullet physics engine
 #
-#  This module defines the following variables
-#
-#  BULLET_FOUND - Was bullet found
-#  BULLET_INCLUDE_DIRS - the Bullet include directories
-#  BULLET_LIBRARIES - Link to this, by default it includes
-#                     all bullet components (Dynamics,
-#                     Collision, LinearMath, & SoftBody)
-#
-#  This module accepts the following variables
-#
+# This module accepts the following env variables
 #  BULLET_ROOT - Can be set to bullet install path or Windows build path
 #
-
+# Once done this will define
+#  Bullet_FOUND         - System has the all required components.
+#  Bullet_INCLUDE_DIRS  - Include directory necessary for using the required components headers.
+#  Bullet_LIBRARIES     - Link these to use the required bullet components.
+#  Bullet_VERSION       - Version of libbullet
+#
+# For each of the components
+#   - LinearMath
+#   - BulletCollision
+#   - BulletSoftBody
+#   - BulletDynamics
+#
 # Copyright (c) 2009, Philip Lowman <philip at yhbt.com>
 # Modified for OpenMW to parse BT_BULLET_VERSION.
 #
@@ -20,67 +22,52 @@
 # BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
-include(PreprocessorUtils)
+include(LibFindMacros)
 
-set(BULLET_ROOT $ENV{BULLET_ROOT})
-
-macro(_FIND_BULLET_LIBRARY _var)
-  find_library(${_var}
-     NAMES
-        ${ARGN}
-     PATHS
-        ${BULLET_ROOT}
-		${BULLET_ROOT}/lib/Debug
-		${BULLET_ROOT}/lib/Release
-        ${BULLET_ROOT}/out/release8/libs
-        ${BULLET_ROOT}/out/debug8/libs
-     PATH_SUFFIXES lib
-  )
-  mark_as_advanced(${_var})
+# Macro: _internal_find_bullet_library
+# Checks for the given component by invoking pkgconfig etc.
+macro(_internal_find_bullet_library _lib)
+    libfind_pkg_detect(Bullet_${_lib} bullet
+        FIND_LIBRARY ${_lib}
+            HINTS $ENV{BULLET_ROOT}
+            PATH_SUFFIXES lib
+    )
+    libfind_process(Bullet_${_lib})
 endmacro()
 
-macro(_BULLET_APPEND_LIBRARIES _list _release)
-   set(_debug ${_release}_DEBUG)
-   if(${_debug})
-      set(${_list} ${${_list}} optimized ${${_release}} debug ${${_debug}})
-   else()
-      set(${_list} ${${_list}} ${${_release}})
-   endif()
-endmacro()
+set(_known_components LinearMath BulletCollision BulletSoftBody BulletDynamics)
 
-find_path(BULLET_INCLUDE_DIR NAMES btBulletCollisionCommon.h
-  PATHS
-    ${BULLET_ROOT}/include
-    ${BULLET_ROOT}/src
-  PATH_SUFFIXES bullet
+# Check if the required components were found and add their stuff to the Bullet_* vars.
+foreach (_component ${Bullet_FIND_COMPONENTS})
+    list(FIND _known_components ${_component} _known_component)
+    if (_known_component EQUAL -1)
+        message(FATAL_ERROR "Unknown component '${_component}'")
+    endif()
+
+    set(Bullet_${_component}_Debug_FIND_QUIETLY TRUE) # don't spam messages with optional Debug component
+    _internal_find_bullet_library(${_component})
+    _internal_find_bullet_library(${_component}_Debug)
+
+    if (Bullet_${_component}_Debug_FOUND)
+        set(Bullet_LIBRARIES ${Bullet_LIBRARIES} optimized ${Bullet_${_component}_LIBRARIES} debug ${Bullet_${_component}_Debug_LIBRARIES})
+    else()
+        set(Bullet_LIBRARIES ${Bullet_LIBRARIES} ${Bullet_${_component}_LIBRARIES})
+    endif()
+endforeach()
+
+libfind_pkg_detect(Bullet bullet
+    FIND_PATH btBulletCollisionCommon.h
+        HINTS $ENV{BULLET_ROOT}
+        PATH_SUFFIXES include/bullet
 )
+set(Bullet_INCLUDE_DIRS ${Bullet_INCLUDE_DIR})
+libfind_version_header(Bullet LinearMath/btScalar.h BT_BULLET_VERSION)
 
-# Find the libraries
-
-#_FIND_BULLET_LIBRARY(BULLET_DYNAMICS_LIBRARY        BulletDynamics)
-#_FIND_BULLET_LIBRARY(BULLET_DYNAMICS_LIBRARY_DEBUG  BulletDynamics_Debug BulletDynamics_d)
-_FIND_BULLET_LIBRARY(BULLET_COLLISION_LIBRARY       BulletCollision)
-_FIND_BULLET_LIBRARY(BULLET_COLLISION_LIBRARY_DEBUG BulletCollision_Debug BulletCollision_d)
-_FIND_BULLET_LIBRARY(BULLET_MATH_LIBRARY            BulletMath LinearMath)
-_FIND_BULLET_LIBRARY(BULLET_MATH_LIBRARY_DEBUG      BulletMath_Debug BulletMath_d LinearMath_debug LinearMath_d)
-
-
-# handle the QUIETLY and REQUIRED arguments and set BULLET_FOUND to TRUE if
-# all listed variables are TRUE
-include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Bullet DEFAULT_MSG
-    #BULLET_DYNAMICS_LIBRARY
-    BULLET_COLLISION_LIBRARY BULLET_MATH_LIBRARY
-    BULLET_INCLUDE_DIR)
-
-set(BULLET_INCLUDE_DIRS ${BULLET_INCLUDE_DIR})
-if(BULLET_FOUND)
-   #_BULLET_APPEND_LIBRARIES(BULLET_LIBRARIES BULLET_DYNAMICS_LIBRARY)
-   _BULLET_APPEND_LIBRARIES(BULLET_LIBRARIES BULLET_COLLISION_LIBRARY)
-   _BULLET_APPEND_LIBRARIES(BULLET_LIBRARIES BULLET_MATH_LIBRARY)
-
-    find_file(BULLET_BTSCALAR_FILE NAMES btScalar.h PATHS "${BULLET_INCLUDE_DIR}/LinearMath")
-    file(READ ${BULLET_BTSCALAR_FILE} BULLET_BTSCALAR_CONTENT)
-    get_preprocessor_entry(BULLET_BTSCALAR_CONTENT BT_BULLET_VERSION BULLET_VERSION)
-    message(STATUS "Bullet version: ${BULLET_VERSION}")
-endif()
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Bullet
+    FOUND_VAR Bullet_FOUND
+    VERSION_VAR Bullet_VERSION
+    HANDLE_COMPONENTS
+    REQUIRED_VARS
+        Bullet_LIBRARIES
+        Bullet_INCLUDE_DIR
+)
