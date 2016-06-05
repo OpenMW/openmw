@@ -87,8 +87,7 @@ namespace MWMechanics
             /// Upon adding this Ai package, should the Ai Sequence attempt to cancel previous Ai packages (default true)?
             virtual bool shouldCancelPreviousAi() const;
 
-            /// Return true if this package should repeat. Can only be false for AIWander, if AIWander is assigned
-            /// assigned through the console or script.
+            /// Return true if this package should repeat. Currently only used for Wander packages.
             virtual bool getRepeat() const;
 
             bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
