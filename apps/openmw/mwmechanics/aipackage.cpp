@@ -47,7 +47,7 @@ bool MWMechanics::AiPackage::shouldCancelPreviousAi() const
 
 bool MWMechanics::AiPackage::getRepeat() const
 {
-    return true;
+    return false;
 }
 
 MWMechanics::AiPackage::AiPackage() : mTimer(0.26f), mStarted(false) { //mTimer starts at .26 to force initial pathbuild
