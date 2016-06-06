@@ -639,20 +639,6 @@ private:
 };
 
 
-// declare C entry point for static compilation.
-extern "C" void graphicswindow_Qt(void)
-{
-    osg::GraphicsContext::setWindowingSystemInterface(QtWindowingSystem::getInterface());
-}
-
-
-void osgQt::initQtWindowingSystem()
-{
-    graphicswindow_Qt();
-}
-
-
-
 void osgQt::setViewer( osgViewer::ViewerBase *viewer )
 {
     HeartBeat::instance()->init( viewer );

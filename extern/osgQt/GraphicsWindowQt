@@ -37,9 +37,6 @@ namespace osgQt
 // forward declarations
 class GraphicsWindowQt;
 
-/// The function sets the WindowingSystem to Qt.
-void initQtWindowingSystem();
-
 /** The function sets the viewer that will be used after entering
  *  the Qt main loop (QCoreApplication::exec()).
  *
