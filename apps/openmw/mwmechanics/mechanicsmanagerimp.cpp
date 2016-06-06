@@ -928,7 +928,7 @@ namespace MWMechanics
             return true;
         }
 
-        if(MWMechanics::isPlayerInCombat()) {
+        if(MWBase::Environment::get().getWorld()->getPlayer().enemiesNearby()) {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}");
             return true;
         }
@@ -1505,6 +1505,10 @@ namespace MWMechanics
 
     std::list<MWWorld::Ptr> MechanicsManager::getActorsFighting(const MWWorld::Ptr& actor) {
         return mActors.getActorsFighting(actor);
+    }
+
+    std::list<MWWorld::Ptr> MechanicsManager::getEnemiesNearby(const MWWorld::Ptr& actor) {
+        return mActors.getEnemiesNearby(actor);
     }
 
     int MechanicsManager::countSavedGameRecords() const

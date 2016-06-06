@@ -145,6 +145,9 @@ void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float
 namespace MWMechanics
 {
 
+    const float aiProcessingDistance = 7168;
+    const float sqrAiProcessingDistance = aiProcessingDistance*aiProcessingDistance;
+
     class SoulTrap : public MWMechanics::EffectSourceVisitor
     {
         MWWorld::Ptr mCreature;
@@ -291,7 +294,7 @@ namespace MWMechanics
         const ESM::Position& actor1Pos = actor1.getRefData().getPosition();
         const ESM::Position& actor2Pos = actor2.getRefData().getPosition();
         float sqrDist = (actor1Pos.asVec3() - actor2Pos.asVec3()).length2();
-        if (sqrDist > 7168*7168)
+        if (sqrDist > sqrAiProcessingDistance)
             return;
 
         // pure water creatures won't try to fight with the target on the ground
@@ -974,19 +977,17 @@ namespace MWMechanics
 
             int hostilesCount = 0; // need to know this to play Battle music
 
-            // AI processing is only done within distance of 7168 units to the player. Note the "AI distance" slider doesn't affect this
-            // (it only does some throttling for targets beyond the "AI distance", so doesn't give any guarantees as to whether AI will be enabled or not)
-            // This distance could be made configurable later, but the setting must be marked with a big warning:
-            // using higher values will make a quest in Bloodmoon harder or impossible to complete (bug #1876)
-            const float sqrProcessingDistance = 7168*7168;
-
             /// \todo move update logic to Actor class where appropriate
 
              // AI and magic effects update
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
+                // AI processing is only done within distance of 7168 units to the player. Note the "AI distance" slider doesn't affect this
+                // (it only does some throttling for targets beyond the "AI distance", so doesn't give any guarantees as to whether AI will be enabled or not)
+                // This distance could be made configurable later, but the setting must be marked with a big warning:
+                // using higher values will make a quest in Bloodmoon harder or impossible to complete (bug #1876)
                 bool inProcessingRange = (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2()
-                        <= sqrProcessingDistance;
+                        <= sqrAiProcessingDistance;
 
                 iter->second->getCharacterController()->setActive(inProcessingRange);
 
@@ -1064,7 +1065,7 @@ namespace MWMechanics
             {
                 if (iter->first != player &&
                         (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2()
-                        > sqrProcessingDistance)
+                        > sqrAiProcessingDistance)
                     continue;
 
                 if (iter->first.getClass().getCreatureStats(iter->first).isParalyzed())
@@ -1391,22 +1392,40 @@ namespace MWMechanics
         return list;
     }
 
+
+
     std::list<MWWorld::Ptr> Actors::getActorsFighting(const MWWorld::Ptr& actor) {
         std::list<MWWorld::Ptr> list;
         std::vector<MWWorld::Ptr> neighbors;
         osg::Vec3f position (actor.getRefData().getPosition().asVec3());
-        getObjectsInRange(position,
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fAlarmRadius")->getFloat(),
-            neighbors); //only care about those within the alarm disance
+        getObjectsInRange(position, aiProcessingDistance, neighbors);
         for(std::vector<MWWorld::Ptr>::iterator iter(neighbors.begin());iter != neighbors.end();++iter)
         {
             const MWWorld::Class &cls = iter->getClass();
-            CreatureStats &stats = cls.getCreatureStats(*iter);
+            const CreatureStats &stats = cls.getCreatureStats(*iter);
             if (!stats.isDead() && stats.getAiSequence().isInCombat(actor))
                 list.push_front(*iter);
         }
         return list;
     }
+
+    std::list<MWWorld::Ptr> Actors::getEnemiesNearby(const MWWorld::Ptr& actor)
+    {
+        std::list<MWWorld::Ptr> list;
+        std::vector<MWWorld::Ptr> neighbors;
+        osg::Vec3f position (actor.getRefData().getPosition().asVec3());
+        getObjectsInRange(position, aiProcessingDistance, neighbors);
+        for(std::vector<MWWorld::Ptr>::iterator iter(neighbors.begin());iter != neighbors.end();++iter)
+        {
+            const CreatureStats &stats = iter->getClass().getCreatureStats(*iter);
+            if (stats.isDead())
+                continue;
+            if (stats.getAiSequence().isInCombat(actor) || MWBase::Environment::get().getMechanicsManager()->isAggressive(*iter, actor))
+                list.push_back(*iter);
+        }
+        return list;
+    }
+
 
     void Actors::write (ESM::ESMWriter& writer, Loading::Listener& listener) const
     {

@@ -193,6 +193,8 @@ namespace MWBase
             /** ie AiCombat is active and the target is the actor **/
             virtual std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor) = 0;
 
+            virtual std::list<MWWorld::Ptr> getEnemiesNearby(const MWWorld::Ptr& actor) = 0;
+
             virtual void playerLoaded() = 0;
 
             virtual int countSavedGameRecords() const = 0;

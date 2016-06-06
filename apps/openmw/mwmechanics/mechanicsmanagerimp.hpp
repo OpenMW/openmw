@@ -153,6 +153,7 @@ namespace MWMechanics
             virtual std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor);
 
             virtual std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor);
+            virtual std::list<MWWorld::Ptr> getEnemiesNearby(const MWWorld::Ptr& actor);
 
             virtual bool toggleAI();
             virtual bool isAIActive();

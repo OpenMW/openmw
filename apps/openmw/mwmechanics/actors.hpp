@@ -123,6 +123,9 @@ namespace MWMechanics
             /**ie AiCombat is active and the target is the actor **/
             std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor);
 
+            /// Unlike getActorsFighting, also returns actors that *would* fight the given actor if they saw him.
+            std::list<MWWorld::Ptr> getEnemiesNearby(const MWWorld::Ptr& actor);
+
             void write (ESM::ESMWriter& writer, Loading::Listener& listener) const;
 
             void readRecord (ESM::ESMReader& reader, uint32_t type);

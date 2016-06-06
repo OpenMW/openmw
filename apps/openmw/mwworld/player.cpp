@@ -258,6 +258,11 @@ namespace MWWorld
         return MWBase::Environment::get().getMechanicsManager()->getActorsFighting(getPlayer()).size() != 0;
     }
 
+    bool Player::enemiesNearby()
+    {
+        return MWBase::Environment::get().getMechanicsManager()->getEnemiesNearby(getPlayer()).size() != 0;
+    }
+
     void Player::markPosition(CellStore *markedCell, ESM::Position markedPosition)
     {
         mMarkedCell = markedCell;
