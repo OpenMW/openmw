@@ -271,7 +271,7 @@ namespace MWGui
             {
                 int value = item.mBase.getClass().getValue(item.mBase) * count;
                 MWBase::Environment::get().getMechanicsManager()->commitCrime(
-                            player, MWWorld::Ptr(), MWBase::MechanicsManager::OT_Theft, value, true);
+                            player, mPtr, MWBase::MechanicsManager::OT_Theft, value, true);
                 MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
                 mPickpocketDetected = true;
                 return false;
