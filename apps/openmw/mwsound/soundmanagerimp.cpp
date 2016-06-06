@@ -837,7 +837,7 @@ namespace MWSound
         timePassed = 0.0f;
 
         // Make sure music is still playing
-        if(!isMusicPlaying())
+        if(!isMusicPlaying() && !mCurrentPlaylist.empty())
             startRandomTitle();
 
         Environment env = Env_Normal;
