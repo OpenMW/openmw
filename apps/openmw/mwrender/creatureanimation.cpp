@@ -75,6 +75,7 @@ void CreatureWeaponAnimation::showCarriedLeft(bool show)
 
 void CreatureWeaponAnimation::updateParts()
 {
+    mAmmunition.reset();
     mWeapon.reset();
     mShield.reset();
 
