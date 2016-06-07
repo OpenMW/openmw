@@ -4,6 +4,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <QTimer>
+#include <osg/Vec3>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
@@ -32,8 +33,17 @@ namespace CSVWidget
 namespace CSVRender
 {
     class TagBase;
+    class Cell;
     class CellArrow;
     class EditMode;
+
+    struct WorldspaceHitResult
+    {
+        bool hit;
+        osg::ref_ptr<TagBase> tag;
+        unsigned int index0, index1, index2; // indices of mesh vertices
+        osg::Vec3d worldPos;
+    };
 
     class WorldspaceWidget : public SceneWidget
     {
@@ -128,6 +138,9 @@ namespace CSVRender
             virtual void clearSelection (int elementMask) = 0;
 
             /// \param elementMask Elements to be affected by the select operation
+            virtual void invertSelection (int elementMask) = 0;
+
+            /// \param elementMask Elements to be affected by the select operation
             virtual void selectAll (int elementMask) = 0;
 
             // Select everything that references the same ID as at least one of the elements
@@ -136,18 +149,16 @@ namespace CSVRender
             /// \param elementMask Elements to be affected by the select operation
             virtual void selectAllWithSameParentId (int elementMask) = 0;
 
-            /// Return the next intersection point with scene elements matched by
+            /// Return the next intersection with scene elements matched by
             /// \a interactionMask based on \a localPos and the camera vector.
-            /// If there is no such point, instead a point "in front" of \a localPos will be
+            /// If there is no such intersection, instead a point "in front" of \a localPos will be
             /// returned.
-            ///
-            /// \param ignoreHidden ignore elements specified in interactionMask that are
-            /// flagged as not visible.
-            osg::Vec3f getIntersectionPoint (const QPoint& localPos,
-                unsigned int interactionMask = Mask_Reference | Mask_Terrain,
-                bool ignoreHidden = false) const;
+            WorldspaceHitResult mousePick (const QPoint& localPos, unsigned int interactionMask) const;
 
             virtual std::string getCellId (const osg::Vec3f& point) const = 0;
+
+            /// \note Returns the cell if it exists, otherwise a null pointer
+            virtual Cell* getCell(const osg::Vec3d& point) const = 0;
 
             virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
                 const = 0;
@@ -191,7 +202,7 @@ namespace CSVRender
             virtual void wheelEvent (QWheelEvent *event);
             virtual void keyPressEvent (QKeyEvent *event);
 
-            virtual void handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button,
+            virtual void handleMouseClick (const WorldspaceHitResult& hit, const std::string& button,
                 bool shift);
 
              /// \return Is \a key a button mapping setting? (ignored otherwise)
@@ -208,8 +219,6 @@ namespace CSVRender
             void dropEvent(QDropEvent* event);
 
             void dragMoveEvent(QDragMoveEvent *event);
-
-            osg::ref_ptr<TagBase> mousePick (const QPoint& localPos);
 
             virtual std::string getStartupInstruction() = 0;
 
@@ -229,8 +238,6 @@ namespace CSVRender
             virtual void referenceAdded (const QModelIndex& index, int start, int end) = 0;
 
             virtual void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight) = 0;
-
-            virtual void pathgridRemoved (const QModelIndex& parent, int start, int end) = 0;
 
             virtual void pathgridAboutToBeRemoved (const QModelIndex& parent, int start, int end) = 0;
 

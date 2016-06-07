@@ -54,8 +54,6 @@ namespace CSVRender
 
             virtual void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-            virtual void pathgridRemoved (const QModelIndex& parent, int start, int end);
-
             virtual void pathgridAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
             virtual void pathgridAdded (const QModelIndex& parent, int start, int end);
@@ -108,6 +106,9 @@ namespace CSVRender
             virtual void clearSelection (int elementMask);
 
             /// \param elementMask Elements to be affected by the select operation
+            virtual void invertSelection (int elementMask);
+
+            /// \param elementMask Elements to be affected by the select operation
             virtual void selectAll (int elementMask);
 
             // Select everything that references the same ID as at least one of the elements
@@ -117,6 +118,8 @@ namespace CSVRender
             virtual void selectAllWithSameParentId (int elementMask);
 
             virtual std::string getCellId (const osg::Vec3f& point) const;
+
+            virtual Cell* getCell(const osg::Vec3d& point) const;
 
             virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
                 const;
@@ -135,7 +138,7 @@ namespace CSVRender
 
             virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
 
-            virtual void handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button, bool shift);
+            virtual void handleMouseClick (const WorldspaceHitResult& hit, const std::string& button, bool shift);
 
         signals:
 

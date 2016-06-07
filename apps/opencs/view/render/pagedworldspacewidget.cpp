@@ -142,14 +142,15 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
         "terrain-move");
 }
 
-void CSVRender::PagedWorldspaceWidget::handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button, bool shift)
+void CSVRender::PagedWorldspaceWidget::handleMouseClick (const WorldspaceHitResult& hit, const std::string& button,
+    bool shift)
 {
-    if (tag && tag->getMask()==Mask_CellArrow)
+    if (hit.tag && hit.tag->getMask()==Mask_CellArrow)
     {
         if (button=="p-edit" || button=="s-edit")
         {
             if (CellArrowTag *cellArrowTag =
-                dynamic_cast<CSVRender::CellArrowTag *> (tag.get()))
+                dynamic_cast<CSVRender::CellArrowTag *> (hit.tag.get()))
             {
                 CellArrow *arrow = cellArrowTag->getCellArrow();
 
@@ -209,7 +210,7 @@ void CSVRender::PagedWorldspaceWidget::handleMouseClick (osg::ref_ptr<TagBase> t
         }
     }
 
-    WorldspaceWidget::handleMouseClick (tag, button, shift);
+    WorldspaceWidget::handleMouseClick (hit, button, shift);
 }
 
 void CSVRender::PagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
@@ -279,38 +280,29 @@ void CSVRender::PagedWorldspaceWidget::pathgridDataChanged (const QModelIndex& t
 {
     const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
 
+    int rowStart = -1;
+    int rowEnd = -1;
+
     if (topLeft.parent().isValid())
     {
-        int row = topLeft.parent().row();
-
-        const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
-        CSMWorld::CellCoordinates coords = CSMWorld::CellCoordinates(pathgrid.mData.mX, pathgrid.mData.mY);
-
-        std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
-        if (searchResult != mCells.end())
-        {
-            searchResult->second->pathgridDataChanged(topLeft, bottomRight);
-            flagAsModified();
-        }
+        rowStart = topLeft.parent().row();
+        rowEnd = bottomRight.parent().row();
     }
-}
-
-void CSVRender::PagedWorldspaceWidget::pathgridRemoved (const QModelIndex& parent, int start, int end)
-{
-    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
-
-    if (parent.isValid())
+    else
     {
-        // Pathgrid data was modified
-        int row = parent.row();
+        rowStart = topLeft.row();
+        rowEnd = bottomRight.row();
+    }
 
+    for (int row = rowStart; row <= rowEnd; ++row)
+    {
         const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
         CSMWorld::CellCoordinates coords = CSMWorld::CellCoordinates(pathgrid.mData.mX, pathgrid.mData.mY);
 
         std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
         if (searchResult != mCells.end())
         {
-            searchResult->second->pathgridRowRemoved(parent, start, end);
+            searchResult->second->pathgridModified();
             flagAsModified();
         }
     }
@@ -340,11 +332,10 @@ void CSVRender::PagedWorldspaceWidget::pathgridAboutToBeRemoved (const QModelInd
 
 void CSVRender::PagedWorldspaceWidget::pathgridAdded(const QModelIndex& parent, int start, int end)
 {
-    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
+   const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
 
     if (!parent.isValid())
     {
-        // Pathgrid added theoretically, unable to test until it is possible to add pathgrids
         for (int row = start; row <= end; ++row)
         {
             const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
@@ -353,24 +344,9 @@ void CSVRender::PagedWorldspaceWidget::pathgridAdded(const QModelIndex& parent, 
             std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
             if (searchResult != mCells.end())
             {
-                searchResult->second->pathgridAdded(pathgrid);
+                searchResult->second->pathgridModified();
                 flagAsModified();
             }
-        }
-    }
-    else
-    {
-        // Pathgrid data was modified
-        int row = parent.row();
-
-        const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
-        CSMWorld::CellCoordinates coords = CSMWorld::CellCoordinates(pathgrid.mData.mX, pathgrid.mData.mY);
-
-        std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
-        if (searchResult != mCells.end())
-        {
-            searchResult->second->pathgridRowAdded(parent, start, end);
-            flagAsModified();
         }
     }
 }
@@ -605,6 +581,15 @@ void CSVRender::PagedWorldspaceWidget::clearSelection (int elementMask)
     flagAsModified();
 }
 
+void CSVRender::PagedWorldspaceWidget::invertSelection (int elementMask)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+        iter->second->setSelection (elementMask, Cell::Selection_Invert);
+
+    flagAsModified();
+}
+
 void CSVRender::PagedWorldspaceWidget::selectAll (int elementMask)
 {
     for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter = mCells.begin();
@@ -632,6 +617,21 @@ std::string CSVRender::PagedWorldspaceWidget::getCellId (const osg::Vec3f& point
         static_cast<int> (std::floor (point.y()/cellSize)));
 
     return cellCoordinates.getId (mWorldspace);
+}
+
+CSVRender::Cell* CSVRender::PagedWorldspaceWidget::getCell(const osg::Vec3d& point) const
+{
+    const int cellSize = 8192;
+
+    CSMWorld::CellCoordinates coords(
+        static_cast<int> (std::floor (point.x()/cellSize)),
+        static_cast<int> (std::floor (point.y()/cellSize)));
+
+    std::map<CSMWorld::CellCoordinates, Cell*>::const_iterator searchResult = mCells.find(coords);
+    if (searchResult != mCells.end())
+        return searchResult->second;
+    else
+        return 0;
 }
 
 std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::PagedWorldspaceWidget::getSelection (

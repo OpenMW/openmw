@@ -27,20 +27,8 @@ namespace CSMWorld
         point.mConnectionNum = 0;
         point.mUnknown = 0;
 
-        // inserting a point should trigger re-indexing of the edges
-        //
-        // FIXME: does not auto refresh edges table view
-        std::vector<ESM::Pathgrid::Edge>::iterator iter = pathgrid.mEdges.begin();
-        for (;iter != pathgrid.mEdges.end(); ++iter)
-        {
-            if ((*iter).mV0 >= position)
-                (*iter).mV0++;
-            if ((*iter).mV1 >= position)
-                (*iter).mV1++;
-        }
-
         points.insert(points.begin()+position, point);
-        pathgrid.mData.mS2 += 1; // increment the number of points
+        pathgrid.mData.mS2 = pathgrid.mPoints.size();
 
         record.setModified (pathgrid);
     }
@@ -54,28 +42,10 @@ namespace CSMWorld
         if (rowToRemove < 0 || rowToRemove >= static_cast<int> (points.size()))
             throw std::runtime_error ("index out of range");
 
-        // deleting a point should trigger re-indexing of the edges
-        // dangling edges are not allowed and hence removed
-        //
-        // FIXME: does not auto refresh edges table view
-        std::vector<ESM::Pathgrid::Edge>::iterator iter = pathgrid.mEdges.begin();
-        for (; iter != pathgrid.mEdges.end();)
-        {
-            if (((*iter).mV0 == rowToRemove) || ((*iter).mV1 == rowToRemove))
-                iter = pathgrid.mEdges.erase(iter);
-            else
-            {
-                if ((*iter).mV0 > rowToRemove)
-                    (*iter).mV0--;
-
-                if ((*iter).mV1 > rowToRemove)
-                    (*iter).mV1--;
-
-                ++iter;
-            }
-        }
+        // Do not remove dangling edges, does not work with current undo mechanism
+        // Do not automatically adjust indices, what would be done with dangling edges?
         points.erase(points.begin()+rowToRemove);
-        pathgrid.mData.mS2 -= 1; // decrement the number of points
+        pathgrid.mData.mS2 = pathgrid.mPoints.size();
 
         record.setModified (pathgrid);
     }
@@ -84,14 +54,8 @@ namespace CSMWorld
             const NestedTableWrapperBase& nestedTable) const
     {
         Pathgrid pathgrid = record.get();
-
-        pathgrid.mPoints =
-            static_cast<const PathgridPointsWrap &>(nestedTable).mRecord.mPoints;
-        pathgrid.mData.mS2 =
-            static_cast<const PathgridPointsWrap &>(nestedTable).mRecord.mData.mS2;
-        // also update edges in case points were added/removed
-        pathgrid.mEdges =
-            static_cast<const PathgridPointsWrap &>(nestedTable).mRecord.mEdges;
+        pathgrid.mPoints = static_cast<const NestedTableWrapper<ESM::Pathgrid::PointList> &>(nestedTable).mNestedTable;
+        pathgrid.mData.mS2 = pathgrid.mPoints.size();
 
         record.setModified (pathgrid);
     }
@@ -99,7 +63,7 @@ namespace CSMWorld
     NestedTableWrapperBase* PathgridPointListAdapter::table(const Record<Pathgrid>& record) const
     {
         // deleted by dtor of NestedTableStoring
-        return new PathgridPointsWrap(record.get());
+        return new NestedTableWrapper<ESM::Pathgrid::PointList>(record.get().mPoints);
     }
 
     QVariant PathgridPointListAdapter::getData(const Record<Pathgrid>& record,
@@ -147,7 +111,6 @@ namespace CSMWorld
 
     PathgridEdgeListAdapter::PathgridEdgeListAdapter () {}
 
-    // ToDo: seems to be auto-sorted in the dialog table display after insertion
     void PathgridEdgeListAdapter::addRow(Record<Pathgrid>& record, int position) const
     {
         Pathgrid pathgrid = record.get();
@@ -218,7 +181,6 @@ namespace CSMWorld
         }
     }
 
-    // ToDo: detect duplicates in mEdges
     void PathgridEdgeListAdapter::setData(Record<Pathgrid>& record,
             const QVariant& value, int subRowIndex, int subColIndex) const
     {

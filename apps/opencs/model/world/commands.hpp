@@ -153,6 +153,15 @@ namespace CSMWorld
             virtual void undo();
     };
 
+    class CreatePathgridCommand : public CreateCommand
+    {
+        public:
+
+            CreatePathgridCommand(IdTable& model, const std::string& id, QUndoCommand *parent = 0);
+
+            virtual void redo();
+    };
+
     /// \brief Update cell ID according to x/y-coordinates
     ///
     /// \note The new value will be calculated in the first call to redo instead of the

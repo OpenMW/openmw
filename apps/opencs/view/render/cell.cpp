@@ -17,6 +17,7 @@
 #include "../../model/world/cellcoordinates.hpp"
 
 #include "mask.hpp"
+#include "pathgrid.hpp"
 #include "terrainstorage.hpp"
 
 bool CSVRender::Cell::removeObject (const std::string& id)
@@ -68,18 +69,6 @@ bool CSVRender::Cell::addObjects (int start, int end)
     return modified;
 }
 
-void CSVRender::Cell::recreatePathgrid()
-{
-    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mData.getPathgrids();
-    int pathgridIndex = pathgrids.searchId(mId);
-    if (pathgridIndex != -1)
-    {
-        mPathgridGeode->removeDrawable(mPathgridGeometry);
-        mPathgridGeometry = SceneUtil::createPathgridGeometry(pathgrids.getRecord(pathgridIndex).get());
-        mPathgridGeode->addDrawable(mPathgridGeometry);
-    }
-}
-
 CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,
     bool deleted)
 : mData (data), mId (Misc::StringUtils::lowerCase (id)), mDeleted (deleted), mSubMode (0),
@@ -92,17 +81,6 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
 
     mCellNode = new osg::Group;
     rootNode->addChild(mCellNode);
-
-    osg::ref_ptr<osg::PositionAttitudeTransform> pathgridTransform = new osg::PositionAttitudeTransform();
-    pathgridTransform->setPosition(osg::Vec3f(mCoordinates.getX() * ESM::Land::REAL_SIZE,
-        mCoordinates.getY() * ESM::Land::REAL_SIZE, 0));
-    pathgridTransform->setNodeMask(Mask_Pathgrid);
-    mCellNode->addChild(pathgridTransform);
-
-    mPathgridGeode = new osg::Geode();
-    pathgridTransform->addChild(mPathgridGeode);
-
-    mPathgridGeometry = 0;
 
     setCellMarker();
 
@@ -132,7 +110,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
             }
         }
 
-        recreatePathgrid();
+        mPathgrid.reset(new Pathgrid(mData, mCellNode, mId, mCoordinates));
     }
 }
 
@@ -143,6 +121,11 @@ CSVRender::Cell::~Cell()
         delete iter->second;
 
     mCellNode->getParent(0)->removeChild(mCellNode);
+}
+
+CSVRender::Pathgrid* CSVRender::Cell::getPathgrid() const
+{
+    return mPathgrid.get();
 }
 
 bool CSVRender::Cell::referenceableDataChanged (const QModelIndex& topLeft,
@@ -283,29 +266,14 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
     return addObjects (start, end);
 }
 
-void CSVRender::Cell::pathgridAdded(const CSMWorld::Pathgrid& pathgrid)
+void CSVRender::Cell::pathgridModified()
 {
-    recreatePathgrid();
+    mPathgrid->recreateGeometry();
 }
 
 void CSVRender::Cell::pathgridRemoved()
 {
-    mPathgridGeode->removeDrawable(mPathgridGeometry);
-}
-
-void CSVRender::Cell::pathgridDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
-{
-    recreatePathgrid();
-}
-
-void CSVRender::Cell::pathgridRowRemoved(const QModelIndex& parent, int start, int end)
-{
-    recreatePathgrid();
-}
-
-void CSVRender::Cell::pathgridRowAdded(const QModelIndex& parent, int start, int end)
-{
-    recreatePathgrid();
+    mPathgrid->removeGeometry();
 }
 
 void CSVRender::Cell::setSelection (int elementMask, Selection mode)
@@ -325,6 +293,27 @@ void CSVRender::Cell::setSelection (int elementMask, Selection mode)
             }
 
             iter->second->setSelected (selected);
+        }
+    }
+    if (elementMask & Mask_Pathgrid)
+    {
+        // Only one pathgrid may be selected, so some operations will only have an effect
+        // if the pathgrid is already focused
+        switch (mode)
+        {
+            case Selection_Clear:
+                mPathgrid->clearSelected();
+                break;
+
+            case Selection_All:
+                if (mPathgrid->isSelected())
+                    mPathgrid->selectAll();
+                break;
+
+            case Selection_Invert:
+                if (mPathgrid->isSelected())
+                    mPathgrid->invertSelected();
+                break;
         }
     }
 }
@@ -406,6 +395,9 @@ std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::Cell::getSelection (un
             iter!=mObjects.end(); ++iter)
             if (iter->second->getSelected())
                 result.push_back (iter->second->getTag());
+    if (elementMask & Mask_Pathgrid)
+        if (mPathgrid->isSelected())
+            result.push_back(mPathgrid->getTag());
 
     return result;
 }
@@ -440,4 +432,6 @@ void CSVRender::Cell::reset (unsigned int elementMask)
         for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
             iter!=mObjects.end(); ++iter)
             iter->second->reset();
+    if (elementMask & Mask_Pathgrid)
+        mPathgrid->resetIndicators();
 }

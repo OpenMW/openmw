@@ -41,21 +41,21 @@ namespace CSVRender
 
             virtual void setEditLock (bool locked);
 
-            virtual void primaryEditPressed (osg::ref_ptr<TagBase> tag);
+            virtual void primaryEditPressed (const WorldspaceHitResult& hit);
 
-            virtual void secondaryEditPressed (osg::ref_ptr<TagBase> tag);
+            virtual void secondaryEditPressed (const WorldspaceHitResult& hit);
 
-            virtual void primarySelectPressed (osg::ref_ptr<TagBase> tag);
+            virtual void primarySelectPressed (const WorldspaceHitResult& hit);
 
-            virtual void secondarySelectPressed (osg::ref_ptr<TagBase> tag);
+            virtual void secondarySelectPressed (const WorldspaceHitResult& hit);
 
-            virtual bool primaryEditStartDrag (osg::ref_ptr<TagBase> tag);
+            virtual bool primaryEditStartDrag (const QPoint& pos);
 
-            virtual bool secondaryEditStartDrag (osg::ref_ptr<TagBase> tag);
+            virtual bool secondaryEditStartDrag (const QPoint& pos);
 
-            virtual void drag (int diffX, int diffY, double speedFactor);
+            virtual void drag (const QPoint& pos, int diffX, int diffY, double speedFactor);
 
-            virtual void dragCompleted();
+            virtual void dragCompleted(const QPoint& pos);
 
             /// \note dragAborted will not be called, if the drag is aborted via changing
             /// editing mode
@@ -65,7 +65,7 @@ namespace CSVRender
 
             virtual void dragEnterEvent (QDragEnterEvent *event);
 
-            virtual void dropEvent (QDropEvent* event);
+            virtual void dropEvent (QDropEvent *event);
 
             virtual int getSubMode() const;
 
