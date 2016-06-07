@@ -1005,7 +1005,7 @@ namespace MWWorld
             return static_cast<float>(mActivationDistanceOverride);
 
         static const int iMaxActivateDist = getStore().get<ESM::GameSetting>().find("iMaxActivateDist")->getInt();
-        return iMaxActivateDist * 5.f / 4.f;
+        return static_cast<float>(iMaxActivateDist);
     }
 
     MWWorld::Ptr World::getFacedObject()
