@@ -1144,14 +1144,19 @@ namespace MWMechanics
 
                     for (PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
                     {
+                        MWWorld::Ptr observer = iter->first;
+
                         if (iter->first == player)  // not the player
                             continue;
 
+                        if (observer.getClass().getCreatureStats(observer).isDead())
+                            continue;
+
                         // is the player in range and can they be detected
-                        if ((iter->first.getRefData().getPosition().asVec3() - player.getRefData().getPosition().asVec3()).length2() <= radius*radius
-                            && MWBase::Environment::get().getWorld()->getLOS(player, iter->first))
+                        if ((observer.getRefData().getPosition().asVec3() - player.getRefData().getPosition().asVec3()).length2() <= radius*radius
+                            && MWBase::Environment::get().getWorld()->getLOS(player, observer))
                         {
-                            if (MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, iter->first))
+                            if (MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, observer))
                             {
                                 detected = true;
                                 avoidedNotice = false;
