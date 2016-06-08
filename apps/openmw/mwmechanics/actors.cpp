@@ -1404,11 +1404,13 @@ namespace MWMechanics
         std::vector<MWWorld::Ptr> neighbors;
         osg::Vec3f position (actor.getRefData().getPosition().asVec3());
         getObjectsInRange(position, aiProcessingDistance, neighbors);
-        for(std::vector<MWWorld::Ptr>::iterator iter(neighbors.begin());iter != neighbors.end();++iter)
+        for(std::vector<MWWorld::Ptr>::const_iterator iter(neighbors.begin());iter != neighbors.end();++iter)
         {
             const MWWorld::Class &cls = iter->getClass();
             const CreatureStats &stats = cls.getCreatureStats(*iter);
-            if (!stats.isDead() && stats.getAiSequence().isInCombat(actor))
+            if (stats.isDead() || *iter == actor)
+                continue;
+            if (stats.getAiSequence().isInCombat(actor))
                 list.push_front(*iter);
         }
         return list;
@@ -1420,10 +1422,10 @@ namespace MWMechanics
         std::vector<MWWorld::Ptr> neighbors;
         osg::Vec3f position (actor.getRefData().getPosition().asVec3());
         getObjectsInRange(position, aiProcessingDistance, neighbors);
-        for(std::vector<MWWorld::Ptr>::iterator iter(neighbors.begin());iter != neighbors.end();++iter)
+        for(std::vector<MWWorld::Ptr>::const_iterator iter(neighbors.begin());iter != neighbors.end();++iter)
         {
             const CreatureStats &stats = iter->getClass().getCreatureStats(*iter);
-            if (stats.isDead())
+            if (stats.isDead() || *iter == actor)
                 continue;
             if (stats.getAiSequence().isInCombat(actor) || MWBase::Environment::get().getMechanicsManager()->isAggressive(*iter, actor))
                 list.push_back(*iter);
