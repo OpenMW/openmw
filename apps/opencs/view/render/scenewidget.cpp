@@ -173,6 +173,9 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
 
     mResourceSystem->getSceneManager()->setParticleSystemMask(Mask_ParticleSystem);
 
+    // Recieve mouse move event even if mouse button is not pressed
+    setMouseTracking(true);
+
     /// \todo make shortcut configurable
     QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
     connect (focusToolbar, SIGNAL (activated()), this, SIGNAL (focusToolbarRequest()));

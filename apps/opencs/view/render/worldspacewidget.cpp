@@ -646,7 +646,10 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
             mToolTipPos = event->globalPos();
 
             if (mShowToolTips)
+            {
+                QToolTip::hideText();
                 mToolTipDelayTimer.start (mToolTipDelay);
+            }
         }
 
         SceneWidget::mouseMoveEvent(event);
