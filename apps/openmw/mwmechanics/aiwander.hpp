@@ -103,6 +103,7 @@ namespace MWMechanics
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
+            float mRemainingDuration;
             int mTimeOfDay;
             std::vector<unsigned char> mIdle;
             bool mRepeat;
@@ -123,7 +124,6 @@ namespace MWMechanics
 
             
 
-            MWWorld::TimeStamp mStartTime;
 
             // allowed pathgrid nodes based on mDistance from the spawn point
             // in local coordinates of mCell
