@@ -119,6 +119,7 @@ Programmers
     smbas
     Stefan Galowicz (bogglez)
     Stanislav Bobrov (Jiub)
+    svaante
     Sylvain Thesnieres (Garvek)
     t6
     terrorfisch
