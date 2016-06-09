@@ -109,6 +109,10 @@ namespace MWMechanics
             return 0.f;
 
         float rating=0.f;
+        float bonus=0.f;
+
+        if (weapon->mData.mType >= ESM::Weapon::MarksmanBow && weapon->mData.mType <= ESM::Weapon::MarksmanThrown)
+            bonus+=1.5f;
 
         if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
         {
@@ -160,7 +164,7 @@ namespace MWMechanics
         if (skill != -1)
             rating *= actor.getClass().getSkill(actor, skill) / 100.f;
 
-        return rating;
+        return rating + bonus;
     }
 
     float rateSpell(const ESM::Spell *spell, const MWWorld::Ptr &actor, const MWWorld::Ptr& enemy)
