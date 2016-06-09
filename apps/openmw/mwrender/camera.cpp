@@ -56,6 +56,7 @@ namespace MWRender
       mMaxCameraDistance(192.f),
       mDistanceAdjusted(false),
       mVanityToggleQueued(false),
+      mVanityToggleQueuedValue(false),
       mViewModeToggleQueued(false),
       mCameraDistance(0.f)
     {
@@ -150,7 +151,7 @@ namespace MWRender
             // Now process the view changes we queued earlier
             if (mVanityToggleQueued)
             {
-                toggleVanityMode(!mVanity.enabled);
+                toggleVanityMode(mVanityToggleQueuedValue);
                 mVanityToggleQueued = false;
             }
             if (mViewModeToggleQueued)
@@ -205,6 +206,7 @@ namespace MWRender
         if (isFirstPerson() && !mAnimation->upperBodyReady())
         {
             mVanityToggleQueued = true;
+            mVanityToggleQueuedValue = enable;
             return false;
         }
 

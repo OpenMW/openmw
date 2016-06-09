@@ -52,6 +52,7 @@ namespace MWRender
         bool mDistanceAdjusted;
 
         bool mVanityToggleQueued;
+        bool mVanityToggleQueuedValue;
         bool mViewModeToggleQueued;
 
         float mCameraDistance;
