@@ -97,8 +97,8 @@ namespace MWMechanics
     };
     
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
-        mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle), mRepeat(repeat)
-      , mStoredInitialActorPosition(false)
+        mDistance(distance), mDuration(duration), mRemainingDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle),
+        mRepeat(repeat), mStoredInitialActorPosition(false)
     {
         mIdle.resize(8, 0);
         init();
@@ -122,6 +122,11 @@ namespace MWMechanics
             mDuration = 0;
         if(mDuration == 0)
             mTimeOfDay = 0;
+        if(mDuration > 24)
+        {
+            mDuration = 24;
+            mRemainingDuration = (mDuration);
+        }
 
         mPopulateAvailableNodes = true;
 
@@ -200,12 +205,7 @@ namespace MWMechanics
             mPopulateAvailableNodes = true;
         }
 
-        if (!mStarted)
-        {
-            // Set mStartTime once this package starts being executed
-            mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
-            mStarted = true;
-        }
+        mRemainingDuration -= ((duration*MWBase::Environment::get().getWorld()->getTimeScaleFactor()) / 3600);
 
         cStats.setDrawState(DrawState_Nothing);
         cStats.setMovementFlag(CreatureStats::Flag_Run, false);
@@ -235,8 +235,9 @@ namespace MWMechanics
 
         if (isPackageCompleted(actor, storage))
         {
-            // Reset mStarted so that package will get a new mStarttime when it repeats
-            mStarted = false;
+            // Reset package so it can be used again
+            mRemainingDuration=mDuration;
+            init();
             return true;
         }
 
@@ -317,10 +318,8 @@ namespace MWMechanics
     {
         if (mDuration)
         {
-            // End package if duration is complete or mid-night hits:
-            MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
-            if ((currentTime.getHour() >= mStartTime.getHour() + mDuration) ||
-                (int(currentTime.getHour()) == 0 && currentTime.getDay() != mStartTime.getDay()))
+            // End package if duration is complete
+            if (mRemainingDuration <= 0)
             {
                     stopWalking(actor, storage);
                     return true;
@@ -784,6 +783,8 @@ namespace MWMechanics
 
     void AiWander::fastForward(const MWWorld::Ptr& actor, AiState &state)
     {
+        // Update duration counter
+        mRemainingDuration--;
         if (mDistance == 0)
             return;
 
@@ -923,11 +924,17 @@ namespace MWMechanics
 
     void AiWander::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
+        float remainingDuration;
+        if (mRemainingDuration > 0 && mRemainingDuration < 24)
+            remainingDuration = mRemainingDuration;
+        else
+            remainingDuration = mDuration;
+
         std::auto_ptr<ESM::AiSequence::AiWander> wander(new ESM::AiSequence::AiWander());
         wander->mData.mDistance = mDistance;
         wander->mData.mDuration = mDuration;
         wander->mData.mTimeOfDay = mTimeOfDay;
-        wander->mStartTime = mStartTime.toEsm();
+        wander->mDurationData.mRemainingDuration = remainingDuration;
         assert (mIdle.size() == 8);
         for (int i=0; i<8; ++i)
             wander->mData.mIdle[i] = mIdle[i];
@@ -945,15 +952,18 @@ namespace MWMechanics
     AiWander::AiWander (const ESM::AiSequence::AiWander* wander)
         : mDistance(wander->mData.mDistance)
         , mDuration(wander->mData.mDuration)
+        , mRemainingDuration(wander->mDurationData.mRemainingDuration)
         , mTimeOfDay(wander->mData.mTimeOfDay)
         , mRepeat(wander->mData.mShouldRepeat != 0)
         , mStoredInitialActorPosition(wander->mStoredInitialActorPosition)
-        , mStartTime(MWWorld::TimeStamp(wander->mStartTime))
     {
         if (mStoredInitialActorPosition)
             mInitialActorPosition = wander->mInitialActorPosition;
         for (int i=0; i<8; ++i)
             mIdle.push_back(wander->mData.mIdle[i]);
+        if (mRemainingDuration <= 0 || mRemainingDuration >= 24)
+            mRemainingDuration = mDuration;
+
 
         init();
     }
