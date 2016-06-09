@@ -175,6 +175,7 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
 
     // Recieve mouse move event even if mouse button is not pressed
     setMouseTracking(true);
+    setFocusPolicy(Qt::StrongFocus);
 
     /// \todo make shortcut configurable
     QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
@@ -289,6 +290,11 @@ void SceneWidget::mouseMoveEvent (QMouseEvent *event)
 
     mPrevMouseX = event->x();
     mPrevMouseY = event->y();
+}
+
+void SceneWidget::focusOutEvent (QFocusEvent *event)
+{
+    mCurrentCamControl->resetInput();
 }
 
 void SceneWidget::wheelEvent(QWheelEvent *event)

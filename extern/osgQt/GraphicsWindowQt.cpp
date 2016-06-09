@@ -245,7 +245,6 @@ bool GraphicsWindowQt::init( QWidget* parent, const QGLWidget* shareWidget, Qt::
     // initialize widget properties
     _widget->setAutoBufferSwap( false );
     _widget->setMouseTracking( true );
-    _widget->setFocusPolicy( Qt::WheelFocus );
     _widget->setGraphicsWindow( this );
     useCursor( _traits->useCursor );
 

@@ -308,6 +308,17 @@ namespace CSVRender
         getCamera()->getViewMatrix().orthoNormal(getCamera()->getViewMatrix());
     }
 
+    void FreeCameraController::resetInput()
+    {
+        mFast = false;
+        mLeft = false;
+        mRight = false;
+        mForward = false;
+        mBackward = false;
+        mRollLeft = false;
+        mRollRight = false;
+    }
+
     void FreeCameraController::yaw(double value)
     {
         getCamera()->getViewMatrix() *= osg::Matrixd::rotate(value, LocalUp);
@@ -533,6 +544,17 @@ namespace CSVRender
 
         // Normalize the matrix to counter drift
         getCamera()->getViewMatrix().orthoNormal(getCamera()->getViewMatrix());
+    }
+
+    void OrbitCameraController::resetInput()
+    {
+        mFast = false;
+        mLeft = false;
+        mRight =false;
+        mUp = false;
+        mDown = false;
+        mRollLeft = false;
+        mRollRight = false;
     }
 
     void OrbitCameraController::onActivate()

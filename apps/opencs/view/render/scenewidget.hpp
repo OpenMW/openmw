@@ -96,6 +96,7 @@ namespace CSVRender
             virtual void wheelEvent (QWheelEvent *event);
             virtual void keyPressEvent (QKeyEvent *event);
             virtual void keyReleaseEvent (QKeyEvent *event);
+            virtual void focusOutEvent (QFocusEvent *event);
 
             /// \return Is \a key a button mapping setting? (ignored otherwise)
             virtual bool storeMappingSetting (const CSMPrefs::Setting *setting);

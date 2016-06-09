@@ -51,6 +51,8 @@ namespace CSVRender
 
             virtual void update(double dt) = 0;
 
+            virtual void resetInput() = 0;
+
         protected:
 
             virtual void onActivate(){}
@@ -86,6 +88,8 @@ namespace CSVRender
             bool handleMouseMoveEvent(std::string mode, int x, int y);
 
             void update(double dt);
+
+            void resetInput();
 
         private:
 
@@ -125,6 +129,8 @@ namespace CSVRender
             bool handleMouseMoveEvent(std::string mode, int x, int y);
 
             void update(double dt);
+
+            void resetInput();
 
         private:
 
