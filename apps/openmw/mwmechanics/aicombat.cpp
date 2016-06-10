@@ -261,6 +261,7 @@ namespace MWMechanics
 
         // Get weapon characteristics
         MWBase::World* world = MWBase::Environment::get().getWorld();
+        static const float fCombatDistance = world->getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
         if (actorClass.hasInventoryStore(actor))
         {
             //Get weapon range
@@ -279,12 +280,12 @@ namespace MWMechanics
                 weapon = weaponSlot->get<ESM::Weapon>()->mBase;
                 weapRange = weapon->mData.mReach;
             }
-            weapRange *= 100.0f;
+            weapRange *= fCombatDistance;
         }
         else //is creature
         {
             weaptype = actorClass.getCreatureStats(actor).getDrawState() == DrawState_Spell ? WeapType_Spell : WeapType_HandToHand;
-            weapRange = 150.0f; //TODO: use true attack range (the same problem in Creature::hit)
+            weapRange = fCombatDistance;
         }
 
         bool distantCombat = false;

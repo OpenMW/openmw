@@ -242,13 +242,10 @@ namespace MWClass
 
         MWMechanics::applyFatigueLoss(ptr, weapon, attackStrength);
 
-        // TODO: where is the distance defined?
-        float dist = 200.f;
+        float dist = gmst.find("fCombatDistance")->getFloat();
         if (!weapon.isEmpty())
-        {
-            const float fCombatDistance = gmst.find("fCombatDistance")->getFloat();
-            dist = fCombatDistance * weapon.get<ESM::Weapon>()->mBase->mData.mReach;
-        }
+            dist *= weapon.get<ESM::Weapon>()->mBase->mData.mReach;
+
         std::pair<MWWorld::Ptr, osg::Vec3f> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, dist);
         if (result.first.isEmpty())
             return; // Didn't hit anything
