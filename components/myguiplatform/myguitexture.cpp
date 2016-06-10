@@ -86,9 +86,12 @@ namespace osgMyGUI
         if (!mImageManager)
             throw std::runtime_error("No imagemanager set");
 
-        mTexture = new osg::Texture2D(mImageManager->getImage(fname));
+        osg::ref_ptr<osg::Image> image (mImageManager->getImage(fname));
+        mTexture = new osg::Texture2D(image);
         mTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         mTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        mTexture->setTextureWidth(image->s());
+        mTexture->setTextureHeight(image->t());
         // disable mip-maps
         mTexture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
 
@@ -107,8 +110,6 @@ namespace osgMyGUI
     {
         if(!mTexture.valid())
             return 0;
-        osg::Image *image = mTexture->getImage();
-        if(image) return image->s();
         return mTexture->getTextureWidth();
     }
 
@@ -116,8 +117,6 @@ namespace osgMyGUI
     {
         if(!mTexture.valid())
             return 0;
-        osg::Image *image = mTexture->getImage();
-        if(image) return image->t();
         return mTexture->getTextureHeight();
     }
 
@@ -128,15 +127,12 @@ namespace osgMyGUI
         if (mLockedImage.valid())
             throw std::runtime_error("Texture already locked");
 
-        mLockedImage = mTexture->getImage();
-        if(!mLockedImage.valid())
-        {
-            mLockedImage = new osg::Image();
-            mLockedImage->allocateImage(
-                mTexture->getTextureWidth(), mTexture->getTextureHeight(), mTexture->getTextureDepth(),
-                mTexture->getSourceFormat(), mTexture->getSourceType()
-            );
-        }
+        mLockedImage = new osg::Image();
+        mLockedImage->allocateImage(
+            mTexture->getTextureWidth(), mTexture->getTextureHeight(), mTexture->getTextureDepth(),
+            mTexture->getSourceFormat(), mTexture->getSourceType()
+        );
+
         return mLockedImage->data();
     }
 
