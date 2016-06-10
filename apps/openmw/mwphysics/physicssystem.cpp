@@ -448,6 +448,10 @@ namespace MWPhysics
                 inertia.z() += time * -627.2f;
                 if (inertia.z() < 0)
                     inertia.z() *= slowFall;
+                if (slowFall < 1.f) {
+                    inertia.x() = 0;
+                    inertia.y() = 0;
+                }
                 physicActor->setInertialForce(inertia);
             }
             physicActor->setOnGround(isOnGround);
