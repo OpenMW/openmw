@@ -41,6 +41,7 @@ CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& con
 CSMDoc::DocumentManager::~DocumentManager()
 {
     mLoaderThread.quit();
+    mLoader.stop();
     mLoader.hasThingsToDo().wakeAll();
     mLoaderThread.wait();
 

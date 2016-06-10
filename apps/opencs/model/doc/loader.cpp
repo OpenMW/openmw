@@ -1,6 +1,6 @@
 #include "loader.hpp"
 
-#include <QTimer>
+#include <iostream>
 
 #include "../tools/reportmodel.hpp"
 
@@ -11,16 +11,22 @@ CSMDoc::Loader::Stage::Stage() : mFile (0), mRecordsLoaded (0), mRecordsLeft (fa
 
 
 CSMDoc::Loader::Loader()
+    : mShouldStop(false)
 {
-    QTimer *timer = new QTimer (this);
+    mTimer = new QTimer (this);
 
-    connect (timer, SIGNAL (timeout()), this, SLOT (load()));
-    timer->start();
+    connect (mTimer, SIGNAL (timeout()), this, SLOT (load()));
+    mTimer->start();
 }
 
 QWaitCondition& CSMDoc::Loader::hasThingsToDo()
 {
     return mThingsToDo;
+}
+
+void CSMDoc::Loader::stop()
+{
+    mShouldStop = true;
 }
 
 void CSMDoc::Loader::load()
@@ -30,6 +36,10 @@ void CSMDoc::Loader::load()
         mMutex.lock();
         mThingsToDo.wait (&mMutex);
         mMutex.unlock();
+
+        if (mShouldStop)
+            mTimer->stop();
+
         return;
     }
 
