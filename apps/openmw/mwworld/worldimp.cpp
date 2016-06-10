@@ -1047,13 +1047,25 @@ namespace MWWorld
         return osg::Matrixf::translate(actor.getRefData().getPosition().asVec3());
     }
 
-
     std::pair<MWWorld::Ptr,osg::Vec3f> World::getHitContact(const MWWorld::ConstPtr &ptr, float distance)
     {
         const ESM::Position &posdata = ptr.getRefData().getPosition();
 
         osg::Quat rot = osg::Quat(posdata.rot[0], osg::Vec3f(-1,0,0)) * osg::Quat(posdata.rot[2], osg::Vec3f(0,0,-1));
-        osg::Vec3f pos = getActorHeadTransform(ptr).getTrans();
+
+        osg::Vec3f pos = ptr.getRefData().getPosition().asVec3();
+
+        if (ptr == getPlayerPtr())
+            pos = getActorHeadTransform(ptr).getTrans(); // special cased for better aiming with the camera
+        else
+        {
+            // general case, compatible with all types of different creatures
+            // note: we intentionally do *not* use the collision box offset here, this is required to make
+            // some flying creatures work that have their collision box offset in the air
+            osg::Vec3f halfExtents = mPhysics->getHalfExtents(ptr);
+            pos.z() += halfExtents.z() * 2 * 0.75;
+            distance += halfExtents.y();
+        }
 
         std::pair<MWWorld::Ptr,osg::Vec3f> result = mPhysics->getHitContact(ptr, pos, rot, distance);
         if(result.first.isEmpty())
@@ -3221,15 +3233,19 @@ namespace MWWorld
 
     osg::Vec3f World::aimToTarget(const ConstPtr &actor, const MWWorld::ConstPtr& target)
     {
-        osg::Vec3f weaponPos = getActorHeadTransform(actor).getTrans();
+        osg::Vec3f weaponPos = actor.getRefData().getPosition().asVec3();
+        weaponPos.z() += mPhysics->getHalfExtents(actor).z() * 2 * 0.75;
         osg::Vec3f targetPos = mPhysics->getCollisionObjectPosition(target);
         return (targetPos - weaponPos);
     }
 
     float World::getHitDistance(const ConstPtr &actor, const ConstPtr &target)
     {
-        osg::Vec3f weaponPos = getActorHeadTransform(actor).getTrans();
-        return mPhysics->getHitDistance(weaponPos, target);
+        osg::Vec3f weaponPos = actor.getRefData().getPosition().asVec3();
+        osg::Vec3f halfExtents = mPhysics->getHalfExtents(actor);
+        weaponPos.z() += halfExtents.z() * 2 * 0.75;
+
+        return mPhysics->getHitDistance(weaponPos, target) - halfExtents.y();
     }
 
     void World::preloadCommonAssets()
