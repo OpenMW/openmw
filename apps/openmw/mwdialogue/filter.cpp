@@ -169,6 +169,11 @@ bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
         // If not currently in a choice, we reject all conditions that test against choices.
         return false;
 
+    if (select.getFunction() == SelectWrapper::Function_Weather && !(MWBase::Environment::get().getWorld()->isCellExterior() || MWBase::Environment::get().getWorld()->isCellQuasiExterior()))
+        // Reject weather conditions in interior cells
+        // Note that the original engine doesn't include the "|| isCellQuasiExterior()" check, which could be considered a bug.
+        return false;
+
     switch (select.getType())
     {
         case SelectWrapper::Type_None: return true;
