@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QTimer>
 #include <QWaitCondition>
 
 namespace CSMDoc
@@ -28,11 +29,16 @@ namespace CSMDoc
             QWaitCondition mThingsToDo;
             std::vector<std::pair<Document *, Stage> > mDocuments;
 
+            QTimer* mTimer;
+            bool mShouldStop;
+
         public:
 
             Loader();
 
             QWaitCondition& hasThingsToDo();
+
+            void stop();
 
         private slots:
 
