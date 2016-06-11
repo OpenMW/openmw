@@ -26,8 +26,6 @@ namespace MWMechanics
         MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(creatureActorId);
         if (!ptr.isEmpty())
         {
-            // TODO: Show death animation before deleting? We shouldn't allow looting the corpse while the animation
-            // plays though, which is a rather lame exploit in vanilla.
             MWBase::Environment::get().getWorld()->deleteObject(ptr);
 
             const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
@@ -157,7 +155,7 @@ namespace MWMechanics
         for (std::map<CreatureStats::SummonKey, int>::iterator it = creatureMap.begin(); it != creatureMap.end(); )
         {
             MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->second);
-            if (!ptr.isEmpty() && ptr.getClass().getCreatureStats(ptr).isDead())
+            if (!ptr.isEmpty() && ptr.getClass().getCreatureStats(ptr).isDead() && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished())
             {
                 // Purge the magic effect so a new creature can be summoned if desired
                 creatureStats.getActiveSpells().purgeEffect(it->first.first, it->first.second);
