@@ -1422,12 +1422,15 @@ namespace MWMechanics
         std::vector<MWWorld::Ptr> neighbors;
         osg::Vec3f position (actor.getRefData().getPosition().asVec3());
         getObjectsInRange(position, aiProcessingDistance, neighbors);
+
+        std::list<MWWorld::Ptr> followers = getActorsFollowing(actor);
         for(std::vector<MWWorld::Ptr>::const_iterator iter(neighbors.begin());iter != neighbors.end();++iter)
         {
             const CreatureStats &stats = iter->getClass().getCreatureStats(*iter);
             if (stats.isDead() || *iter == actor)
                 continue;
-            if (stats.getAiSequence().isInCombat(actor) || MWBase::Environment::get().getMechanicsManager()->isAggressive(*iter, actor))
+            const bool isFollower = std::find(followers.begin(), followers.end(), *iter) != followers.end();
+            if (stats.getAiSequence().isInCombat(actor) || (MWBase::Environment::get().getMechanicsManager()->isAggressive(*iter, actor) && !isFollower))
                 list.push_back(*iter);
         }
         return list;
