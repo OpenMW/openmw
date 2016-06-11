@@ -35,7 +35,7 @@ namespace MWMechanics
             /// Constructor
             /** \param distance Max distance the ACtor will wander
                 \param duration Time, in hours, that this package will be preformed
-                \param timeOfDay Start time of the package, if it has a duration. Currently unimplemented
+                \param timeOfDay Currently unimplemented. Not functional in the original engine.
                 \param idle Chances of each idle to play (9 in total)
                 \param repeat Repeat wander or not **/
             AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat);
