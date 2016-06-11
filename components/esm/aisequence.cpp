@@ -15,7 +15,7 @@ namespace AiSequence
     void AiWander::load(ESMReader &esm)
     {
         esm.getHNT (mData, "DATA");
-        esm.getHNT(mDurationData, "STAR");
+        esm.getHNT(mDurationData, "STAR"); // was mStartTime
         mStoredInitialActorPosition = false;
         if (esm.isNextSub("POS_"))
         {

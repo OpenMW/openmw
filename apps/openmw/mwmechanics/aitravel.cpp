@@ -64,7 +64,7 @@ namespace MWMechanics
         if (pathTo(actor, ESM::Pathgrid::Point(static_cast<int>(mX), static_cast<int>(mY), static_cast<int>(mZ)), duration))
         {
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-            mStarted = false;
+            mStarted = false; // Reset to false so this package will build path again when repeating
             return true;
         }
         return false;
