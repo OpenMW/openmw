@@ -178,8 +178,12 @@ namespace MWWorld
 
         if (const X *ptr = store.search (ref.mRefID))
         {
-            typename std::list<LiveRef>::iterator iter =
-                std::find(mList.begin(), mList.end(), ref.mRefNum);
+            typename std::list<LiveRef>::iterator iter;
+            for (iter = mList.begin(); iter != mList.end(); ++iter)
+            {
+                if (iter->mRef.getRefNum().mIndex == ref.mRefNum.mIndex)
+                    break;
+            }
 
             LiveRef liveCellRef (ref, ptr);
 
