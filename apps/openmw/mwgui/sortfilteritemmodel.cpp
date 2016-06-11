@@ -132,9 +132,12 @@ namespace MWGui
                 && !base.get<ESM::Book>()->mBase->mData.mIsScroll)
             return false;
 
-        if ((mFilter & Filter_OnlyUsableItems) && typeid(*base.getClass().use(base)) == typeid(MWWorld::NullAction)
-                && base.getClass().getScript(base).empty())
-            return false;
+        if ((mFilter & Filter_OnlyUsableItems) && base.getClass().getScript(base).empty())
+        {
+            boost::shared_ptr<MWWorld::Action> actionOnUse = base.getClass().use(base);
+            if (!actionOnUse || actionOnUse->isNullAction())
+                return false;
+        }
 
         return true;
     }
