@@ -61,8 +61,10 @@ namespace MWMechanics
         }
     }
 
-    void UpdateSummonedCreatures::finish()
+    std::set<int> UpdateSummonedCreatures::process()
     {
+        std::set<int> deletedCreatures;
+
         static std::map<int, std::string> summonMap;
         if (summonMap.empty())
         {
@@ -101,6 +103,7 @@ namespace MWMechanics
             {
                 // Effect has ended
                 cleanupSummonedCreature(creatureStats, it->second);
+                deletedCreatures.insert(it->second);
                 creatureMap.erase(it++);
                 continue;
             }
@@ -188,6 +191,8 @@ namespace MWMechanics
             else
                 ++it;
         }
+
+        return deletedCreatures;
     }
 
 }

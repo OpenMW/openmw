@@ -21,7 +21,8 @@ namespace MWMechanics
                             float magnitude, float remainingTime = -1, float totalTime = -1);
 
         /// To call after all effect sources have been visited
-        void finish();
+        /// Returns list of actorIds for creatures that have been deleted due to the magic effect having expired
+        std::set<int> process();
 
     private:
         MWWorld::Ptr mActor;

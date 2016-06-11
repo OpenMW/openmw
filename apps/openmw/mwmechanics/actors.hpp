@@ -43,6 +43,8 @@ namespace MWMechanics
 
             void killDeadActors ();
 
+            void purgeSpellEffects (int casterActorId);
+
         public:
 
             Actors();

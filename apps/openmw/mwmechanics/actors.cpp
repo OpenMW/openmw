@@ -688,7 +688,9 @@ namespace MWMechanics
         creatureStats.getActiveSpells().visitEffectSources(updateSummonedCreatures);
         if (ptr.getClass().hasInventoryStore(ptr))
             ptr.getClass().getInventoryStore(ptr).visitEffectSources(updateSummonedCreatures);
-        updateSummonedCreatures.finish();
+        std::set<int> deleted = updateSummonedCreatures.process();
+        for (std::set<int>::const_iterator it = deleted.begin(); it != deleted.end(); ++it)
+            purgeSpellEffects(*it);
     }
 
     void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr, float duration)
@@ -1242,11 +1244,7 @@ namespace MWMechanics
                 ++mDeathCount[Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId())];
 
                 // Make sure spell effects are removed
-                for (PtrActorMap::iterator iter2(mActors.begin());iter2 != mActors.end();++iter2)
-                {
-                    MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
-                    spells.purge(stats.getActorId());
-                }
+                purgeSpellEffects(stats.getActorId());
 
                 if( iter->first == getPlayer())
                 {
@@ -1258,6 +1256,15 @@ namespace MWMechanics
                 if(iter->first == getPlayer())
                     MWBase::Environment::get().getSoundManager()->streamMusic("Special/MW_Death.mp3");
             }
+        }
+    }
+
+    void Actors::purgeSpellEffects(int casterActorId)
+    {
+        for (PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+        {
+            MWMechanics::ActiveSpells& spells = iter->first.getClass().getCreatureStats(iter->first).getActiveSpells();
+            spells.purge(casterActorId);
         }
     }
 
