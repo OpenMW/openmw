@@ -40,6 +40,7 @@ namespace ESM
         int mActorId;
 
         bool mDead;
+        bool mDeathAnimationFinished;
         bool mDied;
         bool mMurdered;
         bool mTalkedTo;

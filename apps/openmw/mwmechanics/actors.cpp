@@ -20,6 +20,7 @@
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
 
@@ -1208,24 +1209,13 @@ namespace MWMechanics
                     continue;
             }
 
-            if (iter->second->getCharacterController()->kill())
+            CharacterController::KillResult killResult = iter->second->getCharacterController()->kill();
+            if (killResult == CharacterController::Result_DeathAnimStarted)
             {
-                // TODO: It's not known whether the soundgen tags scream, roar, and moan are reliable 
-                // for NPCs since some of the npc death animation files are missing them.
-
                 // Play dying words
+                // Note: It's not known whether the soundgen tags scream, roar, and moan are reliable
+                // for NPCs since some of the npc death animation files are missing them.
                 MWBase::Environment::get().getDialogueManager()->say(iter->first, "hit");
-
-                iter->first.getClass().getCreatureStats(iter->first).notifyDied();
-
-                ++mDeathCount[Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId())];
-
-                // Make sure spell effects are removed
-                for (PtrActorMap::iterator iter2(mActors.begin());iter2 != mActors.end();++iter2)
-                {
-                    MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
-                    spells.purge(stats.getActorId());
-                }
 
                 // Apply soultrap
                 if (iter->first.getTypeName() == typeid(ESM::Creature).name())
@@ -1244,6 +1234,29 @@ namespace MWMechanics
 
                 if (cls.isEssential(iter->first))
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
+            }
+            else if (killResult == CharacterController::Result_DeathAnimJustFinished)
+            {
+                iter->first.getClass().getCreatureStats(iter->first).notifyDied();
+
+                ++mDeathCount[Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId())];
+
+                // Make sure spell effects are removed
+                for (PtrActorMap::iterator iter2(mActors.begin());iter2 != mActors.end();++iter2)
+                {
+                    MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
+                    spells.purge(stats.getActorId());
+                }
+
+                if( iter->first == getPlayer())
+                {
+                    //player's death animation is over
+                    MWBase::Environment::get().getStateManager()->askLoadRecent();
+                }
+
+                // Play Death Music if it was the player dying
+                if(iter->first == getPlayer())
+                    MWBase::Environment::get().getSoundManager()->streamMusic("Special/MW_Death.mp3");
             }
         }
     }

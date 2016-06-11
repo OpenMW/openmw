@@ -20,6 +20,9 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mDead = false;
     esm.getHNOT (mDead, "DEAD");
 
+    mDeathAnimationFinished = false;
+    esm.getHNOT (mDeathAnimationFinished, "DFNT");
+
     mDied = false;
     esm.getHNOT (mDied, "DIED");
 
@@ -140,6 +143,9 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mDead)
         esm.writeHNT ("DEAD", mDead);
 
+    if (mDeathAnimationFinished)
+        esm.writeHNT ("DFNT", mDeathAnimationFinished);
+
     if (mDied)
         esm.writeHNT ("DIED", mDied);
 
@@ -233,6 +239,7 @@ void ESM::CreatureStats::blank()
     mActorId = -1;
     mHasAiSettings = false;
     mDead = false;
+    mDeathAnimationFinished = false;
     mDied = false;
     mMurdered = false;
     mTalkedTo = false;

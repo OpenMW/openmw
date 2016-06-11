@@ -34,7 +34,8 @@ namespace MWMechanics
         Stat<int> mAiSettings[4];
         AiSequence mAiSequence;
         bool mDead;
-        bool mDied;
+        bool mDeathAnimationFinished;
+        bool mDied; // flag for OnDeath script function
         bool mMurdered;
         int mFriendlyHits;
         bool mTalkedTo;
@@ -160,6 +161,9 @@ namespace MWMechanics
         bool isParalyzed() const;
 
         bool isDead() const;
+
+        bool isDeathAnimationFinished() const;
+        void setDeathAnimationFinished(bool finished);
 
         void notifyDied();
 

@@ -351,6 +351,8 @@ namespace MWClass
 
                 data->mNpcStats.setNeedRecalcDynamicStats(true);
             }
+            if (data->mNpcStats.isDead())
+                data->mNpcStats.setDeathAnimationFinished(true);
 
             // race powers
             const ESM::Race *race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);

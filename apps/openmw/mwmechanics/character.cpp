@@ -40,7 +40,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/statemanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -719,15 +718,20 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
             mIdleState = CharState_Idle;
         else
         {
-            // Set the death state, but don't play it yet
-            // We will play it in the first frame, but only if no script set the skipAnim flag
-            signed char deathanim = mPtr.getClass().getCreatureStats(mPtr).getDeathAnimation();
-            if (deathanim == -1)
-                mDeathState = chooseRandomDeathState();
-            else
-                mDeathState = static_cast<CharacterState>(CharState_Death1 + deathanim);
+            const MWMechanics::CreatureStats& cStats = mPtr.getClass().getCreatureStats(mPtr);
+            if (cStats.isDeathAnimationFinished())
+            {
+                // Set the death state, but don't play it yet
+                // We will play it in the first frame, but only if no script set the skipAnim flag
+                signed char deathanim = cStats.getDeathAnimation();
+                if (deathanim == -1)
+                    mDeathState = chooseRandomDeathState();
+                else
+                    mDeathState = static_cast<CharacterState>(CharState_Death1 + deathanim);
 
-            mFloatToSurface = false;
+                mFloatToSurface = false;
+            }
+            // else: nothing to do, will detect death in the next frame and start playing death animation
         }
     }
     else
@@ -2000,30 +2004,28 @@ void CharacterController::forceStateUpdate()
     mAnimation->runAnimation(0.f);
 }
 
-bool CharacterController::kill()
+CharacterController::KillResult CharacterController::kill()
 {
-    if( isDead() )
+    if (mDeathState == CharState_None)
     {
-        if( mPtr == getPlayer() && !isAnimPlaying(mCurrentDeath) )
-        {
-            //player's death animation is over
-            MWBase::Environment::get().getStateManager()->askLoadRecent();
-        }
-        return false;
+        playRandomDeath();
+
+        mAnimation->disable(mCurrentIdle);
+
+        mIdleState = CharState_None;
+        mCurrentIdle.clear();
+        return Result_DeathAnimStarted;
     }
 
-    playRandomDeath();
-
-    mAnimation->disable(mCurrentIdle);
-
-    mIdleState = CharState_None;
-    mCurrentIdle.clear();
-
-    // Play Death Music if it was the player dying
-    if(mPtr == getPlayer())
-        MWBase::Environment::get().getSoundManager()->streamMusic("Special/MW_Death.mp3");
-
-    return true;
+    MWMechanics::CreatureStats& cStats = mPtr.getClass().getCreatureStats(mPtr);
+    if (isAnimPlaying(mCurrentDeath))
+        return Result_DeathAnimPlaying;
+    if (!cStats.isDeathAnimationFinished())
+    {
+        cStats.setDeathAnimationFinished(true);
+        return Result_DeathAnimJustFinished;
+    }
+    return Result_DeathAnimFinished;
 }
 
 void CharacterController::resurrect()

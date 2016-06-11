@@ -234,8 +234,14 @@ public:
     void skipAnim();
     bool isAnimPlaying(const std::string &groupName);
 
-    /// @return false if the character has already been killed before
-    bool kill();
+    enum KillResult
+    {
+        Result_DeathAnimStarted,
+        Result_DeathAnimPlaying,
+        Result_DeathAnimJustFinished,
+        Result_DeathAnimFinished
+    };
+    KillResult kill();
 
     void resurrect();
     bool isDead() const
