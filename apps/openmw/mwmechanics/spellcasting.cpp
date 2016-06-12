@@ -26,7 +26,6 @@
 
 #include "magiceffects.hpp"
 #include "npcstats.hpp"
-#include "summoning.hpp"
 #include "actorutil.hpp"
 
 namespace
@@ -510,7 +509,7 @@ namespace MWMechanics
                     std::map<CreatureStats::SummonKey, int>::iterator found = targetStats.getSummonedCreatureMap().find(std::make_pair(effectIt->mEffectID, mId));
                     if (found != targetStats.getSummonedCreatureMap().end())
                     {
-                        cleanupSummonedCreature(targetStats, found->second);
+                        MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(target, found->second);
                         targetStats.getSummonedCreatureMap().erase(found);
                     }
                 }

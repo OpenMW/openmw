@@ -4,6 +4,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
 
@@ -20,28 +21,6 @@
 
 namespace MWMechanics
 {
-
-    void cleanupSummonedCreature (MWMechanics::CreatureStats& casterStats, int creatureActorId)
-    {
-        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(creatureActorId);
-        if (!ptr.isEmpty())
-        {
-            MWBase::Environment::get().getWorld()->deleteObject(ptr);
-
-            const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
-                    .search("VFX_Summon_End");
-            if (fx)
-                MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
-                    "", ptr.getRefData().getPosition().asVec3());
-        }
-        else if (creatureActorId != -1)
-        {
-            // We didn't find the creature. It's probably in an inactive cell.
-            // Add to graveyard so we can delete it when the cell becomes active.
-            std::vector<int>& graveyard = casterStats.getSummonedCreatureGraveyard();
-            graveyard.push_back(creatureActorId);
-        }
-    }
 
     UpdateSummonedCreatures::UpdateSummonedCreatures(const MWWorld::Ptr &actor)
         : mActor(actor)
@@ -61,10 +40,8 @@ namespace MWMechanics
         }
     }
 
-    std::set<int> UpdateSummonedCreatures::process()
+    void UpdateSummonedCreatures::process()
     {
-        std::set<int> deletedCreatures;
-
         static std::map<int, std::string> summonMap;
         if (summonMap.empty())
         {
@@ -102,8 +79,7 @@ namespace MWMechanics
             if (!found)
             {
                 // Effect has ended
-                cleanupSummonedCreature(creatureStats, it->second);
-                deletedCreatures.insert(it->second);
+                MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(mActor, it->second);
                 creatureMap.erase(it++);
                 continue;
             }
@@ -165,7 +141,7 @@ namespace MWMechanics
                 if (mActor.getClass().hasInventoryStore(ptr))
                     mActor.getClass().getInventoryStore(mActor).purgeEffect(it->first.first, it->first.second);
 
-                cleanupSummonedCreature(creatureStats, it->second);
+                MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(mActor, it->second);
                 creatureMap.erase(it++);
             }
             else
@@ -191,8 +167,6 @@ namespace MWMechanics
             else
                 ++it;
         }
-
-        return deletedCreatures;
     }
 
 }

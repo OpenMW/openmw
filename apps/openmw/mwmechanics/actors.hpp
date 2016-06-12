@@ -19,6 +19,7 @@ namespace MWWorld
 namespace MWMechanics
 {
     class Actor;
+    class CreatureStats;
 
     class Actors
     {
@@ -112,6 +113,8 @@ namespace MWMechanics
         bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName);
 
             void getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out);
+
+            void cleanupSummonedCreature (CreatureStats& casterStats, int creatureActorId);
 
             ///Returns the list of actors which are siding with the given actor in fights
             /**ie AiFollow or AiEscort is active and the target is the actor **/

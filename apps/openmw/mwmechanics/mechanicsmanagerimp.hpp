@@ -189,6 +189,8 @@ namespace MWMechanics
             virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
             virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor);
 
+            virtual void cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId);
+
         private:
             void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0);

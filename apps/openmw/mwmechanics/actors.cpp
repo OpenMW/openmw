@@ -688,9 +688,7 @@ namespace MWMechanics
         creatureStats.getActiveSpells().visitEffectSources(updateSummonedCreatures);
         if (ptr.getClass().hasInventoryStore(ptr))
             ptr.getClass().getInventoryStore(ptr).visitEffectSources(updateSummonedCreatures);
-        std::set<int> deleted = updateSummonedCreatures.process();
-        for (std::set<int>::const_iterator it = deleted.begin(); it != deleted.end(); ++it)
-            purgeSpellEffects(*it);
+        updateSummonedCreatures.process();
     }
 
     void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr, float duration)
@@ -1257,6 +1255,30 @@ namespace MWMechanics
                     MWBase::Environment::get().getSoundManager()->streamMusic("Special/MW_Death.mp3");
             }
         }
+    }
+
+    void Actors::cleanupSummonedCreature (MWMechanics::CreatureStats& casterStats, int creatureActorId)
+    {
+        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(creatureActorId);
+        if (!ptr.isEmpty())
+        {
+            MWBase::Environment::get().getWorld()->deleteObject(ptr);
+
+            const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
+                    .search("VFX_Summon_End");
+            if (fx)
+                MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
+                    "", ptr.getRefData().getPosition().asVec3());
+        }
+        else if (creatureActorId != -1)
+        {
+            // We didn't find the creature. It's probably in an inactive cell.
+            // Add to graveyard so we can delete it when the cell becomes active.
+            std::vector<int>& graveyard = casterStats.getSummonedCreatureGraveyard();
+            graveyard.push_back(creatureActorId);
+        }
+
+        purgeSpellEffects(creatureActorId);
     }
 
     void Actors::purgeSpellEffects(int casterActorId)
