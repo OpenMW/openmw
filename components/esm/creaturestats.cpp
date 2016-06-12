@@ -23,6 +23,9 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mDeathAnimationFinished = false;
     esm.getHNOT (mDeathAnimationFinished, "DFNT");
 
+    if (esm.getFormat() < 3 && mDead)
+        mDeathAnimationFinished = true;
+
     mDied = false;
     esm.getHNOT (mDied, "DIED");
 
