@@ -1301,8 +1301,11 @@ namespace MWPhysics
         mMovementResults.clear();
 
         mTimeAccum += dt;
+#if defined(ANDROID)
+        const float physicsDt = 1.f/30.0f;
+#else
         const float physicsDt = 1.f/60.0f;
-
+#endif
         const int maxAllowedSteps = 20;
         int numSteps = mTimeAccum / (physicsDt);
         numSteps = std::min(numSteps, maxAllowedSteps);
