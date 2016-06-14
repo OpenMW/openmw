@@ -42,6 +42,8 @@ namespace MWMechanics
 
             void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
+            void fastForward(const MWWorld::Ptr& actor, AiState& state);
+
         private:
             std::string mActorId;
             std::string mCellId;
@@ -49,7 +51,8 @@ namespace MWMechanics
             float mY;
             float mZ;
             float mMaxDist;
-            float mRemainingDuration; // In seconds
+            float mDuration; // In hours
+            float mRemainingDuration; // In hours
 
             int mCellX;
             int mCellY;

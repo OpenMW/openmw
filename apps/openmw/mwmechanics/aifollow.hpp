@@ -50,12 +50,15 @@ namespace MWMechanics
 
             int getFollowIndex() const;
 
+            void fastForward(const MWWorld::Ptr& actor, AiState& state);
+
         private:
             /// This will make the actor always follow.
             /** Thus ignoring mDuration and mX,mY,mZ (used for summoned creatures). **/
             bool mAlwaysFollow;
             bool mCommanded;
-            float mRemainingDuration; // Seconds
+            float mDuration; // Hours
+            float mRemainingDuration; // Hours
             float mX;
             float mY;
             float mZ;
