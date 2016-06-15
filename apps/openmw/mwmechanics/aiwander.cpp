@@ -117,7 +117,7 @@ namespace MWMechanics
     };
     
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
-        mDistance(distance), mDuration(duration), mRemainingDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle),
+        mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mRemainingDuration(duration), mIdle(idle),
         mRepeat(repeat), mStoredInitialActorPosition(false)
     {
         mIdle.resize(8, 0);
@@ -197,7 +197,6 @@ namespace MWMechanics
         // get or create temporary storage
         AiWanderStorage& storage = state.get<AiWanderStorage>();
         
-
         const MWWorld::CellStore*& currentCell = storage.mCell;
         MWMechanics::CreatureStats& cStats = actor.getClass().getCreatureStats(actor);
         if(cStats.isDead() || cStats.getHealth().getCurrent() <= 0)
@@ -318,7 +317,6 @@ namespace MWMechanics
     { 
          return mRepeat; 
     }
-
 
     bool AiWander::isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage)
     {
@@ -958,8 +956,8 @@ namespace MWMechanics
     AiWander::AiWander (const ESM::AiSequence::AiWander* wander)
         : mDistance(wander->mData.mDistance)
         , mDuration(wander->mData.mDuration)
-        , mRemainingDuration(wander->mDurationData.mRemainingDuration)
         , mTimeOfDay(wander->mData.mTimeOfDay)
+        , mRemainingDuration(wander->mDurationData.mRemainingDuration)
         , mRepeat(wander->mData.mShouldRepeat != 0)
         , mStoredInitialActorPosition(wander->mStoredInitialActorPosition)
     {
@@ -969,7 +967,6 @@ namespace MWMechanics
             mIdle.push_back(wander->mData.mIdle[i]);
         if (mRemainingDuration <= 0 || mRemainingDuration >= 24)
             mRemainingDuration = mDuration;
-
 
         init();
     }

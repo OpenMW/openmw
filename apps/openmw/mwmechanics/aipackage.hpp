@@ -24,14 +24,13 @@ namespace ESM
 
 namespace MWMechanics
 {
-
     class CharacterController;
 
     /// \brief Base class for AI packages
     class AiPackage
     {
         public:
-            ///Enumerates the various AITypes availible.
+            /// Enumerates the various AITypes availible.
             enum TypeId {
                 TypeIdNone = -1,
                 TypeIdWander = 0,
@@ -47,13 +46,13 @@ namespace MWMechanics
                 TypeIdAvoidDoor = 7
             };
 
-            ///Default constructor
+            /// Default constructor
             AiPackage();
 
-            ///Default Deconstructor
+            /// Default Deconstructor
             virtual ~AiPackage();
 
-            ///Clones the package
+            /// Clones the package
             virtual AiPackage *clone() const = 0;
 
             /// Updates and runs the package (Should run every frame)
@@ -114,9 +113,7 @@ namespace MWMechanics
 
         private:
             bool isNearInactiveCell(const ESM::Position& actorPos);
-
     };
 }
-
 #endif
 

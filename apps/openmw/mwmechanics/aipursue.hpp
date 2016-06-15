@@ -9,10 +9,10 @@
 
 namespace ESM
 {
-namespace AiSequence
-{
-    struct AiPursue;
-}
+    namespace AiSequence
+    {
+        struct AiPursue;
+    }
 }
 
 namespace MWMechanics
@@ -31,7 +31,9 @@ namespace MWMechanics
             AiPursue(const ESM::AiSequence::AiPursue* pursue);
 
             virtual AiPursue *clone() const;
+
             virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
+
             virtual int getTypeId() const;
 
             MWWorld::Ptr getTarget() const;
@@ -39,10 +41,10 @@ namespace MWMechanics
             virtual void writeState (ESM::AiSequence::AiSequence& sequence) const;
 
             virtual bool canCancel() const { return false; }
+
             virtual bool shouldCancelPreviousAi() const { return false; }
 
         private:
-
             int mTargetActorId; // The actor to pursue
     };
 }

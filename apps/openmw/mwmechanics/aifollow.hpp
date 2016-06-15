@@ -11,10 +11,10 @@
 
 namespace ESM
 {
-namespace AiSequence
-{
-    struct AiFollow;
-}
+    namespace AiSequence
+    {
+        struct AiFollow;
+    }
 }
 
 namespace MWMechanics
@@ -35,7 +35,9 @@ namespace MWMechanics
             AiFollow(const ESM::AiSequence::AiFollow* follow);
 
             MWWorld::Ptr getTarget() const;
+
             virtual bool sideWithTarget() const { return true; }
+
             virtual bool followTargetThroughDoors() const { return true; }
 
             virtual AiFollow *clone() const;
@@ -60,17 +62,19 @@ namespace MWMechanics
             /** Thus ignoring mDuration and mX,mY,mZ (used for summoned creatures). **/
             bool mAlwaysFollow;
             bool mCommanded;
+            bool mActive; // Have we spotted the target?
+
             float mDuration; // Hours
             float mRemainingDuration; // Hours
             float mX;
             float mY;
             float mZ;
-            std::string mActorRefId;
-            mutable int mActorId;
-            std::string mCellId;
-            bool mActive; // have we spotted the target?
-            int mFollowIndex;
 
+            std::string mActorRefId;
+            std::string mCellId;
+
+            mutable int mActorId;
+            int mFollowIndex;
             static int mFollowIndexCounter;
     };
 }

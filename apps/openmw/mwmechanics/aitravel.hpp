@@ -7,10 +7,10 @@
 
 namespace ESM
 {
-namespace AiSequence
-{
-    struct AiTravel;
-}
+    namespace AiSequence
+    {
+        struct AiTravel;
+    }
 }
 
 namespace MWMechanics
@@ -44,8 +44,6 @@ namespace MWMechanics
 
             int mCellX;
             int mCellY;
-
     };
 }
-
 #endif

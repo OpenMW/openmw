@@ -6,7 +6,6 @@
 
 namespace MWMechanics
 {
-
     /** \brief stores one object of any class derived from Base.
      *  Requesting a certain derived class via get() either returns
      * the stored object if it has the correct type or otherwise replaces
@@ -15,70 +14,65 @@ namespace MWMechanics
     template< class Base >
     class DerivedClassStorage
     {              
-    private:
-        Base* mStorage;
+        private:
+            Base* mStorage;
         
-        //if needed you have to provide a clone member function
-        DerivedClassStorage( const DerivedClassStorage& other );
-        DerivedClassStorage& operator=( const DerivedClassStorage& );
+            //if needed you have to provide a clone member function
+            DerivedClassStorage( const DerivedClassStorage& other );
+            DerivedClassStorage& operator=( const DerivedClassStorage& );
         
-    public:
-        /// \brief returns reference to stored object or deletes it and creates a fitting
-        template< class Derived >
-        Derived& get()
-        {
-            Derived* result = dynamic_cast<Derived*>(mStorage);
+        public:
+            /// \brief returns reference to stored object or deletes it and creates a fitting
+            template< class Derived >
+            Derived& get()
+            {
+                Derived* result = dynamic_cast<Derived*>(mStorage);
             
-            if(!result)
+                if(!result)
+                {
+                    if(mStorage)
+                        delete mStorage;
+                    mStorage = result = new Derived();
+                }
+            
+                //return a reference to the (new allocated) object 
+                return *result;
+            }
+        
+            template< class Derived >
+            void store( const Derived& payload )
             {
                 if(mStorage)
                     delete mStorage;
-                mStorage = result = new Derived();
+                mStorage = new Derived(payload);
             }
-            
-            //return a reference to the (new allocated) object 
-            return *result;
-        }
         
-        template< class Derived >
-        void store( const Derived& payload )
-        {
-            if(mStorage)
-                delete mStorage;
-            mStorage = new Derived(payload);
-        }
+            /// \brief takes ownership of the passed object
+            template< class Derived >
+            void moveIn( Derived* p )
+            {
+                if(mStorage)
+                    delete mStorage;
+                mStorage = p;
+            }
         
-        /// \brief takes ownership of the passed object
-        template< class Derived >
-        void moveIn( Derived* p )
-        {
-            if(mStorage)
-                delete mStorage;
-            mStorage = p;
-        }
+            bool empty() const
+            {
+                return mStorage == NULL;
+            }
         
-        bool empty() const
-        {
-            return mStorage == NULL;
-        }
+            const std::type_info& getType() const
+            {
+                return typeid(mStorage);
+            }
         
-        const std::type_info& getType() const
-        {
-            return typeid(mStorage);
-        }
-        
-        
-        DerivedClassStorage():mStorage(NULL){}
-        ~DerivedClassStorage()
-        {
-            if(mStorage)
-                delete mStorage;
-        }
-        
-        
-        
+            DerivedClassStorage():mStorage(NULL){}
+            ~DerivedClassStorage()
+            {
+                if(mStorage)
+                    delete mStorage;
+            }
     };
-
 
     /// \brief base class for the temporary storage of AiPackages.
     /**
@@ -86,7 +80,7 @@ namespace MWMechanics
      * which is derived from AiTemporaryBase. The Actor holds a container
      * AiState where one of these storages can be stored at a time.
      * The execute(...) member function takes this container as an argument.
-     * */
+     **/
     struct AiTemporaryBase
     {
         virtual ~AiTemporaryBase(){}
