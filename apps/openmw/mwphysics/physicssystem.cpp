@@ -280,9 +280,9 @@ namespace MWPhysics
             {
                 velocity = (osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))) * movement;
 
-                if (velocity.z() > 0.f)
+                if (velocity.z() > 0.f && physicActor->getOnGround())
                     inertia = velocity;
-                if(!physicActor->getOnGround())
+                else if(!physicActor->getOnGround())
                 {
                     velocity = velocity + physicActor->getInertialForce();
                 }

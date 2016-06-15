@@ -1938,7 +1938,7 @@ void CharacterController::update(float duration)
     if (mSkipAnim)
         mAnimation->updateEffects(duration);
 
-    if (mFloatToSurface && cls.isActor() && cls.getCreatureStats(mPtr).isDead())
+    if (mFloatToSurface && cls.isActor() && cls.getCreatureStats(mPtr).isDead() && cls.canSwim(mPtr))
         moved.z() = 1.0;
 
     // Update movement
