@@ -140,6 +140,8 @@ enum JumpingState {
     JumpState_Landing
 };
 
+struct WeaponInfo;
+
 class CharacterController : public MWRender::Animation::TextKeyListener
 {
     MWWorld::Ptr mPtr;
@@ -193,6 +195,10 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     void setAttackTypeRandomly();
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
+    void refreshHitRecoilAnims();
+    void refreshJumpAnims(const WeaponInfo* weap, JumpingState jump, bool force=false);
+    void refreshMovementAnims(const WeaponInfo* weap, CharacterState movement, bool force=false);
+    void refreshIdleAnims(const WeaponInfo* weap, CharacterState idle, bool force=false);
 
     void clearAnimQueue();
 
