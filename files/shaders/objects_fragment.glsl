@@ -54,10 +54,6 @@ varying vec4 passColor;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
-#if @parallax
-uniform mat4 osg_ViewMatrixInverse;
-#endif
-
 #include "lighting.glsl"
 #include "parallax.glsl"
 
