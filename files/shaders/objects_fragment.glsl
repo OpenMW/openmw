@@ -85,7 +85,9 @@ void main()
     vec2 offset = getParallaxOffset(eyeDir, tbnTranspose, normalTex.a);
     adjustedDiffuseUV += offset; // only offset diffuse for now, other textures are more likely to be using a completely different UV set
 
-#if @diffuseMapUV == @normalMapUV
+    // TODO: check not working as the same UV buffer is being bound to different targets
+    // if diffuseMapUV == normalMapUV
+#if 1
     // fetch a new normal using updated coordinates
     normalTex = texture2D(normalMap, adjustedDiffuseUV);
     viewNormal = gl_NormalMatrix * normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
