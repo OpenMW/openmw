@@ -28,7 +28,7 @@ varying vec2 emissiveMapUV;
 #if @normalMap
 uniform sampler2D normalMap;
 varying vec2 normalMapUV;
-varying vec3 passTangent;
+varying vec4 passTangent;
 #endif
 
 #if @envMap
@@ -69,7 +69,7 @@ void main()
     vec4 normalTex = texture2D(normalMap, normalMapUV);
 
     vec3 normalizedNormal = normalize(passNormal);
-    vec3 normalizedTangent = normalize(passTangent);
+    vec3 normalizedTangent = normalize(passTangent.xyz);
     vec3 binormal = cross(normalizedTangent, normalizedNormal);
     mat3 tbnTranspose = mat3(normalizedTangent, binormal, normalizedNormal);
 
@@ -82,7 +82,7 @@ void main()
     vec3 cameraPos = (gl_ModelViewMatrixInverse * vec4(0,0,0,1)).xyz;
     vec3 objectPos = (gl_ModelViewMatrixInverse * vec4(passViewPos, 1)).xyz;
     vec3 eyeDir = normalize(cameraPos - objectPos);
-    vec2 offset = getParallaxOffset(eyeDir, tbnTranspose, normalTex.a);
+    vec2 offset = getParallaxOffset(eyeDir, tbnTranspose, normalTex.a, (passTangent.w > 0) ? -1.f : 1.f);
     adjustedDiffuseUV += offset; // only offset diffuse for now, other textures are more likely to be using a completely different UV set
 
     // TODO: check not working as the same UV buffer is being bound to different targets

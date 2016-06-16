@@ -53,7 +53,7 @@ void main()
     vec3 cameraPos = (gl_ModelViewMatrixInverse * vec4(0,0,0,1)).xyz;
     vec3 objectPos = (gl_ModelViewMatrixInverse * vec4(passViewPos, 1)).xyz;
     vec3 eyeDir = normalize(cameraPos - objectPos);
-    adjustedUV += getParallaxOffset(eyeDir, tbnTranspose, normalTex.a);
+    adjustedUV += getParallaxOffset(eyeDir, tbnTranspose, normalTex.a, 1.f);
 
     // update normal using new coordinates
     normalTex = texture2D(normalMap, adjustedUV);

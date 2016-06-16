@@ -22,7 +22,7 @@ varying vec2 emissiveMapUV;
 
 #if @normalMap
 varying vec2 normalMapUV;
-varying vec3 passTangent;
+varying vec4 passTangent;
 #endif
 
 #if @envMap
@@ -85,7 +85,7 @@ void main(void)
 
 #if @normalMap
     normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
-    passTangent = gl_MultiTexCoord7.xyz;
+    passTangent = gl_MultiTexCoord7.xyzw;
 #endif
 
 #if @specularMap
