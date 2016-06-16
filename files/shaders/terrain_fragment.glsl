@@ -42,21 +42,22 @@ void main()
     vec3 tangent = vec3(1.0, 0.0, 0.0);
     vec3 binormal = normalize(cross(tangent, normalizedNormal));
     tangent = normalize(cross(normalizedNormal, binormal)); // note, now we need to re-cross to derive tangent again because it wasn't orthonormal
-    mat3 tbn = mat3(tangent, binormal, normalizedNormal);
+    mat3 tbnTranspose = mat3(tangent, binormal, normalizedNormal);
 
-    vec3 viewNormal = normalize(gl_NormalMatrix * (tbn * (normalTex.xyz * 2.0 - 1.0)));
+    vec3 viewNormal = normalize(gl_NormalMatrix * (tbnTranspose * (normalTex.xyz * 2.0 - 1.0)));
 #else
     vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
 #endif
 
 #if @parallax
-    vec3 cameraPos = osg_ViewMatrixInverse[3].xyz;
-    vec3 eyeDir = normalize(cameraPos - (osg_ViewMatrixInverse * vec4(passViewPos, 1)).xyz);
-    adjustedUV += getParallaxOffset(eyeDir, tbn, normalTex.a);
+    vec3 cameraPos = (gl_ModelViewMatrixInverse * vec4(0,0,0,1)).xyz;
+    vec3 objectPos = (gl_ModelViewMatrixInverse * vec4(passViewPos, 1)).xyz;
+    vec3 eyeDir = normalize(cameraPos - objectPos);
+    adjustedUV += getParallaxOffset(eyeDir, tbnTranspose, normalTex.a);
 
     // update normal using new coordinates
     normalTex = texture2D(normalMap, adjustedUV);
-    viewNormal = normalize(gl_NormalMatrix * (tbn * (normalTex.xyz * 2.0 - 1.0)));
+    viewNormal = normalize(gl_NormalMatrix * (tbnTranspose * (normalTex.xyz * 2.0 - 1.0)));
 #endif
 
     vec4 diffuseTex = texture2D(diffuseMap, adjustedUV);
