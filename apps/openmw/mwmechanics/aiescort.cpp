@@ -16,7 +16,6 @@
 #include "movement.hpp"
 
 /*
-    TODO: Test vanilla behavior on passing x0, y0, and z0 with duration of anything including 0.
     TODO: Different behavior for AIEscort a d x y z and AIEscortCell a c d x y z.
     TODO: Take account for actors being in different cells.
 */
@@ -109,7 +108,7 @@ namespace MWMechanics
         }
         else
         {
-            // Stop moving if the player is to far away
+            // Stop moving if the player is too far away
             MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle3", 0, 1);
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
             mMaxDist = 250;
