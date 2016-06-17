@@ -6,14 +6,15 @@
 #include <components/esm/loadland.hpp>
 #include <components/esm/loadmgef.hpp>
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/cellstore.hpp"
+#include "apps/openmw/mwbase/world.hpp"
+#include "apps/openmw/mwbase/environment.hpp"
+
+#include "apps/openmw/mwworld/action.hpp"
+#include "apps/openmw/mwworld/class.hpp"
+#include "apps/openmw/mwworld/cellstore.hpp"
+
 #include "creaturestats.hpp"
 #include "movement.hpp"
-#include "../mwworld/action.hpp"
-
 #include "steering.hpp"
 #include "actorutil.hpp"
 #include "coordinateconverter.hpp"

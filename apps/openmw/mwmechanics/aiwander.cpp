@@ -7,15 +7,15 @@
 
 #include <components/esm/aisequence.hpp>
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/dialoguemanager.hpp"
-#include "../mwbase/soundmanager.hpp"
+#include "apps/openmw/mwbase/world.hpp"
+#include "apps/openmw/mwbase/environment.hpp"
+#include "apps/openmw/mwbase/mechanicsmanager.hpp"
+#include "apps/openmw/mwbase/dialoguemanager.hpp"
+#include "apps/openmw/mwbase/soundmanager.hpp"
 
-#include "../mwworld/class.hpp"
-#include "../mwworld/esmstore.hpp"
-#include "../mwworld/cellstore.hpp"
+#include "apps/openmw/mwworld/class.hpp"
+#include "apps/openmw/mwworld/esmstore.hpp"
+#include "apps/openmw/mwworld/cellstore.hpp"
 
 #include "creaturestats.hpp"
 #include "steering.hpp"

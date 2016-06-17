@@ -3,14 +3,15 @@
 #include <components/esm/aisequence.hpp>
 #include <components/esm/loadcell.hpp>
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/cellstore.hpp"
+#include "apps/openmw/mwbase/world.hpp"
+#include "apps/openmw/mwbase/environment.hpp"
+#include "apps/openmw/mwbase/mechanicsmanager.hpp"
+
+#include "apps/openmw/mwworld/class.hpp"
+#include "apps/openmw/mwworld/cellstore.hpp"
+
 #include "creaturestats.hpp"
 #include "movement.hpp"
-
 #include "steering.hpp"
 
 namespace MWMechanics
