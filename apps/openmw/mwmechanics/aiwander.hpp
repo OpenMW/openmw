@@ -5,11 +5,10 @@
 
 #include <vector>
 
-#include "pathfinding.hpp"
-#include "obstacle.hpp"
-
 #include "../mwworld/timestamp.hpp"
 
+#include "pathfinding.hpp"
+#include "obstacle.hpp"
 #include "aistate.hpp"
 
 namespace ESM

@@ -16,7 +16,6 @@
 #include "steering.hpp"
 #include "movement.hpp"
 #include "character.hpp"
-
 #include "aicombataction.hpp"
 #include "combat.hpp"
 

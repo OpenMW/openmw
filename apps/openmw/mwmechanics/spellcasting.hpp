@@ -1,9 +1,9 @@
 #ifndef MWMECHANICS_SPELLSUCCESS_H
 #define MWMECHANICS_SPELLSUCCESS_H
 
-#include "../mwworld/ptr.hpp"
-
 #include <components/esm/loadskil.hpp>
+
+#include "../mwworld/ptr.hpp"
 
 namespace ESM
 {

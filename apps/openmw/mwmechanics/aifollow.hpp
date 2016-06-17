@@ -2,9 +2,12 @@
 #define GAME_MWMECHANICS_AIFOLLOW_H
 
 #include "aipackage.hpp"
+
 #include <string>
-#include "pathfinding.hpp"
+
 #include <components/esm/defs.hpp>
+
+#include "pathfinding.hpp"
 
 namespace ESM
 {

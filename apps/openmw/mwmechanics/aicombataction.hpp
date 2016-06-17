@@ -3,10 +3,10 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <components/esm/loadspel.hpp>
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/containerstore.hpp"
-
-#include <components/esm/loadspel.hpp>
 
 namespace MWMechanics
 {

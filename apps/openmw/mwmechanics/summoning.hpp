@@ -3,8 +3,9 @@
 
 #include <set>
 
-#include "magiceffects.hpp"
 #include "../mwworld/ptr.hpp"
+
+#include "magiceffects.hpp"
 
 namespace MWMechanics
 {

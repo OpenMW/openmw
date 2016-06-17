@@ -5,10 +5,9 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
-
 #include "../mwworld/class.hpp"
 
+#include "creaturestats.hpp"
 #include "steering.hpp"
 #include "movement.hpp"
 

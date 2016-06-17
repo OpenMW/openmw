@@ -1,7 +1,6 @@
 #include "activespells.hpp"
 
 #include <components/misc/rng.hpp>
-
 #include <components/misc/stringops.hpp>
 
 #include <components/esm/loadmgef.hpp>

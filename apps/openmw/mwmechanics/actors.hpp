@@ -7,8 +7,9 @@
 #include <map>
 #include <list>
 
-#include "movement.hpp"
 #include "../mwbase/world.hpp"
+
+#include "movement.hpp"
 
 namespace MWWorld
 {

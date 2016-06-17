@@ -2,6 +2,7 @@
 #define GAME_MWMECHANICS_AIACTIVATE_H
 
 #include "aipackage.hpp"
+
 #include <string>
 
 #include "pathfinding.hpp"

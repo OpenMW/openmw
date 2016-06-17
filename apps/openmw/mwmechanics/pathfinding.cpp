@@ -1,4 +1,5 @@
 #include "pathfinding.hpp"
+
 #include <limits>
 
 #include "../mwbase/world.hpp"
@@ -6,6 +7,7 @@
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
+
 #include "coordinateconverter.hpp"
 
 namespace

@@ -6,10 +6,10 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
-
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+
+#include "creaturestats.hpp"
 
 namespace MWMechanics
 {

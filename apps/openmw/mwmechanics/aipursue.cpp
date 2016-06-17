@@ -8,8 +8,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
-
 #include "movement.hpp"
 #include "creaturestats.hpp"
 

@@ -1,16 +1,18 @@
 #ifndef OPENMW_MECHANICS_LEVELLEDLIST_H
 #define OPENMW_MECHANICS_LEVELLEDLIST_H
 
-#include <components/misc/rng.hpp>
-
 #include <iostream>
+
+#include <components/misc/rng.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+
 #include "creaturestats.hpp"
 #include "actorutil.hpp"
 

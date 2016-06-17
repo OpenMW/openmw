@@ -21,13 +21,6 @@
 
 #include <iostream>
 
-
-#include "movement.hpp"
-#include "npcstats.hpp"
-#include "creaturestats.hpp"
-#include "security.hpp"
-#include "actorutil.hpp"
-
 #include <components/misc/rng.hpp>
 
 #include <components/settings/settings.hpp>
@@ -45,6 +38,12 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
+
+#include "movement.hpp"
+#include "npcstats.hpp"
+#include "creaturestats.hpp"
+#include "security.hpp"
+#include "actorutil.hpp"
 
 namespace
 {
