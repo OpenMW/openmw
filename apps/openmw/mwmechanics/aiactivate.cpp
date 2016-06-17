@@ -2,13 +2,12 @@
 
 #include <components/esm/aisequence.hpp>
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
+#include "apps/openmw/mwbase/world.hpp"
+#include "apps/openmw/mwbase/environment.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
+#include "apps/openmw/mwworld/class.hpp"
 
-#include "../mwworld/class.hpp"
-
+#include "creaturestats.hpp"
 #include "steering.hpp"
 #include "movement.hpp"
 
@@ -42,10 +41,8 @@ namespace MWMechanics
 
         if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) < 200) { //Stop when you get close
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-            MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(mObjectId,false);
-
-            MWBase::Environment::get().getWorld()->activate(target, actor);
-
+            MWWorld::Ptr activatetarget = MWBase::Environment::get().getWorld()->getPtr(mObjectId,false);
+            MWBase::Environment::get().getWorld()->activate(activatetarget, actor);
             return true;
         }
         else {

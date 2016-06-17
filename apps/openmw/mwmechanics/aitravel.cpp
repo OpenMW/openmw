@@ -3,11 +3,11 @@
 #include <components/esm/aisequence.hpp>
 #include <components/esm/loadcell.hpp>
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
+#include "apps/openmw/mwbase/world.hpp"
+#include "apps/openmw/mwbase/environment.hpp"
 
-#include "../mwworld/class.hpp"
-#include "../mwworld/cellstore.hpp"
+#include "apps/openmw/mwworld/class.hpp"
+#include "apps/openmw/mwworld/cellstore.hpp"
 
 #include "steering.hpp"
 #include "movement.hpp"

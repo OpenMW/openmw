@@ -2,9 +2,13 @@
 
 #include <limits>
 
+#include <components/esm/aisequence.hpp>
+
+#include "apps/openmw/mwbase/environment.hpp"
+#include "apps/openmw/mwbase/world.hpp"
+
 #include "aipackage.hpp"
 #include "aistate.hpp"
-
 #include "aiwander.hpp"
 #include "aiescort.hpp"
 #include "aitravel.hpp"
@@ -13,11 +17,6 @@
 #include "aicombat.hpp"
 #include "aipursue.hpp"
 #include "actorutil.hpp"
-
-#include <components/esm/aisequence.hpp>
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 
 namespace MWMechanics
 {
@@ -92,8 +91,8 @@ std::list<AiPackage*>::const_iterator AiSequence::erase(std::list<AiPackage*>::c
     {
         if (package == it)
         {
-            AiPackage* package = *it;
-            delete package;
+            AiPackage* packagetoerase = *it;
+            delete packagetoerase;
             return mPackages.erase(it);
         }
     }
