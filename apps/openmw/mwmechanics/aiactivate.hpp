@@ -9,10 +9,10 @@
 
 namespace ESM
 {
-namespace AiSequence
-{
-    struct AiActivate;
-}
+    namespace AiSequence
+    {
+        struct AiActivate;
+    }
 }
 
 namespace MWMechanics
@@ -38,4 +38,4 @@ namespace MWMechanics
             std::string mObjectId;
     };
 }
-#endif // GAME_MWMECHANICS_AIACTIVATE_H
+#endif

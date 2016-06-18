@@ -21,7 +21,6 @@
 
 namespace
 {
-
     //chooses an attack depending on probability to avoid uniformity
     ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement);
 
@@ -71,7 +70,6 @@ namespace
 
 namespace MWMechanics
 {
-    
     /// \brief This class holds the variables AiCombat needs which are deleted if the package becomes inactive.
     struct AiCombatStorage : AiTemporaryBase
     {
@@ -121,7 +119,8 @@ namespace MWMechanics
     
     AiCombat::AiCombat(const MWWorld::Ptr& actor) :
         mTargetActorId(actor.getClass().getCreatureStats(actor).getActorId())
-    {}
+    {
+    }
 
     AiCombat::AiCombat(const ESM::AiSequence::AiCombat *combat)
     {
@@ -130,7 +129,6 @@ namespace MWMechanics
 
     void AiCombat::init()
     {
-        
     }
 
     /*
@@ -308,7 +306,6 @@ namespace MWMechanics
             distantCombat = (rangeAttack > 500);
         }
 
-        
         bool& readyToAttack = storage.mReadyToAttack;
         // start new attack
         storage.startAttackIfReady(actor, characterController, weapon, distantCombat);
@@ -674,126 +671,123 @@ namespace MWMechanics
     }
 }
 
-
 namespace
 {
-
-ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement)
-{
-    ESM::Weapon::AttackType attackType;
-
-    if (weapon == NULL)
+    ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement)
     {
-        //hand-to-hand deal equal damage for each type
-        float roll = Misc::Rng::rollClosedProbability();
-        if(roll <= 0.333f)  //side punch
+        ESM::Weapon::AttackType attackType;
+
+        if (weapon == NULL)
         {
-            movement.mPosition[0] = Misc::Rng::rollClosedProbability() ? 1.0f : -1.0f;
-            movement.mPosition[1] = 0;
-            attackType = ESM::Weapon::AT_Slash;
-        }
-        else if(roll <= 0.666f) //forward punch
-        {
-            movement.mPosition[1] = 1;
-            attackType = ESM::Weapon::AT_Thrust;
+            //hand-to-hand deal equal damage for each type
+            float roll = Misc::Rng::rollClosedProbability();
+            if(roll <= 0.333f)  //side punch
+            {
+                movement.mPosition[0] = Misc::Rng::rollClosedProbability() ? 1.0f : -1.0f;
+                movement.mPosition[1] = 0;
+                attackType = ESM::Weapon::AT_Slash;
+            }
+            else if(roll <= 0.666f) //forward punch
+            {
+                movement.mPosition[1] = 1;
+                attackType = ESM::Weapon::AT_Thrust;
+            }
+            else
+            {
+                movement.mPosition[1] = movement.mPosition[0] = 0;
+                attackType = ESM::Weapon::AT_Chop;
+            }
         }
         else
         {
-            movement.mPosition[1] = movement.mPosition[0] = 0;
-            attackType = ESM::Weapon::AT_Chop;
-        }
-    }
-    else
-    {
-        //the more damage attackType deals the more probability it has
-        int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
-        int chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1])/2;
-        int thrust = (weapon->mData.mThrust[0] + weapon->mData.mThrust[1])/2;
+            //the more damage attackType deals the more probability it has
+            int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
+            int chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1])/2;
+            int thrust = (weapon->mData.mThrust[0] + weapon->mData.mThrust[1])/2;
 
-        float roll = Misc::Rng::rollClosedProbability() * (slash + chop + thrust);
-        if(roll <= slash)
-        {
-            movement.mPosition[0] = (Misc::Rng::rollClosedProbability() < 0.5f) ? 1.0f : -1.0f;
-            movement.mPosition[1] = 0;
-            attackType = ESM::Weapon::AT_Slash;
+            float roll = Misc::Rng::rollClosedProbability() * (slash + chop + thrust);
+            if(roll <= slash)
+            {
+                movement.mPosition[0] = (Misc::Rng::rollClosedProbability() < 0.5f) ? 1.0f : -1.0f;
+                movement.mPosition[1] = 0;
+                attackType = ESM::Weapon::AT_Slash;
+            }
+            else if(roll <= (slash + thrust))
+            {
+                movement.mPosition[1] = 1;
+                attackType = ESM::Weapon::AT_Thrust;
+            }
+            else
+            {
+                movement.mPosition[1] = movement.mPosition[0] = 0;
+                attackType = ESM::Weapon::AT_Chop;
+            }
         }
-        else if(roll <= (slash + thrust))
+
+        return attackType;
+    }
+
+    osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const osg::Vec3f& vLastTargetPos,
+        float duration, int weapType, float strength)
+    {
+        float projSpeed;
+
+        // get projectile speed (depending on weapon type)
+        if (weapType == ESM::Weapon::MarksmanThrown)
         {
-            movement.mPosition[1] = 1;
-            attackType = ESM::Weapon::AT_Thrust;
+            static float fThrownWeaponMinSpeed = 
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fThrownWeaponMinSpeed")->getFloat();
+            static float fThrownWeaponMaxSpeed = 
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fThrownWeaponMaxSpeed")->getFloat();
+
+            projSpeed = 
+                fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * strength;
         }
         else
         {
-            movement.mPosition[1] = movement.mPosition[0] = 0;
-            attackType = ESM::Weapon::AT_Chop;
+            static float fProjectileMinSpeed = 
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMinSpeed")->getFloat();
+            static float fProjectileMaxSpeed = 
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMaxSpeed")->getFloat();
+
+            projSpeed = 
+                fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * strength;
         }
+
+        // idea: perpendicular to dir to target speed components of target move vector and projectile vector should be the same
+
+        osg::Vec3f vTargetPos = target.getRefData().getPosition().asVec3();
+        osg::Vec3f vDirToTarget = MWBase::Environment::get().getWorld()->aimToTarget(actor, target);
+        float distToTarget = vDirToTarget.length();
+
+        osg::Vec3f vTargetMoveDir = vTargetPos - vLastTargetPos;
+        vTargetMoveDir /= duration; // |vTargetMoveDir| is target real speed in units/sec now
+
+        osg::Vec3f vPerpToDir = vDirToTarget ^ osg::Vec3f(0,0,1); // cross product
+
+        vPerpToDir.normalize();
+        osg::Vec3f vDirToTargetNormalized = vDirToTarget;
+        vDirToTargetNormalized.normalize();
+
+        // dot product
+        float velPerp = vTargetMoveDir * vPerpToDir;
+        float velDir = vTargetMoveDir * vDirToTargetNormalized;
+
+        // time to collision between target and projectile
+        float t_collision;
+
+        float projVelDirSquared = projSpeed * projSpeed - velPerp * velPerp;
+
+        osg::Vec3f vTargetMoveDirNormalized = vTargetMoveDir;
+        vTargetMoveDirNormalized.normalize();
+
+        float projDistDiff = vDirToTarget * vTargetMoveDirNormalized; // dot product
+        projDistDiff = std::sqrt(distToTarget * distToTarget - projDistDiff * projDistDiff);
+
+        if (projVelDirSquared > 0)
+            t_collision = projDistDiff / (std::sqrt(projVelDirSquared) - velDir);
+        else t_collision = 0; // speed of projectile is not enough to reach moving target
+
+        return vDirToTarget + vTargetMoveDir * t_collision;
     }
-
-    return attackType;
-}
-
-osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const osg::Vec3f& vLastTargetPos,
-    float duration, int weapType, float strength)
-{
-    float projSpeed;
-
-    // get projectile speed (depending on weapon type)
-    if (weapType == ESM::Weapon::MarksmanThrown)
-    {
-        static float fThrownWeaponMinSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fThrownWeaponMinSpeed")->getFloat();
-        static float fThrownWeaponMaxSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fThrownWeaponMaxSpeed")->getFloat();
-
-        projSpeed = 
-            fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * strength;
-    }
-    else
-    {
-        static float fProjectileMinSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMinSpeed")->getFloat();
-        static float fProjectileMaxSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMaxSpeed")->getFloat();
-
-        projSpeed = 
-            fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * strength;
-    }
-
-    // idea: perpendicular to dir to target speed components of target move vector and projectile vector should be the same
-
-    osg::Vec3f vTargetPos = target.getRefData().getPosition().asVec3();
-    osg::Vec3f vDirToTarget = MWBase::Environment::get().getWorld()->aimToTarget(actor, target);
-    float distToTarget = vDirToTarget.length();
-
-    osg::Vec3f vTargetMoveDir = vTargetPos - vLastTargetPos;
-    vTargetMoveDir /= duration; // |vTargetMoveDir| is target real speed in units/sec now
-
-    osg::Vec3f vPerpToDir = vDirToTarget ^ osg::Vec3f(0,0,1); // cross product
-
-    vPerpToDir.normalize();
-    osg::Vec3f vDirToTargetNormalized = vDirToTarget;
-    vDirToTargetNormalized.normalize();
-
-    // dot product
-    float velPerp = vTargetMoveDir * vPerpToDir;
-    float velDir = vTargetMoveDir * vDirToTargetNormalized;
-
-    // time to collision between target and projectile
-    float t_collision;
-
-    float projVelDirSquared = projSpeed * projSpeed - velPerp * velPerp;
-
-    osg::Vec3f vTargetMoveDirNormalized = vTargetMoveDir;
-    vTargetMoveDirNormalized.normalize();
-
-    float projDistDiff = vDirToTarget * vTargetMoveDirNormalized; // dot product
-    projDistDiff = std::sqrt(distToTarget * distToTarget - projDistDiff * projDistDiff);
-
-    if (projVelDirSquared > 0)
-        t_collision = projDistDiff / (std::sqrt(projVelDirSquared) - velDir);
-    else t_collision = 0; // speed of projectile is not enough to reach moving target
-
-    return vDirToTarget + vTargetMoveDir * t_collision;
-}
-
 }

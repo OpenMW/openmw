@@ -9,10 +9,10 @@
 
 namespace ESM
 {
-namespace AiSequence
-{
-    struct AiEscort;
-}
+    namespace AiSequence
+    {
+        struct AiEscort;
+    }
 }
 
 namespace MWMechanics
@@ -25,6 +25,7 @@ namespace MWMechanics
             /** The Actor will escort the specified actor to the world position x, y, z until they reach their position, or they run out of time
                 \implement AiEscort **/
             AiEscort(const std::string &actorId,int duration, float x, float y, float z);
+
             /// Implementation of AiEscortCell
             /** The Actor will escort the specified actor to the cell position x, y, z until they reach their position, or they run out of time
                 \implement AiEscortCell **/
@@ -39,6 +40,7 @@ namespace MWMechanics
             virtual int getTypeId() const;
 
             MWWorld::Ptr getTarget() const;
+
             virtual bool sideWithTarget() const { return true; }
 
             void writeState(ESM::AiSequence::AiSequence &sequence) const;
@@ -48,6 +50,7 @@ namespace MWMechanics
         private:
             std::string mActorId;
             std::string mCellId;
+
             float mX;
             float mY;
             float mZ;

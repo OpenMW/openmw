@@ -18,8 +18,6 @@ namespace ESM
     }
 }
 
-
-
 namespace MWMechanics
 {
     class AiPackage;
@@ -33,23 +31,23 @@ namespace MWMechanics
     /** The top-most AI package is run each frame. When completed, it is removed from the stack. **/
     class AiSequence
     {
-            ///AiPackages to run though
+            /// AiPackages to run though
             std::list<AiPackage *> mPackages;
 
-            ///Finished with top AIPackage, set for one frame
+            /// Finished with top AIPackage, set for one frame
             bool mDone;
 
-            ///Does this AI sequence repeat (repeating of Wander packages handled separately)
+            /// Does this AI sequence repeat (repeating of Wander packages handled separately)
             bool mRepeat;
 
-            ///Copy AiSequence
+            /// Copy AiSequence
             void copy (const AiSequence& sequence);
 
             /// The type of AI package that ran last
             int mLastAiPackage;
 
         public:
-            ///Default constructor
+            /// Default constructor
             AiSequence();
 
             /// Copy Constructor
@@ -124,5 +122,4 @@ namespace MWMechanics
             void readState (const ESM::AiSequence::AiSequence& sequence);
     };
 }
-
 #endif
