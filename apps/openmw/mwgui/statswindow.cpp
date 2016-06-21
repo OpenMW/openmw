@@ -144,7 +144,7 @@ namespace MWGui
     void StatsWindow::setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value)
     {
         int current = std::max(0, static_cast<int>(value.getCurrent()));
-	int base = static_cast<int>(value.getBase());
+        int base = static_cast<int>(value.getBase());
 
         setBar (id, id + "T", current, base);
 
