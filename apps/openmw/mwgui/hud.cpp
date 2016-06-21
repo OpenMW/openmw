@@ -180,27 +180,27 @@ namespace MWGui
     void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
     {
         int current = std::max(0, static_cast<int>(value.getCurrent()));
-        int modified = static_cast<int>(value.getModified());
+        int base = static_cast<int>(value.getBase());
 
         MyGUI::Widget* w;
-        std::string valStr = MyGUI::utility::toString(current) + "/" + MyGUI::utility::toString(modified);
+        std::string valStr = MyGUI::utility::toString(current) + "/" + MyGUI::utility::toString(base);
         if (id == "HBar")
         {
-            mHealth->setProgressRange(modified);
+            mHealth->setProgressRange(base);
             mHealth->setProgressPosition(current);
             getWidget(w, "HealthFrame");
             w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
         }
         else if (id == "MBar")
         {
-            mMagicka->setProgressRange (modified);
+            mMagicka->setProgressRange (base);
             mMagicka->setProgressPosition (current);
             getWidget(w, "MagickaFrame");
             w->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
         }
         else if (id == "FBar")
         {
-            mStamina->setProgressRange (modified);
+            mStamina->setProgressRange (base);
             mStamina->setProgressPosition (current);
             getWidget(w, "FatigueFrame");
             w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);

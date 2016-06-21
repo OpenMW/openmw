@@ -144,13 +144,13 @@ namespace MWGui
     void StatsWindow::setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value)
     {
         int current = std::max(0, static_cast<int>(value.getCurrent()));
-        int modified = static_cast<int>(value.getModified());
+	int base = static_cast<int>(value.getBase());
 
-        setBar (id, id + "T", current, modified);
+        setBar (id, id + "T", current, base);
 
         // health, magicka, fatigue tooltip
         MyGUI::Widget* w;
-        std::string valStr =  MyGUI::utility::toString(current) + "/" + MyGUI::utility::toString(modified);
+        std::string valStr =  MyGUI::utility::toString(current) + "/" + MyGUI::utility::toString(base);
         if (id == "HBar")
         {
             getWidget(w, "Health");
