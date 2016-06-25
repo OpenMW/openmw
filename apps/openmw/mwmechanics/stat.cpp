@@ -33,18 +33,6 @@ namespace MWMechanics
         mBase = mModified = value;
     }
     template<typename T>
-    void Stat<T>::modify(const T& diff)
-    {
-        mBase += diff;
-        if(mBase >= static_cast<T>(0))
-            mModified += diff;
-        else
-        {
-            mModified += diff - mBase;
-            mBase = static_cast<T>(0);
-        }
-    }
-    template<typename T>
     void Stat<T>::setBase (const T& value)
     {
         T diff = value - mBase;
@@ -137,12 +125,6 @@ namespace MWMechanics
 
         if (mCurrent>getModified())
             mCurrent = getModified();
-    }
-    template<typename T>
-    void DynamicStat<T>::modify (const T& diff, bool allowCurrentDecreaseBelowZero)
-    {
-        mStatic.modify (diff);
-        setCurrent (getCurrent()+diff, allowCurrentDecreaseBelowZero);
     }
     template<typename T>
     void DynamicStat<T>::setCurrent (const T& value, bool allowDecreaseBelowZero)
