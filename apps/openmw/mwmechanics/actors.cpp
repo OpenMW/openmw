@@ -423,12 +423,25 @@ namespace MWMechanics
         double magickaFactor = base +
             creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).getMagnitude() * 0.1;
 
-        DynamicStat<float> magicka = creatureStats.getMagicka();
-        float diff = (static_cast<int>(magickaFactor*intelligence)) - magicka.getBase();
-        float currentToBaseRatio = (magicka.getCurrent() / magicka.getBase());
-        magicka.setModified(magicka.getModified() + diff, 0);
-        magicka.setCurrent(magicka.getBase() * currentToBaseRatio);
-        creatureStats.setMagicka(magicka);
+        DynamicStat<float> stat = creatureStats.getMagicka();
+        float diff = (static_cast<int>(magickaFactor*intelligence)) - stat.getBase();
+
+        float currentToBaseRatio = (stat.getCurrent() / stat.getBase());
+        stat.setModified(stat.getModified() + diff, 0);
+        stat.setCurrent(stat.getBase() * currentToBaseRatio);
+        creatureStats.setMagicka(stat);
+
+        int strength = creatureStats.getAttribute(ESM::Attribute::Strength).getModified();
+        int willpower = creatureStats.getAttribute(ESM::Attribute::Willpower).getModified();
+        int agility = creatureStats.getAttribute(ESM::Attribute::Agility).getModified();
+        int endurance = creatureStats.getAttribute(ESM::Attribute::Endurance).getModified();
+        stat = creatureStats.getFatigue();
+        diff = (strength+willpower+agility+endurance) - stat.getBase();
+
+        currentToBaseRatio = (stat.getCurrent() / stat.getBase());
+        stat.setModified(stat.getModified() + diff, 0);
+        stat.setCurrent(stat.getBase() * currentToBaseRatio);
+        creatureStats.setFatigue(stat);
     }
 
     void Actors::restoreDynamicStats (const MWWorld::Ptr& ptr, bool sleep)

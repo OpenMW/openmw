@@ -21,7 +21,7 @@ namespace MWMechanics
           mTalkedTo (false), mAlarmed (false), mAttacked (false),
           mKnockdown(false), mKnockdownOneFrame(false), mKnockdownOverOneFrame(false),
           mHitRecovery(false), mBlock(false), mMovementFlags(0),
-          mFallHeight(0), mRecalcMagicka(false), mLastRestock(0,0), mGoldPool(0), mActorId(-1),
+          mFallHeight(0), mRecalcMagicka(false), mRecalcFatigue(false), mLastRestock(0,0), mGoldPool(0), mActorId(-1),
           mDeathAnimation(-1), mTimeOfDeath(), mLevel (0)
     {
         for (int i=0; i<4; ++i)
@@ -150,18 +150,7 @@ namespace MWMechanics
                      index == ESM::Attribute::Willpower ||
                      index == ESM::Attribute::Agility ||
                      index == ESM::Attribute::Endurance)
-            {
-                int strength     = getAttribute(ESM::Attribute::Strength).getModified();
-                int willpower    = getAttribute(ESM::Attribute::Willpower).getModified();
-                int agility      = getAttribute(ESM::Attribute::Agility).getModified();
-                int endurance    = getAttribute(ESM::Attribute::Endurance).getModified();
-                DynamicStat<float> fatigue = getFatigue();
-                float diff = (strength+willpower+agility+endurance) - fatigue.getBase();
-                float currentToBaseRatio = (fatigue.getCurrent() / fatigue.getBase());
-                fatigue.setModified(fatigue.getModified() + diff, 0);
-                fatigue.setCurrent(fatigue.getBase() * currentToBaseRatio);
-                setFatigue(fatigue);
-            }
+                mRecalcFatigue = true;
         }
     }
 
@@ -385,9 +374,10 @@ namespace MWMechanics
 
     bool CreatureStats::needToRecalcDynamicStats()
     {
-         if (mRecalcMagicka)
+         if (mRecalcMagicka || mRecalcFatigue)
          {
              mRecalcMagicka = false;
+             mRecalcFatigue = false;
              return true;
          }
          return false;
@@ -396,6 +386,7 @@ namespace MWMechanics
     void CreatureStats::setNeedRecalcDynamicStats(bool val)
     {
         mRecalcMagicka = val;
+        mRecalcFatigue = val;
     }
 
     void CreatureStats::setKnockedDown(bool value)
@@ -515,7 +506,7 @@ namespace MWMechanics
         state.mFallHeight = mFallHeight; // TODO: vertical velocity (move from PhysicActor to CreatureStats?)
         state.mLastHitObject = mLastHitObject;
         state.mLastHitAttemptObject = mLastHitAttemptObject;
-        state.mRecalcDynamicStats = mRecalcMagicka;
+        state.mRecalcDynamicStats = (mRecalcMagicka || mRecalcFatigue);
         state.mDrawState = mDrawState;
         state.mLevel = mLevel;
         state.mActorId = mActorId;
@@ -564,6 +555,7 @@ namespace MWMechanics
         mLastHitObject = state.mLastHitObject;
         mLastHitAttemptObject = state.mLastHitAttemptObject;
         mRecalcMagicka = state.mRecalcDynamicStats;
+        mRecalcFatigue = state.mRecalcDynamicStats;
         mDrawState = DrawState_(state.mDrawState);
         mLevel = state.mLevel;
         mActorId = state.mActorId;
