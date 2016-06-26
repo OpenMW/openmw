@@ -95,6 +95,8 @@ void ESM::NpcStats::load (ESMReader &esm)
 
     esm.getHNT (mSkillIncrease, "INCR");
 
+    for (int i=0; i<3; ++i)
+        mSpecIncreases[i] = 0;
     esm.getHNOT (mSpecIncreases, "SPEC");
 
     while (esm.isNextSub ("USED"))
