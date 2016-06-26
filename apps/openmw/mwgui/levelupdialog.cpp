@@ -340,7 +340,7 @@ namespace MWGui
                     ret = "pilgrim";
                 break;
             case 3:
-                if (magicFraction == 3 && stealthFraction == 3)
+                if (magicFraction == 3)
                     ret = "bard";
                 break;
             default:
