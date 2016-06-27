@@ -389,16 +389,6 @@ void FFmpeg_Decoder::readAll(std::vector<char> &output)
     }
 }
 
-void FFmpeg_Decoder::rewind()
-{
-    int stream_idx = mStream - mFormatCtx->streams;
-    if(av_seek_frame(mFormatCtx, stream_idx, 0, 0) < 0)
-        fail("Failed to seek in audio stream");
-    av_free_packet(&mPacket);
-    mFrameSize = mFramePos = 0;
-    mNextPts = 0.0;
-}
-
 size_t FFmpeg_Decoder::getSampleOffset()
 {
     int delay = (mFrameSize-mFramePos) / av_get_channel_layout_nb_channels(mOutputChannelLayout) /
