@@ -1574,15 +1574,7 @@ namespace MWMechanics
         MWWorld::Ptr player = getPlayer();
         CreatureStats& stats = player.getClass().getCreatureStats(player);
         if (stats.isDead())
-        {
-            MWMechanics::DynamicStat<float> stat (stats.getHealth());
-            if (stat.getModified()<1)
-            {
-                stat.setModified(1, 0);
-                stats.setHealth(stat);
-            }
             stats.resurrect();
-        }
     }
 
     bool MechanicsManager::isReadyToBlock(const MWWorld::Ptr &ptr) const
