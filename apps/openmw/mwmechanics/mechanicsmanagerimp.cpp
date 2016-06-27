@@ -310,7 +310,7 @@ namespace MWMechanics
     }
 
     MechanicsManager::MechanicsManager()
-    : mWatchedStatsEmpty (true), mUpdatePlayer (true), mClassSelected (false),
+    : mWatchedTimeToStartDrowning(0), mWatchedStatsEmpty (true), mUpdatePlayer (true), mClassSelected (false),
       mRaceSelected (false), mAI(true)
     {
         //buildPlayer no longer here, needs to be done explicitely after all subsystems are up and running
@@ -372,40 +372,40 @@ namespace MWMechanics
             const MWMechanics::NpcStats &stats = mWatched.getClass().getNpcStats(mWatched);
             for(int i = 0;i < ESM::Attribute::Length;++i)
             {
-                if(stats.getAttribute(i) != mWatchedStats.getAttribute(i) || mWatchedStatsEmpty)
+                if(stats.getAttribute(i) != mWatchedAttributes[i] || mWatchedStatsEmpty)
                 {
                     std::stringstream attrname;
                     attrname << "AttribVal"<<(i+1);
 
-                    mWatchedStats.setAttribute(i, stats.getAttribute(i));
+                    mWatchedAttributes[i] = stats.getAttribute(i);
                     winMgr->setValue(attrname.str(), stats.getAttribute(i));
                 }
             }
 
-            if(stats.getHealth() != mWatchedStats.getHealth() || mWatchedStatsEmpty)
+            if(stats.getHealth() != mWatchedHealth || mWatchedStatsEmpty)
             {
                 static const std::string hbar("HBar");
-                mWatchedStats.setHealth(stats.getHealth());
+                mWatchedHealth = stats.getHealth();
                 winMgr->setValue(hbar, stats.getHealth());
             }
-            if(stats.getMagicka() != mWatchedStats.getMagicka() || mWatchedStatsEmpty)
+            if(stats.getMagicka() != mWatchedMagicka || mWatchedStatsEmpty)
             {
                 static const std::string mbar("MBar");
-                mWatchedStats.setMagicka(stats.getMagicka());
+                mWatchedMagicka = stats.getMagicka();
                 winMgr->setValue(mbar, stats.getMagicka());
             }
-            if(stats.getFatigue() != mWatchedStats.getFatigue() || mWatchedStatsEmpty)
+            if(stats.getFatigue() != mWatchedFatigue || mWatchedStatsEmpty)
             {
                 static const std::string fbar("FBar");
-                mWatchedStats.setFatigue(stats.getFatigue());
+                mWatchedFatigue = stats.getFatigue();
                 winMgr->setValue(fbar, stats.getFatigue());
             }
 
-            if(stats.getTimeToStartDrowning() != mWatchedStats.getTimeToStartDrowning())
+            if(stats.getTimeToStartDrowning() != mWatchedTimeToStartDrowning)
             {
                 const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("fHoldBreathTime")->getFloat();
-                mWatchedStats.setTimeToStartDrowning(stats.getTimeToStartDrowning());
+                mWatchedTimeToStartDrowning = stats.getTimeToStartDrowning();
                 if(stats.getTimeToStartDrowning() >= fHoldBreathTime)
                     winMgr->setDrowningBarVisibility(false);
                 else
@@ -420,10 +420,10 @@ namespace MWMechanics
             //Loop over ESM::Skill::SkillEnum
             for(int i = 0; i < ESM::Skill::Length; ++i)
             {
-                if(stats.getSkill(i) != mWatchedStats.getSkill(i) || mWatchedStatsEmpty)
+                if(stats.getSkill(i) != mWatchedSkills[i] || mWatchedStatsEmpty)
                 {
                     update = true;
-                    mWatchedStats.getSkill(i) = stats.getSkill(i);
+                    mWatchedSkills[i] = stats.getSkill(i);
                     winMgr->setValue((ESM::Skill::SkillEnum)i, stats.getSkill(i));
                 }
             }
@@ -1576,7 +1576,6 @@ namespace MWMechanics
         if (stats.isDead())
         {
             MWMechanics::DynamicStat<float> stat (stats.getHealth());
-
             if (stat.getModified()<1)
             {
                 stat.setModified(1, 0);
