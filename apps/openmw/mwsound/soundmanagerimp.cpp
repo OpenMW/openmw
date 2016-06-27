@@ -258,7 +258,7 @@ namespace MWSound
         {
             sound.reset(new Stream(pos, 1.0f, basevol, 1.0f, minDistance, maxDistance,
                                    Play_Normal|Play_TypeVoice|Play_3D));
-            mOutput->streamSound3D(decoder, sound);
+            mOutput->streamSound3D(decoder, sound, true);
         }
         return sound;
     }

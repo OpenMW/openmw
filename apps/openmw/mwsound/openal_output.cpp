@@ -225,7 +225,7 @@ private:
     friend class OpenAL_Output;
 
 public:
-    OpenAL_SoundStream(ALuint src, DecoderPtr decoder);
+    OpenAL_SoundStream(ALuint src, DecoderPtr decoder, bool getLoudnessData=false);
     ~OpenAL_SoundStream();
 
     bool isPlaying();
@@ -313,7 +313,7 @@ private:
 };
 
 
-OpenAL_SoundStream::OpenAL_SoundStream(ALuint src, DecoderPtr decoder)
+OpenAL_SoundStream::OpenAL_SoundStream(ALuint src, DecoderPtr decoder, bool getLoudnessData)
   : mSource(src), mCurrentBufIdx(0), mFrameSize(0), mSilence(0), mDecoder(decoder), mIsFinished(false)
 {
     alGenBuffers(sNumBuffers, mBuffers);
@@ -339,7 +339,8 @@ OpenAL_SoundStream::OpenAL_SoundStream(ALuint src, DecoderPtr decoder)
         mBufferSize = static_cast<ALuint>(sBufferLength*srate);
         mBufferSize *= mFrameSize;
 
-        mLoudnessAnalyzer.reset(new Sound_Loudness(sLoudnessFPS, mSampleRate, chans, type));
+        if (getLoudnessData)
+            mLoudnessAnalyzer.reset(new Sound_Loudness(sLoudnessFPS, mSampleRate, chans, type));
     }
     catch(std::exception&)
     {
@@ -962,7 +963,7 @@ void OpenAL_Output::streamSound(DecoderPtr decoder, MWBase::SoundStreamPtr sound
     sound->mHandle = stream;
 }
 
-void OpenAL_Output::streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound)
+void OpenAL_Output::streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound, bool getLoudnessData)
 {
     OpenAL_SoundStream *stream = 0;
     ALuint source;
@@ -979,7 +980,7 @@ void OpenAL_Output::streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sou
                      sound->getRealVolume(), sound->getPitch(), false, sound->getUseEnv());
         throwALerror();
 
-        stream = new OpenAL_SoundStream(source, decoder);
+        stream = new OpenAL_SoundStream(source, decoder, getLoudnessData);
         mStreamThread->add(stream);
         mActiveStreams.push_back(sound);
     }
