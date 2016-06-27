@@ -8,15 +8,16 @@
 namespace MWSound
 {
 
-void Sound_Loudness::analyzeLoudness(const std::vector< char >& data, int sampleRate, ChannelConfig chans, SampleType type, float valuesPerSecond)
+void Sound_Loudness::analyzeLoudness(const std::vector< char >& data)
 {
-    int samplesPerSegment = static_cast<int>(sampleRate / valuesPerSecond);
-    int numSamples = bytesToFrames(data.size(), chans, type);
-    int advance = framesToBytes(1, chans, type);
+    mQueue.insert( mQueue.end(), data.begin(), data.end() );
+    if (!mQueue.size())
+        return;
 
-    mSamplesPerSec = valuesPerSecond;
-    mSamples.clear();
-    mSamples.reserve(numSamples/samplesPerSegment);
+    int samplesPerSegment = static_cast<int>(mSampleRate / mSamplesPerSec);
+    int numSamples = bytesToFrames(mQueue.size(), mChannelConfig, mSampleType);
+    int advance = framesToBytes(1, mChannelConfig, mSampleType);
+
 
     int segment=0;
     int sample=0;
@@ -28,16 +29,16 @@ void Sound_Loudness::analyzeLoudness(const std::vector< char >& data, int sample
         {
             // get sample on a scale from -1 to 1
             float value = 0;
-            if (type == SampleType_UInt8)
-                value = ((char)(data[sample*advance]^0x80))/128.f;
-            else if (type == SampleType_Int16)
+            if (mSampleType == SampleType_UInt8)
+                value = ((char)(mQueue[sample*advance]^0x80))/128.f;
+            else if (mSampleType == SampleType_Int16)
             {
-                value = *reinterpret_cast<const int16_t*>(&data[sample*advance]);
+                value = *reinterpret_cast<const int16_t*>(&mQueue[sample*advance]);
                 value /= float(std::numeric_limits<int16_t>::max());
             }
-            else if (type == SampleType_Float32)
+            else if (mSampleType == SampleType_Float32)
             {
-                value = *reinterpret_cast<const float*>(&data[sample*advance]);
+                value = *reinterpret_cast<const float*>(&mQueue[sample*advance]);
                 value = std::max(-1.f, std::min(1.f, value)); // Float samples *should* be scaled to [-1,1] already.
             }
 
@@ -53,7 +54,7 @@ void Sound_Loudness::analyzeLoudness(const std::vector< char >& data, int sample
         ++segment;
     }
 
-    mReady = true;
+    mQueue.erase(mQueue.begin(), mQueue.begin() + sample*advance);
 }
 
 
