@@ -20,7 +20,16 @@ namespace MWMechanics
     class MechanicsManager : public MWBase::MechanicsManager
     {
             MWWorld::Ptr mWatched;
-            NpcStats mWatchedStats;
+
+            AttributeValue mWatchedAttributes[8];
+            SkillValue mWatchedSkills[27];
+
+            DynamicStat<float> mWatchedHealth;
+            DynamicStat<float> mWatchedMagicka;
+            DynamicStat<float> mWatchedFatigue;
+
+            float mWatchedTimeToStartDrowning;
+
             bool mWatchedStatsEmpty;
             bool mUpdatePlayer;
             bool mClassSelected;
