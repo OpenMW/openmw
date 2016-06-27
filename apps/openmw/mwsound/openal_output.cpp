@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <vector>
-#include <osg/Timer>
+#include <memory>
 
 #include <stdint.h>
 
