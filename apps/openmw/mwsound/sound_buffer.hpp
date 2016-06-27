@@ -3,11 +3,7 @@
 
 #include <string>
 
-#include "soundmanagerimp.hpp"
 #include "sound_output.hpp"
-#include "loudness.hpp"
-
-#include "../mwworld/ptr.hpp"
 
 namespace MWSound
 {
