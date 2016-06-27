@@ -95,6 +95,10 @@ void ESM::NpcStats::load (ESMReader &esm)
 
     esm.getHNT (mSkillIncrease, "INCR");
 
+    for (int i=0; i<3; ++i)
+        mSpecIncreases[i] = 0;
+    esm.getHNOT (mSpecIncreases, "SPEC");
+
     while (esm.isNextSub ("USED"))
         mUsedIds.push_back (esm.getHString());
 
@@ -156,6 +160,8 @@ void ESM::NpcStats::save (ESMWriter &esm) const
 
     esm.writeHNT ("INCR", mSkillIncrease);
 
+    esm.writeHNT ("SPEC", mSpecIncreases);
+
     for (std::vector<std::string>::const_iterator iter (mUsedIds.begin()); iter!=mUsedIds.end();
         ++iter)
         esm.writeHNString ("USED", *iter);
@@ -178,6 +184,8 @@ void ESM::NpcStats::blank()
     mLevelProgress = 0;
     for (int i=0; i<8; ++i)
         mSkillIncrease[i] = 0;
+    for (int i=0; i<3; ++i)
+        mSpecIncreases[i] = 0;
     mTimeToStartDrowning = 20;
     mCrimeId = -1;
 }

@@ -67,7 +67,9 @@ struct PCDT
         unsigned int mLevelProgress;
         float mSkillProgress[27]; // skill progress, non-uniform scaled
         unsigned char mSkillIncreases[8]; // number of skill increases for each attribute
-        unsigned char mUnknown3[88];
+        unsigned char mUnknown3[84];
+        unsigned char mSpecIncreases[3]; // number of skill increases for each specialization
+        unsigned char mUnknown4;
     };
 #pragma pack(pop)
 

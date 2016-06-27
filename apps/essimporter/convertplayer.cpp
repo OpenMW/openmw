@@ -17,6 +17,8 @@ namespace ESSImport
             faction.mReputation = it->mReputation;
             out.mObject.mNpcStats.mFactions[Misc::StringUtils::lowerCase(it->mFactionName.toString())] = faction;
         }
+        for (int i=0; i<3; ++i)
+            out.mObject.mNpcStats.mSpecIncreases[i] = pcdt.mPNAM.mSpecIncreases[i];
         for (int i=0; i<8; ++i)
             out.mObject.mNpcStats.mSkillIncrease[i] = pcdt.mPNAM.mSkillIncreases[i];
         for (int i=0; i<27; ++i)
