@@ -653,6 +653,19 @@ if [ -z $CI ]; then
 		cp "$DLL" $CONFIGURATION/osgPlugins-3.3.8
 	done
 	echo
+	
+	echo "Copying Runtime Resources/Config Files"
+	
+	echo "  gamecontrollerdb.txt"
+	cp $CONFIGURATION/../gamecontrollerdb.txt $CONFIGURATION/gamecontrollerdb.txt
+	echo "  openmw.cfg"
+	cp $CONFIGURATION/../openmw.cfg.install $CONFIGURATION/openmw.cfg
+	echo "  openmw-cs.cfg"
+	cp $CONFIGURATION/../openmw-cs.cfg $CONFIGURATION/openmw-cs.cfg
+	echo "  settings-default.cfg"
+	cp $CONFIGURATION/../settings-default.cfg $CONFIGURATION/settings-default.cfg
+	echo "  resources/"
+	cp -r $CONFIGURATION/../resources $CONFIGURATION/resources
 fi
 
 exit $RET
