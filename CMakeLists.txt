@@ -155,17 +155,10 @@ add_definitions(-D__STDC_CONSTANT_MACROS)
 
 # TinyXML
 option(USE_SYSTEM_TINYXML "Use system TinyXML library instead of internal." OFF)
-if(USE_SYSTEM_TINYXML)
-    find_library(TINYXML_LIBRARIES tinyxml)
-    find_path(TINYXML_INCLUDE_DIR tinyxml.h)
-    message(STATUS "Found TinyXML: ${TINYXML_LIBRARIES} ${TINYXML_INCLUDE_DIR}")
+if (USE_SYSTEM_TINYXML)
+    find_package(TinyXML REQUIRED)
     add_definitions (-DTIXML_USE_STL)
-    if(TINYXML_LIBRARIES AND TINYXML_INCLUDE_DIR)
-        include_directories(${TINYXML_INCLUDE_DIR})
-        message(STATUS "Using system TinyXML library.")
-    else()
-        message(FATAL_ERROR "Detection of system TinyXML incomplete.")
-    endif()
+    include_directories(SYSTEM ${TinyXML_INCLUDE_DIRS})
 endif()
 
 # Platform specific
@@ -676,8 +669,6 @@ if (WIN32)
     endforeach(d)
 
     set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
-    # oics uses tinyxml, which has an initialized but unused variable
-    set_target_properties(oics PROPERTIES COMPILE_FLAGS "${WARNINGS} /wd4189 ${MT_BUILD}")
     set_target_properties(osg-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
 
     if (BUILD_BSATOOL)
