@@ -532,6 +532,9 @@ namespace MWMechanics
             creatureStats.setAttribute(i, stat);
         }
 
+        if (creatureStats.needToRecalcDynamicStats())
+            calculateDynamicStats(ptr);
+
         {
             Spells & spells = creatureStats.getSpells();
             for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
