@@ -1025,6 +1025,10 @@ namespace MWWorld
             float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
 
             facedObject = getFacedObject(activationDistance);
+            if (!facedObject.isEmpty() && !facedObject.getClass().isActor() && !facedObject.getCellRef().getTeleport())
+                 return facedObject;
+            else
+                facedObject = getFacedObject(getMaxActivationDistance());
         }
 
         return facedObject;
