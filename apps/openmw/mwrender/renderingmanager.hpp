@@ -137,8 +137,6 @@ namespace MWRender
 
         SkyManager* getSkyManager();
 
-        osg::Vec3f getEyePos();
-
         void spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale = 1.f);
 
         /// Clear all savegame-specific data
