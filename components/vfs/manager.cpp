@@ -51,10 +51,19 @@ namespace VFS
 
     void Manager::buildIndex()
     {
-        mIndex.clear();
+        mMasterIndex.clear();
+        mArchiveIndexes.clear();
+        mArchiveIndexes.reserve(mArchives.size());
 
+        std::back_insert_iterator<std::vector<NameFileMap> > arch_inserter(mArchiveIndexes);
         for (std::vector<Archive*>::const_iterator it = mArchives.begin(); it != mArchives.end(); ++it)
-            (*it)->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
+        {
+            NameFileMap index;
+            (*it)->listResources(index, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
+            for(NameFileMap::const_iterator nf = index.begin();nf != index.end();++nf)
+                mMasterIndex[nf->first] = nf->second;
+            *arch_inserter = index;
+        }
     }
 
     Files::IStreamPtr Manager::get(const std::string &name) const
@@ -67,8 +76,8 @@ namespace VFS
 
     Files::IStreamPtr Manager::getNormalized(const std::string &normalizedName) const
     {
-        std::map<std::string, File*>::const_iterator found = mIndex.find(normalizedName);
-        if (found == mIndex.end())
+        NameFileMap::const_iterator found = mMasterIndex.find(normalizedName);
+        if (found == mMasterIndex.end())
             throw std::runtime_error("Resource '" + normalizedName + "' not found");
         return found->second->open();
     }
@@ -78,17 +87,53 @@ namespace VFS
         std::string normalized = name;
         normalize_path(normalized, mStrict);
 
-        return mIndex.find(normalized) != mIndex.end();
+        return mMasterIndex.find(normalized) != mMasterIndex.end();
     }
 
     const std::map<std::string, File*>& Manager::getIndex() const
     {
-        return mIndex;
+        return mMasterIndex;
     }
 
     void Manager::normalizeFilename(std::string &name) const
     {
         normalize_path(name, mStrict);
+    }
+
+    const std::string& Manager::findFirstOf(std::string name) const
+    {
+        normalize_path(name, mStrict);
+        return getFirstOfEntry(name).first;
+    }
+
+    const std::string& Manager::findFirstOfNormalized(const std::string &normalizedName) const
+    {
+        return getFirstOfEntry(normalizedName).first;
+    }
+
+    const Manager::NameFileMap::value_type &Manager::getFirstOfEntry(const std::string &normalizedName) const
+    {
+        size_t extpos = normalizedName.rfind('.');
+        if(extpos == std::string::npos || normalizedName.find('/', extpos+1) != std::string::npos)
+            extpos = normalizedName.length();
+        const std::string basename = normalizedName.substr(0, extpos);
+
+        /* Search in reverse, so later archives take precedence. */
+        std::vector<NameFileMap>::const_reverse_iterator iter = mArchiveIndexes.rbegin();
+        for(;iter != mArchiveIndexes.rend();++iter)
+        {
+            NameFileMap::const_iterator entry = iter->lower_bound(basename);
+            if(entry != iter->end() && entry->first.length() >= basename.length())
+            {
+                extpos = entry->first.rfind('.');
+                if(extpos == std::string::npos || entry->first.find('/', extpos+1) != std::string::npos)
+                    extpos = entry->first.length();
+                if(entry->first.compare(0, extpos, basename) == 0)
+                    return *entry;
+            }
+        }
+
+        throw std::runtime_error("Resource '" + normalizedName + "' not found");
     }
 
 }

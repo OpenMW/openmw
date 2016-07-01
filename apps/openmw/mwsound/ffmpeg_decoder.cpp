@@ -183,7 +183,8 @@ size_t FFmpeg_Decoder::readAVAudioData(void *data, size_t length)
 void FFmpeg_Decoder::open(const std::string &fname)
 {
     close();
-    mDataStream = mResourceMgr->get(fname);
+
+    mDataStream = mResourceMgr->getNormalized(fname);
 
     if((mFormatCtx=avformat_alloc_context()) == NULL)
         fail("Failed to allocate context");

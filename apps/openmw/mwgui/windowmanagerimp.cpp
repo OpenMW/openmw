@@ -1745,7 +1745,7 @@ namespace MWGui
 
     void WindowManager::playVideo(const std::string &name, bool allowSkipping)
     {
-        mVideoWidget->playVideo("video\\" + name);
+        mVideoWidget->playVideo("Video\\" + name);
 
         mVideoWidget->eventKeyButtonPressed.clear();
         mVideoBackground->eventKeyButtonPressed.clear();

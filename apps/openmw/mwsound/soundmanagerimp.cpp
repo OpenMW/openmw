@@ -131,6 +131,7 @@ namespace MWSound
         return DecoderPtr(new DEFAULT_DECODER (mVFS));
     }
 
+
     Sound_Buffer *SoundManager::insertSound(const std::string &soundId, const ESM::Sound *sound)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
@@ -158,9 +159,8 @@ namespace MWSound
         max = std::max(min, max);
 
         Sound_Buffer *sfx = &*mSoundBuffers->insert(mSoundBuffers->end(),
-            Sound_Buffer("Sound/"+sound->mSound, volume, min, max)
+            Sound_Buffer(mVFS->findFirstOf("Sound/"+sound->mSound), volume, min, max)
         );
-        mVFS->normalizeFilename(sfx->mResourceName);
 
         mBufferNameMap.insert(std::make_pair(soundId, sfx));
 
@@ -219,20 +219,18 @@ namespace MWSound
         return sfx;
     }
 
+    void SoundManager::releaseSound(Sound_Buffer *buffer)
+    {
+        assert(buffer->mUses > 0);
+        if(buffer->mUses-- == 1)
+            mUnusedBuffers.push_front(buffer);
+    }
+
+
     DecoderPtr SoundManager::loadVoice(const std::string &voicefile, Sound_Loudness **lipdata)
     {
         DecoderPtr decoder = getDecoder();
-        // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
-        if(mVFS->exists(voicefile))
-            decoder->open(voicefile);
-        else
-        {
-            std::string file = voicefile;
-            std::string::size_type pos = file.rfind('.');
-            if(pos != std::string::npos)
-                file = file.substr(0, pos)+".mp3";
-            decoder->open(file);
-        }
+        decoder->open(voicefile);
 
         NameLoudnessRefMap::iterator lipiter = mVoiceLipNameMap.find(voicefile);
         if(lipiter != mVoiceLipNameMap.end())
@@ -337,7 +335,8 @@ namespace MWSound
 
     void SoundManager::streamMusic(const std::string& filename)
     {
-        streamMusicFull("Music/"+filename);
+        std::string name = mVFS->findFirstOf("Music/"+filename);
+        streamMusicFull(name);
     }
 
     void SoundManager::startRandomTitle()
@@ -353,10 +352,16 @@ namespace MWSound
             std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(pattern);
             while (found != index.end())
             {
-                if (found->first.size() >= pattern.size() && found->first.substr(0, pattern.size()) == pattern)
-                    filelist.push_back(found->first);
-                else
+                if (found->first.size() < pattern.size() || found->first.compare(0, pattern.size(), pattern) != 0)
                     break;
+
+                /* Only include entries that open a unique resource (e.g. music/foo.mp3 and
+                 * music/foo.ogg will end up playing the same file since one would be a replacement
+                 * for the other).
+                 */
+                const std::string &entry = mVFS->findFirstOfNormalized(found->first);
+                if(filelist.empty() || filelist.back() != entry)
+                    filelist.push_back(entry);
                 ++found;
             }
 
@@ -398,30 +403,11 @@ namespace MWSound
             return;
         try
         {
-            std::string voicefile = "Sound/"+filename;
-
+            std::string voicefile = mVFS->findFirstOf("Sound/"+filename);
             Sound_Loudness *loudness;
-            mVFS->normalizeFilename(voicefile);
+
             DecoderPtr decoder = loadVoice(voicefile, &loudness);
-
-            if(!loudness->isReady())
-                mPendingSaySounds[ptr] = std::make_pair(decoder, loudness);
-            else
-            {
-                MWBase::World *world = MWBase::Environment::get().getWorld();
-                const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
-
-                SaySoundMap::iterator oldIt = mActiveSaySounds.find(ptr);
-                if (oldIt != mActiveSaySounds.end())
-                {
-                    mOutput->finishStream(oldIt->second.first);
-                    mActiveSaySounds.erase(oldIt);
-                }
-
-                MWBase::SoundStreamPtr sound = playVoice(decoder, pos, (ptr == MWMechanics::getPlayer()));
-
-                mActiveSaySounds.insert(std::make_pair(ptr, std::make_pair(sound, loudness)));
-            }
+            mPendingSaySounds[ptr] = std::make_pair(decoder, loudness);
         }
         catch(std::exception &e)
         {
@@ -449,26 +435,11 @@ namespace MWSound
             return;
         try
         {
-            std::string voicefile = "Sound/"+filename;
-
+            std::string voicefile = mVFS->findFirstOf("Sound/"+filename);
             Sound_Loudness *loudness;
-            mVFS->normalizeFilename(voicefile);
+
             DecoderPtr decoder = loadVoice(voicefile, &loudness);
-
-            if(!loudness->isReady())
-                mPendingSaySounds[MWWorld::ConstPtr()] = std::make_pair(decoder, loudness);
-            else
-            {
-                SaySoundMap::iterator oldIt = mActiveSaySounds.find(MWWorld::ConstPtr());
-                if (oldIt != mActiveSaySounds.end())
-                {
-                    mOutput->finishStream(oldIt->second.first);
-                    mActiveSaySounds.erase(oldIt);
-                }
-
-                mActiveSaySounds.insert(std::make_pair(MWWorld::ConstPtr(),
-                                                       std::make_pair(playVoice(decoder, osg::Vec3f(), true), loudness)));
-            }
+            mPendingSaySounds[MWWorld::ConstPtr()] = std::make_pair(decoder, loudness);
         }
         catch(std::exception &e)
         {
@@ -665,7 +636,11 @@ namespace MWSound
         {
             SoundBufferRefPairList::iterator sndidx = snditer->second.begin();
             for(;sndidx != snditer->second.end();++sndidx)
+            {
                 mOutput->finishSound(sndidx->first);
+                releaseSound(sndidx->second);
+            }
+            mActiveSounds.erase(snditer);
         }
     }
 
@@ -680,10 +655,29 @@ namespace MWSound
             {
                 SoundBufferRefPairList::iterator sndidx = snditer->second.begin();
                 for(;sndidx != snditer->second.end();++sndidx)
+                {
                     mOutput->finishSound(sndidx->first);
+                    releaseSound(sndidx->second);
+                }
+                mActiveSounds.erase(snditer++);
             }
-            ++snditer;
+            else
+                ++snditer;
         }
+
+        SayDecoderMap::iterator penditer = mPendingSaySounds.begin();
+        while(penditer != mPendingSaySounds.end())
+        {
+            if(penditer->first != MWWorld::Ptr() &&
+               penditer->first != MWMechanics::getPlayer() &&
+               penditer->first.getCell() == cell)
+            {
+                mPendingSaySounds.erase(penditer++);
+            }
+            else
+                ++penditer;
+        }
+
         SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
         while(sayiter != mActiveSaySounds.end())
         {
@@ -692,8 +686,10 @@ namespace MWSound
                sayiter->first.getCell() == cell)
             {
                 mOutput->finishStream(sayiter->second.first);
+                mActiveSaySounds.erase(sayiter++);
             }
-            ++sayiter;
+            else
+                ++sayiter;
         }
     }
 
@@ -882,9 +878,7 @@ namespace MWSound
                 if(!mOutput->isSoundPlaying(sound))
                 {
                     mOutput->finishSound(sound);
-                    Sound_Buffer *sfx = sndidx->second;
-                    if(sfx->mUses-- == 1)
-                        mUnusedBuffers.push_front(sfx);
+                    releaseSound(sndidx->second);
                     sndidx = snditer->second.erase(sndidx);
                 }
                 else
@@ -1167,9 +1161,7 @@ namespace MWSound
             for(;sndidx != snditer->second.end();++sndidx)
             {
                 mOutput->finishSound(sndidx->first);
-                Sound_Buffer *sfx = sndidx->second;
-                if(sfx->mUses-- == 1)
-                    mUnusedBuffers.push_front(sfx);
+                releaseSound(sndidx->second);
             }
         }
         mActiveSounds.clear();
