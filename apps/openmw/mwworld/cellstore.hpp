@@ -258,6 +258,9 @@ namespace MWWorld
                 if (mState != State_Loaded)
                     return false;
 
+                if (mMergedRefs.empty())
+                    return true;
+
                 mHasState = true;
 
                 for (unsigned int i=0; i<mMergedRefs.size(); ++i)
@@ -304,6 +307,9 @@ namespace MWWorld
             {
                 if (mState != State_Loaded)
                     return false;
+
+                if (mMergedRefs.empty())
+                    return true;
 
                 mHasState = true;
 
