@@ -42,7 +42,6 @@ namespace MWSound
 
         virtual size_t read(char *buffer, size_t bytes) = 0;
         virtual void readAll(std::vector<char> &output);
-        virtual void rewind() = 0;
         virtual size_t getSampleOffset() = 0;
 
         Sound_Decoder(const VFS::Manager* resourceMgr) : mResourceMgr(resourceMgr)
