@@ -513,6 +513,7 @@ namespace MWMechanics
                     CastSpell cast(ptr, ptr);
                     if (cast.applyInstantEffect(ptr, ptr, it->first, it->second.getMagnitude()))
                     {
+                        creatureStats.getSpells().purgeEffect(it->first.mId);
                         creatureStats.getActiveSpells().purgeEffect(it->first.mId);
                         if (ptr.getClass().hasInventoryStore(ptr))
                             ptr.getClass().getInventoryStore(ptr).purgeEffect(it->first.mId);
