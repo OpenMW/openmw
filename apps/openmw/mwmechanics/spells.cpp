@@ -249,6 +249,10 @@ namespace MWMechanics
 
     void Spells::visitEffectSources(EffectSourceVisitor &visitor) const
     {
+        // needed to combine effects from mSpells and mPermanentSpellEffects,
+        // while still grouping them by their source spell
+        std::map<SpellKey, MagicEffects> combinedEffects;
+
         for (TIterator it = begin(); it != end(); ++it)
         {
             const ESM::Spell* spell = it->first;
@@ -272,7 +276,24 @@ namespace MWMechanics
                     random = it->second.mEffectRands.at(i);
 
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
-                visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, spell->mId, -1, magnitude);
+                combinedEffects[spell].add(MWMechanics::EffectKey(*effectIt), magnitude);
+            }
+        }
+
+        for (std::map<SpellKey, MagicEffects>::const_iterator it = mPermanentSpellEffects.begin();
+             it != mPermanentSpellEffects.end(); ++it)
+        {
+            combinedEffects[it->first] += it->second;
+        }
+
+        for (std::map<SpellKey, MagicEffects>::const_iterator it = combinedEffects.begin();
+             it != combinedEffects.end(); ++it)
+        {
+            const ESM::Spell * spell = it->first;
+            for (MagicEffects::Collection::const_iterator effectIt = it->second.begin();
+                 effectIt != it->second.end(); ++effectIt)
+            {
+                visitor.visit(effectIt->first, spell->mName, spell->mId, -1, effectIt->second.getMagnitude());
             }
         }
     }
