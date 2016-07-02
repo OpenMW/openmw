@@ -972,7 +972,7 @@ namespace MWWorld
     {
         mPhysics->clearQueuedMovement();
 
-        if (changeEvent && mCurrentWorldSpace != "sys::default") // FIXME
+        if (changeEvent && mCurrentWorldSpace != ESM::CellId::sDefaultWorldspace)
         {
             // changed worldspace
             mProjectileManager->clear();

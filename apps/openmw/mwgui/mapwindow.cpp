@@ -322,7 +322,7 @@ namespace MWGui
             {
                 ESM::CellId cellId;
                 cellId.mPaged = !mInterior;
-                cellId.mWorldspace = (mInterior ? mPrefix : "sys::default");
+                cellId.mWorldspace = (mInterior ? mPrefix : ESM::CellId::sDefaultWorldspace);
                 cellId.mIndex.mX = mCurX+dX;
                 cellId.mIndex.mY = mCurY+dY;
 
@@ -738,7 +738,7 @@ namespace MWGui
             mEditingMarker.mCell.mWorldspace = LocalMapBase::mPrefix;
         else
         {
-            mEditingMarker.mCell.mWorldspace = "sys::default";
+            mEditingMarker.mCell.mWorldspace = ESM::CellId::sDefaultWorldspace;
             mEditingMarker.mCell.mIndex.mX = x;
             mEditingMarker.mCell.mIndex.mY = y;
         }
@@ -848,7 +848,7 @@ namespace MWGui
         ESM::CellId cellId;
         cellId.mIndex.mX = x;
         cellId.mIndex.mY = y;
-        cellId.mWorldspace = "sys::default";
+        cellId.mWorldspace = ESM::CellId::sDefaultWorldspace;
         cellId.mPaged = true;
         CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(cellId);
         std::vector<std::string> destNotes;

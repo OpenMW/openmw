@@ -303,7 +303,7 @@ void CSVWorld::RegionMap::view()
         hint << cellId;
     }
 
-    emit editRequest (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Scene, "sys::default"),
+    emit editRequest (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Scene, ESM::CellId::sDefaultWorldspace),
         hint.str());
 }
 
