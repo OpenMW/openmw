@@ -303,7 +303,7 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
 
     mSkeleton->updateBoneMatrices(nv->getTraversalNumber());
 
-    updateGeomToSkelMatrix(nv);
+    updateGeomToSkelMatrix(nv->getNodePath());
 
     osg::BoundingBox box;
     for (BoneSphereMap::const_iterator it = mBoneSphereMap.begin(); it != mBoneSphereMap.end(); ++it)
@@ -321,11 +321,11 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
         getParent(i)->dirtyBound();
 }
 
-void RigGeometry::updateGeomToSkelMatrix(osg::NodeVisitor *nv)
+void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
 {
     mSkelToGeomPath.clear();
     bool foundSkel = false;
-    for (osg::NodePath::const_iterator it = nv->getNodePath().begin(); it != nv->getNodePath().end(); ++it)
+    for (osg::NodePath::const_iterator it = nodePath.begin(); it != nodePath.end(); ++it)
     {
         if (!foundSkel)
         {
