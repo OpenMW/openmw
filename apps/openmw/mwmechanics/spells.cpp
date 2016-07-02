@@ -15,6 +15,11 @@
 
 namespace MWMechanics
 {
+    Spells::Spells()
+        : mSpellsChanged(false)
+    {
+    }
+
     Spells::TIterator Spells::begin() const
     {
         return mSpells.begin();
@@ -28,6 +33,44 @@ namespace MWMechanics
     const ESM::Spell* Spells::getSpell(const std::string& id) const
     {
         return MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(id);
+    }
+
+    void Spells::rebuildEffects() const
+    {
+        mEffects = MagicEffects();
+        mSourcedEffects.clear();
+
+        for (TIterator iter = mSpells.begin(); iter!=mSpells.end(); ++iter)
+        {
+            const ESM::Spell *spell = iter->first;
+
+            if (spell->mData.mType==ESM::Spell::ST_Ability || spell->mData.mType==ESM::Spell::ST_Blight ||
+                spell->mData.mType==ESM::Spell::ST_Disease || spell->mData.mType==ESM::Spell::ST_Curse)
+            {
+                int i=0;
+                for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != spell->mEffects.mList.end(); ++it)
+                {
+                    if (iter->second.mPurgedEffects.find(i) != iter->second.mPurgedEffects.end())
+                        continue; // effect was purged
+
+                    float random = 1.f;
+                    if (iter->second.mEffectRands.find(i) != iter->second.mEffectRands.end())
+                        random = iter->second.mEffectRands.at(i);
+
+                    float magnitude = it->mMagnMin + (it->mMagnMax - it->mMagnMin) * random;
+                    mEffects.add (*it, magnitude);
+                    mSourcedEffects[spell].add(MWMechanics::EffectKey(*it), magnitude);
+
+                    ++i;
+                }
+            }
+        }
+
+        for (std::map<SpellKey, MagicEffects>::const_iterator it = mPermanentSpellEffects.begin(); it != mPermanentSpellEffects.end(); ++it)
+        {
+            mEffects += it->second;
+            mSourcedEffects[it->first] += it->second;
+        }
     }
 
     bool Spells::hasSpell(const std::string &spell) const
@@ -69,6 +112,7 @@ namespace MWMechanics
             SpellParams params;
             params.mEffectRands = random;
             mSpells.insert (std::make_pair (spell, params));
+            mSpellsChanged = true;
         }
     }
 
@@ -104,7 +148,10 @@ namespace MWMechanics
         }
 
         if (iter!=mSpells.end())
+        {
             mSpells.erase (iter);
+            mSpellsChanged = true;
+        }
 
         if (spellId==mSelectedSpell)
             mSelectedSpell.clear();
@@ -112,44 +159,17 @@ namespace MWMechanics
 
     MagicEffects Spells::getMagicEffects() const
     {
-        // TODO: These are recalculated every frame, no need to do that
-
-        MagicEffects effects;
-
-        for (TIterator iter = mSpells.begin(); iter!=mSpells.end(); ++iter)
-        {
-            const ESM::Spell *spell = iter->first;
-
-            if (spell->mData.mType==ESM::Spell::ST_Ability || spell->mData.mType==ESM::Spell::ST_Blight ||
-                spell->mData.mType==ESM::Spell::ST_Disease || spell->mData.mType==ESM::Spell::ST_Curse)
-            {
-                int i=0;
-                for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != spell->mEffects.mList.end(); ++it)
-                {
-                    if (iter->second.mPurgedEffects.find(i) != iter->second.mPurgedEffects.end())
-                        continue; // effect was purged
-
-                    float random = 1.f;
-                    if (iter->second.mEffectRands.find(i) != iter->second.mEffectRands.end())
-                        random = iter->second.mEffectRands.at(i);
-
-                    effects.add (*it, it->mMagnMin + (it->mMagnMax - it->mMagnMin) * random);
-                    ++i;
-                }
-            }
+        if (mSpellsChanged) {
+            rebuildEffects();
+            mSpellsChanged = false;
         }
-
-        for (std::map<SpellKey, MagicEffects>::const_iterator it = mPermanentSpellEffects.begin(); it != mPermanentSpellEffects.end(); ++it)
-        {
-            effects += it->second;
-        }
-
-        return effects;
+        return mEffects;
     }
 
     void Spells::clear()
     {
         mSpells.clear();
+        mSpellsChanged = true;
     }
 
     void Spells::setSelectedSpell (const std::string& spellId)
@@ -205,7 +225,10 @@ namespace MWMechanics
         {
             const ESM::Spell *spell = iter->first;
             if (spell->mData.mType == ESM::Spell::ST_Disease)
+            {
                 mSpells.erase(iter++);
+                mSpellsChanged = true;
+            }
             else
                 ++iter;
         }
@@ -217,7 +240,10 @@ namespace MWMechanics
         {
             const ESM::Spell *spell = iter->first;
             if (spell->mData.mType == ESM::Spell::ST_Blight && !hasCorprusEffect(spell))
+            {
                 mSpells.erase(iter++);
+                mSpellsChanged = true;
+            }
             else
                 ++iter;
         }
@@ -229,7 +255,10 @@ namespace MWMechanics
         {
             const ESM::Spell *spell = iter->first;
             if (hasCorprusEffect(spell))
+            {
                 mSpells.erase(iter++);
+                mSpellsChanged = true;
+            }
             else
                 ++iter;
         }
@@ -241,7 +270,10 @@ namespace MWMechanics
         {
             const ESM::Spell *spell = iter->first;
             if (spell->mData.mType == ESM::Spell::ST_Curse)
+            {
                 mSpells.erase(iter++);
+                mSpellsChanged = true;
+            }
             else
                 ++iter;
         }
@@ -249,30 +281,19 @@ namespace MWMechanics
 
     void Spells::visitEffectSources(EffectSourceVisitor &visitor) const
     {
-        for (TIterator it = begin(); it != end(); ++it)
+        if (mSpellsChanged) {
+            rebuildEffects();
+            mSpellsChanged = false;
+        }
+
+        for (std::map<SpellKey, MagicEffects>::const_iterator it = mSourcedEffects.begin();
+             it != mSourcedEffects.end(); ++it)
         {
-            const ESM::Spell* spell = it->first;
-
-            // these are the spell types that are permanently in effect
-            if (!(spell->mData.mType == ESM::Spell::ST_Ability)
-                    && !(spell->mData.mType == ESM::Spell::ST_Disease)
-                    && !(spell->mData.mType == ESM::Spell::ST_Curse)
-                    && !(spell->mData.mType == ESM::Spell::ST_Blight))
-                continue;
-            const ESM::EffectList& list = spell->mEffects;
-            int i=0;
-            for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = list.mList.begin();
-                 effectIt != list.mList.end(); ++effectIt, ++i)
+            const ESM::Spell * spell = it->first;
+            for (MagicEffects::Collection::const_iterator effectIt = it->second.begin();
+                 effectIt != it->second.end(); ++effectIt)
             {
-                if (it->second.mPurgedEffects.find(i) != it->second.mPurgedEffects.end())
-                    continue; // effect was purged
-
-                float random = 1.f;
-                if (it->second.mEffectRands.find(i) != it->second.mEffectRands.end())
-                    random = it->second.mEffectRands.at(i);
-
-                float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
-                visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, spell->mId, -1, magnitude);
+                visitor.visit(effectIt->first, spell->mName, spell->mId, -1, effectIt->second.getMagnitude());
             }
         }
     }
@@ -297,6 +318,7 @@ namespace MWMechanics
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
                 magnitude *= std::max(1, mCorprusSpells[spell].mWorsenings);
                 mPermanentSpellEffects[spell].add(MWMechanics::EffectKey(*effectIt), MWMechanics::EffectParam(magnitude));
+                mSpellsChanged = true;
             }
         }
     }
@@ -326,7 +348,10 @@ namespace MWMechanics
             for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = spellIt->first->mEffects.mList.begin(); effectIt != spellIt->first->mEffects.mList.end(); ++effectIt)
             {
                 if (effectIt->mEffectID == effectId)
+                {
                     spellIt->second.mPurgedEffects.insert(i);
+                    mSpellsChanged = true;
+                }
                 ++i;
             }
         }
@@ -343,7 +368,10 @@ namespace MWMechanics
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = spellIt->first->mEffects.mList.begin(); effectIt != spellIt->first->mEffects.mList.end(); ++effectIt)
         {
             if (effectIt->mEffectID == effectId)
+            {
                 spellIt->second.mPurgedEffects.insert(i);
+                mSpellsChanged = true;
+            }
             ++i;
         }
     }
@@ -409,6 +437,8 @@ namespace MWMechanics
             mCorprusSpells[spell].mWorsenings = state.mCorprusSpells.at(it->first).mWorsenings;
             mCorprusSpells[spell].mNextWorsening = MWWorld::TimeStamp(state.mCorprusSpells.at(it->first).mNextWorsening);
         }
+
+        mSpellsChanged = true;
     }
 
     void Spells::writeState(ESM::SpellState &state) const

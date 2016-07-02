@@ -50,7 +50,6 @@ namespace MWMechanics
             };
 
         private:
-
             TContainer mSpells;
 
             // spell-tied effects that will be applied even after removing the spell (currently used to keep positive effects when corprus is removed)
@@ -63,10 +62,16 @@ namespace MWMechanics
 
             std::map<SpellKey, CorprusStats> mCorprusSpells;
 
+            mutable bool mSpellsChanged;
+            mutable MagicEffects mEffects;
+            mutable std::map<SpellKey, MagicEffects> mSourcedEffects;
+            void rebuildEffects() const;
+
             /// Get spell from ID, throws exception if not found
             const ESM::Spell* getSpell(const std::string& id) const;
 
         public:
+            Spells();
 
             void worsenCorprus(const ESM::Spell* spell);
             static bool hasCorprusEffect(const ESM::Spell *spell);
