@@ -241,7 +241,7 @@ void RigGeometry::update(osg::NodeVisitor* nv)
         return;
     mLastFrameNumber = nv->getTraversalNumber();
 
-    mSkeleton->updateBoneMatrices(nv);
+    mSkeleton->updateBoneMatrices(nv->getTraversalNumber());
 
     // skinning
     osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
@@ -301,7 +301,7 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
         return;
     mBoundsFirstFrame = false;
 
-    mSkeleton->updateBoneMatrices(nv);
+    mSkeleton->updateBoneMatrices(nv->getTraversalNumber());
 
     updateGeomToSkelMatrix(nv);
 
