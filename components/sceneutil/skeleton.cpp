@@ -144,6 +144,12 @@ bool Skeleton::getActive() const
     return mActive;
 }
 
+void Skeleton::markDirty()
+{
+    mTraversedEvenFrame = false;
+    mTraversedOddFrame = false;
+}
+
 void Skeleton::traverse(osg::NodeVisitor& nv)
 {
     if (!getActive() && nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR

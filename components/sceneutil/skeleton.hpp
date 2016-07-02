@@ -53,6 +53,9 @@ namespace SceneUtil
 
         bool getActive() const;
 
+        /// If a new RigGeometry is added after the Skeleton has already been rendered, you must call markDirty().
+        void markDirty();
+
         void traverse(osg::NodeVisitor& nv);
 
     private:
