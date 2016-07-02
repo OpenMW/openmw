@@ -105,6 +105,10 @@ MWWorld::CellStore *MWWorld::Cells::getExterior (int x, int y)
         {
             // Cell isn't predefined. Make one on the fly.
             ESM::Cell record;
+            record.mCellId.mWorldspace = "sys::default";
+            record.mCellId.mPaged = true;
+            record.mCellId.mIndex.mX = x;
+            record.mCellId.mIndex.mY = y;
 
             record.mData.mFlags = ESM::Cell::HasWater;
             record.mData.mX = x;
