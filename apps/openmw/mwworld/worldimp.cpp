@@ -1025,7 +1025,10 @@ namespace MWWorld
             float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
 
             facedObject = getFacedObject(activationDistance);
-            if (!facedObject.isEmpty() && !facedObject.getClass().isActor() && !facedObject.getCellRef().getTeleport())
+
+            // Not allowing telekinesis on actors, on doors that teleport to other cells, or on activators
+            // Original engine doesn't allow telekinesis on books or lights, either
+            if (!facedObject.isEmpty() && !facedObject.getClass().isActor() && !facedObject.getCellRef().getTeleport() && facedObject.getClass().getTypeName() != "struct ESM::Activator")
                  return facedObject;
             else
                 facedObject = getFacedObject(getMaxActivationDistance());
