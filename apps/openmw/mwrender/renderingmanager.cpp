@@ -738,7 +738,9 @@ namespace MWRender
 
         mViewer->getCamera()->accept(*createIntersectionVisitor(intersector, ignorePlayer, ignoreActors));
 
-        return getIntersectionResult(intersector);
+        RayResult result = getIntersectionResult(intersector);
+        result.mDistanceToFirstIntersection = maxDistance * intersector->getFirstIntersection().ratio;
+        return result;
     }
 
     void RenderingManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)

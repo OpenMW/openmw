@@ -1,4 +1,5 @@
 #include "worldimp.hpp"
+#include <iostream>
 
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
@@ -1023,15 +1024,16 @@ namespace MWWorld
             telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
 
             float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
+            float distanceToObject;
 
-            facedObject = getFacedObject(activationDistance);
+            facedObject = getFacedObject(activationDistance, distanceToObject, true);
 
             // Not allowing telekinesis on actors, on doors that teleport to other cells, or on activators
             // Original engine doesn't allow telekinesis on books or lights, either
-            if (!facedObject.isEmpty() && !facedObject.getClass().isActor() && !facedObject.getCellRef().getTeleport() && facedObject.getClass().getTypeName() != "struct ESM::Activator")
-                 return facedObject;
-            else
-                facedObject = getFacedObject(getMaxActivationDistance());
+            if (!facedObject.isEmpty() && (facedObject.getClass().isActor()
+                || facedObject.getCellRef().getTeleport() || facedObject.getClass().getTypeName() == "struct ESM::Activator")
+                && (distanceToObject > getMaxActivationDistance()))
+                return 0;
         }
 
         return facedObject;
@@ -1729,6 +1731,31 @@ namespace MWWorld
         else
         {
             return mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer).mHitObject;
+        }
+    }
+    
+    MWWorld::Ptr World::getFacedObject(float maxDistance, float& distance, bool ignorePlayer)
+    {
+        maxDistance += mRendering->getCameraDistance();
+        MWWorld::Ptr facedObject;
+
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+        {
+            float x, y;
+            MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
+            MWRender::RenderingManager::RayResult rayToObject = mRendering->castCameraToViewportRay(x, y, maxDistance, ignorePlayer);
+            facedObject = rayToObject.mHitObject;
+            if (!facedObject.isEmpty())
+                distance = rayToObject.mDistanceToFirstIntersection;
+            return facedObject;
+        }
+        else
+        {
+            MWRender::RenderingManager::RayResult rayToObject = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer);
+            facedObject = rayToObject.mHitObject;
+            if (!facedObject.isEmpty())
+                distance = rayToObject.mDistanceToFirstIntersection;
+            return facedObject;
         }
     }
 

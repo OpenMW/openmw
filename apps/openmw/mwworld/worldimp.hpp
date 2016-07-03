@@ -127,7 +127,13 @@ namespace MWWorld
             void updateSoundListener();
             void updateWindowManager ();
             void updatePlayer(bool paused);
+
+            /// Return faced object
             MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer=true);
+
+            /// Return faced object and distance from player to it
+            MWWorld::Ptr getFacedObject(float maxDistance, float& distanceToObject, bool ignorePlayer=true);
+
     public: // FIXME
             void removeContainerScripts(const Ptr& reference);
     private:
