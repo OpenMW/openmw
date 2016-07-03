@@ -13,7 +13,7 @@ namespace MWWorld
             std::string mSpellId;
             MWWorld::Ptr mTrapSource;
 
-            virtual void executeImp (const Ptr& actor);
+            virtual void executeImp (const Ptr& actor, float distance);
 
         public:
 

@@ -3228,7 +3228,20 @@ namespace MWWorld
         if (object.getRefData().activate())
         {
             boost::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
-            action->execute (actor);
+            if (object.getCellRef().getTrap() != "") // If the object is trapped, do a distance check to account for opening with telekinesis
+            {
+                float distanceToObject;
+                if (actor == getPlayerPtr()) // If the actor doing the activation is the player, get distance using the raycast in getFacedObject()
+                    MWWorld::Ptr result = getFacedObject(1.0f, distanceToObject, true);
+                else // Otherwise do a position-based distance check
+                {
+                    osg::Vec3f actorPosition(actor.getRefData().getPosition().asVec3());
+                    osg::Vec3f objectPosition(object.getRefData().getPosition().asVec3());
+                    distanceToObject = (objectPosition - actorPosition).length();
+                }
+                action->execute (actor, distanceToObject);
+            }
+        action->execute (actor);
         }
     }
 

@@ -19,7 +19,9 @@ namespace MWWorld
             Action (const Action& action);
             Action& operator= (const Action& action);
 
-            virtual void executeImp (const Ptr& actor) = 0;
+            virtual void executeImp (const Ptr& actor) { return; }
+            virtual void executeImp (const Ptr& actor, float distanceToObject) { return; }
+           
 
         protected:
 
@@ -36,6 +38,7 @@ namespace MWWorld
             ///< Is running this action a no-op? (default false)
 
             void execute (const Ptr& actor);
+            void execute (const Ptr& actor, float distanceToObject);
 
             void setSound (const std::string& id);
             void setSoundOffset(float offset);
