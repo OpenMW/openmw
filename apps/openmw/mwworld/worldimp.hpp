@@ -128,10 +128,6 @@ namespace MWWorld
             void updateWindowManager ();
             void updatePlayer(bool paused);
 
-            /// Return faced object
-            MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer=true);
-
-            /// Return faced object and distance from player to it
             MWWorld::Ptr getFacedObject(float maxDistance, float& distanceToObject, bool ignorePlayer=true);
 
     public: // FIXME
@@ -160,6 +156,10 @@ namespace MWWorld
                 const std::vector<std::string>& content, ContentLoader& contentLoader);
 
             float mSwimHeightScale;
+
+            float mDistanceToFacedObject;
+            MWWorld::Ptr mFacedObject;
+
             bool isUnderwater(const MWWorld::ConstPtr &object, const float heightRatio) const;
             ///< helper function for implementing isSwimming(), isSubmerged(), isWading()
 

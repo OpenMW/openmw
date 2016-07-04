@@ -1,5 +1,4 @@
 #include "worldimp.hpp"
-#include <iostream>
 
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
@@ -151,7 +150,7 @@ namespace MWWorld
       mSky (true), mCells (mStore, mEsm),
       mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles),
       mActivationDistanceOverride (activationDistanceOverride), mStartupScript(startupScript),
-      mStartCell (startCell), mTeleportEnabled(true),
+      mStartCell (startCell), mDistanceToFacedObject(0), mTeleportEnabled(true),
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0)
     {
         mPhysics = new MWPhysics::PhysicsSystem(resourceSystem, rootNode);
@@ -1012,10 +1011,11 @@ namespace MWWorld
     MWWorld::Ptr World::getFacedObject()
     {
         MWWorld::Ptr facedObject;
+        float distanceToObject;
 
         if (MWBase::Environment::get().getWindowManager()->isGuiMode() &&
                 MWBase::Environment::get().getWindowManager()->isConsoleMode())
-            facedObject = getFacedObject(getMaxActivationDistance() * 50, false);
+            facedObject = getFacedObject(getMaxActivationDistance() * 50, distanceToObject, false);
         else
         {
             float telekinesisRangeBonus =
@@ -1024,7 +1024,6 @@ namespace MWWorld
             telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
 
             float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
-            float distanceToObject;
 
             facedObject = getFacedObject(activationDistance, distanceToObject, true);
 
@@ -1036,6 +1035,8 @@ namespace MWWorld
                 return 0;
         }
 
+        mDistanceToFacedObject = distanceToObject;
+        mFacedObject = facedObject;
         return facedObject;
     }
 
@@ -1718,22 +1719,6 @@ namespace MWWorld
         }
     }
 
-    MWWorld::Ptr World::getFacedObject(float maxDistance, bool ignorePlayer)
-    {
-        maxDistance += mRendering->getCameraDistance();
-
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
-        {
-            float x, y;
-            MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            return mRendering->castCameraToViewportRay(x, y, maxDistance, ignorePlayer).mHitObject;
-        }
-        else
-        {
-            return mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer).mHitObject;
-        }
-    }
-    
     MWWorld::Ptr World::getFacedObject(float maxDistance, float& distance, bool ignorePlayer)
     {
         maxDistance += mRendering->getCameraDistance();
@@ -3228,20 +3213,20 @@ namespace MWWorld
         if (object.getRefData().activate())
         {
             boost::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
-            if (object.getCellRef().getTrap() != "") // If the object is trapped, do a distance check to account for opening with telekinesis
+            if (object.getCellRef().getTrap() != "")
             {
-                float distanceToObject;
-                if (actor == getPlayerPtr()) // If the actor doing the activation is the player, get distance using the raycast in getFacedObject()
-                    MWWorld::Ptr result = getFacedObject(1.0f, distanceToObject, true);
-                else // Otherwise do a position-based distance check
+                // For the distance check to a trapped object, use the raycast-derived distance if we have it
+                if (actor == getPlayerPtr() && (object == mFacedObject))
+                    action->execute (actor, mDistanceToFacedObject, true);
+                else // Otherwise use a position comparison
                 {
                     osg::Vec3f actorPosition(actor.getRefData().getPosition().asVec3());
                     osg::Vec3f objectPosition(object.getRefData().getPosition().asVec3());
-                    distanceToObject = (objectPosition - actorPosition).length();
-                }
-                action->execute (actor, distanceToObject);
+                    action->execute (actor, (objectPosition - actorPosition).length(), true);
+                }              
             }
-        action->execute (actor);
+            else
+                action->execute (actor);
         }
     }
 

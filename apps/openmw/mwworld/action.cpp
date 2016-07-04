@@ -17,7 +17,7 @@ MWWorld::Action::Action (bool keepSound, const Ptr& target) : mKeepSound (keepSo
 
 MWWorld::Action::~Action() {}
 
-void MWWorld::Action::execute (const Ptr& actor)
+void MWWorld::Action::execute (const Ptr& actor, float distanceToObject, bool useDistance)
 {
     if(!mSoundId.empty())
     {
@@ -41,36 +41,10 @@ void MWWorld::Action::execute (const Ptr& actor)
                 );
         }
     }
-
-    executeImp(actor);
-}
-
-void MWWorld::Action::execute (const Ptr& actor, float distanceToObject)
-{
-    if(!mSoundId.empty())
-    {
-        if(mKeepSound && actor == MWMechanics::getPlayer())
-            MWBase::Environment::get().getSoundManager()->playSound(mSoundId, 1.0, 1.0,
-                MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Normal, mSoundOffset
-            );
-        else
-        {
-            bool local = mTarget.isEmpty() || !mTarget.isInCell(); // no usable target
-            if(mKeepSound)
-                MWBase::Environment::get().getSoundManager()->playSound3D(
-                    (local ? actor : mTarget).getRefData().getPosition().asVec3(),
-                    mSoundId, 1.0, 1.0, MWBase::SoundManager::Play_TypeSfx,
-                    MWBase::SoundManager::Play_Normal, mSoundOffset
-                );
-            else
-                MWBase::Environment::get().getSoundManager()->playSound3D(local ? actor : mTarget,
-                    mSoundId, 1.0, 1.0, MWBase::SoundManager::Play_TypeSfx,
-                    MWBase::SoundManager::Play_Normal, mSoundOffset
-                );
-        }
-    }
-
-    executeImp(actor, distanceToObject);
+    if (useDistance)
+        executeImp(actor, distanceToObject);
+    else
+        executeImp(actor);
 }
 
 void MWWorld::Action::setSound (const std::string& id)
