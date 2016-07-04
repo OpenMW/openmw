@@ -1036,7 +1036,6 @@ namespace MWWorld
         }
 
         mDistanceToFacedObject = distanceToObject;
-        mFacedObject = facedObject;
         return facedObject;
     }
 
@@ -3213,19 +3212,11 @@ namespace MWWorld
         if (object.getRefData().activate())
         {
             boost::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
-            if (object.getCellRef().getTrap() != "")
-            {
-                // For the distance check to a trapped object, use the raycast-derived distance if we have it
-                if (actor == getPlayerPtr() && (object == mFacedObject))
-                    action->execute (actor, mDistanceToFacedObject, true);
-                else // Otherwise use a position comparison
-                {
-                    osg::Vec3f actorPosition(actor.getRefData().getPosition().asVec3());
-                    osg::Vec3f objectPosition(object.getRefData().getPosition().asVec3());
-                    action->execute (actor, (objectPosition - actorPosition).length(), true);
-                }              
-            }
-            else
+            // If the player is opening a trap with telekinesis on, use the raycast-derived distance to check if the trap should hit
+            if (object.getCellRef().getTrap() != "" && actor == getPlayerPtr() && mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
+                    .get(ESM::MagicEffect::Telekinesis).getMagnitude() > 0)
+                action->execute (actor, mDistanceToFacedObject);           
+            else // Otherwise just activate, and if it's trapped it will always hit
                 action->execute (actor);
         }
     }

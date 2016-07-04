@@ -13,7 +13,11 @@ namespace MWWorld
             std::string mSpellId;
             MWWorld::Ptr mTrapSource;
 
-            virtual void executeImp (const Ptr& actor, float distance);
+            /// Activating trapped object without telekinesis active or within trap range
+            virtual void executeImp (const Ptr& actor);
+
+            /// Activating trapped object with telekinesis active
+            virtual void executeImp (const Ptr& actor, float distanceToObject);
 
         public:
 

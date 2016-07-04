@@ -17,7 +17,7 @@ MWWorld::Action::Action (bool keepSound, const Ptr& target) : mKeepSound (keepSo
 
 MWWorld::Action::~Action() {}
 
-void MWWorld::Action::execute (const Ptr& actor, float distanceToObject, bool useDistance)
+void MWWorld::Action::execute (const Ptr& actor, float distanceToObject)
 {
     if(!mSoundId.empty())
     {
@@ -41,7 +41,7 @@ void MWWorld::Action::execute (const Ptr& actor, float distanceToObject, bool us
                 );
         }
     }
-    if (useDistance)
+    if (distanceToObject != 0)
         executeImp(actor, distanceToObject);
     else
         executeImp(actor);

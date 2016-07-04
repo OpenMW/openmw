@@ -158,7 +158,6 @@ namespace MWWorld
             float mSwimHeightScale;
 
             float mDistanceToFacedObject;
-            MWWorld::Ptr mFacedObject;
 
             bool isUnderwater(const MWWorld::ConstPtr &object, const float heightRatio) const;
             ///< helper function for implementing isSwimming(), isSubmerged(), isWading()
