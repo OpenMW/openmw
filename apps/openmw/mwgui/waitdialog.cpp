@@ -191,6 +191,10 @@ namespace MWGui
         mProgressBar.setProgress(cur, total);
         MWBase::Environment::get().getWorld()->advanceTime(1);
         MWBase::Environment::get().getMechanicsManager()->rest(mSleeping);
+
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        if (player.getClass().getCreatureStats(player).isDead())
+            stopWaiting();
     }
 
     void WaitDialog::onWaitingInterrupted()
