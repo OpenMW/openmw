@@ -804,6 +804,9 @@ namespace MWWorld
 
         mWeatherManager->advanceTime (hours, incremental);
 
+        if (!incremental)
+            mProjectileManager->clear();
+
         hours += mGameHour->getFloat();
 
         setHour (hours);
