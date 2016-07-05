@@ -829,3 +829,7 @@ if (DOXYGEN_FOUND)
         WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
         COMMENT "Generating documentation for the github-pages at ${DOXYGEN_PAGES_OUTPUT_DIR}" VERBATIM)
 endif ()
+
+
+OPTION(WANT_DOCS        "Build documentation." OFF )
+ADD_SUBDIRECTORY(docs)
