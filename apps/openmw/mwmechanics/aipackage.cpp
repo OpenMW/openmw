@@ -68,7 +68,8 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
     {
         bool wasShortcutting = mIsShortcutting;
         bool destInLOS = false;
-        mIsShortcutting = shortcutPath(start, dest, actor, &destInLOS); // try to shortcut first
+        if (getTypeId() != TypeIdWander) // prohibit shortcuts for AiWander
+            mIsShortcutting = shortcutPath(start, dest, actor, &destInLOS); // try to shortcut first
 
         if (!mIsShortcutting)
         {
@@ -139,8 +140,10 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float dur
     MWWorld::Ptr door = getNearbyDoor(actor); // NOTE: checks interior cells only
     if (door != MWWorld::Ptr())
     {
-        if (!door.getCellRef().getTeleport() && door.getCellRef().getTrap().empty()
-                && door.getCellRef().getLockLevel() <= 0 && door.getClass().getDoorState(door) == 0) {
+        // note: AiWander currently does not open doors
+        if (getTypeId() != TypeIdWander && !door.getCellRef().getTeleport() && door.getCellRef().getTrap().empty()
+                && door.getCellRef().getLockLevel() <= 0 && door.getClass().getDoorState(door) == 0)
+        {
             MWBase::Environment::get().getWorld()->activateDoor(door, 1);
         }
     }

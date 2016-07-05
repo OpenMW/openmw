@@ -70,8 +70,6 @@ namespace MWMechanics
         unsigned short mIdleAnimation;
         std::vector<unsigned short> mBadIdles; // Idle animations that when called cause errors
 
-        PathFinder mPathFinder;
-        
         AiWanderStorage():
             mTargetAngleRadians(0),
             mTurnActorGivingGreetingToFacePlayer(false),
@@ -87,7 +85,7 @@ namespace MWMechanics
     
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle), mRepeat(repeat)
-      , mStoredInitialActorPosition(false)
+      , mStoredInitialActorPosition(false), mIsWanderDestReady(false)
     {
         mIdle.resize(8, 0);
         init();
@@ -252,7 +250,7 @@ namespace MWMechanics
         if ((wanderState == Wander_MoveNow) && mDistance)
         {
             // Construct a new path if there isn't one
-            if(!storage.mPathFinder.isPathConstructed())
+            if(!mPathFinder.isPathConstructed())
             {
                 if (mAllowedNodes.size())
                 {
@@ -290,7 +288,7 @@ namespace MWMechanics
 
     void AiWander::returnToStartLocation(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos)
     {
-        if (!storage.mPathFinder.isPathConstructed())
+        if (!mPathFinder.isPathConstructed())
         {
             ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(mReturnPosition));
 
@@ -298,10 +296,11 @@ namespace MWMechanics
             ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
             // don't take shortcuts for wandering
-            storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell());
+            mPathFinder.buildSyncedPath(start, dest, actor.getCell());
 
-            if (storage.mPathFinder.isPathConstructed())
+            if (mPathFinder.isPathConstructed())
             {
+                mIsWanderDestReady = true;
                 storage.mState = Wander_Walking;
             }
         }
@@ -371,7 +370,7 @@ namespace MWMechanics
         float duration, AiWanderStorage& storage, ESM::Position& pos)
     {
         // Are we there yet?
-        if (storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DESTINATION_TOLERANCE))
+        if (mIsWanderDestReady && pathTo(actor, mPathFinder.getPath().back(), duration, DESTINATION_TOLERANCE))
         {
             stopWalking(actor, storage);
             storage.mState = Wander_ChooseAction;
@@ -414,33 +413,20 @@ namespace MWMechanics
 
     void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration, ESM::Position& pos)
     {
-        // turn towards the next point in mPath
-        zTurn(actor, storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
-
-        MWMechanics::Movement& movement = actor.getClass().getMovementSettings(actor);
-        if (mObstacleCheck.check(actor, duration))
+        if (mObstacleCheck.isEvading())
         {
             // first check if we're walking into a door
             if (proximityToDoor(actor)) // NOTE: checks interior cells only
             {
                 // remove allowed points then select another random destination
                 mTrimCurrentNode = true;
-                trimAllowedNodes(mAllowedNodes, storage.mPathFinder);
+                trimAllowedNodes(mAllowedNodes, mPathFinder);
                 mObstacleCheck.clear();
-                storage.mPathFinder.clearPath();
+                mPathFinder.clearPath();
                 storage.mState = Wander_MoveNow;
             }
-            else // probably walking into another NPC
-            {
-                // TODO: diagonal should have same animation as walk forward
-                //       but doesn't seem to do that?
-                mObstacleCheck.takeEvasiveAction(movement);
-            }
+
             mStuckCount++;  // TODO: maybe no longer needed
-        }
-        else
-        {
-            movement.mPosition[1] = 1;
         }
 
         // if stuck for sufficiently long, act like current location was the destination
@@ -564,11 +550,12 @@ namespace MWMechanics
         ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(actorPos));
 
         // don't take shortcuts for wandering
-        storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell());
-        storage.mPathFinder.buildPath(start, dest, actor.getCell());
+        mPathFinder.buildSyncedPath(start, dest, actor.getCell());
 
-        if (storage.mPathFinder.isPathConstructed())
+        if (mPathFinder.isPathConstructed())
         {
+            mIsWanderDestReady = true;
+
             // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
             ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
             mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
@@ -624,7 +611,8 @@ namespace MWMechanics
 
     void AiWander::stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage)
     {
-        storage.mPathFinder.clearPath();
+        mPathFinder.clearPath();
+        mIsWanderDestReady = false;
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
     }
 
@@ -850,6 +838,7 @@ namespace MWMechanics
         , mRepeat(wander->mData.mShouldRepeat != 0)
         , mStoredInitialActorPosition(wander->mStoredInitialActorPosition)
         , mStartTime(MWWorld::TimeStamp(wander->mStartTime))
+        , mIsWanderDestReady(false)
     {
         if (mStoredInitialActorPosition)
             mInitialActorPosition = wander->mInitialActorPosition;

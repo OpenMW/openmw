@@ -130,9 +130,9 @@ namespace MWMechanics
                                   const PathFinder& pathfinder);
 
 
-//             ObstacleCheck mObstacleCheck;
             float mDoorCheckDuration;
             int mStuckCount;
+            bool mIsWanderDestReady;
 
             // constants for converting idleSelect values into groupNames
             enum GroupIndex

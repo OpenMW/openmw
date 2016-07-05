@@ -33,6 +33,7 @@ namespace MWMechanics
             void clear();
 
             bool isNormalState() const;
+            bool isEvading() const;
 
             // Returns true if there is an obstacle and an evasive action
             // should be taken
