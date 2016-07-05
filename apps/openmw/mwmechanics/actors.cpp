@@ -493,6 +493,31 @@ namespace MWMechanics
         stats.setFatigue (fatigue);
     }
 
+    class ExpiryVisitor : public EffectSourceVisitor
+    {
+        private:
+            MWWorld::Ptr mActor;
+            float mDuration;
+
+        public:
+            ExpiryVisitor(const MWWorld::Ptr& actor, float duration)
+                : mActor(actor), mDuration(duration)
+            {
+            }
+
+            virtual void visit (MWMechanics::EffectKey key,
+                                const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
+                                float magnitude, float remainingTime = -1, float /*totalTime*/ = -1)
+            {
+                if (magnitude > 0 && remainingTime > 0 && remainingTime < mDuration)
+                {
+                    CreatureStats& creatureStats = mActor.getClass().getCreatureStats(mActor);
+                    effectTick(creatureStats, mActor, key, magnitude * remainingTime);
+                    creatureStats.getMagicEffects().add(key, -magnitude);
+                }
+            }
+    };
+
     void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration)
     {
         CreatureStats &creatureStats = ptr.getClass().getCreatureStats(ptr);
@@ -502,6 +527,11 @@ namespace MWMechanics
 
         if (duration > 0)
         {
+            // apply correct magnitude for tickable effects that have just expired,
+            // in case duration > remaining time of effect
+            ExpiryVisitor visitor(ptr, duration);
+            creatureStats.getActiveSpells().visitEffectSources(visitor);
+
             for (MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
             {
                 // tickable effects (i.e. effects having a lasting impact after expiry)
@@ -1298,10 +1328,32 @@ namespace MWMechanics
         }
     }
 
-    void Actors::restoreDynamicStats(bool sleep)
+    void Actors::rest(bool sleep)
     {
-        for(PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+        float duration = 3600.f / MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+        for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+        {
+            if (iter->first.getClass().getCreatureStats(iter->first).isDead())
+                continue;
+
             restoreDynamicStats(iter->first, sleep);
+
+            if ((!iter->first.getRefData().getBaseNode()) ||
+                    (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2() > sqrAiProcessingDistance)
+                continue;
+
+            adjustMagicEffects (iter->first);
+            if (iter->first.getClass().getCreatureStats(iter->first).needToRecalcDynamicStats())
+                calculateDynamicStats (iter->first);
+
+            calculateCreatureStatModifiers (iter->first, duration);
+            if (iter->first.getClass().isNpc())
+                calculateNpcStatModifiers(iter->first, duration);
+        }
+
+        fastForwardAi();
     }
 
     int Actors::getHoursToRest(const MWWorld::Ptr &ptr) const

@@ -176,9 +176,9 @@ namespace MWGui
         MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
 
         // advance time
+        MWBase::Environment::get().getMechanicsManager()->rest(false);
+        MWBase::Environment::get().getMechanicsManager()->rest(false);
         MWBase::Environment::get().getWorld ()->advanceTime (2);
-        MWBase::Environment::get().getMechanicsManager()->rest(false);
-        MWBase::Environment::get().getMechanicsManager()->rest(false);
 
         mProgressBar.setVisible(true);
         mProgressBar.setProgress(0, 2);
