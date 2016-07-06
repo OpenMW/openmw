@@ -17,7 +17,7 @@ MWWorld::Action::Action (bool keepSound, const Ptr& target) : mKeepSound (keepSo
 
 MWWorld::Action::~Action() {}
 
-void MWWorld::Action::execute (const Ptr& actor, float distanceToObject)
+void MWWorld::Action::execute (const Ptr& actor, float distanceToFacedObject)
 {
     if(!mSoundId.empty())
     {
@@ -41,8 +41,8 @@ void MWWorld::Action::execute (const Ptr& actor, float distanceToObject)
                 );
         }
     }
-    if (distanceToObject != 0)
-        executeImp(actor, distanceToObject);
+    if (mTarget.getCellRef().getTrap() != "")
+        executeImp(actor, distanceToFacedObject);
     else
         executeImp(actor);
 }

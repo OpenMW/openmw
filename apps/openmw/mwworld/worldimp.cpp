@@ -3205,12 +3205,7 @@ namespace MWWorld
         if (object.getRefData().activate())
         {
             boost::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
-            // If the player is opening a trap with telekinesis on, use the raycast-derived distance to check if the trap should hit
-            if (object.getCellRef().getTrap() != "" && actor == getPlayerPtr() && mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
-                    .get(ESM::MagicEffect::Telekinesis).getMagnitude() > 0)
-                action->execute (actor, mDistanceToFacedObject);           
-            else // Otherwise just activate, and if it's trapped it will always hit
-                action->execute (actor);
+            action->execute (actor, mDistanceToFacedObject);
         }
     }
 
