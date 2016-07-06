@@ -1722,25 +1722,21 @@ namespace MWWorld
     {
         maxDistance += mRendering->getCameraDistance();
         MWWorld::Ptr facedObject;
+        MWRender::RenderingManager::RayResult rayToObject;
 
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             float x, y;
             MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            MWRender::RenderingManager::RayResult rayToObject = mRendering->castCameraToViewportRay(x, y, maxDistance, ignorePlayer);
-            facedObject = rayToObject.mHitObject;
-            if (!facedObject.isEmpty())
-                distance = rayToObject.mRatio * maxDistance;
-            return facedObject;
+            rayToObject = mRendering->castCameraToViewportRay(x, y, maxDistance, ignorePlayer);
         }
         else
-        {
-            MWRender::RenderingManager::RayResult rayToObject = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer);
-            facedObject = rayToObject.mHitObject;
-            if (!facedObject.isEmpty())
-                distance = rayToObject.mRatio * maxDistance;
-            return facedObject;
-        }
+            rayToObject = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer);
+
+        facedObject = rayToObject.mHitObject;
+        if (!facedObject.isEmpty())
+            distance = rayToObject.mRatio * maxDistance;
+        return facedObject;
     }
 
     bool World::isCellExterior() const
