@@ -213,6 +213,14 @@ namespace MWClass
         return true;
     }
 
+    bool Door::allowTelekinesis(const MWWorld::ConstPtr &ptr) const
+    {
+        if (ptr.getCellRef().getTeleport())
+            return false;
+        else
+            return true;
+    }
+
     std::string Door::getScript (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
