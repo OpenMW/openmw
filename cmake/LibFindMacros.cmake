@@ -3,8 +3,6 @@
 # Maintained at https://github.com/Tronic/cmake-modules
 # Please send your improvements as pull requests on Github.
 
-include(CMakeParseArguments)
-
 # Find another package and make it a dependency of the current package.
 # This also automatically forwards the "REQUIRED" argument.
 # Usage: libfind_package(<prefix> <another package> [extra args to find_package])
@@ -56,138 +54,43 @@ function (libfind_pkg_detect PREFIX)
   endif()
 endfunction()
 
-# libfind_header_path(<PREFIX> [PATHS <path> [<path> ...]] NAMES <name> [name ...] VAR <out_var> [QUIET])
-# Get fullpath of the first found header looking inside <PREFIX>_INCLUDE_DIR or in the given PATHS
-# Usage: libfind_header_path(Foobar NAMES foobar/version.h VAR filepath)
-function (libfind_header_path PREFIX)
-  set(options QUIET)
-  set(one_value_keywords VAR PATH)
-  set(multi_value_keywords NAMES PATHS)
-  CMAKE_PARSE_ARGUMENTS(OPT "${options}" "${one_value_keywords}" "${multi_value_keywords}" ${ARGN})
-  if (NOT OPT_VAR OR NOT OPT_NAMES)
-    message(FATAL_ERROR "Arguments VAR, NAMES are required!")
-  endif()
-  if (OPT_UNPARSED_ARGUMENTS)
-    message(FATAL_ERROR "Calling function with unused arguments '${OPT_UNPARSED_ARGUMENTS}'!")
-  endif()
-  if (OPT_QUIET OR ${PREFIX}_FIND_QUIETLY)
-    set(quiet TRUE)
-  endif()
-  set(paths ${OPT_PATHS} ${PREFIX}_INCLUDE_DIR)
-
-  foreach(name ${OPT_NAMES})
-    foreach(path ${paths})
-      set(filepath "${${path}}/${name}")
-      # check for existance
-      if (EXISTS ${filepath})
-        set(${OPT_VAR} ${filepath} PARENT_SCOPE) # export path
-        return()
-      endif()
-    endforeach()
-  endforeach()
-
-  # report error if not found
-  set(${OPT_VAR} NOTFOUND PARENT_SCOPE)
-  if (NOT quiet)
-    message(AUTHOR_WARNING "Unable to find '${OPT_NAMES}'")
-  endif()
-endfunction()
-
-# libfind_version_n_header(<PREFIX>
-#  NAMES <name> [<name> ...]
-#  DEFINES <define> [<define> ...] | CONSTANTS <const> [<const> ...]
-#  [PATHS <path> [<path> ...]]
-#  [QUIET]
-# )
-# Collect all defines|constants from a header inside <PREFIX>_INCLUDE_DIR or in the given PATHS
-#  output stored to <PREFIX>_VERSION.
+# Extracts a version #define from a version.h file, output stored to <PREFIX>_VERSION.
+# Usage: libfind_version_header(Foobar foobar/version.h FOOBAR_VERSION_STR)
+# Fourth argument "QUIET" may be used for silently testing different define names.
 # This function does nothing if the version variable is already defined.
-# Usage: libfind_version_n_header(Foobar NAMES foobar/version.h DEFINES FOOBAR_VERSION_MAJOR FOOBAR_VERSION_MINOR)
-function (libfind_version_n_header PREFIX)
-  # Skip processing if we already have a version
-  if (${PREFIX}_VERSION)
+function (libfind_version_header PREFIX VERSION_H DEFINE_NAME)
+  # Skip processing if we already have a version or if the include dir was not found
+  if (${PREFIX}_VERSION OR NOT ${PREFIX}_INCLUDE_DIR)
     return()
   endif()
-
-  set(options QUIET)
-  set(one_value_keywords )
-  set(multi_value_keywords NAMES PATHS DEFINES CONSTANTS)
-  CMAKE_PARSE_ARGUMENTS(OPT "${options}" "${one_value_keywords}" "${multi_value_keywords}" ${ARGN})
-  if (NOT OPT_NAMES OR (NOT OPT_DEFINES AND NOT OPT_CONSTANTS))
-    message(FATAL_ERROR "Arguments NAMES, DEFINES|CONSTANTS are required!")
-  endif()
-  if (OPT_DEFINES AND OPT_CONSTANTS)
-    message(FATAL_ERROR "Either DEFINES or CONSTANTS must be set!")
-  endif()
-  if (OPT_UNPARSED_ARGUMENTS)
-    message(FATAL_ERROR "Calling function with unused arguments '${OPT_UNPARSED_ARGUMENTS}'!")
-  endif()
-  if (OPT_QUIET OR ${PREFIX}_FIND_QUIETLY)
-    set(quiet TRUE)
-    set(force_quiet "QUIET") # to propagate argument QUIET
-  endif()
-
-  # Read the header
-  libfind_header_path(${PREFIX} NAMES ${OPT_NAMES} PATHS ${OPT_PATHS} VAR filename ${force_quiet})
-  if (NOT filename)
+  set(quiet ${${PREFIX}_FIND_QUIETLY})
+  # Process optional arguments
+  foreach(arg ${ARGN})
+    if (arg STREQUAL "QUIET")
+      set(quiet TRUE)
+    else()
+      message(AUTHOR_WARNING "Unknown argument ${arg} to libfind_version_header ignored.")
+    endif()
+  endforeach()
+  # Read the header and parse for version number
+  set(filename "${${PREFIX}_INCLUDE_DIR}/${VERSION_H}")
+  if (NOT EXISTS ${filename})
+    if (NOT quiet)
+      message(AUTHOR_WARNING "Unable to find ${${PREFIX}_INCLUDE_DIR}/${VERSION_H}")
+    endif()
     return()
   endif()
   file(READ "${filename}" header)
-  # Parse for version number
-  unset(version_parts)
-  foreach(define_name ${OPT_DEFINES})
-    string(REGEX MATCH "# *define +${define_name} +((\"([^\n]*)\")|([^ \n]*))" match "${header}")
-    # No regex match?
-    if (NOT match OR match STREQUAL header)
-      if (NOT quiet)
-        message(AUTHOR_WARNING "Unable to find \#define ${define_name} \"<version>\" from ${filename}")
-      endif()
-      return()
-    else()
-      list(APPEND version_parts "${CMAKE_MATCH_3}${CMAKE_MATCH_4}")
+  string(REGEX MATCH ".*#[ \t]*define[ \t]+${DEFINE_NAME}[ \t]+((\"([^\n]*)\")|([^\n]*))" match "${header}")
+  # No regex match?
+  if (match STREQUAL header)
+    if (NOT quiet)
+      message(AUTHOR_WARNING "Unable to find \#define ${DEFINE_NAME} \"<version>\" from ${${PREFIX}_INCLUDE_DIR}/${VERSION_H}")
     endif()
-  endforeach()
-  foreach(constant_name ${OPT_CONSTANTS})
-    string(REGEX MATCH "${constant_name} *= *((\"([^\;]*)\")|([^ \;]*))" match "${header}")
-    # No regex match?
-    if (NOT match OR match STREQUAL header)
-      if (NOT quiet)
-        message(AUTHOR_WARNING "Unable to find ${constant_name} = \"<version>\" from ${filename}")
-      endif()
-      return()
-    else()
-      list(APPEND version_parts "${CMAKE_MATCH_3}${CMAKE_MATCH_4}")
-    endif()
-  endforeach()
-
-  # Export the version string
-  string(REPLACE ";" "." version "${version_parts}")
-  set(${PREFIX}_VERSION "${version}" PARENT_SCOPE)
-endfunction()
-
-# libfind_version_header(<PREFIX> <HEADER> <DEFINE_NAME> [PATHS <path> [<path> ...]] [QUIET])
-# Extracts a version #define from a version.h file, output stored to <PREFIX>_VERSION.
-# This function does nothing if the version variable is already defined.
-# Usage: libfind_version_header(Foobar foobar/version.h FOOBAR_VERSION_STR)
-function (libfind_version_header PREFIX VERSION_H DEFINE_NAME)
-  # Skip processing if we already have a version
-  if (${PREFIX}_VERSION)
     return()
   endif()
-
-  set(options QUIET)
-  set(one_value_keywords )
-  set(multi_value_keywords PATHS)
-  CMAKE_PARSE_ARGUMENTS(OPT "${options}" "${one_value_keywords}" "${multi_value_keywords}" ${ARGN})
-  if (OPT_UNPARSED_ARGUMENTS)
-    message(FATAL_ERROR "Calling function with unused arguments '${OPT_UNPARSED_ARGUMENTS}'!")
-  endif()
-  if (OPT_QUIET OR ${PREFIX}_FIND_QUIETLY)
-    set(force_quiet "QUIET") # to propagate argument QUIET
-  endif()
-
-  libfind_version_n_header(${PREFIX} NAMES ${VERSION_H} PATHS ${OPT_PATHS} DEFINES ${DEFINE_NAME} ${force_quiet})
-  set(${PREFIX}_VERSION "${${PREFIX}_VERSION}" PARENT_SCOPE)
+  # Export the version string
+  set(${PREFIX}_VERSION "${CMAKE_MATCH_3}${CMAKE_MATCH_4}" PARENT_SCOPE)
 endfunction()
 
 # Do the final processing once the paths have been detected.

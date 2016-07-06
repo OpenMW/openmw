@@ -722,11 +722,7 @@ void MWWorld::InventoryStore::rechargeItems(float duration)
 
 void MWWorld::InventoryStore::purgeEffect(short effectId)
 {
-    for (TSlots::const_iterator it = mSlots.begin(); it != mSlots.end(); ++it)
-    {
-        if (*it != end())
-            purgeEffect(effectId, (*it)->getCellRef().getRefId());
-    }
+    mMagicEffects.remove(MWMechanics::EffectKey(effectId));
 }
 
 void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sourceId)

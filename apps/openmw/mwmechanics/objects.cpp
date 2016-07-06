@@ -2,10 +2,10 @@
 
 #include <iostream>
 
+#include "movement.hpp"
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-
-#include "movement.hpp"
 
 namespace MWMechanics
 {

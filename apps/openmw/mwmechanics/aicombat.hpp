@@ -3,15 +3,16 @@
 
 #include "aipackage.hpp"
 
-#include <boost/shared_ptr.hpp>
+#include "pathfinding.hpp"
+
+#include "movement.hpp"
+#include "obstacle.hpp"
 
 #include "../mwworld/cellstore.hpp" // for Doors
 
 #include "../mwbase/world.hpp"
 
-#include "pathfinding.hpp"
-#include "movement.hpp"
-#include "obstacle.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace ESM
 {

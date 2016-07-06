@@ -4,6 +4,7 @@
 #include <list>
 
 #include <components/esm/loadnpc.hpp>
+//#include "aistate.hpp"
 
 namespace MWWorld
 {

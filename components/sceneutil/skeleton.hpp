@@ -45,16 +45,13 @@ namespace SceneUtil
         Bone* getBone(const std::string& name);
 
         /// Request an update of bone matrices. May be a no-op if already updated in this frame.
-        void updateBoneMatrices(unsigned int traversalNumber);
+        void updateBoneMatrices(osg::NodeVisitor* nv);
 
         /// Set the skinning active flag. Inactive skeletons will not have their child rigs updated.
         /// You should set this flag to false if you know that bones are not currently moving.
         void setActive(bool active);
 
         bool getActive() const;
-
-        /// If a new RigGeometry is added after the Skeleton has already been rendered, you must call markDirty().
-        void markDirty();
 
         void traverse(osg::NodeVisitor& nv);
 

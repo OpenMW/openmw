@@ -66,7 +66,7 @@ namespace ESM
     struct AiWander : AiPackage
     {
         AiWanderData mData;
-        AiWanderDuration mDurationData; // was ESM::TimeStamp mStartTime
+        AiWanderDuration mDurationData; // was ESM::TimeStamp mStartTime;
 
         bool mStoredInitialActorPosition;
         ESM::Vector3 mInitialActorPosition;

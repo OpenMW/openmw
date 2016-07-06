@@ -20,16 +20,7 @@ namespace MWMechanics
     class MechanicsManager : public MWBase::MechanicsManager
     {
             MWWorld::Ptr mWatched;
-
-            AttributeValue mWatchedAttributes[8];
-            SkillValue mWatchedSkills[27];
-
-            DynamicStat<float> mWatchedHealth;
-            DynamicStat<float> mWatchedMagicka;
-            DynamicStat<float> mWatchedFatigue;
-
-            float mWatchedTimeToStartDrowning;
-
+            NpcStats mWatchedStats;
             bool mWatchedStatsEmpty;
             bool mUpdatePlayer;
             bool mClassSelected;
@@ -101,7 +92,7 @@ namespace MWMechanics
             virtual int getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying);
             ///< This is used by every service to determine the price of objects given the trading skills of the player and NPC.
 
-            virtual int getDerivedDisposition(const MWWorld::Ptr& ptr, bool addTemporaryDispositionChange = true);
+            virtual int getDerivedDisposition(const MWWorld::Ptr& ptr, bool addTemporaryDispositionChange = false);
             ///< Calculate the diposition of an NPC toward the player.
 
             virtual int countDeaths (const std::string& id) const;

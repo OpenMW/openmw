@@ -7,9 +7,8 @@
 #include <map>
 #include <list>
 
-#include "../mwbase/world.hpp"
-
 #include "movement.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWWorld
 {
@@ -93,8 +92,8 @@ namespace MWMechanics
             void updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
                                             MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance);
 
-            void rest(bool sleep);
-            ///< Update actors while the player is waiting or sleeping. This should be called every hour.
+            void restoreDynamicStats(bool sleep);
+            ///< If the player is sleeping, this should be called every hour.
 
             void restoreDynamicStats(const MWWorld::Ptr& actor, bool sleep);
 

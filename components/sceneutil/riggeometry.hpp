@@ -80,7 +80,7 @@ namespace SceneUtil
 
         bool initFromParentSkeleton(osg::NodeVisitor* nv);
 
-        void updateGeomToSkelMatrix(const osg::NodePath& nodePath);
+        void updateGeomToSkelMatrix(osg::NodeVisitor* nv);
     };
 
 }

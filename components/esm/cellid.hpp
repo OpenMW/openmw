@@ -20,8 +20,6 @@ namespace ESM
         CellIndex mIndex;
         bool mPaged;
 
-        static const std::string sDefaultWorldspace;
-
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;
     };

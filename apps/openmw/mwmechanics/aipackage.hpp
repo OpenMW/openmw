@@ -1,9 +1,9 @@
 #ifndef GAME_MWMECHANICS_AIPACKAGE_H
 #define GAME_MWMECHANICS_AIPACKAGE_H
 
+#include "pathfinding.hpp"
 #include <components/esm/defs.hpp>
 
-#include "pathfinding.hpp"
 #include "obstacle.hpp"
 #include "aistate.hpp"
 

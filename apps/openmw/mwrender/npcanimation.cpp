@@ -15,7 +15,6 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/visitor.hpp>
-#include <components/sceneutil/skeleton.hpp>
 
 #include <components/nifosg/nifloader.hpp> // TextKeyMapHolder
 
@@ -667,8 +666,6 @@ PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const st
 {
     osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->getInstance(model);
     osg::ref_ptr<osg::Node> attached = SceneUtil::attach(instance, mObjectRoot, bonefilter, bonename);
-    if (mSkeleton)
-        mSkeleton->markDirty();
     mResourceSystem->getSceneManager()->notifyAttached(attached);
     if (enchantedGlow)
         addGlow(attached, *glowColor);

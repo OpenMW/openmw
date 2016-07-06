@@ -74,6 +74,7 @@ namespace MWSound
 
         virtual size_t read(char *buffer, size_t bytes);
         virtual void readAll(std::vector<char> &output);
+        virtual void rewind();
         virtual size_t getSampleOffset();
 
         void fail(const std::string &msg);

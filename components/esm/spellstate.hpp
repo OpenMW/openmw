@@ -4,7 +4,6 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <set>
 
 #include "defs.hpp"
 
@@ -29,11 +28,7 @@ namespace ESM
             float mMagnitude;
         };
 
-        struct SpellParams {
-            std::map<int, float> mEffectRands;
-            std::set<int> mPurgedEffects;
-        };
-        typedef std::map<std::string, SpellParams> TContainer;
+        typedef std::map<std::string, std::map<int, float> > TContainer;
         TContainer mSpells;
 
         std::map<std::string, std::vector<PermanentSpellEffectInfo> > mPermanentSpellEffects;

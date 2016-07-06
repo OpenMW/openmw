@@ -37,7 +37,6 @@ namespace ESM
         int mWerewolfKills;
         int mLevelProgress;
         int mSkillIncrease[8];
-        int mSpecIncreases[3];
         std::vector<std::string> mUsedIds; // lower case IDs
         float mTimeToStartDrowning;
         int mCrimeId;

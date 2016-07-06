@@ -367,6 +367,12 @@ namespace MWRender
         mSky->setSunDirection(position);
     }
 
+    osg::Vec3f RenderingManager::getEyePos()
+    {
+        osg::Vec3d eye = mViewer->getCameraManipulator()->getMatrix().getTrans();
+        return eye;
+    }
+
     void RenderingManager::addCell(const MWWorld::CellStore *store)
     {
         mPathgrid->addCell(store);
@@ -376,6 +382,7 @@ namespace MWRender
         if (store->getCell()->isExterior())
             mTerrain->loadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
     }
+
     void RenderingManager::removeCell(const MWWorld::CellStore *store)
     {
         mPathgrid->removeCell(store);

@@ -2,13 +2,9 @@
 
 #include <limits>
 
-#include <components/esm/aisequence.hpp>
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-
 #include "aipackage.hpp"
 #include "aistate.hpp"
+
 #include "aiwander.hpp"
 #include "aiescort.hpp"
 #include "aitravel.hpp"
@@ -17,6 +13,11 @@
 #include "aicombat.hpp"
 #include "aipursue.hpp"
 #include "actorutil.hpp"
+
+#include <components/esm/aisequence.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWMechanics
 {

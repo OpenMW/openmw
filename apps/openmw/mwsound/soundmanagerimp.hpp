@@ -11,6 +11,7 @@
 
 #include <components/settings/settings.hpp>
 
+#include "loudness.hpp"
 #include "../mwbase/soundmanager.hpp"
 
 namespace VFS
@@ -68,6 +69,12 @@ namespace MWSound
         typedef std::map<std::string,Sound_Buffer*> NameBufferMap;
         NameBufferMap mBufferNameMap;
 
+        typedef std::deque<Sound_Loudness> LoudnessList;
+        LoudnessList mVoiceLipBuffers;
+
+        typedef std::map<std::string,Sound_Loudness*> NameLoudnessRefMap;
+        NameLoudnessRefMap mVoiceLipNameMap;
+
         // NOTE: unused buffers are stored in front-newest order.
         typedef std::deque<Sound_Buffer*> SoundList;
         SoundList mUnusedBuffers;
@@ -77,8 +84,13 @@ namespace MWSound
         typedef std::map<MWWorld::ConstPtr,SoundBufferRefPairList> SoundMap;
         SoundMap mActiveSounds;
 
-        typedef std::map<MWWorld::ConstPtr,MWBase::SoundStreamPtr> SaySoundMap;
+        typedef std::pair<MWBase::SoundStreamPtr,Sound_Loudness*> SoundLoudnessPair;
+        typedef std::map<MWWorld::ConstPtr,SoundLoudnessPair> SaySoundMap;
         SaySoundMap mActiveSaySounds;
+
+        typedef std::pair<DecoderPtr,Sound_Loudness*> DecoderLoudnessPair;
+        typedef std::map<MWWorld::ConstPtr,DecoderLoudnessPair> SayDecoderMap;
+        SayDecoderMap mPendingSaySounds;
 
         typedef std::vector<MWBase::SoundStreamPtr> TrackList;
         TrackList mActiveTracks;
@@ -100,8 +112,9 @@ namespace MWSound
         Sound_Buffer *lookupSound(const std::string &soundId) const;
         Sound_Buffer *loadSound(const std::string &soundId);
 
-        // returns a decoder to start streaming
-        DecoderPtr loadVoice(const std::string &voicefile);
+        // Ensures the loudness/"lip" data gets loaded, and returns a decoder
+        // to start streaming
+        DecoderPtr loadVoice(const std::string &voicefile, Sound_Loudness **lipdata);
 
         MWBase::SoundStreamPtr playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal);
 

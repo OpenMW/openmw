@@ -1,8 +1,5 @@
 #include "aicombataction.hpp"
 
-#include <components/esm/loadench.hpp>
-#include <components/esm/loadmgef.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -11,8 +8,11 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actionequip.hpp"
 
-#include "npcstats.hpp"
-#include "spellcasting.hpp"
+#include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/spellcasting.hpp"
+
+#include <components/esm/loadench.hpp>
+#include <components/esm/loadmgef.hpp>
 
 namespace
 {

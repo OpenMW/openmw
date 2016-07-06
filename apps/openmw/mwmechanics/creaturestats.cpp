@@ -157,9 +157,7 @@ namespace MWMechanics
                 int endurance    = getAttribute(ESM::Attribute::Endurance).getModified();
                 DynamicStat<float> fatigue = getFatigue();
                 float diff = (strength+willpower+agility+endurance) - fatigue.getBase();
-                float currentToBaseRatio = (fatigue.getCurrent() / fatigue.getBase());
-                fatigue.setModified(fatigue.getModified() + diff, 0);
-                fatigue.setCurrent(fatigue.getBase() * currentToBaseRatio);
+                fatigue.modify(diff);
                 setFatigue(fatigue);
             }
         }

@@ -96,7 +96,7 @@ namespace ESM
 
         if (mCellId.mPaged)
         {
-            mCellId.mWorldspace = ESM::CellId::sDefaultWorldspace;
+            mCellId.mWorldspace = "sys::default";
             mCellId.mIndex.mX = mData.mX;
             mCellId.mIndex.mY = mData.mY;
         }

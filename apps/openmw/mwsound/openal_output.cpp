@@ -2,7 +2,6 @@
 #include <stdexcept>
 #include <iostream>
 #include <vector>
-#include <memory>
 
 #include <stdint.h>
 
@@ -213,8 +212,6 @@ private:
 
     DecoderPtr mDecoder;
 
-    std::auto_ptr<Sound_Loudness> mLoudnessAnalyzer;
-
     volatile bool mIsFinished;
 
     void updateAll(bool local);
@@ -225,14 +222,12 @@ private:
     friend class OpenAL_Output;
 
 public:
-    OpenAL_SoundStream(ALuint src, DecoderPtr decoder, bool getLoudnessData=false);
+    OpenAL_SoundStream(ALuint src, DecoderPtr decoder);
     ~OpenAL_SoundStream();
 
     bool isPlaying();
     double getStreamDelay() const;
     double getStreamOffset() const;
-
-    float getCurrentLoudness() const;
 
     bool process();
     ALint refillQueue();
@@ -246,6 +241,9 @@ const ALfloat OpenAL_SoundStream::sBufferLength = 0.125f;
 struct OpenAL_Output::StreamThread {
     typedef std::vector<OpenAL_SoundStream*> StreamVec;
     StreamVec mStreams;
+
+    typedef std::vector<std::pair<DecoderPtr,Sound_Loudness*> > DecoderLoudnessVec;
+    DecoderLoudnessVec mDecoderLoudness;
 
     volatile bool mQuitNow;
     boost::mutex mMutex;
@@ -279,6 +277,32 @@ struct OpenAL_Output::StreamThread {
                     ++iter;
             }
 
+            // Only do one loudness decode at a time, in case it takes particularly long we don't
+            // want to block up anything.
+            DecoderLoudnessVec::iterator dliter = mDecoderLoudness.begin();
+            if(dliter != mDecoderLoudness.end())
+            {
+                DecoderPtr decoder = dliter->first;
+                Sound_Loudness *loudness = dliter->second;
+                mDecoderLoudness.erase(dliter);
+                lock.unlock();
+
+                std::vector<char> data;
+                ChannelConfig chans = ChannelConfig_Mono;
+                SampleType type = SampleType_Int16;
+                int srate = 48000;
+                try {
+                    decoder->getInfo(&srate, &chans, &type);
+                    decoder->readAll(data);
+                }
+                catch(std::exception &e) {
+                    std::cerr<< "Failed to decode audio: "<<e.what() <<std::endl;
+                }
+
+                loudness->analyzeLoudness(data, srate, chans, type, static_cast<float>(sLoudnessFPS));
+                lock.lock();
+                continue;
+            }
             mCondVar.timed_wait(lock, boost::posix_time::milliseconds(50));
         }
     }
@@ -305,6 +329,15 @@ struct OpenAL_Output::StreamThread {
     {
         boost::lock_guard<boost::mutex> lock(mMutex);
         mStreams.clear();
+        mDecoderLoudness.clear();
+    }
+
+    void add(DecoderPtr decoder, Sound_Loudness *loudness)
+    {
+        boost::unique_lock<boost::mutex> lock(mMutex);
+        mDecoderLoudness.push_back(std::make_pair(decoder, loudness));
+        lock.unlock();
+        mCondVar.notify_all();
     }
 
 private:
@@ -313,7 +346,7 @@ private:
 };
 
 
-OpenAL_SoundStream::OpenAL_SoundStream(ALuint src, DecoderPtr decoder, bool getLoudnessData)
+OpenAL_SoundStream::OpenAL_SoundStream(ALuint src, DecoderPtr decoder)
   : mSource(src), mCurrentBufIdx(0), mFrameSize(0), mSilence(0), mDecoder(decoder), mIsFinished(false)
 {
     alGenBuffers(sNumBuffers, mBuffers);
@@ -338,9 +371,6 @@ OpenAL_SoundStream::OpenAL_SoundStream(ALuint src, DecoderPtr decoder, bool getL
         mFrameSize = framesToBytes(1, chans, type);
         mBufferSize = static_cast<ALuint>(sBufferLength*srate);
         mBufferSize *= mFrameSize;
-
-        if (getLoudnessData)
-            mLoudnessAnalyzer.reset(new Sound_Loudness(sLoudnessFPS, mSampleRate, chans, type));
     }
     catch(std::exception&)
     {
@@ -416,15 +446,6 @@ double OpenAL_SoundStream::getStreamOffset() const
     return t;
 }
 
-float OpenAL_SoundStream::getCurrentLoudness() const
-{
-    if (!mLoudnessAnalyzer.get())
-        return 0.f;
-
-    float time = getStreamOffset();
-    return mLoudnessAnalyzer->getLoudnessAtTime(time);
-}
-
 bool OpenAL_SoundStream::process()
 {
     try {
@@ -472,9 +493,6 @@ ALint OpenAL_SoundStream::refillQueue()
             }
             if(got > 0)
             {
-                if (mLoudnessAnalyzer.get())
-                    mLoudnessAnalyzer->analyzeLoudness(data);
-
                 ALuint bufid = mBuffers[mCurrentBufIdx];
                 alBufferData(bufid, mFormat, &data[0], data.size(), mSampleRate);
                 alSourceQueueBuffers(mSource, 1, &bufid);
@@ -963,7 +981,7 @@ void OpenAL_Output::streamSound(DecoderPtr decoder, MWBase::SoundStreamPtr sound
     sound->mHandle = stream;
 }
 
-void OpenAL_Output::streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound, bool getLoudnessData)
+void OpenAL_Output::streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound)
 {
     OpenAL_SoundStream *stream = 0;
     ALuint source;
@@ -980,7 +998,7 @@ void OpenAL_Output::streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sou
                      sound->getRealVolume(), sound->getPitch(), false, sound->getUseEnv());
         throwALerror();
 
-        stream = new OpenAL_SoundStream(source, decoder, getLoudnessData);
+        stream = new OpenAL_SoundStream(source, decoder);
         mStreamThread->add(stream);
         mActiveStreams.push_back(sound);
     }
@@ -1025,14 +1043,6 @@ double OpenAL_Output::getStreamOffset(MWBase::SoundStreamPtr sound)
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
     boost::lock_guard<boost::mutex> lock(mStreamThread->mMutex);
     return stream->getStreamOffset();
-}
-
-float OpenAL_Output::getStreamLoudness(MWBase::SoundStreamPtr sound)
-{
-    if(!sound->mHandle) return 0.0;
-    OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
-    boost::lock_guard<boost::mutex> lock(mStreamThread->mMutex);
-    return stream->getCurrentLoudness();
 }
 
 bool OpenAL_Output::isStreamPlaying(MWBase::SoundStreamPtr sound)
@@ -1131,6 +1141,12 @@ void OpenAL_Output::resumeSounds(int types)
         alSourcePlayv(sources.size(), &sources[0]);
         throwALerror();
     }
+}
+
+
+void OpenAL_Output::loadLoudnessAsync(DecoderPtr decoder, Sound_Loudness *loudness)
+{
+    mStreamThread->add(decoder, loudness);
 }
 
 

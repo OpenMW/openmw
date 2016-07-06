@@ -189,12 +189,8 @@ namespace MWGui
     void WaitDialog::onWaitingProgressChanged(int cur, int total)
     {
         mProgressBar.setProgress(cur, total);
-        MWBase::Environment::get().getMechanicsManager()->rest(mSleeping);
         MWBase::Environment::get().getWorld()->advanceTime(1);
-
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        if (player.getClass().getCreatureStats(player).isDead())
-            stopWaiting();
+        MWBase::Environment::get().getMechanicsManager()->rest(mSleeping);
     }
 
     void WaitDialog::onWaitingInterrupted()

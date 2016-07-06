@@ -63,11 +63,10 @@ namespace MWSound
         virtual void updateSound(MWBase::SoundPtr sound);
 
         virtual void streamSound(DecoderPtr decoder, MWBase::SoundStreamPtr sound);
-        virtual void streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound, bool getLoudnessData);
+        virtual void streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound);
         virtual void finishStream(MWBase::SoundStreamPtr sound);
         virtual double getStreamDelay(MWBase::SoundStreamPtr sound);
         virtual double getStreamOffset(MWBase::SoundStreamPtr sound);
-        virtual float getStreamLoudness(MWBase::SoundStreamPtr sound);
         virtual bool isStreamPlaying(MWBase::SoundStreamPtr sound);
         virtual void updateStream(MWBase::SoundStreamPtr sound);
 
@@ -78,6 +77,8 @@ namespace MWSound
 
         virtual void pauseSounds(int types);
         virtual void resumeSounds(int types);
+
+        virtual void loadLoudnessAsync(DecoderPtr decoder, Sound_Loudness *loudness);
 
         OpenAL_Output(SoundManager &mgr);
         virtual ~OpenAL_Output();

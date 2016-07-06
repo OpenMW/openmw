@@ -8,16 +8,17 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
-#include "../mwbase/windowmanager.hpp"
+
+#include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/difficultyscaling.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/esmstore.hpp"
 
-#include "npcstats.hpp"
-#include "movement.hpp"
-#include "spellcasting.hpp"
-#include "difficultyscaling.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "actorutil.hpp"
 
 namespace

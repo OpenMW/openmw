@@ -1,11 +1,10 @@
 #ifndef GAME_MWMECHANICS_PATHFINDING_H
 #define GAME_MWMECHANICS_PATHFINDING_H
 
-#include <list>
-#include <cassert>
-
 #include <components/esm/defs.hpp>
 #include <components/esm/loadpgrd.hpp>
+#include <list>
+#include <cassert>
 
 namespace MWWorld
 {

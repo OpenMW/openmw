@@ -28,6 +28,12 @@ endif()
 
 # source files
 
+if (ANDROID)
+    add_component_dir (android
+        androiddepthbufferhelper
+        )
+endif()
+
 add_component_dir (settings
     settings
     )

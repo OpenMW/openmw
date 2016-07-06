@@ -10,11 +10,13 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 
-#include "creaturestats.hpp"
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "steering.hpp"
 #include "movement.hpp"
 
 /*
+    TODO: Test vanilla behavior on passing x0, y0, and z0 with duration of anything including 0.
     TODO: Different behavior for AIEscort a d x y z and AIEscortCell a c d x y z.
     TODO: Take account for actors being in different cells.
 */
@@ -22,19 +24,29 @@
 namespace MWMechanics
 {
     AiEscort::AiEscort(const std::string &actorId, int duration, float x, float y, float z)
-    : mActorId(actorId), mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
+    : mActorId(actorId), mX(x), mY(y), mZ(z), mRemainingDuration(static_cast<float>(duration))
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
         mMaxDist = 450;
+
+        // The CS Help File states that if a duration is given, the AI package will run for that long
+        // BUT if a location is givin, it "trumps" the duration so it will simply escort to that location.
+        if(mX != 0 || mY != 0 || mZ != 0)
+            mRemainingDuration = 0;
     }
 
     AiEscort::AiEscort(const std::string &actorId, const std::string &cellId,int duration, float x, float y, float z)
-    : mActorId(actorId), mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
+    : mActorId(actorId), mCellId(cellId), mX(x), mY(y), mZ(z), mRemainingDuration(static_cast<float>(duration))
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
         mMaxDist = 450;
+
+        // The CS Help File states that if a duration is given, the AI package will run for that long
+        // BUT if a location is given, it "trumps" the duration so it will simply escort to that location.
+        if(mX != 0 || mY != 0 || mZ != 0)
+            mRemainingDuration = 0;
     }
 
     AiEscort::AiEscort(const ESM::AiSequence::AiEscort *escort)
@@ -44,12 +56,6 @@ namespace MWMechanics
         , mCellX(std::numeric_limits<int>::max())
         , mCellY(std::numeric_limits<int>::max())
     {
-        // mDuration isn't saved in the save file, so just giving it "1" for now if the package has a duration.
-        // The exact value of mDuration only matters for repeating packages 
-        if (mRemainingDuration != 0)
-            mDuration = 1;
-        else
-            mDuration = 0;
     }
 
 
@@ -62,13 +68,13 @@ namespace MWMechanics
     {
         // If AiEscort has ran for as long or longer then the duration specified
         // and the duration is not infinite, the package is complete.
-        if(mDuration > 0)
+        if(mRemainingDuration != 0)
         {
-            mRemainingDuration -= ((duration*MWBase::Environment::get().getWorld()->getTimeScaleFactor()) / 3600);
-            if (mRemainingDuration <= 0)
+            mRemainingDuration -= duration;
+            if (duration <= 0)
             {
-                mRemainingDuration = mDuration;
-                mStarted = false; // Reset to false so this package will build path again when repeating
+                // Reset mStarted to false so that package can be repeated again
+                mStarted = false;
                 return true;
             }
         }
@@ -99,15 +105,15 @@ namespace MWMechanics
             point.mUnknown = 0;
             if(pathTo(actor,point,duration)) //Returns true on path complete
             {
-                mRemainingDuration = mDuration;
-                mStarted = false; // Reset to false so this package will build path again when repeating
+                // Reset mStarted to false so that package can be repeated again
+                mStarted = false;
                 return true;
             }
             mMaxDist = 450;
         }
         else
         {
-            // Stop moving if the player is too far away
+            // Stop moving if the player is to far away
             MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle3", 0, 1);
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
             mMaxDist = 250;
@@ -141,11 +147,5 @@ namespace MWMechanics
         package.mPackage = escort.release();
         sequence.mPackages.push_back(package);
     }
-
-void AiEscort::fastForward(const MWWorld::Ptr& actor, AiState &state)
-{
-    // Update duration counter
-    mRemainingDuration--;
-}
 }
 

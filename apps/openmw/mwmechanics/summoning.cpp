@@ -6,6 +6,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
+#include "../mwmechanics/spellcasting.hpp"
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/manualref.hpp"
@@ -13,9 +15,9 @@
 
 #include "../mwrender/animation.hpp"
 
-#include "spellcasting.hpp"
 #include "creaturestats.hpp"
 #include "aifollow.hpp"
+
 
 namespace MWMechanics
 {

@@ -6,7 +6,6 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/loadnpc.hpp>
-
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -23,7 +22,8 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 
-#include "spellcasting.hpp"
+#include "../mwmechanics/spellcasting.hpp"
+
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
@@ -425,9 +425,7 @@ namespace MWMechanics
 
         DynamicStat<float> magicka = creatureStats.getMagicka();
         float diff = (static_cast<int>(magickaFactor*intelligence)) - magicka.getBase();
-        float currentToBaseRatio = (magicka.getCurrent() / magicka.getBase());
-        magicka.setModified(magicka.getModified() + diff, 0);
-        magicka.setCurrent(magicka.getBase() * currentToBaseRatio);
+        magicka.modify(diff);
         creatureStats.setMagicka(magicka);
     }
 
@@ -493,31 +491,6 @@ namespace MWMechanics
         stats.setFatigue (fatigue);
     }
 
-    class ExpiryVisitor : public EffectSourceVisitor
-    {
-        private:
-            MWWorld::Ptr mActor;
-            float mDuration;
-
-        public:
-            ExpiryVisitor(const MWWorld::Ptr& actor, float duration)
-                : mActor(actor), mDuration(duration)
-            {
-            }
-
-            virtual void visit (MWMechanics::EffectKey key,
-                                const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
-                                float magnitude, float remainingTime = -1, float /*totalTime*/ = -1)
-            {
-                if (magnitude > 0 && remainingTime > 0 && remainingTime < mDuration)
-                {
-                    CreatureStats& creatureStats = mActor.getClass().getCreatureStats(mActor);
-                    effectTick(creatureStats, mActor, key, magnitude * remainingTime);
-                    creatureStats.getMagicEffects().add(key, -magnitude);
-                }
-            }
-    };
-
     void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration)
     {
         CreatureStats &creatureStats = ptr.getClass().getCreatureStats(ptr);
@@ -527,11 +500,6 @@ namespace MWMechanics
 
         if (duration > 0)
         {
-            // apply correct magnitude for tickable effects that have just expired,
-            // in case duration > remaining time of effect
-            ExpiryVisitor visitor(ptr, duration);
-            creatureStats.getActiveSpells().visitEffectSources(visitor);
-
             for (MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
             {
                 // tickable effects (i.e. effects having a lasting impact after expiry)
@@ -543,7 +511,6 @@ namespace MWMechanics
                     CastSpell cast(ptr, ptr);
                     if (cast.applyInstantEffect(ptr, ptr, it->first, it->second.getMagnitude()))
                     {
-                        creatureStats.getSpells().purgeEffect(it->first.mId);
                         creatureStats.getActiveSpells().purgeEffect(it->first.mId);
                         if (ptr.getClass().hasInventoryStore(ptr))
                             ptr.getClass().getInventoryStore(ptr).purgeEffect(it->first.mId);
@@ -562,9 +529,6 @@ namespace MWMechanics
 
             creatureStats.setAttribute(i, stat);
         }
-
-        if (creatureStats.needToRecalcDynamicStats())
-            calculateDynamicStats(ptr);
 
         {
             Spells & spells = creatureStats.getSpells();
@@ -589,9 +553,8 @@ namespace MWMechanics
             DynamicStat<float> stat = creatureStats.getDynamic(i);
             stat.setModifier(effects.get(ESM::MagicEffect::FortifyHealth+i).getMagnitude() -
                              effects.get(ESM::MagicEffect::DrainHealth+i).getMagnitude(),
-                             // Magicka can be decreased below zero due to a fortify effect wearing off
                              // Fatigue can be decreased below zero meaning the actor will be knocked out
-                             i == 1 || i == 2);
+                             i == 2);
 
             creatureStats.setDynamic(i, stat);
         }
@@ -1034,8 +997,7 @@ namespace MWMechanics
 
                 if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
                 {
-                    MWWorld::Ptr actor = iter->first; // make a copy of the map key to avoid it being invalidated when the player teleports
-                    updateActor(actor, duration);
+                    updateActor(iter->first, duration);
                     if (MWBase::Environment::get().getWorld()->hasCellChanged())
                     {
                         return; // for now abort update of the old cell when cell changes by teleportation magic effect
@@ -1328,32 +1290,10 @@ namespace MWMechanics
         }
     }
 
-    void Actors::rest(bool sleep)
+    void Actors::restoreDynamicStats(bool sleep)
     {
-        float duration = 3600.f / MWBase::Environment::get().getWorld()->getTimeScaleFactor();
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-
-        for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
-        {
-            if (iter->first.getClass().getCreatureStats(iter->first).isDead())
-                continue;
-
+        for(PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
             restoreDynamicStats(iter->first, sleep);
-
-            if ((!iter->first.getRefData().getBaseNode()) ||
-                    (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2() > sqrAiProcessingDistance)
-                continue;
-
-            adjustMagicEffects (iter->first);
-            if (iter->first.getClass().getCreatureStats(iter->first).needToRecalcDynamicStats())
-                calculateDynamicStats (iter->first);
-
-            calculateCreatureStatModifiers (iter->first, duration);
-            if (iter->first.getClass().isNpc())
-                calculateNpcStatModifiers(iter->first, duration);
-        }
-
-        fastForwardAi();
     }
 
     int Actors::getHoursToRest(const MWWorld::Ptr &ptr) const

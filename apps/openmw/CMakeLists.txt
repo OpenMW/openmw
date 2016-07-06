@@ -165,7 +165,7 @@ if (ANDROID)
 endif (ANDROID)
 
 if (USE_SYSTEM_TINYXML)
-    target_link_libraries(openmw ${TinyXML_LIBRARIES})
+    target_link_libraries(openmw ${TINYXML_LIBRARIES})
 endif()
 
 if (NOT UNIX)

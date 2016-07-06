@@ -8,13 +8,12 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
-
-#include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
-
 #include "creaturestats.hpp"
 #include "movement.hpp"
+#include "../mwworld/action.hpp"
+
 #include "steering.hpp"
 #include "actorutil.hpp"
 #include "coordinateconverter.hpp"

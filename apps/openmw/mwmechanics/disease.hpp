@@ -6,14 +6,13 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-
 #include "spells.hpp"
 #include "creaturestats.hpp"
 #include "actorutil.hpp"
+
 
 namespace MWMechanics
 {

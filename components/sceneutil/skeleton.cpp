@@ -108,12 +108,12 @@ Bone* Skeleton::getBone(const std::string &name)
     return bone;
 }
 
-void Skeleton::updateBoneMatrices(unsigned int traversalNumber)
+void Skeleton::updateBoneMatrices(osg::NodeVisitor* nv)
 {
-    if (traversalNumber != mLastFrameNumber)
+    if (nv->getTraversalNumber() != mLastFrameNumber)
         mNeedToUpdateBoneMatrices = true;
 
-    mLastFrameNumber = traversalNumber;
+    mLastFrameNumber = nv->getTraversalNumber();
 
     if (mLastFrameNumber % 2 == 0)
         mTraversedEvenFrame = true;
@@ -142,12 +142,6 @@ void Skeleton::setActive(bool active)
 bool Skeleton::getActive() const
 {
     return mActive;
-}
-
-void Skeleton::markDirty()
-{
-    mTraversedEvenFrame = false;
-    mTraversedOddFrame = false;
 }
 
 void Skeleton::traverse(osg::NodeVisitor& nv)
