@@ -499,8 +499,7 @@ namespace MWMechanics
 
     void MechanicsManager::rest(bool sleep)
     {
-        mActors.restoreDynamicStats (sleep);
-        mActors.fastForwardAi();
+        mActors.rest(sleep);
     }
 
     int MechanicsManager::getHoursToRest() const
