@@ -55,6 +55,10 @@
 
 #include "mwstate/statemanagerimp.hpp"
 
+#if defined(ANDROID)
+#include <components/android/androiddepthbufferhelper.hpp>
+#endif
+
 namespace
 {
     void checkSDLError(int ret)
@@ -325,7 +329,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
 #if !defined(ANDROID)
     int depth = 24;
 #else
-    int depth = 16;
+    int depth = AndroidDepthBufferHelper::getGlDepthBufferSize();
 #endif
     int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(screen),
         pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
