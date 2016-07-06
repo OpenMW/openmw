@@ -1730,7 +1730,7 @@ namespace MWWorld
             MWRender::RenderingManager::RayResult rayToObject = mRendering->castCameraToViewportRay(x, y, maxDistance, ignorePlayer);
             facedObject = rayToObject.mHitObject;
             if (!facedObject.isEmpty())
-                distance = rayToObject.mDistanceToFirstIntersection;
+                distance = rayToObject.mRatio * maxDistance;
             return facedObject;
         }
         else
@@ -1738,7 +1738,7 @@ namespace MWWorld
             MWRender::RenderingManager::RayResult rayToObject = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer);
             facedObject = rayToObject.mHitObject;
             if (!facedObject.isEmpty())
-                distance = rayToObject.mDistanceToFirstIntersection;
+                distance = rayToObject.mRatio * maxDistance;
             return facedObject;
         }
     }

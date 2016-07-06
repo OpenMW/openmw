@@ -668,6 +668,7 @@ namespace MWRender
     {
         RenderingManager::RayResult result;
         result.mHit = false;
+        result.mRatio = 0;
         if (intersector->containsIntersections())
         {
             result.mHit = true;
@@ -675,6 +676,7 @@ namespace MWRender
 
             result.mHitPointWorld = intersection.getWorldIntersectPoint();
             result.mHitNormalWorld = intersection.getWorldIntersectNormal();
+            result.mRatio = intersection.ratio;
 
             PtrHolder* ptrHolder = NULL;
             for (osg::NodePath::const_iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
@@ -738,9 +740,7 @@ namespace MWRender
 
         mViewer->getCamera()->accept(*createIntersectionVisitor(intersector, ignorePlayer, ignoreActors));
 
-        RayResult result = getIntersectionResult(intersector);
-        result.mDistanceToFirstIntersection = maxDistance * intersector->getFirstIntersection().ratio;
-        return result;
+        return getIntersectionResult(intersector);
     }
 
     void RenderingManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
