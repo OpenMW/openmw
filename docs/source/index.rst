@@ -6,9 +6,10 @@ Components
 ----------
 
 .. toctree::
-  :maxdepth: 2
-   
-  openmw
+    :maxdepth: 2
+
+    openmw/index
+    openmw-cs/index
 
 
 Indices and tables

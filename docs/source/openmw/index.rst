@@ -1,5 +1,6 @@
-openmw
-======
+###########################
+OpenMW Source Documentation
+###########################
 
 .. toctree::
   :maxdepth: 2

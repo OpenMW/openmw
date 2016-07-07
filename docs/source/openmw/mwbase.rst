@@ -1,5 +1,6 @@
-openmw/mwbase
-=============
+########
+./mwbase
+########
 
 .. autodoxygenfile:: mwbase/dialoguemanager.hpp
   :project: openmw
