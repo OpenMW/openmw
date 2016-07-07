@@ -140,7 +140,10 @@ if (USE_QT)
     endif()
 endif()
 
-if (USE_QT AND DESIRED_QT_VERSION MATCHES 5)
+if (APPLE)
+    # OS X build process relies on this fix: https://github.com/Kitware/CMake/commit/3df5147043d83aa09acd5c9ce31d5c602efb99db
+    cmake_minimum_required(VERSION 3.1.0)
+elseif (USE_QT AND DESIRED_QT_VERSION MATCHES 5)
     # 2.8.11+ is required to make Qt5 happy and allow linking QtMain on Windows.
     cmake_minimum_required(VERSION 2.8.11)
 else()
