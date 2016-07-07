@@ -1,6 +1,7 @@
 #include "actiontrap.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -17,13 +18,13 @@ namespace MWWorld
         // radius, because for most trap spells this is 1 foot, much less than the activation distance.
         // Using activation distance as the trap range.
 
-        if (distance > trapRange) // actor activated object outside range of trap
+        if (distance > trapRange && actor == MWMechanics::getPlayer()) // player activated object outside range of trap
         {
             MWMechanics::CastSpell cast(mTrapSource, mTrapSource);
             cast.mHitPosition = trapPosition;
             cast.cast(mSpellId);
         }
-        else // actor activated object within range of trap
+        else // player activated object within range of trap, or NPC activated trap
         {
             MWMechanics::CastSpell cast(mTrapSource, actor);
             cast.mHitPosition = actorPosition;
