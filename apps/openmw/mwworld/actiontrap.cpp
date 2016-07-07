@@ -21,7 +21,7 @@ namespace MWWorld
         {
             MWMechanics::CastSpell cast(mTrapSource, mTrapSource);
             cast.mHitPosition = trapPosition;
-            cast.cast(mSpellId);    
+            cast.cast(mSpellId);
         }
         else // actor activated object within range of trap
         {

@@ -150,7 +150,7 @@ namespace MWWorld
       mSky (true), mCells (mStore, mEsm),
       mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles),
       mActivationDistanceOverride (activationDistanceOverride), mStartupScript(startupScript),
-      mStartCell (startCell), mDistanceToFacedObject(0), mTeleportEnabled(true),
+      mStartCell (startCell), mDistanceToFacedObject(-1), mTeleportEnabled(true),
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0)
     {
         mPhysics = new MWPhysics::PhysicsSystem(resourceSystem, rootNode);
@@ -1011,11 +1011,10 @@ namespace MWWorld
     MWWorld::Ptr World::getFacedObject()
     {
         MWWorld::Ptr facedObject;
-        float distanceToObject;
 
         if (MWBase::Environment::get().getWindowManager()->isGuiMode() &&
                 MWBase::Environment::get().getWindowManager()->isConsoleMode())
-            facedObject = getFacedObject(getMaxActivationDistance() * 50, distanceToObject, false);
+            facedObject = getFacedObject(getMaxActivationDistance() * 50, mDistanceToFacedObject, false);
         else
         {
             float telekinesisRangeBonus =
@@ -1025,14 +1024,12 @@ namespace MWWorld
 
             float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
 
-            facedObject = getFacedObject(activationDistance, distanceToObject, true);
+            facedObject = getFacedObject(activationDistance, mDistanceToFacedObject, true);
 
             if (!facedObject.isEmpty() && !facedObject.getClass().allowTelekinesis(facedObject)
-                && distanceToObject > getMaxActivationDistance())
+                && mDistanceToFacedObject > getMaxActivationDistance())
                 return 0;
         }
-
-        mDistanceToFacedObject = distanceToObject;
         return facedObject;
     }
 
@@ -1733,6 +1730,8 @@ namespace MWWorld
         facedObject = rayToObject.mHitObject;
         if (!facedObject.isEmpty())
             distance = rayToObject.mRatio * maxDistance;
+        else
+            distance = -1;
         return facedObject;
     }
 
