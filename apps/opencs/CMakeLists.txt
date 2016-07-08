@@ -86,12 +86,12 @@ opencs_units (view/widget
 opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
     previewwidget editmode instancemode instanceselectionmode instancemovemode
-    orbitcameramode pathgridmode selectionmode pathgridselectionmode
+    orbitcameramode pathgridmode selectionmode pathgridselectionmode cameracontroller
     )
 
 opencs_units_noqt (view/render
     lighting lightingday lightingnight lightingbright object cell terrainstorage tagbase
-    cellarrow cellmarker cellborder cameracontroller pathgrid
+    cellarrow cellmarker cellborder pathgrid
     )
 
 opencs_hdrs_noqt (view/render
@@ -112,7 +112,8 @@ opencs_units (view/prefs
     )
 
 opencs_units (model/prefs
-    state setting intsetting doublesetting boolsetting enumsetting coloursetting
+    state setting intsetting doublesetting boolsetting enumsetting coloursetting shortcut
+    shortcutmanager shortcutsetting
     )
 
 opencs_units_noqt (model/prefs

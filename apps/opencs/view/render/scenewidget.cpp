@@ -19,6 +19,7 @@
 #include "../widget/scenetoolmode.hpp"
 
 #include "../../model/prefs/state.hpp"
+#include "../../model/prefs/shortcut.hpp"
 
 #include "lighting.hpp"
 #include "mask.hpp"
@@ -158,11 +159,15 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
     , mHasDefaultAmbient(false)
     , mPrevMouseX(0)
     , mPrevMouseY(0)
-    , mFreeCamControl(new FreeCameraController())
-    , mOrbitCamControl(new OrbitCameraController())
-    , mCurrentCamControl(mFreeCamControl.get())
+    , mFreeCamControl(0)
+    , mOrbitCamControl(0)
+    , mCurrentCamControl(0)
     , mCamPositionSet(false)
 {
+    mFreeCamControl.reset(new FreeCameraController(this));
+    mOrbitCamControl.reset(new OrbitCameraController(this));
+    mCurrentCamControl = mFreeCamControl.get();
+
     mOrbitCamControl->setPickingMask(Mask_Reference | Mask_Terrain);
     selectNavigationMode("free");
 
@@ -175,11 +180,11 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
 
     // Recieve mouse move event even if mouse button is not pressed
     setMouseTracking(true);
-    setFocusPolicy(Qt::StrongFocus);
+    setFocusPolicy(Qt::ClickFocus);
 
     /// \todo make shortcut configurable
-    QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
-    connect (focusToolbar, SIGNAL (activated()), this, SIGNAL (focusToolbarRequest()));
+    //QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
+    //connect (focusToolbar, SIGNAL (activated()), this, SIGNAL (focusToolbarRequest()));
 
     connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
         this, SLOT (settingChanged (const CSMPrefs::Setting *)));
@@ -271,17 +276,57 @@ void SceneWidget::setDefaultAmbient (const osg::Vec4f& colour)
     setAmbient(mLighting->getAmbientColour(&mDefaultAmbient));
 }
 
+bool SceneWidget::event(QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        SceneWidget::keyPressEvent(keyEvent);
+    }
+    else if (event->type() == QEvent::KeyRelease)
+    {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        SceneWidget::keyReleaseEvent(keyEvent);
+    }
+    else if (event->type() == QEvent::MouseButtonPress)
+    {
+        QMouseEvent* keyEvent = static_cast<QMouseEvent*>(event);
+        SceneWidget::mousePressEvent(keyEvent);
+    }
+    else if (event->type() == QEvent::MouseButtonRelease)
+    {
+        QMouseEvent* keyEvent = static_cast<QMouseEvent*>(event);
+        SceneWidget::mouseReleaseEvent(keyEvent);
+    }
+    else
+    {
+        return RenderWidget::event(event);
+    }
+
+    return true;
+}
+
 void SceneWidget::mousePressEvent (QMouseEvent *event)
 {
     mMouseMode = mapButton(event);
 
     mPrevMouseX = event->x();
     mPrevMouseY = event->y();
+
+    for (std::vector<CSMPrefs::Shortcut*>::iterator it = mShortcuts.begin(); it != mShortcuts.end(); ++it)
+    {
+        (*it)->mousePressEvent(event);
+    }
 }
 
 void SceneWidget::mouseReleaseEvent (QMouseEvent *event)
 {
     mMouseMode = "";
+
+    for (std::vector<CSMPrefs::Shortcut*>::iterator it = mShortcuts.begin(); it != mShortcuts.end(); ++it)
+    {
+        (*it)->mouseReleaseEvent(event);
+    }
 }
 
 void SceneWidget::mouseMoveEvent (QMouseEvent *event)
@@ -305,11 +350,21 @@ void SceneWidget::wheelEvent(QWheelEvent *event)
 void SceneWidget::keyPressEvent (QKeyEvent *event)
 {
     mCurrentCamControl->handleKeyEvent(event, true);
+
+    for (std::vector<CSMPrefs::Shortcut*>::iterator it = mShortcuts.begin(); it != mShortcuts.end(); ++it)
+    {
+        (*it)->keyPressEvent(event);
+    }
 }
 
 void SceneWidget::keyReleaseEvent (QKeyEvent *event)
 {
     mCurrentCamControl->handleKeyEvent(event, false);
+
+    for (std::vector<CSMPrefs::Shortcut*>::iterator it = mShortcuts.begin(); it != mShortcuts.end(); ++it)
+    {
+        (*it)->keyReleaseEvent(event);
+    }
 }
 
 void SceneWidget::update(double dt)
@@ -451,6 +506,11 @@ std::string SceneWidget::mapButton (QMouseEvent *event)
         return iter->second;
 
     return "";
+}
+
+void SceneWidget::addShortcut(CSMPrefs::Shortcut* shortcut)
+{
+    mShortcuts.push_back(shortcut);
 }
 
 }

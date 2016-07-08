@@ -5,10 +5,13 @@
 #include <algorithm>
 #include <sstream>
 
+#include <QMetaEnum>
+
 #include "intsetting.hpp"
 #include "doublesetting.hpp"
 #include "boolsetting.hpp"
 #include "coloursetting.hpp"
+#include "shortcutsetting.hpp"
 
 CSMPrefs::State *CSMPrefs::State::sThis = 0;
 
@@ -224,6 +227,15 @@ void CSMPrefs::State::declare()
         addValues (insertOutsideCell);
     declareEnum ("outside-visible-drop", "Handling drops outside of visible cells", showAndInsert).
         addValues (insertOutsideVisibleCell);
+
+    declareCategory ("Key Bindings");
+    declareShortcut ("free-forward", "Free camera forward", QKeySequence(Qt::Key_W));
+    declareShortcut ("free-backward", "Free camera backward", QKeySequence(Qt::Key_S));
+    declareShortcut ("free-left", "Free camera left", QKeySequence(Qt::Key_A));
+    declareShortcut ("free-right", "Free camera right", QKeySequence(Qt::Key_D));
+    declareShortcut ("free-roll-left", "Free camera roll left", QKeySequence(Qt::Key_Q));
+    declareShortcut ("free-roll-right", "Free camera roll right", QKeySequence(Qt::Key_E));
+    declareShortcut ("free-speed-mode", "Free camera speed mode toggle", QKeySequence(Qt::Key_F));
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)
@@ -340,6 +352,26 @@ CSMPrefs::ColourSetting& CSMPrefs::State::declareColour (const std::string& key,
     return *setting;
 }
 
+CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut (const std::string& key, const std::string& label,
+    const QKeySequence& default_)
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    std::string seqStr = getShortcutManager().sequenceToString(default_);
+    setDefault (key, seqStr);
+
+    QKeySequence seq = getShortcutManager().stringToSequence(mSettings.getString(key,
+        mCurrentCategory->second.getKey()));
+
+    CSMPrefs::ShortcutSetting *setting = new CSMPrefs::ShortcutSetting (&mCurrentCategory->second, &mSettings, &mMutex,
+        key, label, seq);
+
+    mCurrentCategory->second.addSetting (setting);
+
+    return *setting;
+}
+
 void CSMPrefs::State::declareSeparator()
 {
     if (mCurrentCategory==mCategories.end())
@@ -369,10 +401,10 @@ CSMPrefs::State::State (const Files::ConfigurationManager& configurationManager)
     if (sThis)
         throw std::logic_error ("An instance of CSMPRefs::State already exists");
 
+    sThis = this;
+
     load();
     declare();
-
-    sThis = this;
 }
 
 CSMPrefs::State::~State()
@@ -394,6 +426,11 @@ CSMPrefs::State::Iterator CSMPrefs::State::begin()
 CSMPrefs::State::Iterator CSMPrefs::State::end()
 {
     return mCategories.end();
+}
+
+CSMPrefs::ShortcutManager& CSMPrefs::State::getShortcutManager()
+{
+    return mShortcutManager;
 }
 
 CSMPrefs::Category& CSMPrefs::State::operator[] (const std::string& key)

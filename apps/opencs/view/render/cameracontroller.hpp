@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <QObject>
+
 #include <osg/ref_ptr>
 #include <osg/Vec3d>
 
@@ -16,8 +18,12 @@ namespace osg
 
 namespace CSVRender
 {
-    class CameraController
+    class SceneWidget;
+
+    class CameraController : public QObject
     {
+            Q_OBJECT
+
         public:
 
             static const osg::Vec3d WorldUp;
@@ -69,9 +75,11 @@ namespace CSVRender
 
     class FreeCameraController : public CameraController
     {
+            Q_OBJECT
+
         public:
 
-            FreeCameraController();
+            FreeCameraController(SceneWidget* widget);
 
             double getLinearSpeed() const;
             double getRotationalSpeed() const;
@@ -107,13 +115,25 @@ namespace CSVRender
             double mLinSpeed;
             double mRotSpeed;
             double mSpeedMult;
+
+        private slots:
+
+            void forward(bool active);
+            void left(bool active);
+            void backward(bool active);
+            void right(bool active);
+            void rollLeft(bool active);
+            void rollRight(bool active);
+            void swapSpeedMode(bool active);
     };
 
     class OrbitCameraController : public CameraController
     {
+            Q_OBJECT
+
         public:
 
-            OrbitCameraController();
+            OrbitCameraController(SceneWidget* widget);
 
             osg::Vec3d getCenter() const;
             double getOrbitSpeed() const;

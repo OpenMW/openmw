@@ -14,6 +14,10 @@
 
 #include <osgUtil/LineSegmentIntersector>
 
+#include "../../model/prefs/shortcut.hpp"
+
+#include "scenewidget.hpp"
+
 namespace CSVRender
 {
 
@@ -140,7 +144,7 @@ namespace CSVRender
     Free Camera Controller
     */
 
-    FreeCameraController::FreeCameraController()
+    FreeCameraController::FreeCameraController(SceneWidget* scene)
         : mLockUpright(false)
         , mModified(false)
         , mFast(false)
@@ -155,6 +159,33 @@ namespace CSVRender
         , mRotSpeed(osg::PI / 2)
         , mSpeedMult(8)
     {
+        CSMPrefs::Shortcut* forwardShortcut = new CSMPrefs::Shortcut("free-forward", this);
+        scene->addShortcut(forwardShortcut);
+        connect(forwardShortcut, SIGNAL(activated(bool)), this, SLOT(forward(bool)));
+
+        CSMPrefs::Shortcut* leftShortcut = new CSMPrefs::Shortcut("free-left", this);
+        scene->addShortcut(leftShortcut);
+        connect(leftShortcut, SIGNAL(activated(bool)), this, SLOT(left(bool)));
+
+        CSMPrefs::Shortcut* backShortcut = new CSMPrefs::Shortcut("free-backward", this);
+        scene->addShortcut(backShortcut);
+        connect(backShortcut, SIGNAL(activated(bool)), this, SLOT(backward(bool)));
+
+        CSMPrefs::Shortcut* rightShortcut = new CSMPrefs::Shortcut("free-right", this);
+        scene->addShortcut(rightShortcut);
+        connect(rightShortcut, SIGNAL(activated(bool)), this, SLOT(right(bool)));
+
+        CSMPrefs::Shortcut* rollLeftShortcut = new CSMPrefs::Shortcut("free-roll-left", this);
+        scene->addShortcut(rollLeftShortcut);
+        connect(rollLeftShortcut, SIGNAL(activated(bool)), this, SLOT(rollLeft(bool)));
+
+        CSMPrefs::Shortcut* rollRightShortcut = new CSMPrefs::Shortcut("free-roll-right", this);
+        scene->addShortcut(rollRightShortcut);
+        connect(rollRightShortcut, SIGNAL(activated(bool)), this, SLOT(rollRight(bool)));
+
+        CSMPrefs::Shortcut* speedModeShortcut = new CSMPrefs::Shortcut("free-speed-mode", this);
+        scene->addShortcut(speedModeShortcut);
+        connect(speedModeShortcut, SIGNAL(activated(bool)), this, SLOT(swapSpeedMode(bool)));
     }
 
     double FreeCameraController::getLinearSpeed() const
@@ -203,39 +234,6 @@ namespace CSVRender
     {
         if (!isActive())
             return false;
-
-        if (event->key() == Qt::Key_Q)
-        {
-            mRollLeft = pressed;
-        }
-        else if (event->key() == Qt::Key_E)
-        {
-            mRollRight = pressed;
-        }
-        else if (event->key() == Qt::Key_A)
-        {
-            mLeft = pressed;
-        }
-        else if (event->key() == Qt::Key_D)
-        {
-            mRight = pressed;
-        }
-        else if (event->key() == Qt::Key_W)
-        {
-            mForward = pressed;
-        }
-        else if (event->key() == Qt::Key_S)
-        {
-            mBackward = pressed;
-        }
-        else if (event->key() == Qt::Key_Shift)
-        {
-            mFast = pressed;
-        }
-        else
-        {
-            return false;
-        }
 
         return true;
     }
@@ -368,11 +366,53 @@ namespace CSVRender
         getCamera()->setViewMatrixAsLookAt(eye, center, mUp);
     }
 
+    void FreeCameraController::forward(bool active)
+    {
+        if (isActive())
+            mForward = active;
+    }
+
+    void FreeCameraController::left(bool active)
+    {
+        if (isActive())
+            mLeft = active;
+    }
+
+    void FreeCameraController::backward(bool active)
+    {
+        if (isActive())
+            mBackward = active;
+    }
+
+    void FreeCameraController::right(bool active)
+    {
+        if (isActive())
+            mRight = active;
+    }
+
+    void FreeCameraController::rollLeft(bool active)
+    {
+        if (isActive())
+            mRollLeft = active;
+    }
+
+    void FreeCameraController::rollRight(bool active)
+    {
+        if (isActive())
+            mRollRight = active;
+    }
+
+    void FreeCameraController::swapSpeedMode(bool active)
+    {
+        if (isActive() && active)
+            mFast = !mFast;
+    }
+
     /*
     Orbit Camera Controller
     */
 
-    OrbitCameraController::OrbitCameraController()
+    OrbitCameraController::OrbitCameraController(SceneWidget* widget)
         : mInitialized(false)
         , mFast(false)
         , mLeft(false)

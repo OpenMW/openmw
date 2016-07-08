@@ -36,6 +36,7 @@ namespace CSVWidget
 namespace CSMPrefs
 {
     class Setting;
+    class Shortcut;
 }
 
 namespace CSVRender
@@ -84,12 +85,15 @@ namespace CSVRender
             void setDefaultAmbient (const osg::Vec4f& colour);
             ///< \note The actual ambient colour may differ based on lighting settings.
 
+            void addShortcut(CSMPrefs::Shortcut* shortcut);
+
         protected:
             void setLighting (Lighting *lighting);
             ///< \attention The ownership of \a lighting is not transferred to *this.
 
             void setAmbient(const osg::Vec4f& ambient);
 
+            virtual bool event(QEvent *event);
             virtual void mousePressEvent (QMouseEvent *event);
             virtual void mouseReleaseEvent (QMouseEvent *event);
             virtual void mouseMoveEvent (QMouseEvent *event);
@@ -120,6 +124,7 @@ namespace CSVRender
             CameraController* mCurrentCamControl;
 
             std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
+            std::vector<CSMPrefs::Shortcut*> mShortcuts;
 
         private:
             bool mCamPositionSet;
