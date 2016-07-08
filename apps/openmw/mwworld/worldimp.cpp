@@ -1014,7 +1014,7 @@ namespace MWWorld
 
         if (MWBase::Environment::get().getWindowManager()->isGuiMode() &&
                 MWBase::Environment::get().getWindowManager()->isConsoleMode())
-            facedObject = getFacedObject(getMaxActivationDistance() * 50, mDistanceToFacedObject, false);
+            facedObject = getFacedObject(getMaxActivationDistance() * 50, false);
         else
         {
             float telekinesisRangeBonus =
@@ -1024,7 +1024,7 @@ namespace MWWorld
 
             float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
 
-            facedObject = getFacedObject(activationDistance, mDistanceToFacedObject, true);
+            facedObject = getFacedObject(activationDistance, true);
 
             if (!facedObject.isEmpty() && !facedObject.getClass().allowTelekinesis(facedObject)
                 && mDistanceToFacedObject > getMaxActivationDistance())
@@ -1717,7 +1717,7 @@ namespace MWWorld
         }
     }
 
-    MWWorld::Ptr World::getFacedObject(float maxDistance, float& distance, bool ignorePlayer)
+    MWWorld::Ptr World::getFacedObject(float maxDistance, bool ignorePlayer)
     {
         maxDistance += mRendering->getCameraDistance();
         MWWorld::Ptr facedObject;
@@ -1733,10 +1733,10 @@ namespace MWWorld
             rayToObject = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer);
 
         facedObject = rayToObject.mHitObject;
-        if (!facedObject.isEmpty())
-            distance = rayToObject.mRatio * maxDistance;
+        if (rayToObject.mHit)
+            mDistanceToFacedObject = rayToObject.mRatio * maxDistance;
         else
-            distance = -1;
+            mDistanceToFacedObject = -1;
         return facedObject;
     }
 
