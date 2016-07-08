@@ -279,6 +279,9 @@ namespace MWWorld
             virtual bool isKey (const MWWorld::ConstPtr& ptr) const { return false; }
 
             virtual bool isGold(const MWWorld::ConstPtr& ptr) const { return false; }
+
+            virtual bool allowTelekinesis(const MWWorld::ConstPtr& ptr) const { return true; }
+            ///< Return whether this class of object can be activated with telekinesis
             
             /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
             virtual int getBloodTexture (const MWWorld::ConstPtr& ptr) const;

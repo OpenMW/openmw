@@ -35,6 +35,9 @@ namespace MWClass
         ///< Returns total weight of objects inside this object (including modifications from magic
         /// effects). Throws an exception, if the object can't hold other objects.
 
+        virtual bool allowTelekinesis(const MWWorld::ConstPtr& ptr) const;
+        ///< Return whether this class of object can be activated with telekinesis
+
         // not implemented
         Actor(const Actor&);
         Actor& operator= (const Actor&);
