@@ -146,11 +146,18 @@ namespace MWClass
 
             if (ptr.getCellRef().getTeleport())
             {
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ptr.getCellRef().getDestCell(), ptr.getCellRef().getDoorDest(), true));
-
-                action->setSound(openSound);
-
-                return action;
+                if (actor == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getDistanceToFacedObject() > MWBase::Environment::get().getWorld()->getMaxActivationDistance())
+                {
+                    // player activated teleport door with telekinesis
+                    boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
+                    return action;
+                }
+                else
+                {
+                    boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ptr.getCellRef().getDestCell(), ptr.getCellRef().getDoorDest(), true));
+                    action->setSound(openSound);
+                    return action;
+                }              
             }
             else
             {
@@ -215,7 +222,7 @@ namespace MWClass
 
     bool Door::allowTelekinesis(const MWWorld::ConstPtr &ptr) const
     {
-        if (ptr.getCellRef().getTeleport())
+        if (ptr.getCellRef().getTeleport() && ptr.getCellRef().getLockLevel() <= 0 && ptr.getCellRef().getTrap().empty())
             return false;
         else
             return true;
