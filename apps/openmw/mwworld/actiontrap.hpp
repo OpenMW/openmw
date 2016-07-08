@@ -13,7 +13,7 @@ namespace MWWorld
             std::string mSpellId;
             MWWorld::Ptr mTrapSource;
 
-            virtual void executeImp (const Ptr& actor, float distanceToObject);
+            virtual void executeImp (const Ptr& actor);
 
         public:
 
@@ -21,7 +21,7 @@ namespace MWWorld
             /// @param actor Actor that activated the trap
             /// @param trapSource
             ActionTrap (const Ptr& actor, const std::string& spellId, const Ptr& trapSource)
-                : Action(false, trapSource), mSpellId(spellId), mTrapSource(trapSource) {}
+                : Action(false, actor), mSpellId(spellId), mTrapSource(trapSource) {}
     };
 }
 

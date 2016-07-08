@@ -1033,6 +1033,11 @@ namespace MWWorld
         return facedObject;
     }
 
+   float World::getDistanceToFacedObject()
+   {
+        return mDistanceToFacedObject;
+   }
+
     osg::Matrixf World::getActorHeadTransform(const MWWorld::ConstPtr& actor) const
     {
         const MWRender::Animation *anim = mRendering->getAnimation(actor);
@@ -3204,7 +3209,7 @@ namespace MWWorld
         if (object.getRefData().activate())
         {
             boost::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
-            action->execute (actor, mDistanceToFacedObject);
+            action->execute (actor);
         }
     }
 
