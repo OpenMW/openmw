@@ -48,14 +48,14 @@ class NIFFile
 
 public:
     /// Used if file parsing fails
-    void fail(const std::string &msg)
+    void fail(const std::string &msg) const
     {
         std::string err = " NIFFile Error: " + msg;
         err += "\nFile: " + filename;
         throw std::runtime_error(err);
     }
     /// Used when something goes wrong, but not catastrophically so
-    void warn(const std::string &msg)
+    void warn(const std::string &msg) const
     {
         std::cerr << " NIFFile Warning: " << msg <<std::endl
                   << "File: " << filename <<std::endl;
@@ -90,9 +90,9 @@ public:
     bool getUseSkinning() const;
 
     /// Get the name of the file
-    std::string getFilename(){ return filename; }
+    std::string getFilename() const { return filename; }
 };
-typedef boost::shared_ptr<Nif::NIFFile> NIFFilePtr;
+typedef boost::shared_ptr<const Nif::NIFFile> NIFFilePtr;
 
 
 
