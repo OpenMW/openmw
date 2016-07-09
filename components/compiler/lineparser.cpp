@@ -140,30 +140,9 @@ namespace Compiler
 
         if (mState==MessageState || mState==MessageCommaState)
         {
-            std::string arguments;
-
-            for (std::size_t i=0; i<name.size(); ++i)
-            {
-                if (name[i]=='%')
-                {
-                    ++i;
-                    if (i<name.size())
-                    {
-                        if (name[i]=='G' || name[i]=='g')
-                        {
-                            arguments += "l";
-                        }
-                        else if (name[i]=='S' || name[i]=='s')
-                        {
-                            arguments += 'S';
-                        }
-                        else if (name[i]=='.' || name[i]=='f')
-                        {
-                            arguments += 'f';
-                        }
-                    }
-                }
-            }
+            GetArgumentsFromMessageFormat processor;
+            processor.process(name);
+            std::string arguments = processor.getArguments();
 
             if (!arguments.empty())
             {
@@ -577,4 +556,23 @@ namespace Compiler
         mName.clear();
         mExplicit.clear();
     }
+
+    void GetArgumentsFromMessageFormat::visitedPlaceholder(Placeholder placeholder, char /*padding*/, int /*width*/, int /*precision*/)
+    {
+        switch (placeholder)
+        {
+            case StringPlaceholder:
+                mArguments += 'S';
+                break;
+            case IntegerPlaceholder:
+                mArguments += 'l';
+                break;
+            case FloatPlaceholder:
+                mArguments += 'f';
+                break;
+            default:
+                break;
+        }
+    }
+
 }
