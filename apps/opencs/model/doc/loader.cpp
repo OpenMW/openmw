@@ -1,6 +1,6 @@
 #include "loader.hpp"
 
-#include <QTimer>
+#include <iostream>
 
 #include "../tools/reportmodel.hpp"
 
@@ -11,16 +11,22 @@ CSMDoc::Loader::Stage::Stage() : mFile (0), mRecordsLoaded (0), mRecordsLeft (fa
 
 
 CSMDoc::Loader::Loader()
+    : mShouldStop(false)
 {
-    QTimer *timer = new QTimer (this);
+    mTimer = new QTimer (this);
 
-    connect (timer, SIGNAL (timeout()), this, SLOT (load()));
-    timer->start();
+    connect (mTimer, SIGNAL (timeout()), this, SLOT (load()));
+    mTimer->start();
 }
 
 QWaitCondition& CSMDoc::Loader::hasThingsToDo()
 {
     return mThingsToDo;
+}
+
+void CSMDoc::Loader::stop()
+{
+    mShouldStop = true;
 }
 
 void CSMDoc::Loader::load()
@@ -30,6 +36,10 @@ void CSMDoc::Loader::load()
         mMutex.lock();
         mThingsToDo.wait (&mMutex);
         mMutex.unlock();
+
+        if (mShouldStop)
+            mTimer->stop();
+
         return;
     }
 
@@ -45,13 +55,12 @@ void CSMDoc::Loader::load()
 
     bool done = false;
 
-    const int batchingSize = 50;
-
     try
     {
         if (iter->second.mRecordsLeft)
         {
             Messages messages (Message::Severity_Error);
+            const int batchingSize = 50;
             for (int i=0; i<batchingSize; ++i) // do not flood the system with update signals
                 if (document->getData().continueLoading (messages))
                 {

@@ -25,11 +25,12 @@ namespace MWRender
 namespace Resource
 {
     class BulletShapeManager;
+    class ResourceSystem;
 }
 
-namespace Resource
+namespace SceneUtil
 {
-    class ResourceSystem;
+    class UnrefQueue;
 }
 
 class btCollisionWorld;
@@ -53,6 +54,10 @@ namespace MWPhysics
             PhysicsSystem (Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode);
             ~PhysicsSystem ();
 
+            void setUnrefQueue(SceneUtil::UnrefQueue* unrefQueue);
+
+            Resource::BulletShapeManager* getShapeManager();
+
             void enableWater(float height);
             void setWaterHeight(float height);
             void disableWater();
@@ -64,6 +69,8 @@ namespace MWPhysics
 
             Actor* getActor(const MWWorld::Ptr& ptr);
             const Actor* getActor(const MWWorld::ConstPtr& ptr) const;
+
+            const Object* getObject(const MWWorld::ConstPtr& ptr) const;
 
             // Object or Actor
             void remove (const MWWorld::Ptr& ptr);
@@ -124,7 +131,7 @@ namespace MWPhysics
 
             /// Get the position of the collision shape for the actor. Use together with getHalfExtents() to get the collision bounds in world space.
             /// @note The collision shape's origin is in its center, so the position returned can be described as center of the actor collision box in world space.
-            osg::Vec3f getPosition(const MWWorld::ConstPtr& actor) const;
+            osg::Vec3f getCollisionObjectPosition(const MWWorld::ConstPtr& actor) const;
 
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
             /// be overwritten. Valid until the next call to applyQueuedMovement.
@@ -163,12 +170,15 @@ namespace MWPhysics
 
             void updateWater();
 
+            osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
+
             btBroadphaseInterface* mBroadphase;
             btDefaultCollisionConfiguration* mCollisionConfiguration;
             btCollisionDispatcher* mDispatcher;
             btCollisionWorld* mCollisionWorld;
 
             std::auto_ptr<Resource::BulletShapeManager> mShapeManager;
+            Resource::ResourceSystem* mResourceSystem;
 
             typedef std::map<MWWorld::ConstPtr, Object*> ObjectMap;
             ObjectMap mObjects;

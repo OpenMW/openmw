@@ -31,19 +31,16 @@ namespace MWState
 
             CharacterManager (const boost::filesystem::path& saves, const std::string& game);
 
-            Character *getCurrentCharacter (bool create, const std::string& name);
-            ///< \param create Create a new character, if there is no current character.
-            /// \param name The character name to use in case a new character is created.
+            Character *getCurrentCharacter ();
+            ///< @note May return null
 
             void deleteSlot(const MWState::Character *character, const MWState::Slot *slot);
 
-            void createCharacter(const std::string& name);
+            Character* createCharacter(const std::string& name);
             ///< Create new character within saved game management
             /// \param name Name for the character (does not need to be unique)
 
             void setCurrentCharacter (const Character *character);
-
-            void clearCurrentCharacter();
 
             std::list<Character>::const_iterator begin() const;
 

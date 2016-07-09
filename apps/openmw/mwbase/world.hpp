@@ -56,7 +56,6 @@ namespace MWMechanics
 
 namespace MWWorld
 {
-    class Fallback;
     class CellStore;
     class Player;
     class LocalScripts;
@@ -65,6 +64,11 @@ namespace MWWorld
     class RefData;
 
     typedef std::vector<std::pair<MWWorld::Ptr,MWMechanics::Movement> > PtrMovementList;
+}
+
+namespace Fallback
+{
+    class Map;
 }
 
 namespace MWBase
@@ -90,6 +94,8 @@ namespace MWBase
             World() {}
 
             virtual ~World() {}
+
+            virtual void preloadCommonAssets() = 0;
 
             virtual void startNewGame (bool bypass) = 0;
             ///< \param bypass Bypass regular game start.
@@ -119,7 +125,7 @@ namespace MWBase
 
             virtual void adjustSky() = 0;
 
-            virtual const MWWorld::Fallback *getFallback () const = 0;
+            virtual const Fallback::Map *getFallback () const = 0;
 
             virtual MWWorld::Player& getPlayer() = 0;
             virtual MWWorld::Ptr getPlayerPtr() = 0;
@@ -137,7 +143,7 @@ namespace MWBase
 
             virtual bool isCellQuasiExterior() const = 0;
 
-            virtual osg::Vec2f getNorthVector (MWWorld::CellStore* cell) = 0;
+            virtual osg::Vec2f getNorthVector (const MWWorld::CellStore* cell) = 0;
             ///< get north vector for given interior cell
 
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out) = 0;
@@ -225,15 +231,16 @@ namespace MWBase
 
             virtual float getTimeScaleFactor() const = 0;
 
-            virtual void changeToInteriorCell (const std::string& cellName,
-                const ESM::Position& position) = 0;
+            virtual void changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true) = 0;
             ///< Move to interior cell.
+            ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-            virtual void changeToExteriorCell (const ESM::Position& position) = 0;
+            virtual void changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true) = 0;
             ///< Move to exterior cell.
+            ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool detectWorldSpaceChange=true) = 0;
-            ///< @param detectWorldSpaceChange if true, clean up worldspace-specific data when the world space changes
+            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true) = 0;
+            ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
             virtual const ESM::Cell *getExterior (const std::string& cellName) const = 0;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
@@ -264,15 +271,19 @@ namespace MWBase
             virtual MWWorld::Ptr moveObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
             ///< @return an updated Ptr in case the Ptr's cell changes
 
-            virtual MWWorld::Ptr moveObject(const MWWorld::Ptr &ptr, MWWorld::CellStore* newCell, float x, float y, float z) = 0;
+            virtual MWWorld::Ptr moveObject(const MWWorld::Ptr &ptr, MWWorld::CellStore* newCell, float x, float y, float z, bool movePhysics=true) = 0;
             ///< @return an updated Ptr
 
             virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
 
             virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
 
-            virtual MWWorld::Ptr safePlaceObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos) = 0;
-            ///< place an object in a "safe" location (ie not in the void, etc).
+            virtual MWWorld::Ptr placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos) = 0;
+            ///< Place an object. Makes a copy of the Ptr.
+
+            virtual MWWorld::Ptr safePlaceObject (const MWWorld::ConstPtr& ptr, const MWWorld::ConstPtr& referenceObject, MWWorld::CellStore* referenceCell, int direction, float distance) = 0;
+            ///< Place an object in a safe place next to \a referenceObject. \a direction and \a distance specify the wanted placement
+            /// relative to \a referenceObject (but the object may be placed somewhere else if the wanted location is obstructed).
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const = 0;
@@ -417,7 +428,7 @@ namespace MWBase
             virtual bool getLOS(const MWWorld::ConstPtr& actor,const MWWorld::ConstPtr& targetActor) = 0;
             ///< get Line of Sight (morrowind stupid implementation)
 
-            virtual float getDistToNearestRayHit(const osg::Vec3f& from, const osg::Vec3f& dir, float maxDist) = 0;
+            virtual float getDistToNearestRayHit(const osg::Vec3f& from, const osg::Vec3f& dir, float maxDist, bool includeWater = false) = 0;
 
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable) = 0;
 
@@ -485,7 +496,7 @@ namespace MWBase
             // Are we in an exterior or pseudo-exterior cell and it's night?
             virtual bool isDark() const = 0;
 
-            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, osg::Vec3f& result) = 0;
+            virtual bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result) = 0;
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
             /// @note id must be lower case
@@ -521,8 +532,8 @@ namespace MWBase
 
             virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos) = 0;
 
-            virtual void explodeSpell (const osg::Vec3f& origin, const ESM::EffectList& effects,
-                                       const MWWorld::Ptr& caster, ESM::RangeType rangeType, const std::string& id, const std::string& sourceName) = 0;
+            virtual void explodeSpell (const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster,
+                                       const MWWorld::Ptr& ignore, ESM::RangeType rangeType, const std::string& id, const std::string& sourceName) = 0;
 
             virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
 
@@ -545,6 +556,8 @@ namespace MWBase
             virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) = 0;
 
             virtual void removeContainerScripts(const MWWorld::Ptr& reference) = 0;
+
+            virtual bool isPlayerInJail() const = 0;
     };
 }
 

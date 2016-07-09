@@ -6,11 +6,12 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+
 #include "creaturestats.hpp"
 #include "movement.hpp"
-
 #include "steering.hpp"
 
 namespace MWMechanics
@@ -28,30 +29,35 @@ struct AiFollowStorage : AiTemporaryBase
 int AiFollow::mFollowIndexCounter = 0;
 
 AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
-: mAlwaysFollow(false), mCommanded(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
+: mAlwaysFollow(false), mCommanded(false), mDuration(duration), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
 , mActorRefId(actorId), mActorId(-1), mCellId(""), mActive(false), mFollowIndex(mFollowIndexCounter++)
 {
 }
+
 AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
-: mAlwaysFollow(false), mCommanded(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
+: mAlwaysFollow(false), mCommanded(false), mDuration(duration), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
 , mActorRefId(actorId), mActorId(-1), mCellId(cellId), mActive(false), mFollowIndex(mFollowIndexCounter++)
 {
 }
 
 AiFollow::AiFollow(const std::string &actorId, bool commanded)
-: mAlwaysFollow(true), mCommanded(commanded), mRemainingDuration(0), mX(0), mY(0), mZ(0)
+: mAlwaysFollow(true), mCommanded(commanded), mDuration(0), mRemainingDuration(0), mX(0), mY(0), mZ(0)
 , mActorRefId(actorId), mActorId(-1), mCellId(""), mActive(false), mFollowIndex(mFollowIndexCounter++)
 {
-
 }
 
 AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
-    : mAlwaysFollow(follow->mAlwaysFollow), mCommanded(follow->mCommanded), mRemainingDuration(follow->mRemainingDuration)
+    : mCommanded(follow->mCommanded), mRemainingDuration(follow->mRemainingDuration)
     , mX(follow->mData.mX), mY(follow->mData.mY), mZ(follow->mData.mZ)
     , mActorRefId(follow->mTargetId), mActorId(-1)
     , mCellId(follow->mCellId), mActive(follow->mActive), mFollowIndex(mFollowIndexCounter++)
 {
-
+// mDuration isn't saved in the save file, so just giving it "1" for now if the package has a duration.
+// The exact value of mDuration only matters for repeating packages
+    if (mRemainingDuration != 0)
+       mDuration = 1;
+    else
+       mDuration = 0;
 }
 
 bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
@@ -101,11 +107,14 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
     if(!mAlwaysFollow) //Update if you only follow for a bit
     {
          //Check if we've run out of time
-        if (mRemainingDuration != 0)
+        if (mDuration != 0)
         {
-            mRemainingDuration -= duration;
-            if (duration <= 0)
+            mRemainingDuration -= ((duration*MWBase::Environment::get().getWorld()->getTimeScaleFactor()) / 3600);
+            if (mRemainingDuration <= 0)
+            {
+                mRemainingDuration = mDuration;
                 return true;
+            }
         }
 
         if((pos.pos[0]-mX)*(pos.pos[0]-mX) +
@@ -128,8 +137,12 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
     //Set the target destination from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
-    const float threshold = 10; // to avoid constant switching between moving/stopping
-    if (!storage.mMoving) followDistance += threshold;
+    if (!storage.mMoving) 
+    {
+        const float threshold = 10; // to avoid constant switching between moving/stopping
+        followDistance += threshold;
+    }
+
     storage.mMoving = !pathTo(actor, dest, duration, followDistance); // Go to the destination
 
     if (storage.mMoving)
@@ -185,7 +198,7 @@ void AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) const
     sequence.mPackages.push_back(package);
 }
 
-MWWorld::Ptr AiFollow::getTarget()
+MWWorld::Ptr AiFollow::getTarget() const
 {
     if (mActorId == -2)
         return MWWorld::Ptr();
@@ -211,6 +224,12 @@ MWWorld::Ptr AiFollow::getTarget()
 int AiFollow::getFollowIndex() const
 {
     return mFollowIndex;
+}
+
+void AiFollow::fastForward(const MWWorld::Ptr& actor, AiState &state)
+{
+    // Update duration counter
+    mRemainingDuration--;
 }
 
 }

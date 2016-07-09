@@ -63,7 +63,6 @@ namespace SceneUtil
         ControllerVisitor();
 
         virtual void apply(osg::Node& node);
-        virtual void apply(osg::Geode& geode);
 
         virtual void visit(osg::Node& node, Controller& ctrl) = 0;
     };

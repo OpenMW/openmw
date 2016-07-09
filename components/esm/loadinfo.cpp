@@ -10,17 +10,8 @@ namespace ESM
 
     void DialInfo::load(ESMReader &esm, bool &isDeleted)
     {
-        loadId(esm);
-        loadData(esm, isDeleted);
-    }
-
-    void DialInfo::loadId(ESMReader &esm)
-    {
         mId = esm.getHNString("INAM");
-    }
 
-    void DialInfo::loadData(ESMReader &esm, bool &isDeleted)
-    {
         isDeleted = false;
 
         mQuestStatus = QS_None;
@@ -29,13 +20,10 @@ namespace ESM
         mPrev = esm.getHNString("PNAM");
         mNext = esm.getHNString("NNAM");
 
-        // Since there's no way to mark selects as "deleted", we have to clear the SelectStructs from all previous loadings
-        mSelects.clear();
-
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            switch (esm.retSubName().val)
+            switch (esm.retSubName().intval)
             {
                 case ESM::FourCC<'D','A','T','A'>::value:
                     esm.getHT(mData, 12);

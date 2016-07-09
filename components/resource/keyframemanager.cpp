@@ -9,8 +9,7 @@ namespace Resource
 {
 
     KeyframeManager::KeyframeManager(const VFS::Manager* vfs)
-        : mCache(new osgDB::ObjectCache)
-        , mVFS(vfs)
+        : ResourceManager(vfs)
     {
     }
 

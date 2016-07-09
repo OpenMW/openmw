@@ -1,5 +1,7 @@
 #include "cellref.hpp"
 
+#include <iostream>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
@@ -43,7 +45,13 @@ void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
 
     mRefNum.load (esm, wideRefNum);
 
-    mRefID = esm.getHNString ("NAME");
+    mRefID = esm.getHNOString ("NAME");
+    if (mRefID.empty())
+    {
+        std::ios::fmtflags f(std::cerr.flags());
+        std::cerr << "Warning: got CellRef with empty RefId in " << esm.getName() << " 0x" << std::hex << esm.getFileOffset() << std::endl;
+        std::cerr.flags(f);
+    }
 }
 
 void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
@@ -54,7 +62,7 @@ void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
     while (!isLoaded && esm.hasMoreSubs())
     {
         esm.getSubName();
-        switch (esm.retSubName().val)
+        switch (esm.retSubName().intval)
         {
             case ESM::FourCC<'U','N','A','M'>::value:
                 esm.getHT(mReferenceBlocked);

@@ -109,6 +109,8 @@ namespace MWWorld
         ///Checks all nearby actors to see if anyone has an aipackage against you
         bool isInCombat();
 
+        bool enemiesNearby();
+
         void clear();
 
         void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;

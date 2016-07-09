@@ -28,7 +28,7 @@
 #include <components/fontloader/fontloader.hpp>
 
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 
 #include <components/translation/translation.hpp>
 
@@ -194,7 +194,7 @@ namespace MWGui
       , mVersionDescription(versionDescription)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
-        mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getTextureManager(), uiScale);
+        mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getImageManager(), uiScale);
         mGuiPlatform->initialise(resourcePath, logpath);
 
         mGui = new MyGUI::Gui;
@@ -926,7 +926,7 @@ namespace MWGui
         if (!mLocalMapRender)
             return;
 
-        MWWorld::Ptr player = MWMechanics::getPlayer();
+        MWWorld::ConstPtr player = MWMechanics::getPlayer();
 
         osg::Vec3f playerPosition = player.getRefData().getPosition().asVec3();
         osg::Quat playerOrientation (-player.getRefData().getPosition().rot[2], osg::Vec3(0,0,1));
@@ -938,10 +938,9 @@ namespace MWGui
 
         if (!player.getCell()->isExterior())
         {
-            mMap->setActiveCell(x, y, true);
-            mHud->setActiveCell(x, y, true);
+            setActiveMap(x, y, true);
         }
-        // else: need to know the current grid center, call setActiveCell from MWWorld::Scene
+        // else: need to know the current grid center, call setActiveMap from changeCell
 
         mMap->setPlayerDir(playerdirection.x(), playerdirection.y());
         mMap->setPlayerPos(x, y, u, v);
@@ -1007,8 +1006,10 @@ namespace MWGui
         mDebugWindow->onFrame(frameDuration);
     }
 
-    void WindowManager::changeCell(MWWorld::CellStore* cell)
+    void WindowManager::changeCell(const MWWorld::CellStore* cell)
     {
+        mMap->requestMapRender(cell);
+
         std::string name = MWBase::Environment::get().getWorld()->getCellName (cell);
 
         mMap->setCellName( name );
@@ -1020,6 +1021,8 @@ namespace MWGui
                 mMap->addVisitedLocation (name, cell->getCell()->getGridX (), cell->getCell()->getGridY ());
 
             mMap->cellExplored (cell->getCell()->getGridX(), cell->getCell()->getGridY());
+
+            setActiveMap(cell->getCell()->getGridX(), cell->getCell()->getGridY(), false);
         }
         else
         {
@@ -1032,6 +1035,8 @@ namespace MWGui
             else
                 MWBase::Environment::get().getWorld()->getPlayer().setLastKnownExteriorPosition(worldPos);
             mMap->setGlobalMapPlayerPosition(worldPos.x(), worldPos.y());
+
+            setActiveMap(0, 0, true);
         }
     }
 
@@ -1630,9 +1635,7 @@ namespace MWGui
         layout->mMainWidget->setPosition(pos);
         layout->mMainWidget->setSize(size);
 
-        MyGUI::Window* window = dynamic_cast<MyGUI::Window*>(layout->mMainWidget);
-        if (!window)
-            throw std::runtime_error("Attempting to track size of a non-resizable window");
+        MyGUI::Window* window = layout->mMainWidget->castType<MyGUI::Window>();
         window->eventWindowChangeCoord += MyGUI::newDelegate(this, &WindowManager::onWindowChangeCoord);
         mTrackedWindows[window] = name;
     }
@@ -1999,29 +2002,33 @@ namespace MWGui
         return Misc::ResourceHelpers::correctTexturePath(path, mResourceSystem->getVFS());
     }
 
+    bool WindowManager::textureExists(const std::string &path)
+    {
+        std::string corrected = Misc::ResourceHelpers::correctTexturePath(path, mResourceSystem->getVFS());
+        return mResourceSystem->getVFS()->exists(corrected);
+    }
+
     void WindowManager::createCursors()
     {
         MyGUI::ResourceManager::EnumeratorPtr enumerator = MyGUI::ResourceManager::getInstance().getEnumerator();
         while (enumerator.next())
         {
             MyGUI::IResource* resource = enumerator.current().second;
-            ResourceImageSetPointerFix* imgSetPointer = dynamic_cast<ResourceImageSetPointerFix*>(resource);
+            ResourceImageSetPointerFix* imgSetPointer = resource->castType<ResourceImageSetPointerFix>(false);
             if (!imgSetPointer)
                 continue;
             std::string tex_name = imgSetPointer->getImageSet()->getIndexInfo(0,0).texture;
 
-            osg::ref_ptr<osg::Texture2D> tex = mResourceSystem->getTextureManager()->getTexture2D(tex_name, osg::Texture::CLAMP, osg::Texture::CLAMP);
+            osg::ref_ptr<osg::Image> image = mResourceSystem->getImageManager()->getImage(tex_name);
 
-            if(tex.valid())
+            if(image.valid())
             {
                 //everything looks good, send it to the cursor manager
-                Uint8 size_x = imgSetPointer->getSize().width;
-                Uint8 size_y = imgSetPointer->getSize().height;
                 Uint8 hotspot_x = imgSetPointer->getHotSpot().left;
                 Uint8 hotspot_y = imgSetPointer->getHotSpot().top;
                 int rotation = imgSetPointer->getRotation();
 
-                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, tex->getImage(), size_x, size_y, hotspot_x, hotspot_y);
+                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, image, hotspot_x, hotspot_y);
             }
         }
     }
@@ -2076,11 +2083,6 @@ namespace MWGui
                 *(data++) = static_cast<unsigned char>(value*255);
             }
         tex->unlock();
-    }
-
-    void WindowManager::requestMap(std::set<MWWorld::CellStore*> cells)
-    {
-        mLocalMapRender->requestMap(cells);
     }
 
     void WindowManager::removeCell(MWWorld::CellStore *cell)

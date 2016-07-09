@@ -4,7 +4,6 @@
 #include <list>
 
 #include <components/esm/loadnpc.hpp>
-//#include "aistate.hpp"
 
 namespace MWWorld
 {
@@ -39,6 +38,9 @@ namespace MWMechanics
 
             ///Finished with top AIPackage, set for one frame
             bool mDone;
+
+            ///Does this AI sequence repeat (repeating of Wander packages handled separately)
+            bool mRepeat;
 
             ///Copy AiSequence
             void copy (const AiSequence& sequence);

@@ -5,14 +5,14 @@
 
 #include <osg/Texture2D>
 
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 
 namespace osgMyGUI
 {
 
-    OSGTexture::OSGTexture(const std::string &name, Resource::TextureManager* textureManager)
+    OSGTexture::OSGTexture(const std::string &name, Resource::ImageManager* imageManager)
       : mName(name)
-      , mTextureManager(textureManager)
+      , mImageManager(imageManager)
       , mFormat(MyGUI::PixelFormat::Unknow)
       , mUsage(MyGUI::TextureUsage::Default)
       , mNumElemBytes(0)
@@ -20,7 +20,7 @@ namespace osgMyGUI
     }
 
     OSGTexture::OSGTexture(osg::Texture2D *texture)
-        : mTextureManager(NULL)
+        : mImageManager(NULL)
         , mTexture(texture)
         , mFormat(MyGUI::PixelFormat::Unknow)
         , mUsage(MyGUI::TextureUsage::Default)
@@ -83,10 +83,15 @@ namespace osgMyGUI
 
     void OSGTexture::loadFromFile(const std::string &fname)
     {
-        if (!mTextureManager)
-            throw std::runtime_error("No texturemanager set");
+        if (!mImageManager)
+            throw std::runtime_error("No imagemanager set");
 
-        mTexture = mTextureManager->getTexture2D(fname, osg::Texture2D::CLAMP_TO_EDGE, osg::Texture2D::CLAMP_TO_EDGE);
+        osg::ref_ptr<osg::Image> image (mImageManager->getImage(fname));
+        mTexture = new osg::Texture2D(image);
+        mTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        mTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        mTexture->setTextureWidth(image->s());
+        mTexture->setTextureHeight(image->t());
         // disable mip-maps
         mTexture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
 
@@ -105,8 +110,6 @@ namespace osgMyGUI
     {
         if(!mTexture.valid())
             return 0;
-        osg::Image *image = mTexture->getImage();
-        if(image) return image->s();
         return mTexture->getTextureWidth();
     }
 
@@ -114,8 +117,6 @@ namespace osgMyGUI
     {
         if(!mTexture.valid())
             return 0;
-        osg::Image *image = mTexture->getImage();
-        if(image) return image->t();
         return mTexture->getTextureHeight();
     }
 
@@ -126,15 +127,12 @@ namespace osgMyGUI
         if (mLockedImage.valid())
             throw std::runtime_error("Texture already locked");
 
-        mLockedImage = mTexture->getImage();
-        if(!mLockedImage.valid())
-        {
-            mLockedImage = new osg::Image();
-            mLockedImage->allocateImage(
-                mTexture->getTextureWidth(), mTexture->getTextureHeight(), mTexture->getTextureDepth(),
-                mTexture->getSourceFormat(), mTexture->getSourceType()
-            );
-        }
+        mLockedImage = new osg::Image();
+        mLockedImage->allocateImage(
+            mTexture->getTextureWidth(), mTexture->getTextureHeight(), mTexture->getTextureDepth(),
+            mTexture->getSourceFormat(), mTexture->getSourceType()
+        );
+
         return mLockedImage->data();
     }
 
@@ -142,6 +140,8 @@ namespace osgMyGUI
     {
         if (!mLockedImage.valid())
             throw std::runtime_error("Texture not locked");
+
+        mLockedImage->flipVertical();
 
         // mTexture might be in use by the draw thread, so create a new texture instead and use that.
         osg::ref_ptr<osg::Texture2D> newTexture = new osg::Texture2D;

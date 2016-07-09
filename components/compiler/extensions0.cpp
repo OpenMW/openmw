@@ -59,8 +59,8 @@ namespace Compiler
             extensions.registerInstruction ("modfight", "l", opcodeModFight, opcodeModFightExplicit);
             extensions.registerInstruction ("modflee", "l", opcodeModFlee, opcodeModFleeExplicit);
             extensions.registerInstruction ("modalarm", "l", opcodeModAlarm, opcodeModAlarmExplicit);
-            extensions.registerInstruction ("toggleai", "", opcodeToggleAI, opcodeToggleAI);
-            extensions.registerInstruction ("tai", "", opcodeToggleAI, opcodeToggleAI);
+            extensions.registerInstruction ("toggleai", "", opcodeToggleAI);
+            extensions.registerInstruction ("tai", "", opcodeToggleAI);
             extensions.registerInstruction("startcombat", "c", opcodeStartCombat, opcodeStartCombatExplicit);
             extensions.registerInstruction("stopcombat", "x", opcodeStopCombat, opcodeStopCombatExplicit);
             extensions.registerFunction ("gethello", 'l', "", opcodeGetHello, opcodeGetHelloExplicit);
@@ -300,6 +300,7 @@ namespace Compiler
             extensions.registerInstruction ("disableteleporting", "", opcodeDisableTeleporting);
             extensions.registerInstruction ("enableteleporting", "", opcodeEnableTeleporting);
             extensions.registerInstruction ("showvars", "", opcodeShowVars, opcodeShowVarsExplicit);
+            extensions.registerInstruction ("show", "c", opcodeShow, opcodeShowExplicit);
             extensions.registerInstruction ("sv", "", opcodeShowVars, opcodeShowVarsExplicit);
             extensions.registerInstruction("tgm", "", opcodeToggleGodMode);
             extensions.registerInstruction("togglegodmode", "", opcodeToggleGodMode);
@@ -341,9 +342,9 @@ namespace Compiler
             extensions.registerInstruction ("say", "SS", opcodeSay, opcodeSayExplicit);
             extensions.registerFunction ("saydone", 'l', "", opcodeSayDone, opcodeSayDoneExplicit);
             extensions.registerInstruction ("streammusic", "S", opcodeStreamMusic);
-            extensions.registerInstruction ("playsound", "c", opcodePlaySound);
+            extensions.registerInstruction ("playsound", "cXX", opcodePlaySound);
             extensions.registerInstruction ("playsoundvp", "cff", opcodePlaySoundVP);
-            extensions.registerInstruction ("playsound3d", "c", opcodePlaySound3D,
+            extensions.registerInstruction ("playsound3d", "cXX", opcodePlaySound3D,
                 opcodePlaySound3DExplicit);
             extensions.registerInstruction ("playsound3dvp", "cff", opcodePlaySound3DVP,
                 opcodePlaySound3DVPExplicit);
@@ -541,6 +542,7 @@ namespace Compiler
             extensions.registerInstruction("moveworld","cf",opcodeMoveWorld,opcodeMoveWorldExplicit);
             extensions.registerFunction("getstartingangle",'f',"c",opcodeGetStartingAngle,opcodeGetStartingAngleExplicit);
             extensions.registerInstruction("resetactors","",opcodeResetActors);
+            extensions.registerInstruction("fixme","",opcodeFixme, opcodeFixmeExplicit);
             extensions.registerInstruction("ra","",opcodeResetActors);
         }
     }

@@ -2,8 +2,6 @@
 
 #include <SDL_video.h>
 
-#include <osg/Version>
-
 namespace SDLUtil
 {
 
@@ -93,7 +91,7 @@ void GraphicsWindowSDL2::init()
     SDL_Window *oldWin = SDL_GL_GetCurrentWindow();
     SDL_GLContext oldCtx = SDL_GL_GetCurrentContext();
    
-#ifdef OPENGL_ES
+#if defined(OPENGL_ES) || defined(ANDROID)
      SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
      SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
      SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);    
@@ -112,11 +110,7 @@ void GraphicsWindowSDL2::init()
 
     mValid = true;
 
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,4)
     getEventQueue()->syncWindowRectangleWithGraphicsContext();
-#else
-    getEventQueue()->syncWindowRectangleWithGraphcisContext();
-#endif
 }
 
 
@@ -133,11 +127,7 @@ bool GraphicsWindowSDL2::realizeImplementation()
 
     SDL_ShowWindow(mWindow);
 
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,4)
     getEventQueue()->syncWindowRectangleWithGraphicsContext();
-#else
-    getEventQueue()->syncWindowRectangleWithGraphcisContext();
-#endif
 
     mRealized = true;
 

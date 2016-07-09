@@ -12,7 +12,6 @@ namespace MWSound
     class SoundManager;
     struct Sound_Decoder;
     class Sound;
-    class Sound_Loudness;
 
     // An opaque handle for the implementation's sound buffers.
     typedef void *Sound_Handle;
@@ -42,10 +41,11 @@ namespace MWSound
         virtual void updateSound(MWBase::SoundPtr sound) = 0;
 
         virtual void streamSound(DecoderPtr decoder, MWBase::SoundStreamPtr sound) = 0;
-        virtual void streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound) = 0;
+        virtual void streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound, bool getLoudnessData) = 0;
         virtual void finishStream(MWBase::SoundStreamPtr sound) = 0;
         virtual double getStreamDelay(MWBase::SoundStreamPtr sound) = 0;
         virtual double getStreamOffset(MWBase::SoundStreamPtr sound) = 0;
+        virtual float getStreamLoudness(MWBase::SoundStreamPtr sound) = 0;
         virtual bool isStreamPlaying(MWBase::SoundStreamPtr sound) = 0;
         virtual void updateStream(MWBase::SoundStreamPtr sound) = 0;
 
@@ -56,11 +56,6 @@ namespace MWSound
 
         virtual void pauseSounds(int types) = 0;
         virtual void resumeSounds(int types) = 0;
-
-        // HACK: The sound output implementation really shouldn't be handling
-        // asynchronous loudness data loading, but it's currently where we have
-        // a background processing thread.
-        virtual void loadLoudnessAsync(DecoderPtr decoder, Sound_Loudness *loudness) = 0;
 
         Sound_Output& operator=(const Sound_Output &rhs);
         Sound_Output(const Sound_Output &rhs);

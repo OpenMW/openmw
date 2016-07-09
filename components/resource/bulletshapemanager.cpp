@@ -1,8 +1,9 @@
 #include "bulletshapemanager.hpp"
 
 #include <osg/NodeVisitor>
-#include <osg/Geode>
 #include <osg/TriangleFunctor>
+#include <osg/Transform>
+#include <osg/Drawable>
 
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
@@ -13,7 +14,8 @@
 #include "bulletshape.hpp"
 #include "scenemanager.hpp"
 #include "niffilemanager.hpp"
-
+#include "objectcache.hpp"
+#include "multiobjectcache.hpp"
 
 namespace Resource
 {
@@ -61,12 +63,6 @@ public:
 
     }
 
-    virtual void apply(osg::Geode& geode)
-    {
-        for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
-            apply(*geode.getDrawable(i));
-    }
-
     virtual void apply(osg::Drawable &drawable)
     {
         if (!mTriangleMesh)
@@ -96,7 +92,8 @@ private:
 };
 
 BulletShapeManager::BulletShapeManager(const VFS::Manager* vfs, SceneManager* sceneMgr, NifFileManager* nifFileManager)
-    : mVFS(vfs)
+    : ResourceManager(vfs)
+    , mInstanceCache(new MultiObjectCache)
     , mSceneManager(sceneMgr)
     , mNifFileManager(nifFileManager)
 {
@@ -108,14 +105,16 @@ BulletShapeManager::~BulletShapeManager()
 
 }
 
-osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::string &name)
+osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &name)
 {
     std::string normalized = name;
     mVFS->normalizeFilename(normalized);
 
     osg::ref_ptr<BulletShape> shape;
-    Index::iterator it = mIndex.find(normalized);
-    if (it == mIndex.end())
+    osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
+    if (obj)
+        shape = osg::ref_ptr<BulletShape>(static_cast<BulletShape*>(obj.get()));
+    else
     {
         size_t extPos = normalized.find_last_of('.');
         std::string ext;
@@ -137,16 +136,53 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
             node->accept(visitor);
             shape = visitor.getShape();
             if (!shape)
-                return osg::ref_ptr<BulletShapeInstance>();
+            {
+                mCache->addEntryToObjectCache(normalized, NULL);
+                return osg::ref_ptr<BulletShape>();
+            }
         }
 
-        mIndex[normalized] = shape;
+        mCache->addEntryToObjectCache(normalized, shape);
     }
-    else
-        shape = it->second;
+    return shape;
+}
 
-    osg::ref_ptr<BulletShapeInstance> instance = shape->makeInstance();
+osg::ref_ptr<BulletShapeInstance> BulletShapeManager::cacheInstance(const std::string &name)
+{
+    std::string normalized = name;
+    mVFS->normalizeFilename(normalized);
+
+    osg::ref_ptr<BulletShapeInstance> instance = createInstance(normalized);
+    mInstanceCache->addEntryToObjectCache(normalized, instance.get());
     return instance;
+}
+
+osg::ref_ptr<BulletShapeInstance> BulletShapeManager::getInstance(const std::string &name)
+{
+    std::string normalized = name;
+    mVFS->normalizeFilename(normalized);
+
+    osg::ref_ptr<osg::Object> obj = mInstanceCache->takeFromObjectCache(normalized);
+    if (obj.get())
+        return static_cast<BulletShapeInstance*>(obj.get());
+    else
+        return createInstance(normalized);
+}
+
+osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::string &name)
+{
+    osg::ref_ptr<const BulletShape> shape = getShape(name);
+    if (shape)
+        return shape->makeInstance();
+    else
+        return osg::ref_ptr<BulletShapeInstance>();
+}
+
+void BulletShapeManager::updateCache(double referenceTime)
+{
+    ResourceManager::updateCache(referenceTime);
+
+    mInstanceCache->removeUnreferencedObjectsInCache();
 }
 
 }

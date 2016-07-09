@@ -1,13 +1,3 @@
-if (WIN32) # windows users can just run the morrowind installer
-    set(OPENMW_USE_UNSHIELD FALSE)
-else()
-    set(OPENMW_USE_UNSHIELD TRUE)
-
-    find_package(LIBUNSHIELD REQUIRED)
-    if(NOT LIBUNSHIELD_FOUND)
-        message(FATAL_ERROR "Failed to find Unshield library")
-    endif(NOT LIBUNSHIELD_FOUND)
-endif()
 
 set(WIZARD
     componentselectionpage.cpp
@@ -103,7 +93,7 @@ endif()
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if (OPENMW_USE_UNSHIELD)
-    include_directories(${LIBUNSHIELD_INCLUDE_DIR})
+    include_directories(${LIBUNSHIELD_INCLUDE_DIRS})
 endif()
 
 add_executable(openmw-wizard
@@ -129,13 +119,10 @@ if (DESIRED_QT_VERSION MATCHES 4)
     endif()
 else()
     qt5_use_modules(openmw-wizard Widgets Core)
-    if (WIN32)
-        target_link_libraries(Qt5::WinMain)
-    endif()
 endif()
 
 if (OPENMW_USE_UNSHIELD)
-    target_link_libraries(openmw-wizard ${LIBUNSHIELD_LIBRARY})
+    target_link_libraries(openmw-wizard ${LIBUNSHIELD_LIBRARIES})
 endif()
 
 

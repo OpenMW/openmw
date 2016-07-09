@@ -119,6 +119,11 @@ namespace MWGui
         return ret;
     }
 
+    bool ItemModel::allowedToInsertItems() const
+    {
+        return true;
+    }
+
 
     ProxyItemModel::ProxyItemModel()
         : mSourceModel(NULL)

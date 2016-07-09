@@ -2,9 +2,12 @@
 #define GAME_MWMECHANICS_AIFOLLOW_H
 
 #include "aipackage.hpp"
+
 #include <string>
-#include "pathfinding.hpp"
+
 #include <components/esm/defs.hpp>
+
+#include "pathfinding.hpp"
 
 namespace ESM
 {
@@ -31,7 +34,7 @@ namespace MWMechanics
 
             AiFollow(const ESM::AiSequence::AiFollow* follow);
 
-            MWWorld::Ptr getTarget();
+            MWWorld::Ptr getTarget() const;
             virtual bool sideWithTarget() const { return true; }
             virtual bool followTargetThroughDoors() const { return true; }
 
@@ -50,17 +53,20 @@ namespace MWMechanics
 
             int getFollowIndex() const;
 
+            void fastForward(const MWWorld::Ptr& actor, AiState& state);
+
         private:
             /// This will make the actor always follow.
             /** Thus ignoring mDuration and mX,mY,mZ (used for summoned creatures). **/
             bool mAlwaysFollow;
             bool mCommanded;
-            float mRemainingDuration; // Seconds
+            float mDuration; // Hours
+            float mRemainingDuration; // Hours
             float mX;
             float mY;
             float mZ;
             std::string mActorRefId;
-            int mActorId;
+            mutable int mActorId;
             std::string mCellId;
             bool mActive; // have we spotted the target?
             int mFollowIndex;

@@ -51,6 +51,12 @@ namespace MWScript
             /// \note Locals will be automatically configured first, if necessary
             int getIntVar (const std::string& script, const std::string& var);
 
+            /// if var does not exist, returns 0
+            /// @note var needs to be in lowercase
+            ///
+            /// \note Locals will be automatically configured first, if necessary
+            float getFloatVar (const std::string& script, const std::string& var);
+
             /// \note If locals have not been configured yet, no data is written.
             ///
             /// \return Locals written?

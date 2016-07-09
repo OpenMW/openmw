@@ -1,9 +1,9 @@
 #ifndef GAME_MWMECHANICS_AIPACKAGE_H
 #define GAME_MWMECHANICS_AIPACKAGE_H
 
-#include "pathfinding.hpp"
 #include <components/esm/defs.hpp>
 
+#include "pathfinding.hpp"
 #include "obstacle.hpp"
 #include "aistate.hpp"
 
@@ -40,6 +40,9 @@ namespace MWMechanics
                 TypeIdEscort = 2,
                 TypeIdFollow = 3,
                 TypeIdActivate = 4,
+
+                // These 3 are not really handled as Ai Packages in the MW engine
+                // For compatibility do *not* return these in the getCurrentAiPackage script function..
                 TypeIdCombat = 5,
                 TypeIdPursue = 6,
                 TypeIdAvoidDoor = 7
@@ -71,13 +74,22 @@ namespace MWMechanics
             virtual void fastForward(const MWWorld::Ptr& actor, AiState& state) {}
 
             /// Get the target actor the AI is targeted at (not applicable to all AI packages, default return empty Ptr)
-            virtual MWWorld::Ptr getTarget();
+            virtual MWWorld::Ptr getTarget() const;
 
             /// Return true if having this AiPackage makes the actor side with the target in fights (default false)
             virtual bool sideWithTarget() const;
 
             /// Return true if the actor should follow the target through teleport doors (default false)
             virtual bool followTargetThroughDoors() const;
+
+            /// Can this Ai package be canceled? (default true)
+            virtual bool canCancel() const;
+
+            /// Upon adding this Ai package, should the Ai Sequence attempt to cancel previous Ai packages (default true)?
+            virtual bool shouldCancelPreviousAi() const;
+
+            /// Return true if this package should repeat. Currently only used for Wander packages.
+            virtual bool getRepeat() const;
 
             bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
 
@@ -111,18 +123,14 @@ namespace MWMechanics
             bool mShortcutProhibited; // shortcutting may be prohibited after unsuccessful attempt
             ESM::Pathgrid::Point mShortcutFailPos; // position of last shortcut fail
 
-            bool isWithinMaxRange(const osg::Vec3f& pos1, const osg::Vec3f& pos2) const
-            {
-                // Maximum travel distance for vanilla compatibility.
-                // Was likely meant to prevent NPCs walking into non-loaded exterior cells, but for some reason is used in interior cells as well.
-                // We can make this configurable at some point, but the default *must* be the below value. Anything else will break shoddily-written content (*cough* MW *cough*) in bizarre ways.
-                return (pos1 - pos2).length2() <= 7168*7168;
-            }
+            // Set to true once package starts actually being executed
+            bool mStarted;
+
+            ESM::Pathgrid::Point mPrevDest;
 
         private:
             bool isNearInactiveCell(const ESM::Position& actorPos);
     };
-
 }
 
 #endif

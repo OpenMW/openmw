@@ -10,6 +10,8 @@
 #include <components/esm/loadglob.hpp>
 #include <components/esm/cellref.hpp>
 
+#include <components/resource/scenemanager.hpp>
+
 #include "idtable.hpp"
 #include "idtree.hpp"
 #include "columnimp.hpp"
@@ -59,10 +61,13 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
     return number;
 }
 
-CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
+CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0), mResourceSystem(new Resource::ResourceSystem(resourcesManager.getVFS()))
+  mResourcesManager (resourcesManager), mFallbackMap(fallback),
+  mReader (0), mDialogue (0), mReaderIndex(0), mResourceSystem(new Resource::ResourceSystem(resourcesManager.getVFS()))
 {
+    mResourceSystem->getSceneManager()->setShaderPath((resDir / "shaders").string());
+
     int index = 0;
 
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
@@ -176,6 +181,14 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRegions.addColumn (new NameColumn<ESM::Region>);
     mRegions.addColumn (new MapColourColumn<ESM::Region>);
     mRegions.addColumn (new SleepListColumn<ESM::Region>);
+    // Region Weather
+    mRegions.addColumn (new NestedParentColumn<ESM::Region> (Columns::ColumnId_RegionWeather));
+    index = mRegions.getColumns()-1;
+    mRegions.addAdapter (std::make_pair(&mRegions.getColumn(index), new RegionWeatherAdapter ()));
+    mRegions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_WeatherName, ColumnBase::Display_String, false));
+    mRegions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_WeatherChance, ColumnBase::Display_UnsignedInteger8));
     // Region Sounds
     mRegions.addColumn (new NestedParentColumn<ESM::Region> (Columns::ColumnId_RegionSounds));
     index = mRegions.getColumns()-1;
@@ -270,7 +283,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         new NestedChildColumn (Columns::ColumnId_InfoCondFunc, ColumnBase::Display_InfoCondFunc));
     // FIXME: don't have dynamic value enum delegate, use Display_String for now
     mTopicInfos.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_InfoCondVar, ColumnBase::Display_String));
+        new NestedChildColumn (Columns::ColumnId_InfoCondVar, ColumnBase::Display_InfoCondVar));
     mTopicInfos.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_InfoCondComp, ColumnBase::Display_InfoCondComp));
     mTopicInfos.getNestableColumn(index)->addColumn(
@@ -933,7 +946,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
     bool unhandledRecord = false;
 
-    switch (n.val)
+    switch (n.intval)
     {
         case ESM::REC_GLOB: mGlobals.load (*mReader, mBase); break;
         case ESM::REC_GMST: mGmsts.load (*mReader, mBase); break;
@@ -1045,7 +1058,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
                 else
                 {
                     mTopics.load (record, mBase);
-                    mDialogue = &mTopics.getRecord (record.mId).get();   
+                    mDialogue = &mTopics.getRecord (record.mId).get();
                 }
             }
 
@@ -1200,4 +1213,9 @@ void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
 const VFS::Manager* CSMWorld::Data::getVFS() const
 {
     return mResourcesManager.getVFS();
+}
+
+const Fallback::Map* CSMWorld::Data::getFallbackMap() const
+{
+    return mFallbackMap;
 }

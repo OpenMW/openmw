@@ -5,12 +5,12 @@
 #include <vector>
 #include <string>
 
+#include <components/esm/defs.hpp>
+#include <components/esm/activespells.hpp>
+
 #include "../mwworld/timestamp.hpp"
 
 #include "magiceffects.hpp"
-
-#include <components/esm/defs.hpp>
-#include <components/esm/activespells.hpp>
 
 namespace MWMechanics
 {

@@ -6,6 +6,7 @@
 #include "../mwmechanics/levelledlist.hpp"
 
 #include "../mwworld/customdata.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 namespace MWClass
 {
@@ -43,7 +44,28 @@ namespace MWClass
         ensureCustomData(ptr);
 
         CreatureLevListCustomData& customData = ptr.getRefData().getCustomData()->asCreatureLevListCustomData();
-        customData.mSpawn = true;
+        if (customData.mSpawn)
+            return;
+
+        MWWorld::Ptr creature = (customData.mSpawnActorId == -1) ? MWWorld::Ptr() : MWBase::Environment::get().getWorld()->searchPtrViaActorId(customData.mSpawnActorId);
+        if (!creature.isEmpty())
+        {
+            const MWMechanics::CreatureStats& creatureStats = creature.getClass().getCreatureStats(creature);
+            if (creature.getRefData().getCount() == 0)
+                customData.mSpawn = true;
+            else if (creatureStats.isDead())
+            {
+                const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+                static const float fCorpseRespawnDelay = gmst.find("fCorpseRespawnDelay")->getFloat();
+                static const float fCorpseClearDelay = gmst.find("fCorpseClearDelay")->getFloat();
+
+                float delay = std::min(fCorpseRespawnDelay, fCorpseClearDelay);
+                if (creatureStats.getTimeOfDeath() + delay <= MWBase::Environment::get().getWorld()->getTimeStamp())
+                    customData.mSpawn = true;
+            }
+        }
+        else
+            customData.mSpawn = true;
     }
 
     void CreatureLevList::registerSelf()
@@ -51,6 +73,24 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new CreatureLevList);
 
         registerClass (typeid (ESM::CreatureLevList).name(), instance);
+    }
+
+    void CreatureLevList::getModelsToPreload(const MWWorld::Ptr &ptr, std::vector<std::string> &models) const
+    {
+        // disable for now, too many false positives
+        /*
+        const MWWorld::LiveCellRef<ESM::CreatureLevList> *ref = ptr.get<ESM::CreatureLevList>();
+        for (std::vector<ESM::LevelledListBase::LevelItem>::const_iterator it = ref->mBase->mList.begin(); it != ref->mBase->mList.end(); ++it)
+        {
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            if (it->mLevel > player.getClass().getCreatureStats(player).getLevel())
+                continue;
+
+            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            MWWorld::ManualRef ref(store, it->mId);
+            ref.getPtr().getClass().getModelsToPreload(ref.getPtr(), models);
+        }
+        */
     }
 
     void CreatureLevList::insertObjectRendering(const MWWorld::Ptr &ptr, const std::string& model, MWRender::RenderingInterface &renderingInterface) const
@@ -80,7 +120,7 @@ namespace MWClass
             const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
             MWWorld::ManualRef ref(store, id);
             ref.getPtr().getCellRef().setPosition(ptr.getCellRef().getPosition());
-            MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(), ptr.getCell() , ptr.getCellRef().getPosition());
+            MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(), ptr.getCell() , ptr.getCellRef().getPosition());
             customData.mSpawnActorId = placed.getClass().getCreatureStats(placed).getActorId();
             customData.mSpawn = false;
         }

@@ -37,9 +37,15 @@ namespace Terrain
     class World;
 }
 
-namespace MWWorld
+namespace Fallback
 {
-    class Fallback;
+    class Map;
+}
+
+namespace SceneUtil
+{
+    class WorkQueue;
+    class UnrefQueue;
 }
 
 namespace MWRender
@@ -58,12 +64,20 @@ namespace MWRender
     {
     public:
         RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem,
-                         const MWWorld::Fallback* fallback, const std::string& resourcePath);
+                         const Fallback::Map* fallback, const std::string& resourcePath);
         ~RenderingManager();
 
         MWRender::Objects& getObjects();
 
         Resource::ResourceSystem* getResourceSystem();
+
+        SceneUtil::WorkQueue* getWorkQueue();
+        SceneUtil::UnrefQueue* getUnrefQueue();
+        Terrain::World* getTerrain();
+
+        void preloadCommonAssets();
+
+        double getReferenceTime() const;
 
         osg::Group* getLightRoot();
 
@@ -77,7 +91,7 @@ namespace MWRender
         void skySetMoonColour(bool red);
 
         void setSunDirection(const osg::Vec3f& direction);
-        void setSunColour(const osg::Vec4f& colour);
+        void setSunColour(const osg::Vec4f& diffuse, const osg::Vec4f& specular);
 
         void configureAmbient(const ESM::Cell* cell);
         void configureFog(const ESM::Cell* cell);
@@ -122,8 +136,6 @@ namespace MWRender
         bool toggleRenderMode(RenderMode mode);
 
         SkyManager* getSkyManager();
-
-        osg::Vec3f getEyePos();
 
         void spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale = 1.f);
 
@@ -183,8 +195,11 @@ namespace MWRender
 
         osg::ref_ptr<osgViewer::Viewer> mViewer;
         osg::ref_ptr<osg::Group> mRootNode;
-        osg::ref_ptr<osg::Group> mLightRoot;
+        osg::ref_ptr<osg::Group> mSceneRoot;
         Resource::ResourceSystem* mResourceSystem;
+
+        osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
+        osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
         osg::ref_ptr<osg::Light> mSunLight;
 

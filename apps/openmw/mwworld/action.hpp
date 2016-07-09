@@ -32,6 +32,9 @@ namespace MWWorld
 
             virtual ~Action();
 
+            virtual bool isNullAction() { return false; }
+            ///< Is running this action a no-op? (default false)
+
             void execute (const Ptr& actor);
 
             void setSound (const std::string& id);

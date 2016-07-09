@@ -4,13 +4,11 @@
 #include <osgParticle/Particle>
 #include <osgParticle/Shooter>
 #include <osgParticle/Operator>
-#include <osgParticle/ModularEmitter>
+#include <osgParticle/Emitter>
+#include <osgParticle/Placer>
+#include <osgParticle/Counter>
 
 #include <osg/NodeCallback>
-#include <osg/UserDataContainer>
-
-#include <components/nif/nifkey.hpp>
-#include <components/nif/data.hpp>
 
 #include "controller.hpp" // ValueInterpolator
 
@@ -18,6 +16,7 @@ namespace Nif
 {
     class NiGravity;
     class NiPlanarCollider;
+    class NiColorData;
 }
 
 namespace NifOsg

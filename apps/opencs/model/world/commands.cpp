@@ -8,13 +8,16 @@
 #include <QAbstractItemModel>
 #include <QAbstractProxyModel>
 
+#include "cellcoordinates.hpp"
+#include "idcollection.hpp"
 #include "idtable.hpp"
 #include "idtree.hpp"
 #include "nestedtablewrapper.hpp"
+#include "pathgrid.hpp"
 
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
                                         const QVariant& new_, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (&model), mIndex (index), mNew (new_), mHasRecordState(false)
+    : QUndoCommand (parent), mModel (&model), mIndex (index), mNew (new_), mHasRecordState(false), mOldRecordState(CSMWorld::RecordBase::State_BaseOnly)
 {
     if (QAbstractProxyModel *proxy = dynamic_cast<QAbstractProxyModel *> (&model))
     {
@@ -68,9 +71,6 @@ void CSMWorld::ModifyCommand::undo()
 
 void CSMWorld::CreateCommand::applyModifications()
 {
-    for (std::map<int, QVariant>::const_iterator iter (mValues.begin()); iter!=mValues.end(); ++iter)
-        mModel.setData (mModel.getModelIndex (mId, iter->first), iter->second);
-
     if (!mNestedValues.empty())
     {
         CSMWorld::IdTree *tree = dynamic_cast<CSMWorld::IdTree *>(&mModel);
@@ -114,7 +114,7 @@ void CSMWorld::CreateCommand::setType (UniversalId::Type type)
 
 void CSMWorld::CreateCommand::redo()
 {
-    mModel.addRecord (mId, mType);
+    mModel.addRecordWithData (mId, mValues, mType);
     applyModifications();
 }
 
@@ -238,6 +238,29 @@ void CSMWorld::CloneCommand::undo()
     mModel.removeRow (mModel.getModelIndex (mId, 0).row());
 }
 
+CSMWorld::CreatePathgridCommand::CreatePathgridCommand(IdTable& model, const std::string& id, QUndoCommand *parent)
+    : CreateCommand(model, id, parent)
+{
+    setType(UniversalId::Type_Pathgrid);
+}
+
+void CSMWorld::CreatePathgridCommand::redo()
+{
+    CreateCommand::redo();
+
+    Record<Pathgrid> record = static_cast<const Record<Pathgrid>& >(mModel.getRecord(mId));
+    record.get().blank();
+    record.get().mCell = mId;
+
+    std::pair<CellCoordinates, bool> coords = CellCoordinates::fromId(mId);
+    if (coords.second)
+    {
+        record.get().mData.mX = coords.first.getX();
+        record.get().mData.mY = coords.first.getY();
+    }
+
+    mModel.setRecord(mId, record, mType);
+}
 
 CSMWorld::UpdateCellCommand::UpdateCellCommand (IdTable& model, int row, QUndoCommand *parent)
 : QUndoCommand (parent), mModel (model), mRow (row)

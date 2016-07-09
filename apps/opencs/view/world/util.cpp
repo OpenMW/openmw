@@ -212,6 +212,13 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             return sb;
         }
 
+        case CSMWorld::ColumnBase::Display_UnsignedInteger8:
+        {
+            DialogueSpinBox *sb = new DialogueSpinBox(parent);
+            sb->setRange(0, UCHAR_MAX);
+            return sb;
+        }
+
         case CSMWorld::ColumnBase::Display_Var:
 
             return new QLineEdit(parent);

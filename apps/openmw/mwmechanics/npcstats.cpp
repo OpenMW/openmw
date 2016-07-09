@@ -34,6 +34,7 @@ MWMechanics::NpcStats::NpcStats()
     , mIsWerewolf(false)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);
+    mSpecIncreases.resize(3, 0);
 }
 
 int MWMechanics::NpcStats::getBaseDisposition() const
@@ -255,6 +256,8 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
         MWBase::Environment::get().getWorld ()->getStore ().get<ESM::Skill>().find(skillIndex);
     mSkillIncreases[skill->mData.mAttribute] += increase;
 
+    mSpecIncreases[skill->mData.mSpecialization] += gmst.find("iLevelupSpecialization")->getInt();
+
     // Play sound & skill progress notification
     /// \todo check if character is the player, if levelling is ever implemented for NPCs
     MWBase::Environment::get().getSoundManager ()->playSound ("skillraise", 1, 1);
@@ -324,6 +327,11 @@ int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const
     gmst << "iLevelUp" << std::setfill('0') << std::setw(2) << num << "Mult";
 
     return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(gmst.str())->getInt();
+}
+
+int MWMechanics::NpcStats::getSkillIncreasesForSpecialization(int spec) const
+{
+    return mSpecIncreases[spec];
 }
 
 void MWMechanics::NpcStats::flagAsUsed (const std::string& id)
@@ -469,6 +477,9 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
     for (int i=0; i<ESM::Attribute::Length; ++i)
         state.mSkillIncrease[i] = mSkillIncreases[i];
 
+    for (int i=0; i<3; ++i)
+        state.mSpecIncreases[i] = mSpecIncreases[i];
+
     std::copy (mUsedIds.begin(), mUsedIds.end(), std::back_inserter (state.mUsedIds));
 
     state.mTimeToStartDrowning = mTimeToStartDrowning;
@@ -507,6 +518,9 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
 
     for (int i=0; i<ESM::Attribute::Length; ++i)
         mSkillIncreases[i] = state.mSkillIncrease[i];
+
+    for (int i=0; i<3; ++i)
+        mSpecIncreases[i] = state.mSpecIncreases[i];
 
     for (std::vector<std::string>::const_iterator iter (state.mUsedIds.begin());
         iter!=state.mUsedIds.end(); ++iter)

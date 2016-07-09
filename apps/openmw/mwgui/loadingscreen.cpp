@@ -164,7 +164,7 @@ namespace MWGui
             mBackgroundImage->setBackgroundImage("");
 
             mBackgroundImage->setRenderItemTexture(mGuiTexture.get());
-            mBackgroundImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
+            mBackgroundImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
         }
 
         setVisible(true);

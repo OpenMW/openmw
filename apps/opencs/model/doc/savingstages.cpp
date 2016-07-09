@@ -11,6 +11,7 @@
 #include <components/misc/stringops.hpp>
 
 #include "../world/infocollection.hpp"
+#include "../world/cellcoordinates.hpp"
 
 #include "document.hpp"
 #include "savingstate.hpp"
@@ -238,7 +239,7 @@ void CSMDoc::CollectionReferencesStage::perform (int stage, Messages& messages)
             // An empty mOriginalCell is meant to indicate that it is the same as
             // the current cell.  It is possible that a moved ref is moved again.
             if ((record.get().mOriginalCell.empty() ?
-                    record.get().mCell : record.get().mOriginalCell) != stream.str() && !interior)
+                    record.get().mCell : record.get().mOriginalCell) != stream.str() && !interior && record.mState!=CSMWorld::RecordBase::State_ModifiedOnly && !record.get().mNew)
                 indices.push_back (i);
             else
                 indices.push_front (i);
@@ -265,12 +266,31 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
     std::map<std::string, std::deque<int> >::const_iterator references =
         mState.getSubRecords().find (Misc::StringUtils::lowerCase (cell.get().mId));
 
-    if (cell.isModified() || 
+    if (cell.isModified() ||
         cell.mState == CSMWorld::RecordBase::State_Deleted ||
         references!=mState.getSubRecords().end())
     {
         CSMWorld::Cell cellRecord = cell.get();
         bool interior = cellRecord.mId.substr (0, 1)!="#";
+
+        // count new references and adjust RefNumCount accordingsly
+        int newRefNum = cellRecord.mRefNumCounter;
+
+        if (references!=mState.getSubRecords().end())
+        {
+            for (std::deque<int>::const_iterator iter (references->second.begin());
+                iter!=references->second.end(); ++iter)
+            {
+                const CSMWorld::Record<CSMWorld::CellRef>& ref =
+                    mDocument.getData().getReferences().getRecord (*iter);
+
+                if (ref.get().mNew ||
+                    (!interior && ref.mState==CSMWorld::RecordBase::State_ModifiedOnly &&
+                    /// \todo consider worldspace
+                    CSMWorld::CellCoordinates (ref.get().getCellIndex()).getId("")!=ref.get().mCell))
+                    ++cellRecord.mRefNumCounter;
+            }
+        }
 
         // write cell data
         writer.startRecord (cellRecord.sRecordId);
@@ -309,11 +329,18 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                         stream << "#" << index.first << " " << index.second;
                     }
 
-                    // An empty mOriginalCell is meant to indicate that it is the same as
-                    // the current cell.  It is possible that a moved ref is moved again.
-                    if ((refRecord.mOriginalCell.empty() ? refRecord.mCell : refRecord.mOriginalCell)
+                    if (refRecord.mNew ||
+                        (!interior && ref.mState==CSMWorld::RecordBase::State_ModifiedOnly &&
+                        refRecord.mCell!=stream.str()))
+                    {
+                        refRecord.mRefNum.mIndex = newRefNum++;
+                    }
+                    else if ((refRecord.mOriginalCell.empty() ? refRecord.mCell : refRecord.mOriginalCell)
                             != stream.str() && !interior)
                     {
+                        // An empty mOriginalCell is meant to indicate that it is the same as
+                        // the current cell.  It is possible that a moved ref is moved again.
+
                         ESM::MovedCellRef moved;
                         moved.mRefNum = refRecord.mRefNum;
 
@@ -350,7 +377,7 @@ int CSMDoc::WritePathgridCollectionStage::setup()
 void CSMDoc::WritePathgridCollectionStage::perform (int stage, Messages& messages)
 {
     ESM::ESMWriter& writer = mState.getWriter();
-    const CSMWorld::Record<CSMWorld::Pathgrid>& pathgrid = 
+    const CSMWorld::Record<CSMWorld::Pathgrid>& pathgrid =
         mDocument.getData().getPathgrids().getRecord (stage);
 
     if (pathgrid.isModified() || pathgrid.mState == CSMWorld::RecordBase::State_Deleted)
@@ -386,7 +413,7 @@ int CSMDoc::WriteLandCollectionStage::setup()
 void CSMDoc::WriteLandCollectionStage::perform (int stage, Messages& messages)
 {
     ESM::ESMWriter& writer = mState.getWriter();
-    const CSMWorld::Record<CSMWorld::Land>& land = 
+    const CSMWorld::Record<CSMWorld::Land>& land =
         mDocument.getData().getLand().getRecord (stage);
 
     if (land.isModified() || land.mState == CSMWorld::RecordBase::State_Deleted)
@@ -394,10 +421,6 @@ void CSMDoc::WriteLandCollectionStage::perform (int stage, Messages& messages)
         CSMWorld::Land record = land.get();
         writer.startRecord (record.sRecordId);
         record.save (writer, land.mState == CSMWorld::RecordBase::State_Deleted);
-
-        if (const ESM::Land::LandData *data = record.getLandData (record.mDataTypes))
-            data->save (mState.getWriter());
-
         writer.endRecord (record.sRecordId);
     }
 }
@@ -416,7 +439,7 @@ int CSMDoc::WriteLandTextureCollectionStage::setup()
 void CSMDoc::WriteLandTextureCollectionStage::perform (int stage, Messages& messages)
 {
     ESM::ESMWriter& writer = mState.getWriter();
-    const CSMWorld::Record<CSMWorld::LandTexture>& landTexture = 
+    const CSMWorld::Record<CSMWorld::LandTexture>& landTexture =
         mDocument.getData().getLandTextures().getRecord (stage);
 
     if (landTexture.isModified() || landTexture.mState == CSMWorld::RecordBase::State_Deleted)

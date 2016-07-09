@@ -15,9 +15,15 @@
 CSMPrefs::DoubleSetting::DoubleSetting (Category *parent, Settings::Manager *values,
   QMutex *mutex, const std::string& key, const std::string& label, double default_)
 : Setting (parent, values, mutex, key, label),
-  mMin (0), mMax (std::numeric_limits<double>::max()),
+  mPrecision(2), mMin (0), mMax (std::numeric_limits<double>::max()),
   mDefault (default_)
 {}
+
+CSMPrefs::DoubleSetting& CSMPrefs::DoubleSetting::setPrecision(int precision)
+{
+    mPrecision = precision;
+    return *this;
+}
 
 CSMPrefs::DoubleSetting& CSMPrefs::DoubleSetting::setRange (double min, double max)
 {
@@ -49,6 +55,7 @@ std::pair<QWidget *, QWidget *> CSMPrefs::DoubleSetting::makeWidgets (QWidget *p
     QLabel *label = new QLabel (QString::fromUtf8 (getLabel().c_str()), parent);
 
     QDoubleSpinBox *widget = new QDoubleSpinBox (parent);
+    widget->setDecimals(mPrecision);
     widget->setRange (mMin, mMax);
     widget->setValue (mDefault);
 

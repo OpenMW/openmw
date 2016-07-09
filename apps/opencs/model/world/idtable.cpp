@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+#include <components/esm/cellid.hpp>
+
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
 
@@ -149,6 +151,23 @@ void CSMWorld::IdTable::addRecord (const std::string& id, UniversalId::Type type
     endInsertRows();
 }
 
+void CSMWorld::IdTable::addRecordWithData (const std::string& id,
+    const std::map<int, QVariant>& data, UniversalId::Type type)
+{
+    int index = mIdCollection->getAppendIndex (id, type);
+
+    beginInsertRows (QModelIndex(), index, index);
+
+    mIdCollection->appendBlankRecord (id, type);
+
+    for (std::map<int, QVariant>::const_iterator iter (data.begin()); iter!=data.end(); ++iter)
+    {
+        mIdCollection->setData(index, iter->first, iter->second);
+    }
+
+    endInsertRows();
+}
+
 void CSMWorld::IdTable::cloneRecord(const std::string& origin,
                                     const std::string& destination,
                                     CSMWorld::UniversalId::Type type)
@@ -242,7 +261,7 @@ std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view (int row) 
         return std::make_pair (UniversalId::Type_None, "");
 
     if (id[0]=='#')
-        id = "sys::default";
+        id = ESM::CellId::sDefaultWorldspace;
 
     return std::make_pair (UniversalId (UniversalId::Type_Scene, id), hint);
 }

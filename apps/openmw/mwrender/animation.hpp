@@ -55,6 +55,9 @@ public:
 
     ~PartHolder();
 
+    /// Unreferences mNode *without* detaching it from the graph. Only use if you know what you are doing.
+    void unlink();
+
     osg::ref_ptr<osg::Node> getNode()
     {
         return mNode;
@@ -229,7 +232,8 @@ protected:
 
     // Stored in all lowercase for a case-insensitive lookup
     typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
-    NodeMap mNodeMap;
+    mutable NodeMap mNodeMap;
+    mutable bool mNodeMapCreated;
 
     MWWorld::Ptr mPtr;
 
@@ -260,11 +264,13 @@ protected:
 
     float mAlpha;
 
+    const NodeMap& getNodeMap() const;
+
     /* Sets the appropriate animations on the bone groups based on priority.
      */
     void resetActiveGroups();
 
-    size_t detectBlendMask(osg::Node* node);
+    size_t detectBlendMask(const osg::Node* node) const;
 
     /* Updates the position of the accum root node for the given time, and
      * returns the wanted movement vector from the previous time. */
@@ -292,9 +298,10 @@ protected:
      */
     void setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature);
 
-    /* Adds the keyframe controllers in the specified model as a new animation source. Note that
-     * the filename portion of the provided model name will be prepended with 'x', and the .nif
-     * extension will be replaced with .kf. */
+    /** Adds the keyframe controllers in the specified model as a new animation source. Note that the .nif
+     * file extension will be replaced with .kf.
+     * @note Later added animation sources have the highest priority when it comes to finding a particular animation.
+    */
     void addAnimSource(const std::string &model);
 
     /** Adds an additional light to the given node using the specified ESM record. */
@@ -308,7 +315,7 @@ protected:
      */
     virtual void addControllers();
 
-    osg::Vec4f getEnchantmentColor(MWWorld::Ptr item);
+    osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
 
     void addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor);
 
@@ -320,7 +327,7 @@ public:
     Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem);
     virtual ~Animation();
 
-    MWWorld::Ptr getPtr();
+    MWWorld::ConstPtr getPtr() const;
 
     /// Set active flag on the object skeleton, if one exists.
     /// @see SceneUtil::Skeleton::setActive
@@ -342,11 +349,11 @@ public:
      */
     void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", std::string texture = "");
     void removeEffect (int effectId);
-    void getLoopingEffects (std::vector<int>& out);
+    void getLoopingEffects (std::vector<int>& out) const;
 
     virtual void updatePtr(const MWWorld::Ptr &ptr);
 
-    bool hasAnimation(const std::string &anim);
+    bool hasAnimation(const std::string &anim) const;
 
     // Specifies the axis' to accumulate on. Non-accumulated axis will just
     // move visually, but not affect the actual movement. Each x/y/z value

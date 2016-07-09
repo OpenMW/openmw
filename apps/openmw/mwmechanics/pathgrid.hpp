@@ -1,8 +1,9 @@
 #ifndef GAME_MWMECHANICS_PATHGRID_H
 #define GAME_MWMECHANICS_PATHGRID_H
 
-#include <components/esm/loadpgrd.hpp>
 #include <list>
+
+#include <components/esm/loadpgrd.hpp>
 
 namespace ESM
 {

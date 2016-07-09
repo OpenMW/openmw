@@ -67,6 +67,7 @@ add_openmw_dir (mwworld
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     store esmstore recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
     contentloader esmloader actiontrap cellreflist cellref physicssystem weather projectilemanager
+    cellpreloader
     )
 
 add_openmw_dir (mwphysics
@@ -75,7 +76,7 @@ add_openmw_dir (mwphysics
 
 add_openmw_dir (mwclass
     classes activator creature npc weapon armor potion apparatus book clothing container door
-    ingredient creaturelevlist itemlevlist light lockpick misc probe repair static actor
+    ingredient creaturelevlist itemlevlist light lockpick misc probe repair static actor bodypart
     )
 
 add_openmw_dir (mwmechanics
@@ -83,7 +84,7 @@ add_openmw_dir (mwmechanics
     drawstate spells activespells npcstats aipackage aisequence aipursue alchemy aiwander aitravel aifollow aiavoiddoor
     aiescort aiactivate aicombat repair enchanting pathfinding pathgrid security spellsuccess spellcasting
     disease pickpocket levelledlist combat steering obstacle autocalcspell difficultyscaling aicombataction actor summoning
-    character actors objects aistate coordinateconverter
+    character actors objects aistate coordinateconverter trading
     )
 
 add_openmw_dir (mwstate
@@ -114,7 +115,7 @@ endif ()
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.
 include_directories(
-    ${FFMPEG_INCLUDE_DIRS}
+    ${FFmpeg_INCLUDE_DIRS}
 )
 
 target_link_libraries(openmw
@@ -130,8 +131,7 @@ target_link_libraries(openmw
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${OPENAL_LIBRARY}
-    ${FFMPEG_LIBRARIES}
-    ${BULLET_LIBRARIES}
+    ${FFmpeg_LIBRARIES}
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
     "osg-ffmpeg-videoplayer"
@@ -165,7 +165,7 @@ if (ANDROID)
 endif (ANDROID)
 
 if (USE_SYSTEM_TINYXML)
-    target_link_libraries(openmw ${TINYXML_LIBRARIES})
+    target_link_libraries(openmw ${TinyXML_LIBRARIES})
 endif()
 
 if (NOT UNIX)
@@ -182,7 +182,7 @@ if(APPLE)
     find_library(IOKIT_FRAMEWORK IOKit)
     target_link_libraries(openmw ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
 
-    if (FFMPEG_FOUND)
+    if (FFmpeg_FOUND)
         find_library(COREVIDEO_FRAMEWORK CoreVideo)
         find_library(VDA_FRAMEWORK VideoDecodeAcceleration)
         target_link_libraries(openmw ${COREVIDEO_FRAMEWORK} ${VDA_FRAMEWORK})

@@ -133,12 +133,17 @@ void CSMPrefs::State::declare()
     declareBool ("show-linenum", "Show Line Numbers", true).
         setTooltip ("Show line numbers to the left of the script editor window."
         "The current row and column numbers of the text cursor are shown at the bottom.");
+    declareBool ("wrap-lines", "Wrap Lines", false).
+        setTooltip ("Wrap lines longer than width of script editor.");
     declareBool ("mono-font", "Use monospace font", true);
+    declareInt ("tab-width", "Tab Width", 4).
+        setTooltip ("Number of characters for tab width").
+        setRange (1, 10);
     EnumValue warningsNormal ("Normal", "Report warnings as warning");
     declareEnum ("warnings", "Warning Mode", warningsNormal).
         addValue ("Ignore", "Do not report warning").
         addValue (warningsNormal).
-        addValue ("Strcit", "Promote warning to an error");
+        addValue ("Strict", "Promote warning to an error");
     declareBool ("toolbar", "Show toolbar", true);
     declareInt ("compile-delay", "Delay between updating of source errors", 100).
         setTooltip ("Delay in milliseconds").
@@ -170,6 +175,17 @@ void CSMPrefs::State::declare()
     inputButtons.add (left).add (cLeft).add (right).add (cRight).add (middle).add (cMiddle);
     declareEnum ("p-navi", "Primary Camera Navigation Button", left).addValues (inputButtons);
     declareEnum ("s-navi", "Secondary Camera Navigation Button", cLeft).addValues (inputButtons);
+    declareDouble ("p-navi-free-sensitivity", "Free Camera Sensitivity", 1/650.).setPrecision(5).setRange(0.0, 1.0);
+    declareBool ("p-navi-free-invert", "Invert Free Camera Mouse Input", false);
+    declareDouble ("p-navi-orbit-sensitivity", "Orbit Camera Sensitivity", 1/650.).setPrecision(5).setRange(0.0, 1.0);
+    declareBool ("p-navi-orbit-invert", "Invert Orbit Camera Mouse Input", false);
+    declareDouble ("s-navi-sensitivity", "Secondary Camera Movement Sensitivity", 50.0).setRange(-1000.0, 1000.0);
+    declareDouble ("navi-wheel-factor", "Camera Zoom Sensitivity", 8).setRange(-100.0, 100.0);
+    declareDouble ("navi-free-lin-speed", "Free Camera Linear Speed", 1000.0).setRange(1.0, 10000.0);
+    declareDouble ("navi-free-rot-speed", "Free Camera Rotational Speed", 3.14 / 2).setRange(0.001, 6.28);
+    declareDouble ("navi-free-speed-mult", "Free Camera Speed Multiplier (from Modifier)", 8).setRange(0.001, 1000.0);
+    declareDouble ("navi-orbit-rot-speed", "Orbital Camera Rotational Speed", 3.14 / 4).setRange(0.001, 6.28);
+    declareDouble ("navi-orbit-speed-mult", "Orbital Camera Speed Multiplier (from Modifier)", 4).setRange(0.001, 1000.0);
     declareEnum ("p-edit", "Primary Editing Button", right).addValues (inputButtons);
     declareEnum ("s-edit", "Secondary Editing Button", cRight).addValues (inputButtons);
     declareEnum ("p-select", "Primary Selection Button", middle).addValues (inputButtons);
@@ -190,6 +206,24 @@ void CSMPrefs::State::declare()
     declareBool ("scene-hide-basic", "Hide basic  3D scenes tooltips", false);
     declareInt ("scene-delay", "Tooltip delay in milliseconds", 500).
         setMin (1);
+
+    EnumValue createAndInsert ("Create cell and insert");
+    EnumValue showAndInsert ("Show cell and insert");
+    EnumValue dontInsert ("Discard");
+    EnumValue insertAnyway ("Insert anyway");
+    EnumValues insertOutsideCell;
+    insertOutsideCell.add (createAndInsert).add (dontInsert).add (insertAnyway);
+    EnumValues insertOutsideVisibleCell;
+    insertOutsideVisibleCell.add (showAndInsert).add (dontInsert).add (insertAnyway);
+
+    declareCategory ("Scene Drops");
+    declareInt ("distance", "Drop Distance", 50).
+        setTooltip ("If an instance drop can not be placed against another object at the "
+            "insert point, it will be placed by this distance from the insert point instead");
+    declareEnum ("outside-drop", "Handling drops outside of cells", createAndInsert).
+        addValues (insertOutsideCell);
+    declareEnum ("outside-visible-drop", "Handling drops outside of visible cells", showAndInsert).
+        addValues (insertOutsideVisibleCell);
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)

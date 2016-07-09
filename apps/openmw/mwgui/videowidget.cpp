@@ -50,7 +50,7 @@ void VideoWidget::playVideo(const std::string &video)
     mTexture.reset(new osgMyGUI::OSGTexture(texture));
 
     setRenderItemTexture(mTexture.get());
-    getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+    getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
 }
 
 int VideoWidget::getVideoWidth()

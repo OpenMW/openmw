@@ -19,7 +19,8 @@ static bool isCacheableRecord(int id)
         id == ESM::REC_BOOK || id == ESM::REC_CLOT || id == ESM::REC_CONT || id == ESM::REC_CREA ||
         id == ESM::REC_DOOR || id == ESM::REC_INGR || id == ESM::REC_LEVC || id == ESM::REC_LEVI ||
         id == ESM::REC_LIGH || id == ESM::REC_LOCK || id == ESM::REC_MISC || id == ESM::REC_NPC_ ||
-        id == ESM::REC_PROB || id == ESM::REC_REPA || id == ESM::REC_STAT || id == ESM::REC_WEAP)
+        id == ESM::REC_PROB || id == ESM::REC_REPA || id == ESM::REC_STAT || id == ESM::REC_WEAP ||
+        id == ESM::REC_BODY)
     {
         return true;
     }
@@ -73,10 +74,10 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         esm.getRecHeader();
 
         // Look up the record type.
-        std::map<int, StoreBase *>::iterator it = mStores.find(n.val);
+        std::map<int, StoreBase *>::iterator it = mStores.find(n.intval);
 
         if (it == mStores.end()) {
-            if (n.val == ESM::REC_INFO) {
+            if (n.intval == ESM::REC_INFO) {
                 if (dialogue)
                 {
                     dialogue->readInfo(esm, esm.getIndex() != 0);
@@ -86,12 +87,12 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                     std::cerr << "error: info record without dialog" << std::endl;
                     esm.skipRecord();
                 }
-            } else if (n.val == ESM::REC_MGEF) {
+            } else if (n.intval == ESM::REC_MGEF) {
                 mMagicEffects.load (esm);
-            } else if (n.val == ESM::REC_SKIL) {
+            } else if (n.intval == ESM::REC_SKIL) {
                 mSkills.load (esm);
             }
-            else if (n.val==ESM::REC_FILT || n.val == ESM::REC_DBGP)
+            else if (n.intval==ESM::REC_FILT || n.intval == ESM::REC_DBGP)
             {
                 // ignore project file only records
                 esm.skipRecord();
@@ -109,7 +110,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                 continue;
             }
 
-            if (n.val==ESM::REC_DIAL) {
+            if (n.intval==ESM::REC_DIAL) {
                 dialogue = const_cast<ESM::Dialogue*>(mDialogs.find(id.mId));
             } else {
                 dialogue = 0;

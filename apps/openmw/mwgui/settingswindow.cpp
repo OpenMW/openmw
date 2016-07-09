@@ -27,13 +27,6 @@
 
 namespace
 {
-    std::string fpsLevelToStr(int level)
-    {
-        if (level == 0)
-            return "#{sOff}";
-        else //if (level == 1)
-            return "#{sOn}";
-    }
 
     std::string textureMipmappingToStr(const std::string& val)
     {
@@ -130,12 +123,14 @@ namespace MWGui
             if (type == sliderType)
             {
                 MyGUI::ScrollBar* scroll = current->castType<MyGUI::ScrollBar>();
+                std::string valueStr;
                 if (getSettingValueType(current) == "Float")
                 {
                     // TODO: ScrollBar isn't meant for this. should probably use a dedicated FloatSlider widget
                     float min,max;
                     getSettingMinMax(scroll, min, max);
                     float value = Settings::Manager::getFloat(getSettingName(current), getSettingCategory(current));
+                    valueStr = MyGUI::utility::toString((int)value);
                     value = std::max(min, std::min(value, max));
                     value = (value-min)/(max-min);
 
@@ -144,12 +139,27 @@ namespace MWGui
                 else
                 {
                     int value = Settings::Manager::getInt(getSettingName(current), getSettingCategory(current));
+                    valueStr = MyGUI::utility::toString(value);
                     scroll->setScrollPosition(value);
                 }
                 scroll->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
+                updateSliderLabel(scroll, valueStr);
             }
 
             configureWidgets(current);
+        }
+    }
+
+    void SettingsWindow::updateSliderLabel(MyGUI::ScrollBar *scroller, const std::string& value)
+    {
+        std::string labelWidgetName = scroller->getUserString("SettingLabelWidget");
+        if (!labelWidgetName.empty())
+        {
+            MyGUI::TextBox* textBox;
+            getWidget(textBox, labelWidgetName);
+            std::string labelCaption = scroller->getUserString("SettingLabelCaption");
+            boost::algorithm::replace_all(labelCaption, "%s", value);
+            textBox->setCaptionWithReplacing(labelCaption);
         }
     }
 
@@ -165,19 +175,11 @@ namespace MWGui
         getWidget(mOkButton, "OkButton");
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mFullscreenButton, "FullscreenButton");
-        getWidget(mVSyncButton, "VSyncButton");
         getWidget(mWindowBorderButton, "WindowBorderButton");
-        getWidget(mFOVSlider, "FOVSlider");
-        getWidget(mAnisotropySlider, "AnisotropySlider");
         getWidget(mTextureFilteringButton, "TextureFilteringButton");
-        getWidget(mAnisotropyLabel, "AnisotropyLabel");
         getWidget(mAnisotropyBox, "AnisotropyBox");
-        getWidget(mShadersButton, "ShadersButton");
-        getWidget(mShadowsEnabledButton, "ShadowsEnabledButton");
-        getWidget(mShadowsTextureSize, "ShadowsTextureSize");
         getWidget(mControlsBox, "ControlsBox");
         getWidget(mResetControlsButton, "ResetControlsButton");
-        getWidget(mDifficultySlider, "DifficultySlider");
         getWidget(mKeyboardSwitch, "KeyboardButton");
         getWidget(mControllerSwitch, "ControllerButton");
         getWidget(mWaterTextureSize, "WaterTextureSize");
@@ -204,8 +206,6 @@ namespace MWGui
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
 
         mWaterTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterTextureSizeChanged);
-
-        mShadowsTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onShadowTextureSizeChanged);
 
         mKeyboardSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onKeyboardSwitchClicked);
         mControllerSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onControllerSwitchClicked);
@@ -238,7 +238,6 @@ namespace MWGui
 
         std::string tmip = Settings::Manager::getString("texture mipmap", "General");
         mTextureFilteringButton->setCaption(textureMipmappingToStr(tmip));
-        mAnisotropyLabel->setCaption("Anisotropy (" + MyGUI::utility::toString(Settings::Manager::getInt("anisotropy", "General")) + ")");
 
         int waterTextureSize = Settings::Manager::getInt ("rtt size", "Water");
         if (waterTextureSize >= 512)
@@ -247,22 +246,6 @@ namespace MWGui
             mWaterTextureSize->setIndexSelected(1);
         if (waterTextureSize >= 2048)
             mWaterTextureSize->setIndexSelected(2);
-
-        mShadowsTextureSize->setCaption (Settings::Manager::getString ("texture size", "Shadows"));
-
-        if (!Settings::Manager::getBool("shaders", "Objects"))
-        {
-            mShadowsEnabledButton->setEnabled(false);
-        }
-
-        MyGUI::TextBox* fovText;
-        getWidget(fovText, "FovText");
-        fovText->setCaption("Field of View (" + MyGUI::utility::toString(int(Settings::Manager::getInt("field of view", "Camera"))) + ")");
-
-        MyGUI::TextBox* diffText;
-        getWidget(diffText, "DifficultyText");
-
-        diffText->setCaptionWithReplacing("#{sDifficulty} (" + MyGUI::utility::toString(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
 
         mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
 
@@ -343,12 +326,6 @@ namespace MWGui
         apply();
     }
 
-    void SettingsWindow::onShadowTextureSizeChanged(MyGUI::ComboBox *_sender, size_t pos)
-    {
-        Settings::Manager::setString("texture size", "Shadows", _sender->getItemNameAt(pos));
-        apply();
-    }
-
     void SettingsWindow::onButtonToggled(MyGUI::Widget* _sender)
     {
         std::string on = MWBase::Environment::get().getWindowManager()->getGameSettingString("sOn", "On");
@@ -363,21 +340,6 @@ namespace MWGui
         {
             _sender->castType<MyGUI::Button>()->setCaption(on);
             newState = true;
-        }
-
-        if (_sender == mShadersButton)
-        {
-            if (newState == false)
-            {
-                // shadows not supported
-                mShadowsEnabledButton->setEnabled(false);
-                mShadowsEnabledButton->setCaptionWithReplacing("#{sOff}");
-                Settings::Manager::setBool("enabled", "Shadows", false);
-            }
-            else
-            {
-                mShadowsEnabledButton->setEnabled(true);
-            }
         }
 
         if (_sender == mFullscreenButton)
@@ -439,6 +401,7 @@ namespace MWGui
     {
         if (getSettingType(scroller) == "Slider")
         {
+            std::string valueStr;
             if (getSettingValueType(scroller) == "Float")
             {
                 float value = pos / float(scroller->getScrollRange()-1);
@@ -447,28 +410,15 @@ namespace MWGui
                 getSettingMinMax(scroller, min, max);
                 value = min + (max-min) * value;
                 Settings::Manager::setFloat(getSettingName(scroller), getSettingCategory(scroller), value);
-
-                if (scroller == mFOVSlider)
-                {
-                    MyGUI::TextBox* fovText;
-                    getWidget(fovText, "FovText");
-                    fovText->setCaption("Field of View (" + MyGUI::utility::toString(int(value)) + ")");
-                }
-                if (scroller == mDifficultySlider)
-                {
-                    MyGUI::TextBox* diffText;
-                    getWidget(diffText, "DifficultyText");
-                    diffText->setCaptionWithReplacing("#{sDifficulty} (" + MyGUI::utility::toString(int(value)) + ")");
-                }
+                valueStr = MyGUI::utility::toString(int(value));
             }
             else
             {
                 Settings::Manager::setInt(getSettingName(scroller), getSettingCategory(scroller), pos);
-                if (scroller == mAnisotropySlider)
-                {
-                    mAnisotropyLabel->setCaption("Anisotropy (" + MyGUI::utility::toString(pos) + ")");
-                }
+                valueStr = MyGUI::utility::toString(pos);
             }
+            updateSliderLabel(scroller, valueStr);
+
             apply();
         }
     }

@@ -37,7 +37,7 @@ namespace MWMechanics
 
             // Returns true if there is an obstacle and an evasive action
             // should be taken
-            bool check(const MWWorld::Ptr& actor, float duration);
+            bool check(const MWWorld::Ptr& actor, float duration, float scaleMinimumDistance = 1.0f);
 
             // change direction to try to fix "stuck" actor
             void takeEvasiveAction(MWMechanics::Movement& actorMovement);

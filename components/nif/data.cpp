@@ -65,8 +65,14 @@ void ShapeData::read(NIFStream *nif)
         uvlist.resize(uvs);
         for(int i = 0;i < uvs;i++)
         {
-            uvlist[i] = new osg::Vec2Array(osg::Array::BIND_PER_VERTEX);
-            nif->getVector2s(uvlist[i], verts);
+            osg::Vec2Array* list = uvlist[i] = new osg::Vec2Array(osg::Array::BIND_PER_VERTEX);
+            nif->getVector2s(list, verts);
+
+            // flip the texture coordinates to convert them to the OpenGL convention of bottom-left image origin
+            for (unsigned int uv=0; uv<list->size(); ++uv)
+            {
+                (*list)[uv] = osg::Vec2((*list)[uv].x(), 1.f - (*list)[uv].y());
+            }
         }
     }
 }
@@ -148,7 +154,7 @@ void NiFloatData::read(NIFStream *nif)
 
 void NiPixelData::read(NIFStream *nif)
 {
-    nif->getInt(); // always 0 or 1
+    fmt = (Format)nif->getUInt();
 
     rmask = nif->getInt(); // usually 0xff
     gmask = nif->getInt(); // usually 0xff00
@@ -163,19 +169,23 @@ void NiPixelData::read(NIFStream *nif)
     mips = nif->getInt();
 
     // Bytes per pixel, should be bpp * 8
-    /*int bytes =*/ nif->getInt();
+    /* int bytes = */ nif->getInt();
 
     for(int i=0; i<mips; i++)
     {
         // Image size and offset in the following data field
-        /*int x =*/ nif->getInt();
-        /*int y =*/ nif->getInt();
-        /*int offset =*/ nif->getInt();
+        Mipmap m;
+        m.width = nif->getUInt();
+        m.height = nif->getUInt();
+        m.dataOffset = nif->getUInt();
+        mipmaps.push_back(m);
     }
 
-    // Skip the data
+    // Read the data
     unsigned int dataSize = nif->getInt();
-    nif->skip(dataSize);
+    data.reserve(dataSize);
+    for (unsigned i=0; i<dataSize; ++i)
+        data.push_back((unsigned char)nif->getChar());
 }
 
 void NiColorData::read(NIFStream *nif)

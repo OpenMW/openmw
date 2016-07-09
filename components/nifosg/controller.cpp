@@ -254,11 +254,17 @@ void UVController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
         float uScale = mUScale.interpKey(value);
         float vScale = mVScale.interpKey(value);
 
+        osg::Matrix flipMat;
+        flipMat.preMultTranslate(osg::Vec3f(0,1,0));
+        flipMat.preMultScale(osg::Vec3f(1,-1,1));
+
         osg::Matrixf mat = osg::Matrixf::scale(uScale, vScale, 1);
         mat.setTrans(uTrans, vTrans, 0);
 
+        mat = flipMat * mat * flipMat;
+
         // setting once is enough because all other texture units share the same TexMat (see setDefaults).
-        if (mTextureUnits.size())
+        if (!mTextureUnits.empty())
         {
             osg::TexMat* texMat = static_cast<osg::TexMat*>(stateset->getTextureAttribute(*mTextureUnits.begin(), osg::StateAttribute::TEXMAT));
             texMat->setMatrix(mat);
@@ -433,12 +439,15 @@ ParticleSystemController::ParticleSystemController(const ParticleSystemControlle
 
 void ParticleSystemController::operator() (osg::Node* node, osg::NodeVisitor* nv)
 {
+    osgParticle::ParticleProcessor* emitter = static_cast<osgParticle::ParticleProcessor*>(node);
     if (hasInput())
     {
-        osgParticle::ParticleProcessor* emitter = static_cast<osgParticle::ParticleProcessor*>(node);
         float time = getInputValue(nv);
+        emitter->getParticleSystem()->setFrozen(false);
         emitter->setEnabled(time >= mEmitStart && time < mEmitStop);
     }
+    else
+        emitter->getParticleSystem()->setFrozen(true);
     traverse(node, nv);
 }
 

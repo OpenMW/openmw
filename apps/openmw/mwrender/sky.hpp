@@ -3,16 +3,17 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 #include <osg/ref_ptr>
 #include <osg/Vec4f>
-#include <osg/PositionAttitudeTransform>
 
 namespace osg
 {
     class Group;
     class Node;
     class Material;
+    class PositionAttitudeTransform;
 }
 
 namespace osgParticle
@@ -152,6 +153,8 @@ namespace MWRender
 
         /// Set height of water plane (used to remove underwater weather particles)
         void setWaterHeight(float height);
+
+        void listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures);
 
     private:
         void create();

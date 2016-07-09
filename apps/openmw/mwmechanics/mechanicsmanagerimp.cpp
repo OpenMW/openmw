@@ -11,18 +11,16 @@
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 
-#include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
-
-#include "../mwmechanics/aicombat.hpp"
-#include "../mwmechanics/aipursue.hpp"
-
+#include "aicombat.hpp"
+#include "aipursue.hpp"
 #include "spellcasting.hpp"
 #include "autocalcspell.hpp"
 #include "npcstats.hpp"
@@ -312,7 +310,7 @@ namespace MWMechanics
     }
 
     MechanicsManager::MechanicsManager()
-    : mWatchedStatsEmpty (true), mUpdatePlayer (true), mClassSelected (false),
+    : mWatchedTimeToStartDrowning(0), mWatchedStatsEmpty (true), mUpdatePlayer (true), mClassSelected (false),
       mRaceSelected (false), mAI(true)
     {
         //buildPlayer no longer here, needs to be done explicitely after all subsystems are up and running
@@ -374,40 +372,40 @@ namespace MWMechanics
             const MWMechanics::NpcStats &stats = mWatched.getClass().getNpcStats(mWatched);
             for(int i = 0;i < ESM::Attribute::Length;++i)
             {
-                if(stats.getAttribute(i) != mWatchedStats.getAttribute(i) || mWatchedStatsEmpty)
+                if(stats.getAttribute(i) != mWatchedAttributes[i] || mWatchedStatsEmpty)
                 {
                     std::stringstream attrname;
                     attrname << "AttribVal"<<(i+1);
 
-                    mWatchedStats.setAttribute(i, stats.getAttribute(i));
+                    mWatchedAttributes[i] = stats.getAttribute(i);
                     winMgr->setValue(attrname.str(), stats.getAttribute(i));
                 }
             }
 
-            if(stats.getHealth() != mWatchedStats.getHealth() || mWatchedStatsEmpty)
+            if(stats.getHealth() != mWatchedHealth || mWatchedStatsEmpty)
             {
                 static const std::string hbar("HBar");
-                mWatchedStats.setHealth(stats.getHealth());
+                mWatchedHealth = stats.getHealth();
                 winMgr->setValue(hbar, stats.getHealth());
             }
-            if(stats.getMagicka() != mWatchedStats.getMagicka() || mWatchedStatsEmpty)
+            if(stats.getMagicka() != mWatchedMagicka || mWatchedStatsEmpty)
             {
                 static const std::string mbar("MBar");
-                mWatchedStats.setMagicka(stats.getMagicka());
+                mWatchedMagicka = stats.getMagicka();
                 winMgr->setValue(mbar, stats.getMagicka());
             }
-            if(stats.getFatigue() != mWatchedStats.getFatigue() || mWatchedStatsEmpty)
+            if(stats.getFatigue() != mWatchedFatigue || mWatchedStatsEmpty)
             {
                 static const std::string fbar("FBar");
-                mWatchedStats.setFatigue(stats.getFatigue());
+                mWatchedFatigue = stats.getFatigue();
                 winMgr->setValue(fbar, stats.getFatigue());
             }
 
-            if(stats.getTimeToStartDrowning() != mWatchedStats.getTimeToStartDrowning())
+            if(stats.getTimeToStartDrowning() != mWatchedTimeToStartDrowning)
             {
                 const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("fHoldBreathTime")->getFloat();
-                mWatchedStats.setTimeToStartDrowning(stats.getTimeToStartDrowning());
+                mWatchedTimeToStartDrowning = stats.getTimeToStartDrowning();
                 if(stats.getTimeToStartDrowning() >= fHoldBreathTime)
                     winMgr->setDrowningBarVisibility(false);
                 else
@@ -422,10 +420,10 @@ namespace MWMechanics
             //Loop over ESM::Skill::SkillEnum
             for(int i = 0; i < ESM::Skill::Length; ++i)
             {
-                if(stats.getSkill(i) != mWatchedStats.getSkill(i) || mWatchedStatsEmpty)
+                if(stats.getSkill(i) != mWatchedSkills[i] || mWatchedStatsEmpty)
                 {
                     update = true;
-                    mWatchedStats.getSkill(i) = stats.getSkill(i);
+                    mWatchedSkills[i] = stats.getSkill(i);
                     winMgr->setValue((ESM::Skill::SkillEnum)i, stats.getSkill(i));
                 }
             }
@@ -501,8 +499,7 @@ namespace MWMechanics
 
     void MechanicsManager::rest(bool sleep)
     {
-        mActors.restoreDynamicStats (sleep);
-        mActors.fastForwardAi();
+        mActors.rest(sleep);
     }
 
     int MechanicsManager::getHoursToRest() const
@@ -581,7 +578,7 @@ namespace MWMechanics
         mUpdatePlayer = true;
     }
 
-    int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr)
+    int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr, bool addTemporaryDispositionChange)
     {
         const MWMechanics::NpcStats& npcSkill = ptr.getClass().getNpcStats(ptr);
         float x = static_cast<float>(npcSkill.getBaseDisposition());
@@ -653,6 +650,9 @@ namespace MWMechanics
 
         x += ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Charm).getMagnitude();
 
+        if(addTemporaryDispositionChange)
+          x += MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange();
+
         int effective_disposition = std::max(0,std::min(int(x),100));//, normally clamped to [0..100] when used
         return effective_disposition;
     }
@@ -667,10 +667,9 @@ namespace MWMechanics
         MWWorld::Ptr playerPtr = getPlayer();
         const MWMechanics::NpcStats &playerStats = playerPtr.getClass().getNpcStats(playerPtr);
 
-        // I suppose the temporary disposition change _has_ to be considered here,
+        // I suppose the temporary disposition change (second param to getDerivedDisposition()) _has_ to be considered here,
         // otherwise one would get different prices when exiting and re-entering the dialogue window...
-        int clampedDisposition = std::max(0, std::min(getDerivedDisposition(ptr)
-            + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange(),100));
+        int clampedDisposition = getDerivedDisposition(ptr);
         float a = static_cast<float>(std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100));
         float b = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float c = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
@@ -700,8 +699,7 @@ namespace MWMechanics
         return mActors.countDeaths (id);
     }
 
-    void MechanicsManager::getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
-        float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange)
+    void MechanicsManager::getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type, bool& success, float& tempChange, float& permChange)
     {
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -717,7 +715,7 @@ namespace MWMechanics
         float playerRating1, playerRating2, playerRating3;
         getPersuasionRatings(playerStats, playerRating1, playerRating2, playerRating3, true);
 
-        int currentDisposition = std::min(100, std::max(0, int(getDerivedDisposition(npc) + currentTemporaryDispositionDelta)));
+        int currentDisposition = getDerivedDisposition(npc);
 
         float d = 1 - 0.02f * abs(currentDisposition - 50);
         float target1 = d * (playerRating1 - npcRating1 + 50);
@@ -927,7 +925,7 @@ namespace MWMechanics
             return true;
         }
 
-        if(MWMechanics::isPlayerInCombat()) {
+        if(MWBase::Environment::get().getWorld()->getPlayer().enemiesNearby()) {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}");
             return true;
         }
@@ -1330,7 +1328,7 @@ namespace MWMechanics
         {
             if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
             {
-                MWWorld::Ptr target = static_cast<AiCombat*>(*it)->getTarget();
+                MWWorld::Ptr target = (*it)->getTarget();
                 if (!target.isEmpty() && target.getClass().isNpc())
                     isFightingNpc = true;
             }
@@ -1435,7 +1433,7 @@ namespace MWMechanics
             osg::Vec3f observerDir = (observer.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0));
 
             float angleRadians = std::acos(observerDir * vec / (observerDir.length() * vec.length()));
-            if (angleRadians < osg::DegreesToRadians(90.f))
+            if (angleRadians > osg::DegreesToRadians(90.f))
                 y = obsTerm * observerStats.getFatigueTerm() * fSneakNoViewMult;
             else
                 y = obsTerm * observerStats.getFatigueTerm() * fSneakViewMult;
@@ -1506,6 +1504,10 @@ namespace MWMechanics
         return mActors.getActorsFighting(actor);
     }
 
+    std::list<MWWorld::Ptr> MechanicsManager::getEnemiesNearby(const MWWorld::Ptr& actor) {
+        return mActors.getEnemiesNearby(actor);
+    }
+
     int MechanicsManager::countSavedGameRecords() const
     {
         return 1 // Death counter
@@ -1539,13 +1541,15 @@ namespace MWMechanics
     {
         mActors.clear();
         mStolenItems.clear();
+        mClassSelected = false;
+        mRaceSelected = false;
     }
 
     bool MechanicsManager::isAggressive(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
     {
         int disposition = 50;
         if (ptr.getClass().isNpc())
-            disposition = getDerivedDisposition(ptr);
+            disposition = getDerivedDisposition(ptr, false);
 
         int fight = std::max(0, ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified()
                 + static_cast<int>(getFightDistanceBias(ptr, target) + getFightDispositionBias(static_cast<float>(disposition))));
@@ -1556,7 +1560,7 @@ namespace MWMechanics
                     (target == getPlayer() &&
                      MWBase::Environment::get().getWorld()->getGlobalInt("pcknownwerewolf")))
             {
-                const ESM::GameSetting * iWerewolfFightMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("iWerewolfFightMod");
+                const ESM::GameSetting * iWerewolfFightMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iWerewolfFightMod");
                 fight += iWerewolfFightMod->getInt();
             }
         }
@@ -1569,16 +1573,7 @@ namespace MWMechanics
         MWWorld::Ptr player = getPlayer();
         CreatureStats& stats = player.getClass().getCreatureStats(player);
         if (stats.isDead())
-        {
-            MWMechanics::DynamicStat<float> stat (stats.getHealth());
-
-            if (stat.getModified()<1)
-            {
-                stat.setModified(1, 0);
-                stats.setHealth(stat);
-            }
             stats.resurrect();
-        }
     }
 
     bool MechanicsManager::isReadyToBlock(const MWWorld::Ptr &ptr) const
@@ -1691,6 +1686,11 @@ namespace MWMechanics
         MWMechanics::NpcStats &stats = actor.getClass().getNpcStats(actor);
 
         stats.getSkill(ESM::Skill::Acrobatics).setBase(gmst.find("fWerewolfAcrobatics")->getInt());
+    }
+
+    void MechanicsManager::cleanupSummonedCreature(const MWWorld::Ptr &caster, int creatureActorId)
+    {
+        mActors.cleanupSummonedCreature(caster.getClass().getCreatureStats(caster), creatureActorId);
     }
 
 }

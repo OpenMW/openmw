@@ -16,7 +16,6 @@
 #include "steering.hpp"
 #include "movement.hpp"
 #include "character.hpp"
-
 #include "aicombataction.hpp"
 #include "combat.hpp"
 
@@ -67,9 +66,10 @@ namespace MWMechanics
         mActionCooldown(0),
         mStrength(),
         mForceNoShortcut(false),
+        mShortcutFailPos(),
         mMovement(),
         mAdjustAiming(false)
-        {}    
+        {}
 
         void startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack);
         void updateCombatMove(float duration);
@@ -433,7 +433,7 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
         float roll = Misc::Rng::rollClosedProbability();
         if(roll <= 0.333f)  //side punch
         {
-            movement.mPosition[0] = Misc::Rng::rollClosedProbability() ? 1.0f : -1.0f;
+            movement.mPosition[0] = (Misc::Rng::rollClosedProbability() < 0.5f) ? 1.0f : -1.0f;
             movement.mPosition[1] = 0;
             attackType = ESM::Weapon::AT_Slash;
         }

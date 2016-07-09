@@ -19,14 +19,20 @@ void NiTextureEffect::read(NIFStream *nif)
 {
     NiDynamicEffect::read(nif);
 
-    /*
-           3 x Vector4 = [1,0,0,0]
-           int = 2
-           int = 0 or 3
-           int = 2
-           int = 2
-        */
-    nif->skip(16*4);
+    // Model Projection Matrix
+    nif->skip(3 * 3 * sizeof(float));
+
+    // Model Projection Transform
+    nif->skip(3 * sizeof(float));
+
+    // Texture Filtering
+    nif->skip(4);
+
+    clamp = nif->getUInt();
+
+    textureType = (TextureType)nif->getUInt();
+
+    coordGenType = (CoordGenType)nif->getUInt();
 
     texture.read(nif);
 

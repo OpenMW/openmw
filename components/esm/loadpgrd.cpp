@@ -46,7 +46,7 @@ namespace ESM
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            switch (esm.retSubName().val)
+            switch (esm.retSubName().intval)
             {
                 case ESM::SREC_NAME:
                     mCell = esm.getHString();
@@ -127,6 +127,28 @@ namespace ESM
 
     void Pathgrid::save(ESMWriter &esm, bool isDeleted) const
     {
+        // Correct connection count and sort edges by point
+        // Can probably be optimized
+        PointList correctedPoints = mPoints;
+        std::vector<int> sortedEdges;
+
+        sortedEdges.reserve(mEdges.size());
+
+        for (size_t point = 0; point < correctedPoints.size(); ++point)
+        {
+            correctedPoints[point].mConnectionNum = 0;
+
+            for (EdgeList::const_iterator it = mEdges.begin(); it != mEdges.end(); ++it)
+            {
+                if (static_cast<size_t>(it->mV0) == point)
+                {
+                    sortedEdges.push_back(it->mV1);
+                    ++correctedPoints[point].mConnectionNum;
+                }
+            }
+        }
+
+        // Save
         esm.writeHNCString("NAME", mCell);
         esm.writeHNT("DATA", mData, 12);
 
@@ -136,22 +158,22 @@ namespace ESM
             return;
         }
 
-        if (!mPoints.empty())
+        if (!correctedPoints.empty())
         {
             esm.startSubRecord("PGRP");
-            for (PointList::const_iterator it = mPoints.begin(); it != mPoints.end(); ++it)
+            for (PointList::const_iterator it = correctedPoints.begin(); it != correctedPoints.end(); ++it)
             {
                 esm.writeT(*it);
             }
             esm.endRecord("PGRP");
         }
 
-        if (!mEdges.empty())
+        if (!sortedEdges.empty())
         {
             esm.startSubRecord("PGRC");
-            for (std::vector<Edge>::const_iterator it = mEdges.begin(); it != mEdges.end(); ++it)
+            for (std::vector<int>::const_iterator it = sortedEdges.begin(); it != sortedEdges.end(); ++it)
             {
-                esm.writeT(it->mV1);
+                esm.writeT(*it);
             }
             esm.endRecord("PGRC");
         }

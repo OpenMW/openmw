@@ -125,7 +125,7 @@ namespace SceneUtil
         traverse(node, nv);
     }
 
-    void LightController::setDiffuse(osg::Vec4f color)
+    void LightController::setDiffuse(const osg::Vec4f& color)
     {
         mDiffuseColor = color;
     }

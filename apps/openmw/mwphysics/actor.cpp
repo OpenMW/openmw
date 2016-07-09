@@ -16,7 +16,7 @@ namespace MWPhysics
 {
 
 
-Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shape, btCollisionWorld* world)
+Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> shape, btCollisionWorld* world)
   : mCanWaterWalk(false), mWalkingOnWater(false)
   , mCollisionObject(0), mForce(0.f, 0.f, 0.f), mOnGround(false)
   , mInternalCollisionMode(true)
@@ -45,8 +45,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance
 
     updateRotation();
     updateScale();
-    // already called by updateScale()
-    //updatePosition();
+    updatePosition();
 
     updateCollisionMask();
 }
@@ -86,17 +85,42 @@ void Actor::updatePosition()
 {
     osg::Vec3f position = mPtr.getRefData().getPosition().asVec3();
 
+    mPosition = position;
+    mPreviousPosition = position;
+
+    updateCollisionObjectPosition();
+}
+
+void Actor::updateCollisionObjectPosition()
+{
     btTransform tr = mCollisionObject->getWorldTransform();
     osg::Vec3f scaledTranslation = mRotation * osg::componentMultiply(mMeshTranslation, mScale);
-    osg::Vec3f newPosition = scaledTranslation + position;
-
+    osg::Vec3f newPosition = scaledTranslation + mPosition;
     tr.setOrigin(toBullet(newPosition));
     mCollisionObject->setWorldTransform(tr);
 }
 
-osg::Vec3f Actor::getPosition() const
+osg::Vec3f Actor::getCollisionObjectPosition() const
 {
     return toOsg(mCollisionObject->getWorldTransform().getOrigin());
+}
+
+void Actor::setPosition(const osg::Vec3f &position)
+{
+    mPreviousPosition = mPosition;
+
+    mPosition = position;
+    updateCollisionObjectPosition();
+}
+
+osg::Vec3f Actor::getPosition() const
+{
+    return mPosition;
+}
+
+osg::Vec3f Actor::getPreviousPosition() const
+{
+    return mPreviousPosition;
 }
 
 void Actor::updateRotation ()
@@ -106,7 +130,7 @@ void Actor::updateRotation ()
     tr.setRotation(toBullet(mRotation));
     mCollisionObject->setWorldTransform(tr);
 
-    updatePosition();
+    updateCollisionObjectPosition();
 }
 
 void Actor::updateScale()
@@ -122,7 +146,7 @@ void Actor::updateScale()
     mPtr.getClass().adjustScale(mPtr, scaleVec, true);
     mRenderingScale = scaleVec;
 
-    updatePosition();
+    updateCollisionObjectPosition();
 }
 
 osg::Vec3f Actor::getHalfExtents() const

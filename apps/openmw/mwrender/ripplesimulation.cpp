@@ -3,7 +3,6 @@
 #include <iomanip>
 
 #include <osg/PolygonOffset>
-#include <osg/Geode>
 #include <osg/Texture2D>
 #include <osg/Material>
 #include <osg/Depth>
@@ -13,21 +12,21 @@
 
 #include <components/misc/rng.hpp>
 #include <components/nifosg/controller.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <components/fallback/fallback.hpp>
 
 #include "vismask.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
-#include "../mwworld/fallback.hpp"
-
 #include "../mwmechanics/actorutil.hpp"
 
 namespace
 {
-    void createWaterRippleStateSet(Resource::ResourceSystem* resourceSystem, const MWWorld::Fallback* fallback, osg::Node* node)
+    void createWaterRippleStateSet(Resource::ResourceSystem* resourceSystem, const Fallback::Map* fallback, osg::Node* node)
     {
         int rippleFrameCount = fallback->getFallbackInt("Water_RippleFrameCount");
         if (rippleFrameCount <= 0)
@@ -40,7 +39,11 @@ namespace
         {
             std::ostringstream texname;
             texname << "textures/water/" << tex << std::setw(2) << std::setfill('0') << i << ".dds";
-            textures.push_back(resourceSystem->getTextureManager()->getTexture2D(texname.str(), osg::Texture::REPEAT, osg::Texture::REPEAT));
+            osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(resourceSystem->getImageManager()->getImage(texname.str())));
+            tex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+            tex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+            resourceSystem->getSceneManager()->applyFilterSettings(tex);
+            textures.push_back(tex);
         }
 
         osg::ref_ptr<NifOsg::FlipController> controller (new NifOsg::FlipController(0, 0.3f/rippleFrameCount, textures));
@@ -78,13 +81,10 @@ namespace
 namespace MWRender
 {
 
-RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem* resourceSystem, const MWWorld::Fallback* fallback)
+RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem* resourceSystem, const Fallback::Map* fallback)
     : mParent(parent)
 {
-    osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-
     mParticleSystem = new osgParticle::ParticleSystem;
-    geode->addDrawable(mParticleSystem);
 
     mParticleSystem->setParticleAlignment(osgParticle::ParticleSystem::FIXED);
     mParticleSystem->setAlignVectorX(osg::Vec3f(1,0,0));
@@ -102,7 +102,7 @@ RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem*
 
     mParticleNode = new osg::PositionAttitudeTransform;
     mParticleNode->addChild(updater);
-    mParticleNode->addChild(geode);
+    mParticleNode->addChild(mParticleSystem);
     mParticleNode->setNodeMask(Mask_Effect);
 
     createWaterRippleStateSet(resourceSystem, fallback, mParticleNode);

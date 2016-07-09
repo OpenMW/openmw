@@ -34,7 +34,8 @@ namespace MWMechanics
         Stat<int> mAiSettings[4];
         AiSequence mAiSequence;
         bool mDead;
-        bool mDied;
+        bool mDeathAnimationFinished;
+        bool mDied; // flag for OnDeath script function
         bool mMurdered;
         int mFriendlyHits;
         bool mTalkedTo;
@@ -62,8 +63,10 @@ namespace MWMechanics
 
         int mActorId;
 
-        // The index of the death animation that was played
-        unsigned char mDeathAnimation;
+        // The index of the death animation that was played, or -1 if none played
+        signed char mDeathAnimation;
+
+        MWWorld::TimeStamp mTimeOfDeath;
 
     public:
         typedef std::pair<int, std::string> SummonKey; // <ESM::MagicEffect index, spell ID>
@@ -158,6 +161,9 @@ namespace MWMechanics
         bool isParalyzed() const;
 
         bool isDead() const;
+
+        bool isDeathAnimationFinished() const;
+        void setDeathAnimationFinished(bool finished);
 
         void notifyDied();
 
@@ -256,8 +262,10 @@ namespace MWMechanics
         void setGoldPool(int pool);
         int getGoldPool() const;
 
-        unsigned char getDeathAnimation() const;
-        void setDeathAnimation(unsigned char index);
+        signed char getDeathAnimation() const; // -1 means not decided
+        void setDeathAnimation(signed char index);
+
+        MWWorld::TimeStamp getTimeOfDeath() const;
 
         int getActorId();
         ///< Will generate an actor ID, if the actor does not have one yet.

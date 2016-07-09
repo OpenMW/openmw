@@ -20,7 +20,16 @@ namespace MWMechanics
     class MechanicsManager : public MWBase::MechanicsManager
     {
             MWWorld::Ptr mWatched;
-            NpcStats mWatchedStats;
+
+            AttributeValue mWatchedAttributes[8];
+            SkillValue mWatchedSkills[27];
+
+            DynamicStat<float> mWatchedHealth;
+            DynamicStat<float> mWatchedMagicka;
+            DynamicStat<float> mWatchedFatigue;
+
+            float mWatchedTimeToStartDrowning;
+
             bool mWatchedStatsEmpty;
             bool mUpdatePlayer;
             bool mClassSelected;
@@ -92,15 +101,13 @@ namespace MWMechanics
             virtual int getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying);
             ///< This is used by every service to determine the price of objects given the trading skills of the player and NPC.
 
-            virtual int getDerivedDisposition(const MWWorld::Ptr& ptr);
+            virtual int getDerivedDisposition(const MWWorld::Ptr& ptr, bool addTemporaryDispositionChange = true);
             ///< Calculate the diposition of an NPC toward the player.
 
             virtual int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
 
-            virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
-                float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange);
-            void toLower(std::string npcFaction);
+            virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type, bool& success, float& tempChange, float& permChange);
             ///< Perform a persuasion action on NPC
 
             /// Check if \a observer is potentially aware of \a ptr. Does not do a line of sight check!
@@ -155,6 +162,7 @@ namespace MWMechanics
             virtual std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor);
 
             virtual std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor);
+            virtual std::list<MWWorld::Ptr> getEnemiesNearby(const MWWorld::Ptr& actor);
 
             virtual bool toggleAI();
             virtual bool isAIActive();
@@ -189,6 +197,8 @@ namespace MWMechanics
 
             virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
             virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor);
+
+            virtual void cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId);
 
         private:
             void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,

@@ -5,13 +5,10 @@
 #include <osg/Fog>
 #include <osg/Depth>
 #include <osg/Group>
-#include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Material>
 #include <osg/PositionAttitudeTransform>
-#include <osg/Depth>
 #include <osg/ClipNode>
-#include <osg/MatrixTransform>
 #include <osg/FrontFace>
 #include <osg/Shader>
 #include <osg/GLExtensions>
@@ -25,7 +22,7 @@
 #include <osgUtil/CullVisitor>
 
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 
 #include <components/nifosg/controller.hpp>
 #include <components/sceneutil/controller.hpp>
@@ -34,12 +31,14 @@
 
 #include <components/esm/loadcell.hpp>
 
+#include <components/fallback/fallback.hpp>
+
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/fallback.hpp"
 
 #include "vismask.hpp"
 #include "ripplesimulation.hpp"
 #include "renderbin.hpp"
+#include "util.hpp"
 
 namespace
 {
@@ -209,18 +208,8 @@ private:
     osg::Plane mPlane;
 };
 
-// Node callback to entirely skip the traversal.
-class NoTraverseCallback : public osg::NodeCallback
-{
-public:
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-    {
-        // no traverse()
-    }
-};
-
 /// Moves water mesh away from the camera slightly if the camera gets too close on the Z axis.
-/// The offset works around graphics artifacts that occured with the GL_DEPTH_CLAMP when the camera gets extremely close to the mesh (seen on NVIDIA at least).
+/// The offset works around graphics artifacts that occurred with the GL_DEPTH_CLAMP when the camera gets extremely close to the mesh (seen on NVIDIA at least).
 /// Must be added as a Cull callback.
 class FudgeCallback : public osg::NodeCallback
 {
@@ -313,7 +302,12 @@ public:
         setUpdateCallback(new NoTraverseCallback);
 
         // No need for fog here, we are already applying fog on the water surface itself as well as underwater fog
-        getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
+        // assign large value to effectively turn off fog
+        // shaders don't respect glDisable(GL_FOG)
+        osg::ref_ptr<osg::Fog> fog (new osg::Fog);
+        fog->setStart(10000000);
+        fog->setEnd(10000000);
+        getOrCreateStateSet()->setAttributeAndModes(fog, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
 
         mClipCullNode = new ClipCullNode;
         addChild(mClipCullNode);
@@ -380,7 +374,9 @@ public:
         setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         setReferenceFrame(osg::Camera::RELATIVE_RF);
 
-        setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Player|Mask_Lighting);
+        bool reflectActors = Settings::Manager::getBool("reflect actors", "Water");
+
+        setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_ParticleSystem|Mask_Sky|Mask_Player|Mask_Lighting|(reflectActors ? Mask_Actor : 0));
         setNodeMask(Mask_RenderToTexture);
 
         unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");
@@ -457,7 +453,7 @@ public:
 };
 
 Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico,
-             const MWWorld::Fallback* fallback, const std::string& resourcePath)
+             const Fallback::Map* fallback, const std::string& resourcePath)
     : mParent(parent)
     , mSceneRoot(sceneRoot)
     , mResourceSystem(resourceSystem)
@@ -469,25 +465,22 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 {
     mSimulation.reset(new RippleSimulation(parent, resourceSystem, fallback));
 
-    osg::ref_ptr<osg::Geometry> waterGeom = createWaterGeometry(CELL_SIZE*150, 40, 900);
-    waterGeom->setDrawCallback(new DepthClampCallback);
-
-    mWaterGeode = new osg::Geode;
-    mWaterGeode->addDrawable(waterGeom);
-    mWaterGeode->setNodeMask(Mask_Water);
+    mWaterGeom = createWaterGeometry(CELL_SIZE*150, 40, 900);
+    mWaterGeom->setDrawCallback(new DepthClampCallback);
+    mWaterGeom->setNodeMask(Mask_Water);
 
     if (ico)
-        ico->add(mWaterGeode);
+        ico->add(mWaterGeom);
 
     mWaterNode = new osg::PositionAttitudeTransform;
-    mWaterNode->addChild(mWaterGeode);
+    mWaterNode->addChild(mWaterGeom);
     mWaterNode->addCullCallback(new FudgeCallback);
 
     // simple water fallback for the local map
-    osg::ref_ptr<osg::Geode> geode2 (osg::clone(mWaterGeode.get(), osg::CopyOp::DEEP_COPY_NODES));
-    createSimpleWaterStateSet(geode2, mFallback->getFallbackFloat("Water_Map_Alpha"));
-    geode2->setNodeMask(Mask_SimpleWater);
-    mWaterNode->addChild(geode2);
+    osg::ref_ptr<osg::Geometry> geom2 (osg::clone(mWaterGeom.get(), osg::CopyOp::DEEP_COPY_NODES));
+    createSimpleWaterStateSet(geom2, mFallback->getFallbackFloat("Water_Map_Alpha"));
+    geom2->setNodeMask(Mask_SimpleWater);
+    mWaterNode->addChild(geom2);
 
     mSceneRoot->addChild(mWaterNode);
 
@@ -524,10 +517,10 @@ void Water::updateWaterMaterial()
             mParent->addChild(mRefraction);
         }
 
-        createShaderWaterStateSet(mWaterGeode, mReflection, mRefraction);
+        createShaderWaterStateSet(mWaterGeom, mReflection, mRefraction);
     }
     else
-        createSimpleWaterStateSet(mWaterGeode, mFallback->getFallbackFloat("Water_World_Alpha"));
+        createSimpleWaterStateSet(mWaterGeom, mFallback->getFallbackFloat("Water_World_Alpha"));
 
     updateVisible();
 }
@@ -561,10 +554,13 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
     {
         std::ostringstream texname;
         texname << "textures/water/" << texture << std::setw(2) << std::setfill('0') << i << ".dds";
-        textures.push_back(mResourceSystem->getTextureManager()->getTexture2D(texname.str(), osg::Texture::REPEAT, osg::Texture::REPEAT));
+        osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(mResourceSystem->getImageManager()->getImage(texname.str())));
+        tex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+        tex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+        textures.push_back(tex);
     }
 
-    if (!textures.size())
+    if (textures.empty())
         return;
 
     float fps = mFallback->getFallbackFloat("Water_SurfaceFPS");
@@ -586,12 +582,13 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     osg::ref_ptr<osg::Shader> fragmentShader (readShader(osg::Shader::FRAGMENT, mResourcePath + "/shaders/water_fragment.glsl", defineMap));
 
     osg::ref_ptr<osg::Texture2D> normalMap (new osg::Texture2D(readPngImage(mResourcePath + "/shaders/water_nm.png")));
+    if (normalMap->getImage())
+        normalMap->getImage()->flipVertical();
     normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
     normalMap->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
     normalMap->setMaxAnisotropy(16);
     normalMap->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
     normalMap->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-    normalMap->getImage()->flipVertical();
 
     osg::ref_ptr<osg::StateSet> shaderStateset = new osg::StateSet;
     shaderStateset->addUniform(new osg::Uniform("normalMap", 0));
@@ -647,6 +644,18 @@ Water::~Water()
     {
         mParent->removeChild(mRefraction);
         mRefraction = NULL;
+    }
+}
+
+void Water::listAssetsToPreload(std::vector<std::string> &textures)
+{
+    int frameCount = mFallback->getFallbackInt("Water_SurfaceFrameCount");
+    std::string texture = mFallback->getFallbackString("Water_SurfaceTexture");
+    for (int i=0; i<frameCount; ++i)
+    {
+        std::ostringstream texname;
+        texname << "textures/water/" << texture << std::setw(2) << std::setfill('0') << i << ".dds";
+        textures.push_back(texname.str());
     }
 }
 

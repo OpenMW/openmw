@@ -117,5 +117,16 @@
         <file alias="scene-view-c29">scene-view-status-29.png</file>
         <file alias="scene-view-c30">scene-view-status-30.png</file>
         <file alias="scene-view-c31">scene-view-status-31.png</file>
+        <file alias="scene-view-marker-2">scene-exterior-arrows.png</file>
+        <file alias="scene-view-marker-4">scene-exterior-borders.png</file>
+        <file alias="scene-view-marker-1">scene-exterior-marker.png</file>
+        <file alias="scene-view-marker-c0">scene-exterior-status-0.png</file>
+        <file alias="scene-view-marker-c1">scene-exterior-status-1.png</file>
+        <file alias="scene-view-marker-c2">scene-exterior-status-2.png</file>
+        <file alias="scene-view-marker-c3">scene-exterior-status-3.png</file>
+        <file alias="scene-view-marker-c4">scene-exterior-status-4.png</file>
+        <file alias="scene-view-marker-c5">scene-exterior-status-5.png</file>
+        <file alias="scene-view-marker-c6">scene-exterior-status-6.png</file>
+        <file alias="scene-view-marker-c7">scene-exterior-status-7.png</file>
     </qresource>
 </RCC>

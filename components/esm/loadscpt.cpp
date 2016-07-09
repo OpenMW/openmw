@@ -67,15 +67,17 @@ namespace ESM
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            switch (esm.retSubName().val)
+            switch (esm.retSubName().intval)
             {
                 case ESM::FourCC<'S','C','H','D'>::value:
+                {
                     SCHD data;
                     esm.getHT(data, 52);
                     mData = data.mData;
                     mId = data.mName.toString();
                     hasHeader = true;
                     break;
+                }
                 case ESM::FourCC<'S','C','V','R'>::value:
                     // list of local variables
                     loadSCVR(esm);
@@ -113,7 +115,7 @@ namespace ESM
         memset(&data, 0, sizeof(data));
 
         data.mData = mData;
-        memcpy(data.mName.name, mId.c_str(), mId.size());
+        data.mName.assign(mId);
 
         esm.writeHNT("SCHD", data, 52);
 

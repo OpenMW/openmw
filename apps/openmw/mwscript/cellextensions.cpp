@@ -49,7 +49,7 @@ namespace MWScript
                     world->getPlayer().setTeleported(true);
                     if (world->findExteriorPosition(cell, pos))
                     {
-                        world->changeToExteriorCell(pos);
+                        world->changeToExteriorCell(pos, true);
                         world->fixPosition(world->getPlayerPtr());
                     }
                     else
@@ -57,7 +57,7 @@ namespace MWScript
                         // Change to interior even if findInteriorPosition()
                         // yields false. In this case position will be zero-point.
                         world->findInteriorPosition(cell, pos);
-                        world->changeToInteriorCell(cell, pos);
+                        world->changeToInteriorCell(cell, pos, true);
                     }
                 }
         };
@@ -82,7 +82,7 @@ namespace MWScript
 
                     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-                    world->changeToExteriorCell (pos);
+                    world->changeToExteriorCell (pos, true);
                     world->fixPosition(world->getPlayerPtr());
                 }
         };

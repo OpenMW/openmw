@@ -39,6 +39,8 @@ namespace MWGui
         void resetCoins();
 
         void setAttributeValues();
+
+        std::string getLevelupClassImage(const int combatIncreases, const int magicIncreases, const int stealthIncreases);
     };
 
 }

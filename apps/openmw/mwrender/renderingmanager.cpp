@@ -17,7 +17,7 @@
 #include <osgViewer/Viewer>
 
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 
 #include <components/settings/settings.hpp>
@@ -26,12 +26,14 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/workqueue.hpp>
+#include <components/sceneutil/unrefqueue.hpp>
 
 #include <components/terrain/terraingrid.hpp>
 
 #include <components/esm/loadcell.hpp>
+#include <components/fallback/fallback.hpp>
 
-#include "../mwworld/fallback.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "sky.hpp"
@@ -42,6 +44,7 @@
 #include "camera.hpp"
 #include "water.hpp"
 #include "terrainstorage.hpp"
+#include "util.hpp"
 
 namespace MWRender
 {
@@ -125,11 +128,36 @@ namespace MWRender
         bool mWireframe;
     };
 
+    class PreloadCommonAssetsWorkItem : public SceneUtil::WorkItem
+    {
+    public:
+        PreloadCommonAssetsWorkItem(Resource::ResourceSystem* resourceSystem)
+            : mResourceSystem(resourceSystem)
+        {
+        }
+
+        virtual void doWork()
+        {
+            for (std::vector<std::string>::const_iterator it = mModels.begin(); it != mModels.end(); ++it)
+                mResourceSystem->getSceneManager()->getTemplate(*it);
+            for (std::vector<std::string>::const_iterator it = mTextures.begin(); it != mTextures.end(); ++it)
+                mResourceSystem->getImageManager()->getImage(*it);
+        }
+
+        std::vector<std::string> mModels;
+        std::vector<std::string> mTextures;
+
+    private:
+        Resource::ResourceSystem* mResourceSystem;
+    };
+
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem,
-                                       const MWWorld::Fallback* fallback, const std::string& resourcePath)
+                                       const Fallback::Map* fallback, const std::string& resourcePath)
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
+        , mWorkQueue(new SceneUtil::WorkQueue)
+        , mUnrefQueue(new SceneUtil::UnrefQueue)
         , mFogDepth(0.f)
         , mUnderwaterColor(fallback->getFallbackColour("Water_UnderwaterColor"))
         , mUnderwaterWeight(fallback->getFallbackFloat("Water_UnderwaterColorWeight"))
@@ -140,28 +168,40 @@ namespace MWRender
         , mFieldOfViewOverridden(false)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
+        resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
+        resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders"));
+        resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
+        resourceSystem->getSceneManager()->setForcePerPixelLighting(Settings::Manager::getBool("force per pixel lighting", "Shaders"));
+        resourceSystem->getSceneManager()->setAutoUseNormalMaps(Settings::Manager::getBool("auto use object normal maps", "Shaders"));
+        resourceSystem->getSceneManager()->setNormalMapPattern(Settings::Manager::getString("normal map pattern", "Shaders"));
+        resourceSystem->getSceneManager()->setNormalHeightMapPattern(Settings::Manager::getString("normal height map pattern", "Shaders"));
+        resourceSystem->getSceneManager()->setAutoUseSpecularMaps(Settings::Manager::getBool("auto use object specular maps", "Shaders"));
+        resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::Manager::getString("specular map pattern", "Shaders"));
 
-        osg::ref_ptr<SceneUtil::LightManager> lightRoot = new SceneUtil::LightManager;
-        lightRoot->setLightingMask(Mask_Lighting);
-        mLightRoot = lightRoot;
-        lightRoot->setStartLight(1);
+        osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager;
+        sceneRoot->setLightingMask(Mask_Lighting);
+        mSceneRoot = sceneRoot;
+        sceneRoot->setStartLight(1);
 
-        mRootNode->addChild(lightRoot);
+        mRootNode->addChild(sceneRoot);
 
         mPathgrid.reset(new Pathgrid(mRootNode));
 
-        mObjects.reset(new Objects(mResourceSystem, lightRoot));
+        mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));
 
         mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
 
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
-        mEffectManager.reset(new EffectManager(lightRoot, mResourceSystem));
+        mEffectManager.reset(new EffectManager(sceneRoot, mResourceSystem));
 
-        mWater.reset(new Water(mRootNode, lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
+        mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
 
-        mTerrain.reset(new Terrain::TerrainGrid(lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(),
-                                                new TerrainStorage(mResourceSystem->getVFS(), false), Mask_Terrain));
+        mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(),
+                                                new TerrainStorage(mResourceSystem->getVFS(), Settings::Manager::getString("normal map pattern", "Shaders"), Settings::Manager::getString("normal height map pattern", "Shaders"),
+                                                                   Settings::Manager::getBool("auto use terrain normal maps", "Shaders"),
+                                                     Settings::Manager::getString("terrain specular map pattern", "Shaders"), Settings::Manager::getBool("auto use terrain specular maps", "Shaders")),
+                                                 Mask_Terrain, &mResourceSystem->getSceneManager()->getShaderManager(), mUnrefQueue.get()));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 
@@ -175,21 +215,21 @@ namespace MWRender
         mSunLight->setAmbient(osg::Vec4f(0,0,0,1));
         mSunLight->setSpecular(osg::Vec4f(0,0,0,0));
         mSunLight->setConstantAttenuation(1.f);
-        lightRoot->addChild(source);
+        sceneRoot->addChild(source);
 
-        lightRoot->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
-        lightRoot->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::ON);
-        lightRoot->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+        sceneRoot->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+        sceneRoot->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::ON);
+        sceneRoot->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
 
-        lightRoot->setNodeMask(Mask_Scene);
-        lightRoot->setName("Scene Root");
+        sceneRoot->setNodeMask(Mask_Scene);
+        sceneRoot->setName("Scene Root");
 
-        mSky.reset(new SkyManager(lightRoot, resourceSystem->getSceneManager()));
+        mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager()));
 
         source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
 
         mStateUpdater = new StateUpdater;
-        lightRoot->addUpdateCallback(mStateUpdater);
+        sceneRoot->addUpdateCallback(mStateUpdater);
 
         osg::Camera::CullingMode cullingMode = osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING;
 
@@ -230,9 +270,40 @@ namespace MWRender
         return mResourceSystem;
     }
 
+    SceneUtil::WorkQueue* RenderingManager::getWorkQueue()
+    {
+        return mWorkQueue.get();
+    }
+
+    SceneUtil::UnrefQueue* RenderingManager::getUnrefQueue()
+    {
+        return mUnrefQueue.get();
+    }
+
+    Terrain::World* RenderingManager::getTerrain()
+    {
+        return mTerrain.get();
+    }
+
+    void RenderingManager::preloadCommonAssets()
+    {
+        osg::ref_ptr<PreloadCommonAssetsWorkItem> workItem (new PreloadCommonAssetsWorkItem(mResourceSystem));
+        mSky->listAssetsToPreload(workItem->mModels, workItem->mTextures);
+        mWater->listAssetsToPreload(workItem->mTextures);
+
+        workItem->mTextures.push_back("textures/_land_default.dds");
+
+        mWorkQueue->addWorkItem(workItem);
+    }
+
+    double RenderingManager::getReferenceTime() const
+    {
+        return mViewer->getFrameStamp()->getReferenceTime();
+    }
+
     osg::Group* RenderingManager::getLightRoot()
     {
-        return mLightRoot.get();
+        return mSceneRoot.get();
     }
 
     void RenderingManager::setNightEyeFactor(float factor)
@@ -274,15 +345,17 @@ namespace MWRender
     {
         setAmbientColour(SceneUtil::colourFromRGB(cell->mAmbi.mAmbient));
 
-        mSunLight->setDiffuse(SceneUtil::colourFromRGB(cell->mAmbi.mSunlight));
+        osg::Vec4f diffuse = SceneUtil::colourFromRGB(cell->mAmbi.mSunlight);
+        mSunLight->setDiffuse(diffuse);
+        mSunLight->setSpecular(diffuse);
         mSunLight->setDirection(osg::Vec3f(1.f,-1.f,-1.f));
     }
 
-    void RenderingManager::setSunColour(const osg::Vec4f &colour)
+    void RenderingManager::setSunColour(const osg::Vec4f& diffuse, const osg::Vec4f& specular)
     {
         // need to wrap this in a StateUpdater?
-        mSunLight->setDiffuse(colour);
-        mSunLight->setSpecular(colour);
+        mSunLight->setDiffuse(diffuse);
+        mSunLight->setSpecular(specular);
     }
 
     void RenderingManager::setSunDirection(const osg::Vec3f &direction)
@@ -294,12 +367,6 @@ namespace MWRender
         mSky->setSunDirection(position);
     }
 
-    osg::Vec3f RenderingManager::getEyePos()
-    {
-        osg::Vec3d eye = mViewer->getCameraManipulator()->getMatrix().getTrans();
-        return eye;
-    }
-
     void RenderingManager::addCell(const MWWorld::CellStore *store)
     {
         mPathgrid->addCell(store);
@@ -309,7 +376,6 @@ namespace MWRender
         if (store->getCell()->isExterior())
             mTerrain->loadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
     }
-
     void RenderingManager::removeCell(const MWWorld::CellStore *store)
     {
         mPathgrid->removeCell(store);
@@ -384,6 +450,8 @@ namespace MWRender
 
     void RenderingManager::update(float dt, bool paused)
     {
+        mUnrefQueue->flush(mWorkQueue.get());
+
         if (!paused)
         {
             mEffectManager->update(dt);
@@ -504,15 +572,6 @@ namespace MWRender
         mutable bool mDone;
     };
 
-
-    class NoTraverseCallback : public osg::NodeCallback
-    {
-    public:
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-        }
-    };
-
     void RenderingManager::screenshot(osg::Image *image, int w, int h)
     {
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
@@ -537,7 +596,7 @@ namespace MWRender
         image->setPixelFormat(texture->getInternalFormat());
 
         rttCamera->setUpdateCallback(new NoTraverseCallback);
-        rttCamera->addChild(mLightRoot);
+        rttCamera->addChild(mSceneRoot);
         rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~Mask_GUI));
 
         mRootNode->addChild(rttCamera);
@@ -720,7 +779,7 @@ namespace MWRender
         {
             mPlayerNode = new SceneUtil::PositionAttitudeTransform;
             mPlayerNode->setNodeMask(Mask_Player);
-            mLightRoot->addChild(mPlayerNode);
+            mSceneRoot->addChild(mPlayerNode);
         }
 
         mPlayerNode->setUserDataContainer(new osg::DefaultUserDataContainer);
@@ -784,13 +843,18 @@ namespace MWRender
 
     void RenderingManager::updateTextureFiltering()
     {
-        mResourceSystem->getTextureManager()->setFilterSettings(
+        mViewer->stopThreading();
+
+        mResourceSystem->getSceneManager()->setFilterSettings(
             Settings::Manager::getString("texture mag filter", "General"),
             Settings::Manager::getString("texture min filter", "General"),
             Settings::Manager::getString("texture mipmap", "General"),
-            Settings::Manager::getInt("anisotropy", "General"),
-            mViewer
+            Settings::Manager::getInt("anisotropy", "General")
         );
+
+        mTerrain->updateTextureFiltering();
+
+        mViewer->startThreading();
     }
 
     void RenderingManager::updateAmbient()

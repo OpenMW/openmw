@@ -2,6 +2,7 @@
 #define OPENMW_MWRENDER_WATER_H
 
 #include <memory>
+#include <vector>
 
 #include <osg/ref_ptr>
 #include <osg/Vec3f>
@@ -12,7 +13,7 @@ namespace osg
 {
     class Group;
     class PositionAttitudeTransform;
-    class Geode;
+    class Geometry;
     class Node;
 }
 
@@ -28,9 +29,13 @@ namespace Resource
 
 namespace MWWorld
 {
-    class Fallback;
     class CellStore;
     class Ptr;
+}
+
+namespace Fallback
+{
+    class Map;
 }
 
 namespace MWRender
@@ -48,9 +53,9 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mSceneRoot;
         osg::ref_ptr<osg::PositionAttitudeTransform> mWaterNode;
-        osg::ref_ptr<osg::Geode> mWaterGeode;
+        osg::ref_ptr<osg::Geometry> mWaterGeom;
         Resource::ResourceSystem* mResourceSystem;
-        const MWWorld::Fallback* mFallback;
+        const Fallback::Map* mFallback;
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
         std::auto_ptr<RippleSimulation> mSimulation;
@@ -77,9 +82,11 @@ namespace MWRender
 
     public:
         Water(osg::Group* parent, osg::Group* sceneRoot,
-              Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, const MWWorld::Fallback* fallback,
+              Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, const Fallback::Map* fallback,
               const std::string& resourcePath);
         ~Water();
+
+        void listAssetsToPreload(std::vector<std::string>& textures);
 
         void setEnabled(bool enabled);
 

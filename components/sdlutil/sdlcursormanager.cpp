@@ -211,12 +211,12 @@ namespace SDLUtil
         SDL_SetCursor(mCursorMap.find(name)->second);
     }
 
-    void SDLCursorManager::createCursor(const std::string& name, int rotDegrees, osg::Image* image, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
+    void SDLCursorManager::createCursor(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x, Uint8 hotspot_y)
     {
-        _createCursorFromResource(name, rotDegrees, image, size_x, size_y, hotspot_x, hotspot_y);
+        _createCursorFromResource(name, rotDegrees, image, hotspot_x, hotspot_y);
     }
 
-    void SDLCursorManager::_createCursorFromResource(const std::string& name, int rotDegrees, osg::Image* image, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
+    void SDLCursorManager::_createCursorFromResource(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x, Uint8 hotspot_y)
     {
         osg::ref_ptr<osg::Image> decompressed;
 
@@ -231,7 +231,7 @@ namespace SDLUtil
             return;
         }
 
-        SDL_Surface* surf = SDLUtil::imageToSurface(decompressed, false);
+        SDL_Surface* surf = SDLUtil::imageToSurface(decompressed, true);
 
         //set the cursor and store it for later
         SDL_Cursor* curs = SDL_CreateColorCursor(surf, hotspot_x, hotspot_y);
@@ -239,8 +239,6 @@ namespace SDLUtil
 
         //clean up
         SDL_FreeSurface(surf);
-
-        _setGUICursor(name);
     }
 
 }

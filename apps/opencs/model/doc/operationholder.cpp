@@ -2,7 +2,9 @@
 
 #include "operation.hpp"
 
-CSMDoc::OperationHolder::OperationHolder (Operation *operation) : mRunning (false)
+CSMDoc::OperationHolder::OperationHolder (Operation *operation)
+    : mOperation(NULL)
+    , mRunning (false)
 {
     if (operation)
         setOperation (operation);

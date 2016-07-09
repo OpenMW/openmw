@@ -211,7 +211,7 @@ void MagicEffect::load(ESMReader &esm, bool &isDeleted)
     while (esm.hasMoreSubs())
     {
         esm.getSubName();
-        switch (esm.retSubName().val)
+        switch (esm.retSubName().intval)
         {
             case ESM::FourCC<'I','T','E','X'>::value:
                 mIcon = esm.getHString();

@@ -8,6 +8,7 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <iostream>
 
 namespace
 {
@@ -512,12 +513,13 @@ namespace MWWorld
             bool deleted = false;
             cell->getNextRef(esm, ref, deleted);
 
-            // Add data required to make reference appear in the correct cell.
-            // We should not need to test for duplicates, as this part of the code is pre-cell merge.
-            cell->mMovedRefs.push_back(cMRef);
-            // But there may be duplicates here!
             if (!deleted)
             {
+                // Add data required to make reference appear in the correct cell.
+                // We should not need to test for duplicates, as this part of the code is pre-cell merge.
+                cell->mMovedRefs.push_back(cMRef);
+
+                // But there may be duplicates here!
                 ESM::CellRefTracker::iterator iter = std::find(cellAlt->mLeasedRefs.begin(), cellAlt->mLeasedRefs.end(), ref.mRefNum);
                 if (iter == cellAlt->mLeasedRefs.end())
                   cellAlt->mLeasedRefs.push_back(ref);
@@ -680,7 +682,10 @@ namespace MWWorld
                         ESM::MovedCellRef target0 = *itold;
                         ESM::Cell *wipecell = const_cast<ESM::Cell*>(search(target0.mTarget[0], target0.mTarget[1]));
                         ESM::CellRefTracker::iterator it_lease = std::find(wipecell->mLeasedRefs.begin(), wipecell->mLeasedRefs.end(), it->mRefNum);
-                        wipecell->mLeasedRefs.erase(it_lease);
+                        if (it_lease != wipecell->mLeasedRefs.end())
+                            wipecell->mLeasedRefs.erase(it_lease);
+                        else
+                            std::cerr << "can't find " << it->mRefNum.mIndex << " " << it->mRefNum.mContentFile  << " in leasedRefs " << std::endl;
                         *itold = *it;
                     }
                     else

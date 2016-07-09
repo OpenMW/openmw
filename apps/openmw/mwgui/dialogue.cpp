@@ -547,7 +547,7 @@ namespace MWGui
 
     void DialogueWindow::onScrollbarMoved(MyGUI::ScrollBar *sender, size_t pos)
     {
-        mHistory->setPosition(0, pos * -1);
+        mHistory->setPosition(0, static_cast<int>(pos) * -1);
     }
 
     void DialogueWindow::addResponse(const std::string &text, const std::string &title)
@@ -639,9 +639,7 @@ namespace MWGui
     {
         if(mMainWidget->getVisible() && mEnabled && mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
-            int disp = std::max(0, std::min(100,
-                MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
-                    + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()));
+            int disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr);
             mDispositionBar->setProgressRange(100);
             mDispositionBar->setProgressPosition(disp);
             mDispositionText->setCaption(MyGUI::utility::toString(disp)+std::string("/100"));

@@ -120,19 +120,15 @@ namespace MWMechanics
      * u = how long to move sideways
      *
      */
-    bool ObstacleCheck::check(const MWWorld::Ptr& actor, float duration)
+    bool ObstacleCheck::check(const MWWorld::Ptr& actor, float duration, float scaleMinimumDistance)
     {
         const MWWorld::Class& cls = actor.getClass();
         ESM::Position pos = actor.getRefData().getPosition();
 
-        // actors can move at most 60 fps (the physics framerate).
-        // the max() can be removed if we implement physics interpolation.
-        float movementDuration = std::max(1/60.f, duration);
-
         if(mDistSameSpot == -1)
-            mDistSameSpot = DIST_SAME_SPOT * cls.getSpeed(actor);
+            mDistSameSpot = DIST_SAME_SPOT * cls.getSpeed(actor) * scaleMinimumDistance;
 
-        float distSameSpot = mDistSameSpot * movementDuration;
+        float distSameSpot = mDistSameSpot * duration;
 
         bool samePosition =  (osg::Vec2f(pos.pos[0], pos.pos[1]) - osg::Vec2f(mPrevX, mPrevY)).length2() <  distSameSpot * distSameSpot;
 

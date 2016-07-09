@@ -20,7 +20,7 @@
 #include <components/sdlutil/imagetosurface.hpp>
 
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include <components/compiler/extensions0.hpp>
 
@@ -69,17 +69,13 @@ void OMW::Engine::executeLocalScripts()
     MWWorld::LocalScripts& localScripts = mEnvironment.getWorld()->getLocalScripts();
 
     localScripts.startIteration();
-
-    while (!localScripts.isFinished())
+    std::pair<std::string, MWWorld::Ptr> script;
+    while (localScripts.getNext(script))
     {
-        std::pair<std::string, MWWorld::Ptr> script = localScripts.getNext();
-
         MWScript::InterpreterContext interpreterContext (
             &script.second.getRefData().getLocals(), script.second);
         mEnvironment.getScriptManager()->run (script.first, interpreterContext);
     }
-
-    localScripts.setIgnore (MWWorld::Ptr());
 }
 
 void OMW::Engine::frame(float frametime)
@@ -450,13 +446,12 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true);
 
     mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
-    mResourceSystem->getTextureManager()->setUnRefImageDataAfterApply(true);
-    mResourceSystem->getTextureManager()->setFilterSettings(
+    mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(false); // keep to Off for now to allow better state sharing
+    mResourceSystem->getSceneManager()->setFilterSettings(
         Settings::Manager::getString("texture mag filter", "General"),
         Settings::Manager::getString("texture min filter", "General"),
         Settings::Manager::getString("texture mipmap", "General"),
-        Settings::Manager::getInt("anisotropy", "General"),
-        NULL
+        Settings::Manager::getInt("anisotropy", "General")
     );
 
     // Create input and UI first to set up a bootstrapping environment for
@@ -474,8 +469,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     }
 
     // find correct path to the game controller bindings
-    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/gamecontrollerdb.cfg";
-    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/gamecontrollerdb.cfg";
+    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/gamecontrollerdb.txt";
+    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/gamecontrollerdb.txt";
     std::string gameControllerdb;
     if (boost::filesystem::exists(localdefault))
         gameControllerdb = localdefault;
@@ -653,6 +648,8 @@ void OMW::Engine::go()
     }
     else if (!mSkipMenu)
     {
+        mEnvironment.getWorld()->preloadCommonAssets();
+
         // start in main menu
         mEnvironment.getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         try

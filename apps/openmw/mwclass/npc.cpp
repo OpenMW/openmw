@@ -37,6 +37,7 @@
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
+#include "../mwrender/npcanimation.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -350,6 +351,8 @@ namespace MWClass
 
                 data->mNpcStats.setNeedRecalcDynamicStats(true);
             }
+            if (data->mNpcStats.isDead())
+                data->mNpcStats.setDeathAnimationFinished(true);
 
             // race powers
             const ESM::Race *race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
@@ -427,6 +430,91 @@ namespace MWClass
             model = "meshes\\base_animkna.nif";
 
         return model;
+    }
+
+    void Npc::getModelsToPreload(const MWWorld::Ptr &ptr, std::vector<std::string> &models) const
+    {
+        const MWWorld::LiveCellRef<ESM::NPC> *npc = ptr.get<ESM::NPC>();
+        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().search(npc->mBase->mRace);
+        if(race && race->mData.mFlags & ESM::Race::Beast)
+            models.push_back("meshes\\base_animkna.nif");
+
+        // keep these always loaded just in case
+        models.push_back("meshes/xargonian_swimkna.nif");
+        models.push_back("meshes/xbase_anim_female.nif");
+        models.push_back("meshes/xbase_anim.nif");
+
+        if (!npc->mBase->mModel.empty())
+            models.push_back("meshes/"+npc->mBase->mModel);
+
+        if (!npc->mBase->mHead.empty())
+        {
+            const ESM::BodyPart* head = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(npc->mBase->mHead);
+            if (head)
+                models.push_back("meshes/"+head->mModel);
+        }
+        if (!npc->mBase->mHair.empty())
+        {
+            const ESM::BodyPart* hair = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(npc->mBase->mHair);
+            if (hair)
+                models.push_back("meshes/"+hair->mModel);
+        }
+
+        bool female = (npc->mBase->mFlags & ESM::NPC::Female);
+
+        // FIXME: use const version of InventoryStore functions once they are available
+        // preload equipped items
+        if (ptr.getClass().hasInventoryStore(ptr))
+        {
+            MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
+            for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+            {
+                MWWorld::ContainerStoreIterator equipped = invStore.getSlot(slot);
+                if (equipped != invStore.end())
+                {
+                    std::vector<ESM::PartReference> parts;
+                    if(equipped->getTypeName() == typeid(ESM::Clothing).name())
+                    {
+                        const ESM::Clothing *clothes = equipped->get<ESM::Clothing>()->mBase;
+                        parts = clothes->mParts.mParts;
+                    }
+                    else if(equipped->getTypeName() == typeid(ESM::Armor).name())
+                    {
+                        const ESM::Armor *armor = equipped->get<ESM::Armor>()->mBase;
+                        parts = armor->mParts.mParts;
+                    }
+                    else
+                    {
+                        std::string model = equipped->getClass().getModel(*equipped);
+                        if (!model.empty())
+                            models.push_back(model);
+                    }
+
+                    for (std::vector<ESM::PartReference>::const_iterator it = parts.begin(); it != parts.end(); ++it)
+                    {
+                        std::string partname = female ? it->mFemale : it->mMale;
+                        if (partname.empty())
+                            partname = female ? it->mMale : it->mFemale;
+                        const ESM::BodyPart* part = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(partname);
+                        if (part && !part->mModel.empty())
+                            models.push_back("meshes/"+part->mModel);
+                    }
+                }
+            }
+        }
+
+        // preload body parts
+        if (race)
+        {
+            const std::vector<const ESM::BodyPart*>& parts = MWRender::NpcAnimation::getBodyParts(Misc::StringUtils::lowerCase(race->mId), female, false, false);
+            for (std::vector<const ESM::BodyPart*>::const_iterator it = parts.begin(); it != parts.end(); ++it)
+            {
+                const ESM::BodyPart* part = *it;
+                if (part && !part->mModel.empty())
+                    models.push_back("meshes/"+part->mModel);
+            }
+        }
+
     }
 
     std::string Npc::getName (const MWWorld::ConstPtr& ptr) const
@@ -551,18 +639,7 @@ namespace MWClass
             damage *= store.find("fCombatKODamageMult")->getFloat();
 
         // Apply "On hit" enchanted weapons
-        std::string enchantmentName = !weapon.isEmpty() ? weapon.getClass().getEnchantment(weapon) : "";
-        if (!enchantmentName.empty())
-        {
-            const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
-                        enchantmentName);
-            if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
-            {
-                MWMechanics::CastSpell cast(ptr, victim);
-                cast.mHitPosition = hitPosition;
-                cast.cast(weapon);
-            }
-        }
+        MWMechanics::applyOnStrikeEnchantment(ptr, victim, weapon, hitPosition);
 
         MWMechanics::applyElementalShields(ptr, victim);
 
@@ -1217,20 +1294,31 @@ namespace MWClass
 
     void Npc::respawn(const MWWorld::Ptr &ptr) const
     {
-        if (ptr.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Respawn)
+        const MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
+        if (ptr.getRefData().getCount() > 0 && !creatureStats.isDead())
+            return;
+
+        const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        static const float fCorpseRespawnDelay = gmst.find("fCorpseRespawnDelay")->getFloat();
+        static const float fCorpseClearDelay = gmst.find("fCorpseClearDelay")->getFloat();
+
+        float delay = ptr.getRefData().getCount() == 0 ? fCorpseClearDelay : std::min(fCorpseRespawnDelay, fCorpseClearDelay);
+
+        if (ptr.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Respawn
+                && creatureStats.getTimeOfDeath() + delay <= MWBase::Environment::get().getWorld()->getTimeStamp())
         {
-            // Note we do not respawn moved references in the cell they were moved to. Instead they are respawned in the original cell.
-            // This also means we cannot respawn dynamically placed references with no content file connection.
             if (ptr.getCellRef().hasContentFile())
             {
                 if (ptr.getRefData().getCount() == 0)
                     ptr.getRefData().setCount(1);
 
-                // Reset to original position
-                ptr.getRefData().setPosition(ptr.getCellRef().getPosition());
-
                 MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
                 ptr.getRefData().setCustomData(NULL);
+
+                // Reset to original position
+                MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
+                        ptr.getCellRef().getPosition().pos[1],
+                        ptr.getCellRef().getPosition().pos[2]);
             }
         }
     }

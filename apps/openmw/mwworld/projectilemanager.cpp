@@ -92,7 +92,7 @@ namespace MWWorld
             attachTo = rotateNode;
         }
 
-        mResourceSystem->getSceneManager()->createInstance(model, attachTo);
+        mResourceSystem->getSceneManager()->getInstance(model, attachTo);
 
         SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
         state.mNode->accept(disableFreezeOnCullVisitor);
@@ -117,7 +117,13 @@ namespace MWWorld
                                             const ESM::EffectList &effects, const Ptr &caster, const std::string &sourceName,
                                             const osg::Vec3f& fallbackDirection)
     {
-        osg::Vec3f pos = mPhysics->getPosition(caster) + osg::Vec3f(0,0,mPhysics->getHalfExtents(caster).z() * 0.5); // Spawn at 0.75 * ActorHeight
+        osg::Vec3f pos = caster.getRefData().getPosition().asVec3();
+        if (caster.getClass().isActor())
+        {
+            // Spawn at 0.75 * ActorHeight
+            // Note: we ignore the collision box offset, this is required to make some flying creatures work as intended.
+            pos.z() += mPhysics->getHalfExtents(caster).z() * 2 * 0.75;
+        }
 
         if (MWBase::Environment::get().getWorld()->isUnderwater(caster.getCell(), pos)) // Underwater casting not possible
             return;
@@ -237,7 +243,8 @@ namespace MWWorld
 
             if (hit)
             {
-                MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, ESM::RT_Target, it->mSpellId, it->mSourceName);
+                MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, result.mHitObject,
+                                                                    ESM::RT_Target, it->mSpellId, it->mSourceName);
 
                 MWBase::Environment::get().getSoundManager()->stopSound(it->mSound);
                 mParent->removeChild(it->mNode);

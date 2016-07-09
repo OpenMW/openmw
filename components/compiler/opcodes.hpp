@@ -52,7 +52,6 @@ namespace Compiler
         const int opcodeGetLineOfSight = 0x2000222;
         const int opcodeGetLineOfSightExplicit = 0x2000223;
         const int opcodeToggleAI = 0x2000224;
-        const int opcodeToggleAIExplicit = 0x2000225;
         const int opcodeGetTarget = 0x2000238;
         const int opcodeGetTargetExplicit = 0x2000239;
         const int opcodeStartCombat = 0x200023a;
@@ -277,6 +276,8 @@ namespace Compiler
         const int opcodeEnableTeleporting = 0x2000216;
         const int opcodeShowVars = 0x200021d;
         const int opcodeShowVarsExplicit = 0x200021e;
+        const int opcodeShow = 0x2000304;
+        const int opcodeShowExplicit = 0x2000305;
         const int opcodeToggleGodMode = 0x200021f;
         const int opcodeToggleScripts = 0x2000301;
         const int opcodeDisableLevitation = 0x2000220;
@@ -498,6 +499,8 @@ namespace Compiler
         const int opcodeMoveWorld = 0x2000208;
         const int opcodeMoveWorldExplicit = 0x2000209;
         const int opcodeResetActors = 0x20002f4;
+        const int opcodeFixme = 0x2000302;
+        const int opcodeFixmeExplicit = 0x2000303;
     }
 
     namespace User

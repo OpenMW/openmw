@@ -39,7 +39,13 @@ namespace Terrain
               Storage* storage, int nodeMask);
         virtual ~World();
 
+        virtual void updateTextureFiltering() {}
+
+        virtual void updateCache() {}
+
         float getHeightAt (const osg::Vec3f& worldPos);
+
+        virtual osg::ref_ptr<osg::Node> cacheCell(int x, int y) {return NULL;}
 
         // This is only a hint and may be ignored by the implementation.
         virtual void loadCell(int x, int y) {}
@@ -49,8 +55,6 @@ namespace Terrain
 
     protected:
         Storage* mStorage;
-
-        BufferCache mCache;
 
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mTerrainRoot;

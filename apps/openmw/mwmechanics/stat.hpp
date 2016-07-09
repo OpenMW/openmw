@@ -32,7 +32,6 @@ namespace MWMechanics
 
             /// Set base and modified to \a value.
             void set (const T& value);
-            void modify(const T& diff);
 
             /// Set base and adjust modified accordingly.
             void setBase (const T& value);
@@ -84,9 +83,6 @@ namespace MWMechanics
 
             /// Set modified value an adjust base accordingly.
             void setModified (T value, const T& min, const T& max = std::numeric_limits<T>::max());
-
-            /// Change modified relatively.
-            void modify (const T& diff, bool allowCurrentDecreaseBelowZero=false);
 
             void setCurrent (const T& value, bool allowDecreaseBelowZero = false);
             void setModifier (const T& modifier, bool allowCurrentDecreaseBelowZero=false);

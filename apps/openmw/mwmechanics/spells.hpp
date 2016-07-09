@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <set>
 
 #include <components/misc/stringops.hpp>
 
@@ -32,8 +33,12 @@ namespace MWMechanics
         public:
 
             typedef const ESM::Spell* SpellKey;
+            struct SpellParams {
+                std::map<int, float> mEffectRands; // <effect index, normalised random magnitude>
+                std::set<int> mPurgedEffects; // indices of purged effects
+            };
 
-            typedef std::map<SpellKey, std::map<const int, float> > TContainer; // ID, <effect index, normalised random magnitude>
+            typedef std::map<SpellKey, SpellParams> TContainer;
             typedef TContainer::const_iterator TIterator;
 
             struct CorprusStats
@@ -45,7 +50,6 @@ namespace MWMechanics
             };
 
         private:
-
             TContainer mSpells;
 
             // spell-tied effects that will be applied even after removing the spell (currently used to keep positive effects when corprus is removed)
@@ -58,14 +62,23 @@ namespace MWMechanics
 
             std::map<SpellKey, CorprusStats> mCorprusSpells;
 
+            mutable bool mSpellsChanged;
+            mutable MagicEffects mEffects;
+            mutable std::map<SpellKey, MagicEffects> mSourcedEffects;
+            void rebuildEffects() const;
+
             /// Get spell from ID, throws exception if not found
             const ESM::Spell* getSpell(const std::string& id) const;
 
         public:
+            Spells();
 
             void worsenCorprus(const ESM::Spell* spell);
             static bool hasCorprusEffect(const ESM::Spell *spell);
             const std::map<SpellKey, CorprusStats> & getCorprusSpells() const;
+
+            void purgeEffect(int effectId);
+            void purgeEffect(int effectId, const std::string & sourceId);
 
             bool canUsePower (const ESM::Spell* spell) const;
             void usePower (const ESM::Spell* spell);

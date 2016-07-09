@@ -19,14 +19,12 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
-
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwrender/animation.hpp"
 
 #include "magiceffects.hpp"
 #include "npcstats.hpp"
-#include "summoning.hpp"
 #include "actorutil.hpp"
 
 namespace
@@ -60,13 +58,6 @@ namespace
             speed = magicEffect->mData.mSpeed;
             break;
         }
-    }
-
-    void applyDynamicStatsEffect(int attribute, const MWWorld::Ptr& target, float magnitude)
-    {
-        MWMechanics::DynamicStat<float> value = target.getClass().getCreatureStats(target).getDynamic(attribute);
-        value.setCurrent(value.getCurrent()+magnitude, attribute == 2);
-        target.getClass().getCreatureStats(target).setDynamic(attribute, value);
     }
 
 }
@@ -378,6 +369,11 @@ namespace MWMechanics
             if (!checkEffectTarget(effectIt->mEffectID, target, castByPlayer))
                 continue;
 
+            // caster needs to be an actor for linked effects (e.g. Absorb)
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::CasterLinked
+                    && (caster.isEmpty() || !caster.getClass().isActor()))
+                continue;
+
             // If player is healing someone, show the target's HP bar
             if (castByPlayer && target != caster
                     && effectIt->mEffectID == ESM::MagicEffect::RestoreHealth
@@ -512,7 +508,7 @@ namespace MWMechanics
                     std::map<CreatureStats::SummonKey, int>::iterator found = targetStats.getSummonedCreatureMap().find(std::make_pair(effectIt->mEffectID, mId));
                     if (found != targetStats.getSummonedCreatureMap().end())
                     {
-                        cleanupSummonedCreature(targetStats, found->second);
+                        MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(target, found->second);
                         targetStats.getSummonedCreatureMap().erase(found);
                     }
                 }
@@ -552,7 +548,7 @@ namespace MWMechanics
         }
 
         if (!exploded)
-            MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, effects, caster, range, mId, mSourceName);
+            MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, effects, caster, target, range, mId, mSourceName);
 
         if (!reflectedEffects.mList.empty())
             inflict(caster, target, reflectedEffects, range, true, exploded);
@@ -689,7 +685,7 @@ namespace MWMechanics
         throw std::runtime_error("ID type cannot be casted");
     }
 
-    bool CastSpell::cast(const MWWorld::Ptr &item)
+    bool CastSpell::cast(const MWWorld::Ptr &item, bool launchProjectile)
     {
         std::string enchantmentName = item.getClass().getEnchantment(item);
         if (enchantmentName.empty())
@@ -756,15 +752,20 @@ namespace MWMechanics
             inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Touch);
         }
 
-        std::string projectileModel;
-        std::string sound;
-        float speed = 0;
-        getProjectileInfo(enchantment->mEffects, projectileModel, sound, speed);
-        if (!projectileModel.empty())
-            MWBase::Environment::get().getWorld()->launchMagicBolt(projectileModel, sound, mId, speed,
-                                                               false, enchantment->mEffects, mCaster, mSourceName,
-                                                                   // Not needed, enchantments can only be cast by actors
-                                                                   osg::Vec3f(1,0,0));
+        if (launchProjectile)
+        {
+            std::string projectileModel;
+            std::string sound;
+            float speed = 0;
+            getProjectileInfo(enchantment->mEffects, projectileModel, sound, speed);
+            if (!projectileModel.empty())
+                MWBase::Environment::get().getWorld()->launchMagicBolt(projectileModel, sound, mId, speed,
+                                                                   false, enchantment->mEffects, mCaster, mSourceName,
+                                                                       // Not needed, enchantments can only be cast by actors
+                                                                       osg::Vec3f(1,0,0));
+        }
+        else if (!mTarget.isEmpty())
+            inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Target);
 
         return true;
     }

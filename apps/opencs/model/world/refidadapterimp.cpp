@@ -108,7 +108,7 @@ void CSMWorld::IngredEffectRefIdAdapter::setNestedTable (const RefIdColumn* colu
     ESM::Ingredient ingredient = record.get();
 
     ingredient.mData =
-        static_cast<const NestedTableWrapper<std::vector<typename ESM::Ingredient::IRDTstruct> >&>(nestedTable).mNestedTable.at(0);
+        static_cast<const NestedTableWrapper<std::vector<ESM::Ingredient::IRDTstruct> >&>(nestedTable).mNestedTable.at(0);
 
     record.setModified (ingredient);
 }
@@ -120,11 +120,11 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::IngredEffectRefIdAdapter::nestedTabl
         static_cast<const Record<ESM::Ingredient>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
     // return the whole struct
-    std::vector<typename ESM::Ingredient::IRDTstruct> wrap;
+    std::vector<ESM::Ingredient::IRDTstruct> wrap;
     wrap.push_back(record.get().mData);
 
     // deleted by dtor of NestedTableStoring
-    return new NestedTableWrapper<std::vector<typename ESM::Ingredient::IRDTstruct> >(wrap);
+    return new NestedTableWrapper<std::vector<ESM::Ingredient::IRDTstruct> >(wrap);
 }
 
 QVariant CSMWorld::IngredEffectRefIdAdapter::getNestedData (const RefIdColumn *column,
@@ -1129,7 +1129,7 @@ void CSMWorld::CreatureAttributesRefIdAdapter::setNestedTable (const RefIdColumn
 
     // store the whole struct
     creature.mData =
-        static_cast<const NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> > &>(nestedTable).mNestedTable.at(0);
+        static_cast<const NestedTableWrapper<std::vector<ESM::Creature::NPDTstruct> > &>(nestedTable).mNestedTable.at(0);
 
     record.setModified (creature);
 }
@@ -1141,10 +1141,10 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::CreatureAttributesRefIdAdapter::nest
         static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
     // return the whole struct
-    std::vector<typename ESM::Creature::NPDTstruct> wrap;
+    std::vector<ESM::Creature::NPDTstruct> wrap;
     wrap.push_back(record.get().mData);
     // deleted by dtor of NestedTableStoring
-    return new NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> >(wrap);
+    return new NestedTableWrapper<std::vector<ESM::Creature::NPDTstruct> >(wrap);
 }
 
 QVariant CSMWorld::CreatureAttributesRefIdAdapter::getNestedData (const RefIdColumn *column,
@@ -1153,7 +1153,7 @@ QVariant CSMWorld::CreatureAttributesRefIdAdapter::getNestedData (const RefIdCol
     const Record<ESM::Creature>& record =
         static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
-    const ESM::Creature creature = record.get();
+    const ESM::Creature& creature = record.get();
 
     if (subColIndex == 0)
         return subRowIndex;
@@ -1235,7 +1235,7 @@ void CSMWorld::CreatureAttackRefIdAdapter::setNestedTable (const RefIdColumn* co
 
     // store the whole struct
     creature.mData =
-        static_cast<const NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> > &>(nestedTable).mNestedTable.at(0);
+        static_cast<const NestedTableWrapper<std::vector<ESM::Creature::NPDTstruct> > &>(nestedTable).mNestedTable.at(0);
 
     record.setModified (creature);
 }
@@ -1247,10 +1247,10 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::CreatureAttackRefIdAdapter::nestedTa
         static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
     // return the whole struct
-    std::vector<typename ESM::Creature::NPDTstruct> wrap;
+    std::vector<ESM::Creature::NPDTstruct> wrap;
     wrap.push_back(record.get().mData);
     // deleted by dtor of NestedTableStoring
-    return new NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> >(wrap);
+    return new NestedTableWrapper<std::vector<ESM::Creature::NPDTstruct> >(wrap);
 }
 
 QVariant CSMWorld::CreatureAttackRefIdAdapter::getNestedData (const RefIdColumn *column,
@@ -1259,7 +1259,7 @@ QVariant CSMWorld::CreatureAttackRefIdAdapter::getNestedData (const RefIdColumn 
     const Record<ESM::Creature>& record =
         static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
-    const ESM::Creature creature = record.get();
+    const ESM::Creature& creature = record.get();
 
     if (subRowIndex < 0 || subRowIndex > 2 || subColIndex < 0 || subColIndex > 2)
         throw std::runtime_error ("index out of range");
@@ -1337,7 +1337,7 @@ QVariant CSMWorld::CreatureMiscRefIdAdapter::getNestedData (const RefIdColumn *c
     const Record<ESM::Creature>& record =
         static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
-    const ESM::Creature creature = record.get();
+    const ESM::Creature& creature = record.get();
 
     switch (subColIndex)
     {
@@ -1440,26 +1440,28 @@ void CSMWorld::WeaponRefIdAdapter::setData (const RefIdColumn *column, RefIdData
     Record<ESM::Weapon>& record = static_cast<Record<ESM::Weapon>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Weapon)));
 
+    ESM::Weapon weapon = record.get();
+
     if (column==mColumns.mType)
-        record.get().mData.mType = value.toInt();
+        weapon.mData.mType = value.toInt();
     else if (column==mColumns.mHealth)
-        record.get().mData.mHealth = value.toInt();
+        weapon.mData.mHealth = value.toInt();
     else if (column==mColumns.mSpeed)
-        record.get().mData.mSpeed = value.toFloat();
+        weapon.mData.mSpeed = value.toFloat();
     else if (column==mColumns.mReach)
-        record.get().mData.mReach = value.toFloat();
+        weapon.mData.mReach = value.toFloat();
     else if (column==mColumns.mChop[0])
-        record.get().mData.mChop[0] = value.toInt();
+        weapon.mData.mChop[0] = value.toInt();
     else if (column==mColumns.mChop[1])
-        record.get().mData.mChop[1] = value.toInt();
+        weapon.mData.mChop[1] = value.toInt();
     else if (column==mColumns.mSlash[0])
-        record.get().mData.mSlash[0] = value.toInt();
+        weapon.mData.mSlash[0] = value.toInt();
     else if (column==mColumns.mSlash[1])
-        record.get().mData.mSlash[1] = value.toInt();
+        weapon.mData.mSlash[1] = value.toInt();
     else if (column==mColumns.mThrust[0])
-        record.get().mData.mThrust[0] = value.toInt();
+        weapon.mData.mThrust[0] = value.toInt();
     else if (column==mColumns.mThrust[1])
-        record.get().mData.mThrust[1] = value.toInt();
+        weapon.mData.mThrust[1] = value.toInt();
     else
     {
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
@@ -1468,11 +1470,16 @@ void CSMWorld::WeaponRefIdAdapter::setData (const RefIdColumn *column, RefIdData
         if (iter!=mColumns.mFlags.end())
         {
             if (value.toInt()!=0)
-                record.get().mData.mFlags |= iter->second;
+                weapon.mData.mFlags |= iter->second;
             else
-                record.get().mData.mFlags &= ~iter->second;
+                weapon.mData.mFlags &= ~iter->second;
         }
         else
+        {
             EnchantableRefIdAdapter<ESM::Weapon>::setData (column, data, index, value);
+            return; // Don't overwrite changes made by base class
+        }
     }
+
+    record.setModified(weapon);
 }

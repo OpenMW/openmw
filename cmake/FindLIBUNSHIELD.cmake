@@ -1,8 +1,8 @@
 # Locate LIBUNSHIELD
 # This module defines
-# LIBUNSHIELD_LIBRARY
+# LIBUNSHIELD_LIBRARIES
 # LIBUNSHIELD_FOUND, if false, do not try to link to LibUnshield
-# LIBUNSHIELD_INCLUDE_DIR, where to find the headers
+# LIBUNSHIELD_INCLUDE_DIRS, where to find the headers
 #
 # Created by Tom Mason (wheybags) for OpenMW (http://openmw.org), based on FindMPG123.cmake
 #
@@ -12,37 +12,24 @@
 # function. Do we really need to repeat this stuff for every single
 # library when they all work the same? </today's rant>
 
-FIND_PATH(LIBUNSHIELD_INCLUDE_DIR libunshield.h
-  HINTS
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
-  /opt
-  /usr/include
+include(LibFindMacros)
+
+set(POSSIBLE_LOCATIONS
+    ~/Library/Frameworks
+    /Library/Frameworks
+    /usr/local
+    /usr
+    /sw # Fink
+    /opt/local # DarwinPorts
+    /opt/csw # Blastwave
+    /opt
+    /usr/include
 )
 
-FIND_LIBRARY(LIBUNSHIELD_LIBRARY 
-  unshield
-  HINTS
-#  PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-  /usr/lib
+libfind_pkg_detect(LIBUNSHIELD libunshield
+    FIND_PATH libunshield.h
+        HINTS ${POSSIBLE_LOCATIONS}
+    FIND_LIBRARY unshield
+        HINTS ${POSSIBLE_LOCATIONS}
 )
-
-IF(LIBUNSHIELD_LIBRARY AND LIBUNSHIELD_INCLUDE_DIR)
-  SET(LIBUNSHIELD_FOUND "YES")
-ENDIF(LIBUNSHIELD_LIBRARY AND LIBUNSHIELD_INCLUDE_DIR)
-
+libfind_process(LIBUNSHIELD)

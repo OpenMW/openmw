@@ -204,7 +204,7 @@ namespace MWGui
     virtual void configureSkills (const SkillList& major, const SkillList& minor); ///< configure skill groups, each set contains the skill ID for that group.
     virtual void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
 
-    virtual void changeCell(MWWorld::CellStore* cell); ///< change the active cell
+    virtual void changeCell(const MWWorld::CellStore* cell); ///< change the active cell
 
     virtual void setFocusObject(const MWWorld::Ptr& focus);
     virtual void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
@@ -374,8 +374,8 @@ namespace MWGui
     virtual std::string correctIconPath(const std::string& path);
     virtual std::string correctBookartPath(const std::string& path, int width, int height);
     virtual std::string correctTexturePath(const std::string& path);
+    virtual bool textureExists(const std::string& path);
 
-    void requestMap(std::set<MWWorld::CellStore*> cells);
     void removeCell(MWWorld::CellStore* cell);
     void writeFog(MWWorld::CellStore* cell);
 

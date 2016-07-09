@@ -15,7 +15,6 @@
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadmgef.hpp>
 
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -449,6 +448,16 @@ MWMechanics::Alchemy::TEffectsIterator MWMechanics::Alchemy::beginEffects() cons
 MWMechanics::Alchemy::TEffectsIterator MWMechanics::Alchemy::endEffects() const
 {
     return mEffects.end();
+}
+
+bool MWMechanics::Alchemy::knownEffect(unsigned int potionEffectIndex, const MWWorld::Ptr &npc)
+{
+    MWMechanics::NpcStats& npcStats = npc.getClass().getNpcStats(npc);
+    int alchemySkill = npcStats.getSkill (ESM::Skill::Alchemy).getBase();
+    static const float fWortChanceValue =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->getFloat();
+    return (potionEffectIndex <= 1 && alchemySkill >= fWortChanceValue)
+            || (potionEffectIndex <= 3 && alchemySkill >= fWortChanceValue*2);
 }
 
 MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& name)

@@ -17,6 +17,8 @@ namespace ESSImport
             faction.mReputation = it->mReputation;
             out.mObject.mNpcStats.mFactions[Misc::StringUtils::lowerCase(it->mFactionName.toString())] = faction;
         }
+        for (int i=0; i<3; ++i)
+            out.mObject.mNpcStats.mSpecIncreases[i] = pcdt.mPNAM.mSpecIncreases[i];
         for (int i=0; i<8; ++i)
             out.mObject.mNpcStats.mSkillIncrease[i] = pcdt.mPNAM.mSkillIncreases[i];
         for (int i=0; i<27; ++i)
@@ -28,7 +30,7 @@ namespace ESSImport
         if (pcdt.mPNAM.mDrawState & PCDT::DrawState_Spell)
             out.mObject.mCreatureStats.mDrawState = 2;
 
-        firstPersonCam = (pcdt.mPNAM.mCameraState == PCDT::CameraState_FirstPerson);
+        firstPersonCam = !(pcdt.mPNAM.mCameraFlags & PCDT::CameraFlag_ThirdPerson);
 
         for (std::vector<std::string>::const_iterator it = pcdt.mKnownDialogueTopics.begin();
              it != pcdt.mKnownDialogueTopics.end(); ++it)

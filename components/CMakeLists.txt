@@ -22,7 +22,7 @@ endif (GIT_CHECKOUT)
 
 if (OPENGL_ES)
     find_package(OpenGLES REQUIRED)
-else()    
+else()
     find_package(OpenGL REQUIRED)
 endif()
 
@@ -41,13 +41,16 @@ add_component_dir (vfs
     )
 
 add_component_dir (resource
-    scenemanager keyframemanager texturemanager resourcesystem bulletshapemanager bulletshape niffilemanager objectcache
+    scenemanager keyframemanager imagemanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem resourcemanager
+    )
+
+add_component_dir (shader
+    shadermanager shadervisitor
     )
 
 add_component_dir (sceneutil
-    clone attach lightmanager visitor util statesetupdater controller skeleton riggeometry lightcontroller positionattitudetransform
-    # not used yet
-    #workqueue
+    clone attach visitor util statesetupdater controller skeleton riggeometry lightcontroller
+    lightmanager lightutil positionattitudetransform workqueue unrefqueue pathgridutil
     )
 
 add_component_dir (nif
@@ -138,6 +141,10 @@ add_component_dir (version
     version
     )
 
+add_component_dir (fallback
+    fallback validate
+    )
+
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 
@@ -174,7 +181,7 @@ if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     endif()
 endif ()
 
-include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${Bullet_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
@@ -184,7 +191,7 @@ else()
     set(GL_LIB ${OPENGL_gl_LIBRARY})
 endif()
 
-target_link_libraries(components 
+target_link_libraries(components
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_THREAD_LIBRARY}
@@ -198,7 +205,7 @@ target_link_libraries(components
     ${OSGGA_LIBRARIES}
     ${OSGFX_LIBRARIES}
     ${OSGANIMATION_LIBRARIES}
-    ${BULLET_LIBRARIES}
+    ${Bullet_LIBRARIES}
     ${SDL2_LIBRARY}
     # For MyGUI platform
     ${GL_LIB}

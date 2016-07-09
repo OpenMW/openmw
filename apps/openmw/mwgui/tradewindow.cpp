@@ -4,8 +4,6 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_ControllerManager.h>
 
-#include <components/misc/rng.hpp>
-
 #include <components/widgets/numericeditbox.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -19,8 +17,8 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "inventorywindow.hpp"
 #include "itemview.hpp"
@@ -323,78 +321,23 @@ namespace MWGui
             }
         }
 
-        // TODO: move to mwmechanics
+        bool offerAccepted = mTrading.haggle(player, mPtr, mCurrentBalance, mCurrentMerchantOffer);
 
-        // Is the player buying?
-        bool buying = (mCurrentMerchantOffer < 0);
+        // apply disposition change if merchant is NPC
+        if ( mPtr.getClass().isNpc() ) {
+            int dispositionDelta = offerAccepted
+                ? gmst.find("iBarterSuccessDisposition")->getInt()
+                : gmst.find("iBarterFailDisposition")->getInt();
 
-        if(mCurrentBalance > mCurrentMerchantOffer)
-        {
-            //if npc is a creature: reject (no haggle)
-            if (mPtr.getTypeName() != typeid(ESM::NPC).name())
-            {
-                MWBase::Environment::get().getWindowManager()->
-                    messageBox("#{sNotifyMessage9}");
-                return;
-            }
-
-            int a = abs(mCurrentMerchantOffer);
-            int b = abs(mCurrentBalance);
-            int d = 0;
-            if (buying)
-                d = int(100 * (a - b) / a);
-            else
-                d = int(100 * (b - a) / a);
-
-            int clampedDisposition = std::max(0, std::min(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
-                + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange(),100));
-
-            const MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
-            const MWMechanics::CreatureStats &playerStats = player.getClass().getCreatureStats(player);
-
-            float a1 = static_cast<float>(player.getClass().getSkill(player, ESM::Skill::Mercantile));
-            float b1 = 0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified();
-            float c1 = 0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified();
-            float d1 = static_cast<float>(mPtr.getClass().getSkill(mPtr, ESM::Skill::Mercantile));
-            float e1 = 0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified();
-            float f1 = 0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified();
-
-            float dispositionTerm = gmst.find("fDispositionMod")->getFloat() * (clampedDisposition - 50);
-            float pcTerm = (dispositionTerm - 50 + a1 + b1 + c1) * playerStats.getFatigueTerm();
-            float npcTerm = (d1 + e1 + f1) * sellerStats.getFatigueTerm();
-            float x = gmst.find("fBargainOfferMulti")->getFloat() * d + gmst.find("fBargainOfferBase")->getFloat();
-            if (buying)
-                x += abs(int(pcTerm - npcTerm));
-            else
-                x += abs(int(npcTerm - pcTerm));
-
-            int roll = Misc::Rng::rollDice(100) + 1;
-            if(roll > x || (mCurrentMerchantOffer < 0) != (mCurrentBalance < 0)) //trade refused
-            {
-                MWBase::Environment::get().getWindowManager()->
-                    messageBox("#{sNotifyMessage9}");
-
-                int iBarterFailDisposition = gmst.find("iBarterFailDisposition")->getInt();
-                if (mPtr.getClass().isNpc())
-                    MWBase::Environment::get().getDialogueManager()->applyDispositionChange(iBarterFailDisposition);
-                return;
-            }
-
-            //skill use!
-            float skillGain = 0.f;
-            int finalPrice = std::abs(mCurrentBalance);
-            int initialMerchantOffer = std::abs(mCurrentMerchantOffer);
-            if (!buying && (finalPrice > initialMerchantOffer) && finalPrice > 0)
-                skillGain = floor(100 * (finalPrice - initialMerchantOffer) / float(finalPrice));
-            else if (buying && (finalPrice < initialMerchantOffer) && initialMerchantOffer > 0)
-                skillGain = floor(100 * (initialMerchantOffer - finalPrice) / float(initialMerchantOffer));
-
-            player.getClass().skillUsageSucceeded(player, ESM::Skill::Mercantile, 0, skillGain);
+            MWBase::Environment::get().getDialogueManager()->applyDispositionChange(dispositionDelta);
         }
 
-        int iBarterSuccessDisposition = gmst.find("iBarterSuccessDisposition")->getInt();
-        if (mPtr.getClass().isNpc())
-            MWBase::Environment::get().getDialogueManager()->applyDispositionChange(iBarterSuccessDisposition);
+        // display message on haggle failure
+        if ( !offerAccepted ) {
+            MWBase::Environment::get().getWindowManager()->
+                messageBox("#{sNotifyMessage9}");
+            return;
+        }
 
         // make the item transfer
         mTradeModel->transferItems();
@@ -477,15 +420,15 @@ namespace MWGui
         // prevent overflows, and prevent entering INT_MIN since abs(INT_MIN) is undefined
         if (mCurrentBalance == INT_MAX || mCurrentBalance == INT_MIN+1)
             return;
-        if(mCurrentBalance<=-1) mCurrentBalance -= 1;
-        if(mCurrentBalance>=1) mCurrentBalance += 1;
+        if (mCurrentBalance < 0) mCurrentBalance -= 1;
+        else mCurrentBalance += 1;
         updateLabels();
     }
 
     void TradeWindow::onDecreaseButtonTriggered()
     {
-        if(mCurrentBalance<-1) mCurrentBalance += 1;
-        if(mCurrentBalance>1) mCurrentBalance -= 1;
+        if (mCurrentBalance < 0) mCurrentBalance += 1;
+        else mCurrentBalance -= 1;
         updateLabels();
     }
 
@@ -496,13 +439,13 @@ namespace MWGui
 
         mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + MyGUI::utility::toString(playerGold));
 
-        if (mCurrentBalance > 0)
+        if (mCurrentBalance < 0)
         {
-            mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalSold}");
+            mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalCost}");
         }
         else
         {
-            mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalCost}");
+            mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalSold}");
         }
 
         mTotalBalance->setValue(std::abs(mCurrentBalance));

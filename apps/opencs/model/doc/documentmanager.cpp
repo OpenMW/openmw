@@ -41,6 +41,7 @@ CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& con
 CSMDoc::DocumentManager::~DocumentManager()
 {
     mLoaderThread.quit();
+    mLoader.stop();
     mLoader.hasThingsToDo().wakeAll();
     mLoaderThread.wait();
 
@@ -64,7 +65,7 @@ CSMDoc::Document *CSMDoc::DocumentManager::makeDocument (
     const std::vector< boost::filesystem::path >& files,
     const boost::filesystem::path& savePath, bool new_)
 {
-    return new Document (mVFS, mConfiguration, files, new_, savePath, mResDir, mEncoding, mResourcesManager, mBlacklistedScripts);
+    return new Document (mVFS, mConfiguration, files, new_, savePath, mResDir, &mFallbackMap, mEncoding, mResourcesManager, mBlacklistedScripts);
 }
 
 void CSMDoc::DocumentManager::insertDocument (CSMDoc::Document *document)
@@ -98,6 +99,11 @@ void CSMDoc::DocumentManager::removeDocument (CSMDoc::Document *document)
 void CSMDoc::DocumentManager::setResourceDir (const boost::filesystem::path& parResDir)
 {
     mResDir = boost::filesystem::system_complete(parResDir);
+}
+
+void CSMDoc::DocumentManager::setFallbackMap(const std::map<std::string, std::string>& fallbackMap)
+{
+    mFallbackMap = Fallback::Map(fallbackMap);
 }
 
 void CSMDoc::DocumentManager::setEncoding (ToUTF8::FromType encoding)

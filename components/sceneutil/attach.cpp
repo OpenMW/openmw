@@ -1,10 +1,10 @@
 #include "attach.hpp"
 
 #include <stdexcept>
+#include <iostream>
 
 #include <osg/NodeVisitor>
 #include <osg/Group>
-#include <osg/Geode>
 #include <osg/FrontFace>
 #include <osg/PositionAttitudeTransform>
 #include <osg/MatrixTransform>
@@ -34,14 +34,30 @@ namespace SceneUtil
             std::string lowerName = Misc::StringUtils::lowerCase(node.getName());
             if ((lowerName.size() >= mFilter.size() && lowerName.compare(0, mFilter.size(), mFilter) == 0)
                     || (lowerName.size() >= mFilter2.size() && lowerName.compare(0, mFilter2.size(), mFilter2) == 0))
-            {
-                mParent->addChild(&node);
-            }
+                mToCopy.push_back(&node);
             else
                 traverse(node);
         }
 
+        void doCopy()
+        {
+            for (std::vector<osg::ref_ptr<osg::Node> >::iterator it = mToCopy.begin(); it != mToCopy.end(); ++it)
+            {
+                osg::ref_ptr<osg::Node> node = *it;
+                if (node->getNumParents() > 1)
+                    std::cerr << "CopyRigVisitor warning: node has multiple parents" << std::endl;
+                while (node->getNumParents())
+                    node->getParent(0)->removeChild(node);
+
+                mParent->addChild(node);
+            }
+            mToCopy.clear();
+        }
+
     private:
+        typedef std::vector<osg::ref_ptr<osg::Node> > NodeVector;
+        NodeVector mToCopy;
+
         osg::ref_ptr<osg::Group> mParent;
         std::string mFilter;
         std::string mFilter2;
@@ -55,10 +71,20 @@ namespace SceneUtil
 
             CopyRigVisitor copyVisitor(handle, filter);
             toAttach->accept(copyVisitor);
+            copyVisitor.doCopy();
 
-            master->asGroup()->addChild(handle);
-
-            return handle;
+            if (handle->getNumChildren() == 1)
+            {
+                osg::ref_ptr<osg::Node> newHandle = handle->getChild(0);
+                handle->removeChild(newHandle);
+                master->asGroup()->addChild(newHandle);
+                return newHandle;
+            }
+            else
+            {
+                master->asGroup()->addChild(handle);
+                return handle;
+            }
         }
         else
         {
@@ -93,9 +119,15 @@ namespace SceneUtil
                 // Need to invert culling because of the negative scale
                 // Note: for absolute correctness we would need to check the current front face for every mesh then invert it
                 // However MW isn't doing this either, so don't. Assuming all meshes are using backface culling is more efficient.
-                osg::FrontFace* frontFace = new osg::FrontFace;
-                frontFace->setMode(osg::FrontFace::CLOCKWISE);
-                trans->getOrCreateStateSet()->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
+                static osg::ref_ptr<osg::StateSet> frontFaceStateSet;
+                if (!frontFaceStateSet)
+                {
+                    frontFaceStateSet = new osg::StateSet;
+                    osg::FrontFace* frontFace = new osg::FrontFace;
+                    frontFace->setMode(osg::FrontFace::CLOCKWISE);
+                    frontFaceStateSet->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
+                }
+                trans->setStateSet(frontFaceStateSet);
             }
 
             if (trans)

@@ -20,7 +20,7 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
-#include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/alchemy.hpp"
 
 namespace MWClass
 {
@@ -124,17 +124,8 @@ namespace MWClass
 
         // hide effects the player doesnt know about
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats (player);
-        int alchemySkill = npcStats.getSkill (ESM::Skill::Alchemy).getBase();
-        int i=0;
-        static const float fWortChanceValue =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->getFloat();
-        for (MWGui::Widgets::SpellEffectList::iterator it = info.effects.begin(); it != info.effects.end(); ++it)
-        {
-            it->mKnown = (i <= 1 && alchemySkill >= fWortChanceValue)
-                 || (i <= 3 && alchemySkill >= fWortChanceValue*2);
-            ++i;
-        }
+        for (unsigned int i=0; i<info.effects.size(); ++i)
+            info.effects[i].mKnown = MWMechanics::Alchemy::knownEffect(i, player);
 
         info.isPotion = true;
 

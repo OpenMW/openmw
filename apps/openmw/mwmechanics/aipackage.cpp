@@ -8,12 +8,13 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+
+#include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+
 #include "creaturestats.hpp"
 #include "movement.hpp"
-#include "../mwworld/action.hpp"
-
 #include "steering.hpp"
 #include "actorutil.hpp"
 #include "coordinateconverter.hpp"
@@ -22,12 +23,13 @@ MWMechanics::AiPackage::~AiPackage() {}
 
 MWMechanics::AiPackage::AiPackage() : 
     mTimer(AI_REACTION_TIME + 1.0f), // to force initial pathbuild
+    mStarted(false),
     mIsShortcutting(false),
     mShortcutProhibited(false), mShortcutFailPos()
 {
 }
 
-MWWorld::Ptr MWMechanics::AiPackage::getTarget()
+MWWorld::Ptr MWMechanics::AiPackage::getTarget() const
 {
     return MWWorld::Ptr();
 }
@@ -38,6 +40,21 @@ bool MWMechanics::AiPackage::sideWithTarget() const
 }
 
 bool MWMechanics::AiPackage::followTargetThroughDoors() const
+{
+    return false;
+}
+
+bool MWMechanics::AiPackage::canCancel() const
+{
+    return true;
+}
+
+bool MWMechanics::AiPackage::shouldCancelPreviousAi() const
+{
+    return true;
+}
+
+bool MWMechanics::AiPackage::getRepeat() const
 {
     return false;
 }
@@ -73,7 +90,8 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
 
         if (!mIsShortcutting)
         {
-            if (wasShortcutting || doesPathNeedRecalc(dest)) // only rebuild path if the target has moved
+            if (!mStarted // If repeating an AI package (mStarted = false), build a new path so package doesn't immediately end
+                || wasShortcutting || doesPathNeedRecalc(dest)) // if need to rebuild path
             {
                 mPathFinder.buildSyncedPath(start, dest, actor.getCell());
 
@@ -94,7 +112,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
                 }
             }
 
-            if(!mPathFinder.getPath().empty()) //Path has points in it
+            if (!mPathFinder.getPath().empty()) //Path has points in it
             {
                 ESM::Pathgrid::Point lastPos = mPathFinder.getPath().back(); //Get the end of the proposed path
 
@@ -104,9 +122,10 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
         }
 
         mTimer = 0;
+        mStarted = true;
     }
 
-    if (isDestReached || mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1])) //Path finished?
+    if (isDestReached || mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1])) // if path is finished
     {
         // turn to destination point
         zTurn(actor, getZAngleToPoint(start, dest));

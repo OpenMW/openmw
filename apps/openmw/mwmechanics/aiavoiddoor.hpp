@@ -2,10 +2,14 @@
 #define GAME_MWMECHANICS_AIAVOIDDOOR_H
 
 #include "aipackage.hpp"
+
 #include <string>
-#include "pathfinding.hpp"
+
 #include <components/esm/defs.hpp>
+
 #include "../mwworld/class.hpp"
+
+#include "pathfinding.hpp"
 
 namespace MWMechanics
 {
@@ -25,6 +29,9 @@ namespace MWMechanics
             virtual int getTypeId() const;
 
             virtual unsigned int getPriority() const;
+
+            virtual bool canCancel() const { return false; }
+            virtual bool shouldCancelPreviousAi() const { return false; }
 
         private:
             float mDuration;

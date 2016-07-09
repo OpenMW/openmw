@@ -90,6 +90,7 @@ private:
     void readHeader();
 
     /// Get the index of a given file name, or -1 if not found
+    /// @note Thread safe.
     int getIndex(const char *str) const;
 
 public:
@@ -116,12 +117,17 @@ public:
 
     /** Open a file contained in the archive. Throws an exception if the
         file doesn't exist.
+     * @note Thread safe.
     */
     Files::IStreamPtr getFile(const char *file);
 
+    /** Open a file contained in the archive.
+     * @note Thread safe.
+    */
     Files::IStreamPtr getFile(const FileStruct* file);
 
     /// Get a list of all files
+    /// @note Thread safe.
     const FileList &getList() const
     { return files; }
 };

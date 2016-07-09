@@ -3,7 +3,6 @@
 #include <stdexcept>
 
 #include <osg/NodeVisitor>
-#include <osg/Geode>
 
 #include <osgUtil/CullVisitor>
 
@@ -45,17 +44,32 @@ namespace SceneUtil
 
         virtual void apply(osg::State& state) const
         {
+            if (mLights.empty())
+                return;
             osg::Matrix modelViewMatrix = state.getModelViewMatrix();
 
             state.applyModelViewMatrix(state.getInitialViewMatrix());
 
             for (unsigned int i=0; i<mLights.size(); ++i)
-            {
-                mLights[i]->setLightNum(i+mIndex);
-                mLights[i]->apply(state);
-            }
+                applyLight((GLenum)((int)GL_LIGHT0 + i + mIndex), mLights[i].get());
 
             state.applyModelViewMatrix(modelViewMatrix);
+        }
+
+        void applyLight(GLenum lightNum, const osg::Light* light) const
+        {
+            glLightfv( lightNum, GL_AMBIENT,               light->getAmbient().ptr() );
+            glLightfv( lightNum, GL_DIFFUSE,               light->getDiffuse().ptr() );
+            glLightfv( lightNum, GL_SPECULAR,              light->getSpecular().ptr() );
+            glLightfv( lightNum, GL_POSITION,              light->getPosition().ptr() );
+            // TODO: enable this once spot lights are supported
+            // need to transform SPOT_DIRECTION by the world matrix?
+            //glLightfv( lightNum, GL_SPOT_DIRECTION,        light->getDirection().ptr() );
+            //glLightf ( lightNum, GL_SPOT_EXPONENT,         light->getSpotExponent() );
+            //glLightf ( lightNum, GL_SPOT_CUTOFF,           light->getSpotCutoff() );
+            glLightf ( lightNum, GL_CONSTANT_ATTENUATION,  light->getConstantAttenuation() );
+            glLightf ( lightNum, GL_LINEAR_ATTENUATION,    light->getLinearAttenuation() );
+            glLightf ( lightNum, GL_QUADRATIC_ATTENUATION, light->getQuadraticAttenuation() );
         }
 
     private:
@@ -192,18 +206,27 @@ namespace SceneUtil
             return found->second;
         else
         {
-
+            osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
             std::vector<osg::ref_ptr<osg::Light> > lights;
             for (unsigned int i=0; i<lightList.size();++i)
+            {
                 lights.push_back(lightList[i]->mLightSource->getLight(frameNum));
+            }
 
+            // the first light state attribute handles the actual state setting for all lights
+            // it's best to batch these up so that we don't need to touch the modelView matrix more than necessary
             osg::ref_ptr<LightStateAttribute> attr = new LightStateAttribute(mStartLight, lights);
-
-            osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
-
             // don't use setAttributeAndModes, that does not support light indices!
             stateset->setAttribute(attr, osg::StateAttribute::ON);
             stateset->setAssociatedModes(attr, osg::StateAttribute::ON);
+
+            // need to push some dummy attributes to ensure proper state tracking
+            // lights need to reset to their default when the StateSet is popped
+            for (unsigned int i=1; i<lightList.size(); ++i)
+            {
+                osg::ref_ptr<LightStateAttribute> dummy = new LightStateAttribute(mStartLight+i, std::vector<osg::ref_ptr<osg::Light> >());
+                stateset->setAttribute(dummy, osg::StateAttribute::ON);
+            }
 
             stateSetCache.insert(std::make_pair(hash, stateset));
             return stateset;
@@ -242,6 +265,17 @@ namespace SceneUtil
     void LightManager::setStartLight(int start)
     {
         mStartLight = start;
+
+        // Set default light state to zero
+        for (int i=start; i<8; ++i)
+        {
+            osg::ref_ptr<osg::Light> defaultLight (new osg::Light(i));
+            defaultLight->setAmbient(osg::Vec4());
+            defaultLight->setDiffuse(osg::Vec4());
+            defaultLight->setSpecular(osg::Vec4());
+            defaultLight->setConstantAttenuation(0.f);
+            getOrCreateStateSet()->setAttributeAndModes(defaultLight, osg::StateAttribute::OFF);
+        }
     }
 
     int LightManager::getStartLight() const
@@ -309,8 +343,15 @@ namespace SceneUtil
             const osg::RefMatrix* viewMatrix = cv->getCurrentRenderStage()->getInitialViewMatrix();
             const std::vector<LightManager::LightSourceViewBound>& lights = mLightManager->getLightsInViewSpace(cv->getCurrentCamera(), viewMatrix);
 
-            // we do the intersections in view space
-            osg::BoundingSphere nodeBound = node->getBound();
+            // get the node bounds in view space
+            // NB do not node->getBound() * modelView, that would apply the node's transformation twice
+            osg::BoundingSphere nodeBound;
+            osg::Group* group = node->asGroup();
+            if (group)
+            {
+                for (unsigned int i=0; i<group->getNumChildren(); ++i)
+                    nodeBound.expandBy(group->getChild(i)->getBound());
+            }
             osg::Matrixf mat = *cv->getModelViewMatrix();
             transformBoundingSphere(mat, nodeBound);
 
@@ -322,7 +363,7 @@ namespace SceneUtil
                     mLightList.push_back(&l);
             }
         }
-        if (mLightList.size())
+        if (!mLightList.empty())
         {
             unsigned int maxLights = static_cast<unsigned int> (8 - mLightManager->getStartLight());
 
@@ -369,30 +410,6 @@ namespace SceneUtil
         }
         else
             traverse(node, nv);
-    }
-
-    void configureLight(osg::Light *light, float radius, bool isExterior, bool outQuadInLin, bool useQuadratic,
-                        float quadraticValue, float quadraticRadiusMult, bool useLinear, float linearRadiusMult, float linearValue)
-    {
-        bool quadratic = useQuadratic && (!outQuadInLin || isExterior);
-
-        float quadraticAttenuation = 0;
-        float linearAttenuation = 0;
-        if (quadratic)
-        {
-            float r = radius * quadraticRadiusMult;
-            quadraticAttenuation = quadraticValue / std::pow(r, 2);
-        }
-        if (useLinear)
-        {
-            float r = radius * linearRadiusMult;
-            linearAttenuation = linearValue / r;
-        }
-
-        light->setLinearAttenuation(linearAttenuation);
-        light->setQuadraticAttenuation(quadraticAttenuation);
-        light->setConstantAttenuation(0.f);
-
     }
 
 }

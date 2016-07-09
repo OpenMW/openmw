@@ -2,18 +2,22 @@
 
 #include <memory>
 
+#include <osg/Material>
+
+#include <OpenThreads/ScopedLock>
+
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/unrefqueue.hpp>
 
 #include <components/esm/loadland.hpp>
 
 #include <osg/Geometry>
-#include <osg/Geode>
 #include <osg/KdTree>
-#include <osg/Version>
 
 #include <osgFX/Effect>
 
@@ -45,13 +49,16 @@ namespace
 namespace Terrain
 {
 
-TerrainGrid::TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
-                         Storage* storage, int nodeMask)
+TerrainGrid::TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, Shader::ShaderManager* shaderManager, SceneUtil::UnrefQueue* unrefQueue)
     : Terrain::World(parent, resourceSystem, ico, storage, nodeMask)
     , mNumSplits(4)
-    , mKdTreeBuilder(new osg::KdTreeBuilder)
+    , mCache((storage->getCellVertices()-1)/static_cast<float>(mNumSplits) + 1)
+    , mUnrefQueue(unrefQueue)
+    , mShaderManager(shaderManager)
 {
-    mCache = BufferCache((storage->getCellVertices()-1)/static_cast<float>(mNumSplits) + 1);
+    osg::ref_ptr<osg::Material> material (new osg::Material);
+    material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+    mTerrainRoot->getOrCreateStateSet()->setAttributeAndModes(material, osg::StateAttribute::ON);
 }
 
 TerrainGrid::~TerrainGrid()
@@ -62,11 +69,20 @@ TerrainGrid::~TerrainGrid()
     }
 }
 
-class GridElement
+osg::ref_ptr<osg::Node> TerrainGrid::cacheCell(int x, int y)
 {
-public:
-    osg::ref_ptr<osg::Node> mNode;
-};
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
+        Grid::iterator found = mGridCache.find(std::make_pair(x,y));
+        if (found != mGridCache.end())
+            return found->second;
+    }
+    osg::ref_ptr<osg::Node> node = buildTerrain(NULL, 1.f, osg::Vec2f(x+0.5, y+0.5));
+
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
+    mGridCache.insert(std::make_pair(std::make_pair(x,y), node));
+    return node;
+}
 
 osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter)
 {
@@ -133,12 +149,51 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
 
         // For compiling textures, I don't think the osgFX::Effect does it correctly
         osg::ref_ptr<osg::Node> textureCompileDummy (new osg::Node);
+        unsigned int dummyTextureCounter = 0;
 
-        std::vector<osg::ref_ptr<osg::Texture2D> > layerTextures;
-        for (std::vector<LayerInfo>::const_iterator it = layerList.begin(); it != layerList.end(); ++it)
+        bool useShaders = mResourceSystem->getSceneManager()->getForceShaders();
+        if (!mResourceSystem->getSceneManager()->getClampLighting())
+            useShaders = true; // always use shaders when lighting is unclamped, this is to avoid lighting seams between a terrain chunk with normal maps and one without normal maps
+        std::vector<TextureLayer> layers;
         {
-            layerTextures.push_back(mResourceSystem->getTextureManager()->getTexture2D(it->mDiffuseMap, osg::Texture::REPEAT, osg::Texture::REPEAT));
-            textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(0, layerTextures.back());
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mTextureCacheMutex);
+            for (std::vector<LayerInfo>::const_iterator it = layerList.begin(); it != layerList.end(); ++it)
+            {
+                TextureLayer textureLayer;
+                textureLayer.mParallax = it->mParallax;
+                textureLayer.mSpecular = it->mSpecular;
+                osg::ref_ptr<osg::Texture2D> texture = mTextureCache[it->mDiffuseMap];
+                if (!texture)
+                {
+                    texture = new osg::Texture2D(mResourceSystem->getImageManager()->getImage(it->mDiffuseMap));
+                    texture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+                    texture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+                    mResourceSystem->getSceneManager()->applyFilterSettings(texture);
+                    mTextureCache[it->mDiffuseMap] = texture;
+                }
+                textureLayer.mDiffuseMap = texture;
+                textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, texture);
+
+                if (!it->mNormalMap.empty())
+                {
+                    texture = mTextureCache[it->mNormalMap];
+                    if (!texture)
+                    {
+                        texture = new osg::Texture2D(mResourceSystem->getImageManager()->getImage(it->mNormalMap));
+                        texture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+                        texture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+                        mResourceSystem->getSceneManager()->applyFilterSettings(texture);
+                        mTextureCache[it->mNormalMap] = texture;
+                    }
+                    textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, texture);
+                    textureLayer.mNormalMap = texture;
+                }
+
+                if (it->requiresShaders())
+                    useShaders = true;
+
+                layers.push_back(textureLayer);
+            }
         }
 
         std::vector<osg::ref_ptr<osg::Texture2D> > blendmapTextures;
@@ -148,12 +203,10 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             texture->setImage(*it);
             texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
             texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-            texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-            texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
             texture->setResizeNonPowerOfTwoHint(false);
             blendmapTextures.push_back(texture);
 
-            textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(0, layerTextures.back());
+            textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, blendmapTextures.back());
         }
 
         // use texture coordinates for both texture units, the layer texture and blend texture
@@ -161,19 +214,14 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             geometry->setTexCoordArray(i, mCache.getUVBuffer());
 
         float blendmapScale = ESM::Land::LAND_TEXTURE_SIZE*chunkSize;
-        osg::ref_ptr<osgFX::Effect> effect (new Terrain::Effect(layerTextures, blendmapTextures, blendmapScale, blendmapScale));
+        osg::ref_ptr<osgFX::Effect> effect (new Terrain::Effect(mShaderManager ? useShaders : false, mResourceSystem->getSceneManager()->getForcePerPixelLighting(), mResourceSystem->getSceneManager()->getClampLighting(),
+                                                                mShaderManager, layers, blendmapTextures, blendmapScale, blendmapScale));
 
         effect->addCullCallback(new SceneUtil::LightListCallback);
 
         transform->addChild(effect);
 
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
         osg::Node* toAttach = geometry.get();
-#else
-        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-        geode->addDrawable(geometry);
-        osg::Node* toAttach = geode.get();
-#endif
 
         effect->addChild(toAttach);
 
@@ -192,24 +240,31 @@ void TerrainGrid::loadCell(int x, int y)
     if (mGrid.find(std::make_pair(x, y)) != mGrid.end())
         return; // already loaded
 
-    osg::Vec2f center(x+0.5f, y+0.5f);
+    // try to get it from the cache
+    osg::ref_ptr<osg::Node> terrainNode;
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
+        Grid::const_iterator found = mGridCache.find(std::make_pair(x,y));
+        if (found != mGridCache.end())
+        {
+            terrainNode = found->second;
+            if (!terrainNode)
+                return; // no terrain defined
+        }
+    }
 
-    osg::ref_ptr<osg::Node> terrainNode = buildTerrain(NULL, 1.f, center);
+    // didn't find in cache, build it
     if (!terrainNode)
-        return; // no terrain defined
+    {
+        osg::Vec2f center(x+0.5f, y+0.5f);
+        terrainNode = buildTerrain(NULL, 1.f, center);
+        if (!terrainNode)
+            return; // no terrain defined
+    }
 
-    std::auto_ptr<GridElement> element (new GridElement);
-    element->mNode = terrainNode;
-    mTerrainRoot->addChild(element->mNode);
+    mTerrainRoot->addChild(terrainNode);
 
-    // kdtree probably not needed with mNumSplits=4
-    /*
-    // build a kdtree to speed up intersection tests with the terrain
-    // Note, the build could be optimized using a custom kdtree builder, since we know that the terrain can be represented by a quadtree
-    geode->accept(*mKdTreeBuilder);
-    */
-
-    mGrid[std::make_pair(x,y)] = element.release();
+    mGrid[std::make_pair(x,y)] = terrainNode;
 }
 
 void TerrainGrid::unloadCell(int x, int y)
@@ -218,11 +273,45 @@ void TerrainGrid::unloadCell(int x, int y)
     if (it == mGrid.end())
         return;
 
-    GridElement* element = it->second;
-    mTerrainRoot->removeChild(element->mNode);
-    delete element;
+    osg::ref_ptr<osg::Node> terrainNode = it->second;
+    mTerrainRoot->removeChild(terrainNode);
+
+    if (mUnrefQueue.get())
+        mUnrefQueue->push(terrainNode);
 
     mGrid.erase(it);
+}
+
+void TerrainGrid::updateCache()
+{
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
+        for (Grid::iterator it = mGridCache.begin(); it != mGridCache.end();)
+        {
+            if (it->second->referenceCount() <= 1)
+                mGridCache.erase(it++);
+            else
+                ++it;
+        }
+    }
+
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mTextureCacheMutex);
+        for (TextureCache::iterator it = mTextureCache.begin(); it != mTextureCache.end();)
+        {
+            if (it->second->referenceCount() <= 1)
+                mTextureCache.erase(it++);
+            else
+                ++it;
+        }
+    }
+}
+
+void TerrainGrid::updateTextureFiltering()
+{
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mTextureCacheMutex);
+    for (TextureCache::iterator it = mTextureCache.begin(); it != mTextureCache.end(); ++it)
+        mResourceSystem->getSceneManager()->applyFilterSettings(it->second);
 }
 
 }

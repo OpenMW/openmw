@@ -12,7 +12,6 @@ class btCollisionWorld;
 namespace osg
 {
     class Group;
-    class Geode;
     class Geometry;
 }
 
@@ -24,7 +23,6 @@ class DebugDrawer : public btIDebugDraw
 protected:
     osg::ref_ptr<osg::Group> mParentNode;
     btCollisionWorld *mWorld;
-    osg::ref_ptr<osg::Geode> mGeode;
     osg::ref_ptr<osg::Geometry> mGeometry;
     osg::ref_ptr<osg::Vec3Array> mVertices;
     osg::ref_ptr<osg::DrawArrays> mDrawArrays;

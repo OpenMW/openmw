@@ -17,7 +17,6 @@
 #include <osg/Texture2D>
 #include <osg/ref_ptr>
 
-#include <osg/Timer>
 #include <osg/StateSet>
 #include <osg/NodeCallback>
 #include <osg/Drawable>
@@ -304,6 +303,8 @@ namespace NifOsg
         FlipController(const FlipController& copy, const osg::CopyOp& copyop);
 
         META_Object(NifOsg, FlipController)
+
+        std::vector<osg::ref_ptr<osg::Texture2D> >& getTextures() { return mTextures; }
 
         virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv);
     };

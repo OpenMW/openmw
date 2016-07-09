@@ -9,6 +9,7 @@
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/commanddispatcher.hpp"
+#include "../../model/world/commandmacro.hpp"
 
 #include "tableeditidaction.hpp"
 #include "util.hpp"
@@ -63,7 +64,7 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
             connect(mAddNewRowAction, SIGNAL(triggered()),
                     this, SLOT(addNewRowActionTriggered()));
 
-            mRemoveRowAction = new QAction (tr ("Remove row"), this);
+            mRemoveRowAction = new QAction (tr ("Remove rows"), this);
 
             connect(mRemoveRowAction, SIGNAL(triggered()),
                     this, SLOT(removeRowActionTriggered()));
@@ -100,10 +101,8 @@ void CSVWorld::NestedTable::contextMenuEvent (QContextMenuEvent *event)
 
     if (mAddNewRowAction && mRemoveRowAction)
     {
-        if (selectionModel()->selectedRows().size() == 1)
-            menu.addAction(mRemoveRowAction);
-
         menu.addAction(mAddNewRowAction);
+        menu.addAction(mRemoveRowAction);
     }
 
     menu.exec (event->globalPos());
@@ -111,17 +110,27 @@ void CSVWorld::NestedTable::contextMenuEvent (QContextMenuEvent *event)
 
 void CSVWorld::NestedTable::removeRowActionTriggered()
 {
-    mDocument.getUndoStack().push(new CSMWorld::DeleteNestedCommand(*(mModel->model()),
-                                                                    mModel->getParentId(),
-                                                                    selectionModel()->selectedRows().begin()->row(),
-                                                                    mModel->getParentColumn()));
+    CSMWorld::CommandMacro macro(mDocument.getUndoStack(),
+        selectionModel()->selectedRows().size() > 1 ? tr("Remove rows") : "");
+
+    // Remove rows in reverse order
+    for (int i = selectionModel()->selectedRows().size() - 1; i >= 0; --i)
+    {
+        macro.push(new CSMWorld::DeleteNestedCommand(*(mModel->model()), mModel->getParentId(),
+            selectionModel()->selectedRows()[i].row(), mModel->getParentColumn()));
+    }
 }
 
 void CSVWorld::NestedTable::addNewRowActionTriggered()
 {
+    int row = 0;
+
+    if (!selectionModel()->selectedRows().empty())
+        row = selectionModel()->selectedRows().back().row() + 1;
+
     mDocument.getUndoStack().push(new CSMWorld::AddNestedCommand(*(mModel->model()),
                                                                  mModel->getParentId(),
-                                                                 selectionModel()->selectedRows().size(),
+                                                                 row,
                                                                  mModel->getParentColumn()));
 }
 

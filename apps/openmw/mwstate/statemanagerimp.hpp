@@ -73,8 +73,8 @@ namespace MWState
             virtual void loadGame (const Character *character, const std::string &filepath);
             ///< Load a saved game file belonging to the given character.
 
-            virtual Character *getCurrentCharacter (bool create = true);
-            ///< \param create Create a new character, if there is no current character.
+            virtual Character *getCurrentCharacter ();
+            ///< @note May return null.
 
             virtual CharacterIterator characterBegin();
             ///< Any call to SaveGame and getCurrentCharacter can invalidate the returned

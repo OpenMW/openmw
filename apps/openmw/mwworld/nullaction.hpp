@@ -9,6 +9,8 @@ namespace MWWorld
     class NullAction : public Action
     {
             virtual void executeImp (const Ptr& actor) {}
+
+            virtual bool isNullAction() { return true; }
     };
 }
 

@@ -56,6 +56,7 @@ namespace MWRender
       mMaxCameraDistance(192.f),
       mDistanceAdjusted(false),
       mVanityToggleQueued(false),
+      mVanityToggleQueuedValue(false),
       mViewModeToggleQueued(false),
       mCameraDistance(0.f)
     {
@@ -68,6 +69,8 @@ namespace MWRender
         mMainCam.pitch = 0.f;
         mMainCam.yaw = 0.f;
         mMainCam.offset = 400.f;
+
+        mCameraDistance = mMaxCameraDistance;
 
         mUpdateCallback = new UpdateRenderCameraCallback(this);
         mCamera->addUpdateCallback(mUpdateCallback);
@@ -88,10 +91,10 @@ namespace MWRender
         const osg::Node* trackNode = mTrackingNode;
         if (!trackNode)
             return osg::Vec3d();
-        osg::MatrixList mats = trackNode->getWorldMatrices();
-        if (!mats.size())
+        osg::NodePathList nodepaths = trackNode->getParentalNodePaths();
+        if (nodepaths.empty())
             return osg::Vec3d();
-        const osg::Matrix& worldMat = mats[0];
+        osg::Matrix worldMat = osg::computeLocalToWorld(nodepaths[0]);
 
         osg::Vec3d position = worldMat.getTrans();
         if (!isFirstPerson())
@@ -108,7 +111,7 @@ namespace MWRender
 
         osg::Quat orient =  osg::Quat(getPitch(), osg::Vec3d(1,0,0)) * osg::Quat(getYaw(), osg::Vec3d(0,0,1));
 
-        osg::Vec3d offset = orient * osg::Vec3d(0, -mCameraDistance, 0);
+        osg::Vec3d offset = orient * osg::Vec3d(0, isFirstPerson() ? 0 : -mCameraDistance, 0);
         position += offset;
 
         osg::Vec3d forward = orient * osg::Vec3d(0,1,0);
@@ -148,7 +151,7 @@ namespace MWRender
             // Now process the view changes we queued earlier
             if (mVanityToggleQueued)
             {
-                toggleVanityMode(!mVanity.enabled);
+                toggleVanityMode(mVanityToggleQueuedValue);
                 mVanityToggleQueued = false;
             }
             if (mViewModeToggleQueued)
@@ -187,12 +190,6 @@ namespace MWRender
 
         mFirstPersonView = !mFirstPersonView;
         processViewChange();
-
-        if (mFirstPersonView) {
-            mCameraDistance = 0.f;
-        } else {
-            mCameraDistance = mMaxCameraDistance;
-        }
     }
     
     void Camera::allowVanityMode(bool allow)
@@ -206,9 +203,10 @@ namespace MWRender
     {
         // Changing the view will stop all playing animations, so if we are playing
         // anything important, queue the view change for later
-        if (isFirstPerson() && !mAnimation->upperBodyReady())
+        if (mFirstPersonView && !mAnimation->upperBodyReady())
         {
             mVanityToggleQueued = true;
+            mVanityToggleQueuedValue = enable;
             return false;
         }
 
@@ -313,6 +311,8 @@ namespace MWRender
 
     float Camera::getCameraDistance() const
     {
+        if (isFirstPerson())
+            return 0.f;
         return mCameraDistance;
     }
 
@@ -395,7 +395,7 @@ namespace MWRender
 
         osg::Quat orient =  osg::Quat(getPitch(), osg::Vec3d(1,0,0)) * osg::Quat(getYaw(), osg::Vec3d(0,0,1));
 
-        osg::Vec3d offset = orient * osg::Vec3d(0, -mCameraDistance, 0);
+        osg::Vec3d offset = orient * osg::Vec3d(0, isFirstPerson() ? 0 : -mCameraDistance, 0);
         camera = focal + offset;
     }
 

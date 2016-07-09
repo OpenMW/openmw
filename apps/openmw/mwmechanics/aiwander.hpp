@@ -5,12 +5,10 @@
 
 #include <vector>
 
-#include "pathfinding.hpp"
-#include "obstacle.hpp"
-
 #include "../mwworld/timestamp.hpp"
 
-
+#include "pathfinding.hpp"
+#include "obstacle.hpp"
 #include "aistate.hpp"
 
 namespace ESM
@@ -23,9 +21,7 @@ namespace ESM
 }
 
 namespace MWMechanics
-{    
-    
-    
+{       
     struct AiWanderStorage;
 
     /// \brief Causes the Actor to wander within a specified range
@@ -35,14 +31,12 @@ namespace MWMechanics
             /// Constructor
             /** \param distance Max distance the ACtor will wander
                 \param duration Time, in hours, that this package will be preformed
-                \param timeOfDay Start time of the package, if it has a duration. Currently unimplemented
+                \param timeOfDay Currently unimplemented. Not functional in the original engine.
                 \param idle Chances of each idle to play (9 in total)
                 \param repeat Repeat wander or not **/
             AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat);
 
             AiWander (const ESM::AiSequence::AiWander* wander);
-
-            
 
             virtual AiPackage *clone() const;
 
@@ -58,6 +52,8 @@ namespace MWMechanics
 
             virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
             
+            bool getRepeat() const;
+            
             enum GreetingState {
                 Greet_None,
                 Greet_InProgress,
@@ -70,10 +66,10 @@ namespace MWMechanics
                 Wander_MoveNow,
                 Wander_Walking
             };
+
         private:
             // NOTE: mDistance and mDuration must be set already
             void init();
-            
             void stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage);
 
             /// Have the given actor play an idle animation
@@ -91,48 +87,32 @@ namespace MWMechanics
             void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos);
             void onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
-                const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos);
+                const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos, float duration);
             bool isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void returnToStartLocation(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos);
+            void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance);
+            bool destinationIsAtWater(const MWWorld::Ptr &actor, const osg::Vec3f& destination);
+            bool destinationThroughGround(const osg::Vec3f& startPoint, const osg::Vec3f& destination);
+            void completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
+            float mRemainingDuration;
             int mTimeOfDay;
             std::vector<unsigned char> mIdle;
             bool mRepeat;
-            
 
             bool mHasReturnPosition; // NOTE: Could be removed if mReturnPosition was initialized to actor position,
                                     // if we had the actor in the AiWander constructor...
             osg::Vec3f mReturnPosition;
-
             osg::Vec3f mInitialActorPosition;
             bool mStoredInitialActorPosition;
 
-           
-
-            // do we need to calculate allowed nodes based on mDistance
-            bool mPopulateAvailableNodes;
-
-
-            
-
-            MWWorld::TimeStamp mStartTime;
-
-            // allowed pathgrid nodes based on mDistance from the spawn point
-            std::vector<ESM::Pathgrid::Point> mAllowedNodes;
-
-            void getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell);
-
-            ESM::Pathgrid::Point mCurrentNode;
-            bool mTrimCurrentNode;
-            void trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
-                                  const PathFinder& pathfinder);
-
-
-            float mDoorCheckDuration;
-            int mStuckCount;
             bool mIsWanderDestReady;
+
+            void getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell, AiWanderStorage& storage);
+
+            void trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes, const PathFinder& pathfinder);
 
             // constants for converting idleSelect values into groupNames
             enum GroupIndex
@@ -144,19 +124,17 @@ namespace MWMechanics
             /// convert point from local (i.e. cell) to world co-ordinates
             void ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell * cell);
 
-            void SetCurrentNodeToClosestAllowedNode(osg::Vec3f npcPos);
+            void SetCurrentNodeToClosestAllowedNode(osg::Vec3f npcPos, AiWanderStorage& storage);
 
-            void AddNonPathGridAllowedPoints(osg::Vec3f npcPos, const ESM::Pathgrid * pathGrid, int pointIndex);
+            void AddNonPathGridAllowedPoints(osg::Vec3f npcPos, const ESM::Pathgrid * pathGrid, int pointIndex, AiWanderStorage& storage);
 
-            void AddPointBetweenPathGridPoints(const ESM::Pathgrid::Point& start, const ESM::Pathgrid::Point& end);
+            void AddPointBetweenPathGridPoints(const ESM::Pathgrid::Point& start, const ESM::Pathgrid::Point& end, AiWanderStorage& storage);
 
             /// lookup table for converting idleSelect value to groupName
             static const std::string sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1];
 
             static int OffsetToPreventOvercrowding();
-    };
-    
-    
+    }; 
 }
 
 #endif

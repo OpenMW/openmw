@@ -30,12 +30,12 @@ class MovedCellRef
 public:
     RefNum mRefNum;
 
-    // Target cell (if exterior)
+    // Coordinates of target exterior cell
     int mTarget[2];
 
-    // TODO: Support moving references between exterior and interior cells!
-    //  This may happen in saves, when an NPC follows the player. Tribunal
-    //  introduces a henchman (which no one uses), so we may need this as well.
+    // The content file format does not support moving objects to an interior cell.
+    // The save game format does support moving to interior cells, but uses a different mechanism
+    // (see the MovedRefTracker implementation in MWWorld::CellStore for more details).
 };
 
 /// Overloaded compare operator used to search inside a list of cell refs.
@@ -141,7 +141,7 @@ struct Cell
 
   bool hasWater() const
   {
-      return (mData.mFlags&HasWater) != 0;
+      return ((mData.mFlags&HasWater) != 0) || isExterior();
   }
 
   // Restore the given reader to the stored position. Will try to open

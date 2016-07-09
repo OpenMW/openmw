@@ -136,16 +136,18 @@ int MWWorld::ContainerStore::count(const std::string &id)
     return total;
 }
 
-void MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container, int count)
 {
-    if (ptr.getRefData().getCount() <= 1)
-        return;
-    MWWorld::ContainerStoreIterator it = addNewStack(ptr, ptr.getRefData().getCount()-1);
+    if (ptr.getRefData().getCount() <= count)
+        return end();
+    MWWorld::ContainerStoreIterator it = addNewStack(ptr, ptr.getRefData().getCount()-count);
     const std::string script = it->getClass().getScript(*it);
     if (!script.empty())
         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, *it);
 
-    remove(ptr, ptr.getRefData().getCount()-1, container);
+    remove(ptr, ptr.getRefData().getCount()-count, container);
+
+    return it;
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::Ptr& item)
@@ -529,10 +531,10 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
         {
             std::map<std::string, int>::iterator listInMap = allowedForReplace.find(itemOrList);
 
-            int restockNum = it->mCount;
+            int restockNum = std::abs(it->mCount);
             //If we know we must restock less, take it into account
             if(listInMap != allowedForReplace.end())
-                restockNum += listInMap->second;//We add, because list items have negative count
+                restockNum -= std::min(restockNum, listInMap->second);
             //restock
             addInitialItem(itemOrList, owner, restockNum, true);
         }
@@ -627,7 +629,7 @@ int MWWorld::ContainerStore::getType (const ConstPtr& ptr)
         return Type_Weapon;
 
     throw std::runtime_error (
-        "Object of type " + ptr.getTypeName() + " can not be placed into a container");
+        "Object '" + ptr.getCellRef().getRefId() + "' of type " + ptr.getTypeName() + " can not be placed into a container");
 }
 
 MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)

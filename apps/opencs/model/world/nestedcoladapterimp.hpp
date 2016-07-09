@@ -25,21 +25,6 @@ namespace CSMWorld
     struct Pathgrid;
     struct Info;
 
-    struct PathgridPointsWrap : public NestedTableWrapperBase
-    {
-        ESM::Pathgrid mRecord;
-
-        PathgridPointsWrap(ESM::Pathgrid pathgrid)
-            : mRecord(pathgrid) {}
-
-        virtual ~PathgridPointsWrap() {}
-
-        virtual int size() const
-        {
-            return mRecord.mPoints.size(); // used in IdTree::setNestedTable()
-        }
-    };
-
     class PathgridPointListAdapter : public NestedColumnAdapter<Pathgrid>
     {
     public:
@@ -539,6 +524,31 @@ namespace CSMWorld
         virtual int getColumnsCount(const Record<CSMWorld::Cell>& record) const;
 
         virtual int getRowsCount(const Record<CSMWorld::Cell>& record) const;
+    };
+
+    class RegionWeatherAdapter : public NestedColumnAdapter<ESM::Region>
+    {
+    public:
+        RegionWeatherAdapter ();
+
+        virtual void addRow(Record<ESM::Region>& record, int position) const;
+
+        virtual void removeRow(Record<ESM::Region>& record, int rowToRemove) const;
+
+        virtual void setTable(Record<ESM::Region>& record,
+                const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* table(const Record<ESM::Region>& record) const;
+
+        virtual QVariant getData(const Record<ESM::Region>& record,
+                int subRowIndex, int subColIndex) const;
+
+        virtual void setData(Record<ESM::Region>& record,
+                const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getColumnsCount(const Record<ESM::Region>& record) const;
+
+        virtual int getRowsCount(const Record<ESM::Region>& record) const;
     };
 }
 

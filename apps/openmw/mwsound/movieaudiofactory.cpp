@@ -27,7 +27,6 @@ namespace MWSound
 
         virtual void open(const std::string &fname);
         virtual void close();
-        virtual void rewind();
         virtual std::string getName();
         virtual void getInfo(int *samplerate, ChannelConfig *chans, SampleType *type);
         virtual size_t read(char *buffer, size_t bytes);
@@ -102,7 +101,6 @@ namespace MWSound
         throw std::runtime_error("unimplemented");
     }
     void MWSoundDecoderBridge::close() {}
-    void MWSoundDecoderBridge::rewind() {}
 
     std::string MWSoundDecoderBridge::getName()
     {

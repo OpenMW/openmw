@@ -6,24 +6,21 @@
 #include <QMouseEvent>
 #include <QApplication>
 
-#include <osgGA/TrackballManipulator>
-
 #include <components/esm/loadland.hpp>
 
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
 
-#include "../widget/scenetooltoggle.hpp"
+#include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolmode.hpp"
 #include "../widget/scenetooltoggle2.hpp"
 
 #include "editmode.hpp"
-#include "elements.hpp"
+#include "mask.hpp"
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
     bool modified = false;
-    bool wasEmpty = mCells.empty();
 
     const CSMWorld::IdCollection<CSMWorld::Cell>& cells = mDocument.getData().getCells();
 
@@ -114,11 +111,6 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
         }
     }
 
-    /// \todo do not overwrite manipulator object
-    /// \todo move code to useViewHint function
-    if (modified && wasEmpty)
-        mView->setCameraManipulator(new osgGA::TrackballManipulator);
-
     return modified;
 }
 
@@ -126,8 +118,8 @@ void CSVRender::PagedWorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
     WorldspaceWidget::addVisibilitySelectorButtons (tool);
-    tool->addButton (Element_Terrain, "Terrain");
-    tool->addButton (Element_Fog, "Fog", "", true);
+    tool->addButton (Button_Terrain, Mask_Terrain, "Terrain");
+    tool->addButton (Button_Fog, Mask_Fog, "Fog", "", true);
 }
 
 void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
@@ -137,27 +129,28 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
 
     /// \todo replace EditMode with suitable subclasses
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain shape editing"),
+        new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain shape editing"),
         "terrain-shape");
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain texture editing"),
+        new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain texture editing"),
         "terrain-texture");
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain vertex paint editing"),
+        new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain vertex paint editing"),
         "terrain-vertex");
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain movement"),
+        new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain movement"),
         "terrain-move");
 }
 
-void CSVRender::PagedWorldspaceWidget::handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button, bool shift)
+void CSVRender::PagedWorldspaceWidget::handleMouseClick (const WorldspaceHitResult& hit, const std::string& button,
+    bool shift)
 {
-    if (tag && tag->getElement()==Element_CellArrow)
+    if (hit.tag && hit.tag->getMask()==Mask_CellArrow)
     {
         if (button=="p-edit" || button=="s-edit")
         {
             if (CellArrowTag *cellArrowTag =
-                dynamic_cast<CSVRender::CellArrowTag *> (tag.get()))
+                dynamic_cast<CSVRender::CellArrowTag *> (hit.tag.get()))
             {
                 CellArrow *arrow = cellArrowTag->getCellArrow();
 
@@ -217,7 +210,7 @@ void CSVRender::PagedWorldspaceWidget::handleMouseClick (osg::ref_ptr<TagBase> t
         }
     }
 
-    WorldspaceWidget::handleMouseClick (tag, button, shift);
+    WorldspaceWidget::handleMouseClick (hit, button, shift);
 }
 
 void CSVRender::PagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
@@ -283,6 +276,82 @@ void CSVRender::PagedWorldspaceWidget::referenceAdded (const QModelIndex& parent
             flagAsModified();
 }
 
+void CSVRender::PagedWorldspaceWidget::pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
+
+    int rowStart = -1;
+    int rowEnd = -1;
+
+    if (topLeft.parent().isValid())
+    {
+        rowStart = topLeft.parent().row();
+        rowEnd = bottomRight.parent().row();
+    }
+    else
+    {
+        rowStart = topLeft.row();
+        rowEnd = bottomRight.row();
+    }
+
+    for (int row = rowStart; row <= rowEnd; ++row)
+    {
+        const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
+        CSMWorld::CellCoordinates coords = CSMWorld::CellCoordinates(pathgrid.mData.mX, pathgrid.mData.mY);
+
+        std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
+        if (searchResult != mCells.end())
+        {
+            searchResult->second->pathgridModified();
+            flagAsModified();
+        }
+    }
+}
+
+void CSVRender::PagedWorldspaceWidget::pathgridAboutToBeRemoved (const QModelIndex& parent, int start, int end)
+{
+    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
+
+    if (!parent.isValid())
+    {
+        // Pathgrid going to be deleted
+        for (int row = start; row <= end; ++row)
+        {
+            const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
+            CSMWorld::CellCoordinates coords = CSMWorld::CellCoordinates(pathgrid.mData.mX, pathgrid.mData.mY);
+
+            std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
+            if (searchResult != mCells.end())
+            {
+                searchResult->second->pathgridRemoved();
+                flagAsModified();
+            }
+        }
+    }
+}
+
+void CSVRender::PagedWorldspaceWidget::pathgridAdded(const QModelIndex& parent, int start, int end)
+{
+   const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
+
+    if (!parent.isValid())
+    {
+        for (int row = start; row <= end; ++row)
+        {
+            const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
+            CSMWorld::CellCoordinates coords = CSMWorld::CellCoordinates(pathgrid.mData.mX, pathgrid.mData.mY);
+
+            std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
+            if (searchResult != mCells.end())
+            {
+                searchResult->second->pathgridModified();
+                flagAsModified();
+            }
+        }
+    }
+}
+
+
 std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
 {
     osg::Vec3d eye, center, up;
@@ -309,10 +378,13 @@ void CSVRender::PagedWorldspaceWidget::addCellToScene (
     bool deleted = index==-1 ||
         cells.getRecord (index).mState==CSMWorld::RecordBase::State_Deleted;
 
-    Cell *cell = new Cell (mDocument.getData(), mRootNode, coordinates.getId (mWorldspace),
-        deleted);
+    std::auto_ptr<Cell> cell (
+        new Cell (mDocument.getData(), mRootNode, coordinates.getId (mWorldspace),
+        deleted));
+    EditMode *editMode = getEditMode();
+    cell->setSubMode (editMode->getSubMode(), editMode->getInteractionMask());
 
-    mCells.insert (std::make_pair (coordinates, cell));
+    mCells.insert (std::make_pair (coordinates, cell.release()));
 }
 
 void CSVRender::PagedWorldspaceWidget::removeCellFromScene (
@@ -432,6 +504,11 @@ void CSVRender::PagedWorldspaceWidget::setCellSelection (const CSMWorld::CellSel
     emit cellSelectionChanged (mSelection);
 }
 
+const CSMWorld::CellSelection& CSVRender::PagedWorldspaceWidget::getCellSelection() const
+{
+    return mSelection;
+}
+
 std::pair< int, int > CSVRender::PagedWorldspaceWidget::getCoordinatesFromId (const std::string& record) const
 {
     std::istringstream stream (record.c_str());
@@ -492,7 +569,7 @@ CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::g
 
 unsigned int CSVRender::PagedWorldspaceWidget::getVisibilityMask() const
 {
-    return WorldspaceWidget::getVisibilityMask() | mControlElements->getSelection();
+    return WorldspaceWidget::getVisibilityMask() | mControlElements->getSelectionMask();
 }
 
 void CSVRender::PagedWorldspaceWidget::clearSelection (int elementMask)
@@ -504,18 +581,118 @@ void CSVRender::PagedWorldspaceWidget::clearSelection (int elementMask)
     flagAsModified();
 }
 
-CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (
+void CSVRender::PagedWorldspaceWidget::invertSelection (int elementMask)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+        iter->second->setSelection (elementMask, Cell::Selection_Invert);
+
+    flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::selectAll (int elementMask)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+        iter->second->setSelection (elementMask, Cell::Selection_All);
+
+    flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::selectAllWithSameParentId (int elementMask)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+        iter->second->selectAllWithSameParentId (elementMask);
+
+    flagAsModified();
+}
+
+std::string CSVRender::PagedWorldspaceWidget::getCellId (const osg::Vec3f& point) const
+{
+    const int cellSize = 8192;
+
+    CSMWorld::CellCoordinates cellCoordinates (
+        static_cast<int> (std::floor (point.x()/cellSize)),
+        static_cast<int> (std::floor (point.y()/cellSize)));
+
+    return cellCoordinates.getId (mWorldspace);
+}
+
+CSVRender::Cell* CSVRender::PagedWorldspaceWidget::getCell(const osg::Vec3d& point) const
+{
+    const int cellSize = 8192;
+
+    CSMWorld::CellCoordinates coords(
+        static_cast<int> (std::floor (point.x()/cellSize)),
+        static_cast<int> (std::floor (point.y()/cellSize)));
+
+    std::map<CSMWorld::CellCoordinates, Cell*>::const_iterator searchResult = mCells.find(coords);
+    if (searchResult != mCells.end())
+        return searchResult->second;
+    else
+        return 0;
+}
+
+std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::PagedWorldspaceWidget::getSelection (
+    unsigned int elementMask) const
+{
+    std::vector<osg::ref_ptr<CSVRender::TagBase> > result;
+
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::const_iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+    {
+        std::vector<osg::ref_ptr<CSVRender::TagBase> > cellResult =
+            iter->second->getSelection (elementMask);
+
+        result.insert (result.end(), cellResult.begin(), cellResult.end());
+    }
+
+    return result;
+}
+
+std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::PagedWorldspaceWidget::getEdited (
+    unsigned int elementMask) const
+{
+    std::vector<osg::ref_ptr<CSVRender::TagBase> > result;
+
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::const_iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+    {
+        std::vector<osg::ref_ptr<CSVRender::TagBase> > cellResult =
+            iter->second->getEdited (elementMask);
+
+        result.insert (result.end(), cellResult.begin(), cellResult.end());
+    }
+
+    return result;
+}
+
+void CSVRender::PagedWorldspaceWidget::setSubMode (int subMode, unsigned int elementMask)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::const_iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+        iter->second->setSubMode (subMode, elementMask);
+}
+
+void CSVRender::PagedWorldspaceWidget::reset (unsigned int elementMask)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::const_iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+        iter->second->reset (elementMask);
+}
+
+CSVWidget::SceneToolToggle2 *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (
     CSVWidget::SceneToolbar *parent)
 {
-    mControlElements = new CSVWidget::SceneToolToggle (parent,
-        "Controls & Guides Visibility", ":placeholder");
+    mControlElements = new CSVWidget::SceneToolToggle2 (parent,
+        "Controls & Guides Visibility", ":scenetoolbar/scene-view-marker-c", ":scenetoolbar/scene-view-marker-");
 
-    mControlElements->addButton (":placeholder", Element_CellMarker, ":placeholder",
-        "Cell marker");
-    mControlElements->addButton (":placeholder", Element_CellArrow, ":placeholder", "Cell arrows");
-    mControlElements->addButton (":placeholder", Element_CellBorder, ":placeholder", "Cell border");
+    mControlElements->addButton (1, Mask_CellMarker, "Cell Marker");
+    mControlElements->addButton (2, Mask_CellArrow, "Cell Arrows");
+    mControlElements->addButton (4, Mask_CellBorder, "Cell Border");
 
-    mControlElements->setSelection (0xffffffff);
+    mControlElements->setSelectionMask (0xffffffff);
 
     connect (mControlElements, SIGNAL (selectionChanged()),
         this, SLOT (elementSelectionChanged()));

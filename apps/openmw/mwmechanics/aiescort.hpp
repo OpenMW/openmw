@@ -2,6 +2,7 @@
 #define GAME_MWMECHANICS_AIESCORT_H
 
 #include "aipackage.hpp"
+
 #include <string>
 
 #include "pathfinding.hpp"
@@ -37,10 +38,12 @@ namespace MWMechanics
 
             virtual int getTypeId() const;
 
-            MWWorld::Ptr getTarget();
+            MWWorld::Ptr getTarget() const;
             virtual bool sideWithTarget() const { return true; }
 
             void writeState(ESM::AiSequence::AiSequence &sequence) const;
+
+            void fastForward(const MWWorld::Ptr& actor, AiState& state);
 
         private:
             std::string mActorId;
@@ -49,7 +52,8 @@ namespace MWMechanics
             float mY;
             float mZ;
             float mMaxDist;
-            float mRemainingDuration; // In seconds
+            float mDuration; // In hours
+            float mRemainingDuration; // In hours
 
             int mCellX;
             int mCellY;

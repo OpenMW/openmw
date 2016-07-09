@@ -176,7 +176,7 @@ namespace MWBase
             virtual void updateSkillArea() = 0;
             ///< update display of skills, factions, birth sign, reputation and bounty
 
-            virtual void changeCell(MWWorld::CellStore* cell) = 0;
+            virtual void changeCell(const MWWorld::CellStore* cell) = 0;
             ///< change the active cell
 
             virtual void setFocusObject(const MWWorld::Ptr& focus) = 0;
@@ -353,8 +353,8 @@ namespace MWBase
             virtual std::string correctIconPath(const std::string& path) = 0;
             virtual std::string correctBookartPath(const std::string& path, int width, int height) = 0;
             virtual std::string correctTexturePath(const std::string& path) = 0;
+            virtual bool textureExists(const std::string& path) = 0;
 
-            virtual void requestMap(std::set<MWWorld::CellStore*> cells) = 0;
             virtual void removeCell(MWWorld::CellStore* cell) = 0;
             virtual void writeFog(MWWorld::CellStore* cell) = 0;
     };

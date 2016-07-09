@@ -70,6 +70,26 @@ struct NiSpotLight : public NiPointLight
 struct NiTextureEffect : NiDynamicEffect
 {
     NiSourceTexturePtr texture;
+    unsigned int clamp;
+
+    enum TextureType
+    {
+        Projected_Light = 0,
+        Projected_Shadow = 1,
+        Environment_Map = 2,
+        Fog_Map = 3
+    };
+    TextureType textureType;
+
+    enum CoordGenType
+    {
+        World_Parallel = 0,
+        World_Perspective,
+        Sphere_Map,
+        Specular_Cube_Map,
+        Diffuse_Cube_Map
+    };
+    CoordGenType coordGenType;
 
     void read(NIFStream *nif);
     void post(NIFFile *nif);

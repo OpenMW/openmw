@@ -529,13 +529,13 @@ namespace MWDialogue
         bool success;
         float temp, perm;
         MWBase::Environment::get().getMechanicsManager()->getPersuasionDispositionChange(
-                    mActor, MWBase::MechanicsManager::PersuasionType(type), mTemporaryDispositionChange,
+                    mActor, MWBase::MechanicsManager::PersuasionType(type),
                     success, temp, perm);
         mTemporaryDispositionChange += temp;
         mPermanentDispositionChange += perm;
 
         // change temp disposition so that final disposition is between 0...100
-        float curDisp = static_cast<float>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor));
+        float curDisp = static_cast<float>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor, false));
         if (curDisp + mTemporaryDispositionChange < 0)
             mTemporaryDispositionChange = -curDisp;
         else if (curDisp + mTemporaryDispositionChange > 100)
@@ -629,7 +629,8 @@ namespace MWDialogue
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         const ESM::Dialogue *dial = store.get<ESM::Dialogue>().find(topic);
 
-        Filter filter(actor, 0, false);
+        const MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
+        Filter filter(actor, 0, creatureStats.hasTalkedToPlayer());
         const ESM::DialInfo *info = filter.search(*dial, false);
         if(info != NULL)
         {

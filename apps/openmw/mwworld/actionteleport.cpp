@@ -64,9 +64,9 @@ namespace MWWorld
         {
             world->getPlayer().setTeleported(true);
             if (mCellName.empty())
-                world->changeToExteriorCell (mPosition);
+                world->changeToExteriorCell (mPosition, true);
             else
-                world->changeToInteriorCell (mCellName, mPosition);
+                world->changeToInteriorCell (mCellName, mPosition, true);
         }
         else
         {

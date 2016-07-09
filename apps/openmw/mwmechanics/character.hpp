@@ -140,6 +140,8 @@ enum JumpingState {
     JumpState_Landing
 };
 
+struct WeaponInfo;
+
 class CharacterController : public MWRender::Animation::TextKeyListener
 {
     MWWorld::Ptr mPtr;
@@ -160,6 +162,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     CharacterState mDeathState;
     std::string mCurrentDeath;
+    bool mFloatToSurface;
 
     CharacterState mHitState;
     std::string mCurrentHit;
@@ -188,9 +191,14 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     bool mAttackingOrSpell;
 
-    void determineAttackType();
+    void setAttackTypeBasedOnMovement();
+    void setAttackTypeRandomly();
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
+    void refreshHitRecoilAnims();
+    void refreshJumpAnims(const WeaponInfo* weap, JumpingState jump, bool force=false);
+    void refreshMovementAnims(const WeaponInfo* weap, CharacterState movement, bool force=false);
+    void refreshIdleAnims(const WeaponInfo* weap, CharacterState idle, bool force=false);
 
     void clearAnimQueue();
 
@@ -205,11 +213,12 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     void updateMagicEffects();
 
     void playDeath(float startpoint, CharacterState death);
+    CharacterState chooseRandomDeathState() const;
     void playRandomDeath(float startpoint = 0.0f);
 
     /// choose a random animation group with \a prefix and numeric suffix
     /// @param num if non-NULL, the chosen animation number will be written here
-    std::string chooseRandomGroup (const std::string& prefix, int* num = NULL);
+    std::string chooseRandomGroup (const std::string& prefix, int* num = NULL) const;
 
     bool updateCarriedLeftVisible(WeaponType weaptype) const;
 
@@ -231,8 +240,14 @@ public:
     void skipAnim();
     bool isAnimPlaying(const std::string &groupName);
 
-    /// @return false if the character has already been killed before
-    bool kill();
+    enum KillResult
+    {
+        Result_DeathAnimStarted,
+        Result_DeathAnimPlaying,
+        Result_DeathAnimJustFinished,
+        Result_DeathAnimFinished
+    };
+    KillResult kill();
 
     void resurrect();
     bool isDead() const

@@ -3,6 +3,8 @@
 #include <set>
 #include <iostream>
 
+#include <OpenThreads/ScopedLock>
+
 #include <osg/Image>
 #include <osg/Plane>
 
@@ -14,8 +16,15 @@
 namespace ESMTerrain
 {
 
-    Storage::Storage(const VFS::Manager *vfs)
+    const float defaultHeight = ESM::Land::DEFAULT_HEIGHT;
+
+    Storage::Storage(const VFS::Manager *vfs, const std::string& normalMapPattern, const std::string& normalHeightMapPattern, bool autoUseNormalMaps, const std::string& specularMapPattern, bool autoUseSpecularMaps)
         : mVFS(vfs)
+        , mNormalMapPattern(normalMapPattern)
+        , mNormalHeightMapPattern(normalHeightMapPattern)
+        , mAutoUseNormalMaps(autoUseNormalMaps)
+        , mSpecularMapPattern(specularMapPattern)
+        , mAutoUseSpecularMaps(autoUseSpecularMaps)
     {
     }
 
@@ -62,7 +71,9 @@ namespace ESMTerrain
             return true;
         }
 
-        return false;
+        min = defaultHeight;
+        max = defaultHeight;
+        return true;
     }
 
     void Storage::fixNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row)
@@ -203,7 +214,7 @@ namespace ESMTerrain
                         assert (vertX < numVerts);
                         assert (vertY < numVerts);
 
-                        float height = -2048;
+                        float height = defaultHeight;
                         if (heightData)
                             height = heightData->mHeights[col*ESM::Land::LAND_SIZE + row];
 
@@ -395,9 +406,9 @@ namespace ESMTerrain
                     int channel = pack ? std::max(0, (layerIndex-1) % 4) : 0;
 
                     if (blendIndex == i)
-                        pData[y*blendmapSize*channels + x*channels + channel] = 255;
+                        pData[(blendmapSize - y - 1)*blendmapSize*channels + x*channels + channel] = 255;
                     else
-                        pData[y*blendmapSize*channels + x*channels + channel] = 0;
+                        pData[(blendmapSize - y - 1)*blendmapSize*channels + x*channels + channel] = 0;
                 }
             }
 
@@ -412,7 +423,7 @@ namespace ESMTerrain
 
         const ESM::Land* land = getLand(cellX, cellY);
         if (!land || !(land->mDataTypes&ESM::Land::DATA_VHGT))
-            return -2048;
+            return defaultHeight;
 
         // Mostly lifted from Ogre::Terrain::getHeightAtTerrainPosition
 
@@ -494,6 +505,8 @@ namespace ESMTerrain
 
     Terrain::LayerInfo Storage::getLayerInfo(const std::string& texture)
     {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mLayerInfoMutex);
+
         // Already have this cached?
         std::map<std::string, Terrain::LayerInfo>::iterator found = mLayerInfoMap.find(texture);
         if (found != mLayerInfoMap.end())
@@ -503,28 +516,34 @@ namespace ESMTerrain
         info.mParallax = false;
         info.mSpecular = false;
         info.mDiffuseMap = texture;
-        std::string texture_ = texture;
-        boost::replace_last(texture_, ".", "_nh.");
 
-        if (mVFS->exists(texture_))
+        if (mAutoUseNormalMaps)
         {
-            info.mNormalMap = texture_;
-            info.mParallax = true;
-        }
-        else
-        {
-            texture_ = texture;
-            boost::replace_last(texture_, ".", "_n.");
+            std::string texture_ = texture;
+            boost::replace_last(texture_, ".", mNormalHeightMapPattern + ".");
             if (mVFS->exists(texture_))
+            {
                 info.mNormalMap = texture_;
+                info.mParallax = true;
+            }
+            else
+            {
+                texture_ = texture;
+                boost::replace_last(texture_, ".", mNormalMapPattern + ".");
+                if (mVFS->exists(texture_))
+                    info.mNormalMap = texture_;
+            }
         }
 
-        texture_ = texture;
-        boost::replace_last(texture_, ".", "_diffusespec.");
-        if (mVFS->exists(texture_))
+        if (mAutoUseSpecularMaps)
         {
-            info.mDiffuseMap = texture_;
-            info.mSpecular = true;
+            std::string texture_ = texture;
+            boost::replace_last(texture_, ".", mSpecularMapPattern + ".");
+            if (mVFS->exists(texture_))
+            {
+                info.mDiffuseMap = texture_;
+                info.mSpecular = true;
+            }
         }
 
         mLayerInfoMap[texture] = info;

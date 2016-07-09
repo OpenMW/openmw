@@ -4,7 +4,6 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
-#include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Group>
 
@@ -26,13 +25,8 @@ DebugDrawer::DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btCollisionWorld *
       mWorld(world),
       mDebugOn(true)
 {
-    mGeode = new osg::Geode;
-    mParentNode->addChild(mGeode);
-    mGeode->setNodeMask(Mask_Debug);
 
     createGeometry();
-
-    mParentNode->addChild(mGeode);
 }
 
 void DebugDrawer::createGeometry()
@@ -40,6 +34,7 @@ void DebugDrawer::createGeometry()
     if (!mGeometry)
     {
         mGeometry = new osg::Geometry;
+        mGeometry->setNodeMask(Mask_Debug);
 
         mVertices = new osg::Vec3Array;
 
@@ -50,7 +45,7 @@ void DebugDrawer::createGeometry()
         mGeometry->setDataVariance(osg::Object::DYNAMIC);
         mGeometry->addPrimitiveSet(mDrawArrays);
 
-        mGeode->addDrawable(mGeometry);
+        mParentNode->addChild(mGeometry);
     }
 }
 
@@ -58,7 +53,7 @@ void DebugDrawer::destroyGeometry()
 {
     if (mGeometry)
     {
-        mGeode->removeDrawable(mGeometry);
+        mParentNode->removeChild(mGeometry);
         mGeometry = NULL;
         mVertices = NULL;
         mDrawArrays = NULL;
@@ -67,7 +62,7 @@ void DebugDrawer::destroyGeometry()
 
 DebugDrawer::~DebugDrawer()
 {
-    mParentNode->removeChild(mGeode);
+    destroyGeometry();
 }
 
 void DebugDrawer::step()

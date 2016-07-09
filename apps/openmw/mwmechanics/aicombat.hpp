@@ -3,16 +3,15 @@
 
 #include "aipackage.hpp"
 
-#include "pathfinding.hpp"
-
-#include "movement.hpp"
-#include "obstacle.hpp"
+#include <boost/shared_ptr.hpp>
 
 #include "../mwworld/cellstore.hpp" // for Doors
 
 #include "../mwbase/world.hpp"
 
-#include <boost/shared_ptr.hpp>
+#include "pathfinding.hpp"
+#include "movement.hpp"
+#include "obstacle.hpp"
 
 namespace ESM
 {
@@ -52,6 +51,9 @@ namespace MWMechanics
             MWWorld::Ptr getTarget() const;
 
             virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
+
+            virtual bool canCancel() const { return false; }
+            virtual bool shouldCancelPreviousAi() const { return false; }
 
         private:
 

@@ -38,21 +38,22 @@ bool CSVWorld::ScriptEdit::event (QEvent *event)
     return QPlainTextEdit::event (event);
 }
 
-CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, ScriptHighlighter::Mode mode,
-    QWidget* parent)
-    : QPlainTextEdit (parent),
-    mChangeLocked (0),
+CSVWorld::ScriptEdit::ScriptEdit(
+    const CSMDoc::Document& document,
+    ScriptHighlighter::Mode mode,
+    QWidget* parent
+) : QPlainTextEdit(parent),
+    mChangeLocked(0),
     mShowLineNum(false),
     mLineNumberArea(0),
     mDefaultFont(font()),
     mMonoFont(QFont("Monospace")),
-    mDocument (document),
+    mTabCharCount(4),
+    mDocument(document),
     mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive)
-
 {
-//    setAcceptRichText (false);
-    setLineWrapMode (QPlainTextEdit::NoWrap);
-    setTabStopWidth (4);
+    wrapLines(false);
+    setTabWidth();
     setUndoRedoEnabled (false); // we use OpenCS-wide undo/redo instead
 
     mAllowedTypes <<CSMWorld::UniversalId::Type_Journal
@@ -118,14 +119,6 @@ void CSVWorld::ScriptEdit::showLineNum(bool show)
         mShowLineNum = show;
         updateLineNumberAreaWidth(0);
     }
-}
-
-void CSVWorld::ScriptEdit::setMonoFont(bool show)
-{
-    if(show)
-        setFont(mMonoFont);
-    else
-        setFont(mDefaultFont);
 }
 
 bool CSVWorld::ScriptEdit::isChangeLocked() const
@@ -194,14 +187,49 @@ bool CSVWorld::ScriptEdit::stringNeedsQuote (const std::string& id) const
     return !(string.contains(mWhiteListQoutes));
 }
 
-void CSVWorld::ScriptEdit::settingChanged (const CSMPrefs::Setting *setting)
+void CSVWorld::ScriptEdit::setTabWidth()
 {
-    if (mHighlighter->settingChanged (setting))
+    // Set tab width to specified number of characters using current font.
+    setTabStopWidth(mTabCharCount * fontMetrics().width(' '));
+}
+
+void CSVWorld::ScriptEdit::wrapLines(bool wrap)
+{
+    if (wrap)
+    {
+        setLineWrapMode(QPlainTextEdit::WidgetWidth);
+    }
+    else
+    {
+        setLineWrapMode(QPlainTextEdit::NoWrap);
+    }
+}
+
+void CSVWorld::ScriptEdit::settingChanged(const CSMPrefs::Setting *setting)
+{
+    // Determine which setting was changed.
+    if (mHighlighter->settingChanged(setting))
+    {
         updateHighlighting();
-    else if (*setting=="Scripts/mono-font")
-        setFont (setting->isTrue() ? mMonoFont : mDefaultFont);
-    else if (*setting=="Scripts/show-linenum")
-        showLineNum (setting->isTrue());
+    }
+    else if (*setting == "Scripts/mono-font")
+    {
+        setFont(setting->isTrue() ? mMonoFont : mDefaultFont);
+        setTabWidth();
+    }
+    else if (*setting == "Scripts/show-linenum")
+    {
+        showLineNum(setting->isTrue());
+    }
+    else if (*setting == "Scripts/wrap-lines")
+    {
+        wrapLines(setting->isTrue());
+    }
+    else if (*setting == "Scripts/tab-width")
+    {
+        mTabCharCount = setting->toInt();
+        setTabWidth();
+    }
 }
 
 void CSVWorld::ScriptEdit::idListChanged()

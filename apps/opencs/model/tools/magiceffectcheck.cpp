@@ -7,7 +7,7 @@
 
 namespace
 {
-    void addMessageIfNotEmpty(CSMDoc::Messages &messages, const CSMWorld::UniversalId &id, const std::string text)
+    void addMessageIfNotEmpty(CSMDoc::Messages &messages, const CSMWorld::UniversalId &id, const std::string& text)
     {
         if (!text.empty())
         {

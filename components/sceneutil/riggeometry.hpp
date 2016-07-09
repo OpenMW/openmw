@@ -13,6 +13,9 @@ namespace SceneUtil
     /// @brief Mesh skinning implementation.
     /// @note A RigGeometry may be attached directly to a Skeleton, or somewhere below a Skeleton.
     /// Note though that the RigGeometry ignores any transforms below the Skeleton, so the attachment point is not that important.
+    /// @note To avoid race conditions, the rig geometry needs to be double buffered. This can be done
+    /// using a FrameSwitch node that has two RigGeometry children. In the future we may want to consider implementing
+    /// the double buffering inside RigGeometry.
     class RigGeometry : public osg::Geometry
     {
     public:
@@ -36,7 +39,11 @@ namespace SceneUtil
 
         void setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap);
 
+        /// Initialize this geometry from the source geometry.
+        /// @note The source geometry will not be modified.
         void setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom);
+
+        osg::ref_ptr<osg::Geometry> getSourceGeometry();
 
         // Called automatically by our CullCallback
         void update(osg::NodeVisitor* nv);
@@ -46,6 +53,7 @@ namespace SceneUtil
 
     private:
         osg::ref_ptr<osg::Geometry> mSourceGeometry;
+        osg::ref_ptr<osg::Vec4Array> mSourceTangents;
         Skeleton* mSkeleton;
 
         osg::NodePath mSkelToGeomPath;
@@ -72,7 +80,7 @@ namespace SceneUtil
 
         bool initFromParentSkeleton(osg::NodeVisitor* nv);
 
-        void updateGeomToSkelMatrix(osg::NodeVisitor* nv);
+        void updateGeomToSkelMatrix(const osg::NodePath& nodePath);
     };
 
 }

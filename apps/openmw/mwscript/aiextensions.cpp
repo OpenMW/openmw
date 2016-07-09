@@ -465,7 +465,6 @@ namespace MWScript
                 }
         };
 
-        template<class R>
         class OpToggleAI : public Interpreter::Opcode0
         {
             public:
@@ -520,8 +519,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Ai::opcodeStartCombatExplicit, new OpStartCombat<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Ai::opcodeStopCombat, new OpStopCombat<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Ai::opcodeStopCombatExplicit, new OpStopCombat<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeToggleAI, new OpToggleAI<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Ai::opcodeToggleAIExplicit, new OpToggleAI<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeToggleAI, new OpToggleAI);
 
             interpreter.installSegment5 (Compiler::Ai::opcodeSetHello, new OpSetAiSetting<ImplicitRef>(0));
             interpreter.installSegment5 (Compiler::Ai::opcodeSetHelloExplicit, new OpSetAiSetting<ExplicitRef>(0));

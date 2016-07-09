@@ -2,7 +2,11 @@
 
 #include <cmath>
 
-CSMWorld::CellRef::CellRef()
+#include <sstream>
+
+#include "cellcoordinates.hpp"
+
+CSMWorld::CellRef::CellRef() : mNew (true)
 {
     mRefNum.mIndex = 0;
     mRefNum.mContentFile = 0;
@@ -10,8 +14,5 @@ CSMWorld::CellRef::CellRef()
 
 std::pair<int, int> CSMWorld::CellRef::getCellIndex() const
 {
-    const int cellSize = 8192;
-
-    return std::make_pair (
-        std::floor (mPos.pos[0]/cellSize), std::floor (mPos.pos[1]/cellSize));
+    return CellCoordinates::coordinatesToCellIndex (mPos.pos[0], mPos.pos[1]);
 }

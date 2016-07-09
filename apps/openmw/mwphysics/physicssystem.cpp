@@ -22,6 +22,7 @@
 
 #include <components/esm/loadgmst.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/unrefqueue.hpp>
 
 #include <components/nifosg/particle.hpp> // FindRecIndexVisitor
 
@@ -67,8 +68,8 @@ namespace MWPhysics
             return osg::RadiansToDegrees(std::acos(normal * osg::Vec3f(0.f, 0.f, 1.f)));
         }
 
-        static bool stepMove(btCollisionObject *colobj, osg::Vec3f &position,
-                             const osg::Vec3f &toMove, float &remainingTime, btCollisionWorld* collisionWorld)
+        static bool stepMove(const btCollisionObject *colobj, osg::Vec3f &position,
+                             const osg::Vec3f &toMove, float &remainingTime, const btCollisionWorld* collisionWorld)
         {
             /*
              * Slide up an incline or set of stairs.  Should be called only after a
@@ -220,7 +221,7 @@ namespace MWPhysics
                 collisionWorld->rayTest(from, to, resultCallback1);
 
                 if (resultCallback1.hasHit() &&
-                        ( (toOsg(resultCallback1.m_hitPointWorld) - tracer.mEndPos).length() > 30
+                        ( (toOsg(resultCallback1.m_hitPointWorld) - tracer.mEndPos).length() > 35
                         || getSlope(tracer.mPlaneNormal) > sMaxSlope))
                 {
                     actor->setOnGround(getSlope(toOsg(resultCallback1.m_hitNormalWorld)) <= sMaxSlope);
@@ -233,13 +234,11 @@ namespace MWPhysics
             }
         }
 
-        static osg::Vec3f move(const MWWorld::Ptr &ptr, Actor* physicActor, const osg::Vec3f &movement, float time,
-                                  bool isFlying, float waterlevel, float slowFall, btCollisionWorld* collisionWorld,
+        static osg::Vec3f move(osg::Vec3f position, const MWWorld::Ptr &ptr, Actor* physicActor, const osg::Vec3f &movement, float time,
+                                  bool isFlying, float waterlevel, float slowFall, const btCollisionWorld* collisionWorld,
                                std::map<MWWorld::Ptr, MWWorld::Ptr>& standingCollisionTracker)
         {
             const ESM::Position& refpos = ptr.getRefData().getPosition();
-            osg::Vec3f position(refpos.asVec3());
-
             // Early-out for totally static creatures
             // (Not sure if gravity should still apply?)
             if (!ptr.getClass().isMobile(ptr))
@@ -255,7 +254,7 @@ namespace MWPhysics
                                     ) * movement * time;
             }
 
-            btCollisionObject *colobj = physicActor->getCollisionObject();
+            const btCollisionObject *colobj = physicActor->getCollisionObject();
             osg::Vec3f halfExtents = physicActor->getHalfExtents();
 
             // NOTE: here we don't account for the collision box translation (i.e. physicActor->getPosition() - refpos.pos).
@@ -281,16 +280,16 @@ namespace MWPhysics
             {
                 velocity = (osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))) * movement;
 
-                if (velocity.z() > 0.f)
+                if (velocity.z() > 0.f && physicActor->getOnGround())
                     inertia = velocity;
-                if(!physicActor->getOnGround())
+                else if(!physicActor->getOnGround())
                 {
                     velocity = velocity + physicActor->getInertialForce();
                 }
             }
 
-            // dead actors underwater will float to the surface
-            if (ptr.getClass().getCreatureStats(ptr).isDead() && position.z() < swimlevel)
+            // dead actors underwater will float to the surface, if the CharacterController tells us to do so
+            if (movement.z() > 0 && ptr.getClass().getCreatureStats(ptr).isDead() && position.z() < swimlevel)
                 velocity = osg::Vec3f(0,0,1) * 25;
 
             ptr.getClass().getMovementSettings(ptr).mPosition[2] = 0;
@@ -449,6 +448,10 @@ namespace MWPhysics
                 inertia.z() += time * -627.2f;
                 if (inertia.z() < 0)
                     inertia.z() *= slowFall;
+                if (slowFall < 1.f) {
+                    inertia.x() = 0;
+                    inertia.y() = 0;
+                }
                 physicActor->setInertialForce(inertia);
             }
             physicActor->setOnGround(isOnGround);
@@ -506,6 +509,9 @@ namespace MWPhysics
     private:
         btHeightfieldTerrainShape* mShape;
         btCollisionObject* mCollisionObject;
+
+        void operator=(const HeightField&);
+        HeightField(const HeightField&);
     };
 
     // --------------------------------------------------------------
@@ -530,6 +536,11 @@ namespace MWPhysics
             setOrigin(btVector3(pos[0], pos[1], pos[2]));
         }
 
+        const Resource::BulletShapeInstance* getShapeInstance() const
+        {
+            return mShapeInstance.get();
+        }
+
         void setScale(float scale)
         {
             mShapeInstance->getCollisionShape()->setLocalScaling(btVector3(scale,scale,scale));
@@ -546,6 +557,11 @@ namespace MWPhysics
         }
 
         btCollisionObject* getCollisionObject()
+        {
+            return mCollisionObject.get();
+        }
+
+        const btCollisionObject* getCollisionObject() const
         {
             return mCollisionObject.get();
         }
@@ -573,7 +589,7 @@ namespace MWPhysics
 
             assert (mShapeInstance->getCollisionShape()->isCompound());
 
-            btCompoundShape* compound = dynamic_cast<btCompoundShape*>(mShapeInstance->getCollisionShape());
+            btCompoundShape* compound = static_cast<btCompoundShape*>(mShapeInstance->getCollisionShape());
 
             for (std::map<int, int>::iterator it = mShapeInstance->mAnimatedShapes.begin(); it != mShapeInstance->mAnimatedShapes.end();)
             {
@@ -637,12 +653,15 @@ namespace MWPhysics
 
     PhysicsSystem::PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode)
         : mShapeManager(new Resource::BulletShapeManager(resourceSystem->getVFS(), resourceSystem->getSceneManager(), resourceSystem->getNifFileManager()))
+        , mResourceSystem(resourceSystem)
         , mDebugDrawEnabled(false)
         , mTimeAccum(0.0f)
         , mWaterHeight(0)
         , mWaterEnabled(false)
         , mParentNode(parentNode)
     {
+        mResourceSystem->addResourceManager(mShapeManager.get());
+
         mCollisionConfiguration = new btDefaultCollisionConfiguration();
         mDispatcher = new btCollisionDispatcher(mCollisionConfiguration);
         mBroadphase = new btDbvtBroadphase();
@@ -656,6 +675,8 @@ namespace MWPhysics
 
     PhysicsSystem::~PhysicsSystem()
     {
+        mResourceSystem->removeResourceManager(mShapeManager.get());
+
         if (mWaterCollisionObject.get())
             mCollisionWorld->removeCollisionObject(mWaterCollisionObject.get());
 
@@ -680,6 +701,16 @@ namespace MWPhysics
         delete mCollisionConfiguration;
         delete mDispatcher;
         delete mBroadphase;
+    }
+
+    void PhysicsSystem::setUnrefQueue(SceneUtil::UnrefQueue *unrefQueue)
+    {
+        mUnrefQueue = unrefQueue;
+    }
+
+    Resource::BulletShapeManager *PhysicsSystem::getShapeManager()
+    {
+        return mShapeManager.get();
     }
 
     bool PhysicsSystem::toggleDebugRendering()
@@ -743,18 +774,11 @@ namespace MWPhysics
             mLeastDistSqr(std::numeric_limits<float>::max())
         { }
 
-#if BT_BULLET_VERSION >= 281
         virtual btScalar addSingleResult(btManifoldPoint& cp,
                                          const btCollisionObjectWrapper* col0Wrap,int partId0,int index0,
                                          const btCollisionObjectWrapper* col1Wrap,int partId1,int index1)
         {
             const btCollisionObject* collisionObject = col1Wrap->m_collisionObject;
-#else
-        virtual btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObject* col0, int partId0, int index0,
-                                         const btCollisionObject* col1, int partId1, int index1)
-        {
-            const btCollisionObject* collisionObject = col1;
-#endif
             if (collisionObject != mMe)
             {
                 btScalar distsqr = mOrigin.distance2(cp.getPositionWorldOnA());
@@ -868,6 +892,12 @@ namespace MWPhysics
             const Actor* actor = getActor(ignore);
             if (actor)
                 me = actor->getCollisionObject();
+            else
+            {
+                const Object* object = getObject(ignore);
+                if (object)
+                    me = object->getCollisionObject();
+            }
         }
 
         ClosestNotMeRayResultCallback resultCallback(me, btFrom, btTo);
@@ -920,8 +950,8 @@ namespace MWPhysics
         if (!physactor1 || !physactor2)
             return false;
 
-        osg::Vec3f pos1 (physactor1->getPosition() + osg::Vec3f(0,0,physactor1->getHalfExtents().z() * 0.8)); // eye level
-        osg::Vec3f pos2 (physactor2->getPosition() + osg::Vec3f(0,0,physactor2->getHalfExtents().z() * 0.8));
+        osg::Vec3f pos1 (physactor1->getCollisionObjectPosition() + osg::Vec3f(0,0,physactor1->getHalfExtents().z() * 0.9)); // eye level
+        osg::Vec3f pos2 (physactor2->getCollisionObjectPosition() + osg::Vec3f(0,0,physactor2->getHalfExtents().z() * 0.9));
 
         RayResult result = castRay(pos1, pos2, MWWorld::Ptr(), CollisionType_World|CollisionType_HeightMap|CollisionType_Door);
 
@@ -983,11 +1013,11 @@ namespace MWPhysics
             return osg::Vec3f();
     }
 
-    osg::Vec3f PhysicsSystem::getPosition(const MWWorld::ConstPtr &actor) const
+    osg::Vec3f PhysicsSystem::getCollisionObjectPosition(const MWWorld::ConstPtr &actor) const
     {
         const Actor* physactor = getActor(actor);
         if (physactor)
-            return physactor->getPosition();
+            return physactor->getCollisionObjectPosition();
         else
             return osg::Vec3f();
     }
@@ -1004,7 +1034,6 @@ namespace MWPhysics
 
         std::vector<MWWorld::Ptr> mResult;
 
-#if BT_BULLET_VERSION >= 281
         virtual btScalar addSingleResult(btManifoldPoint& cp,
                                          const btCollisionObjectWrapper* col0Wrap,int partId0,int index0,
                                          const btCollisionObjectWrapper* col1Wrap,int partId1,int index1)
@@ -1012,14 +1041,6 @@ namespace MWPhysics
             const btCollisionObject* collisionObject = col0Wrap->m_collisionObject;
             if (collisionObject == mTestedAgainst)
                 collisionObject = col1Wrap->m_collisionObject;
-#else
-        virtual btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObject* col0, int partId0, int index0,
-                                         const btCollisionObject* col1, int partId1, int index1)
-        {
-            const btCollisionObject* collisionObject = col0;
-            if (collisionObject == mTestedAgainst)
-                collisionObject = col1;
-#endif
             PtrHolder* holder = static_cast<PtrHolder*>(collisionObject->getUserPointer());
             if (holder)
                 mResult.push_back(holder->getPtr());
@@ -1075,7 +1096,7 @@ namespace MWPhysics
 
     void PhysicsSystem::addObject (const MWWorld::Ptr& ptr, const std::string& mesh, int collisionType)
     {
-        osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->createInstance(mesh);
+        osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(mesh);
         if (!shapeInstance || !shapeInstance->getCollisionShape())
             return;
 
@@ -1095,6 +1116,9 @@ namespace MWPhysics
         if (found != mObjects.end())
         {
             mCollisionWorld->removeCollisionObject(found->second->getCollisionObject());
+
+            if (mUnrefQueue.get())
+                mUnrefQueue->push(found->second->getShapeInstance());
 
             mAnimatedObjects.erase(found->second);
 
@@ -1165,6 +1189,14 @@ namespace MWPhysics
         return NULL;
     }
 
+    const Object* PhysicsSystem::getObject(const MWWorld::ConstPtr &ptr) const
+    {
+        ObjectMap::const_iterator found = mObjects.find(ptr);
+        if (found != mObjects.end())
+            return found->second;
+        return NULL;
+    }
+
     void PhysicsSystem::updateScale(const MWWorld::Ptr &ptr)
     {
         ObjectMap::iterator found = mObjects.find(ptr);
@@ -1221,11 +1253,11 @@ namespace MWPhysics
     }
 
     void PhysicsSystem::addActor (const MWWorld::Ptr& ptr, const std::string& mesh) {
-        osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->createInstance(mesh);
-        if (!shapeInstance)
+        osg::ref_ptr<const Resource::BulletShape> shape = mShapeManager->getShape(mesh);
+        if (!shape)
             return;
 
-        Actor* actor = new Actor(ptr, shapeInstance, mCollisionWorld);
+        Actor* actor = new Actor(ptr, shape, mCollisionWorld);
         mActors.insert(std::make_pair(ptr, actor));
     }
 
@@ -1269,54 +1301,69 @@ namespace MWPhysics
         mMovementResults.clear();
 
         mTimeAccum += dt;
-        if(mTimeAccum >= 1.0f/60.0f)
+        const float physicsDt = 1.f/60.0f;
+
+        const int maxAllowedSteps = 20;
+        int numSteps = mTimeAccum / (physicsDt);
+        numSteps = std::min(numSteps, maxAllowedSteps);
+
+        mTimeAccum -= numSteps * physicsDt;
+
+        if (numSteps)
         {
             // Collision events should be available on every frame
             mStandingCollisions.clear();
+        }
 
-            const MWBase::World *world = MWBase::Environment::get().getWorld();
-            PtrVelocityList::iterator iter = mMovementQueue.begin();
-            for(;iter != mMovementQueue.end();++iter)
+        const MWBase::World *world = MWBase::Environment::get().getWorld();
+        PtrVelocityList::iterator iter = mMovementQueue.begin();
+        for(;iter != mMovementQueue.end();++iter)
+        {
+            float waterlevel = -std::numeric_limits<float>::max();
+            const MWWorld::CellStore *cell = iter->first.getCell();
+            if(cell->getCell()->hasWater())
+                waterlevel = cell->getWaterLevel();
+
+
+            const MWMechanics::MagicEffects& effects = iter->first.getClass().getCreatureStats(iter->first).getMagicEffects();
+
+            bool waterCollision = false;
+            if (effects.get(ESM::MagicEffect::WaterWalking).getMagnitude()
+                    && cell->getCell()->hasWater()
+                    && !world->isUnderwater(iter->first.getCell(),
+                                           osg::Vec3f(iter->first.getRefData().getPosition().asVec3())))
+                waterCollision = true;
+
+            ActorMap::iterator foundActor = mActors.find(iter->first);
+            if (foundActor == mActors.end()) // actor was already removed from the scene
+                continue;
+            Actor* physicActor = foundActor->second;
+            physicActor->setCanWaterWalk(waterCollision);
+
+            // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
+            float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
+
+            osg::Vec3f position = physicActor->getPosition();
+            float oldHeight = position.z();
+            for (int i=0; i<numSteps; ++i)
             {
-                float waterlevel = -std::numeric_limits<float>::max();
-                const MWWorld::CellStore *cell = iter->first.getCell();
-                if(cell->getCell()->hasWater())
-                    waterlevel = cell->getWaterLevel();
-
-                float oldHeight = iter->first.getRefData().getPosition().pos[2];
-
-                const MWMechanics::MagicEffects& effects = iter->first.getClass().getCreatureStats(iter->first).getMagicEffects();
-
-                bool waterCollision = false;
-                if (effects.get(ESM::MagicEffect::WaterWalking).getMagnitude()
-                        && cell->getCell()->hasWater()
-                        && !world->isUnderwater(iter->first.getCell(),
-                                               osg::Vec3f(iter->first.getRefData().getPosition().asVec3())))
-                    waterCollision = true;
-
-                ActorMap::iterator foundActor = mActors.find(iter->first);
-                if (foundActor == mActors.end()) // actor was already removed from the scene
-                    continue;
-                Actor* physicActor = foundActor->second;
-                physicActor->setCanWaterWalk(waterCollision);
-
-                // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
-                float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
-
-                osg::Vec3f newpos = MovementSolver::move(physicActor->getPtr(), physicActor, iter->second, mTimeAccum,
-                                                            world->isFlying(iter->first),
-                                                            waterlevel, slowFall, mCollisionWorld, mStandingCollisions);
-
-                float heightDiff = newpos.z() - oldHeight;
-
-                if (heightDiff < 0)
-                    iter->first.getClass().getCreatureStats(iter->first).addToFallHeight(-heightDiff);
-
-                mMovementResults.push_back(std::make_pair(iter->first, newpos));
+                position = MovementSolver::move(position, physicActor->getPtr(), physicActor, iter->second, physicsDt,
+                                                world->isFlying(iter->first),
+                                                waterlevel, slowFall, mCollisionWorld, mStandingCollisions);
+                physicActor->setPosition(position);
             }
 
-            mTimeAccum = 0.0f;
+            float interpolationFactor = mTimeAccum / physicsDt;
+            osg::Vec3f interpolated = position * interpolationFactor + physicActor->getPreviousPosition() * (1.f - interpolationFactor);
+
+            float heightDiff = position.z() - oldHeight;
+
+            if (heightDiff < 0)
+                iter->first.getClass().getCreatureStats(iter->first).addToFallHeight(-heightDiff);
+
+            mMovementResults.push_back(std::make_pair(iter->first, interpolated));
         }
+
         mMovementQueue.clear();
 
         return mMovementResults;

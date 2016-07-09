@@ -85,6 +85,7 @@ namespace CSMWorld
             Display_Enchantment,
             //CONCRETE TYPES ENDS HERE
 
+            Display_UnsignedInteger8,
             Display_Integer,
             Display_Float,
             Display_Var,

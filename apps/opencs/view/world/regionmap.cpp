@@ -17,6 +17,7 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/tablemimedata.hpp"
+#include "../../model/world/commandmacro.hpp"
 
 void CSVWorld::RegionMap::contextMenuEvent (QContextMenuEvent *event)
 {
@@ -159,8 +160,7 @@ void CSVWorld::RegionMap::setRegion (const std::string& regionId)
 
     QString regionId2 = QString::fromUtf8 (regionId.c_str());
 
-    if (selected.size()>1)
-        mDocument.getUndoStack().beginMacro (tr ("Set Region"));
+    CSMWorld::CommandMacro macro (mDocument.getUndoStack(), selected.size()>1 ? tr ("Set Region") : "");
 
     for (QModelIndexList::const_iterator iter (selected.begin()); iter!=selected.end(); ++iter)
     {
@@ -170,12 +170,8 @@ void CSVWorld::RegionMap::setRegion (const std::string& regionId)
         QModelIndex index = cellsModel->getModelIndex (cellId,
             cellsModel->findColumnIndex (CSMWorld::Columns::ColumnId_Region));
 
-        mDocument.getUndoStack().push (
-            new CSMWorld::ModifyCommand (*cellsModel, index, regionId2));
+        macro.push (new CSMWorld::ModifyCommand (*cellsModel, index, regionId2));
     }
-
-    if (selected.size()>1)
-        mDocument.getUndoStack().endMacro();
 }
 
 CSVWorld::RegionMap::RegionMap (const CSMWorld::UniversalId& universalId,
@@ -258,19 +254,15 @@ void CSVWorld::RegionMap::createCells()
     CSMWorld::IdTable *cellsModel = &dynamic_cast<CSMWorld::IdTable&> (*
         mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
 
-    if (selected.size()>1)
-        mDocument.getUndoStack().beginMacro (tr ("Create cells"));
+    CSMWorld::CommandMacro macro (mDocument.getUndoStack(), selected.size()>1 ? tr ("Create cells"): "");
 
     for (QModelIndexList::const_iterator iter (selected.begin()); iter!=selected.end(); ++iter)
     {
         std::string cellId = model()->data (*iter, CSMWorld::RegionMap::Role_CellId).
             toString().toUtf8().constData();
 
-        mDocument.getUndoStack().push (new CSMWorld::CreateCommand (*cellsModel, cellId));
+        macro.push (new CSMWorld::CreateCommand (*cellsModel, cellId));
     }
-
-    if (selected.size()>1)
-        mDocument.getUndoStack().endMacro();
 }
 
 void CSVWorld::RegionMap::setRegion()
@@ -311,7 +303,7 @@ void CSVWorld::RegionMap::view()
         hint << cellId;
     }
 
-    emit editRequest (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Scene, "sys::default"),
+    emit editRequest (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Scene, ESM::CellId::sDefaultWorldspace),
         hint.str());
 }
 

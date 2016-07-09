@@ -69,7 +69,7 @@ namespace MWGui
 
     HUD::HUD(CustomMarkerCollection &customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender)
         : Layout("openmw_hud.layout")
-        , LocalMapBase(customMarkers, localMapRender)
+        , LocalMapBase(customMarkers, localMapRender, Settings::Manager::getBool("local map hud fog of war", "Map"))
         , mHealth(NULL)
         , mMagicka(NULL)
         , mStamina(NULL)
@@ -159,7 +159,7 @@ namespace MWGui
 
         getWidget(mCrosshair, "Crosshair");
 
-        LocalMapBase::init(mMinimap, mCompass, Settings::Manager::getInt("local map hud widget size", "Map"));
+        LocalMapBase::init(mMinimap, mCompass, Settings::Manager::getInt("local map hud widget size", "Map"), Settings::Manager::getInt("local map cell distance", "Map"));
 
         mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
         mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);

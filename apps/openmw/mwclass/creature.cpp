@@ -134,6 +134,9 @@ namespace MWClass
             data->mCreatureStats.setAiSetting (MWMechanics::CreatureStats::AI_Flee, ref->mBase->mAiData.mFlee);
             data->mCreatureStats.setAiSetting (MWMechanics::CreatureStats::AI_Alarm, ref->mBase->mAiData.mAlarm);
 
+            if (data->mCreatureStats.isDead())
+                data->mCreatureStats.setDeathAnimationFinished(true);
+
             // spells
             for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
                 iter!=ref->mBase->mSpells.mList.end(); ++iter)
@@ -182,6 +185,29 @@ namespace MWClass
         return "";
     }
 
+    void Creature::getModelsToPreload(const MWWorld::Ptr &ptr, std::vector<std::string> &models) const
+    {
+        std::string model = getModel(ptr);
+        if (!model.empty())
+            models.push_back(model);
+
+        // FIXME: use const version of InventoryStore functions once they are available
+        if (ptr.getClass().hasInventoryStore(ptr))
+        {
+            MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
+            for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+            {
+                MWWorld::ContainerStoreIterator equipped = invStore.getSlot(slot);
+                if (equipped != invStore.end())
+                {
+                    model = equipped->getClass().getModel(*equipped);
+                    if (!model.empty())
+                        models.push_back(model);
+                }
+            }
+        }
+    }
+
     std::string Creature::getName (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
@@ -219,13 +245,10 @@ namespace MWClass
 
         MWMechanics::applyFatigueLoss(ptr, weapon, attackStrength);
 
-        // TODO: where is the distance defined?
-        float dist = 200.f;
+        float dist = gmst.find("fCombatDistance")->getFloat();
         if (!weapon.isEmpty())
-        {
-            const float fCombatDistance = gmst.find("fCombatDistance")->getFloat();
-            dist = fCombatDistance * weapon.get<ESM::Weapon>()->mBase->mData.mReach;
-        }
+            dist *= weapon.get<ESM::Weapon>()->mBase->mData.mReach;
+
         std::pair<MWWorld::Ptr, osg::Vec3f> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, dist);
         if (result.first.isEmpty())
             return; // Didn't hit anything
@@ -283,18 +306,7 @@ namespace MWClass
             }
 
             // Apply "On hit" enchanted weapons
-            std::string enchantmentName = !weapon.isEmpty() ? weapon.getClass().getEnchantment(weapon) : "";
-            if (!enchantmentName.empty())
-            {
-                const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
-                            enchantmentName);
-                if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
-                {
-                    MWMechanics::CastSpell cast(ptr, victim);
-                    cast.mHitPosition = hitPosition;
-                    cast.cast(weapon);
-                }
-            }
+            MWMechanics::applyOnStrikeEnchantment(ptr, victim, weapon, hitPosition);
         }
         else if (isBipedal(ptr))
         {
@@ -747,20 +759,31 @@ namespace MWClass
 
     void Creature::respawn(const MWWorld::Ptr &ptr) const
     {
-        if (isFlagBitSet(ptr, ESM::Creature::Respawn))
+        const MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
+        if (ptr.getRefData().getCount() > 0 && !creatureStats.isDead())
+            return;
+
+        const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        static const float fCorpseRespawnDelay = gmst.find("fCorpseRespawnDelay")->getFloat();
+        static const float fCorpseClearDelay = gmst.find("fCorpseClearDelay")->getFloat();
+
+        float delay = ptr.getRefData().getCount() == 0 ? fCorpseClearDelay : std::min(fCorpseRespawnDelay, fCorpseClearDelay);
+
+        if (isFlagBitSet(ptr, ESM::Creature::Respawn)
+                && creatureStats.getTimeOfDeath() + delay <= MWBase::Environment::get().getWorld()->getTimeStamp())
         {
-            // Note we do not respawn moved references in the cell they were moved to. Instead they are respawned in the original cell.
-            // This also means we cannot respawn dynamically placed references with no content file connection.
             if (ptr.getCellRef().hasContentFile())
             {
                 if (ptr.getRefData().getCount() == 0)
                     ptr.getRefData().setCount(1);
 
-                // Reset to original position
-                ptr.getRefData().setPosition(ptr.getCellRef().getPosition());
-
                 MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
                 ptr.getRefData().setCustomData(NULL);
+
+                // Reset to original position
+                MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
+                        ptr.getCellRef().getPosition().pos[1],
+                        ptr.getCellRef().getPosition().pos[2]);
             }
         }
     }

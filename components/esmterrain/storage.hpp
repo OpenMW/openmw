@@ -1,6 +1,8 @@
 #ifndef COMPONENTS_ESM_TERRAIN_STORAGE_H
 #define COMPONENTS_ESM_TERRAIN_STORAGE_H
 
+#include <OpenThreads/Mutex>
+
 #include <components/terrain/storage.hpp>
 
 #include <components/esm/loadland.hpp>
@@ -25,7 +27,7 @@ namespace ESMTerrain
         virtual const ESM::LandTexture* getLandTexture(int index, short plugin) = 0;
 
     public:
-        Storage(const VFS::Manager* vfs);
+        Storage(const VFS::Manager* vfs, const std::string& normalMapPattern = "", const std::string& normalHeightMapPattern = "", bool autoUseNormalMaps = false, const std::string& specularMapPattern = "", bool autoUseSpecularMaps = false);
 
         /// Data is loaded first, if necessary. Will return a 0-pointer if there is no data for
         /// any of the data types specified via \a flags. Will also return a 0-pointer if there
@@ -105,6 +107,14 @@ namespace ESMTerrain
         std::string getTextureName (UniqueTextureId id);
 
         std::map<std::string, Terrain::LayerInfo> mLayerInfoMap;
+        OpenThreads::Mutex mLayerInfoMutex;
+
+        std::string mNormalMapPattern;
+        std::string mNormalHeightMapPattern;
+        bool mAutoUseNormalMaps;
+
+        std::string mSpecularMapPattern;
+        bool mAutoUseSpecularMaps;
 
         Terrain::LayerInfo getLayerInfo(const std::string& texture);
     };

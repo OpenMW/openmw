@@ -38,6 +38,8 @@ Skeleton::Skeleton()
     , mNeedToUpdateBoneMatrices(true)
     , mActive(true)
     , mLastFrameNumber(0)
+    , mTraversedEvenFrame(false)
+    , mTraversedOddFrame(false)
 {
 
 }
@@ -48,6 +50,8 @@ Skeleton::Skeleton(const Skeleton &copy, const osg::CopyOp &copyop)
     , mNeedToUpdateBoneMatrices(true)
     , mActive(copy.mActive)
     , mLastFrameNumber(0)
+    , mTraversedEvenFrame(false)
+    , mTraversedOddFrame(false)
 {
 
 }
@@ -104,12 +108,17 @@ Bone* Skeleton::getBone(const std::string &name)
     return bone;
 }
 
-void Skeleton::updateBoneMatrices(osg::NodeVisitor* nv)
+void Skeleton::updateBoneMatrices(unsigned int traversalNumber)
 {
-    if (nv->getTraversalNumber() != mLastFrameNumber)
+    if (traversalNumber != mLastFrameNumber)
         mNeedToUpdateBoneMatrices = true;
 
-    mLastFrameNumber = nv->getTraversalNumber();
+    mLastFrameNumber = traversalNumber;
+
+    if (mLastFrameNumber % 2 == 0)
+        mTraversedEvenFrame = true;
+    else
+        mTraversedOddFrame = true;
 
     if (mNeedToUpdateBoneMatrices)
     {
@@ -135,12 +144,18 @@ bool Skeleton::getActive() const
     return mActive;
 }
 
+void Skeleton::markDirty()
+{
+    mTraversedEvenFrame = false;
+    mTraversedOddFrame = false;
+}
+
 void Skeleton::traverse(osg::NodeVisitor& nv)
 {
     if (!getActive() && nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR
             // need to process at least 2 frames before shutting off update, since we need to have both frame-alternating RigGeometries initialized
             // this would be more naturally handled if the double-buffering was implemented in RigGeometry itself rather than in a FrameSwitch decorator node
-            && mLastFrameNumber != 0 && mLastFrameNumber+2 <= nv.getTraversalNumber())
+            && mLastFrameNumber != 0 && mTraversedEvenFrame && mTraversedOddFrame)
         return;
     osg::Group::traverse(nv);
 }

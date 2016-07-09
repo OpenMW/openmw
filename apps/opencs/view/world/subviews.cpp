@@ -14,6 +14,7 @@
 #include "scenesubview.hpp"
 #include "dialoguecreator.hpp"
 #include "infocreator.hpp"
+#include "pathgridcreator.hpp"
 #include "previewsubview.hpp"
 
 void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
@@ -42,7 +43,6 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Enchantments,
         CSMWorld::UniversalId::Type_BodyParts,
         CSMWorld::UniversalId::Type_SoundGens,
-        CSMWorld::UniversalId::Type_Pathgrids,
 
         CSMWorld::UniversalId::Type_None // end marker
     };
@@ -52,7 +52,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
             new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GenericCreator> >);
 
     manager.add (CSMWorld::UniversalId::Type_StartScripts,
-        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<StartScriptCreator> >);
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, StartScriptCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_Cells,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<CellCreator> >);
@@ -74,6 +74,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     manager.add (CSMWorld::UniversalId::Type_JournalInfos,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, InfoCreatorFactory>);
+
+    manager.add (CSMWorld::UniversalId::Type_Pathgrids,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<PathgridCreator> >);
 
     // Subviews for resources tables
     manager.add (CSMWorld::UniversalId::Type_Meshes,
@@ -125,7 +128,6 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Enchantment,
         CSMWorld::UniversalId::Type_BodyPart,
         CSMWorld::UniversalId::Type_SoundGen,
-        CSMWorld::UniversalId::Type_Pathgrid,
 
         CSMWorld::UniversalId::Type_None // end marker
     };
@@ -136,8 +138,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
             CreatorFactory<GenericCreator> > (false));
 
     manager.add (CSMWorld::UniversalId::Type_StartScript,
-        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView,
-        CreatorFactory<StartScriptCreator> > (false));
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, StartScriptCreatorFactory>(false));
 
     manager.add (CSMWorld::UniversalId::Type_Skill,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, NullCreatorFactory > (false));
@@ -169,6 +170,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     manager.add (CSMWorld::UniversalId::Type_Journal,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, JournalCreatorFactory> (false));
 
+    manager.add (CSMWorld::UniversalId::Type_Pathgrid,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<PathgridCreator> > (false));
+
     manager.add (CSMWorld::UniversalId::Type_DebugProfile,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> > (false));
 
@@ -177,7 +181,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     manager.add (CSMWorld::UniversalId::Type_MetaData,
         new CSVDoc::SubViewFactory<SimpleDialogueSubView >);
-        
+
     //preview
     manager.add (CSMWorld::UniversalId::Type_Preview, new CSVDoc::SubViewFactory<PreviewSubView>);
 }

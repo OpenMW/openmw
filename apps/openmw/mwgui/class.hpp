@@ -8,6 +8,8 @@
 
 namespace MWGui
 {
+    void setClassImage(MyGUI::ImageBox* imageBox, const std::string& classId);
+
     class InfoBoxDialog : public WindowModal
     {
     public:

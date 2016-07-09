@@ -62,7 +62,15 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
     }
 
     // NPC faction
-    if (!info.mFaction.empty())
+    if (info.mFactionLess)
+    {
+        if (isCreature)
+            return true;
+
+        if (!mActor.getClass().getPrimaryFaction(mActor).empty())
+            return false;
+    }
+    else if (!info.mFaction.empty())
     {
         if (isCreature)
             return true;
@@ -145,8 +153,7 @@ bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info, bool invert
     if (isCreature)
         return true;
 
-    int actorDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor)
-            + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange();
+    int actorDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor);
     // For service refusal, the disposition check is inverted. However, a value of 0 still means "always succeed".
     return invert ? (info.mData.mDisposition == 0 || actorDisposition < info.mData.mDisposition)
                   : (actorDisposition >= info.mData.mDisposition);
@@ -155,9 +162,17 @@ bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info, bool invert
 bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
 {
     if (select.isNpcOnly() && (mActor.getTypeName() != typeid (ESM::NPC).name()))
-        // If the actor is a creature, we do not test the conditions applicable
-        // only to NPCs.
+        // If the actor is a creature, we pass all conditions only applicable to NPCs.
         return true;
+
+    if (select.getFunction() == SelectWrapper::Function_Choice && mChoice == -1)
+        // If not currently in a choice, we reject all conditions that test against choices.
+        return false;
+
+    if (select.getFunction() == SelectWrapper::Function_Weather && !(MWBase::Environment::get().getWorld()->isCellExterior() || MWBase::Environment::get().getWorld()->isCellQuasiExterior()))
+        // Reject weather conditions in interior cells
+        // Note that the original engine doesn't include the "|| isCellQuasiExterior()" check, which could be considered a bug.
+        return false;
 
     switch (select.getType())
     {
@@ -478,7 +493,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_SameRace:
 
-            return !Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mRace, player.get<ESM::NPC>()->mBase->mRace);
+            return Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mRace, player.get<ESM::NPC>()->mBase->mRace);
 
         case SelectWrapper::Function_SameFaction:
 

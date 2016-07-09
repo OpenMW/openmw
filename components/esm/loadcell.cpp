@@ -69,7 +69,7 @@ namespace ESM
         while (!isLoaded && esm.hasMoreSubs())
         {
             esm.getSubName();
-            switch (esm.retSubName().val)
+            switch (esm.retSubName().intval)
             {
                 case ESM::SREC_NAME:
                     mName = esm.getHString();
@@ -96,7 +96,7 @@ namespace ESM
 
         if (mCellId.mPaged)
         {
-            mCellId.mWorldspace = "sys::default";
+            mCellId.mWorldspace = ESM::CellId::sDefaultWorldspace;
             mCellId.mIndex.mX = mData.mX;
             mCellId.mIndex.mY = mData.mY;
         }
@@ -114,7 +114,7 @@ namespace ESM
         while (!isLoaded && esm.hasMoreSubs())
         {
             esm.getSubName();
-            switch (esm.retSubName().val)
+            switch (esm.retSubName().intval)
             {
                 case ESM::FourCC<'I','N','T','V'>::value:
                     int waterl;

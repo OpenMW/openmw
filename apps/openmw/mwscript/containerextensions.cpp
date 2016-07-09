@@ -317,7 +317,7 @@ namespace MWScript
                          it != invStore.end(); ++it)
                     {
                         if (::Misc::StringUtils::ciEqual(it->getCellRef().getSoul(), name))
-                            ++count;
+                            count += it->getRefData().getCount();
                     }
                     runtime.push(count);
                 }

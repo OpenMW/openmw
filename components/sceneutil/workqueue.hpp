@@ -14,37 +14,61 @@
 namespace SceneUtil
 {
 
-    class WorkTicket : public osg::Referenced
-    {
-    public:
-        void waitTillDone();
-
-        void signalDone();
-
-    private:
-        OpenThreads::Atomic mDone;
-        OpenThreads::Mutex mMutex;
-        OpenThreads::Condition mCondition;
-    };
-
-    class WorkItem
+    class WorkItem : public osg::Referenced
     {
     public:
         WorkItem();
         virtual ~WorkItem();
 
         /// Override in a derived WorkItem to perform actual work.
-        /// By default, just signals the ticket that the work is done.
-        virtual void doWork();
+        virtual void doWork() {}
 
-        osg::ref_ptr<WorkTicket> getTicket();
+        bool isDone() const;
+
+        /// Wait until the work is completed. Usually called from the main thread.
+        void waitTillDone();
+
+        /// Internal use by the WorkQueue.
+        void signalDone();
 
     protected:
-        osg::ref_ptr<WorkTicket> mTicket;
+        OpenThreads::Atomic mDone;
+        OpenThreads::Mutex mMutex;
+        OpenThreads::Condition mCondition;
     };
 
-    class WorkQueue;
+    class WorkThread;
 
+    /// @brief A work queue that users can push work items onto, to be completed by one or more background threads.
+    /// @note Work items will be processed in the order that they were given in, however
+    /// if multiple work threads are involved then it is possible for a later item to complete before earlier items.
+    class WorkQueue : public osg::Referenced
+    {
+    public:
+        WorkQueue(int numWorkerThreads=1);
+        ~WorkQueue();
+
+        /// Add a new work item to the back of the queue.
+        /// @par The work item's waitTillDone() method may be used by the caller to wait until the work is complete.
+        /// @param front If true, add item to the front of the queue. If false (default), add to the back.
+        void addWorkItem(osg::ref_ptr<WorkItem> item, bool front=false);
+
+        /// Get the next work item from the front of the queue. If the queue is empty, waits until a new item is added.
+        /// If the workqueue is in the process of being destroyed, may return NULL.
+        /// @par Used internally by the WorkThread.
+        osg::ref_ptr<WorkItem> removeWorkItem();
+
+    private:
+        bool mIsReleased;
+        std::deque<osg::ref_ptr<WorkItem> > mQueue;
+
+        OpenThreads::Mutex mMutex;
+        OpenThreads::Condition mCondition;
+
+        std::vector<WorkThread*> mThreads;
+    };
+
+    /// Internally used by WorkQueue.
     class WorkThread : public OpenThreads::Thread
     {
     public:
@@ -55,35 +79,6 @@ namespace SceneUtil
     private:
         WorkQueue* mWorkQueue;
     };
-
-    /// @brief A work queue that users can push work items onto, to be completed by one or more background threads.
-    class WorkQueue
-    {
-    public:
-        WorkQueue(int numWorkerThreads=1);
-        ~WorkQueue();
-
-        /// Add a new work item to the back of the queue.
-        /// @par The returned WorkTicket may be used by the caller to wait until the work is complete.
-        osg::ref_ptr<WorkTicket> addWorkItem(WorkItem* item);
-
-        /// Get the next work item from the front of the queue. If the queue is empty, waits until a new item is added.
-        /// If the workqueue is in the process of being destroyed, may return NULL.
-        /// @note The caller must free the returned WorkItem
-        WorkItem* removeWorkItem();
-
-        void runThread();
-
-    private:
-        bool mIsReleased;
-        std::queue<WorkItem*> mQueue;
-
-        OpenThreads::Mutex mMutex;
-        OpenThreads::Condition mCondition;
-
-        std::vector<WorkThread*> mThreads;
-    };
-
 
 
 }

@@ -9,8 +9,8 @@ void ESM::Header::blank()
 {
     mData.version = ESM::VER_13;
     mData.type = 0;
-    mData.author.assign ("");
-    mData.desc.assign ("");
+    mData.author.clear();
+    mData.desc.clear();
     mData.records = 0;
     mFormat = CurrentFormat;
     mMaster.clear();
@@ -32,8 +32,8 @@ void ESM::Header::load (ESMReader &esm)
       esm.getSubHeader();
       esm.getT(mData.version);
       esm.getT(mData.type);
-      mData.author.assign(esm.getString(sizeof(mData.author.name)));
-      mData.desc.assign(esm.getString(sizeof(mData.desc.name)));
+      mData.author.assign( esm.getString(mData.author.data_size()) );
+      mData.desc.assign( esm.getString(mData.desc.data_size()) );
       esm.getT(mData.records);
     }
 
@@ -53,14 +53,14 @@ void ESM::Header::load (ESMReader &esm)
     {
         esm.getSubHeader();
         mSCRD.resize(esm.getSubSize());
-        if (mSCRD.size())
+        if (!mSCRD.empty())
             esm.getExact(&mSCRD[0], mSCRD.size());
     }
     if (esm.isNextSub("SCRS"))
     {
         esm.getSubHeader();
         mSCRS.resize(esm.getSubSize());
-        if (mSCRS.size())
+        if (!mSCRS.empty())
             esm.getExact(&mSCRS[0], mSCRS.size());
     }
 }
@@ -73,8 +73,8 @@ void ESM::Header::save (ESMWriter &esm)
     esm.startSubRecord("HEDR");
     esm.writeT(mData.version);
     esm.writeT(mData.type);
-    esm.writeFixedSizeString(mData.author.toString(), 32);
-    esm.writeFixedSizeString(mData.desc.toString(), 256);
+    esm.writeFixedSizeString(mData.author.toString(), mData.author.data_size());
+    esm.writeFixedSizeString(mData.desc.toString(), mData.desc.data_size());
     esm.writeT(mData.records);
     esm.endRecord("HEDR");
 

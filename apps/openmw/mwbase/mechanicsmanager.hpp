@@ -97,7 +97,7 @@ namespace MWBase
             virtual int getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying) = 0;
             ///< This is used by every service to determine the price of objects given the trading skills of the player and NPC.
 
-            virtual int getDerivedDisposition(const MWWorld::Ptr& ptr) = 0;
+            virtual int getDerivedDisposition(const MWWorld::Ptr& ptr, bool addTemporaryDispositionChange = true) = 0;
             ///< Calculate the diposition of an NPC toward the player.
 
             virtual int countDeaths (const std::string& id) const = 0;
@@ -153,8 +153,7 @@ namespace MWBase
                 PT_Bribe100,
                 PT_Bribe1000
             };
-            virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
-                float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange) = 0;
+            virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type, bool& success, float& tempChange, float& permChange) = 0;
             ///< Perform a persuasion action on NPC
 
             virtual void forceStateUpdate(const MWWorld::Ptr &ptr) = 0;
@@ -194,6 +193,8 @@ namespace MWBase
             /** ie AiCombat is active and the target is the actor **/
             virtual std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor) = 0;
 
+            virtual std::list<MWWorld::Ptr> getEnemiesNearby(const MWWorld::Ptr& actor) = 0;
+
             virtual void playerLoaded() = 0;
 
             virtual int countSavedGameRecords() const = 0;
@@ -228,6 +229,8 @@ namespace MWBase
             /// Sets the NPC's Acrobatics skill to match the fWerewolfAcrobatics GMST.
             /// It only applies to the current form the NPC is in.
             virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor) = 0;
+
+            virtual void cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId) = 0;
     };
 }
 

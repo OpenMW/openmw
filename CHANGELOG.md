@@ -1,3 +1,162 @@
+0.39.0
+------
+
+    Bug #1384: Dark Brotherhood Assassin (and other scripted NPCs?) spawns beneath/inside solid objects
+    Bug #1544: "Drop" drops equipped item in a separate stack
+    Bug #1587: Collision detection glitches
+    Bug #1629: Container UI locks up in Vivec at Jeanne's
+    Bug #1771: Dark Brotherhood Assassin oddity in Eight Plates
+    Bug #1827: Unhandled NiTextureEffect in ex_dwrv_ruin30.nif
+    Bug #2089: When saving while swimming in water in an interior cell, you will be spawned under water on loading
+    Bug #2295: Internal texture not showing, nipixeldata
+    Bug #2363: Corpses don't disappear
+    Bug #2369: Respawns should be timed individually
+    Bug #2393: Сharacter is stuck in the tree
+    Bug #2444: [Mod] NPCs from Animated Morrowind appears not using proper animations
+    Bug #2467: Creatures do not respawn
+    Bug #2515: Ghosts in Ibar-Dad spawn stuck in walls
+    Bug #2610: FixMe script still needs to be implemented
+    Bug #2689: Riekling raider pig constantly screams while running
+    Bug #2719: Vivec don't put their hands on the knees with this replacer (Psymoniser Vivec God Replacement NPC Edition v1.0
+    Bug #2737: Camera shaking when side stepping around object
+    Bug #2760: AI Combat Priority Problem - Use of restoration spell instead of attacking
+    Bug #2806: Stack overflow in LocalScripts::getNext
+    Bug #2807: Collision detection allows player to become stuck inside objects
+    Bug #2814: Stairs to Marandus have improper collision
+    Bug #2925: Ranes Ienith will not appear, breaking the Morag Tong and Thieves Guid questlines
+    Bug #3024: Editor: Creator bar in startscript subview does not accept script ID drops
+    Bug #3046: Sleep creature: Velk is spawned half-underground in the Thirr River Valley
+    Bug #3080: Calling aifollow without operant in local script every frame causes mechanics to overheat + log
+    Bug #3101: Regression: White guar does not move
+    Bug #3108: Game Freeze after Killing Diseased Rat in Foreign Quarter Tomb
+    Bug #3124: Bloodmoon Quest - Rite of the Wolf Giver (BM_WolfGiver) – Innocent victim won't turn werewolf
+    Bug #3125: Improper dialogue window behavior when talking to creatures
+    Bug #3130: Some wandering NPCs disappearing, cannot finish quests
+    Bug #3132: Editor: GMST ID named sMake Enchantment is instead named sMake when making new game from scratch
+    Bug #3133: OpenMW and the OpenCS are writting warnings about scripts that use the function GetDisabled.
+    Bug #3135: Journal entry for The Pigrim's Path missing name
+    Bug #3136: Dropped bow is displaced
+    Bug #3140: Editor: OpenMW-CS fails to open newly converted and saved omwaddon file.
+    Bug #3142: Duplicate Resist Magic message
+    Bug #3143: Azura missing her head
+    Bug #3146: Potion effect showing when ingredient effects are not known
+    Bug #3155: When executing chop attack with a spear, hands turn partly invisible
+    Bug #3161: Fast travel from Silt Strider or Boat Ride will break save files made afterwards
+    Bug #3163: Editor: Objects dropped to scene do not always save
+    Bug #3173: Game Crashes After Casting Recall Spell
+    Bug #3174: Constant effect enchantments play spell animation on dead bodies
+    Bug #3175: Spell effects do not wear down when caster dies
+    Bug #3176: NPCs appearing randomly far away from towns
+    Bug #3177: Submerged corpse floats ontop of water when it shouldn't (Widow Vabdas' Deed quest)
+    Bug #3184: Bacola Closcius in Balmora, South Wall Cornerclub spams magic effects if attacked
+    Bug #3207: Editor: New objects do not render
+    Bug #3212: Arrow of Ranged Silence
+    Bug #3213: Looking at Floor After Magical Transport
+    Bug #3220: The number of remaining ingredients in the alchemy window doesn't go down when failing to brew a potion
+    Bug #3222: Falling through the water in Vivec
+    Bug #3223: Crash at the beginning with MOD (The Symphony)
+    Bug #3228: Purple screen when leveling up.
+    Bug #3233: Infinite disposition via MWDialogue::Filter::testDisposition() glitch
+    Bug #3234: Armor mesh stuck on body in inventory menu
+    Bug #3235: Unlike vanilla, OpenMW don't allow statics and activators cast effects on the player.
+    Bug #3238: Not loading cells when using Poorly Placed Object Fix.esm
+    Bug #3248: Editor: Using the "Next Script" and "Previous Script" buttons changes the record status to "Modified"
+    Bug #3258: Woman biped skeleton
+    Bug #3259: No alternating punches
+    Bug #3262: Crash in class selection menu
+    Bug #3279: Load menu: Deleting a savegame makes scroll bar jump to the top
+    Bug #3326: Starting a new game, getting to class selection, then starting another new game temporarily assigns Acrobat class
+    Bug #3327: Stuck in table after loading when character was sneaking when quicksave
+    Feature #652: Editor: GMST verifier
+    Feature #929: Editor: Info record verifier
+    Feature #1279: Editor: Render cell border markers
+    Feature #2482: Background cell loading and caching of loaded cells
+    Feature #2484: Editor: point lighting
+    Feature #2801: Support NIF bump map textures in osg
+    Feature #2926: Editor: Optional line wrap in script editor wrap lines
+    Feature #3000: Editor: Reimplement 3D scene camera system
+    Feature #3035: Editor: Make scenes a drop target for referenceables
+    Feature #3043: Editor: Render cell markers v2
+    Feature #3164: Editor: Instance Selection Menu
+    Feature #3165: Editor: Instance editing mode - move sub mode
+    Feature #3244: Allow changing water Level of Interiors behaving like exteriors
+    Feature #3250: Editor: Use "Enter" key instead of clicking "Create" button to confirm ID input in Creator Bar
+    Support #3179: Fatal error on startup
+
+0.38.0
+------
+
+    Bug #1699: Guard will continuously run into mudcrab
+    Bug #1934: Saw in Dome of Kasia doesnt harm the player
+    Bug #1962: Rat floats when killed near the door
+    Bug #1963: Kwama eggsacks pulse too fast
+    Bug #2198: NPC voice sound source should be placed at their head
+    Bug #2210: OpenMW installation wizard crashes...
+    Bug #2211: Editor: handle DELE subrecord at the end of a record
+    Bug #2413: ESM error Unknown subrecord in Grandmaster of Hlaalu
+    Bug #2537: Bloodmoon quest Ristaag: Sattir not consistently dying, plot fails to advance; same with Grerid
+    Bug #2697: "The Swimmer" moves away after leading you to underwater cave
+    Bug #2724: Loading previous save duplicates containers and harvestables
+    Bug #2769: Inventory doll - Cursor not respecting order of clothes
+    Bug #2865: Scripts silently fail when moving NPCs between cells.
+    Bug #2873: Starting a new game leads to CTD / Fatal Error
+    Bug #2918: Editor: it's not possible to create an omwaddon containing a dot in the file name
+    Bug #2933: Dialog box can't disable a npc if it is in another cell. (Rescue Madura Seran).
+    Bug #2942: atronach sign behavior (spell absorption) changes when trying to receive a blessing at "shrine of tribunal"
+    Bug #2952: Enchantment Merchant Items reshuffled EVERY time 'barter' is clicked
+    Bug #2961: ESM Error: Unknown subrecord if Deus Ex Machina mod is loaded
+    Bug #2972: Resurrecting the player via console does not work when health was 0
+    Bug #2986: Projectile weapons work underwater
+    Bug #2988: "Expected subrecord" bugs showing up.
+    Bug #2991: Can't use keywords in strings for MessageBox
+    Bug #2993: Tribunal:The Shrine of the Dead – Urvel Dulni can't stop to follow the player.
+    Bug #3008: NIFFile Error while loading meshes with a NiLODNode
+    Bug #3010: Engine: items should sink to the ground when dropped under water
+    Bug #3011: NIFFile Error while loading meshes with a NiPointLight
+    Bug #3016: Engine: something wrong with scripting - crash / fatal error
+    Bug #3020: Editor: verify does not check if given "item ID" (as content) for a "container" exists
+    Bug #3026: [MOD: Julan Ashlander Companion] Dialogue not triggering correctly
+    Bug #3028: Tooltips for Health, Magicka and Fatigue show in Options menu even when bars aren't visible
+    Bug #3034: Item count check dialogue option doesn't work (Guards accept gold even if you don't have enough)
+    Bug #3036: Owned tooltip color affects spell tooltips incorrrectly
+    Bug #3037: Fatal error loading old ES_Landscape.esp in Store<ESM::LandTexture>::search
+    Bug #3038: Player sounds come from underneath
+    Bug #3040: Execution of script failed: There is a message box already
+    Bug #3047: [MOD: Julan Ashlander Companion] Scripts KS_Bedscript or KS_JulanNight not working as intended
+    Bug #3048: Fatal Error
+    Bug #3051: High field of view results in first person rendering glitches
+    Bug #3053: Crash on new game at character class selection
+    Bug #3058: Physiched sleeves aren't rendered correctly.
+    Bug #3060: NPCs use wrong landing sound
+    Bug #3062: Mod support regression: Andromeda's fast travel.
+    Bug #3063: Missing Journal Textures without Tribunal and Bloodmoon installed
+    Bug #3077: repeated aifollow causes the distance to stack
+    Bug #3078: Creature Dialogues not showing when certain Function/Conditions are required.
+    Bug #3082: Crash when entering Holamayan Monastery with mesh replacer installed
+    Bug #3086: Party at Boro's House – Creature with Class don't talk under OpenMW
+    Bug #3089: Dreamers spawn too soon
+    Bug #3100: Certain controls erroneously work as a werewolf
+    Bug #3102: Multiple unique soultrap spell sources clone souls.
+    Bug #3105: Summoned creatures and objects disappear at midnight
+    Bug #3112: gamecontrollerdb file creation with wrong extension
+    Bug #3116: Dialogue Function "Same Race" is avoided
+    Bug #3117: Dialogue Bug: Choice conditions are tested when not in a choice
+    Bug #3118: Body Parts are not rendered when used in a pose.
+    Bug #3122: NPC direction is reversed during sneak awareness check
+    Feature #776: Sound effects from one direction don't necessarily affect both speakers in stereo
+    Feature #858: Different fov settings for hands and the game world
+    Feature #1176: Handle movement of objects between cells
+    Feature #2507: Editor: choosing colors for syntax highlighting
+    Feature #2867: Editor: hide script error list when there are no errors
+    Feature #2885: Accept a file format other than nif
+    Feature #2982: player->SetDelete 1 results in: PC can't move, menu can be opened
+    Feature #2996: Editor: make it possible to preset the height of the script check area in a script view
+    Feature #3014: Editor: Tooltips in 3D scene
+    Feature #3064: Werewolf field of view
+    Feature #3074: Quicksave indicator
+    Task #287: const version of Ptr
+    Task #2542: Editor: redo user settings system
+
 0.37.0
 ------
 

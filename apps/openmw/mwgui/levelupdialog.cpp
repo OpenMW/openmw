@@ -4,19 +4,22 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_EditBox.h>
 
+#include <components/fallback/fallback.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/fallback.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
+
+#include "class.hpp"
 
 namespace MWGui
 {
@@ -153,7 +156,9 @@ namespace MWGui
                 cls = &*it;
         }
 
-        mClassImage->setImageTexture ("textures\\levelup\\" + cls->mId + ".dds");
+        setClassImage(mClassImage, getLevelupClassImage(pcStats.getSkillIncreasesForSpecialization(0),
+                                                        pcStats.getSkillIncreasesForSpecialization(1),
+                                                        pcStats.getSkillIncreasesForSpecialization(2)));
 
         int level = creatureStats.getLevel ()+1;
         mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + MyGUI::utility::toString(level));
@@ -244,5 +249,104 @@ namespace MWGui
                 mSpentAttributes.push_back(attribute);
         }
         assignCoins();
+    }
+
+    std::string LevelupDialog::getLevelupClassImage(const int combatIncreases, const int magicIncreases, const int stealthIncreases)
+    {
+        std::string ret = "acrobat";
+
+        int total = combatIncreases + magicIncreases + stealthIncreases;
+        if (total == 0)
+            return ret;
+
+        int combatFraction = static_cast<int>(static_cast<float>(combatIncreases) / total * 10.f);
+        int magicFraction = static_cast<int>(static_cast<float>(magicIncreases) / total * 10.f);
+        int stealthFraction = static_cast<int>(static_cast<float>(stealthIncreases) / total * 10.f);
+
+        if (combatFraction > 7)
+            ret = "warrior";
+        else if (magicFraction > 7)
+            ret = "mage";
+        else if (stealthFraction > 7)
+            ret = "thief";
+
+        switch (combatFraction)
+        {
+            case 7:
+                ret = "warrior";
+                break;
+            case 6:
+                if (stealthFraction == 1)
+                    ret = "barbarian";
+                else if (stealthFraction == 3)
+                    ret = "crusader";
+                else
+                    ret = "knight";
+                break;
+            case 5:
+                if (stealthFraction == 3)
+                    ret = "scout";
+                else
+                    ret = "archer";
+                break;
+            case 4:
+                ret = "rogue";
+                break;
+            default:
+                break;
+        }
+
+        switch (magicFraction)
+        {
+            case 7:
+                ret = "mage";
+                break;
+            case 6:
+                if (combatFraction == 2)
+                    ret = "sorcerer";
+                else if (combatIncreases == 3)
+                    ret = "healer";
+                else
+                    ret = "battlemage";
+                break;
+            case 5:
+                ret = "witchhunter";
+                break;
+            case 4:
+                ret = "spellsword";
+                // In vanilla there's also code for "nightblade", however it seems to be unreachable.
+                break;
+            default:
+                break;
+        }
+
+        switch (stealthFraction)
+        {
+            case 7:
+                ret = "thief";
+                break;
+            case 6:
+                if (magicFraction == 1)
+                    ret = "agent";
+                else if (magicIncreases == 3)
+                    ret = "assassin";
+                else
+                    ret = "acrobat";
+                break;
+            case 5:
+                if (magicIncreases == 3)
+                    ret = "monk";
+                else
+                    ret = "pilgrim";
+                break;
+            case 3:
+                if (magicFraction == 3)
+                    ret = "bard";
+                break;
+            default:
+                break;
+        }
+
+        return ret;
     }
 }

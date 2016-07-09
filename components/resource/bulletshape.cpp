@@ -1,6 +1,7 @@
 #include "bulletshape.hpp"
 
 #include <stdexcept>
+#include <string>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
@@ -14,6 +15,14 @@ BulletShape::BulletShape()
     : mCollisionShape(NULL)
 {
 
+}
+
+BulletShape::BulletShape(const BulletShape &copy, const osg::CopyOp &copyop)
+    : mCollisionShape(duplicateCollisionShape(copy.mCollisionShape))
+    , mCollisionBoxHalfExtents(copy.mCollisionBoxHalfExtents)
+    , mCollisionBoxTranslate(copy.mCollisionBoxTranslate)
+    , mAnimatedShapes(copy.mAnimatedShapes)
+{
 }
 
 BulletShape::~BulletShape()
@@ -36,11 +45,11 @@ void BulletShape::deleteShape(btCollisionShape* shape)
     }
 }
 
-btCollisionShape* BulletShape::duplicateCollisionShape(btCollisionShape *shape) const
+btCollisionShape* BulletShape::duplicateCollisionShape(const btCollisionShape *shape) const
 {
     if(shape->isCompound())
     {
-        btCompoundShape *comp = static_cast<btCompoundShape*>(shape);
+        const btCompoundShape *comp = static_cast<const btCompoundShape*>(shape);
         btCompoundShape *newShape = new btCompoundShape;
 
         int numShapes = comp->getNumChildShapes();
@@ -54,29 +63,13 @@ btCollisionShape* BulletShape::duplicateCollisionShape(btCollisionShape *shape) 
         return newShape;
     }
 
-    if(btBvhTriangleMeshShape* trishape = dynamic_cast<btBvhTriangleMeshShape*>(shape))
+    if(const btBvhTriangleMeshShape* trishape = dynamic_cast<const btBvhTriangleMeshShape*>(shape))
     {
-#if BT_BULLET_VERSION >= 283
-        btScaledBvhTriangleMeshShape* newShape = new btScaledBvhTriangleMeshShape(trishape, btVector3(1.f, 1.f, 1.f));
-#else
-        // work around btScaledBvhTriangleMeshShape bug ( https://code.google.com/p/bullet/issues/detail?id=371 ) in older bullet versions
-        btTriangleMesh* oldMesh = static_cast<btTriangleMesh*>(trishape->getMeshInterface());
-        btTriangleMesh* newMesh = new btTriangleMesh(*oldMesh);
-
-        // Do not build a new bvh (not needed, since it's the same as the original shape's bvh)
-        bool buildBvh = true;
-        if (trishape->getOptimizedBvh())
-            buildBvh = false;
-        TriangleMeshShape* newShape = new TriangleMeshShape(newMesh, true, buildBvh);
-        // Set original shape's bvh via pointer
-        // The pointer is safe because the BulletShapeInstance keeps a ref_ptr to the original BulletShape
-        if (!buildBvh)
-            newShape->setOptimizedBvh(trishape->getOptimizedBvh());
-#endif
+        btScaledBvhTriangleMeshShape* newShape = new btScaledBvhTriangleMeshShape(const_cast<btBvhTriangleMeshShape*>(trishape), btVector3(1.f, 1.f, 1.f));
         return newShape;
     }
 
-    if (btBoxShape* boxshape = dynamic_cast<btBoxShape*>(shape))
+    if (const btBoxShape* boxshape = dynamic_cast<const btBoxShape*>(shape))
     {
         return new btBoxShape(*boxshape);
     }
@@ -89,13 +82,13 @@ btCollisionShape *BulletShape::getCollisionShape()
     return mCollisionShape;
 }
 
-osg::ref_ptr<BulletShapeInstance> BulletShape::makeInstance()
+osg::ref_ptr<BulletShapeInstance> BulletShape::makeInstance() const
 {
     osg::ref_ptr<BulletShapeInstance> instance (new BulletShapeInstance(this));
     return instance;
 }
 
-BulletShapeInstance::BulletShapeInstance(osg::ref_ptr<BulletShape> source)
+BulletShapeInstance::BulletShapeInstance(osg::ref_ptr<const BulletShape> source)
     : BulletShape()
     , mSource(source)
 {

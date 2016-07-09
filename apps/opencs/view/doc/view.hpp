@@ -95,7 +95,8 @@ namespace CSVDoc
             void resizeViewHeight (int height);
 
             void updateScrollbar();
-
+            void updateWidth(bool isGrowLimit, int minSubViewWidth);
+            void createScrollArea();
         public:
 
             View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews);
@@ -143,7 +144,7 @@ namespace CSVDoc
             void updateTitle();
 
             // called when subviews are added or removed
-            void updateSubViewIndicies (SubView *view = 0);
+            void updateSubViewIndices (SubView *view = NULL);
 
         private slots:
 

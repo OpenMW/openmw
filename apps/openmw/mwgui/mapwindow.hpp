@@ -23,6 +23,11 @@ namespace ESM
     class ESMWriter;
 }
 
+namespace MWWorld
+{
+    class CellStore;
+}
+
 namespace Loading
 {
     class Listener;
@@ -61,12 +66,13 @@ namespace MWGui
     class LocalMapBase
     {
     public:
-        LocalMapBase(CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender);
+        LocalMapBase(CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender, bool fogOfWarEnabled = true);
         virtual ~LocalMapBase();
-        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int mapWidgetSize);
+        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int mapWidgetSize, int cellDistance);
 
         void setCellPrefix(const std::string& prefix);
         void setActiveCell(const int x, const int y, bool interior=false);
+        void requestMapRender(const MWWorld::CellStore* cell);
         void setPlayerDir(const float x, const float y);
         void setPlayerPos(int cellX, int cellY, const float nx, const float ny);
 
@@ -78,7 +84,6 @@ namespace MWGui
         {
             MarkerUserData(MWRender::LocalMap* map)
                 : mLocalMapRender(map)
-                , interior(false)
                 , cellX(0)
                 , cellY(0)
                 , nX(0.f)
@@ -89,7 +94,6 @@ namespace MWGui
             bool isPositionExplored() const;
 
             MWRender::LocalMap* mLocalMapRender;
-            bool interior;
             int cellX;
             int cellY;
             float nX;
@@ -107,9 +111,13 @@ namespace MWGui
         MyGUI::ImageBox* mCompass;
         std::string mPrefix;
         bool mChanged;
-        bool mFogOfWar;
+        bool mFogOfWarToggled;
+        bool mFogOfWarEnabled;
 
         int mMapWidgetSize;
+
+        int mNumCells; // for convenience, mCellDistance * 2 + 1
+        int mCellDistance;
 
         // Stores markers that were placed by a player. May be shared between multiple map views.
         CustomMarkerCollection& mCustomMarkers;
