@@ -19,6 +19,7 @@
 #include "../mwmechanics/aifollow.hpp"
 #include "../mwmechanics/aitravel.hpp"
 #include "../mwmechanics/aiwander.hpp"
+#include "../mwmechanics/aiface.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -483,7 +484,16 @@ namespace MWScript
         public:
             virtual void execute(Interpreter::Runtime& runtime)
             {
-                /// \todo implement
+                MWWorld::Ptr actor = R()(runtime);
+
+                Interpreter::Type_Float x = runtime[0].mFloat;
+                runtime.pop();
+
+                Interpreter::Type_Float y = runtime[0].mFloat;
+                runtime.pop();
+
+                MWMechanics::AiFace facePackage(x, y);
+                actor.getClass().getCreatureStats(actor).getAiSequence().stack(facePackage, actor);
             }
         };
 

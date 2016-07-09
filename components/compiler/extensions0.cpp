@@ -70,7 +70,7 @@ namespace Compiler
             extensions.registerFunction ("getlineofsight", 'l', "c", opcodeGetLineOfSight, opcodeGetLineOfSightExplicit);
             extensions.registerFunction ("getlos", 'l', "c", opcodeGetLineOfSight, opcodeGetLineOfSightExplicit);
             extensions.registerFunction("gettarget", 'l', "c", opcodeGetTarget, opcodeGetTargetExplicit);
-            extensions.registerInstruction("face", "llX", opcodeFace, opcodeFaceExplicit);
+            extensions.registerInstruction("face", "ffX", opcodeFace, opcodeFaceExplicit);
         }
     }
 
