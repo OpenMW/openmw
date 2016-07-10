@@ -150,7 +150,7 @@ namespace MWWorld
       mSky (true), mCells (mStore, mEsm),
       mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles),
       mActivationDistanceOverride (activationDistanceOverride), mStartupScript(startupScript),
-      mStartCell (startCell), mTeleportEnabled(true),
+      mStartCell (startCell), mDistanceToFacedObject(-1), mTeleportEnabled(true),
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0)
     {
         mPhysics = new MWPhysics::PhysicsSystem(resourceSystem, rootNode);
@@ -1027,11 +1027,19 @@ namespace MWWorld
 
             float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
 
-            facedObject = getFacedObject(activationDistance);
-        }
+            facedObject = getFacedObject(activationDistance, true);
 
+            if (!facedObject.isEmpty() && !facedObject.getClass().allowTelekinesis(facedObject)
+                && mDistanceToFacedObject > getMaxActivationDistance())
+                return 0;
+        }
         return facedObject;
     }
+
+   float World::getDistanceToFacedObject()
+   {
+        return mDistanceToFacedObject;
+   }
 
     osg::Matrixf World::getActorHeadTransform(const MWWorld::ConstPtr& actor) const
     {
@@ -1715,17 +1723,24 @@ namespace MWWorld
     MWWorld::Ptr World::getFacedObject(float maxDistance, bool ignorePlayer)
     {
         maxDistance += mRendering->getCameraDistance();
+        MWWorld::Ptr facedObject;
+        MWRender::RenderingManager::RayResult rayToObject;
 
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             float x, y;
             MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            return mRendering->castCameraToViewportRay(x, y, maxDistance, ignorePlayer).mHitObject;
+            rayToObject = mRendering->castCameraToViewportRay(x, y, maxDistance, ignorePlayer);
         }
         else
-        {
-            return mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer).mHitObject;
-        }
+            rayToObject = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer);
+
+        facedObject = rayToObject.mHitObject;
+        if (rayToObject.mHit)
+            mDistanceToFacedObject = rayToObject.mRatio * maxDistance;
+        else
+            mDistanceToFacedObject = -1;
+        return facedObject;
     }
 
     bool World::isCellExterior() const

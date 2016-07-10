@@ -38,7 +38,7 @@ namespace MWMechanics
         //Set the target destination for the actor
         ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
-        if (pathTo(actor, dest, duration, 200)) //Go to the destination
+        if (pathTo(actor, dest, duration, MWBase::Environment::get().getWorld()->getMaxActivationDistance())) //Stop when you get in activation range
         {
             // activate when reached
             MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(mObjectId,false);

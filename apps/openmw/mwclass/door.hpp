@@ -45,6 +45,9 @@ namespace MWClass
 
             virtual bool canLock(const MWWorld::ConstPtr &ptr) const;
 
+            virtual bool allowTelekinesis(const MWWorld::ConstPtr &ptr) const;
+            ///< Return whether this class of object can be activated with telekinesis
+
             virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;
             ///< Return name of the script attached to ptr
 

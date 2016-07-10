@@ -13,67 +13,89 @@
 #include "defines.hpp"
 
 #include <components/misc/rng.hpp>
+#include <components/misc/messageformatparser.hpp>
 
 namespace Interpreter
 {
-    inline std::string formatMessage (const std::string& message, Runtime& runtime)
+    class RuntimeMessageFormatter : public Misc::MessageFormatParser
     {
-        std::string formattedMessage;
+        private:
+            std::string mFormattedMessage;
+            Runtime& mRuntime;
 
-        for (std::size_t i=0; i<message.size(); ++i)
-        {
-            char c = message[i];
-
-            if (c!='%')
-                formattedMessage += c;
-            else
+        protected:
+            virtual void visitedPlaceholder(Placeholder placeholder, char padding, int width, int precision)
             {
-                ++i;
-                if (i<message.size())
+                std::ostringstream out;
+                out.fill(padding);
+                if (width != -1)
+                    out.width(width);
+                if (precision != -1)
+                    out.precision(precision);
+
+                switch (placeholder)
                 {
-                    c = message[i];
-
-                    if (c=='S' || c=='s')
-                    {
-                        int index = runtime[0].mInteger;
-                        runtime.pop();
-                        formattedMessage += runtime.getStringLiteral (index);
-                    }
-                    else if (c=='g' || c=='G')
-                    {
-                        Type_Integer value = runtime[0].mInteger;
-                        runtime.pop();
-
-                        std::ostringstream out;
-                        out << value;
-                        formattedMessage += out.str();
-                    }
-                    else if (c=='f' || c=='F' || c=='.')
-                    {
-                        while (c!='f' && i+1<message.size())
+                    case StringPlaceholder:
                         {
-                            ++i;
-                            c = message[i];
+                            int index = mRuntime[0].mInteger;
+                            mRuntime.pop();
+
+                            out << mRuntime.getStringLiteral(index);
+                            mFormattedMessage += out.str();
                         }
+                        break;
+                    case IntegerPlaceholder:
+                        {
+                            Type_Integer value = mRuntime[0].mInteger;
+                            mRuntime.pop();
 
-                        float value = runtime[0].mFloat;
-                        runtime.pop();
+                            out << value;
+                            mFormattedMessage += out.str();
+                        }
+                        break;
+                    case FloatPlaceholder:
+                        {
+                            float value = mRuntime[0].mFloat;
+                            mRuntime.pop();
 
-                        std::ostringstream out;
-                        out << value;
-                        formattedMessage += out.str();
-                    }
-                    else if (c=='%')
-                        formattedMessage += "%";
-                    else
-                    {
-                        formattedMessage += "%";
-                        formattedMessage += c;
-                    }
+                            out << std::fixed << value;
+                            mFormattedMessage += out.str();
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
-        }
-        
+
+            virtual void visitedCharacter(char c)
+            {
+                mFormattedMessage += c;
+            }
+
+        public:
+            RuntimeMessageFormatter(Runtime& runtime)
+                : mRuntime(runtime)
+            {
+            }
+
+            virtual void process(const std::string& message)
+            {
+                mFormattedMessage.clear();
+                MessageFormatParser::process(message);
+            }
+
+            std::string getFormattedMessage() const
+            {
+                return mFormattedMessage;
+            }
+    };
+
+    inline std::string formatMessage (const std::string& message, Runtime& runtime)
+    {
+        RuntimeMessageFormatter formatter(runtime);
+        formatter.process(message);
+
+        std::string formattedMessage = formatter.getFormattedMessage();
         formattedMessage = fixDefinesMsgBox(formattedMessage, runtime.getContext());
         return formattedMessage;
     }

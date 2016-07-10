@@ -79,4 +79,8 @@ namespace MWClass
         weight += effects.get(MWMechanics::EffectKey(ESM::MagicEffect::Burden)).getMagnitude();
         return (weight < 0) ? 0.0f : weight;
     }
+
+    bool Actor::allowTelekinesis(const MWWorld::ConstPtr &ptr) const {
+        return false;
+    }
 }

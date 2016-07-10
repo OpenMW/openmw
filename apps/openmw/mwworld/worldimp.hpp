@@ -127,7 +127,9 @@ namespace MWWorld
             void updateSoundListener();
             void updateWindowManager ();
             void updatePlayer(bool paused);
+
             MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer=true);
+
     public: // FIXME
             void removeContainerScripts(const Ptr& reference);
     private:
@@ -154,6 +156,9 @@ namespace MWWorld
                 const std::vector<std::string>& content, ContentLoader& contentLoader);
 
             float mSwimHeightScale;
+
+            float mDistanceToFacedObject;
+
             bool isUnderwater(const MWWorld::ConstPtr &object, const float heightRatio) const;
             ///< helper function for implementing isSwimming(), isSubmerged(), isWading()
 
@@ -342,6 +347,8 @@ namespace MWWorld
 
             virtual MWWorld::Ptr getFacedObject();
             ///< Return pointer to the object the player is looking at, if it is within activation range
+
+            virtual float getDistanceToFacedObject();
 
             /// Returns a pointer to the object the provided object would hit (if within the
             /// specified distance), and the point where the hit occurs. This will attempt to
