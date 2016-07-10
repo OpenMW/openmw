@@ -321,8 +321,8 @@ namespace NifOsg
                     continue;
                 }
 
-                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
-                    continue;
+                // Vanilla seems to ignore the "active" flag for NiKeyframeController,
+                // so we don't want to skip inactive controllers here.
 
                 const Nif::NiStringExtraData *strdata = static_cast<const Nif::NiStringExtraData*>(extra.getPtr());
                 const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
