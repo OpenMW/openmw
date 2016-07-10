@@ -429,7 +429,7 @@ namespace MWMechanics
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(mSpellId);
         int types = getRangeTypes(spell->mEffects);
 
-        isRanged = (types & RangeTypes::Target);
+        isRanged = (types & Target);
         return suggestCombatRange(types);
     }
 
