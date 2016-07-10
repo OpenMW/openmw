@@ -1305,7 +1305,9 @@ bool CharacterController::updateWeaponState()
                 if(!resultMessage.empty())
                     MWBase::Environment::get().getWindowManager()->messageBox(resultMessage);
                 if(!resultSound.empty())
-                    MWBase::Environment::get().getSoundManager()->playSound(resultSound, 1.0f, 1.0f);
+                    MWBase::Environment::get().getSoundManager()->playSound3D(target,
+                    resultSound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
+                    MWBase::SoundManager::Play_Normal);
             }
             else if (ammunition)
             {
