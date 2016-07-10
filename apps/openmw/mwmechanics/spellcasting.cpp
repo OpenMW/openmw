@@ -696,7 +696,7 @@ namespace MWMechanics
 
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(enchantmentName);
 
-        mStack = (enchantment->mData.mType == ESM::Enchantment::CastOnce);
+        mStack = false;
 
         // Check if there's enough charge left
         if (enchantment->mData.mType == ESM::Enchantment::WhenUsed || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
