@@ -1737,7 +1737,7 @@ namespace MWWorld
 
         facedObject = rayToObject.mHitObject;
         if (rayToObject.mHit)
-            mDistanceToFacedObject = rayToObject.mRatio * maxDistance;
+            mDistanceToFacedObject = (rayToObject.mRatio * maxDistance) - mRendering->getCameraDistance();
         else
             mDistanceToFacedObject = -1;
         return facedObject;
