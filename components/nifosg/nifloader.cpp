@@ -918,9 +918,9 @@ namespace NifOsg
             emitter->setShooter(shooter);
 
             osgParticle::BoxPlacer* placer = new osgParticle::BoxPlacer;
-            placer->setXRange(-partctrl->offsetRandom.x(), partctrl->offsetRandom.x());
-            placer->setYRange(-partctrl->offsetRandom.y(), partctrl->offsetRandom.y());
-            placer->setZRange(-partctrl->offsetRandom.z(), partctrl->offsetRandom.z());
+            placer->setXRange(-partctrl->offsetRandom.x() / 2.f, partctrl->offsetRandom.x() / 2.f);
+            placer->setYRange(-partctrl->offsetRandom.y() / 2.f, partctrl->offsetRandom.y() / 2.f);
+            placer->setZRange(-partctrl->offsetRandom.z() / 2.f, partctrl->offsetRandom.z() / 2.f);
 
             emitter->setPlacer(placer);
             return emitter;
