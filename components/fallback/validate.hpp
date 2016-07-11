@@ -12,11 +12,11 @@
 namespace Fallback
 {
 
-    struct FallbackMap {
-        std::map<std::string, std::string> mMap;
-    };
+	struct FallbackMap {
+		std::map<std::string, std::string> mMap;
+	};
 
-	struct EscapeFallbackMap : FallbackMap 
+	struct EscapeFallbackMap : FallbackMap
 	{
 		std::map<Files::EscapeHashString, Files::EscapeHashString> mMap;
 
@@ -29,38 +29,47 @@ namespace Fallback
 		}
 	};
 
-    void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap*, int)
-    {
-        if(v.empty())
-        {
-            v = boost::any(FallbackMap());
-        }
+	void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap*, int)
+	{
+		if (v.empty())
+		{
+			v = boost::any(FallbackMap());
+		}
 
-        FallbackMap *map = boost::any_cast<FallbackMap>(&v);
+		FallbackMap *map = boost::any_cast<FallbackMap>(&v);
 
-        for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); ++it)
-        {
-            int sep = it->find(",");
-            if(sep < 1 || sep == (int)it->length()-1)
-    #if (BOOST_VERSION < 104200)
-                throw boost::program_options::validation_error("invalid value");
-    #else
-                throw boost::program_options::validation_error(boost::program_options::validation_error::invalid_option_value);
-    #endif
+		for (std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it)
+		{
+			int sep = it->find(",");
+			if (sep < 1 || sep == (int)it->length() - 1)
+#if (BOOST_VERSION < 104200)
+				throw boost::program_options::validation_error("invalid value");
+#else
+				throw boost::program_options::validation_error(boost::program_options::validation_error::invalid_option_value);
+#endif
 
-            std::string key(it->substr(0,sep));
-            std::string value(it->substr(sep+1));
+			std::string key(it->substr(0, sep));
+			std::string value(it->substr(sep + 1));
 
-            if(map->mMap.find(key) == map->mMap.end())
-            {
-                map->mMap.insert(std::make_pair (key,value));
-            }
-        }
-    }
+			if (map->mMap.find(key) == map->mMap.end())
+			{
+				map->mMap.insert(std::make_pair(key, value));
+			}
+		}
+	}
 
 	void validate(boost::any &v, std::vector<std::string> const &tokens, EscapeFallbackMap* eFM, int a)
 	{
 		validate(v, tokens, (FallbackMap *)eFM, a);
+	}
+}
+
+namespace Files {
+	void validate(boost::any &v, const std::vector<std::string> &tokens, Files::EscapeHashString * eHS, int a)
+	{
+		std::string * temp = eHS->toStdStringPtr();
+		boost::program_options::validate(v, tokens, temp, a);
+		delete temp;
 	}
 }
 

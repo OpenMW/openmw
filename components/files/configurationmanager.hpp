@@ -107,6 +107,7 @@ class EscapeHashString : public std::string
 		EscapeHashString(InputIterator first, InputIterator last);
 
 		std::string toStdString() const;
+		std::string * toStdStringPtr() const;
 };
 
 } /* namespace Cfg */

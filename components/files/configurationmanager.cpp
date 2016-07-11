@@ -285,6 +285,12 @@ std::string EscapeHashString::toStdString() const
 	return std::string(* this);
 }
 
+std::string * EscapeHashString::toStdStringPtr() const
+{
+	std::string * ret = new std::string(*this);
+	return ret;
+}
+
 const boost::filesystem::path& ConfigurationManager::getGlobalPath() const
 {
     return mFixedPath.getGlobalConfigPath();
