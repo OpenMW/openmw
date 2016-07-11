@@ -145,7 +145,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
             "\n\twin1252 - Western European (Latin) alphabet, used by default")
 
-        ("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
+			("fallback", bpo::value<EscapeFallbackMap>()->default_value(EscapeFallbackMap(), "")
             ->multitoken()->composing(), "fallback values")
 
         ("no-grab", "Don't grab mouse cursor")
@@ -248,7 +248,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     // other settings
     engine.setSoundUsage(!variables["no-sound"].as<bool>());
-    engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
+	engine.setFallbackValues(variables["fallback"].as<EscapeFallbackMap>().toFallbackMap().mMap);
     engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
     engine.enableFontExport(variables["export-fonts"].as<bool>());
 

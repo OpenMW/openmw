@@ -13,8 +13,21 @@ namespace Fallback
 {
 
     struct FallbackMap {
-        std::map<Files::EscapeHashString, Files::EscapeHashString> mMap;
+        std::map<std::string, std::string> mMap;
     };
+
+	struct EscapeFallbackMap : FallbackMap 
+	{
+		std::map<Files::EscapeHashString, Files::EscapeHashString> mMap;
+
+		FallbackMap toFallbackMap() const
+		{
+			FallbackMap temp = FallbackMap();
+			for (std::map<Files::EscapeHashString, Files::EscapeHashString>::const_iterator it = mMap.begin(); it != mMap.end(); ++it)
+				temp.mMap[it->first.toStdString()] = it->second.toStdString();
+			return temp;
+		}
+	};
 
     void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap*, int)
     {
