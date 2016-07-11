@@ -54,11 +54,11 @@ namespace MWMechanics
         
         AiCombatStorage():
         mAttackCooldown(0),
-        mTimerReact(0),
+        mTimerReact(AI_REACTION_TIME),
         mTimerCombatMove(0),
         mReadyToAttack(false),
         mAttack(false),
-        mAttackRange(200),  // default attack range (same as in Creature::Hit)
+        mAttackRange(0),
         mCombatMove(false),
         mLastTargetPos(0,0,0),
         mCell(NULL),
@@ -159,8 +159,11 @@ namespace MWMechanics
                 || target.getClass().getCreatureStats(target).isDead())
             return true;
 
-        //Update every frame
-        storage.mReadyToAttack = pathTo(actor, target.getRefData().getPosition().pos, duration, storage.mAttackRange);
+        if (storage.mCurrentAction.get()) // need to wait to init action with it's attack range
+        {
+            //Update every frame
+            storage.mReadyToAttack = pathTo(actor, target.getRefData().getPosition().pos, duration, storage.mAttackRange);
+        }
 
         storage.updateCombatMove(duration);
         if (storage.mReadyToAttack) updateActorsMovement(actor, duration, storage);

@@ -44,7 +44,8 @@ float suggestCombatRange(int rangeTypes)
 {
     if (rangeTypes & Touch)
     {
-        return 100.f;
+        static const float fCombatDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
+        return fCombatDistance;
     }
     else if (rangeTypes & Target)
     {
