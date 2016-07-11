@@ -124,11 +124,6 @@ namespace MWMechanics
             bool mShortcutProhibited; // shortcutting may be prohibited after unsuccessful attempt
             ESM::Pathgrid::Point mShortcutFailPos; // position of last shortcut fail
 
-            // Set to true once package starts actually being executed
-            bool mStarted;
-
-            ESM::Pathgrid::Point mPrevDest;
-
         private:
             bool isNearInactiveCell(const ESM::Position& actorPos);
     };

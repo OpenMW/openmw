@@ -23,7 +23,6 @@ MWMechanics::AiPackage::~AiPackage() {}
 
 MWMechanics::AiPackage::AiPackage() : 
     mTimer(AI_REACTION_TIME + 1.0f), // to force initial pathbuild
-    mStarted(false),
     mIsShortcutting(false),
     mShortcutProhibited(false), mShortcutFailPos()
 {
@@ -90,8 +89,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
 
         if (!mIsShortcutting)
         {
-            if (!mStarted // If repeating an AI package (mStarted = false), build a new path so package doesn't immediately end
-                || wasShortcutting || doesPathNeedRecalc(dest)) // if need to rebuild path
+            if (wasShortcutting || doesPathNeedRecalc(dest)) // if need to rebuild path
             {
                 mPathFinder.buildSyncedPath(start, dest, actor.getCell());
 
@@ -122,7 +120,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
         }
 
         mTimer = 0;
-        mStarted = true;
     }
 
     if (isDestReached || mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1])) // if path is finished
@@ -250,9 +247,7 @@ bool MWMechanics::AiPackage::checkWayIsClearForActor(const ESM::Pathgrid::Point&
 
 bool MWMechanics::AiPackage::doesPathNeedRecalc(const ESM::Pathgrid::Point& newDest)
 {
-    if (mPathFinder.getPath().empty()) return true;
-
-    return (distance(mPathFinder.getPath().back(), newDest) > 10);
+    return mPathFinder.getPath().empty() || (distance(mPathFinder.getPath().back(), newDest) > 10);
 }
 
 bool MWMechanics::AiPackage::isTargetMagicallyHidden(const MWWorld::Ptr& target)

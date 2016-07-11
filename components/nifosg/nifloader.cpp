@@ -321,8 +321,8 @@ namespace NifOsg
                     continue;
                 }
 
-                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
-                    continue;
+                // Vanilla seems to ignore the "active" flag for NiKeyframeController,
+                // so we don't want to skip inactive controllers here.
 
                 const Nif::NiStringExtraData *strdata = static_cast<const Nif::NiStringExtraData*>(extra.getPtr());
                 const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
@@ -918,9 +918,9 @@ namespace NifOsg
             emitter->setShooter(shooter);
 
             osgParticle::BoxPlacer* placer = new osgParticle::BoxPlacer;
-            placer->setXRange(-partctrl->offsetRandom.x(), partctrl->offsetRandom.x());
-            placer->setYRange(-partctrl->offsetRandom.y(), partctrl->offsetRandom.y());
-            placer->setZRange(-partctrl->offsetRandom.z(), partctrl->offsetRandom.z());
+            placer->setXRange(-partctrl->offsetRandom.x() / 2.f, partctrl->offsetRandom.x() / 2.f);
+            placer->setYRange(-partctrl->offsetRandom.y() / 2.f, partctrl->offsetRandom.y() / 2.f);
+            placer->setZRange(-partctrl->offsetRandom.z() / 2.f, partctrl->offsetRandom.z() / 2.f);
 
             emitter->setPlacer(placer);
             return emitter;

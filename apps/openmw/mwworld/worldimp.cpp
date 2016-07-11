@@ -1722,7 +1722,8 @@ namespace MWWorld
 
     MWWorld::Ptr World::getFacedObject(float maxDistance, bool ignorePlayer)
     {
-        maxDistance += mRendering->getCameraDistance();
+        const float camDist = mRendering->getCameraDistance();
+        maxDistance += camDist;
         MWWorld::Ptr facedObject;
         MWRender::RenderingManager::RayResult rayToObject;
 
@@ -1737,7 +1738,7 @@ namespace MWWorld
 
         facedObject = rayToObject.mHitObject;
         if (rayToObject.mHit)
-            mDistanceToFacedObject = rayToObject.mRatio * maxDistance;
+            mDistanceToFacedObject = (rayToObject.mRatio * maxDistance) - camDist;
         else
             mDistanceToFacedObject = -1;
         return facedObject;

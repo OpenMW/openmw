@@ -68,7 +68,6 @@ namespace MWMechanics
             if (mRemainingDuration <= 0)
             {
                 mRemainingDuration = mDuration;
-                mStarted = false; // Reset to false so this package will build path again when repeating
                 return true;
             }
         }
@@ -100,7 +99,6 @@ namespace MWMechanics
             if(pathTo(actor,point,duration)) //Returns true on path complete
             {
                 mRemainingDuration = mDuration;
-                mStarted = false; // Reset to false so this package will build path again when repeating
                 return true;
             }
             mMaxDist = 450;
