@@ -251,44 +251,43 @@ std::vector<std::string> EscapeHashString::toStdStringVector(const std::vector<E
 	return temp;
 }
 
-EscapeHashString::EscapeHashString()
+EscapeHashString::EscapeHashString() : mData()
 {
 }
 
-EscapeHashString::EscapeHashString(const std::string & str) : std::string(EscapeHashString::processString(str))
+EscapeHashString::EscapeHashString(const std::string & str) : mData(EscapeHashString::processString(str))
 {
 }
 
-EscapeHashString::EscapeHashString(const std::string & str, size_t pos, size_t len) : std::string(EscapeHashString::processString(str), pos, len)
+EscapeHashString::EscapeHashString(const std::string & str, size_t pos, size_t len) : mData(EscapeHashString::processString(str), pos, len)
 {
 }
 
-EscapeHashString::EscapeHashString(const char * s) : std::string(EscapeHashString::processString(std::string(s)))
+EscapeHashString::EscapeHashString(const char * s) : mData(EscapeHashString::processString(std::string(s)))
 {
 }
 
-EscapeHashString::EscapeHashString(const char * s, size_t n) : std::string(EscapeHashString::processString(std::string(s)), 0, n)
+EscapeHashString::EscapeHashString(const char * s, size_t n) : mData(EscapeHashString::processString(std::string(s)), 0, n)
 {
 }
 
-EscapeHashString::EscapeHashString(size_t n, char c) : std::string(n, c)
+EscapeHashString::EscapeHashString(size_t n, char c) : mData(n, c)
 {
 }
 
 template <class InputIterator>
-EscapeHashString::EscapeHashString(InputIterator first, InputIterator last) : std::string(EscapeHashString::processString(std::string(first, last)))
+EscapeHashString::EscapeHashString(InputIterator first, InputIterator last) : mData(EscapeHashString::processString(std::string(first, last)))
 {
 }
 
 std::string EscapeHashString::toStdString() const
 {
-	return std::string(* this);
+	return std::string(mData);
 }
 
 std::string * EscapeHashString::toStdStringPtr() const
 {
-	std::string * ret = new std::string(*this);
-	return ret;
+	return new std::string(mData);
 }
 
 const boost::filesystem::path& ConfigurationManager::getGlobalPath() const

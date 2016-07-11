@@ -93,6 +93,8 @@ struct escape_hash_filter : public boost::iostreams::input_filter
  */
 class EscapeHashString : public std::string
 {
+	private:
+		std::string mData;
 	public:
 		static std::string processString(const std::string & str);
 		static std::vector<std::string> toStdStringVector(const std::vector<EscapeHashString> & vec);

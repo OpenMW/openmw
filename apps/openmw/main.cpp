@@ -69,7 +69,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 {
     // Create a local alias for brevity
     namespace bpo = boost::program_options;
-	typedef std::vector<Files::EscapeHashString> StringsVector;
+	typedef std::vector<Files::EscapeHashString> EscapeStringsVector;
+	typedef std::vector<std::string> StringsVector;
 
     bpo::options_description desc("Syntax: openmw <options>\nAllowed options");
 
@@ -82,7 +83,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 			("data-local", bpo::value<Files::EscapeHashString>()->default_value(""),
             "set local data directory (highest priority)")
 
-        ("fallback-archive", bpo::value<StringsVector>()->default_value(StringsVector(), "fallback-archive")
+        ("fallback-archive", bpo::value<EscapeStringsVector>()->default_value(EscapeStringsVector(), "fallback-archive")
             ->multitoken(), "set fallback BSA archives (later archives have higher priority)")
 
 			("resources", bpo::value<Files::EscapeHashString>()->default_value("resources"),
@@ -91,7 +92,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 			("start", bpo::value<Files::EscapeHashString>()->default_value(""),
             "set initial cell")
 
-        ("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
+        ("content", bpo::value<EscapeStringsVector>()->default_value(EscapeStringsVector(), "")
             ->multitoken(), "content file(s): esm/esp, or omwgame/omwaddon")
 
         ("no-sound", bpo::value<bool>()->implicit_value(true)
@@ -119,7 +120,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             "\t1 - show warning but consider script as correctly compiled anyway\n"
             "\t2 - treat warnings as errors")
 
-        ("script-blacklist", bpo::value<StringsVector>()->default_value(StringsVector(), "")
+        ("script-blacklist", bpo::value<EscapeStringsVector>()->default_value(EscapeStringsVector(), "")
             ->multitoken(), "ignore the specified script (if the use of the blacklist is enabled)")
 
         ("script-blacklist-use", bpo::value<bool>()->implicit_value(true)
@@ -173,20 +174,20 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     {
         cfgMgr.readConfiguration(variables, desc, true);
 
-        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<std::string>());
+        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapeHashString>().toStdString());
         std::cout << v.describe() << std::endl;
         return false;
     }
 
     cfgMgr.readConfiguration(variables, desc);
 
-    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<std::string>());
+    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapeHashString>().toStdString());
     std::cout << v.describe() << std::endl;
 
     engine.setGrabMouse(!variables.count("no-grab"));
 
     // Font encoding settings
-    std::string encoding(variables["encoding"].as<std::string>());
+    std::string encoding(variables["encoding"].as<Files::EscapeHashString>().toStdString());
     std::cout << ToUTF8::encodingUsingMessage(encoding) << std::endl;
     engine.setEncoding(ToUTF8::calculateEncoding(encoding));
 
@@ -195,7 +196,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     Files::PathContainer dataDirs(variables["data"].as<Files::PathContainer>());
 
-    std::string local(variables["data-local"].as<std::string>());
+    std::string local(variables["data-local"].as<Files::EscapeHashString>().toStdString());
     if (!local.empty())
     {
         dataDirs.push_back(Files::PathContainer::value_type(local));
@@ -206,15 +207,15 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setDataDirs(dataDirs);
 
     // fallback archives
-    StringsVector archives = variables["fallback-archive"].as<StringsVector>();
+    StringsVector archives = Files::EscapeHashString::toStdStringVector(variables["fallback-archive"].as<EscapeStringsVector>());
     for (StringsVector::const_iterator it = archives.begin(); it != archives.end(); ++it)
     {
         engine.addArchive(*it);
     }
 
-    engine.setResourceDir(variables["resources"].as<std::string>());
+    engine.setResourceDir(variables["resources"].as<Files::EscapeHashString>().toStdString());
 
-    StringsVector content = variables["content"].as<StringsVector>();
+	StringsVector content = Files::EscapeHashString::toStdStringVector(variables["content"].as<EscapeStringsVector>());
     if (content.empty())
     {
       std::cout << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting..." << std::endl;
@@ -229,7 +230,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     }
 
     // startup-settings
-    engine.setCell(variables["start"].as<std::string>());
+    engine.setCell(variables["start"].as<Files::EscapeHashString>().toStdString());
     engine.setSkipMenu (variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
     if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
         std::cerr << "new-game used without skip-menu -> ignoring it" << std::endl;
@@ -239,11 +240,11 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCompileAllDialogue(variables["script-all-dialogue"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
-    engine.setStartupScript (variables["script-run"].as<std::string>());
+    engine.setStartupScript (variables["script-run"].as<Files::EscapeHashString>().toStdString());
     engine.setWarningsMode (variables["script-warn"].as<int>());
-    engine.setScriptBlacklist (Files::EscapeHashString::toStdStringVector(variables["script-blacklist"].as<StringsVector>()));
+    engine.setScriptBlacklist (Files::EscapeHashString::toStdStringVector(variables["script-blacklist"].as<EscapeStringsVector>()));
     engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
-    engine.setSaveGameFile (variables["load-savegame"].as<std::string>());
+    engine.setSaveGameFile (variables["load-savegame"].as<Files::EscapeHashString>().toStdString());
 
     // other settings
     engine.setSoundUsage(!variables["no-sound"].as<bool>());

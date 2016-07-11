@@ -67,9 +67,14 @@ namespace Fallback
 namespace Files {
 	void validate(boost::any &v, const std::vector<std::string> &tokens, Files::EscapeHashString * eHS, int a)
 	{
-		std::string * temp = eHS->toStdStringPtr();
-		boost::program_options::validate(v, tokens, temp, a);
-		delete temp;
+		if (eHS == NULL)
+			boost::program_options::validate(v, tokens, (std::string *) NULL, a);
+		else
+		{
+			std::string * temp = eHS->toStdStringPtr();
+			boost::program_options::validate(v, tokens, temp, a);
+			delete temp;
+		}
 	}
 }
 
