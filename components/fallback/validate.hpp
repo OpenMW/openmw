@@ -58,6 +58,10 @@ namespace Fallback
         }
     }
 
+	void validate(boost::any &v, std::vector<std::string> const &tokens, EscapeFallbackMap* eFM, int a)
+	{
+		validate(v, tokens, (FallbackMap *)eFM, a);
+	}
 }
 
 #endif
