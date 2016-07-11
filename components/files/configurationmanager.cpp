@@ -164,7 +164,7 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
     return false;
 }
 
-escape_hash_filter::escape_hash_filter() : mNext()
+escape_hash_filter::escape_hash_filter() : mNext(), mSeenNonWhitespace(false), mFinishLine(false)
 {
 }
 
@@ -186,23 +186,23 @@ int escape_hash_filter::get(Source & src)
 		}
 		else if (character == EOF)
 		{
-			seenNonWhitespace = false;
-			finishLine = false;
+			mSeenNonWhitespace = false;
+			mFinishLine = false;
 			mNext.push(character);
 		}
 		else if (character == '\n')
 		{
-			seenNonWhitespace = false;
-			finishLine = false;
+			mSeenNonWhitespace = false;
+			mFinishLine = false;
 			mNext.push(character);
 		}
-		else if (finishLine)
+		else if (mFinishLine)
 		{
 			mNext.push(character);
 		}
 		else if (character == '#')
 		{
-			if (seenNonWhitespace)
+			if (mSeenNonWhitespace)
 			{
 				mNext.push(sEscape);
 				mNext.push(sHashIdentifier);
@@ -211,7 +211,7 @@ int escape_hash_filter::get(Source & src)
 			{
 				//it's fine being interpreted by Boost as a comment, and so is anything afterwards
 				mNext.push(character);
-				finishLine = true;
+				mFinishLine = true;
 			}
 		}
 		else if (mPrevious == sEscape)
@@ -223,8 +223,8 @@ int escape_hash_filter::get(Source & src)
 		{
 			mNext.push(character);
 		}
-		if (!seenNonWhitespace && !isspace(character))
-			seenNonWhitespace = true;
+		if (!mSeenNonWhitespace && !isspace(character))
+			mSeenNonWhitespace = true;
 		if (record)
 			mPrevious = character;
 	}

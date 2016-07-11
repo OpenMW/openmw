@@ -84,8 +84,8 @@ struct escape_hash_filter : public boost::iostreams::input_filter
 		std::queue<int> mNext;
 		int mPrevious;
 
-		bool seenNonWhitespace = false;
-		bool finishLine = false;
+		bool mSeenNonWhitespace;
+		bool mFinishLine;
 };
 
 /**
