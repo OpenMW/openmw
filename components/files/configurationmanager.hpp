@@ -71,9 +71,9 @@ struct ConfigurationManager
  */
 struct escape_hash_filter : public boost::iostreams::input_filter
 {
-	static const int sEscape = '@';
-	static const int sHashIdentifier = 'h';
-	static const int sEscapeIdentifier = 'a';
+	static const int sEscape;
+	static const int sHashIdentifier;
+	static const int sEscapeIdentifier;
 
 	escape_hash_filter();
 	virtual ~escape_hash_filter();
