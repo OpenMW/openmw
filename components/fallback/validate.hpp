@@ -16,19 +16,6 @@ namespace Fallback
 		std::map<std::string, std::string> mMap;
 	};
 
-	struct EscapeFallbackMap : FallbackMap
-	{
-		std::map<Files::EscapeHashString, Files::EscapeHashString> mMap;
-
-		FallbackMap toFallbackMap() const
-		{
-			FallbackMap temp = FallbackMap();
-			for (std::map<Files::EscapeHashString, Files::EscapeHashString>::const_iterator it = mMap.begin(); it != mMap.end(); ++it)
-				temp.mMap[it->first.toStdString()] = it->second.toStdString();
-			return temp;
-		}
-	};
-
 	void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap*, int)
 	{
 		if (v.empty())
@@ -40,16 +27,17 @@ namespace Fallback
 
 		for (std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it)
 		{
-			int sep = it->find(",");
-			if (sep < 1 || sep == (int)it->length() - 1)
+			std::string temp = Files::EscapeHashString::processString(*it);
+			int sep = temp.find(",");
+			if (sep < 1 || sep == (int)temp.length() - 1)
 #if (BOOST_VERSION < 104200)
 				throw boost::program_options::validation_error("invalid value");
 #else
 				throw boost::program_options::validation_error(boost::program_options::validation_error::invalid_option_value);
 #endif
 
-			std::string key(it->substr(0, sep));
-			std::string value(it->substr(sep + 1));
+			std::string key(temp.substr(0, sep));
+			std::string value(temp.substr(sep + 1));
 
 			if (map->mMap.find(key) == map->mMap.end())
 			{
@@ -57,24 +45,15 @@ namespace Fallback
 			}
 		}
 	}
-
-	void validate(boost::any &v, std::vector<std::string> const &tokens, EscapeFallbackMap* eFM, int a)
-	{
-		validate(v, tokens, (FallbackMap *)eFM, a);
-	}
 }
 
 namespace Files {
 	void validate(boost::any &v, const std::vector<std::string> &tokens, Files::EscapeHashString * eHS, int a)
 	{
-		if (eHS == NULL)
-			boost::program_options::validate(v, tokens, (std::string *) NULL, a);
-		else
-		{
-			std::string * temp = eHS->toStdStringPtr();
-			boost::program_options::validate(v, tokens, temp, a);
-			delete temp;
-		}
+		boost::program_options::validators::check_first_occurrence(v);
+		
+		if (v.empty())
+			v = boost::any(EscapeHashString(boost::program_options::validators::get_single_string(tokens)));
 	}
 }
 
