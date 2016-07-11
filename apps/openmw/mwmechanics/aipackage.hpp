@@ -108,9 +108,6 @@ namespace MWMechanics
 
             float mTimer;
 
-            // Set to true once package starts actually being executed
-            bool mStarted;
-
             ESM::Pathgrid::Point mPrevDest;
 
         private:

@@ -51,7 +51,7 @@ bool MWMechanics::AiPackage::getRepeat() const
     return false;
 }
 
-MWMechanics::AiPackage::AiPackage() : mTimer(0.26f), mStarted(false) { //mTimer starts at .26 to force initial pathbuild
+MWMechanics::AiPackage::AiPackage() : mTimer(0.26f) { //mTimer starts at .26 to force initial pathbuild
 
 }
 
@@ -79,14 +79,8 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     //***********************
     if(mTimer > 0.25)
     {
-        const ESM::Cell *cell = actor.getCell()->getCell();
-        // If repeating an AI package (mStarted has been set to false again), build a new path if needed so package doesn't immediately end
-        if (!mStarted && distance(pos.pos, dest) > 10) {
-            mStarted = true;
-            mPathFinder.buildSyncedPath(pos.pos, dest, actor.getCell(), true); //Rebuild path, in case the target has moved
-            mPrevDest = dest;
-        }
-        else if (doesPathNeedRecalc(dest, cell)) { //Only rebuild path if it's moved
+        const ESM::Cell *cell = actor.getCell()->getCell();       
+        if (doesPathNeedRecalc(dest, cell)) { //Only rebuild path if it's moved
             mPathFinder.buildSyncedPath(pos.pos, dest, actor.getCell(), true); //Rebuild path, in case the target has moved
             mPrevDest = dest;
         }
@@ -146,7 +140,7 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float dur
 
 bool MWMechanics::AiPackage::doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell)
 {
-    return distance(mPrevDest, dest) > 10;
+    return mPathFinder.getPath().empty() || (distance(mPrevDest, dest) > 10);
 }
 
 bool MWMechanics::AiPackage::isTargetMagicallyHidden(const MWWorld::Ptr& target)
