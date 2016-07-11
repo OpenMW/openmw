@@ -240,6 +240,17 @@ std::string EscapeHashString::processString(const std::string & str)
 	return temp;
 }
 
+
+std::vector<std::string> EscapeHashString::toStdStringVector(const std::vector<EscapeHashString> & vec)
+{
+	std::vector<std::string> temp = std::vector<std::string>();
+	for (std::vector<EscapeHashString>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+	{
+		temp.push_back(it->toStdString());
+	}
+	return temp;
+}
+
 EscapeHashString::EscapeHashString()
 {
 }
@@ -267,6 +278,11 @@ EscapeHashString::EscapeHashString(size_t n, char c) : std::string(n, c)
 template <class InputIterator>
 EscapeHashString::EscapeHashString(InputIterator first, InputIterator last) : std::string(EscapeHashString::processString(std::string(first, last)))
 {
+}
+
+std::string EscapeHashString::toStdString() const
+{
+	return std::string(* this);
 }
 
 const boost::filesystem::path& ConfigurationManager::getGlobalPath() const

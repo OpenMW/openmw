@@ -95,6 +95,7 @@ class EscapeHashString : public std::string
 {
 	public:
 		static std::string processString(const std::string & str);
+		static std::vector<std::string> toStdStringVector(const std::vector<EscapeHashString> & vec);
 
 		EscapeHashString();
 		EscapeHashString(const std::string & str);
@@ -104,6 +105,8 @@ class EscapeHashString : public std::string
 		EscapeHashString(size_t n, char c);
 		template <class InputIterator>
 		EscapeHashString(InputIterator first, InputIterator last);
+
+		std::string toStdString() const;
 };
 
 } /* namespace Cfg */

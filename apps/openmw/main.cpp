@@ -242,7 +242,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
     engine.setStartupScript (variables["script-run"].as<std::string>());
     engine.setWarningsMode (variables["script-warn"].as<int>());
-    engine.setScriptBlacklist (variables["script-blacklist"].as<StringsVector>());
+    engine.setScriptBlacklist (string::toStdStringVector(variables["script-blacklist"].as<StringsVector>()));
     engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
     engine.setSaveGameFile (variables["load-savegame"].as<std::string>());
 
