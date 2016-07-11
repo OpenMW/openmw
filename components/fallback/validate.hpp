@@ -3,7 +3,7 @@
 
 #include <boost/program_options.hpp>
 
-#include <components\files\configurationmanager.hpp>
+#include <components/files/configurationmanager.hpp>
 
 // Parses and validates a fallback map from boost program_options.
 // Note: for boost to pick up the validate function, you need to pull in the namespace e.g.
