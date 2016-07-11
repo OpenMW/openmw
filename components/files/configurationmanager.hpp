@@ -2,8 +2,10 @@
 #define COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 
 #include <map>
+#include <queue>
 
 #include <boost/program_options.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
 
 #include <components/files/fixedpath.hpp>
 #include <components/files/collections.hpp>
@@ -61,6 +63,47 @@ struct ConfigurationManager
         TokensMappingContainer mTokensMapping;
 
         bool mSilent;
+};
+
+
+/**
+ * \struct escape_hash_filter
+ */
+struct escape_hash_filter : public boost::iostreams::input_filter
+{
+	static const int sEscape = '@';
+	static const int sHashIdentifier = 'h';
+	static const int sEscapeIdentifier = 'a';
+
+	escape_hash_filter();
+	virtual ~escape_hash_filter();
+
+	template <typename Source> int get(Source & src);
+
+	private:
+		std::queue<int> mNext;
+		int mPrevious;
+
+		bool seenNonWhitespace = false;
+		bool finishLine = false;
+};
+
+/**
+ * \class EscapeHashString
+ */
+class EscapeHashString : public std::string
+{
+	public:
+		static std::string processString(const std::string & str);
+
+		EscapeHashString();
+		EscapeHashString(const std::string & str);
+		EscapeHashString(const std::string & str, size_t pos, size_t len = std::string::npos);
+		EscapeHashString(const char * s);
+		EscapeHashString(const char * s, size_t n);
+		EscapeHashString(size_t n, char c);
+		template <class InputIterator>
+		EscapeHashString(InputIterator first, InputIterator last);
 };
 
 } /* namespace Cfg */
