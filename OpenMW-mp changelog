@@ -1,3 +1,55 @@
+0.0.1b
+    Fixed NPC attack segfault
+    Movement interpolation
+    Lua-scripting
+    Chat
+
+0.0.1a
+    Combat animation
+    Synchronization of melee and ranged (bow, crossbow, throwable weapons) combat
+    Synchronization of health, mana, stamina (sic) and death
+    Synchronization of attributes and skills
+
+0.0.1
+    Synchronization of racial features
+    Synchronization of position
+    Synchronization of the state (nothing/weapon/spell)
+    Synchronization of movement and jump animations
+
+To do:
+
+0.0.1b
+    Finish combat package (knockout, knockdown, spells and enchantments)
+    Improve position synchronization while being knocked out, knocked down or dying
+    Partial (unbreakable) items synchronization
+    Spells synchronization
+
+0.0.2
+    Vampirism
+    Lycanthropy
+    Items synchronization
+    Locks synchronization
+    Opening doors
+    Opening locks
+    Activators interaction (hook?)
+
+0.0.2b
+Code cleanup
+
+0.0.3
+    Containers synchronization
+    Loot
+    Stealing from other players
+    Dropping/picking up items
+
+Future
+    Disableable console (~)
+    Client-side script functions for synchronization
+    Weather sync
+    Time sync
+    NPC sync
+    Trading
+
 Сделано:
 0.0.1b
 Пофикшен сегфолт при атаке НПЦ
