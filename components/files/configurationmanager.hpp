@@ -71,21 +71,21 @@ struct ConfigurationManager
  */
 struct escape_hash_filter : public boost::iostreams::input_filter
 {
-	static const int sEscape;
-	static const int sHashIdentifier;
-	static const int sEscapeIdentifier;
+    static const int sEscape;
+    static const int sHashIdentifier;
+    static const int sEscapeIdentifier;
 
-	escape_hash_filter();
-	virtual ~escape_hash_filter();
+    escape_hash_filter();
+    virtual ~escape_hash_filter();
 
-	template <typename Source> int get(Source & src);
+    template <typename Source> int get(Source & src);
 
-	private:
-		std::queue<int> mNext;
-		int mPrevious;
+    private:
+        std::queue<int> mNext;
+        int mPrevious;
 
-		bool mSeenNonWhitespace;
-		bool mFinishLine;
+        bool mSeenNonWhitespace;
+        bool mFinishLine;
 };
 
 /**
@@ -93,23 +93,23 @@ struct escape_hash_filter : public boost::iostreams::input_filter
  */
 class EscapeHashString : public std::string
 {
-	private:
-		std::string mData;
-	public:
-		static std::string processString(const std::string & str);
-		static std::vector<std::string> toStdStringVector(const std::vector<EscapeHashString> & vec);
+    private:
+        std::string mData;
+    public:
+        static std::string processString(const std::string & str);
+        static std::vector<std::string> toStdStringVector(const std::vector<EscapeHashString> & vec);
 
-		EscapeHashString();
-		EscapeHashString(const std::string & str);
-		EscapeHashString(const std::string & str, size_t pos, size_t len = std::string::npos);
-		EscapeHashString(const char * s);
-		EscapeHashString(const char * s, size_t n);
-		EscapeHashString(size_t n, char c);
-		template <class InputIterator>
-		EscapeHashString(InputIterator first, InputIterator last);
+        EscapeHashString();
+        EscapeHashString(const std::string & str);
+        EscapeHashString(const std::string & str, size_t pos, size_t len = std::string::npos);
+        EscapeHashString(const char * s);
+        EscapeHashString(const char * s, size_t n);
+        EscapeHashString(size_t n, char c);
+        template <class InputIterator>
+        EscapeHashString(InputIterator first, InputIterator last);
 
-		std::string toStdString() const;
-		std::string * toStdStringPtr() const;
+        std::string toStdString() const;
+        std::string * toStdStringPtr() const;
 };
 
 } /* namespace Cfg */

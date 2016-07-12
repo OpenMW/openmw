@@ -69,8 +69,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 {
     // Create a local alias for brevity
     namespace bpo = boost::program_options;
-	typedef std::vector<Files::EscapeHashString> EscapeStringsVector;
-	typedef std::vector<std::string> StringsVector;
+    typedef std::vector<Files::EscapeHashString> EscapeStringsVector;
+    typedef std::vector<std::string> StringsVector;
 
     bpo::options_description desc("Syntax: openmw <options>\nAllowed options");
 
@@ -80,16 +80,16 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("data", bpo::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")
             ->multitoken()->composing(), "set data directories (later directories have higher priority)")
 
-			("data-local", bpo::value<Files::EscapeHashString>()->default_value(""),
+            ("data-local", bpo::value<Files::EscapeHashString>()->default_value(""),
             "set local data directory (highest priority)")
 
         ("fallback-archive", bpo::value<EscapeStringsVector>()->default_value(EscapeStringsVector(), "fallback-archive")
             ->multitoken(), "set fallback BSA archives (later archives have higher priority)")
 
-			("resources", bpo::value<Files::EscapeHashString>()->default_value("resources"),
+            ("resources", bpo::value<Files::EscapeHashString>()->default_value("resources"),
             "set resources directory")
 
-			("start", bpo::value<Files::EscapeHashString>()->default_value(""),
+            ("start", bpo::value<Files::EscapeHashString>()->default_value(""),
             "set initial cell")
 
         ("content", bpo::value<EscapeStringsVector>()->default_value(EscapeStringsVector(), "")
@@ -110,7 +110,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-console", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "enable console-only script functionality")
 
-			("script-run", bpo::value<Files::EscapeHashString>()->default_value(""),
+            ("script-run", bpo::value<Files::EscapeHashString>()->default_value(""),
             "select a file containing a list of console commands that is executed on startup")
 
         ("script-warn", bpo::value<int>()->implicit_value (1)
@@ -126,7 +126,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-blacklist-use", bpo::value<bool>()->implicit_value(true)
             ->default_value(true), "enable script blacklisting")
 
-			("load-savegame", bpo::value<Files::EscapeHashString>()->default_value(""),
+            ("load-savegame", bpo::value<Files::EscapeHashString>()->default_value(""),
             "load a save game file on game startup (specify an absolute filename or a filename relative to the current working directory)")
 
         ("skip-menu", bpo::value<bool>()->implicit_value(true)
@@ -138,14 +138,14 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("fs-strict", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "strict file system handling (no case folding)")
 
-			("encoding", bpo::value<Files::EscapeHashString>()->
+            ("encoding", bpo::value<Files::EscapeHashString>()->
             default_value("win1252"),
             "Character encoding used in OpenMW game messages:\n"
             "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
             "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
             "\n\twin1252 - Western European (Latin) alphabet, used by default")
 
-			("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
+            ("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
             ->multitoken()->composing(), "fallback values")
 
         ("no-grab", "Don't grab mouse cursor")
@@ -215,7 +215,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     engine.setResourceDir(variables["resources"].as<Files::EscapeHashString>().toStdString());
 
-	StringsVector content = Files::EscapeHashString::toStdStringVector(variables["content"].as<EscapeStringsVector>());
+    StringsVector content = Files::EscapeHashString::toStdStringVector(variables["content"].as<EscapeStringsVector>());
     if (content.empty())
     {
       std::cout << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting..." << std::endl;
@@ -248,7 +248,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     // other settings
     engine.setSoundUsage(!variables["no-sound"].as<bool>());
-	engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
+    engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
     engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
     engine.enableFontExport(variables["export-fonts"].as<bool>());
 
