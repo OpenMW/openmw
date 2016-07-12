@@ -8,6 +8,7 @@
 #include <apps/openmw/mwbase/environment.hpp>
 #include <apps/openmw/mwgui/windowmanagerimp.hpp>
 #include <apps/openmw/mwinput/inputmanagerimp.hpp>
+#include <MyGUI_InputManager.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -180,7 +181,7 @@ namespace mwmp
             editState = true;
         }
         else // CHAT_ENABLED
-            editState = !editState;
+            editState = true;
         SetEditState(editState);
     }
 
