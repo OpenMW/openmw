@@ -6,15 +6,7 @@
 #  RakNet_INCLUDES - the RakNet include directory
 #  RakNet_LIBRARY - Link these to use RakNet
 
-if(Win32)
-SET(RakNet_LIBRARY_Name RakNetLibStatic)
-SET(RakNet_LIBRARY_Name_Debug RakNetLibStaticDebug)
-else(Win32)
-SET(RakNet_LIBRARY_Name RakNetStatic)
-SET(RakNet_LIBRARY_Name_Debug RakNetStatic_Debug)
-endif(Win32)
-
-FIND_LIBRARY (RakNet_LIBRARY_RELEASE NAMES ${RakNet_LIBRARY_Name}
+FIND_LIBRARY (RakNet_LIBRARY_RELEASE NAMES RakNetLibStatic
     PATHS
     ENV LD_LIBRARY_PATH
     ENV LIBRARY_PATH
@@ -23,10 +15,10 @@ FIND_LIBRARY (RakNet_LIBRARY_RELEASE NAMES ${RakNet_LIBRARY_Name}
     /usr/local/lib64
     /usr/local/lib
     /opt/local/lib
-	${RAKNET_ROOT}/lib
+    $ENV{RAKNET_ROOT}/lib
     )
 	
-FIND_LIBRARY (RakNet_LIBRARY_DEBUG NAMES  ${RakNet_LIBRARY_Name_Debug}
+FIND_LIBRARY (RakNet_LIBRARY_DEBUG NAMES RakNetLibStatic
     PATHS
     ENV LD_LIBRARY_PATH
     ENV LIBRARY_PATH
@@ -35,7 +27,7 @@ FIND_LIBRARY (RakNet_LIBRARY_DEBUG NAMES  ${RakNet_LIBRARY_Name_Debug}
     /usr/local/lib64
     /usr/local/lib
     /opt/local/lib
-	${RAKNET_ROOT}/lib
+    $ENV{RAKNET_ROOT}/lib
     )	
 	
 	
@@ -45,7 +37,7 @@ FIND_PATH (RakNet_INCLUDES raknet/RakPeer.h
     /usr/include
     /usr/local/include
     /opt/local/include
-	${RAKNET_ROOT}/include
+	$ENV{RAKNET_ROOT}/include
     )
  
 IF(RakNet_INCLUDES AND RakNet_LIBRARY_RELEASE)

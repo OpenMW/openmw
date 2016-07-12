@@ -5,13 +5,7 @@
 #  Terra_INCLUDES - the Terra include directory
 #  Terra_LIBRARY - Link these to use Terra
 
-if(Win32)
-SET(Terra_LIBRARY_Name terra.so)
-else(Win32)
-SET(Terra_LIBRARY_Name terra)
-endif(Win32)
-
-FIND_LIBRARY (Terra_LIBRARY_RELEASE NAMES ${Terra_LIBRARY_Name}
+FIND_LIBRARY (Terra_LIBRARY_RELEASE NAMES terra
     PATHS
     ENV LD_LIBRARY_PATH
     ENV LIBRARY_PATH
@@ -20,11 +14,10 @@ FIND_LIBRARY (Terra_LIBRARY_RELEASE NAMES ${Terra_LIBRARY_Name}
     /usr/local/lib64
     /usr/local/lib
     /opt/local/lib
-    ${Terra_ROOT}/lib
-    ${Terra_DIR}/lib
+    $ENV{Terra_ROOT}/lib
     )
 	
-FIND_LIBRARY (Terra_LIBRARY_DEBUG NAMES  ${Terra_LIBRARY_Name_Debug}
+FIND_LIBRARY (Terra_LIBRARY_DEBUG NAMES terra
     PATHS
     ENV LD_LIBRARY_PATH
     ENV LIBRARY_PATH
@@ -33,8 +26,7 @@ FIND_LIBRARY (Terra_LIBRARY_DEBUG NAMES  ${Terra_LIBRARY_Name_Debug}
     /usr/local/lib64
     /usr/local/lib
     /opt/local/lib
-    ${Terra_ROOT}/lib
-    ${Terra_DIR}/lib
+    $ENV{Terra_ROOT}/lib
     )	
 	
 	
@@ -44,8 +36,7 @@ FIND_PATH (Terra_INCLUDES terra/terra.h
     /usr/include
     /usr/local/include
     /opt/local/include
-    ${Terra_ROOT}/include
-    ${Terra_DIR}/include
+    $ENV{Terra_ROOT}/include
     )
  
 IF(Terra_INCLUDES AND Terra_LIBRARY_RELEASE)
