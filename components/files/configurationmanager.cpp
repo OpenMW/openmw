@@ -244,17 +244,6 @@ std::string EscapeHashString::processString(const std::string & str)
     return temp;
 }
 
-
-std::vector<std::string> EscapeHashString::toStdStringVector(const std::vector<EscapeHashString> & vec)
-{
-    std::vector<std::string> temp = std::vector<std::string>();
-    for (std::vector<EscapeHashString>::const_iterator it = vec.begin(); it != vec.end(); ++it)
-    {
-        temp.push_back(it->toStdString());
-    }
-    return temp;
-}
-
 EscapeHashString::EscapeHashString() : mData()
 {
 }
@@ -289,9 +278,36 @@ std::string EscapeHashString::toStdString() const
     return std::string(mData);
 }
 
-std::string * EscapeHashString::toStdStringPtr() const
+std::istream & operator>> (std::istream & is, EscapeHashString & eHS)
 {
-    return new std::string(mData);
+    std::string temp;
+    is >> temp;
+    eHS = EscapeHashString(temp);
+    return is;
+}
+
+std::ostream & operator<< (std::ostream & os, const EscapeHashString & eHS)
+{
+    os << eHS.mData;
+    return os;
+}
+
+EscapeStringVector::EscapeStringVector() : mVector()
+{
+}
+
+EscapeStringVector::~EscapeStringVector()
+{
+}
+
+std::vector<std::string> EscapeStringVector::toStdStringVector() const
+{
+    std::vector<std::string> temp = std::vector<std::string>();
+    for (std::vector<EscapeHashString>::const_iterator it = mVector.begin(); it != mVector.end(); ++it)
+    {
+        temp.push_back(it->toStdString());
+    }
+    return temp;
 }
 
 const boost::filesystem::path& ConfigurationManager::getGlobalPath() const

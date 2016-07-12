@@ -91,13 +91,12 @@ struct escape_hash_filter : public boost::iostreams::input_filter
 /**
  * \class EscapeHashString
  */
-class EscapeHashString : public std::string
+class EscapeHashString
 {
     private:
         std::string mData;
     public:
         static std::string processString(const std::string & str);
-        static std::vector<std::string> toStdStringVector(const std::vector<EscapeHashString> & vec);
 
         EscapeHashString();
         EscapeHashString(const std::string & str);
@@ -109,7 +108,20 @@ class EscapeHashString : public std::string
         EscapeHashString(InputIterator first, InputIterator last);
 
         std::string toStdString() const;
-        std::string * toStdStringPtr() const;
+
+        friend std::ostream & operator<< (std::ostream & os, const EscapeHashString & eHS);
+};
+
+std::istream & operator>> (std::istream & is, EscapeHashString & eHS);
+
+struct EscapeStringVector
+{
+    std::vector<Files::EscapeHashString> mVector;
+
+    EscapeStringVector();
+    virtual ~EscapeStringVector();
+
+    std::vector<std::string> toStdStringVector() const;
 };
 
 } /* namespace Cfg */

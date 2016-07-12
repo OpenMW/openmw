@@ -69,7 +69,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 {
     // Create a local alias for brevity
     namespace bpo = boost::program_options;
-    typedef std::vector<Files::EscapeHashString> EscapeStringsVector;
     typedef std::vector<std::string> StringsVector;
 
     bpo::options_description desc("Syntax: openmw <options>\nAllowed options");
@@ -83,7 +82,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             ("data-local", bpo::value<Files::EscapeHashString>()->default_value(""),
             "set local data directory (highest priority)")
 
-        ("fallback-archive", bpo::value<EscapeStringsVector>()->default_value(EscapeStringsVector(), "fallback-archive")
+        ("fallback-archive", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "fallback-archive")
             ->multitoken(), "set fallback BSA archives (later archives have higher priority)")
 
             ("resources", bpo::value<Files::EscapeHashString>()->default_value("resources"),
@@ -92,7 +91,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             ("start", bpo::value<Files::EscapeHashString>()->default_value(""),
             "set initial cell")
 
-        ("content", bpo::value<EscapeStringsVector>()->default_value(EscapeStringsVector(), "")
+        ("content", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
             ->multitoken(), "content file(s): esm/esp, or omwgame/omwaddon")
 
         ("no-sound", bpo::value<bool>()->implicit_value(true)
@@ -120,7 +119,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             "\t1 - show warning but consider script as correctly compiled anyway\n"
             "\t2 - treat warnings as errors")
 
-        ("script-blacklist", bpo::value<EscapeStringsVector>()->default_value(EscapeStringsVector(), "")
+        ("script-blacklist", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
             ->multitoken(), "ignore the specified script (if the use of the blacklist is enabled)")
 
         ("script-blacklist-use", bpo::value<bool>()->implicit_value(true)
@@ -207,7 +206,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setDataDirs(dataDirs);
 
     // fallback archives
-    StringsVector archives = Files::EscapeHashString::toStdStringVector(variables["fallback-archive"].as<EscapeStringsVector>());
+    StringsVector archives = variables["fallback-archive"].as<Files::EscapeStringVector>().toStdStringVector();
     for (StringsVector::const_iterator it = archives.begin(); it != archives.end(); ++it)
     {
         engine.addArchive(*it);
@@ -215,7 +214,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     engine.setResourceDir(variables["resources"].as<Files::EscapeHashString>().toStdString());
 
-    StringsVector content = Files::EscapeHashString::toStdStringVector(variables["content"].as<EscapeStringsVector>());
+    StringsVector content = variables["content"].as<Files::EscapeStringVector>().toStdStringVector();
     if (content.empty())
     {
       std::cout << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting..." << std::endl;
@@ -242,7 +241,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
     engine.setStartupScript (variables["script-run"].as<Files::EscapeHashString>().toStdString());
     engine.setWarningsMode (variables["script-warn"].as<int>());
-    engine.setScriptBlacklist (Files::EscapeHashString::toStdStringVector(variables["script-blacklist"].as<EscapeStringsVector>()));
+    engine.setScriptBlacklist (variables["script-blacklist"].as<Files::EscapeStringVector>().toStdStringVector());
     engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
     engine.setSaveGameFile (variables["load-savegame"].as<Files::EscapeHashString>().toStdString());
 

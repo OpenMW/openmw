@@ -55,6 +55,17 @@ namespace Files {
         if (v.empty())
             v = boost::any(EscapeHashString(boost::program_options::validators::get_single_string(tokens)));
     }
+
+    void validate(boost::any &v, const std::vector<std::string> &tokens, EscapeStringVector *, int)
+    {
+        if (v.empty())
+            v = boost::any(EscapeStringVector());
+
+        EscapeStringVector * eSV = boost::any_cast<EscapeStringVector>(&v);
+
+        for (std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it)
+            eSV->mVector.push_back(EscapeHashString(*it));
+    }
 }
 
 #endif
