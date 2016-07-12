@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     if (peer->Startup((unsigned)players, &sd, 1) != RakNet::RAKNET_STARTED)
         return 0;
 
-    peer->SetMaximumIncomingConnections((unsigned short)(players / 2));
+    peer->SetMaximumIncomingConnections((unsigned short)(players));
 
     Networking networking(peer);
 
