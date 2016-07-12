@@ -90,6 +90,7 @@ public:
     static int GetIncreaseSkill(unsigned short pid, unsigned int pos) noexcept;
     static void SetIncreaseSkill(unsigned short pid, unsigned int pos, int value) noexcept;
 
+    static void Resurrect(unsigned short pid);
 
     //static void AddItem(unsigned short pid, const char* itemName, unsigned short count) noexcept;
     //static void RemoveItem(unsigned short pid, const char* itemName, unsigned short count) noexcept;
@@ -205,6 +206,7 @@ public:
             {"HasItemEquipped",     ScriptFunctions::HasItemEquipped},
             {"SendMessage",         ScriptFunctions::SendMessage},
             {"SetCharGenStage",     ScriptFunctions::SetCharGenStage},
+            {"Resurrect",           ScriptFunctions::Resurrect},
 
             {"Kick",                ScriptFunctions::Kick},
     };

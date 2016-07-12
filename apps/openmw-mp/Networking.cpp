@@ -212,7 +212,6 @@ void Networking::Update(RakNet::Packet *packet)
             //packetMainStats.Read(player);
             player->CreatureStats()->mDead = true;
             myPacket->Send(player, true);
-            controller->GetPacket(ID_GAME_RESURRECT)->RequestData(player->guid);
 
             Script::Call<Script::CallbackIdentity("OnPlayerDeath")>(player->GetID());
 

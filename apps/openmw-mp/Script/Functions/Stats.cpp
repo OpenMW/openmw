@@ -406,3 +406,10 @@ void ScriptFunctions::SetCharGenStage(unsigned short pid, int start, int end) no
 
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_CHARGEN)->Send(player, false);
 }
+
+void ScriptFunctions::Resurrect(unsigned short pid)
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_RESURRECT)->RequestData(player->guid);
+}
