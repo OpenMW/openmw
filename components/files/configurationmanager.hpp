@@ -1,13 +1,7 @@
 #ifndef COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 #define COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 
-#if defined(_WIN32) && !defined(__MINGW32__)
-#include <boost/tr1/tr1/unordered_map>
-#elif defined HAVE_UNORDERED_MAP
-#include <unordered_map>
-#else
-#include <tr1/unordered_map>
-#endif
+#include <map>
 
 #include <boost/program_options.hpp>
 
@@ -52,11 +46,7 @@ struct ConfigurationManager
         typedef Files::FixedPath<> FixedPathType;
 
         typedef const boost::filesystem::path& (FixedPathType::*path_type_f)() const;
-    #if defined HAVE_UNORDERED_MAP
-        typedef std::unordered_map<std::string, path_type_f> TokensMappingContainer;
-    #else
-        typedef std::tr1::unordered_map<std::string, path_type_f> TokensMappingContainer;
-    #endif
+        typedef std::map<std::string, path_type_f> TokensMappingContainer;
 
         bool loadConfig(const boost::filesystem::path& path,
             boost::program_options::variables_map& variables,
