@@ -106,22 +106,16 @@ namespace MWMechanics
 
     bool checkWayIsClear(const osg::Vec3f& from, const osg::Vec3f& to, float offsetXY)
     {
-        if((to - from).length() >= PATHFIND_CAUTION_DIST || std::abs(from.z() - to.z()) <= PATHFIND_Z_REACH)
-        {
-            osg::Vec3f dir = to - from;
-            dir.z() = 0;
-            dir.normalize();
-            float verticalOffset = 200; // instead of '200' here we want the height of the actor
-            osg::Vec3f _from = from + dir*offsetXY + osg::Z_AXIS * verticalOffset;
+        osg::Vec3f dir = to - from;
+        dir.z() = 0;
+        dir.normalize();
+        float verticalOffset = 200; // instead of '200' here we want the height of the actor
+        osg::Vec3f _from = from + dir*offsetXY + osg::Z_AXIS * verticalOffset;
 
-            // cast up-down ray and find height in world space of hit
-            float h = _from.z() - MWBase::Environment::get().getWorld()->getDistToNearestRayHit(_from, -osg::Z_AXIS, verticalOffset + PATHFIND_Z_REACH + 1);
+        // cast up-down ray and find height of hit in world space
+        float h = _from.z() - MWBase::Environment::get().getWorld()->getDistToNearestRayHit(_from, -osg::Z_AXIS, verticalOffset + PATHFIND_Z_REACH + 1);
 
-            if(std::abs(from.z() - h) <= PATHFIND_Z_REACH)
-                return true;
-        }
-
-        return false;
+        return (std::abs(from.z() - h) <= PATHFIND_Z_REACH);
     }
 
     PathFinder::PathFinder()

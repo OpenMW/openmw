@@ -23,8 +23,6 @@ namespace MWMechanics
 
      const float PATHFIND_Z_REACH = 50.0f;
     //static const float sMaxSlope = 49.0f; // duplicate as in physicssystem
-    // distance at which actor pays more attention to decide whether to shortcut or stick to pathgrid
-    const float PATHFIND_CAUTION_DIST = 500.0f;
     // distance after which actor (failed previously to shortcut) will try again
     const float PATHFIND_SHORTCUT_RETRY_DIST = 300.0f;
 
