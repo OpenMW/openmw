@@ -481,6 +481,12 @@ namespace NifOsg
                 return;
             }
 
+            if (textureEffect->texture.empty())
+            {
+                std::cerr << "NiTextureEffect missing source texture in " << mFilename << std::endl;
+                return;
+            }
+
             osg::ref_ptr<osg::TexGen> texGen (new osg::TexGen);
             switch (textureEffect->coordGenType)
             {
