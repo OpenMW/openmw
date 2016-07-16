@@ -33,10 +33,16 @@ public:
     static boost::any CallPublic(const char *name, ...) noexcept;
 
     static void GetPos(unsigned short pid, float *x, float *y, float *z) noexcept;
+    static double GetPosX(unsigned short pid) noexcept;
+    static double GetPosY(unsigned short pid) noexcept;
+    static double GetPosZ(unsigned short pid) noexcept;
     static void SetPos(unsigned short pid, float x, float y, float z) noexcept;
 
 
     static void GetAngle(unsigned short pid, float *x, float *y, float *z) noexcept;
+    static double GetAngleX(unsigned short pid) noexcept;
+    static double GetAngleY(unsigned short pid) noexcept;
+    static double GetAngleZ(unsigned short pid) noexcept;
     static void SetAngle(unsigned short pid, float x, float y, float z) noexcept;
 
     static void SetCell(unsigned short pid, const char *name) noexcept;
@@ -139,9 +145,15 @@ public:
             {"StopServer",          ScriptFunctions::StopServer},
 
             {"GetPos",              ScriptFunctions::GetPos},
+            {"GetPosX",             ScriptFunctions::GetPosX},
+            {"GetPosY",             ScriptFunctions::GetPosY},
+            {"GetPosZ",             ScriptFunctions::GetPosZ},
             {"SetPos",              ScriptFunctions::SetPos},
 
             {"GetAngle",            ScriptFunctions::GetAngle},
+            {"GetAngleX",           ScriptFunctions::GetAngleX},
+            {"GetAngleY",           ScriptFunctions::GetAngleY},
+            {"GetAngleZ",           ScriptFunctions::GetAngleZ},
             {"SetAngle",            ScriptFunctions::SetAngle},
 
             {"GetCell",             ScriptFunctions::GetCell},

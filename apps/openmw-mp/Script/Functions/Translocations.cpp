@@ -24,6 +24,30 @@ void ScriptFunctions::GetPos(unsigned short pid, float *x, float *y, float *z) n
     *z = player->Position()->pos[2];
 }
 
+double ScriptFunctions::GetPosX(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->Position()->pos[0];
+}
+
+double ScriptFunctions::GetPosY(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->Position()->pos[1];
+}
+
+double ScriptFunctions::GetPosZ(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->Position()->pos[2];
+}
+
 void ScriptFunctions::SetPos(unsigned short pid, float x, float y, float z) noexcept
 {
     Player *player;
@@ -90,6 +114,30 @@ void ScriptFunctions::GetAngle(unsigned short pid, float *x, float *y, float *z)
     *x = player->Position()->rot[0];
     *y = player->Position()->rot[1];
     *z = player->Position()->rot[2];
+}
+
+double ScriptFunctions::GetAngleX(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->Position()->rot[0];
+}
+
+double ScriptFunctions::GetAngleY(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->Position()->rot[1];
+}
+
+double ScriptFunctions::GetAngleZ(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->Position()->rot[2];
 }
 
 void ScriptFunctions::SetAngle(unsigned short pid, float x, float y, float z) noexcept
