@@ -836,6 +836,10 @@ namespace MWMechanics
         if (mCaster == getPlayer() && spellIncreasesSkill(spell))
             mCaster.getClass().skillUsageSucceeded(mCaster,
                 spellSchoolToSkill(school), 0);
+    
+        // A non-actor doesn't have casting animation so it plays its spell casting effects here
+        if (!mCaster.getClass().isActor())
+            playSpellCastingEffects(mId);
 
         inflict(mCaster, mCaster, spell->mEffects, ESM::RT_Self);
 
@@ -928,6 +932,38 @@ namespace MWMechanics
         inflict(mCaster, mCaster, effects, ESM::RT_Self);
 
         return true;
+    }
+
+    void CastSpell::playSpellCastingEffects(const std::string &spellid){
+       
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
+        const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
+
+        const ESM::MagicEffect *effect;
+        effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
+
+        if (mCaster.getClass().isActor()) // TODO: Non-actors (except for large statics?) should also create a visual casting effect
+        {
+            const ESM::Static* castStatic;
+            if (!effect->mCasting.empty())
+                castStatic = store.get<ESM::Static>().find (effect->mCasting);
+            else
+                castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
+
+            MWBase::Environment::get().getWorld()->getAnimation(mCaster)->addEffect(
+                                "meshes\\" + castStatic->mModel, effect->mIndex);
+        }
+
+        static const std::string schools[] = {
+            "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+        };
+
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+        if(!effect->mCastSound.empty())
+            sndMgr->playSound3D(mCaster, effect->mCastSound, 1.0f, 1.0f);
+        else
+            sndMgr->playSound3D(mCaster, schools[effect->mData.mSchool]+" cast", 1.0f, 1.0f);
     }
 
     int getEffectiveEnchantmentCastCost(float castCost, const MWWorld::Ptr &actor)
