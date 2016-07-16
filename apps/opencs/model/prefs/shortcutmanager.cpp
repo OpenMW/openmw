@@ -4,6 +4,8 @@
 #include <iostream>
 
 #include <QMetaEnum>
+#include <QRegExp>
+#include <QStringList>
 
 #include "shortcut.hpp"
 
@@ -27,7 +29,7 @@ namespace CSMPrefs
         {
             if (it->second == shortcut)
             {
-                it = mShortcuts.erase(it);
+                mShortcuts.erase(it++);
             }
             else
             {
@@ -45,7 +47,7 @@ namespace CSMPrefs
         {
             if (it->second == wrapper)
             {
-                it = mShortcutWrappers.erase(it);
+                mShortcutWrappers.erase(it++);
             }
             else
             {
