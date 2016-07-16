@@ -92,6 +92,9 @@ namespace MWMechanics
             /// Return true if this package should repeat. Currently only used for Wander packages.
             virtual bool getRepeat() const;
 
+            /// Reset pathfinding state
+            void reset();
+
             bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
 
         protected:

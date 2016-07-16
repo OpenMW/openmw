@@ -58,6 +58,18 @@ bool MWMechanics::AiPackage::getRepeat() const
     return false;
 }
 
+void MWMechanics::AiPackage::reset()
+{
+    // reset all members
+    mTimer = AI_REACTION_TIME + 1.0f;
+    mIsShortcutting = false;
+    mShortcutProhibited = false;
+    mShortcutFailPos = ESM::Pathgrid::Point();
+
+    mPathFinder.clearPath();
+    mObstacleCheck.clear();
+}
+
 bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgrid::Point& dest, float duration, float destTolerance)
 {
     mTimer += duration; //Update timer
