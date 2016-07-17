@@ -1,47 +1,51 @@
-Сделано:
 0.0.1b
-Пофикшен сегфолт при атаке НПЦ
-Интерполляция движения
-Lua скриптинг
-Чат
+    Fixed NPC attack segfault
+    Movement interpolation
+    Lua-scripting
+    Chat
+
 0.0.1a
-Анимация атаки.
-Синхронизация атаки melee/throw/bow/crossbow
-Синхронизация здоровья/маны/стамины/смерти
-Синхронизация характеристик и навыков
+    Combat animation
+    Synchronization of melee and ranged (bow, crossbow, throwable weapons) combat
+    Synchronization of health, mana, stamina (sic) and death
+    Synchronization of attributes and skills
+
 0.0.1
-Синхронизация рассовых признаков
-Синхронизация положения в мире
-Синхронизация состояния (оружие/заклинание/ничего)
-Синхронизация анимации перемещния и прыжков
+    Synchronization of racial features
+    Synchronization of position
+    Synchronization of the state (nothing/weapon/spell)
+    Synchronization of movement and jump animations
 
+To do:
 
-Сделать:
 0.0.1b
-Закончить пакет атаки (нокаут, нокдаун, заклинания и зачарования)
-Улучшить синхронизацию координат при нокауте/нокдауне/смерти
-Частичная синхронизация состояния предметов (не ломаемые)
-Синхронизация заклинаний
+    Finish combat package (knockout, knockdown, spells and enchantments)
+    Improve position synchronization while being knocked out, knocked down or dying
+    Partial (unbreakable) items synchronization
+    Spells synchronization
+
 0.0.2
-Вампиризм
-Оборотни
-Синхронизация состояния предметов
-Синхронизация замков
-Открывание дверей
-Отпирание дверей
-Взаимодействие с активаторами (хук?)
+    Vampirism
+    Lycanthropy
+    Items synchronization
+    Locks synchronization
+    Opening doors
+    Opening locks
+    Activators interaction (hook?)
+
 0.0.2b
-Чистка кода
+    Code cleanup
+
 0.0.3
-Синхронизция контейнеров
-Лут
-Воровство у др. игроков.
-Выбрасывание/подбор вещей.
+    Containers synchronization
+    Loot
+    Stealing from other players
+    Dropping/picking up items
 
 Future
-Отключаемая консоль (~)
-клиентские скриптовые функции для синхронизации
-Синхронизация погоды
-Синхронизация времени
-Синхронизация НПЦ
-Трейд
+    Disableable console (~)
+    Client-side script functions for synchronization
+    Weather sync
+    Time sync
+    NPC sync
+    Trading
