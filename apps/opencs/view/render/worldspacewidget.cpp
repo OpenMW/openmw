@@ -148,7 +148,7 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
         "<li>Hold shift to speed up movement</li>"
         "</ul>");
     tool->addButton(
-        new CSVRender::OrbitCameraMode(this, QIcon(":scenetoolbar/orbiting-camera"),
+        new CSVRender::OrbitCameraMode(this, mShortcutHandler, QIcon(":scenetoolbar/orbiting-camera"),
             "Orbiting Camera"
             "<ul><li>Always facing the centre point</li>"
             "<li>Rotate around the centre point via WASD or by moving the mouse while holding the left button</li>"

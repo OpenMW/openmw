@@ -3,6 +3,12 @@
 
 #include "../widget/modebutton.hpp"
 
+namespace CSMPrefs
+{
+    class Shortcut;
+    class ShortcutEventHandler;
+}
+
 namespace CSVRender
 {
     class WorldspaceWidget;
@@ -13,16 +19,20 @@ namespace CSVRender
 
         public:
 
-            OrbitCameraMode(WorldspaceWidget* worldspaceWidget, const QIcon& icon, const QString& tooltip = "",
-                QWidget* parent = 0);
+            OrbitCameraMode(WorldspaceWidget* worldspaceWidget, CSMPrefs::ShortcutEventHandler* shortcutHandler,
+                const QIcon& icon, const QString& tooltip = "", QWidget* parent = 0);
+            ~OrbitCameraMode();
 
             virtual void activate(CSVWidget::SceneToolbar* toolbar);
+            virtual void deactivate(CSVWidget::SceneToolbar* toolbar);
             virtual bool createContextMenu(QMenu* menu);
 
         private:
 
             WorldspaceWidget* mWorldspaceWidget;
+            CSMPrefs::ShortcutEventHandler* mShortcutHandler;
             QAction* mCenterOnSelection;
+            CSMPrefs::Shortcut* mCenterShortcut;
 
         private slots:
 
