@@ -311,16 +311,40 @@ void LocalPlayer::SendAttack(char type)
     GetNetworking()->SendData(&bs);
 }
 
+
 void LocalPlayer::updateCell(bool forceUpdate)
 {
     const ESM::Cell *_cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell();
     static bool isExterior = !_cell->isExterior();
 
-    if(isExterior != _cell->isExterior() || !Misc::StringUtils::ciEqual(_cell->mName, GetCell()->mName) || forceUpdate)
+    bool shouldUpdate = false;
+
+    // Send a packet to server to update this LocalPlayer's cell if:
+    // 1) forceUpdate is true
+    // 2) The LocalPlayer's cell name does not equal the World Player's cell name
+    // 3) The LocalPlayer's exterior cell coordinates do not equal the World Player's
+    //    exterior cell coordinates
+    if (forceUpdate) {
+        shouldUpdate = true;
+    }
+    else if (!Misc::StringUtils::ciEqual(_cell->mName, GetCell()->mName)) {
+        shouldUpdate = true;
+    }
+    else if (_cell->isExterior()) {
+        
+        if (_cell->mCellId.mIndex.mX != GetCell()->mCellId.mIndex.mX) {
+            shouldUpdate = true;
+        }
+        else if (_cell->mCellId.mIndex.mY != GetCell()->mCellId.mIndex.mY) {
+            shouldUpdate = true;
+        }
+    }
+
+    if (shouldUpdate)
     {
         (*GetCell()) = *_cell;
         isExterior = _cell->isExterior();
-
+        
         RakNet::BitStream bs;
         GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_CELL)->Packet(&bs, this, true);
         GetNetworking()->SendData(&bs);

@@ -9,8 +9,8 @@
 mwmp::PacketCell::PacketCell(RakNet::RakPeerInterface *peer) : BasePacket(peer)
 {
     packetID = ID_GAME_CELL;
-    priority = MEDIUM_PRIORITY;
-    reliability = UNRELIABLE_SEQUENCED;
+    priority = IMMEDIATE_PRIORITY;
+    reliability = RELIABLE_ORDERED;
 }
 
 void mwmp::PacketCell::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
