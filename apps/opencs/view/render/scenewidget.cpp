@@ -20,6 +20,7 @@
 
 #include "../../model/prefs/state.hpp"
 #include "../../model/prefs/shortcut.hpp"
+#include "../../model/prefs/shortcuteventhandler.hpp"
 
 #include "lighting.hpp"
 #include "mask.hpp"
@@ -159,13 +160,13 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
     , mHasDefaultAmbient(false)
     , mPrevMouseX(0)
     , mPrevMouseY(0)
-    , mFreeCamControl(0)
-    , mOrbitCamControl(0)
-    , mCurrentCamControl(0)
     , mCamPositionSet(false)
 {
-    mFreeCamControl.reset(new FreeCameraController(this));
-    mOrbitCamControl.reset(new OrbitCameraController(this));
+    mShortcutHandler = new CSMPrefs::ShortcutEventHandler(this);
+    installEventFilter(mShortcutHandler);
+
+    mFreeCamControl.reset(new FreeCameraController(mShortcutHandler));
+    mOrbitCamControl.reset(new OrbitCameraController(mShortcutHandler));
     mCurrentCamControl = mFreeCamControl.get();
 
     mOrbitCamControl->setPickingMask(Mask_Reference | Mask_Terrain);
@@ -201,6 +202,8 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
 
 SceneWidget::~SceneWidget()
 {
+    removeEventFilter(mShortcutHandler);
+
     // Since we're holding on to the scene templates past the existance of this graphics context, we'll need to manually release the created objects
     mResourceSystem->getSceneManager()->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
 }
@@ -276,57 +279,17 @@ void SceneWidget::setDefaultAmbient (const osg::Vec4f& colour)
     setAmbient(mLighting->getAmbientColour(&mDefaultAmbient));
 }
 
-bool SceneWidget::event(QEvent *event)
-{
-    if (event->type() == QEvent::KeyPress)
-    {
-        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-        SceneWidget::keyPressEvent(keyEvent);
-    }
-    else if (event->type() == QEvent::KeyRelease)
-    {
-        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-        SceneWidget::keyReleaseEvent(keyEvent);
-    }
-    else if (event->type() == QEvent::MouseButtonPress)
-    {
-        QMouseEvent* keyEvent = static_cast<QMouseEvent*>(event);
-        SceneWidget::mousePressEvent(keyEvent);
-    }
-    else if (event->type() == QEvent::MouseButtonRelease)
-    {
-        QMouseEvent* keyEvent = static_cast<QMouseEvent*>(event);
-        SceneWidget::mouseReleaseEvent(keyEvent);
-    }
-    else
-    {
-        return RenderWidget::event(event);
-    }
-
-    return true;
-}
-
 void SceneWidget::mousePressEvent (QMouseEvent *event)
 {
     mMouseMode = mapButton(event);
 
     mPrevMouseX = event->x();
     mPrevMouseY = event->y();
-
-    for (std::vector<CSMPrefs::Shortcut*>::iterator it = mShortcuts.begin(); it != mShortcuts.end(); ++it)
-    {
-        (*it)->mousePressEvent(event);
-    }
 }
 
 void SceneWidget::mouseReleaseEvent (QMouseEvent *event)
 {
     mMouseMode = "";
-
-    for (std::vector<CSMPrefs::Shortcut*>::iterator it = mShortcuts.begin(); it != mShortcuts.end(); ++it)
-    {
-        (*it)->mouseReleaseEvent(event);
-    }
 }
 
 void SceneWidget::mouseMoveEvent (QMouseEvent *event)
@@ -345,26 +308,6 @@ void SceneWidget::focusOutEvent (QFocusEvent *event)
 void SceneWidget::wheelEvent(QWheelEvent *event)
 {
     mCurrentCamControl->handleMouseMoveEvent("t-navi", event->delta(), 0);
-}
-
-void SceneWidget::keyPressEvent (QKeyEvent *event)
-{
-    mCurrentCamControl->handleKeyEvent(event, true);
-
-    for (std::vector<CSMPrefs::Shortcut*>::iterator it = mShortcuts.begin(); it != mShortcuts.end(); ++it)
-    {
-        (*it)->keyPressEvent(event);
-    }
-}
-
-void SceneWidget::keyReleaseEvent (QKeyEvent *event)
-{
-    mCurrentCamControl->handleKeyEvent(event, false);
-
-    for (std::vector<CSMPrefs::Shortcut*>::iterator it = mShortcuts.begin(); it != mShortcuts.end(); ++it)
-    {
-        (*it)->keyReleaseEvent(event);
-    }
 }
 
 void SceneWidget::update(double dt)
@@ -506,11 +449,6 @@ std::string SceneWidget::mapButton (QMouseEvent *event)
         return iter->second;
 
     return "";
-}
-
-void SceneWidget::addShortcut(CSMPrefs::Shortcut* shortcut)
-{
-    mShortcuts.push_back(shortcut);
 }
 
 }

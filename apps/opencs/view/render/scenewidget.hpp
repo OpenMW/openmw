@@ -7,14 +7,15 @@
 #include <QWidget>
 #include <QTimer>
 
+#include <osgViewer/View>
+#include <osgViewer/CompositeViewer>
+
 #include <boost/shared_ptr.hpp>
 
 #include "lightingday.hpp"
 #include "lightingnight.hpp"
 #include "lightingbright.hpp"
 
-#include <osgViewer/View>
-#include <osgViewer/CompositeViewer>
 
 namespace Resource
 {
@@ -37,6 +38,7 @@ namespace CSMPrefs
 {
     class Setting;
     class Shortcut;
+    class ShortcutEventHandler;
 }
 
 namespace CSVRender
@@ -85,21 +87,16 @@ namespace CSVRender
             void setDefaultAmbient (const osg::Vec4f& colour);
             ///< \note The actual ambient colour may differ based on lighting settings.
 
-            void addShortcut(CSMPrefs::Shortcut* shortcut);
-
         protected:
             void setLighting (Lighting *lighting);
             ///< \attention The ownership of \a lighting is not transferred to *this.
 
             void setAmbient(const osg::Vec4f& ambient);
 
-            virtual bool event(QEvent *event);
             virtual void mousePressEvent (QMouseEvent *event);
             virtual void mouseReleaseEvent (QMouseEvent *event);
             virtual void mouseMoveEvent (QMouseEvent *event);
             virtual void wheelEvent (QWheelEvent *event);
-            virtual void keyPressEvent (QKeyEvent *event);
-            virtual void keyReleaseEvent (QKeyEvent *event);
             virtual void focusOutEvent (QFocusEvent *event);
 
             /// \return Is \a key a button mapping setting? (ignored otherwise)
@@ -124,7 +121,7 @@ namespace CSVRender
             CameraController* mCurrentCamControl;
 
             std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
-            std::vector<CSMPrefs::Shortcut*> mShortcuts;
+            CSMPrefs::ShortcutEventHandler *mShortcutHandler;
 
         private:
             bool mCamPositionSet;

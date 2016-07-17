@@ -16,6 +16,11 @@ namespace osg
     class Group;
 }
 
+namespace CSMPrefs
+{
+    class ShortcutEventHandler;
+}
+
 namespace CSVRender
 {
     class SceneWidget;
@@ -52,7 +57,6 @@ namespace CSVRender
             // moves the camera to an intelligent position
             void setup(osg::Group* root, unsigned int mask, const osg::Vec3d& up);
 
-            virtual bool handleKeyEvent(QKeyEvent* event, bool pressed) = 0;
             virtual bool handleMouseMoveEvent(std::string mode, int x, int y) = 0;
 
             virtual void update(double dt) = 0;
@@ -79,7 +83,7 @@ namespace CSVRender
 
         public:
 
-            FreeCameraController(SceneWidget* widget);
+            FreeCameraController(CSMPrefs::ShortcutEventHandler* handler);
 
             double getLinearSpeed() const;
             double getRotationalSpeed() const;
@@ -92,7 +96,6 @@ namespace CSVRender
             void fixUpAxis(const osg::Vec3d& up);
             void unfixUpAxis();
 
-            bool handleKeyEvent(QKeyEvent* event, bool pressed);
             bool handleMouseMoveEvent(std::string mode, int x, int y);
 
             void update(double dt);
@@ -133,7 +136,7 @@ namespace CSVRender
 
         public:
 
-            OrbitCameraController(SceneWidget* widget);
+            OrbitCameraController(CSMPrefs::ShortcutEventHandler* handler);
 
             osg::Vec3d getCenter() const;
             double getOrbitSpeed() const;
@@ -145,7 +148,6 @@ namespace CSVRender
             void setOrbitSpeedMultiplier(double value);
             void setPickingMask(unsigned int value);
 
-            bool handleKeyEvent(QKeyEvent* event, bool pressed);
             bool handleMouseMoveEvent(std::string mode, int x, int y);
 
             void update(double dt);
@@ -172,6 +174,16 @@ namespace CSVRender
 
             double mOrbitSpeed;
             double mOrbitSpeedMult;
+
+        private slots:
+
+            void up(bool active);
+            void left(bool active);
+            void down(bool active);
+            void right(bool active);
+            void rollLeft(bool active);
+            void rollRight(bool active);
+            void swapSpeedMode(bool active);
     };
 }
 

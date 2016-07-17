@@ -16,11 +16,6 @@ namespace CSMPrefs
         mShortcuts.insert(std::make_pair(shortcut->getName(), shortcut));
     }
 
-    void ShortcutManager::addShortcut(QShortcutWrapper* wrapper)
-    {
-        mShortcutWrappers.insert(std::make_pair(wrapper->getName(), wrapper));
-    }
-
     void ShortcutManager::removeShortcut(Shortcut* shortcut)
     {
         std::pair<ShortcutMap::iterator, ShortcutMap::iterator> range = mShortcuts.equal_range(shortcut->getName());
@@ -30,24 +25,6 @@ namespace CSMPrefs
             if (it->second == shortcut)
             {
                 mShortcuts.erase(it++);
-            }
-            else
-            {
-                ++it;
-            }
-        }
-    }
-
-    void ShortcutManager::removeShortcut(QShortcutWrapper* wrapper)
-    {
-        std::pair<ShortcutWrapperMap::iterator, ShortcutWrapperMap::iterator> range = mShortcutWrappers.equal_range(
-            wrapper->getName());
-
-        for (ShortcutWrapperMap::iterator it = range.first; it != range.second;)
-        {
-            if (it->second == wrapper)
-            {
-                mShortcutWrappers.erase(it++);
             }
             else
             {
@@ -85,14 +62,8 @@ namespace CSMPrefs
 
         // Change active shortcuts
         std::pair<ShortcutMap::iterator, ShortcutMap::iterator> rangeS = mShortcuts.equal_range(name);
-        std::pair<ShortcutWrapperMap::iterator, ShortcutWrapperMap::iterator> rangeW = mShortcutWrappers.equal_range(name);
 
         for (ShortcutMap::iterator it = rangeS.first; it != rangeS.second; ++it)
-        {
-            it->second->setSequence(sequence);
-        }
-
-        for (ShortcutWrapperMap::iterator it = rangeW.first; it != rangeW.second; ++it)
         {
             it->second->setSequence(sequence);
         }

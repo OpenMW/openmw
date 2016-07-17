@@ -14,6 +14,8 @@ namespace CSMPrefs
         , mName(name)
         , mCurrentPos(0)
         , mLastPos(0)
+        , mActive(false)
+        , mEnabled(true)
     {
         State::get().getShortcutManager().addShortcut(this);
         setSequence(State::get().getShortcutManager().getSequence(name));
@@ -22,6 +24,16 @@ namespace CSMPrefs
     Shortcut::~Shortcut()
     {
         State::get().getShortcutManager().removeShortcut(this);
+    }
+
+    bool Shortcut::isActive() const
+    {
+        return mActive;
+    }
+
+    bool Shortcut::isEnabled() const
+    {
+        return mEnabled;
     }
 
     const std::string& Shortcut::getName() const
@@ -34,6 +46,21 @@ namespace CSMPrefs
         return mSequence;
     }
 
+    int Shortcut::getPosition() const
+    {
+        return mCurrentPos;
+    }
+
+    int Shortcut::getLastPosition() const
+    {
+        return mLastPos;
+    }
+
+    void Shortcut::setPosition(int pos)
+    {
+        mCurrentPos = pos;
+    }
+
     void Shortcut::setSequence(const QKeySequence& sequence)
     {
         mSequence = sequence;
@@ -41,99 +68,22 @@ namespace CSMPrefs
         mLastPos = sequence.count() - 1;
     }
 
-    void Shortcut::keyPressEvent(QKeyEvent* event)
+    void Shortcut::activate(bool state)
     {
-        int withMod = event->key() | event->modifiers();
-        int noMod = event->key();
+        mActive = state;
+        emit activated(state);
 
-        if (withMod == mSequence[mCurrentPos] || (mCurrentPos > 0 && noMod == mSequence[mCurrentPos]))
-        {
-            if (mCurrentPos == mLastPos)
-            {
-                activated(true);
-            }
-            else
-                ++mCurrentPos;
-        }
+        if (state)
+            emit activated();
     }
 
-    void Shortcut::keyReleaseEvent(QKeyEvent* event)
+    void Shortcut::enable(bool state)
     {
-        const int KeyMask = 0x01FFFFFF;
-
-        if ((mSequence[mCurrentPos] & KeyMask) == event->key())
-        {
-            if (mCurrentPos == mLastPos)
-            {
-                activated(false);
-                mCurrentPos = 0; // Resets to start, maybe shouldn't?
-            }
-            else if (mCurrentPos > 0)
-            {
-                --mCurrentPos;
-            }
-        }
+        mEnabled = state;
     }
 
-    void Shortcut::mousePressEvent(QMouseEvent* event)
+    QString Shortcut::toString() const
     {
-        int withMod = event->button() | (int)event->modifiers();
-        int noMod = event->button();
-
-        if (withMod == mSequence[mCurrentPos] || (mCurrentPos > 0 && noMod == mSequence[mCurrentPos]))
-        {
-            if (mCurrentPos == mLastPos)
-                activated(true);
-            else
-                ++mCurrentPos;
-        }
-    }
-
-    void Shortcut::mouseReleaseEvent(QMouseEvent* event)
-    {
-        const int MouseMask = 0x0000001F;
-
-        if ((mSequence[mCurrentPos] & MouseMask) == event->button())
-        {
-            if (mCurrentPos == mLastPos)
-            {
-                activated(false);
-                mCurrentPos = 0;
-            }
-            else if (mCurrentPos > 0)
-            {
-                --mCurrentPos;
-            }
-        }
-    }
-
-    QShortcutWrapper::QShortcutWrapper(const std::string& name, QShortcut* shortcut)
-        : QObject(shortcut)
-        , mName(name)
-        , mShortcut(shortcut)
-    {
-        State::get().getShortcutManager().addShortcut(this);
-        setSequence(State::get().getShortcutManager().getSequence(name));
-    }
-
-    QShortcutWrapper::~QShortcutWrapper()
-    {
-        State::get().getShortcutManager().removeShortcut(this);
-    }
-
-    const std::string& QShortcutWrapper::getName() const
-    {
-        return mName;
-    }
-
-    const QKeySequence& QShortcutWrapper::getSequence() const
-    {
-        return mSequence;
-    }
-
-    void QShortcutWrapper::setSequence(const QKeySequence& sequence)
-    {
-        mSequence = sequence;
-        mShortcut->setKey(sequence);
+        return QString(State::get().getShortcutManager().sequenceToString(mSequence).data());
     }
 }

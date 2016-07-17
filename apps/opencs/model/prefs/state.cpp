@@ -236,6 +236,15 @@ void CSMPrefs::State::declare()
     declareShortcut ("free-roll-left", "Free camera roll left", QKeySequence(Qt::Key_Q));
     declareShortcut ("free-roll-right", "Free camera roll right", QKeySequence(Qt::Key_E));
     declareShortcut ("free-speed-mode", "Free camera speed mode toggle", QKeySequence(Qt::Key_F));
+    declareSeparator ();
+    declareShortcut ("orbit-up", "Orbit camera up", QKeySequence(Qt::Key_W));
+    declareShortcut ("orbit-down", "Orbit camera down", QKeySequence(Qt::Key_S));
+    declareShortcut ("orbit-left", "Orbit camera left", QKeySequence(Qt::Key_A));
+    declareShortcut ("orbit-right", "Orbit camera right", QKeySequence(Qt::Key_D));
+    declareShortcut ("orbit-roll-left", "Orbit camera roll left", QKeySequence(Qt::Key_Q));
+    declareShortcut ("orbit-roll-right", "Orbit camera roll right", QKeySequence(Qt::Key_E));
+    declareShortcut ("orbit-speed-mode", "Orbit camera speed mode toggle", QKeySequence(Qt::Key_F));
+    declareShortcut ("orbit-center-selection", "Centers the camera on the selected item", QKeySequence(Qt::Key_C));
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)

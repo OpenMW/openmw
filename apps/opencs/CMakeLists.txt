@@ -113,7 +113,7 @@ opencs_units (view/prefs
 
 opencs_units (model/prefs
     state setting intsetting doublesetting boolsetting enumsetting coloursetting shortcut
-    shortcutmanager shortcutsetting
+    shortcuteventhandler shortcutmanager shortcutsetting
     )
 
 opencs_units_noqt (model/prefs

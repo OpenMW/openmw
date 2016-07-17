@@ -1,8 +1,11 @@
 #ifndef CSM_PREFS_SHORTCUT_H
 #define CSM_PREFS_SHORTCUT_H
 
+#include <string>
+
 #include <QKeySequence>
 #include <QObject>
+#include <QString>
 
 class QKeyEvent;
 class QMouseEvent;
@@ -20,10 +23,24 @@ namespace CSMPrefs
             Shortcut(const std::string& name, QObject* parent);
             ~Shortcut();
 
+            bool isActive() const;
+            bool isEnabled() const;
+
             const std::string& getName() const;
             const QKeySequence& getSequence() const;
+            /// The position in the sequence
+            int getPosition() const;
+            /// The position in the sequence
+            int getLastPosition() const;
 
             void setSequence(const QKeySequence& sequence);
+            /// The position in the sequence
+            void setPosition(int pos);
+
+            void activate(bool state);
+            void enable(bool state);
+
+            QString toString() const;
 
         private:
 
@@ -32,39 +49,16 @@ namespace CSMPrefs
             int mCurrentPos;
             int mLastPos;
 
-        public slots:
-
-            void keyPressEvent(QKeyEvent* event);
-            void keyReleaseEvent(QKeyEvent* event);
-            void mousePressEvent(QMouseEvent* event);
-            void mouseReleaseEvent(QMouseEvent* event);
+            bool mActive;
+            bool mEnabled;
 
         signals:
 
-            /// Triggered when the shortcut is activated or deactived; can be determined from \p active
-            void activated(bool active);
-    };
+            /// Triggered when the shortcut is activated or deactived; can be determined from \p state
+            void activated(bool state);
 
-    /// Wraps a QShortcut object so that the sequence can be modified by the settings
-    class QShortcutWrapper : public QObject
-    {
-            Q_OBJECT
-
-        public:
-
-            QShortcutWrapper(const std::string& name, QShortcut* shortcut);
-            ~QShortcutWrapper();
-
-            const std::string& getName() const;
-            const QKeySequence& getSequence() const;
-
-            void setSequence(const QKeySequence& sequence);
-
-        private:
-
-            std::string mName;
-            QKeySequence mSequence;
-            QShortcut* mShortcut;
+            /// Trigger when activated; convenience signal.
+            void activated();
     };
 }
 
