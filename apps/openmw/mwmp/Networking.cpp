@@ -204,7 +204,16 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
         case ID_GAME_UPDATE_POS:
         {
             if(id == myid)
-                getLocalPlayer()->updatePosition(true);
+            {
+                if (packet->length != myPacket->headerSize())
+                {
+                    cout << "ID_GAME_UPDATE_POS changed by server" << endl;
+                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                    getLocalPlayer()->setPosition();
+                }
+                else
+                    getLocalPlayer()->updatePosition(true);
+            }
             else if(pl != 0)
                 myPacket->Packet(&bsIn, pl, false);
             break;

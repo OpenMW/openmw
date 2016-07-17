@@ -29,6 +29,8 @@ namespace mwmp
         void updateCell(bool forceUpdate = false);
         void updateDrawStateAndFlags(bool forceUpdate = false);
 
+        void setPosition();
+
         void CharGen(int stageFirst, int stageEnd);
 
         bool CharGenThread(); // return true if CGStage::current == CGStage::end

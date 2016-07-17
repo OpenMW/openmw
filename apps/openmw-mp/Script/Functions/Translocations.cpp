@@ -48,7 +48,7 @@ double ScriptFunctions::GetPosZ(unsigned short pid) noexcept
     return player->Position()->pos[2];
 }
 
-void ScriptFunctions::SetPos(unsigned short pid, float x, float y, float z) noexcept
+void ScriptFunctions::SetPos(unsigned short pid, double x, double y, double z) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -140,7 +140,7 @@ double ScriptFunctions::GetAngleZ(unsigned short pid) noexcept
     return player->Position()->rot[2];
 }
 
-void ScriptFunctions::SetAngle(unsigned short pid, float x, float y, float z) noexcept
+void ScriptFunctions::SetAngle(unsigned short pid, double x, double y, double z) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
