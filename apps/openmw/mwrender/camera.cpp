@@ -54,7 +54,6 @@ namespace MWRender
       mIsNearest(false),
       mHeight(124.f),
       mMaxCameraDistance(192.f),
-      mDistanceAdjusted(false),
       mVanityToggleQueued(false),
       mVanityToggleQueuedValue(false),
       mViewModeToggleQueued(false),
@@ -342,21 +341,16 @@ namespace MWRender
             } else if (!mFirstPersonView) {
                 mMaxCameraDistance = mCameraDistance;
             }
-        } else {
-            mDistanceAdjusted = true;
         }
     }
 
     void Camera::setCameraDistance()
     {
-        if (mDistanceAdjusted) {
-            if (mVanity.enabled || mPreviewMode) {
-                mCameraDistance = mPreviewCam.offset;
-            } else if (!mFirstPersonView) {
-                mCameraDistance = mMaxCameraDistance;
-            }
+        if (mVanity.enabled || mPreviewMode) {
+            mCameraDistance = mPreviewCam.offset;
+        } else if (!mFirstPersonView) {
+            mCameraDistance = mMaxCameraDistance;
         }
-        mDistanceAdjusted = false;
     }
 
     void Camera::setAnimation(NpcAnimation *anim)

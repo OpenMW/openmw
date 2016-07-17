@@ -49,8 +49,6 @@ namespace MWRender
         float mHeight, mMaxCameraDistance;
         CamData mMainCam, mPreviewCam;
 
-        bool mDistanceAdjusted;
-
         bool mVanityToggleQueued;
         bool mVanityToggleQueuedValue;
         bool mViewModeToggleQueued;
