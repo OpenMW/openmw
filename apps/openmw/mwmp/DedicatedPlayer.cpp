@@ -69,7 +69,7 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
         world->findInteriorPosition("ToddTest", _pos);
         MWWorld::CellStore *store = world->getInterior("ToddTest");
 
-        MWWorld::Ptr tmp = world->safePlaceObject(_player->reference->getPtr(), store, _pos);
+        MWWorld::Ptr tmp = world->placeObject(_player->reference->getPtr(), store, _pos);
 
         _player->ptr.mCell = tmp.mCell;
         _player->ptr.mRef = tmp.mRef;

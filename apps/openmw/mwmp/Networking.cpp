@@ -387,7 +387,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
                 player.getClass().getCreatureStats(player).resurrect();
                 ESM::Position pos;
                 MWBase::Environment::get().getWorld()->findInteriorPosition("ToddTest", pos);
-                MWBase::Environment::get().getWorld()->changeToInteriorCell("ToddTest", pos);
+                MWBase::Environment::get().getWorld()->changeToInteriorCell("ToddTest", pos, true);
                 (*getLocalPlayer()->Position()) = pos;
                 (*getLocalPlayer()->GetCell()) = *player.getCell()->getCell();
                 myPacket->Send(getLocalPlayer(), serverAddr);
@@ -423,7 +423,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
                         MWBase::World *world = MWBase::Environment::get().getWorld();
                         ESM::Position pos;
                         world->findInteriorPosition(getLocalPlayer()->GetCell()->mName, pos);
-                        world->changeToInteriorCell(getLocalPlayer()->GetCell()->mName, pos);
+                        world->changeToInteriorCell(getLocalPlayer()->GetCell()->mName, pos, true);
                     }
 
                     getLocalPlayer()->updateCell(true);
