@@ -242,6 +242,10 @@ namespace MWWorld
 
         // Objects with no refnum can't be handled correctly in the merging process that happens
         // on a save/load, so do a simple copy & delete for these objects.
+
+        // The code below is disabled for TES3MP for as long as player objects lack refnums,
+        // because it will break exterior cell transitions for them
+        /*
         if (!object.getCellRef().getRefNum().hasContentFile())
         {
             MWWorld::Ptr copied = object.getClass().copyToCell(object, *cellToMoveTo, object.getRefData().getCount());
@@ -249,6 +253,7 @@ namespace MWWorld
             object.getRefData().setBaseNode(NULL);
             return copied;
         }
+        */
 
         MovedRefTracker::iterator found = mMovedHere.find(object.getBase());
         if (found != mMovedHere.end())

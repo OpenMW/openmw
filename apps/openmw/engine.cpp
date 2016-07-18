@@ -55,6 +55,8 @@
 
 #include "mwstate/statemanagerimp.hpp"
 
+#include "mwmp/Main.hpp"
+
 namespace
 {
     void checkSDLError(int ret)
@@ -98,13 +100,15 @@ void OMW::Engine::frame(float frametime)
         if (mUseSound)
             mEnvironment.getSoundManager()->update(frametime);
 
+        mwmp::Main::Frame(frametime);
+
         // Main menu opened? Then scripts are also paused.
         bool paused = mEnvironment.getWindowManager()->containsMode(MWGui::GM_MainMenu);
 
         // update game state
         mEnvironment.getStateManager()->update (frametime);
 
-        bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
+        bool guiActive = /*mEnvironment.getWindowManager()->isGuiMode()*/ false;
 
         osg::Timer_t beforeScriptTick = osg::Timer::instance()->tick();
         if (mEnvironment.getStateManager()->getState()==
@@ -145,9 +149,9 @@ void OMW::Engine::frame(float frametime)
         if (mEnvironment.getStateManager()->getState()==
             MWBase::StateManager::State_Running)
         {
-            MWWorld::Ptr player = mEnvironment.getWorld()->getPlayerPtr();
+            /*MWWorld::Ptr player = mEnvironment.getWorld()->getPlayerPtr();
             if(!guiActive && player.getClass().getCreatureStats(player).isDead())
-                mEnvironment.getStateManager()->endGame();
+                mEnvironment.getStateManager()->endGame();*/
         }
 
         // update world
@@ -640,7 +644,10 @@ void OMW::Engine::go()
     ToUTF8::Utf8Encoder encoder (mEncoding);
     mEncoder = &encoder;
 
+
     prepareEngine (settings);
+    mwmp::Main::Create();
+    mSkipMenu = true;
 
     if (!mSaveGameFile.empty())
     {
@@ -678,7 +685,7 @@ void OMW::Engine::go()
         frameTimer.setStartTick();
         dt = std::min(dt, 0.2);
 
-        bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
+        bool guiActive = /*mEnvironment.getWindowManager()->isGuiMode()*/ false;
         if (!guiActive)
             simulationTime += dt;
 
@@ -712,6 +719,7 @@ void OMW::Engine::go()
     // Save user settings
     settings.saveUser(settingspath);
 
+    mwmp::Main::Destroy();
     std::cout << "Quitting peacefully." << std::endl;
 }
 

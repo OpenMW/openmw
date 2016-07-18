@@ -96,6 +96,8 @@ add_openmw_dir (mwbase
     inputmanager windowmanager statemanager
     )
 
+add_openmw_dir (mwmp DedicatedPlayer LocalPlayer Networking Main GUIChat GUILogin)
+
 # Main executable
 
 if (NOT ANDROID)
@@ -137,6 +139,7 @@ target_link_libraries(openmw
     "osg-ffmpeg-videoplayer"
     "oics"
     components
+    ${RakNet_LIBRARY}
 )
 
 if (ANDROID)
