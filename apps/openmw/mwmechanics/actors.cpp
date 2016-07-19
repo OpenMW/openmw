@@ -8,6 +8,9 @@
 #include <components/esm/loadnpc.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <apps/openmw/mwmp/Main.hpp>
+#include <apps/openmw/mwmp/DedicatedPlayer.hpp>
+
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -1030,7 +1033,15 @@ namespace MWMechanics
                 iter->second->getCharacterController()->setActive(inProcessingRange);
 
                 if (iter->first == player)
-                    iter->second->getCharacterController()->setAttackingOrSpell(MWBase::Environment::get().getWorld()->getPlayer().getAttackingOrSpell());
+                {
+                    bool state = MWBase::Environment::get().getWorld()->getPlayer().getAttackingOrSpell();
+                    iter->second->getCharacterController()->setAttackingOrSpell(state);
+                    mwmp::Main::get().getLocalPlayer()->PrepareAttack(2, state);
+                }
+
+                if(mwmp::Main::get().getNetworking()->isDedicatedPlayer(iter->first))
+                    iter->second->getCharacterController()->setAttackingOrSpell(mwmp::Main::get().getNetworking()->Attack(iter->first));
+
 
                 if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
                 {

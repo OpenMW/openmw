@@ -6,6 +6,8 @@
 #include <boost/format.hpp>
 
 #include <components/misc/rng.hpp>
+#include <apps/openmw/mwmp/Main.hpp>
+#include <apps/openmw/mwmp/DedicatedPlayer.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -809,11 +811,36 @@ namespace MWMechanics
 
             // Check success
             float successChance = getSpellSuccessChance(spell, mCaster);
-            if (Misc::Rng::roll0to99() >= successChance)
+
+            bool isDedicated = mwmp::Main::get().getNetworking()->isDedicatedPlayer(mCaster);
+
+            if(mCaster == getPlayer())
+            {
+                mwmp::Main::get().getLocalPlayer()->GetAttack()->success = true;
+                mwmp::Main::get().getLocalPlayer()->GetAttack()->pressed = true;
+            }
+
+            if(isDedicated)
+            {
+                mwmp::Players::GetPlayer(mCaster)->GetAttack()->pressed = false;
+            }
+
+            if ((!isDedicated && Misc::Rng::roll0to99() >= successChance) ||
+                (isDedicated && mwmp::Players::GetPlayer(mCaster)->GetAttack()->success == 0))
             {
                 if (mCaster == getPlayer())
+                {
+                    mwmp::Main::get().getLocalPlayer()->GetAttack()->success = false;
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
+                }
                 fail = true;
+            }
+
+            if(mCaster == getPlayer())
+            {
+                mwmp::Main::get().getLocalPlayer()->SendAttack(1);
+                mwmp::Main::get().getLocalPlayer()->GetAttack()->pressed = false;
+                mwmp::Main::get().getLocalPlayer()->SendAttack(1);
             }
 
             if (fail)

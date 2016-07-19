@@ -65,6 +65,7 @@ option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time"
 
 # Apps and tools
 option(BUILD_OPENMW "build OpenMW" ON)
+option(BUILD_OPENMW_MP "build OpenMW-MP" ON)
 option(BUILD_BSATOOL "build BSA extractor" ON)
 option(BUILD_ESMTOOL "build ESM inspector" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
@@ -115,6 +116,9 @@ endif(APPLE)
 if (WIN32)
     option(USE_DEBUG_CONSOLE "whether a debug console should be enabled for debug builds, if false debug output is redirected to Visual Studio output" ON)
 endif()
+
+find_package(RakNet REQUIRED)
+include_directories(${RakNet_INCLUDES})
 
 if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
    set(USE_QT FALSE)
@@ -328,6 +332,12 @@ endif (APPLE)
 
 # Other files
 
+configure_file(${OpenMW_SOURCE_DIR}/files/tes3mp/tes3mp-client-default.cfg
+        "${OpenMW_BINARY_DIR}/tes3mp-client-default.cfg")
+
+configure_file(${OpenMW_SOURCE_DIR}/files/tes3mp/tes3mp-server-default.cfg
+        "${OpenMW_BINARY_DIR}/tes3mp-server-default.cfg")
+
 configure_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
     "${OpenMW_BINARY_DIR}/settings-default.cfg")
 
@@ -433,6 +443,11 @@ IF(NOT WIN32 AND NOT APPLE)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/resources/version" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
 
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/tes3mp-client-default" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/tes3mp-client.install" DESTINATION "${SYSCONFDIR}" RENAME "tes3mp-client.cfg" COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/tes3mp-server-default" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw-mp")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/tes3mp-server.install" DESTINATION "${SYSCONFDIR}" RENAME "tes3mp-server.cfg" COMPONENT "openmw-mp")
+
     IF(BUILD_OPENCS)
         INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw-cs.cfg" DESTINATION "${SYSCONFDIR}" COMPONENT "opencs")
     ENDIF(BUILD_OPENCS)
@@ -452,6 +467,7 @@ if(WIN32)
         "${OpenMW_SOURCE_DIR}/Docs/license/GPL3.txt"
         "${OpenMW_SOURCE_DIR}/Docs/license/DejaVu Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
+        "${OpenMW_BINARY_DIR}/tes3mp-client-default.cfg"
         "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt"
         "${OpenMW_BINARY_DIR}/Release/openmw.exe"
         DESTINATION ".")
@@ -555,6 +571,10 @@ add_subdirectory (components)
 #endif()
 
 # Apps and tools
+if (BUILD_OPENMW_MP)
+    add_subdirectory( apps/openmw-mp )
+endif()
+
 if (BUILD_OPENMW)
     add_subdirectory( apps/openmw )
 endif()

@@ -141,9 +141,16 @@ add_component_dir (version
     version
     )
 
+add_component_dir (openmw-mp
+        PacketsController
+        Packets/BasePacket Packets/PacketBaseInfo Packets/PacketPosition Packets/PacketEquiped Packets/PacketAttributesAndStats
+        Packets/PacketAttack Packets/PacketMainStats Packets/PacketCell Packets/PacketDrawState Packets/PacketChatMessage
+        Packets/PacketCharGen Packets/PacketAttribute Packets/PacketSkill Packets/PacketHandshake)
+
 add_component_dir (fallback
     fallback validate
     )
+
 
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
