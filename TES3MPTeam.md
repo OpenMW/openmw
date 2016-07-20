@@ -4,7 +4,7 @@ Tes3mp Team
 Programmers
 -----------
 
-    Stanislav (Koncord) Zhukov - The main loafer and part-time Project Leader
+    Stanislav (Koncord) Zhukov - The main loafer and Project Leader
     David Cernat - not a loafer :D
 
 
