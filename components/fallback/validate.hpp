@@ -70,21 +70,31 @@ namespace Files {
             eSV->mVector.push_back(EscapeHashString(*it));
     }
 
-    struct EscapePathContainer {
-        PathContainer mContainer;
+    struct EscapePath {
+        boost::filesystem::path mPath;
+
+        static PathContainer toPathContainer(const std::vector<EscapePath> & escapePathContainer);
     };
 
-    std::istream & operator>> (std::istream & istream, EscapePathContainer & escapePathContainer)
+    typedef std::vector<EscapePath> EscapePathContainer;
+
+    PathContainer EscapePath::toPathContainer(const EscapePathContainer & escapePathContainer)
+    {
+        PathContainer temp;
+        for (EscapePathContainer::const_iterator it = escapePathContainer.begin(); it != escapePathContainer.end(); ++it)
+            temp.push_back(it->mPath);
+        return temp;
+    }
+
+    std::istream & operator>> (std::istream & istream, EscapePath & escapePath)
     {
         std::cout << "The new dodgy operator>> is being used" << std::endl;
 
         boost::iostreams::filtering_istream filteredStream;
-        filteredStream.push(unescape_hash_filter());
+        //filteredStream.push(unescape_hash_filter());
         filteredStream.push(istream);
 
-        boost::filesystem::path path;
-        filteredStream >> path;
-        escapePathContainer.mContainer.push_back(path);
+        filteredStream >> escapePath.mPath;
 
         return istream;
     }

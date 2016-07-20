@@ -193,7 +193,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     // directory settings
     engine.enableFSStrict(variables["fs-strict"].as<bool>());
 
-    Files::PathContainer dataDirs(variables["data"].as<Files::EscapePathContainer>().mContainer);
+    Files::PathContainer dataDirs(Files::EscapePath::toPathContainer(variables["data"].as<Files::EscapePathContainer>()));
 
     std::string local(variables["data-local"].as<Files::EscapeHashString>().toStdString());
     if (!local.empty())
