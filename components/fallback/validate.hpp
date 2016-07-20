@@ -2,6 +2,8 @@
 #define OPENMW_COMPONENTS_FALLBACK_VALIDATE_H
 
 #include <boost/program_options.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
 
 #include <components/files/configurationmanager.hpp>
 #include <components/files/multidircollection.hpp>
@@ -80,7 +82,9 @@ namespace Files {
         filteredStream.push(unescape_hash_filter());
         filteredStream.push(istream);
 
-        filteredStream >> escapePathContainer.mContainer;
+        boost::filesystem::path path;
+        filteredStream >> path;
+        escapePathContainer.mContainer.push_back(path);
 
         return istream;
     }
