@@ -237,6 +237,30 @@ int escape_hash_filter::get(Source & src)
     return retval;
 }
 
+template <typename Source>
+int unescape_hash_filter::get(Source & src)
+{
+    int character = boost::iostreams::get(src);
+    if (character == escape_hash_filter::sEscape)
+    {
+        int nextChar = boost::iostreams::get(src);
+        switch (nextChar)
+        {
+        case escape_hash_filter::sEscapeIdentifier:
+            return escape_hash_filter::sEscape;
+            break;
+        case escape_hash_filter::sHashIdentifier:
+            return '#';
+            break;
+        default:
+            return '?';
+            break;
+        }
+    }
+    else
+        return character;
+}
+
 std::string EscapeHashString::processString(const std::string & str)
 {
     std::string temp = boost::replace_all_copy<std::string>(str, std::string() + (char)escape_hash_filter::sEscape + (char)escape_hash_filter::sHashIdentifier, "#");

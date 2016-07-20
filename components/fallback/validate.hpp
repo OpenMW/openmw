@@ -4,6 +4,7 @@
 #include <boost/program_options.hpp>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/files/multidircollection.hpp>
 
 // Parses and validates a fallback map from boost program_options.
 // Note: for boost to pick up the validate function, you need to pull in the namespace e.g.
@@ -65,6 +66,23 @@ namespace Files {
 
         for (std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it)
             eSV->mVector.push_back(EscapeHashString(*it));
+    }
+
+    struct EscapePathContainer {
+        PathContainer mContainer;
+    };
+
+    std::istream & operator>> (std::istream & istream, EscapePathContainer & escapePathContainer)
+    {
+        std::cout << "The new dodgy operator>> is being used" << std::endl;
+
+        boost::iostreams::filtering_istream filteredStream;
+        filteredStream.push(unescape_hash_filter());
+        filteredStream.push(istream);
+
+        filteredStream >> escapePathContainer.mContainer;
+
+        return istream;
     }
 }
 

@@ -88,6 +88,11 @@ struct escape_hash_filter : public boost::iostreams::input_filter
         bool mFinishLine;
 };
 
+struct unescape_hash_filter : public boost::iostreams::input_filter
+{
+    template <typename Source> int get(Source & src);
+};
+
 /**
  * \class EscapeHashString
  */
