@@ -91,7 +91,7 @@ namespace Files {
         std::cout << "The new dodgy operator>> is being used" << std::endl;
 
         boost::iostreams::filtering_istream filteredStream;
-        //filteredStream.push(unescape_hash_filter());
+        filteredStream.push(unescape_hash_filter());
         filteredStream.push(istream);
 
         filteredStream >> escapePath.mPath;
