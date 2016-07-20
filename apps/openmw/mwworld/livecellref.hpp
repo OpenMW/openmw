@@ -27,6 +27,11 @@ namespace MWWorld
          * and individual type-dependent data.
          */
         MWWorld::CellRef mRef;
+    
+        /* Added by TES3MP to prevent dedicated players' references from automatically
+         * and unpredictably moving across exterior cell boundaries on clients
+         */
+        bool canChangeCell;
 
         /** runtime-data */
         RefData mData;

@@ -1141,7 +1141,7 @@ namespace MWWorld
         bool haveToMove = isPlayer || (currCell && mWorldScene->isCellActive(*currCell));
         MWWorld::Ptr newPtr = ptr;
 
-        if (currCell != newCell)
+        if (currCell != newCell && ptr.getBase()->canChangeCell)
         {
             removeContainerScripts(ptr);
 

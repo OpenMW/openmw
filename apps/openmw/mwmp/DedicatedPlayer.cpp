@@ -242,6 +242,10 @@ void DedicatedPlayer::UpdatePtr(MWWorld::Ptr newPtr)
     ptr.mCell = newPtr.mCell;
     ptr.mRef = newPtr.mRef;
     ptr.mContainerStore = newPtr.mContainerStore;
+
+    // Disallow this player's reference from moving across cells until
+    // the correct packet is sent by the player
+    ptr.getBase()->canChangeCell = false;
 }
 
 
@@ -400,5 +404,9 @@ void DedicatedPlayer::updateCell()
         cellStore = world->getExterior(cell.mCellId.mIndex.mX, cell.mCellId.mIndex.mY);
     else
         cellStore = world->getInterior(cell.mName);
+
+    // Allow this player's reference to move across a cell now that
+    // a manual cell update has been called
+    ptr.getBase()->canChangeCell = true;
     UpdatePtr(world->moveObject(ptr, cellStore, pos.pos[0], pos.pos[1], pos.pos[2]));
 }

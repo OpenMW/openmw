@@ -14,6 +14,7 @@
 MWWorld::LiveCellRefBase::LiveCellRefBase(const std::string& type, const ESM::CellRef &cref)
   : mClass(&Class::get(type)), mRef(cref), mData(cref)
 {
+    canChangeCell = true;
 }
 
 void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
