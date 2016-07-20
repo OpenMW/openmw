@@ -145,6 +145,9 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
         boost::iostreams::filtering_istream configFileStream;
         configFileStream.push(escape_hash_filter());
         configFileStream.push(configFileStreamUnfiltered);
+
+        boost::iostreams::filtering_istream dummyStreamThatShouldMakeOtherCodeCompile;
+        dummyStreamThatShouldMakeOtherCodeCompile.push(unescape_hash_filter());
         if (configFileStreamUnfiltered.is_open())
         {
             boost::program_options::store(boost::program_options::parse_config_file(
