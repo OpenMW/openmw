@@ -142,15 +142,14 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
         "terrain-move");
 }
 
-void CSVRender::PagedWorldspaceWidget::handleMouseClick (const WorldspaceHitResult& hit, const std::string& button,
+void CSVRender::PagedWorldspaceWidget::handleMouseClick (const WorldspaceHitResult& hit, InteractionType type,
     bool shift)
 {
     if (hit.tag && hit.tag->getMask()==Mask_CellArrow)
     {
-        if (button=="p-edit" || button=="s-edit")
+        if (type == InteractionType_PrimaryEdit || type == InteractionType_SecondaryEdit)
         {
-            if (CellArrowTag *cellArrowTag =
-                dynamic_cast<CSVRender::CellArrowTag *> (hit.tag.get()))
+            if (CellArrowTag *cellArrowTag = dynamic_cast<CSVRender::CellArrowTag *> (hit.tag.get()))
             {
                 CellArrow *arrow = cellArrowTag->getCellArrow();
 
@@ -173,7 +172,7 @@ void CSVRender::PagedWorldspaceWidget::handleMouseClick (const WorldspaceHitResu
 
                 if (shift)
                 {
-                    if (button=="p-edit")
+                    if (type == InteractionType_PrimaryEdit)
                         addCellSelection (x, y);
                     else
                         moveCellSelection (x, y);
@@ -191,7 +190,7 @@ void CSVRender::PagedWorldspaceWidget::handleMouseClick (const WorldspaceHitResu
                         modified = true;
                     }
 
-                    if (button=="s-edit")
+                    if (type == InteractionType_SecondaryEdit)
                     {
                         if (mCells.find (coordinates)!=mCells.end())
                         {
@@ -210,7 +209,7 @@ void CSVRender::PagedWorldspaceWidget::handleMouseClick (const WorldspaceHitResu
         }
     }
 
-    WorldspaceWidget::handleMouseClick (hit, button, shift);
+    WorldspaceWidget::handleMouseClick (hit, type, shift);
 }
 
 void CSVRender::PagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,

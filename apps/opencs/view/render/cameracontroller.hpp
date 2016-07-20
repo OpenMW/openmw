@@ -37,7 +37,7 @@ namespace CSVRender
             static const osg::Vec3d LocalLeft;
             static const osg::Vec3d LocalForward;
 
-            CameraController();
+            CameraController(QObject* parent);
             virtual ~CameraController();
 
             bool isActive() const;
@@ -83,7 +83,7 @@ namespace CSVRender
 
         public:
 
-            FreeCameraController(CSMPrefs::ShortcutEventHandler* handler);
+            FreeCameraController(CSMPrefs::ShortcutEventHandler* handler, QObject* parent=0);
 
             double getLinearSpeed() const;
             double getRotationalSpeed() const;
@@ -112,6 +112,7 @@ namespace CSVRender
             void stabilize();
 
             bool mLockUpright, mModified;
+            bool mNaviPrimary, mNaviSecondary;
             bool mFast, mLeft, mRight, mForward, mBackward, mRollLeft, mRollRight;
             osg::Vec3d mUp;
 
@@ -121,13 +122,15 @@ namespace CSVRender
 
         private slots:
 
+            void naviPrimary(bool active);
+            void naviSecondary(bool active);
             void forward(bool active);
             void left(bool active);
             void backward(bool active);
             void right(bool active);
             void rollLeft(bool active);
             void rollRight(bool active);
-            void swapSpeedMode(bool active);
+            void swapSpeedMode();
     };
 
     class OrbitCameraController : public CameraController
@@ -136,7 +139,7 @@ namespace CSVRender
 
         public:
 
-            OrbitCameraController(CSMPrefs::ShortcutEventHandler* handler);
+            OrbitCameraController(CSMPrefs::ShortcutEventHandler* handler, QObject* parent=0);
 
             osg::Vec3d getCenter() const;
             double getOrbitSpeed() const;
@@ -167,6 +170,7 @@ namespace CSVRender
             void zoom(double value);
 
             bool mInitialized;
+            bool mNaviPrimary, mNaviSecondary;
             bool mFast, mLeft, mRight, mUp, mDown, mRollLeft, mRollRight;
             unsigned int mPickingMask;
             osg::Vec3d mCenter;
@@ -177,13 +181,15 @@ namespace CSVRender
 
         private slots:
 
+            void naviPrimary(bool active);
+            void naviSecondary(bool active);
             void up(bool active);
             void left(bool active);
             void down(bool active);
             void right(bool active);
             void rollLeft(bool active);
             void rollRight(bool active);
-            void swapSpeedMode(bool active);
+            void swapSpeedMode();
     };
 }
 

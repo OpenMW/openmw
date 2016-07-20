@@ -32,8 +32,9 @@ namespace CSVRender
     const osg::Vec3d CameraController::LocalLeft = osg::Vec3d(1, 0, 0);
     const osg::Vec3d CameraController::LocalForward = osg::Vec3d(0, 0, 1);
 
-    CameraController::CameraController()
-        : mActive(false)
+    CameraController::CameraController(QObject* parent)
+        : QObject(parent)
+        , mActive(false)
         , mInverted(false)
         , mCameraSensitivity(1/650.f)
         , mSecondaryMoveMult(50)
@@ -163,8 +164,9 @@ namespace CSVRender
     Free Camera Controller
     */
 
-    FreeCameraController::FreeCameraController(CSMPrefs::ShortcutEventHandler* handler)
-        : mLockUpright(false)
+    FreeCameraController::FreeCameraController(CSMPrefs::ShortcutEventHandler* handler, QObject* parent)
+        : CameraController(parent)
+        , mLockUpright(false)
         , mModified(false)
         , mFast(false)
         , mLeft(false)
@@ -178,6 +180,16 @@ namespace CSVRender
         , mRotSpeed(osg::PI / 2)
         , mSpeedMult(8)
     {
+        CSMPrefs::Shortcut* naviPrimaryShortcut = new CSMPrefs::Shortcut("scene-navi-primary", this);
+        naviPrimaryShortcut->enable(false);
+        handler->addShortcut(naviPrimaryShortcut);
+        connect(naviPrimaryShortcut, SIGNAL(activated(bool)), this, SLOT(naviPrimary(bool)));
+
+        CSMPrefs::Shortcut* naviSecondaryShortcut = new CSMPrefs::Shortcut("scene-navi-secondary", this);
+        naviSecondaryShortcut->enable(false);
+        handler->addShortcut(naviSecondaryShortcut);
+        connect(naviSecondaryShortcut, SIGNAL(activated(bool)), this, SLOT(naviSecondary(bool)));
+
         CSMPrefs::Shortcut* forwardShortcut = new CSMPrefs::Shortcut("free-forward", this);
         forwardShortcut->enable(false);
         handler->addShortcut(forwardShortcut);
@@ -211,7 +223,7 @@ namespace CSVRender
         CSMPrefs::Shortcut* speedModeShortcut = new CSMPrefs::Shortcut("free-speed-mode", this);
         speedModeShortcut->enable(false);
         handler->addShortcut(speedModeShortcut);
-        connect(speedModeShortcut, SIGNAL(activated(bool)), this, SLOT(swapSpeedMode(bool)));
+        connect(speedModeShortcut, SIGNAL(activated()), this, SLOT(swapSpeedMode()));
     }
 
     double FreeCameraController::getLinearSpeed() const
@@ -261,13 +273,13 @@ namespace CSVRender
         if (!isActive())
             return false;
 
-        if (mode == "p-navi")
+        if (mNaviPrimary)
         {
             double scalar = getCameraSensitivity() * (getInverted() ? -1.0 : 1.0);
             yaw(x * scalar);
             pitch(y * scalar);
         }
-        else if (mode == "s-navi")
+        else if (mNaviSecondary)
         {
             osg::Vec3d movement;
             movement += LocalLeft * -x * getSecondaryMovementMultiplier();
@@ -384,54 +396,58 @@ namespace CSVRender
         getCamera()->setViewMatrixAsLookAt(eye, center, mUp);
     }
 
+    void FreeCameraController::naviPrimary(bool active)
+    {
+        mNaviPrimary = active;
+    }
+
+    void FreeCameraController::naviSecondary(bool active)
+    {
+        mNaviSecondary = active;
+    }
+
     void FreeCameraController::forward(bool active)
     {
-        if (isActive())
-            mForward = active;
+        mForward = active;
     }
 
     void FreeCameraController::left(bool active)
     {
-        if (isActive())
-            mLeft = active;
+        mLeft = active;
     }
 
     void FreeCameraController::backward(bool active)
     {
-        if (isActive())
-            mBackward = active;
+        mBackward = active;
     }
 
     void FreeCameraController::right(bool active)
     {
-        if (isActive())
-            mRight = active;
+        mRight = active;
     }
 
     void FreeCameraController::rollLeft(bool active)
     {
-        if (isActive())
-            mRollLeft = active;
+        mRollLeft = active;
     }
 
     void FreeCameraController::rollRight(bool active)
     {
-        if (isActive())
-            mRollRight = active;
+        mRollRight = active;
     }
 
-    void FreeCameraController::swapSpeedMode(bool active)
+    void FreeCameraController::swapSpeedMode()
     {
-        if (isActive() && active)
-            mFast = !mFast;
+        mFast = !mFast;
     }
 
     /*
     Orbit Camera Controller
     */
 
-    OrbitCameraController::OrbitCameraController(CSMPrefs::ShortcutEventHandler* handler)
-        : mInitialized(false)
+    OrbitCameraController::OrbitCameraController(CSMPrefs::ShortcutEventHandler* handler, QObject* parent)
+        : CameraController(parent)
+        , mInitialized(false)
         , mFast(false)
         , mLeft(false)
         , mRight(false)
@@ -445,6 +461,16 @@ namespace CSVRender
         , mOrbitSpeed(osg::PI / 4)
         , mOrbitSpeedMult(4)
     {
+        CSMPrefs::Shortcut* naviPrimaryShortcut = new CSMPrefs::Shortcut("scene-navi-primary", this);
+        naviPrimaryShortcut->enable(false);
+        handler->addShortcut(naviPrimaryShortcut);
+        connect(naviPrimaryShortcut, SIGNAL(activated(bool)), this, SLOT(naviPrimary(bool)));
+
+        CSMPrefs::Shortcut* naviSecondaryShortcut = new CSMPrefs::Shortcut("scene-navi-secondary", this);
+        naviSecondaryShortcut->enable(false);
+        handler->addShortcut(naviSecondaryShortcut);
+        connect(naviSecondaryShortcut, SIGNAL(activated(bool)), this, SLOT(naviSecondary(bool)));
+
         CSMPrefs::Shortcut* upShortcut = new CSMPrefs::Shortcut("orbit-up", this);
         upShortcut->enable(false);
         handler->addShortcut(upShortcut);
@@ -478,7 +504,7 @@ namespace CSVRender
         CSMPrefs::Shortcut* speedModeShortcut = new CSMPrefs::Shortcut("orbit-speed-mode", this);
         speedModeShortcut->enable(false);
         handler->addShortcut(speedModeShortcut);
-        connect(speedModeShortcut, SIGNAL(activated(bool)), this, SLOT(swapSpeedMode(bool)));
+        connect(speedModeShortcut, SIGNAL(activated()), this, SLOT(swapSpeedMode()));
     }
 
     osg::Vec3d OrbitCameraController::getCenter() const
@@ -537,13 +563,13 @@ namespace CSVRender
         if (!mInitialized)
             initialize();
 
-        if (mode == "p-navi")
+        if (mNaviPrimary)
         {
             double scalar = getCameraSensitivity() * (getInverted() ? -1.0 : 1.0);
             rotateHorizontal(x * scalar);
             rotateVertical(-y * scalar);
         }
-        else if (mode == "s-navi")
+        else if (mNaviSecondary)
         {
             osg::Vec3d movement;
             movement += LocalLeft * x * getSecondaryMovementMultiplier();
@@ -696,28 +722,34 @@ namespace CSVRender
         getCamera()->setViewMatrixAsLookAt(mCenter + offset, mCenter, up);
     }
 
+    void OrbitCameraController::naviPrimary(bool active)
+    {
+        mNaviPrimary = active;
+    }
+
+    void OrbitCameraController::naviSecondary(bool active)
+    {
+        mNaviSecondary = active;
+    }
+
     void OrbitCameraController::up(bool active)
     {
-        if (isActive())
-            mUp = active;
+        mUp = active;
     }
 
     void OrbitCameraController::left(bool active)
     {
-        if (isActive())
-            mLeft = active;
+        mLeft = active;
     }
 
     void OrbitCameraController::down(bool active)
     {
-        if (isActive())
-            mDown = active;
+        mDown = active;
     }
 
     void OrbitCameraController::right(bool active)
     {
-        if (isActive())
-            mRight = active;
+        mRight = active;
     }
 
     void OrbitCameraController::rollLeft(bool active)
@@ -728,13 +760,11 @@ namespace CSVRender
 
     void OrbitCameraController::rollRight(bool active)
     {
-        if (isActive())
-            mRollRight = active;
+        mRollRight = active;
     }
 
-    void OrbitCameraController::swapSpeedMode(bool active)
+    void OrbitCameraController::swapSpeedMode()
     {
-        if (isActive() && active)
-            mFast = !mFast;
+        mFast = !mFast;
     }
 }

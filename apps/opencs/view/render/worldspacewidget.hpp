@@ -15,6 +15,7 @@
 namespace CSMPrefs
 {
     class Setting;
+    class Shortcut;
 }
 
 namespace CSMWorld
@@ -55,7 +56,7 @@ namespace CSVRender
             unsigned int mInteractionMask;
             CSVWidget::SceneToolMode *mEditMode;
             bool mLocked;
-            std::string mDragMode;
+            int mDragMode;
             bool mDragging;
             int mDragX;
             int mDragY;
@@ -66,6 +67,12 @@ namespace CSVRender
             QPoint mToolTipPos;
             bool mShowToolTips;
             int mToolTipDelay;
+
+            CSMPrefs::Shortcut* mPrimaryEditShortcut;
+            CSMPrefs::Shortcut* mSecondaryEditShortcut;
+            CSMPrefs::Shortcut* mPrimarySelectShortcut;
+            CSMPrefs::Shortcut* mSecondarySelectShortcut;
+            CSMPrefs::Shortcut* mAbortShortcut;
 
         public:
 
@@ -83,6 +90,15 @@ namespace CSVRender
                 needPaged,
                 needUnpaged,
                 ignored //either mixed cells, or not cells
+            };
+
+            enum InteractionType
+            {
+                InteractionType_PrimaryEdit,
+                InteractionType_PrimarySelect,
+                InteractionType_SecondaryEdit,
+                InteractionType_SecondarySelect,
+                InteractionType_None
             };
 
             WorldspaceWidget (CSMDoc::Document& document, QWidget *parent = 0);
@@ -171,12 +187,6 @@ namespace CSVRender
             /// Erase all overrides and restore the visual representation to its true state.
             virtual void reset (unsigned int elementMask) = 0;
 
-            /// \note Drags will be automatically aborted when the aborting is triggered
-            /// (either explicitly or implicitly) from within this class. This function only
-            /// needs to be called, when the drag abort is triggered externally (e.g. from
-            /// an edit mode).
-            void abortDrag();
-
         protected:
 
             /// Visual elements in a scene
@@ -197,16 +207,9 @@ namespace CSVRender
             virtual void updateOverlay();
 
             virtual void mouseMoveEvent (QMouseEvent *event);
-            virtual void mousePressEvent (QMouseEvent *event);
-            virtual void mouseReleaseEvent (QMouseEvent *event);
             virtual void wheelEvent (QWheelEvent *event);
-            virtual void keyPressEvent (QKeyEvent *event);
 
-            virtual void handleMouseClick (const WorldspaceHitResult& hit, const std::string& button,
-                bool shift);
-
-             /// \return Is \a key a button mapping setting? (ignored otherwise)
-            virtual bool storeMappingSetting (const CSMPrefs::Setting *setting);
+            virtual void handleMouseClick (const WorldspaceHitResult& hit, InteractionType type, bool shift);
 
             virtual void settingChanged (const CSMPrefs::Setting *setting);
 
@@ -221,6 +224,16 @@ namespace CSVRender
             void dragMoveEvent(QDragMoveEvent *event);
 
             virtual std::string getStartupInstruction() = 0;
+
+            void handleInteraction(InteractionType type, bool activate);
+
+        public slots:
+
+            /// \note Drags will be automatically aborted when the aborting is triggered
+            /// (either explicitly or implicitly) from within this class. This function only
+            /// needs to be called, when the drag abort is triggered externally (e.g. from
+            /// an edit mode).
+            void abortDrag();
 
         private slots:
 
@@ -254,6 +267,14 @@ namespace CSVRender
             void editModeChanged (const std::string& id);
 
             void showToolTip();
+
+            void primaryEdit(bool activate);
+
+            void secondaryEdit(bool activate);
+
+            void primarySelect(bool activate);
+
+            void secondarySelect(bool activate);
 
         protected slots:
 

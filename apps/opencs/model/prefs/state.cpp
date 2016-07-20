@@ -236,6 +236,7 @@ void CSMPrefs::State::declare()
     declareShortcut ("free-roll-left", "Free camera roll left", QKeySequence(Qt::Key_Q));
     declareShortcut ("free-roll-right", "Free camera roll right", QKeySequence(Qt::Key_E));
     declareShortcut ("free-speed-mode", "Free camera speed mode toggle", QKeySequence(Qt::Key_F));
+
     declareSeparator ();
     declareShortcut ("orbit-up", "Orbit camera up", QKeySequence(Qt::Key_W));
     declareShortcut ("orbit-down", "Orbit camera down", QKeySequence(Qt::Key_S));
@@ -245,6 +246,19 @@ void CSMPrefs::State::declare()
     declareShortcut ("orbit-roll-right", "Orbit camera roll right", QKeySequence(Qt::Key_E));
     declareShortcut ("orbit-speed-mode", "Orbit camera speed mode toggle", QKeySequence(Qt::Key_F));
     declareShortcut ("orbit-center-selection", "Centers the camera on the selected item", QKeySequence(Qt::Key_C));
+
+    declareSeparator ();
+    declareShortcut ("scene-navi-primary", "Camera rotation from mouse movement", QKeySequence(Qt::LeftButton));
+    declareShortcut ("scene-navi-secondary", "Camera translation from mouse movement",
+        QKeySequence(Qt::ControlModifier | (int)Qt::LeftButton));
+    declareShortcut ("scene-edit-primary", "Scene primary edit button", QKeySequence(Qt::RightButton));
+    declareShortcut ("scene-edit-secondary", "Scene secondary edit button",
+        QKeySequence(Qt::ControlModifier | (int)Qt::RightButton));
+    declareShortcut ("scene-select-primary", "Scene primary select button", QKeySequence(Qt::MiddleButton));
+    declareShortcut ("scene-select-secondary", "Scene secondary select button",
+        QKeySequence(Qt::ControlModifier | (int)Qt::MiddleButton));
+    declareShortcut ("scene-edit-abort", "Scene editor abort key", QKeySequence(Qt::Key_Escape));
+    declareShortcut ("scene-focus-toolbar", "Change focus in scene editor", QKeySequence(Qt::Key_T));
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)

@@ -69,7 +69,10 @@ namespace CSMPrefs
                 Shortcut* shortcut = *it;
 
                 if (shortcut->isActive())
+                {
                     shortcut->activate(false);
+                    shortcut->setPosition(0);
+                }
             }
         }
 
