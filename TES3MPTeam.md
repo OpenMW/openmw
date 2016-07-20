@@ -6,6 +6,10 @@ Programmers
 
     Stanislav (Koncord) Zhukov - The main loafer and Project Leader
     David Cernat - not a loafer :D
+    
+Script developers
+--------------
+    Grim Kriegor
 
 
 Testers:
