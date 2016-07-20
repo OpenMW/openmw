@@ -237,25 +237,46 @@ int escape_hash_filter::get(Source & src)
     return retval;
 }
 
+unescape_hash_filter::unescape_hash_filter() : expectingIdentifier(false)
+{
+}
+
+unescape_hash_filter::~unescape_hash_filter()
+{
+}
+
 template <typename Source>
 int unescape_hash_filter::get(Source & src)
 {
-    int character = boost::iostreams::get(src);
+    int character;
+    if (!expectingIdentifier)
+        character = boost::iostreams::get(src);
+    else
+    {
+        character = escape_hash_filter::sEscape;
+        expectingIdentifier = false;
+    }
     if (character == escape_hash_filter::sEscape)
     {
         int nextChar = boost::iostreams::get(src);
+        int intended;
         switch (nextChar)
         {
         case escape_hash_filter::sEscapeIdentifier:
-            return escape_hash_filter::sEscape;
+            intended = escape_hash_filter::sEscape;
             break;
         case escape_hash_filter::sHashIdentifier:
-            return '#';
+            intended = '#';
+            break;
+        case boost::iostreams::WOULD_BLOCK:
+            expectingIdentifier = true;
+            intended = nextChar;
             break;
         default:
-            return '?';
+            intended = '?';
             break;
         }
+        return intended;
     }
     else
         return character;

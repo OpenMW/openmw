@@ -90,7 +90,13 @@ struct escape_hash_filter : public boost::iostreams::input_filter
 
 struct unescape_hash_filter : public boost::iostreams::input_filter
 {
+    unescape_hash_filter();
+    virtual ~unescape_hash_filter();
+    
     template <typename Source> int get(Source & src);
+
+    private:
+        bool expectingIdentifier;
 };
 
 /**
