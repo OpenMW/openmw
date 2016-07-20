@@ -5,6 +5,7 @@ Programmers
 -----------
 
     Stanislav (Koncord) Zhukov - The main loafer and part-time Project Leader
+    David Cernat - not a loafer :D
 
 
 Testers:
