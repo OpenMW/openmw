@@ -107,6 +107,15 @@ osg::Camera *RenderWidget::getCamera()
     return mView->getCamera();
 }
 
+void RenderWidget::toggleRenderStats()
+{
+    osgViewer::GraphicsWindow* window =
+        static_cast<osgViewer::GraphicsWindow*>(mView->getCamera()->getGraphicsContext());
+
+    window->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KEY_S);
+    window->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KEY_S);
+}
+
 
 // --------------------------------------------------
 
@@ -182,10 +191,6 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
     setMouseTracking(true);
     setFocusPolicy(Qt::ClickFocus);
 
-    mFocusToolbarShortcut = new CSMPrefs::Shortcut("scene-focus-toolbar", this);
-    mShortcutHandler->addShortcut(mFocusToolbarShortcut);
-    connect(mFocusToolbarShortcut, SIGNAL(activated()), this, SIGNAL(focusToolbarRequest()));
-
     connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
         this, SLOT (settingChanged (const CSMPrefs::Setting *)));
 
@@ -197,6 +202,15 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
     }
 
     connect (&CompositeViewer::get(), SIGNAL (simulationUpdated(double)), this, SLOT (update(double)));
+
+    // Shortcuts
+    CSMPrefs::Shortcut* focusToolbarShortcut = new CSMPrefs::Shortcut("scene-focus-toolbar", this);
+    mShortcutHandler->addShortcut(focusToolbarShortcut);
+    connect(focusToolbarShortcut, SIGNAL(activated()), this, SIGNAL(focusToolbarRequest()));
+
+    CSMPrefs::Shortcut* renderStatsShortcut = new CSMPrefs::Shortcut("scene-render-stats", this);
+    mShortcutHandler->addShortcut(renderStatsShortcut);
+    connect(renderStatsShortcut, SIGNAL(activated()), this, SLOT(toggleRenderStats()));
 }
 
 SceneWidget::~SceneWidget()
@@ -280,7 +294,7 @@ void SceneWidget::setDefaultAmbient (const osg::Vec4f& colour)
 
 void SceneWidget::mouseMoveEvent (QMouseEvent *event)
 {
-    mCurrentCamControl->handleMouseMoveEvent("TODO", event->x() - mPrevMouseX, event->y() - mPrevMouseY);
+    mCurrentCamControl->handleMouseMoveEvent(event->x() - mPrevMouseX, event->y() - mPrevMouseY);
 
     mPrevMouseX = event->x();
     mPrevMouseY = event->y();
@@ -288,7 +302,7 @@ void SceneWidget::mouseMoveEvent (QMouseEvent *event)
 
 void SceneWidget::wheelEvent(QWheelEvent *event)
 {
-    mCurrentCamControl->handleMouseMoveEvent("t-navi", event->delta(), 0);
+    mCurrentCamControl->handleMouseScrollEvent(event->delta());
 }
 
 void SceneWidget::update(double dt)

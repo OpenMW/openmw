@@ -68,12 +68,6 @@ namespace CSVRender
             bool mShowToolTips;
             int mToolTipDelay;
 
-            CSMPrefs::Shortcut* mPrimaryEditShortcut;
-            CSMPrefs::Shortcut* mSecondaryEditShortcut;
-            CSMPrefs::Shortcut* mPrimarySelectShortcut;
-            CSMPrefs::Shortcut* mSecondarySelectShortcut;
-            CSMPrefs::Shortcut* mAbortShortcut;
-
         public:
 
             enum DropType
@@ -209,7 +203,7 @@ namespace CSVRender
             virtual void mouseMoveEvent (QMouseEvent *event);
             virtual void wheelEvent (QWheelEvent *event);
 
-            virtual void handleMouseClick (const WorldspaceHitResult& hit, InteractionType type, bool shift);
+            virtual void handleInteractionPress (const WorldspaceHitResult& hit, InteractionType type);
 
             virtual void settingChanged (const CSMPrefs::Setting *setting);
 

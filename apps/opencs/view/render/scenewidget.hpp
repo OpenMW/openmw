@@ -69,18 +69,19 @@ namespace CSVRender
             osg::ref_ptr<osg::Group> mRootNode;
 
             QTimer mTimer;
+
+        protected slots:
+
+            void toggleRenderStats();
     };
 
     /// Extension of RenderWidget to support lighting mode selection & toolbar
     class SceneWidget : public RenderWidget
     {
             Q_OBJECT
-
         public:
-
             SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget* parent = 0,
                     Qt::WindowFlags f = 0, bool retrieveInput = true);
-
             virtual ~SceneWidget();
 
             CSVWidget::SceneToolMode *makeLightingSelector (CSVWidget::SceneToolbar *parent);
@@ -91,7 +92,6 @@ namespace CSVRender
             ///< \note The actual ambient colour may differ based on lighting settings.
 
         protected:
-
             void setLighting (Lighting *lighting);
             ///< \attention The ownership of \a lighting is not transferred to *this.
 
@@ -117,7 +117,6 @@ namespace CSVRender
             CameraController* mCurrentCamControl;
 
             CSMPrefs::ShortcutEventHandler *mShortcutHandler;
-            CSMPrefs::Shortcut* mFocusToolbarShortcut;
 
         private:
             bool mCamPositionSet;
@@ -145,9 +144,7 @@ namespace CSVRender
     class CompositeViewer : public QObject, public osgViewer::CompositeViewer
     {
             Q_OBJECT
-
         public:
-
             CompositeViewer();
 
             static CompositeViewer& get();

@@ -142,74 +142,71 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
         "terrain-move");
 }
 
-void CSVRender::PagedWorldspaceWidget::handleMouseClick (const WorldspaceHitResult& hit, InteractionType type,
-    bool shift)
+void CSVRender::PagedWorldspaceWidget::handleInteractionPress (const WorldspaceHitResult& hit, InteractionType type)
 {
     if (hit.tag && hit.tag->getMask()==Mask_CellArrow)
     {
-        if (type == InteractionType_PrimaryEdit || type == InteractionType_SecondaryEdit)
+        if (CellArrowTag *cellArrowTag = dynamic_cast<CSVRender::CellArrowTag *> (hit.tag.get()))
         {
-            if (CellArrowTag *cellArrowTag = dynamic_cast<CSVRender::CellArrowTag *> (hit.tag.get()))
+            CellArrow *arrow = cellArrowTag->getCellArrow();
+
+            CSMWorld::CellCoordinates coordinates = arrow->getCoordinates();
+
+            CellArrow::Direction direction = arrow->getDirection();
+
+            int x = 0;
+            int y = 0;
+
+            switch (direction)
             {
-                CellArrow *arrow = cellArrowTag->getCellArrow();
+                case CellArrow::Direction_North: y = 1; break;
+                case CellArrow::Direction_West: x = -1; break;
+                case CellArrow::Direction_South: y = -1; break;
+                case CellArrow::Direction_East: x = 1; break;
+            }
 
-                CSMWorld::CellCoordinates coordinates = arrow->getCoordinates();
+            bool modified = false;
 
-                CellArrow::Direction direction = arrow->getDirection();
+            if (type == InteractionType_PrimarySelect)
+            {
+                addCellSelection (x, y);
+                modified = true;
+            }
+            else if (type == InteractionType_SecondarySelect)
+            {
+                moveCellSelection (x, y);
+                modified = true;
+            }
+            else // Primary/SecondaryEdit
+            {
+                CSMWorld::CellCoordinates newCoordinates = coordinates.move (x, y);
 
-                int x = 0;
-                int y = 0;
-
-                switch (direction)
+                if (mCells.find (newCoordinates)==mCells.end())
                 {
-                    case CellArrow::Direction_North: y = 1; break;
-                    case CellArrow::Direction_West: x = -1; break;
-                    case CellArrow::Direction_South: y = -1; break;
-                    case CellArrow::Direction_East: x = 1; break;
-                }
-
-                bool modified = false;
-
-                if (shift)
-                {
-                    if (type == InteractionType_PrimaryEdit)
-                        addCellSelection (x, y);
-                    else
-                        moveCellSelection (x, y);
-
+                    addCellToScene (newCoordinates);
+                    mSelection.add (newCoordinates);
                     modified = true;
                 }
-                else
-                {
-                    CSMWorld::CellCoordinates newCoordinates = coordinates.move (x, y);
 
-                    if (mCells.find (newCoordinates)==mCells.end())
+                if (type == InteractionType_SecondaryEdit)
+                {
+                    if (mCells.find (coordinates)!=mCells.end())
                     {
-                        addCellToScene (newCoordinates);
-                        mSelection.add (newCoordinates);
+                        removeCellFromScene (coordinates);
+                        mSelection.remove (coordinates);
                         modified = true;
                     }
-
-                    if (type == InteractionType_SecondaryEdit)
-                    {
-                        if (mCells.find (coordinates)!=mCells.end())
-                        {
-                            removeCellFromScene (coordinates);
-                            mSelection.remove (coordinates);
-                            modified = true;
-                        }
-                    }
                 }
-
-                if (modified)
-                    adjustCells();
-
-                return;
             }
+
+            if (modified)
+                adjustCells();
+
+            return;
         }
     }
 
-    WorldspaceWidget::handleMouseClick (hit, type, shift);
+    WorldspaceWidget::handleInteractionPress (hit, type);
 }
 
 void CSVRender::PagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,

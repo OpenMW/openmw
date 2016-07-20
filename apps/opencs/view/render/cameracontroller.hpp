@@ -57,11 +57,10 @@ namespace CSVRender
             // moves the camera to an intelligent position
             void setup(osg::Group* root, unsigned int mask, const osg::Vec3d& up);
 
-            virtual bool handleMouseMoveEvent(std::string mode, int x, int y) = 0;
+            virtual void handleMouseMoveEvent(int x, int y) = 0;
+            virtual void handleMouseScrollEvent(int x) = 0;
 
             virtual void update(double dt) = 0;
-
-            virtual void resetInput() = 0;
 
         protected:
 
@@ -96,11 +95,10 @@ namespace CSVRender
             void fixUpAxis(const osg::Vec3d& up);
             void unfixUpAxis();
 
-            bool handleMouseMoveEvent(std::string mode, int x, int y);
+            void handleMouseMoveEvent(int x, int y);
+            void handleMouseScrollEvent(int x);
 
             void update(double dt);
-
-            void resetInput();
 
         private:
 
@@ -151,11 +149,10 @@ namespace CSVRender
             void setOrbitSpeedMultiplier(double value);
             void setPickingMask(unsigned int value);
 
-            bool handleMouseMoveEvent(std::string mode, int x, int y);
+            void handleMouseMoveEvent(int x, int y);
+            void handleMouseScrollEvent(int x);
 
             void update(double dt);
-
-            void resetInput();
 
         private:
 

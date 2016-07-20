@@ -138,7 +138,7 @@ namespace CSVRender
 
             virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
 
-            virtual void handleMouseClick (const WorldspaceHitResult& hit, InteractionType type, bool shift);
+            virtual void handleInteractionPress (const WorldspaceHitResult& hit, InteractionType type);
 
         signals:
 

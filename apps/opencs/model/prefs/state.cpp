@@ -259,6 +259,7 @@ void CSMPrefs::State::declare()
         QKeySequence(Qt::ControlModifier | (int)Qt::MiddleButton));
     declareShortcut ("scene-edit-abort", "Scene editor abort key", QKeySequence(Qt::Key_Escape));
     declareShortcut ("scene-focus-toolbar", "Change focus in scene editor", QKeySequence(Qt::Key_T));
+    declareShortcut ("scene-render-stats", "Displays debug rendering stats", QKeySequence(Qt::Key_F3));
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)

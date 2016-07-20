@@ -97,25 +97,25 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     CSMPrefs::get()["Tooltips"].update();
 
     // Shortcuts
-    mPrimaryEditShortcut = new CSMPrefs::Shortcut("scene-edit-primary", this);
-    mShortcutHandler->addShortcut(mPrimaryEditShortcut);
-    connect(mPrimaryEditShortcut, SIGNAL(activated(bool)), this, SLOT(primaryEdit(bool)));
+    CSMPrefs::Shortcut* primaryEditShortcut = new CSMPrefs::Shortcut("scene-edit-primary", this);
+    mShortcutHandler->addShortcut(primaryEditShortcut);
+    connect(primaryEditShortcut, SIGNAL(activated(bool)), this, SLOT(primaryEdit(bool)));
 
-    mSecondaryEditShortcut = new CSMPrefs::Shortcut("scene-edit-secondary", this);
-    mShortcutHandler->addShortcut(mSecondaryEditShortcut);
-    connect(mSecondaryEditShortcut, SIGNAL(activated(bool)), this, SLOT(secondaryEdit(bool)));
+    CSMPrefs::Shortcut* secondaryEditShortcut = new CSMPrefs::Shortcut("scene-edit-secondary", this);
+    mShortcutHandler->addShortcut(secondaryEditShortcut);
+    connect(secondaryEditShortcut, SIGNAL(activated(bool)), this, SLOT(secondaryEdit(bool)));
 
-    mPrimarySelectShortcut = new CSMPrefs::Shortcut("scene-select-primary", this);
-    mShortcutHandler->addShortcut(mPrimarySelectShortcut);
-    connect(mPrimarySelectShortcut, SIGNAL(activated(bool)), this, SLOT(primarySelect(bool)));
+    CSMPrefs::Shortcut* primarySelectShortcut = new CSMPrefs::Shortcut("scene-select-primary", this);
+    mShortcutHandler->addShortcut(primarySelectShortcut);
+    connect(primarySelectShortcut, SIGNAL(activated(bool)), this, SLOT(primarySelect(bool)));
 
-    mSecondarySelectShortcut = new CSMPrefs::Shortcut("scene-select-secondary", this);
-    mShortcutHandler->addShortcut(mSecondarySelectShortcut);
-    connect(mSecondarySelectShortcut, SIGNAL(activated(bool)), this, SLOT(secondarySelect(bool)));
+    CSMPrefs::Shortcut* secondarySelectShortcut = new CSMPrefs::Shortcut("scene-select-secondary", this);
+    mShortcutHandler->addShortcut(secondarySelectShortcut);
+    connect(secondarySelectShortcut, SIGNAL(activated(bool)), this, SLOT(secondarySelect(bool)));
 
-    mAbortShortcut = new CSMPrefs::Shortcut("scene-edit-abort", this);
-    mShortcutHandler->addShortcut(mAbortShortcut);
-    connect(mSecondaryEditShortcut, SIGNAL(activated()), this, SLOT(abortDrag()));
+    CSMPrefs::Shortcut* abortShortcut = new CSMPrefs::Shortcut("scene-edit-abort", this);
+    mShortcutHandler->addShortcut(abortShortcut);
+    connect(abortShortcut, SIGNAL(activated()), this, SLOT(abortDrag()));
 }
 
 CSVRender::WorldspaceWidget::~WorldspaceWidget ()
@@ -670,7 +670,7 @@ void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
         SceneWidget::wheelEvent(event);
 }
 
-void CSVRender::WorldspaceWidget::handleMouseClick (const WorldspaceHitResult& hit, InteractionType type, bool shift)
+void CSVRender::WorldspaceWidget::handleInteractionPress (const WorldspaceHitResult& hit, InteractionType type)
 {
     EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
 
@@ -729,7 +729,7 @@ void CSVRender::WorldspaceWidget::handleInteraction(InteractionType type, bool a
         else
         {
             WorldspaceHitResult hit = mousePick(mapFromGlobal(QCursor::pos()), getInteractionMask());
-            handleMouseClick(hit, type, false);
+            handleInteractionPress(hit, type);
         }
     }
 }

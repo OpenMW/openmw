@@ -268,10 +268,10 @@ namespace CSVRender
         mLockUpright = false;
     }
 
-    bool FreeCameraController::handleMouseMoveEvent(std::string mode, int x, int y)
+    void FreeCameraController::handleMouseMoveEvent(int x, int y)
     {
         if (!isActive())
-            return false;
+            return;
 
         if (mNaviPrimary)
         {
@@ -287,16 +287,14 @@ namespace CSVRender
 
             translate(movement);
         }
-        else if (mode == "t-navi")
-        {
-            translate(LocalForward * x * (mFast ? getWheelMovementMultiplier() : 1));
-        }
-        else
-        {
-            return false;
-        }
+    }
 
-        return true;
+    void FreeCameraController::handleMouseScrollEvent(int x)
+    {
+        if (!isActive())
+            return;
+
+        translate(LocalForward * x * (mFast ? getWheelMovementMultiplier() : 1));
     }
 
     void FreeCameraController::update(double dt)
@@ -334,17 +332,6 @@ namespace CSVRender
 
         // Normalize the matrix to counter drift
         getCamera()->getViewMatrix().orthoNormal(getCamera()->getViewMatrix());
-    }
-
-    void FreeCameraController::resetInput()
-    {
-        mFast = false;
-        mLeft = false;
-        mRight = false;
-        mForward = false;
-        mBackward = false;
-        mRollLeft = false;
-        mRollRight = false;
     }
 
     void FreeCameraController::yaw(double value)
@@ -555,10 +542,10 @@ namespace CSVRender
         mPickingMask = value;
     }
 
-    bool OrbitCameraController::handleMouseMoveEvent(std::string mode, int x, int y)
+    void OrbitCameraController::handleMouseMoveEvent(int x, int y)
     {
         if (!isActive())
-            return false;
+            return;
 
         if (!mInitialized)
             initialize();
@@ -577,16 +564,14 @@ namespace CSVRender
 
             translate(movement);
         }
-        else if (mode == "t-navi")
-        {
-            zoom(-x * (mFast ? getWheelMovementMultiplier() : 1));
-        }
-        else
-        {
-            return false;
-        }
+    }
 
-        return true;
+    void OrbitCameraController::handleMouseScrollEvent(int x)
+    {
+        if (!isActive())
+            return;
+
+        zoom(-x * (mFast ? getWheelMovementMultiplier() : 1));
     }
 
     void OrbitCameraController::update(double dt)
@@ -618,17 +603,6 @@ namespace CSVRender
 
         // Normalize the matrix to counter drift
         getCamera()->getViewMatrix().orthoNormal(getCamera()->getViewMatrix());
-    }
-
-    void OrbitCameraController::resetInput()
-    {
-        mFast = false;
-        mLeft = false;
-        mRight =false;
-        mUp = false;
-        mDown = false;
-        mRollLeft = false;
-        mRollRight = false;
     }
 
     void OrbitCameraController::onActivate()
