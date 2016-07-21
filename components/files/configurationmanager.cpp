@@ -145,9 +145,6 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
         boost::iostreams::filtering_istream configFileStream;
         configFileStream.push(escape_hash_filter());
         configFileStream.push(configFileStreamUnfiltered);
-
-        boost::iostreams::filtering_istream dummyStreamThatShouldMakeOtherCodeCompile;
-        dummyStreamThatShouldMakeOtherCodeCompile.push(unescape_hash_filter());
         if (configFileStreamUnfiltered.is_open())
         {
             boost::program_options::store(boost::program_options::parse_config_file(
@@ -166,10 +163,6 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
     }
     return false;
 }
-
-const int escape_hash_filter::sEscape = '@';
-const int escape_hash_filter::sEscapeIdentifier = 'a';
-const int escape_hash_filter::sHashIdentifier = 'h';
 
 escape_hash_filter::escape_hash_filter() : mNext(), mSeenNonWhitespace(false), mFinishLine(false)
 {
@@ -246,43 +239,6 @@ unescape_hash_filter::unescape_hash_filter() : expectingIdentifier(false)
 
 unescape_hash_filter::~unescape_hash_filter()
 {
-}
-
-template <typename Source>
-int unescape_hash_filter::get(Source & src)
-{
-    int character;
-    if (!expectingIdentifier)
-        character = boost::iostreams::get(src);
-    else
-    {
-        character = escape_hash_filter::sEscape;
-        expectingIdentifier = false;
-    }
-    if (character == escape_hash_filter::sEscape)
-    {
-        int nextChar = boost::iostreams::get(src);
-        int intended;
-        switch (nextChar)
-        {
-        case escape_hash_filter::sEscapeIdentifier:
-            intended = escape_hash_filter::sEscape;
-            break;
-        case escape_hash_filter::sHashIdentifier:
-            intended = '#';
-            break;
-        case boost::iostreams::WOULD_BLOCK:
-            expectingIdentifier = true;
-            intended = nextChar;
-            break;
-        default:
-            intended = '?';
-            break;
-        }
-        return intended;
-    }
-    else
-        return character;
 }
 
 std::string EscapeHashString::processString(const std::string & str)
