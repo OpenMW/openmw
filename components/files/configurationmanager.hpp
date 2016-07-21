@@ -71,9 +71,9 @@ struct ConfigurationManager
  */
 struct escape_hash_filter : public boost::iostreams::input_filter
 {
-    static const int sEscape = '@';
-    static const int sHashIdentifier = 'h';
-    static const int sEscapeIdentifier = 'a';
+    static const int sEscape;
+    static const int sHashIdentifier;
+    static const int sEscapeIdentifier;
 
     escape_hash_filter();
     virtual ~escape_hash_filter();
@@ -114,22 +114,17 @@ int unescape_hash_filter::get(Source & src)
     {
         int nextChar = boost::iostreams::get(src);
         int intended;
-        switch (nextChar)
-        {
-        case escape_hash_filter::sEscapeIdentifier:
+        if (nextChar == escape_hash_filter::sEscapeIdentifier)
             intended = escape_hash_filter::sEscape;
-            break;
-        case escape_hash_filter::sHashIdentifier:
+        else if (nextChar == escape_hash_filter::sHashIdentifier)
             intended = '#';
-            break;
-        case boost::iostreams::WOULD_BLOCK:
+        else if (nextChar == boost::iostreams::WOULD_BLOCK)
+        {
             expectingIdentifier = true;
             intended = nextChar;
-            break;
-        default:
-            intended = '?';
-            break;
         }
+        else
+            intended = '?';
         return intended;
     }
     else
