@@ -280,7 +280,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
             {
                 myPacket->Packet(&bsIn, pl, false);
 
-                cout << "Player: " << pl->Npc()->mName << " pressed: " << (pl->GetAttack()->pressed == 1) << endl;
+                //cout << "Player: " << pl->Npc()->mName << " pressed: " << (pl->GetAttack()->pressed == 1) << endl;
                 if(pl->GetAttack()->pressed == 0)
                 {
                     cout << "success: " << (pl->GetAttack()->success == 1);
@@ -525,7 +525,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
                 {
                     skillValue.readState(__pl->NpcStats()->mSkills[i]);
                     __pl_ptr.getClass().getNpcStats(__pl_ptr).setSkill(i, skillValue);
-                    printf("skill %d, value %d\n", i, skillValue.getBase());
+                    //printf("skill %d, value %d\n", i, skillValue.getBase());
                 }
 
                 break;

@@ -342,6 +342,12 @@ void LocalPlayer::updateCell(bool forceUpdate)
 
     if (shouldUpdate)
     {
+        // tes3mp debug start
+        printf("Telling server I moved from %s to %s\n",
+            GetCell()->getDescription().c_str(),
+            _cell->getDescription().c_str());
+        // tes3mp debug end
+        
         (*GetCell()) = *_cell;
         isExterior = _cell->isExterior();
         
