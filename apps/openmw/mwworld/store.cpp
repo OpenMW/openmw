@@ -513,19 +513,16 @@ namespace MWWorld
             bool deleted = false;
             cell->getNextRef(esm, ref, deleted);
 
-            if (!deleted)
-            {
-                // Add data required to make reference appear in the correct cell.
-                // We should not need to test for duplicates, as this part of the code is pre-cell merge.
-                cell->mMovedRefs.push_back(cMRef);
+            // Add data required to make reference appear in the correct cell.
+            // We should not need to test for duplicates, as this part of the code is pre-cell merge.
+            cell->mMovedRefs.push_back(cMRef);
 
-                // But there may be duplicates here!
-                ESM::CellRefTracker::iterator iter = std::find(cellAlt->mLeasedRefs.begin(), cellAlt->mLeasedRefs.end(), ref.mRefNum);
-                if (iter == cellAlt->mLeasedRefs.end())
-                  cellAlt->mLeasedRefs.push_back(ref);
-                else
-                  *iter = ref;
-            }
+            // But there may be duplicates here!
+            ESM::CellRefTracker::iterator iter = std::find_if(cellAlt->mLeasedRefs.begin(), cellAlt->mLeasedRefs.end(), ESM::CellRefTrackerPredicate(ref.mRefNum));
+            if (iter == cellAlt->mLeasedRefs.end())
+                cellAlt->mLeasedRefs.push_back(std::make_pair(ref, deleted));
+            else
+                *iter = std::make_pair(ref, deleted);
         }
     }
     const ESM::Cell *Store<ESM::Cell>::search(const std::string &id) const
@@ -681,7 +678,7 @@ namespace MWWorld
                     if (itold != oldcell->mMovedRefs.end()) {
                         ESM::MovedCellRef target0 = *itold;
                         ESM::Cell *wipecell = const_cast<ESM::Cell*>(search(target0.mTarget[0], target0.mTarget[1]));
-                        ESM::CellRefTracker::iterator it_lease = std::find(wipecell->mLeasedRefs.begin(), wipecell->mLeasedRefs.end(), it->mRefNum);
+                        ESM::CellRefTracker::iterator it_lease = std::find_if(wipecell->mLeasedRefs.begin(), wipecell->mLeasedRefs.end(), ESM::CellRefTrackerPredicate(it->mRefNum));
                         if (it_lease != wipecell->mLeasedRefs.end())
                             wipecell->mLeasedRefs.erase(it_lease);
                         else

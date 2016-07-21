@@ -497,9 +497,11 @@ namespace MWWorld
         // List moved references, from separately tracked list.
         for (ESM::CellRefTracker::const_iterator it = mCell->mLeasedRefs.begin(); it != mCell->mLeasedRefs.end(); ++it)
         {
-            const ESM::CellRef &ref = *it;
+            const ESM::CellRef &ref = it->first;
+            bool deleted = it->second;
 
-            mIds.push_back(Misc::StringUtils::lowerCase(ref.mRefID));
+            if (!deleted)
+                mIds.push_back(Misc::StringUtils::lowerCase(ref.mRefID));
         }
 
         std::sort (mIds.begin(), mIds.end());
@@ -549,9 +551,10 @@ namespace MWWorld
         // Load moved references, from separately tracked list.
         for (ESM::CellRefTracker::const_iterator it = mCell->mLeasedRefs.begin(); it != mCell->mLeasedRefs.end(); ++it)
         {
-            ESM::CellRef &ref = const_cast<ESM::CellRef&>(*it);
+            ESM::CellRef &ref = const_cast<ESM::CellRef&>(it->first);
+            bool deleted = it->second;
 
-            loadRef (ref, false);
+            loadRef (ref, deleted);
         }
 
         updateMergedRefs();
