@@ -66,6 +66,13 @@ namespace CSMPrefs
             void setActivationStatus(ActivationStatus status);
             void setModifierStatus(bool status);
 
+            // Workaround for Qt4 signals being "protected"
+            void signalActivated(bool state);
+            void signalActivated();
+
+            void signalSecondary(bool state);
+            void signalSecondary();
+
             QString toString() const;
 
         private:
@@ -82,7 +89,6 @@ namespace CSMPrefs
 
             ActivationStatus mActivationStatus;
             bool mModifierStatus;
-
 
         signals:
 

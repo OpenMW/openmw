@@ -125,6 +125,25 @@ namespace CSMPrefs
         mModifierStatus = status;
     }
 
+    void Shortcut::signalActivated(bool state)
+    {
+        emit activated(state);
+    }
+
+    void Shortcut::signalActivated()
+    {
+        emit activated();
+    }
+
+    void Shortcut::signalSecondary(bool state)
+    {
+        emit secondary(state);
+    }
+    void Shortcut::signalSecondary()
+    {
+        emit secondary();
+    }
+
     QString Shortcut::toString() const
     {
         return QString(State::get().getShortcutManager().sequenceToString(std::make_pair(mSequence, mModifier)).data());

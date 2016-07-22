@@ -76,12 +76,12 @@ namespace CSMPrefs
                 if (shortcut->getActivationStatus() == Shortcut::AS_Regular)
                 {
                     shortcut->setActivationStatus(Shortcut::AS_Inactive);
-                    emit shortcut->activated(false);
+                    shortcut->signalActivated(false);
                 }
                 else if (shortcut->getActivationStatus() == Shortcut::AS_Secondary)
                 {
                     shortcut->setActivationStatus(Shortcut::AS_Inactive);
-                    emit shortcut->secondary(false);
+                    shortcut->signalSecondary(false);
                 }
             }
         }
@@ -131,14 +131,14 @@ namespace CSMPrefs
             if (shortcut->getModifierStatus() && shortcut->getSecondaryMode() == Shortcut::SM_Replace)
             {
                 shortcut->setActivationStatus(Shortcut::AS_Secondary);
-                emit shortcut->secondary(true);
-                emit shortcut->secondary();
+                shortcut->signalSecondary(true);
+                shortcut->signalSecondary();
             }
             else
             {
                 shortcut->setActivationStatus(Shortcut::AS_Regular);
-                emit shortcut->activated(true);
-                emit shortcut->activated();
+                shortcut->signalActivated(true);
+                shortcut->signalActivated();
             }
 
             used = true;
@@ -170,13 +170,13 @@ namespace CSMPrefs
                 if (shortcut->getActivationStatus() == Shortcut::AS_Regular)
                 {
                     shortcut->setActivationStatus(Shortcut::AS_Inactive);
-                    emit shortcut->activated(false);
+                    shortcut->signalActivated(false);
                     used = true;
                 }
                 else if (shortcut->getActivationStatus() == Shortcut::AS_Secondary)
                 {
                     shortcut->setActivationStatus(Shortcut::AS_Inactive);
-                    emit shortcut->secondary(false);
+                    shortcut->signalSecondary(false);
                     used = true;
                 }
             }
@@ -201,12 +201,12 @@ namespace CSMPrefs
             {
                 if (activate)
                 {
-                    emit shortcut->secondary(true);
-                    emit shortcut->secondary();
+                    shortcut->signalSecondary(true);
+                    shortcut->signalSecondary();
                 }
                 else
                 {
-                    emit shortcut->secondary(false);
+                    shortcut->signalSecondary(false);
                 }
 
                 used = true;
@@ -215,7 +215,7 @@ namespace CSMPrefs
             {
                 shortcut->setActivationStatus(Shortcut::AS_Inactive);
                 shortcut->setPosition(0);
-                emit shortcut->secondary(false);
+                shortcut->signalSecondary(false);
                 used = true;
             }
         }
