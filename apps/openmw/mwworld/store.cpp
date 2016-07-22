@@ -675,14 +675,17 @@ namespace MWWorld
                 for (ESM::MovedCellRefTracker::const_iterator it = cell.mMovedRefs.begin(); it != cell.mMovedRefs.end(); ++it) {
                     // remove reference from current leased ref tracker and add it to new cell
                     ESM::MovedCellRefTracker::iterator itold = std::find(oldcell->mMovedRefs.begin(), oldcell->mMovedRefs.end(), it->mRefNum);
-                    if (itold != oldcell->mMovedRefs.end()) {
-                        ESM::MovedCellRef target0 = *itold;
-                        ESM::Cell *wipecell = const_cast<ESM::Cell*>(search(target0.mTarget[0], target0.mTarget[1]));
-                        ESM::CellRefTracker::iterator it_lease = std::find_if(wipecell->mLeasedRefs.begin(), wipecell->mLeasedRefs.end(), ESM::CellRefTrackerPredicate(it->mRefNum));
-                        if (it_lease != wipecell->mLeasedRefs.end())
-                            wipecell->mLeasedRefs.erase(it_lease);
-                        else
-                            std::cerr << "can't find " << it->mRefNum.mIndex << " " << it->mRefNum.mContentFile  << " in leasedRefs " << std::endl;
+                    if (itold != oldcell->mMovedRefs.end())
+                    {
+                        if (it->mTarget[0] != itold->mTarget[0] || it->mTarget[1] != itold->mTarget[1])
+                        {
+                            ESM::Cell *wipecell = const_cast<ESM::Cell*>(search(itold->mTarget[0], itold->mTarget[1]));
+                            ESM::CellRefTracker::iterator it_lease = std::find_if(wipecell->mLeasedRefs.begin(), wipecell->mLeasedRefs.end(), ESM::CellRefTrackerPredicate(it->mRefNum));
+                            if (it_lease != wipecell->mLeasedRefs.end())
+                                wipecell->mLeasedRefs.erase(it_lease);
+                            else
+                                std::cerr << "can't find " << it->mRefNum.mIndex << " " << it->mRefNum.mContentFile  << " in leasedRefs " << std::endl;
+                        }
                         *itold = *it;
                     }
                     else
