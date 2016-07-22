@@ -181,7 +181,7 @@ void DedicatedPlayer::Move(float dt)
         ref_pos.pos[0] = lerp.x();
         ref_pos.pos[1] = lerp.y();
         ref_pos.pos[2] = lerp.z();
-        ptr.getRefData().setPosition(ref_pos);
+        world->moveObject(ptr, ref_pos.pos[0], ref_pos.pos[1], ref_pos.pos[2]);
     }
 
     MWMechanics::Movement *move = &ptr.getClass().getMovementSettings(ptr);
