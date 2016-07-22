@@ -229,7 +229,7 @@ void CSMPrefs::State::declare()
         addValues (insertOutsideVisibleCell);
 
     declareCategory ("Key Bindings");
-    declareShortcut ("free-forward", "Free camera forward", QKeySequence(Qt::Key_W));
+    declareShortcut ("free-forward", "Free camera forward", QKeySequence(Qt::Key_W), Qt::Key_Shift);
     declareShortcut ("free-backward", "Free camera backward", QKeySequence(Qt::Key_S));
     declareShortcut ("free-left", "Free camera left", QKeySequence(Qt::Key_A));
     declareShortcut ("free-right", "Free camera right", QKeySequence(Qt::Key_D));
@@ -238,7 +238,7 @@ void CSMPrefs::State::declare()
     declareShortcut ("free-speed-mode", "Free camera speed mode toggle", QKeySequence(Qt::Key_F));
 
     declareSeparator ();
-    declareShortcut ("orbit-up", "Orbit camera up", QKeySequence(Qt::Key_W));
+    declareShortcut ("orbit-up", "Orbit camera up", QKeySequence(Qt::Key_W), Qt::Key_Shift);
     declareShortcut ("orbit-down", "Orbit camera down", QKeySequence(Qt::Key_S));
     declareShortcut ("orbit-left", "Orbit camera left", QKeySequence(Qt::Key_A));
     declareShortcut ("orbit-right", "Orbit camera right", QKeySequence(Qt::Key_D));
@@ -377,19 +377,19 @@ CSMPrefs::ColourSetting& CSMPrefs::State::declareColour (const std::string& key,
 }
 
 CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut (const std::string& key, const std::string& label,
-    const QKeySequence& default_)
+    const QKeySequence& default_, int modifier)
 {
     if (mCurrentCategory==mCategories.end())
         throw std::logic_error ("no category for setting");
 
-    std::string seqStr = getShortcutManager().sequenceToString(default_);
+    std::string seqStr = getShortcutManager().sequenceToString(std::make_pair(default_, modifier));
     setDefault (key, seqStr);
 
-    QKeySequence seq = getShortcutManager().stringToSequence(mSettings.getString(key,
+    ShortcutManager::SequenceData data = getShortcutManager().stringToSequence(mSettings.getString(key,
         mCurrentCategory->second.getKey()));
 
     CSMPrefs::ShortcutSetting *setting = new CSMPrefs::ShortcutSetting (&mCurrentCategory->second, &mSettings, &mMutex,
-        key, label, seq);
+        key, label, data);
 
     mCurrentCategory->second.addSetting (setting);
 

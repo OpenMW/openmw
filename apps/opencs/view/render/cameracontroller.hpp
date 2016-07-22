@@ -111,7 +111,8 @@ namespace CSVRender
 
             bool mLockUpright, mModified;
             bool mNaviPrimary, mNaviSecondary;
-            bool mFast, mLeft, mRight, mForward, mBackward, mRollLeft, mRollRight;
+            bool mFast, mFastAlternate;
+            bool mLeft, mRight, mForward, mBackward, mRollLeft, mRollRight;
             osg::Vec3d mUp;
 
             double mLinSpeed;
@@ -128,6 +129,7 @@ namespace CSVRender
             void right(bool active);
             void rollLeft(bool active);
             void rollRight(bool active);
+            void alternateFast(bool active);
             void swapSpeedMode();
     };
 
@@ -168,7 +170,8 @@ namespace CSVRender
 
             bool mInitialized;
             bool mNaviPrimary, mNaviSecondary;
-            bool mFast, mLeft, mRight, mUp, mDown, mRollLeft, mRollRight;
+            bool mFast, mFastAlternate;
+            bool mLeft, mRight, mUp, mDown, mRollLeft, mRollRight;
             unsigned int mPickingMask;
             osg::Vec3d mCenter;
             double mDistance;
@@ -186,6 +189,7 @@ namespace CSVRender
             void right(bool active);
             void rollLeft(bool active);
             void rollRight(bool active);
+            void alternateFast(bool active);
             void swapSpeedMode();
     };
 }

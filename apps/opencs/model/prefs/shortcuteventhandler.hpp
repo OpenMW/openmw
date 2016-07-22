@@ -39,7 +39,9 @@ namespace CSMPrefs
 
             bool activate(unsigned int mod, unsigned int button);
 
-            bool deactivate(unsigned int button);
+            bool deactivate(unsigned int mod, unsigned int button);
+
+            bool checkModifier(unsigned int mod, unsigned int button, Shortcut* shortcut, bool activate);
 
             MatchResult match(unsigned int mod, unsigned int button, unsigned int value);
 

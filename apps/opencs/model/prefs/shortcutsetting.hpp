@@ -11,15 +11,19 @@ namespace CSMPrefs
     {
             Q_OBJECT
 
-            QKeySequence mDefault;
-
         public:
 
+            typedef std::pair<QKeySequence, int> SequenceData;
+
             ShortcutSetting(Category* parent, Settings::Manager* values, QMutex* mutex, const std::string& key,
-                const std::string& label, const QKeySequence& default_);
+                const std::string& label, const SequenceData& default_);
 
             // TODO replace with custom page
             virtual std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent);
+
+        private:
+
+            SequenceData mDefault;
 
         private slots:
 

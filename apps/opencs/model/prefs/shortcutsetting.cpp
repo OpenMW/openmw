@@ -10,7 +10,7 @@
 namespace CSMPrefs
 {
     ShortcutSetting::ShortcutSetting(Category* parent, Settings::Manager* values, QMutex* mutex, const std::string& key,
-        const std::string& label, const QKeySequence& default_)
+        const std::string& label, const SequenceData& default_)
         : Setting(parent, values, mutex, key, label)
         , mDefault(default_)
     {
@@ -33,9 +33,9 @@ namespace CSMPrefs
             QMutexLocker lock(getMutex());
             getValues().setString(getKey(), getParent()->getKey(), text.toUtf8().data());
 
-            QKeySequence sequence = State::get().getShortcutManager().stringToSequence(text.toUtf8().data());
+            SequenceData data = State::get().getShortcutManager().stringToSequence(text.toUtf8().data());
 
-            State::get().getShortcutManager().setSequence(getKey(), sequence);
+            State::get().getShortcutManager().setSequence(getKey(), data);
         }
 
         getParent()->getState()->update(*this);

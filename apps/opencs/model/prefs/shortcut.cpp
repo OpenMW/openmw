@@ -11,24 +11,41 @@ namespace CSMPrefs
 {
     Shortcut::Shortcut(const std::string& name, QObject* parent)
         : QObject(parent)
+        , mEnabled(true)
         , mName(name)
+        , mSecondaryMode(SM_Ignore)
+        , mModifier(0)
         , mCurrentPos(0)
         , mLastPos(0)
-        , mActive(false)
-        , mEnabled(true)
+        , mActivationStatus(AS_Inactive)
+        , mModifierStatus(false)
     {
         State::get().getShortcutManager().addShortcut(this);
-        setSequence(State::get().getShortcutManager().getSequence(name));
+        ShortcutManager::SequenceData data = State::get().getShortcutManager().getSequence(name);
+        setSequence(data.first);
+        setModifier(data.second);
+    }
+
+    Shortcut::Shortcut(const std::string& name, SecondaryMode secMode, QObject* parent)
+        : QObject(parent)
+        , mEnabled(true)
+        , mName(name)
+        , mSecondaryMode(secMode)
+        , mModifier(0)
+        , mCurrentPos(0)
+        , mLastPos(0)
+        , mActivationStatus(AS_Inactive)
+        , mModifierStatus(false)
+    {
+        State::get().getShortcutManager().addShortcut(this);
+        ShortcutManager::SequenceData data = State::get().getShortcutManager().getSequence(name);
+        setSequence(data.first);
+        setModifier(data.second);
     }
 
     Shortcut::~Shortcut()
     {
         State::get().getShortcutManager().removeShortcut(this);
-    }
-
-    bool Shortcut::isActive() const
-    {
-        return mActive;
     }
 
     bool Shortcut::isEnabled() const
@@ -41,9 +58,19 @@ namespace CSMPrefs
         return mName;
     }
 
+    Shortcut::SecondaryMode Shortcut::getSecondaryMode() const
+    {
+        return mSecondaryMode;
+    }
+
     const QKeySequence& Shortcut::getSequence() const
     {
         return mSequence;
+    }
+
+    int Shortcut::getModifier() const
+    {
+        return mModifier;
     }
 
     int Shortcut::getPosition() const
@@ -56,9 +83,19 @@ namespace CSMPrefs
         return mLastPos;
     }
 
-    void Shortcut::setPosition(int pos)
+    Shortcut::ActivationStatus Shortcut::getActivationStatus() const
     {
-        mCurrentPos = pos;
+        return mActivationStatus;
+    }
+
+    bool Shortcut::getModifierStatus() const
+    {
+        return mModifierStatus;
+    }
+
+    void Shortcut::enable(bool state)
+    {
+        mEnabled = state;
     }
 
     void Shortcut::setSequence(const QKeySequence& sequence)
@@ -68,22 +105,28 @@ namespace CSMPrefs
         mLastPos = sequence.count() - 1;
     }
 
-    void Shortcut::activate(bool state)
+    void Shortcut::setModifier(int modifier)
     {
-        mActive = state;
-        emit activated(state);
-
-        if (state)
-            emit activated();
+        mModifier = modifier;
     }
 
-    void Shortcut::enable(bool state)
+    void Shortcut::setPosition(int pos)
     {
-        mEnabled = state;
+        mCurrentPos = pos;
+    }
+
+    void Shortcut::setActivationStatus(ActivationStatus status)
+    {
+        mActivationStatus = status;
+    }
+
+    void Shortcut::setModifierStatus(bool status)
+    {
+        mModifierStatus = status;
     }
 
     QString Shortcut::toString() const
     {
-        return QString(State::get().getShortcutManager().sequenceToString(mSequence).data());
+        return QString(State::get().getShortcutManager().sequenceToString(std::make_pair(mSequence, mModifier)).data());
     }
 }

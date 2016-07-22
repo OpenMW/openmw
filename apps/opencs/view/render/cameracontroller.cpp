@@ -169,6 +169,7 @@ namespace CSVRender
         , mLockUpright(false)
         , mModified(false)
         , mFast(false)
+        , mFastAlternate(false)
         , mLeft(false)
         , mRight(false)
         , mForward(false)
@@ -190,10 +191,12 @@ namespace CSVRender
         handler->addShortcut(naviSecondaryShortcut);
         connect(naviSecondaryShortcut, SIGNAL(activated(bool)), this, SLOT(naviSecondary(bool)));
 
-        CSMPrefs::Shortcut* forwardShortcut = new CSMPrefs::Shortcut("free-forward", this);
+        CSMPrefs::Shortcut* forwardShortcut = new CSMPrefs::Shortcut("free-forward", CSMPrefs::Shortcut::SM_Detach,
+            this);
         forwardShortcut->enable(false);
         handler->addShortcut(forwardShortcut);
         connect(forwardShortcut, SIGNAL(activated(bool)), this, SLOT(forward(bool)));
+        connect(forwardShortcut, SIGNAL(secondary(bool)), this, SLOT(alternateFast(bool)));
 
         CSMPrefs::Shortcut* leftShortcut = new CSMPrefs::Shortcut("free-left", this);
         leftShortcut->enable(false);
@@ -294,7 +297,7 @@ namespace CSVRender
         if (!isActive())
             return;
 
-        translate(LocalForward * x * (mFast ? getWheelMovementMultiplier() : 1));
+        translate(LocalForward * x * ((mFast ^ mFastAlternate) ? getWheelMovementMultiplier() : 1));
     }
 
     void FreeCameraController::update(double dt)
@@ -305,7 +308,7 @@ namespace CSVRender
         double linDist = mLinSpeed * dt;
         double rotDist = mRotSpeed * dt;
 
-        if (mFast)
+        if (mFast ^ mFastAlternate)
             linDist *= mSpeedMult;
 
         if (mLeft)
@@ -423,6 +426,11 @@ namespace CSVRender
         mRollRight = active;
     }
 
+    void FreeCameraController::alternateFast(bool active)
+    {
+        mFastAlternate = active;
+    }
+
     void FreeCameraController::swapSpeedMode()
     {
         mFast = !mFast;
@@ -436,6 +444,7 @@ namespace CSVRender
         : CameraController(parent)
         , mInitialized(false)
         , mFast(false)
+        , mFastAlternate(false)
         , mLeft(false)
         , mRight(false)
         , mUp(false)
@@ -458,10 +467,11 @@ namespace CSVRender
         handler->addShortcut(naviSecondaryShortcut);
         connect(naviSecondaryShortcut, SIGNAL(activated(bool)), this, SLOT(naviSecondary(bool)));
 
-        CSMPrefs::Shortcut* upShortcut = new CSMPrefs::Shortcut("orbit-up", this);
+        CSMPrefs::Shortcut* upShortcut = new CSMPrefs::Shortcut("orbit-up", CSMPrefs::Shortcut::SM_Detach, this);
         upShortcut->enable(false);
         handler->addShortcut(upShortcut);
         connect(upShortcut, SIGNAL(activated(bool)), this, SLOT(up(bool)));
+        connect(upShortcut, SIGNAL(secondary(bool)), this, SLOT(alternateFast(bool)));
 
         CSMPrefs::Shortcut* leftShortcut = new CSMPrefs::Shortcut("orbit-left", this);
         leftShortcut->enable(false);
@@ -571,7 +581,7 @@ namespace CSVRender
         if (!isActive())
             return;
 
-        zoom(-x * (mFast ? getWheelMovementMultiplier() : 1));
+        zoom(-x * ((mFast ^ mFastAlternate) ? getWheelMovementMultiplier() : 1));
     }
 
     void OrbitCameraController::update(double dt)
@@ -584,7 +594,7 @@ namespace CSVRender
 
         double rotDist = mOrbitSpeed * dt;
 
-        if (mFast)
+        if (mFast ^ mFastAlternate)
             rotDist *= mOrbitSpeedMult;
 
         if (mLeft)
@@ -735,6 +745,11 @@ namespace CSVRender
     void OrbitCameraController::rollRight(bool active)
     {
         mRollRight = active;
+    }
+
+    void OrbitCameraController::alternateFast(bool active)
+    {
+        mFastAlternate = active;
     }
 
     void OrbitCameraController::swapSpeedMode()
