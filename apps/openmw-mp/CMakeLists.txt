@@ -80,21 +80,12 @@ ${APPLE_BUNDLE_RESOURCES}
 add_definitions(-std=gnu++11)
 
 target_link_libraries(openmw-mp
-    ${OSG_LIBRARIES}
-    ${OPENTHREADS_LIBRARIES}
-    ${OSGPARTICLE_LIBRARIES}
-    ${OSGUTIL_LIBRARIES}
-    ${OSGDB_LIBRARIES}
-    ${OSGVIEWER_LIBRARIES}
-    ${OSGGA_LIBRARIES}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_THREAD_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${BULLET_LIBRARIES}
+    #${Boost_SYSTEM_LIBRARY}
+    #${Boost_THREAD_LIBRARY}
+    #${Boost_FILESYSTEM_LIBRARY}
+    #${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${RakNet_LIBRARY}
     components
-    amx
     ${Terra_LIBRARY}
     ${Pawn_LIBRARY}
 )
