@@ -1,5 +1,7 @@
 #include "worldimp.hpp"
 
+#include <stdio.h>
+
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
 
@@ -1140,6 +1142,17 @@ namespace MWWorld
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = isPlayer || (currCell && mWorldScene->isCellActive(*currCell));
         MWWorld::Ptr newPtr = ptr;
+        
+        // tes3mp debug start
+        if (currCell != newCell) {
+            
+            printf("Tick: %s was %s move from %s to %s\n",
+                   ptr.getBase()->mRef.getRefId().c_str(),
+                   ptr.getBase()->canChangeCell ? "allowed" : "denied",
+                   currCell->getCell()->getDescription().c_str(),
+                   newCell->getCell()->getDescription().c_str());
+        }
+        // tes3mp debug end
 
         if (currCell != newCell && ptr.getBase()->canChangeCell)
         {

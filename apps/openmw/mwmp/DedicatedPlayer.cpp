@@ -181,7 +181,7 @@ void DedicatedPlayer::Move(float dt)
         ref_pos.pos[0] = lerp.x();
         ref_pos.pos[1] = lerp.y();
         ref_pos.pos[2] = lerp.z();
-        ptr.getRefData().setPosition(ref_pos);
+        world->moveObject(ptr, ref_pos.pos[0], ref_pos.pos[1], ref_pos.pos[2]);
     }
 
     MWMechanics::Movement *move = &ptr.getClass().getMovementSettings(ptr);
@@ -404,6 +404,13 @@ void DedicatedPlayer::updateCell()
         cellStore = world->getExterior(cell.mCellId.mIndex.mX, cell.mCellId.mIndex.mY);
     else
         cellStore = world->getInterior(cell.mName);
+    
+    // tes3mp debug start
+    printf("Server says %s (%s) moved to %s\n",
+        ptr.getBase()->mRef.getRefId().c_str(),
+        this->Npc()->mName.c_str(),
+        cellStore->getCell()->getDescription().c_str());
+    // tes3mp debug end
 
     // Allow this player's reference to move across a cell now that
     // a manual cell update has been called

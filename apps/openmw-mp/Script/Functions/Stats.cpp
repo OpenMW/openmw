@@ -339,7 +339,7 @@ void ScriptFunctions::SetSkill(unsigned short pid, unsigned short skill, int val
 
     player->NpcStats()->mSkills[skill].mBase = value;
 
-    DEBUG_PRINTF("SetSkill(%d, %d, %d)\n", pid, skill, value);
+    //DEBUG_PRINTF("SetSkill(%d, %d, %d)\n", pid, skill, value);
 
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_SKILL)->Send(player, false);
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_SKILL)->Send(player, true);

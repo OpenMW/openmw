@@ -1,5 +1,7 @@
 #include "cellstore.hpp"
 
+#include <stdio.h>
+
 #include <iostream>
 #include <algorithm>
 
@@ -214,6 +216,18 @@ namespace MWWorld
         if (found != mMovedToAnotherCell.end())
         {
             // A cell we had previously moved an object to is returning it to us.
+            
+            // tes3mp debug start
+            if (found->second != from) {
+                    
+                printf("Storage: %s owned %s which it gave to %s which isn't %s therefore CRASH\n",
+                    this->getCell()->getDescription().c_str(),
+                    object.getBase()->mRef.getRefId().c_str(),
+                    found->second->getCell()->getDescription().c_str(),
+                    from->getCell()->getDescription().c_str());   
+            }
+            // tes3mp debug end
+            
             assert (found->second == from);
             mMovedToAnotherCell.erase(found);
         }
@@ -269,6 +283,14 @@ namespace MWWorld
             // Now that object is back to its rightful owner, we can move it
             if (cellToMoveTo != originalCell)
             {
+                // tes3mp debug start
+                printf("Storage: %s's original cell %s gives it from %s to %s\n",
+                    object.getBase()->mRef.getRefId().c_str(),
+                    originalCell->getCell()->getDescription().c_str(),
+                    this->getCell()->getDescription().c_str(),
+                    cellToMoveTo->getCell()->getDescription().c_str());
+                // tes3mp debug end
+                
                 originalCell->moveTo(object, cellToMoveTo);
             }
 
