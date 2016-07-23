@@ -76,12 +76,15 @@ namespace mwmp
         void RW(std::string &str, bool write)
         {
             if (write)
-                bs->Write(str.c_str());
+            {
+                RakNet::RakString rstr(str.c_str());
+                bs->Write(rstr);
+            }
             else
             {
-                char cstr[256];
-                bs->Read(cstr);
-                str = cstr;
+                RakNet::RakString rstr;
+                bs->Read(rstr);
+                str = rstr.C_String();
             }
         }
 
