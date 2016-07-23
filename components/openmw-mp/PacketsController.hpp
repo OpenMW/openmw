@@ -32,6 +32,8 @@ namespace mwmp
     class PacketSkill;
     class PacketHandshake;
 
+    class PacketGUIBoxes;
+
     class PacketsController
     {
     public:
@@ -61,6 +63,7 @@ namespace mwmp
         PacketAttribute *packetAttribute;
         PacketSkill *packetSkill;
         PacketHandshake *packetHandshake;
+        PacketGUIBoxes *packetGUIBoxes;
     };
 }
 

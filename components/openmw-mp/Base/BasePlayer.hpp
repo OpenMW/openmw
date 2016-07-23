@@ -42,6 +42,23 @@ namespace mwmp
             int current, end;
         };
 
+        struct GUIMessageBox
+        {
+            int id;
+            int type;
+            enum GUI_TYPE
+            {
+                MessageBox = 0,
+                CustomMessageBox,
+                InputDialog,
+                PasswordDialog
+            };
+            std::string label;
+            std::string buttons;
+
+            std::string data;
+        };
+
         BasePlayer(RakNet::RakNetGUID guid) : guid(guid)
         {
 
@@ -124,6 +141,7 @@ namespace mwmp
             return &passw;
         }
         RakNet::RakNetGUID guid;
+        GUIMessageBox guiMessageBox;
 
     protected:
         ESM::Position pos;

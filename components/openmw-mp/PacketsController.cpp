@@ -19,6 +19,7 @@
 #include "Packets/PacketAttribute.hpp"
 #include "Packets/PacketSkill.hpp"
 #include "Packets/PacketHandshake.hpp"
+#include "Packets/PacketGUIBoxes.hpp"
 
 #include "PacketsController.hpp"
 
@@ -46,6 +47,8 @@ mwmp::PacketsController::PacketsController(RakNet::RakPeerInterface *peer)
     packetSkill = new PacketSkill(peer);
 
     packetHandshake = new PacketHandshake(peer);
+
+    packetGUIBoxes = new PacketGUIBoxes(peer);
 }
 
 
@@ -105,6 +108,9 @@ mwmp::BasePacket *mwmp::PacketsController::GetPacket(RakNet::MessageID id)
         case ID_HANDSHAKE:
             packet = packetHandshake;
             break;
+        case ID_GUI_MESSAGEBOX:
+            packet = packetGUIBoxes;
+            break;
         default:
             packet = 0;
     }
@@ -134,4 +140,6 @@ void mwmp::PacketsController::SetStream(RakNet::BitStream *inStream, RakNet::Bit
     packetSkill->SetStreams(inStream, outStream);
 
     packetHandshake->SetStreams(inStream, outStream);
+
+    packetGUIBoxes->SetStreams(inStream, outStream);
 }
