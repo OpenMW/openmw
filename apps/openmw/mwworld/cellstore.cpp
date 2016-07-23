@@ -497,9 +497,11 @@ namespace MWWorld
         // List moved references, from separately tracked list.
         for (ESM::CellRefTracker::const_iterator it = mCell->mLeasedRefs.begin(); it != mCell->mLeasedRefs.end(); ++it)
         {
-            const ESM::CellRef &ref = *it;
+            const ESM::CellRef &ref = it->first;
+            bool deleted = it->second;
 
-            mIds.push_back(Misc::StringUtils::lowerCase(ref.mRefID));
+            if (!deleted)
+                mIds.push_back(Misc::StringUtils::lowerCase(ref.mRefID));
         }
 
         std::sort (mIds.begin(), mIds.end());
@@ -513,6 +515,8 @@ namespace MWWorld
 
         if (mCell->mContextList.empty())
             return; // this is a dynamically generated cell -> skipping.
+
+        std::map<ESM::RefNum, std::string> refNumToID; // used to detect refID modifications
 
         // Load references from all plugins that do something with this cell.
         for (size_t i = 0; i < mCell->mContextList.size(); i++)
@@ -537,7 +541,7 @@ namespace MWWorld
                         continue;
                     }
 
-                    loadRef (ref, deleted);
+                    loadRef (ref, deleted, refNumToID);
                 }
             }
             catch (std::exception& e)
@@ -549,9 +553,10 @@ namespace MWWorld
         // Load moved references, from separately tracked list.
         for (ESM::CellRefTracker::const_iterator it = mCell->mLeasedRefs.begin(); it != mCell->mLeasedRefs.end(); ++it)
         {
-            ESM::CellRef &ref = const_cast<ESM::CellRef&>(*it);
+            ESM::CellRef &ref = const_cast<ESM::CellRef&>(it->first);
+            bool deleted = it->second;
 
-            loadRef (ref, false);
+            loadRef (ref, deleted, refNumToID);
         }
 
         updateMergedRefs();
@@ -582,11 +587,46 @@ namespace MWWorld
         return Ptr();
     }
 
-    void CellStore::loadRef (ESM::CellRef& ref, bool deleted)
+    void CellStore::loadRef (ESM::CellRef& ref, bool deleted, std::map<ESM::RefNum, std::string>& refNumToID)
     {
         Misc::StringUtils::lowerCaseInPlace (ref.mRefID);
 
         const MWWorld::ESMStore& store = mStore;
+
+        std::map<ESM::RefNum, std::string>::iterator it = refNumToID.find(ref.mRefNum);
+        if (it != refNumToID.end())
+        {
+            if (it->second != ref.mRefID)
+            {
+                // refID was modified, make sure we don't end up with duplicated refs
+                switch (store.find(it->second))
+                {
+                    case ESM::REC_ACTI: mActivators.remove(ref.mRefNum); break;
+                    case ESM::REC_ALCH: mPotions.remove(ref.mRefNum); break;
+                    case ESM::REC_APPA: mAppas.remove(ref.mRefNum); break;
+                    case ESM::REC_ARMO: mArmors.remove(ref.mRefNum); break;
+                    case ESM::REC_BOOK: mBooks.remove(ref.mRefNum); break;
+                    case ESM::REC_CLOT: mClothes.remove(ref.mRefNum); break;
+                    case ESM::REC_CONT: mContainers.remove(ref.mRefNum); break;
+                    case ESM::REC_CREA: mCreatures.remove(ref.mRefNum); break;
+                    case ESM::REC_DOOR: mDoors.remove(ref.mRefNum); break;
+                    case ESM::REC_INGR: mIngreds.remove(ref.mRefNum); break;
+                    case ESM::REC_LEVC: mCreatureLists.remove(ref.mRefNum); break;
+                    case ESM::REC_LEVI: mItemLists.remove(ref.mRefNum); break;
+                    case ESM::REC_LIGH: mLights.remove(ref.mRefNum); break;
+                    case ESM::REC_LOCK: mLockpicks.remove(ref.mRefNum); break;
+                    case ESM::REC_MISC: mMiscItems.remove(ref.mRefNum); break;
+                    case ESM::REC_NPC_: mNpcs.remove(ref.mRefNum); break;
+                    case ESM::REC_PROB: mProbes.remove(ref.mRefNum); break;
+                    case ESM::REC_REPA: mRepairs.remove(ref.mRefNum); break;
+                    case ESM::REC_STAT: mStatics.remove(ref.mRefNum); break;
+                    case ESM::REC_WEAP: mWeapons.remove(ref.mRefNum); break;
+                    case ESM::REC_BODY: mBodyParts.remove(ref.mRefNum); break;
+                    default:
+                        break;
+                }
+            }
+        }
 
         switch (store.find (ref.mRefID))
         {
@@ -612,12 +652,15 @@ namespace MWWorld
             case ESM::REC_WEAP: mWeapons.load(ref, deleted, store); break;
             case ESM::REC_BODY: mBodyParts.load(ref, deleted, store); break;
 
-            case 0: std::cerr << "Cell reference '" + ref.mRefID + "' not found!\n"; break;
+            case 0: std::cerr << "Cell reference '" + ref.mRefID + "' not found!\n"; return;
 
             default:
                 std::cerr
                     << "WARNING: Ignoring reference '" << ref.mRefID << "' of unhandled type\n";
+                return;
         }
+
+        refNumToID[ref.mRefNum] = ref.mRefID;
     }
 
     void CellStore::loadState (const ESM::CellState& state)
