@@ -30,7 +30,7 @@ void LangNative::LoadProgram(const char *filename)
 
     fclose(file);
 
-#ifdef __WIN32__
+#ifdef _WIN32
     lib = LoadLibrary(filename);
 #else
     lib = dlopen(filename, RTLD_LAZY);
@@ -58,7 +58,7 @@ void LangNative::LoadProgram(const char *filename)
 
 int LangNative::FreeProgram()
 {
-#ifdef __WIN32__
+#ifdef _WIN32
     FreeLibrary(lib);
 #else
     dlclose(lib);

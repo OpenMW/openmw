@@ -25,7 +25,7 @@ Script::Script(const char *path)
 
     fclose(file);
 
-#ifdef __WIN32__
+#ifdef _WIN32
     if (strstr(path, ".dll"))
 #else
     if (strstr(path, ".so"))

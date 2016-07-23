@@ -17,7 +17,7 @@ void printVersion(string version, int protocol)
 {
     cout << "TES3:MP dedicated server " << version;
     cout << " (";
-#ifdef __WIN32__
+#ifdef _WIN32
     cout << "Windows";
 #elif __linux
     cout << "Linux";

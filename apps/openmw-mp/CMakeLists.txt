@@ -1,9 +1,10 @@
 project(openmw-mp)
 
-add_subdirectory(amx)
-
 option(BUILD_WITH_PAWN "Enable Pawn language" OFF)
 if(BUILD_WITH_PAWN)
+
+    add_subdirectory(amx)
+
     #set(Pawn_ROOT ${CMAKE_SOURCE_DIR}/external/pawn/)
     set(Pawn_INCLUDES ${Pawn_ROOT}/include)
     set(Pawn_LIBRARY ${Pawn_ROOT}/lib/libamx.a)
