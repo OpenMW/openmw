@@ -7,9 +7,7 @@
 #include <QObject>
 #include <QString>
 
-class QKeyEvent;
-class QMouseEvent;
-class QShortcut;
+class QWidget;
 
 namespace CSMPrefs
 {
@@ -34,8 +32,8 @@ namespace CSMPrefs
                 SM_Ignore   ///< The secondary signal will not ever be emitted
             };
 
-            Shortcut(const std::string& name, QObject* parent);
-            Shortcut(const std::string& name, SecondaryMode secMode, QObject* parent);
+            Shortcut(const std::string& name, QWidget* parent);
+            Shortcut(const std::string& name, SecondaryMode secMode, QWidget* parent);
 
             ~Shortcut();
 

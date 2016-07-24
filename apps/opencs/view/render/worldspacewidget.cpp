@@ -98,23 +98,18 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
 
     // Shortcuts
     CSMPrefs::Shortcut* primaryEditShortcut = new CSMPrefs::Shortcut("scene-edit-primary", this);
-    mShortcutHandler->addShortcut(primaryEditShortcut);
     connect(primaryEditShortcut, SIGNAL(activated(bool)), this, SLOT(primaryEdit(bool)));
 
     CSMPrefs::Shortcut* secondaryEditShortcut = new CSMPrefs::Shortcut("scene-edit-secondary", this);
-    mShortcutHandler->addShortcut(secondaryEditShortcut);
     connect(secondaryEditShortcut, SIGNAL(activated(bool)), this, SLOT(secondaryEdit(bool)));
 
     CSMPrefs::Shortcut* primarySelectShortcut = new CSMPrefs::Shortcut("scene-select-primary", this);
-    mShortcutHandler->addShortcut(primarySelectShortcut);
     connect(primarySelectShortcut, SIGNAL(activated(bool)), this, SLOT(primarySelect(bool)));
 
     CSMPrefs::Shortcut* secondarySelectShortcut = new CSMPrefs::Shortcut("scene-select-secondary", this);
-    mShortcutHandler->addShortcut(secondarySelectShortcut);
     connect(secondarySelectShortcut, SIGNAL(activated(bool)), this, SLOT(secondarySelect(bool)));
 
     CSMPrefs::Shortcut* abortShortcut = new CSMPrefs::Shortcut("scene-edit-abort", this);
-    mShortcutHandler->addShortcut(abortShortcut);
     connect(abortShortcut, SIGNAL(activated()), this, SLOT(abortDrag()));
 }
 
@@ -184,7 +179,7 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
         "<li>Hold shift to speed up movement</li>"
         "</ul>");
     tool->addButton(
-        new CSVRender::OrbitCameraMode(this, mShortcutHandler, QIcon(":scenetoolbar/orbiting-camera"),
+        new CSVRender::OrbitCameraMode(this, QIcon(":scenetoolbar/orbiting-camera"),
             "Orbiting Camera"
             "<ul><li>Always facing the centre point</li>"
             "<li>Rotate around the centre point via WASD or by moving the mouse while holding the left button</li>"

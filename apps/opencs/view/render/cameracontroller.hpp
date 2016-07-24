@@ -2,13 +2,12 @@
 #define OPENCS_VIEW_CAMERACONTROLLER_H
 
 #include <string>
+#include <vector>
 
 #include <QObject>
 
 #include <osg/ref_ptr>
 #include <osg/Vec3d>
-
-class QKeyEvent;
 
 namespace osg
 {
@@ -18,7 +17,7 @@ namespace osg
 
 namespace CSMPrefs
 {
-    class ShortcutEventHandler;
+    class Shortcut;
 }
 
 namespace CSVRender
@@ -66,6 +65,8 @@ namespace CSVRender
 
             virtual void onActivate(){}
 
+            void addShortcut(CSMPrefs::Shortcut* shortcut);
+
         private:
 
             bool mActive, mInverted;
@@ -74,6 +75,8 @@ namespace CSVRender
             double mWheelMoveMult;
 
             osg::Camera* mCamera;
+
+            std::vector<CSMPrefs::Shortcut*> mShortcuts;
     };
 
     class FreeCameraController : public CameraController
@@ -82,7 +85,7 @@ namespace CSVRender
 
         public:
 
-            FreeCameraController(CSMPrefs::ShortcutEventHandler* handler, QObject* parent=0);
+            FreeCameraController(QWidget* parent);
 
             double getLinearSpeed() const;
             double getRotationalSpeed() const;
@@ -139,7 +142,7 @@ namespace CSVRender
 
         public:
 
-            OrbitCameraController(CSMPrefs::ShortcutEventHandler* handler, QObject* parent=0);
+            OrbitCameraController(QWidget* parent);
 
             osg::Vec3d getCenter() const;
             double getOrbitSpeed() const;

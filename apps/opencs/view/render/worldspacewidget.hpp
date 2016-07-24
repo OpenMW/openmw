@@ -15,7 +15,6 @@
 namespace CSMPrefs
 {
     class Setting;
-    class Shortcut;
 }
 
 namespace CSMWorld

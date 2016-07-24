@@ -16,6 +16,7 @@
 
 #include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
+#include "../../model/prefs/shortcut.hpp"
 
 #include "../../model/world/idtable.hpp"
 
@@ -61,6 +62,9 @@ void CSVDoc::View::setupFileMenu()
     mSave = new QAction (tr ("&Save"), this);
     connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
     file->addAction (mSave);
+
+    CSMPrefs::Shortcut* saveShortcut = new CSMPrefs::Shortcut("document-save", this);
+    connect (saveShortcut, SIGNAL(activated()), this, SLOT(save()));
 
     mVerify = new QAction (tr ("&Verify"), this);
     connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));

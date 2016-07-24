@@ -3,17 +3,25 @@
 #include <sstream>
 #include <iostream>
 
+#include <QApplication>
 #include <QMetaEnum>
 #include <QRegExp>
 #include <QStringList>
 
 #include "shortcut.hpp"
+#include "shortcuteventhandler.hpp"
 
 namespace CSMPrefs
 {
+    ShortcutManager::ShortcutManager()
+    {
+        mEventHandler = new ShortcutEventHandler(this);
+    }
+
     void ShortcutManager::addShortcut(Shortcut* shortcut)
     {
         mShortcuts.insert(std::make_pair(shortcut->getName(), shortcut));
+        mEventHandler->addShortcut(shortcut);
     }
 
     void ShortcutManager::removeShortcut(Shortcut* shortcut)
@@ -31,6 +39,8 @@ namespace CSMPrefs
                 ++it;
             }
         }
+
+        mEventHandler->removeShortcut(shortcut);
     }
 
     ShortcutManager::SequenceData ShortcutManager::getSequence(const std::string& name) const

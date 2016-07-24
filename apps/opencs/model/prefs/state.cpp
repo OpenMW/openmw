@@ -229,6 +229,10 @@ void CSMPrefs::State::declare()
         addValues (insertOutsideVisibleCell);
 
     declareCategory ("Key Bindings");
+
+    declareShortcut ("document-save", "Save", QKeySequence(Qt::ControlModifier | Qt::Key_S));
+
+    declareSeparator ();
     declareShortcut ("free-forward", "Free camera forward", QKeySequence(Qt::Key_W), Qt::Key_Shift);
     declareShortcut ("free-backward", "Free camera backward", QKeySequence(Qt::Key_S));
     declareShortcut ("free-left", "Free camera left", QKeySequence(Qt::Key_A));

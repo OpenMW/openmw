@@ -1,6 +1,7 @@
 #ifndef CSM_PREFS_SHORTCUT_EVENT_HANDLER_H
 #define CSM_PREFS_SHORTCUT_EVENT_HANDLER_H
 
+#include <map>
 #include <vector>
 
 #include <QObject>
@@ -19,7 +20,7 @@ namespace CSMPrefs
 
         public:
 
-            ShortcutEventHandler(QObject* parent=0);
+            ShortcutEventHandler(QObject* parent);
 
             void addShortcut(Shortcut* shortcut);
             void removeShortcut(Shortcut* shortcut);
@@ -30,6 +31,11 @@ namespace CSMPrefs
 
         private:
 
+            typedef std::vector<Shortcut*> ShortcutList;
+            // Child, Parent
+            typedef std::map<QWidget*, QWidget*> WidgetMap;
+            typedef std::map<QWidget*, ShortcutList> ShortcutMap;
+
             enum MatchResult
             {
                 Matches_WithMod,
@@ -37,9 +43,11 @@ namespace CSMPrefs
                 Matches_Not
             };
 
-            bool activate(unsigned int mod, unsigned int button);
+            void updateParent(QWidget* widget);
 
-            bool deactivate(unsigned int mod, unsigned int button);
+            bool activate(QWidget* widget, unsigned int mod, unsigned int button);
+
+            bool deactivate(QWidget* widget, unsigned int mod, unsigned int button);
 
             bool checkModifier(unsigned int mod, unsigned int button, Shortcut* shortcut, bool activate);
 
@@ -49,7 +57,12 @@ namespace CSMPrefs
             static bool sort(const std::pair<MatchResult, Shortcut*>& left,
                 const std::pair<MatchResult, Shortcut*>& right);
 
-            std::vector<Shortcut*> mShortcuts;
+            WidgetMap mChildParentRelations;
+            ShortcutMap mWidgetShortcuts;
+
+        private slots:
+
+            void widgetDestroyed();
     };
 }
 

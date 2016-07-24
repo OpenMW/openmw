@@ -1,15 +1,15 @@
 #include "shortcut.hpp"
 
-#include <QKeyEvent>
-#include <QMouseEvent>
-#include <QShortcut>
+#include <cassert>
+
+#include <QWidget>
 
 #include "state.hpp"
 #include "shortcutmanager.hpp"
 
 namespace CSMPrefs
 {
-    Shortcut::Shortcut(const std::string& name, QObject* parent)
+    Shortcut::Shortcut(const std::string& name, QWidget* parent)
         : QObject(parent)
         , mEnabled(true)
         , mName(name)
@@ -20,13 +20,15 @@ namespace CSMPrefs
         , mActivationStatus(AS_Inactive)
         , mModifierStatus(false)
     {
+        assert (parent);
+
         State::get().getShortcutManager().addShortcut(this);
         ShortcutManager::SequenceData data = State::get().getShortcutManager().getSequence(name);
         setSequence(data.first);
         setModifier(data.second);
     }
 
-    Shortcut::Shortcut(const std::string& name, SecondaryMode secMode, QObject* parent)
+    Shortcut::Shortcut(const std::string& name, SecondaryMode secMode, QWidget* parent)
         : QObject(parent)
         , mEnabled(true)
         , mName(name)
@@ -37,6 +39,8 @@ namespace CSMPrefs
         , mActivationStatus(AS_Inactive)
         , mModifierStatus(false)
     {
+        assert (parent);
+
         State::get().getShortcutManager().addShortcut(this);
         ShortcutManager::SequenceData data = State::get().getShortcutManager().getSequence(name);
         setSequence(data.first);

@@ -171,11 +171,8 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
     , mPrevMouseY(0)
     , mCamPositionSet(false)
 {
-    mShortcutHandler = new CSMPrefs::ShortcutEventHandler(this);
-    installEventFilter(mShortcutHandler);
-
-    mFreeCamControl = new FreeCameraController(mShortcutHandler, this);
-    mOrbitCamControl = new OrbitCameraController(mShortcutHandler, this);
+    mFreeCamControl = new FreeCameraController(this);
+    mOrbitCamControl = new OrbitCameraController(this);
     mCurrentCamControl = mFreeCamControl;
 
     mOrbitCamControl->setPickingMask(Mask_Reference | Mask_Terrain);
@@ -205,18 +202,14 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
 
     // Shortcuts
     CSMPrefs::Shortcut* focusToolbarShortcut = new CSMPrefs::Shortcut("scene-focus-toolbar", this);
-    mShortcutHandler->addShortcut(focusToolbarShortcut);
     connect(focusToolbarShortcut, SIGNAL(activated()), this, SIGNAL(focusToolbarRequest()));
 
     CSMPrefs::Shortcut* renderStatsShortcut = new CSMPrefs::Shortcut("scene-render-stats", this);
-    mShortcutHandler->addShortcut(renderStatsShortcut);
     connect(renderStatsShortcut, SIGNAL(activated()), this, SLOT(toggleRenderStats()));
 }
 
 SceneWidget::~SceneWidget()
 {
-    removeEventFilter(mShortcutHandler);
-
     // Since we're holding on to the scene templates past the existance of this graphics context, we'll need to manually release the created objects
     mResourceSystem->getSceneManager()->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
 }

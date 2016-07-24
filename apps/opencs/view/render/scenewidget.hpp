@@ -37,8 +37,6 @@ namespace CSVWidget
 namespace CSMPrefs
 {
     class Setting;
-    class Shortcut;
-    class ShortcutEventHandler;
 }
 
 namespace CSVRender
@@ -115,8 +113,6 @@ namespace CSVRender
             FreeCameraController* mFreeCamControl;
             OrbitCameraController* mOrbitCamControl;
             CameraController* mCurrentCamControl;
-
-            CSMPrefs::ShortcutEventHandler *mShortcutHandler;
 
         private:
             bool mCamPositionSet;

@@ -9,6 +9,7 @@
 namespace CSMPrefs
 {
     class Shortcut;
+    class ShortcutEventHandler;
 
     /// Class used to track and update shortcuts/sequences
     class ShortcutManager : public QObject
@@ -19,6 +20,9 @@ namespace CSMPrefs
 
             /// Key Sequence, Modifier (for secondary signal)
             typedef std::pair<QKeySequence, int> SequenceData;
+
+
+            ShortcutManager();
 
             /// The shortcut class will do this automatically
             void addShortcut(Shortcut* shortcut);
@@ -40,6 +44,8 @@ namespace CSMPrefs
 
             ShortcutMap mShortcuts;
             SequenceMap mSequences;
+
+            ShortcutEventHandler* mEventHandler;
     };
 }
 

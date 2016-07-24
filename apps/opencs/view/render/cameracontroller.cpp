@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include <QKeyEvent>
+#include <QWidget>
 
 #include <osg/BoundingBox>
 #include <osg/Camera>
@@ -15,7 +15,6 @@
 #include <osgUtil/LineSegmentIntersector>
 
 #include "../../model/prefs/shortcut.hpp"
-#include "../../model/prefs/shortcuteventhandler.hpp"
 
 #include "scenewidget.hpp"
 
@@ -79,27 +78,17 @@ namespace CSVRender
 
     void CameraController::setCamera(osg::Camera* camera)
     {
+        bool wasActive = mActive;
+
         mCamera = camera;
         mActive = (mCamera != NULL);
 
-        if (mActive)
+        if (mActive != wasActive)
         {
-            onActivate();
-
-            QList<CSMPrefs::Shortcut*> shortcuts = findChildren<CSMPrefs::Shortcut*>();
-
-            for (QList<CSMPrefs::Shortcut*>::iterator it = shortcuts.begin(); it != shortcuts.end(); ++it)
+            for (std::vector<CSMPrefs::Shortcut*>::iterator it = mShortcuts.begin(); it != mShortcuts.end(); ++it)
             {
-                (*it)->enable(true);
-            }
-        }
-        else
-        {
-            QList<CSMPrefs::Shortcut*> shortcuts = findChildren<CSMPrefs::Shortcut*>();
-
-            for (QList<CSMPrefs::Shortcut*>::iterator it = shortcuts.begin(); it != shortcuts.end(); ++it)
-            {
-                (*it)->enable(false);
+                CSMPrefs::Shortcut* shortcut = *it;
+                shortcut->enable(mActive);
             }
         }
     }
@@ -160,14 +149,21 @@ namespace CSVRender
         getCamera()->setViewMatrixAsLookAt(eye, center, up);
     }
 
+    void CameraController::addShortcut(CSMPrefs::Shortcut* shortcut)
+    {
+        mShortcuts.push_back(shortcut);
+    }
+
     /*
     Free Camera Controller
     */
 
-    FreeCameraController::FreeCameraController(CSMPrefs::ShortcutEventHandler* handler, QObject* parent)
-        : CameraController(parent)
+    FreeCameraController::FreeCameraController(QWidget* widget)
+        : CameraController(widget)
         , mLockUpright(false)
         , mModified(false)
+        , mNaviPrimary(false)
+        , mNaviSecondary(false)
         , mFast(false)
         , mFastAlternate(false)
         , mLeft(false)
@@ -181,52 +177,61 @@ namespace CSVRender
         , mRotSpeed(osg::PI / 2)
         , mSpeedMult(8)
     {
-        CSMPrefs::Shortcut* naviPrimaryShortcut = new CSMPrefs::Shortcut("scene-navi-primary", this);
+        CSMPrefs::Shortcut* naviPrimaryShortcut = new CSMPrefs::Shortcut("scene-navi-primary", widget);
         naviPrimaryShortcut->enable(false);
-        handler->addShortcut(naviPrimaryShortcut);
         connect(naviPrimaryShortcut, SIGNAL(activated(bool)), this, SLOT(naviPrimary(bool)));
 
-        CSMPrefs::Shortcut* naviSecondaryShortcut = new CSMPrefs::Shortcut("scene-navi-secondary", this);
+        addShortcut(naviPrimaryShortcut);
+
+        CSMPrefs::Shortcut* naviSecondaryShortcut = new CSMPrefs::Shortcut("scene-navi-secondary", widget);
         naviSecondaryShortcut->enable(false);
-        handler->addShortcut(naviSecondaryShortcut);
         connect(naviSecondaryShortcut, SIGNAL(activated(bool)), this, SLOT(naviSecondary(bool)));
 
+        addShortcut(naviSecondaryShortcut);
+
         CSMPrefs::Shortcut* forwardShortcut = new CSMPrefs::Shortcut("free-forward", CSMPrefs::Shortcut::SM_Detach,
-            this);
+            widget);
         forwardShortcut->enable(false);
-        handler->addShortcut(forwardShortcut);
         connect(forwardShortcut, SIGNAL(activated(bool)), this, SLOT(forward(bool)));
         connect(forwardShortcut, SIGNAL(secondary(bool)), this, SLOT(alternateFast(bool)));
 
-        CSMPrefs::Shortcut* leftShortcut = new CSMPrefs::Shortcut("free-left", this);
+        addShortcut(forwardShortcut);
+
+        CSMPrefs::Shortcut* leftShortcut = new CSMPrefs::Shortcut("free-left", widget);
         leftShortcut->enable(false);
-        handler->addShortcut(leftShortcut);
         connect(leftShortcut, SIGNAL(activated(bool)), this, SLOT(left(bool)));
 
-        CSMPrefs::Shortcut* backShortcut = new CSMPrefs::Shortcut("free-backward", this);
+        addShortcut(leftShortcut);
+
+        CSMPrefs::Shortcut* backShortcut = new CSMPrefs::Shortcut("free-backward", widget);
         backShortcut->enable(false);
-        handler->addShortcut(backShortcut);
         connect(backShortcut, SIGNAL(activated(bool)), this, SLOT(backward(bool)));
 
-        CSMPrefs::Shortcut* rightShortcut = new CSMPrefs::Shortcut("free-right", this);
+        addShortcut(backShortcut);
+
+        CSMPrefs::Shortcut* rightShortcut = new CSMPrefs::Shortcut("free-right", widget);
         rightShortcut->enable(false);
-        handler->addShortcut(rightShortcut);
         connect(rightShortcut, SIGNAL(activated(bool)), this, SLOT(right(bool)));
 
-        CSMPrefs::Shortcut* rollLeftShortcut = new CSMPrefs::Shortcut("free-roll-left", this);
+        addShortcut(rightShortcut);
+
+        CSMPrefs::Shortcut* rollLeftShortcut = new CSMPrefs::Shortcut("free-roll-left", widget);
         rollLeftShortcut->enable(false);
-        handler->addShortcut(rollLeftShortcut);
         connect(rollLeftShortcut, SIGNAL(activated(bool)), this, SLOT(rollLeft(bool)));
 
-        CSMPrefs::Shortcut* rollRightShortcut = new CSMPrefs::Shortcut("free-roll-right", this);
+        addShortcut(rollLeftShortcut);
+
+        CSMPrefs::Shortcut* rollRightShortcut = new CSMPrefs::Shortcut("free-roll-right", widget);
         rollRightShortcut->enable(false);
-        handler->addShortcut(rollRightShortcut);
         connect(rollRightShortcut, SIGNAL(activated(bool)), this, SLOT(rollRight(bool)));
 
-        CSMPrefs::Shortcut* speedModeShortcut = new CSMPrefs::Shortcut("free-speed-mode", this);
+        addShortcut(rollRightShortcut);
+
+        CSMPrefs::Shortcut* speedModeShortcut = new CSMPrefs::Shortcut("free-speed-mode", widget);
         speedModeShortcut->enable(false);
-        handler->addShortcut(speedModeShortcut);
         connect(speedModeShortcut, SIGNAL(activated()), this, SLOT(swapSpeedMode()));
+
+        addShortcut(speedModeShortcut);
     }
 
     double FreeCameraController::getLinearSpeed() const
@@ -440,9 +445,11 @@ namespace CSVRender
     Orbit Camera Controller
     */
 
-    OrbitCameraController::OrbitCameraController(CSMPrefs::ShortcutEventHandler* handler, QObject* parent)
-        : CameraController(parent)
+    OrbitCameraController::OrbitCameraController(QWidget* widget)
+        : CameraController(widget)
         , mInitialized(false)
+        , mNaviPrimary(false)
+        , mNaviSecondary(false)
         , mFast(false)
         , mFastAlternate(false)
         , mLeft(false)
@@ -457,51 +464,60 @@ namespace CSVRender
         , mOrbitSpeed(osg::PI / 4)
         , mOrbitSpeedMult(4)
     {
-        CSMPrefs::Shortcut* naviPrimaryShortcut = new CSMPrefs::Shortcut("scene-navi-primary", this);
+        CSMPrefs::Shortcut* naviPrimaryShortcut = new CSMPrefs::Shortcut("scene-navi-primary", widget);
         naviPrimaryShortcut->enable(false);
-        handler->addShortcut(naviPrimaryShortcut);
         connect(naviPrimaryShortcut, SIGNAL(activated(bool)), this, SLOT(naviPrimary(bool)));
 
-        CSMPrefs::Shortcut* naviSecondaryShortcut = new CSMPrefs::Shortcut("scene-navi-secondary", this);
+        addShortcut(naviPrimaryShortcut);
+
+        CSMPrefs::Shortcut* naviSecondaryShortcut = new CSMPrefs::Shortcut("scene-navi-secondary", widget);
         naviSecondaryShortcut->enable(false);
-        handler->addShortcut(naviSecondaryShortcut);
         connect(naviSecondaryShortcut, SIGNAL(activated(bool)), this, SLOT(naviSecondary(bool)));
 
-        CSMPrefs::Shortcut* upShortcut = new CSMPrefs::Shortcut("orbit-up", CSMPrefs::Shortcut::SM_Detach, this);
+        addShortcut(naviSecondaryShortcut);
+
+        CSMPrefs::Shortcut* upShortcut = new CSMPrefs::Shortcut("orbit-up", CSMPrefs::Shortcut::SM_Detach, widget);
         upShortcut->enable(false);
-        handler->addShortcut(upShortcut);
         connect(upShortcut, SIGNAL(activated(bool)), this, SLOT(up(bool)));
         connect(upShortcut, SIGNAL(secondary(bool)), this, SLOT(alternateFast(bool)));
 
-        CSMPrefs::Shortcut* leftShortcut = new CSMPrefs::Shortcut("orbit-left", this);
+        addShortcut(upShortcut);
+
+        CSMPrefs::Shortcut* leftShortcut = new CSMPrefs::Shortcut("orbit-left", widget);
         leftShortcut->enable(false);
-        handler->addShortcut(leftShortcut);
         connect(leftShortcut, SIGNAL(activated(bool)), this, SLOT(left(bool)));
 
-        CSMPrefs::Shortcut* downShortcut = new CSMPrefs::Shortcut("orbit-down", this);
+        addShortcut(leftShortcut);
+
+        CSMPrefs::Shortcut* downShortcut = new CSMPrefs::Shortcut("orbit-down", widget);
         downShortcut->enable(false);
-        handler->addShortcut(downShortcut);
         connect(downShortcut, SIGNAL(activated(bool)), this, SLOT(down(bool)));
 
-        CSMPrefs::Shortcut* rightShortcut = new CSMPrefs::Shortcut("orbit-right", this);
+        addShortcut(downShortcut);
+
+        CSMPrefs::Shortcut* rightShortcut = new CSMPrefs::Shortcut("orbit-right", widget);
         rightShortcut->enable(false);
-        handler->addShortcut(rightShortcut);
         connect(rightShortcut, SIGNAL(activated(bool)), this, SLOT(right(bool)));
 
-        CSMPrefs::Shortcut* rollLeftShortcut = new CSMPrefs::Shortcut("orbit-roll-left", this);
+        addShortcut(rightShortcut);
+
+        CSMPrefs::Shortcut* rollLeftShortcut = new CSMPrefs::Shortcut("orbit-roll-left", widget);
         rollLeftShortcut->enable(false);
-        handler->addShortcut(rollLeftShortcut);
         connect(rollLeftShortcut, SIGNAL(activated(bool)), this, SLOT(rollLeft(bool)));
 
-        CSMPrefs::Shortcut* rollRightShortcut = new CSMPrefs::Shortcut("orbit-roll-right", this);
+        addShortcut(rollLeftShortcut);
+
+        CSMPrefs::Shortcut* rollRightShortcut = new CSMPrefs::Shortcut("orbit-roll-right", widget);
         rollRightShortcut->enable(false);
-        handler->addShortcut(rollRightShortcut);
         connect(rollRightShortcut, SIGNAL(activated(bool)), this, SLOT(rollRight(bool)));
 
-        CSMPrefs::Shortcut* speedModeShortcut = new CSMPrefs::Shortcut("orbit-speed-mode", this);
+        addShortcut(rollRightShortcut);
+
+        CSMPrefs::Shortcut* speedModeShortcut = new CSMPrefs::Shortcut("orbit-speed-mode", widget);
         speedModeShortcut->enable(false);
-        handler->addShortcut(speedModeShortcut);
         connect(speedModeShortcut, SIGNAL(activated()), this, SLOT(swapSpeedMode()));
+
+        addShortcut(speedModeShortcut);
     }
 
     osg::Vec3d OrbitCameraController::getCenter() const

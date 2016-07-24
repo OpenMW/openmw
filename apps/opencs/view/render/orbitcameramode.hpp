@@ -1,12 +1,13 @@
 #ifndef CSV_RENDER_ORBITCAMERAPICKMODE_H
 #define CSV_RENDER_ORBITCAMERAPICKMODE_H
 
+#include <memory>
+
 #include "../widget/modebutton.hpp"
 
 namespace CSMPrefs
 {
     class Shortcut;
-    class ShortcutEventHandler;
 }
 
 namespace CSVRender
@@ -19,8 +20,8 @@ namespace CSVRender
 
         public:
 
-            OrbitCameraMode(WorldspaceWidget* worldspaceWidget, CSMPrefs::ShortcutEventHandler* shortcutHandler,
-                const QIcon& icon, const QString& tooltip = "", QWidget* parent = 0);
+            OrbitCameraMode(WorldspaceWidget* worldspaceWidget, const QIcon& icon, const QString& tooltip = "",
+                QWidget* parent = 0);
             ~OrbitCameraMode();
 
             virtual void activate(CSVWidget::SceneToolbar* toolbar);
@@ -30,9 +31,8 @@ namespace CSVRender
         private:
 
             WorldspaceWidget* mWorldspaceWidget;
-            CSMPrefs::ShortcutEventHandler* mShortcutHandler;
             QAction* mCenterOnSelection;
-            CSMPrefs::Shortcut* mCenterShortcut;
+            std::auto_ptr<CSMPrefs::Shortcut> mCenterShortcut;
 
         private slots:
 
