@@ -1,8 +1,7 @@
 #include <apps/openmw/mwworld/ptr.hpp>
 #include "Networking.hpp"
 #include "LocalPlayer.hpp"
-#include "GUIChat.hpp"
-#include "GUILogin.hpp"
+#include "GUIController.hpp"
 
 namespace mwmp
 {
@@ -20,8 +19,7 @@ namespace mwmp
 
         Networking *getNetworking() const;
         LocalPlayer *getLocalPlayer() const;
-        GUIChat *getChatBox() const;
-        GUILogin *getGUILogin() const;
+        GUIController *getGUIConroller() const;
 
         void UpdateWorld(float dt) const;
 
@@ -34,13 +32,9 @@ namespace mwmp
         Networking *mNetworking;
         LocalPlayer *mLocalPlayer;
 
-        GUIChat *mChat;
-        GUILogin *mGUILogin;
+        GUIController *mGUIController;
 
         std::string server;
         unsigned short port;
-
-        int keySay;
-        int keyChatMode;
     };
 }

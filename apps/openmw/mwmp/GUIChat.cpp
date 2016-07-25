@@ -17,6 +17,8 @@
 #include "Networking.hpp"
 #include "Main.hpp"
 
+#include "GUIController.hpp"
+
 
 namespace mwmp
 {

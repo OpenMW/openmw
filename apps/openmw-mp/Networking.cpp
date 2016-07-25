@@ -270,6 +270,16 @@ void Networking::Update(RakNet::Packet *packet)
             break;
         }
 
+        case ID_GUI_MESSAGEBOX:
+        {
+            DEBUG_PRINTF("ID_GUI_MESSAGEBOX\n");
+            myPacket->Read(player);
+
+            Script::Call<Script::CallbackIdentity("OnGUIAction")>(player->GetID(), (int)player->guiMessageBox.id,
+                                                                  player->guiMessageBox.data.c_str());
+            break;
+        }
+
         default:
             printf("Message with identifier %i has arrived.\n", packet->data[1]);
             break;

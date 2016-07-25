@@ -22,8 +22,10 @@
 
 namespace mwmp
 {
+    class GUIController;
     class GUIChat : public MWGui::WindowBase, public MWGui::ReferenceInterface
     {
+        friend class GUIController;
     public:
         enum
         {

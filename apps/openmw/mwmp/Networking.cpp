@@ -459,7 +459,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
                     myPacket->Packet(&bsIn, pl, false);
                     message =  *pl->ChatMessage();
                 }
-                Main::get().getChatBox()->print(message);
+                Main::get().getGUIConroller()->PrintChatMessage(message);
                 break;
             }
             case ID_GAME_CHARGEN:
@@ -528,6 +528,23 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
                     //printf("skill %d, value %d\n", i, skillValue.getBase());
                 }
 
+                break;
+            }
+            case ID_GUI_MESSAGEBOX:
+            {
+                if(id == myid)
+                {
+                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
+
+                    printf("ID_GUI_MESSAGEBOX, Type %d, MSG %s\n", getLocalPlayer()->guiMessageBox.type, getLocalPlayer()->guiMessageBox.label.c_str());
+
+                    if(getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::MessageBox)
+                        Main::get().getGUIConroller()->ShowMessageBox(getLocalPlayer()->guiMessageBox);
+                    else if(getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::CustomMessageBox)
+                        Main::get().getGUIConroller()->ShowCustomMessageBox(getLocalPlayer()->guiMessageBox);
+                    else if(getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::InputDialog)
+                        Main::get().getGUIConroller()->ShowInputBox(getLocalPlayer()->guiMessageBox);
+                }
                 break;
             }
         default:

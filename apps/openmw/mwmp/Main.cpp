@@ -26,7 +26,6 @@
 
 #include "DedicatedPlayer.hpp"
 #include "LocalPlayer.hpp"
-#include "GUIChat.hpp"
 
 using namespace mwmp;
 using namespace std;
@@ -61,12 +60,11 @@ Main::Main()
     std::cout << "Main::Main" << std::endl;
     mNetworking = new Networking();
     mLocalPlayer = new LocalPlayer();
+    mGUIController = new GUIController();
     //mLocalPlayer->CharGen(0, 4);
 
     server = "mp.tes3mp.com";
     port = 25565;
-    keySay = SDLK_y;
-    keyChatMode = SDLK_F2;
 }
 
 Main::~Main()
@@ -74,6 +72,7 @@ Main::~Main()
     std::cout << "Main::~Main" << std::endl;
     delete mNetworking;
     delete mLocalPlayer;
+    delete mGUIController;
     Players::CleanUp();
 }
 
@@ -94,17 +93,7 @@ void Main::Create()
     pMain->server = mgr.getString("server", "General");
     pMain->port = (unsigned short)mgr.getInt("port", "General");
 
-    float chatDelay = mgr.getFloat("delay", "Chat");
-    int chatY = mgr.getInt("y", "Chat");
-    int chatX = mgr.getInt("x", "Chat");
-    int chatW = mgr.getInt("w", "Chat");
-    int chatH = mgr.getInt("h", "Chat");
-    pMain->keySay =      SDL_GetKeyFromName(mgr.getString("keySay", "Chat").c_str());
-    pMain->keyChatMode = SDL_GetKeyFromName(mgr.getString("keyChatMode", "Chat").c_str());
-
-
-    pMain->mChat = new GUIChat(chatX, chatY, chatW, chatH);
-    pMain->getChatBox()->SetDelay(chatDelay);
+    pMain->mGUIController->setupChat(mgr);
 
     mgr.mUserSettings = saveUserSettings;
     mgr.mDefaultSettings = saveDefaultSettings;
@@ -119,7 +108,7 @@ void Main::Destroy()
 {
     assert(pMain);
 
-    delete pMain->mChat;
+    delete pMain->mGUIController;
 
     delete pMain;
     pMain = 0;
@@ -138,7 +127,7 @@ void Main::Frame(float dt)
     Players::Update(dt);
     get().UpdateWorld(dt);
 
-    get().getChatBox()->Update(dt);
+    get().getGUIConroller()->update(dt);
 
 }
 
@@ -160,7 +149,7 @@ void Main::UpdateWorld(float dt) const
         mNetworking->Connect(server, port);
         player.getClass().getCreatureStats(player).getSpells().add("fireball");
         mLocalPlayer->updateBaseStats(true);
-        mChat->setVisible(true);
+        get().getGUIConroller()->setChatVisible(true);
     }
     else
         mLocalPlayer->Update();
@@ -181,23 +170,15 @@ LocalPlayer *Main::getLocalPlayer() const
     return mLocalPlayer;
 }
 
-GUIChat *Main::getChatBox() const
-{
-    return mChat;
-}
 
-GUILogin *Main::getGUILogin() const
+GUIController *Main::getGUIConroller() const
 {
-    return mGUILogin;
+    return mGUIController;
 }
-
 
 void Main::PressedKey(int key)
 {
-
-    if(pMain == nullptr || get().getChatBox() == nullptr) return;
-    if(key == get().keyChatMode)
-        get().getChatBox()->PressedChatMode();
-    else if(key == get().keySay)
-        get().getChatBox()->PressedSay();
+    if(pMain == nullptr) return;
+    if(get().getGUIConroller()->pressedKey(key))
+        return; // if any gui bind pressed
 }

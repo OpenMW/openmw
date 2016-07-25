@@ -129,6 +129,10 @@ public:
 
     static void Kick(unsigned short pid) noexcept;
 
+    static void MessageBox(unsigned short pid, int id, const char *label) noexcept;
+    static void CustomMessageBox(unsigned short pid, int id, const char *label, const char *buttons) noexcept;
+    static void InputDialog(unsigned short pid, int id, const char *label) noexcept;
+
     static constexpr ScriptFunctionData functions[]{
             {"CreateTimer",         ScriptFunctions::CreateTimer},
             {"CreateTimerEx",       reinterpret_cast<Function<void>>(ScriptFunctions::CreateTimerEx)},
@@ -219,6 +223,9 @@ public:
             {"SendMessage",         ScriptFunctions::SendMessage},
             {"SetCharGenStage",     ScriptFunctions::SetCharGenStage},
             {"Resurrect",           ScriptFunctions::Resurrect},
+            {"MessageBox",          ScriptFunctions::MessageBox},
+            {"CustomMessageBox",    ScriptFunctions::CustomMessageBox},
+            {"InputDialog",         ScriptFunctions::InputDialog},
 
             {"Kick",                ScriptFunctions::Kick},
     };
@@ -234,7 +241,8 @@ public:
             {"OnPlayerChangeCell",    Function<void, unsigned short>()},
             {"OnPlayerUpdateEquiped", Function<void, unsigned short>()},
             {"OnPlayerSendMessage",   Function<bool, unsigned short, const char*>()},
-            {"OnPlayerEndCharGen",    Function<void, unsigned short>()}
+            {"OnPlayerEndCharGen",    Function<void, unsigned short>()},
+            {"OnGUIAction",           Function<void, unsigned short, int, const char*>()}
     };
 };
 
