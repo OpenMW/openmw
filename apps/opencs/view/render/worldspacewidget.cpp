@@ -163,30 +163,32 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
     /// \todo consider user-defined button-mapping
     tool->addButton (":scenetoolbar/1st-person", "1st",
         "First Person"
-        "<ul><li>Mouse-Look while holding the left button</li>"
-        "<li>WASD movement keys</li>"
+        "<ul><li>Camera is held upright</li>"
+        "<li>Mouse-Look while holding {scene-navi-primary}</li>"
+        "<li>Movement keys: {free-forward}(forward), {free-left}(left), {free-backward}(back), {free-right}(right)</li>"
+        "<li>Strafing (also vertically) by holding {scene-navi-secondary}</li>"
         "<li>Mouse wheel moves the camera forward/backward</li>"
-        "<li>Strafing (also vertically) by holding the left mouse button and control</li>"
-        "<li>Camera is held upright</li>"
-        "<li>Hold shift to speed up movement</li>"
+        "<li>Hold {free-forward:mod} to speed up movement</li>"
         "</ul>");
     tool->addButton (":scenetoolbar/free-camera", "free",
         "Free Camera"
-        "<ul><li>Mouse-Look while holding the left button</li>"
-        "<li>Strafing (also vertically) via WASD or by holding the left mouse button and control</li>"
+        "<ul><li>Mouse-Look while holding {scene-navi-primary}</li>"
+        "<li>Movement keys: {free-forward}(forward), {free-left}(left), {free-backward}(back), {free-right}(right)</li>"
+        "<li>Roll camera with {free-roll-left} and {free-roll-right} keys</li>"
+        "<li>Strafing (also vertically) by holding {scene-navi-secondary}</li>"
         "<li>Mouse wheel moves the camera forward/backward</li>"
-        "<li>Roll camera with Q and E keys</li>"
-        "<li>Hold shift to speed up movement</li>"
+        "<li>Hold {free-forward:mod} to speed up movement</li>"
         "</ul>");
     tool->addButton(
         new CSVRender::OrbitCameraMode(this, QIcon(":scenetoolbar/orbiting-camera"),
             "Orbiting Camera"
             "<ul><li>Always facing the centre point</li>"
-            "<li>Rotate around the centre point via WASD or by moving the mouse while holding the left button</li>"
+            "<li>Rotate around the centre point via {orbit-up}, {orbit-left}, {orbit-down}, {orbit-right} or by moving "
+                "the mouse while holding {scene-navi-primary}</li>"
+            "<li>Roll camera with {orbit-roll-left} and {orbit-roll-right} keys</li>"
+            "<li>Strafing (also vertically) by holding {scene-navi-secondary} (includes relocation of the centre point)</li>"
             "<li>Mouse wheel moves camera away or towards centre point but can not pass through it</li>"
-            "<li>Roll camera with Q and E keys</li>"
-            "<li>Strafing (also vertically) by holding the left mouse button and control (includes relocation of the centre point)</li>"
-            "<li>Hold shift to speed up movement</li>"
+            "<li>Hold {orbit-up:mod} to speed up movement</li>"
             "</ul>", tool),
         "orbit");
 

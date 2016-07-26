@@ -26,7 +26,8 @@ namespace CSVRender
 
     void OrbitCameraMode::activate(CSVWidget::SceneToolbar* toolbar)
     {
-        mCenterOnSelection = new QAction("Center on selected object\t" + mCenterShortcut->toString(), this);
+        mCenterOnSelection = new QAction("Center on selected object", this);
+        mCenterShortcut->associateAction(mCenterOnSelection);
         connect(mCenterOnSelection, SIGNAL(triggered()), this, SLOT(centerSelection()));
 
         mCenterShortcut->enable(true);
@@ -34,6 +35,7 @@ namespace CSVRender
 
     void OrbitCameraMode::deactivate(CSVWidget::SceneToolbar* toolbar)
     {
+        mCenterShortcut->associateAction(0);
         mCenterShortcut->enable(false);
     }
 

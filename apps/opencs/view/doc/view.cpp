@@ -64,6 +64,7 @@ void CSVDoc::View::setupFileMenu()
     file->addAction (mSave);
 
     CSMPrefs::Shortcut* saveShortcut = new CSMPrefs::Shortcut("document-save", this);
+    saveShortcut->associateAction(mSave);
     connect (saveShortcut, SIGNAL(activated()), this, SLOT(save()));
 
     mVerify = new QAction (tr ("&Verify"), this);

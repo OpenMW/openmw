@@ -7,6 +7,7 @@
 
 class QHBoxLayout;
 class QMenu;
+class QEvent;
 
 namespace CSVWidget
 {
@@ -42,6 +43,10 @@ namespace CSVWidget
             virtual bool createContextMenu (QMenu *menu);
 
             void setButton (std::map<ModeButton *, std::string>::iterator iter);
+
+        protected:
+
+            bool event(QEvent* event);
 
         public:
 

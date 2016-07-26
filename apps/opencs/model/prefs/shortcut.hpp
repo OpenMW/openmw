@@ -7,6 +7,7 @@
 #include <QObject>
 #include <QString>
 
+class QAction;
 class QWidget;
 
 namespace CSMPrefs
@@ -64,6 +65,9 @@ namespace CSMPrefs
             void setActivationStatus(ActivationStatus status);
             void setModifierStatus(bool status);
 
+            /// Appends the sequence to the QAction text, also keeps it up to date
+            void associateAction(QAction* action);
+
             // Workaround for Qt4 signals being "protected"
             void signalActivated(bool state);
             void signalActivated();
@@ -87,6 +91,13 @@ namespace CSMPrefs
 
             ActivationStatus mActivationStatus;
             bool mModifierStatus;
+
+            QAction* mAction;
+            QString mActionText;
+
+        private slots:
+
+            void actionDeleted();
 
         signals:
 

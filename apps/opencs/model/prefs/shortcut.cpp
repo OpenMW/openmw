@@ -2,6 +2,7 @@
 
 #include <cassert>
 
+#include <QAction>
 #include <QWidget>
 
 #include "state.hpp"
@@ -19,6 +20,7 @@ namespace CSMPrefs
         , mLastPos(0)
         , mActivationStatus(AS_Inactive)
         , mModifierStatus(false)
+        , mAction(0)
     {
         assert (parent);
 
@@ -38,6 +40,7 @@ namespace CSMPrefs
         , mLastPos(0)
         , mActivationStatus(AS_Inactive)
         , mModifierStatus(false)
+        , mAction(0)
     {
         assert (parent);
 
@@ -107,6 +110,9 @@ namespace CSMPrefs
         mSequence = sequence;
         mCurrentPos = 0;
         mLastPos = sequence.count() - 1;
+
+        if (mAction)
+            mAction->setText(mActionText + "\t" + toString());
     }
 
     void Shortcut::setModifier(int modifier)
@@ -127,6 +133,24 @@ namespace CSMPrefs
     void Shortcut::setModifierStatus(bool status)
     {
         mModifierStatus = status;
+    }
+
+    void Shortcut::associateAction(QAction* action)
+    {
+        if (mAction)
+        {
+            disconnect(this, SLOT(actionDeleted()));
+        }
+
+        mAction = action;
+
+        if (mAction)
+        {
+            mActionText = mAction->text();
+            mAction->setText(mActionText + "\t" + toString());
+
+            connect(mAction, SIGNAL(destroyed()), this, SLOT(actionDeleted()));
+        }
     }
 
     void Shortcut::signalActivated(bool state)
@@ -151,5 +175,10 @@ namespace CSMPrefs
     QString Shortcut::toString() const
     {
         return QString(State::get().getShortcutManager().sequenceToString(std::make_pair(mSequence, mModifier)).data());
+    }
+
+    void Shortcut::actionDeleted()
+    {
+        mAction = 0;
     }
 }

@@ -92,7 +92,7 @@ namespace CSMPrefs
         std::string output;
 
         // KeySequence
-        for (int i = 0; i < data.first.count(); ++i)
+        for (int i = 0; i < (int)data.first.count(); ++i)
         {
             if (data.first[i] & ModMask)
             {

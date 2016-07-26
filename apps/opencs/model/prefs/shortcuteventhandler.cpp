@@ -137,6 +137,7 @@ namespace CSMPrefs
             if (parentIt != mWidgetShortcuts.end())
             {
                 mChildParentRelations.insert(std::make_pair(widget, parent));
+                updateParent(parent);
                 break;
             }
 
