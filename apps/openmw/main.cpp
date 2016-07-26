@@ -3,6 +3,7 @@
 
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/files/escape.hpp>
 #include <components/fallback/validate.hpp>
 
 #include <SDL_messagebox.h>
