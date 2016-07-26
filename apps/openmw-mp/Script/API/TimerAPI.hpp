@@ -35,7 +35,7 @@ namespace mwmp
         void Start();
         void Restart(int msec);
     private:
-        long startTime, targetMsec;
+        double startTime, targetMsec;
         std::string publ, arg_types;
         std::vector<boost::any> args;
         Script *scr;
