@@ -217,6 +217,7 @@ void CSMPrefs::State::declare()
 
     declareCategory ("Key Bindings");
 
+    declareSubcategory ("Document");
     declareShortcut ("document-file-newgame", "Create new game", QKeySequence());
     declareShortcut ("document-file-newaddon", "Create new addon", QKeySequence());
     declareShortcut ("document-file-open", "Open", QKeySequence());
@@ -269,12 +270,12 @@ void CSMPrefs::State::declare()
     declareShortcut ("document-debug-shutdown", "Stop Debug", QKeySequence());
     declareShortcut ("document-debug-runlog", "Run Log", QKeySequence());
 
-    declareSeparator ();
+    declareSubcategory ("Table");
     declareShortcut ("table-edit", "Edit record", QKeySequence());
     declareShortcut ("table-add", "Add row/record", QKeySequence(Qt::ControlModifier | Qt::Key_N));
     declareShortcut ("table-clone", "Clone record", QKeySequence());
     declareShortcut ("table-revert", "Revert record", QKeySequence());
-    declareShortcut ("table-remove", "Remove record", QKeySequence(Qt::Key_Delete));
+    declareShortcut ("table-remove", "Remove row/record", QKeySequence(Qt::Key_Delete));
     declareShortcut ("table-moveup", "Move record up", QKeySequence());
     declareShortcut ("table-movedown", "Move record down", QKeySequence());
     declareShortcut ("table-view", "View record", QKeySequence());
@@ -282,46 +283,46 @@ void CSMPrefs::State::declare()
     declareShortcut ("table-extendeddelete", "Extended record deletion", QKeySequence());
     declareShortcut ("table-extendedrevert", "Extended record revertion", QKeySequence());
 
-    declareSeparator ();
+    declareSubcategory ("Report Table");
     declareShortcut ("reporttable-show", "Show report", QKeySequence());
     declareShortcut ("reporttable-remove", "Remove report", QKeySequence(Qt::Key_Delete));
     declareShortcut ("reporttable-replace", "Replace report", QKeySequence());
     declareShortcut ("reporttable-refresh", "Refresh report", QKeySequence());
 
-    declareSeparator ();
-    declareShortcut ("free-forward", "Free camera forward", QKeySequence(Qt::Key_W), Qt::Key_Shift);
-    declareShortcut ("free-backward", "Free camera backward", QKeySequence(Qt::Key_S));
-    declareShortcut ("free-left", "Free camera left", QKeySequence(Qt::Key_A));
-    declareShortcut ("free-right", "Free camera right", QKeySequence(Qt::Key_D));
-    declareModifier ("free-forward", "Free camera speed modifier");
-    declareShortcut ("free-roll-left", "Free camera roll left", QKeySequence(Qt::Key_Q));
-    declareShortcut ("free-roll-right", "Free camera roll right", QKeySequence(Qt::Key_E));
-    declareShortcut ("free-speed-mode", "Free camera speed mode toggle", QKeySequence(Qt::Key_F));
+    declareSubcategory ("1st/Free Camera");
+    declareShortcut ("free-forward", "Forward", QKeySequence(Qt::Key_W), Qt::Key_Shift);
+    declareShortcut ("free-backward", "Backward", QKeySequence(Qt::Key_S));
+    declareShortcut ("free-left", "Left", QKeySequence(Qt::Key_A));
+    declareShortcut ("free-right", "Right", QKeySequence(Qt::Key_D));
+    declareModifier ("free-forward", "Speed modifier");
+    declareShortcut ("free-roll-left", "Roll left", QKeySequence(Qt::Key_Q));
+    declareShortcut ("free-roll-right", "Roll right", QKeySequence(Qt::Key_E));
+    declareShortcut ("free-speed-mode", "Speed mode toggle", QKeySequence(Qt::Key_F));
 
-    declareSeparator ();
-    declareShortcut ("orbit-up", "Orbit camera up", QKeySequence(Qt::Key_W), Qt::Key_Shift);
-    declareShortcut ("orbit-down", "Orbit camera down", QKeySequence(Qt::Key_S));
-    declareShortcut ("orbit-left", "Orbit camera left", QKeySequence(Qt::Key_A));
-    declareShortcut ("orbit-right", "Orbit camera right", QKeySequence(Qt::Key_D));
-    declareModifier ("orbit-up", "Orbit camera speed modifier");
-    declareShortcut ("orbit-roll-left", "Orbit camera roll left", QKeySequence(Qt::Key_Q));
-    declareShortcut ("orbit-roll-right", "Orbit camera roll right", QKeySequence(Qt::Key_E));
-    declareShortcut ("orbit-speed-mode", "Orbit camera speed mode toggle", QKeySequence(Qt::Key_F));
-    declareShortcut ("orbit-center-selection", "Centers the camera on the selected item", QKeySequence(Qt::Key_C));
+    declareSubcategory ("Orbit Camera");
+    declareShortcut ("orbit-up", "Up", QKeySequence(Qt::Key_W), Qt::Key_Shift);
+    declareShortcut ("orbit-down", "Down", QKeySequence(Qt::Key_S));
+    declareShortcut ("orbit-left", "Left", QKeySequence(Qt::Key_A));
+    declareShortcut ("orbit-right", "Right", QKeySequence(Qt::Key_D));
+    declareModifier ("orbit-up", "Speed modifier");
+    declareShortcut ("orbit-roll-left", "Roll left", QKeySequence(Qt::Key_Q));
+    declareShortcut ("orbit-roll-right", "Roll right", QKeySequence(Qt::Key_E));
+    declareShortcut ("orbit-speed-mode", "Speed mode toggle", QKeySequence(Qt::Key_F));
+    declareShortcut ("orbit-center-selection", "Center on selected", QKeySequence(Qt::Key_C));
 
-    declareSeparator ();
+    declareSubcategory ("Scene");
     declareShortcut ("scene-navi-primary", "Camera rotation from mouse movement", QKeySequence(Qt::LeftButton));
     declareShortcut ("scene-navi-secondary", "Camera translation from mouse movement",
         QKeySequence(Qt::ControlModifier | (int)Qt::LeftButton));
-    declareShortcut ("scene-edit-primary", "Scene primary edit button", QKeySequence(Qt::RightButton));
-    declareShortcut ("scene-edit-secondary", "Scene secondary edit button",
+    declareShortcut ("scene-edit-primary", "Primary edit", QKeySequence(Qt::RightButton));
+    declareShortcut ("scene-edit-secondary", "Secondary edit",
         QKeySequence(Qt::ControlModifier | (int)Qt::RightButton));
-    declareShortcut ("scene-select-primary", "Scene primary select button", QKeySequence(Qt::MiddleButton));
-    declareShortcut ("scene-select-secondary", "Scene secondary select button",
+    declareShortcut ("scene-select-primary", "Primary select", QKeySequence(Qt::MiddleButton));
+    declareShortcut ("scene-select-secondary", "Secondary select",
         QKeySequence(Qt::ControlModifier | (int)Qt::MiddleButton));
-    declareShortcut ("scene-edit-abort", "Scene editor abort key", QKeySequence(Qt::Key_Escape));
-    declareShortcut ("scene-focus-toolbar", "Change focus in scene editor", QKeySequence(Qt::Key_T));
-    declareShortcut ("scene-render-stats", "Displays debug rendering stats", QKeySequence(Qt::Key_F3));
+    declareShortcut ("scene-edit-abort", "Abort", QKeySequence(Qt::Key_Escape));
+    declareShortcut ("scene-focus-toolbar", "Toggle toolbar focus", QKeySequence(Qt::Key_T));
+    declareShortcut ("scene-render-stats", "Debug rendering stats", QKeySequence(Qt::Key_F3));
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)
@@ -480,6 +481,17 @@ void CSMPrefs::State::declareSeparator()
 
     CSMPrefs::Setting *setting =
         new CSMPrefs::Setting (&mCurrentCategory->second, &mSettings, &mMutex, "", "");
+
+    mCurrentCategory->second.addSetting (setting);
+}
+
+void CSMPrefs::State::declareSubcategory(const std::string& label)
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    CSMPrefs::Setting *setting =
+        new CSMPrefs::Setting (&mCurrentCategory->second, &mSettings, &mMutex, "", label);
 
     mCurrentCategory->second.addSetting (setting);
 }

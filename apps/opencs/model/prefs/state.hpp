@@ -82,6 +82,8 @@ namespace CSMPrefs
 
             void declareSeparator();
 
+            void declareSubcategory(const std::string& label);
+
             void setDefault (const std::string& key, const std::string& default_);
 
         public:
