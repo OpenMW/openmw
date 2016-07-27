@@ -62,7 +62,7 @@ void CSVWorld::DragRecordTable::dragMoveEvent(QDragMoveEvent *event)
 }
 
 void CSVWorld::DragRecordTable::dropEvent(QDropEvent *event)
-{
+{(void)write(1,"H\n",2);
     QModelIndex index = indexAt(event->pos());
     CSMWorld::ColumnBase::Display display = getIndexDisplayType(index);
     if (CSVWorld::DragDropUtils::canAcceptData(*event, display))
