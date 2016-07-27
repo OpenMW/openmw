@@ -3,7 +3,7 @@ TES3MP
 
 TES3MP is a project aiming to add multiplayer functionality to [OpenMW](https://github.com/OpenMW/openmw), a free and open source recreation of the popular Bethesda Softworks' game "The Elder Scrolls III: Morrowind".
 
-* Version: 0.01
+* Version: 0.0.1b
 * License: GPLv3 (see docs/license/GPL3.txt for more information)
 * Website: https://steamcommunity.com/groups/mwmulti
 
@@ -13,7 +13,8 @@ Font Licenses:
 Project Status
 --------------
 
-[Version Changelog](https://github.com/TES3MP/openmw-tes3mp/blob/master/OpenMW-mp%20changelog)
+[Version changelog and milestones](https://github.com/TES3MP/openmw-tes3mp/blob/master/OpenMW-mp%20changelog)
+
 We are still in a very early phase of development, at the moment we have synchronization of character appearance, character skills, stats, attributes and death as well as movement on interiors and exteriors, melee and ranged combat.
 
 Contributing
