@@ -12,6 +12,7 @@
 #include "boolsetting.hpp"
 #include "coloursetting.hpp"
 #include "shortcutsetting.hpp"
+#include "modifiersetting.hpp"
 
 CSMPrefs::State *CSMPrefs::State::sThis = 0;
 
@@ -292,6 +293,7 @@ void CSMPrefs::State::declare()
     declareShortcut ("free-backward", "Free camera backward", QKeySequence(Qt::Key_S));
     declareShortcut ("free-left", "Free camera left", QKeySequence(Qt::Key_A));
     declareShortcut ("free-right", "Free camera right", QKeySequence(Qt::Key_D));
+    declareModifier ("free-forward", "Free camera speed modifier");
     declareShortcut ("free-roll-left", "Free camera roll left", QKeySequence(Qt::Key_Q));
     declareShortcut ("free-roll-right", "Free camera roll right", QKeySequence(Qt::Key_E));
     declareShortcut ("free-speed-mode", "Free camera speed mode toggle", QKeySequence(Qt::Key_F));
@@ -301,6 +303,7 @@ void CSMPrefs::State::declare()
     declareShortcut ("orbit-down", "Orbit camera down", QKeySequence(Qt::Key_S));
     declareShortcut ("orbit-left", "Orbit camera left", QKeySequence(Qt::Key_A));
     declareShortcut ("orbit-right", "Orbit camera right", QKeySequence(Qt::Key_D));
+    declareModifier ("orbit-up", "Orbit camera speed modifier");
     declareShortcut ("orbit-roll-left", "Orbit camera roll left", QKeySequence(Qt::Key_Q));
     declareShortcut ("orbit-roll-right", "Orbit camera roll right", QKeySequence(Qt::Key_E));
     declareShortcut ("orbit-speed-mode", "Orbit camera speed mode toggle", QKeySequence(Qt::Key_F));
@@ -452,7 +455,19 @@ CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut (const std::string& 
     getShortcutManager().setSequence(key, sequence, mod);
 
     CSMPrefs::ShortcutSetting *setting = new CSMPrefs::ShortcutSetting (&mCurrentCategory->second, &mSettings, &mMutex,
-        key, label, sequence);
+        key, label);
+    mCurrentCategory->second.addSetting (setting);
+
+    return *setting;
+}
+
+CSMPrefs::ModifierSetting& CSMPrefs::State::declareModifier(const std::string& key, const std::string& label)
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    CSMPrefs::ModifierSetting *setting = new CSMPrefs::ModifierSetting (&mCurrentCategory->second, &mSettings, &mMutex,
+        key, label);
     mCurrentCategory->second.addSetting (setting);
 
     return *setting;

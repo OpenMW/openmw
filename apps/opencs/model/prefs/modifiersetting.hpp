@@ -1,5 +1,5 @@
-#ifndef CSM_PREFS_SHORTCUTSETTING_H
-#define CSM_PREFS_SHORTCUTSETTING_H
+#ifndef CSM_PREFS_MODIFIERSETTING_H
+#define CSM_PREFS_MODIFIERSETTING_H
 
 #include <QKeySequence>
 
@@ -10,13 +10,13 @@ class QPushButton;
 
 namespace CSMPrefs
 {
-    class ShortcutSetting : public Setting
+    class ModifierSetting : public Setting
     {
             Q_OBJECT
 
         public:
 
-            ShortcutSetting(Category* parent, Settings::Manager* values, QMutex* mutex, const std::string& key,
+            ModifierSetting(Category* parent, Settings::Manager* values, QMutex* mutex, const std::string& key,
                 const std::string& label);
 
             virtual std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent);
@@ -27,13 +27,10 @@ namespace CSMPrefs
 
         private:
 
-            bool handleEvent(QObject* target, int mod, int value, bool active);
+            bool handleEvent(QObject* target, int mod, int value);
 
             QPushButton* mButton;
-
             bool mEditorActive;
-            int mEditorPos;
-            int mEditorKeys[4];
 
         private slots:
 

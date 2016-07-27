@@ -14,9 +14,8 @@
 namespace CSMPrefs
 {
     ShortcutSetting::ShortcutSetting(Category* parent, Settings::Manager* values, QMutex* mutex, const std::string& key,
-        const std::string& label, const QKeySequence& default_)
+        const std::string& label)
         : Setting(parent, values, mutex, key, label)
-        , mDefault(default_)
         , mEditorActive(false)
         , mEditorPos(0)
     {
@@ -30,7 +29,11 @@ namespace CSMPrefs
 
     std::pair<QWidget*, QWidget*> ShortcutSetting::makeWidgets(QWidget* parent)
     {
-        QString text = QString::fromUtf8(State::get().getShortcutManager().convertToString(mDefault).c_str());
+        QKeySequence sequence;
+        int modifier = 0;
+        State::get().getShortcutManager().getSequence(getKey(), sequence, modifier);
+
+        QString text = QString::fromUtf8(State::get().getShortcutManager().convertToString(sequence).c_str());
 
         QLabel* label = new QLabel(QString::fromUtf8(getLabel().c_str()), parent);
         QPushButton* widget = new QPushButton(text, parent);

@@ -27,6 +27,7 @@ namespace CSMPrefs
     class BoolSetting;
     class ColourSetting;
     class ShortcutSetting;
+    class ModifierSetting;
 
     /// \brief User settings state
     ///
@@ -76,6 +77,8 @@ namespace CSMPrefs
 
             ShortcutSetting& declareShortcut (const std::string& key, const std::string& label,
                 const QKeySequence& default_, int modifier_=0);
+
+            ModifierSetting& declareModifier(const std::string& key, const std::string& label);
 
             void declareSeparator();
 
