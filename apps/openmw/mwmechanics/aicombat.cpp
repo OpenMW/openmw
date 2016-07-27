@@ -162,7 +162,8 @@ namespace MWMechanics
         if (storage.mCurrentAction.get()) // need to wait to init action with it's attack range
         {
             //Update every frame
-            storage.mReadyToAttack = pathTo(actor, target.getRefData().getPosition().pos, duration, storage.mAttackRange);
+            bool is_target_reached = pathTo(actor, target.getRefData().getPosition().pos, duration, storage.mAttackRange);
+            if (is_target_reached) storage.mReadyToAttack = true;
         }
 
         storage.updateCombatMove(duration);
@@ -229,9 +230,11 @@ namespace MWMechanics
 
         osg::Vec3f vAimDir = MWBase::Environment::get().getWorld()->aimToTarget(actor, target);
         float distToTarget = MWBase::Environment::get().getWorld()->getHitDistance(actor, target);
+
+        storage.mReadyToAttack = (distToTarget <= rangeAttack);
         
         // can't fight if attacker can't go where target is.  E.g. A fish can't attack person on land.
-        if (distToTarget >= rangeAttack
+        if (distToTarget > rangeAttack
                 && !actorClass.isNpc() && !MWMechanics::isEnvironmentCompatible(actor, target))
         {
             // TODO: start fleeing?
