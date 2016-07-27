@@ -269,6 +269,25 @@ void CSMPrefs::State::declare()
     declareShortcut ("document-debug-runlog", "Run Log", QKeySequence());
 
     declareSeparator ();
+    declareShortcut ("table-edit", "Edit record", QKeySequence());
+    declareShortcut ("table-add", "Add row/record", QKeySequence(Qt::ControlModifier | Qt::Key_N));
+    declareShortcut ("table-clone", "Clone record", QKeySequence());
+    declareShortcut ("table-revert", "Revert record", QKeySequence());
+    declareShortcut ("table-remove", "Remove record", QKeySequence(Qt::Key_Delete));
+    declareShortcut ("table-moveup", "Move record up", QKeySequence());
+    declareShortcut ("table-movedown", "Move record down", QKeySequence());
+    declareShortcut ("table-view", "View record", QKeySequence());
+    declareShortcut ("table-preview", "Preview record", QKeySequence());
+    declareShortcut ("table-extendeddelete", "Extended record deletion", QKeySequence());
+    declareShortcut ("table-extendedrevert", "Extended record revertion", QKeySequence());
+
+    declareSeparator ();
+    declareShortcut ("reporttable-show", "Show report", QKeySequence());
+    declareShortcut ("reporttable-remove", "Remove report", QKeySequence(Qt::Key_Delete));
+    declareShortcut ("reporttable-replace", "Replace report", QKeySequence());
+    declareShortcut ("reporttable-refresh", "Refresh report", QKeySequence());
+
+    declareSeparator ();
     declareShortcut ("free-forward", "Free camera forward", QKeySequence(Qt::Key_W), Qt::Key_Shift);
     declareShortcut ("free-backward", "Free camera backward", QKeySequence(Qt::Key_S));
     declareShortcut ("free-left", "Free camera left", QKeySequence(Qt::Key_A));

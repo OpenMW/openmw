@@ -93,7 +93,7 @@ namespace CSMPrefs
         const int MaxKeys = 4; // A limitation of QKeySequence
 
         // Modifiers are handled differently
-        const int Blacklist[]
+        const int Blacklist[] =
         {
             Qt::Key_Shift,
             Qt::Key_Control,

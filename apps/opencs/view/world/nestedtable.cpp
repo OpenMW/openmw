@@ -5,6 +5,8 @@
 #include <QMenu>
 #include <QDebug>
 
+#include "../../model/prefs/shortcut.hpp"
+
 #include "../../model/world/nestedtableproxymodel.hpp"
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/commands.hpp"
@@ -60,14 +62,16 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
         if (!fixedRows)
         {
             mAddNewRowAction = new QAction (tr ("Add new row"), this);
-
             connect(mAddNewRowAction, SIGNAL(triggered()),
                     this, SLOT(addNewRowActionTriggered()));
+            CSMPrefs::Shortcut* addRowShortcut = new CSMPrefs::Shortcut("table-add", this);
+            addRowShortcut->associateAction(mAddNewRowAction);
 
             mRemoveRowAction = new QAction (tr ("Remove rows"), this);
-
             connect(mRemoveRowAction, SIGNAL(triggered()),
                     this, SLOT(removeRowActionTriggered()));
+            CSMPrefs::Shortcut* removeRowShortcut = new CSMPrefs::Shortcut("table-remove", this);
+            removeRowShortcut->associateAction(mRemoveRowAction);
         }
 
         mEditIdAction = new TableEditIdAction(*this, this);

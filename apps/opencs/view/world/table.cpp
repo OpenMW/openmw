@@ -21,6 +21,7 @@
 #include "../../model/world/commanddispatcher.hpp"
 
 #include "../../model/prefs/state.hpp"
+#include "../../model/prefs/shortcut.hpp"
 
 #include "tableeditidaction.hpp"
 #include "util.hpp"
@@ -283,49 +284,72 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     mEditAction = new QAction (tr ("Edit Record"), this);
     connect (mEditAction, SIGNAL (triggered()), this, SLOT (editRecord()));
     addAction (mEditAction);
+    CSMPrefs::Shortcut* editShortcut = new CSMPrefs::Shortcut("table-edit", this);
+    editShortcut->associateAction(mEditAction);
 
     if (createAndDelete)
     {
         mCreateAction = new QAction (tr ("Add Record"), this);
         connect (mCreateAction, SIGNAL (triggered()), this, SIGNAL (createRequest()));
         addAction (mCreateAction);
+        CSMPrefs::Shortcut* createShortcut = new CSMPrefs::Shortcut("table-add", this);
+        createShortcut->associateAction(mCreateAction);
 
         mCloneAction = new QAction (tr ("Clone Record"), this);
         connect(mCloneAction, SIGNAL (triggered()), this, SLOT (cloneRecord()));
         addAction(mCloneAction);
+        CSMPrefs::Shortcut* cloneShortcut = new CSMPrefs::Shortcut("table-clone", this);
+        cloneShortcut->associateAction(mCloneAction);
     }
 
     mRevertAction = new QAction (tr ("Revert Record"), this);
     connect (mRevertAction, SIGNAL (triggered()), mDispatcher, SLOT (executeRevert()));
     addAction (mRevertAction);
+    CSMPrefs::Shortcut* revertShortcut = new CSMPrefs::Shortcut("table-revert", this);
+    revertShortcut->associateAction(mRevertAction);
 
     mDeleteAction = new QAction (tr ("Delete Record"), this);
     connect (mDeleteAction, SIGNAL (triggered()), mDispatcher, SLOT (executeDelete()));
     addAction (mDeleteAction);
+    CSMPrefs::Shortcut* deleteShortcut = new CSMPrefs::Shortcut("table-remove", this);
+    deleteShortcut->associateAction(mDeleteAction);
+
 
     mMoveUpAction = new QAction (tr ("Move Up"), this);
     connect (mMoveUpAction, SIGNAL (triggered()), this, SLOT (moveUpRecord()));
     addAction (mMoveUpAction);
+    CSMPrefs::Shortcut* moveUpShortcut = new CSMPrefs::Shortcut("table-moveup", this);
+    moveUpShortcut->associateAction(mMoveUpAction);
 
     mMoveDownAction = new QAction (tr ("Move Down"), this);
     connect (mMoveDownAction, SIGNAL (triggered()), this, SLOT (moveDownRecord()));
     addAction (mMoveDownAction);
+    CSMPrefs::Shortcut* moveDownShortcut = new CSMPrefs::Shortcut("table-movedown", this);
+    moveDownShortcut->associateAction(mMoveDownAction);
 
     mViewAction = new QAction (tr ("View"), this);
     connect (mViewAction, SIGNAL (triggered()), this, SLOT (viewRecord()));
     addAction (mViewAction);
+    CSMPrefs::Shortcut* viewShortcut = new CSMPrefs::Shortcut("table-view", this);
+    viewShortcut->associateAction(mViewAction);
 
     mPreviewAction = new QAction (tr ("Preview"), this);
     connect (mPreviewAction, SIGNAL (triggered()), this, SLOT (previewRecord()));
     addAction (mPreviewAction);
+    CSMPrefs::Shortcut* previewShortcut = new CSMPrefs::Shortcut("table-preview", this);
+    previewShortcut->associateAction(mPreviewAction);
 
     mExtendedDeleteAction = new QAction (tr ("Extended Delete Record"), this);
     connect (mExtendedDeleteAction, SIGNAL (triggered()), this, SLOT (executeExtendedDelete()));
     addAction (mExtendedDeleteAction);
+    CSMPrefs::Shortcut* extendedDeleteShortcut = new CSMPrefs::Shortcut("table-extendeddelete", this);
+    extendedDeleteShortcut->associateAction(mExtendedDeleteAction);
 
     mExtendedRevertAction = new QAction (tr ("Extended Revert Record"), this);
     connect (mExtendedRevertAction, SIGNAL (triggered()), this, SLOT (executeExtendedRevert()));
     addAction (mExtendedRevertAction);
+    CSMPrefs::Shortcut* extendedRevertShortcut = new CSMPrefs::Shortcut("table-extendedrevert", this);
+    extendedRevertShortcut->associateAction(mExtendedRevertAction);
 
     mEditIdAction = new TableEditIdAction (*this, this);
     connect (mEditIdAction, SIGNAL (triggered()), this, SLOT (editCell()));
