@@ -134,56 +134,8 @@ boost::any LangLua::Call(const char *name, const char *argl, int buf, ...)
     va_list vargs;
     va_start(vargs, buf);
     std::vector<boost::any> args;
-    try
-    {
-        size_t len = strlen(argl);
 
-        for (unsigned int i = 0; i < len; ++i)
-        {
-            switch (argl[i])
-            {
-                case 'i':
-                    args.emplace_back(va_arg(vargs, unsigned int));
-                    break;
-
-                case 'q':
-                    args.emplace_back(va_arg(vargs, signed int));
-                    break;
-
-                case 'l':
-                    args.emplace_back(va_arg(vargs, unsigned long long));
-                    break;
-
-                case 'w':
-                    args.emplace_back(va_arg(vargs, signed long long));
-                    break;
-
-                case 'f':
-                {
-                    args.emplace_back(va_arg(vargs, double));
-                    break;
-                }
-
-                case 'p':
-                    args.emplace_back(va_arg(vargs, void*));
-                    break;
-
-                case 's':
-                    args.emplace_back(va_arg(vargs, const char*));
-                    break;
-
-                default:
-                    throw runtime_error("PAWN call: Unknown argument identifier " + argl[i]);
-            }
-        }
-
-    }
-    catch(...)
-    {
-        va_end(vargs);
-        throw;
-    }
-    va_end(vargs);
+    ScriptFunctions::GetArguments(args, vargs, argl);
 
     return Call(name, argl, args);
 }
