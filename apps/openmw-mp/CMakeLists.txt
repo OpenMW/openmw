@@ -77,7 +77,7 @@ ${SERVER_FILES}
 ${SERVER} ${SERVER_HEADER}
 ${APPLE_BUNDLE_RESOURCES}
 )
-add_definitions(-std=gnu++11)
+add_definitions(-std=gnu++14 -Wno-ignored-qualifiers)
 
 target_link_libraries(openmw-mp
     #${Boost_SYSTEM_LIBRARY}
@@ -89,10 +89,6 @@ target_link_libraries(openmw-mp
     ${Terra_LIBRARY}
     ${Pawn_LIBRARY}
 )
-
-if (USE_SYSTEM_TINYXML)
-    target_link_libraries(openmw-mp ${TINYXML_LIBRARIES})
-endif()
 
 if (UNIX)
     target_link_libraries(openmw-mp dl)
