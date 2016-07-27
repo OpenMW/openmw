@@ -40,10 +40,10 @@ public:
     LangLua(lua_State *lua);
     ~LangLua();
     static int MakePublic(lua_State *lua) noexcept;
-    static int CallPublic(lua_State *lua) noexcept;
+    static int CallPublic(lua_State *lua);
 
     static int CreateTimer(lua_State *lua) noexcept;
-    static int CreateTimerEx(lua_State *lua) noexcept;
+    static int CreateTimerEx(lua_State *lua);
 
     virtual void LoadProgram(const char *filename) override;
     virtual int FreeProgram() override;

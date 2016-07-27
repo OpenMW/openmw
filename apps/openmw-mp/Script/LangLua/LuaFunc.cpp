@@ -76,7 +76,7 @@ int LangLua::MakePublic(lua_State *lua) noexcept
 
 }
 
-int LangLua::CallPublic(lua_State *lua) noexcept
+int LangLua::CallPublic(lua_State *lua)
 {
     const char * name = luabridge::Stack<const char*>::get(lua, 1);
 
@@ -84,7 +84,7 @@ int LangLua::CallPublic(lua_State *lua) noexcept
 
     string types = Public::GetDefinition(name);
 
-    if(args_n  != types.size())
+    if(args_n  != (long)types.size())
         throw invalid_argument("Script call: Number of arguments does not match definition");
 
     vector<boost::any> args = DefToVec(lua, types, 2, args_n);
@@ -115,7 +115,7 @@ int LangLua::CreateTimer(lua_State *lua) noexcept
     return 1;
 }
 
-int LangLua::CreateTimerEx(lua_State *lua) noexcept
+int LangLua::CreateTimerEx(lua_State *lua)
 {
     const char * callback = luabridge::Stack<const char*>::get(lua, 1);
     int msec = luabridge::Stack<int>::get(lua, 2);

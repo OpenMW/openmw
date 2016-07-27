@@ -38,7 +38,7 @@ namespace Utils
 
     std::string &RemoveExtension(std::string &file);
 
-    unsigned int FileLength(const char *file);
+    long int FileLength(const char *file);
 
     unsigned int crc32buf(char *buf, size_t len);
 

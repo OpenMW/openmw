@@ -80,6 +80,7 @@ void ScriptFunctions::GetArguments(std::vector<boost::any> &params, va_list args
         va_end(args);
         throw;
     }
+    va_end(args);
 }
 
 void ScriptFunctions::MakePublic(ScriptFunc _public, const char *name, char ret_type, const char *def) noexcept

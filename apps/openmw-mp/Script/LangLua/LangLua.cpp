@@ -108,7 +108,7 @@ void LangLua::LoadProgram(const char *filename)
 
     luabridge::Namespace tes3mp = luabridge::getGlobalNamespace(lua).beginNamespace("tes3mp");
 
-    for(int i = 0; i < functions_n; i++)
+    for(unsigned i = 0; i < functions_n; i++)
         tes3mp.addCFunction(functions_[i].name, functions_[i].func);
 
     tes3mp.endNamespace();
@@ -121,6 +121,7 @@ void LangLua::LoadProgram(const char *filename)
 int LangLua::FreeProgram()
 {
     lua_close(lua);
+    return 0;
 }
 
 bool LangLua::IsCallbackPresent(const char *name)
@@ -135,7 +136,7 @@ boost::any LangLua::Call(const char *name, const char *argl, int buf, ...)
     std::vector<boost::any> args;
     try
     {
-        unsigned int len = strlen(argl);
+        size_t len = strlen(argl);
 
         for (unsigned int i = 0; i < len; ++i)
         {

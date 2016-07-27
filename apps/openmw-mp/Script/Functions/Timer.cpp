@@ -13,12 +13,12 @@ using namespace mwmp;
 
 int ScriptFunctions::CreateTimer(ScriptFunc callback, int msec) noexcept
 {
-
+    return -1;
 }
 
 int ScriptFunctions::CreateTimerEx(ScriptFunc callback, int msec, const char *types, ...) noexcept
 {
-
+    return -1;
 }
 
 void ScriptFunctions::StartTimer(int timerId) noexcept
@@ -43,7 +43,7 @@ void ScriptFunctions::FreeTimer(int timerId) noexcept
 
 bool ScriptFunctions::IsTimerElapsed(int timerId) noexcept
 {
-    TimerAPI::IsEndTimer(timerId);
+    return TimerAPI::IsEndTimer(timerId);
 }
 
 

@@ -57,7 +57,7 @@ string Utils::str_replace(const string& source, const char* find, const char* re
 {
     unsigned int find_len = strlen(find);
     unsigned int replace_len = strlen(replace);
-    long pos = 0;
+    size_t pos = 0;
 
     string dest = source;
 
@@ -72,7 +72,7 @@ string Utils::str_replace(const string& source, const char* find, const char* re
 
 string& Utils::RemoveExtension(string& file)
 {
-    unsigned int pos = file.find_last_of('.');
+    size_t pos = file.find_last_of('.');
 
     if (pos)
         file = file.substr(0, pos);
@@ -80,7 +80,7 @@ string& Utils::RemoveExtension(string& file)
     return file;
 }
 
-unsigned int Utils::FileLength(const char* file)
+long int Utils::FileLength(const char* file)
 {
     FILE* _file = fopen(file, "rb");
 
@@ -88,7 +88,7 @@ unsigned int Utils::FileLength(const char* file)
         return 0;
 
     fseek(_file, 0, SEEK_END);
-    unsigned int size = ftell(_file);
+    long int size = ftell(_file);
     fclose(_file);
 
     return size;

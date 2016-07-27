@@ -47,8 +47,8 @@ protected:
     };
 
 protected:
-    std::string def;
     char ret_type;
+    std::string def;
     int script_type;
     enum
     {
