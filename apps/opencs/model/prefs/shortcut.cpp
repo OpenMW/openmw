@@ -137,7 +137,10 @@ namespace CSMPrefs
     {
         if (mAction)
         {
-            disconnect(this, SLOT(actionDeleted()));
+            mAction->setText(mActionText);
+
+            disconnect(this, SIGNAL(activated()), mAction, SLOT(trigger()));
+            disconnect(mAction, SIGNAL(destroyed()), this, SLOT(actionDeleted()));
         }
 
         mAction = action;
@@ -147,6 +150,7 @@ namespace CSMPrefs
             mActionText = mAction->text();
             mAction->setText(mActionText + "\t" + State::get().getShortcutManager().convertToString(mSequence).data());
 
+            connect(this, SIGNAL(activated()), mAction, SLOT(trigger()));
             connect(mAction, SIGNAL(destroyed()), this, SLOT(actionDeleted()));
         }
     }

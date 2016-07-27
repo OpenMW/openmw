@@ -1,7 +1,8 @@
 #include "scenetoolbar.hpp"
 
 #include <QVBoxLayout>
-#include <QShortcut>
+
+#include "../../model/prefs/shortcut.hpp"
 
 #include "scenetool.hpp"
 
@@ -25,9 +26,8 @@ CSVWidget::SceneToolbar::SceneToolbar (int buttonSize, QWidget *parent)
 
     setLayout (mLayout);
 
-    /// \todo make shortcut configurable
-    QShortcut *focusScene = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
-    connect (focusScene, SIGNAL (activated()), this, SIGNAL (focusSceneRequest()));
+    CSMPrefs::Shortcut* focusSceneShortcut = new CSMPrefs::Shortcut("scene-focus-toolbar", this);
+    connect(focusSceneShortcut, SIGNAL(activated()), this, SIGNAL(focusSceneRequest()));
 }
 
 void CSVWidget::SceneToolbar::addTool (SceneTool *tool, SceneTool *insertPoint)

@@ -1,7 +1,5 @@
 #include "shortcutsetting.hpp"
 
-#include <iostream>
-
 #include <QEvent>
 #include <QKeyEvent>
 #include <QLabel>

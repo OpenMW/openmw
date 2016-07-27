@@ -168,16 +168,6 @@ void CSMPrefs::State::declare()
         "list go to the first/last item");
 
     declareCategory ("3D Scene Input");
-    EnumValue left ("Left Mouse-Button");
-    EnumValue cLeft ("Ctrl-Left Mouse-Button");
-    EnumValue right ("Right Mouse-Button");
-    EnumValue cRight ("Ctrl-Right Mouse-Button");
-    EnumValue middle ("Middle Mouse-Button");
-    EnumValue cMiddle ("Ctrl-Middle Mouse-Button");
-    EnumValues inputButtons;
-    inputButtons.add (left).add (cLeft).add (right).add (cRight).add (middle).add (cMiddle);
-    declareEnum ("p-navi", "Primary Camera Navigation Button", left).addValues (inputButtons);
-    declareEnum ("s-navi", "Secondary Camera Navigation Button", cLeft).addValues (inputButtons);
     declareDouble ("p-navi-free-sensitivity", "Free Camera Sensitivity", 1/650.).setPrecision(5).setRange(0.0, 1.0);
     declareBool ("p-navi-free-invert", "Invert Free Camera Mouse Input", false);
     declareDouble ("p-navi-orbit-sensitivity", "Orbit Camera Sensitivity", 1/650.).setPrecision(5).setRange(0.0, 1.0);
@@ -189,10 +179,6 @@ void CSMPrefs::State::declare()
     declareDouble ("navi-free-speed-mult", "Free Camera Speed Multiplier (from Modifier)", 8).setRange(0.001, 1000.0);
     declareDouble ("navi-orbit-rot-speed", "Orbital Camera Rotational Speed", 3.14 / 4).setRange(0.001, 6.28);
     declareDouble ("navi-orbit-speed-mult", "Orbital Camera Speed Multiplier (from Modifier)", 4).setRange(0.001, 1000.0);
-    declareEnum ("p-edit", "Primary Editing Button", right).addValues (inputButtons);
-    declareEnum ("s-edit", "Secondary Editing Button", cRight).addValues (inputButtons);
-    declareEnum ("p-select", "Primary Selection Button", middle).addValues (inputButtons);
-    declareEnum ("s-select", "Secondary Selection Button", cMiddle).addValues (inputButtons);
     declareSeparator();
     declareBool ("context-select", "Context Sensitive Selection", false);
     declareDouble ("drag-factor", "Mouse sensitivity during drag operations", 1.0).
@@ -230,7 +216,57 @@ void CSMPrefs::State::declare()
 
     declareCategory ("Key Bindings");
 
-    declareShortcut ("document-save", "Save", QKeySequence(Qt::ControlModifier | Qt::Key_S));
+    declareShortcut ("document-file-newgame", "Create new game", QKeySequence());
+    declareShortcut ("document-file-newaddon", "Create new addon", QKeySequence());
+    declareShortcut ("document-file-open", "Open", QKeySequence());
+    declareShortcut ("document-file-save", "Save", QKeySequence(Qt::ControlModifier | Qt::Key_S));
+    declareShortcut ("document-file-verify", "Verify", QKeySequence(Qt::ControlModifier | Qt::Key_V));
+    declareShortcut ("document-file-merge", "Merge", QKeySequence());
+    declareShortcut ("document-file-errorlog", "Load error log", QKeySequence());
+    declareShortcut ("document-file-metadata", "Meta Data", QKeySequence());
+    declareShortcut ("document-file-close", "Close", QKeySequence());
+    declareShortcut ("document-file-exit", "Exit", QKeySequence());
+    declareShortcut ("document-edit-undo", "Undo", QKeySequence(Qt::ControlModifier | Qt::Key_Z));
+    declareShortcut ("document-edit-redo", "Redo", QKeySequence(Qt::ControlModifier | Qt::ShiftModifier | Qt::Key_Z));
+    declareShortcut ("document-edit-preferences", "Show Preferences", QKeySequence());
+    declareShortcut ("document-edit-search", "Show Search", QKeySequence());
+    declareShortcut ("document-view-newview", "New View", QKeySequence());
+    declareShortcut ("document-view-statusbar", "Show Status Bar", QKeySequence());
+    declareShortcut ("document-view-filters", "Show Filters", QKeySequence());
+    declareShortcut ("document-world-regions", "Show Regions", QKeySequence());
+    declareShortcut ("document-world-cells", "Show Cells", QKeySequence());
+    declareShortcut ("document-world-referencables", "Show Referencables", QKeySequence());
+    declareShortcut ("document-world-references", "Show References", QKeySequence());
+    declareShortcut ("document-world-pathgrid", "Show Pathgrids", QKeySequence());
+    declareShortcut ("document-world-regionmap", "Show Region Map", QKeySequence());
+    declareShortcut ("document-mechanics-globals", "Show Globals", QKeySequence());
+    declareShortcut ("document-mechanics-gamesettings", "Show Game Settings", QKeySequence());
+    declareShortcut ("document-mechanics-scripts", "Show Scripts", QKeySequence());
+    declareShortcut ("document-mechanics-spells", "Show Spells", QKeySequence());
+    declareShortcut ("document-mechanics-enchantments", "Show Enchantments", QKeySequence());
+    declareShortcut ("document-mechanics-magiceffects", "Show Magic Effects", QKeySequence());
+    declareShortcut ("document-mechanics-startscripts", "Show Start Scripts", QKeySequence());
+    declareShortcut ("document-character-skills", "Show Skills", QKeySequence());
+    declareShortcut ("document-character-classes", "Show Classes", QKeySequence());
+    declareShortcut ("document-character-factions", "Show Factions", QKeySequence());
+    declareShortcut ("document-character-races", "Show Races", QKeySequence());
+    declareShortcut ("document-character-birthsigns", "Show Birthsigns", QKeySequence());
+    declareShortcut ("document-character-topics", "Show Topics", QKeySequence());
+    declareShortcut ("document-character-journals", "Show Journals", QKeySequence());
+    declareShortcut ("document-character-topicinfos", "Show Topic Infos", QKeySequence());
+    declareShortcut ("document-character-journalinfos", "Show Journal Infos", QKeySequence());
+    declareShortcut ("document-character-bodyparts", "Show Body Parts", QKeySequence());
+    declareShortcut ("document-assets-sounds", "Show Sound Assets", QKeySequence());
+    declareShortcut ("document-assets-soundgens", "Show Sound Generators", QKeySequence());
+    declareShortcut ("document-assets-meshes", "Show Mesh Assets", QKeySequence());
+    declareShortcut ("document-assets-icons", "Show Icon Assets", QKeySequence());
+    declareShortcut ("document-assets-music", "Show Music Assets", QKeySequence());
+    declareShortcut ("document-assets-soundres", "Show Sound Files", QKeySequence());
+    declareShortcut ("document-assets-textures", "TShow exture Assets", QKeySequence());
+    declareShortcut ("document-assets-videos", "Show Video Assets", QKeySequence());
+    declareShortcut ("document-debug-run", "Run Debug", QKeySequence());
+    declareShortcut ("document-debug-shutdown", "Stop Debug", QKeySequence());
+    declareShortcut ("document-debug-runlog", "Run Log", QKeySequence());
 
     declareSeparator ();
     declareShortcut ("free-forward", "Free camera forward", QKeySequence(Qt::Key_W), Qt::Key_Shift);

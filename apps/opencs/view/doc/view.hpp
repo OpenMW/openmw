@@ -84,6 +84,8 @@ namespace CSVDoc
 
             void setupUi();
 
+            void setupShortcut(const char* name, QAction* action);
+
             void updateActions();
 
             void exitApplication();

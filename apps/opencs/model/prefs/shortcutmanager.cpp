@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <sstream>
-#include <iostream>
 
 #include <QApplication>
 #include <QMetaEnum>
@@ -141,9 +140,6 @@ namespace CSMPrefs
     std::string ShortcutManager::convertToString(const QKeySequence& sequence, int modifier) const
     {
         std::string concat = convertToString(sequence) + ";" + convertToString(modifier);
-        std::cout << sequence[0] << "." << sequence[1] << "."<< sequence[2] << "."<< sequence[3] << "." << modifier << std::endl;
-        std::cout << concat << std::endl;
-
         return concat;
     }
 

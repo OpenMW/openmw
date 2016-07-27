@@ -3,7 +3,6 @@
 #include <QEvent>
 #include <QResizeEvent>
 #include <QTimer>
-#include <QShortcut>
 #include <QLayout>
 
 #include <extern/osgQt/GraphicsWindowQt>
