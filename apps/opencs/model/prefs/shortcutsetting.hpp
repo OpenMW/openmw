@@ -5,6 +5,9 @@
 
 #include "setting.hpp"
 
+class QEvent;
+class QPushButton;
+
 namespace CSMPrefs
 {
     class ShortcutSetting : public Setting
@@ -13,21 +16,30 @@ namespace CSMPrefs
 
         public:
 
-            typedef std::pair<QKeySequence, int> SequenceData;
-
             ShortcutSetting(Category* parent, Settings::Manager* values, QMutex* mutex, const std::string& key,
-                const std::string& label, const SequenceData& default_);
+                const std::string& label, const QKeySequence& default_);
 
-            // TODO replace with custom page
             virtual std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent);
+
+        protected:
+
+            bool eventFilter(QObject* target, QEvent* event);
 
         private:
 
-            SequenceData mDefault;
+            bool handleEvent(QObject* target, int mod, int value, bool active);
+
+            QKeySequence mDefault;
+
+            QPushButton* mButton;
+
+            bool mEditorActive;
+            int mEditorPos;
+            int mEditorKeys[4];
 
         private slots:
 
-            void valueChanged(const QString& text);
+            void buttonToggled(bool checked);
     };
 }
 

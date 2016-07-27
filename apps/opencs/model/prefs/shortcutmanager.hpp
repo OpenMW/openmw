@@ -18,10 +18,6 @@ namespace CSMPrefs
 
         public:
 
-            /// Key Sequence, Modifier (for secondary signal)
-            typedef std::pair<QKeySequence, int> SequenceData;
-
-
             ShortcutManager();
 
             /// The shortcut class will do this automatically
@@ -30,22 +26,41 @@ namespace CSMPrefs
             /// The shortcut class will do this automatically
             void removeShortcut(Shortcut* shortcut);
 
-            SequenceData getSequence(const std::string& name) const;
-            void setSequence(const std::string& name, const SequenceData& sequence);
+            bool getSequence(const std::string& name, QKeySequence& sequence, int& modifier) const;
+            void setSequence(const std::string& name, const QKeySequence& sequence, int modifier);
 
-            std::string sequenceToString(const SequenceData& sequence);
-            SequenceData stringToSequence(const std::string& str);
+            std::string convertToString(const QKeySequence& sequence) const;
+            std::string convertToString(int modifier) const;
+
+            std::string convertToString(const QKeySequence& sequence, int modifier) const;
+
+            void convertFromString(const std::string& data, QKeySequence& sequence) const;
+            void convertFromString(const std::string& data, int& modifier) const;
+
+            void convertFromString(const std::string& data, QKeySequence& sequence, int& modifier) const;
 
         private:
+
+            /// Key Sequence, Modifier (for secondary signal)
+            typedef std::pair<QKeySequence, int> SequenceData;
 
             // Need a multimap in case multiple shortcuts share the same name
             typedef std::multimap<std::string, Shortcut*> ShortcutMap;
             typedef std::map<std::string, SequenceData> SequenceMap;
+            typedef std::map<int, std::string> NameMap;
+            typedef std::map<std::string, int> KeyMap;
 
             ShortcutMap mShortcuts;
             SequenceMap mSequences;
 
+            NameMap mNames;
+            KeyMap mKeys;
+
             ShortcutEventHandler* mEventHandler;
+
+            void createLookupTables();
+
+            static const std::pair<int, const char*> QtKeys[];
     };
 }
 

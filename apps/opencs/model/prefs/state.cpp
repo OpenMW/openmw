@@ -381,20 +381,23 @@ CSMPrefs::ColourSetting& CSMPrefs::State::declareColour (const std::string& key,
 }
 
 CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut (const std::string& key, const std::string& label,
-    const QKeySequence& default_, int modifier)
+    const QKeySequence& default_, int modifier_)
 {
     if (mCurrentCategory==mCategories.end())
         throw std::logic_error ("no category for setting");
 
-    std::string seqStr = getShortcutManager().sequenceToString(std::make_pair(default_, modifier));
+    std::string seqStr = getShortcutManager().convertToString(default_, modifier_);
     setDefault (key, seqStr);
 
-    ShortcutManager::SequenceData data = getShortcutManager().stringToSequence(mSettings.getString(key,
-        mCurrentCategory->second.getKey()));
+    // Setup with actual data
+    QKeySequence sequence;
+    int mod;
+
+    getShortcutManager().convertFromString(mSettings.getString(key, mCurrentCategory->second.getKey()), sequence, mod);
+    getShortcutManager().setSequence(key, sequence, mod);
 
     CSMPrefs::ShortcutSetting *setting = new CSMPrefs::ShortcutSetting (&mCurrentCategory->second, &mSettings, &mMutex,
-        key, label, data);
-
+        key, label, sequence);
     mCurrentCategory->second.addSetting (setting);
 
     return *setting;

@@ -25,9 +25,7 @@ namespace CSMPrefs
         assert (parent);
 
         State::get().getShortcutManager().addShortcut(this);
-        ShortcutManager::SequenceData data = State::get().getShortcutManager().getSequence(name);
-        setSequence(data.first);
-        setModifier(data.second);
+        State::get().getShortcutManager().getSequence(name, mSequence, mModifier);
     }
 
     Shortcut::Shortcut(const std::string& name, SecondaryMode secMode, QWidget* parent)
@@ -45,9 +43,7 @@ namespace CSMPrefs
         assert (parent);
 
         State::get().getShortcutManager().addShortcut(this);
-        ShortcutManager::SequenceData data = State::get().getShortcutManager().getSequence(name);
-        setSequence(data.first);
-        setModifier(data.second);
+        State::get().getShortcutManager().getSequence(name, mSequence, mModifier);
     }
 
     Shortcut::~Shortcut()
@@ -112,7 +108,9 @@ namespace CSMPrefs
         mLastPos = sequence.count() - 1;
 
         if (mAction)
-            mAction->setText(mActionText + "\t" + toString());
+        {
+            mAction->setText(mActionText + "\t" + State::get().getShortcutManager().convertToString(mSequence).data());
+        }
     }
 
     void Shortcut::setModifier(int modifier)
@@ -147,7 +145,7 @@ namespace CSMPrefs
         if (mAction)
         {
             mActionText = mAction->text();
-            mAction->setText(mActionText + "\t" + toString());
+            mAction->setText(mActionText + "\t" + State::get().getShortcutManager().convertToString(mSequence).data());
 
             connect(mAction, SIGNAL(destroyed()), this, SLOT(actionDeleted()));
         }
@@ -174,7 +172,7 @@ namespace CSMPrefs
 
     QString Shortcut::toString() const
     {
-        return QString(State::get().getShortcutManager().sequenceToString(std::make_pair(mSequence, mModifier)).data());
+        return QString(State::get().getShortcutManager().convertToString(mSequence, mModifier).data());
     }
 
     void Shortcut::actionDeleted()
