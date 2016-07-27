@@ -76,7 +76,32 @@ namespace CSMPrefs
         const size_t BlacklistSize = sizeof(Blacklist) / sizeof(int);
 
         if (!mEditorActive)
+        {
+            if (value == Qt::RightButton)
+            {
+                // Clear modifier
+                QKeySequence sequence;
+                int modifier = 0;
+
+                State::get().getShortcutManager().getSequence(getKey(), sequence, modifier);
+
+                modifier = 0;
+                State::get().getShortcutManager().setSequence(getKey(), sequence, modifier);
+
+                // Store
+                {
+                    std::string value = State::get().getShortcutManager().convertToString(sequence, modifier);
+
+                    QMutexLocker lock(getMutex());
+                    getValues().setString(getKey(), getParent()->getKey(), value);
+                }
+
+                // Update button
+                mButton->setText("");
+            }
+
             return false;
+        }
 
         // Handle blacklist
         for (size_t i = 0; i < BlacklistSize; ++i)
