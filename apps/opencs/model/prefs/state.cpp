@@ -222,7 +222,7 @@ void CSMPrefs::State::declare()
     declareShortcut ("document-file-newaddon", "Create new addon", QKeySequence());
     declareShortcut ("document-file-open", "Open", QKeySequence());
     declareShortcut ("document-file-save", "Save", QKeySequence(Qt::ControlModifier | Qt::Key_S));
-    declareShortcut ("document-file-verify", "Verify", QKeySequence(Qt::ControlModifier | Qt::Key_V));
+    declareShortcut ("document-file-verify", "Verify", QKeySequence());
     declareShortcut ("document-file-merge", "Merge", QKeySequence());
     declareShortcut ("document-file-errorlog", "Load error log", QKeySequence());
     declareShortcut ("document-file-metadata", "Meta Data", QKeySequence());
@@ -320,6 +320,11 @@ void CSMPrefs::State::declare()
     declareShortcut ("scene-select-primary", "Primary select", QKeySequence(Qt::MiddleButton));
     declareShortcut ("scene-select-secondary", "Secondary select",
         QKeySequence(Qt::ControlModifier | (int)Qt::MiddleButton));
+    declareShortcut ("scene-load-cam-cell", "Load camera cell", QKeySequence(Qt::KeypadModifier | Qt::Key_5));
+    declareShortcut ("scene-load-cam-eastcell", "Load east cell", QKeySequence(Qt::KeypadModifier | Qt::Key_6));
+    declareShortcut ("scene-load-cam-northcell", "Load north cell", QKeySequence(Qt::KeypadModifier | Qt::Key_8));
+    declareShortcut ("scene-load-cam-westcell", "Load west cell", QKeySequence(Qt::KeypadModifier | Qt::Key_4));
+    declareShortcut ("scene-load-cam-southcell", "Load south cell", QKeySequence(Qt::KeypadModifier | Qt::Key_2));
     declareShortcut ("scene-edit-abort", "Abort", QKeySequence(Qt::Key_Escape));
     declareShortcut ("scene-focus-toolbar", "Toggle toolbar focus", QKeySequence(Qt::Key_T));
     declareShortcut ("scene-render-stats", "Debug rendering stats", QKeySequence(Qt::Key_F3));

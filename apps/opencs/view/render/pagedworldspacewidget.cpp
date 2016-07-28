@@ -8,6 +8,8 @@
 
 #include <components/esm/loadland.hpp>
 
+#include "../../model/prefs/shortcut.hpp"
+
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
 
@@ -433,6 +435,24 @@ void CSVRender::PagedWorldspaceWidget::moveCellSelection (int x, int y)
     mSelection = newSelection;
 }
 
+void CSVRender::PagedWorldspaceWidget::addCellToSceneFromCamera (int offsetX, int offsetY)
+{
+    const int CellSize = 8192;
+
+    osg::Vec3f eye, center, up;
+    getCamera()->getViewMatrixAsLookAt(eye, center, up);
+
+    int cellX = (int)std::floor(center.x() / CellSize) + offsetX;
+    int cellY = (int)std::floor(center.y() / CellSize) + offsetY;
+
+    CSMWorld::CellCoordinates cellCoordinates(cellX, cellY);
+
+    if (mCells.find(cellCoordinates) == mCells.end())
+    {
+        addCellToScene(cellCoordinates);
+    }
+}
+
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
 : WorldspaceWidget (document, parent), mDocument (document), mWorldspace ("std::default"),
   mControlElements(NULL), mDisplayCellCoord(true)
@@ -446,6 +466,22 @@ CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc
         this, SLOT (cellRemoved (const QModelIndex&, int, int)));
     connect (cells, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (cellAdded (const QModelIndex&, int, int)));
+
+    // Shortcuts
+    CSMPrefs::Shortcut* loadCameraCellShortcut = new CSMPrefs::Shortcut("scene-load-cam-cell", this);
+    connect(loadCameraCellShortcut, SIGNAL(activated()), this, SLOT(loadCameraCell()));
+
+    CSMPrefs::Shortcut* loadCameraEastCellShortcut = new CSMPrefs::Shortcut("scene-load-cam-eastcell", this);
+    connect(loadCameraEastCellShortcut, SIGNAL(activated()), this, SLOT(loadEastCell()));
+
+    CSMPrefs::Shortcut* loadCameraNorthCellShortcut = new CSMPrefs::Shortcut("scene-load-cam-northcell", this);
+    connect(loadCameraNorthCellShortcut, SIGNAL(activated()), this, SLOT(loadNorthCell()));
+
+    CSMPrefs::Shortcut* loadCameraWestCellShortcut = new CSMPrefs::Shortcut("scene-load-cam-westcell", this);
+    connect(loadCameraWestCellShortcut, SIGNAL(activated()), this, SLOT(loadWestCell()));
+
+    CSMPrefs::Shortcut* loadCameraSouthCellShortcut = new CSMPrefs::Shortcut("scene-load-cam-southcell", this);
+    connect(loadCameraSouthCellShortcut, SIGNAL(activated()), this, SLOT(loadSouthCell()));
 }
 
 CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
@@ -717,4 +753,29 @@ void CSVRender::PagedWorldspaceWidget::cellAdded (const QModelIndex& index, int 
     /// \todo check if no selected cell is affected and do not update, if that is the case
     if (adjustCells())
         flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::loadCameraCell()
+{
+    addCellToSceneFromCamera(0, 0);
+}
+
+void CSVRender::PagedWorldspaceWidget::loadEastCell()
+{
+    addCellToSceneFromCamera(1, 0);
+}
+
+void CSVRender::PagedWorldspaceWidget::loadNorthCell()
+{
+    addCellToSceneFromCamera(0, 1);
+}
+
+void CSVRender::PagedWorldspaceWidget::loadWestCell()
+{
+    addCellToSceneFromCamera(-1, 0);
+}
+
+void CSVRender::PagedWorldspaceWidget::loadSouthCell()
+{
+    addCellToSceneFromCamera(0, -1);
 }
