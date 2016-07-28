@@ -65,7 +65,7 @@ void ScriptFunctions::GetArguments(std::vector<boost::any> &params, va_list args
 
                 case 's':
                 {
-                    params.emplace_back(string(va_arg(args, const char*)));
+                    params.emplace_back(va_arg(args, const char*));
                     break;
                 }
 
