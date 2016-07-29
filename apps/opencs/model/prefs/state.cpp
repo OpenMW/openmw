@@ -218,20 +218,20 @@ void CSMPrefs::State::declare()
     declareCategory ("Key Bindings");
 
     declareSubcategory ("Document");
-    declareShortcut ("document-file-newgame", "New Game", QKeySequence());
+    declareShortcut ("document-file-newgame", "New Game", QKeySequence(Qt::ControlModifier | Qt::Key_N));
     declareShortcut ("document-file-newaddon", "New Addon", QKeySequence());
-    declareShortcut ("document-file-open", "Open", QKeySequence());
+    declareShortcut ("document-file-open", "Open", QKeySequence(Qt::ControlModifier | Qt::Key_O));
     declareShortcut ("document-file-save", "Save", QKeySequence(Qt::ControlModifier | Qt::Key_S));
     declareShortcut ("document-file-verify", "Verify", QKeySequence());
     declareShortcut ("document-file-merge", "Merge", QKeySequence());
     declareShortcut ("document-file-errorlog", "Open Load Error Log", QKeySequence());
     declareShortcut ("document-file-metadata", "Meta Data", QKeySequence());
-    declareShortcut ("document-file-close", "Close Document", QKeySequence());
-    declareShortcut ("document-file-exit", "Exit Application", QKeySequence());
+    declareShortcut ("document-file-close", "Close Document", QKeySequence(Qt::ControlModifier | Qt::Key_W));
+    declareShortcut ("document-file-exit", "Exit Application", QKeySequence(Qt::ControlModifier | Qt::Key_Q));
     declareShortcut ("document-edit-undo", "Undo", QKeySequence(Qt::ControlModifier | Qt::Key_Z));
     declareShortcut ("document-edit-redo", "Redo", QKeySequence(Qt::ControlModifier | Qt::ShiftModifier | Qt::Key_Z));
     declareShortcut ("document-edit-preferences", "Open Preferences", QKeySequence());
-    declareShortcut ("document-edit-search", "Search", QKeySequence());
+    declareShortcut ("document-edit-search", "Search", QKeySequence(Qt::ControlModifier | Qt::Key_F));
     declareShortcut ("document-view-newview", "New View", QKeySequence());
     declareShortcut ("document-view-statusbar", "Toggle Status Bar", QKeySequence());
     declareShortcut ("document-view-filters", "Open Filter List", QKeySequence());
@@ -272,8 +272,8 @@ void CSMPrefs::State::declare()
 
     declareSubcategory ("Table");
     declareShortcut ("table-edit", "Edit Record", QKeySequence());
-    declareShortcut ("table-add", "Add Row/Record", QKeySequence(Qt::ControlModifier | Qt::Key_N));
-    declareShortcut ("table-clone", "Clone Record", QKeySequence());
+    declareShortcut ("table-add", "Add Row/Record", QKeySequence(Qt::ShiftModifier | Qt::Key_A));
+    declareShortcut ("table-clone", "Clone Record", QKeySequence(Qt::ShiftModifier | Qt::Key_D));
     declareShortcut ("table-revert", "Revert Record", QKeySequence());
     declareShortcut ("table-remove", "Remove Row/Record", QKeySequence(Qt::Key_Delete));
     declareShortcut ("table-moveup", "Move Record Up", QKeySequence());
