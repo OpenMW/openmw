@@ -164,6 +164,7 @@ void LocalPlayer::setCell()
     }
 
     updateCell(true);
+    updatePosition(true);
 }
 
 
