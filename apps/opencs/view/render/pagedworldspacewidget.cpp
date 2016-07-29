@@ -447,9 +447,12 @@ void CSVRender::PagedWorldspaceWidget::addCellToSceneFromCamera (int offsetX, in
 
     CSMWorld::CellCoordinates cellCoordinates(cellX, cellY);
 
-    if (mCells.find(cellCoordinates) == mCells.end())
+    if (!mSelection.has(cellCoordinates))
     {
         addCellToScene(cellCoordinates);
+        mSelection.add(cellCoordinates);
+
+        adjustCells();
     }
 }
 

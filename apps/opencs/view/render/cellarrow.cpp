@@ -7,6 +7,9 @@
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
 
+#include "../../model/prefs/state.hpp"
+#include "../../model/prefs/shortcutmanager.hpp"
+
 #include "mask.hpp"
 
 CSVRender::CellArrowTag::CellArrowTag (CellArrow *arrow)
@@ -35,14 +38,19 @@ QString CSVRender::CellArrowTag::getToolTip (bool hideBasics) const
         text +=
             "<p>"
             "Modify which cells are shown"
-            "<ul><li>Primary-Edit: Add cell in given direction</li>"
-            "<li>Secondary-Edit: Add cell and remove old cell</li>"
-            "<li>Shift Primary-Edit: Add cells in given direction</li>"
-            "<li>Shift Secondary-Edit: Add cells and remove old cells</li>"
+            "<ul><li>{scene-edit-primary}: Add cell in given direction</li>"
+            "<li>{scene-edit-secondary}: Add cell and remove old cell</li>"
+            "<li>{scene-select-primary}: Add cells in given direction</li>"
+            "<li>{scene-select-secondary}: Add cells and remove old cells</li>"
+            "<li>{scene-load-cam-cell}: Load cell where camera is located</li>"
+            "<li>{scene-load-cam-eastcell}: Load cell to east</li>"
+            "<li>{scene-load-cam-northcell}: Load cell to north</li>"
+            "<li>{scene-load-cam-westcell}: Load cell to west</li>"
+            "<li>{scene-load-cam-southcell}: Load cell to south</li>"
             "</ul>";
     }
 
-    return text;
+    return CSMPrefs::State::get().getShortcutManager().processToolTip(text);
 }
 
 

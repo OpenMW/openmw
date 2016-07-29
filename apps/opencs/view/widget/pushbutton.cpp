@@ -4,69 +4,11 @@
 #include <QKeyEvent>
 
 #include "../../model/prefs/state.hpp"
+#include "../../model/prefs/shortcutmanager.hpp"
 
 void CSVWidget::PushButton::processShortcuts()
 {
-    const QChar SequenceStart = '{';
-    const QChar SequenceEnd = '}';
-    const QString ModifierSequence = QString::fromUtf8(":mod");
-
-    const QChar SettingSeparator = ';';
-
-    QStringList substrings;
-
-    int prevIndex = 0;
-    int startIndex = mToolTip.indexOf(SequenceStart);
-    int endIndex = (startIndex != -1) ? mToolTip.indexOf(SequenceEnd, startIndex) : -1;
-
-    // Process every valid shortcut escape sequence
-    while (startIndex != -1 && endIndex != -1)
-    {
-        int count = startIndex - prevIndex;
-        if (count > 0)
-        {
-            substrings.push_back(mToolTip.mid(prevIndex, count));
-        }
-
-        // Find sequence name
-        count = endIndex - startIndex - 1;
-        if (count > 0)
-        {
-            // Check if looking for modifier
-            int separatorIndex = mToolTip.indexOf(ModifierSequence, startIndex);
-            if (separatorIndex != -1 && separatorIndex < endIndex)
-            {
-                count = separatorIndex - startIndex - 1;
-
-                QString settingName = mToolTip.mid(startIndex+1, count);
-                QString value = QString::fromUtf8(
-                    CSMPrefs::State::get()["Key Bindings"][settingName.toUtf8().data()].toString().c_str());
-
-                substrings.push_back(value.right(value.size() - value.indexOf(SettingSeparator) - 1));
-            }
-            else
-            {
-                QString settingName = mToolTip.mid(startIndex+1, count);
-                QString value = QString::fromUtf8(
-                    CSMPrefs::State::get()["Key Bindings"][settingName.toUtf8().data()].toString().c_str());
-
-                // Don't want modifier
-                substrings.push_back(value.left(value.indexOf(SettingSeparator)));
-            }
-
-            prevIndex = endIndex + 1;
-        }
-
-        startIndex = mToolTip.indexOf(SequenceStart, endIndex);
-        endIndex = (startIndex != -1) ? mToolTip.indexOf(SequenceEnd, startIndex) : -1;
-    }
-
-    if (prevIndex < mToolTip.size())
-    {
-        substrings.push_back(mToolTip.mid(prevIndex));
-    }
-
-    mProcessedToolTip = substrings.join("");
+    mProcessedToolTip = CSMPrefs::State::get().getShortcutManager().processToolTip(mToolTip);
 }
 
 void CSVWidget::PushButton::setExtendedToolTip()

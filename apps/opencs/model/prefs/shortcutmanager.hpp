@@ -5,6 +5,7 @@
 
 #include <QKeySequence>
 #include <QObject>
+#include <QString>
 
 namespace CSMPrefs
 {
@@ -38,6 +39,9 @@ namespace CSMPrefs
             void convertFromString(const std::string& data, int& modifier) const;
 
             void convertFromString(const std::string& data, QKeySequence& sequence, int& modifier) const;
+
+            /// Replaces "{sequence-name}" or "{sequence-name:mod}" with the appropriate text
+            QString processToolTip(const QString& toolTip) const;
 
         private:
 

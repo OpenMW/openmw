@@ -33,7 +33,6 @@ namespace CSVWidget
 
         private:
 
-            // Uses {, :, and } as escape sequences for looking up shortcut settings
             void processShortcuts();
             void setExtendedToolTip();
 

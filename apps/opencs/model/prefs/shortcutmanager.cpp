@@ -255,6 +255,74 @@ namespace CSMPrefs
         }
     }
 
+    QString ShortcutManager::processToolTip(const QString& toolTip) const
+    {
+        const QChar SequenceStart = '{';
+        const QChar SequenceEnd = '}';
+        const QString ModifierSequence = QString::fromUtf8(":mod");
+
+        QStringList substrings;
+
+        int prevIndex = 0;
+        int startIndex = toolTip.indexOf(SequenceStart);
+        int endIndex = (startIndex != -1) ? toolTip.indexOf(SequenceEnd, startIndex) : -1;
+
+        // Process every valid shortcut escape sequence
+        while (startIndex != -1 && endIndex != -1)
+        {
+            int count = startIndex - prevIndex;
+            if (count > 0)
+            {
+                substrings.push_back(toolTip.mid(prevIndex, count));
+            }
+
+            // Find sequence name
+            startIndex += 1; // '{' character
+            count = endIndex - startIndex;
+            if (count > 0)
+            {
+                // Check if looking for modifier
+                int separatorIndex = toolTip.indexOf(ModifierSequence, startIndex);
+                if (separatorIndex != -1 && separatorIndex < endIndex)
+                {
+                    count = separatorIndex - startIndex;
+
+                    QString settingName = toolTip.mid(startIndex, count);
+
+                    QKeySequence ignored;
+                    int modifier = 0;
+                    getSequence(settingName.toUtf8().data(), ignored, modifier);
+
+                    QString value = QString::fromUtf8(convertToString(modifier).c_str());
+                    substrings.push_back(value);
+                }
+                else
+                {
+                    QString settingName = toolTip.mid(startIndex, count);
+
+                    QKeySequence sequence;
+                    int ignored = 0;
+                    getSequence(settingName.toUtf8().data(), sequence, ignored);
+
+                    QString value = QString::fromUtf8(convertToString(sequence).c_str());
+                    substrings.push_back(value);
+                }
+
+                prevIndex = endIndex + 1; // '}' character
+            }
+
+            startIndex = toolTip.indexOf(SequenceStart, endIndex);
+            endIndex = (startIndex != -1) ? toolTip.indexOf(SequenceEnd, startIndex) : -1;
+        }
+
+        if (prevIndex < toolTip.size())
+        {
+            substrings.push_back(toolTip.mid(prevIndex));
+        }
+
+        return substrings.join("");
+    }
+
     const std::pair<int, const char*> ShortcutManager::QtKeys[] =
     {
         std::make_pair((int)Qt::Key_Space                  , "Space"),
