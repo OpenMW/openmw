@@ -4,7 +4,6 @@
 
 #include <QComboBox>
 #include <QGridLayout>
-#include <QSpacerItem>
 #include <QStackedLayout>
 #include <QVBoxLayout>
 

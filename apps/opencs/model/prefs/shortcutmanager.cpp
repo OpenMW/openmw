@@ -1,11 +1,8 @@
 #include "shortcutmanager.hpp"
 
 #include <algorithm>
-#include <sstream>
 
 #include <QApplication>
-#include <QMetaEnum>
-#include <QRegExp>
 #include <QStringList>
 
 #include "shortcut.hpp"
