@@ -45,7 +45,7 @@ void CSVDoc::View::closeEvent (QCloseEvent *event)
 
 void CSVDoc::View::setupFileMenu()
 {
-    QMenu *file = menuBar()->addMenu (tr ("&File"));
+    QMenu *file = menuBar()->addMenu (tr ("File"));
 
     QAction *newGame = new QAction (tr ("New Game"), this);
     connect (newGame, SIGNAL (triggered()), this, SIGNAL (newGameRequest()));
@@ -58,17 +58,17 @@ void CSVDoc::View::setupFileMenu()
     setupShortcut("document-file-newaddon", newAddon);
     file->addAction (newAddon);
 
-    QAction *open = new QAction (tr ("&Open"), this);
+    QAction *open = new QAction (tr ("Open"), this);
     connect (open, SIGNAL (triggered()), this, SIGNAL (loadDocumentRequest()));
     setupShortcut("document-file-open", open);
     file->addAction (open);
 
-    mSave = new QAction (tr ("&Save"), this);
+    mSave = new QAction (tr ("Save"), this);
     connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
     setupShortcut("document-file-save", mSave);
     file->addAction (mSave);
 
-    mVerify = new QAction (tr ("&Verify"), this);
+    mVerify = new QAction (tr ("Verify"), this);
     connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
     setupShortcut("document-file-verify", mVerify);
     file->addAction (mVerify);
@@ -78,7 +78,7 @@ void CSVDoc::View::setupFileMenu()
     setupShortcut("document-file-merge", mMerge);
     file->addAction (mMerge);
 
-    QAction *loadErrors = new QAction (tr ("Load Error Log"), this);
+    QAction *loadErrors = new QAction (tr ("Open Load Error Log"), this);
     connect (loadErrors, SIGNAL (triggered()), this, SLOT (loadErrorLog()));
     setupShortcut("document-file-errorlog", loadErrors);
     file->addAction (loadErrors);
@@ -88,12 +88,12 @@ void CSVDoc::View::setupFileMenu()
     setupShortcut("document-file-metadata", meta);
     file->addAction (meta);
 
-    QAction *close = new QAction (tr ("&Close"), this);
+    QAction *close = new QAction (tr ("Close Document"), this);
     connect (close, SIGNAL (triggered()), this, SLOT (close()));
     setupShortcut("document-file-close", close);
     file->addAction(close);
 
-    QAction *exit = new QAction (tr ("&Exit"), this);
+    QAction *exit = new QAction (tr ("Exit Application"), this);
     connect (exit, SIGNAL (triggered()), this, SLOT (exit()));
     connect (this, SIGNAL(exitApplicationRequest(CSVDoc::View *)), &mViewManager, SLOT(exitApplication(CSVDoc::View *)));
     setupShortcut("document-file-exit", exit);
@@ -103,17 +103,17 @@ void CSVDoc::View::setupFileMenu()
 
 void CSVDoc::View::setupEditMenu()
 {
-    QMenu *edit = menuBar()->addMenu (tr ("&Edit"));
+    QMenu *edit = menuBar()->addMenu (tr ("Edit"));
 
-    mUndo = mDocument->getUndoStack().createUndoAction (this, tr("&Undo"));
+    mUndo = mDocument->getUndoStack().createUndoAction (this, tr("Undo"));
     setupShortcut("document-edit-undo", mUndo);
     edit->addAction (mUndo);
 
-    mRedo= mDocument->getUndoStack().createRedoAction (this, tr("&Redo"));
+    mRedo= mDocument->getUndoStack().createRedoAction (this, tr("Redo"));
     setupShortcut("document-edit-redo", mRedo);
     edit->addAction (mRedo);
 
-    QAction *userSettings = new QAction (tr ("&Preferences"), this);
+    QAction *userSettings = new QAction (tr ("Preferences"), this);
     connect (userSettings, SIGNAL (triggered()), this, SIGNAL (editSettingsRequest()));
     setupShortcut("document-edit-preferences", userSettings);
     edit->addAction (userSettings);
@@ -126,14 +126,14 @@ void CSVDoc::View::setupEditMenu()
 
 void CSVDoc::View::setupViewMenu()
 {
-    QMenu *view = menuBar()->addMenu (tr ("&View"));
+    QMenu *view = menuBar()->addMenu (tr ("View"));
 
-    QAction *newWindow = new QAction (tr ("&New View"), this);
+    QAction *newWindow = new QAction (tr ("New View"), this);
     connect (newWindow, SIGNAL (triggered()), this, SLOT (newView()));
     setupShortcut("document-view-newview", newWindow);
     view->addAction (newWindow);
 
-    mShowStatusBar = new QAction (tr ("Show Status Bar"), this);
+    mShowStatusBar = new QAction (tr ("Toggle Status Bar"), this);
     mShowStatusBar->setCheckable (true);
     connect (mShowStatusBar, SIGNAL (toggled (bool)), this, SLOT (toggleShowStatusBar (bool)));
     setupShortcut("document-view-statusbar", mShowStatusBar);
@@ -150,7 +150,7 @@ void CSVDoc::View::setupViewMenu()
 
 void CSVDoc::View::setupWorldMenu()
 {
-    QMenu *world = menuBar()->addMenu (tr ("&World"));
+    QMenu *world = menuBar()->addMenu (tr ("World"));
 
     QAction *regions = new QAction (tr ("Regions"), this);
     connect (regions, SIGNAL (triggered()), this, SLOT (addRegionsSubView()));
@@ -187,14 +187,14 @@ void CSVDoc::View::setupWorldMenu()
 
 void CSVDoc::View::setupMechanicsMenu()
 {
-    QMenu *mechanics = menuBar()->addMenu (tr ("&Mechanics"));
+    QMenu *mechanics = menuBar()->addMenu (tr ("Mechanics"));
 
     QAction *globals = new QAction (tr ("Globals"), this);
     connect (globals, SIGNAL (triggered()), this, SLOT (addGlobalsSubView()));
     setupShortcut("document-mechanics-globals", globals);
     mechanics->addAction (globals);
 
-    QAction *gmsts = new QAction (tr ("Game settings"), this);
+    QAction *gmsts = new QAction (tr ("Game Settings"), this);
     connect (gmsts, SIGNAL (triggered()), this, SLOT (addGmstsSubView()));
     setupShortcut("document-mechanics-gamesettings", gmsts);
     mechanics->addAction (gmsts);
@@ -282,7 +282,7 @@ void CSVDoc::View::setupCharacterMenu()
 
 void CSVDoc::View::setupAssetsMenu()
 {
-    QMenu *assets = menuBar()->addMenu (tr ("&Assets"));
+    QMenu *assets = menuBar()->addMenu (tr ("Assets"));
 
     QAction *sounds = new QAction (tr ("Sounds"), this);
     connect (sounds, SIGNAL (triggered()), this, SLOT (addSoundsSubView()));
@@ -354,7 +354,7 @@ void CSVDoc::View::setupDebugMenu()
     setupShortcut("document-debug-shutdown", mStopDebug);
     debug->addAction (mStopDebug);
 
-    QAction *runLog = new QAction (tr ("Run Log"), this);
+    QAction *runLog = new QAction (tr ("Open Run Log"), this);
     connect (runLog, SIGNAL (triggered()), this, SLOT (addRunLogSubView()));
     setupShortcut("document-debug-runlog", runLog);
     debug->addAction (runLog);

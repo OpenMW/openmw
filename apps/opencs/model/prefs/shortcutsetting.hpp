@@ -29,11 +29,16 @@ namespace CSMPrefs
 
             bool handleEvent(QObject* target, int mod, int value, bool active);
 
+            void storeValue(const QKeySequence& sequence);
+            void resetState();
+
+            static const int MaxKeys = 4;
+
             QPushButton* mButton;
 
             bool mEditorActive;
             int mEditorPos;
-            int mEditorKeys[4];
+            int mEditorKeys[MaxKeys];
 
         private slots:
 

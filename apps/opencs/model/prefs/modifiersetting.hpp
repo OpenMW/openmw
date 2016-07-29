@@ -29,6 +29,9 @@ namespace CSMPrefs
 
             bool handleEvent(QObject* target, int mod, int value);
 
+            void storeValue(int modifier);
+            void resetState();
+
             QPushButton* mButton;
             bool mEditorActive;
 

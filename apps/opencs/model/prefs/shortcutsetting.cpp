@@ -3,7 +3,6 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <QLabel>
-#include <QLineEdit>
 #include <QMouseEvent>
 #include <QPushButton>
 #include <QWidget>
@@ -13,14 +12,14 @@
 
 namespace CSMPrefs
 {
+    const int ShortcutSetting::MaxKeys;
+
     ShortcutSetting::ShortcutSetting(Category* parent, Settings::Manager* values, QMutex* mutex, const std::string& key,
         const std::string& label)
         : Setting(parent, values, mutex, key, label)
         , mEditorActive(false)
         , mEditorPos(0)
     {
-        const int MaxKeys = 4; // A limitation of QKeySequence
-
         for (int i = 0; i < MaxKeys; ++i)
         {
             mEditorKeys[i] = 0;
@@ -30,8 +29,8 @@ namespace CSMPrefs
     std::pair<QWidget*, QWidget*> ShortcutSetting::makeWidgets(QWidget* parent)
     {
         QKeySequence sequence;
-        int modifier = 0;
-        State::get().getShortcutManager().getSequence(getKey(), sequence, modifier);
+        int ignored = 0;
+        State::get().getShortcutManager().getSequence(getKey(), sequence, ignored);
 
         QString text = QString::fromUtf8(State::get().getShortcutManager().convertToString(sequence).c_str());
 
@@ -87,14 +86,16 @@ namespace CSMPrefs
 
             return handleEvent(target, mod, key, false);
         }
+        else if (event->type() == QEvent::FocusOut)
+        {
+            resetState();
+        }
 
         return false;
     }
 
     bool ShortcutSetting::handleEvent(QObject* target, int mod, int value, bool active)
     {
-        const int MaxKeys = 4; // A limitation of QKeySequence
-
         // Modifiers are handled differently
         const int Blacklist[] =
         {
@@ -112,24 +113,10 @@ namespace CSMPrefs
             if (value == Qt::RightButton && !active)
             {
                 // Clear sequence
-                QKeySequence sequence;
-                int modifier = 0;
+                QKeySequence sequence = QKeySequence(0, 0, 0, 0);
+                storeValue(sequence);
 
-                State::get().getShortcutManager().getSequence(getKey(), sequence, modifier);
-
-                sequence = QKeySequence(0, 0, 0, 0);
-                State::get().getShortcutManager().setSequence(getKey(), sequence, modifier);
-
-                // Store
-                {
-                    std::string value = State::get().getShortcutManager().convertToString(sequence, modifier);
-
-                    QMutexLocker lock(getMutex());
-                    getValues().setString(getKey(), getParent()->getKey(), value);
-                }
-
-                // Update button
-                mButton->setText("");
+                resetState();
             }
 
             return false;
@@ -145,37 +132,10 @@ namespace CSMPrefs
         if (!active || mEditorPos >= MaxKeys)
         {
             // Update key
-            QKeySequence sequence;
-            int modifier = 0;
+            QKeySequence sequence = QKeySequence(mEditorKeys[0], mEditorKeys[1], mEditorKeys[2], mEditorKeys[3]);
+            storeValue(sequence);
 
-            State::get().getShortcutManager().getSequence(getKey(), sequence, modifier);
-
-            sequence = QKeySequence(mEditorKeys[0], mEditorKeys[1], mEditorKeys[2], mEditorKeys[3]);
-            State::get().getShortcutManager().setSequence(getKey(), sequence, modifier);
-
-            // Store
-            {
-                std::string value = State::get().getShortcutManager().convertToString(sequence, modifier);
-
-                QMutexLocker lock(getMutex());
-                getValues().setString(getKey(), getParent()->getKey(), value);
-            }
-
-            getParent()->getState()->update(*this);
-
-            // Update button
-            QString text = QString::fromUtf8(State::get().getShortcutManager().convertToString(sequence).c_str());
-
-            mButton->setText(text);
-            mButton->setChecked(false);
-            mEditorActive = false;
-
-            // Reset
-            mEditorPos = 0;
-            for (int i = 0; i < MaxKeys; ++i)
-            {
-                mEditorKeys[i] = 0;
-            }
+            resetState();
         }
         else
         {
@@ -192,6 +152,43 @@ namespace CSMPrefs
         }
 
         return true;
+    }
+
+    void ShortcutSetting::storeValue(const QKeySequence& sequence)
+    {
+        QKeySequence ignored;
+        int modifier;
+        State::get().getShortcutManager().getSequence(getKey(), ignored, modifier);
+        State::get().getShortcutManager().setSequence(getKey(), sequence, modifier);
+
+        // Convert to string and assign
+        std::string value = State::get().getShortcutManager().convertToString(sequence, modifier);
+
+        {
+            QMutexLocker lock(getMutex());
+            getValues().setString(getKey(), getParent()->getKey(), value);
+        }
+
+        getParent()->getState()->update(*this);
+    }
+
+    void ShortcutSetting::resetState()
+    {
+        mButton->setChecked(false);
+        mEditorActive = false;
+        mEditorPos = 0;
+        for (int i = 0; i < MaxKeys; ++i)
+        {
+            mEditorKeys[i] = 0;
+        }
+
+        // Button text
+        QKeySequence sequence;
+        int modifier = 0;
+        State::get().getShortcutManager().getSequence(getKey(), sequence, modifier);
+
+        QString text = QString::fromUtf8(State::get().getShortcutManager().convertToString(sequence).c_str());
+        mButton->setText(text);
     }
 
     void ShortcutSetting::buttonToggled(bool checked)

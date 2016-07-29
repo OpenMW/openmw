@@ -3,7 +3,6 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <QLabel>
-#include <QLineEdit>
 #include <QMouseEvent>
 #include <QPushButton>
 #include <QWidget>
@@ -61,6 +60,10 @@ namespace CSMPrefs
 
             return handleEvent(target, mod, button);
         }
+        else if (event->type() == QEvent::FocusOut)
+        {
+            resetState();
+        }
 
         return false;
     }
@@ -80,24 +83,10 @@ namespace CSMPrefs
             if (value == Qt::RightButton)
             {
                 // Clear modifier
-                QKeySequence sequence;
                 int modifier = 0;
+                storeValue(modifier);
 
-                State::get().getShortcutManager().getSequence(getKey(), sequence, modifier);
-
-                modifier = 0;
-                State::get().getShortcutManager().setSequence(getKey(), sequence, modifier);
-
-                // Store
-                {
-                    std::string value = State::get().getShortcutManager().convertToString(sequence, modifier);
-
-                    QMutexLocker lock(getMutex());
-                    getValues().setString(getKey(), getParent()->getKey(), value);
-                }
-
-                // Update button
-                mButton->setText("");
+                resetState();
             }
 
             return false;
@@ -112,32 +101,44 @@ namespace CSMPrefs
 
 
         // Update modifier
+        int modifier = value;
+        storeValue(modifier);
+
+        resetState();
+
+        return true;
+    }
+
+    void ModifierSetting::storeValue(int modifier)
+    {
         QKeySequence sequence;
-        int modifier = 0;
-
-        State::get().getShortcutManager().getSequence(getKey(), sequence, modifier);
-
-        modifier = value;
+        int ignored;
+        State::get().getShortcutManager().getSequence(getKey(), sequence, ignored);
         State::get().getShortcutManager().setSequence(getKey(), sequence, modifier);
 
-        // Store
-        {
-            std::string value = State::get().getShortcutManager().convertToString(sequence, modifier);
+        // Convert to string and assign
+        std::string value = State::get().getShortcutManager().convertToString(sequence, modifier);
 
+        {
             QMutexLocker lock(getMutex());
             getValues().setString(getKey(), getParent()->getKey(), value);
         }
 
         getParent()->getState()->update(*this);
+    }
 
-        // Update button
-        QString text = QString::fromUtf8(State::get().getShortcutManager().convertToString(modifier).c_str());
-
-        mButton->setText(text);
+    void ModifierSetting::resetState()
+    {
         mButton->setChecked(false);
         mEditorActive = false;
 
-        return true;
+        // Button text
+        QKeySequence sequence;
+        int modifier = 0;
+        State::get().getShortcutManager().getSequence(getKey(), sequence, modifier);
+
+        QString text = QString::fromUtf8(State::get().getShortcutManager().convertToString(modifier).c_str());
+        mButton->setText(text);
     }
 
     void ModifierSetting::buttonToggled(bool checked)
