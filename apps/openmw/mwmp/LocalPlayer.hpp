@@ -30,6 +30,7 @@ namespace mwmp
         void updateDrawStateAndFlags(bool forceUpdate = false);
 
         void setPosition();
+        void setCell();
 
         void CharGen(int stageFirst, int stageEnd);
 

@@ -79,8 +79,6 @@ void ScriptFunctions::SetCell(unsigned short pid, const char *name) noexcept
 
     cout << " in to cell \"" << player->GetCell()->mName << "\"" << endl;
 
-    player->GetCell()->mData.mFlags |=  1;
-
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_CELL)->Send(player, false);
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_CELL)->Send(player, true);
 }
@@ -92,6 +90,43 @@ const char* ScriptFunctions::GetCell(unsigned short pid) noexcept
 
 
     return player->GetCell()->mName.c_str();
+}
+
+void ScriptFunctions::SetExterior(unsigned short pid, int x, int y) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    cout << "attempt to move player (pid: " << pid << " name: " << player->Npc()->mName << ") from ";
+    if(!player->GetCell()->isExterior())
+        cout << "\"" << player->GetCell()->mName << "\"";
+    else
+        cout << "exterior: " << player->GetCell()->mCellId.mIndex.mX << ", " << player->GetCell()->mCellId.mIndex.mY;
+    cout << " in to exterior cell \"" << x << ", " << y << "\"" << endl;
+
+    /*cout << "TEST1 : " << player->GetCell()->mData.mFlags << endl;
+    player->GetCell()->mData.mFlags &= ~1;
+    cout << "TEST2 : " << player->GetCell()->mData.mFlags << endl;*/
+
+    player->GetCell()->mCellId.mIndex.mX = x;
+    player->GetCell()->mCellId.mIndex.mY = y;
+
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_CELL)->Send(player, false);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_CELL)->Send(player, true);
+}
+
+int ScriptFunctions::GetExteriorX(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,0);
+    return player->GetCell()->mCellId.mIndex.mX;
+}
+
+int ScriptFunctions::GetExteriorY(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,0);
+    return player->GetCell()->mCellId.mIndex.mY;
 }
 
 bool ScriptFunctions::IsInInterior(unsigned short pid) noexcept

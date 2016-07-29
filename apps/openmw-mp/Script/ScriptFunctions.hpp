@@ -48,6 +48,10 @@ public:
     static void SetCell(unsigned short pid, const char *name) noexcept;
     static const char *GetCell(unsigned short pid) noexcept;
 
+    static void SetExterior(unsigned short pid, int x, int y) noexcept;
+    static int GetExteriorX(unsigned short pid) noexcept;
+    static int GetExteriorY(unsigned short pid) noexcept;
+
     static bool IsInInterior(unsigned short pid) noexcept;
 
     static void SetName(unsigned short pid, const char *name) noexcept;
@@ -162,6 +166,9 @@ public:
 
             {"GetCell",             ScriptFunctions::GetCell},
             {"SetCell",             ScriptFunctions::SetCell},
+            {"SetExterior",         ScriptFunctions::SetExterior},
+            {"GetExteriorX",         ScriptFunctions::GetExteriorX},
+            {"GetExteriorY",         ScriptFunctions::GetExteriorY},
             {"IsInInterior",        ScriptFunctions::IsInInterior},
 
             {"GetName",             ScriptFunctions::GetName},

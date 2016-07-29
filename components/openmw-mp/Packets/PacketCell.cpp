@@ -19,11 +19,9 @@ void mwmp::PacketCell::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, b
 
     RW(player->GetCell()->mData.mFlags, send);
 
-    if(player->GetCell()->isExterior())
-    {
-        RW(player->GetCell()->mCellId.mIndex.mX, send);
-        RW(player->GetCell()->mCellId.mIndex.mY, send);
-    }
-    else
-        RW(player->GetCell()->mName, send);
+
+    RW(player->GetCell()->mCellId.mIndex.mX, send);
+    RW(player->GetCell()->mCellId.mIndex.mY, send);
+
+    RW(player->GetCell()->mName, send);
 }

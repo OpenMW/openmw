@@ -128,6 +128,44 @@ void LocalPlayer::setPosition()
     world->rotateObject(player, Position()->rot[0], Position()->rot[1], Position()->rot[2]);
 }
 
+void LocalPlayer::setCell()
+{
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    MWWorld::Ptr player = world->getPlayerPtr();
+    ESM::Position pos;
+
+    world->getPlayer().setTeleported(true);
+
+    int x = GetCell()->mCellId.mIndex.mX;
+    int y = GetCell()->mCellId.mIndex.mY;
+    ESM::CellId curCell =  player.mCell->getCell()->mCellId;
+    if(x != curCell.mIndex.mX || y != curCell.mIndex.mY)
+    {
+        cout << "Exterior location: " << x << ", " << y << endl;
+        world->indexToPosition (x, y, pos.pos[0], pos.pos[1], true);
+        pos.pos[2] = 0;
+
+        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+
+        world->changeToExteriorCell (pos, true);
+        world->fixPosition(player);
+    }
+    else if (world->findExteriorPosition(GetCell()->mName, pos))
+    {
+        cout << "Exterior location: " << GetCell()->mName << endl;
+        world->changeToExteriorCell(pos, true);
+        world->fixPosition(player);
+    }
+    else
+    {
+        cout << "Interior location: " << GetCell()->mName << endl;
+        world->findInteriorPosition(GetCell()->mName, pos);
+        world->changeToInteriorCell(GetCell()->mName, pos, true);
+    }
+
+    updateCell(true);
+}
+
 
 void LocalPlayer::updateInventory(bool forceUpdate)
 {

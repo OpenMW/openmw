@@ -414,19 +414,13 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
             {
                 if(id == myid)
                 {
-                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
-
-                    if(!getLocalPlayer()->GetCell()->isExterior())
+                    if (packet->length == myPacket->headerSize())
+                        getLocalPlayer()->updateCell(true);
+                    else
                     {
-                        cout << "location: " << getLocalPlayer()->GetCell()->mName << endl;
-
-                        MWBase::World *world = MWBase::Environment::get().getWorld();
-                        ESM::Position pos;
-                        world->findInteriorPosition(getLocalPlayer()->GetCell()->mName, pos);
-                        world->changeToInteriorCell(getLocalPlayer()->GetCell()->mName, pos, true);
+                        myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                        getLocalPlayer()->setCell();
                     }
-
-                    getLocalPlayer()->updateCell(true);
                 }
                 else if(pl != 0)
                 {
