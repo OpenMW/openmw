@@ -77,7 +77,7 @@ add_component_dir (esm
     loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
     savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap inventorystate containerstate npcstate creaturestate dialoguestate statstate
     npcstats creaturestats weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
-    aisequence magiceffects util custommarkerstate stolenitems transport
+    aisequence magiceffects util custommarkerstate stolenitems transport animationstate
     )
 
 add_component_dir (esmterrain

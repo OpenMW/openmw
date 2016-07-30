@@ -146,9 +146,10 @@ namespace MWMechanics
 
             /// Attempt to play an animation group
             /// @return Success or error
-            virtual bool playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
+            virtual bool playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist=false);
             virtual void skipAnimation(const MWWorld::Ptr& ptr);
             virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string &groupName);
+            virtual void persistAnimationStates();
 
             /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
             /// paused we may want to do it manually (after equipping permanent enchantment)

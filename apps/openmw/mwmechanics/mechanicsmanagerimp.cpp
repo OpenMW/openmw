@@ -842,12 +842,12 @@ namespace MWMechanics
             mActors.forceStateUpdate(ptr);
     }
 
-    bool MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
+    bool MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist)
     {
         if(ptr.getClass().isActor())
-            return mActors.playAnimationGroup(ptr, groupName, mode, number);
+            return mActors.playAnimationGroup(ptr, groupName, mode, number, persist);
         else
-            return mObjects.playAnimationGroup(ptr, groupName, mode, number);
+            return mObjects.playAnimationGroup(ptr, groupName, mode, number, persist);
     }
     void MechanicsManager::skipAnimation(const MWWorld::Ptr& ptr)
     {
@@ -862,6 +862,12 @@ namespace MWMechanics
             return mActors.checkAnimationPlaying(ptr, groupName);
         else
             return false;
+    }
+
+    void MechanicsManager::persistAnimationStates()
+    {
+        mActors.persistAnimationStates();
+        mObjects.persistAnimationStates();
     }
 
     void MechanicsManager::updateMagicEffects(const MWWorld::Ptr &ptr)

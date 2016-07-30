@@ -415,6 +415,8 @@ public:
     /// Get the current absolute position in the animation track for the animation that is currently playing from the given group.
     float getCurrentTime(const std::string& groupname) const;
 
+    size_t getCurrentLoopCount(const std::string& groupname) const;
+
     /** Disables the specified animation group;
      * \param groupname Animation group to disable.
      */

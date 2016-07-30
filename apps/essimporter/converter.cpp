@@ -34,6 +34,9 @@ namespace
             objstate.mCount = 0;
         convertSCRI(cellref.mSCRI, objstate.mLocals);
         objstate.mHasLocals = !objstate.mLocals.mVariables.empty();
+
+        if (cellref.mHasANIS)
+            convertANIS(cellref.mANIS, objstate.mAnimationState);
     }
 
     bool isIndexedRefId(const std::string& indexedRefId)
