@@ -10,7 +10,6 @@ prebuilt
 
 ## doxygen
 Doxygen
-!docs/cs-manual/Makefile
 
 ## ides/editors
 *~
@@ -35,17 +34,15 @@ resources
 
 ## binaries
 /esmtool
-/mwiniimport
-/omwlauncher
 /openmw
 /opencs
 /niftest
-bsatool
-openmw-cs
-openmw-essimporter
-openmw-iniimporter
-openmw-launcher
-openmw-wizard
+/bsatool
+/openmw-cs
+/openmw-essimporter
+/openmw-iniimporter
+/openmw-launcher
+/openmw-wizard
 
 ## generated objects
 apps/openmw/config.hpp
@@ -80,4 +77,4 @@ moc_*.cxx
 *.so
 gamecontrollerdb.txt
 openmw.appdata.xml
-
+venv/

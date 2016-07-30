@@ -1,8 +1,3 @@
-.. OpenMW CS Manual documentation master file, created by
-   sphinx-quickstart on Fri Feb  5 21:28:27 2016.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 #####################
 OpenMW CS user manual
 #####################

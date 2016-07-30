@@ -76,6 +76,14 @@ option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest" OFF)
 option(BUILD_NIFTEST "build nif file tester" OFF)
 option(BUILD_MYGUI_PLUGIN "build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ON)
+option(BUILD_DOCS        "build documentation." OFF )
+
+# what is necessary to build documentation
+IF( BUILD_DOCS )
+    # Builds the documentation.
+    FIND_PACKAGE( Sphinx REQUIRED )
+    FIND_PACKAGE( Doxygen REQUIRED )
+ENDIF()
 
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
