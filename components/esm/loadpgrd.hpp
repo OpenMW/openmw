@@ -16,6 +16,8 @@ class ESMWriter;
 struct Pathgrid
 {
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "Pathgrid"; }
 
     struct DATAstruct
     {
@@ -51,8 +53,8 @@ struct Pathgrid
     typedef std::vector<Edge> EdgeList;
     EdgeList mEdges;
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
 };

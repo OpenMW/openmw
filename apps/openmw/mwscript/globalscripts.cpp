@@ -1,9 +1,10 @@
-
 #include "globalscripts.hpp"
 
 #include <cassert>
+#include <iostream>
 
 #include <components/misc/stringops.hpp>
+#include <components/esm/esmwriter.hpp>
 #include <components/esm/globalscript.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -99,7 +100,7 @@ namespace MWScript
             mStore.get<ESM::StartScript>().begin();
             iter != mStore.get<ESM::StartScript>().end(); ++iter)
         {
-            scripts.push_back (iter->mScript);
+            scripts.push_back (iter->mId);
         }
 
         // add scripts
@@ -142,11 +143,10 @@ namespace MWScript
             writer.startRecord (ESM::REC_GSCR);
             script.save (writer);
             writer.endRecord (ESM::REC_GSCR);
-            progress.increaseProgress();
         }
     }
 
-    bool GlobalScripts::readRecord (ESM::ESMReader& reader, int32_t type)
+    bool GlobalScripts::readRecord (ESM::ESMReader& reader, uint32_t type)
     {
         if (type==ESM::REC_GSCR)
         {
@@ -198,13 +198,12 @@ namespace MWScript
 
         if (iter==mScripts.end())
         {
-            if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
-            {
-                GlobalScriptDesc desc;
-                desc.mLocals.configure (*script);
+            const ESM::Script *script = mStore.get<ESM::Script>().find (name);
 
-                iter = mScripts.insert (std::make_pair (name, desc)).first;
-            }
+            GlobalScriptDesc desc;
+            desc.mLocals.configure (*script);
+
+            iter = mScripts.insert (std::make_pair (name2, desc)).first;
         }
 
         return iter->second.mLocals;

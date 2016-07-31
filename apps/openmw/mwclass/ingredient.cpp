@@ -1,4 +1,3 @@
-
 #include "ingredient.hpp"
 
 #include <components/esm/loadingr.hpp>
@@ -11,7 +10,7 @@
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/physicssystem.hpp"
+#include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/actioneat.hpp"
 #include "../mwworld/nullaction.hpp"
 
@@ -24,34 +23,22 @@
 
 namespace MWClass
 {
-    std::string Ingredient::getId (const MWWorld::Ptr& ptr) const
-    {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
 
-        return ref->mBase->mId;
-    }
-
-    void Ingredient::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Ingredient::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        const std::string model = getModel(ptr);
         if (!model.empty()) {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    void Ingredient::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Ingredient::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
-        if(!model.empty())
-            physics.addObject(ptr,true);
+        // TODO: add option somewhere to enable collision for placeable objects
     }
 
-    std::string Ingredient::getModel(const MWWorld::Ptr &ptr) const
+    std::string Ingredient::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -60,10 +47,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Ingredient::getName (const MWWorld::Ptr& ptr) const
+    std::string Ingredient::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 
         return ref->mBase->mName;
     }
@@ -74,18 +60,16 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string Ingredient::getScript (const MWWorld::Ptr& ptr) const
+    std::string Ingredient::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 
         return ref->mBase->mScript;
     }
 
-    int Ingredient::getValue (const MWWorld::Ptr& ptr) const
+    int Ingredient::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 
         return ref->mBase->mData.mValue;
     }
@@ -107,39 +91,36 @@ namespace MWClass
         registerClass (typeid (ESM::Ingredient).name(), instance);
     }
 
-    std::string Ingredient::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Ingredient::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Ingredient Up");
     }
 
-    std::string Ingredient::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Ingredient::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Ingredient Down");
     }
 
-    std::string Ingredient::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    std::string Ingredient::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-          MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 
         return ref->mBase->mIcon;
     }
 
-    bool Ingredient::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Ingredient::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Ingredient::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Ingredient::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -183,25 +164,22 @@ namespace MWClass
         return info;
     }
 
-    MWWorld::Ptr
-    Ingredient::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Ingredient::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 
-        return MWWorld::Ptr(&cell.get<ESM::Ingredient>().insert(*ref), &cell);
+        return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    bool Ingredient::canSell (const MWWorld::Ptr& item, int npcServices) const
+    bool Ingredient::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Ingredients;
+        return (npcServices & ESM::NPC::Ingredients) != 0;
     }
 
 
-    float Ingredient::getWeight(const MWWorld::Ptr &ptr) const
+    float Ingredient::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
         return ref->mBase->mData.mWeight;
     }
 }

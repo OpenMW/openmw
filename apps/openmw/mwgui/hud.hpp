@@ -4,7 +4,11 @@
 #include "mapwindow.hpp"
 
 #include "../mwmechanics/stat.hpp"
-#include "../mwworld/ptr.hpp"
+
+namespace MWWorld
+{
+    class Ptr;
+}
 
 namespace MWGui
 {
@@ -12,15 +16,12 @@ namespace MWGui
     class SpellIcons;
     class ItemWidget;
 
-    class HUD : public OEngine::GUI::Layout, public LocalMapBase
+    class HUD : public Layout, public LocalMapBase
     {
     public:
-        HUD(CustomMarkerCollection& customMarkers, int fpsLevel, DragAndDrop* dragAndDrop);
+        HUD(CustomMarkerCollection& customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender);
         virtual ~HUD();
         void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
-        void setFPS(float fps);
-        void setTriangleCount(unsigned int count);
-        void setBatchCount(unsigned int count);
 
         /// Set time left for the player to start drowning
         /// @param time time left to start drowning
@@ -36,8 +37,6 @@ namespace MWGui
         void setEffectVisible(bool visible);
         void setMinimapVisible(bool visible);
 
-        void setFpsLevel(const int level);
-
         void setSelectedSpell(const std::string& spellId, int successChancePercent);
         void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent);
         void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent);
@@ -45,6 +44,7 @@ namespace MWGui
         void unsetSelectedWeapon();
 
         void setCrosshairVisible(bool visible);
+        void setCrosshairOwned(bool owned);
 
         void onFrame(float dt);
 
@@ -73,11 +73,6 @@ namespace MWGui
         MyGUI::TextBox* mCellNameBox;
         MyGUI::TextBox* mWeaponSpellBox;
         MyGUI::Widget *mDrowningFrame, *mDrowningFlash;
-
-        MyGUI::Widget* mFpsBox;
-        MyGUI::TextBox* mFpsCounter;
-        MyGUI::TextBox* mTriangleCounter;
-        MyGUI::TextBox* mBatchCounter;
 
         // bottom left elements
         int mHealthManaStaminaBaseLeft, mWeapBoxBaseLeft, mSpellBoxBaseLeft, mSneakBoxBaseLeft;
@@ -114,6 +109,10 @@ namespace MWGui
         void onWeaponClicked(MyGUI::Widget* _sender);
         void onMagicClicked(MyGUI::Widget* _sender);
         void onMapClicked(MyGUI::Widget* _sender);
+
+        // LocalMapBase
+        virtual void customMarkerCreated(MyGUI::Widget* marker);
+        virtual void doorMarkerCreated(MyGUI::Widget* marker);
 
         void updateEnemyHealthBar();
 

@@ -4,7 +4,7 @@
 #include <QDialog>
 
 #include "ui_contentselector.h"
-#include "../model/contentmodel.hpp"
+#include <components/contentselector/model/contentmodel.hpp>
 
 class QSortFilterProxyModel;
 
@@ -14,12 +14,12 @@ namespace ContentSelectorView
     {
         Q_OBJECT
 
+        QMenu *mContextMenu;
         QStringList mFilePaths;
 
     protected:
 
         ContentSelectorModel::ContentModel *mContentModel;
-        QSortFilterProxyModel *mGameFileProxyModel;
         QSortFilterProxyModel *mAddonProxyModel;
 
     public:
@@ -29,10 +29,11 @@ namespace ContentSelectorView
         QString currentFile() const;
 
         void addFiles(const QString &path);
+        void clearFiles();
         void setProfileContent (const QStringList &fileList);
 
         void clearCheckStates();
-        void setCheckStates (const QStringList &list);
+        void setContentList(const QStringList &list);
 
         ContentSelectorModel::ContentFileList selectedFiles() const;
 
@@ -52,16 +53,22 @@ namespace ContentSelectorView
         void buildContentModel();
         void buildGameFileView();
         void buildAddonView();
+        void buildContextMenu();
+        void setGameFileSelected(int index, bool selected);
+        void setCheckStateForMultiSelectedItems(bool checked);
 
     signals:
         void signalCurrentGamefileIndexChanged (int);
-        void signalAddonFileSelected (int);
-        void signalAddonFileUnselected (int);
+
+        void signalAddonDataChanged (const QModelIndex& topleft, const QModelIndex& bottomright);
 
     private slots:
 
         void slotCurrentGameFileIndexChanged(int index);
-        void slotAddonTableItemClicked(const QModelIndex &index);
+        void slotAddonTableItemActivated(const QModelIndex& index);
+        void slotShowContextMenu(const QPoint& pos);
+        void slotCheckMultiSelectedItems();
+        void slotUncheckMultiSelectedItems();
     };
 }
 

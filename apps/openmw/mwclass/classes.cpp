@@ -1,4 +1,3 @@
-
 #include "classes.hpp"
 
 #include "activator.hpp"
@@ -21,6 +20,7 @@
 #include "probe.hpp"
 #include "repair.hpp"
 #include "static.hpp"
+#include "bodypart.hpp"
 
 namespace MWClass
 {
@@ -46,5 +46,6 @@ namespace MWClass
         Probe::registerSelf();
         Repair::registerSelf();
         Static::registerSelf();
+        BodyPart::registerSelf();
     }
 }

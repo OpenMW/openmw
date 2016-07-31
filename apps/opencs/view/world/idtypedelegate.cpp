@@ -3,9 +3,9 @@
 #include "../../model/world/universalid.hpp"
 
 CSVWorld::IdTypeDelegate::IdTypeDelegate
-    (const ValueList &values, const IconList &icons, CSMDoc::Document& document, QObject *parent)
-    : DataDisplayDelegate (values, icons, document,
-                           "records", "type-format",
+    (const ValueList &values, const IconList &icons, CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent)
+    : DataDisplayDelegate (values, icons, dispatcher, document,
+                           "Records", "type-format",
                            parent)
 {}
 
@@ -21,7 +21,7 @@ CSVWorld::IdTypeDelegateFactory::IdTypeDelegateFactory()
 }
 
 CSVWorld::CommandDelegate *CSVWorld::IdTypeDelegateFactory::makeDelegate (
-    CSMDoc::Document& document, QObject *parent) const
+    CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const
 {
-    return new IdTypeDelegate (mValues, mIcons, document, parent);
+    return new IdTypeDelegate (mValues, mIcons, dispatcher, document, parent);
 }

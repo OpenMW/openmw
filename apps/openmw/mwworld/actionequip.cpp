@@ -4,6 +4,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
+
 #include <components/compiler/locals.hpp>
 
 #include "inventorystore.hpp"
@@ -24,7 +26,7 @@ namespace MWWorld
         std::pair <int, std::string> result = object.getClass().canBeEquipped (object, actor);
 
         // display error message if the player tried to equip something
-        if (!result.second.empty() && actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (!result.second.empty() && actor == MWMechanics::getPlayer())
             MWBase::Environment::get().getWindowManager()->messageBox(result.second);
 
         switch(result.first)
@@ -50,7 +52,12 @@ namespace MWWorld
             }
         }
 
-        assert(it != invStore.end());
+        if (it == invStore.end())
+        {
+            std::stringstream error;
+            error << "ActionEquip can't find item " << object.getCellRef().getRefId();
+            throw std::runtime_error(error.str());
+        }
 
         // equip the item in the first free slot
         std::vector<int>::const_iterator slot=slots_.first.begin();

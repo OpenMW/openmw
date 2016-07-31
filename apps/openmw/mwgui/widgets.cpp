@@ -1,12 +1,7 @@
 #include "widgets.hpp"
-#include "../mwworld/esmstore.hpp"
-
-#include <boost/lexical_cast.hpp>
 
 #include <sstream>
 #include <iomanip>
-
-#include <components/misc/resourcehelpers.hpp>
 
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ImageBox.h>
@@ -16,8 +11,9 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#undef min
-#undef max
+#include "../mwworld/esmstore.hpp"
+
+#include "controllers.hpp"
 
 namespace MWGui
 {
@@ -71,7 +67,7 @@ namespace MWGui
             if (mSkillValueWidget)
             {
                 SkillValue::Type modified = mValue.getModified(), base = mValue.getBase();
-                mSkillValueWidget->setCaption(boost::lexical_cast<std::string>(modified));
+                mSkillValueWidget->setCaption(MyGUI::utility::toString(modified));
                 if (modified > base)
                     mSkillValueWidget->_setWidgetState("increased");
                 else if (modified < base)
@@ -167,7 +163,7 @@ namespace MWGui
             if (mAttributeValueWidget)
             {
                 int modified = mValue.getModified(), base = mValue.getBase();
-                mAttributeValueWidget->setCaption(boost::lexical_cast<std::string>(modified));
+                mAttributeValueWidget->setCaption(MyGUI::utility::toString(modified));
                 if (modified > base)
                     mAttributeValueWidget->_setWidgetState("increased");
                 else if (modified < base)
@@ -238,7 +234,7 @@ namespace MWGui
                 params.mMagnMin = it->mMagnMin;
                 params.mMagnMax = it->mMagnMax;
                 params.mRange = it->mRange;
-                params.mIsConstant = (flags & MWEffectList::EF_Constant);
+                params.mIsConstant = (flags & MWEffectList::EF_Constant) != 0;
                 params.mNoTarget = (flags & MWEffectList::EF_NoTarget);
                 effect->setSpellEffect(params);
                 effects.push_back(effect);
@@ -429,9 +425,9 @@ namespace MWGui
                     spellLine += formatter.str();
                 }
                 else if ( displayType != ESM::MagicEffect::MDT_None ) {
-                    spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin);
+                    spellLine += " " + MyGUI::utility::toString(mEffectParams.mMagnMin);
                     if (mEffectParams.mMagnMin != mEffectParams.mMagnMax)
-                        spellLine += to + boost::lexical_cast<std::string>(mEffectParams.mMagnMax);
+                        spellLine += to + MyGUI::utility::toString(mEffectParams.mMagnMax);
 
                     if ( displayType == ESM::MagicEffect::MDT_Percentage )
                         spellLine += pct;
@@ -449,12 +445,12 @@ namespace MWGui
             {
                 if (mEffectParams.mDuration > 0 && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
                 {
-                    spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sfor", "") + " " + boost::lexical_cast<std::string>(mEffectParams.mDuration) + ((mEffectParams.mDuration == 1) ? sec : secs);
+                    spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sfor", "") + " " + MyGUI::utility::toString(mEffectParams.mDuration) + ((mEffectParams.mDuration == 1) ? sec : secs);
                 }
 
                 if (mEffectParams.mArea > 0)
                 {
-                    spellLine += " #{sin} " + boost::lexical_cast<std::string>(mEffectParams.mArea) + " #{sfootarea}";
+                    spellLine += " #{sin} " + MyGUI::utility::toString(mEffectParams.mArea) + " #{sfootarea}";
                 }
 
                 // potions have no target
@@ -473,7 +469,7 @@ namespace MWGui
             mTextWidget->setCaptionWithReplacing(spellLine);
             mRequestedWidth = mTextWidget->getTextSize().width + 24;
 
-            mImageWidget->setImageTexture(Misc::ResourceHelpers::correctIconPath(magicEffect->mIcon));
+            mImageWidget->setImageTexture(MWBase::Environment::get().getWindowManager()->correctIconPath(magicEffect->mIcon));
         }
 
         MWSpellEffect::~MWSpellEffect()
@@ -539,10 +535,13 @@ namespace MWGui
 
         MWScrollBar::MWScrollBar()
             : mEnableRepeat(true)
-            , mRepeatTriggerTime(0.5)
-            , mRepeatStepTime(0.1)
+            , mRepeatTriggerTime(0.5f)
+            , mRepeatStepTime(0.1f)
             , mIsIncreasing(true)
         {
+#if MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3,2,2)
+            ScrollBar::setRepeatEnabled(false);
+#endif
         }
 
         MWScrollBar::~MWScrollBar()
@@ -606,7 +605,7 @@ namespace MWGui
             controller->eventRepeatClick += newDelegate(this, &MWScrollBar::repeatClick);
             controller->setEnabled(mEnableRepeat);
             controller->setRepeat(mRepeatTriggerTime, mRepeatStepTime);
-			MyGUI::ControllerManager::getInstance().addItem(this, controller);
+            MyGUI::ControllerManager::getInstance().addItem(this, controller);
         }
 
         void MWScrollBar::onDecreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
@@ -622,7 +621,7 @@ namespace MWGui
             controller->eventRepeatClick += newDelegate(this, &MWScrollBar::repeatClick);
             controller->setEnabled(mEnableRepeat);
             controller->setRepeat(mRepeatTriggerTime, mRepeatStepTime);
-			MyGUI::ControllerManager::getInstance().addItem(this, controller);
+            MyGUI::ControllerManager::getInstance().addItem(this, controller);
         }
 
         void MWScrollBar::onIncreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)

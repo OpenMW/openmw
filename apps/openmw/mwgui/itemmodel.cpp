@@ -1,5 +1,7 @@
 #include "itemmodel.hpp"
 
+#include <set>
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/store.hpp"
@@ -12,10 +14,10 @@ namespace MWGui
 {
 
     ItemStack::ItemStack(const MWWorld::Ptr &base, ItemModel *creator, size_t count)
-        : mCreator(creator)
-        , mCount(count)
+        : mType(Type_Normal)
         , mFlags(0)
-        , mType(Type_Normal)
+        , mCreator(creator)
+        , mCount(count)
         , mBase(base)
     {
         if (base.getClass().getEnchantment(base) != "")
@@ -33,7 +35,7 @@ namespace MWGui
             {
                 const ESM::GameSetting &currentSetting = *currentIteration;
                 std::string currentGMSTID = currentSetting.mId;
-                Misc::StringUtils::toLower(currentGMSTID);
+                Misc::StringUtils::lowerCaseInPlace(currentGMSTID);
 
                 // Don't bother checking this GMST if it's not a sMagicBound* one.
                 const std::string& toFind = "smagicbound";
@@ -42,7 +44,7 @@ namespace MWGui
 
                 // All sMagicBound* GMST's should be of type string
                 std::string currentGMSTValue = currentSetting.getString();
-                Misc::StringUtils::toLower(currentGMSTValue);
+                Misc::StringUtils::lowerCaseInPlace(currentGMSTValue);
 
                 boundItemIDCache.insert(currentGMSTValue);
             }
@@ -50,17 +52,17 @@ namespace MWGui
 
         // Perform bound item check and assign the Flag_Bound bit if it passes
         std::string tempItemID = base.getCellRef().getRefId();
-        Misc::StringUtils::toLower(tempItemID);
+        Misc::StringUtils::lowerCaseInPlace(tempItemID);
 
         if (boundItemIDCache.count(tempItemID) != 0)
             mFlags |= Flag_Bound;
     }
 
     ItemStack::ItemStack()
-        : mCreator(NULL)
-        , mCount(0)
+        : mType(Type_Normal)
         , mFlags(0)
-        , mType(Type_Normal)
+        , mCreator(NULL)
+        , mCount(0)
     {
     }
 
@@ -117,6 +119,16 @@ namespace MWGui
         return ret;
     }
 
+    bool ItemModel::allowedToInsertItems() const
+    {
+        return true;
+    }
+
+
+    ProxyItemModel::ProxyItemModel()
+        : mSourceModel(NULL)
+    {
+    }
 
     ProxyItemModel::~ProxyItemModel()
     {
@@ -160,6 +172,20 @@ namespace MWGui
     ItemModel::ModelIndex ProxyItemModel::getIndex (ItemStack item)
     {
         return mSourceModel->getIndex(item);
+    }
+
+    void ProxyItemModel::setSourceModel(ItemModel *sourceModel)
+    {
+        if (mSourceModel == sourceModel)
+            return;
+
+        if (mSourceModel)
+        {
+            delete mSourceModel;
+            mSourceModel = NULL;
+        }
+
+        mSourceModel = sourceModel;
     }
 
 }

@@ -23,6 +23,10 @@ namespace MWState
 
             void cleanup (bool force = false);
 
+            bool verifyProfile (const ESM::SavedGame& profile) const;
+
+            void writeScreenshot (std::vector<char>& imageData) const;
+
             std::map<int, int> buildContentFileIndexMap (const ESM::ESMReader& reader) const;
 
         public:
@@ -61,13 +65,16 @@ namespace MWState
             /** Used for quickload **/
             virtual void quickLoad();
 
-            virtual void loadGame (const Character *character, const Slot *slot);
-            ///< Load a saved game file from \a slot.
-            ///
-            /// \note \a slot must belong to \a character.
+            virtual void loadGame (const std::string& filepath);
+            ///< Load a saved game directly from the given file path. This will search the CharacterManager
+            /// for a Character containing this save file, and set this Character current if one was found.
+            /// Otherwise, a new Character will be created.
 
-            virtual Character *getCurrentCharacter (bool create = true);
-            ///< \param create Create a new character, if there is no current character.
+            virtual void loadGame (const Character *character, const std::string &filepath);
+            ///< Load a saved game file belonging to the given character.
+
+            virtual Character *getCurrentCharacter ();
+            ///< @note May return null.
 
             virtual CharacterIterator characterBegin();
             ///< Any call to SaveGame and getCurrentCharacter can invalidate the returned

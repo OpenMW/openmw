@@ -1,7 +1,7 @@
 #ifndef MWGUI_WINDOW_BASE_H
 #define MWGUI_WINDOW_BASE_H
 
-#include <openengine/gui/layout.hpp>
+#include "layout.hpp"
 
 namespace MWBase
 {
@@ -13,7 +13,7 @@ namespace MWGui
     class WindowManager;
     class DragAndDrop;
 
-    class WindowBase: public OEngine::GUI::Layout
+    class WindowBase: public Layout
     {
         public:
         WindowBase(const std::string& parLayout);
@@ -21,16 +21,16 @@ namespace MWGui
         // Events
         typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;
 
-        ///Unhides the window
+        /// Notify that window has been made visible
         virtual void open() {}
-        ///Hides the window
+        /// Notify that window has been hidden
         virtual void close () {}
-        ///Gracefully exits the window
+        /// Gracefully exits the window
         virtual void exit() {}
-        ///Sets the visibility of the window
+        /// Sets the visibility of the window
         virtual void setVisible(bool visible);
-        ///Returns the visibility state of the window
-        virtual bool isVisible();
+        /// Returns the visibility state of the window
+        bool isVisible();
         void center();
     };
 

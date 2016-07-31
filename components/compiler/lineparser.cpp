@@ -1,4 +1,3 @@
-
 #include "lineparser.hpp"
 
 #include <memory>
@@ -56,8 +55,8 @@ namespace Compiler
     LineParser::LineParser (ErrorHandler& errorHandler, const Context& context, Locals& locals,
         Literals& literals, std::vector<Interpreter::Type_Code>& code, bool allowExpression)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals), mCode (code),
-       mState (BeginState), mExprParser (errorHandler, context, locals, literals),
-       mAllowExpression (allowExpression), mButtons(0), mType(0), mReferenceMember(false)
+       mState (BeginState), mReferenceMember(false), mButtons(0), mType(0),
+       mExprParser (errorHandler, context, locals, literals), mAllowExpression (allowExpression)
     {}
 
     bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
@@ -141,30 +140,9 @@ namespace Compiler
 
         if (mState==MessageState || mState==MessageCommaState)
         {
-            std::string arguments;
-
-            for (std::size_t i=0; i<name.size(); ++i)
-            {
-                if (name[i]=='%')
-                {
-                    ++i;
-                    if (i<name.size())
-                    {
-                        if (name[i]=='G' || name[i]=='g')
-                        {
-                            arguments += "l";
-                        }
-                        else if (name[i]=='S' || name[i]=='s')
-                        {
-                            arguments += 'S';
-                        }
-                        else if (name[i]=='.' || name[i]=='f')
-                        {
-                            arguments += 'f';
-                        }
-                    }
-                }
-            }
+            GetArgumentsFromMessageFormat processor;
+            processor.process(name);
+            std::string arguments = processor.getArguments();
 
             if (!arguments.empty())
             {
@@ -222,6 +200,23 @@ namespace Compiler
 
     bool LineParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
+        if (mState==MessageState || mState==MessageCommaState)
+        {
+            if (const Extensions *extensions = getContext().getExtensions())
+            {
+                std::string argumentType; // ignored
+                bool hasExplicit = false; // ignored
+                if (extensions->isInstruction (keyword, argumentType, hasExplicit))
+                {
+                    // pretend this is not a keyword
+                    std::string name = loc.mLiteral;
+                    if (name.size()>=2 && name[0]=='"' && name[name.size()-1]=='"')
+                        name = name.substr (1, name.size()-2);
+                    return parseName (name, loc, scanner);
+                }
+            }
+        }
+
         if (mState==SetMemberVarState)
         {
             mMemberName = loc.mLiteral;
@@ -395,7 +390,12 @@ namespace Compiler
                 }
 
                 case Scanner::K_set: mState = SetState; return true;
-                case Scanner::K_messagebox: mState = MessageState; return true;
+
+                case Scanner::K_messagebox:
+
+                    mState = MessageState;
+                    scanner.enableStrictKeywords();
+                    return true;
 
                 case Scanner::K_return:
 
@@ -539,7 +539,7 @@ namespace Compiler
         }
 
         if (mAllowExpression && mState==BeginState &&
-            (code==Scanner::S_open || code==Scanner::S_minus))
+            (code==Scanner::S_open || code==Scanner::S_minus || code==Scanner::S_plus))
         {
             scanner.putbackSpecial (code, loc);
             parseExpression (scanner, loc);
@@ -556,4 +556,23 @@ namespace Compiler
         mName.clear();
         mExplicit.clear();
     }
+
+    void GetArgumentsFromMessageFormat::visitedPlaceholder(Placeholder placeholder, char /*padding*/, int /*width*/, int /*precision*/)
+    {
+        switch (placeholder)
+        {
+            case StringPlaceholder:
+                mArguments += 'S';
+                break;
+            case IntegerPlaceholder:
+                mArguments += 'l';
+                break;
+            case FloatPlaceholder:
+                mArguments += 'f';
+                break;
+            default:
+                break;
+        }
+    }
+
 }

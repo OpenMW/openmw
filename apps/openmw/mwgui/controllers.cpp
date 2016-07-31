@@ -1,6 +1,7 @@
 #include "controllers.hpp"
 
 #include <MyGUI_InputManager.h>
+#include <MyGUI_Widget.h>
 
 namespace MWGui
 {
@@ -8,8 +9,8 @@ namespace MWGui
     {
 
         ControllerRepeatEvent::ControllerRepeatEvent() :
-            mInit(0.5),
-            mStep(0.1),
+            mInit(0.5f),
+            mStep(0.1f),
             mEnabled(true),
             mTimeLeft(0)
         {

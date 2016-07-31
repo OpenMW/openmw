@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <set>
 
 #include "defs.hpp"
 
@@ -12,6 +13,7 @@ namespace ESM
     class ESMReader;
     class ESMWriter;
 
+    // NOTE: spell ids must be lower case
     struct SpellState
     {
         struct CorprusStats
@@ -27,7 +29,11 @@ namespace ESM
             float mMagnitude;
         };
 
-        typedef std::map<std::string, std::map<const int, float> > TContainer;
+        struct SpellParams {
+            std::map<int, float> mEffectRands;
+            std::set<int> mPurgedEffects;
+        };
+        typedef std::map<std::string, SpellParams> TContainer;
         TContainer mSpells;
 
         std::map<std::string, std::vector<PermanentSpellEffectInfo> > mPermanentSpellEffects;

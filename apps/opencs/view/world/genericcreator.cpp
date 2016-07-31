@@ -1,4 +1,3 @@
-
 #include "genericcreator.hpp"
 
 #include <memory>
@@ -41,11 +40,25 @@ void CSVWorld::GenericCreator::insertAtBeginning (QWidget *widget, bool stretche
 void CSVWorld::GenericCreator::insertBeforeButtons (QWidget *widget, bool stretched)
 {
     mLayout->insertWidget (mLayout->count()-2, widget, stretched ? 1 : 0);
+
+    // Reset tab order relative to buttons.
+    setTabOrder(widget, mCreate);
+    setTabOrder(mCreate, mCancel);
 }
 
 std::string CSVWorld::GenericCreator::getId() const
 {
     return mId->text().toUtf8().constData();
+}
+
+std::string CSVWorld::GenericCreator::getIdValidatorResult() const
+{
+    std::string errors;
+
+    if (!mId->hasAcceptableInput())
+        errors = mValidator->getError();
+
+    return errors;
 }
 
 void CSVWorld::GenericCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const {}
@@ -129,10 +142,19 @@ void CSVWorld::GenericCreator::addScope (const QString& name, CSMWorld::Scope sc
 
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id, bool relaxedIdRules)
-: mData (data), mUndoStack (undoStack), mListId (id), mLocked (false), mCloneMode (false),
+: mData (data), mUndoStack (undoStack), mListId (id), mLocked (false),
   mClonedType (CSMWorld::UniversalId::Type_None), mScopes (CSMWorld::Scope_Content), mScope (0),
-  mScopeLabel (0)
+  mScopeLabel (0), mCloneMode (false)
 {
+    // If the collection ID has a parent type, use it instead.
+    // It will change IDs with Record/SubRecord class (used for creators in Dialogue subviews)
+    // to IDs with general RecordList class (used for creators in Table subviews).
+    CSMWorld::UniversalId::Type listParentType = CSMWorld::UniversalId::getParentType(mListId.getType());
+    if (listParentType != CSMWorld::UniversalId::Type_None)
+    {
+        mListId = listParentType;
+    }
+
     mLayout = new QHBoxLayout;
     mLayout->setContentsMargins (0, 0, 0, 0);
 
@@ -143,15 +165,18 @@ CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undo
     mCreate = new QPushButton ("Create");
     mLayout->addWidget (mCreate);
 
-    QPushButton *cancelButton = new QPushButton ("Cancel");
-    mLayout->addWidget (cancelButton);
+    mCancel = new QPushButton("Cancel");
+    mLayout->addWidget(mCancel);
 
     setLayout (mLayout);
 
-    connect (cancelButton, SIGNAL (clicked (bool)), this, SIGNAL (done()));
+    connect (mCancel, SIGNAL (clicked (bool)), this, SIGNAL (done()));
     connect (mCreate, SIGNAL (clicked (bool)), this, SLOT (create()));
 
     connect (mId, SIGNAL (textChanged (const QString&)), this, SLOT (textChanged (const QString&)));
+    connect (mId, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
+
+    connect (&mData, SIGNAL (idListChanged()), this, SLOT (dataIdListChanged()));
 }
 
 void CSVWorld::GenericCreator::setEditLock (bool locked)
@@ -183,6 +208,14 @@ std::string CSVWorld::GenericCreator::getErrors() const
 void CSVWorld::GenericCreator::textChanged (const QString& text)
 {
     update();
+}
+
+void CSVWorld::GenericCreator::inputReturnPressed()
+{
+    if (mCreate->isEnabled())
+    {
+        create();
+    }
 }
 
 void CSVWorld::GenericCreator::create()
@@ -223,6 +256,11 @@ void CSVWorld::GenericCreator::cloneMode(const std::string& originId,
 
 void CSVWorld::GenericCreator::toggleWidgets(bool active)
 {
+}
+
+void CSVWorld::GenericCreator::focus()
+{
+    mId->setFocus();
 }
 
 void CSVWorld::GenericCreator::setScope (unsigned int scope)
@@ -276,4 +314,13 @@ void CSVWorld::GenericCreator::scopeChanged (int index)
 {
     update();
     updateNamespace();
+}
+
+void CSVWorld::GenericCreator::dataIdListChanged()
+{
+    // If the original ID of cloned record was removed, cancel the creator
+    if (mCloneMode && !mData.hasId(mClonedId))
+    {
+        emit done();
+    }
 }

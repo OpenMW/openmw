@@ -1,13 +1,14 @@
-
 #include "light.hpp"
 
 #include <components/esm/loadligh.hpp>
-#include <components/esm/lightstate.hpp>
+#include <components/esm/objectstate.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
@@ -16,7 +17,7 @@
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/physicssystem.hpp"
+#include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/customdata.hpp"
 
 #include "../mwgui/tooltips.hpp"
@@ -24,67 +25,39 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
-namespace
-{
-    struct LightCustomData : public MWWorld::CustomData
-    {
-        float mTime;
-        ///< Time remaining
-
-        LightCustomData(MWWorld::Ptr ptr)
-        {
-            MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
-            mTime = ref->mBase->mData.mTime;
-        }
-        ///< Constructs this CustomData from the base values for Ptr.
-
-        virtual MWWorld::CustomData *clone() const
-        {
-            return new LightCustomData (*this);
-        }
-    };
-}
-
 namespace MWClass
 {
-    std::string Light::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Light>()->mBase->mId;
-    }
 
-    void Light::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Light::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        const std::string model = getModel(ptr);
-
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         // Insert even if model is empty, so that the light is added
-        renderingInterface.getObjects().insertModel(ptr, model, false, !(ref->mBase->mData.mFlags & ESM::Light::OffDefault));
+        renderingInterface.getObjects().insertModel(ptr, model, true, !(ref->mBase->mData.mFlags & ESM::Light::OffDefault));
     }
 
-    void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Light::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
         assert (ref->mBase != NULL);
 
-        const std::string &model = ref->mBase->mModel;
-
-        if(!model.empty())
-            physics.addObject(ptr,ref->mBase->mData.mFlags & ESM::Light::Carry);
+        // TODO: add option somewhere to enable collision for placeable objects
+        if (!model.empty() && (ref->mBase->mData.mFlags & ESM::Light::Carry) == 0)
+            physics.addObject(ptr, model);
 
         if (!ref->mBase->mSound.empty() && !(ref->mBase->mData.mFlags & ESM::Light::OffDefault))
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0,
                                                                       MWBase::SoundManager::Play_TypeSfx,
                                                                       MWBase::SoundManager::Play_Loop);
+
+        MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
-    std::string Light::getModel(const MWWorld::Ptr &ptr) const
+    std::string Light::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
-        assert (ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -93,10 +66,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Light::getName (const MWWorld::Ptr& ptr) const
+    std::string Light::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         if (ref->mBase->mModel.empty())
             return "";
@@ -117,18 +89,16 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string Light::getScript (const MWWorld::Ptr& ptr) const
+    std::string Light::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         return ref->mBase->mScript;
     }
 
-    std::pair<std::vector<int>, bool> Light::getEquipmentSlots (const MWWorld::Ptr& ptr) const
+    std::pair<std::vector<int>, bool> Light::getEquipmentSlots (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         std::vector<int> slots_;
 
@@ -138,10 +108,9 @@ namespace MWClass
         return std::make_pair (slots_, false);
     }
 
-    int Light::getValue (const MWWorld::Ptr& ptr) const
+    int Light::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         return ref->mBase->mData.mValue;
     }
@@ -153,44 +122,43 @@ namespace MWClass
         registerClass (typeid (ESM::Light).name(), instance);
     }
 
-    std::string Light::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Light::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Misc Up");
     }
 
-    std::string Light::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Light::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Misc Down");
     }
 
 
-    std::string Light::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    std::string Light::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-          MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         return ref->mBase->mIcon;
     }
 
-    bool Light::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Light::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Light::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Light::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
 
+        if (Settings::Manager::getBool("show effect duration","Game"))
+            text += "\n#{sDuration}: " + MWGui::ToolTips::toString(ptr.getClass().getRemainingUsageTime(ptr));
         if (ref->mBase->mData.mWeight != 0)
         {
             text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
@@ -218,48 +186,42 @@ namespace MWClass
 
     void Light::setRemainingUsageTime (const MWWorld::Ptr& ptr, float duration) const
     {
-        ensureCustomData(ptr);
-
-        float &timeRemaining = dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime;
-        timeRemaining = duration;
+        ptr.getCellRef().setChargeFloat(duration);
     }
 
-    float Light::getRemainingUsageTime (const MWWorld::Ptr& ptr) const
+    float Light::getRemainingUsageTime (const MWWorld::ConstPtr& ptr) const
     {
-        ensureCustomData(ptr);
-
-        return dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime;
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        if (ptr.getCellRef().getCharge() == -1)
+            return static_cast<float>(ref->mBase->mData.mTime);
+        else
+            return ptr.getCellRef().getChargeFloat();
     }
 
-    MWWorld::Ptr
-    Light::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Light::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
-        return MWWorld::Ptr(&cell.get<ESM::Light>().insert(*ref), &cell);
+        return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    void Light::ensureCustomData (const MWWorld::Ptr& ptr) const
+    bool Light::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
-        if (!ptr.getRefData().getCustomData())
-            ptr.getRefData().setCustomData(new LightCustomData(ptr));
+        return (npcServices & ESM::NPC::Lights) != 0;
     }
 
-    bool Light::canSell (const MWWorld::Ptr& item, int npcServices) const
+    float Light::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        return npcServices & ESM::NPC::Lights;
-    }
-
-    float Light::getWeight(const MWWorld::Ptr &ptr) const
-    {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
         return ref->mBase->mData.mWeight;
     }
 
-    std::pair<int, std::string> Light::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string> Light::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
     {
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        if (!(ref->mBase->mData.mFlags & ESM::Light::Carry))
+            return std::make_pair(0,"");
+
         MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
         MWWorld::ContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 
@@ -281,27 +243,7 @@ namespace MWClass
         return std::make_pair(1,"");
     }
 
-    void Light::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
-        const
-    {
-        const ESM::LightState& state2 = dynamic_cast<const ESM::LightState&> (state);
-
-        ensureCustomData (ptr);
-
-        dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime = state2.mTime;
-    }
-
-    void Light::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
-        const
-    {
-        ESM::LightState& state2 = dynamic_cast<ESM::LightState&> (state);
-
-        ensureCustomData (ptr);
-
-        state2.mTime = dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime;
-    }
-
-    std::string Light::getSound(const MWWorld::Ptr& ptr) const
+    std::string Light::getSound(const MWWorld::ConstPtr& ptr) const
     {
       return ptr.get<ESM::Light>()->mBase->mSound;
     }

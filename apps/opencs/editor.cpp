@@ -1,52 +1,52 @@
-
 #include "editor.hpp"
-
-#include <openengine/bullet/BulletShapeLoader.h>
 
 #include <QApplication>
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QMessageBox>
 
-#include <OgreRoot.h>
-#include <OgreRenderWindow.h>
+#include <components/vfs/manager.hpp>
+#include <components/vfs/registerarchives.hpp>
 
-#include <extern/shiny/Main/Factory.hpp>
-#include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
+#include <components/fallback/validate.hpp>
 
-#include <components/ogreinit/ogreinit.hpp>
-
-#include <components/bsa/resources.hpp>
+#include <components/nifosg/nifloader.hpp>
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
-CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
-: mUserSettings (mCfgMgr), mOverlaySystem (0), mDocumentManager (mCfgMgr),
-  mViewManager (mDocumentManager),
-  mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL), mPid(""), mLock()
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
+using namespace Fallback;
+
+CS::Editor::Editor ()
+: mSettingsState (mCfgMgr), mDocumentManager (mCfgMgr),
+  mViewManager (mDocumentManager), mPid(""),
+  mLock(), mMerge (mDocumentManager),
+  mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 
     setupDataFiles (config.first);
 
-    CSMSettings::UserSettings::instance().loadSettings ("opencs.ini");
-    mSettings.setModel (CSMSettings::UserSettings::instance());
+    NifOsg::Loader::setShowMarkers(true);
 
-    ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
+    mVFS.reset(new VFS::Manager(mFsStrict));
 
-    mOverlaySystem.reset (new CSVRender::OverlaySystem);
+    VFS::registerArchives(mVFS.get(), Files::Collections(config.first, !mFsStrict), config.second, true);
 
-    Bsa::registerResources (Files::Collections (config.first, !mFsStrict), config.second, true,
-        mFsStrict);
-
-    mDocumentManager.listResources();
+    mDocumentManager.setVFS(mVFS.get());
 
     mNewGame.setLocalData (mLocal);
     mFileDialog.setLocalData (mLocal);
+    mMerge.setLocalData (mLocal);
 
     connect (&mDocumentManager, SIGNAL (documentAdded (CSMDoc::Document *)),
         this, SLOT (documentAdded (CSMDoc::Document *)));
+    connect (&mDocumentManager, SIGNAL (documentAboutToBeRemoved (CSMDoc::Document *)),
+        this, SLOT (documentAboutToBeRemoved (CSMDoc::Document *)));
     connect (&mDocumentManager, SIGNAL (lastDocumentDeleted()),
         this, SLOT (lastDocumentDeleted()));
 
@@ -54,6 +54,7 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     connect (&mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
     connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
     connect (&mViewManager, SIGNAL (editSettingsRequest()), this, SLOT (showSettings ()));
+    connect (&mViewManager, SIGNAL (mergeDocument (CSMDoc::Document *)), this, SLOT (mergeDocument (CSMDoc::Document *)));
 
     connect (&mStartup, SIGNAL (createGame()), this, SLOT (createGame ()));
     connect (&mStartup, SIGNAL (createAddon()), this, SLOT (createAddon ()));
@@ -65,9 +66,11 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 
     connect (&mFileDialog, SIGNAL(signalCreateNewFile (const boost::filesystem::path&)),
              this, SLOT(createNewFile (const boost::filesystem::path&)));
+    connect (&mFileDialog, SIGNAL (rejected()), this, SLOT (cancelFileDialog ()));
 
     connect (&mNewGame, SIGNAL (createRequest (const boost::filesystem::path&)),
              this, SLOT (createNewGame (const boost::filesystem::path&)));
+    connect (&mNewGame, SIGNAL (cancelCreateGame()), this, SLOT (cancelCreateGame ()));
 }
 
 CS::Editor::~Editor ()
@@ -75,10 +78,8 @@ CS::Editor::~Editor ()
     mPidFile.close();
 
     if(mServer && boost::filesystem::exists(mPid))
-        remove(mPid.string().c_str()); // ignore any error
-
-    // cleanup global resources used by OEngine
-    delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
+        static_cast<void> ( // silence coverity warning
+        remove(mPid.string().c_str())); // ignore any error
 }
 
 void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
@@ -90,10 +91,10 @@ void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
     }
 }
 
-std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig()
+std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig(bool quiet)
 {
     boost::program_options::variables_map variables;
-    boost::program_options::options_description desc("Syntax: opencs <options>\nAllowed options");
+    boost::program_options::options_description desc("Syntax: openmw-cs <options>\nAllowed options");
 
     desc.add_options()
     ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken()->composing())
@@ -103,6 +104,8 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     ("resources", boost::program_options::value<std::string>()->default_value("resources"))
     ("fallback-archive", boost::program_options::value<std::vector<std::string> >()->
         default_value(std::vector<std::string>(), "fallback-archive")->multitoken())
+    ("fallback", boost::program_options::value<FallbackMap>()->default_value(FallbackMap(), "")
+        ->multitoken()->composing(), "fallback values")
     ("script-blacklist", boost::program_options::value<std::vector<std::string> >()->default_value(std::vector<std::string>(), "")
         ->multitoken(), "exclude specified script from the verifier (if the use of the blacklist is enabled)")
     ("script-blacklist-use", boost::program_options::value<bool>()->implicit_value(true)
@@ -110,12 +113,14 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     boost::program_options::notify(variables);
 
-    mCfgMgr.readConfiguration(variables, desc);
+    mCfgMgr.readConfiguration(variables, desc, quiet);
 
     mDocumentManager.setEncoding (
         ToUTF8::calculateEncoding (variables["encoding"].as<std::string>()));
 
     mDocumentManager.setResourceDir (mResources = variables["resources"].as<std::string>());
+
+    mDocumentManager.setFallbackMap (variables["fallback"].as<FallbackMap>().mMap);
 
     if (variables["script-blacklist-use"].as<bool>())
         mDocumentManager.setBlacklistedScripts (
@@ -173,15 +178,53 @@ void CS::Editor::createGame()
     mNewGame.activateWindow();
 }
 
+void CS::Editor::cancelCreateGame()
+{
+    if (!mDocumentManager.isEmpty())
+        return;
+
+    mNewGame.hide();
+
+    if (mStartup.isHidden())
+        mStartup.show();
+
+    mStartup.raise();
+    mStartup.activateWindow();
+}
+
 void CS::Editor::createAddon()
 {
     mStartup.hide();
+
+    mFileDialog.clearFiles();
+    std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig(/*quiet*/true);
+    setupDataFiles (config.first);
+
     mFileDialog.showDialog (CSVDoc::ContentAction_New);
+}
+
+void CS::Editor::cancelFileDialog()
+{
+    if (!mDocumentManager.isEmpty())
+        return;
+
+    mFileDialog.hide();
+
+    if (mStartup.isHidden())
+        mStartup.show();
+
+    mStartup.raise();
+    mStartup.activateWindow();
 }
 
 void CS::Editor::loadDocument()
 {
     mStartup.hide();
+
+    mFileDialog.clearFiles();
+    std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig(/*quiet*/true);
+    setupDataFiles (config.first);
+
     mFileDialog.showDialog (CSVDoc::ContentAction_Edit);
 }
 
@@ -236,6 +279,7 @@ void CS::Editor::showSettings()
     if (mSettings.isHidden())
         mSettings.show();
 
+    mSettings.move (QCursor::pos());
     mSettings.raise();
     mSettings.activateWindow();
 }
@@ -245,7 +289,7 @@ bool CS::Editor::makeIPCServer()
     try
     {
         mPid = boost::filesystem::temp_directory_path();
-        mPid /= "opencs.pid";
+        mPid /= "openmw-cs.pid";
         bool pidExists = boost::filesystem::exists(mPid);
 
         mPidFile.open(mPid);
@@ -273,12 +317,12 @@ bool CS::Editor::makeIPCServer()
             mServer->close();
             fullPath.remove(QRegExp("dummy$"));
             fullPath += mIpcServerName;
-            if(boost::filesystem::exists(fullPath.toStdString().c_str()))
+            if(boost::filesystem::exists(fullPath.toUtf8().constData()))
             {
                 // TODO: compare pid of the current process with that in the file
                 std::cout << "Detected unclean shutdown." << std::endl;
                 // delete the stale file
-                if(remove(fullPath.toStdString().c_str()))
+                if(remove(fullPath.toUtf8().constData()))
                     std::cerr << "ERROR removing stale connection file" << std::endl;
             }
         }
@@ -320,120 +364,26 @@ int CS::Editor::run()
     return QApplication::exec();
 }
 
-std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
-{
-    std::string renderer =
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-        "Direct3D9 Rendering Subsystem";
-#else
-        "OpenGL Rendering Subsystem";
-#endif
-    std::string renderSystem = mUserSettings.setting("Video/render system", renderer.c_str()).toStdString();
-
-    Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName(renderSystem));
-
-    // Initialise Ogre::OverlaySystem after Ogre::Root but before initialisation
-    mOverlaySystem.get();
-
-    Ogre::Root::getSingleton().initialise(false);
-
-    // Create a hidden background window to keep resources
-    Ogre::NameValuePairList params;
-    params.insert(std::make_pair("title", ""));
-
-    std::string antialiasing = mUserSettings.settingValue("Video/antialiasing").toStdString();
-    if(antialiasing == "MSAA 16")     antialiasing = "16";
-    else if(antialiasing == "MSAA 8") antialiasing = "8";
-    else if(antialiasing == "MSAA 4") antialiasing = "4";
-    else if(antialiasing == "MSAA 2") antialiasing = "2";
-    else                              antialiasing = "0";
-    params.insert(std::make_pair("FSAA", antialiasing));
-
-    params.insert(std::make_pair("vsync", "false"));
-    params.insert(std::make_pair("hidden", "true"));
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-    params.insert(std::make_pair("macAPI", "cocoa"));
-#endif
-    // NOTE: fullscreen mode not supported (doesn't really make sense for opencs)
-    Ogre::RenderWindow* hiddenWindow = Ogre::Root::getSingleton().createRenderWindow("InactiveHidden", 1, 1, false, &params);
-    hiddenWindow->setActive(false);
-
-    sh::OgrePlatform* platform =
-        new sh::OgrePlatform ("General", (mResources / "materials").string());
-
-    // for font used in overlays
-    Ogre::Root::getSingleton().addResourceLocation ((mResources / "mygui").string(),
-            "FileSystem", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
-
-    if (!boost::filesystem::exists (mCfgMgr.getCachePath()))
-        boost::filesystem::create_directories (mCfgMgr.getCachePath());
-
-    platform->setCacheFolder (mCfgMgr.getCachePath().string());
-
-    std::auto_ptr<sh::Factory> factory (new sh::Factory (platform));
-
-    QString shLang = mUserSettings.settingValue("General/shader mode");
-    QString rend = renderSystem.c_str();
-    bool openGL = rend.contains(QRegExp("^OpenGL", Qt::CaseInsensitive));
-    bool glES = rend.contains(QRegExp("^OpenGL ES", Qt::CaseInsensitive));
-
-    // force shader language based on render system
-    if(shLang == ""
-            || (openGL && shLang == "hlsl")
-            || (!openGL && shLang == "glsl")
-            || (glES && shLang != "glsles"))
-    {
-        shLang = openGL ? (glES ? "glsles" : "glsl") : "hlsl";
-        //no group means "General" group in the "ini" file standard
-        mUserSettings.setDefinitions("shader mode", (QStringList() << shLang));
-    }
-    enum sh::Language lang;
-    if(shLang == "glsl")        lang = sh::Language_GLSL;
-    else if(shLang == "glsles") lang = sh::Language_GLSLES;
-    else if(shLang == "hlsl")   lang = sh::Language_HLSL;
-    else                        lang = sh::Language_CG;
-
-    factory->setCurrentLanguage (lang);
-    factory->setWriteSourceCache (true);
-    factory->setReadSourceCache (true);
-    factory->setReadMicrocodeCache (true);
-    factory->setWriteMicrocodeCache (true);
-
-    factory->loadAllFiles();
-
-    bool shaders = mUserSettings.setting("3d-render/shaders", QString("true")) == "true" ? true : false;
-    sh::Factory::getInstance ().setShadersEnabled (shaders);
-
-    std::string fog = mUserSettings.setting("Shader/fog", QString("true")).toStdString();
-    sh::Factory::getInstance().setGlobalSetting ("fog", fog);
-
-
-    std::string shadows = mUserSettings.setting("Shader/shadows", QString("false")).toStdString();
-    sh::Factory::getInstance().setGlobalSetting ("shadows", shadows);
-
-    std::string shadows_pssm = mUserSettings.setting("Shader/shadows_pssm", QString("false")).toStdString();
-    sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", shadows_pssm);
-
-    std::string render_refraction = mUserSettings.setting("Shader/render_refraction", QString("false")).toStdString();
-    sh::Factory::getInstance ().setGlobalSetting ("render_refraction", render_refraction);
-
-    // internal setting - may be switched on or off by the use of shader configurations
-    sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
-
-    std::string num_lights = mUserSettings.setting("3d-render-adv/num_lights", QString("8")).toStdString();
-    sh::Factory::getInstance ().setGlobalSetting ("num_lights", num_lights);
-
-    /// \todo add more configurable shiny settings
-
-    return factory;
-}
-
 void CS::Editor::documentAdded (CSMDoc::Document *document)
 {
     mViewManager.addView (document);
 }
 
+void CS::Editor::documentAboutToBeRemoved (CSMDoc::Document *document)
+{
+    if (mMerge.getDocument()==document)
+        mMerge.cancel();
+}
+
 void CS::Editor::lastDocumentDeleted()
 {
     QApplication::quit();
+}
+
+void CS::Editor::mergeDocument (CSMDoc::Document *document)
+{
+    mMerge.configure (document);
+    mMerge.show();
+    mMerge.raise();
+    mMerge.activateWindow();
 }

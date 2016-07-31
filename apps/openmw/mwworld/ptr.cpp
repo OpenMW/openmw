@@ -1,4 +1,3 @@
-
 #include "ptr.hpp"
 
 #include <cassert>
@@ -50,6 +49,33 @@ MWWorld::ContainerStore *MWWorld::Ptr::getContainerStore() const
 }
 
 MWWorld::Ptr::operator const void *()
+{
+    return mRef;
+}
+
+// -------------------------------------------------------------------------------
+
+const std::string &MWWorld::ConstPtr::getTypeName() const
+{
+    if(mRef != 0)
+        return mRef->mClass->getTypeName();
+    throw std::runtime_error("Can't get type name from an empty object.");
+}
+
+const MWWorld::LiveCellRefBase *MWWorld::ConstPtr::getBase() const
+{
+    if (!mRef)
+        throw std::runtime_error ("Can't access cell ref pointed to by null Ptr");
+
+    return mRef;
+}
+
+const MWWorld::ContainerStore *MWWorld::ConstPtr::getContainerStore() const
+{
+    return mContainerStore;
+}
+
+MWWorld::ConstPtr::operator const void *()
 {
     return mRef;
 }

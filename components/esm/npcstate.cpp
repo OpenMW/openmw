@@ -1,24 +1,37 @@
-
 #include "npcstate.hpp"
 
 void ESM::NpcState::load (ESMReader &esm)
 {
     ObjectState::load (esm);
 
-    mInventory.load (esm);
+    if (mHasCustomState)
+    {
+        mInventory.load (esm);
 
-    mNpcStats.load (esm);
+        mNpcStats.load (esm);
 
-    mCreatureStats.load (esm);
+        mCreatureStats.load (esm);
+    }
 }
 
 void ESM::NpcState::save (ESMWriter &esm, bool inInventory) const
 {
     ObjectState::save (esm, inInventory);
 
-    mInventory.save (esm);
+    if (mHasCustomState)
+    {
+        mInventory.save (esm);
 
-    mNpcStats.save (esm);
+        mNpcStats.save (esm);
 
-    mCreatureStats.save (esm);
+        mCreatureStats.save (esm);
+    }
+}
+
+void ESM::NpcState::blank()
+{
+    ObjectState::blank();
+    mNpcStats.blank();
+    mCreatureStats.blank();
+    mHasCustomState = true;
 }

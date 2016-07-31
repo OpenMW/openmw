@@ -19,6 +19,8 @@ namespace CSVWorld
 
             std::vector<std::pair<int, QString> > mValues;
 
+            int getValueIndex(const QModelIndex &index, int role = Qt::DisplayRole) const;
+
         private:
 
             virtual void setModelDataImp (QWidget *editor, QAbstractItemModel *model,
@@ -30,7 +32,7 @@ namespace CSVWorld
         public:
 
             EnumDelegate (const std::vector<std::pair<int, QString> >& values,
-                CSMDoc::Document& document, QObject *parent);
+                CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent);
 
             virtual QWidget *createEditor(QWidget *parent,
                                           const QStyleOptionViewItem& option,
@@ -45,6 +47,8 @@ namespace CSVWorld
 
             virtual void paint (QPainter *painter, const QStyleOptionViewItem& option,
                 const QModelIndex& index) const;
+
+            virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
     };
 
@@ -64,7 +68,7 @@ namespace CSVWorld
             EnumDelegateFactory (const std::vector<std::string>& names, bool allowNone = false);
             /// \param allowNone Use value of -1 for "none selected" (empty string)
 
-            virtual CommandDelegate *makeDelegate (CSMDoc::Document& document, QObject *parent) const;
+            virtual CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
 
             void add (int value, const QString& name);

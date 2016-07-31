@@ -1,12 +1,16 @@
-
 #include "tablesubview.hpp"
 
 #include <QVBoxLayout>
 #include <QEvent>
+#include <QHeaderView>
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QDropEvent>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
+#include "../doc/sizehint.hpp"
 #include "../filter/filterbox.hpp"
 #include "table.hpp"
 #include "tablebottombox.hpp"
@@ -18,10 +22,8 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
-    layout->setContentsMargins (QMargins (0, 0, 0, 0));
-
     layout->addWidget (mBottom =
-        new TableBottomBox (creatorFactory, document.getData(), document.getUndoStack(), id, this), 0);
+        new TableBottomBox (creatorFactory, document, id, this), 0);
 
     layout->insertWidget (0, mTable =
         new Table (id, mBottom->canCreateAndDelete(), sorting, document), 2);
@@ -30,11 +32,18 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     layout->insertWidget (0, mFilterBox);
 
-    QWidget *widget = new QWidget;
+    CSVDoc::SizeHintWidget *widget = new CSVDoc::SizeHintWidget;
 
     widget->setLayout (layout);
 
     setWidget (widget);
+    // prefer height of the screen and full width of the table
+    const QRect rect = QApplication::desktop()->screenGeometry(this);
+    int frameHeight = 40; // set a reasonable default
+    QWidget *topLevel = QApplication::topLevelAt(pos());
+    if (topLevel)
+        frameHeight = topLevel->frameGeometry().height() - topLevel->height();
+    widget->setSizeHint(QSize(mTable->horizontalHeader()->length(), rect.height()-frameHeight));
 
     connect (mTable, SIGNAL (editRequest (const CSMWorld::UniversalId&, const std::string&)),
         this, SLOT (editRequest (const CSMWorld::UniversalId&, const std::string&)));
@@ -59,6 +68,11 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
         connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)),
                 mBottom, SLOT(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)));
+
+        connect (mTable, SIGNAL(extendedDeleteConfigRequest(const std::vector<std::string> &)),
+            mBottom, SLOT(extendedDeleteConfigRequest(const std::vector<std::string> &)));
+        connect (mTable, SIGNAL(extendedRevertConfigRequest(const std::vector<std::string> &)),
+            mBottom, SLOT(extendedRevertConfigRequest(const std::vector<std::string> &)));
     }
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),
         mTable, SLOT (requestFocus (const std::string&)));
@@ -82,12 +96,6 @@ void CSVWorld::TableSubView::setEditLock (bool locked)
 void CSVWorld::TableSubView::editRequest (const CSMWorld::UniversalId& id, const std::string& hint)
 {
     focusId (id, hint);
-}
-
-void CSVWorld::TableSubView::updateUserSetting
-                                (const QString &name, const QStringList &list)
-{
-    mTable->updateUserSetting(name, list);
 }
 
 void CSVWorld::TableSubView::setStatusBar (bool show)
@@ -138,18 +146,19 @@ bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
 {
     if (event->type() == QEvent::Drop)
     {
-        QDropEvent* drop = dynamic_cast<QDropEvent*>(event);
-        const CSMWorld::TableMimeData* data = dynamic_cast<const CSMWorld::TableMimeData*>(drop->mimeData());
-        if (!data) // May happen when non-records (e.g. plain text) are dragged and dropped
-            return false;
-
-        bool handled = data->holdsType(CSMWorld::UniversalId::Type_Filter);
-        if (handled)
+        if (QDropEvent* drop = dynamic_cast<QDropEvent*>(event))
         {
-            mFilterBox->setRecordFilter(data->returnMatching(CSMWorld::UniversalId::Type_Filter).getId());
+            const CSMWorld::TableMimeData* data = dynamic_cast<const CSMWorld::TableMimeData*>(drop->mimeData());
+            if (!data) // May happen when non-records (e.g. plain text) are dragged and dropped
+                return false;
+
+            bool handled = data->holdsType(CSMWorld::UniversalId::Type_Filter);
+            if (handled)
+            {
+                mFilterBox->setRecordFilter(data->returnMatching(CSMWorld::UniversalId::Type_Filter).getId());
+            }
+            return handled;
         }
-        return handled;
     }
     return false;
 }
-

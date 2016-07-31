@@ -15,13 +15,21 @@ namespace AiSequence
     void AiWander::load(ESMReader &esm)
     {
         esm.getHNT (mData, "DATA");
-        esm.getHNT(mStartTime, "STAR");
+        esm.getHNT(mDurationData, "STAR"); // was mStartTime
+        mStoredInitialActorPosition = false;
+        if (esm.isNextSub("POS_"))
+        {
+            mStoredInitialActorPosition = true;
+            esm.getHT(mInitialActorPosition);
+        }
     }
 
     void AiWander::save(ESMWriter &esm) const
     {
         esm.writeHNT ("DATA", mData);
-        esm.writeHNT ("STAR", mStartTime);
+        esm.writeHNT ("STAR", mDurationData);
+        if (mStoredInitialActorPosition)
+            esm.writeHNT ("POS_", mInitialActorPosition);
     }
 
     void AiTravel::load(ESMReader &esm)

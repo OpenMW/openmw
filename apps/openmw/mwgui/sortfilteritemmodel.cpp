@@ -1,5 +1,7 @@
 #include "sortfilteritemmodel.hpp"
 
+#include <components/misc/stringops.hpp>
+
 #include <components/esm/loadalch.hpp>
 #include <components/esm/loadappa.hpp>
 #include <components/esm/loadarmo.hpp>
@@ -52,9 +54,10 @@ namespace
 
             if (left.mBase.getTypeName() == right.mBase.getTypeName())
             {
-                int cmp = left.mBase.getClass().getName(left.mBase).compare(
-                            right.mBase.getClass().getName(right.mBase));
-                return cmp < 0;
+                std::string leftName = Misc::StringUtils::lowerCase(left.mBase.getClass().getName(left.mBase));
+                std::string rightName = Misc::StringUtils::lowerCase(right.mBase.getClass().getName(right.mBase));
+
+                return leftName.compare(rightName) < 0;
             }
             else
                 return compareType(left.mBase.getTypeName(), right.mBase.getTypeName());
@@ -67,9 +70,8 @@ namespace MWGui
 
     SortFilterItemModel::SortFilterItemModel(ItemModel *sourceModel)
         : mCategory(Category_All)
-        , mShowEquipped(true)
-        , mSortByType(true)
         , mFilter(0)
+        , mSortByType(true)
     {
         mSourceModel = sourceModel;
     }
@@ -87,9 +89,6 @@ namespace MWGui
     bool SortFilterItemModel::filterAccepts (const ItemStack& item)
     {
         MWWorld::Ptr base = item.mBase;
-
-        if (item.mType == ItemStack::Type_Equipped && !mShowEquipped)
-            return false;
 
         int category = 0;
         if (base.getTypeName() == typeid(ESM::Armor).name()
@@ -133,9 +132,12 @@ namespace MWGui
                 && !base.get<ESM::Book>()->mBase->mData.mIsScroll)
             return false;
 
-        if ((mFilter & Filter_OnlyUsableItems) && typeid(*base.getClass().use(base)) == typeid(MWWorld::NullAction)
-                && base.getClass().getScript(base).empty())
-            return false;
+        if ((mFilter & Filter_OnlyUsableItems) && base.getClass().getScript(base).empty())
+        {
+            boost::shared_ptr<MWWorld::Action> actionOnUse = base.getClass().use(base);
+            if (!actionOnUse || actionOnUse->isNullAction())
+                return false;
+        }
 
         return true;
     }

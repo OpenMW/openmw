@@ -1,18 +1,20 @@
 #ifndef MWGUI_TRADEWINDOW_H
 #define MWGUI_TRADEWINDOW_H
 
-#include "container.hpp"
+#include "../mwmechanics/trading.hpp"
+
+#include "referenceinterface.hpp"
+#include "windowbase.hpp"
 
 namespace Gui
 {
     class NumericEditBox;
 }
 
-namespace MWGui
+namespace MyGUI
 {
-    class WindowManager;
+    class ControllerItem;
 }
-
 
 namespace MWGui
 {
@@ -40,6 +42,7 @@ namespace MWGui
             ItemView* mItemView;
             SortFilterItemModel* mSortModel;
             TradeItemModel* mTradeModel;
+            MWMechanics::Trading mTrading;
 
             static const float sBalanceChangeInitialPause; // in seconds
             static const float sBalanceChangeInterval; // in seconds
@@ -98,6 +101,8 @@ namespace MWGui
             virtual void onReferenceUnavailable();
 
             int getMerchantGold();
+
+            void restock();
     };
 }
 

@@ -1,10 +1,10 @@
-
 #include "adjusterwidget.hpp"
 
 #include <stdexcept>
 #include <string>
 
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -63,6 +63,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
     QString message;
 
     mValid = (!name.isEmpty());
+    bool warning = false;
 
     if (!mValid)
     {
@@ -72,8 +73,11 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
     {
         boost::filesystem::path path (name.toUtf8().data());
 
-        bool isLegacyPath = (path.extension() == ".esm" ||
-                             path.extension() == ".esp");
+        std::string extension = path.extension().string();
+        boost::algorithm::to_lower(extension);
+
+        bool isLegacyPath = (extension == ".esm" ||
+                             extension == ".esp");
 
         bool isFilePathChanged = (path.parent_path().string() != mLocalData.string());
 
@@ -102,13 +106,14 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
             {
                 /// \todo add an user setting to make this an error.
                 message += "<p>A file with the same name already exists. If you continue, it will be overwritten.";
+                warning = true;
             }
         }
     }
 
     mMessage->setText (message);
     mIcon->setPixmap (style()->standardIcon (
-        mValid ? QStyle::SP_MessageBoxInformation : QStyle::SP_MessageBoxWarning).
+        mValid ? (warning ? QStyle::SP_MessageBoxWarning : QStyle::SP_MessageBoxInformation) : QStyle::SP_MessageBoxCritical).
         pixmap (QSize (16, 16)));
 
     emit stateChanged (mValid);

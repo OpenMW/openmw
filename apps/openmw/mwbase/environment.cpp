@@ -1,4 +1,3 @@
-
 #include "environment.hpp"
 
 #include <cassert>
@@ -17,8 +16,8 @@ MWBase::Environment *MWBase::Environment::sThis = 0;
 
 MWBase::Environment::Environment()
 : mWorld (0), mSoundManager (0), mScriptManager (0), mWindowManager (0),
-  mMechanicsManager (0),  mDialogueManager (0), mJournal (0), mInputManager (0), mFrameDuration (0),
-  mStateManager (0)
+  mMechanicsManager (0),  mDialogueManager (0), mJournal (0), mInputManager (0), mStateManager (0),
+  mFrameDuration (0)
 {
     assert (!sThis);
     sThis = this;

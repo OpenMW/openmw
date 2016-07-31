@@ -1,4 +1,3 @@
-
 #include "filter.hpp"
 
 #include "esmreader.hpp"
@@ -7,14 +6,46 @@
 
 unsigned int ESM::Filter::sRecordId = REC_FILT;
 
-void ESM::Filter::load (ESMReader& esm)
+void ESM::Filter::load (ESMReader& esm, bool &isDeleted)
 {
-    mFilter = esm.getHNString ("FILT");
-    mDescription = esm.getHNString ("DESC");
+    isDeleted = false;
+
+    while (esm.hasMoreSubs())
+    {
+        esm.getSubName();
+        uint32_t name = esm.retSubName().intval;
+        switch (name)
+        {
+            case ESM::SREC_NAME:
+                mId = esm.getHString();
+                break;
+            case ESM::FourCC<'F','I','L','T'>::value:
+                mFilter = esm.getHString();
+                break;
+            case ESM::FourCC<'D','E','S','C'>::value:
+                mDescription = esm.getHString();
+                break;
+            case ESM::SREC_DELE:
+                esm.skipHSub();
+                isDeleted = true;
+                break;
+            default:
+                esm.fail("Unknown subrecord");
+                break;
+        }
+    }
 }
 
-void ESM::Filter::save (ESMWriter& esm) const
+void ESM::Filter::save (ESMWriter& esm, bool isDeleted) const
 {
+    esm.writeHNCString ("NAME", mId);
+
+    if (isDeleted)
+    {
+        esm.writeHNCString("DELE", "");
+        return;
+    }
+
     esm.writeHNCString ("FILT", mFilter);
     esm.writeHNCString ("DESC", mDescription);
 }

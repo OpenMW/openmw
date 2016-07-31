@@ -12,7 +12,7 @@
 namespace CSMWorld
 {
     struct Cell;
-    struct UniversalId;
+    class UniversalId;
 
     /// \brief References in cells
     class RefCollection : public Collection<CellRef>
@@ -27,8 +27,7 @@ namespace CSMWorld
             {}
 
             void load (ESM::ESMReader& reader, int cellIndex, bool base,
-                std::map<ESM::RefNum, std::string>& cache,
-                CSMDoc::Messages& messages);
+                std::map<ESM::RefNum, std::string>& cache, CSMDoc::Messages& messages);
             ///< Load a sequence of references.
 
             std::string getNewId();

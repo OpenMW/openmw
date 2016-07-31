@@ -7,9 +7,7 @@
 #include <unistd.h>
 #include <boost/filesystem/fstream.hpp>
 
-/**
- * FIXME: Someone with MacOS system should check this and correct if necessary
- */
+#include <components/misc/stringops.hpp>
 
 namespace
 {
@@ -49,9 +47,8 @@ boost::filesystem::path MacOsPath::getUserConfigPath() const
 
 boost::filesystem::path MacOsPath::getUserDataPath() const
 {
-    // TODO: probably wrong?
     boost::filesystem::path userPath (getUserHome());
-    userPath /= "Library/Preferences/";
+    userPath /= "Library/Application Support/";
 
     return userPath / mName;
 }
@@ -134,7 +131,7 @@ boost::filesystem::path MacOsPath::getInstallPath() const
             if (!mwpath.empty())
             {
                 // Change drive letter to lowercase, so we could use ~/.wine/dosdevice symlinks
-                mwpath[0] = tolower(mwpath[0]);
+                mwpath[0] = Misc::StringUtils::toLower(mwpath[0]);
                 installPath /= homePath;
                 installPath /= ".wine/dosdevices/";
                 installPath /= mwpath;

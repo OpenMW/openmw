@@ -108,13 +108,12 @@
             <Widget type="Widget" skin="HUD_Box" position="0 0 65 65" align="Center">
 
                 <Widget type="ScrollView" skin="MW_MapView" position="2 2 61 61" align="Left Bottom" name="MiniMap">
-                    <Property key="CanvasSize" value="1536 1536"/>
-
                     <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="Bottom Left" name="Compass">
                         <Property key="ImageTexture" value="textures\compass.dds"/>
                     </Widget>
 
-                    <Widget type="Button" skin="" position="0 0 1536 1536" name="MiniMapButton" align="Right Bottom">
+                    <Widget type="Button" skin="" position_real="0 0 1 1" name="MiniMapButton" align="Stretch">
+                        <Property key="Depth" value="10"/>
                     </Widget>
 
                 </Widget>
@@ -123,55 +122,7 @@
         </Widget>
 
         <!-- Crosshair -->
-        <Widget type="ImageBox" skin="ImageBox" position="0 0 32 32" align="Center Center" name="Crosshair">
-            <Property key="ImageTexture" value="textures\target.dds"/>
-        </Widget>
-
-        <!-- Basic FPSCounter box -->
-        <Widget type="Widget" skin="HUD_Box" position="12 12 32 26" align="Left Top" name="FPSBox">
-            <Property key="Visible" value="false"/>
-            <Widget type="TextBox" skin="NumFPS" position="3 3 25 17" align="Center" name="FPSCounter"/>
-        </Widget>
-
-        <!-- Advanced FPSCounter box -->
-        <Widget type="Widget" skin="HUD_Box" position="12 12 165 64" align="Left Top" name="FPSBoxAdv">
-            <Property key="Visible" value="false"/>
-
-            <Widget type="Widget" skin="" position="0 0 110 60" align="Left Top">
-
-                <Widget type="TextBox" skin="NumFPS" position="0 0 110 32" align="Left Top">
-                    <Property key="Caption" value="FPS: "/>
-                    <Property key="TextAlign" value="Right"/>
-                </Widget>
-
-                <Widget type="TextBox" skin="NumFPS" position="0 16 110 32" align="Left Top">
-                    <Property key="Caption" value="Tri Count: "/>
-                    <Property key="TextAlign" value="Right"/>
-                </Widget>
-
-                <Widget type="TextBox" skin="NumFPS" position="0 32 110 32" align="Left Top">
-                    <Property key="Caption" value="Batch Count: "/>
-                    <Property key="TextAlign" value="Right"/>
-                </Widget>
-
-            </Widget>
-
-            <Widget type="Widget" skin="" position="110 0 55 60" align="Left Top">
-
-                <Widget type="TextBox" skin="NumFPS" position="0 0 55 32" align="Left Top" name="FPSCounterAdv">
-                    <Property key="TextAlign" value="Left"/>
-                </Widget>
-
-                <Widget type="TextBox" skin="NumFPS" position="0 16 55 32" align="Left Top" name="TriangleCounter">
-                    <Property key="TextAlign" value="Left"/>
-                </Widget>
-
-                <Widget type="TextBox" skin="NumFPS" position="0 32 55 32" align="Left Top" name="BatchCounter">
-                    <Property key="TextAlign" value="Left"/>
-                </Widget>
-
-            </Widget>
-
+        <Widget type="ImageBox" skin="HUD_Crosshair" position="0 0 32 32" align="Center Center" name="Crosshair">
         </Widget>
 
     </Widget>

@@ -1,4 +1,6 @@
 #include "creaturestats.hpp"
+#include "esmreader.hpp"
+#include "esmwriter.hpp"
 
 void ESM::CreatureStats::load (ESMReader &esm)
 {
@@ -18,14 +20,20 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mDead = false;
     esm.getHNOT (mDead, "DEAD");
 
+    mDeathAnimationFinished = false;
+    esm.getHNOT (mDeathAnimationFinished, "DFNT");
+
+    if (esm.getFormat() < 3 && mDead)
+        mDeathAnimationFinished = true;
+
     mDied = false;
     esm.getHNOT (mDied, "DIED");
 
     mMurdered = false;
     esm.getHNOT (mMurdered, "MURD");
 
-    mFriendlyHits = 0;
-    esm.getHNOT (mFriendlyHits, "FRHT");
+    if (esm.isNextSub("FRHT"))
+        esm.skipHSub(); // Friendly hits, no longer used
 
     mTalkedTo = false;
     esm.getHNOT (mTalkedTo, "TALK");
@@ -39,8 +47,8 @@ void ESM::CreatureStats::load (ESMReader &esm)
     if (esm.isNextSub("HOST"))
         esm.skipHSub(); // Hostile, no longer used
 
-    mAttackingOrSpell = false;
-    esm.getHNOT (mAttackingOrSpell, "ATCK");
+    if (esm.isNextSub("ATCK"))
+        esm.skipHSub(); // attackingOrSpell, no longer used
 
     mKnockdown = false;
     esm.getHNOT (mKnockdown, "KNCK");
@@ -60,8 +68,8 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mMovementFlags = 0;
     esm.getHNOT (mMovementFlags, "MOVE");
 
-    mAttackStrength = 0;
-    esm.getHNOT (mAttackStrength, "ASTR");
+    if (esm.isNextSub("ASTR"))
+        esm.skipHSub(); // attackStrength, no longer used
 
     mFallHeight = 0;
     esm.getHNOT (mFallHeight, "FALL");
@@ -82,8 +90,12 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mActorId = -1;
     esm.getHNOT (mActorId, "ACID");
 
-    mDeathAnimation = 0;
+    mDeathAnimation = -1;
     esm.getHNOT (mDeathAnimation, "DANM");
+
+    mTimeOfDeath.mDay = 0;
+    mTimeOfDeath.mHour = 0;
+    esm.getHNOT (mTimeOfDeath, "DTIM");
 
     mSpells.load(esm);
     mActiveSpells.load(esm);
@@ -94,9 +106,10 @@ void ESM::CreatureStats::load (ESMReader &esm)
     {
         int magicEffect;
         esm.getHT(magicEffect);
+        std::string source = esm.getHNOString("SOUR");
         int actorId;
         esm.getHNT (actorId, "ACID");
-        mSummonedCreatureMap[magicEffect] = actorId;
+        mSummonedCreatureMap[std::make_pair(magicEffect, source)] = actorId;
     }
 
     while (esm.isNextSub("GRAV"))
@@ -133,14 +146,14 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mDead)
         esm.writeHNT ("DEAD", mDead);
 
+    if (mDeathAnimationFinished)
+        esm.writeHNT ("DFNT", mDeathAnimationFinished);
+
     if (mDied)
         esm.writeHNT ("DIED", mDied);
 
     if (mMurdered)
         esm.writeHNT ("MURD", mMurdered);
-
-    if (mFriendlyHits)
-        esm.writeHNT ("FRHT", mFriendlyHits);
 
     if (mTalkedTo)
         esm.writeHNT ("TALK", mTalkedTo);
@@ -150,9 +163,6 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
 
     if (mAttacked)
         esm.writeHNT ("ATKD", mAttacked);
-
-    if (mAttackingOrSpell)
-        esm.writeHNT ("ATCK", mAttackingOrSpell);
 
     if (mKnockdown)
         esm.writeHNT ("KNCK", mKnockdown);
@@ -171,9 +181,6 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
 
     if (mMovementFlags)
         esm.writeHNT ("MOVE", mMovementFlags);
-
-    if (mAttackStrength)
-        esm.writeHNT ("ASTR", mAttackStrength);
 
     if (mFallHeight)
         esm.writeHNT ("FALL", mFallHeight);
@@ -196,17 +203,21 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mActorId != -1)
         esm.writeHNT ("ACID", mActorId);
 
-    if (mDeathAnimation)
+    if (mDeathAnimation != -1)
         esm.writeHNT ("DANM", mDeathAnimation);
+
+    if (mTimeOfDeath.mHour != 0 && mTimeOfDeath.mDay != 0)
+        esm.writeHNT ("DTIM", mTimeOfDeath);
 
     mSpells.save(esm);
     mActiveSpells.save(esm);
     mAiSequence.save(esm);
     mMagicEffects.save(esm);
 
-    for (std::map<int, int>::const_iterator it = mSummonedCreatureMap.begin(); it != mSummonedCreatureMap.end(); ++it)
+    for (std::map<std::pair<int, std::string>, int>::const_iterator it = mSummonedCreatureMap.begin(); it != mSummonedCreatureMap.end(); ++it)
     {
-        esm.writeHNT ("SUMM", it->first);
+        esm.writeHNT ("SUMM", it->first.first);
+        esm.writeHNString ("SOUR", it->first.second);
         esm.writeHNT ("ACID", it->second);
     }
 
@@ -216,6 +227,36 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     }
 
     esm.writeHNT("AISE", mHasAiSettings);
-    for (int i=0; i<4; ++i)
-        mAiSettings[i].save(esm);
+    if (mHasAiSettings)
+    {
+        for (int i=0; i<4; ++i)
+            mAiSettings[i].save(esm);
+    }
+}
+
+void ESM::CreatureStats::blank()
+{
+    mTradeTime.mHour = 0;
+    mTradeTime.mDay = 0;
+    mGoldPool = 0;
+    mActorId = -1;
+    mHasAiSettings = false;
+    mDead = false;
+    mDeathAnimationFinished = false;
+    mDied = false;
+    mMurdered = false;
+    mTalkedTo = false;
+    mAlarmed = false;
+    mAttacked = false;
+    mKnockdown = false;
+    mKnockdownOneFrame = false;
+    mKnockdownOverOneFrame = false;
+    mHitRecovery = false;
+    mBlock = false;
+    mMovementFlags = 0;
+    mFallHeight = 0.f;
+    mRecalcDynamicStats = false;
+    mDrawState = 0;
+    mDeathAnimation = -1;
+    mLevel = 1;
 }

@@ -3,6 +3,9 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+
+#include "../mwworld/class.hpp"
+
 #include "player.hpp"
 
 namespace
@@ -25,19 +28,30 @@ namespace
 namespace MWWorld
 {
     ActionTeleport::ActionTeleport (const std::string& cellName,
-        const ESM::Position& position)
-    : Action (true), mCellName (cellName), mPosition (position)
+        const ESM::Position& position, bool teleportFollowers)
+    : Action (true), mCellName (cellName), mPosition (position), mTeleportFollowers(teleportFollowers)
     {
     }
 
     void ActionTeleport::executeImp (const Ptr& actor)
     {
-        //find any NPC that is following the actor and teleport him too
-        std::set<MWWorld::Ptr> followers;
-        getFollowers(actor, followers);
-        for(std::set<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
+        if (mTeleportFollowers)
         {
-            teleport(*it);
+            //find any NPC that is following the actor and teleport him too
+            std::set<MWWorld::Ptr> followers;
+            getFollowers(actor, followers);
+            for(std::set<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
+            {
+                MWWorld::Ptr follower = *it;
+
+                std::string script = follower.getClass().getScript(follower);
+                if (!script.empty() && follower.getRefData().getLocals().getIntVar(script, "stayoutside") == 1)
+                    continue;
+
+                if ((follower.getRefData().getPosition().asVec3() - actor.getRefData().getPosition().asVec3()).length2()
+                        <= 800*800)
+                    teleport(*it);
+            }
         }
 
         teleport(actor);
@@ -50,9 +64,9 @@ namespace MWWorld
         {
             world->getPlayer().setTeleported(true);
             if (mCellName.empty())
-                world->changeToExteriorCell (mPosition);
+                world->changeToExteriorCell (mPosition, true);
             else
-                world->changeToInteriorCell (mCellName, mPosition);
+                world->changeToInteriorCell (mCellName, mPosition, true);
         }
         else
         {

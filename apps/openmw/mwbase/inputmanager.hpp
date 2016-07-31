@@ -2,8 +2,8 @@
 #define GAME_MWBASE_INPUTMANAGER_H
 
 #include <string>
-
-#include <components/settings/settings.hpp>
+#include <set>
+#include <vector>
 
 namespace MWBase
 {
@@ -25,11 +25,13 @@ namespace MWBase
 
             virtual ~InputManager() {}
 
+            virtual bool isWindowVisible() = 0;
+
             virtual void update(float dt, bool disableControls, bool disableEvents=false) = 0;
 
             virtual void changeInputMode(bool guiMode) = 0;
 
-            virtual void processChangedSettings(const Settings::CategorySettingVector& changed) = 0;
+            virtual void processChangedSettings(const std::set< std::pair<std::string, std::string> >& changed) = 0;
 
             virtual void setDragDrop(bool dragDrop) = 0;
 
@@ -37,11 +39,23 @@ namespace MWBase
             virtual bool getControlSwitch (const std::string& sw) = 0;
 
             virtual std::string getActionDescription (int action) = 0;
-            virtual std::string getActionBindingName (int action) = 0;
-            virtual std::vector<int> getActionSorting () = 0;
+            virtual std::string getActionKeyBindingName (int action) = 0;
+            virtual std::string getActionControllerBindingName (int action) = 0;
+            virtual std::string sdlControllerAxisToString(int axis) = 0;
+            virtual std::string sdlControllerButtonToString(int button) = 0;
+            ///Actions available for binding to keyboard buttons
+            virtual std::vector<int> getActionKeySorting() = 0;
+            ///Actions available for binding to controller buttons
+            virtual std::vector<int> getActionControllerSorting() = 0;
             virtual int getNumActions() = 0;
-            virtual void enableDetectingBindingMode (int action) = 0;
-            virtual void resetToDefaultBindings() = 0;
+            ///If keyboard is true, only pay attention to keyboard events. If false, only pay attention to controller events (excluding esc)
+            virtual void enableDetectingBindingMode (int action, bool keyboard) = 0;
+            virtual void resetToDefaultKeyBindings() = 0;
+            virtual void resetToDefaultControllerBindings() = 0;
+
+            /// Returns if the last used input device was a joystick or a keyboard
+            /// @return true if joystick, false otherwise
+            virtual bool joystickLastUsed() = 0;
     };
 }
 

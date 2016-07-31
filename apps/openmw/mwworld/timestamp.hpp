@@ -3,7 +3,7 @@
 
 namespace ESM
 {
-    class TimeStamp;
+    struct TimeStamp;
 }
 
 namespace MWWorld

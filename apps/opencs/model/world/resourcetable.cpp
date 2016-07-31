@@ -1,4 +1,3 @@
-
 #include "resourcetable.hpp"
 
 #include <stdexcept>
@@ -60,7 +59,7 @@ QVariant CSMWorld::ResourceTable::headerData (int section, Qt::Orientation orien
                 return Columns::getName (Columns::ColumnId_Id).c_str();
 
             if (role==ColumnBase::Role_Display)
-                return ColumnBase::Display_String;
+                return ColumnBase::Display_Id;
 
             break;
 
@@ -143,4 +142,15 @@ std::pair<CSMWorld::UniversalId, std::string> CSMWorld::ResourceTable::view (int
 bool CSMWorld::ResourceTable::isDeleted (const std::string& id) const
 {
     return false;
+}
+
+int CSMWorld::ResourceTable::getColumnId (int column) const
+{
+    switch (column)
+    {
+        case 0: return Columns::ColumnId_Id;
+        case 1: return Columns::ColumnId_RecordType;
+    }
+
+    return -1;
 }

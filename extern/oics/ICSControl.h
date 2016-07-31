@@ -34,7 +34,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace ICS
 {
-	
+
     class DllExport Control
 	{
 	public:
@@ -53,8 +53,9 @@ namespace ICS
 		void setValue(float value);
 		inline float getValue(){ return mValue; };
 		inline float getInitialValue(){ return mInitialValue; };
+		inline void setInitialValue(float i) {mInitialValue = i;};
 
-		void attachChannel(Channel* channel, Channel::ChannelDirection direction, float percentage = 1.0);	
+		void attachChannel(Channel* channel, Channel::ChannelDirection direction, float percentage = 1.0);
 		std::list<Channel*> getAttachedChannels(){ return mAttachedChannels; };
 
 		inline float getStepSize(){ return mStepSize; };

@@ -1,11 +1,9 @@
 #ifndef MWMECHANICS_SPELLSUCCESS_H
 #define MWMECHANICS_SPELLSUCCESS_H
 
-#include "../mwworld/ptr.hpp"
-
-#include <OgreVector3.h>
-
 #include <components/esm/loadskil.hpp>
+
+#include "../mwworld/ptr.hpp"
 
 namespace ESM
 {
@@ -17,10 +15,13 @@ namespace ESM
 
 namespace MWMechanics
 {
-    class EffectKey;
+    struct EffectKey;
     class MagicEffects;
+    class CreatureStats;
 
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
+
+    bool isSummoningEffect(int effectId);
 
     /**
      * @param spell spell to cast
@@ -58,6 +59,10 @@ namespace MWMechanics
     float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
                               const ESM::Spell* spell = NULL, const MagicEffects* effects = NULL);
 
+    int getEffectiveEnchantmentCastCost (float castCost, const MWWorld::Ptr& actor);
+
+    void effectTick(CreatureStats& creatureStats, const MWWorld::Ptr& actor, const MWMechanics::EffectKey& effectKey, float magnitude);
+
     class CastSpell
     {
     private:
@@ -67,7 +72,7 @@ namespace MWMechanics
         bool mStack;
         std::string mId; // ID of spell, potion, item etc
         std::string mSourceName; // Display name for spell, potion, etc
-        Ogre::Vector3 mHitPosition; // Used for spawning area orb
+        osg::Vec3f mHitPosition; // Used for spawning area orb
         bool mAlwaysSucceed; // Always succeed spells casted by NPCs/creatures regardless of their chance (default: false)
 
     public:
@@ -76,7 +81,8 @@ namespace MWMechanics
         bool cast (const ESM::Spell* spell);
 
         /// @note mCaster must be an actor
-        bool cast (const MWWorld::Ptr& item);
+        /// @param launchProjectile If set to false, "on target" effects are directly applied instead of being launched as projectile originating from the caster.
+        bool cast (const MWWorld::Ptr& item, bool launchProjectile=true);
 
         /// @note mCaster must be an NPC
         bool cast (const ESM::Ingredient* ingredient);
@@ -92,7 +98,8 @@ namespace MWMechanics
                       const ESM::EffectList& effects, ESM::RangeType range, bool reflected=false, bool exploded=false);
 
         /// @note \a caster can be any type of object, or even an empty object.
-        void applyInstantEffect (const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const MWMechanics::EffectKey& effect, float magnitude);
+        /// @return was the target suitable for the effect?
+        bool applyInstantEffect (const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const MWMechanics::EffectKey& effect, float magnitude);
     };
 
 }

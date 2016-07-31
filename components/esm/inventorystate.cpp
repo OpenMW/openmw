@@ -1,78 +1,118 @@
-
 #include "inventorystate.hpp"
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-namespace
-{
-    void read (ESM::ESMReader &esm, ESM::ObjectState& state, int& slot)
-    {
-        slot = -1;
-        esm.getHNOT (slot, "SLOT");
-
-        state.load (esm);
-    }
-
-    void write (ESM::ESMWriter &esm, const ESM::ObjectState& state, unsigned int type, int slot)
-    {
-        esm.writeHNT ("IOBJ", type);
-
-        if (slot!=-1)
-            esm.writeHNT ("SLOT", slot);
-
-        state.save (esm, true);
-    }
-}
-
 void ESM::InventoryState::load (ESMReader &esm)
 {
+    int index = 0;
     while (esm.isNextSub ("IOBJ"))
     {
-        unsigned int id = 0;
-        esm.getHT (id);
+        int unused; // no longer used
+        esm.getHT(unused);
 
-        if (id==ESM::REC_LIGH)
+        ObjectState state;
+
+        // obsolete
+        if (esm.isNextSub("SLOT"))
         {
-            LightState state;
             int slot;
-            read (esm, state, slot);
-            if (state.mCount == 0)
-                continue;
-            mLights.push_back (std::make_pair (state, slot));
+            esm.getHT(slot);
+            mEquipmentSlots[index] = slot;
         }
-        else
-        {
-            ObjectState state;
-            int slot;
-            read (esm, state, slot);
-            if (state.mCount == 0)
-                continue;
-            mItems.push_back (std::make_pair (state, std::make_pair (id, slot)));
-        }
+
+        state.mRef.loadId(esm, true);
+        state.load (esm);
+
+        if (state.mCount == 0)
+            continue;
+
+        mItems.push_back (state);
+
+        ++index;
     }
-
+    //Next item is Levelled item
     while (esm.isNextSub("LEVM"))
     {
+        //Get its name
         std::string id = esm.getHString();
         int count;
+        std::string parentGroup = "";
+        //Then get its count
         esm.getHNT (count, "COUN");
-        mLevelledItemMap[id] = count;
+        //Old save formats don't have information about parent group; check for that
+        if(esm.isNextSub("LGRP"))
+            //Newest saves contain parent group
+            parentGroup = esm.getHString();
+        mLevelledItemMap[std::make_pair(id, parentGroup)] = count;
     }
+
+    while (esm.isNextSub("MAGI"))
+    {
+        std::string id = esm.getHString();
+
+        std::vector<std::pair<float, float> > params;
+        while (esm.isNextSub("RAND"))
+        {
+            float rand, multiplier;
+            esm.getHT (rand);
+            esm.getHNT (multiplier, "MULT");
+            params.push_back(std::make_pair(rand, multiplier));
+        }
+        mPermanentMagicEffectMagnitudes[id] = params;
+    }
+
+    while (esm.isNextSub("EQUI"))
+    {
+        esm.getSubHeader();
+        int index;
+        esm.getT(index);
+        int slot;
+        esm.getT(slot);
+        mEquipmentSlots[index] = slot;
+    }
+
+    mSelectedEnchantItem = -1;
+    esm.getHNOT(mSelectedEnchantItem, "SELE");
 }
 
 void ESM::InventoryState::save (ESMWriter &esm) const
 {
-    for (std::vector<std::pair<ObjectState, std::pair<unsigned int, int> > >::const_iterator iter (mItems.begin()); iter!=mItems.end(); ++iter)
-        write (esm, iter->first, iter->second.first, iter->second.second);
-
-    for (std::vector<std::pair<LightState, int> >::const_iterator iter (mLights.begin());
-        iter!=mLights.end(); ++iter)
-        write (esm, iter->first, ESM::REC_LIGH, iter->second);
-
-    for (std::map<std::string, int>::const_iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
+    for (std::vector<ObjectState>::const_iterator iter (mItems.begin()); iter!=mItems.end(); ++iter)
     {
-        esm.writeHNString ("LEVM", it->first);
-        esm.writeHNT ("COUN", it->second);
+        int unused = 0;
+        esm.writeHNT ("IOBJ", unused);
+
+        iter->save (esm, true);
     }
+
+    for (std::map<std::pair<std::string, std::string>, int>::const_iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
+    {
+        esm.writeHNString ("LEVM", it->first.first);
+        esm.writeHNT ("COUN", it->second);
+        esm.writeHNString("LGRP", it->first.second);
+    }
+
+    for (TEffectMagnitudes::const_iterator it = mPermanentMagicEffectMagnitudes.begin(); it != mPermanentMagicEffectMagnitudes.end(); ++it)
+    {
+        esm.writeHNString("MAGI", it->first);
+
+        const std::vector<std::pair<float, float> >& params = it->second;
+        for (std::vector<std::pair<float, float> >::const_iterator pIt = params.begin(); pIt != params.end(); ++pIt)
+        {
+            esm.writeHNT ("RAND", pIt->first);
+            esm.writeHNT ("MULT", pIt->second);
+        }
+    }
+
+    for (std::map<int, int>::const_iterator it = mEquipmentSlots.begin(); it != mEquipmentSlots.end(); ++it)
+    {
+        esm.startSubRecord("EQUI");
+        esm.writeT(it->first);
+        esm.writeT(it->second);
+        esm.endRecord("EQUI");
+    }
+
+    if (mSelectedEnchantItem != -1)
+        esm.writeHNT ("SELE", mSelectedEnchantItem);
 }

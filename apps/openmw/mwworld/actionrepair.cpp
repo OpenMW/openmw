@@ -4,6 +4,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 namespace MWWorld
 {
@@ -14,12 +15,14 @@ namespace MWWorld
 
     void ActionRepair::executeImp (const Ptr& actor)
     {
-        if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()) {
+        if (actor != MWMechanics::getPlayer())
+            return;
+
+        if(MWMechanics::isPlayerInCombat()) {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage2}");
             return;
         }
 
-        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Repair);
         MWBase::Environment::get().getWindowManager()->startRepairItem(getTarget());
     }
 }

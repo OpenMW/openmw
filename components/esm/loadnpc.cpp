@@ -8,92 +8,154 @@ namespace ESM
 {
     unsigned int NPC::sRecordId = REC_NPC_;
 
-void NPC::load(ESMReader &esm)
-{
-    mPersistent = esm.getRecordFlags() & 0x0400;
-
-    mModel = esm.getHNOString("MODL");
-    mName = esm.getHNOString("FNAM");
-
-    mRace = esm.getHNString("RNAM");
-    mClass = esm.getHNString("CNAM");
-    mFaction = esm.getHNString("ANAM");
-    mHead = esm.getHNString("BNAM");
-    mHair = esm.getHNString("KNAM");
-
-    mScript = esm.getHNOString("SCRI");
-
-    esm.getSubNameIs("NPDT");
-    esm.getSubHeader();
-    if (esm.getSubSize() == 52)
+    void NPC::load(ESMReader &esm, bool &isDeleted)
     {
-        mNpdtType = NPC_DEFAULT;
-        esm.getExact(&mNpdt52, 52);
-    }
-    else if (esm.getSubSize() == 12)
-    {
-        mNpdtType = NPC_WITH_AUTOCALCULATED_STATS;
-        esm.getExact(&mNpdt12, 12);
-    }
-    else
-        esm.fail("NPC_NPDT must be 12 or 52 bytes long");
+        isDeleted = false;
 
-    esm.getHNT(mFlags, "FLAG");
+        mPersistent = (esm.getRecordFlags() & 0x0400) != 0;
 
-    mInventory.load(esm);
-    mSpells.load(esm);
-
-    if (esm.isNextSub("AIDT"))
-    {
-        esm.getHExact(&mAiData, sizeof(mAiData));
-        mHasAI= true;
-    }
-    else
+        mSpells.mList.clear();
+        mInventory.mList.clear();
+        mTransport.mList.clear();
+        mAiPackage.mList.clear();
         mHasAI = false;
 
-    mTransport.clear();
-    while (esm.isNextSub("DODT") || esm.isNextSub("DNAM")) {
-        if (esm.retSubName() == 0x54444f44) { // DODT struct
-            Dest dodt;
-            esm.getHExact(&dodt.mPos, 24);
-            mTransport.push_back(dodt);
-        } else if (esm.retSubName() == 0x4d414e44) { // DNAM struct
-            mTransport.back().mCellName = esm.getHString();
+        bool hasName = false;
+        bool hasNpdt = false;
+        bool hasFlags = false;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            switch (esm.retSubName().intval)
+            {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'M','O','D','L'>::value:
+                    mModel = esm.getHString();
+                    break;
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'R','N','A','M'>::value:
+                    mRace = esm.getHString();
+                    break;
+                case ESM::FourCC<'C','N','A','M'>::value:
+                    mClass = esm.getHString();
+                    break;
+                case ESM::FourCC<'A','N','A','M'>::value:
+                    mFaction = esm.getHString();
+                    break;
+                case ESM::FourCC<'B','N','A','M'>::value:
+                    mHead = esm.getHString();
+                    break;
+                case ESM::FourCC<'K','N','A','M'>::value:
+                    mHair = esm.getHString();
+                    break;
+                case ESM::FourCC<'S','C','R','I'>::value:
+                    mScript = esm.getHString();
+                    break;
+                case ESM::FourCC<'N','P','D','T'>::value:
+                    hasNpdt = true;
+                    esm.getSubHeader();
+                    if (esm.getSubSize() == 52)
+                    {
+                        mNpdtType = NPC_DEFAULT;
+                        esm.getExact(&mNpdt52, 52);
+                    }
+                    else if (esm.getSubSize() == 12)
+                    {
+                        mNpdtType = NPC_WITH_AUTOCALCULATED_STATS;
+                        esm.getExact(&mNpdt12, 12);
+                    }
+                    else
+                        esm.fail("NPC_NPDT must be 12 or 52 bytes long");
+                    break;
+                case ESM::FourCC<'F','L','A','G'>::value:
+                    hasFlags = true;
+                    esm.getHT(mFlags);
+                    break;
+                case ESM::FourCC<'N','P','C','S'>::value:
+                    mSpells.add(esm);
+                    break;
+                case ESM::FourCC<'N','P','C','O'>::value:
+                    mInventory.add(esm);
+                    break;
+                case ESM::FourCC<'A','I','D','T'>::value:
+                    esm.getHExact(&mAiData, sizeof(mAiData));
+                    mHasAI= true;
+                    break;
+                case ESM::FourCC<'D','O','D','T'>::value:
+                case ESM::FourCC<'D','N','A','M'>::value:
+                    mTransport.add(esm);
+                    break;
+                case AI_Wander:
+                case AI_Activate:
+                case AI_Escort:
+                case AI_Follow:
+                case AI_Travel:
+                case AI_CNDT:
+                    mAiPackage.add(esm);
+                    break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+                    break;
+            }
         }
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasNpdt && !isDeleted)
+            esm.fail("Missing NPDT subrecord");
+        if (!hasFlags && !isDeleted)
+            esm.fail("Missing FLAG subrecord");
     }
-    mAiPackage.load(esm);
-}
-void NPC::save(ESMWriter &esm) const
-{
-    esm.writeHNOCString("MODL", mModel);
-    esm.writeHNOCString("FNAM", mName);
-    esm.writeHNCString("RNAM", mRace);
-    esm.writeHNCString("CNAM", mClass);
-    esm.writeHNCString("ANAM", mFaction);
-    esm.writeHNCString("BNAM", mHead);
-    esm.writeHNCString("KNAM", mHair);
-    esm.writeHNOCString("SCRI", mScript);
+    void NPC::save(ESMWriter &esm, bool isDeleted) const
+    {
+        esm.writeHNCString("NAME", mId);
 
-    if (mNpdtType == NPC_DEFAULT)
-        esm.writeHNT("NPDT", mNpdt52, 52);
-    else if (mNpdtType == NPC_WITH_AUTOCALCULATED_STATS)
-        esm.writeHNT("NPDT", mNpdt12, 12);
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
 
-    esm.writeHNT("FLAG", mFlags);
+        esm.writeHNOCString("MODL", mModel);
+        esm.writeHNOCString("FNAM", mName);
+        esm.writeHNCString("RNAM", mRace);
+        esm.writeHNCString("CNAM", mClass);
+        esm.writeHNCString("ANAM", mFaction);
+        esm.writeHNCString("BNAM", mHead);
+        esm.writeHNCString("KNAM", mHair);
+        esm.writeHNOCString("SCRI", mScript);
 
-    mInventory.save(esm);
-    mSpells.save(esm);
-    if (mHasAI) {
-        esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
+        if (mNpdtType == NPC_DEFAULT)
+            esm.writeHNT("NPDT", mNpdt52, 52);
+        else if (mNpdtType == NPC_WITH_AUTOCALCULATED_STATS)
+            esm.writeHNT("NPDT", mNpdt12, 12);
+
+        esm.writeHNT("FLAG", mFlags);
+
+        mInventory.save(esm);
+        mSpells.save(esm);
+        if (mAiData.mHello != 0
+            || mAiData.mFight != 0
+            || mAiData.mFlee != 0
+            || mAiData.mAlarm != 0
+            || mAiData.mServices != 0)
+        {
+            esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
+        }
+
+        mTransport.save(esm);
+
+        mAiPackage.save(esm);
     }
-
-    typedef std::vector<Dest>::const_iterator DestIter;
-    for (DestIter it = mTransport.begin(); it != mTransport.end(); ++it) {
-        esm.writeHNT("DODT", it->mPos, sizeof(it->mPos));
-        esm.writeHNOCString("DNAM", it->mCellName);
-    }
-    mAiPackage.save(esm);
-}
 
     bool NPC::isMale() const {
         return (mFlags & Female) == 0;
@@ -108,7 +170,7 @@ void NPC::save(ESMWriter &esm) const
 
     void NPC::blank()
     {
-        mNpdtType = 0;
+        mNpdtType = NPC_DEFAULT;
         mNpdt52.mLevel = 0;
         mNpdt52.mStrength = mNpdt52.mIntelligence = mNpdt52.mWillpower = mNpdt52.mAgility =
             mNpdt52.mSpeed = mNpdt52.mEndurance = mNpdt52.mPersonality = mNpdt52.mLuck = 0;
@@ -133,7 +195,7 @@ void NPC::save(ESMWriter &esm) const
         mSpells.mList.clear();
         mAiData.blank();
         mHasAI = false;
-        mTransport.clear();
+        mTransport.mList.clear();
         mAiPackage.mList.clear();
         mName.clear();
         mModel.clear();
@@ -143,5 +205,20 @@ void NPC::save(ESMWriter &esm) const
         mScript.clear();
         mHair.clear();
         mHead.clear();
+    }
+
+    int NPC::getFactionRank() const
+    {
+        if (mFaction.empty())
+            return -1;
+        else if (mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+            return mNpdt12.mRank;
+        else // NPC_DEFAULT
+            return mNpdt52.mRank;
+    }
+
+    const std::vector<Transport::Dest>& NPC::getTransport() const
+    {
+        return mTransport.mList;
     }
 }

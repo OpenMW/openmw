@@ -1,9 +1,13 @@
 #ifndef MWGUI_CONTROLLERS_H
 #define MWGUI_CONTROLLERS_H
 
-#include <MyGUI_Widget.h>
+#include <string>
 #include <MyGUI_ControllerItem.h>
 
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace MWGui
 {

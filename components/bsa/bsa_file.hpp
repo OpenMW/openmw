@@ -25,12 +25,13 @@
 #define BSA_BSA_FILE_H
 
 #include <stdint.h>
-#include <libs/platform/strings.h>
 #include <string>
 #include <vector>
 #include <map>
 
-#include <OgreDataStream.h>
+#include <components/misc/stringops.hpp>
+
+#include <components/files/constrainedfilestream.hpp>
 
 
 namespace Bsa
@@ -72,7 +73,7 @@ private:
     struct iltstr
     {
         bool operator()(const char *s1, const char *s2) const
-        { return strcasecmp(s1,s2) < 0; }
+        { return Misc::StringUtils::ciLess(s1, s2); }
     };
 
     /** A map used for fast file name lookup. The value is the index into
@@ -89,6 +90,7 @@ private:
     void readHeader();
 
     /// Get the index of a given file name, or -1 if not found
+    /// @note Thread safe.
     int getIndex(const char *str) const;
 
 public:
@@ -115,10 +117,17 @@ public:
 
     /** Open a file contained in the archive. Throws an exception if the
         file doesn't exist.
+     * @note Thread safe.
     */
-    Ogre::DataStreamPtr getFile(const char *file);
+    Files::IStreamPtr getFile(const char *file);
+
+    /** Open a file contained in the archive.
+     * @note Thread safe.
+    */
+    Files::IStreamPtr getFile(const FileStruct* file);
 
     /// Get a list of all files
+    /// @note Thread safe.
     const FileList &getList() const
     { return files; }
 };

@@ -52,7 +52,6 @@ namespace Compiler
         const int opcodeGetLineOfSight = 0x2000222;
         const int opcodeGetLineOfSightExplicit = 0x2000223;
         const int opcodeToggleAI = 0x2000224;
-        const int opcodeToggleAIExplicit = 0x2000225;
         const int opcodeGetTarget = 0x2000238;
         const int opcodeGetTargetExplicit = 0x2000239;
         const int opcodeStartCombat = 0x200023a;
@@ -167,6 +166,7 @@ namespace Compiler
         const int opcodeSameFaction = 0x20001b5;
         const int opcodeSameFactionExplicit = 0x20001b6;
         const int opcodeModFactionReaction = 0x2000242;
+        const int opcodeSetFactionReaction = 0x20002ff;
         const int opcodeGetFactionReaction = 0x2000243;
         const int opcodeClearInfoActor = 0x2000245;
         const int opcodeClearInfoActorExplicit = 0x2000246;
@@ -184,6 +184,7 @@ namespace Compiler
         const int opcodeEnableMapMenu = 0x2000015;
         const int opcodeEnableStatsMenu = 0x2000016;
         const int opcodeEnableRest = 0x2000017;
+        const int opcodeEnableLevelupMenu = 0x2000300;
         const int opcodeShowRestMenu = 0x2000018;
         const int opcodeShowRestMenuExplicit = 0x2000234;
         const int opcodeGetButtonPressed = 0x2000137;
@@ -226,8 +227,8 @@ namespace Compiler
         const int opcodeGetLockedExplicit = 0x20001c8;
         const int opcodeGetEffect = 0x20001cf;
         const int opcodeGetEffectExplicit = 0x20001d0;
-        const int opcodeBetaComment = 0x2000247;
-        const int opcodeBetaCommentExplicit = 0x2000248;
+        const int opcodeBetaComment = 0x2002d;
+        const int opcodeBetaCommentExplicit = 0x2002e;
         const int opcodeAddSoulGem = 0x20001f3;
         const int opcodeAddSoulGemExplicit = 0x20001f4;
         const int opcodeRemoveSoulGem = 0x20027;
@@ -275,7 +276,10 @@ namespace Compiler
         const int opcodeEnableTeleporting = 0x2000216;
         const int opcodeShowVars = 0x200021d;
         const int opcodeShowVarsExplicit = 0x200021e;
+        const int opcodeShow = 0x2000304;
+        const int opcodeShowExplicit = 0x2000305;
         const int opcodeToggleGodMode = 0x200021f;
+        const int opcodeToggleScripts = 0x2000301;
         const int opcodeDisableLevitation = 0x2000220;
         const int opcodeEnableLevitation = 0x2000221;
         const int opcodeCast = 0x2000227;
@@ -495,6 +499,8 @@ namespace Compiler
         const int opcodeMoveWorld = 0x2000208;
         const int opcodeMoveWorldExplicit = 0x2000209;
         const int opcodeResetActors = 0x20002f4;
+        const int opcodeFixme = 0x2000302;
+        const int opcodeFixmeExplicit = 0x2000303;
     }
 
     namespace User

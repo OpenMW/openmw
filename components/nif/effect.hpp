@@ -29,76 +29,70 @@
 namespace Nif
 {
 
-typedef Node Effect;
-
-// Used for NiAmbientLight and NiDirectionalLight. Might also work for
-// NiPointLight and NiSpotLight?
-struct NiLight : Effect
+struct NiDynamicEffect : public Node
 {
-    struct SLight
-    {
-        float dimmer;
-        Ogre::Vector3 ambient;
-        Ogre::Vector3 diffuse;
-        Ogre::Vector3 specular;
-
-        void read(NIFStream *nif)
-        {
-            dimmer = nif->getFloat();
-            ambient = nif->getVector3();
-            diffuse = nif->getVector3();
-            specular = nif->getVector3();
-        }
-    };
-    SLight light;
-
     void read(NIFStream *nif)
     {
-        Effect::read(nif);
-
-        nif->getInt(); // 1
-        nif->getInt(); // 1?
-        light.read(nif);
+        Node::read(nif);
+        unsigned int numAffectedNodes = nif->getUInt();
+        for (unsigned int i=0; i<numAffectedNodes; ++i)
+            nif->getUInt(); // ref to another Node
     }
 };
 
-struct NiTextureEffect : Effect
+// Used as base for NiAmbientLight, NiDirectionalLight, NiPointLight and NiSpotLight.
+struct NiLight : NiDynamicEffect
+{
+    float dimmer;
+    osg::Vec3f ambient;
+    osg::Vec3f diffuse;
+    osg::Vec3f specular;
+
+    void read(NIFStream *nif);
+};
+
+struct NiPointLight : public NiLight
+{
+    float constantAttenuation;
+    float linearAttenuation;
+    float quadraticAttenuation;
+
+    void read(NIFStream *nif);
+};
+
+struct NiSpotLight : public NiPointLight
+{
+    float cutoff;
+    float exponent;
+    void read(NIFStream *nif);
+};
+
+struct NiTextureEffect : NiDynamicEffect
 {
     NiSourceTexturePtr texture;
+    unsigned int clamp;
 
-    void read(NIFStream *nif)
+    enum TextureType
     {
-        Effect::read(nif);
+        Projected_Light = 0,
+        Projected_Shadow = 1,
+        Environment_Map = 2,
+        Fog_Map = 3
+    };
+    TextureType textureType;
 
-        int tmp = nif->getInt();
-        if(tmp) nif->getInt(); // always 1?
-
-        /*
-           3 x Vector4 = [1,0,0,0]
-           int = 2
-           int = 0 or 3
-           int = 2
-           int = 2
-        */
-        nif->skip(16*4);
-
-        texture.read(nif);
-
-        /*
-           byte = 0
-           vector4 = [1,0,0,0]
-           short = 0
-           short = -75
-           short = 0
-        */
-        nif->skip(23);
-    }
-
-    void post(NIFFile *nif)
+    enum CoordGenType
     {
-        Effect::post(nif);
-        texture.post(nif);
-    }
+        World_Parallel = 0,
+        World_Perspective,
+        Sphere_Map,
+        Specular_Cube_Map,
+        Diffuse_Cube_Map
+    };
+    CoordGenType coordGenType;
+
+    void read(NIFStream *nif);
+    void post(NIFFile *nif);
 };
 
 } // Namespace

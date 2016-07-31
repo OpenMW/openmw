@@ -71,7 +71,7 @@ namespace MWGui
         /// to begin when additional text is inserted. Pagination attempts to keep
         /// sections together on a single page. The margin parameter adds additional space
         /// before the next line of text.
-        virtual void sectionBreak (float margin = 0) = 0;
+        virtual void sectionBreak (int margin = 0) = 0;
 
         /// Changes the alignment for the current section of text.
         virtual void setSectionAlignment (Alignment sectionAlignment) = 0;

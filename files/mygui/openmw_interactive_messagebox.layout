@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 500 400" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="MessageBox" position="0 0 500 400" name="_Main">
         <Widget type="EditBox" skin="MW_TextEditClient" position="10 10 490 20" align="Left Top Stretch" name="message">
             <Property key="FontName" value="Default"/>
             <Property key="TextAlign" value="Center"/>

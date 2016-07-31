@@ -1,4 +1,3 @@
-
 #include "dialoguestate.hpp"
 
 #include "esmreader.hpp"
@@ -13,13 +12,20 @@ void ESM::DialogueState::load (ESMReader &esm)
     {
         std::string faction = esm.getHString();
 
-        while (esm.isNextSub ("REAC"))
+        while (esm.isNextSub("REA2"))
         {
             std::string faction2 = esm.getHString();
             int reaction;
             esm.getHNT(reaction, "INTV");
+            mChangedFactionReaction[faction][faction2] = reaction;
+        }
 
-            mModFactionReaction[faction][faction2] = reaction;
+        // no longer used
+        while (esm.isNextSub ("REAC"))
+        {
+            esm.skipHSub();
+            esm.getSubName();
+            esm.skipHSub();
         }
     }
 }
@@ -32,15 +38,15 @@ void ESM::DialogueState::save (ESMWriter &esm) const
         esm.writeHNString ("TOPI", *iter);
     }
 
-    for (std::map<std::string, std::map<std::string, int> >::const_iterator iter = mModFactionReaction.begin();
-         iter != mModFactionReaction.end(); ++iter)
+    for (std::map<std::string, std::map<std::string, int> >::const_iterator iter = mChangedFactionReaction.begin();
+         iter != mChangedFactionReaction.end(); ++iter)
     {
         esm.writeHNString ("FACT", iter->first);
 
         for (std::map<std::string, int>::const_iterator reactIter = iter->second.begin();
              reactIter != iter->second.end(); ++reactIter)
         {
-            esm.writeHNString ("REAC", reactIter->first);
+            esm.writeHNString ("REA2", reactIter->first);
             esm.writeHNT ("INTV", reactIter->second);
         }
     }

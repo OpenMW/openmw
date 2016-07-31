@@ -1,7 +1,9 @@
 #ifndef MWGUI_TravelWINDOW_H
 #define MWGUI_TravelWINDOW_H
 
-#include "container.hpp"
+
+#include "windowbase.hpp"
+#include "referenceinterface.hpp"
 
 namespace MyGUI
 {

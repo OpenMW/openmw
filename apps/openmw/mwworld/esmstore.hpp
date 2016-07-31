@@ -1,6 +1,7 @@
 #ifndef OPENMW_MWWORLD_ESMSTORE_H
 #define OPENMW_MWWORLD_ESMSTORE_H
 
+#include <sstream>
 #include <stdexcept>
 
 #include <components/esm/records.hpp>
@@ -99,9 +100,6 @@ namespace MWWorld
         ESMStore()
           : mDynamicCount(0)
         {
-            // Cell store needs access to this for tracking moved references
-            mCells.mEsmStore = this;
-
             mStores[ESM::REC_ACTI] = &mActivators;
             mStores[ESM::REC_ALCH] = &mPotions;
             mStores[ESM::REC_APPA] = &mAppas;
@@ -236,7 +234,7 @@ namespace MWWorld
 
         void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-        bool readRecord (ESM::ESMReader& reader, int32_t type);
+        bool readRecord (ESM::ESMReader& reader, uint32_t type);
         ///< \return Known type?
     };
 

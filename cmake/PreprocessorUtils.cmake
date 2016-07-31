@@ -36,9 +36,9 @@ endmacro()
 macro(replace_preprocessor_entry VARIABLE KEYWORD NEW_VALUE)
   string(REGEX REPLACE 
     "(// *)?# *define +${KEYWORD} +[^ \n]*"
-	"#define ${KEYWORD} ${NEW_VALUE}"
-	${VARIABLE}_TEMP
-	${${VARIABLE}}
+        "#define ${KEYWORD} ${NEW_VALUE}"
+        ${VARIABLE}_TEMP
+        ${${VARIABLE}}
   )
   set(${VARIABLE} ${${VARIABLE}_TEMP})  
 endmacro()
@@ -51,10 +51,35 @@ macro(set_preprocessor_entry VARIABLE KEYWORD ENABLE)
   endif ()
   string(REGEX REPLACE 
     "(// *)?# *define +${KEYWORD} *\n"
-	${TMP_REPLACE_STR}
-	${VARIABLE}_TEMP
-	${${VARIABLE}}
+        ${TMP_REPLACE_STR}
+        ${VARIABLE}_TEMP
+        ${${VARIABLE}}
   )
   set(${VARIABLE} ${${VARIABLE}_TEMP})  
 endmacro()
-  
+
+
+# get_version_from_n_defines(result_version_name header_path [list of defines...])
+#
+# get_version_from_n_defines(MyPackage_VERSION /Header/Path/HeaderName.h
+#     MYPACKAGE_VERSION_MAJOR
+#     MYPACKAGE_VERSION_MINOR
+# )
+# Function call will get the values of defines MYPACKAGE_VERSION_MAJOR & MYPACKAGE_VERSION_MINOR
+#  from header and set "${MYPACKAGE_VERSION_MAJOR}.${MYPACKAGE_VERSION_MINOR}" into MyPackage_VERSION
+#
+
+function(get_version_from_n_defines OUT_VAR HEADER_PATH)
+    if (NOT EXISTS ${HEADER_PATH})
+        message(FATAL_ERROR "Unable to find '${HEADER_PATH}'")
+        return()
+    endif ()
+    file(READ ${HEADER_PATH} _CONTENT)
+    unset(_DEFINES_LIST)
+    foreach (_DEFINE_NAME ${ARGN})
+        get_preprocessor_entry(_CONTENT ${_DEFINE_NAME} _DEFINE_VALUE)
+        list(APPEND _DEFINES_LIST ${_DEFINE_VALUE})
+    endforeach()
+    string(REPLACE ";" "." _VERSION "${_DEFINES_LIST}")
+    set(${OUT_VAR} "${_VERSION}" PARENT_SCOPE)
+endfunction()

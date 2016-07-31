@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "columnbase.hpp"
+
 namespace CSMWorld
 {
     namespace Columns
@@ -63,7 +65,7 @@ namespace CSMWorld
             ColumnId_Weight = 50,
             ColumnId_EnchantmentPoints = 51,
             ColumnId_Quality = 52,
-            ColumnId_Ai = 53,
+            // unused
             ColumnId_AiHello = 54,
             ColumnId_AiFlee = 55,
             ColumnId_AiFight = 56,
@@ -100,7 +102,7 @@ namespace CSMWorld
             ColumnId_OriginalCreature = 87,
             ColumnId_Biped = 88,
             ColumnId_HasWeapon = 89,
-            ColumnId_NoMovement = 90,
+            // unused
             ColumnId_Swims = 91,
             ColumnId_Flies = 92,
             ColumnId_Walks = 93,
@@ -165,35 +167,168 @@ namespace CSMWorld
             ColumnId_Rank = 152,
             ColumnId_Gender = 153,
             ColumnId_PcRank = 154,
-            ColumnId_ReferenceableId = 156,
-            ColumnId_CombatState = 157,
-            ColumnId_MagicState = 158,
-            ColumnId_StealthState = 159,
-            ColumnId_EnchantmentType = 160,
-            ColumnId_Vampire = 161,
-            ColumnId_BodyPartType = 162,
-            ColumnId_MeshType = 163,
-            ColumnId_OwnerGlobal = 164,
-            ColumnId_DefaultProfile = 165,
-            ColumnId_BypassNewGame = 166,
-            ColumnId_GlobalProfile = 167,
-            ColumnId_RefNumCounter = 168,
-            ColumnId_RefNum = 169,
-            ColumnId_Creature = 170,
-            ColumnId_SoundGeneratorType = 171,
-            ColumnId_AllowSpellmaking = 172,
-            ColumnId_AllowEnchanting = 173,
-            ColumnId_BaseCost = 174,
-            ColumnId_School = 175,
-            ColumnId_Particle = 176,
-            ColumnId_CastingObject = 177,
-            ColumnId_HitObject = 178,
-            ColumnId_AreaObject = 179,
-            ColumnId_BoltObject = 180,
-            ColumnId_CastingSound = 177,
-            ColumnId_HitSound = 178,
-            ColumnId_AreaSound = 179,
-            ColumnId_BoltSound = 180,
+            ColumnId_ReferenceableId = 155,
+            ColumnId_ContainerContent = 156,
+            ColumnId_ItemCount = 157,
+            ColumnId_InventoryItemId = 158,
+            ColumnId_CombatState = 159,
+            ColumnId_MagicState = 160,
+            ColumnId_StealthState = 161,
+            ColumnId_EnchantmentType = 162,
+            ColumnId_Vampire = 163,
+            ColumnId_BodyPartType = 164,
+            ColumnId_MeshType = 165,
+            ColumnId_ActorInventory = 166,
+            ColumnId_SpellList = 167,
+            ColumnId_SpellId = 168,
+            ColumnId_NpcDestinations = 169,
+            ColumnId_DestinationCell = 170,
+            ColumnId_PosX = 171, // these are float
+            ColumnId_PosY = 172, // these are float
+            ColumnId_PosZ = 173, // these are float
+            ColumnId_RotX = 174,
+            ColumnId_RotY = 175,
+            ColumnId_RotZ = 176,
+            // unused
+            ColumnId_OwnerGlobal = 178,
+            ColumnId_DefaultProfile = 179,
+            ColumnId_BypassNewGame = 180,
+            ColumnId_GlobalProfile = 181,
+            ColumnId_RefNumCounter = 182,
+            ColumnId_RefNum = 183,
+            ColumnId_Creature = 184,
+            ColumnId_SoundGeneratorType = 185,
+            ColumnId_AllowSpellmaking = 186,
+            ColumnId_AllowEnchanting = 187,
+            ColumnId_BaseCost = 188,
+            ColumnId_School = 189,
+            ColumnId_Particle = 190,
+            ColumnId_CastingObject = 191,
+            ColumnId_HitObject = 192,
+            ColumnId_AreaObject = 193,
+            ColumnId_BoltObject = 194,
+            ColumnId_CastingSound = 195,
+            ColumnId_HitSound = 196,
+            ColumnId_AreaSound = 197,
+            ColumnId_BoltSound = 198,
+
+            ColumnId_PathgridPoints = 199,
+            ColumnId_PathgridIndex = 200,
+            ColumnId_PathgridPosX = 201, // these are int
+            ColumnId_PathgridPosY = 202, // these are int
+            ColumnId_PathgridPosZ = 203, // these are int
+            ColumnId_PathgridEdges = 204,
+            ColumnId_PathgridEdgeIndex = 205,
+            ColumnId_PathgridEdge0 = 206,
+            ColumnId_PathgridEdge1 = 207,
+
+            ColumnId_RegionSounds = 208,
+            ColumnId_SoundName = 209,
+            ColumnId_SoundChance = 210,
+
+            ColumnId_FactionReactions = 211,
+            //ColumnId_FactionID = 212,
+            ColumnId_FactionReaction = 213,
+
+            ColumnId_EffectList = 214,
+            ColumnId_EffectId = 215,
+            //ColumnId_EffectAttribute = 216,
+            ColumnId_EffectRange = 217,
+            ColumnId_EffectArea = 218,
+
+            ColumnId_AiPackageList = 219,
+            ColumnId_AiPackageType = 220,
+            ColumnId_AiWanderDist = 221,
+            ColumnId_AiDuration = 222,
+            ColumnId_AiWanderToD = 223,
+            // unused
+            ColumnId_AiWanderRepeat = 225,
+            ColumnId_AiActivateName = 226,
+            // use ColumnId_PosX, etc for AI destinations
+            ColumnId_AiTargetId = 227,
+            ColumnId_AiTargetCell = 228,
+
+            ColumnId_PartRefList = 229,
+            ColumnId_PartRefType = 230,
+            ColumnId_PartRefMale = 231,
+            ColumnId_PartRefFemale = 232,
+
+            ColumnId_LevelledList = 233,
+            ColumnId_LevelledItemId = 234,
+            ColumnId_LevelledItemLevel = 235,
+            ColumnId_LevelledItemType = 236,
+            ColumnId_LevelledItemTypeEach = 237,
+            ColumnId_LevelledItemChanceNone = 238,
+
+            ColumnId_PowerList = 239,
+            ColumnId_Skill = 240,
+
+            ColumnId_InfoList = 241,
+            ColumnId_InfoCondition = 242,
+            ColumnId_InfoCondFunc = 243,
+            ColumnId_InfoCondVar = 244,
+            ColumnId_InfoCondComp = 245,
+            ColumnId_InfoCondValue = 246,
+
+            ColumnId_OriginalCell = 247,
+
+            ColumnId_NpcAttributes = 248,
+            ColumnId_NpcSkills = 249,
+            ColumnId_UChar = 250,
+            ColumnId_NpcMisc = 251,
+            ColumnId_Level = 252,
+            ColumnId_NpcFactionID = 253,
+            // unused
+            ColumnId_Mana = 255,
+            ColumnId_Fatigue = 256,
+            ColumnId_NpcDisposition = 257,
+            ColumnId_NpcReputation = 258,
+            ColumnId_NpcRank = 259,
+            ColumnId_Gold = 260,
+            ColumnId_NpcPersistence = 261,
+
+            ColumnId_RaceAttributes = 262,
+            ColumnId_Male = 263,
+            // unused
+            ColumnId_RaceSkillBonus = 265,
+            // unused
+            ColumnId_RaceBonus = 267,
+
+            ColumnId_Interior = 268,
+            ColumnId_Ambient = 269,
+            ColumnId_Sunlight = 270,
+            ColumnId_Fog = 271,
+            ColumnId_FogDensity = 272,
+            ColumnId_WaterLevel = 273,
+            ColumnId_MapColor = 274,
+
+            ColumnId_FileFormat = 275,
+            ColumnId_FileDescription = 276,
+            ColumnId_Author = 277,
+
+            ColumnId_MinMagnitude = 278,
+            ColumnId_MaxMagnitude = 279,
+
+            ColumnId_CreatureAttributes = 280,
+            ColumnId_AttributeValue = 281,
+            ColumnId_CreatureAttack = 282,
+            ColumnId_MinAttack = 283,
+            ColumnId_MaxAttack = 284,
+            ColumnId_CreatureMisc = 285,
+
+            ColumnId_Idle1 = 286,
+            ColumnId_Idle2 = 287,
+            ColumnId_Idle3 = 288,
+            ColumnId_Idle4 = 289,
+            ColumnId_Idle5 = 290,
+            ColumnId_Idle6 = 291,
+            ColumnId_Idle7 = 292,
+            ColumnId_Idle8 = 293,
+
+            ColumnId_RegionWeather = 294,
+            ColumnId_WeatherName = 295,
+            ColumnId_WeatherChance = 296,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,
@@ -227,7 +362,8 @@ namespace CSMWorld
             ColumnId_Skill3 = 0x50002,
             ColumnId_Skill4 = 0x50003,
             ColumnId_Skill5 = 0x50004,
-            ColumnId_Skill6 = 0x50005
+            ColumnId_Skill6 = 0x50005,
+            ColumnId_Skill7 = 0x50006
         };
 
         std::string getName (ColumnId column);

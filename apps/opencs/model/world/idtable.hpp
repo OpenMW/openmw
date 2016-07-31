@@ -10,7 +10,7 @@
 namespace CSMWorld
 {
     class CollectionBase;
-    class RecordBase;
+    struct RecordBase;
 
     class IdTable : public IdTableBase
     {
@@ -53,13 +53,18 @@ namespace CSMWorld
             void addRecord (const std::string& id, UniversalId::Type type = UniversalId::Type_None);
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
+            void addRecordWithData (const std::string& id, const std::map<int, QVariant>& data,
+                UniversalId::Type type = UniversalId::Type_None);
+            ///< \param type Will be ignored, unless the collection supports multiple record types
+
             void cloneRecord(const std::string& origin,
                              const std::string& destination,
                              UniversalId::Type type = UniversalId::Type_None);
 
             virtual QModelIndex getModelIndex (const std::string& id, int column) const;
 
-            void setRecord (const std::string& id, const RecordBase& record);
+            void setRecord (const std::string& id, const RecordBase& record,
+                    UniversalId::Type type = UniversalId::Type_None);
             ///< Add record or overwrite existing recrod.
 
             const RecordBase& getRecord (const std::string& id) const;
@@ -82,7 +87,11 @@ namespace CSMWorld
             /// Is \a id flagged as deleted?
             virtual bool isDeleted (const std::string& id) const;
 
-            int getColumnId(int column) const;
+            virtual int getColumnId(int column) const;
+
+        protected:
+
+            virtual CollectionBase *idCollection() const;
     };
 }
 

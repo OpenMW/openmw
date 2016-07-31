@@ -20,7 +20,7 @@ namespace CSVWidget
 
             struct ButtonDesc
             {
-                unsigned int mId;
+                unsigned int mMask;
                 std::string mSmallIcon;
                 QString mName;
                 int mIndex;
@@ -54,13 +54,13 @@ namespace CSVWidget
             /// \note The layout algorithm can not handle more than 9 buttons. To prevent this An
             /// attempt to add more will result in an exception being thrown.
             /// The small icons will be sized at (x-4)/3 (where x is the main icon size).
-            void addButton (const std::string& icon, unsigned int id,
+            void addButton (const std::string& icon, unsigned int mask,
                 const std::string& smallIcon, const QString& name, const QString& tooltip = "");
 
-            unsigned int getSelection() const;
+            unsigned int getSelectionMask() const;
 
-            /// \param or'ed button IDs. IDs that do not exist will be ignored.
-            void setSelection (unsigned int selection);
+            /// \param or'ed button masks. buttons that do not exist will be ignored.
+            void setSelectionMask (unsigned int selection);
 
         signals:
 

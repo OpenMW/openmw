@@ -1,12 +1,13 @@
 #ifndef GAME_MWMECHANICS_CHARACTER_HPP
 #define GAME_MWMECHANICS_CHARACTER_HPP
 
-#include <OgreVector3.h>
+#include <deque>
 
 #include <components/esm/loadmgef.hpp>
 
 #include "../mwworld/ptr.hpp"
-#include "aistate.hpp"
+
+#include "../mwrender/animation.hpp"
 
 namespace MWWorld
 {
@@ -22,15 +23,19 @@ namespace MWRender
 namespace MWMechanics
 {
 
-class Movement;
+struct Movement;
 class CreatureStats;
 
 enum Priority {
     Priority_Default,
+    Priority_WeaponLowerBody,
+    Priority_SneakIdleLowerBody,
+    Priority_SwimIdle,
     Priority_Jump,
     Priority_Movement,
     Priority_Hit,
     Priority_Weapon,
+    Priority_Block,
     Priority_Knockdown,
     Priority_Torch,
     Priority_Storm,
@@ -135,14 +140,13 @@ enum JumpingState {
     JumpState_Landing
 };
 
-class CharacterController
+struct WeaponInfo;
+
+class CharacterController : public MWRender::Animation::TextKeyListener
 {
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
     
-    //
-    AiState mAiState;
-
     typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
     AnimationQueue mAnimQueue;
 
@@ -151,12 +155,14 @@ class CharacterController
 
     CharacterState mMovementState;
     std::string mCurrentMovement;
-    float mMovementSpeed;
+    float mMovementAnimSpeed;
+    bool mAdjustMovementAnimSpeed;
     bool mHasMovedInXY;
     bool mMovementAnimationControlled;
 
     CharacterState mDeathState;
     std::string mCurrentDeath;
+    bool mFloatToSurface;
 
     CharacterState mHitState;
     std::string mCurrentHit;
@@ -169,26 +175,36 @@ class CharacterController
     WeaponType mWeaponType;
     std::string mCurrentWeapon;
 
+    float mAttackStrength;
+
     bool mSkipAnim;
 
     // counted for skill increase
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
-    MWWorld::Ptr mHeadTrackTarget;
+    MWWorld::ConstPtr mHeadTrackTarget;
 
     float mTurnAnimationThreshold; // how long to continue playing turning animation after actor stopped turning
 
     std::string mAttackType; // slash, chop or thrust
-    void determineAttackType();
 
-    void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
+    bool mAttackingOrSpell;
+
+    void setAttackTypeBasedOnMovement();
+    void setAttackTypeRandomly();
+
+    void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
+    void refreshHitRecoilAnims();
+    void refreshJumpAnims(const WeaponInfo* weap, JumpingState jump, bool force=false);
+    void refreshMovementAnims(const WeaponInfo* weap, CharacterState movement, bool force=false);
+    void refreshIdleAnims(const WeaponInfo* weap, CharacterState idle, bool force=false);
 
     void clearAnimQueue();
 
     bool updateWeaponState();
     bool updateCreatureState();
-    void updateIdleStormState();
+    void updateIdleStormState(bool inwater);
 
     void updateHeadTracking(float duration);
 
@@ -197,17 +213,21 @@ class CharacterController
     void updateMagicEffects();
 
     void playDeath(float startpoint, CharacterState death);
+    CharacterState chooseRandomDeathState() const;
     void playRandomDeath(float startpoint = 0.0f);
 
     /// choose a random animation group with \a prefix and numeric suffix
     /// @param num if non-NULL, the chosen animation number will be written here
-    std::string chooseRandomGroup (const std::string& prefix, int* num = NULL);
+    std::string chooseRandomGroup (const std::string& prefix, int* num = NULL) const;
 
     bool updateCarriedLeftVisible(WeaponType weaptype) const;
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();
+
+    virtual void handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
+                       const std::multimap<float, std::string>& map);
 
     // Be careful when to call this, see comment in Actors
     void updateContinuousVfx();
@@ -216,12 +236,18 @@ public:
 
     void update(float duration);
 
-    void playGroup(const std::string &groupname, int mode, int count);
+    bool playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();
     bool isAnimPlaying(const std::string &groupName);
 
-    /// @return false if the character has already been killed before
-    bool kill();
+    enum KillResult
+    {
+        Result_DeathAnimStarted,
+        Result_DeathAnimPlaying,
+        Result_DeathAnimJustFinished,
+        Result_DeathAnimFinished
+    };
+    KillResult kill();
 
     void resurrect();
     bool isDead() const
@@ -229,16 +255,24 @@ public:
 
     void forceStateUpdate();
     
-    AiState& getAiState() { return mAiState; }
-
     bool isReadyToBlock() const;
     bool isKnockedOut() const;
+    bool isSneaking() const;
+
+    void setAttackingOrSpell(bool attackingOrSpell);
+
+    bool readyToPrepareAttack() const;
+    bool readyToStartAttack() const;
+
+    float getAttackStrength() const;
+
+    /// @see Animation::setActive
+    void setActive(bool active);
 
     /// Make this character turn its head towards \a target. To turn off head tracking, pass an empty Ptr.
-    void setHeadTrackTarget(const MWWorld::Ptr& target);
+    void setHeadTrackTarget(const MWWorld::ConstPtr& target);
 };
 
-    void getWeaponGroup(WeaponType weaptype, std::string &group);
     MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype);
 }
 

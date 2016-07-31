@@ -16,16 +16,16 @@ namespace CSMWorld
             enum Class
             {
                 Class_None = 0,
-                Class_Record,
-                Class_RefRecord, // referenceable record
-                Class_SubRecord,
-                Class_RecordList,
-                Class_Collection, // multiple types of records combined
-                Class_Transient, // not part of the world data or the project data
-                Class_NonRecord, // record like data that is not part of the world
-                Class_Resource, ///< \attention Resource IDs are unique only within the
+                Class_Record = 1,
+                Class_RefRecord = 2, // referenceable record
+                Class_SubRecord = 4,
+                Class_RecordList = 8,
+                Class_Collection = 16, // multiple types of records combined
+                Class_Transient = 32, // not part of the world data or the project data
+                Class_NonRecord = 64, // record like data that is not part of the world
+                Class_Resource = 128, ///< \attention Resource IDs are unique only within the
                                 /// respective collection
-                Class_ResourceList
+                Class_ResourceList = 256
             };
 
             enum ArgumentType
@@ -128,6 +128,11 @@ namespace CSMWorld
                 Type_MagicEffect,
                 Type_Pathgrids,
                 Type_Pathgrid,
+                Type_StartScripts,
+                Type_StartScript,
+                Type_Search,
+                Type_MetaDatas,
+                Type_MetaData,
                 Type_RunLog
             };
 
@@ -177,6 +182,8 @@ namespace CSMWorld
             ///< Will return an empty string, if no icon is available.
 
             static std::vector<Type> listReferenceableTypes();
+
+            static std::vector<Type> listTypes (int classes);
 
             /// If \a type is a SubRecord, RefRecord or Record type return the type of the table
             /// that contains records of type \a type.

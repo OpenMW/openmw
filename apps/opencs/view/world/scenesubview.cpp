@@ -1,4 +1,3 @@
-
 #include "scenesubview.hpp"
 
 #include <sstream>
@@ -16,6 +15,7 @@
 
 #include "../render/pagedworldspacewidget.hpp"
 #include "../render/unpagedworldspacewidget.hpp"
+#include "../render/editmode.hpp"
 
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
@@ -27,22 +27,18 @@
 #include "creator.hpp"
 
 CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id), mLayout(new QHBoxLayout), mDocument(document), mScene(NULL), mToolbar(NULL)
+: SubView (id), mScene(NULL), mLayout(new QHBoxLayout), mDocument(document), mToolbar(NULL)
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
-    layout->setContentsMargins (QMargins (0, 0, 0, 0));
-
-    layout->addWidget (mBottom =
-        new TableBottomBox (NullCreatorFactory(), document.getData(), document.getUndoStack(), id,
-        this), 0);
+    layout->addWidget (mBottom = new TableBottomBox (NullCreatorFactory(), document, id, this), 0);
 
     mLayout->setContentsMargins (QMargins (0, 0, 0, 0));
 
     CSVRender::WorldspaceWidget* worldspaceWidget = NULL;
     widgetType whatWidget;
 
-    if (id.getId()=="sys::default")
+    if (id.getId()==ESM::CellId::sDefaultWorldspace)
     {
         whatWidget = widget_Paged;
 
@@ -116,7 +112,7 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
 
     if (type==widget_Paged)
     {
-        CSVWidget::SceneToolToggle *controlVisibilityTool =
+        CSVWidget::SceneToolToggle2 *controlVisibilityTool =
             dynamic_cast<CSVRender::PagedWorldspaceWidget&> (*widget).
             makeControlVisibilitySelector (toolbar);
 
@@ -126,20 +122,14 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
     CSVWidget::SceneToolRun *runTool = widget->makeRunTool (toolbar);
     toolbar->addTool (runTool);
 
-    CSVWidget::SceneToolMode *editModeTool = widget->makeEditModeSelector (toolbar);
-    toolbar->addTool (editModeTool);
+    toolbar->addTool (widget->makeEditModeSelector (toolbar), runTool);
 
     return toolbar;
 }
 
 void CSVWorld::SceneSubView::setEditLock (bool locked)
 {
-
-}
-
-void CSVWorld::SceneSubView::updateEditorSetting(const QString &settingName, const QString &settingValue)
-{
-
+    mScene->setEditLock (locked);
 }
 
 void CSVWorld::SceneSubView::setStatusBar (bool show)
@@ -170,7 +160,7 @@ void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::UniversalId& 
 
 void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::CellSelection& selection)
 {
-    setUniversalId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Scene, "sys::default"));
+    setUniversalId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Scene, ESM::CellId::sDefaultWorldspace));
     int size = selection.getSize();
 
     std::ostringstream stream;
@@ -252,8 +242,6 @@ void CSVWorld::SceneSubView::replaceToolbarAndWorldspace (CSVRender::WorldspaceW
     mToolbar = toolbar;
 
     connect (mScene, SIGNAL (focusToolbarRequest()), mToolbar, SLOT (setFocus()));
-    connect (this, SIGNAL (updateSceneUserSetting(const QString &, const QStringList &)),
-            mScene, SLOT (updateUserSetting(const QString &, const QStringList &)));
     connect (mToolbar, SIGNAL (focusSceneRequest()), mScene, SLOT (setFocus()));
 
     mLayout->addWidget (mToolbar, 0);
@@ -261,9 +249,4 @@ void CSVWorld::SceneSubView::replaceToolbarAndWorldspace (CSVRender::WorldspaceW
 
     mScene->selectDefaultNavigationMode();
     setFocusProxy (mScene);
-}
-
-void CSVWorld::SceneSubView::updateUserSetting (const QString &key, const QStringList &list)
-{
-    emit updateSceneUserSetting(key, list);
 }

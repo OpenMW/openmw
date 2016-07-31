@@ -3,11 +3,15 @@
 
 #include "genericcreator.hpp"
 
-class QLineEdit;
-
 namespace CSMWorld
 {
     class InfoCollection;
+    class IdCompletionManager;
+}
+
+namespace CSVWidget
+{
+    class DropLineEdit;
 }
 
 namespace CSVWorld
@@ -16,7 +20,7 @@ namespace CSVWorld
     {
             Q_OBJECT
 
-            QLineEdit *mTopic;
+            CSVWidget::DropLineEdit *mTopic;
 
             virtual std::string getId() const;
 
@@ -25,7 +29,7 @@ namespace CSVWorld
         public:
 
             InfoCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-                const CSMWorld::UniversalId& id);
+                const CSMWorld::UniversalId& id, CSMWorld::IdCompletionManager& completionManager);
 
             virtual void cloneMode (const std::string& originId,
                 const CSMWorld::UniversalId::Type type);
@@ -35,10 +39,21 @@ namespace CSVWorld
             virtual std::string getErrors() const;
             ///< Return formatted error descriptions for the current state of the creator. if an empty
             /// string is returned, there is no error.
-
+            
+            /// Focus main input widget
+            virtual void focus();
+            
         private slots:
 
             void topicChanged();
+    };
+
+    class InfoCreatorFactory : public CreatorFactoryBase
+    {
+        public:
+
+            virtual Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const;
+            ///< The ownership of the returned Creator is transferred to the caller.
     };
 }
 

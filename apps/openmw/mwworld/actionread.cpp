@@ -4,12 +4,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld/player.hpp"
-
 #include "../mwmechanics/npcstats.hpp"
-
-#include "../mwgui/bookwindow.hpp"
-#include "../mwgui/scrollwindow.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "player.hpp"
 #include "class.hpp"
@@ -23,8 +19,11 @@ namespace MWWorld
 
     void ActionRead::executeImp (const MWWorld::Ptr& actor) {
 
+        if (actor != MWMechanics::getPlayer())
+            return;
+
         //Ensure we're not in combat
-        if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()
+        if(MWMechanics::isPlayerInCombat()
                 // Reading in combat is still allowed if the scroll/book is not in the player inventory yet
                 // (since otherwise, there would be no way to pick it up)
                 && getTarget().getContainerStore() == &actor.getClass().getContainerStore(actor)
@@ -33,27 +32,22 @@ namespace MWWorld
             return;
         }
 
+        bool showTakeButton = (getTarget().getContainerStore() != &actor.getClass().getContainerStore(actor));
+
         LiveCellRef<ESM::Book> *ref = getTarget().get<ESM::Book>();
 
         if (ref->mBase->mData.mIsScroll)
-        {
-            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Scroll);
-            MWBase::Environment::get().getWindowManager()->getScrollWindow()->open(getTarget());
-        }
+            MWBase::Environment::get().getWindowManager()->showScroll(getTarget(), showTakeButton);
         else
-        {
-            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Book);
-            MWBase::Environment::get().getWindowManager()->getBookWindow()->open(getTarget());
-        }
+            MWBase::Environment::get().getWindowManager()->showBook(getTarget(), showTakeButton);
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats (player);
+        MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats (actor);
 
         // Skill gain from books
         if (ref->mBase->mData.mSkillID >= 0 && ref->mBase->mData.mSkillID < ESM::Skill::Length
                 && !npcStats.hasBeenUsed (ref->mBase->mId))
         {
-            MWWorld::LiveCellRef<ESM::NPC> *playerRef = player.get<ESM::NPC>();
+            MWWorld::LiveCellRef<ESM::NPC> *playerRef = actor.get<ESM::NPC>();
 
             const ESM::Class *class_ =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find (

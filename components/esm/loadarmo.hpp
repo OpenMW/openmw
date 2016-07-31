@@ -55,6 +55,10 @@ struct PartReferenceList
 {
     std::vector<PartReference> mParts;
 
+    /// Load one part, assumes the subrecord name was already read
+    void add(ESMReader &esm);
+
+    /// TODO: remove this method. The ESM format does not guarantee that all Part subrecords follow one another.
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 };
@@ -62,6 +66,8 @@ struct PartReferenceList
 struct Armor
 {
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "Armor"; }
 
     enum Type
     {
@@ -90,8 +96,8 @@ struct Armor
 
     std::string mId, mName, mModel, mIcon, mScript, mEnchant;
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

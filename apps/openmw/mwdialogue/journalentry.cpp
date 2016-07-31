@@ -1,4 +1,3 @@
-
 #include "journalentry.hpp"
 
 #include <stdexcept>
@@ -89,7 +88,7 @@ namespace MWDialogue
 
         for (ESM::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
-            if (iter->mData.mDisposition==index) /// \todo cleanup info structure
+            if (iter->mData.mJournalIndex==index)
             {
                 return iter->mId;
             }
@@ -103,8 +102,8 @@ namespace MWDialogue
     {}
 
     StampedJournalEntry::StampedJournalEntry (const std::string& topic, const std::string& infoId,
-        int day, int month, int dayOfMonth)
-    : JournalEntry (topic, infoId, MWWorld::Ptr()), mDay (day), mMonth (month), mDayOfMonth (dayOfMonth)
+        int day, int month, int dayOfMonth, const MWWorld::Ptr& actor)
+    : JournalEntry (topic, infoId, actor), mDay (day), mMonth (month), mDayOfMonth (dayOfMonth)
     {}
 
     StampedJournalEntry::StampedJournalEntry (const ESM::JournalEntry& record)
@@ -120,12 +119,12 @@ namespace MWDialogue
         entry.mDayOfMonth = mDayOfMonth;
     }
 
-    StampedJournalEntry StampedJournalEntry::makeFromQuest (const std::string& topic, int index)
+    StampedJournalEntry StampedJournalEntry::makeFromQuest (const std::string& topic, int index, const MWWorld::Ptr& actor)
     {
         int day = MWBase::Environment::get().getWorld()->getGlobalInt ("dayspassed");
         int month = MWBase::Environment::get().getWorld()->getGlobalInt ("month");
         int dayOfMonth = MWBase::Environment::get().getWorld()->getGlobalInt ("day");
 
-        return StampedJournalEntry (topic, idFromIndex (topic, index), day, month, dayOfMonth);
+        return StampedJournalEntry (topic, idFromIndex (topic, index), day, month, dayOfMonth, actor);
     }
 }

@@ -1,11 +1,8 @@
-
 # Copy resource files into the build directory
 set(SDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
 
 set(MYGUI_FILES
-    black.png
-    white.png
     core.skin
     core.xml
     core_layouteditor.xml
@@ -83,9 +80,11 @@ set(MYGUI_FILES
     openmw_savegame_dialog.layout
     openmw_recharge_dialog.layout
     openmw_screen_fader.layout
+    openmw_screen_fader_hit.layout
     openmw_edit_note.layout
     openmw_debug_window.layout
     openmw_debug_window.skin.xml
+    openmw_jail_screen.layout
     DejaVuLGCSansMono.ttf
     ../launcher/images/openmw.png
     OpenMWResourcePlugin.xml

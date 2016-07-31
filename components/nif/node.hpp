@@ -1,8 +1,6 @@
 #ifndef OPENMW_COMPONENTS_NIF_NODE_HPP
 #define OPENMW_COMPONENTS_NIF_NODE_HPP
 
-#include <OgreMatrix4.h>
-
 #include "controlled.hpp"
 #include "extra.hpp"
 #include "data.hpp"
@@ -11,10 +9,12 @@
 #include "controller.hpp"
 #include "base.hpp"
 
+#include <components/misc/stringops.hpp>
+
 namespace Nif
 {
 
-class NiNode;
+struct NiNode;
 
 /** A Node is an object that's part of the main NIF tree. It has
     parent node (unless it's the root), and transformation (location
@@ -26,14 +26,14 @@ public:
     // Node flags. Interpretation depends somewhat on the type of node.
     int flags;
     Transformation trafo;
-    Ogre::Vector3 velocity; // Unused? Might be a run-time game state
+    osg::Vec3f velocity; // Unused? Might be a run-time game state
     PropertyList props;
 
     // Bounding box info
     bool hasBounds;
-    Ogre::Vector3 boundPos;
-    Ogre::Matrix3 boundRot;
-    Ogre::Vector3 boundXYZ; // Box size
+    osg::Vec3f boundPos;
+    Matrix3 boundRot;
+    osg::Vec3f boundXYZ; // Box size
 
     void read(NIFStream *nif)
     {
@@ -70,7 +70,7 @@ public:
     NiNode *parent;
 
     // Bone transformation. If set, node is a part of a skeleton.
-    const NiSkinData::BoneTrafo *boneTrafo;
+    const Transformation *boneTrafo;
 
     // Bone weight info, from NiSkinData
     const NiSkinData::BoneInfo *boneInfo;
@@ -79,7 +79,7 @@ public:
     // boneTrafo is set it is the root bone in the skeleton.
     short boneIndex;
 
-    void makeRootBone(const NiSkinData::BoneTrafo *tr)
+    void makeRootBone(const Transformation *tr)
     {
         boneTrafo = tr;
         boneIndex = -1;
@@ -91,18 +91,6 @@ public:
         boneTrafo = &bi.trafo;
         boneIndex = ind;
     }
-
-    void getProperties(const Nif::NiTexturingProperty *&texprop,
-                       const Nif::NiMaterialProperty *&matprop,
-                       const Nif::NiAlphaProperty *&alphaprop,
-                       const Nif::NiVertexColorProperty *&vertprop,
-                       const Nif::NiZBufferProperty *&zprop,
-                       const Nif::NiSpecularProperty *&specprop,
-                       const Nif::NiWireframeProperty *&wireprop,
-                       const Nif::NiStencilProperty *&stencilprop) const;
-
-    Ogre::Matrix4 getLocalTransform() const;
-    Ogre::Matrix4 getWorldTransform() const;
 };
 
 struct NiNode : Node
@@ -132,10 +120,10 @@ struct NiNode : Node
         children.read(nif);
         effects.read(nif);
 
-        // Discard tranformations for the root node, otherwise some meshes
+        // Discard transformations for the root node, otherwise some meshes
         // occasionally get wrong orientation. Only for NiNode-s for now, but
         // can be expanded if needed.
-        if (0 == recIndex)
+        if (0 == recIndex && !Misc::StringUtils::ciEqual(name, "bip01"))
         {
             static_cast<Nif::Node*>(this)->trafo = Nif::Transformation::getIdentity();
         }
@@ -180,6 +168,8 @@ struct NiTriShape : Node
         Node::post(nif);
         data.post(nif);
         skin.post(nif);
+        if (!skin.empty())
+            nif->setUseSkinning(true);
     }
 };
 
@@ -259,6 +249,42 @@ struct NiRotatingParticles : Node
     {
         Node::post(nif);
         data.post(nif);
+    }
+};
+
+// A node used as the base to switch between child nodes, such as for LOD levels.
+struct NiSwitchNode : public NiNode
+{
+    void read(NIFStream *nif)
+    {
+        NiNode::read(nif);
+        nif->getInt(); // unknown
+    }
+};
+
+struct NiLODNode : public NiSwitchNode
+{
+    osg::Vec3f lodCenter;
+
+    struct LODRange
+    {
+        float minRange;
+        float maxRange;
+    };
+    std::vector<LODRange> lodLevels;
+
+    void read(NIFStream *nif)
+    {
+        NiSwitchNode::read(nif);
+        lodCenter = nif->getVector3();
+        unsigned int numLodLevels = nif->getUInt();
+        for (unsigned int i=0; i<numLodLevels; ++i)
+        {
+            LODRange r;
+            r.minRange = nif->getFloat();
+            r.maxRange = nif->getFloat();
+            lodLevels.push_back(r);
+        }
     }
 };
 

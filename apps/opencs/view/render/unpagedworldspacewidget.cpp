@@ -1,12 +1,10 @@
-
 #include "unpagedworldspacewidget.hpp"
 
 #include <sstream>
 
-#include <OgreColourValue.h>
-#include <OgreCamera.h>
+#include <QEvent>
 
-#include <QtGui/qevent.h>
+#include <components/sceneutil/util.hpp>
 
 #include "../../model/doc/document.hpp"
 
@@ -17,15 +15,15 @@
 #include "../widget/scenetooltoggle.hpp"
 #include "../widget/scenetooltoggle2.hpp"
 
-#include "elements.hpp"
+#include "mask.hpp"
 
 void CSVRender::UnpagedWorldspaceWidget::update()
 {
     const CSMWorld::Record<CSMWorld::Cell>& record =
         dynamic_cast<const CSMWorld::Record<CSMWorld::Cell>&> (mCellsModel->getRecord (mCellId));
 
-    Ogre::ColourValue colour;
-    colour.setAsABGR (record.get().mAmbi.mAmbient);
+    osg::Vec4f colour = SceneUtil::colourFromRGB(record.get().mAmbi.mAmbient);
+
     setDefaultAmbient (colour);
 
     /// \todo deal with mSunlight and mFog/mForDensity
@@ -34,7 +32,7 @@ void CSVRender::UnpagedWorldspaceWidget::update()
 }
 
 CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document, QWidget* parent)
-: WorldspaceWidget (document, parent), mCellId (cellId)
+: WorldspaceWidget (document, parent), mDocument(document), mCellId (cellId)
 {
     mCellsModel = &dynamic_cast<CSMWorld::IdTable&> (
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
@@ -49,7 +47,7 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
 
     update();
 
-    mCell.reset (new Cell (document.getData(), getSceneManager(), mCellId, document.getPhysics()));
+    mCell.reset (new Cell (document.getData(), mRootNode, mCellId));
 }
 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,
@@ -91,12 +89,69 @@ bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld:
         return false;
 
     mCellId = data.begin()->getId();
-    mCell.reset (new Cell (getDocument().getData(), getSceneManager(), mCellId, getDocument().getPhysics()));
+
+    mCell.reset (new Cell (getDocument().getData(), mRootNode, mCellId));
 
     update();
     emit cellChanged(*data.begin());
 
     return true;
+}
+
+void CSVRender::UnpagedWorldspaceWidget::clearSelection (int elementMask)
+{
+    mCell->setSelection (elementMask, Cell::Selection_Clear);
+    flagAsModified();
+}
+
+void CSVRender::UnpagedWorldspaceWidget::invertSelection (int elementMask)
+{
+    mCell->setSelection (elementMask, Cell::Selection_Invert);
+    flagAsModified();
+}
+
+void CSVRender::UnpagedWorldspaceWidget::selectAll (int elementMask)
+{
+    mCell->setSelection (elementMask, Cell::Selection_All);
+    flagAsModified();
+}
+
+void CSVRender::UnpagedWorldspaceWidget::selectAllWithSameParentId (int elementMask)
+{
+    mCell->selectAllWithSameParentId (elementMask);
+    flagAsModified();
+}
+
+std::string CSVRender::UnpagedWorldspaceWidget::getCellId (const osg::Vec3f& point) const
+{
+    return mCellId;
+}
+
+CSVRender::Cell* CSVRender::UnpagedWorldspaceWidget::getCell(const osg::Vec3d& point) const
+{
+    return mCell.get();
+}
+
+std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::UnpagedWorldspaceWidget::getSelection (
+    unsigned int elementMask) const
+{
+    return mCell->getSelection (elementMask);
+}
+
+std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::UnpagedWorldspaceWidget::getEdited (
+    unsigned int elementMask) const
+{
+    return mCell->getEdited (elementMask);
+}
+
+void  CSVRender::UnpagedWorldspaceWidget::setSubMode (int subMode, unsigned int elementMask)
+{
+    mCell->setSubMode (subMode, elementMask);
+}
+
+void CSVRender::UnpagedWorldspaceWidget::reset (unsigned int elementMask)
+{
+    mCell->reset (elementMask);
 }
 
 void CSVRender::UnpagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
@@ -153,23 +208,94 @@ void CSVRender::UnpagedWorldspaceWidget::referenceAdded (const QModelIndex& pare
             flagAsModified();
 }
 
+void CSVRender::UnpagedWorldspaceWidget::pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
+
+    int rowStart = -1;
+    int rowEnd = -1;
+
+    if (topLeft.parent().isValid())
+    {
+        rowStart = topLeft.parent().row();
+        rowEnd = bottomRight.parent().row();
+    }
+    else
+    {
+        rowStart = topLeft.row();
+        rowEnd = bottomRight.row();
+    }
+
+    for (int row = rowStart; row <= rowEnd; ++row)
+    {
+        const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
+        if (mCellId == pathgrid.mId)
+        {
+            mCell->pathgridModified();
+            flagAsModified();
+            return;
+        }
+    }
+}
+
+void CSVRender::UnpagedWorldspaceWidget::pathgridAboutToBeRemoved (const QModelIndex& parent, int start, int end)
+{
+    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
+
+    if (!parent.isValid())
+    {
+        // Pathgrid going to be deleted
+        for (int row = start; row <= end; ++row)
+        {
+            const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
+            if (mCellId == pathgrid.mId)
+            {
+                mCell->pathgridRemoved();
+                flagAsModified();
+                return;
+            }
+        }
+    }
+}
+
+void CSVRender::UnpagedWorldspaceWidget::pathgridAdded (const QModelIndex& parent, int start, int end)
+{
+    const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids = mDocument.getData().getPathgrids();
+
+    if (!parent.isValid())
+    {
+        for (int row = start; row <= end; ++row)
+        {
+            const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
+            if (mCellId == pathgrid.mId)
+            {
+                mCell->pathgridModified();
+                flagAsModified();
+                return;
+            }
+        }
+    }
+}
+
 void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
     WorldspaceWidget::addVisibilitySelectorButtons (tool);
-    tool->addButton (Element_Terrain, "Terrain", "", true);
-    tool->addButton (Element_Fog, "Fog");
+    tool->addButton (Button_Terrain, Mask_Terrain, "Terrain", "", true);
+    tool->addButton (Button_Fog, Mask_Fog, "Fog");
 }
 
 std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()
 {
-    Ogre::Vector3 position = getCamera()->getPosition();
+    osg::Vec3d eye, center, up;
+    mView->getCamera()->getViewMatrixAsLookAt(eye, center, up);
+    osg::Vec3d position = eye;
 
     std::ostringstream stream;
 
     stream
         << "player->positionCell "
-        << position.x << ", " << position.y << ", " << position.z
+        << position.x() << ", " << position.y() << ", " << position.z()
         << ", 0, \"" << mCellId << "\"";
 
     return stream.str();

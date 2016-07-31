@@ -1,51 +1,85 @@
 #ifndef COMPONENTS_TERRAIN_MATERIAL_H
 #define COMPONENTS_TERRAIN_MATERIAL_H
 
-#include <OgreMaterial.h>
+#include <osgFX/Technique>
+#include <osgFX/Effect>
 
-#include "storage.hpp"
+#include "defs.hpp"
+
+namespace osg
+{
+    class Texture2D;
+}
+
+namespace Shader
+{
+    class ShaderManager;
+}
 
 namespace Terrain
 {
 
-    class MaterialGenerator
+    struct TextureLayer
+    {
+        osg::ref_ptr<osg::Texture2D> mDiffuseMap;
+        osg::ref_ptr<osg::Texture2D> mNormalMap; // optional
+        bool mParallax;
+        bool mSpecular;
+    };
+
+    class FixedFunctionTechnique : public osgFX::Technique
     {
     public:
-        MaterialGenerator ();
+        FixedFunctionTechnique(
+                const std::vector<TextureLayer>& layers,
+                const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps, int blendmapScale, float layerTileSize);
 
-        void setLayerList (const std::vector<LayerInfo>& layerList) { mLayerList = layerList; }
-        bool hasLayers() { return mLayerList.size(); }
-        void setBlendmapList (const std::vector<Ogre::TexturePtr>& blendmapList) { mBlendmapList = blendmapList; }
-        const std::vector<Ogre::TexturePtr>& getBlendmapList() { return mBlendmapList; }
-        void setCompositeMap (const std::string& name) { mCompositeMap = name; }
+    protected:
+        virtual void define_passes() {}
+    };
 
-        void enableShaders(bool shaders) { mShaders = shaders; }
-        void enableShadows(bool shadows) { mShadows = shadows; }
-        void enableNormalMapping(bool normalMapping) { mNormalMapping = normalMapping; }
-        void enableParallaxMapping(bool parallaxMapping) { mParallaxMapping = parallaxMapping; }
-        void enableSplitShadows(bool splitShadows) { mSplitShadows = splitShadows; }
+    class ShaderTechnique : public osgFX::Technique
+    {
+    public:
+        ShaderTechnique(Shader::ShaderManager& shaderManager, bool forcePerPixelLighting, bool clampLighting,
+                const std::vector<TextureLayer>& layers,
+                const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps, int blendmapScale, float layerTileSize);
 
-        /// Creates a material suitable for displaying a chunk of terrain using alpha-blending.
-        Ogre::MaterialPtr generate ();
+    protected:
+        virtual void define_passes() {}
+    };
 
-        /// Creates a material suitable for displaying a chunk of terrain using a ready-made composite map.
-        Ogre::MaterialPtr generateForCompositeMap ();
+    class Effect : public osgFX::Effect
+    {
+    public:
+        Effect(bool useShaders, bool forcePerPixelLighting, bool clampLighting, Shader::ShaderManager* shaderManager,
+                const std::vector<TextureLayer>& layers,
+                const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps, int blendmapScale, float layerTileSize);
 
-        /// Creates a material suitable for rendering composite maps, i.e. for "baking" several layer textures
-        /// into one. The main difference compared to a normal material is that no shading is applied at this point.
-        Ogre::MaterialPtr generateForCompositeMapRTT ();
+        virtual bool define_techniques();
+
+        virtual const char *effectName() const
+        {
+            return NULL;
+        }
+        virtual const char *effectDescription() const
+        {
+            return NULL;
+        }
+        virtual const char *effectAuthor() const
+        {
+            return NULL;
+        }
 
     private:
-        Ogre::MaterialPtr create (bool renderCompositeMap, bool displayCompositeMap);
-
-        std::vector<LayerInfo> mLayerList;
-        std::vector<Ogre::TexturePtr> mBlendmapList;
-        std::string mCompositeMap;
-        bool mShaders;
-        bool mShadows;
-        bool mSplitShadows;
-        bool mNormalMapping;
-        bool mParallaxMapping;
+        Shader::ShaderManager* mShaderManager;
+        bool mUseShaders;
+        bool mForcePerPixelLighting;
+        bool mClampLighting;
+        std::vector<TextureLayer> mLayers;
+        std::vector<osg::ref_ptr<osg::Texture2D> > mBlendmaps;
+        int mBlendmapScale;
+        float mLayerTileSize;
     };
 
 }

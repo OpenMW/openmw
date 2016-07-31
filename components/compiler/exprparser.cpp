@@ -1,4 +1,3 @@
-
 #include "exprparser.hpp"
 
 #include <stdexcept>
@@ -324,7 +323,7 @@ namespace Compiler
                     mNextOperand = false;
                     mOperands.push_back ('l');
 
-                    return 2;
+                    return true;
                 }
             }
 
@@ -353,7 +352,10 @@ namespace Compiler
             if (extensions->isInstruction (keyword, argumentType, hasExplicit))
             {
                 // pretend this is not a keyword
-                return parseName (loc.mLiteral, loc, scanner);
+                std::string name = loc.mLiteral;
+                if (name.size()>=2 && name[0]=='"' && name[name.size()-1]=='"')
+                    name = name.substr (1, name.size()-2);
+                return parseName (name, loc, scanner);
             }
         }
 
@@ -637,7 +639,8 @@ namespace Compiler
         if (code==Scanner::S_newline)
         {
             // end marker
-            mTokenLoc = loc;
+            if (mTokenLoc.mLiteral.empty())
+                mTokenLoc = loc;
             scanner.putbackSpecial (code, loc);
             return false;
         }
@@ -646,6 +649,13 @@ namespace Compiler
         {
             // unary
             mOperators.push_back ('m');
+            mTokenLoc = loc;
+            return true;
+        }
+
+        if (code ==Scanner::S_plus && mNextOperand)
+        {
+            // Also unary, but +, just ignore it
             mTokenLoc = loc;
             return true;
         }
@@ -780,9 +790,10 @@ namespace Compiler
                     stringParser.setOptional (true);
 
                 if (*iter=='c') stringParser.smashCase();
+                if (*iter=='x') stringParser.discard();
                 scanner.scan (stringParser);
 
-                if (optional && stringParser.isEmpty())
+                if ((optional || *iter=='x') && stringParser.isEmpty())
                     break;
 
                 if (*iter!='x')
@@ -795,6 +806,9 @@ namespace Compiler
                     if (optional)
                         ++optionalCount;
                 }
+                else
+                    getErrorHandler().warning ("Ignoring extra argument",
+                        stringParser.getTokenLoc());
             }
             else if (*iter=='X')
             {
@@ -806,6 +820,8 @@ namespace Compiler
 
                 if (parser.isEmpty())
                     break;
+                else
+                    getErrorHandler().warning("Ignoring extra argument", parser.getTokenLoc());
             }
             else if (*iter=='z')
             {
@@ -816,6 +832,8 @@ namespace Compiler
 
                 if (discardParser.isEmpty())
                     break;
+                else
+                    getErrorHandler().warning("Ignoring extra argument", discardParser.getTokenLoc());
             }
             else if (*iter=='j')
             {
@@ -860,5 +878,10 @@ namespace Compiler
         }
 
         return optionalCount;
+    }
+
+    const TokenLoc& ExprParser::getTokenLoc() const
+    {
+        return mTokenLoc;
     }
 }

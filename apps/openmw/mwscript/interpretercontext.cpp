@@ -1,4 +1,3 @@
-
 #include "interpretercontext.hpp"
 
 #include <cmath>
@@ -139,14 +138,13 @@ namespace MWScript
 
     InterpreterContext::InterpreterContext (
         MWScript::Locals *locals, MWWorld::Ptr reference, const std::string& targetId)
-    : mLocals (locals), mReference (reference),
-      mActivationHandled (false), mTargetId (targetId)
+    : mLocals (locals), mReference (reference), mTargetId (targetId)
     {
         // If we run on a reference (local script, dialogue script or console with object
         // selected), store the ID of that reference store it so it can be inherited by
         // targeted scripts started from this one.
         if (targetId.empty() && !reference.isEmpty())
-            mTargetId = reference.getClass().getId (reference);
+            mTargetId = reference.getCellRef().getRefId();
     }
 
     int InterpreterContext::getLocalShort (int index) const
@@ -200,7 +198,10 @@ namespace MWScript
     void InterpreterContext::messageBox (const std::string& message,
         const std::vector<std::string>& buttons)
     {
-        MWBase::Environment::get().getWindowManager()->messageBox (message, buttons);
+        if (buttons.empty())
+            MWBase::Environment::get().getWindowManager()->messageBox (message);
+        else
+            MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons);
     }
 
     void InterpreterContext::report (const std::string& message)
@@ -267,15 +268,21 @@ namespace MWScript
 
     std::string InterpreterContext::getActionBinding(const std::string& action) const
     {
-        std::vector<int> actions = MWBase::Environment::get().getInputManager()->getActionSorting ();
+        MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
+        std::vector<int> actions = input->getActionKeySorting ();
         for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
         {
-            std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
+            std::string desc = input->getActionDescription (*it);
             if(desc == "")
                 continue;
 
             if(desc == action)
-                return MWBase::Environment::get().getInputManager()->getActionBindingName (*it);
+            {
+                if(input->joystickLastUsed())
+                    return input->getActionControllerBindingName(*it);
+                else
+                    return input->getActionKeyBindingName (*it);
+            }
         }
 
         return "None";
@@ -310,17 +317,19 @@ namespace MWScript
 
     std::string InterpreterContext::getNPCRank() const
     {
-        if (getReferenceImp().getClass().getNpcStats(getReferenceImp()).getFactionRanks().empty())
+        const MWWorld::Ptr& ptr = getReferenceImp();
+        std::string faction = ptr.getClass().getPrimaryFaction(ptr);
+        if (faction.empty())
             throw std::runtime_error("getNPCRank(): NPC is not in a faction");
 
-        const std::map<std::string, int>& ranks = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks();
-        std::map<std::string, int>::const_iterator it = ranks.begin();
+        int rank = ptr.getClass().getPrimaryFactionRank(ptr);
+        if (rank < 0 || rank > 9)
+            throw std::runtime_error("getNPCRank(): invalid rank");
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::ESMStore &store = world->getStore();
-        const ESM::Faction *faction = store.get<ESM::Faction>().find(it->first);
-
-        return faction->mRanks[it->second];
+        const ESM::Faction *fact = store.get<ESM::Faction>().find(faction);
+        return fact->mRanks[rank];
     }
 
     std::string InterpreterContext::getPCName() const
@@ -349,13 +358,12 @@ namespace MWScript
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
 
-        if (getReferenceImp().getClass().getNpcStats(getReferenceImp()).getFactionRanks().empty())
+        std::string factionId = getReferenceImp().getClass().getPrimaryFaction(getReferenceImp());
+        if (factionId.empty())
             throw std::runtime_error("getPCRank(): NPC is not in a faction");
 
-        std::string factionId = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks().begin()->first;
-
         const std::map<std::string, int>& ranks = player.getClass().getNpcStats (player).getFactionRanks();
-        std::map<std::string, int>::const_iterator it = ranks.find(factionId);
+        std::map<std::string, int>::const_iterator it = ranks.find(Misc::StringUtils::lowerCase(factionId));
         int rank = -1;
         if (it != ranks.end())
             rank = it->second;
@@ -379,13 +387,12 @@ namespace MWScript
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
 
-        if (getReferenceImp().getClass().getNpcStats(getReferenceImp()).getFactionRanks().empty())
+        std::string factionId = getReferenceImp().getClass().getPrimaryFaction(getReferenceImp());
+        if (factionId.empty())
             throw std::runtime_error("getPCNextRank(): NPC is not in a faction");
 
-        std::string factionId = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks().begin()->first;
-
         const std::map<std::string, int>& ranks = player.getClass().getNpcStats (player).getFactionRanks();
-        std::map<std::string, int>::const_iterator it = ranks.find(factionId);
+        std::map<std::string, int>::const_iterator it = ranks.find(Misc::StringUtils::lowerCase(factionId));
         int rank = -1;
         if (it != ranks.end())
             rank = it->second;
@@ -466,37 +473,13 @@ namespace MWScript
         for (int i=0; i<3; ++i)
             diff[i] = pos1[i] - pos2[i];
 
-        return std::sqrt (diff[0]*diff[0] + diff[1]*diff[1] + diff[2]*diff[2]);
-    }
-
-    bool InterpreterContext::hasBeenActivated (const MWWorld::Ptr& ptr)
-    {
-        if (!mActivated.isEmpty() && mActivated==ptr)
-        {
-            mActivationHandled = true;
-            return true;
-        }
-
-        return false;
-    }
-
-    bool InterpreterContext::hasActivationBeenHandled() const
-    {
-        return mActivationHandled;
-    }
-
-    void InterpreterContext::activate (const MWWorld::Ptr& ptr)
-    {
-        mActivated = ptr;
-        mActivationHandled = false;
+        return static_cast<float>(std::sqrt(diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2]));
     }
 
     void InterpreterContext::executeActivation(MWWorld::Ptr ptr, MWWorld::Ptr actor)
     {
         boost::shared_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, actor));
         action->execute (actor);
-        if (mActivated == ptr)
-            mActivationHandled = true;
     }
 
     float InterpreterContext::getSecondsPassed() const
@@ -590,9 +573,9 @@ namespace MWScript
         return mTargetId;
     }
 
-    void InterpreterContext::updatePtr(const MWWorld::Ptr& updated)
+    void InterpreterContext::updatePtr(const MWWorld::Ptr& base, const MWWorld::Ptr& updated)
     {
-        if (!mReference.isEmpty())
+        if (!mReference.isEmpty() && base == mReference)
             mReference = updated;
     }
 }

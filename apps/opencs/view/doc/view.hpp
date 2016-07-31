@@ -10,6 +10,7 @@
 
 class QAction;
 class QDockWidget;
+class QScrollArea;
 
 namespace CSMDoc
 {
@@ -19,6 +20,11 @@ namespace CSMDoc
 namespace CSMWorld
 {
     class UniversalId;
+}
+
+namespace CSMPrefs
+{
+    class Setting;
 }
 
 namespace CSVDoc
@@ -42,11 +48,14 @@ namespace CSVDoc
             QAction *mVerify;
             QAction *mShowStatusBar;
             QAction *mStopDebug;
+            QAction *mMerge;
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
             SubViewFactoryManager mSubViewFactory;
             QMainWindow mSubViewWindow;
             GlobalDebugProfileMenu *mGlobalDebugProfileMenu;
+            QScrollArea *mScroll;
+            bool mScrollbarOnly;
 
 
             // not implemented
@@ -79,14 +88,15 @@ namespace CSVDoc
 
             void exitApplication();
 
-            void loadUserSettings();
-
             /// User preference function
             void resizeViewWidth (int width);
 
             /// User preference function
             void resizeViewHeight (int height);
 
+            void updateScrollbar();
+            void updateWidth(bool isGrowLimit, int minSubViewWidth);
+            void createScrollArea();
         public:
 
             View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews);
@@ -109,9 +119,6 @@ namespace CSVDoc
 
             Operations *getOperations() const;
 
-            /// Function called by view manager when user preferences are updated
-            void updateEditorSetting (const QString &, const QString &);
-
         signals:
 
             void newGameRequest();
@@ -124,6 +131,8 @@ namespace CSVDoc
 
             void editSettingsRequest();
 
+            void mergeDocument (CSMDoc::Document *document);
+
         public slots:
 
             void addSubView (const CSMWorld::UniversalId& id, const std::string& hint = "");
@@ -132,14 +141,14 @@ namespace CSVDoc
 
             void abortOperation (int type);
 
-            void updateUserSetting (const QString &, const QStringList &);
-
             void updateTitle();
 
             // called when subviews are added or removed
-            void updateSubViewIndicies (SubView *view = 0);
+            void updateSubViewIndices (SubView *view = NULL);
 
         private slots:
+
+            void settingChanged (const CSMPrefs::Setting *setting);
 
             void newView();
 
@@ -215,6 +224,12 @@ namespace CSVDoc
 
             void addPathgridSubView();
 
+            void addStartScriptsSubView();
+
+            void addSearchSubView();
+
+            void addMetaDataSubView();
+
             void toggleShowStatusBar (bool show);
 
             void loadErrorLog();
@@ -224,6 +239,10 @@ namespace CSVDoc
             void stop();
 
             void closeRequest (SubView *subView);
+
+            void moveScrollBarToEnd(int min, int max);
+
+            void merge();
     };
 }
 

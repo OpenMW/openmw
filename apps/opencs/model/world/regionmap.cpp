@@ -1,4 +1,3 @@
-
 #include "regionmap.hpp"
 
 #include <cmath>
@@ -169,7 +168,7 @@ void CSMWorld::RegionMap::updateRegions (const std::vector<std::string>& regions
 {
     std::vector<std::string> regions2 (regions);
 
-    std::for_each (regions2.begin(), regions2.end(), &Misc::StringUtils::lowerCase);
+    std::for_each (regions2.begin(), regions2.end(), Misc::StringUtils::lowerCaseInPlace);
     std::sort (regions2.begin(), regions2.end());
 
     for (std::map<CellCoordinates, CellDescription>::const_iterator iter (mMap.begin());
@@ -334,9 +333,9 @@ QVariant CSMWorld::RegionMap::data (const QModelIndex& index, int role) const
                 mColours.find (Misc::StringUtils::lowerCase (cell->second.mRegion));
 
             if (iter!=mColours.end())
-                return QBrush (
-                    QColor (iter->second>>24, (iter->second>>16) & 255, (iter->second>>8) & 255,
-                    iter->second & 255));
+                return QBrush (QColor (iter->second & 0xff, 
+                                       (iter->second >> 8) & 0xff, 
+                                       (iter->second >> 16) & 0xff));
 
             if (cell->second.mRegion.empty())
                 return QBrush (Qt::Dense6Pattern); // no region

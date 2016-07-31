@@ -6,8 +6,8 @@
 
         <Widget type="Widget" skin="MW_Box" position="8 8 381 381" align="Stretch" name="Client"/>
 
-        <Widget type="Widget" position="13 13 357 371" align="Left Top Stretch">
-            <Widget type="BookPage" skin="MW_BookPage" position="0 0 357 371" name="History" align="Left Top Stretch">
+        <Widget type="Widget" position="15 15 364 370" align="Left Top Stretch">
+            <Widget type="BookPage" skin="MW_BookPage" position="0 0 364 370" name="History" align="Left Top Stretch">
             </Widget>
         </Widget>
 

@@ -4,16 +4,9 @@
 #include <memory>
 
 #include <stdexcept>
+#include <sstream>
 
-extern "C" {
-#ifndef HAVE_LIBSWRESAMPLE
-// FIXME: remove this section once libswresample is packaged for Debian
-int  swr_init(AVAudioResampleContext *avr);
-void  swr_free(AVAudioResampleContext **avr);
-int swr_convert( AVAudioResampleContext *avr, uint8_t** output, int out_samples, const uint8_t** input, int in_samples);
-AVAudioResampleContext * swr_alloc_set_opts( AVAudioResampleContext *avr, int64_t out_ch_layout, AVSampleFormat out_fmt, int out_rate, int64_t in_ch_layout, AVSampleFormat in_fmt, int in_rate, int o, void* l);
-#endif
-}
+#include <components/vfs/manager.hpp>
 
 namespace MWSound
 {
@@ -25,33 +18,51 @@ void FFmpeg_Decoder::fail(const std::string &msg)
 
 int FFmpeg_Decoder::readPacket(void *user_data, uint8_t *buf, int buf_size)
 {
-    Ogre::DataStreamPtr stream = static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
-    return stream->read(buf, buf_size);
+    try
+    {
+        std::istream& stream = *static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
+        stream.clear();
+        stream.read((char*)buf, buf_size);
+        return stream.gcount();
+    }
+    catch (std::exception& )
+    {
+        return 0;
+    }
 }
 
-int FFmpeg_Decoder::writePacket(void *user_data, uint8_t *buf, int buf_size)
+int FFmpeg_Decoder::writePacket(void *, uint8_t *, int)
 {
-    Ogre::DataStreamPtr stream = static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
-    return stream->write(buf, buf_size);
+    throw std::runtime_error("can't write to read-only stream");
 }
 
 int64_t FFmpeg_Decoder::seek(void *user_data, int64_t offset, int whence)
 {
-    Ogre::DataStreamPtr stream = static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
+    std::istream& stream = *static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
 
     whence &= ~AVSEEK_FORCE;
+
+    stream.clear();
+
     if(whence == AVSEEK_SIZE)
-        return stream->size();
+    {
+        size_t prev = stream.tellg();
+        stream.seekg(0, std::ios_base::end);
+        size_t size = stream.tellg();
+        stream.seekg(prev, std::ios_base::beg);
+        return size;
+    }
+
     if(whence == SEEK_SET)
-        stream->seek(offset);
+        stream.seekg(offset, std::ios_base::beg);
     else if(whence == SEEK_CUR)
-        stream->seek(stream->tell()+offset);
+        stream.seekg(offset, std::ios_base::cur);
     else if(whence == SEEK_END)
-        stream->seek(stream->size()+offset);
+        stream.seekg(offset, std::ios_base::end);
     else
         return -1;
 
-    return stream->tell();
+    return stream.tellg();
 }
 
 
@@ -172,7 +183,7 @@ size_t FFmpeg_Decoder::readAVAudioData(void *data, size_t length)
 void FFmpeg_Decoder::open(const std::string &fname)
 {
     close();
-    mDataStream = mResourceMgr.openResource(fname);
+    mDataStream = mResourceMgr->get(fname);
 
     if((mFormatCtx=avformat_alloc_context()) == NULL)
         fail("Failed to allocate context");
@@ -275,7 +286,7 @@ void FFmpeg_Decoder::close()
         avformat_close_input(&mFormatCtx);
     }
 
-    mDataStream.setNull();
+    mDataStream.reset();
 }
 
 std::string FFmpeg_Decoder::getName()
@@ -378,16 +389,6 @@ void FFmpeg_Decoder::readAll(std::vector<char> &output)
     }
 }
 
-void FFmpeg_Decoder::rewind()
-{
-    int stream_idx = mStream - mFormatCtx->streams;
-    if(av_seek_frame(mFormatCtx, stream_idx, 0, 0) < 0)
-        fail("Failed to seek in audio stream");
-    av_free_packet(&mPacket);
-    mFrameSize = mFramePos = 0;
-    mNextPts = 0.0;
-}
-
 size_t FFmpeg_Decoder::getSampleOffset()
 {
     int delay = (mFrameSize-mFramePos) / av_get_channel_layout_nb_channels(mOutputChannelLayout) /
@@ -395,8 +396,9 @@ size_t FFmpeg_Decoder::getSampleOffset()
     return (int)(mNextPts*(*mStream)->codec->sample_rate) - delay;
 }
 
-FFmpeg_Decoder::FFmpeg_Decoder()
-  : mFormatCtx(NULL)
+FFmpeg_Decoder::FFmpeg_Decoder(const VFS::Manager* vfs)
+  : Sound_Decoder(vfs)
+  , mFormatCtx(NULL)
   , mStream(NULL)
   , mFrame(NULL)
   , mFrameSize(0)

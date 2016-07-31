@@ -9,6 +9,10 @@
 
 #include <QColor>
 
+#include <components/esm/loadbody.hpp>
+#include <components/esm/loadskil.hpp>
+#include <components/esm/loadrace.hpp>
+
 #include "columnbase.hpp"
 #include "columns.hpp"
 #include "info.hpp"
@@ -43,7 +47,7 @@ namespace CSMWorld
     struct StringIdColumn : public Column<ESXRecordT>
     {
         StringIdColumn (bool hidden = false)
-        : Column<ESXRecordT> (Columns::ColumnId_Id, ColumnBase::Display_String,
+        : Column<ESXRecordT> (Columns::ColumnId_Id, ColumnBase::Display_Id,
             hidden ? 0 : ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue)
         {}
 
@@ -467,8 +471,9 @@ namespace CSMWorld
         int mMask;
         bool mInverted;
 
-        FlagColumn (int columnId, int mask, bool inverted = false)
-        : Column<ESXRecordT> (columnId, ColumnBase::Display_Boolean), mMask (mask),
+        FlagColumn (int columnId, int mask,
+                int flags = ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, bool inverted = false)
+        : Column<ESXRecordT> (columnId, ColumnBase::Display_Boolean, flags), mMask (mask),
           mInverted (inverted)
         {}
 
@@ -693,7 +698,7 @@ namespace CSMWorld
 
             QColor colour = data.value<QColor>();
 
-            record2.mMapColor = colour.rgb() & 0xffffff;
+            record2.mMapColor = (colour.blue() << 16) | (colour.green() << 8) | colour.red();
 
             record.setModified (record2);
         }
@@ -708,7 +713,7 @@ namespace CSMWorld
     struct SleepListColumn : public Column<ESXRecordT>
     {
         SleepListColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_SleepEncounter, ColumnBase::Display_String)
+        : Column<ESXRecordT> (Columns::ColumnId_SleepEncounter, ColumnBase::Display_CreatureLevelledList)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -734,7 +739,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct TextureColumn : public Column<ESXRecordT>
     {
-        TextureColumn() : Column<ESXRecordT> (Columns::ColumnId_Texture, ColumnBase::Display_String) {}
+        TextureColumn() : Column<ESXRecordT> (Columns::ColumnId_Texture, ColumnBase::Display_Texture) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -818,7 +823,7 @@ namespace CSMWorld
 
         ScriptColumn (Type type)
         : Column<ESXRecordT> (Columns::ColumnId_ScriptText,
-            type==Type_File ? ColumnBase::Display_Script : ColumnBase::Display_ScriptLines,
+            type==Type_File ? ColumnBase::Display_ScriptFile : ColumnBase::Display_ScriptLines,
             type==Type_File ? 0 : ColumnBase::Flag_Dialogue)
         {}
 
@@ -870,7 +875,13 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct CellColumn : public Column<ESXRecordT>
     {
-        CellColumn() : Column<ESXRecordT> (Columns::ColumnId_Cell, ColumnBase::Display_Cell) {}
+        bool mBlocked;
+
+        /// \param blocked Do not allow user-modification
+        CellColumn (bool blocked = false)
+        : Column<ESXRecordT> (Columns::ColumnId_Cell, ColumnBase::Display_Cell),
+          mBlocked (blocked)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -893,7 +904,39 @@ namespace CSMWorld
 
         virtual bool isUserEditable() const
         {
+            return !mBlocked;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct OriginalCellColumn : public Column<ESXRecordT>
+    {
+        OriginalCellColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_OriginalCell, ColumnBase::Display_Cell)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mOriginalCell.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mOriginalCell = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
             return true;
+        }
+
+        virtual bool isUserEditable() const
+        {
+            return false;
         }
     };
 
@@ -1053,13 +1096,13 @@ namespace CSMWorld
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
-            return record.get().mCharge;
+            return record.get().mChargeInt;
         }
 
         virtual void set (Record<ESXRecordT>& record, const QVariant& data)
         {
             ESXRecordT record2 = record.get();
-            record2.mCharge = data.toInt();
+            record2.mChargeInt = data.toInt();
             record.setModified (record2);
         }
 
@@ -1230,7 +1273,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct TrapColumn : public Column<ESXRecordT>
     {
-        TrapColumn() : Column<ESXRecordT> (Columns::ColumnId_Trap, ColumnBase::Display_String) {}
+        TrapColumn() : Column<ESXRecordT> (Columns::ColumnId_Trap, ColumnBase::Display_Spell) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1255,7 +1298,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct FilterColumn : public Column<ESXRecordT>
     {
-        FilterColumn() : Column<ESXRecordT> (Columns::ColumnId_Filter, ColumnBase::Display_String) {}
+        FilterColumn() : Column<ESXRecordT> (Columns::ColumnId_Filter, ColumnBase::Display_Filter) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1276,7 +1319,6 @@ namespace CSMWorld
             return true;
         }
     };
-
 
     template<typename ESXRecordT>
     struct PosColumn : public Column<ESXRecordT>
@@ -1459,7 +1501,10 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct TopicColumn : public Column<ESXRecordT>
     {
-        TopicColumn (bool journal) : Column<ESXRecordT> (journal ? Columns::ColumnId_Journal : Columns::ColumnId_Topic, ColumnBase::Display_String) {}
+        TopicColumn (bool journal) 
+        : Column<ESXRecordT> (journal ? Columns::ColumnId_Journal : Columns::ColumnId_Topic,
+                              journal ? ColumnBase::Display_Journal : ColumnBase::Display_Topic) 
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1489,7 +1534,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct ActorColumn : public Column<ESXRecordT>
     {
-        ActorColumn() : Column<ESXRecordT> (Columns::ColumnId_Actor, ColumnBase::Display_String) {}
+        ActorColumn() : Column<ESXRecordT> (Columns::ColumnId_Actor, ColumnBase::Display_Npc) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1792,7 +1837,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct ModelColumn : public Column<ESXRecordT>
     {
-        ModelColumn() : Column<ESXRecordT> (Columns::ColumnId_Model, ColumnBase::Display_String) {}
+        ModelColumn() : Column<ESXRecordT> (Columns::ColumnId_Model, ColumnBase::Display_Mesh) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1870,8 +1915,8 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct MeshTypeColumn : public Column<ESXRecordT>
     {
-        MeshTypeColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_MeshType, ColumnBase::Display_MeshType)
+        MeshTypeColumn(int flags = ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue)
+        : Column<ESXRecordT> (Columns::ColumnId_MeshType, ColumnBase::Display_MeshType, flags)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -2120,7 +2165,9 @@ namespace CSMWorld
     struct EffectTextureColumn : public Column<ESXRecordT>
     {
         EffectTextureColumn (Columns::ColumnId columnId)
-        : Column<ESXRecordT> (columnId, ColumnBase::Display_Texture)
+        : Column<ESXRecordT> (columnId, 
+                              columnId == Columns::ColumnId_Particle ? ColumnBase::Display_Texture 
+                                                                     : ColumnBase::Display_Icon)
         {
             assert (this->mColumnId==Columns::ColumnId_Icon ||
                 this->mColumnId==Columns::ColumnId_Particle);
@@ -2264,6 +2311,89 @@ namespace CSMWorld
         {
             return true;
         }
+    };
+
+    template<typename ESXRecordT>
+    struct FormatColumn : public Column<ESXRecordT>
+    {
+        FormatColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_FileFormat, ColumnBase::Display_Integer)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mFormat;
+        }
+
+        virtual bool isEditable() const
+        {
+            return false;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct AuthorColumn : public Column<ESXRecordT>
+    {
+        AuthorColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_Author, ColumnBase::Display_String32)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mAuthor.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mAuthor = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct FileDescriptionColumn : public Column<ESXRecordT>
+    {
+        FileDescriptionColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_FileDescription, ColumnBase::Display_LongString256)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mDescription.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mDescription = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+    
+    struct BodyPartRaceColumn : public RaceColumn<ESM::BodyPart>
+    {
+        const MeshTypeColumn<ESM::BodyPart> *mMeshType;
+
+        BodyPartRaceColumn(const MeshTypeColumn<ESM::BodyPart> *meshType);
+
+        virtual QVariant get(const Record<ESM::BodyPart> &record) const;
+        virtual void set(Record<ESM::BodyPart> &record, const QVariant &data);
+        virtual bool isEditable() const;
     };
 }
 

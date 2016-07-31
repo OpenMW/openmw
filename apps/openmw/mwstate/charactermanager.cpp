@@ -1,4 +1,3 @@
-
 #include "charactermanager.hpp"
 
 #include <sstream>
@@ -33,11 +32,8 @@ MWState::CharacterManager::CharacterManager (const boost::filesystem::path& save
     }
 }
 
-MWState::Character *MWState::CharacterManager::getCurrentCharacter (bool create, const std::string& name)
+MWState::Character *MWState::CharacterManager::getCurrentCharacter ()
 {
-    if (!mCurrent && create)
-        createCharacter(name);
-
     return mCurrent;
 }
 
@@ -57,7 +53,7 @@ void MWState::CharacterManager::deleteSlot(const MWState::Character *character, 
     }
 }
 
-void MWState::CharacterManager::createCharacter(const std::string& name)
+MWState::Character* MWState::CharacterManager::createCharacter(const std::string& name)
 {
     std::ostringstream stream;
 
@@ -83,8 +79,7 @@ void MWState::CharacterManager::createCharacter(const std::string& name)
     }
 
     mCharacters.push_back (Character (path, mGame));
-
-    mCurrent = &mCharacters.back();
+    return &mCharacters.back();
 }
 
 std::list<MWState::Character>::iterator MWState::CharacterManager::findCharacter(const MWState::Character* character)
@@ -102,15 +97,16 @@ std::list<MWState::Character>::iterator MWState::CharacterManager::findCharacter
 
 void MWState::CharacterManager::setCurrentCharacter (const Character *character)
 {
-    std::list<Character>::iterator it = findCharacter(character);
+    if (!character)
+        mCurrent = NULL;
+    else
+    {
+        std::list<Character>::iterator it = findCharacter(character);
 
-    mCurrent = &*it;
+        mCurrent = &*it;
+    }
 }
 
-void MWState::CharacterManager::clearCurrentCharacter()
-{
-    mCurrent = 0;
-}
 
 std::list<MWState::Character>::const_iterator MWState::CharacterManager::begin() const
 {

@@ -4,28 +4,13 @@
 #include "esmwriter.hpp"
 #include "defs.hpp"
 
+#include <iostream>
+
 namespace ESM
 {
-
-struct SCHD
-{
-    NAME32              mName;
-    Script::SCHDstruct  mData;
-};
-
     unsigned int Script::sRecordId = REC_SCPT;
 
-void Script::load(ESMReader &esm)
-{
-    SCHD data;
-    esm.getHNT(data, "SCHD", 52);
-    mData = data.mData;
-    mId = data.mName.toString();
-
-    mVarNames.clear();
-
-    // List of local variables
-    if (esm.isNextSub("SCVR"))
+    void Script::loadSCVR(ESMReader &esm)
     {
         int s = mData.mStringTableSize;
 
@@ -72,58 +57,90 @@ void Script::load(ESMReader &esm)
         }
     }
 
-    // Script mData
-    if (esm.isNextSub("SCDT"))
+    void Script::load(ESMReader &esm, bool &isDeleted)
     {
-        mScriptData.resize(mData.mScriptDataSize);
-        esm.getHExact(&mScriptData[0], mScriptData.size());
-    }
+        isDeleted = false;
 
-    // Script text
-    mScriptText = esm.getHNOString("SCTX");
+        mVarNames.clear();
 
-    // NOTE: A minor hack/workaround...
-    //
-    // MAO_Containers.esp from Morrowind Acoustic Overhaul has SCVR records
-    // at the end (see Bug #1849). Since OpenMW does not use SCVR subrecords
-    // for variable names just skip these as a quick fix.  An alternative
-    // solution would be to decode and validate SCVR subrecords even if they
-    // appear here.
-    if (esm.isNextSub("SCVR")) {
-        esm.skipHSub();
-    }
-}
-void Script::save(ESMWriter &esm) const
-{
-    std::string varNameString;
-    if (!mVarNames.empty())
-        for (std::vector<std::string>::const_iterator it = mVarNames.begin(); it != mVarNames.end(); ++it)
-            varNameString.append(*it);
-
-    SCHD data;
-    memset(&data, 0, sizeof(data));
-
-    data.mData = mData;
-    memcpy(data.mName.name, mId.c_str(), mId.size());
-
-    esm.writeHNT("SCHD", data, 52);
-
-    if (!mVarNames.empty())
-    {
-        esm.startSubRecord("SCVR");
-        for (std::vector<std::string>::const_iterator it = mVarNames.begin(); it != mVarNames.end(); ++it)
+        bool hasHeader = false;
+        while (esm.hasMoreSubs())
         {
-            esm.writeHCString(*it);
+            esm.getSubName();
+            switch (esm.retSubName().intval)
+            {
+                case ESM::FourCC<'S','C','H','D'>::value:
+                {
+                    SCHD data;
+                    esm.getHT(data, 52);
+                    mData = data.mData;
+                    mId = data.mName.toString();
+                    hasHeader = true;
+                    break;
+                }
+                case ESM::FourCC<'S','C','V','R'>::value:
+                    // list of local variables
+                    loadSCVR(esm);
+                    break;
+                case ESM::FourCC<'S','C','D','T'>::value:
+                    // compiled script
+                    mScriptData.resize(mData.mScriptDataSize);
+                    esm.getHExact(&mScriptData[0], mScriptData.size());
+                    break;
+                case ESM::FourCC<'S','C','T','X'>::value:
+                    mScriptText = esm.getHString();
+                    break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+                    break;
+            }
         }
-        esm.endRecord("SCVR");
+
+        if (!hasHeader)
+            esm.fail("Missing SCHD subrecord");
     }
 
-    esm.startSubRecord("SCDT");
-    esm.write(reinterpret_cast<const char * >(&mScriptData[0]), mData.mScriptDataSize);
-    esm.endRecord("SCDT");
+    void Script::save(ESMWriter &esm, bool isDeleted) const
+    {
+        std::string varNameString;
+        if (!mVarNames.empty())
+            for (std::vector<std::string>::const_iterator it = mVarNames.begin(); it != mVarNames.end(); ++it)
+                varNameString.append(*it);
 
-    esm.writeHNOString("SCTX", mScriptText);
-}
+        SCHD data;
+        memset(&data, 0, sizeof(data));
+
+        data.mData = mData;
+        data.mName.assign(mId);
+
+        esm.writeHNT("SCHD", data, 52);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
+        if (!mVarNames.empty())
+        {
+            esm.startSubRecord("SCVR");
+            for (std::vector<std::string>::const_iterator it = mVarNames.begin(); it != mVarNames.end(); ++it)
+            {
+                esm.writeHCString(*it);
+            }
+            esm.endRecord("SCVR");
+        }
+
+        esm.startSubRecord("SCDT");
+        esm.write(reinterpret_cast<const char * >(&mScriptData[0]), mData.mScriptDataSize);
+        esm.endRecord("SCDT");
+
+        esm.writeHNOString("SCTX", mScriptText);
+    }
 
     void Script::blank()
     {

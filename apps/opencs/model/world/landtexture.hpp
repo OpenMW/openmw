@@ -7,15 +7,12 @@
 
 namespace CSMWorld
 {
-    /// \brief Wrapper for LandTexture record. Encodes mIndex and the plugin index (obtained from ESMReader)
-    /// in the ID.
-    ///
-    /// \attention The mId field of the ESM::LandTexture struct is not used.
+    /// \brief Wrapper for LandTexture record, providing info which plugin the LandTexture was loaded from.
     struct LandTexture : public ESM::LandTexture
     {
-        std::string mId;
+        int mPluginIndex;
 
-        void load (ESM::ESMReader &esm);
+        void load (ESM::ESMReader &esm, bool &isDeleted);
     };
 }
 

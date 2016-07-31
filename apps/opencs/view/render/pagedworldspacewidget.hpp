@@ -11,6 +11,7 @@
 namespace CSVWidget
 {
    class SceneToolToggle;
+   class SceneToolToggle2;
 }
 
 namespace CSVRender
@@ -26,10 +27,8 @@ namespace CSVRender
             CSMWorld::CellSelection mSelection;
             std::map<CSMWorld::CellCoordinates, Cell *> mCells;
             std::string mWorldspace;
-            CSVWidget::SceneToolToggle *mControlElements;
+            CSVWidget::SceneToolToggle2 *mControlElements;
             bool mDisplayCellCoord;
-            std::map<CSMWorld::CellCoordinates, TextOverlay *> mTextOverlays;
-            OverlayMask *mOverlayMask;
 
         private:
 
@@ -53,7 +52,27 @@ namespace CSVRender
 
             virtual void referenceAdded (const QModelIndex& index, int start, int end);
 
+            virtual void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            virtual void pathgridAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+            virtual void pathgridAdded (const QModelIndex& parent, int start, int end);
+
             virtual std::string getStartupInstruction();
+
+            /// \note Does not update the view or any cell marker
+            void addCellToScene (const CSMWorld::CellCoordinates& coordinates);
+
+            /// \note Does not update the view or any cell marker
+            ///
+            /// \note Calling this function for a cell that is not in the selection is a no-op.
+            void removeCellFromScene (const CSMWorld::CellCoordinates& coordinates);
+
+            /// \note Does not update the view or any cell marker
+            void addCellSelection (int x, int y);
+
+            /// \note Does not update the view or any cell marker
+            void moveCellSelection (int x, int y);
 
         public:
 
@@ -68,6 +87,8 @@ namespace CSVRender
 
             void setCellSelection(const CSMWorld::CellSelection& selection);
 
+            const CSMWorld::CellSelection& getCellSelection() const;
+
             /// \return Drop handled?
             virtual bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
                 DropType type);
@@ -76,10 +97,40 @@ namespace CSVRender
 
             /// \attention The created tool is not added to the toolbar (via addTool). Doing
             /// that is the responsibility of the calling function.
-            virtual CSVWidget::SceneToolToggle *makeControlVisibilitySelector (
+            virtual CSVWidget::SceneToolToggle2 *makeControlVisibilitySelector (
                 CSVWidget::SceneToolbar *parent);
 
             virtual unsigned int getVisibilityMask() const;
+
+            /// \param elementMask Elements to be affected by the clear operation
+            virtual void clearSelection (int elementMask);
+
+            /// \param elementMask Elements to be affected by the select operation
+            virtual void invertSelection (int elementMask);
+
+            /// \param elementMask Elements to be affected by the select operation
+            virtual void selectAll (int elementMask);
+
+            // Select everything that references the same ID as at least one of the elements
+            // already selected
+            //
+            /// \param elementMask Elements to be affected by the select operation
+            virtual void selectAllWithSameParentId (int elementMask);
+
+            virtual std::string getCellId (const osg::Vec3f& point) const;
+
+            virtual Cell* getCell(const osg::Vec3d& point) const;
+
+            virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
+                const;
+
+            virtual std::vector<osg::ref_ptr<TagBase> > getEdited (unsigned int elementMask)
+                const;
+
+            virtual void setSubMode (int subMode, unsigned int elementMask);
+
+            /// Erase all overrides and restore the visual representation to its true state.
+            virtual void reset (unsigned int elementMask);
 
         protected:
 
@@ -87,13 +138,7 @@ namespace CSVRender
 
             virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
 
-            virtual void updateOverlay();
-
-            virtual void mousePressEvent (QMouseEvent *event);
-
-            virtual void mouseReleaseEvent (QMouseEvent *event);
-
-            virtual void mouseDoubleClickEvent (QMouseEvent *event);
+            virtual void handleMouseClick (const WorldspaceHitResult& hit, const std::string& button, bool shift);
 
         signals:
 

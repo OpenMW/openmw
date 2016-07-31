@@ -179,7 +179,7 @@ CSMWorld::UniversalId CSMWorld::TableMimeData::returnMatching (CSMWorld::Univers
         }
     }
 
-    throw std::runtime_error ("TableMimeData object does not hold object of the seeked type");
+    throw std::runtime_error ("TableMimeData object does not hold object of the sought type");
 }
 
 CSMWorld::UniversalId CSMWorld::TableMimeData::returnMatching (CSMWorld::ColumnBase::Display type) const
@@ -201,7 +201,7 @@ CSMWorld::UniversalId CSMWorld::TableMimeData::returnMatching (CSMWorld::ColumnB
         }
     }
 
-    throw std::runtime_error ("TableMimeData object does not hold object of the seeked type");
+    throw std::runtime_error ("TableMimeData object does not hold object of the sought type");
 }
 
 bool CSMWorld::TableMimeData::fromDocument (const CSMDoc::Document& document) const
@@ -264,6 +264,8 @@ namespace
         { CSMWorld::UniversalId::Type_Texture, CSMWorld::ColumnBase::Display_Texture },
         { CSMWorld::UniversalId::Type_Video, CSMWorld::ColumnBase::Display_Video },
         { CSMWorld::UniversalId::Type_Global, CSMWorld::ColumnBase::Display_GlobalVariable },
+        { CSMWorld::UniversalId::Type_BodyPart, CSMWorld::ColumnBase::Display_BodyPart },
+        { CSMWorld::UniversalId::Type_Enchantment, CSMWorld::ColumnBase::Display_Enchantment },
 
         { CSMWorld::UniversalId::Type_None, CSMWorld::ColumnBase::Display_None } // end marker
     };

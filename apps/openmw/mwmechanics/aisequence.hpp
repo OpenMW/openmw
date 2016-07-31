@@ -4,7 +4,6 @@
 #include <list>
 
 #include <components/esm/loadnpc.hpp>
-//#include "aistate.hpp"
 
 namespace MWWorld
 {
@@ -15,7 +14,7 @@ namespace ESM
 {
     namespace AiSequence
     {
-        class AiSequence;
+        struct AiSequence;
     }
 }
 
@@ -24,6 +23,7 @@ namespace ESM
 namespace MWMechanics
 {
     class AiPackage;
+    class CharacterController;
     
     template< class Base > class DerivedClassStorage;
     struct AiTemporaryBase;
@@ -38,6 +38,9 @@ namespace MWMechanics
 
             ///Finished with top AIPackage, set for one frame
             bool mDone;
+
+            ///Does this AI sequence repeat (repeating of Wander packages handled separately)
+            bool mRepeat;
 
             ///Copy AiSequence
             void copy (const AiSequence& sequence);
@@ -95,7 +98,10 @@ namespace MWMechanics
             void stopPursuit();
 
             /// Execute current package, switching if needed.
-            void execute (const MWWorld::Ptr& actor, MWMechanics::AiState& state, float duration);
+            void execute (const MWWorld::Ptr& actor, CharacterController& characterController, MWMechanics::AiState& state, float duration);
+
+            /// Simulate the passing of time using the currently active AI package
+            void fastForward(const MWWorld::Ptr &actor, AiState &state);
 
             /// Remove all packages.
             void clear();

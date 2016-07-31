@@ -3,21 +3,18 @@
 
 #include <string>
 
-#include <OgreVector3.h>
+#include <osg/ref_ptr>
+#include <osg/PositionAttitudeTransform>
 
 #include <components/esm/effectlist.hpp>
-#include <components/nifogre/ogrenifloader.hpp>
 
 #include "../mwbase/soundmanager.hpp"
 
 #include "ptr.hpp"
 
-namespace OEngine
+namespace MWPhysics
 {
-namespace Physic
-{
-    class PhysicEngine;
-}
+    class PhysicsSystem;
 }
 
 namespace Loading
@@ -25,9 +22,21 @@ namespace Loading
     class Listener;
 }
 
-namespace Ogre
+namespace osg
 {
-    class SceneManager;
+    class Group;
+    class Quat;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
+}
+
+namespace MWRender
+{
+    class EffectAnimationTime;
+    class RenderingManager;
 }
 
 namespace MWWorld
@@ -36,16 +45,16 @@ namespace MWWorld
     class ProjectileManager
     {
     public:
-        ProjectileManager (Ogre::SceneManager* sceneMgr,
-                OEngine::Physic::PhysicEngine& engine);
+        ProjectileManager (osg::Group* parent, Resource::ResourceSystem* resourceSystem,
+                MWRender::RenderingManager* rendering, MWPhysics::PhysicsSystem* physics);
 
         /// If caster is an actor, the actor's facing orientation is used. Otherwise fallbackDirection is used.
         void launchMagicBolt (const std::string& model, const std::string &sound, const std::string &spellId,
                                      float speed, bool stack, const ESM::EffectList& effects,
-                                       const MWWorld::Ptr& caster, const std::string& sourceName, const Ogre::Vector3& fallbackDirection);
+                                       const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection);
 
-        void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
-                                       const Ogre::Vector3& pos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed);
+        void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
+                                       const osg::Vec3f& pos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength);
 
         void update(float dt);
 
@@ -53,26 +62,27 @@ namespace MWWorld
         void clear();
 
         void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
-        bool readRecord (ESM::ESMReader& reader, int32_t type);
+        bool readRecord (ESM::ESMReader& reader, uint32_t type);
         int countSavedGameRecords() const;
 
     private:
-        OEngine::Physic::PhysicEngine& mPhysEngine;
-        Ogre::SceneManager* mSceneMgr;
+        osg::ref_ptr<osg::Group> mParent;
+        Resource::ResourceSystem* mResourceSystem;
+        MWRender::RenderingManager* mRendering;
+        MWPhysics::PhysicsSystem* mPhysics;
 
         struct State
         {
-            NifOgre::ObjectScenePtr mObject;
-            Ogre::SceneNode* mNode;
+            osg::ref_ptr<osg::PositionAttitudeTransform> mNode;
+            boost::shared_ptr<MWRender::EffectAnimationTime> mEffectAnimationTime;
 
             int mActorId;
 
-            // actorId doesn't work for non-actors, so we also keep track of the Ogre-handle.
-            // For non-actors, the caster ptr is mainly needed to prevent the projectile
-            // from colliding with its caster.
             // TODO: this will break when the game is saved and reloaded, since there is currently
             // no way to write identifiers for non-actors to a savegame.
-            std::string mCasterHandle;
+            MWWorld::Ptr mCasterHandle;
+
+            MWWorld::Ptr getCaster();
 
             // MW-id of this projectile
             std::string mId;
@@ -100,7 +110,8 @@ namespace MWWorld
             // RefID of the bow or crossbow the actor was using when this projectile was fired (may be empty)
             std::string mBowId;
 
-            Ogre::Vector3 mVelocity;
+            osg::Vec3f mVelocity;
+            float mAttackStrength;
         };
 
         std::vector<MagicBoltState> mMagicBolts;
@@ -109,8 +120,11 @@ namespace MWWorld
         void moveProjectiles(float dt);
         void moveMagicBolts(float dt);
 
-        void createModel (State& state, const std::string& model);
-        void update (NifOgre::ObjectScenePtr object, float duration);
+        void createModel (State& state, const std::string& model, const osg::Vec3f& pos, const osg::Quat& orient, bool rotate);
+        void update (State& state, float duration);
+
+        void operator=(const ProjectileManager&);
+        ProjectileManager(const ProjectileManager&);
     };
 
 }

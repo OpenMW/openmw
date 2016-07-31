@@ -3,6 +3,8 @@
 
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/files/escape.hpp>
+#include <components/fallback/validate.hpp>
 
 #include <SDL_messagebox.h>
 #include <SDL_main.h>
@@ -14,22 +16,25 @@
 
 #if defined(_WIN32)
 // For OutputDebugString
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#endif
+#include <windows.h>
 // makes __argc and __argv available on windows
 #include <cstdlib>
 #endif
 
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#if (defined(__APPLE__) || (defined(__linux)  &&  !defined(ANDROID)) || (defined(__unix) &&  !defined(ANDROID)) || defined(__posix))
+    #define USE_CRASH_CATCHER 1
+#else
+    #define USE_CRASH_CATCHER 0
+#endif
+
+#if USE_CRASH_CATCHER
 #include <csignal>
 extern int cc_install_handlers(int argc, char **argv, int num_signals, int *sigs, const char *logfile, int (*user_info)(char*, char*));
 extern int is_debugger_attached(void);
-#endif
-
-// for Ogre::macBundlePath
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-#include <OSX/macUtils.h>
 #endif
 
 #include <boost/version.hpp>
@@ -49,39 +54,8 @@ inline boost::filesystem::path lexical_cast<boost::filesystem::path, std::string
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
 
-struct FallbackMap {
-    std::map<std::string,std::string> mMap;
-};
 
-void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap*, int)
-{
-    if(v.empty())
-    {
-        v = boost::any(FallbackMap());
-    }
-
-    FallbackMap *map = boost::any_cast<FallbackMap>(&v);
-
-    for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); ++it)
-    {
-        int sep = it->find(",");
-        if(sep < 1 || sep == (int)it->length()-1)
-#if (BOOST_VERSION < 104200)
-            throw boost::program_options::validation_error("invalid value");
-#else
-            throw boost::program_options::validation_error(boost::program_options::validation_error::invalid_option_value);
-#endif
-
-        std::string key(it->substr(0,sep));
-        std::string value(it->substr(sep+1));
-
-        if(map->mMap.find(key) == map->mMap.end())
-        {
-            map->mMap.insert(std::make_pair (key,value));
-        }
-    }
-}
-
+using namespace Fallback;
 
 /**
  * \brief Parses application command line and calls \ref Cfg::ConfigurationManager
@@ -103,22 +77,22 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     desc.add_options()
         ("help", "print help message")
         ("version", "print version information and quit")
-        ("data", bpo::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")
+        ("data", bpo::value<Files::EscapePathContainer>()->default_value(Files::EscapePathContainer(), "data")
             ->multitoken()->composing(), "set data directories (later directories have higher priority)")
 
-        ("data-local", bpo::value<std::string>()->default_value(""),
+            ("data-local", bpo::value<Files::EscapeHashString>()->default_value(""),
             "set local data directory (highest priority)")
 
-        ("fallback-archive", bpo::value<StringsVector>()->default_value(StringsVector(), "fallback-archive")
+        ("fallback-archive", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "fallback-archive")
             ->multitoken(), "set fallback BSA archives (later archives have higher priority)")
 
-        ("resources", bpo::value<std::string>()->default_value("resources"),
+            ("resources", bpo::value<Files::EscapeHashString>()->default_value("resources"),
             "set resources directory")
 
-        ("start", bpo::value<std::string>()->default_value(""),
+            ("start", bpo::value<Files::EscapeHashString>()->default_value(""),
             "set initial cell")
 
-        ("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
+        ("content", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
             ->multitoken(), "content file(s): esm/esp, or omwgame/omwaddon")
 
         ("no-sound", bpo::value<bool>()->implicit_value(true)
@@ -136,7 +110,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-console", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "enable console-only script functionality")
 
-        ("script-run", bpo::value<std::string>()->default_value(""),
+            ("script-run", bpo::value<Files::EscapeHashString>()->default_value(""),
             "select a file containing a list of console commands that is executed on startup")
 
         ("script-warn", bpo::value<int>()->implicit_value (1)
@@ -146,11 +120,14 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             "\t1 - show warning but consider script as correctly compiled anyway\n"
             "\t2 - treat warnings as errors")
 
-        ("script-blacklist", bpo::value<StringsVector>()->default_value(StringsVector(), "")
+        ("script-blacklist", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
             ->multitoken(), "ignore the specified script (if the use of the blacklist is enabled)")
 
         ("script-blacklist-use", bpo::value<bool>()->implicit_value(true)
             ->default_value(true), "enable script blacklisting")
+
+            ("load-savegame", bpo::value<Files::EscapeHashString>()->default_value(""),
+            "load a save game file on game startup (specify an absolute filename or a filename relative to the current working directory)")
 
         ("skip-menu", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "skip main menu on game startup")
@@ -161,14 +138,14 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("fs-strict", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "strict file system handling (no case folding)")
 
-        ( "encoding", bpo::value<std::string>()->
+            ("encoding", bpo::value<Files::EscapeHashString>()->
             default_value("win1252"),
             "Character encoding used in OpenMW game messages:\n"
             "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
             "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
             "\n\twin1252 - Western European (Latin) alphabet, used by default")
 
-        ("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
+            ("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
             ->multitoken()->composing(), "fallback values")
 
         ("no-grab", "Don't grab mouse cursor")
@@ -187,46 +164,39 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     bpo::store(valid_opts, variables);
     bpo::notify(variables);
 
-    bool run = true;
-
     if (variables.count ("help"))
     {
         std::cout << desc << std::endl;
-        run = false;
+        return false;
     }
 
     if (variables.count ("version"))
     {
-        std::cout << "OpenMW version " << OPENMW_VERSION << std::endl;
+        cfgMgr.readConfiguration(variables, desc, true);
 
-        std::string rev = OPENMW_VERSION_COMMITHASH;
-        std::string tag = OPENMW_VERSION_TAGHASH;
-        if (!rev.empty() && !tag.empty())
-        {
-            rev = rev.substr(0, 10);
-            std::cout << "Revision " << rev << std::endl;
-        }
-        run = false;
+        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapeHashString>().toStdString());
+        std::cout << v.describe() << std::endl;
+        return false;
     }
 
-    if (!run)
-        return false;
-
     cfgMgr.readConfiguration(variables, desc);
+
+    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapeHashString>().toStdString());
+    std::cout << v.describe() << std::endl;
 
     engine.setGrabMouse(!variables.count("no-grab"));
 
     // Font encoding settings
-    std::string encoding(variables["encoding"].as<std::string>());
+    std::string encoding(variables["encoding"].as<Files::EscapeHashString>().toStdString());
     std::cout << ToUTF8::encodingUsingMessage(encoding) << std::endl;
     engine.setEncoding(ToUTF8::calculateEncoding(encoding));
 
     // directory settings
     engine.enableFSStrict(variables["fs-strict"].as<bool>());
 
-    Files::PathContainer dataDirs(variables["data"].as<Files::PathContainer>());
+    Files::PathContainer dataDirs(Files::EscapePath::toPathContainer(variables["data"].as<Files::EscapePathContainer>()));
 
-    std::string local(variables["data-local"].as<std::string>());
+    std::string local(variables["data-local"].as<Files::EscapeHashString>().toStdString());
     if (!local.empty())
     {
         dataDirs.push_back(Files::PathContainer::value_type(local));
@@ -237,15 +207,15 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setDataDirs(dataDirs);
 
     // fallback archives
-    StringsVector archives = variables["fallback-archive"].as<StringsVector>();
+    StringsVector archives = variables["fallback-archive"].as<Files::EscapeStringVector>().toStdStringVector();
     for (StringsVector::const_iterator it = archives.begin(); it != archives.end(); ++it)
     {
         engine.addArchive(*it);
     }
 
-    engine.setResourceDir(variables["resources"].as<std::string>());
+    engine.setResourceDir(variables["resources"].as<Files::EscapeHashString>().toStdString());
 
-    StringsVector content = variables["content"].as<StringsVector>();
+    StringsVector content = variables["content"].as<Files::EscapeStringVector>().toStdStringVector();
     if (content.empty())
     {
       std::cout << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting..." << std::endl;
@@ -260,7 +230,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     }
 
     // startup-settings
-    engine.setCell(variables["start"].as<std::string>());
+    engine.setCell(variables["start"].as<Files::EscapeHashString>().toStdString());
     engine.setSkipMenu (variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
     if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
         std::cerr << "new-game used without skip-menu -> ignoring it" << std::endl;
@@ -270,10 +240,11 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCompileAllDialogue(variables["script-all-dialogue"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
-    engine.setStartupScript (variables["script-run"].as<std::string>());
+    engine.setStartupScript (variables["script-run"].as<Files::EscapeHashString>().toStdString());
     engine.setWarningsMode (variables["script-warn"].as<int>());
-    engine.setScriptBlacklist (variables["script-blacklist"].as<StringsVector>());
+    engine.setScriptBlacklist (variables["script-blacklist"].as<Files::EscapeStringVector>().toStdStringVector());
     engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
+    engine.setSaveGameFile (variables["load-savegame"].as<Files::EscapeHashString>().toStdString());
 
     // other settings
     engine.setSoundUsage(!variables["no-sound"].as<bool>());
@@ -292,7 +263,7 @@ public:
     std::streamsize write(const char *str, std::streamsize size)
     {
         // Make a copy for null termination
-        std::string tmp (str, size);
+        std::string tmp (str, static_cast<unsigned int>(size));
         // Write string to Visual Studio Debug output
         OutputDebugString (tmp.c_str ());
         return size;
@@ -324,6 +295,10 @@ private:
 
 int main(int argc, char**argv)
 {
+#if defined(__APPLE__)
+    setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
+#endif
+
     // Some objects used to redirect cout and cerr
     // Scope must be here, so this still works inside the catch block for logging exceptions
     std::streambuf* cout_rdbuf = std::cout.rdbuf ();
@@ -364,7 +339,7 @@ int main(int argc, char**argv)
 #endif
 
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#if USE_CRASH_CATCHER
         // Unix crash catcher
         if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_attached())
         {
@@ -376,10 +351,10 @@ int main(int argc, char**argv)
             std::cout << "Running in a debugger, not installing crash catcher" << std::endl;
 #endif
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        // set current dir to bundle path
-        boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
-        boost::filesystem::current_path(bundlePath);
+#ifdef __APPLE__
+        // FIXME: set current dir to bundle path
+        //boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
+        //boost::filesystem::current_path(bundlePath);
 #endif
 
         engine.reset(new OMW::Engine(cfgMgr));
@@ -391,12 +366,12 @@ int main(int argc, char**argv)
     }
     catch (std::exception &e)
     {
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        if (isatty(fileno(stdin)))
-            std::cerr << "\nERROR: " << e.what() << std::endl;
-        else
+#if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
+        if (!isatty(fileno(stdin)))
 #endif
             SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);
+
+        std::cerr << "\nERROR: " << e.what() << std::endl;
 
         ret = 1;
     }

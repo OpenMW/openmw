@@ -1,6 +1,8 @@
 #include "pickpocketitemmodel.hpp"
 
-#include "../mwmechanics/npcstats.hpp"
+#include <components/misc/rng.hpp>
+#include <components/esm/loadskil.hpp>
+
 #include "../mwworld/class.hpp"
 
 namespace MWGui
@@ -12,11 +14,13 @@ namespace MWGui
         int chance = thief.getClass().getSkill(thief, ESM::Skill::Sneak);
 
         mSourceModel->update();
+
+        // build list of items that player is unable to find when attempts to pickpocket.
         if (hideItems)
         {
             for (size_t i = 0; i<mSourceModel->getItemCount(); ++i)
             {
-                if (std::rand() / static_cast<float>(RAND_MAX) * 100 > chance)
+                if (Misc::Rng::roll0to99() > chance)
                     mHiddenItems.push_back(mSourceModel->getItem(i));
             }
         }
@@ -58,6 +62,12 @@ namespace MWGui
     {
         ProxyItemModel::removeItem(item, count);
         /// \todo check if player is detected
+    }
+
+    bool PickpocketItemModel::allowedToInsertItems() const
+    {
+        // don't allow "reverse pickpocket" (yet)
+        return false;
     }
 
 }

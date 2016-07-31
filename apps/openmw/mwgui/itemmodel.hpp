@@ -46,22 +46,32 @@ namespace MWGui
         ItemModel();
         virtual ~ItemModel() {}
 
-        typedef int ModelIndex;
+        typedef int ModelIndex; // -1 means invalid index
 
+        /// Throws for invalid index or out of range index
         virtual ItemStack getItem (ModelIndex index) = 0;
-        ///< throws for invalid index
+
+        /// The number of items in the model, this specifies the range of indices you can pass to
+        /// the getItem function (but this range is only valid until the next call to update())
         virtual size_t getItemCount() = 0;
 
+        /// Returns an invalid index if the item was not found
         virtual ModelIndex getIndex (ItemStack item) = 0;
 
+        /// Rebuild the item model, this will invalidate existing model indices
         virtual void update() = 0;
 
         /// Move items from this model to \a otherModel.
+        /// @note Derived implementations may return an empty Ptr if the move was unsuccessful.
         virtual MWWorld::Ptr moveItem (const ItemStack& item, size_t count, ItemModel* otherModel);
 
-        /// @param setNewOwner Set the copied item's owner to the actor we are copying to, or keep the original owner?
+        /// @param setNewOwner If true, set the copied item's owner to the actor we are copying to,
+        ///                    otherwise reset owner to ""
         virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false) = 0;
         virtual void removeItem (const ItemStack& item, size_t count) = 0;
+
+        /// Is the player allowed to insert items into this model? (default true)
+        virtual bool allowedToInsertItems() const;
 
     private:
         ItemModel(const ItemModel&);
@@ -73,10 +83,14 @@ namespace MWGui
     class ProxyItemModel : public ItemModel
     {
     public:
+        ProxyItemModel();
         virtual ~ProxyItemModel();
         virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false);
         virtual void removeItem (const ItemStack& item, size_t count);
         virtual ModelIndex getIndex (ItemStack item);
+
+        /// @note Takes ownership of the passed pointer.
+        void setSourceModel(ItemModel* sourceModel);
 
         ModelIndex mapToSource (ModelIndex index);
         ModelIndex mapFromSource (ModelIndex index);

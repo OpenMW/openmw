@@ -34,6 +34,8 @@ namespace CSVDoc
 
             void setUniversalId(const CSMWorld::UniversalId& id);
 
+            bool event (QEvent *event);
+
         public:
 
             SubView (const CSMWorld::UniversalId& id);
@@ -50,8 +52,6 @@ namespace CSVDoc
 
             virtual std::string getTitle() const;
 
-            virtual void updateUserSetting (const QString& name, const QStringList& value);
-
         private:
 
             void closeEvent (QCloseEvent *event);
@@ -64,7 +64,9 @@ namespace CSVDoc
 
             void updateTitle();
 
-            void updateSubViewIndicies (SubView *view = 0);
+            void updateSubViewIndices (SubView *view = NULL);
+
+            void universalIdChanged (const CSMWorld::UniversalId& universalId);
 
         protected slots:
 

@@ -23,13 +23,19 @@ namespace MWMechanics
             AiTravel(float x, float y, float z);
             AiTravel(const ESM::AiSequence::AiTravel* travel);
 
+            /// Simulates the passing of time
+            virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
+
             void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
             virtual AiTravel *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
 
             virtual int getTypeId() const;
+
+        protected:
+            virtual bool doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell);
 
         private:
             float mX;

@@ -1,12 +1,14 @@
 #ifndef COMPONENTS_SETTINGS_H
 #define COMPONENTS_SETTINGS_H
 
-#include <OgreConfigFile.h>
+#include <set>
+#include <map>
+#include <string>
 
 namespace Settings
 {
     typedef std::pair < std::string, std::string > CategorySetting; 
-    typedef std::vector< std::pair<std::string, std::string> > CategorySettingVector;
+    typedef std::set< std::pair<std::string, std::string> > CategorySettingVector;
     typedef std::map < CategorySetting, std::string > CategorySettingValueMap;
 
     ///
@@ -15,14 +17,14 @@ namespace Settings
     class Manager
     {
     public:
-        static Ogre::ConfigFile mFile;
-        static Ogre::ConfigFile mDefaultFile;
+        static CategorySettingValueMap mDefaultSettings;
+        static CategorySettingValueMap mUserSettings;
 
         static CategorySettingVector mChangedSettings;
         ///< tracks all the settings that were changed since the last apply() call
 
-        static CategorySettingValueMap mNewSettings;
-        ///< tracks all the settings that are in the default file, but not in user file yet
+        void clear();
+        ///< clears all settings and default settings
 
         void loadDefault (const std::string& file);
         ///< load file as the default settings (can be overridden by user settings)

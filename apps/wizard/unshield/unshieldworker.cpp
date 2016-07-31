@@ -6,7 +6,6 @@
 #include <QWriteLocker>
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QFileInfoListIterator>
 #include <QStringList>
 #include <QTextStream>
 #include <QTextCodec>
@@ -46,9 +45,7 @@ Wizard::UnshieldWorker::~UnshieldWorker()
 
 void Wizard::UnshieldWorker::stopWorker()
 {
-    mMutex.lock();
     mStopped = true;
-    mMutex.unlock();
 }
 
 void Wizard::UnshieldWorker::setInstallComponent(Wizard::Component component, bool install)
@@ -739,7 +736,8 @@ bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &dest
 
     // Ensure the target path exists
     QDir dir;
-    dir.mkpath(path);
+    if (!dir.mkpath(path))
+        return false;
 
     QString fileName(path);
     fileName.append(QString::fromUtf8(unshield_file_name(unshield, index)));

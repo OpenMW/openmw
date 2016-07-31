@@ -1,11 +1,21 @@
-
 #include "refiddata.hpp"
 
 #include <cassert>
-
-#include <components/misc/stringops.hpp>
+#include <memory>
 
 CSMWorld::RefIdDataContainerBase::~RefIdDataContainerBase() {}
+
+
+std::string CSMWorld::RefIdData::getRecordId(const CSMWorld::RefIdData::LocalIndex &index) const
+{
+    std::map<UniversalId::Type, RefIdDataContainerBase *>::const_iterator found =
+        mRecordContainers.find (index.second);
+
+    if (found == mRecordContainers.end())
+        throw std::logic_error ("invalid local index type");
+
+    return found->second->getId(index.first);
+}
 
 CSMWorld::RefIdData::RefIdData()
 {
@@ -161,22 +171,33 @@ int CSMWorld::RefIdData::getAppendIndex (UniversalId::Type type) const
     return index;
 }
 
-void CSMWorld::RefIdData::load (const LocalIndex& index, ESM::ESMReader& reader, bool base)
+void CSMWorld::RefIdData::load (ESM::ESMReader& reader, bool base, CSMWorld::UniversalId::Type type)
 {
-    std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator iter =
-        mRecordContainers.find (index.second);
+    std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator found =
+        mRecordContainers.find (type);
 
-    if (iter==mRecordContainers.end())
-        throw std::logic_error ("invalid local index type");
+    if (found == mRecordContainers.end())
+        throw std::logic_error ("Invalid Referenceable ID type");
 
-    iter->second->load (index.first, reader, base);
+    int index = found->second->load(reader, base);
+    if (index != -1)
+    {
+        LocalIndex localIndex = LocalIndex(index, type);
+        if (base && getRecord(localIndex).mState == RecordBase::State_Deleted)
+        {
+            erase(localIndex, 1);
+        }
+        else
+        {
+            mIndex[Misc::StringUtils::lowerCase(getRecordId(localIndex))] = localIndex;
+        }
+    }
 }
 
 void CSMWorld::RefIdData::erase (const LocalIndex& index, int count)
 {
     std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator iter =
         mRecordContainers.find (index.second);
-
     if (iter==mRecordContainers.end())
         throw std::logic_error ("invalid local index type");
 
@@ -187,6 +208,20 @@ void CSMWorld::RefIdData::erase (const LocalIndex& index, int count)
 
         if (result!=mIndex.end())
             mIndex.erase (result);
+    }
+
+    // Adjust the local indexes to avoid gaps between them after removal of records
+    int recordIndex = index.first + count;
+    int recordCount = iter->second->getSize();
+    while (recordIndex < recordCount)
+    {
+        std::map<std::string, LocalIndex>::iterator recordIndexFound =
+            mIndex.find(Misc::StringUtils::lowerCase(iter->second->getId(recordIndex)));
+        if (recordIndexFound != mIndex.end())
+        {
+            recordIndexFound->second.first -= count;
+        }
+        ++recordIndex;
     }
 
     iter->second->erase (index.first, count);
@@ -332,7 +367,7 @@ const CSMWorld::RefIdDataContainer< ESM::Static >& CSMWorld::RefIdData::getStati
     return mStatics;
 }
 
-void CSMWorld::RefIdData::insertRecord(CSMWorld::RecordBase& record, CSMWorld::UniversalId::Type type, const std::string& id)
+void CSMWorld::RefIdData::insertRecord (CSMWorld::RecordBase& record, CSMWorld::UniversalId::Type type, const std::string& id)
 {
   std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator iter =
         mRecordContainers.find (type);
@@ -344,4 +379,17 @@ void CSMWorld::RefIdData::insertRecord(CSMWorld::RecordBase& record, CSMWorld::U
 
     mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (id),
         LocalIndex (iter->second->getSize()-1, type)));
+}
+
+void CSMWorld::RefIdData::copyTo (int index, RefIdData& target) const
+{
+    LocalIndex localIndex = globalToLocalIndex (index);
+
+    RefIdDataContainerBase *source = mRecordContainers.find (localIndex.second)->second;
+
+    std::string id = source->getId (localIndex.first);
+
+    std::auto_ptr<CSMWorld::RecordBase> newRecord (source->getRecord (localIndex.first).modifiedCopy());
+
+    target.insertRecord (*newRecord, localIndex.second, id);
 }

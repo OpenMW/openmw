@@ -9,6 +9,7 @@
 #include "aipackage.hpp"
 #include "spelllist.hpp"
 #include "loadskil.hpp"
+#include "transport.hpp"
 
 namespace ESM {
 
@@ -22,6 +23,8 @@ class ESMWriter;
 struct NPC
 {
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "NPC"; }
 
   // Services
   enum Services
@@ -51,12 +54,12 @@ struct NPC
 
   enum Flags
     {
-      Female    = 0x0001,
-      Essential = 0x0002,
-      Respawn   = 0x0004,
-      Autocalc  = 0x0008,
-      Skeleton  = 0x0400, // Skeleton blood effect (white)
-      Metal     = 0x0800  // Metal blood effect (golden?)
+      Female        = 0x0001,
+      Essential     = 0x0002,
+      Respawn       = 0x0004,
+      Autocalc      = 0x0010,
+      Skeleton      = 0x0400, // Skeleton blood effect (white)
+      Metal         = 0x0800  // Metal blood effect (golden?)
     };
 
   enum NpcType
@@ -98,17 +101,13 @@ struct NPC
         char mUnknown1, mUnknown2, mUnknown3;
         int mGold;
     }; // 12 bytes
-
-    struct Dest
-    {
-        Position    mPos;
-        std::string mCellName;
-    };
     #pragma pack(pop)
 
     unsigned char mNpdtType;
     NPDTstruct52 mNpdt52;
     NPDTstruct12 mNpdt12; //for autocalculated characters
+
+    int getFactionRank() const; /// wrapper for mNpdt*, -1 = no rank
 
     int mFlags;
 
@@ -120,7 +119,10 @@ struct NPC
     AIData mAiData;
     bool mHasAI;
 
-    std::vector<Dest> mTransport;
+    Transport mTransport;
+
+    const std::vector<Transport::Dest>& getTransport() const;
+
     AIPackageList     mAiPackage;
 
     std::string mId, mName, mModel, mRace, mClass, mFaction, mScript;
@@ -128,8 +130,8 @@ struct NPC
     // body parts
     std::string mHair, mHead;
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     bool isMale() const;
 

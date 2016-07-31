@@ -1,4 +1,3 @@
-
 #include "npcstats.hpp"
 
 #include "esmreader.hpp"
@@ -31,18 +30,44 @@ void ESM::NpcStats::load (ESMReader &esm)
     esm.getHNOT (mDisposition, "DISP");
 
     for (int i=0; i<27; ++i)
+        mSkills[i].load (esm);
+
+    mWerewolfDeprecatedData = false;
+    if (esm.peekNextSub("STBA"))
     {
-        mSkills[i].mRegular.load (esm);
-        mSkills[i].mWerewolf.load (esm);
+        // we have deprecated werewolf skills, stored interleaved
+        // Load into one big vector, then remove every 2nd value
+        mWerewolfDeprecatedData = true;
+        std::vector<ESM::StatState<int> > skills(mSkills, mSkills + sizeof(mSkills)/sizeof(mSkills[0]));
+
+        for (int i=0; i<27; ++i)
+        {
+            ESM::StatState<int> skill;
+            skill.load(esm);
+            skills.push_back(skill);
+        }
+
+        int i=0;
+        for (std::vector<ESM::StatState<int> >::iterator it = skills.begin(); it != skills.end(); ++i)
+        {
+            if (i%2 == 1)
+                it = skills.erase(it);
+            else
+                ++it;
+        }
+        assert(skills.size() == 27);
+        std::copy(skills.begin(), skills.end(), mSkills);
     }
 
+    // No longer used
     bool hasWerewolfAttributes = false;
     esm.getHNOT (hasWerewolfAttributes, "HWAT");
-
     if (hasWerewolfAttributes)
     {
+        ESM::StatState<int> dummy;
         for (int i=0; i<8; ++i)
-            mWerewolfAttributes[i].load (esm);
+            dummy.load(esm);
+        mWerewolfDeprecatedData = true;
     }
 
     mIsWerewolf = false;
@@ -57,17 +82,22 @@ void ESM::NpcStats::load (ESMReader &esm)
     mWerewolfKills = 0;
     esm.getHNOT (mWerewolfKills, "WKIL");
 
-    mProfit = 0;
-    esm.getHNOT (mProfit, "PROF");
+    // No longer used
+    if (esm.isNextSub("PROF"))
+        esm.skipHSub(); // int profit
 
-    // No longer used. Now part of CreatureStats.
-    float attackStrength = 0;
-    esm.getHNOT (attackStrength, "ASTR");
+    // No longer used
+    if (esm.isNextSub("ASTR"))
+        esm.skipHSub(); // attackStrength
 
     mLevelProgress = 0;
     esm.getHNOT (mLevelProgress, "LPRO");
 
     esm.getHNT (mSkillIncrease, "INCR");
+
+    for (int i=0; i<3; ++i)
+        mSpecIncreases[i] = 0;
+    esm.getHNOT (mSpecIncreases, "SPEC");
 
     while (esm.isNextSub ("USED"))
         mUsedIds.push_back (esm.getHString());
@@ -75,8 +105,9 @@ void ESM::NpcStats::load (ESMReader &esm)
     mTimeToStartDrowning = 0;
     esm.getHNOT (mTimeToStartDrowning, "DRTI");
 
-    mLastDrowningHit = 0;
-    esm.getHNOT (mLastDrowningHit, "DRLH");
+    // No longer used
+    float lastDrowningHit = 0;
+    esm.getHNOT (lastDrowningHit, "DRLH");
 
     // No longer used
     float levelHealthBonus = 0;
@@ -110,14 +141,7 @@ void ESM::NpcStats::save (ESMWriter &esm) const
         esm.writeHNT ("DISP", mDisposition);
 
     for (int i=0; i<27; ++i)
-    {
-        mSkills[i].mRegular.save (esm);
-        mSkills[i].mWerewolf.save (esm);
-    }
-
-    esm.writeHNT ("HWAT", true);
-    for (int i=0; i<8; ++i)
-        mWerewolfAttributes[i].save (esm);
+        mSkills[i].save (esm);
 
     if (mIsWerewolf)
         esm.writeHNT ("WOLF", mIsWerewolf);
@@ -131,13 +155,12 @@ void ESM::NpcStats::save (ESMWriter &esm) const
     if (mWerewolfKills)
         esm.writeHNT ("WKIL", mWerewolfKills);
 
-    if (mProfit)
-        esm.writeHNT ("PROF", mProfit);
-
     if (mLevelProgress)
         esm.writeHNT ("LPRO", mLevelProgress);
 
     esm.writeHNT ("INCR", mSkillIncrease);
+
+    esm.writeHNT ("SPEC", mSpecIncreases);
 
     for (std::vector<std::string>::const_iterator iter (mUsedIds.begin()); iter!=mUsedIds.end();
         ++iter)
@@ -146,9 +169,23 @@ void ESM::NpcStats::save (ESMWriter &esm) const
     if (mTimeToStartDrowning)
         esm.writeHNT ("DRTI", mTimeToStartDrowning);
 
-    if (mLastDrowningHit)
-        esm.writeHNT ("DRLH", mLastDrowningHit);
-
     if (mCrimeId != -1)
         esm.writeHNT ("CRID", mCrimeId);
+}
+
+void ESM::NpcStats::blank()
+{
+    mWerewolfDeprecatedData = false;
+    mIsWerewolf = false;
+    mDisposition = 0;
+    mBounty = 0;
+    mReputation = 0;
+    mWerewolfKills = 0;
+    mLevelProgress = 0;
+    for (int i=0; i<8; ++i)
+        mSkillIncrease[i] = 0;
+    for (int i=0; i<3; ++i)
+        mSpecIncreases[i] = 0;
+    mTimeToStartDrowning = 20;
+    mCrimeId = -1;
 }

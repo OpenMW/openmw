@@ -34,20 +34,19 @@ namespace MWMechanics
         Stat<int> mAiSettings[4];
         AiSequence mAiSequence;
         bool mDead;
-        bool mDied;
+        bool mDeathAnimationFinished;
+        bool mDied; // flag for OnDeath script function
         bool mMurdered;
         int mFriendlyHits;
         bool mTalkedTo;
         bool mAlarmed;
         bool mAttacked;
-        bool mAttackingOrSpell;
         bool mKnockdown;
         bool mKnockdownOneFrame;
         bool mKnockdownOverOneFrame;
         bool mHitRecovery;
         bool mBlock;
         unsigned int mMovementFlags;
-        float mAttackStrength; // Note only some creatures attack with weapons
 
         float mFallHeight;
 
@@ -64,20 +63,21 @@ namespace MWMechanics
 
         int mActorId;
 
-        // The index of the death animation that was played
-        unsigned char mDeathAnimation;
+        // The index of the death animation that was played, or -1 if none played
+        signed char mDeathAnimation;
 
-        // <ESM::MagicEffect index, ActorId>
-        std::map<int, int> mSummonedCreatures;
+        MWWorld::TimeStamp mTimeOfDeath;
+
+    public:
+        typedef std::pair<int, std::string> SummonKey; // <ESM::MagicEffect index, spell ID>
+    private:
+        std::map<SummonKey, int> mSummonedCreatures; // <SummonKey, ActorId>
+
         // Contains ActorIds of summoned creatures with an expired lifetime that have not been deleted yet.
         // This may be necessary when the creature is in an inactive cell.
         std::vector<int> mSummonGraveyard;
 
     protected:
-        // These two are only set by NpcStats, but they are declared in CreatureStats to prevent using virtual methods.
-        bool mIsWerewolf;
-        AttributeValue mWerewolfAttributes[8];
-
         int mLevel;
 
     public:
@@ -85,10 +85,6 @@ namespace MWMechanics
 
         DrawState_ getDrawState() const;
         void setDrawState(DrawState_ state);
-
-        /// When attacking, stores how strong the attack should be (0 = weakest, 1 = strongest)
-        float getAttackStrength() const;
-        void setAttackStrength(float value);
 
         bool needToRecalcDynamicStats();
         void setNeedRecalcDynamicStats(bool val);
@@ -162,7 +158,12 @@ namespace MWMechanics
         float getFatigueTerm() const;
         ///< Return effective fatigue
 
+        bool isParalyzed() const;
+
         bool isDead() const;
+
+        bool isDeathAnimationFinished() const;
+        void setDeathAnimationFinished(bool finished);
 
         void notifyDied();
 
@@ -199,8 +200,6 @@ namespace MWMechanics
         bool getAttacked() const;
         void setAttacked (bool attacked);
 
-        bool getCreatureTargetted() const;
-
         float getEvasion() const;
 
         void setKnockedDown(bool value);
@@ -218,8 +217,8 @@ namespace MWMechanics
         void setBlock(bool value);
         bool getBlock() const;
 
-        std::map<int, int>& getSummonedCreatureMap();
-        std::vector<int>& getSummonedCreatureGraveyard();
+        std::map<SummonKey, int>& getSummonedCreatureMap(); // <SummonKey, ActorId of summoned creature>
+        std::vector<int>& getSummonedCreatureGraveyard(); // ActorIds
 
         enum Flag
         {
@@ -263,8 +262,10 @@ namespace MWMechanics
         void setGoldPool(int pool);
         int getGoldPool() const;
 
-        unsigned char getDeathAnimation() const;
-        void setDeathAnimation(unsigned char index);
+        signed char getDeathAnimation() const; // -1 means not decided
+        void setDeathAnimation(signed char index);
+
+        MWWorld::TimeStamp getTimeOfDeath() const;
 
         int getActorId();
         ///< Will generate an actor ID, if the actor does not have one yet.

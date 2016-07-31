@@ -6,13 +6,10 @@
 #include "widgets.hpp"
 #include "windowbase.hpp"
 
-/*
-  This file contains the dialogs for choosing a class.
-  Layout is defined by resources/mygui/openmw_chargen_class.layout.
- */
-
 namespace MWGui
 {
+    void setClassImage(MyGUI::ImageBox* imageBox, const std::string& classId);
+
     class InfoBoxDialog : public WindowModal
     {
     public:

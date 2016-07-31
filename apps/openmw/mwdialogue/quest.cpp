@@ -1,4 +1,3 @@
-
 #include "quest.hpp"
 
 #include <components/esm/queststate.hpp>
@@ -75,7 +74,7 @@ namespace MWDialogue
             iter!=dialogue->mInfo.end(); ++iter)
             if (iter->mId == entry.mInfoId)
             {
-                index = iter->mData.mDisposition; /// \todo cleanup info structure
+                index = iter->mData.mJournalIndex;
                 break;
             }
 

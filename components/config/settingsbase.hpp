@@ -17,7 +17,7 @@ namespace Config
         SettingsBase() { mMultiValue = false; }
         ~SettingsBase() {}
 
-        inline QString value(const QString &key, const QString &defaultValue = QString())
+        inline QString value(const QString &key, const QString &defaultValue = QString()) const
         {
             return mSettings.value(key).isEmpty() ? defaultValue : mSettings.value(key);
         }
@@ -46,7 +46,7 @@ namespace Config
             mSettings.remove(key);
         }
 
-        Map getSettings() {return mSettings;}
+        Map getSettings() const {return mSettings;} 
 
         bool readFile(QTextStream &stream)
         {
@@ -99,6 +99,11 @@ namespace Config
             // Merge the changed keys with those which didn't
             mSettings.unite(cache);
             return true;
+        }
+
+        void clear()
+        {
+            mSettings.clear();
         }
 
     private:

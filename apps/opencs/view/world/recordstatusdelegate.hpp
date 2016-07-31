@@ -17,9 +17,9 @@ namespace CSVWorld
     {
     public:
 
-        explicit RecordStatusDelegate(const ValueList& values,
-                                      const IconList& icons,
-                                      CSMDoc::Document& document, QObject *parent = 0);
+        RecordStatusDelegate (const ValueList& values, const IconList& icons,
+            CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document,
+            QObject *parent = 0);
     };
 
     class RecordStatusDelegateFactory : public DataDisplayDelegateFactory
@@ -28,7 +28,7 @@ namespace CSVWorld
 
             RecordStatusDelegateFactory();
 
-            virtual CommandDelegate *makeDelegate (CSMDoc::Document& document, QObject *parent) const;
+            virtual CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
 
     };

@@ -22,7 +22,7 @@ namespace MWGui
 
         virtual void resetReference();
 
-        void open(const MWWorld::Ptr& npc);
+        void openCompanion(const MWWorld::Ptr& npc);
         void onFrame ();
 
     private:

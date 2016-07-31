@@ -8,62 +8,93 @@
 #-------------------------------------------------------------------
 
 # - Try to find FreeType
+#
+# This module accepts the following env variable
+#  FREETYPE_DIR - Can be set to custom install path
+#
 # Once done, this will define
 #
-#  FREETYPE_FOUND - system has FreeType
-#  FREETYPE_INCLUDE_DIRS - the FreeType include directories 
-#  FREETYPE_LIBRARIES - link these to use FreeType
+#  Freetype_FOUND - system has FreeType
+#  Freetype_INCLUDE_DIRS - the FreeType include directories
+#  Freetype_LIBRARIES - link these to use FreeType
+#  Freetype_VERSION - version of FreeType
+#
+# libfreetype internals:
+#
+# ======================================
+# new versions (2.5.2)
+#
+# file structure:
+#     <prefix>/include/freetype2/ft2build.h
+#     <prefix>/include/freetype2/freetype.h
+# used as:
+#     #include <ft2build.h>
+#     #include <freetype.h>
+# requires:
+#     -I <prefix>/include/freetype2/
+#
+# ======================================
+# old versions (2.4.8, 2.3.5)
+#
+# file structure:
+#     <prefix>/include/ft2build.h
+#     <prefix>/include/freetype2/freetype/freetype.h
+# used as:
+#     #include <ft2build.h>
+#     #include <freetype/freetype.h>
+# requires:
+#     -I <prefix>/include/ -I <prefix>/include/freetype2/
+#
+# ======================================
 
-include(FindPkgMacros)
-findpkg_begin(FREETYPE)
+include(LibFindMacros)
+include(PreprocessorUtils)
 
-# Get path, convert backslashes as ${ENV_${var}}
-getenv_path(FREETYPE_HOME)
-
-# construct search paths
-set(FREETYPE_PREFIX_PATH ${FREETYPE_HOME} ${ENV_FREETYPE_HOME})
-create_search_paths(FREETYPE)
-# redo search if prefix path changed
-clear_if_changed(FREETYPE_PREFIX_PATH
-  FREETYPE_LIBRARY_FWK
-  FREETYPE_LIBRARY_REL
-  FREETYPE_LIBRARY_DBG
-  FREETYPE_INCLUDE_DIR
+set(_REGULAR_INSTALL_PATHS
+    /usr/X11R6
+    /usr/local/X11R6
+    /usr/local/X11
+    /usr/freeware
+    ENV GTKMM_BASEPATH
+    [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]
 )
 
-set(FREETYPE_LIBRARY_NAMES freetype2311 freetype239 freetype238 freetype235 freetype219 freetype)
-get_debug_names(FREETYPE_LIBRARY_NAMES)
+libfind_pkg_detect(Freetype freetype2
+    FIND_PATH ft2build.h
+        HINTS $ENV{FREETYPE_DIR}
+        PATHS ${_REGULAR_INSTALL_PATHS}
+        PATH_SUFFIXES include freetype2
+    FIND_LIBRARY freetype freetype2311 freetype239 freetype238 freetype235 freetype219
+        HINTS $ENV{FREETYPE_DIR}
+        PATHS ${_REGULAR_INSTALL_PATHS}
+        PATH_SUFFIXES lib
+)
+find_path(Freetype_OLD_INCLUDE_DIR
+    # in new versions of freetype old_include_dir equals to include_dir
+    # see explanation above
+    NAMES freetype/freetype.h freetype.h
+    PATHS ${Freetype_INCLUDE_DIR}
+    PATH_SUFFIXES freetype2
+    NO_DEFAULT_PATH
+)
 
-use_pkgconfig(FREETYPE_PKGC freetype2)
+# get version from freetype.h
+find_file(Freetype_HEADER
+    NAMES freetype.h
+    PATH_SUFFIXES freetype
+    PATHS ${Freetype_OLD_INCLUDE_DIR}
+)
+if (Freetype_HEADER)
+    get_version_from_n_defines(Freetype_VERSION
+        ${Freetype_HEADER}
+        FREETYPE_MAJOR FREETYPE_MINOR FREETYPE_PATCH
+    )
+endif()
 
-# prefer static library over framework 
-set(CMAKE_FIND_FRAMEWORK "LAST")
+set(Freetype_PROCESS_INCLUDES Freetype_INCLUDE_DIR Freetype_OLD_INCLUDE_DIR)
+libfind_process(Freetype)
 
-message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
-findpkg_framework(FREETYPE)
-message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
-
-find_path(FREETYPE_INCLUDE_DIR NAMES freetype/freetype.h HINTS ${FREETYPE_INC_SEARCH_PATH} ${FREETYPE_PKGC_INCLUDE_DIRS} PATH_SUFFIXES freetype2)
-find_path(FREETYPE_FT2BUILD_INCLUDE_DIR NAMES ft2build.h HINTS ${FREETYPE_INC_SEARCH_PATH} ${FREETYPE_PKGC_INCLUDE_DIRS})
-
-if (SYMBIAN) 
-set(ORIGINAL_CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})
-set(CMAKE_PREFIX_PATH ${CMAKE_SYSYEM_OUT_DIR})
-message(STATUS "Lib will be searched in Symbian out dir: ${CMAKE_SYSYEM_OUT_DIR}")
-endif (SYMBIAN)
-find_library(FREETYPE_LIBRARY_REL NAMES ${FREETYPE_LIBRARY_NAMES} HINTS ${FREETYPE_LIB_SEARCH_PATH} ${FREETYPE_PKGC_LIBRARY_DIRS} PATH_SUFFIXES "" release relwithdebinfo minsizerel)
-find_library(FREETYPE_LIBRARY_DBG NAMES ${FREETYPE_LIBRARY_NAMES_DBG} HINTS ${FREETYPE_LIB_SEARCH_PATH} ${FREETYPE_PKGC_LIBRARY_DIRS} PATH_SUFFIXES "" debug)
-if (SYMBIAN) 
-set(CMAKE_PREFIX_PATH ${ORIGINAL_CMAKE_PREFIX_PATH})
-endif (SYMBIAN)
-
-make_library_set(FREETYPE_LIBRARY)
-
-findpkg_finish(FREETYPE)
-mark_as_advanced(FREETYPE_FT2BUILD_INCLUDE_DIR)
-if (NOT FREETYPE_FT2BUILD_INCLUDE_DIR STREQUAL FREETYPE_INCLUDE_DIR)
-  set(FREETYPE_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIRS} ${FREETYPE_FT2BUILD_INCLUDE_DIR})
-endif ()
-
-# Reset framework finding
-set(CMAKE_FIND_FRAMEWORK "FIRST")
+if (Freetype_INCLUDE_DIRS)
+    list(REMOVE_DUPLICATES Freetype_INCLUDE_DIRS)
+endif()

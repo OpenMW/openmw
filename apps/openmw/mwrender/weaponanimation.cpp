@@ -1,28 +1,32 @@
 #include "weaponanimation.hpp"
 
-#include <OgreEntity.h>
-#include <OgreBone.h>
-#include <OgreSceneNode.h>
-#include <OgreSkeletonInstance.h>
+#include <osg/MatrixTransform>
+
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/combat.hpp"
 
 #include "animation.hpp"
+#include "rotatecontroller.hpp"
 
 namespace MWRender
 {
 
-float WeaponAnimationTime::getValue() const
+float WeaponAnimationTime::getValue(osg::NodeVisitor*)
 {
     if (mWeaponGroup.empty())
         return 0;
+
     float current = mAnimation->getCurrentTime(mWeaponGroup);
     if (current == -1)
         return 0;
@@ -40,77 +44,86 @@ void WeaponAnimationTime::updateStartTime()
     setGroup(mWeaponGroup);
 }
 
+WeaponAnimation::WeaponAnimation()
+    : mPitchFactor(0)
+{
+}
+
+WeaponAnimation::~WeaponAnimation()
+{
+
+}
+
 void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
 {
     MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
     MWWorld::ContainerStoreIterator weaponSlot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if (weaponSlot != inv.end() && weaponSlot->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
-        showWeapon(true);
-    else
+    if (weaponSlot == inv.end())
+        return;
+    if (weaponSlot->getTypeName() != typeid(ESM::Weapon).name())
+        return;
+    int weaponType = weaponSlot->get<ESM::Weapon>()->mBase->mData.mType;
+    if (weaponType == ESM::Weapon::MarksmanThrown)
     {
-        NifOgre::ObjectScenePtr weapon = getWeapon();
+        std::string soundid = weaponSlot->getClass().getUpSoundId(*weaponSlot);
+        if(!soundid.empty())
+        {
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            sndMgr->playSound3D(actor, soundid, 1.0f, 1.0f);
+        }
+        showWeapon(true);
+    }
+    else if (weaponType == ESM::Weapon::MarksmanBow || weaponType == ESM::Weapon::MarksmanCrossbow)
+    {
+        osg::Group* parent = getArrowBone();
+        if (!parent)
+            return;
 
         MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
         if (ammo == inv.end())
             return;
         std::string model = ammo->getClass().getModel(*ammo);
 
-        assert(weapon->mSkelBase && "Need a skeleton to attach the arrow to");
-        mAmmunition = NifOgre::Loader::createObjects(weapon->mSkelBase, "ArrowBone", weapon->mSkelBase->getParentSceneNode(), model);
-        configureAddedObject(mAmmunition, *ammo, MWWorld::InventoryStore::Slot_Ammunition);
+        osg::ref_ptr<osg::Node> arrow = getResourceSystem()->getSceneManager()->getInstance(model, parent);
+
+        mAmmunition = PartHolderPtr(new PartHolder(arrow));
     }
 }
 
-void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
+void WeaponAnimation::releaseArrow(MWWorld::Ptr actor, float attackStrength)
 {
     MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
     MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     if (weapon == inv.end())
         return;
+    if (weapon->getTypeName() != typeid(ESM::Weapon).name())
+        return;
 
     // The orientation of the launched projectile. Always the same as the actor orientation, even if the ArrowBone's orientation dictates otherwise.
-    Ogre::Quaternion orient = Ogre::Quaternion(Ogre::Radian(actor.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
-            Ogre::Quaternion(Ogre::Radian(actor.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X);
+    osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0))
+            * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0,0,-1));
 
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-    // Reduce fatigue
-    // somewhat of a guess, but using the weapon weight makes sense
-    const float fFatigueAttackBase = gmst.find("fFatigueAttackBase")->getFloat();
-    const float fFatigueAttackMult = gmst.find("fFatigueAttackMult")->getFloat();
-    const float fWeaponFatigueMult = gmst.find("fWeaponFatigueMult")->getFloat();
-    MWMechanics::CreatureStats& attackerStats = actor.getClass().getCreatureStats(actor);
-    MWMechanics::DynamicStat<float> fatigue = attackerStats.getFatigue();
-    const float normalizedEncumbrance = actor.getClass().getNormalizedEncumbrance(actor);
-    float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
-    if (!weapon->isEmpty())
-        fatigueLoss += weapon->getClass().getWeight(*weapon) * attackerStats.getAttackStrength() * fWeaponFatigueMult;
-    fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
-    attackerStats.setFatigue(fatigue);
+    MWMechanics::applyFatigueLoss(actor, *weapon, attackStrength);
 
     if (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
     {
         // Thrown weapons get detached now
-        NifOgre::ObjectScenePtr objects = getWeapon();
-
-        Ogre::Vector3 launchPos(0,0,0);
-        if (objects->mSkelBase)
-        {
-            launchPos = objects->mSkelBase->getParentNode()->_getDerivedPosition();
-        }
-        else if (objects->mEntities.size())
-        {
-            objects->mEntities[0]->getParentNode()->needUpdate(true);
-            launchPos = objects->mEntities[0]->getParentNode()->_getDerivedPosition();
-        }
+        osg::Node* weaponNode = getWeaponNode();
+        if (!weaponNode)
+            return;
+        osg::NodePathList nodepaths = weaponNode->getParentalNodePaths();
+        if (nodepaths.empty())
+            return;
+        osg::Vec3f launchPos = osg::computeLocalToWorld(nodepaths[0]).getTrans();
 
         float fThrownWeaponMinSpeed = gmst.find("fThrownWeaponMinSpeed")->getFloat();
         float fThrownWeaponMaxSpeed = gmst.find("fThrownWeaponMaxSpeed")->getFloat();
-        float speed = fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) *
-                actor.getClass().getCreatureStats(actor).getAttackStrength();
+        float speed = fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * attackStrength;
 
-        MWBase::Environment::get().getWorld()->launchProjectile(actor, *weapon, launchPos, orient, *weapon, speed);
+        MWBase::Environment::get().getWorld()->launchProjectile(actor, *weapon, launchPos, orient, *weapon, speed, attackStrength);
 
         showWeapon(false);
 
@@ -123,48 +136,76 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
         if (ammo == inv.end())
             return;
 
-        Ogre::Vector3 launchPos(0,0,0);
-        if (mAmmunition->mSkelBase)
-        {
-            launchPos = mAmmunition->mSkelBase->getParentNode()->_getDerivedPosition();
-        }
-        else if (mAmmunition->mEntities.size())
-        {
-            mAmmunition->mEntities[0]->getParentNode()->needUpdate(true);
-            launchPos = mAmmunition->mEntities[0]->getParentNode()->_getDerivedPosition();
-        }
+        if (!mAmmunition)
+            return;
+
+        osg::ref_ptr<osg::Node> ammoNode = mAmmunition->getNode();
+        osg::NodePathList nodepaths = ammoNode->getParentalNodePaths();
+        if (nodepaths.empty())
+            return;
+        osg::Vec3f launchPos = osg::computeLocalToWorld(nodepaths[0]).getTrans();
 
         float fProjectileMinSpeed = gmst.find("fProjectileMinSpeed")->getFloat();
         float fProjectileMaxSpeed = gmst.find("fProjectileMaxSpeed")->getFloat();
-        float speed = fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * actor.getClass().getCreatureStats(actor).getAttackStrength();
+        float speed = fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * attackStrength;
 
-        MWBase::Environment::get().getWorld()->launchProjectile(actor, *ammo, launchPos, orient, *weapon, speed);
+        MWBase::Environment::get().getWorld()->launchProjectile(actor, *ammo, launchPos, orient, *weapon, speed, attackStrength);
 
         inv.remove(*ammo, 1, actor);
-        mAmmunition.setNull();
+        mAmmunition.reset();
     }
 }
 
-void WeaponAnimation::pitchSkeleton(float xrot, Ogre::SkeletonInstance* skel)
+void WeaponAnimation::addControllers(const std::map<std::string, osg::ref_ptr<osg::MatrixTransform> >& nodes,
+                                     std::multimap<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::NodeCallback> > &map, osg::Node* objectRoot)
 {
-    if (mPitchFactor == 0)
+    for (int i=0; i<2; ++i)
+    {
+        mSpineControllers[i] = NULL;
+
+        std::map<std::string, osg::ref_ptr<osg::MatrixTransform> >::const_iterator found = nodes.find(i == 0 ? "bip01 spine1" : "bip01 spine2");
+        if (found != nodes.end())
+        {
+            osg::Node* node = found->second;
+            mSpineControllers[i] = new RotateController(objectRoot);
+            node->addUpdateCallback(mSpineControllers[i]);
+            map.insert(std::make_pair(node, mSpineControllers[i]));
+        }
+    }
+}
+
+void WeaponAnimation::deleteControllers()
+{
+    for (int i=0; i<2; ++i)
+        mSpineControllers[i] = NULL;
+}
+
+void WeaponAnimation::configureControllers(float characterPitchRadians)
+{
+    if (mPitchFactor == 0.f || characterPitchRadians == 0.f)
+    {
+        setControllerEnabled(false);
         return;
+    }
 
-    float pitch = xrot * mPitchFactor;
-    Ogre::Node *node;
+    float pitch = characterPitchRadians * mPitchFactor;
+    osg::Quat rotate (pitch/2, osg::Vec3f(-1,0,0));
+    setControllerRotate(rotate);
+    setControllerEnabled(true);
+}
 
-    // In spherearcher.nif, we have spine, not Spine. Not sure if all bone names should be case insensitive?
-    if (skel->hasBone("Bip01 spine2"))
-        node = skel->getBone("Bip01 spine2");
-    else
-        node = skel->getBone("Bip01 Spine2");
-    node->pitch(Ogre::Radian(-pitch/2), Ogre::Node::TS_WORLD);
+void WeaponAnimation::setControllerRotate(const osg::Quat& rotate)
+{
+    for (int i=0; i<2; ++i)
+        if (mSpineControllers[i])
+            mSpineControllers[i]->setRotate(rotate);
+}
 
-    if (skel->hasBone("Bip01 spine1")) // in spherearcher.nif
-        node = skel->getBone("Bip01 spine1");
-    else
-        node = skel->getBone("Bip01 Spine1");
-    node->pitch(Ogre::Radian(-pitch/2), Ogre::Node::TS_WORLD);
+void WeaponAnimation::setControllerEnabled(bool enabled)
+{
+    for (int i=0; i<2; ++i)
+        if (mSpineControllers[i])
+            mSpineControllers[i]->setEnabled(enabled);
 }
 
 }

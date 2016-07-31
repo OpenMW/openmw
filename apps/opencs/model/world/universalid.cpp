@@ -1,4 +1,3 @@
-
 #include "universalid.hpp"
 
 #include <ostream>
@@ -38,9 +37,9 @@ namespace
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Enchantments, "Enchantments", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_BodyParts, "Body Parts", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Referenceables,
-            "Referenceables", 0 },
+            "Objects", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_References,
-            "References", 0 },
+            "Instances", 0 },
         { CSMWorld::UniversalId::Class_NonRecord, CSMWorld::UniversalId::Type_RegionMap,
             "Region Map", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Filters, "Filters", 0 },
@@ -55,6 +54,8 @@ namespace
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_SoundGens, "Sound Generators", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_MagicEffects, "Magic Effects", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Pathgrids, "Pathgrids", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_StartScripts, "Start Scripts", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_MetaDatas, "Meta Data Table", 0 },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
@@ -78,7 +79,7 @@ namespace
         { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_JournalInfo, "JournalInfo", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Cell, "Cell", ":./cell.png" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Cell_Missing, "Cell", ":./cell.png" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Referenceable, "Referenceables", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Referenceable, "Object", 0 },
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Activator, "Activator", ":./activator.png" },
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Potion, "Potion", ":./potion.png" },
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Apparatus, "Apparatus", ":./apparatus.png" },
@@ -102,7 +103,7 @@ namespace
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Repair, "Repair", ":./repair.png" },
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Static, "Static", ":./static.png" },
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Weapon, "Weapon", ":./weapon.png" },
-        { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_Reference, "Reference", 0 },
+        { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_Reference, "Instance", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Filter, "Filter", ":./filter.png" },
         { CSMWorld::UniversalId::Class_Collection, CSMWorld::UniversalId::Type_Scene, "Scene", 0 },
         { CSMWorld::UniversalId::Class_Collection, CSMWorld::UniversalId::Type_Preview, "Preview", 0 },
@@ -118,6 +119,8 @@ namespace
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_SoundGen, "Sound Generator", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_MagicEffect, "Magic Effect", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Pathgrid, "Pathgrid", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_StartScript, "Start Script", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_MetaData, "Meta Data", 0 },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
@@ -126,11 +129,13 @@ namespace
     {
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_VerificationResults, "Verification Results", 0 },
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_LoadErrorLog, "Load Error Log", 0 },
+        { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_Search, "Global Search", 0 },
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
 }
 
 CSMWorld::UniversalId::UniversalId (const std::string& universalId)
+: mIndex(0)
 {
     std::string::size_type index = universalId.find (':');
 
@@ -342,6 +347,25 @@ std::vector<CSMWorld::UniversalId::Type> CSMWorld::UniversalId::listReferenceabl
             list.push_back (sIdArg[i].mType);
 
     return list;
+}
+
+std::vector<CSMWorld::UniversalId::Type> CSMWorld::UniversalId::listTypes (int classes)
+{
+    std::vector<CSMWorld::UniversalId::Type> list;
+
+    for (int i=0; sNoArg[i].mName; ++i)
+        if (sNoArg[i].mClass & classes)
+            list.push_back (sNoArg[i].mType);
+
+    for (int i=0; sIdArg[i].mName; ++i)
+        if (sIdArg[i].mClass & classes)
+            list.push_back (sIdArg[i].mType);
+
+    for (int i=0; sIndexArg[i].mName; ++i)
+        if (sIndexArg[i].mClass & classes)
+            list.push_back (sIndexArg[i].mType);
+            
+    return list;    
 }
 
 CSMWorld::UniversalId::Type CSMWorld::UniversalId::getParentType (Type type)

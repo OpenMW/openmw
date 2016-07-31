@@ -7,6 +7,7 @@
 
 #include "columnbase.hpp"
 #include "collectionbase.hpp"
+#include "nestedcollection.hpp"
 #include "refiddata.hpp"
 
 namespace ESM
@@ -17,8 +18,10 @@ namespace ESM
 namespace CSMWorld
 {
     class RefIdAdapter;
+    struct NestedTableWrapperBase;
+    class NestedRefIdAdapterBase;
 
-    class RefIdColumn : public ColumnBase
+    class RefIdColumn : public NestableColumn
     {
             bool mEditable;
             bool mUserEditable;
@@ -26,15 +29,15 @@ namespace CSMWorld
         public:
 
             RefIdColumn (int columnId, Display displayType,
-                int flag = Flag_Table | Flag_Dialogue, bool editable = true,
-                bool userEditable = true);
+                         int flag = Flag_Table | Flag_Dialogue, bool editable = true,
+                         bool userEditable = true);
 
             virtual bool isEditable() const;
 
             virtual bool isUserEditable() const;
     };
 
-    class RefIdCollection : public CollectionBase
+    class RefIdCollection : public CollectionBase, public NestedCollection
     {
         private:
 
@@ -42,10 +45,14 @@ namespace CSMWorld
             std::deque<RefIdColumn> mColumns;
             std::map<UniversalId::Type, RefIdAdapter *> mAdapters;
 
+            std::vector<std::pair<const ColumnBase*, std::map<UniversalId::Type, NestedRefIdAdapterBase*> > > mNestedAdapters;
+
         private:
 
-            const RefIdAdapter& findAdaptor (UniversalId::Type) const;
+            const RefIdAdapter& findAdapter (UniversalId::Type) const;
             ///< Throws an exception if no adaptor for \a Type can be found.
+
+            const NestedRefIdAdapterBase& getNestedAdapter(const ColumnBase &column, UniversalId::Type type) const;
 
         public:
 
@@ -69,7 +76,7 @@ namespace CSMWorld
 
             virtual void removeRows (int index, int count);
 
-            virtual void cloneRecord(const std::string& origin, 
+            virtual void cloneRecord(const std::string& origin,
                                      const std::string& destination,
                                      const UniversalId::Type type);
 
@@ -110,11 +117,29 @@ namespace CSMWorld
             ///
             /// \return Success?
 
+            virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const;
+
+            virtual NestedTableWrapperBase* nestedTable(int row, int column) const;
+
+            virtual void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable);
+
+            virtual int getNestedRowsCount(int row, int column) const;
+
+            virtual int getNestedColumnsCount(int row, int column) const;
+
+            NestableColumn *getNestableColumn(int column);
+
+            virtual void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn);
+
+            virtual void removeNestedRows(int row, int column, int subRow);
+
+            virtual void addNestedRow(int row, int col, int position);
+
             void save (int index, ESM::ESMWriter& writer) const;
 
-	    const RefIdData& getDataSet() const; //I can't figure out a better name for this one :(
+            const RefIdData& getDataSet() const; //I can't figure out a better name for this one :(
+            void copyTo (int index, RefIdCollection& target) const;
     };
 }
 
 #endif
-

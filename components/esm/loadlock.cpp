@@ -8,26 +8,70 @@ namespace ESM
 {
     unsigned int Lockpick::sRecordId = REC_LOCK;
 
-void Lockpick::load(ESMReader &esm)
-{
-    mModel = esm.getHNString("MODL");
-    mName = esm.getHNOString("FNAM");
+    void Lockpick::load(ESMReader &esm, bool &isDeleted)
+    {
+        isDeleted = false;
 
-    esm.getHNT(mData, "LKDT", 16);
+        bool hasName = false;
+        bool hasData = false;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            switch (esm.retSubName().intval)
+            {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'M','O','D','L'>::value:
+                    mModel = esm.getHString();
+                    break;
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'L','K','D','T'>::value:
+                    esm.getHT(mData, 16);
+                    hasData = true;
+                    break;
+                case ESM::FourCC<'S','C','R','I'>::value:
+                    mScript = esm.getHString();
+                    break;
+                case ESM::FourCC<'I','T','E','X'>::value:
+                    mIcon = esm.getHString();
+                    break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+                    break;
+            }
+        }
 
-    mScript = esm.getHNOString("SCRI");
-    mIcon = esm.getHNOString("ITEX");
-}
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasData && !isDeleted)
+            esm.fail("Missing LKDT subrecord");
+    }
 
-void Lockpick::save(ESMWriter &esm) const
-{
-    esm.writeHNCString("MODL", mModel);
-    esm.writeHNOCString("FNAM", mName);
+    void Lockpick::save(ESMWriter &esm, bool isDeleted) const
+    {
+        esm.writeHNCString("NAME", mId);
 
-    esm.writeHNT("LKDT", mData, 16);
-    esm.writeHNOString("SCRI", mScript);
-    esm.writeHNOCString("ITEX", mIcon);
-}
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
+        esm.writeHNCString("MODL", mModel);
+        esm.writeHNOCString("FNAM", mName);
+
+        esm.writeHNT("LKDT", mData, 16);
+        esm.writeHNOString("SCRI", mScript);
+        esm.writeHNOCString("ITEX", mIcon);
+    }
 
     void Lockpick::blank()
     {

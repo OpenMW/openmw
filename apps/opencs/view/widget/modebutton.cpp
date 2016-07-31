@@ -1,4 +1,3 @@
-
 #include "modebutton.hpp"
 
 CSVWidget::ModeButton::ModeButton (const QIcon& icon, const QString& tooltip, QWidget *parent)
@@ -8,3 +7,8 @@ CSVWidget::ModeButton::ModeButton (const QIcon& icon, const QString& tooltip, QW
 void CSVWidget::ModeButton::activate (SceneToolbar *toolbar) {}
 
 void CSVWidget::ModeButton::deactivate (SceneToolbar *toolbar) {}
+
+bool CSVWidget::ModeButton::createContextMenu (QMenu *menu)
+{
+    return false;
+}

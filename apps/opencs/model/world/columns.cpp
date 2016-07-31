@@ -1,9 +1,9 @@
-
 #include "columns.hpp"
 
 #include <components/misc/stringops.hpp>
 
 #include "universalid.hpp"
+#include "infoselectwrapper.hpp"
 
 namespace CSMWorld
 {
@@ -35,6 +35,8 @@ namespace CSMWorld
             { ColumnId_Volume, "Volume" },
             { ColumnId_MinRange, "Min Range" },
             { ColumnId_MaxRange, "Max Range" },
+            { ColumnId_MinMagnitude, "Min Magnitude" },
+            { ColumnId_MaxMagnitude, "Max Magnitude" },
             { ColumnId_SoundFile, "Sound File" },
             { ColumnId_MapColour, "Map Colour" },
             { ColumnId_SleepEncounter, "Sleep Encounter" },
@@ -70,7 +72,6 @@ namespace CSMWorld
             { ColumnId_Weight, "Weight" },
             { ColumnId_EnchantmentPoints, "Enchantment Points" },
             { ColumnId_Quality, "Quality" },
-            { ColumnId_Ai, "AI" },
             { ColumnId_AiHello, "AI Hello" },
             { ColumnId_AiFlee, "AI Flee" },
             { ColumnId_AiFight, "AI Fight" },
@@ -92,7 +93,7 @@ namespace CSMWorld
             { ColumnId_Trainer, "Trainer" },
             { ColumnId_Spellmaking, "Spellmaking" },
             { ColumnId_EnchantingService, "Enchanting Service" },
-            { ColumnId_RepairService, "Repair Serivce" },
+            { ColumnId_RepairService, "Repair Service" },
             { ColumnId_ApparatusType, "Apparatus Type" },
             { ColumnId_ArmorType, "Armor Type" },
             { ColumnId_Health, "Health" },
@@ -107,7 +108,6 @@ namespace CSMWorld
             { ColumnId_OriginalCreature, "Original Creature" },
             { ColumnId_Biped, "Biped" },
             { ColumnId_HasWeapon, "Has Weapon" },
-            { ColumnId_NoMovement, "No Movement" },
             { ColumnId_Swims, "Swims" },
             { ColumnId_Flies, "Flies" },
             { ColumnId_Walks, "Walks" },
@@ -172,7 +172,12 @@ namespace CSMWorld
             { ColumnId_Rank, "Rank" },
             { ColumnId_Gender, "Gender" },
             { ColumnId_PcRank, "PC Rank" },
-            { ColumnId_ReferenceableId, "Referenceable ID" },
+            { ColumnId_ReferenceableId, "Object ID" },
+
+            { ColumnId_ContainerContent, "Content" },
+            { ColumnId_ItemCount, "Count" },
+            { ColumnId_InventoryItemId, "Item ID"},
+
             { ColumnId_CombatState, "Combat" },
             { ColumnId_MagicState, "Magic" },
             { ColumnId_StealthState, "Stealth" },
@@ -180,6 +185,20 @@ namespace CSMWorld
             { ColumnId_Vampire, "Vampire" },
             { ColumnId_BodyPartType, "Bodypart Type" },
             { ColumnId_MeshType, "Mesh Type" },
+
+            { ColumnId_ActorInventory, "Inventory" },
+            { ColumnId_SpellList, "Spells" },
+            { ColumnId_SpellId, "Spell ID"},
+
+            { ColumnId_NpcDestinations, "Destinations" },
+            { ColumnId_DestinationCell, "Dest Cell"},
+            { ColumnId_PosX, "Dest X"},
+            { ColumnId_PosY, "Dest Y"},
+            { ColumnId_PosZ, "Dest Z"},
+            { ColumnId_RotX, "Rotation X"},
+            { ColumnId_RotY, "Rotation Y"},
+            { ColumnId_RotZ, "Rotation Z"},
+
             { ColumnId_OwnerGlobal, "Owner Global" },
             { ColumnId_DefaultProfile, "Default Profile" },
             { ColumnId_BypassNewGame, "Bypass New Game" },
@@ -201,6 +220,115 @@ namespace CSMWorld
             { ColumnId_HitSound, "Hit Sound" },
             { ColumnId_AreaSound, "Area Sound" },
             { ColumnId_BoltSound, "Bolt Sound" },
+
+            { ColumnId_PathgridPoints, "Points" },
+            { ColumnId_PathgridIndex, "pIndex" },
+            { ColumnId_PathgridPosX, "X" },
+            { ColumnId_PathgridPosY, "Y" },
+            { ColumnId_PathgridPosZ, "Z" },
+            { ColumnId_PathgridEdges, "Edges" },
+            { ColumnId_PathgridEdgeIndex, "eIndex" },
+            { ColumnId_PathgridEdge0, "Point 0" },
+            { ColumnId_PathgridEdge1, "Point 1" },
+
+            { ColumnId_RegionSounds, "Sounds" },
+            { ColumnId_SoundName, "Sound Name" },
+            { ColumnId_SoundChance, "Chance" },
+
+            { ColumnId_FactionReactions, "Reactions" },
+            //{ ColumnId_FactionID, "Faction ID" },
+            { ColumnId_FactionReaction, "Reaction" },
+
+            { ColumnId_EffectList, "Effects" },
+            { ColumnId_EffectId, "Effect" },
+            //{ ColumnId_EffectAttribute, "Attrib" },
+            { ColumnId_EffectRange, "Range" },
+            { ColumnId_EffectArea, "Area" },
+
+            { ColumnId_AiPackageList, "Ai Packages" },
+            { ColumnId_AiPackageType, "Package" },
+            { ColumnId_AiWanderDist, "Wander Dist" },
+            { ColumnId_AiDuration, "Ai Duration" },
+            { ColumnId_AiWanderToD, "Wander ToD" },
+            //{ ColumnId_AiWanderIdle, "Wander Idle" },
+            { ColumnId_AiWanderRepeat, "Wander Repeat" },
+            { ColumnId_AiActivateName, "Activate" },
+            { ColumnId_AiTargetId, "Target ID" },
+            { ColumnId_AiTargetCell, "Target Cell" },
+
+            { ColumnId_PartRefList, "Part Reference" },
+            { ColumnId_PartRefType, "Type" },
+            { ColumnId_PartRefMale, "Male Part" },
+            { ColumnId_PartRefFemale, "Female Part" },
+
+            { ColumnId_LevelledList,"Levelled List" },
+            { ColumnId_LevelledItemId,"Levelled Item" },
+            { ColumnId_LevelledItemLevel,"Item Level" },
+            { ColumnId_LevelledItemType, "Calculate all levels <= player" },
+            { ColumnId_LevelledItemTypeEach, "Select a new item each instance" },
+            { ColumnId_LevelledItemChanceNone, "Chance None" },
+
+            { ColumnId_PowerList, "Powers" },
+            { ColumnId_Skill, "Skill" },
+
+            { ColumnId_InfoList, "Info List" },
+            { ColumnId_InfoCondition, "Info Conditions" },
+            { ColumnId_InfoCondFunc, "Function" },
+            { ColumnId_InfoCondVar, "Variable/Object" },
+            { ColumnId_InfoCondComp, "Relation" },
+            { ColumnId_InfoCondValue, "Values" },
+            { ColumnId_OriginalCell, "Original Cell" },
+
+            { ColumnId_NpcAttributes, "NPC Attributes" },
+            { ColumnId_NpcSkills, "NPC Skill" },
+            { ColumnId_UChar, "Value [0..255]" },
+            { ColumnId_NpcMisc, "NPC Misc" },
+            { ColumnId_Level, "Level" },
+            { ColumnId_NpcFactionID, "Faction ID" },
+            { ColumnId_Mana, "Mana" },
+            { ColumnId_Fatigue, "Fatigue" },
+            { ColumnId_NpcDisposition, "NPC Disposition" },
+            { ColumnId_NpcReputation, "Reputation" },
+            { ColumnId_NpcRank, "NPC Rank" },
+            { ColumnId_Gold, "Gold" },
+            { ColumnId_NpcPersistence, "Persistent" },
+
+            { ColumnId_RaceAttributes, "Race Attributes" },
+            { ColumnId_Male, "Male" },
+            { ColumnId_RaceSkillBonus, "Skill Bonus" },
+            { ColumnId_RaceBonus, "Bonus" },
+
+            { ColumnId_Interior, "Interior" },
+            { ColumnId_Ambient, "Ambient" },
+            { ColumnId_Sunlight, "Sunlight" },
+            { ColumnId_Fog, "Fog" },
+            { ColumnId_FogDensity, "Fog Density" },
+            { ColumnId_WaterLevel, "Water Level" },
+            { ColumnId_MapColor, "Map Color" },
+
+            { ColumnId_FileFormat, "File Format" },
+            { ColumnId_FileDescription, "File Description" },
+            { ColumnId_Author, "Author" },
+
+            { ColumnId_CreatureAttributes, "Creature Attributes" },
+            { ColumnId_AttributeValue, "Attrib Value" },
+            { ColumnId_CreatureAttack, "Creature Attack" },
+            { ColumnId_MinAttack, "Min Attack" },
+            { ColumnId_MaxAttack, "Max Attack" },
+            { ColumnId_CreatureMisc, "Creature Misc" },
+
+            { ColumnId_Idle1, "Idle 1" },
+            { ColumnId_Idle2, "Idle 2" },
+            { ColumnId_Idle3, "Idle 3" },
+            { ColumnId_Idle4, "Idle 4" },
+            { ColumnId_Idle5, "Idle 5" },
+            { ColumnId_Idle6, "Idle 6" },
+            { ColumnId_Idle7, "Idle 7" },
+            { ColumnId_Idle8, "Idle 8" },
+
+            { ColumnId_RegionWeather, "Weather" },
+            { ColumnId_WeatherName, "Type" },
+            { ColumnId_WeatherChance, "Percent Chance" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
@@ -228,6 +356,7 @@ namespace CSMWorld
             { ColumnId_Skill4, "Skill 4" },
             { ColumnId_Skill5, "Skill 5" },
             { ColumnId_Skill6, "Skill 6" },
+            { ColumnId_Skill7, "Skill 7" },
 
             { -1, 0 } // end marker
         };
@@ -261,6 +390,7 @@ namespace
         "Combat", "Magic", "Stealth", 0
     };
 
+    // see ESM::Attribute::AttributeID in <component/esm/attr.hpp>
     static const char *sAttributes[] =
     {
         "Strength", "Intelligence", "Willpower", "Agility", "Speed", "Endurance", "Personality",
@@ -353,6 +483,74 @@ namespace
         "Alteration", "Conjuration", "Destruction", "Illusion", "Mysticism", "Restoration", 0
     };
 
+    // impact from magic effects, see ESM::Skill::SkillEnum in <component/esm/loadskil.hpp>
+    static const char *sSkills[] =
+    {
+        "Block", "Armorer", "MediumArmor", "HeavyArmor", "BluntWeapon",
+        "LongBlade", "Axe", "Spear", "Athletics", "Enchant",
+        "Destruction", "Alteration", "Illusion", "Conjuration", "Mysticism",
+        "Restoration", "Alchemy", "Unarmored", "Security", "Sneak",
+        "Acrobatics", "LightArmor", "ShortBlade", "Marksman", "Mercantile",
+        "Speechcraft", "HandToHand", 0
+    };
+
+    // range of magic effects, see ESM::RangeType in <component/esm/defs.hpp>
+    static const char *sEffectRange[] =
+    {
+        "Self", "Touch", "Target", 0
+    };
+
+    // magic effect names, see ESM::MagicEffect::Effects in <component/esm/loadmgef.hpp>
+    static const char *sEffectId[] =
+    {
+        "WaterBreathing", "SwiftSwim", "WaterWalking", "Shield", "FireShield",
+        "LightningShield", "FrostShield", "Burden", "Feather", "Jump",
+        "Levitate", "SlowFall", "Lock", "Open", "FireDamage",
+        "ShockDamage", "FrostDamage", "DrainAttribute", "DrainHealth", "DrainMagicka",
+        "DrainFatigue", "DrainSkill", "DamageAttribute", "DamageHealth", "DamageMagicka",
+        "DamageFatigue", "DamageSkill", "Poison", "WeaknessToFire", "WeaknessToFrost",
+        "WeaknessToShock", "WeaknessToMagicka", "WeaknessToCommonDisease", "WeaknessToBlightDisease", "WeaknessToCorprusDisease",
+        "WeaknessToPoison", "WeaknessToNormalWeapons", "DisintegrateWeapon", "DisintegrateArmor", "Invisibility",
+        "Chameleon", "Light", "Sanctuary", "NightEye", "Charm",
+        "Paralyze", "Silence", "Blind", "Sound", "CalmHumanoid",
+        "CalmCreature", "FrenzyHumanoid", "FrenzyCreature", "DemoralizeHumanoid", "DemoralizeCreature",
+        "RallyHumanoid", "RallyCreature", "Dispel", "Soultrap", "Telekinesis",
+        "Mark", "Recall", "DivineIntervention", "AlmsiviIntervention", "DetectAnimal",
+        "DetectEnchantment", "DetectKey", "SpellAbsorption", "Reflect", "CureCommonDisease",
+        "CureBlightDisease", "CureCorprusDisease", "CurePoison", "CureParalyzation", "RestoreAttribute",
+        "RestoreHealth", "RestoreMagicka", "RestoreFatigue", "RestoreSkill", "FortifyAttribute",
+        "FortifyHealth", "FortifyMagicka", "FortifyFatigue", "FortifySkill", "FortifyMaximumMagicka",
+        "AbsorbAttribute", "AbsorbHealth", "AbsorbMagicka", "AbsorbFatigue", "AbsorbSkill",
+        "ResistFire", "ResistFrost", "ResistShock", "ResistMagicka", "ResistCommonDisease",
+        "ResistBlightDisease", "ResistCorprusDisease", "ResistPoison", "ResistNormalWeapons", "ResistParalysis",
+        "RemoveCurse", "TurnUndead", "SummonScamp", "SummonClannfear", "SummonDaedroth",
+        "SummonDremora", "SummonAncestralGhost", "SummonSkeletalMinion", "SummonBonewalker", "SummonGreaterBonewalker",
+        "SummonBonelord", "SummonWingedTwilight", "SummonHunger", "SummonGoldenSaint", "SummonFlameAtronach",
+        "SummonFrostAtronach", "SummonStormAtronach", "FortifyAttack", "CommandCreature", "CommandHumanoid",
+        "BoundDagger", "BoundLongsword", "BoundMace", "BoundBattleAxe", "BoundSpear",
+        "BoundLongbow", "ExtraSpell", "BoundCuirass", "BoundHelm", "BoundBoots",
+        "BoundShield", "BoundGloves", "Corprus", "Vampirism", "SummonCenturionSphere",
+        "SunDamage", "StuntedMagicka", "SummonFabricant", "SummonWolf", "SummonBear",
+        "SummonBonewolf", "SummonCreature04", "SummonCreature05", 0
+    };
+
+    // see ESM::PartReferenceType in <component/esm/loadarmo.hpp>
+    static const char *sPartRefType[] =
+    {
+        "Head", "Hair", "Neck", "Cuirass", "Groin",
+        "Skirt", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist",
+        "Shield", "Right Forearm", "Left Forearm", "Right Upperarm", "Left Upperarm",
+        "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee",
+        "Left Knee", "Right Leg", "Left Leg", "Right Pauldron", "Left Pauldron",
+        "Weapon", "Tail", 0
+    };
+
+    // see the enums in <component/esm/aipackage.hpp>
+    static const char *sAiPackageType[] =
+    {
+        "AI Wander", "AI Travel", "AI Follow", "AI Escort", "AI Activate", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -375,6 +573,13 @@ namespace
             case CSMWorld::Columns::ColumnId_MeshType: return sMeshTypes;
             case CSMWorld::Columns::ColumnId_SoundGeneratorType: return sSoundGeneratorType;
             case CSMWorld::Columns::ColumnId_School: return sSchools;
+            case CSMWorld::Columns::ColumnId_Skill: return sSkills;
+            case CSMWorld::Columns::ColumnId_EffectRange: return sEffectRange;
+            case CSMWorld::Columns::ColumnId_EffectId: return sEffectId;
+            case CSMWorld::Columns::ColumnId_PartRefType: return sPartRefType;
+            case CSMWorld::Columns::ColumnId_AiPackageType: return sAiPackageType;
+            case CSMWorld::Columns::ColumnId_InfoCondFunc: return CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings;
+            case CSMWorld::Columns::ColumnId_InfoCondComp: return CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings;
 
             default: return 0;
         }

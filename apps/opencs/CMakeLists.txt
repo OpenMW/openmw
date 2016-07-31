@@ -4,10 +4,8 @@ set (OPENCS_SRC main.cpp
 
 opencs_units (. editor)
 
-set (CMAKE_BUILD_TYPE DEBUG)
-
 opencs_units (model/doc
-    document operation saving documentmanager loader runner
+    document operation saving documentmanager loader runner operationholder
     )
 
 opencs_units_noqt (model/doc
@@ -20,14 +18,15 @@ opencs_hdrs_noqt (model/doc
 
 
 opencs_units (model/world
-    idtable idtableproxymodel regionmap data commanddispatcher idtablebase resourcetable
+    idtable idtableproxymodel regionmap data commanddispatcher idtablebase resourcetable nestedtableproxymodel idtree infotableproxymodel
     )
 
 
 opencs_units_noqt (model/world
-    universalid record commands columnbase scriptcontext cell refidcollection
+    universalid record commands columnbase columnimp scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
-    pathgrid landtexture land
+    pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
+    idcompletionmanager metadata defaultgmsts infoselectwrapper commandmacro
     )
 
 opencs_hdrs_noqt (model/world
@@ -36,18 +35,24 @@ opencs_hdrs_noqt (model/world
 
 
 opencs_units (model/tools
-    tools reportmodel
+    tools reportmodel mergeoperation
     )
 
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
-    birthsigncheck spellcheck referenceablecheck scriptcheck bodypartcheck
+    birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
+    startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
+    mergestages gmstcheck topicinfocheck journalcheck
+    )
+
+opencs_hdrs_noqt (model/tools
+    mergestate
     )
 
 
 opencs_units (view/doc
     viewmanager view operations operation subview startup filedialog newgame
-    filewidget adjusterwidget loader globaldebugprofilemenu runlogsubview
+    filewidget adjusterwidget loader globaldebugprofilemenu runlogsubview sizehint
     )
 
 
@@ -62,68 +67,56 @@ opencs_hdrs_noqt (view/doc
 
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
-    cellcreator referenceablecreator referencecreator scenesubview
-    infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable
+    cellcreator pathgridcreator referenceablecreator startscriptcreator referencecreator scenesubview
+    infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
+    dialoguespinbox recordbuttonbar tableeditidaction scripterrortable extendedcommandconfigurator
     )
 
 opencs_units_noqt (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
-    scripthighlighter idvalidator dialoguecreator physicssystem
+    scripthighlighter idvalidator dialoguecreator idcompletiondelegate
+    colordelegate dragdroputils
     )
 
 opencs_units (view/widget
     scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle scenetoolrun modebutton
-    scenetooltoggle2
+    scenetooltoggle2 completerpopup coloreditor colorpickerpopup droplineedit
     )
 
 opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
-    previewwidget editmode
+    previewwidget editmode instancemode instanceselectionmode instancemovemode
+    orbitcameramode pathgridmode selectionmode pathgridselectionmode
     )
 
 opencs_units_noqt (view/render
-    navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
-    lightingbright object cell terrainstorage textoverlay overlaymask overlaysystem mousestate
+    lighting lightingday lightingnight lightingbright object cell terrainstorage tagbase
+    cellarrow cellmarker cellborder cameracontroller pathgrid
     )
 
 opencs_hdrs_noqt (view/render
-    elements
+    mask
     )
 
 
 opencs_units (view/tools
-    reportsubview reporttable
+    reportsubview reporttable searchsubview searchbox merge
     )
 
 opencs_units_noqt (view/tools
     subviews
     )
 
-opencs_units (view/settings
-    settingwindow
-    dialog
-    page
-    view
-    booleanview
-    textview
-    listview
-    rangeview
-    resizeablestackedwidget
-    spinbox
+opencs_units (view/prefs
+    dialogue pagebase page
     )
 
-opencs_units_noqt (view/settings
-    frame
+opencs_units (model/prefs
+    state setting intsetting doublesetting boolsetting enumsetting coloursetting
     )
 
-opencs_units (model/settings
-    usersettings
-    setting
-    connector
-    )
-
-opencs_hdrs_noqt (model/settings
-    support
+opencs_units_noqt (model/prefs
+    category
     )
 
 opencs_units_noqt (model/filter
@@ -146,37 +139,34 @@ set (OPENCS_UI
     ${CMAKE_SOURCE_DIR}/files/ui/filedialog.ui
     )
 
-source_group (opencs FILES ${OPENCS_SRC} ${OPENCS_HDR})
+source_group (openmw-cs FILES ${OPENCS_SRC} ${OPENCS_HDR})
 
 if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-set(BOOST_COMPONENTS system filesystem program_options thread wave)
-if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
-endif(WIN32)
+if (DESIRED_QT_VERSION MATCHES 4)
+    include(${QT_USE_FILE})
+    qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+    qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
+    qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+else()
+    qt5_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+    qt5_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
+    qt5_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+endif()
 
-find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
-
-find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
-include(${QT_USE_FILE})
-
-qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
-qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
-qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${BULLET_INCLUDE_DIRS})
+# for compiled .ui files
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if(APPLE)
-    set (OPENCS_MAC_ICON ${CMAKE_SOURCE_DIR}/files/mac/opencs.icns)
+    set (OPENCS_MAC_ICON ${CMAKE_SOURCE_DIR}/files/mac/openmw-cs.icns)
 else()
     set (OPENCS_MAC_ICON "")
 endif(APPLE)
 
-add_executable(opencs
+add_executable(openmw-cs
     MACOSX_BUNDLE
-    ${OENGINE_BULLET}
     ${OPENCS_SRC}
     ${OPENCS_UI_HDR}
     ${OPENCS_MOC_SRC}
@@ -185,31 +175,55 @@ add_executable(opencs
 )
 
 if(APPLE)
-    set_target_properties(opencs PROPERTIES
+    set_target_properties(openmw-cs PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}"
-        OUTPUT_NAME "OpenCS"
-        MACOSX_BUNDLE_ICON_FILE "opencs.icns"
+        OUTPUT_NAME "OpenMW-CS"
+        MACOSX_BUNDLE_ICON_FILE "openmw-cs.icns"
         MACOSX_BUNDLE_BUNDLE_NAME "OpenCS"
         MACOSX_BUNDLE_GUI_IDENTIFIER "org.openmw.opencs"
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${OPENMW_VERSION}
         MACOSX_BUNDLE_BUNDLE_VERSION ${OPENMW_VERSION}
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/files/mac/openmw-cs-Info.plist.in"
         )
 
     set_source_files_properties(${OPENCS_MAC_ICON} PROPERTIES
         MACOSX_PACKAGE_LOCATION Resources)
 endif(APPLE)
 
-target_link_libraries(opencs
-    ${OGRE_LIBRARIES}
-    ${OGRE_Overlay_LIBRARIES}
-    ${OGRE_STATIC_PLUGINS}
-    ${SHINY_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${BULLET_LIBRARIES}
-    ${QT_LIBRARIES}
+target_link_libraries(openmw-cs
+    ${OSG_LIBRARIES}
+    ${OPENTHREADS_LIBRARIES}
+    ${OSGTEXT_LIBRARIES}
+    ${OSGUTIL_LIBRARIES}
+    ${OSGVIEWER_LIBRARIES}
+    ${OSGGA_LIBRARIES}
+    ${OSGFX_LIBRARIES}
+    ${EXTERN_OSGQT_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     components
 )
 
+if (DESIRED_QT_VERSION MATCHES 4)
+    target_link_libraries(openmw-cs
+    ${QT_QTGUI_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTOPENGL_LIBRARY})
+
+    if (WIN32)
+        target_link_libraries(openmw-cs ${QT_QTMAIN_LIBRARY})
+    endif()
+else()
+    qt5_use_modules(openmw-cs Widgets Core Network OpenGL)
+endif()
+
+if (WIN32)
+    target_link_libraries(openmw-cs ${Boost_LOCALE_LIBRARY})
+endif()
+
+
 if(APPLE)
-    INSTALL(TARGETS opencs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)
+    INSTALL(TARGETS openmw-cs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)
 endif()

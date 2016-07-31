@@ -3,11 +3,6 @@
 
 #include "windowbase.hpp"
 
-/*
-  This file contains the dialog for choosing a birth sign.
-  Layout is defined by resources/mygui/openmw_chargen_race.layout.
- */
-
 namespace MWGui
 {
     class BirthDialog : public WindowModal

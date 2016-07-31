@@ -5,7 +5,6 @@
 
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
-#include <QLineEdit>
 
 #include "../../model/world/columnbase.hpp"
 #include "../../model/doc/document.hpp"
@@ -16,6 +15,12 @@ namespace CSMWorld
 {
     class TableMimeData;
     class UniversalId;
+    class CommandDispatcher;
+}
+
+namespace CSMPrefs
+{
+    class Setting;
 }
 
 namespace CSVWorld
@@ -51,7 +56,8 @@ namespace CSVWorld
 
             virtual ~CommandDelegateFactory();
 
-            virtual CommandDelegate *makeDelegate (CSMDoc::Document& document, QObject *parent)
+            virtual CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher,
+                CSMDoc::Document& document, QObject *parent)
                 const = 0;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
     };
@@ -78,7 +84,8 @@ namespace CSVWorld
             ///
             /// This function must not be called more than once per value of \a display.
 
-            CommandDelegate *makeDelegate (CSMWorld::ColumnBase::Display display, CSMDoc::Document& document,
+            CommandDelegate *makeDelegate (CSMWorld::ColumnBase::Display display,
+                CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document,
                 QObject *parent) const;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
             ///
@@ -88,31 +95,14 @@ namespace CSVWorld
 
     };
 
-    class DropLineEdit : public QLineEdit
-    {
-        Q_OBJECT
-
-        public:
-            DropLineEdit(QWidget *parent);
-
-        private:
-            void dragEnterEvent(QDragEnterEvent *event);
-
-            void dragMoveEvent(QDragMoveEvent *event);
-
-            void dropEvent(QDropEvent *event);
-
-        signals:
-            void tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data, const CSMDoc::Document* document);
-    };
-
     ///< \brief Use commands instead of manipulating the model directly
     class CommandDelegate : public QStyledItemDelegate
     {
             Q_OBJECT
 
-            CSMDoc::Document& mDocument;
             bool mEditLock;
+            CSMWorld::CommandDispatcher *mCommandDispatcher;
+            CSMDoc::Document& mDocument;
 
         protected:
 
@@ -120,20 +110,28 @@ namespace CSVWorld
 
             CSMDoc::Document& getDocument() const;
 
+            CSMWorld::ColumnBase::Display getDisplayTypeFromIndex(const QModelIndex &index) const;
+
             virtual void setModelDataImp (QWidget *editor, QAbstractItemModel *model,
                 const QModelIndex& index) const;
 
         public:
 
-            CommandDelegate (CSMDoc::Document& document, QObject *parent);
+            /// \param commandDispatcher If CommandDelegate will be only be used on read-only
+            /// cells, a 0-pointer can be passed here.
+            CommandDelegate (CSMWorld::CommandDispatcher *commandDispatcher, CSMDoc::Document& document, QObject *parent);
 
             virtual void setModelData (QWidget *editor, QAbstractItemModel *model,
                 const QModelIndex& index) const;
 
             virtual QWidget *createEditor (QWidget *parent,
                                            const QStyleOptionViewItem& option,
+                                           const QModelIndex& index) const;
+
+            virtual QWidget *createEditor (QWidget *parent,
+                                           const QStyleOptionViewItem& option,
                                            const QModelIndex& index,
-                                           CSMWorld::ColumnBase::Display display = CSMWorld::ColumnBase::Display_None) const;
+                                           CSMWorld::ColumnBase::Display display) const;
 
             void setEditLock (bool locked);
 
@@ -141,13 +139,13 @@ namespace CSVWorld
 
             ///< \return Does column require update?
 
-            virtual void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay = false) const;
+            virtual void setEditorData (QWidget *editor, const QModelIndex& index) const;
 
+            virtual void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const;
 
-        public slots:
-
-            virtual void updateUserSetting
-                            (const QString &name, const QStringList &list) {}
+            /// \attention This is not a slot. For ordering reasons this function needs to be
+            /// called manually from the parent object's settingChanged function.
+            virtual void settingChanged (const CSMPrefs::Setting *setting);
     };
 }
 

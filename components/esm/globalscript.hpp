@@ -12,7 +12,7 @@ namespace ESM
 
     struct GlobalScript
     {
-        std::string mId;
+        std::string mId; /// \note must be lowercase
         Locals mLocals;
         int mRunning;
         std::string mTargetId; // for targeted scripts

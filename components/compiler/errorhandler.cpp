@@ -1,4 +1,3 @@
-
 #include "errorhandler.hpp"
 
 namespace Compiler
@@ -33,7 +32,10 @@ namespace Compiler
 
     void ErrorHandler::warning (const std::string& message, const TokenLoc& loc)
     {
-        if (mWarningsMode==1)
+        if (mWarningsMode==1 ||
+            // temporarily change from mode 2 to mode 1 if error downgrading is enabled to
+            // avoid infinite recursion
+            (mWarningsMode==2 && mDowngradeErrors))
         {
             ++mWarnings;
             report (message, loc, WarningMessage);

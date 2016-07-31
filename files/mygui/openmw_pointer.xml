@@ -23,13 +23,13 @@
         <Property key="Point" value="17 15"/>
         <Property key="Size" value="32 32"/>
         <Property key="Resource" value="HResizePointerImage"/>
-        <Property key="Rotation" value="45"/>
+        <Property key="Rotation" value="-45"/>
     </Resource>
     <Resource type="ResourceImageSetPointer" name="dresize2">
         <Property key="Point" value="15 15"/>
         <Property key="Size" value="32 32"/>
         <Property key="Resource" value="HResizePointerImage"/>
-        <Property key="Rotation" value="-45"/>
+        <Property key="Rotation" value="45"/>
     </Resource>
     <Resource type="ResourceImageSetPointer" name="drop_ground">
         <Property key="Point" value="0 24"/>

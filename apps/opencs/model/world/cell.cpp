@@ -1,20 +1,16 @@
-
 #include "cell.hpp"
 
 #include <sstream>
 
-void CSMWorld::Cell::load (ESM::ESMReader &esm)
+void CSMWorld::Cell::load (ESM::ESMReader &esm, bool &isDeleted)
 {
-    mName = mId;
+    ESM::Cell::load (esm, isDeleted, false);
 
-    ESM::Cell::load (esm, false);
-
-    if (!(mData.mFlags & Interior))
+    mId = mName;
+    if (isExterior())
     {
         std::ostringstream stream;
-
         stream << "#" << mData.mX << " " << mData.mY;
-
         mId = stream.str();
     }
 }

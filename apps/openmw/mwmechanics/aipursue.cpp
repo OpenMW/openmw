@@ -1,14 +1,12 @@
 #include "aipursue.hpp"
 
 #include <components/esm/aisequence.hpp>
+#include <components/esm/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"
-#include "../mwworld/cellstore.hpp"
-
-#include "../mwmechanics/creaturestats.hpp"
 
 #include "movement.hpp"
 #include "creaturestats.hpp"
@@ -30,7 +28,7 @@ AiPursue *MWMechanics::AiPursue::clone() const
 {
     return new AiPursue(*this);
 }
-bool AiPursue::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
+bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
     if(actor.getClass().getCreatureStats(actor).isDead())
         return true;
@@ -42,6 +40,9 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, AiState& state, float duratio
                                                                                                         // with the MechanicsManager
             )
         return true; //Target doesn't exist
+
+    if (isTargetMagicallyHidden(target))
+        return true;
 
     if(target.getClass().getCreatureStats(target).isDead())
         return true;

@@ -189,37 +189,69 @@ namespace ESM
 {
     unsigned int MagicEffect::sRecordId = REC_MGEF;
 
-void MagicEffect::load(ESMReader &esm)
+void MagicEffect::load(ESMReader &esm, bool &isDeleted)
 {
-  esm.getHNT(mIndex, "INDX");
+    isDeleted = false; // MagicEffect record can't be deleted now (may be changed in the future)
+
+    esm.getHNT(mIndex, "INDX");
 
     mId = indexToId (mIndex);
 
-  esm.getHNT(mData, "MEDT", 36);
-  if (esm.getFormat() == 0)
-  {
-      // don't allow mods to change fixed flags in the legacy format
-      mData.mFlags &= (AllowSpellmaking | AllowEnchanting | NegativeLight);
-      if (mIndex>=0 && mIndex<NumberOfHardcodedFlags)
+    esm.getHNT(mData, "MEDT", 36);
+    if (esm.getFormat() == 0)
+    {
+        // don't allow mods to change fixed flags in the legacy format
+        mData.mFlags &= (AllowSpellmaking | AllowEnchanting | NegativeLight);
+        if (mIndex>=0 && mIndex<NumberOfHardcodedFlags)
         mData.mFlags |= HardcodedFlags[mIndex];
-  }
+    }
 
-  mIcon = esm.getHNOString("ITEX");
-  mParticle = esm.getHNOString("PTEX");
-
-  mBoltSound = esm.getHNOString("BSND");
-  mCastSound = esm.getHNOString("CSND");
-  mHitSound = esm.getHNOString("HSND");
-  mAreaSound = esm.getHNOString("ASND");
-
-  mCasting = esm.getHNOString("CVFX");
-  mBolt = esm.getHNOString("BVFX");
-  mHit = esm.getHNOString("HVFX");
-  mArea = esm.getHNOString("AVFX");
-
-  mDescription = esm.getHNOString("DESC");
+    // vanilla MW accepts the _SND subrecords before or after DESC... I hope
+    // this isn't true for other records, or we have to do a mass-refactor
+    while (esm.hasMoreSubs())
+    {
+        esm.getSubName();
+        switch (esm.retSubName().intval)
+        {
+            case ESM::FourCC<'I','T','E','X'>::value:
+                mIcon = esm.getHString();
+                break;
+            case ESM::FourCC<'P','T','E','X'>::value:
+                mParticle = esm.getHString();
+                break;
+            case ESM::FourCC<'B','S','N','D'>::value:
+                mBoltSound = esm.getHString();
+                break;
+            case ESM::FourCC<'C','S','N','D'>::value:
+                mCastSound = esm.getHString();
+                break;
+            case ESM::FourCC<'H','S','N','D'>::value:
+                mHitSound = esm.getHString();
+                break;
+            case ESM::FourCC<'A','S','N','D'>::value:
+                mAreaSound = esm.getHString();
+                break;
+            case ESM::FourCC<'C','V','F','X'>::value:
+                mCasting = esm.getHString();
+                break;
+            case ESM::FourCC<'B','V','F','X'>::value:
+                mBolt = esm.getHString();
+                break;
+            case ESM::FourCC<'H','V','F','X'>::value:
+                mHit = esm.getHString();
+                break;
+            case ESM::FourCC<'A','V','F','X'>::value:
+                mArea = esm.getHString();
+                break;
+            case ESM::FourCC<'D','E','S','C'>::value:
+                mDescription = esm.getHString();
+                break;
+            default:
+                esm.fail("Unknown subrecord");
+        }
+    }
 }
-void MagicEffect::save(ESMWriter &esm) const
+void MagicEffect::save(ESMWriter &esm, bool /*isDeleted*/) const
 {
     esm.writeHNT("INDX", mIndex);
 

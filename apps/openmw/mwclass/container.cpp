@@ -1,4 +1,3 @@
-
 #include "container.hpp"
 
 #include <components/esm/loadcont.hpp>
@@ -8,6 +7,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/failedaction.hpp"
@@ -18,36 +18,34 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/actionopen.hpp"
 #include "../mwworld/actiontrap.hpp"
-#include "../mwworld/physicssystem.hpp"
+#include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
-#include "../mwrender/actors.hpp"
+#include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
-namespace
+namespace MWClass
 {
-    struct ContainerCustomData : public MWWorld::CustomData
+    class ContainerCustomData : public MWWorld::CustomData
     {
+    public:
         MWWorld::ContainerStore mContainerStore;
 
         virtual MWWorld::CustomData *clone() const;
+
+        virtual ContainerCustomData& asContainerCustomData()
+        {
+            return *this;
+        }
     };
 
     MWWorld::CustomData *ContainerCustomData::clone() const
     {
         return new ContainerCustomData (*this);
-    }
-}
-
-namespace MWClass
-{
-    std::string Container::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Container>()->mBase->mId;
     }
 
     void Container::ensureCustomData (const MWWorld::Ptr& ptr) const
@@ -59,8 +57,10 @@ namespace MWClass
             MWWorld::LiveCellRef<ESM::Container> *ref =
                 ptr.get<ESM::Container>();
 
+            // setting ownership not needed, since taking items from a container inherits the
+            // container's owner automatically
             data->mContainerStore.fill(
-                ref->mBase->mInventory, ptr.getCellRef().getOwner(), ptr.getCellRef().getFaction(), MWBase::Environment::get().getWorld()->getStore());
+                ref->mBase->mInventory, "");
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -73,6 +73,7 @@ namespace MWClass
             ptr.get<ESM::Container>();
         if (ref->mBase->mFlags & ESM::Container::Respawn)
         {
+            MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
             ptr.getRefData().setCustomData(NULL);
         }
     }
@@ -82,31 +83,29 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().getOwner(), ptr.getCellRef().getFaction());
+
+        // setting ownership not needed, since taking items from a container inherits the
+        // container's owner automatically
+        store.restock(list, ptr, "");
     }
 
-    void Container::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Container::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        const std::string model = getModel(ptr);
         if (!model.empty()) {
-            MWRender::Actors& actors = renderingInterface.getActors();
-            actors.insertActivator(ptr);
+            renderingInterface.getObjects().insertModel(ptr, model, true);
         }
     }
 
-    void Container::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Container::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr, model);
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
-    std::string Container::getModel(const MWWorld::Ptr &ptr) const
+    std::string Container::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -138,17 +137,18 @@ namespace MWClass
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
 
-        bool needKey = ptr.getCellRef().getLockLevel() > 0;
+        bool isLocked = ptr.getCellRef().getLockLevel() > 0;
+        bool isTrapped = !ptr.getCellRef().getTrap().empty();
         bool hasKey = false;
         std::string keyName;
 
         // make key id lowercase
         std::string keyId = ptr.getCellRef().getKey();
-        Misc::StringUtils::toLower(keyId);
+        Misc::StringUtils::lowerCaseInPlace(keyId);
         for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
         {
             std::string refId = it->getCellRef().getRefId();
-            Misc::StringUtils::toLower(refId);
+            Misc::StringUtils::lowerCaseInPlace(refId);
             if (refId == keyId)
             {
                 hasKey = true;
@@ -156,18 +156,26 @@ namespace MWClass
             }
         }
 
-        if (needKey && hasKey)
+        if ((isLocked || isTrapped) && hasKey)
         {
             MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}");
-            unlock(ptr);
+            if(isLocked)
+                unlock(ptr);
             // using a key disarms the trap
-            ptr.getCellRef().setTrap("");
+            if(isTrapped)
+            {
+                ptr.getCellRef().setTrap("");
+                MWBase::Environment::get().getSoundManager()->playSound3D(ptr,
+                    "Disarm Trap", 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
+                    MWBase::SoundManager::Play_Normal);
+                isTrapped = false;
+            }
         }
 
 
-        if (!needKey || hasKey)
+        if (!isLocked || hasKey)
         {
-            if(ptr.getCellRef().getTrap().empty())
+            if(!isTrapped)
             {
                 boost::shared_ptr<MWWorld::Action> action (new MWWorld::ActionOpen(ptr));
                 return action;
@@ -175,7 +183,7 @@ namespace MWClass
             else
             {
                 // Activate trap
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(actor, ptr.getCellRef().getTrap(), ptr));
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(ptr.getCellRef().getTrap(), ptr));
                 action->setSound(trapActivationSound);
                 return action;
             }
@@ -188,10 +196,9 @@ namespace MWClass
         }
     }
 
-    std::string Container::getName (const MWWorld::Ptr& ptr) const
+    std::string Container::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         return ref->mBase->mName;
     }
@@ -201,13 +208,12 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
+        return ptr.getRefData().getCustomData()->asContainerCustomData().mContainerStore;
     }
 
-    std::string Container::getScript (const MWWorld::Ptr& ptr) const
+    std::string Container::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         return ref->mBase->mScript;
     }
@@ -219,18 +225,16 @@ namespace MWClass
         registerClass (typeid (ESM::Container).name(), instance);
     }
 
-    bool Container::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Container::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName;
@@ -279,19 +283,22 @@ namespace MWClass
         ptr.getCellRef().setLockLevel(-abs(ptr.getCellRef().getLockLevel())); //Makes lockLevel negative
     }
 
-
-    MWWorld::Ptr
-    Container::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    bool Container::canLock(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
-
-        return MWWorld::Ptr(&cell.get<ESM::Container>().insert(*ref), &cell);
+        return true;
     }
 
-    void Container::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
-        const
+    MWWorld::Ptr Container::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
+
+        return MWWorld::Ptr(cell.insert(ref), &cell);
+    }
+
+    void Container::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const
+    {
+        if (!state.mHasCustomState)
+            return;
         const ESM::ContainerState& state2 = dynamic_cast<const ESM::ContainerState&> (state);
 
         if (!ptr.getRefData().getCustomData())
@@ -305,14 +312,17 @@ namespace MWClass
             readState (state2.mInventory);
     }
 
-    void Container::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
-        const
+    void Container::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
     {
         ESM::ContainerState& state2 = dynamic_cast<ESM::ContainerState&> (state);
 
-        ensureCustomData (ptr);
+        if (!ptr.getRefData().getCustomData())
+        {
+            state.mHasCustomState = false;
+            return;
+        }
 
-        dynamic_cast<ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
+        dynamic_cast<const ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
             writeState (state2.mInventory);
     }
 }

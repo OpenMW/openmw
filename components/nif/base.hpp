@@ -32,26 +32,8 @@ public:
     float timeStart, timeStop;
     ControlledPtr target;
 
-    void read(NIFStream *nif)
-    {
-        next.read(nif);
-
-        flags = nif->getUShort();
-
-        frequency = nif->getFloat();
-        phase = nif->getFloat();
-        timeStart = nif->getFloat();
-        timeStop = nif->getFloat();
-
-        target.read(nif);
-    }
-
-    void post(NIFFile *nif)
-    {
-        Record::post(nif);
-        next.post(nif);
-        target.post(nif);
-    }
+    void read(NIFStream *nif);
+    void post(NIFFile *nif);
 };
 
 /// Anything that has a controller

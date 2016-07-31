@@ -8,23 +8,65 @@ namespace ESM
 {
     unsigned int Door::sRecordId = REC_DOOR;
 
-void Door::load(ESMReader &esm)
-{
-    mModel = esm.getHNString("MODL");
-    mName = esm.getHNOString("FNAM");
-    mScript = esm.getHNOString("SCRI");
-    mOpenSound = esm.getHNOString("SNAM");
-    mCloseSound = esm.getHNOString("ANAM");
-}
+    void Door::load(ESMReader &esm, bool &isDeleted)
+    {
+        isDeleted = false;
 
-void Door::save(ESMWriter &esm) const
-{
-    esm.writeHNCString("MODL", mModel);
-    esm.writeHNOCString("FNAM", mName);
-    esm.writeHNOCString("SCRI", mScript);
-    esm.writeHNOCString("SNAM", mOpenSound);
-    esm.writeHNOCString("ANAM", mCloseSound);
-}
+        bool hasName = false;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            switch (esm.retSubName().intval)
+            {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'M','O','D','L'>::value:
+                    mModel = esm.getHString();
+                    break;
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'S','C','R','I'>::value:
+                    mScript = esm.getHString();
+                    break;
+                case ESM::FourCC<'S','N','A','M'>::value:
+                    mOpenSound = esm.getHString();
+                    break;
+                case ESM::FourCC<'A','N','A','M'>::value:
+                    mCloseSound = esm.getHString();
+                    break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+                    break;
+            }
+        }
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+    }
+
+    void Door::save(ESMWriter &esm, bool isDeleted) const
+    {
+        esm.writeHNCString("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
+        esm.writeHNCString("MODL", mModel);
+        esm.writeHNOCString("FNAM", mName);
+        esm.writeHNOCString("SCRI", mScript);
+        esm.writeHNOCString("SNAM", mOpenSound);
+        esm.writeHNOCString("ANAM", mCloseSound);
+    }
 
     void Door::blank()
     {

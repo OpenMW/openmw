@@ -13,10 +13,12 @@ class QLineEdit;
 class QHBoxLayout;
 class QComboBox;
 class QLabel;
+class QUndoStack;
 
 namespace CSMWorld
 {
     class CreateCommand;
+    class Data;
 }
 
 namespace CSVWorld
@@ -31,6 +33,7 @@ namespace CSVWorld
             QUndoStack& mUndoStack;
             CSMWorld::UniversalId mListId;
             QPushButton *mCreate;
+            QPushButton *mCancel;
             QLineEdit *mId;
             std::string mErrors;
             QHBoxLayout *mLayout;
@@ -54,9 +57,14 @@ namespace CSVWorld
 
             void insertAtBeginning (QWidget *widget, bool stretched);
 
+            /// \brief Insert given widget before Create and Cancel buttons.
+            /// \param widget Widget to add to layout.
+            /// \param stretched Whether widget should be streched or not.
             void insertBeforeButtons (QWidget *widget, bool stretched);
 
             virtual std::string getId() const;
+
+            virtual std::string getIdValidatorResult() const;
 
             /// Allow subclasses to add additional data to \a command.
             virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
@@ -101,13 +109,21 @@ namespace CSVWorld
 
             virtual void setScope (unsigned int scope);
 
+            /// Focus main input widget
+            virtual void focus();
+
         private slots:
 
             void textChanged (const QString& text);
 
+            /// \brief Create record if able to after Return key is pressed on input.
+            void inputReturnPressed();
+
             void create();
 
             void scopeChanged (int index);
+
+            void dataIdListChanged();
     };
 }
 

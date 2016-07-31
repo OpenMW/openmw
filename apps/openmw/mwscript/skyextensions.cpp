@@ -1,4 +1,3 @@
-
 #include "skyextensions.hpp"
 
 #include <components/compiler/extensions.hpp>
@@ -25,10 +24,7 @@ namespace MWScript
                 {
                     bool enabled = MWBase::Environment::get().getWorld()->toggleSky();
 
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    context.report (enabled ? "Sky -> On" : "Sky -> Off");
+                    runtime.getContext().report (enabled ? "Sky -> On" : "Sky -> Off");
                 }
         };
 

@@ -1,10 +1,11 @@
 #ifndef GAME_MWMECHANICS_PATHFINDING_H
 #define GAME_MWMECHANICS_PATHFINDING_H
 
-#include <components/esm/loadpgrd.hpp>
 #include <list>
+#include <cassert>
 
-#include <OgreMath.h>
+#include <components/esm/defs.hpp>
+#include <components/esm/loadpgrd.hpp>
 
 namespace MWWorld
 {
@@ -13,43 +14,40 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    float distance(ESM::Pathgrid::Point point, float x, float y, float);
-    float distance(ESM::Pathgrid::Point a, ESM::Pathgrid::Point b);
+    float distance(const ESM::Pathgrid::Point& point, float x, float y, float);
+    float distance(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b);
     class PathFinder
     {
         public:
             PathFinder();
 
-            static float sgn(Ogre::Radian a)
+            static const int PathTolerance = 32;
+
+            static float sgn(float val)
             {
-                if(a.valueRadians() > 0)
+                if(val > 0)
                     return 1.0;
                 return -1.0;
             }
 
-            static float sgn(float a)
+            static int sgn(int a)
             {
                 if(a > 0)
-                    return 1.0;
-                return -1.0;
+                    return 1;
+                return -1;
             }
 
             void clearPath();
 
-            void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
-                           const MWWorld::CellStore* cell, bool allowShortcuts = true);
+            bool checkPathCompleted(float x, float y, float tolerance = PathTolerance);
+            ///< \Returns true if we are within \a tolerance units of the last path point.
 
-            bool checkPathCompleted(float x, float y, float z);
-            ///< \Returns true if the last point of the path has been reached.
-
-            bool checkWaypoint(float x, float y, float z);
-            ///< \Returns true if a way point was reached
-
+            /// In radians
             float getZAngleToNext(float x, float y) const;
 
             bool isPathConstructed() const
             {
-                return mIsPathConstructed;
+                return !mPath.empty();
             }
 
             int getPathSize() const
@@ -64,22 +62,76 @@ namespace MWMechanics
 
             /** Synchronize new path with old one to avoid visiting 1 waypoint 2 times
             @note
-                If the first point is chosen as the nearest one
-                the situation can occur when the 1st point of the new path is undesirable
-                (i.e. the 2nd point of new path == the 1st point of old path).
-            @param path - old path
-            @return true if such point was found and deleted
+                BuildPath() takes closest PathGrid point to NPC as first point of path.
+                This is undesireable if NPC has just passed a Pathgrid point, as this
+                makes the 2nd point of the new path == the 1st point of old path.
+                Which results in NPC "running in a circle" back to the just passed waypoint.
              */
-            bool syncStart(const std::list<ESM::Pathgrid::Point> &path);
+            void buildSyncedPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
+                const MWWorld::CellStore* cell, bool allowShortcuts = true);
 
             void addPointToPath(ESM::Pathgrid::Point &point)
             {
                 mPath.push_back(point);
             }
 
-        private:
+            /// utility function to convert a osg::Vec3f to a Pathgrid::Point
+            static ESM::Pathgrid::Point MakePathgridPoint(const osg::Vec3f& v)
+            {
+                return ESM::Pathgrid::Point(static_cast<int>(v[0]), static_cast<int>(v[1]), static_cast<int>(v[2]));
+            }
 
-            bool mIsPathConstructed;
+            /// utility function to convert an ESM::Position to a Pathgrid::Point
+            static ESM::Pathgrid::Point MakePathgridPoint(const ESM::Position& p)
+            {
+                return ESM::Pathgrid::Point(static_cast<int>(p.pos[0]), static_cast<int>(p.pos[1]), static_cast<int>(p.pos[2]));
+            }
+
+            static osg::Vec3f MakeOsgVec3(const ESM::Pathgrid::Point& p)
+            {
+                return osg::Vec3f(static_cast<float>(p.mX), static_cast<float>(p.mY), static_cast<float>(p.mZ));
+            }
+            
+            // Slightly cheaper version for comparisons.
+            // Caller needs to be careful for very short distances (i.e. less than 1)
+            // or when accumuating the results i.e. (a + b)^2 != a^2 + b^2
+            //
+            static float DistanceSquared(ESM::Pathgrid::Point point, const osg::Vec3f& pos)
+            {
+                return (MWMechanics::PathFinder::MakeOsgVec3(point) - pos).length2();
+            }
+
+            // Return the closest pathgrid point index from the specified position co
+            // -ordinates.  NOTE: Does not check if there is a sensible way to get there
+            // (e.g. a cliff in front).
+            //
+            // NOTE: pos is expected to be in local co-ordinates, as is grid->mPoints
+            //
+            static int GetClosestPoint(const ESM::Pathgrid* grid, const osg::Vec3f& pos)
+            {
+                assert(grid && !grid->mPoints.empty());
+
+                float distanceBetween = DistanceSquared(grid->mPoints[0], pos);
+                int closestIndex = 0;
+
+                // TODO: if this full scan causes performance problems mapping pathgrid
+                //       points to a quadtree may help
+                for(unsigned int counter = 1; counter < grid->mPoints.size(); counter++)
+                {
+                    float potentialDistBetween = DistanceSquared(grid->mPoints[counter], pos);
+                    if(potentialDistBetween < distanceBetween)
+                    {
+                        distanceBetween = potentialDistBetween;
+                        closestIndex = counter;
+                    }
+                }
+
+                return closestIndex;
+            }
+
+        private:
+            void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
+                const MWWorld::CellStore* cell, bool allowShortcuts = true);
 
             std::list<ESM::Pathgrid::Point> mPath;
 

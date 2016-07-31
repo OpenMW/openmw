@@ -3,9 +3,14 @@
 #ifndef OPENMW_COMPONENTS_NIF_NIFKEY_HPP
 #define OPENMW_COMPONENTS_NIF_NIFKEY_HPP
 
-#include <OgreStringConverter.h>
-
 #include "nifstream.hpp"
+
+#include <sstream>
+#include <map>
+
+#include <boost/shared_ptr.hpp>
+
+#include "niffile.hpp"
 
 namespace Nif
 {
@@ -13,20 +18,27 @@ namespace Nif
 template<typename T>
 struct KeyT {
     T mValue;
+
+    // FIXME: Implement Quadratic and TBC interpolation
+    /*
     T mForwardValue;  // Only for Quadratic interpolation, and never for QuaternionKeyList
     T mBackwardValue; // Only for Quadratic interpolation, and never for QuaternionKeyList
     float mTension;    // Only for TBC interpolation
     float mBias;       // Only for TBC interpolation
     float mContinuity; // Only for TBC interpolation
+    */
 };
 typedef KeyT<float> FloatKey;
-typedef KeyT<Ogre::Vector3> Vector3Key;
-typedef KeyT<Ogre::Vector4> Vector4Key;
-typedef KeyT<Ogre::Quaternion> QuaternionKey;
+typedef KeyT<osg::Vec3f> Vector3Key;
+typedef KeyT<osg::Vec4f> Vector4Key;
+typedef KeyT<osg::Quat> QuaternionKey;
 
 template<typename T, T (NIFStream::*getValue)()>
 struct KeyMapT {
     typedef std::map< float, KeyT<T> > MapType;
+
+    typedef T ValueType;
+    typedef KeyT<T> KeyType;
 
     static const unsigned int sLinearInterpolation = 1;
     static const unsigned int sQuadraticInterpolation = 2;
@@ -92,7 +104,12 @@ struct KeyMapT {
         {
             //Don't try to read XYZ keys into the wrong part
             if ( count != 1 )
-                nif->file->fail("XYZ_ROTATION_KEY count should always be '1' .  Retrieved Value: "+Ogre::StringConverter::toString(count));
+            {
+                std::stringstream error;
+                error << "XYZ_ROTATION_KEY count should always be '1' .  Retrieved Value: "
+                      << count;
+                nif->file->fail(error.str());
+            }
         }
         else if (0 == mInterpolationType)
         {
@@ -100,7 +117,11 @@ struct KeyMapT {
                 nif->file->fail("Interpolation type 0 doesn't work with keys");
         }
         else
-            nif->file->fail("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
+        {
+            std::stringstream error;
+            error << "Unhandled interpolation type: " << mInterpolationType;
+            nif->file->fail(error.str());
+        }
     }
 
 private:
@@ -109,31 +130,36 @@ private:
         key.mValue = (nif.*getValue)();
     }
 
-    static void readQuadratic(NIFStream &nif, KeyT<Ogre::Quaternion> &key)
-    {
-        readValue(nif, key);
-    }
-
     template <typename U>
     static void readQuadratic(NIFStream &nif, KeyT<U> &key)
     {
         readValue(nif, key);
-        key.mForwardValue = (nif.*getValue)();
-        key.mBackwardValue = (nif.*getValue)();
+        /*key.mForwardValue = */(nif.*getValue)();
+        /*key.mBackwardValue = */(nif.*getValue)();
+    }
+
+    static void readQuadratic(NIFStream &nif, KeyT<osg::Quat> &key)
+    {
+        readValue(nif, key);
     }
 
     static void readTBC(NIFStream &nif, KeyT<T> &key)
     {
         readValue(nif, key);
-        key.mTension = nif.getFloat();
-        key.mBias = nif.getFloat();
-        key.mContinuity = nif.getFloat();
+        /*key.mTension = */nif.getFloat();
+        /*key.mBias = */nif.getFloat();
+        /*key.mContinuity = */nif.getFloat();
     }
 };
 typedef KeyMapT<float,&NIFStream::getFloat> FloatKeyMap;
-typedef KeyMapT<Ogre::Vector3,&NIFStream::getVector3> Vector3KeyMap;
-typedef KeyMapT<Ogre::Vector4,&NIFStream::getVector4> Vector4KeyMap;
-typedef KeyMapT<Ogre::Quaternion,&NIFStream::getQuaternion> QuaternionKeyMap;
+typedef KeyMapT<osg::Vec3f,&NIFStream::getVector3> Vector3KeyMap;
+typedef KeyMapT<osg::Vec4f,&NIFStream::getVector4> Vector4KeyMap;
+typedef KeyMapT<osg::Quat,&NIFStream::getQuaternion> QuaternionKeyMap;
+
+typedef boost::shared_ptr<FloatKeyMap> FloatKeyMapPtr;
+typedef boost::shared_ptr<Vector3KeyMap> Vector3KeyMapPtr;
+typedef boost::shared_ptr<Vector4KeyMap> Vector4KeyMapPtr;
+typedef boost::shared_ptr<QuaternionKeyMap> QuaternionKeyMapPtr;
 
 } // Namespace
 #endif //#ifndef OPENMW_COMPONENTS_NIF_NIFKEY_HPP

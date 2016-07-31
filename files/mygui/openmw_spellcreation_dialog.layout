@@ -1,42 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 560 400" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 560 394" name="_Main">
 
         <Widget type="HBox" position="12 12 250 30">
-
             <Widget type="AutoSizedTextBox" skin="NormalText">
                 <Property key="Caption" value="#{sName}"/>
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                <UserString key="Caption_Text" value="#{sSpellmakingHelp1}"/>
             </Widget>
 
             <Widget type="EditBox" skin="MW_TextEdit" position="0 0 30 30" name="NameEdit">
                 <UserString key="HStretch" value="true"/>
             </Widget>
 
-            <Widget type="Widget">
-            </Widget>
-
+            <Widget type="Widget"/>
         </Widget>
 
         <Widget type="TextBox" skin="NormalText" position="280 0 300 24">
             <Property key="Caption" value="#{sEnchantmentMenu4}"/>
+            <Property key="TextAlign" value="Left HCenter"/>
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="TextToolTip"/>
+            <UserString key="Caption_Text" value="#{sSpellmakingHelp2}"/>
         </Widget>
         <Widget type="TextBox" skin="SandText" position="280 0 258 24" name="MagickaCost">
             <Property key="TextAlign" value="Right HCenter"/>
+            <Property key="NeedMouse" value="false"/>
         </Widget>
-
 
         <Widget type="TextBox" skin="NormalText" position="280 24 300 24">
             <Property key="Caption" value="#{sSpellmakingMenu1}"/>
+            <Property key="TextAlign" value="Left HCenter"/>
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="TextToolTip"/>
+            <UserString key="Caption_Text" value="#{sSpellmakingHelp3}"/>
         </Widget>
         <Widget type="TextBox" skin="SandText" position="280 24 258 24" name="SuccessChance">
             <Property key="TextAlign" value="Right HCenter"/>
+            <Property key="NeedMouse" value="false"/>
         </Widget>
-
 
         <!-- Available effects -->
         <Widget type="TextBox" skin="NormalText" position="12 48 300 24">
             <Property key="Caption" value="#{sMagicEffects}"/>
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="TextToolTip"/>
+            <UserString key="Caption_Text" value="#{sSpellmakingHelp5}"/>
         </Widget>
         <Widget type="MWList" skin="MW_SimpleList" position="12 76 202 269" name="AvailableEffects">
         </Widget>
@@ -44,6 +55,9 @@
         <!-- Used effects -->
         <Widget type="TextBox" skin="NormalText" position="226 48 300 24">
             <Property key="Caption" value="#{sEffects}"/>
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="TextToolTip"/>
+            <UserString key="Caption_Text" value="#{sSpellmakingHelp6}"/>
         </Widget>
         <Widget type="Widget" skin="MW_Box" position="226 76 316 269">
             <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 308 261" name="UsedEffects">
@@ -51,7 +65,7 @@
             </Widget>
         </Widget>
 
-        <Widget type="HBox" position="0 340 560 60">
+        <Widget type="HBox" position="0 336 558 60">
             <Property key="Padding" value="16"/>
 
             <Widget type="Widget" position="0 0 0 0">
@@ -60,6 +74,9 @@
 
             <Widget type="AutoSizedTextBox" skin="NormalText">
                 <Property key="Caption" value="#{sBarterDialog7}"/>
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                <UserString key="Caption_Text" value="#{sSpellmakingHelp4}"/>
             </Widget>
             <Widget type="AutoSizedTextBox" skin="SandText" name="PriceLabel">
             </Widget>

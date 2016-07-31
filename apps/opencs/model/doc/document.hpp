@@ -13,6 +13,7 @@
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "../world/data.hpp"
+#include "../world/idcompletionmanager.hpp"
 
 #include "../tools/tools.hpp"
 
@@ -20,8 +21,19 @@
 #include "saving.hpp"
 #include "blacklist.hpp"
 #include "runner.hpp"
+#include "operationholder.hpp"
 
 class QAbstractItemModel;
+
+namespace Fallback
+{
+    class Map;
+}
+
+namespace VFS
+{
+    class Manager;
+}
 
 namespace ESM
 {
@@ -32,17 +44,12 @@ namespace ESM
 
 namespace Files
 {
-    class ConfigurationManager;
+    struct ConfigurationManager;
 }
 
 namespace CSMWorld
 {
     class ResourcesManager;
-}
-
-namespace CSVWorld
-{
-    class PhysicsSystem;
 }
 
 namespace CSMDoc
@@ -53,17 +60,22 @@ namespace CSMDoc
 
         private:
 
+            const VFS::Manager* mVFS;
             boost::filesystem::path mSavePath;
             std::vector<boost::filesystem::path> mContentFiles;
             bool mNew;
             CSMWorld::Data mData;
             CSMTools::Tools mTools;
             boost::filesystem::path mProjectPath;
-            Saving mSaving;
+            Saving mSavingOperation;
+            OperationHolder mSaving;
             boost::filesystem::path mResDir;
+            const Fallback::Map* mFallbackMap;
             Blacklist mBlacklist;
             Runner mRunner;
-            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
+            bool mDirty;
+
+            CSMWorld::IdCompletionManager mIdCompletionManager;
 
             // It is important that the undo stack is declared last, because on desctruction it fires a signal, that is connected to a slot, that is
             // using other member variables.  Unfortunately this connection is cut only in the QObject destructor, which is way too late.
@@ -91,13 +103,16 @@ namespace CSMDoc
 
         public:
 
-            Document (const Files::ConfigurationManager& configuration,
+            Document (const VFS::Manager* vfs, const Files::ConfigurationManager& configuration,
                 const std::vector< boost::filesystem::path >& files, bool new_,
                 const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
+                const Fallback::Map* fallback,
                 ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
                 const std::vector<std::string>& blacklistedScripts);
 
             ~Document();
+
+            const VFS::Manager* getVFS() const;
 
             QUndoStack& getUndoStack();
 
@@ -116,7 +131,13 @@ namespace CSMDoc
 
             void save();
 
-            CSMWorld::UniversalId verify();
+            CSMWorld::UniversalId verify (const CSMWorld::UniversalId& reportId = CSMWorld::UniversalId());
+
+            CSMWorld::UniversalId newSearch();
+
+            void runSearch (const CSMWorld::UniversalId& searchId, const CSMTools::Search& search);
+
+            void runMerge (std::auto_ptr<CSMDoc::Document> target);
 
             void abortOperation (int type);
 
@@ -136,7 +157,9 @@ namespace CSMDoc
 
             QTextDocument *getRunLog();
 
-            boost::shared_ptr<CSVWorld::PhysicsSystem> getPhysics();
+            CSMWorld::IdCompletionManager &getIdCompletionManager();
+
+            void flagAsDirty();
 
         signals:
 
@@ -144,12 +167,15 @@ namespace CSMDoc
 
             void progress (int current, int max, int type, int threads, CSMDoc::Document *document);
 
+            /// \attention When this signal is emitted, *this hands over the ownership of the
+            /// document. This signal must be handled to avoid a leak.
+            void mergeDone (CSMDoc::Document *document);
+
         private slots:
 
             void modificationStateChanged (bool clean);
 
-            void reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
-                const std::string& hint, int type);
+            void reportMessage (const CSMDoc::Message& message, int type);
 
             void operationDone (int type, bool failed);
 
@@ -162,4 +188,3 @@ namespace CSMDoc
 }
 
 #endif
-

@@ -1,6 +1,8 @@
 #include "countdialog.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Button.h>
+#include <MyGUI_ScrollBar.h>
+#include <MyGUI_RenderManager.h>
 
 #include <components/widgets/numericeditbox.hpp>
 
@@ -27,7 +29,7 @@ namespace MWGui
         mItemEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &CountDialog::onEnterKeyPressed);
     }
 
-    void CountDialog::open(const std::string& item, const std::string& message, const int maxCount)
+    void CountDialog::openCountDialog(const std::string& item, const std::string& message, const int maxCount)
     {
         setVisible(true);
 

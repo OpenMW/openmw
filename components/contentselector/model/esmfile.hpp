@@ -59,12 +59,13 @@ namespace ContentSelectorModel
         inline QString description() const          { return mDescription; }
         inline QString toolTip() const              { return sToolTip.arg(mAuthor)
                                                              .arg(mFormat)
+                                                             .arg(mModified.toString(Qt::ISODate))
                                                              .arg(mPath)
                                                              .arg(mDescription)
                                                              .arg(mGameFiles.join(", "));
                                                     }
 
-        inline bool isGameFile() const              { return (mGameFiles.size() == 0); }
+        bool isGameFile() const;
         QByteArray encodedData() const;
 
     public:

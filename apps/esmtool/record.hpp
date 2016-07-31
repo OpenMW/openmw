@@ -19,7 +19,7 @@ namespace EsmTool
     {
     protected:
         std::string mId;
-        int mFlags;
+        uint32_t mFlags;
         ESM::NAME mType;
         bool mPrintPlain;
 
@@ -32,19 +32,13 @@ namespace EsmTool
 
         virtual ~RecordBase() {}
 
-        const std::string &getId() const {
-            return mId;
-        }
+        virtual std::string getId() const = 0;
 
-        void setId(const std::string &id) { 
-            mId = id;
-        }
-
-        int getFlags() const {
+        uint32_t getFlags() const {
             return mFlags;
         }
 
-        void setFlags(int flags) {
+        void setFlags(uint32_t flags) {
             mFlags = flags;
         }
 
@@ -52,12 +46,8 @@ namespace EsmTool
             return mType;
         }
 
-        bool getPrintPlain() const {
-        	return mPrintPlain;
-        }
-
         void setPrintPlain(bool plain) {
-        	mPrintPlain = plain;
+            mPrintPlain = plain;
         }
 
         virtual void load(ESM::ESMReader &esm) = 0;
@@ -77,22 +67,37 @@ namespace EsmTool
     class Record : public RecordBase
     {
         T mData;
+        bool mIsDeleted;
 
     public:
+        Record()
+            : mIsDeleted(false)
+        {}
+
+        std::string getId() const {
+            return mData.mId;
+        }
+
         T &get() {
             return mData;
         }
 
         void save(ESM::ESMWriter &esm) {
-            mData.save(esm);
+            mData.save(esm, mIsDeleted);
         }
 
         void load(ESM::ESMReader &esm) {
-            mData.load(esm);
+            mData.load(esm, mIsDeleted);
         }
 
         void print();
     };
+    
+    template<> std::string Record<ESM::Cell>::getId() const;
+    template<> std::string Record<ESM::Land>::getId() const;
+    template<> std::string Record<ESM::MagicEffect>::getId() const;
+    template<> std::string Record<ESM::Pathgrid>::getId() const;
+    template<> std::string Record<ESM::Skill>::getId() const;
 
     template<> void Record<ESM::Activator>::print();
     template<> void Record<ESM::Potion>::print();

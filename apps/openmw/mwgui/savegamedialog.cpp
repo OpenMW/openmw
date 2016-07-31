@@ -1,12 +1,23 @@
 #include "savegamedialog.hpp"
-#include "widgets.hpp"
 
-#include <OgreImage.h>
-#include <OgreTextureManager.h>
+#include <sstream>
+#include <iomanip>
+
+#include <MyGUI_ComboBox.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_ListBox.h>
+#include <MyGUI_InputManager.h>
+
+#include <osgDB/ReadFile>
+#include <osg/Texture2D>
+
+#include <components/myguiplatform/myguitexture.hpp>
 
 #include <components/misc/stringops.hpp>
 
 #include <components/settings/settings.hpp>
+
+#include <components/files/memorystream.hpp>
 
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -17,6 +28,7 @@
 #include "../mwstate/character.hpp"
 
 #include "confirmationdialog.hpp"
+#include "widgets.hpp"
 
 namespace MWGui
 {
@@ -64,7 +76,7 @@ namespace MWGui
     void SaveGameDialog::confirmDeleteSave()
     {
         ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-        dialog->open("#{sMessage3}");
+        dialog->askForConfirmation("#{sMessage3}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onDeleteSlotConfirmed);
         dialog->eventCancelClicked.clear();
@@ -74,16 +86,20 @@ namespace MWGui
     {
         MWBase::Environment::get().getStateManager()->deleteGame (mCurrentCharacter, mCurrentSlot);
         mSaveList->removeItemAt(mSaveList->getIndexSelected());
-        onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
+        onSlotSelected(mSaveList, mSaveList->getIndexSelected());
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
 
-        // The character might be deleted now
-        size_t previousIndex = mCharacterSelection->getIndexSelected();
-        open();
-        if (mCharacterSelection->getItemCount())
+        if (mSaveList->getItemCount() == 0)
         {
-            size_t nextCharacter = std::min(previousIndex, mCharacterSelection->getItemCount()-1);
-            mCharacterSelection->setIndexSelected(nextCharacter);
-            onCharacterSelected(mCharacterSelection, nextCharacter);
+            // The character might be deleted now
+            size_t previousIndex = mCharacterSelection->getIndexSelected();
+            open();
+            if (mCharacterSelection->getItemCount())
+            {
+                size_t nextCharacter = std::min(previousIndex, mCharacterSelection->getItemCount()-1);
+                mCharacterSelection->setIndexSelected(nextCharacter);
+                onCharacterSelected(mCharacterSelection, nextCharacter);
+            }
         }
     }
 
@@ -120,7 +136,7 @@ namespace MWGui
         if (mgr->characterBegin() == mgr->characterEnd())
             return;
 
-        mCurrentCharacter = mgr->getCurrentCharacter (false);
+        mCurrentCharacter = mgr->getCurrentCharacter();
 
         std::string directory =
             Misc::StringUtils::lowerCase (Settings::Manager::getString ("character", "Saves"));
@@ -190,7 +206,7 @@ namespace MWGui
 
         if (!load)
         {
-            mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter (false);
+            mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter();
         }
 
         center();
@@ -223,7 +239,7 @@ namespace MWGui
             if (mCurrentSlot != NULL && !reallySure)
             {
                 ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-                dialog->open("#{sMessage4}");
+                dialog->askForConfirmation("#{sMessage4}");
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onConfirmationGiven);
                 dialog->eventCancelClicked.clear();
@@ -246,7 +262,7 @@ namespace MWGui
         else
         {
             assert (mCurrentCharacter && mCurrentSlot);
-            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot);
+            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot->mPath.string());
         }
     }
 
@@ -300,12 +316,28 @@ namespace MWGui
             onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
     }
 
+    std::string formatTimeplayed(const double timeInSeconds)
+    {
+        int timePlayed = (int)floor(timeInSeconds);
+        int days = timePlayed / 60 / 60 / 24;
+        int hours = (timePlayed / 60 / 60) % 24;
+        int minutes = (timePlayed / 60) % 60;
+        int seconds = timePlayed % 60;
+
+        std::stringstream stream;
+        stream << std::setfill('0') << std::setw(2) << days << ":";
+        stream << std::setfill('0') << std::setw(2) << hours << ":";
+        stream << std::setfill('0') << std::setw(2) << minutes << ":";
+        stream << std::setfill('0') << std::setw(2) << seconds;
+        return stream.str();
+    }
+
     void SaveGameDialog::onSlotSelected(MyGUI::ListBox *sender, size_t pos)
     {
         mOkButton->setEnabled(pos != MyGUI::ITEM_NONE || mSaving);
         mDeleteButton->setEnabled(pos != MyGUI::ITEM_NONE);
 
-        if (pos == MyGUI::ITEM_NONE)
+        if (pos == MyGUI::ITEM_NONE || !mCurrentCharacter)
         {
             mCurrentSlot = NULL;
             mInfoText->setCaption("");
@@ -332,15 +364,19 @@ namespace MWGui
         timeinfo = localtime(&time);
 
         // Use system/environment locale settings for datetime formatting
+        char* oldLctime = setlocale(LC_TIME, NULL);
         setlocale(LC_TIME, "");
 
         const int size=1024;
         char buffer[size];
         if (std::strftime(buffer, size, "%x %X", timeinfo) > 0)
             text << buffer << "\n";
-        text << "Level " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
-        text << mCurrentSlot->mProfile.mPlayerCell << "\n";
-        // text << "Time played: " << slot->mProfile.mTimePlayed << "\n";
+
+        // reset
+        setlocale(LC_TIME, oldLctime);
+
+        text << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
+        text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCell << "}\n";
 
         int hour = int(mCurrentSlot->mProfile.mInGameTime.mGameHour);
         bool pm = hour >= 12;
@@ -352,30 +388,44 @@ namespace MWGui
             << MWBase::Environment::get().getWorld()->getMonthName(mCurrentSlot->mProfile.mInGameTime.mMonth)
             <<  " " << hour << " " << (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
 
+        if (Settings::Manager::getBool("timeplayed","Saves"))
+        {
+            text << "\n" << "Time played: " << formatTimeplayed(mCurrentSlot->mProfile.mTimePlayed);
+        }
+
         mInfoText->setCaptionWithReplacing(text.str());
 
+
         // Decode screenshot
-        std::vector<char> data = mCurrentSlot->mProfile.mScreenshot; // MemoryDataStream doesn't work with const data :(
-        Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&data[0], data.size()));
-        Ogre::Image image;
-        image.load(stream, "jpg");
+        const std::vector<char>& data = mCurrentSlot->mProfile.mScreenshot;
+        Files::IMemStream instream (&data[0], data.size());
 
-        const std::string textureName = "@savegame_screenshot";
-        Ogre::TexturePtr texture;
-        texture = Ogre::TextureManager::getSingleton().getByName(textureName);
-        mScreenshot->setImageTexture("");
-        if (texture.isNull())
+        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
+        if (!readerwriter)
         {
-            texture = Ogre::TextureManager::getSingleton().createManual(textureName,
-                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                Ogre::TEX_TYPE_2D,
-                image.getWidth(), image.getHeight(), 0, Ogre::PF_BYTE_RGBA, Ogre::TU_DYNAMIC_WRITE_ONLY);
+            std::cerr << "Can't open savegame screenshot, no jpg readerwriter found" << std::endl;
+            return;
         }
-        texture->unload();
-        texture->setWidth(image.getWidth());
-        texture->setHeight(image.getHeight());
-        texture->loadImage(image);
 
-        mScreenshot->setImageTexture(textureName);
+        osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(instream);
+        if (!result.success())
+        {
+            std::cerr << "Failed to read savegame screenshot: " << result.message() << " code " << result.status() << std::endl;
+            return;
+        }
+
+        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
+        texture->setImage(result.getImage());
+        texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+        texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        texture->setResizeNonPowerOfTwoHint(false);
+        texture->setUnRefImageDataAfterApply(true);
+
+        mScreenshotTexture.reset(new osgMyGUI::OSGTexture(texture));
+
+        mScreenshot->setRenderItemTexture(mScreenshotTexture.get());
+        mScreenshot->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
     }
 }

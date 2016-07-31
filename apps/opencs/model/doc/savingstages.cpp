@@ -1,4 +1,3 @@
-
 #include "savingstages.hpp"
 
 #include <fstream>
@@ -12,6 +11,7 @@
 #include <components/misc/stringops.hpp>
 
 #include "../world/infocollection.hpp"
+#include "../world/cellcoordinates.hpp"
 
 #include "document.hpp"
 #include "savingstate.hpp"
@@ -53,18 +53,16 @@ void CSMDoc::WriteHeaderStage::perform (int stage, Messages& messages)
 
     mState.getWriter().clearMaster();
 
-    mState.getWriter().setFormat (0);
-
     if (mSimple)
     {
         mState.getWriter().setAuthor ("");
         mState.getWriter().setDescription ("");
         mState.getWriter().setRecordCount (0);
+        mState.getWriter().setFormat (ESM::Header::CurrentFormat);
     }
     else
     {
-        mState.getWriter().setAuthor (mDocument.getData().getAuthor());
-        mState.getWriter().setDescription (mDocument.getData().getDescription());
+        mDocument.getData().getMetaData().save (mState.getWriter());
         mState.getWriter().setRecordCount (
             mDocument.getData().count (CSMWorld::RecordBase::State_Modified) +
             mDocument.getData().count (CSMWorld::RecordBase::State_ModifiedOnly) +
@@ -90,7 +88,7 @@ void CSMDoc::WriteHeaderStage::perform (int stage, Messages& messages)
 
 CSMDoc::WriteDialogueCollectionStage::WriteDialogueCollectionStage (Document& document,
     SavingState& state, bool journal)
-: mDocument (document), mState (state),
+: mState (state),
   mTopics (journal ? document.getData().getJournals() : document.getData().getTopics()),
   mInfos (journal ? document.getData().getJournalInfos() : document.getData().getTopicInfos())
 {}
@@ -102,84 +100,77 @@ int CSMDoc::WriteDialogueCollectionStage::setup()
 
 void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& messages)
 {
+    ESM::ESMWriter& writer = mState.getWriter();
     const CSMWorld::Record<ESM::Dialogue>& topic = mTopics.getRecord (stage);
 
-    CSMWorld::RecordBase::State state = topic.mState;
-
-    if (state==CSMWorld::RecordBase::State_Deleted)
+    if (topic.mState == CSMWorld::RecordBase::State_Deleted)
     {
         // if the topic is deleted, we do not need to bother with INFO records.
-
-        /// \todo wrote record with delete flag
-
+        ESM::Dialogue dialogue = topic.get();
+        writer.startRecord(dialogue.sRecordId);
+        dialogue.save(writer, true);
+        writer.endRecord(dialogue.sRecordId);
         return;
     }
 
     // Test, if we need to save anything associated info records.
     bool infoModified = false;
-
     CSMWorld::InfoCollection::Range range = mInfos.getTopicRange (topic.get().mId);
 
     for (CSMWorld::InfoCollection::RecordConstIterator iter (range.first); iter!=range.second; ++iter)
     {
-        CSMWorld::RecordBase::State state = iter->mState;
-
-        if (state==CSMWorld::RecordBase::State_Modified ||
-            state==CSMWorld::RecordBase::State_ModifiedOnly ||
-            state==CSMWorld::RecordBase::State_Deleted)
+        if (iter->isModified() || iter->mState == CSMWorld::RecordBase::State_Deleted)
         {
             infoModified = true;
             break;
         }
     }
 
-    if (state==CSMWorld::RecordBase::State_Modified ||
-        state==CSMWorld::RecordBase::State_ModifiedOnly ||
-        infoModified)
+    if (topic.isModified() || infoModified)
     {
-        mState.getWriter().startRecord (topic.mModified.sRecordId);
-        mState.getWriter().writeHNCString ("NAME", topic.mModified.mId);
-        topic.mModified.save (mState.getWriter());
-        mState.getWriter().endRecord (topic.mModified.sRecordId);
+        if (infoModified && topic.mState != CSMWorld::RecordBase::State_Modified
+                         && topic.mState != CSMWorld::RecordBase::State_ModifiedOnly)
+        {
+            mState.getWriter().startRecord (topic.mBase.sRecordId);
+            topic.mBase.save (mState.getWriter(), topic.mState == CSMWorld::RecordBase::State_Deleted);
+            mState.getWriter().endRecord (topic.mBase.sRecordId);
+        }
+        else
+        {
+            mState.getWriter().startRecord (topic.mModified.sRecordId);
+            topic.mModified.save (mState.getWriter(), topic.mState == CSMWorld::RecordBase::State_Deleted);
+            mState.getWriter().endRecord (topic.mModified.sRecordId);
+        }
 
         // write modified selected info records
-        for (CSMWorld::InfoCollection::RecordConstIterator iter (range.first); iter!=range.second;
-             ++iter)
+        for (CSMWorld::InfoCollection::RecordConstIterator iter (range.first); iter!=range.second; ++iter)
         {
-            CSMWorld::RecordBase::State state = iter->mState;
-
-            if (state==CSMWorld::RecordBase::State_Deleted)
-            {
-                /// \todo wrote record with delete flag
-            }
-            else if (state==CSMWorld::RecordBase::State_Modified ||
-                state==CSMWorld::RecordBase::State_ModifiedOnly)
+            if (iter->isModified() || iter->mState == CSMWorld::RecordBase::State_Deleted)
             {
                 ESM::DialInfo info = iter->get();
                 info.mId = info.mId.substr (info.mId.find_last_of ('#')+1);
 
+                info.mPrev = "";
                 if (iter!=range.first)
                 {
                     CSMWorld::InfoCollection::RecordConstIterator prev = iter;
                     --prev;
 
-                    info.mPrev =
-                        prev->mModified.mId.substr (prev->mModified.mId.find_last_of ('#')+1);
+                    info.mPrev = prev->get().mId.substr (prev->get().mId.find_last_of ('#')+1);
                 }
 
                 CSMWorld::InfoCollection::RecordConstIterator next = iter;
                 ++next;
 
+                info.mNext = "";
                 if (next!=range.second)
                 {
-                    info.mNext =
-                        next->mModified.mId.substr (next->mModified.mId.find_last_of ('#')+1);
+                    info.mNext = next->get().mId.substr (next->get().mId.find_last_of ('#')+1);
                 }
 
-                mState.getWriter().startRecord (info.sRecordId);
-                mState.getWriter().writeHNCString ("INAM", info.mId);
-                info.save (mState.getWriter());
-                mState.getWriter().endRecord (info.sRecordId);
+                writer.startRecord (info.sRecordId);
+                info.save (writer, iter->mState == CSMWorld::RecordBase::State_Deleted);
+                writer.endRecord (info.sRecordId);
             }
         }
     }
@@ -227,12 +218,31 @@ void CSMDoc::CollectionReferencesStage::perform (int stage, Messages& messages)
         const CSMWorld::Record<CSMWorld::CellRef>& record =
             mDocument.getData().getReferences().getRecord (i);
 
-        if (record.mState==CSMWorld::RecordBase::State_Deleted ||
-            record.mState==CSMWorld::RecordBase::State_Modified ||
-            record.mState==CSMWorld::RecordBase::State_ModifiedOnly)
+        if (record.isModified() || record.mState == CSMWorld::RecordBase::State_Deleted)
         {
-            mState.getSubRecords()[Misc::StringUtils::lowerCase (record.get().mCell)]
-                .push_back (i);
+            std::string cellId = record.get().mOriginalCell.empty() ?
+                record.get().mCell : record.get().mOriginalCell;
+
+            std::deque<int>& indices =
+                mState.getSubRecords()[Misc::StringUtils::lowerCase (cellId)];
+
+            // collect moved references at the end of the container
+            bool interior = cellId.substr (0, 1)!="#";
+            std::ostringstream stream;
+            if (!interior)
+            {
+                // recalculate the ref's cell location
+                std::pair<int, int> index = record.get().getCellIndex();
+                stream << "#" << index.first << " " << index.second;
+            }
+
+            // An empty mOriginalCell is meant to indicate that it is the same as
+            // the current cell.  It is possible that a moved ref is moved again.
+            if ((record.get().mOriginalCell.empty() ?
+                    record.get().mCell : record.get().mOriginalCell) != stream.str() && !interior && record.mState!=CSMWorld::RecordBase::State_ModifiedOnly && !record.get().mNew)
+                indices.push_back (i);
+            else
+                indices.push_front (i);
         }
     }
 }
@@ -250,63 +260,106 @@ int CSMDoc::WriteCellCollectionStage::setup()
 
 void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
 {
-    const CSMWorld::Record<CSMWorld::Cell>& cell =
-        mDocument.getData().getCells().getRecord (stage);
+    ESM::ESMWriter& writer = mState.getWriter();
+    const CSMWorld::Record<CSMWorld::Cell>& cell = mDocument.getData().getCells().getRecord (stage);
 
-    std::map<std::string, std::vector<int> >::const_iterator references =
+    std::map<std::string, std::deque<int> >::const_iterator references =
         mState.getSubRecords().find (Misc::StringUtils::lowerCase (cell.get().mId));
 
-    if (cell.mState==CSMWorld::RecordBase::State_Modified ||
-        cell.mState==CSMWorld::RecordBase::State_ModifiedOnly ||
+    if (cell.isModified() ||
+        cell.mState == CSMWorld::RecordBase::State_Deleted ||
         references!=mState.getSubRecords().end())
     {
-        bool interior = cell.get().mId.substr (0, 1)!="#";
+        CSMWorld::Cell cellRecord = cell.get();
+        bool interior = cellRecord.mId.substr (0, 1)!="#";
 
-        // write cell data
-        mState.getWriter().startRecord (cell.mModified.sRecordId);
+        // count new references and adjust RefNumCount accordingsly
+        int newRefNum = cellRecord.mRefNumCounter;
 
-        mState.getWriter().writeHNOCString ("NAME", cell.get().mName);
-
-        ESM::Cell cell2 = cell.get();
-
-        if (interior)
-            cell2.mData.mFlags |= ESM::Cell::Interior;
-        else
-        {
-            cell2.mData.mFlags &= ~ESM::Cell::Interior;
-
-            std::istringstream stream (cell.get().mId.c_str());
-            char ignore;
-            stream >> ignore >> cell2.mData.mX >> cell2.mData.mY;
-        }
-        cell2.save (mState.getWriter());
-
-        // write references
         if (references!=mState.getSubRecords().end())
         {
-            for (std::vector<int>::const_iterator iter (references->second.begin());
+            for (std::deque<int>::const_iterator iter (references->second.begin());
                 iter!=references->second.end(); ++iter)
             {
                 const CSMWorld::Record<CSMWorld::CellRef>& ref =
                     mDocument.getData().getReferences().getRecord (*iter);
 
-                if (ref.mState==CSMWorld::RecordBase::State_Modified ||
-                    ref.mState==CSMWorld::RecordBase::State_ModifiedOnly)
+                if (ref.get().mNew ||
+                    (!interior && ref.mState==CSMWorld::RecordBase::State_ModifiedOnly &&
+                    /// \todo consider worldspace
+                    CSMWorld::CellCoordinates (ref.get().getCellIndex()).getId("")!=ref.get().mCell))
+                    ++cellRecord.mRefNumCounter;
+            }
+        }
+
+        // write cell data
+        writer.startRecord (cellRecord.sRecordId);
+
+        if (interior)
+            cellRecord.mData.mFlags |= ESM::Cell::Interior;
+        else
+        {
+            cellRecord.mData.mFlags &= ~ESM::Cell::Interior;
+
+            std::istringstream stream (cellRecord.mId.c_str());
+            char ignore;
+            stream >> ignore >> cellRecord.mData.mX >> cellRecord.mData.mY;
+        }
+
+        cellRecord.save (writer, cell.mState == CSMWorld::RecordBase::State_Deleted);
+
+        // write references
+        if (references!=mState.getSubRecords().end())
+        {
+            for (std::deque<int>::const_iterator iter (references->second.begin());
+                iter!=references->second.end(); ++iter)
+            {
+                const CSMWorld::Record<CSMWorld::CellRef>& ref =
+                    mDocument.getData().getReferences().getRecord (*iter);
+
+                if (ref.isModified() || ref.mState == CSMWorld::RecordBase::State_Deleted)
                 {
-                    ref.get().save (mState.getWriter());
-                }
-                else if (ref.mState==CSMWorld::RecordBase::State_Deleted)
-                {
-                    /// \todo write record with delete flag
+                    CSMWorld::CellRef refRecord = ref.get();
+
+                    // recalculate the ref's cell location
+                    std::ostringstream stream;
+                    if (!interior)
+                    {
+                        std::pair<int, int> index = refRecord.getCellIndex();
+                        stream << "#" << index.first << " " << index.second;
+                    }
+
+                    if (refRecord.mNew ||
+                        (!interior && ref.mState==CSMWorld::RecordBase::State_ModifiedOnly &&
+                        refRecord.mCell!=stream.str()))
+                    {
+                        refRecord.mRefNum.mIndex = newRefNum++;
+                    }
+                    else if ((refRecord.mOriginalCell.empty() ? refRecord.mCell : refRecord.mOriginalCell)
+                            != stream.str() && !interior)
+                    {
+                        // An empty mOriginalCell is meant to indicate that it is the same as
+                        // the current cell.  It is possible that a moved ref is moved again.
+
+                        ESM::MovedCellRef moved;
+                        moved.mRefNum = refRecord.mRefNum;
+
+                        // Need to fill mTarget with the ref's new position.
+                        std::istringstream istream (stream.str().c_str());
+
+                        char ignore;
+                        istream >> ignore >> moved.mTarget[0] >> moved.mTarget[1];
+
+                        refRecord.mRefNum.save (writer, false, "MVRF");
+                        writer.writeHNT ("CNDT", moved.mTarget, 8);
+                    }
+
+                    refRecord.save (writer, false, false, ref.mState == CSMWorld::RecordBase::State_Deleted);
                 }
             }
         }
 
-        mState.getWriter().endRecord (cell.mModified.sRecordId);
-    }
-    else if (cell.mState==CSMWorld::RecordBase::State_Deleted)
-    {
-        /// \todo write record with delete flag
+        writer.endRecord (cellRecord.sRecordId);
     }
 }
 
@@ -323,11 +376,11 @@ int CSMDoc::WritePathgridCollectionStage::setup()
 
 void CSMDoc::WritePathgridCollectionStage::perform (int stage, Messages& messages)
 {
+    ESM::ESMWriter& writer = mState.getWriter();
     const CSMWorld::Record<CSMWorld::Pathgrid>& pathgrid =
         mDocument.getData().getPathgrids().getRecord (stage);
 
-    if (pathgrid.mState==CSMWorld::RecordBase::State_Modified ||
-        pathgrid.mState==CSMWorld::RecordBase::State_ModifiedOnly)
+    if (pathgrid.isModified() || pathgrid.mState == CSMWorld::RecordBase::State_Deleted)
     {
         CSMWorld::Pathgrid record = pathgrid.get();
 
@@ -340,15 +393,61 @@ void CSMDoc::WritePathgridCollectionStage::perform (int stage, Messages& message
         else
             record.mCell = record.mId;
 
-        mState.getWriter().startRecord (record.sRecordId);
-
-        record.save (mState.getWriter());
-
-        mState.getWriter().endRecord (record.sRecordId);
+        writer.startRecord (record.sRecordId);
+        record.save (writer, pathgrid.mState == CSMWorld::RecordBase::State_Deleted);
+        writer.endRecord (record.sRecordId);
     }
-    else if (pathgrid.mState==CSMWorld::RecordBase::State_Deleted)
+}
+
+
+CSMDoc::WriteLandCollectionStage::WriteLandCollectionStage (Document& document,
+    SavingState& state)
+: mDocument (document), mState (state)
+{}
+
+int CSMDoc::WriteLandCollectionStage::setup()
+{
+    return mDocument.getData().getLand().getSize();
+}
+
+void CSMDoc::WriteLandCollectionStage::perform (int stage, Messages& messages)
+{
+    ESM::ESMWriter& writer = mState.getWriter();
+    const CSMWorld::Record<CSMWorld::Land>& land =
+        mDocument.getData().getLand().getRecord (stage);
+
+    if (land.isModified() || land.mState == CSMWorld::RecordBase::State_Deleted)
     {
-        /// \todo write record with delete flag
+        CSMWorld::Land record = land.get();
+        writer.startRecord (record.sRecordId);
+        record.save (writer, land.mState == CSMWorld::RecordBase::State_Deleted);
+        writer.endRecord (record.sRecordId);
+    }
+}
+
+
+CSMDoc::WriteLandTextureCollectionStage::WriteLandTextureCollectionStage (Document& document,
+    SavingState& state)
+: mDocument (document), mState (state)
+{}
+
+int CSMDoc::WriteLandTextureCollectionStage::setup()
+{
+    return mDocument.getData().getLandTextures().getSize();
+}
+
+void CSMDoc::WriteLandTextureCollectionStage::perform (int stage, Messages& messages)
+{
+    ESM::ESMWriter& writer = mState.getWriter();
+    const CSMWorld::Record<CSMWorld::LandTexture>& landTexture =
+        mDocument.getData().getLandTextures().getRecord (stage);
+
+    if (landTexture.isModified() || landTexture.mState == CSMWorld::RecordBase::State_Deleted)
+    {
+        CSMWorld::LandTexture record = landTexture.get();
+        writer.startRecord (record.sRecordId);
+        record.save (writer, landTexture.mState == CSMWorld::RecordBase::State_Deleted);
+        writer.endRecord (record.sRecordId);
     }
 }
 

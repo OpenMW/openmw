@@ -8,19 +8,65 @@ namespace ESM
 {
     unsigned int Spell::sRecordId = REC_SPEL;
 
-void Spell::load(ESMReader &esm)
-{
-    mName = esm.getHNOString("FNAM");
-    esm.getHNT(mData, "SPDT", 12);
-    mEffects.load(esm);
-}
+    void Spell::load(ESMReader &esm, bool &isDeleted)
+    {
+        isDeleted = false;
 
-void Spell::save(ESMWriter &esm) const
-{
-    esm.writeHNOCString("FNAM", mName);
-    esm.writeHNT("SPDT", mData, 12);
-    mEffects.save(esm);
-}
+        mEffects.mList.clear();
+
+        bool hasName = false;
+        bool hasData = false;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            switch (esm.retSubName().intval)
+            {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'S','P','D','T'>::value:
+                    esm.getHT(mData, 12);
+                    hasData = true;
+                    break;
+                case ESM::FourCC<'E','N','A','M'>::value:
+                    ENAMstruct s;
+                    esm.getHT(s, 24);
+                    mEffects.mList.push_back(s);
+                    break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+                    break;
+            }
+        }
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasData && !isDeleted)
+            esm.fail("Missing SPDT subrecord");
+    }
+
+    void Spell::save(ESMWriter &esm, bool isDeleted) const
+    {
+        esm.writeHNCString("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
+        esm.writeHNOCString("FNAM", mName);
+        esm.writeHNT("SPDT", mData, 12);
+        mEffects.save(esm);
+    }
 
     void Spell::blank()
     {
@@ -29,7 +75,6 @@ void Spell::save(ESMWriter &esm) const
         mData.mFlags = 0;
 
         mName.clear();
-
         mEffects.mList.clear();
     }
 }

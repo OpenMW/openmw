@@ -22,17 +22,22 @@ struct ContItem
     NAME32 mItem;
 };
 
+/// InventoryList, NPCO subrecord
 struct InventoryList
 {
     std::vector<ContItem> mList;
 
-    void load(ESMReader &esm);
+    /// Load one item, assumes subrecord name is already read
+    void add(ESMReader &esm);
+
     void save(ESMWriter &esm) const;
 };
 
 struct Container
 {
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "Container"; }
 
     enum Flags
     {
@@ -47,8 +52,8 @@ struct Container
     int mFlags;
     InventoryList mInventory;
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

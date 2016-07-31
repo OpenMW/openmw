@@ -17,6 +17,8 @@ class ESMWriter;
 struct Light
 {
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "Light"; }
 
     enum Flags
     {
@@ -37,7 +39,7 @@ struct Light
         int mValue;
         int mTime; // Duration
         int mRadius;
-        int mColor; // 4-byte rgba value
+        unsigned int mColor; // 4-byte rgba value
         int mFlags;
     }; // Size = 24 bytes
 
@@ -45,8 +47,8 @@ struct Light
 
     std::string mSound, mScript, mModel, mIcon, mName, mId;
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

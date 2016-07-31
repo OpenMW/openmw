@@ -25,14 +25,18 @@
 #include <components/esm/loadbody.hpp>
 #include <components/esm/loadsndg.hpp>
 #include <components/esm/loadmgef.hpp>
+#include <components/esm/loadsscr.hpp>
 #include <components/esm/debugprofile.hpp>
 #include <components/esm/filter.hpp>
+
+#include <components/resource/resourcesystem.hpp>
 
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "../doc/stage.hpp"
 
 #include "idcollection.hpp"
+#include "nestedidcollection.hpp"
 #include "universalid.hpp"
 #include "cell.hpp"
 #include "land.hpp"
@@ -40,10 +44,24 @@
 #include "refidcollection.hpp"
 #include "refcollection.hpp"
 #include "infocollection.hpp"
+#include "nestedinfocollection.hpp"
 #include "pathgrid.hpp"
+#include "metadata.hpp"
+#ifndef Q_MOC_RUN
 #include "subcellcollection.hpp"
+#endif
 
 class QAbstractItemModel;
+
+namespace VFS
+{
+    class Manager;
+}
+
+namespace Fallback
+{
+    class Map;
+}
 
 namespace ESM
 {
@@ -65,40 +83,43 @@ namespace CSMWorld
             IdCollection<ESM::GameSetting> mGmsts;
             IdCollection<ESM::Skill> mSkills;
             IdCollection<ESM::Class> mClasses;
-            IdCollection<ESM::Faction> mFactions;
-            IdCollection<ESM::Race> mRaces;
+            NestedIdCollection<ESM::Faction> mFactions;
+            NestedIdCollection<ESM::Race> mRaces;
             IdCollection<ESM::Sound> mSounds;
             IdCollection<ESM::Script> mScripts;
-            IdCollection<ESM::Region> mRegions;
-            IdCollection<ESM::BirthSign> mBirthsigns;
-            IdCollection<ESM::Spell> mSpells;
+            NestedIdCollection<ESM::Region> mRegions;
+            NestedIdCollection<ESM::BirthSign> mBirthsigns;
+            NestedIdCollection<ESM::Spell> mSpells;
             IdCollection<ESM::Dialogue> mTopics;
             IdCollection<ESM::Dialogue> mJournals;
-            IdCollection<ESM::Enchantment> mEnchantments;
+            NestedIdCollection<ESM::Enchantment> mEnchantments;
             IdCollection<ESM::BodyPart> mBodyParts;
             IdCollection<ESM::MagicEffect> mMagicEffects;
             SubCellCollection<Pathgrid> mPathgrids;
             IdCollection<ESM::DebugProfile> mDebugProfiles;
             IdCollection<ESM::SoundGenerator> mSoundGens;
-            InfoCollection mTopicInfos;
+            IdCollection<ESM::StartScript> mStartScripts;
+            NestedInfoCollection mTopicInfos;
             InfoCollection mJournalInfos;
-            IdCollection<Cell> mCells;
+            NestedIdCollection<Cell> mCells;
             IdCollection<LandTexture> mLandTextures;
             IdCollection<Land> mLand;
             RefIdCollection mReferenceables;
             RefCollection mRefs;
             IdCollection<ESM::Filter> mFilters;
+            Collection<MetaData> mMetaData;
             const ResourcesManager& mResourcesManager;
+            const Fallback::Map* mFallbackMap;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
-            std::string mAuthor;
-            std::string mDescription;
             ESM::ESMReader *mReader;
             const ESM::Dialogue *mDialogue; // last loaded dialogue
             bool mBase;
             bool mProject;
             std::map<std::string, std::map<ESM::RefNum, std::string> > mRefLoadCache;
             int mReaderIndex;
+
+            boost::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 
             std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
@@ -117,9 +138,17 @@ namespace CSMWorld
 
         public:
 
-            Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager);
+            Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir);
 
             virtual ~Data();
+
+            const VFS::Manager* getVFS() const;
+
+            const Fallback::Map* getFallbackMap() const;
+
+            boost::shared_ptr<Resource::ResourceSystem> getResourceSystem();
+
+            boost::shared_ptr<const Resource::ResourceSystem> getResourceSystem() const;
 
             const IdCollection<ESM::Global>& getGlobals() const;
 
@@ -211,7 +240,11 @@ namespace CSMWorld
 
             const IdCollection<CSMWorld::Land>& getLand() const;
 
+            IdCollection<CSMWorld::Land>& getLand();
+
             const IdCollection<CSMWorld::LandTexture>& getLandTextures() const;
+
+            IdCollection<CSMWorld::LandTexture>& getLandTextures();
 
             const IdCollection<ESM::SoundGenerator>& getSoundGens() const;
 
@@ -225,8 +258,16 @@ namespace CSMWorld
 
             SubCellCollection<Pathgrid>& getPathgrids();
 
+            const IdCollection<ESM::StartScript>& getStartScripts() const;
+
+            IdCollection<ESM::StartScript>& getStartScripts();
+
             /// Throws an exception, if \a id does not match a resources list.
             const Resources& getResources (const UniversalId& id) const;
+
+            const MetaData& getMetaData() const;
+
+            void setMetaData (const MetaData& metaData);
 
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.
@@ -256,14 +297,6 @@ namespace CSMWorld
 
             int count (RecordBase::State state) const;
             ///< Return number of top-level records with the given \a state.
-
-            void setDescription (const std::string& description);
-
-            std::string getDescription() const;
-
-            void setAuthor (const std::string& author);
-
-            std::string getAuthor() const;
 
         signals:
 

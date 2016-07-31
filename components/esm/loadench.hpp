@@ -18,6 +18,8 @@ class ESMWriter;
 struct Enchantment
 {
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "Enchantment"; }
 
     enum Type
     {
@@ -40,8 +42,8 @@ struct Enchantment
     ENDTstruct mData;
     EffectList mEffects;
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

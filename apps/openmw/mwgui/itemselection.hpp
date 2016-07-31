@@ -1,7 +1,14 @@
 #ifndef OPENMW_GAME_MWGUI_ITEMSELECTION_H
 #define OPENMW_GAME_MWGUI_ITEMSELECTION_H
 
-#include "container.hpp"
+#include <MyGUI_Delegate.h>
+
+#include "windowbase.hpp"
+
+namespace MWWorld
+{
+    class Ptr;
+}
 
 namespace MWGui
 {

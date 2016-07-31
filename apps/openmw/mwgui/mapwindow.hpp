@@ -3,19 +3,29 @@
 
 #include <stdint.h>
 
+#include <boost/shared_ptr.hpp>
+
 #include "windowpinnablebase.hpp"
 
 #include <components/esm/cellid.hpp>
 
+#include <components/esm/custommarkerstate.hpp>
+
 namespace MWRender
 {
     class GlobalMap;
+    class LocalMap;
 }
 
 namespace ESM
 {
     class ESMReader;
     class ESMWriter;
+}
+
+namespace MWWorld
+{
+    class CellStore;
 }
 
 namespace Loading
@@ -26,54 +36,43 @@ namespace Loading
 namespace MWGui
 {
 
-    struct CustomMarker
-    {
-        float mWorldX;
-        float mWorldY;
-
-        ESM::CellId mCell;
-
-        std::string mNote;
-
-        bool operator == (const CustomMarker& other)
-        {
-            return mNote == other.mNote && mCell == other.mCell && mWorldX == other.mWorldX && mWorldY == other.mWorldY;
-        }
-
-        void load (ESM::ESMReader& reader);
-        void save (ESM::ESMWriter& writer) const;
-    };
-
     class CustomMarkerCollection
     {
     public:
-        void addMarker(const CustomMarker& marker, bool triggerEvent=true);
-        void deleteMarker (const CustomMarker& marker);
-        void updateMarker(const CustomMarker& marker, const std::string& newNote);
+        void addMarker(const ESM::CustomMarker& marker, bool triggerEvent=true);
+        void deleteMarker (const ESM::CustomMarker& marker);
+        void updateMarker(const ESM::CustomMarker& marker, const std::string& newNote);
 
         void clear();
 
         size_t size() const;
 
-        std::vector<CustomMarker>::const_iterator begin() const;
-        std::vector<CustomMarker>::const_iterator end() const;
+        typedef std::multimap<ESM::CellId, ESM::CustomMarker> ContainerType;
+
+        typedef std::pair<ContainerType::const_iterator, ContainerType::const_iterator> RangeType;
+
+        ContainerType::const_iterator begin() const;
+        ContainerType::const_iterator end() const;
+
+        RangeType getMarkers(const ESM::CellId& cellId) const;
 
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
         EventHandle_Void eventMarkersChanged;
 
     private:
-        std::vector<CustomMarker> mMarkers;
+        ContainerType mMarkers;
     };
 
     class LocalMapBase
     {
     public:
-        LocalMapBase(CustomMarkerCollection& markers);
+        LocalMapBase(CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender, bool fogOfWarEnabled = true);
         virtual ~LocalMapBase();
-        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass);
+        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int mapWidgetSize, int cellDistance);
 
         void setCellPrefix(const std::string& prefix);
         void setActiveCell(const int x, const int y, bool interior=false);
+        void requestMapRender(const MWWorld::CellStore* cell);
         void setPlayerDir(const float x, const float y);
         void setPlayerPos(int cellX, int cellY, const float nx, const float ny);
 
@@ -81,23 +80,44 @@ namespace MWGui
 
         bool toggleFogOfWar();
 
-        struct MarkerPosition
+        struct MarkerUserData
         {
-            bool interior;
+            MarkerUserData(MWRender::LocalMap* map)
+                : mLocalMapRender(map)
+                , cellX(0)
+                , cellY(0)
+                , nX(0.f)
+                , nY(0.f)
+            {
+            }
+
+            bool isPositionExplored() const;
+
+            MWRender::LocalMap* mLocalMapRender;
             int cellX;
             int cellY;
             float nX;
             float nY;
+            std::vector<std::string> notes;
+            std::string caption;
         };
 
     protected:
+        MWRender::LocalMap* mLocalMapRender;
+
         int mCurX, mCurY;
         bool mInterior;
         MyGUI::ScrollView* mLocalMap;
         MyGUI::ImageBox* mCompass;
         std::string mPrefix;
         bool mChanged;
-        bool mFogOfWar;
+        bool mFogOfWarToggled;
+        bool mFogOfWarEnabled;
+
+        int mMapWidgetSize;
+
+        int mNumCells; // for convenience, mCellDistance * 2 + 1
+        int mCellDistance;
 
         // Stores markers that were placed by a player. May be shared between multiple map views.
         CustomMarkerCollection& mCustomMarkers;
@@ -105,16 +125,20 @@ namespace MWGui
         std::vector<MyGUI::ImageBox*> mMapWidgets;
         std::vector<MyGUI::ImageBox*> mFogWidgets;
 
+        typedef std::vector<boost::shared_ptr<MyGUI::ITexture> > TextureVector;
+        TextureVector mMapTextures;
+        TextureVector mFogTextures;
+
         // Keep track of created marker widgets, just to easily remove them later.
         std::vector<MyGUI::Widget*> mDoorMarkerWidgets;
         std::vector<MyGUI::Widget*> mMagicMarkerWidgets;
         std::vector<MyGUI::Widget*> mCustomMarkerWidgets;
 
-        void updateCustomMarkers();
+        virtual void updateCustomMarkers();
 
         void applyFogOfWar();
 
-        MyGUI::IntPoint getMarkerPosition (float worldX, float worldY, MarkerPosition& markerPos);
+        MyGUI::IntPoint getMarkerPosition (float worldX, float worldY, MarkerUserData& markerPos);
 
         virtual void notifyPlayerUpdate() {}
         virtual void notifyMapChanged() {}
@@ -165,7 +189,7 @@ namespace MWGui
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase, public NoDrop
     {
     public:
-        MapWindow(CustomMarkerCollection& customMarkers, DragAndDrop* drag, const std::string& cacheDir);
+        MapWindow(CustomMarkerCollection& customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender);
         virtual ~MapWindow();
 
         void setCellName(const std::string& cellName);
@@ -174,7 +198,8 @@ namespace MWGui
 
         void renderGlobalMap(Loading::Listener* loadingListener);
 
-        // adds the marker to the global map
+        /// adds the marker to the global map
+        /// @param name The ESM::Cell::mName
         void addVisitedLocation(const std::string& name, int x, int y);
 
         // reveals this cell's map on the global map
@@ -187,11 +212,13 @@ namespace MWGui
 
         void onFrame(float dt);
 
+        virtual void updateCustomMarkers();
+
         /// Clear all savegame-specific data
         void clear();
 
         void write (ESM::ESMWriter& writer, Loading::Listener& progress);
-        void readRecord (ESM::ESMReader& reader, int32_t type);
+        void readRecord (ESM::ESMReader& reader, uint32_t type);
 
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
@@ -205,8 +232,11 @@ namespace MWGui
         void onNoteDoubleClicked(MyGUI::Widget* sender);
         void onChangeScrollWindowCoord(MyGUI::Widget* sender);
         void globalMapUpdatePlayer();
+        void setGlobalMapMarkerTooltip(MyGUI::Widget* widget, int x, int y);
 
         MyGUI::ScrollView* mGlobalMap;
+        std::auto_ptr<MyGUI::ITexture> mGlobalMapTexture;
+        std::auto_ptr<MyGUI::ITexture> mGlobalMapOverlayTexture;
         MyGUI::ImageBox* mGlobalMapImage;
         MyGUI::ImageBox* mGlobalMapOverlay;
         MyGUI::ImageBox* mPlayerArrowLocal;
@@ -230,8 +260,10 @@ namespace MWGui
 
         MWRender::GlobalMap* mGlobalMapRender;
 
+        std::map<std::pair<int, int>, MyGUI::Widget*> mGlobalMapMarkers;
+
         EditNoteDialog mEditNoteDialog;
-        CustomMarker mEditingMarker;
+        ESM::CustomMarker mEditingMarker;
 
         virtual void onPinToggled();
         virtual void onTitleDoubleClicked();

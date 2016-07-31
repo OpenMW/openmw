@@ -2,7 +2,9 @@
 
 #include <components/esm/loadgmst.hpp>
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Button.h>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_Gui.h>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -11,6 +13,7 @@
 #include "../mwbase/soundmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -38,7 +41,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
     int currentY = 0;
 
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr player = MWMechanics::getPlayer();
     int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
     MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
@@ -57,17 +60,17 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
             float fRepairMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                     .find("fRepairMult")->getFloat();
 
-            float p = std::max(1, basePrice);
-            float r = std::max(1, static_cast<int>(maxDurability / p));
+            float p = static_cast<float>(std::max(1, basePrice));
+            float r = static_cast<float>(std::max(1, static_cast<int>(maxDurability / p)));
 
-            int x = ((maxDurability - durability) / r);
-            x = (fRepairMult * x);
+            int x = static_cast<int>((maxDurability - durability) / r);
+            x = static_cast<int>(fRepairMult * x);
 
             int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mActor, x, true);
 
 
             std::string name = iter->getClass().getName(*iter)
-                    + " - " + boost::lexical_cast<std::string>(price)
+                    + " - " + MyGUI::utility::toString(price)
                     + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                     .find("sgp")->getString();
 
@@ -83,7 +86,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
             currentY += 18;
 
-            button->setUserString("Price", boost::lexical_cast<std::string>(price));
+            button->setUserString("Price", MyGUI::utility::toString(price));
             button->setUserData(*iter);
             button->setCaptionWithReplacing(name);
             button->setSize(button->getTextSize().width,18);
@@ -98,20 +101,22 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
     mList->setVisibleVScroll(true);
 
     mGoldLabel->setCaptionWithReplacing("#{sGold}: "
-        + boost::lexical_cast<std::string>(playerGold));
+        + MyGUI::utility::toString(playerGold));
 }
 
 void MerchantRepair::onMouseWheel(MyGUI::Widget* _sender, int _rel)
 {
-    if (mList->getViewOffset().top + _rel*0.3 > 0)
+    if (mList->getViewOffset().top + _rel*0.3f > 0)
         mList->setViewOffset(MyGUI::IntPoint(0, 0));
     else
-        mList->setViewOffset(MyGUI::IntPoint(0, mList->getViewOffset().top + _rel*0.3));
+        mList->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mList->getViewOffset().top + _rel*0.3f)));
 }
 
 void MerchantRepair::open()
 {
     center();
+    // Reset scrollbars
+    mList->setViewOffset(MyGUI::IntPoint(0, 0));
 }
 
 void MerchantRepair::exit()
@@ -121,9 +126,9 @@ void MerchantRepair::exit()
 
 void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 {
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr player = MWMechanics::getPlayer();
 
-    int price = boost::lexical_cast<int>(sender->getUserString("Price"));
+    int price = MyGUI::utility::parseInt(sender->getUserString("Price"));
     if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
         return;
 

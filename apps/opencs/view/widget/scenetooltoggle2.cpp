@@ -1,4 +1,3 @@
-
 #include "scenetooltoggle2.hpp"
 
 #include <stdexcept>
@@ -42,8 +41,15 @@ void CSVWidget::SceneToolToggle2::adjustToolTip()
 
 void CSVWidget::SceneToolToggle2::adjustIcon()
 {
+    unsigned int buttonIds = 0;
+
+    for (std::map<PushButton *, ButtonDesc>::const_iterator iter (mButtons.begin());
+        iter!=mButtons.end(); ++iter)
+        if (iter->first->isChecked())
+            buttonIds |= iter->second.mButtonId;
+
     std::ostringstream stream;
-    stream << mCompositeIcon << getSelection();
+    stream << mCompositeIcon << buttonIds;
     setIcon (QIcon (QString::fromUtf8 (stream.str().c_str())));
 }
 
@@ -71,7 +77,7 @@ void CSVWidget::SceneToolToggle2::showPanel (const QPoint& position)
         mFirst->setFocus (Qt::OtherFocusReason);
 }
 
-void CSVWidget::SceneToolToggle2::addButton (unsigned int id,
+void CSVWidget::SceneToolToggle2::addButton (unsigned int id, unsigned int mask,
     const QString& name, const QString& tooltip, bool disabled)
 {
     std::ostringstream stream;
@@ -90,7 +96,8 @@ void CSVWidget::SceneToolToggle2::addButton (unsigned int id,
     mLayout->addWidget (button);
 
     ButtonDesc desc;
-    desc.mId = id;
+    desc.mButtonId = id;
+    desc.mMask = mask;
     desc.mName = name;
     desc.mIndex = mButtons.size();
 
@@ -102,23 +109,23 @@ void CSVWidget::SceneToolToggle2::addButton (unsigned int id,
         mFirst = button;
 }
 
-unsigned int CSVWidget::SceneToolToggle2::getSelection() const
+unsigned int CSVWidget::SceneToolToggle2::getSelectionMask() const
 {
     unsigned int selection = 0;
 
     for (std::map<PushButton *, ButtonDesc>::const_iterator iter (mButtons.begin());
         iter!=mButtons.end(); ++iter)
         if (iter->first->isChecked())
-            selection |= iter->second.mId;
+            selection |= iter->second.mMask;
 
     return selection;
 }
 
-void CSVWidget::SceneToolToggle2::setSelection (unsigned int selection)
+void CSVWidget::SceneToolToggle2::setSelectionMask (unsigned int selection)
 {
     for (std::map<PushButton *, ButtonDesc>::iterator iter (mButtons.begin());
         iter!=mButtons.end(); ++iter)
-        iter->first->setChecked (selection & iter->second.mId);
+        iter->first->setChecked (selection & iter->second.mMask);
 
     adjustToolTip();
     adjustIcon();

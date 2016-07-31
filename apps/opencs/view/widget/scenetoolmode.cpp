@@ -1,12 +1,28 @@
-
 #include "scenetoolmode.hpp"
 
 #include <QHBoxLayout>
 #include <QFrame>
 #include <QSignalMapper>
+#include <QMenu>
+#include <QContextMenuEvent>
 
 #include "scenetoolbar.hpp"
 #include "modebutton.hpp"
+
+void CSVWidget::SceneToolMode::contextMenuEvent (QContextMenuEvent *event)
+{
+    QMenu menu (this);
+    if (createContextMenu (&menu))
+        menu.exec (event->globalPos());
+}
+
+bool CSVWidget::SceneToolMode::createContextMenu (QMenu *menu)
+{
+    if (mCurrent)
+        return mCurrent->createContextMenu (menu);
+
+    return false;
+}
 
 void CSVWidget::SceneToolMode::adjustToolTip (const ModeButton *activeMode)
 {
@@ -16,7 +32,31 @@ void CSVWidget::SceneToolMode::adjustToolTip (const ModeButton *activeMode)
 
     toolTip += "<p>(left click to change mode)";
 
+    if (createContextMenu (0))
+        toolTip += "<br>(right click to access context menu)";
+
     setToolTip (toolTip);
+}
+
+void CSVWidget::SceneToolMode::setButton (std::map<ModeButton *, std::string>::iterator iter)
+{
+    for (std::map<ModeButton *, std::string>::const_iterator iter2 = mButtons.begin();
+        iter2!=mButtons.end(); ++iter2)
+        iter2->first->setChecked (iter2==iter);
+
+    setIcon (iter->first->icon());
+    adjustToolTip (iter->first);
+
+    if (mCurrent!=iter->first)
+    {
+        if (mCurrent)
+            mCurrent->deactivate (mToolbar);
+
+        mCurrent = iter->first;
+        mCurrent->activate (mToolbar);
+    }
+
+    emit modeChanged (iter->second);
 }
 
 CSVWidget::SceneToolMode::SceneToolMode (SceneToolbar *parent, const QString& toolTip)
@@ -72,9 +112,30 @@ void CSVWidget::SceneToolMode::addButton (ModeButton *button, const std::string&
     }
 }
 
+CSVWidget::ModeButton *CSVWidget::SceneToolMode::getCurrent()
+{
+    return mCurrent;
+}
+
+std::string CSVWidget::SceneToolMode::getCurrentId() const
+{
+    return mButtons.find (mCurrent)->second;
+}
+
+void CSVWidget::SceneToolMode::setButton (const std::string& id)
+{
+    for (std::map<ModeButton *, std::string>::iterator iter = mButtons.begin();
+        iter!=mButtons.end(); ++iter)
+        if (iter->second==id)
+        {
+            setButton (iter);
+            break;
+        }
+}
+
 void CSVWidget::SceneToolMode::selected()
 {
-    std::map<ModeButton *, std::string>::const_iterator iter =
+    std::map<ModeButton *, std::string>::iterator iter =
         mButtons.find (dynamic_cast<ModeButton *> (sender()));
 
     if (iter!=mButtons.end())
@@ -82,22 +143,6 @@ void CSVWidget::SceneToolMode::selected()
         if (!iter->first->hasKeepOpen())
             mPanel->hide();
 
-        for (std::map<ModeButton *, std::string>::const_iterator iter2 = mButtons.begin();
-            iter2!=mButtons.end(); ++iter2)
-            iter2->first->setChecked (iter2==iter);
-
-        setIcon (iter->first->icon());
-        adjustToolTip (iter->first);
-
-        if (mCurrent!=iter->first)
-        {
-            if (mCurrent)
-                mCurrent->deactivate (mToolbar);
-
-            mCurrent = iter->first;
-            mCurrent->activate (mToolbar);
-        }
-
-        emit modeChanged (iter->second);
+        setButton (iter);
     }
 }

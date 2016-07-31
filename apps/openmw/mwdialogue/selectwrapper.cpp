@@ -1,4 +1,3 @@
-
 #include "selectwrapper.hpp"
 
 #include <cctype>
@@ -205,6 +204,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_Reputation, Function_FactionRankDiff,
         Function_WerewolfKills,
         Function_RankLow, Function_RankHigh,
+        Function_CreatureTargetted,
         Function_None // end marker
     };
 
@@ -225,7 +225,6 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_PcVampire, Function_TalkedToPc,
         Function_Alarmed, Function_Detected,
         Function_Attacked, Function_ShouldAttack,
-        Function_CreatureTargetted,
         Function_Werewolf,
         Function_None // end marker
     };
@@ -264,10 +263,6 @@ bool MWDialogue::SelectWrapper::isNpcOnly() const
     {
         Function_NotFaction, Function_NotClass, Function_NotRace,
         Function_SameGender, Function_SameRace, Function_SameFaction,
-        Function_PcSkill,
-        Function_PcExpelled,
-        Function_PcVampire,
-        Function_PcCrimeLevel,
         Function_RankRequirement,
         Function_Reputation, Function_FactionRankDiff,
         Function_Werewolf, Function_WerewolfKills,

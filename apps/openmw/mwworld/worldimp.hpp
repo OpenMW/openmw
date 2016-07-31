@@ -1,27 +1,37 @@
 #ifndef GAME_MWWORLD_WORLDIMP_H
 #define GAME_MWWORLD_WORLDIMP_H
 
-#include "../mwrender/debugging.hpp"
-
 #include <boost/shared_ptr.hpp>
+
+#include <osg/ref_ptr>
+
+#include <components/settings/settings.hpp>
+#include <components/fallback/fallback.hpp>
+
+#include "../mwbase/world.hpp"
 
 #include "ptr.hpp"
 #include "scene.hpp"
 #include "esmstore.hpp"
-#include "physicssystem.hpp"
 #include "cells.hpp"
 #include "localscripts.hpp"
 #include "timestamp.hpp"
-#include "fallback.hpp"
 #include "globals.hpp"
-
-#include "../mwbase/world.hpp"
-
 #include "contentloader.hpp"
 
-namespace Ogre
+namespace osg
 {
-    class Vector3;
+    class Group;
+}
+
+namespace osgViewer
+{
+    class Viewer;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
 }
 
 namespace ESM
@@ -34,17 +44,16 @@ namespace Files
     class Collections;
 }
 
-namespace Render
-{
-    class OgreRenderer;
-}
-
 namespace MWRender
 {
     class SkyManager;
-    class CellRender;
     class Animation;
     class Camera;
+}
+
+namespace ToUTF8
+{
+    class Utf8Encoder;
 }
 
 struct ContentLoader;
@@ -59,7 +68,9 @@ namespace MWWorld
 
     class World : public MWBase::World
     {
-            MWWorld::Fallback mFallback;
+            Resource::ResourceSystem* mResourceSystem;
+
+            Fallback::Map mFallback;
             MWRender::RenderingManager* mRendering;
 
             MWWorld::WeatherManager* mWeatherManager;
@@ -70,25 +81,29 @@ namespace MWWorld
             MWWorld::ESMStore mStore;
             LocalScripts mLocalScripts;
             MWWorld::Globals mGlobalVariables;
-            MWWorld::PhysicsSystem *mPhysics;
+            MWPhysics::PhysicsSystem *mPhysics;
             bool mSky;
+
+            ESM::Variant* mGameHour;
+            ESM::Variant* mDaysPassed;
+            ESM::Variant* mDay;
+            ESM::Variant* mMonth;
+            ESM::Variant* mYear;
+            ESM::Variant* mTimeScale;
 
             Cells mCells;
 
             std::string mCurrentWorldSpace;
 
-            OEngine::Physic::PhysicEngine* mPhysEngine;
-
             boost::shared_ptr<ProjectileManager> mProjectileManager;
 
             bool mGodMode;
+            bool mScriptsEnabled;
             std::vector<std::string> mContentFiles;
 
             // not implemented
             World (const World&);
             World& operator= (const World&);
-
-            Ptr getPtrViaHandle (const std::string& handle, CellStore& cellStore);
 
             int mActivationDistanceOverride;
 
@@ -102,23 +117,22 @@ namespace MWWorld
             void updateWeather(float duration, bool paused = false);
             int getDaysPerMonth (int month) const;
 
-            void rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust);
+            void rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, bool adjust);
 
-            Ptr moveObjectImp (const Ptr& ptr, float x, float y, float z);
+            Ptr moveObjectImp (const Ptr& ptr, float x, float y, float z, bool movePhysics=true);
             ///< @return an updated Ptr in case the Ptr's cell changes
 
-            Ptr copyObjectToCell(const Ptr &ptr, CellStore* cell, ESM::Position pos, bool adjustPos=true);
+            Ptr copyObjectToCell(const ConstPtr &ptr, CellStore* cell, ESM::Position pos, int count, bool adjustPos);
 
             void updateSoundListener();
             void updateWindowManager ();
-            void performUpdateSceneQueries ();
-            void getFacedHandle(std::string& facedHandle, float maxDistance, bool ignorePlayer=true);
+            void updatePlayer(bool paused);
 
-            float getMaxActivationDistance ();
-            float getNpcActivationDistance ();
-            float getObjectActivationDistance ();
+            MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer=true);
 
+    public: // FIXME
             void removeContainerScripts(const Ptr& reference);
+    private:
             void addContainerScripts(const Ptr& reference, CellStore* cell);
             void PCDropped (const Ptr& item);
 
@@ -130,6 +144,8 @@ namespace MWWorld
 
             void ensureNeededRecords();
 
+            void fillGlobalVariables();
+
             /**
              * @brief loadContentFiles - Loads content files (esm,esp,omwgame,omwaddon)
              * @param fileCollections- Container which holds content file names and their paths
@@ -139,6 +155,13 @@ namespace MWWorld
             void loadContentFiles(const Files::Collections& fileCollections,
                 const std::vector<std::string>& content, ContentLoader& contentLoader);
 
+            float mSwimHeightScale;
+
+            float mDistanceToFacedObject;
+
+            bool isUnderwater(const MWWorld::ConstPtr &object, const float heightRatio) const;
+            ///< helper function for implementing isSwimming(), isSubmerged(), isWading()
+
             bool mTeleportEnabled;
             bool mLevitationEnabled;
             bool mGoToJail;
@@ -146,27 +169,35 @@ namespace MWWorld
 
             float feetToGameUnits(float feet);
 
+            MWWorld::ConstPtr getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id );
+            MWWorld::ConstPtr getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id );
+
         public:
 
-            World (OEngine::Render::OgreRenderer& renderer,
+            World (
+                osgViewer::Viewer* viewer,
+                osg::ref_ptr<osg::Group> rootNode,
+                Resource::ResourceSystem* resourceSystem,
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& contentFiles,
-                const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
-                int activationDistanceOverride, const std::string& startCell, const std::string& startupScript);
+                int activationDistanceOverride, const std::string& startCell, const std::string& startupScript, const std::string& resourcePath);
 
             virtual ~World();
 
             virtual void startNewGame (bool bypass);
             ///< \param bypass Bypass regular game start.
 
+            virtual void preloadCommonAssets();
+
             virtual void clear();
 
             virtual int countSavedGameRecords() const;
+            virtual int countSavedGameCells() const;
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-            virtual void readRecord (ESM::ESMReader& reader, int32_t type,
+            virtual void readRecord (ESM::ESMReader& reader, uint32_t type,
                 const std::map<int, int>& contentFileMap);
 
             virtual CellStore *getExterior (int x, int y);
@@ -185,9 +216,7 @@ namespace MWWorld
 
             virtual void adjustSky();
 
-            virtual void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
-
-            virtual const Fallback *getFallback() const;
+            virtual const Fallback::Map *getFallback() const;
 
             virtual Player& getPlayer();
             virtual MWWorld::Ptr getPlayerPtr();
@@ -205,20 +234,11 @@ namespace MWWorld
 
             virtual bool isCellQuasiExterior() const;
 
-            virtual Ogre::Vector2 getNorthVector (CellStore* cell);
+            virtual osg::Vec2f getNorthVector (const CellStore* cell);
             ///< get north vector for given interior cell
 
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out);
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
-
-            virtual void worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
-            ///< see MWRender::LocalMap::worldToInteriorMapPosition
-
-            virtual Ogre::Vector2 interiorMapToWorldPosition (float nX, float nY, int x, int y);
-            ///< see MWRender::LocalMap::interiorMapToWorldPosition
-
-            virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
-            ///< see MWRender::LocalMap::isPositionExplored
 
             virtual void setGlobalInt (const std::string& name, int value);
             ///< Set value independently from real type.
@@ -252,16 +272,10 @@ namespace MWWorld
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
-            virtual Ptr getPtrViaHandle (const std::string& handle);
-            ///< Return a pointer to a liveCellRef with the given Ogre handle.
-
-            virtual Ptr searchPtrViaHandle (const std::string& handle);
-            ///< Return a pointer to a liveCellRef with the given Ogre handle or Ptr() if not found
-
             virtual Ptr searchPtrViaActorId (int actorId);
             ///< Search is limited to the active cells.
 
-            virtual MWWorld::Ptr findContainer (const MWWorld::Ptr& ptr);
+            virtual MWWorld::Ptr findContainer (const MWWorld::ConstPtr& ptr);
             ///< Return a pointer to a liveCellRef which contains \a ptr.
             /// \note Search is limited to the active cells.
 
@@ -276,7 +290,7 @@ namespace MWWorld
 
             virtual void disable (const Ptr& ptr);
 
-            virtual void advanceTime (double hours);
+            virtual void advanceTime (double hours, bool incremental = false);
             ///< Advance in-game time.
 
             virtual void setHour (double hour);
@@ -315,15 +329,16 @@ namespace MWWorld
 
             virtual float getTimeScaleFactor() const;
 
-            virtual void changeToInteriorCell (const std::string& cellName,
-                const ESM::Position& position);
+            virtual void changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true);
             ///< Move to interior cell.
+            ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-            virtual void changeToExteriorCell (const ESM::Position& position);
+            virtual void changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true);
             ///< Move to exterior cell.
+            ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool detectWorldSpaceChange=true);
-            ///< @param detectWorldSpaceChange if true, clean up worldspace-specific data when the world space changes
+            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent=true);
+            ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
             virtual const ESM::Cell *getExterior (const std::string& cellName) const;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
@@ -333,29 +348,40 @@ namespace MWWorld
             virtual MWWorld::Ptr getFacedObject();
             ///< Return pointer to the object the player is looking at, if it is within activation range
 
+            virtual float getDistanceToFacedObject();
+
             /// Returns a pointer to the object the provided object would hit (if within the
             /// specified distance), and the point where the hit occurs. This will attempt to
             /// use the "Head" node as a basis.
-            virtual std::pair<MWWorld::Ptr,Ogre::Vector3> getHitContact(const MWWorld::Ptr &ptr, float distance);
+            virtual std::pair<MWWorld::Ptr,osg::Vec3f> getHitContact(const MWWorld::ConstPtr &ptr, float distance);
 
+            /// @note No-op for items in containers. Use ContainerStore::removeItem instead.
             virtual void deleteObject (const Ptr& ptr);
+
             virtual void undeleteObject (const Ptr& ptr);
 
             virtual MWWorld::Ptr moveObject (const Ptr& ptr, float x, float y, float z);
             ///< @return an updated Ptr in case the Ptr's cell changes
-            virtual void moveObject (const Ptr& ptr, CellStore* newCell, float x, float y, float z);
+
+            virtual MWWorld::Ptr moveObject (const Ptr& ptr, CellStore* newCell, float x, float y, float z, bool movePhysics=true);
+            ///< @return an updated Ptr
 
             virtual void scaleObject (const Ptr& ptr, float scale);
 
-            /// World rotates object, uses degrees
+            /// World rotates object, uses radians
+            /// @note Rotations via this method use a different rotation order than the initial rotations in the CS. This
+            /// could be considered a bug, but is needed for MW compatibility.
             /// \param adjust indicates rotation should be set or adjusted
             virtual void rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust = false);
 
-            /// Local rotates object, uses degrees
-            virtual void localRotateObject (const Ptr& ptr, float x, float y, float z);
+            virtual MWWorld::Ptr placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos);
+            ///< Place an object. Makes a copy of the Ptr.
 
-            virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr, MWWorld::CellStore* cell, ESM::Position pos);
-            ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr.
+            virtual MWWorld::Ptr safePlaceObject (const MWWorld::ConstPtr& ptr, const MWWorld::ConstPtr& referenceObject, MWWorld::CellStore* referenceCell, int direction, float distance);
+            ///< Place an object in a safe place next to \a referenceObject. \a direction and \a distance specify the wanted placement
+            /// relative to \a referenceObject (but the object may be placed somewhere else if the wanted location is obstructed).
+
+            virtual float getMaxActivationDistance();
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const;
@@ -364,7 +390,7 @@ namespace MWWorld
             virtual void positionToIndex (float x, float y, int &cellX, int &cellY) const;
             ///< Convert position to cell numbers
 
-            virtual void queueMovement(const Ptr &ptr, const Ogre::Vector3 &velocity);
+            virtual void queueMovement(const Ptr &ptr, const osg::Vec3f &velocity);
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
@@ -376,7 +402,7 @@ namespace MWWorld
             /// collisions and gravity.
             ///< \return Resulting mode
 
-            virtual bool toggleRenderMode (RenderMode mode);
+            virtual bool toggleRenderMode (MWRender::RenderMode mode);
             ///< Toggle a render mode.
             ///< \return Resulting mode
 
@@ -430,14 +456,14 @@ namespace MWWorld
 
             virtual void update (float duration, bool paused);
 
-            virtual MWWorld::Ptr placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount);
+            virtual MWWorld::Ptr placeObject (const MWWorld::ConstPtr& object, float cursorX, float cursorY, int amount);
             ///< copy and place an object into the gameworld at the specified cursor position
             /// @param object
             /// @param cursor X (relative 0-1)
             /// @param cursor Y (relative 0-1)
             /// @param number of objects to place
 
-            virtual MWWorld::Ptr dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object, int amount);
+            virtual MWWorld::Ptr dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::ConstPtr& object, int amount);
             ///< copy and place an object into the gameworld at the given actor's position
             /// @param actor giving the dropped object position
             /// @param object
@@ -451,38 +477,27 @@ namespace MWWorld
             virtual bool isFlying(const MWWorld::Ptr &ptr) const;
             virtual bool isSlowFalling(const MWWorld::Ptr &ptr) const;
             ///Is the head of the creature underwater?
-            virtual bool isSubmerged(const MWWorld::Ptr &object) const;
-            virtual bool isSwimming(const MWWorld::Ptr &object) const;
-            virtual bool isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const;
+            virtual bool isSubmerged(const MWWorld::ConstPtr &object) const;
+            virtual bool isSwimming(const MWWorld::ConstPtr &object) const;
+            virtual bool isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const;
+            virtual bool isWading(const MWWorld::ConstPtr &object) const;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;
 
-            virtual void togglePOV() {
-                mRendering->togglePOV();
-            }
+            virtual osg::Matrixf getActorHeadTransform(const MWWorld::ConstPtr& actor) const;
 
-            virtual bool isFirstPerson() const {
-                return mRendering->getCamera()->isFirstPerson();
-            }
+            virtual void togglePOV();
 
-            virtual void togglePreviewMode(bool enable) {
-                mRendering->togglePreviewMode(enable);
-            }
+            virtual bool isFirstPerson() const;
 
-            virtual bool toggleVanityMode(bool enable) {
-                return mRendering->toggleVanityMode(enable);
-            }
+            virtual void togglePreviewMode(bool enable);
 
-            virtual void allowVanityMode(bool allow) {
-                mRendering->allowVanityMode(allow);
-            }
+            virtual bool toggleVanityMode(bool enable);
 
-            virtual void togglePlayerLooking(bool enable) {
-                mRendering->togglePlayerLooking(enable);
-            }
+            virtual void allowVanityMode(bool allow);
 
-            virtual void changeVanityModeScale(float factor) {
-                mRendering->changeVanityModeScale(factor);
-            }
+            virtual void togglePlayerLooking(bool enable);
+
+            virtual void changeVanityModeScale(float factor);
 
             virtual bool vanityRotateCamera(float * rot);
             virtual void setCameraDistance(float dist, bool adjust = false, bool override = true);
@@ -498,28 +513,28 @@ namespace MWWorld
             /// @note throws an exception when invoked on a teleport door
             virtual void activateDoor(const MWWorld::Ptr& door, int state);
 
-            virtual bool getPlayerStandingOn (const MWWorld::Ptr& object); ///< @return true if the player is standing on \a object
-            virtual bool getActorStandingOn (const MWWorld::Ptr& object); ///< @return true if any actor is standing on \a object
-            virtual bool getPlayerCollidingWith(const MWWorld::Ptr& object); ///< @return true if the player is colliding with \a object
-            virtual bool getActorCollidingWith (const MWWorld::Ptr& object); ///< @return true if any actor is colliding with \a object
-            virtual void hurtStandingActors (const MWWorld::Ptr& object, float dmgPerSecond);
+            virtual bool getPlayerStandingOn (const MWWorld::ConstPtr& object); ///< @return true if the player is standing on \a object
+            virtual bool getActorStandingOn (const MWWorld::ConstPtr& object); ///< @return true if any actor is standing on \a object
+            virtual bool getPlayerCollidingWith(const MWWorld::ConstPtr& object); ///< @return true if the player is colliding with \a object
+            virtual bool getActorCollidingWith (const MWWorld::ConstPtr& object); ///< @return true if any actor is colliding with \a object
+            virtual void hurtStandingActors (const MWWorld::ConstPtr& object, float dmgPerSecond);
             ///< Apply a health difference to any actors standing on \a object.
             /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
-            virtual void hurtCollidingActors (const MWWorld::Ptr& object, float dmgPerSecond);
+            virtual void hurtCollidingActors (const MWWorld::ConstPtr& object, float dmgPerSecond);
             ///< Apply a health difference to any actors colliding with \a object.
             /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
 
             virtual float getWindSpeed();
 
-            virtual void getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out);
+            virtual void getContainersOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out);
             ///< get all containers in active cells owned by this Npc
-            virtual void getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out);
+            virtual void getItemsOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out);
             ///< get all items in active cells owned by this Npc
 
-            virtual bool getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor);
+            virtual bool getLOS(const MWWorld::ConstPtr& actor,const MWWorld::ConstPtr& targetActor);
             ///< get Line of Sight (morrowind stupid implementation)
 
-            virtual float getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist);
+            virtual float getDistToNearestRayHit(const osg::Vec3f& from, const osg::Vec3f& dir, float maxDist, bool includeWater = false);
 
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable);
 
@@ -532,10 +547,11 @@ namespace MWWorld
 
             /// \todo Probably shouldn't be here
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr);
+            virtual const MWRender::Animation* getAnimation(const MWWorld::ConstPtr &ptr) const;
+            virtual void reattachPlayerCamera();
 
             /// \todo this does not belong here
-            virtual void frameStarted (float dt, bool paused);
-            virtual void screenshot (Ogre::Image& image, int w, int h);
+            virtual void screenshot (osg::Image* image, int w, int h);
 
             /// Find center of exterior cell above land surface
             /// \return false if exterior with given name not exists, true otherwise
@@ -557,13 +573,12 @@ namespace MWWorld
             /// Returns true if levitation spell effect is allowed.
             virtual bool isLevitationEnabled() const;
 
-            virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
-
-            virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor);
-
             virtual bool getGodModeState();
 
             virtual bool toggleGodMode();
+
+            virtual bool toggleScripts();
+            virtual bool getScriptsEnabled() const;
 
             /**
              * @brief startSpellCast attempt to start casting a spell. Might fail immediately if conditions are not met.
@@ -580,9 +595,9 @@ namespace MWWorld
 
             virtual void launchMagicBolt (const std::string& model, const std::string& sound, const std::string& spellId,
                                           float speed, bool stack, const ESM::EffectList& effects,
-                                           const MWWorld::Ptr& caster, const std::string& sourceName, const Ogre::Vector3& fallbackDirection);
-            virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
-                                           const Ogre::Vector3& worldPos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed);
+                                           const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection);
+            virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
+                                           const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength);
 
 
             virtual const std::vector<std::string>& getContentFiles() const;
@@ -591,7 +606,7 @@ namespace MWWorld
             // Are we in an exterior or pseudo-exterior cell and it's night?
             virtual bool isDark() const;
 
-            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result);
+            virtual bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result);
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
             /// @note id must be lower case
@@ -617,12 +632,12 @@ namespace MWWorld
             virtual void spawnRandomCreature(const std::string& creatureList);
 
             /// Spawn a blood effect for \a ptr at \a worldPosition
-            virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition);
+            virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition);
 
-            virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const Ogre::Vector3& worldPos);
+            virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos);
 
-            virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
-                                       const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName);
+            virtual void explodeSpell (const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster,
+                                       const MWWorld::Ptr& ignore, ESM::RangeType rangeType, const std::string& id, const std::string& sourceName);
 
             virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor);
 
@@ -630,12 +645,21 @@ namespace MWWorld
             virtual bool isInStorm() const;
 
             /// @see MWWorld::WeatherManager::getStormDirection
-            virtual Ogre::Vector3 getStormDirection() const;
+            virtual osg::Vec3f getStormDirection() const;
 
             /// Resets all actors in the current active cells to their original location within that cell.
             virtual void resetActors();
 
-            virtual bool isWalkingOnWater (const MWWorld::Ptr& actor);
+            virtual bool isWalkingOnWater (const MWWorld::ConstPtr& actor);
+
+            /// Return a vector aiming the actor's weapon towards a target.
+            /// @note The length of the vector is the distance between actor and target.
+            virtual osg::Vec3f aimToTarget(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target);
+
+            /// Return the distance between actor's weapon and target's collision box.
+            virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target);
+
+            virtual bool isPlayerInJail() const;
     };
 }
 

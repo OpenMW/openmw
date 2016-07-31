@@ -1,4 +1,3 @@
-
 #include "character.hpp"
 
 #include <ctime>
@@ -29,9 +28,6 @@ void MWState::Character::addSlot (const boost::filesystem::path& path, const std
     ESM::ESMReader reader;
     reader.open (slot.mPath.string());
 
-    if (reader.getFormat()>ESM::Header::CurrentFormat)
-        return; // format is too new -> ignore
-
     if (reader.getRecName()!=ESM::REC_SAVE)
         return; // invalid save file -> ignore
 
@@ -61,7 +57,8 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
             stream << "_";
     }
 
-    slot.mPath = mPath / stream.str();
+    const std::string ext = ".omwsave";
+    slot.mPath = mPath / (stream.str() + ext);
 
     // Append an index if necessary to ensure a unique file
     int i=0;
@@ -70,7 +67,7 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
            std::ostringstream test;
            test << stream.str();
            test << " - " << ++i;
-           slot.mPath = mPath / test.str();
+           slot.mPath = mPath / (test.str() + ext);
     }
 
     slot.mProfile = profile;
@@ -189,4 +186,9 @@ ESM::SavedGame MWState::Character::getSignature() const
             slot = *iter;
 
     return slot.mProfile;
+}
+
+const boost::filesystem::path& MWState::Character::getPath() const
+{
+    return mPath;
 }

@@ -1,6 +1,10 @@
 #include "levelupdialog.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Button.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_EditBox.h>
+
+#include <components/fallback/fallback.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -8,12 +12,14 @@
 #include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/fallback.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
+
+#include "class.hpp"
 
 namespace MWGui
 {
@@ -34,17 +40,17 @@ namespace MWGui
         for (int i=1; i<9; ++i)
         {
             MyGUI::TextBox* t;
-            getWidget(t, "AttribVal" + boost::lexical_cast<std::string>(i));
+            getWidget(t, "AttribVal" + MyGUI::utility::toString(i));
 
             MyGUI::Button* b;
-            getWidget(b, "Attrib" + boost::lexical_cast<std::string>(i));
+            getWidget(b, "Attrib" + MyGUI::utility::toString(i));
             b->setUserData (i-1);
             b->eventMouseButtonClick += MyGUI::newDelegate(this, &LevelupDialog::onAttributeClicked);
             mAttributes.push_back(b);
 
             mAttributeValues.push_back(t);
 
-            getWidget(t, "AttribMultiplier" + boost::lexical_cast<std::string>(i));
+            getWidget(t, "AttribMultiplier" + MyGUI::utility::toString(i));
 
             mAttributeMultipliers.push_back(t);
         }
@@ -76,7 +82,7 @@ namespace MWGui
             if (val >= 100)
                 val = 100;
 
-            mAttributeValues[i]->setCaption(boost::lexical_cast<std::string>(val));
+            mAttributeValues[i]->setCaption(MyGUI::utility::toString(val));
         }
     }
 
@@ -137,7 +143,6 @@ namespace MWGui
 
         if(world->getStore().get<ESM::Class>().isDynamic(cls->mId))
         {
-            // Vanilla uses thief.dds for custom classes.
             // Choosing Stealth specialization and Speed/Agility as attributes, if possible. Otherwise fall back to first class found.
             MWWorld::SharedIterator<ESM::Class> it = world->getStore().get<ESM::Class>().begin();
             for(; it != world->getStore().get<ESM::Class>().end(); ++it)
@@ -151,16 +156,18 @@ namespace MWGui
                 cls = &*it;
         }
 
-        mClassImage->setImageTexture ("textures\\levelup\\" + cls->mId + ".dds");
+        setClassImage(mClassImage, getLevelupClassImage(pcStats.getSkillIncreasesForSpecialization(0),
+                                                        pcStats.getSkillIncreasesForSpecialization(1),
+                                                        pcStats.getSkillIncreasesForSpecialization(2)));
 
         int level = creatureStats.getLevel ()+1;
-        mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + boost::lexical_cast<std::string>(level));
+        mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + MyGUI::utility::toString(level));
 
         std::string levelupdescription;
         if(level > 20)
             levelupdescription=world->getFallback()->getFallbackString("Level_Up_Default");
         else
-            levelupdescription=world->getFallback()->getFallbackString("Level_Up_Level"+boost::lexical_cast<std::string>(level));
+            levelupdescription=world->getFallback()->getFallbackString("Level_Up_Level"+MyGUI::utility::toString(level));
 
         mLevelDescription->setCaption (levelupdescription);
 
@@ -171,14 +178,17 @@ namespace MWGui
             if (pcStats.getAttribute(i).getBase() < 100)
             {
                 mAttributes[i]->setEnabled(true);
+                mAttributeValues[i]->setEnabled(true);
                 availableAttributes++;
 
                 int mult = pcStats.getLevelupAttributeMultiplier (i);
-                text->setCaption(mult <= 1 ? "" : "x" + boost::lexical_cast<std::string>(mult));
+                mult = std::min(mult, 100-pcStats.getAttribute(i).getBase());
+                text->setCaption(mult <= 1 ? "" : "x" + MyGUI::utility::toString(mult));
             }
             else
             {
                 mAttributes[i]->setEnabled(false);
+                mAttributeValues[i]->setEnabled(false);
 
                 text->setCaption("");
             }
@@ -199,7 +209,7 @@ namespace MWGui
 
     void LevelupDialog::onOkButtonClicked(MyGUI::Widget* sender)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats (player);
 
         if (mSpentAttributes.size() < mCoinCount)
@@ -239,5 +249,104 @@ namespace MWGui
                 mSpentAttributes.push_back(attribute);
         }
         assignCoins();
+    }
+
+    std::string LevelupDialog::getLevelupClassImage(const int combatIncreases, const int magicIncreases, const int stealthIncreases)
+    {
+        std::string ret = "acrobat";
+
+        int total = combatIncreases + magicIncreases + stealthIncreases;
+        if (total == 0)
+            return ret;
+
+        int combatFraction = static_cast<int>(static_cast<float>(combatIncreases) / total * 10.f);
+        int magicFraction = static_cast<int>(static_cast<float>(magicIncreases) / total * 10.f);
+        int stealthFraction = static_cast<int>(static_cast<float>(stealthIncreases) / total * 10.f);
+
+        if (combatFraction > 7)
+            ret = "warrior";
+        else if (magicFraction > 7)
+            ret = "mage";
+        else if (stealthFraction > 7)
+            ret = "thief";
+
+        switch (combatFraction)
+        {
+            case 7:
+                ret = "warrior";
+                break;
+            case 6:
+                if (stealthFraction == 1)
+                    ret = "barbarian";
+                else if (stealthFraction == 3)
+                    ret = "crusader";
+                else
+                    ret = "knight";
+                break;
+            case 5:
+                if (stealthFraction == 3)
+                    ret = "scout";
+                else
+                    ret = "archer";
+                break;
+            case 4:
+                ret = "rogue";
+                break;
+            default:
+                break;
+        }
+
+        switch (magicFraction)
+        {
+            case 7:
+                ret = "mage";
+                break;
+            case 6:
+                if (combatFraction == 2)
+                    ret = "sorcerer";
+                else if (combatIncreases == 3)
+                    ret = "healer";
+                else
+                    ret = "battlemage";
+                break;
+            case 5:
+                ret = "witchhunter";
+                break;
+            case 4:
+                ret = "spellsword";
+                // In vanilla there's also code for "nightblade", however it seems to be unreachable.
+                break;
+            default:
+                break;
+        }
+
+        switch (stealthFraction)
+        {
+            case 7:
+                ret = "thief";
+                break;
+            case 6:
+                if (magicFraction == 1)
+                    ret = "agent";
+                else if (magicIncreases == 3)
+                    ret = "assassin";
+                else
+                    ret = "acrobat";
+                break;
+            case 5:
+                if (magicIncreases == 3)
+                    ret = "monk";
+                else
+                    ret = "pilgrim";
+                break;
+            case 3:
+                if (magicFraction == 3)
+                    ret = "bard";
+                break;
+            default:
+                break;
+        }
+
+        return ret;
     }
 }

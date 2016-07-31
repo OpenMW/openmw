@@ -8,6 +8,8 @@
 
 #include "messages.hpp"
 
+class QString;
+
 namespace CSMDoc
 {
     class Stage
@@ -25,4 +27,3 @@ namespace CSMDoc
 }
 
 #endif
-

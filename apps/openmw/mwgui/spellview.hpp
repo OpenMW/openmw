@@ -1,6 +1,8 @@
 #ifndef OPENMW_GUI_SPELLVIEW_H
 #define OPENMW_GUI_SPELLVIEW_H
 
+#include <boost/tuple/tuple.hpp>
+
 #include <MyGUI_Widget.h>
 
 #include "spellmodel.hpp"
@@ -37,6 +39,9 @@ namespace MWGui
 
         void update();
 
+        /// simplified update called each frame
+        void incrementalUpdate();
+
         typedef MyGUI::delegates::CMultiDelegate1<SpellModel::ModelIndex> EventHandle_ModelIndex;
         /// Fired when a spell was clicked
         EventHandle_ModelIndex eventSpellClicked;
@@ -45,15 +50,33 @@ namespace MWGui
 
         virtual void setSize(const MyGUI::IntSize& _value);
         virtual void setCoord(const MyGUI::IntCoord& _value);
-        void setSize(int _width, int _height);
-        void setCoord(int _left, int _top, int _width, int _height);
+
+        void resetScrollbars();
 
     private:
         MyGUI::ScrollView* mScrollView;
 
         std::auto_ptr<SpellModel> mModel;
 
-        std::vector< std::pair<MyGUI::Widget*, MyGUI::Widget*> > mLines;
+        /// tracks a row in the spell view
+        struct LineInfo
+        {
+            /// the widget on the left side of the row
+            MyGUI::Widget* mLeftWidget;
+
+            /// the widget on the left side of the row (if there is one)
+            MyGUI::Widget* mRightWidget;
+
+            /// index to item in mModel that row is showing information for
+            SpellModel::ModelIndex mSpellIndex;
+
+            LineInfo(MyGUI::Widget* leftWidget, MyGUI::Widget* rightWidget, SpellModel::ModelIndex spellIndex);
+        };
+
+        /// magic number indicating LineInfo does not correspond to an item in mModel
+        enum { NoSpellIndex = -1 };
+
+        std::vector< LineInfo > mLines;
 
         bool mShowCostColumn;
         bool mHighlightSelected;
@@ -63,7 +86,11 @@ namespace MWGui
         void adjustSpellWidget(const Spell& spell, SpellModel::ModelIndex index, MyGUI::Widget* widget);
 
         void onSpellSelected(MyGUI::Widget* _sender);
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onMouseWheelMoved(MyGUI::Widget* _sender, int _rel);
+
+        SpellModel::ModelIndex getSpellModelIndex(MyGUI::Widget* _sender);
+
+        static const char* sSpellModelIndex;
     };
 
 }

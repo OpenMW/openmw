@@ -1,39 +1,98 @@
 #ifndef OPENCS_VIEW_OBJECT_H
 #define OPENCS_VIEW_OBJECT_H
 
+#include <string>
+
 #include <boost/shared_ptr.hpp>
 
-#include <components/nifogre/ogrenifloader.hpp>
+#include <osg/ref_ptr>
+#include <osg/Referenced>
+
+#include <components/esm/defs.hpp>
+
+#include "tagbase.hpp"
 
 class QModelIndex;
+class QUndoStack;
 
-namespace Ogre
+namespace osg
 {
-    class SceneNode;
+    class PositionAttitudeTransform;
+    class Group;
+    class Node;
+    class Geode;
+}
+
+namespace osgFX
+{
+    class Scribe;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
 }
 
 namespace CSMWorld
 {
     class Data;
-    class CellRef;
-}
-
-namespace CSVWorld
-{
-    class PhysicsSystem;
+    struct CellRef;
+    class CommandMacro;
 }
 
 namespace CSVRender
 {
+    class Object;
+
+    // An object to attach as user data to the osg::Node, allows us to get an Object back from a Node when we are doing a ray query
+    class ObjectTag : public TagBase
+    {
+        public:
+
+            ObjectTag (Object* object);
+
+            Object* mObject;
+
+            virtual QString getToolTip (bool hideBasics) const;
+    };
+
+    class ObjectMarkerTag : public ObjectTag
+    {
+        public:
+
+            ObjectMarkerTag (Object* object, int axis);
+
+            int mAxis;
+    };
+
     class Object
     {
-            const CSMWorld::Data& mData;
+        public:
+
+            enum OverrideFlags
+            {
+                Override_Position = 1,
+                Override_Rotation = 2,
+                Override_Scale = 4
+            };
+
+        private:
+
+            CSMWorld::Data& mData;
             std::string mReferenceId;
             std::string mReferenceableId;
-            Ogre::SceneNode *mBase;
-            NifOgre::ObjectScenePtr mObject;
+            osg::ref_ptr<osg::PositionAttitudeTransform> mRootNode;
+            osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
+            osg::ref_ptr<osgFX::Scribe> mOutline;
+            bool mSelected;
+            osg::Group* mParentNode;
+            Resource::ResourceSystem* mResourceSystem;
             bool mForceBaseToZero;
-            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
+            ESM::Position mPositionOverride;
+            int mScaleOverride;
+            int mOverrideFlags;
+            osg::ref_ptr<osg::Node> mMarker[3];
+            int mSubMode;
 
             /// Not implemented
             Object (const Object&);
@@ -41,31 +100,39 @@ namespace CSVRender
             /// Not implemented
             Object& operator= (const Object&);
 
-            /// Destroy all scene nodes and movable objects attached to node.
-            static void clearSceneNode (Ogre::SceneNode *node);
-
             /// Remove object from node (includes deleting)
             void clear();
 
             /// Update model
+            /// @note Make sure adjustTransform() was called first so world space particles get positioned correctly
             void update();
 
             /// Adjust position, orientation and scale
-            void adjust();
+            void adjustTransform();
 
             /// Throws an exception if *this was constructed with referenceable
             const CSMWorld::CellRef& getReference() const;
 
+            void updateMarker();
+
+            osg::ref_ptr<osg::Node> makeMarker (int axis);
+
+            osg::Vec3f getMarkerPosition (float x, float y, float z, int axis);
+
         public:
 
-            Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode,
+            Object (CSMWorld::Data& data, osg::Group *cellNode,
                 const std::string& id, bool referenceable,
-                boost::shared_ptr<CSVWorld::PhysicsSystem> physics = boost::shared_ptr<CSVWorld::PhysicsSystem> (),
                 bool forceBaseToZero = false);
             /// \param forceBaseToZero If this is a reference ignore the coordinates and place
             /// it at 0, 0, 0 instead.
 
             ~Object();
+
+            /// Mark the object as selected, selected objects show an outline effect
+            void setSelected(bool selected);
+
+            bool getSelected() const;
 
             /// \return Did this call result in a modification of the visual representation of
             /// this object?
@@ -84,6 +151,35 @@ namespace CSVRender
             std::string getReferenceId() const;
 
             std::string getReferenceableId() const;
+
+            osg::ref_ptr<TagBase> getTag() const;
+
+            /// Is there currently an editing operation running on this object?
+            bool isEdited() const;
+
+            void setEdited (int flags);
+
+            ESM::Position getPosition() const;
+
+            float getScale() const;
+
+            /// Set override position.
+            void setPosition (const float position[3]);
+
+            /// Set override rotation
+            void setRotation (const float rotation[3]);
+
+            /// Set override scale
+            void setScale (float scale);
+
+            /// Apply override changes via command and end edit mode
+            void apply (CSMWorld::CommandMacro& commands);
+
+            void setSubMode (int subMode);
+
+            /// Erase all overrides and restore the visual representation of the object to its
+            /// true state.
+            void reset();
     };
 }
 

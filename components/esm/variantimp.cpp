@@ -1,4 +1,3 @@
-
 #include "variantimp.hpp"
 
 #include <stdexcept>
@@ -81,6 +80,9 @@ void ESM::VariantStringData::read (ESMReader& esm, Variant::Format format, VarTy
     if (format==Variant::Format_Info)
         esm.fail ("info variables of type string not supported");
 
+    if (format==Variant::Format_Local)
+        esm.fail ("local variables of type string not supported");
+
     // GMST
     mValue = esm.getHString();
 }
@@ -125,7 +127,7 @@ int ESM::VariantIntegerData::getInteger (bool default_) const
 
 float ESM::VariantIntegerData::getFloat (bool default_) const
 {
-    return mValue;
+    return static_cast<float>(mValue);
 }
 
 void ESM::VariantIntegerData::setInteger (int value)
@@ -173,6 +175,21 @@ void ESM::VariantIntegerData::read (ESMReader& esm, Variant::Format format, VarT
 
         esm.getHT (mValue);
     }
+    else if (format==Variant::Format_Local)
+    {
+        if (type==VT_Short)
+        {
+            short value;
+            esm.getHT(value);
+            mValue = value;
+        }
+        else if (type==VT_Int)
+        {
+            esm.getHT(mValue);
+        }
+        else
+            esm.fail("unsupported local variable integer type");
+    }
 }
 
 void ESM::VariantIntegerData::write (ESMWriter& esm, Variant::Format format, VarType type) const
@@ -184,7 +201,7 @@ void ESM::VariantIntegerData::write (ESMWriter& esm, Variant::Format format, Var
     {
         if (type==VT_Short || type==VT_Long)
         {
-            float value = mValue;
+            float value = static_cast<float>(mValue);
             esm.writeHNString ("FNAM", type==VT_Short ? "s" : "l");
             esm.writeHNT ("FLTV", value);
         }
@@ -203,6 +220,15 @@ void ESM::VariantIntegerData::write (ESMWriter& esm, Variant::Format format, Var
         }
 
         esm.writeHNT ("INTV", mValue);
+    }
+    else if (format==Variant::Format_Local)
+    {
+        if (type==VT_Short)
+            esm.writeHNT ("STTV", (short)mValue);
+        else if (type == VT_Int)
+            esm.writeHNT ("INTV", mValue);
+        else
+            throw std::runtime_error("unsupported local variable integer type");
     }
 }
 
@@ -235,7 +261,7 @@ float ESM::VariantFloatData::getFloat (bool default_) const
 
 void ESM::VariantFloatData::setInteger (int value)
 {
-    mValue = value;
+    mValue = static_cast<float>(value);
 }
 
 void ESM::VariantFloatData::setFloat (float value)
@@ -252,7 +278,7 @@ void ESM::VariantFloatData::read (ESMReader& esm, Variant::Format format, VarTyp
     {
         esm.getHNT (mValue, "FLTV");
     }
-    else if (format==Variant::Format_Gmst || format==Variant::Format_Info)
+    else if (format==Variant::Format_Gmst || format==Variant::Format_Info || format==Variant::Format_Local)
     {
         esm.getHT (mValue);
     }
@@ -268,7 +294,7 @@ void ESM::VariantFloatData::write (ESMWriter& esm, Variant::Format format, VarTy
         esm.writeHNString ("FNAM", "f");
         esm.writeHNT ("FLTV", mValue);
     }
-    else if (format==Variant::Format_Gmst || format==Variant::Format_Info)
+    else if (format==Variant::Format_Gmst || format==Variant::Format_Info || format==Variant::Format_Local)
     {
         esm.writeHNT ("FLTV", mValue);
     }

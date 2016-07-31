@@ -1,14 +1,16 @@
 #include "difficultyscaling.hpp"
 
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/esmstore.hpp"
 
-#include <components/settings/settings.hpp>
+#include "actorutil.hpp"
 
 float scaleDamage(float damage, const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim)
 {
-    const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    const MWWorld::Ptr& player = MWMechanics::getPlayer();
 
     // [-100, 100]
     int difficultySetting = Settings::Manager::getInt("difficulty", "Game");

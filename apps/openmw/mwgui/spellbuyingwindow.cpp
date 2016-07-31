@@ -1,6 +1,8 @@
 #include "spellbuyingwindow.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Gui.h>
+#include <MyGUI_Button.h>
+#include <MyGUI_ScrollView.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -10,10 +12,10 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 namespace MWGui
 {
@@ -21,8 +23,8 @@ namespace MWGui
 
     SpellBuyingWindow::SpellBuyingWindow() :
         WindowBase("openmw_spell_buying_window.layout")
-        , mCurrentY(0)
         , mLastPos(0)
+        , mCurrentY(0)
     {
         setCoord(0, 0, 450, 300);
 
@@ -44,10 +46,10 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore();
 
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-        int price = spell->mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->getFloat();
+        int price = static_cast<int>(spell->mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->getFloat());
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
         // TODO: refactor to use MyGUI::ListBox
@@ -65,7 +67,7 @@ namespace MWGui
         mCurrentY += sLineHeight;
 
         toAdd->setUserData(price);
-        toAdd->setCaptionWithReplacing(spell->mName+"   -   "+boost::lexical_cast<std::string>(price)+"#{sgp}");
+        toAdd->setCaptionWithReplacing(spell->mName+"   -   "+MyGUI::utility::toString(price)+"#{sgp}");
         toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");
@@ -93,8 +95,7 @@ namespace MWGui
 
         for (MWMechanics::Spells::TIterator iter = merchantSpells.begin(); iter!=merchantSpells.end(); ++iter)
         {
-            const ESM::Spell* spell =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
+            const ESM::Spell* spell = iter->first;
 
             if (spell->mData.mType!=ESM::Spell::ST_Spell)
                 continue; // don't try to sell diseases, curses or powers
@@ -108,10 +109,10 @@ namespace MWGui
                     continue;
             }
 
-            if (playerHasSpell(iter->first))
+            if (playerHasSpell(iter->first->mId))
                 continue;
 
-            addSpell (iter->first);
+            addSpell (iter->first->mId);
         }
 
         updateLabels();
@@ -124,21 +125,15 @@ namespace MWGui
 
     bool SpellBuyingWindow::playerHasSpell(const std::string &id)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWMechanics::Spells& playerSpells = player.getClass().getCreatureStats (player).getSpells();
-        for (MWMechanics::Spells::TIterator it = playerSpells.begin(); it != playerSpells.end(); ++it)
-        {
-            if (Misc::StringUtils::ciEqual(id, it->first))
-                return true;
-        }
-        return false;
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        return player.getClass().getCreatureStats(player).getSpells().hasSpell(id);
     }
 
     void SpellBuyingWindow::onSpellButtonClick(MyGUI::Widget* _sender)
     {
         int price = *_sender->getUserData<int>();
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
             return;
 
@@ -163,10 +158,10 @@ namespace MWGui
 
     void SpellBuyingWindow::updateLabels()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(playerGold));
+        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
         mPlayerGold->setCoord(8,
                               mPlayerGold->getTop(),
                               mPlayerGold->getTextSize().width,
@@ -185,7 +180,7 @@ namespace MWGui
         if (mSpellsView->getViewOffset().top + _rel*0.3 > 0)
             mSpellsView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mSpellsView->setViewOffset(MyGUI::IntPoint(0, mSpellsView->getViewOffset().top + _rel*0.3));
+            mSpellsView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mSpellsView->getViewOffset().top + _rel*0.3f)));
     }
 }
 

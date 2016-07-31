@@ -1,12 +1,12 @@
 #include "spellicons.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 #include <sstream>
 #include <iomanip>
 
+#include <MyGUI_ImageBox.h>
+
 #include <components/esm/loadmgef.hpp>
-#include <components/misc/resourcehelpers.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -17,6 +17,7 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "tooltips.hpp"
 
@@ -25,15 +26,16 @@ namespace MWGui
 {
 
     void EffectSourceVisitor::visit (MWMechanics::EffectKey key,
-                                           const std::string& sourceName, int casterActorId,
-                                     float magnitude, float remainingTime)
+                                           const std::string& sourceName, const std::string& sourceId, int casterActorId,
+                                     float magnitude, float remainingTime, float totalTime)
     {
         MagicEffectInfo newEffectSource;
         newEffectSource.mKey = key;
-        newEffectSource.mMagnitude = magnitude;
+        newEffectSource.mMagnitude = static_cast<int>(magnitude);
         newEffectSource.mPermanent = mIsPermanent;
         newEffectSource.mRemainingTime = remainingTime;
         newEffectSource.mSource = sourceName;
+        newEffectSource.mTotalTime = totalTime;
 
         mEffectSources[key.mId].push_back(newEffectSource);
     }
@@ -43,7 +45,7 @@ namespace MWGui
     {
         // TODO: Tracking add/remove/expire would be better than force updating every frame
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         const MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
 
 
@@ -69,10 +71,11 @@ namespace MWGui
                 MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(it->first);
 
             float remainingDuration = 0;
+            float totalDuration = 0;
 
             std::string sourcesDescription;
 
-            const float fadeTime = 5.f;
+            static const float fadeTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fMagicStartIconBlink")->getFloat();
 
             for (std::vector<MagicEffectInfo>::const_iterator effectIt = it->second.begin();
                  effectIt != it->second.end(); ++effectIt)
@@ -82,9 +85,15 @@ namespace MWGui
 
                 // if at least one of the effect sources is permanent, the effect will never wear off
                 if (effectIt->mPermanent)
+                {
                     remainingDuration = fadeTime;
+                    totalDuration = fadeTime;
+                }
                 else
+                {
                     remainingDuration = std::max(remainingDuration, effectIt->mRemainingTime);
+                    totalDuration = std::max(totalDuration, effectIt->mTotalTime);
+                }
 
                 sourcesDescription +=  effectIt->mSource;
 
@@ -107,7 +116,7 @@ namespace MWGui
                 }
                 else if ( displayType != ESM::MagicEffect::MDT_None )
                 {
-                    sourcesDescription += ": " + boost::lexical_cast<std::string>(effectIt->mMagnitude);
+                    sourcesDescription += ": " + MyGUI::utility::toString(effectIt->mMagnitude);
 
                     if ( displayType == ESM::MagicEffect::MDT_Percentage )
                         sourcesDescription += MWBase::Environment::get().getWindowManager()->getGameSettingString("spercent", "");
@@ -126,6 +135,24 @@ namespace MWGui
                             MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", "") );
                     }
                 }
+                if (effectIt->mRemainingTime > -1 &&
+                        Settings::Manager::getBool("show effect duration","Game")) {
+                    sourcesDescription += " #{sDuration}: ";
+                    float duration = effectIt->mRemainingTime;
+                    if (duration > 3600) {
+                        int hour = duration / 3600;
+                        duration -= hour*3600;
+                        sourcesDescription += MWGui::ToolTips::toString(hour) + "h";
+                    }
+                    if (duration > 60) {
+                        int minute = duration / 60;
+                        duration -= minute*60;
+                        sourcesDescription += MWGui::ToolTips::toString(minute) + "m";
+                    }
+                    if (duration > 0.1) {
+                        sourcesDescription += MWGui::ToolTips::toString(duration) + "s";
+                    }
+                }
             }
 
             if (remainingDuration > 0.f)
@@ -137,7 +164,7 @@ namespace MWGui
                         ("ImageBox", MyGUI::IntCoord(w,2,16,16), MyGUI::Align::Default);
                     mWidgetMap[it->first] = image;
 
-                    image->setImageTexture(Misc::ResourceHelpers::correctIconPath(effect->mIcon));
+                    image->setImageTexture(MWBase::Environment::get().getWindowManager()->correctIconPath(effect->mIcon));
 
                     std::string name = ESM::MagicEffect::effectIdToString (it->first);
 
@@ -160,8 +187,9 @@ namespace MWGui
                 ToolTipInfo* tooltipInfo = image->getUserData<ToolTipInfo>();
                 tooltipInfo->text = sourcesDescription;
 
-                // Fade out during the last 5 seconds
-                image->setAlpha(std::min(remainingDuration/fadeTime, 1.f));
+                // Fade out
+                if (totalDuration >= fadeTime && fadeTime > 0.f)
+                    image->setAlpha(std::min(remainingDuration/fadeTime, 1.f));
             }
             else if (mWidgetMap.find(it->first) != mWidgetMap.end())
             {

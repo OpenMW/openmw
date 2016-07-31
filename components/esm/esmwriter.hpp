@@ -4,10 +4,13 @@
 #include <iosfwd>
 #include <list>
 
-#include <components/to_utf8/to_utf8.hpp>
-
 #include "esmcommon.hpp"
 #include "loadtes3.hpp"
+
+namespace ToUTF8
+{
+    class Utf8Encoder;
+}
 
 namespace ESM {
 
@@ -117,6 +120,7 @@ public:
         void startSubRecord(const std::string& name);
         void endRecord(const std::string& name);
         void endRecord(uint32_t name);
+        void writeFixedSizeString(const std::string& data, int size);
         void writeHString(const std::string& data);
         void writeHCString(const std::string& data);
         void writeName(const std::string& data);

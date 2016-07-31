@@ -1,5 +1,8 @@
 #include "confirmationdialog.hpp"
 
+#include <MyGUI_Button.h>
+#include <MyGUI_EditBox.h>
+
 namespace MWGui
 {
     ConfirmationDialog::ConfirmationDialog() :
@@ -13,7 +16,7 @@ namespace MWGui
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ConfirmationDialog::onOkButtonClicked);
     }
 
-    void ConfirmationDialog::open(const std::string& message, const std::string& confirmMessage, const std::string& cancelMessage)
+    void ConfirmationDialog::askForConfirmation(const std::string& message, const std::string& confirmMessage, const std::string& cancelMessage)
     {
         setVisible(true);
 

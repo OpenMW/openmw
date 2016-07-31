@@ -1,13 +1,3 @@
-if (WIN32) # windows users can just run the morrowind installer
-    set(OPENMW_USE_UNSHIELD FALSE)
-else()
-    set(OPENMW_USE_UNSHIELD TRUE)
-
-    find_package(LIBUNSHIELD REQUIRED)
-    if(NOT LIBUNSHIELD_FOUND)
-        message(FATAL_ERROR "Failed to find Unshield library")
-    endif(NOT LIBUNSHIELD_FOUND)
-endif()
 
 set(WIZARD
     componentselectionpage.cpp
@@ -81,7 +71,6 @@ endif (OPENMW_USE_UNSHIELD)
 
 source_group(wizard FILES ${WIZARD} ${WIZARD_HEADER})
 
-find_package(Qt4 REQUIRED)
 set(QT_USE_QTGUI 1)
 
 # Set some platform specific settings
@@ -90,16 +79,21 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-QT4_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/wizard/wizard.qrc)
-QT4_WRAP_CPP(MOC_SRCS ${WIZARD_HEADER_MOC})
-QT4_WRAP_UI(UI_HDRS ${WIZARD_UI})
+if (DESIRED_QT_VERSION MATCHES 4)
+    include(${QT_USE_FILE})
+    QT4_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/wizard/wizard.qrc)
+    QT4_WRAP_CPP(MOC_SRCS ${WIZARD_HEADER_MOC})
+    QT4_WRAP_UI(UI_HDRS ${WIZARD_UI})
+else()
+    QT5_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/wizard/wizard.qrc)
+    QT5_WRAP_CPP(MOC_SRCS ${WIZARD_HEADER_MOC})
+    QT5_WRAP_UI(UI_HDRS ${WIZARD_UI})
+endif()
 
-
-include(${QT_USE_FILE})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if (OPENMW_USE_UNSHIELD)
-    include_directories(${LIBUNSHIELD_INCLUDE_DIR})
+    include_directories(${LIBUNSHIELD_INCLUDE_DIRS})
 endif()
 
 add_executable(openmw-wizard
@@ -112,13 +106,23 @@ add_executable(openmw-wizard
 )
 
 target_link_libraries(openmw-wizard
-    ${Boost_LIBRARIES}
-    ${QT_LIBRARIES}
     components
 )
 
+if (DESIRED_QT_VERSION MATCHES 4)
+    target_link_libraries(openmw-wizard
+    ${QT_QTGUI_LIBRARY}
+    ${QT_QTCORE_LIBRARY})
+
+    if (WIN32)
+        target_link_libraries(openmw-wizard ${QT_QTMAIN_LIBRARY})
+    endif()
+else()
+    qt5_use_modules(openmw-wizard Widgets Core)
+endif()
+
 if (OPENMW_USE_UNSHIELD)
-    target_link_libraries(openmw-wizard ${LIBUNSHIELD_LIBRARY})
+    target_link_libraries(openmw-wizard ${LIBUNSHIELD_LIBRARIES})
 endif()
 
 

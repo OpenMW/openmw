@@ -3,10 +3,13 @@
 
 #include <vector>
 
-#include "../mwmechanics/alchemy.hpp"
-
 #include "widgets.hpp"
 #include "windowbase.hpp"
+
+namespace MWMechanics
+{
+    class Alchemy;
+}
 
 namespace MWGui
 {
@@ -45,7 +48,7 @@ namespace MWGui
 
         void update();
 
-        MWMechanics::Alchemy mAlchemy;
+        std::auto_ptr<MWMechanics::Alchemy> mAlchemy;
 
         std::vector<ItemWidget*> mApparatus;
         std::vector<ItemWidget*> mIngredients;

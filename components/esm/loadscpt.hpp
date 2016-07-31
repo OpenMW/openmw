@@ -20,12 +20,19 @@ class Script
 {
 public:
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "Script"; }
 
     struct SCHDstruct
     {
         /// Data from script-precompling in the editor.
         /// \warning Do not use them. OpenCS currently does not precompile scripts.
         int mNumShorts, mNumLongs, mNumFloats, mScriptDataSize, mStringTableSize;
+    };
+    struct SCHD
+    {
+        NAME32              mName;
+        Script::SCHDstruct  mData;
     }; // 52 bytes
 
     std::string mId;
@@ -43,11 +50,14 @@ public:
     /// Script source code
     std::string mScriptText;
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID/index).
+
+private:
+    void loadSCVR(ESMReader &esm);
 };
 }
 #endif

@@ -4,7 +4,7 @@
 #include "../mwbase/dialoguemanager.hpp"
 
 #include <map>
-#include <list>
+#include <set>
 
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/translation/translation.hpp>
@@ -23,13 +23,13 @@ namespace MWDialogue
     class DialogueManager : public MWBase::DialogueManager
     {
             std::map<std::string, ESM::Dialogue> mDialogueMap;
-            std::map<std::string, bool> mKnownTopics;// Those are the topics the player knows.
+            std::set<std::string> mKnownTopics;// Those are the topics the player knows.
 
             // Modified faction reactions. <Faction1, <Faction2, Difference> >
             typedef std::map<std::string, std::map<std::string, int> > ModFactionReactionMap;
-            ModFactionReactionMap mModFactionReaction;
+            ModFactionReactionMap mChangedFactionReaction;
 
-            std::list<std::string> mActorKnownTopics;
+            std::set<std::string> mActorKnownTopics;
 
             Translation::Storage& mTranslationDataStorage;
             MWScript::CompilerContext mCompilerContext;
@@ -45,7 +45,6 @@ namespace MWDialogue
 
             float mTemporaryDispositionChange;
             float mPermanentDispositionChange;
-            bool mScriptVerbose;
 
             void parseText (const std::string& text);
 
@@ -92,10 +91,12 @@ namespace MWDialogue
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-            virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+            virtual void readRecord (ESM::ESMReader& reader, uint32_t type);
 
             /// Changes faction1's opinion of faction2 by \a diff.
             virtual void modFactionReaction (const std::string& faction1, const std::string& faction2, int diff);
+
+            virtual void setFactionReaction (const std::string& faction1, const std::string& faction2, int absolute);
 
             /// @return faction1's opinion of faction2
             virtual int getFactionReaction (const std::string& faction1, const std::string& faction2) const;

@@ -7,6 +7,8 @@
 #include "../world/idcollection.hpp"
 #include "../world/scope.hpp"
 
+#include <components/esm/defs.hpp>
+
 #include "savingstate.hpp"
 
 namespace ESM
@@ -98,26 +100,23 @@ namespace CSMDoc
         if (CSMWorld::getScopeFromId (mCollection.getRecord (stage).get().mId)!=mScope)
             return;
 
+        ESM::ESMWriter& writer = mState.getWriter();
         CSMWorld::RecordBase::State state = mCollection.getRecord (stage).mState;
+        typename CollectionT::ESXRecord record = mCollection.getRecord (stage).get();
 
-        if (state==CSMWorld::RecordBase::State_Modified ||
-            state==CSMWorld::RecordBase::State_ModifiedOnly)
+        if (state == CSMWorld::RecordBase::State_Modified ||
+            state == CSMWorld::RecordBase::State_ModifiedOnly ||
+            state == CSMWorld::RecordBase::State_Deleted)
         {
-            mState.getWriter().startRecord (mCollection.getRecord (stage).mModified.sRecordId);
-            mState.getWriter().writeHNCString ("NAME", mCollection.getId (stage));
-            mCollection.getRecord (stage).mModified.save (mState.getWriter());
-            mState.getWriter().endRecord (mCollection.getRecord (stage).mModified.sRecordId);
-        }
-        else if (state==CSMWorld::RecordBase::State_Deleted)
-        {
-            /// \todo write record with delete flag
+            writer.startRecord (record.sRecordId);
+            record.save (writer, state == CSMWorld::RecordBase::State_Deleted);
+            writer.endRecord (record.sRecordId);
         }
     }
 
 
     class WriteDialogueCollectionStage : public Stage
     {
-            Document& mDocument;
             SavingState& mState;
             const CSMWorld::IdCollection<ESM::Dialogue>& mTopics;
             CSMWorld::InfoCollection& mInfos;
@@ -192,6 +191,40 @@ namespace CSMDoc
         public:
 
             WritePathgridCollectionStage (Document& document, SavingState& state);
+
+            virtual int setup();
+            ///< \return number of steps
+
+            virtual void perform (int stage, Messages& messages);
+            ///< Messages resulting from this stage will be appended to \a messages.
+    };
+
+
+    class WriteLandCollectionStage : public Stage
+    {
+            Document& mDocument;
+            SavingState& mState;
+
+        public:
+
+            WriteLandCollectionStage (Document& document, SavingState& state);
+
+            virtual int setup();
+            ///< \return number of steps
+
+            virtual void perform (int stage, Messages& messages);
+            ///< Messages resulting from this stage will be appended to \a messages.
+    };
+
+
+    class WriteLandTextureCollectionStage : public Stage
+    {
+            Document& mDocument;
+            SavingState& mState;
+
+        public:
+
+            WriteLandTextureCollectionStage (Document& document, SavingState& state);
 
             virtual int setup();
             ///< \return number of steps

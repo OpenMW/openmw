@@ -18,12 +18,22 @@ namespace CSMTools
     /// \brief VerifyStage: make sure that scripts compile
     class ScriptCheckStage : public CSMDoc::Stage, private Compiler::ErrorHandler
     {
+            enum WarningMode
+            {
+                Mode_Ignore,
+                Mode_Normal,
+                Mode_Strict
+            };
+
             const CSMDoc::Document& mDocument;
             Compiler::Extensions mExtensions;
             CSMWorld::ScriptContext mContext;
             std::string mId;
             std::string mFile;
             CSMDoc::Messages *mMessages;
+            WarningMode mWarningMode;
+
+            CSMDoc::Message::Severity getSeverity (Type type);
 
             virtual void report (const std::string& message, const Compiler::TokenLoc& loc, Type type);
             ///< Report error to the user.

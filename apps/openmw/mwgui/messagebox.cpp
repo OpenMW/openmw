@@ -1,9 +1,18 @@
+#include "messagebox.hpp"
+
+#include <MyGUI_LanguageManager.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_Button.h>
+
 #include <components/misc/stringops.hpp>
 
-#include "messagebox.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
+#undef MessageBox
 
 namespace MWGui
 {
@@ -61,7 +70,7 @@ namespace MWGui
         it = mMessageBoxes.begin();
         while(it != mMessageBoxes.end())
         {
-                (*it)->update(height);
+                (*it)->update(static_cast<int>(height));
                 height += (*it)->getHeight();
                 ++it;
         }
@@ -108,8 +117,11 @@ namespace MWGui
 
     bool MessageBoxManager::createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons)
     {
-        if(mInterMessageBoxe != NULL) {
-            throw std::runtime_error("There is a message box already");
+        if (mInterMessageBoxe != NULL)
+        {
+            std::cerr << "Warning: replacing an interactive message box that was not answered yet" << std::endl;
+            delete mInterMessageBoxe;
+            mInterMessageBoxe = NULL;
         }
 
         mInterMessageBoxe = new InteractiveMessageBox(*this, message, buttons);
@@ -139,10 +151,11 @@ namespace MWGui
         return false;
     }
 
-    int MessageBoxManager::readPressedButton ()
+    int MessageBoxManager::readPressedButton (bool reset)
     {
         int pressed = mLastButtonPressed;
-        mLastButtonPressed = -1;
+        if (reset)
+            mLastButtonPressed = -1;
         return pressed;
     }
 
@@ -151,10 +164,10 @@ namespace MWGui
 
     MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message)
       : Layout("openmw_messagebox.layout")
-      , mMessageBoxManager(parMessageBoxManager)
-      , mMessage(message)
       , mCurrentTime(0)
       , mMaxTime(0)
+      , mMessageBoxManager(parMessageBoxManager)
+      , mMessage(message)
     {
         // defines
         mBottomPadding = 48;
@@ -186,7 +199,6 @@ namespace MWGui
         : WindowModal("openmw_interactive_messagebox.layout")
       , mMessageBoxManager(parMessageBoxManager)
       , mButtonPressed(-1)
-        , mTextButtonPadding(0)
     {
         WindowModal::open();
 

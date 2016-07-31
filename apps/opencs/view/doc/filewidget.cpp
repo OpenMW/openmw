@@ -1,4 +1,3 @@
-
 #include "filewidget.hpp"
 
 #include <QHBoxLayout>
@@ -17,7 +16,6 @@ CSVDoc::FileWidget::FileWidget (QWidget *parent) : QWidget (parent), mAddon (fal
     QHBoxLayout *layout = new QHBoxLayout (this);
 
     mInput = new QLineEdit (this);
-    mInput->setValidator (new QRegExpValidator(QRegExp("^[a-zA-Z0-9_-\\s]*$")));
 
     layout->addWidget (mInput, 1);
 
@@ -55,4 +53,12 @@ void CSVDoc::FileWidget::textChanged (const QString& text)
 void CSVDoc::FileWidget::extensionLabelIsVisible(bool visible)
 {
     mType->setVisible(visible);
+}
+
+void CSVDoc::FileWidget::setName (const std::string& text)
+{
+    QString text2 = QString::fromUtf8 (text.c_str());
+
+    mInput->setText (text2);
+    textChanged (text2);
 }

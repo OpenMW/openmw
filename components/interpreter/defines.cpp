@@ -1,10 +1,11 @@
 #include "defines.hpp"
 
-#include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <iostream>
+
+#include <components/misc/stringops.hpp>
 
 namespace Interpreter{
 
@@ -25,17 +26,17 @@ namespace Interpreter{
         return a.length() > b.length();
     }
 
-    std::string fixDefinesReal(std::string text, char eschar, bool isBook, Context& context)
+    std::string fixDefinesReal(std::string text, bool dialogue, Context& context)
     {
         unsigned int start = 0;
         std::ostringstream retval;
         for(unsigned int i = 0; i < text.length(); i++)
         {
-            if(text[i] == eschar)
+            char eschar = text[i];
+            if(eschar == '%' || eschar == '^')
             {
                 retval << text.substr(start, i - start);
-                std::string temp = text.substr(i+1, 100);
-                transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
+                std::string temp = Misc::StringUtils::lowerCase(text.substr(i+1, 100));
                 
                 bool found = false;
                 try
@@ -47,10 +48,10 @@ namespace Interpreter{
                         retval << context.getActionBinding("#{sReady_Magic}");
                     }
                     else if((found = check(temp, "actionprevweapon", &i, &start))){
-                        retval << "PLACEHOLDER_ACTION_PREV_WEAPON";
+                        retval << context.getActionBinding("#{sPrevWeapon}");
                     }
                     else if((found = check(temp, "actionnextweapon", &i, &start))){
-                        retval << "PLACEHOLDER_ACTION_PREV_WEAPON";
+                        retval << context.getActionBinding("#{sNextWeapon}");
                     }
                     else if((found = check(temp, "actiontogglerun", &i, &start))){
                         retval << context.getActionBinding("#{sAuto_Run}");
@@ -62,10 +63,10 @@ namespace Interpreter{
                         retval << context.getActionBinding("#{sReady_Weapon}");
                     }
                     else if((found = check(temp, "actionprevspell", &i, &start))){
-                        retval << "PLACEHOLDER_ACTION_PREV_SPELL";
+                        retval << context.getActionBinding("#{sPrevSpell}");
                     }
                     else if((found = check(temp, "actionnextspell", &i, &start))){
-                        retval << "PLACEHOLDER_ACTION_NEXT_SPELL";
+                        retval << context.getActionBinding("#{sNextSpell}");
                     }
                     else if((found = check(temp, "actionrestmenu", &i, &start))){
                         retval << context.getActionBinding("#{sRestKey}");
@@ -113,7 +114,7 @@ namespace Interpreter{
                         retval << context.getCurrentCellName();
                     }
 
-                    else if(eschar == '%' && !isBook) { // In Dialogue, not messagebox
+                    else if(dialogue) { // In Dialogue, not messagebox
                         if(     (found = check(temp, "faction", &i, &start))){
                             retval << context.getNPCFaction();
                         }
@@ -207,15 +208,15 @@ namespace Interpreter{
         return retval.str ();
     }
 
-    std::string fixDefinesDialog(std::string text, Context& context){
-        return fixDefinesReal(text, '%', false, context);
+    std::string fixDefinesDialog(const std::string& text, Context& context){
+        return fixDefinesReal(text, true, context);
     }
 
-    std::string fixDefinesMsgBox(std::string text, Context& context){
-        return fixDefinesReal(text, '^', false, context);
+    std::string fixDefinesMsgBox(const std::string& text, Context& context){
+        return fixDefinesReal(text, false, context);
     }
 
-    std::string fixDefinesBook(std::string text, Context& context){
-        return fixDefinesReal(text, '%', true, context);
+    std::string fixDefinesBook(const std::string& text, Context& context){
+        return fixDefinesReal(text, false, context);
     }
 }

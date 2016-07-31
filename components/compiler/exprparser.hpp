@@ -103,6 +103,8 @@ namespace Compiler
             /// \param invert Store arguments in reverted order.
             /// \param ignoreKeyword A keyword that is seen as junk
             /// \return number of optional arguments
+
+            const TokenLoc& getTokenLoc() const;
     };
 }
 

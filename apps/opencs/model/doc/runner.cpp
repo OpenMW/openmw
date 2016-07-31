@@ -1,4 +1,3 @@
-
 #include "runner.hpp"
 
 #include <QApplication>
@@ -6,7 +5,7 @@
 #include <QTemporaryFile>
 #include <QTextStream>
 
-#include "operation.hpp"
+#include "operationholder.hpp"
 
 CSMDoc::Runner::Runner (const boost::filesystem::path& projectPath)
 : mRunning (false), mStartup (0), mProjectPath (projectPath)
@@ -145,7 +144,7 @@ void CSMDoc::Runner::readyReadStandardOutput()
 }
 
 
-CSMDoc::SaveWatcher::SaveWatcher (Runner *runner, Operation *operation)
+CSMDoc::SaveWatcher::SaveWatcher (Runner *runner, OperationHolder *operation)
 : QObject (runner), mRunner (runner)
 {
     connect (operation, SIGNAL (done (int, bool)), this, SLOT (saveDone (int, bool)));

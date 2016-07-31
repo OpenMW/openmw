@@ -1,4 +1,3 @@
-
 #include "dialogueextensions.hpp"
 
 #include <components/compiler/extensions.hpp>
@@ -11,6 +10,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/journal.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -22,12 +22,17 @@ namespace MWScript
 {
     namespace Dialogue
     {
+        template <class R>
         class OpJournal : public Interpreter::Opcode0
         {
             public:
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
+                    MWWorld::Ptr ptr = R()(runtime, false); // required=false
+                    if (ptr.isEmpty())
+                        ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
                     std::string quest = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
@@ -37,7 +42,7 @@ namespace MWScript
                     // Invoking Journal with a non-existing index is allowed, and triggers no errors. Seriously? :(
                     try
                     {
-                        MWBase::Environment::get().getJournal()->addEntry (quest, index);
+                        MWBase::Environment::get().getJournal()->addEntry (quest, index, ptr);
                     }
                     catch (...)
                     {
@@ -196,7 +201,7 @@ namespace MWScript
 
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
-                    runtime.push (ptr.getClass().getNpcStats (ptr).isSameFaction (player.getClass().getNpcStats (player)));
+                    player.getClass().getNpcStats (player).isInFaction(ptr.getClass().getPrimaryFaction(ptr));
                 }
         };
 
@@ -236,6 +241,25 @@ namespace MWScript
             }
         };
 
+        class OpSetFactionReaction : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                std::string faction1 = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                std::string faction2 = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                int newValue = runtime[0].mInteger;
+                runtime.pop();
+
+                MWBase::Environment::get().getDialogueManager()->setFactionReaction(faction1, faction2, newValue);
+            }
+        };
+
         template <class R>
         class OpClearInfoActor : public Interpreter::Opcode0
         {
@@ -251,7 +275,7 @@ namespace MWScript
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeJournal, new OpJournal);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeJournal, new OpJournal<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSetJournalIndex, new OpSetJournalIndex);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeGetJournalIndex, new OpGetJournalIndex);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeAddTopic, new OpAddTopic);
@@ -268,6 +292,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFaction, new OpSameFaction<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFactionExplicit, new OpSameFaction<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeModFactionReaction, new OpModFactionReaction);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeSetFactionReaction, new OpSetFactionReaction);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeGetFactionReaction, new OpGetFactionReaction);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeClearInfoActor, new OpClearInfoActor<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeClearInfoActorExplicit, new OpClearInfoActor<ExplicitRef>);

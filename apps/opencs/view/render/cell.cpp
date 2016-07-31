@@ -1,18 +1,23 @@
-
 #include "cell.hpp"
 
-#include <OgreSceneManager.h>
-#include <OgreSceneNode.h>
+#include <osg/PositionAttitudeTransform>
+#include <osg/Geode>
+#include <osg/Geometry>
+#include <osg/Group>
 
 #include <components/misc/stringops.hpp>
+#include <components/esm/loadcell.hpp>
 #include <components/esm/loadland.hpp>
+#include <components/sceneutil/pathgridutil.hpp>
 
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/data.hpp"
-#include "../world/physicssystem.hpp"
+#include "../../model/world/refcollection.hpp"
+#include "../../model/world/cellcoordinates.hpp"
 
-#include "elements.hpp"
+#include "mask.hpp"
+#include "pathgrid.hpp"
 #include "terrainstorage.hpp"
 
 bool CSVRender::Cell::removeObject (const std::string& id)
@@ -23,35 +28,40 @@ bool CSVRender::Cell::removeObject (const std::string& id)
     if (iter==mObjects.end())
         return false;
 
-    delete iter->second;
-    mObjects.erase (iter);
+    removeObject (iter);
     return true;
+}
+
+std::map<std::string, CSVRender::Object *>::iterator CSVRender::Cell::removeObject (
+    std::map<std::string, Object *>::iterator iter)
+{
+    delete iter->second;
+    mObjects.erase (iter++);
+    return iter;
 }
 
 bool CSVRender::Cell::addObjects (int start, int end)
 {
-    CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
-        *mData.getTableModel (CSMWorld::UniversalId::Type_References));
-
-    int idColumn = references.findColumnIndex (CSMWorld::Columns::ColumnId_Id);
-    int cellColumn = references.findColumnIndex (CSMWorld::Columns::ColumnId_Cell);
-    int stateColumn = references.findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
-
     bool modified = false;
+
+    const CSMWorld::RefCollection& collection = mData.getReferences();
 
     for (int i=start; i<=end; ++i)
     {
-        std::string cell = Misc::StringUtils::lowerCase (references.data (
-            references.index (i, cellColumn)).toString().toUtf8().constData());
+        std::string cell = Misc::StringUtils::lowerCase (collection.getRecord (i).get().mCell);
 
-        int state = references.data (references.index (i, stateColumn)).toInt();
+        CSMWorld::RecordBase::State state = collection.getRecord (i).mState;
 
         if (cell==mId && state!=CSMWorld::RecordBase::State_Deleted)
         {
-            std::string id = Misc::StringUtils::lowerCase (references.data (
-                references.index (i, idColumn)).toString().toUtf8().constData());
+            std::string id = Misc::StringUtils::lowerCase (collection.getRecord (i).get().mId);
 
-            mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false, mPhysics)));
+            std::auto_ptr<Object> object (new Object (mData, mCellNode, id, false));
+
+            if (mSubModeElementMask & Mask_Reference)
+                object->setSubMode (mSubMode);
+
+            mObjects.insert (std::make_pair (id, object.release()));
             modified = true;
         }
     }
@@ -59,52 +69,63 @@ bool CSVRender::Cell::addObjects (int start, int end)
     return modified;
 }
 
-CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
-    const std::string& id, boost::shared_ptr<CSVWorld::PhysicsSystem> physics, const Ogre::Vector3& origin)
-: mData (data), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager), mPhysics(physics)
+CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,
+    bool deleted)
+: mData (data), mId (Misc::StringUtils::lowerCase (id)), mDeleted (deleted), mSubMode (0),
+  mSubModeElementMask (0)
 {
-    mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();
-    mCellNode->setPosition (origin);
+    std::pair<CSMWorld::CellCoordinates, bool> result = CSMWorld::CellCoordinates::fromId (id);
 
-    CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
-        *mData.getTableModel (CSMWorld::UniversalId::Type_References));
+    if (result.second)
+        mCoordinates = result.first;
 
-    int rows = references.rowCount();
+    mCellNode = new osg::Group;
+    rootNode->addChild(mCellNode);
 
-    addObjects (0, rows-1);
+    setCellMarker();
 
-    const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
-    int landIndex = land.searchId(mId);
-    if (landIndex != -1)
+    if (!mDeleted)
     {
-        mTerrain.reset(new Terrain::TerrainGrid(sceneManager, new TerrainStorage(mData), Element_Terrain, true,
-                                                Terrain::Align_XY));
+        CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
+            *mData.getTableModel (CSMWorld::UniversalId::Type_References));
 
-        const ESM::Land* esmLand = land.getRecord(mId).get().mLand.get();
-        mTerrain->loadCell(esmLand->mX,
-                           esmLand->mY);
+        int rows = references.rowCount();
 
-        if(esmLand)
+        addObjects (0, rows-1);
+
+        const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
+        int landIndex = land.searchId(mId);
+        if (landIndex != -1)
         {
-            float verts = ESM::Land::LAND_SIZE;
-            float worldsize = ESM::Land::REAL_SIZE;
-            mX = esmLand->mX;
-            mY = esmLand->mY;
-            mPhysics->addHeightField(sceneManager,
-                    esmLand->mLandData->mHeights, mX, mY, 0, worldsize / (verts-1), verts);
+            const ESM::Land& esmLand = land.getRecord(mId).get();
+
+            if (esmLand.getLandData (ESM::Land::DATA_VHGT))
+            {
+                mTerrain.reset(new Terrain::TerrainGrid(mCellNode, data.getResourceSystem().get(), NULL, new TerrainStorage(mData), Mask_Terrain));
+                mTerrain->loadCell(esmLand.mX,
+                                   esmLand.mY);
+
+                mCellBorder.reset(new CellBorder(mCellNode, mCoordinates));
+                mCellBorder->buildShape(esmLand);
+            }
         }
+
+        mPathgrid.reset(new Pathgrid(mData, mCellNode, mId, mCoordinates));
     }
 }
 
 CSVRender::Cell::~Cell()
 {
-    mPhysics->removeHeightField(mSceneMgr, mX, mY);
-
     for (std::map<std::string, Object *>::iterator iter (mObjects.begin());
         iter!=mObjects.end(); ++iter)
         delete iter->second;
 
-    mCellNode->getCreator()->destroySceneNode (mCellNode);
+    mCellNode->getParent(0)->removeChild(mCellNode);
+}
+
+CSVRender::Pathgrid* CSVRender::Cell::getPathgrid() const
+{
+    return mPathgrid.get();
 }
 
 bool CSVRender::Cell::referenceableDataChanged (const QModelIndex& topLeft,
@@ -139,6 +160,9 @@ bool CSVRender::Cell::referenceableAboutToBeRemoved (const QModelIndex& parent, 
 bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
+    if (mDeleted)
+        return false;
+
     CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
         *mData.getTableModel (CSMWorld::UniversalId::Type_References));
 
@@ -168,8 +192,8 @@ bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
     // perform update and remove where needed
     bool modified = false;
 
-    for (std::map<std::string, Object *>::iterator iter (mObjects.begin());
-        iter!=mObjects.end(); ++iter)
+    std::map<std::string, Object *>::iterator iter = mObjects.begin();
+    while (iter!=mObjects.end())
     {
         if (iter->second->referenceDataChanged (topLeft, bottomRight))
             modified = true;
@@ -178,23 +202,30 @@ bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
 
         if (iter2!=ids.end())
         {
-            if (iter2->second)
-            {
-                removeObject (iter->first);
-                modified = true;
-            }
-
+            bool deleted = iter2->second;
             ids.erase (iter2);
+
+            if (deleted)
+            {
+                iter = removeObject (iter);
+                modified = true;
+                continue;
+            }
         }
+
+        ++iter;
     }
 
     // add new objects
     for (std::map<std::string, bool>::iterator iter (ids.begin()); iter!=ids.end(); ++iter)
     {
-        mObjects.insert (std::make_pair (
-            iter->first, new Object (mData, mCellNode, iter->first, false, mPhysics)));
+        if (!iter->second)
+        {
+            mObjects.insert (std::make_pair (
+                iter->first, new Object (mData, mCellNode, iter->first, false)));
 
-        modified = true;
+            modified = true;
+        }
     }
 
     return modified;
@@ -204,6 +235,9 @@ bool CSVRender::Cell::referenceAboutToBeRemoved (const QModelIndex& parent, int 
     int end)
 {
     if (parent.isValid())
+        return false;
+
+    if (mDeleted)
         return false;
 
     CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
@@ -226,13 +260,178 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
     if (parent.isValid())
         return false;
 
+    if (mDeleted)
+        return false;
+
     return addObjects (start, end);
 }
 
-float CSVRender::Cell::getTerrainHeightAt(const Ogre::Vector3 &pos) const
+void CSVRender::Cell::pathgridModified()
 {
-    if(mTerrain.get() != NULL)
-        return mTerrain->getHeightAt(pos);
-    else
-        return -std::numeric_limits<float>::max();
+    mPathgrid->recreateGeometry();
+}
+
+void CSVRender::Cell::pathgridRemoved()
+{
+    mPathgrid->removeGeometry();
+}
+
+void CSVRender::Cell::setSelection (int elementMask, Selection mode)
+{
+    if (elementMask & Mask_Reference)
+    {
+        for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+            iter!=mObjects.end(); ++iter)
+        {
+            bool selected = false;
+
+            switch (mode)
+            {
+                case Selection_Clear: selected = false; break;
+                case Selection_All: selected = true; break;
+                case Selection_Invert: selected = !iter->second->getSelected(); break;
+            }
+
+            iter->second->setSelected (selected);
+        }
+    }
+    if (elementMask & Mask_Pathgrid)
+    {
+        // Only one pathgrid may be selected, so some operations will only have an effect
+        // if the pathgrid is already focused
+        switch (mode)
+        {
+            case Selection_Clear:
+                mPathgrid->clearSelected();
+                break;
+
+            case Selection_All:
+                if (mPathgrid->isSelected())
+                    mPathgrid->selectAll();
+                break;
+
+            case Selection_Invert:
+                if (mPathgrid->isSelected())
+                    mPathgrid->invertSelected();
+                break;
+        }
+    }
+}
+
+void CSVRender::Cell::selectAllWithSameParentId (int elementMask)
+{
+    std::set<std::string> ids;
+
+    for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+        iter!=mObjects.end(); ++iter)
+    {
+        if (iter->second->getSelected())
+            ids.insert (iter->second->getReferenceableId());
+    }
+
+    for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+        iter!=mObjects.end(); ++iter)
+    {
+        if (!iter->second->getSelected() &&
+            ids.find (iter->second->getReferenceableId())!=ids.end())
+        {
+            iter->second->setSelected (true);
+        }
+    }
+}
+
+void CSVRender::Cell::setCellArrows (int mask)
+{
+    for (int i=0; i<4; ++i)
+    {
+        CellArrow::Direction direction = static_cast<CellArrow::Direction> (1<<i);
+
+        bool enable = mask & direction;
+
+        if (enable!=(mCellArrows[i].get()!=0))
+        {
+            if (enable)
+                mCellArrows[i].reset (new CellArrow (mCellNode, direction, mCoordinates));
+            else
+                mCellArrows[i].reset (0);
+        }
+    }
+}
+
+void CSVRender::Cell::setCellMarker()
+{
+    bool cellExists = false;
+    bool isInteriorCell = false;
+
+    int cellIndex = mData.getCells().searchId(mId);
+    if (cellIndex > -1)
+    {
+        const CSMWorld::Record<CSMWorld::Cell>& cellRecord = mData.getCells().getRecord(cellIndex);
+        cellExists = !cellRecord.isDeleted();
+        isInteriorCell = cellRecord.get().mData.mFlags & ESM::Cell::Interior;
+    }
+
+    if (!isInteriorCell) {
+        mCellMarker.reset(new CellMarker(mCellNode, mCoordinates, cellExists));
+    }
+}
+
+CSMWorld::CellCoordinates CSVRender::Cell::getCoordinates() const
+{
+    return mCoordinates;
+}
+
+bool CSVRender::Cell::isDeleted() const
+{
+    return mDeleted;
+}
+
+std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::Cell::getSelection (unsigned int elementMask) const
+{
+    std::vector<osg::ref_ptr<TagBase> > result;
+
+    if (elementMask & Mask_Reference)
+        for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+            iter!=mObjects.end(); ++iter)
+            if (iter->second->getSelected())
+                result.push_back (iter->second->getTag());
+    if (elementMask & Mask_Pathgrid)
+        if (mPathgrid->isSelected())
+            result.push_back(mPathgrid->getTag());
+
+    return result;
+}
+
+std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::Cell::getEdited (unsigned int elementMask) const
+{
+    std::vector<osg::ref_ptr<TagBase> > result;
+
+    if (elementMask & Mask_Reference)
+        for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+            iter!=mObjects.end(); ++iter)
+            if (iter->second->isEdited())
+                result.push_back (iter->second->getTag());
+
+    return result;
+}
+
+void CSVRender::Cell::setSubMode (int subMode, unsigned int elementMask)
+{
+    mSubMode = subMode;
+    mSubModeElementMask = elementMask;
+
+    if (elementMask & Mask_Reference)
+        for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+            iter!=mObjects.end(); ++iter)
+                iter->second->setSubMode (subMode);
+}
+
+void CSVRender::Cell::reset (unsigned int elementMask)
+{
+    if (elementMask & Mask_Reference)
+        for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+            iter!=mObjects.end(); ++iter)
+            iter->second->reset();
+    if (elementMask & Mask_Pathgrid)
+        mPathgrid->resetIndicators();
 }

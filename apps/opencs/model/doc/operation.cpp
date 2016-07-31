@@ -1,4 +1,3 @@
-
 #include "operation.hpp"
 
 #include <string>
@@ -29,9 +28,10 @@ void CSMDoc::Operation::prepareStages()
 CSMDoc::Operation::Operation (int type, bool ordered, bool finalAlways)
 : mType (type), mStages(std::vector<std::pair<Stage *, int> >()), mCurrentStage(mStages.begin()),
   mCurrentStep(0), mCurrentStepTotal(0), mTotalSteps(0), mOrdered (ordered),
-  mFinalAlways (finalAlways), mError(false)
+  mFinalAlways (finalAlways), mError(false), mConnected (false), mPrepared (false),
+  mDefaultSeverity (Message::Severity_Error)
 {
-    connect (this, SIGNAL (finished()), this, SLOT (operationDone()));
+    mTimer = new QTimer (this);
 }
 
 CSMDoc::Operation::~Operation()
@@ -42,20 +42,27 @@ CSMDoc::Operation::~Operation()
 
 void CSMDoc::Operation::run()
 {
-    prepareStages();
+    mTimer->stop();
 
-    QTimer timer;
+    if (!mConnected)
+    {
+        connect (mTimer, SIGNAL (timeout()), this, SLOT (executeStage()));
+        mConnected = true;
+    }
 
-    timer.connect (&timer, SIGNAL (timeout()), this, SLOT (executeStage()));
+    mPrepared = false;
 
-    timer.start (0);
-
-    exec();
+    mTimer->start (0);
 }
 
 void CSMDoc::Operation::appendStage (Stage *stage)
 {
     mStages.push_back (std::make_pair (stage, 0));
+}
+
+void CSMDoc::Operation::setDefaultSeverity (Message::Severity severity)
+{
+    mDefaultSeverity = severity;
 }
 
 bool CSMDoc::Operation::hasError() const
@@ -65,7 +72,7 @@ bool CSMDoc::Operation::hasError() const
 
 void CSMDoc::Operation::abort()
 {
-    if (!isRunning())
+    if (!mTimer->isActive())
         return;
 
     mError = true;
@@ -84,7 +91,13 @@ void CSMDoc::Operation::abort()
 
 void CSMDoc::Operation::executeStage()
 {
-    Messages messages;
+    if (!mPrepared)
+    {
+        prepareStages();
+        mPrepared = true;
+    }
+
+    Messages messages (mDefaultSeverity);
 
     while (mCurrentStage!=mStages.end())
     {
@@ -101,7 +114,7 @@ void CSMDoc::Operation::executeStage()
             }
             catch (const std::exception& e)
             {
-                emit reportMessage (CSMWorld::UniversalId(), e.what(), "", mType);
+                emit reportMessage (Message (CSMWorld::UniversalId(), e.what(), "", Message::Severity_SeriousError), mType);
                 abort();
             }
 
@@ -113,13 +126,14 @@ void CSMDoc::Operation::executeStage()
     emit progress (mCurrentStepTotal, mTotalSteps ? mTotalSteps : 1, mType);
 
     for (Messages::Iterator iter (messages.begin()); iter!=messages.end(); ++iter)
-        emit reportMessage (iter->mId, iter->mMessage, iter->mHint, mType);
+        emit reportMessage (*iter, mType);
 
     if (mCurrentStage==mStages.end())
-        exit();
+        operationDone();
 }
 
 void CSMDoc::Operation::operationDone()
 {
+    mTimer->stop();
     emit done (mType, mError);
 }

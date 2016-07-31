@@ -1,4 +1,3 @@
-
 #include "consoleextensions.hpp"
 
 #include <components/compiler/extensions.hpp>

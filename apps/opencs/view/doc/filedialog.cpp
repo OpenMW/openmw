@@ -18,7 +18,7 @@
 #include "adjusterwidget.hpp"
 
 CSVDoc::FileDialog::FileDialog(QWidget *parent) :
-    QDialog(parent), mSelector (0), mFileWidget (0), mAdjusterWidget (0), mDialogBuilt(false)
+    QDialog(parent), mSelector (0), mAction(ContentAction_Undefined), mFileWidget (0), mAdjusterWidget (0), mDialogBuilt(false)
 {
     ui.setupUi (this);
     resize(400, 400);
@@ -31,6 +31,11 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
 void CSVDoc::FileDialog::addFiles(const QString &path)
 {
     mSelector->addFiles(path);
+}
+
+void CSVDoc::FileDialog::clearFiles()
+{
+    mSelector->clearFiles();
 }
 
 QStringList CSVDoc::FileDialog::selectedFilePaths()
@@ -105,7 +110,6 @@ void CSVDoc::FileDialog::buildNewFileView()
 
         connect (mFileWidget, SIGNAL (nameChanged(const QString &, bool)),
                 this, SLOT (slotUpdateAcceptButton(const QString &, bool)));
-
     }
 
     ui.projectGroupBoxLayout->insertWidget (0, mFileWidget);
@@ -125,17 +129,21 @@ void CSVDoc::FileDialog::buildOpenFileView()
 
     if(!mDialogBuilt)
     {
-        connect (mSelector, SIGNAL (signalAddonFileSelected (int)), this, SLOT (slotUpdateAcceptButton (int)));
-        connect (mSelector, SIGNAL (signalAddonFileUnselected (int)), this, SLOT (slotUpdateAcceptButton (int)));
+        connect (mSelector, SIGNAL (signalAddonDataChanged (const QModelIndex&, const QModelIndex&)), this, SLOT (slotAddonDataChanged(const QModelIndex&, const QModelIndex&)));
     }
         connect (ui.projectButtonBox, SIGNAL (accepted()), this, SLOT (slotOpenFile()));
 }
 
-void CSVDoc::FileDialog::slotUpdateAcceptButton (int)
+void CSVDoc::FileDialog::slotAddonDataChanged(const QModelIndex &topleft, const QModelIndex &bottomright)
+{
+    slotUpdateAcceptButton(0);
+}
+
+void CSVDoc::FileDialog::slotUpdateAcceptButton(int)
 {
     QString name = "";
 
-    if (mAction == ContentAction_New)
+    if (mFileWidget && mAction == ContentAction_New)
         name = mFileWidget->getName();
 
     slotUpdateAcceptButton (name, true);
@@ -143,17 +151,19 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton (int)
 
 void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString &name, bool)
 {
-    bool success = (mSelector->selectedFiles().size() > 0);
+    bool success = !mSelector->selectedFiles().empty();
 
     bool isNew = (mAction == ContentAction_New);
 
     if (isNew)
         success = success && !(name.isEmpty());
-    else
+    else if (success)
     {
         ContentSelectorModel::EsmFile *file = mSelector->selectedFiles().back();
         mAdjusterWidget->setName (file->filePath(), !file->isGameFile());
     }
+    else
+        mAdjusterWidget->setName ("", true);
 
     ui.projectButtonBox->button (QDialogButtonBox::Ok)->setEnabled (success);
 }

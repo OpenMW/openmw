@@ -11,24 +11,22 @@ namespace MWClass
 
         public:
 
-            /// Return ID of \a ptr
-            virtual std::string getId (const MWWorld::Ptr& ptr) const;
-
-            virtual std::string getName (const MWWorld::Ptr& ptr) const;
+            virtual std::string getName (const MWWorld::ConstPtr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
             static void registerSelf();
 
-            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
+            virtual void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const;
+            ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation: list getModel().
+
+            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
-            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
-                const;
+            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const;
             ///< Read additional state from \a state into \a ptr.
 
-            virtual void writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
-                const;
+            virtual void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const;
             ///< Write additional state from \a ptr into \a state.
 
             virtual void respawn (const MWWorld::Ptr& ptr) const;

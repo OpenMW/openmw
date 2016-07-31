@@ -1,87 +1,73 @@
-#ifndef RIPPLE_SIMULATION_H
-#define RIPPLE_SIMULATION_H
+#ifndef OPENMW_MWRENDER_RIPPLESIMULATION_H
+#define OPENMW_MWRENDER_RIPPLESIMULATION_H
 
-#include <OgreTexture.h>
-#include <OgreMaterial.h>
-#include <OgreVector2.h>
-#include <OgreVector3.h>
+#include <osg/ref_ptr>
 
 #include "../mwworld/ptr.hpp"
 
-namespace Ogre
+namespace osg
 {
-    class RenderTexture;
-    class Camera;
-    class SceneManager;
-    class Rectangle2D;
+    class Group;
+    class PositionAttitudeTransform;
+}
+
+namespace osgParticle
+{
+    class ParticleSystem;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
+}
+
+namespace Fallback
+{
+    class Map;
 }
 
 namespace MWRender
 {
 
-struct Emitter
-{
-    MWWorld::Ptr mPtr;
-    Ogre::Vector3 mLastEmitPosition;
-    float mScale;
-    float mForce;
-};
+    struct Emitter
+    {
+        MWWorld::ConstPtr mPtr;
+        osg::Vec3f mLastEmitPosition;
+        float mScale;
+        float mForce;
+    };
 
-class RippleSimulation
-{
-public:
-    RippleSimulation(Ogre::SceneManager* mainSceneManager);
-    ~RippleSimulation();
+    class RippleSimulation
+    {
+    public:
+        RippleSimulation(osg::Group* parent, Resource::ResourceSystem* resourceSystem, const Fallback::Map* fallback);
+        ~RippleSimulation();
 
-    void update(float dt, Ogre::Vector2 position);
+        /// @param dt Time since the last frame
+        void update(float dt);
 
-    /// adds an emitter, position will be tracked automatically
-    void addEmitter (const MWWorld::Ptr& ptr, float scale = 1.f, float force = 1.f);
-    void removeEmitter (const MWWorld::Ptr& ptr);
-    void updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
+        /// adds an emitter, position will be tracked automatically
+        void addEmitter (const MWWorld::ConstPtr& ptr, float scale = 1.f, float force = 1.f);
+        void removeEmitter (const MWWorld::ConstPtr& ptr);
+        void updateEmitterPtr (const MWWorld::ConstPtr& old, const MWWorld::ConstPtr& ptr);
+        void removeCell(const MWWorld::CellStore* store);
 
-private:
-    RippleSimulation(const RippleSimulation&);
-    RippleSimulation& operator=(const RippleSimulation&);
+        void emitRipple(const osg::Vec3f& pos);
 
-    std::vector<Emitter> mEmitters;
+        /// Change the height of the water surface, thus moving all ripples with it
+        void setWaterHeight(float height);
 
-    Ogre::RenderTexture* mRenderTargets[4];
-    Ogre::TexturePtr mTextures[4];
+        /// Remove all active ripples
+        void clear();
 
-    int mTextureSize;
-    float mRippleAreaLength;
-    float mImpulseSize;
+    private:
+        osg::ref_ptr<osg::Group> mParent;
 
-    bool mFirstUpdate;
+        osg::ref_ptr<osgParticle::ParticleSystem> mParticleSystem;
+        osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
 
-    Ogre::Camera* mCamera;
-
-    // own scenemanager to render our simulation
-    Ogre::SceneManager* mSceneMgr;
-    Ogre::Rectangle2D* mRectangle;
-
-    // scenemanager to create the debug overlays on
-    Ogre::SceneManager* mMainSceneMgr;
-
-    static const int TEX_NORMAL = 3;
-
-    Ogre::Rectangle2D* mImpulse;
-
-    void addImpulses();
-    void heightMapToNormalMap();
-    void waterSimulation();
-    void swapHeightMaps();
-
-    float mTime;
-
-    Ogre::Vector2 mRippleCenter;
-
-    Ogre::Vector2 mTexelOffset;
-
-    Ogre::Vector2 mCurrentFrameOffset;
-    Ogre::Vector2 mPreviousFrameOffset;
-};
+        std::vector<Emitter> mEmitters;
+    };
 
 }
 

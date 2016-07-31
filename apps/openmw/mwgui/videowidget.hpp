@@ -1,9 +1,17 @@
 #ifndef OPENMW_MWGUI_VIDEOWIDGET_H
 #define OPENMW_MWGUI_VIDEOWIDGET_H
 
-#include <MyGUI_ImageBox.h>
+#include <MyGUI_Widget.h>
 
-#include <extern/ogre-ffmpeg-videoplayer/videoplayer.hpp>
+namespace Video
+{
+    class VideoPlayer;
+}
+
+namespace VFS
+{
+    class Manager;
+}
 
 namespace MWGui
 {
@@ -11,12 +19,15 @@ namespace MWGui
     /**
      * Widget that plays a video.
      */
-    class VideoWidget : public MyGUI::ImageBox
+    class VideoWidget : public MyGUI::Widget
     {
     public:
         MYGUI_RTTI_DERIVED(VideoWidget)
 
         VideoWidget();
+
+        /// Set the VFS (virtual file system) to find the videos on.
+        void setVFS(const VFS::Manager* vfs);
 
         void playVideo (const std::string& video);
 
@@ -32,8 +43,16 @@ namespace MWGui
         /// Stop video and free resources (done automatically on destruction)
         void stop();
 
+        /// Adjust the coordinates of this video widget relative to its parent,
+        /// based on the dimensions of the playing video.
+        /// @param stretch Stretch the video to fill the whole screen? If false,
+        ///                black bars may be added to fix the aspect ratio.
+        void autoResize (bool stretch);
+
     private:
-        Video::VideoPlayer mPlayer;
+        const VFS::Manager* mVFS;
+        std::auto_ptr<MyGUI::ITexture> mTexture;
+        std::auto_ptr<Video::VideoPlayer> mPlayer;
     };
 
 }

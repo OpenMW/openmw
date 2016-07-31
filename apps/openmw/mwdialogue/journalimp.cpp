@@ -1,4 +1,3 @@
-
 #include "journalimp.hpp"
 
 #include <iterator>
@@ -76,7 +75,7 @@ namespace MWDialogue
         mTopics.clear();
     }
 
-    void Journal::addEntry (const std::string& id, int index)
+    void Journal::addEntry (const std::string& id, int index, const MWWorld::Ptr& actor)
     {
         // bail out of we already have heard this...
         std::string infoId = JournalEntry::idFromIndex (id, index);
@@ -84,7 +83,7 @@ namespace MWDialogue
             if (i->mTopic == id && i->mInfoId == infoId)
                 return;
 
-        StampedJournalEntry entry = StampedJournalEntry::makeFromQuest (id, index);
+        StampedJournalEntry entry = StampedJournalEntry::makeFromQuest (id, index, actor);
 
         mJournal.push_back (entry);
 
@@ -92,9 +91,7 @@ namespace MWDialogue
 
         quest.addEntry (entry); // we are doing slicing on purpose here
 
-        std::vector<std::string> empty;
-        std::string notification = "#{sJournalEntry}";
-        MWBase::Environment::get().getWindowManager()->messageBox (notification, empty);
+        MWBase::Environment::get().getWindowManager()->messageBox ("#{sJournalEntry}");
     }
 
     void Journal::setJournalIndex (const std::string& id, int index)
@@ -189,7 +186,6 @@ namespace MWDialogue
             writer.startRecord (ESM::REC_QUES);
             state.save (writer);
             writer.endRecord (ESM::REC_QUES);
-            progress.increaseProgress();
 
             for (Topic::TEntryIter iter (quest.begin()); iter!=quest.end(); ++iter)
             {
@@ -200,7 +196,6 @@ namespace MWDialogue
                 writer.startRecord (ESM::REC_JOUR);
                 entry.save (writer);
                 writer.endRecord (ESM::REC_JOUR);
-                progress.increaseProgress();
             }
         }
 
@@ -212,7 +207,6 @@ namespace MWDialogue
             writer.startRecord (ESM::REC_JOUR);
             entry.save (writer);
             writer.endRecord (ESM::REC_JOUR);
-            progress.increaseProgress();
         }
 
         for (TTopicIter iter (mTopics.begin()); iter!=mTopics.end(); ++iter)
@@ -228,14 +222,13 @@ namespace MWDialogue
                 writer.startRecord (ESM::REC_JOUR);
                 entry.save (writer);
                 writer.endRecord (ESM::REC_JOUR);
-                progress.increaseProgress();
             }
         }
     }
 
-    void Journal::readRecord (ESM::ESMReader& reader, int32_t type)
+    void Journal::readRecord (ESM::ESMReader& reader, uint32_t type)
     {
-        if (type==ESM::REC_JOUR)
+        if (type==ESM::REC_JOUR || type==ESM::REC_JOUR_LEGACY)
         {
             ESM::JournalEntry record;
             record.load (reader);
@@ -265,7 +258,12 @@ namespace MWDialogue
             record.load (reader);
 
             if (isThere (record.mTopic))
-                mQuests.insert (std::make_pair (record.mTopic, record));
+            {
+                std::pair<TQuestContainer::iterator, bool> result = mQuests.insert (std::make_pair (record.mTopic, record));
+                // reapply quest index, this is to handle users upgrading from only
+                // Morrowind.esm (no quest states) to Morrowind.esm + Tribunal.esm
+                result.first->second.setIndex(record.mState);
+            }
         }
     }
 }

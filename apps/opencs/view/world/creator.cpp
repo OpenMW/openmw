@@ -1,4 +1,3 @@
-
 #include "creator.hpp"
 
 #include <stdexcept>
@@ -15,8 +14,8 @@ void CSVWorld::Creator::setScope (unsigned int scope)
 CSVWorld::CreatorFactoryBase::~CreatorFactoryBase() {}
 
 
-CSVWorld::Creator *CSVWorld::NullCreatorFactory::makeCreator (CSMWorld::Data& data,
-    QUndoStack& undoStack, const CSMWorld::UniversalId& id) const
+CSVWorld::Creator *CSVWorld::NullCreatorFactory::makeCreator (CSMDoc::Document& document, 
+                                                              const CSMWorld::UniversalId& id) const
 {
     return 0;
 }

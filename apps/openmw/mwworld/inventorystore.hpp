@@ -87,7 +87,6 @@ namespace MWWorld
                 float mMultiplier;
             };
 
-            // TODO: store in savegame
             typedef std::map<std::string, std::vector<EffectParams> > TEffectMagnitudes;
             TEffectMagnitudes mPermanentMagicEffectMagnitudes;
 
@@ -111,13 +110,10 @@ namespace MWWorld
             void updateMagicEffects(const Ptr& actor);
             void updateRechargingItems();
 
-            void fireEquipmentChangedEvent();
+            void fireEquipmentChangedEvent(const Ptr& actor);
 
-            virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;
-            ///< Return inventory slot that \a ref is in or -1 (if \a ref is not in a slot).
-
-            virtual void setSlot (const MWWorld::ContainerStoreIterator& iter, int slot);
-            ///< Set slot for \a iter. Ignored if \a iter is an end iterator or if slot==-1.
+            virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
+            virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
 
         public:
 
@@ -145,7 +141,7 @@ namespace MWWorld
             void equip (int slot, const ContainerStoreIterator& iterator, const Ptr& actor);
             ///< \warning \a iterator can not be an end()-iterator, use unequip function instead
 
-            bool isEquipped(const MWWorld::Ptr& item);
+            bool isEquipped(const MWWorld::ConstPtr& item);
             ///< Utility function, returns true if the given item is equipped in any slot
 
             void setSelectedEnchantItem(const ContainerStoreIterator& iterator);
@@ -171,7 +167,7 @@ namespace MWWorld
             ///< \attention This function is internal to the world model and should not be called from
             /// outside.
 
-            virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
+            virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2);
             ///< @return true if the two specified objects can stack with each other
 
             virtual int remove(const Ptr& item, int count, const Ptr& actor);
@@ -192,8 +188,19 @@ namespace MWWorld
             /// (it can be re-stacked so its count may be different than when it
             /// was equipped).
 
+            ContainerStoreIterator unequipItemQuantity(const Ptr& item, const Ptr& actor, int count);
+            ///< Unequip a specific quantity of an item identified by its Ptr.
+            /// An exception is thrown if the item is not currently equipped,
+            /// if count <= 0, or if count > the item stack size.
+            ///
+            /// @return an iterator to the unequipped items that were previously
+            /// in the slot (they can be re-stacked so its count may be different
+            /// than the requested count).
+
             void setListener (InventoryStoreListener* listener, const Ptr& actor);
             ///< Set a listener for various events, see \a InventoryStoreListener
+
+            InventoryStoreListener* getListener();
 
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor);
 
@@ -203,8 +210,15 @@ namespace MWWorld
             void purgeEffect (short effectId);
             ///< Remove a magic effect
 
+            void purgeEffect (short effectId, const std::string& sourceId);
+            ///< Remove a magic effect
+
             virtual void clear();
             ///< Empty container.
+
+            virtual void writeState (ESM::InventoryState& state) const;
+
+            virtual void readState (const ESM::InventoryState& state);
     };
 }
 

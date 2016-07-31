@@ -3,13 +3,17 @@
 
 #include <string>
 
+#include <osg/ref_ptr>
+#include <osg/Vec3>
+#include <osg/Vec3d>
+
 #include "../mwworld/ptr.hpp"
 
-namespace Ogre
+namespace osg
 {
-    class Vector3;
     class Camera;
-    class SceneNode;
+    class NodeCallback;
+    class Node;
 }
 
 namespace MWRender
@@ -24,10 +28,10 @@ namespace MWRender
         };
 
         MWWorld::Ptr mTrackingPtr;
+        osg::ref_ptr<const osg::Node> mTrackingNode;
+        float mHeightScale;
 
-        Ogre::Camera *mCamera;
-        Ogre::SceneNode *mCameraNode;
-        Ogre::SceneNode *mCameraPosNode;
+        osg::ref_ptr<osg::Camera> mCamera;
 
         NpcAnimation *mAnimation;
 
@@ -42,27 +46,32 @@ namespace MWRender
             bool enabled, allowed;
         } mVanity;
 
-        float mHeight, mCameraDistance;
+        float mHeight, mMaxCameraDistance;
         CamData mMainCam, mPreviewCam;
 
-        bool mDistanceAdjusted;
-
         bool mVanityToggleQueued;
+        bool mVanityToggleQueuedValue;
         bool mViewModeToggleQueued;
 
-        void setPosition(const Ogre::Vector3& position);
-        void setPosition(float x, float y, float z);
+        float mCameraDistance;
+
+        osg::ref_ptr<osg::NodeCallback> mUpdateCallback;
 
     public:
-        Camera(Ogre::Camera *camera);
+        Camera(osg::Camera* camera);
         ~Camera();
+
+        MWWorld::Ptr getTrackingPtr() const;
+
+        /// Update the view matrix of \a cam
+        void updateCamera(osg::Camera* cam);
 
         /// Reset to defaults
         void reset();
 
         /// Set where the camera is looking at. Uses Morrowind (euler) angles
         /// \param rot Rotation angles in radians
-        void rotateCamera(const Ogre::Vector3 &rot, bool adjust);
+        void rotateCamera(float pitch, float yaw, bool adjust);
 
         float getYaw();
         void setYaw(float angle);
@@ -70,10 +79,8 @@ namespace MWRender
         float getPitch();
         void setPitch(float angle);
 
-        const std::string &getHandle() const;
-
         /// Attach camera to object
-        Ogre::SceneNode* attachTo(const MWWorld::Ptr &);
+        void attachTo(const MWWorld::Ptr &);
 
         /// @param Force view mode switch, even if currently not allowed by the animation.
         void toggleViewMode(bool force=false);
@@ -85,9 +92,6 @@ namespace MWRender
         void togglePreviewMode(bool enable);
 
         /// \brief Lowers the camera for sneak.
-        /// As animation is tied to the camera, this needs
-        /// to be set each frame after the animation is
-        /// applied.
         void setSneakOffset(float offset);
 
         bool isFirstPerson() const
@@ -110,8 +114,10 @@ namespace MWRender
 
         void setAnimation(NpcAnimation *anim);
 
+        osg::Vec3d getFocalPoint();
+
         /// Stores focal and camera world positions in passed arguments
-        void getPosition(Ogre::Vector3 &focal, Ogre::Vector3 &camera);
+        void getPosition(osg::Vec3f &focal, osg::Vec3f &camera);
 
         void togglePlayerLooking(bool enable);
 

@@ -1,11 +1,16 @@
 #ifndef OPENMW_GAME_MWGUI_MAINMENU_H
 #define OPENMW_GAME_MWGUI_MAINMENU_H
 
-#include <openengine/gui/layout.hpp>
+#include "layout.hpp"
 
 namespace Gui
 {
     class ImageButton;
+}
+
+namespace VFS
+{
+    class Manager;
 }
 
 namespace MWGui
@@ -15,7 +20,7 @@ namespace MWGui
     class SaveGameDialog;
     class VideoWidget;
 
-    class MainMenu : public OEngine::GUI::Layout
+    class MainMenu : public Layout
     {
             int mWidth;
             int mHeight;
@@ -24,7 +29,7 @@ namespace MWGui
 
         public:
 
-            MainMenu(int w, int h);
+            MainMenu(int w, int h, const VFS::Manager* vfs, const std::string& versionDescription);
             ~MainMenu();
 
             void onResChange(int w, int h);
@@ -34,6 +39,7 @@ namespace MWGui
             void update(float dt);
 
         private:
+            const VFS::Manager* mVFS;
 
             MyGUI::Widget* mButtonBox;
             MyGUI::TextBox* mVersionText;

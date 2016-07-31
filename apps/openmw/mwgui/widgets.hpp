@@ -2,7 +2,6 @@
 #define MWGUI_WIDGETS_H
 
 #include "../mwmechanics/stat.hpp"
-#include "controllers.hpp"
 
 #include <components/esm/effectlist.hpp>
 #include <components/esm/loadskil.hpp>
@@ -14,6 +13,7 @@
 namespace MyGUI
 {
     class ImageBox;
+    class ControllerItem;
 }
 
 namespace MWBase
@@ -36,17 +36,17 @@ namespace MWGui
         struct SpellEffectParams
         {
             SpellEffectParams()
-                : mMagnMin(-1)
+                : mNoTarget(false)
+                , mIsConstant(false)
+                , mKnown(true)
+                , mEffectID(-1)
+                , mSkill(-1)
+                , mAttribute(-1)
+                , mMagnMin(-1)
                 , mMagnMax(-1)
                 , mRange(-1)
                 , mDuration(-1)
-                , mSkill(-1)
                 , mArea(0)
-                , mAttribute(-1)
-                , mEffectID(-1)
-                , mNoTarget(false)
-                , mIsConstant(false)
-                , mKnown(true)
             {
             }
 

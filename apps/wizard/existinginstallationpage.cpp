@@ -29,11 +29,7 @@ void Wizard::ExistingInstallationPage::initializePage()
     QStringList paths(mWizard->mInstallations.keys());
 
     // Hide the default item if there are installations to choose from
-    if (paths.isEmpty()) {
-        installationsList->item(0)->setHidden(false);
-    } else {
-        installationsList->item(0)->setHidden(true);
-    }
+    installationsList->item(0)->setHidden(!paths.isEmpty());
 
     foreach (const QString &path, paths) {
         QListWidgetItem *item = new QListWidgetItem(path);

@@ -32,9 +32,9 @@ namespace ICS
 {
     Control::Control(const std::string& name, bool autoChangeDirectionOnLimitsAfterStop, bool autoReverseToInitialValue
 		, float initialValue, float stepSize, float stepsPerSeconds, bool axisBindable)
-	: mName(name)
-	 , mValue(initialValue)
+	: mValue(initialValue)
 	 , mInitialValue(initialValue)
+	 , mName(name)
 	 , mStepSize(stepSize)
 	 , mStepsPerSeconds(stepsPerSeconds)
 	 , mAutoReverseToInitialValue(autoReverseToInitialValue)
@@ -43,10 +43,10 @@ namespace ICS
 	 , mAxisBindable(axisBindable)
 	 , currentChangingDirection(STOP)
 	{
-	    
+
 	}
 
-	Control::~Control() 
+	Control::~Control()
 	{
 		mAttachedChannels.clear();
 	}
@@ -92,7 +92,7 @@ namespace ICS
     }
 
 	void Control::setChangingDirection(ControlChangingDirection direction)
-	{ 
+	{
 		currentChangingDirection = direction;
 		mPendingActions.push_back(direction);
 	}
@@ -102,9 +102,9 @@ namespace ICS
         if(!mPendingActions.empty())
 		{
 			size_t timedActionsCount = 0;
-			
+
 			std::list<Control::ControlChangingDirection>::iterator cached_end = mPendingActions.end();
-			for(std::list<Control::ControlChangingDirection>::iterator it = mPendingActions.begin() ; 
+			for(std::list<Control::ControlChangingDirection>::iterator it = mPendingActions.begin() ;
                 it != cached_end ; ++it)
 			{
 				if( (*it) != Control::STOP )
@@ -112,14 +112,14 @@ namespace ICS
 					timedActionsCount++;
 				}
 			}
-			
+
 			float timeSinceLastFramePart = timeSinceLastFrame / std::max<size_t>(1, timedActionsCount);
-			for(std::list<Control::ControlChangingDirection>::iterator it = mPendingActions.begin() ; 
+			for(std::list<Control::ControlChangingDirection>::iterator it = mPendingActions.begin() ;
                 it != cached_end ; ++it)
 			{
 				if( (*it) != Control::STOP )
 				{
-					this->setValue(mValue + 
+					this->setValue(mValue +
 						(((int)(*it)) * mStepSize * mStepsPerSeconds * (timeSinceLastFramePart)));
 				}
 				else if(mAutoReverseToInitialValue && !mIgnoreAutoReverse && mValue != mInitialValue )
@@ -141,7 +141,7 @@ namespace ICS
 		}
 		else if( currentChangingDirection != Control::STOP )
 		{
-			this->setValue(mValue + 
+			this->setValue(mValue +
 				(((int)currentChangingDirection) * mStepSize * mStepsPerSeconds * (timeSinceLastFrame)));
 		}
 		else if(mAutoReverseToInitialValue && !mIgnoreAutoReverse && mValue != mInitialValue )

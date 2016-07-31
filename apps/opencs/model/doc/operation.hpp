@@ -2,8 +2,13 @@
 #define CSM_DOC_OPERATION_H
 
 #include <vector>
+#include <map>
 
-#include <QThread>
+#include <QObject>
+#include <QTimer>
+#include <QStringList>
+
+#include "messages.hpp"
 
 namespace CSMWorld
 {
@@ -14,7 +19,7 @@ namespace CSMDoc
 {
     class Stage;
 
-    class Operation : public QThread
+    class Operation : public QObject
     {
             Q_OBJECT
 
@@ -27,6 +32,10 @@ namespace CSMDoc
             int mOrdered;
             bool mFinalAlways;
             bool mError;
+            bool mConnected;
+            QTimer *mTimer;
+            bool mPrepared;
+            Message::Severity mDefaultSeverity;
 
             void prepareStages();
 
@@ -38,12 +47,13 @@ namespace CSMDoc
 
             virtual ~Operation();
 
-            virtual void run();
-
             void appendStage (Stage *stage);
             ///< The ownership of \a stage is transferred to *this.
             ///
             /// \attention Do no call this function while this Operation is running.
+
+            /// \attention Do no call this function while this Operation is running.
+            void setDefaultSeverity (Message::Severity severity);
 
             bool hasError() const;
 
@@ -51,8 +61,7 @@ namespace CSMDoc
 
             void progress (int current, int max, int type);
 
-            void reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
-                const std::string& hint, int type);
+            void reportMessage (const CSMDoc::Message& message, int type);
 
             void done (int type, bool failed);
 
@@ -60,11 +69,15 @@ namespace CSMDoc
 
             void abort();
 
+            void run();
+
         private slots:
 
             void executeStage();
 
-            void operationDone();
+        protected slots:
+
+            virtual void operationDone();
     };
 }
 

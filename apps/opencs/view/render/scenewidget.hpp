@@ -1,22 +1,30 @@
 #ifndef OPENCS_VIEW_SCENEWIDGET_H
 #define OPENCS_VIEW_SCENEWIDGET_H
 
-#include <QWidget>
+#include <map>
+#include <memory>
 
-#include <OgreColourValue.h>
+#include <QWidget>
+#include <QTimer>
+
+#include <boost/shared_ptr.hpp>
 
 #include "lightingday.hpp"
 #include "lightingnight.hpp"
 #include "lightingbright.hpp"
 
-namespace Ogre
+#include <osgViewer/View>
+#include <osgViewer/CompositeViewer>
+
+namespace Resource
 {
+    class ResourceSystem;
+}
+
+namespace osg
+{
+    class Group;
     class Camera;
-    class SceneManager;
-    class RenderWindow;
-    class Viewport;
-    class OverlaySystem;
-    class RenderTargetListener;
 }
 
 namespace CSVWidget
@@ -25,109 +33,107 @@ namespace CSVWidget
     class SceneToolbar;
 }
 
+namespace CSMPrefs
+{
+    class Setting;
+}
+
 namespace CSVRender
 {
-    class Navigation;
+    class CameraController;
+    class FreeCameraController;
+    class OrbitCameraController;
     class Lighting;
 
-    class SceneWidget : public QWidget
+    class RenderWidget : public QWidget
     {
-        Q_OBJECT
+            Q_OBJECT
 
         public:
+            RenderWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
+            virtual ~RenderWidget();
 
-            SceneWidget(QWidget *parent);
+            void flagAsModified();
+
+            void setVisibilityMask(int mask);
+
+            osg::Camera *getCamera();
+
+        protected:
+
+            osg::ref_ptr<osgViewer::View> mView;
+
+            osg::Group* mRootNode;
+
+            QTimer mTimer;
+    };
+
+    // Extension of RenderWidget to support lighting mode selection & toolbar
+    class SceneWidget : public RenderWidget
+    {
+            Q_OBJECT
+        public:
+            SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget* parent = 0,
+                    Qt::WindowFlags f = 0, bool retrieveInput = true);
             virtual ~SceneWidget();
-
-            QPaintEngine* paintEngine() const;
 
             CSVWidget::SceneToolMode *makeLightingSelector (CSVWidget::SceneToolbar *parent);
             ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
             /// is the responsibility of the calling function.
 
-            virtual void setVisibilityMask (unsigned int mask);
-
-            virtual void updateScene();
-
-        protected:
-
-            void setNavigation (Navigation *navigation);
-            ///< \attention The ownership of \a navigation is not transferred to *this.
-
-            void addRenderTargetListener(Ogre::RenderTargetListener *listener);
-
-            void removeRenderTargetListener(Ogre::RenderTargetListener *listener);
-
-            Ogre::Viewport *getViewport();
-
-            Ogre::SceneManager *getSceneManager();
-
-            Ogre::Camera *getCamera();
-
-            void flagAsModified();
-
-            void setDefaultAmbient (const Ogre::ColourValue& colour);
+            void setDefaultAmbient (const osg::Vec4f& colour);
             ///< \note The actual ambient colour may differ based on lighting settings.
 
-            virtual void updateOverlay();
-
-            virtual void mouseReleaseEvent (QMouseEvent *event);
-
-            virtual void mouseMoveEvent (QMouseEvent *event);
-
-            void wheelEvent (QWheelEvent *event);
-
-            void keyPressEvent (QKeyEvent *event);
-
-        private:
-            void paintEvent(QPaintEvent* e);
-            void resizeEvent(QResizeEvent* e);
-            bool event(QEvent* e);
-
-            void keyReleaseEvent (QKeyEvent *event);
-
-            void focusOutEvent (QFocusEvent *event);
-
-            void leaveEvent (QEvent *event);
-
-            void updateOgreWindow();
-
+        protected:
             void setLighting (Lighting *lighting);
             ///< \attention The ownership of \a lighting is not transferred to *this.
 
-            Ogre::Camera*       mCamera;
-            Ogre::SceneManager* mSceneMgr;
-            Ogre::RenderWindow* mWindow;
-            Ogre::Viewport *mViewport;
-            Ogre::OverlaySystem *mOverlaySystem;
+            void setAmbient(const osg::Vec4f& ambient);
 
-            Navigation *mNavigation;
-            Lighting *mLighting;
-            bool mUpdate;
-            bool mKeyForward;
-            bool mKeyBackward;
-            bool mKeyLeft;
-            bool mKeyRight;
-            bool mKeyRollLeft;
-            bool mKeyRollRight;
-            bool mFast;
-            bool mDragging;
-            bool mMod1;
-            QPoint mOldPos;
-            int mFastFactor;
-            Ogre::ColourValue mDefaultAmbient;
+            virtual void mousePressEvent (QMouseEvent *event);
+            virtual void mouseReleaseEvent (QMouseEvent *event);
+            virtual void mouseMoveEvent (QMouseEvent *event);
+            virtual void wheelEvent (QWheelEvent *event);
+            virtual void keyPressEvent (QKeyEvent *event);
+            virtual void keyReleaseEvent (QKeyEvent *event);
+            virtual void focusOutEvent (QFocusEvent *event);
+
+            /// \return Is \a key a button mapping setting? (ignored otherwise)
+            virtual bool storeMappingSetting (const CSMPrefs::Setting *setting);
+
+            std::string mapButton (QMouseEvent *event);
+
+            boost::shared_ptr<Resource::ResourceSystem> mResourceSystem;
+
+            Lighting* mLighting;
+
+            osg::Vec4f mDefaultAmbient;
             bool mHasDefaultAmbient;
             LightingDay mLightingDay;
             LightingNight mLightingNight;
             LightingBright mLightingBright;
 
-        public slots:
+            int mPrevMouseX, mPrevMouseY;
+            std::string mMouseMode;
+            std::auto_ptr<FreeCameraController> mFreeCamControl;
+            std::auto_ptr<OrbitCameraController> mOrbitCamControl;
+            CameraController* mCurrentCamControl;
 
-            void updateUserSetting (const QString &key, const QStringList &list);
+            std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
+
+        private:
+            bool mCamPositionSet;
+
+        public slots:
+            void update(double dt);
+
+        protected slots:
+
+            virtual void settingChanged (const CSMPrefs::Setting *setting);
+
+            void selectNavigationMode (const std::string& mode);
 
         private slots:
-
-            void update();
 
             void selectLightingMode (const std::string& mode);
 
@@ -135,6 +141,30 @@ namespace CSVRender
 
             void focusToolbarRequest();
     };
+
+
+    // There are rendering glitches when using multiple Viewer instances, work around using CompositeViewer with multiple views
+    class CompositeViewer : public QObject, public osgViewer::CompositeViewer
+    {
+            Q_OBJECT
+        public:
+            CompositeViewer();
+
+            static CompositeViewer& get();
+
+            QTimer mTimer;
+
+        private:
+            osg::Timer mFrameTimer;
+            double mSimulationTime;
+
+        public slots:
+            void update();
+
+        signals:
+            void simulationUpdated(double dt);
+    };
+
 }
 
 #endif

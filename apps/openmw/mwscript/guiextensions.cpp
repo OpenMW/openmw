@@ -1,4 +1,3 @@
-
 #include "guiextensions.hpp"
 
 #include <components/compiler/extensions.hpp>
@@ -12,8 +11,10 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-
+#include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+
+#include "../mwmechanics/actorutil.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -54,7 +55,7 @@ namespace MWScript
             {
                 MWWorld::Ptr bed = R()(runtime, false);
 
-                if (bed.isEmpty() || !MWBase::Environment::get().getMechanicsManager()->sleepInBed(MWBase::Environment::get().getWorld()->getPlayerPtr(),
+                if (bed.isEmpty() || !MWBase::Environment::get().getMechanicsManager()->sleepInBed(MWMechanics::getPlayer(),
                                                                              bed))
                     MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_RestBed);
             }
@@ -115,7 +116,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 std::string cell = (runtime.getStringLiteral (runtime[0].mInteger));
-                ::Misc::StringUtils::toLower(cell);
+                ::Misc::StringUtils::lowerCaseInPlace(cell);
                 runtime.pop();
 
                 // "Will match complete or partial cells, so ShowMap, "Vivec" will show cells Vivec and Vivec, Fred's House as well."
@@ -128,7 +129,7 @@ namespace MWScript
                 for (; it != cells.extEnd(); ++it)
                 {
                     std::string name = it->mName;
-                    ::Misc::StringUtils::toLower(name);
+                    ::Misc::StringUtils::lowerCaseInPlace(name);
                     if (name.find(cell) != std::string::npos)
                         MWBase::Environment::get().getWindowManager()->addVisitedLocation (
                             it->mName,
@@ -231,6 +232,8 @@ namespace MWScript
                 new OpShowDialogue (MWGui::GM_Race));
             interpreter.installSegment5 (Compiler::Gui::opcodeEnableStatsReviewMenu,
                 new OpShowDialogue (MWGui::GM_Review));
+            interpreter.installSegment5 (Compiler::Gui::opcodeEnableLevelupMenu,
+                new OpShowDialogue (MWGui::GM_Levelup));
 
             interpreter.installSegment5 (Compiler::Gui::opcodeEnableInventoryMenu,
                 new OpEnableWindow (MWGui::GW_Inventory));

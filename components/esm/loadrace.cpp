@@ -15,23 +15,68 @@ namespace ESM
 
     int Race::MaleFemaleF::getValue (bool male) const
     {
-        return male ? mMale : mFemale;
+        return static_cast<int>(male ? mMale : mFemale);
     }
 
-void Race::load(ESMReader &esm)
-{
-    mName = esm.getHNOString("FNAM");
-    esm.getHNT(mData, "RADT", 140);
-    mPowers.load(esm);
-    mDescription = esm.getHNOString("DESC");
-}
-void Race::save(ESMWriter &esm) const
-{
-    esm.writeHNOCString("FNAM", mName);
-    esm.writeHNT("RADT", mData, 140);
-    mPowers.save(esm);
-    esm.writeHNOString("DESC", mDescription);
-}
+    void Race::load(ESMReader &esm, bool &isDeleted)
+    {
+        isDeleted = false;
+
+        mPowers.mList.clear();
+
+        bool hasName = false;
+        bool hasData = false;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            switch (esm.retSubName().intval)
+            {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'R','A','D','T'>::value:
+                    esm.getHT(mData, 140);
+                    hasData = true;
+                    break;
+                case ESM::FourCC<'D','E','S','C'>::value:
+                    mDescription = esm.getHString();
+                    break;
+                case ESM::FourCC<'N','P','C','S'>::value:
+                    mPowers.add(esm);
+                    break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+            }
+        }
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasData && !isDeleted)
+            esm.fail("Missing RADT subrecord");
+    }
+    void Race::save(ESMWriter &esm, bool isDeleted) const
+    {
+        esm.writeHNCString("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
+        esm.writeHNOCString("FNAM", mName);
+        esm.writeHNT("RADT", mData, 140);
+        mPowers.save(esm);
+        esm.writeHNOString("DESC", mDescription);
+    }
 
     void Race::blank()
     {

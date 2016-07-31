@@ -9,8 +9,8 @@ namespace Gui
 {
 
     MWList::MWList() :
-        mClient(0)
-        , mScrollView(0)
+        mScrollView(0)
+        ,mClient(0)
         , mItemHeight(0)
     {
     }
@@ -48,7 +48,7 @@ namespace Gui
         const int _scrollBarWidth = 20; // fetch this from skin?
         const int scrollBarWidth = scrollbarShown ? _scrollBarWidth : 0;
         const int spacing = 3;
-        size_t viewPosition = -mScrollView->getViewOffset().top;
+        int viewPosition = -mScrollView->getViewOffset().top;
 
         while (mScrollView->getChildCount())
         {
@@ -70,7 +70,7 @@ namespace Gui
                 button->setCaption((*it));
                 button->getSubWidgetText()->setWordWrap(true);
                 button->getSubWidgetText()->setTextAlign(MyGUI::Align::Left);
-                button->eventMouseWheel += MyGUI::newDelegate(this, &MWList::onMouseWheel);
+                button->eventMouseWheel += MyGUI::newDelegate(this, &MWList::onMouseWheelMoved);
                 button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWList::onItemSelected);
 
                 int height = button->getTextSize().height;
@@ -99,10 +99,10 @@ namespace Gui
         if (!scrollbarShown && mItemHeight > mClient->getSize().height)
             redraw(true);
 
-        size_t viewRange = mScrollView->getCanvasSize().height;
+        int viewRange = mScrollView->getCanvasSize().height;
         if(viewPosition > viewRange)
             viewPosition = viewRange;
-        mScrollView->setViewOffset(MyGUI::IntPoint(0, viewPosition * -1));
+        mScrollView->setViewOffset(MyGUI::IntPoint(0, -viewPosition));
     }
 
     void MWList::setPropertyOverride(const std::string &_key, const std::string &_value)
@@ -135,13 +135,13 @@ namespace Gui
         mItems.clear();
     }
 
-    void MWList::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+    void MWList::onMouseWheelMoved(MyGUI::Widget* _sender, int _rel)
     {
         //NB view offset is negative
-        if (mScrollView->getViewOffset().top + _rel*0.3 > 0)
+        if (mScrollView->getViewOffset().top + _rel*0.3f > 0)
             mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mScrollView->setViewOffset(MyGUI::IntPoint(0, mScrollView->getViewOffset().top + _rel*0.3));
+            mScrollView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mScrollView->getViewOffset().top + _rel*0.3)));
     }
 
     void MWList::onItemSelected(MyGUI::Widget* _sender)
@@ -152,9 +152,13 @@ namespace Gui
         eventWidgetSelected(_sender);
     }
 
-    MyGUI::Widget* MWList::getItemWidget(const std::string& name)
+    MyGUI::Button *MWList::getItemWidget(const std::string& name)
     {
-        return mScrollView->findWidget (getName() + "_item_" + name);
+        return mScrollView->findWidget (getName() + "_item_" + name)->castType<MyGUI::Button>();
     }
 
+    void MWList::scrollToTop()
+    {
+        mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
+    }
 }

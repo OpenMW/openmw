@@ -1,6 +1,10 @@
 #include "review.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <cmath>
+
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_Gui.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -9,8 +13,15 @@
 
 #include "tooltips.hpp"
 
-#undef min
-#undef max
+namespace
+{
+    void adjustButtonSize(MyGUI::Button *button)
+    {
+        // adjust size of button to fit its text
+        MyGUI::IntSize size = button->getTextSize();
+        button->setSize(size.width + 24, button->getSize().height);
+    }
+}
 
 namespace MWGui
 {
@@ -63,7 +74,7 @@ namespace MWGui
         Widgets::MWAttributePtr attribute;
         for (int idx = 0; idx < ESM::Attribute::Length; ++idx)
         {
-            getWidget(attribute, std::string("Attribute") + boost::lexical_cast<std::string>(idx));
+            getWidget(attribute, std::string("Attribute") + MyGUI::utility::toString(idx));
             mAttributeWidgets.insert(std::make_pair(static_cast<int>(ESM::Attribute::sAttributeIds[idx]), attribute));
             attribute->setAttributeId(ESM::Attribute::sAttributeIds[idx]);
             attribute->setAttributeValue(Widgets::MWAttribute::AttributeValue());
@@ -134,22 +145,22 @@ namespace MWGui
 
     void ReviewDialog::setHealth(const MWMechanics::DynamicStat<float>& value)
     {
-        mHealth->setValue(value.getCurrent(), value.getModified());
-        std::string valStr =  boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
+        mHealth->setValue(static_cast<int>(value.getCurrent()), static_cast<int>(value.getModified()));
+        std::string valStr =  MyGUI::utility::toString(value.getCurrent()) + "/" + MyGUI::utility::toString(value.getModified());
         mHealth->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
     }
 
     void ReviewDialog::setMagicka(const MWMechanics::DynamicStat<float>& value)
     {
-        mMagicka->setValue(value.getCurrent(), value.getModified());
-        std::string valStr =  boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
-        mMagicka->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
+        mMagicka->setValue(static_cast<int>(value.getCurrent()), static_cast<int>(value.getModified()));
+        std::string valStr =  MyGUI::utility::toString(value.getCurrent()) + "/" + MyGUI::utility::toString(value.getModified());
+        mMagicka->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
     }
 
     void ReviewDialog::setFatigue(const MWMechanics::DynamicStat<float>& value)
     {
-        mFatigue->setValue(value.getCurrent(), value.getModified());
-        std::string valStr =  boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
+        mFatigue->setValue(static_cast<int>(value.getCurrent()), static_cast<int>(value.getModified()));
+        std::string valStr =  MyGUI::utility::toString(value.getCurrent()) + "/" + MyGUI::utility::toString(value.getModified());
         mFatigue->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
     }
 
@@ -168,8 +179,8 @@ namespace MWGui
         MyGUI::TextBox* widget = mSkillWidgetMap[skillId];
         if (widget)
         {
-            float modified = value.getModified(), base = value.getBase();
-            std::string text = boost::lexical_cast<std::string>(std::floor(modified));
+            float modified = static_cast<float>(value.getModified()), base = static_cast<float>(value.getBase());
+            std::string text = MyGUI::utility::toString(std::floor(modified));
             std::string state = "normal";
             if (modified > base)
                 state = "increased";
@@ -289,7 +300,7 @@ namespace MWGui
                 state = "increased";
             else if (modified < base)
                 state = "decreased";
-            MyGUI::TextBox* widget = addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), state, coord1, coord2);
+            MyGUI::TextBox* widget = addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId), MyGUI::utility::toString(static_cast<int>(modified)), state, coord1, coord2);
 
             for (int i=0; i<2; ++i)
             {
@@ -364,7 +375,7 @@ namespace MWGui
         if (mSkillView->getViewOffset().top + _rel*0.3 > 0)
             mSkillView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mSkillView->setViewOffset(MyGUI::IntPoint(0, mSkillView->getViewOffset().top + _rel*0.3));
+            mSkillView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + _rel*0.3)));
     }
 
 }

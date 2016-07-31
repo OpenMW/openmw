@@ -1,4 +1,3 @@
-
 #include "scenetooltoggle.hpp"
 
 #include <stdexcept>
@@ -41,7 +40,7 @@ void CSVWidget::SceneToolToggle::adjustToolTip()
 
 void CSVWidget::SceneToolToggle::adjustIcon()
 {
-    unsigned int selection = getSelection();
+    unsigned int selection = getSelectionMask();
     if (!selection)
         setIcon (QIcon (QString::fromUtf8 (mEmptyIcon.c_str())));
     else
@@ -136,7 +135,7 @@ void CSVWidget::SceneToolToggle::showPanel (const QPoint& position)
         mFirst->setFocus (Qt::OtherFocusReason);
 }
 
-void CSVWidget::SceneToolToggle::addButton (const std::string& icon, unsigned int id,
+void CSVWidget::SceneToolToggle::addButton (const std::string& icon, unsigned int mask,
     const std::string& smallIcon, const QString& name, const QString& tooltip)
 {
     if (mButtons.size()>=9)
@@ -152,7 +151,7 @@ void CSVWidget::SceneToolToggle::addButton (const std::string& icon, unsigned in
     mLayout->addWidget (button);
 
     ButtonDesc desc;
-    desc.mId = id;
+    desc.mMask = mask;
     desc.mSmallIcon = smallIcon;
     desc.mName = name;
     desc.mIndex = mButtons.size();
@@ -165,23 +164,23 @@ void CSVWidget::SceneToolToggle::addButton (const std::string& icon, unsigned in
         mFirst = button;
 }
 
-unsigned int CSVWidget::SceneToolToggle::getSelection() const
+unsigned int CSVWidget::SceneToolToggle::getSelectionMask() const
 {
     unsigned int selection = 0;
 
     for (std::map<PushButton *, ButtonDesc>::const_iterator iter (mButtons.begin());
         iter!=mButtons.end(); ++iter)
         if (iter->first->isChecked())
-            selection |= iter->second.mId;
+            selection |= iter->second.mMask;
 
     return selection;
 }
 
-void CSVWidget::SceneToolToggle::setSelection (unsigned int selection)
+void CSVWidget::SceneToolToggle::setSelectionMask (unsigned int selection)
 {
     for (std::map<PushButton *, ButtonDesc>::iterator iter (mButtons.begin());
         iter!=mButtons.end(); ++iter)
-        iter->first->setChecked (selection & iter->second.mId);
+        iter->first->setChecked (selection & iter->second.mMask);
 
     adjustToolTip();
     adjustIcon();

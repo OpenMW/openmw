@@ -12,8 +12,8 @@ namespace CSMDoc
 
         State_Saving = 16,
         State_Verifying = 32,
-        State_Compiling = 64, // not implemented yet
-        State_Searching = 128, // not implemented yet
+        State_Merging = 64,
+        State_Searching = 128,
         State_Loading = 256   // pseudo-state; can not be encountered in a loaded document
     };
 }

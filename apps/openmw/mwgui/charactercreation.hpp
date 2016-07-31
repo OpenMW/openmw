@@ -4,8 +4,19 @@
 #include <components/esm/loadskil.hpp>
 #include <components/esm/loadclas.hpp>
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/windowmanager.hpp"
+#include <vector>
+
+#include "../mwmechanics/stat.hpp"
+
+namespace osgViewer
+{
+    class Viewer;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
+}
 
 namespace MWGui
 {
@@ -28,7 +39,7 @@ namespace MWGui
     public:
     typedef std::vector<int> SkillList;
 
-    CharacterCreation();
+    CharacterCreation(osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem);
     ~CharacterCreation();
 
     //Show a dialog
@@ -38,9 +49,11 @@ namespace MWGui
     void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
     void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value);
     void configureSkills (const SkillList& major, const SkillList& minor);
-    void doRenderUpdate();
 
     private:
+    osgViewer::Viewer* mViewer;
+    Resource::ResourceSystem* mResourceSystem;
+
     //Dialogs
     TextInputDialog* mNameDialog;
     RaceDialog* mRaceDialog;
@@ -70,6 +83,7 @@ namespace MWGui
     //Race dialog
     void onRaceDialogDone(WindowBase* parWindow);
     void onRaceDialogBack();
+    void selectRace();
 
     //Class dialogs
     void onClassChoice(int _index);
@@ -81,10 +95,14 @@ namespace MWGui
     void onClassQuestionChosen(int _index);
     void onGenerateClassBack();
     void onGenerateClassDone(WindowBase* parWindow);
+    void selectGeneratedClass();
+    void selectCreatedClass();
+    void selectPickedClass();
 
     //Birthsign dialog
     void onBirthSignDialogDone(WindowBase* parWindow);
     void onBirthSignDialogBack();
+    void selectBirthSign();
 
     //Review dialog
     void onReviewDialogDone(WindowBase* parWindow);
@@ -103,6 +121,8 @@ namespace MWGui
     };
 
     CSE mCreationStage; // Which state the character creating is in, controls back/next/ok buttons
+
+    void handleDialogDone(CSE currentStage, int nextMode);
     };
 }
 

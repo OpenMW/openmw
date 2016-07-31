@@ -1,4 +1,3 @@
-
 #include "scriptparser.hpp"
 
 #include "scanner.hpp"

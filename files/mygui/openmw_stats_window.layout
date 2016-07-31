@@ -235,7 +235,9 @@
 
             <!-- Player skills, factions, birthsign and reputation -->
             <Widget type="Widget" skin="MW_Box" position="8 8 248 292" align="Left Stretch" name="Skills">
-                <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 240 284" align="Left Top Stretch" name="SkillView"/>
+                <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 240 284" align="Left Top Stretch" name="SkillView">
+                    <Property key="CanvasAlign" value="Left Top"/>
+                </Widget>
             </Widget>
 
         </Widget>

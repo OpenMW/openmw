@@ -3,14 +3,9 @@
 
 #include <QWidget>
 
-#include <OgreRoot.h>
-#include <OgreRenderSystem.h>
-
-#include <components/ogreinit/ogreinit.hpp>
-
-
 #include "ui_graphicspage.h"
 
+#include <components/settings/settings.hpp>
 
 namespace Files { struct ConfigurationManager; }
 
@@ -23,13 +18,12 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSettings, QWidget *parent = 0);
+        GraphicsPage(Files::ConfigurationManager &cfg, Settings::Manager &engineSettings, QWidget *parent = 0);
 
         void saveSettings();
         bool loadSettings();
 
     public slots:
-        void rendererChanged(const QString &renderer);
         void screenChanged(int screen);
 
     private slots:
@@ -37,20 +31,12 @@ namespace Launcher
         void slotStandardToggled(bool checked);
 
     private:
-        OgreInit::OgreInit mOgreInit;
-        Ogre::Root *mOgre;
-        Ogre::RenderSystem *mSelectedRenderSystem;
-        Ogre::RenderSystem *mOpenGLRenderSystem;
-        Ogre::RenderSystem *mDirect3DRenderSystem;
-
         Files::ConfigurationManager &mCfgMgr;
-        GraphicsSettings &mGraphicsSettings;
+        Settings::Manager &mEngineSettings;
 
-        QStringList getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer);
         QStringList getAvailableResolutions(int screen);
         QRect getMaximumResolution();
 
-        bool setupOgre();
         bool setupSDL();
     };
 }

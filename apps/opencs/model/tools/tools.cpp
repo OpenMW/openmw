@@ -1,4 +1,3 @@
-
 #include "tools.hpp"
 
 #include <QThreadPool>
@@ -23,33 +22,44 @@
 #include "referenceablecheck.hpp"
 #include "scriptcheck.hpp"
 #include "bodypartcheck.hpp"
+#include "referencecheck.hpp"
+#include "startscriptcheck.hpp"
+#include "searchoperation.hpp"
+#include "pathgridcheck.hpp"
+#include "soundgencheck.hpp"
+#include "magiceffectcheck.hpp"
+#include "mergeoperation.hpp"
+#include "gmstcheck.hpp"
+#include "topicinfocheck.hpp"
+#include "journalcheck.hpp"
 
-CSMDoc::Operation *CSMTools::Tools::get (int type)
+CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
 {
     switch (type)
     {
-        case CSMDoc::State_Verifying: return mVerifier;
+        case CSMDoc::State_Verifying: return &mVerifier;
+        case CSMDoc::State_Searching: return &mSearch;
+        case CSMDoc::State_Merging: return &mMerge;
     }
 
     return 0;
 }
 
-const CSMDoc::Operation *CSMTools::Tools::get (int type) const
+const CSMDoc::OperationHolder *CSMTools::Tools::get (int type) const
 {
     return const_cast<Tools *> (this)->get (type);
 }
 
-CSMDoc::Operation *CSMTools::Tools::getVerifier()
+CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
 {
-    if (!mVerifier)
+    if (!mVerifierOperation)
     {
-        mVerifier = new CSMDoc::Operation (CSMDoc::State_Verifying, false);
+        mVerifierOperation = new CSMDoc::Operation (CSMDoc::State_Verifying, false);
 
-        connect (mVerifier, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
-        connect (mVerifier, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
-        connect (mVerifier,
-            SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
-            this, SLOT (verifierMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
+        connect (&mVerifier, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
+        connect (&mVerifier, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
+        connect (&mVerifier, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
+            this, SLOT (verifierMessage (const CSMDoc::Message&, int)));
 
         std::vector<std::string> mandatoryIds; //  I want C++11, damn it!
         mandatoryIds.push_back ("Day");
@@ -57,73 +67,177 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
         mandatoryIds.push_back ("GameHour");
         mandatoryIds.push_back ("Month");
         mandatoryIds.push_back ("PCRace");
-        mandatoryIds.push_back ("PCVampire");
-        mandatoryIds.push_back ("PCWerewolf");
-        mandatoryIds.push_back ("PCYear");
 
-        mVerifier->appendStage (new MandatoryIdStage (mData.getGlobals(),
+        mVerifierOperation->appendStage (new MandatoryIdStage (mData.getGlobals(),
             CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Globals), mandatoryIds));
 
-        mVerifier->appendStage (new SkillCheckStage (mData.getSkills()));
+        mVerifierOperation->appendStage (new SkillCheckStage (mData.getSkills()));
 
-        mVerifier->appendStage (new ClassCheckStage (mData.getClasses()));
+        mVerifierOperation->appendStage (new ClassCheckStage (mData.getClasses()));
 
-        mVerifier->appendStage (new FactionCheckStage (mData.getFactions()));
+        mVerifierOperation->appendStage (new FactionCheckStage (mData.getFactions()));
 
-        mVerifier->appendStage (new RaceCheckStage (mData.getRaces()));
+        mVerifierOperation->appendStage (new RaceCheckStage (mData.getRaces()));
 
-        mVerifier->appendStage (new SoundCheckStage (mData.getSounds()));
+        mVerifierOperation->appendStage (new SoundCheckStage (mData.getSounds()));
 
-        mVerifier->appendStage (new RegionCheckStage (mData.getRegions()));
+        mVerifierOperation->appendStage (new RegionCheckStage (mData.getRegions()));
 
-        mVerifier->appendStage (new BirthsignCheckStage (mData.getBirthsigns()));
+        mVerifierOperation->appendStage (new BirthsignCheckStage (mData.getBirthsigns()));
 
-        mVerifier->appendStage (new SpellCheckStage (mData.getSpells()));
+        mVerifierOperation->appendStage (new SpellCheckStage (mData.getSpells()));
 
-        mVerifier->appendStage (new ReferenceableCheckStage (mData.getReferenceables().getDataSet(), mData.getRaces(), mData.getClasses(), mData.getFactions()));
+        mVerifierOperation->appendStage (new ReferenceableCheckStage (mData.getReferenceables().getDataSet(), mData.getRaces(), mData.getClasses(), mData.getFactions(), mData.getScripts()));
 
-        mVerifier->appendStage (new ScriptCheckStage (mDocument));
+        mVerifierOperation->appendStage (new ReferenceCheckStage(mData.getReferences(), mData.getReferenceables(), mData.getCells(), mData.getFactions()));
 
-        mVerifier->appendStage(
+        mVerifierOperation->appendStage (new ScriptCheckStage (mDocument));
+
+        mVerifierOperation->appendStage (new StartScriptCheckStage (mData.getStartScripts(), mData.getScripts()));
+
+        mVerifierOperation->appendStage(
             new BodyPartCheckStage(
                 mData.getBodyParts(),
                 mData.getResources(
                     CSMWorld::UniversalId( CSMWorld::UniversalId::Type_Meshes )),
                 mData.getRaces() ));
+
+        mVerifierOperation->appendStage (new PathgridCheckStage (mData.getPathgrids()));
+
+        mVerifierOperation->appendStage (new SoundGenCheckStage (mData.getSoundGens(),
+                                                                 mData.getSounds(),
+                                                                 mData.getReferenceables()));
+
+        mVerifierOperation->appendStage (new MagicEffectCheckStage (mData.getMagicEffects(),
+                                                                    mData.getSounds(),
+                                                                    mData.getReferenceables(),
+                                                                    mData.getResources (CSMWorld::UniversalId::Type_Icons),
+                                                                    mData.getResources (CSMWorld::UniversalId::Type_Textures)));
+
+        mVerifierOperation->appendStage (new GmstCheckStage (mData.getGmsts()));
+
+        mVerifierOperation->appendStage (new TopicInfoCheckStage (mData.getTopicInfos(),
+                                                                  mData.getCells(),
+                                                                  mData.getClasses(),
+                                                                  mData.getFactions(),
+                                                                  mData.getGmsts(),
+                                                                  mData.getGlobals(),
+                                                                  mData.getJournals(),
+                                                                  mData.getRaces(),
+                                                                  mData.getRegions(),
+                                                                  mData.getTopics(),
+                                                                  mData.getReferenceables().getDataSet(),
+                                                                  mData.getResources (CSMWorld::UniversalId::Type_SoundsRes)));
+
+        mVerifierOperation->appendStage (new JournalCheckStage(mData.getJournals(), mData.getJournalInfos()));
+
+        mVerifier.setOperation (mVerifierOperation);
     }
 
-    return mVerifier;
+    return &mVerifier;
 }
 
-CSMTools::Tools::Tools (CSMDoc::Document& document)
-: mDocument (document), mData (document.getData()), mVerifier (0), mNextReportNumber (0)
+CSMTools::Tools::Tools (CSMDoc::Document& document, ToUTF8::FromType encoding)
+: mDocument (document), mData (document.getData()), mVerifierOperation (0),
+  mSearchOperation (0), mMergeOperation (0), mNextReportNumber (0), mEncoding (encoding)
 {
     // index 0: load error log
     mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
     mActiveReports.insert (std::make_pair (CSMDoc::State_Loading, 0));
+
+    connect (&mSearch, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
+    connect (&mSearch, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
+    connect (&mSearch, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
+        this, SLOT (verifierMessage (const CSMDoc::Message&, int)));
+
+    connect (&mMerge, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
+    connect (&mMerge, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
+    // don't need to connect report message, since there are no messages for merge
 }
 
 CSMTools::Tools::~Tools()
 {
-    delete mVerifier;
+    if (mVerifierOperation)
+    {
+        mVerifier.abortAndWait();
+        delete mVerifierOperation;
+    }
+
+    if (mSearchOperation)
+    {
+        mSearch.abortAndWait();
+        delete mSearchOperation;
+    }
+
+    if (mMergeOperation)
+    {
+        mMerge.abortAndWait();
+        delete mMergeOperation;
+    }
 
     for (std::map<int, ReportModel *>::iterator iter (mReports.begin()); iter!=mReports.end(); ++iter)
         delete iter->second;
 }
 
-CSMWorld::UniversalId CSMTools::Tools::runVerifier()
+CSMWorld::UniversalId CSMTools::Tools::runVerifier (const CSMWorld::UniversalId& reportId)
 {
-    mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
-    mActiveReports[CSMDoc::State_Verifying] = mNextReportNumber-1;
+    int reportNumber = reportId.getType()==CSMWorld::UniversalId::Type_VerificationResults ?
+        reportId.getIndex() : mNextReportNumber++;
+
+    if (mReports.find (reportNumber)==mReports.end())
+        mReports.insert (std::make_pair (reportNumber, new ReportModel));
+
+    mActiveReports[CSMDoc::State_Verifying] = reportNumber;
 
     getVerifier()->start();
 
-    return CSMWorld::UniversalId (CSMWorld::UniversalId::Type_VerificationResults, mNextReportNumber-1);
+    return CSMWorld::UniversalId (CSMWorld::UniversalId::Type_VerificationResults, reportNumber);
+}
+
+CSMWorld::UniversalId CSMTools::Tools::newSearch()
+{
+    mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel (true, false)));
+
+    return CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Search, mNextReportNumber-1);
+}
+
+void CSMTools::Tools::runSearch (const CSMWorld::UniversalId& searchId, const Search& search)
+{
+    mActiveReports[CSMDoc::State_Searching] = searchId.getIndex();
+
+    if (!mSearchOperation)
+    {
+        mSearchOperation = new SearchOperation (mDocument);
+        mSearch.setOperation (mSearchOperation);
+    }
+
+    mSearchOperation->configure (search);
+
+    mSearch.start();
+}
+
+void CSMTools::Tools::runMerge (std::auto_ptr<CSMDoc::Document> target)
+{
+    // not setting an active report, because merge does not produce messages
+
+    if (!mMergeOperation)
+    {
+        mMergeOperation = new MergeOperation (mDocument, mEncoding);
+        mMerge.setOperation (mMergeOperation);
+        connect (mMergeOperation, SIGNAL (mergeDone (CSMDoc::Document*)),
+            this, SIGNAL (mergeDone (CSMDoc::Document*)));
+    }
+
+    target->flagAsDirty();
+
+    mMergeOperation->setTarget (target);
+
+    mMerge.start();
 }
 
 void CSMTools::Tools::abortOperation (int type)
 {
-    if (CSMDoc::Operation *operation = get (type))
+    if (CSMDoc::OperationHolder *operation = get (type))
         operation->abort();
 }
 
@@ -132,13 +246,15 @@ int CSMTools::Tools::getRunningOperations() const
     static const int sOperations[] =
     {
        CSMDoc::State_Verifying,
+       CSMDoc::State_Searching,
+       CSMDoc::State_Merging,
         -1
     };
 
     int result = 0;
 
     for (int i=0; sOperations[i]!=-1; ++i)
-        if (const CSMDoc::Operation *operation = get (sOperations[i]))
+        if (const CSMDoc::OperationHolder *operation = get (sOperations[i]))
             if (operation->isRunning())
                 result |= sOperations[i];
 
@@ -148,18 +264,17 @@ int CSMTools::Tools::getRunningOperations() const
 CSMTools::ReportModel *CSMTools::Tools::getReport (const CSMWorld::UniversalId& id)
 {
     if (id.getType()!=CSMWorld::UniversalId::Type_VerificationResults &&
-        id.getType()!=CSMWorld::UniversalId::Type_LoadErrorLog)
+        id.getType()!=CSMWorld::UniversalId::Type_LoadErrorLog &&
+        id.getType()!=CSMWorld::UniversalId::Type_Search)
         throw std::logic_error ("invalid request for report model: " + id.toString());
 
     return mReports.at (id.getIndex());
 }
 
-void CSMTools::Tools::verifierMessage (const CSMWorld::UniversalId& id, const std::string& message,
-    const std::string& hint, int type)
+void CSMTools::Tools::verifierMessage (const CSMDoc::Message& message, int type)
 {
     std::map<int, int>::iterator iter = mActiveReports.find (type);
 
     if (iter!=mActiveReports.end())
-        mReports[iter->second]->add (id, message, hint);
+        mReports[iter->second]->add (message);
 }
-

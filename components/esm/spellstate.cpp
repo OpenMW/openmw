@@ -12,7 +12,7 @@ namespace ESM
         {
             std::string id = esm.getHString();
 
-            std::map<const int, float> random;
+            SpellParams state;
             while (esm.isNextSub("INDX"))
             {
                 int index;
@@ -21,10 +21,16 @@ namespace ESM
                 float magnitude;
                 esm.getHNT(magnitude, "RAND");
 
-                random[index] = magnitude;
+                state.mEffectRands[index] = magnitude;
             }
 
-            mSpells[id] = random;
+            while (esm.isNextSub("PURG")) {
+                int index;
+                esm.getHT(index);
+                state.mPurgedEffects.insert(index);
+            }
+
+            mSpells[id] = state;
         }
 
         while (esm.isNextSub("PERM"))
@@ -73,12 +79,16 @@ namespace ESM
         {
             esm.writeHNString("SPEL", it->first);
 
-            const std::map<const int, float>& random = it->second;
-            for (std::map<const int, float>::const_iterator rIt = random.begin(); rIt != random.end(); ++rIt)
+            const std::map<int, float>& random = it->second.mEffectRands;
+            for (std::map<int, float>::const_iterator rIt = random.begin(); rIt != random.end(); ++rIt)
             {
                 esm.writeHNT("INDX", rIt->first);
                 esm.writeHNT("RAND", rIt->second);
             }
+
+            const std::set<int>& purges = it->second.mPurgedEffects;
+            for (std::set<int>::const_iterator pIt = purges.begin(); pIt != purges.end(); ++pIt)
+                esm.writeHNT("PURG", *pIt);
         }
 
         for (std::map<std::string, std::vector<PermanentSpellEffectInfo> >::const_iterator it = mPermanentSpellEffects.begin(); it != mPermanentSpellEffects.end(); ++it)

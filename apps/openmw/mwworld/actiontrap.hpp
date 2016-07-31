@@ -18,10 +18,9 @@ namespace MWWorld
         public:
 
             /// @param spellId
-            /// @param actor Actor that activated the trap
             /// @param trapSource
-            ActionTrap (const Ptr& actor, const std::string& spellId, const Ptr& trapSource)
-                : Action(false, actor), mSpellId(spellId), mTrapSource(trapSource) {}
+            ActionTrap (const std::string& spellId, const Ptr& trapSource)
+                : Action(false, trapSource), mSpellId(spellId), mTrapSource(trapSource) {}
     };
 }
 

@@ -8,23 +8,63 @@ namespace ESM
 {
     unsigned int BirthSign::sRecordId = REC_BSGN;
 
-void BirthSign::load(ESMReader &esm)
-{
-    mName = esm.getHNOString("FNAM");
-    mTexture = esm.getHNOString("TNAM");
-    mDescription = esm.getHNOString("DESC");
+    void BirthSign::load(ESMReader &esm, bool &isDeleted)
+    {
+        isDeleted = false;
 
-    mPowers.load(esm);
-}
+        mPowers.mList.clear();
 
-void BirthSign::save(ESMWriter &esm) const
-{
-    esm.writeHNOCString("FNAM", mName);
-    esm.writeHNOCString("TNAM", mTexture);
-    esm.writeHNOCString("DESC", mDescription);
+        bool hasName = false;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            switch (esm.retSubName().intval)
+            {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'T','N','A','M'>::value:
+                    mTexture = esm.getHString();
+                    break;
+                case ESM::FourCC<'D','E','S','C'>::value:
+                    mDescription = esm.getHString();
+                    break;
+                case ESM::FourCC<'N','P','C','S'>::value:
+                    mPowers.add(esm);
+                    break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+                    break;
+            }
+        }
 
-    mPowers.save(esm);
-}
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+    }
+
+    void BirthSign::save(ESMWriter &esm, bool isDeleted) const
+    {
+        esm.writeHNCString("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+        esm.writeHNOCString("FNAM", mName);
+        esm.writeHNOCString("TNAM", mTexture);
+        esm.writeHNOCString("DESC", mDescription);
+
+        mPowers.save(esm);
+    }
 
     void BirthSign::blank()
     {

@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <QStringList>
 #include <QString>
+#include <QFile>
 #include <QMap>
 
 #include <boost/filesystem/path.hpp>
@@ -59,13 +60,19 @@ namespace Config
 
         bool hasMaster();
 
-        QStringList values(const QString &key, const QStringList &defaultValues = QStringList());
+        QStringList values(const QString &key, const QStringList &defaultValues = QStringList()) const;
 
         bool readFile(QTextStream &stream);
         bool readFile(QTextStream &stream, QMap<QString, QString> &settings);
         bool readUserFile(QTextStream &stream);
 
         bool writeFile(QTextStream &stream);
+        bool writeFileWithComments(QFile &file);
+
+        void setContentList(const QStringList& fileNames);
+        QStringList getContentList() const;
+
+        void clear();
 
     private:
         Files::ConfigurationManager &mCfgMgr;
@@ -76,6 +83,10 @@ namespace Config
 
         QStringList mDataDirs;
         QString mDataLocal;
+
+        static const char sContentKey[];
+
+        bool isOrderedLine(const QString& line) const;
     };
 }
 #endif // GAMESETTINGS_HPP

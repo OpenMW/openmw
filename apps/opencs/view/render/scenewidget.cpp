@@ -4,467 +4,453 @@
 #include <QResizeEvent>
 #include <QTimer>
 #include <QShortcut>
+#include <QLayout>
 
-#include <OgreRoot.h>
-#include <OgreRenderWindow.h>
-#include <OgreEntity.h>
-#include <OgreCamera.h>
-#include <OgreSceneNode.h>
-#include <OgreViewport.h>
-#include <OgreOverlaySystem.h>
+#include <extern/osgQt/GraphicsWindowQt>
+#include <osg/GraphicsContext>
+#include <osgViewer/CompositeViewer>
+#include <osgViewer/ViewerEventHandlers>
+#include <osg/LightModel>
+
+#include <components/resource/scenemanager.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 #include "../widget/scenetoolmode.hpp"
-#include "../../model/settings/usersettings.hpp"
 
-#include "navigation.hpp"
+#include "../../model/prefs/state.hpp"
+
 #include "lighting.hpp"
-#include "overlaysystem.hpp"
+#include "mask.hpp"
+#include "cameracontroller.hpp"
 
 namespace CSVRender
 {
-    SceneWidget::SceneWidget(QWidget *parent)
-        : QWidget(parent)
-        , mCamera(NULL)
-        , mSceneMgr(NULL)
-        , mWindow(NULL)
-        , mViewport(NULL)
-        , mNavigation (0), mLighting (0), mUpdate (false), mKeyForward (false)
-        , mKeyBackward (false), mKeyLeft (false), mKeyRight (false)
-        , mKeyRollLeft (false), mKeyRollRight (false)
-        , mFast (false), mDragging (false), mMod1 (false)
-        , mFastFactor (4)
-        , mDefaultAmbient (0, 0, 0, 0), mHasDefaultAmbient (false)
+
+RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
+    : QWidget(parent, f)
+    , mRootNode(0)
+{
+
+    osgViewer::CompositeViewer& viewer = CompositeViewer::get();
+
+    osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
+    //ds->setNumMultiSamples(8);
+
+    osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
+    traits->windowName = "";
+    traits->windowDecoration = true;
+    traits->x = 0;
+    traits->y = 0;
+    traits->width = width();
+    traits->height = height();
+    traits->doubleBuffer = true;
+    traits->alpha = ds->getMinimumNumAlphaBits();
+    traits->stencil = ds->getMinimumNumStencilBits();
+    traits->sampleBuffers = ds->getMultiSamples();
+    traits->samples = ds->getNumMultiSamples();
+    // Doesn't make much sense as we're running on demand updates, and there seems to be a bug with the refresh rate when running multiple QGLWidgets
+    traits->vsync = false;
+
+    mView = new osgViewer::View;
+
+    osg::ref_ptr<osgQt::GraphicsWindowQt> window = new osgQt::GraphicsWindowQt(traits.get());
+    QLayout* layout = new QHBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(window->getGLWidget());
+    setLayout(layout);
+
+    mView->getCamera()->setGraphicsContext(window);
+    mView->getCamera()->setClearColor( osg::Vec4(0.2, 0.2, 0.6, 1.0) );
+    mView->getCamera()->setViewport( new osg::Viewport(0, 0, traits->width, traits->height) );
+    mView->getCamera()->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
+
+    SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;
+    lightMgr->setStartLight(1);
+    lightMgr->setLightingMask(Mask_Lighting);
+    mRootNode = lightMgr;
+
+    mView->getCamera()->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+    mView->getCamera()->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+
+    mView->setSceneData(mRootNode);
+
+    // Press S to reveal profiling stats
+    mView->addEventHandler(new osgViewer::StatsHandler);
+
+    mView->getCamera()->setCullMask(~(Mask_UpdateVisitor));
+
+    viewer.addView(mView);
+    viewer.setDone(false);
+    viewer.realize();
+}
+
+RenderWidget::~RenderWidget()
+{
+    CompositeViewer::get().removeView(mView);
+}
+
+void RenderWidget::flagAsModified()
+{
+    mView->requestRedraw();
+}
+
+void RenderWidget::setVisibilityMask(int mask)
+{
+    mView->getCamera()->setCullMask(mask | Mask_ParticleSystem | Mask_Lighting);
+}
+
+osg::Camera *RenderWidget::getCamera()
+{
+    return mView->getCamera();
+}
+
+
+// --------------------------------------------------
+
+CompositeViewer::CompositeViewer()
+    : mSimulationTime(0.0)
+{
+#if QT_VERSION >= 0x050000
+    // Qt5 is currently crashing and reporting "Cannot make QOpenGLContext current in a different thread" when the viewer is run multi-threaded, this is regression from Qt4
+    osgViewer::ViewerBase::ThreadingModel threadingModel = osgViewer::ViewerBase::SingleThreaded;
+#else
+    osgViewer::ViewerBase::ThreadingModel threadingModel = osgViewer::ViewerBase::DrawThreadPerContext;
+#endif
+
+    setThreadingModel(threadingModel);
+
+    // disable the default setting of viewer.done() by pressing Escape.
+    setKeyEventSetsDone(0);
+
+    // Only render when the camera position changed, or content flagged dirty
+    //setRunFrameScheme(osgViewer::ViewerBase::ON_DEMAND);
+    setRunFrameScheme(osgViewer::ViewerBase::CONTINUOUS);
+
+    connect( &mTimer, SIGNAL(timeout()), this, SLOT(update()) );
+    mTimer.start( 10 );
+}
+
+CompositeViewer &CompositeViewer::get()
+{
+    static CompositeViewer sThis;
+    return sThis;
+}
+
+void CompositeViewer::update()
+{
+    double dt = mFrameTimer.time_s();
+    mFrameTimer.setStartTick();
+
+    emit simulationUpdated(dt);
+
+    mSimulationTime += dt;
+    frame(mSimulationTime);
+}
+
+// ---------------------------------------------------
+
+SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget *parent, Qt::WindowFlags f,
+    bool retrieveInput)
+    : RenderWidget(parent, f)
+    , mResourceSystem(resourceSystem)
+    , mLighting(NULL)
+    , mHasDefaultAmbient(false)
+    , mPrevMouseX(0)
+    , mPrevMouseY(0)
+    , mFreeCamControl(new FreeCameraController())
+    , mOrbitCamControl(new OrbitCameraController())
+    , mCurrentCamControl(mFreeCamControl.get())
+    , mCamPositionSet(false)
+{
+    mOrbitCamControl->setPickingMask(Mask_Reference | Mask_Terrain);
+    selectNavigationMode("free");
+
+    // we handle lighting manually
+    mView->setLightingMode(osgViewer::View::NO_LIGHT);
+
+    setLighting(&mLightingDay);
+
+    mResourceSystem->getSceneManager()->setParticleSystemMask(Mask_ParticleSystem);
+
+    // Recieve mouse move event even if mouse button is not pressed
+    setMouseTracking(true);
+    setFocusPolicy(Qt::StrongFocus);
+
+    /// \todo make shortcut configurable
+    QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
+    connect (focusToolbar, SIGNAL (activated()), this, SIGNAL (focusToolbarRequest()));
+
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+
+    // TODO update this outside of the constructor where virtual methods can be used
+    if (retrieveInput)
     {
-        setAttribute(Qt::WA_PaintOnScreen);
-        setAttribute(Qt::WA_NoSystemBackground);
+        CSMPrefs::get()["3D Scene Input"].update();
+        CSMPrefs::get()["Tooltips"].update();
+    }
 
-        setFocusPolicy (Qt::StrongFocus);
+    connect (&CompositeViewer::get(), SIGNAL (simulationUpdated(double)), this, SLOT (update(double)));
+}
 
-        mSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
+SceneWidget::~SceneWidget()
+{
+    // Since we're holding on to the scene templates past the existance of this graphics context, we'll need to manually release the created objects
+    mResourceSystem->getSceneManager()->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
+}
 
-        mSceneMgr->setAmbientLight (Ogre::ColourValue (0,0,0,1));
+void SceneWidget::setLighting(Lighting *lighting)
+{
+    if (mLighting)
+        mLighting->deactivate();
 
-        mCamera = mSceneMgr->createCamera("foo");
+    mLighting = lighting;
+    mLighting->activate (mRootNode);
 
-        mCamera->setPosition (300, 0, 0);
-        mCamera->lookAt (0, 0, 0);
-        mCamera->setNearClipDistance (0.1);
+    osg::Vec4f ambient = mLighting->getAmbientColour(mHasDefaultAmbient ? &mDefaultAmbient : 0);
+    setAmbient(ambient);
 
-        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    flagAsModified();
+}
 
-        float farClipDist = userSettings.setting("3d-render/far-clip-distance", QString("300000")).toFloat();
-        mCamera->setFarClipDistance (farClipDist);
+void SceneWidget::setAmbient(const osg::Vec4f& ambient)
+{
+    osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+    osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
+    lightmodel->setAmbientIntensity(ambient);
+    stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
+    stateset->setMode(GL_LIGHT0, osg::StateAttribute::ON);
+    stateset->setAttributeAndModes(lightmodel, osg::StateAttribute::ON);
+    mRootNode->setStateSet(stateset);
+}
 
-        mFastFactor = userSettings.setting("scene-input/fast-factor", QString("4")).toInt();
-
-        mCamera->roll (Ogre::Degree (90));
-
+void SceneWidget::selectLightingMode (const std::string& mode)
+{
+    if (mode=="day")
         setLighting (&mLightingDay);
+    else if (mode=="night")
+        setLighting (&mLightingNight);
+    else if (mode=="bright")
+        setLighting (&mLightingBright);
+}
 
-        mOverlaySystem = OverlaySystem::instance().get();
-        mSceneMgr->addRenderQueueListener(mOverlaySystem);
+CSVWidget::SceneToolMode *SceneWidget::makeLightingSelector (CSVWidget::SceneToolbar *parent)
+{
+    CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent, "Lighting Mode");
 
-        QTimer *timer = new QTimer (this);
+    /// \todo replace icons
+    tool->addButton (":scenetoolbar/day", "day",
+        "Day"
+        "<ul><li>Cell specific ambient in interiors</li>"
+        "<li>Low ambient in exteriors</li>"
+        "<li>Strong directional light source</li>"
+        "<li>This mode closely resembles day time in-game</li></ul>");
+    tool->addButton (":scenetoolbar/night", "night",
+        "Night"
+        "<ul><li>Cell specific ambient in interiors</li>"
+        "<li>Low ambient in exteriors</li>"
+        "<li>Weak directional light source</li>"
+        "<li>This mode closely resembles night time in-game</li></ul>");
+    tool->addButton (":scenetoolbar/bright", "bright",
+        "Bright"
+        "<ul><li>Maximum ambient</li>"
+        "<li>Strong directional light source</li></ul>");
 
-        connect (timer, SIGNAL (timeout()), this, SLOT (update()));
+    connect (tool, SIGNAL (modeChanged (const std::string&)),
+        this, SLOT (selectLightingMode (const std::string&)));
 
-        int timerStart = userSettings.setting("scene-input/timer", QString("20")).toInt();
-        timer->start (timerStart);
+    return tool;
+}
 
-        /// \todo make shortcut configurable
-        QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
-        connect (focusToolbar, SIGNAL (activated()), this, SIGNAL (focusToolbarRequest()));
-    }
+void SceneWidget::setDefaultAmbient (const osg::Vec4f& colour)
+{
+    mDefaultAmbient = colour;
+    mHasDefaultAmbient = true;
 
-    CSVWidget::SceneToolMode *SceneWidget::makeLightingSelector (CSVWidget::SceneToolbar *parent)
+    setAmbient(mLighting->getAmbientColour(&mDefaultAmbient));
+}
+
+void SceneWidget::mousePressEvent (QMouseEvent *event)
+{
+    mMouseMode = mapButton(event);
+
+    mPrevMouseX = event->x();
+    mPrevMouseY = event->y();
+}
+
+void SceneWidget::mouseReleaseEvent (QMouseEvent *event)
+{
+    mMouseMode = "";
+}
+
+void SceneWidget::mouseMoveEvent (QMouseEvent *event)
+{
+    mCurrentCamControl->handleMouseMoveEvent(mMouseMode, event->x() - mPrevMouseX, event->y() - mPrevMouseY);
+
+    mPrevMouseX = event->x();
+    mPrevMouseY = event->y();
+}
+
+void SceneWidget::focusOutEvent (QFocusEvent *event)
+{
+    mCurrentCamControl->resetInput();
+}
+
+void SceneWidget::wheelEvent(QWheelEvent *event)
+{
+    mCurrentCamControl->handleMouseMoveEvent("t-navi", event->delta(), 0);
+}
+
+void SceneWidget::keyPressEvent (QKeyEvent *event)
+{
+    mCurrentCamControl->handleKeyEvent(event, true);
+}
+
+void SceneWidget::keyReleaseEvent (QKeyEvent *event)
+{
+    mCurrentCamControl->handleKeyEvent(event, false);
+}
+
+void SceneWidget::update(double dt)
+{
+    if (mCamPositionSet)
     {
-        CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent, "Lighting Mode");
-
-        /// \todo replace icons
-        tool->addButton (":scenetoolbar/day", "day",
-            "Day"
-            "<ul><li>Cell specific ambient in interiors</li>"
-            "<li>Low ambient in exteriors</li>"
-            "<li>Strong directional light source/lir>"
-            "<li>This mode closely resembles day time in-game</li></ul>");
-        tool->addButton (":scenetoolbar/night", "night",
-            "Night"
-            "<ul><li>Cell specific ambient in interiors</li>"
-            "<li>Low ambient in exteriors</li>"
-            "<li>Weak directional light source</li>"
-            "<li>This mode closely resembles night time in-game</li></ul>");
-        tool->addButton (":scenetoolbar/bright", "bright",
-            "Bright"
-            "<ul><li>Maximum ambient</li>"
-            "<li>Strong directional light source</li></ul>");
-
-        connect (tool, SIGNAL (modeChanged (const std::string&)),
-            this, SLOT (selectLightingMode (const std::string&)));
-
-        return tool;
+        mCurrentCamControl->update(dt);
     }
-
-    void SceneWidget::setDefaultAmbient (const Ogre::ColourValue& colour)
+    else
     {
-        mDefaultAmbient = colour;
-        mHasDefaultAmbient = true;
-
-        if (mLighting)
-            mLighting->setDefaultAmbient (colour);
+        mCurrentCamControl->setup(mRootNode, Mask_Reference | Mask_Terrain, CameraController::WorldUp);
+        mCamPositionSet = true;
     }
+}
 
-    void SceneWidget::updateOgreWindow()
+void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
+{
+    if (*setting=="3D Scene Input/p-navi-free-sensitivity")
     {
-        if (mWindow)
+        mFreeCamControl->setCameraSensitivity(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/p-navi-orbit-sensitivity")
+    {
+        mOrbitCamControl->setCameraSensitivity(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/p-navi-free-invert")
+    {
+        mFreeCamControl->setInverted(setting->isTrue());
+    }
+    else if (*setting=="3D Scene Input/p-navi-orbit-invert")
+    {
+        mOrbitCamControl->setInverted(setting->isTrue());
+    }
+    else if (*setting=="3D Scene Input/s-navi-sensitivity")
+    {
+        mFreeCamControl->setSecondaryMovementMultiplier(setting->toDouble());
+        mOrbitCamControl->setSecondaryMovementMultiplier(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-wheel-factor")
+    {
+        mFreeCamControl->setWheelMovementMultiplier(setting->toDouble());
+        mOrbitCamControl->setWheelMovementMultiplier(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-free-lin-speed")
+    {
+        mFreeCamControl->setLinearSpeed(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-free-rot-speed")
+    {
+        mFreeCamControl->setRotationalSpeed(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-free-speed-mult")
+    {
+        mFreeCamControl->setSpeedMultiplier(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-orbit-rot-speed")
+    {
+        mOrbitCamControl->setOrbitSpeed(setting->toDouble());
+    }
+    else if (*setting=="3D Scene Input/navi-orbit-speed-mult")
+    {
+        mOrbitCamControl->setOrbitSpeedMultiplier(setting->toDouble());
+    }
+    else
+    {
+        storeMappingSetting(setting);
+    }
+}
+
+void SceneWidget::selectNavigationMode (const std::string& mode)
+{
+    if (mode=="1st")
+    {
+        mCurrentCamControl->setCamera(NULL);
+        mCurrentCamControl = mFreeCamControl.get();
+        mCurrentCamControl->setCamera(getCamera());
+        mFreeCamControl->fixUpAxis(CameraController::WorldUp);
+    }
+    else if (mode=="free")
+    {
+        mCurrentCamControl->setCamera(NULL);
+        mCurrentCamControl = mFreeCamControl.get();
+        mCurrentCamControl->setCamera(getCamera());
+        mFreeCamControl->unfixUpAxis();
+    }
+    else if (mode=="orbit")
+    {
+        mCurrentCamControl->setCamera(NULL);
+        mCurrentCamControl = mOrbitCamControl.get();
+        mCurrentCamControl->setCamera(getCamera());
+    }
+}
+
+bool SceneWidget::storeMappingSetting (const CSMPrefs::Setting *setting)
+{
+    if (setting->getParent()->getKey()!="3D Scene Input")
+        return false;
+
+    static const char * const sMappingSettings[] =
+    {
+        "p-navi", "s-navi",
+        0
+    };
+
+    for (int i=0; sMappingSettings[i]; ++i)
+        if (setting->getKey()==sMappingSettings[i])
         {
-            Ogre::Root::getSingleton().destroyRenderTarget(mWindow);
-            mWindow = NULL;
-        }
+            QString value = QString::fromUtf8 (setting->toString().c_str());
 
-        std::stringstream windowHandle;
-#ifdef WIN32
-        windowHandle << Ogre::StringConverter::toString((uintptr_t)(this->winId()));
-#else
-        windowHandle << this->winId();
-#endif
-        std::stringstream windowTitle;
-        static int count=0;
-        windowTitle << ++count;
+            Qt::MouseButton button = Qt::NoButton;
 
-        Ogre::NameValuePairList params;
-
-        params.insert(std::make_pair("externalWindowHandle",  windowHandle.str()));
-        params.insert(std::make_pair("title", windowTitle.str()));
-
-        std::string antialiasing =
-            CSMSettings::UserSettings::instance().settingValue("3d-render/antialiasing").toStdString();
-        if(antialiasing == "MSAA 16")     antialiasing = "16";
-        else if(antialiasing == "MSAA 8") antialiasing = "8";
-        else if(antialiasing == "MSAA 4") antialiasing = "4";
-        else if(antialiasing == "MSAA 2") antialiasing = "2";
-        else                              antialiasing = "0";
-        params.insert(std::make_pair("FSAA", antialiasing));
-
-        params.insert(std::make_pair("vsync", "false")); // TODO setting
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        params.insert(std::make_pair("macAPI", "cocoa"));
-        params.insert(std::make_pair("macAPICocoaUseNSView", "true"));
-#endif
-
-        mWindow = Ogre::Root::getSingleton().createRenderWindow(windowTitle.str(), this->width(), this->height(), false, &params);
-
-        mViewport = mWindow->addViewport (mCamera);
-        mViewport->setBackgroundColour (Ogre::ColourValue (0.3,0.3,0.3,1));
-
-        Ogre::Real aspectRatio = Ogre::Real(width()) / Ogre::Real(height());
-        mCamera->setAspectRatio(aspectRatio);
-    }
-
-    SceneWidget::~SceneWidget()
-    {
-        if (mWindow)
-            Ogre::Root::getSingleton().destroyRenderTarget (mWindow);
-
-        if (mSceneMgr)
-            mSceneMgr->removeRenderQueueListener (mOverlaySystem);
-
-        if (mSceneMgr)
-            Ogre::Root::getSingleton().destroySceneManager (mSceneMgr);
-
-    }
-
-    void SceneWidget::setVisibilityMask (unsigned int mask)
-    {
-        mViewport->setVisibilityMask (mask);
-    }
-
-    void SceneWidget::setNavigation (Navigation *navigation)
-    {
-        if ((mNavigation = navigation))
-        {
-            mNavigation->setFastModeFactor (mFast ? mFastFactor : 1);
-            if (mNavigation->activate (mCamera))
-                mUpdate = true;
-        }
-    }
-
-    void SceneWidget::addRenderTargetListener(Ogre::RenderTargetListener *listener)
-    {
-        mWindow->addListener(listener);
-    }
-
-    void SceneWidget::removeRenderTargetListener(Ogre::RenderTargetListener *listener)
-    {
-        mWindow->removeListener(listener);
-    }
-
-    Ogre::Viewport *SceneWidget::getViewport()
-    {
-        if (!mWindow)
-            updateOgreWindow();
-
-        return mViewport;
-    }
-
-    Ogre::SceneManager *SceneWidget::getSceneManager()
-    {
-        return mSceneMgr;
-    }
-
-    Ogre::Camera *SceneWidget::getCamera()
-    {
-        return mCamera;
-    }
-
-    void SceneWidget::flagAsModified()
-    {
-        mUpdate = true;
-    }
-
-    void SceneWidget::paintEvent(QPaintEvent* e)
-    {
-        if (!mWindow)
-            updateOgreWindow();
-
-        mWindow->update();
-        e->accept();
-    }
-
-    QPaintEngine* SceneWidget::paintEngine() const
-    {
-        // We don't want another paint engine to get in the way.
-        // So we return nothing.
-        return NULL;
-    }
-
-    void SceneWidget::resizeEvent(QResizeEvent *e)
-    {
-        if (!mWindow)
-            return;
-
-        const QSize &newSize = e->size();
-
-        // TODO: Fix Ogre to handle this more consistently (fixed in 1.9)
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
-        mWindow->resize(newSize.width(), newSize.height());
-#else
-        mWindow->windowMovedOrResized();
-#endif
-
-        Ogre::Real aspectRatio = Ogre::Real(newSize.width()) / Ogre::Real(newSize.height());
-        mCamera->setAspectRatio(aspectRatio);
-    }
-
-    bool SceneWidget::event(QEvent *e)
-    {
-        if (e->type() == QEvent::WinIdChange)
-        {
-            // I haven't actually seen this happen yet.
-            if (mWindow)
-                updateOgreWindow();
-        }
-        return QWidget::event(e);
-    }
-
-    void SceneWidget::keyPressEvent (QKeyEvent *event)
-    {
-        switch (event->key())
-        {
-            case Qt::Key_W: mKeyForward = true; break;
-            case Qt::Key_S: mKeyBackward = true; break;
-            case Qt::Key_A: mKeyLeft = true; break;
-            case Qt::Key_D: mKeyRight = true; break;
-            case Qt::Key_Q: mKeyRollLeft = true; break;
-            case Qt::Key_E: mKeyRollRight = true; break;
-            case Qt::Key_Control: mMod1 = true; break;
-
-            case Qt::Key_Shift:
-
-                mFast = true;
-
-                if (mNavigation)
-                    mNavigation->setFastModeFactor (mFastFactor);
-
-                break;
-
-            default: QWidget::keyPressEvent (event);
-        }
-    }
-
-    void SceneWidget::keyReleaseEvent (QKeyEvent *event)
-    {
-        switch (event->key())
-        {
-            case Qt::Key_W: mKeyForward = false; break;
-            case Qt::Key_S: mKeyBackward = false; break;
-            case Qt::Key_A: mKeyLeft = false; break;
-            case Qt::Key_D: mKeyRight = false; break;
-            case Qt::Key_Q: mKeyRollLeft = false; break;
-            case Qt::Key_E: mKeyRollRight = false; break;
-            case Qt::Key_Control: mMod1 = false; break;
-
-            case Qt::Key_Shift:
-
-                mFast = false;
-
-                if (mNavigation)
-                    mNavigation->setFastModeFactor (1);
-
-                break;
-
-            default: QWidget::keyReleaseEvent (event);
-        }
-    }
-
-    void SceneWidget::wheelEvent (QWheelEvent *event)
-    {
-        if (mNavigation)
-            if (event->delta())
-                if (mNavigation->wheelMoved (event->delta()))
-                    mUpdate = true;
-    }
-
-    void SceneWidget::leaveEvent (QEvent *event)
-    {
-        mDragging = false;
-    }
-
-    void SceneWidget::mouseMoveEvent (QMouseEvent *event)
-    {
-        if (event->buttons() & Qt::LeftButton)
-        {
-            if (mDragging)
-            {
-                QPoint diff = mOldPos-event->pos();
-                mOldPos = event->pos();
-
-                if (mNavigation)
-                    if (mNavigation->mouseMoved (diff, mMod1 ? 1 : 0))
-                        mUpdate = true;
-            }
+            if (value.endsWith ("Left Mouse-Button"))
+                button = Qt::LeftButton;
+            else if (value.endsWith ("Right Mouse-Button"))
+                button = Qt::RightButton;
+            else if (value.endsWith ("Middle Mouse-Button"))
+                button = Qt::MiddleButton;
             else
-            {
-                mDragging = true;
-                mOldPos = event->pos();
-            }
-        }
-    }
+                return false;
 
-    void SceneWidget::mouseReleaseEvent (QMouseEvent *event)
-    {
-        if (!(event->buttons() & Qt::LeftButton))
-            mDragging = false;
-    }
+            bool ctrl = value.startsWith ("Ctrl-");
 
-    void SceneWidget::focusOutEvent (QFocusEvent *event)
-    {
-        mKeyForward = false;
-        mKeyBackward = false;
-        mKeyLeft = false;
-        mKeyRight = false;
-        mFast = false;
-        mMod1 = false;
-
-        QWidget::focusOutEvent (event);
-    }
-
-    void SceneWidget::update()
-    {
-        if (mNavigation)
-        {
-            int horizontal = 0;
-            int vertical = 0;
-
-            if (mKeyForward && !mKeyBackward)
-                vertical = 1;
-            else if (!mKeyForward && mKeyBackward)
-                vertical = -1;
-
-            if (mKeyLeft && !mKeyRight)
-                horizontal = -1;
-            else if (!mKeyLeft && mKeyRight)
-                horizontal = 1;
-
-            if (horizontal || vertical)
-                if (mNavigation->handleMovementKeys (vertical, horizontal))
-                    mUpdate = true;
-
-            int roll = 0;
-
-            if (mKeyRollLeft && !mKeyRollRight)
-                roll = 1;
-            else if (!mKeyRollLeft && mKeyRollRight)
-                roll = -1;
-
-            if (roll)
-                if (mNavigation->handleRollKeys (roll))
-                    mUpdate = true;
-
+            mButtonMapping[std::make_pair (button, ctrl)] = sMappingSettings[i];
+            return true;
         }
 
-        if (mUpdate && mWindow)
-        {
-            mUpdate = false;
-            mWindow->update();
-            updateOverlay();
-        }
-    }
+    return false;
+}
 
-    void SceneWidget::updateScene()
-    {
-        flagAsModified();
-    }
+std::string SceneWidget::mapButton (QMouseEvent *event)
+{
+    std::pair<Qt::MouseButton, bool> phyiscal (
+        event->button(), event->modifiers() & Qt::ControlModifier);
 
-    void SceneWidget::updateOverlay()
-    { }
+    std::map<std::pair<Qt::MouseButton, bool>, std::string>::const_iterator iter =
+        mButtonMapping.find (phyiscal);
 
-    void SceneWidget::setLighting (Lighting *lighting)
-    {
-        if (mLighting)
-            mLighting->deactivate();
+    if (iter!=mButtonMapping.end())
+        return iter->second;
 
-        mLighting = lighting;
-        mLighting->activate (mSceneMgr, mHasDefaultAmbient ? &mDefaultAmbient : 0);
+    return "";
+}
 
-        if (mWindow)
-            mWindow->update();
-    }
-
-    void SceneWidget::selectLightingMode (const std::string& mode)
-    {
-        if (mode=="day")
-            setLighting (&mLightingDay);
-        else if (mode=="night")
-            setLighting (&mLightingNight);
-        else if (mode=="bright")
-            setLighting (&mLightingBright);
-    }
-
-    void SceneWidget::updateUserSetting (const QString &key, const QStringList &list)
-    {
-        if(key.contains(QRegExp("^\\b(Objects|Shader|Scene)", Qt::CaseInsensitive)))
-            flagAsModified();
-
-        if(key == "3d-render/far-clip-distance" && !list.empty())
-        {
-            if(mCamera->getFarClipDistance() != list.at(0).toFloat())
-                mCamera->setFarClipDistance(list.at(0).toFloat());
-        }
-
-        // minimise unnecessary ogre window creation by updating only when there is a change
-        if(key == "3d-render/antialiasing")
-        {
-            unsigned int aa = mWindow->getFSAA();
-            unsigned int antialiasing = 0;
-            if(!list.empty())
-            {
-                if(list.at(0) == "MSAA 16")     antialiasing = 16;
-                else if(list.at(0) == "MSAA 8") antialiasing = 8;
-                else if(list.at(0) == "MSAA 4") antialiasing = 4;
-                else if(list.at(0) == "MSAA 2") antialiasing = 2;
-            }
-            if(aa != antialiasing)
-                updateOgreWindow();
-        }
-    }
 }

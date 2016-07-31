@@ -57,8 +57,8 @@ struct FixedPath
         , mGlobalConfigPath(mPath.getGlobalConfigPath())
         , mLocalPath(mPath.getLocalPath())
         , mGlobalDataPath(mPath.getGlobalDataPath())
-        , mInstallPath(mPath.getInstallPath())
         , mCachePath(mPath.getCachePath())
+        , mInstallPath(mPath.getInstallPath())
     {
     }
 

@@ -21,6 +21,8 @@ class ESMWriter;
 struct DialInfo
 {
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "DialInfo"; }
 
     enum Gender
     {
@@ -32,7 +34,11 @@ struct DialInfo
     struct DATAstruct
     {
         int mUnknown1;
-        int mDisposition;
+        union
+        {
+            int mDisposition; // Used for dialogue responses
+            int mJournalIndex;  // Used for journal entries
+        };
         signed char mRank; // Rank of NPC
         signed char mGender; // See Gender enum
         signed char mPCrank; // Player rank
@@ -53,8 +59,7 @@ struct DialInfo
         QS_None = 0,
         QS_Name = 1,
         QS_Finished = 2,
-        QS_Restart = 3,
-        QS_Deleted
+        QS_Restart = 3
     };
 
     // Rules for when to include this item in the final list of options
@@ -100,8 +105,10 @@ struct DialInfo
         REC_DELE = 0x454c4544
     };
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    ///< Loads Info record
+
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

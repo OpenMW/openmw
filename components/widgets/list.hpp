@@ -1,5 +1,5 @@
-#ifndef MWGUI_LIST_HPP
-#define MWGUI_LIST_HPP
+#ifndef OPENMW_COMPONENTS_WIDGETS_LIST_HPP
+#define OPENMW_COMPONENTS_WIDGETS_LIST_HPP
 
 #include <MyGUI_ScrollView.h>
 
@@ -43,8 +43,10 @@ namespace Gui
         std::string getItemNameAt(unsigned int at); ///< \attention if there are separators, this method will return "" at the place where the separator is
         void clear();
 
-        MyGUI::Widget* getItemWidget(const std::string& name);
+        MyGUI::Button* getItemWidget(const std::string& name);
         ///< get widget for an item name, useful to set up tooltip
+
+        void scrollToTop();
 
         virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
 
@@ -53,7 +55,7 @@ namespace Gui
 
         void redraw(bool scrollbarShown = false);
 
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onMouseWheelMoved(MyGUI::Widget* _sender, int _rel);
         void onItemSelected(MyGUI::Widget* _sender);
 
     private:

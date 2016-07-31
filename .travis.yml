@@ -1,11 +1,38 @@
 os:
  - linux
  - osx
+osx_image: xcode7.2
 language: cpp
+sudo: required
+dist: trusty
 branches:
   only:
     - master
+    - coverity_scan
     - /openmw-.*$/
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "jybGzAdUbqt9vWR/GEnRd96BgAi/7Zd1+2HK68j/i/8+/1YH2XxLOy4Jv/DUBhBlJIkxs/Xv8dRcUlFOclZDHX1d/9Qnsqd3oUVkD7k1y7cTOWy9TBQaE/v/kZo3LpzA3xPwwthrb0BvqIbOfIELi5fS5s8ba85WFRg3AX70wWE="
+addons:
+  coverity_scan:
+    project:
+      name: "OpenMW/openmw"
+      description: "<Your project description here>"
+    notification_email: scrawl@baseoftrash.de
+    build_command_prepend: "cmake . -DBUILD_UNITTESTS=FALSE"
+    build_command:   "make -j2"
+    branch_pattern: coverity_scan
+matrix:
+  include:
+    - os: linux
+      env:
+        ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
+      compiler: clang
+  allow_failures:
+    - env: ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
+
 before_install:
  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./CI/before_install.linux.sh; fi
  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then ./CI/before_install.osx.sh; fi
@@ -14,9 +41,10 @@ before_script:
  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then ./CI/before_script.osx.sh; fi
 script:
  - cd ./build
- - make -j4
-after_script:
- - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./openmw_test_suite; fi
+ - if [ "$COVERITY_SCAN_BRANCH" != 1 ]; then ${ANALYZE}make -j3; fi
+ - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then make package; fi
+ - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./openmw_test_suite; fi
+ - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then cd .. && ./CI/check_tabs.sh; fi
 notifications:
   recipients:
     - corrmage+travis-ci@gmail.com

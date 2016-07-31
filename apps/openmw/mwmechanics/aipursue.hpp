@@ -31,12 +31,15 @@ namespace MWMechanics
             AiPursue(const ESM::AiSequence::AiPursue* pursue);
 
             virtual AiPursue *clone() const;
-            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
             virtual int getTypeId() const;
 
             MWWorld::Ptr getTarget() const;
 
             virtual void writeState (ESM::AiSequence::AiSequence& sequence) const;
+
+            virtual bool canCancel() const { return false; }
+            virtual bool shouldCancelPreviousAi() const { return false; }
 
         private:
 

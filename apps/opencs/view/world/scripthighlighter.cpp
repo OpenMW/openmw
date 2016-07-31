@@ -1,10 +1,12 @@
-
 #include "scripthighlighter.hpp"
 
 #include <sstream>
 
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/extensions0.hpp>
+
+#include "../../model/prefs/setting.hpp"
+#include "../../model/prefs/category.hpp"
 
 bool CSVWorld::ScriptHighlighter::parseInt (int value, const Compiler::TokenLoc& loc,
     Compiler::Scanner& scanner)
@@ -78,48 +80,12 @@ CSVWorld::ScriptHighlighter::ScriptHighlighter (const CSMWorld::Data& data, Mode
 : QSyntaxHighlighter (parent), Compiler::Parser (mErrorHandler, mContext), mContext (data),
   mMode (mode)
 {
-    /// \todo replace this with user settings
-    {
-        QTextCharFormat format;
-        format.setForeground (Qt::darkMagenta);
-        mScheme.insert (std::make_pair (Type_Int, format));
-    }
+    QColor color ("black");
+    QTextCharFormat format;
+    format.setForeground (color);
 
-    {
-        QTextCharFormat format;
-        format.setForeground (Qt::magenta);
-        mScheme.insert (std::make_pair (Type_Float, format));
-    }
-
-    {
-        QTextCharFormat format;
-        format.setForeground (Qt::gray);
-        mScheme.insert (std::make_pair (Type_Name, format));
-    }
-
-    {
-        QTextCharFormat format;
-        format.setForeground (Qt::red);
-        mScheme.insert (std::make_pair (Type_Keyword, format));
-    }
-
-    {
-        QTextCharFormat format;
-        format.setForeground (Qt::darkYellow);
-        mScheme.insert (std::make_pair (Type_Special, format));
-    }
-
-    {
-        QTextCharFormat format;
-        format.setForeground (Qt::green);
-        mScheme.insert (std::make_pair (Type_Comment, format));
-    }
-
-    {
-        QTextCharFormat format;
-        format.setForeground (Qt::blue);
-        mScheme.insert (std::make_pair (Type_Id, format));
-    }
+    for (int i=0; i<=Type_Id; ++i)
+        mScheme.insert (std::make_pair (static_cast<Type> (i), format));
 
     // configure compiler
     Compiler::registerExtensions (mExtensions);
@@ -142,4 +108,28 @@ void CSVWorld::ScriptHighlighter::highlightBlock (const QString& text)
 void CSVWorld::ScriptHighlighter::invalidateIds()
 {
     mContext.invalidateIds();
+}
+
+bool CSVWorld::ScriptHighlighter::settingChanged (const CSMPrefs::Setting *setting)
+{
+    if (setting->getParent()->getKey()=="Scripts")
+    {
+        static const char *const colours[Type_Id+2] =
+        {
+            "colour-int", "colour-float", "colour-name", "colour-keyword",
+            "colour-special", "colour-comment", "colour-id",
+            0
+        };
+
+        for (int i=0; colours[i]; ++i)
+            if (setting->getKey()==colours[i])
+            {
+                QTextCharFormat format;
+                format.setForeground (setting->toColor());
+                mScheme[static_cast<Type> (i)] = format;
+                return true;
+            }
+    }
+
+    return false;
 }

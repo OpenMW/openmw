@@ -8,6 +8,7 @@
 #include "esmcommon.hpp"
 #include "defs.hpp"
 #include "cellref.hpp"
+#include "cellid.hpp"
 
 namespace MWWorld
 {
@@ -18,7 +19,6 @@ namespace ESM
 {
 class ESMReader;
 class ESMWriter;
-    class CellId;
 
 /* Moved cell reference tracking object. This mainly stores the target cell
         of the reference, so we can easily know where it has been moved when another
@@ -30,12 +30,12 @@ class MovedCellRef
 public:
     RefNum mRefNum;
 
-    // Target cell (if exterior)
+    // Coordinates of target exterior cell
     int mTarget[2];
 
-    // TODO: Support moving references between exterior and interior cells!
-    //  This may happen in saves, when an NPC follows the player. Tribunal
-    //  introduces a henchman (which no one uses), so we may need this as well.
+    // The content file format does not support moving objects to an interior cell.
+    // The save game format does support moving to interior cells, but uses a different mechanism
+    // (see the MovedRefTracker implementation in MWWorld::CellStore for more details).
 };
 
 /// Overloaded compare operator used to search inside a list of cell refs.
@@ -43,7 +43,15 @@ bool operator==(const MovedCellRef& ref, const RefNum& refNum);
 bool operator==(const CellRef& ref, const RefNum& refNum);
 
 typedef std::list<MovedCellRef> MovedCellRefTracker;
-typedef std::list<CellRef> CellRefTracker;
+typedef std::list<std::pair<CellRef, bool> > CellRefTracker;
+
+struct CellRefTrackerPredicate
+{
+    RefNum mRefNum;
+
+    CellRefTrackerPredicate(const RefNum& refNum) : mRefNum(refNum) {}
+    bool operator() (const std::pair<CellRef, bool>& refdelPair) { return refdelPair.first == mRefNum; }
+};
 
 /* Cells hold data about objects, creatures, statics (rocks, walls,
    buildings) and landscape (for exterior cells). Cells frequently
@@ -56,6 +64,8 @@ typedef std::list<CellRef> CellRefTracker;
 struct Cell
 {
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "Cell"; }
 
   enum Flags
     {
@@ -78,7 +88,13 @@ struct Cell
     float mFogDensity;
   };
 
-  Cell() : mWater(0) {}
+  Cell() : mName(""),
+           mRegion(""),
+           mWater(0),
+           mWaterInt(false),
+           mMapColor(0),
+           mRefNumCounter(0)
+  {}
 
   // Interior cells are indexed by this (it's the 'id'), for exterior
   // cells it is optional.
@@ -89,6 +105,8 @@ struct Cell
 
   std::vector<ESM_Context> mContextList; // File position; multiple positions for multiple plugin support
   DATAstruct mData;
+  CellId mCellId;
+
   AMBIstruct mAmbi;
 
   float mWater; // Water level
@@ -108,11 +126,11 @@ struct Cell
 
   // This method is left in for compatibility with esmtool. Parsing moved references currently requires
   //  passing ESMStore, bit it does not know about this parameter, so we do it this way.
-  void load(ESMReader &esm, bool saveContext = true); // Load everything (except references)
-  void loadData(ESMReader &esm); // Load DATAstruct only
-  void loadCell(ESMReader &esm, bool saveContext = true); // Load everything, except DATAstruct and references
+  void load(ESMReader &esm, bool &isDeleted, bool saveContext = true); // Load everything (except references)
+  void loadNameAndData(ESMReader &esm, bool &isDeleted); // Load NAME and DATAstruct
+  void loadCell(ESMReader &esm, bool saveContext = true); // Load everything, except NAME, DATAstruct and references
 
-  void save(ESMWriter &esm) const;
+  void save(ESMWriter &esm, bool isDeleted = false) const;
 
   bool isExterior() const
   {
@@ -131,7 +149,7 @@ struct Cell
 
   bool hasWater() const
   {
-      return (mData.mFlags&HasWater);
+      return ((mData.mFlags&HasWater) != 0) || isExterior();
   }
 
   // Restore the given reader to the stored position. Will try to open
@@ -150,7 +168,12 @@ struct Cell
      All fields of the CellRef struct are overwritten. You can safely
      reuse one memory location without blanking it between calls.
   */
-  static bool getNextRef(ESMReader &esm, CellRef &ref, bool& deleted);
+  /// \param ignoreMoves ignore MVRF record and read reference like a regular CellRef.
+  static bool getNextRef(ESMReader &esm, 
+                         CellRef &ref, 
+                         bool &isDeleted, 
+                         bool ignoreMoves = false, 
+                         MovedCellRef *mref = 0);
 
   /* This fetches an MVRF record, which is used to track moved references.
    * Since they are comparably rare, we use a separate method for this.
@@ -160,7 +183,7 @@ struct Cell
     void blank();
     ///< Set record to default state (does not touch the ID/index).
 
-    CellId getCellId() const;
+    const CellId& getCellId() const;
 };
 }
 #endif

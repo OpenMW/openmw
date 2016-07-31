@@ -16,10 +16,7 @@ namespace MWGui
 
             virtual void exit();
 
-            void open(MWWorld::Ptr book);
-            void setTakeButtonShow(bool show);
-            void nextPage();
-            void prevPage();
+            void openBook(MWWorld::Ptr book, bool showTakeButton);
             void setInventoryAllowed(bool allowed);
 
         protected:
@@ -28,6 +25,10 @@ namespace MWGui
             void onCloseButtonClicked (MyGUI::Widget* sender);
             void onTakeButtonClicked (MyGUI::Widget* sender);
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+            void setTakeButtonShow(bool show);
+
+            void nextPage();
+            void prevPage();
 
             void updatePages();
             void clearPages();

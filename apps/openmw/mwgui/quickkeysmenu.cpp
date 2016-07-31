@@ -1,9 +1,12 @@
 #include "quickkeysmenu.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_Button.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_ImageBox.h>
 
+#include <components/esm/esmwriter.hpp>
 #include <components/esm/quickkeys.hpp>
-#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
@@ -12,20 +15,14 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
-#include "../mwgui/inventorywindow.hpp"
-#include "../mwgui/bookwindow.hpp"
-#include "../mwgui/scrollwindow.hpp"
-
-#include "windowmanagerimp.hpp"
 #include "itemselection.hpp"
-
 #include "spellview.hpp"
-
-
 #include "itemwidget.hpp"
 #include "sortfilteritemmodel.hpp"
 
@@ -53,7 +50,7 @@ namespace MWGui
         for (int i = 0; i < 10; ++i)
         {
             ItemWidget* button;
-            getWidget(button, "QuickKey" + boost::lexical_cast<std::string>(i+1));
+            getWidget(button, "QuickKey" + MyGUI::utility::toString(i+1));
 
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &QuickKeysMenu::onQuickKeyButtonClicked);
 
@@ -92,12 +89,24 @@ namespace MWGui
         while (key->getChildCount()) // Destroy number label
             MyGUI::Gui::getInstance().destroyWidget(key->getChildAt(0));
 
-        mAssigned[index] = Type_Unassigned;
+        if (index == 9)
+        {
+            mAssigned[index] = Type_HandToHand;
 
-        MyGUI::TextBox* textBox = key->createWidgetReal<MyGUI::TextBox>("SandText", MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Default);
-        textBox->setTextAlign (MyGUI::Align::Center);
-        textBox->setCaption (boost::lexical_cast<std::string>(index+1));
-        textBox->setNeedMouseFocus (false);
+            MyGUI::ImageBox* image = key->createWidget<MyGUI::ImageBox>("ImageBox",
+                MyGUI::IntCoord(14, 13, 32, 32), MyGUI::Align::Default);
+            image->setImageTexture("icons\\k\\stealth_handtohand.dds");
+            image->setNeedMouseFocus(false);
+        }
+        else
+        {
+            mAssigned[index] = Type_Unassigned;
+
+            MyGUI::TextBox* textBox = key->createWidgetReal<MyGUI::TextBox>("SandText", MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Default);
+            textBox->setTextAlign (MyGUI::Align::Center);
+            textBox->setCaption (MyGUI::utility::toString(index+1));
+            textBox->setNeedMouseFocus (false);
+        }
     }
 
     void QuickKeysMenu::onQuickKeyButtonClicked(MyGUI::Widget* sender)
@@ -137,7 +146,7 @@ namespace MWGui
             mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &QuickKeysMenu::onAssignItemCancel);
         }
         mItemSelectionDialog->setVisible(true);
-        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
+        mItemSelectionDialog->openContainer(MWMechanics::getPlayer());
         mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyUsableItems);
 
         mAssignDialog->setVisible (false);
@@ -231,7 +240,7 @@ namespace MWGui
         std::string path = effect->mIcon;
         int slashPos = path.rfind('\\');
         path.insert(slashPos+1, "b_");
-        path = Misc::ResourceHelpers::correctIconPath(path);
+        path = MWBase::Environment::get().getWindowManager()->correctIconPath(path);
 
         button->setFrame("textures\\menu_icon_select_magic.dds", MyGUI::IntCoord(2, 2, 40, 40));
         button->setIcon(path);
@@ -252,7 +261,7 @@ namespace MWGui
 
         QuickKeyType type = mAssigned[index-1];
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
 
         if (type == Type_Item || type == Type_MagicItem)
@@ -300,7 +309,7 @@ namespace MWGui
         else if (type == Type_Item)
         {
             MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
-            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
+            MWBase::Environment::get().getWindowManager()->useItem(item);
             MWWorld::ContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             // change draw state only if the item is in player's right hand
             if (rightHand != store.end() && item == *rightHand)
@@ -326,7 +335,7 @@ namespace MWGui
             // equip, if it can be equipped
             if (!item.getClass().getEquipmentSlots(item).first.empty())
             {
-                MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
+                MWBase::Environment::get().getWindowManager()->useItem(item);
 
                 // make sure that item was successfully equipped
                 if (!store.isEquipped(item))
@@ -335,6 +344,11 @@ namespace MWGui
 
             store.setSelectedEnchantItem(it);
             MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Spell);
+        }
+        else if (type == Type_HandToHand)
+        {
+            store.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, player);
+            MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
         }
     }
 
@@ -407,6 +421,7 @@ namespace MWGui
             switch (type)
             {
                 case Type_Unassigned:
+                case Type_HandToHand:
                     break;
                 case Type_Item:
                 case Type_MagicItem:
@@ -429,7 +444,7 @@ namespace MWGui
         writer.endRecord(ESM::REC_KEYS);
     }
 
-    void QuickKeysMenu::readRecord(ESM::ESMReader &reader, int32_t type)
+    void QuickKeysMenu::readRecord(ESM::ESMReader &reader, uint32_t type)
     {
         if (type != ESM::REC_KEYS)
             return;
@@ -451,13 +466,14 @@ namespace MWGui
             switch (keyType)
             {
             case Type_Magic:
-                onAssignMagic(id);
+                if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(id))
+                    onAssignMagic(id);
                 break;
             case Type_Item:
             case Type_MagicItem:
             {
                 // Find the item by id
-                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                MWWorld::Ptr player = MWMechanics::getPlayer();
                 MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
                 MWWorld::Ptr item;
                 for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
@@ -487,6 +503,7 @@ namespace MWGui
                 break;
             }
             case Type_Unassigned:
+            case Type_HandToHand:
                 unassign(button, i);
                 break;
             }
@@ -526,8 +543,8 @@ namespace MWGui
     {
         WindowModal::open();
 
-        mMagicList->setModel(new SpellModel(MWBase::Environment::get().getWorld()->getPlayerPtr()));
-        mMagicList->update();
+        mMagicList->setModel(new SpellModel(MWMechanics::getPlayer()));
+        mMagicList->resetScrollbars();
     }
 
     void MagicSelectionDialog::onModelIndexSelected(SpellModel::ModelIndex index)

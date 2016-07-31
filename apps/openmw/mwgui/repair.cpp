@@ -2,11 +2,14 @@
 
 #include <iomanip>
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_Gui.h>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
@@ -35,6 +38,8 @@ Repair::Repair()
 void Repair::open()
 {
     center();
+    // Reset scrollbars
+    mRepairView->setViewOffset(MyGUI::IntPoint(0, 0));
 }
 
 void Repair::exit()
@@ -65,7 +70,7 @@ void Repair::updateRepairView()
     std::stringstream qualityStr;
     qualityStr << std::setprecision(3) << quality;
 
-    mUsesLabel->setCaptionWithReplacing("#{sUses} " + boost::lexical_cast<std::string>(uses));
+    mUsesLabel->setCaptionWithReplacing("#{sUses} " + MyGUI::utility::toString(uses));
     mQualityLabel->setCaptionWithReplacing("#{sQuality} " + qualityStr.str());
 
     bool toolBoxVisible = (mRepair.getTool().getRefData().getCount() != 0);
@@ -91,7 +96,7 @@ void Repair::updateRepairView()
 
     int currentY = 0;
 
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr player = MWMechanics::getPlayer();
     MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
     int categories = MWWorld::ContainerStore::Type_Weapon | MWWorld::ContainerStore::Type_Armor;
     for (MWWorld::ContainerStoreIterator iter (store.begin(categories));
@@ -149,10 +154,10 @@ void Repair::onRepairItem(MyGUI::Widget *sender)
 
 void Repair::onMouseWheel(MyGUI::Widget* _sender, int _rel)
 {
-    if (mRepairView->getViewOffset().top + _rel*0.3 > 0)
+    if (mRepairView->getViewOffset().top + _rel*0.3f > 0)
         mRepairView->setViewOffset(MyGUI::IntPoint(0, 0));
     else
-        mRepairView->setViewOffset(MyGUI::IntPoint(0, mRepairView->getViewOffset().top + _rel*0.3));
+        mRepairView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mRepairView->getViewOffset().top + _rel*0.3f)));
 }
 
 }

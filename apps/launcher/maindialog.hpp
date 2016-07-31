@@ -13,7 +13,7 @@
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
 
-#include "settings/graphicssettings.hpp"
+#include <components/settings/settings.hpp>
 
 #include "ui_mainwindow.h"
 
@@ -31,6 +31,13 @@ namespace Launcher
     class UnshieldThread;
     class SettingsPage;
 
+    enum FirstRunDialogResult
+    {
+        FirstRunDialogResultFailure,
+        FirstRunDialogResultContinue,
+        FirstRunDialogResultWizard
+    };
+
 #ifndef WIN32
     bool expansions(Launcher::UnshieldThread& cd);
 #endif
@@ -43,8 +50,7 @@ namespace Launcher
         explicit MainDialog(QWidget *parent = 0);
         ~MainDialog();
 
-        bool setup();
-        bool showFirstRunDialog();
+        FirstRunDialogResult showFirstRunDialog();
 
         bool reloadSettings();
         bool writeSettings();
@@ -58,12 +64,16 @@ namespace Launcher
         void wizardFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
     private:
+        bool setup();
+
         void createIcons();
         void createPages();
 
         bool setupLauncherSettings();
         bool setupGameSettings();
         bool setupGraphicsSettings();
+
+        void setVersionLabel();
 
         void loadSettings();
         void saveSettings();
@@ -84,7 +94,7 @@ namespace Launcher
         Files::ConfigurationManager mCfgMgr;
 
         Config::GameSettings mGameSettings;
-        GraphicsSettings mGraphicsSettings;
+        Settings::Manager mEngineSettings;
         Config::LauncherSettings mLauncherSettings;
 
     };

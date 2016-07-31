@@ -2,7 +2,7 @@
 
 <MyGUI type="Resource" version="1.1">
     <!-- Defines a transparent background -->
-    <Resource type="ResourceSkin" name="BlackBG" size="8 8" texture="transparent.png">
+    <Resource type="ResourceSkin" name="BlackBG" size="8 8" texture="transparent">
         <Property key="Colour" value="#{fontcolour=background}"/>
         <BasisSkin type="MainSkin" offset="0 0 8 8">
             <State name="normal" offset="0 0 8 8"/>
@@ -11,41 +11,49 @@
 
     <!-- Define the borders for pin button (up) -->
     <Resource type="ResourceSkin" name="PU_B" size="12 2" texture="textures\menu_rightbuttonup_bottom.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 12 2">
             <State name="normal" offset="0 0 12 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PU_BR" size="2 2" texture="textures\menu_rightbuttonup_bottom_right.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PU_R" size="2 12" texture="textures\menu_rightbuttonup_right.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 12">
             <State name="normal" offset="0 0 2 12"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PU_TR" size="2 2" texture="textures\menu_rightbuttonup_top_right.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PU_T" size="12 2" texture="textures\menu_rightbuttonup_top.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 12 2">
             <State name="normal" offset="0 0 12 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PU_TL" size="2 2" texture="textures\menu_rightbuttonup_top_left.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PU_L" size="2 12" texture="textures\menu_rightbuttonup_left.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 12">
             <State name="normal" offset="0 0 2 12"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PU_BL" size="2 2" texture="textures\menu_rightbuttonup_bottom_left.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
@@ -53,41 +61,49 @@
 
     <!-- Define the borders for pin button (down) -->
     <Resource type="ResourceSkin" name="PD_B" size="12 2" texture="textures\menu_rightbuttondown_bottom.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 12 2">
             <State name="normal" offset="0 0 12 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PD_BR" size="2 2" texture="textures\menu_rightbuttondown_bottom_right.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PD_R" size="2 12" texture="textures\menu_rightbuttondown_right.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 12">
             <State name="normal" offset="0 0 2 12"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PD_TR" size="2 2" texture="textures\menu_rightbuttondown_top_right.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PD_T" size="12 2" texture="textures\menu_rightbuttondown_top.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 12 2">
             <State name="normal" offset="0 0 12 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PD_TL" size="2 2" texture="textures\menu_rightbuttondown_top_left.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PD_L" size="2 12" texture="textures\menu_rightbuttondown_left.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 12">
             <State name="normal" offset="0 0 2 12"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PD_BL" size="2 2" texture="textures\menu_rightbuttondown_bottom_left.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
@@ -122,8 +138,16 @@
     </Resource>
 
     <!-- Defines a pure black background -->
-    <Resource type="ResourceSkin" name="DialogBG" size="8 8" texture="white.png">
+    <Resource type="ResourceSkin" name="DialogBG" size="8 8" texture="white">
         <Property key="Colour" value="#{fontcolour=background}"/>
+        <BasisSkin type="MainSkin" offset="0 0 8 8">
+            <State name="normal" offset="0 0 8 8"/>
+        </BasisSkin>
+    </Resource>
+    
+    <!-- Defines a owned background -->
+    <Resource type="ResourceSkin" name="DialogBG_Owned" size="8 8" texture="white">
+        <Property key="Colour" value="#{setting=GUI,color background owned}"/> 
         <BasisSkin type="MainSkin" offset="0 0 8 8">
             <State name="normal" offset="0 0 8 8"/>
         </BasisSkin>
@@ -151,14 +175,22 @@
     </Resource>
 
     <Resource type="ResourceSkin" name="DB_T" size="512 4" texture="textures\menu_thick_border_top.dds">
-        <BasisSkin type="MainSkin" offset="0 0 512 4">
-            <State name="normal" offset="0 0 512 4"/>
+        <BasisSkin type="TileRect" offset="0 0 512 4" align="Stretch">
+            <State name="normal" offset="0 0 512 4">
+                <Property key="TileSize" value="512 4"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Resource>
 
     <Resource type="ResourceSkin" name="DB_L" size="4 512" texture="textures\menu_thick_border_left.dds">
-        <BasisSkin type="MainSkin" offset="0 0 4 512">
-            <State name="normal" offset="0 0 4 512"/>
+        <BasisSkin type="TileRect" offset="0 0 4 512" align="Stretch">
+            <State name="normal" offset="0 0 4 512">
+                <Property key="TileSize" value="4 512"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Resource>
 
@@ -395,17 +427,9 @@
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Center"/>
 
-        <Child type="Widget" skin="DialogBG" offset="0 0 88 20" align="Stretch"/>
-
-        <Child type="TextBox" skin="SandText" offset="2 0 84 20" align="Stretch" name="Client"/>
-
-        <!-- Add the borders of the surrounding blocks -->
-        <Child type="Widget" skin="HB_LEFT" offset="86 2 2 16" align="Top Right"/>
-        <Child type="Widget" skin="HB_RIGHT" offset="0 2 2 16" align="Top Left"/>
-        <Child type="Widget" skin="HB_TR" offset="0 0 2 2" align="Top Left"/>
-        <Child type="Widget" skin="HB_TL" offset="86 0 2 2" align="Top Right"/>
-        <Child type="Widget" skin="HB_BR" offset="0 18 2 2" align="Bottom Left"/>
-        <Child type="Widget" skin="HB_BL" offset="86 18 2 2" align="Bottom Right"/>
+        <Child type="Widget" skin="HB_ALL" offset="0 0 30 20" align="Default" name="Left"/>
+        <Child type="TextBox" skin="SandText" offset="30 0 28 20" align="Left VStretch" name="Client"/>
+        <Child type="Widget" skin="HB_ALL" offset="0 0 30 20" align="Right" name="Right"/>
     </Resource>
 
 <!-- ----------------------------------------------------
@@ -420,7 +444,8 @@
         <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>
 
-        <Child type="Widget" skin="BlackBG" offset="8 28 240 220" align="Stretch" name="Client"/>
+        <Child type="Widget" skin="BlackBG" offset="0 0 256 256" align="Stretch"/>
+        <Child type="Widget" skin="" offset="8 28 240 220" align="Stretch" name="Client"/>
 
         <!-- Outer Borders -->
         <Child type="Widget" skin="TB_T" offset="14 0 228 4" align="Top HStretch" name="Action">
@@ -538,12 +563,7 @@
             <Property key="Scale" value="0 0 1 1"/>
         </Child>
 
-        <!-- Caption -->
-        <Child type="Widget" skin="HB_ALL" offset="4 4 248 20" align="Top HStretch">
-            <Property key="Scale" value="1 1 0 0"/>
-        </Child>
-
-        <Child type="EditBox" skin="MW_Caption" offset="80 4 88 20" align="HCenter Top" name="Caption">
+        <Child type="WindowCaption" skin="MW_Caption" offset="4 4 248 20" align="HStretch Top" name="Caption">
         </Child>
 
         <!-- This invisible button makes it possible to move the
@@ -559,7 +579,8 @@
         <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>
 
-        <Child type="Widget" skin="BlackBG" offset="8 28 240 220" align="Stretch" name="Client"/>
+        <Child type="Widget" skin="BlackBG" offset=" 0 0 256 256" align="Stretch"/>
+        <Child type="Widget" skin="" offset="8 28 240 220" align="Stretch" name="Client"/>
 
         <!-- Outer Borders -->
         <Child type="Widget" skin="TB_T" offset="14 0 228 4" align="Top HStretch" name="Action">
@@ -695,7 +716,8 @@
         <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>
 
-        <Child type="Widget" skin="BlackBG" offset="8 28 240 220" align="Stretch" name="Client"/>
+        <Child type="Widget" skin="BlackBG" offset=" 0 0 256 256" align="Stretch"/>
+        <Child type="Widget" skin="" offset="8 28 240 220" align="Stretch" name="Client"/>
 
         <!-- Outer Borders -->
         <Child type="Widget" skin="TB_T" offset="14 0 228 4" align="Top HStretch" name="Action">
@@ -814,12 +836,7 @@
         </Child>
 
         <!-- Caption -->
-
-        <Child type="Widget" skin="HB_ALL" offset="4 4 248 20" align="Top HStretch">
-            <Property key="Scale" value="1 1 0 0"/>
-        </Child>
-
-        <Child type="EditBox" skin="MW_Caption" offset="80 4 88 20" align="HCenter Top" name="Caption">
+        <Child type="WindowCaption" skin="MW_Caption_Pin" offset="4 4 248 20" align="HStretch Top" name="Caption">
         </Child>
 
         <!-- This invisible button makes it possible to move the

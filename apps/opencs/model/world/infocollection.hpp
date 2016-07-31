@@ -6,7 +6,7 @@
 
 namespace ESM
 {
-    class Dialogue;
+    struct Dialogue;
 }
 
 namespace CSMWorld
@@ -22,7 +22,7 @@ namespace CSMWorld
 
             void load (const Info& record, bool base);
 
-            int getIndex (const std::string& id, const std::string& topic) const;
+            int getInfoIndex (const std::string& id, const std::string& topic) const;
             ///< Return index for record \a id or -1 (if not present; deleted records are considered)
             ///
             /// \param id info ID without topic prefix
@@ -44,6 +44,8 @@ namespace CSMWorld
             Range getTopicRange (const std::string& topic) const;
             ///< Return iterators that point to the beginning and past the end of the range for
             /// the given topic.
+
+            void removeDialogueInfos(const std::string& dialogueId);
     };
 }
 

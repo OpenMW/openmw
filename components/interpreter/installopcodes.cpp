@@ -1,4 +1,3 @@
-
 #include "installopcodes.hpp"
 
 #include <functional>

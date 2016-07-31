@@ -2,8 +2,10 @@
 #define COMPILER_LINEPARSER_H_INCLUDED
 
 #include <vector>
+#include <string>
 
 #include <components/interpreter/types.hpp>
+#include <components/misc/messageformatparser.hpp>
 
 #include "parser.hpp"
 #include "exprparser.hpp"
@@ -73,6 +75,24 @@ namespace Compiler
 
             void reset();
             ///< Reset parser to clean state.
+    };
+
+    class GetArgumentsFromMessageFormat : public ::Misc::MessageFormatParser
+    {
+        private:
+            std::string mArguments;
+
+        protected:
+            virtual void visitedPlaceholder(Placeholder placeholder, char padding, int width, int precision);
+            virtual void visitedCharacter(char c) {}
+
+        public:
+            virtual void process(const std::string& message)
+            {
+                mArguments.clear();
+                ::Misc::MessageFormatParser::process(message);
+            }
+            std::string getArguments() const { return mArguments; }
     };
 }
 

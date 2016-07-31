@@ -3,7 +3,6 @@
 # (see: https://wiki.openmw.org/index.php?title=Paths)
 
 data="?global?data"
-data="?mw?Data Files"
 data=./data
 data-local="?userdata?data"
 resources=./resources

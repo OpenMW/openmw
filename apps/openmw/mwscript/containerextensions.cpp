@@ -1,4 +1,3 @@
-
 #include "containerextensions.hpp"
 
 #include <stdexcept>
@@ -14,15 +13,19 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include <components/misc/stringops.hpp>
+
 #include <components/esm/loadskil.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
+
+#include "../mwmechanics/actorutil.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -53,6 +56,12 @@ namespace MWScript
                     if (count == 0)
                         return;
 
+                    if(::Misc::StringUtils::ciEqual(item, "gold_005")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_010")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_025")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_100"))
+                        item = "gold_001";
+
                     MWWorld::Ptr itemPtr = *ptr.getClass().getContainerStore (ptr).add (item, count, ptr);
 
                     // Spawn a messagebox (only for items added to player's inventory and if player is talking to someone)
@@ -71,8 +80,7 @@ namespace MWScript
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage61}");
                             msgBox = boost::str(boost::format(msgBox) % count % itemName);
                         }
-                        std::vector <std::string> noButtons;
-                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, noButtons, MWGui::ShowInDialogueMode_Only);
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, MWGui::ShowInDialogueMode_Only);
                     }
                 }
         };
@@ -89,6 +97,12 @@ namespace MWScript
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+                    if(::Misc::StringUtils::ciEqual(item, "gold_005")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_010")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_025")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_100"))
+                        item = "gold_001";
+                    
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
                     runtime.push (store.count(item));
@@ -117,6 +131,12 @@ namespace MWScript
                     if (count == 0)
                         return;
 
+                    if(::Misc::StringUtils::ciEqual(item, "gold_005")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_010")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_025")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_100"))
+                        item = "gold_001";
+                        
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
                     std::string itemName;
@@ -128,7 +148,7 @@ namespace MWScript
 
                     // Spawn a messagebox (only for items removed from player's inventory)
                     if ((numRemoved > 0)
-                        && (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr()))
+                        && (ptr == MWMechanics::getPlayer()))
                     {
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory
                         std::string msgBox;
@@ -143,8 +163,7 @@ namespace MWScript
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage62}");
                             msgBox = boost::str (boost::format(msgBox) % itemName);
                         }
-                        std::vector <std::string> noButtons;
-                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, noButtons, MWGui::ShowInDialogueMode_Only);
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, MWGui::ShowInDialogueMode_Only);
                     }
                 }
         };
@@ -171,11 +190,13 @@ namespace MWScript
                     if (it == invStore.end())
                         throw std::runtime_error("Item to equip not found");
 
-                    MWWorld::ActionEquip action (*it);
-                    action.execute(ptr);
-
-                    if (ptr.getRefData().getHandle() == "player" && !ptr.getClass().getScript(ptr).empty())
-                        ptr.getRefData().getLocals().setVarByInt(ptr.getClass().getScript(ptr), "onpcequip", 1);
+                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                        MWBase::Environment::get().getWindowManager()->useItem(*it);
+                    else
+                    {
+                        boost::shared_ptr<MWWorld::Action> action = it->getClass().use(*it);
+                        action->execute(ptr);
+                    }
                 }
         };
 
@@ -296,7 +317,7 @@ namespace MWScript
                          it != invStore.end(); ++it)
                     {
                         if (::Misc::StringUtils::ciEqual(it->getCellRef().getSoul(), name))
-                            ++count;
+                            count += it->getRefData().getCount();
                     }
                     runtime.push(count);
                 }

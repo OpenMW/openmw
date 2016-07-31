@@ -1,39 +1,49 @@
 #include "loadingscreen.hpp"
 
-#include <OgreRenderWindow.h>
-#include <OgreMaterialManager.h>
-#include <OgreTechnique.h>
-#include <OgreRectangle2D.h>
-#include <OgreSceneNode.h>
-#include <OgreTextureManager.h>
-#include <OgreViewport.h>
-#include <OgreHardwarePixelBuffer.h>
+#include <osgViewer/Viewer>
+
+#include <osg/Texture2D>
+
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_ScrollBar.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_TextBox.h>
+
+#include <components/misc/rng.hpp>
+
+#include <components/myguiplatform/myguitexture.hpp>
+
+#include <components/settings/settings.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/statemanager.hpp"
-
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
+
+#include "../mwrender/vismask.hpp"
 
 #include "backgroundimage.hpp"
 
 namespace MWGui
 {
 
-    LoadingScreen::LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw)
-        : mSceneMgr(sceneMgr)
-        , mWindow(rw)
-        , WindowBase("openmw_loading_screen.layout")
-        , mLastRenderTime(0.f)
-        , mLastWallpaperChangeTime(0.f)
+    LoadingScreen::LoadingScreen(const VFS::Manager* vfs, osgViewer::Viewer* viewer)
+        : WindowBase("openmw_loading_screen.layout")
+        , mVFS(vfs)
+        , mViewer(viewer)
+        , mTargetFrameRate(120.0)
+        , mLastWallpaperChangeTime(0.0)
+        , mLastRenderTime(0.0)
+        , mLoadingOnTime(0.0)
+        , mImportantLabel(false)
         , mProgress(0)
-        , mVSyncWasEnabled(false)
     {
         mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
 
         getWidget(mLoadingText, "LoadingText");
         getWidget(mProgressBar, "ProgressBar");
+        getWidget(mLoadingBox, "LoadingBox");
 
         mProgressBar->setScrollViewPage(1);
 
@@ -41,15 +51,48 @@ namespace MWGui
             MyGUI::Align::Stretch, "Menu");
 
         setVisible(false);
-    }
 
-    void LoadingScreen::setLabel(const std::string &label)
-    {
-        mLoadingText->setCaptionWithReplacing(label);
+        findSplashScreens();
     }
 
     LoadingScreen::~LoadingScreen()
     {
+    }
+
+    void LoadingScreen::findSplashScreens()
+    {
+        const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
+        std::string pattern = "Splash/";
+        mVFS->normalizeFilename(pattern);
+
+        std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(pattern);
+        while (found != index.end())
+        {
+            const std::string& name = found->first;
+            if (name.size() >= pattern.size() && name.substr(0, pattern.size()) == pattern)
+            {
+                size_t pos = name.find_last_of('.');
+                if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".tga") == 0)
+                    mSplashScreens.push_back(found->first);
+            }
+            else
+                break;
+            ++found;
+        }
+        if (mSplashScreens.empty())
+            std::cerr << "No splash screens found!" << std::endl;
+    }
+
+    void LoadingScreen::setLabel(const std::string &label, bool important)
+    {
+        mImportantLabel = important;
+
+        mLoadingText->setCaptionWithReplacing(label);
+        int padding = mLoadingBox->getWidth() - mLoadingText->getWidth();
+        MyGUI::IntSize size(mLoadingText->getTextSize().width+padding, mLoadingBox->getHeight());
+        size.width = std::max(300, size.width);
+        mLoadingBox->setSize(size);
+        mLoadingBox->setPosition(mMainWidget->getWidth()/2 - mLoadingBox->getWidth()/2, mLoadingBox->getTop());
     }
 
     void LoadingScreen::setVisible(bool visible)
@@ -58,43 +101,70 @@ namespace MWGui
         mBackgroundImage->setVisible(visible);
     }
 
+    class CopyFramebufferToTextureCallback : public osg::Camera::DrawCallback
+    {
+    public:
+        CopyFramebufferToTextureCallback(osg::Texture2D* texture, int w, int h)
+            : mTexture(texture), mWidth(w), mHeight(h)
+        {
+        }
+
+        virtual void operator () (osg::RenderInfo& renderInfo) const
+        {
+            mTexture->copyTexImage2D(*renderInfo.getState(), 0, 0, mWidth, mHeight);
+
+            // Callback removes itself when done
+            if (renderInfo.getCurrentCamera())
+                renderInfo.getCurrentCamera()->setInitialDrawCallback(NULL);
+        }
+
+    private:
+        osg::ref_ptr<osg::Texture2D> mTexture;
+        int mWidth, mHeight;
+    };
+
     void LoadingScreen::loadingOn()
     {
+        mLoadingOnTime = mTimer.time_m();
         // Early-out if already on
         if (mMainWidget->getVisible())
             return;
 
-        // Temporarily turn off VSync, we want to do actual loading rather than waiting for the screen to sync.
-        // Threaded loading would be even better, of course - especially because some drivers force VSync to on and we can't change it.
-        mVSyncWasEnabled = mWindow->isVSyncEnabled();
-        mWindow->setVSyncEnabled(false);
+        if (mViewer->getIncrementalCompileOperation())
+        {
+            mViewer->getIncrementalCompileOperation()->setMaximumNumOfObjectsToCompilePerFrame(100);
+            mViewer->getIncrementalCompileOperation()->setTargetFrameRate(mTargetFrameRate);
+        }
 
         bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
                 == MWBase::StateManager::State_NoGame);
 
-
         if (!showWallpaper)
         {
-            mBackgroundImage->setImageTexture("");
-            int width = mWindow->getWidth();
-            int height = mWindow->getHeight();
-            const std::string textureName = "@loading_background";
-            Ogre::TexturePtr texture;
-            texture = Ogre::TextureManager::getSingleton().getByName(textureName);
-            if (texture.isNull())
+            // Copy the current framebuffer onto a texture and display that texture as the background image
+            // Note, we could also set the camera to disable clearing and have the background image transparent,
+            // but then we get shaking effects on buffer swaps.
+
+            if (!mTexture)
             {
-                texture = Ogre::TextureManager::getSingleton().createManual(textureName,
-                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                    Ogre::TEX_TYPE_2D,
-                    width, height, 0, mWindow->suggestPixelFormat(), Ogre::TU_DYNAMIC_WRITE_ONLY);
+                mTexture = new osg::Texture2D;
+                mTexture->setInternalFormat(GL_RGB);
+                mTexture->setResizeNonPowerOfTwoHint(false);
             }
-            texture->unload();
-            texture->setWidth(width);
-            texture->setHeight(height);
-            texture->createInternalResources();
-            mWindow->copyContentsToMemory(texture->getBuffer()->lock(Ogre::Image::Box(0,0,width,height), Ogre::HardwareBuffer::HBL_DISCARD));
-            texture->getBuffer()->unlock();
-            mBackgroundImage->setBackgroundImage(texture->getName(), false, false);
+
+            int width = mViewer->getCamera()->getViewport()->width();
+            int height = mViewer->getCamera()->getViewport()->height();
+            mViewer->getCamera()->setInitialDrawCallback(new CopyFramebufferToTextureCallback(mTexture, width, height));
+
+            if (!mGuiTexture.get())
+            {
+                mGuiTexture.reset(new osgMyGUI::OSGTexture(mTexture));
+            }
+
+            mBackgroundImage->setBackgroundImage("");
+
+            mBackgroundImage->setRenderItemTexture(mGuiTexture.get());
+            mBackgroundImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
         }
 
         setVisible(true);
@@ -109,9 +179,20 @@ namespace MWGui
 
     void LoadingScreen::loadingOff()
     {
-        // Re-enable vsync now.
-        mWindow->setVSyncEnabled(mVSyncWasEnabled);
+        if (mLastRenderTime < mLoadingOnTime)
+        {
+            // the loading was so fast that we didn't show loading screen at all
+            // we may still want to show the label if the caller requested it
+            if (mImportantLabel)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox(mLoadingText->getCaption());
+                mImportantLabel = false;
+            }
+        }
+        else
+            mImportantLabel = false; // label was already shown on loading screen
 
+        //std::cout << "loading took " << mTimer.time_m() - mLoadingOnTime << std::endl;
         setVisible(false);
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Loading);
@@ -120,27 +201,15 @@ namespace MWGui
 
     void LoadingScreen::changeWallpaper ()
     {
-        if (mResources.empty())
+        if (!mSplashScreens.empty())
         {
-            Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
-            for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
-            {
-                Ogre::StringVectorPtr resourcesInThisGroup = Ogre::ResourceGroupManager::getSingleton ().findResourceNames (*it, "Splash/*.tga");
-                mResources.insert(mResources.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
-            }
-        }
-
-        if (!mResources.empty())
-        {
-            std::string const & randomSplash = mResources.at (rand() % mResources.size());
-
-            Ogre::TextureManager::getSingleton ().load (randomSplash, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+            std::string const & randomSplash = mSplashScreens.at(Misc::Rng::rollDice(mSplashScreens.size()));
 
             // TODO: add option (filename pattern?) to use image aspect ratio instead of 4:3
-            mBackgroundImage->setBackgroundImage(randomSplash, true, true);
+            // we can't do this by default, because the Morrowind splash screens are 1024x1024, but should be displayed as 4:3
+            bool stretch = Settings::Manager::getBool("stretch menu background", "GUI");
+            mBackgroundImage->setBackgroundImage(randomSplash, true, stretch);
         }
-        else
-            std::cerr << "No loading screens found!" << std::endl;
     }
 
     void LoadingScreen::setProgressRange (size_t range)
@@ -153,11 +222,13 @@ namespace MWGui
 
     void LoadingScreen::setProgress (size_t value)
     {
-        if (value - mProgress < mProgressBar->getScrollRange()/100.f)
+        // skip expensive update if there isn't enough visible progress
+        if (value - mProgress < mProgressBar->getScrollRange()/200.f)
             return;
+        value = std::min(value, mProgressBar->getScrollRange()-1);
         mProgress = value;
         mProgressBar->setScrollPosition(0);
-        mProgressBar->setTrackSize(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize());
+        mProgressBar->setTrackSize(static_cast<int>(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
         draw();
     }
 
@@ -165,63 +236,76 @@ namespace MWGui
     {
         mProgressBar->setScrollPosition(0);
         size_t value = mProgress + increase;
+        value = std::min(value, mProgressBar->getScrollRange()-1);
         mProgress = value;
-        mProgressBar->setTrackSize(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize());
+        mProgressBar->setTrackSize(static_cast<int>(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
         draw();
     }
 
-    void LoadingScreen::indicateProgress()
+    bool LoadingScreen::needToDrawLoadingScreen()
     {
-        float time = (mTimer.getMilliseconds() % 2001) / 1000.f;
-        if (time > 1)
-            time = (time-2)*-1;
+        if ( mTimer.time_m() <= mLastRenderTime + (1.0/mTargetFrameRate) * 1000.0)
+            return false;
 
-        mProgressBar->setTrackSize(50);
-        mProgressBar->setScrollPosition(time * (mProgressBar->getScrollRange()-1));
-        draw();
+        // the minimal delay before a loading screen shows
+        const float initialDelay = 0.05;
+
+        bool alreadyShown = (mLastRenderTime > mLoadingOnTime);
+        float diff = (mTimer.time_m() - mLoadingOnTime);
+
+        if (!alreadyShown)
+        {
+            // bump the delay by the current progress - i.e. if during the initial delay the loading
+            // has almost finished, no point showing the loading screen now
+            diff -= mProgress / static_cast<float>(mProgressBar->getScrollRange()) * 100.f;
+        }
+
+        bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
+                == MWBase::StateManager::State_NoGame);
+        if (!showWallpaper && diff < initialDelay*1000)
+            return false;
+        return true;
     }
 
     void LoadingScreen::draw()
     {
-        const float loadingScreenFps = 20.f;
+        if (!needToDrawLoadingScreen())
+            return;
 
-        if (mTimer.getMilliseconds () > mLastRenderTime + (1.f/loadingScreenFps) * 1000.f)
+        bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
+                == MWBase::StateManager::State_NoGame);
+        if (showWallpaper && mTimer.time_m() > mLastWallpaperChangeTime + 5000*1)
         {
-            mLastRenderTime = mTimer.getMilliseconds ();
-
-            bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
-                    == MWBase::StateManager::State_NoGame);
-
-            if (showWallpaper && mTimer.getMilliseconds () > mLastWallpaperChangeTime + 5000*1)
-            {
-                mLastWallpaperChangeTime = mTimer.getMilliseconds ();
-                changeWallpaper();
-            }
-
-            // Turn off rendering except the GUI
-            mSceneMgr->clearSpecialCaseRenderQueues();
-            // SCRQM_INCLUDE with RENDER_QUEUE_OVERLAY does not work.
-            for (int i = 0; i < Ogre::RENDER_QUEUE_MAX; ++i)
-            {
-                if (i > 0 && i < 96)
-                    mSceneMgr->addSpecialCaseRenderQueue(i);
-            }
-            mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
-
-            MWBase::Environment::get().getInputManager()->update(0, true, true);
-
-            // First, swap buffers from last draw, then, queue an update of the
-            // window contents, but don't swap buffers (which would have
-            // caused a sync / flush and would be expensive).
-            // We're doing this so we can do some actual loading while the GPU is busy with the render.
-            // This means the render is lagging a frame behind, but this is hardly noticable.
-            mWindow->swapBuffers();
-
-            mWindow->update(false);
-
-            // resume 3d rendering
-            mSceneMgr->clearSpecialCaseRenderQueues();
-            mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+            mLastWallpaperChangeTime = mTimer.time_m();
+            changeWallpaper();
         }
+
+        // Turn off rendering except the GUI
+        int oldUpdateMask = mViewer->getUpdateVisitor()->getTraversalMask();
+        int oldCullMask = mViewer->getCamera()->getCullMask();
+        mViewer->getUpdateVisitor()->setTraversalMask(MWRender::Mask_GUI);
+        mViewer->getCamera()->setCullMask(MWRender::Mask_GUI);
+
+        MWBase::Environment::get().getInputManager()->update(0, true, true);
+
+        //osg::Timer timer;
+        // at the time this function is called we are in the middle of a frame,
+        // so out of order calls are necessary to get a correct frameNumber for the next frame.
+        // refer to the advance() and frame() order in Engine::go()
+        mViewer->eventTraversal();
+        mViewer->updateTraversal();
+        mViewer->renderingTraversals();
+        mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
+        //std::cout << "frame took " << timer.time_m() << std::endl;
+
+        //if (mViewer->getIncrementalCompileOperation())
+            //std::cout << "num to compile " << mViewer->getIncrementalCompileOperation()->getToCompile().size() << std::endl;
+
+        // resume 3d rendering
+        mViewer->getUpdateVisitor()->setTraversalMask(oldUpdateMask);
+        mViewer->getCamera()->setCullMask(oldCullMask);
+
+        mLastRenderTime = mTimer.time_m();
     }
+
 }

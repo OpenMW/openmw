@@ -1,4 +1,3 @@
-
 #include "generator.hpp"
 
 #include <cassert>
@@ -150,10 +149,13 @@ namespace
         code.push_back (Compiler::Generator::segment0 (2, offset));
     }
 
+    /*
+    Currently unused
     void opSkipOnZero (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (24));
     }
+    */
 
     void opSkipOnNonZero (Compiler::Generator::CodeContainer& code)
     {

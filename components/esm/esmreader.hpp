@@ -2,12 +2,12 @@
 #define OPENMW_ESM_READER_H
 
 #include <stdint.h>
-#include <libs/platform/string.h>
+#include <string.h>
 #include <cassert>
 #include <vector>
 #include <sstream>
 
-#include <OgreDataStream.h>
+#include <components/files/constrainedfilestream.hpp>
 
 #include <components/misc/stringops.hpp>
 
@@ -32,10 +32,11 @@ public:
 
   int getVer() const { return mHeader.mData.version; }
   int getRecordCount() const { return mHeader.mData.records; }
-  float getFVer() const { if(mHeader.mData.version == VER_12) return 1.2; else return 1.3; }
+  float getFVer() const { return (mHeader.mData.version == VER_12) ? 1.2f : 1.3f; }
   const std::string getAuthor() const { return mHeader.mData.author.toString(); }
   const std::string getDesc() const { return mHeader.mData.desc.toString(); }
   const std::vector<Header::MasterData> &getGameFiles() const { return mHeader.mMaster; }
+  const Header& getHeader() const { return mHeader; }
   int getFormat() const;
   const NAME &retSubName() const { return mCtx.subName; }
   uint32_t getSubSize() const { return mCtx.leftSub; }
@@ -62,20 +63,18 @@ public:
 
   /// Raw opening. Opens the file and sets everything up but doesn't
   /// parse the header.
-  void openRaw(Ogre::DataStreamPtr _esm, const std::string &name);
+  void openRaw(Files::IStreamPtr _esm, const std::string &name);
 
   /// Load ES file from a new stream, parses the header. Closes the
   /// currently open file first, if any.
-  void open(Ogre::DataStreamPtr _esm, const std::string &name);
+  void open(Files::IStreamPtr _esm, const std::string &name);
 
   void open(const std::string &file);
 
-  void openRaw(const std::string &file);
+  void openRaw(const std::string &filename);
 
-  /// Get the file size. Make sure that the file has been opened!
-  size_t getFileSize() { return mEsm->size(); }
   /// Get the current position in the file. Make sure that the file has been opened!
-  size_t getFileOffset() { return mEsm->tell(); }
+  size_t getFileOffset();
 
   // This is a quick hack for multiple esm/esp files. Each plugin introduces its own
   //  terrain palette, but ESMReader does not pass a reference to the correct plugin
@@ -136,7 +135,11 @@ public:
   {
       getSubHeader();
       if (mCtx.leftSub != sizeof(X))
-          fail("getHT(): subrecord size mismatch");
+      {
+          std::stringstream error;
+          error << "getHT(): subrecord size mismatch (requested " << sizeof(X) << ", got " << mCtx.leftSub << ")";
+          fail(error.str());
+      }
       getT(x);
   }
 
@@ -180,6 +183,11 @@ public:
    */
   bool isNextSub(const char* name);
 
+  bool peekNextSub(const char* name);
+
+  // Store the current subrecord name for the next call of getSubName()
+  void cacheSubName();
+
   // Read subrecord name. This gets called a LOT, so I've optimized it
   // slightly.
   void getSubName();
@@ -193,6 +201,9 @@ public:
 
   // Skip sub record and check its size
   void skipHSubSize(int size);
+
+  // Skip all subrecords until the given subrecord or no more subrecords remaining
+  void skipHSubUntil(const char* name);
 
   /* Sub-record header. This updates leftRec beyond the current
      sub-record as well. leftSub contains size of current sub-record.
@@ -244,8 +255,7 @@ public:
   // them from native encoding to UTF8 in the process.
   std::string getString(int size);
 
-  void skip(int bytes) { mEsm->seek(mEsm->tell()+bytes); }
-  uint64_t getOffset() { return mEsm->tell(); }
+  void skip(int bytes);
 
   /// Used for error handling
   void fail(const std::string &msg);
@@ -256,8 +266,10 @@ public:
   /// Get record flags of last record
   unsigned int getRecordFlags() { return mRecordFlags; }
 
+  size_t getFileSize() const { return mFileSize; }
+
 private:
-  Ogre::DataStreamPtr mEsm;
+  Files::IStreamPtr mEsm;
 
   ESM_Context mCtx;
 
@@ -272,6 +284,9 @@ private:
 
   std::vector<ESMReader> *mGlobalReaderList;
   ToUTF8::Utf8Encoder* mEncoder;
+
+  size_t mFileSize;
+
 };
 }
 #endif

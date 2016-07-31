@@ -1,5 +1,9 @@
 #include "class.hpp"
 
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_ListBox.h>
+#include <MyGUI_Gui.h>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -7,8 +11,15 @@
 
 #include "tooltips.hpp"
 
-#undef min
-#undef max
+namespace
+{
+
+    bool sortClasses(const std::pair<std::string, std::string>& left, const std::pair<std::string, std::string>& right)
+    {
+        return left.second.compare(right.second) < 0;
+    }
+
+}
 
 namespace MWGui
 {
@@ -44,7 +55,9 @@ namespace MWGui
     void GenerateClassResultDialog::setClassId(const std::string &classId)
     {
         mCurrentClassId = classId;
-        mClassImage->setImageTexture(std::string("textures\\levelup\\") + mCurrentClassId + ".dds");
+
+        setClassImage(mClassImage, mCurrentClassId);
+
         mClassName->setCaption(MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(mCurrentClassId)->mName);
 
         center();
@@ -130,8 +143,6 @@ namespace MWGui
             if (Misc::StringUtils::ciEqual(*mClassList->getItemDataAt<std::string>(i), classId))
             {
                 mClassList->setIndexSelected(i);
-                MyGUI::Button* okButton;
-                getWidget(okButton, "OKButton");
                 break;
             }
         }
@@ -166,9 +177,6 @@ namespace MWGui
         if (_index == MyGUI::ITEM_NONE)
             return;
 
-        MyGUI::Button* okButton;
-        getWidget(okButton, "OKButton");
-
         const std::string *classId = mClassList->getItemDataAt<std::string>(_index);
         if (Misc::StringUtils::ciEqual(mCurrentClassId, *classId))
             return;
@@ -185,7 +193,7 @@ namespace MWGui
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-        int index = 0;
+        std::vector<std::pair<std::string, std::string> > items; // class id, class name
         MWWorld::Store<ESM::Class>::iterator it = store.get<ESM::Class>().begin();
         for (; it != store.get<ESM::Class>().end(); ++it)
         {
@@ -193,8 +201,18 @@ namespace MWGui
             if (!playable) // Only display playable classes
                 continue;
 
-            const std::string &id = it->mId;
-            mClassList->addItem(it->mName, id);
+            if (store.get<ESM::Class>().isDynamic(it->mId))
+                continue; // custom-made class not relevant for this dialog
+
+            items.push_back(std::make_pair(it->mId, it->mName));
+        }
+        std::sort(items.begin(), items.end(), sortClasses);
+
+        int index = 0;
+        for (std::vector<std::pair<std::string, std::string> >::const_iterator it = items.begin(); it != items.end(); ++it)
+        {
+            const std::string &id = it->first;
+            mClassList->addItem(it->second, id);
             if (mCurrentClassId.empty())
             {
                 mCurrentClassId = id;
@@ -241,7 +259,7 @@ namespace MWGui
             ToolTips::createSkillToolTip(mMajorSkill[i], klass->mData.mSkills[i][1]);
         }
 
-        mClassImage->setImageTexture(std::string("textures\\levelup\\") + mCurrentClassId + ".dds");
+        setClassImage(mClassImage, mCurrentClassId);
     }
 
     /* InfoBoxDialog */
@@ -771,6 +789,7 @@ namespace MWGui
 
     SelectSkillDialog::SelectSkillDialog()
       : WindowModal("openmw_chargen_select_skill.layout")
+      , mSkillId(ESM::Skill::Block)
     {
         // Centre dialog
         center();
@@ -884,6 +903,17 @@ namespace MWGui
     void DescriptionDialog::onOkClicked(MyGUI::Widget* _sender)
     {
         eventDone(this);
+    }
+
+    void setClassImage(MyGUI::ImageBox* imageBox, const std::string &classId)
+    {
+        std::string classImage = std::string("textures\\levelup\\") + classId + ".dds";
+        if (!MWBase::Environment::get().getWindowManager()->textureExists(classImage))
+        {
+            std::cout << "No class image for " << classId << ", falling back to default" << std::endl;
+            classImage = "textures\\levelup\\warrior.dds";
+        }
+        imageBox->setImageTexture(classImage);
     }
 
 }

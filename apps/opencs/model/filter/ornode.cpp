@@ -1,4 +1,3 @@
-
 #include "ornode.hpp"
 
 #include <sstream>

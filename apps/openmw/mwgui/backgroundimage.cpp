@@ -5,16 +5,16 @@
 namespace MWGui
 {
 
-void BackgroundImage::setBackgroundImage (const std::string& image, bool fixedRatio, bool correct)
+void BackgroundImage::setBackgroundImage (const std::string& image, bool fixedRatio, bool stretch)
 {
     if (mChild)
     {
         MyGUI::Gui::getInstance().destroyWidget(mChild);
         mChild = NULL;
     }
-    if (correct)
+    if (!stretch)
     {
-        setImageTexture("black.png");
+        setImageTexture("black");
 
         if (fixedRatio)
             mAspect = 4.0/3.0;
@@ -41,8 +41,8 @@ void BackgroundImage::adjustSize()
 
     MyGUI::IntSize screenSize = getSize();
 
-    int leftPadding = std::max(0.0, (screenSize.width - screenSize.height * mAspect) / 2);
-    int topPadding = std::max(0.0, (screenSize.height - screenSize.width / mAspect) / 2);
+    int leftPadding = std::max(0, static_cast<int>(screenSize.width - screenSize.height * mAspect) / 2);
+    int topPadding = std::max(0, static_cast<int>(screenSize.height - screenSize.width / mAspect) / 2);
 
     mChild->setCoord(leftPadding, topPadding, screenSize.width - leftPadding*2, screenSize.height - topPadding*2);
 }

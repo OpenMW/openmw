@@ -16,6 +16,8 @@ class ESMWriter;
 struct Weapon
 {
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "Weapon"; }
 
     enum Type
     {
@@ -67,8 +69,8 @@ struct Weapon
 
     std::string mId, mName, mModel, mIcon, mEnchant, mScript;
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

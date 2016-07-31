@@ -5,16 +5,18 @@
 
 #include <stdint.h>
 #include <stdexcept>
+#include <vector>
 
-#include <OgreDataStream.h>
-#include <OgreVector2.h>
-#include <OgreVector3.h>
-#include <OgreVector4.h>
-#include <OgreMatrix3.h>
-#include <OgreQuaternion.h>
-#include <OgreStringConverter.h>
+#include <components/files/constrainedfilestream.hpp>
+
+#include <osg/Vec3f>
+#include <osg/Vec4f>
+#include <osg/Quat>
+#include <osg/Array>
+#include <osg/PrimitiveSet>
 
 #include "niftypes.hpp"
+
 
 namespace Nif
 {
@@ -24,7 +26,7 @@ class NIFFile;
 class NIFStream {
 
     /// Input stream
-    Ogre::DataStreamPtr inp;
+    Files::IStreamPtr inp;
 
     uint8_t read_byte();
     uint16_t read_le16();
@@ -35,33 +37,9 @@ public:
 
     NIFFile * const file;
 
-    NIFStream (NIFFile * file, Ogre::DataStreamPtr inp): file (file), inp (inp) {}
+    NIFStream (NIFFile * file, Files::IStreamPtr inp): inp (inp), file (file) {}
 
-    /*************************************************
-               Parser functions
-    ****************************************************/
-
-    template <typename T>
-    struct GetHandler
-    {
-        typedef T (NIFStream::*fn_t)();
-
-        static const fn_t sValue; // this is specialized per supported type in the .cpp file
-
-        static T read (NIFStream* nif)
-        {
-            return (nif->*sValue) ();
-        }
-    };
-
-    template <typename T>
-    void read (NIFStream* nif, T & Value)
-    {
-        Value = GetHandler <T>::read (nif);
-    }
-
-    void skip(size_t size) { inp->skip(size); }
-    void read (void * data, size_t size) { inp->read (data, size); }
+    void skip(size_t size) { inp->ignore(size); }
 
     char getChar() { return read_byte(); }
     short getShort() { return read_le16(); }
@@ -70,11 +48,11 @@ public:
     unsigned int getUInt() { return read_le32(); }
     float getFloat() { return read_le32f(); }
 
-    Ogre::Vector2 getVector2();
-    Ogre::Vector3 getVector3();
-    Ogre::Vector4 getVector4();
-    Ogre::Matrix3 getMatrix3();
-    Ogre::Quaternion getQuaternion();
+    osg::Vec2f getVector2();
+    osg::Vec3f getVector3();
+    osg::Vec4f getVector4();
+    Matrix3 getMatrix3();
+    osg::Quat getQuaternion();
     Transformation getTrafo();
 
     ///Read in a string of the given length
@@ -84,12 +62,12 @@ public:
     ///This is special since the version string doesn't start with a number, and ends with "\n"
     std::string getVersionString();
 
-    void getShorts(std::vector<short> &vec, size_t size);
+    void getUShorts(osg::VectorGLushort* vec, size_t size);
     void getFloats(std::vector<float> &vec, size_t size);
-    void getVector2s(std::vector<Ogre::Vector2> &vec, size_t size);
-    void getVector3s(std::vector<Ogre::Vector3> &vec, size_t size);
-    void getVector4s(std::vector<Ogre::Vector4> &vec, size_t size);
-    void getQuaternions(std::vector<Ogre::Quaternion> &quat, size_t size);
+    void getVector2s(osg::Vec2Array* vec, size_t size);
+    void getVector3s(osg::Vec3Array* vec, size_t size);
+    void getVector4s(osg::Vec4Array* vec, size_t size);
+    void getQuaternions(std::vector<osg::Quat> &quat, size_t size);
 };
 
 }

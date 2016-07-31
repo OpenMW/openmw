@@ -33,7 +33,7 @@ namespace MWWorld
 
         mHour = static_cast<float> (std::fmod (hours, 24));
 
-        mDay += hours / 24;
+        mDay += static_cast<int>(hours / 24);
 
         return *this;
     }
@@ -96,7 +96,7 @@ namespace MWWorld
         if (left.getHour()<right.getHour())
         {
             hours = 24-right.getHour()+left.getHour();
-            ++days;
+            --days;
         }
         else
         {

@@ -1,6 +1,10 @@
 #include "statswindow.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Window.h>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_ProgressBar.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_Gui.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -8,8 +12,10 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "tooltips.hpp"
 
@@ -75,13 +81,13 @@ namespace MWGui
         if (mSkillView->getViewOffset().top + _rel*0.3 > 0)
             mSkillView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mSkillView->setViewOffset(MyGUI::IntPoint(0, mSkillView->getViewOffset().top + _rel*0.3));
+            mSkillView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + _rel*0.3)));
     }
 
     void StatsWindow::onWindowResize(MyGUI::Window* window)
     {
-        mLeftPane->setCoord( MyGUI::IntCoord(0, 0, 0.44*window->getSize().width, window->getSize().height) );
-        mRightPane->setCoord( MyGUI::IntCoord(0.44*window->getSize().width, 0, 0.56*window->getSize().width, window->getSize().height) );
+        mLeftPane->setCoord( MyGUI::IntCoord(0, 0, static_cast<int>(0.44*window->getSize().width), window->getSize().height) );
+        mRightPane->setCoord( MyGUI::IntCoord(static_cast<int>(0.44*window->getSize().width), 0, static_cast<int>(0.56*window->getSize().width), window->getSize().height) );
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
         mSkillView->setVisibleVScroll(false);
         mSkillView->setCanvasSize (mSkillView->getWidth(), mSkillView->getCanvasSize().height);
@@ -103,7 +109,6 @@ namespace MWGui
     void StatsWindow::setPlayerName(const std::string& playerName)
     {
         mMainWidget->castType<MyGUI::Window>()->setCaption(playerName);
-        adjustWindowCaption();
     }
 
     void StatsWindow::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
@@ -145,7 +150,7 @@ namespace MWGui
 
         // health, magicka, fatigue tooltip
         MyGUI::Widget* w;
-        std::string valStr =  boost::lexical_cast<std::string>(current) + "/" + boost::lexical_cast<std::string>(modified);
+        std::string valStr =  MyGUI::utility::toString(current) + "/" + MyGUI::utility::toString(modified);
         if (id == "HBar")
         {
             getWidget(w, "Health");
@@ -154,7 +159,7 @@ namespace MWGui
         else if (id == "MBar")
         {
             getWidget(w, "Magicka");
-            w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
+            w->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
         }
         else if (id == "FBar")
         {
@@ -190,7 +195,7 @@ namespace MWGui
         if (widget)
         {
             int modified = value.getModified(), base = value.getBase();
-            std::string text = boost::lexical_cast<std::string>(modified);
+            std::string text = MyGUI::utility::toString(modified);
             std::string state = "normal";
             if (modified > base)
                 state = "increased";
@@ -230,7 +235,7 @@ namespace MWGui
 
         NoDrop::onFrame(dt);
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         const MWMechanics::NpcStats &PCstats = player.getClass().getNpcStats(player);
 
         // level progress
@@ -239,10 +244,10 @@ namespace MWGui
         {
             int max = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iLevelUpTotal")->getInt();
             getWidget(levelWidget, i==0 ? "Level_str" : "LevelText");
-            levelWidget->setUserString("RangePosition_LevelProgress", boost::lexical_cast<std::string>(PCstats.getLevelProgress()));
-            levelWidget->setUserString("Range_LevelProgress", boost::lexical_cast<std::string>(max));
-            levelWidget->setUserString("Caption_LevelProgressText", boost::lexical_cast<std::string>(PCstats.getLevelProgress()) + "/"
-                                       + boost::lexical_cast<std::string>(max));
+            levelWidget->setUserString("RangePosition_LevelProgress", MyGUI::utility::toString(PCstats.getLevelProgress()));
+            levelWidget->setUserString("Range_LevelProgress", MyGUI::utility::toString(max));
+            levelWidget->setUserString("Caption_LevelProgressText", MyGUI::utility::toString(PCstats.getLevelProgress()) + "/"
+                                       + MyGUI::utility::toString(max));
         }
 
         setFactions(PCstats.getFactionRanks());
@@ -342,9 +347,13 @@ namespace MWGui
     {
         MyGUI::TextBox* skillNameWidget;
 
-        skillNameWidget = mSkillView->createWidget<MyGUI::TextBox>("SandText", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
+        skillNameWidget = mSkillView->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Default);
+
         skillNameWidget->setCaption(text);
         skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
+
+        int textWidth = skillNameWidget->getTextSize().width;
+        skillNameWidget->setSize(textWidth, skillNameWidget->getHeight());
 
         mSkillWidgets.push_back(skillNameWidget);
 
@@ -368,17 +377,25 @@ namespace MWGui
         for (SkillList::const_iterator it = skills.begin(); it != end; ++it)
         {
             int skillId = *it;
-            if (skillId < 0 || skillId > ESM::Skill::Length) // Skip unknown skill indexes
+            if (skillId < 0 || skillId >= ESM::Skill::Length) // Skip unknown skill indexes
                 continue;
-            assert(skillId >= 0 && skillId < ESM::Skill::Length);
             const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
             const MWMechanics::SkillValue &stat = mSkillValues.find(skillId)->second;
             int base = stat.getBase();
             int modified = stat.getModified();
-            int progressPercent = stat.getProgress() * 100;
 
+            MWWorld::Ptr player = MWMechanics::getPlayer();
             const MWWorld::ESMStore &esmStore =
                 MWBase::Environment::get().getWorld()->getStore();
+
+            float progressRequirement = player.getClass().getNpcStats(player).getSkillProgressRequirement(skillId,
+                *esmStore.get<ESM::Class>().find(player.get<ESM::NPC>()->mBase->mClass));
+
+            // This is how vanilla MW displays the progress bar (I think). Note it's slightly inaccurate,
+            // due to the int casting in the skill levelup logic. Also the progress label could in rare cases
+            // reach 100% without the skill levelling up.
+            // Leaving the original display logic for now, for consistency with ess-imported savegames.
+            int progressPercent = int(float(stat.getProgress()) / float(progressRequirement) * 100.f + 0.5f);
 
             const ESM::Skill* skill = esmStore.get<ESM::Skill>().find(skillId);
 
@@ -393,7 +410,7 @@ namespace MWGui
             else if (modified < base)
                 state = "decreased";
             MyGUI::TextBox* widget = addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId),
-                boost::lexical_cast<std::string>(static_cast<int>(modified)), state, coord1, coord2);
+                MyGUI::utility::toString(static_cast<int>(modified)), state, coord1, coord2);
 
             for (int i=0; i<2; ++i)
             {
@@ -411,9 +428,9 @@ namespace MWGui
                     mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Visible_SkillProgressVBox", "true");
                     mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("UserData^Hidden_SkillProgressVBox", "false");
 
-                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_SkillProgressText", boost::lexical_cast<std::string>(progressPercent)+"/100");
+                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_SkillProgressText", MyGUI::utility::toString(progressPercent)+"/100");
                     mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Range_SkillProgress", "100");
-                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("RangePosition_SkillProgress", boost::lexical_cast<std::string>(progressPercent));
+                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("RangePosition_SkillProgress", MyGUI::utility::toString(progressPercent));
                 } else {
                     mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Visible_SkillMaxed", "true");
                     mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("UserData^Hidden_SkillMaxed", "false");
@@ -477,7 +494,7 @@ namespace MWGui
 
         if (!mFactions.empty())
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr player = MWMechanics::getPlayer();
             const MWMechanics::NpcStats &PCstats = player.getClass().getNpcStats(player);
             const std::set<std::string> &expelled = PCstats.getExpelled();
 
@@ -524,8 +541,8 @@ namespace MWGui
                         const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[0]);
                         const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[1]);
 
-                        text += "\n#{fontcolourhtml=normal}#{" + attr1->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute1)
-                                + ", #{" + attr2->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute2);
+                        text += "\n#{fontcolourhtml=normal}#{" + attr1->mName + "}: " + MyGUI::utility::toString(rankData.mAttribute1)
+                                + ", #{" + attr2->mName + "}: " + MyGUI::utility::toString(rankData.mAttribute2);
 
                         text += "\n\n#{fontcolourhtml=header}#{sFavoriteSkills}";
                         text += "\n#{fontcolourhtml=normal}";
@@ -546,9 +563,9 @@ namespace MWGui
                         text += "\n";
 
                         if (rankData.mSkill1 > 0)
-                            text += "\n#{sNeedOneSkill} " + boost::lexical_cast<std::string>(rankData.mSkill1);
+                            text += "\n#{sNeedOneSkill} " + MyGUI::utility::toString(rankData.mSkill1);
                         if (rankData.mSkill2 > 0)
-                            text += "\n#{sNeedTwoSkills} " + boost::lexical_cast<std::string>(rankData.mSkill2);
+                            text += "\n#{sNeedTwoSkills} " + MyGUI::utility::toString(rankData.mSkill2);
                     }
                 }
 
@@ -577,7 +594,7 @@ namespace MWGui
             addSeparator(coord1, coord2);
 
         addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString("sReputation", "Reputation"),
-                    boost::lexical_cast<std::string>(static_cast<int>(mReputation)), "normal", coord1, coord2);
+                    MyGUI::utility::toString(static_cast<int>(mReputation)), "normal", coord1, coord2);
 
         for (int i=0; i<2; ++i)
         {
@@ -587,7 +604,7 @@ namespace MWGui
         }
 
         addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString("sBounty", "Bounty"),
-                    boost::lexical_cast<std::string>(static_cast<int>(mBounty)), "normal", coord1, coord2);
+                    MyGUI::utility::toString(static_cast<int>(mBounty)), "normal", coord1, coord2);
 
         for (int i=0; i<2; ++i)
         {

@@ -1,5 +1,7 @@
 #include "console.hpp"
 
+#include <MyGUI_EditBox.h>
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -102,8 +104,20 @@ namespace MWGui
                 it->second->listIdentifier (mNames);
             }
 
+            // exterior cell names aren't technically identifiers, but since the COC function accepts them,
+            // we should list them too
+            for (MWWorld::Store<ESM::Cell>::iterator it = store.get<ESM::Cell>().extBegin();
+                 it != store.get<ESM::Cell>().extEnd(); ++it)
+            {
+                if (!it->mName.empty())
+                    mNames.push_back(it->mName);
+            }
+
             // sort
             std::sort (mNames.begin(), mNames.end());
+
+            // remove duplicates
+            mNames.erase( std::unique( mNames.begin(), mNames.end() ), mNames.end() );
         }
     }
 
@@ -156,25 +170,25 @@ namespace MWGui
         mCommandLine->setFontName(fntName);
     }
 
-    void Console::print(const std::string &msg)
+    void Console::print(const std::string &msg, const std::string& color)
     {
-        mHistory->addText(msg);
+        mHistory->addText(color + MyGUI::TextIterator::toTagsString(msg));
     }
 
     void Console::printOK(const std::string &msg)
     {
-        print("#FF00FF" + msg + "\n");
+        print(msg + "\n", "#FF00FF");
     }
 
     void Console::printError(const std::string &msg)
     {
-        print("#FF2222" + msg + "\n");
+        print(msg + "\n", "#FF2222");
     }
 
     void Console::execute (const std::string& command)
     {
         // Log the command
-        print("#FFFFFF> " + command + "\n");
+        print("> " + command + "\n");
 
         Compiler::Locals locals;
         Compiler::Output output (locals);
@@ -226,7 +240,7 @@ namespace MWGui
             mCommandLine->setCaption(newCaption);
 
             // List candidates if repeatedly pressing tab
-            if (oldCaption == newCaption && matches.size())
+            if (oldCaption == newCaption && !matches.empty())
             {
                 int i = 0;
                 printOK("");
@@ -276,13 +290,17 @@ namespace MWGui
 
         // Add the command to the history, and set the current pointer to
         // the end of the list
-        mCommandHistory.push_back(cm);
+        if (mCommandHistory.empty() || mCommandHistory.back() != cm)
+            mCommandHistory.push_back(cm);
         mCurrent = mCommandHistory.end();
         mEditString.clear();
 
-        execute (cm);
-
+        // Reset the command line before the command execution.
+        // It prevents the re-triggering of the acceptCommand() event for the same command 
+        // during the actual command execution
         mCommandLine->setCaption("");
+
+        execute (cm);
     }
 
     std::string Console::complete( std::string input, std::vector<std::string> &matches )
@@ -347,7 +365,7 @@ namespace MWGui
 
             /* Is the beginning of the string different from the input string? If yes skip it. */
             for( std::string::iterator iter=tmp.begin(), iter2=(*it).begin(); iter < tmp.end();++iter, ++iter2) {
-                if( tolower(*iter) != tolower(*iter2) ) {
+                if( Misc::StringUtils::toLower(*iter) != Misc::StringUtils::toLower(*iter2) ) {
                     string_different=true;
                     break;
                 }
@@ -387,7 +405,7 @@ namespace MWGui
 
         for(std::string::iterator iter=matches.front().begin()+tmp.length(); iter < matches.front().end(); ++iter, ++i) {
             for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end();++it) {
-                if( tolower((*it)[i]) != tolower(*iter) ) {
+                if( Misc::StringUtils::toLower((*it)[i]) != Misc::StringUtils::toLower(*iter) ) {
                     /* Append the longest match to the end of the output string*/
                     output.append(matches.front().substr( 0, i));
                     return output;

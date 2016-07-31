@@ -1,4 +1,3 @@
-
 #include "discardparser.hpp"
 
 #include "scanner.hpp"
@@ -15,6 +14,9 @@ namespace Compiler
     {
         if (mState==StartState || mState==CommaState || mState==MinusState)
         {
+            if (isEmpty())
+                mTokenLoc = loc;
+
             start();
             return false;
         }
@@ -26,6 +28,9 @@ namespace Compiler
     {
         if (mState==StartState || mState==CommaState || mState==MinusState)
         {
+            if (isEmpty())
+                mTokenLoc = loc;
+
             start();
             return false;
         }
@@ -38,6 +43,9 @@ namespace Compiler
     {
         if (mState==StartState || mState==CommaState)
         {
+            if (isEmpty())
+                mTokenLoc = loc;
+
             start();
             return false;
         }
@@ -49,12 +57,22 @@ namespace Compiler
     {
         if (code==Scanner::S_comma && mState==StartState)
         {
+            if (isEmpty())
+                mTokenLoc = loc;
+
+            start();
+
             mState = CommaState;
             return true;
         }
 
         if (code==Scanner::S_minus && (mState==StartState || mState==CommaState))
         {
+            if (isEmpty())
+                mTokenLoc = loc;
+
+            start();
+
             mState = MinusState;
             return true;
         }
@@ -65,6 +83,12 @@ namespace Compiler
     void DiscardParser::reset()
     {
         mState = StartState;
+        mTokenLoc = TokenLoc();
         Parser::reset();
+    }
+
+    const TokenLoc& DiscardParser::getTokenLoc() const
+    {
+        return mTokenLoc;
     }
 }

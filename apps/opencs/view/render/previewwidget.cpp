@@ -1,18 +1,13 @@
-
 #include "previewwidget.hpp"
-
-#include <OgreSceneManager.h>
-#include <OgreSceneNode.h>
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
 
 CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
     const std::string& id, bool referenceable, QWidget *parent)
-: SceneWidget (parent), mData (data),
-  mObject (data, getSceneManager()->getRootSceneNode(), id, referenceable, boost::shared_ptr<CSVWorld::PhysicsSystem>(), true)
+: SceneWidget (data.getResourceSystem(), parent), mData (data), mObject(data, mRootNode, id, referenceable)
 {
-    setNavigation (&mOrbit);
+    selectNavigationMode("orbit");
 
     QAbstractItemModel *referenceables =
         mData.getTableModel (CSMWorld::UniversalId::Type_Referenceables);

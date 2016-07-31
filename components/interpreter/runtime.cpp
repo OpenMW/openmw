@@ -1,4 +1,3 @@
-
 #include "runtime.hpp"
 
 #include <stdexcept>
@@ -7,7 +6,7 @@
 
 namespace Interpreter
 {
-    Runtime::Runtime() : mContext (0), mCode (0), mPC (0), mCodeSize(0) {}
+    Runtime::Runtime() : mContext (0), mCode (0), mCodeSize(0), mPC (0) {}
 
     int Runtime::getPC() const
     {

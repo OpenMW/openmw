@@ -6,8 +6,6 @@
 
         <!-- Local map -->
         <Widget type="ScrollView" skin="MW_MapView" position="0 0 284 264" align="Stretch" name="LocalMap">
-            <Property key="CanvasSize" value="1536 1536"/>
-
             <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="Top Left" name="CompassLocal">
                 <Property key="ImageTexture" value="textures\compass.dds"/>
             </Widget>

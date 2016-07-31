@@ -1,5 +1,8 @@
 #include "itemselection.hpp"
 
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Button.h>
+
 #include "itemview.hpp"
 #include "inventoryitemmodel.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -36,6 +39,7 @@ namespace MWGui
         mModel = new InventoryItemModel(container);
         mSortModel = new SortFilterItemModel(mModel);
         mItemView->setModel(mSortModel);
+        mItemView->resetScrollBars();
     }
 
     void ItemSelectionDialog::setCategory(int category)

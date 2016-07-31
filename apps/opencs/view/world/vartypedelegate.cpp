@@ -1,10 +1,10 @@
-
 #include "vartypedelegate.hpp"
 
 #include <QUndoStack>
 
 #include "../../model/world/commands.hpp"
 #include "../../model/world/columns.hpp"
+#include "../../model/world/commandmacro.hpp"
 
 void CSVWorld::VarTypeDelegate::addCommands (QAbstractItemModel *model, const QModelIndex& index, int type)
     const
@@ -37,18 +37,15 @@ void CSVWorld::VarTypeDelegate::addCommands (QAbstractItemModel *model, const QM
         default: break; // ignore the rest
     }
 
-    getUndoStack().beginMacro (
-        "Modify " + model->headerData (index.column(), Qt::Horizontal, Qt::DisplayRole).toString());
+    CSMWorld::CommandMacro macro (getUndoStack(), "Modify " + model->headerData (index.column(), Qt::Horizontal, Qt::DisplayRole).toString());
 
-    getUndoStack().push (new CSMWorld::ModifyCommand (*model, index, type));
-    getUndoStack().push (new CSMWorld::ModifyCommand (*model, next, value));
-
-    getUndoStack().endMacro();
+    macro.push (new CSMWorld::ModifyCommand (*model, index, type));
+    macro.push (new CSMWorld::ModifyCommand (*model, next, value));
 }
 
 CSVWorld::VarTypeDelegate::VarTypeDelegate (const std::vector<std::pair<int, QString> >& values,
-    CSMDoc::Document& document, QObject *parent)
-: EnumDelegate (values, document, parent)
+    CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent)
+: EnumDelegate (values, dispatcher, document, parent)
 {}
 
 
@@ -69,9 +66,9 @@ CSVWorld::VarTypeDelegateFactory::VarTypeDelegateFactory (ESM::VarType type0,
 }
 
 CSVWorld::CommandDelegate *CSVWorld::VarTypeDelegateFactory::makeDelegate (
-    CSMDoc::Document& document, QObject *parent) const
+    CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const
 {
-    return new VarTypeDelegate (mValues, document, parent);
+    return new VarTypeDelegate (mValues, dispatcher, document, parent);
 }
 
 void CSVWorld::VarTypeDelegateFactory::add (ESM::VarType type)

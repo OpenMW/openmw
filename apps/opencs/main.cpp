@@ -1,4 +1,3 @@
-
 #include "editor.hpp"
 
 #include <exception>
@@ -9,9 +8,7 @@
 #include <QIcon>
 #include <QMetaType>
 
-#include <extern/shiny/Main/Factory.hpp>
-
-#include <components/ogreinit/ogreinit.hpp>
+#include "model/doc/messages.hpp"
 
 #include "model/world/universalid.hpp"
 
@@ -46,47 +43,48 @@ class Application : public QApplication
 
 int main(int argc, char *argv[])
 {
-    Q_INIT_RESOURCE (resources);
+    #ifdef Q_OS_MAC
+        setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
+    #endif
 
-    qRegisterMetaType<std::string> ("std::string");
-    qRegisterMetaType<CSMWorld::UniversalId> ("CSMWorld::UniversalId");
-
-    OgreInit::OgreInit ogreInit;
-
-    std::auto_ptr<sh::Factory> shinyFactory;
-
-    Application application (argc, argv);
-
-#ifdef Q_OS_MAC
-    QDir dir(QCoreApplication::applicationDirPath());
-    if (dir.dirName() == "MacOS") {
-        dir.cdUp();
-        dir.cdUp();
-        dir.cdUp();
-    }
-    QDir::setCurrent(dir.absolutePath());
-
-    // force Qt to load only LOCAL plugins, don't touch system Qt installation
-    QDir pluginsPath(QCoreApplication::applicationDirPath());
-    pluginsPath.cdUp();
-    pluginsPath.cd("Plugins");
-
-    QStringList libraryPaths;
-    libraryPaths << pluginsPath.path() << QCoreApplication::applicationDirPath();
-    application.setLibraryPaths(libraryPaths);
-#endif
-
-    application.setWindowIcon (QIcon (":./opencs.png"));
-
-    CS::Editor editor (ogreInit);
-
-    if(!editor.makeIPCServer())
+    try
     {
-        editor.connectToIPCServer();
+        // To allow background thread drawing in OSG
+        QApplication::setAttribute(Qt::AA_X11InitThreads, true);
+
+        Q_INIT_RESOURCE (resources);
+
+        qRegisterMetaType<std::string> ("std::string");
+        qRegisterMetaType<CSMWorld::UniversalId> ("CSMWorld::UniversalId");
+        qRegisterMetaType<CSMDoc::Message> ("CSMDoc::Message");
+
+        Application application (argc, argv);
+
+    #ifdef Q_OS_MAC
+        QDir dir(QCoreApplication::applicationDirPath());
+        if (dir.dirName() == "MacOS") {
+            dir.cdUp();
+            dir.cdUp();
+            dir.cdUp();
+        }
+        QDir::setCurrent(dir.absolutePath());
+    #endif
+
+        application.setWindowIcon (QIcon (":./openmw-cs.png"));
+
+        CS::Editor editor;
+
+        if(!editor.makeIPCServer())
+        {
+            editor.connectToIPCServer();
+            return 0;
+        }
+        return editor.run();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "ERROR: " << e.what() << std::endl;
         return 0;
     }
 
-    shinyFactory = editor.setupGraphics();
-
-    return editor.run();
 }

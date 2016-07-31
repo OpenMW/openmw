@@ -1,4 +1,3 @@
-
 #include "newgame.hpp"
 
 #include <QApplication>
@@ -65,4 +64,10 @@ void CSVDoc::NewGameDialogue::stateChanged (bool valid)
 void CSVDoc::NewGameDialogue::create()
 {
     emit createRequest (mAdjusterWidget->getPath());
+}
+
+void CSVDoc::NewGameDialogue::reject()
+{
+    emit cancelCreateGame ();
+    QDialog::reject();
 }

@@ -2,8 +2,6 @@
 
 #include <cmath>
 
-#include <boost/lexical_cast.hpp>
-
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
@@ -32,8 +30,12 @@ ItemView::~ItemView()
 
 void ItemView::setModel(ItemModel *model)
 {
+    if (mModel == model)
+        return;
+
     delete mModel;
     mModel = model;
+
     update();
 }
 
@@ -56,11 +58,11 @@ void ItemView::layoutWidgets()
     int x = 0;
     int y = 0;
     MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
-    int maxHeight = dragArea->getHeight();
+    int maxHeight = mScrollView->getHeight();
 
     int rows = maxHeight/42;
     rows = std::max(rows, 1);
-    bool showScrollbar = std::ceil(dragArea->getChildCount()/float(rows)) > mScrollView->getWidth()/42;
+    bool showScrollbar = int(std::ceil(dragArea->getChildCount()/float(rows))) > mScrollView->getWidth()/42;
     if (showScrollbar)
         maxHeight -= 18;
 
@@ -105,7 +107,7 @@ void ItemView::update()
                                                                        MyGUI::Align::Stretch);
     dragArea->setNeedMouseFocus(true);
     dragArea->eventMouseButtonClick += MyGUI::newDelegate(this, &ItemView::onSelectedBackground);
-    dragArea->eventMouseWheel += MyGUI::newDelegate(this, &ItemView::onMouseWheel);
+    dragArea->eventMouseWheel += MyGUI::newDelegate(this, &ItemView::onMouseWheelMoved);
 
     for (ItemModel::ModelIndex i=0; i<static_cast<int>(mModel->getItemCount()); ++i)
     {
@@ -124,10 +126,15 @@ void ItemView::update()
         itemWidget->setCount(item.mCount);
 
         itemWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ItemView::onSelectedItem);
-        itemWidget->eventMouseWheel += MyGUI::newDelegate(this, &ItemView::onMouseWheel);
+        itemWidget->eventMouseWheel += MyGUI::newDelegate(this, &ItemView::onMouseWheelMoved);
     }
 
     layoutWidgets();
+}
+
+void ItemView::resetScrollBars()
+{
+    mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
 }
 
 void ItemView::onSelectedItem(MyGUI::Widget *sender)
@@ -141,12 +148,12 @@ void ItemView::onSelectedBackground(MyGUI::Widget *sender)
     eventBackgroundClicked();
 }
 
-void ItemView::onMouseWheel(MyGUI::Widget *_sender, int _rel)
+void ItemView::onMouseWheelMoved(MyGUI::Widget *_sender, int _rel)
 {
-    if (mScrollView->getViewOffset().left + _rel*0.3 > 0)
+    if (mScrollView->getViewOffset().left + _rel*0.3f > 0)
         mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
     else
-        mScrollView->setViewOffset(MyGUI::IntPoint(mScrollView->getViewOffset().left + _rel*0.3, 0));
+        mScrollView->setViewOffset(MyGUI::IntPoint(static_cast<int>(mScrollView->getViewOffset().left + _rel*0.3f), 0));
 }
 
 void ItemView::setSize(const MyGUI::IntSize &_value)
@@ -157,22 +164,12 @@ void ItemView::setSize(const MyGUI::IntSize &_value)
         layoutWidgets();
 }
 
-void ItemView::setSize(int _width, int _height)
-{
-    setSize(MyGUI::IntSize(_width, _height));
-}
-
 void ItemView::setCoord(const MyGUI::IntCoord &_value)
 {
     bool changed = (_value.width != getWidth() || _value.height != getHeight());
     Base::setCoord(_value);
     if (changed)
         layoutWidgets();
-}
-
-void ItemView::setCoord(int _left, int _top, int _width, int _height)
-{
-    setCoord(MyGUI::IntCoord(_left, _top, _width, _height));
 }
 
 void ItemView::registerComponents()

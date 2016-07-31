@@ -1,18 +1,21 @@
-
 #include "infocreator.hpp"
 
 #include <algorithm>
 
 #include <QLabel>
-#include <QLineEdit>
 #include <QUuid>
 
 #include <components/misc/stringops.hpp>
+
+#include "../../model/doc/document.hpp"
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/idtable.hpp"
+#include "../../model/world/idcompletionmanager.hpp"
+
+#include "../widget/droplineedit.hpp"
 
 std::string CSVWorld::InfoCreator::getId() const
 {
@@ -39,18 +42,25 @@ void CSVWorld::InfoCreator::configureCreateCommand (CSMWorld::CreateCommand& com
 }
 
 CSVWorld::InfoCreator::InfoCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-    const CSMWorld::UniversalId& id)
+    const CSMWorld::UniversalId& id, CSMWorld::IdCompletionManager& completionManager)
 : GenericCreator (data, undoStack, id)
 {
     QLabel *label = new QLabel ("Topic", this);
     insertBeforeButtons (label, false);
 
-    mTopic = new QLineEdit (this);
+    CSMWorld::ColumnBase::Display displayType = CSMWorld::ColumnBase::Display_Topic;
+    if (getCollectionId().getType() == CSMWorld::UniversalId::Type_JournalInfos)
+    {
+        displayType = CSMWorld::ColumnBase::Display_Journal;
+    }
+    mTopic = new CSVWidget::DropLineEdit(displayType, this);
+    mTopic->setCompleter(completionManager.getCompleter(displayType).get());
     insertBeforeButtons (mTopic, true);
 
     setManualEditing (false);
 
     connect (mTopic, SIGNAL (textChanged (const QString&)), this, SLOT (topicChanged()));
+    connect (mTopic, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
 }
 
 void CSVWorld::InfoCreator::cloneMode (const std::string& originId,
@@ -91,7 +101,21 @@ std::string CSVWorld::InfoCreator::getErrors() const
     return errors;
 }
 
+void CSVWorld::InfoCreator::focus()
+{
+    mTopic->setFocus();
+}
+
 void CSVWorld::InfoCreator::topicChanged()
 {
     update();
+}
+
+CSVWorld::Creator *CSVWorld::InfoCreatorFactory::makeCreator(CSMDoc::Document& document,
+                                                             const CSMWorld::UniversalId& id) const
+{
+    return new InfoCreator(document.getData(),
+                           document.getUndoStack(),
+                           id,
+                           document.getIdCompletionManager());
 }

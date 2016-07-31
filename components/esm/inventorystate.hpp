@@ -4,7 +4,6 @@
 #include <map>
 
 #include "objectstate.hpp"
-#include "lightstate.hpp"
 
 namespace ESM
 {
@@ -16,14 +15,19 @@ namespace ESM
     /// \brief State for inventories and containers
     struct InventoryState
     {
-        // anything but lights (type, slot)
-        std::vector<std::pair<ObjectState, std::pair<unsigned int, int> > > mItems;
+        std::vector<ObjectState> mItems;
 
-        // lights (slot)
-        std::vector<std::pair<LightState, int> > mLights;
+        // <Index in mItems, equipment slot>
+        std::map<int, int> mEquipmentSlots;
 
-        std::map<std::string, int> mLevelledItemMap;
+        std::map<std::pair<std::string, std::string>, int> mLevelledItemMap;
 
+        typedef std::map<std::string, std::vector<std::pair<float, float> > > TEffectMagnitudes;
+        TEffectMagnitudes mPermanentMagicEffectMagnitudes;
+
+        int mSelectedEnchantItem; // For inventories only
+
+        InventoryState() : mSelectedEnchantItem(-1) {}
         virtual ~InventoryState() {}
 
         virtual void load (ESMReader &esm);

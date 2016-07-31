@@ -31,6 +31,15 @@
         </BasisSkin>
     </Resource>
 
+    <Resource type="ResourceLayout" name="CustomMarkerButton" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 16 16" name="Root">
+            <Widget type="ImageBox" skin="ImageBox" position="0 0 16 16" align="Stretch">
+                <Property key="ImageTexture" value="icons\map_marker_red.dds"/>
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
     <Resource type="ResourceLayout" name="TabControl" version="3.2.0">
         <Widget type="Widget" skin="" position="5 5 89 60" name="Root">
             <UserString key="ButtonSkin" value="MW_Button_RightPadding"/>
@@ -92,7 +101,7 @@
             <Property key="ModeDrop" value="true"/>
 
             <Widget type="Widget" skin="MW_Box" position="0 0 100 26" align="Stretch">
-                <Widget type="TextBox" skin="SandText" position="2 2 75 20" align="Stretch" name="Client">
+                <Widget type="TextBox" skin="SandText" position="6 2 71 20" align="Stretch" name="Client">
                     <Property key="TextAlign" value="Left VCenter"/>
                 </Widget>
                 <Widget type="ListBox" skin="MW_PopupList" position="65 38 100 200" style="Popup" layer="Popup" name="List">
@@ -134,6 +143,21 @@
             </Widget>
 
             <Widget type="Widget" skin="MW_Box_Overlay" position="0 0 50 50" align="Stretch"/>
+        </Widget>
+    </Resource>
+
+    <!-- Same as MW_Caption, but reserves some free space on the right for the Pin button -
+       i.e. not allowing the caption label to stretch there, but still showing the tiling background. -->
+    <Resource type="ResourceLayout" name="MW_Caption_Pin" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 88 20" name="Root">
+            <Widget type="Widget" skin="HB_ALL" position="0 0 30 20" align="Default" name="Left"/>
+            <Widget type="Widget" skin="" position="0 0 69 20" align="Stretch">
+                <Widget type="TextBox" skin="SandText" position="30 0 28 20" align="Left VStretch" name="Client">
+                    <Property key="FontName" value="Default"/>
+                    <Property key="TextAlign" value="Center"/>
+                </Widget>
+            </Widget>
+            <Widget type="Widget" skin="HB_ALL" position="0 0 30 20" align="Right" name="Right"/>
         </Widget>
     </Resource>
 

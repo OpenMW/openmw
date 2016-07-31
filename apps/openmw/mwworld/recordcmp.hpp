@@ -5,6 +5,8 @@
 
 #include <components/esm/records.hpp>
 
+#include <components/misc/stringops.hpp>
+
 namespace MWWorld
 {
     struct RecordCmp

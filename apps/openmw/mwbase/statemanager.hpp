@@ -62,10 +62,13 @@ namespace MWBase
             ///
             /// \note Slot must belong to the current character.
 
-            virtual void loadGame (const MWState::Character *character, const MWState::Slot *slot) = 0;
-            ///< Load a saved game file from \a slot.
-            ///
-            /// \note \a slot must belong to \a character.
+            virtual void loadGame (const std::string& filepath) = 0;
+            ///< Load a saved game directly from the given file path. This will search the CharacterManager
+            /// for a Character containing this save file, and set this Character current if one was found.
+            /// Otherwise, a new Character will be created.
+
+            virtual void loadGame (const MWState::Character *character, const std::string& filepath) = 0;
+            ///< Load a saved game file belonging to the given character.
 
             ///Simple saver, writes over the file if already existing
             /** Used for quick save and autosave **/
@@ -75,8 +78,8 @@ namespace MWBase
             /** Used for quickload **/
             virtual void quickLoad()=0;
 
-            virtual MWState::Character *getCurrentCharacter (bool create = true) = 0;
-            ///< \param create Create a new character, if there is no current character.
+            virtual MWState::Character *getCurrentCharacter () = 0;
+            ///< @note May return null.
 
             virtual CharacterIterator characterBegin() = 0;
             ///< Any call to SaveGame and getCurrentCharacter can invalidate the returned

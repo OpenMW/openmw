@@ -1,4 +1,3 @@
-
 #include "userextensions.hpp"
 
 #include <components/compiler/extensions.hpp>

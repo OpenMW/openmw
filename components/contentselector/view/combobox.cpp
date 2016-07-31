@@ -30,7 +30,7 @@ void ContentSelectorView::ComboBox::paintEvent(QPaintEvent *)
     // draw the icon and text
     if (!opt.editable && currentIndex() == -1) // <<< we adjust the text displayed when nothing is selected
         opt.currentText = mPlaceholderText;
-        painter.drawControl(QStyle::CE_ComboBoxLabel, opt);
+    painter.drawControl(QStyle::CE_ComboBoxLabel, opt);
 }
 
 void ContentSelectorView::ComboBox::setPlaceholderText(const QString &text)

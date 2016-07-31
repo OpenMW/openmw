@@ -10,14 +10,20 @@
 #include <QThread>
 
 #include <components/to_utf8/to_utf8.hpp>
+#include <components/fallback/fallback.hpp>
 
 #include "../world/resourcesmanager.hpp"
 
 #include "loader.hpp"
 
+namespace VFS
+{
+    class Manager;
+}
+
 namespace Files
 {
-    class ConfigurationManager;
+    struct ConfigurationManager;
 }
 
 namespace CSMDoc
@@ -35,6 +41,7 @@ namespace CSMDoc
             ToUTF8::FromType mEncoding;
             CSMWorld::ResourcesManager mResourcesManager;
             std::vector<std::string> mBlacklistedScripts;
+            const VFS::Manager* mVFS;
 
             DocumentManager (const DocumentManager&);
             DocumentManager& operator= (const DocumentManager&);
@@ -50,18 +57,31 @@ namespace CSMDoc
             ///< \param new_ Do not load the last content file in \a files and instead create in an
             /// appropriate way.
 
-	    void setResourceDir (const boost::filesystem::path& parResDir);
+            /// Create a new document. The ownership of the created document is transferred to
+            /// the calling function. The DocumentManager does not manage it. Loading has not
+            /// taken place at the point when the document is returned.
+            ///
+            /// \param new_ Do not load the last content file in \a files and instead create in an
+            /// appropriate way.
+            Document *makeDocument (const std::vector< boost::filesystem::path >& files,
+                const boost::filesystem::path& savePath, bool new_);
+
+            void setResourceDir (const boost::filesystem::path& parResDir);
+
+            void setFallbackMap (const std::map<std::string, std::string>& fallbackMap);
 
             void setEncoding (ToUTF8::FromType encoding);
 
             void setBlacklistedScripts (const std::vector<std::string>& scriptIds);
 
-            /// Ask OGRE for a list of available resources.
-            void listResources();
+            void setVFS(const VFS::Manager* vfs);
+
+            bool isEmpty();
 
         private:
 
-	    boost::filesystem::path mResDir;
+            boost::filesystem::path mResDir;
+            Fallback::Map mFallbackMap;
 
         private slots:
 
@@ -77,9 +97,15 @@ namespace CSMDoc
             void removeDocument (CSMDoc::Document *document);
             ///< Emits the lastDocumentDeleted signal, if applicable.
 
+            /// Hand over document to *this. The ownership is transferred. The DocumentManager
+            /// will initiate the load procedure, if necessary
+            void insertDocument (CSMDoc::Document *document);
+
         signals:
 
             void documentAdded (CSMDoc::Document *document);
+
+            void documentAboutToBeRemoved (CSMDoc::Document *document);
 
             void loadRequest (CSMDoc::Document *document);
 

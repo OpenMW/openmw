@@ -25,10 +25,10 @@
 using namespace Process;
 
 Wizard::MainWizard::MainWizard(QWidget *parent) :
-    mGameSettings(mCfgMgr),
     QWizard(parent),
+    mInstallations(),
     mError(false),
-    mInstallations()
+    mGameSettings(mCfgMgr)
 {
 #ifndef Q_OS_MAC
     setWizardStyle(QWizard::ModernStyle);
@@ -62,6 +62,12 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
     setupLauncherSettings();
     setupInstallations();
     setupPages();
+
+    const boost::filesystem::path& installedPath = mCfgMgr.getInstallPath();
+    if (!installedPath.empty())
+    {
+        addInstallation(toQString(installedPath));
+    }
 }
 
 Wizard::MainWizard::~MainWizard()
@@ -71,7 +77,7 @@ Wizard::MainWizard::~MainWizard()
 
 void Wizard::MainWizard::setupLog()
 {
-    QString logPath(QString::fromUtf8(mCfgMgr.getLogPath().string().c_str()));
+    QString logPath(toQString(mCfgMgr.getLogPath()));
     logPath.append(QLatin1String("wizard.log"));
 
     QFile file(logPath);
@@ -93,7 +99,7 @@ void Wizard::MainWizard::setupLog()
 
 void Wizard::MainWizard::addLogText(const QString &text)
 {
-    QString logPath(QString::fromUtf8(mCfgMgr.getLogPath().string().c_str()));
+    QString logPath(toQString(mCfgMgr.getLogPath()));
     logPath.append(QLatin1String("wizard.log"));
 
     QFile file(logPath);
@@ -121,8 +127,8 @@ void Wizard::MainWizard::addLogText(const QString &text)
 
 void Wizard::MainWizard::setupGameSettings()
 {
-    QString userPath(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
-    QString globalPath(QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str()));
+    QString userPath(toQString(mCfgMgr.getUserConfigPath()));
+    QString globalPath(toQString(mCfgMgr.getGlobalPath()));
     QString message(tr("<html><head/><body><p><b>Could not open %1 for reading</b></p> \
                     <p>Please make sure you have the right permissions \
                     and try again.</p></body></html>"));
@@ -132,7 +138,7 @@ void Wizard::MainWizard::setupGameSettings()
     QString path(userPath + QLatin1String("openmw.cfg"));
     QFile file(path);
 
-    qDebug() << "Loading config file:" << qPrintable(path);
+    qDebug() << "Loading config file:" << path.toUtf8().constData();
 
     if (file.exists()) {
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -157,7 +163,7 @@ void Wizard::MainWizard::setupGameSettings()
     paths.append(globalPath + QLatin1String("openmw.cfg"));
 
     foreach (const QString &path, paths) {
-        qDebug() << "Loading config file:" << qPrintable(path);
+        qDebug() << "Loading config file:" << path.toUtf8().constData();
 
         QFile file(path);
         if (file.exists()) {
@@ -181,8 +187,8 @@ void Wizard::MainWizard::setupGameSettings()
 
 void Wizard::MainWizard::setupLauncherSettings()
 {
-    QString path(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
-    path.append(QLatin1String("launcher.cfg"));
+    QString path(toQString(mCfgMgr.getUserConfigPath()));
+    path.append(QLatin1String(Config::LauncherSettings::sLauncherConfigFileName));
 
     QString message(tr("<html><head/><body><p><b>Could not open %1 for reading</b></p> \
                     <p>Please make sure you have the right permissions \
@@ -191,7 +197,7 @@ void Wizard::MainWizard::setupLauncherSettings()
 
     QFile file(path);
 
-    qDebug() << "Loading config file:" << qPrintable(path);
+    qDebug() << "Loading config file:" << path.toUtf8().constData();
 
     if (file.exists()) {
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -228,7 +234,7 @@ void Wizard::MainWizard::runSettingsImporter()
     QString path(field(QLatin1String("installation.path")).toString());
 
     // Create the file if it doesn't already exist, else the importer will fail
-    QString userPath(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
+    QString userPath(toQString(mCfgMgr.getUserConfigPath()));
     QFile file(userPath + QLatin1String("openmw.cfg"));
 
     if (!file.exists()) {
@@ -281,7 +287,7 @@ void Wizard::MainWizard::runSettingsImporter()
     arguments.append(QLatin1String("--cfg"));
     arguments.append(userPath + QLatin1String("openmw.cfg"));
 
-    if (!mImporterInvoker->startProcess(QLatin1String("mwiniimport"), arguments, false))
+    if (!mImporterInvoker->startProcess(QLatin1String("openmw-iniimporter"), arguments, false))
         return qApp->quit();
 }
 
@@ -387,7 +393,7 @@ void Wizard::MainWizard::writeSettings()
     mGameSettings.removeDataDir(path);
     mGameSettings.addDataDir(path);
 
-    QString userPath(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
+    QString userPath(toQString(mCfgMgr.getUserConfigPath()));
     QDir dir(userPath);
 
     if (!dir.exists()) {
@@ -427,7 +433,7 @@ void Wizard::MainWizard::writeSettings()
     file.close();
 
     // Launcher settings
-    file.setFileName(userPath + QLatin1String("launcher.cfg"));
+    file.setFileName(userPath + QLatin1String(Config::LauncherSettings::sLauncherConfigFileName));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         // File cannot be opened or created
@@ -459,4 +465,9 @@ bool Wizard::MainWizard::findFiles(const QString &name, const QString &path)
     // TODO: add MIME handling to make sure the files are real
     return (dir.entryList().contains(name + QLatin1String(".esm"), Qt::CaseInsensitive)
             && dir.entryList().contains(name + QLatin1String(".bsa"), Qt::CaseInsensitive));
+}
+
+QString Wizard::MainWizard::toQString(const boost::filesystem::path& path)
+{
+    return QString::fromUtf8(path.string().c_str());
 }

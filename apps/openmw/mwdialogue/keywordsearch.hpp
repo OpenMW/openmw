@@ -2,7 +2,7 @@
 #define GAME_MWDIALOGUE_KEYWORDSEARCH_H
 
 #include <map>
-#include <locale>
+#include <cctype>
 #include <stdexcept>
 #include <vector>
 #include <algorithm>    // std::reverse
@@ -28,6 +28,8 @@ public:
 
     void seed (string_t keyword, value_t value)
     {
+        if (keyword.empty())
+            return;
         seed_impl  (/*std::move*/ (keyword), /*std::move*/ (value), 0, mRoot);
     }
 
@@ -42,7 +44,7 @@ public:
         typename Entry::childen_t::iterator current;
         typename Entry::childen_t::iterator next;
 
-        current = mRoot.mChildren.find (std::tolower (*keyword.begin(), mLocale));
+        current = mRoot.mChildren.find (Misc::StringUtils::toLower (*keyword.begin()));
         if (current == mRoot.mChildren.end())
             return false;
         else if (current->second.mKeyword.size() && Misc::StringUtils::ciEqual(current->second.mKeyword, keyword))
@@ -53,7 +55,7 @@ public:
 
         for (Point i = ++keyword.begin(); i != keyword.end(); ++i)
         {
-            next = current->second.mChildren.find(std::tolower (*i, mLocale));
+            next = current->second.mChildren.find(Misc::StringUtils::toLower (*i));
             if (next == current->second.mChildren.end())
                 return false;
             if (Misc::StringUtils::ciEqual(next->second.mKeyword, keyword))
@@ -66,21 +68,28 @@ public:
         return false;
     }
 
-    bool search (Point beg, Point end, Match & match, Point start)
+    static bool sortMatches(const Match& left, const Match& right)
     {
+        return left.mBeg < right.mBeg;
+    }
+
+    void highlightKeywords (Point beg, Point end, std::vector<Match>& out)
+    {
+        std::vector<Match> matches;
         for (Point i = beg; i != end; ++i)
         {
             // check if previous character marked start of new word
-            if (i != start)
+            if (i != beg)
             {
                 Point prev = i;
-                --prev; 
+                --prev;
                 if(isalpha(*prev))
                     continue;
             }
 
+
             // check first character
-            typename Entry::childen_t::iterator candidate = mRoot.mChildren.find (std::tolower (*i, mLocale));
+            typename Entry::childen_t::iterator candidate = mRoot.mChildren.find (Misc::StringUtils::toLower (*i));
 
             // no match, on to next character
             if (candidate == mRoot.mChildren.end ())
@@ -95,7 +104,7 @@ public:
 
             while ((j + 1) != end)
             {
-                typename Entry::childen_t::iterator next = candidate->second.mChildren.find (std::tolower (*++j, mLocale));
+                typename Entry::childen_t::iterator next = candidate->second.mChildren.find (Misc::StringUtils::toLower (*++j));
 
                 if (next == candidate->second.mChildren.end ())
                 {
@@ -127,7 +136,7 @@ public:
 
                 while (k != end && t != candidate->second.mKeyword.end ())
                 {
-                    if (std::tolower (*k, mLocale) != std::tolower (*t, mLocale))
+                    if (Misc::StringUtils::toLower (*k) != Misc::StringUtils::toLower (*t))
                         break;
 
                     ++k, ++t;
@@ -137,16 +146,57 @@ public:
                 if (t != candidate->second.mKeyword.end ())
                     continue;
 
-                // we did it, report the good news
+                // found a keyword, but there might still be longer keywords that start somewhere _within_ this keyword
+                // we will resolve these overlapping keywords later, choosing the longest one in case of conflict
+                Match match;
                 match.mValue = candidate->second.mValue;
                 match.mBeg = i;
                 match.mEnd = k;
-                return true;
+                matches.push_back(match);
+                break;
             }
         }
 
-        // no match in range, report the bad news
-        return false;
+        // resolve overlapping keywords
+        while (!matches.empty())
+        {
+            int longestKeywordSize = 0;
+            typename std::vector<Match>::iterator longestKeyword = matches.begin();
+            for (typename std::vector<Match>::iterator it = matches.begin(); it != matches.end(); ++it)
+            {
+                int size = it->mEnd - it->mBeg;
+                if (size > longestKeywordSize)
+                {
+                    longestKeywordSize = size;
+                    longestKeyword = it;
+                }
+
+                typename std::vector<Match>::iterator next = it;
+                ++next;
+
+                if (next == matches.end())
+                    break;
+
+                if (it->mEnd <= next->mBeg)
+                {
+                    break; // no overlap
+                }
+            }
+
+            Match keyword = *longestKeyword;
+            matches.erase(longestKeyword);
+            out.push_back(keyword);
+            // erase anything that overlaps with the keyword we just added to the output
+            for (typename std::vector<Match>::iterator it = matches.begin(); it != matches.end();)
+            {
+                if (it->mBeg < keyword.mEnd && it->mEnd > keyword.mBeg)
+                    it = matches.erase(it);
+                else
+                    ++it;
+            }
+        }
+
+        std::sort(out.begin(), out.end(), sortMatches);
     }
 
 private:
@@ -162,7 +212,7 @@ private:
 
     void seed_impl (string_t keyword, value_t value, size_t depth, Entry  & entry)
     {
-        int ch = tolower (keyword.at (depth), mLocale);
+        int ch = Misc::StringUtils::toLower (keyword.at (depth));
 
         typename Entry::childen_t::iterator j = entry.mChildren.find (ch);
 
@@ -199,7 +249,6 @@ private:
     }
 
     Entry mRoot;
-    std::locale mLocale;
 };
 
 }

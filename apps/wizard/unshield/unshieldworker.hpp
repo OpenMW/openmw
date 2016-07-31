@@ -24,7 +24,6 @@ namespace Wizard
     class UnshieldWorker : public QObject
     {
         Q_OBJECT
-        Q_ENUMS(Wizard::Component)
 
     public:
         UnshieldWorker(QObject *parent = 0);
@@ -105,7 +104,6 @@ namespace Wizard
         QTextCodec *mIniCodec;
 
         QWaitCondition mWait;
-        QMutex mMutex;
 
         QReadWriteLock mLock;
 

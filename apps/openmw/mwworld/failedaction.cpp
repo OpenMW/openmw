@@ -4,6 +4,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
 
 namespace MWWorld
 {
@@ -13,7 +14,7 @@ namespace MWWorld
 
     void FailedAction::executeImp(const Ptr &actor)
     {
-        if(actor.getRefData().getHandle() == "player" && !mMessage.empty())
+        if(actor == MWMechanics::getPlayer() && !mMessage.empty())
             MWBase::Environment::get().getWindowManager()->messageBox(mMessage);
     }
 }

@@ -2,10 +2,14 @@
 #define GAME_MWMECHANICS_AIAVOIDDOOR_H
 
 #include "aipackage.hpp"
+
 #include <string>
-#include "pathfinding.hpp"
+
 #include <components/esm/defs.hpp>
+
 #include "../mwworld/class.hpp"
+
+#include "pathfinding.hpp"
 
 namespace MWMechanics
 {
@@ -16,19 +20,22 @@ namespace MWMechanics
     {
         public:
             /// Avoid door until the door is fully open
-            AiAvoidDoor(const MWWorld::Ptr& doorPtr);
+            AiAvoidDoor(const MWWorld::ConstPtr& doorPtr);
 
             virtual AiAvoidDoor *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
 
             virtual int getTypeId() const;
 
             virtual unsigned int getPriority() const;
 
+            virtual bool canCancel() const { return false; }
+            virtual bool shouldCancelPreviousAi() const { return false; }
+
         private:
             float mDuration;
-            MWWorld::Ptr mDoorPtr;
+            MWWorld::ConstPtr mDoorPtr;
             ESM::Position mLastPos;
             float mAdjAngle;
     };

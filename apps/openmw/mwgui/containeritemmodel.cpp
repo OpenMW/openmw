@@ -37,7 +37,7 @@ ContainerItemModel::ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSour
     : mItemSources(itemSources)
     , mWorldItems(worldItems)
 {
-    assert (mItemSources.size());
+    assert (!mItemSources.empty());
 }
 
 ContainerItemModel::ContainerItemModel (const MWWorld::Ptr& source)

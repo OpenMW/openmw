@@ -4,11 +4,12 @@ namespace CSVRender
 {
 
     TerrainStorage::TerrainStorage(const CSMWorld::Data &data)
-        : mData(data)
+        : ESMTerrain::Storage(data.getResourceSystem()->getVFS())
+        , mData(data)
     {
     }
 
-    ESM::Land* TerrainStorage::getLand(int cellX, int cellY)
+    const ESM::Land* TerrainStorage::getLand(int cellX, int cellY)
     {
         std::ostringstream stream;
         stream << "#" << cellX << " " << cellY;
@@ -19,19 +20,24 @@ namespace CSVRender
         if (index == -1)
             return NULL;
 
-        ESM::Land* land = mData.getLand().getRecord(index).get().mLand.get();
+        const ESM::Land& land = mData.getLand().getRecord(index).get();
         int mask = ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX;
-        if (!land->isDataLoaded(mask))
-            land->loadData(mask);
-        return land;
+        land.loadData (mask);
+        return &land;
     }
 
     const ESM::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)
     {
-        std::ostringstream stream;
-        stream << index << "_" << plugin;
+        int numRecords = mData.getLandTextures().getSize();
 
-        return &mData.getLandTextures().getRecord(stream.str()).get();
+        for (int i=0; i<numRecords; ++i)
+        {
+            const CSMWorld::LandTexture* ltex = &mData.getLandTextures().getRecord(i).get();
+            if (ltex->mIndex == index && ltex->mPluginIndex == plugin)
+                return ltex;
+        }
+
+        return NULL;
     }
 
     void TerrainStorage::getBounds(float &minX, float &maxX, float &minY, float &maxY)

@@ -58,6 +58,8 @@ op 0x20029: PCRaiseRank, explicit reference
 op 0x2002a: PCLowerRank, explicit reference
 op 0x2002b: PCJoinFaction, explicit reference
 op 0x2002c: MenuTest
+op 0x2002d: BetaComment
+op 0x2002e: BetaComment, explicit reference
 opcodes 0x2002d-0x3ffff unused
 
 Segment 4:
@@ -362,7 +364,7 @@ op 0x2000221: EnableLevitation
 op 0x2000222: GetLineOfSight
 op 0x2000223: GetLineOfSightExplicit
 op 0x2000224: ToggleAI
-op 0x2000225: ToggleAIExplicit
+op 0x2000225: unused
 op 0x2000226: COE
 op 0x2000227: Cast
 op 0x2000228: Cast, explicit
@@ -396,8 +398,8 @@ op 0x2000243: GetFactionReaction
 op 0x2000244: Activate, explicit
 op 0x2000245: ClearInfoActor
 op 0x2000246: ClearInfoActor, explicit
-op 0x2000247: BetaComment
-op 0x2000248: BetaComment, explicit
+op 0x2000247: (unused)
+op 0x2000248: (unused)
 op 0x2000249: OnMurder
 op 0x200024a: OnMurder, explicit
 op 0x200024b: ToggleMenus
@@ -442,5 +444,12 @@ op 0x20002fb: AddToLevCreature
 op 0x20002fc: RemoveFromLevCreature
 op 0x20002fd: AddToLevItem
 op 0x20002fe: RemoveFromLevItem
+op 0x20002ff: SetFactionReaction
+op 0x2000300: EnableLevelupMenu
+op 0x2000301: ToggleScripts
+op 0x2000302: Fixme
+op 0x2000303: Fixme, explicit
+op 0x2000304: Show
+op 0x2000305: Show, explicit
 
-opcodes 0x20002ff-0x3ffffff unused
+opcodes 0x2000304-0x3ffffff unused

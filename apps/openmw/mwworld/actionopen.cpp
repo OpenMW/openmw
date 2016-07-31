@@ -3,8 +3,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwgui/container.hpp"
-
 #include "../mwmechanics/disease.hpp"
 
 #include "class.hpp"
@@ -25,7 +23,6 @@ namespace MWWorld
 
         MWMechanics::diseaseContact(actor, getTarget());
 
-        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Container);
-        MWBase::Environment::get().getWindowManager()->getContainerWindow()->open(getTarget(), mLoot);
+        MWBase::Environment::get().getWindowManager()->openContainer(getTarget(), mLoot);
     }
 }
