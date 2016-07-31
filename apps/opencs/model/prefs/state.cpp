@@ -309,15 +309,15 @@ void CSMPrefs::State::declare()
     declareShortcut ("orbit-center-selection", "Center On Selected", QKeySequence(Qt::Key_C));
 
     declareSubcategory ("Scene");
-    declareShortcut ("scene-navi-primary", "Camera Rotation From Mouse Movement", QKeySequence(Qt::MiddleButton));
+    declareShortcut ("scene-navi-primary", "Camera Rotation From Mouse Movement", QKeySequence(Qt::LeftButton));
     declareShortcut ("scene-navi-secondary", "Camera Translation From Mouse Movement",
-        QKeySequence(Qt::ShiftModifier | (int)Qt::MiddleButton));
-    declareShortcut ("scene-edit-primary", "Primary Edit", QKeySequence(Qt::LeftButton));
+        QKeySequence(Qt::ControlModifier | (int)Qt::LeftButton));
+    declareShortcut ("scene-edit-primary", "Primary Edit", QKeySequence(Qt::RightButton));
     declareShortcut ("scene-edit-secondary", "Secondary Edit",
-        QKeySequence(Qt::ShiftModifier | (int)Qt::LeftButton));
-    declareShortcut ("scene-select-primary", "Primary Select", QKeySequence(Qt::RightButton));
+        QKeySequence(Qt::ControlModifier | (int)Qt::RightButton));
+    declareShortcut ("scene-select-primary", "Primary Select", QKeySequence(Qt::MiddleButton));
     declareShortcut ("scene-select-secondary", "Secondary Select",
-        QKeySequence(Qt::ShiftModifier | (int)Qt::RightButton));
+        QKeySequence(Qt::ControlModifier | (int)Qt::MiddleButton));
     declareShortcut ("scene-load-cam-cell", "Load Camera Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_5));
     declareShortcut ("scene-load-cam-eastcell", "Load East Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_6));
     declareShortcut ("scene-load-cam-northcell", "Load North Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_8));
