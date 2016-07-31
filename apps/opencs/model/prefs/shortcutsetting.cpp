@@ -29,8 +29,7 @@ namespace CSMPrefs
     std::pair<QWidget*, QWidget*> ShortcutSetting::makeWidgets(QWidget* parent)
     {
         QKeySequence sequence;
-        int ignored = 0;
-        State::get().getShortcutManager().getSequence(getKey(), sequence, ignored);
+        State::get().getShortcutManager().getSequence(getKey(), sequence);
 
         QString text = QString::fromUtf8(State::get().getShortcutManager().convertToString(sequence).c_str());
 
@@ -156,13 +155,10 @@ namespace CSMPrefs
 
     void ShortcutSetting::storeValue(const QKeySequence& sequence)
     {
-        QKeySequence ignored;
-        int modifier;
-        State::get().getShortcutManager().getSequence(getKey(), ignored, modifier);
-        State::get().getShortcutManager().setSequence(getKey(), sequence, modifier);
+        State::get().getShortcutManager().setSequence(getKey(), sequence);
 
         // Convert to string and assign
-        std::string value = State::get().getShortcutManager().convertToString(sequence, modifier);
+        std::string value = State::get().getShortcutManager().convertToString(sequence);
 
         {
             QMutexLocker lock(getMutex());
@@ -184,8 +180,7 @@ namespace CSMPrefs
 
         // Button text
         QKeySequence sequence;
-        int modifier = 0;
-        State::get().getShortcutManager().getSequence(getKey(), sequence, modifier);
+        State::get().getShortcutManager().getSequence(getKey(), sequence);
 
         QString text = QString::fromUtf8(State::get().getShortcutManager().convertToString(sequence).c_str());
         mButton->setText(text);

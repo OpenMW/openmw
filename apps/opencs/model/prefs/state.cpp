@@ -287,27 +287,6 @@ void CSMPrefs::State::declare()
     declareShortcut ("reporttable-replace", "Replace Report", QKeySequence());
     declareShortcut ("reporttable-refresh", "Refresh Report", QKeySequence());
 
-    declareSubcategory ("1st/Free Camera");
-    declareShortcut ("free-forward", "Forward", QKeySequence(Qt::Key_W), Qt::Key_Shift);
-    declareShortcut ("free-backward", "Backward", QKeySequence(Qt::Key_S));
-    declareShortcut ("free-left", "Left", QKeySequence(Qt::Key_A));
-    declareShortcut ("free-right", "Right", QKeySequence(Qt::Key_D));
-    declareModifier ("free-forward", "Speed Modifier");
-    declareShortcut ("free-roll-left", "Roll Left", QKeySequence(Qt::Key_Q));
-    declareShortcut ("free-roll-right", "Roll Right", QKeySequence(Qt::Key_E));
-    declareShortcut ("free-speed-mode", "Toggle Speed Mode", QKeySequence(Qt::Key_F));
-
-    declareSubcategory ("Orbit Camera");
-    declareShortcut ("orbit-up", "Up", QKeySequence(Qt::Key_W), Qt::Key_Shift);
-    declareShortcut ("orbit-down", "Down", QKeySequence(Qt::Key_S));
-    declareShortcut ("orbit-left", "Left", QKeySequence(Qt::Key_A));
-    declareShortcut ("orbit-right", "Right", QKeySequence(Qt::Key_D));
-    declareModifier ("orbit-up", "Speed Modifier");
-    declareShortcut ("orbit-roll-left", "Roll Left", QKeySequence(Qt::Key_Q));
-    declareShortcut ("orbit-roll-right", "Roll Right", QKeySequence(Qt::Key_E));
-    declareShortcut ("orbit-speed-mode", "Toggle Speed Mode", QKeySequence(Qt::Key_F));
-    declareShortcut ("orbit-center-selection", "Center On Selected", QKeySequence(Qt::Key_C));
-
     declareSubcategory ("Scene");
     declareShortcut ("scene-navi-primary", "Camera Rotation From Mouse Movement", QKeySequence(Qt::LeftButton));
     declareShortcut ("scene-navi-secondary", "Camera Translation From Mouse Movement",
@@ -318,6 +297,7 @@ void CSMPrefs::State::declare()
     declareShortcut ("scene-select-primary", "Primary Select", QKeySequence(Qt::MiddleButton));
     declareShortcut ("scene-select-secondary", "Secondary Select",
         QKeySequence(Qt::ControlModifier | (int)Qt::MiddleButton));
+    declareModifier ("scene-speed-modifier", "Speed Modifier", Qt::Key_Shift);
     declareShortcut ("scene-load-cam-cell", "Load Camera Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_5));
     declareShortcut ("scene-load-cam-eastcell", "Load East Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_6));
     declareShortcut ("scene-load-cam-northcell", "Load North Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_8));
@@ -326,6 +306,25 @@ void CSMPrefs::State::declare()
     declareShortcut ("scene-edit-abort", "Abort", QKeySequence(Qt::Key_Escape));
     declareShortcut ("scene-focus-toolbar", "Toggle Toolbar Focus", QKeySequence(Qt::Key_T));
     declareShortcut ("scene-render-stats", "Debug Rendering Stats", QKeySequence(Qt::Key_F3));
+
+    declareSubcategory ("1st/Free Camera");
+    declareShortcut ("free-forward", "Forward", QKeySequence(Qt::Key_W));
+    declareShortcut ("free-backward", "Backward", QKeySequence(Qt::Key_S));
+    declareShortcut ("free-left", "Left", QKeySequence(Qt::Key_A));
+    declareShortcut ("free-right", "Right", QKeySequence(Qt::Key_D));
+    declareShortcut ("free-roll-left", "Roll Left", QKeySequence(Qt::Key_Q));
+    declareShortcut ("free-roll-right", "Roll Right", QKeySequence(Qt::Key_E));
+    declareShortcut ("free-speed-mode", "Toggle Speed Mode", QKeySequence(Qt::Key_F));
+
+    declareSubcategory ("Orbit Camera");
+    declareShortcut ("orbit-up", "Up", QKeySequence(Qt::Key_W));
+    declareShortcut ("orbit-down", "Down", QKeySequence(Qt::Key_S));
+    declareShortcut ("orbit-left", "Left", QKeySequence(Qt::Key_A));
+    declareShortcut ("orbit-right", "Right", QKeySequence(Qt::Key_D));
+    declareShortcut ("orbit-roll-left", "Roll Left", QKeySequence(Qt::Key_Q));
+    declareShortcut ("orbit-roll-right", "Roll Right", QKeySequence(Qt::Key_E));
+    declareShortcut ("orbit-speed-mode", "Toggle Speed Mode", QKeySequence(Qt::Key_F));
+    declareShortcut ("orbit-center-selection", "Center On Selected", QKeySequence(Qt::Key_C));
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)
@@ -443,20 +442,19 @@ CSMPrefs::ColourSetting& CSMPrefs::State::declareColour (const std::string& key,
 }
 
 CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut (const std::string& key, const std::string& label,
-    const QKeySequence& default_, int modifier_)
+    const QKeySequence& default_)
 {
     if (mCurrentCategory==mCategories.end())
         throw std::logic_error ("no category for setting");
 
-    std::string seqStr = getShortcutManager().convertToString(default_, modifier_);
+    std::string seqStr = getShortcutManager().convertToString(default_);
     setDefault (key, seqStr);
 
     // Setup with actual data
     QKeySequence sequence;
-    int mod;
 
-    getShortcutManager().convertFromString(mSettings.getString(key, mCurrentCategory->second.getKey()), sequence, mod);
-    getShortcutManager().setSequence(key, sequence, mod);
+    getShortcutManager().convertFromString(mSettings.getString(key, mCurrentCategory->second.getKey()), sequence);
+    getShortcutManager().setSequence(key, sequence);
 
     CSMPrefs::ShortcutSetting *setting = new CSMPrefs::ShortcutSetting (&mCurrentCategory->second, &mSettings, &mMutex,
         key, label);
@@ -465,10 +463,20 @@ CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut (const std::string& 
     return *setting;
 }
 
-CSMPrefs::ModifierSetting& CSMPrefs::State::declareModifier(const std::string& key, const std::string& label)
+CSMPrefs::ModifierSetting& CSMPrefs::State::declareModifier(const std::string& key, const std::string& label,
+    int default_)
 {
     if (mCurrentCategory==mCategories.end())
         throw std::logic_error ("no category for setting");
+
+    std::string modStr = getShortcutManager().convertToString(default_);
+    setDefault (key, modStr);
+
+    // Setup with actual data
+    int modifier;
+
+    getShortcutManager().convertFromString(mSettings.getString(key, mCurrentCategory->second.getKey()), modifier);
+    getShortcutManager().setModifier(key, modifier);
 
     CSMPrefs::ModifierSetting *setting = new CSMPrefs::ModifierSetting (&mCurrentCategory->second, &mSettings, &mMutex,
         key, label);

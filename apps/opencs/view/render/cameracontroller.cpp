@@ -189,8 +189,8 @@ namespace CSVRender
 
         addShortcut(naviSecondaryShortcut);
 
-        CSMPrefs::Shortcut* forwardShortcut = new CSMPrefs::Shortcut("free-forward", CSMPrefs::Shortcut::SM_Detach,
-            widget);
+        CSMPrefs::Shortcut* forwardShortcut = new CSMPrefs::Shortcut("free-forward", "scene-speed-modifier",
+            CSMPrefs::Shortcut::SM_Detach, widget);
         forwardShortcut->enable(false);
         connect(forwardShortcut, SIGNAL(activated(bool)), this, SLOT(forward(bool)));
         connect(forwardShortcut, SIGNAL(secondary(bool)), this, SLOT(alternateFast(bool)));
@@ -476,7 +476,8 @@ namespace CSVRender
 
         addShortcut(naviSecondaryShortcut);
 
-        CSMPrefs::Shortcut* upShortcut = new CSMPrefs::Shortcut("orbit-up", CSMPrefs::Shortcut::SM_Detach, widget);
+        CSMPrefs::Shortcut* upShortcut = new CSMPrefs::Shortcut("orbit-up", "scene-speed-modifier",
+            CSMPrefs::Shortcut::SM_Detach, widget);
         upShortcut->enable(false);
         connect(upShortcut, SIGNAL(activated(bool)), this, SLOT(up(bool)));
         connect(upShortcut, SIGNAL(secondary(bool)), this, SLOT(alternateFast(bool)));

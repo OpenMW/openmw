@@ -14,6 +14,7 @@ namespace CSMPrefs
         : QObject(parent)
         , mEnabled(true)
         , mName(name)
+        , mModName("")
         , mSecondaryMode(SM_Ignore)
         , mModifier(0)
         , mCurrentPos(0)
@@ -25,13 +26,34 @@ namespace CSMPrefs
         assert (parent);
 
         State::get().getShortcutManager().addShortcut(this);
-        State::get().getShortcutManager().getSequence(name, mSequence, mModifier);
+        State::get().getShortcutManager().getSequence(name, mSequence);
     }
 
-    Shortcut::Shortcut(const std::string& name, SecondaryMode secMode, QWidget* parent)
+    Shortcut::Shortcut(const std::string& name, const std::string& modName, QWidget* parent)
         : QObject(parent)
         , mEnabled(true)
         , mName(name)
+        , mModName(modName)
+        , mSecondaryMode(SM_Ignore)
+        , mModifier(0)
+        , mCurrentPos(0)
+        , mLastPos(0)
+        , mActivationStatus(AS_Inactive)
+        , mModifierStatus(false)
+        , mAction(0)
+    {
+        assert (parent);
+
+        State::get().getShortcutManager().addShortcut(this);
+        State::get().getShortcutManager().getSequence(name, mSequence);
+        State::get().getShortcutManager().getModifier(modName, mModifier);
+    }
+
+    Shortcut::Shortcut(const std::string& name, const std::string& modName, SecondaryMode secMode, QWidget* parent)
+        : QObject(parent)
+        , mEnabled(true)
+        , mName(name)
+        , mModName(modName)
         , mSecondaryMode(secMode)
         , mModifier(0)
         , mCurrentPos(0)
@@ -43,7 +65,8 @@ namespace CSMPrefs
         assert (parent);
 
         State::get().getShortcutManager().addShortcut(this);
-        State::get().getShortcutManager().getSequence(name, mSequence, mModifier);
+        State::get().getShortcutManager().getSequence(name, mSequence);
+        State::get().getShortcutManager().getModifier(modName, mModifier);
     }
 
     Shortcut::~Shortcut()
@@ -59,6 +82,11 @@ namespace CSMPrefs
     const std::string& Shortcut::getName() const
     {
         return mName;
+    }
+
+    const std::string& Shortcut::getModifierName() const
+    {
+        return mModName;
     }
 
     Shortcut::SecondaryMode Shortcut::getSecondaryMode() const

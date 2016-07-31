@@ -168,7 +168,7 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
         "<li>Movement keys: {free-forward}(forward), {free-left}(left), {free-backward}(back), {free-right}(right)</li>"
         "<li>Strafing (also vertically) by holding {scene-navi-secondary}</li>"
         "<li>Mouse wheel moves the camera forward/backward</li>"
-        "<li>Hold {free-forward:mod} to speed up movement</li>"
+        "<li>Hold {scene-speed-modifier} to speed up movement</li>"
         "</ul>");
     tool->addButton (":scenetoolbar/free-camera", "free",
         "Free Camera"
@@ -188,7 +188,7 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
             "<li>Roll camera with {orbit-roll-left} and {orbit-roll-right} keys</li>"
             "<li>Strafing (also vertically) by holding {scene-navi-secondary} (includes relocation of the centre point)</li>"
             "<li>Mouse wheel moves camera away or towards centre point but can not pass through it</li>"
-            "<li>Hold {orbit-up:mod} to speed up movement</li>"
+            "<li>Hold {scene-speed-modifier} to speed up movement</li>"
             "</ul>", tool),
         "orbit");
 

@@ -19,6 +19,7 @@ namespace CSMPrefs
     void ShortcutManager::addShortcut(Shortcut* shortcut)
     {
         mShortcuts.insert(std::make_pair(shortcut->getName(), shortcut));
+        mShortcuts.insert(std::make_pair(shortcut->getModifierName(), shortcut));
         mEventHandler->addShortcut(shortcut);
     }
 
@@ -41,13 +42,12 @@ namespace CSMPrefs
         mEventHandler->removeShortcut(shortcut);
     }
 
-    bool ShortcutManager::getSequence(const std::string& name, QKeySequence& sequence, int& modifier) const
+    bool ShortcutManager::getSequence(const std::string& name, QKeySequence& sequence) const
     {
         SequenceMap::const_iterator item = mSequences.find(name);
         if (item != mSequences.end())
         {
-            sequence = item->second.first;
-            modifier = item->second.second;
+            sequence = item->second;
 
             return true;
         }
@@ -55,17 +55,17 @@ namespace CSMPrefs
             return false;
     }
 
-    void ShortcutManager::setSequence(const std::string& name, const QKeySequence& sequence, int modifier)
+    void ShortcutManager::setSequence(const std::string& name, const QKeySequence& sequence)
     {
         // Add to map/modify
         SequenceMap::iterator item = mSequences.find(name);
         if (item != mSequences.end())
         {
-            item->second = std::make_pair(sequence, modifier);
+            item->second = sequence;
         }
         else
         {
-            mSequences.insert(std::make_pair(name, std::make_pair(sequence, modifier)));
+            mSequences.insert(std::make_pair(name, sequence));
         }
 
         // Change active shortcuts
@@ -74,6 +74,40 @@ namespace CSMPrefs
         for (ShortcutMap::iterator it = rangeS.first; it != rangeS.second; ++it)
         {
             it->second->setSequence(sequence);
+        }
+    }
+
+    bool ShortcutManager::getModifier(const std::string& name, int& modifier) const
+    {
+        ModifierMap::const_iterator item = mModifiers.find(name);
+        if (item != mModifiers.end())
+        {
+            modifier = item->second;
+
+            return true;
+        }
+        else
+            return false;
+    }
+
+    void ShortcutManager::setModifier(const std::string& name, int modifier)
+    {
+        // Add to map/modify
+        ModifierMap::iterator item = mModifiers.find(name);
+        if (item != mModifiers.end())
+        {
+            item->second = modifier;
+        }
+        else
+        {
+            mModifiers.insert(std::make_pair(name, modifier));
+        }
+
+        // Change active shortcuts
+        std::pair<ShortcutMap::iterator, ShortcutMap::iterator> rangeS = mShortcuts.equal_range(name);
+
+        for (ShortcutMap::iterator it = rangeS.first; it != rangeS.second; ++it)
+        {
             it->second->setModifier(modifier);
         }
     }
@@ -256,7 +290,6 @@ namespace CSMPrefs
     {
         const QChar SequenceStart = '{';
         const QChar SequenceEnd = '}';
-        const QString ModifierSequence = QString::fromUtf8(":mod");
 
         QStringList substrings;
 
@@ -278,30 +311,19 @@ namespace CSMPrefs
             count = endIndex - startIndex;
             if (count > 0)
             {
-                // Check if looking for modifier
-                int separatorIndex = toolTip.indexOf(ModifierSequence, startIndex);
-                if (separatorIndex != -1 && separatorIndex < endIndex)
+                QString settingName = toolTip.mid(startIndex, count);
+
+                QKeySequence sequence;
+                int modifier;
+
+                if (getSequence(settingName.toUtf8().data(), sequence))
                 {
-                    count = separatorIndex - startIndex;
-
-                    QString settingName = toolTip.mid(startIndex, count);
-
-                    QKeySequence ignored;
-                    int modifier = 0;
-                    getSequence(settingName.toUtf8().data(), ignored, modifier);
-
-                    QString value = QString::fromUtf8(convertToString(modifier).c_str());
+                    QString value = QString::fromUtf8(convertToString(sequence).c_str());
                     substrings.push_back(value);
                 }
-                else
+                else if (getModifier(settingName.toUtf8().data(), modifier))
                 {
-                    QString settingName = toolTip.mid(startIndex, count);
-
-                    QKeySequence sequence;
-                    int ignored = 0;
-                    getSequence(settingName.toUtf8().data(), sequence, ignored);
-
-                    QString value = QString::fromUtf8(convertToString(sequence).c_str());
+                    QString value = QString::fromUtf8(convertToString(modifier).c_str());
                     substrings.push_back(value);
                 }
 

@@ -34,13 +34,16 @@ namespace CSMPrefs
             };
 
             Shortcut(const std::string& name, QWidget* parent);
-            Shortcut(const std::string& name, SecondaryMode secMode, QWidget* parent);
+            Shortcut(const std::string& name, const std::string& modName, QWidget* parent);
+            Shortcut(const std::string& name, const std::string& modName, SecondaryMode secMode, QWidget* parent);
 
             ~Shortcut();
 
             bool isEnabled() const;
 
             const std::string& getName() const;
+            const std::string& getModifierName() const;
+
             SecondaryMode getSecondaryMode() const;
 
             const QKeySequence& getSequence() const;
@@ -82,6 +85,7 @@ namespace CSMPrefs
             bool mEnabled;
 
             std::string mName;
+            std::string mModName;
             SecondaryMode mSecondaryMode;
             QKeySequence mSequence;
             int mModifier;

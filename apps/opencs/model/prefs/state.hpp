@@ -76,9 +76,9 @@ namespace CSMPrefs
             ColourSetting& declareColour (const std::string& key, const std::string& label, QColor default_);
 
             ShortcutSetting& declareShortcut (const std::string& key, const std::string& label,
-                const QKeySequence& default_, int modifier_=0);
+                const QKeySequence& default_);
 
-            ModifierSetting& declareModifier(const std::string& key, const std::string& label);
+            ModifierSetting& declareModifier(const std::string& key, const std::string& label, int modifier_);
 
             void declareSeparator();
 
