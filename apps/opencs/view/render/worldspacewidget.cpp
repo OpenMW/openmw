@@ -44,6 +44,7 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     , mDragging (false)
     , mDragX(0)
     , mDragY(0)
+    , mSpeedMode(false)
     , mDragFactor(0)
     , mDragWheelFactor(0)
     , mDragShiftFactor(0)
@@ -97,8 +98,10 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     CSMPrefs::get()["Tooltips"].update();
 
     // Shortcuts
-    CSMPrefs::Shortcut* primaryEditShortcut = new CSMPrefs::Shortcut("scene-edit-primary", this);
+    CSMPrefs::Shortcut* primaryEditShortcut = new CSMPrefs::Shortcut("scene-edit-primary", "scene-speed-modifier",
+            CSMPrefs::Shortcut::SM_Detach, this);
     connect(primaryEditShortcut, SIGNAL(activated(bool)), this, SLOT(primaryEdit(bool)));
+    connect(primaryEditShortcut, SIGNAL(secondary(bool)), this, SLOT(speedMode(bool)));
 
     CSMPrefs::Shortcut* secondaryEditShortcut = new CSMPrefs::Shortcut("scene-edit-secondary", this);
     connect(secondaryEditShortcut, SIGNAL(activated(bool)), this, SLOT(secondaryEdit(bool)));
@@ -602,7 +605,7 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 
         double factor = mDragFactor;
 
-        if (event->modifiers() & Qt::ShiftModifier)
+        if (mSpeedMode)
             factor *= mDragShiftFactor;
 
         EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
@@ -656,7 +659,7 @@ void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
     {
         double factor = mDragWheelFactor;
 
-        if (event->modifiers() & Qt::ShiftModifier)
+        if (mSpeedMode)
             factor *= mDragShiftFactor;
 
         EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
@@ -704,6 +707,11 @@ void CSVRender::WorldspaceWidget::primarySelect(bool activate)
 void CSVRender::WorldspaceWidget::secondarySelect(bool activate)
 {
     handleInteraction(InteractionType_SecondarySelect, activate);
+}
+
+void CSVRender::WorldspaceWidget::speedMode(bool activate)
+{
+    mSpeedMode = activate;
 }
 
 void CSVRender::WorldspaceWidget::handleInteraction(InteractionType type, bool activate)

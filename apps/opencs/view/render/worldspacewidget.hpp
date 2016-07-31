@@ -59,6 +59,7 @@ namespace CSVRender
             bool mDragging;
             int mDragX;
             int mDragY;
+            bool mSpeedMode;
             double mDragFactor;
             double mDragWheelFactor;
             double mDragShiftFactor;
@@ -208,6 +209,8 @@ namespace CSVRender
 
             EditMode *getEditMode();
 
+            bool getSpeedMode();
+
         private:
 
             void dragEnterEvent(QDragEnterEvent *event);
@@ -268,6 +271,8 @@ namespace CSVRender
             void primarySelect(bool activate);
 
             void secondarySelect(bool activate);
+
+            void speedMode(bool activate);
 
         protected slots:
 
