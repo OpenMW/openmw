@@ -851,13 +851,13 @@ namespace MWClass
             _atk->attacker = mwmp::Main::get().getLocalPlayer()->guid;
             _atk->target = mwmp::Players::GetPlayer(ptr)->guid;
             _atk->knockdown = getCreatureStats(ptr).getKnockedDown();
-            mwmp::Main::get().getLocalPlayer()->SendAttack(0); // todo : нужна чуствительность к виду
+            mwmp::Main::get().getLocalPlayer()->SendAttack(0); // todo: make this sensitive to different weapon types
         }
 
         if(ptr == MWMechanics::getPlayer())
         {
             mwmp::Main::get().getLocalPlayer()->updateBaseStats(true);
-            mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after get damage;
+            mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after getting damage;
         }
     }
 
