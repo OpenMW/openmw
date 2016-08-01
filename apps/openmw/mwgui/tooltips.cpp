@@ -395,9 +395,9 @@ namespace MWGui
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         if (info.enchant != "")
         {
-            try
+            enchant = store.get<ESM::Enchantment>().search(info.enchant);
+            if (enchant)
             {
-                enchant = store.get<ESM::Enchantment>().find(info.enchant);
                 if (enchant->mData.mType == ESM::Enchantment::CastOnce)
                     text += "\n#{sItemCastOnce}";
                 else if (enchant->mData.mType == ESM::Enchantment::WhenStrikes)
@@ -406,10 +406,6 @@ namespace MWGui
                     text += "\n#{sItemCastWhenUsed}";
                 else if (enchant->mData.mType == ESM::Enchantment::ConstantEffect)
                     text += "\n#{sItemCastConstant}";
-            }
-            catch (const std::runtime_error& ex)
-            {
-
             }
         }
 
