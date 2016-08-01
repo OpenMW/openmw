@@ -395,15 +395,22 @@ namespace MWGui
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         if (info.enchant != "")
         {
-            enchant = store.get<ESM::Enchantment>().find(info.enchant);
-            if (enchant->mData.mType == ESM::Enchantment::CastOnce)
-                text += "\n#{sItemCastOnce}";
-            else if (enchant->mData.mType == ESM::Enchantment::WhenStrikes)
-                text += "\n#{sItemCastWhenStrikes}";
-            else if (enchant->mData.mType == ESM::Enchantment::WhenUsed)
-                text += "\n#{sItemCastWhenUsed}";
-            else if (enchant->mData.mType == ESM::Enchantment::ConstantEffect)
-                text += "\n#{sItemCastConstant}";
+            try
+            {
+                enchant = store.get<ESM::Enchantment>().find(info.enchant);
+                if (enchant->mData.mType == ESM::Enchantment::CastOnce)
+                    text += "\n#{sItemCastOnce}";
+                else if (enchant->mData.mType == ESM::Enchantment::WhenStrikes)
+                    text += "\n#{sItemCastWhenStrikes}";
+                else if (enchant->mData.mType == ESM::Enchantment::WhenUsed)
+                    text += "\n#{sItemCastWhenUsed}";
+                else if (enchant->mData.mType == ESM::Enchantment::ConstantEffect)
+                    text += "\n#{sItemCastConstant}";
+            }
+            catch (const std::runtime_error& ex)
+            {
+
+            }
         }
 
         // this the maximum width of the tooltip before it starts word-wrapping
@@ -472,9 +479,8 @@ namespace MWGui
             totalSize.width = std::max(totalSize.width, coord.width);
         }
 
-        if (info.enchant != "")
+        if (enchant)
         {
-            assert(enchant);
             MyGUI::Widget* enchantArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>("",
                 MyGUI::IntCoord(padding.left, totalSize.height, 300-padding.left, 300-totalSize.height),
                 MyGUI::Align::Stretch);
