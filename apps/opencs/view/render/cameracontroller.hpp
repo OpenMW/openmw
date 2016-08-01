@@ -2,11 +2,12 @@
 #define OPENCS_VIEW_CAMERACONTROLLER_H
 
 #include <string>
+#include <vector>
+
+#include <QObject>
 
 #include <osg/ref_ptr>
 #include <osg/Vec3d>
-
-class QKeyEvent;
 
 namespace osg
 {
@@ -14,10 +15,19 @@ namespace osg
     class Group;
 }
 
+namespace CSMPrefs
+{
+    class Shortcut;
+}
+
 namespace CSVRender
 {
-    class CameraController
+    class SceneWidget;
+
+    class CameraController : public QObject
     {
+            Q_OBJECT
+
         public:
 
             static const osg::Vec3d WorldUp;
@@ -26,7 +36,7 @@ namespace CSVRender
             static const osg::Vec3d LocalLeft;
             static const osg::Vec3d LocalForward;
 
-            CameraController();
+            CameraController(QObject* parent);
             virtual ~CameraController();
 
             bool isActive() const;
@@ -46,16 +56,16 @@ namespace CSVRender
             // moves the camera to an intelligent position
             void setup(osg::Group* root, unsigned int mask, const osg::Vec3d& up);
 
-            virtual bool handleKeyEvent(QKeyEvent* event, bool pressed) = 0;
-            virtual bool handleMouseMoveEvent(std::string mode, int x, int y) = 0;
+            virtual void handleMouseMoveEvent(int x, int y) = 0;
+            virtual void handleMouseScrollEvent(int x) = 0;
 
             virtual void update(double dt) = 0;
-
-            virtual void resetInput() = 0;
 
         protected:
 
             virtual void onActivate(){}
+
+            void addShortcut(CSMPrefs::Shortcut* shortcut);
 
         private:
 
@@ -65,13 +75,17 @@ namespace CSVRender
             double mWheelMoveMult;
 
             osg::Camera* mCamera;
+
+            std::vector<CSMPrefs::Shortcut*> mShortcuts;
     };
 
     class FreeCameraController : public CameraController
     {
+            Q_OBJECT
+
         public:
 
-            FreeCameraController();
+            FreeCameraController(QWidget* parent);
 
             double getLinearSpeed() const;
             double getRotationalSpeed() const;
@@ -84,12 +98,10 @@ namespace CSVRender
             void fixUpAxis(const osg::Vec3d& up);
             void unfixUpAxis();
 
-            bool handleKeyEvent(QKeyEvent* event, bool pressed);
-            bool handleMouseMoveEvent(std::string mode, int x, int y);
+            void handleMouseMoveEvent(int x, int y);
+            void handleMouseScrollEvent(int x);
 
             void update(double dt);
-
-            void resetInput();
 
         private:
 
@@ -101,19 +113,36 @@ namespace CSVRender
             void stabilize();
 
             bool mLockUpright, mModified;
-            bool mFast, mLeft, mRight, mForward, mBackward, mRollLeft, mRollRight;
+            bool mNaviPrimary, mNaviSecondary;
+            bool mFast, mFastAlternate;
+            bool mLeft, mRight, mForward, mBackward, mRollLeft, mRollRight;
             osg::Vec3d mUp;
 
             double mLinSpeed;
             double mRotSpeed;
             double mSpeedMult;
+
+        private slots:
+
+            void naviPrimary(bool active);
+            void naviSecondary(bool active);
+            void forward(bool active);
+            void left(bool active);
+            void backward(bool active);
+            void right(bool active);
+            void rollLeft(bool active);
+            void rollRight(bool active);
+            void alternateFast(bool active);
+            void swapSpeedMode();
     };
 
     class OrbitCameraController : public CameraController
     {
+            Q_OBJECT
+
         public:
 
-            OrbitCameraController();
+            OrbitCameraController(QWidget* parent);
 
             osg::Vec3d getCenter() const;
             double getOrbitSpeed() const;
@@ -125,12 +154,10 @@ namespace CSVRender
             void setOrbitSpeedMultiplier(double value);
             void setPickingMask(unsigned int value);
 
-            bool handleKeyEvent(QKeyEvent* event, bool pressed);
-            bool handleMouseMoveEvent(std::string mode, int x, int y);
+            void handleMouseMoveEvent(int x, int y);
+            void handleMouseScrollEvent(int x);
 
             void update(double dt);
-
-            void resetInput();
 
         private:
 
@@ -145,13 +172,28 @@ namespace CSVRender
             void zoom(double value);
 
             bool mInitialized;
-            bool mFast, mLeft, mRight, mUp, mDown, mRollLeft, mRollRight;
+            bool mNaviPrimary, mNaviSecondary;
+            bool mFast, mFastAlternate;
+            bool mLeft, mRight, mUp, mDown, mRollLeft, mRollRight;
             unsigned int mPickingMask;
             osg::Vec3d mCenter;
             double mDistance;
 
             double mOrbitSpeed;
             double mOrbitSpeedMult;
+
+        private slots:
+
+            void naviPrimary(bool active);
+            void naviSecondary(bool active);
+            void up(bool active);
+            void left(bool active);
+            void down(bool active);
+            void right(bool active);
+            void rollLeft(bool active);
+            void rollRight(bool active);
+            void alternateFast(bool active);
+            void swapSpeedMode();
     };
 }
 

@@ -16,6 +16,7 @@
 #include "category.hpp"
 #include "setting.hpp"
 #include "enumsetting.hpp"
+#include "shortcutmanager.hpp"
 
 class QColor;
 
@@ -25,6 +26,8 @@ namespace CSMPrefs
     class DoubleSetting;
     class BoolSetting;
     class ColourSetting;
+    class ShortcutSetting;
+    class ModifierSetting;
 
     /// \brief User settings state
     ///
@@ -45,6 +48,7 @@ namespace CSMPrefs
 
             const std::string mConfigFile;
             const Files::ConfigurationManager& mConfigurationManager;
+            ShortcutManager mShortcutManager;
             Settings::Manager mSettings;
             Collection mCategories;
             Iterator mCurrentCategory;
@@ -71,7 +75,14 @@ namespace CSMPrefs
 
             ColourSetting& declareColour (const std::string& key, const std::string& label, QColor default_);
 
+            ShortcutSetting& declareShortcut (const std::string& key, const std::string& label,
+                const QKeySequence& default_);
+
+            ModifierSetting& declareModifier(const std::string& key, const std::string& label, int modifier_);
+
             void declareSeparator();
+
+            void declareSubcategory(const std::string& label);
 
             void setDefault (const std::string& key, const std::string& default_);
 
@@ -86,6 +97,8 @@ namespace CSMPrefs
             Iterator begin();
 
             Iterator end();
+
+            ShortcutManager& getShortcutManager();
 
             Category& operator[](const std::string& key);
 

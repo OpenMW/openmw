@@ -19,6 +19,8 @@ namespace CSVRender
 
             virtual void activate(CSVWidget::SceneToolbar* toolbar);
 
+            virtual void deactivate(CSVWidget::SceneToolbar* toolbar);
+
             virtual void primaryEditPressed(const WorldspaceHitResult& hit);
 
             virtual void secondaryEditPressed(const WorldspaceHitResult& hit);

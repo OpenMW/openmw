@@ -9,6 +9,8 @@
 #include "doublesetting.hpp"
 #include "boolsetting.hpp"
 #include "coloursetting.hpp"
+#include "shortcutsetting.hpp"
+#include "modifiersetting.hpp"
 
 CSMPrefs::State *CSMPrefs::State::sThis = 0;
 
@@ -165,16 +167,6 @@ void CSMPrefs::State::declare()
         "list go to the first/last item");
 
     declareCategory ("3D Scene Input");
-    EnumValue left ("Left Mouse-Button");
-    EnumValue cLeft ("Ctrl-Left Mouse-Button");
-    EnumValue right ("Right Mouse-Button");
-    EnumValue cRight ("Ctrl-Right Mouse-Button");
-    EnumValue middle ("Middle Mouse-Button");
-    EnumValue cMiddle ("Ctrl-Middle Mouse-Button");
-    EnumValues inputButtons;
-    inputButtons.add (left).add (cLeft).add (right).add (cRight).add (middle).add (cMiddle);
-    declareEnum ("p-navi", "Primary Camera Navigation Button", left).addValues (inputButtons);
-    declareEnum ("s-navi", "Secondary Camera Navigation Button", cLeft).addValues (inputButtons);
     declareDouble ("p-navi-free-sensitivity", "Free Camera Sensitivity", 1/650.).setPrecision(5).setRange(0.0, 1.0);
     declareBool ("p-navi-free-invert", "Invert Free Camera Mouse Input", false);
     declareDouble ("p-navi-orbit-sensitivity", "Orbit Camera Sensitivity", 1/650.).setPrecision(5).setRange(0.0, 1.0);
@@ -186,10 +178,6 @@ void CSMPrefs::State::declare()
     declareDouble ("navi-free-speed-mult", "Free Camera Speed Multiplier (from Modifier)", 8).setRange(0.001, 1000.0);
     declareDouble ("navi-orbit-rot-speed", "Orbital Camera Rotational Speed", 3.14 / 4).setRange(0.001, 6.28);
     declareDouble ("navi-orbit-speed-mult", "Orbital Camera Speed Multiplier (from Modifier)", 4).setRange(0.001, 1000.0);
-    declareEnum ("p-edit", "Primary Editing Button", right).addValues (inputButtons);
-    declareEnum ("s-edit", "Secondary Editing Button", cRight).addValues (inputButtons);
-    declareEnum ("p-select", "Primary Selection Button", middle).addValues (inputButtons);
-    declareEnum ("s-select", "Secondary Selection Button", cMiddle).addValues (inputButtons);
     declareSeparator();
     declareBool ("context-select", "Context Sensitive Selection", false);
     declareDouble ("drag-factor", "Mouse sensitivity during drag operations", 1.0).
@@ -224,6 +212,119 @@ void CSMPrefs::State::declare()
         addValues (insertOutsideCell);
     declareEnum ("outside-visible-drop", "Handling drops outside of visible cells", showAndInsert).
         addValues (insertOutsideVisibleCell);
+
+    declareCategory ("Key Bindings");
+
+    declareSubcategory ("Document");
+    declareShortcut ("document-file-newgame", "New Game", QKeySequence(Qt::ControlModifier | Qt::Key_N));
+    declareShortcut ("document-file-newaddon", "New Addon", QKeySequence());
+    declareShortcut ("document-file-open", "Open", QKeySequence(Qt::ControlModifier | Qt::Key_O));
+    declareShortcut ("document-file-save", "Save", QKeySequence(Qt::ControlModifier | Qt::Key_S));
+    declareShortcut ("document-file-verify", "Verify", QKeySequence());
+    declareShortcut ("document-file-merge", "Merge", QKeySequence());
+    declareShortcut ("document-file-errorlog", "Open Load Error Log", QKeySequence());
+    declareShortcut ("document-file-metadata", "Meta Data", QKeySequence());
+    declareShortcut ("document-file-close", "Close Document", QKeySequence(Qt::ControlModifier | Qt::Key_W));
+    declareShortcut ("document-file-exit", "Exit Application", QKeySequence(Qt::ControlModifier | Qt::Key_Q));
+    declareShortcut ("document-edit-undo", "Undo", QKeySequence(Qt::ControlModifier | Qt::Key_Z));
+    declareShortcut ("document-edit-redo", "Redo", QKeySequence(Qt::ControlModifier | Qt::ShiftModifier | Qt::Key_Z));
+    declareShortcut ("document-edit-preferences", "Open Preferences", QKeySequence());
+    declareShortcut ("document-edit-search", "Search", QKeySequence(Qt::ControlModifier | Qt::Key_F));
+    declareShortcut ("document-view-newview", "New View", QKeySequence());
+    declareShortcut ("document-view-statusbar", "Toggle Status Bar", QKeySequence());
+    declareShortcut ("document-view-filters", "Open Filter List", QKeySequence());
+    declareShortcut ("document-world-regions", "Open Region List", QKeySequence());
+    declareShortcut ("document-world-cells", "Open Cell List", QKeySequence());
+    declareShortcut ("document-world-referencables", "Open Object List", QKeySequence());
+    declareShortcut ("document-world-references", "Open Instance List", QKeySequence());
+    declareShortcut ("document-world-pathgrid", "Open Pathgrid List", QKeySequence());
+    declareShortcut ("document-world-regionmap", "Open Region Map", QKeySequence());
+    declareShortcut ("document-mechanics-globals", "Open Global List", QKeySequence());
+    declareShortcut ("document-mechanics-gamesettings", "Open Game Settings", QKeySequence());
+    declareShortcut ("document-mechanics-scripts", "Open Script List", QKeySequence());
+    declareShortcut ("document-mechanics-spells", "Open Spell List", QKeySequence());
+    declareShortcut ("document-mechanics-enchantments", "Open Enchantment List", QKeySequence());
+    declareShortcut ("document-mechanics-magiceffects", "Open Magic Effect List", QKeySequence());
+    declareShortcut ("document-mechanics-startscripts", "Open Start Script List", QKeySequence());
+    declareShortcut ("document-character-skills", "Open Skill List", QKeySequence());
+    declareShortcut ("document-character-classes", "Open Class List", QKeySequence());
+    declareShortcut ("document-character-factions", "Open Faction List", QKeySequence());
+    declareShortcut ("document-character-races", "Open Race List", QKeySequence());
+    declareShortcut ("document-character-birthsigns", "Open Birthsign List", QKeySequence());
+    declareShortcut ("document-character-topics", "Open Topic List", QKeySequence());
+    declareShortcut ("document-character-journals", "Open Journal List", QKeySequence());
+    declareShortcut ("document-character-topicinfos", "Open Topic Info List", QKeySequence());
+    declareShortcut ("document-character-journalinfos", "Open Journal Info List", QKeySequence());
+    declareShortcut ("document-character-bodyparts", "Open Body Part List", QKeySequence());
+    declareShortcut ("document-assets-sounds", "Open Sound Asset List", QKeySequence());
+    declareShortcut ("document-assets-soundgens", "Open Sound Generator List", QKeySequence());
+    declareShortcut ("document-assets-meshes", "Open Mesh Asset List", QKeySequence());
+    declareShortcut ("document-assets-icons", "Open Icon Asset List", QKeySequence());
+    declareShortcut ("document-assets-music", "Open Music Asset List", QKeySequence());
+    declareShortcut ("document-assets-soundres", "Open Sound File List", QKeySequence());
+    declareShortcut ("document-assets-textures", "Open Texture Asset List", QKeySequence());
+    declareShortcut ("document-assets-videos", "Open Video Asset List", QKeySequence());
+    declareShortcut ("document-debug-run", "Run Debug", QKeySequence());
+    declareShortcut ("document-debug-shutdown", "Stop Debug", QKeySequence());
+    declareShortcut ("document-debug-runlog", "Open Run Log", QKeySequence());
+
+    declareSubcategory ("Table");
+    declareShortcut ("table-edit", "Edit Record", QKeySequence());
+    declareShortcut ("table-add", "Add Row/Record", QKeySequence(Qt::ShiftModifier | Qt::Key_A));
+    declareShortcut ("table-clone", "Clone Record", QKeySequence(Qt::ShiftModifier | Qt::Key_D));
+    declareShortcut ("table-revert", "Revert Record", QKeySequence());
+    declareShortcut ("table-remove", "Remove Row/Record", QKeySequence(Qt::Key_Delete));
+    declareShortcut ("table-moveup", "Move Record Up", QKeySequence());
+    declareShortcut ("table-movedown", "Move Record Down", QKeySequence());
+    declareShortcut ("table-view", "View Record", QKeySequence());
+    declareShortcut ("table-preview", "Preview Record", QKeySequence());
+    declareShortcut ("table-extendeddelete", "Extended Record Deletion", QKeySequence());
+    declareShortcut ("table-extendedrevert", "Extended Record Revertion", QKeySequence());
+
+    declareSubcategory ("Report Table");
+    declareShortcut ("reporttable-show", "Show Report", QKeySequence());
+    declareShortcut ("reporttable-remove", "Remove Report", QKeySequence(Qt::Key_Delete));
+    declareShortcut ("reporttable-replace", "Replace Report", QKeySequence());
+    declareShortcut ("reporttable-refresh", "Refresh Report", QKeySequence());
+
+    declareSubcategory ("Scene");
+    declareShortcut ("scene-navi-primary", "Camera Rotation From Mouse Movement", QKeySequence(Qt::LeftButton));
+    declareShortcut ("scene-navi-secondary", "Camera Translation From Mouse Movement",
+        QKeySequence(Qt::ControlModifier | (int)Qt::LeftButton));
+    declareShortcut ("scene-edit-primary", "Primary Edit", QKeySequence(Qt::RightButton));
+    declareShortcut ("scene-edit-secondary", "Secondary Edit",
+        QKeySequence(Qt::ControlModifier | (int)Qt::RightButton));
+    declareShortcut ("scene-select-primary", "Primary Select", QKeySequence(Qt::MiddleButton));
+    declareShortcut ("scene-select-secondary", "Secondary Select",
+        QKeySequence(Qt::ControlModifier | (int)Qt::MiddleButton));
+    declareModifier ("scene-speed-modifier", "Speed Modifier", Qt::Key_Shift);
+    declareShortcut ("scene-load-cam-cell", "Load Camera Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_5));
+    declareShortcut ("scene-load-cam-eastcell", "Load East Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_6));
+    declareShortcut ("scene-load-cam-northcell", "Load North Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_8));
+    declareShortcut ("scene-load-cam-westcell", "Load West Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_4));
+    declareShortcut ("scene-load-cam-southcell", "Load South Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_2));
+    declareShortcut ("scene-edit-abort", "Abort", QKeySequence(Qt::Key_Escape));
+    declareShortcut ("scene-focus-toolbar", "Toggle Toolbar Focus", QKeySequence(Qt::Key_T));
+    declareShortcut ("scene-render-stats", "Debug Rendering Stats", QKeySequence(Qt::Key_F3));
+
+    declareSubcategory ("1st/Free Camera");
+    declareShortcut ("free-forward", "Forward", QKeySequence(Qt::Key_W));
+    declareShortcut ("free-backward", "Backward", QKeySequence(Qt::Key_S));
+    declareShortcut ("free-left", "Left", QKeySequence(Qt::Key_A));
+    declareShortcut ("free-right", "Right", QKeySequence(Qt::Key_D));
+    declareShortcut ("free-roll-left", "Roll Left", QKeySequence(Qt::Key_Q));
+    declareShortcut ("free-roll-right", "Roll Right", QKeySequence(Qt::Key_E));
+    declareShortcut ("free-speed-mode", "Toggle Speed Mode", QKeySequence(Qt::Key_F));
+
+    declareSubcategory ("Orbit Camera");
+    declareShortcut ("orbit-up", "Up", QKeySequence(Qt::Key_W));
+    declareShortcut ("orbit-down", "Down", QKeySequence(Qt::Key_S));
+    declareShortcut ("orbit-left", "Left", QKeySequence(Qt::Key_A));
+    declareShortcut ("orbit-right", "Right", QKeySequence(Qt::Key_D));
+    declareShortcut ("orbit-roll-left", "Roll Left", QKeySequence(Qt::Key_Q));
+    declareShortcut ("orbit-roll-right", "Roll Right", QKeySequence(Qt::Key_E));
+    declareShortcut ("orbit-speed-mode", "Toggle Speed Mode", QKeySequence(Qt::Key_F));
+    declareShortcut ("orbit-center-selection", "Center On Selected", QKeySequence(Qt::Key_C));
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)
@@ -340,6 +441,50 @@ CSMPrefs::ColourSetting& CSMPrefs::State::declareColour (const std::string& key,
     return *setting;
 }
 
+CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut (const std::string& key, const std::string& label,
+    const QKeySequence& default_)
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    std::string seqStr = getShortcutManager().convertToString(default_);
+    setDefault (key, seqStr);
+
+    // Setup with actual data
+    QKeySequence sequence;
+
+    getShortcutManager().convertFromString(mSettings.getString(key, mCurrentCategory->second.getKey()), sequence);
+    getShortcutManager().setSequence(key, sequence);
+
+    CSMPrefs::ShortcutSetting *setting = new CSMPrefs::ShortcutSetting (&mCurrentCategory->second, &mSettings, &mMutex,
+        key, label);
+    mCurrentCategory->second.addSetting (setting);
+
+    return *setting;
+}
+
+CSMPrefs::ModifierSetting& CSMPrefs::State::declareModifier(const std::string& key, const std::string& label,
+    int default_)
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    std::string modStr = getShortcutManager().convertToString(default_);
+    setDefault (key, modStr);
+
+    // Setup with actual data
+    int modifier;
+
+    getShortcutManager().convertFromString(mSettings.getString(key, mCurrentCategory->second.getKey()), modifier);
+    getShortcutManager().setModifier(key, modifier);
+
+    CSMPrefs::ModifierSetting *setting = new CSMPrefs::ModifierSetting (&mCurrentCategory->second, &mSettings, &mMutex,
+        key, label);
+    mCurrentCategory->second.addSetting (setting);
+
+    return *setting;
+}
+
 void CSMPrefs::State::declareSeparator()
 {
     if (mCurrentCategory==mCategories.end())
@@ -347,6 +492,17 @@ void CSMPrefs::State::declareSeparator()
 
     CSMPrefs::Setting *setting =
         new CSMPrefs::Setting (&mCurrentCategory->second, &mSettings, &mMutex, "", "");
+
+    mCurrentCategory->second.addSetting (setting);
+}
+
+void CSMPrefs::State::declareSubcategory(const std::string& label)
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    CSMPrefs::Setting *setting =
+        new CSMPrefs::Setting (&mCurrentCategory->second, &mSettings, &mMutex, "", label);
 
     mCurrentCategory->second.addSetting (setting);
 }
@@ -369,10 +525,10 @@ CSMPrefs::State::State (const Files::ConfigurationManager& configurationManager)
     if (sThis)
         throw std::logic_error ("An instance of CSMPRefs::State already exists");
 
+    sThis = this;
+
     load();
     declare();
-
-    sThis = this;
 }
 
 CSMPrefs::State::~State()
@@ -394,6 +550,11 @@ CSMPrefs::State::Iterator CSMPrefs::State::begin()
 CSMPrefs::State::Iterator CSMPrefs::State::end()
 {
     return mCategories.end();
+}
+
+CSMPrefs::ShortcutManager& CSMPrefs::State::getShortcutManager()
+{
+    return mShortcutManager;
 }
 
 CSMPrefs::Category& CSMPrefs::State::operator[] (const std::string& key)

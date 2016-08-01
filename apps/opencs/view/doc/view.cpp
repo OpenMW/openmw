@@ -16,6 +16,7 @@
 
 #include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
+#include "../../model/prefs/shortcut.hpp"
 
 #include "../../model/world/idtable.hpp"
 
@@ -44,83 +45,98 @@ void CSVDoc::View::closeEvent (QCloseEvent *event)
 
 void CSVDoc::View::setupFileMenu()
 {
-    QMenu *file = menuBar()->addMenu (tr ("&File"));
+    QMenu *file = menuBar()->addMenu (tr ("File"));
 
     QAction *newGame = new QAction (tr ("New Game"), this);
     connect (newGame, SIGNAL (triggered()), this, SIGNAL (newGameRequest()));
+    setupShortcut("document-file-newgame", newGame);
     file->addAction (newGame);
+
 
     QAction *newAddon = new QAction (tr ("New Addon"), this);
     connect (newAddon, SIGNAL (triggered()), this, SIGNAL (newAddonRequest()));
+    setupShortcut("document-file-newaddon", newAddon);
     file->addAction (newAddon);
 
-    QAction *open = new QAction (tr ("&Open"), this);
+    QAction *open = new QAction (tr ("Open"), this);
     connect (open, SIGNAL (triggered()), this, SIGNAL (loadDocumentRequest()));
+    setupShortcut("document-file-open", open);
     file->addAction (open);
 
-    mSave = new QAction (tr ("&Save"), this);
+    mSave = new QAction (tr ("Save"), this);
     connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
+    setupShortcut("document-file-save", mSave);
     file->addAction (mSave);
 
-    mVerify = new QAction (tr ("&Verify"), this);
+    mVerify = new QAction (tr ("Verify"), this);
     connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
+    setupShortcut("document-file-verify", mVerify);
     file->addAction (mVerify);
 
     mMerge = new QAction (tr ("Merge"), this);
     connect (mMerge, SIGNAL (triggered()), this, SLOT (merge()));
+    setupShortcut("document-file-merge", mMerge);
     file->addAction (mMerge);
 
-    QAction *loadErrors = new QAction (tr ("Load Error Log"), this);
+    QAction *loadErrors = new QAction (tr ("Open Load Error Log"), this);
     connect (loadErrors, SIGNAL (triggered()), this, SLOT (loadErrorLog()));
+    setupShortcut("document-file-errorlog", loadErrors);
     file->addAction (loadErrors);
 
     QAction *meta = new QAction (tr ("Meta Data"), this);
     connect (meta, SIGNAL (triggered()), this, SLOT (addMetaDataSubView()));
+    setupShortcut("document-file-metadata", meta);
     file->addAction (meta);
 
-    QAction *close = new QAction (tr ("&Close"), this);
+    QAction *close = new QAction (tr ("Close Document"), this);
     connect (close, SIGNAL (triggered()), this, SLOT (close()));
+    setupShortcut("document-file-close", close);
     file->addAction(close);
 
-    QAction *exit = new QAction (tr ("&Exit"), this);
+    QAction *exit = new QAction (tr ("Exit Application"), this);
     connect (exit, SIGNAL (triggered()), this, SLOT (exit()));
     connect (this, SIGNAL(exitApplicationRequest(CSVDoc::View *)), &mViewManager, SLOT(exitApplication(CSVDoc::View *)));
+    setupShortcut("document-file-exit", exit);
 
     file->addAction(exit);
 }
 
 void CSVDoc::View::setupEditMenu()
 {
-    QMenu *edit = menuBar()->addMenu (tr ("&Edit"));
+    QMenu *edit = menuBar()->addMenu (tr ("Edit"));
 
-    mUndo = mDocument->getUndoStack().createUndoAction (this, tr("&Undo"));
-    mUndo->setShortcuts (QKeySequence::Undo);
+    mUndo = mDocument->getUndoStack().createUndoAction (this, tr("Undo"));
+    setupShortcut("document-edit-undo", mUndo);
     edit->addAction (mUndo);
 
-    mRedo= mDocument->getUndoStack().createRedoAction (this, tr("&Redo"));
-    mRedo->setShortcuts (QKeySequence::Redo);
+    mRedo= mDocument->getUndoStack().createRedoAction (this, tr("Redo"));
+    setupShortcut("document-edit-redo", mRedo);
     edit->addAction (mRedo);
 
-    QAction *userSettings = new QAction (tr ("&Preferences"), this);
+    QAction *userSettings = new QAction (tr ("Preferences"), this);
     connect (userSettings, SIGNAL (triggered()), this, SIGNAL (editSettingsRequest()));
+    setupShortcut("document-edit-preferences", userSettings);
     edit->addAction (userSettings);
 
     QAction *search = new QAction (tr ("Search"), this);
     connect (search, SIGNAL (triggered()), this, SLOT (addSearchSubView()));
+    setupShortcut("document-edit-search", search);
     edit->addAction (search);
 }
 
 void CSVDoc::View::setupViewMenu()
 {
-    QMenu *view = menuBar()->addMenu (tr ("&View"));
+    QMenu *view = menuBar()->addMenu (tr ("View"));
 
-    QAction *newWindow = new QAction (tr ("&New View"), this);
+    QAction *newWindow = new QAction (tr ("New View"), this);
     connect (newWindow, SIGNAL (triggered()), this, SLOT (newView()));
+    setupShortcut("document-view-newview", newWindow);
     view->addAction (newWindow);
 
-    mShowStatusBar = new QAction (tr ("Show Status Bar"), this);
+    mShowStatusBar = new QAction (tr ("Toggle Status Bar"), this);
     mShowStatusBar->setCheckable (true);
     connect (mShowStatusBar, SIGNAL (toggled (bool)), this, SLOT (toggleShowStatusBar (bool)));
+    setupShortcut("document-view-statusbar", mShowStatusBar);
 
     mShowStatusBar->setChecked (CSMPrefs::get()["Windows"]["show-statusbar"].isTrue());
 
@@ -128,70 +144,84 @@ void CSVDoc::View::setupViewMenu()
 
     QAction *filters = new QAction (tr ("Filters"), this);
     connect (filters, SIGNAL (triggered()), this, SLOT (addFiltersSubView()));
+    setupShortcut("document-view-filters", filters);
     view->addAction (filters);
 }
 
 void CSVDoc::View::setupWorldMenu()
 {
-    QMenu *world = menuBar()->addMenu (tr ("&World"));
+    QMenu *world = menuBar()->addMenu (tr ("World"));
 
     QAction *regions = new QAction (tr ("Regions"), this);
     connect (regions, SIGNAL (triggered()), this, SLOT (addRegionsSubView()));
+    setupShortcut("document-world-regions", regions);
     world->addAction (regions);
 
     QAction *cells = new QAction (tr ("Cells"), this);
     connect (cells, SIGNAL (triggered()), this, SLOT (addCellsSubView()));
+    setupShortcut("document-world-cells", cells);
     world->addAction (cells);
 
     QAction *referenceables = new QAction (tr ("Objects"), this);
     connect (referenceables, SIGNAL (triggered()), this, SLOT (addReferenceablesSubView()));
+    setupShortcut("document-world-referencables", referenceables);
     world->addAction (referenceables);
 
     QAction *references = new QAction (tr ("Instances"), this);
     connect (references, SIGNAL (triggered()), this, SLOT (addReferencesSubView()));
+    setupShortcut("document-world-references", references);
     world->addAction (references);
 
     QAction *grid = new QAction (tr ("Pathgrid"), this);
     connect (grid, SIGNAL (triggered()), this, SLOT (addPathgridSubView()));
+    setupShortcut("document-world-pathgrid", grid);
     world->addAction (grid);
 
     world->addSeparator(); // items that don't represent single record lists follow here
 
     QAction *regionMap = new QAction (tr ("Region Map"), this);
     connect (regionMap, SIGNAL (triggered()), this, SLOT (addRegionMapSubView()));
+    setupShortcut("document-world-regionmap", regionMap);
     world->addAction (regionMap);
 }
 
 void CSVDoc::View::setupMechanicsMenu()
 {
-    QMenu *mechanics = menuBar()->addMenu (tr ("&Mechanics"));
+    QMenu *mechanics = menuBar()->addMenu (tr ("Mechanics"));
 
     QAction *globals = new QAction (tr ("Globals"), this);
     connect (globals, SIGNAL (triggered()), this, SLOT (addGlobalsSubView()));
+    setupShortcut("document-mechanics-globals", globals);
     mechanics->addAction (globals);
 
-    QAction *gmsts = new QAction (tr ("Game settings"), this);
+    QAction *gmsts = new QAction (tr ("Game Settings"), this);
     connect (gmsts, SIGNAL (triggered()), this, SLOT (addGmstsSubView()));
+    setupShortcut("document-mechanics-gamesettings", gmsts);
     mechanics->addAction (gmsts);
 
     QAction *scripts = new QAction (tr ("Scripts"), this);
     connect (scripts, SIGNAL (triggered()), this, SLOT (addScriptsSubView()));
+    setupShortcut("document-mechanics-scripts", scripts);
     mechanics->addAction (scripts);
 
     QAction *spells = new QAction (tr ("Spells"), this);
     connect (spells, SIGNAL (triggered()), this, SLOT (addSpellsSubView()));
+    setupShortcut("document-mechanics-spells", spells);
     mechanics->addAction (spells);
 
     QAction *enchantments = new QAction (tr ("Enchantments"), this);
     connect (enchantments, SIGNAL (triggered()), this, SLOT (addEnchantmentsSubView()));
+    setupShortcut("document-mechanics-enchantments", enchantments);
     mechanics->addAction (enchantments);
 
     QAction *effects = new QAction (tr ("Magic Effects"), this);
     connect (effects, SIGNAL (triggered()), this, SLOT (addMagicEffectsSubView()));
+    setupShortcut("document-mechanics-magiceffects", effects);
     mechanics->addAction (effects);
 
     QAction *startScripts = new QAction (tr ("Start Scripts"), this);
     connect (startScripts, SIGNAL (triggered()), this, SLOT (addStartScriptsSubView()));
+    setupShortcut("document-mechanics-startscripts", startScripts);
     mechanics->addAction (startScripts);
 }
 
@@ -201,81 +231,99 @@ void CSVDoc::View::setupCharacterMenu()
 
     QAction *skills = new QAction (tr ("Skills"), this);
     connect (skills, SIGNAL (triggered()), this, SLOT (addSkillsSubView()));
+    setupShortcut("document-character-skills", skills);
     characters->addAction (skills);
 
     QAction *classes = new QAction (tr ("Classes"), this);
     connect (classes, SIGNAL (triggered()), this, SLOT (addClassesSubView()));
+    setupShortcut("document-character-classes", classes);
     characters->addAction (classes);
 
     QAction *factions = new QAction (tr ("Factions"), this);
     connect (factions, SIGNAL (triggered()), this, SLOT (addFactionsSubView()));
+    setupShortcut("document-character-factions", factions);
     characters->addAction (factions);
 
     QAction *races = new QAction (tr ("Races"), this);
     connect (races, SIGNAL (triggered()), this, SLOT (addRacesSubView()));
+    setupShortcut("document-character-races", races);
     characters->addAction (races);
 
     QAction *birthsigns = new QAction (tr ("Birthsigns"), this);
     connect (birthsigns, SIGNAL (triggered()), this, SLOT (addBirthsignsSubView()));
+    setupShortcut("document-character-birthsigns", birthsigns);
     characters->addAction (birthsigns);
 
     QAction *topics = new QAction (tr ("Topics"), this);
     connect (topics, SIGNAL (triggered()), this, SLOT (addTopicsSubView()));
+    setupShortcut("document-character-topics", topics);
     characters->addAction (topics);
 
     QAction *journals = new QAction (tr ("Journals"), this);
     connect (journals, SIGNAL (triggered()), this, SLOT (addJournalsSubView()));
+    setupShortcut("document-character-journals", journals);
     characters->addAction (journals);
 
     QAction *topicInfos = new QAction (tr ("Topic Infos"), this);
     connect (topicInfos, SIGNAL (triggered()), this, SLOT (addTopicInfosSubView()));
+    setupShortcut("document-character-topicinfos", topicInfos);
     characters->addAction (topicInfos);
 
     QAction *journalInfos = new QAction (tr ("Journal Infos"), this);
     connect (journalInfos, SIGNAL (triggered()), this, SLOT (addJournalInfosSubView()));
+    setupShortcut("document-character-journalinfos", journalInfos);
     characters->addAction (journalInfos);
 
     QAction *bodyParts = new QAction (tr ("Body Parts"), this);
     connect (bodyParts, SIGNAL (triggered()), this, SLOT (addBodyPartsSubView()));
+    setupShortcut("document-character-bodyparts", bodyParts);
     characters->addAction (bodyParts);
 }
 
 void CSVDoc::View::setupAssetsMenu()
 {
-    QMenu *assets = menuBar()->addMenu (tr ("&Assets"));
+    QMenu *assets = menuBar()->addMenu (tr ("Assets"));
 
     QAction *sounds = new QAction (tr ("Sounds"), this);
     connect (sounds, SIGNAL (triggered()), this, SLOT (addSoundsSubView()));
+    setupShortcut("document-assets-sounds", sounds);
     assets->addAction (sounds);
 
     QAction *soundGens = new QAction (tr ("Sound Generators"), this);
     connect (soundGens, SIGNAL (triggered()), this, SLOT (addSoundGensSubView()));
+    setupShortcut("document-assets-soundgens", soundGens);
     assets->addAction (soundGens);
 
     assets->addSeparator(); // resources follow here
 
     QAction *meshes = new QAction (tr ("Meshes"), this);
     connect (meshes, SIGNAL (triggered()), this, SLOT (addMeshesSubView()));
+    setupShortcut("document-assets-meshes", meshes);
     assets->addAction (meshes);
 
     QAction *icons = new QAction (tr ("Icons"), this);
     connect (icons, SIGNAL (triggered()), this, SLOT (addIconsSubView()));
+    setupShortcut("document-assets-icons", icons);
     assets->addAction (icons);
 
     QAction *musics = new QAction (tr ("Music"), this);
     connect (musics, SIGNAL (triggered()), this, SLOT (addMusicsSubView()));
+    setupShortcut("document-assets-music", musics);
     assets->addAction (musics);
 
     QAction *soundsRes = new QAction (tr ("Sound Files"), this);
     connect (soundsRes, SIGNAL (triggered()), this, SLOT (addSoundsResSubView()));
+    setupShortcut("document-assets-soundres", soundsRes);
     assets->addAction (soundsRes);
 
     QAction *textures = new QAction (tr ("Textures"), this);
     connect (textures, SIGNAL (triggered()), this, SLOT (addTexturesSubView()));
+    setupShortcut("document-assets-textures", textures);
     assets->addAction (textures);
 
     QAction *videos = new QAction (tr ("Videos"), this);
     connect (videos, SIGNAL (triggered()), this, SLOT (addVideosSubView()));
+    setupShortcut("document-assets-videos", videos);
     assets->addAction (videos);
 }
 
@@ -299,12 +347,16 @@ void CSVDoc::View::setupDebugMenu()
     QAction *runDebug = debug->addMenu (mGlobalDebugProfileMenu);
     runDebug->setText (tr ("Run OpenMW"));
 
+    setupShortcut("document-debug-run", runDebug);
+
     mStopDebug = new QAction (tr ("Shutdown OpenMW"), this);
     connect (mStopDebug, SIGNAL (triggered()), this, SLOT (stop()));
+    setupShortcut("document-debug-shutdown", mStopDebug);
     debug->addAction (mStopDebug);
 
-    QAction *runLog = new QAction (tr ("Run Log"), this);
+    QAction *runLog = new QAction (tr ("Open Run Log"), this);
     connect (runLog, SIGNAL (triggered()), this, SLOT (addRunLogSubView()));
+    setupShortcut("document-debug-runlog", runLog);
     debug->addAction (runLog);
 }
 
@@ -318,6 +370,12 @@ void CSVDoc::View::setupUi()
     setupCharacterMenu();
     setupAssetsMenu();
     setupDebugMenu();
+}
+
+void CSVDoc::View::setupShortcut(const char* name, QAction* action)
+{
+    CSMPrefs::Shortcut* shortcut = new CSMPrefs::Shortcut(name, this);
+    shortcut->associateAction(action);
 }
 
 void CSVDoc::View::updateTitle()

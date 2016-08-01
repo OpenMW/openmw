@@ -35,10 +35,10 @@ namespace CSVRender
     {
         return QString(
             "Pathgrid editing"
-            "<ul><li>Primary edit: Add node to scene</li>"
-            "<li>Secondary edit: Connect selected nodes to node</li>"
-            "<li>Primary drag: Move selected nodes</li>"
-            "<li>Secondary drag: Connect one node to another</li>"
+            "<ul><li>Press {scene-edit-primary} to add a node to the cursor location</li>"
+            "<li>Press {scene-edit-secondary} to connect the selected nodes to the node beneath the cursor</li>"
+            "<li>Press {scene-edit-primary} and drag to move selected nodes</li>"
+            "<li>Press {scene-edit-secondary} and drag to connect one node to another</li>"
             "</ul><p>Note: Only a single cell's pathgrid may be edited at a time");
     }
 
@@ -51,6 +51,16 @@ namespace CSVRender
 
         EditMode::activate(toolbar);
         toolbar->addTool(mSelectionMode);
+    }
+
+    void PathgridMode::deactivate(CSVWidget::SceneToolbar* toolbar)
+    {
+        if (mSelectionMode)
+        {
+            toolbar->removeTool (mSelectionMode);
+            delete mSelectionMode;
+            mSelectionMode = 0;
+        }
     }
 
     void PathgridMode::primaryEditPressed(const WorldspaceHitResult& hitResult)

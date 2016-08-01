@@ -5,6 +5,7 @@
 #include <QSignalMapper>
 #include <QMenu>
 #include <QContextMenuEvent>
+#include <QEvent>
 
 #include "scenetoolbar.hpp"
 #include "modebutton.hpp"
@@ -131,6 +132,16 @@ void CSVWidget::SceneToolMode::setButton (const std::string& id)
             setButton (iter);
             break;
         }
+}
+
+bool CSVWidget::SceneToolMode::event(QEvent* event)
+{
+    if (event->type() == QEvent::ToolTip)
+    {
+        adjustToolTip(mCurrent);
+    }
+
+    return SceneTool::event(event);
 }
 
 void CSVWidget::SceneToolMode::selected()
