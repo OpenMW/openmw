@@ -31,7 +31,7 @@ private:
     using IndicesFor = build_indices<N>;
 
 public:
-    virtual void *GetInterface() override;
+    virtual lib_t GetInterface() override;
     template<std::size_t... Indices>
     static LuaFuctionData* functions(indices<Indices...>);
     lua_State *lua;

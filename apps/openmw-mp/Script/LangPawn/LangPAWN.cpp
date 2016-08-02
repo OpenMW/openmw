@@ -434,9 +434,9 @@ inline AMX_NATIVE_INFO *LangPAWN::functions(indices<Indices...>)
 }
 
 
-void *LangPAWN::GetInterface()
+lib_t LangPAWN::GetInterface()
 {
-    return amx;
+    return reinterpret_cast<lib_t>(amx);
 }
 
 LangPAWN::LangPAWN()

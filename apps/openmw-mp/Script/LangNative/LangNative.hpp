@@ -11,9 +11,9 @@
 
 class LangNative : public Language
 {
-    SystemInterface<>::lib_t lib;
+    lib_t lib;
 public:
-    virtual void *GetInterface() override;
+    virtual lib_t GetInterface() override;
     LangNative();
     ~LangNative();
     virtual void LoadProgram(const char *filename) override;

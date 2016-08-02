@@ -9,9 +9,9 @@
 
 using namespace std;
 
-void *LangLua::GetInterface()
+lib_t LangLua::GetInterface()
 {
-    return lua;
+    return reinterpret_cast<lib_t>(lua);
 }
 
 LangLua::LangLua(lua_State *lua)

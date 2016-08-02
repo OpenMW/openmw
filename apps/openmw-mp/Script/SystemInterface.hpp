@@ -11,14 +11,11 @@
 #include <dlfcn.h>
 #endif
 
+#include "Types.hpp"
+
 template<typename R = void*>
 struct SystemInterface
 {
-#ifdef _WIN32
-    typedef HMODULE lib_t;
-#else
-    typedef void* lib_t;
-#endif
 
     union
     {

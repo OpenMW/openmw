@@ -12,6 +12,16 @@
 #include <RakNetTypes.h>
 #include <Utils.hpp>
 
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
+
+#ifdef _WIN32
+typedef HMODULE lib_t;
+#else
+typedef void* lib_t;
+#endif
+
 template<typename T> struct sizeof_void { enum { value = sizeof(T) }; };
 template<> struct sizeof_void<void> { enum { value = 0 }; };
 

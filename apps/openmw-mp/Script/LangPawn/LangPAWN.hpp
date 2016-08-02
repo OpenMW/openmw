@@ -21,7 +21,7 @@ private:
     using IndicesFor = build_indices<N>;
 
 public:
-    virtual void *GetInterface() override;
+    virtual lib_t GetInterface() override;
     template<std::size_t... Indices>
     static AMX_NATIVE_INFO* functions(indices<Indices...>);
 

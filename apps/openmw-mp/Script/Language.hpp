@@ -20,7 +20,7 @@ public:
     virtual boost::any Call(const char* name, const char* argl, int buf, ...) = 0;
     virtual boost::any Call(const char* name, const char* argl, const std::vector<boost::any>& args) = 0;
 
-    virtual void * GetInterface() = 0;
+    virtual lib_t GetInterface() = 0;
 
 };
 

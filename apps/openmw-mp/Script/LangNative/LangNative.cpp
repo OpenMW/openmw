@@ -14,7 +14,7 @@
 using namespace std;
 
 template<typename R>
-bool SetScript(SystemInterface<>::lib_t lib, const char *name, R value)
+bool SetScript(lib_t lib, const char *name, R value)
 {
     SystemInterface<R *> result(lib, name);
 
@@ -85,7 +85,7 @@ boost::any LangNative::Call(const char *name, const char *argl, const std::vecto
 }
 
 
-void *LangNative::GetInterface()
+lib_t LangNative::GetInterface()
 {
     return lib;
 }
