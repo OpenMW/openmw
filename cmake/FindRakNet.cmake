@@ -40,21 +40,31 @@ FIND_PATH (RakNet_INCLUDES raknet/RakPeer.h
 	$ENV{RAKNET_ROOT}/include
     )
  
+MESSAGE(STATUS ${RakNet_INCLUDES})
+MESSAGE(STATUS ${RakNet_LIBRARY_RELEASE})
+ 
 IF(RakNet_INCLUDES AND RakNet_LIBRARY_RELEASE)
     SET(RakNet_FOUND TRUE)
 ENDIF(RakNet_INCLUDES AND RakNet_LIBRARY_RELEASE)
 
 IF(RakNet_FOUND)
-  SET(RakNet_INCLUDES ${RakNet_INCLUDES})
+  SET(RakNet_INCLUDES ${RakNet_INCLUDES}/raknet)
   
   
    IF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
         SET(RakNet_LIBRARY optimized ${RakNet_LIBRARY_RELEASE} debug ${RakNet_LIBRARY_DEBUG})
-      ELSE()
+		IF(WIN32)
+			SET(RakNet_LIBRARY optimized ${RakNet_LIBRARY_RELEASE} debug ${RakNet_LIBRARY_DEBUG} -lws2_32)
+		ENDIF(WIN32)
+   ELSE()
         # if there are no configuration types and CMAKE_BUILD_TYPE has no value
         # then just use the release libraries
         SET(RakNet_LIBRARY ${RakNet_LIBRARY_RELEASE} )
-      ENDIF()
+		IF(WIN32)
+			SET(RakNet_LIBRARY ${RakNet_LIBRARY_RELEASE} -lws2_32)
+		ENDIF(WIN32)
+   ENDIF()
+   
   IF(NOT RakNet_FIND_QUIETLY)
     MESSAGE(STATUS "Found RakNet: ${RakNet_LIBRARIES}")
   ENDIF(NOT RakNet_FIND_QUIETLY)
