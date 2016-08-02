@@ -39,7 +39,8 @@ add_component_dir (bsa
 add_component_dir (vfs
     manager archive bsaarchive filesystemarchive registerarchives
     )
-
+	
+IF(BUILD_OPENMW OR BUILD_OPENCS)
 add_component_dir (resource
     scenemanager keyframemanager imagemanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem resourcemanager
     )
@@ -64,6 +65,7 @@ add_component_dir (nifosg
 add_component_dir (nifbullet
     bulletnifloader
     )
+ENDIF(BUILD_OPENMW OR BUILD_OPENCS)
 
 add_component_dir (to_utf8
     to_utf8
@@ -120,7 +122,8 @@ add_component_dir (terrain
 add_component_dir (loadinglistener
     loadinglistener
     )
-
+	
+IF(BUILD_OPENMW OR BUILD_OPENCS)
 add_component_dir (myguiplatform
     myguirendermanager myguidatamanager myguiplatform myguitexture myguiloglistener additivelayer scalinglayer
     )
@@ -136,6 +139,7 @@ add_component_dir (fontloader
 add_component_dir (sdlutil
     sdlgraphicswindow imagetosurface sdlinputwrapper sdlvideowrapper OISCompat events sdlcursormanager
     )
+ENDIF(BUILD_OPENMW OR BUILD_OPENCS)
 
 add_component_dir (version
     version
@@ -155,6 +159,7 @@ add_component_dir (fallback
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 
+IF(BUILD_OPENMW OR BUILD_OPENCS)
 if (USE_QT)
     add_component_qt_dir (contentselector
         model/modelitem model/esmfile
@@ -181,6 +186,7 @@ if (USE_QT)
         QT5_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
     endif()
 endif()
+ENDIF(BUILD_OPENMW OR BUILD_OPENCS)
 
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" AND NOT APPLE)
