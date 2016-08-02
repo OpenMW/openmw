@@ -485,8 +485,8 @@ void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
                 while (stream >> ignore1 >> ignore2 >> x >> y)
                     selection.add (CSMWorld::CellCoordinates (x, y));
                                
-                // Setup camera
-                mCurrentCamControl->setup(mRootNode, Mask_Reference | Mask_Terrain, CameraController::WorldUp);
+                // Mark that camera needs setup
+                mCamPositionSet=false;
             }
         }
         else if (hint[0]=='r')

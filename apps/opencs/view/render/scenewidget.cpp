@@ -160,6 +160,7 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
     , mFreeCamControl(new FreeCameraController())
     , mOrbitCamControl(new OrbitCameraController())
     , mCurrentCamControl(mFreeCamControl.get())
+    , mCamPositionSet(false)
 {
     mOrbitCamControl->setPickingMask(Mask_Reference | Mask_Terrain);
     selectNavigationMode("free");
@@ -312,7 +313,15 @@ void SceneWidget::keyReleaseEvent (QKeyEvent *event)
 
 void SceneWidget::update(double dt)
 {
-    mCurrentCamControl->update(dt);
+    if(mCamPositionSet)
+    {
+        mCurrentCamControl->update(dt);
+    }
+    else
+    {
+        mCurrentCamControl->setup(mRootNode, Mask_Reference | Mask_Terrain, CameraController::WorldUp);
+        mCamPositionSet = true;
+    }
 }
 
 void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)

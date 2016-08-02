@@ -118,6 +118,7 @@ namespace CSVRender
             std::auto_ptr<FreeCameraController> mFreeCamControl;
             std::auto_ptr<OrbitCameraController> mOrbitCamControl;
             CameraController* mCurrentCamControl;
+            bool mCamPositionSet;
 
             std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
 
