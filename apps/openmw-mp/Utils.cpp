@@ -60,9 +60,6 @@ const vector<string> Utils::split(const string &str, int delimiter)
     return result;
 }
 
-
-
-#undef _SEP_
 void Utils::timestamp()
 {
     time_t ltime;
