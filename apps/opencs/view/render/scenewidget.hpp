@@ -122,6 +122,7 @@ namespace CSVRender
             std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
 
         public slots:
+            /// \note Remember set the camera before running
             void update(double dt);
 
         protected slots:
