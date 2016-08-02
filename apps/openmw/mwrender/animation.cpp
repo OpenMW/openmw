@@ -1143,10 +1143,18 @@ namespace MWRender
         std::string enchantmentName = item.getClass().getEnchantment(item);
         if (enchantmentName.empty())
             return result;
-        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(enchantmentName);
+
+        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchantmentName);
+        if (!enchantment)
+            return result;
+
         assert (enchantment->mEffects.mList.size());
-        const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
+
+        const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().search(
                 enchantment->mEffects.mList.front().mEffectID);
+        if (!magicEffect)
+            return result;
+
         result.x() = magicEffect->mData.mRed / 255.f;
         result.y() = magicEffect->mData.mGreen / 255.f;
         result.z() = magicEffect->mData.mBlue / 255.f;
