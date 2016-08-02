@@ -810,6 +810,7 @@ if (APPLE)
               set(\${default_embedded_path_var} \"\${path}\" PARENT_SCOPE)
             endif()
         endfunction()
+
         cmake_policy(SET CMP0009 OLD)
         fixup_bundle(\"${INSTALLED_OPENMW_APP}\" \"${PLUGINS}\" \"\")
         fixup_bundle(\"${INSTALLED_OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"\")

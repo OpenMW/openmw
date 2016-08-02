@@ -17,6 +17,7 @@
 
 #include "editmode.hpp"
 #include "mask.hpp"
+#include "cameracontroller.hpp"
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
@@ -477,12 +478,15 @@ void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
             {
                 char ignore1; // : or ;
                 char ignore2; // #
+                // Current coordinate
                 int x, y;
 
+                // Loop throught all the coordinates to add them to selection
                 while (stream >> ignore1 >> ignore2 >> x >> y)
                     selection.add (CSMWorld::CellCoordinates (x, y));
-
-                /// \todo adjust camera position
+                               
+                // Setup camera
+                mCurrentCamControl->setup(mRootNode, Mask_Reference | Mask_Terrain, CameraController::WorldUp);
             }
         }
         else if (hint[0]=='r')

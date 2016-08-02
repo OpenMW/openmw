@@ -31,7 +31,6 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
     , mRootNode(0)
 {
-
     osgViewer::CompositeViewer& viewer = CompositeViewer::get();
 
     osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
@@ -314,15 +313,7 @@ void SceneWidget::keyReleaseEvent (QKeyEvent *event)
 
 void SceneWidget::update(double dt)
 {
-    if (mCamPositionSet)
-    {
-        mCurrentCamControl->update(dt);
-    }
-    else
-    {
-        mCurrentCamControl->setup(mRootNode, Mask_Reference | Mask_Terrain, CameraController::WorldUp);
-        mCamPositionSet = true;
-    }
+    mCurrentCamControl->update(dt);
 }
 
 void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
