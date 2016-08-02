@@ -2,7 +2,10 @@
 // Created by koncord on 09.05.16.
 //
 
-#include <dlfcn.h>
+#ifndef _WIN32
+    #include <dlfcn.h>
+#endif
+
 #include <stdexcept>
 #include "LangNative.hpp"
 #include <Script/SystemInterface.hpp>
