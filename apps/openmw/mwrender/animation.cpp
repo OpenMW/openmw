@@ -1126,12 +1126,13 @@ namespace MWRender
     };
 
     void Animation::addSpellCastGlow(osg::Vec4f glowColor){
-        addGlow(mObjectRoot, glowColor, true);
+        if (mSpellGlowUpdater == NULL) // only start a new spell glow if there isn't one already 
+            addGlow(mObjectRoot, glowColor, true);
         MWBase::Environment::get().getMechanicsManager()->add(mPtr);
     }
 
     void Animation::updateSpellGlow(float duration){
-        if (mGlowUpdater != NULL && (mGlowUpdater->getHasDuration()))
+        if (mSpellGlowUpdater != NULL)
             mSpellGlowDuration += duration;
         if (mSpellGlowDuration >= 1.5f) // length of spell glow effect was measured from original game as around 1.5 seconds
             removeSpellGlow();
@@ -1145,10 +1146,10 @@ namespace MWRender
         else
             writableStateSet = osg::clone(mObjectRoot->getStateSet(), osg::CopyOp::SHALLOW_COPY);
 
-        std::vector<osg::ref_ptr<osg::Texture2D> > Textures = mGlowUpdater->getTextures();
-        int TexUnit = mGlowUpdater->getTexUnit();
-        mObjectRoot->removeUpdateCallback(mGlowUpdater);
-        mGlowUpdater = NULL;
+        std::vector<osg::ref_ptr<osg::Texture2D> > Textures = mSpellGlowUpdater->getTextures();
+        int TexUnit = mSpellGlowUpdater->getTexUnit();
+        mObjectRoot->removeUpdateCallback(mSpellGlowUpdater);
+        mSpellGlowUpdater = NULL;
 
         for (size_t index = 0; index < Textures.size(); index++)
         {
@@ -1157,7 +1158,10 @@ namespace MWRender
         }
 
         mObjectRoot->setStateSet(writableStateSet);
-        writableStateSet->removeUniform(mUniform);
+        if (writableStateSet->getUniform("envMapColor2")) // if we added a second uniform, remove that one instead of the original
+            writableStateSet->removeUniform("envMapColor2");
+        else
+            writableStateSet->removeUniform("envMapColor");
         mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
         mSpellGlowDuration = 0.f;
     }
@@ -1186,9 +1190,13 @@ namespace MWRender
         FindLowestUnusedTexUnitVisitor findLowestUnusedTexUnitVisitor;
         node->accept(findLowestUnusedTexUnitVisitor);
         int texUnit = findLowestUnusedTexUnitVisitor.mLowestUnusedTexUnit;
-        mGlowUpdater = new GlowUpdater(texUnit, glowColor, textures, hasDuration);
-        //osg::ref_ptr<GlowUpdater> glowupdater (new GlowUpdater(texUnit, glowColor, textures));
-        node->addUpdateCallback(mGlowUpdater);
+
+        osg::ref_ptr<GlowUpdater> glowUpdater = new GlowUpdater(texUnit, glowColor, textures, hasDuration);
+
+        if (hasDuration) // store the glowUpdater for later removal and checking if this is a spell glow
+            mSpellGlowUpdater = glowUpdater;
+
+        node->addUpdateCallback(glowUpdater);
 
         // set a texture now so that the ShaderVisitor can find it
         osg::ref_ptr<osg::StateSet> writableStateSet = NULL;
@@ -1200,8 +1208,11 @@ namespace MWRender
             node->setStateSet(writableStateSet);
         }
         writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
-        mUniform = new osg::Uniform("envMapColor", glowColor);
-        writableStateSet->addUniform(mUniform);
+        
+        if (hasDuration && writableStateSet->getUniform("envMapColor")) // if we are adding a spell glow to something with an enchantment glow
+            writableStateSet->addUniform(new osg::Uniform("envMapColor2", glowColor));
+        else
+            writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
 
         mResourceSystem->getSceneManager()->recreateShaders(node);
     }

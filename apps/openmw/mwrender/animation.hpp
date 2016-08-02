@@ -270,8 +270,7 @@ protected:
     float mAlpha;
     float mSpellGlowDuration;
 
-    osg::ref_ptr<GlowUpdater> mGlowUpdater;
-    osg::Uniform* mUniform;
+    osg::ref_ptr<GlowUpdater> mSpellGlowUpdater;
 
     const NodeMap& getNodeMap() const;
 
