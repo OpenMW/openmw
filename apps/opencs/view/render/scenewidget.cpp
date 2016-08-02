@@ -313,7 +313,7 @@ void SceneWidget::keyReleaseEvent (QKeyEvent *event)
 
 void SceneWidget::update(double dt)
 {
-    if(mCamPositionSet)
+    if (mCamPositionSet)
     {
         mCurrentCamControl->update(dt);
     }
