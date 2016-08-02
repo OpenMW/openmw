@@ -38,6 +38,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwmechanics/character.hpp" // FIXME: for MWMechanics::Priority
 
@@ -89,10 +90,11 @@ namespace
     class GlowUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        GlowUpdater(int texUnit, osg::Vec4f color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures)
+        GlowUpdater(int texUnit, osg::Vec4f color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures, bool hasDuration)
             : mTexUnit(texUnit)
             , mColor(color)
             , mTextures(textures)
+            , mHasDuration(hasDuration)
         {
         }
 
@@ -122,10 +124,26 @@ namespace
             stateset->setTextureAttribute(mTexUnit, mTextures[index], osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
         }
 
+        bool const getHasDuration()
+        {
+            return mHasDuration;
+        }
+
+        std::vector<osg::ref_ptr<osg::Texture2D> > const getTextures()
+        {
+            return mTextures;
+        }
+
+        int const getTexUnit()
+        {
+            return mTexUnit;
+        }
+
     private:
         int mTexUnit;
         osg::Vec4f mColor;
         std::vector<osg::ref_ptr<osg::Texture2D> > mTextures;
+        bool mHasDuration;
     };
 
     class NodeMapVisitor : public osg::NodeVisitor
@@ -340,6 +358,7 @@ namespace MWRender
         , mHeadYawRadians(0.f)
         , mHeadPitchRadians(0.f)
         , mAlpha(1.f)
+        , mSpellGlowDuration(0.f)
     {
         for(size_t i = 0;i < sNumBlendMasks;i++)
             mAnimationTimePtr[i].reset(new AnimationTime);
@@ -1106,7 +1125,44 @@ namespace MWRender
         int mLowestUnusedTexUnit;
     };
 
-    void Animation::addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor)
+    void Animation::addSpellCastGlow(osg::Vec4f glowColor){
+        addGlow(mObjectRoot, glowColor, true);
+        MWBase::Environment::get().getMechanicsManager()->add(mPtr);
+    }
+
+    void Animation::updateSpellGlow(float duration){
+        if (mGlowUpdater != NULL && (mGlowUpdater->getHasDuration()))
+            mSpellGlowDuration += duration;
+        if (mSpellGlowDuration >= 1.5f) // length of spell glow effect was measured from original game as around 1.5 seconds
+            removeSpellGlow();
+    }
+
+    void Animation::removeSpellGlow()
+    {
+        osg::ref_ptr<osg::StateSet> writableStateSet = NULL;
+        if (!mObjectRoot->getStateSet())
+            writableStateSet = mObjectRoot->getOrCreateStateSet();
+        else
+            writableStateSet = osg::clone(mObjectRoot->getStateSet(), osg::CopyOp::SHALLOW_COPY);
+
+        std::vector<osg::ref_ptr<osg::Texture2D> > Textures = mGlowUpdater->getTextures();
+        int TexUnit = mGlowUpdater->getTexUnit();
+        mObjectRoot->removeUpdateCallback(mGlowUpdater);
+        mGlowUpdater = NULL;
+
+        for (size_t index = 0; index < Textures.size(); index++)
+        {
+            writableStateSet->setTextureAttribute(TexUnit, Textures[index], osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
+            writableStateSet->removeTextureAttribute(TexUnit, Textures[index]);
+        }
+
+        mObjectRoot->setStateSet(writableStateSet);
+        writableStateSet->removeUniform(mUniform);
+        mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
+        mSpellGlowDuration = 0.f;
+    }
+
+    void Animation::addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor, bool hasDuration)
     {
         std::vector<osg::ref_ptr<osg::Texture2D> > textures;
         for (int i=0; i<32; ++i)
@@ -1130,8 +1186,9 @@ namespace MWRender
         FindLowestUnusedTexUnitVisitor findLowestUnusedTexUnitVisitor;
         node->accept(findLowestUnusedTexUnitVisitor);
         int texUnit = findLowestUnusedTexUnitVisitor.mLowestUnusedTexUnit;
-        osg::ref_ptr<GlowUpdater> glowupdater (new GlowUpdater(texUnit, glowColor, textures));
-        node->addUpdateCallback(glowupdater);
+        mGlowUpdater = new GlowUpdater(texUnit, glowColor, textures, hasDuration);
+        //osg::ref_ptr<GlowUpdater> glowupdater (new GlowUpdater(texUnit, glowColor, textures));
+        node->addUpdateCallback(mGlowUpdater);
 
         // set a texture now so that the ShaderVisitor can find it
         osg::ref_ptr<osg::StateSet> writableStateSet = NULL;
@@ -1143,7 +1200,8 @@ namespace MWRender
             node->setStateSet(writableStateSet);
         }
         writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
-        writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
+        mUniform = new osg::Uniform("envMapColor", glowColor);
+        writableStateSet->addUniform(mUniform);
 
         mResourceSystem->getSceneManager()->recreateShaders(node);
     }
