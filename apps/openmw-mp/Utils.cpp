@@ -7,6 +7,7 @@
 #include <cstring>
 #include <ctime>
 #include <cmath>
+#include <memory>
 
 using namespace std;
 
