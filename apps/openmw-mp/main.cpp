@@ -63,44 +63,19 @@ std::string loadSettings (Settings::Manager & settings)
     return settingspath;
 }
 
-const vector<string> split(const string &str, int delimiter)
-{
-    string buffer;
-    vector<string> result;
-
-    for (auto symb:str)
-        if (symb != delimiter)
-            buffer += symb;
-        else if (!buffer.empty())
-        {
-            result.push_back(move(buffer));
-            buffer.clear();
-        }
-    if (!buffer.empty())
-        result.push_back(move(buffer));
-
-    return result;
-}
-
-
-
 int main(int argc, char *argv[])
 {
     Settings::Manager mgr;
 
     loadSettings(mgr);
 
-    //string plugin_home = "/home/koncord/ClionProjects/tes3mp-server/files";
-
     int players = mgr.getInt("players", "General");
     int port = mgr.getInt("port", "General");
 
-    std::string plugin_home = mgr.getString("home", "Plugins");
-    string moddir = plugin_home + "/files";
+    string plugin_home = mgr.getString("home", "Plugins");
+    string moddir = Utils::convertPath(plugin_home + "/files");
 
-    vector<string> plugins (split(mgr.getString("plugins", "Plugins"), ','));
-
-    cout << plugins[0] << endl;
+    vector<string> plugins (Utils::split(mgr.getString("plugins", "Plugins"), ','));
 
     printVersion("0.0.1b", 1);
 
@@ -108,7 +83,7 @@ int main(int argc, char *argv[])
     setenv("AMXFILE", moddir.c_str(), 1);
     setenv("MOD_DIR", moddir.c_str(), 1); // hack for lua
 
-    setenv("LUA_PATH", (plugin_home + "/scripts/?.lua" + ";" + plugin_home + "/scripts/?.t").c_str(), 1);
+    setenv("LUA_PATH", Utils::convertPath(plugin_home + "/scripts/?.lua" + ";" + plugin_home + "/scripts/?.t").c_str(), 1);
 
     for(auto plugin : plugins)
         Script::LoadScript(plugin.c_str(), plugin_home.c_str());

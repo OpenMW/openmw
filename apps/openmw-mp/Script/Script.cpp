@@ -80,7 +80,7 @@ void Script::LoadScripts(char *scripts, const char *base)
         while (token)
         {
             char path[4096];
-            snprintf(path, sizeof(path), "%s/%s/%s", base, "scripts", token);
+            snprintf(path, sizeof(path), Utils::convertPath("%s/%s/%s").c_str(), base, "scripts", token);
             Script::scripts.emplace_back(new Script(path));
             token = strtok(nullptr, ",");
         }
@@ -104,6 +104,6 @@ void Script::UnloadScripts()
 void Script::LoadScript(const char *script, const char *base)
 {
     char path[4096];
-    snprintf(path, sizeof(path), "%s/%s/%s", base, "scripts", script);
+    snprintf(path, sizeof(path), Utils::convertPath("%s/%s/%s").c_str(), base, "scripts", script);
     Script::scripts.emplace_back(new Script(path));
 }

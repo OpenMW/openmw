@@ -10,6 +10,59 @@
 
 using namespace std;
 
+#ifdef _WIN32
+int setenv(const char *name, const char *value, int overwrite)
+{
+	std::unique_ptr<char> tmp(new char[strlen(name) + strlen(value) + 1]);
+	sprintf(tmp.get(), "%s=%s", name, value);
+
+	printf("%s\n",tmp.get());
+
+    return putenv((const char*)tmp.get());
+}
+#endif
+
+
+std::string Utils::convertPath(std::string str)
+{
+#if defined(_WIN32)
+#define _SEP_ '\\'
+#elif defined(__APPLE__)
+#define _SEP_ ':'
+#endif
+
+#if defined(_WIN32) || defined(__APPLE__)
+    for(auto &ch : str)
+        if(ch == '/')
+	           ch = _SEP_;
+#endif //defined(_WIN32) || defined(__APPLE__)
+    return str;
+
+#undef _SEP_
+}
+
+const vector<string> Utils::split(const string &str, int delimiter)
+{
+    string buffer;
+    vector<string> result;
+
+    for (auto symb:str)
+        if (symb != delimiter)
+            buffer += symb;
+        else if (!buffer.empty())
+        {
+            result.push_back(move(buffer));
+            buffer.clear();
+        }
+    if (!buffer.empty())
+        result.push_back(move(buffer));
+
+    return result;
+}
+
+
+
+#undef _SEP_
 void Utils::timestamp()
 {
     time_t ltime;

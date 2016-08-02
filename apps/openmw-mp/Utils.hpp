@@ -7,7 +7,7 @@
 
 #include <cstddef>
 #include <string>
-
+#include <vector>
 
 #if (!defined(DEBUG_PRINTF) && defined(DEBUG))
 #define DEBUG_PRINTF printf
@@ -15,8 +15,16 @@
 #define DEBUG_PRINTF(...)
 #endif
 
+#ifdef _WIN32
+int setenv(const char *name, const char *value, int overwrite);
+#endif
+
 namespace Utils
 {
+
+    const std::vector<std::string> split(const std::string &str, int delimiter);
+
+    std::string convertPath(std::string str);
     template<size_t N>
     constexpr unsigned int hash(const char(&str)[N], size_t I = N)
     {
