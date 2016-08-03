@@ -104,10 +104,7 @@ void ScriptFunctions::SetExterior(unsigned short pid, int x, int y) noexcept
         cout << "exterior: " << player->GetCell()->mCellId.mIndex.mX << ", " << player->GetCell()->mCellId.mIndex.mY;
     cout << " in to exterior cell \"" << x << ", " << y << "\"" << endl;
 
-    /*cout << "TEST1 : " << player->GetCell()->mData.mFlags << endl;
-    player->GetCell()->mData.mFlags &= ~1;
-    cout << "TEST2 : " << player->GetCell()->mData.mFlags << endl;*/
-
+    player->GetCell()->mName = "";
     player->GetCell()->mCellId.mIndex.mX = x;
     player->GetCell()->mCellId.mIndex.mY = y;
 
