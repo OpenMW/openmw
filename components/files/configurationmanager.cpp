@@ -5,10 +5,13 @@
 #include <algorithm>
 #include <ctype.h>
 
+#include <components/files/escape.hpp>
+
 #include <boost/bind.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
 
 /**
  * \namespace Files
@@ -162,152 +165,6 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
         }
     }
     return false;
-}
-
-const int escape_hash_filter::sEscape = '@';
-const int escape_hash_filter::sEscapeIdentifier = 'a';
-const int escape_hash_filter::sHashIdentifier = 'h';
-
-escape_hash_filter::escape_hash_filter() : mNext(), mSeenNonWhitespace(false), mFinishLine(false)
-{
-}
-
-escape_hash_filter::~escape_hash_filter()
-{
-}
-
-template <typename Source>
-int escape_hash_filter::get(Source & src)
-{
-    if (mNext.empty())
-    {
-        int character = boost::iostreams::get(src);
-        bool record = true;
-        if (character == boost::iostreams::WOULD_BLOCK)
-        {
-            mNext.push(character);
-            record = false;
-        }
-        else if (character == EOF)
-        {
-            mSeenNonWhitespace = false;
-            mFinishLine = false;
-            mNext.push(character);
-        }
-        else if (character == '\n')
-        {
-            mSeenNonWhitespace = false;
-            mFinishLine = false;
-            mNext.push(character);
-        }
-        else if (mFinishLine)
-        {
-            mNext.push(character);
-        }
-        else if (character == '#')
-        {
-            if (mSeenNonWhitespace)
-            {
-                mNext.push(sEscape);
-                mNext.push(sHashIdentifier);
-            }
-            else
-            {
-                //it's fine being interpreted by Boost as a comment, and so is anything afterwards
-                mNext.push(character);
-                mFinishLine = true;
-            }
-        }
-        else if (mPrevious == sEscape)
-        {
-            mNext.push(sEscape);
-            mNext.push(sEscapeIdentifier);
-        }
-        else
-        {
-            mNext.push(character);
-        }
-        if (!mSeenNonWhitespace && !isspace(character))
-            mSeenNonWhitespace = true;
-        if (record)
-            mPrevious = character;
-    }
-    int retval = mNext.front();
-    mNext.pop();
-    return retval;
-}
-
-std::string EscapeHashString::processString(const std::string & str)
-{
-    std::string temp = boost::replace_all_copy<std::string>(str, std::string() + (char)escape_hash_filter::sEscape + (char)escape_hash_filter::sHashIdentifier, "#");
-    boost::replace_all(temp, std::string() + (char)escape_hash_filter::sEscape + (char)escape_hash_filter::sEscapeIdentifier, std::string((char) escape_hash_filter::sEscape, 1));
-    return temp;
-}
-
-EscapeHashString::EscapeHashString() : mData()
-{
-}
-
-EscapeHashString::EscapeHashString(const std::string & str) : mData(EscapeHashString::processString(str))
-{
-}
-
-EscapeHashString::EscapeHashString(const std::string & str, size_t pos, size_t len) : mData(EscapeHashString::processString(str), pos, len)
-{
-}
-
-EscapeHashString::EscapeHashString(const char * s) : mData(EscapeHashString::processString(std::string(s)))
-{
-}
-
-EscapeHashString::EscapeHashString(const char * s, size_t n) : mData(EscapeHashString::processString(std::string(s)), 0, n)
-{
-}
-
-EscapeHashString::EscapeHashString(size_t n, char c) : mData(n, c)
-{
-}
-
-template <class InputIterator>
-EscapeHashString::EscapeHashString(InputIterator first, InputIterator last) : mData(EscapeHashString::processString(std::string(first, last)))
-{
-}
-
-std::string EscapeHashString::toStdString() const
-{
-    return std::string(mData);
-}
-
-std::istream & operator>> (std::istream & is, EscapeHashString & eHS)
-{
-    std::string temp;
-    is >> temp;
-    eHS = EscapeHashString(temp);
-    return is;
-}
-
-std::ostream & operator<< (std::ostream & os, const EscapeHashString & eHS)
-{
-    os << eHS.mData;
-    return os;
-}
-
-EscapeStringVector::EscapeStringVector() : mVector()
-{
-}
-
-EscapeStringVector::~EscapeStringVector()
-{
-}
-
-std::vector<std::string> EscapeStringVector::toStdStringVector() const
-{
-    std::vector<std::string> temp = std::vector<std::string>();
-    for (std::vector<EscapeHashString>::const_iterator it = mVector.begin(); it != mVector.end(); ++it)
-    {
-        temp.push_back(it->toStdString());
-    }
-    return temp;
 }
 
 const boost::filesystem::path& ConfigurationManager::getGlobalPath() const

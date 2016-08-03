@@ -3,6 +3,7 @@
 
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/files/escape.hpp>
 #include <components/fallback/validate.hpp>
 
 #include <SDL_messagebox.h>
@@ -76,7 +77,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     desc.add_options()
         ("help", "print help message")
         ("version", "print version information and quit")
-        ("data", bpo::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")
+        ("data", bpo::value<Files::EscapePathContainer>()->default_value(Files::EscapePathContainer(), "data")
             ->multitoken()->composing(), "set data directories (later directories have higher priority)")
 
             ("data-local", bpo::value<Files::EscapeHashString>()->default_value(""),
@@ -193,7 +194,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     // directory settings
     engine.enableFSStrict(variables["fs-strict"].as<bool>());
 
-    Files::PathContainer dataDirs(variables["data"].as<Files::PathContainer>());
+    Files::PathContainer dataDirs(Files::EscapePath::toPathContainer(variables["data"].as<Files::EscapePathContainer>()));
 
     std::string local(variables["data-local"].as<Files::EscapeHashString>().toStdString());
     if (!local.empty())

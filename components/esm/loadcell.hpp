@@ -43,7 +43,15 @@ bool operator==(const MovedCellRef& ref, const RefNum& refNum);
 bool operator==(const CellRef& ref, const RefNum& refNum);
 
 typedef std::list<MovedCellRef> MovedCellRefTracker;
-typedef std::list<CellRef> CellRefTracker;
+typedef std::list<std::pair<CellRef, bool> > CellRefTracker;
+
+struct CellRefTrackerPredicate
+{
+    RefNum mRefNum;
+
+    CellRefTrackerPredicate(const RefNum& refNum) : mRefNum(refNum) {}
+    bool operator() (const std::pair<CellRef, bool>& refdelPair) { return refdelPair.first == mRefNum; }
+};
 
 /* Cells hold data about objects, creatures, statics (rocks, walls,
    buildings) and landscape (for exterior cells). Cells frequently

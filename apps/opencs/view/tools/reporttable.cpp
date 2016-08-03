@@ -15,6 +15,7 @@
 #include "../../model/tools/reportmodel.hpp"
 
 #include "../../model/prefs/state.hpp"
+#include "../../model/prefs/shortcut.hpp"
 
 #include "../../view/world/idtypedelegate.hpp"
 
@@ -171,14 +172,20 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     mShowAction = new QAction (tr ("Show"), this);
     connect (mShowAction, SIGNAL (triggered()), this, SLOT (showSelection()));
     addAction (mShowAction);
+    CSMPrefs::Shortcut* showShortcut = new CSMPrefs::Shortcut("reporttable-show", this);
+    showShortcut->associateAction(mShowAction);
 
     mRemoveAction = new QAction (tr ("Remove from list"), this);
     connect (mRemoveAction, SIGNAL (triggered()), this, SLOT (removeSelection()));
     addAction (mRemoveAction);
+    CSMPrefs::Shortcut* removeShortcut = new CSMPrefs::Shortcut("reporttable-remove", this);
+    removeShortcut->associateAction(mRemoveAction);
 
     mReplaceAction = new QAction (tr ("Replace"), this);
     connect (mReplaceAction, SIGNAL (triggered()), this, SIGNAL (replaceRequest()));
     addAction (mReplaceAction);
+    CSMPrefs::Shortcut* replaceShortcut = new CSMPrefs::Shortcut("reporttable-replace", this);
+    replaceShortcut->associateAction(mReplaceAction);
 
     if (mRefreshState)
     {
@@ -186,6 +193,8 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
         mRefreshAction->setEnabled (!(mDocument.getState() & mRefreshState));
         connect (mRefreshAction, SIGNAL (triggered()), this, SIGNAL (refreshRequest()));
         addAction (mRefreshAction);
+        CSMPrefs::Shortcut* refreshShortcut = new CSMPrefs::Shortcut("reporttable-refresh", this);
+        refreshShortcut->associateAction(mRefreshAction);
     }
 
     mDoubleClickActions.insert (std::make_pair (Qt::NoModifier, Action_Edit));

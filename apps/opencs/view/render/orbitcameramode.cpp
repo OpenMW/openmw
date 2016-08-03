@@ -2,6 +2,9 @@
 
 #include <QMenu>
 
+#include "../../model/prefs/shortcut.hpp"
+#include "../../model/prefs/shortcuteventhandler.hpp"
+
 #include "worldspacewidget.hpp"
 
 namespace CSVRender
@@ -12,12 +15,28 @@ namespace CSVRender
         , mWorldspaceWidget(worldspaceWidget)
         , mCenterOnSelection(0)
     {
+        mCenterShortcut.reset(new CSMPrefs::Shortcut("orbit-center-selection", worldspaceWidget));
+        mCenterShortcut->enable(false);
+        connect(mCenterShortcut.get(), SIGNAL(activated()), this, SLOT(centerSelection()));
+    }
+
+    OrbitCameraMode::~OrbitCameraMode()
+    {
     }
 
     void OrbitCameraMode::activate(CSVWidget::SceneToolbar* toolbar)
     {
         mCenterOnSelection = new QAction("Center on selected object", this);
+        mCenterShortcut->associateAction(mCenterOnSelection);
         connect(mCenterOnSelection, SIGNAL(triggered()), this, SLOT(centerSelection()));
+
+        mCenterShortcut->enable(true);
+    }
+
+    void OrbitCameraMode::deactivate(CSVWidget::SceneToolbar* toolbar)
+    {
+        mCenterShortcut->associateAction(0);
+        mCenterShortcut->enable(false);
     }
 
     bool OrbitCameraMode::createContextMenu(QMenu* menu)

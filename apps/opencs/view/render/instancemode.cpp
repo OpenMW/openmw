@@ -42,14 +42,14 @@ void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
         mSubMode->addButton (new InstanceMoveMode (this), "move");
         mSubMode->addButton (":placeholder", "rotate",
             "Rotate selected instances"
-            "<ul><li>Use primary edit to rotate instances freely</li>"
-            "<li>Use secondary edit to rotate instances within the grid</li>"
+            "<ul><li>Use {scene-edit-primary} to rotate instances freely</li>"
+            "<li>Use {scene-edit-secondary} to rotate instances within the grid</li>"
             "</ul>"
             "<font color=Red>Not implemented yet</font color>");
         mSubMode->addButton (":placeholder", "scale",
             "Scale selected instances"
-            "<ul><li>Use primary edit to scale instances freely</li>"
-            "<li>Use secondary edit to scale instances along the grid</li>"
+            "<ul><li>Use {scene-edit-primary} to scale instances freely</li>"
+            "<li>Use {scene-edit-secondary} to scale instances along the grid</li>"
             "</ul>"
             "<font color=Red>Not implemented yet</font color>");
 

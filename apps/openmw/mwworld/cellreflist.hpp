@@ -29,6 +29,18 @@ namespace MWWorld
             mList.push_back(item);
             return mList.back();
         }
+
+        /// Remove all references with the given refNum from this list.
+        void remove (const ESM::RefNum &refNum)
+        {
+            for (typename List::iterator it = mList.begin(); it != mList.end();)
+            {
+                if (*it == refNum)
+                    mList.erase(it++);
+                else
+                    ++it;
+            }
+        }
     };
 }
 

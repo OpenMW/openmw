@@ -3,6 +3,11 @@
 
 #include <QPushButton>
 
+namespace CSMPrefs
+{
+    class Setting;
+}
+
 namespace CSVWidget
 {
     class PushButton : public QPushButton
@@ -24,9 +29,11 @@ namespace CSVWidget
             bool mKeepOpen;
             Type mType;
             QString mToolTip;
+            QString mProcessedToolTip;
 
         private:
 
+            void processShortcuts();
             void setExtendedToolTip();
 
         protected:
@@ -57,6 +64,7 @@ namespace CSVWidget
         private slots:
 
             void checkedStateChanged (bool checked);
+            void settingChanged (const CSMPrefs::Setting *setting);
     };
 }
 

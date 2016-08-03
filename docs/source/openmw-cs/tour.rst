@@ -24,7 +24,7 @@ We will start by launching OpenMW CS, the location of the program depends on
 your operating system. You will be presented with a dialogue with three
 options: create a new game, create a new addon, edit a content file.
 
-.. figure:: ./_static/images/chapter-1/opening-dialogue.png
+.. figure:: _static/images/chapter-1/opening-dialogue.png
    :alt: Opening dialogue with three option and setting button (the wrench)
 
 The first option is for creating an entirely new game, that's not what we want.
@@ -37,7 +37,7 @@ optionally a number of other addons we want to depend on. The name of the
 project is arbitrary, it will be used to identify the addon later in the OpenMW
 launcher.
 
-.. figure:: ./_static/images/chapter-1/new-project.png
+.. figure:: _static/images/chapter-1/new-project.png
    :alt: Creation dialogue for a new project, pick content modules and name
 
 Choose Morrowind as your content file and enter `Ring of Night Vision` as the
@@ -47,7 +47,7 @@ to, but for this mod the base game is enough.
 Once the addon has been created you will be presented with a table. If you see
 a blank window rather than a table choose *World* → *Objects* from the menu.
 
-.. figure:: ./_static/images/chapter-1/objects.png
+.. figure:: _static/images/chapter-1/objects.png
    :alt: The table showing all objet records in the game.
 
 Let's talk about the interface for a second. Every window in OpenMW CS has
@@ -83,7 +83,7 @@ We need to enter an *ID* (short for *identifier*) and pick the type. The
 identifier is a unique name by which the ring can later be identified; I have
 chosen `ring_night_vision`. For the type choose *Clothing*.
 
-.. figure:: ./_static/images/chapter-1/add-record.png
+.. figure:: _static/images/chapter-1/add-record.png
    :alt: Enter the ID and type of the new ring
 
 The table should jump right to our newly created record, if not read further
@@ -101,7 +101,7 @@ instead of using the context menu; the default is double-clicking while
 holding down the shift key.
 
 
-.. figure:: ./_static/images/chapter-1/edit-record.png
+.. figure:: _static/images/chapter-1/edit-record.png
    :alt: Edit the properties of the record in a separate panel
 
 You can set the name, weight and coin value as you like, I chose `Ring of Night

@@ -3,9 +3,17 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 
+#include "../../model/prefs/state.hpp"
+#include "../../model/prefs/shortcutmanager.hpp"
+
+void CSVWidget::PushButton::processShortcuts()
+{
+    mProcessedToolTip = CSMPrefs::State::get().getShortcutManager().processToolTip(mToolTip);
+}
+
 void CSVWidget::PushButton::setExtendedToolTip()
 {
-    QString tooltip = mToolTip;
+    QString tooltip = mProcessedToolTip;
 
     if (tooltip.isEmpty())
         tooltip = "(Tool tip not implemented yet)";
@@ -77,13 +85,18 @@ CSVWidget::PushButton::PushButton (const QIcon& icon, Type type, const QString& 
         connect (this, SIGNAL (toggled (bool)), this, SLOT (checkedStateChanged (bool)));
     }
     setCheckable (type==Type_Mode || type==Type_Toggle);
+    processShortcuts();
     setExtendedToolTip();
+
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
 }
 
 CSVWidget::PushButton::PushButton (Type type, const QString& tooltip, QWidget *parent)
 : QPushButton (parent), mKeepOpen (false), mType (type), mToolTip (tooltip)
 {
     setCheckable (type==Type_Mode || type==Type_Toggle);
+    processShortcuts();
     setExtendedToolTip();
 }
 
@@ -94,7 +107,7 @@ bool CSVWidget::PushButton::hasKeepOpen() const
 
 QString CSVWidget::PushButton::getBaseToolTip() const
 {
-    return mToolTip;
+    return mProcessedToolTip;
 }
 
 CSVWidget::PushButton::Type CSVWidget::PushButton::getType() const
@@ -105,4 +118,13 @@ CSVWidget::PushButton::Type CSVWidget::PushButton::getType() const
 void CSVWidget::PushButton::checkedStateChanged (bool checked)
 {
     setExtendedToolTip();
+}
+
+void CSVWidget::PushButton::settingChanged (const CSMPrefs::Setting *setting)
+{
+    if (setting->getParent()->getKey() == "Key Bindings")
+    {
+        processShortcuts();
+        setExtendedToolTip();
+    }
 }

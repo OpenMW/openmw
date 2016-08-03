@@ -2,10 +2,8 @@
 #define COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 
 #include <map>
-#include <queue>
 
 #include <boost/program_options.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
 
 #include <components/files/fixedpath.hpp>
 #include <components/files/collections.hpp>
@@ -64,66 +62,6 @@ struct ConfigurationManager
 
         bool mSilent;
 };
-
-
-/**
- * \struct escape_hash_filter
- */
-struct escape_hash_filter : public boost::iostreams::input_filter
-{
-    static const int sEscape;
-    static const int sHashIdentifier;
-    static const int sEscapeIdentifier;
-
-    escape_hash_filter();
-    virtual ~escape_hash_filter();
-
-    template <typename Source> int get(Source & src);
-
-    private:
-        std::queue<int> mNext;
-        int mPrevious;
-
-        bool mSeenNonWhitespace;
-        bool mFinishLine;
-};
-
-/**
- * \class EscapeHashString
- */
-class EscapeHashString
-{
-    private:
-        std::string mData;
-    public:
-        static std::string processString(const std::string & str);
-
-        EscapeHashString();
-        EscapeHashString(const std::string & str);
-        EscapeHashString(const std::string & str, size_t pos, size_t len = std::string::npos);
-        EscapeHashString(const char * s);
-        EscapeHashString(const char * s, size_t n);
-        EscapeHashString(size_t n, char c);
-        template <class InputIterator>
-        EscapeHashString(InputIterator first, InputIterator last);
-
-        std::string toStdString() const;
-
-        friend std::ostream & operator<< (std::ostream & os, const EscapeHashString & eHS);
-};
-
-std::istream & operator>> (std::istream & is, EscapeHashString & eHS);
-
-struct EscapeStringVector
-{
-    std::vector<Files::EscapeHashString> mVector;
-
-    EscapeStringVector();
-    virtual ~EscapeStringVector();
-
-    std::vector<std::string> toStdStringVector() const;
-};
-
 } /* namespace Cfg */
 
 #endif /* COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP */

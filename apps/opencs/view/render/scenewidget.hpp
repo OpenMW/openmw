@@ -7,14 +7,15 @@
 #include <QWidget>
 #include <QTimer>
 
+#include <osgViewer/View>
+#include <osgViewer/CompositeViewer>
+
 #include <boost/shared_ptr.hpp>
 
 #include "lightingday.hpp"
 #include "lightingnight.hpp"
 #include "lightingbright.hpp"
 
-#include <osgViewer/View>
-#include <osgViewer/CompositeViewer>
 
 namespace Resource
 {
@@ -53,6 +54,7 @@ namespace CSVRender
             RenderWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
             virtual ~RenderWidget();
 
+            /// Initiates a request to redraw the view
             void flagAsModified();
 
             void setVisibilityMask(int mask);
@@ -62,13 +64,16 @@ namespace CSVRender
         protected:
 
             osg::ref_ptr<osgViewer::View> mView;
-
-            osg::Group* mRootNode;
+            osg::ref_ptr<osg::Group> mRootNode;
 
             QTimer mTimer;
+
+        protected slots:
+
+            void toggleRenderStats();
     };
 
-    // Extension of RenderWidget to support lighting mode selection & toolbar
+    /// Extension of RenderWidget to support lighting mode selection & toolbar
     class SceneWidget : public RenderWidget
     {
             Q_OBJECT
@@ -90,18 +95,8 @@ namespace CSVRender
 
             void setAmbient(const osg::Vec4f& ambient);
 
-            virtual void mousePressEvent (QMouseEvent *event);
-            virtual void mouseReleaseEvent (QMouseEvent *event);
             virtual void mouseMoveEvent (QMouseEvent *event);
             virtual void wheelEvent (QWheelEvent *event);
-            virtual void keyPressEvent (QKeyEvent *event);
-            virtual void keyReleaseEvent (QKeyEvent *event);
-            virtual void focusOutEvent (QFocusEvent *event);
-
-            /// \return Is \a key a button mapping setting? (ignored otherwise)
-            virtual bool storeMappingSetting (const CSMPrefs::Setting *setting);
-
-            std::string mapButton (QMouseEvent *event);
 
             boost::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 
@@ -114,12 +109,10 @@ namespace CSVRender
             LightingBright mLightingBright;
 
             int mPrevMouseX, mPrevMouseY;
-            std::string mMouseMode;
-            std::auto_ptr<FreeCameraController> mFreeCamControl;
-            std::auto_ptr<OrbitCameraController> mOrbitCamControl;
-            CameraController* mCurrentCamControl;
 
-            std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
+            FreeCameraController* mFreeCamControl;
+            OrbitCameraController* mOrbitCamControl;
+            CameraController* mCurrentCamControl;
 
         private:
             bool mCamPositionSet;

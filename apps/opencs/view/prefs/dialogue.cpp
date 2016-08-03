@@ -11,6 +11,7 @@
 #include "../../model/prefs/state.hpp"
 
 #include "page.hpp"
+#include "keybindingpage.hpp"
 
 void CSVPrefs::Dialogue::buildCategorySelector (QSplitter *main)
 {
@@ -52,8 +53,10 @@ void CSVPrefs::Dialogue::buildContentArea (QSplitter *main)
 CSVPrefs::PageBase *CSVPrefs::Dialogue::makePage (const std::string& key)
 {
     // special case page code goes here
-
-    return new Page (CSMPrefs::get()[key], mContent);
+    if (key == "Key Bindings")
+        return new KeyBindingPage(CSMPrefs::get()[key], mContent);
+    else
+        return new Page (CSMPrefs::get()[key], mContent);
 }
 
 CSVPrefs::Dialogue::Dialogue()
