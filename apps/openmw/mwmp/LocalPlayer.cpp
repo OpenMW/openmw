@@ -140,26 +140,26 @@ void LocalPlayer::setCell()
     int y = GetCell()->mCellId.mIndex.mY;
     ESM::CellId curCell =  player.mCell->getCell()->mCellId;
 
-	if (GetCell()->mName.empty())
-	{
-		world->indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
-		pos.pos[2] = 0;
+    if (GetCell()->mName.empty())
+    {
+        world->indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
+        pos.pos[2] = 0;
 
-		pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-		world->changeToExteriorCell(pos, true);
-		world->fixPosition(player);
-	}
-	else if (world->findExteriorPosition(GetCell()->mName, pos))
-	{
-		world->changeToExteriorCell(pos, true);
-		world->fixPosition(player);
-	}
-	else
-	{
-		world->findInteriorPosition(GetCell()->mName, pos);
-		world->changeToInteriorCell(GetCell()->mName, pos, true);
-	}
+        world->changeToExteriorCell(pos, true);
+        world->fixPosition(player);
+    }
+    else if (world->findExteriorPosition(GetCell()->mName, pos))
+    {
+        world->changeToExteriorCell(pos, true);
+        world->fixPosition(player);
+    }
+    else
+    {
+        world->findInteriorPosition(GetCell()->mName, pos);
+        world->changeToInteriorCell(GetCell()->mName, pos, true);
+    }
 
     updateCell(true);
 }
@@ -391,7 +391,7 @@ void LocalPlayer::updateCell(bool forceUpdate)
         GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_CELL)->Packet(&bs, this, true);
         GetNetworking()->SendData(&bs);
 
-		updatePosition(true);
+        updatePosition(true);
     }
 }
 
