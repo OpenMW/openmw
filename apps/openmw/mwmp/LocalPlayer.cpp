@@ -155,8 +155,8 @@ void LocalPlayer::setCell()
 		world->changeToExteriorCell(pos, true);
 		world->fixPosition(player);
 	}
-	else {
-
+	else
+	{
 		world->findInteriorPosition(GetCell()->mName, pos);
 		world->changeToInteriorCell(GetCell()->mName, pos, true);
 	}
@@ -390,6 +390,8 @@ void LocalPlayer::updateCell(bool forceUpdate)
         RakNet::BitStream bs;
         GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_CELL)->Packet(&bs, this, true);
         GetNetworking()->SendData(&bs);
+
+		updatePosition(true);
     }
 }
 
