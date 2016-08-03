@@ -85,6 +85,7 @@ namespace CSVRender
 
             virtual ~PagedWorldspaceWidget();
 
+            /// Decodes the the hint string to set of cell that are rendered.
             void useViewHint (const std::string& hint);
 
             void setCellSelection(const CSMWorld::CellSelection& selection);

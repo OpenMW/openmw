@@ -32,7 +32,7 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
     , mRootNode(0)
 {
-
+    
     osgViewer::CompositeViewer& viewer = CompositeViewer::get();
 
     osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
