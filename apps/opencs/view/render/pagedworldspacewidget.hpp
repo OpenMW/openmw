@@ -83,8 +83,7 @@ namespace CSVRender
 
             virtual ~PagedWorldspaceWidget();
 
-            /// \brief Decodes the the hint string to set of cell that are rendered.
-            /// \details Calculates avarage of cell's coordinates to be new camera location.
+            /// Decodes the the hint string to set of cell that are rendered.
             void useViewHint (const std::string& hint);
 
             void setCellSelection(const CSMWorld::CellSelection& selection);
