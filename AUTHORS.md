@@ -75,6 +75,7 @@ Programmers
     Lars Söderberg (Lazaroth)
     lazydev
     Leon Saunders (emoose)
+    lohikaarme
     Lukasz Gromanowski (lgro)
     Manuel Edelmann (vorenon)
     Marc Bouvier (CramitDeFrog)
