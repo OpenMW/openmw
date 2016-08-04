@@ -13,6 +13,7 @@
 #include <apps/openmw/mwmechanics/npcstats.hpp>
 #include <apps/openmw/mwworld/inventorystore.hpp>
 #include <apps/openmw/mwmechanics/combat.hpp>
+#include <SDL_messagebox.h>
 #include "Networking.hpp"
 #include "../mwstate/statemanagerimp.hpp"
 #include "DedicatedPlayer.hpp"
@@ -109,20 +110,23 @@ void Networking::Connect(const std::string &ip, unsigned short port)
         for (RakNet::Packet *packet = peer->Receive(); packet; peer->DeallocatePacket(
                 packet), packet = peer->Receive())
         {
+            std::string errmsg = "";
             switch (packet->data[0])
             {
                 case ID_CONNECTION_ATTEMPT_FAILED:
                 {
-                    cerr << "Connection failed." << endl;
+                    errmsg = "Connection failed.\n"
+                            "Maybe the IP address is wrong or a firewall on either system is blocking\n"
+                            "UDP packets on the port you have chosen.";
                     MWBase::Environment::get().getStateManager()->requestQuit();
                     queue = false;
                     break;
                 }
                 case ID_INVALID_PASSWORD:
                 {
-                    cerr << "Connection failed. Different versions of client or server." << endl
-                         << "Ask your server administrator for resolve this problem." << endl;
-                    MWBase::Environment::get().getStateManager()->requestQuit();
+                    errmsg = "Connection failed.\n"
+                            "The client or server is outdated.\n"
+                            "Ask your server administrator for resolve this problem.";
                     queue = false;
                     break;
                 }
@@ -144,6 +148,12 @@ void Networking::Connect(const std::string &ip, unsigned short port)
                     throw runtime_error("ID_CONNECTION_LOST.\n");
                 default:
                     printf("Connection message with identifier %i has arrived in initialization.\n", packet->data[0]);
+            }
+            if(!errmsg.empty())
+            {
+                cerr << errmsg << endl;
+                SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "TES3MP", errmsg.c_str(), 0);
+                MWBase::Environment::get().getStateManager()->requestQuit();
             }
         }
     }
