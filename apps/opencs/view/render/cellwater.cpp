@@ -3,11 +3,11 @@
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Group>
-#include <osg/PolygonOffset>
 #include <osg/PositionAttitudeTransform>
 
 #include <components/esm/loadland.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/sceneutil/waterutil.hpp>
 
 #include "../../model/world/cell.hpp"
 #include "../../model/world/cellcoordinates.hpp"
@@ -27,12 +27,14 @@ namespace CSVRender
         , mWaterTransform(0)
         , mWaterNode(0)
         , mWaterGeometry(0)
+        , mDeleted(false)
         , mExterior(false)
         , mHasWater(false)
-        , mWaterHeight(0)
     {
         mWaterTransform = new osg::PositionAttitudeTransform();
-        mWaterTransform->setPosition(osg::Vec3f(cellCoords.getX() * CellSize, cellCoords.getY() * CellSize, 0));
+        mWaterTransform->setPosition(osg::Vec3f(cellCoords.getX() * CellSize + CellSize / 2.f,
+            cellCoords.getY() * CellSize + CellSize / 2.f, 0));
+
         mWaterTransform->setNodeMask(Mask_Water);
         mParentNode->addChild(mWaterTransform);
 
@@ -42,7 +44,7 @@ namespace CSVRender
         int cellIndex = mData.getCells().searchId(mId);
         if (cellIndex > -1)
         {
-            updateCellData(mData.getCells().getRecord(cellIndex).get());
+            updateCellData(mData.getCells().getRecord(cellIndex));
         }
 
         // Keep water existance/height up to date
@@ -56,28 +58,35 @@ namespace CSVRender
         mParentNode->removeChild(mWaterTransform);
     }
 
-    void CellWater::updateCellData(const CSMWorld::Cell& cell)
+    void CellWater::updateCellData(const CSMWorld::Record<CSMWorld::Cell>& cellRecord)
     {
-        int cellIndex = mData.getCells().searchId(mId);
-        if (cellIndex > -1)
+        mDeleted = cellRecord.isDeleted();
+        if (!mDeleted)
         {
-            const CSMWorld::Record<CSMWorld::Cell>& cellRecord = mData.getCells().getRecord(cellIndex);
+            const CSMWorld::Cell& cell = cellRecord.get();
 
-            mDeleted = cellRecord.isDeleted();
-            if (!mDeleted)
+            if (mExterior != cell.isExterior() || mHasWater != cell.hasWater())
             {
                 mExterior = cellRecord.get().isExterior();
-
                 mHasWater = cellRecord.get().hasWater();
-                mWaterHeight = cellRecord.get().mWater;
+
+                recreate();
             }
+
+            float waterHeight = -1;
+            if (!mExterior)
+            {
+                waterHeight = cellRecord.get().mWater;
+            }
+
+            osg::Vec3d pos = mWaterTransform->getPosition();
+            pos.z() = waterHeight;
+            mWaterTransform->setPosition(pos);
         }
         else
         {
-            mDeleted = true;
+            recreate();
         }
-
-        update();
     }
 
     void CellWater::cellDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
@@ -100,42 +109,22 @@ namespace CSVRender
 
         for (int row = rowStart; row <= rowEnd; ++row)
         {
-            const CSMWorld::Cell& cell = cells.getRecord(row).get();
+            const CSMWorld::Record<CSMWorld::Cell>& cellRecord = cells.getRecord(row);
 
-            if (Misc::StringUtils::lowerCase(cell.mId) == mId)
-                updateCellData(cell);
+            if (Misc::StringUtils::lowerCase(cellRecord.get().mId) == mId)
+                updateCellData(cellRecord);
         }
     }
 
-    void CellWater::update()
+    void CellWater::recreate()
     {
-        const int InteriorSize = CellSize * 10;
+        const int InteriorScalar = 20;
+        const int SegmentsPerCell = 1;
+        const int TextureRepeatsPerCell = 6;
 
-        const size_t NumPoints = 4;
-        const size_t NumIndices = 6;
+        const float Alpha = 0.5f;
 
-        const osg::Vec3f ExteriorPoints[] =
-        {
-            osg::Vec3f(0,        0,        mWaterHeight),
-            osg::Vec3f(0,        CellSize, mWaterHeight),
-            osg::Vec3f(CellSize, CellSize, mWaterHeight),
-            osg::Vec3f(CellSize, 0,        mWaterHeight)
-        };
-
-        const osg::Vec3f InteriorPoints[] =
-        {
-            osg::Vec3f(-InteriorSize, -InteriorSize, mWaterHeight),
-            osg::Vec3f(-InteriorSize,  InteriorSize, mWaterHeight),
-            osg::Vec3f( InteriorSize,  InteriorSize, mWaterHeight),
-            osg::Vec3f( InteriorSize, -InteriorSize, mWaterHeight)
-        };
-
-        const unsigned short TriangleStrip[] =
-        {
-            0, 1, 2, 3, 0, 1
-        };
-
-        const osg::Vec4f Color = osg::Vec4f(0.6f, 0.7f, 1.f, 0.5f);
+        const int RenderBin = osg::StateSet::TRANSPARENT_BIN - 1;
 
         if (mWaterGeometry)
         {
@@ -146,45 +135,25 @@ namespace CSVRender
         if (mDeleted || !mHasWater)
             return;
 
-        mWaterGeometry = new osg::Geometry();
+        float size;
+        int segments;
+        float textureRepeats;
 
-        osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array();
-        osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
-        osg::ref_ptr<osg::DrawElementsUShort> indices = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP,
-            NumIndices);
-
-        for (size_t i = 0; i < NumPoints; ++i)
+        if (mExterior)
         {
-            if (mExterior)
-                vertices->push_back(ExteriorPoints[i]);
-            else
-                vertices->push_back(InteriorPoints[i]);
+            size = CellSize;
+            segments = SegmentsPerCell;
+            textureRepeats = TextureRepeatsPerCell;
+        }
+        else
+        {
+            size = CellSize * InteriorScalar;
+            segments = SegmentsPerCell * InteriorScalar;
+            textureRepeats = TextureRepeatsPerCell * InteriorScalar;
         }
 
-        colors->push_back(Color);
-
-        for (size_t i = 0; i < NumIndices; ++i)
-        {
-            indices->setElement(i, TriangleStrip[i]);
-        }
-
-        mWaterGeometry->setVertexArray(vertices);
-        mWaterGeometry->setColorArray(colors, osg::Array::BIND_OVERALL);
-        mWaterGeometry->addPrimitiveSet(indices);
-
-        // Transparency
-        mWaterGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-        mWaterGeometry->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON );
-        mWaterGeometry->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-        mWaterGeometry->getOrCreateStateSet()->setRenderBinDetails(1000, "RenderBin");
-
-        // Reduce some z-fighting
-        osg::ref_ptr<osg::PolygonOffset> polygonOffset = new osg::PolygonOffset();
-        polygonOffset->setFactor(0.2f);
-        polygonOffset->setUnits(0.2f);
-
-        mWaterGeometry->getOrCreateStateSet()->setAttributeAndModes(polygonOffset,
-            osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+        mWaterGeometry = SceneUtil::createWaterGeometry(size, segments, textureRepeats);
+        mWaterGeometry->setStateSet(SceneUtil::createSimpleWaterStateSet(Alpha, RenderBin));
 
         mWaterNode->addDrawable(mWaterGeometry);
     }

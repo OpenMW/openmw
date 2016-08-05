@@ -8,6 +8,8 @@
 #include <QObject>
 #include <QModelIndex>
 
+#include "../../model/world/record.hpp"
+
 namespace osg
 {
     class Geode;
@@ -38,7 +40,7 @@ namespace CSVRender
 
             ~CellWater();
 
-            void updateCellData(const CSMWorld::Cell& cell);
+            void updateCellData(const CSMWorld::Record<CSMWorld::Cell>& cellRecord);
 
         private slots:
 
@@ -46,7 +48,7 @@ namespace CSVRender
 
         private:
 
-            void update();
+            void recreate();
 
             static const int CellSize;
 
@@ -61,9 +63,7 @@ namespace CSVRender
 
             bool mDeleted;
             bool mExterior;
-
             bool mHasWater;
-            float mWaterHeight;
     };
 }
 
