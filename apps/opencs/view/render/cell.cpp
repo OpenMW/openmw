@@ -16,6 +16,7 @@
 #include "../../model/world/refcollection.hpp"
 #include "../../model/world/cellcoordinates.hpp"
 
+#include "cellwater.hpp"
 #include "mask.hpp"
 #include "pathgrid.hpp"
 #include "terrainstorage.hpp"
@@ -111,6 +112,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
         }
 
         mPathgrid.reset(new Pathgrid(mData, mCellNode, mId, mCoordinates));
+        mCellWater.reset(new CellWater(mData, mCellNode, mId, mCoordinates));
     }
 }
 
