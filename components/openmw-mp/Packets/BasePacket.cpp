@@ -16,7 +16,6 @@ void BasePacket::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 
     if(send)
     {
-        bs->Write((RakNet::MessageID) ID_CUSTOM_MESSAGE);
         bs->Write((RakNet::MessageID) packetID);
         bs->Write(player->guid);
     }
@@ -67,7 +66,6 @@ void BasePacket::SetSendStream(RakNet::BitStream *bitStream)
 void BasePacket::RequestData(RakNet::RakNetGUID player)
 {
     bsSend->ResetWritePointer();
-    bsSend->Write((RakNet::MessageID) ID_CUSTOM_MESSAGE);
     bsSend->Write((RakNet::MessageID) packetID);
     bsSend->Write(player);
     peer->Send(bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, 0, player, false);

@@ -75,11 +75,9 @@ void Networking::Update()
                     printf("Connection lost.\n");
                     MWBase::Environment::get().getStateManager()->requestQuit();
                 break;
-            case ID_CUSTOM_MESSAGE:
-                ReciveMessage(packet);
-                break;
             default:
-                printf("Message with identifier %i has arrived.\n", packet->data[0]);
+                ReciveMessage(packet);
+                //printf("Message with identifier %i has arrived.\n", packet->data[0]);
                 break;
         }
     }
@@ -166,7 +164,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
     if(packet->length < 3)
         return;
 
-    RakNet::BitStream bsIn(&packet->data[2], packet->length, false);
+    RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
     bsIn.Read(id);
 
     DedicatedPlayer *pl = 0;
@@ -174,9 +172,9 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
     if(id != myid)
         pl = Players::GetPlayer(id);
 
-    BasePacket *myPacket = controller.GetPacket(packet->data[1]);
+    BasePacket *myPacket = controller.GetPacket(packet->data[0]);
 
-    switch(packet->data[1])
+    switch(packet->data[0])
     {
         case ID_HANDSHAKE:
         {
@@ -552,7 +550,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
                 break;
             }
         default:
-            printf("Custom message with identifier %i has arrived in initialization.\n", packet->data[1]);
+            printf("Custom message with identifier %i has arrived in initialization.\n", packet->data[0]);
     }
 }
 

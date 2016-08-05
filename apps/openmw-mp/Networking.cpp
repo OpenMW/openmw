@@ -58,7 +58,7 @@ void Networking::Update(RakNet::Packet *packet)
         return;
     }
 
-    RakNet::BitStream bsIn(&packet->data[2], packet->length, false);
+    RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
 
     {
         RakNet::RakNetGUID ignoredGUID;
@@ -68,9 +68,9 @@ void Networking::Update(RakNet::Packet *packet)
 
     controller->SetStream(&bsIn, 0);
 
-    BasePacket *myPacket = controller->GetPacket(packet->data[1]);
+    BasePacket *myPacket = controller->GetPacket(packet->data[0]);
 
-    if(packet->data[1] == ID_HANDSHAKE)
+    if(packet->data[0] == ID_HANDSHAKE)
     {
         DEBUG_PRINTF("ID_HANDSHAKE\n");
         string passw = "SuperPassword";
@@ -114,7 +114,7 @@ void Networking::Update(RakNet::Packet *packet)
         return;
     }
 
-    switch(packet->data[1])
+    switch(packet->data[0])
     {
         case ID_GAME_BASE_INFO:
         {
@@ -283,7 +283,7 @@ void Networking::Update(RakNet::Packet *packet)
         }
 
         default:
-            printf("Message with identifier %i has arrived.\n", packet->data[1]);
+            printf("Message with identifier %i has arrived.\n", packet->data[0]);
             break;
     }
 }
@@ -385,11 +385,8 @@ int Networking::MainLoop()
                     printf("A client lost the connection.\n");
                     DisconnectPlayer(packet->guid);
                     break;
-                case ID_CUSTOM_MESSAGE:
-                    Update(packet);
-                    break;
                 default:
-                    printf("Message with identifier %i has arrived.\n", packet->data[0]);
+                    Update(packet);
                     break;
             }
         }
