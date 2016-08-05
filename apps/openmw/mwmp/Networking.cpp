@@ -161,7 +161,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
 {
     RakNet::RakNetGUID id;
 
-    if(packet->length < 3)
+    if(packet->length < 2)
         return;
 
     RakNet::BitStream bsIn(&packet->data[1], packet->length, false);

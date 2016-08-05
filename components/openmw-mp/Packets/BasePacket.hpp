@@ -35,7 +35,7 @@ namespace mwmp
 
         size_t headerSize()
         {
-            return 10; // 10 == char + char + RakNetGUID (uint64_t)
+            return 9; // 9 == packetID + RakNetGUID (uint64_t)
         }
 
     protected:
