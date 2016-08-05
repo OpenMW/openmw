@@ -20,7 +20,7 @@ namespace osg
 
 namespace CSMWorld
 {
-    class Cell;
+    struct Cell;
     class CellCoordinates;
     class Data;
 }
