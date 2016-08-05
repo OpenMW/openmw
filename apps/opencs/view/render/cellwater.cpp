@@ -6,7 +6,10 @@
 #include <osg/PositionAttitudeTransform>
 
 #include <components/esm/loadland.hpp>
+#include <components/fallback/fallback.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/resource/imagemanager.hpp>
+#include <components/resource/resourcesystem.hpp>
 #include <components/sceneutil/waterutil.hpp>
 
 #include "../../model/world/cell.hpp"
@@ -154,6 +157,20 @@ namespace CSVRender
 
         mWaterGeometry = SceneUtil::createWaterGeometry(size, segments, textureRepeats);
         mWaterGeometry->setStateSet(SceneUtil::createSimpleWaterStateSet(Alpha, RenderBin));
+
+        // Add water texture
+        std::string textureName = mData.getFallbackMap()->getFallbackString("Water_SurfaceTexture");
+        textureName = "textures/water/" + textureName + "00.dds";
+
+        Resource::ImageManager* imageManager = mData.getResourceSystem()->getImageManager();
+
+        osg::ref_ptr<osg::Texture2D> waterTexture = new osg::Texture2D();
+        waterTexture->setImage(imageManager->getImage(textureName));
+        waterTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+        waterTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+
+        mWaterGeometry->getStateSet()->setTextureAttributeAndModes(0, waterTexture, osg::StateAttribute::ON);
+
 
         mWaterNode->addDrawable(mWaterGeometry);
     }
