@@ -9,6 +9,8 @@
 #include <iostream>
 #include <Script/Script.hpp>
 #include <Script/API/TimerAPI.hpp>
+#include <chrono>
+#include <thread>
 
 #include "Networking.hpp"
 
@@ -392,6 +394,7 @@ int Networking::MainLoop()
             }
         }
         TimerAPI::Tick();
+        this_thread::sleep_for(chrono::milliseconds(1));
     }
 
     TimerAPI::Terminate();
