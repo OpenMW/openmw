@@ -5,6 +5,8 @@
     Bug #1873: Death events are triggered at the beginning of the death animation
     Bug #1996: Resting interrupts magic effects
     Bug #2399: Vampires can rest in broad daylight and survive the experience
+    Bug #2604: Incorrect magicka recalculation
+    Bug #2721: Telekinesis extends interaction range where it shouldn't
     Bug #2981: When waiting, NPCs can go where they wouldn't go normally.
     Bug #3045: Esp files containing the letter '#' in the file name cannot be loaded on startup
     Bug #3071: Slowfall does not stop momentum when jumping
@@ -31,8 +33,10 @@
     Bug #3397: Actors that start the game dead always have the same death pose
     Bug #3401: Sirollus Saccus sells not glass arrows
     Bug #3402: Editor: Weapon data not being properly set
+    Bug #3405: Mulvisic Othril will not use her chitin throwing stars
     Bug #3407: Tanisie Verethi will immediately detect the player
     Bug #3408: Improper behavior of ashmire particles
+    Bug #3412: Ai Wander start time resets when saving/loading the game
     Bug #3416: 1st person and 3rd person camera isn't converted from .ess correctly
     Bug #3421: Idling long enough while paralyzed sometimes causes character to get stuck
     Bug #3423: Sleep interruption inside dungeons too agressive
