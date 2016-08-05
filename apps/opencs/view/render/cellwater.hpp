@@ -6,6 +6,7 @@
 #include <osg/ref_ptr>
 
 #include <QObject>
+#include <QModelIndex>
 
 namespace osg
 {
