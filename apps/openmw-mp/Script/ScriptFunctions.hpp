@@ -137,6 +137,11 @@ public:
     static void CustomMessageBox(unsigned short pid, int id, const char *label, const char *buttons) noexcept;
     static void InputDialog(unsigned short pid, int id, const char *label) noexcept;
 
+    static void SendBaseInfo(unsigned short pid) noexcept;
+    static void SendAttributes(unsigned short pid) noexcept;
+    static void SendBaseStats(unsigned short pid) noexcept;
+    static void SendSkills(unsigned short pid) noexcept;
+
     static constexpr ScriptFunctionData functions[]{
             {"CreateTimer",         ScriptFunctions::CreateTimer},
             {"CreateTimerEx",       reinterpret_cast<Function<void>>(ScriptFunctions::CreateTimerEx)},
@@ -235,6 +240,11 @@ public:
             {"InputDialog",         ScriptFunctions::InputDialog},
 
             {"Kick",                ScriptFunctions::Kick},
+
+            {"SendBaseInfo",        ScriptFunctions::SendBaseInfo},
+            {"SendAttributes",      ScriptFunctions::SendAttributes},
+            {"SendBaseStats",       ScriptFunctions::SendBaseStats},
+            {"SendSkills",          ScriptFunctions::SendSkills},
     };
 
     static constexpr ScriptCallbackData callbacks[]{

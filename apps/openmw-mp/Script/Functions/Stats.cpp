@@ -19,9 +19,6 @@ void ScriptFunctions::SetName(unsigned short pid, const char *name) noexcept
         return;
 
     player->GetCell()->mName = name;
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, true);
 }
 
 const char *ScriptFunctions::GetName(unsigned short pid) noexcept
@@ -44,9 +41,6 @@ void ScriptFunctions::SetBirthsign(unsigned short pid, const char *sign) noexcep
         return;
 
     *player->BirthSign() = sign;
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, true);
 }
 
 const char *ScriptFunctions::GetBirthsign(unsigned short pid) noexcept
@@ -70,10 +64,6 @@ void ScriptFunctions::SetRace(unsigned short pid, const char *race) noexcept
     printf("Attempt to set race %s -> %s", player->Npc()->mRace.c_str(), race);
 
     player->Npc()->mRace = race;
-
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, true);
 }
 
 const char *ScriptFunctions::GetRace(unsigned short pid) noexcept
@@ -93,9 +83,6 @@ void ScriptFunctions::SetHead(unsigned short pid, const char *race) noexcept
         return;
 
     player->Npc()->mHead = race;
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, true);
 }
 
 const char *ScriptFunctions::GetHead(unsigned short pid) noexcept
@@ -117,8 +104,6 @@ void ScriptFunctions::SetHairstyle(unsigned short pid, const char *style) noexce
 
     player->Npc()->mHair = style;
 
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, true);
 }
 
 const char *ScriptFunctions::GetHairstyle(unsigned short pid) noexcept
@@ -144,9 +129,6 @@ void ScriptFunctions::SetIsMale(unsigned short pid, int value) noexcept
     GET_PLAYER(pid, player,);
 
     player->Npc()->setIsMale(value == true);
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, true);
 }
 
 
@@ -165,9 +147,6 @@ void ScriptFunctions::SetHealth(unsigned short pid, float value) noexcept
     GET_PLAYER(pid, player,);
 
     player->CreatureStats()->mDynamic[0].mBase = value;
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, true);
 }
 
 float ScriptFunctions::GetCurrentHealth(unsigned short pid) noexcept
@@ -184,9 +163,6 @@ void ScriptFunctions::SetCurrentHealth(unsigned short pid, float value) noexcept
     GET_PLAYER(pid, player,);
 
     player->CreatureStats()->mDynamic[0].mCurrent = 0;
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, true);
 }
 
 float ScriptFunctions::GetMagicka(unsigned short pid) noexcept
@@ -203,9 +179,6 @@ void ScriptFunctions::SetMagicka(unsigned short pid, float value) noexcept
     GET_PLAYER(pid, player,);
 
     player->CreatureStats()->mDynamic[1].mBase = value;
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, true);
 }
 
 float ScriptFunctions::GetCurrentMagicka(unsigned short pid) noexcept
@@ -222,9 +195,6 @@ void ScriptFunctions::SetCurrentMagicka(unsigned short pid, float value) noexcep
     GET_PLAYER(pid, player,);
 
     player->CreatureStats()->mDynamic[1].mCurrent = 0;
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, true);
 }
 
 float ScriptFunctions::GetFatigue(unsigned short pid) noexcept
@@ -242,9 +212,6 @@ void ScriptFunctions::SetFatigue(unsigned short pid, float value) noexcept
     GET_PLAYER(pid, player,);
 
     player->CreatureStats()->mDynamic[2].mBase = value;
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, true);
 }
 
 float ScriptFunctions::GetCurrentFatigue(unsigned short pid) noexcept
@@ -261,9 +228,6 @@ void ScriptFunctions::SetCurrentFatigue(unsigned short pid, float value) noexcep
     GET_PLAYER(pid, player,);
 
     player->CreatureStats()->mDynamic[2].mCurrent = 0;
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, true);
 }
 
 int ScriptFunctions::GetAttribute(unsigned short pid, unsigned short attribute) noexcept
@@ -288,9 +252,6 @@ void ScriptFunctions::SetAttribute(unsigned short pid, unsigned short attribute,
     DEBUG_PRINTF("SetAttribute(%d, %d, %d)\n", pid, attribute, value);
 
     player->CreatureStats()->mAttributes[attribute].mBase = value;
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_ATTRIBUTE)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_ATTRIBUTE)->Send(player, true);
 }
 
 int ScriptFunctions::GetCurrentAttribute(unsigned short pid, unsigned short attribute) noexcept
@@ -313,9 +274,6 @@ void ScriptFunctions::SetCurrentAttribute(unsigned short pid, unsigned short att
         return;
 
     player->CreatureStats()->mAttributes[attribute].mCurrent = value;
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_ATTRIBUTE)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_ATTRIBUTE)->Send(player, true);
 }
 
 int ScriptFunctions::GetSkill(unsigned short pid, unsigned short skill) noexcept
@@ -341,8 +299,6 @@ void ScriptFunctions::SetSkill(unsigned short pid, unsigned short skill, int val
 
     //DEBUG_PRINTF("SetSkill(%d, %d, %d)\n", pid, skill, value);
 
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_SKILL)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_SKILL)->Send(player, true);
 }
 
 int ScriptFunctions::GetCurrentSkill(unsigned short pid, unsigned short skill) noexcept
@@ -365,9 +321,6 @@ void ScriptFunctions::SetCurrentSkill(unsigned short pid, unsigned short skill, 
         return;
 
     player->NpcStats()->mSkills[skill].mCurrent = value;
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_SKILL)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_SKILL)->Send(player, true);
 }
 
 
@@ -391,9 +344,6 @@ void ScriptFunctions::SetIncreaseSkill(unsigned short pid, unsigned int pos, int
         return;
 
     player->NpcStats()->mSkillIncrease[pos] = value;
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_SKILL)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_SKILL)->Send(player, true);
 }
 
 void ScriptFunctions::SetCharGenStage(unsigned short pid, int start, int end) noexcept
@@ -412,4 +362,39 @@ void ScriptFunctions::Resurrect(unsigned short pid)
     Player *player;
     GET_PLAYER(pid, player,);
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_RESURRECT)->RequestData(player->guid);
+}
+
+void ScriptFunctions::SendBaseInfo(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, false);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, true);
+}
+
+void ScriptFunctions::SendAttributes(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_ATTRIBUTE)->Send(player, false);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_ATTRIBUTE)->Send(player, true);
+}
+
+void ScriptFunctions::SendBaseStats(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, false);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, true);
+}
+
+void ScriptFunctions::SendSkills(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_SKILL)->Send(player, false);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_SKILL)->Send(player, true);
 }
