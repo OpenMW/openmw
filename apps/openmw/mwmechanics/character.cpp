@@ -1531,11 +1531,10 @@ void CharacterController::update(float duration)
     osg::Vec3f movement(0.f, 0.f, 0.f);
     float speed = 0.f;
 
+    updateMagicEffects();
+
     if(!cls.isActor())
     {
-        updateMagicEffects();
-        MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mPtr);
-        animation->updateSpellGlow(duration);
         if(mAnimQueue.size() > 1)
         {
             if(mAnimation->isPlaying(mAnimQueue.front().mGroup) == false)

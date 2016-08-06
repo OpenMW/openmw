@@ -113,7 +113,8 @@ namespace MWClass
         bool hasKey = false;
         std::string keyName;
 
-        if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr() &&  // assuming player is using telekinesis
+        // make door glow if player activates it with telekinesis
+        if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
             MWBase::Environment::get().getWorld()->getDistanceToFacedObject() > 
             MWBase::Environment::get().getWorld()->getMaxActivationDistance())
         {

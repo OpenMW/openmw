@@ -5,11 +5,6 @@
 
 #include <components/sceneutil/controller.hpp>
 
-namespace
-{
-    class GlowUpdater;
-}
-
 namespace ESM
 {
     struct Light;
@@ -268,9 +263,6 @@ protected:
     osg::ref_ptr<SceneUtil::LightSource> mGlowLight;
 
     float mAlpha;
-    float mSpellGlowDuration;
-
-    osg::ref_ptr<GlowUpdater> mSpellGlowUpdater;
 
     const NodeMap& getNodeMap() const;
 
@@ -325,7 +317,7 @@ protected:
 
     osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
 
-    void addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor, bool hasDuration = false);
+    void addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor, float glowDuration = -1);
 
     /// Set the render bin for this animation's object root. May be customized by subclasses.
     virtual void setRenderBin();
@@ -360,8 +352,6 @@ public:
     void getLoopingEffects (std::vector<int>& out) const;
 
     void addSpellCastGlow(osg::Vec4f glowColor);
-    void updateSpellGlow(float duration);
-    void removeSpellGlow();
 
     virtual void updatePtr(const MWWorld::Ptr &ptr);
 

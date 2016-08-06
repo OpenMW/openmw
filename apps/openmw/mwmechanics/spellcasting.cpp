@@ -837,7 +837,7 @@ namespace MWMechanics
             mCaster.getClass().skillUsageSucceeded(mCaster,
                 spellSchoolToSkill(school), 0);
     
-        // A non-actor doesn't have casting animation so it plays its spell casting effects here
+        // A non-actor doesn't play its effects from a character controller, so play spell casting effects here
         if (!mCaster.getClass().isActor())
             playSpellCastingEffects(mId);
 
