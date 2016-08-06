@@ -12,8 +12,8 @@ Script developers
     Grim Kriegor
 
 
-Testers:
---------
+Testers
+-------
 
     Volk Milit aka Ja'Virr-Dar - Team Manager, Debian Linux
     Shnatsel - Debian Linux
@@ -27,4 +27,10 @@ Public Relations and Translations
     Shnatsel - Translator & News Writer
 
 
-Thanks to developers of OpenMW. They do amazing things.
+Art
+---
+
+    Texafornian - TES3MP logo
+
+
+Thanks to the developers of OpenMW. They do amazing things.
