@@ -123,8 +123,13 @@ namespace ESSImport
 
         if (esm.isNextSub("ND3D"))
             esm.skipHSub();
+
+        mHasANIS = false;
         if (esm.isNextSub("ANIS"))
-            esm.skipHSub();
+        {
+            mHasANIS = true;
+            esm.getHT(mANIS);
+        }
     }
 
 }

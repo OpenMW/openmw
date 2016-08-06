@@ -31,6 +31,8 @@ namespace MWWorld
         mDeletedByContentFile = refData.mDeletedByContentFile;
         mFlags = refData.mFlags;
 
+        mAnimationState = refData.mAnimationState;
+
         mCustomData = refData.mCustomData ? refData.mCustomData->clone() : 0;
     }
 
@@ -65,6 +67,7 @@ namespace MWWorld
       mEnabled (objectState.mEnabled != 0),
       mCount (objectState.mCount),
       mPosition (objectState.mPosition),
+      mAnimationState(objectState.mAnimationState),
       mCustomData (0),
       mChanged(true), mFlags(objectState.mFlags) // Loading from a savegame -> assume changed
     {
@@ -96,6 +99,8 @@ namespace MWWorld
         objectState.mCount = mCount;
         objectState.mPosition = mPosition;
         objectState.mFlags = mFlags;
+
+        objectState.mAnimationState = mAnimationState;
     }
 
     RefData& RefData::operator= (const RefData& refData)
@@ -269,4 +274,15 @@ namespace MWWorld
         else
             return false;
     }
+
+    const ESM::AnimationState& RefData::getAnimationState() const
+    {
+        return mAnimationState;
+    }
+
+    ESM::AnimationState& RefData::getAnimationState()
+    {
+        return mAnimationState;
+    }
+
 }

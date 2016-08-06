@@ -34,6 +34,8 @@ void ESM::ObjectState::load (ESMReader &esm)
     int unused;
     esm.getHNOT(unused, "LTIM");
 
+    mAnimationState.load(esm);
+
     // FIXME: assuming "false" as default would make more sense, but also break compatibility with older save files
     mHasCustomState = true;
     esm.getHNOT (mHasCustomState, "HCUS");
@@ -60,6 +62,8 @@ void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
 
     if (mFlags != 0)
         esm.writeHNT ("FLAG", mFlags);
+
+    mAnimationState.save(esm);
 
     if (!mHasCustomState)
         esm.writeHNT ("HCUS", false);

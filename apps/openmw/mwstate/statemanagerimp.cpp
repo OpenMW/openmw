@@ -219,6 +219,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         else
             slot = character->updateSlot (slot, profile);
 
+        // Make sure the animation state held by references is up to date before saving the game.
+        MWBase::Environment::get().getMechanicsManager()->persistAnimationStates();
+
         // Write to a memory stream first. If there is an exception during the save process, we don't want to trash the
         // existing save file we are overwriting.
         std::stringstream stream;

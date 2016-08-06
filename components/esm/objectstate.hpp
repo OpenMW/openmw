@@ -6,6 +6,7 @@
 
 #include "cellref.hpp"
 #include "locals.hpp"
+#include "animationstate.hpp"
 
 namespace ESM
 {
@@ -30,6 +31,8 @@ namespace ESM
         bool mHasCustomState;
 
         unsigned int mVersion;
+
+        ESM::AnimationState mAnimationState;
 
         ObjectState() : mHasCustomState(true), mVersion(0)
         {}

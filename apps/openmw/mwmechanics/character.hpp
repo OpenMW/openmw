@@ -147,7 +147,13 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
     
-    typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
+    struct AnimationQueueEntry
+    {
+        std::string mGroup;
+        size_t mLoopCount;
+        bool mPersist;
+    };
+    typedef std::deque<AnimationQueueEntry> AnimationQueue;
     AnimationQueue mAnimQueue;
 
     CharacterState mIdleState;
@@ -236,7 +242,10 @@ public:
 
     void update(float duration);
 
-    bool playGroup(const std::string &groupname, int mode, int count);
+    void persistAnimationState();
+    void unpersistAnimationState();
+
+    bool playGroup(const std::string &groupname, int mode, int count, bool persist=false);
     void skipAnim();
     bool isAnimPlaying(const std::string &groupName);
 

@@ -1389,12 +1389,12 @@ namespace MWMechanics
             iter->second->getCharacterController()->forceStateUpdate();
     }
 
-    bool Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
+    bool Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist)
     {
         PtrActorMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
         {
-            return iter->second->getCharacterController()->playGroup(groupName, mode, number);
+            return iter->second->getCharacterController()->playGroup(groupName, mode, number, persist);
         }
         else
         {
@@ -1415,6 +1415,12 @@ namespace MWMechanics
         if(iter != mActors.end())
             return iter->second->getCharacterController()->isAnimPlaying(groupName);
         return false;
+    }
+
+    void Actors::persistAnimationStates()
+    {
+        for (PtrActorMap::iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
+            iter->second->getCharacterController()->persistAnimationState();
     }
 
     void Actors::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out)
