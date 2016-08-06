@@ -5,7 +5,6 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/param.h>
-#include <sys/ucontext.h>
 #include <sys/utsname.h>
 #include <string.h>
 #include <errno.h>
@@ -21,10 +20,11 @@
 
 #ifdef __linux__
 #include <sys/prctl.h>
+#include <sys/ucontext.h>
 #ifndef PR_SET_PTRACER
 #define PR_SET_PTRACER 0x59616d61
 #endif
-#elif defined (__APPLE__) || defined (__FreeBSD__)
+#elif defined (__APPLE__) || defined (__FreeBSD__) || defined(__OpenBSD__)
 #include <signal.h>
 #endif
 
