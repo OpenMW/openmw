@@ -37,6 +37,7 @@ Programmers
     Cory F. Cohen (cfcohen)
     Cris Mihalache (Mirceam)
     darkf
+    devnexen
     Dieho
     Dmitry Shkurskiy (endorph)
     Douglas Diniz (Dgdiniz)
