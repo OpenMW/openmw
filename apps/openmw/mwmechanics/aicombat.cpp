@@ -50,7 +50,6 @@ namespace MWMechanics
         bool mForceNoShortcut;
         ESM::Position mShortcutFailPos;
         MWMechanics::Movement mMovement;
-        bool mAdjustAiming;
         
         AiCombatStorage():
         mAttackCooldown(0),
@@ -67,8 +66,7 @@ namespace MWMechanics
         mStrength(),
         mForceNoShortcut(false),
         mShortcutFailPos(),
-        mMovement(),
-        mAdjustAiming(false)
+        mMovement()
         {}
 
         void startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack);
@@ -255,12 +253,14 @@ namespace MWMechanics
                 vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, AI_REACTION_TIME, (weapon ? weapon->mData.mType : 0), storage.mStrength);
                 lastTargetPos = vTargetPos;
 
-                MWMechanics::Movement& movement = storage.mMovement;
-                movement.mRotation[0] = getXAngleToDir(vAimDir);
-                movement.mRotation[2] = getZAngleToDir(vAimDir);
+                storage.mMovement.mRotation[0] = getXAngleToDir(vAimDir);
+                storage.mMovement.mRotation[2] = getZAngleToDir(vAimDir);
             }
-
-            storage.mAdjustAiming = isRangedCombat;
+            else
+            {
+                storage.mMovement.mRotation[0] = getXAngleToDir(vAimDir);
+                storage.mMovement.mRotation[2] = getZAngleToDir((vTargetPos-vActorPos)); // using vAimDir results in spastic movements since the head is animated
+            }
         }
     }
 
@@ -272,11 +272,8 @@ namespace MWMechanics
         actorMovementSettings.mPosition[1] = storage.mMovement.mPosition[1];
         actorMovementSettings.mPosition[2] = storage.mMovement.mPosition[2];
 
-        if (storage.mAdjustAiming)
-        {
-            rotateActorOnAxis(actor, 2, actorMovementSettings, storage.mMovement);
-            rotateActorOnAxis(actor, 0, actorMovementSettings, storage.mMovement);
-        }
+        rotateActorOnAxis(actor, 2, actorMovementSettings, storage.mMovement);
+        rotateActorOnAxis(actor, 0, actorMovementSettings, storage.mMovement);
     }
 
     void AiCombat::rotateActorOnAxis(const MWWorld::Ptr& actor, int axis, 
