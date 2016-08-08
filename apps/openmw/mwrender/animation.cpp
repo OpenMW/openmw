@@ -183,11 +183,6 @@ namespace
             return mDone;
         }
 
-        int getTexUnit()
-        {
-            return mTexUnit;
-        }
-
         void setWatchedSpellGlow(osg::ref_ptr<GlowUpdater> watched)
         {
             mWatchedSpellGlow = watched;
@@ -1190,7 +1185,7 @@ namespace MWRender
 
     void Animation::addSpellCastGlow(const ESM::MagicEffect *effect){
 
-        osg::Vec4f glowColor = {1,1,1,1};
+        osg::Vec4f glowColor(1,1,1,1);
         glowColor.x() = effect->mData.mRed / 255.f;
         glowColor.y() = effect->mData.mGreen / 255.f;
         glowColor.z() = effect->mData.mBlue / 255.f;

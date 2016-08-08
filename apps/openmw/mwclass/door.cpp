@@ -120,10 +120,9 @@ namespace MWClass
         {
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
 
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-            const ESM::MagicEffect *effect;
-            int index = effect->effectStringToId("sEffectTelekinesis");
-            effect = store.get<ESM::MagicEffect>().find(index);
+            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();            
+            int index = ESM::MagicEffect::effectStringToId("sEffectTelekinesis");
+            const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(index);
 
             animation->addSpellCastGlow(effect); // TODO: Telekinesis glow should only be as long as the door animation
         }
