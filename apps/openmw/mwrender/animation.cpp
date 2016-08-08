@@ -90,7 +90,7 @@ namespace
     {
     public:
         GlowUpdater(int texUnit, osg::Vec4f color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures,
-            osg::ref_ptr<osg::Node> node, float maxduration, Resource::ResourceSystem* resourcesystem, osg::Uniform* uniform)
+            osg::ref_ptr<osg::Node> node, float maxduration, Resource::ResourceSystem* resourcesystem)
             : mTexUnit(texUnit)
             , mColor(color)
             , mTextures(textures)
@@ -99,7 +99,6 @@ namespace
             , mStartingTime(0)
             , mResourceSystem(resourcesystem)
             , mDone(false)
-            , mUniform(uniform)
             , mWatchedSpellGlow(NULL)
         {
         }
@@ -139,8 +138,8 @@ namespace
             // the permanent glow to display its glow texture cycling properly.
             if (mWatchedSpellGlow != NULL && mWatchedSpellGlow->isDone())
             {
-               mNode->removeUpdateCallback(mWatchedSpellGlow);
-               mWatchedSpellGlow = NULL;
+                mNode->removeUpdateCallback(mWatchedSpellGlow);
+                mWatchedSpellGlow = NULL;
             }
             
             // Set the starting time to measure glow duration from if this is a temporary glow
@@ -160,15 +159,11 @@ namespace
                     writableStateSet = osg::clone(mNode->getStateSet(), osg::CopyOp::SHALLOW_COPY);
                 
                 for (size_t i = 0; i < mTextures.size(); i++)
-                {
                     writableStateSet->removeTextureAttribute(mTexUnit, mTextures[i]);
-                }
 
-                writableStateSet->removeUniform(mUniform); // remove the uniform given to the temporary glow in addglow()
                 mNode->setStateSet(writableStateSet);
-                
                 this->reset(); // without this a texture from the glow will continue to show on the object
-                mResourceSystem->getSceneManager()->recreateShaders(mNode);             
+                mResourceSystem->getSceneManager()->recreateShaders(mNode);
                 mDone = true;
             }
         }
@@ -212,7 +207,6 @@ namespace
         float mStartingTime;
         Resource::ResourceSystem* mResourceSystem;
         bool mDone;
-        osg::Uniform* mUniform;
         osg::ref_ptr<GlowUpdater> mWatchedSpellGlow;
     };
 
@@ -1246,10 +1240,7 @@ namespace MWRender
         node->accept(findLowestUnusedTexUnitVisitor);
         texUnit = findLowestUnusedTexUnitVisitor.mLowestUnusedTexUnit;
     
-        osg::Uniform* uniform = new osg::Uniform("envMapColor", glowColor);
-
-
-        osg::ref_ptr<GlowUpdater> glowUpdater = new GlowUpdater(texUnit, glowColor, textures, node, glowDuration, mResourceSystem, uniform);
+        osg::ref_ptr<GlowUpdater> glowUpdater = new GlowUpdater(texUnit, glowColor, textures, node, glowDuration, mResourceSystem);
 
         node->addUpdateCallback(glowUpdater);
         if (node->getUpdateCallback() &&
@@ -1267,7 +1258,7 @@ namespace MWRender
             node->setStateSet(writableStateSet);
         }
         writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
-        writableStateSet->addUniform(uniform);
+        writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
 
         mResourceSystem->getSceneManager()->recreateShaders(node);
     }
