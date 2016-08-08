@@ -16,6 +16,20 @@ namespace MWMechanics
 {
     float distance(const ESM::Pathgrid::Point& point, float x, float y, float);
     float distance(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b);
+    float getZAngleToDir(const osg::Vec3f& dir);
+    float getXAngleToDir(const osg::Vec3f& dir);
+    float getZAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest);
+    float getXAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest);
+
+     const float PATHFIND_Z_REACH = 50.0f;
+    //static const float sMaxSlope = 49.0f; // duplicate as in physicssystem
+    // distance after which actor (failed previously to shortcut) will try again
+    const float PATHFIND_SHORTCUT_RETRY_DIST = 300.0f;
+
+    // cast up-down ray with some offset from actor position to check for pits/obstacles on the way to target;
+    // magnitude of pits/obstacles is defined by PATHFIND_Z_REACH
+    bool checkWayIsClear(const osg::Vec3f& from, const osg::Vec3f& to, float offsetXY);
+
     class PathFinder
     {
         public:
@@ -39,11 +53,16 @@ namespace MWMechanics
 
             void clearPath();
 
+            void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
+                           const MWWorld::CellStore* cell);
+
             bool checkPathCompleted(float x, float y, float tolerance = PathTolerance);
             ///< \Returns true if we are within \a tolerance units of the last path point.
 
             /// In radians
             float getZAngleToNext(float x, float y) const;
+
+            float getXAngleToNext(float x, float y, float z) const;
 
             bool isPathConstructed() const
             {
@@ -68,9 +87,9 @@ namespace MWMechanics
                 Which results in NPC "running in a circle" back to the just passed waypoint.
              */
             void buildSyncedPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
-                const MWWorld::CellStore* cell, bool allowShortcuts = true);
+                const MWWorld::CellStore* cell);
 
-            void addPointToPath(ESM::Pathgrid::Point &point)
+            void addPointToPath(const ESM::Pathgrid::Point &point)
             {
                 mPath.push_back(point);
             }
@@ -130,9 +149,6 @@ namespace MWMechanics
             }
 
         private:
-            void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
-                const MWWorld::CellStore* cell, bool allowShortcuts = true);
-
             std::list<ESM::Pathgrid::Point> mPath;
 
             const ESM::Pathgrid *mPathgrid;
