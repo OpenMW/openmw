@@ -56,7 +56,7 @@ namespace MWScript
                             throw std::runtime_error ("animation mode out of range");
                     }
 
-                    MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, std::numeric_limits<int>::max());
+                    MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, std::numeric_limits<int>::max(), true);
                }
         };
 
@@ -89,7 +89,7 @@ namespace MWScript
                             throw std::runtime_error ("animation mode out of range");
                     }
 
-                    MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, loops);
+                    MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, loops, true);
                }
         };
         

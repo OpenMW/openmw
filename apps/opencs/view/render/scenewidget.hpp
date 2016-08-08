@@ -109,13 +109,13 @@ namespace CSVRender
             LightingBright mLightingBright;
 
             int mPrevMouseX, mPrevMouseY;
+            
+            /// Tells update that camera isn't set
+            bool mCamPositionSet;
 
             FreeCameraController* mFreeCamControl;
             OrbitCameraController* mOrbitCamControl;
             CameraController* mCurrentCamControl;
-
-        private:
-            bool mCamPositionSet;
 
         public slots:
             void update(double dt);

@@ -843,6 +843,15 @@ namespace MWRender
         return iter->second.getTime();
     }
 
+    size_t Animation::getCurrentLoopCount(const std::string& groupname) const
+    {
+        AnimStateMap::const_iterator iter = mStates.find(groupname);
+        if(iter == mStates.end())
+            return 0;
+
+        return iter->second.mLoopCount;
+    }
+
     void Animation::disable(const std::string &groupname)
     {
         AnimStateMap::iterator iter = mStates.find(groupname);

@@ -75,6 +75,7 @@ CSVRender::CellMarker::CellMarker(
     mMarkerNode->setAutoRotateMode(osg::AutoTransform::ROTATE_TO_SCREEN);
     mMarkerNode->setAutoScaleToScreen(true);
     mMarkerNode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+    mMarkerNode->getOrCreateStateSet()->setRenderBinDetails(osg::StateSet::TRANSPARENT_BIN + 1, "RenderBin");
 
     mMarkerNode->setUserData(new CellMarkerTag(this));
     mMarkerNode->setNodeMask(Mask_CellMarker);

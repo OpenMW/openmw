@@ -35,6 +35,7 @@ namespace CSMWorld
 
 namespace CSVRender
 {
+    class CellWater;
     class Pathgrid;
     class TagBase;
 
@@ -49,6 +50,7 @@ namespace CSVRender
             std::auto_ptr<CellArrow> mCellArrows[4];
             std::auto_ptr<CellMarker> mCellMarker;
             std::auto_ptr<CellBorder> mCellBorder;
+            std::auto_ptr<CellWater> mCellWater;
             std::auto_ptr<Pathgrid> mPathgrid;
             bool mDeleted;
             int mSubMode;

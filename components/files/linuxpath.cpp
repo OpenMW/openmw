@@ -1,6 +1,6 @@
 #include "linuxpath.hpp"
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__OpenBSD__)
 
 #include <cstdlib>
 #include <cstring>
@@ -159,4 +159,4 @@ boost::filesystem::path LinuxPath::getInstallPath() const
 
 } /* namespace Files */
 
-#endif /* defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) */
+#endif /* defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__OpenBSD__) */

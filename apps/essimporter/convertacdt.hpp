@@ -4,6 +4,7 @@
 #include <components/esm/creaturestats.hpp>
 #include <components/esm/npcstats.hpp>
 #include <components/esm/loadskil.hpp>
+#include <components/esm/animationstate.hpp>
 
 #include "importacdt.hpp"
 
@@ -18,6 +19,8 @@ namespace ESSImport
     void convertACSC (const ACSC& acsc, ESM::CreatureStats& cStats);
 
     void convertNpcData (const ActorData& actorData, ESM::NpcStats& npcStats);
+
+    void convertANIS (const ANIS& anis, ESM::AnimationState& state);
 }
 
 #endif

@@ -37,6 +37,7 @@ Programmers
     Cory F. Cohen (cfcohen)
     Cris Mihalache (Mirceam)
     darkf
+    devnexen
     Dieho
     Dmitry Shkurskiy (endorph)
     Douglas Diniz (Dgdiniz)
@@ -75,6 +76,7 @@ Programmers
     Lars Söderberg (Lazaroth)
     lazydev
     Leon Saunders (emoose)
+    lohikaarme
     Lukasz Gromanowski (lgro)
     Manuel Edelmann (vorenon)
     Marc Bouvier (CramitDeFrog)

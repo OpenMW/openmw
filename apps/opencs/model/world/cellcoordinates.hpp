@@ -37,7 +37,8 @@ namespace CSMWorld
             ///
             /// \note The worldspace part of \a id is ignored
             static std::pair<CellCoordinates, bool> fromId (const std::string& id);
-
+            
+            /// \return cell coordinates such that given world coordinates are in it.
             static std::pair<int, int> coordinatesToCellIndex (float x, float y);
     };
 
