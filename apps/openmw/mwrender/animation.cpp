@@ -1138,7 +1138,10 @@ namespace MWRender
         if (!node->getStateSet())
             writableStateSet = node->getOrCreateStateSet();
         else
+        {
             writableStateSet = osg::clone(node->getStateSet(), osg::CopyOp::SHALLOW_COPY);
+            node->setStateSet(writableStateSet);
+        }
         writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
         writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
 
