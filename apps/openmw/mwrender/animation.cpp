@@ -159,9 +159,9 @@ namespace
                 else
                     writableStateSet = osg::clone(mNode->getStateSet(), osg::CopyOp::SHALLOW_COPY);
                 
-                for (size_t index = 0; index < mTextures.size(); index++)
+                for (size_t i = 0; i < mTextures.size(); i++)
                 {
-                    writableStateSet->removeTextureAttribute(mTexUnit, mTextures[index]);
+                    writableStateSet->removeTextureAttribute(mTexUnit, mTextures[i]);
                 }
 
                 writableStateSet->removeUniform(mUniform); // remove the uniform given to the temporary glow in addglow()
@@ -1194,7 +1194,13 @@ namespace MWRender
         int mLowestUnusedTexUnit;
     };
 
-    void Animation::addSpellCastGlow(osg::Vec4f glowColor){
+    void Animation::addSpellCastGlow(const ESM::MagicEffect *effect){
+
+        osg::Vec4f glowColor = {1,1,1,1};
+        glowColor.x() = effect->mData.mRed / 255.f;
+        glowColor.y() = effect->mData.mGreen / 255.f;
+        glowColor.z() = effect->mData.mBlue / 255.f;
+
         if (!mObjectRoot->getUpdateCallback()) // If there is no glow on object
             addGlow(mObjectRoot, glowColor, 1.5); // Glow length measured from in-game as about 1.5 seconds
 

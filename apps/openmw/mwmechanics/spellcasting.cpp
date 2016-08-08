@@ -584,6 +584,12 @@ namespace MWMechanics
             }
             else if (effectId == ESM::MagicEffect::Open)
             {
+                const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                const ESM::MagicEffect *magiceffect;
+                magiceffect = store.get<ESM::MagicEffect>().find(effectId);
+                MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(target);
+                animation->addSpellCastGlow(magiceffect);
+
                 if (target.getCellRef().getLockLevel() <= magnitude)
                 {
                     if (target.getCellRef().getLockLevel() > 0)
@@ -837,7 +843,7 @@ namespace MWMechanics
             mCaster.getClass().skillUsageSucceeded(mCaster,
                 spellSchoolToSkill(school), 0);
     
-        // A non-actor doesn't play its effects from a character controller, so play spell casting effects here
+        // A non-actor doesn't play its spell cast effects from a character controller, so play them here
         if (!mCaster.getClass().isActor())
             playSpellCastingEffects(mId);
 
@@ -945,7 +951,7 @@ namespace MWMechanics
 
         MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
 
-        if (mCaster.getClass().isActor()) // TODO: Non-actors (except for large statics?) should also create a visual casting effect
+        if (mCaster.getClass().isActor()) // TODO: Non-actors (except for large statics?) should also create a spell cast vfx
         {
             const ESM::Static* castStatic;
             if (!effect->mCasting.empty())
@@ -957,14 +963,7 @@ namespace MWMechanics
         }
 
         if (!mCaster.getClass().isActor())
-        {
-            osg::Vec4f glowcolor(1,1,1,1);
-            glowcolor.x() = effect->mData.mRed / 255.f;
-            glowcolor.y() = effect->mData.mGreen / 255.f;
-            glowcolor.z() = effect->mData.mBlue / 255.f;
-
-            animation->addSpellCastGlow(glowcolor);
-        }
+            animation->addSpellCastGlow(effect);
 
         static const std::string schools[] = {
             "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"

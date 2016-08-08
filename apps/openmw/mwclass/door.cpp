@@ -122,14 +122,10 @@ namespace MWClass
 
             const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::MagicEffect *effect;
-            effect = store.get<ESM::MagicEffect>().find(59);
+            int index = effect->effectStringToId("sEffectTelekinesis");
+            effect = store.get<ESM::MagicEffect>().find(index);
 
-            osg::Vec4f glowcolor(1,1,1,1);
-            glowcolor.x() = effect->mData.mRed / 255.f;
-            glowcolor.y() = effect->mData.mGreen / 255.f;
-            glowcolor.z() = effect->mData.mBlue / 255.f;
-
-            animation->addSpellCastGlow(glowcolor); // TODO: Telekinesis glow should only be as long as the door animation
+            animation->addSpellCastGlow(effect); // TODO: Telekinesis glow should only be as long as the door animation
         }
 
         // make key id lowercase

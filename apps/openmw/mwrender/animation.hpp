@@ -8,6 +8,7 @@
 namespace ESM
 {
     struct Light;
+    struct MagicEffect;
 }
 
 namespace Resource
@@ -351,7 +352,7 @@ public:
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out) const;
 
-    void addSpellCastGlow(osg::Vec4f glowColor);
+    void addSpellCastGlow(const ESM::MagicEffect *effect);
 
     virtual void updatePtr(const MWWorld::Ptr &ptr);
 
