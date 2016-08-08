@@ -32,7 +32,7 @@ namespace CSVRender
 
             WorldspaceWidget* mWorldspaceWidget;
             QAction* mCenterOnSelection;
-            std::auto_ptr<CSMPrefs::Shortcut> mCenterShortcut;
+            CSMPrefs::Shortcut* mCenterShortcut;
 
         private slots:
 
