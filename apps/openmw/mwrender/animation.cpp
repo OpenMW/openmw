@@ -269,10 +269,7 @@ namespace MWRender
         virtual void setDefaults(osg::StateSet *stateset)
         {
             if (mDone)
-            {
-                stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXTURE);
-                stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXGEN);
-            }
+                removeTexture(stateset);
             else
             {
                 stateset->setTextureMode(mTexUnit, GL_TEXTURE_2D, osg::StateAttribute::ON);
@@ -291,6 +288,19 @@ namespace MWRender
                 stateset->setTextureAttributeAndModes(mTexUnit, texEnv, osg::StateAttribute::ON);
                 stateset->addUniform(new osg::Uniform("envMapColor", mColor));
             }
+        }
+
+        void removeTexture(osg::StateSet* stateset)
+        {
+            stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXTURE);
+            stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXGEN);
+            stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXENV);
+            stateset->removeTextureMode(mTexUnit, GL_TEXTURE_2D);
+            stateset->removeUniform("envMapColor");
+
+            osg::StateSet::TextureAttributeList& list = stateset->getTextureAttributeList();
+            while (list.size() && list.rbegin()->empty())
+                list.pop_back();
         }
 
         virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
@@ -315,7 +325,7 @@ namespace MWRender
             {
                 if (mOriginalDuration >= 0) // if this glowupdater was a temporary glow since its creation
                 {
-                    stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXTURE);
+                    removeTexture(stateset);
                     this->reset();
                     mDone = true;
                     mResourceSystem->getSceneManager()->recreateShaders(mNode);
