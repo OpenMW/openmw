@@ -1182,8 +1182,8 @@ namespace MWRender
         int mLowestUnusedTexUnit;
     };
 
-    void Animation::addSpellCastGlow(const ESM::MagicEffect *effect){
-
+    void Animation::addSpellCastGlow(const ESM::MagicEffect *effect)
+    {
         osg::Vec4f glowColor(1,1,1,1);
         glowColor.x() = effect->mData.mRed / 255.f;
         glowColor.y() = effect->mData.mGreen / 255.f;
@@ -1197,28 +1197,9 @@ namespace MWRender
     }
 
     void Animation::addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor, float glowDuration)
-    {
-        std::vector<osg::ref_ptr<osg::Texture2D> > textures;
-        for (int i=0; i<32; ++i)
-        {
-            std::stringstream stream;
-            stream << "textures/magicitem/caust";
-            stream << std::setw(2);
-            stream << std::setfill('0');
-            stream << i;
-            stream << ".dds";
-
-            osg::ref_ptr<osg::Image> image = mResourceSystem->getImageManager()->getImage(stream.str());
-            osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(image));
-            tex->setName("envMap");
-            tex->setWrap(osg::Texture::WRAP_S, osg::Texture2D::REPEAT);
-            tex->setWrap(osg::Texture::WRAP_T, osg::Texture2D::REPEAT);
-            mResourceSystem->getSceneManager()->applyFilterSettings(tex);
-            textures.push_back(tex);
-        }     
-
+    {        
         if (mGlowUpdater && mGlowUpdater->isDone())
-                node->removeUpdateCallback(mGlowUpdater);
+            node->removeUpdateCallback(mGlowUpdater);
 
         FindLowestUnusedTexUnitVisitor findLowestUnusedTexUnitVisitor;
         node->accept(findLowestUnusedTexUnitVisitor);
@@ -1230,25 +1211,44 @@ namespace MWRender
             mGlowUpdater->setDuration(glowDuration);
         }
         else
-        {    
+        {  
+            std::vector<osg::ref_ptr<osg::Texture2D> > textures;
+            for (int i=0; i<32; ++i)
+            {
+                std::stringstream stream;
+                stream << "textures/magicitem/caust";
+                stream << std::setw(2);
+                stream << std::setfill('0');
+                stream << i;
+                stream << ".dds";
+
+                osg::ref_ptr<osg::Image> image = mResourceSystem->getImageManager()->getImage(stream.str());
+                osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(image));
+                tex->setName("envMap");
+                tex->setWrap(osg::Texture::WRAP_S, osg::Texture2D::REPEAT);
+                tex->setWrap(osg::Texture::WRAP_T, osg::Texture2D::REPEAT);
+                mResourceSystem->getSceneManager()->applyFilterSettings(tex);
+                textures.push_back(tex);
+            }
+
             osg::ref_ptr<GlowUpdater> glowUpdater = new GlowUpdater(texUnit, glowColor, textures, node, glowDuration, mResourceSystem);
             mGlowUpdater = glowUpdater;
             node->addUpdateCallback(glowUpdater);
-        }
+        
 
-        // set a texture now so that the ShaderVisitor can find it
-        osg::ref_ptr<osg::StateSet> writableStateSet = NULL;
-        if (!node->getStateSet())
-            writableStateSet = node->getOrCreateStateSet();
-        else
-        {
-            writableStateSet = osg::clone(node->getStateSet(), osg::CopyOp::SHALLOW_COPY);
-            node->setStateSet(writableStateSet);
+            // set a texture now so that the ShaderVisitor can find it
+            osg::ref_ptr<osg::StateSet> writableStateSet = NULL;
+            if (!node->getStateSet())
+                writableStateSet = node->getOrCreateStateSet();
+            else
+            {
+                writableStateSet = osg::clone(node->getStateSet(), osg::CopyOp::SHALLOW_COPY);
+                node->setStateSet(writableStateSet);
+            }
+            writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
+            writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
+            mResourceSystem->getSceneManager()->recreateShaders(node);
         }
-        writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
-        writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
-
-        mResourceSystem->getSceneManager()->recreateShaders(node);
     }
 
     // TODO: Should not be here

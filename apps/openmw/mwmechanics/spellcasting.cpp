@@ -571,7 +571,7 @@ namespace MWMechanics
     {
         short effectId = effect.mId;
         if (target.getClass().canLock(target))
-        {      
+        {
             if (effectId == ESM::MagicEffect::Lock)
             {
                 const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
