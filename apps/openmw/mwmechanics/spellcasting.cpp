@@ -572,6 +572,11 @@ namespace MWMechanics
         short effectId = effect.mId;
         if (target.getClass().canLock(target))
         {
+            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const ESM::MagicEffect *magiceffect;
+            magiceffect = store.get<ESM::MagicEffect>().find(effectId);
+            MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(target);
+            animation->addSpellCastGlow(magiceffect);
             if (effectId == ESM::MagicEffect::Lock)
             {
                 if (target.getCellRef().getLockLevel() < magnitude) //If the door is not already locked to a higher value, lock it to spell magnitude
@@ -584,12 +589,6 @@ namespace MWMechanics
             }
             else if (effectId == ESM::MagicEffect::Open)
             {
-                const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-                const ESM::MagicEffect *magiceffect;
-                magiceffect = store.get<ESM::MagicEffect>().find(effectId);
-                MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(target);
-                animation->addSpellCastGlow(magiceffect);
-
                 if (target.getCellRef().getLockLevel() <= magnitude)
                 {
                     if (target.getCellRef().getLockLevel() > 0)

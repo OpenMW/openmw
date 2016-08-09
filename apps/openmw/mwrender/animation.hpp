@@ -33,6 +33,7 @@ namespace MWRender
 
 class ResetAccumRootCallback;
 class RotateController;
+class GlowUpdater;
 
 class EffectAnimationTime : public SceneUtil::ControllerSource
 {
@@ -262,6 +263,7 @@ protected:
     float mHeadPitchRadians;
 
     osg::ref_ptr<SceneUtil::LightSource> mGlowLight;
+    osg::ref_ptr<GlowUpdater> mGlowUpdater;
 
     float mAlpha;
 
