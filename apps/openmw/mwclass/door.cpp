@@ -25,6 +25,7 @@
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
+#include "../mwrender/animation.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
@@ -111,6 +112,20 @@ namespace MWClass
         bool isTrapped = !ptr.getCellRef().getTrap().empty();
         bool hasKey = false;
         std::string keyName;
+
+        // make door glow if player activates it with telekinesis
+        if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+            MWBase::Environment::get().getWorld()->getDistanceToFacedObject() > 
+            MWBase::Environment::get().getWorld()->getMaxActivationDistance())
+        {
+            MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+
+            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();            
+            int index = ESM::MagicEffect::effectStringToId("sEffectTelekinesis");
+            const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(index);
+
+            animation->addSpellCastGlow(effect); // TODO: Telekinesis glow should only be as long as the door animation
+        }
 
         // make key id lowercase
         std::string keyId = ptr.getCellRef().getKey();
