@@ -116,7 +116,6 @@ void Networking::Connect(const std::string &ip, unsigned short port)
                     errmsg = "Connection failed.\n"
                             "Maybe the IP address is wrong or a firewall on either system is blocking\n"
                             "UDP packets on the port you have chosen.";
-                    MWBase::Environment::get().getStateManager()->requestQuit();
                     queue = false;
                     break;
                 }
