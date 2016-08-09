@@ -7,6 +7,8 @@ namespace CSVWorld
 {
     class GlobalCreator : public GenericCreator
     {
+            Q_OBJECT
+
         public:
 
             GlobalCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
