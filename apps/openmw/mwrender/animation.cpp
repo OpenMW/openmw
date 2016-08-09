@@ -251,7 +251,7 @@ namespace MWRender
     {
     public:
         GlowUpdater(int texUnit, osg::Vec4f color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures,
-            osg::ref_ptr<osg::Node> node, float duration, Resource::ResourceSystem* resourcesystem)
+            osg::Node* node, float duration, Resource::ResourceSystem* resourcesystem)
             : mTexUnit(texUnit)
             , mColor(color)
             , mOriginalColor(color)
@@ -367,7 +367,7 @@ namespace MWRender
         osg::Vec4f mColor;
         osg::Vec4f mOriginalColor; // for restoring the color of a permanent glow after a temporary glow on the object finishes
         std::vector<osg::ref_ptr<osg::Texture2D> > mTextures;
-        osg::ref_ptr<osg::Node> mNode;
+        osg::Node* mNode;
         float mDuration;
         float mOriginalDuration; // for recording that this is originally a permanent glow if it is changed to a temporary one
         float mStartingTime;
@@ -1200,7 +1200,7 @@ namespace MWRender
         glowColor.z() = effect->mData.mBlue / 255.f;
 
         if (!mGlowUpdater) // If there is no glow on object
-            addGlow(mObjectRoot, glowColor, 1.5); // Glow length measured from in-game as about 1.5 seconds
+            addGlow(mObjectRoot, glowColor, 1.5); // Glow length measured from original engine as about 1.5 seconds
 
         else if (mGlowUpdater->isDone() || (mGlowUpdater->isPermanentGlowUpdater() == true))
             addGlow(mObjectRoot, glowColor, 1.5);
