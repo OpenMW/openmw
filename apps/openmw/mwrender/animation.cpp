@@ -268,26 +268,29 @@ namespace MWRender
 
         virtual void setDefaults(osg::StateSet *stateset)
         {
-            stateset->setTextureMode(mTexUnit, GL_TEXTURE_2D, osg::StateAttribute::ON);
-
-            osg::TexGen* texGen = new osg::TexGen;
-            texGen->setMode(osg::TexGen::SPHERE_MAP);
-
-            stateset->setTextureAttributeAndModes(mTexUnit, texGen, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-
-            osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
-            texEnv->setSource0_RGB(osg::TexEnvCombine::CONSTANT);
-            texEnv->setConstantColor(mColor);
-            texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
-            texEnv->setSource2_RGB(osg::TexEnvCombine::TEXTURE);
-            texEnv->setOperand2_RGB(osg::TexEnvCombine::SRC_COLOR);
-
-            stateset->setTextureAttributeAndModes(mTexUnit, texEnv, osg::StateAttribute::ON);
-
-            // Reduce the texture list back down by one when a temporary glow finishes
-            // to allow FindLowestUnusedTexUnitVisitor to choose the same texunit again.
             if (mDone)
-                stateset->getTextureAttributeList().resize(stateset->getTextureAttributeList().size() - 1);
+            {
+                stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXTURE);
+                stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXGEN);
+            }
+            else
+            {
+                stateset->setTextureMode(mTexUnit, GL_TEXTURE_2D, osg::StateAttribute::ON);
+                osg::TexGen* texGen = new osg::TexGen;
+                texGen->setMode(osg::TexGen::SPHERE_MAP);
+
+                stateset->setTextureAttributeAndModes(mTexUnit, texGen, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+                osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
+                texEnv->setSource0_RGB(osg::TexEnvCombine::CONSTANT);
+                texEnv->setConstantColor(mColor);
+                texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
+                texEnv->setSource2_RGB(osg::TexEnvCombine::TEXTURE);
+                texEnv->setOperand2_RGB(osg::TexEnvCombine::SRC_COLOR);
+
+                stateset->setTextureAttributeAndModes(mTexUnit, texEnv, osg::StateAttribute::ON);
+                stateset->addUniform(new osg::Uniform("envMapColor", mColor));
+            }
         }
 
         virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
@@ -295,7 +298,6 @@ namespace MWRender
             if (mColorChanged){
                 this->reset();
                 setDefaults(stateset);
-                mResourceSystem->getSceneManager()->recreateShaders(mNode);
                 mColorChanged = false;
             }
             if (mDone)
@@ -313,10 +315,10 @@ namespace MWRender
             {
                 if (mOriginalDuration >= 0) // if this glowupdater was a temporary glow since its creation
                 {
-                    for (size_t i = 0; i < mTextures.size(); i++)
-                        stateset->removeTextureAttribute(mTexUnit, mTextures[i]);
+                    stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXTURE);
                     this->reset();
                     mDone = true;
+                    mResourceSystem->getSceneManager()->recreateShaders(mNode);
                 }
                 if (mOriginalDuration < 0) // if this glowupdater was originally a permanent glow
                 {
@@ -325,9 +327,7 @@ namespace MWRender
                     mColor = mOriginalColor;
                     this->reset();
                     setDefaults(stateset);
-                    stateset->addUniform(new osg::Uniform("envMapColor", mColor));
                 }
-                mResourceSystem->getSceneManager()->recreateShaders(mNode);
             }
         }
 
