@@ -94,13 +94,10 @@ void Networking::Connect(const std::string &ip, unsigned short port)
     master.SetBinaryAddress(ip.c_str());
     master.SetPortHostOrder(port);
     const char passw[8] = "1234567";
-
+    std::string errmsg = "";
 
     if (peer->Connect(master.ToString(false), master.GetPort(), passw, sizeof(passw), 0, 0, 3, 500, 0) != RakNet::CONNECTION_ATTEMPT_STARTED)
-    {
-        cout << "Connection attempt failed." << endl;
-        MWBase::Environment::get().getStateManager()->requestQuit();
-    }
+        errmsg = "Connection attempt failed.\n";
 
     bool queue = true;
     while(queue)
@@ -108,7 +105,6 @@ void Networking::Connect(const std::string &ip, unsigned short port)
         for (RakNet::Packet *packet = peer->Receive(); packet; peer->DeallocatePacket(
                 packet), packet = peer->Receive())
         {
-            std::string errmsg = "";
             switch (packet->data[0])
             {
                 case ID_CONNECTION_ATTEMPT_FAILED:
@@ -146,13 +142,14 @@ void Networking::Connect(const std::string &ip, unsigned short port)
                 default:
                     printf("Connection message with identifier %i has arrived in initialization.\n", packet->data[0]);
             }
-            if(!errmsg.empty())
-            {
-                cerr << errmsg << endl;
-                SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "TES3MP", errmsg.c_str(), 0);
-                MWBase::Environment::get().getStateManager()->requestQuit();
-            }
         }
+    }
+
+    if(!errmsg.empty())
+    {
+        cerr << errmsg << endl;
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "TES3MP", errmsg.c_str(), 0);
+        MWBase::Environment::get().getStateManager()->requestQuit();
     }
 }
 
