@@ -13,7 +13,7 @@ namespace MWWorld
         virtual void executeImp(const Ptr &actor);
 
     public:
-        FailedAction(const std::string &message = std::string());
+        FailedAction(const std::string &message = std::string(), const Ptr& target = Ptr());
     };
 }
 

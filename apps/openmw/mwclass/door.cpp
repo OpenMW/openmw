@@ -220,7 +220,7 @@ namespace MWClass
         else
         {
             // locked, and we can't open.
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction(std::string(), ptr));
             action->setSound(lockedSound);
             return action;
         }
