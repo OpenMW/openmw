@@ -524,9 +524,17 @@ namespace MWMechanics
 
                         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
                         if(!magicEffect->mHitSound.empty())
+                        {
+                            if (sndMgr->getSoundPlaying(target, magicEffect->mHitSound))
+                                sndMgr->stopSound3D(target, magicEffect->mHitSound);
                             sndMgr->playSound3D(target, magicEffect->mHitSound, 1.0f, 1.0f);
+                        }
                         else
+                        {
+                            if (sndMgr->getSoundPlaying(target, schools[magicEffect->mData.mSchool]+" hit"))
+                                sndMgr->stopSound3D(target, schools[magicEffect->mData.mSchool]+" hit");
                             sndMgr->playSound3D(target, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
+                        }
                         firstAppliedEffect = false;
                     }
 
