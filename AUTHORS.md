@@ -99,6 +99,7 @@ Programmers
     Nikolay Kasyanov (corristo)
     nobrakal
     Nolan Poe (nopoe)
+    Oleg Chkan (mrcheko)
     Paul Cercueil (pcercuei)
     Paul McElroy (Greendogo)
     Pi03k
