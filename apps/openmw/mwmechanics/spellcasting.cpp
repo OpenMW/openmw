@@ -613,8 +613,6 @@ namespace MWMechanics
                     }
                     target.getClass().unlock(target);
                 }
-                else
-                    MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
                 return true;
             }
         }
