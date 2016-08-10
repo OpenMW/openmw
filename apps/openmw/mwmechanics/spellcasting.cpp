@@ -737,6 +737,8 @@ namespace MWMechanics
                     "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
                 };
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                if (sndMgr->getSoundPlaying(mCaster, "Spell Failure " + schools[school]))
+                    sndMgr->stopSound3D(mCaster, "Spell Failure " + schools[school]);
                 sndMgr->playSound3D(mCaster, "Spell Failure " + schools[school], 1.0f, 1.0f);
                 return false;
             }
@@ -838,6 +840,8 @@ namespace MWMechanics
                 };
 
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                if (sndMgr->getSoundPlaying(mCaster, "Spell Failure " + schools[school]))
+                    sndMgr->stopSound3D(mCaster, "Spell Failure " + schools[school]);
                 sndMgr->playSound3D(mCaster, "Spell Failure " + schools[school], 1.0f, 1.0f);
                 return false;
             }
