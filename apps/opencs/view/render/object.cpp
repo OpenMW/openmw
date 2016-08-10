@@ -29,6 +29,13 @@
 
 #include "mask.hpp"
 
+
+const float CSVRender::Object::MarkerShaftWidth = 30;
+const float CSVRender::Object::MarkerShaftBaseLength = 70;
+const float CSVRender::Object::MarkerHeadWidth = 50;
+const float CSVRender::Object::MarkerHeadLength = 50;
+
+
 namespace
 {
 
@@ -179,7 +186,21 @@ void CSVRender::Object::updateMarker()
         {
             if (mSubMode==0)
             {
-                mMarker[i] = makeMarker (i);
+                mMarker[i] = makeMoveOrScaleMarker (i);
+                mMarker[i]->setUserData(new ObjectMarkerTag (this, i));
+
+                mRootNode->addChild (mMarker[i]);
+            }
+            else if (mSubMode==1)
+            {
+                mMarker[i] = makeRotateMarker (i);
+                mMarker[i]->setUserData(new ObjectMarkerTag (this, i));
+
+                mRootNode->addChild (mMarker[i]);
+            }
+            else if (mSubMode==2)
+            {
+                mMarker[i] = makeMoveOrScaleMarker (i);
                 mMarker[i]->setUserData(new ObjectMarkerTag (this, i));
 
                 mRootNode->addChild (mMarker[i]);
@@ -188,16 +209,11 @@ void CSVRender::Object::updateMarker()
     }
 }
 
-osg::ref_ptr<osg::Node> CSVRender::Object::makeMarker (int axis)
+osg::ref_ptr<osg::Node> CSVRender::Object::makeMoveOrScaleMarker (int axis)
 {
     osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
 
-    const float shaftWidth = 10;
-    const float shaftBaseLength = 50;
-    const float headWidth = 30;
-    const float headLength = 30;
-
-    float shaftLength = shaftBaseLength + mBaseNode->getBound().radius();
+    float shaftLength = MarkerShaftBaseLength + mBaseNode->getBound().radius();
 
     // shaft
     osg::Vec3Array *vertices = new osg::Vec3Array;
@@ -206,20 +222,20 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeMarker (int axis)
     {
         float length = i ? shaftLength : 0;
 
-        vertices->push_back (getMarkerPosition (-shaftWidth/2, -shaftWidth/2, length, axis));
-        vertices->push_back (getMarkerPosition (-shaftWidth/2, shaftWidth/2, length, axis));
-        vertices->push_back (getMarkerPosition (shaftWidth/2, shaftWidth/2, length, axis));
-        vertices->push_back (getMarkerPosition (shaftWidth/2, -shaftWidth/2, length, axis));
+        vertices->push_back (getMarkerPosition (-MarkerShaftWidth/2, -MarkerShaftWidth/2, length, axis));
+        vertices->push_back (getMarkerPosition (-MarkerShaftWidth/2, MarkerShaftWidth/2, length, axis));
+        vertices->push_back (getMarkerPosition (MarkerShaftWidth/2, MarkerShaftWidth/2, length, axis));
+        vertices->push_back (getMarkerPosition (MarkerShaftWidth/2, -MarkerShaftWidth/2, length, axis));
     }
 
     // head backside
-    vertices->push_back (getMarkerPosition (-headWidth/2, -headWidth/2, shaftLength, axis));
-    vertices->push_back (getMarkerPosition (-headWidth/2, headWidth/2, shaftLength, axis));
-    vertices->push_back (getMarkerPosition (headWidth/2, headWidth/2, shaftLength, axis));
-    vertices->push_back (getMarkerPosition (headWidth/2, -headWidth/2, shaftLength, axis));
+    vertices->push_back (getMarkerPosition (-MarkerHeadWidth/2, -MarkerHeadWidth/2, shaftLength, axis));
+    vertices->push_back (getMarkerPosition (-MarkerHeadWidth/2, MarkerHeadWidth/2, shaftLength, axis));
+    vertices->push_back (getMarkerPosition (MarkerHeadWidth/2, MarkerHeadWidth/2, shaftLength, axis));
+    vertices->push_back (getMarkerPosition (MarkerHeadWidth/2, -MarkerHeadWidth/2, shaftLength, axis));
 
     // head
-    vertices->push_back (getMarkerPosition (0, 0, shaftLength+headLength, axis));
+    vertices->push_back (getMarkerPosition (0, 0, shaftLength+MarkerHeadLength, axis));
 
     geometry->setVertexArray (vertices);
 
@@ -280,6 +296,87 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeMarker (int axis)
     geometry->getOrCreateStateSet()->setMode (GL_LIGHTING, osg::StateAttribute::OFF);
 
     osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+    geode->addDrawable (geometry);
+
+    return geode;
+}
+
+osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
+{
+    const float Pi = 3.14159265f;
+
+    const float InnerRadius = mBaseNode->getBound().radius();
+    const float OuterRadius = InnerRadius + MarkerShaftWidth;
+
+    const float SegmentDistance = 100.f;
+    const size_t SegmentCount = std::min(64, std::max(8, (int)(OuterRadius * 2 * Pi / SegmentDistance)));
+    const size_t VerticesPerSegment = 4;
+    const size_t IndicesPerSegment = 24;
+
+    const size_t VertexCount = SegmentCount * VerticesPerSegment;
+    const size_t IndexCount = SegmentCount * IndicesPerSegment;
+
+    const float Angle = 2 * Pi / SegmentCount;
+
+    const unsigned short IndexPattern[IndicesPerSegment] =
+    {
+        0, 4, 5, 0, 5, 1,
+        2, 6, 4, 2, 4, 0,
+        3, 7, 6, 3, 6, 2,
+        1, 5, 7, 1, 7, 3
+    };
+
+
+    osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+
+    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(VertexCount);
+    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(1);
+    osg::ref_ptr<osg::DrawElementsUShort> primitives = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES,
+        IndexCount);
+
+    for (size_t i = 0; i < SegmentCount; ++i)
+    {
+        size_t index = i * VerticesPerSegment;
+
+        float innerX = InnerRadius * std::cos(i * Angle);
+        float innerY = InnerRadius * std::sin(i * Angle);
+
+        float outerX = OuterRadius * std::cos(i * Angle);
+        float outerY = OuterRadius * std::sin(i * Angle);
+
+        vertices->at(index++) = getMarkerPosition(innerX, innerY,  MarkerShaftWidth / 2, axis);
+        vertices->at(index++) = getMarkerPosition(innerX, innerY, -MarkerShaftWidth / 2, axis);
+        vertices->at(index++) = getMarkerPosition(outerX, outerY,  MarkerShaftWidth / 2, axis);
+        vertices->at(index++) = getMarkerPosition(outerX, outerY, -MarkerShaftWidth / 2, axis);
+    }
+
+    colors->at(0) = osg::Vec4f (axis==0 ? 1.0f : 0.2f, axis==1 ? 1.0f : 0.2f, axis==2 ? 1.0f : 0.2f, 1.0f);
+
+    for (size_t i = 0; i < SegmentCount; ++i)
+    {
+        size_t indices[IndicesPerSegment];
+        for (size_t j = 0; j < IndicesPerSegment; ++j)
+        {
+            indices[j] = i * VerticesPerSegment + j;
+
+            if (indices[j] >= VertexCount)
+                indices[j] -= VertexCount;
+        }
+
+        size_t offset = i * IndicesPerSegment;
+        for (size_t j = 0; j < IndicesPerSegment; ++j)
+        {
+            primitives->setElement(offset++, indices[IndexPattern[j]]);
+        }
+    }
+
+    geometry->setVertexArray(vertices);
+    geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+    geometry->addPrimitiveSet(primitives);
+
+    geometry->getOrCreateStateSet()->setMode (GL_LIGHTING, osg::StateAttribute::OFF);
+
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
     geode->addDrawable (geometry);
 
     return geode;
@@ -494,7 +591,7 @@ ESM::Position CSVRender::Object::getPosition() const
 
 float CSVRender::Object::getScale() const
 {
-    return mOverrideFlags & Override_Scale ? mScaleOverride : getReference().mScale;
+    return (mOverrideFlags & Override_Scale) ? mScaleOverride : getReference().mScale;
 }
 
 void CSVRender::Object::setPosition (const float position[3])

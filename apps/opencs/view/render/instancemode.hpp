@@ -1,6 +1,9 @@
 #ifndef CSV_RENDER_INSTANCEMODE_H
 #define CSV_RENDER_INSTANCEMODE_H
 
+#include <osg/Quat>
+#include <osg/Vec3f>
+
 #include "editmode.hpp"
 
 namespace CSVWidget
@@ -19,7 +22,9 @@ namespace CSVRender
             enum DragMode
             {
                 DragMode_None,
-                DragMode_Move
+                DragMode_Move,
+                DragMode_Rotate,
+                DragMode_Scale
             };
 
             CSVWidget::SceneToolMode *mSubMode;
@@ -28,8 +33,12 @@ namespace CSVRender
             DragMode mDragMode;
             int mDragAxis;
             bool mLocked;
+            float mUnitScaleDist;
 
             int getSubModeFromId (const std::string& id) const;
+
+            osg::Vec3f quatToEuler(const osg::Quat& quat) const;
+            osg::Quat eulerToQuat(const osg::Vec3f& euler) const;
 
         public:
 
