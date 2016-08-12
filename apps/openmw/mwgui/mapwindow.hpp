@@ -155,6 +155,10 @@ namespace MWGui
 
         float mLastDirectionX;
         float mLastDirectionY;
+
+    private:
+        void updateDoorMarkers();
+        bool mNeedDoorMarkersUpdate;
     };
 
     class EditNoteDialog : public MWGui::WindowModal
