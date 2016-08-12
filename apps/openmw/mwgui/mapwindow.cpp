@@ -163,7 +163,6 @@ namespace MWGui
         , mInterior(false)
         , mLocalMap(NULL)
         , mCompass(NULL)
-        , mPrefix()
         , mChanged(true)
         , mFogOfWarToggled(true)
         , mFogOfWarEnabled(fogOfWarEnabled)
@@ -174,6 +173,7 @@ namespace MWGui
         , mMarkerUpdateTimer(0.0f)
         , mLastDirectionX(0.0f)
         , mLastDirectionY(0.0f)
+        , mNeedDoorMarkersUpdate(false)
     {
         mCustomMarkers.eventMarkersChanged += MyGUI::newDelegate(this, &LocalMapBase::updateCustomMarkers);
     }
@@ -368,12 +368,6 @@ namespace MWGui
 
         applyFogOfWar();
 
-
-        // clear all previous door markers
-        for (std::vector<MyGUI::Widget*>::iterator it = mDoorMarkerWidgets.begin(); it != mDoorMarkerWidgets.end(); ++it)
-            MyGUI::Gui::getInstance().destroyWidget(*it);
-        mDoorMarkerWidgets.clear();
-
         // Update the map textures
         TextureVector textures;
         for (int mx=0; mx<mNumCells; ++mx)
@@ -399,60 +393,9 @@ namespace MWGui
         }
         mMapTextures.swap(textures);
 
-        MWBase::World* world = MWBase::Environment::get().getWorld();
-
-        // Retrieve the door markers we want to show
-        std::vector<MWBase::World::DoorMarker> doors;
-        if (interior)
-        {
-            MWWorld::CellStore* cell = world->getInterior (mPrefix);
-            world->getDoorMarkers(cell, doors);
-        }
-        else
-        {
-            for (int dX=-mCellDistance; dX<=mCellDistance; ++dX)
-            {
-                for (int dY=-mCellDistance; dY<=mCellDistance; ++dY)
-                {
-                    MWWorld::CellStore* cell = world->getExterior (mCurX+dX, mCurY+dY);
-                    world->getDoorMarkers(cell, doors);
-                }
-            }
-        }
-
-        // Create a widget for each marker
-        int counter = 0;
-        for (std::vector<MWBase::World::DoorMarker>::iterator it = doors.begin(); it != doors.end(); ++it)
-        {
-            MWBase::World::DoorMarker marker = *it;
-
-            std::vector<std::string> destNotes;
-            CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(marker.dest);
-            for (CustomMarkerCollection::ContainerType::const_iterator it = markers.first; it != markers.second; ++it)
-                destNotes.push_back(it->second.mNote);
-
-            MarkerUserData data (mLocalMapRender);
-            data.notes = destNotes;
-            data.caption = marker.name;
-            MyGUI::IntPoint widgetPos = getMarkerPosition(marker.x, marker.y, data);
-            MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
-                                        widgetPos.top - 4,
-                                        8, 8);
-            ++counter;
-            MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("MarkerButton",
-                widgetCoord, MyGUI::Align::Default);
-            markerWidget->setNormalColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal}")));
-            markerWidget->setHoverColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal_over}")));
-            markerWidget->setDepth(Local_MarkerLayer);
-            markerWidget->setNeedMouseFocus(true);
-            // Used by tooltips to not show the tooltip if marker is hidden by fog of war
-            markerWidget->setUserString("ToolTipType", "MapMarker");
-
-            markerWidget->setUserData(data);
-            doorMarkerCreated(markerWidget);
-
-            mDoorMarkerWidgets.push_back(markerWidget);
-        }
+        // Delay the door markers update until scripts have been given a chance to run.
+        // If we don't do this, door markers that should be disabled will still appear on the map.
+        mNeedDoorMarkersUpdate = true;
 
         updateMagicMarkers();
         updateCustomMarkers();
@@ -565,12 +508,81 @@ namespace MWGui
 
     void LocalMapBase::onFrame(float dt)
     {
+        if (mNeedDoorMarkersUpdate)
+        {
+            updateDoorMarkers();
+            mNeedDoorMarkersUpdate = false;
+        }
+
         mMarkerUpdateTimer += dt;
 
         if (mMarkerUpdateTimer >= 0.25)
         {
             mMarkerUpdateTimer = 0;
             updateMagicMarkers();
+        }
+    }
+
+    void LocalMapBase::updateDoorMarkers()
+    {
+        // clear all previous door markers
+        for (std::vector<MyGUI::Widget*>::iterator it = mDoorMarkerWidgets.begin(); it != mDoorMarkerWidgets.end(); ++it)
+            MyGUI::Gui::getInstance().destroyWidget(*it);
+        mDoorMarkerWidgets.clear();
+
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+
+        // Retrieve the door markers we want to show
+        std::vector<MWBase::World::DoorMarker> doors;
+        if (mInterior)
+        {
+            MWWorld::CellStore* cell = world->getInterior (mPrefix);
+            world->getDoorMarkers(cell, doors);
+        }
+        else
+        {
+            for (int dX=-mCellDistance; dX<=mCellDistance; ++dX)
+            {
+                for (int dY=-mCellDistance; dY<=mCellDistance; ++dY)
+                {
+                    MWWorld::CellStore* cell = world->getExterior (mCurX+dX, mCurY+dY);
+                    world->getDoorMarkers(cell, doors);
+                }
+            }
+        }
+
+        // Create a widget for each marker
+        int counter = 0;
+        for (std::vector<MWBase::World::DoorMarker>::iterator it = doors.begin(); it != doors.end(); ++it)
+        {
+            MWBase::World::DoorMarker marker = *it;
+
+            std::vector<std::string> destNotes;
+            CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(marker.dest);
+            for (CustomMarkerCollection::ContainerType::const_iterator it = markers.first; it != markers.second; ++it)
+                destNotes.push_back(it->second.mNote);
+
+            MarkerUserData data (mLocalMapRender);
+            data.notes = destNotes;
+            data.caption = marker.name;
+            MyGUI::IntPoint widgetPos = getMarkerPosition(marker.x, marker.y, data);
+            MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
+                                        widgetPos.top - 4,
+                                        8, 8);
+            ++counter;
+            MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("MarkerButton",
+                widgetCoord, MyGUI::Align::Default);
+            markerWidget->setNormalColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal}")));
+            markerWidget->setHoverColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal_over}")));
+            markerWidget->setDepth(Local_MarkerLayer);
+            markerWidget->setNeedMouseFocus(true);
+            // Used by tooltips to not show the tooltip if marker is hidden by fog of war
+            markerWidget->setUserString("ToolTipType", "MapMarker");
+
+            markerWidget->setUserData(data);
+            doorMarkerCreated(markerWidget);
+
+            mDoorMarkerWidgets.push_back(markerWidget);
         }
     }
 
