@@ -323,14 +323,15 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
         osg::Vec3f camBack = eye - centre;
 
         // Convert coordinate system
-        int widgetWidth = getWorldspaceWidget().width();
+        osg::Vec3f screenCenter = getScreenCoords(getSelectionCenter(selection));
+
         int widgetHeight = getWorldspaceWidget().height();
 
-        int newX = pos.x() - widgetWidth / 2;
-        int newY = -pos.y() + widgetHeight / 2;
+        float newX = pos.x() - screenCenter.x();
+        float newY = (widgetHeight - pos.y()) - screenCenter.y();
 
-        int oldX = newX - diffX;
-        int oldY = newY - diffY; // diffY appears to already be flipped
+        float oldX = newX - diffX;
+        float oldY = newY - diffY; // diffY appears to already be flipped
 
         osg::Vec3f oldVec = osg::Vec3f(oldX, oldY, 0);
         oldVec.normalize();
