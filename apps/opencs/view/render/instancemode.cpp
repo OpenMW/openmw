@@ -59,6 +59,36 @@ osg::Quat CSVRender::InstanceMode::eulerToQuat(const osg::Vec3f& euler) const
     return zr * yr * xr;
 }
 
+osg::Vec3f CSVRender::InstanceMode::getSelectionCenter(const std::vector<osg::ref_ptr<TagBase> >& selection) const
+{
+    osg::Vec3f center = osg::Vec3f(0, 0, 0);
+    int objectCount = 0;
+
+    for (std::vector<osg::ref_ptr<TagBase> >::const_iterator iter (selection.begin()); iter!=selection.end(); ++iter)
+    {
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (iter->get()))
+        {
+            const ESM::Position& position = objectTag->mObject->getPosition();
+            center += osg::Vec3f(position.pos[0], position.pos[1], position.pos[2]);
+
+            ++objectCount;
+        }
+    }
+    center /= objectCount;
+
+    return center;
+}
+
+osg::Vec3f CSVRender::InstanceMode::getScreenCoords(const osg::Vec3f& pos)
+{
+    osg::Matrix viewMatrix = getWorldspaceWidget().getCamera()->getViewMatrix();
+    osg::Matrix projMatrix = getWorldspaceWidget().getCamera()->getProjectionMatrix();
+    osg::Matrix windowMatrix = getWorldspaceWidget().getCamera()->getViewport()->computeWindowMatrix();
+    osg::Matrix combined = viewMatrix * projMatrix * windowMatrix;
+
+    return pos * combined;
+}
+
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":placeholder"), Mask_Reference, "Instance editing",
   parent), mSubMode (0), mSubModeId ("move"), mSelectionMode (0), mDragMode (DragMode_None),
@@ -223,14 +253,16 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (const QPoint& pos)
                 objectTag->mObject->setEdited (Object::Override_Scale);
                 mDragMode = DragMode_Scale;
 
-                // Calculate scale
-                int widgetWidth = getWorldspaceWidget().width();
+                // Calculate scale factor
+                std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getEdited (Mask_Reference);
+                osg::Vec3f center = getScreenCoords(getSelectionCenter(selection));
+
                 int widgetHeight = getWorldspaceWidget().height();
 
-                int x = pos.x() - widgetWidth / 2;
-                int y = pos.y() - widgetHeight / 2;
+                float dx = pos.x() - center.x();
+                float dy = (widgetHeight - pos.y()) - center.y();
 
-                mUnitScaleDist = std::sqrt(x * x + y * y);
+                mUnitScaleDist = std::sqrt(dx * dx + dy * dy);
             }
         }
     }
@@ -257,6 +289,8 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
 {
     osg::Vec3f offset;
     osg::Quat rotation;
+
+    std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getEdited (Mask_Reference);
 
     if (mDragMode == DragMode_Move)
     {
@@ -330,20 +364,22 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
     }
     else if (mDragMode == DragMode_Scale)
     {
-        int widgetWidth = getWorldspaceWidget().width();
+        osg::Vec3f center = getScreenCoords(getSelectionCenter(selection));
+
+        // Calculate scaling distance/rate
         int widgetHeight = getWorldspaceWidget().height();
 
-        int x = pos.x() - widgetWidth / 2;
-        int y = pos.y() - widgetHeight / 2;
+        float dx = pos.x() - center.x();
+        float dy = (widgetHeight - pos.y()) - center.y();
 
-        float dist = std::sqrt(x * x + y * y);
+        float dist = std::sqrt(dx * dx + dy * dy);
         float scale = dist / mUnitScaleDist;
 
         // Only uniform scaling is currently supported
         offset = osg::Vec3f(scale, scale, scale);
     }
 
-    std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getEdited (Mask_Reference);
+    // Apply
     for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin()); iter!=selection.end(); ++iter)
     {
         if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (iter->get()))

@@ -1,6 +1,7 @@
 #ifndef CSV_RENDER_INSTANCEMODE_H
 #define CSV_RENDER_INSTANCEMODE_H
 
+#include <osg/ref_ptr>
 #include <osg/Quat>
 #include <osg/Vec3f>
 
@@ -13,6 +14,7 @@ namespace CSVWidget
 
 namespace CSVRender
 {
+    class TagBase;
     class InstanceSelectionMode;
 
     class InstanceMode : public EditMode
@@ -39,6 +41,9 @@ namespace CSVRender
 
             osg::Vec3f quatToEuler(const osg::Quat& quat) const;
             osg::Quat eulerToQuat(const osg::Vec3f& euler) const;
+
+            osg::Vec3f getSelectionCenter(const std::vector<osg::ref_ptr<TagBase> >& selection) const;
+            osg::Vec3f getScreenCoords(const osg::Vec3f& pos);
 
         public:
 
