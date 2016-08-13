@@ -712,7 +712,7 @@ if (WIN32)
 endif()
 
 # Apple bundling
-if (APPLE)
+if (APPLE AND DESIRED_QT_VERSION MATCHES 5)
     get_property(QT_COCOA_PLUGIN_PATH TARGET Qt5::QCocoaIntegrationPlugin PROPERTY LOCATION_RELEASE)
     get_filename_component(QT_COCOA_PLUGIN_DIR "${QT_COCOA_PLUGIN_PATH}" DIRECTORY)
     get_filename_component(QT_COCOA_PLUGIN_GROUP "${QT_COCOA_PLUGIN_DIR}" NAME)
