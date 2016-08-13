@@ -356,6 +356,14 @@ namespace MWMechanics
 
         bool castByPlayer = (!caster.isEmpty() && caster == getPlayer());
 
+        ActiveSpells targetSpells;
+        if (target.getClass().isActor())
+            targetSpells = target.getClass().getCreatureStats(target).getActiveSpells();
+
+        bool canCastAnEffect = false;    // For bound equipment.If this remains false
+                                         // throughout the iteration of this spell's 
+                                         // effects, we display a "can't re-cast" message
+
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (effects.mList.begin());
             effectIt!=effects.mList.end(); ++effectIt)
         {
@@ -365,6 +373,16 @@ namespace MWMechanics
             const ESM::MagicEffect *magicEffect =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 effectIt->mEffectID);
+
+            // Re-casting a bound equipment effect has no effect if the spell is still active
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::NonRecastable && targetSpells.isSpellActive(mId))
+            {
+                if (effectIt == (effects.mList.end() - 1) && !canCastAnEffect && castByPlayer)
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCannotRecast}");
+                continue;
+            }
+            else
+                canCastAnEffect = true;
 
             if (!checkEffectTarget(effectIt->mEffectID, target, castByPlayer))
                 continue;
