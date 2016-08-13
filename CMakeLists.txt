@@ -797,7 +797,7 @@ if (APPLE AND DESIRED_QT_VERSION MATCHES 5)
         fixup_bundle(\"${INSTALLED_OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"\")
         " COMPONENT Runtime)
     include(CPack)
-endif (APPLE)
+endif (APPLE AND DESIRED_QT_VERSION MATCHES 5)
 
 # Doxygen Target -- simply run 'make doc' or 'make doc_pages'
 # output directory for 'make doc'       is "${OpenMW_BINARY_DIR}/docs/Doxygen"
