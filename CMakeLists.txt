@@ -343,8 +343,12 @@ endif()
 
 # CXX Compiler settings
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wundef -Wno-unused-parameter -std=c++11 -stdlib=libc++ -pedantic -Wno-long-long")
-    add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS=ON -DBOOST_NO_CXX11_RVALUE_REFERENCES=ON )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wundef -Wno-unused-parameter -std=c++11 -pedantic -Wno-long-long")
+    add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS=ON )
+
+    if (APPLE)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+    endif()
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT APPLE)
         if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 3.6 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 3.6)
