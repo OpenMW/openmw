@@ -47,6 +47,7 @@ set(SERVER
     Player.cpp
     Networking.cpp
     Utils.cpp
+    Log.cpp
     Script/Script.cpp Script/ScriptFunction.cpp
     Script/ScriptFunctions.cpp
     Script/Functions/Translocations.cpp Script/Functions/Stats.cpp Script/Functions/Items.cpp

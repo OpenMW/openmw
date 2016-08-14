@@ -2,6 +2,7 @@
 #include <BitStream.h>
 #include "Player.hpp"
 #include "Networking.hpp"
+#include "Log.hpp"
 #include <RakPeer.h>
 #include <MessageIdentifiers.h>
 #include <components/openmw-mp/NetworkMessages.hpp>
@@ -69,6 +70,11 @@ int main(int argc, char *argv[])
 
     loadSettings(mgr);
 
+    int logLevel = mgr.getInt("loglevel", "General");
+    if(logLevel < Log::INFO || logLevel > Log::FATAL)
+        logLevel = Log::INFO;
+    LOG_INIT(logLevel);
+
     int players = mgr.getInt("players", "General");
     int port = mgr.getInt("port", "General");
 
@@ -106,6 +112,8 @@ int main(int argc, char *argv[])
     RakNet::RakPeerInterface::DestroyInstance(peer);
     if (code == 0)
         printf("Quitting peacefully.\n");
+        LOG_MESSAGE_SIMPLE(Log::INFO, "%s", "Quitting peacefully.");
 
+    LOG_QUIT();
     return code;
 }
