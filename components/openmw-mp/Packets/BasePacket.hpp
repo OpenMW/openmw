@@ -33,9 +33,9 @@ namespace mwmp
         void SetSendStream(RakNet::BitStream *bitStream);
         void SetStreams(RakNet::BitStream *inStream, RakNet::BitStream *outStream);
 
-        size_t headerSize()
+        static const size_t headerSize()
         {
-            return 9; // 9 == packetID + RakNetGUID (uint64_t)
+            return (sizeof(packetID) + RakNet::RakNetGUID::size()); // packetID + RakNetGUID (uint64_t)
         }
 
     protected:
