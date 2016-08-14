@@ -159,11 +159,9 @@ namespace MWClass
 
         if (Settings::Manager::getBool("show effect duration","Game"))
             text += "\n#{sDuration}: " + MWGui::ToolTips::toString(ptr.getClass().getRemainingUsageTime(ptr));
-        if (ref->mBase->mData.mWeight != 0)
-        {
-            text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-            text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
-        }
+
+        text += MWGui::ToolTips::getWeightString(ref->mBase->mData.mWeight, "#{sWeight}");
+        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
