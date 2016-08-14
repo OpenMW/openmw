@@ -48,6 +48,7 @@ set(SERVER
     Networking.cpp
     Utils.cpp
     Log.cpp
+    MasterClient.cpp
     Script/Script.cpp Script/ScriptFunction.cpp
     Script/ScriptFunctions.cpp
     Script/Functions/Translocations.cpp Script/Functions/Stats.cpp Script/Functions/Items.cpp

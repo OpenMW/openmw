@@ -6,6 +6,7 @@
 #define OPENMW_NETWORKING_HPP
 
 #include <components/openmw-mp/PacketsController.hpp>
+#include "Player.hpp"
 
 namespace  mwmp
 {
@@ -19,6 +20,7 @@ namespace  mwmp
         void DisconnectPlayer(RakNet::RakNetGUID guid);
         void KickPlayer(RakNet::RakNetGUID guid);
         void Update(RakNet::Packet *packet);
+        unsigned short NumberOfConnections() const;
 
         int MainLoop();
 

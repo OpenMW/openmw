@@ -402,3 +402,8 @@ void Networking::KickPlayer(RakNet::RakNetGUID guid)
 {
     peer->CloseConnection(guid, true);
 }
+
+unsigned short Networking::NumberOfConnections() const
+{
+    return peer->NumberOfConnections();
+}

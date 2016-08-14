@@ -2,6 +2,7 @@
 #include <BitStream.h>
 #include "Player.hpp"
 #include "Networking.hpp"
+#include "MasterClient.hpp"
 #include "Log.hpp"
 #include <RakPeer.h>
 #include <MessageIdentifiers.h>
@@ -10,6 +11,7 @@
 #include <iostream>
 #include <components/files/configurationmanager.hpp>
 #include <components/settings/settings.hpp>
+#include <thread>
 
 using namespace std;
 using namespace mwmp;
@@ -64,6 +66,11 @@ std::string loadSettings (Settings::Manager & settings)
     return settingspath;
 }
 
+void queryThread(MasterClient *mclient)
+{
+    mclient->Update();
+}
+
 int main(int argc, char *argv[])
 {
     Settings::Manager mgr;
@@ -76,6 +83,7 @@ int main(int argc, char *argv[])
     LOG_INIT(logLevel);
 
     int players = mgr.getInt("players", "General");
+    string addr = mgr.getString("address", "General");
     int port = mgr.getInt("port", "General");
 
     string plugin_home = mgr.getString("home", "Plugins");
@@ -99,7 +107,7 @@ int main(int argc, char *argv[])
     const char passw[8] = "1234567";
     peer->SetIncomingPassword(passw, sizeof(passw));
 
-    RakNet::SocketDescriptor sd((unsigned short)port, 0);
+    RakNet::SocketDescriptor sd((unsigned short)port, addr.c_str());
     if (peer->Startup((unsigned)players, &sd, 1) != RakNet::RAKNET_STARTED)
         return 0;
 
@@ -107,11 +115,33 @@ int main(int argc, char *argv[])
 
     Networking networking(peer);
 
+    bool masterEnabled = mgr.getBool("enabled", "MasterServer");
+    thread thrQuery;
+    MasterClient *mclient;
+    if(masterEnabled)
+    {
+        LOG_MESSAGE_SIMPLE(Log::INFO, "%s", "Sharing server query info to master enabled.");
+        string masterAddr = mgr.getString("address", "MasterServer");
+        int masterPort = mgr.getInt("port", "MasterServer");
+        mclient = new MasterClient(masterAddr, (unsigned short) masterPort, addr, (unsigned short) port);
+        mclient->SetMaxPlayers((unsigned)players);
+        string motd = mgr.getString("motd", "General");
+        mclient->SetMOTD(motd);
+        thrQuery = thread(queryThread, mclient);
+    }
+    
+
     int code = networking.MainLoop();
 
     RakNet::RakPeerInterface::DestroyInstance(peer);
+
+    if(thrQuery.joinable())
+    {
+        mclient->Stop();
+        thrQuery.join();
+    }
+
     if (code == 0)
-        printf("Quitting peacefully.\n");
         LOG_MESSAGE_SIMPLE(Log::INFO, "%s", "Quitting peacefully.");
 
     LOG_QUIT();
