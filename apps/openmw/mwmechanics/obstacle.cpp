@@ -93,11 +93,6 @@ namespace MWMechanics
         return mWalkState == State_Norm;
     }
 
-    bool ObstacleCheck::isEvading() const
-    {
-        return mWalkState == State_Evade;
-    }
-
     /*
      * input   - actor, duration (time since last check)
      * output  - true if evasive action needs to be taken

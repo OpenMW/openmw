@@ -108,10 +108,8 @@ namespace MWMechanics
             osg::Vec3f mInitialActorPosition;
             bool mStoredInitialActorPosition;
 
-            bool mIsWanderDestReady;
-
             void getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell, AiWanderStorage& storage);
-
+            
             void trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes, const PathFinder& pathfinder);
 
             // constants for converting idleSelect values into groupNames

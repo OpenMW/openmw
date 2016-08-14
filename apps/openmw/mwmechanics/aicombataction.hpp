@@ -16,9 +16,8 @@ namespace MWMechanics
     public:
         virtual ~Action() {}
         virtual void prepare(const MWWorld::Ptr& actor) = 0;
-        virtual float getCombatRange (bool& isRanged) const = 0;
+        virtual void getCombatRange (float& rangeAttack, float& rangeFollow) = 0;
         virtual float getActionCooldown() { return 0.f; }
-        virtual const ESM::Weapon* getWeapon() const { return NULL; };
     };
 
     class ActionSpell : public Action
@@ -29,7 +28,7 @@ namespace MWMechanics
         /// Sets the given spell as selected on the actor's spell list.
         virtual void prepare(const MWWorld::Ptr& actor);
 
-        virtual float getCombatRange (bool& isRanged) const;
+        virtual void getCombatRange (float& rangeAttack, float& rangeFollow);
     };
 
     class ActionEnchantedItem : public Action
@@ -39,7 +38,7 @@ namespace MWMechanics
         MWWorld::ContainerStoreIterator mItem;
         /// Sets the given item as selected enchanted item in the actor's InventoryStore.
         virtual void prepare(const MWWorld::Ptr& actor);
-        virtual float getCombatRange (bool& isRanged) const;
+        virtual void getCombatRange (float& rangeAttack, float& rangeFollow);
 
         /// Since this action has no animation, apply a small cool down for using it
         virtual float getActionCooldown() { return 1.f; }
@@ -52,7 +51,7 @@ namespace MWMechanics
         MWWorld::Ptr mPotion;
         /// Drinks the given potion.
         virtual void prepare(const MWWorld::Ptr& actor);
-        virtual float getCombatRange (bool& isRanged) const;
+        virtual void getCombatRange (float& rangeAttack, float& rangeFollow);
 
         /// Since this action has no animation, apply a small cool down for using it
         virtual float getActionCooldown() { return 1.f; }
@@ -63,7 +62,6 @@ namespace MWMechanics
     private:
         MWWorld::Ptr mAmmunition;
         MWWorld::Ptr mWeapon;
-        bool         mIsNpc;
 
     public:
         /// \a weapon may be empty for hand-to-hand combat
@@ -71,8 +69,7 @@ namespace MWMechanics
             : mAmmunition(ammo), mWeapon(weapon) {}
         /// Equips the given weapon.
         virtual void prepare(const MWWorld::Ptr& actor);
-        virtual float getCombatRange (bool& isRanged) const;
-        virtual const ESM::Weapon* getWeapon() const;
+        virtual void getCombatRange (float& rangeAttack, float& rangeFollow);
     };
 
     float rateSpell (const ESM::Spell* spell, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
