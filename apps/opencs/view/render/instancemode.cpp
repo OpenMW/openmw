@@ -215,23 +215,26 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (const QPoint& pos)
     if (mDragMode!=DragMode_None || mLocked)
         return false;
 
-
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-    if (hit.tag && CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
-    {
-        getWorldspaceWidget().clearSelection (Mask_Reference);
-        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (hit.tag.get()))
-        {
-            CSVRender::Object* object = objectTag->mObject;
-            object->setSelected (true);
-        }
-    }
 
-    std::vector<osg::ref_ptr<TagBase> > selection =
-        getWorldspaceWidget().getSelection (Mask_Reference);
-
+    std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Reference);
     if (selection.empty())
-        return false;
+    {
+        // Only change selection at the start of drag if no object is already selected
+        if (hit.tag && CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
+        {
+            getWorldspaceWidget().clearSelection (Mask_Reference);
+            if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (hit.tag.get()))
+            {
+                CSVRender::Object* object = objectTag->mObject;
+                object->setSelected (true);
+            }
+        }
+
+        selection = getWorldspaceWidget().getSelection (Mask_Reference);
+        if (selection.empty())
+            return false;
+    }
 
     for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin());
         iter!=selection.end(); ++iter)
