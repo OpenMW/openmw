@@ -159,7 +159,7 @@ namespace MWClass
 
         std::string text;
 
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mWeight, "#{sWeight}");
+        text += MWGui::ToolTips::getWeightString(ref->mBase->mData.mWeight, "#{sWeight}");
         if (!gold && !ref->mBase->mData.mIsKey)
             text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
