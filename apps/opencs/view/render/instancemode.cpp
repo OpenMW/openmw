@@ -323,33 +323,28 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
         osg::Vec3f eye, centre, up;
         getWorldspaceWidget().getCamera()->getViewMatrix().getLookAt (eye, centre, up);
 
-        osg::Vec3f camBack = eye - centre;
-
-        // Convert coordinate system
-        osg::Vec3f screenCenter = getScreenCoords(getSelectionCenter(selection));
-
-        int widgetHeight = getWorldspaceWidget().height();
-
-        float newX = pos.x() - screenCenter.x();
-        float newY = (widgetHeight - pos.y()) - screenCenter.y();
-
-        float oldX = newX - diffX;
-        float oldY = newY - diffY; // diffY appears to already be flipped
-
-        osg::Vec3f oldVec = osg::Vec3f(oldX, oldY, 0);
-        oldVec.normalize();
-
-        osg::Vec3f newVec = osg::Vec3f(newX, newY, 0);
-        newVec.normalize();
-
-        // Find angle and axis of rotation
-        float angle = std::acos(oldVec * newVec) * speedFactor;
-        if (((oldVec ^ newVec) * camBack < 0) ^ (camBack.z() < 0))
-            angle *= -1;
-
+        float angle;
         osg::Vec3f axis;
-        if (mDragAxis != -1)
+
+        if (mDragAxis == -1)
         {
+            // Free rotate
+            float rotationFactor = CSMPrefs::get()["3D Scene Input"]["rotate-factor"].toDouble() * speedFactor;
+
+            osg::Quat cameraRotation = getWorldspaceWidget().getCamera()->getInverseViewMatrix().getRotate();
+
+            osg::Vec3f camForward = centre - eye;
+            osg::Vec3f screenDir = cameraRotation * osg::Vec3f(diffX, diffY, 0);
+            screenDir.normalize();
+
+            angle = std::sqrt(diffX*diffX + diffY*diffY) * rotationFactor;
+            axis = screenDir ^ camForward;
+        }
+        else
+        {
+            // Global axis rotation
+            osg::Vec3f camBack = eye - centre;
+
             for (int i = 0; i < 3; ++i)
             {
                 if (i == mDragAxis)
@@ -358,11 +353,32 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
                     axis[i] = 0;
             }
 
+            // Flip axis if facing opposite side
             if (camBack * axis < 0)
                 axis *= -1;
+
+            // Convert coordinate system
+            osg::Vec3f screenCenter = getScreenCoords(getSelectionCenter(selection));
+
+            int widgetHeight = getWorldspaceWidget().height();
+
+            float newX = pos.x() - screenCenter.x();
+            float newY = (widgetHeight - pos.y()) - screenCenter.y();
+
+            float oldX = newX - diffX;
+            float oldY = newY - diffY; // diffY appears to already be flipped
+
+            osg::Vec3f oldVec = osg::Vec3f(oldX, oldY, 0);
+            oldVec.normalize();
+
+            osg::Vec3f newVec = osg::Vec3f(newX, newY, 0);
+            newVec.normalize();
+
+            // Find angle and axis of rotation
+            angle = std::acos(oldVec * newVec) * speedFactor;
+            if (((oldVec ^ newVec) * camBack < 0) ^ (camBack.z() < 0))
+                angle *= -1;
         }
-        else
-            axis = camBack;
 
         rotation = osg::Quat(angle, axis);
     }
