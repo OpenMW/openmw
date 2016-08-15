@@ -33,9 +33,11 @@ class Log
         void print(int level, const char *file, int line, const char *message, ...) const;
     private:
         Log(int logLevel);
-        Log( const Log& ) = delete;
-        Log& operator=( const Log& ) = delete;
-        static Log * sLog;
+        /// Not implemented
+        Log( const Log& );
+        /// Not implemented
+        Log& operator=(Log& );
+        static Log *sLog;
         int logLevel;
 
 };
