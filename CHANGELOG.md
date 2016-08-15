@@ -41,6 +41,7 @@
     Bug #3421: Idling long enough while paralyzed sometimes causes character to get stuck
     Bug #3423: Sleep interruption inside dungeons too agressive
     Bug #3424: Pickpocketing sometimes won't work
+    Bug #3432: AiFollow / AiEscort durations handled incorrectly
     Bug #3434: Dead NPC's and Creatures still contribute to sneak skill increases
     Bug #3437: Weather-conditioned dialogue should not play in interiors
     Bug #3439: Effects cast by summon stick around after their death
