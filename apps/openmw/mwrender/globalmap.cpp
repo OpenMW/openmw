@@ -107,6 +107,10 @@ namespace MWRender
 
     GlobalMap::~GlobalMap()
     {
+        for (CameraVector::iterator it = mCamerasPendingRemoval.begin(); it != mCamerasPendingRemoval.end(); ++it)
+            removeCamera(*it);
+        for (CameraVector::iterator it = mActiveCameras.begin(); it != mActiveCameras.end(); ++it)
+            removeCamera(*it);
     }
 
     void GlobalMap::render (Loading::Listener* loadingListener)
@@ -507,7 +511,8 @@ namespace MWRender
     void GlobalMap::cleanupCameras()
     {
         for (CameraVector::iterator it = mCamerasPendingRemoval.begin(); it != mCamerasPendingRemoval.end(); ++it)
-            mRoot->removeChild(*it);
+            removeCamera(*it);
+
         mCamerasPendingRemoval.clear();
 
         for (ImageDestVector::iterator it = mPendingImageDest.begin(); it != mPendingImageDest.end();)
@@ -523,5 +528,11 @@ namespace MWRender
 
             it = mPendingImageDest.erase(it);
         }
+    }
+
+    void GlobalMap::removeCamera(osg::Camera *cam)
+    {
+        cam->removeChildren(0, cam->getNumChildren());
+        mRoot->removeChild(cam);
     }
 }

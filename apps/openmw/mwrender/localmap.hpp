@@ -63,6 +63,8 @@ namespace MWRender
 
         osg::ref_ptr<osg::Texture2D> getFogOfWarTexture (int x, int y);
 
+        void removeCamera(osg::Camera* cam);
+
         /**
          * Indicates a camera has been queued for rendering and can be cleaned up in the next frame. For internal use only.
          */

@@ -412,6 +412,8 @@ void RenderManager::initialise()
 
 void RenderManager::shutdown()
 {
+    mGuiRoot->removeChildren(0, mGuiRoot->getNumChildren());
+    mSceneRoot->removeChild(mGuiRoot);
 }
 
 MyGUI::IVertexBuffer* RenderManager::createVertexBuffer()

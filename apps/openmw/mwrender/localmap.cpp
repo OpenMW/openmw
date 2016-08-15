@@ -88,9 +88,9 @@ LocalMap::LocalMap(osgViewer::Viewer* viewer)
 LocalMap::~LocalMap()
 {
     for (CameraVector::iterator it = mActiveCameras.begin(); it != mActiveCameras.end(); ++it)
-        mRoot->removeChild(*it);
+        removeCamera(*it);
     for (CameraVector::iterator it = mCamerasPendingRemoval.begin(); it != mCamerasPendingRemoval.end(); ++it)
-        mRoot->removeChild(*it);
+        removeCamera(*it);
 }
 
 const osg::Vec2f LocalMap::rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle)
@@ -275,6 +275,12 @@ osg::ref_ptr<osg::Texture2D> LocalMap::getFogOfWarTexture(int x, int y)
         return found->second.mFogOfWarTexture;
 }
 
+void LocalMap::removeCamera(osg::Camera *cam)
+{
+    cam->removeChildren(0, cam->getNumChildren());
+    mRoot->removeChild(cam);
+}
+
 void LocalMap::markForRemoval(osg::Camera *cam)
 {
     CameraVector::iterator found = std::find(mActiveCameras.begin(), mActiveCameras.end(), cam);
@@ -293,11 +299,7 @@ void LocalMap::cleanupCameras()
         return;
 
     for (CameraVector::iterator it = mCamerasPendingRemoval.begin(); it != mCamerasPendingRemoval.end(); ++it)
-    {
-        (*it)->removeChildren(0, (*it)->getNumChildren());
-        (*it)->setGraphicsContext(NULL);
-        mRoot->removeChild(*it);
-    }
+        removeCamera(*it);
 
     mCamerasPendingRemoval.clear();
 }
