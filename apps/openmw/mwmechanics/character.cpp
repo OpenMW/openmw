@@ -1542,9 +1542,10 @@ void CharacterController::update(float duration)
                 mAnimation->disable(mAnimQueue.front().mGroup);
                 mAnimQueue.pop_front();
 
+                bool loopfallback = (mAnimQueue.front().mGroup.compare(0,4,"idle") == 0);
                 mAnimation->play(mAnimQueue.front().mGroup, Priority_Default,
                                  MWRender::Animation::BlendMask_All, false,
-                                 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount);
+                                 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
             }
         }
     }
@@ -1822,9 +1823,10 @@ void CharacterController::update(float duration)
                 mAnimation->disable(mAnimQueue.front().mGroup);
                 mAnimQueue.pop_front();
 
+                bool loopfallback = (mAnimQueue.front().mGroup.compare(0,4,"idle") == 0);
                 mAnimation->play(mAnimQueue.front().mGroup, Priority_Default,
                                  MWRender::Animation::BlendMask_All, false,
-                                 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount);
+                                 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
             }
         }
 
