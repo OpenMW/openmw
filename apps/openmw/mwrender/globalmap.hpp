@@ -56,6 +56,8 @@ namespace MWRender
          */
         void cleanupCameras();
 
+        void removeCamera(osg::Camera* cam);
+
         /**
          * Mark a camera for cleanup in the next update. For internal use only.
          */
