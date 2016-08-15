@@ -16,6 +16,26 @@ env:
    #   via the "travis encrypt" command using the project repo's public key
    - secure: "jybGzAdUbqt9vWR/GEnRd96BgAi/7Zd1+2HK68j/i/8+/1YH2XxLOy4Jv/DUBhBlJIkxs/Xv8dRcUlFOclZDHX1d/9Qnsqd3oUVkD7k1y7cTOWy9TBQaE/v/kZo3LpzA3xPwwthrb0BvqIbOfIELi5fS5s8ba85WFRg3AX70wWE="
 addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:openmw/openmw'
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.6
+    packages: [
+      # Dev
+      clang-3.6, libunshield-dev, libtinyxml-dev,
+      # Tests
+      libgtest-dev, google-mock,
+      # Boost
+      libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev, libboost-thread-dev,
+      # FFmpeg
+      libavcodec-dev, libavformat-dev, libavutil-dev, libswscale-dev,
+      # Audio & Video
+      libsdl2-dev, libqt4-dev, libopenal-dev,
+      # The other from OpenMW ppa
+      libbullet-dev, libswresample-dev, libopenscenegraph-dev, libmygui-dev
+    ]
+
   coverity_scan:
     project:
       name: "OpenMW/openmw"
@@ -33,12 +53,8 @@ matrix:
   allow_failures:
     - env: ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
 
-before_install:
- - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./CI/before_install.linux.sh; fi
- - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then ./CI/before_install.osx.sh; fi
-before_script:
- - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./CI/before_script.linux.sh; fi
- - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then ./CI/before_script.osx.sh; fi
+before_install: ./CI/before_install.${TRAVIS_OS_NAME}.sh
+before_script: ./CI/before_script.${TRAVIS_OS_NAME}.sh
 script:
  - cd ./build
  - if [ "$COVERITY_SCAN_BRANCH" != 1 ]; then ${ANALYZE}make -j3; fi
