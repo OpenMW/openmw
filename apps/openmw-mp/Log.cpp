@@ -5,6 +5,7 @@
 #include <cstdarg>
 #include <iostream>
 #include <cstring>
+#include <ctime>
 #include "Log.hpp"
 
 using namespace std;
