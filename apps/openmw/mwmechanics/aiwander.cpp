@@ -812,9 +812,6 @@ namespace MWMechanics
         MWBase::Environment::get().getWorld()->moveObject(actor, static_cast<float>(dest.mX), 
             static_cast<float>(dest.mY), static_cast<float>(dest.mZ));
         actor.getClass().adjustPosition(actor, false);
-
-        // may have changed cell
-        storage.mPopulateAvailableNodes = true;
     }
 
     int AiWander::OffsetToPreventOvercrowding()

@@ -44,6 +44,7 @@
 #include "creaturestats.hpp"
 #include "security.hpp"
 #include "actorutil.hpp"
+#include "spellcasting.hpp"
 
 namespace
 {
@@ -961,34 +962,6 @@ void CharacterController::updateIdleStormState(bool inwater)
     }
 }
 
-void CharacterController::castSpell(const std::string &spellid)
-{
-    static const std::string schools[] = {
-        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-    };
-
-    const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-    const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
-    const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
-
-    const ESM::MagicEffect *effect;
-    effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
-
-    const ESM::Static* castStatic;
-    if (!effect->mCasting.empty())
-        castStatic = store.get<ESM::Static>().find (effect->mCasting);
-    else
-        castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
-
-    mAnimation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex);
-
-    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-    if(!effect->mCastSound.empty())
-        sndMgr->playSound3D(mPtr, effect->mCastSound, 1.0f, 1.0f);
-    else
-        sndMgr->playSound3D(mPtr, schools[effect->mData.mSchool]+" cast", 1.0f, 1.0f);
-}
-
 bool CharacterController::updateCreatureState()
 {
     const MWWorld::Class &cls = mPtr.getClass();
@@ -1020,7 +993,8 @@ bool CharacterController::updateCreatureState()
                 const std::string spellid = stats.getSpells().getSelectedSpell();
                 if (!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
                 {
-                    castSpell(spellid);
+                    MWMechanics::CastSpell cast(mPtr, NULL);
+                    cast.playSpellCastingEffects(spellid);
 
                     if (!mAnimation->hasAnimation("spellcast"))
                         MWBase::Environment::get().getWorld()->castSpell(mPtr); // No "release" text key to use, so cast immediately
@@ -1248,7 +1222,8 @@ bool CharacterController::updateWeaponState()
 
                 if(!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
                 {
-                    castSpell(spellid);
+                    MWMechanics::CastSpell cast(mPtr, NULL);
+                    cast.playSpellCastingEffects(spellid);
 
                     const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
                     const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);

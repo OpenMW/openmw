@@ -15,9 +15,9 @@ namespace CSVRender
         , mWorldspaceWidget(worldspaceWidget)
         , mCenterOnSelection(0)
     {
-        mCenterShortcut.reset(new CSMPrefs::Shortcut("orbit-center-selection", worldspaceWidget));
+        mCenterShortcut = new CSMPrefs::Shortcut("orbit-center-selection", worldspaceWidget);
         mCenterShortcut->enable(false);
-        connect(mCenterShortcut.get(), SIGNAL(activated()), this, SLOT(centerSelection()));
+        connect(mCenterShortcut, SIGNAL(activated()), this, SLOT(centerSelection()));
     }
 
     OrbitCameraMode::~OrbitCameraMode()

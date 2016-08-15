@@ -48,7 +48,6 @@
 # ======================================
 
 include(LibFindMacros)
-include(PreprocessorUtils)
 
 set(_REGULAR_INSTALL_PATHS
     /usr/X11R6
@@ -78,21 +77,13 @@ find_path(Freetype_OLD_INCLUDE_DIR
     PATH_SUFFIXES freetype2
     NO_DEFAULT_PATH
 )
-
-# get version from freetype.h
-find_file(Freetype_HEADER
-    NAMES freetype.h
-    PATH_SUFFIXES freetype
-    PATHS ${Freetype_OLD_INCLUDE_DIR}
+libfind_version_n_header(Freetype
+    NAMES freetype/freetype.h freetype.h
+    PATHS Freetype_OLD_INCLUDE_DIR
+    DEFINES FREETYPE_MAJOR FREETYPE_MINOR FREETYPE_PATCH
 )
-if (Freetype_HEADER)
-    get_version_from_n_defines(Freetype_VERSION
-        ${Freetype_HEADER}
-        FREETYPE_MAJOR FREETYPE_MINOR FREETYPE_PATCH
-    )
-endif()
 
-set(Freetype_PROCESS_INCLUDES Freetype_INCLUDE_DIR Freetype_OLD_INCLUDE_DIR)
+set(Freetype_PROCESS_INCLUDES Freetype_OLD_INCLUDE_DIR)
 libfind_process(Freetype)
 
 if (Freetype_INCLUDE_DIRS)

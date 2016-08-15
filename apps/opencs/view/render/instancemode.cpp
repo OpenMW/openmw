@@ -370,8 +370,6 @@ void CSVRender::InstanceMode::dropEvent (QDropEvent* event)
                     selection.add (CSMWorld::CellCoordinates::fromId (cellId).first);
                     paged->setCellSelection (selection);
                 }
-
-                noCell = false;
             }
         }
         else if (CSVRender::PagedWorldspaceWidget *paged =

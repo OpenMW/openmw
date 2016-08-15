@@ -62,6 +62,7 @@ namespace MWGui
         void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
         ///< set the screen-space position of the tooltip for focused object
 
+        static std::string getWeightString(const float weight, const std::string& prefix);
         static std::string getValueString(const int value, const std::string& prefix);
         ///< @return "prefix: value" or "" if value is 0
 

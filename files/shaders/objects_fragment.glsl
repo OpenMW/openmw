@@ -59,7 +59,9 @@ varying vec3 passNormal;
 
 void main()
 {
+#if @diffuseMap
     vec2 adjustedDiffuseUV = diffuseMapUV;
+#endif
 
 #if @normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);

@@ -15,7 +15,7 @@ namespace SceneUtil
             for (int i=0; i<2; ++i) // Using SHALLOW_COPY for StateAttributes, if users want to modify it is their responsibility to set a non-shared one first
                                     // This can be done conveniently in user implementations of the setDefaults() method
             {
-                mStateSets[i] = static_cast<osg::StateSet*>(osg::clone(src, osg::CopyOp::SHALLOW_COPY));
+                mStateSets[i] = osg::clone(src, osg::CopyOp::SHALLOW_COPY);
                 setDefaults(mStateSets[i]);
             }
         }
@@ -65,7 +65,7 @@ namespace SceneUtil
         : StateSetUpdater(copy, copyop)
     {
         for (unsigned int i=0; i<copy.mCtrls.size(); ++i)
-            mCtrls.push_back(static_cast<StateSetUpdater*>(osg::clone(copy.mCtrls[i].get(), copyop)));
+            mCtrls.push_back(osg::clone(copy.mCtrls[i].get(), copyop));
     }
 
     unsigned int CompositeStateSetUpdater::getNumControllers()
