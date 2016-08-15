@@ -6,8 +6,8 @@
 #define OPENMW_MASTERCLIENT_HPP
 
 #include <string>
-#include <raknet/HTTPConnection2.h>
-#include <raknet/TCPInterface.h>
+#include <HTTPConnection2.h>
+#include <TCPInterface.h>
 #include <mutex>
 
 class MasterClient
