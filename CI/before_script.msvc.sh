@@ -428,11 +428,7 @@ printf "MyGUI 3.2.2... "
 		mv MyGUI-3.2.2-win$BITS MyGUI
 	fi
 
-	MYGUI_SDK="`real_pwd`/MyGUI"
-
-	add_cmake_opts -DMYGUISDK="$MYGUI_SDK" \
-		-DMYGUI_INCLUDE_DIRS="$MYGUI_SDK/include/MYGUI" \
-		-DMYGUI_PREQUEST_FILE="$MYGUI_SDK/include/MYGUI/MyGUI_Prerequest.h"
+	export MYGUI_HOME="`real_pwd`/MyGUI"
 
 	if [ $CONFIGURATION == "Debug" ]; then
 		SUFFIX="_d"
