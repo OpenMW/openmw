@@ -135,27 +135,6 @@ namespace MWGui
         MWMechanics::CreatureStats& creatureStats = player.getClass().getCreatureStats(player);
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
-        const ESM::NPC *playerData = player.get<ESM::NPC>()->mBase;
-
-        // set class image
-        const ESM::Class *cls =
-            world->getStore().get<ESM::Class>().find(playerData->mClass);
-
-        if(world->getStore().get<ESM::Class>().isDynamic(cls->mId))
-        {
-            // Choosing Stealth specialization and Speed/Agility as attributes, if possible. Otherwise fall back to first class found.
-            MWWorld::SharedIterator<ESM::Class> it = world->getStore().get<ESM::Class>().begin();
-            for(; it != world->getStore().get<ESM::Class>().end(); ++it)
-            {
-                if(it->mData.mIsPlayable && it->mData.mSpecialization == 2 && it->mData.mAttribute[0] == 4 && it->mData.mAttribute[1] == 3)
-                    break;
-            }
-            if (it == world->getStore().get<ESM::Class>().end())
-                it = world->getStore().get<ESM::Class>().begin();
-            if (it != world->getStore().get<ESM::Class>().end())
-                cls = &*it;
-        }
-
         setClassImage(mClassImage, getLevelupClassImage(pcStats.getSkillIncreasesForSpecialization(0),
                                                         pcStats.getSkillIncreasesForSpecialization(1),
                                                         pcStats.getSkillIncreasesForSpecialization(2)));

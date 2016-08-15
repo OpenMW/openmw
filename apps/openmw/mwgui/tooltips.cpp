@@ -586,6 +586,14 @@ namespace MWGui
         return stream.str();
     }
 
+    std::string ToolTips::getWeightString(const float weight, const std::string& prefix)
+    {
+        if (weight == 0)
+            return "";
+        else
+            return "\n" + prefix + ": " + toString(weight);
+    }
+
     std::string ToolTips::getValueString(const int value, const std::string& prefix)
     {
         if (value == 0)

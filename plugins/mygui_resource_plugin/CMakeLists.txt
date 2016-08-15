@@ -27,6 +27,5 @@ set_target_properties(${MYGUI_RESOURCE_PLUGIN_LIBRARY} PROPERTIES PREFIX "")
 
 target_link_libraries(${MYGUI_RESOURCE_PLUGIN_LIBRARY}
     ${OGRE_LIBRARIES}
-    ${MYGUI_LIBRARIES}
     components
 )

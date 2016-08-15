@@ -134,7 +134,7 @@ target_link_libraries(openmw
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${OPENAL_LIBRARY}
     ${FFmpeg_LIBRARIES}
-    ${MYGUI_LIBRARIES}
+    ${MyGUI_LIBRARIES}
     ${SDL2_LIBRARY}
     "osg-ffmpeg-videoplayer"
     "oics"

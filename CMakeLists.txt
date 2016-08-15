@@ -227,76 +227,74 @@ IF(BOOST_STATIC)
 endif()
 
 IF(BUILD_OPENMW OR BUILD_OPENCS)
-	find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgUtil osgFX)
 
-	include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+    find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgUtil osgFX)
 
-	if(OSG_STATIC)
-	   macro(use_static_osg_plugin_library PLUGIN_NAME)
-		  set(PLUGIN_NAME_DBG ${PLUGIN_NAME}d ${PLUGIN_NAME}D ${PLUGIN_NAME}_d ${PLUGIN_NAME}_D ${PLUGIN_NAME}_debug ${PLUGIN_NAME})
+    include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
-		  # For now, users wishing to do a static build will need to pass the path to where the plugins reside
-		  # More clever logic would need to deduce the path, probably installed under <OpenSceneGraph>/lib/osgPlugins-<X.X.X>
-		  include(FindPkgMacros)
-		  find_library(${PLUGIN_NAME}_LIBRARY_REL NAMES ${PLUGIN_NAME} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
-		  find_library(${PLUGIN_NAME}_LIBRARY_DBG NAMES ${PLUGIN_NAME_DBG} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
-		  make_library_set(${PLUGIN_NAME}_LIBRARY)
+    if(OSG_STATIC)
+       macro(use_static_osg_plugin_library PLUGIN_NAME)
+          set(PLUGIN_NAME_DBG ${PLUGIN_NAME}d ${PLUGIN_NAME}D ${PLUGIN_NAME}_d ${PLUGIN_NAME}_D ${PLUGIN_NAME}_debug ${PLUGIN_NAME})
 
-		  if("${${PLUGIN_NAME}_LIBRARY}" STREQUAL "")
-			 message(FATAL_ERROR "Unable to find static OpenSceneGraph plugin: ${PLUGIN_NAME}")
-		  endif()
+          # For now, users wishing to do a static build will need to pass the path to where the plugins reside
+          # More clever logic would need to deduce the path, probably installed under <OpenSceneGraph>/lib/osgPlugins-<X.X.X>
+          include(FindPkgMacros)
+          find_library(${PLUGIN_NAME}_LIBRARY_REL NAMES ${PLUGIN_NAME} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
+          find_library(${PLUGIN_NAME}_LIBRARY_DBG NAMES ${PLUGIN_NAME_DBG} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
+          make_library_set(${PLUGIN_NAME}_LIBRARY)
 
-		  set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${PLUGIN_NAME}_LIBRARY})
-	   endmacro()
+          if("${${PLUGIN_NAME}_LIBRARY}" STREQUAL "")
+             message(FATAL_ERROR "Unable to find static OpenSceneGraph plugin: ${PLUGIN_NAME}")
+          endif()
 
-	   add_definitions(-DOSG_LIBRARY_STATIC)
+          set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${PLUGIN_NAME}_LIBRARY})
+       endmacro()
 
-	   set(PLUGIN_LIST
-		   osgdb_png # depends on libpng, zlib
-		   osgdb_tga
-		   osgdb_dds
-		   osgdb_jpeg # depends on libjpeg
-		   )
+       add_definitions(-DOSG_LIBRARY_STATIC)
 
-	   foreach(PLUGIN ${PLUGIN_LIST})
-		  use_static_osg_plugin_library(${PLUGIN})
-	   endforeach()
+       set(PLUGIN_LIST
+           osgdb_png # depends on libpng, zlib
+           osgdb_tga
+           osgdb_dds
+           osgdb_jpeg # depends on libjpeg
+           )
 
-	   # OSG static plugins need to linked against their respective dependencies
-	   set(PLUGIN_DEPS_LIST
-		   PNG # needed by osgdb_png
-		   ZLIB # needed by osgdb_png
-		   JPEG # needed by osgdb_jpeg
-		   )
+       foreach(PLUGIN ${PLUGIN_LIST})
+          use_static_osg_plugin_library(${PLUGIN})
+       endforeach()
 
-	   macro(use_static_osg_plugin_dep DEPENDENCY)
-		  find_package(${DEPENDENCY} REQUIRED)
+       # OSG static plugins need to linked against their respective dependencies
+       set(PLUGIN_DEPS_LIST
+           PNG # needed by osgdb_png
+           ZLIB # needed by osgdb_png
+           JPEG # needed by osgdb_jpeg
+           )
 
-		  set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${DEPENDENCY}_LIBRARIES})
-	   endmacro()
-	   foreach(DEPENDENCY ${PLUGIN_DEPS_LIST})
-		  use_static_osg_plugin_dep(${DEPENDENCY})
-	   endforeach()
-	endif()
+       macro(use_static_osg_plugin_dep DEPENDENCY)
+          find_package(${DEPENDENCY} REQUIRED)
 
-	if(QT_STATIC)
-	   if(WIN32)
-		  if(DESIRED_QT_VERSION MATCHES 4)
-			 # QtCore needs WSAAsyncSelect from Ws2_32.lib
-			 set(QT_QTCORE_LIBRARY ${QT_QTCORE_LIBRARY} Ws2_32.lib)
-			 message("QT_QTCORE_LIBRARY: ${QT_QTCORE_LIBRARY}")
-		  endif()
-	   endif()
-	endif()
+          set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${DEPENDENCY}_LIBRARIES})
+       endmacro()
+       foreach(DEPENDENCY ${PLUGIN_DEPS_LIST})
+          use_static_osg_plugin_dep(${DEPENDENCY})
+       endforeach()
+    endif()
 
-	find_package(MyGUI REQUIRED)
-	if (${MYGUI_VERSION} VERSION_LESS "3.2.1")
-		message(FATAL_ERROR "OpenMW requires MyGUI 3.2.1 or later, please install the latest version from http://mygui.info")
-	endif()
+    if(QT_STATIC)
+       if(WIN32)
+          if(DESIRED_QT_VERSION MATCHES 4)
+             # QtCore needs WSAAsyncSelect from Ws2_32.lib
+             set(QT_QTCORE_LIBRARY ${QT_QTCORE_LIBRARY} Ws2_32.lib)
+             message("QT_QTCORE_LIBRARY: ${QT_QTCORE_LIBRARY}")
+          endif()
+       endif()
+    endif()
 
-	find_package(SDL2 REQUIRED)
-	find_package(OpenAL REQUIRED)
-	find_package(Bullet 283 REQUIRED COMPONENTS BulletCollision LinearMath)
+    find_package(MyGUI 3.2.1 REQUIRED)
+    find_package(SDL2 REQUIRED)
+    find_package(OpenAL REQUIRED)
+    find_package(Bullet 283 REQUIRED COMPONENTS BulletCollision LinearMath)
+
 ENDIF(BUILD_OPENMW OR BUILD_OPENCS)
 
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
@@ -305,12 +303,12 @@ include_directories("."
     SYSTEM
     ${SDL2_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
-    ${MYGUI_INCLUDE_DIRS}
+    ${MyGUI_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
     ${Bullet_INCLUDE_DIRS}
 )
 
-link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${MYGUI_LIB_DIR})
+link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
 
 if(MYGUI_STATIC)
    add_definitions(-DMYGUI_STATIC)

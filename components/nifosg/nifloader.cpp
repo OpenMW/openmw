@@ -1110,7 +1110,7 @@ namespace NifOsg
                 geometry->setDataVariance(osg::Object::STATIC);
                 osg::ref_ptr<FrameSwitch> frameswitch = new FrameSwitch;
 
-                osg::ref_ptr<osg::Geometry> geom2 = static_cast<osg::Geometry*>(osg::clone(geometry.get(), osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES));
+                osg::ref_ptr<osg::Geometry> geom2 = osg::clone(geometry.get(), osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES);
                 frameswitch->addChild(geometry);
                 frameswitch->addChild(geom2);
 
@@ -1224,8 +1224,7 @@ namespace NifOsg
 
             osg::ref_ptr<FrameSwitch> frameswitch = new FrameSwitch;
 
-            SceneUtil::RigGeometry* rig2 = static_cast<SceneUtil::RigGeometry*>(osg::clone(rig.get(), osg::CopyOp::DEEP_COPY_NODES|
-                                                                                           osg::CopyOp::DEEP_COPY_DRAWABLES));
+            SceneUtil::RigGeometry* rig2 = osg::clone(rig.get(), osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES);
             frameswitch->addChild(rig);
             frameswitch->addChild(rig2);
 

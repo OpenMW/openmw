@@ -96,8 +96,8 @@ T TimeOfDayInterpolator<T>::getValue(const float gameHour, const TimeOfDaySettin
 
 
 
-template class TimeOfDayInterpolator<float>;
-template class TimeOfDayInterpolator<osg::Vec4f>;
+template class MWWorld::TimeOfDayInterpolator<float>;
+template class MWWorld::TimeOfDayInterpolator<osg::Vec4f>;
 
 Weather::Weather(const std::string& name,
                  const Fallback::Map& fallback,

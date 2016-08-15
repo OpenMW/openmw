@@ -79,12 +79,13 @@ void WindowModal::close()
 NoDrop::NoDrop(DragAndDrop *drag, MyGUI::Widget *widget)
     : mWidget(widget), mDrag(drag), mTransparent(false)
 {
-    if (!mWidget)
-        throw std::runtime_error("NoDrop needs a non-NULL widget!");
 }
 
 void NoDrop::onFrame(float dt)
 {
+    if (!mWidget)
+        return;
+
     MyGUI::IntPoint mousePos = MyGUI::InputManager::getInstance().getMousePosition();
 
     if (mDrag->mIsOnDragAndDrop)
@@ -113,5 +114,6 @@ void NoDrop::onFrame(float dt)
 
 void NoDrop::setAlpha(float alpha)
 {
-    mWidget->setAlpha(alpha);
+    if (mWidget)
+        mWidget->setAlpha(alpha);
 }

@@ -226,8 +226,10 @@ namespace MWClass
             typeText = "#{sLight}";
         else if (armorType == ESM::Skill::MediumArmor)
             typeText = "#{sMedium}";
-        else
+        else if (armorType == ESM::Skill::HeavyArmor)
             typeText = "#{sHeavy}";
+        else // if (armorType == ESM::Skill::Unarmored)
+            typeText = "";
 
         text += "\n#{sArmorRating}: " + MWGui::ToolTips::toString(getEffectiveArmorRating(ptr,
             MWMechanics::getPlayer()));
@@ -236,7 +238,9 @@ namespace MWClass
         text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
                 + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
 
-        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight) + " (" + typeText + ")";
+        if (typeText != "")
+            text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight) + " (" + typeText + ")";
+
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
