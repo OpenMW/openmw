@@ -78,8 +78,8 @@ int main(int argc, char *argv[])
     loadSettings(mgr);
 
     int logLevel = mgr.getInt("loglevel", "General");
-    if(logLevel < Log::INFO || logLevel > Log::FATAL)
-        logLevel = Log::INFO;
+    if(logLevel < Log::LOG_INFO || logLevel > Log::LOG_FATAL)
+        logLevel = Log::LOG_INFO;
     LOG_INIT(logLevel);
 
     int players = mgr.getInt("players", "General");
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     MasterClient *mclient;
     if(masterEnabled)
     {
-        LOG_MESSAGE_SIMPLE(Log::INFO, "%s", "Sharing server query info to master enabled.");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sharing server query info to master enabled.");
         string masterAddr = mgr.getString("address", "MasterServer");
         int masterPort = mgr.getInt("port", "MasterServer");
         mclient = new MasterClient(masterAddr, (unsigned short) masterPort, addr, (unsigned short) port);
@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     }
 
     if (code == 0)
-        LOG_MESSAGE_SIMPLE(Log::INFO, "%s", "Quitting peacefully.");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Quitting peacefully.");
 
     LOG_QUIT();
     return code;

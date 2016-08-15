@@ -93,18 +93,18 @@ RakNet::RakString MasterClient::Send(std::string motd, unsigned players, unsigne
         // then Receive(), then HasFailedConnectionAttempt(),HasLostConnection()
         sa = tcpInterface.HasCompletedConnectionAttempt();
         if (sa != RakNet::UNASSIGNED_SYSTEM_ADDRESS)
-            LOG_MESSAGE_SIMPLE(Log::INFO, "Connected to master server: %s", sa.ToString());
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Connected to master server: %s", sa.ToString());
 
         sa = tcpInterface.HasFailedConnectionAttempt();
         if (sa != RakNet::UNASSIGNED_SYSTEM_ADDRESS)
         {
-            LOG_MESSAGE_SIMPLE(Log::WARNING, "Failed to connect to master server: %s", sa.ToString());
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Failed to connect to master server: %s", sa.ToString());
             return "FAIL_CONNECT";
         }
         sa = tcpInterface.HasLostConnection();
         if (sa != RakNet::UNASSIGNED_SYSTEM_ADDRESS)
         {
-            LOG_MESSAGE_SIMPLE(Log::WARNING, "Lost connection to master server: %s", sa.ToString());
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Lost connection to master server: %s", sa.ToString());
             return "LOST_CONNECTION";
         }
 
@@ -132,12 +132,12 @@ void MasterClient::Update()
     while (sRun)
     {
         if (response == "Created")
-            LOG_MESSAGE_SIMPLE(Log::INFO, "Server registered on the master server.", "");
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server registered on the master server.", "");
         else if (response == "Accepted")
-            LOG_MESSAGE_SIMPLE(Log::INFO, "Server updated information about himself on the master server.", "");
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server updated information about himself on the master server.", "");
         else if (response == "bad request")
         {
-            LOG_MESSAGE_SIMPLE(Log::WARNING, "Update rate is too low, and the master server has deleted information about"
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Update rate is too low, and the master server has deleted information about"
                     " the server. Trying low rate...", "");
             SetUpdateRate(timeout - step_rate);
             update = false;

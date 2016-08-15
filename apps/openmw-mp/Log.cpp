@@ -58,13 +58,13 @@ void Log::print(int level, const char *file, int line, const char *message, ...)
     str += "[";
     switch(level)
     {
-        case WARNING:
+        case LOG_WARN:
             str += "WARN";
             break;
-        case ERROR:
+        case LOG_ERROR:
             str += "ERR";
             break;
-        case FATAL:
+        case LOG_FATAL:
             str += "FATAL";
             break;
         default:

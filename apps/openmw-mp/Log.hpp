@@ -22,10 +22,10 @@ class Log
     public:
         enum
         {
-            INFO = 0,
-            WARNING,
-            ERROR,
-            FATAL,
+            LOG_INFO = 0,
+            LOG_WARN,
+            LOG_ERROR,
+            LOG_FATAL,
         };
         static void Create(int logLevel);
         static void Delete();
