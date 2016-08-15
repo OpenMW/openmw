@@ -107,9 +107,15 @@ int main(int argc, char *argv[])
     const char passw[8] = "1234567";
     peer->SetIncomingPassword(passw, sizeof(passw));
 
+    if(RakNet::NonNumericHostString(addr.c_str()))
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "%s", "You cannot use non numeric addresses for server.");
+        return 1;
+    }
+
     RakNet::SocketDescriptor sd((unsigned short)port, addr.c_str());
     if (peer->Startup((unsigned)players, &sd, 1) != RakNet::RAKNET_STARTED)
-        return 0;
+        return 1;
 
     peer->SetMaximumIncomingConnections((unsigned short)(players));
 

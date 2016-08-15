@@ -50,7 +50,7 @@ const char* getTime()
 
 void Log::print(int level, const char *file, int line, const char *message, ...) const
 {
-    if(level > logLevel) return;
+    if(level < logLevel) return;
     std::string str = "[" + string(getTime()) + "] ";
 
     if(file != 0 && line != 0)
