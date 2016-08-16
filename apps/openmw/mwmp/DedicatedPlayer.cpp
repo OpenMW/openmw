@@ -54,7 +54,6 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
     dedic_pl.mName = _player->Npc()->mName;
     dedic_pl.mFlags = _player->Npc()->mFlags;
 
-
     if (_player->state == 0)
     {
         dedic_pl.mId = "Dedicated Player";
@@ -63,33 +62,41 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
 
 
         _player->reference = new MWWorld::ManualRef(world->getStore(), recid, 1);
+    }
 
-        // temporary spawn character in ToddTest cell
-        ESM::Position _pos;
-        world->findInteriorPosition("ToddTest", _pos);
-        MWWorld::CellStore *store = world->getInterior("ToddTest");
+    // Temporarily spawn or move player to ToddTest whenever setting base info
+    ESM::Position _pos;
+    world->findInteriorPosition("ToddTest", _pos);
+    MWWorld::CellStore *cellStore = world->getInterior("ToddTest");
 
-        MWWorld::Ptr tmp = world->placeObject(_player->reference->getPtr(), store, _pos);
+    if (_player->state == 0)
+    {
+        MWWorld::Ptr tmp = world->placeObject(_player->reference->getPtr(), cellStore, _pos);
 
         _player->ptr.mCell = tmp.mCell;
         _player->ptr.mRef = tmp.mRef;
 
+        _player->cell = *_player->ptr.getCell()->getCell();
+        _player->pos = _player->ptr.getRefData().getPosition();
     }
     else
     {
+        _player->ptr.getBase()->canChangeCell = true;
+        _player->UpdatePtr(world->moveObject(_player->ptr, cellStore, _pos.pos[0], _pos.pos[1], _pos.pos[2]));
+
         dedic_pl.mId = players[id]->ptr.get<ESM::NPC>()->mBase->mId;
 
         MWWorld::ESMStore *store = const_cast<MWWorld::ESMStore *>(&world->getStore());
         MWWorld::Store<ESM::NPC> *esm_store = const_cast<MWWorld::Store<ESM::NPC> *> (&store->get<ESM::NPC>());
 
         esm_store->insert(dedic_pl);
+
+        _player->updateCell();
     }
 
     _player->guid = id;
     _player->state = 2;
 
-    _player->cell = *_player->ptr.getCell()->getCell();
-    _player->pos = _player->ptr.getRefData().getPosition();
     world->enable(players[id]->ptr);
 }
 
@@ -113,6 +120,7 @@ void Players::DisconnectPlayer(RakNet::RakNetGUID id)
         world->findInteriorPosition("ToddTest", _pos);
         MWWorld::CellStore *store = world->getInterior("ToddTest");
 
+        players[id]->getPtr().getBase()->canChangeCell = true;
         world->moveObject(players[id]->getPtr(), store, _pos.pos[0], _pos.pos[1], _pos.pos[2]);
     }
 }
@@ -398,6 +406,7 @@ void DedicatedPlayer::UpdateDrawState()
 
 void DedicatedPlayer::updateCell()
 {
+
     MWBase::World *world = MWBase::Environment::get().getWorld();
     MWWorld::CellStore *cellStore;
     if (cell.isExterior() == 1)
