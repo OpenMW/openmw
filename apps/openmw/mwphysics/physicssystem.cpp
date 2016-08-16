@@ -591,7 +591,7 @@ namespace MWPhysics
 
             btCompoundShape* compound = static_cast<btCompoundShape*>(mShapeInstance->getCollisionShape());
 
-            for (std::map<int, int>::iterator it = mShapeInstance->mAnimatedShapes.begin(); it != mShapeInstance->mAnimatedShapes.end();)
+            for (std::map<int, int>::const_iterator it = mShapeInstance->mAnimatedShapes.begin(); it != mShapeInstance->mAnimatedShapes.end(); ++it)
             {
                 int recIndex = it->first;
                 int shapeIndex = it->second;
@@ -606,24 +606,6 @@ namespace MWPhysics
 
                 osg::NodePath path = visitor.mFoundPath;
                 path.erase(path.begin());
-
-                // Attempt to remove "animated" shapes that are not actually animated
-                // We may get these because the BulletNifLoader does not know if a .kf file with additional controllers will be attached later on.
-                // On the first animateCollisionShapes call, we'll consider the graph completely loaded (with extra controllers and what not),
-                // so now we can better decide if the shape is really animated.
-                bool animated = false;
-                for (osg::NodePath::iterator nodePathIt = path.begin(); nodePathIt != path.end(); ++nodePathIt)
-                {
-                    osg::Node* node = *nodePathIt;
-                    if (node->getUpdateCallback())
-                        animated = true;
-                }
-                if (!animated)
-                {
-                    mShapeInstance->mAnimatedShapes.erase(it++);
-                    break;
-                }
-
                 osg::Matrixf matrix = osg::computeLocalToWorld(path);
                 osg::Vec3f scale = matrix.getScale();
                 matrix.orthoNormalize(matrix);
@@ -636,8 +618,6 @@ namespace MWPhysics
 
                 compound->getChildShape(shapeIndex)->setLocalScaling(compound->getLocalScaling() * toBullet(scale));
                 compound->updateChildTransform(shapeIndex, transform);
-
-                ++it;
             }
 
             collisionWorld->updateSingleAabb(mCollisionObject.get());
