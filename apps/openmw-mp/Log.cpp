@@ -6,11 +6,13 @@
 #include <iostream>
 #include <cstring>
 #include <ctime>
+#include <cstdio>
+#include <sstream>
 #include "Log.hpp"
 
 using namespace std;
 
-Log *Log::sLog = nullptr;
+Log *Log::sLog = NULL;
 
 Log::Log(int logLevel) : logLevel(logLevel)
 {
@@ -19,17 +21,17 @@ Log::Log(int logLevel) : logLevel(logLevel)
 
 void Log::Create(int logLevel)
 {
-    if(sLog != nullptr)
+    if(sLog != NULL)
         return;
     sLog = new Log(logLevel);
 }
 
 void Log::Delete()
 {
-    if(sLog == nullptr)
+    if(sLog == NULL)
         return
     delete sLog;
-    sLog = nullptr;
+    sLog = NULL;
 }
 
 const Log &Log::Get()
@@ -51,32 +53,37 @@ const char* getTime()
 void Log::print(int level, const char *file, int line, const char *message, ...) const
 {
     if(level < logLevel) return;
-    std::string str = "[" + string(getTime()) + "] ";
+    std::stringstream sstr;
+    sstr << "[" << getTime() << "] ";
 
     if(file != 0 && line != 0)
-        str += "["+ string(file) + ":" + to_string(line) + "] ";
+    {
+        sstr << "[" << file << ":";
+        sstr << line << "] ";
+    }
 
-    str += "[";
+    sstr << "[";
     switch(level)
     {
         case LOG_WARN:
-            str += "WARN";
+            sstr << "WARN";
             break;
         case LOG_ERROR:
-            str += "ERR";
+            sstr << "ERR";
             break;
         case LOG_FATAL:
-            str += "FATAL";
+            sstr << "FATAL";
             break;
         default:
-            str += "INFO";
+            sstr << "INFO";
     }
-    str += "]: ";
-    str += message;
-    if(str.back() != '\n')
-        str += '\n';
+    sstr << "]: ";
+    sstr << message;
+    char back = *sstr.str().rbegin();
+    if(back != '\n')
+        sstr << '\n';
     va_list args;
     va_start(args, message);
-    vprintf(str.c_str(), args);
+    vprintf(sstr.str().c_str(), args);
     va_end(args);
 }
