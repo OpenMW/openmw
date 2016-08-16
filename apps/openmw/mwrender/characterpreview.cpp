@@ -93,7 +93,6 @@ namespace MWRender
         mCamera->setViewport(0, 0, sizeX, sizeY);
         mCamera->setRenderOrder(osg::Camera::PRE_RENDER);
         mCamera->attach(osg::Camera::COLOR_BUFFER, mTexture);
-        mCamera->setGraphicsContext(mViewer->getCamera()->getGraphicsContext());
 
         mCamera->setNodeMask(Mask_RenderToTexture);
 

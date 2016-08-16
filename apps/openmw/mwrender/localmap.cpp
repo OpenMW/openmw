@@ -208,7 +208,6 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
 
     camera->addChild(lightSource);
     camera->setStateSet(stateset);
-    camera->setGraphicsContext(mViewer->getCamera()->getGraphicsContext());
     camera->setViewport(0, 0, mMapResolution, mMapResolution);
     camera->setUpdateCallback(new CameraLocalUpdateCallback(this));
 
