@@ -596,17 +596,23 @@ namespace MWPhysics
                 int recIndex = it->first;
                 int shapeIndex = it->second;
 
-                NifOsg::FindGroupByRecIndex visitor(recIndex);
-                mPtr.getRefData().getBaseNode()->accept(visitor);
-                if (!visitor.mFound)
+                std::map<int, osg::NodePath>::iterator nodePathFound = mRecIndexToNodePath.find(recIndex);
+                if (nodePathFound == mRecIndexToNodePath.end())
                 {
-                    std::cerr << "animateCollisionShapes: Can't find node " << recIndex << std::endl;
-                    return;
+                    NifOsg::FindGroupByRecIndex visitor(recIndex);
+                    mPtr.getRefData().getBaseNode()->accept(visitor);
+                    if (!visitor.mFound)
+                    {
+                        std::cerr << "animateCollisionShapes: Can't find node " << recIndex << std::endl;
+                        return;
+                    }
+                    osg::NodePath nodePath = visitor.mFoundPath;
+                    nodePath.erase(nodePath.begin());
+                    nodePathFound = mRecIndexToNodePath.insert(std::make_pair(recIndex, nodePath)).first;
                 }
 
-                osg::NodePath path = visitor.mFoundPath;
-                path.erase(path.begin());
-                osg::Matrixf matrix = osg::computeLocalToWorld(path);
+                osg::NodePath& nodePath = nodePathFound->second;
+                osg::Matrixf matrix = osg::computeLocalToWorld(nodePath);
                 osg::Vec3f scale = matrix.getScale();
                 matrix.orthoNormalize(matrix);
 
@@ -626,6 +632,7 @@ namespace MWPhysics
     private:
         std::auto_ptr<btCollisionObject> mCollisionObject;
         osg::ref_ptr<Resource::BulletShapeInstance> mShapeInstance;
+        std::map<int, osg::NodePath> mRecIndexToNodePath;
         bool mSolid;
     };
 
