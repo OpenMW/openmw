@@ -622,8 +622,10 @@ namespace MWPhysics
                     for (int j=0; j<3; ++j)
                         transform.getBasis()[i][j] = matrix(j,i); // NB column/row major difference
 
-                compound->getChildShape(shapeIndex)->setLocalScaling(compound->getLocalScaling() * toBullet(scale));
-                compound->updateChildTransform(shapeIndex, transform);
+                if (compound->getLocalScaling() * toBullet(scale) != compound->getChildShape(shapeIndex)->getLocalScaling())
+                    compound->getChildShape(shapeIndex)->setLocalScaling(compound->getLocalScaling() * toBullet(scale));
+                if (!(transform == compound->getChildTransform(shapeIndex)))
+                    compound->updateChildTransform(shapeIndex, transform);
             }
 
             collisionWorld->updateSingleAabb(mCollisionObject.get());
