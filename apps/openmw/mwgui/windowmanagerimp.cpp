@@ -282,7 +282,7 @@ namespace MWGui
 
         mRecharge = new Recharge();
         mMenu = new MainMenu(w, h, mResourceSystem->getVFS(), mVersionDescription);
-        mLocalMapRender = new MWRender::LocalMap(mViewer);
+        mLocalMapRender = new MWRender::LocalMap(mViewer->getSceneData()->asGroup());
         mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender);
         trackWindow(mMap, "map");
         mStatsWindow = new StatsWindow(mDragAndDrop);
