@@ -37,16 +37,6 @@ namespace osgQt
 // forward declarations
 class GraphicsWindowQt;
 
-/** The function sets the viewer that will be used after entering
- *  the Qt main loop (QCoreApplication::exec()).
- *
- *  The function also initializes internal structures required for proper
- *  scene rendering.
- *
- *  The method must be called from main thread. */
-void setViewer( osgViewer::ViewerBase *viewer );
-
-
 class GLWidget : public QGLWidget
 {
     typedef QGLWidget inherited;

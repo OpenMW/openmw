@@ -147,6 +147,7 @@ namespace MWRender
 
     CharacterPreview::~CharacterPreview ()
     {
+        mCamera->removeChildren(0, mCamera->getNumChildren());
         mViewer->getSceneData()->asGroup()->removeChild(mCamera);
     }
 

@@ -318,7 +318,7 @@ namespace MWClass
                     + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
         }
 
-        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
+        text += MWGui::ToolTips::getWeightString(ref->mBase->mData.mWeight, "#{sWeight}");
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         info.enchant = ref->mBase->mEnchant;

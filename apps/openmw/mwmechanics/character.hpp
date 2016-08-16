@@ -214,8 +214,6 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     void updateHeadTracking(float duration);
 
-    void castSpell(const std::string& spellid);
-
     void updateMagicEffects();
 
     void playDeath(float startpoint, CharacterState death);

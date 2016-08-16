@@ -7,7 +7,6 @@
 #
 
 include(LibFindMacros)
-include(PreprocessorUtils)
 
 libfind_pkg_detect(TinyXML tinyxml
     FIND_PATH tinyxml.h

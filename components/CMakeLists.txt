@@ -222,7 +222,7 @@ target_link_libraries(components
     ${SDL2_LIBRARY}
     # For MyGUI platform
     ${GL_LIB}
-    ${MYGUI_LIBRARIES}
+    ${MyGUI_LIBRARIES}
     )
 
 if (WIN32)

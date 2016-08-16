@@ -239,7 +239,7 @@ UVController::UVController(const UVController& copy, const osg::CopyOp& copyop)
 
 void UVController::setDefaults(osg::StateSet *stateset)
 {
-    osg::TexMat* texMat = new osg::TexMat;
+    osg::ref_ptr<osg::TexMat> texMat (new osg::TexMat);
     for (std::set<int>::const_iterator it = mTextureUnits.begin(); it != mTextureUnits.end(); ++it)
         stateset->setTextureAttributeAndModes(*it, texMat, osg::StateAttribute::ON);
 }

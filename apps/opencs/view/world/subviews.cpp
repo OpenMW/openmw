@@ -7,6 +7,7 @@
 #include "scriptsubview.hpp"
 #include "regionmapsubview.hpp"
 #include "genericcreator.hpp"
+#include "globalcreator.hpp"
 #include "cellcreator.hpp"
 #include "referenceablecreator.hpp"
 #include "referencecreator.hpp"
@@ -32,7 +33,6 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     static const CSMWorld::UniversalId::Type sTableTypes[] =
     {
-        CSMWorld::UniversalId::Type_Globals,
         CSMWorld::UniversalId::Type_Classes,
         CSMWorld::UniversalId::Type_Factions,
         CSMWorld::UniversalId::Type_Races,
@@ -77,6 +77,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     manager.add (CSMWorld::UniversalId::Type_Pathgrids,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<PathgridCreator> >);
+
+    manager.add (CSMWorld::UniversalId::Type_Globals,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GlobalCreator> >);
 
     // Subviews for resources tables
     manager.add (CSMWorld::UniversalId::Type_Meshes,

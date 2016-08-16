@@ -258,6 +258,8 @@ namespace MWRender
 
     RenderingManager::~RenderingManager()
     {
+        // let background loading thread finish before we delete anything else
+        mWorkQueue = NULL;
     }
 
     MWRender::Objects& RenderingManager::getObjects()

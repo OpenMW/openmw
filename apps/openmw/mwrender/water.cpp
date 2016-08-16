@@ -443,11 +443,13 @@ void Water::updateWaterMaterial()
 {
     if (mReflection)
     {
+        mReflection->removeChildren(0, mReflection->getNumChildren());
         mParent->removeChild(mReflection);
         mReflection = NULL;
     }
     if (mRefraction)
     {
+        mRefraction->removeChildren(0, mRefraction->getNumChildren());
         mParent->removeChild(mRefraction);
         mRefraction = NULL;
     }
@@ -572,11 +574,13 @@ Water::~Water()
 
     if (mReflection)
     {
+        mReflection->removeChildren(0, mReflection->getNumChildren());
         mParent->removeChild(mReflection);
         mReflection = NULL;
     }
     if (mRefraction)
     {
+        mRefraction->removeChildren(0, mRefraction->getNumChildren());
         mParent->removeChild(mRefraction);
         mRefraction = NULL;
     }

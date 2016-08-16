@@ -8,6 +8,7 @@
 namespace ESM
 {
     struct Light;
+    struct MagicEffect;
 }
 
 namespace Resource
@@ -32,6 +33,7 @@ namespace MWRender
 
 class ResetAccumRootCallback;
 class RotateController;
+class GlowUpdater;
 
 class EffectAnimationTime : public SceneUtil::ControllerSource
 {
@@ -261,6 +263,7 @@ protected:
     float mHeadPitchRadians;
 
     osg::ref_ptr<SceneUtil::LightSource> mGlowLight;
+    osg::ref_ptr<GlowUpdater> mGlowUpdater;
 
     float mAlpha;
 
@@ -317,7 +320,7 @@ protected:
 
     osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
 
-    void addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor);
+    void addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor, float glowDuration = -1);
 
     /// Set the render bin for this animation's object root. May be customized by subclasses.
     virtual void setRenderBin();
@@ -350,6 +353,8 @@ public:
     void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", std::string texture = "");
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out) const;
+
+    void addSpellCastGlow(const ESM::MagicEffect *effect);
 
     virtual void updatePtr(const MWWorld::Ptr &ptr);
 
