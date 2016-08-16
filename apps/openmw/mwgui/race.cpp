@@ -41,9 +41,9 @@ namespace
 namespace MWGui
 {
 
-    RaceDialog::RaceDialog(osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem)
+    RaceDialog::RaceDialog(osg::Group* parent, Resource::ResourceSystem* resourceSystem)
       : WindowModal("openmw_chargen_race.layout")
-      , mViewer(viewer)
+      , mParent(parent)
       , mResourceSystem(resourceSystem)
       , mGenderIndex(0)
       , mFaceIndex(0)
@@ -136,7 +136,7 @@ namespace MWGui
         mPreview.reset(NULL);
         mPreviewTexture.reset(NULL);
 
-        mPreview.reset(new MWRender::RaceSelectionPreview(mViewer, mResourceSystem));
+        mPreview.reset(new MWRender::RaceSelectionPreview(mParent, mResourceSystem));
         mPreview->rebuild();
         mPreview->setAngle (mCurrentAngle);
 

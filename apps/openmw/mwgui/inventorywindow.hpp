@@ -6,9 +6,9 @@
 
 #include "../mwworld/ptr.hpp"
 
-namespace osgViewer
+namespace osg
 {
-    class Viewer;
+    class Group;
 }
 
 namespace Resource
@@ -37,7 +37,7 @@ namespace MWGui
     class InventoryWindow : public WindowPinnableBase
     {
         public:
-            InventoryWindow(DragAndDrop* dragAndDrop, osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem);
+            InventoryWindow(DragAndDrop* dragAndDrop, osg::Group* parent, Resource::ResourceSystem* resourceSystem);
 
             virtual void open();
 
