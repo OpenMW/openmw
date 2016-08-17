@@ -1533,6 +1533,9 @@ void CharacterController::update(float duration)
 
     updateMagicEffects();
 
+    if(mAnimQueue.size() > 1 && (mAnimation->getLoopingEnabled(mAnimQueue.front().mGroup) == true))
+        mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, false);
+
     if(!cls.isActor())
     {
         if(mAnimQueue.size() > 1)
@@ -2009,8 +2012,26 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
     }
     else
     {
-        if (!mAnimQueue.empty() && mAnimQueue.front().mGroup == groupname && isAnimPlaying(mAnimQueue.front().mGroup))
-            return true;
+        // If the given animation is a looped animation, is already playing
+        // and has not yet reached its Loop Stop key, make it the only animation
+        // in the queue, and retain the loop count from the animation that was
+        // already playing. This emulates observed behavior from the original
+        // engine and allows banners to animate correctly.
+        if (!mAnimQueue.empty() && mAnimQueue.front().mGroup == groupname &&
+            mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": loop start") >= 0)
+        {
+            float endOfLoop = mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": loop stop");
+
+            if (endOfLoop < 0) // if no Loop Stop key was found, use the Stop key
+                endOfLoop = mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": stop");
+
+            if (endOfLoop > 0 && (mAnimation->getCurrentTime(mAnimQueue.front().mGroup) < endOfLoop))
+            {
+                mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, true);
+                mAnimQueue.resize(1);                    
+                return true;
+            }
+        }
 
         count = std::max(count, 1);
 
@@ -2035,8 +2056,6 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
         }
         else if(mode == 0)
         {
-            if (!mAnimQueue.empty())
-                mAnimation->stopLooping(mAnimQueue.front().mGroup);
             mAnimQueue.resize(1);
             mAnimQueue.push_back(entry);
         }

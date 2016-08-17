@@ -183,6 +183,7 @@ protected:
         float mSpeedMult;
 
         bool mPlaying;
+        bool mLoopingEnabled;
         size_t mLoopCount;
 
         AnimPriority mPriority;
@@ -190,8 +191,8 @@ protected:
         bool mAutoDisable;
 
         AnimState() : mStartTime(0.0f), mLoopStartTime(0.0f), mLoopStopTime(0.0f), mStopTime(0.0f),
-                      mTime(new float), mSpeedMult(1.0f), mPlaying(false), mLoopCount(0),
-                      mPriority(0), mBlendMask(0), mAutoDisable(true)
+                      mTime(new float), mSpeedMult(1.0f), mPlaying(false), mLoopingEnabled(true),
+                      mLoopCount(0), mPriority(0), mBlendMask(0), mAutoDisable(true)
         {
         }
         ~AnimState();
@@ -431,6 +432,10 @@ public:
     float getVelocity(const std::string &groupname) const;
 
     virtual osg::Vec3f runAnimation(float duration);
+
+    void setLoopingEnabled(const std::string &groupname, bool enabled);
+
+    bool getLoopingEnabled(const std::string &groupname) const;
 
     /// This is typically called as part of runAnimation, but may be called manually if needed.
     void updateEffects(float duration);
