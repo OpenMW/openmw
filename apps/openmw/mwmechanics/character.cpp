@@ -2009,6 +2009,9 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
     }
     else
     {
+        if (!mAnimQueue.empty() && mAnimQueue.front().mGroup == groupname && isAnimPlaying(mAnimQueue.front().mGroup))
+            return true;
+
         count = std::max(count, 1);
 
         AnimationQueueEntry entry;
