@@ -12,6 +12,9 @@
 #include <components/files/configurationmanager.hpp>
 #include <components/settings/settings.hpp>
 #include <thread>
+#include <boost/iostreams/concepts.hpp>
+#include <boost/iostreams/stream_buffer.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 using namespace std;
 using namespace mwmp;
@@ -71,15 +74,61 @@ void queryThread(MasterClient *mclient)
     mclient->Update();
 }
 
+class Tee : public boost::iostreams::sink
+{
+public:
+    Tee(std::ostream &stream, std::ostream &stream2)
+            : out(stream), out2(stream2)
+    {
+    }
+
+    std::streamsize write(const char *str, std::streamsize size)
+    {
+        out.write (str, size);
+        out.flush();
+        out2.write (str, size);
+        out2.flush();
+        return size;
+    }
+
+private:
+    std::ostream &out;
+    std::ostream &out2;
+};
+
 int main(int argc, char *argv[])
 {
     Settings::Manager mgr;
+    Files::ConfigurationManager cfgMgr;
 
     loadSettings(mgr);
 
     int logLevel = mgr.getInt("loglevel", "General");
     if (logLevel < Log::LOG_INFO || logLevel > Log::LOG_FATAL)
         logLevel = Log::LOG_INFO;
+
+    // Some objects used to redirect cout and cerr
+    // Scope must be here, so this still works inside the catch block for logging exceptions
+    std::streambuf* cout_rdbuf = std::cout.rdbuf ();
+    std::streambuf* cerr_rdbuf = std::cerr.rdbuf ();
+
+    boost::iostreams::stream_buffer<Tee> coutsb;
+    boost::iostreams::stream_buffer<Tee> cerrsb;
+
+    std::ostream oldcout(cout_rdbuf);
+    std::ostream oldcerr(cerr_rdbuf);
+
+    boost::filesystem::ofstream logfile;
+
+    // Redirect cout and cerr to openmw.log
+    logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / "/server.log"));
+
+    coutsb.open (Tee(logfile, oldcout));
+    cerrsb.open (Tee(logfile, oldcerr));
+
+    std::cout.rdbuf (&coutsb);
+    std::cerr.rdbuf (&cerrsb);
+
     LOG_INIT(logLevel);
 
     int players = mgr.getInt("players", "General");
@@ -151,5 +200,10 @@ int main(int argc, char *argv[])
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Quitting peacefully.");
 
     LOG_QUIT();
+
+    // Restore cout and cerr
+    std::cout.rdbuf(cout_rdbuf);
+    std::cerr.rdbuf(cerr_rdbuf);
+
     return code;
 }
