@@ -406,13 +406,20 @@ void DedicatedPlayer::UpdateDrawState()
 
 void DedicatedPlayer::updateCell()
 {
+    // Prevent cell update when player hasn't been instantiated yet
+    if (state == 0)
+        return;
 
     MWBase::World *world = MWBase::Environment::get().getWorld();
     MWWorld::CellStore *cellStore;
+
     if (cell.isExterior() == 1)
         cellStore = world->getExterior(cell.mCellId.mIndex.mX, cell.mCellId.mIndex.mY);
-    else
+    else if (!cell.mName.empty())
         cellStore = world->getInterior(cell.mName);
+    // Go no further if cell data is invalid
+    else
+        return;
     
     // tes3mp debug start
     printf("Server says %s (%s) moved to %s\n",
