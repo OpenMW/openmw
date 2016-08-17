@@ -24,7 +24,7 @@ mwmp::GUIController::GUIController(): mInputBox(0)
 
 mwmp::GUIController::~GUIController()
 {
-   /* if(mChat != nullptr)
+   /* if (mChat != nullptr)
         delete mChat;
     mChat = nullptr;*/
 }

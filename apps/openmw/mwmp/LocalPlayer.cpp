@@ -70,7 +70,7 @@ void LocalPlayer::updateBaseStats(bool forceUpdate)
     static MWMechanics::DynamicStat<float> oldFatigue(creatureClass->getFatigue());
 
     static float timer = 0;
-    if(((oldHealth != health || oldMagicka != magicka || oldFatigue != fatigue) &&
+    if (((oldHealth != health || oldMagicka != magicka || oldFatigue != fatigue) &&
             (timer += MWBase::Environment::get().getFrameDuration()) >= 0.5 ) || forceUpdate)
     {
         oldHealth = health;
@@ -179,16 +179,16 @@ void LocalPlayer::updateInventory(bool forceUpdate)
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
     {
         MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
-        if(it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), EquipedItem(slot)->refid))
+        if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), EquipedItem(slot)->refid))
         {
             invChanged = true;
 
             EquipedItem(slot)->refid = it->getCellRef().getRefId();
-            if(slot == MWWorld::InventoryStore::Slot_CarriedRight)
+            if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
             {
                 MWMechanics::WeaponType weaptype;
                 MWMechanics::getActiveWeapon(player.getClass().getCreatureStats(player), player.getClass().getInventoryStore(player), &weaptype);
-                if(weaptype != MWMechanics::WeapType_Thrown)
+                if (weaptype != MWMechanics::WeapType_Thrown)
                     EquipedItem(slot)->count = 1;
             }
             else
@@ -246,7 +246,7 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
         }
         attackPressed = true;
     }
-    else if(!world->getPlayer().getAttackingOrSpell() && attackPressed)
+    else if (!world->getPlayer().getAttackingOrSpell() && attackPressed)
     {
         if (/*state == MWMechanics::DrawState_Spell ||*/ state == MWMechanics::DrawState_Weapon)
         {
@@ -455,7 +455,7 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
         else if (state == MWMechanics::DrawState_Spell)
             (*DrawState()) = 2;
 
-        if(jump)
+        if (jump)
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after jump;
 
         RakNet::BitStream bs;
@@ -474,10 +474,10 @@ void LocalPlayer::CharGen(int stageFirst, int stageEnd)
 bool LocalPlayer::CharGenThread() // ToDo: need fix
 {
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
-    if(windowManager->isGuiMode())
+    if (windowManager->isGuiMode())
         return false;
 
-    if(CharGenStage()->current >= CharGenStage()->end)
+    if (CharGenStage()->current >= CharGenStage()->end)
     {
 
         if (GetNetworking()->isConnected() && CharGenStage()->current == CharGenStage()->end &&
@@ -486,9 +486,10 @@ bool LocalPlayer::CharGenThread() // ToDo: need fix
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             (*Npc()) = *player.get<ESM::NPC>()->mBase;
 
+            printf("Sending ID_GAME_BASE_INFO to server with my CharGen info");
             GetNetworking()->GetPacket(ID_GAME_BASE_INFO)->Send(this);
 
-            if(CharGenStage()->end != 1)
+            if (CharGenStage()->end != 1)
             {
                 updateBaseStats(true);
                 updateAttributesAndSkills(true);

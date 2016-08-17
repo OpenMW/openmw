@@ -14,7 +14,7 @@ void BasePacket::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
     this->player = player;
     this->bs = bs;
 
-    if(send)
+    if (send)
     {
         bs->Write(packetID);
         bs->Write(player->guid);
@@ -73,8 +73,8 @@ void BasePacket::RequestData(RakNet::RakNetGUID player)
 
 void BasePacket::SetStreams(RakNet::BitStream *inStream, RakNet::BitStream *outStream)
 {
-    if(inStream != 0)
+    if (inStream != 0)
         bsRead = inStream;
-    if(outStream != 0)
+    if (outStream != 0)
         bsSend = outStream;
 }

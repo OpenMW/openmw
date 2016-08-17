@@ -113,7 +113,7 @@ RakNet::RakString MasterClient::Send(std::string motd, unsigned players, unsigne
 
         if (httpConnection->GetResponse(transmitted, hostTransmitted, response, hostReceived, contentOffset))
         {
-            if(contentOffset < 0)
+            if (contentOffset < 0)
                 return "NO_CONTENT"; // no content
             tcpInterface.CloseConnection(sa);
             return (response.C_String() + contentOffset);

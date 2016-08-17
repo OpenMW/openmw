@@ -66,7 +66,7 @@ void ScriptFunctions::SetCell(unsigned short pid, const char *name) noexcept
     Player *player;
     GET_PLAYER(pid, player,);
 
-    /*if(player->GetCell()->mName == name)
+    /*if (player->GetCell()->mName == name)
         return;*/
 
     cout << "attempt to move player (pid: " << pid << " name: " << player->Npc()->mName << ") from ";

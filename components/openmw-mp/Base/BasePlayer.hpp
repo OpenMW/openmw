@@ -97,7 +97,7 @@ namespace mwmp
 
         virtual Item *EquipedItem(int id)
         {
-            if(id >= 18) return &equipedItems[18];
+            if (id >= 18) return &equipedItems[18];
             return &equipedItems[id];
         }
 

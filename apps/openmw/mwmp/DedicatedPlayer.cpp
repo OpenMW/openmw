@@ -103,7 +103,7 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
 
 void Players::CleanUp()
 {
-    for(std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
+    for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
         delete it->second;
 }
 
@@ -225,7 +225,7 @@ void Players::Update(float dt)
         value.readState(pl->CreatureStats()->mDynamic[2]);
         npcStats->setFatigue(value);
 
-        if(npcStats->isDead())
+        if (npcStats->isDead())
             npcStats->resurrect();
 
 
@@ -274,10 +274,10 @@ void DedicatedPlayer::UpdateInventory()
         const string &dedicItem = EquipedItem(slot)->refid;
         std::string item = "";
         bool equal = false;
-        if(it != invStore.end())
+        if (it != invStore.end())
         {
             item = it->getCellRef().getRefId();
-            if(!Misc::StringUtils::ciEqual(item, dedicItem)) // if other item equiped
+            if (!Misc::StringUtils::ciEqual(item, dedicItem)) // if other item equiped
             {
                 MWWorld::ContainerStore &store = ptr.getClass().getContainerStore(ptr);
                 store.remove(item, store.count(item), ptr);
@@ -353,11 +353,11 @@ const std::string DedicatedPlayer::GetAnim()
                 type == ESM::Weapon::MarksmanCrossbow ||
                 type == ESM::Weapon::MarksmanBow*/)
                 anim_weap = "1h";
-            else if(type == ESM::Weapon::LongBladeTwoHand ||
+            else if (type == ESM::Weapon::LongBladeTwoHand ||
                     type == ESM::Weapon::BluntTwoClose ||
                     type == ESM::Weapon::AxeTwoHand)
                 anim_weap = "2c";
-            else if(type == ESM::Weapon::BluntTwoWide ||
+            else if (type == ESM::Weapon::BluntTwoWide ||
                     type == ESM::Weapon::SpearTwoWide)
                 anim_weap = "2w";
         }
@@ -376,12 +376,12 @@ DedicatedPlayer *Players::GetPlayer(const MWWorld::Ptr &ptr)
 {
     std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin();
 
-    for(; it != players.end(); it++)
+    for (; it != players.end(); it++)
     {
-        if(it->second == 0 || it->second->getPtr().mRef == 0)
+        if (it->second == 0 || it->second->getPtr().mRef == 0)
             continue;
         string refid = ptr.getCellRef().getRefId();
-        if(it->second->getPtr().getCellRef().getRefId() == refid)
+        if (it->second->getPtr().getCellRef().getRefId() == refid)
             return it->second;
     }
     return 0;
@@ -392,9 +392,9 @@ void DedicatedPlayer::UpdateDrawState()
     using namespace MWMechanics;
     if (drawState == 0)
         ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Nothing);
-    else if(drawState == 1)
+    else if (drawState == 1)
         ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Weapon);
-    else if(drawState == 2)
+    else if (drawState == 2)
         ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Spell);
 
     MWMechanics::NpcStats *npcStats = &ptr.getClass().getNpcStats(ptr);

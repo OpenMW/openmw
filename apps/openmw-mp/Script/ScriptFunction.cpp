@@ -66,7 +66,7 @@ boost::any ScriptFunction::Call(const vector<boost::any> &args)
 
         cell ret = boost::any_cast<cell>(any);
 
-        switch(ret_type)
+        switch (ret_type)
         {
             case 'i':
                 result = static_cast<unsigned int>(ret);

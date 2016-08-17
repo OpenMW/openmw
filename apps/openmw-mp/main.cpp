@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     loadSettings(mgr);
 
     int logLevel = mgr.getInt("loglevel", "General");
-    if(logLevel < Log::LOG_INFO || logLevel > Log::LOG_FATAL)
+    if (logLevel < Log::LOG_INFO || logLevel > Log::LOG_FATAL)
         logLevel = Log::LOG_INFO;
     LOG_INIT(logLevel);
 

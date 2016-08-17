@@ -16,7 +16,7 @@ void ScriptFunctions::SendMessage(unsigned short pid, const char *message, bool 
     DEBUG_PRINTF("System: %s", message);
 
     mwmp::Networking::Get().GetController()->GetPacket(ID_CHAT_MESSAGE)->Send(player, false);
-    if(broadcast)
+    if (broadcast)
         mwmp::Networking::Get().GetController()->GetPacket(ID_CHAT_MESSAGE)->Send(player, true);
 }
 

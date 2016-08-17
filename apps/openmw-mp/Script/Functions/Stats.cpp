@@ -235,7 +235,7 @@ int ScriptFunctions::GetAttribute(unsigned short pid, unsigned short attribute) 
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    if(attribute > 7)
+    if (attribute > 7)
         return 0;
 
     return player->CreatureStats()->mAttributes[attribute].mBase;
@@ -246,7 +246,7 @@ void ScriptFunctions::SetAttribute(unsigned short pid, unsigned short attribute,
     Player *player;
     GET_PLAYER(pid, player,);
 
-    if(attribute > 7)
+    if (attribute > 7)
         return;
 
     DEBUG_PRINTF("SetAttribute(%d, %d, %d)\n", pid, attribute, value);
@@ -259,7 +259,7 @@ int ScriptFunctions::GetCurrentAttribute(unsigned short pid, unsigned short attr
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    if(attribute > 7)
+    if (attribute > 7)
         return 0;
 
     return player->CreatureStats()->mAttributes[attribute].mCurrent;

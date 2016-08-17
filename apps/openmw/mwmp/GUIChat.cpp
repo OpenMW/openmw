@@ -80,7 +80,7 @@ namespace mwmp
     void GUIChat::acceptCommand(MyGUI::EditBox *_sender)
     {
         const std::string &cm = mCommandLine->getOnlyText();
-        if(cm.empty()) return;
+        if (cm.empty()) return;
 
         // Add the command to the history, and set the current pointer to
         // the end of the list
@@ -150,7 +150,7 @@ namespace mwmp
         windowState++;
         if (windowState == 3) windowState = 0;
 
-        switch(windowState)
+        switch (windowState)
         {
             case CHAT_DISABLED:
                 this->mMainWidget->setVisible(false);
@@ -192,7 +192,7 @@ namespace mwmp
         if (mCommandHistory.empty()) return;
 
         // Traverse history with up and down arrows
-        if(key == MyGUI::KeyCode::ArrowUp)
+        if (key == MyGUI::KeyCode::ArrowUp)
         {
             // If the user was editing a string, store it for later
             if (mCurrent == mCommandHistory.end())
@@ -206,7 +206,7 @@ namespace mwmp
         }
         else if (key == MyGUI::KeyCode::ArrowDown)
         {
-            if(mCurrent != mCommandHistory.end())
+            if (mCurrent != mCommandHistory.end())
             {
                 ++mCurrent;
 

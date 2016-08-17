@@ -128,16 +128,16 @@ cell LangPAWN::CallPublic(AMX *amx, const cell *params) noexcept
     }
 
     boost::any result = Public::Call(&name[0], args);
-    if(result.empty())
+    if (result.empty())
         return 0;
 
     cell ret = 0;
 
-    if(result.type().hash_code() == typeid(signed int).hash_code())
+    if (result.type().hash_code() == typeid(signed int).hash_code())
         ret = boost::any_cast<signed int>(result);
-    else if(result.type().hash_code() == typeid(unsigned int).hash_code())
+    else if (result.type().hash_code() == typeid(unsigned int).hash_code())
         ret = boost::any_cast<unsigned int>(result);
-    else if(result.type().hash_code() == typeid(double).hash_code())
+    else if (result.type().hash_code() == typeid(double).hash_code())
         ret = amx_ftoc(result);
 
     return ret;

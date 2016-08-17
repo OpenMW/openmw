@@ -21,14 +21,14 @@ Log::Log(int logLevel) : logLevel(logLevel)
 
 void Log::Create(int logLevel)
 {
-    if(sLog != NULL)
+    if (sLog != NULL)
         return;
     sLog = new Log(logLevel);
 }
 
 void Log::Delete()
 {
-    if(sLog == NULL)
+    if (sLog == NULL)
         return
     delete sLog;
     sLog = NULL;
@@ -52,18 +52,18 @@ const char* getTime()
 
 void Log::print(int level, const char *file, int line, const char *message, ...) const
 {
-    if(level < logLevel) return;
+    if (level < logLevel) return;
     std::stringstream sstr;
     sstr << "[" << getTime() << "] ";
 
-    if(file != 0 && line != 0)
+    if (file != 0 && line != 0)
     {
         sstr << "[" << file << ":";
         sstr << line << "] ";
     }
 
     sstr << "[";
-    switch(level)
+    switch (level)
     {
         case LOG_WARN:
             sstr << "WARN";
@@ -80,7 +80,7 @@ void Log::print(int level, const char *file, int line, const char *message, ...)
     sstr << "]: ";
     sstr << message;
     char back = *sstr.str().rbegin();
-    if(back != '\n')
+    if (back != '\n')
         sstr << '\n';
     va_list args;
     va_start(args, message);

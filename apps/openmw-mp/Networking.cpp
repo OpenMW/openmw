@@ -178,7 +178,7 @@ void Networking::Update(RakNet::Packet *packet)
         {
             DEBUG_PRINTF("ID_GAME_ATTACK\n");
 
-            if(!player->CreatureStats()->mDead)
+            if (!player->CreatureStats()->mDead)
             {
                 myPacket->Read(player);
 
@@ -250,7 +250,7 @@ void Networking::Update(RakNet::Packet *packet)
             Script::CallBackReturn<Script::CallbackIdentity("OnPlayerSendMessage")> result = true;
             Script::Call<Script::CallbackIdentity("OnPlayerSendMessage")>(result, player->GetID(), player->ChatMessage()->c_str());
 
-            if(result)
+            if (result)
             {
                 *player->ChatMessage() = player->Npc()->mName + " (" + std::to_string(player->GetID()) + "): "
                                          + *player->ChatMessage() + "\n";

@@ -108,7 +108,7 @@ void LangLua::LoadProgram(const char *filename)
 
     luabridge::Namespace tes3mp = luabridge::getGlobalNamespace(lua).beginNamespace("tes3mp");
 
-    for(unsigned i = 0; i < functions_n; i++)
+    for (unsigned i = 0; i < functions_n; i++)
         tes3mp.addCFunction(functions_[i].name, functions_[i].func);
 
     tes3mp.endNamespace();

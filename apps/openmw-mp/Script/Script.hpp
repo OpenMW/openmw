@@ -37,7 +37,7 @@ private:
     template<typename R>
     R GetScript(const char *name)
     {
-        if(script_type == SCRIPT_CPP)
+        if (script_type == SCRIPT_CPP)
         {
             return SystemInterface<R>(lang->GetInterface(), name).result;
         }
@@ -99,14 +99,14 @@ public:
             if (script->script_type == SCRIPT_CPP)
                 result = reinterpret_cast<FunctionEllipsis<CallBackReturn<I>>>(callback)(std::forward<Args>(args)...);
 #if defined (ENABLE_PAWN)
-            else if(script->script_type == SCRIPT_PAWN)
+            else if (script->script_type == SCRIPT_PAWN)
             {
                 boost::any any = script->lang->Call(data.name, data.callback.types, B, std::forward<Args>(args)...);
                 result = reinterpret_cast<CallBackReturn<I>> ((int)boost::any_cast<int64_t>(any)); // TODO: WTF?! int?!
             }
 #endif
 #if defined (ENABLE_LUA)
-            else if(script->script_type == SCRIPT_LUA)
+            else if (script->script_type == SCRIPT_LUA)
             {
                 boost::any any = script->lang->Call(data.name, data.callback.types, B, std::forward<Args>(args)...);
                 result = static_cast<CallBackReturn<I>>(boost::any_cast<luabridge::LuaRef>(any).cast<CallBackReturn<I>>());
@@ -138,11 +138,11 @@ public:
             if (script->script_type == SCRIPT_CPP)
                 reinterpret_cast<FunctionEllipsis<CallBackReturn<I>>>(callback)(std::forward<Args>(args)...);
 #if defined (ENABLE_PAWN)
-            else if(script->script_type == SCRIPT_PAWN)
+            else if (script->script_type == SCRIPT_PAWN)
                 script->lang->Call(data.name, data.callback.types, B, std::forward<Args>(args)...);
 #endif
 #if defined (ENABLE_LUA)
-            else if(script->script_type == SCRIPT_LUA)
+            else if (script->script_type == SCRIPT_LUA)
                 script->lang->Call(data.name, data.callback.types, B, std::forward<Args>(args)...);
 #endif
             ++count;

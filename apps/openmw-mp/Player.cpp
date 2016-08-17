@@ -9,7 +9,7 @@ TSlots Players::slots;
 
 void Players::DeletePlayer(RakNet::RakNetGUID id)
 {
-    if(players[id] != 0)
+    if (players[id] != 0)
     {
         slots[players[id]->GetID()] = 0;
         delete players[id];
@@ -22,9 +22,9 @@ void Players::NewPlayer(RakNet::RakNetGUID id)
 {
     players[id] = new Player(id);
 
-    for(int i = 0; i < 16; i++)
+    for (int i = 0; i < 16; i++)
     {
-        if(slots[i] == 0)
+        if (slots[i] == 0)
         {
             slots[i] = players[id];
             slots[i]->SetID(i);

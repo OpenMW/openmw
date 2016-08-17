@@ -55,7 +55,7 @@ mwmp::PacketsController::PacketsController(RakNet::RakPeerInterface *peer)
 mwmp::BasePacket *mwmp::PacketsController::GetPacket(RakNet::MessageID id)
 {
     BasePacket * packet;
-    switch(id)
+    switch (id)
     {
         case ID_GAME_UPDATE_POS:
             packet = packetPosition;

@@ -100,7 +100,7 @@ void Networking::Connect(const std::string &ip, unsigned short port)
         errmsg = "Connection attempt failed.\n";
 
     bool queue = true;
-    while(queue)
+    while (queue)
     {
         for (RakNet::Packet *packet = peer->Receive(); packet; peer->DeallocatePacket(
                 packet), packet = peer->Receive())
@@ -170,7 +170,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
 
     BasePacket *myPacket = controller.GetPacket(packet->data[0]);
 
-    switch(packet->data[0])
+    switch (packet->data[0])
     {
         case ID_HANDSHAKE:
         {
@@ -183,7 +183,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             if (id == myid)
             {
                 cout << "TEST: " << packet->length << endl;
-                if(packet->length == myPacket->headerSize())
+                if (packet->length == myPacket->headerSize())
                 {
                     cout << "ID_GAME_BASE_INFO request only" << endl;
                     myPacket->Send(getLocalPlayer(), serverAddr);
@@ -233,7 +233,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
         {
             if (id == myid)
                 MWBase::Environment::get().getStateManager()->requestQuit();
-            else if(pl != 0)
+            else if (pl != 0)
                 Players::DisconnectPlayer(id);
 
         }
@@ -288,7 +288,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 if (pl->GetAttack()->pressed == 0)
                 {
                     cout << "success: " << (pl->GetAttack()->success == 1);
-                    if(pl->GetAttack()->success == 1)
+                    if (pl->GetAttack()->success == 1)
                         cout << " damage: " << pl->GetAttack()->damage;
                     cout << endl;
                 }
@@ -536,11 +536,11 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
 
                     printf("ID_GUI_MESSAGEBOX, Type %d, MSG %s\n", getLocalPlayer()->guiMessageBox.type, getLocalPlayer()->guiMessageBox.label.c_str());
 
-                    if(getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::MessageBox)
+                    if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::MessageBox)
                         Main::get().getGUIConroller()->ShowMessageBox(getLocalPlayer()->guiMessageBox);
-                    else if(getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::CustomMessageBox)
+                    else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::CustomMessageBox)
                         Main::get().getGUIConroller()->ShowCustomMessageBox(getLocalPlayer()->guiMessageBox);
-                    else if(getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::InputDialog)
+                    else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::InputDialog)
                         Main::get().getGUIConroller()->ShowInputBox(getLocalPlayer()->guiMessageBox);
                 }
                 break;
@@ -562,7 +562,7 @@ LocalPlayer *Networking::getLocalPlayer()
 
 bool Networking::isDedicatedPlayer(const MWWorld::Ptr &ptr)
 {
-    if(ptr.mRef == 0)
+    if (ptr.mRef == 0)
         return 0;
     DedicatedPlayer *pl = Players::GetPlayer(ptr);
 
@@ -573,7 +573,7 @@ bool Networking::Attack(const MWWorld::Ptr &ptr)
 {
     DedicatedPlayer *pl = Players::GetPlayer(ptr);
 
-    if(pl == 0)
+    if (pl == 0)
         return false;
 
     return pl->GetAttack()->pressed;

@@ -220,7 +220,7 @@ bool TimerAPI::IsEndTimer(int timerid)
 
 void TimerAPI::Terminate()
 {
-    for(auto timer : timers)
+    for (auto timer : timers)
     {
         if (timer.second != nullptr)
             delete timer.second;
