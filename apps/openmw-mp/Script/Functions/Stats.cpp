@@ -233,7 +233,7 @@ void ScriptFunctions::SetCurrentFatigue(unsigned short pid, float value) noexcep
     player->CreatureStats()->mDynamic[2].mCurrent = 0;
 }
 
-int ScriptFunctions::GetAttributeIdByName(const char *name) noexcept
+int ScriptFunctions::GetAttributeId(const char *name) noexcept
 {
     for (int x = 0; x < 8; x++)
     {
@@ -246,7 +246,7 @@ int ScriptFunctions::GetAttributeIdByName(const char *name) noexcept
     return -1;
 }
 
-int ScriptFunctions::GetSkillIdByName(const char *name) noexcept
+int ScriptFunctions::GetSkillId(const char *name) noexcept
 {
     for (int x = 0; x < 27; x++)
     {
@@ -257,6 +257,16 @@ int ScriptFunctions::GetSkillIdByName(const char *name) noexcept
     }
 
     return -1;
+}
+
+const char *ScriptFunctions::GetAttributeName(unsigned short attribute) noexcept
+{
+    return Attribute::sAttributeNames[attribute].c_str();
+}
+
+const char *ScriptFunctions::GetSkillName(unsigned short skill) noexcept
+{
+    return Skill::sSkillNames[skill].c_str();
 }
 
 int ScriptFunctions::GetAttribute(unsigned short pid, unsigned short attribute) noexcept
