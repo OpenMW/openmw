@@ -47,7 +47,6 @@ set(SERVER
     Player.cpp
     Networking.cpp
     Utils.cpp
-    Log.cpp
     MasterClient.cpp
     Script/Script.cpp Script/ScriptFunction.cpp
     Script/ScriptFunctions.cpp

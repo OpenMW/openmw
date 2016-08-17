@@ -8,7 +8,7 @@
 #include <iostream>
 #include <RakPeerInterface.h>
 #include "MasterClient.hpp"
-#include "Log.hpp"
+#include <components/openmw-mp/Log.hpp>
 #include "Networking.hpp"
 
 using namespace std;

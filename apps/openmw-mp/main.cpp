@@ -3,9 +3,9 @@
 #include "Player.hpp"
 #include "Networking.hpp"
 #include "MasterClient.hpp"
-#include "Log.hpp"
 #include <RakPeer.h>
 #include <MessageIdentifiers.h>
+#include <components/openmw-mp/Log.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <apps/openmw-mp/Script/Script.hpp>
 #include <iostream>
