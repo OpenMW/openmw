@@ -296,7 +296,7 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
 
     controller->GetPacket(ID_GAME_BASE_INFO)->RequestData(guid);
     //controller->GetPacket(ID_GAME_UPDATE_SKILLS)->RequestData(guid);
-    //controller->GetPacket(ID_GAME_UPDATE_BASESTATS)->RequestData(guid);
+    controller->GetPacket(ID_GAME_UPDATE_BASESTATS)->RequestData(guid);
     controller->GetPacket(ID_GAME_UPDATE_POS)->RequestData(guid);
     controller->GetPacket(ID_GAME_CELL)->RequestData(guid);
     controller->GetPacket(ID_GAME_UPDATE_EQUIPED)->RequestData(guid);
@@ -307,7 +307,7 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
 
         controller->GetPacket(ID_GAME_BASE_INFO)->Send(pl->second, guid);
         //controller->GetPacket(ID_GAME_UPDATE_SKILLS)->Send(pl->second, guid);
-        //controller->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(pl->second, guid);
+        controller->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_UPDATE_POS)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_CELL)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_UPDATE_EQUIPED)->Send(pl->second, guid);
