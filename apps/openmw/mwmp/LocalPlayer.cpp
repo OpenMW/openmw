@@ -486,7 +486,7 @@ bool LocalPlayer::CharGenThread() // ToDo: need fix
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             (*Npc()) = *player.get<ESM::NPC>()->mBase;
 
-            printf("Sending ID_GAME_BASE_INFO to server with my CharGen info");
+            printf("Sending ID_GAME_BASE_INFO to server with my CharGen info\n");
             GetNetworking()->GetPacket(ID_GAME_BASE_INFO)->Send(this);
 
             if (CharGenStage()->end != 1)

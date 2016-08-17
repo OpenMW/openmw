@@ -6,6 +6,7 @@
 #include <RakPeer.h>
 #include <Kbhit.h>
 #include <components/openmw-mp/NetworkMessages.hpp>
+#include <components/openmw-mp/Log.hpp>
 #include <iostream>
 #include <Script/Script.hpp>
 #include <Script/API/TimerAPI.hpp>
@@ -118,7 +119,7 @@ void Networking::Update(RakNet::Packet *packet)
     {
         case ID_GAME_BASE_INFO:
         {
-            DEBUG_PRINTF("ID_GAME_BASE_INFO\n");
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s", player->Npc()->mName.c_str());
 
             myPacket->Read(player);
             myPacket->Send(player, true);

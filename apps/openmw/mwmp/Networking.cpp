@@ -180,9 +180,12 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
         }
         case ID_GAME_BASE_INFO:
         {
+            printf("Received ID_GAME_BASE_INFO from server\n");
+
             if (id == myid)
             {
-                cout << "TEST: " << packet->length << endl;
+                printf("- Packet was about my id\n");
+
                 if (packet->length == myPacket->headerSize())
                 {
                     cout << "ID_GAME_BASE_INFO request only" << endl;
@@ -191,14 +194,19 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 else
                 {
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    cout << "ID_GAME_BASE_INFO" << endl;
+                    cout << "- Updating LocalPlayer" << endl;
                     getLocalPlayer()->updateChar();
                 }
             }
             else
             {
-                if (pl == 0)
+                printf("- Packet was about %s\n", pl == 0 ? "new player" : pl->Npc()->mName.c_str());
+
+                if (pl == 0) {
+
+                    printf("- Exchanging data with new player\n");
                     pl = Players::NewPlayer(id);
+                }
 
                 myPacket->Packet(&bsIn, pl, false);
                 Players::CreatePlayer(id);
