@@ -87,6 +87,9 @@ public:
     static float GetCurrentFatigue(unsigned short pid) noexcept;
     static void SetCurrentFatigue(unsigned short pid, float fatigue) noexcept;
 
+    static int GetAttributeIdByName(const char *name) noexcept;
+    static int GetSkillIdByName(const char *name) noexcept;
+
     static int GetAttribute(unsigned short pid, unsigned short attribute) noexcept;
     static void SetAttribute(unsigned short pid, unsigned short attribute, int value) noexcept;
     static int GetCurrentAttribute(unsigned short pid, unsigned short attribute) noexcept;
@@ -193,6 +196,9 @@ public:
 
             {"GetBirthsign",        ScriptFunctions::GetBirthsign},
             {"SetBirthsign",        ScriptFunctions::SetBirthsign},
+
+            {"GetAttributeIdByName", ScriptFunctions::GetAttributeIdByName},
+            {"GetSkillIdByName",     ScriptFunctions::GetSkillIdByName},
 
             {"GetAttribute",        ScriptFunctions::GetAttribute},
             {"SetAttribute",        ScriptFunctions::SetAttribute},

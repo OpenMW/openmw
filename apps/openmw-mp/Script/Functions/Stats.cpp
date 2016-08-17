@@ -5,10 +5,13 @@
 #include <apps/openmw-mp/Script/ScriptFunctions.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <apps/openmw-mp/Networking.hpp>
+#include <components/esm/attr.hpp>
+#include <components/esm/loadskil.hpp>
 #include <components/misc/stringops.hpp>
 #include <iostream>
 
 using namespace std;
+using namespace ESM;
 
 void ScriptFunctions::SetName(unsigned short pid, const char *name) noexcept
 {
@@ -228,6 +231,32 @@ void ScriptFunctions::SetCurrentFatigue(unsigned short pid, float value) noexcep
     GET_PLAYER(pid, player,);
 
     player->CreatureStats()->mDynamic[2].mCurrent = 0;
+}
+
+int ScriptFunctions::GetAttributeIdByName(const char *name) noexcept
+{
+    for (int x = 0; x < 8; x++)
+    {
+        if (Misc::StringUtils::ciEqual(name, Attribute::sAttributeNames[x]))
+        {
+            return x;
+        }
+    }
+
+    return -1;
+}
+
+int ScriptFunctions::GetSkillIdByName(const char *name) noexcept
+{
+    for (int x = 0; x < 27; x++)
+    {
+        if (Misc::StringUtils::ciEqual(name, Skill::sSkillNames[x]))
+        {
+            return x;
+        }
+    }
+
+    return -1;
 }
 
 int ScriptFunctions::GetAttribute(unsigned short pid, unsigned short attribute) noexcept
