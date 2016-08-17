@@ -23,6 +23,7 @@
 #include <apps/openmw/mwdialogue/dialoguemanagerimp.hpp>
 #include <apps/openmw/mwworld/inventorystore.hpp>
 #include <apps/openmw/mwmechanics/spellcasting.hpp>
+#include <components/openmw-mp/Log.hpp>
 
 #include "DedicatedPlayer.hpp"
 #include "LocalPlayer.hpp"
@@ -57,7 +58,7 @@ std::string loadSettings (Settings::Manager & settings)
 
 Main::Main()
 {
-    std::cout << "Main::Main" << std::endl;
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "TES3MP started");
     mNetworking = new Networking();
     mLocalPlayer = new LocalPlayer();
     mGUIController = new GUIController();
@@ -69,7 +70,7 @@ Main::Main()
 
 Main::~Main()
 {
-    std::cout << "Main::~Main" << std::endl;
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "TES3MP stopped");
     delete mNetworking;
     delete mLocalPlayer;
     delete mGUIController;
@@ -90,6 +91,8 @@ void Main::Create()
     mgr.mChangedSettings.clear();
     loadSettings(mgr);
 
+    int logLevel = mgr.getInt("loglevel", "General");
+    Log::SetLevel(logLevel);
     pMain->server = mgr.getString("server", "General");
     pMain->port = (unsigned short)mgr.getInt("port", "General");
 

@@ -38,6 +38,7 @@ extern int is_debugger_attached(void);
 #endif
 
 #include <boost/version.hpp>
+#include <components/openmw-mp/Log.hpp>
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */
@@ -337,6 +338,7 @@ int main(int argc, char**argv)
         std::cout.rdbuf (&coutsb);
         std::cerr.rdbuf (&cerrsb);
 #endif
+        LOG_INIT(Log::LOG_INFO);
 
 
 #if USE_CRASH_CATCHER
@@ -379,6 +381,8 @@ int main(int argc, char**argv)
     // Restore cout and cerr
     std::cout.rdbuf(cout_rdbuf);
     std::cerr.rdbuf(cerr_rdbuf);
+
+    LOG_QUIT();
 
     return ret;
 }
