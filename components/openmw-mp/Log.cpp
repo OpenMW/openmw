@@ -39,6 +39,11 @@ const Log &Log::Get()
     return *sLog;
 }
 
+void Log::SetLevel(int level)
+{
+    sLog->logLevel = level;
+}
+
 const char* getTime()
 {
     time_t t = time(0);

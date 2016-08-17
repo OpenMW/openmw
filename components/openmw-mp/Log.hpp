@@ -22,14 +22,16 @@ class Log
     public:
         enum
         {
-            LOG_INFO = 0,
+            LOG_VERBOSE = 0,
+            LOG_INFO,
             LOG_WARN,
             LOG_ERROR,
-            LOG_FATAL,
+            LOG_FATAL
         };
         static void Create(int logLevel);
         static void Delete();
         static const Log &Get();
+        static void SetLevel(int level);
         void print(int level, const char *file, int line, const char *message, ...) const;
     private:
         Log(int logLevel);
@@ -39,7 +41,6 @@ class Log
         Log& operator=(Log& );
         static Log *sLog;
         int logLevel;
-
 };
 
 
