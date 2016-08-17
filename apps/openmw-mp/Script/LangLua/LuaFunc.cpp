@@ -13,9 +13,9 @@ inline vector<boost::any> DefToVec(lua_State *lua, string types, int args_begin,
 {
     vector<boost::any> args;
 
-    for(int i = args_begin; i < args_n + args_begin; i++)
+    for (int i = args_begin; i < args_n + args_begin; i++)
     {
-        switch(types[i - args_begin])
+        switch (types[i - args_begin])
         {
             case 'i':
             {
@@ -84,22 +84,22 @@ int LangLua::CallPublic(lua_State *lua)
 
     string types = Public::GetDefinition(name);
 
-    if(args_n  != (long)types.size())
+    if (args_n  != (long)types.size())
         throw invalid_argument("Script call: Number of arguments does not match definition");
 
     vector<boost::any> args = DefToVec(lua, types, 2, args_n);
 
     boost::any result = Public::Call(&name[0], args);
-    if(result.empty())
+    if (result.empty())
         return 0;
 
-    if(result.type().hash_code() == typeid(signed int).hash_code())
+    if (result.type().hash_code() == typeid(signed int).hash_code())
         luabridge::Stack<signed int>::push(lua, boost::any_cast<signed int>(result));
-    else if(result.type().hash_code() == typeid(unsigned int).hash_code())
+    else if (result.type().hash_code() == typeid(unsigned int).hash_code())
         luabridge::Stack<unsigned int>::push(lua, boost::any_cast<unsigned int>(result));
-    else if(result.type().hash_code() == typeid(double).hash_code())
+    else if (result.type().hash_code() == typeid(double).hash_code())
         luabridge::Stack<double>::push(lua, boost::any_cast<double>(result));
-    else if(result.type().hash_code() == typeid(const char*).hash_code())
+    else if (result.type().hash_code() == typeid(const char*).hash_code())
         luabridge::Stack<const char*>::push(lua, boost::any_cast<const char*>(result));
     return 1;
 }
@@ -126,9 +126,9 @@ int LangLua::CreateTimerEx(lua_State *lua)
 
     vector<boost::any> args;
 
-    for(int i = 4; i < args_n + 4; i++)
+    for (int i = 4; i < args_n + 4; i++)
     {
-        switch(types[i - 4])
+        switch (types[i - 4])
         {
             case 'i':
             {

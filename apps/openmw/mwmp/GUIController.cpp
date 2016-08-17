@@ -48,7 +48,7 @@ void mwmp::GUIController::setupChat(const Settings::Manager &mgr)
 
 void mwmp::GUIController::PrintChatMessage(std::string &msg)
 {
-    if(mChat != nullptr)
+    if (mChat != nullptr)
         mChat->print(msg);
 }
 
@@ -72,7 +72,7 @@ std::vector<std::string> splitString(const std::string &str, char delim = ';')
     std::istringstream ss(str);
     std::vector<std::string> result;
     std::string token;
-    while(std::getline(ss, token, delim))
+    while (std::getline(ss, token, delim))
         result.push_back(token);
     return result;
 }
@@ -114,14 +114,14 @@ void mwmp::GUIController::OnInputBoxDone(MWGui::WindowBase *parWindow)
 bool mwmp::GUIController::pressedKey(int key)
 {
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
-    if(mChat == nullptr || windowManager->getMode() != MWGui::GM_None)
+    if (mChat == nullptr || windowManager->getMode() != MWGui::GM_None)
         return false;
-    if(key == keyChatMode)
+    if (key == keyChatMode)
     {
         mChat->PressedChatMode();
         return true;
     }
-    else if(key == keySay)
+    else if (key == keySay)
     {
         //MyGUI::Widget *oldFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
         mChat->PressedSay();
@@ -141,11 +141,11 @@ bool mwmp::GUIController::HaveFocusedElement()
 
 void mwmp::GUIController::update(float dt)
 {
-    if(mChat != nullptr)
+    if (mChat != nullptr)
         mChat->Update(dt);
 
     int pressedButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
-    if(pressedButton != -1 && calledMessageBox)
+    if (pressedButton != -1 && calledMessageBox)
     {
         printf("Pressed: %d\n", pressedButton);
         calledMessageBox = false;

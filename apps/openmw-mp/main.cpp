@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 
     setenv("LUA_PATH", Utils::convertPath(plugin_home + "/scripts/?.lua" + ";" + plugin_home + "/scripts/?.t").c_str(), 1);
 
-    for(auto plugin : plugins)
+    for (auto plugin : plugins)
         Script::LoadScript(plugin.c_str(), plugin_home.c_str());
 
     RakNet::RakPeerInterface *peer = RakNet::RakPeerInterface::GetInstance();
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     const char passw[8] = "1234567";
     peer->SetIncomingPassword(passw, sizeof(passw));
 
-    if(RakNet::NonNumericHostString(addr.c_str()))
+    if (RakNet::NonNumericHostString(addr.c_str()))
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "%s", "You cannot use non numeric addresses for server.");
         return 1;
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     bool masterEnabled = mgr.getBool("enabled", "MasterServer");
     thread thrQuery;
     MasterClient *mclient;
-    if(masterEnabled)
+    if (masterEnabled)
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sharing server query info to master enabled.");
         string masterAddr = mgr.getString("address", "MasterServer");
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 
     RakNet::RakPeerInterface::DestroyInstance(peer);
 
-    if(thrQuery.joinable())
+    if (thrQuery.joinable())
     {
         mclient->Stop();
         thrQuery.join();

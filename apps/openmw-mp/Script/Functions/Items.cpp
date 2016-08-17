@@ -49,8 +49,8 @@ bool ScriptFunctions::HasItemEquipped(unsigned short pid, const char* itemName)
     Player *player;
     GET_PLAYER(pid, player, false);
 
-    for(int slot = 0; slot < 27; slot ++)
-        if(Misc::StringUtils::ciEqual(player->EquipedItem(slot)->refid, itemName))
+    for (int slot = 0; slot < 27; slot ++)
+        if (Misc::StringUtils::ciEqual(player->EquipedItem(slot)->refid, itemName))
             return true;
     return false;
 }

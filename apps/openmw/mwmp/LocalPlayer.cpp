@@ -222,11 +222,11 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
     static bool attackPressed = false; // prevent flood
     MWMechanics::DrawState_ state = player.getClass().getNpcStats(player).getDrawState();
     //player.getClass().hit(player, 1, ESM::Weapon::AT_Chop);
-    if(world->getPlayer().getAttackingOrSpell() && !attackPressed)
+    if (world->getPlayer().getAttackingOrSpell() && !attackPressed)
     {
         MWWorld::Ptr weapon = MWWorld::Ptr(); // hand-to-hand
         //player.getClass().onHit(player, 0.5, true, weapon, 0, 1);
-        if(state == MWMechanics::DrawState_Spell)
+        if (state == MWMechanics::DrawState_Spell)
         {
             //cout << "getAttackingOrSpell" << endl;
             const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
@@ -240,7 +240,7 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
             GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
             GetNetworking()->SendData(&bs);*/
         }
-        else if(state == MWMechanics::DrawState_Weapon)
+        else if (state == MWMechanics::DrawState_Weapon)
         {
             //PrepareAttack(2);
         }
@@ -248,7 +248,7 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
     }
     else if(!world->getPlayer().getAttackingOrSpell() && attackPressed)
     {
-        if(/*state == MWMechanics::DrawState_Spell ||*/ state == MWMechanics::DrawState_Weapon)
+        if (/*state == MWMechanics::DrawState_Spell ||*/ state == MWMechanics::DrawState_Weapon)
         {
             //localNetPlayer->GetAttack()->success = false;
             //SendAttack(0);
@@ -264,7 +264,7 @@ void LocalPlayer::updateDeadState(bool forceUpdate)
     MWMechanics::NpcStats *playerStats = &player.getClass().getNpcStats(player);
     static bool isDead = false;
 
-    if(playerStats->isDead() && !isDead)
+    if (playerStats->isDead() && !isDead)
     {
         CreatureStats()->mDead = true;
         RakNet::BitStream bs;
@@ -272,7 +272,7 @@ void LocalPlayer::updateDeadState(bool forceUpdate)
         GetNetworking()->SendData(&bs);
         isDead = true;
     }
-    else if(playerStats->getHealth().getCurrent() > 0 && isDead)
+    else if (playerStats->getHealth().getCurrent() > 0 && isDead)
         isDead = false;
 }
 
@@ -282,10 +282,10 @@ void LocalPlayer::updateAttributesAndSkills(bool forceUpdate)
 
     const MWMechanics::NpcStats &_npcStats = player.getClass().getNpcStats(player);
 
-    for(int i = 0; i < PacketAttributesAndStats::StatsCount; ++i)
+    for (int i = 0; i < PacketAttributesAndStats::StatsCount; ++i)
         _npcStats.getSkill(i).writeState( NpcStats()->mSkills[i]);
 
-    for(int i = 0; i < PacketAttributesAndStats::AttributesCount; ++i)
+    for (int i = 0; i < PacketAttributesAndStats::AttributesCount; ++i)
         _npcStats.getAttribute(i).writeState(CreatureStats()->mAttributes[i]);
 }
 
@@ -298,12 +298,12 @@ Networking *LocalPlayer::GetNetworking()
 
 void LocalPlayer::PrepareAttack(char type, bool state)
 {
-    if(GetAttack()->pressed == state)
+    if (GetAttack()->pressed == state)
         return;
 
     MWMechanics::DrawState_ dstate = GetPlayerPtr().getClass().getNpcStats(GetPlayerPtr()).getDrawState();
 
-    if(dstate == MWMechanics::DrawState_Spell)
+    if (dstate == MWMechanics::DrawState_Spell)
     {
         const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
 
@@ -332,7 +332,7 @@ void LocalPlayer::SendAttack(char type)
 {
     MWMechanics::DrawState_ state = GetPlayerPtr().getClass().getNpcStats(GetPlayerPtr()).getDrawState();
 
-    if(state == MWMechanics::DrawState_Spell)
+    if (state == MWMechanics::DrawState_Spell)
     {
 
     }
@@ -360,18 +360,23 @@ void LocalPlayer::updateCell(bool forceUpdate)
     // 2) The LocalPlayer's cell name does not equal the World Player's cell name
     // 3) The LocalPlayer's exterior cell coordinates do not equal the World Player's
     //    exterior cell coordinates
-    if (forceUpdate) {
+    if (forceUpdate)
+    {
         shouldUpdate = true;
     }
-    else if (!Misc::StringUtils::ciEqual(_cell->mName, GetCell()->mName)) {
+    else if (!Misc::StringUtils::ciEqual(_cell->mName, GetCell()->mName))
+    {
         shouldUpdate = true;
     }
-    else if (_cell->isExterior()) {
+    else if (_cell->isExterior())
+    {
         
-        if (_cell->mCellId.mIndex.mX != GetCell()->mCellId.mIndex.mX) {
+        if (_cell->mCellId.mIndex.mX != GetCell()->mCellId.mIndex.mX)
+        {
             shouldUpdate = true;
         }
-        else if (_cell->mCellId.mIndex.mY != GetCell()->mCellId.mIndex.mY) {
+        else if (_cell->mCellId.mIndex.mY != GetCell()->mCellId.mIndex.mY)
+        {
             shouldUpdate = true;
         }
     }
@@ -419,7 +424,7 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
     MWMechanics::DrawState_ state = player.getClass().getNpcStats(player).getDrawState();
     static MWMechanics::DrawState_ oldState = player.getClass().getNpcStats(player).getDrawState();
     //static float timer = 0;
-    if(oldRun != run
+    if (oldRun != run
           || oldSneak != sneak || oldForceJump != forceJump
           || oldForceMoveJump != forceMoveJump || oldState != state ||
             ((jump || onJump)/* && (timer += MWBase::Environment::get().getFrameDuration() )> 0.5*/)
@@ -480,7 +485,9 @@ bool LocalPlayer::CharGenThread() // ToDo: need fix
         {
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             (*Npc()) = *player.get<ESM::NPC>()->mBase;
+
             GetNetworking()->GetPacket(ID_GAME_BASE_INFO)->Send(this);
+
             if(CharGenStage()->end != 1)
             {
                 updateBaseStats(true);

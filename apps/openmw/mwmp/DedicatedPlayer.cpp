@@ -202,16 +202,16 @@ void DedicatedPlayer::Move(float dt)
 
 void Players::Update(float dt)
 {
-    for(std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
+    for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
     {
         DedicatedPlayer *pl = it->second;
-        if(pl == 0) continue;
+        if (pl == 0) continue;
 
         MWMechanics::NpcStats *npcStats = &pl->ptr.getClass().getNpcStats(pl->getPtr());
 
         MWMechanics::DynamicStat<float> value;
 
-        if(pl->CreatureStats()->mDead)
+        if (pl->CreatureStats()->mDead)
         {
             value.readState(pl->CreatureStats()->mDynamic[0]);
             npcStats->setHealth(value);
@@ -286,7 +286,7 @@ void DedicatedPlayer::UpdateInventory()
                 equal = true;
         }
 
-        if(dedicItem.empty() || equal)
+        if (dedicItem.empty() || equal)
             continue;
 
         const int count = EquipedItem(slot)->count;
@@ -319,7 +319,7 @@ const std::string DedicatedPlayer::GetAnim()
     else
         anim = "walk";
 
-    if(movementAnim != 0)
+    if (movementAnim != 0)
     {
 
         if (movementAnim == 3)

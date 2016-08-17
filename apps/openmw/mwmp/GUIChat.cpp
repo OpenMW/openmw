@@ -110,7 +110,7 @@ namespace mwmp
 
     void GUIChat::print(const std::string &msg, const std::string &color)
     {
-        if(windowState == 2 && !isVisible())
+        if (windowState == 2 && !isVisible())
         {
             setVisible(true);
         }
@@ -148,7 +148,7 @@ namespace mwmp
     void GUIChat::PressedChatMode()
     {
         windowState++;
-        if(windowState == 3) windowState = 0;
+        if (windowState == 3) windowState = 0;
 
         switch(windowState)
         {
@@ -176,7 +176,7 @@ namespace mwmp
     {
         if (windowState == CHAT_DISABLED)
             return;
-        else if(windowState == CHAT_HIDDENMODE)
+        else if (windowState == CHAT_HIDDENMODE)
         {
             setVisible(true);
             curTime = 0;
@@ -189,28 +189,28 @@ namespace mwmp
 
     void GUIChat::keyPress(MyGUI::Widget *_sender, MyGUI::KeyCode key, MyGUI::Char _char)
     {
-        if(mCommandHistory.empty()) return;
+        if (mCommandHistory.empty()) return;
 
         // Traverse history with up and down arrows
         if(key == MyGUI::KeyCode::ArrowUp)
         {
             // If the user was editing a string, store it for later
-            if(mCurrent == mCommandHistory.end())
+            if (mCurrent == mCommandHistory.end())
                 mEditString = mCommandLine->getOnlyText();
 
-            if(mCurrent != mCommandHistory.begin())
+            if (mCurrent != mCommandHistory.begin())
             {
                 --mCurrent;
                 mCommandLine->setCaption(*mCurrent);
             }
         }
-        else if(key == MyGUI::KeyCode::ArrowDown)
+        else if (key == MyGUI::KeyCode::ArrowDown)
         {
             if(mCurrent != mCommandHistory.end())
             {
                 ++mCurrent;
 
-                if(mCurrent != mCommandHistory.end())
+                if (mCurrent != mCommandHistory.end())
                     mCommandLine->setCaption(*mCurrent);
                 else
                     // Restore the edit string
@@ -222,10 +222,10 @@ namespace mwmp
 
     void GUIChat::Update(float dt)
     {
-        if(windowState == CHAT_HIDDENMODE && !editState && isVisible())
+        if (windowState == CHAT_HIDDENMODE && !editState && isVisible())
         {
             curTime += dt;
-            if(curTime >= delay)
+            if (curTime >= delay)
             {
                 SetEditState(false);
                 this->mMainWidget->setVisible(false);

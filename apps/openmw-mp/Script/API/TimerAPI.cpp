@@ -36,7 +36,7 @@ Timer::Timer(lua_State *lua, ScriptFuncLua callback, long msec, const std::strin
 
 void Timer::Tick()
 {
-    if(end)
+    if (end)
         return;
 
     const auto duration = chrono::system_clock::now().time_since_epoch();
@@ -153,7 +153,7 @@ void TimerAPI::FreeTimer(int timerid)
 
     try
     {
-        if(timers.at(timerid) != nullptr)
+        if (timers.at(timerid) != nullptr)
         {
             delete timers[timerid];
             timers[timerid] = nullptr;
@@ -182,7 +182,7 @@ void TimerAPI::StartTimer(int timerid)
     try
     {
         Timer *timer = timers.at(timerid);
-        if(timer == nullptr)
+        if (timer == nullptr)
             throw 1;
         timer->Start();
     }
@@ -222,7 +222,7 @@ void TimerAPI::Terminate()
 {
     for(auto timer : timers)
     {
-        if(timer.second != nullptr)
+        if (timer.second != nullptr)
             delete timer.second;
         timer.second = nullptr;
     }
@@ -232,7 +232,7 @@ void TimerAPI::Tick()
 {
     for (auto timer : timers)
     {
-        if(timer.second != nullptr)
+        if (timer.second != nullptr)
             timer.second->Tick();
     }
 }

@@ -48,7 +48,7 @@ void Networking::Update(RakNet::Packet *packet)
 
     Player *player = Players::GetPlayer(packet->guid);
 
-    if(player == 0)
+    if (player == 0)
     {
         controller->GetPacket(ID_HANDSHAKE)->RequestData(packet->guid);
 
@@ -70,21 +70,21 @@ void Networking::Update(RakNet::Packet *packet)
 
     BasePacket *myPacket = controller->GetPacket(packet->data[0]);
 
-    if(packet->data[0] == ID_HANDSHAKE)
+    if (packet->data[0] == ID_HANDSHAKE)
     {
         DEBUG_PRINTF("ID_HANDSHAKE\n");
         string passw = "SuperPassword";
 
         myPacket->Read(player);
 
-        if(player->isHandshaked())
+        if (player->isHandshaked())
         {
             DEBUG_PRINTF("Wrong handshake with player %d, name: %s\n", player->GetID(), player->Npc()->mName.c_str());
             KickPlayer(player->guid);
             return;
         }
 
-        if(*player->GetPassw() != passw)
+        if (*player->GetPassw() != passw)
         {
             DEBUG_PRINTF("Wrong server password (player %d, name: %s) pass: %s\n", player->GetID(), player->Npc()->mName.c_str(), player->GetPassw()->c_str());
             KickPlayer(player->guid);
@@ -96,7 +96,7 @@ void Networking::Update(RakNet::Packet *packet)
         Script::CallBackReturn<ident> result = true;
         Script::Call<ident>(result, Players::GetPlayer(packet->guid)->GetID());
 
-        if(!result)
+        if (!result)
         {
             controller->GetPacket(ID_USER_DISCONNECTED)->Send(Players::GetPlayer(packet->guid), false);
             Players::DeletePlayer(packet->guid);
@@ -107,14 +107,14 @@ void Networking::Update(RakNet::Packet *packet)
 
     }
 
-    if(!player->isHandshaked())
+    if (!player->isHandshaked())
     {
         DEBUG_PRINTF("Wrong auth player %d, name: %s\n", player->GetID(), player->Npc()->mName.c_str());
         //KickPlayer(player->guid);
         return;
     }
 
-    switch(packet->data[0])
+    switch (packet->data[0])
     {
         case ID_GAME_BASE_INFO:
         {
@@ -129,7 +129,7 @@ void Networking::Update(RakNet::Packet *packet)
         {
             //DEBUG_PRINTF("ID_GAME_UPDATE_POS \n");
 
-            if(!player->CreatureStats()->mDead)
+            if (!player->CreatureStats()->mDead)
             {
                 myPacket->Read(player);
                 myPacket->Send(player, true); //send to other clients
@@ -141,7 +141,7 @@ void Networking::Update(RakNet::Packet *packet)
         {
             DEBUG_PRINTF("ID_GAME_CELL \n");
 
-            if(!player->CreatureStats()->mDead)
+            if (!player->CreatureStats()->mDead)
             {
                 myPacket->Read(player);
                 myPacket->Send(player, true); //send to other clients
@@ -154,7 +154,7 @@ void Networking::Update(RakNet::Packet *packet)
         {
             DEBUG_PRINTF("ID_GAME_UPDATE_SKILLS\n");
 
-            if(!player->CreatureStats()->mDead)
+            if (!player->CreatureStats()->mDead)
             {
                 myPacket->Read(player);
                 myPacket->Send(player, true);
@@ -301,9 +301,9 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
     controller->GetPacket(ID_GAME_CELL)->RequestData(guid);
     controller->GetPacket(ID_GAME_UPDATE_EQUIPED)->RequestData(guid);
 
-    for(TPlayers::iterator pl = players->begin(); pl != players->end(); pl++)
+    for (TPlayers::iterator pl = players->begin(); pl != players->end(); pl++)
     {
-        if(pl->first == guid) continue;
+        if (pl->first == guid) continue;
 
         controller->GetPacket(ID_GAME_BASE_INFO)->Send(pl->second, guid);
         //controller->GetPacket(ID_GAME_UPDATE_SKILLS)->Send(pl->second, guid);
@@ -351,7 +351,7 @@ int Networking::MainLoop()
 
     while (running)
     {
-        if(kbhit() && getch() == '\n')
+        if (kbhit() && getch() == '\n')
             break;
         for (packet=peer->Receive(); packet; peer->DeallocatePacket(packet), packet=peer->Receive())
         {

@@ -134,10 +134,10 @@ void Main::Frame(float dt)
 void Main::UpdateWorld(float dt) const
 {
 
-    if(!mLocalPlayer->CharGenThread())
+    if (!mLocalPlayer->CharGenThread())
         return;
 
-    if(!mNetworking->isConnected())
+    if (!mNetworking->isConnected())
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWBase::Environment::get().getMechanicsManager()->toggleAI();
@@ -178,7 +178,7 @@ GUIController *Main::getGUIConroller() const
 
 void Main::PressedKey(int key)
 {
-    if(pMain == nullptr) return;
-    if(get().getGUIConroller()->pressedKey(key))
+    if (pMain == nullptr) return;
+    if (get().getGUIConroller()->pressedKey(key))
         return; // if any gui bind pressed
 }

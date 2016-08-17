@@ -270,7 +270,7 @@ void ScriptFunctions::SetCurrentAttribute(unsigned short pid, unsigned short att
     Player *player;
     GET_PLAYER(pid, player,);
 
-    if(attribute > 7)
+    if (attribute > 7)
         return;
 
     player->CreatureStats()->mAttributes[attribute].mCurrent = value;
@@ -281,7 +281,7 @@ int ScriptFunctions::GetSkill(unsigned short pid, unsigned short skill) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    if(skill > 27)
+    if (skill > 27)
         return 0;
 
     return player->NpcStats()->mSkills[skill].mBase;
@@ -292,7 +292,7 @@ void ScriptFunctions::SetSkill(unsigned short pid, unsigned short skill, int val
     Player *player;
     GET_PLAYER(pid, player,);
 
-    if(skill > 27)
+    if (skill > 27)
         return;
 
     player->NpcStats()->mSkills[skill].mBase = value;
@@ -306,7 +306,7 @@ int ScriptFunctions::GetCurrentSkill(unsigned short pid, unsigned short skill) n
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    if(skill > 27)
+    if (skill > 27)
         return 0;
 
     return player->NpcStats()->mSkills[skill].mCurrent;
@@ -317,7 +317,7 @@ void ScriptFunctions::SetCurrentSkill(unsigned short pid, unsigned short skill, 
     Player *player;
     GET_PLAYER(pid, player,);
 
-    if(skill > 27)
+    if (skill > 27)
         return;
 
     player->NpcStats()->mSkills[skill].mCurrent = value;
@@ -329,7 +329,7 @@ int ScriptFunctions::GetIncreaseSkill(unsigned short pid, unsigned int pos) noex
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    if(pos > 7)
+    if (pos > 7)
         return 0;
 
     return player->NpcStats()->mSkillIncrease[pos];
@@ -340,7 +340,7 @@ void ScriptFunctions::SetIncreaseSkill(unsigned short pid, unsigned int pos, int
     Player *player;
     GET_PLAYER(pid, player,);
 
-    if(pos > 7)
+    if (pos > 7)
         return;
 
     player->NpcStats()->mSkillIncrease[pos] = value;

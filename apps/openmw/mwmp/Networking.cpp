@@ -76,7 +76,7 @@ void Networking::Update()
                     MWBase::Environment::get().getStateManager()->requestQuit();
                 break;
             default:
-                ReciveMessage(packet);
+                ReceiveMessage(packet);
                 //printf("Message with identifier %i has arrived.\n", packet->data[0]);
                 break;
         }
@@ -145,7 +145,7 @@ void Networking::Connect(const std::string &ip, unsigned short port)
         }
     }
 
-    if(!errmsg.empty())
+    if (!errmsg.empty())
     {
         cerr << errmsg << endl;
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "TES3MP", errmsg.c_str(), 0);
@@ -153,11 +153,11 @@ void Networking::Connect(const std::string &ip, unsigned short port)
     }
 }
 
-void Networking::ReciveMessage(RakNet::Packet *packet)
+void Networking::ReceiveMessage(RakNet::Packet *packet)
 {
     RakNet::RakNetGUID id;
 
-    if(packet->length < 2)
+    if (packet->length < 2)
         return;
 
     RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
@@ -165,7 +165,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
 
     DedicatedPlayer *pl = 0;
     static RakNet::RakNetGUID myid = getLocalPlayer()->guid;
-    if(id != myid)
+    if (id != myid)
         pl = Players::GetPlayer(id);
 
     BasePacket *myPacket = controller.GetPacket(packet->data[0]);
@@ -180,7 +180,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
         }
         case ID_GAME_BASE_INFO:
         {
-            if(id == myid)
+            if (id == myid)
             {
                 cout << "TEST: " << packet->length << endl;
                 if(packet->length == myPacket->headerSize())
@@ -197,7 +197,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
             }
             else
             {
-                if(pl == 0)
+                if (pl == 0)
                     pl = Players::NewPlayer(id);
 
                 myPacket->Packet(&bsIn, pl, false);
@@ -207,7 +207,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
         }
         case ID_GAME_UPDATE_POS:
         {
-            if(id == myid)
+            if (id == myid)
             {
                 if (packet->length != myPacket->headerSize())
                 {
@@ -218,7 +218,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
                 else
                     getLocalPlayer()->updatePosition(true);
             }
-            else if(pl != 0)
+            else if (pl != 0)
                 myPacket->Packet(&bsIn, pl, false);
             break;
         }
@@ -231,7 +231,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
         }
         case ID_USER_DISCONNECTED:
         {
-            if(id == myid)
+            if (id == myid)
                 MWBase::Environment::get().getStateManager()->requestQuit();
             else if(pl != 0)
                 Players::DisconnectPlayer(id);
@@ -239,7 +239,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
         }
         case ID_GAME_UPDATE_EQUIPED:
         {
-            if(id == myid)
+            if (id == myid)
             {
                 getLocalPlayer()->updateInventory(true);
                 myPacket->Send(getLocalPlayer(), serverAddr);
@@ -253,7 +253,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
         }
         case ID_GAME_UPDATE_SKILLS:
         {
-            if(id == myid)
+            if (id == myid)
             {
                 getLocalPlayer()->updateAttributesAndSkills(true);
                 myPacket->Send(getLocalPlayer(), serverAddr);
@@ -280,12 +280,12 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
         }
         case ID_GAME_ATTACK:
         {
-            if(pl != 0)
+            if (pl != 0)
             {
                 myPacket->Packet(&bsIn, pl, false);
 
                 //cout << "Player: " << pl->Npc()->mName << " pressed: " << (pl->GetAttack()->pressed == 1) << endl;
-                if(pl->GetAttack()->pressed == 0)
+                if (pl->GetAttack()->pressed == 0)
                 {
                     cout << "success: " << (pl->GetAttack()->success == 1);
                     if(pl->GetAttack()->success == 1)
@@ -297,16 +297,16 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
                 stats.getSpells().setSelectedSpell(pl->GetAttack()->refid);
 
                 MWWorld::Ptr victim;
-                if(pl->GetAttack()->target == getLocalPlayer()->guid)
+                if (pl->GetAttack()->target == getLocalPlayer()->guid)
                     victim = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                else if(Players::GetPlayer(pl->GetAttack()->target) != 0)
+                else if (Players::GetPlayer(pl->GetAttack()->target) != 0)
                     victim = Players::GetPlayer(pl->GetAttack()->target)->getPtr();
 
                 MWWorld::Ptr attacker;
                 attacker = pl->getPtr();
 
                 // Get the weapon used (if hand-to-hand, weapon = inv.end())
-                if(*pl->DrawState() == 1)
+                if (*pl->DrawState() == 1)
                 {
                     MWWorld::InventoryStore &inv = attacker.getClass().getInventoryStore(attacker);
                     MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(
@@ -341,7 +341,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
         }
         case ID_GAME_UPDATE_BASESTATS:
         {
-            if(id == myid)
+            if (id == myid)
             {
                 getLocalPlayer()->updateBaseStats(true);
                 myPacket->Send(getLocalPlayer(), serverAddr);
@@ -363,7 +363,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
         case ID_GAME_DIE:
         {
             printf("ID_GAME_DIE\n");
-            if(id == myid)
+            if (id == myid)
             {
                 MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                 MWMechanics::DynamicStat<float> health = player.getClass().getCreatureStats(player).getHealth();
@@ -371,7 +371,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
                 player.getClass().getCreatureStats(player).setHealth(health);
                 myPacket->Send(getLocalPlayer(), serverAddr);
             }
-            else if(pl != 0)
+            else if (pl != 0)
             {
                 printf("attempt to kill %s\n", pl->Npc()->mName.c_str());
                 MWMechanics::DynamicStat<float> health;
@@ -416,7 +416,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
         }
             case ID_GAME_CELL:
             {
-                if(id == myid)
+                if (id == myid)
                 {
                     if (packet->length == myPacket->headerSize())
                         getLocalPlayer()->updateCell(true);
@@ -426,7 +426,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
                         getLocalPlayer()->setCell();
                     }
                 }
-                else if(pl != 0)
+                else if (pl != 0)
                 {
                     myPacket->Packet(&bsIn, pl, false);
                     pl->updateCell();
@@ -435,9 +435,9 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
             }
             case ID_GAME_DRAWSTATE:
             {
-                if(id == myid)
+                if (id == myid)
                     getLocalPlayer()->updateDrawStateAndFlags(true);
-                else if(pl != 0)
+                else if (pl != 0)
                 {
                     myPacket->Packet(&bsIn, pl, false);
                     pl->UpdateDrawState();
@@ -447,12 +447,12 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
             case ID_CHAT_MESSAGE:
             {
                 std::string message;
-                if(id == myid)
+                if (id == myid)
                 {
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
                     message =  *getLocalPlayer()->ChatMessage();
                 }
-                else if(pl != 0)
+                else if (pl != 0)
                 {
                     myPacket->Packet(&bsIn, pl, false);
                     message =  *pl->ChatMessage();
@@ -462,7 +462,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
             }
             case ID_GAME_CHARGEN:
             {
-                if(id == myid)
+                if (id == myid)
                 {
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
                 }
@@ -530,7 +530,7 @@ void Networking::ReciveMessage(RakNet::Packet *packet)
             }
             case ID_GUI_MESSAGEBOX:
             {
-                if(id == myid)
+                if (id == myid)
                 {
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
 

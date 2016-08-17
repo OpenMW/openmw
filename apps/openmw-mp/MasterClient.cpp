@@ -164,7 +164,7 @@ void MasterClient::Stop()
 
 void MasterClient::SetUpdateRate(unsigned int rate)
 {
-    if(timeout < min_rate)
+    if (timeout < min_rate)
         timeout = min_rate;
     else if (timeout > max_rate)
         timeout = max_rate;

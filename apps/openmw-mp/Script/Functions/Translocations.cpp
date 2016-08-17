@@ -70,7 +70,7 @@ void ScriptFunctions::SetCell(unsigned short pid, const char *name) noexcept
         return;*/
 
     cout << "attempt to move player (pid: " << pid << " name: " << player->Npc()->mName << ") from ";
-    if(!player->GetCell()->isExterior())
+    if (!player->GetCell()->isExterior())
         cout << "\"" << player->GetCell()->mName << "\"";
     else
         cout << "exterior";
@@ -98,7 +98,7 @@ void ScriptFunctions::SetExterior(unsigned short pid, int x, int y) noexcept
     GET_PLAYER(pid, player,);
 
     cout << "attempt to move player (pid: " << pid << " name: " << player->Npc()->mName << ") from ";
-    if(!player->GetCell()->isExterior())
+    if (!player->GetCell()->isExterior())
         cout << "\"" << player->GetCell()->mName << "\"";
     else
         cout << "exterior: " << player->GetCell()->mCellId.mIndex.mX << ", " << player->GetCell()->mCellId.mIndex.mY;

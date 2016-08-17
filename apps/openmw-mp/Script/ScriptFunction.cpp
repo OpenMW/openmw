@@ -94,7 +94,7 @@ boost::any ScriptFunction::Call(const vector<boost::any> &args)
         LangLua langLua(fLua.lua);
         boost::any any = langLua.Call(fLua.name.c_str(), def.c_str(), args);
 
-        switch(ret_type)
+        switch (ret_type)
         {
             case 'i':
                 result = boost::any_cast<luabridge::LuaRef>(any).cast<unsigned int>();

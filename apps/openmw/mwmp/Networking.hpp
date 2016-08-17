@@ -54,7 +54,7 @@ namespace mwmp
 
         PacketsController controller;
 
-        void ReciveMessage(RakNet::Packet *packet);
+        void ReceiveMessage(RakNet::Packet *packet);
         LocalPlayer *getLocalPlayer();
     };
 }
