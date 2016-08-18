@@ -30,8 +30,6 @@ const char *ScriptFunctions::GetName(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    cout << "pname: " << player->Npc()->mName.c_str() << endl;
-
     return player->Npc()->mName.c_str();
 }
 
@@ -64,7 +62,7 @@ void ScriptFunctions::SetRace(unsigned short pid, const char *race) noexcept
     if (player->Npc()->mRace == race)
         return;
 
-    printf("Attempt to set race %s -> %s", player->Npc()->mRace.c_str(), race);
+    printf("Attempt to set race %s -> %s\n", player->Npc()->mRace.c_str(), race);
 
     player->Npc()->mRace = race;
 }
@@ -287,8 +285,6 @@ void ScriptFunctions::SetAttribute(unsigned short pid, unsigned short attribute,
 
     if (attribute > 7)
         return;
-
-    DEBUG_PRINTF("SetAttribute(%d, %d, %d)\n", pid, attribute, value);
 
     player->CreatureStats()->mAttributes[attribute].mBase = value;
 }
