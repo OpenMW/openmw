@@ -1,6 +1,10 @@
 #ifndef CSV_RENDER_INSTANCEMODE_H
 #define CSV_RENDER_INSTANCEMODE_H
 
+#include <osg/ref_ptr>
+#include <osg/Quat>
+#include <osg/Vec3f>
+
 #include "editmode.hpp"
 
 namespace CSVWidget
@@ -10,6 +14,7 @@ namespace CSVWidget
 
 namespace CSVRender
 {
+    class TagBase;
     class InstanceSelectionMode;
 
     class InstanceMode : public EditMode
@@ -19,7 +24,9 @@ namespace CSVRender
             enum DragMode
             {
                 DragMode_None,
-                DragMode_Move
+                DragMode_Move,
+                DragMode_Rotate,
+                DragMode_Scale
             };
 
             CSVWidget::SceneToolMode *mSubMode;
@@ -28,8 +35,15 @@ namespace CSVRender
             DragMode mDragMode;
             int mDragAxis;
             bool mLocked;
+            float mUnitScaleDist;
 
             int getSubModeFromId (const std::string& id) const;
+
+            osg::Vec3f quatToEuler(const osg::Quat& quat) const;
+            osg::Quat eulerToQuat(const osg::Vec3f& euler) const;
+
+            osg::Vec3f getSelectionCenter(const std::vector<osg::ref_ptr<TagBase> >& selection) const;
+            osg::Vec3f getScreenCoords(const osg::Vec3f& pos);
 
         public:
 
