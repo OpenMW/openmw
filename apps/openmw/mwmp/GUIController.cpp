@@ -87,7 +87,6 @@ void mwmp::GUIController::ShowCustomMessageBox(const BasePlayer::GUIMessageBox &
 
 void mwmp::GUIController::ShowInputBox(const BasePlayer::GUIMessageBox &guiMessageBox)
 {
-    printf("test adf\n");
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
 
     windowManager->removeDialog(mInputBox);

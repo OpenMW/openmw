@@ -8,6 +8,7 @@
 #include <components/esm/attr.hpp>
 #include <components/esm/loadskil.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/openmw-mp/Log.hpp>
 #include <iostream>
 
 using namespace std;
@@ -62,7 +63,10 @@ void ScriptFunctions::SetRace(unsigned short pid, const char *race) noexcept
     if (player->Npc()->mRace == race)
         return;
 
-    printf("Attempt to set race %s -> %s\n", player->Npc()->mRace.c_str(), race);
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Seting race for %s: %s -> %s\n",
+        player->Npc()->mName.c_str(),
+        player->Npc()->mRace.c_str(),
+        race);
 
     player->Npc()->mRace = race;
 }

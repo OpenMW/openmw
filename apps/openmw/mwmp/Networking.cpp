@@ -16,6 +16,7 @@
 #include <SDL_messagebox.h>
 #include "Networking.hpp"
 #include "../mwstate/statemanagerimp.hpp"
+#include <components/openmw-mp/Log.hpp>
 #include "DedicatedPlayer.hpp"
 #include "Main.hpp"
 
@@ -49,35 +50,35 @@ void Networking::Update()
         switch (packet->data[0])
         {
             case ID_REMOTE_DISCONNECTION_NOTIFICATION:
-                printf("Another client has disconnected.\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Another client has disconnected.\n");
                 break;
             case ID_REMOTE_CONNECTION_LOST:
-                printf("Another client has lost connection.\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Another client has lost connection.\n");
                 break;
             case ID_REMOTE_NEW_INCOMING_CONNECTION:
-                printf("Another client has connected.\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Another client has connected.\n");
                 break;
             case ID_CONNECTION_REQUEST_ACCEPTED:
-                printf("Our connection request has been accepted.\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Our connection request has been accepted.\n");
                 break;
             case ID_NEW_INCOMING_CONNECTION:
-                printf("A connection is incoming.\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "A connection is incoming.\n");
                 break;
             case ID_NO_FREE_INCOMING_CONNECTIONS:
-                printf("The server is full.\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "The server is full.\n");
                 MWBase::Environment::get().getStateManager()->requestQuit();
                 break;
             case ID_DISCONNECTION_NOTIFICATION:
-                    printf("We have been disconnected.\n");
-                    MWBase::Environment::get().getStateManager()->requestQuit();
+                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "We have been disconnected.\n");
+                MWBase::Environment::get().getStateManager()->requestQuit();
                 break;
             case ID_CONNECTION_LOST:
-                    printf("Connection lost.\n");
-                    MWBase::Environment::get().getStateManager()->requestQuit();
+                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Connection lost.\n");
+                MWBase::Environment::get().getStateManager()->requestQuit();
                 break;
             default:
                 ReceiveMessage(packet);
-                //printf("Message with identifier %i has arrived.\n", packet->data[0]);
+                //LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Message with identifier %i has arrived.\n", packet->data[0]);
                 break;
         }
     }
@@ -140,7 +141,7 @@ void Networking::Connect(const std::string &ip, unsigned short port)
                 case ID_CONNECTION_LOST:
                     throw runtime_error("ID_CONNECTION_LOST.\n");
                 default:
-                    printf("Connection message with identifier %i has arrived in initialization.\n", packet->data[0]);
+                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Connection message with identifier %i has arrived in initialization.\n", packet->data[0]);
             }
         }
     }
@@ -180,31 +181,31 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
         }
         case ID_GAME_BASE_INFO:
         {
-            printf("Received ID_GAME_BASE_INFO from server\n");
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO from server\n");
 
             if (id == myid)
             {
-                printf("- Packet was about my id\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Packet was about my id\n");
 
                 if (packet->length == myPacket->headerSize())
                 {
-                    cout << "ID_GAME_BASE_INFO request only" << endl;
+                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Requesting info");
                     myPacket->Send(getLocalPlayer(), serverAddr);
                 }
                 else
                 {
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    cout << "- Updating LocalPlayer" << endl;
+                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Updating LocalPlayer\n");
                     getLocalPlayer()->updateChar();
                 }
             }
             else
             {
-                printf("- Packet was about %s\n", pl == 0 ? "new player" : pl->Npc()->mName.c_str());
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Packet was about %s\n", pl == 0 ? "new player" : pl->Npc()->mName.c_str());
 
                 if (pl == 0) {
 
-                    printf("- Exchanging data with new player\n");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Exchanging data with new player\n");
                     pl = Players::NewPlayer(id);
                 }
 
@@ -219,7 +220,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             {
                 if (packet->length != myPacket->headerSize())
                 {
-                    cout << "ID_GAME_UPDATE_POS changed by server" << endl;
+                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_GAME_UPDATE_POS changed by server\n");
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
                     getLocalPlayer()->setPosition();
                 }
@@ -232,7 +233,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
         }
         case ID_USER_MYID:
         {
-            cout << "ID_USER_MYID" << endl;
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_USER_MYID from server");
             myid = id;
             getLocalPlayer()->guid = id;
             break;
@@ -261,19 +262,13 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
         }
         case ID_GAME_UPDATE_SKILLS:
         {
-            printf("Received ID_GAME_UPDATE_SKILLS from server\n");
-
             if (id == myid)
             {
-                printf("- Packet was about my id\n");
-
                 getLocalPlayer()->updateAttributesAndSkills(true);
                 myPacket->Send(getLocalPlayer(), serverAddr);
             }
             else if (pl != 0)
             {
-                printf("- Packet was about %s\n", pl->Npc()->mName.c_str());
-
                 myPacket->Packet(&bsIn, pl, false);
 
                 MWMechanics::SkillValue skillValue;
@@ -302,10 +297,14 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 //cout << "Player: " << pl->Npc()->mName << " pressed: " << (pl->GetAttack()->pressed == 1) << endl;
                 if (pl->GetAttack()->pressed == 0)
                 {
-                    cout << "success: " << (pl->GetAttack()->success == 1);
+                    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Attack success: %s\n",
+                        pl->GetAttack()->success ? "true" : "false");
+
                     if (pl->GetAttack()->success == 1)
-                        cout << " damage: " << pl->GetAttack()->damage;
-                    cout << endl;
+                    {
+                        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Damage: %f\n",
+                            pl->GetAttack()->damage);
+                    }
                 }
 
                 MWMechanics::CreatureStats &stats = pl->getPtr().getClass().getNpcStats(pl->getPtr());
@@ -349,7 +348,8 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 }
                 else
                 {
-                    cout << "SpellId: " << pl->GetAttack()->refid << endl;
+                    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "SpellId: %s\n",
+                        pl->GetAttack()->refid.c_str());
                 }
             }
             break;
@@ -377,7 +377,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
         }
         case ID_GAME_DIE:
         {
-            printf("ID_GAME_DIE\n");
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_DIE from server\n");
             if (id == myid)
             {
                 MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -388,7 +388,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             }
             else if (pl != 0)
             {
-                printf("Attempt to kill %s\n", pl->Npc()->mName.c_str());
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Packet was about %s\n", pl->Npc()->mName.c_str());
                 MWMechanics::DynamicStat<float> health;
                 pl->CreatureStats()->mDead = true;
                 health.readState(pl->CreatureStats()->mDynamic[0]);
@@ -538,7 +538,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 {
                     skillValue.readState(__pl->NpcStats()->mSkills[i]);
                     __pl_ptr.getClass().getNpcStats(__pl_ptr).setSkill(i, skillValue);
-                    //printf("skill %d, value %d\n", i, skillValue.getBase());
+                    //LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "skill %d, value %d\n", i, skillValue.getBase());
                 }
 
                 break;
@@ -549,7 +549,9 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 {
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
 
-                    printf("ID_GUI_MESSAGEBOX, Type %d, MSG %s\n", getLocalPlayer()->guiMessageBox.type, getLocalPlayer()->guiMessageBox.label.c_str());
+                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_GUI_MESSAGEBOX, Type %d, MSG %s\n",
+                        getLocalPlayer()->guiMessageBox.type,
+                        getLocalPlayer()->guiMessageBox.label.c_str());
 
                     if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::MessageBox)
                         Main::get().getGUIConroller()->ShowMessageBox(getLocalPlayer()->guiMessageBox);
@@ -561,7 +563,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 break;
             }
         default:
-            printf("Custom message with identifier %i has arrived in initialization.\n", packet->data[0]);
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Custom message with identifier %i has arrived in initialization.\n", packet->data[0]);
     }
 }
 

@@ -22,6 +22,7 @@
 #include <apps/openmw/mwworld/inventorystore.hpp>
 #include <apps/openmw/mwmechanics/spellcasting.hpp>
 #include <apps/openmw/mwgui/inventorywindow.hpp>
+#include <components/openmw-mp/Log.hpp>
 
 #include "LocalPlayer.hpp"
 #include "Main.hpp"
@@ -228,7 +229,6 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
         //player.getClass().onHit(player, 0.5, true, weapon, 0, 1);
         if (state == MWMechanics::DrawState_Spell)
         {
-            //cout << "getAttackingOrSpell" << endl;
             const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
 
             GetAttack()->attacker = guid;
@@ -383,11 +383,9 @@ void LocalPlayer::updateCell(bool forceUpdate)
 
     if (shouldUpdate)
     {
-        // tes3mp debug start
-        printf("Telling server I moved from %s to %s\n",
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Telling server I moved from %s to %s\n",
             GetCell()->getDescription().c_str(),
             _cell->getDescription().c_str());
-        // tes3mp debug end
         
         (*GetCell()) = *_cell;
         isExterior = _cell->isExterior();
@@ -486,7 +484,7 @@ bool LocalPlayer::CharGenThread() // ToDo: need fix
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             (*Npc()) = *player.get<ESM::NPC>()->mBase;
 
-            printf("Sending ID_GAME_BASE_INFO to server with my CharGen info\n");
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_GAME_BASE_INFO to server with my CharGen info\n");
             GetNetworking()->GetPacket(ID_GAME_BASE_INFO)->Send(this);
 
             if (CharGenStage()->end != 1)

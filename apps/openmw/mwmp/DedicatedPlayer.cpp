@@ -19,6 +19,7 @@
 #include "../mwworld/action.hpp"
 #include <apps/openmw/mwworld/inventorystore.hpp>
 #include <boost/algorithm/clamp.hpp>
+#include <components/openmw-mp/Log.hpp>
 using namespace mwmp;
 using namespace std;
 
@@ -389,6 +390,7 @@ DedicatedPlayer *Players::GetPlayer(const MWWorld::Ptr &ptr)
 
 void DedicatedPlayer::UpdateDrawState()
 {
+
     using namespace MWMechanics;
     if (drawState == 0)
         ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Nothing);
@@ -421,12 +423,10 @@ void DedicatedPlayer::updateCell()
     else
         return;
     
-    // tes3mp debug start
-    printf("Server says %s (%s) moved to %s\n",
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server says %s (%s) moved to %s\n",
         ptr.getBase()->mRef.getRefId().c_str(),
         this->Npc()->mName.c_str(),
         cellStore->getCell()->getDescription().c_str());
-    // tes3mp debug end
 
     // Allow this player's reference to move across a cell now that
     // a manual cell update has been called

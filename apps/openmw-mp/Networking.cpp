@@ -80,14 +80,19 @@ void Networking::Update(RakNet::Packet *packet)
 
         if (player->isHandshaked())
         {
-            DEBUG_PRINTF("Wrong handshake with player %d, name: %s\n", player->GetID(), player->Npc()->mName.c_str());
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong handshake with player %d, name: %s\n",
+                player->GetID(),
+                player->Npc()->mName.c_str());
             KickPlayer(player->guid);
             return;
         }
 
         if (*player->GetPassw() != passw)
         {
-            DEBUG_PRINTF("Wrong server password (player %d, name: %s) pass: %s\n", player->GetID(), player->Npc()->mName.c_str(), player->GetPassw()->c_str());
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong server password for player %d, name: %s (pass: %s)\n",
+                player->GetID(),
+                player->Npc()->mName.c_str(),
+                player->GetPassw()->c_str());
             KickPlayer(player->guid);
             return;
         }
@@ -110,7 +115,9 @@ void Networking::Update(RakNet::Packet *packet)
 
     if (!player->isHandshaked())
     {
-        DEBUG_PRINTF("Wrong auth player %d, name: %s\n", player->GetID(), player->Npc()->mName.c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong auth for player %d, name: %s\n",
+            player->GetID(),
+            player->Npc()->mName.c_str());
         //KickPlayer(player->guid);
         return;
     }
@@ -119,7 +126,8 @@ void Networking::Update(RakNet::Packet *packet)
     {
         case ID_GAME_BASE_INFO:
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s", player->Npc()->mName.c_str());
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s",
+                player->Npc()->mName.c_str());
 
             myPacket->Read(player);
             myPacket->Send(player, true);
