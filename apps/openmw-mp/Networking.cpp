@@ -148,13 +148,23 @@ void Networking::Update(RakNet::Packet *packet)
         }
         case ID_GAME_CELL:
         {
-            DEBUG_PRINTF("ID_GAME_CELL \n");
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_CELL from %s\n",
+                player->Npc()->mName.c_str());
 
             if (!player->CreatureStats()->mDead)
             {
                 myPacket->Read(player);
+
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Moved to %s\n",
+                    player->GetCell()->getDescription().c_str());
+
                 myPacket->Send(player, true); //send to other clients
                 Script::Call<Script::CallbackIdentity("OnPlayerChangeCell")>(player->GetID());
+            }
+            else
+            {
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Ignored because %s is dead\n",
+                    player->Npc()->mName.c_str());
             }
 
             break;

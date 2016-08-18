@@ -43,6 +43,8 @@ MWWorld::Ptr DedicatedPlayer::getPtr()
 
 void Players::CreatePlayer(RakNet::RakNetGUID id)
 {
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Setting up character info\n");
+
     MWBase::World *world = MWBase::Environment::get().getWorld();
     MWWorld::Ptr player = world->getPlayerPtr();
 
@@ -72,6 +74,9 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
 
     if (_player->state == 0)
     {
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Creating new reference pointer for %s\n",
+            _player->Npc()->mName.c_str());
+
         MWWorld::Ptr tmp = world->placeObject(_player->reference->getPtr(), cellStore, _pos);
 
         _player->ptr.mCell = tmp.mCell;
@@ -82,6 +87,9 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
     }
     else
     {
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Updating reference pointer for %s\n",
+            _player->Npc()->mName.c_str());
+
         _player->ptr.getBase()->canChangeCell = true;
         _player->UpdatePtr(world->moveObject(_player->ptr, cellStore, _pos.pos[0], _pos.pos[1], _pos.pos[2]));
 
@@ -116,7 +124,7 @@ void Players::DisconnectPlayer(RakNet::RakNetGUID id)
         MWBase::World *world = MWBase::Environment::get().getWorld();
         world->disable(players[id]->getPtr());
 
-        //move player to toddTest
+        // Move player to ToddTest
         ESM::Position _pos;
         world->findInteriorPosition("ToddTest", _pos);
         MWWorld::CellStore *store = world->getInterior("ToddTest");
@@ -260,6 +268,9 @@ void DedicatedPlayer::UpdatePtr(MWWorld::Ptr newPtr)
 
 DedicatedPlayer *Players::NewPlayer(RakNet::RakNetGUID guid)
 {
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Creating new DedicatedPlayer with guid %i\n",
+        guid.ToUint32);
+
     players[guid] = new DedicatedPlayer(guid);
     players[guid]->state = 0;
     return players[guid];
@@ -421,8 +432,14 @@ void DedicatedPlayer::updateCell()
         cellStore = world->getInterior(cell.mName);
     // Go no further if cell data is invalid
     else
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Server sent invalid cell change info about %s (%s)!\n",
+            ptr.getBase()->mRef.getRefId().c_str(),
+            this->Npc()->mName.c_str());
+
         return;
-    
+    }
+
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server says %s (%s) moved to %s\n",
         ptr.getBase()->mRef.getRefId().c_str(),
         this->Npc()->mName.c_str(),

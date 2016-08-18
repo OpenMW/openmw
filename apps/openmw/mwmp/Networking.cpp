@@ -130,6 +130,11 @@ void Networking::Connect(const std::string &ip, unsigned short port)
                     connected = true;
                     queue = false;
 
+                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONNECTION_REQUESTED_ACCEPTED from %s\n",
+                        serverAddr.ToString());
+
+                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_GAME_BASE_INFO to server\n");
+
                     GetPacket(ID_GAME_BASE_INFO)->Send(getLocalPlayer());
 
                     break;
