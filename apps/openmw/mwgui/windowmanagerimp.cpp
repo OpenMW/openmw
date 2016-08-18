@@ -282,7 +282,7 @@ namespace MWGui
 
         mRecharge = new Recharge();
         mMenu = new MainMenu(w, h, mResourceSystem->getVFS(), mVersionDescription);
-        mLocalMapRender = new MWRender::LocalMap(mViewer);
+        mLocalMapRender = new MWRender::LocalMap(mViewer->getSceneData()->asGroup());
         mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender);
         trackWindow(mMap, "map");
         mStatsWindow = new StatsWindow(mDragAndDrop);
@@ -293,7 +293,7 @@ namespace MWGui
         bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
         mJournal = JournalWindow::create(JournalViewModel::create (), questList);
         mMessageBoxManager = new MessageBoxManager(mStore->get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
-        mInventoryWindow = new InventoryWindow(mDragAndDrop, mViewer, mResourceSystem);
+        mInventoryWindow = new InventoryWindow(mDragAndDrop, mViewer->getSceneData()->asGroup(), mResourceSystem);
         mTradeWindow = new TradeWindow();
         trackWindow(mTradeWindow, "barter");
         mSpellBuyingWindow = new SpellBuyingWindow();
@@ -350,7 +350,7 @@ namespace MWGui
 
         mHud->setVisible(mHudEnabled);
 
-        mCharGen = new CharacterCreation(mViewer, mResourceSystem);
+        mCharGen = new CharacterCreation(mViewer->getSceneData()->asGroup(), mResourceSystem);
 
         // Setup player stats
         for (int i = 0; i < ESM::Attribute::Length; ++i)
@@ -384,7 +384,7 @@ namespace MWGui
         {
             disallowAll();
             delete mCharGen;
-            mCharGen = new CharacterCreation(mViewer, mResourceSystem);
+            mCharGen = new CharacterCreation(mViewer->getSceneData()->asGroup(), mResourceSystem);
             mGuiModes.clear();
             MWBase::Environment::get().getInputManager()->changeInputMode(false);
             mHud->unsetSelectedWeapon();

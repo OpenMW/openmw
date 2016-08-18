@@ -591,40 +591,28 @@ namespace MWPhysics
 
             btCompoundShape* compound = static_cast<btCompoundShape*>(mShapeInstance->getCollisionShape());
 
-            for (std::map<int, int>::iterator it = mShapeInstance->mAnimatedShapes.begin(); it != mShapeInstance->mAnimatedShapes.end();)
+            for (std::map<int, int>::const_iterator it = mShapeInstance->mAnimatedShapes.begin(); it != mShapeInstance->mAnimatedShapes.end(); ++it)
             {
                 int recIndex = it->first;
                 int shapeIndex = it->second;
 
-                NifOsg::FindGroupByRecIndex visitor(recIndex);
-                mPtr.getRefData().getBaseNode()->accept(visitor);
-                if (!visitor.mFound)
+                std::map<int, osg::NodePath>::iterator nodePathFound = mRecIndexToNodePath.find(recIndex);
+                if (nodePathFound == mRecIndexToNodePath.end())
                 {
-                    std::cerr << "animateCollisionShapes: Can't find node " << recIndex << std::endl;
-                    return;
+                    NifOsg::FindGroupByRecIndex visitor(recIndex);
+                    mPtr.getRefData().getBaseNode()->accept(visitor);
+                    if (!visitor.mFound)
+                    {
+                        std::cerr << "animateCollisionShapes: Can't find node " << recIndex << std::endl;
+                        return;
+                    }
+                    osg::NodePath nodePath = visitor.mFoundPath;
+                    nodePath.erase(nodePath.begin());
+                    nodePathFound = mRecIndexToNodePath.insert(std::make_pair(recIndex, nodePath)).first;
                 }
 
-                osg::NodePath path = visitor.mFoundPath;
-                path.erase(path.begin());
-
-                // Attempt to remove "animated" shapes that are not actually animated
-                // We may get these because the BulletNifLoader does not know if a .kf file with additional controllers will be attached later on.
-                // On the first animateCollisionShapes call, we'll consider the graph completely loaded (with extra controllers and what not),
-                // so now we can better decide if the shape is really animated.
-                bool animated = false;
-                for (osg::NodePath::iterator nodePathIt = path.begin(); nodePathIt != path.end(); ++nodePathIt)
-                {
-                    osg::Node* node = *nodePathIt;
-                    if (node->getUpdateCallback())
-                        animated = true;
-                }
-                if (!animated)
-                {
-                    mShapeInstance->mAnimatedShapes.erase(it++);
-                    break;
-                }
-
-                osg::Matrixf matrix = osg::computeLocalToWorld(path);
+                osg::NodePath& nodePath = nodePathFound->second;
+                osg::Matrixf matrix = osg::computeLocalToWorld(nodePath);
                 osg::Vec3f scale = matrix.getScale();
                 matrix.orthoNormalize(matrix);
 
@@ -634,10 +622,10 @@ namespace MWPhysics
                     for (int j=0; j<3; ++j)
                         transform.getBasis()[i][j] = matrix(j,i); // NB column/row major difference
 
-                compound->getChildShape(shapeIndex)->setLocalScaling(compound->getLocalScaling() * toBullet(scale));
-                compound->updateChildTransform(shapeIndex, transform);
-
-                ++it;
+                if (compound->getLocalScaling() * toBullet(scale) != compound->getChildShape(shapeIndex)->getLocalScaling())
+                    compound->getChildShape(shapeIndex)->setLocalScaling(compound->getLocalScaling() * toBullet(scale));
+                if (!(transform == compound->getChildTransform(shapeIndex)))
+                    compound->updateChildTransform(shapeIndex, transform);
             }
 
             collisionWorld->updateSingleAabb(mCollisionObject.get());
@@ -646,6 +634,7 @@ namespace MWPhysics
     private:
         std::auto_ptr<btCollisionObject> mCollisionObject;
         osg::ref_ptr<Resource::BulletShapeInstance> mShapeInstance;
+        std::map<int, osg::NodePath> mRecIndexToNodePath;
         bool mSolid;
     };
 

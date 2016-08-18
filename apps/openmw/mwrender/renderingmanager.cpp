@@ -620,7 +620,6 @@ namespace MWRender
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
 
         rttCamera->removeChildren(0, rttCamera->getNumChildren());
-        rttCamera->setGraphicsContext(NULL);
         mRootNode->removeChild(rttCamera);
     }
 

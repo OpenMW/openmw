@@ -6,8 +6,8 @@
 #include <osg/Texture2D>
 #include <osg/Camera>
 #include <osg/PositionAttitudeTransform>
-#include <osgViewer/Viewer>
 #include <osg/LightModel>
+#include <osg/LightSource>
 #include <osgUtil/IntersectionVisitor>
 #include <osgUtil/LineSegmentIntersector>
 
@@ -65,9 +65,9 @@ namespace MWRender
         unsigned int mLastRenderedFrame;
     };
 
-    CharacterPreview::CharacterPreview(osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem,
+    CharacterPreview::CharacterPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem,
                                        MWWorld::Ptr character, int sizeX, int sizeY, const osg::Vec3f& position, const osg::Vec3f& lookAt)
-        : mViewer(viewer)
+        : mParent(parent)
         , mResourceSystem(resourceSystem)
         , mPosition(position)
         , mLookAt(lookAt)
@@ -93,7 +93,6 @@ namespace MWRender
         mCamera->setViewport(0, 0, sizeX, sizeY);
         mCamera->setRenderOrder(osg::Camera::PRE_RENDER);
         mCamera->attach(osg::Camera::COLOR_BUFFER, mTexture);
-        mCamera->setGraphicsContext(mViewer->getCamera()->getGraphicsContext());
 
         mCamera->setNodeMask(Mask_RenderToTexture);
 
@@ -140,7 +139,7 @@ namespace MWRender
         mDrawOnceCallback = new DrawOnceCallback;
         mCamera->addUpdateCallback(mDrawOnceCallback);
 
-        mViewer->getSceneData()->asGroup()->addChild(mCamera);
+        mParent->addChild(mCamera);
 
         mCharacter.mCell = NULL;
     }
@@ -148,7 +147,7 @@ namespace MWRender
     CharacterPreview::~CharacterPreview ()
     {
         mCamera->removeChildren(0, mCamera->getNumChildren());
-        mViewer->getSceneData()->asGroup()->removeChild(mCamera);
+        mParent->removeChild(mCamera);
     }
 
     int CharacterPreview::getTextureWidth() const
@@ -191,8 +190,8 @@ namespace MWRender
     // --------------------------------------------------------------------------------------------------
 
 
-    InventoryPreview::InventoryPreview(osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem, MWWorld::Ptr character)
-        : CharacterPreview(viewer, resourceSystem, character, 512, 1024, osg::Vec3f(0, 700, 71), osg::Vec3f(0,0,71))
+    InventoryPreview::InventoryPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, MWWorld::Ptr character)
+        : CharacterPreview(parent, resourceSystem, character, 512, 1024, osg::Vec3f(0, 700, 71), osg::Vec3f(0,0,71))
     {
     }
 
@@ -320,8 +319,8 @@ namespace MWRender
 
     // --------------------------------------------------------------------------------------------------
 
-    RaceSelectionPreview::RaceSelectionPreview(osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem)
-        : CharacterPreview(viewer, resourceSystem, MWMechanics::getPlayer(),
+    RaceSelectionPreview::RaceSelectionPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem)
+        : CharacterPreview(parent, resourceSystem, MWMechanics::getPlayer(),
             512, 512, osg::Vec3f(0, 125, 8), osg::Vec3f(0,0,8))
         , mBase (*mCharacter.get<ESM::NPC>()->mBase)
         , mRef(&mBase)

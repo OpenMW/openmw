@@ -229,55 +229,16 @@ endif()
 IF(BUILD_OPENMW OR BUILD_OPENCS)
 
     find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgUtil osgFX)
-
     include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
+    get_filename_component(OSG_LIB_DIR ${OSGDB_LIBRARY} DIRECTORY)
+    set(OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
+
     if(OSG_STATIC)
-       macro(use_static_osg_plugin_library PLUGIN_NAME)
-          set(PLUGIN_NAME_DBG ${PLUGIN_NAME}d ${PLUGIN_NAME}D ${PLUGIN_NAME}_d ${PLUGIN_NAME}_D ${PLUGIN_NAME}_debug ${PLUGIN_NAME})
+        add_definitions(-DOSG_LIBRARY_STATIC)
 
-          # For now, users wishing to do a static build will need to pass the path to where the plugins reside
-          # More clever logic would need to deduce the path, probably installed under <OpenSceneGraph>/lib/osgPlugins-<X.X.X>
-          include(FindPkgMacros)
-          find_library(${PLUGIN_NAME}_LIBRARY_REL NAMES ${PLUGIN_NAME} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
-          find_library(${PLUGIN_NAME}_LIBRARY_DBG NAMES ${PLUGIN_NAME_DBG} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
-          make_library_set(${PLUGIN_NAME}_LIBRARY)
-
-          if("${${PLUGIN_NAME}_LIBRARY}" STREQUAL "")
-             message(FATAL_ERROR "Unable to find static OpenSceneGraph plugin: ${PLUGIN_NAME}")
-          endif()
-
-          set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${PLUGIN_NAME}_LIBRARY})
-       endmacro()
-
-       add_definitions(-DOSG_LIBRARY_STATIC)
-
-       set(PLUGIN_LIST
-           osgdb_png # depends on libpng, zlib
-           osgdb_tga
-           osgdb_dds
-           osgdb_jpeg # depends on libjpeg
-           )
-
-       foreach(PLUGIN ${PLUGIN_LIST})
-          use_static_osg_plugin_library(${PLUGIN})
-       endforeach()
-
-       # OSG static plugins need to linked against their respective dependencies
-       set(PLUGIN_DEPS_LIST
-           PNG # needed by osgdb_png
-           ZLIB # needed by osgdb_png
-           JPEG # needed by osgdb_jpeg
-           )
-
-       macro(use_static_osg_plugin_dep DEPENDENCY)
-          find_package(${DEPENDENCY} REQUIRED)
-
-          set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${DEPENDENCY}_LIBRARIES})
-       endmacro()
-       foreach(DEPENDENCY ${PLUGIN_DEPS_LIST})
-          use_static_osg_plugin_dep(${DEPENDENCY})
-       endforeach()
+        find_package(OSGPlugins REQUIRED COMPONENTS osgdb_png osgdb_tga osgdb_dds osgdb_jpeg)
+        list(APPEND OPENSCENEGRAPH_LIBRARIES ${OSGPlugins_LIBRARIES})
     endif()
 
     if(QT_STATIC)
@@ -793,11 +754,14 @@ if (APPLE)
                       )
 
     foreach (PLUGIN_NAME ${USED_OSG_PLUGINS})
-      set(PLUGIN_ABS "${OSG_PLUGIN_LIB_SEARCH_PATH}/${PLUGIN_NAME}.so")
+      set(PLUGIN_ABS "${OSGPlugins_LIB_DIR}/${PLUGIN_NAME}.so")
       set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
     endforeach ()
 
-    get_filename_component(OSG_PLUGIN_PREFIX_DIR "${OSG_PLUGIN_LIB_SEARCH_PATH}" NAME)
+    get_filename_component(OSG_PLUGIN_PREFIX_DIR "${OSGPlugins_LIB_DIR}" NAME)
+    if (NOT OSG_PLUGIN_PREFIX_DIR)
+      message(FATAL_ERROR "Can't get directory name for OSG plugins from '${OSGPlugins_LIB_DIR}'")
+    endif()
 
     # installs used plugins in bundle at given path (bundle_path must be relative to ${CMAKE_INSTALL_PREFIX})
     # and returns list of install paths for all installed plugins

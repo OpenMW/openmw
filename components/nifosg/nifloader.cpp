@@ -868,6 +868,8 @@ namespace NifOsg
             else
                 return;
 
+            osg::BoundingBox box;
+
             int i=0;
             for (std::vector<Nif::NiParticleSystemController::Particle>::const_iterator it = partctrl->particles.begin();
                  i<particledata->activeCount && it != partctrl->particles.end(); ++it, ++i)
@@ -882,7 +884,8 @@ namespace NifOsg
                 // Note this position and velocity is not correct for a particle system with absolute reference frame,
                 // which can not be done in this loader since we are not attached to the scene yet. Will be fixed up post-load in the SceneManager.
                 created->setVelocity(particle.velocity);
-                created->setPosition(particledata->vertices->at(particle.vertex));
+                const osg::Vec3f& position = particledata->vertices->at(particle.vertex);
+                created->setPosition(position);
 
                 osg::Vec4f partcolor (1.f,1.f,1.f,1.f);
                 if (particle.vertex < int(particledata->colors->size()))
@@ -891,10 +894,12 @@ namespace NifOsg
                 float size = particledata->sizes.at(particle.vertex) * partctrl->size;
 
                 created->setSizeRange(osgParticle::rangef(size, size));
+                box.expandBy(osg::BoundingSphere(position, size));
             }
 
-            osg::BoundingBox box;
+            // radius may be used to force a larger bounding box
             box.expandBy(osg::BoundingSphere(osg::Vec3(0,0,0), particledata->radius));
+
             partsys->setInitialBound(box);
         }
 

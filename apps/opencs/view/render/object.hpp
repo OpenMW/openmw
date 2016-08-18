@@ -78,6 +78,11 @@ namespace CSVRender
 
         private:
 
+            static const float MarkerShaftWidth;
+            static const float MarkerShaftBaseLength;
+            static const float MarkerHeadWidth;
+            static const float MarkerHeadLength;
+
             CSMWorld::Data& mData;
             std::string mReferenceId;
             std::string mReferenceableId;
@@ -89,7 +94,7 @@ namespace CSVRender
             Resource::ResourceSystem* mResourceSystem;
             bool mForceBaseToZero;
             ESM::Position mPositionOverride;
-            int mScaleOverride;
+            float mScaleOverride;
             int mOverrideFlags;
             osg::ref_ptr<osg::Node> mMarker[3];
             int mSubMode;
@@ -115,7 +120,8 @@ namespace CSVRender
 
             void updateMarker();
 
-            osg::ref_ptr<osg::Node> makeMarker (int axis);
+            osg::ref_ptr<osg::Node> makeMoveOrScaleMarker (int axis);
+            osg::ref_ptr<osg::Node> makeRotateMarker (int axis);
 
             osg::Vec3f getMarkerPosition (float x, float y, float z, int axis);
 

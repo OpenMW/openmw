@@ -10,11 +10,6 @@
 
 #include "resourcemanager.hpp"
 
-namespace osgViewer
-{
-    class Viewer;
-}
-
 namespace osgDB
 {
     class Options;

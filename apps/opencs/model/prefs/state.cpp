@@ -188,6 +188,7 @@ void CSMPrefs::State::declare()
             "Shift-acceleration factor during drag operations", 4.0).
         setTooltip ("Acceleration factor during drag operations while holding down shift").
         setRange (0.001, 100.0);
+    declareDouble ("rotate-factor", "Free rotation factor", 0.007).setPrecision(4).setRange(0.0001, 0.1);
 
     declareCategory ("Tooltips");
     declareBool ("scene", "Show Tooltips in 3D scenes", true);

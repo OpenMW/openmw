@@ -7,10 +7,9 @@
 #include <osg/LightModel>
 #include <osg/Texture2D>
 #include <osg/ComputeBoundsVisitor>
+#include <osg/LightSource>
 
 #include <osgDB/ReadFile>
-
-#include <osgViewer/Viewer>
 
 #include <components/esm/fogstate.hpp>
 #include <components/esm/loadcell.hpp>
@@ -68,16 +67,14 @@ namespace
 namespace MWRender
 {
 
-LocalMap::LocalMap(osgViewer::Viewer* viewer)
-    : mViewer(viewer)
+LocalMap::LocalMap(osg::Group* root)
+    : mRoot(root)
     , mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
     , mMapWorldSize(8192.f)
     , mCellDistance(Settings::Manager::getInt("local map cell distance", "Map"))
     , mAngle(0.f)
     , mInterior(false)
 {
-    mRoot = mViewer->getSceneData()->asGroup();
-
     SceneUtil::FindByNameVisitor find("Scene Root");
     mRoot->accept(find);
     mSceneRoot = find.mFoundNode;
@@ -208,7 +205,6 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
 
     camera->addChild(lightSource);
     camera->setStateSet(stateset);
-    camera->setGraphicsContext(mViewer->getCamera()->getGraphicsContext());
     camera->setViewport(0, 0, mMapResolution, mMapResolution);
     camera->setUpdateCallback(new CameraLocalUpdateCallback(this));
 
@@ -311,7 +307,7 @@ void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell)
     int x = cell->getCell()->getGridX();
     int y = cell->getCell()->getGridY();
 
-    osg::BoundingSphere bound = mViewer->getSceneData()->getBound();
+    osg::BoundingSphere bound = mSceneRoot->getBound();
     float zmin = bound.center().z() - bound.radius();
     float zmax = bound.center().z() + bound.radius();
 

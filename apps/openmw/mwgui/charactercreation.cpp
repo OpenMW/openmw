@@ -62,8 +62,8 @@ namespace
 namespace MWGui
 {
 
-    CharacterCreation::CharacterCreation(osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem)
-        : mViewer(viewer)
+    CharacterCreation::CharacterCreation(osg::Group* parent, Resource::ResourceSystem* resourceSystem)
+        : mParent(parent)
         , mResourceSystem(resourceSystem)
         , mNameDialog(0)
         , mRaceDialog(0)
@@ -152,7 +152,7 @@ namespace MWGui
                 case GM_Race:
                     MWBase::Environment::get().getWindowManager()->removeDialog(mRaceDialog);
                     mRaceDialog = 0;
-                    mRaceDialog = new RaceDialog(mViewer, mResourceSystem);
+                    mRaceDialog = new RaceDialog(mParent, mResourceSystem);
                     mRaceDialog->setNextButtonShow(mCreationStage >= CSE_RaceChosen);
                     mRaceDialog->setRaceId(mPlayerRaceId);
                     mRaceDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onRaceDialogDone);

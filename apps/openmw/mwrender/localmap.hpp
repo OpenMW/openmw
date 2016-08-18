@@ -19,11 +19,6 @@ namespace ESM
     struct FogTexture;
 }
 
-namespace osgViewer
-{
-    class Viewer;
-}
-
 namespace osg
 {
     class Texture2D;
@@ -41,7 +36,7 @@ namespace MWRender
     class LocalMap
     {
     public:
-        LocalMap(osgViewer::Viewer* viewer);
+        LocalMap(osg::Group* root);
         ~LocalMap();
 
         /**
@@ -106,8 +101,6 @@ namespace MWRender
         osg::Group* getRoot();
 
     private:
-        osg::ref_ptr<osgViewer::Viewer> mViewer;
-
         osg::ref_ptr<osg::Group> mRoot;
         osg::ref_ptr<osg::Node> mSceneRoot;
 
