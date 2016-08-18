@@ -296,8 +296,9 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
     controller->GetPacket(ID_USER_MYID)->Send(Players::GetPlayer(guid), false);
 
     controller->GetPacket(ID_GAME_BASE_INFO)->RequestData(guid);
-    //controller->GetPacket(ID_GAME_UPDATE_SKILLS)->RequestData(guid);
     controller->GetPacket(ID_GAME_UPDATE_BASESTATS)->RequestData(guid);
+    controller->GetPacket(ID_GAME_ATTRIBUTE)->RequestData(guid);
+    controller->GetPacket(ID_GAME_SKILL)->RequestData(guid);
     controller->GetPacket(ID_GAME_UPDATE_POS)->RequestData(guid);
     controller->GetPacket(ID_GAME_CELL)->RequestData(guid);
     controller->GetPacket(ID_GAME_UPDATE_EQUIPED)->RequestData(guid);
@@ -307,14 +308,17 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
         if (pl->first == guid) continue;
 
         controller->GetPacket(ID_GAME_BASE_INFO)->Send(pl->second, guid);
-        //controller->GetPacket(ID_GAME_UPDATE_SKILLS)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(pl->second, guid);
+        controller->GetPacket(ID_GAME_ATTRIBUTE)->Send(pl->second, guid);
+        controller->GetPacket(ID_GAME_SKILL)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_UPDATE_POS)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_CELL)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_UPDATE_EQUIPED)->Send(pl->second, guid);
     }
 
 }
+
+
 
 void Networking::DisconnectPlayer(RakNet::RakNetGUID guid)
 {
@@ -362,7 +366,7 @@ int Networking::MainLoop()
                     printf("Another client has disconnected.\n");
                     break;
                 case ID_REMOTE_CONNECTION_LOST:
-                    printf("Another client has lost the connection.\n");
+                    printf("Another client has lost connection.\n");
                     break;
                 case ID_REMOTE_NEW_INCOMING_CONNECTION:
                     printf("Another client has connected.\n");
@@ -383,7 +387,7 @@ int Networking::MainLoop()
                     DisconnectPlayer(packet->guid);
                     break;
                 case ID_CONNECTION_LOST:
-                    printf("A client lost the connection.\n");
+                    printf("A client has lost connection.\n");
                     DisconnectPlayer(packet->guid);
                     break;
                 default:

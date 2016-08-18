@@ -52,7 +52,7 @@ void Networking::Update()
                 printf("Another client has disconnected.\n");
                 break;
             case ID_REMOTE_CONNECTION_LOST:
-                printf("Another client has lost the connection.\n");
+                printf("Another client has lost connection.\n");
                 break;
             case ID_REMOTE_NEW_INCOMING_CONNECTION:
                 printf("Another client has connected.\n");
@@ -119,7 +119,7 @@ void Networking::Connect(const std::string &ip, unsigned short port)
                 {
                     errmsg = "Connection failed.\n"
                             "The client or server is outdated.\n"
-                            "Ask your server administrator for resolve this problem.";
+                            "Ask your server administrator to resolve this problem.";
                     queue = false;
                     break;
                 }
@@ -261,17 +261,24 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
         }
         case ID_GAME_UPDATE_SKILLS:
         {
+            printf("Received ID_GAME_UPDATE_SKILLS from server\n");
+
             if (id == myid)
             {
+                printf("- Packet was about my id\n");
+
                 getLocalPlayer()->updateAttributesAndSkills(true);
                 myPacket->Send(getLocalPlayer(), serverAddr);
             }
             else if (pl != 0)
             {
+                printf("- Packet was about %s\n", pl->Npc()->mName.c_str());
+
                 myPacket->Packet(&bsIn, pl, false);
 
                 MWMechanics::SkillValue skillValue;
                 MWMechanics::AttributeValue attributeValue;
+
                 for (int i = 0; i < PacketAttributesAndStats::StatsCount; ++i)
                 {
                     skillValue.readState(pl->NpcStats()->mSkills[i]);
@@ -381,7 +388,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             }
             else if (pl != 0)
             {
-                printf("attempt to kill %s\n", pl->Npc()->mName.c_str());
+                printf("Attempt to kill %s\n", pl->Npc()->mName.c_str());
                 MWMechanics::DynamicStat<float> health;
                 pl->CreatureStats()->mDead = true;
                 health.readState(pl->CreatureStats()->mDynamic[0]);
