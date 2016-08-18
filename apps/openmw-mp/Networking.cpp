@@ -229,7 +229,9 @@ void Networking::Update(RakNet::Packet *packet)
 
         case ID_GAME_DIE:
         {
-            DEBUG_PRINTF("ID_GAME_DIE\n");
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_DIE from %s\n",
+                player->Npc()->mName.c_str());
+
             //packetMainStats.Read(player);
             player->CreatureStats()->mDead = true;
             myPacket->Send(player, true);

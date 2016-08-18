@@ -14,6 +14,7 @@
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/loadcell.hpp>
 
+#include <components/openmw-mp/Log.hpp>
 #include <components/openmw-mp/Base/BasePlayer.hpp>
 
 struct Player;

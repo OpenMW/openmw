@@ -9,8 +9,14 @@ TSlots Players::slots;
 
 void Players::DeletePlayer(RakNet::RakNetGUID id)
 {
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Deleting player with guid %s\n",
+        id.ToString());
+
     if (players[id] != 0)
     {
+        LOG_APPEND(Log::LOG_INFO, "- Emptying slot %i\n",
+            players[id]->GetID());
+
         slots[players[id]->GetID()] = 0;
         delete players[id];
         players.erase(id);
@@ -20,12 +26,18 @@ void Players::DeletePlayer(RakNet::RakNetGUID id)
 
 void Players::NewPlayer(RakNet::RakNetGUID id)
 {
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Creating new player with guid %s\n",
+        id.ToString());
+
     players[id] = new Player(id);
 
     for (int i = 0; i < 16; i++)
     {
         if (slots[i] == 0)
         {
+            LOG_APPEND(Log::LOG_INFO, "- Storing in slot %i\n",
+                i);
+
             slots[i] = players[id];
             slots[i]->SetID(i);
             break;
