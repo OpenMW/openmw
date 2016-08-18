@@ -56,21 +56,25 @@ const char* getTime()
     return result;
 }
 
-void Log::print(int level, const char *file, int line, const char *message, ...) const
+void Log::print(int level, bool hasPrefix, const char *file, int line, const char *message, ...) const
 {
     if (level < logLevel) return;
     std::stringstream sstr;
-    sstr << "[" << getTime() << "] ";
 
-    if (file != 0 && line != 0)
+    if (hasPrefix)
     {
-        sstr << "[" << file << ":";
-        sstr << line << "] ";
-    }
 
-    sstr << "[";
-    switch (level)
-    {
+        sstr << "[" << getTime() << "] ";
+
+        if (file != 0 && line != 0)
+        {
+            sstr << "[" << file << ":";
+            sstr << line << "] ";
+        }
+
+        sstr << "[";
+        switch (level)
+        {
         case LOG_WARN:
             sstr << "WARN";
             break;
@@ -82,8 +86,11 @@ void Log::print(int level, const char *file, int line, const char *message, ...)
             break;
         default:
             sstr << "INFO";
+        }
+        sstr << "]: ";
+
     }
-    sstr << "]: ";
+
     sstr << message;
     char back = *sstr.str().rbegin();
     if (back != '\n')

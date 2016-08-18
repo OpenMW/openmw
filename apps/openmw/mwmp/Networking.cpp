@@ -190,27 +190,27 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
 
             if (id == myid)
             {
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Packet was about my id\n");
+                LOG_APPEND(Log::LOG_INFO, "- Packet was about my id\n");
 
                 if (packet->length == myPacket->headerSize())
                 {
-                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Requesting info");
+                    LOG_APPEND(Log::LOG_INFO, "- Requesting info");
                     myPacket->Send(getLocalPlayer(), serverAddr);
                 }
                 else
                 {
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Updating LocalPlayer\n");
+                    LOG_APPEND(Log::LOG_INFO, "- Updating LocalPlayer\n");
                     getLocalPlayer()->updateChar();
                 }
             }
             else
             {
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Packet was about %s\n", pl == 0 ? "new player" : pl->Npc()->mName.c_str());
+                LOG_APPEND(Log::LOG_INFO, "- Packet was about %s\n", pl == 0 ? "new player" : pl->Npc()->mName.c_str());
 
                 if (pl == 0) {
 
-                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Exchanging data with new player\n");
+                    LOG_APPEND(Log::LOG_INFO, "- Exchanging data with new player\n");
                     pl = Players::NewPlayer(id);
                 }
 
@@ -393,7 +393,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             }
             else if (pl != 0)
             {
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Packet was about %s\n", pl->Npc()->mName.c_str());
+                LOG_APPEND(Log::LOG_INFO, "- Packet was about %s\n", pl->Npc()->mName.c_str());
                 MWMechanics::DynamicStat<float> health;
                 pl->CreatureStats()->mDead = true;
                 health.readState(pl->CreatureStats()->mDynamic[0]);

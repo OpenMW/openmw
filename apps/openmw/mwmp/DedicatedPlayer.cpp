@@ -43,7 +43,7 @@ MWWorld::Ptr DedicatedPlayer::getPtr()
 
 void Players::CreatePlayer(RakNet::RakNetGUID id)
 {
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Setting up character info\n");
+    LOG_APPEND(Log::LOG_INFO, "- Setting up character info\n");
 
     MWBase::World *world = MWBase::Environment::get().getWorld();
     MWWorld::Ptr player = world->getPlayerPtr();
@@ -74,7 +74,7 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
 
     if (_player->state == 0)
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Creating new reference pointer for %s\n",
+        LOG_APPEND(Log::LOG_INFO, "- Creating new reference pointer for %s\n",
             _player->Npc()->mName.c_str());
 
         MWWorld::Ptr tmp = world->placeObject(_player->reference->getPtr(), cellStore, _pos);
@@ -87,7 +87,7 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
     }
     else
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Updating reference pointer for %s\n",
+        LOG_APPEND(Log::LOG_INFO, "- Updating reference pointer for %s\n",
             _player->Npc()->mName.c_str());
 
         _player->ptr.getBase()->canChangeCell = true;
@@ -268,7 +268,7 @@ void DedicatedPlayer::UpdatePtr(MWWorld::Ptr newPtr)
 
 DedicatedPlayer *Players::NewPlayer(RakNet::RakNetGUID guid)
 {
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Creating new DedicatedPlayer with guid %i\n",
+    LOG_APPEND(Log::LOG_INFO, "- Creating new DedicatedPlayer with guid %i\n",
         guid.ToUint32);
 
     players[guid] = new DedicatedPlayer(guid);

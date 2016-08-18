@@ -155,7 +155,7 @@ void Networking::Update(RakNet::Packet *packet)
             {
                 myPacket->Read(player);
 
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Moved to %s\n",
+                LOG_APPEND(Log::LOG_INFO, "- Moved to %s\n",
                     player->GetCell()->getDescription().c_str());
 
                 myPacket->Send(player, true); //send to other clients
@@ -163,7 +163,7 @@ void Networking::Update(RakNet::Packet *packet)
             }
             else
             {
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Ignored because %s is dead\n",
+                LOG_APPEND(Log::LOG_INFO, "- Ignored because %s is dead\n",
                     player->Npc()->mName.c_str());
             }
 

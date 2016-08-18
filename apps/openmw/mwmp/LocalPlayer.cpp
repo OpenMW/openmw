@@ -383,7 +383,9 @@ void LocalPlayer::updateCell(bool forceUpdate)
 
     if (shouldUpdate)
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Telling server I moved from %s to %s\n",
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_GAME_CELL to server\n");
+
+        LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s\n",
             GetCell()->getDescription().c_str(),
             _cell->getDescription().c_str());
         
