@@ -8,6 +8,7 @@
 #include <ctime>
 #include <cstdio>
 #include <sstream>
+#include <vector>
 #include "Log.hpp"
 
 using namespace std;
@@ -89,6 +90,10 @@ void Log::print(int level, const char *file, int line, const char *message, ...)
         sstr << '\n';
     va_list args;
     va_start(args, message);
-    vprintf(sstr.str().c_str(), args);
+    vector<char> buf(vsnprintf(NULL, 0, sstr.str().c_str(), args) + 1);
     va_end(args);
+    va_start(args, message);
+    vsnprintf(buf.data(), buf.size(), sstr.str().c_str(), args);
+    va_end(args);
+    cout << buf.data() << flush;
 }
