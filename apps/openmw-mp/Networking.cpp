@@ -432,3 +432,8 @@ unsigned short Networking::NumberOfConnections() const
 {
     return peer->NumberOfConnections();
 }
+
+unsigned int Networking::MaxConnections() const
+{
+    return peer->GetMaximumIncomingConnections();
+}

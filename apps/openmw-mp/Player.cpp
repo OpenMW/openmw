@@ -3,6 +3,7 @@
 //
 
 #include "Player.hpp"
+#include "Networking.hpp"
 
 TPlayers Players::players;
 TSlots Players::slots;
@@ -35,7 +36,7 @@ void Players::NewPlayer(RakNet::RakNetGUID id)
     players[id]->NpcStats()->blank();
     players[id]->CreatureStats()->blank();
 
-    for (int i = 0; i < 16; i++)
+    for (int i = 0; i < mwmp::Networking::Get().MaxConnections(); i++)
     {
         if (slots[i] == 0)
         {

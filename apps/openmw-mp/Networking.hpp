@@ -21,6 +21,7 @@ namespace  mwmp
         void KickPlayer(RakNet::RakNetGUID guid);
         void Update(RakNet::Packet *packet);
         unsigned short NumberOfConnections() const;
+        unsigned int MaxConnections() const;
 
         int MainLoop();
 
