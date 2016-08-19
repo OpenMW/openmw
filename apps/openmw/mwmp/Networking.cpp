@@ -50,30 +50,30 @@ void Networking::Update()
         switch (packet->data[0])
         {
             case ID_REMOTE_DISCONNECTION_NOTIFICATION:
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Another client has disconnected.\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Another client has disconnected.\n");
                 break;
             case ID_REMOTE_CONNECTION_LOST:
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Another client has lost connection.\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Another client has lost connection.\n");
                 break;
             case ID_REMOTE_NEW_INCOMING_CONNECTION:
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Another client has connected.\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Another client has connected.\n");
                 break;
             case ID_CONNECTION_REQUEST_ACCEPTED:
-                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Our connection request has been accepted.\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Our connection request has been accepted.\n");
                 break;
             case ID_NEW_INCOMING_CONNECTION:
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "A connection is incoming.\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "A connection is incoming.\n");
                 break;
             case ID_NO_FREE_INCOMING_CONNECTIONS:
-                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "The server is full.\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "The server is full.\n");
                 MWBase::Environment::get().getStateManager()->requestQuit();
                 break;
             case ID_DISCONNECTION_NOTIFICATION:
-                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "We have been disconnected.\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "We have been disconnected.\n");
                 MWBase::Environment::get().getStateManager()->requestQuit();
                 break;
             case ID_CONNECTION_LOST:
-                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Connection lost.\n");
+                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Connection lost.\n");
                 MWBase::Environment::get().getStateManager()->requestQuit();
                 break;
             default:
@@ -133,7 +133,7 @@ void Networking::Connect(const std::string &ip, unsigned short port)
                     LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONNECTION_REQUESTED_ACCEPTED from %s\n",
                         serverAddr.ToString());
 
-                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_GAME_BASE_INFO to server\n");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server\n");
 
                     GetPacket(ID_GAME_BASE_INFO)->Send(getLocalPlayer());
 
@@ -186,21 +186,21 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
         }
         case ID_GAME_BASE_INFO:
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO from server\n");
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_GAME_BASE_INFO from server\n");
 
             if (id == myid)
             {
-                LOG_APPEND(Log::LOG_INFO, "- Packet was about my id\n");
+                LOG_APPEND(Log::LOG_INFO, "%s", "- Packet was about my id\n");
 
                 if (packet->length == myPacket->headerSize())
                 {
-                    LOG_APPEND(Log::LOG_INFO, "- Requesting info");
+                    LOG_APPEND(Log::LOG_INFO, "%s", "- Requesting info");
                     myPacket->Send(getLocalPlayer(), serverAddr);
                 }
                 else
                 {
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    LOG_APPEND(Log::LOG_INFO, "- Updating LocalPlayer\n");
+                    LOG_APPEND(Log::LOG_INFO, "%s", "- Updating LocalPlayer\n");
                     getLocalPlayer()->updateChar();
                 }
             }
@@ -210,7 +210,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
 
                 if (pl == 0) {
 
-                    LOG_APPEND(Log::LOG_INFO, "- Exchanging data with new player\n");
+                    LOG_APPEND(Log::LOG_INFO, "%s", "- Exchanging data with new player\n");
                     pl = Players::NewPlayer(id);
                 }
 
@@ -225,7 +225,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             {
                 if (packet->length != myPacket->headerSize())
                 {
-                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_GAME_UPDATE_POS changed by server\n");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "ID_GAME_UPDATE_POS changed by server\n");
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
                     getLocalPlayer()->setPosition();
                 }
@@ -238,7 +238,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
         }
         case ID_USER_MYID:
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_USER_MYID from server");
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_USER_MYID from server");
             myid = id;
             getLocalPlayer()->guid = id;
             break;
@@ -382,7 +382,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
         }
         case ID_GAME_DIE:
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_DIE from server\n");
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_GAME_DIE from server\n");
             if (id == myid)
             {
                 MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();

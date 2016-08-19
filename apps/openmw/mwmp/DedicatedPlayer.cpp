@@ -43,7 +43,7 @@ MWWorld::Ptr DedicatedPlayer::getPtr()
 
 void Players::CreatePlayer(RakNet::RakNetGUID id)
 {
-    LOG_APPEND(Log::LOG_INFO, "- Setting up character info\n");
+    LOG_APPEND(Log::LOG_INFO, "%s", "- Setting up character info\n");
 
     MWBase::World *world = MWBase::Environment::get().getWorld();
     MWWorld::Ptr player = world->getPlayerPtr();
