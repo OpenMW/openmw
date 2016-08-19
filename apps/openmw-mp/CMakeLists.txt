@@ -1,4 +1,4 @@
-project(openmw-mp)
+project(tes3mp-server)
 
 option(BUILD_WITH_PAWN "Enable Pawn language" OFF)
 if(BUILD_WITH_PAWN)
@@ -67,20 +67,20 @@ set(SERVER_HEADER
         ${LuaScript_Headers}
         ${NativeScript_Headers}
 )
-source_group(openmw-mp FILES ${SERVER} ${SERVER_HEADER})
+source_group(tes3mp-server FILES ${SERVER} ${SERVER_HEADER})
 
 include_directories("./")
 
 # Main executable
 
-add_executable(openmw-mp
+add_executable(tes3mp-server
 ${SERVER_FILES}
 ${SERVER} ${SERVER_HEADER}
 ${APPLE_BUNDLE_RESOURCES}
 )
 add_definitions(-std=gnu++14 -Wno-ignored-qualifiers)
 
-target_link_libraries(openmw-mp
+target_link_libraries(tes3mp-server
     #${Boost_SYSTEM_LIBRARY}
     #${Boost_THREAD_LIBRARY}
     #${Boost_FILESYSTEM_LIBRARY}
@@ -92,16 +92,16 @@ target_link_libraries(openmw-mp
 )
 
 if (UNIX)
-    target_link_libraries(openmw-mp dl)
+    target_link_libraries(tes3mp-server dl)
     # Fix for not visible pthreads functions for linker with glibc 2.15
     if(NOT APPLE)
-        target_link_libraries(openmw-mp ${CMAKE_THREAD_LIBS_INIT})
+        target_link_libraries(tes3mp-server ${CMAKE_THREAD_LIBS_INIT})
     endif(NOT APPLE)
 endif(UNIX)
 
 if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
-  target_link_libraries(openmw-mp gcov)
+  target_link_libraries(tes3mp-server gcov)
 endif()
 
 if (MSVC)
