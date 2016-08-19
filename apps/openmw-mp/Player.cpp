@@ -30,6 +30,10 @@ void Players::NewPlayer(RakNet::RakNetGUID id)
         id.ToString());
 
     players[id] = new Player(id);
+    players[id]->GetCell()->blank();
+    players[id]->Npc()->blank();
+    players[id]->NpcStats()->blank();
+    players[id]->CreatureStats()->blank();
 
     for (int i = 0; i < 16; i++)
     {
