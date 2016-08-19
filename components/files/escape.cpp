@@ -9,7 +9,7 @@ namespace Files
     const int escape_hash_filter::sEscapeIdentifier = 'a';
     const int escape_hash_filter::sHashIdentifier = 'h';
 
-    escape_hash_filter::escape_hash_filter() : mNext(), mSeenNonWhitespace(false), mFinishLine(false)
+    escape_hash_filter::escape_hash_filter() : mNext(), mPrevious(), mSeenNonWhitespace(false), mFinishLine(false)
     {
     }
 
