@@ -80,7 +80,7 @@ void Networking::Update(RakNet::Packet *packet)
 
         if (player->isHandshaked())
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong handshake with player %d, name: %s\n",
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong handshake with player %d, name: %s",
                 player->GetID(),
                 player->Npc()->mName.c_str());
             KickPlayer(player->guid);
@@ -89,7 +89,7 @@ void Networking::Update(RakNet::Packet *packet)
 
         if (*player->GetPassw() != passw)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong server password for player %d, name: %s (pass: %s)\n",
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong server password for player %d, name: %s (pass: %s)",
                 player->GetID(),
                 player->Npc()->mName.c_str(),
                 player->GetPassw()->c_str());
@@ -115,7 +115,7 @@ void Networking::Update(RakNet::Packet *packet)
 
     if (!player->isHandshaked())
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong auth for player %d, name: %s\n",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong auth for player %d, name: %s",
             player->GetID(),
             player->Npc()->mName.c_str());
         //KickPlayer(player->guid);
@@ -148,14 +148,14 @@ void Networking::Update(RakNet::Packet *packet)
         }
         case ID_GAME_CELL:
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_CELL from %s\n",
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_CELL from %s",
                 player->Npc()->mName.c_str());
 
             if (!player->CreatureStats()->mDead)
             {
                 myPacket->Read(player);
 
-                LOG_APPEND(Log::LOG_INFO, "- Moved to %s\n",
+                LOG_APPEND(Log::LOG_INFO, "- Moved to %s",
                     player->GetCell()->getDescription().c_str());
 
                 myPacket->Send(player, true); //send to other clients
@@ -163,7 +163,7 @@ void Networking::Update(RakNet::Packet *packet)
             }
             else
             {
-                LOG_APPEND(Log::LOG_INFO, "- Ignored because %s is dead\n",
+                LOG_APPEND(Log::LOG_INFO, "- Ignored because %s is dead",
                     player->Npc()->mName.c_str());
             }
 
@@ -229,7 +229,7 @@ void Networking::Update(RakNet::Packet *packet)
 
         case ID_GAME_DIE:
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_DIE from %s\n",
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_DIE from %s",
                 player->Npc()->mName.c_str());
 
             //packetMainStats.Read(player);

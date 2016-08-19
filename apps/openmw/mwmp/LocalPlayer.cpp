@@ -383,9 +383,9 @@ void LocalPlayer::updateCell(bool forceUpdate)
 
     if (shouldUpdate)
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_CELL to server\n");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_CELL to server");
 
-        LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s\n",
+        LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s",
             GetCell()->getDescription().c_str(),
             _cell->getDescription().c_str());
         
@@ -486,7 +486,7 @@ bool LocalPlayer::CharGenThread() // ToDo: need fix
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             (*Npc()) = *player.get<ESM::NPC>()->mBase;
 
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server with my CharGen info\n");
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server with my CharGen info");
             GetNetworking()->GetPacket(ID_GAME_BASE_INFO)->Send(this);
 
             if (CharGenStage()->end != 1)

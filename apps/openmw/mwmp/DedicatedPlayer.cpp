@@ -43,7 +43,7 @@ MWWorld::Ptr DedicatedPlayer::getPtr()
 
 void Players::CreatePlayer(RakNet::RakNetGUID id)
 {
-    LOG_APPEND(Log::LOG_INFO, "%s", "- Setting up character info\n");
+    LOG_APPEND(Log::LOG_INFO, "%s", "- Setting up character info");
 
     MWBase::World *world = MWBase::Environment::get().getWorld();
     MWWorld::Ptr player = world->getPlayerPtr();
@@ -74,7 +74,7 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
 
     if (_player->state == 0)
     {
-        LOG_APPEND(Log::LOG_INFO, "- Creating new reference pointer for %s\n",
+        LOG_APPEND(Log::LOG_INFO, "- Creating new reference pointer for %s",
             _player->Npc()->mName.c_str());
 
         MWWorld::Ptr tmp = world->placeObject(_player->reference->getPtr(), cellStore, _pos);
@@ -87,7 +87,7 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
     }
     else
     {
-        LOG_APPEND(Log::LOG_INFO, "- Updating reference pointer for %s\n",
+        LOG_APPEND(Log::LOG_INFO, "- Updating reference pointer for %s",
             _player->Npc()->mName.c_str());
 
         _player->ptr.getBase()->canChangeCell = true;
@@ -268,7 +268,7 @@ void DedicatedPlayer::UpdatePtr(MWWorld::Ptr newPtr)
 
 DedicatedPlayer *Players::NewPlayer(RakNet::RakNetGUID guid)
 {
-    LOG_APPEND(Log::LOG_INFO, "- Creating new DedicatedPlayer with guid %i\n",
+    LOG_APPEND(Log::LOG_INFO, "- Creating new DedicatedPlayer with guid %i",
         guid.ToUint32);
 
     players[guid] = new DedicatedPlayer(guid);
@@ -433,14 +433,14 @@ void DedicatedPlayer::updateCell()
     // Go no further if cell data is invalid
     else
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Server sent invalid cell change info about %s (%s)!\n",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Server sent invalid cell change info about %s (%s)!",
             ptr.getBase()->mRef.getRefId().c_str(),
             this->Npc()->mName.c_str());
 
         return;
     }
 
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server says %s (%s) moved to %s\n",
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server says %s (%s) moved to %s",
         ptr.getBase()->mRef.getRefId().c_str(),
         this->Npc()->mName.c_str(),
         cellStore->getCell()->getDescription().c_str());

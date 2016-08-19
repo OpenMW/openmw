@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
 
     if (RakNet::NonNumericHostString(addr.c_str()))
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "%s", "You cannot use non numeric addresses for server.");
+        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "%s", "You cannot use non-numeric addresses for the server.");
         return 1;
     }
 
