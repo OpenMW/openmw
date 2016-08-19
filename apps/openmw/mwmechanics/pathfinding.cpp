@@ -82,6 +82,42 @@ namespace MWMechanics
         return sqrt(x * x + y * y + z * z);
     }
 
+    float getZAngleToDir(const osg::Vec3f& dir)
+    {
+        return std::atan2(dir.x(), dir.y());
+    }
+
+    float getXAngleToDir(const osg::Vec3f& dir)
+    {
+        return -std::asin(dir.z() / dir.length());
+    }
+
+    float getZAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest)
+    {
+        osg::Vec3f dir = PathFinder::MakeOsgVec3(dest) - PathFinder::MakeOsgVec3(origin);
+        return getZAngleToDir(dir);
+    }
+
+    float getXAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest)
+    {
+        osg::Vec3f dir = PathFinder::MakeOsgVec3(dest) - PathFinder::MakeOsgVec3(origin);
+        return getXAngleToDir(dir);
+    }
+
+    bool checkWayIsClear(const osg::Vec3f& from, const osg::Vec3f& to, float offsetXY)
+    {
+        osg::Vec3f dir = to - from;
+        dir.z() = 0;
+        dir.normalize();
+        float verticalOffset = 200; // instead of '200' here we want the height of the actor
+        osg::Vec3f _from = from + dir*offsetXY + osg::Z_AXIS * verticalOffset;
+
+        // cast up-down ray and find height of hit in world space
+        float h = _from.z() - MWBase::Environment::get().getWorld()->getDistToNearestRayHit(_from, -osg::Z_AXIS, verticalOffset + PATHFIND_Z_REACH + 1);
+
+        return (std::abs(from.z() - h) <= PATHFIND_Z_REACH);
+    }
+
     PathFinder::PathFinder()
         : mPathgrid(NULL),
           mCell(NULL)
@@ -132,22 +168,9 @@ namespace MWMechanics
      */
     void PathFinder::buildPath(const ESM::Pathgrid::Point &startPoint,
                                const ESM::Pathgrid::Point &endPoint,
-                               const MWWorld::CellStore* cell,
-                               bool allowShortcuts)
+                               const MWWorld::CellStore* cell)
     {
         mPath.clear();
-
-        if(allowShortcuts)
-        {
-            // if there's a ray cast hit, can't take a direct path
-            if (!MWBase::Environment::get().getWorld()->castRay(
-                static_cast<float>(startPoint.mX), static_cast<float>(startPoint.mY), static_cast<float>(startPoint.mZ),
-                static_cast<float>(endPoint.mX), static_cast<float>(endPoint.mY), static_cast<float>(endPoint.mZ)))
-            {
-                mPath.push_back(endPoint);
-                return;
-            }
-        }
 
         if(mCell != cell || !mPathgrid)
         {
@@ -243,6 +266,19 @@ namespace MWMechanics
         return std::atan2(directionX, directionY);
     }
 
+    float PathFinder::getXAngleToNext(float x, float y, float z) const
+    {
+        // This should never happen (programmers should have an if statement checking
+        // isPathConstructed that prevents this call if otherwise).
+        if(mPath.empty())
+            return 0.;
+
+        const ESM::Pathgrid::Point &nextPoint = *mPath.begin();
+        osg::Vec3f dir = MakeOsgVec3(nextPoint) - osg::Vec3f(x,y,z);
+
+        return -std::asin(dir.z() / dir.length());
+    }
+
     bool PathFinder::checkPathCompleted(float x, float y, float tolerance)
     {
         if(mPath.empty())
@@ -264,19 +300,18 @@ namespace MWMechanics
     // see header for the rationale
     void PathFinder::buildSyncedPath(const ESM::Pathgrid::Point &startPoint,
         const ESM::Pathgrid::Point &endPoint,
-        const MWWorld::CellStore* cell,
-        bool allowShortcuts)
+        const MWWorld::CellStore* cell)
     {
         if (mPath.size() < 2)
         {
             // if path has one point, then it's the destination.
             // don't need to worry about bad path for this case
-            buildPath(startPoint, endPoint, cell, allowShortcuts);
+            buildPath(startPoint, endPoint, cell);
         }
         else
         {
             const ESM::Pathgrid::Point oldStart(*getPath().begin());
-            buildPath(startPoint, endPoint, cell, allowShortcuts);
+            buildPath(startPoint, endPoint, cell);
             if (mPath.size() >= 2)
             {
                 // if 2nd waypoint of new path == 1st waypoint of old, 

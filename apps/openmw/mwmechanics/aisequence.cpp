@@ -234,6 +234,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
             // Put repeating noncombat AI packages on the end of the stack so they can be used again
             if (isActualAiPackage(packageTypeId) && (mRepeat || package->getRepeat()))
             {
+                package->reset();
                 mPackages.push_back(package->clone());
             }
             // To account for the rare case where AiPackage::execute() queued another AI package
