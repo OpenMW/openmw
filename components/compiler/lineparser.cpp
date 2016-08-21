@@ -59,6 +59,8 @@ namespace Compiler
        mExprParser (errorHandler, context, locals, literals), mAllowExpression (allowExpression)
     {}
 
+    LineParser::~LineParser() {}
+
     bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
     {
         if (mAllowExpression && mState==BeginState)

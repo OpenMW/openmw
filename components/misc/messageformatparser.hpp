@@ -19,6 +19,8 @@ namespace Misc
             virtual void visitedCharacter(char c) = 0;
 
         public:
+            virtual ~MessageFormatParser();
+
             virtual void process(const std::string& message);
     };
 }

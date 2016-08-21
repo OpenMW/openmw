@@ -2,6 +2,8 @@
 
 namespace Misc
 {
+    MessageFormatParser::~MessageFormatParser() {}
+
     void MessageFormatParser::process(const std::string& m)
     {
         for (unsigned int i = 0; i < m.size(); ++i)
