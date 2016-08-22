@@ -212,6 +212,8 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     bool updateCreatureState();
     void updateIdleStormState(bool inwater);
 
+    void updateAnimQueue();
+
     void updateHeadTracking(float duration);
 
     void updateMagicEffects();

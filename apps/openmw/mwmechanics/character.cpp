@@ -1524,6 +1524,23 @@ bool CharacterController::updateWeaponState()
     return forcestateupdate;
 }
 
+void CharacterController::updateAnimQueue()
+{
+    if(mAnimQueue.size() > 1)
+    {
+        if(mAnimation->isPlaying(mAnimQueue.front().mGroup) == false)
+        {
+            mAnimation->disable(mAnimQueue.front().mGroup);
+            mAnimQueue.pop_front();
+
+            bool loopfallback = (mAnimQueue.front().mGroup.compare(0,4,"idle") == 0);
+            mAnimation->play(mAnimQueue.front().mGroup, Priority_Default,
+                             MWRender::Animation::BlendMask_All, false,
+                             1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
+        }
+    }
+}
+
 void CharacterController::update(float duration)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -1537,21 +1554,7 @@ void CharacterController::update(float duration)
         mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, mAnimQueue.size() <= 1);
 
     if(!cls.isActor())
-    {
-        if(mAnimQueue.size() > 1)
-        {
-            if(mAnimation->isPlaying(mAnimQueue.front().mGroup) == false)
-            {
-                mAnimation->disable(mAnimQueue.front().mGroup);
-                mAnimQueue.pop_front();
-
-                bool loopfallback = (mAnimQueue.front().mGroup.compare(0,4,"idle") == 0);
-                mAnimation->play(mAnimQueue.front().mGroup, Priority_Default,
-                                 MWRender::Animation::BlendMask_All, false,
-                                 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
-            }
-        }
-    }
+        updateAnimQueue();
     else if(!cls.getCreatureStats(mPtr).isDead())
     {
         bool onground = world->isOnGround(mPtr);
@@ -1819,19 +1822,8 @@ void CharacterController::update(float duration)
         {
             idlestate = (inwater ? CharState_IdleSwim : (sneak && !inJump ? CharState_IdleSneak : CharState_Idle));
         }
-        else if(mAnimQueue.size() > 1)
-        {
-            if(mAnimation->isPlaying(mAnimQueue.front().mGroup) == false)
-            {
-                mAnimation->disable(mAnimQueue.front().mGroup);
-                mAnimQueue.pop_front();
-
-                bool loopfallback = (mAnimQueue.front().mGroup.compare(0,4,"idle") == 0);
-                mAnimation->play(mAnimQueue.front().mGroup, Priority_Default,
-                                 MWRender::Animation::BlendMask_All, false,
-                                 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
-            }
-        }
+        else
+            updateAnimQueue();
 
         if (!mSkipAnim)
         {
