@@ -1539,6 +1539,9 @@ void CharacterController::updateAnimQueue()
                              1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
         }
     }
+
+    if(!mAnimQueue.empty())
+        mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, mAnimQueue.size() <= 1);
 }
 
 void CharacterController::update(float duration)
@@ -1549,9 +1552,6 @@ void CharacterController::update(float duration)
     float speed = 0.f;
 
     updateMagicEffects();
-
-    if(!mAnimQueue.empty())
-        mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, mAnimQueue.size() <= 1);
 
     if(!cls.isActor())
         updateAnimQueue();
