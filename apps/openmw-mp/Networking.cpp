@@ -169,9 +169,19 @@ void Networking::Update(RakNet::Packet *packet)
 
             break;
         }
-        case ID_GAME_UPDATE_SKILLS:
+        case ID_GAME_ATTRIBUTE:
         {
-            DEBUG_PRINTF("ID_GAME_UPDATE_SKILLS\n");
+
+            if (!player->CreatureStats()->mDead)
+            {
+                myPacket->Read(player);
+                myPacket->Send(player, true);
+            }
+
+            break;
+        }
+        case ID_GAME_SKILL:
+        {
 
             if (!player->CreatureStats()->mDead)
             {

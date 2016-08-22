@@ -50,6 +50,7 @@ void LocalPlayer::Update()
     updateDeadState();
     updateInventory();
     updateBaseStats();
+    updateAttributesAndSkills();
 }
 
 MWWorld::Ptr LocalPlayer::GetPlayerPtr()
@@ -86,6 +87,40 @@ void LocalPlayer::updateBaseStats(bool forceUpdate)
 
         GetNetworking()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(this);
 
+    }
+}
+
+void LocalPlayer::updateAttributesAndSkills(bool forceUpdate)
+{
+    MWWorld::Ptr player = GetPlayerPtr();
+
+    const MWMechanics::NpcStats &_npcStats = player.getClass().getNpcStats(player);
+
+    bool isUpdatingSkills = false;
+    bool isUpdatingAttributes = false;
+
+    for (int i = 0; i < 27; ++i) {
+
+        if (_npcStats.getSkill(i).getBase() != NpcStats()->mSkills[i].mBase) {
+            _npcStats.getSkill(i).writeState(NpcStats()->mSkills[i]);
+            isUpdatingSkills = true;
+        }
+    }
+
+    for (int i = 0; i < 8; ++i) {
+
+        if (_npcStats.getAttribute(i).getBase() != CreatureStats()->mAttributes[i].mBase) {
+            _npcStats.getAttribute(i).writeState(CreatureStats()->mAttributes[i]);
+            isUpdatingAttributes = true;
+        }
+    }
+
+    if (isUpdatingSkills) {
+        GetNetworking()->GetPacket(ID_GAME_SKILL)->Send(this);
+    }
+
+    if (isUpdatingAttributes) {
+        GetNetworking()->GetPacket(ID_GAME_ATTRIBUTE)->Send(this);
     }
 }
 
@@ -274,19 +309,6 @@ void LocalPlayer::updateDeadState(bool forceUpdate)
     }
     else if (playerStats->getHealth().getCurrent() > 0 && isDead)
         isDead = false;
-}
-
-void LocalPlayer::updateAttributesAndSkills(bool forceUpdate)
-{
-    MWWorld::Ptr player = GetPlayerPtr();
-
-    const MWMechanics::NpcStats &_npcStats = player.getClass().getNpcStats(player);
-
-    for (int i = 0; i < PacketAttributesAndStats::StatsCount; ++i)
-        _npcStats.getSkill(i).writeState( NpcStats()->mSkills[i]);
-
-    for (int i = 0; i < PacketAttributesAndStats::AttributesCount; ++i)
-        _npcStats.getAttribute(i).writeState(CreatureStats()->mAttributes[i]);
 }
 
 Networking *LocalPlayer::GetNetworking()
