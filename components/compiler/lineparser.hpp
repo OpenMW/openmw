@@ -51,9 +51,6 @@ namespace Compiler
                 bool allowExpression = false);
             ///< \param allowExpression Allow lines consisting of a naked expression
             /// (result is send to the messagebox interface)
-            
-            virtual ~LineParser();
-            ///< destructor
 
             virtual bool parseInt (int value, const TokenLoc& loc, Scanner& scanner);
             ///< Handle an int token.
