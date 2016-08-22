@@ -334,17 +334,17 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                     if (!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
                         weapon = MWWorld::Ptr();
 
-                    bool healthdmg;
-                    if (!weapon.isEmpty())
-                        healthdmg = true;
-                    else
-                    {
-                        MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
-                        healthdmg = otherstats.isParalyzed() || otherstats.getKnockedDown();
-                    }
-
                     if (victim.mRef != 0)
                     {
+                        bool healthdmg;
+                        if (!weapon.isEmpty())
+                            healthdmg = true;
+                        else
+                        {
+                            MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
+                            healthdmg = otherstats.isParalyzed() || otherstats.getKnockedDown();
+                        }
+
                         if (!weapon.isEmpty())
                             MWMechanics::blockMeleeAttack(attacker, victim, weapon, pl->GetAttack()->damage, 1);
                         pl->getPtr().getClass().onHit(victim, pl->GetAttack()->damage, healthdmg, weapon, attacker,
