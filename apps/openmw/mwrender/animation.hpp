@@ -395,10 +395,6 @@ public:
               float speedmult, const std::string &start, const std::string &stop,
               float startpoint, size_t loops, bool loopfallback=false);
 
-    /** If the given animation group is currently playing, set its remaining loop count to '0'.
-     */
-    void stopLooping(const std::string& groupName);
-
     /** Adjust the speed multiplier of an already playing animation.
      */
     void adjustSpeedMult (const std::string& groupname, float speedmult);

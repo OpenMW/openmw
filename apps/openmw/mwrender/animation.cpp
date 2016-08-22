@@ -873,16 +873,6 @@ namespace MWRender
         addControllers();
     }
 
-    void Animation::stopLooping(const std::string& groupname)
-    {
-        AnimStateMap::iterator stateiter = mStates.find(groupname);
-        if(stateiter != mStates.end())
-        {
-            stateiter->second.mLoopCount = 0;
-            return;
-        }
-    }
-
     void Animation::adjustSpeedMult(const std::string &groupname, float speedmult)
     {
         AnimStateMap::iterator state(mStates.find(groupname));
