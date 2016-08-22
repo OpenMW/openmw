@@ -1023,7 +1023,7 @@ namespace MWRender
             {
                 float targetTime;
 
-                if (state.getTime() < state.mLoopStopTime || state.mLoopCount == 0)
+                if (!state.shouldLoop())
                 {
                     targetTime = state.getTime() + timepassed;
                     if(textkey == textkeys.end() || textkey->first > targetTime)
@@ -1048,27 +1048,21 @@ namespace MWRender
                         ++textkey;
                     }
                 }
-
-                if(state.getTime() >= state.mLoopStopTime)
+                if(state.shouldLoop())
                 {
-                    if (!state.mLoopingEnabled)
-                        state.mLoopCount = 0;
-                    else if (state.mLoopCount > 0)
+                    state.mLoopCount--;
+                    state.setTime(state.mLoopStartTime);
+                    state.mPlaying = true;
+
+                    textkey = textkeys.lower_bound(state.getTime());
+                    while(textkey != textkeys.end() && textkey->first <= state.getTime())
                     {
-                        state.mLoopCount--;
-                        state.setTime(state.mLoopStartTime);
-                        state.mPlaying = true;
-
-                        textkey = textkeys.lower_bound(state.getTime());
-                        while(textkey != textkeys.end() && textkey->first <= state.getTime())
-                        {
-                            handleTextKey(state, stateiter->first, textkey, textkeys);
-                            ++textkey;
-                        }
-
-                        if(state.getTime() >= state.mLoopStopTime)
-                            break;
+                        handleTextKey(state, stateiter->first, textkey, textkeys);
+                        ++textkey;
                     }
+
+                    if(state.getTime() >= state.mLoopStopTime)
+                        break;
                 } 
 
                 if(timepassed <= 0.0f)

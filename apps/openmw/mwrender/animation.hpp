@@ -205,6 +205,11 @@ protected:
         {
             *mTime = time;
         }
+
+        bool shouldLoop() const
+        {
+            return getTime() >= mLoopStopTime && mLoopingEnabled && mLoopCount > 0;
+        }
     };
     typedef std::map<std::string,AnimState> AnimStateMap;
     AnimStateMap mStates;
