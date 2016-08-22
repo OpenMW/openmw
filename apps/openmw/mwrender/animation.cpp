@@ -1106,14 +1106,6 @@ namespace MWRender
             state->second.mLoopingEnabled = enabled;
     }
 
-    bool Animation::getLoopingEnabled(const std::string &groupname) const
-    {
-        AnimStateMap::const_iterator state(mStates.find(groupname));
-        if(state != mStates.end())
-            return state->second.mLoopingEnabled;
-        return false;
-    }
-
     void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature)
     {
         osg::ref_ptr<osg::StateSet> previousStateset;

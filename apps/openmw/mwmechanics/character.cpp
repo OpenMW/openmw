@@ -1533,8 +1533,8 @@ void CharacterController::update(float duration)
 
     updateMagicEffects();
 
-    if(mAnimQueue.size() > 1 && (mAnimation->getLoopingEnabled(mAnimQueue.front().mGroup) == true))
-        mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, false);
+    if(!mAnimQueue.empty())
+        mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, mAnimQueue.size() <= 1);
 
     if(!cls.isActor())
     {

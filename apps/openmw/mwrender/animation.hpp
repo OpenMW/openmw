@@ -435,8 +435,6 @@ public:
 
     void setLoopingEnabled(const std::string &groupname, bool enabled);
 
-    bool getLoopingEnabled(const std::string &groupname) const;
-
     /// This is typically called as part of runAnimation, but may be called manually if needed.
     void updateEffects(float duration);
 
