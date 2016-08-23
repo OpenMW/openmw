@@ -133,6 +133,9 @@ void LocalPlayer::updatePosition(bool forceUpdate)
 
     static bool posChanged = false;
 
+    static bool isJumping = false;
+    static bool sentJumpEnd = true;
+
     ESM::Position _pos = player.getRefData().getPosition();
 
     const bool isChangedPos = (move.mPosition[0] != 0 || move.mPosition[1] != 0 || move.mPosition[2] != 0
@@ -142,6 +145,9 @@ void LocalPlayer::updatePosition(bool forceUpdate)
     {
         posChanged = isChangedPos;
 
+        if (!isJumping && !world->isOnGround(player) && !world->isFlying(player)) {
+            isJumping = true;
+        }
 
         (*Position()) = _pos;
 
@@ -149,6 +155,18 @@ void LocalPlayer::updatePosition(bool forceUpdate)
         Dir()->pos[1] = move.mPosition[1];
         Dir()->pos[2] = move.mPosition[2];
 
+        GetNetworking()->GetPacket(ID_GAME_UPDATE_POS)->Send(this);
+    }
+    else if (isJumping && world->isOnGround(player)) {
+
+        isJumping = false;
+        sentJumpEnd = false;
+    }
+    // Packet with jump end position has to be sent one tick after above check
+    else if (!sentJumpEnd) {
+
+        sentJumpEnd = true;
+        (*Position()) = _pos;
         GetNetworking()->GetPacket(ID_GAME_UPDATE_POS)->Send(this);
     }
 }
