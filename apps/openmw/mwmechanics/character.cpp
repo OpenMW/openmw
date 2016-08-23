@@ -1989,9 +1989,10 @@ void CharacterController::unpersistAnimationState()
         mCurrentIdle.clear();
         mIdleState = CharState_SpecialIdle;
 
+        bool loopfallback = (mAnimQueue.front().mGroup.compare(0,4,"idle") == 0);
         mAnimation->play(anim.mGroup,
                          Priority_Default, MWRender::Animation::BlendMask_All, false, 1.0f,
-                         "start", "stop", complete, anim.mLoopCount);
+                         "start", "stop", complete, anim.mLoopCount, loopfallback);
     }
 }
 
