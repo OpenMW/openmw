@@ -873,16 +873,6 @@ namespace MWRender
         addControllers();
     }
 
-    void Animation::stopLooping(const std::string& groupname)
-    {
-        AnimStateMap::iterator stateiter = mStates.find(groupname);
-        if(stateiter != mStates.end())
-        {
-            stateiter->second.mLoopCount = 0;
-            return;
-        }
-    }
-
     void Animation::adjustSpeedMult(const std::string &groupname, float speedmult)
     {
         AnimStateMap::iterator state(mStates.find(groupname));
@@ -1023,35 +1013,33 @@ namespace MWRender
             {
                 float targetTime;
 
-                if(state.getTime() >= state.mLoopStopTime && state.mLoopCount > 0)
-                    goto handle_loop;
-
-                targetTime = state.getTime() + timepassed;
-                if(textkey == textkeys.end() || textkey->first > targetTime)
+                if (!state.shouldLoop())
                 {
-                    if(mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())
-                        updatePosition(state.getTime(), targetTime, movement);
-                    state.setTime(std::min(targetTime, state.mStopTime));
+                    targetTime = state.getTime() + timepassed;
+                    if(textkey == textkeys.end() || textkey->first > targetTime)
+                    {
+                        if(mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())
+                            updatePosition(state.getTime(), targetTime, movement);
+                        state.setTime(std::min(targetTime, state.mStopTime));
+                    }
+                    else
+                    {
+                        if(mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())
+                            updatePosition(state.getTime(), textkey->first, movement);
+                        state.setTime(textkey->first);
+                    }
+
+                    state.mPlaying = (state.getTime() < state.mStopTime);
+                    timepassed = targetTime - state.getTime();
+
+                    while(textkey != textkeys.end() && textkey->first <= state.getTime())
+                    {
+                        handleTextKey(state, stateiter->first, textkey, textkeys);
+                        ++textkey;
+                    }
                 }
-                else
+                if(state.shouldLoop())
                 {
-                    if(mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())
-                        updatePosition(state.getTime(), textkey->first, movement);
-                    state.setTime(textkey->first);
-                }
-
-                state.mPlaying = (state.getTime() < state.mStopTime);
-                timepassed = targetTime - state.getTime();
-
-                while(textkey != textkeys.end() && textkey->first <= state.getTime())
-                {
-                    handleTextKey(state, stateiter->first, textkey, textkeys);
-                    ++textkey;
-                }
-
-                if(state.getTime() >= state.mLoopStopTime && state.mLoopCount > 0)
-                {
-                handle_loop:
                     state.mLoopCount--;
                     state.setTime(state.mLoopStartTime);
                     state.mPlaying = true;
@@ -1065,7 +1053,7 @@ namespace MWRender
 
                     if(state.getTime() >= state.mLoopStopTime)
                         break;
-                }
+                } 
 
                 if(timepassed <= 0.0f)
                     break;
@@ -1093,6 +1081,13 @@ namespace MWRender
         }
 
         return movement;
+    }
+
+    void Animation::setLoopingEnabled(const std::string &groupname, bool enabled)
+    {
+        AnimStateMap::iterator state(mStates.find(groupname));
+        if(state != mStates.end())
+            state->second.mLoopingEnabled = enabled;
     }
 
     void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature)

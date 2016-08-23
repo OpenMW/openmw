@@ -1524,6 +1524,26 @@ bool CharacterController::updateWeaponState()
     return forcestateupdate;
 }
 
+void CharacterController::updateAnimQueue()
+{
+    if(mAnimQueue.size() > 1)
+    {
+        if(mAnimation->isPlaying(mAnimQueue.front().mGroup) == false)
+        {
+            mAnimation->disable(mAnimQueue.front().mGroup);
+            mAnimQueue.pop_front();
+
+            bool loopfallback = (mAnimQueue.front().mGroup.compare(0,4,"idle") == 0);
+            mAnimation->play(mAnimQueue.front().mGroup, Priority_Default,
+                             MWRender::Animation::BlendMask_All, false,
+                             1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
+        }
+    }
+
+    if(!mAnimQueue.empty())
+        mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, mAnimQueue.size() <= 1);
+}
+
 void CharacterController::update(float duration)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -1534,21 +1554,7 @@ void CharacterController::update(float duration)
     updateMagicEffects();
 
     if(!cls.isActor())
-    {
-        if(mAnimQueue.size() > 1)
-        {
-            if(mAnimation->isPlaying(mAnimQueue.front().mGroup) == false)
-            {
-                mAnimation->disable(mAnimQueue.front().mGroup);
-                mAnimQueue.pop_front();
-
-                bool loopfallback = (mAnimQueue.front().mGroup.compare(0,4,"idle") == 0);
-                mAnimation->play(mAnimQueue.front().mGroup, Priority_Default,
-                                 MWRender::Animation::BlendMask_All, false,
-                                 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
-            }
-        }
-    }
+        updateAnimQueue();
     else if(!cls.getCreatureStats(mPtr).isDead())
     {
         bool onground = world->isOnGround(mPtr);
@@ -1816,19 +1822,8 @@ void CharacterController::update(float duration)
         {
             idlestate = (inwater ? CharState_IdleSwim : (sneak && !inJump ? CharState_IdleSneak : CharState_Idle));
         }
-        else if(mAnimQueue.size() > 1)
-        {
-            if(mAnimation->isPlaying(mAnimQueue.front().mGroup) == false)
-            {
-                mAnimation->disable(mAnimQueue.front().mGroup);
-                mAnimQueue.pop_front();
-
-                bool loopfallback = (mAnimQueue.front().mGroup.compare(0,4,"idle") == 0);
-                mAnimation->play(mAnimQueue.front().mGroup, Priority_Default,
-                                 MWRender::Animation::BlendMask_All, false,
-                                 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
-            }
-        }
+        else
+            updateAnimQueue();
 
         if (!mSkipAnim)
         {
@@ -1994,9 +1989,10 @@ void CharacterController::unpersistAnimationState()
         mCurrentIdle.clear();
         mIdleState = CharState_SpecialIdle;
 
+        bool loopfallback = (mAnimQueue.front().mGroup.compare(0,4,"idle") == 0);
         mAnimation->play(anim.mGroup,
                          Priority_Default, MWRender::Animation::BlendMask_All, false, 1.0f,
-                         "start", "stop", complete, anim.mLoopCount);
+                         "start", "stop", complete, anim.mLoopCount, loopfallback);
     }
 }
 
@@ -2009,6 +2005,27 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
     }
     else
     {
+        // If the given animation is a looped animation, is already playing
+        // and has not yet reached its Loop Stop key, make it the only animation
+        // in the queue, and retain the loop count from the animation that was
+        // already playing. This emulates observed behavior from the original
+        // engine and allows banners to animate correctly.
+        if (!mAnimQueue.empty() && mAnimQueue.front().mGroup == groupname &&
+            mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": loop start") >= 0)
+        {
+            float endOfLoop = mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": loop stop");
+
+            if (endOfLoop < 0) // if no Loop Stop key was found, use the Stop key
+                endOfLoop = mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": stop");
+
+            if (endOfLoop > 0 && (mAnimation->getCurrentTime(mAnimQueue.front().mGroup) < endOfLoop))
+            {
+                mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, true);
+                mAnimQueue.resize(1);                    
+                return true;
+            }
+        }
+
         count = std::max(count, 1);
 
         AnimationQueueEntry entry;
@@ -2032,8 +2049,6 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
         }
         else if(mode == 0)
         {
-            if (!mAnimQueue.empty())
-                mAnimation->stopLooping(mAnimQueue.front().mGroup);
             mAnimQueue.resize(1);
             mAnimQueue.push_back(entry);
         }
