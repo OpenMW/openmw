@@ -176,6 +176,8 @@ void Networking::Update(RakNet::Packet *packet)
             {
                 myPacket->Read(player);
                 myPacket->Send(player, true);
+
+                Script::Call<Script::CallbackIdentity("OnPlayerChangeAttributes")>(player->GetID());
             }
 
             break;
@@ -187,6 +189,8 @@ void Networking::Update(RakNet::Packet *packet)
             {
                 myPacket->Read(player);
                 myPacket->Send(player, true);
+
+                Script::Call<Script::CallbackIdentity("OnPlayerChangeSkills")>(player->GetID());
             }
 
             break;
