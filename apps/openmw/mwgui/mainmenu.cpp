@@ -211,6 +211,8 @@ namespace MWGui
         if (state==MWBase::StateManager::State_Running)
             buttons.push_back("return");
 
+        /* Disabled by tes3mp
+
         buttons.push_back("newgame");
 
         if (state==MWBase::StateManager::State_Running &&
@@ -221,6 +223,7 @@ namespace MWGui
         if (MWBase::Environment::get().getStateManager()->characterBegin()!=
             MWBase::Environment::get().getStateManager()->characterEnd())
             buttons.push_back("loadgame");
+        */
 
         buttons.push_back("options");
 
