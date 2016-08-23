@@ -147,6 +147,16 @@ public:
     static void SendBaseStats(unsigned short pid) noexcept;
     static void SendSkills(unsigned short pid) noexcept;
 
+    //state 0 - disallow, 1 - allow
+    static void SetMapVisibility(unsigned short targetPID, unsigned short affectedPID, unsigned short state) noexcept
+    {
+
+    }
+    static void SetMapVisibilityAll(unsigned short targetPID, unsigned short state) noexcept
+    {
+
+    }
+
     static constexpr ScriptFunctionData functions[]{
             {"CreateTimer",         ScriptFunctions::CreateTimer},
             {"CreateTimerEx",       reinterpret_cast<Function<void>>(ScriptFunctions::CreateTimerEx)},
@@ -255,6 +265,9 @@ public:
             {"SendAttributes",      ScriptFunctions::SendAttributes},
             {"SendBaseStats",       ScriptFunctions::SendBaseStats},
             {"SendSkills",          ScriptFunctions::SendSkills},
+
+            {"SetMapVisibility",    ScriptFunctions::SetMapVisibility},
+            {"SetMapVisibilityAll", ScriptFunctions::SetMapVisibilityAll},
     };
 
     static constexpr ScriptCallbackData callbacks[]{
