@@ -180,6 +180,8 @@ void LocalPlayer::setPosition()
     world->getPlayer().setTeleported(true);
     world->moveObject(player, Position()->pos[0], Position()->pos[1], Position()->pos[2]);
     world->rotateObject(player, Position()->rot[0], Position()->rot[1], Position()->rot[2]);
+
+    updatePosition(true);
 }
 
 void LocalPlayer::setCell()
