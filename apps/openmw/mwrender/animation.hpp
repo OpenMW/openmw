@@ -360,7 +360,9 @@ public:
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out) const;
 
-    void addSpellCastGlow(const ESM::MagicEffect *effect);
+    // Add a spell casting glow to an object. From measuring video taken from the original engine,
+    // the glow seems to be about 1.5 seconds except for telekinesis, which is 1 second.
+    void addSpellCastGlow(const ESM::MagicEffect *effect, float glowDuration = 1.5);
 
     virtual void updatePtr(const MWWorld::Ptr &ptr);
 

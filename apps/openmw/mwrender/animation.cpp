@@ -1187,7 +1187,7 @@ namespace MWRender
         int mLowestUnusedTexUnit;
     };
 
-    void Animation::addSpellCastGlow(const ESM::MagicEffect *effect)
+    void Animation::addSpellCastGlow(const ESM::MagicEffect *effect, float glowDuration)
     {
         osg::Vec4f glowColor(1,1,1,1);
         glowColor.x() = effect->mData.mRed / 255.f;
@@ -1202,10 +1202,10 @@ namespace MWRender
             if (mGlowUpdater && mGlowUpdater->isPermanentGlowUpdater())
             {
                 mGlowUpdater->setColor(glowColor);
-                mGlowUpdater->setDuration(1.5); // Glow length measured from original engine as about 1.5 seconds
+                mGlowUpdater->setDuration(glowDuration);
             }
             else
-                addGlow(mObjectRoot, glowColor, 1.5);
+                addGlow(mObjectRoot, glowColor, glowDuration);
         }
     }
 
