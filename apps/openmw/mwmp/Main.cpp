@@ -24,6 +24,7 @@
 #include <apps/openmw/mwworld/inventorystore.hpp>
 #include <apps/openmw/mwmechanics/spellcasting.hpp>
 #include <components/openmw-mp/Log.hpp>
+#include <cstdlib>
 
 #include "DedicatedPlayer.hpp"
 #include "LocalPlayer.hpp"
@@ -32,6 +33,7 @@ using namespace mwmp;
 using namespace std;
 
 Main *Main::pMain = 0;
+std::string Main::addr = "";
 
 std::string loadSettings (Settings::Manager & settings)
 {
@@ -77,6 +79,18 @@ Main::~Main()
     Players::CleanUp();
 }
 
+void Main::OptionsDesc(boost::program_options::options_description *desc)
+{
+    namespace bpo = boost::program_options;
+    desc->add_options()("connect", bpo::value<std::string>()->default_value(""),
+                        "connect to server (e.g. --connect=127.0.0.1:25565)");
+}
+
+void Main::Configure(const boost::program_options::variables_map &variables)
+{
+    Main::addr = variables["connect"].as<string>();
+}
+
 void Main::Create()
 {
     assert(!pMain);
@@ -93,8 +107,18 @@ void Main::Create()
 
     int logLevel = mgr.getInt("loglevel", "General");
     Log::SetLevel(logLevel);
-    pMain->server = mgr.getString("server", "General");
-    pMain->port = (unsigned short)mgr.getInt("port", "General");
+    if(addr.empty())
+    {
+        pMain->server = mgr.getString("server", "General");
+        pMain->port = (unsigned short) mgr.getInt("port", "General");
+    }
+    else
+    {
+        size_t delim_pos = addr.find(':');
+        pMain->server = addr.substr(0, delim_pos);
+        pMain->port = atoi(addr.substr(delim_pos + 1).c_str());
+
+    }
 
     pMain->mGUIController->setupChat(mgr);
 

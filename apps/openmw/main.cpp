@@ -13,6 +13,7 @@
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include "mwmp/Main.hpp"
 
 #if defined(_WIN32)
 // For OutputDebugString
@@ -156,6 +157,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
         ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override");
 
+    mwmp::Main::OptionsDesc(&desc);
+
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
         .options(desc).allow_unregistered().run();
 
@@ -252,6 +255,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
     engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
     engine.enableFontExport(variables["export-fonts"].as<bool>());
+
+    mwmp::Main::Configure(&variables);
 
     return true;
 }
