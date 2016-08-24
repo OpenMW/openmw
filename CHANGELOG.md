@@ -1,3 +1,68 @@
+0.40.0
+------
+
+    Bug #1320: AiWander - Creatures in cells without pathgrids do not wander
+    Bug #1873: Death events are triggered at the beginning of the death animation
+    Bug #1996: Resting interrupts magic effects
+    Bug #2399: Vampires can rest in broad daylight and survive the experience
+    Bug #2604: Incorrect magicka recalculation
+    Bug #2721: Telekinesis extends interaction range where it shouldn't
+    Bug #2981: When waiting, NPCs can go where they wouldn't go normally.
+    Bug #3045: Esp files containing the letter '#' in the file name cannot be loaded on startup
+    Bug #3071: Slowfall does not stop momentum when jumping
+    Bug #3085: Plugins can not replace parent cell references with a cell reference of different type
+    Bug #3145: Bug with AI Cliff Racer. He will not attack you, unless you put in front of him.
+    Bug #3149: Editor: Weather tables were missing from regions
+    Bug #3201: Netch shoots over your head
+    Bug #3269: If you deselect a mod and try to load a save made inside a cell added by it, you end bellow the terrain in the grid 0/0
+    Bug #3286: Editor: Script editor tab width
+    Bug #3329: Teleportation spells cause crash to desktop after build update from 0.37 to 0.38.0
+    Bug #3331: Editor: Start Scripts table: Adding a script doesn't refresh the list of Start Scripts and allows to add a single script multiple times
+    Bug #3332: Editor: Scene view: Tool tips only occur when holding the left mouse button
+    Bug #3340: ESS-Importer does not separate item stacks
+    Bug #3342: Editor: Creation of pathgrids did not check if the pathgrid already existed
+    Bug #3346: "Talked to PC" is always 0 for "Hello" dialogue
+    Bug #3349: AITravel doesn't repeat
+    Bug #3370: NPCs wandering to invalid locations after training
+    Bug #3378: "StopCombat" command does not function in vanilla quest
+    Bug #3384: Battle at Nchurdamz - Larienna Macrina does not stop combat after killing Hrelvesuu
+    Bug #3388: Monster Respawn tied to Quicksave
+    Bug #3390: Strange visual effect in Dagoth Ur's chamber
+    Bug #3391: Inappropriate Blight weather behavior at end of main quest
+    Bug #3394: Replaced dialogue inherits some of its old data
+    Bug #3397: Actors that start the game dead always have the same death pose
+    Bug #3401: Sirollus Saccus sells not glass arrows
+    Bug #3402: Editor: Weapon data not being properly set
+    Bug #3405: Mulvisic Othril will not use her chitin throwing stars
+    Bug #3407: Tanisie Verethi will immediately detect the player
+    Bug #3408: Improper behavior of ashmire particles
+    Bug #3412: Ai Wander start time resets when saving/loading the game
+    Bug #3416: 1st person and 3rd person camera isn't converted from .ess correctly
+    Bug #3421: Idling long enough while paralyzed sometimes causes character to get stuck
+    Bug #3423: Sleep interruption inside dungeons too agressive
+    Bug #3424: Pickpocketing sometimes won't work
+    Bug #3432: AiFollow / AiEscort durations handled incorrectly
+    Bug #3434: Dead NPC's and Creatures still contribute to sneak skill increases
+    Bug #3437: Weather-conditioned dialogue should not play in interiors
+    Bug #3439: Effects cast by summon stick around after their death
+    Bug #3440: Parallax maps looks weird
+    Bug #3443: Class graphic for custom class should be Acrobat
+    Bug #3446: OpenMW segfaults when using Atrayonis's "Anthology Solstheim: Tomb of the Snow Prince" mod
+    Bug #3448: After dispelled, invisibility icon is still displayed
+    Bug #3453: First couple of seconds of NPC speech is muted
+    Bug #3455: Portable house mods lock player and npc movement up exiting house.
+    Bug #3456: Equipping an item will undo dispel of constant effect invisibility
+    Bug #3458: Constant effect restore health doesn't work during Wait
+    Bug #3466: It is possible to stack multiple scroll effects of the same type
+    Bug #3471: When two mods delete the same references, many references are not disabled by the engine.
+    Bug #3473: 3rd person camera can be glitched
+    Feature #1424: NPC "Face" function
+    Feature #2974: Editor: Multiple Deletion of Subrecords
+    Feature #3044: Editor: Render path grid v2
+    Feature #3362: Editor: Configurable key bindings
+    Feature #3375: Make sun / moon reflections weather dependent
+    Feature #3386: Editor: Edit pathgrid
+
 0.39.0
 ------
 

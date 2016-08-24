@@ -183,6 +183,7 @@ protected:
         float mSpeedMult;
 
         bool mPlaying;
+        bool mLoopingEnabled;
         size_t mLoopCount;
 
         AnimPriority mPriority;
@@ -190,8 +191,8 @@ protected:
         bool mAutoDisable;
 
         AnimState() : mStartTime(0.0f), mLoopStartTime(0.0f), mLoopStopTime(0.0f), mStopTime(0.0f),
-                      mTime(new float), mSpeedMult(1.0f), mPlaying(false), mLoopCount(0),
-                      mPriority(0), mBlendMask(0), mAutoDisable(true)
+                      mTime(new float), mSpeedMult(1.0f), mPlaying(false), mLoopingEnabled(true),
+                      mLoopCount(0), mPriority(0), mBlendMask(0), mAutoDisable(true)
         {
         }
         ~AnimState();
@@ -203,6 +204,11 @@ protected:
         void setTime(float time)
         {
             *mTime = time;
+        }
+
+        bool shouldLoop() const
+        {
+            return getTime() >= mLoopStopTime && mLoopingEnabled && mLoopCount > 0;
         }
     };
     typedef std::map<std::string,AnimState> AnimStateMap;
@@ -354,7 +360,9 @@ public:
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out) const;
 
-    void addSpellCastGlow(const ESM::MagicEffect *effect);
+    // Add a spell casting glow to an object. From measuring video taken from the original engine,
+    // the glow seems to be about 1.5 seconds except for telekinesis, which is 1 second.
+    void addSpellCastGlow(const ESM::MagicEffect *effect, float glowDuration = 1.5);
 
     virtual void updatePtr(const MWWorld::Ptr &ptr);
 
@@ -388,10 +396,6 @@ public:
     void play(const std::string &groupname, const AnimPriority& priority, int blendMask, bool autodisable,
               float speedmult, const std::string &start, const std::string &stop,
               float startpoint, size_t loops, bool loopfallback=false);
-
-    /** If the given animation group is currently playing, set its remaining loop count to '0'.
-     */
-    void stopLooping(const std::string& groupName);
 
     /** Adjust the speed multiplier of an already playing animation.
      */
@@ -431,6 +435,8 @@ public:
     float getVelocity(const std::string &groupname) const;
 
     virtual osg::Vec3f runAnimation(float duration);
+
+    void setLoopingEnabled(const std::string &groupname, bool enabled);
 
     /// This is typically called as part of runAnimation, but may be called manually if needed.
     void updateEffects(float duration);

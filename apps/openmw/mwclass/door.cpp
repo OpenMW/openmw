@@ -124,7 +124,7 @@ namespace MWClass
             int index = ESM::MagicEffect::effectStringToId("sEffectTelekinesis");
             const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(index);
 
-            animation->addSpellCastGlow(effect); // TODO: Telekinesis glow should only be as long as the door animation
+            animation->addSpellCastGlow(effect, 1); // 1 second glow to match the time taken for a door opening or closing
         }
 
         // make key id lowercase

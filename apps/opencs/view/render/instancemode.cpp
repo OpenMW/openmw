@@ -74,7 +74,9 @@ osg::Vec3f CSVRender::InstanceMode::getSelectionCenter(const std::vector<osg::re
             ++objectCount;
         }
     }
-    center /= objectCount;
+
+    if (objectCount > 0)
+        center /= objectCount;
 
     return center;
 }
@@ -92,7 +94,7 @@ osg::Vec3f CSVRender::InstanceMode::getScreenCoords(const osg::Vec3f& pos)
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":placeholder"), Mask_Reference, "Instance editing",
   parent), mSubMode (0), mSubModeId ("move"), mSelectionMode (0), mDragMode (DragMode_None),
-  mDragAxis (-1), mLocked (false)
+  mDragAxis (-1), mLocked (false), mUnitScaleDist(1)
 {
 }
 
