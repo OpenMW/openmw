@@ -477,7 +477,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                     myPacket->Packet(&bsIn, pl, false);
                     message =  *pl->ChatMessage();
                 }
-                Main::get().getGUIConroller()->PrintChatMessage(message);
+                Main::get().getGUIController()->PrintChatMessage(message);
                 break;
             }
             case ID_GAME_CHARGEN:
