@@ -130,7 +130,7 @@ void Main::Frame(float dt)
     Players::Update(dt);
     get().UpdateWorld(dt);
 
-    get().getGUIConroller()->update(dt);
+    get().getGUIController()->update(dt);
 
 }
 
@@ -152,7 +152,7 @@ void Main::UpdateWorld(float dt) const
         mNetworking->Connect(server, port);
         player.getClass().getCreatureStats(player).getSpells().add("fireball");
         mLocalPlayer->updateBaseStats(true);
-        get().getGUIConroller()->setChatVisible(true);
+        get().getGUIController()->setChatVisible(true);
     }
     else
         mLocalPlayer->Update();
@@ -174,7 +174,7 @@ LocalPlayer *Main::getLocalPlayer() const
 }
 
 
-GUIController *Main::getGUIConroller() const
+GUIController *Main::getGUIController() const
 {
     return mGUIController;
 }
@@ -182,6 +182,6 @@ GUIController *Main::getGUIConroller() const
 void Main::PressedKey(int key)
 {
     if (pMain == nullptr) return;
-    if (get().getGUIConroller()->pressedKey(key))
+    if (get().getGUIController()->pressedKey(key))
         return; // if any gui bind pressed
 }

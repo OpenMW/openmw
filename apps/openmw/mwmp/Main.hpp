@@ -19,7 +19,7 @@ namespace mwmp
 
         Networking *getNetworking() const;
         LocalPlayer *getLocalPlayer() const;
-        GUIController *getGUIConroller() const;
+        GUIController *getGUIController() const;
 
         void UpdateWorld(float dt) const;
 

@@ -559,11 +559,11 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                         getLocalPlayer()->guiMessageBox.label.c_str());
 
                     if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::MessageBox)
-                        Main::get().getGUIConroller()->ShowMessageBox(getLocalPlayer()->guiMessageBox);
+                        Main::get().getGUIController()->ShowMessageBox(getLocalPlayer()->guiMessageBox);
                     else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::CustomMessageBox)
-                        Main::get().getGUIConroller()->ShowCustomMessageBox(getLocalPlayer()->guiMessageBox);
+                        Main::get().getGUIController()->ShowCustomMessageBox(getLocalPlayer()->guiMessageBox);
                     else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::InputDialog)
-                        Main::get().getGUIConroller()->ShowInputBox(getLocalPlayer()->guiMessageBox);
+                        Main::get().getGUIController()->ShowInputBox(getLocalPlayer()->guiMessageBox);
                 }
                 break;
             }
