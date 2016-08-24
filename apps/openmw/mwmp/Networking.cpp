@@ -410,8 +410,8 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                 player.getClass().getCreatureStats(player).resurrect();
                 ESM::Position pos;
-                MWBase::Environment::get().getWorld()->findInteriorPosition("ToddTest", pos);
-                MWBase::Environment::get().getWorld()->changeToInteriorCell("ToddTest", pos, true);
+                MWBase::Environment::get().getWorld()->findInteriorPosition("Pelagiad, Fort Pelagiad", pos);
+                MWBase::Environment::get().getWorld()->changeToInteriorCell("Pelagiad, Fort Pelagiad", pos, true);
                 (*getLocalPlayer()->Position()) = pos;
                 (*getLocalPlayer()->GetCell()) = *player.getCell()->getCell();
                 myPacket->Send(getLocalPlayer(), serverAddr);
@@ -477,7 +477,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                     myPacket->Packet(&bsIn, pl, false);
                     message =  *pl->ChatMessage();
                 }
-                Main::get().getGUIConroller()->PrintChatMessage(message);
+                Main::get().getGUIController()->PrintChatMessage(message);
                 break;
             }
             case ID_GAME_CHARGEN:
@@ -559,11 +559,11 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                         getLocalPlayer()->guiMessageBox.label.c_str());
 
                     if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::MessageBox)
-                        Main::get().getGUIConroller()->ShowMessageBox(getLocalPlayer()->guiMessageBox);
+                        Main::get().getGUIController()->ShowMessageBox(getLocalPlayer()->guiMessageBox);
                     else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::CustomMessageBox)
-                        Main::get().getGUIConroller()->ShowCustomMessageBox(getLocalPlayer()->guiMessageBox);
+                        Main::get().getGUIController()->ShowCustomMessageBox(getLocalPlayer()->guiMessageBox);
                     else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::InputDialog)
-                        Main::get().getGUIConroller()->ShowInputBox(getLocalPlayer()->guiMessageBox);
+                        Main::get().getGUIController()->ShowInputBox(getLocalPlayer()->guiMessageBox);
                 }
                 break;
             }

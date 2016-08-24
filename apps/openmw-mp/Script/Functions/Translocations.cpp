@@ -58,7 +58,6 @@ void ScriptFunctions::SetPos(unsigned short pid, double x, double y, double z) n
     player->Position()->pos[2] = z;
 
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_POS)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_POS)->Send(player, true);
 }
 
 void ScriptFunctions::SetCell(unsigned short pid, const char *name) noexcept
@@ -80,7 +79,6 @@ void ScriptFunctions::SetCell(unsigned short pid, const char *name) noexcept
     cout << " in to cell \"" << player->GetCell()->mName << "\"" << endl;
 
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_CELL)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_CELL)->Send(player, true);
 }
 
 const char* ScriptFunctions::GetCell(unsigned short pid) noexcept
@@ -109,7 +107,6 @@ void ScriptFunctions::SetExterior(unsigned short pid, int x, int y) noexcept
     player->GetCell()->mCellId.mIndex.mY = y;
 
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_CELL)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_CELL)->Send(player, true);
 }
 
 int ScriptFunctions::GetExteriorX(unsigned short pid) noexcept
@@ -182,5 +179,4 @@ void ScriptFunctions::SetAngle(unsigned short pid, double x, double y, double z)
     player->Position()->rot[2] = z;
 
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_POS)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_POS)->Send(player, true);
 }
