@@ -45,6 +45,8 @@ Networking::~Networking()
 void Networking::Update()
 {
     RakNet::Packet *packet;
+    std::string errmsg = "";
+
     for (packet=peer->Receive(); packet; peer->DeallocatePacket(packet), packet=peer->Receive())
     {
         switch (packet->data[0])
@@ -65,22 +67,26 @@ void Networking::Update()
                 LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "A connection is incoming.");
                 break;
             case ID_NO_FREE_INCOMING_CONNECTIONS:
-                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "The server is full.");
-                MWBase::Environment::get().getStateManager()->requestQuit();
+                errmsg = "The server is full.";   
                 break;
             case ID_DISCONNECTION_NOTIFICATION:
-                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "We have been disconnected.");
-                MWBase::Environment::get().getStateManager()->requestQuit();
+                errmsg = "We have been disconnected.";
                 break;
             case ID_CONNECTION_LOST:
-                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Connection lost.");
-                MWBase::Environment::get().getStateManager()->requestQuit();
+                errmsg = "Connection lost.";
                 break;
             default:
                 ReceiveMessage(packet);
                 //LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Message with identifier %i has arrived.", packet->data[0]);
                 break;
         }
+    }
+
+    if (!errmsg.empty()) {
+
+        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "%s", errmsg);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "tes3mp", errmsg.c_str(), 0);
+        MWBase::Environment::get().getStateManager()->requestQuit();
     }
 }
 
@@ -111,7 +117,7 @@ void Networking::Connect(const std::string &ip, unsigned short port)
                 case ID_CONNECTION_ATTEMPT_FAILED:
                 {
                     errmsg = "Connection failed.\n"
-                            "Maybe the IP address is wrong or a firewall on either system is blocking\n"
+                            "Either the IP address is wrong or a firewall on either system is blocking\n"
                             "UDP packets on the port you have chosen.";
                     queue = false;
                     break;
@@ -153,8 +159,8 @@ void Networking::Connect(const std::string &ip, unsigned short port)
 
     if (!errmsg.empty())
     {
-        cerr << errmsg << endl;
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "TES3MP", errmsg.c_str(), 0);
+        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "%s", errmsg);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "tes3mp", errmsg.c_str(), 0);
         MWBase::Environment::get().getStateManager()->requestQuit();
     }
 }
