@@ -3,7 +3,7 @@ set(GAME
     main.cpp
     engine.cpp
 
-    ${CMAKE_SOURCE_DIR}/files/windows/openmw.rc
+    ${CMAKE_SOURCE_DIR}/files/tes3mp/tes3mp.rc
 )
 
 if (ANDROID)
