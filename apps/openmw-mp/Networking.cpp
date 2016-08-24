@@ -115,9 +115,8 @@ void Networking::Update(RakNet::Packet *packet)
 
     if (!player->isHandshaked())
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong auth for player %d, name: %s",
-            player->GetID(),
-            player->Npc()->mName.c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Have not completed handshake with player %d",
+            player->GetID());
         //KickPlayer(player->guid);
         return;
     }
