@@ -410,8 +410,8 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                 player.getClass().getCreatureStats(player).resurrect();
                 ESM::Position pos;
-                MWBase::Environment::get().getWorld()->findInteriorPosition("ToddTest", pos);
-                MWBase::Environment::get().getWorld()->changeToInteriorCell("ToddTest", pos, true);
+                MWBase::Environment::get().getWorld()->findInteriorPosition("Pelagiad, Fort Pelagiad", pos);
+                MWBase::Environment::get().getWorld()->changeToInteriorCell("Pelagiad, Fort Pelagiad", pos, true);
                 (*getLocalPlayer()->Position()) = pos;
                 (*getLocalPlayer()->GetCell()) = *player.getCell()->getCell();
                 myPacket->Send(getLocalPlayer(), serverAddr);
