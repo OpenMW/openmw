@@ -311,12 +311,15 @@ void CharacterController::refreshHitRecoilAnims()
         mAnimation->disable(mCurrentHit);
         mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "loop stop", "stop", 0.0f, 0);
     }
+    if (mHitState != CharState_None)
+        mIdleState = CharState_None;
 }
 
 void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState jump, bool force)
 {
     if(force || jump != mJumpState)
     {
+        mIdleState = CharState_None;
         bool startAtLoop = (jump == mJumpState);
         mJumpState = jump;
 
@@ -359,6 +362,7 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
 {
     if(force || movement != mMovementState)
     {
+        mIdleState = CharState_None;
         mMovementState = movement;
 
         std::string movementAnimName;
@@ -1197,6 +1201,7 @@ bool CharacterController::updateWeaponState()
     bool animPlaying;
     if(mAttackingOrSpell)
     {
+        mIdleState = CharState_None;
         if(mUpperBodyState == UpperCharState_WeapEquiped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
