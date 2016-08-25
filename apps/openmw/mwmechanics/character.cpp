@@ -468,7 +468,8 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
 
 void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterState idle, bool force)
 {
-    if(force || idle != mIdleState)
+    if(force || idle != mIdleState ||
+        ((idle == mIdleState) && !mAnimation->isPlaying(mCurrentIdle) && mAnimQueue.empty()))
     {
         mIdleState = idle;
         size_t numLoops = ~0ul;
