@@ -471,6 +471,7 @@ void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterStat
     if(force || idle != mIdleState)
     {
         mIdleState = idle;
+        size_t numLoops = ~0ul;
 
         std::string idle;
         MWRender::Animation::AnimPriority idlePriority (Priority_Default);
@@ -494,14 +495,15 @@ void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterStat
                 idle += weap->shortgroup;
                 if(!mAnimation->hasAnimation(idle))
                     idle = "idle";
-            }
+                numLoops = 1 + Misc::Rng::rollDice(4);
+            }  
         }
 
         mAnimation->disable(mCurrentIdle);
         mCurrentIdle = idle;
         if(!mCurrentIdle.empty())
             mAnimation->play(mCurrentIdle, idlePriority, MWRender::Animation::BlendMask_All, false,
-                             1.0f, "start", "stop", 0.0f, ~0ul, true);
+                             1.0f, "start", "stop", 0.0f, numLoops, true);
     }
 }
 
