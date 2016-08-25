@@ -500,7 +500,10 @@ void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterStat
                 idle += weap->shortgroup;
                 if(!mAnimation->hasAnimation(idle))
                     idle = "idle";
-                numLoops = 1 + Misc::Rng::rollDice(4);
+
+                // play until the Loop Stop key 2 to 5 times, then play until the Stop key
+                // this replicates original engine behavior for the "Idle1h" 1st-person animation
+                numLoops = 1 + Misc::Rng::rollDice(4); 
             }  
         }
 
