@@ -311,12 +311,15 @@ void CharacterController::refreshHitRecoilAnims()
         mAnimation->disable(mCurrentHit);
         mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "loop stop", "stop", 0.0f, 0);
     }
+    if (mHitState != CharState_None)
+        mIdleState = CharState_None;
 }
 
 void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState jump, bool force)
 {
     if(force || jump != mJumpState)
     {
+        mIdleState = CharState_None;
         bool startAtLoop = (jump == mJumpState);
         mJumpState = jump;
 
@@ -359,6 +362,7 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
 {
     if(force || movement != mMovementState)
     {
+        mIdleState = CharState_None;
         mMovementState = movement;
 
         std::string movementAnimName;
@@ -468,9 +472,11 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
 
 void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterState idle, bool force)
 {
-    if(force || idle != mIdleState)
+    if(force || idle != mIdleState ||
+        ((idle == mIdleState) && !mAnimation->isPlaying(mCurrentIdle) && mAnimQueue.empty()))
     {
         mIdleState = idle;
+        size_t numLoops = ~0ul;
 
         std::string idle;
         MWRender::Animation::AnimPriority idlePriority (Priority_Default);
@@ -494,14 +500,18 @@ void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterStat
                 idle += weap->shortgroup;
                 if(!mAnimation->hasAnimation(idle))
                     idle = "idle";
-            }
+
+                // play until the Loop Stop key 2 to 5 times, then play until the Stop key
+                // this replicates original engine behavior for the "Idle1h" 1st-person animation
+                numLoops = 1 + Misc::Rng::rollDice(4); 
+            }  
         }
 
         mAnimation->disable(mCurrentIdle);
         mCurrentIdle = idle;
         if(!mCurrentIdle.empty())
             mAnimation->play(mCurrentIdle, idlePriority, MWRender::Animation::BlendMask_All, false,
-                             1.0f, "start", "stop", 0.0f, ~0ul, true);
+                             1.0f, "start", "stop", 0.0f, numLoops, true);
     }
 }
 
@@ -1194,6 +1204,7 @@ bool CharacterController::updateWeaponState()
     bool animPlaying;
     if(mAttackingOrSpell)
     {
+        mIdleState = CharState_None;
         if(mUpperBodyState == UpperCharState_WeapEquiped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
