@@ -54,6 +54,7 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
     dedic_pl.mRace = _player->Npc()->mRace;
     dedic_pl.mHead = _player->Npc()->mHead;
     dedic_pl.mHair = _player->Npc()->mHair;
+    dedic_pl.mClass = _player->Npc()->mClass;
     dedic_pl.mName = _player->Npc()->mName;
     dedic_pl.mFlags = _player->Npc()->mFlags;
 

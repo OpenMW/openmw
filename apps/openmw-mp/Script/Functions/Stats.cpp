@@ -63,7 +63,7 @@ void ScriptFunctions::SetRace(unsigned short pid, const char *race) noexcept
     if (player->Npc()->mRace == race)
         return;
 
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Seting race for %s: %s -> %s",
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Setting race for %s: %s -> %s",
         player->Npc()->mName.c_str(),
         player->Npc()->mRace.c_str(),
         race);
@@ -77,6 +77,30 @@ const char *ScriptFunctions::GetRace(unsigned short pid) noexcept
     GET_PLAYER(pid, player, 0);
 
     return player->Npc()->mRace.c_str();
+}
+
+void ScriptFunctions::SetClass(unsigned short pid, const char *className) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    if (player->Npc()->mClass == className)
+        return;
+
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Setting class for %s: %s -> %s",
+        player->Npc()->mName.c_str(),
+        player->Npc()->mClass.c_str(),
+        className);
+
+    player->Npc()->mClass = className;
+}
+
+const char *ScriptFunctions::GetClass(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->Npc()->mClass.c_str();
 }
 
 void ScriptFunctions::SetHead(unsigned short pid, const char *race) noexcept

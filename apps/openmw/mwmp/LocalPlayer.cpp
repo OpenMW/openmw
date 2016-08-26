@@ -579,5 +579,8 @@ void LocalPlayer::updateChar()
             Npc()->mHead,
             Npc()->mHair
     );
+
+    MWBase::Environment::get().getMechanicsManager()->setPlayerClass(Npc()->mClass);
+
     MWBase::Environment::get().getWindowManager()->getInventoryWindow()->rebuildAvatar();
 }

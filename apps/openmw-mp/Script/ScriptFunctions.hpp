@@ -63,6 +63,9 @@ public:
     static void SetRace(unsigned short pid, const char *race) noexcept;
     static const char *GetRace(unsigned short pid) noexcept;
 
+    static void SetClass(unsigned short pid, const char *name) noexcept;
+    static const char *GetClass(unsigned short pid) noexcept;
+
     static void SetHead(unsigned short pid, const char *head) noexcept;
     static const char *GetHead(unsigned short pid) noexcept;
 
@@ -197,6 +200,9 @@ public:
             {"GetRace",             ScriptFunctions::GetRace},
             {"SetRace",             ScriptFunctions::SetRace},
 
+            {"SetClass",            ScriptFunctions::SetClass},
+            {"GetClass",            ScriptFunctions::GetClass},
+
             {"GetHead",             ScriptFunctions::GetHead},
             {"SetHead",             ScriptFunctions::SetHead},
 
@@ -209,10 +215,10 @@ public:
             {"GetBirthsign",        ScriptFunctions::GetBirthsign},
             {"SetBirthsign",        ScriptFunctions::SetBirthsign},
 
-            {"GetAttributeId", ScriptFunctions::GetAttributeId},
-            {"GetSkillId",     ScriptFunctions::GetSkillId},
-            {"GetAttributeName", ScriptFunctions::GetAttributeName},
-            {"GetSkillName",     ScriptFunctions::GetSkillName},
+            {"GetAttributeId",      ScriptFunctions::GetAttributeId},
+            {"GetSkillId",          ScriptFunctions::GetSkillId},
+            {"GetAttributeName",    ScriptFunctions::GetAttributeName},
+            {"GetSkillName",        ScriptFunctions::GetSkillName},
 
             {"GetAttribute",        ScriptFunctions::GetAttribute},
             {"SetAttribute",        ScriptFunctions::SetAttribute},
@@ -238,8 +244,6 @@ public:
             {"SetCurrentFatigue",   ScriptFunctions::SetCurrentFatigue},
             {"GetCurrentFatigue",   ScriptFunctions::GetCurrentFatigue},
 
-//            {"SetClass",          ScriptFunctions::SetClass},
-//            {"GetClass",          ScriptFunctions::GetClass},
             {"GetIncreaseSkill",    ScriptFunctions::GetIncreaseSkill},
             {"SetIncreaseSkill",    ScriptFunctions::SetIncreaseSkill},
 
