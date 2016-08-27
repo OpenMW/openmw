@@ -15,6 +15,7 @@
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <components/openmw-mp/Version.hpp>
 
 using namespace std;
 using namespace mwmp;
@@ -140,7 +141,7 @@ int main(int argc, char *argv[])
 
     vector<string> plugins (Utils::split(mgr.getString("plugins", "Plugins"), ','));
 
-    printVersion("0.0.1b", 1);
+    printVersion(TES3MP_VERSION, TES3MP_PROTO_VERSION);
 
 
     setenv("AMXFILE", moddir.c_str(), 1);
@@ -153,8 +154,7 @@ int main(int argc, char *argv[])
 
     RakNet::RakPeerInterface *peer = RakNet::RakPeerInterface::GetInstance();
 
-    const char passw[8] = "1234567";
-    peer->SetIncomingPassword(passw, sizeof(passw));
+    peer->SetIncomingPassword(TES3MP_VERSION, (int)strlen(TES3MP_VERSION));
 
     if (RakNet::NonNumericHostString(addr.c_str()))
     {

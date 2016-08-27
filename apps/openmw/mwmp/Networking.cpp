@@ -17,6 +17,7 @@
 #include "Networking.hpp"
 #include "../mwstate/statemanagerimp.hpp"
 #include <components/openmw-mp/Log.hpp>
+#include <components/openmw-mp/Version.hpp>
 #include "DedicatedPlayer.hpp"
 #include "Main.hpp"
 
@@ -100,10 +101,9 @@ void Networking::Connect(const std::string &ip, unsigned short port)
     RakNet::SystemAddress master;
     master.SetBinaryAddress(ip.c_str());
     master.SetPortHostOrder(port);
-    const char passw[8] = "1234567";
     std::string errmsg = "";
 
-    if (peer->Connect(master.ToString(false), master.GetPort(), passw, sizeof(passw), 0, 0, 3, 500, 0) != RakNet::CONNECTION_ATTEMPT_STARTED)
+    if (peer->Connect(master.ToString(false), master.GetPort(), TES3MP_VERSION, (int) strlen(TES3MP_VERSION), 0, 0, 3, 500, 0) != RakNet::CONNECTION_ATTEMPT_STARTED)
         errmsg = "Connection attempt failed.\n";
 
     bool queue = true;
