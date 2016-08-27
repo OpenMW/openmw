@@ -377,7 +377,12 @@ namespace MWGui
         ButtonList buttons;
         buttons.push_back(MWBase::Environment::get().getWindowManager()->getGameSettingString("sClassChoiceMenu1", ""));
         buttons.push_back(MWBase::Environment::get().getWindowManager()->getGameSettingString("sClassChoiceMenu2", ""));
+        
+        /* Disabled for tes3mp until it can handle custom classes
+        
         buttons.push_back(MWBase::Environment::get().getWindowManager()->getGameSettingString("sClassChoiceMenu3", ""));
+        */
+
         buttons.push_back(MWBase::Environment::get().getWindowManager()->getGameSettingString("sBack", ""));
         setButtons(buttons);
     }
