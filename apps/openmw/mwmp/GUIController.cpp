@@ -95,7 +95,6 @@ void mwmp::GUIController::ShowInputBox(const BasePlayer::GUIMessageBox &guiMessa
     mInputBox = new MWGui::TextInputDialog();
     mInputBox->setTextLabel(guiMessageBox.label);
     mInputBox->eventDone += MyGUI::newDelegate(this, &GUIController::OnInputBoxDone);
-    mInputBox->setVisible(true);
 
 }
 
@@ -161,7 +160,11 @@ void mwmp::GUIController::WM_UpdateVisible(MWGui::GuiMode mode)
     switch(mode)
     {
         case MWGui::GM_TES3MPPipe:
+        {
+            if (mInputBox != 0)
+                mInputBox->setVisible(true);
             break;
+        }
         default:
             break;
     }
