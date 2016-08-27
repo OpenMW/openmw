@@ -7,6 +7,7 @@
 
 #include <components/settings/settings.hpp>
 #include <apps/openmw/mwgui/textinput.hpp>
+#include <apps/openmw/mwgui/mode.hpp>
 #include <components/openmw-mp/Base/BasePlayer.hpp>
 #include "GUIChat.hpp"
 
@@ -33,6 +34,7 @@ namespace mwmp
 
         void update(float dt);
 
+        void WM_UpdateVisible(MWGui::GuiMode mode);
     private:
         GUIChat *mChat;
         int keySay;

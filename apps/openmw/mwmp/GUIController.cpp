@@ -90,6 +90,7 @@ void mwmp::GUIController::ShowInputBox(const BasePlayer::GUIMessageBox &guiMessa
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
 
     windowManager->removeDialog(mInputBox);
+    windowManager->pushGuiMode(MWGui::GM_TES3MPPipe);
     mInputBox = 0;
     mInputBox = new MWGui::TextInputDialog();
     mInputBox->setTextLabel(guiMessageBox.label);
@@ -108,6 +109,7 @@ void mwmp::GUIController::OnInputBoxDone(MWGui::WindowBase *parWindow)
 
     MWBase::Environment::get().getWindowManager()->removeDialog(mInputBox);
     mInputBox = 0;
+    MWBase::Environment::get().getWindowManager()->popGuiMode();
 }
 
 bool mwmp::GUIController::pressedKey(int key)
@@ -152,6 +154,17 @@ void mwmp::GUIController::update(float dt)
         Main::get().getNetworking()->GetPacket(ID_GUI_MESSAGEBOX)->Send(Main::get().getLocalPlayer());
     }
 
+}
+
+void mwmp::GUIController::WM_UpdateVisible(MWGui::GuiMode mode)
+{
+    switch(mode)
+    {
+        case MWGui::GM_TES3MPPipe:
+            break;
+        default:
+            break;
+    }
 }
 
 

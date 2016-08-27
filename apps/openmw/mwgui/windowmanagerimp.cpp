@@ -45,6 +45,7 @@
 #include <components/sdlutil/sdlcursormanager.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
+#include <apps/openmw/mwmp/Main.hpp>
 
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -675,6 +676,9 @@ namespace MWGui
                     mHud->setVisible(false);
                     mToolTips->setVisible(false);
                     setCursorVisible(mMessageBoxManager && mMessageBoxManager->isInteractiveMessageBox());
+                    break;
+                case GM_TES3MPPipe:
+                    mwmp::Main::get().getGUIController()->WM_UpdateVisible(mode);
                     break;
                 default:
                     // Unsupported mode, switch back to game
