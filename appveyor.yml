@@ -51,8 +51,8 @@ before_build:
     - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -u -p %PLATFORM% -v %msvc%
 
 build_script:
-    - cmd: if %PLATFORM%==Win32 set build=Build_32
-    - cmd: if %PLATFORM%==x64 set build=Build_64
+    - cmd: if %PLATFORM%==Win32 set build=MSVC%msvc%_32
+    - cmd: if %PLATFORM%==x64 set build=MSVC%msvc%_64
     - cmd: msbuild %build%\OpenMW.sln /t:Build /p:Configuration=%configuration% /m:2 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 test: off
