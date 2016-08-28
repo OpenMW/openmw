@@ -491,16 +491,16 @@ cd $DEPS
 echo
 
 # OpenAL
-printf "OpenAL-Soft 1.16.0... "
+printf "OpenAL-Soft 1.17.2... "
 {
-	if [ -d openal-soft-1.16.0-bin ]; then
+	if [ -d openal-soft-1.17.2-bin ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf openal-soft-1.16.0-bin
-		eval 7z x -y OpenAL-Soft-1.16.0.zip $STRIP
+		rm -rf openal-soft-1.17.2-bin
+		eval 7z x -y OpenAL-Soft-1.17.2.zip $STRIP
 	fi
 
-	OPENAL_SDK="$(real_pwd)/openal-soft-1.16.0-bin"
+	OPENAL_SDK="$(real_pwd)/openal-soft-1.17.2-bin"
 
 	add_cmake_opts -DOPENAL_INCLUDE_DIR="$OPENAL_SDK/include/AL" \
 		-DOPENAL_LIBRARY="$OPENAL_SDK/libs/Win$BITS/OpenAL32.lib"
