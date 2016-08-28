@@ -103,9 +103,7 @@ if [ -z $APPVEYOR ]; then
 else
 	echo "Running prebuild in Appveyor."
 
-	cd ${APPVEYOR_BUILD_FOLDER:-}
-	VERSION="$(cat README.md | grep Version: | awk '{ print $3; }')-$(git rev-parse --short HEAD)"
-	appveyor UpdateBuild -Version "$VERSION" > /dev/null &
+	cd "$APPVEYOR_BUILD_FOLDER"
 fi
 
 run_cmd() {
