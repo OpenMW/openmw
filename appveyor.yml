@@ -43,7 +43,8 @@ cache:
     - C:\projects\openmw\deps\ffmpeg-3.0.1-dev-win64.7z
     - C:\projects\openmw\deps\ffmpeg-3.0.1-win32.7z
     - C:\projects\openmw\deps\ffmpeg-3.0.1-win64.7z
-    - C:\projects\openmw\deps\qt-5-install.qs
+    - C:\projects\openmw\deps\OpenAL-Soft-1.17.2.zip
+    - C:\projects\openmw\deps\SDL2-2.0.4.zip
 
 clone_folder: C:\projects\openmw
 

@@ -583,7 +583,7 @@ fi
 
 			echo Done.
 			printf "  Cleaning up extraneous data... "
-			rm -r "$(real_pwd)/Qt/"{Docs,Examples,Tools,vcredist,"MaintenanceTool.*"}
+			rm -r "$(real_pwd)/Qt/"{dist,Docs,Examples,Tools,vcredist,components.xml,MaintenanceTool.dat,MaintenanceTool.exe,MaintenanceTool.ini,network.xml,qt-install.qs}
 		fi
 
 		cd $QT_SDK
