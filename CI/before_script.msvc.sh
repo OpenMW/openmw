@@ -4,6 +4,7 @@ set -euo pipefail
 
 APPVEYOR=${APPVEYOR:-}
 CI=${CI:-}
+STEP=${STEP:-}
 
 VERBOSE=""
 STRIP=""
