@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-APPVEYOR=""
-CI=""
+APPVEYOR=${APPVEYOR:-}
+CI=${CI:-}
 
 VERBOSE=""
 STRIP=""
