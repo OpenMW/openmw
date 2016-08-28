@@ -679,7 +679,7 @@ if [ ! -z $CI ]; then
 fi
 
 if [ -z $VERBOSE ]; then
-	printf "- Configuring... "
+	printf -- "- Configuring... "
 else
 	echo "- cmake .. $CMAKE_OPTS"
 fi
@@ -702,13 +702,13 @@ if [ -z $CI ]; then
 	echo "- Copying Runtime DLLs..."
 	mkdir -p $BUILD_CONFIG
 	for DLL in $RUNTIME_DLLS; do
-		echo "  `basename $DLL`."
+		echo "    `basename $DLL`."
 		cp "$DLL" $BUILD_CONFIG/
 	done
 	echo "- OSG Plugin DLLs..."
 	mkdir -p $BUILD_CONFIG/osgPlugins-3.4.0
 	for DLL in $OSG_PLUGINS; do
-		echo "  `basename $DLL`."
+		echo "    `basename $DLL`."
 		cp "$DLL" $BUILD_CONFIG/osgPlugins-3.4.0
 	done
 	echo
