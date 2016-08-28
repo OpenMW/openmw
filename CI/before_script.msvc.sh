@@ -118,7 +118,7 @@ run_cmd() {
 
 		if [ $RET -ne 0 ]; then
 			if [ -z $APPVEYOR ]; then
-				echo "Command $CMD failed, output can be found in `real_pwd`/output.log"
+				echo "Command $CMD failed, output can be found in $(real_pwd)/output.log"
 			else
 				echo
 				echo "Command $CMD failed;"
@@ -198,7 +198,7 @@ add_osg_dlls() {
 }
 
 if [ -z $PLATFORM ]; then
-	PLATFORM=`uname -m`
+	PLATFORM="$(uname -m)"
 fi
 
 if [ -z $CONFIGURATION ]; then
@@ -283,7 +283,7 @@ echo
 mkdir -p deps
 cd deps
 
-DEPS="`pwd`"
+DEPS="$(pwd)"
 
 if [ -z $SKIP_DOWNLOAD ]; then
 	echo "Downloading dependency packages."
@@ -358,7 +358,7 @@ fi
 mkdir -p "${BUILD_DIR}/deps"
 cd "${BUILD_DIR}/deps"
 
-DEPS_INSTALL=`pwd`
+DEPS_INSTALL="$(pwd)"
 cd $DEPS
 
 echo
@@ -402,7 +402,7 @@ fi
 			BOOST_SDK="c:/Libraries/boost_1_60_0"
 		fi
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
-			-DBOOST_LIBRARYDIR="$BOOST_SDK/lib${BITS}-msvc-${MSVC_VER}.0"
+			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.0"
 
 		echo Done.
 	fi
@@ -416,7 +416,7 @@ printf "Bullet 2.83.7... "
 	cd $DEPS_INSTALL
 
 	if [ -d Bullet ]; then
-		printf "Exists. (No version checking) "
+		printf -- "Exists. (No version checking) "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf Bullet
 		eval 7z x -y "${DEPS}/Bullet-2.83.7-msvc${MSVC_YEAR}-win${BITS}.7z" $STRIP
@@ -503,8 +503,8 @@ printf "OpenAL-Soft 1.17.2... "
 
 	OPENAL_SDK="$(real_pwd)/openal-soft-1.17.2-bin"
 
-	add_cmake_opts -DOPENAL_INCLUDE_DIR="$OPENAL_SDK/include/AL" \
-		-DOPENAL_LIBRARY="$OPENAL_SDK/libs/Win$BITS/OpenAL32.lib"
+	add_cmake_opts -DOPENAL_INCLUDE_DIR="${OPENAL_SDK}/include/AL" \
+		-DOPENAL_LIBRARY="${OPENAL_SD}K/libs/Win${BITS}/OpenAL32.lib"
 
 	echo Done.
 }
@@ -538,10 +538,11 @@ printf "OSG 3.4.0-scrawl... "
 		SUFFIX=""
 	fi
 
-	add_runtime_dlls "$(pwd)/OSG/bin/"{OpenThreads,zlib}${SUFFIX}.dll \
+	add_runtime_dlls "$(pwd)/OSG/bin/"{OpenThreads,zlib,libpng*}${SUFFIX}.dll \
 		"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer}${SUFFIX}.dll
 
-	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.0/osgdb_"{bmp,dds,jpeg,png,tga}${SUFFIX}.dll
+	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.0/osgdb_"{bmp,dds,jpeg,osg,png,tga}${SUFFIX}.dll
+	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.0/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer}${SUFFIX}.dll
 
 	echo Done.
 }
@@ -575,34 +576,36 @@ fi
 			sed -i "s|INSTALL_DIR|$(real_pwd)/Qt|" qt-install.qs
 			sed -i "s/qt.VERSION.winBITS_msvcYEAR/qt.57.win${BITS}_msvc${MSVC_YEAR}${SUFFIX}/" qt-install.qs
 
-			printf "(Installation might take a while) "
+			printf -- "(Installation might take a while) "
 			"${DEPS}/qt-5.7.0-msvc${MSVC_YEAR}-win${BITS}.exe" --script qt-install.qs --silent
 
 			mv qt-install.qs Qt/
 
 			echo Done.
 			printf "  Cleaning up extraneous data... "
-			rm -r "$(real_pwd)/Qt/"{Docs,Examples,Tools,vcredist,MaintenanceTool.*}
+			rm -r "$(real_pwd)/Qt/"{Docs,Examples,Tools,vcredist,"MaintenanceTool.*"}
 		fi
 
 		cd $QT_SDK
 
 		add_cmake_opts -DDESIRED_QT_VERSION=5 \
-			-DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe" \
+			-DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
 			-DCMAKE_PREFIX_PATH="$QT_SDK"
 
 		if [ $CONFIGURATION == "Debug" ]; then
 			SUFFIX="d"
+		else
+			SUFFIX=""
 		fi
 
-		add_runtime_dlls "$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL}$SUFFIX.dll
+		add_runtime_dlls "$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${SUFFIX}.dll
 
 		echo Done.
 	else
 		QT_SDK="C:/Qt/5.7/msvc${MSVC_YEAR}${SUFFIX}"
 
 		add_cmake_opts -DDESIRED_QT_VERSION=5 \
-			-DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe" \
+			-DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
 			-DCMAKE_PREFIX_PATH="$QT_SDK"
 
 		echo Done.
@@ -678,6 +681,25 @@ if [ ! -z $CI ]; then
 	esac
 fi
 
+# NOTE: Disable this when/if we want to run test cases
+if [ -z $CI ]; then
+	echo "- Copying Runtime DLLs..."
+	mkdir -p $BUILD_CONFIG
+	for DLL in $RUNTIME_DLLS; do
+		echo "    $(basename $DLL)."
+		cp "$DLL" $BUILD_CONFIG/
+	done
+	echo
+
+	echo "- OSG Plugin DLLs..."
+	mkdir -p $BUILD_CONFIG/osgPlugins-3.4.0
+	for DLL in $OSG_PLUGINS; do
+		echo "    $(basename $DLL)."
+		cp "$DLL" $BUILD_CONFIG/osgPlugins-3.4.0
+	done
+	echo
+fi
+
 if [ -z $VERBOSE ]; then
 	printf -- "- Configuring... "
 else
@@ -695,26 +717,8 @@ if [ -z $VERBOSE ]; then
 	fi
 fi
 
-echo
-
-# NOTE: Disable this when/if we want to run test cases
 if [ -z $CI ]; then
-	echo "- Copying Runtime DLLs..."
-	mkdir -p $BUILD_CONFIG
-	for DLL in $RUNTIME_DLLS; do
-		echo "    `basename $DLL`."
-		cp "$DLL" $BUILD_CONFIG/
-	done
-	echo "- OSG Plugin DLLs..."
-	mkdir -p $BUILD_CONFIG/osgPlugins-3.4.0
-	for DLL in $OSG_PLUGINS; do
-		echo "    `basename $DLL`."
-		cp "$DLL" $BUILD_CONFIG/osgPlugins-3.4.0
-	done
-	echo
-	
 	echo "- Copying Runtime Resources/Config Files"
-	
 	echo "    gamecontrollerdb.txt"
 	cp gamecontrollerdb.txt $BUILD_CONFIG/gamecontrollerdb.txt
 	echo "    openmw.cfg"
@@ -725,6 +729,7 @@ if [ -z $CI ]; then
 	cp settings-default.cfg $BUILD_CONFIG/settings-default.cfg
 	echo "    resources/"
 	cp -r resources $BUILD_CONFIG/resources
+	echo
 fi
 
 exit $RET
