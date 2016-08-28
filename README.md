@@ -30,3 +30,8 @@ Getting Started
 * [Community forums](https://steamcommunity.com/groups/mwmulti)
 * [Installation and build instructions](https://github.com/TES3MP/openmw-tes3mp/wiki/Installation-and-build-instructions)
 * [Known issues and bug reports](https://github.com/TES3MP/openmw-tes3mp/issues)
+
+Donations
+---------------
+
+At the moment, TES3MP itself isn't accepting donations, however you can benefit the project by supporting OpenMW and or by [becoming Koncord's patron](https://www.patreon.com/Koncord).
