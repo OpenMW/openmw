@@ -504,7 +504,7 @@ printf "OpenAL-Soft 1.17.2... "
 	OPENAL_SDK="$(real_pwd)/openal-soft-1.17.2-bin"
 
 	add_cmake_opts -DOPENAL_INCLUDE_DIR="${OPENAL_SDK}/include/AL" \
-		-DOPENAL_LIBRARY="${OPENAL_SD}K/libs/Win${BITS}/OpenAL32.lib"
+		-DOPENAL_LIBRARY="${OPENAL_SDK}/libs/Win${BITS}/OpenAL32.lib"
 
 	echo Done.
 }
