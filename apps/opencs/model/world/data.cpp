@@ -902,6 +902,8 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     mReader->setIndex(mReaderIndex++);
     mReader->open (path.string());
 
+    mContentFileNames.insert(std::make_pair(path.filename().string(), mReader->getIndex()));
+
     mBase = base;
     mProject = project;
 
@@ -912,6 +914,35 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
         metaData.load (*mReader);
 
         mMetaData.setRecord (0, Record<MetaData> (RecordBase::State_ModifiedOnly, 0, &metaData));
+    }
+
+    // Fix uninitialized master data index
+    for (std::vector<ESM::Header::MasterData>::const_iterator masterData = mReader->getGameFiles().begin();
+        masterData != mReader->getGameFiles().end(); ++masterData)
+    {
+        std::map<std::string, int>::iterator nameResult = mContentFileNames.find(masterData->name);
+        if (nameResult != mContentFileNames.end())
+        {
+            ESM::Header::MasterData& hackedMasterData = const_cast<ESM::Header::MasterData&>(*masterData);
+            hackedMasterData.index = nameResult->second;
+        }
+    }
+
+    // Needed for saving
+    if (!mBase)
+    {
+        mReverseContentFiles.insert(std::make_pair(mReader->getIndex(), 0));
+    }
+    if (mProject)
+    {
+        mReverseContentFiles.insert(std::make_pair(mReader->getIndex(), 0));
+
+        // A new project has no header, so extrapolate the content files from the reader index
+        // The base/project index of 0 will not be overwritten
+        for (int i = 0; i < mReader->getIndex(); ++i)
+        {
+            mReverseContentFiles.insert(std::make_pair(i, i+1));
+        }
     }
 
     return mReader->getRecordCount();
@@ -1169,6 +1200,16 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mMagicEffects) +
         count (state, mReferenceables) +
         count (state, mPathgrids);
+}
+
+int CSMWorld::Data::getPluginContentFile(int currentContentFile)
+{
+    std::map<int, int>::iterator searchResult = mReverseContentFiles.find(currentContentFile);
+
+    if (searchResult != mReverseContentFiles.end())
+        return searchResult->second;
+    else
+        return 0; // Assume faulty plugin with original content
 }
 
 std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
