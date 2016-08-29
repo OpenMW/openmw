@@ -6,6 +6,7 @@
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
 
+#include "Packets/PacketClass.hpp"
 #include "Packets/PacketPosition.hpp"
 #include "Packets/PacketBaseInfo.hpp"
 #include "components/openmw-mp/Packets/PacketEquiped.hpp"
@@ -59,6 +60,7 @@ mwmp::PacketsController::PacketsController(RakNet::RakPeerInterface *peer)
 
     AddPacket<PacketHandshake>(&packets, peer);
     AddPacket<PacketGUIBoxes>(&packets, peer);
+    AddPacket<PacketClass>(&packets, peer);
 }
 
 

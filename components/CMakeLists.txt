@@ -150,7 +150,8 @@ add_component_dir (openmw-mp
         PacketsController
         Packets/BasePacket Packets/PacketBaseInfo Packets/PacketPosition Packets/PacketEquiped Packets/PacketAttributesAndStats
         Packets/PacketAttack Packets/PacketMainStats Packets/PacketCell Packets/PacketDrawState Packets/PacketChatMessage
-        Packets/PacketCharGen Packets/PacketAttribute Packets/PacketSkill Packets/PacketHandshake Packets/PacketGUIBoxes)
+        Packets/PacketCharGen Packets/PacketAttribute Packets/PacketSkill Packets/PacketHandshake Packets/PacketGUIBoxes
+        Packets/PacketClass)
 
 add_component_dir (fallback
     fallback validate
