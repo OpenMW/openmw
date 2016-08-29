@@ -195,6 +195,11 @@ add_osg_dlls() {
 	OSG_PLUGINS="$OSG_PLUGINS $@"
 }
 
+QT_PLATFORMS=""
+add_qt_platform_dlls() {
+	QT_PLATFORMS="$QT_PLATFORMS $@"
+}
+
 if [ -z $PLATFORM ]; then
 	PLATFORM="$(uname -m)"
 fi
@@ -596,7 +601,9 @@ fi
 			SUFFIX=""
 		fi
 
-		add_runtime_dlls "$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${SUFFIX}.dll
+		add_runtime_dlls "$(pwd)/bin/lib"{EGL,GLESv2}${SUFFIX}.dll \
+			"$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${SUFFIX}.dll
+		add_qt_platform_dlls "$(pwd)/plugins/platforms/qwindows${SUFFIX}.dll"
 
 		echo Done.
 	else
@@ -694,6 +701,14 @@ if [ -z $CI ]; then
 	for DLL in $OSG_PLUGINS; do
 		echo "    $(basename $DLL)."
 		cp "$DLL" $BUILD_CONFIG/osgPlugins-3.4.0
+	done
+	echo
+
+	echo "- Qt Platform DLLs..."
+	mkdir -p ${BUILD_CONFIG}/platforms
+	for DLL in $QT_PLATFORMS; do
+		echo "    $(basename $DLL)"
+		cp "$DLL" "${BUILD_CONFIG}/platforms"
 	done
 	echo
 fi
