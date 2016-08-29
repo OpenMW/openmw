@@ -116,7 +116,7 @@ namespace Interpreter
 
                 for (std::size_t i=0; i<arg0; ++i)
                 {
-                    int index = runtime[0].mInteger;
+                    index = runtime[0].mInteger;
                     runtime.pop();
                     buttons.push_back (runtime.getStringLiteral (index));
                 }
