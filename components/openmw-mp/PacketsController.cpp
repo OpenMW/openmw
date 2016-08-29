@@ -2,6 +2,10 @@
 // Created by koncord on 15.01.16.
 //
 
+#include <boost/shared_ptr.hpp>
+#include <boost/foreach.hpp>
+#include <boost/make_shared.hpp>
+
 #include "Packets/PacketPosition.hpp"
 #include "Packets/PacketBaseInfo.hpp"
 #include "components/openmw-mp/Packets/PacketEquiped.hpp"
@@ -23,123 +27,48 @@
 
 #include "PacketsController.hpp"
 
+template <typename T>
+inline void AddPacket(mwmp::PacketsController::packets_t *packets, RakNet::RakPeerInterface *peer)
+{
+    T *packet = new T(peer);
+    typedef mwmp::PacketsController::packets_t::value_type value_t;
+    packets->insert(value_t(packet->GetPacketID(), value_t::second_type(packet)));
+}
 
 mwmp::PacketsController::PacketsController(RakNet::RakPeerInterface *peer)
 {
-    packetPosition = new PacketPosition(peer);
-    packetCell = new PacketCell(peer);
-    packetBaseInfo = new PacketBaseInfo(peer);
-    packetEquiped = new PacketEquiped(peer);
-    attributesAndStats = new PacketAttributesAndStats(peer);
-    packetAttack = new PacketAttack(peer);
-    packetMainStats = new PacketMainStats(peer);
-    packetResurrect = new PacketResurrect(peer);
-    packetDie = new PacketDie(peer);
-    packetDrawState = new PacketDrawState(peer);
+    AddPacket<PacketPosition>(&packets, peer);
+    AddPacket<PacketCell>(&packets, peer);
+    AddPacket<PacketBaseInfo>(&packets, peer);
+    AddPacket<PacketEquiped>(&packets, peer);
 
-    packetSendMyID = new PacketSendMyID(peer);
-    packetDisconnect = new PacketDisconnect(peer);
+    AddPacket<PacketAttributesAndStats>(&packets, peer);
+    AddPacket<PacketAttack>(&packets, peer);
+    AddPacket<PacketMainStats>(&packets, peer);
+    AddPacket<PacketResurrect>(&packets, peer);
 
-    packetChatMessage = new PacketChatMessage(peer);
-    packetCharGen = new PacketCharGen(peer);
+    AddPacket<PacketDie>(&packets, peer);
+    AddPacket<PacketDrawState>(&packets, peer);
+    AddPacket<PacketSendMyID>(&packets, peer);
+    AddPacket<PacketDisconnect>(&packets, peer);
 
-    packetAttribute = new PacketAttribute(peer);
-    packetSkill = new PacketSkill(peer);
+    AddPacket<PacketChatMessage>(&packets, peer);
+    AddPacket<PacketCharGen>(&packets, peer);
+    AddPacket<PacketAttribute>(&packets, peer);
+    AddPacket<PacketSkill>(&packets, peer);
 
-    packetHandshake = new PacketHandshake(peer);
-
-    packetGUIBoxes = new PacketGUIBoxes(peer);
+    AddPacket<PacketHandshake>(&packets, peer);
+    AddPacket<PacketGUIBoxes>(&packets, peer);
 }
 
 
 mwmp::BasePacket *mwmp::PacketsController::GetPacket(RakNet::MessageID id)
 {
-    BasePacket * packet;
-    switch (id)
-    {
-        case ID_GAME_UPDATE_POS:
-            packet = packetPosition;
-            break;
-        case ID_GAME_CELL:
-            packet = packetCell;
-            break;
-        case ID_GAME_BASE_INFO:
-            packet = packetBaseInfo;
-            break;
-        case ID_GAME_UPDATE_EQUIPED:
-            packet = packetEquiped;
-            break;
-        case ID_GAME_UPDATE_SKILLS:
-            packet = attributesAndStats;
-            break;
-        case ID_GAME_ATTACK:
-            packet = packetAttack;
-            break;
-        case ID_GAME_UPDATE_BASESTATS:
-            packet = packetMainStats;
-            break;
-        case ID_GAME_RESURRECT:
-            packet = packetResurrect;
-            break;
-        case ID_GAME_DIE:
-            packet = packetDie;
-            break;
-        case ID_GAME_DRAWSTATE:
-            packet = packetDrawState;
-            break;
-        case ID_USER_MYID:
-            packet = packetSendMyID;
-            break;
-        case ID_USER_DISCONNECTED:
-            packet = packetDisconnect;
-            break;
-        case ID_CHAT_MESSAGE:
-            packet = packetChatMessage;
-            break;
-        case ID_GAME_CHARGEN:
-            packet = packetCharGen;
-            break;
-        case ID_GAME_ATTRIBUTE:
-            packet = packetAttribute;
-            break;
-        case ID_GAME_SKILL:
-            packet = packetSkill;
-            break;
-        case ID_HANDSHAKE:
-            packet = packetHandshake;
-            break;
-        case ID_GUI_MESSAGEBOX:
-            packet = packetGUIBoxes;
-            break;
-        default:
-            packet = 0;
-    }
-    return packet;
+    return packets[(unsigned char)id].get();
 }
 
 void mwmp::PacketsController::SetStream(RakNet::BitStream *inStream, RakNet::BitStream *outStream)
 {
-    packetPosition->SetStreams(inStream, outStream);
-    packetCell->SetStreams(inStream, outStream);
-    packetBaseInfo->SetStreams(inStream, outStream);
-    packetEquiped->SetStreams(inStream, outStream);
-    attributesAndStats->SetStreams(inStream, outStream);
-    packetAttack->SetStreams(inStream, outStream);
-    packetMainStats->SetStreams(inStream, outStream);
-    packetResurrect->SetStreams(inStream, outStream);
-    packetDie->SetStreams(inStream, outStream);
-    packetDrawState->SetStreams(inStream, outStream);
-
-    packetSendMyID->SetStreams(inStream, outStream);
-    packetDisconnect->SetStreams(inStream, outStream);
-
-    packetChatMessage->SetStreams(inStream, outStream);
-    packetCharGen->SetStreams(inStream, outStream);
-
-    packetAttribute->SetStreams(inStream, outStream);
-    packetSkill->SetStreams(inStream, outStream);
-
-    packetHandshake->SetStreams(inStream, outStream);
-
-    packetGUIBoxes->SetStreams(inStream, outStream);
+    BOOST_FOREACH( packets_t::value_type &packet, packets )
+        packet.second->SetStreams(inStream, outStream);
 }

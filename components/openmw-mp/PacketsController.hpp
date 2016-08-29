@@ -8,62 +8,21 @@
 
 #include <RakPeerInterface.h>
 #include "Packets/BasePacket.hpp"
+#include <map>
+#include <boost/shared_ptr.hpp>
 
 namespace mwmp
 {
-    class PacketPosition;
-    class PacketCell;
-    class PacketBaseInfo;
-    class PacketEquiped;
-    class PacketAttributesAndStats;
-    class PacketAttack;
-    class PacketMainStats;
-    class PacketResurrect;
-    class PacketDie;
-    class PacketDrawState;
-
-    class PacketSendMyID;
-    class PacketDisconnect;
-
-    class PacketChatMessage;
-    class PacketCharGen;
-
-    class PacketAttribute;
-    class PacketSkill;
-    class PacketHandshake;
-
-    class PacketGUIBoxes;
-
     class PacketsController
     {
     public:
         PacketsController(RakNet::RakPeerInterface *peer);
-
         BasePacket *GetPacket(RakNet::MessageID id);
-
         void SetStream(RakNet::BitStream *inStream, RakNet::BitStream *outStream);
 
+        typedef std::map<unsigned char, boost::shared_ptr<BasePacket> > packets_t;
     private:
-        PacketPosition *packetPosition;
-        PacketCell *packetCell;
-        PacketBaseInfo *packetBaseInfo;
-        PacketEquiped *packetEquiped;
-        PacketAttributesAndStats *attributesAndStats;
-        PacketAttack *packetAttack;
-        PacketMainStats *packetMainStats;
-        PacketResurrect *packetResurrect;
-        PacketDie *packetDie;
-        PacketDrawState *packetDrawState;
-
-        PacketSendMyID *packetSendMyID;
-        PacketDisconnect *packetDisconnect;
-
-        PacketChatMessage *packetChatMessage;
-        PacketCharGen *packetCharGen;
-        PacketAttribute *packetAttribute;
-        PacketSkill *packetSkill;
-        PacketHandshake *packetHandshake;
-        PacketGUIBoxes *packetGUIBoxes;
+        packets_t packets;
     };
 }
 
