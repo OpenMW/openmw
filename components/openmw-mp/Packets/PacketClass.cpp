@@ -15,9 +15,7 @@ void mwmp::PacketClass::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, 
     BasePacket::Packet(bs, player, send);
 
     RW(player->klass.mId, send);
-    RW(player->customClass, send);
-
-    if(player->customClass)
+    if(player->klass.mId.empty()) // custom class
     {
         RW(player->klass.mName, send);
         RW(player->klass.mDescription, send);

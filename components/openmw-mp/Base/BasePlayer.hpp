@@ -9,6 +9,7 @@
 #include <components/esm/loadcell.hpp>
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/creaturestats.hpp>
+#include <components/esm/loadclas.hpp>
 #include <RakNetTypes.h>
 
 namespace mwmp
@@ -142,6 +143,7 @@ namespace mwmp
         }
         RakNet::RakNetGUID guid;
         GUIMessageBox guiMessageBox;
+        ESM::Class klass;
 
     protected:
         ESM::Position pos;
