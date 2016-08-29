@@ -38,6 +38,11 @@ namespace mwmp
             return (sizeof(packetID) + RakNet::RakNetGUID::size()); // packetID + RakNetGUID (uint64_t)
         }
 
+        unsigned char GetPacketID()
+        {
+            return packetID;
+        }
+
     protected:
         template<class templateType>
         void RW(templateType &data, unsigned int size, bool write)
