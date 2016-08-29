@@ -58,7 +58,7 @@ namespace
         }
         for (size_t j = 0; j < numbytes; ++j)
         {
-            unsigned char ch = utf8[i++];
+            ch = utf8[i++];
             if (ch < 0x80 || ch > 0xBF)
                 throw std::logic_error("not a UTF-8 string");
             unicode <<= 6;
@@ -374,7 +374,7 @@ namespace Gui
                     if (it->first != i)
                         continue;
 
-                    MyGUI::xml::ElementPtr code = codes->createChild("Code");
+                    code = codes->createChild("Code");
                     code->addAttribute("index", it->second);
                     code->addAttribute("coord", MyGUI::utility::toString(x1) + " "
                                                 + MyGUI::utility::toString(y1) + " "
