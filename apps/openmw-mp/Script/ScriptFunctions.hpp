@@ -10,6 +10,7 @@
 #include <Script/Functions/GUI.hpp>
 #include <Script/Functions/Stats.hpp>
 #include <Script/Functions/Items.hpp>
+#include <Script/Functions/World.hpp>
 #include <RakNetTypes.h>
 //#include <amx/amx.h>
 #include <tuple>
@@ -82,6 +83,7 @@ public:
             ITEMAPI,
             GUIFUNCTIONS,
             CHARCLASSFUNCTIONS,
+            WORLDFUNCTIONS,
 
 
     };

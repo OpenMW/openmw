@@ -144,6 +144,9 @@ namespace mwmp
         RakNet::RakNetGUID guid;
         GUIMessageBox guiMessageBox;
         ESM::Class klass;
+        int month;
+        int day;
+        double hour;
 
     protected:
         ESM::Position pos;
