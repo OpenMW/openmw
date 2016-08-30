@@ -982,10 +982,19 @@ void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, boo
         };
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+
         if(!magicEffect->mHitSound.empty())
+        {
+            if (sndMgr->getSoundPlaying(mPtr, magicEffect->mHitSound))
+                sndMgr->stopSound3D(mPtr, magicEffect->mHitSound);
             sndMgr->playSound3D(mPtr, magicEffect->mHitSound, 1.0f, 1.0f);
+        }
         else
+        {
+            if (sndMgr->getSoundPlaying(mPtr, schools[magicEffect->mData.mSchool]+" hit"))
+                sndMgr->stopSound3D(mPtr, schools[magicEffect->mData.mSchool]+" hit");
             sndMgr->playSound3D(mPtr, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
+        }
     }
 
     if (!magicEffect->mHit.empty())

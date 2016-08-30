@@ -542,9 +542,17 @@ namespace MWMechanics
 
                         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
                         if(!magicEffect->mHitSound.empty())
+                        {
+                            if (sndMgr->getSoundPlaying(target, magicEffect->mHitSound))
+                                sndMgr->stopSound3D(target, magicEffect->mHitSound);
                             sndMgr->playSound3D(target, magicEffect->mHitSound, 1.0f, 1.0f);
+                        }
                         else
+                        {
+                            if (sndMgr->getSoundPlaying(target, schools[magicEffect->mData.mSchool]+" hit"))
+                                sndMgr->stopSound3D(target, schools[magicEffect->mData.mSchool]+" hit");
                             sndMgr->playSound3D(target, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
+                        }
                         firstAppliedEffect = false;
                     }
 
@@ -623,8 +631,6 @@ namespace MWMechanics
                     }
                     target.getClass().unlock(target);
                 }
-                else
-                    MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
                 return true;
             }
         }
@@ -749,6 +755,8 @@ namespace MWMechanics
                     "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
                 };
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                if (sndMgr->getSoundPlaying(mCaster, "Spell Failure " + schools[school]))
+                    sndMgr->stopSound3D(mCaster, "Spell Failure " + schools[school]);
                 sndMgr->playSound3D(mCaster, "Spell Failure " + schools[school], 1.0f, 1.0f);
                 return false;
             }
@@ -850,6 +858,8 @@ namespace MWMechanics
                 };
 
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                if (sndMgr->getSoundPlaying(mCaster, "Spell Failure " + schools[school]))
+                    sndMgr->stopSound3D(mCaster, "Spell Failure " + schools[school]);
                 sndMgr->playSound3D(mCaster, "Spell Failure " + schools[school], 1.0f, 1.0f);
                 return false;
             }
