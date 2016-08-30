@@ -107,7 +107,7 @@ void Main::Create()
 
     int logLevel = mgr.getInt("loglevel", "General");
     Log::SetLevel(logLevel);
-    if(addr.empty())
+    if (addr.empty())
     {
         pMain->server = mgr.getString("server", "General");
         pMain->port = (unsigned short) mgr.getInt("port", "General");
