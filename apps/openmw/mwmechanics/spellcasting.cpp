@@ -383,6 +383,21 @@ namespace MWMechanics
             }
             else
                 canCastAnEffect = true;
+          
+            if (magicEffect->mIndex == ESM::MagicEffect::WaterWalking)
+            {
+                if (target.getClass().isPureWaterCreature(target))
+                    continue;
+
+                MWBase::World *world = MWBase::Environment::get().getWorld();
+
+                if (!world->isWaterWalkingCastableOnTarget(target))
+                {
+                    if (caster == getPlayer())
+                        MWBase::Environment::get().getWindowManager()->messageBox ("#{sMagicInvalidEffect}");
+                    continue;
+                }
+            }
 
             if (!checkEffectTarget(effectIt->mEffectID, target, castByPlayer))
                 continue;
