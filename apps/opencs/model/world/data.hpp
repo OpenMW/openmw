@@ -124,8 +124,6 @@ namespace CSMWorld
             std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
             std::map<std::string, int> mContentFileNames;
-            // current index, plugin index
-            std::map<int, int> mReverseContentFiles;
 
             // not implemented
             Data (const Data&);
@@ -301,9 +299,6 @@ namespace CSMWorld
 
             int count (RecordBase::State state) const;
             ///< Return number of top-level records with the given \a state.
-
-            /// Returns the content file number relative to the plugin being edited, 0 by default
-            int getPluginContentFile(int currentContentFile);
 
         signals:
 

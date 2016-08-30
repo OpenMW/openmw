@@ -321,9 +321,9 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                 {
                     CSMWorld::CellRef refRecord = ref.get();
 
-                    // Correct content file number to be relative to plugin
-                    refRecord.mRefNum.mContentFile = mDocument.getData().getPluginContentFile(
-                        refRecord.mRefNum.mContentFile);
+                    // Check for uninitialized content file
+                    if (!refRecord.mRefNum.hasContentFile())
+                        refRecord.mRefNum.mContentFile = 0;
 
                     // recalculate the ref's cell location
                     std::ostringstream stream;
