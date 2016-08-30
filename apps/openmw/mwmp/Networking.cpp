@@ -577,7 +577,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
         {
             if (id == myid)
             {
-                if(packet->length == myPacket->headerSize())
+                if (packet->length == myPacket->headerSize())
                     getLocalPlayer()->SendClass();
                 else
                 {
@@ -589,15 +589,15 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
         }
         case ID_GAME_TIME:
         {
-            if(id == myid)
+            if (id == myid)
             {
                 myPacket->Packet(&bsIn, getLocalPlayer(), false);
                 MWBase::World *world = MWBase::Environment::get().getWorld();
-                if(getLocalPlayer()->hour != -1)
+                if (getLocalPlayer()->hour != -1)
                     world->setHour(getLocalPlayer()->hour);
-                else if(getLocalPlayer()->day != -1)
+                else if (getLocalPlayer()->day != -1)
                     world->setDay(getLocalPlayer()->day);
-                else if(getLocalPlayer()->month != -1)
+                else if (getLocalPlayer()->month != -1)
                     world->setMonth(getLocalPlayer()->month);
             }
         }

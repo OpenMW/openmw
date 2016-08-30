@@ -586,7 +586,7 @@ void LocalPlayer::updateChar()
 
 void LocalPlayer::SetClass()
 {
-    if(klass.mId.empty()) // custom class
+    if (klass.mId.empty()) // custom class
     {
         klass.mData.mIsPlayable = 0x1;
         MWBase::Environment::get().getMechanicsManager()->setPlayerClass(klass);
@@ -607,7 +607,7 @@ void LocalPlayer::SendClass()
     const ESM::NPC *cpl = world->getPlayerPtr().get<ESM::NPC>()->mBase;
     const ESM::Class *cls = world->getStore().get<ESM::Class>().find(cpl->mClass);
 
-    if(cpl->mClass.find("$dynamic") != string::npos) // custom class
+    if (cpl->mClass.find("$dynamic") != string::npos) // custom class
     {
         klass.mId = "";
         klass.mName = cls->mName;
