@@ -9,7 +9,7 @@
 
 
 
-void GUIFunctions::MessageBox(unsigned short pid, int id, const char *label) noexcept
+void GUIFunctions::_MessageBox(unsigned short pid, int id, const char *label) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
