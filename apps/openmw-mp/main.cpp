@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
     int port = mgr.getInt("port", "General");
 
     string plugin_home = mgr.getString("home", "Plugins");
-    string moddir = Utils::convertPath(plugin_home + "/files");
+    string moddir = Utils::convertPath(plugin_home + "/data");
 
     vector<string> plugins (Utils::split(mgr.getString("plugins", "Plugins"), ','));
 
