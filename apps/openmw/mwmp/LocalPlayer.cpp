@@ -535,7 +535,8 @@ bool LocalPlayer::CharGenThread() // ToDo: need fix
             {
                 updateBaseStats(true);
                 updateAttributesAndSkills(true);
-                GetNetworking()->GetPacket(ID_GAME_UPDATE_SKILLS)->Send(this);
+                //GetNetworking()->GetPacket(ID_GAME_UPDATE_SKILLS)->Send(this);
+                SendClass();
                 GetNetworking()->GetPacket(ID_GAME_CHARGEN)->Send(this);
             }
             CharGenStage()->end = 0;
@@ -580,7 +581,41 @@ void LocalPlayer::updateChar()
             Npc()->mHair
     );
 
-    MWBase::Environment::get().getMechanicsManager()->setPlayerClass(Npc()->mClass);
-
     MWBase::Environment::get().getWindowManager()->getInventoryWindow()->rebuildAvatar();
+}
+
+void LocalPlayer::SetClass()
+{
+    if(klass.mId.empty()) // custom class
+    {
+        klass.mData.mIsPlayable = 0x1;
+        MWBase::Environment::get().getMechanicsManager()->setPlayerClass(klass);
+        MWBase::Environment::get().getWindowManager()->setPlayerClass(klass);
+    }
+    else
+    {
+        MWBase::Environment::get().getMechanicsManager()->setPlayerClass(Npc()->mClass);
+        const ESM::Class *_klass = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(Npc()->mClass);
+        if (_klass)
+            MWBase::Environment::get().getWindowManager()->setPlayerClass(klass);
+    }
+}
+
+void LocalPlayer::SendClass()
+{
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    const ESM::NPC *cpl = world->getPlayerPtr().get<ESM::NPC>()->mBase;
+    const ESM::Class *cls = world->getStore().get<ESM::Class>().find(cpl->mClass);
+
+    if(cpl->mClass.find("$dynamic") != string::npos) // custom class
+    {
+        klass.mId = "";
+        klass.mName = cls->mName;
+        klass.mDescription = cls->mDescription;
+        klass.mData = cls->mData;
+    }
+    else
+        klass.mId = cls->mId;
+
+    GetNetworking()->GetPacket(ID_GAME_CHARCLASS)->Send(this);
 }

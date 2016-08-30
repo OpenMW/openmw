@@ -316,6 +316,13 @@ void Networking::Update(RakNet::Packet *packet)
             break;
         }
 
+        case ID_GAME_CHARCLASS:
+        {
+            DEBUG_PRINTF("ID_GAME_CHARCLASS\n");
+            myPacket->Read(player);
+            break;
+        }
+
         default:
             printf("Message with identifier %i has arrived.\n", packet->data[0]);
             break;

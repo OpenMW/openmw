@@ -51,7 +51,7 @@ set(SERVER
     Script/Script.cpp Script/ScriptFunction.cpp
     Script/ScriptFunctions.cpp
     Script/Functions/Translocations.cpp Script/Functions/Stats.cpp Script/Functions/Items.cpp
-    Script/Functions/Timer.cpp Script/Functions/Chat.cpp Script/Functions/GUI.cpp
+    Script/Functions/Timer.cpp Script/Functions/Chat.cpp Script/Functions/GUI.cpp Script/Functions/CharClass.cpp Script/Functions/CharClass.hpp
     Script/API/TimerAPI.cpp Script/API/PublicFnAPI.cpp
         ${PawnScript_Sources}
         ${LuaScript_Sources}

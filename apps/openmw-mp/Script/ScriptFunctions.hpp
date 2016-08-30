@@ -5,6 +5,7 @@
 #ifndef SOURCEPAWN_SCRIPTFUNCTIONS_HPP
 #define SOURCEPAWN_SCRIPTFUNCTIONS_HPP
 
+#include <Script/Functions/CharClass.hpp>
 #include <RakNetTypes.h>
 //#include <amx/amx.h>
 #include <tuple>
@@ -272,6 +273,10 @@ public:
 
             {"SetMapVisibility",    ScriptFunctions::SetMapVisibility},
             {"SetMapVisibilityAll", ScriptFunctions::SetMapVisibilityAll},
+
+            CHARCLASSFUNCTIONS,
+
+
     };
 
     static constexpr ScriptCallbackData callbacks[]{

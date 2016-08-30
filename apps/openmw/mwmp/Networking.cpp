@@ -573,6 +573,20 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 }
                 break;
             }
+        case ID_GAME_CHARCLASS:
+        {
+            if (id == myid)
+            {
+                if(packet->length == myPacket->headerSize())
+                    getLocalPlayer()->SendClass();
+                else
+                {
+                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                    getLocalPlayer()->SetClass();
+                }
+            }
+            break;
+        }
         default:
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Custom message with identifier %i has arrived in initialization.", packet->data[0]);
     }

@@ -32,6 +32,8 @@ namespace mwmp
         void setPosition();
         void setCell();
 
+        void SetClass();
+        void SendClass();
         void CharGen(int stageFirst, int stageEnd);
 
         bool CharGenThread(); // return true if CGStage::current == CGStage::end
