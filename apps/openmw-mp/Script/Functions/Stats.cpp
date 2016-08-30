@@ -1,6 +1,7 @@
 //
 // Created by koncord on 29.02.16.
 //
+#include "Stats.hpp"
 
 #include <apps/openmw-mp/Script/ScriptFunctions.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
@@ -14,7 +15,7 @@
 using namespace std;
 using namespace ESM;
 
-void ScriptFunctions::SetName(unsigned short pid, const char *name) noexcept
+void StatsFunctions::SetName(unsigned short pid, const char *name) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -25,7 +26,7 @@ void ScriptFunctions::SetName(unsigned short pid, const char *name) noexcept
     player->GetCell()->mName = name;
 }
 
-const char *ScriptFunctions::GetName(unsigned short pid) noexcept
+const char *StatsFunctions::GetName(unsigned short pid) noexcept
 {
 
     Player *player;
@@ -34,7 +35,7 @@ const char *ScriptFunctions::GetName(unsigned short pid) noexcept
     return player->Npc()->mName.c_str();
 }
 
-void ScriptFunctions::SetBirthsign(unsigned short pid, const char *sign) noexcept
+void StatsFunctions::SetBirthsign(unsigned short pid, const char *sign) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -45,7 +46,7 @@ void ScriptFunctions::SetBirthsign(unsigned short pid, const char *sign) noexcep
     *player->BirthSign() = sign;
 }
 
-const char *ScriptFunctions::GetBirthsign(unsigned short pid) noexcept
+const char *StatsFunctions::GetBirthsign(unsigned short pid) noexcept
 {
 
     Player *player;
@@ -55,7 +56,7 @@ const char *ScriptFunctions::GetBirthsign(unsigned short pid) noexcept
     return player->BirthSign()->c_str();
 }
 
-void ScriptFunctions::SetRace(unsigned short pid, const char *race) noexcept
+void StatsFunctions::SetRace(unsigned short pid, const char *race) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -71,7 +72,7 @@ void ScriptFunctions::SetRace(unsigned short pid, const char *race) noexcept
     player->Npc()->mRace = race;
 }
 
-const char *ScriptFunctions::GetRace(unsigned short pid) noexcept
+const char *StatsFunctions::GetRace(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -79,7 +80,7 @@ const char *ScriptFunctions::GetRace(unsigned short pid) noexcept
     return player->Npc()->mRace.c_str();
 }
 
-void ScriptFunctions::SetClass(unsigned short pid, const char *className) noexcept
+void StatsFunctions::SetClass(unsigned short pid, const char *className) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
@@ -95,7 +96,7 @@ void ScriptFunctions::SetClass(unsigned short pid, const char *className) noexce
     player->Npc()->mClass = className;
 }
 
-const char *ScriptFunctions::GetClass(unsigned short pid) noexcept
+const char *StatsFunctions::GetClass(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -103,7 +104,7 @@ const char *ScriptFunctions::GetClass(unsigned short pid) noexcept
     return player->Npc()->mClass.c_str();
 }
 
-void ScriptFunctions::SetHead(unsigned short pid, const char *race) noexcept
+void StatsFunctions::SetHead(unsigned short pid, const char *race) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -114,7 +115,7 @@ void ScriptFunctions::SetHead(unsigned short pid, const char *race) noexcept
     player->Npc()->mHead = race;
 }
 
-const char *ScriptFunctions::GetHead(unsigned short pid) noexcept
+const char *StatsFunctions::GetHead(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -123,7 +124,7 @@ const char *ScriptFunctions::GetHead(unsigned short pid) noexcept
     return player->Npc()->mHead.c_str();
 }
 
-void ScriptFunctions::SetHairstyle(unsigned short pid, const char *style) noexcept
+void StatsFunctions::SetHairstyle(unsigned short pid, const char *style) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -135,7 +136,7 @@ void ScriptFunctions::SetHairstyle(unsigned short pid, const char *style) noexce
 
 }
 
-const char *ScriptFunctions::GetHairstyle(unsigned short pid) noexcept
+const char *StatsFunctions::GetHairstyle(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -143,7 +144,7 @@ const char *ScriptFunctions::GetHairstyle(unsigned short pid) noexcept
     return player->Npc()->mHair.c_str();
 }
 
-int ScriptFunctions::GetIsMale(unsigned short pid) noexcept
+int StatsFunctions::GetIsMale(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,false);
@@ -152,7 +153,7 @@ int ScriptFunctions::GetIsMale(unsigned short pid) noexcept
 
 }
 
-void ScriptFunctions::SetIsMale(unsigned short pid, int value) noexcept
+void StatsFunctions::SetIsMale(unsigned short pid, int value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -161,7 +162,7 @@ void ScriptFunctions::SetIsMale(unsigned short pid, int value) noexcept
 }
 
 
-float ScriptFunctions::GetHealth(unsigned short pid) noexcept
+float StatsFunctions::GetHealth(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0.f);
@@ -170,7 +171,7 @@ float ScriptFunctions::GetHealth(unsigned short pid) noexcept
 
 }
 
-void ScriptFunctions::SetHealth(unsigned short pid, float value) noexcept
+void StatsFunctions::SetHealth(unsigned short pid, float value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -178,7 +179,7 @@ void ScriptFunctions::SetHealth(unsigned short pid, float value) noexcept
     player->CreatureStats()->mDynamic[0].mBase = value;
 }
 
-float ScriptFunctions::GetCurrentHealth(unsigned short pid) noexcept
+float StatsFunctions::GetCurrentHealth(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.f);
@@ -186,7 +187,7 @@ float ScriptFunctions::GetCurrentHealth(unsigned short pid) noexcept
     return player->CreatureStats()->mDynamic[0].mCurrent;
 }
 
-void ScriptFunctions::SetCurrentHealth(unsigned short pid, float value) noexcept
+void StatsFunctions::SetCurrentHealth(unsigned short pid, float value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -194,7 +195,7 @@ void ScriptFunctions::SetCurrentHealth(unsigned short pid, float value) noexcept
     player->CreatureStats()->mDynamic[0].mCurrent = 0;
 }
 
-float ScriptFunctions::GetMagicka(unsigned short pid) noexcept
+float StatsFunctions::GetMagicka(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0.f);
@@ -202,7 +203,7 @@ float ScriptFunctions::GetMagicka(unsigned short pid) noexcept
     return player->CreatureStats()->mDynamic[1].mBase;
 }
 
-void ScriptFunctions::SetMagicka(unsigned short pid, float value) noexcept
+void StatsFunctions::SetMagicka(unsigned short pid, float value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -210,7 +211,7 @@ void ScriptFunctions::SetMagicka(unsigned short pid, float value) noexcept
     player->CreatureStats()->mDynamic[1].mBase = value;
 }
 
-float ScriptFunctions::GetCurrentMagicka(unsigned short pid) noexcept
+float StatsFunctions::GetCurrentMagicka(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.f);
@@ -218,7 +219,7 @@ float ScriptFunctions::GetCurrentMagicka(unsigned short pid) noexcept
     return player->CreatureStats()->mDynamic[1].mCurrent;
 }
 
-void ScriptFunctions::SetCurrentMagicka(unsigned short pid, float value) noexcept
+void StatsFunctions::SetCurrentMagicka(unsigned short pid, float value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -226,7 +227,7 @@ void ScriptFunctions::SetCurrentMagicka(unsigned short pid, float value) noexcep
     player->CreatureStats()->mDynamic[1].mCurrent = 0;
 }
 
-float ScriptFunctions::GetFatigue(unsigned short pid) noexcept
+float StatsFunctions::GetFatigue(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0.f);
@@ -235,7 +236,7 @@ float ScriptFunctions::GetFatigue(unsigned short pid) noexcept
 
 }
 
-void ScriptFunctions::SetFatigue(unsigned short pid, float value) noexcept
+void StatsFunctions::SetFatigue(unsigned short pid, float value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -243,7 +244,7 @@ void ScriptFunctions::SetFatigue(unsigned short pid, float value) noexcept
     player->CreatureStats()->mDynamic[2].mBase = value;
 }
 
-float ScriptFunctions::GetCurrentFatigue(unsigned short pid) noexcept
+float StatsFunctions::GetCurrentFatigue(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.f);
@@ -251,7 +252,7 @@ float ScriptFunctions::GetCurrentFatigue(unsigned short pid) noexcept
     return player->CreatureStats()->mDynamic[2].mCurrent;
 }
 
-void ScriptFunctions::SetCurrentFatigue(unsigned short pid, float value) noexcept
+void StatsFunctions::SetCurrentFatigue(unsigned short pid, float value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -259,7 +260,7 @@ void ScriptFunctions::SetCurrentFatigue(unsigned short pid, float value) noexcep
     player->CreatureStats()->mDynamic[2].mCurrent = 0;
 }
 
-int ScriptFunctions::GetAttributeId(const char *name) noexcept
+int StatsFunctions::GetAttributeId(const char *name) noexcept
 {
     for (int x = 0; x < 8; x++)
     {
@@ -272,7 +273,7 @@ int ScriptFunctions::GetAttributeId(const char *name) noexcept
     return -1;
 }
 
-int ScriptFunctions::GetSkillId(const char *name) noexcept
+int StatsFunctions::GetSkillId(const char *name) noexcept
 {
     for (int x = 0; x < 27; x++)
     {
@@ -285,17 +286,17 @@ int ScriptFunctions::GetSkillId(const char *name) noexcept
     return -1;
 }
 
-const char *ScriptFunctions::GetAttributeName(unsigned short attribute) noexcept
+const char *StatsFunctions::GetAttributeName(unsigned short attribute) noexcept
 {
     return Attribute::sAttributeNames[attribute].c_str();
 }
 
-const char *ScriptFunctions::GetSkillName(unsigned short skill) noexcept
+const char *StatsFunctions::GetSkillName(unsigned short skill) noexcept
 {
     return Skill::sSkillNames[skill].c_str();
 }
 
-int ScriptFunctions::GetAttribute(unsigned short pid, unsigned short attribute) noexcept
+int StatsFunctions::GetAttribute(unsigned short pid, unsigned short attribute) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -306,7 +307,7 @@ int ScriptFunctions::GetAttribute(unsigned short pid, unsigned short attribute) 
     return player->CreatureStats()->mAttributes[attribute].mBase;
 }
 
-void ScriptFunctions::SetAttribute(unsigned short pid, unsigned short attribute, int value) noexcept
+void StatsFunctions::SetAttribute(unsigned short pid, unsigned short attribute, int value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -317,7 +318,7 @@ void ScriptFunctions::SetAttribute(unsigned short pid, unsigned short attribute,
     player->CreatureStats()->mAttributes[attribute].mBase = value;
 }
 
-int ScriptFunctions::GetCurrentAttribute(unsigned short pid, unsigned short attribute) noexcept
+int StatsFunctions::GetCurrentAttribute(unsigned short pid, unsigned short attribute) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -328,7 +329,7 @@ int ScriptFunctions::GetCurrentAttribute(unsigned short pid, unsigned short attr
     return player->CreatureStats()->mAttributes[attribute].mCurrent;
 }
 
-void ScriptFunctions::SetCurrentAttribute(unsigned short pid, unsigned short attribute, int value) noexcept
+void StatsFunctions::SetCurrentAttribute(unsigned short pid, unsigned short attribute, int value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -339,7 +340,7 @@ void ScriptFunctions::SetCurrentAttribute(unsigned short pid, unsigned short att
     player->CreatureStats()->mAttributes[attribute].mCurrent = value;
 }
 
-int ScriptFunctions::GetSkill(unsigned short pid, unsigned short skill) noexcept
+int StatsFunctions::GetSkill(unsigned short pid, unsigned short skill) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -350,7 +351,7 @@ int ScriptFunctions::GetSkill(unsigned short pid, unsigned short skill) noexcept
     return player->NpcStats()->mSkills[skill].mBase;
 }
 
-void ScriptFunctions::SetSkill(unsigned short pid, unsigned short skill, int value) noexcept  //TODO: need packet for one value
+void StatsFunctions::SetSkill(unsigned short pid, unsigned short skill, int value) noexcept  //TODO: need packet for one value
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -364,7 +365,7 @@ void ScriptFunctions::SetSkill(unsigned short pid, unsigned short skill, int val
 
 }
 
-int ScriptFunctions::GetCurrentSkill(unsigned short pid, unsigned short skill) noexcept
+int StatsFunctions::GetCurrentSkill(unsigned short pid, unsigned short skill) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -375,7 +376,7 @@ int ScriptFunctions::GetCurrentSkill(unsigned short pid, unsigned short skill) n
     return player->NpcStats()->mSkills[skill].mCurrent;
 }
 
-void ScriptFunctions::SetCurrentSkill(unsigned short pid, unsigned short skill, int value) noexcept //TODO: need packet for one value
+void StatsFunctions::SetCurrentSkill(unsigned short pid, unsigned short skill, int value) noexcept //TODO: need packet for one value
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -387,7 +388,7 @@ void ScriptFunctions::SetCurrentSkill(unsigned short pid, unsigned short skill, 
 }
 
 
-int ScriptFunctions::GetIncreaseSkill(unsigned short pid, unsigned int pos) noexcept
+int StatsFunctions::GetIncreaseSkill(unsigned short pid, unsigned int pos) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -398,7 +399,7 @@ int ScriptFunctions::GetIncreaseSkill(unsigned short pid, unsigned int pos) noex
     return player->NpcStats()->mSkillIncrease[pos];
 }
 
-void ScriptFunctions::SetIncreaseSkill(unsigned short pid, unsigned int pos, int value) noexcept // TODO: need packet for transmit it
+void StatsFunctions::SetIncreaseSkill(unsigned short pid, unsigned int pos, int value) noexcept // TODO: need packet for transmit it
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -409,7 +410,7 @@ void ScriptFunctions::SetIncreaseSkill(unsigned short pid, unsigned int pos, int
     player->NpcStats()->mSkillIncrease[pos] = value;
 }
 
-void ScriptFunctions::SetCharGenStage(unsigned short pid, int start, int end) noexcept
+void StatsFunctions::SetCharGenStage(unsigned short pid, int start, int end) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -420,14 +421,14 @@ void ScriptFunctions::SetCharGenStage(unsigned short pid, int start, int end) no
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_CHARGEN)->Send(player, false);
 }
 
-void ScriptFunctions::Resurrect(unsigned short pid)
+void StatsFunctions::Resurrect(unsigned short pid)
 {
     Player *player;
     GET_PLAYER(pid, player,);
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_RESURRECT)->RequestData(player->guid);
 }
 
-void ScriptFunctions::SendBaseInfo(unsigned short pid) noexcept
+void StatsFunctions::SendBaseInfo(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -436,7 +437,7 @@ void ScriptFunctions::SendBaseInfo(unsigned short pid) noexcept
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, true);
 }
 
-void ScriptFunctions::SendAttributes(unsigned short pid) noexcept
+void StatsFunctions::SendAttributes(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -445,7 +446,7 @@ void ScriptFunctions::SendAttributes(unsigned short pid) noexcept
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_ATTRIBUTE)->Send(player, true);
 }
 
-void ScriptFunctions::SendBaseStats(unsigned short pid) noexcept
+void StatsFunctions::SendBaseStats(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -453,7 +454,7 @@ void ScriptFunctions::SendBaseStats(unsigned short pid) noexcept
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, true);
 }
 
-void ScriptFunctions::SendSkills(unsigned short pid) noexcept
+void StatsFunctions::SendSkills(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);

@@ -6,6 +6,10 @@
 #define SOURCEPAWN_SCRIPTFUNCTIONS_HPP
 
 #include <Script/Functions/CharClass.hpp>
+#include <Script/Functions/Translocations.hpp>
+#include <Script/Functions/GUI.hpp>
+#include <Script/Functions/Stats.hpp>
+#include <Script/Functions/Items.hpp>
 #include <RakNetTypes.h>
 //#include <amx/amx.h>
 #include <tuple>
@@ -33,96 +37,9 @@ public:
     static void MakePublic(ScriptFunc _public, const char *name, char ret_type, const char *def) noexcept;
     static boost::any CallPublic(const char *name, ...) noexcept;
 
-    static void GetPos(unsigned short pid, float *x, float *y, float *z) noexcept;
-    static double GetPosX(unsigned short pid) noexcept;
-    static double GetPosY(unsigned short pid) noexcept;
-    static double GetPosZ(unsigned short pid) noexcept;
-    static void SetPos(unsigned short pid, double x, double y, double z) noexcept;
-
-
-    static void GetAngle(unsigned short pid, float *x, float *y, float *z) noexcept;
-    static double GetAngleX(unsigned short pid) noexcept;
-    static double GetAngleY(unsigned short pid) noexcept;
-    static double GetAngleZ(unsigned short pid) noexcept;
-    static void SetAngle(unsigned short pid, double x, double y, double z) noexcept;
-
-    static void SetCell(unsigned short pid, const char *name) noexcept;
-    static const char *GetCell(unsigned short pid) noexcept;
-
-    static void SetExterior(unsigned short pid, int x, int y) noexcept;
-    static int GetExteriorX(unsigned short pid) noexcept;
-    static int GetExteriorY(unsigned short pid) noexcept;
-
-    static bool IsInInterior(unsigned short pid) noexcept;
-
-    static void SetName(unsigned short pid, const char *name) noexcept;
-    static const char *GetName(unsigned short pid) noexcept;
-
-    static void SetBirthsign(unsigned short pid, const char *name) noexcept;
-    static const char *GetBirthsign(unsigned short pid) noexcept;
-
-    static void SetRace(unsigned short pid, const char *race) noexcept;
-    static const char *GetRace(unsigned short pid) noexcept;
-
-    static void SetClass(unsigned short pid, const char *name) noexcept;
-    static const char *GetClass(unsigned short pid) noexcept;
-
-    static void SetHead(unsigned short pid, const char *head) noexcept;
-    static const char *GetHead(unsigned short pid) noexcept;
-
-    static void SetHairstyle(unsigned short pid, const char *style) noexcept;
-    static const char *GetHairstyle(unsigned short pid) noexcept;
-
-    static void SetIsMale(unsigned short pid, int male) noexcept;
-    static int GetIsMale(unsigned short pid) noexcept;
-
-    static float GetHealth(unsigned short pid) noexcept;
-    static void SetHealth(unsigned short pid, float health) noexcept;
-    static float GetCurrentHealth(unsigned short pid) noexcept;
-    static void SetCurrentHealth(unsigned short pid, float health) noexcept;
-
-    static float GetMagicka(unsigned short pid) noexcept;
-    static void SetMagicka(unsigned short pid, float magicka) noexcept;
-    static float GetCurrentMagicka(unsigned short pid) noexcept;
-    static void SetCurrentMagicka(unsigned short pid, float magicka) noexcept;
-
-    static float GetFatigue(unsigned short pid) noexcept;
-    static void SetFatigue(unsigned short pid, float fatigue) noexcept;
-    static float GetCurrentFatigue(unsigned short pid) noexcept;
-    static void SetCurrentFatigue(unsigned short pid, float fatigue) noexcept;
-
-    static int GetAttributeId(const char *name) noexcept;
-    static int GetSkillId(const char *name) noexcept;
-    static const char *GetAttributeName(unsigned short attribute) noexcept;
-    static const char *GetSkillName(unsigned short skill) noexcept;
-
-    static int GetAttribute(unsigned short pid, unsigned short attribute) noexcept;
-    static void SetAttribute(unsigned short pid, unsigned short attribute, int value) noexcept;
-    static int GetCurrentAttribute(unsigned short pid, unsigned short attribute) noexcept;
-    static void SetCurrentAttribute(unsigned short pid, unsigned short attribute, int value) noexcept;
-
-    static int GetSkill(unsigned short pid, unsigned short skill) noexcept;
-    static void SetSkill(unsigned short pid, unsigned short skill, int value) noexcept;
-    static int GetCurrentSkill(unsigned short pid, unsigned short skill) noexcept;
-    static void SetCurrentSkill(unsigned short pid, unsigned short skill, int value) noexcept;
-
-    static int GetIncreaseSkill(unsigned short pid, unsigned int pos) noexcept;
-    static void SetIncreaseSkill(unsigned short pid, unsigned int pos, int value) noexcept;
-
-    static void Resurrect(unsigned short pid);
-
-    //static void AddItem(unsigned short pid, const char* itemName, unsigned short count) noexcept;
-    //static void RemoveItem(unsigned short pid, const char* itemName, unsigned short count) noexcept;
-    //static void GetItemCount(unsigned short pid, const char* itemName) noexcept;
-    static void EquipItem(unsigned short pid, unsigned short slot, const char* itemName, unsigned short count) noexcept;
-    static void UnequipItem(unsigned short pid, unsigned short slot) noexcept;
-    static bool HasItemEquipped(unsigned short pid, const char* itemName);
-    static const char *GetItemSlot(unsigned short pid, unsigned short slot) noexcept;
-
     static void SendMessage(unsigned short pid, const char *message, bool broadcast) noexcept;
     static void CleanChat(unsigned short pid);
     static void CleanChat();
-    static void SetCharGenStage(unsigned short pid, int start, int end) noexcept;
 
     /**
      * \brief Create timer
@@ -133,7 +50,6 @@ public:
     static int CreateTimer(ScriptFunc callback, int msec) noexcept;
     static int CreateTimerEx(ScriptFunc callback, int msec, const char *types, ...) noexcept;
 
-
     static void StartTimer(int timerId) noexcept;
     static void StopTimer(int timerId) noexcept;
     static void RestartTimer(int timerId, int msec) noexcept;
@@ -141,25 +57,6 @@ public:
     static bool IsTimerElapsed(int timerId) noexcept;
 
     static void Kick(unsigned short pid) noexcept;
-
-    static void MessageBox(unsigned short pid, int id, const char *label) noexcept;
-    static void CustomMessageBox(unsigned short pid, int id, const char *label, const char *buttons) noexcept;
-    static void InputDialog(unsigned short pid, int id, const char *label) noexcept;
-
-    static void SendBaseInfo(unsigned short pid) noexcept;
-    static void SendAttributes(unsigned short pid) noexcept;
-    static void SendBaseStats(unsigned short pid) noexcept;
-    static void SendSkills(unsigned short pid) noexcept;
-
-    //state 0 - disallow, 1 - allow
-    static void SetMapVisibility(unsigned short targetPID, unsigned short affectedPID, unsigned short state) noexcept
-    {
-
-    }
-    static void SetMapVisibilityAll(unsigned short targetPID, unsigned short state) noexcept
-    {
-
-    }
 
     static constexpr ScriptFunctionData functions[]{
             {"CreateTimer",         ScriptFunctions::CreateTimer},
@@ -176,104 +73,14 @@ public:
 
             {"StopServer",          ScriptFunctions::StopServer},
 
-            {"GetPos",              ScriptFunctions::GetPos},
-            {"GetPosX",             ScriptFunctions::GetPosX},
-            {"GetPosY",             ScriptFunctions::GetPosY},
-            {"GetPosZ",             ScriptFunctions::GetPosZ},
-            {"SetPos",              ScriptFunctions::SetPos},
-
-            {"GetAngle",            ScriptFunctions::GetAngle},
-            {"GetAngleX",           ScriptFunctions::GetAngleX},
-            {"GetAngleY",           ScriptFunctions::GetAngleY},
-            {"GetAngleZ",           ScriptFunctions::GetAngleZ},
-            {"SetAngle",            ScriptFunctions::SetAngle},
-
-            {"GetCell",             ScriptFunctions::GetCell},
-            {"SetCell",             ScriptFunctions::SetCell},
-            {"SetExterior",         ScriptFunctions::SetExterior},
-            {"GetExteriorX",         ScriptFunctions::GetExteriorX},
-            {"GetExteriorY",         ScriptFunctions::GetExteriorY},
-            {"IsInInterior",        ScriptFunctions::IsInInterior},
-
-            {"GetName",             ScriptFunctions::GetName},
-            {"SetName",             ScriptFunctions::SetName},
-
-            {"GetRace",             ScriptFunctions::GetRace},
-            {"SetRace",             ScriptFunctions::SetRace},
-
-            {"SetClass",            ScriptFunctions::SetClass},
-            {"GetClass",            ScriptFunctions::GetClass},
-
-            {"GetHead",             ScriptFunctions::GetHead},
-            {"SetHead",             ScriptFunctions::SetHead},
-
-            {"GetHair",             ScriptFunctions::GetHairstyle},
-            {"SetHair",             ScriptFunctions::SetHairstyle},
-
-            {"GetIsMale",           ScriptFunctions::GetIsMale},
-            {"SetIsMale",           ScriptFunctions::SetIsMale},
-
-            {"GetBirthsign",        ScriptFunctions::GetBirthsign},
-            {"SetBirthsign",        ScriptFunctions::SetBirthsign},
-
-            {"GetAttributeId",      ScriptFunctions::GetAttributeId},
-            {"GetSkillId",          ScriptFunctions::GetSkillId},
-            {"GetAttributeName",    ScriptFunctions::GetAttributeName},
-            {"GetSkillName",        ScriptFunctions::GetSkillName},
-
-            {"GetAttribute",        ScriptFunctions::GetAttribute},
-            {"SetAttribute",        ScriptFunctions::SetAttribute},
-            {"GetCurrentAttribute", ScriptFunctions::GetCurrentAttribute},
-            {"SetCurrentAttribute", ScriptFunctions::SetCurrentAttribute},
-            {"GetSkill",            ScriptFunctions::GetSkill},
-            {"SetSkill",            ScriptFunctions::SetSkill},
-            {"GetCurrentSkill",     ScriptFunctions::GetCurrentSkill},
-            {"SetCurrentSkill",     ScriptFunctions::SetCurrentSkill},
-
-            {"GetHealth",           ScriptFunctions::GetHealth},
-            {"SetHealth",           ScriptFunctions::SetHealth},
-            {"GetCurrentHealth",    ScriptFunctions::GetCurrentHealth},
-            {"SetCurrentHealth",    ScriptFunctions::SetCurrentHealth},
-
-            {"GetMagicka",          ScriptFunctions::GetMagicka},
-            {"SetMagicka",          ScriptFunctions::SetMagicka},
-            {"GetCurrentMagicka",   ScriptFunctions::GetCurrentMagicka},
-            {"SetCurrentMagicka",   ScriptFunctions::SetCurrentMagicka},
-
-            {"SetFatigue",          ScriptFunctions::SetFatigue},
-            {"GetFatigue",          ScriptFunctions::GetFatigue},
-            {"SetCurrentFatigue",   ScriptFunctions::SetCurrentFatigue},
-            {"GetCurrentFatigue",   ScriptFunctions::GetCurrentFatigue},
-
-            {"GetIncreaseSkill",    ScriptFunctions::GetIncreaseSkill},
-            {"SetIncreaseSkill",    ScriptFunctions::SetIncreaseSkill},
-
 //            {"Cast",              ScriptFunctions::Cast},
-
-//            {"AddItem",           ScriptFunctions::AddItem},
-//            {"RemoveItem",        ScriptFunctions::RemoveItem},
-//            {"GetItemCount",      ScriptFunctions::GetItemCount},
-            {"EquipItem",           ScriptFunctions::EquipItem},
-            {"UnequipItem",         ScriptFunctions::UnequipItem},
-            {"GetItemSlot",         ScriptFunctions::GetItemSlot},
-            {"HasItemEquipped",     ScriptFunctions::HasItemEquipped},
             {"SendMessage",         ScriptFunctions::SendMessage},
-            {"SetCharGenStage",     ScriptFunctions::SetCharGenStage},
-            {"Resurrect",           ScriptFunctions::Resurrect},
-            {"MessageBox",          ScriptFunctions::MessageBox},
-            {"CustomMessageBox",    ScriptFunctions::CustomMessageBox},
-            {"InputDialog",         ScriptFunctions::InputDialog},
-
             {"Kick",                ScriptFunctions::Kick},
 
-            {"SendBaseInfo",        ScriptFunctions::SendBaseInfo},
-            {"SendAttributes",      ScriptFunctions::SendAttributes},
-            {"SendBaseStats",       ScriptFunctions::SendBaseStats},
-            {"SendSkills",          ScriptFunctions::SendSkills},
-
-            {"SetMapVisibility",    ScriptFunctions::SetMapVisibility},
-            {"SetMapVisibilityAll", ScriptFunctions::SetMapVisibilityAll},
-
+            TRANSLOCATIONFUNCTIONS,
+            STATSFUNCTIONS,
+            ITEMAPI,
+            GUIFUNCTIONS,
             CHARCLASSFUNCTIONS,
 
 
