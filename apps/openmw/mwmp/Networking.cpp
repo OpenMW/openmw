@@ -587,6 +587,20 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             }
             break;
         }
+        case ID_GAME_TIME:
+        {
+            if(id == myid)
+            {
+                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                MWBase::World *world = MWBase::Environment::get().getWorld();
+                if(getLocalPlayer()->hour != -1)
+                    world->setHour(getLocalPlayer()->hour);
+                else if(getLocalPlayer()->day != -1)
+                    world->setDay(getLocalPlayer()->day);
+                else if(getLocalPlayer()->month != -1)
+                    world->setMonth(getLocalPlayer()->month);
+            }
+        }
         default:
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Custom message with identifier %i has arrived in initialization.", packet->data[0]);
     }
