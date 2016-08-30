@@ -33,7 +33,7 @@ addons:
       # Audio & Video
       libsdl2-dev, libqt4-dev, libopenal-dev,
       # The other from OpenMW ppa
-      libbullet-dev, libswresample-dev, libopenscenegraph-dev, libmygui-dev
+      libbullet-dev, libswresample-dev, libopenscenegraph-3.4-dev, libmygui-dev
     ]
 
   coverity_scan:
@@ -42,7 +42,7 @@ addons:
       description: "<Your project description here>"
     notification_email: scrawl@baseoftrash.de
     build_command_prepend: "cmake . -DBUILD_UNITTESTS=FALSE"
-    build_command:   "make -j2"
+    build_command:   "make -j3"
     branch_pattern: coverity_scan
 matrix:
   include:
