@@ -14,7 +14,7 @@ env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
-   - secure: "jybGzAdUbqt9vWR/GEnRd96BgAi/7Zd1+2HK68j/i/8+/1YH2XxLOy4Jv/DUBhBlJIkxs/Xv8dRcUlFOclZDHX1d/9Qnsqd3oUVkD7k1y7cTOWy9TBQaE/v/kZo3LpzA3xPwwthrb0BvqIbOfIELi5fS5s8ba85WFRg3AX70wWE="
+   - secure: "PwN1bETMQf8kiSxFpuuknzjdtqhYniBUFwMaVzpSs3lVVslNU/H3AHoiFtR5gVIuUAgNF13dDn8Zg1hu14QOOpYbXGLuVE51ePcqNjXkwb2NbrfswGOxbUEb4nHhY/Wl1LPjndwLk0kTTyDk6kPHU4nQuuCoElriWV2nShtTJbHOeLbLxRw6ZH5j7iFpdLqJh+gMeh0zFnP2kyHPVZlGnVcqjqTJA+R57J7faG1j/VGlYV34VB5PluIdHrphGUOV1aOh6yIxa3SVOPrjQK6MjP/6eaJ8tE7L5od4YWoMkjlmaNVLz3SBn+HiNpbYx6sXE2Z9B6ZSpP5eKcxVX+D1pdVFn/9c130D0zHT8B3BW0/sVqY35g5QTs4mXs3wS6R1v49iTVB5Y4N10RMHpw87hl2oyILSidNCu0kMJxuXeHw88Uyx3qdj01HahFjN2AQWfzCq9oUBirAXi2ECt5e8zlX7/8Sh+dRL/XaTxZGkEGaO7/DhO/Jr/ptvCt5GclZavvuXnbXB5p0BB06Br/4lRogfC2fOgQPxf2656ss6p7B6I/l98SNEyR1q869GMrFKRJ9rf5yERF2tBYolEZ7eb8mX0jctk9i9WRQ/KscPm/YDOxexMx6aJ5BAG3vK9uDiuOgzmQ2QTnA1X/WCDI+GLIFpzjajWl8Ik1iyXHhTiOc="
 addons:
   apt:
     sources:
@@ -38,9 +38,9 @@ addons:
 
   coverity_scan:
     project:
-      name: "OpenMW/openmw"
+      name: "TES3MP/openmw-tes3mp"
       description: "<Your project description here>"
-    notification_email: scrawl@baseoftrash.de
+    notification_email: stas5978@gmail.com
     build_command_prepend: "cmake . -DBUILD_UNITTESTS=FALSE"
     build_command:   "make -j2"
     branch_pattern: coverity_scan
@@ -53,7 +53,9 @@ matrix:
   allow_failures:
     - env: ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
 
-before_install: ./CI/before_install.${TRAVIS_OS_NAME}.sh
+before_install: 
+      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+      - ./CI/before_install.${TRAVIS_OS_NAME}.sh
 before_script: ./CI/before_script.${TRAVIS_OS_NAME}.sh
 script:
  - cd ./build
@@ -67,9 +69,3 @@ notifications:
   email:
     on_success: change
     on_failure: always
-  irc:
-    channels:
-      - "chat.freenode.net#openmw"
-    on_success: change
-    on_failure: always
-    use_notice: true
