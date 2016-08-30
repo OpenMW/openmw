@@ -6,7 +6,7 @@
 #define OPENMW_GUI_HPP
 
 #define GUIFUNCTIONS \
-    {"_MessageBox",          GUIFunctions::_MessageBox},\
+    {"MessageBox",          GUIFunctions::_MessageBox},\
     {"CustomMessageBox",    GUIFunctions::CustomMessageBox},\
     {"InputDialog",         GUIFunctions::InputDialog},\
     {"SetMapVisibility",    GUIFunctions::SetMapVisibility},\
