@@ -32,8 +32,8 @@ addons:
       libavcodec-dev, libavformat-dev, libavutil-dev, libswscale-dev,
       # Audio & Video
       libsdl2-dev, libqt4-dev, libopenal-dev,
-      # The other from OpenMW ppa
-      libbullet-dev, libswresample-dev, libopenscenegraph-3.4-dev, libmygui-dev
+      # The other ones from OpenMW ppa
+      libbullet-dev, libswresample-dev, libopenscenegraph-3.4-130, libopenscenegraph-3.4-dev, libmygui-dev
     ]
 
   coverity_scan:
