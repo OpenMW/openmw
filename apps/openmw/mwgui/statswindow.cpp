@@ -5,6 +5,7 @@
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_FontManager.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -18,12 +19,11 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "tooltips.hpp"
+#include <components/settings/settings.hpp>
+#include "textsizeutil.hpp"
 
 namespace MWGui
 {
-
-    const int StatsWindow::sLineHeight = 18;
-
     StatsWindow::StatsWindow (DragAndDrop* drag)
       : WindowPinnableBase("openmw_stats_window.layout")
       , NoDrop(drag, mMainWidget)
@@ -312,8 +312,8 @@ namespace MWGui
         groupWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
         mSkillWidgets.push_back(groupWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        coord1.top += TextSizeUtil::getLineHeight();
+        coord2.top += TextSizeUtil::getLineHeight();
     }
 
     MyGUI::TextBox* StatsWindow::addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
@@ -337,8 +337,8 @@ namespace MWGui
         mSkillWidgets.push_back(skillNameWidget);
         mSkillWidgets.push_back(skillValueWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        coord1.top += TextSizeUtil::getLineHeight();
+        coord2.top += TextSizeUtil::getLineHeight();
 
         return skillValueWidget;
     }
@@ -357,8 +357,8 @@ namespace MWGui
 
         mSkillWidgets.push_back(skillNameWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        coord1.top += TextSizeUtil::getLineHeight();
+        coord2.top += TextSizeUtil::getLineHeight();
 
         return skillNameWidget;
     }
@@ -444,6 +444,115 @@ namespace MWGui
         }
     }
 
+    void StatsWindow::updateHealthMagickaFatigue(MWBase::World *world)
+    {
+        static const char *HealthMagickaFatigueRowWidgets[] = { "Health", "Magicka", "Fatigue", NULL };
+        static const char *widgetsToResize[] = { "Health", "Health_str", "HBar", "HBarT", "Magicka", "Magicka_str", "MBar", "MBarT",  "Fatigue", "Fatigue_str", "FBar", "FBarT", NULL };
+        MyGUI::Widget *pWidget;
+        int line = 0, iResize = 0;
+        int borderHeight = 0;
+
+        for(iResize = 0; widgetsToResize[iResize] != NULL; ++iResize)
+        {
+            getWidget(pWidget, widgetsToResize[iResize]);
+            TextSizeUtil::resizeWidgetToLineHeight(pWidget);
+        }
+
+        for (line = 0; HealthMagickaFatigueRowWidgets[line] != NULL; ++line)
+        {
+            getWidget(pWidget, HealthMagickaFatigueRowWidgets[line]);
+            TextSizeUtil::moveWidgetToLine(pWidget, line, sVerticalPadding);
+            borderHeight += pWidget->getCoord().height;
+        }
+        borderHeight += (2 * sVerticalPadding);
+
+        getWidget(pWidget, "HealthMagickaFatigueBorder");
+        const MyGUI::IntCoord &baseCoords = pWidget->getCoord();
+        pWidget->setCoord(baseCoords.left, baseCoords.top, baseCoords.width, borderHeight);
+    }
+
+    void StatsWindow::updateLevelRaceClass(MWBase::World *world)
+    {
+        static const char *LevelRaceClassRowWidgets[] = { "Level", "Race", "Class", NULL };
+        static const char *widgetsToResize[] = { "Level", "Level_str", "LevelText", "Race", "Race_str", "RaceText", "Class", "Class_str", "ClassText", NULL };
+        const MWWorld::ESMStore &store = world->getStore();
+        const ESM::NPC *player = world->getPlayerPtr().get<ESM::NPC>()->mBase;
+        const ESM::Race* playerRace = store.get<ESM::Race>().find(player->mRace);
+        const ESM::Class *playerClass = store.get<ESM::Class>().find(player->mClass);
+        int borderHeight = 0;
+        int borderTop = 0;
+
+        MyGUI::Widget *pWidget, *pHealthMagickaFatiqueWidget;
+
+        int line = 0, iResize = 0;
+
+        for(iResize = 0; widgetsToResize[iResize] != NULL; ++iResize)
+        {
+            getWidget(pWidget, widgetsToResize[iResize]);
+            TextSizeUtil::resizeWidgetToLineHeight(pWidget);
+        }
+
+        for (line = 0; LevelRaceClassRowWidgets[line] != NULL; ++line)
+        {
+            getWidget(pWidget, LevelRaceClassRowWidgets[line]);
+            TextSizeUtil::moveWidgetToLine(pWidget, line, sVerticalPadding);
+            borderHeight += pWidget->getCoord().height;
+        }
+
+        borderHeight += (2 * sVerticalPadding);
+
+        getWidget(pWidget, "RaceText");
+        ToolTips::createRaceToolTip(pWidget, playerRace);
+        getWidget(pWidget, "Race_str");
+        ToolTips::createRaceToolTip(pWidget, playerRace);
+
+        getWidget(pWidget, "ClassText");
+        ToolTips::createClassToolTip(pWidget, *playerClass);
+        getWidget(pWidget, "Class_str");
+        ToolTips::createClassToolTip(pWidget, *playerClass);
+
+        getWidget(pHealthMagickaFatiqueWidget, "HealthMagickaFatigueBorder");
+        getWidget(pWidget, "LevelRaceClassBorder");
+        const MyGUI::IntCoord &oldCoords = pWidget->getCoord();
+        MyGUI::IntCoord borderCoords(oldCoords.left, pHealthMagickaFatiqueWidget->getCoord().height+(2*sVerticalMargin), oldCoords.width, borderHeight);
+        pWidget->setCoord(borderCoords);
+    }
+
+    void StatsWindow::updateAttributes()
+    {
+        static const char *AttributeRowWidgets[] = { "Attrib1Box", "Attrib2Box", "Attrib3Box", "Attrib4Box", "Attrib5Box", "Attrib6Box", "Attrib7Box", "Attrib8Box", NULL };
+        static const char *widgetsToResize[] = { "Attrib1Box", "Attrib1", "AttribVal1", "Attrib2Box", "Attrib2", "AttribVal2", "Attrib3Box", "Attrib3", "AttribVal3", "Attrib4Box", "Attrib4", "AttribVal4", "Attrib5Box", "Attrib5", "AttribVal5", "Attrib6Box", "Attrib6", "AttribVal6", "Attrib7Box", "Attrib7", "AttribVal7", "Attrib8Box", "Attrib8", "AttribVal8", NULL };
+        MyGUI::Widget *pHealthMagickaStaminaWidget, *pLevelRaceClassWidget, *pAttributeWidget, *pWidget;
+
+        getWidget(pHealthMagickaStaminaWidget, "HealthMagickaFatigueBorder");
+        getWidget(pLevelRaceClassWidget, "LevelRaceClassBorder");
+        getWidget(pAttributeWidget, "AttributeBorder");
+
+        int line = 0, iWidget = 0;
+
+        for (iWidget = 0; widgetsToResize[iWidget] != NULL; ++iWidget)
+        {
+            getWidget(pWidget, widgetsToResize[iWidget]);
+            TextSizeUtil::resizeWidgetToLineHeight(pWidget);
+        }
+
+        for (line = 0; AttributeRowWidgets[line] != NULL; ++line)
+        {
+            getWidget(pWidget, AttributeRowWidgets[line]);
+            TextSizeUtil::moveWidgetToLine(pWidget, line, sVerticalPadding);
+        }
+
+        const MyGUI::IntCoord &attribCoord = pAttributeWidget->getCoord();
+        int top = pHealthMagickaStaminaWidget->getCoord().height + pLevelRaceClassWidget->getCoord().height + (3 * sVerticalMargin);
+        int heightDiff = top - attribCoord.top;
+
+        pAttributeWidget->setCoord(attribCoord.left, top, attribCoord.width, attribCoord.height - heightDiff);
+    }
+
+    
+
+    
+
     void StatsWindow::updateSkillArea()
     {
         mChanged = false;
@@ -455,8 +564,8 @@ namespace MWGui
         mSkillWidgets.clear();
 
         const int valueSize = 40;
-        MyGUI::IntCoord coord1(10, 0, mSkillView->getWidth() - (10 + valueSize) - 24, 18);
-        MyGUI::IntCoord coord2(coord1.left + coord1.width, coord1.top, valueSize, coord1.height);
+        MyGUI::IntCoord coord1(10, 0, mSkillView->getWidth() - (10 + valueSize) - 24, TextSizeUtil::getLineHeight());
+        MyGUI::IntCoord coord2(coord1.left + coord1.width, coord1.top, valueSize, TextSizeUtil::getLineHeight());
 
         if (!mMajorSkills.empty())
             addSkills(mMajorSkills, "sSkillClassMajor", "Major Skills", coord1, coord2);
@@ -469,28 +578,10 @@ namespace MWGui
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::ESMStore &store = world->getStore();
-        const ESM::NPC *player =
-            world->getPlayerPtr().get<ESM::NPC>()->mBase;
 
-        // race tooltip
-        const ESM::Race* playerRace = store.get<ESM::Race>().find(player->mRace);
-
-        MyGUI::Widget* raceWidget;
-        getWidget(raceWidget, "RaceText");
-        ToolTips::createRaceToolTip(raceWidget, playerRace);
-        getWidget(raceWidget, "Race_str");
-        ToolTips::createRaceToolTip(raceWidget, playerRace);
-
-        // class tooltip
-        MyGUI::Widget* classWidget;
-
-        const ESM::Class *playerClass =
-            store.get<ESM::Class>().find(player->mClass);
-
-        getWidget(classWidget, "ClassText");
-        ToolTips::createClassToolTip(classWidget, *playerClass);
-        getWidget(classWidget, "Class_str");
-        ToolTips::createClassToolTip(classWidget, *playerClass);
+        StatsWindow::updateLevelRaceClass(world);
+        StatsWindow::updateHealthMagickaFatigue(world);
+        StatsWindow::updateAttributes();
 
         if (!mFactions.empty())
         {

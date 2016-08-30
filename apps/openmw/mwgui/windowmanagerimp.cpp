@@ -1120,46 +1120,65 @@ namespace MWGui
         mCursorVisible = visible;
     }
 
+    bool WindowManager::handleSettingsConfigTag(std::string tag, MyGUI::UString& _result)
+    {
+        static const std::string SettingConfigPrefix = "setting=";
+        static const size_t prefixLength = SettingConfigPrefix.length();
+
+        if(tag.compare(0, prefixLength, SettingConfigPrefix) != 0)
+        {
+            return false;
+        }
+
+        tag = tag.substr(prefixLength, tag.length());
+        int comma = tag.find(",");
+        if (comma != std::string::npos) {
+            std::string iniSection = tag.substr(0, comma);
+            std::string iniKey = tag.substr(comma + 1, tag.length());
+            
+            _result = Settings::Manager::getString(iniKey, iniSection);
+        }
+        return true;
+    }
+
+    bool WindowManager::handleCellReferenceTag(std::string tag, MyGUI::UString& _result) {
+        static const std::string cellReferencePrefix = "sCell=";
+        static const size_t prefixLength = cellReferencePrefix.length();
+
+        if (tag.compare(0, prefixLength, cellReferencePrefix) != 0)
+        {
+            return false;
+        }
+
+        _result = mTranslationDataStorage.translateCellName(tag.substr(prefixLength));
+        return true;
+    }
+
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
     {
         std::string tag(_tag);
-        
-        std::string MyGuiPrefix = "setting=";
-        size_t MyGuiPrefixLength = MyGuiPrefix.length();
 
-        std::string tokenToFind = "sCell=";
-        size_t tokenLength = tokenToFind.length();
-        
-        if(tag.compare(0, MyGuiPrefixLength, MyGuiPrefix) == 0)
+        if (handleSettingsConfigTag(tag, _result))
+            return;
+
+        if (handleCellReferenceTag(tag, _result))
+            return;
+
+        if (Gui::replaceTag(tag, _result, mFallbackMap))
+            return;
+
+        if (!mStore)
         {
-            tag = tag.substr(MyGuiPrefixLength, tag.length());
-            std::string settingSection = tag.substr(0, tag.find(","));
-            std::string settingTag = tag.substr(tag.find(",")+1, tag.length());
-            
-            _result = Settings::Manager::getString(settingTag, settingSection);            
-        }
-        else if (tag.compare(0, tokenLength, tokenToFind) == 0)
-        {
-            _result = mTranslationDataStorage.translateCellName(tag.substr(tokenLength));
-        }
-        else if (Gui::replaceTag(tag, _result, mFallbackMap))
-        {
+            std::cerr << "WindowManager::onRetrieveTag: no Store set up yet, can not replace '" << tag << "'" << std::endl;
             return;
         }
-        else
-        {
-            if (!mStore)
-            {
-                std::cerr << "WindowManager::onRetrieveTag: no Store set up yet, can not replace '" << tag << "'" << std::endl;
-                return;
-            }
-            const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().find(tag);
 
-            if (setting && setting->mValue.getType()==ESM::VT_String)
-                _result = setting->mValue.getString();
-            else
-                _result = tag;
-        }
+        const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().find(tag);
+
+        if (setting && setting->mValue.getType()==ESM::VT_String)
+            _result = setting->mValue.getString();
+        else
+            _result = tag;
     }
 
     void WindowManager::processChangedSettings(const Settings::CategorySettingVector& changed)

@@ -19,11 +19,10 @@
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "textsizeutil.hpp"
 
 namespace MWGui
 {
-    const int TravelWindow::sLineHeight = 18;
-
     TravelWindow::TravelWindow() :
         WindowBase("openmw_travel_window.layout")
         , mCurrentY(0)
@@ -76,9 +75,9 @@ namespace MWGui
 
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
-        MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>("SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
+        MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>("SandTextButton", 0, mCurrentY, 200, TextSizeUtil::getLineHeight(), MyGUI::Align::Default);
         toAdd->setEnabled(price<=playerGold);
-        mCurrentY += sLineHeight;
+        mCurrentY += TextSizeUtil::getLineHeight();
         if(interior)
             toAdd->setUserString("interior","y");
         else
@@ -89,7 +88,7 @@ namespace MWGui
         toAdd->setUserString("price",oss.str());
 
         toAdd->setCaptionWithReplacing("#{sCell=" + name + "}   -   " + MyGUI::utility::toString(price)+"#{sgp}");
-        toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
+        toAdd->setSize(toAdd->getTextSize().width, TextSizeUtil::getLineHeight());
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &TravelWindow::onMouseWheel);
         toAdd->setUserString("Destination", name);
         toAdd->setUserData(pos);

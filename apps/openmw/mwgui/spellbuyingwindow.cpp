@@ -16,11 +16,10 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "textsizeutil.hpp"
 
 namespace MWGui
 {
-    const int SpellBuyingWindow::sLineHeight = 18;
-
     SpellBuyingWindow::SpellBuyingWindow() :
         WindowBase("openmw_spell_buying_window.layout")
         , mLastPos(0)
@@ -60,15 +59,15 @@ namespace MWGui
                 0,
                 mCurrentY,
                 200,
-                sLineHeight,
+                TextSizeUtil::getLineHeight(),
                 MyGUI::Align::Default
             );
 
-        mCurrentY += sLineHeight;
+        mCurrentY += TextSizeUtil::getLineHeight();
 
         toAdd->setUserData(price);
         toAdd->setCaptionWithReplacing(spell->mName+"   -   "+MyGUI::utility::toString(price)+"#{sgp}");
-        toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
+        toAdd->setSize(toAdd->getTextSize().width, TextSizeUtil::getLineHeight());
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");
         toAdd->setUserString("Spell", spellId);

@@ -43,8 +43,6 @@ namespace MWGui
             void clearDestinations();
             int mCurrentY;
 
-            static const int sLineHeight;
-
             void updateLabels();
 
             virtual void onReferenceUnavailable();
