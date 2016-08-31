@@ -1236,10 +1236,10 @@ bool CharacterController::updateWeaponState()
                     cast.playSpellCastingEffects(spellid);
 
                     const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
-                    const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
+                    const ESM::ENAMstruct &lasteffect = spell->mEffects.mList.at(spell->mEffects.mList.size() - 1);
 
                     const ESM::MagicEffect *effect;
-                    effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
+                    effect = store.get<ESM::MagicEffect>().find(lasteffect.mEffectID);
 
                     const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
                     if (mAnimation->getNode("Bip01 L Hand"))
@@ -1248,7 +1248,7 @@ bool CharacterController::updateWeaponState()
                     if (mAnimation->getNode("Bip01 R Hand"))
                         mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 R Hand", effect->mParticle);
 
-                    switch(effectentry.mRange)
+                    switch(lasteffect.mRange)
                     {
                         case 0: mAttackType = "self"; break;
                         case 1: mAttackType = "touch"; break;
