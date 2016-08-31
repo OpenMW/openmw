@@ -154,11 +154,11 @@ namespace Shader
 
             if (mAutoUseNormalMaps && diffuseMap != NULL && normalMap == NULL)
             {
-                std::string normalMap = diffuseMap->getImage(0)->getFileName();
+                std::string normalMapFileName = diffuseMap->getImage(0)->getFileName();
 
                 osg::ref_ptr<osg::Image> image;
                 bool normalHeight = false;
-                std::string normalHeightMap = normalMap;
+                std::string normalHeightMap = normalMapFileName;
                 boost::replace_last(normalHeightMap, ".", mNormalHeightMapPattern + ".");
                 if (mImageManager.getVFS()->exists(normalHeightMap))
                 {
@@ -167,10 +167,10 @@ namespace Shader
                 }
                 else
                 {
-                    boost::replace_last(normalMap, ".", mNormalMapPattern + ".");
-                    if (mImageManager.getVFS()->exists(normalMap))
+                    boost::replace_last(normalMapFileName, ".", mNormalMapPattern + ".");
+                    if (mImageManager.getVFS()->exists(normalMapFileName))
                     {
-                        image = mImageManager.getImage(normalMap);
+                        image = mImageManager.getImage(normalMapFileName);
                     }
                 }
 
@@ -196,11 +196,11 @@ namespace Shader
             }
             if (mAutoUseSpecularMaps && diffuseMap != NULL && specularMap == NULL)
             {
-                std::string specularMap = diffuseMap->getImage(0)->getFileName();
-                boost::replace_last(specularMap, ".", mSpecularMapPattern + ".");
-                if (mImageManager.getVFS()->exists(specularMap))
+                std::string specularMapFileName = diffuseMap->getImage(0)->getFileName();
+                boost::replace_last(specularMapFileName, ".", mSpecularMapPattern + ".");
+                if (mImageManager.getVFS()->exists(specularMapFileName))
                 {
-                    osg::ref_ptr<osg::Texture2D> specularMapTex (new osg::Texture2D(mImageManager.getImage(specularMap)));
+                    osg::ref_ptr<osg::Texture2D> specularMapTex (new osg::Texture2D(mImageManager.getImage(specularMapFileName)));
                     specularMapTex->setWrap(osg::Texture::WRAP_S, diffuseMap->getWrap(osg::Texture::WRAP_S));
                     specularMapTex->setWrap(osg::Texture::WRAP_T, diffuseMap->getWrap(osg::Texture::WRAP_T));
                     specularMapTex->setFilter(osg::Texture::MIN_FILTER, diffuseMap->getFilter(osg::Texture::MIN_FILTER));

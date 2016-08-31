@@ -65,11 +65,11 @@ void ESM::InventoryState::load (ESMReader &esm)
     while (esm.isNextSub("EQUI"))
     {
         esm.getSubHeader();
-        int index;
-        esm.getT(index);
+        int equipIndex;
+        esm.getT(equipIndex);
         int slot;
         esm.getT(slot);
-        mEquipmentSlots[index] = slot;
+        mEquipmentSlots[equipIndex] = slot;
     }
 
     mSelectedEnchantItem = -1;

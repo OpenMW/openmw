@@ -698,14 +698,14 @@ namespace NifOsg
                     continue;
                 if (ctrl->recType == Nif::RC_NiUVController)
                 {
-                    const Nif::NiUVController *uvctrl = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
+                    const Nif::NiUVController *niuvctrl = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
                     std::set<int> texUnits;
                     for (unsigned int i=0; i<boundTextures.size(); ++i)
                         texUnits.insert(i);
 
-                    osg::ref_ptr<UVController> ctrl = new UVController(uvctrl->data.getPtr(), texUnits);
-                    setupController(uvctrl, ctrl, animflags);
-                    composite->addController(ctrl);
+                    osg::ref_ptr<UVController> uvctrl = new UVController(niuvctrl->data.getPtr(), texUnits);
+                    setupController(niuvctrl, uvctrl, animflags);
+                    composite->addController(uvctrl);
                 }
                 else if (ctrl->recType == Nif::RC_NiVisController)
                 {

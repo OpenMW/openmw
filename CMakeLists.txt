@@ -464,7 +464,10 @@ if(WIN32)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/Plugin_MyGUI_OpenMW_Resources.dll" DESTINATION ".")
     ENDIF(BUILD_MYGUI_PLUGIN)
 
-    INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
+    INSTALL(DIRECTORY
+        "${OpenMW_BINARY_DIR}/Release/platforms"
+        "${OpenMW_BINARY_DIR}/resources"
+        DESTINATION ".")
     FILE(GLOB plugin_dir "${OpenMW_BINARY_DIR}/Release/osgPlugins-*")
     INSTALL(DIRECTORY ${plugin_dir} DESTINATION ".")
 
@@ -639,8 +642,14 @@ if (WIN32)
         4987 # nonstandard extension used (triggered by setjmp.h)
         4996 # Function was declared deprecated
 
+        # caused by OSG
+        4589 # Constructor of abstract class 'osg::Operation' ignores initializer for virtual base class 'osg::Referenced' (False warning)
+
         # caused by boost
         4191 # 'type cast' : unsafe conversion (1.56, thread_primitives.hpp, normally off)
+
+        # caused by MyGUI
+        4275 # non dll-interface class 'std::exception' used as base for dll-interface class 'MyGUI::Exception'
 
         # OpenMW specific warnings
         4099 # Type mismatch, declared class or struct is defined with other type
@@ -655,11 +664,19 @@ if (WIN32)
         4309 # Variable overflow, trying to store 128 in a signed char for example
         4351 # New behavior: elements of array 'array' will be default initialized (desired behavior)
         4355 # Using 'this' in member initialization list
+        4464 # relative include path contains '..'
         4505 # Unreferenced local function has been removed
         4701 # Potentially uninitialized local variable used
         4702 # Unreachable code
+        4714 # function 'QString QString::trimmed(void) &&' marked as __forceinline not inlined
         4800 # Boolean optimization warning, e.g. myBool = (myInt != 0) instead of myBool = myInt
         )
+
+    if (MSVC_VERSION GREATER 1800)
+        set(WARNINGS_DISABLE ${WARNINGS_DISABLE} 5026 5027
+            5031 # #pragma warning(pop): likely mismatch, popping warning state pushed in different file (config_begin.hpp, config_end.hpp)
+        )
+    endif()
 
     foreach(d ${WARNINGS_DISABLE})
         set(WARNINGS "${WARNINGS} /wd${d}")
@@ -693,7 +710,12 @@ if (WIN32)
     endif()
 
     if (BUILD_OPENMW)
-        set_target_properties(tes3mp PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+        # Very specific issue this, only needed on 32-bit VS2015 during unity builds.
+        if (MSVC_VERSION GREATER 1800 AND CMAKE_SIZEOF_VOID_P EQUAL 4 AND OPENMW_UNITY_BUILD)
+            set_target_properties(tes3mp PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD} /bigobj")
+        else()
+            set_target_properties(tes3mp PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+        endif()
     endif()
 
     if (BUILD_WIZARD)

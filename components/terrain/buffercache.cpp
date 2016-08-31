@@ -124,7 +124,7 @@ osg::ref_ptr<IndexArrayType> createIndexBuffer(unsigned int flags, unsigned int 
         // West
         size_t col = 0;
         outerStep = size_t(1) << (lodDeltas[Terrain::West] + lodLevel);
-        for (size_t row = 0; row < verts-1; row += outerStep)
+        for (row = 0; row < verts-1; row += outerStep)
         {
             indices->push_back(verts*col+row+outerStep);
             indices->push_back(verts*col+row);
@@ -148,7 +148,7 @@ osg::ref_ptr<IndexArrayType> createIndexBuffer(unsigned int flags, unsigned int 
         // East
         col = verts-1;
         outerStep = size_t(1) << (lodDeltas[Terrain::East] + lodLevel);
-        for (size_t row = 0; row < verts-1; row += outerStep)
+        for (row = 0; row < verts-1; row += outerStep)
         {
             indices->push_back(verts*col+row);
             indices->push_back(verts*col+row+outerStep);

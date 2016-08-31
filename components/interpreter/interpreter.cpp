@@ -241,9 +241,9 @@ namespace Interpreter
 
             while (mRuntime.getPC()>=0 && mRuntime.getPC()<opcodes)
             {
-                Type_Code code = codeBlock[mRuntime.getPC()];
+                Type_Code runCode = codeBlock[mRuntime.getPC()];
                 mRuntime.setPC (mRuntime.getPC()+1);
-                execute (code);
+                execute (runCode);
             }
         }
         catch (...)

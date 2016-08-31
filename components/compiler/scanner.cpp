@@ -260,7 +260,7 @@ namespace Compiler
         return true;
     }
 
-    static const char *keywords[] =
+    static const char *sKeywords[] =
     {
         "begin", "end",
         "short", "long", "float",
@@ -306,11 +306,11 @@ namespace Compiler
 
         std::string lowerCase = Misc::StringUtils::lowerCase(name);
 
-        for (; keywords[i]; ++i)
-            if (lowerCase==keywords[i])
+        for (; sKeywords[i]; ++i)
+            if (lowerCase==sKeywords[i])
                 break;
 
-        if (keywords[i])
+        if (sKeywords[i])
         {
             cont = parser.parseKeyword (i, loc, *this);
             return true;
@@ -618,8 +618,8 @@ namespace Compiler
 
     void Scanner::listKeywords (std::vector<std::string>& keywords)
     {
-        for (int i=0; Compiler::keywords[i]; ++i)
-            keywords.push_back (Compiler::keywords[i]);
+        for (int i=0; Compiler::sKeywords[i]; ++i)
+            keywords.push_back (Compiler::sKeywords[i]);
 
         if (mExtensions)
             mExtensions->listKeywords (keywords);
