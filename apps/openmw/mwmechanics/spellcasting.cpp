@@ -307,6 +307,9 @@ namespace MWMechanics
         std::string sound;
         
         osg::Vec3f fallbackDirection (0,1,0);
+
+        bool isFirstProjectile = true;
+
         for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
             iter!=effects.mList.end(); ++iter)
         {
@@ -335,8 +338,18 @@ namespace MWMechanics
                    osg::Vec3f(mTarget.getRefData().getPosition().asVec3())-
                    osg::Vec3f(mCaster.getRefData().getPosition().asVec3());
             
-            MWBase::Environment::get().getWorld()->launchMagicBolt(model, sound, mId, speed,
+            // Only send the effects data with the first projectile, so we don't have the impact sounds
+            // playing multiple times.
+            if (isFirstProjectile)
+                MWBase::Environment::get().getWorld()->launchMagicBolt(model, sound, mId, speed,
                                                        false, effects, mCaster, mSourceName, fallbackDirection);
+            else
+            {
+                const ESM::EffectList empty;
+                MWBase::Environment::get().getWorld()->launchMagicBolt(model, sound, mId, speed,
+                                                       false, empty, mCaster, mSourceName, fallbackDirection);
+            }
+            isFirstProjectile = false;
         }
     }
 
