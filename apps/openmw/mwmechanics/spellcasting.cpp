@@ -393,7 +393,7 @@ namespace MWMechanics
 
                 if (!world->isWaterWalkingCastableOnTarget(target))
                 {
-                    if (castByPlayer)
+                    if (castByPlayer && caster == target)
                         MWBase::Environment::get().getWindowManager()->messageBox ("#{sMagicInvalidEffect}");
                     continue;
                 }
