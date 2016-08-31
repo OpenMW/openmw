@@ -292,7 +292,7 @@ namespace MWMechanics
                 }
                 break;
             case ESM::MagicEffect::WaterWalking:
-                if (target.getClass().isPureWaterCreature(target))
+                if (target.getClass().isPureWaterCreature(target) && MWBase::Environment::get().getWorld()->isSwimming(target))
                     return false;
 
                 MWBase::World *world = MWBase::Environment::get().getWorld();
