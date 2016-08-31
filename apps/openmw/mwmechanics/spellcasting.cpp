@@ -286,9 +286,26 @@ namespace MWMechanics
     /// If \a model is empty, the spell has no ranged effects and should not spawn a projectile.
     void CastSpell::getProjectileInfoAndLaunch (const ESM::EffectList& effects)
     {
+        // All projectiles should use the same speed. From observations in the
+        // original engine, this seems to be the average of the constituent effects.
+        // First we get this average speed.
+        float speed = 0;
+        int count = 0;
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
+            iter!=effects.mList.end(); ++iter)
+        {
+            const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
+                iter->mEffectID);
+            speed += magicEffect->mData.mSpeed;
+            count++;
+        }
+
+        if (count != 0)
+            speed /= count;
+
         std::string model;
         std::string sound;
-        float speed = 0;
+        
         osg::Vec3f fallbackDirection (0,1,0);
         for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
             iter!=effects.mList.end(); ++iter)
@@ -311,8 +328,6 @@ namespace MWMechanics
             else
                 sound = schools[magicEffect->mData.mSchool] + " bolt";
 
-            speed = magicEffect->mData.mSpeed;
-
             // Fall back to a "caster to target" direction if we have no other means of determining it
             // (e.g. when cast by a non-actor)
             if (!mTarget.isEmpty())
@@ -320,8 +335,7 @@ namespace MWMechanics
                    osg::Vec3f(mTarget.getRefData().getPosition().asVec3())-
                    osg::Vec3f(mCaster.getRefData().getPosition().asVec3());
             
-            if (!model.empty())
-                MWBase::Environment::get().getWorld()->launchMagicBolt(model, sound, mId, speed,
+            MWBase::Environment::get().getWorld()->launchMagicBolt(model, sound, mId, speed,
                                                        false, effects, mCaster, mSourceName, fallbackDirection);
         }
     }
