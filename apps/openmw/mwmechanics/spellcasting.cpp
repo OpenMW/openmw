@@ -356,7 +356,6 @@ namespace MWMechanics
 
         ESM::EffectList reflectedEffects;
         std::vector<ActiveSpells::ActiveEffect> appliedLastingEffects;
-        bool firstAppliedEffect = true;
         bool anyHarmfulEffect = false;
 
         // HACK: cache target's magic effects here, and add any applied effects to it. Use the cached effects for determining resistance.
@@ -545,20 +544,15 @@ namespace MWMechanics
 
                 if (target.getClass().isActor() || magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)
                 {
-                    // Play sound, only for the first effect
-                    if (firstAppliedEffect)
-                    {
-                        static const std::string schools[] = {
-                            "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-                        };
+                    static const std::string schools[] = {
+                        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+                    };
 
-                        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                        if(!magicEffect->mHitSound.empty())
-                            sndMgr->playSound3D(target, magicEffect->mHitSound, 1.0f, 1.0f);
-                        else
-                            sndMgr->playSound3D(target, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
-                        firstAppliedEffect = false;
-                    }
+                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                    if(!magicEffect->mHitSound.empty())
+                        sndMgr->playSound3D(target, magicEffect->mHitSound, 1.0f, 1.0f);
+                    else
+                        sndMgr->playSound3D(target, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
 
                     // Add VFX
                     const ESM::Static* castStatic;
