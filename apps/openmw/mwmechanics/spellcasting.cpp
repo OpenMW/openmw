@@ -880,7 +880,6 @@ namespace MWMechanics
             inflict(mTarget, mCaster, spell->mEffects, ESM::RT_Touch);
         }
 
-
         std::string projectileModel;
         std::string sound;
         float speed = 0;
@@ -970,36 +969,39 @@ namespace MWMechanics
        
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
-        const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
 
-        const ESM::MagicEffect *effect;
-        effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
-
-        MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
-
-        if (mCaster.getClass().isActor()) // TODO: Non-actors (except for large statics?) should also create a spell cast vfx
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter = spell->mEffects.mList.begin();
+            iter != spell->mEffects.mList.end(); ++iter)
         {
-            const ESM::Static* castStatic;
-            if (!effect->mCasting.empty())
-                castStatic = store.get<ESM::Static>().find (effect->mCasting);
+            const ESM::MagicEffect *effect;
+            effect = store.get<ESM::MagicEffect>().find(iter->mEffectID);
+
+            MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
+
+            if (mCaster.getClass().isActor()) // TODO: Non-actors (except for large statics?) should also create a spell cast vfx
+            {
+                const ESM::Static* castStatic;
+                if (!effect->mCasting.empty())
+                    castStatic = store.get<ESM::Static>().find (effect->mCasting);
+                else
+                    castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
+
+                animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex);
+            }
+
+            if (!mCaster.getClass().isActor())
+                animation->addSpellCastGlow(effect);
+
+            static const std::string schools[] = {
+                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+            };
+
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            if(!effect->mCastSound.empty())
+                sndMgr->playSound3D(mCaster, effect->mCastSound, 1.0f, 1.0f);
             else
-                castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
-
-            animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex);
+                sndMgr->playSound3D(mCaster, schools[effect->mData.mSchool]+" cast", 1.0f, 1.0f);
         }
-
-        if (!mCaster.getClass().isActor())
-            animation->addSpellCastGlow(effect);
-
-        static const std::string schools[] = {
-            "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-        };
-
-        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        if(!effect->mCastSound.empty())
-            sndMgr->playSound3D(mCaster, effect->mCastSound, 1.0f, 1.0f);
-        else
-            sndMgr->playSound3D(mCaster, schools[effect->mData.mSchool]+" cast", 1.0f, 1.0f);
     }
 
     int getEffectiveEnchantmentCastCost(float castCost, const MWWorld::Ptr &actor)
