@@ -23,7 +23,7 @@ namespace
 {
 
     //chooses an attack depending on probability to avoid uniformity
-    ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement);
+    std::string chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement);
 
     osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const osg::Vec3f& vLastTargetPos,
         float duration, int weapType, float strength);
@@ -630,7 +630,7 @@ namespace MWMechanics
                 characterController.setAttackingOrSpell(true);
 
                 if (!distantCombat)
-                    chooseBestAttack(weapon, mMovement);
+                    characterController.setAIAttackType(chooseBestAttack(weapon, mMovement));
 
                 mStrength = Misc::Rng::rollClosedProbability();
 
@@ -678,9 +678,9 @@ namespace MWMechanics
 namespace
 {
 
-ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement)
+std::string chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement)
 {
-    ESM::Weapon::AttackType attackType;
+    std::string attackType;
 
     if (weapon == NULL)
     {
@@ -690,17 +690,17 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
         {
             movement.mPosition[0] = (Misc::Rng::rollClosedProbability() < 0.5f) ? 1.0f : -1.0f;
             movement.mPosition[1] = 0;
-            attackType = ESM::Weapon::AT_Slash;
+            attackType = "slash";
         }
         else if(roll <= 0.666f) //forward punch
         {
             movement.mPosition[1] = 1;
-            attackType = ESM::Weapon::AT_Thrust;
+            attackType = "thrust";
         }
         else
         {
             movement.mPosition[1] = movement.mPosition[0] = 0;
-            attackType = ESM::Weapon::AT_Chop;
+            attackType = "chop";
         }
     }
     else
@@ -715,17 +715,17 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
         {
             movement.mPosition[0] = (Misc::Rng::rollClosedProbability() < 0.5f) ? 1.0f : -1.0f;
             movement.mPosition[1] = 0;
-            attackType = ESM::Weapon::AT_Slash;
+            attackType = "slash";
         }
         else if(roll <= (slash + thrust))
         {
             movement.mPosition[1] = 1;
-            attackType = ESM::Weapon::AT_Thrust;
+            attackType = "thrust";
         }
         else
         {
             movement.mPosition[1] = movement.mPosition[0] = 0;
-            attackType = ESM::Weapon::AT_Chop;
+            attackType = "chop";
         }
     }
 

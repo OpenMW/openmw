@@ -1208,7 +1208,6 @@ bool CharacterController::updateWeaponState()
         if(mUpperBodyState == UpperCharState_WeapEquiped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
-            mAttackType.clear();
             if(mWeaponType == WeapType_Spell)
             {
                 // Unset casting flag, otherwise pressing the mouse button down would
@@ -1309,14 +1308,17 @@ bool CharacterController::updateWeaponState()
                 {
                     if (isWeapon)
                     {
-                        if(mPtr == getPlayer() &&
-                                Settings::Manager::getBool("best attack", "Game"))
+                        if(mPtr == getPlayer())
                         {
-                            MWWorld::ContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                            mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
+                            if (Settings::Manager::getBool("best attack", "Game"))        
+                            {
+                                MWWorld::ContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                                mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
+                            }
+                            else
+                                setAttackTypeBasedOnMovement();
                         }
-                        else
-                            setAttackTypeBasedOnMovement();
+                        // else if (mPtr != getPlayer()) use mAttackType already set by AiCombat
                     }
                     else
                         setAttackTypeRandomly();
@@ -2225,6 +2227,11 @@ bool CharacterController::isSneaking() const
 void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
 {
     mAttackingOrSpell = attackingOrSpell;
+}
+
+void CharacterController::setAIAttackType(std::string attackType)
+{
+    mAttackType = attackType;
 }
 
 bool CharacterController::readyToPrepareAttack() const
