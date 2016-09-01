@@ -594,8 +594,8 @@ void LocalPlayer::SetClass()
     }
     else
     {
-        MWBase::Environment::get().getMechanicsManager()->setPlayerClass(Npc()->mClass);
-        const ESM::Class *_klass = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(Npc()->mClass);
+        MWBase::Environment::get().getMechanicsManager()->setPlayerClass(klass);
+        const ESM::Class *_klass = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(klass.mId);
         if (_klass)
             MWBase::Environment::get().getWindowManager()->setPlayerClass(klass);
     }
