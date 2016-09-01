@@ -687,21 +687,11 @@ std::string chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &m
         //hand-to-hand deal equal damage for each type
         float roll = Misc::Rng::rollClosedProbability();
         if(roll <= 0.333f)  //side punch
-        {
-            movement.mPosition[0] = (Misc::Rng::rollClosedProbability() < 0.5f) ? 1.0f : -1.0f;
-            movement.mPosition[1] = 0;
             attackType = "slash";
-        }
         else if(roll <= 0.666f) //forward punch
-        {
-            movement.mPosition[1] = 1;
             attackType = "thrust";
-        }
         else
-        {
-            movement.mPosition[1] = movement.mPosition[0] = 0;
             attackType = "chop";
-        }
     }
     else
     {
@@ -712,21 +702,11 @@ std::string chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &m
 
         float roll = Misc::Rng::rollClosedProbability() * (slash + chop + thrust);
         if(roll <= slash)
-        {
-            movement.mPosition[0] = (Misc::Rng::rollClosedProbability() < 0.5f) ? 1.0f : -1.0f;
-            movement.mPosition[1] = 0;
             attackType = "slash";
-        }
         else if(roll <= (slash + thrust))
-        {
-            movement.mPosition[1] = 1;
             attackType = "thrust";
-        }
         else
-        {
-            movement.mPosition[1] = movement.mPosition[0] = 0;
             attackType = "chop";
-        }
     }
 
     return attackType;
