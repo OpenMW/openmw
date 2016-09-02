@@ -488,7 +488,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
 
                 myPacket->Packet(&bsIn, __pl, false);
 
-                for (int i = 0; i < PacketAttributesAndStats::AttributesCount; ++i)
+                for (int i = 0; i < 8; ++i)
                 {
                     attributeValue.readState(__pl->CreatureStats()->mAttributes[i]);
                     __pl_ptr.getClass().getCreatureStats(__pl_ptr).setAttribute(i, attributeValue);
@@ -517,7 +517,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
 
                 myPacket->Packet(&bsIn, __pl, false);
 
-                for (int i = 0; i < PacketAttributesAndStats::StatsCount; ++i)
+                for (int i = 0; i < 27; ++i)
                 {
                     skillValue.readState(__pl->NpcStats()->mSkills[i]);
                     __pl_ptr.getClass().getNpcStats(__pl_ptr).setSkill(i, skillValue);

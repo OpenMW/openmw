@@ -6,7 +6,6 @@
 
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/esm/creaturestats.hpp>
-#include "PacketAttributesAndStats.hpp"
 
 using namespace mwmp;
 

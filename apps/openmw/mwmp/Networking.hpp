@@ -13,7 +13,6 @@
 #include <components/openmw-mp/Packets/PacketPosition.hpp>
 #include <components/openmw-mp/Packets/PacketBaseInfo.hpp>
 #include <components/openmw-mp/Packets/PacketEquiped.hpp>
-#include <components/openmw-mp/Packets/PacketAttributesAndStats.hpp>
 #include <components/openmw-mp/Packets/PacketAttack.hpp>
 #include <components/openmw-mp/Packets/PacketMainStats.hpp>
 #include <components/openmw-mp/Packets/PacketResurrect.hpp>
