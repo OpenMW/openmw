@@ -1236,19 +1236,27 @@ bool CharacterController::updateWeaponState()
                     cast.playSpellCastingEffects(spellid);
 
                     const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
-                    const ESM::ENAMstruct &lasteffect = spell->mEffects.mList.at(spell->mEffects.mList.size() - 1);
+                    
+                    const ESM::ENAMstruct &lastEffect = spell->mEffects.mList.at(spell->mEffects.mList.size() - 1);
 
                     const ESM::MagicEffect *effect;
-                    effect = store.get<ESM::MagicEffect>().find(lasteffect.mEffectID);
+
+                    effect = store.get<ESM::MagicEffect>().find(lastEffect.mEffectID); // use last effect of list for color of VFX_Hands
 
                     const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
-                    if (mAnimation->getNode("Bip01 L Hand"))
-                        mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 L Hand", effect->mParticle);
 
-                    if (mAnimation->getNode("Bip01 R Hand"))
-                        mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 R Hand", effect->mParticle);
+                    for (int iter = 0; iter < spell->mEffects.mList.size(); ++iter) // play hands vfx for each effect
+                    {
+                        if (mAnimation->getNode("Bip01 L Hand"))
+                            mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 L Hand", effect->mParticle);
 
-                    switch(lasteffect.mRange)
+                        if (mAnimation->getNode("Bip01 R Hand"))
+                            mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 R Hand", effect->mParticle);
+                    }
+
+                    const ESM::ENAMstruct &firstEffect = spell->mEffects.mList.at(0); // first effect used for casting animation
+
+                    switch(firstEffect.mRange)
                     {
                         case 0: mAttackType = "self"; break;
                         case 1: mAttackType = "touch"; break;
