@@ -80,30 +80,6 @@ const char *StatsFunctions::GetRace(unsigned short pid) noexcept
     return player->Npc()->mRace.c_str();
 }
 
-void StatsFunctions::SetClass(unsigned short pid, const char *className) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    if (player->Npc()->mClass == className)
-        return;
-
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Setting class for %s: %s -> %s",
-        player->Npc()->mName.c_str(),
-        player->Npc()->mClass.c_str(),
-        className);
-
-    player->Npc()->mClass = className;
-}
-
-const char *StatsFunctions::GetClass(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0);
-
-    return player->Npc()->mClass.c_str();
-}
-
 void StatsFunctions::SetHead(unsigned short pid, const char *race) noexcept
 {
     Player *player;

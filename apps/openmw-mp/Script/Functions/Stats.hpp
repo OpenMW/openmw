@@ -12,9 +12,6 @@
     {"GetRace",             StatsFunctions::GetRace},\
     {"SetRace",             StatsFunctions::SetRace},\
     \
-    {"SetClass",            StatsFunctions::SetClass},\
-    {"GetClass",            StatsFunctions::GetClass},\
-    \
     {"GetHead",             StatsFunctions::GetHead},\
     {"SetHead",             StatsFunctions::SetHead},\
     \

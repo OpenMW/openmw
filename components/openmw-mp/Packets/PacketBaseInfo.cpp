@@ -19,7 +19,6 @@ void PacketBaseInfo::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send
     RW(player->Npc()->mName, send);
     RW(player->Npc()->mModel, send);
     RW(player->Npc()->mRace, send);
-    RW(player->Npc()->mClass, send);
     RW(player->Npc()->mHair, send);
     RW(player->Npc()->mHead, send);
 
