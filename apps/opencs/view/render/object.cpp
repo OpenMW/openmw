@@ -644,13 +644,16 @@ void CSVRender::Object::apply (CSMWorld::CommandMacro& commands)
         int column = collection.findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (
             CSMWorld::Columns::ColumnId_Cell));
 
-        std::pair<int, int> cellIndex = collection.getRecord (recordIndex).get().getCellIndex();
+        if (CSMWorld::CellCoordinates::isExteriorCell(collection.getRecord (recordIndex).get().mCell))
+        {
+            std::pair<int, int> cellIndex = collection.getRecord (recordIndex).get().getCellIndex();
 
-        /// \todo figure out worldspace (not important until multiple worldspaces are supported)
-        std::string cellId = CSMWorld::CellCoordinates (cellIndex).getId ("");
+            /// \todo figure out worldspace (not important until multiple worldspaces are supported)
+            std::string cellId = CSMWorld::CellCoordinates (cellIndex).getId ("");
 
-        commands.push (new CSMWorld::ModifyCommand (*model,
-            model->index (recordIndex, column), QString::fromUtf8 (cellId.c_str())));
+            commands.push (new CSMWorld::ModifyCommand (*model,
+                model->index (recordIndex, column), QString::fromUtf8 (cellId.c_str())));
+        }
     }
 
     if (mOverrideFlags & Override_Rotation)

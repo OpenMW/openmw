@@ -2098,6 +2098,19 @@ namespace MWWorld
         return pos.z() < cell->getWaterLevel();
     }
 
+    bool World::isWaterWalkingCastableOnTarget(const MWWorld::ConstPtr &target) const
+    {
+        const MWWorld::CellStore* cell = target.getCell();
+        if (!cell->getCell()->hasWater())
+            return true;
+
+        // Based on observations from the original engine, the depth
+        // limit at which water walking can still be cast on a target
+        // in water appears to be the same as what the highest swimmable
+        // z position would be with SwimHeightScale + 1.
+        return !isUnderwater(target, mSwimHeightScale + 1);
+    }
+
     bool World::isOnGround(const MWWorld::Ptr &ptr) const
     {
         return mPhysics->isOnGround(ptr);
