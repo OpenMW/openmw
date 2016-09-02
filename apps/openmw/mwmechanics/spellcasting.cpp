@@ -345,7 +345,7 @@ namespace MWMechanics
                                                        false, effects, mCaster, mSourceName, fallbackDirection);
             else
             {
-                const ESM::EffectList empty;
+                ESM::EffectList empty;
                 MWBase::Environment::get().getWorld()->launchMagicBolt(model, sound, mId, speed,
                                                        false, empty, mCaster, mSourceName, fallbackDirection);
             }

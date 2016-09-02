@@ -1245,7 +1245,7 @@ bool CharacterController::updateWeaponState()
 
                     const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
 
-                    for (int iter = 0; iter < spell->mEffects.mList.size(); ++iter) // play hands vfx for each effect
+                    for (size_t iter = 0; iter < spell->mEffects.mList.size(); ++iter) // play hands vfx for each effect
                     {
                         if (mAnimation->getNode("Bip01 L Hand"))
                             mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 L Hand", effect->mParticle);
