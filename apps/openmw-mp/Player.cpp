@@ -35,6 +35,7 @@ void Players::NewPlayer(RakNet::RakNetGUID id)
     players[id]->Npc()->blank();
     players[id]->NpcStats()->blank();
     players[id]->CreatureStats()->blank();
+    players[id]->klass.blank();
 
     for (int i = 0; i < mwmp::Networking::Get().MaxConnections(); i++)
     {
