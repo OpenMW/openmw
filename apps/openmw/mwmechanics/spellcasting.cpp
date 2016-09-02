@@ -259,7 +259,7 @@ namespace MWMechanics
     }
 
     /// Check if the given affect can be applied to the target. If \a castByPlayer, emits a message box on failure.
-    bool checkEffectTarget (int effectId, const MWWorld::Ptr& target, bool castByPlayer)
+    bool checkEffectTarget (int effectId, const MWWorld::Ptr& target, const MWWorld::Ptr& caster, bool castByPlayer)
     {
         switch (effectId)
         {
@@ -291,8 +291,20 @@ namespace MWMechanics
                     return false;
                 }
                 break;
-        }
+            case ESM::MagicEffect::WaterWalking:
+                if (target.getClass().isPureWaterCreature(target) && MWBase::Environment::get().getWorld()->isSwimming(target))
+                    return false;
 
+                MWBase::World *world = MWBase::Environment::get().getWorld();
+
+                if (!world->isWaterWalkingCastableOnTarget(target))
+                {
+                    if (castByPlayer && caster == target)
+                        MWBase::Environment::get().getWindowManager()->messageBox ("#{sMagicInvalidEffect}");
+                    return false;
+                }
+                break;
+        }
         return true;
     }
 
@@ -384,7 +396,7 @@ namespace MWMechanics
             else
                 canCastAnEffect = true;
 
-            if (!checkEffectTarget(effectIt->mEffectID, target, castByPlayer))
+            if (!checkEffectTarget(effectIt->mEffectID, target, caster, castByPlayer))
                 continue;
 
             // caster needs to be an actor for linked effects (e.g. Absorb)

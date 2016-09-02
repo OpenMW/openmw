@@ -481,6 +481,7 @@ namespace MWWorld
             virtual bool isSwimming(const MWWorld::ConstPtr &object) const;
             virtual bool isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const;
             virtual bool isWading(const MWWorld::ConstPtr &object) const;
+            virtual bool isWaterWalkingCastableOnTarget(const MWWorld::ConstPtr &target) const;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;
 
             virtual osg::Matrixf getActorHeadTransform(const MWWorld::ConstPtr& actor) const;
