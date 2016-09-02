@@ -80,15 +80,15 @@ const char *StatsFunctions::GetRace(unsigned short pid) noexcept
     return player->Npc()->mRace.c_str();
 }
 
-void StatsFunctions::SetHead(unsigned short pid, const char *race) noexcept
+void StatsFunctions::SetHead(unsigned short pid, const char *head) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
 
-    if (player->Npc()->mHead == race)
+    if (player->Npc()->mHead == head)
         return;
 
-    player->Npc()->mHead = race;
+    player->Npc()->mHead = head;
 }
 
 const char *StatsFunctions::GetHead(unsigned short pid) noexcept
