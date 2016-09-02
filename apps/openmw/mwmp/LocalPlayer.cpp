@@ -525,8 +525,10 @@ bool LocalPlayer::CharGenThread() // ToDo: need fix
         if (GetNetworking()->isConnected() && CharGenStage()->current == CharGenStage()->end &&
             CharGenStage()->end != 0)
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            MWWorld::Ptr player = world->getPlayerPtr();
             (*Npc()) = *player.get<ESM::NPC>()->mBase;
+            (*BirthSign()) = world->getPlayer().getBirthSign();
 
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server with my CharGen info");
             GetNetworking()->GetPacket(ID_GAME_BASE_INFO)->Send(this);
@@ -580,6 +582,8 @@ void LocalPlayer::updateChar()
             Npc()->mHead,
             Npc()->mHair
     );
+
+    MWBase::Environment::get().getMechanicsManager()->setPlayerBirthsign(*BirthSign());
 
     MWBase::Environment::get().getWindowManager()->getInventoryWindow()->rebuildAvatar();
 }
