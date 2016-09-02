@@ -37,11 +37,16 @@ std::string CSMWorld::CellCoordinates::getId (const std::string& worldspace) con
     return stream.str();
 }
 
+bool CSMWorld::CellCoordinates::isExteriorCell (const std::string& id)
+{
+    return (!id.empty() && id[0]=='#');
+}
+
 std::pair<CSMWorld::CellCoordinates, bool> CSMWorld::CellCoordinates::fromId (
     const std::string& id)
 {
     // no worldspace for now, needs to be changed for 1.1
-    if (!id.empty() && id[0]=='#')
+    if (isExteriorCell(id))
     {
         int x, y;
         char ignore;
