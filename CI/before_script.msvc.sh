@@ -509,6 +509,8 @@ printf "OpenAL-Soft 1.17.2... "
 	add_cmake_opts -DOPENAL_INCLUDE_DIR="${OPENAL_SDK}/include/AL" \
 		-DOPENAL_LIBRARY="${OPENAL_SDK}/libs/Win${BITS}/OpenAL32.lib"
 
+	add_runtime_dlls "$(pwd)/openal-soft-1.17.2-bin/bin/WIN${BITS}/soft_oal.dll:OpenAL32.dll"
+
 	echo Done.
 }
 cd $DEPS
@@ -631,7 +633,7 @@ printf "SDL 2.0.4... "
 
 	export SDL2DIR="$(real_pwd)/SDL2-2.0.4"
 
-	add_runtime_dlls "${SDL2DIR}/lib/x${ARCHSUFFIX}/SDL2.dll"
+	add_runtime_dlls "$(pwd)/SDL2-2.0.4/lib/x${ARCHSUFFIX}/SDL2.dll"
 
 	echo Done.
 }
@@ -691,8 +693,16 @@ if [ -z $CI ]; then
 	echo "- Copying Runtime DLLs..."
 	mkdir -p $BUILD_CONFIG
 	for DLL in $RUNTIME_DLLS; do
-		echo "    $(basename $DLL)."
-		cp "$DLL" $BUILD_CONFIG/
+		TARGET="$(basename "$DLL")"
+		if [[ "$DLL" == *":"* ]]; then
+			IFS=':'; SPLIT=( ${DLL} ); unset IFS
+
+			DLL=${SPLIT[0]}
+			TARGET=${SPLIT[1]}
+		fi
+
+		echo "    ${TARGET}."
+		cp "$DLL" "$BUILD_CONFIG/$TARGET"
 	done
 	echo
 
