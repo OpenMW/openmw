@@ -537,7 +537,6 @@ bool LocalPlayer::CharGenThread() // ToDo: need fix
             {
                 updateBaseStats(true);
                 updateAttributesAndSkills(true);
-                //GetNetworking()->GetPacket(ID_GAME_UPDATE_SKILLS)->Send(this);
                 SendClass();
                 GetNetworking()->GetPacket(ID_GAME_CHARGEN)->Send(this);
             }

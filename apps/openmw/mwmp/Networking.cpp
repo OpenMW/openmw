@@ -271,34 +271,6 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             }
             break;
         }
-        case ID_GAME_UPDATE_SKILLS:
-        {
-            if (id == myid)
-            {
-                getLocalPlayer()->updateAttributesAndSkills(true);
-                myPacket->Send(getLocalPlayer(), serverAddr);
-            }
-            else if (pl != 0)
-            {
-                myPacket->Packet(&bsIn, pl, false);
-
-                MWMechanics::SkillValue skillValue;
-                MWMechanics::AttributeValue attributeValue;
-
-                for (int i = 0; i < PacketAttributesAndStats::StatsCount; ++i)
-                {
-                    skillValue.readState(pl->NpcStats()->mSkills[i]);
-                    pl->getPtr().getClass().getNpcStats(pl->getPtr()).setSkill(i, skillValue);
-                }
-
-                for (int i = 0; i < PacketAttributesAndStats::AttributesCount; ++i)
-                {
-                    attributeValue.readState(pl->CreatureStats()->mAttributes[i]);
-                    pl->getPtr().getClass().getCreatureStats(pl->getPtr()).setAttribute(i, attributeValue);
-                }
-            }
-            break;
-        }
         case ID_GAME_ATTACK:
         {
             if (pl != 0)
