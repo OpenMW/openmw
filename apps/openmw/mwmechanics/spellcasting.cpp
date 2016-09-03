@@ -304,11 +304,12 @@ namespace MWMechanics
             speed /= count;
 
         std::string model;
+        std::vector<std::string> models;
         std::string sound;
+        std::vector<std::string> sounds;
+        ESM::EffectList projectileEffects;
         
-        osg::Vec3f fallbackDirection (0,1,0);
-
-        bool isFirstProjectile = true;
+        osg::Vec3f fallbackDirection (0,1,0);     
 
         for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
             iter!=effects.mList.end(); ++iter)
@@ -322,6 +323,7 @@ namespace MWMechanics
             model = magicEffect->mBolt;
             if (model.empty())
                 model = "VFX_DefaultBolt";
+            models.push_back(model);
 
             static const std::string schools[] = {
                 "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
@@ -330,6 +332,9 @@ namespace MWMechanics
                 sound = magicEffect->mBoltSound;
             else
                 sound = schools[magicEffect->mData.mSchool] + " bolt";
+            sounds.push_back(sound);
+            projectileEffects.mList.push_back(*iter);
+        }
 
             // Fall back to a "caster to target" direction if we have no other means of determining it
             // (e.g. when cast by a non-actor)
@@ -338,19 +343,8 @@ namespace MWMechanics
                    osg::Vec3f(mTarget.getRefData().getPosition().asVec3())-
                    osg::Vec3f(mCaster.getRefData().getPosition().asVec3());
             
-            // Only send the effects data with the first projectile, so we don't have the impact sounds
-            // playing multiple times.
-            if (isFirstProjectile)
-                MWBase::Environment::get().getWorld()->launchMagicBolt(model, sound, mId, speed,
-                                                       false, effects, mCaster, mSourceName, fallbackDirection);
-            else
-            {
-                ESM::EffectList empty;
-                MWBase::Environment::get().getWorld()->launchMagicBolt(model, sound, mId, speed,
-                                                       false, empty, mCaster, mSourceName, fallbackDirection);
-            }
-            isFirstProjectile = false;
-        }
+            MWBase::Environment::get().getWorld()->launchMagicBolt(models, sounds, mId, speed,
+                                                       false, projectileEffects, mCaster, mSourceName, fallbackDirection);
     }
 
     void CastSpell::inflict(const MWWorld::Ptr &target, const MWWorld::Ptr &caster,
