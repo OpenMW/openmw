@@ -682,18 +682,7 @@ std::string chooseBestAttack(const ESM::Weapon* weapon)
 {
     std::string attackType;
 
-    if (weapon == NULL)
-    {
-        //hand-to-hand deal equal damage for each type
-        float roll = Misc::Rng::rollClosedProbability();
-        if(roll <= 0.333f)  //side punch
-            attackType = "slash";
-        else if(roll <= 0.666f) //forward punch
-            attackType = "thrust";
-        else
-            attackType = "chop";
-    }
-    else
+    if (weapon != NULL)
     {
         //the more damage attackType deals the more probability it has
         int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
