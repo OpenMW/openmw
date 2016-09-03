@@ -269,6 +269,7 @@ public:
     bool isSneaking() const;
 
     void setAttackingOrSpell(bool attackingOrSpell);
+    void setAIAttackType(std::string attackType); // set and used by AiCombat
 
     bool readyToPrepareAttack() const;
     bool readyToStartAttack() const;
