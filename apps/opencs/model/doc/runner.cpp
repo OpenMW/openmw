@@ -81,7 +81,7 @@ void CSMDoc::Runner::start (bool delayed)
         arguments << ("--script-run="+mStartup->fileName());;
 
         arguments <<
-            QString::fromUtf8 (("--data="+mProjectPath.parent_path().string()).c_str());
+            QString::fromUtf8 (("--data=\""+mProjectPath.parent_path().string()+"\"").c_str());
 
         for (std::vector<std::string>::const_iterator iter (mContentFiles.begin());
             iter!=mContentFiles.end(); ++iter)
