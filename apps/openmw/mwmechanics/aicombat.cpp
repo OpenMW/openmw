@@ -23,7 +23,7 @@ namespace
 {
 
     //chooses an attack depending on probability to avoid uniformity
-    std::string chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement);
+    std::string chooseBestAttack(const ESM::Weapon* weapon);
 
     osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const osg::Vec3f& vLastTargetPos,
         float duration, int weapType, float strength);
@@ -630,7 +630,7 @@ namespace MWMechanics
                 characterController.setAttackingOrSpell(true);
 
                 if (!distantCombat)
-                    characterController.setAIAttackType(chooseBestAttack(weapon, mMovement));
+                    characterController.setAIAttackType(chooseBestAttack(weapon));
 
                 mStrength = Misc::Rng::rollClosedProbability();
 
@@ -678,7 +678,7 @@ namespace MWMechanics
 namespace
 {
 
-std::string chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement)
+std::string chooseBestAttack(const ESM::Weapon* weapon)
 {
     std::string attackType;
 
