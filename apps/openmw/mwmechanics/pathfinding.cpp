@@ -89,7 +89,8 @@ namespace MWMechanics
 
     float getXAngleToDir(const osg::Vec3f& dir)
     {
-        return -std::asin(dir.z() / dir.length());
+        float dirLen = dir.length();
+        return (dirLen != 0) ? -std::asin(dir.z() / dirLen) : 0;
     }
 
     float getZAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest)
@@ -276,7 +277,7 @@ namespace MWMechanics
         const ESM::Pathgrid::Point &nextPoint = *mPath.begin();
         osg::Vec3f dir = MakeOsgVec3(nextPoint) - osg::Vec3f(x,y,z);
 
-        return -std::asin(dir.z() / dir.length());
+        return getXAngleToDir(dir);
     }
 
     bool PathFinder::checkPathCompleted(float x, float y, float tolerance)
