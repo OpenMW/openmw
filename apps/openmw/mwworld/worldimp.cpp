@@ -2705,11 +2705,10 @@ namespace MWWorld
         mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed, attackStrength);
     }
 
-    void World::launchMagicBolt (const std::string& model, const std::string &sound, const std::string &spellId,
-                                 float speed, bool stack, const ESM::EffectList& effects,
-                                   const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection)
+    void World::launchMagicBolt (const std::string &spellId, bool stack, const ESM::EffectList& effects,
+                                 const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection)
     {
-        mProjectileManager->launchMagicBolt(model, sound, spellId, speed, stack, effects, caster, sourceName, fallbackDirection);
+        mProjectileManager->launchMagicBolt(spellId, stack, effects, caster, sourceName, fallbackDirection);
     }
 
     const std::vector<std::string>& World::getContentFiles() const
@@ -3163,8 +3162,9 @@ namespace MWWorld
         {
             const ESM::MagicEffect* effect = getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
 
-            if (effectIt->mArea <= 0)
-                continue; // Not an area effect
+            if (effectIt->mArea <= 0 || effectIt->mRange != rangeType)
+                continue; // Not an area effect or not right range type
+
 
             // Spawn the explosion orb effect
             const ESM::Static* areaStatic;
