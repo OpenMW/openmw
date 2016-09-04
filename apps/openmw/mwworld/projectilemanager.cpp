@@ -102,7 +102,10 @@ namespace MWWorld
                 std::ostringstream nodeName;
                 nodeName << "Dummy" << std::setw(2) << std::setfill('0') << iter;
                 const ESM::Weapon* weapon = MWBase::Environment::get().getWorld()->getStore().get<ESM::Weapon>().find (state.mIdMagic.at(iter));
-                mResourceSystem->getSceneManager()->getInstance("meshes\\" + weapon->mModel, attachTo);
+                SceneUtil::FindByNameVisitor findVisitor(nodeName.str());
+                attachTo->accept(findVisitor);
+                if (findVisitor.mFoundNode)
+                    mResourceSystem->getSceneManager()->getInstance("meshes\\" + weapon->mModel, findVisitor.mFoundNode);
             }
 
         SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
