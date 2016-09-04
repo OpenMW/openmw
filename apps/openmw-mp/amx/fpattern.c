@@ -64,9 +64,9 @@
 
 /* System includes */
 #if defined TEST
-	#include <assert.h>
+    #include <assert.h>
 #elif !defined assert
-	#define assert(e)
+    #define assert(e)
 #endif
 #include <string.h>
 
@@ -1151,8 +1151,8 @@ int main(int argc, char **argv)
     test(1, "a`x",      "a``x");
     test(1, "*`?",      "`*```?");
     test(1, "a*x",      "a`*x");
-    test(1, "a€",       "a`80");
-    test(0, "a€",       "a`8");
+    test(1, "aï¿½",       "a`80");
+    test(0, "aï¿½",       "a`8");
 
 #if defined FPAT_DELIM
     test(0, "",         "/");

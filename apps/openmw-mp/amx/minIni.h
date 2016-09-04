@@ -68,7 +68,7 @@ int  ini_browse(INI_CALLBACK Callback, const void *UserData, const mTCHAR *Filen
 #if defined __cplusplus
 
 #if defined __WXWINDOWS__
-	#include "wxMinIni.h"
+    #include "wxMinIni.h"
 #else
   #include <string>
 

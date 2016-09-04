@@ -68,7 +68,7 @@
 #elif defined FREEBSD && !defined __FreeBSD__
   #define __FreeBSD__
 #elif defined(_MSC_VER)
-  #pragma warning(disable: 4996)	/* for Microsoft Visual C/C++ */
+  #pragma warning(disable: 4996)  /* for Microsoft Visual C/C++ */
 #endif
 #if !defined strnicmp && !defined PORTABLE_STRNICMP
   #if defined __LINUX__ || defined __FreeBSD__ || defined __OpenBSD__ || defined __APPLE__

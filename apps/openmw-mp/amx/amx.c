@@ -558,7 +558,7 @@ int AMXAPI amx_Callback(AMX *amx, cell index, cell *result, const cell *params)
      * behind the SYSREQ(.N) instruction and its parameter(s)
      */
     unsigned char *code=amx->code+(int)amx->cip-sizeof(cell);
-    if (amx->flags & AMX_FLAG_SYSREQN)		/* SYSREQ.N has 2 parameters */
+    if (amx->flags & AMX_FLAG_SYSREQN) /* SYSREQ.N has 2 parameters */
       code-=sizeof(cell);
     assert(amx->code!=NULL);
     assert(amx->cip>=4 && amx->cip<(hdr->dat - hdr->cod));

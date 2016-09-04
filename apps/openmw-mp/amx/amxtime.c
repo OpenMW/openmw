@@ -26,10 +26,10 @@
 
 #define CELLMIN   (-1 << (8*sizeof(cell) - 1))
 
-#define SECONDS_PER_MINUTE	60
-#define SECONDS_PER_HOUR	3600
-#define SECONDS_PER_DAY		86400
-#define SECONDS_PER_YEAR	31556952	/* based on 365.2425 days per year */
+#define SECONDS_PER_MINUTE  60
+#define SECONDS_PER_HOUR    3600
+#define SECONDS_PER_DAY     86400
+#define SECONDS_PER_YEAR    31556952    /* based on 365.2425 days per year */
 
 #if !defined CLOCKS_PER_SEC
   #define CLOCKS_PER_SEC CLK_TCK
@@ -310,9 +310,9 @@ static cell AMX_NATIVE_CALL n_tickcount(AMX *amx, const cell *params)
   INIT_TIMER();
   cptr=amx_Address(amx,params[1]);
   #if defined __WIN32__ || defined _WIN32 || defined WIN32
-    *cptr=1000;               	/* granularity = 1 ms */
+    *cptr=1000;                 /* granularity = 1 ms */
   #else
-    *cptr=(cell)CLOCKS_PER_SEC;	/* in Unix/Linux, this is often 100 */
+    *cptr=(cell)CLOCKS_PER_SEC; /* in Unix/Linux, this is often 100 */
   #endif
   return gettimestamp() & 0x7fffffff;
 }

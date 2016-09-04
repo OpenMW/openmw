@@ -1,4 +1,5 @@
 #ifndef AMXCONS_H_INCLUDED
+#ifndef AMXCONS_H_INCLUDED
 #define AMXCONS_H_INCLUDED
 
 typedef struct tagFMTINFO {

@@ -14,10 +14,10 @@ using namespace std;
 #ifdef _WIN32
 int setenv(const char *name, const char *value, int overwrite)
 {
-	std::unique_ptr<char> tmp(new char[strlen(name) + strlen(value) + 1]);
-	sprintf(tmp.get(), "%s=%s", name, value);
+    std::unique_ptr<char> tmp(new char[strlen(name) + strlen(value) + 1]);
+    sprintf(tmp.get(), "%s=%s", name, value);
 
-	printf("%s\n",tmp.get());
+    printf("%s\n",tmp.get());
 
     return putenv((const char*)tmp.get());
 }
@@ -35,7 +35,7 @@ std::string Utils::convertPath(std::string str)
 #if defined(_WIN32) || defined(__APPLE__)
     for (auto &ch : str)
         if (ch == '/')
-	           ch = _SEP_;
+               ch = _SEP_;
 #endif //defined(_WIN32) || defined(__APPLE__)
     return str;
 
@@ -150,7 +150,7 @@ long int Utils::FileLength(const char* file)
 */
 
 #define UPDC32(octet,crc) (crc_32_tab[((crc)\
-									   ^ ((unsigned char)octet)) & 0xff] ^ ((crc) >> 8))
+                                       ^ ((unsigned char)octet)) & 0xff] ^ ((crc) >> 8))
 
 static unsigned int crc_32_tab[] =   /* CRC polynomial 0xedb88320 */
         {

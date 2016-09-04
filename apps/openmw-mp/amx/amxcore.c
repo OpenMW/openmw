@@ -218,8 +218,8 @@ void amx_swapcell(cell *pc)
       uchar b[4];
     #elif PAWN_CELL_SIZE==64
       uchar b[8];
-	#else
-	  #error Unsupported cell size
+    #else
+      #error Unsupported cell size
     #endif
   } value;
   uchar t;
@@ -241,13 +241,13 @@ void amx_swapcell(cell *pc)
     t = value.b[0];
     value.b[0] = value.b[7];
     value.b[7] = t;
-	t = value.b[1];
-	value.b[1] = value.b[6];
-	value.b[6] = t;
-	t = value.b[2];
-	value.b[2] = value.b[5];
-	value.b[5] = t;
-	t = value.b[3];
+    t = value.b[1];
+    value.b[1] = value.b[6];
+    value.b[6] = t;
+    t = value.b[2];
+    value.b[2] = value.b[5];
+    value.b[5] = t;
+    t = value.b[3];
     value.b[3] = value.b[4];
     value.b[4] = t;
   #else

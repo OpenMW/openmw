@@ -69,7 +69,7 @@
     typedef unsigned long int uint32_t;
   #endif
   #if defined __WIN32__ || defined _WIN32 || defined WIN32
-    typedef __int64	          int64_t;
+    typedef __int64           int64_t;
     typedef unsigned __int64  uint64_t;
     #define HAVE_I64
   #endif
