@@ -2,6 +2,7 @@
 
 #include <cfloat>
 #include <limits>
+#include <stdio.h>
 
 #include <boost/format.hpp>
 
@@ -341,7 +342,7 @@ namespace MWMechanics
             std::vector<std::string>::iterator it;
             it = projectileIDs.begin();
             char numstr[8];
-            sprintf(numstr, "%zd", (effects.mList.size()));
+            sprintf(numstr, "%d", (int)(effects.mList.size()));
             std::string ID = "VFX_Multiple";
             ID = ID + numstr;
             it = projectileIDs.insert(it, ID);

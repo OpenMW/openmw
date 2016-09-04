@@ -1,5 +1,7 @@
 #include "projectilemanager.hpp"
 
+#include <stdio.h>
+
 #include <osg/PositionAttitudeTransform>
 
 #include <components/esm/esmwriter.hpp>
@@ -92,13 +94,13 @@ namespace MWWorld
             attachTo = rotateNode;
         }
 
-        mResourceSystem->getSceneManager()->getInstance(model, attachTo);
+        osg::ref_ptr<osg::Node> ptr = mResourceSystem->getSceneManager()->getInstance(model, attachTo);
 
         if (state.mIdMagic.size() > 1)
             for (size_t iter = 1; iter != state.mIdMagic.size(); ++iter)
             {
                 char numstr[8];
-                sprintf(numstr, "%zd", iter);
+                sprintf(numstr, "%d", (int)iter);
                 std::string node = "Dummy0";
                 node = node + numstr;
                 const ESM::Weapon* weapon = MWBase::Environment::get().getWorld()->getStore().get<ESM::Weapon>().find (state.mIdMagic.at(iter));
