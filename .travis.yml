@@ -50,9 +50,6 @@ matrix:
     - os: linux
       env:
         ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
-        COMPILER_NAME=gcc
-        CXX=g++-6
-        CC=gcc-6
       compiler: clang
   allow_failures:
     - env: ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
