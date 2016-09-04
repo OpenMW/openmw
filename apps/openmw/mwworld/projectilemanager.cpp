@@ -486,6 +486,10 @@ namespace MWWorld
             state.mActorId = esm.mActorId;
             state.mStack = esm.mStack;
             state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, esm.mEffects);
+            state.mSpeed = esm.mSpeed; // speed is derived from non-projectile effects as well as
+                                       // projectile effects, so we can't calculate it from the save
+                                       // file's effect list, which is already trimmed of non-projectile
+                                       // effects. We need to use the stored value.
 
             std::string model;
             try
