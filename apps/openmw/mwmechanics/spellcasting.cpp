@@ -303,8 +303,8 @@ namespace MWMechanics
         if (count != 0)
             speed /= count;
 
-        std::string model;
-        std::vector<std::string> models;
+        std::string projectileID;
+        std::vector<std::string> projectileIDs;
         std::string sound;
         std::vector<std::string> sounds;
         ESM::EffectList projectileEffects;
@@ -320,10 +320,10 @@ namespace MWMechanics
             const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 iter->mEffectID);
 
-            model = magicEffect->mBolt;
-            if (model.empty())
-                model = "VFX_DefaultBolt";
-            models.push_back(model);
+            projectileID = magicEffect->mBolt;
+            if (projectileID.empty())
+                projectileID = "VFX_DefaultBolt";
+            projectileIDs.push_back(projectileID);
 
             static const std::string schools[] = {
                 "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
@@ -335,16 +335,28 @@ namespace MWMechanics
             sounds.push_back(sound);
             projectileEffects.mList.push_back(*iter);
         }
+        
+        if (projectileEffects.mList.size() > 1) // add a VFX_Multiple projectile if there are multiple projectile effects
+        {
+            std::vector<std::string>::iterator it;
+            it = projectileIDs.begin();
+            char numstr[8];
+            sprintf(numstr, "%zd", (effects.mList.size()));
+            std::string ID = "VFX_Multiple";
+            ID = ID + numstr;
+            it = projectileIDs.insert(it, ID);
+        }
 
-            // Fall back to a "caster to target" direction if we have no other means of determining it
-            // (e.g. when cast by a non-actor)
-            if (!mTarget.isEmpty())
-                fallbackDirection =
-                   osg::Vec3f(mTarget.getRefData().getPosition().asVec3())-
-                   osg::Vec3f(mCaster.getRefData().getPosition().asVec3());
+        // Fall back to a "caster to target" direction if we have no other means of determining it
+        // (e.g. when cast by a non-actor)
+        if (!mTarget.isEmpty())
+            fallbackDirection =
+                osg::Vec3f(mTarget.getRefData().getPosition().asVec3())-
+                osg::Vec3f(mCaster.getRefData().getPosition().asVec3());
             
-            MWBase::Environment::get().getWorld()->launchMagicBolt(models, sounds, mId, speed,
-                                                       false, projectileEffects, mCaster, mSourceName, fallbackDirection);
+        if (!projectileEffects.mList.empty())
+            MWBase::Environment::get().getWorld()->launchMagicBolt(projectileIDs, sounds, mId, speed,
+                                                   false, projectileEffects, mCaster, mSourceName, fallbackDirection);
     }
 
     void CastSpell::inflict(const MWWorld::Ptr &target, const MWWorld::Ptr &caster,

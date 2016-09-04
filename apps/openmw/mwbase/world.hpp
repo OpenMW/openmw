@@ -486,7 +486,7 @@ namespace MWBase
 
             virtual void castSpell (const MWWorld::Ptr& actor) = 0;
 
-            virtual void launchMagicBolt (const std::vector<std::string>& models, const std::vector<std::string>& sounds, const std::string& spellId,
+            virtual void launchMagicBolt (const std::vector<std::string>& projectileIDs, const std::vector<std::string>& sounds, const std::string& spellId,
                                           float speed, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection) = 0;
             virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,

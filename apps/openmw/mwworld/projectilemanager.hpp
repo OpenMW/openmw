@@ -49,7 +49,7 @@ namespace MWWorld
                 MWRender::RenderingManager* rendering, MWPhysics::PhysicsSystem* physics);
 
         /// If caster is an actor, the actor's facing orientation is used. Otherwise fallbackDirection is used.
-        void launchMagicBolt (const std::vector<std::string>& models, const std::vector<std::string> &sounds, const std::string &spellId,
+        void launchMagicBolt (const std::vector<std::string>& projectileIDs, const std::vector<std::string> &sounds, const std::string &spellId,
                                      float speed, bool stack, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection);
 
