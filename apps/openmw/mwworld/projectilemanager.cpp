@@ -1,6 +1,6 @@
 #include "projectilemanager.hpp"
 
-#include <stdio.h>
+#include <iomanip>
 
 #include <osg/PositionAttitudeTransform>
 
@@ -99,10 +99,8 @@ namespace MWWorld
         if (state.mIdMagic.size() > 1)
             for (size_t iter = 1; iter != state.mIdMagic.size(); ++iter)
             {
-                char numstr[8];
-                sprintf(numstr, "%d", (int)iter);
-                std::string node = "Dummy0";
-                node = node + numstr;
+                std::ostringstream nodeName;
+                nodeName << "Dummy" << std::setw(2) << std::setfill('0') << iter;
                 const ESM::Weapon* weapon = MWBase::Environment::get().getWorld()->getStore().get<ESM::Weapon>().find (state.mIdMagic.at(iter));
                 mResourceSystem->getSceneManager()->getInstance("meshes\\" + weapon->mModel, attachTo);
             }

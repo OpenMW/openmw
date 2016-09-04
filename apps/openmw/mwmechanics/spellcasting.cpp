@@ -2,7 +2,7 @@
 
 #include <cfloat>
 #include <limits>
-#include <stdio.h>
+#include <iomanip>
 
 #include <boost/format.hpp>
 
@@ -339,13 +339,11 @@ namespace MWMechanics
         
         if (projectileEffects.mList.size() > 1) // add a VFX_Multiple projectile if there are multiple projectile effects
         {
+            std::ostringstream ID;
+            ID << "VFX_Multiple" << projectileEffects.mList.size();
             std::vector<std::string>::iterator it;
             it = projectileIDs.begin();
-            char numstr[8];
-            sprintf(numstr, "%d", (int)(effects.mList.size()));
-            std::string ID = "VFX_Multiple";
-            ID = ID + numstr;
-            it = projectileIDs.insert(it, ID);
+            it = projectileIDs.insert(it, ID.str());
         }
 
         // Fall back to a "caster to target" direction if we have no other means of determining it
