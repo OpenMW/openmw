@@ -285,63 +285,9 @@ namespace MWMechanics
 
     /// Get projectile properties (model, sound and speed) for a spell with the given effects and launch.
     /// If \a model is empty, the spell has no ranged effects and should not spawn a projectile.
-    void CastSpell::getProjectileInfoAndLaunch (const ESM::EffectList& effects)
-    {
-        // All projectiles should use the same speed. From observations in the
-        // original engine, this seems to be the average of the constituent effects.
-        // First we get this average speed.
-        float speed = 0;
-        int count = 0;
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
-            iter!=effects.mList.end(); ++iter)
-        {
-            const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-                iter->mEffectID);
-            speed += magicEffect->mData.mSpeed;
-            count++;
-        }
-
-        if (count != 0)
-            speed /= count;
-
-        std::vector<std::string> projectileIDs;
-        std::vector<std::string> sounds;
-        ESM::EffectList projectileEffects;
-        
+    void CastSpell::launchMagicBolt (const ESM::EffectList& effects)
+    {        
         osg::Vec3f fallbackDirection (0,1,0);     
-
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
-            iter!=effects.mList.end(); ++iter)
-        {
-            if (iter->mRange != ESM::RT_Target)
-                continue;
-
-            const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-                iter->mEffectID);
-
-            if (magicEffect->mBolt.empty())
-                projectileIDs.push_back("VFX_DefaultBolt");
-            else
-                projectileIDs.push_back(magicEffect->mBolt);
-
-            static const std::string schools[] = {
-                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-            };
-            if (!magicEffect->mBoltSound.empty())
-                sounds.push_back(magicEffect->mBoltSound);
-            else
-                sounds.push_back(schools[magicEffect->mData.mSchool] + " bolt");
-            projectileEffects.mList.push_back(*iter);
-        }
-        
-        if (projectileEffects.mList.size() > 1) // insert a VFX_Multiple projectile if there are multiple projectile effects
-        {
-            std::ostringstream ID;
-            ID << "VFX_Multiple" << projectileEffects.mList.size();
-            std::vector<std::string>::iterator it;
-            it = projectileIDs.begin();
-            it = projectileIDs.insert(it, ID.str());
-        }
 
         // Fall back to a "caster to target" direction if we have no other means of determining it
         // (e.g. when cast by a non-actor)
@@ -350,9 +296,8 @@ namespace MWMechanics
                 osg::Vec3f(mTarget.getRefData().getPosition().asVec3())-
                 osg::Vec3f(mCaster.getRefData().getPosition().asVec3());
             
-        if (!projectileEffects.mList.empty())
-            MWBase::Environment::get().getWorld()->launchMagicBolt(projectileIDs, sounds, mId, speed,
-                                                   false, projectileEffects, mCaster, mSourceName, fallbackDirection);
+        MWBase::Environment::get().getWorld()->launchMagicBolt(mId, false, effects,
+                                                   mCaster, mSourceName, fallbackDirection);
     }
 
     void CastSpell::inflict(const MWWorld::Ptr &target, const MWWorld::Ptr &caster,
@@ -823,7 +768,7 @@ namespace MWMechanics
         }
 
         if (launchProjectile)
-            getProjectileInfoAndLaunch(enchantment->mEffects);
+            launchMagicBolt(enchantment->mEffects);
         else if (!mTarget.isEmpty())
             inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Target);
 
@@ -906,7 +851,7 @@ namespace MWMechanics
         if (!mTarget.isEmpty())
             inflict(mTarget, mCaster, spell->mEffects, ESM::RT_Touch);
 
-        getProjectileInfoAndLaunch(spell->mEffects);
+        launchMagicBolt(spell->mEffects);
 
         return true;
     }

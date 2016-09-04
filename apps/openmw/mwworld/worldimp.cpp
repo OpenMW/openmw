@@ -2705,11 +2705,10 @@ namespace MWWorld
         mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed, attackStrength);
     }
 
-    void World::launchMagicBolt (const std::vector<std::string> &projectileIDs, const std::vector<std::string> &sounds, const std::string &spellId,
-                                 float speed, bool stack, const ESM::EffectList& effects,
-                                   const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection)
+    void World::launchMagicBolt (const std::string &spellId, bool stack, const ESM::EffectList& effects,
+                                 const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection)
     {
-        mProjectileManager->launchMagicBolt(projectileIDs, sounds, spellId, speed, stack, effects, caster, sourceName, fallbackDirection);
+        mProjectileManager->launchMagicBolt(spellId, stack, effects, caster, sourceName, fallbackDirection);
     }
 
     const std::vector<std::string>& World::getContentFiles() const

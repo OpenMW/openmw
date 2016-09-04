@@ -35,6 +35,55 @@
 
 #include "../mwphysics/physicssystem.hpp"
 
+namespace
+{
+    ESM::EffectList getMagicBoltData(std::vector<std::string>& projectileIDs, std::vector<std::string>& sounds, float& speed, const ESM::EffectList& effects)
+    {
+        int count = 0;
+        ESM::EffectList projectileEffects;
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
+            iter!=effects.mList.end(); ++iter)
+        {
+            const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
+                iter->mEffectID);
+
+            // All the projectiles should use the same speed. From observations in the
+            // original engine, this seems to be the average of the constituent effects.
+            speed += magicEffect->mData.mSpeed;
+            count++;
+
+            if (iter->mRange != ESM::RT_Target)
+                continue;
+
+            if (magicEffect->mBolt.empty())
+                projectileIDs.push_back("VFX_DefaultBolt");
+            else
+                projectileIDs.push_back(magicEffect->mBolt);
+
+            static const std::string schools[] = {
+                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+            };
+            if (!magicEffect->mBoltSound.empty())
+                sounds.push_back(magicEffect->mBoltSound);
+            else
+                sounds.push_back(schools[magicEffect->mData.mSchool] + " bolt");
+            projectileEffects.mList.push_back(*iter);
+        }
+        
+        if (count != 0)
+            speed /= count;
+        
+        if (projectileEffects.mList.size() > 1) // insert a VFX_Multiple projectile if there are multiple projectile effects
+        {
+            std::ostringstream ID;
+            ID << "VFX_Multiple" << effects.mList.size();
+            std::vector<std::string>::iterator it;
+            it = projectileIDs.begin();
+            it = projectileIDs.insert(it, ID.str());
+        }
+        return projectileEffects;
+    }
+}
 
 namespace MWWorld
 {
@@ -126,10 +175,8 @@ namespace MWWorld
         state.mEffectAnimationTime->addTime(duration);
     }
 
-    void ProjectileManager::launchMagicBolt(const std::vector<std::string> &projectileIDs, const std::vector<std::string> &sounds,
-                                            const std::string &spellId, float speed, bool stack,
-                                            const ESM::EffectList &effects, const Ptr &caster, const std::string &sourceName,
-                                            const osg::Vec3f& fallbackDirection)
+    void ProjectileManager::launchMagicBolt(const std::string &spellId, bool stack, const ESM::EffectList &effects, const Ptr &caster,
+                                             const std::string &sourceName, const osg::Vec3f& fallbackDirection)
     {
         osg::Vec3f pos = caster.getRefData().getPosition().asVec3();
         if (caster.getClass().isActor())
@@ -157,23 +204,23 @@ namespace MWWorld
             state.mActorId = caster.getClass().getCreatureStats(caster).getActorId();
         else
             state.mActorId = -1;
-        state.mSpeed = speed;
         state.mStack = stack;
-        state.mIdMagic = projectileIDs;
-        state.mSoundIds = sounds;
 
-        // Should have already had non-projectile effects removed
-        state.mEffects = effects;
+        state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, effects);
 
-        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectileIDs.at(0));
+        // Non-projectile should have been removed by getMagicBoltData
+        if (state.mEffects.mList.size() == 0)
+            return;
+
+        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), state.mIdMagic.at(0));
         MWWorld::Ptr ptr = ref.getPtr();
 
         createModel(state, ptr.getClass().getModel(ptr), pos, orient, true);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        for (size_t it = 0; it != sounds.size(); it++)
+        for (size_t it = 0; it != state.mSoundIds.size(); it++)
         {
-            state.mSounds.push_back(sndMgr->playSound3D(pos, sounds.at(it), 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop));
+            state.mSounds.push_back(sndMgr->playSound3D(pos, state.mSoundIds.at(it), 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop));
         }
             
         mMagicBolts.push_back(state);
@@ -437,40 +484,8 @@ namespace MWWorld
             state.mIdMagic.push_back(esm.mId);
             state.mSpellId = esm.mSpellId;
             state.mActorId = esm.mActorId;
-            state.mSpeed = esm.mSpeed;
             state.mStack = esm.mStack;
-            state.mEffects = esm.mEffects;
-
-            std::string projectileID;
-            std::vector<std::string> projectileIDs;
-
-            if (esm.mEffects.mList.size() > 1)
-            {
-                std::ostringstream ID;
-                ID << "VFX_Multiple" << esm.mEffects.mList.size();
-                state.mIdMagic.push_back(ID.str());
-            }
-
-            for (std::vector<ESM::ENAMstruct>::const_iterator iter (esm.mEffects.mList.begin());
-                iter != esm.mEffects.mList.end(); ++iter)
-            {
-                const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-                    iter->mEffectID);
-
-                projectileID = magicEffect->mBolt;
-                if (projectileID.empty())
-                projectileID = "VFX_DefaultBolt";
-                state.mIdMagic.push_back(projectileID);
-
-                static const std::string schools[] = {
-                    "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-                };
-
-                if (!magicEffect->mBoltSound.empty())
-                    state.mSoundIds.push_back(magicEffect->mBoltSound);
-                else
-                    state.mSoundIds.push_back(schools[magicEffect->mData.mSchool] + " bolt");
-            }
+            state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, esm.mEffects);
 
             std::string model;
             try

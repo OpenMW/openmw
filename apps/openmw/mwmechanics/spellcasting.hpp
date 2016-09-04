@@ -94,9 +94,8 @@ namespace MWMechanics
 
         void playSpellCastingEffects(const std::string &spellid);
 
-        /// Get the models, sounds and speeds for all projectiles
-        /// in the given effects, and launch them.
-        void getProjectileInfoAndLaunch (const ESM::EffectList& effects);
+        /// Launch a bolt with the given effects.
+        void launchMagicBolt (const ESM::EffectList& effects);
 
         /// @note \a target can be any type of object, not just actors.
         /// @note \a caster can be any type of object, or even an empty object.
