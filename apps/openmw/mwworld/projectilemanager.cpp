@@ -143,7 +143,7 @@ namespace MWWorld
             attachTo = rotateNode;
         }
 
-        osg::ref_ptr<osg::Node> ptr = mResourceSystem->getSceneManager()->getInstance(model, attachTo);
+        mResourceSystem->getSceneManager()->getInstance(model, attachTo);
 
         if (state.mIdMagic.size() > 1)
             for (size_t iter = 1; iter != state.mIdMagic.size(); ++iter)
@@ -209,7 +209,7 @@ namespace MWWorld
         state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, effects);
 
         // Non-projectile should have been removed by getMagicBoltData
-        if (state.mEffects.mList.size() == 0)
+        if (state.mEffects.mList.empty())
             return;
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), state.mIdMagic.at(0));

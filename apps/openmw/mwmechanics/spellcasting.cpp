@@ -283,8 +283,6 @@ namespace MWMechanics
     {
     }
 
-    /// Get projectile properties (model, sound and speed) for a spell with the given effects and launch.
-    /// If \a model is empty, the spell has no ranged effects and should not spawn a projectile.
     void CastSpell::launchMagicBolt (const ESM::EffectList& effects)
     {        
         osg::Vec3f fallbackDirection (0,1,0);     
