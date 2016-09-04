@@ -168,9 +168,11 @@ namespace MWWorld
         createModel(state, ptr.getClass().getModel(ptr), pos, orient, true);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        if (projectileIDs.size() == 1)
-            state.mSound = sndMgr->playSound3D(pos, sounds.at(0), 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
-
+        for (size_t it = 0; it != sounds.size(); it++)
+        {
+            state.mSound.push_back(sndMgr->playSound3D(pos, sounds.at(it), 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop));
+        }
+            
         mMagicBolts.push_back(state);
     }
 
@@ -212,8 +214,10 @@ namespace MWWorld
             osg::Vec3f pos(it->mNode->getPosition());
             osg::Vec3f newPos = pos + direction * duration * speed;
 
-            if (it->mSound.get())
-                it->mSound->setPosition(newPos);
+            for (size_t soundIter = 0; soundIter != it->mSound.size(); soundIter++)
+            {
+                it->mSound.at(soundIter)->setPosition(newPos);
+            }
 
             it->mNode->setPosition(newPos);
 
@@ -253,7 +257,11 @@ namespace MWWorld
                 MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, result.mHitObject,
                                                                     ESM::RT_Target, it->mSpellId, it->mSourceName);
 
-                MWBase::Environment::get().getSoundManager()->stopSound(it->mSound);
+                for (size_t soundIter = 0; soundIter != it->mSound.size(); soundIter++)
+                {
+                    MWBase::Environment::get().getSoundManager()->stopSound(it->mSound.at(soundIter));
+                }
+
                 mParent->removeChild(it->mNode);
 
                 it = mMagicBolts.erase(it);
@@ -333,7 +341,10 @@ namespace MWWorld
         for (std::vector<MagicBoltState>::iterator it = mMagicBolts.begin(); it != mMagicBolts.end(); ++it)
         {
             mParent->removeChild(it->mNode);
-            MWBase::Environment::get().getSoundManager()->stopSound(it->mSound);
+            for (size_t soundIter = 0; soundIter != it->mSound.size(); soundIter++)
+            {
+                MWBase::Environment::get().getSoundManager()->stopSound(it->mSound.at(soundIter));
+            }
         }
         mMagicBolts.clear();
     }
@@ -442,8 +453,8 @@ namespace MWWorld
             createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true);
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            state.mSound = sndMgr->playSound3D(esm.mPosition, esm.mSound, 1.0f, 1.0f,
-                                               MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
+            state.mSound.push_back(sndMgr->playSound3D(esm.mPosition, esm.mSound, 1.0f, 1.0f,
+                                               MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop));
             state.mSoundId.push_back(esm.mSound);
 
             mMagicBolts.push_back(state);

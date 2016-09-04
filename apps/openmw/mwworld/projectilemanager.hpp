@@ -104,7 +104,7 @@ namespace MWWorld
 
             bool mStack;
 
-            MWBase::SoundPtr mSound;
+            std::vector<MWBase::SoundPtr> mSound;
             std::vector<std::string> mSoundId;
         };
 
