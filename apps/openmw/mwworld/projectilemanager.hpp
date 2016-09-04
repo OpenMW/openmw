@@ -104,8 +104,8 @@ namespace MWWorld
 
             bool mStack;
 
-            std::vector<MWBase::SoundPtr> mSound;
-            std::vector<std::string> mSoundId;
+            std::vector<MWBase::SoundPtr> mSounds;
+            std::vector<std::string> mSoundIds;
         };
 
         struct ProjectileState : public State

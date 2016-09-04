@@ -304,9 +304,7 @@ namespace MWMechanics
         if (count != 0)
             speed /= count;
 
-        std::string projectileID;
         std::vector<std::string> projectileIDs;
-        std::string sound;
         std::vector<std::string> sounds;
         ESM::EffectList projectileEffects;
         
@@ -321,23 +319,22 @@ namespace MWMechanics
             const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 iter->mEffectID);
 
-            projectileID = magicEffect->mBolt;
-            if (projectileID.empty())
-                projectileID = "VFX_DefaultBolt";
-            projectileIDs.push_back(projectileID);
+            if (magicEffect->mBolt.empty())
+                projectileIDs.push_back("VFX_DefaultBolt");
+            else
+                projectileIDs.push_back(magicEffect->mBolt);
 
             static const std::string schools[] = {
                 "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
             };
             if (!magicEffect->mBoltSound.empty())
-                sound = magicEffect->mBoltSound;
+                sounds.push_back(magicEffect->mBoltSound);
             else
-                sound = schools[magicEffect->mData.mSchool] + " bolt";
-            sounds.push_back(sound);
+                sounds.push_back(schools[magicEffect->mData.mSchool] + " bolt");
             projectileEffects.mList.push_back(*iter);
         }
         
-        if (projectileEffects.mList.size() > 1) // add a VFX_Multiple projectile if there are multiple projectile effects
+        if (projectileEffects.mList.size() > 1) // insert a VFX_Multiple projectile if there are multiple projectile effects
         {
             std::ostringstream ID;
             ID << "VFX_Multiple" << projectileEffects.mList.size();
