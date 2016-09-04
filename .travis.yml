@@ -1,7 +1,7 @@
 os:
  - linux
- - osx
-osx_image: xcode7.2
+# - osx
+#osx_image: xcode7.2
 language: cpp
 sudo: required
 dist: trusty
@@ -55,7 +55,6 @@ matrix:
     - env: ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
 
 before_install: 
-      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
       - ./CI/before_install.${TRAVIS_OS_NAME}.sh
 before_script: ./CI/before_script.${TRAVIS_OS_NAME}.sh
 script:
