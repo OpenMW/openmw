@@ -159,7 +159,7 @@ void Networking::Connect(const std::string &ip, unsigned short port)
 
     if (!errmsg.empty())
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "%s", errmsg);
+        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "%s", errmsg.c_str());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "tes3mp", errmsg.c_str(), 0);
         MWBase::Environment::get().getStateManager()->requestQuit();
     }
