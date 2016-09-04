@@ -35,7 +35,7 @@ namespace mwmp
 
         static size_t headerSize()
         {
-            return (sizeof(packetID) + RakNet::RakNetGUID::size()); // packetID + RakNetGUID (uint64_t)
+            return (size_t)(1 + RakNet::RakNetGUID::size()); // packetID + RakNetGUID (uint64_t)
         }
 
         unsigned char GetPacketID()
