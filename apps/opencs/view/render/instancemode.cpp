@@ -92,7 +92,7 @@ osg::Vec3f CSVRender::InstanceMode::getScreenCoords(const osg::Vec3f& pos)
 }
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
-: EditMode (worldspaceWidget, QIcon (":placeholder"), Mask_Reference, "Instance editing",
+: EditMode (worldspaceWidget, QIcon (":placeholder"), Mask_Reference | Mask_Terrain, "Instance editing",
   parent), mSubMode (0), mSubModeId ("move"), mSelectionMode (0), mDragMode (DragMode_None),
   mDragAxis (-1), mLocked (false), mUnitScaleDist(1)
 {
