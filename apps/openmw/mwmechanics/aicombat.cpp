@@ -369,7 +369,7 @@ namespace MWMechanics
         {
             // TODO: start fleeing?
             storage.stopAttack();
-            return false;
+            return true;
         }
 
         // for distant combat we should know if target is in LOS even if distToTarget < rangeAttack 
