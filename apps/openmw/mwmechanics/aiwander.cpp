@@ -113,7 +113,7 @@ namespace MWMechanics
     
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mRemainingDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle),
-        mRepeat(repeat), mStoredInitialActorPosition(false), mIsWanderDestReady(false)
+        mRepeat(repeat), mStoredInitialActorPosition(false)
     {
         mIdle.resize(8, 0);
         init();
@@ -191,7 +191,6 @@ namespace MWMechanics
     {
         // get or create temporary storage
         AiWanderStorage& storage = state.get<AiWanderStorage>();
-        
 
         const MWWorld::CellStore*& currentCell = storage.mCell;
         MWMechanics::CreatureStats& cStats = actor.getClass().getCreatureStats(actor);
@@ -201,6 +200,7 @@ namespace MWMechanics
         bool cellChange = currentCell && (actor.getCell() != currentCell);
         if(!currentCell || cellChange)
         {
+            stopWalking(actor, storage);
             currentCell = actor.getCell();
             storage.mPopulateAvailableNodes = true;
         }
@@ -344,7 +344,6 @@ namespace MWMechanics
 
             if (mPathFinder.isPathConstructed())
             {
-                mIsWanderDestReady = true;
                 storage.setState(Wander_Walking);
             }
         }
@@ -380,7 +379,6 @@ namespace MWMechanics
 
                 if (mPathFinder.isPathConstructed())
                 {
-                    mIsWanderDestReady = true;
                     storage.setState(Wander_Walking, true);
                 }
                 return;
@@ -476,7 +474,7 @@ namespace MWMechanics
         float duration, AiWanderStorage& storage, ESM::Position& pos)
     {
         // Are we there yet?
-        if (mIsWanderDestReady && pathTo(actor, mPathFinder.getPath().back(), duration, DESTINATION_TOLERANCE))
+        if (pathTo(actor, mPathFinder.getPath().back(), duration, DESTINATION_TOLERANCE))
         {
             stopWalking(actor, storage);
             storage.setState(Wander_ChooseAction);
@@ -659,8 +657,6 @@ namespace MWMechanics
 
         if (mPathFinder.isPathConstructed())
         {
-            mIsWanderDestReady = true;
-
             // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
             ESM::Pathgrid::Point temp = storage.mAllowedNodes[randNode];
             storage.mAllowedNodes.erase(storage.mAllowedNodes.begin() + randNode);
@@ -717,7 +713,6 @@ namespace MWMechanics
     void AiWander::stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage)
     {
         mPathFinder.clearPath();
-        mIsWanderDestReady = false;
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
     }
 
@@ -950,7 +945,6 @@ namespace MWMechanics
         , mTimeOfDay(wander->mData.mTimeOfDay)
         , mRepeat(wander->mData.mShouldRepeat != 0)
         , mStoredInitialActorPosition(wander->mStoredInitialActorPosition)
-        , mIsWanderDestReady(false)
     {
         if (mStoredInitialActorPosition)
             mInitialActorPosition = wander->mInitialActorPosition;
