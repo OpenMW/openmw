@@ -79,6 +79,8 @@ namespace MWMechanics
                 return mPath;
             }
 
+            const MWWorld::CellStore* getPathCell() const;
+
             /** Synchronize new path with old one to avoid visiting 1 waypoint 2 times
             @note
                 BuildPath() takes closest PathGrid point to NPC as first point of path.
