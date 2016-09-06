@@ -34,17 +34,10 @@ namespace MWMechanics
 
             virtual int getTypeId() const;
 
-        protected:
-            virtual bool doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell);
-
         private:
             float mX;
             float mY;
             float mZ;
-
-            int mCellX;
-            int mCellY;
-
     };
 }
 

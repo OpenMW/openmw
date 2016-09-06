@@ -40,23 +40,21 @@ int getRangeTypes (const ESM::EffectList& effects)
     return types;
 }
 
-void suggestCombatRange(int rangeTypes, float& rangeAttack, float& rangeFollow)
+float suggestCombatRange(int rangeTypes)
 {
     if (rangeTypes & Touch)
     {
-        rangeAttack = 100.f;
-        rangeFollow = 300.f;
+        static const float fCombatDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
+        return fCombatDistance;
     }
     else if (rangeTypes & Target)
     {
-        rangeAttack = 1000.f;
-        rangeFollow = 0.f;
+        return 1000.f;
     }
     else
     {
         // For Self spells, distance doesn't matter, so back away slightly to avoid enemy hits
-        rangeAttack = 600.f;
-        rangeFollow = 0.f;
+        return 600.f;
     }
 }
 
@@ -427,11 +425,13 @@ namespace MWMechanics
         }
     }
 
-    void ActionSpell::getCombatRange(float& rangeAttack, float& rangeFollow)
+    float ActionSpell::getCombatRange (bool& isRanged) const
     {
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(mSpellId);
         int types = getRangeTypes(spell->mEffects);
-        suggestCombatRange(types, rangeAttack, rangeFollow);
+
+        isRanged = (types & Target);
+        return suggestCombatRange(types);
     }
 
     void ActionEnchantedItem::prepare(const MWWorld::Ptr &actor)
@@ -441,18 +441,17 @@ namespace MWMechanics
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Spell);
     }
 
-    void ActionEnchantedItem::getCombatRange(float& rangeAttack, float& rangeFollow)
+    float ActionEnchantedItem::getCombatRange(bool& isRanged) const
     {
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(mItem->getClass().getEnchantment(*mItem));
         int types = getRangeTypes(enchantment->mEffects);
-        suggestCombatRange(types, rangeAttack, rangeFollow);
+        return suggestCombatRange(types);
     }
 
-    void ActionPotion::getCombatRange(float& rangeAttack, float& rangeFollow)
+    float ActionPotion::getCombatRange(bool& isRanged) const
     {
         // distance doesn't matter, so back away slightly to avoid enemy hits
-        rangeAttack = 600.f;
-        rangeFollow = 0.f;
+        return 600.f;
     }
 
     void ActionPotion::prepare(const MWWorld::Ptr &actor)
@@ -463,6 +462,8 @@ namespace MWMechanics
 
     void ActionWeapon::prepare(const MWWorld::Ptr &actor)
     {
+        mIsNpc = actor.getClass().isNpc();
+
         if (actor.getClass().hasInventoryStore(actor))
         {
             if (mWeapon.isEmpty())
@@ -482,9 +483,43 @@ namespace MWMechanics
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Weapon);
     }
 
-    void ActionWeapon::getCombatRange(float& rangeAttack, float& rangeFollow)
+    float ActionWeapon::getCombatRange(bool& isRanged) const
     {
-        // Already done in AiCombat itself
+        isRanged = false;
+
+        static const float fCombatDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
+
+        if (mWeapon.isEmpty())
+        {
+            if (!mIsNpc)
+            {
+                return fCombatDistance;
+            }
+            else
+            {
+                static float fHandToHandReach =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
+
+                return fHandToHandReach * fCombatDistance;
+            }
+        }
+
+        const ESM::Weapon* weapon = mWeapon.get<ESM::Weapon>()->mBase;
+
+        if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
+        {
+            isRanged = true;
+            return 1000.f;
+        }
+        else
+            return weapon->mData.mReach * fCombatDistance;
+    }
+
+    const ESM::Weapon* ActionWeapon::getWeapon() const
+    {
+        if (mWeapon.isEmpty())
+            return NULL;
+        return mWeapon.get<ESM::Weapon>()->mBase;
     }
 
     boost::shared_ptr<Action> prepareNextAction(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
