@@ -102,7 +102,7 @@ namespace MWScript
                             || ::Misc::StringUtils::ciEqual(item, "gold_025")
                             || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
-                    
+
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
                     runtime.push (store.count(item));
@@ -136,7 +136,7 @@ namespace MWScript
                             || ::Misc::StringUtils::ciEqual(item, "gold_025")
                             || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
-                        
+
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
                     std::string itemName;
@@ -188,7 +188,11 @@ namespace MWScript
                             break;
                     }
                     if (it == invStore.end())
-                        throw std::runtime_error("Item to equip not found");
+                    {
+                        it = ptr.getClass().getContainerStore (ptr).add (item, 1, ptr);
+                        std::cerr << "Implicitly adding one " << item << " to container "
+                            "to fulfil requirements of Equip instruction" << std::endl;
+                    }
 
                     if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                         MWBase::Environment::get().getWindowManager()->useItem(*it);
