@@ -541,12 +541,17 @@ namespace MWMechanics
                     else
                         castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_DefaultHit");
 
+                    std::string texture = "";
+
+                    if (!magicEffect->mParticle.empty() && !(magicEffect->mData.mFlags & ESM::MagicEffect::Harmful))
+                        texture = magicEffect->mParticle;
+
                     // TODO: VFX are no longer active after saving/reloading the game
                     bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
                     // Note: in case of non actor, a free effect should be fine as well
                     MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(target);
                     if (anim)
-                        anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
+                        anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "", texture);
                 }
             }
         }
