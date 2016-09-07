@@ -3162,8 +3162,8 @@ namespace MWWorld
         {
             const ESM::MagicEffect* effect = getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
 
-            if (effectIt->mRange != rangeType)
-                continue; // Not right range type
+            if ((effectIt->mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()) || effectIt->mRange != rangeType)
+                continue; // Not right range type, or not area effect and hit an actor
 
             // Spawn the explosion orb effect
             const ESM::Static* areaStatic;
