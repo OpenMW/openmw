@@ -30,7 +30,6 @@
 
 namespace MWMechanics
 {
-
     ESM::Skill::SkillEnum spellSchoolToSkill(int school)
     {
         std::map<int, ESM::Skill::SkillEnum> schoolSkillMap; // maps spell school to skill id

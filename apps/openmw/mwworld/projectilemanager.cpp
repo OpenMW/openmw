@@ -30,6 +30,7 @@
 #include "../mwrender/animation.hpp"
 #include "../mwrender/vismask.hpp"
 #include "../mwrender/renderingmanager.hpp"
+#include "../mwrender/util.hpp"
 
 #include "../mwsound/sound.hpp"
 
@@ -37,7 +38,7 @@
 
 namespace
 {
-    ESM::EffectList getMagicBoltData(std::vector<std::string>& projectileIDs, std::vector<std::string>& sounds, float& speed, const ESM::EffectList& effects)
+    ESM::EffectList getMagicBoltData(std::vector<std::string>& projectileIDs, std::vector<std::string>& sounds, float& speed, std::string& texture, const ESM::EffectList& effects)
     {
         int count = 0;
         ESM::EffectList projectileEffects;
@@ -72,6 +73,13 @@ namespace
         
         if (count != 0)
             speed /= count;
+
+        if (projectileEffects.mList.size() == 1)
+        {
+            const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
+                effects.mList.begin()->mEffectID);
+            texture = magicEffect->mParticle;
+        }
         
         if (projectileEffects.mList.size() > 1) // insert a VFX_Multiple projectile if there are multiple projectile effects
         {
@@ -126,7 +134,7 @@ namespace MWWorld
     };
 
 
-    void ProjectileManager::createModel(State &state, const std::string &model, const osg::Vec3f& pos, const osg::Quat& orient, bool rotate)
+    void ProjectileManager::createModel(State &state, const std::string &model, const osg::Vec3f& pos, const osg::Quat& orient, bool rotate, std::string texture)
     {
         state.mNode = new osg::PositionAttitudeTransform;
         state.mNode->setNodeMask(MWRender::Mask_Effect);
@@ -168,6 +176,7 @@ namespace MWWorld
 
         SceneUtil::AssignControllerSourcesVisitor assignVisitor (state.mEffectAnimationTime);
         state.mNode->accept(assignVisitor);
+        MWRender::overrideTexture(texture, mResourceSystem, state.mNode);
     }
 
     void ProjectileManager::update(State& state, float duration)
@@ -206,7 +215,9 @@ namespace MWWorld
             state.mActorId = -1;
         state.mStack = stack;
 
-        state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, effects);
+        std::string texture = "";
+
+        state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, texture, effects);
 
         // Non-projectile should have been removed by getMagicBoltData
         if (state.mEffects.mList.empty())
@@ -215,7 +226,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), state.mIdMagic.at(0));
         MWWorld::Ptr ptr = ref.getPtr();
 
-        createModel(state, ptr.getClass().getModel(ptr), pos, orient, true);
+        createModel(state, ptr.getClass().getModel(ptr), pos, orient, true, texture);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         for (size_t it = 0; it != state.mSoundIds.size(); it++)
@@ -485,7 +496,8 @@ namespace MWWorld
             state.mSpellId = esm.mSpellId;
             state.mActorId = esm.mActorId;
             state.mStack = esm.mStack;
-            state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, esm.mEffects);
+            std::string color = "";
+            state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, color, esm.mEffects);
             state.mSpeed = esm.mSpeed; // speed is derived from non-projectile effects as well as
                                        // projectile effects, so we can't calculate it from the save
                                        // file's effect list, which is already trimmed of non-projectile
@@ -503,7 +515,7 @@ namespace MWWorld
                 return true;
             }
 
-            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true);
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true, color);
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             
