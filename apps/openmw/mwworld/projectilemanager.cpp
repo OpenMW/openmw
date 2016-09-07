@@ -74,7 +74,8 @@ namespace
         if (count != 0)
             speed /= count;
 
-        if (projectileEffects.mList.size() == 1)
+        // in the original engine, the particle texture is only used if there is only one projectile
+        if (projectileEffects.mList.size() == 1) 
         {
             const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 effects.mList.begin()->mEffectID);

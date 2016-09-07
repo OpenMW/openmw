@@ -543,6 +543,7 @@ namespace MWMechanics
 
                     std::string texture = "";
 
+                    // Use particle textures for non-harmful effects
                     if (!magicEffect->mParticle.empty() && !(magicEffect->mData.mFlags & ESM::MagicEffect::Harmful))
                         texture = magicEffect->mParticle;
 
