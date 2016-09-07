@@ -3162,9 +3162,8 @@ namespace MWWorld
         {
             const ESM::MagicEffect* effect = getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
 
-            if (effectIt->mArea <= 0 || effectIt->mRange != rangeType)
-                continue; // Not an area effect or not right range type
-
+            if ((effectIt->mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()) || effectIt->mRange != rangeType)
+                continue; // Not right range type, or not area effect and hit an actor
 
             // Spawn the explosion orb effect
             const ESM::Static* areaStatic;
@@ -3173,7 +3172,13 @@ namespace MWWorld
             else
                 areaStatic = getStore().get<ESM::Static>().find ("VFX_DefaultArea");
 
-            mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, static_cast<float>(effectIt->mArea * 2));
+            if (effectIt->mArea <= 0)
+            {
+                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, 1.0f);
+                continue;
+            }
+            else
+                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, static_cast<float>(effectIt->mArea * 2));              
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             static const std::string schools[] = {
