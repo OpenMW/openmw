@@ -543,8 +543,9 @@ namespace MWMechanics
 
                     std::string texture = "";
 
-                    // Use particle textures for non-harmful effects
-                    if (!magicEffect->mParticle.empty() && !(magicEffect->mData.mFlags & ESM::MagicEffect::Harmful))
+                    // TODO: Choosing whether to apply the override texture should be chosen based on nodes in the .NIF file.
+                    if (magicEffect->mHit.empty() || magicEffect->mHit == "VFX_DefaultHit" || magicEffect->mHit == "VFX_MysticismHit"
+                        || magicEffect->mHit == "VFX_SoulTrapHit")                        
                         texture = magicEffect->mParticle;
 
                     // TODO: VFX are no longer active after saving/reloading the game
@@ -939,12 +940,18 @@ namespace MWMechanics
             if (mCaster.getClass().isActor()) // TODO: Non-actors (except for large statics?) should also create a spell cast vfx
             {
                 const ESM::Static* castStatic;
+                std::string texture = "";
+
                 if (!effect->mCasting.empty())
                     castStatic = store.get<ESM::Static>().find (effect->mCasting);
                 else
                     castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
 
-                animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex);
+                // TODO: Choosing whether to apply the override texture should be chosen based on nodes in the .NIF file.
+                if (effect->mCasting.empty() || effect->mCasting == "VFX_DefaultCast" || effect->mCasting == "VFX_ShieldCast")
+                        texture = effect->mParticle;
+
+                animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex, false, "", texture);
             }
 
             if (!mCaster.getClass().isActor())

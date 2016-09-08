@@ -3163,11 +3163,7 @@ namespace MWWorld
             const ESM::MagicEffect* effect = getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
 
             if ((effectIt->mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()) || effectIt->mRange != rangeType)
-<<<<<<< fe3a033642f21393bc267afa4edcc373c9d5f80b
                 continue; // Not right range type, or not area effect and hit an actor
-=======
-                continue; // Not right range type
->>>>>>> Use particle texture for "hit" effects
 
             // Spawn the explosion orb effect
             const ESM::Static* areaStatic;
@@ -3176,13 +3172,19 @@ namespace MWWorld
             else
                 areaStatic = getStore().get<ESM::Static>().find ("VFX_DefaultArea");
 
+            std::string texture = "";
+
+            // TODO: Choosing whether to apply the override texture should be chosen based on nodes in the .NIF file.
+            if (effect->mArea.empty() || effect->mArea == "VFX_DefaultArea")
+                texture = effect->mParticle;
+
             if (effectIt->mArea <= 0)
             {
-                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, 1.0f);
+                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, 1.0f);
                 continue;
             }
             else
-                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, static_cast<float>(effectIt->mArea * 2));              
+                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, static_cast<float>(effectIt->mArea * 2));              
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             static const std::string schools[] = {
