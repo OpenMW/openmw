@@ -166,6 +166,16 @@ void CSMPrefs::State::declare()
         setTooltip ("When using next/previous functions at the last/first item of a "
         "list go to the first/last item");
 
+    declareCategory ("Marker Size");
+    declareDouble ("MarkerShaftWidth", "Marker Shaft Width", 30.0).
+        setRange (0.001, 100.0);
+    declareDouble ("MarkerShaftBaseLength", "Marker Shaft Base Length", 70.0).
+        setRange (0.001, 100.0);
+    declareDouble ("MarkerHeadWidth", "Marker Header Width", 50.0).
+        setRange (0.001, 100.0);
+    declareDouble ("MarkerHeadLength", "Marker Header Length", 50.0).
+        setRange (0.001, 100.0);
+
     declareCategory ("3D Scene Input");
     declareDouble ("p-navi-free-sensitivity", "Free Camera Sensitivity", 1/650.).setPrecision(5).setRange(0.0, 1.0);
     declareBool ("p-navi-free-invert", "Invert Free Camera Mouse Input", false);
