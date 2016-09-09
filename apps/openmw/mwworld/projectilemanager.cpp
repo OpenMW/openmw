@@ -80,7 +80,7 @@ namespace
             const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 effects.mList.begin()->mEffectID);
 
-            // TODO: Choosing whether to apply the override texture should be chosen based on nodes in the .NIF file.
+            // TODO: Applying the override texture should depend on texture properties in the .NIF file and not use special cases.
             if (magicEffect->mBolt.empty() || magicEffect->mBolt == "VFX_DefaultBolt" || magicEffect->mBolt == "VFX_DestructBolt")
                 texture = magicEffect->mParticle;
         }

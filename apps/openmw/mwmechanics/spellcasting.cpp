@@ -543,7 +543,7 @@ namespace MWMechanics
 
                     std::string texture = "";
 
-                    // TODO: Choosing whether to apply the override texture should be chosen based on nodes in the .NIF file.
+                    // TODO: Applying the override texture should depend on texture properties in the .NIF file and not use special cases.
                     if (magicEffect->mHit.empty() || magicEffect->mHit == "VFX_DefaultHit" || magicEffect->mHit == "VFX_MysticismHit"
                         || magicEffect->mHit == "VFX_SoulTrapHit")                        
                         texture = magicEffect->mParticle;
@@ -937,7 +937,7 @@ namespace MWMechanics
 
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
 
-            if (mCaster.getClass().isActor()) // TODO: Non-actors (except for large statics?) should also create a spell cast vfx
+            if (mCaster.getClass().isActor()) // TODO: Non-actors should also create a spell cast vfx
             {
                 const ESM::Static* castStatic;
                 std::string texture = "";
@@ -947,7 +947,7 @@ namespace MWMechanics
                 else
                     castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
 
-                // TODO: Choosing whether to apply the override texture should be chosen based on nodes in the .NIF file.
+                // TODO: Applying the override texture should depend on texture properties in the .NIF file and not use special cases.
                 if (effect->mCasting.empty() || effect->mCasting == "VFX_DefaultCast" || effect->mCasting == "VFX_ShieldCast")
                         texture = effect->mParticle;
 

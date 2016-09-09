@@ -3174,7 +3174,7 @@ namespace MWWorld
 
             std::string texture = "";
 
-            // TODO: Choosing whether to apply the override texture should be chosen based on nodes in the .NIF file.
+            // TODO: Applying the override texture should depend on texture properties in the .NIF file and not use special cases.
             if (effect->mArea.empty() || effect->mArea == "VFX_DefaultArea")
                 texture = effect->mParticle;
 
