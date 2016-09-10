@@ -69,7 +69,7 @@ namespace MWMechanics
         mMovement()
         {}
 
-        void startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& target);
+        void startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
         void updateCombatMove(float duration);
         void stopCombatMove();
         void startAttackIfReady(const MWWorld::Ptr& actor, CharacterController& characterController, 
@@ -242,7 +242,7 @@ namespace MWMechanics
 
         if (storage.mReadyToAttack)
         {
-            storage.startCombatMove(actorClass.isNpc(), isRangedCombat, distToTarget, rangeAttack, target);
+            storage.startCombatMove(actorClass.isNpc(), isRangedCombat, distToTarget, rangeAttack, actor, target);
             // start new attack
             storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat);
 
@@ -322,21 +322,22 @@ namespace MWMechanics
         sequence.mPackages.push_back(package);
     }
 
-    void AiCombatStorage::startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& target)
+    void AiCombatStorage::startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
     {
         if (mMovement.mPosition[0] || mMovement.mPosition[1])
         {
             mTimerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
             mCombatMove = true;
         }
-        // dodge movements (for NPCs only)
-        else if (isNpc)
+        // dodge movements (for NPCs and bipedal creatures)
+        else if (isNpc || ((actor.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Bipedal) != 0))
         {
             // get the range of the target's weapon
             float rangeAttackOfTarget = 0.f;
-            MWWorld::Ptr targetWeapon = MWWorld::Ptr();
             bool isRangedCombat = false;
+            MWWorld::Ptr targetWeapon = MWWorld::Ptr();         
             const MWWorld::Class& targetClass = target.getClass();
+
             if (targetClass.hasInventoryStore(target))
             {
                 MWMechanics::WeaponType weapType = WeapType_None;
@@ -345,12 +346,14 @@ namespace MWMechanics
                 if (weapType != WeapType_PickProbe && weapType != WeapType_Spell && weapType != WeapType_None && weapType != WeapType_HandToHand)
                     targetWeapon = *weaponSlot;
             }
+
             boost::shared_ptr<Action> targetWeaponAction (new ActionWeapon(targetWeapon));
+
             if (targetWeaponAction.get())
                 rangeAttackOfTarget = targetWeaponAction->getCombatRange(isRangedCombat);
               
             // apply sideway movement (kind of dodging) with some probability
-            // if NPC is within range of target's weapon
+            // if actor is within range of target's weapon
             if (distToTarget <= rangeAttackOfTarget && Misc::Rng::rollClosedProbability() < 0.25)
             {
                 mMovement.mPosition[0] = Misc::Rng::rollProbability() < 0.5 ? 1.0f : -1.0f; // to the left/right
