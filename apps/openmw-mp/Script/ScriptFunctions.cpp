@@ -9,6 +9,7 @@
 #include <apps/openmw-mp/Player.hpp>
 #include <apps/openmw-mp/Networking.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
+#include <components/openmw-mp/Version.hpp>
 
 template<typename... Types>
 constexpr char TypeString<Types...>::value[];
@@ -118,4 +119,14 @@ void ScriptFunctions::Kick(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player,);
     mwmp::Networking::GetPtr()->KickPlayer(player->guid);
+}
+
+const char *ScriptFunctions::GetServerVersion() noexcept
+{
+    return TES3MP_VERSION;
+}
+
+const char *ScriptFunctions::GetProtocolVersion() noexcept
+{
+    return to_string((int)TES3MP_PROTO_VERSION).c_str();
 }

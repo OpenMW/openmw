@@ -58,6 +58,8 @@ public:
     static bool IsTimerElapsed(int timerId) noexcept;
 
     static void Kick(unsigned short pid) noexcept;
+    static const char *GetServerVersion() noexcept;
+    static const char *GetProtocolVersion() noexcept;
 
     static constexpr ScriptFunctionData functions[]{
             {"CreateTimer",         ScriptFunctions::CreateTimer},
@@ -77,6 +79,8 @@ public:
 //            {"Cast",              ScriptFunctions::Cast},
             {"SendMessage",         ScriptFunctions::SendMessage},
             {"Kick",                ScriptFunctions::Kick},
+            {"GetServerVersion",    ScriptFunctions::GetServerVersion},
+            {"GetProtocolVersion",    ScriptFunctions::GetProtocolVersion},
 
             TRANSLOCATIONFUNCTIONS,
             STATSFUNCTIONS,
