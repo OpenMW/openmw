@@ -14,6 +14,7 @@
 #include "../mwworld/cellstore.hpp"
 
 #include "creaturestats.hpp"
+#include "npcstats.hpp"
 #include "movement.hpp"
 #include "steering.hpp"
 #include "actorutil.hpp"
@@ -179,6 +180,24 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float dur
     {
         mObstacleCheck.takeEvasiveAction(movement);
     }
+}
+
+bool MWMechanics::AiPackage::preventDrowning(const MWWorld::Ptr& actor)
+{
+	const MWWorld::Class& actorClass = actor.getClass();
+	if (actorClass.isNpc())
+	{
+		if (actorClass.getNpcStats(actor).getTimeToStartDrowning() < 3)
+		{
+			//go up
+			//another option: create a new AiTravel package with coordinates at water level. 
+			//or maybe cast a spell if available
+			actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+			smoothTurn(actor, -180, 0);
+			return true;
+		}
+	}
+	return false;
 }
 
 bool MWMechanics::AiPackage::shortcutPath(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor, bool *destInLOS)

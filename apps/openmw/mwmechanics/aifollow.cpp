@@ -64,6 +64,10 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
 {
     MWWorld::Ptr target = getTarget();
 
+	//if the actor has to go up for air, then no other actions is taken
+	if (preventDrowning(actor))
+		return false;
+
     if (target.isEmpty() || !target.getRefData().getCount() || !target.getRefData().isEnabled()  // Really we should be checking whether the target is currently registered
                                                                                                  // with the MechanicsManager
             )
