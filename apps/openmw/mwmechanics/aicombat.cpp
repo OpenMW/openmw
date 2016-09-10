@@ -148,9 +148,9 @@ namespace MWMechanics
         if (actor.getClass().getCreatureStats(actor).isDead())
             return true;
 
-		//if the actor has to go up for air, then no other actions is taken
-		if (preventDrowning(actor))
-			return false;
+        //if the actor has to go up for air, then no other actions is taken
+        if (preventDrowning(actor))
+            return false;
 
         MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
         if (target.isEmpty())

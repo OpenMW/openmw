@@ -115,7 +115,7 @@ namespace MWMechanics
 
             void evadeObstacles(const MWWorld::Ptr& actor, float duration, const ESM::Position& pos);
 
-			bool preventDrowning(const MWWorld::Ptr& actor);
+            bool preventDrowning(const MWWorld::Ptr& actor);
 
             // TODO: all this does not belong here, move into temporary storage
             PathFinder mPathFinder;

@@ -72,9 +72,9 @@ namespace MWMechanics
             }
         }
 
-		//if the actor has to go up for air, then no other actions is taken
-		if (preventDrowning(actor))
-			return false;
+        //if the actor has to go up for air, then no other actions is taken
+        if (preventDrowning(actor))
+            return false;
 
         if (!mCellId.empty() && mCellId != actor.getCell()->getCell()->getCellId().mWorldspace)
             return false; // Not in the correct cell, pause and rely on the player to go back through a teleport door

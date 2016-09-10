@@ -197,9 +197,9 @@ namespace MWMechanics
         if(cStats.isDead() || cStats.getHealth().getCurrent() <= 0)
             return true; // Don't bother with dead actors
 
-		//if the actor has to go up for air, then no other actions is taken
-		if (preventDrowning(actor))
-			return false;
+        //if the actor has to go up for air, then no other actions is taken
+        if (preventDrowning(actor))
+            return false;
 
         bool cellChange = currentCell && (actor.getCell() != currentCell);
         if(!currentCell || cellChange)
