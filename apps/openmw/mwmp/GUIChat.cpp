@@ -143,6 +143,9 @@ namespace mwmp
         windowState++;
         if (windowState == 3) windowState = 0;
 
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Switch chat mode to %s", windowState == CHAT_DISABLED ? "CHAT_DISABLED" :
+                                                                       windowState == CHAT_ENABLED ? "CHAT_ENABLED" :
+                                                                       "CHAT_HIDDENMODE");
         switch (windowState)
         {
             case CHAT_DISABLED:
@@ -177,6 +180,8 @@ namespace mwmp
         }
         else // CHAT_ENABLED
             editState = true;
+
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "%s", "Opening chat.");
         SetEditState(editState);
     }
 
