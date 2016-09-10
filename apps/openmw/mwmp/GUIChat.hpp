@@ -23,7 +23,7 @@
 namespace mwmp
 {
     class GUIController;
-    class GUIChat : public MWGui::WindowBase, public MWGui::ReferenceInterface
+    class GUIChat : public MWGui::WindowBase
     {
         friend class GUIController;
     public:
@@ -76,13 +76,9 @@ namespace mwmp
         /// Error message
         void printError(const std::string &msg);
 
-        virtual void resetReference ();
-
         void send(const std::string &str);
 
     protected:
-
-        virtual void onReferenceUnavailable();
 
     private:
 

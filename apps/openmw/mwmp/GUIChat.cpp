@@ -9,6 +9,7 @@
 #include <apps/openmw/mwgui/windowmanagerimp.hpp>
 #include <apps/openmw/mwinput/inputmanagerimp.hpp>
 #include <MyGUI_InputManager.h>
+#include <components/openmw-mp/Log.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -66,21 +67,12 @@ namespace mwmp
         //WindowBase::exit();
     }
 
-    void GUIChat::resetReference()
-    {
-        ReferenceInterface::resetReference();
-        //setSelectedObject(MWWorld::Ptr());
-    }
-
-    void GUIChat::onReferenceUnavailable()
-    {
-        //setSelectedObject(MWWorld::Ptr());
-    }
-
     void GUIChat::acceptCommand(MyGUI::EditBox *_sender)
     {
         const std::string &cm = mCommandLine->getOnlyText();
         if (cm.empty()) return;
+
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Player: %s", cm.c_str());
 
         // Add the command to the history, and set the current pointer to
         // the end of the list
@@ -115,6 +107,7 @@ namespace mwmp
             setVisible(true);
         }
         mHistory->addText(color + MyGUI::TextIterator::toTagsString(msg));
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", msg.c_str());
     }
 
     void GUIChat::printOK(const std::string &msg)
