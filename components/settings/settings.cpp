@@ -390,7 +390,7 @@ std::string Manager::getString(const std::string &setting, const std::string &ca
         return it->second;
 
     throw std::runtime_error(std::string("Trying to retrieve a non-existing setting: ") + setting
-                             + ".\nMake sure the settings-default.cfg file file was properly installed.");
+                             + ".\nMake sure the settings-default.cfg file was properly installed.");
 }
 
 float Manager::getFloat (const std::string& setting, const std::string& category)
