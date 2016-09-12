@@ -46,7 +46,7 @@ void EffectManager::addEffect(const std::string &model, const std::string& textu
     SceneUtil::AssignControllerSourcesVisitor assignVisitor(effect.mAnimTime);
     node->accept(assignVisitor);
 
-    overrideTexture(textureOverride, mResourceSystem, node);
+    overrideFirstRootTexture(textureOverride, mResourceSystem, node);
 
     mParentNode->addChild(trans);
     mResourceSystem->getSceneManager()->notifyAttached(node);

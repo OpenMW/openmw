@@ -1342,7 +1342,7 @@ namespace MWRender
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
         node->accept(assignVisitor);
 
-        overrideTexture(texture, mResourceSystem, node);
+        overrideFirstRootTexture(texture, mResourceSystem, node);
 
         // TODO: in vanilla morrowind the effect is scaled based on the host object's bounding box.
 

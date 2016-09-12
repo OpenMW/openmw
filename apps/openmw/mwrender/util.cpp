@@ -1,13 +1,52 @@
 #include "util.hpp"
 
 #include <osg/Node>
+#include <osg/ValueObject>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/sceneutil/visitor.hpp>
 
 namespace MWRender
 {
+
+class TextureOverrideVisitor : public osg::NodeVisitor
+    {
+    public:
+        TextureOverrideVisitor(size_t refID, std::string texture, Resource::ResourceSystem* resourcesystem)
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mRefID(refID)
+            , mTexture(texture)
+            , mResourcesystem(resourcesystem)
+        {
+        }
+
+        virtual void apply(osg::Node& node)
+        {
+            int index;
+            osg::ref_ptr<osg::Node> nodePtr(&node);
+            if (node.getUserValue("NiTexturingPropertyIndex", index))
+            {
+                if (mRefID == index) 
+                    overrideTexture(mTexture, mResourcesystem, nodePtr);
+            }
+            traverse(node);
+        }
+        int mRefID;
+        std::string mTexture;
+        Resource::ResourceSystem* mResourcesystem;
+};
+
+void overrideFirstRootTexture(const std::string &texture, Resource::ResourceSystem *resourceSystem, osg::ref_ptr<osg::Node> node)
+{
+        int index;
+        if (node->getUserValue("overrideIndex", index))
+        {
+            TextureOverrideVisitor overrideVisitor(index, texture, resourceSystem);
+            node->accept(overrideVisitor);
+        }
+}
 
 void overrideTexture(const std::string &texture, Resource::ResourceSystem *resourceSystem, osg::ref_ptr<osg::Node> node)
 {
@@ -26,7 +65,7 @@ void overrideTexture(const std::string &texture, Resource::ResourceSystem *resou
     else
         stateset = new osg::StateSet;
 
-    stateset->setTextureAttribute(0, tex, osg::StateAttribute::OVERRIDE);
+    stateset->setTextureAttribute(0, tex, osg::StateAttribute::PROTECTED);
 
     node->setStateSet(stateset);
 }

@@ -6,6 +6,7 @@
 #include <osg/Array>
 #include <osg/LOD>
 #include <osg/TexGen>
+#include <osg/ValueObject>
 
 // resource
 #include <components/misc/stringops.hpp>
@@ -368,13 +369,32 @@ namespace NifOsg
             return created;
         }
 
-        void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<int>& boundTextures, int animflags)
+        void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<int>& boundTextures, int animflags, bool isRootNode)
         {
             const Nif::PropertyList& props = nifNode->props;
-            for (size_t i = 0; i <props.length();++i)
+            bool foundFirstRootTexturingProperty = false;
+            for (size_t i = 0; i <props.length(); ++i)
             {
                 if (!props[i].empty())
+                {
+                    // store the recIndex of the NiTexturingProperty. Used for spells when overriding textures.
+                    // Get the lowest numbered one for the root node. This is what is overridden when a spell
+                    // effect "particle texture" is used. For non-root nodes we keep setting until we have the highest
+                    // numbered one, which is the one that displays in the game and can be overridden if it matches the
+                    // lowest one on the root.
+                    if (!foundFirstRootTexturingProperty && isRootNode && props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
+                    {
+                        int index = props[i].getPtr()->recIndex;
+                        applyTo->setUserValue("overrideIndex", index);  
+                        foundFirstRootTexturingProperty = true;
+                    }
+                    else if (props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
+                    {
+                        int index = props[i].getPtr()->recIndex;
+                        applyTo->setUserValue("NiTexturingPropertyIndex", index);                
+                    }
                     handleProperty(props[i].getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
+                }              
             }
         }
 
@@ -631,7 +651,7 @@ namespace NifOsg
 
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
-            applyNodeProperties(nifNode, node, composite, imageManager, boundTextures, animflags);
+            applyNodeProperties(nifNode, node, composite, imageManager, boundTextures, animflags, node == rootNode);
 
             if (nifNode->recType == Nif::RC_NiTriShape && !skipMeshes)
             {

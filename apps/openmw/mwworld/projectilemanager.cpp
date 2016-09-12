@@ -74,15 +74,12 @@ namespace
         if (count != 0)
             speed /= count;
 
-        // in the original engine, the particle texture is only used if there is only one projectile
+        // the particle texture is only used if there is only one projectile
         if (projectileEffects.mList.size() == 1) 
         {
             const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 effects.mList.begin()->mEffectID);
-
-            // TODO: Applying the override texture should depend on texture properties in the .NIF file and not use special cases.
-            if (magicEffect->mBolt.empty() || magicEffect->mBolt == "VFX_DefaultBolt" || magicEffect->mBolt == "VFX_DestructBolt")
-                texture = magicEffect->mParticle;
+            texture = magicEffect->mParticle;
         }
         
         if (projectileEffects.mList.size() > 1) // insert a VFX_Multiple projectile if there are multiple projectile effects
@@ -155,7 +152,7 @@ namespace MWWorld
             attachTo = rotateNode;
         }
 
-        mResourceSystem->getSceneManager()->getInstance(model, attachTo);
+        osg::ref_ptr<osg::Node> projectile = mResourceSystem->getSceneManager()->getInstance(model, attachTo);
 
         if (state.mIdMagic.size() > 1)
             for (size_t iter = 1; iter != state.mIdMagic.size(); ++iter)
@@ -180,7 +177,8 @@ namespace MWWorld
 
         SceneUtil::AssignControllerSourcesVisitor assignVisitor (state.mEffectAnimationTime);
         state.mNode->accept(assignVisitor);
-        MWRender::overrideTexture(texture, mResourceSystem, state.mNode);
+
+        MWRender::overrideFirstRootTexture(texture, mResourceSystem, projectile);
     }
 
     void ProjectileManager::update(State& state, float duration)
@@ -500,8 +498,8 @@ namespace MWWorld
             state.mSpellId = esm.mSpellId;
             state.mActorId = esm.mActorId;
             state.mStack = esm.mStack;
-            std::string color = "";
-            state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, color, esm.mEffects);
+            std::string texture = "";
+            state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, texture, esm.mEffects);
             state.mSpeed = esm.mSpeed; // speed is derived from non-projectile effects as well as
                                        // projectile effects, so we can't calculate it from the save
                                        // file's effect list, which is already trimmed of non-projectile
@@ -519,7 +517,7 @@ namespace MWWorld
                 return true;
             }
 
-            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true, color);
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true, texture);
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             

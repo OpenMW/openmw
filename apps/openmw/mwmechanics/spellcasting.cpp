@@ -541,12 +541,7 @@ namespace MWMechanics
                     else
                         castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_DefaultHit");
 
-                    std::string texture = "";
-
-                    // TODO: Applying the override texture should depend on texture properties in the .NIF file and not use special cases.
-                    if (magicEffect->mHit.empty() || magicEffect->mHit == "VFX_DefaultHit" || magicEffect->mHit == "VFX_MysticismHit"
-                        || magicEffect->mHit == "VFX_SoulTrapHit")                        
-                        texture = magicEffect->mParticle;
+                    std::string texture = magicEffect->mParticle;
 
                     // TODO: VFX are no longer active after saving/reloading the game
                     bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
@@ -940,16 +935,13 @@ namespace MWMechanics
             if (mCaster.getClass().isActor()) // TODO: Non-actors should also create a spell cast vfx
             {
                 const ESM::Static* castStatic;
-                std::string texture = "";
 
                 if (!effect->mCasting.empty())
                     castStatic = store.get<ESM::Static>().find (effect->mCasting);
                 else
                     castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
 
-                // TODO: Applying the override texture should depend on texture properties in the .NIF file and not use special cases.
-                if (effect->mCasting.empty() || effect->mCasting == "VFX_DefaultCast" || effect->mCasting == "VFX_ShieldCast")
-                        texture = effect->mParticle;
+                std::string texture = effect->mParticle;
 
                 animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex, false, "", texture);
             }

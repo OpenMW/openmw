@@ -3172,11 +3172,7 @@ namespace MWWorld
             else
                 areaStatic = getStore().get<ESM::Static>().find ("VFX_DefaultArea");
 
-            std::string texture = "";
-
-            // TODO: Applying the override texture should depend on texture properties in the .NIF file and not use special cases.
-            if (effect->mArea.empty() || effect->mArea == "VFX_DefaultArea")
-                texture = effect->mParticle;
+            std::string texture = effect->mParticle;
 
             if (effectIt->mArea <= 0)
             {
