@@ -462,8 +462,6 @@ namespace MWMechanics
 
     void ActionWeapon::prepare(const MWWorld::Ptr &actor)
     {
-        mIsNpc = actor.getClass().isNpc();
-
         if (actor.getClass().hasInventoryStore(actor))
         {
             if (mWeapon.isEmpty())

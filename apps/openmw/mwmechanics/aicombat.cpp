@@ -330,7 +330,7 @@ namespace MWMechanics
             mCombatMove = true;
         }
         // dodge movements (for NPCs and bipedal creatures)
-        else if (isNpc || ((actor.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Bipedal) != 0))
+        else if (actor.getClass().isBipedal(actor))
         {
             // get the range of the target's weapon
             float rangeAttackOfTarget = 0.f;
