@@ -264,7 +264,7 @@ namespace MWClass
 
         if(Misc::Rng::roll0to99() >= hitchance)
         {
-            victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, false);
+            victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, osg::Vec3f(), false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
             return;
         }
@@ -318,15 +318,12 @@ namespace MWClass
         if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage, attackStrength))
             damage = 0;
 
-        if (damage > 0)
-            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
-
         MWMechanics::diseaseContact(victim, ptr);
 
-        victim.getClass().onHit(victim, damage, healthdmg, weapon, ptr, true);
+        victim.getClass().onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true);
     }
 
-    void Creature::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
+    void Creature::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, osg::Vec3f hitPosition, bool successful) const
     {
         // NOTE: 'object' and/or 'attacker' may be empty.
 
@@ -342,10 +339,10 @@ namespace MWClass
             setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
-        if(!object.isEmpty())
+        if (!object.isEmpty())
             getCreatureStats(ptr).setLastHitAttemptObject(object.getCellRef().getRefId());
 
-        if(setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
+        if (setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
         {
             const std::string &script = ptr.get<ESM::Creature>()->mBase->mScript;
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
@@ -353,14 +350,14 @@ namespace MWClass
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
 
-        if(!successful)
+        if (!successful)
         {
             // Missed
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "miss", 1.0f, 1.0f);
             return;
         }
 
-        if(!object.isEmpty())
+        if (!object.isEmpty())
             getCreatureStats(ptr).setLastHitObject(object.getCellRef().getRefId());
 
         if (damage > 0.0f && !object.isEmpty())
@@ -391,7 +388,10 @@ namespace MWClass
             if(ishealth)
             {
                 if (!attacker.isEmpty())
+                {
                     damage = scaleDamage(damage, attacker, ptr);
+                    MWBase::Environment::get().getWorld()->spawnBloodEffect(ptr, hitPosition);
+                }
 
                 MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
 
