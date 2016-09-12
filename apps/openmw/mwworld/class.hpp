@@ -120,7 +120,7 @@ namespace MWWorld
             ///               enums. ignored for creature attacks.
             /// (default implementation: throw an exception)
 
-            virtual void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, osg::Vec3f hitPosition, bool successful) const;
+            virtual void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) const;
             ///< Alerts \a ptr that it's being hit for \a damage points to health if \a ishealth is
             /// true (else fatigue) by \a object (sword, arrow, etc). \a attacker specifies the
             /// actor responsible for the attack, and \a successful specifies if the hit is

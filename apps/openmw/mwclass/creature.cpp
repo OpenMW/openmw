@@ -323,7 +323,7 @@ namespace MWClass
         victim.getClass().onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true);
     }
 
-    void Creature::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, osg::Vec3f hitPosition, bool successful) const
+    void Creature::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) const
     {
         // NOTE: 'object' and/or 'attacker' may be empty.
 

@@ -651,7 +651,7 @@ namespace MWClass
         othercls.onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true);
     }
 
-    void Npc::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, osg::Vec3f hitPosition, bool successful) const
+    void Npc::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) const
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
 
