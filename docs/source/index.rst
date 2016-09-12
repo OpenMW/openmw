@@ -10,6 +10,7 @@ Components
 
     openmw/index
     openmw-cs/index
+    openmw-mods/index
 
 
 Indices and tables
