@@ -69,7 +69,7 @@ namespace MWMechanics
         mMovement()
         {}
 
-        void startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
+        void startCombatMove(bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
         void updateCombatMove(float duration);
         void stopCombatMove();
         void startAttackIfReady(const MWWorld::Ptr& actor, CharacterController& characterController, 
@@ -242,7 +242,7 @@ namespace MWMechanics
 
         if (storage.mReadyToAttack)
         {
-            storage.startCombatMove(actorClass.isNpc(), isRangedCombat, distToTarget, rangeAttack, actor, target);
+            storage.startCombatMove(isRangedCombat, distToTarget, rangeAttack, actor, target);
             // start new attack
             storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat);
 
@@ -322,7 +322,7 @@ namespace MWMechanics
         sequence.mPackages.push_back(package);
     }
 
-    void AiCombatStorage::startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
+    void AiCombatStorage::startCombatMove(bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
     {
         if (mMovement.mPosition[0] || mMovement.mPosition[1])
         {
