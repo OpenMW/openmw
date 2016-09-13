@@ -25,9 +25,9 @@ MWMechanics::AiPackage::~AiPackage() {}
 
 MWMechanics::AiPackage::AiPackage() : 
     mTimer(AI_REACTION_TIME + 1.0f), // to force initial pathbuild
+    mRotateOnTheRunChecks(0),
     mIsShortcutting(false),
-    mShortcutProhibited(false), mShortcutFailPos(),
-    mRotateOnTheRunChecks(0)
+    mShortcutProhibited(false), mShortcutFailPos()
 {
 }
 
