@@ -69,7 +69,7 @@ namespace MWMechanics
         mMovement()
         {}
 
-        void startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack);
+        void startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
         void updateCombatMove(float duration);
         void stopCombatMove();
         void startAttackIfReady(const MWWorld::Ptr& actor, CharacterController& characterController, 
@@ -242,7 +242,7 @@ namespace MWMechanics
 
         if (storage.mReadyToAttack)
         {
-            storage.startCombatMove(actorClass.isNpc(), isRangedCombat, distToTarget, rangeAttack);
+            storage.startCombatMove(actorClass.isNpc(), isRangedCombat, distToTarget, rangeAttack, actor, target);
             // start new attack
             storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat);
 
@@ -306,7 +306,6 @@ namespace MWMechanics
         return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
     }
 
-
     AiCombat *MWMechanics::AiCombat::clone() const
     {
         return new AiCombat(*this);
@@ -323,18 +322,39 @@ namespace MWMechanics
         sequence.mPackages.push_back(package);
     }
 
-    void AiCombatStorage::startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack)
+    void AiCombatStorage::startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
     {
         if (mMovement.mPosition[0] || mMovement.mPosition[1])
         {
             mTimerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
             mCombatMove = true;
         }
-        // dodge movements (for NPCs only)
-        else if (isNpc && (!isDistantCombat || (distToTarget < rangeAttack / 2)))
+        // dodge movements (for NPCs and bipedal creatures)
+        else if (actor.getClass().isBipedal(actor))
         {
-            //apply sideway movement (kind of dodging) with some probability
-            if (Misc::Rng::rollClosedProbability() < 0.25)
+            // get the range of the target's weapon
+            float rangeAttackOfTarget = 0.f;
+            bool isRangedCombat = false;
+            MWWorld::Ptr targetWeapon = MWWorld::Ptr();         
+            const MWWorld::Class& targetClass = target.getClass();
+
+            if (targetClass.hasInventoryStore(target))
+            {
+                MWMechanics::WeaponType weapType = WeapType_None;
+                MWWorld::ContainerStoreIterator weaponSlot =
+                    MWMechanics::getActiveWeapon(targetClass.getCreatureStats(target), targetClass.getInventoryStore(target), &weapType);
+                if (weapType != WeapType_PickProbe && weapType != WeapType_Spell && weapType != WeapType_None && weapType != WeapType_HandToHand)
+                    targetWeapon = *weaponSlot;
+            }
+
+            boost::shared_ptr<Action> targetWeaponAction (new ActionWeapon(targetWeapon));
+
+            if (targetWeaponAction.get())
+                rangeAttackOfTarget = targetWeaponAction->getCombatRange(isRangedCombat);
+              
+            // apply sideway movement (kind of dodging) with some probability
+            // if actor is within range of target's weapon
+            if (distToTarget <= rangeAttackOfTarget && Misc::Rng::rollClosedProbability() < 0.25)
             {
                 mMovement.mPosition[0] = Misc::Rng::rollProbability() < 0.5 ? 1.0f : -1.0f; // to the left/right
                 mTimerCombatMove = 0.05f + 0.15f * Misc::Rng::rollClosedProbability();
@@ -342,6 +362,9 @@ namespace MWMechanics
             }
         }
 
+        // Original engine behavior seems to be to back up during ranged combat
+        // according to fCombatDistance or opponent's weapon range, unless opponent
+        // is also using a ranged weapon
         if (isDistantCombat && distToTarget < rangeAttack / 4)
         {
             mMovement.mPosition[1] = -1;

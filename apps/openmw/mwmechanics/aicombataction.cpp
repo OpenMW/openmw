@@ -462,8 +462,6 @@ namespace MWMechanics
 
     void ActionWeapon::prepare(const MWWorld::Ptr &actor)
     {
-        mIsNpc = actor.getClass().isNpc();
-
         if (actor.getClass().hasInventoryStore(actor))
         {
             if (mWeapon.isEmpty())
@@ -491,17 +489,9 @@ namespace MWMechanics
 
         if (mWeapon.isEmpty())
         {
-            if (!mIsNpc)
-            {
-                return fCombatDistance;
-            }
-            else
-            {
-                static float fHandToHandReach =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
-
-                return fHandToHandReach * fCombatDistance;
-            }
+            static float fHandToHandReach =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
+            return fHandToHandReach * fCombatDistance;
         }
 
         const ESM::Weapon* weapon = mWeapon.get<ESM::Weapon>()->mBase;
