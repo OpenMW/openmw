@@ -7,7 +7,7 @@ A brief overview of the differences between the two engines.
 OpenMW is designed to be able to use all the normal Morrowind mod files such as .esm/.esp plugins, texture replacers, mesh replacers, etc.
 
 .. warning::
-	All external programs and libraries that depend on ''morrowind.exe'' cannot function with OpenMW. This means you should assume mods dependent on Morrowind Graphics Extender, Morrowind Code Patch, Morrowind Script Extender, etc, will *not* work correctly.
+	All external programs and libraries that depend on ''morrowind.exe'' cannot function with OpenMW. This means you should assume mods dependent on Morrowind Graphics Extender, Morrowind Code Patch, Morrowind Script Extender, etc, will *not* work correctly, nor will the tools themselves.
 
 Multiple Data Folders
 ---------------------

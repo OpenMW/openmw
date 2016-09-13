@@ -13,3 +13,4 @@ The following document is the complete reference guide to modifying, or modding,
 
    foreword
    differences
+   mod-install
