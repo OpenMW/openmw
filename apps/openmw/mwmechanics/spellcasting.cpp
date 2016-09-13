@@ -569,7 +569,7 @@ namespace MWMechanics
 
         // Notify the target actor they've been hit
         if (anyHarmfulEffect && target.getClass().isActor() && target != caster && !caster.isEmpty() && caster.getClass().isActor())
-            target.getClass().onHit(target, 0.f, true, MWWorld::Ptr(), caster, true);
+            target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
     }
 
     bool CastSpell::applyInstantEffect(const MWWorld::Ptr &target, const MWWorld::Ptr &caster, const MWMechanics::EffectKey& effect, float magnitude)
