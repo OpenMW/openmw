@@ -40,6 +40,7 @@ namespace
     ESM::EffectList getMagicBoltData(std::vector<std::string>& projectileIDs, std::vector<std::string>& sounds, float& speed, const ESM::EffectList& effects)
     {
         int count = 0;
+        speed = 0.0f;
         ESM::EffectList projectileEffects;
         for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
             iter!=effects.mList.end(); ++iter)
