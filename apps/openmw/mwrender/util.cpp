@@ -65,7 +65,7 @@ void overrideTexture(const std::string &texture, Resource::ResourceSystem *resou
     else
         stateset = new osg::StateSet;
 
-    stateset->setTextureAttribute(0, tex, osg::StateAttribute::PROTECTED);
+    stateset->setTextureAttribute(0, tex, osg::StateAttribute::OVERRIDE);
 
     node->setStateSet(stateset);
 }

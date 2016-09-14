@@ -3145,7 +3145,7 @@ namespace MWWorld
         modelName << roll;
         std::string model = "meshes\\" + getFallback()->getFallbackString(modelName.str());
 
-        mRendering->spawnEffect(model, texture, worldPosition);
+        mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
     }
 
     void World::spawnEffect(const std::string &model, const std::string &textureOverride, const osg::Vec3f &worldPos)
