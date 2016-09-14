@@ -97,6 +97,9 @@ namespace MWMechanics
 
             bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
 
+            /// Return if actor's rotation speed is sufficient to rotate to the destination pathpoint on the run. Otherwise actor should rotate while standing.
+            static bool isReachableRotatingOnTheRun(const MWWorld::Ptr& actor, const ESM::Pathgrid::Point& dest);
+
         protected:
             /// Handles path building and shortcutting with obstacles avoiding
             /** \return If the actor has arrived at his destination **/
@@ -122,6 +125,8 @@ namespace MWMechanics
             float mTimer;
 
             osg::Vec3f mLastActorPos;
+
+            short mRotateOnTheRunChecks; // attempts to check rotation to the pathpoint on the run possibility
 
             bool mIsShortcutting;   // if shortcutting at the moment
             bool mShortcutProhibited; // shortcutting may be prohibited after unsuccessful attempt

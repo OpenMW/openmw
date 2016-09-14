@@ -190,7 +190,7 @@ namespace MWMechanics
 
         if (Misc::Rng::roll0to99() >= getHitChance(attacker, victim, skillValue))
         {
-            victim.getClass().onHit(victim, 0.0f, false, projectile, attacker, false);
+            victim.getClass().onHit(victim, 0.0f, false, projectile, attacker, osg::Vec3f(), false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, attacker);
             return;
         }
@@ -218,9 +218,6 @@ namespace MWMechanics
         if (weapon != projectile)
             appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, projectile, hitPosition);
 
-        if (damage > 0)
-            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
-
         // Non-enchanted arrows shot at enemies have a chance to turn up in their inventory
         if (victim != getPlayer()
                 && !appliedEnchantment)
@@ -230,7 +227,7 @@ namespace MWMechanics
                 victim.getClass().getContainerStore(victim).add(projectile, 1, victim);
         }
 
-        victim.getClass().onHit(victim, damage, true, projectile, attacker, true);
+        victim.getClass().onHit(victim, damage, true, projectile, attacker, hitPosition, true);
     }
 
     float getHitChance(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, int skillValue)

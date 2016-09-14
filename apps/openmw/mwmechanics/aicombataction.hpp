@@ -63,7 +63,6 @@ namespace MWMechanics
     private:
         MWWorld::Ptr mAmmunition;
         MWWorld::Ptr mWeapon;
-        bool         mIsNpc;
 
     public:
         /// \a weapon may be empty for hand-to-hand combat

@@ -19,10 +19,13 @@
 #include "actorutil.hpp"
 #include "coordinateconverter.hpp"
 
+#include <osg/Quat>
+
 MWMechanics::AiPackage::~AiPackage() {}
 
 MWMechanics::AiPackage::AiPackage() : 
     mTimer(AI_REACTION_TIME + 1.0f), // to force initial pathbuild
+    mRotateOnTheRunChecks(0),
     mIsShortcutting(false),
     mShortcutProhibited(false), mShortcutFailPos()
 {
@@ -104,6 +107,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
             if (wasShortcutting || doesPathNeedRecalc(dest, actor.getCell())) // if need to rebuild path
             {
                 mPathFinder.buildSyncedPath(start, dest, actor.getCell());
+                mRotateOnTheRunChecks = 3;
 
                 // give priority to go directly on target if there is minimal opportunity
                 if (destInLOS && mPathFinder.getPath().size() > 1)
@@ -143,7 +147,13 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
     }
     else
     {
-        actor.getClass().getMovementSettings(actor).mPosition[1] = 1; // run to target
+        if (mRotateOnTheRunChecks == 0
+            || isReachableRotatingOnTheRun(actor, *mPathFinder.getPath().begin())) // to prevent circling around a path point
+        {
+            actor.getClass().getMovementSettings(actor).mPosition[1] = 1; // move to the target
+            if (mRotateOnTheRunChecks > 0) mRotateOnTheRunChecks--;
+        }
+
         // handle obstacles on the way
         evadeObstacles(actor, duration, pos);
     }
@@ -291,4 +301,33 @@ bool MWMechanics::AiPackage::isNearInactiveCell(const ESM::Position& actorPos)
     {
         return false;
     }
+}
+
+bool MWMechanics::AiPackage::isReachableRotatingOnTheRun(const MWWorld::Ptr& actor, const ESM::Pathgrid::Point& dest)
+{
+    // get actor's shortest radius for moving in circle
+    float speed = actor.getClass().getSpeed(actor);
+    speed += speed * 0.1f; // 10% real speed inaccuracy
+    float radius = speed / MAX_VEL_ANGULAR_RADIANS;
+
+    // get radius direction to the center
+    const float* rot = actor.getRefData().getPosition().rot;
+    osg::Quat quatRot(rot[0], -osg::X_AXIS, rot[1], -osg::Y_AXIS, rot[2], -osg::Z_AXIS);
+    osg::Vec3f dir = quatRot * osg::Y_AXIS; // actor's orientation direction is a tangent to circle
+    osg::Vec3f radiusDir = dir ^ osg::Z_AXIS; // radius is perpendicular to a tangent
+    radiusDir.normalize();
+    radiusDir *= radius;
+    
+    // pick up the nearest center candidate
+    osg::Vec3f dest_ = PathFinder::MakeOsgVec3(dest);
+    osg::Vec3f pos = actor.getRefData().getPosition().asVec3();
+    osg::Vec3f center1 = pos - radiusDir;
+    osg::Vec3f center2 = pos + radiusDir;
+    osg::Vec3f center = (center1 - dest_).length2() < (center2 - dest_).length2() ? center1 : center2;
+
+    float distToDest = (center - dest_).length();
+
+    // if pathpoint is reachable for the actor rotating on the run:
+    // no points of actor's circle should be farther from the center than destination point
+    return (radius <= distToDest);
 }
