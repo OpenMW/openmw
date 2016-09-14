@@ -415,7 +415,7 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                     // Basically we don't want sounds when the actor is first loaded,
                     // the items should appear as if they'd always been equipped.
                     mListener->permanentEffectAdded(magicEffect, !mFirstAutoEquip,
-                                                        !mFirstAutoEquip && effectIt == enchantment.mEffects.mList.begin());
+                                                        !mFirstAutoEquip);
                 }
 
                 if (magnitude)
