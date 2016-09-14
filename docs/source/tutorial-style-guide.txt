@@ -46,6 +46,6 @@ I also prefer parentheticals to commas around gerund phrases.
 Files and Extensions
 --------------------
 
-When referring to a filename or filepath use the double single quotes as for inline literals. (e.g. ''morrowind.exe'')
+When referring to a filename or filepath use the double single quotes as for inline literals. (e.g. ``morrowind.exe``)
 When referring to a file extension by itself use all caps without the dot beforehand. (e.g. ZIP instead of .zip or .ZIP)
 
