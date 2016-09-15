@@ -23,7 +23,7 @@ class NpcAnimation : public Animation, public WeaponAnimation, public MWWorld::I
 {
 public:
     virtual void equipmentChanged();
-    virtual void permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound);
+    virtual void permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew);
 
 public:
     typedef std::map<ESM::PartReferenceType,std::string> PartBoneMap;
