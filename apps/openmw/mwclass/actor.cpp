@@ -83,4 +83,19 @@ namespace MWClass
     bool Actor::allowTelekinesis(const MWWorld::ConstPtr &ptr) const {
         return false;
     }
+
+    bool Actor::isActor() const
+    {
+        return true;
+    }
+
+    bool Actor::canBeActivated(const MWWorld::Ptr& ptr) const
+    {
+        MWMechanics::CreatureStats &stats = getCreatureStats(ptr);
+
+        if (stats.getAiSequence().isInCombat() && !stats.isDead())
+            return false;
+
+        return true;
+    }
 }
