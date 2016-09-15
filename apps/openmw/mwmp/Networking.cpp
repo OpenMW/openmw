@@ -325,7 +325,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
 
                         if (!weapon.isEmpty())
                             MWMechanics::blockMeleeAttack(attacker, victim, weapon, pl->GetAttack()->damage, 1);
-                        pl->getPtr().getClass().onHit(victim, pl->GetAttack()->damage, healthdmg, weapon, attacker,
+                        pl->getPtr().getClass().onHit(victim, pl->GetAttack()->damage, healthdmg, weapon, attacker, osg::Vec3f(),
                                                       pl->GetAttack()->success);
                     }
                 }
