@@ -5,6 +5,11 @@
 
 namespace ESM
 {
+    bool AnimationState::empty() const
+    {
+        return mScriptedAnims.empty();
+    }
+
     void AnimationState::load(ESMReader& esm)
     {
         mScriptedAnims.clear();
