@@ -238,7 +238,7 @@ namespace MWWorld
 
     bool RefData::hasChanged() const
     {
-        return mChanged;
+        return mChanged || !mAnimationState.empty();
     }
 
     bool RefData::activate()

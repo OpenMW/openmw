@@ -26,6 +26,8 @@ namespace ESM
         typedef std::vector<ScriptedAnimation> ScriptedAnimations;
         ScriptedAnimations mScriptedAnims;
 
+        bool empty() const;
+
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;
     };

@@ -98,6 +98,11 @@ namespace MWWorld
         throw std::runtime_error("class cannot block");
     }
 
+    bool Class::canBeActivated(const Ptr& ptr) const
+    {
+        return !getName(ptr).empty();
+    }
+
     void Class::onHit(const Ptr& ptr, float damage, bool ishealth, const Ptr& object, const Ptr& attacker, const osg::Vec3f& hitPosition, bool successful) const
     {
         throw std::runtime_error("class cannot be hit");
