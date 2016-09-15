@@ -33,7 +33,6 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
     if(actor.getClass().getCreatureStats(actor).isDead())
         return true;
 
-    ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
     const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId); //The target to follow
 
     if(target == MWWorld::Ptr() || !target.getRefData().getCount() || !target.getRefData().isEnabled()  // Really we should be checking whether the target is currently registered
@@ -52,13 +51,9 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
     //Set the target desition from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
-    if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) < 100) { //Stop when you get close
-        actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-        target.getClass().activate(target,actor).get()->execute(actor); //Arrest player
+    if (pathTo(actor, dest, duration, 100)) {
+        target.getClass().activate(target,actor).get()->execute(actor); //Arrest player when reached
         return true;
-    }
-    else {
-        pathTo(actor, dest, duration); //Go to the destination
     }
 
     actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, true); //Make NPC run

@@ -609,7 +609,7 @@ namespace MWClass
                 mwmp::Main::get().getLocalPlayer()->SendAttack(0);
             }
 
-            othercls.onHit(victim, 0.0f, false, weapon, ptr, false);
+            othercls.onHit(victim, 0.0f, false, weapon, ptr, osg::Vec3f(), false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
             return;
         }
@@ -664,15 +664,12 @@ namespace MWClass
         if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage, attackStrength))
             damage = 0;
 
-        if (healthdmg && damage > 0)
-            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
-
         MWMechanics::diseaseContact(victim, ptr);
 
-        othercls.onHit(victim, damage, healthdmg, weapon, ptr, true);
+        othercls.onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true);
     }
 
-    void Npc::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
+    void Npc::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) const
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
 
@@ -689,10 +686,10 @@ namespace MWClass
             setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
-        if(!object.isEmpty())
+        if (!object.isEmpty())
             getCreatureStats(ptr).setLastHitAttemptObject(object.getCellRef().getRefId());
 
-        if(setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
+        if (setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
         {
             const std::string &script = ptr.getClass().getScript(ptr);
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
@@ -700,14 +697,14 @@ namespace MWClass
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
 
-        if(!successful)
+        if (!successful)
         {
             // Missed
             sndMgr->playSound3D(ptr, "miss", 1.0f, 1.0f);
             return;
         }
 
-        if(!object.isEmpty())
+        if (!object.isEmpty())
             getCreatureStats(ptr).setLastHitObject(object.getCellRef().getRefId());
 
 
@@ -717,7 +714,7 @@ namespace MWClass
         if (damage < 0.001f)
             damage = 0;
 
-        if(damage > 0.0f && !attacker.isEmpty())
+        if (damage > 0.0f && !attacker.isEmpty())
         {
             // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
             // something, alert the character controller, scripts, etc.
@@ -748,7 +745,7 @@ namespace MWClass
             else
                 getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
-            if(damage > 0 && ishealth)
+            if (damage > 0 && ishealth)
             {
                 // Hit percentages:
                 // cuirass = 30%
@@ -810,16 +807,18 @@ namespace MWClass
             }
         }
 
-        if(ishealth)
+        if (ishealth)
         {
             if (!attacker.isEmpty())
                 damage = scaleDamage(damage, attacker, ptr);
 
-            if(damage > 0.0f)
+            if (damage > 0.0f)
             {
                 sndMgr->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
                 if (ptr == MWMechanics::getPlayer())
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay();
+                if (!attacker.isEmpty())
+                    MWBase::Environment::get().getWorld()->spawnBloodEffect(ptr, hitPosition);
             }
             MWMechanics::DynamicStat<float> health(getCreatureStats(ptr).getHealth());
             health.setCurrent(health.getCurrent() - damage);

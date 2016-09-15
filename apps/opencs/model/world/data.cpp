@@ -64,7 +64,7 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
   mResourcesManager (resourcesManager), mFallbackMap(fallback),
-  mReader (0), mDialogue (0), mReaderIndex(0), mResourceSystem(new Resource::ResourceSystem(resourcesManager.getVFS()))
+  mReader (0), mDialogue (0), mReaderIndex(1), mResourceSystem(new Resource::ResourceSystem(resourcesManager.getVFS()))
 {
     mResourceSystem->getSceneManager()->setShaderPath((resDir / "shaders").string());
 
@@ -899,8 +899,10 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
 
     mReader = new ESM::ESMReader;
     mReader->setEncoder (&mEncoder);
-    mReader->setIndex(mReaderIndex++);
+    mReader->setIndex((project || !base) ? 0 : mReaderIndex++);
     mReader->open (path.string());
+
+    mContentFileNames.insert(std::make_pair(path.filename().string(), mReader->getIndex()));
 
     mBase = base;
     mProject = project;
@@ -912,6 +914,20 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
         metaData.load (*mReader);
 
         mMetaData.setRecord (0, Record<MetaData> (RecordBase::State_ModifiedOnly, 0, &metaData));
+    }
+
+    // Fix uninitialized master data index
+    for (std::vector<ESM::Header::MasterData>::const_iterator masterData = mReader->getGameFiles().begin();
+        masterData != mReader->getGameFiles().end(); ++masterData)
+    {
+        std::map<std::string, int>::iterator nameResult = mContentFileNames.find(masterData->name);
+        if (nameResult != mContentFileNames.end())
+        {
+            ESM::Header::MasterData& hackedMasterData = const_cast<ESM::Header::MasterData&>(*masterData);
+
+
+            hackedMasterData.index = nameResult->second;
+        }
     }
 
     return mReader->getRecordCount();

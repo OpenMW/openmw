@@ -24,6 +24,7 @@ namespace ESM
 
 namespace MWMechanics
 {
+    const float AI_REACTION_TIME = 0.25f;
 
     class CharacterController;
 
@@ -91,14 +92,29 @@ namespace MWMechanics
             /// Return true if this package should repeat. Currently only used for Wander packages.
             virtual bool getRepeat() const;
 
+            /// Reset pathfinding state
+            void reset();
+
             bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
 
-        protected:
-            /// Causes the actor to attempt to walk to the specified location
-            /** \return If the actor has arrived at his destination **/
-            bool pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Point dest, float duration);
+            /// Return if actor's rotation speed is sufficient to rotate to the destination pathpoint on the run. Otherwise actor should rotate while standing.
+            static bool isReachableRotatingOnTheRun(const MWWorld::Ptr& actor, const ESM::Pathgrid::Point& dest);
 
-            virtual bool doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell);
+        protected:
+            /// Handles path building and shortcutting with obstacles avoiding
+            /** \return If the actor has arrived at his destination **/
+            bool pathTo(const MWWorld::Ptr& actor, const ESM::Pathgrid::Point& dest, float duration, float destTolerance = 0.0f);
+
+            /// Check if there aren't any obstacles along the path to make shortcut possible
+            /// If a shortcut is possible then path will be cleared and filled with the destination point.
+            /// \param destInLOS If not NULL function will return ray cast check result
+            /// \return If can shortcut the path
+            bool shortcutPath(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor, bool *destInLOS);
+
+            /// Check if the way to the destination is clear, taking into account actor speed
+            bool checkWayIsClearForActor(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor);
+
+            virtual bool doesPathNeedRecalc(const ESM::Pathgrid::Point& newDest, const MWWorld::CellStore* currentCell);
 
             void evadeObstacles(const MWWorld::Ptr& actor, float duration, const ESM::Position& pos);
 
@@ -108,11 +124,16 @@ namespace MWMechanics
 
             float mTimer;
 
-            ESM::Pathgrid::Point mPrevDest;
+            osg::Vec3f mLastActorPos;
+
+            short mRotateOnTheRunChecks; // attempts to check rotation to the pathpoint on the run possibility
+
+            bool mIsShortcutting;   // if shortcutting at the moment
+            bool mShortcutProhibited; // shortcutting may be prohibited after unsuccessful attempt
+            ESM::Pathgrid::Point mShortcutFailPos; // position of last shortcut fail
 
         private:
             bool isNearInactiveCell(const ESM::Position& actorPos);
-
     };
 }
 

@@ -464,10 +464,11 @@ if(WIN32)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/Plugin_MyGUI_OpenMW_Resources.dll" DESTINATION ".")
     ENDIF(BUILD_MYGUI_PLUGIN)
 
-    INSTALL(DIRECTORY
-        "${OpenMW_BINARY_DIR}/Release/platforms"
-        "${OpenMW_BINARY_DIR}/resources"
-        DESTINATION ".")
+    IF(DESIRED_QT_VERSION MATCHES 5)
+        INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Release/platforms" DESTINATION ".")
+    ENDIF()
+
+    INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
     FILE(GLOB plugin_dir "${OpenMW_BINARY_DIR}/Release/osgPlugins-*")
     INSTALL(DIRECTORY ${plugin_dir} DESTINATION ".")
 

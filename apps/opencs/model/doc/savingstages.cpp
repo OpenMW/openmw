@@ -321,6 +321,10 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                 {
                     CSMWorld::CellRef refRecord = ref.get();
 
+                    // Check for uninitialized content file
+                    if (!refRecord.mRefNum.hasContentFile())
+                        refRecord.mRefNum.mContentFile = 0;
+
                     // recalculate the ref's cell location
                     std::ostringstream stream;
                     if (!interior)

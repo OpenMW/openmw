@@ -2726,11 +2726,10 @@ namespace MWWorld
         mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed, attackStrength);
     }
 
-    void World::launchMagicBolt (const std::string& model, const std::string &sound, const std::string &spellId,
-                                 float speed, bool stack, const ESM::EffectList& effects,
-                                   const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection)
+    void World::launchMagicBolt (const std::string &spellId, bool stack, const ESM::EffectList& effects,
+                                 const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection)
     {
-        mProjectileManager->launchMagicBolt(model, sound, spellId, speed, stack, effects, caster, sourceName, fallbackDirection);
+        mProjectileManager->launchMagicBolt(spellId, stack, effects, caster, sourceName, fallbackDirection);
     }
 
     const std::vector<std::string>& World::getContentFiles() const
@@ -3184,8 +3183,8 @@ namespace MWWorld
         {
             const ESM::MagicEffect* effect = getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
 
-            if (effectIt->mArea <= 0)
-                continue; // Not an area effect
+            if ((effectIt->mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()) || effectIt->mRange != rangeType)
+                continue; // Not right range type, or not area effect and hit an actor
 
             // Spawn the explosion orb effect
             const ESM::Static* areaStatic;
@@ -3194,7 +3193,13 @@ namespace MWWorld
             else
                 areaStatic = getStore().get<ESM::Static>().find ("VFX_DefaultArea");
 
-            mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, static_cast<float>(effectIt->mArea));
+            if (effectIt->mArea <= 0)
+            {
+                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, 1.0f);
+                continue;
+            }
+            else
+                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, static_cast<float>(effectIt->mArea * 2));              
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             static const std::string schools[] = {

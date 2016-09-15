@@ -2,6 +2,7 @@
 
 #include <cfloat>
 #include <limits>
+#include <iomanip>
 
 #include <boost/format.hpp>
 
@@ -28,41 +29,6 @@
 #include "magiceffects.hpp"
 #include "npcstats.hpp"
 #include "actorutil.hpp"
-
-namespace
-{
-
-    /// Get projectile properties (model, sound and speed) for a spell with the given effects
-    /// If \a model is empty, the spell has no ranged effects and should not spawn a projectile.
-    void getProjectileInfo (const ESM::EffectList& effects, std::string& model, std::string& sound, float& speed)
-    {
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
-            iter!=effects.mList.end(); ++iter)
-        {
-            if (iter->mRange != ESM::RT_Target)
-                continue;
-
-            const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-                iter->mEffectID);
-
-            model = magicEffect->mBolt;
-            if (model.empty())
-                model = "VFX_DefaultBolt";
-
-            static const std::string schools[] = {
-                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-            };
-            if (!magicEffect->mBoltSound.empty())
-                sound = magicEffect->mBoltSound;
-            else
-                sound = schools[magicEffect->mData.mSchool] + " bolt";
-
-            speed = magicEffect->mData.mSpeed;
-            break;
-        }
-    }
-
-}
 
 namespace MWMechanics
 {
@@ -319,6 +285,21 @@ namespace MWMechanics
     {
     }
 
+    void CastSpell::launchMagicBolt (const ESM::EffectList& effects)
+    {        
+        osg::Vec3f fallbackDirection (0,1,0);     
+
+        // Fall back to a "caster to target" direction if we have no other means of determining it
+        // (e.g. when cast by a non-actor)
+        if (!mTarget.isEmpty())
+            fallbackDirection =
+                osg::Vec3f(mTarget.getRefData().getPosition().asVec3())-
+                osg::Vec3f(mCaster.getRefData().getPosition().asVec3());
+            
+        MWBase::Environment::get().getWorld()->launchMagicBolt(mId, false, effects,
+                                                   mCaster, mSourceName, fallbackDirection);
+    }
+
     void CastSpell::inflict(const MWWorld::Ptr &target, const MWWorld::Ptr &caster,
                             const ESM::EffectList &effects, ESM::RangeType range, bool reflected, bool exploded)
     {
@@ -358,7 +339,6 @@ namespace MWMechanics
 
         ESM::EffectList reflectedEffects;
         std::vector<ActiveSpells::ActiveEffect> appliedLastingEffects;
-        bool firstAppliedEffect = true;
         bool anyHarmfulEffect = false;
 
         // HACK: cache target's magic effects here, and add any applied effects to it. Use the cached effects for determining resistance.
@@ -547,20 +527,15 @@ namespace MWMechanics
 
                 if (target.getClass().isActor() || magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)
                 {
-                    // Play sound, only for the first effect
-                    if (firstAppliedEffect)
-                    {
-                        static const std::string schools[] = {
-                            "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-                        };
+                    static const std::string schools[] = {
+                        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+                    };
 
-                        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                        if(!magicEffect->mHitSound.empty())
-                            sndMgr->playSound3D(target, magicEffect->mHitSound, 1.0f, 1.0f);
-                        else
-                            sndMgr->playSound3D(target, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
-                        firstAppliedEffect = false;
-                    }
+                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                    if(!magicEffect->mHitSound.empty())
+                        sndMgr->playSound3D(target, magicEffect->mHitSound, 1.0f, 1.0f);
+                    else
+                        sndMgr->playSound3D(target, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
 
                     // Add VFX
                     const ESM::Static* castStatic;
@@ -596,7 +571,7 @@ namespace MWMechanics
 
         // Notify the target actor they've been hit
         if (anyHarmfulEffect && target.getClass().isActor() && target != caster && !caster.isEmpty() && caster.getClass().isActor())
-            target.getClass().onHit(target, 0.f, true, MWWorld::Ptr(), caster, true);
+            target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
     }
 
     bool CastSpell::applyInstantEffect(const MWWorld::Ptr &target, const MWWorld::Ptr &caster, const MWMechanics::EffectKey& effect, float magnitude)
@@ -793,17 +768,7 @@ namespace MWMechanics
         }
 
         if (launchProjectile)
-        {
-            std::string projectileModel;
-            std::string sound;
-            float speed = 0;
-            getProjectileInfo(enchantment->mEffects, projectileModel, sound, speed);
-            if (!projectileModel.empty())
-                MWBase::Environment::get().getWorld()->launchMagicBolt(projectileModel, sound, mId, speed,
-                                                                   false, enchantment->mEffects, mCaster, mSourceName,
-                                                                       // Not needed, enchantments can only be cast by actors
-                                                                       osg::Vec3f(1,0,0));
-        }
+            launchMagicBolt(enchantment->mEffects);
         else if (!mTarget.isEmpty())
             inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Target);
 
@@ -909,28 +874,9 @@ namespace MWMechanics
         inflict(mCaster, mCaster, spell->mEffects, ESM::RT_Self);
 
         if (!mTarget.isEmpty())
-        {
             inflict(mTarget, mCaster, spell->mEffects, ESM::RT_Touch);
-        }
 
-
-        std::string projectileModel;
-        std::string sound;
-        float speed = 0;
-        getProjectileInfo(spell->mEffects, projectileModel, sound, speed);
-        if (!projectileModel.empty())
-        {
-            osg::Vec3f fallbackDirection (0,1,0);
-            // Fall back to a "caster to target" direction if we have no other means of determining it
-            // (e.g. when cast by a non-actor)
-            if (!mTarget.isEmpty())
-                fallbackDirection =
-                   osg::Vec3f(mTarget.getRefData().getPosition().asVec3())-
-                   osg::Vec3f(mCaster.getRefData().getPosition().asVec3());
-
-            MWBase::Environment::get().getWorld()->launchMagicBolt(projectileModel, sound, mId, speed,
-                       false, spell->mEffects, mCaster, mSourceName, fallbackDirection);
-        }
+        launchMagicBolt(spell->mEffects);
 
         return true;
     }
@@ -1003,36 +949,39 @@ namespace MWMechanics
        
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
-        const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
 
-        const ESM::MagicEffect *effect;
-        effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
-
-        MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
-
-        if (mCaster.getClass().isActor()) // TODO: Non-actors (except for large statics?) should also create a spell cast vfx
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter = spell->mEffects.mList.begin();
+            iter != spell->mEffects.mList.end(); ++iter)
         {
-            const ESM::Static* castStatic;
-            if (!effect->mCasting.empty())
-                castStatic = store.get<ESM::Static>().find (effect->mCasting);
+            const ESM::MagicEffect *effect;
+            effect = store.get<ESM::MagicEffect>().find(iter->mEffectID);
+
+            MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
+
+            if (mCaster.getClass().isActor()) // TODO: Non-actors (except for large statics?) should also create a spell cast vfx
+            {
+                const ESM::Static* castStatic;
+                if (!effect->mCasting.empty())
+                    castStatic = store.get<ESM::Static>().find (effect->mCasting);
+                else
+                    castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
+
+                animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex);
+            }
+
+            if (!mCaster.getClass().isActor())
+                animation->addSpellCastGlow(effect);
+
+            static const std::string schools[] = {
+                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+            };
+
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            if(!effect->mCastSound.empty())
+                sndMgr->playSound3D(mCaster, effect->mCastSound, 1.0f, 1.0f);
             else
-                castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
-
-            animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex);
+                sndMgr->playSound3D(mCaster, schools[effect->mData.mSchool]+" cast", 1.0f, 1.0f);
         }
-
-        if (!mCaster.getClass().isActor())
-            animation->addSpellCastGlow(effect);
-
-        static const std::string schools[] = {
-            "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-        };
-
-        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        if(!effect->mCastSound.empty())
-            sndMgr->playSound3D(mCaster, effect->mCastSound, 1.0f, 1.0f);
-        else
-            sndMgr->playSound3D(mCaster, schools[effect->mData.mSchool]+" cast", 1.0f, 1.0f);
     }
 
     int getEffectiveEnchantmentCastCost(float castCost, const MWWorld::Ptr &actor)

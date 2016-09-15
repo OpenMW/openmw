@@ -1208,7 +1208,6 @@ bool CharacterController::updateWeaponState()
         if(mUpperBodyState == UpperCharState_WeapEquiped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
-            mAttackType.clear();
             if(mWeaponType == WeapType_Spell)
             {
                 // Unset casting flag, otherwise pressing the mouse button down would
@@ -1237,19 +1236,27 @@ bool CharacterController::updateWeaponState()
                     cast.playSpellCastingEffects(spellid);
 
                     const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
-                    const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
+                    
+                    const ESM::ENAMstruct &lastEffect = spell->mEffects.mList.at(spell->mEffects.mList.size() - 1);
 
                     const ESM::MagicEffect *effect;
-                    effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
+
+                    effect = store.get<ESM::MagicEffect>().find(lastEffect.mEffectID); // use last effect of list for color of VFX_Hands
 
                     const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
-                    if (mAnimation->getNode("Bip01 L Hand"))
-                        mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 L Hand", effect->mParticle);
 
-                    if (mAnimation->getNode("Bip01 R Hand"))
-                        mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 R Hand", effect->mParticle);
+                    for (size_t iter = 0; iter < spell->mEffects.mList.size(); ++iter) // play hands vfx for each effect
+                    {
+                        if (mAnimation->getNode("Bip01 L Hand"))
+                            mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 L Hand", effect->mParticle);
 
-                    switch(effectentry.mRange)
+                        if (mAnimation->getNode("Bip01 R Hand"))
+                            mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 R Hand", effect->mParticle);
+                    }
+
+                    const ESM::ENAMstruct &firstEffect = spell->mEffects.mList.at(0); // first effect used for casting animation
+
+                    switch(firstEffect.mRange)
                     {
                         case 0: mAttackType = "self"; break;
                         case 1: mAttackType = "touch"; break;
@@ -1309,14 +1316,17 @@ bool CharacterController::updateWeaponState()
                 {
                     if (isWeapon)
                     {
-                        if(mPtr == getPlayer() &&
-                                Settings::Manager::getBool("best attack", "Game"))
+                        if(mPtr == getPlayer())
                         {
-                            MWWorld::ContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                            mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
+                            if (Settings::Manager::getBool("best attack", "Game"))        
+                            {
+                                MWWorld::ContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                                mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
+                            }
+                            else
+                                setAttackTypeBasedOnMovement();
                         }
-                        else
-                            setAttackTypeBasedOnMovement();
+                        // else if (mPtr != getPlayer()) use mAttackType already set by AiCombat
                     }
                     else
                         setAttackTypeRandomly();
@@ -1761,7 +1771,7 @@ void CharacterController::update(float duration)
                 float realHealthLost = static_cast<float>(healthLost * (1.0f - 0.25f * fatigueTerm));
                 health.setCurrent(health.getCurrent() - realHealthLost);
                 cls.getCreatureStats(mPtr).setHealth(health);
-                cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), true);
+                cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), osg::Vec3f(), true);
 
                 const int acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
                 if (healthLost > (acrobaticsSkill * fatigueTerm))
@@ -2225,6 +2235,11 @@ bool CharacterController::isSneaking() const
 void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
 {
     mAttackingOrSpell = attackingOrSpell;
+}
+
+void CharacterController::setAIAttackType(std::string attackType)
+{
+    mAttackType = attackType;
 }
 
 bool CharacterController::readyToPrepareAttack() const

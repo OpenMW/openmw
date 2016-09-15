@@ -1,5 +1,7 @@
 #include "projectilemanager.hpp"
 
+#include <iomanip>
+
 #include <osg/PositionAttitudeTransform>
 
 #include <components/esm/esmwriter.hpp>
@@ -33,6 +35,56 @@
 
 #include "../mwphysics/physicssystem.hpp"
 
+namespace
+{
+    ESM::EffectList getMagicBoltData(std::vector<std::string>& projectileIDs, std::vector<std::string>& sounds, float& speed, const ESM::EffectList& effects)
+    {
+        int count = 0;
+        speed = 0.0f;
+        ESM::EffectList projectileEffects;
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
+            iter!=effects.mList.end(); ++iter)
+        {
+            const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
+                iter->mEffectID);
+
+            // All the projectiles should use the same speed. From observations in the
+            // original engine, this seems to be the average of the constituent effects.
+            speed += magicEffect->mData.mSpeed;
+            count++;
+
+            if (iter->mRange != ESM::RT_Target)
+                continue;
+
+            if (magicEffect->mBolt.empty())
+                projectileIDs.push_back("VFX_DefaultBolt");
+            else
+                projectileIDs.push_back(magicEffect->mBolt);
+
+            static const std::string schools[] = {
+                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+            };
+            if (!magicEffect->mBoltSound.empty())
+                sounds.push_back(magicEffect->mBoltSound);
+            else
+                sounds.push_back(schools[magicEffect->mData.mSchool] + " bolt");
+            projectileEffects.mList.push_back(*iter);
+        }
+        
+        if (count != 0)
+            speed /= count;
+        
+        if (projectileEffects.mList.size() > 1) // insert a VFX_Multiple projectile if there are multiple projectile effects
+        {
+            std::ostringstream ID;
+            ID << "VFX_Multiple" << effects.mList.size();
+            std::vector<std::string>::iterator it;
+            it = projectileIDs.begin();
+            it = projectileIDs.insert(it, ID.str());
+        }
+        return projectileEffects;
+    }
+}
 
 namespace MWWorld
 {
@@ -94,6 +146,18 @@ namespace MWWorld
 
         mResourceSystem->getSceneManager()->getInstance(model, attachTo);
 
+        if (state.mIdMagic.size() > 1)
+            for (size_t iter = 1; iter != state.mIdMagic.size(); ++iter)
+            {
+                std::ostringstream nodeName;
+                nodeName << "Dummy" << std::setw(2) << std::setfill('0') << iter;
+                const ESM::Weapon* weapon = MWBase::Environment::get().getWorld()->getStore().get<ESM::Weapon>().find (state.mIdMagic.at(iter));
+                SceneUtil::FindByNameVisitor findVisitor(nodeName.str());
+                attachTo->accept(findVisitor);
+                if (findVisitor.mFoundNode)
+                    mResourceSystem->getSceneManager()->getInstance("meshes\\" + weapon->mModel, findVisitor.mFoundNode);
+            }
+
         SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
         state.mNode->accept(disableFreezeOnCullVisitor);
 
@@ -112,10 +176,8 @@ namespace MWWorld
         state.mEffectAnimationTime->addTime(duration);
     }
 
-    void ProjectileManager::launchMagicBolt(const std::string &model, const std::string &sound,
-                                            const std::string &spellId, float speed, bool stack,
-                                            const ESM::EffectList &effects, const Ptr &caster, const std::string &sourceName,
-                                            const osg::Vec3f& fallbackDirection)
+    void ProjectileManager::launchMagicBolt(const std::string &spellId, bool stack, const ESM::EffectList &effects, const Ptr &caster,
+                                             const std::string &sourceName, const osg::Vec3f& fallbackDirection)
     {
         osg::Vec3f pos = caster.getRefData().getPosition().asVec3();
         if (caster.getClass().isActor())
@@ -137,33 +199,31 @@ namespace MWWorld
 
         MagicBoltState state;
         state.mSourceName = sourceName;
-        state.mId = model;
         state.mSpellId = spellId;
         state.mCasterHandle = caster;
         if (caster.getClass().isActor())
             state.mActorId = caster.getClass().getCreatureStats(caster).getActorId();
         else
             state.mActorId = -1;
-        state.mSpeed = speed;
         state.mStack = stack;
-        state.mSoundId = sound;
 
-        // Only interested in "on target" effects
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
-            iter!=effects.mList.end(); ++iter)
-        {
-            if (iter->mRange == ESM::RT_Target)
-                state.mEffects.mList.push_back(*iter);
-        }
+        state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, effects);
 
-        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), model);
+        // Non-projectile should have been removed by getMagicBoltData
+        if (state.mEffects.mList.empty())
+            return;
+
+        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), state.mIdMagic.at(0));
         MWWorld::Ptr ptr = ref.getPtr();
 
         createModel(state, ptr.getClass().getModel(ptr), pos, orient, true);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        state.mSound = sndMgr->playSound3D(pos, sound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
-
+        for (size_t it = 0; it != state.mSoundIds.size(); it++)
+        {
+            state.mSounds.push_back(sndMgr->playSound3D(pos, state.mSoundIds.at(it), 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop));
+        }
+            
         mMagicBolts.push_back(state);
     }
 
@@ -173,7 +233,7 @@ namespace MWWorld
         state.mActorId = actor.getClass().getCreatureStats(actor).getActorId();
         state.mBowId = bow.getCellRef().getRefId();
         state.mVelocity = orient * osg::Vec3f(0,1,0) * speed;
-        state.mId = projectile.getCellRef().getRefId();
+        state.mIdArrow = projectile.getCellRef().getRefId();
         state.mCasterHandle = actor;
         state.mAttackStrength = attackStrength;
 
@@ -205,8 +265,10 @@ namespace MWWorld
             osg::Vec3f pos(it->mNode->getPosition());
             osg::Vec3f newPos = pos + direction * duration * speed;
 
-            if (it->mSound.get())
-                it->mSound->setPosition(newPos);
+            for (size_t soundIter = 0; soundIter != it->mSounds.size(); soundIter++)
+            {
+                it->mSounds.at(soundIter)->setPosition(newPos);
+            }
 
             it->mNode->setPosition(newPos);
 
@@ -246,7 +308,11 @@ namespace MWWorld
                 MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, result.mHitObject,
                                                                     ESM::RT_Target, it->mSpellId, it->mSourceName);
 
-                MWBase::Environment::get().getSoundManager()->stopSound(it->mSound);
+                for (size_t soundIter = 0; soundIter != it->mSounds.size(); soundIter++)
+                {
+                    MWBase::Environment::get().getSoundManager()->stopSound(it->mSounds.at(soundIter));
+                }
+
                 mParent->removeChild(it->mNode);
 
                 it = mMagicBolts.erase(it);
@@ -286,7 +352,7 @@ namespace MWWorld
             {
                 if (result.mHit)
                 {
-                    MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mId);
+                    MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
 
                     // Try to get a Ptr to the bow that was used. It might no longer exist.
                     MWWorld::Ptr bow = projectileRef.getPtr();
@@ -326,7 +392,10 @@ namespace MWWorld
         for (std::vector<MagicBoltState>::iterator it = mMagicBolts.begin(); it != mMagicBolts.end(); ++it)
         {
             mParent->removeChild(it->mNode);
-            MWBase::Environment::get().getSoundManager()->stopSound(it->mSound);
+            for (size_t soundIter = 0; soundIter != it->mSounds.size(); soundIter++)
+            {
+                MWBase::Environment::get().getSoundManager()->stopSound(it->mSounds.at(soundIter));
+            }
         }
         mMagicBolts.clear();
     }
@@ -338,7 +407,7 @@ namespace MWWorld
             writer.startRecord(ESM::REC_PROJ);
 
             ESM::ProjectileState state;
-            state.mId = it->mId;
+            state.mId = it->mIdArrow;
             state.mPosition = ESM::Vector3(osg::Vec3f(it->mNode->getPosition()));
             state.mOrientation = ESM::Quaternion(osg::Quat(it->mNode->getAttitude()));
             state.mActorId = it->mActorId;
@@ -357,14 +426,14 @@ namespace MWWorld
             writer.startRecord(ESM::REC_MPRJ);
 
             ESM::MagicBoltState state;
-            state.mId = it->mId;
+            state.mId = it->mIdMagic.at(0);
             state.mPosition = ESM::Vector3(osg::Vec3f(it->mNode->getPosition()));
             state.mOrientation = ESM::Quaternion(osg::Quat(it->mNode->getAttitude()));
             state.mActorId = it->mActorId;
 
             state.mSpellId = it->mSpellId;
             state.mEffects = it->mEffects;
-            state.mSound = it->mSoundId;
+            state.mSound = it->mSoundIds.at(0);
             state.mSourceName = it->mSourceName;
             state.mSpeed = it->mSpeed;
             state.mStack = it->mStack;
@@ -386,7 +455,7 @@ namespace MWWorld
             state.mActorId = esm.mActorId;
             state.mBowId = esm.mBowId;
             state.mVelocity = esm.mVelocity;
-            state.mId = esm.mId;
+            state.mIdArrow = esm.mId;
             state.mAttackStrength = esm.mAttackStrength;
 
             std::string model;
@@ -413,17 +482,20 @@ namespace MWWorld
 
             MagicBoltState state;
             state.mSourceName = esm.mSourceName;
-            state.mId = esm.mId;
+            state.mIdMagic.push_back(esm.mId);
             state.mSpellId = esm.mSpellId;
             state.mActorId = esm.mActorId;
-            state.mSpeed = esm.mSpeed;
             state.mStack = esm.mStack;
-            state.mEffects = esm.mEffects;
+            state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, esm.mEffects);
+            state.mSpeed = esm.mSpeed; // speed is derived from non-projectile effects as well as
+                                       // projectile effects, so we can't calculate it from the save
+                                       // file's effect list, which is already trimmed of non-projectile
+                                       // effects. We need to use the stored value.
 
             std::string model;
             try
             {
-                MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), esm.mId);
+                MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), state.mIdMagic.at(0));
                 MWWorld::Ptr ptr = ref.getPtr();
                 model = ptr.getClass().getModel(ptr);
             }
@@ -435,9 +507,12 @@ namespace MWWorld
             createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true);
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            state.mSound = sndMgr->playSound3D(esm.mPosition, esm.mSound, 1.0f, 1.0f,
-                                               MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
-            state.mSoundId = esm.mSound;
+            
+            for (size_t soundIter = 0; soundIter != state.mSoundIds.size(); soundIter++)
+            {
+                state.mSounds.push_back(sndMgr->playSound3D(esm.mPosition, state.mSoundIds.at(soundIter), 1.0f, 1.0f,
+                                        MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop));
+            }
 
             mMagicBolts.push_back(state);
             return true;

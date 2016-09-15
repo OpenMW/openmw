@@ -123,6 +123,8 @@ namespace CSMWorld
 
             std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
+            std::map<std::string, int> mContentFileNames;
+
             // not implemented
             Data (const Data&);
             Data& operator= (const Data&);
