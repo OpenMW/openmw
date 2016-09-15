@@ -130,6 +130,10 @@ namespace MWWorld
             ///< Play the appropriate sound for a blocked attack, depending on the currently equipped shield
             /// (default implementation: throw an exception)
 
+            virtual bool canBeActivated(const Ptr& ptr) const;
+            ///< \return Can the player activate this object?
+            /// (default implementation: true if object's user-readable name is not empty, false otherwise)
+
             virtual boost::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
             ///< Generate action for activation (default implementation: return a null action).
 

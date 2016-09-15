@@ -220,16 +220,8 @@ namespace MWWorld
         if (toActivate.isEmpty())
             return;
 
-        if (toActivate.getClass().getName(toActivate) == "") // objects without name presented to user can never be activated
+        if (!toActivate.getClass().canBeActivated(toActivate))
             return;
-
-        if (toActivate.getClass().isActor())
-        {
-            MWMechanics::CreatureStats &stats = toActivate.getClass().getCreatureStats(toActivate);
-
-            if (stats.getAiSequence().isInCombat() && !stats.isDead())
-                return;
-        }
 
         MWBase::Environment::get().getWorld()->activate(toActivate, player);
     }

@@ -104,11 +104,6 @@ namespace MWClass
             virtual void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const;
             ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation: list getModel().
 
-            virtual bool
-            isActor() const {
-                return true;
-            }
-
             virtual bool isBipedal (const MWWorld::ConstPtr &ptr) const;
             virtual bool canFly (const MWWorld::ConstPtr &ptr) const;
             virtual bool canSwim (const MWWorld::ConstPtr &ptr) const;
