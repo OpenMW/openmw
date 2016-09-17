@@ -413,7 +413,10 @@ namespace MWGui
         int TextElement::currentFontHeight() const
         {
             std::string fontName(mTextStyle.mFont == "Default" ? MyGUI::FontManager::getInstance().getDefaultFont() : mTextStyle.mFont);
-            return MyGUI::FontManager::getInstance().getByName(fontName)->getDefaultHeight();
+            MyGUI::IFont* font = MyGUI::FontManager::getInstance().getByName(fontName);
+            if (!font)
+                return 0;
+            return font->getDefaultHeight();
         }
 
         int TextElement::getHeight()
