@@ -369,7 +369,7 @@ namespace NifOsg
             return created;
         }
 
-        void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<int>& boundTextures, int animflags, bool isRootNode)
+        void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<int>& boundTextures, int animflags)
         {
             const Nif::PropertyList& props = nifNode->props;
             bool foundFirstRootTexturingProperty = false;
@@ -382,7 +382,7 @@ namespace NifOsg
                     // effect "particle texture" is used. For non-root nodes we keep setting until we have the highest
                     // numbered one, which is the one that displays in the game and can be overridden if it matches the
                     // lowest one on the root.
-                    if (!foundFirstRootTexturingProperty && isRootNode && props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
+                    if (!foundFirstRootTexturingProperty && nifNode->parent == NULL && props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
                     {
                         int index = props[i].getPtr()->recIndex;
                         applyTo->setUserValue("overrideIndex", index);  
@@ -651,7 +651,7 @@ namespace NifOsg
 
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
-            applyNodeProperties(nifNode, node, composite, imageManager, boundTextures, animflags, node == rootNode);
+            applyNodeProperties(nifNode, node, composite, imageManager, boundTextures, animflags);
 
             if (nifNode->recType == Nif::RC_NiTriShape && !skipMeshes)
             {
