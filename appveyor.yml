@@ -8,8 +8,8 @@ branches:
 
 environment:
     matrix:
-        - msvc: 2013
-#       - msvc: 2015
+#       - msvc: 2013
+        - msvc: 2015
 
 platform:
     - Win32
