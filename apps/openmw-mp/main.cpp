@@ -105,8 +105,8 @@ int main(int argc, char *argv[])
     loadSettings(mgr);
 
     int logLevel = mgr.getInt("loglevel", "General");
-    if (logLevel < Log::LOG_INFO || logLevel > Log::LOG_FATAL)
-        logLevel = Log::LOG_INFO;
+    if (logLevel < Log::LOG_VERBOSE || logLevel > Log::LOG_FATAL)
+        logLevel = Log::LOG_VERBOSE;
 
     // Some objects used to redirect cout and cerr
     // Scope must be here, so this still works inside the catch block for logging exceptions
