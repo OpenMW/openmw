@@ -123,6 +123,7 @@ Programmers
     smbas
     Stefan Galowicz (bogglez)
     Stanislav Bobrov (Jiub)
+    stil-t
     svaante
     Sylvain Thesnieres (Garvek)
     t6
