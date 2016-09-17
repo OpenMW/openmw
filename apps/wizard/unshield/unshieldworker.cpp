@@ -302,7 +302,7 @@ bool Wizard::UnshieldWorker::copyDirectory(const QString &source, const QString 
 
 bool Wizard::UnshieldWorker::installFile(const QString &fileName, const QString &path, Qt::MatchFlags flags, bool keepSource)
 {
-    return installFiles(fileName, path, flags, true, keepSource);
+    return installFiles(fileName, path, flags, keepSource, true);
 }
 
 bool Wizard::UnshieldWorker::installFiles(const QString &fileName, const QString &path, Qt::MatchFlags flags, bool keepSource, bool single)

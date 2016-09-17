@@ -38,8 +38,7 @@ namespace NifOsg
         // Decomposing the original components from the 4x4 matrix isn't possible, which causes
         // problems when a KeyframeController wants to change only one of these components. So
         // we store the scale and rotation components separately here.
-        // Note for a cleaner solution it would be possible to write a custom Transform node,
-        // but then we have to fork osgAnimation :/
+        // Note for a cleaner solution it would be possible to write a custom Transform node
         float mScale;
         Nif::Matrix3 mRotationScale;
     };
