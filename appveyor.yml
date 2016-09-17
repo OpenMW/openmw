@@ -9,15 +9,15 @@ branches:
 environment:
     matrix:
         - msvc: 2013
-        - msvc: 2015
+#       - msvc: 2015
 
 platform:
     - Win32
-#   - x64
+    - x64
 
 configuration:
-    - Debug
-#   - Release
+#   - Debug
+    - Release
 
 # For the Qt, Boost, CMake, etc installs
 os: Visual Studio 2015
