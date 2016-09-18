@@ -46,12 +46,15 @@ public:
     void SetID(unsigned short id);
 
     bool isHandshaked();
-
     void Handshake();
+
+    void Loaded();
+    bool isLoaded();
 
     virtual ~Player();
 private:
     bool handshake;
+    bool loaded;
 };
 
 #endif //OPENMW_PLAYER_HPP

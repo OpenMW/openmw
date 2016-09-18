@@ -64,6 +64,7 @@ std::map<RakNet::RakNetGUID, Player*> *Players::GetPlayers()
 Player::Player(RakNet::RakNetGUID id) : BasePlayer(id)
 {
     handshake = false;
+    loaded = false;
 }
 
 Player::~Player()
@@ -91,6 +92,15 @@ bool Player::isHandshaked()
     return handshake;
 }
 
+void Player::Loaded()
+{
+    loaded = true;
+}
+
+bool Player::isLoaded()
+{
+    return loaded;
+}
 
 Player *Players::GetPlayer(unsigned short id)
 {
