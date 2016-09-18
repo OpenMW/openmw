@@ -610,14 +610,14 @@ fi
 		echo Done.
 	else
 		QT_SDK="C:/Qt/5.7/msvc${MSVC_YEAR}${SUFFIX}"
-		
+
 		cd $QT_SDK
 
 		add_cmake_opts -DDESIRED_QT_VERSION=5 \
 			-DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
 			-DCMAKE_PREFIX_PATH="$QT_SDK"
 
-		add_runtime_dlls "$(pwd)/bin/lib"{EGL,GLESv2}${SUFFIX}.dll \
+		add_runtime_dlls "$(pwd)/bin/lib"{EGL,GLESv2}.dll \
 			"$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${SUFFIX}.dll
 		add_qt_platform_dlls "$(pwd)/plugins/platforms/qwindows${SUFFIX}.dll"
 
