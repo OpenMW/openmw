@@ -970,12 +970,12 @@ Resource::ResourceSystem* NpcAnimation::getResourceSystem()
     return mResourceSystem;
 }
 
-void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound)
+void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew)
 {
     // During first auto equip, we don't play any sounds.
     // Basically we don't want sounds when the actor is first loaded,
     // the items should appear as if they'd always been equipped.
-    if (playSound)
+    if (isNew)
     {
         static const std::string schools[] = {
             "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
@@ -994,7 +994,7 @@ void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, boo
         bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
         // Don't play particle VFX unless the effect is new or it should be looping.
         if (isNew || loop)
-            addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
+            addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "", magicEffect->mParticle);
     }
 }
 

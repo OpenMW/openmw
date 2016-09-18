@@ -91,15 +91,17 @@ namespace MWGui
 
         if (mSaveList->getItemCount() == 0)
         {
-            // The character might be deleted now
             size_t previousIndex = mCharacterSelection->getIndexSelected();
-            open();
+            mCurrentCharacter = NULL;
+            mCharacterSelection->removeItemAt(previousIndex);
             if (mCharacterSelection->getItemCount())
             {
                 size_t nextCharacter = std::min(previousIndex, mCharacterSelection->getItemCount()-1);
                 mCharacterSelection->setIndexSelected(nextCharacter);
                 onCharacterSelected(mCharacterSelection, nextCharacter);
             }
+            else
+                fillSaveList();
         }
     }
 

@@ -32,7 +32,7 @@ namespace MWWorld
          *              If it isn't new, non-looping VFX should not be played.
          * @param playSound Play effect sound?
          */
-        virtual void permanentEffectAdded (const ESM::MagicEffect *magicEffect, bool isNew, bool playSound) {}
+        virtual void permanentEffectAdded (const ESM::MagicEffect *magicEffect, bool isNew) {}
 
     };
 

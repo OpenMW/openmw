@@ -3166,7 +3166,7 @@ namespace MWWorld
         modelName << roll;
         std::string model = "meshes\\" + getFallback()->getFallbackString(modelName.str());
 
-        mRendering->spawnEffect(model, texture, worldPosition);
+        mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
     }
 
     void World::spawnEffect(const std::string &model, const std::string &textureOverride, const osg::Vec3f &worldPos)
@@ -3183,7 +3183,7 @@ namespace MWWorld
         {
             const ESM::MagicEffect* effect = getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
 
-            if ((effectIt->mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()) || effectIt->mRange != rangeType)
+            if (effectIt->mRange != rangeType || (effectIt->mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()))
                 continue; // Not right range type, or not area effect and hit an actor
 
             // Spawn the explosion orb effect
@@ -3193,13 +3193,15 @@ namespace MWWorld
             else
                 areaStatic = getStore().get<ESM::Static>().find ("VFX_DefaultArea");
 
+            std::string texture = effect->mParticle;
+
             if (effectIt->mArea <= 0)
             {
-                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, 1.0f);
+                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, 1.0f);
                 continue;
             }
             else
-                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, static_cast<float>(effectIt->mArea * 2));              
+                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, static_cast<float>(effectIt->mArea * 2));              
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             static const std::string schools[] = {

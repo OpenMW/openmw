@@ -6,6 +6,7 @@
 #include <osg/Array>
 #include <osg/LOD>
 #include <osg/TexGen>
+#include <osg/ValueObject>
 
 // resource
 #include <components/misc/stringops.hpp>
@@ -276,11 +277,13 @@ namespace NifOsg
     public:
         /// @param filename used for warning messages.
         LoaderImpl(const std::string& filename)
-            : mFilename(filename)
+            : mFilename(filename), mFirstRootTextureIndex(-1), mFoundFirstRootTexturingProperty(false)
         {
 
         }
         std::string mFilename;
+        size_t mFirstRootTextureIndex;
+        bool mFoundFirstRootTexturingProperty;
 
         static void loadKf(Nif::NIFFilePtr nif, KeyframeHolder& target)
         {
@@ -371,10 +374,24 @@ namespace NifOsg
         void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<int>& boundTextures, int animflags)
         {
             const Nif::PropertyList& props = nifNode->props;
-            for (size_t i = 0; i <props.length();++i)
+            for (size_t i = 0; i <props.length(); ++i)
             {
                 if (!props[i].empty())
+                {
+                    // Get the lowest numbered recIndex of the NiTexturingProperty root node.
+                    // This is what is overridden when a spell effect "particle texture" is used.
+                    if (nifNode->parent == NULL && !mFoundFirstRootTexturingProperty && props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
+                    {
+                        mFirstRootTextureIndex = props[i].getPtr()->recIndex;
+                        mFoundFirstRootTexturingProperty = true;
+                    }
+                    else if (props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
+                    {
+                        if (props[i].getPtr()->recIndex == mFirstRootTextureIndex)
+                            applyTo->setUserValue("overrideFx", 1);                
+                    }
                     handleProperty(props[i].getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
+                }              
             }
         }
 

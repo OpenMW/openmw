@@ -138,7 +138,7 @@ namespace MWRender
 
         SkyManager* getSkyManager();
 
-        void spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale = 1.f);
+        void spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale = 1.f, bool isMagicVFX = true);
 
         /// Clear all savegame-specific data
         void clear();
