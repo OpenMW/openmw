@@ -618,8 +618,8 @@ fi
 			-DCMAKE_PREFIX_PATH="$QT_SDK"
 
 		add_runtime_dlls "$(pwd)/bin/lib"{EGL,GLESv2}.dll \
-			"$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${SUFFIX}.dll
-		add_qt_platform_dlls "$(pwd)/plugins/platforms/qwindows${SUFFIX}.dll"
+			"$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}.dll
+		add_qt_platform_dlls "$(pwd)/plugins/platforms/qwindows.dll"
 
 		echo Done.
 	fi
