@@ -644,9 +644,9 @@ void OMW::Engine::go()
     ToUTF8::Utf8Encoder encoder (mEncoding);
     mEncoder = &encoder;
 
-
+    mwmp::Main::Init(mContentFiles);
     prepareEngine (settings);
-    mwmp::Main::Create();
+    mwmp::Main::PostInit();
     mSkipMenu = true;
 
     if (!mSaveGameFile.empty())
