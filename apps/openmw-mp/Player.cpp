@@ -92,12 +92,12 @@ bool Player::isHandshaked()
     return handshake;
 }
 
-void Player::Loaded()
+void Player::Loaded(int state)
 {
-    loaded = true;
+    loaded = state;
 }
 
-bool Player::isLoaded()
+int Player::LoadedState()
 {
     return loaded;
 }

@@ -49,15 +49,6 @@ void Networking::Update(RakNet::Packet *packet)
 
     Player *player = Players::GetPlayer(packet->guid);
 
-    if (player == 0)
-    {
-        controller->GetPacket(ID_HANDSHAKE)->RequestData(packet->guid);
-        Players::NewPlayer(packet->guid);
-        player = Players::GetPlayer(packet->guid);
-        controller->GetPacket(ID_USER_MYID)->Send(Players::GetPlayer(packet->guid), false);
-        return;
-    }
-
     RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
 
     {
@@ -67,6 +58,15 @@ void Networking::Update(RakNet::Packet *packet)
     }
 
     controller->SetStream(&bsIn, 0);
+
+    if (player == 0)
+    {
+        controller->GetPacket(ID_HANDSHAKE)->RequestData(packet->guid);
+        Players::NewPlayer(packet->guid);
+        player = Players::GetPlayer(packet->guid);
+        controller->GetPacket(ID_USER_MYID)->Send(Players::GetPlayer(packet->guid), false);
+        return;
+    }
 
     BasePacket *myPacket = controller->GetPacket(packet->data[0]);
 
@@ -109,7 +109,7 @@ void Networking::Update(RakNet::Packet *packet)
 
     if (packet->data[0] == ID_LOADED)
     {
-        player->Loaded();
+        player->Loaded(Player::LOADED);
 
         static constexpr unsigned int ident = Script::CallbackIdentity("OnPlayerConnect");
         Script::CallBackReturn<ident> result = true;
@@ -131,12 +131,13 @@ void Networking::Update(RakNet::Packet *packet)
         myPacket->Send(player, true);
     }
 
-    if(!player->isLoaded())
+    if (player->LoadedState() == Player::NOTLOADED)
         return;
-    else if(player->BirthSign()->empty())
+    else if (player->LoadedState() == Player::LOADED)
     {
-        (*player->BirthSign()) = "a";
+        player->Loaded(Player::POSTLOADED);
         NewPlayer(packet->guid);
+        return;
     }
 
     switch (packet->data[0])

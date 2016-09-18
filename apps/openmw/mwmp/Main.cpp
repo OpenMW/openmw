@@ -91,11 +91,11 @@ void Main::Configure(const boost::program_options::variables_map &variables)
     Main::addr = variables["connect"].as<string>();
 }
 
-Settings::CategorySettingValueMap saveUserSettings;
-Settings::CategorySettingValueMap saveDefaultSettings;
-Settings::CategorySettingVector saveChangedSettings;
+static Settings::CategorySettingValueMap saveUserSettings;
+static Settings::CategorySettingValueMap saveDefaultSettings;
+static Settings::CategorySettingVector saveChangedSettings;
 
-Settings::Manager InitMgr(Settings::Manager &mgr)
+void InitMgr(Settings::Manager &mgr)
 {
     saveUserSettings = mgr.mUserSettings;
     saveDefaultSettings = mgr.mDefaultSettings;
