@@ -49,16 +49,6 @@ void Networking::Update(RakNet::Packet *packet)
 
     Player *player = Players::GetPlayer(packet->guid);
 
-    if (player == 0)
-    {
-        controller->GetPacket(ID_HANDSHAKE)->RequestData(packet->guid);
-
-        NewPlayer(packet->guid);
-        player = Players::GetPlayer(packet->guid);
-
-        return;
-    }
-
     RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
 
     {
@@ -68,6 +58,15 @@ void Networking::Update(RakNet::Packet *packet)
     }
 
     controller->SetStream(&bsIn, 0);
+
+    if (player == 0)
+    {
+        controller->GetPacket(ID_HANDSHAKE)->RequestData(packet->guid);
+        Players::NewPlayer(packet->guid);
+        player = Players::GetPlayer(packet->guid);
+        controller->GetPacket(ID_USER_MYID)->Send(Players::GetPlayer(packet->guid), false);
+        return;
+    }
 
     BasePacket *myPacket = controller->GetPacket(packet->data[0]);
 
@@ -97,6 +96,20 @@ void Networking::Update(RakNet::Packet *packet)
             return;
         }
         player->Handshake();
+        return;
+    }
+
+    if (!player->isHandshaked())
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Have not completed handshake with player %d",
+            player->GetID());
+        //KickPlayer(player->guid);
+        return;
+    }
+
+    if (packet->data[0] == ID_LOADED)
+    {
+        player->Loaded(Player::LOADED);
 
         static constexpr unsigned int ident = Script::CallbackIdentity("OnPlayerConnect");
         Script::CallBackReturn<ident> result = true;
@@ -108,22 +121,28 @@ void Networking::Update(RakNet::Packet *packet)
             Players::DeletePlayer(packet->guid);
             return;
         }
+    }
+    else if(packet->data[0] == ID_GAME_BASE_INFO)
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s",
+                           player->Npc()->mName.c_str());
 
-        return;
-
+        myPacket->Read(player);
+        myPacket->Send(player, true);
     }
 
-    if (!player->isHandshaked())
+    if (player->LoadedState() == Player::NOTLOADED)
+        return;
+    else if (player->LoadedState() == Player::LOADED)
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Have not completed handshake with player %d",
-            player->GetID());
-        //KickPlayer(player->guid);
+        player->Loaded(Player::POSTLOADED);
+        NewPlayer(packet->guid);
         return;
     }
 
     switch (packet->data[0])
     {
-        case ID_GAME_BASE_INFO:
+        /*case ID_GAME_BASE_INFO:
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s",
                 player->Npc()->mName.c_str());
@@ -132,7 +151,7 @@ void Networking::Update(RakNet::Packet *packet)
             myPacket->Send(player, true);
 
             break;
-        }
+        }*/
         case ID_GAME_UPDATE_POS:
         {
             //DEBUG_PRINTF("ID_GAME_UPDATE_POS \n");
@@ -331,10 +350,6 @@ void Networking::Update(RakNet::Packet *packet)
 
 void Networking::NewPlayer(RakNet::RakNetGUID guid)
 {
-    Players::NewPlayer(guid);
-
-    controller->GetPacket(ID_USER_MYID)->Send(Players::GetPlayer(guid), false);
-
     controller->GetPacket(ID_GAME_BASE_INFO)->RequestData(guid);
     controller->GetPacket(ID_GAME_UPDATE_BASESTATS)->RequestData(guid);
     controller->GetPacket(ID_GAME_ATTRIBUTE)->RequestData(guid);
@@ -343,7 +358,7 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
     controller->GetPacket(ID_GAME_CELL)->RequestData(guid);
     controller->GetPacket(ID_GAME_UPDATE_EQUIPED)->RequestData(guid);
 
-    for (TPlayers::iterator pl = players->begin(); pl != players->end(); pl++)
+    for (TPlayers::iterator pl = players->begin(); pl != players->end(); pl++) //sending other players to new player
     {
         if (pl->first == guid) continue;
 

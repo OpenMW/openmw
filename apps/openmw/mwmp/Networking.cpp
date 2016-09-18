@@ -103,7 +103,10 @@ void Networking::Connect(const std::string &ip, unsigned short port)
     master.SetPortHostOrder(port);
     std::string errmsg = "";
 
-    if (peer->Connect(master.ToString(false), master.GetPort(), TES3MP_VERSION, (int) strlen(TES3MP_VERSION), 0, 0, 3, 500, 0) != RakNet::CONNECTION_ATTEMPT_STARTED)
+    stringstream sstr(TES3MP_VERSION);
+    sstr << TES3MP_PROTO_VERSION;
+
+    if (peer->Connect(master.ToString(false), master.GetPort(), sstr.str().c_str(), (int) sstr.str().size(), 0, 0, 3, 500, 0) != RakNet::CONNECTION_ATTEMPT_STARTED)
         errmsg = "Connection attempt failed.\n";
 
     bool queue = true;
@@ -138,10 +141,6 @@ void Networking::Connect(const std::string &ip, unsigned short port)
 
                     LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONNECTION_REQUESTED_ACCEPTED from %s",
                         serverAddr.ToString());
-
-                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server");
-
-                    GetPacket(ID_GAME_BASE_INFO)->Send(getLocalPlayer());
 
                     break;
                 }

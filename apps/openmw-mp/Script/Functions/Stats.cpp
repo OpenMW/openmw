@@ -20,10 +20,10 @@ void StatsFunctions::SetName(unsigned short pid, const char *name) noexcept
     Player *player;
     GET_PLAYER(pid, player,);
 
-    if (player->GetCell()->mName == name)
+    if (player->Npc()->mName == name)
         return;
 
-    player->GetCell()->mName = name;
+    player->Npc()->mName = name;
 }
 
 const char *StatsFunctions::GetName(unsigned short pid) noexcept
@@ -40,7 +40,7 @@ void StatsFunctions::SetBirthsign(unsigned short pid, const char *sign) noexcept
     Player *player;
     GET_PLAYER(pid, player,);
 
-    if (player->GetCell()->mName == sign)
+    if (*player->BirthSign() == sign)
         return;
 
     *player->BirthSign() = sign;

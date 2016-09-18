@@ -105,8 +105,8 @@ int main(int argc, char *argv[])
     loadSettings(mgr);
 
     int logLevel = mgr.getInt("loglevel", "General");
-    if (logLevel < Log::LOG_INFO || logLevel > Log::LOG_FATAL)
-        logLevel = Log::LOG_INFO;
+    if (logLevel < Log::LOG_VERBOSE || logLevel > Log::LOG_FATAL)
+        logLevel = Log::LOG_VERBOSE;
 
     // Some objects used to redirect cout and cerr
     // Scope must be here, so this still works inside the catch block for logging exceptions
@@ -154,7 +154,10 @@ int main(int argc, char *argv[])
 
     RakNet::RakPeerInterface *peer = RakNet::RakPeerInterface::GetInstance();
 
-    peer->SetIncomingPassword(TES3MP_VERSION, (int)strlen(TES3MP_VERSION));
+    stringstream sstr(TES3MP_VERSION);
+    sstr << TES3MP_PROTO_VERSION;
+
+    peer->SetIncomingPassword(sstr.str().c_str(), (int)sstr.str().size());
 
     if (RakNet::NonNumericHostString(addr.c_str()))
     {

@@ -91,19 +91,35 @@ void Main::Configure(const boost::program_options::variables_map &variables)
     Main::addr = variables["connect"].as<string>();
 }
 
-void Main::Create()
+static Settings::CategorySettingValueMap saveUserSettings;
+static Settings::CategorySettingValueMap saveDefaultSettings;
+static Settings::CategorySettingVector saveChangedSettings;
+
+void InitMgr(Settings::Manager &mgr)
+{
+    saveUserSettings = mgr.mUserSettings;
+    saveDefaultSettings = mgr.mDefaultSettings;
+    saveChangedSettings = mgr.mChangedSettings;
+    mgr.mUserSettings.clear();
+    mgr.mDefaultSettings.clear();
+    mgr.mChangedSettings.clear();
+    loadSettings(mgr);
+}
+
+void RestoreMgr(Settings::Manager &mgr)
+{
+    mgr.mUserSettings = saveUserSettings;
+    mgr.mDefaultSettings = saveDefaultSettings;
+    mgr.mChangedSettings = saveChangedSettings;
+}
+
+void Main::Init(std::vector<std::string> &content)
 {
     assert(!pMain);
     pMain = new Main();
 
     Settings::Manager mgr;
-    Settings::CategorySettingValueMap saveUserSettings = mgr.mUserSettings;
-    Settings::CategorySettingValueMap saveDefaultSettings = mgr.mDefaultSettings;
-    Settings::CategorySettingVector saveChangedSettings = mgr.mChangedSettings;
-    mgr.mUserSettings.clear();
-    mgr.mDefaultSettings.clear();
-    mgr.mChangedSettings.clear();
-    loadSettings(mgr);
+    InitMgr(mgr);
 
     int logLevel = mgr.getInt("loglevel", "General");
     Log::SetLevel(logLevel);
@@ -120,15 +136,21 @@ void Main::Create()
 
     }
 
+    pMain->mNetworking->Connect(pMain->server, pMain->port);
+    RestoreMgr(mgr);
+}
+
+void Main::PostInit()
+{
+    Settings::Manager mgr;
+    InitMgr(mgr);
+
     pMain->mGUIController->setupChat(mgr);
+    RestoreMgr(mgr);
 
-    mgr.mUserSettings = saveUserSettings;
-    mgr.mDefaultSettings = saveDefaultSettings;
-    mgr.mChangedSettings = saveChangedSettings;
-
-    //pMain->mGUILogin = new GUILogin();
     const MWBase::Environment &environment = MWBase::Environment::get();
     environment.getStateManager()->newGame(true);
+    MWBase::Environment::get().getMechanicsManager()->toggleAI();
 }
 
 void Main::Destroy()
@@ -164,17 +186,14 @@ void Main::UpdateWorld(float dt) const
     if (!mLocalPlayer->CharGenThread())
         return;
 
-    if (!mNetworking->isConnected())
+    static bool init = true;
+    if (init)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWBase::Environment::get().getMechanicsManager()->toggleAI();
+        init = false;
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server");
 
-        (*mLocalPlayer->Npc()) = *player.get<ESM::NPC>()->mBase;
-
-        mLocalPlayer->updateAttributesAndSkills();
-
-        mNetworking->Connect(server, port);
-        player.getClass().getCreatureStats(player).getSpells().add("fireball");
+        mNetworking->GetPacket(ID_GAME_BASE_INFO)->Send(getLocalPlayer());
+        mNetworking->GetPacket(ID_LOADED)->Send(getLocalPlayer());
         mLocalPlayer->updateBaseStats(true);
         get().getGUIController()->setChatVisible(true);
     }

@@ -40,18 +40,27 @@ class Player : public mwmp::BasePlayer
     unsigned short id;
 public:
 
+    enum
+    {
+        NOTLOADED=0,
+        LOADED,
+        POSTLOADED
+    };
     Player(RakNet::RakNetGUID id);
 
     unsigned short GetID();
     void SetID(unsigned short id);
 
     bool isHandshaked();
-
     void Handshake();
+
+    void Loaded(int state);
+    int LoadedState();
 
     virtual ~Player();
 private:
     bool handshake;
+    int loaded;
 };
 
 #endif //OPENMW_PLAYER_HPP

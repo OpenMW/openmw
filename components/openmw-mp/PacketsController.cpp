@@ -25,6 +25,7 @@
 #include "Packets/PacketHandshake.hpp"
 #include "Packets/PacketGUIBoxes.hpp"
 #include "Packets/PacketTime.hpp"
+#include "Packets/PacketLoaded.hpp"
 
 #include "PacketsController.hpp"
 
@@ -61,7 +62,7 @@ mwmp::PacketsController::PacketsController(RakNet::RakPeerInterface *peer)
     AddPacket<PacketGUIBoxes>(&packets, peer);
     AddPacket<PacketClass>(&packets, peer);
     AddPacket<PacketTime>(&packets, peer);
-
+    AddPacket<PacketLoaded>(&packets, peer);
 }
 
 
