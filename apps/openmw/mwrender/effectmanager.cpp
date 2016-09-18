@@ -25,7 +25,7 @@ EffectManager::~EffectManager()
     clear();
 }
 
-void EffectManager::addEffect(const std::string &model, const std::string& textureOverride, const osg::Vec3f &worldPosition, float scale)
+void EffectManager::addEffect(const std::string &model, const std::string& textureOverride, const osg::Vec3f &worldPosition, float scale, bool isMagicVFX)
 {
     osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model);
 
@@ -46,7 +46,10 @@ void EffectManager::addEffect(const std::string &model, const std::string& textu
     SceneUtil::AssignControllerSourcesVisitor assignVisitor(effect.mAnimTime);
     node->accept(assignVisitor);
 
-    overrideTexture(textureOverride, mResourceSystem, node);
+    if (isMagicVFX)
+        overrideFirstRootTexture(textureOverride, mResourceSystem, node);
+    else
+        overrideTexture(textureOverride, mResourceSystem, node);
 
     mParentNode->addChild(trans);
     mResourceSystem->getSceneManager()->notifyAttached(node);

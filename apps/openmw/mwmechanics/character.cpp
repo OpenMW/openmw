@@ -1235,10 +1235,8 @@ bool CharacterController::updateWeaponState()
                     MWMechanics::CastSpell cast(mPtr, NULL);
                     cast.playSpellCastingEffects(spellid);
 
-                    const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
-                    
-                    const ESM::ENAMstruct &lastEffect = spell->mEffects.mList.at(spell->mEffects.mList.size() - 1);
-
+                    const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);                   
+                    const ESM::ENAMstruct &lastEffect = spell->mEffects.mList.back();
                     const ESM::MagicEffect *effect;
 
                     effect = store.get<ESM::MagicEffect>().find(lastEffect.mEffectID); // use last effect of list for color of VFX_Hands
