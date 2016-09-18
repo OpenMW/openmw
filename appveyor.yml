@@ -8,7 +8,7 @@ branches:
 
 environment:
     matrix:
-#       - msvc: 2013
+        - msvc: 2013
         - msvc: 2015
 
 platform:
@@ -56,7 +56,22 @@ build_script:
     - cmd: if %PLATFORM%==x64 set build=MSVC%msvc%_64
     - cmd: msbuild %build%\OpenMW.sln /t:Build /p:Configuration=%configuration% /m:2 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
+after_build:
+    - cmd: if %PLATFORM%==Win32 set build=MSVC%msvc%_32
+    - cmd: if %PLATFORM%==x64 set build=MSVC%msvc%_64
+    - cmd: msbuild %build%\PACKAGE.vcxproj /t:Build /p:Configuration=%configuration%
+
 test: off
+
+artifacts:
+    - path: MSVC2013_32/OpenMW-*-win32.exe
+      name: OpenMW-MSVC2013-win32.exe
+    - path: MSVC2013_64/OpenMW-*-win64.exe
+      name: OpenMW-MSVC2013-win64.exe
+    - path: MSVC2015_32/OpenMW-*-win32.exe
+      name: OpenMW-MSVC2015-win32.exe
+    - path: MSVC2015_64/OpenMW-*-win64.exe
+      name: OpenMW-MSVC2015-win64.exe
 
 #notifications:
 #    - provider: Email
