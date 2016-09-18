@@ -49,7 +49,7 @@ cache:
 clone_folder: C:\projects\openmw
 
 before_build:
-    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -u -p %PLATFORM% -v %msvc%
+    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -u -p %PLATFORM% -v %msvc% -c %configuration%
 
 build_script:
     - cmd: if %PLATFORM%==Win32 set build=MSVC%msvc%_32
