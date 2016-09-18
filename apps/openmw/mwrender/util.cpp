@@ -14,9 +14,8 @@ namespace MWRender
 class TextureOverrideVisitor : public osg::NodeVisitor
     {
     public:
-        TextureOverrideVisitor(int refID, std::string texture, Resource::ResourceSystem* resourcesystem)
+        TextureOverrideVisitor(std::string texture, Resource::ResourceSystem* resourcesystem)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mRefID(refID)
             , mTexture(texture)
             , mResourcesystem(resourcesystem)
         {
@@ -26,26 +25,21 @@ class TextureOverrideVisitor : public osg::NodeVisitor
         {
             int index;
             osg::ref_ptr<osg::Node> nodePtr(&node);
-            if (node.getUserValue("NiTexturingPropertyIndex", index))
+            if (node.getUserValue("overrideFx", index))
             {
-                if (mRefID == index) 
+                if (index == 1) 
                     overrideTexture(mTexture, mResourcesystem, nodePtr);
             }
             traverse(node);
         }
-        int mRefID;
         std::string mTexture;
         Resource::ResourceSystem* mResourcesystem;
 };
 
 void overrideFirstRootTexture(const std::string &texture, Resource::ResourceSystem *resourceSystem, osg::ref_ptr<osg::Node> node)
 {
-        int index;
-        if (node->getUserValue("overrideIndex", index))
-        {
-            TextureOverrideVisitor overrideVisitor(index, texture, resourceSystem);
-            node->accept(overrideVisitor);
-        }
+    TextureOverrideVisitor overrideVisitor(texture, resourceSystem);
+    node->accept(overrideVisitor);
 }
 
 void overrideTexture(const std::string &texture, Resource::ResourceSystem *resourceSystem, osg::ref_ptr<osg::Node> node)
