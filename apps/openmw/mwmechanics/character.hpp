@@ -198,7 +198,6 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     bool mAttackingOrSpell;
 
     void setAttackTypeBasedOnMovement();
-    void setAttackTypeRandomly();
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
     void refreshHitRecoilAnims();
@@ -270,6 +269,7 @@ public:
 
     void setAttackingOrSpell(bool attackingOrSpell);
     void setAIAttackType(std::string attackType); // set and used by AiCombat
+    static void setAttackTypeRandomly(std::string& attackType);
 
     bool readyToPrepareAttack() const;
     bool readyToStartAttack() const;

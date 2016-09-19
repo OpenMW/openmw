@@ -1312,9 +1312,9 @@ bool CharacterController::updateWeaponState()
                     mAttackType = "shoot";
                 else
                 {
-                    if (isWeapon)
+                    if(mPtr == getPlayer())
                     {
-                        if(mPtr == getPlayer())
+                        if (isWeapon)
                         {
                             if (Settings::Manager::getBool("best attack", "Game"))        
                             {
@@ -1324,10 +1324,10 @@ bool CharacterController::updateWeaponState()
                             else
                                 setAttackTypeBasedOnMovement();
                         }
-                        // else if (mPtr != getPlayer()) use mAttackType already set by AiCombat
+                        else
+                            setAttackTypeRandomly(mAttackType);                       
                     }
-                    else
-                        setAttackTypeRandomly();
+                    // else if (mPtr != getPlayer()) use mAttackType set by AiCombat
                 }
 
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
@@ -2188,17 +2188,6 @@ void CharacterController::updateMagicEffects()
     mAnimation->setLightEffect(light);
 }
 
-void CharacterController::setAttackTypeRandomly()
-{
-    float random = Misc::Rng::rollProbability();
-    if (random >= 2/3.f)
-        mAttackType = "thrust";
-    else if (random >= 1/3.f)
-        mAttackType = "slash";
-    else
-        mAttackType = "chop";
-}
-
 void CharacterController::setAttackTypeBasedOnMovement()
 {
     float *move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
@@ -2238,6 +2227,17 @@ void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
 void CharacterController::setAIAttackType(std::string attackType)
 {
     mAttackType = attackType;
+}
+
+void CharacterController::setAttackTypeRandomly(std::string& attackType)
+{
+    float random = Misc::Rng::rollProbability();
+    if (random >= 2/3.f)
+        attackType = "thrust";
+    else if (random >= 1/3.f)
+        attackType = "slash";
+    else
+        attackType = "chop";
 }
 
 bool CharacterController::readyToPrepareAttack() const
