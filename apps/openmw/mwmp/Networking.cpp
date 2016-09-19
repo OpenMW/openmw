@@ -468,6 +468,9 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
 
             case ID_GAME_ATTRIBUTE:
             {
+                if (packet->length == myPacket->headerSize())
+                    return;
+
                 BasePlayer *__pl = nullptr;
                 MWWorld::Ptr __pl_ptr;
                 if (id == myid)
@@ -497,6 +500,9 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
 
             case ID_GAME_SKILL:
             {
+                if (packet->length == myPacket->headerSize())
+                    return;
+
                 BasePlayer *__pl = nullptr;
                 MWWorld::Ptr __pl_ptr;
                 if (id == myid)

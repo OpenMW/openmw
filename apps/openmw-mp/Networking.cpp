@@ -122,7 +122,7 @@ void Networking::Update(RakNet::Packet *packet)
             return;
         }
     }
-    else if(packet->data[0] == ID_GAME_BASE_INFO)
+    else if (packet->data[0] == ID_GAME_BASE_INFO)
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s",
                            player->Npc()->mName.c_str());
@@ -352,8 +352,6 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
 {
     controller->GetPacket(ID_GAME_BASE_INFO)->RequestData(guid);
     controller->GetPacket(ID_GAME_UPDATE_BASESTATS)->RequestData(guid);
-    controller->GetPacket(ID_GAME_ATTRIBUTE)->RequestData(guid);
-    controller->GetPacket(ID_GAME_SKILL)->RequestData(guid);
     controller->GetPacket(ID_GAME_UPDATE_POS)->RequestData(guid);
     controller->GetPacket(ID_GAME_CELL)->RequestData(guid);
     controller->GetPacket(ID_GAME_UPDATE_EQUIPED)->RequestData(guid);
