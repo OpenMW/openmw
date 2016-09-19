@@ -646,14 +646,28 @@ namespace MWMechanics
             if (target != getPlayer())
                 return false;
 
+            MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
+
             if (effectId == ESM::MagicEffect::DivineIntervention)
             {
                 MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "divinemarker");
+                anim->removeEffect(ESM::MagicEffect::DivineIntervention);
+                const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
+                    .search("VFX_Summon_end");
+                if (fx)
+                    MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
+                        "", mCaster.getRefData().getPosition().asVec3());
                 return true;
             }
             else if (effectId == ESM::MagicEffect::AlmsiviIntervention)
             {
                 MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "templemarker");
+                anim->removeEffect(ESM::MagicEffect::AlmsiviIntervention);
+                const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
+                    .search("VFX_Summon_end");
+                if (fx)
+                    MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
+                        "", mCaster.getRefData().getPosition().asVec3());
                 return true;
             }
 
@@ -674,6 +688,7 @@ namespace MWMechanics
                     MWWorld::ActionTeleport action(markedCell->isExterior() ? "" : markedCell->getCell()->mName,
                                             markedPosition, false);
                     action.execute(target);
+                    anim->removeEffect(ESM::MagicEffect::Recall);
                 }
                 return true;
             }
