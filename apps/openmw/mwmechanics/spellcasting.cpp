@@ -655,8 +655,7 @@ namespace MWMechanics
                 const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
                     .search("VFX_Summon_end");
                 if (fx)
-                    MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
-                        "", mCaster.getRefData().getPosition().asVec3());
+                    anim->addEffect("meshes\\" + fx->mModel, -1);
                 return true;
             }
             else if (effectId == ESM::MagicEffect::AlmsiviIntervention)
@@ -666,8 +665,7 @@ namespace MWMechanics
                 const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
                     .search("VFX_Summon_end");
                 if (fx)
-                    MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
-                        "", mCaster.getRefData().getPosition().asVec3());
+                    anim->addEffect("meshes\\" + fx->mModel, -1);
                 return true;
             }
 
