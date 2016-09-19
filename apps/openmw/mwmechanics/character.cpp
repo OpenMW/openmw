@@ -2167,7 +2167,7 @@ void CharacterController::updateMagicEffects()
     if (!mPtr.getClass().isActor())
         return;
     float alpha = 1.f;
-    if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude())
+    if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).getModifier()) // Ignore base magnitude (see bug #3555).
     {
         if (mPtr == getPlayer())
             alpha = 0.4f;
