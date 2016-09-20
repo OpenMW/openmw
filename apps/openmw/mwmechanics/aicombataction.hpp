@@ -19,6 +19,7 @@ namespace MWMechanics
         virtual float getCombatRange (bool& isRanged) const = 0;
         virtual float getActionCooldown() { return 0.f; }
         virtual const ESM::Weapon* getWeapon() const { return NULL; };
+        virtual bool isAttackingOrSpell() const { return true; }
     };
 
     class ActionSpell : public Action
@@ -53,6 +54,7 @@ namespace MWMechanics
         /// Drinks the given potion.
         virtual void prepare(const MWWorld::Ptr& actor);
         virtual float getCombatRange (bool& isRanged) const;
+        virtual bool isAttackingOrSpell() const { return false; }
 
         /// Since this action has no animation, apply a small cool down for using it
         virtual float getActionCooldown() { return 1.f; }
