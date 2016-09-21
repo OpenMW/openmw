@@ -2642,7 +2642,8 @@ namespace MWWorld
 
         // Get the target to use for "on touch" effects, using the facing direction from Head node
         MWWorld::Ptr target;
-        float distance = 192.f; // ??
+        float distance = getMaxActivationDistance();
+
         osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
         osg::Vec3f origin = getActorHeadTransform(actor).getTrans();
 
@@ -2678,6 +2679,16 @@ namespace MWWorld
         {
             target = result2.mHitObject;
             hitPosition = result2.mHitPointWorld;
+        }
+
+        // When targeting an actor that is in combat with an "on touch" spell, 
+        // compare against the minimum of activation distance and combat distance.
+
+        if (!target.isEmpty() && target.getClass().isActor() && target.getClass().getCreatureStats (target).getAiSequence().isInCombat()) 
+        {
+            distance = std::min (distance, getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat());
+            if (distance < dist1 && distance < dist2)
+                target = NULL;
         }
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
