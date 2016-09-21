@@ -3176,7 +3176,8 @@ namespace MWWorld
 
             if (effectIt->mArea <= 0)
             {
-                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, 1.0f);
+                if (effectIt->mRange == ESM::RT_Target)
+                    mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, 1.0f);
                 continue;
             }
             else
