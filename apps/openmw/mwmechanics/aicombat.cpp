@@ -229,7 +229,7 @@ namespace MWMechanics
         osg::Vec3f vAimDir = MWBase::Environment::get().getWorld()->aimToTarget(actor, target);
         float distToTarget = MWBase::Environment::get().getWorld()->getHitDistance(actor, target);
 
-        storage.mReadyToAttack = (distToTarget <= rangeAttack);
+        storage.mReadyToAttack = (currentAction->isAttackingOrSpell() && distToTarget <= rangeAttack);
         
         // can't fight if attacker can't go where target is.  E.g. A fish can't attack person on land.
         if (distToTarget > rangeAttack
