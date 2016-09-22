@@ -3187,6 +3187,9 @@ namespace MWWorld
             if (effectIt->mRange != rangeType || (effectIt->mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()))
                 continue; // Not right range type, or not area effect and hit an actor
 
+            if (effectIt->mRange == ESM::RT_Touch && (!ignore.isEmpty()) && (!ignore.getClass().isActor() && !ignore.getClass().canBeActivated(ignore)))
+                continue; // Don't play explosion for touch spells on non-activatable objects
+
             // Spawn the explosion orb effect
             const ESM::Static* areaStatic;
             if (!effect->mArea.empty())
