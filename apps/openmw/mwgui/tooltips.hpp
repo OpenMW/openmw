@@ -42,6 +42,8 @@ namespace MWGui
 
         bool isPotion; // potions do not show target in the tooltip
         bool wordWrap;
+
+        std::string flavorText;
     };
 
     class ToolTips : public Layout
@@ -57,6 +59,7 @@ namespace MWGui
         bool getFullHelp() const;
 
         void setDelay(float delay);
+        void setFlavorDelay(float delay);
 
         void setFocusObject(const MWWorld::ConstPtr& focus);
         void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
@@ -87,10 +90,10 @@ namespace MWGui
         static void createRaceToolTip(MyGUI::Widget* widget, const ESM::Race* playerRace);
         static void createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass);
         static void createMagicEffectToolTip(MyGUI::Widget* widget, short id);
-        
+
         bool checkOwned();
         /// Returns True if taking mFocusObject would be crime
- 
+
     private:
         MyGUI::Widget* mDynamicToolTipBox;
 
@@ -117,13 +120,17 @@ namespace MWGui
         float mDelay;
         float mRemainingDelay; // remaining time until tooltip will show
 
+        // time (after showing normal tooltip) when flavor text tooltip will be shown
+        float mFlavorDelay;
+        float mRemainingFlavorDelay; // remaining time until flavor text tooltip will show
+
         int mLastMouseX;
         int mLastMouseY;
 
         bool mEnabled;
 
         bool mFullHelp;
-        
+
         int mShowOwned;
     };
 }
