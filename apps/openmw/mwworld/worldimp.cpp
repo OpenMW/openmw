@@ -1020,12 +1020,7 @@ namespace MWWorld
             facedObject = getFacedObject(getMaxActivationDistance() * 50, false);
         else
         {
-            float telekinesisRangeBonus =
-                    mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
-                    .get(ESM::MagicEffect::Telekinesis).getMagnitude();
-            telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
-
-            float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
+            float activationDistance = getActivationDistancePlusTelekinesis();
 
             facedObject = getFacedObject(activationDistance, true);
 
@@ -2642,7 +2637,7 @@ namespace MWWorld
 
         // Get the target to use for "on touch" effects, using the facing direction from Head node
         MWWorld::Ptr target;
-        float distance = getMaxActivationDistance();
+        float distance = getActivationDistancePlusTelekinesis();
 
         osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
         osg::Vec3f origin = getActorHeadTransform(actor).getTrans();
@@ -2674,11 +2669,15 @@ namespace MWWorld
         {
             target = result1.mHitObject;
             hitPosition = result1.mHitPos;
+            if (!target.isEmpty() && dist1 > getMaxActivationDistance() && !target.getClass().allowTelekinesis(target))
+            target = NULL;
         }
         else if (result2.mHit)
         {
             target = result2.mHitObject;
             hitPosition = result2.mHitPointWorld;
+            if (!target.isEmpty() && dist2 > getMaxActivationDistance() && !target.getClass().allowTelekinesis(target))
+            target = NULL;
         }
 
         // When targeting an actor that is in combat with an "on touch" spell, 
@@ -3009,6 +3008,18 @@ namespace MWWorld
         // Looks like there is no GMST for this. This factor was determined in experiments
         // with the Telekinesis effect.
         return feet * 22;
+    }
+
+    float World::getActivationDistancePlusTelekinesis()
+    {
+        float telekinesisRangeBonus =
+                    mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
+                    .get(ESM::MagicEffect::Telekinesis).getMagnitude();
+        telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
+
+        float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
+
+        return activationDistance;
     }
 
     MWWorld::Ptr World::getPlayerPtr()
