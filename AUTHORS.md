@@ -17,7 +17,7 @@ Programmers
     aegis
     Aleksandar Jovanov
     Alex Haddad (rainChu)
-    Alex McKibben (WeirdSexy)
+    Alex McKibben
     alexanderkjall
     Alexander Nadeau (wareya)
     Alexander Olofsson (Ace)
@@ -159,7 +159,6 @@ Packagers
 Public Relations and Translations
 ---------------------------------
 
-    Alex McKibben (WeirdSexy) - Podcaster
     Artem Kotsynyak (greye) - Russian News Writer
     Jim Clauwaert (Zedd) - Public Outreach
     Julien Voisin (jvoisin/ap0) - French News Writer
