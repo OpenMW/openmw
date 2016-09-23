@@ -99,10 +99,10 @@ namespace MWGui
 
         MWWorld::ConstPtr mFocusObject;
 
-        MyGUI::IntSize getToolTipViaPtr (int count, bool image=true);
+        MyGUI::IntSize getToolTipViaPtr (int count, bool image=true, bool showFlavorText=false);
         ///< @return requested tooltip size
 
-        MyGUI::IntSize createToolTip(const ToolTipInfo& info, bool isFocusObject);
+        MyGUI::IntSize createToolTip(const ToolTipInfo& info, bool isFocusObject, bool showFlavorText=false);
         ///< @return requested tooltip size
         /// @param isFocusObject Is the object this tooltips originates from mFocusObject?
 

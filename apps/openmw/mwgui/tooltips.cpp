@@ -92,21 +92,6 @@ namespace MWGui
         const MyGUI::IntSize &viewSize = MyGUI::RenderManager::getInstance().getViewSize();
         const MyGUI::IntPoint& mousePos = MyGUI::InputManager::getInstance().getMousePosition();
 
-        // process delays
-        if (mousePos.left == mLastMouseX && mousePos.top == mLastMouseY)
-        {
-            mRemainingDelay -= frameDuration;
-            mRemainingFlavorDelay -= frameDuration;
-        }
-        else
-        {
-            mHorizontalScrollIndex = 0;
-            mRemainingDelay = mDelay;
-            mRemainingFlavorDelay = mDelay+mFlavorDelay;
-        }
-        mLastMouseX = mousePos.left;
-        mLastMouseY = mousePos.top;
-
         bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
 
         if (guiMode)
@@ -138,8 +123,23 @@ namespace MWGui
 
             else
             {
+                if (mousePos.left == mLastMouseX && mousePos.top == mLastMouseY)
+                {
+                    mRemainingDelay -= frameDuration;
+                    mRemainingFlavorDelay -= frameDuration;
+                }
+                else
+                {
+                    mHorizontalScrollIndex = 0;
+                    mRemainingDelay = mDelay;
+                    mRemainingFlavorDelay = mDelay+mFlavorDelay;
+                }
+                mLastMouseX = mousePos.left;
+                mLastMouseY = mousePos.top;
+
                 if (mRemainingDelay > 0)
                     return;
+                bool showFlavorText = (mRemainingFlavorDelay <= 0) ? true : false;
 
                 MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getMouseFocusWidget();
                 if (focus == 0)
@@ -187,7 +187,7 @@ namespace MWGui
                 {
                     std::pair<ItemModel::ModelIndex, ItemModel*> pair = *focus->getUserData<std::pair<ItemModel::ModelIndex, ItemModel*> >();
                     mFocusObject = pair.second->getItem(pair.first).mBase;
-                    getToolTipViaPtr(pair.second->getItem(pair.first).mCount, false);
+                    getToolTipViaPtr(pair.second->getItem(pair.first).mCount, false, showFlavorText);
                 }
                 else if (type == "ToolTipInfo")
                 {
@@ -201,7 +201,7 @@ namespace MWGui
 
                     mFocusObject = item;
                     if (!mFocusObject.isEmpty ())
-                        getToolTipViaPtr(mFocusObject.getRefData().getCount(), false);
+                        getToolTipViaPtr(mFocusObject.getRefData().getCount(), false, showFlavorText);
                 }
                 else if (type == "Spell")
                 {
@@ -319,7 +319,7 @@ namespace MWGui
         mFocusObject = focus;
     }
 
-    MyGUI::IntSize ToolTips::getToolTipViaPtr (int count, bool image)
+    MyGUI::IntSize ToolTips::getToolTipViaPtr (int count, bool image, bool showFlavorText)
     {
         // this the maximum width of the tooltip before it starts word-wrapping
         setCoord(0, 0, 300, 300);
@@ -338,7 +338,7 @@ namespace MWGui
             ToolTipInfo info = object.getToolTipInfo(mFocusObject, count);
             if (!image)
                 info.icon = "";
-            tooltipSize = createToolTip(info, true);
+            tooltipSize = createToolTip(info, true, showFlavorText);
         }
 
         return tooltipSize;
@@ -363,7 +363,7 @@ namespace MWGui
         }
     }
 
-    MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info, bool isFocusObject)
+    MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info, bool isFocusObject, bool showFlavorText)
     {
         mDynamicToolTipBox->setVisible(true);
         MyGUI::Widget* toolTipWidget = mDynamicToolTipBox->createWidget<MyGUI::Widget>("Widget",
@@ -567,7 +567,7 @@ namespace MWGui
         MyGUI::IntPoint tooltipPosition = MyGUI::IntPoint(mousePos.left, mousePos.top);
         position(tooltipPosition, totalSize, viewportSize);
 
-        if(mRemainingFlavorDelay <= 0 && info.flavorText != "")
+        if(showFlavorText && info.flavorText != "")
         {
             const int flavorTextWidth = 300;
             const int flavorTextMargin = 4; // space between general tooltip and flavor text tooltip
