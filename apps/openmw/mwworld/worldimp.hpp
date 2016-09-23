@@ -168,6 +168,7 @@ namespace MWWorld
             int mDaysInPrison;
 
             float feetToGameUnits(float feet);
+            float getActivationDistancePlusTelekinesis();
 
             MWWorld::ConstPtr getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id );
             MWWorld::ConstPtr getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id );
