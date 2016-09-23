@@ -122,6 +122,8 @@ namespace MWGui
 
         std::vector<ESM::ENAMstruct> mEffects;
 
+        bool mUniqueEffectsOnly;
+
         void onEffectAdded(ESM::ENAMstruct effect);
         void onEffectModified(ESM::ENAMstruct effect);
         void onEffectRemoved(ESM::ENAMstruct effect);
