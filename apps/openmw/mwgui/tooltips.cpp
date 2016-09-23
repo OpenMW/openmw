@@ -37,6 +37,7 @@ namespace MWGui
         , mRemainingDelay(0.0)
         , mFlavorDelay(0.0)
         , mRemainingFlavorDelay(0.0)
+        , mFlavorWidth(300)
         , mLastMouseX(0)
         , mLastMouseY(0)
         , mEnabled(true)
@@ -86,17 +87,15 @@ namespace MWGui
         }
 
         if (!mEnabled)
-        {
             return;
-        }
 
         const MyGUI::IntSize &viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        const MyGUI::IntPoint& mousePos = MyGUI::InputManager::getInstance().getMousePosition();
-
         bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
 
         if (guiMode)
         {
+            const MyGUI::IntPoint& mousePos = MyGUI::InputManager::getInstance().getMousePosition();
+
             if (MWBase::Environment::get().getWindowManager()->getWorldMouseOver() && ((MWBase::Environment::get().getWindowManager()->getMode() == GM_Console)
                 || (MWBase::Environment::get().getWindowManager()->getMode() == GM_Container)
                 || (MWBase::Environment::get().getWindowManager()->getMode() == GM_Inventory)))
