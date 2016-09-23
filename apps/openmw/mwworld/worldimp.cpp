@@ -2669,15 +2669,15 @@ namespace MWWorld
         {
             target = result1.mHitObject;
             hitPosition = result1.mHitPos;
-            if (!target.isEmpty() && dist1 > getMaxActivationDistance() && !target.getClass().allowTelekinesis(target))
-            target = NULL;
+            if (dist1 > getMaxActivationDistance() && !target.isEmpty() && (target.getClass().isActor() || !target.getClass().canBeActivated(target)))
+                target = NULL;
         }
         else if (result2.mHit)
         {
             target = result2.mHitObject;
             hitPosition = result2.mHitPointWorld;
-            if (!target.isEmpty() && dist2 > getMaxActivationDistance() && !target.getClass().allowTelekinesis(target))
-            target = NULL;
+            if (dist2 > getMaxActivationDistance() && !target.isEmpty() && (target.getClass().isActor() || !target.getClass().canBeActivated(target)))
+                target = NULL;
         }
 
         // When targeting an actor that is in combat with an "on touch" spell, 
