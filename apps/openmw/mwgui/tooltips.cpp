@@ -56,6 +56,7 @@ namespace MWGui
         mRemainingDelay = mDelay;
         mFlavorDelay = Settings::Manager::getFloat("tooltip flavor delay", "GUI");
         mRemainingFlavorDelay = mDelay+mFlavorDelay;
+        mFlavorWidth = Settings::Manager::getInt("tooltip flavor width", "GUI");
 
         for (unsigned int i=0; i < mMainWidget->getChildCount(); ++i)
         {
@@ -569,7 +570,6 @@ namespace MWGui
 
         if(showFlavorText && info.flavorText != "")
         {
-            const int flavorTextWidth = 300;
             const int flavorTextMargin = 4; // space between general tooltip and flavor text tooltip
 
             MyGUI::Widget* toolTipFlavorWidget = mDynamicToolTipBox->createWidget<MyGUI::Widget>("Widget",
@@ -577,16 +577,16 @@ namespace MWGui
             toolTipFlavorWidget->changeWidgetSkin(boxSkin);
 
             MyGUI::EditBox* flavorText = toolTipFlavorWidget->createWidget<MyGUI::EditBox>("SandText",
-                MyGUI::IntCoord(padding.left, padding.top, flavorTextWidth-padding.left*2, viewportSize.height), MyGUI::Align::Default, "ToolTipFlavorText");
+                MyGUI::IntCoord(padding.left, padding.top, mFlavorWidth-padding.left*2, viewportSize.height), MyGUI::Align::Default, "ToolTipFlavorText");
             flavorText->setProperty("MultiLine", "true");
             flavorText->setProperty("WordWrap", "true");
             flavorText->setProperty("TextAlign", "Left Top");
             flavorText->setCaptionWithReplacing(info.flavorText);
             flavorText->setSize(flavorText->getTextSize()); // set height of EditBox to height of text
-            toolTipFlavorWidget->setSize(MyGUI::IntSize(flavorTextWidth, flavorText->getTextSize().height+padding.top*2));
+            toolTipFlavorWidget->setSize(MyGUI::IntSize(mFlavorWidth, flavorText->getTextSize().height+padding.top*2));
 
             // update total tooltip size
-            totalSize.width += flavorTextWidth+flavorTextMargin;
+            totalSize.width += mFlavorWidth+flavorTextMargin;
             totalSize.height = std::max(totalSize.height, toolTipFlavorWidget->getHeight());
 
             // move widget to different sides depending on where is the most free space
@@ -600,10 +600,10 @@ namespace MWGui
 
             if(toolTipWidget->getHeight() < toolTipFlavorWidget->getHeight())
             {
-                // if bottom cut
+                // if bottom cut, move up
                 if( (tooltipPosition.top + toolTipFlavorWidget->getHeight()) > viewportSize.height )
                     toolTipWidgetPos.top = (tooltipPosition.top + toolTipFlavorWidget->getHeight()) - viewportSize.height;
-                // if top cut
+                // if top cut, move down
                 if( (tooltipPosition.top - toolTipWidgetPos.top) < 0 )
                     toolTipWidgetPos.top = tooltipPosition.top;
             }

@@ -123,6 +123,7 @@ namespace MWGui
         // time (after showing normal tooltip) when flavor text tooltip will be shown
         float mFlavorDelay;
         float mRemainingFlavorDelay; // remaining time until flavor text tooltip will show
+        int mFlavorWidth; // width of flavor text tooltip
 
         int mLastMouseX;
         int mLastMouseY;
