@@ -46,7 +46,7 @@ struct Clothing
 
     PartReferenceList mParts;
 
-    std::string mId, mName, mModel, mIcon, mEnchant, mScript;
+    std::string mId, mName, mModel, mIcon, mEnchant, mScript, mFlavorText;
 
     void load(ESMReader &esm, bool &isDeleted);
     void save(ESMWriter &esm, bool isDeleted = false) const;

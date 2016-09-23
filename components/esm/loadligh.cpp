@@ -42,6 +42,9 @@ namespace ESM
                 case ESM::FourCC<'S','N','A','M'>::value:
                     mSound = esm.getHString();
                     break;
+                case ESM::FourCC<'F','T','X','T'>::value:
+                    mFlavorText = esm.getHString();
+                    break;
                 case ESM::SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
@@ -73,6 +76,7 @@ namespace ESM
         esm.writeHNT("LHDT", mData, 24);
         esm.writeHNOCString("SCRI", mScript);
         esm.writeHNOCString("SNAM", mSound);
+        esm.writeHNOCString("FTXT", mFlavorText);
     }
 
     void Light::blank()
@@ -88,5 +92,6 @@ namespace ESM
         mModel.clear();
         mIcon.clear();
         mName.clear();
+        mFlavorText.clear();
     }
 }

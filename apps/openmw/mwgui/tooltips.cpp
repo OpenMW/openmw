@@ -558,7 +558,7 @@ namespace MWGui
 
         totalSize += MyGUI::IntSize(padding.left*2, padding.top*2);
 
-        // make sure that scratched text doesn't overflow out of widget (into flavor text)
+        // make sure that stretched text doesn't overflow out of widget (into flavor text)
         toolTipWidget->setSize(totalSize);
 
         // get default tooltip position
@@ -567,7 +567,7 @@ namespace MWGui
         MyGUI::IntPoint tooltipPosition = MyGUI::IntPoint(mousePos.left, mousePos.top);
         position(tooltipPosition, totalSize, viewportSize);
 
-        if(mRemainingFlavorDelay <= 0 && (info.flavorText != "" || true))
+        if(mRemainingFlavorDelay <= 0 && info.flavorText != "")
         {
             const int flavorTextWidth = 300;
             const int flavorTextMargin = 4; // space between general tooltip and flavor text tooltip
@@ -581,7 +581,7 @@ namespace MWGui
             flavorText->setProperty("MultiLine", "true");
             flavorText->setProperty("WordWrap", "true");
             flavorText->setProperty("TextAlign", "Left Top");
-            flavorText->setCaptionWithReplacing("Daedric weapons are made from raw ebony which has been refined using the craft and magical substances of the lesser minions of Oblivion. The process is not a pleasant one for the Daedra involved, and the weapons retain echoes of preternaturally prolonged suffering endured during manufacture. Daedric weapons are the most rare and expensive weapons known in Tamriel. \n#{setting=GUI,color crosshair owned}");
+            flavorText->setCaptionWithReplacing(info.flavorText);
             flavorText->setSize(flavorText->getTextSize()); // set height of EditBox to height of text
             toolTipFlavorWidget->setSize(MyGUI::IntSize(flavorTextWidth, flavorText->getTextSize().height+padding.top*2));
 

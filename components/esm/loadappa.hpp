@@ -36,7 +36,7 @@ struct Apparatus
     };
 
     AADTstruct mData;
-    std::string mId, mModel, mIcon, mScript, mName;
+    std::string mId, mModel, mIcon, mScript, mName, mFlavorText;
 
     void load(ESMReader &esm, bool &isDeleted);
     void save(ESMWriter &esm, bool isDeleted = false) const;

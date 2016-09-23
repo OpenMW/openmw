@@ -70,6 +70,8 @@ CSMWorld::RefIdCollection::RefIdCollection()
     inventoryColumns.mWeight = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_CoinValue, ColumnBase::Display_Integer));
     inventoryColumns.mValue = &mColumns.back();
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_FlavorText, ColumnBase::Display_LongString));
+    inventoryColumns.mFlavorText = &mColumns.back();
 
     IngredientColumns ingredientColumns (inventoryColumns);
     mColumns.push_back (RefIdColumn (Columns::ColumnId_EffectList,

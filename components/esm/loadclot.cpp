@@ -47,6 +47,9 @@ namespace ESM
                 case ESM::FourCC<'I','N','D','X'>::value:
                     mParts.add(esm);
                     break;
+                case ESM::FourCC<'F','T','X','T'>::value:
+                    mFlavorText = esm.getHString();
+                    break;
                 case ESM::SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
@@ -83,6 +86,7 @@ namespace ESM
         mParts.save(esm);
 
         esm.writeHNOCString("ENAM", mEnchant);
+        esm.writeHNOCString("FTXT", mFlavorText);
     }
 
     void Clothing::blank()
@@ -97,5 +101,6 @@ namespace ESM
         mIcon.clear();
         mEnchant.clear();
         mScript.clear();
+        mFlavorText.clear();
     }
 }
