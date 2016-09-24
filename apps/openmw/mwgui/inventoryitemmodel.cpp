@@ -77,10 +77,8 @@ void InventoryItemModel::update()
     for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
     {
         MWWorld::Ptr item = *it;
-        // NOTE: Don't show WerewolfRobe objects in the inventory, or allow them to be taken.
-        // Vanilla likely uses a hack like this since there's no other way to prevent it from
-        // being shown or taken.
-        if(item.getCellRef().getRefId() == "werewolfrobe")
+
+        if (!item.getClass().showsInInventory(item))
             continue;
 
         ItemStack newItem (item, this, item.getRefData().getCount());

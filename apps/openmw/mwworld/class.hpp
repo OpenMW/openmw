@@ -98,6 +98,11 @@ namespace MWWorld
             virtual MWGui::ToolTipInfo getToolTipInfo (const ConstPtr& ptr, int count) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
+            virtual bool showsInInventory (const ConstPtr& ptr) const;
+            ///< Return whether ptr shows in inventory views.
+            /// Hidden items are not displayed and cannot be (re)moved by the user.
+            /// \return True if shown, false if hidden.
+
             virtual MWMechanics::NpcStats& getNpcStats (const Ptr& ptr) const;
             ///< Return NPC stats or throw an exception, if class does not have NPC stats
             /// (default implementation: throw an exception)
