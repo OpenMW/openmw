@@ -583,8 +583,13 @@ void CSVWorld::EditWidget::remake(int row)
                 table->resizeColumnsToContents();
                 if (!editable)
                 {
+                    // Make table look disabled without actually disabling.
+                    // This allows user to scroll through table without
+                    // being able to edit items.
                     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
-                    table->setEnabled(false);
+                    table->setSelectionMode(QAbstractItemView::NoSelection);
+                    table->setFocusPolicy(Qt::NoFocus);
+                    table->setStyleSheet("background-color: whitesmoke");
                 }
 
                 int rows = mTable->rowCount(mTable->index(row, i));
