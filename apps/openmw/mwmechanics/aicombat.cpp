@@ -362,9 +362,9 @@ namespace MWMechanics
             }
         }
 
-        // Original engine behavior seems to be to back up during ranged combat
-        // according to fCombatDistance or opponent's weapon range, unless opponent
-        // is also using a ranged weapon
+        // Below behavior for backing up during ranged combat differs from vanilla.
+        // Vanilla is observed as backing up only as far as fCombatDistance or
+        // opponent's weapon range, or not backing up if opponent is also using a ranged weapon
         if (isDistantCombat && distToTarget < rangeAttack / 4)
         {
             mMovement.mPosition[1] = -1;
@@ -468,6 +468,8 @@ std::string chooseBestAttack(const ESM::Weapon* weapon)
         else
             attackType = "chop";
     }
+    else
+        MWMechanics::CharacterController::setAttackTypeRandomly(attackType);
 
     return attackType;
 }
