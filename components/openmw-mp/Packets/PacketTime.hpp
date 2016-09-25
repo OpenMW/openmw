@@ -13,7 +13,6 @@ namespace mwmp
     class PacketTime : public BasePacket
     {
     public:
-        const static int StatsCount = 27;
         PacketTime(RakNet::RakPeerInterface *peer);
 
         virtual void Packet(RakNet::BitStream *bs, BasePlayer *player, bool send);
