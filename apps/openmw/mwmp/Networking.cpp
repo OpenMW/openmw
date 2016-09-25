@@ -468,6 +468,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
 
             case ID_GAME_ATTRIBUTE:
             {
+                // Ignore requests for this packet
                 if (packet->length == myPacket->headerSize())
                     return;
 
@@ -486,9 +487,9 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 else
                     return;
 
-                MWMechanics::AttributeValue attributeValue;
-
                 myPacket->Packet(&bsIn, __pl, false);
+
+                MWMechanics::AttributeValue attributeValue;
 
                 for (int i = 0; i < 8; ++i)
                 {
@@ -500,6 +501,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
 
             case ID_GAME_SKILL:
             {
+                // Ignore requests for this packet
                 if (packet->length == myPacket->headerSize())
                     return;
 
@@ -518,9 +520,9 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 else
                     return;
 
-                MWMechanics::SkillValue skillValue;
-
                 myPacket->Packet(&bsIn, __pl, false);
+
+                MWMechanics::SkillValue skillValue;
 
                 for (int i = 0; i < 27; ++i)
                 {
@@ -531,6 +533,35 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
 
                 break;
             }
+
+            case ID_GAME_LEVEL:
+            {
+                // Ignore requests for this packet
+                if (packet->length == myPacket->headerSize())
+                    return;
+
+                BasePlayer *__pl = nullptr;
+                MWWorld::Ptr __pl_ptr;
+                if (id == myid)
+                {
+                    __pl = getLocalPlayer();
+                    __pl_ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                }
+                else if (pl != 0)
+                {
+                    __pl = pl;
+                    __pl_ptr = pl->getPtr();
+                }
+                else
+                    return;
+
+                myPacket->Packet(&bsIn, __pl, false);
+
+                __pl_ptr.getClass().getCreatureStats(__pl_ptr).setLevel(__pl->CreatureStats()->mLevel);
+
+                break;
+            }
+
             case ID_GUI_MESSAGEBOX:
             {
                 if (id == myid)

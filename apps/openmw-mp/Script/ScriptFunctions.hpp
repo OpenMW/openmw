@@ -93,20 +93,21 @@ public:
     };
 
     static constexpr ScriptCallbackData callbacks[]{
-            {"Main",                  Function<int, int, int>()},
-            {"OnServerInit",          Function<void>()},
-            {"OnServerExit",          Function<void, bool>()},
-            {"OnPlayerConnect",       Function<bool, unsigned short>()},
-            {"OnPlayerDisconnect",    Function<void, unsigned short>()},
-            {"OnPlayerDeath",         Function<void, unsigned short>()},
-            {"OnPlayerResurrect",     Function<void, unsigned short>()},
-            {"OnPlayerChangeCell",    Function<void, unsigned short>()},
+            {"Main",                     Function<int, int, int>()},
+            {"OnServerInit",             Function<void>()},
+            {"OnServerExit",             Function<void, bool>()},
+            {"OnPlayerConnect",          Function<bool, unsigned short>()},
+            {"OnPlayerDisconnect",       Function<void, unsigned short>()},
+            {"OnPlayerDeath",            Function<void, unsigned short>()},
+            {"OnPlayerResurrect",        Function<void, unsigned short>()},
+            {"OnPlayerChangeCell",       Function<void, unsigned short>()},
             {"OnPlayerChangeAttributes", Function<void, unsigned short>()},
-            {"OnPlayerChangeSkills",  Function<void, unsigned short>()},
-            {"OnPlayerUpdateEquiped", Function<void, unsigned short>()},
-            {"OnPlayerSendMessage",   Function<bool, unsigned short, const char*>()},
-            {"OnPlayerEndCharGen",    Function<void, unsigned short>()},
-            {"OnGUIAction",           Function<void, unsigned short, int, const char*>()}
+            {"OnPlayerChangeSkills",     Function<void, unsigned short>()},
+            {"OnPlayerChangeLevel",      Function<void, unsigned short>()},
+            {"OnPlayerUpdateEquiped",    Function<void, unsigned short>()},
+            {"OnPlayerSendMessage",      Function<bool, unsigned short, const char*>()},
+            {"OnPlayerEndCharGen",       Function<void, unsigned short>()},
+            {"OnGUIAction",              Function<void, unsigned short, int, const char*>()}
     };
 };
 

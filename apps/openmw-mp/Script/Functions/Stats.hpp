@@ -21,6 +21,9 @@
     {"GetIsMale",           StatsFunctions::GetIsMale},\
     {"SetIsMale",           StatsFunctions::SetIsMale},\
     \
+    {"GetLevel",           StatsFunctions::GetLevel},\
+    {"SetLevel",           StatsFunctions::SetLevel},\
+    \
     {"GetBirthsign",        StatsFunctions::GetBirthsign},\
     {"SetBirthsign",        StatsFunctions::SetBirthsign},\
     \
@@ -86,20 +89,23 @@ public:
     static void SetIsMale(unsigned short pid, int male) noexcept;
     static int GetIsMale(unsigned short pid) noexcept;
 
+    static int GetLevel(unsigned short pid) noexcept;
+    static void SetLevel(unsigned short pid, int value) noexcept;
+
     static float GetHealth(unsigned short pid) noexcept;
-    static void SetHealth(unsigned short pid, float health) noexcept;
+    static void SetHealth(unsigned short pid, float value) noexcept;
     static float GetCurrentHealth(unsigned short pid) noexcept;
-    static void SetCurrentHealth(unsigned short pid, float health) noexcept;
+    static void SetCurrentHealth(unsigned short pid, float value) noexcept;
 
     static float GetMagicka(unsigned short pid) noexcept;
-    static void SetMagicka(unsigned short pid, float magicka) noexcept;
+    static void SetMagicka(unsigned short pid, float value) noexcept;
     static float GetCurrentMagicka(unsigned short pid) noexcept;
-    static void SetCurrentMagicka(unsigned short pid, float magicka) noexcept;
+    static void SetCurrentMagicka(unsigned short pid, float value) noexcept;
 
     static float GetFatigue(unsigned short pid) noexcept;
-    static void SetFatigue(unsigned short pid, float fatigue) noexcept;
+    static void SetFatigue(unsigned short pid, float value) noexcept;
     static float GetCurrentFatigue(unsigned short pid) noexcept;
-    static void SetCurrentFatigue(unsigned short pid, float fatigue) noexcept;
+    static void SetCurrentFatigue(unsigned short pid, float value) noexcept;
 
     static int GetAttributeId(const char *name) noexcept;
     static int GetSkillId(const char *name) noexcept;

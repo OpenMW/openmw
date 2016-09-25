@@ -213,6 +213,19 @@ void Networking::Update(RakNet::Packet *packet)
 
             break;
         }
+        case ID_GAME_LEVEL:
+        {
+
+            if (!player->CreatureStats()->mDead)
+            {
+                myPacket->Read(player);
+                myPacket->Send(player, true);
+
+                Script::Call<Script::CallbackIdentity("OnPlayerChangeLevel")>(player->GetID());
+            }
+
+            break;
+        }
         case ID_GAME_UPDATE_EQUIPED:
         {
             DEBUG_PRINTF("ID_GAME_UPDATE_EQUIPED\n");

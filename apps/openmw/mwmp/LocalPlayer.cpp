@@ -50,7 +50,7 @@ void LocalPlayer::Update()
     updateDeadState();
     updateInventory();
     updateBaseStats();
-    updateAttributesAndSkills();
+    updateClassStats();
 }
 
 MWWorld::Ptr LocalPlayer::GetPlayerPtr()
@@ -90,7 +90,7 @@ void LocalPlayer::updateBaseStats(bool forceUpdate)
     }
 }
 
-void LocalPlayer::updateAttributesAndSkills(bool forceUpdate)
+void LocalPlayer::updateClassStats(bool forceUpdate)
 {
     MWWorld::Ptr player = GetPlayerPtr();
 
@@ -114,6 +114,9 @@ void LocalPlayer::updateAttributesAndSkills(bool forceUpdate)
             isUpdatingAttributes = true;
         }
     }
+
+    if (_npcStats.getLevel() != CreatureStats()->mLevel)
+        GetNetworking()->GetPacket(ID_GAME_LEVEL)->Send(this);
 
     if (isUpdatingSkills) {
         GetNetworking()->GetPacket(ID_GAME_SKILL)->Send(this);
@@ -536,7 +539,7 @@ bool LocalPlayer::CharGenThread() // ToDo: need fix
             if (CharGenStage()->end != 1)
             {
                 updateBaseStats(true);
-                updateAttributesAndSkills(true);
+                updateClassStats(true);
                 SendClass();
                 GetNetworking()->GetPacket(ID_GAME_CHARGEN)->Send(this);
             }

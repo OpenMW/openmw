@@ -22,6 +22,7 @@
 #include "Packets/PacketCharGen.hpp"
 #include "Packets/PacketAttribute.hpp"
 #include "Packets/PacketSkill.hpp"
+#include "Packets/PacketLevel.hpp"
 #include "Packets/PacketHandshake.hpp"
 #include "Packets/PacketGUIBoxes.hpp"
 #include "Packets/PacketTime.hpp"
@@ -57,6 +58,7 @@ mwmp::PacketsController::PacketsController(RakNet::RakPeerInterface *peer)
     AddPacket<PacketCharGen>(&packets, peer);
     AddPacket<PacketAttribute>(&packets, peer);
     AddPacket<PacketSkill>(&packets, peer);
+    AddPacket<PacketLevel>(&packets, peer);
 
     AddPacket<PacketHandshake>(&packets, peer);
     AddPacket<PacketGUIBoxes>(&packets, peer);

@@ -96,7 +96,6 @@ const char *StatsFunctions::GetHead(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-
     return player->Npc()->mHead.c_str();
 }
 
@@ -109,7 +108,6 @@ void StatsFunctions::SetHairstyle(unsigned short pid, const char *style) noexcep
         return;
 
     player->Npc()->mHair = style;
-
 }
 
 const char *StatsFunctions::GetHairstyle(unsigned short pid) noexcept
@@ -126,7 +124,6 @@ int StatsFunctions::GetIsMale(unsigned short pid) noexcept
     GET_PLAYER(pid, player,false);
 
     return player->Npc()->isMale();
-
 }
 
 void StatsFunctions::SetIsMale(unsigned short pid, int value) noexcept
@@ -137,6 +134,21 @@ void StatsFunctions::SetIsMale(unsigned short pid, int value) noexcept
     player->Npc()->setIsMale(value == true);
 }
 
+int StatsFunctions::GetLevel(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.f);
+
+    return player->CreatureStats()->mLevel;
+}
+
+void StatsFunctions::SetLevel(unsigned short pid, int value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->CreatureStats()->mLevel = value;
+}
 
 float StatsFunctions::GetHealth(unsigned short pid) noexcept
 {
@@ -144,7 +156,6 @@ float StatsFunctions::GetHealth(unsigned short pid) noexcept
     GET_PLAYER(pid, player,0.f);
 
     return player->CreatureStats()->mDynamic[0].mBase;
-
 }
 
 void StatsFunctions::SetHealth(unsigned short pid, float value) noexcept
@@ -209,7 +220,6 @@ float StatsFunctions::GetFatigue(unsigned short pid) noexcept
     GET_PLAYER(pid, player,0.f);
 
     return player->CreatureStats()->mDynamic[2].mBase;
-
 }
 
 void StatsFunctions::SetFatigue(unsigned short pid, float value) noexcept
@@ -338,7 +348,6 @@ void StatsFunctions::SetSkill(unsigned short pid, unsigned short skill, int valu
     player->NpcStats()->mSkills[skill].mBase = value;
 
     //DEBUG_PRINTF("SetSkill(%d, %d, %d)\n", pid, skill, value);
-
 }
 
 int StatsFunctions::GetCurrentSkill(unsigned short pid, unsigned short skill) noexcept
