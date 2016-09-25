@@ -173,6 +173,16 @@ namespace MWClass
         return info;
     }
 
+    bool Light::showsInInventory (const MWWorld::ConstPtr& ptr) const
+    {
+        const ESM::Light* light = ptr.get<ESM::Light>()->mBase;
+
+        if (!(light->mData.mFlags & ESM::Light::Carry))
+            return false;
+
+        return Class::showsInInventory(ptr);
+    }
+
     boost::shared_ptr<MWWorld::Action> Light::use (const MWWorld::Ptr& ptr) const
     {
         boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));

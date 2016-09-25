@@ -175,6 +175,12 @@ namespace CSMWorld
             {
                 mContainer[index].setModified(record);
             }
+            else
+            {
+                // Overwrite
+                mContainer[index].setModified(record);
+                mContainer[index].merge();
+            }
         }
 
         return index;
