@@ -86,7 +86,6 @@ const char* TranslocationFunctions::GetCell(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-
     return player->GetCell()->mName.c_str();
 }
 

@@ -438,12 +438,13 @@ void LocalPlayer::updateCell(bool forceUpdate)
         
         (*GetCell()) = *_cell;
         isExterior = _cell->isExterior();
+
+        // Make sure the position is updated before a cell packet is sent
+        updatePosition(true);
         
         RakNet::BitStream bs;
         GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_CELL)->Packet(&bs, this, true);
         GetNetworking()->SendData(&bs);
-
-        updatePosition(true);
     }
 }
 
