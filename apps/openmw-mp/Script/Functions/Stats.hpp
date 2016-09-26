@@ -21,8 +21,8 @@
     {"GetIsMale",           StatsFunctions::GetIsMale},\
     {"SetIsMale",           StatsFunctions::SetIsMale},\
     \
-    {"GetLevel",           StatsFunctions::GetLevel},\
-    {"SetLevel",           StatsFunctions::SetLevel},\
+    {"GetLevel",            StatsFunctions::GetLevel},\
+    {"SetLevel",            StatsFunctions::SetLevel},\
     \
     {"GetBirthsign",        StatsFunctions::GetBirthsign},\
     {"SetBirthsign",        StatsFunctions::SetBirthsign},\
@@ -63,7 +63,8 @@
     {"SendBaseInfo",        StatsFunctions::SendBaseInfo},\
     {"SendAttributes",      StatsFunctions::SendAttributes},\
     {"SendBaseStats",       StatsFunctions::SendBaseStats},\
-    {"SendSkills",          StatsFunctions::SendSkills}
+    {"SendSkills",          StatsFunctions::SendSkills},\
+    {"SendLevel",           StatsFunctions::SendLevel}
 
 class StatsFunctions
 {
@@ -132,6 +133,7 @@ public:
     static void SendAttributes(unsigned short pid) noexcept;
     static void SendBaseStats(unsigned short pid) noexcept;
     static void SendSkills(unsigned short pid) noexcept;
+    static void SendLevel(unsigned short pid) noexcept;
 };
 
 #endif //OPENMW_STATS_HPP

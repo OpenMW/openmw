@@ -372,7 +372,6 @@ void StatsFunctions::SetCurrentSkill(unsigned short pid, unsigned short skill, i
     player->NpcStats()->mSkills[skill].mCurrent = value;
 }
 
-
 int StatsFunctions::GetIncreaseSkill(unsigned short pid, unsigned int pos) noexcept
 {
     Player *player;
@@ -446,4 +445,13 @@ void StatsFunctions::SendSkills(unsigned short pid) noexcept
 
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_SKILL)->Send(player, false);
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_SKILL)->Send(player, true);
+}
+
+void StatsFunctions::SendLevel(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_LEVEL)->Send(player, false);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_LEVEL)->Send(player, true);
 }

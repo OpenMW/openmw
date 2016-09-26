@@ -115,8 +115,10 @@ void LocalPlayer::updateClassStats(bool forceUpdate)
         }
     }
 
-    if (_npcStats.getLevel() != CreatureStats()->mLevel)
+    if (_npcStats.getLevel() != CreatureStats()->mLevel) {
+        CreatureStats()->mLevel = _npcStats.getLevel();
         GetNetworking()->GetPacket(ID_GAME_LEVEL)->Send(this);
+    }
 
     if (isUpdatingSkills) {
         GetNetworking()->GetPacket(ID_GAME_SKILL)->Send(this);
