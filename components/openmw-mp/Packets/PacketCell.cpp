@@ -19,7 +19,6 @@ void mwmp::PacketCell::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, b
 
     RW(player->GetCell()->mData.mFlags, send);
 
-
     RW(player->GetCell()->mCellId.mIndex.mX, send);
     RW(player->GetCell()->mCellId.mIndex.mY, send);
 

@@ -25,7 +25,7 @@
     {"SetExterior",         TranslocationFunctions::SetExterior},\
     {"GetExteriorX",        TranslocationFunctions::GetExteriorX},\
     {"GetExteriorY",        TranslocationFunctions::GetExteriorY},\
-    {"IsInInterior",        TranslocationFunctions::IsInInterior}
+    {"IsInExterior",        TranslocationFunctions::IsInExterior}
 
 
 class TranslocationFunctions
@@ -36,7 +36,6 @@ public:
     static double GetPosY(unsigned short pid) noexcept;
     static double GetPosZ(unsigned short pid) noexcept;
     static void SetPos(unsigned short pid, double x, double y, double z) noexcept;
-
 
     static void GetAngle(unsigned short pid, float *x, float *y, float *z) noexcept;
     static double GetAngleX(unsigned short pid) noexcept;
@@ -51,7 +50,7 @@ public:
     static int GetExteriorX(unsigned short pid) noexcept;
     static int GetExteriorY(unsigned short pid) noexcept;
 
-    static bool IsInInterior(unsigned short pid) noexcept;
+    static bool IsInExterior(unsigned short pid) noexcept;
 };
 
 #endif //OPENMW_TRANSLOCATIONS_HPP

@@ -6,6 +6,7 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <apps/openmw-mp/Player.hpp>
 #include <apps/openmw-mp/Networking.hpp>
+#include <components/openmw-mp/Log.hpp>
 
 #include <iostream>
 using namespace std;
@@ -65,18 +66,19 @@ void TranslocationFunctions::SetCell(unsigned short pid, const char *name) noexc
     Player *player;
     GET_PLAYER(pid, player,);
 
-    /*if (player->GetCell()->mName == name)
-        return;*/
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Script is moving %s from %s to %s",
+        player->Npc()->mName.c_str(),
+        player->GetCell()->getDescription().c_str(),
+        name);
 
-    cout << "attempt to move player (pid: " << pid << " name: " << player->Npc()->mName << ") from ";
-    if (!player->GetCell()->isExterior())
-        cout << "\"" << player->GetCell()->mName << "\"";
-    else
-        cout << "exterior";
+    // If the player is currently in an exterior, turn on the interior flag
+    // from the  cell so the player doesn't get teleported to their exterior
+    // grid position (which we haven't changed)
+    if (player->GetCell()->isExterior()) {
+        player->GetCell()->mData.mFlags |= ESM::Cell::Interior;
+    }
 
     player->GetCell()->mName = name;
-
-    cout << " in to cell \"" << player->GetCell()->mName << "\"" << endl;
 
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_CELL)->Send(player, false);
 }
@@ -94,14 +96,18 @@ void TranslocationFunctions::SetExterior(unsigned short pid, int x, int y) noexc
     Player *player;
     GET_PLAYER(pid, player,);
 
-    cout << "attempt to move player (pid: " << pid << " name: " << player->Npc()->mName << ") from ";
-    if (!player->GetCell()->isExterior())
-        cout << "\"" << player->GetCell()->mName << "\"";
-    else
-        cout << "exterior: " << player->GetCell()->mCellId.mIndex.mX << ", " << player->GetCell()->mCellId.mIndex.mY;
-    cout << " in to exterior cell \"" << x << ", " << y << "\"" << endl;
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Script is moving %s from %s to %i,%i",
+        player->Npc()->mName.c_str(),
+        player->GetCell()->getDescription().c_str(),
+        x,
+        y);
 
-    player->GetCell()->mName = "";
+    // If the player is currently in an interior, turn off the interior flag
+    // from the cell
+    if (!player->GetCell()->isExterior()) {
+        player->GetCell()->mData.mFlags &= ~ESM::Cell::Interior;
+    }
+
     player->GetCell()->mCellId.mIndex.mX = x;
     player->GetCell()->mCellId.mIndex.mY = y;
 
@@ -122,12 +128,12 @@ int TranslocationFunctions::GetExteriorY(unsigned short pid) noexcept
     return player->GetCell()->mCellId.mIndex.mY;
 }
 
-bool TranslocationFunctions::IsInInterior(unsigned short pid) noexcept
+bool TranslocationFunctions::IsInExterior(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, false);
 
-    return !player->GetCell()->isExterior();
+    return player->GetCell()->isExterior();
 }
 
 void TranslocationFunctions::GetAngle(unsigned short pid, float *x, float *y, float *z) noexcept

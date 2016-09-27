@@ -201,7 +201,7 @@ void LocalPlayer::setCell()
     int y = GetCell()->mCellId.mIndex.mY;
     ESM::CellId curCell =  player.mCell->getCell()->mCellId;
 
-    if (GetCell()->mName.empty())
+    if (GetCell()->isExterior())
     {
         world->indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
         pos.pos[2] = 0;
@@ -416,8 +416,7 @@ void LocalPlayer::updateCell(bool forceUpdate)
         shouldUpdate = true;
     }
     else if (_cell->isExterior())
-    {
-        
+    {   
         if (_cell->mCellId.mIndex.mX != GetCell()->mCellId.mIndex.mX)
         {
             shouldUpdate = true;
@@ -439,7 +438,8 @@ void LocalPlayer::updateCell(bool forceUpdate)
         (*GetCell()) = *_cell;
         isExterior = _cell->isExterior();
 
-        // Make sure the position is updated before a cell packet is sent
+        // Make sure the position is updated before a cell packet is sent, or else
+        // cell change events in server scripts will have the wrong player position
         updatePosition(true);
         
         RakNet::BitStream bs;
