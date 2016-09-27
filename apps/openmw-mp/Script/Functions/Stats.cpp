@@ -246,6 +246,16 @@ void StatsFunctions::SetCurrentFatigue(unsigned short pid, float value) noexcept
     player->CreatureStats()->mDynamic[2].mCurrent = 0;
 }
 
+int StatsFunctions::GetAttributeCount() noexcept
+{
+    return Attribute::Length;
+}
+
+int StatsFunctions::GetSkillCount() noexcept
+{
+    return Skill::Length;
+}
+
 int StatsFunctions::GetAttributeId(const char *name) noexcept
 {
     for (int x = 0; x < Attribute::Length; x++)
@@ -274,11 +284,17 @@ int StatsFunctions::GetSkillId(const char *name) noexcept
 
 const char *StatsFunctions::GetAttributeName(unsigned short attribute) noexcept
 {
+    if (attribute >= Attribute::Length)
+        return "invalid";
+
     return Attribute::sAttributeNames[attribute].c_str();
 }
 
 const char *StatsFunctions::GetSkillName(unsigned short skill) noexcept
 {
+    if (skill >= Skill::Length)
+        return "invalid";
+
     return Skill::sSkillNames[skill].c_str();
 }
 

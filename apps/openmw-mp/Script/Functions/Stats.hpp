@@ -27,6 +27,8 @@
     {"GetBirthsign",        StatsFunctions::GetBirthsign},\
     {"SetBirthsign",        StatsFunctions::SetBirthsign},\
     \
+    {"GetAttributeCount",   StatsFunctions::GetAttributeCount},\
+    {"GetSkillCount",       StatsFunctions::GetSkillCount},\
     {"GetAttributeId",      StatsFunctions::GetAttributeId},\
     {"GetSkillId",          StatsFunctions::GetSkillId},\
     {"GetAttributeName",    StatsFunctions::GetAttributeName},\
@@ -108,6 +110,8 @@ public:
     static float GetCurrentFatigue(unsigned short pid) noexcept;
     static void SetCurrentFatigue(unsigned short pid, float value) noexcept;
 
+    static int GetAttributeCount() noexcept;
+    static int GetSkillCount() noexcept;
     static int GetAttributeId(const char *name) noexcept;
     static int GetSkillId(const char *name) noexcept;
     static const char *GetAttributeName(unsigned short attribute) noexcept;
