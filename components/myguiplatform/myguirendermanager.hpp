@@ -1,6 +1,10 @@
 #ifndef OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUIRENDERMANAGER_H
 #define OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUIRENDERMANAGER_H
 
+#if defined(OPENGL_ES)
+#  include <GLES/gl.h>
+#endif
+
 #include <MyGUI_RenderManager.h>
 
 #include <osg/ref_ptr>

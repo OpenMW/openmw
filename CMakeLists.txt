@@ -511,7 +511,7 @@ endif(WIN32)
 # Extern
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
-if (USE_QT)
+if (BUILD_OPENCS)
     add_subdirectory (extern/osgQt)
 endif()
 
