@@ -298,7 +298,7 @@ const char *StatsFunctions::GetSkillName(unsigned short skill) noexcept
     return Skill::sSkillNames[skill].c_str();
 }
 
-int StatsFunctions::GetAttribute(unsigned short pid, unsigned short attribute) noexcept
+int StatsFunctions::GetAttributeBase(unsigned short pid, unsigned short attribute) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -309,7 +309,7 @@ int StatsFunctions::GetAttribute(unsigned short pid, unsigned short attribute) n
     return player->CreatureStats()->mAttributes[attribute].mBase;
 }
 
-void StatsFunctions::SetAttribute(unsigned short pid, unsigned short attribute, int value) noexcept
+void StatsFunctions::SetAttributeBase(unsigned short pid, unsigned short attribute, int value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -342,7 +342,7 @@ void StatsFunctions::SetAttributeCurrent(unsigned short pid, unsigned short attr
     player->CreatureStats()->mAttributes[attribute].mCurrent = value;
 }
 
-int StatsFunctions::GetSkill(unsigned short pid, unsigned short skill) noexcept
+int StatsFunctions::GetSkillBase(unsigned short pid, unsigned short skill) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -353,7 +353,7 @@ int StatsFunctions::GetSkill(unsigned short pid, unsigned short skill) noexcept
     return player->NpcStats()->mSkills[skill].mBase;
 }
 
-void StatsFunctions::SetSkill(unsigned short pid, unsigned short skill, int value) noexcept  //TODO: need packet for one value
+void StatsFunctions::SetSkillBase(unsigned short pid, unsigned short skill, int value) noexcept  //TODO: need packet for one value
 {
     Player *player;
     GET_PLAYER(pid, player,);

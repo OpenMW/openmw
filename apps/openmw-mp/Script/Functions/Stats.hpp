@@ -34,12 +34,12 @@
     {"GetAttributeName",    StatsFunctions::GetAttributeName},\
     {"GetSkillName",        StatsFunctions::GetSkillName},\
     \
-    {"GetAttribute",        StatsFunctions::GetAttribute},\
-    {"SetAttribute",        StatsFunctions::SetAttribute},\
+    {"GetAttributeBase",    StatsFunctions::GetAttributeBase},\
+    {"SetAttributeBase",    StatsFunctions::SetAttributeBase},\
     {"GetAttributeCurrent", StatsFunctions::GetAttributeCurrent},\
     {"SetAttributeCurrent", StatsFunctions::SetAttributeCurrent},\
-    {"GetSkill",            StatsFunctions::GetSkill},\
-    {"SetSkill",            StatsFunctions::SetSkill},\
+    {"GetSkillBase",        StatsFunctions::GetSkillBase},\
+    {"SetSkillBase",        StatsFunctions::SetSkillBase},\
     {"GetSkillCurrent",     StatsFunctions::GetSkillCurrent},\
     {"SetSkillCurrent",     StatsFunctions::SetSkillCurrent},\
     \
@@ -81,9 +81,6 @@ public:
     static void SetRace(unsigned short pid, const char *race) noexcept;
     static const char *GetRace(unsigned short pid) noexcept;
 
-    static void SetClass(unsigned short pid, const char *name) noexcept;
-    static const char *GetClass(unsigned short pid) noexcept;
-
     static void SetHead(unsigned short pid, const char *head) noexcept;
     static const char *GetHead(unsigned short pid) noexcept;
 
@@ -118,13 +115,13 @@ public:
     static const char *GetAttributeName(unsigned short attribute) noexcept;
     static const char *GetSkillName(unsigned short skill) noexcept;
 
-    static int GetAttribute(unsigned short pid, unsigned short attribute) noexcept;
-    static void SetAttribute(unsigned short pid, unsigned short attribute, int value) noexcept;
+    static int GetAttributeBase(unsigned short pid, unsigned short attribute) noexcept;
+    static void SetAttributeBase(unsigned short pid, unsigned short attribute, int value) noexcept;
     static int GetAttributeCurrent(unsigned short pid, unsigned short attribute) noexcept;
     static void SetAttributeCurrent(unsigned short pid, unsigned short attribute, int value) noexcept;
 
-    static int GetSkill(unsigned short pid, unsigned short skill) noexcept;
-    static void SetSkill(unsigned short pid, unsigned short skill, int value) noexcept;
+    static int GetSkillBase(unsigned short pid, unsigned short skill) noexcept;
+    static void SetSkillBase(unsigned short pid, unsigned short skill, int value) noexcept;
     static int GetSkillCurrent(unsigned short pid, unsigned short skill) noexcept;
     static void SetSkillCurrent(unsigned short pid, unsigned short skill, int value) noexcept;
 
