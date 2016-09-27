@@ -36,30 +36,31 @@
     \
     {"GetAttribute",        StatsFunctions::GetAttribute},\
     {"SetAttribute",        StatsFunctions::SetAttribute},\
-    {"GetCurrentAttribute", StatsFunctions::GetCurrentAttribute},\
-    {"SetCurrentAttribute", StatsFunctions::SetCurrentAttribute},\
+    {"GetAttributeCurrent", StatsFunctions::GetAttributeCurrent},\
+    {"SetAttributeCurrent", StatsFunctions::SetAttributeCurrent},\
     {"GetSkill",            StatsFunctions::GetSkill},\
     {"SetSkill",            StatsFunctions::SetSkill},\
-    {"GetCurrentSkill",     StatsFunctions::GetCurrentSkill},\
-    {"SetCurrentSkill",     StatsFunctions::SetCurrentSkill},\
+    {"GetSkillCurrent",     StatsFunctions::GetSkillCurrent},\
+    {"SetSkillCurrent",     StatsFunctions::SetSkillCurrent},\
     \
-    {"GetHealth",           StatsFunctions::GetHealth},\
-    {"SetHealth",           StatsFunctions::SetHealth},\
-    {"GetCurrentHealth",    StatsFunctions::GetCurrentHealth},\
-    {"SetCurrentHealth",    StatsFunctions::SetCurrentHealth},\
+    {"GetHealthBase",       StatsFunctions::GetHealthBase},\
+    {"SetHealthBase",       StatsFunctions::SetHealthBase},\
+    {"GetHealthCurrent",    StatsFunctions::GetHealthCurrent},\
+    {"SetHealthCurrent",    StatsFunctions::SetHealthCurrent},\
     \
-    {"GetMagicka",          StatsFunctions::GetMagicka},\
-    {"SetMagicka",          StatsFunctions::SetMagicka},\
-    {"GetCurrentMagicka",   StatsFunctions::GetCurrentMagicka},\
-    {"SetCurrentMagicka",   StatsFunctions::SetCurrentMagicka},\
+    {"GetMagickaBase",      StatsFunctions::GetMagickaBase},\
+    {"SetMagickaBase",      StatsFunctions::SetMagickaBase},\
+    {"GetMagickaCurrent",   StatsFunctions::GetMagickaCurrent},\
+    {"SetMagickaCurrent",   StatsFunctions::SetMagickaCurrent},\
     \
-    {"SetFatigue",          StatsFunctions::SetFatigue},\
-    {"GetFatigue",          StatsFunctions::GetFatigue},\
-    {"SetCurrentFatigue",   StatsFunctions::SetCurrentFatigue},\
-    {"GetCurrentFatigue",   StatsFunctions::GetCurrentFatigue},\
+    {"SetFatigueBase",      StatsFunctions::SetFatigueBase},\
+    {"GetFatigueBase",      StatsFunctions::GetFatigueBase},\
+    {"SetFatigueCurrent",   StatsFunctions::SetFatigueCurrent},\
+    {"GetFatigueCurrent",   StatsFunctions::GetFatigueCurrent},\
     \
-    {"GetIncreaseSkill",    StatsFunctions::GetIncreaseSkill},\
-    {"SetIncreaseSkill",    StatsFunctions::SetIncreaseSkill},\
+    {"GetSkillIncrease",    StatsFunctions::GetSkillIncrease},\
+    {"SetSkillIncrease",    StatsFunctions::SetSkillIncrease},\
+    \
     {"SetCharGenStage",     StatsFunctions::SetCharGenStage},\
     {"Resurrect",           StatsFunctions::Resurrect},\
     {"SendBaseInfo",        StatsFunctions::SendBaseInfo},\
@@ -95,20 +96,20 @@ public:
     static int GetLevel(unsigned short pid) noexcept;
     static void SetLevel(unsigned short pid, int value) noexcept;
 
-    static float GetHealth(unsigned short pid) noexcept;
-    static void SetHealth(unsigned short pid, float value) noexcept;
-    static float GetCurrentHealth(unsigned short pid) noexcept;
-    static void SetCurrentHealth(unsigned short pid, float value) noexcept;
+    static float GetHealthBase(unsigned short pid) noexcept;
+    static void SetHealthBase(unsigned short pid, float value) noexcept;
+    static float GetHealthCurrent(unsigned short pid) noexcept;
+    static void SetHealthCurrent(unsigned short pid, float value) noexcept;
 
-    static float GetMagicka(unsigned short pid) noexcept;
-    static void SetMagicka(unsigned short pid, float value) noexcept;
-    static float GetCurrentMagicka(unsigned short pid) noexcept;
-    static void SetCurrentMagicka(unsigned short pid, float value) noexcept;
+    static float GetMagickaBase(unsigned short pid) noexcept;
+    static void SetMagickaBase(unsigned short pid, float value) noexcept;
+    static float GetMagickaCurrent(unsigned short pid) noexcept;
+    static void SetMagickaCurrent(unsigned short pid, float value) noexcept;
 
-    static float GetFatigue(unsigned short pid) noexcept;
-    static void SetFatigue(unsigned short pid, float value) noexcept;
-    static float GetCurrentFatigue(unsigned short pid) noexcept;
-    static void SetCurrentFatigue(unsigned short pid, float value) noexcept;
+    static float GetFatigueBase(unsigned short pid) noexcept;
+    static void SetFatigueBase(unsigned short pid, float value) noexcept;
+    static float GetFatigueCurrent(unsigned short pid) noexcept;
+    static void SetFatigueCurrent(unsigned short pid, float value) noexcept;
 
     static int GetAttributeCount() noexcept;
     static int GetSkillCount() noexcept;
@@ -119,16 +120,16 @@ public:
 
     static int GetAttribute(unsigned short pid, unsigned short attribute) noexcept;
     static void SetAttribute(unsigned short pid, unsigned short attribute, int value) noexcept;
-    static int GetCurrentAttribute(unsigned short pid, unsigned short attribute) noexcept;
-    static void SetCurrentAttribute(unsigned short pid, unsigned short attribute, int value) noexcept;
+    static int GetAttributeCurrent(unsigned short pid, unsigned short attribute) noexcept;
+    static void SetAttributeCurrent(unsigned short pid, unsigned short attribute, int value) noexcept;
 
     static int GetSkill(unsigned short pid, unsigned short skill) noexcept;
     static void SetSkill(unsigned short pid, unsigned short skill, int value) noexcept;
-    static int GetCurrentSkill(unsigned short pid, unsigned short skill) noexcept;
-    static void SetCurrentSkill(unsigned short pid, unsigned short skill, int value) noexcept;
+    static int GetSkillCurrent(unsigned short pid, unsigned short skill) noexcept;
+    static void SetSkillCurrent(unsigned short pid, unsigned short skill, int value) noexcept;
 
-    static int GetIncreaseSkill(unsigned short pid, unsigned int pos) noexcept;
-    static void SetIncreaseSkill(unsigned short pid, unsigned int pos, int value) noexcept;
+    static int GetSkillIncrease(unsigned short pid, unsigned int pos) noexcept;
+    static void SetSkillIncrease(unsigned short pid, unsigned int pos, int value) noexcept;
 
     static void Resurrect(unsigned short pid);
     static void SetCharGenStage(unsigned short pid, int start, int end) noexcept;
