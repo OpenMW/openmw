@@ -248,7 +248,7 @@ void StatsFunctions::SetCurrentFatigue(unsigned short pid, float value) noexcept
 
 int StatsFunctions::GetAttributeId(const char *name) noexcept
 {
-    for (int x = 0; x < 8; x++)
+    for (int x = 0; x < Attribute::Length; x++)
     {
         if (Misc::StringUtils::ciEqual(name, Attribute::sAttributeNames[x]))
         {
@@ -261,7 +261,7 @@ int StatsFunctions::GetAttributeId(const char *name) noexcept
 
 int StatsFunctions::GetSkillId(const char *name) noexcept
 {
-    for (int x = 0; x < 27; x++)
+    for (int x = 0; x < Skill::Length; x++)
     {
         if (Misc::StringUtils::ciEqual(name, Skill::sSkillNames[x]))
         {
@@ -287,7 +287,7 @@ int StatsFunctions::GetAttribute(unsigned short pid, unsigned short attribute) n
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    if (attribute > 7)
+    if (attribute >= Attribute::Length)
         return 0;
 
     return player->CreatureStats()->mAttributes[attribute].mBase;
@@ -298,7 +298,7 @@ void StatsFunctions::SetAttribute(unsigned short pid, unsigned short attribute, 
     Player *player;
     GET_PLAYER(pid, player,);
 
-    if (attribute > 7)
+    if (attribute >= Attribute::Length)
         return;
 
     player->CreatureStats()->mAttributes[attribute].mBase = value;
@@ -309,7 +309,7 @@ int StatsFunctions::GetCurrentAttribute(unsigned short pid, unsigned short attri
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    if (attribute > 7)
+    if (attribute >= Attribute::Length)
         return 0;
 
     return player->CreatureStats()->mAttributes[attribute].mCurrent;
@@ -320,7 +320,7 @@ void StatsFunctions::SetCurrentAttribute(unsigned short pid, unsigned short attr
     Player *player;
     GET_PLAYER(pid, player,);
 
-    if (attribute > 7)
+    if (attribute >= Attribute::Length)
         return;
 
     player->CreatureStats()->mAttributes[attribute].mCurrent = value;
@@ -331,7 +331,7 @@ int StatsFunctions::GetSkill(unsigned short pid, unsigned short skill) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    if (skill > 27)
+    if (skill >= Skill::Length)
         return 0;
 
     return player->NpcStats()->mSkills[skill].mBase;
@@ -342,7 +342,7 @@ void StatsFunctions::SetSkill(unsigned short pid, unsigned short skill, int valu
     Player *player;
     GET_PLAYER(pid, player,);
 
-    if (skill > 27)
+    if (skill >= Skill::Length)
         return;
 
     player->NpcStats()->mSkills[skill].mBase = value;
@@ -355,7 +355,7 @@ int StatsFunctions::GetCurrentSkill(unsigned short pid, unsigned short skill) no
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    if (skill > 27)
+    if (skill >= Skill::Length)
         return 0;
 
     return player->NpcStats()->mSkills[skill].mCurrent;
@@ -366,7 +366,7 @@ void StatsFunctions::SetCurrentSkill(unsigned short pid, unsigned short skill, i
     Player *player;
     GET_PLAYER(pid, player,);
 
-    if (skill > 27)
+    if (skill >= Skill::Length)
         return;
 
     player->NpcStats()->mSkills[skill].mCurrent = value;
