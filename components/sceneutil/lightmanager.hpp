@@ -1,6 +1,10 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_LIGHTMANAGER_H
 #define OPENMW_COMPONENTS_SCENEUTIL_LIGHTMANAGER_H
 
+#if defined(OPENGL_ES)
+#  include <GLES/gl.h>
+#endif
+
 #include <osg/Light>
 
 #include <osg/Group>

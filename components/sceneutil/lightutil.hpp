@@ -1,6 +1,10 @@
 #ifndef OPENMW_COMPONENTS_LIGHTUTIL_H
 #define OPENMW_COMPONENTS_LIGHTUTIL_H
 
+#if defined(OPENGL_ES)
+#  include <GLES/gl.h>
+#endif
+
 namespace osg
 {
     class Group;
