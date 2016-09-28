@@ -94,20 +94,20 @@ public:
     static int GetLevel(unsigned short pid) noexcept;
     static void SetLevel(unsigned short pid, int value) noexcept;
 
-    static float GetHealthBase(unsigned short pid) noexcept;
-    static void SetHealthBase(unsigned short pid, float value) noexcept;
-    static float GetHealthCurrent(unsigned short pid) noexcept;
-    static void SetHealthCurrent(unsigned short pid, float value) noexcept;
+    static double GetHealthBase(unsigned short pid) noexcept;
+    static void SetHealthBase(unsigned short pid, double value) noexcept;
+    static double GetHealthCurrent(unsigned short pid) noexcept;
+    static void SetHealthCurrent(unsigned short pid, double value) noexcept;
 
-    static float GetMagickaBase(unsigned short pid) noexcept;
-    static void SetMagickaBase(unsigned short pid, float value) noexcept;
-    static float GetMagickaCurrent(unsigned short pid) noexcept;
-    static void SetMagickaCurrent(unsigned short pid, float value) noexcept;
+    static double GetMagickaBase(unsigned short pid) noexcept;
+    static void SetMagickaBase(unsigned short pid, double value) noexcept;
+    static double GetMagickaCurrent(unsigned short pid) noexcept;
+    static void SetMagickaCurrent(unsigned short pid, double value) noexcept;
 
-    static float GetFatigueBase(unsigned short pid) noexcept;
-    static void SetFatigueBase(unsigned short pid, float value) noexcept;
-    static float GetFatigueCurrent(unsigned short pid) noexcept;
-    static void SetFatigueCurrent(unsigned short pid, float value) noexcept;
+    static double GetFatigueBase(unsigned short pid) noexcept;
+    static void SetFatigueBase(unsigned short pid, double value) noexcept;
+    static double GetFatigueCurrent(unsigned short pid) noexcept;
+    static void SetFatigueCurrent(unsigned short pid, double value) noexcept;
 
     static int GetAttributeCount() noexcept;
     static int GetSkillCount() noexcept;

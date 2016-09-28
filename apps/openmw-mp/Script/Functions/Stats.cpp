@@ -137,7 +137,7 @@ void StatsFunctions::SetIsMale(unsigned short pid, int value) noexcept
 int StatsFunctions::GetLevel(unsigned short pid) noexcept
 {
     Player *player;
-    GET_PLAYER(pid, player, 0.f);
+    GET_PLAYER(pid, player, 0.0f);
 
     return player->CreatureStats()->mLevel;
 }
@@ -150,15 +150,15 @@ void StatsFunctions::SetLevel(unsigned short pid, int value) noexcept
     player->CreatureStats()->mLevel = value;
 }
 
-float StatsFunctions::GetHealthBase(unsigned short pid) noexcept
+double StatsFunctions::GetHealthBase(unsigned short pid) noexcept
 {
     Player *player;
-    GET_PLAYER(pid, player,0.f);
+    GET_PLAYER(pid, player, 0.0f);
 
     return player->CreatureStats()->mDynamic[0].mBase;
 }
 
-void StatsFunctions::SetHealthBase(unsigned short pid, float value) noexcept
+void StatsFunctions::SetHealthBase(unsigned short pid, double value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -166,15 +166,15 @@ void StatsFunctions::SetHealthBase(unsigned short pid, float value) noexcept
     player->CreatureStats()->mDynamic[0].mBase = value;
 }
 
-float StatsFunctions::GetHealthCurrent(unsigned short pid) noexcept
+double StatsFunctions::GetHealthCurrent(unsigned short pid) noexcept
 {
     Player *player;
-    GET_PLAYER(pid, player, 0.f);
+    GET_PLAYER(pid, player, 0.0f);
 
     return player->CreatureStats()->mDynamic[0].mCurrent;
 }
 
-void StatsFunctions::SetHealthCurrent(unsigned short pid, float value) noexcept
+void StatsFunctions::SetHealthCurrent(unsigned short pid, double value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -182,15 +182,15 @@ void StatsFunctions::SetHealthCurrent(unsigned short pid, float value) noexcept
     player->CreatureStats()->mDynamic[0].mCurrent = 0;
 }
 
-float StatsFunctions::GetMagickaBase(unsigned short pid) noexcept
+double StatsFunctions::GetMagickaBase(unsigned short pid) noexcept
 {
     Player *player;
-    GET_PLAYER(pid, player,0.f);
+    GET_PLAYER(pid, player, 0.0f);
 
     return player->CreatureStats()->mDynamic[1].mBase;
 }
 
-void StatsFunctions::SetMagickaBase(unsigned short pid, float value) noexcept
+void StatsFunctions::SetMagickaBase(unsigned short pid, double value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -198,15 +198,15 @@ void StatsFunctions::SetMagickaBase(unsigned short pid, float value) noexcept
     player->CreatureStats()->mDynamic[1].mBase = value;
 }
 
-float StatsFunctions::GetMagickaCurrent(unsigned short pid) noexcept
+double StatsFunctions::GetMagickaCurrent(unsigned short pid) noexcept
 {
     Player *player;
-    GET_PLAYER(pid, player, 0.f);
+    GET_PLAYER(pid, player, 0.0f);
 
     return player->CreatureStats()->mDynamic[1].mCurrent;
 }
 
-void StatsFunctions::SetMagickaCurrent(unsigned short pid, float value) noexcept
+void StatsFunctions::SetMagickaCurrent(unsigned short pid, double value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -214,15 +214,15 @@ void StatsFunctions::SetMagickaCurrent(unsigned short pid, float value) noexcept
     player->CreatureStats()->mDynamic[1].mCurrent = 0;
 }
 
-float StatsFunctions::GetFatigueBase(unsigned short pid) noexcept
+double StatsFunctions::GetFatigueBase(unsigned short pid) noexcept
 {
     Player *player;
-    GET_PLAYER(pid, player,0.f);
+    GET_PLAYER(pid, player, 0.0f);
 
     return player->CreatureStats()->mDynamic[2].mBase;
 }
 
-void StatsFunctions::SetFatigueBase(unsigned short pid, float value) noexcept
+void StatsFunctions::SetFatigueBase(unsigned short pid, double value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -230,15 +230,15 @@ void StatsFunctions::SetFatigueBase(unsigned short pid, float value) noexcept
     player->CreatureStats()->mDynamic[2].mBase = value;
 }
 
-float StatsFunctions::GetFatigueCurrent(unsigned short pid) noexcept
+double StatsFunctions::GetFatigueCurrent(unsigned short pid) noexcept
 {
     Player *player;
-    GET_PLAYER(pid, player, 0.f);
+    GET_PLAYER(pid, player, 0.0f);
 
     return player->CreatureStats()->mDynamic[2].mCurrent;
 }
 
-void StatsFunctions::SetFatigueCurrent(unsigned short pid, float value) noexcept
+void StatsFunctions::SetFatigueCurrent(unsigned short pid, double value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -362,8 +362,6 @@ void StatsFunctions::SetSkillBase(unsigned short pid, unsigned short skill, int 
         return;
 
     player->NpcStats()->mSkills[skill].mBase = value;
-
-    //DEBUG_PRINTF("SetSkill(%d, %d, %d)\n", pid, skill, value);
 }
 
 int StatsFunctions::GetSkillCurrent(unsigned short pid, unsigned short skill) noexcept
