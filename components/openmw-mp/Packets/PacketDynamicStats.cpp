@@ -1,5 +1,5 @@
 //
-// Created by David Cernat on 28.09.16.
+// Created by koncord on 13.01.16.
 //
 
 #include "PacketDynamicStats.hpp"

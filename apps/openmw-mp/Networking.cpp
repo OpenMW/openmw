@@ -233,7 +233,7 @@ void Networking::Update(RakNet::Packet *packet)
             myPacket->Read(player);
             myPacket->Send(player, true);
 
-            Script::Call<Script::CallbackIdentity("OnPlayerUpdateEquiped")>(player->GetID());
+            Script::Call<Script::CallbackIdentity("OnPlayerChangeEquipment")>(player->GetID());
 
             break;
         }
