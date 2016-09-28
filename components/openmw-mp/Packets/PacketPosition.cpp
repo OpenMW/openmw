@@ -10,7 +10,7 @@ using namespace mwmp;
 
 PacketPosition::PacketPosition(RakNet::RakPeerInterface *peer) : BasePacket(peer)
 {
-    packetID = ID_GAME_UPDATE_POS;
+    packetID = ID_GAME_POS;
     priority = MEDIUM_PRIORITY;
     //reliability = UNRELIABLE_SEQUENCED;
 }

@@ -223,13 +223,13 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             }
             break;
         }
-        case ID_GAME_UPDATE_POS:
+        case ID_GAME_POS:
         {
             if (id == myid)
             {
                 if (packet->length != myPacket->headerSize())
                 {
-                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "ID_GAME_UPDATE_POS changed by server");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "ID_GAME_POS changed by server");
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
                     getLocalPlayer()->setPosition();
                 }

@@ -58,7 +58,7 @@ void TranslocationFunctions::SetPos(unsigned short pid, double x, double y, doub
     player->Position()->pos[1] = y;
     player->Position()->pos[2] = z;
 
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_POS)->Send(player, false);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_POS)->Send(player, false);
 }
 
 void TranslocationFunctions::SetCell(unsigned short pid, const char *name) noexcept
@@ -183,5 +183,5 @@ void TranslocationFunctions::SetAngle(unsigned short pid, double x, double y, do
     player->Position()->rot[1] = y;
     player->Position()->rot[2] = z;
 
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_POS)->Send(player, false);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_POS)->Send(player, false);
 }

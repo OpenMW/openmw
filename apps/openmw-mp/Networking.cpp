@@ -152,9 +152,9 @@ void Networking::Update(RakNet::Packet *packet)
 
             break;
         }*/
-        case ID_GAME_UPDATE_POS:
+        case ID_GAME_POS:
         {
-            //DEBUG_PRINTF("ID_GAME_UPDATE_POS \n");
+            //DEBUG_PRINTF("ID_GAME_POS \n");
 
             if (!player->CreatureStats()->mDead)
             {
@@ -291,7 +291,7 @@ void Networking::Update(RakNet::Packet *packet)
             //packetResurrect.Read(player);
             player->CreatureStats()->mDead = false;
             myPacket->Send(player, true);
-            controller->GetPacket(ID_GAME_UPDATE_POS)->RequestData(player->guid);
+            controller->GetPacket(ID_GAME_POS)->RequestData(player->guid);
             controller->GetPacket(ID_GAME_CELL)->RequestData(player->guid);
 
             Script::Call<Script::CallbackIdentity("OnPlayerResurrect")>(player->GetID());
@@ -363,7 +363,7 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
 {
     controller->GetPacket(ID_GAME_BASE_INFO)->RequestData(guid);
     controller->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->RequestData(guid);
-    controller->GetPacket(ID_GAME_UPDATE_POS)->RequestData(guid);
+    controller->GetPacket(ID_GAME_POS)->RequestData(guid);
     controller->GetPacket(ID_GAME_CELL)->RequestData(guid);
     controller->GetPacket(ID_GAME_EQUIPMENT)->RequestData(guid);
 
@@ -375,7 +375,7 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
         controller->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_ATTRIBUTE)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_SKILL)->Send(pl->second, guid);
-        controller->GetPacket(ID_GAME_UPDATE_POS)->Send(pl->second, guid);
+        controller->GetPacket(ID_GAME_POS)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_CELL)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_EQUIPMENT)->Send(pl->second, guid);
     }
