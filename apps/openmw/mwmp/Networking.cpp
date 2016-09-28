@@ -128,8 +128,7 @@ void Networking::Connect(const std::string &ip, unsigned short port)
                 case ID_INVALID_PASSWORD:
                 {
                     errmsg = "Connection failed.\n"
-                            "The client or server is outdated.\n"
-                            "Ask your server administrator to resolve this problem.";
+                            "The client or server is outdated.";
                     queue = false;
                     break;
                 }
