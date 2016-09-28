@@ -179,7 +179,7 @@ void StatsFunctions::SetHealthCurrent(unsigned short pid, double value) noexcept
     Player *player;
     GET_PLAYER(pid, player,);
 
-    player->CreatureStats()->mDynamic[0].mCurrent = 0;
+    player->CreatureStats()->mDynamic[0].mCurrent = value;
 }
 
 double StatsFunctions::GetMagickaBase(unsigned short pid) noexcept
@@ -211,7 +211,7 @@ void StatsFunctions::SetMagickaCurrent(unsigned short pid, double value) noexcep
     Player *player;
     GET_PLAYER(pid, player,);
 
-    player->CreatureStats()->mDynamic[1].mCurrent = 0;
+    player->CreatureStats()->mDynamic[1].mCurrent = value;
 }
 
 double StatsFunctions::GetFatigueBase(unsigned short pid) noexcept
@@ -243,7 +243,7 @@ void StatsFunctions::SetFatigueCurrent(unsigned short pid, double value) noexcep
     Player *player;
     GET_PLAYER(pid, player,);
 
-    player->CreatureStats()->mDynamic[2].mCurrent = 0;
+    player->CreatureStats()->mDynamic[2].mCurrent = value;
 }
 
 int StatsFunctions::GetAttributeCount() noexcept
