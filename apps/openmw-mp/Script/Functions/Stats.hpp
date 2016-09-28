@@ -64,7 +64,7 @@
     {"SetCharGenStage",         StatsFunctions::SetCharGenStage},\
     {"Resurrect",               StatsFunctions::Resurrect},\
     {"SendBaseInfo",            StatsFunctions::SendBaseInfo},\
-
+    \
     {"SendDynamicStatsBase",    StatsFunctions::SendDynamicStatsBase}, \
     {"SendDynamicStatsCurrent", StatsFunctions::SendDynamicStatsCurrent}, \
     {"SendAttributes",          StatsFunctions::SendAttributes},\
