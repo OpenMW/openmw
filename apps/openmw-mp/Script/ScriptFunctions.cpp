@@ -128,5 +128,6 @@ const char *ScriptFunctions::GetServerVersion() noexcept
 
 const char *ScriptFunctions::GetProtocolVersion() noexcept
 {
-    return to_string((int)TES3MP_PROTO_VERSION).c_str();
+    static string version = to_string(TES3MP_PROTO_VERSION);
+    return version.c_str();
 }
