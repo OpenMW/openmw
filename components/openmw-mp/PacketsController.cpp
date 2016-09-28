@@ -11,7 +11,8 @@
 #include "Packets/PacketBaseInfo.hpp"
 #include "components/openmw-mp/Packets/PacketEquiped.hpp"
 #include "Packets/PacketAttack.hpp"
-#include "Packets/PacketMainStats.hpp"
+#include "Packets/PacketDynamicStatsBase.hpp"
+#include "Packets/PacketDynamicStatsCurrent.hpp"
 #include "Packets/PacketResurrect.hpp"
 #include "Packets/PacketDie.hpp"
 #include "Packets/PacketCell.hpp"
@@ -46,7 +47,8 @@ mwmp::PacketsController::PacketsController(RakNet::RakPeerInterface *peer)
     AddPacket<PacketEquiped>(&packets, peer);
 
     AddPacket<PacketAttack>(&packets, peer);
-    AddPacket<PacketMainStats>(&packets, peer);
+    AddPacket<PacketDynamicStatsBase>(&packets, peer);
+    AddPacket<PacketDynamicStatsCurrent>(&packets, peer);
     AddPacket<PacketResurrect>(&packets, peer);
 
     AddPacket<PacketDie>(&packets, peer);

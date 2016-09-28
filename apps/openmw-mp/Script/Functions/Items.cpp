@@ -16,8 +16,8 @@ void ItemFunctions::AddItem(unsigned short pid, const char* itemName, unsigned s
 
 
 
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(player, true);*/
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->Send(player, false);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->Send(player, true);*/
     LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");
 }
 

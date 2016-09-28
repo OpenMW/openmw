@@ -49,7 +49,7 @@ void LocalPlayer::Update()
     updateAttackState();
     updateDeadState();
     updateInventory();
-    updateBaseStats();
+    updateDynamicStats();
     updateClassStats();
 }
 
@@ -58,7 +58,7 @@ MWWorld::Ptr LocalPlayer::GetPlayerPtr()
     return MWBase::Environment::get().getWorld()->getPlayerPtr();
 }
 
-void LocalPlayer::updateBaseStats(bool forceUpdate)
+void LocalPlayer::updateDynamicStats(bool forceUpdate)
 {
     MWWorld::Ptr player = GetPlayerPtr();
 
@@ -85,7 +85,7 @@ void LocalPlayer::updateBaseStats(bool forceUpdate)
 
         timer = 0;
 
-        GetNetworking()->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(this);
+        GetNetworking()->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->Send(this);
 
     }
 }
@@ -541,7 +541,7 @@ bool LocalPlayer::CharGenThread() // ToDo: need fix
 
             if (CharGenStage()->end != 1)
             {
-                updateBaseStats(true);
+                updateDynamicStats(true);
                 updateClassStats(true);
                 SendClass();
                 GetNetworking()->GetPacket(ID_GAME_CHARGEN)->Send(this);

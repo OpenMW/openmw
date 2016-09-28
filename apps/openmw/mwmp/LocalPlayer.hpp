@@ -20,7 +20,7 @@ namespace mwmp
 
         void Update();
 
-        void updateBaseStats(bool forceUpdate = false);
+        void updateDynamicStats(bool forceUpdate = false);
         void updatePosition(bool forceUpdate = false);
         void updateInventory(bool forceUpdate = false);
         void updateAttackState(bool forceUpdate = false);

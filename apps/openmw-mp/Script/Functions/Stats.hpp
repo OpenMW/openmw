@@ -6,68 +6,70 @@
 #define OPENMW_STATS_HPP
 
 #define STATSFUNCTIONS \
-    {"GetName",             StatsFunctions::GetName},\
-    {"SetName",             StatsFunctions::SetName},\
+    {"GetName",                 StatsFunctions::GetName},\
+    {"SetName",                 StatsFunctions::SetName},\
     \
-    {"GetRace",             StatsFunctions::GetRace},\
-    {"SetRace",             StatsFunctions::SetRace},\
+    {"GetRace",                 StatsFunctions::GetRace},\
+    {"SetRace",                 StatsFunctions::SetRace},\
     \
-    {"GetHead",             StatsFunctions::GetHead},\
-    {"SetHead",             StatsFunctions::SetHead},\
+    {"GetHead",                 StatsFunctions::GetHead},\
+    {"SetHead",                 StatsFunctions::SetHead},\
     \
-    {"GetHair",             StatsFunctions::GetHairstyle},\
-    {"SetHair",             StatsFunctions::SetHairstyle},\
+    {"GetHair",                 StatsFunctions::GetHairstyle},\
+    {"SetHair",                 StatsFunctions::SetHairstyle},\
     \
-    {"GetIsMale",           StatsFunctions::GetIsMale},\
-    {"SetIsMale",           StatsFunctions::SetIsMale},\
+    {"GetIsMale",               StatsFunctions::GetIsMale},\
+    {"SetIsMale",               StatsFunctions::SetIsMale},\
     \
-    {"GetLevel",            StatsFunctions::GetLevel},\
-    {"SetLevel",            StatsFunctions::SetLevel},\
+    {"GetLevel",                StatsFunctions::GetLevel},\
+    {"SetLevel",                StatsFunctions::SetLevel},\
     \
-    {"GetBirthsign",        StatsFunctions::GetBirthsign},\
-    {"SetBirthsign",        StatsFunctions::SetBirthsign},\
+    {"GetBirthsign",            StatsFunctions::GetBirthsign},\
+    {"SetBirthsign",            StatsFunctions::SetBirthsign},\
     \
-    {"GetAttributeCount",   StatsFunctions::GetAttributeCount},\
-    {"GetSkillCount",       StatsFunctions::GetSkillCount},\
-    {"GetAttributeId",      StatsFunctions::GetAttributeId},\
-    {"GetSkillId",          StatsFunctions::GetSkillId},\
-    {"GetAttributeName",    StatsFunctions::GetAttributeName},\
-    {"GetSkillName",        StatsFunctions::GetSkillName},\
+    {"GetAttributeCount",       StatsFunctions::GetAttributeCount},\
+    {"GetSkillCount",           StatsFunctions::GetSkillCount},\
+    {"GetAttributeId",          StatsFunctions::GetAttributeId},\
+    {"GetSkillId",              StatsFunctions::GetSkillId},\
+    {"GetAttributeName",        StatsFunctions::GetAttributeName},\
+    {"GetSkillName",            StatsFunctions::GetSkillName},\
     \
-    {"GetAttributeBase",    StatsFunctions::GetAttributeBase},\
-    {"SetAttributeBase",    StatsFunctions::SetAttributeBase},\
-    {"GetAttributeCurrent", StatsFunctions::GetAttributeCurrent},\
-    {"SetAttributeCurrent", StatsFunctions::SetAttributeCurrent},\
-    {"GetSkillBase",        StatsFunctions::GetSkillBase},\
-    {"SetSkillBase",        StatsFunctions::SetSkillBase},\
-    {"GetSkillCurrent",     StatsFunctions::GetSkillCurrent},\
-    {"SetSkillCurrent",     StatsFunctions::SetSkillCurrent},\
+    {"GetAttributeBase",        StatsFunctions::GetAttributeBase},\
+    {"SetAttributeBase",        StatsFunctions::SetAttributeBase},\
+    {"GetAttributeCurrent",     StatsFunctions::GetAttributeCurrent},\
+    {"SetAttributeCurrent",     StatsFunctions::SetAttributeCurrent},\
+    {"GetSkillBase",            StatsFunctions::GetSkillBase},\
+    {"SetSkillBase",            StatsFunctions::SetSkillBase},\
+    {"GetSkillCurrent",         StatsFunctions::GetSkillCurrent},\
+    {"SetSkillCurrent",         StatsFunctions::SetSkillCurrent},\
     \
-    {"GetHealthBase",       StatsFunctions::GetHealthBase},\
-    {"SetHealthBase",       StatsFunctions::SetHealthBase},\
-    {"GetHealthCurrent",    StatsFunctions::GetHealthCurrent},\
-    {"SetHealthCurrent",    StatsFunctions::SetHealthCurrent},\
+    {"GetHealthBase",           StatsFunctions::GetHealthBase},\
+    {"SetHealthBase",           StatsFunctions::SetHealthBase},\
+    {"GetHealthCurrent",        StatsFunctions::GetHealthCurrent},\
+    {"SetHealthCurrent",        StatsFunctions::SetHealthCurrent},\
     \
-    {"GetMagickaBase",      StatsFunctions::GetMagickaBase},\
-    {"SetMagickaBase",      StatsFunctions::SetMagickaBase},\
-    {"GetMagickaCurrent",   StatsFunctions::GetMagickaCurrent},\
-    {"SetMagickaCurrent",   StatsFunctions::SetMagickaCurrent},\
+    {"GetMagickaBase",          StatsFunctions::GetMagickaBase},\
+    {"SetMagickaBase",          StatsFunctions::SetMagickaBase},\
+    {"GetMagickaCurrent",       StatsFunctions::GetMagickaCurrent},\
+    {"SetMagickaCurrent",       StatsFunctions::SetMagickaCurrent},\
     \
-    {"SetFatigueBase",      StatsFunctions::SetFatigueBase},\
-    {"GetFatigueBase",      StatsFunctions::GetFatigueBase},\
-    {"SetFatigueCurrent",   StatsFunctions::SetFatigueCurrent},\
-    {"GetFatigueCurrent",   StatsFunctions::GetFatigueCurrent},\
+    {"SetFatigueBase",          StatsFunctions::SetFatigueBase},\
+    {"GetFatigueBase",          StatsFunctions::GetFatigueBase},\
+    {"SetFatigueCurrent",       StatsFunctions::SetFatigueCurrent},\
+    {"GetFatigueCurrent",       StatsFunctions::GetFatigueCurrent},\
     \
-    {"GetSkillIncrease",    StatsFunctions::GetSkillIncrease},\
-    {"SetSkillIncrease",    StatsFunctions::SetSkillIncrease},\
+    {"GetSkillIncrease",        StatsFunctions::GetSkillIncrease},\
+    {"SetSkillIncrease",        StatsFunctions::SetSkillIncrease},\
     \
-    {"SetCharGenStage",     StatsFunctions::SetCharGenStage},\
-    {"Resurrect",           StatsFunctions::Resurrect},\
-    {"SendBaseInfo",        StatsFunctions::SendBaseInfo},\
-    {"SendAttributes",      StatsFunctions::SendAttributes},\
-    {"SendBaseStats",       StatsFunctions::SendBaseStats},\
-    {"SendSkills",          StatsFunctions::SendSkills},\
-    {"SendLevel",           StatsFunctions::SendLevel}
+    {"SetCharGenStage",         StatsFunctions::SetCharGenStage},\
+    {"Resurrect",               StatsFunctions::Resurrect},\
+    {"SendBaseInfo",            StatsFunctions::SendBaseInfo},\
+
+    {"SendDynamicStatsBase",    StatsFunctions::SendDynamicStatsBase}, \
+    {"SendDynamicStatsCurrent", StatsFunctions::SendDynamicStatsCurrent}, \
+    {"SendAttributes",          StatsFunctions::SendAttributes},\
+    {"SendSkills",              StatsFunctions::SendSkills},\
+    {"SendLevel",               StatsFunctions::SendLevel}
 
 class StatsFunctions
 {
@@ -130,10 +132,11 @@ public:
 
     static void Resurrect(unsigned short pid);
     static void SetCharGenStage(unsigned short pid, int start, int end) noexcept;
-
     static void SendBaseInfo(unsigned short pid) noexcept;
+
+    static void SendDynamicStatsBase(unsigned short pid) noexcept;
+    static void SendDynamicStatsCurrent(unsigned short pid) noexcept;
     static void SendAttributes(unsigned short pid) noexcept;
-    static void SendBaseStats(unsigned short pid) noexcept;
     static void SendSkills(unsigned short pid) noexcept;
     static void SendLevel(unsigned short pid) noexcept;
 };

@@ -259,14 +259,14 @@ void Networking::Update(RakNet::Packet *packet)
 #endif
 
                 myPacket->Send(player, true);
-                controller->GetPacket(ID_GAME_UPDATE_BASESTATS)->RequestData(player->GetAttack()->target);
+                controller->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->RequestData(player->GetAttack()->target);
             }
             break;
         }
 
-        case ID_GAME_UPDATE_BASESTATS:
+        case ID_GAME_DYNAMICSTATS_CURRENT:
         {
-            DEBUG_PRINTF("ID_GAME_UPDATE_BASESTATS\n");
+            DEBUG_PRINTF("ID_GAME_DYNAMICSTATS_CURRENT\n");
             myPacket->Read(player);
             myPacket->Send(player, true);
             break;
@@ -277,7 +277,6 @@ void Networking::Update(RakNet::Packet *packet)
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_DIE from %s",
                 player->Npc()->mName.c_str());
 
-            //packetMainStats.Read(player);
             player->CreatureStats()->mDead = true;
             myPacket->Send(player, true);
 
@@ -294,7 +293,6 @@ void Networking::Update(RakNet::Packet *packet)
             myPacket->Send(player, true);
             controller->GetPacket(ID_GAME_UPDATE_POS)->RequestData(player->guid);
             controller->GetPacket(ID_GAME_CELL)->RequestData(player->guid);
-            //packetMainStats.RequestData(player->guid);
 
             Script::Call<Script::CallbackIdentity("OnPlayerResurrect")>(player->GetID());
 
@@ -364,7 +362,7 @@ void Networking::Update(RakNet::Packet *packet)
 void Networking::NewPlayer(RakNet::RakNetGUID guid)
 {
     controller->GetPacket(ID_GAME_BASE_INFO)->RequestData(guid);
-    controller->GetPacket(ID_GAME_UPDATE_BASESTATS)->RequestData(guid);
+    controller->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->RequestData(guid);
     controller->GetPacket(ID_GAME_UPDATE_POS)->RequestData(guid);
     controller->GetPacket(ID_GAME_CELL)->RequestData(guid);
     controller->GetPacket(ID_GAME_UPDATE_EQUIPED)->RequestData(guid);
@@ -374,7 +372,7 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
         if (pl->first == guid) continue;
 
         controller->GetPacket(ID_GAME_BASE_INFO)->Send(pl->second, guid);
-        controller->GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(pl->second, guid);
+        controller->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_ATTRIBUTE)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_SKILL)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_UPDATE_POS)->Send(pl->second, guid);

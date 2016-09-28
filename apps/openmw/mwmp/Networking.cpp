@@ -336,11 +336,11 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             }
             break;
         }
-        case ID_GAME_UPDATE_BASESTATS:
+        case ID_GAME_DYNAMICSTATS_CURRENT:
         {
             if (id == myid)
             {
-                getLocalPlayer()->updateBaseStats(true);
+                getLocalPlayer()->updateDynamicStats(true);
                 myPacket->Send(getLocalPlayer(), serverAddr);
             }
             else if (pl != 0)
@@ -393,8 +393,8 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 (*getLocalPlayer()->GetCell()) = *player.getCell()->getCell();
                 myPacket->Send(getLocalPlayer(), serverAddr);
 
-                getLocalPlayer()->updateBaseStats(true);
-                controller.GetPacket(ID_GAME_UPDATE_BASESTATS)->Send(getLocalPlayer(), serverAddr);
+                getLocalPlayer()->updateDynamicStats(true);
+                controller.GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->Send(getLocalPlayer(), serverAddr);
             }
             else if (pl != 0)
             {
