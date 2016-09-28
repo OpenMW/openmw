@@ -83,8 +83,8 @@ void Networking::Update()
         }
     }
 
-    if (!errmsg.empty()) {
-
+    if (!errmsg.empty())
+    {
         LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "%s", errmsg.c_str());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "tes3mp", errmsg.c_str(), 0);
         MWBase::Environment::get().getStateManager()->requestQuit();
@@ -212,8 +212,8 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             {
                 LOG_APPEND(Log::LOG_INFO, "- Packet was about %s", pl == 0 ? "new player" : pl->Npc()->mName.c_str());
 
-                if (pl == 0) {
-
+                if (pl == 0)
+                {
                     LOG_APPEND(Log::LOG_INFO, "%s", "- Exchanging data with new player");
                     pl = Players::NewPlayer(id);
                 }

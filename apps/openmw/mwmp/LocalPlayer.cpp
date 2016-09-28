@@ -72,21 +72,23 @@ void LocalPlayer::updateDynamicStats(bool forceUpdate)
     static MWMechanics::DynamicStat<float> oldFatigue(creatureClass->getFatigue());
 
     static float timer = 0;
-    if (((oldHealth != health || oldMagicka != magicka || oldFatigue != fatigue) &&
-            (timer += MWBase::Environment::get().getFrameDuration()) >= 0.5 ) || forceUpdate)
+
+    if ((timer += MWBase::Environment::get().getFrameDuration()) >= 0.5 || forceUpdate)
     {
-        oldHealth = health;
-        oldMagicka = magicka;
-        oldFatigue = fatigue;
+        if (oldHealth != health || oldMagicka != magicka || oldFatigue != fatigue || forceUpdate)
+        {
+            oldHealth = health;
+            oldMagicka = magicka;
+            oldFatigue = fatigue;
 
-        health.writeState(CreatureStats()->mDynamic[0]);
-        magicka.writeState(CreatureStats()->mDynamic[1]);
-        fatigue.writeState(CreatureStats()->mDynamic[2]);
+            health.writeState(CreatureStats()->mDynamic[0]);
+            magicka.writeState(CreatureStats()->mDynamic[1]);
+            fatigue.writeState(CreatureStats()->mDynamic[2]);
 
-        timer = 0;
+            timer = 0;
 
-        GetNetworking()->GetPacket(ID_GAME_DYNAMICSTATS)->Send(this);
-
+            GetNetworking()->GetPacket(ID_GAME_DYNAMICSTATS)->Send(this);
+        }
     }
 }
 
@@ -99,32 +101,37 @@ void LocalPlayer::updateClassStats(bool forceUpdate)
     bool isUpdatingSkills = false;
     bool isUpdatingAttributes = false;
 
-    for (int i = 0; i < 27; ++i) {
-
-        if (_npcStats.getSkill(i).getBase() != NpcStats()->mSkills[i].mBase) {
+    for (int i = 0; i < 27; ++i)
+    {
+        if (_npcStats.getSkill(i).getBase() != NpcStats()->mSkills[i].mBase)
+        {
             _npcStats.getSkill(i).writeState(NpcStats()->mSkills[i]);
             isUpdatingSkills = true;
         }
     }
 
-    for (int i = 0; i < 8; ++i) {
-
-        if (_npcStats.getAttribute(i).getBase() != CreatureStats()->mAttributes[i].mBase) {
+    for (int i = 0; i < 8; ++i)
+    {
+        if (_npcStats.getAttribute(i).getBase() != CreatureStats()->mAttributes[i].mBase)
+        {
             _npcStats.getAttribute(i).writeState(CreatureStats()->mAttributes[i]);
             isUpdatingAttributes = true;
         }
     }
 
-    if (_npcStats.getLevel() != CreatureStats()->mLevel) {
+    if (_npcStats.getLevel() != CreatureStats()->mLevel)
+    {
         CreatureStats()->mLevel = _npcStats.getLevel();
         GetNetworking()->GetPacket(ID_GAME_LEVEL)->Send(this);
     }
 
-    if (isUpdatingSkills) {
+    if (isUpdatingSkills)
+    {
         GetNetworking()->GetPacket(ID_GAME_SKILL)->Send(this);
     }
 
-    if (isUpdatingAttributes) {
+    if (isUpdatingAttributes)
+    {
         GetNetworking()->GetPacket(ID_GAME_ATTRIBUTE)->Send(this);
     }
 }
@@ -150,7 +157,8 @@ void LocalPlayer::updatePosition(bool forceUpdate)
     {
         posChanged = isChangedPos;
 
-        if (!isJumping && !world->isOnGround(player) && !world->isFlying(player)) {
+        if (!isJumping && !world->isOnGround(player) && !world->isFlying(player))
+        {
             isJumping = true;
         }
 
@@ -162,14 +170,14 @@ void LocalPlayer::updatePosition(bool forceUpdate)
 
         GetNetworking()->GetPacket(ID_GAME_POS)->Send(this);
     }
-    else if (isJumping && world->isOnGround(player)) {
-
+    else if (isJumping && world->isOnGround(player))
+    {
         isJumping = false;
         sentJumpEnd = false;
     }
     // Packet with jump end position has to be sent one tick after above check
-    else if (!sentJumpEnd) {
-
+    else if (!sentJumpEnd)
+    {
         sentJumpEnd = true;
         (*Position()) = _pos;
         GetNetworking()->GetPacket(ID_GAME_POS)->Send(this);
