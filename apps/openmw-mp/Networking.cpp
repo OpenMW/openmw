@@ -259,14 +259,14 @@ void Networking::Update(RakNet::Packet *packet)
 #endif
 
                 myPacket->Send(player, true);
-                controller->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->RequestData(player->GetAttack()->target);
+                controller->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(player->GetAttack()->target);
             }
             break;
         }
 
-        case ID_GAME_DYNAMICSTATS_CURRENT:
+        case ID_GAME_DYNAMICSTATS:
         {
-            DEBUG_PRINTF("ID_GAME_DYNAMICSTATS_CURRENT\n");
+            DEBUG_PRINTF("ID_GAME_DYNAMICSTATS\n");
             myPacket->Read(player);
             myPacket->Send(player, true);
             break;
@@ -362,7 +362,7 @@ void Networking::Update(RakNet::Packet *packet)
 void Networking::NewPlayer(RakNet::RakNetGUID guid)
 {
     controller->GetPacket(ID_GAME_BASE_INFO)->RequestData(guid);
-    controller->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->RequestData(guid);
+    controller->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(guid);
     controller->GetPacket(ID_GAME_POS)->RequestData(guid);
     controller->GetPacket(ID_GAME_CELL)->RequestData(guid);
     controller->GetPacket(ID_GAME_EQUIPMENT)->RequestData(guid);
@@ -372,7 +372,7 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
         if (pl->first == guid) continue;
 
         controller->GetPacket(ID_GAME_BASE_INFO)->Send(pl->second, guid);
-        controller->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->Send(pl->second, guid);
+        controller->GetPacket(ID_GAME_DYNAMICSTATS)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_ATTRIBUTE)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_SKILL)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_POS)->Send(pl->second, guid);

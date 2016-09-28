@@ -14,8 +14,7 @@
 #include <components/openmw-mp/Packets/PacketBaseInfo.hpp>
 #include <components/openmw-mp/Packets/PacketEquipment.hpp>
 #include <components/openmw-mp/Packets/PacketAttack.hpp>
-#include <components/openmw-mp/Packets/PacketDynamicStatsBase.hpp>
-#include <components/openmw-mp/Packets/PacketDynamicStatsCurrent.hpp>
+#include <components/openmw-mp/Packets/PacketDynamicStats.hpp>
 #include <components/openmw-mp/Packets/PacketResurrect.hpp>
 #include <components/openmw-mp/Packets/PacketDie.hpp>
 #include <components/openmw-mp/Packets/PacketCell.hpp>

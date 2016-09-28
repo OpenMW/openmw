@@ -2,8 +2,8 @@
 // Created by koncord on 07.01.16.
 //
 
-#ifndef OPENMW_PACKETCONTAINER_HPP
-#define OPENMW_PACKETCONTAINER_HPP
+#ifndef OPENMW_PACKETEQUIPMENT_HPP
+#define OPENMW_PACKETEQUIPMENT_HPP
 
 #include <components/openmw-mp/Packets/BasePacket.hpp>
 
@@ -18,4 +18,4 @@ namespace mwmp
     };
 }
 
-#endif //OPENMW_PACKETCONTAINER_HPP
+#endif //OPENMW_PACKETEQUIPMENT_HPP

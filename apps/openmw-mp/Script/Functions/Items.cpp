@@ -11,13 +11,9 @@
 
 void ItemFunctions::AddItem(unsigned short pid, const char* itemName, unsigned short count) noexcept
 {
-    /*Player *player;
+    Player *player;
     GET_PLAYER(pid, player,);
 
-
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->Send(player, true);*/
     LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");
 }
 

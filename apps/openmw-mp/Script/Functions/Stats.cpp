@@ -437,20 +437,12 @@ void StatsFunctions::SendBaseInfo(unsigned short pid) noexcept
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, true);
 }
 
-void StatsFunctions::SendDynamicStatsBase(unsigned short pid) noexcept
+void StatsFunctions::SendDynamicStats(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_DYNAMICSTATS_BASE)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_DYNAMICSTATS_BASE)->Send(player, true);
-}
-
-void StatsFunctions::SendDynamicStatsCurrent(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, );
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->Send(player, true);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_DYNAMICSTATS)->Send(player, false);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_DYNAMICSTATS)->Send(player, true);
 }
 
 void StatsFunctions::SendAttributes(unsigned short pid) noexcept

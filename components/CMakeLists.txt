@@ -149,9 +149,9 @@ add_component_dir (openmw-mp
         Log
         PacketsController
         Packets/BasePacket Packets/PacketBaseInfo Packets/PacketPosition Packets/PacketEquipment Packets/PacketAttack
-        Packets/PacketDynamicStatsBase Packets/PacketDynamicStatsCurrent Packets/PacketCell Packets/PacketDrawState
-        Packets/PacketChatMessage Packets/PacketCharGen Packets/PacketAttribute Packets/PacketSkill Packets/PacketLevel
-        Packets/PacketHandshake Packets/PacketGUIBoxes Packets/PacketClass Packets/PacketTime)
+        Packets/PacketDynamicStats Packets/PacketCell Packets/PacketDrawState Packets/PacketChatMessage
+        Packets/PacketCharGen Packets/PacketAttribute Packets/PacketSkill Packets/PacketLevel Packets/PacketHandshake
+        Packets/PacketGUIBoxes Packets/PacketClass Packets/PacketTime)
 
 add_component_dir (fallback
     fallback validate

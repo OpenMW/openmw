@@ -65,8 +65,7 @@
     {"Resurrect",               StatsFunctions::Resurrect},\
     {"SendBaseInfo",            StatsFunctions::SendBaseInfo},\
     \
-    {"SendDynamicStatsBase",    StatsFunctions::SendDynamicStatsBase}, \
-    {"SendDynamicStatsCurrent", StatsFunctions::SendDynamicStatsCurrent}, \
+    {"SendDynamicStats",        StatsFunctions::SendDynamicStats}, \
     {"SendAttributes",          StatsFunctions::SendAttributes},\
     {"SendSkills",              StatsFunctions::SendSkills},\
     {"SendLevel",               StatsFunctions::SendLevel}
@@ -134,8 +133,7 @@ public:
     static void SetCharGenStage(unsigned short pid, int start, int end) noexcept;
     static void SendBaseInfo(unsigned short pid) noexcept;
 
-    static void SendDynamicStatsBase(unsigned short pid) noexcept;
-    static void SendDynamicStatsCurrent(unsigned short pid) noexcept;
+    static void SendDynamicStats(unsigned short pid) noexcept;
     static void SendAttributes(unsigned short pid) noexcept;
     static void SendSkills(unsigned short pid) noexcept;
     static void SendLevel(unsigned short pid) noexcept;
