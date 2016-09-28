@@ -255,7 +255,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 Players::DisconnectPlayer(id);
 
         }
-        case ID_GAME_UPDATE_EQUIPED:
+        case ID_GAME_EQUIPMENT:
         {
             if (id == myid)
             {

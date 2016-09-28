@@ -29,8 +29,8 @@ void ItemFunctions::EquipItem(unsigned short pid, unsigned short slot, const cha
     player->EquipedItem(slot)->refid = itemName;
     player->EquipedItem(slot)->count = count;
 
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_EQUIPED)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_UPDATE_EQUIPED)->Send(player, true);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_EQUIPMENT)->Send(player, false);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_EQUIPMENT)->Send(player, true);
 }
 
 void ItemFunctions::UnequipItem(unsigned short pid, unsigned short slot) noexcept

@@ -9,10 +9,10 @@
 
 namespace mwmp
 {
-    class PacketEquiped : public BasePacket
+    class PacketEquipment : public BasePacket
     {
     public:
-        PacketEquiped(RakNet::RakPeerInterface *peer);
+        PacketEquipment(RakNet::RakPeerInterface *peer);
 
         virtual void Packet(RakNet::BitStream *bs, BasePlayer *player, bool send);
     };

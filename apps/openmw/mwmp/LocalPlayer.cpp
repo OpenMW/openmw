@@ -267,7 +267,7 @@ void LocalPlayer::updateInventory(bool forceUpdate)
     {
         RakNet::BitStream bs;
         bs.ResetWritePointer();
-        GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_UPDATE_EQUIPED)->Packet(&bs, this, true);
+        GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_EQUIPMENT)->Packet(&bs, this, true);
         GetNetworking()->SendData(&bs);
         invChanged = false;
     }

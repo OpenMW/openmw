@@ -226,9 +226,9 @@ void Networking::Update(RakNet::Packet *packet)
 
             break;
         }
-        case ID_GAME_UPDATE_EQUIPED:
+        case ID_GAME_EQUIPMENT:
         {
-            DEBUG_PRINTF("ID_GAME_UPDATE_EQUIPED\n");
+            DEBUG_PRINTF("ID_GAME_EQUIPMENT\n");
 
             myPacket->Read(player);
             myPacket->Send(player, true);
@@ -365,7 +365,7 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
     controller->GetPacket(ID_GAME_DYNAMICSTATS_CURRENT)->RequestData(guid);
     controller->GetPacket(ID_GAME_UPDATE_POS)->RequestData(guid);
     controller->GetPacket(ID_GAME_CELL)->RequestData(guid);
-    controller->GetPacket(ID_GAME_UPDATE_EQUIPED)->RequestData(guid);
+    controller->GetPacket(ID_GAME_EQUIPMENT)->RequestData(guid);
 
     for (TPlayers::iterator pl = players->begin(); pl != players->end(); pl++) //sending other players to new player
     {
@@ -377,7 +377,7 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
         controller->GetPacket(ID_GAME_SKILL)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_UPDATE_POS)->Send(pl->second, guid);
         controller->GetPacket(ID_GAME_CELL)->Send(pl->second, guid);
-        controller->GetPacket(ID_GAME_UPDATE_EQUIPED)->Send(pl->second, guid);
+        controller->GetPacket(ID_GAME_EQUIPMENT)->Send(pl->second, guid);
     }
 
 }

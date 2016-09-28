@@ -9,7 +9,7 @@
 #include "Packets/PacketClass.hpp"
 #include "Packets/PacketPosition.hpp"
 #include "Packets/PacketBaseInfo.hpp"
-#include "components/openmw-mp/Packets/PacketEquiped.hpp"
+#include "components/openmw-mp/Packets/PacketEquipment.hpp"
 #include "Packets/PacketAttack.hpp"
 #include "Packets/PacketDynamicStatsBase.hpp"
 #include "Packets/PacketDynamicStatsCurrent.hpp"
@@ -44,7 +44,7 @@ mwmp::PacketsController::PacketsController(RakNet::RakPeerInterface *peer)
     AddPacket<PacketPosition>(&packets, peer);
     AddPacket<PacketCell>(&packets, peer);
     AddPacket<PacketBaseInfo>(&packets, peer);
-    AddPacket<PacketEquiped>(&packets, peer);
+    AddPacket<PacketEquipment>(&packets, peer);
 
     AddPacket<PacketAttack>(&packets, peer);
     AddPacket<PacketDynamicStatsBase>(&packets, peer);

@@ -2,17 +2,17 @@
 // Created by koncord on 07.01.16.
 //
 
-#include "PacketEquiped.hpp"
+#include "PacketEquipment.hpp"
 #include <components/openmw-mp/NetworkMessages.hpp>
 
 using namespace mwmp;
 
-PacketEquiped::PacketEquiped(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+PacketEquipment::PacketEquipment(RakNet::RakPeerInterface *peer) : BasePacket(peer)
 {
-    packetID = ID_GAME_UPDATE_EQUIPED;
+    packetID = ID_GAME_EQUIPMENT;
 }
 
-void PacketEquiped::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketEquipment::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
     BasePacket::Packet(bs, player, send);
 
