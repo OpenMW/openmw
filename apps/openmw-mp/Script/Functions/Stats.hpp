@@ -128,8 +128,8 @@ public:
     static void SetSkillBase(unsigned short pid, unsigned short skill, int value) noexcept;
     static int GetSkillCurrent(unsigned short pid, unsigned short skill) noexcept;
     static void SetSkillCurrent(unsigned short pid, unsigned short skill, int value) noexcept;
-    static int GetSkillProgress(unsigned short pid, unsigned short skill) noexcept;
-    static void SetSkillProgress(unsigned short pid, unsigned short skill, int value) noexcept;
+    static double GetSkillProgress(unsigned short pid, unsigned short skill) noexcept;
+    static void SetSkillProgress(unsigned short pid, unsigned short skill, double value) noexcept;
 
     static int GetSkillIncrease(unsigned short pid, unsigned int pos) noexcept;
     static void SetSkillIncrease(unsigned short pid, unsigned int pos, int value) noexcept;

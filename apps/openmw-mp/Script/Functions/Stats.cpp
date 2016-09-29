@@ -386,10 +386,10 @@ void StatsFunctions::SetSkillCurrent(unsigned short pid, unsigned short skill, i
     player->NpcStats()->mSkills[skill].mCurrent = value;
 }
 
-int StatsFunctions::GetSkillProgress(unsigned short pid, unsigned short skill) noexcept
+double StatsFunctions::GetSkillProgress(unsigned short pid, unsigned short skill) noexcept
 {
     Player *player;
-    GET_PLAYER(pid, player, 0);
+    GET_PLAYER(pid, player, 0.0f);
 
     if (skill >= Skill::Length)
         return 0;
@@ -397,7 +397,7 @@ int StatsFunctions::GetSkillProgress(unsigned short pid, unsigned short skill) n
     return player->NpcStats()->mSkills[skill].mProgress;
 }
 
-void StatsFunctions::SetSkillProgress(unsigned short pid, unsigned short skill, int value) noexcept
+void StatsFunctions::SetSkillProgress(unsigned short pid, unsigned short skill, double value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
