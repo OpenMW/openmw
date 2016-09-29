@@ -239,12 +239,13 @@ void LocalPlayer::setDynamicStats()
     MWWorld::Ptr player = world->getPlayerPtr();
 
     MWMechanics::CreatureStats *ptrCreatureStats = &player.getClass().getCreatureStats(player);
-
     MWMechanics::DynamicStat<float> dynamicStat;
 
     for (int i = 0; i < 3; ++i)
     {
-        dynamicStat.readState(CreatureStats()->mDynamic[i]);
+        dynamicStat = ptrCreatureStats->getDynamic(i);
+        dynamicStat.setBase(CreatureStats()->mDynamic[i].mBase);
+        dynamicStat.setCurrent(CreatureStats()->mDynamic[i].mCurrent);
         ptrCreatureStats->setDynamic(i, dynamicStat);
     }
 }
