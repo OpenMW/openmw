@@ -14,11 +14,11 @@ void mwmp::PacketClass::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, 
 {
     BasePacket::Packet(bs, player, send);
 
-    RW(player->klass.mId, send);
-    if (player->klass.mId.empty()) // custom class
+    RW(player->charClass.mId, send);
+    if (player->charClass.mId.empty()) // custom class
     {
-        RW(player->klass.mName, send);
-        RW(player->klass.mDescription, send);
-        RW(player->klass.mData, send);
+        RW(player->charClass.mName, send);
+        RW(player->charClass.mDescription, send);
+        RW(player->charClass.mData, send);
     }
 }

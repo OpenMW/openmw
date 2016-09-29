@@ -22,20 +22,20 @@ void CharClassFunctions::SetDefaultClass(unsigned short pid, const char *id) noe
 {
     Player *player;
     GET_PLAYER(pid, player,);
-    player->klass.mId = id;
+    player->charClass.mId = id;
 }
 void CharClassFunctions::SetClassName(unsigned short pid, const char *name) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
-    player->klass.mName = name;
-    player->klass.mId = "";
+    player->charClass.mName = name;
+    player->charClass.mId = "";
 }
 void CharClassFunctions::SetClassDesc(unsigned short pid, const char *desc) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
-    player->klass.mDescription = desc;
+    player->charClass.mDescription = desc;
 }
 void CharClassFunctions::SetClassMajorAttribute(unsigned short pid, unsigned char slot, int attrId) noexcept
 {
@@ -45,14 +45,14 @@ void CharClassFunctions::SetClassMajorAttribute(unsigned short pid, unsigned cha
     if (slot > 1)
         throw invalid_argument("Incorrect attribute slot id");
 
-    player->klass.mData.mAttribute[slot] = attrId;
+    player->charClass.mData.mAttribute[slot] = attrId;
 
 }
 void CharClassFunctions::SetClassSpecialization(unsigned short pid, int spec) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
-    player->klass.mData.mSpecialization = spec;
+    player->charClass.mData.mSpecialization = spec;
 }
 void CharClassFunctions::SetClassMajorSkill(unsigned short pid, unsigned char slot, int skillId) noexcept
 {
@@ -60,7 +60,7 @@ void CharClassFunctions::SetClassMajorSkill(unsigned short pid, unsigned char sl
     GET_PLAYER(pid, player,);
     if (slot > 4)
         throw invalid_argument("Incorrect skill slot id");
-    player->klass.mData.mSkills[slot][1] = skillId;
+    player->charClass.mData.mSkills[slot][1] = skillId;
 }
 void CharClassFunctions::SetClassMinorSkill(unsigned short pid, unsigned char slot, int skillId) noexcept
 {
@@ -68,35 +68,35 @@ void CharClassFunctions::SetClassMinorSkill(unsigned short pid, unsigned char sl
     GET_PLAYER(pid, player,);
     if (slot > 4)
         throw invalid_argument("Incorrect skill slot id");
-    player->klass.mData.mSkills[slot][0] = skillId;
+    player->charClass.mData.mSkills[slot][0] = skillId;
 }
 
 int CharClassFunctions::IsClassDefault(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0);
-    return !player->klass.mId.empty(); // true if default
+    return !player->charClass.mId.empty(); // true if default
 }
 
 const char *CharClassFunctions::GetDefaultClass(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,"");
-    return player->klass.mId.c_str();
+    return player->charClass.mId.c_str();
 }
 
 const char *CharClassFunctions::GetClassName(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,"");
-    return player->klass.mName.c_str();
+    return player->charClass.mName.c_str();
 }
 
 const char *CharClassFunctions::GetClassDesc(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,"");
-    return player->klass.mDescription.c_str();
+    return player->charClass.mDescription.c_str();
 }
 
 int CharClassFunctions::GetClassMajorAttribute(unsigned short pid, unsigned char slot) noexcept
@@ -105,14 +105,14 @@ int CharClassFunctions::GetClassMajorAttribute(unsigned short pid, unsigned char
     GET_PLAYER(pid, player,0);
     if (slot > 1)
         throw invalid_argument("Incorrect attribute slot id");
-    return player->klass.mData.mAttribute[slot];
+    return player->charClass.mData.mAttribute[slot];
 }
 
 int CharClassFunctions::GetClassSpecialization(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0);
-    return player->klass.mData.mSpecialization;
+    return player->charClass.mData.mSpecialization;
 }
 
 int CharClassFunctions::GetClassMajorSkill(unsigned short pid, unsigned char slot) noexcept
@@ -121,7 +121,7 @@ int CharClassFunctions::GetClassMajorSkill(unsigned short pid, unsigned char slo
     GET_PLAYER(pid, player,0);
     if (slot > 4)
         throw invalid_argument("Incorrect skill slot id");
-    return player->klass.mData.mSkills[slot][1];
+    return player->charClass.mData.mSkills[slot][1];
 }
 
 int CharClassFunctions::GetClassMinorSkill(unsigned short pid, unsigned char slot) noexcept
@@ -130,5 +130,5 @@ int CharClassFunctions::GetClassMinorSkill(unsigned short pid, unsigned char slo
     GET_PLAYER(pid, player,0);
     if (slot > 4)
         throw invalid_argument("Incorrect skill slot id");
-    return player->klass.mData.mSkills[slot][0];
+    return player->charClass.mData.mSkills[slot][0];
 }

@@ -48,64 +48,63 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
     MWBase::World *world = MWBase::Environment::get().getWorld();
     MWWorld::Ptr player = world->getPlayerPtr();
 
-    ESM::NPC dedic_pl = *player.get<ESM::NPC>()->mBase;
-    DedicatedPlayer *_player = players[id];
+    ESM::NPC npc = *player.get<ESM::NPC>()->mBase;
+    DedicatedPlayer *dedicPlayer = players[id];
 
-    dedic_pl.mRace = _player->Npc()->mRace;
-    dedic_pl.mHead = _player->Npc()->mHead;
-    dedic_pl.mHair = _player->Npc()->mHair;
-    dedic_pl.mClass = _player->Npc()->mClass;
-    dedic_pl.mName = _player->Npc()->mName;
-    dedic_pl.mFlags = _player->Npc()->mFlags;
+    npc.mRace = dedicPlayer->Npc()->mRace;
+    npc.mHead = dedicPlayer->Npc()->mHead;
+    npc.mHair = dedicPlayer->Npc()->mHair;
+    npc.mClass = dedicPlayer->Npc()->mClass;
+    npc.mName = dedicPlayer->Npc()->mName;
+    npc.mFlags = dedicPlayer->Npc()->mFlags;
 
-    if (_player->state == 0)
+    if (dedicPlayer->state == 0)
     {
-        dedic_pl.mId = "Dedicated Player";
+        npc.mId = "Dedicated Player";
 
-        std::string recid = world->createRecord(dedic_pl)->mId;
+        std::string recid = world->createRecord(npc)->mId;
 
-
-        _player->reference = new MWWorld::ManualRef(world->getStore(), recid, 1);
+        dedicPlayer->reference = new MWWorld::ManualRef(world->getStore(), recid, 1);
     }
 
     // Temporarily spawn or move player to ToddTest whenever setting base info
-    ESM::Position _pos;
-    world->findInteriorPosition("ToddTest", _pos);
+    ESM::Position newPos;
+    world->findInteriorPosition("ToddTest", newPos);
     MWWorld::CellStore *cellStore = world->getInterior("ToddTest");
 
-    if (_player->state == 0)
+    if (dedicPlayer->state == 0)
     {
         LOG_APPEND(Log::LOG_INFO, "- Creating new reference pointer for %s",
-            _player->Npc()->mName.c_str());
+            dedicPlayer->Npc()->mName.c_str());
 
-        MWWorld::Ptr tmp = world->placeObject(_player->reference->getPtr(), cellStore, _pos);
+        MWWorld::Ptr tmp = world->placeObject(dedicPlayer->reference->getPtr(), cellStore, newPos);
 
-        _player->ptr.mCell = tmp.mCell;
-        _player->ptr.mRef = tmp.mRef;
+        dedicPlayer->ptr.mCell = tmp.mCell;
+        dedicPlayer->ptr.mRef = tmp.mRef;
 
-        _player->cell = *_player->ptr.getCell()->getCell();
-        _player->pos = _player->ptr.getRefData().getPosition();
+        dedicPlayer->cell = *dedicPlayer->ptr.getCell()->getCell();
+        dedicPlayer->pos = dedicPlayer->ptr.getRefData().getPosition();
     }
     else
     {
         LOG_APPEND(Log::LOG_INFO, "- Updating reference pointer for %s",
-            _player->Npc()->mName.c_str());
+            dedicPlayer->Npc()->mName.c_str());
 
-        _player->ptr.getBase()->canChangeCell = true;
-        _player->UpdatePtr(world->moveObject(_player->ptr, cellStore, _pos.pos[0], _pos.pos[1], _pos.pos[2]));
+        dedicPlayer->ptr.getBase()->canChangeCell = true;
+        dedicPlayer->UpdatePtr(world->moveObject(dedicPlayer->ptr, cellStore, newPos.pos[0], newPos.pos[1], newPos.pos[2]));
 
-        dedic_pl.mId = players[id]->ptr.get<ESM::NPC>()->mBase->mId;
+        npc.mId = players[id]->ptr.get<ESM::NPC>()->mBase->mId;
 
         MWWorld::ESMStore *store = const_cast<MWWorld::ESMStore *>(&world->getStore());
         MWWorld::Store<ESM::NPC> *esm_store = const_cast<MWWorld::Store<ESM::NPC> *> (&store->get<ESM::NPC>());
 
-        esm_store->insert(dedic_pl);
+        esm_store->insert(npc);
 
-        _player->updateCell();
+        dedicPlayer->updateCell();
     }
 
-    _player->guid = id;
-    _player->state = 2;
+    dedicPlayer->guid = id;
+    dedicPlayer->state = 2;
 
     world->enable(players[id]->ptr);
 }
@@ -126,12 +125,12 @@ void Players::DisconnectPlayer(RakNet::RakNetGUID id)
         world->disable(players[id]->getPtr());
 
         // Move player to ToddTest
-        ESM::Position _pos;
-        world->findInteriorPosition("ToddTest", _pos);
+        ESM::Position newPos;
+        world->findInteriorPosition("ToddTest", newPos);
         MWWorld::CellStore *store = world->getInterior("ToddTest");
 
         players[id]->getPtr().getBase()->canChangeCell = true;
-        world->moveObject(players[id]->getPtr(), store, _pos.pos[0], _pos.pos[1], _pos.pos[2]);
+        world->moveObject(players[id]->getPtr(), store, newPos.pos[0], newPos.pos[1], newPos.pos[2]);
     }
 }
 
@@ -190,16 +189,16 @@ void DedicatedPlayer::Move(float dt)
 {
     if (state != 2) return;
 
-    ESM::Position ref_pos = ptr.getRefData().getPosition();
+    ESM::Position refPos = ptr.getRefData().getPosition();
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
 
     {
-        osg::Vec3f lerp = Lerp(ref_pos.asVec3(), pos.asVec3(), dt * 15);
-        ref_pos.pos[0] = lerp.x();
-        ref_pos.pos[1] = lerp.y();
-        ref_pos.pos[2] = lerp.z();
-        world->moveObject(ptr, ref_pos.pos[0], ref_pos.pos[1], ref_pos.pos[2]);
+        osg::Vec3f lerp = Lerp(refPos.asVec3(), pos.asVec3(), dt * 15);
+        refPos.pos[0] = lerp.x();
+        refPos.pos[1] = lerp.y();
+        refPos.pos[2] = lerp.z();
+        world->moveObject(ptr, refPos.pos[0], refPos.pos[1], refPos.pos[2]);
     }
 
     MWMechanics::Movement *move = &ptr.getClass().getMovementSettings(ptr);
@@ -217,39 +216,39 @@ void Players::Update(float dt)
         DedicatedPlayer *pl = it->second;
         if (pl == 0) continue;
 
-        MWMechanics::NpcStats *npcStats = &pl->ptr.getClass().getNpcStats(pl->getPtr());
+        MWMechanics::NpcStats *ptrNpcStats = &pl->ptr.getClass().getNpcStats(pl->getPtr());
 
         MWMechanics::DynamicStat<float> value;
 
         if (pl->CreatureStats()->mDead)
         {
             value.readState(pl->CreatureStats()->mDynamic[0]);
-            npcStats->setHealth(value);
+            ptrNpcStats->setHealth(value);
             continue;
         }
 
         value.readState(pl->CreatureStats()->mDynamic[0]);
-        npcStats->setHealth(value);
+        ptrNpcStats->setHealth(value);
         value.readState(pl->CreatureStats()->mDynamic[1]);
-        npcStats->setMagicka(value);
+        ptrNpcStats->setMagicka(value);
         value.readState(pl->CreatureStats()->mDynamic[2]);
-        npcStats->setFatigue(value);
+        ptrNpcStats->setFatigue(value);
 
-        if (npcStats->isDead())
-            npcStats->resurrect();
+        if (ptrNpcStats->isDead())
+            ptrNpcStats->resurrect();
 
 
-        npcStats->setAttacked(false);
+        ptrNpcStats->setAttacked(false);
 
-        npcStats->getAiSequence().stopCombat();
+        ptrNpcStats->getAiSequence().stopCombat();
 
-        npcStats->setAlarmed(false);
-        npcStats->setAiSetting(MWMechanics::CreatureStats::AI_Alarm, 0);
-        npcStats->setAiSetting(MWMechanics::CreatureStats::AI_Fight, 0);
-        npcStats->setAiSetting(MWMechanics::CreatureStats::AI_Flee, 0);
-        npcStats->setAiSetting(MWMechanics::CreatureStats::AI_Hello, 0);
+        ptrNpcStats->setAlarmed(false);
+        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Alarm, 0);
+        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Fight, 0);
+        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Flee, 0);
+        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Hello, 0);
 
-        npcStats->setBaseDisposition(255);
+        ptrNpcStats->setBaseDisposition(255);
         pl->Move(dt);
         pl->UpdateDrawState();
     }
@@ -320,8 +319,8 @@ void DedicatedPlayer::UpdateInventory()
 const std::string DedicatedPlayer::GetAnim()
 {
     static string anim;
-    static string anim_dir;
-    static string anim_weap;
+    static string animDir;
+    static string animWeap;
 
     MWMechanics::NpcStats *npcStats = &ptr.getClass().getNpcStats(ptr);
 
@@ -336,18 +335,18 @@ const std::string DedicatedPlayer::GetAnim()
     {
 
         if (movementAnim == 3)
-            anim_dir = "forward";
+            animDir = "forward";
         else if (movementAnim == 4)
-            anim_dir = "back";
+            animDir = "back";
         else if (movementAnim == 2)
-            anim_dir = "left";
+            animDir = "left";
         else if (movementAnim == 1)
-            anim_dir = "right";
+            animDir = "right";
     }
     else
     {
         anim = "idle";
-        anim_dir = "";
+        animDir = "";
     }
 
     if (npcStats->getDrawState() == MWMechanics::DrawState_Weapon)
@@ -365,24 +364,24 @@ const std::string DedicatedPlayer::GetAnim()
                 type == ESM::Weapon::MarksmanThrown ||
                 type == ESM::Weapon::MarksmanCrossbow ||
                 type == ESM::Weapon::MarksmanBow*/)
-                anim_weap = "1h";
+                animWeap = "1h";
             else if (type == ESM::Weapon::LongBladeTwoHand ||
                     type == ESM::Weapon::BluntTwoClose ||
                     type == ESM::Weapon::AxeTwoHand)
-                anim_weap = "2c";
+                animWeap = "2c";
             else if (type == ESM::Weapon::BluntTwoWide ||
                     type == ESM::Weapon::SpearTwoWide)
-                anim_weap = "2w";
+                animWeap = "2w";
         }
         else
-            anim_weap = "hh";
+            animWeap = "hh";
     }
     else if (movementAnim == 0 && npcStats->getDrawState() == MWMechanics::DrawState_Spell)
-        anim_weap = "spell";
+        animWeap = "spell";
     else
-        anim_weap = "";
+        animWeap = "";
 
-    return (anim + anim_dir + anim_weap);
+    return (anim + animDir + animWeap);
 }
 
 DedicatedPlayer *Players::GetPlayer(const MWWorld::Ptr &ptr)
@@ -411,11 +410,11 @@ void DedicatedPlayer::UpdateDrawState()
     else if (drawState == 2)
         ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Spell);
 
-    MWMechanics::NpcStats *npcStats = &ptr.getClass().getNpcStats(ptr);
-    npcStats->setMovementFlag(CreatureStats::Flag_Run, (movementFlags & CreatureStats::Flag_Run) != 0);
-    npcStats->setMovementFlag(CreatureStats::Flag_Sneak, (movementFlags & CreatureStats::Flag_Sneak) != 0);
-    npcStats->setMovementFlag(CreatureStats::Flag_ForceJump, (movementFlags & CreatureStats::Flag_ForceJump) != 0);
-    npcStats->setMovementFlag(CreatureStats::Flag_ForceMoveJump, (movementFlags & CreatureStats::Flag_ForceMoveJump) != 0);
+    MWMechanics::NpcStats *ptrNpcStats = &ptr.getClass().getNpcStats(ptr);
+    ptrNpcStats->setMovementFlag(CreatureStats::Flag_Run, (movementFlags & CreatureStats::Flag_Run) != 0);
+    ptrNpcStats->setMovementFlag(CreatureStats::Flag_Sneak, (movementFlags & CreatureStats::Flag_Sneak) != 0);
+    ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceJump, (movementFlags & CreatureStats::Flag_ForceJump) != 0);
+    ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceMoveJump, (movementFlags & CreatureStats::Flag_ForceMoveJump) != 0);
 }
 
 void DedicatedPlayer::updateCell()

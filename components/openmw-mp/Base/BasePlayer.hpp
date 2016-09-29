@@ -143,7 +143,7 @@ namespace mwmp
         }
         RakNet::RakNetGUID guid;
         GUIMessageBox guiMessageBox;
-        ESM::Class klass;
+        ESM::Class charClass;
         int month;
         int day;
         double hour;
