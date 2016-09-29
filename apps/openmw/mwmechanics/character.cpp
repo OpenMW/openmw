@@ -1312,7 +1312,11 @@ bool CharacterController::updateWeaponState()
                     mAttackType = "shoot";
                 else
                 {
-                    if(mPtr == getPlayer())
+                    // tes3mp needs player-controlled NPCs to not have their attacks
+                    // cancelled here, so a 2nd condition has been added that should
+                    // return true only for them
+
+                    if(mPtr == getPlayer() || !mPtr.getBase()->canChangeCell)
                     {
                         if (isWeapon)
                         {
