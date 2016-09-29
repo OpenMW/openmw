@@ -420,169 +420,165 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             }
             break;
         }
-            case ID_GAME_CELL:
+        case ID_GAME_CELL:
+        {
+            if (id == myid)
             {
-                if (id == myid)
-                {
-                    if (packet->length == myPacket->headerSize())
-                        getLocalPlayer()->updateCell(true);
-                    else
-                    {
-                        myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                        getLocalPlayer()->setCell();
-                    }
-                }
-                else if (pl != 0)
-                {
-                    myPacket->Packet(&bsIn, pl, false);
-                    pl->updateCell();
-                }
-                break;
-            }
-            case ID_GAME_DRAWSTATE:
-            {
-                if (id == myid)
-                    getLocalPlayer()->updateDrawStateAndFlags(true);
-                else if (pl != 0)
-                {
-                    myPacket->Packet(&bsIn, pl, false);
-                    pl->UpdateDrawState();
-                }
-                break;
-            }
-            case ID_CHAT_MESSAGE:
-            {
-                std::string message;
-                if (id == myid)
+                if (packet->length == myPacket->headerSize())
+                    getLocalPlayer()->updateCell(true);
+                else
                 {
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    message =  *getLocalPlayer()->ChatMessage();
+                    getLocalPlayer()->setCell();
                 }
-                else if (pl != 0)
-                {
-                    myPacket->Packet(&bsIn, pl, false);
-                    message =  *pl->ChatMessage();
-                }
-                Main::get().getGUIController()->PrintChatMessage(message);
-
-                break;
             }
-            case ID_GAME_CHARGEN:
+            else if (pl != 0)
             {
-                if (id == myid)
+                myPacket->Packet(&bsIn, pl, false);
+                pl->updateCell();
+            }
+            break;
+        }
+        case ID_GAME_DRAWSTATE:
+        {
+            if (id == myid)
+                getLocalPlayer()->updateDrawStateAndFlags(true);
+            else if (pl != 0)
+            {
+                myPacket->Packet(&bsIn, pl, false);
+                pl->UpdateDrawState();
+            }
+            break;
+        }
+        case ID_CHAT_MESSAGE:
+        {
+            std::string message;
+            if (id == myid)
+            {
+                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                message =  *getLocalPlayer()->ChatMessage();
+            }
+            else if (pl != 0)
+            {
+                myPacket->Packet(&bsIn, pl, false);
+                message =  *pl->ChatMessage();
+            }
+            Main::get().getGUIController()->PrintChatMessage(message);
+
+            break;
+        }
+        case ID_GAME_CHARGEN:
+        {
+            if (id == myid)
+            {
+                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+            }
+            break;
+        }
+        case ID_GAME_ATTRIBUTE:
+        {
+            if (id == myid)
+            {
+                if (packet->length == myPacket->headerSize())
+                {
+                    getLocalPlayer()->updateClassStats(true);
+                }
+                else
                 {
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                    getLocalPlayer()->setAttributes();
                 }
-                break;
             }
-
-            case ID_GAME_ATTRIBUTE:
+            else if (pl != 0)
             {
-                if (id == myid)
-                {
-                    if (packet->length == myPacket->headerSize())
-                    {
-                        getLocalPlayer()->updateClassStats(true);
-                    }
-                    else
-                    {
-                        myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                        getLocalPlayer()->setAttributes();
-                    }
-                }
-                else if (pl != 0)
-                {
-                    myPacket->Packet(&bsIn, pl, false);
+                myPacket->Packet(&bsIn, pl, false);
 
-                    MWWorld::Ptr ptrPlayer = pl->getPtr();
-                    MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
-                    MWMechanics::AttributeValue attributeValue;
+                MWWorld::Ptr ptrPlayer = pl->getPtr();
+                MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
+                MWMechanics::AttributeValue attributeValue;
 
-                    for (int i = 0; i < 8; ++i)
-                    {
-                        attributeValue.readState(pl->CreatureStats()->mAttributes[i]);
-                        ptrCreatureStats->setAttribute(i, attributeValue);
-                    }
+                for (int i = 0; i < 8; ++i)
+                {
+                    attributeValue.readState(pl->CreatureStats()->mAttributes[i]);
+                    ptrCreatureStats->setAttribute(i, attributeValue);
                 }
-                break;
             }
-
-            case ID_GAME_SKILL:
+            break;
+        }
+        case ID_GAME_SKILL:
+        {
+            if (id == myid)
             {
-                if (id == myid)
+                if (packet->length == myPacket->headerSize())
                 {
-                    if (packet->length == myPacket->headerSize())
-                    {
-                        getLocalPlayer()->updateClassStats(true);
-                    }
-                    else
-                    {
-                        myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                        getLocalPlayer()->setSkills();
-                    }
+                    getLocalPlayer()->updateClassStats(true);
                 }
-                else if (pl != 0)
-                {
-                    myPacket->Packet(&bsIn, pl, false);
-
-                    MWWorld::Ptr ptrPlayer = pl->getPtr();
-                    MWMechanics::NpcStats *ptrNpcStats = &ptrPlayer.getClass().getNpcStats(ptrPlayer);
-                    MWMechanics::SkillValue skillValue;
-
-                    for (int i = 0; i < 27; ++i)
-                    {
-                        skillValue.readState(pl->NpcStats()->mSkills[i]);
-                        ptrNpcStats->setSkill(i, skillValue);
-                    }
-                }
-                break;
-            }
-
-            case ID_GAME_LEVEL:
-            {
-                if (id == myid)
-                {
-                    if (packet->length == myPacket->headerSize())
-                    {
-                        getLocalPlayer()->updateClassStats(true);
-                    }
-                    else
-                    {
-                        myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                        getLocalPlayer()->setLevel();
-                    }
-                }
-                else if (pl != 0)
-                {
-                    myPacket->Packet(&bsIn, pl, false);
-
-                    MWWorld::Ptr ptrPlayer = pl->getPtr();
-                    MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
-
-                    ptrCreatureStats->setLevel(pl->CreatureStats()->mLevel);
-                }
-                break;
-            }
-
-            case ID_GUI_MESSAGEBOX:
-            {
-                if (id == myid)
+                else
                 {
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
-
-                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_GUI_MESSAGEBOX, Type %d, MSG %s",
-                        getLocalPlayer()->guiMessageBox.type,
-                        getLocalPlayer()->guiMessageBox.label.c_str());
-
-                    if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::MessageBox)
-                        Main::get().getGUIController()->ShowMessageBox(getLocalPlayer()->guiMessageBox);
-                    else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::CustomMessageBox)
-                        Main::get().getGUIController()->ShowCustomMessageBox(getLocalPlayer()->guiMessageBox);
-                    else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::InputDialog)
-                        Main::get().getGUIController()->ShowInputBox(getLocalPlayer()->guiMessageBox);
+                    getLocalPlayer()->setSkills();
                 }
-                break;
             }
+            else if (pl != 0)
+            {
+                myPacket->Packet(&bsIn, pl, false);
+
+                MWWorld::Ptr ptrPlayer = pl->getPtr();
+                MWMechanics::NpcStats *ptrNpcStats = &ptrPlayer.getClass().getNpcStats(ptrPlayer);
+                MWMechanics::SkillValue skillValue;
+
+                for (int i = 0; i < 27; ++i)
+                {
+                    skillValue.readState(pl->NpcStats()->mSkills[i]);
+                    ptrNpcStats->setSkill(i, skillValue);
+                }
+            }
+            break;
+        }
+        case ID_GAME_LEVEL:
+        {
+            if (id == myid)
+            {
+                if (packet->length == myPacket->headerSize())
+                {
+                    getLocalPlayer()->updateClassStats(true);
+                }
+                else
+                {
+                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                    getLocalPlayer()->setLevel();
+                }
+            }
+            else if (pl != 0)
+            {
+                myPacket->Packet(&bsIn, pl, false);
+
+                MWWorld::Ptr ptrPlayer = pl->getPtr();
+                MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
+
+                ptrCreatureStats->setLevel(pl->CreatureStats()->mLevel);
+            }
+            break;
+        }
+        case ID_GUI_MESSAGEBOX:
+        {
+            if (id == myid)
+            {
+                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_GUI_MESSAGEBOX, Type %d, MSG %s",
+                    getLocalPlayer()->guiMessageBox.type,
+                    getLocalPlayer()->guiMessageBox.label.c_str());
+
+                if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::MessageBox)
+                    Main::get().getGUIController()->ShowMessageBox(getLocalPlayer()->guiMessageBox);
+                else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::CustomMessageBox)
+                    Main::get().getGUIController()->ShowCustomMessageBox(getLocalPlayer()->guiMessageBox);
+                else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::InputDialog)
+                    Main::get().getGUIController()->ShowInputBox(getLocalPlayer()->guiMessageBox);
+            }
+            break;
+        }
         case ID_GAME_CHARCLASS:
         {
             if (id == myid)
