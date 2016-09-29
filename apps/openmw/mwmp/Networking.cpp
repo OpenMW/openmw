@@ -357,12 +357,11 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
                 MWMechanics::DynamicStat<float> value;
 
-                value.readState(pl->CreatureStats()->mDynamic[0]);
-                ptrCreatureStats->setHealth(value);
-                value.readState(pl->CreatureStats()->mDynamic[1]);
-                ptrCreatureStats->setMagicka(value);
-                value.readState(pl->CreatureStats()->mDynamic[2]);
-                ptrCreatureStats->setFatigue(value);
+                for (int i = 0; i < 3; ++i)
+                {
+                    value.readState(pl->CreatureStats()->mDynamic[i]);
+                    ptrCreatureStats->setDynamic(i, value);
+                }
             }
             break;
         }
