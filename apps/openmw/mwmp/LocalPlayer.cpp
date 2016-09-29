@@ -249,6 +249,45 @@ void LocalPlayer::setDynamicStats()
     }
 }
 
+void LocalPlayer::setAttributes()
+{
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    MWWorld::Ptr player = world->getPlayerPtr();
+
+    MWMechanics::CreatureStats *ptrCreatureStats = &player.getClass().getCreatureStats(player);
+    MWMechanics::AttributeValue attributeValue;
+
+    for (int i = 0; i < 8; ++i)
+    {
+        attributeValue.readState(CreatureStats()->mAttributes[i]);
+        ptrCreatureStats->setAttribute(i, attributeValue);
+    }
+}
+
+void LocalPlayer::setSkills()
+{
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    MWWorld::Ptr player = world->getPlayerPtr();
+
+    MWMechanics::NpcStats *ptrNpcStats = &player.getClass().getNpcStats(player);
+    MWMechanics::SkillValue skillValue;
+
+    for (int i = 0; i < 27; ++i)
+    {
+        skillValue.readState(NpcStats()->mSkills[i]);
+        ptrNpcStats->setSkill(i, skillValue);
+    }
+}
+
+void LocalPlayer::setLevel()
+{
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    MWWorld::Ptr player = world->getPlayerPtr();
+
+    MWMechanics::CreatureStats *ptrCreatureStats = &player.getClass().getCreatureStats(player);
+    ptrCreatureStats->setLevel(CreatureStats()->mLevel);
+}
+
 void LocalPlayer::updateInventory(bool forceUpdate)
 {
     MWWorld::Ptr player = GetPlayerPtr();

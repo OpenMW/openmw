@@ -352,14 +352,17 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             else if (pl != 0)
             {
                 myPacket->Packet(&bsIn, pl, false);
+
+                MWWorld::Ptr ptrPlayer = pl->getPtr();
+                MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
                 MWMechanics::DynamicStat<float> value;
 
                 value.readState(pl->CreatureStats()->mDynamic[0]);
-                pl->getPtr().getClass().getCreatureStats(pl->getPtr()).setHealth(value);
+                ptrCreatureStats->setHealth(value);
                 value.readState(pl->CreatureStats()->mDynamic[1]);
-                pl->getPtr().getClass().getCreatureStats(pl->getPtr()).setMagicka(value);
+                ptrCreatureStats->setMagicka(value);
                 value.readState(pl->CreatureStats()->mDynamic[2]);
-                pl->getPtr().getClass().getCreatureStats(pl->getPtr()).setFatigue(value);
+                ptrCreatureStats->setFatigue(value);
             }
             break;
         }
@@ -461,6 +464,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                     message =  *pl->ChatMessage();
                 }
                 Main::get().getGUIController()->PrintChatMessage(message);
+
                 break;
             }
             case ID_GAME_CHARGEN:
@@ -474,97 +478,89 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
 
             case ID_GAME_ATTRIBUTE:
             {
-                // Ignore requests for this packet
-                if (packet->length == myPacket->headerSize())
-                    return;
-
-                BasePlayer *__pl = nullptr;
-                MWWorld::Ptr __pl_ptr;
                 if (id == myid)
                 {
-                    __pl = getLocalPlayer();
-                    __pl_ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    if (packet->length == myPacket->headerSize())
+                    {
+                        getLocalPlayer()->updateClassStats(true);
+                    }
+                    else
+                    {
+                        myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                        getLocalPlayer()->setAttributes();
+                    }
                 }
                 else if (pl != 0)
                 {
-                    __pl = pl;
-                    __pl_ptr = pl->getPtr();
-                }
-                else
-                    return;
+                    myPacket->Packet(&bsIn, pl, false);
 
-                myPacket->Packet(&bsIn, __pl, false);
+                    MWWorld::Ptr ptrPlayer = pl->getPtr();
+                    MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
+                    MWMechanics::AttributeValue attributeValue;
 
-                MWMechanics::AttributeValue attributeValue;
-
-                for (int i = 0; i < 8; ++i)
-                {
-                    attributeValue.readState(__pl->CreatureStats()->mAttributes[i]);
-                    __pl_ptr.getClass().getCreatureStats(__pl_ptr).setAttribute(i, attributeValue);
+                    for (int i = 0; i < 8; ++i)
+                    {
+                        attributeValue.readState(pl->CreatureStats()->mAttributes[i]);
+                        ptrCreatureStats->setAttribute(i, attributeValue);
+                    }
                 }
                 break;
             }
 
             case ID_GAME_SKILL:
             {
-                // Ignore requests for this packet
-                if (packet->length == myPacket->headerSize())
-                    return;
-
-                BasePlayer *__pl = nullptr;
-                MWWorld::Ptr __pl_ptr;
                 if (id == myid)
                 {
-                    __pl = getLocalPlayer();
-                    __pl_ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    if (packet->length == myPacket->headerSize())
+                    {
+                        getLocalPlayer()->updateClassStats(true);
+                    }
+                    else
+                    {
+                        myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                        getLocalPlayer()->setSkills();
+                    }
                 }
                 else if (pl != 0)
                 {
-                    __pl = pl;
-                    __pl_ptr = pl->getPtr();
+                    myPacket->Packet(&bsIn, pl, false);
+
+                    MWWorld::Ptr ptrPlayer = pl->getPtr();
+                    MWMechanics::NpcStats *ptrNpcStats = &ptrPlayer.getClass().getNpcStats(ptrPlayer);
+                    MWMechanics::SkillValue skillValue;
+
+                    for (int i = 0; i < 27; ++i)
+                    {
+                        skillValue.readState(pl->NpcStats()->mSkills[i]);
+                        ptrNpcStats->setSkill(i, skillValue);
+                    }
                 }
-                else
-                    return;
-
-                myPacket->Packet(&bsIn, __pl, false);
-
-                MWMechanics::SkillValue skillValue;
-
-                for (int i = 0; i < 27; ++i)
-                {
-                    skillValue.readState(__pl->NpcStats()->mSkills[i]);
-                    __pl_ptr.getClass().getNpcStats(__pl_ptr).setSkill(i, skillValue);
-                    //LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "skill %d, value %d", i, skillValue.getBase());
-                }
-
                 break;
             }
 
             case ID_GAME_LEVEL:
             {
-                // Ignore requests for this packet
-                if (packet->length == myPacket->headerSize())
-                    return;
-
-                BasePlayer *__pl = nullptr;
-                MWWorld::Ptr __pl_ptr;
                 if (id == myid)
                 {
-                    __pl = getLocalPlayer();
-                    __pl_ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    if (packet->length == myPacket->headerSize())
+                    {
+                        getLocalPlayer()->updateClassStats(true);
+                    }
+                    else
+                    {
+                        myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                        getLocalPlayer()->setLevel();
+                    }
                 }
                 else if (pl != 0)
                 {
-                    __pl = pl;
-                    __pl_ptr = pl->getPtr();
+                    myPacket->Packet(&bsIn, pl, false);
+
+                    MWWorld::Ptr ptrPlayer = pl->getPtr();
+                    MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
+
+                    ptrCreatureStats->setLevel(pl->CreatureStats()->mLevel);
                 }
-                else
-                    return;
-
-                myPacket->Packet(&bsIn, __pl, false);
-
-                __pl_ptr.getClass().getCreatureStats(__pl_ptr).setLevel(__pl->CreatureStats()->mLevel);
-
                 break;
             }
 

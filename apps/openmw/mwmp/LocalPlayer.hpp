@@ -32,6 +32,9 @@ namespace mwmp
         void setPosition();
         void setCell();
         void setDynamicStats();
+        void setAttributes();
+        void setSkills();
+        void setLevel();
 
         void SetClass();
         void SendClass();
