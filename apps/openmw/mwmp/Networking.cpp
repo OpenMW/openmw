@@ -339,8 +339,15 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
         {
             if (id == myid)
             {
-                getLocalPlayer()->updateDynamicStats(true);
-                myPacket->Send(getLocalPlayer(), serverAddr);
+                if (packet->length == myPacket->headerSize())
+                {
+                    getLocalPlayer()->updateDynamicStats(true);
+                }
+                else
+                {
+                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                    getLocalPlayer()->setDynamicStats();
+                }
             }
             else if (pl != 0)
             {

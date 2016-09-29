@@ -62,14 +62,14 @@ void LocalPlayer::updateDynamicStats(bool forceUpdate)
 {
     MWWorld::Ptr player = GetPlayerPtr();
 
-    MWMechanics::CreatureStats *creatureClass = &player.getClass().getCreatureStats(player);
-    MWMechanics::DynamicStat<float> health(creatureClass->getHealth());
-    MWMechanics::DynamicStat<float> magicka(creatureClass->getMagicka());
-    MWMechanics::DynamicStat<float> fatigue(creatureClass->getFatigue());
+    MWMechanics::CreatureStats *ptrCreatureStats = &player.getClass().getCreatureStats(player);
+    MWMechanics::DynamicStat<float> health(ptrCreatureStats->getHealth());
+    MWMechanics::DynamicStat<float> magicka(ptrCreatureStats->getMagicka());
+    MWMechanics::DynamicStat<float> fatigue(ptrCreatureStats->getFatigue());
 
-    static MWMechanics::DynamicStat<float> oldHealth(creatureClass->getHealth());
-    static MWMechanics::DynamicStat<float> oldMagicka(creatureClass->getMagicka());
-    static MWMechanics::DynamicStat<float> oldFatigue(creatureClass->getFatigue());
+    static MWMechanics::DynamicStat<float> oldHealth(ptrCreatureStats->getHealth());
+    static MWMechanics::DynamicStat<float> oldMagicka(ptrCreatureStats->getMagicka());
+    static MWMechanics::DynamicStat<float> oldFatigue(ptrCreatureStats->getFatigue());
 
     static float timer = 0;
 
@@ -233,6 +233,21 @@ void LocalPlayer::setCell()
     updateCell(true);
 }
 
+void LocalPlayer::setDynamicStats()
+{
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    MWWorld::Ptr player = world->getPlayerPtr();
+
+    MWMechanics::CreatureStats *ptrCreatureStats = &player.getClass().getCreatureStats(player);
+
+    MWMechanics::DynamicStat<float> dynamicStat;
+
+    for (int i = 0; i < 3; ++i)
+    {
+        dynamicStat.readState(CreatureStats()->mDynamic[i]);
+        ptrCreatureStats->setDynamic(i, dynamicStat);
+    }
+}
 
 void LocalPlayer::updateInventory(bool forceUpdate)
 {

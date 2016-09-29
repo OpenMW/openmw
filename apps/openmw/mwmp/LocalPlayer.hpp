@@ -31,6 +31,7 @@ namespace mwmp
 
         void setPosition();
         void setCell();
+        void setDynamicStats();
 
         void SetClass();
         void SendClass();
