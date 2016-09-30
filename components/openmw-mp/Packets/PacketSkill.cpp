@@ -20,4 +20,6 @@ void PacketSkill::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 
     for (int i = 0; i < StatsCount; ++i)
         RW(player->NpcStats()->mSkills[i], send);
+
+    RW(player->NpcStats()->mLevelProgress, send);
 }

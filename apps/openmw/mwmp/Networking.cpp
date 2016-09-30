@@ -480,7 +480,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             {
                 if (packet->length == myPacket->headerSize())
                 {
-                    getLocalPlayer()->updateClassStats(true);
+                    getLocalPlayer()->updateAttributes(true);
                 }
                 else
                 {
@@ -510,7 +510,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             {
                 if (packet->length == myPacket->headerSize())
                 {
-                    getLocalPlayer()->updateClassStats(true);
+                    getLocalPlayer()->updateSkills(true);
                 }
                 else
                 {
@@ -540,7 +540,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             {
                 if (packet->length == myPacket->headerSize())
                 {
-                    getLocalPlayer()->updateClassStats(true);
+                    getLocalPlayer()->updateLevel(true);
                 }
                 else
                 {

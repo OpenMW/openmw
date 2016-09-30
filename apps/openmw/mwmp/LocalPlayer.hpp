@@ -25,7 +25,9 @@ namespace mwmp
         void updateInventory(bool forceUpdate = false);
         void updateAttackState(bool forceUpdate = false);
         void updateDeadState(bool forceUpdate = false);
-        void updateClassStats(bool forceUpdate = false);
+        void updateAttributes(bool forceUpdate = false);
+        void updateSkills(bool forceUpdate = false);
+        void updateLevel(bool forceUpdate = false);
         void updateCell(bool forceUpdate = false);
         void updateDrawStateAndFlags(bool forceUpdate = false);
 

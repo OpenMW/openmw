@@ -150,6 +150,22 @@ void StatsFunctions::SetLevel(unsigned short pid, int value) noexcept
     player->CreatureStats()->mLevel = value;
 }
 
+int StatsFunctions::GetLevelProgress(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->NpcStats()->mLevelProgress;
+}
+
+void StatsFunctions::SetLevelProgress(unsigned short pid, int value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->NpcStats()->mLevelProgress = value;
+}
+
 double StatsFunctions::GetHealthBase(unsigned short pid) noexcept
 {
     Player *player;

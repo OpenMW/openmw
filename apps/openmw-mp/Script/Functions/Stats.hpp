@@ -96,6 +96,8 @@ public:
 
     static int GetLevel(unsigned short pid) noexcept;
     static void SetLevel(unsigned short pid, int value) noexcept;
+    static int GetLevelProgress(unsigned short pid) noexcept;
+    static void SetLevelProgress(unsigned short pid, int value) noexcept;
 
     static double GetHealthBase(unsigned short pid) noexcept;
     static void SetHealthBase(unsigned short pid, double value) noexcept;

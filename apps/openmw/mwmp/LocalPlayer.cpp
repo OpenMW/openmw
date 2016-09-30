@@ -50,7 +50,9 @@ void LocalPlayer::Update()
     updateDeadState();
     updateInventory();
     updateDynamicStats();
-    updateClassStats();
+    updateAttributes();
+    updateSkills();
+    updateLevel();
 }
 
 MWWorld::Ptr LocalPlayer::GetPlayerPtr()
@@ -92,21 +94,40 @@ void LocalPlayer::updateDynamicStats(bool forceUpdate)
     }
 }
 
-void LocalPlayer::updateClassStats(bool forceUpdate)
+void LocalPlayer::updateAttributes(bool forceUpdate)
 {
     MWWorld::Ptr player = GetPlayerPtr();
-
     const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+    bool isUpdating = false;
 
-    bool isUpdatingSkills = false;
-    bool isUpdatingAttributes = false;
+    for (int i = 0; i < 8; ++i)
+    {
+        if (ptrNpcStats.getAttribute(i).getBase() != CreatureStats()->mAttributes[i].mBase)
+        {
+            ptrNpcStats.getAttribute(i).writeState(CreatureStats()->mAttributes[i]);
+            isUpdating = true;
+        }
+    }
+
+    if (isUpdating || forceUpdate)
+    {
+        GetNetworking()->GetPacket(ID_GAME_ATTRIBUTE)->Send(this);
+    }
+}
+
+void LocalPlayer::updateSkills(bool forceUpdate)
+{
+    MWWorld::Ptr player = GetPlayerPtr();
+    const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+    bool isUpdating = false;
+
 
     for (int i = 0; i < 27; ++i)
     {
         if (ptrNpcStats.getSkill(i).getBase() != NpcStats()->mSkills[i].mBase)
         {
             ptrNpcStats.getSkill(i).writeState(NpcStats()->mSkills[i]);
-            isUpdatingSkills = true;
+            isUpdating = true;
         }
         // If we only have skill progress, update the state for relevant skills
         // but don't send a packet just because of this (to avoid spam)
@@ -116,29 +137,22 @@ void LocalPlayer::updateClassStats(bool forceUpdate)
         }
     }
 
-    for (int i = 0; i < 8; ++i)
+    if (isUpdating || forceUpdate)
     {
-        if (ptrNpcStats.getAttribute(i).getBase() != CreatureStats()->mAttributes[i].mBase)
-        {
-            ptrNpcStats.getAttribute(i).writeState(CreatureStats()->mAttributes[i]);
-            isUpdatingAttributes = true;
-        }
+        NpcStats()->mLevelProgress = ptrNpcStats.getLevelProgress();
+        GetNetworking()->GetPacket(ID_GAME_SKILL)->Send(this);
     }
+}
 
-    if (ptrNpcStats.getLevel() != CreatureStats()->mLevel)
+void LocalPlayer::updateLevel(bool forceUpdate)
+{
+    MWWorld::Ptr player = GetPlayerPtr();
+    const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+
+    if (ptrNpcStats.getLevel() != CreatureStats()->mLevel || forceUpdate)
     {
         CreatureStats()->mLevel = ptrNpcStats.getLevel();
         GetNetworking()->GetPacket(ID_GAME_LEVEL)->Send(this);
-    }
-
-    if (isUpdatingSkills)
-    {
-        GetNetworking()->GetPacket(ID_GAME_SKILL)->Send(this);
-    }
-
-    if (isUpdatingAttributes)
-    {
-        GetNetworking()->GetPacket(ID_GAME_ATTRIBUTE)->Send(this);
     }
 }
 
@@ -510,6 +524,9 @@ void LocalPlayer::updateCell(bool forceUpdate)
         RakNet::BitStream bs;
         GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_CELL)->Packet(&bs, this, true);
         GetNetworking()->SendData(&bs);
+
+        // Also update skill progress
+        updateSkills(true);
     }
 }
 
@@ -607,7 +624,9 @@ bool LocalPlayer::CharGenThread() // ToDo: need fix
             if (CharGenStage()->end != 1)
             {
                 updateDynamicStats(true);
-                updateClassStats(true);
+                updateAttributes(true);
+                updateSkills(true);
+                updateLevel(true);
                 SendClass();
                 GetNetworking()->GetPacket(ID_GAME_CHARGEN)->Send(this);
             }
