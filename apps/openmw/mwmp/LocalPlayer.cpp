@@ -108,6 +108,12 @@ void LocalPlayer::updateClassStats(bool forceUpdate)
             ptrNpcStats.getSkill(i).writeState(NpcStats()->mSkills[i]);
             isUpdatingSkills = true;
         }
+        // If we only have skill progress, update the state for relevant skills
+        // but don't send a packet just because of this (to avoid spam)
+        else if (ptrNpcStats.getSkill(i).getProgress() != NpcStats()->mSkills[i].mProgress)
+        {
+            ptrNpcStats.getSkill(i).writeState(NpcStats()->mSkills[i]);
+        }
     }
 
     for (int i = 0; i < 8; ++i)
