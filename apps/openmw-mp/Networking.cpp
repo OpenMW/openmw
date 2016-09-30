@@ -30,10 +30,10 @@ Networking::Networking(RakNet::RakPeerInterface *peer)
 
     controller->SetStream(0, &bsOut); // set send stream
 
-    Script::Call<Script::CallbackIdentity("OnServerInit")>();
-
     running = true;
     exitCode = 0;
+
+    Script::Call<Script::CallbackIdentity("OnServerInit")>();
 }
 
 Networking::~Networking()
@@ -42,6 +42,7 @@ Networking::~Networking()
 
     sThis = 0;
     delete controller;
+    LOG_QUIT();
 }
 
 void Networking::Update(RakNet::Packet *packet)
@@ -411,7 +412,6 @@ void Networking::StopServer(int code)
 {
     running = false;
     exitCode = code;
-
 }
 
 int Networking::MainLoop()

@@ -202,8 +202,6 @@ int main(int argc, char *argv[])
     if (code == 0)
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Quitting peacefully.");
 
-    LOG_QUIT();
-
     // Restore cout and cerr
     std::cout.rdbuf(cout_rdbuf);
     std::cerr.rdbuf(cerr_rdbuf);
