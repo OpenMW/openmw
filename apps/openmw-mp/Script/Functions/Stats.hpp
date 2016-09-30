@@ -23,6 +23,8 @@
     \
     {"GetLevel",                StatsFunctions::GetLevel},\
     {"SetLevel",                StatsFunctions::SetLevel},\
+    {"GetLevelProgress",        StatsFunctions::GetLevelProgress},\
+    {"SetLevelProgress",        StatsFunctions::SetLevelProgress},\
     \
     {"GetBirthsign",            StatsFunctions::GetBirthsign},\
     {"SetBirthsign",            StatsFunctions::SetBirthsign},\
