@@ -583,11 +583,11 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             if (id == myid)
             {
                 if (packet->length == myPacket->headerSize())
-                    getLocalPlayer()->SendClass();
+                    getLocalPlayer()->sendClass();
                 else
                 {
                     myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    getLocalPlayer()->SetClass();
+                    getLocalPlayer()->setClass();
                 }
             }
             break;

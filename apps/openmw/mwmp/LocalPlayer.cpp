@@ -41,6 +41,16 @@ LocalPlayer::~LocalPlayer()
 
 }
 
+Networking *LocalPlayer::GetNetworking()
+{
+    return mwmp::Main::get().getNetworking();
+}
+
+MWWorld::Ptr LocalPlayer::GetPlayerPtr()
+{
+    return MWBase::Environment::get().getWorld()->getPlayerPtr();
+}
+
 void LocalPlayer::Update()
 {
     updateCell();
@@ -55,9 +65,72 @@ void LocalPlayer::Update()
     updateLevel();
 }
 
-MWWorld::Ptr LocalPlayer::GetPlayerPtr()
+void LocalPlayer::charGen(int stageFirst, int stageEnd)
 {
-    return MWBase::Environment::get().getWorld()->getPlayerPtr();
+    CharGenStage()->current = stageFirst;
+    CharGenStage()->end = stageEnd;
+}
+
+bool LocalPlayer::charGenThread() // todo: need fix
+{
+    MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
+    if (windowManager->isGuiMode())
+        return false;
+
+    if (CharGenStage()->current >= CharGenStage()->end)
+    {
+
+        if (GetNetworking()->isConnected() && CharGenStage()->current == CharGenStage()->end &&
+            CharGenStage()->end != 0)
+        {
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            MWWorld::Ptr player = world->getPlayerPtr();
+            (*Npc()) = *player.get<ESM::NPC>()->mBase;
+            (*BirthSign()) = world->getPlayer().getBirthSign();
+
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server with my CharGen info");
+            GetNetworking()->GetPacket(ID_GAME_BASE_INFO)->Send(this);
+
+            if (CharGenStage()->end != 1)
+            {
+                updateDynamicStats(true);
+                updateAttributes(true);
+                updateSkills(true);
+                updateLevel(true);
+                sendClass();
+                GetNetworking()->GetPacket(ID_GAME_CHARGEN)->Send(this);
+            }
+            CharGenStage()->end = 0;
+            /*RakNet::BitStream bs;
+            GetNetworking()->GetPacket(ID_GAME_BASE_INFO)->Packet(&bs, this, true);
+            GetNetworking()->SendData(&bs);*/
+
+        }
+        return true;
+    }
+
+    switch (CharGenStage()->current)
+    {
+    case 0:
+        windowManager->pushGuiMode(MWGui::GM_Name);
+        break;
+    case 1:
+        windowManager->pushGuiMode(MWGui::GM_Race);
+        break;
+    case 2:
+        windowManager->pushGuiMode(MWGui::GM_Class);
+        break;
+    case 3:
+        windowManager->pushGuiMode(MWGui::GM_Birth);
+        break;
+    default:
+        windowManager->pushGuiMode(MWGui::GM_Review);
+        break;
+    }
+    GetNetworking()->GetPacket(ID_GAME_CHARGEN)->Send(this);
+    CharGenStage()->current++;
+
+    return false;
 }
 
 void LocalPlayer::updateDynamicStats(bool forceUpdate)
@@ -161,7 +234,8 @@ void LocalPlayer::updateLevel(bool forceUpdate)
         CreatureStats()->mLevel = ptrNpcStats.getLevel();
         GetNetworking()->GetPacket(ID_GAME_LEVEL)->Send(this);
 
-        // Also update skills to refresh level progress
+        // Also update skills to refresh level progress and attribute bonuses
+        // for next level up
         updateSkills(true);
     }
 }
@@ -214,52 +288,246 @@ void LocalPlayer::updatePosition(bool forceUpdate)
     }
 }
 
-
-void LocalPlayer::setPosition()
+void LocalPlayer::updateCell(bool forceUpdate)
 {
-    MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = world->getPlayerPtr();
+    const ESM::Cell *ptrCell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell();
+    bool shouldUpdate = false;
 
-    world->getPlayer().setTeleported(true);
-    world->moveObject(player, Position()->pos[0], Position()->pos[1], Position()->pos[2]);
-    world->rotateObject(player, Position()->rot[0], Position()->rot[1], Position()->rot[2]);
+    // Send a packet to server to update this LocalPlayer's cell if:
+    // 1) forceUpdate is true
+    // 2) The LocalPlayer's cell name does not equal the World Player's cell name
+    // 3) The LocalPlayer's exterior cell coordinates do not equal the World Player's
+    //    exterior cell coordinates
+    if (forceUpdate)
+    {
+        shouldUpdate = true;
+    }
+    else if (!Misc::StringUtils::ciEqual(ptrCell->mName, GetCell()->mName))
+    {
+        shouldUpdate = true;
+    }
+    else if (ptrCell->isExterior())
+    {
+        if (ptrCell->mCellId.mIndex.mX != GetCell()->mCellId.mIndex.mX)
+        {
+            shouldUpdate = true;
+        }
+        else if (ptrCell->mCellId.mIndex.mY != GetCell()->mCellId.mIndex.mY)
+        {
+            shouldUpdate = true;
+        }
+    }
 
-    updatePosition(true);
+    if (shouldUpdate)
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_CELL to server");
+
+        LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s",
+            GetCell()->getDescription().c_str(),
+            ptrCell->getDescription().c_str());
+
+        (*GetCell()) = *ptrCell;
+
+        // Make sure the position is updated before a cell packet is sent, or else
+        // cell change events in server scripts will have the wrong player position
+        updatePosition(true);
+
+        RakNet::BitStream bs;
+        GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_CELL)->Packet(&bs, this, true);
+        GetNetworking()->SendData(&bs);
+
+        // Also update skill progress
+        updateSkills(true);
+    }
 }
 
-void LocalPlayer::setCell()
+void LocalPlayer::updateChar()
+{
+    MWBase::Environment::get().getMechanicsManager()->setPlayerRace(
+        Npc()->mRace,
+        Npc()->isMale(),
+        Npc()->mHead,
+        Npc()->mHair
+    );
+
+    MWBase::Environment::get().getMechanicsManager()->setPlayerBirthsign(*BirthSign());
+
+    MWBase::Environment::get().getWindowManager()->getInventoryWindow()->rebuildAvatar();
+}
+
+void LocalPlayer::updateInventory(bool forceUpdate)
+{
+    MWWorld::Ptr player = GetPlayerPtr();
+
+    static bool invChanged = false;
+
+    if (forceUpdate)
+        invChanged = true;
+
+
+    MWWorld::InventoryStore &invStore = player.getClass().getInventoryStore(player);
+    for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+    {
+        MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
+        if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), EquipedItem(slot)->refid))
+        {
+            invChanged = true;
+
+            EquipedItem(slot)->refid = it->getCellRef().getRefId();
+            if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
+            {
+                MWMechanics::WeaponType weaptype;
+                MWMechanics::getActiveWeapon(player.getClass().getCreatureStats(player), player.getClass().getInventoryStore(player), &weaptype);
+                if (weaptype != MWMechanics::WeapType_Thrown)
+                    EquipedItem(slot)->count = 1;
+            }
+            else
+                EquipedItem(slot)->count = invStore.count(it->getCellRef().getRefId());
+        }
+        else if (it == invStore.end() && !EquipedItem(slot)->refid.empty())
+        {
+            invChanged = true;
+            EquipedItem(slot)->refid = "";
+            EquipedItem(slot)->count = 0;
+        }
+    }
+
+    if (invChanged)
+    {
+        RakNet::BitStream bs;
+        bs.ResetWritePointer();
+        GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_EQUIPMENT)->Packet(&bs, this, true);
+        GetNetworking()->SendData(&bs);
+        invChanged = false;
+    }
+}
+
+void LocalPlayer::updateAttackState(bool forceUpdate)
+{
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    MWWorld::Ptr player = GetPlayerPtr();
+
+    using namespace MWMechanics;
+
+    static bool attackPressed = false; // prevent flood
+    MWMechanics::DrawState_ state = player.getClass().getNpcStats(player).getDrawState();
+    //player.getClass().hit(player, 1, ESM::Weapon::AT_Chop);
+    if (world->getPlayer().getAttackingOrSpell() && !attackPressed)
+    {
+        MWWorld::Ptr weapon = MWWorld::Ptr(); // hand-to-hand
+                                              //player.getClass().onHit(player, 0.5, true, weapon, 0, 1);
+        if (state == MWMechanics::DrawState_Spell)
+        {
+            const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
+
+            GetAttack()->attacker = guid;
+            GetAttack()->type = 1;
+            GetAttack()->pressed = true;
+            GetAttack()->refid = spell;
+
+            /*RakNet::BitStream bs;
+            GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
+            GetNetworking()->SendData(&bs);*/
+        }
+        else if (state == MWMechanics::DrawState_Weapon)
+        {
+            //PrepareAttack(2);
+        }
+        attackPressed = true;
+    }
+    else if (!world->getPlayer().getAttackingOrSpell() && attackPressed)
+    {
+        if (/*state == MWMechanics::DrawState_Spell ||*/ state == MWMechanics::DrawState_Weapon)
+        {
+            //localNetPlayer->GetAttack()->success = false;
+            //SendAttack(0);
+        }
+        attackPressed = false;
+    }
+}
+
+void LocalPlayer::updateDeadState(bool forceUpdate)
+{
+    MWWorld::Ptr player = GetPlayerPtr();
+
+    MWMechanics::NpcStats *ptrNpcStats = &player.getClass().getNpcStats(player);
+    static bool isDead = false;
+
+    if (ptrNpcStats->isDead() && !isDead)
+    {
+        CreatureStats()->mDead = true;
+        RakNet::BitStream bs;
+        GetNetworking()->GetPacket((RakNet::MessageID)ID_GAME_DIE)->Packet(&bs, this, true);
+        GetNetworking()->SendData(&bs);
+        isDead = true;
+    }
+    else if (ptrNpcStats->getHealth().getCurrent() > 0 && isDead)
+        isDead = false;
+}
+
+void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
     MWWorld::Ptr player = world->getPlayerPtr();
-    ESM::Position pos;
 
-    world->getPlayer().setTeleported(true);
 
-    int x = GetCell()->mCellId.mIndex.mX;
-    int y = GetCell()->mCellId.mIndex.mY;
+    MWMechanics::NpcStats ptrNpcStats = player.getClass().getNpcStats(player);
+    using namespace MWMechanics;
 
-    if (GetCell()->isExterior())
+    static bool oldRun = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Run);
+    static bool oldSneak = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Sneak);
+    static bool oldForceJump = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceJump);
+    static bool oldForceMoveJump = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceMoveJump);
+
+    bool run = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Run);
+    bool sneak = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Sneak);
+    bool forceJump = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceJump);
+    bool forceMoveJump = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceMoveJump);
+    bool jump = !world->isOnGround(player) && !world->isFlying(player);
+    static bool onJump = false;
+
+    MWMechanics::DrawState_ state = player.getClass().getNpcStats(player).getDrawState();
+    static MWMechanics::DrawState_ oldState = player.getClass().getNpcStats(player).getDrawState();
+    //static float timer = 0;
+    if (oldRun != run
+        || oldSneak != sneak || oldForceJump != forceJump
+        || oldForceMoveJump != forceMoveJump || oldState != state ||
+        ((jump || onJump)/* && (timer += MWBase::Environment::get().getFrameDuration() )> 0.5*/)
+        || forceUpdate)
     {
-        world->indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
-        pos.pos[2] = 0;
+        oldSneak = sneak;
+        oldRun = run;
+        oldForceJump = forceJump;
+        oldForceMoveJump = forceMoveJump;
+        oldState = state;
+        onJump = jump;
 
-        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+        movementFlags = 0;
+#define __SETFLAG(flag, value) (value) ? (movementFlags | flag) : (movementFlags & ~flag)
 
-        world->changeToExteriorCell(pos, true);
-        world->fixPosition(player);
-    }
-    else if (world->findExteriorPosition(GetCell()->mName, pos))
-    {
-        world->changeToExteriorCell(pos, true);
-        world->fixPosition(player);
-    }
-    else
-    {
-        world->findInteriorPosition(GetCell()->mName, pos);
-        world->changeToInteriorCell(GetCell()->mName, pos, true);
-    }
+        movementFlags = __SETFLAG(CreatureStats::Flag_Sneak, sneak);
+        movementFlags = __SETFLAG(CreatureStats::Flag_Run, run);
+        movementFlags = __SETFLAG(CreatureStats::Flag_ForceJump, forceJump);
+        movementFlags = __SETFLAG(CreatureStats::Flag_ForceJump, jump);
+        movementFlags = __SETFLAG(CreatureStats::Flag_ForceMoveJump, forceMoveJump);
 
-    updateCell(true);
+#undef __SETFLAG
+
+        if (state == MWMechanics::DrawState_Nothing)
+            (*DrawState()) = 0;
+        else if (state == MWMechanics::DrawState_Weapon)
+            (*DrawState()) = 1;
+        else if (state == MWMechanics::DrawState_Spell)
+            (*DrawState()) = 2;
+
+        if (jump)
+            mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after jump;
+
+        RakNet::BitStream bs;
+        GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_DRAWSTATE)->Packet(&bs, this, true);
+        GetNetworking()->SendData(&bs);
+        //timer = 0;
+    }
 }
 
 void LocalPlayer::setDynamicStats()
@@ -325,124 +593,111 @@ void LocalPlayer::setLevel()
     ptrCreatureStats->setLevel(CreatureStats()->mLevel);
 }
 
-void LocalPlayer::updateInventory(bool forceUpdate)
-{
-    MWWorld::Ptr player = GetPlayerPtr();
-
-    static bool invChanged = false;
-
-    if (forceUpdate)
-        invChanged = true;
-
-
-    MWWorld::InventoryStore &invStore = player.getClass().getInventoryStore(player);
-    for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
-    {
-        MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
-        if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), EquipedItem(slot)->refid))
-        {
-            invChanged = true;
-
-            EquipedItem(slot)->refid = it->getCellRef().getRefId();
-            if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
-            {
-                MWMechanics::WeaponType weaptype;
-                MWMechanics::getActiveWeapon(player.getClass().getCreatureStats(player), player.getClass().getInventoryStore(player), &weaptype);
-                if (weaptype != MWMechanics::WeapType_Thrown)
-                    EquipedItem(slot)->count = 1;
-            }
-            else
-                EquipedItem(slot)->count = invStore.count(it->getCellRef().getRefId());
-        }
-        else if (it == invStore.end() && !EquipedItem(slot)->refid.empty())
-        {
-            invChanged = true;
-            EquipedItem(slot)->refid = "";
-            EquipedItem(slot)->count = 0;
-        }
-    }
-
-    if (invChanged)
-    {
-        RakNet::BitStream bs;
-        bs.ResetWritePointer();
-        GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_EQUIPMENT)->Packet(&bs, this, true);
-        GetNetworking()->SendData(&bs);
-        invChanged = false;
-    }
-}
-
-void LocalPlayer::updateAttackState(bool forceUpdate)
+void LocalPlayer::setPosition()
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = GetPlayerPtr();
+    MWWorld::Ptr player = world->getPlayerPtr();
 
-    using namespace MWMechanics;
+    world->getPlayer().setTeleported(true);
+    world->moveObject(player, Position()->pos[0], Position()->pos[1], Position()->pos[2]);
+    world->rotateObject(player, Position()->rot[0], Position()->rot[1], Position()->rot[2]);
 
-    static bool attackPressed = false; // prevent flood
-    MWMechanics::DrawState_ state = player.getClass().getNpcStats(player).getDrawState();
-    //player.getClass().hit(player, 1, ESM::Weapon::AT_Chop);
-    if (world->getPlayer().getAttackingOrSpell() && !attackPressed)
-    {
-        MWWorld::Ptr weapon = MWWorld::Ptr(); // hand-to-hand
-        //player.getClass().onHit(player, 0.5, true, weapon, 0, 1);
-        if (state == MWMechanics::DrawState_Spell)
-        {
-            const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
-
-            GetAttack()->attacker = guid;
-            GetAttack()->type = 1;
-            GetAttack()->pressed = true;
-            GetAttack()->refid = spell;
-
-            /*RakNet::BitStream bs;
-            GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
-            GetNetworking()->SendData(&bs);*/
-        }
-        else if (state == MWMechanics::DrawState_Weapon)
-        {
-            //PrepareAttack(2);
-        }
-        attackPressed = true;
-    }
-    else if (!world->getPlayer().getAttackingOrSpell() && attackPressed)
-    {
-        if (/*state == MWMechanics::DrawState_Spell ||*/ state == MWMechanics::DrawState_Weapon)
-        {
-            //localNetPlayer->GetAttack()->success = false;
-            //SendAttack(0);
-        }
-        attackPressed = false;
-    }
+    updatePosition(true);
 }
 
-void LocalPlayer::updateDeadState(bool forceUpdate)
+void LocalPlayer::setCell()
 {
-    MWWorld::Ptr player = GetPlayerPtr();
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    MWWorld::Ptr player = world->getPlayerPtr();
+    ESM::Position pos;
 
-    MWMechanics::NpcStats *ptrNpcStats = &player.getClass().getNpcStats(player);
-    static bool isDead = false;
+    world->getPlayer().setTeleported(true);
 
-    if (ptrNpcStats->isDead() && !isDead)
+    int x = GetCell()->mCellId.mIndex.mX;
+    int y = GetCell()->mCellId.mIndex.mY;
+
+    if (GetCell()->isExterior())
     {
-        CreatureStats()->mDead = true;
-        RakNet::BitStream bs;
-        GetNetworking()->GetPacket((RakNet::MessageID)ID_GAME_DIE)->Packet(&bs, this, true);
-        GetNetworking()->SendData(&bs);
-        isDead = true;
+        world->indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
+        pos.pos[2] = 0;
+
+        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+
+        world->changeToExteriorCell(pos, true);
+        world->fixPosition(player);
     }
-    else if (ptrNpcStats->getHealth().getCurrent() > 0 && isDead)
-        isDead = false;
+    else if (world->findExteriorPosition(GetCell()->mName, pos))
+    {
+        world->changeToExteriorCell(pos, true);
+        world->fixPosition(player);
+    }
+    else
+    {
+        world->findInteriorPosition(GetCell()->mName, pos);
+        world->changeToInteriorCell(GetCell()->mName, pos, true);
+    }
+
+    updateCell(true);
 }
 
-Networking *LocalPlayer::GetNetworking()
+void LocalPlayer::setClass()
 {
-    return mwmp::Main::get().getNetworking();
+    if (charClass.mId.empty()) // custom class
+    {
+        charClass.mData.mIsPlayable = 0x1;
+        MWBase::Environment::get().getMechanicsManager()->setPlayerClass(charClass);
+        MWBase::Environment::get().getWindowManager()->setPlayerClass(charClass);
+    }
+    else
+    {
+        MWBase::Environment::get().getMechanicsManager()->setPlayerClass(charClass.mId);
+
+        const ESM::Class *existingCharClass = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(charClass.mId);
+
+        if (existingCharClass)
+            MWBase::Environment::get().getWindowManager()->setPlayerClass(charClass);
+    }
 }
 
+void LocalPlayer::sendClass()
+{
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    const ESM::NPC *cpl = world->getPlayerPtr().get<ESM::NPC>()->mBase;
+    const ESM::Class *cls = world->getStore().get<ESM::Class>().find(cpl->mClass);
 
+    if (cpl->mClass.find("$dynamic") != string::npos) // custom class
+    {
+        charClass.mId = "";
+        charClass.mName = cls->mName;
+        charClass.mDescription = cls->mDescription;
+        charClass.mData = cls->mData;
+    }
+    else
+        charClass.mId = cls->mId;
 
-void LocalPlayer::PrepareAttack(char type, bool state)
+    GetNetworking()->GetPacket(ID_GAME_CHARCLASS)->Send(this);
+}
+
+void LocalPlayer::sendAttack(char type)
+{
+    MWMechanics::DrawState_ state = GetPlayerPtr().getClass().getNpcStats(GetPlayerPtr()).getDrawState();
+
+    if (state == MWMechanics::DrawState_Spell)
+    {
+
+    }
+    else
+    {
+
+    }
+    GetAttack()->type = type;
+    GetAttack()->pressed = false;
+    RakNet::BitStream bs;
+    GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
+    GetNetworking()->SendData(&bs);
+}
+
+void LocalPlayer::prepareAttack(char type, bool state)
 {
     if (GetAttack()->pressed == state)
         return;
@@ -471,263 +726,4 @@ void LocalPlayer::PrepareAttack(char type, bool state)
     RakNet::BitStream bs;
     GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
     GetNetworking()->SendData(&bs);
-}
-
-
-void LocalPlayer::SendAttack(char type)
-{
-    MWMechanics::DrawState_ state = GetPlayerPtr().getClass().getNpcStats(GetPlayerPtr()).getDrawState();
-
-    if (state == MWMechanics::DrawState_Spell)
-    {
-
-    }
-    else
-    {
-
-    }
-    GetAttack()->type = type;
-    GetAttack()->pressed = false;
-    RakNet::BitStream bs;
-    GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
-    GetNetworking()->SendData(&bs);
-}
-
-
-void LocalPlayer::updateCell(bool forceUpdate)
-{
-    const ESM::Cell *ptrCell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell();
-    bool shouldUpdate = false;
-
-    // Send a packet to server to update this LocalPlayer's cell if:
-    // 1) forceUpdate is true
-    // 2) The LocalPlayer's cell name does not equal the World Player's cell name
-    // 3) The LocalPlayer's exterior cell coordinates do not equal the World Player's
-    //    exterior cell coordinates
-    if (forceUpdate)
-    {
-        shouldUpdate = true;
-    }
-    else if (!Misc::StringUtils::ciEqual(ptrCell->mName, GetCell()->mName))
-    {
-        shouldUpdate = true;
-    }
-    else if (ptrCell->isExterior())
-    {   
-        if (ptrCell->mCellId.mIndex.mX != GetCell()->mCellId.mIndex.mX)
-        {
-            shouldUpdate = true;
-        }
-        else if (ptrCell->mCellId.mIndex.mY != GetCell()->mCellId.mIndex.mY)
-        {
-            shouldUpdate = true;
-        }
-    }
-
-    if (shouldUpdate)
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_CELL to server");
-
-        LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s",
-            GetCell()->getDescription().c_str(),
-            ptrCell->getDescription().c_str());
-        
-        (*GetCell()) = *ptrCell;
-
-        // Make sure the position is updated before a cell packet is sent, or else
-        // cell change events in server scripts will have the wrong player position
-        updatePosition(true);
-        
-        RakNet::BitStream bs;
-        GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_CELL)->Packet(&bs, this, true);
-        GetNetworking()->SendData(&bs);
-
-        // Also update skill progress
-        updateSkills(true);
-    }
-}
-
-void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
-{
-    MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = world->getPlayerPtr();
-
-
-    MWMechanics::NpcStats ptrNpcStats = player.getClass().getNpcStats(player);
-    using namespace MWMechanics;
-
-    static bool oldRun = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Run);
-    static bool oldSneak = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Sneak);
-    static bool oldForceJump = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceJump);
-    static bool oldForceMoveJump = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceMoveJump);
-
-    bool run = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Run);
-    bool sneak = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Sneak);
-    bool forceJump = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceJump);
-    bool forceMoveJump = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceMoveJump);
-    bool jump = !world->isOnGround(player) && !world->isFlying(player);
-    static bool onJump = false;
-
-    MWMechanics::DrawState_ state = player.getClass().getNpcStats(player).getDrawState();
-    static MWMechanics::DrawState_ oldState = player.getClass().getNpcStats(player).getDrawState();
-    //static float timer = 0;
-    if (oldRun != run
-          || oldSneak != sneak || oldForceJump != forceJump
-          || oldForceMoveJump != forceMoveJump || oldState != state ||
-            ((jump || onJump)/* && (timer += MWBase::Environment::get().getFrameDuration() )> 0.5*/)
-          || forceUpdate)
-    {
-        oldSneak = sneak;
-        oldRun = run;
-        oldForceJump = forceJump;
-        oldForceMoveJump = forceMoveJump;
-        oldState = state;
-        onJump = jump;
-
-        movementFlags = 0;
-#define __SETFLAG(flag, value) (value) ? (movementFlags | flag) : (movementFlags & ~flag)
-
-        movementFlags = __SETFLAG(CreatureStats::Flag_Sneak, sneak);
-        movementFlags = __SETFLAG(CreatureStats::Flag_Run, run);
-        movementFlags = __SETFLAG(CreatureStats::Flag_ForceJump, forceJump);
-        movementFlags = __SETFLAG(CreatureStats::Flag_ForceJump, jump);
-        movementFlags = __SETFLAG(CreatureStats::Flag_ForceMoveJump, forceMoveJump);
-
-#undef __SETFLAG
-
-        if (state == MWMechanics::DrawState_Nothing)
-            (*DrawState()) = 0;
-        else if (state == MWMechanics::DrawState_Weapon)
-            (*DrawState()) = 1;
-        else if (state == MWMechanics::DrawState_Spell)
-            (*DrawState()) = 2;
-
-        if (jump)
-            mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after jump;
-
-        RakNet::BitStream bs;
-        GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_DRAWSTATE)->Packet(&bs, this, true);
-        GetNetworking()->SendData(&bs);
-        //timer = 0;
-    }
-}
-
-void LocalPlayer::CharGen(int stageFirst, int stageEnd)
-{
-    CharGenStage()->current = stageFirst;
-    CharGenStage()->end = stageEnd;
-}
-
-bool LocalPlayer::CharGenThread() // ToDo: need fix
-{
-    MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
-    if (windowManager->isGuiMode())
-        return false;
-
-    if (CharGenStage()->current >= CharGenStage()->end)
-    {
-
-        if (GetNetworking()->isConnected() && CharGenStage()->current == CharGenStage()->end &&
-            CharGenStage()->end != 0)
-        {
-            MWBase::World *world = MWBase::Environment::get().getWorld();
-            MWWorld::Ptr player = world->getPlayerPtr();
-            (*Npc()) = *player.get<ESM::NPC>()->mBase;
-            (*BirthSign()) = world->getPlayer().getBirthSign();
-
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server with my CharGen info");
-            GetNetworking()->GetPacket(ID_GAME_BASE_INFO)->Send(this);
-
-            if (CharGenStage()->end != 1)
-            {
-                updateDynamicStats(true);
-                updateAttributes(true);
-                updateSkills(true);
-                updateLevel(true);
-                SendClass();
-                GetNetworking()->GetPacket(ID_GAME_CHARGEN)->Send(this);
-            }
-            CharGenStage()->end = 0;
-            /*RakNet::BitStream bs;
-            GetNetworking()->GetPacket(ID_GAME_BASE_INFO)->Packet(&bs, this, true);
-            GetNetworking()->SendData(&bs);*/
-
-        }
-        return true;
-    }
-
-    switch (CharGenStage()->current)
-    {
-        case 0:
-            windowManager->pushGuiMode(MWGui::GM_Name);
-            break;
-        case 1:
-            windowManager->pushGuiMode(MWGui::GM_Race);
-            break;
-        case 2:
-            windowManager->pushGuiMode(MWGui::GM_Class);
-            break;
-        case 3:
-            windowManager->pushGuiMode(MWGui::GM_Birth);
-            break;
-        default:
-            windowManager->pushGuiMode(MWGui::GM_Review);
-            break;
-    }
-    GetNetworking()->GetPacket(ID_GAME_CHARGEN)->Send(this);
-    CharGenStage()->current++;
-
-    return false;
-}
-
-void LocalPlayer::updateChar()
-{
-    MWBase::Environment::get().getMechanicsManager()->setPlayerRace(
-            Npc()->mRace,
-            Npc()->isMale(),
-            Npc()->mHead,
-            Npc()->mHair
-    );
-
-    MWBase::Environment::get().getMechanicsManager()->setPlayerBirthsign(*BirthSign());
-
-    MWBase::Environment::get().getWindowManager()->getInventoryWindow()->rebuildAvatar();
-}
-
-void LocalPlayer::SetClass()
-{
-    if (charClass.mId.empty()) // custom class
-    {
-        charClass.mData.mIsPlayable = 0x1;
-        MWBase::Environment::get().getMechanicsManager()->setPlayerClass(charClass);
-        MWBase::Environment::get().getWindowManager()->setPlayerClass(charClass);
-    }
-    else
-    {
-        MWBase::Environment::get().getMechanicsManager()->setPlayerClass(charClass.mId);
-
-        const ESM::Class *existingCharClass = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(charClass.mId);
-
-        if (existingCharClass)
-            MWBase::Environment::get().getWindowManager()->setPlayerClass(charClass);
-    }
-}
-
-void LocalPlayer::SendClass()
-{
-    MWBase::World *world = MWBase::Environment::get().getWorld();
-    const ESM::NPC *cpl = world->getPlayerPtr().get<ESM::NPC>()->mBase;
-    const ESM::Class *cls = world->getStore().get<ESM::Class>().find(cpl->mClass);
-
-    if (cpl->mClass.find("$dynamic") != string::npos) // custom class
-    {
-        charClass.mId = "";
-        charClass.mName = cls->mName;
-        charClass.mDescription = cls->mDescription;
-        charClass.mData = cls->mData;
-    }
-    else
-        charClass.mId = cls->mId;
-
-    GetNetworking()->GetPacket(ID_GAME_CHARCLASS)->Send(this);
 }

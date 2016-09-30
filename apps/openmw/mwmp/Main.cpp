@@ -183,7 +183,7 @@ void Main::Frame(float dt)
 void Main::UpdateWorld(float dt) const
 {
 
-    if (!mLocalPlayer->CharGenThread())
+    if (!mLocalPlayer->charGenThread())
         return;
 
     static bool init = true;

@@ -855,9 +855,9 @@ namespace MWMechanics
 
             if(mCaster == getPlayer())
             {
-                mwmp::Main::get().getLocalPlayer()->SendAttack(1);
+                mwmp::Main::get().getLocalPlayer()->sendAttack(1);
                 mwmp::Main::get().getLocalPlayer()->GetAttack()->pressed = false;
-                mwmp::Main::get().getLocalPlayer()->SendAttack(1);
+                mwmp::Main::get().getLocalPlayer()->sendAttack(1);
             }
 
             if (fail)

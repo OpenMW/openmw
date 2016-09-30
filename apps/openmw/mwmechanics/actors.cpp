@@ -1036,7 +1036,7 @@ namespace MWMechanics
                 {
                     bool state = MWBase::Environment::get().getWorld()->getPlayer().getAttackingOrSpell();
                     iter->second->getCharacterController()->setAttackingOrSpell(state);
-                    mwmp::Main::get().getLocalPlayer()->PrepareAttack(2, state);
+                    mwmp::Main::get().getLocalPlayer()->prepareAttack(2, state);
                 }
 
                 if(mwmp::Main::get().getNetworking()->isDedicatedPlayer(iter->first))
