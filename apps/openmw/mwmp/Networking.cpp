@@ -259,8 +259,15 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
         {
             if (id == myid)
             {
-                getLocalPlayer()->updateInventory(true);
-                myPacket->Send(getLocalPlayer(), serverAddr);
+                if (packet->length == myPacket->headerSize())
+                {
+                    getLocalPlayer()->updateInventory(true);
+                }
+                else
+                {
+                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                    getLocalPlayer()->setInventory();
+                }
             }
             else if (pl != 0)
             {

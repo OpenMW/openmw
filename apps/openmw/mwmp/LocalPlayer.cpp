@@ -366,7 +366,7 @@ void LocalPlayer::updateInventory(bool forceUpdate)
 
 
     MWWorld::InventoryStore &invStore = player.getClass().getInventoryStore(player);
-    for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+    for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
     {
         MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
         if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), EquipedItem(slot)->refid))
@@ -656,6 +656,26 @@ void LocalPlayer::setClass()
 
         if (existingCharClass)
             MWBase::Environment::get().getWindowManager()->setPlayerClass(charClass);
+    }
+}
+
+void LocalPlayer::setInventory()
+{
+    MWWorld::Ptr ptrPlayer = GetPlayerPtr();
+
+    MWWorld::InventoryStore &ptrInventory = ptrPlayer.getClass().getInventoryStore(ptrPlayer);
+    ptrInventory.clear();
+
+    for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
+    {
+        mwmp::Item *currentItem = EquipedItem(slot);
+
+        //printf("Setting currentItem: %s in slot %i\n", currentItem->refid, slot);
+
+        if (!currentItem->refid.empty())
+        {
+            ptrInventory.equip(slot, ptrInventory.ContainerStore::add(EquipedItem(slot)->refid.c_str(), 1, ptrPlayer), ptrPlayer);
+        }
     }
 }
 

@@ -42,6 +42,7 @@ namespace mwmp
         void setPosition();
         void setCell();
         void setClass();
+        void setInventory();
 
         void sendClass();
         void sendAttack(char type);
