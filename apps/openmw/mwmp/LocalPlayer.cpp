@@ -153,6 +153,9 @@ void LocalPlayer::updateLevel(bool forceUpdate)
     {
         CreatureStats()->mLevel = ptrNpcStats.getLevel();
         GetNetworking()->GetPacket(ID_GAME_LEVEL)->Send(this);
+
+        // Also update skills to refresh level progress
+        updateSkills(true);
     }
 }
 
@@ -297,6 +300,8 @@ void LocalPlayer::setSkills()
         skillValue.readState(NpcStats()->mSkills[i]);
         ptrNpcStats->setSkill(i, skillValue);
     }
+
+    ptrNpcStats->setLevelProgress(NpcStats()->mLevelProgress);
 }
 
 void LocalPlayer::setLevel()
