@@ -84,6 +84,7 @@ namespace MWMechanics
             void increaseSkill (int skillIndex, const ESM::Class& class_, bool preserveProgress);
 
             int getLevelProgress() const;
+            void setLevelProgress(int value); // Added by tes3mp
 
             int getLevelupAttributeMultiplier(int attribute) const;
 

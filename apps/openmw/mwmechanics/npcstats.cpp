@@ -284,6 +284,12 @@ int MWMechanics::NpcStats::getLevelProgress () const
     return mLevelProgress;
 }
 
+// Added by tes3mp
+void MWMechanics::NpcStats::setLevelProgress(int value)
+{
+    mLevelProgress = value;
+}
+
 void MWMechanics::NpcStats::levelUp()
 {
     const MWWorld::Store<ESM::GameSetting> &gmst =
