@@ -86,6 +86,9 @@ namespace MWMechanics
             int getLevelProgress() const;
             void setLevelProgress(int value); // Added by tes3mp
 
+            int getSkillIncrease(int attribute) const; // Added by tes3mp
+            void setSkillIncrease(int attribute, int value); // Added by tes3mp
+
             int getLevelupAttributeMultiplier(int attribute) const;
 
             int getSkillIncreasesForSpecialization(int spec) const;

@@ -290,6 +290,18 @@ void MWMechanics::NpcStats::setLevelProgress(int value)
     mLevelProgress = value;
 }
 
+// Added by tes3mp
+int MWMechanics::NpcStats::getSkillIncrease(int attribute) const
+{
+    return mSkillIncreases[attribute];
+}
+
+// Added by tes3mp
+void MWMechanics::NpcStats::setSkillIncrease(int attribute, int value)
+{
+    mSkillIncreases[attribute] = value;
+}
+
 void MWMechanics::NpcStats::levelUp()
 {
     const MWWorld::Store<ESM::GameSetting> &gmst =
