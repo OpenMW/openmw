@@ -134,6 +134,13 @@ void LocalPlayer::updateSkills(bool forceUpdate)
         else if (ptrNpcStats.getSkill(i).getProgress() != NpcStats()->mSkills[i].mProgress)
         {
             ptrNpcStats.getSkill(i).writeState(NpcStats()->mSkills[i]);
+        }    
+    }
+
+    for (int i = 0; i < 8; i++)
+    {
+        if (ptrNpcStats.getSkillIncrease(i) != NpcStats()->mSkillIncrease[i]) {
+            NpcStats()->mSkillIncrease[i] = ptrNpcStats.getSkillIncrease(i);
         }
     }
 
@@ -299,6 +306,11 @@ void LocalPlayer::setSkills()
     {
         skillValue.readState(NpcStats()->mSkills[i]);
         ptrNpcStats->setSkill(i, skillValue);
+    }
+
+    for (int i = 0; i < 8; ++i)
+    {
+        ptrNpcStats->setSkillIncrease(i, NpcStats()->mSkillIncrease[i]);
     }
 
     ptrNpcStats->setLevelProgress(NpcStats()->mLevelProgress);

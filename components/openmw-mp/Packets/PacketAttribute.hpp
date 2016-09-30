@@ -12,7 +12,7 @@ namespace mwmp
     class PacketAttribute : public BasePacket
     {
     public:
-        const static int AttributesCount = 8;
+        const static int AttributeCount = 8;
         PacketAttribute(RakNet::RakPeerInterface *peer);
 
         virtual void Packet(RakNet::BitStream *bs, BasePlayer *player, bool send);

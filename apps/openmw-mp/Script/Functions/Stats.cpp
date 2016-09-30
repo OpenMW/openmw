@@ -424,26 +424,26 @@ void StatsFunctions::SetSkillProgress(unsigned short pid, unsigned short skill, 
     player->NpcStats()->mSkills[skill].mProgress = value;
 }
 
-int StatsFunctions::GetSkillIncrease(unsigned short pid, unsigned int pos) noexcept
+int StatsFunctions::GetSkillIncrease(unsigned short pid, unsigned int attribute) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    if (pos > 7)
+    if (attribute > Attribute::Length)
         return 0;
 
-    return player->NpcStats()->mSkillIncrease[pos];
+    return player->NpcStats()->mSkillIncrease[attribute];
 }
 
-void StatsFunctions::SetSkillIncrease(unsigned short pid, unsigned int pos, int value) noexcept // TODO: need packet for transmit it
+void StatsFunctions::SetSkillIncrease(unsigned short pid, unsigned int attribute, int value) noexcept // TODO: need packet for transmit it
 {
     Player *player;
     GET_PLAYER(pid, player,);
 
-    if (pos > 7)
+    if (attribute > Attribute::Length)
         return;
 
-    player->NpcStats()->mSkillIncrease[pos] = value;
+    player->NpcStats()->mSkillIncrease[attribute] = value;
 }
 
 void StatsFunctions::SetCharGenStage(unsigned short pid, int start, int end) noexcept
