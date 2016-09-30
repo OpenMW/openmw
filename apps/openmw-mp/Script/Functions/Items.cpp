@@ -24,9 +24,6 @@ void ItemFunctions::EquipItem(unsigned short pid, unsigned short slot, const cha
 
     player->EquipedItem(slot)->refid = itemName;
     player->EquipedItem(slot)->count = count;
-
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_EQUIPMENT)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_EQUIPMENT)->Send(player, true);
 }
 
 void ItemFunctions::UnequipItem(unsigned short pid, unsigned short slot) noexcept
@@ -37,12 +34,10 @@ void ItemFunctions::UnequipItem(unsigned short pid, unsigned short slot) noexcep
 
 const char *ItemFunctions::GetItemSlot(unsigned short pid, unsigned short slot) noexcept
 {
-    /*Player *player;
+    Player *player;
     GET_PLAYER(pid, player, 0);
 
-    return player->EquipedItem(slot)->refid.c_str();*/
-    LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");
-    return "";
+    return player->EquipedItem(slot)->refid.c_str();
 }
 
 bool ItemFunctions::HasItemEquipped(unsigned short pid, const char* itemName)
@@ -63,4 +58,13 @@ void ItemFunctions::RemoveItem(unsigned short pid, const char* itemName, unsigne
 void ItemFunctions::GetItemCount(unsigned short pid, const char* itemName) noexcept
 {
     LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");
+}
+
+void ItemFunctions::SendEquipment(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_EQUIPMENT)->Send(player, false);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_EQUIPMENT)->Send(player, true);
 }

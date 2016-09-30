@@ -70,7 +70,7 @@
     {"Resurrect",               StatsFunctions::Resurrect},\
     {"SendBaseInfo",            StatsFunctions::SendBaseInfo},\
     \
-    {"SendDynamicStats",        StatsFunctions::SendDynamicStats}, \
+    {"SendDynamicStats",        StatsFunctions::SendDynamicStats},\
     {"SendAttributes",          StatsFunctions::SendAttributes},\
     {"SendSkills",              StatsFunctions::SendSkills},\
     {"SendLevel",               StatsFunctions::SendLevel}

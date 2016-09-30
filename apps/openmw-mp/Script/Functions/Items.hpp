@@ -6,13 +6,16 @@
 #define OPENMW_ITEMS_HPP
 
 #define ITEMAPI \
-            {"AddItem",           ItemFunctions::AddItem},\
-            {"RemoveItem",        ItemFunctions::RemoveItem},\
-            {"GetItemCount",      ItemFunctions::GetItemCount},\
-            {"EquipItem",         ItemFunctions::EquipItem},\
-            {"UnequipItem",       ItemFunctions::UnequipItem},\
-            {"GetItemSlot",       ItemFunctions::GetItemSlot},\
-            {"HasItemEquipped",   ItemFunctions::HasItemEquipped}\
+    {"AddItem",           ItemFunctions::AddItem},\
+    {"RemoveItem",        ItemFunctions::RemoveItem},\
+    {"GetItemCount",      ItemFunctions::GetItemCount},\
+    {"EquipItem",         ItemFunctions::EquipItem},\
+    {"UnequipItem",       ItemFunctions::UnequipItem},\
+    {"GetItemSlot",       ItemFunctions::GetItemSlot},\
+    {"HasItemEquipped",   ItemFunctions::HasItemEquipped},\
+    \
+    {"SendEquipment",     ItemFunctions::SendEquipment}\
+    
 
 class ItemFunctions
 {
@@ -24,6 +27,8 @@ public:
     static void UnequipItem(unsigned short pid, unsigned short slot) noexcept;
     static bool HasItemEquipped(unsigned short pid, const char* itemName);
     static const char *GetItemSlot(unsigned short pid, unsigned short slot) noexcept;
+
+    static void SendEquipment(unsigned short pid) noexcept;
 };
 
 #endif //OPENMW_ITEMS_HPP
