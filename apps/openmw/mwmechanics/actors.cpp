@@ -1535,7 +1535,7 @@ namespace MWMechanics
         for(std::vector<MWWorld::Ptr>::const_iterator iter(neighbors.begin());iter != neighbors.end();++iter)
         {
             const CreatureStats &stats = iter->getClass().getCreatureStats(*iter);
-            if (stats.isDead() || *iter == actor)
+            if (stats.isDead() || *iter == actor || iter->getClass().isPureWaterCreature(*iter))
                 continue;
             const bool isFollower = std::find(followers.begin(), followers.end(), *iter) != followers.end();
             if (stats.getAiSequence().isInCombat(actor) || (MWBase::Environment::get().getMechanicsManager()->isAggressive(*iter, actor) && !isFollower))
