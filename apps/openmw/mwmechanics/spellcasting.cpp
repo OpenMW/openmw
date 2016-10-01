@@ -412,7 +412,7 @@ namespace MWMechanics
             if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && target.getClass().isActor())
             {
                 if (absorbed)
-                    break;
+                    continue;
 
                 // Try reflecting
                 if (!reflected && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
@@ -426,7 +426,7 @@ namespace MWMechanics
                                     "meshes\\" + reflectStatic->mModel, ESM::MagicEffect::Reflect, false, "");
                         reflectedEffects.mList.push_back(*effectIt);
                         magnitudeMult = 0;
-                        break;
+                        continue;
                     }
                 }
 
