@@ -425,7 +425,6 @@ namespace MWMechanics
                         MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
                                     "meshes\\" + reflectStatic->mModel, ESM::MagicEffect::Reflect, false, "");
                         reflectedEffects.mList.push_back(*effectIt);
-                        magnitudeMult = 0;
                         continue;
                     }
                 }
