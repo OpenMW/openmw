@@ -157,7 +157,7 @@ struct TypesetBookImpl : TypesetBook
     StyleImpl * hitTestWithMargin (int left, int top)
     {
         StyleImpl * hit = hitTest(left, top);
-        if (hit && hit->mInteractiveId > 0)
+        if (hit && hit->mInteractiveId != 0)
             return hit;
 
         const int maxMargin = 10;
@@ -174,7 +174,7 @@ struct TypesetBookImpl : TypesetBook
                 else
                     hit = hitTest(left+margin, top);
 
-                if (hit && hit->mInteractiveId > 0)
+                if (hit && hit->mInteractiveId != 0)
                     return hit;
             }
         }
