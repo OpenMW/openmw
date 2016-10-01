@@ -24,9 +24,14 @@ mwmp::GUIController::GUIController(): mInputBox(0)
 
 mwmp::GUIController::~GUIController()
 {
-   /* if (mChat != nullptr)
+
+}
+
+void mwmp::GUIController::cleanup()
+{
+    if (mChat != nullptr)
         delete mChat;
-    mChat = nullptr;*/
+    mChat = nullptr;
 }
 
 void mwmp::GUIController::setupChat(const Settings::Manager &mgr)

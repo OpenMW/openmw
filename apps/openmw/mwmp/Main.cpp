@@ -75,7 +75,6 @@ Main::~Main()
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "TES3MP stopped");
     delete mNetworking;
     delete mLocalPlayer;
-    delete mGUIController;
     Players::CleanUp();
 }
 
@@ -156,8 +155,6 @@ void Main::PostInit()
 void Main::Destroy()
 {
     assert(pMain);
-
-    delete pMain->mGUIController;
 
     delete pMain;
     pMain = 0;

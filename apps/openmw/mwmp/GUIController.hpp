@@ -18,6 +18,7 @@ namespace mwmp
     public:
         GUIController();
         ~GUIController();
+        void cleanup();
         void setupChat(const Settings::Manager &manager);
 
         void PrintChatMessage(std::string &msg);

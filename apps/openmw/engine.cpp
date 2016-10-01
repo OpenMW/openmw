@@ -28,6 +28,7 @@
 #include <components/translation/translation.hpp>
 
 #include <components/version/version.hpp>
+#include <components/openmw-mp/Log.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
 
@@ -230,7 +231,10 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
+    mwmp::Main::get().getGUIController()->cleanup();
     mEnvironment.cleanup();
+
+    mwmp::Main::Destroy();
 
     delete mScriptContext;
     mScriptContext = NULL;
@@ -246,6 +250,9 @@ OMW::Engine::~Engine()
     }
 
     SDL_Quit();
+
+
+    LOG_QUIT();
 }
 
 void OMW::Engine::enableFSStrict(bool fsStrict)
@@ -719,7 +726,6 @@ void OMW::Engine::go()
     // Save user settings
     settings.saveUser(settingspath);
 
-    mwmp::Main::Destroy();
     std::cout << "Quitting peacefully." << std::endl;
 }
 

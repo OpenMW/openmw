@@ -387,7 +387,6 @@ int main(int argc, char**argv)
     std::cout.rdbuf(cout_rdbuf);
     std::cerr.rdbuf(cerr_rdbuf);
 
-    LOG_QUIT();
 
     return ret;
 }
