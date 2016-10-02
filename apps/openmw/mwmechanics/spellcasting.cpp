@@ -411,6 +411,10 @@ namespace MWMechanics
             float magnitudeMult = 1;
             if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && target.getClass().isActor())
             {
+                // Notify the target actor they've been hit
+                if (target != caster && !caster.isEmpty())
+                    target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
+
                 if (absorbed)
                     continue;
 
@@ -443,10 +447,6 @@ namespace MWMechanics
                 // If player is attempting to cast a harmful spell, show the target's HP bar
                 if (castByPlayer && target != caster)
                     MWBase::Environment::get().getWindowManager()->setEnemy(target);
-
-                // Notify the target actor they've been hit
-                if (target != caster && !caster.isEmpty())
-                    target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
             }
 
             if (magnitudeMult > 0 && !absorbed)
