@@ -777,16 +777,16 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiAlphaController)
                 {
                     const Nif::NiAlphaController* alphactrl = static_cast<const Nif::NiAlphaController*>(ctrl.getPtr());
-                    osg::ref_ptr<AlphaController> ctrl(new AlphaController(alphactrl->data.getPtr()));
-                    setupController(alphactrl, ctrl, animflags);
-                    composite->addController(ctrl);
+                    osg::ref_ptr<AlphaController> osgctrl(new AlphaController(alphactrl->data.getPtr()));
+                    setupController(alphactrl, osgctrl, animflags);
+                    composite->addController(osgctrl);
                 }
                 else if (ctrl->recType == Nif::RC_NiMaterialColorController)
                 {
                     const Nif::NiMaterialColorController* matctrl = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
-                    osg::ref_ptr<MaterialColorController> ctrl(new MaterialColorController(matctrl->data.getPtr()));
-                    setupController(matctrl, ctrl, animflags);
-                    composite->addController(ctrl);
+                    osg::ref_ptr<MaterialColorController> osgctrl(new MaterialColorController(matctrl->data.getPtr()));
+                    setupController(matctrl, osgctrl, animflags);
+                    composite->addController(osgctrl);
                 }
                 else
                     std::cerr << "Unexpected material controller " << ctrl->recType << " in " << mFilename << std::endl;

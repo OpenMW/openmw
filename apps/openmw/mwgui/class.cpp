@@ -193,9 +193,8 @@ namespace MWGui
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-        std::vector<std::pair<std::string, std::string> > items; // class id, class name
-        MWWorld::Store<ESM::Class>::iterator it = store.get<ESM::Class>().begin();
-        for (; it != store.get<ESM::Class>().end(); ++it)
+        std::vector<std::pair<std::string, std::string> > items; // class id, class name       
+        for (MWWorld::Store<ESM::Class>::iterator it = store.get<ESM::Class>().begin(); it != store.get<ESM::Class>().end(); ++it)
         {
             bool playable = (it->mData.mIsPlayable != 0);
             if (!playable) // Only display playable classes

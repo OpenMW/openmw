@@ -735,9 +735,7 @@ namespace MWGui
 
         std::vector<std::string> abilities, powers, spells;
 
-        std::vector<std::string>::const_iterator it = sign->mPowers.mList.begin();
-        std::vector<std::string>::const_iterator end = sign->mPowers.mList.end();
-        for (; it != end; ++it)
+        for (std::vector<std::string>::const_iterator it = sign->mPowers.mList.begin(); it != sign->mPowers.mList.end(); ++it)
         {
             const std::string &spellId = *it;
             const ESM::Spell *spell = store.get<ESM::Spell>().search(spellId);
