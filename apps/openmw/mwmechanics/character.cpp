@@ -2297,7 +2297,7 @@ void CharacterController::updateHeadTracking(float duration)
                 node = anim->getNode("Bip01 Head");
             if (node != NULL)
             {
-                osg::NodePathList nodepaths = node->getParentalNodePaths();
+                nodepaths = node->getParentalNodePaths();
                 if (!nodepaths.empty())
                     direction = osg::computeLocalToWorld(nodepaths[0]).getTrans() - headPos;
             }

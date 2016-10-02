@@ -2477,9 +2477,9 @@ namespace MWWorld
             }
             if (0 != source) {
                 // Find door leading to our current teleport door
-                // and use it destination to position inside cell.
-                const DoorList &doors = source->getReadOnlyDoors().mList;
-                for (DoorList::const_iterator jt = doors.begin(); jt != doors.end(); ++jt) {
+                // and use its destination to position inside cell.
+                const DoorList &destinationDoors = source->getReadOnlyDoors().mList;
+                for (DoorList::const_iterator jt = destinationDoors.begin(); jt != destinationDoors.end(); ++jt) {
                     if (it->mRef.getTeleport() &&
                         Misc::StringUtils::ciEqual(name, jt->mRef.getDestCell()))
                     {
@@ -3247,9 +3247,9 @@ namespace MWWorld
             cast.mId = id;
             cast.mSourceName = sourceName;
             cast.mStack = false;
-            ESM::EffectList effects;
-            effects.mList = apply->second;
-            cast.inflict(apply->first, caster, effects, rangeType, false, true);
+            ESM::EffectList effectsToApply;
+            effectsToApply.mList = apply->second;
+            cast.inflict(apply->first, caster, effectsToApply, rangeType, false, true);
         }
     }
 
