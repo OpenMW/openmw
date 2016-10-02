@@ -336,7 +336,6 @@ namespace MWMechanics
 
         ESM::EffectList reflectedEffects;
         std::vector<ActiveSpells::ActiveEffect> appliedLastingEffects;
-        bool anyHarmfulEffect = false;
 
         // HACK: cache target's magic effects here, and add any applied effects to it. Use the cached effects for determining resistance.
         // This is required for Weakness effects in a spell to apply to any subsequent effects in the spell.
@@ -412,17 +411,15 @@ namespace MWMechanics
             float magnitudeMult = 1;
             if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && target.getClass().isActor())
             {
-                anyHarmfulEffect = true;
+                // Notify the target actor they've been hit
+                if (target != caster && !caster.isEmpty())
+                    target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
 
-                if (absorbed) // Absorbed, and we know there was a harmful effect (figuring that out is the only reason we are in this loop)
-                    break;
-
-                // If player is attempting to cast a harmful spell, show the target's HP bar
-                if (castByPlayer && target != caster)
-                    MWBase::Environment::get().getWindowManager()->setEnemy(target);
+                if (absorbed)
+                    continue;
 
                 // Try reflecting
-                if (!reflected && magnitudeMult > 0 && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
+                if (!reflected && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
                 {
                     float reflect = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Reflect).getMagnitude();
                     bool isReflected = (Misc::Rng::roll0to99() < reflect);
@@ -432,23 +429,24 @@ namespace MWMechanics
                         MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
                                     "meshes\\" + reflectStatic->mModel, ESM::MagicEffect::Reflect, false, "");
                         reflectedEffects.mList.push_back(*effectIt);
-                        magnitudeMult = 0;
+                        continue;
                     }
                 }
 
                 // Try resisting
-                if (magnitudeMult > 0 && target.getClass().isActor())
+                magnitudeMult = MWMechanics::getEffectMultiplier(effectIt->mEffectID, target, caster, spell, &targetEffects);
+                if (magnitudeMult == 0)
                 {
-                    magnitudeMult = MWMechanics::getEffectMultiplier(effectIt->mEffectID, target, caster, spell, &targetEffects);
-                    if (magnitudeMult == 0)
-                    {
-                        // Fully resisted, show message
-                        if (target == getPlayer())
-                            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicPCResisted}");
-                        else if (castByPlayer)
-                            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
-                    }
+                    // Fully resisted, show message
+                    if (target == getPlayer())
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicPCResisted}");
+                    else if (castByPlayer)
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
                 }
+
+                // If player is attempting to cast a harmful spell, show the target's HP bar
+                if (castByPlayer && target != caster)
+                    MWBase::Environment::get().getWindowManager()->setEnemy(target);
             }
 
             if (magnitudeMult > 0 && !absorbed)
@@ -567,10 +565,6 @@ namespace MWMechanics
             target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
                                                                                   mSourceName, casterActorId);
         }
-
-        // Notify the target actor they've been hit
-        if (anyHarmfulEffect && target.getClass().isActor() && target != caster && !caster.isEmpty() && caster.getClass().isActor())
-            target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
     }
 
     bool CastSpell::applyInstantEffect(const MWWorld::Ptr &target, const MWWorld::Ptr &caster, const MWMechanics::EffectKey& effect, float magnitude)
