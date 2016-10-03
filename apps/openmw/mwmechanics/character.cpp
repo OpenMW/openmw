@@ -465,7 +465,7 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
             }
 
             mAnimation->play(mCurrentMovement, Priority_Movement, movemask, false,
-                             1.f, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
+                             1.f, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul, true);
         }
     }
 }
