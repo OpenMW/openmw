@@ -146,9 +146,6 @@ namespace MWClass
 
         float epsilon = 0.0005f;
 
-        if (ref->mBase->mData.mWeight == 0)
-            return ESM::Skill::Unarmored;
-
         if (ref->mBase->mData.mWeight <= iWeight * gmst.find ("fLightMaxMod")->getFloat() + epsilon)
             return ESM::Skill::LightArmor;
 

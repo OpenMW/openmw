@@ -1160,7 +1160,6 @@ namespace MWClass
 
                 switch(boots->getClass().getEquipmentSkill(*boots))
                 {
-                    case ESM::Skill::Unarmored:
                     case ESM::Skill::LightArmor:
                         return (name == "left") ? "FootLightLeft" : "FootLightRight";
                     case ESM::Skill::MediumArmor:
