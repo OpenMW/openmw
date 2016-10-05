@@ -217,7 +217,7 @@ namespace MWBase
             virtual bool toggleSky() = 0;
             ///< \return Resulting mode
 
-            virtual void changeWeather(const std::string& region, unsigned int id) = 0;
+            virtual void changeWeather(const std::string& region, const unsigned int id) = 0;
 
             virtual int getCurrentWeather() const = 0;
 
