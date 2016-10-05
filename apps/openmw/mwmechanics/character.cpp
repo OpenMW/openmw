@@ -694,6 +694,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mAnimation(anim)
     , mIdleState(CharState_None)
     , mMovementState(CharState_None)
+    , mMovementAnimSpeed(0.f)
     , mAdjustMovementAnimSpeed(false)
     , mHasMovedInXY(false)
     , mMovementAnimationControlled(true)

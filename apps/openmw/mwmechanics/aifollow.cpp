@@ -47,7 +47,7 @@ AiFollow::AiFollow(const std::string &actorId, bool commanded)
 }
 
 AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
-    : mCommanded(follow->mCommanded), mRemainingDuration(follow->mRemainingDuration)
+    : mAlwaysFollow(follow->mAlwaysFollow), mCommanded(follow->mCommanded), mRemainingDuration(follow->mRemainingDuration)
     , mX(follow->mData.mX), mY(follow->mData.mY), mZ(follow->mData.mZ)
     , mActorRefId(follow->mTargetId), mActorId(-1)
     , mCellId(follow->mCellId), mActive(follow->mActive), mFollowIndex(mFollowIndexCounter++)
