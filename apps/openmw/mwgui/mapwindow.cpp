@@ -165,7 +165,11 @@ namespace MWGui
         , mCompass(NULL)
         , mChanged(true)
         , mFogOfWarToggled(true)
+#if defined (ANDROID) && !defined (OPENGL_ES)
+        , mFogOfWarEnabled(false)
+#else
         , mFogOfWarEnabled(fogOfWarEnabled)
+#endif
         , mMapWidgetSize(0)
         , mNumCells(0)
         , mCellDistance(0)
