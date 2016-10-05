@@ -478,28 +478,28 @@ void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterStat
         mIdleState = idle;
         size_t numLoops = ~0ul;
 
-        std::string idle;
+        std::string idleGroup;
         MWRender::Animation::AnimPriority idlePriority (Priority_Default);
         // Only play "idleswim" or "idlesneak" if they exist. Otherwise, fallback to
         // "idle"+weapon or "idle".
         if(mIdleState == CharState_IdleSwim && mAnimation->hasAnimation("idleswim"))
         {
-            idle = "idleswim";
+            idleGroup = "idleswim";
             idlePriority = Priority_SwimIdle;
         }
         else if(mIdleState == CharState_IdleSneak && mAnimation->hasAnimation("idlesneak"))
         {
-            idle = "idlesneak";
+            idleGroup = "idlesneak";
             idlePriority[MWRender::Animation::BoneGroup_LowerBody] = Priority_SneakIdleLowerBody;
         }
         else if(mIdleState != CharState_None)
         {
-            idle = "idle";
+            idleGroup = "idle";
             if(weap != sWeaponTypeListEnd)
             {
-                idle += weap->shortgroup;
-                if(!mAnimation->hasAnimation(idle))
-                    idle = "idle";
+                idleGroup += weap->shortgroup;
+                if(!mAnimation->hasAnimation(idleGroup))
+                    idleGroup = "idle";
 
                 // play until the Loop Stop key 2 to 5 times, then play until the Stop key
                 // this replicates original engine behavior for the "Idle1h" 1st-person animation
@@ -508,7 +508,7 @@ void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterStat
         }
 
         mAnimation->disable(mCurrentIdle);
-        mCurrentIdle = idle;
+        mCurrentIdle = idleGroup;
         if(!mCurrentIdle.empty())
             mAnimation->play(mCurrentIdle, idlePriority, MWRender::Animation::BlendMask_All, false,
                              1.0f, "start", "stop", 0.0f, numLoops, true);
@@ -571,8 +571,8 @@ MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::I
             else if(type == typeid(ESM::Weapon).name())
             {
                 MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
-                ESM::Weapon::Type type = (ESM::Weapon::Type)ref->mBase->mData.mType;
-                switch(type)
+                ESM::Weapon::Type weaponType = (ESM::Weapon::Type)ref->mBase->mData.mType;
+                switch(weaponType)
                 {
                     case ESM::Weapon::ShortBladeOneHand:
                     case ESM::Weapon::LongBladeOneHand:
@@ -1740,14 +1740,12 @@ void CharacterController::update(float duration)
                     cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
 
                 // decrease fatigue
-                const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
                 const float fatigueJumpBase = gmst.find("fFatigueJumpBase")->getFloat();
                 const float fatigueJumpMult = gmst.find("fFatigueJumpMult")->getFloat();
                 float normalizedEncumbrance = mPtr.getClass().getNormalizedEncumbrance(mPtr);
                 if (normalizedEncumbrance > 1)
                     normalizedEncumbrance = 1;
                 const float fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
-                DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
                 fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
                 cls.getCreatureStats(mPtr).setFatigue(fatigue);
             }

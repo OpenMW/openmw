@@ -559,8 +559,8 @@ namespace MWGui
 
             std::vector<std::string> destNotes;
             CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(marker.dest);
-            for (CustomMarkerCollection::ContainerType::const_iterator it = markers.first; it != markers.second; ++it)
-                destNotes.push_back(it->second.mNote);
+            for (CustomMarkerCollection::ContainerType::const_iterator iter = markers.first; iter != markers.second; ++iter)
+                destNotes.push_back(iter->second.mNote);
 
             MarkerUserData data (mLocalMapRender);
             data.notes = destNotes;

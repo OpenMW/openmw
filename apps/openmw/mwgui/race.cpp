@@ -362,10 +362,10 @@ namespace MWGui
         std::sort(items.begin(), items.end(), sortRaces);
 
         int index = 0;
-        for (std::vector<std::pair<std::string, std::string> >::const_iterator it = items.begin(); it != items.end(); ++it)
+        for (std::vector<std::pair<std::string, std::string> >::const_iterator iter = items.begin(); iter != items.end(); ++iter)
         {
-            mRaceList->addItem(it->second, it->first);
-            if (Misc::StringUtils::ciEqual(it->first, mCurrentRaceId))
+            mRaceList->addItem(iter->second, iter->first);
+            if (Misc::StringUtils::ciEqual(iter->first, mCurrentRaceId))
                 mRaceList->setIndexSelected(index);
             ++index;
         }
