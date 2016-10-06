@@ -73,7 +73,7 @@ void MWMechanics::Alchemy::applyTools (int flags, float& value) const
     bool duration = !(flags & ESM::MagicEffect::NoDuration);
     bool negative = (flags & ESM::MagicEffect::Harmful) != 0;
 
-    int tool = negative ? ESM::Apparatus::Retort : ESM::Apparatus::Albemic;
+    int tool = negative ? ESM::Apparatus::Alembic : ESM::Apparatus::Retort;
 
     int setup = 0;
 
