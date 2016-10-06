@@ -146,9 +146,6 @@ namespace MWClass
 
         float epsilon = 0.0005f;
 
-        if (ref->mBase->mData.mWeight == 0)
-            return ESM::Skill::Unarmored;
-
         if (ref->mBase->mData.mWeight <= iWeight * gmst.find ("fLightMaxMod")->getFloat() + epsilon)
             return ESM::Skill::LightArmor;
 
@@ -220,16 +217,19 @@ namespace MWClass
         std::string text;
 
         // get armor type string (light/medium/heavy)
-        int armorType = getEquipmentSkill(ptr);
         std::string typeText;
-        if (armorType == ESM::Skill::LightArmor)
-            typeText = "#{sLight}";
-        else if (armorType == ESM::Skill::MediumArmor)
-            typeText = "#{sMedium}";
-        else if (armorType == ESM::Skill::HeavyArmor)
-            typeText = "#{sHeavy}";
-        else // if (armorType == ESM::Skill::Unarmored)
+        if (ref->mBase->mData.mWeight == 0)
             typeText = "";
+        else
+        {
+            int armorType = getEquipmentSkill(ptr);       
+            if (armorType == ESM::Skill::LightArmor)
+                typeText = "#{sLight}";
+            else if (armorType == ESM::Skill::MediumArmor)
+                typeText = "#{sMedium}";
+            else
+                typeText = "#{sHeavy}";
+        }
 
         text += "\n#{sArmorRating}: " + MWGui::ToolTips::toString(getEffectiveArmorRating(ptr,
             MWMechanics::getPlayer()));

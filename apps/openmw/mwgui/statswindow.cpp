@@ -494,8 +494,8 @@ namespace MWGui
 
         if (!mFactions.empty())
         {
-            MWWorld::Ptr player = MWMechanics::getPlayer();
-            const MWMechanics::NpcStats &PCstats = player.getClass().getNpcStats(player);
+            MWWorld::Ptr playerPtr = MWMechanics::getPlayer();
+            const MWMechanics::NpcStats &PCstats = playerPtr.getClass().getNpcStats(playerPtr);
             const std::set<std::string> &expelled = PCstats.getExpelled();
 
             bool firstFaction=true;
