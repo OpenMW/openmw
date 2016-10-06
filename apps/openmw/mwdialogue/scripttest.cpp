@@ -39,9 +39,9 @@ void test(const MWWorld::Ptr& actor, int &compiled, int &total, const Compiler::
     {
         std::vector<const ESM::DialInfo*> infos = filter.listAll(*it);
 
-        for (std::vector<const ESM::DialInfo*>::iterator it = infos.begin(); it != infos.end(); ++it)
+        for (std::vector<const ESM::DialInfo*>::iterator iter = infos.begin(); iter != infos.end(); ++iter)
         {
-            const ESM::DialInfo* info = *it;
+            const ESM::DialInfo* info = *iter;
             if (!info->mResultScript.empty())
             {
                 bool success = true;

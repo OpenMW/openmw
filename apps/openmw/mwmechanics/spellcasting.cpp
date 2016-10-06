@@ -495,13 +495,13 @@ namespace MWMechanics
                             {
                                 if (effectIt->mEffectID == ESM::MagicEffect::AbsorbAttribute+i)
                                 {
-                                    std::vector<ActiveSpells::ActiveEffect> effects;
+                                    std::vector<ActiveSpells::ActiveEffect> absorbEffects;
                                     ActiveSpells::ActiveEffect effect_ = effect;
                                     effect_.mMagnitude *= -1;
-                                    effects.push_back(effect_);
+                                    absorbEffects.push_back(effect_);
                                     // Also make sure to set casterActorId = target, so that the effect on the caster gets purged when the target dies
                                     caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
-                                                effects, mSourceName, target.getClass().getCreatureStats(target).getActorId());
+                                                absorbEffects, mSourceName, target.getClass().getCreatureStats(target).getActorId());
                                 }
                             }
                         }
@@ -512,11 +512,11 @@ namespace MWMechanics
                 if (isSummoningEffect(effectIt->mEffectID) && !target.isEmpty() && target.getClass().isActor())
                 {
                     CreatureStats& targetStats = target.getClass().getCreatureStats(target);
-                    std::map<CreatureStats::SummonKey, int>::iterator found = targetStats.getSummonedCreatureMap().find(std::make_pair(effectIt->mEffectID, mId));
-                    if (found != targetStats.getSummonedCreatureMap().end())
+                    std::map<CreatureStats::SummonKey, int>::iterator findCreature = targetStats.getSummonedCreatureMap().find(std::make_pair(effectIt->mEffectID, mId));
+                    if (findCreature != targetStats.getSummonedCreatureMap().end())
                     {
-                        MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(target, found->second);
-                        targetStats.getSummonedCreatureMap().erase(found);
+                        MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(target, findCreature->second);
+                        targetStats.getSummonedCreatureMap().erase(findCreature);
                     }
                 }
 

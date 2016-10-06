@@ -423,12 +423,12 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 
         if (ref.getPtr().getTypeName()==typeid (ESM::ItemLevList).name())
         {
-            const ESM::ItemLevList* levItem = ref.getPtr().get<ESM::ItemLevList>()->mBase;
+            const ESM::ItemLevList* levItemList = ref.getPtr().get<ESM::ItemLevList>()->mBase;
 
-            if (topLevel && std::abs(count) > 1 && levItem->mFlags & ESM::ItemLevList::Each)
+            if (topLevel && std::abs(count) > 1 && levItemList->mFlags & ESM::ItemLevList::Each)
             {
                 for (int i=0; i<std::abs(count); ++i)
-                    addInitialItem(id, owner, count > 0 ? 1 : -1, true, levItem->mId);
+                    addInitialItem(id, owner, count > 0 ? 1 : -1, true, levItemList->mId);
                 return;
             }
             else
@@ -436,7 +436,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
                 std::string id = MWMechanics::getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
                 if (id.empty())
                     return;
-                addInitialItem(id, owner, count, false, levItem->mId);
+                addInitialItem(id, owner, count, false, levItemList->mId);
             }
         }
         else
