@@ -10,6 +10,13 @@
 #include <apps/openmw/mwgui/mode.hpp>
 #include <components/openmw-mp/Base/BasePlayer.hpp>
 #include "GUIChat.hpp"
+#include "PlayerMarkerCollection.hpp"
+
+namespace MWGui
+{
+    class LocalMapBase;
+    class MapWindow;
+}
 
 namespace mwmp
 {
@@ -36,7 +43,17 @@ namespace mwmp
         void update(float dt);
 
         void WM_UpdateVisible(MWGui::GuiMode mode);
+
+        void updatePlayersMarkers(MWGui::LocalMapBase *localMapBase);
+        void updateGlobalMapMarkerTooltips(MWGui::MapWindow *pWindow);
+
+        void SetMapVisibility(int pid, bool state);
+        PlayerMarkerCollection mPlayerMarkers;
     private:
+        void setGlobalMapMarkerTooltip(MWGui::MapWindow *mapWindow ,MyGUI::Widget* markerWidget, int x, int y);
+
+    private:
+        std::vector<MyGUI::Widget*> mPlayerMarkerWidgets;
         GUIChat *mChat;
         int keySay;
         int keyChatMode;

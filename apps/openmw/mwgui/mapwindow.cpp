@@ -15,6 +15,7 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/settings/settings.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
+#include <apps/openmw/mwmp/Main.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -176,11 +177,13 @@ namespace MWGui
         , mNeedDoorMarkersUpdate(false)
     {
         mCustomMarkers.eventMarkersChanged += MyGUI::newDelegate(this, &LocalMapBase::updateCustomMarkers);
+        mwmp::Main::get().getGUIController()->mPlayerMarkers.eventMarkersChanged += MyGUI::newDelegate(this, &LocalMapBase::updatePlayerMarkers);
     }
 
     LocalMapBase::~LocalMapBase()
     {
         mCustomMarkers.eventMarkersChanged -= MyGUI::newDelegate(this, &LocalMapBase::updateCustomMarkers);
+        mwmp::Main::get().getGUIController()->mPlayerMarkers.eventMarkersChanged -= MyGUI::newDelegate(this, &LocalMapBase::updatePlayerMarkers);
     }
 
     void LocalMapBase::init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int mapWidgetSize, int cellDistance)
@@ -354,6 +357,20 @@ namespace MWGui
         }
 
         redraw();
+    }
+
+    void LocalMapBase::updatePlayerMarkers()
+    {
+        mwmp::Main::get().getGUIController()->updatePlayersMarkers(this);
+    }
+
+    void MapWindow::updatePlayerMarkers()
+    {
+        printf("MapWindow::updatePlayerMarkers!!\n");
+        LocalMapBase::updatePlayerMarkers();
+
+        mwmp::Main::get().getGUIController()->updateGlobalMapMarkerTooltips(this);
+        printf("End of MapWindow::updatePlayerMarkers!!\n");
     }
 
     void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
