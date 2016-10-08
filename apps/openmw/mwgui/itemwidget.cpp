@@ -79,7 +79,10 @@ namespace MWGui
 
     void ItemWidget::setIcon(const MWWorld::Ptr &ptr)
     {
-        setIcon(MWBase::Environment::get().getWindowManager()->correctIconPath(ptr.getClass().getInventoryIcon(ptr)));
+        std::string invIcon = ptr.getClass().getInventoryIcon(ptr);
+        if (invIcon.empty())
+            invIcon = "default icon.tga";
+        setIcon(MWBase::Environment::get().getWindowManager()->correctIconPath(invIcon));
     }
 
 
