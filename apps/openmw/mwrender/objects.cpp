@@ -112,11 +112,11 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
     PtrAnimationMap::iterator iter = mObjects.find(ptr);
     if(iter != mObjects.end())
     {
+        if (mUnrefQueue.get())
+            mUnrefQueue->push(iter->second->getObjectRoot());
+
         delete iter->second;
         mObjects.erase(iter);
-
-        if (mUnrefQueue.get())
-            mUnrefQueue->push(ptr.getRefData().getBaseNode());
 
         ptr.getRefData().getBaseNode()->getParent(0)->removeChild(ptr.getRefData().getBaseNode());
 
