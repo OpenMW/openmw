@@ -98,7 +98,7 @@ public:
             {"OnServerExit",             Function<void, bool>()},
             {"OnPlayerConnect",          Function<bool, unsigned short>()},
             {"OnPlayerDisconnect",       Function<void, unsigned short>()},
-            {"OnPlayerDeath",            Function<void, unsigned short>()},
+            {"OnPlayerDeath",            Function<void, unsigned short, short, unsigned short>()},
             {"OnPlayerResurrect",        Function<void, unsigned short>()},
             {"OnPlayerChangeCell",       Function<void, unsigned short>()},
             {"OnPlayerChangeAttributes", Function<void, unsigned short>()},

@@ -65,6 +65,7 @@ Player::Player(RakNet::RakNetGUID id) : BasePlayer(id)
 {
     handshake = false;
     loaded = false;
+    lastAttacker = 0;
 }
 
 Player::~Player()
@@ -104,5 +105,22 @@ int Player::LoadedState()
 
 Player *Players::GetPlayer(unsigned short id)
 {
+    if (slots.find(id) == slots.end())
+        return nullptr;
     return slots[id];
+}
+
+void Player::setLastAttackerID(unsigned short pid)
+{
+    lastAttacker = pid;
+}
+
+void Player::resetLastAttacker()
+{
+    lastAttacker = id;
+}
+
+unsigned short Player::getLastAttackerID()
+{
+    return lastAttacker;
 }

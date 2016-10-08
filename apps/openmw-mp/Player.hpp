@@ -57,10 +57,15 @@ public:
     void Loaded(int state);
     int LoadedState();
 
+    void setLastAttackerID(unsigned short pid);
+    void resetLastAttacker();
+    unsigned short getLastAttackerID();
+
     virtual ~Player();
 private:
     bool handshake;
     int loaded;
+    unsigned short lastAttacker;
 };
 
 #endif //OPENMW_PLAYER_HPP

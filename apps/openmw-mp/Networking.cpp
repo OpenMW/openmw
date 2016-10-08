@@ -247,17 +247,22 @@ void Networking::Update(RakNet::Packet *packet)
             {
                 myPacket->Read(player);
 
-#if defined(DEBUG)
-                cout << "Player: " << player->Npc()->mName << " atk state: " << (player->GetAttack()->pressed == 1) <<
-                endl;
+                Player *target = Players::GetPlayer(player->GetAttack()->target);
+
+                if (target == nullptr)
+                    target = player;
+
+                LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player: %s attaked %s state: %d", player->Npc()->mName.c_str(),
+                                   target->Npc()->mName.c_str(), player->GetAttack()->pressed == 1);
                 if (player->GetAttack()->pressed == 0)
                 {
-                    cout << "success: " << (player->GetAttack()->success == 1);
+                    LOG_APPEND(Log::LOG_VERBOSE, "success: %d", player->GetAttack()->success == 1);
                     if (player->GetAttack()->success == 1)
-                        cout << " damage: " << player->GetAttack()->damage;
-                    cout << endl;
+                    {
+                        LOG_APPEND(Log::LOG_VERBOSE, "damage: %d", player->GetAttack()->damage == 1);
+                        player->setLastAttackerID(target->GetID());
+                    }
                 }
-#endif
 
                 myPacket->Send(player, true);
                 controller->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(player->GetAttack()->target);
@@ -278,10 +283,23 @@ void Networking::Update(RakNet::Packet *packet)
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_DIE from %s",
                 player->Npc()->mName.c_str());
 
+            Player *killer = Players::GetPlayer(player->getLastAttackerID());
+
+            short reason = 0; // unknown;
+
+            if (!killer)
+                killer = player;
+            else if(killer->GetID() == player->GetID())
+                reason = 2; //suicide
+            else
+                reason = 1; //killed
+
+            player->resetLastAttacker();
+
             player->CreatureStats()->mDead = true;
             myPacket->Send(player, true);
 
-            Script::Call<Script::CallbackIdentity("OnPlayerDeath")>(player->GetID());
+            Script::Call<Script::CallbackIdentity("OnPlayerDeath")>(player->GetID(), reason, killer->GetID());
 
             break;
         }
