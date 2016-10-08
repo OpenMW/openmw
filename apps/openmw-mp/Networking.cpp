@@ -289,7 +289,7 @@ void Networking::Update(RakNet::Packet *packet)
 
             if (!killer)
                 killer = player;
-            else if(killer->GetID() == player->GetID())
+            else if (killer->GetID() == player->GetID())
                 reason = 2; //suicide
             else
                 reason = 1; //killed
@@ -406,7 +406,7 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
 void Networking::DisconnectPlayer(RakNet::RakNetGUID guid)
 {
     Player *player = Players::GetPlayer(guid);
-    if(!player)
+    if (!player)
         return;
     Script::Call<Script::CallbackIdentity("OnPlayerDisconnect")>(player->GetID());
     controller->GetPacket(ID_USER_DISCONNECTED)->Send(player, true);
