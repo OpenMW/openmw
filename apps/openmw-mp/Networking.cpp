@@ -405,8 +405,11 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
 
 void Networking::DisconnectPlayer(RakNet::RakNetGUID guid)
 {
-    Script::Call<Script::CallbackIdentity("OnPlayerDisconnect")>(Players::GetPlayer(guid)->GetID());
-    controller->GetPacket(ID_USER_DISCONNECTED)->Send(Players::GetPlayer(guid), true);
+    Player *player = Players::GetPlayer(guid);
+    if(!player)
+        return;
+    Script::Call<Script::CallbackIdentity("OnPlayerDisconnect")>(player->GetID());
+    controller->GetPacket(ID_USER_DISCONNECTED)->Send(player, true);
     Players::DeletePlayer(guid);
 }
 
