@@ -741,9 +741,12 @@ if (APPLE)
 
     set(ABSOLUTE_PLUGINS "")
     set(USED_OSG_PLUGINS
+                        osgdb_bmp
                         osgdb_dds
                         osgdb_jpeg
+                        osgdb_osg
                         osgdb_png
+                        osgdb_serializers_osg
                         osgdb_tga
                       )
 
