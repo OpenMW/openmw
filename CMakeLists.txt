@@ -223,13 +223,23 @@ endif()
 find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgUtil osgFX)
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
+set(USED_OSG_PLUGINS
+                    osgdb_bmp
+                    osgdb_dds
+                    osgdb_jpeg
+                    osgdb_osg
+                    osgdb_png
+                    osgdb_serializers_osg
+                    osgdb_tga
+                  )
+
 get_filename_component(OSG_LIB_DIR ${OSGDB_LIBRARY} DIRECTORY)
 set(OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
 
 if(OSG_STATIC)
     add_definitions(-DOSG_LIBRARY_STATIC)
 
-    find_package(OSGPlugins REQUIRED COMPONENTS osgdb_png osgdb_tga osgdb_dds osgdb_jpeg)
+    find_package(OSGPlugins REQUIRED COMPONENTS ${USED_OSG_PLUGINS})
     list(APPEND OPENSCENEGRAPH_LIBRARIES ${OSGPlugins_LIBRARIES})
 endif()
 
@@ -740,15 +750,6 @@ if (APPLE)
     " COMPONENT Runtime)
 
     set(ABSOLUTE_PLUGINS "")
-    set(USED_OSG_PLUGINS
-                        osgdb_bmp
-                        osgdb_dds
-                        osgdb_jpeg
-                        osgdb_osg
-                        osgdb_png
-                        osgdb_serializers_osg
-                        osgdb_tga
-                      )
 
     foreach (PLUGIN_NAME ${USED_OSG_PLUGINS})
       set(PLUGIN_ABS "${OSGPlugins_LIB_DIR}/${PLUGIN_NAME}.so")
