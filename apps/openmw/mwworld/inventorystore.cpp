@@ -606,12 +606,12 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItemQuantity(con
     return unstack(item, actor, item.getRefData().getCount() - count);
 }
 
-MWWorld::InventoryStoreListener* MWWorld::InventoryStore::getListener()
+MWWorld::InventoryStoreListener* MWWorld::InventoryStore::getInvListener()
 {
     return mListener;
 }
 
-void MWWorld::InventoryStore::setListener(InventoryStoreListener *listener, const Ptr& actor)
+void MWWorld::InventoryStore::setInvListener(InventoryStoreListener *listener, const Ptr& actor)
 {
     mListener = listener;
     updateMagicEffects(actor);

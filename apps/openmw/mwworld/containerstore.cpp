@@ -136,6 +136,17 @@ int MWWorld::ContainerStore::count(const std::string &id)
     return total;
 }
 
+MWWorld::ContainerStoreListener* MWWorld::ContainerStore::getContListener() const
+{
+    return mListener;
+}
+
+
+void MWWorld::ContainerStore::setContListener(MWWorld::ContainerStoreListener* listener)
+{
+    mListener = listener;
+}
+
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container, int count)
 {
     if (ptr.getRefData().getCount() <= count)
@@ -292,6 +303,9 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
             item.getRefData().getLocals().setVarByInt(script, "onpcadd", 1);
     }
 
+    if (mListener)
+        mListener->itemAdded(item, count);
+
     return it;
 }
 
@@ -397,6 +411,9 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
     }
 
     flagAsModified();
+
+    if (mListener)
+        mListener->itemRemoved(item, count - toRemove);
 
     // number of removed items
     return count - toRemove;

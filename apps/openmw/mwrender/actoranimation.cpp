@@ -1,0 +1,155 @@
+#include "actoranimation.hpp"
+
+#include <utility>
+
+#include <osg/Node>
+#include <osg/Group>
+#include <osg/Vec4f>
+
+#include <components/esm/loadligh.hpp>
+#include <components/esm/loadcell.hpp>
+
+#include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/lightutil.hpp>
+
+#include <components/fallback/fallback.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwworld/ptr.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
+
+#include "vismask.hpp"
+
+namespace MWRender
+{
+
+ActorAnimation::ActorAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem,
+                               bool disableListener)
+    : Animation(ptr, parentNode, resourceSystem),
+      mListenerDisabled(disableListener)
+{
+    MWWorld::ContainerStore& store = mPtr.getClass().getContainerStore(mPtr);
+
+    for (MWWorld::ContainerStoreIterator iter = store.begin(MWWorld::ContainerStore::Type_Light); iter != store.end(); ++iter)
+    {
+        const ESM::Light* light = iter->get<ESM::Light>()->mBase;
+        if (!(light->mData.mFlags & ESM::Light::Carry))
+        {
+            addHiddenItemLight(*iter, light);
+        }
+    }
+
+    if (!mListenerDisabled)
+        store.setContListener(this);
+}
+
+ActorAnimation::~ActorAnimation()
+{
+    if (!mListenerDisabled && mPtr.getRefData().getCustomData() && mPtr.getClass().getContainerStore(mPtr).getContListener() == this)
+        mPtr.getClass().getContainerStore(mPtr).setContListener(NULL);
+
+    for (ItemLightMap::iterator iter = mItemLights.begin(); iter != mItemLights.end(); ++iter)
+    {
+        mInsert->removeChild(iter->second);
+    }
+}
+
+void ActorAnimation::itemAdded(const MWWorld::ConstPtr& item, int /*count*/)
+{
+    if (item.getTypeName() == typeid(ESM::Light).name())
+    {
+        const ESM::Light* light = item.get<ESM::Light>()->mBase;
+        if (!(light->mData.mFlags & ESM::Light::Carry))
+        {
+            addHiddenItemLight(item, light);
+        }
+    }
+}
+
+void ActorAnimation::itemRemoved(const MWWorld::ConstPtr& item, int /*count*/)
+{
+    if (item.getTypeName() == typeid(ESM::Light).name())
+    {
+        ItemLightMap::iterator iter = mItemLights.find(item);
+        if (iter != mItemLights.end())
+        {
+            if (!item.getRefData().getCount())
+            {
+                removeHiddenItemLight(item);
+            }
+        }
+    }
+}
+
+void ActorAnimation::objectRootReset()
+{
+    if (SceneUtil::LightListCallback* callback = findLightListCallback())
+    {
+        for (ItemLightMap::iterator iter = mItemLights.begin(); iter != mItemLights.end(); ++iter)
+        {
+            callback->getIgnoredLightSources().insert(iter->second);
+        }
+    }
+}
+
+void ActorAnimation::addHiddenItemLight(const MWWorld::ConstPtr& item, const ESM::Light* esmLight)
+{
+    if (mItemLights.find(item) != mItemLights.end())
+        return;
+
+    const Fallback::Map* fallback = MWBase::Environment::get().getWorld()->getFallback();
+    static bool outQuadInLin = fallback->getFallbackBool("LightAttenuation_OutQuadInLin");
+    static bool useQuadratic = fallback->getFallbackBool("LightAttenuation_UseQuadratic");
+    static float quadraticValue = fallback->getFallbackFloat("LightAttenuation_QuadraticValue");
+    static float quadraticRadiusMult = fallback->getFallbackFloat("LightAttenuation_QuadraticRadiusMult");
+    static bool useLinear = fallback->getFallbackBool("LightAttenuation_UseLinear");
+    static float linearRadiusMult = fallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
+    static float linearValue = fallback->getFallbackFloat("LightAttenuation_LinearValue");
+    bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
+
+    osg::Vec4f ambient(1,1,1,1);
+    osg::ref_ptr<SceneUtil::LightSource> lightSource = SceneUtil::createLightSource(esmLight, Mask_Lighting, exterior, outQuadInLin,
+                                 useQuadratic, quadraticValue, quadraticRadiusMult, useLinear, linearRadiusMult, linearValue, ambient);
+
+    mInsert->addChild(lightSource);
+
+    if (SceneUtil::LightListCallback* callback = findLightListCallback())
+        callback->getIgnoredLightSources().insert(lightSource.get());
+
+    mItemLights.insert(std::make_pair(item, lightSource));
+}
+
+void ActorAnimation::removeHiddenItemLight(const MWWorld::ConstPtr& item)
+{
+    ItemLightMap::iterator iter = mItemLights.find(item);
+    if (iter == mItemLights.end())
+        return;
+
+    if (SceneUtil::LightListCallback* callback = findLightListCallback())
+    {
+        std::set<SceneUtil::LightSource*>::iterator ignoredIter = callback->getIgnoredLightSources().find(iter->second.get());
+        if (ignoredIter != callback->getIgnoredLightSources().end())
+            callback->getIgnoredLightSources().erase(ignoredIter);
+    }
+
+    mInsert->removeChild(iter->second);
+    mItemLights.erase(iter);
+}
+
+SceneUtil::LightListCallback* ActorAnimation::findLightListCallback()
+{
+    if (osg::Callback* callback = mObjectRoot->getCullCallback())
+    {
+        do
+        {
+            if (SceneUtil::LightListCallback* lightListCallback = dynamic_cast<SceneUtil::LightListCallback *>(callback))
+                return lightListCallback;
+        }
+        while ((callback = callback->getNestedCallback()));
+    }
+    return NULL;
+}
+
+}

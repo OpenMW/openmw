@@ -36,7 +36,6 @@ namespace SceneUtil
         light->setLinearAttenuation(linearAttenuation);
         light->setQuadraticAttenuation(quadraticAttenuation);
         light->setConstantAttenuation(0.f);
-
     }
 
     void addLight (osg::Group* node, const ESM::Light* esmLight, unsigned int partsysMask, unsigned int lightMask, bool isExterior, bool outQuadInLin, bool useQuadratic,
@@ -68,6 +67,14 @@ namespace SceneUtil
             attachTo = trans;
         }
 
+        osg::ref_ptr<LightSource> lightSource = createLightSource(esmLight, lightMask, isExterior, outQuadInLin, useQuadratic, quadraticValue,
+                                                                  quadraticRadiusMult, useLinear, linearRadiusMult, linearValue);
+        attachTo->addChild(lightSource);
+    }
+
+    osg::ref_ptr<LightSource> createLightSource(const ESM::Light* esmLight, unsigned int lightMask, bool isExterior, bool outQuadInLin, bool useQuadratic, float quadraticValue,
+                                                float quadraticRadiusMult, bool useLinear, float linearRadiusMult, float linearValue, const osg::Vec4f& ambient)
+    {
         osg::ref_ptr<SceneUtil::LightSource> lightSource (new SceneUtil::LightSource);
         osg::ref_ptr<osg::Light> light (new osg::Light);
         lightSource->setNodeMask(lightMask);
@@ -85,7 +92,7 @@ namespace SceneUtil
             diffuse.a() = 1;
         }
         light->setDiffuse(diffuse);
-        light->setAmbient(osg::Vec4f(0,0,0,1));
+        light->setAmbient(ambient);
         light->setSpecular(osg::Vec4f(0,0,0,0));
 
         lightSource->setLight(light);
@@ -103,7 +110,6 @@ namespace SceneUtil
 
         lightSource->addUpdateCallback(ctrl);
 
-        attachTo->addChild(lightSource);
+        return lightSource;
     }
-
 }

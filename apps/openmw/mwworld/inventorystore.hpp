@@ -197,10 +197,10 @@ namespace MWWorld
             /// in the slot (they can be re-stacked so its count may be different
             /// than the requested count).
 
-            void setListener (InventoryStoreListener* listener, const Ptr& actor);
+            void setInvListener (InventoryStoreListener* listener, const Ptr& actor);
             ///< Set a listener for various events, see \a InventoryStoreListener
 
-            InventoryStoreListener* getListener();
+            InventoryStoreListener* getInvListener();
 
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor);
 
