@@ -83,17 +83,6 @@ void ActorAnimation::itemRemoved(const MWWorld::ConstPtr& item, int /*count*/)
     }
 }
 
-void ActorAnimation::objectRootReset()
-{
-    if (SceneUtil::LightListCallback* callback = findLightListCallback())
-    {
-        for (ItemLightMap::iterator iter = mItemLights.begin(); iter != mItemLights.end(); ++iter)
-        {
-            callback->getIgnoredLightSources().insert(iter->second);
-        }
-    }
-}
-
 void ActorAnimation::addHiddenItemLight(const MWWorld::ConstPtr& item, const ESM::Light* esmLight)
 {
     if (mItemLights.find(item) != mItemLights.end())
@@ -115,7 +104,7 @@ void ActorAnimation::addHiddenItemLight(const MWWorld::ConstPtr& item, const ESM
 
     mInsert->addChild(lightSource);
 
-    if (SceneUtil::LightListCallback* callback = findLightListCallback())
+    if (SceneUtil::LightListCallback* callback = mLightListCallback)
         callback->getIgnoredLightSources().insert(lightSource.get());
 
     mItemLights.insert(std::make_pair(item, lightSource));
@@ -127,7 +116,7 @@ void ActorAnimation::removeHiddenItemLight(const MWWorld::ConstPtr& item)
     if (iter == mItemLights.end())
         return;
 
-    if (SceneUtil::LightListCallback* callback = findLightListCallback())
+    if (SceneUtil::LightListCallback* callback = mLightListCallback)
     {
         std::set<SceneUtil::LightSource*>::iterator ignoredIter = callback->getIgnoredLightSources().find(iter->second.get());
         if (ignoredIter != callback->getIgnoredLightSources().end())
@@ -136,20 +125,6 @@ void ActorAnimation::removeHiddenItemLight(const MWWorld::ConstPtr& item)
 
     mInsert->removeChild(iter->second);
     mItemLights.erase(iter);
-}
-
-SceneUtil::LightListCallback* ActorAnimation::findLightListCallback()
-{
-    if (osg::Callback* callback = mObjectRoot->getCullCallback())
-    {
-        do
-        {
-            if (SceneUtil::LightListCallback* lightListCallback = dynamic_cast<SceneUtil::LightListCallback *>(callback))
-                return lightListCallback;
-        }
-        while ((callback = callback->getNestedCallback()));
-    }
-    return NULL;
 }
 
 }

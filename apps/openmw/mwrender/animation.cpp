@@ -429,6 +429,8 @@ namespace MWRender
     {
         for(size_t i = 0;i < sNumBlendMasks;i++)
             mAnimationTimePtr[i].reset(new AnimationTime);
+
+        mLightListCallback = new SceneUtil::LightListCallback;
     }
 
     Animation::~Animation()
@@ -1095,6 +1097,8 @@ namespace MWRender
         osg::ref_ptr<osg::StateSet> previousStateset;
         if (mObjectRoot)
         {
+            if (mLightListCallback)
+                mObjectRoot->removeCullCallback(mLightListCallback);
             previousStateset = mObjectRoot->getStateSet();
             mObjectRoot->getParent(0)->removeChild(mObjectRoot);
         }
@@ -1150,7 +1154,9 @@ namespace MWRender
             removeTriBipVisitor.remove();
         }
 
-        mObjectRoot->addCullCallback(new SceneUtil::LightListCallback);
+        if (!mLightListCallback)
+            mLightListCallback = new SceneUtil::LightListCallback;
+        mObjectRoot->addCullCallback(mLightListCallback);
 
         objectRootReset();
     }

@@ -25,6 +25,7 @@ namespace NifOsg
 namespace SceneUtil
 {
     class LightSource;
+    class LightListCallback;
     class Skeleton;
 }
 
@@ -272,6 +273,8 @@ protected:
     osg::ref_ptr<GlowUpdater> mGlowUpdater;
 
     float mAlpha;
+
+    osg::ref_ptr<SceneUtil::LightListCallback> mLightListCallback;
 
     const NodeMap& getNodeMap() const;
 

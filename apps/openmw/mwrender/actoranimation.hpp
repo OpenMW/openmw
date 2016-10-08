@@ -38,14 +38,9 @@ class ActorAnimation : public Animation, public MWWorld::ContainerStoreListener
         virtual void itemAdded(const MWWorld::ConstPtr& item, int count);
         virtual void itemRemoved(const MWWorld::ConstPtr& item, int count);
 
-    protected:
-        virtual void objectRootReset();
-
     private:
         void addHiddenItemLight(const MWWorld::ConstPtr& item, const ESM::Light* esmLight);
         void removeHiddenItemLight(const MWWorld::ConstPtr& item);
-
-        SceneUtil::LightListCallback* findLightListCallback();
 
         typedef std::map<MWWorld::ConstPtr, osg::ref_ptr<SceneUtil::LightSource> > ItemLightMap;
         ItemLightMap mItemLights;
