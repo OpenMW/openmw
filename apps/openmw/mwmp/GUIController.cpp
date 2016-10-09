@@ -150,14 +150,17 @@ bool mwmp::GUIController::pressedKey(int key)
         printf("mwmp::GUIController::pressedKey.newFocus: %s.\n", newFocus ? newFocus->getName().c_str() : "nil");*/
         return true;
     }
-    else if(key == SDLK_RETURN)
+    else if(key == SDLK_BACKSPACE)
     {
+        /*
         static bool test = true;
         if(test)
         {
             test = false;
             SetMapVisibility(0, true);
         }
+        */
+        SetMapVisibility(0, true);
     }
     return false;
 }
@@ -242,7 +245,18 @@ void mwmp::GUIController::SetMapVisibility(int pid, bool state)
 
     mEditingMarker.mWorldX = world->getPlayerPtr().getRefData().getPosition().pos[0];
     mEditingMarker.mWorldY = world->getPlayerPtr().getRefData().getPosition().pos[1];
-    mEditingMarker.mCell.mWorldspace = ESM::CellId::sDefaultWorldspace;
+
+    mEditingMarker.mCell.mPaged = ptrCell->isExterior();
+
+    if (!ptrCell->isExterior())
+        mEditingMarker.mCell.mWorldspace = ptrCell->mName;
+    else
+    {
+        mEditingMarker.mCell.mWorldspace = ESM::CellId::sDefaultWorldspace;
+        mEditingMarker.mCell.mIndex.mX = ptrCell->getGridX();
+        mEditingMarker.mCell.mIndex.mY = ptrCell->getGridY();
+    }
+
     mPlayerMarkers.addMarker(mEditingMarker, true);
 }
 
