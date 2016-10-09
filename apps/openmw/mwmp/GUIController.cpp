@@ -263,9 +263,10 @@ void mwmp::GUIController::SetMapVisibility(int pid, bool state)
 void mwmp::GUIController::updatePlayersMarkers(MWGui::LocalMapBase *localMapBase)
 {
     printf("updatePlayersMarkers!!!\n");
-    for (std::vector<MyGUI::Widget*>::iterator it = mPlayerMarkerWidgets.begin(); it != mPlayerMarkerWidgets.end(); ++it)
+    for (std::vector<MyGUI::Widget*>::iterator it = localMapBase->mPlayerMarkerWidgets.begin(); it != localMapBase->mPlayerMarkerWidgets.end(); ++it)
+
         MyGUI::Gui::getInstance().destroyWidget(*it);
-    mPlayerMarkerWidgets.clear();
+    localMapBase->mPlayerMarkerWidgets.clear();
 
     for (int dX = -localMapBase->mCellDistance; dX <= localMapBase->mCellDistance; ++dX)
     {
@@ -288,6 +289,7 @@ void mwmp::GUIController::updatePlayersMarkers(MWGui::LocalMapBase *localMapBase
                 MyGUI::IntCoord widgetCoord(widgetPos.left - 8, widgetPos.top - 8, 16, 16);
                 MarkerWidget* markerWidget = localMapBase->mLocalMap->createWidget<MarkerWidget>("CustomMarkerButton",
                                                                                    widgetCoord, MyGUI::Align::Default);
+
                 markerWidget->setDepth(0); // Local_MarkerAboveFogLayer
                 markerWidget->setUserString("ToolTipType", "Layout");
                 markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
@@ -297,7 +299,7 @@ void mwmp::GUIController::updatePlayersMarkers(MWGui::LocalMapBase *localMapBase
                 markerWidget->setUserData(marker);
                 markerWidget->setNeedMouseFocus(true);
                 //localMapBase->customMarkerCreated(markerWidget);
-                mPlayerMarkerWidgets.push_back(markerWidget);
+                localMapBase->mPlayerMarkerWidgets.push_back(markerWidget);
             }
         }
     }

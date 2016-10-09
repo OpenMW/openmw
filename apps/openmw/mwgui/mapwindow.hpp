@@ -139,6 +139,7 @@ namespace MWGui
         std::vector<MyGUI::Widget*> mDoorMarkerWidgets;
         std::vector<MyGUI::Widget*> mMagicMarkerWidgets;
         std::vector<MyGUI::Widget*> mCustomMarkerWidgets;
+        std::vector<MyGUI::Widget*> mPlayerMarkerWidgets;
 
         virtual void updateCustomMarkers();
         virtual void updatePlayerMarkers();
