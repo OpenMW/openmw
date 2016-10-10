@@ -211,15 +211,6 @@ if(NOT HAVE_STDINT_H)
 endif()
 
 
-set(BOOST_COMPONENTS system filesystem program_options thread)
-if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
-endif(WIN32)
-
-IF(BOOST_STATIC)
-    set(Boost_USE_STATIC_LIBS   ON)
-endif()
-
 find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgUtil osgFX)
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
@@ -253,8 +244,18 @@ if(QT_STATIC)
    endif()
 endif()
 
-find_package(MyGUI 3.2.1 REQUIRED)
+
+set(BOOST_COMPONENTS system filesystem program_options)
+if(WIN32)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
+endif(WIN32)
+
+IF(BOOST_STATIC)
+    set(Boost_USE_STATIC_LIBS   ON)
+endif()
+
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+find_package(MyGUI 3.2.1 REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet 283 REQUIRED COMPONENTS BulletCollision LinearMath)
