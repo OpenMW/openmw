@@ -33,6 +33,8 @@ namespace MWDialogue
             bool testDisposition (const ESM::DialInfo& info, bool invert=false) const;
             ///< Is the actor disposition toward the player high enough (or low enough, if \a invert is true)?
 
+            bool testFunctionLocal(const SelectWrapper& select) const;
+
             bool testSelectStruct (const SelectWrapper& select) const;
 
             bool testSelectStructNumeric (const SelectWrapper& select) const;
