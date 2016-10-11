@@ -19,6 +19,7 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "vismask.hpp"
 
@@ -104,8 +105,8 @@ void ActorAnimation::addHiddenItemLight(const MWWorld::ConstPtr& item, const ESM
 
     mInsert->addChild(lightSource);
 
-    if (SceneUtil::LightListCallback* callback = mLightListCallback)
-        callback->getIgnoredLightSources().insert(lightSource.get());
+    if (mLightListCallback && mPtr == MWMechanics::getPlayer())
+        mLightListCallback->getIgnoredLightSources().insert(lightSource.get());
 
     mItemLights.insert(std::make_pair(item, lightSource));
 }
@@ -116,11 +117,11 @@ void ActorAnimation::removeHiddenItemLight(const MWWorld::ConstPtr& item)
     if (iter == mItemLights.end())
         return;
 
-    if (SceneUtil::LightListCallback* callback = mLightListCallback)
+    if (mLightListCallback && mPtr == MWMechanics::getPlayer())
     {
-        std::set<SceneUtil::LightSource*>::iterator ignoredIter = callback->getIgnoredLightSources().find(iter->second.get());
-        if (ignoredIter != callback->getIgnoredLightSources().end())
-            callback->getIgnoredLightSources().erase(ignoredIter);
+        std::set<SceneUtil::LightSource*>::iterator ignoredIter = mLightListCallback->getIgnoredLightSources().find(iter->second.get());
+        if (ignoredIter != mLightListCallback->getIgnoredLightSources().end())
+            mLightListCallback->getIgnoredLightSources().erase(ignoredIter);
     }
 
     mInsert->removeChild(iter->second);

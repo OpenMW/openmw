@@ -1157,8 +1157,6 @@ namespace MWRender
         if (!mLightListCallback)
             mLightListCallback = new SceneUtil::LightListCallback;
         mObjectRoot->addCullCallback(mLightListCallback);
-
-        objectRootReset();
     }
 
     osg::Group* Animation::getObjectRoot()
