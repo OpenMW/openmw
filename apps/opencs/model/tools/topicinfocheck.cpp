@@ -108,7 +108,7 @@ void CSMTools::TopicInfoCheckStage::perform(int stage, CSMDoc::Messages& message
         verifyCell(topicInfo.mCell, id, messages);
     }
 
-    if (!topicInfo.mFaction.empty())
+    if (!topicInfo.mFaction.empty() && !topicInfo.mFactionLess)
     {
         if (verifyId(topicInfo.mFaction, mFactions, id, messages))
         {
