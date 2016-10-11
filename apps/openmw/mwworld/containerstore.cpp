@@ -113,7 +113,7 @@ void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
 
 const std::string MWWorld::ContainerStore::sGoldId = "gold_001";
 
-MWWorld::ContainerStore::ContainerStore() : mCachedWeight (0), mWeightUpToDate (false) {}
+MWWorld::ContainerStore::ContainerStore() : mListener(NULL), mCachedWeight (0), mWeightUpToDate (false) {}
 
 MWWorld::ContainerStore::~ContainerStore() {}
 
