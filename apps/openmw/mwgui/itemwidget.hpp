@@ -44,6 +44,7 @@ namespace MWGui
         virtual void initialiseOverride();
 
         MyGUI::ImageBox* mItem;
+        MyGUI::ImageBox* mItemShadow;
         MyGUI::ImageBox* mFrame;
         MyGUI::TextBox* mText;
     };
