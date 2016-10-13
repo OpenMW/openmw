@@ -120,16 +120,21 @@ void OMW::Engine::frame(float frametime)
                     // global scripts
                     mEnvironment.getScriptManager()->getGlobalScripts().run();
                 }
-
-                mEnvironment.getWorld()->markCellAsUnchanged();
             }
+        }
 
+        mEnvironment.getWorld()->markCellAsUnchanged();
+
+        if (mEnvironment.getStateManager()->getState()==
+            MWBase::StateManager::State_Running)
+        {
             if (!guiActive)
             {
                 double hours = (frametime * mEnvironment.getWorld()->getTimeScaleFactor()) / 3600.0;
                 mEnvironment.getWorld()->advanceTime(hours, true);
             }
         }
+
         osg::Timer_t afterScriptTick = osg::Timer::instance()->tick();
 
         // update actors
