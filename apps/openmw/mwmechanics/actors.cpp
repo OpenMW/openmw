@@ -1035,8 +1035,9 @@ namespace MWMechanics
                 if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
                 {
                     MWWorld::Ptr actor = iter->first; // make a copy of the map key to avoid it being invalidated when the player teleports
+                    bool cellChanged = MWBase::Environment::get().getWorld()->hasCellChanged();
                     updateActor(actor, duration);
-                    if (MWBase::Environment::get().getWorld()->hasCellChanged())
+                    if (!cellChanged && MWBase::Environment::get().getWorld()->hasCellChanged())
                     {
                         return; // for now abort update of the old cell when cell changes by teleportation magic effect
                                 // a better solution might be to apply cell changes at the end of the frame
