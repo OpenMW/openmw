@@ -448,8 +448,7 @@ namespace MWDialogue
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
 
-        // Clamp permanent disposition change so that final disposition doesn't go below 0 (could happen with intimidate)
-        
+        // Clamp permanent disposition change so that final disposition doesn't go below 0 (could happen with intimidate)       
         float curDisp = static_cast<float>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor, false));
         if (curDisp + mPermanentDispositionChange < 0)
             mPermanentDispositionChange = -curDisp;
