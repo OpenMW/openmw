@@ -463,8 +463,7 @@ namespace MWMechanics
                 }
                 else // target.getClass().isActor() == true
                 {
-                    bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
-                    if (hasDuration && effectIt->mDuration == 0)
+                    if (effectIt->mDuration == 0)
                     {
                         // duration 0 means apply full magnitude instantly
                         bool wasDead = target.getClass().getCreatureStats(target).isDead();
@@ -610,36 +609,8 @@ namespace MWMechanics
                 return true;
             }
         }
-        else if (target.getClass().isActor())
+        else if (target.getClass().isActor() && target == getPlayer())
         {
-            switch (effectId)
-            {
-            case ESM::MagicEffect::CurePoison:
-                target.getClass().getCreatureStats(target).getActiveSpells().purgeEffect(ESM::MagicEffect::Poison);
-                return true;
-            case ESM::MagicEffect::CureParalyzation:
-                target.getClass().getCreatureStats(target).getActiveSpells().purgeEffect(ESM::MagicEffect::Paralyze);
-                return true;
-            case ESM::MagicEffect::CureCommonDisease:
-                target.getClass().getCreatureStats(target).getSpells().purgeCommonDisease();
-                return true;
-            case ESM::MagicEffect::CureBlightDisease:
-                target.getClass().getCreatureStats(target).getSpells().purgeBlightDisease();
-                return true;
-            case ESM::MagicEffect::CureCorprusDisease:
-                target.getClass().getCreatureStats(target).getSpells().purgeCorprusDisease();
-                return true;
-            case ESM::MagicEffect::Dispel:
-                target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude);
-                return true;
-            case ESM::MagicEffect::RemoveCurse:
-                target.getClass().getCreatureStats(target).getSpells().purgeCurses();
-                return true;
-            }
-
-            if (target != getPlayer())
-                return false;
-
             MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
 
             if (effectId == ESM::MagicEffect::DivineIntervention)
@@ -662,7 +633,6 @@ namespace MWMechanics
                     anim->addEffect("meshes\\" + fx->mModel, -1);
                 return true;
             }
-
             else if (effectId == ESM::MagicEffect::Mark)
             {
                 MWBase::Environment::get().getWorld()->getPlayer().markPosition(
@@ -1149,6 +1119,27 @@ namespace MWMechanics
             break;
         }
 
+        case ESM::MagicEffect::CurePoison:
+            actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Poison);
+            break;
+        case ESM::MagicEffect::CureParalyzation:
+            actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Paralyze);
+            break;
+        case ESM::MagicEffect::CureCommonDisease:
+            actor.getClass().getCreatureStats(actor).getSpells().purgeCommonDisease();
+            break;
+        case ESM::MagicEffect::CureBlightDisease:
+            actor.getClass().getCreatureStats(actor).getSpells().purgeBlightDisease();
+            break;
+        case ESM::MagicEffect::CureCorprusDisease:
+            actor.getClass().getCreatureStats(actor).getSpells().purgeCorprusDisease();
+            break;
+        case ESM::MagicEffect::Dispel:
+            actor.getClass().getCreatureStats(actor).getActiveSpells().purgeAll(magnitude);
+            break;
+        case ESM::MagicEffect::RemoveCurse:
+            actor.getClass().getCreatureStats(actor).getSpells().purgeCurses();
+            break;
         }
 
         if (receivedMagicDamage && actor == getPlayer())
