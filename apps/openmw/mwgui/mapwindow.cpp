@@ -165,11 +165,7 @@ namespace MWGui
         , mCompass(NULL)
         , mChanged(true)
         , mFogOfWarToggled(true)
-#if defined (ANDROID) && !defined (OPENGL_ES)
-        , mFogOfWarEnabled(false)
-#else
         , mFogOfWarEnabled(fogOfWarEnabled)
-#endif
         , mMapWidgetSize(0)
         , mNumCells(0)
         , mCellDistance(0)
@@ -232,6 +228,9 @@ namespace MWGui
     bool LocalMapBase::toggleFogOfWar()
     {
         mFogOfWarToggled = !mFogOfWarToggled;
+#if defined (ANDROID)
+        mFogOfWarEnabled = false;
+#endif
         applyFogOfWar();
         return mFogOfWarToggled;
     }
