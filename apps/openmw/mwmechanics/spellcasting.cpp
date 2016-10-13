@@ -463,7 +463,8 @@ namespace MWMechanics
                 }
                 else // target.getClass().isActor() == true
                 {
-                    if (effectIt->mDuration == 0)
+                    bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
+                    if (hasDuration && effectIt->mDuration == 0)
                     {
                         // duration 0 means apply full magnitude instantly
                         bool wasDead = target.getClass().getCreatureStats(target).isDead();
@@ -479,7 +480,10 @@ namespace MWMechanics
                         ActiveSpells::ActiveEffect effect;
                         effect.mEffectId = effectIt->mEffectID;
                         effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
-                        effect.mDuration = static_cast<float>(effectIt->mDuration);
+                        if (!hasDuration)
+                            effect.mDuration = 1.0f;
+                        else
+                            effect.mDuration = static_cast<float>(effectIt->mDuration);
                         effect.mMagnitude = magnitude;
 
                         targetEffects.add(MWMechanics::EffectKey(*effectIt), MWMechanics::EffectParam(effect.mMagnitude));
