@@ -7,6 +7,8 @@
 
 #include <LinearMath/btQuickprof.h>
 
+#ifndef BT_NO_PROFILE
+
 namespace
 {
     void bulletDumpRecursive(CProfileIterator* pit, int spacing, std::stringstream& os)
@@ -71,6 +73,7 @@ namespace
     }
 }
 
+#endif // BT_NO_PROFILE
 
 namespace MWGui
 {
@@ -92,10 +95,13 @@ namespace MWGui
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
         mMainWidget->setSize(viewSize);
+
+
     }
 
     void DebugWindow::onFrame(float dt)
     {
+#ifndef BT_NO_PROFILE
         if (!isVisible())
             return;
 
@@ -115,6 +121,7 @@ namespace MWGui
         size_t previousPos = mBulletProfilerEdit->getVScrollPosition();
         mBulletProfilerEdit->setCaption(stream.str());
         mBulletProfilerEdit->setVScrollPosition(std::min(previousPos, mBulletProfilerEdit->getVScrollRange()-1));
+#endif
     }
 
 }

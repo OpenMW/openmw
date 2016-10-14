@@ -14,6 +14,7 @@
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
+
 #include <LinearMath/btQuickprof.h>
 
 #include <components/nifbullet/bulletnifloader.hpp>
@@ -1363,8 +1364,10 @@ namespace MWPhysics
         for (std::set<Object*>::iterator it = mAnimatedObjects.begin(); it != mAnimatedObjects.end(); ++it)
             (*it)->animateCollisionShapes(mCollisionWorld);
 
+#ifndef BT_NO_PROFILE
         CProfileManager::Reset();
         CProfileManager::Increment_Frame_Counter();
+#endif
     }
 
     void PhysicsSystem::debugDraw()
