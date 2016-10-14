@@ -67,8 +67,8 @@ void CSVWorld::DragRecordTable::dropEvent(QDropEvent *event)
     CSMWorld::ColumnBase::Display display = getIndexDisplayType(index);
     if (CSVWorld::DragDropUtils::canAcceptData(*event, display))
     {
-        const CSMWorld::TableMimeData *data = CSVWorld::DragDropUtils::getTableMimeData(*event);
-        if (data->fromDocument(mDocument))
+        const CSMWorld::TableMimeData *tableMimeData = CSVWorld::DragDropUtils::getTableMimeData(*event);
+        if (tableMimeData->fromDocument(mDocument))
         {
             CSMWorld::UniversalId id = CSVWorld::DragDropUtils::getAcceptedData(*event, display);
             QVariant newIndexData = QString::fromUtf8(id.getId().c_str());
