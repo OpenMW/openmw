@@ -187,12 +187,12 @@ namespace MWDialogue
             state.save (writer);
             writer.endRecord (ESM::REC_QUES);
 
-            for (Topic::TEntryIter iter (quest.begin()); iter!=quest.end(); ++iter)
+            for (Topic::TEntryIter entryIter (quest.begin()); entryIter!=quest.end(); ++entryIter)
             {
                 ESM::JournalEntry entry;
                 entry.mType = ESM::JournalEntry::Type_Quest;
                 entry.mTopic = quest.getTopic();
-                iter->write (entry);
+                entryIter->write (entry);
                 writer.startRecord (ESM::REC_JOUR);
                 entry.save (writer);
                 writer.endRecord (ESM::REC_JOUR);
@@ -213,12 +213,12 @@ namespace MWDialogue
         {
             const Topic& topic = iter->second;
 
-            for (Topic::TEntryIter iter (topic.begin()); iter!=topic.end(); ++iter)
+            for (Topic::TEntryIter entryIter (topic.begin()); entryIter!=topic.end(); ++entryIter)
             {
                 ESM::JournalEntry entry;
                 entry.mType = ESM::JournalEntry::Type_Topic;
                 entry.mTopic = topic.getTopic();
-                iter->write (entry);
+                entryIter->write (entry);
                 writer.startRecord (ESM::REC_JOUR);
                 entry.save (writer);
                 writer.endRecord (ESM::REC_JOUR);

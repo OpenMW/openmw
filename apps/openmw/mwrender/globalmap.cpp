@@ -172,37 +172,37 @@ namespace MWRender
 
                         unsigned char r,g,b;
 
-                        float y = 0;
+                        float y2 = 0;
                         if (landData)
-                            y = (landData->mWnam[vertexY * 9 + vertexX] << 4) / 2048.f;
+                            y2 = (landData->mWnam[vertexY * 9 + vertexX] << 4) / 2048.f;
                         else
-                            y = (SCHAR_MIN << 4) / 2048.f;
-                        if (y < 0)
+                            y2 = (SCHAR_MIN << 4) / 2048.f;
+                        if (y2 < 0)
                         {
-                            r = static_cast<unsigned char>(14 * y + 38);
-                            g = static_cast<unsigned char>(20 * y + 56);
-                            b = static_cast<unsigned char>(18 * y + 51);
+                            r = static_cast<unsigned char>(14 * y2 + 38);
+                            g = static_cast<unsigned char>(20 * y2 + 56);
+                            b = static_cast<unsigned char>(18 * y2 + 51);
                         }
-                        else if (y < 0.3f)
+                        else if (y2 < 0.3f)
                         {
-                            if (y < 0.1f)
-                                y *= 8.f;
+                            if (y2 < 0.1f)
+                                y2 *= 8.f;
                             else
                             {
-                                y -= 0.1f;
-                                y += 0.8f;
+                                y2 -= 0.1f;
+                                y2 += 0.8f;
                             }
-                            r = static_cast<unsigned char>(66 - 32 * y);
-                            g = static_cast<unsigned char>(48 - 23 * y);
-                            b = static_cast<unsigned char>(33 - 16 * y);
+                            r = static_cast<unsigned char>(66 - 32 * y2);
+                            g = static_cast<unsigned char>(48 - 23 * y2);
+                            b = static_cast<unsigned char>(33 - 16 * y2);
                         }
                         else
                         {
-                            y -= 0.3f;
-                            y *= 1.428f;
-                            r = static_cast<unsigned char>(34 - 29 * y);
-                            g = static_cast<unsigned char>(25 - 20 * y);
-                            b = static_cast<unsigned char>(17 - 12 * y);
+                            y2 -= 0.3f;
+                            y2 *= 1.428f;
+                            r = static_cast<unsigned char>(34 - 29 * y2);
+                            g = static_cast<unsigned char>(25 - 20 * y2);
+                            b = static_cast<unsigned char>(17 - 12 * y2);
                         }
 
                         data[texelY * mWidth * 3 + texelX * 3] = r;
