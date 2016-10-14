@@ -5,6 +5,7 @@
 
 #include "../mwworld/inventorystore.hpp"
 
+#include "actoranimation.hpp"
 #include "weaponanimation.hpp"
 
 namespace ESM
@@ -19,7 +20,7 @@ namespace MWRender
 class NeckController;
 class HeadAnimationTime;
 
-class NpcAnimation : public Animation, public WeaponAnimation, public MWWorld::InventoryStoreListener
+class NpcAnimation : public ActorAnimation, public WeaponAnimation, public MWWorld::InventoryStoreListener
 {
 public:
     virtual void equipmentChanged();

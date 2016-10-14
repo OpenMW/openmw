@@ -217,19 +217,20 @@ if(NOT HAVE_STDINT_H)
 endif()
 
 
-set(BOOST_COMPONENTS system filesystem program_options thread)
-if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
-endif(WIN32)
-
-IF(BOOST_STATIC)
-    set(Boost_USE_STATIC_LIBS   ON)
-endif()
-
 IF(BUILD_OPENMW OR BUILD_OPENCS)
 
     find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgUtil osgFX)
     include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+
+    set(USED_OSG_PLUGINS
+                    osgdb_bmp
+                    osgdb_dds
+                    osgdb_jpeg
+                    osgdb_osg
+                    osgdb_png
+                    osgdb_serializers_osg
+                    osgdb_tga
+                  )
 
     get_filename_component(OSG_LIB_DIR ${OSGDB_LIBRARY} DIRECTORY)
     set(OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
@@ -237,7 +238,7 @@ IF(BUILD_OPENMW OR BUILD_OPENCS)
     if(OSG_STATIC)
         add_definitions(-DOSG_LIBRARY_STATIC)
 
-        find_package(OSGPlugins REQUIRED COMPONENTS osgdb_png osgdb_tga osgdb_dds osgdb_jpeg)
+        find_package(OSGPlugins REQUIRED COMPONENTS ${USED_OSG_PLUGINS})
         list(APPEND OPENSCENEGRAPH_LIBRARIES ${OSGPlugins_LIBRARIES})
     endif()
 
@@ -257,6 +258,16 @@ IF(BUILD_OPENMW OR BUILD_OPENCS)
     find_package(Bullet 283 REQUIRED COMPONENTS BulletCollision LinearMath)
 
 ENDIF(BUILD_OPENMW OR BUILD_OPENCS)
+
+
+set(BOOST_COMPONENTS system filesystem program_options)
+if(WIN32)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
+endif(WIN32)
+
+IF(BOOST_STATIC)
+    set(Boost_USE_STATIC_LIBS   ON)
+endif()
 
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
@@ -769,12 +780,6 @@ if (APPLE)
     " COMPONENT Runtime)
 
     set(ABSOLUTE_PLUGINS "")
-    set(USED_OSG_PLUGINS
-                        osgdb_dds
-                        osgdb_jpeg
-                        osgdb_png
-                        osgdb_tga
-                      )
 
     foreach (PLUGIN_NAME ${USED_OSG_PLUGINS})
       set(PLUGIN_ABS "${OSGPlugins_LIB_DIR}/${PLUGIN_NAME}.so")

@@ -356,8 +356,7 @@ short MagicEffect::getWeaknessEffect(short effect)
     effects[Corprus] = WeaknessToCorprusDisease;
     effects[Poison] = WeaknessToPoison;
 
-    // Weakness to magicka or -1 ?
-    effects[Paralyze] = WeaknessToMagicka;
+    effects[Paralyze] = -1;
 
     if (effects.find(effect) != effects.end())
         return effects[effect];

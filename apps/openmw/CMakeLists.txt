@@ -23,7 +23,7 @@ add_openmw_dir (mwrender
     actors objects renderingmanager animation rotatecontroller sky npcanimation vismask
     creatureanimation effectmanager util renderinginterface pathgrid rendermode weaponanimation
     bulletdebugdraw globalmap characterpreview camera localmap water terrainstorage ripplesimulation
-    renderbin
+    renderbin actoranimation
     )
 
 add_openmw_dir (mwinput
@@ -145,14 +145,15 @@ target_link_libraries(tes3mp
 if (ANDROID)
     set (OSG_PLUGINS
         -Wl,--whole-archive
-        ${OSG_PLUGINS_DIR}/libosgdb_dds.a
-        ${OSG_PLUGINS_DIR}/libosgdb_bmp.a
-        ${OSG_PLUGINS_DIR}/libosgdb_tga.a
-        ${OSG_PLUGINS_DIR}/libosgdb_gif.a
-        ${OSG_PLUGINS_DIR}/libosgdb_jpeg.a
-        ${OSG_PLUGINS_DIR}/libosgdb_png.a
-        -Wl,--no-whole-archive
     )
+    foreach(PLUGIN_NAME ${USED_OSG_PLUGINS})
+        set(OSG_PLUGINS ${OSG_PLUGINS} ${OSG_PLUGINS_DIR}/lib${PLUGIN_NAME}.a)
+    endforeach()
+
+    set (OSG_PLUGINS
+        ${OSG_PLUGINS} -Wl,--no-whole-archive
+    )
+
     target_link_libraries(tes3mp
         EGL
         android

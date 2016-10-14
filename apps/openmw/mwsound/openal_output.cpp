@@ -3,12 +3,16 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <cstring>
 
 #include <stdint.h>
 
 #include <components/vfs/manager.hpp>
 
-#include <boost/thread.hpp>
+#include <OpenThreads/Thread>
+#include <OpenThreads/Condition>
+#include <OpenThreads/Mutex>
+#include <OpenThreads/ScopedLock>
 
 #include "openal_output.hpp"
 #include "sound_decoder.hpp"
@@ -243,31 +247,31 @@ const ALfloat OpenAL_SoundStream::sBufferLength = 0.125f;
 //
 // A background streaming thread (keeps active streams processed)
 //
-struct OpenAL_Output::StreamThread {
+struct OpenAL_Output::StreamThread : public OpenThreads::Thread {
     typedef std::vector<OpenAL_SoundStream*> StreamVec;
     StreamVec mStreams;
 
     volatile bool mQuitNow;
-    boost::mutex mMutex;
-    boost::condition_variable mCondVar;
-    boost::thread mThread;
+    OpenThreads::Mutex mMutex;
+    OpenThreads::Condition mCondVar;
 
     StreamThread()
-      : mQuitNow(false), mThread(boost::ref(*this))
+      : mQuitNow(false)
     {
+        start();
     }
     ~StreamThread()
     {
         mQuitNow = true;
         mMutex.lock(); mMutex.unlock();
-        mCondVar.notify_all();
-        mThread.join();
+        mCondVar.broadcast();
+        join();
     }
 
-    // boost::thread entry point
-    void operator()()
+    // thread entry point
+    virtual void run()
     {
-        boost::unique_lock<boost::mutex> lock(mMutex);
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
         while(!mQuitNow)
         {
             StreamVec::iterator iter = mStreams.begin();
@@ -279,31 +283,30 @@ struct OpenAL_Output::StreamThread {
                     ++iter;
             }
 
-            mCondVar.timed_wait(lock, boost::posix_time::milliseconds(50));
+            mCondVar.wait(&mMutex, 50);
         }
     }
 
     void add(OpenAL_SoundStream *stream)
     {
-        boost::unique_lock<boost::mutex> lock(mMutex);
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
         if(std::find(mStreams.begin(), mStreams.end(), stream) == mStreams.end())
         {
             mStreams.push_back(stream);
-            lock.unlock();
-            mCondVar.notify_all();
+            mCondVar.broadcast();
         }
     }
 
     void remove(OpenAL_SoundStream *stream)
     {
-        boost::lock_guard<boost::mutex> lock(mMutex);
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
         StreamVec::iterator iter = std::find(mStreams.begin(), mStreams.end(), stream);
         if(iter != mStreams.end()) mStreams.erase(iter);
     }
 
     void removeAll()
     {
-        boost::lock_guard<boost::mutex> lock(mMutex);
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
         mStreams.clear();
     }
 
@@ -468,7 +471,7 @@ ALint OpenAL_SoundStream::refillQueue()
             if(got < data.size())
             {
                 mIsFinished = true;
-                memset(&data[got], mSilence, data.size()-got);
+                std::memset(&data[got], mSilence, data.size()-got);
             }
             if(got > 0)
             {
@@ -1023,7 +1026,7 @@ double OpenAL_Output::getStreamOffset(MWBase::SoundStreamPtr sound)
 {
     if(!sound->mHandle) return 0.0;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
-    boost::lock_guard<boost::mutex> lock(mStreamThread->mMutex);
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mStreamThread->mMutex);
     return stream->getStreamOffset();
 }
 
@@ -1031,7 +1034,7 @@ float OpenAL_Output::getStreamLoudness(MWBase::SoundStreamPtr sound)
 {
     if(!sound->mHandle) return 0.0;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
-    boost::lock_guard<boost::mutex> lock(mStreamThread->mMutex);
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mStreamThread->mMutex);
     return stream->getCurrentLoudness();
 }
 
@@ -1039,7 +1042,7 @@ bool OpenAL_Output::isStreamPlaying(MWBase::SoundStreamPtr sound)
 {
     if(!sound->mHandle) return false;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
-    boost::lock_guard<boost::mutex> lock(mStreamThread->mMutex);
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mStreamThread->mMutex);
     return stream->isPlaying();
 }
 

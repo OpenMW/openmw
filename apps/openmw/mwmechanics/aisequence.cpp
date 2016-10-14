@@ -91,8 +91,8 @@ std::list<AiPackage*>::const_iterator AiSequence::erase(std::list<AiPackage*>::c
     {
         if (package == it)
         {
-            AiPackage* package = *it;
-            delete package;
+            AiPackage* packagePtr = *it;
+            delete packagePtr;
             return mPackages.erase(it);
         }
     }

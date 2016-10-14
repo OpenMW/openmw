@@ -359,6 +359,10 @@ namespace SceneUtil
             for (unsigned int i=0; i<lights.size(); ++i)
             {
                 const LightManager::LightSourceViewBound& l = lights[i];
+
+                if (mIgnoredLightSources.count(l.mLightSource))
+                    continue;
+
                 if (l.mViewBound.intersects(nodeBound))
                     mLightList.push_back(&l);
             }
