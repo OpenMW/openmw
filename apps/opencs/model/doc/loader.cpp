@@ -73,11 +73,11 @@ void CSMDoc::Loader::load()
             CSMWorld::UniversalId log (CSMWorld::UniversalId::Type_LoadErrorLog, 0);
 
             { // silence a g++ warning
-            for (CSMDoc::Messages::Iterator iter (messages.begin());
-                iter!=messages.end(); ++iter)
+            for (CSMDoc::Messages::Iterator messageIter (messages.begin());
+                messageIter!=messages.end(); ++messageIter)
             {
-                document->getReport (log)->add (*iter);
-                emit loadMessage (document, iter->mMessage);
+                document->getReport (log)->add (*messageIter);
+                emit loadMessage (document, messageIter->mMessage);
             }
             }
 

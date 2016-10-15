@@ -303,15 +303,15 @@ CSVRender::WorldspaceWidget::dropRequirments
     return ignored;
 }
 
-bool CSVRender::WorldspaceWidget::handleDrop (const std::vector<CSMWorld::UniversalId>& data,
+bool CSVRender::WorldspaceWidget::handleDrop (const std::vector<CSMWorld::UniversalId>& universalIdData,
     DropType type)
 {
     if (type==Type_DebugProfile)
     {
         if (mRun)
         {
-            for (std::vector<CSMWorld::UniversalId>::const_iterator iter (data.begin());
-                iter!=data.end(); ++iter)
+            for (std::vector<CSMWorld::UniversalId>::const_iterator iter (universalIdData.begin());
+                iter!=universalIdData.end(); ++iter)
                 mRun->addProfile (iter->getId());
         }
 
@@ -402,9 +402,9 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick (const QPo
             continue;
         }
 
-        for (std::vector<osg::Node*>::iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
+        for (std::vector<osg::Node*>::iterator nodeIter = intersection.nodePath.begin(); nodeIter != intersection.nodePath.end(); ++nodeIter)
         {
-            osg::Node* node = *it;
+            osg::Node* node = *nodeIter;
             if (osg::ref_ptr<CSVRender::TagBase> tag = dynamic_cast<CSVRender::TagBase *>(node->getUserData()))
             {
                 WorldspaceHitResult hit = { true, tag, 0, 0, 0, intersection.getWorldIntersectPoint() };
