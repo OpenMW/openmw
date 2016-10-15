@@ -26,10 +26,10 @@ CSVWorld::ReferenceableCreator::ReferenceableCreator (CSMWorld::Data& data, QUnd
     for (std::vector<CSMWorld::UniversalId::Type>::const_iterator iter (types.begin());
          iter!=types.end(); ++iter)
     {
-        CSMWorld::UniversalId id (*iter, "");
+        CSMWorld::UniversalId id2 (*iter, "");
 
-        mType->addItem (QIcon (id.getIcon().c_str()), id.getTypeName().c_str(),
-            static_cast<int> (id.getType()));
+        mType->addItem (QIcon (id2.getIcon().c_str()), id2.getTypeName().c_str(),
+            static_cast<int> (id2.getType()));
     }
 
     insertBeforeButtons (mType, false);

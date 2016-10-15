@@ -19,8 +19,6 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
         record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
         (base ? record2.mBase : record2.mModified) = record;
 
-        int index = -1;
-
         std::string topic = Misc::StringUtils::lowerCase (record2.get().mTopicId);
 
         if (!record2.get().mPrev.empty())
