@@ -216,21 +216,32 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
 
 void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 {
+    if (!actor.getClass().isNpc())
+        // autoEquip is no-op for creatures
+        return;
+
+    const MWBase::World *world = MWBase::Environment::get().getWorld();
+    const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
+    MWMechanics::NpcStats& stats = actor.getClass().getNpcStats(actor);
+
+    static float fUnarmoredBase1 = store.find("fUnarmoredBase1")->getFloat();
+    static float fUnarmoredBase2 = store.find("fUnarmoredBase2")->getFloat();
+    int unarmoredSkill = stats.getSkill(ESM::Skill::Unarmored).getModified();
+
+    float unarmoredRating = static_cast<int>((fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill));
+
     TSlots slots_;
     initSlots (slots_);
 
     // Disable model update during auto-equip
     mUpdatesEnabled = false;
 
-    for (ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
+    // Relevant are only clothing and armor items:
+    //  - Equipping lights is handled in Actors::updateEquippedLight based on environment light.
+    //  - Equipping weapons is handled by AiCombat.
+    for (ContainerStoreIterator iter (begin(ContainerStore::Type_Clothing | ContainerStore::Type_Armor)); iter!=end(); ++iter)
     {
         Ptr test = *iter;
-
-        // Don't autoEquip lights. Handled in Actors::updateEquippedLight based on environment light.
-        if (test.getTypeName() == typeid(ESM::Light).name())
-        {
-            continue;
-        }
 
         // Only autoEquip if we are the original owner of the item.
         // This stops merchants from auto equipping anything you sell to them.
@@ -243,7 +254,20 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         {
             continue;
         }
-        int testSkill = test.getClass().getEquipmentSkill (test);
+
+        switch(test.getClass().canBeEquipped (test, actor).first)
+        {
+            case 0:
+                continue;
+            default:
+                break;
+        }
+
+        if (iter.getType() == ContainerStore::Type_Armor &&
+                test.getClass().getEffectiveArmorRating(test, actor) <= std::max(unarmoredRating, 0.f))
+        {
+            continue;
+        }
 
         std::pair<std::vector<int>, bool> itemsSlots =
             iter->getClass().getEquipmentSlots (*iter);
@@ -251,49 +275,33 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         for (std::vector<int>::const_iterator iter2 (itemsSlots.first.begin());
             iter2!=itemsSlots.first.end(); ++iter2)
         {
-            if (*iter2 == Slot_CarriedRight) // Items in right hand are situational use, so don't equip them.
-                // Equipping weapons is handled by AiCombat. Anything else (lockpicks, probes) can't be used by NPCs anyway (yet)
-                continue;
-
-            if (iter.getType() == MWWorld::ContainerStore::Type_Weapon)
-                continue;
-
             if (slots_.at (*iter2)!=end())
             {
                 Ptr old = *slots_.at (*iter2);
 
-                // check skill
-                int oldSkill = old.getClass().getEquipmentSkill (old);
-
-                bool use = false;
-                if (testSkill!=-1 && oldSkill==-1)
-                    use = true;
-                else if (testSkill!=-1 && oldSkill!=-1 && testSkill!=oldSkill)
+                if (iter.getType() == ContainerStore::Type_Armor)
                 {
-                    if (actor.getClass().getSkill(actor, oldSkill) > actor.getClass().getSkill (actor, testSkill))
-                        continue; // rejected, because old item better matched the NPC's skills.
-
-                    if (actor.getClass().getSkill(actor, oldSkill) < actor.getClass().getSkill (actor, testSkill))
-                        use = true;
-                }
-
-                if (!use)
-                {
-                    // check value
-                    if (old.getClass().getValue (old)>=
-                        test.getClass().getValue (test))
+                    if (old.getTypeName() == typeid(ESM::Armor).name())
                     {
-                        continue;
+                        if (old.getClass().getEffectiveArmorRating(old, actor) >= test.getClass().getEffectiveArmorRating(test, actor))
+                            // old armor had better armor rating
+                            continue;
                     }
+                    // suitable armor should replace already equipped clothing
                 }
-            }
-
-            switch(test.getClass().canBeEquipped (test, actor).first)
-            {
-                case 0:
-                    continue;
-                default:
-                    break;
+                else if (iter.getType() == ContainerStore::Type_Clothing)
+                {
+                    if (old.getTypeName() == typeid(ESM::Clothing).name())
+                    {
+                        // check value
+                        if (old.getClass().getValue (old) > test.getClass().getValue (test))
+                            // old clothing was more valuable
+                            continue;
+                    }
+                    else
+                        // suitable clothing should NOT replace already equipped armor
+                        continue;
+                }
             }
 
             if (!itemsSlots.second) // if itemsSlots.second is true, item can stay stacked when equipped
