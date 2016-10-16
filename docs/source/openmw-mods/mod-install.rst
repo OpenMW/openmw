@@ -22,6 +22,13 @@ You have now installed your mod. Any simple replacer mods that only contain reso
 Enable
 ------
 
-Any mods that have plugin files must be enabled to work.
+Any mods that have plugin files must be enabled to work. Master game files and plugin files can only be enabled if they have been properly installed within a *data folder* as described above.
 
-#.
+#.	Open the OpenMW Launcher.
+#.	Click on the Data Files tab.
+#.	In the Content List box, select the content list you wish to modify in the dropdown menu, or make a new one by:
+	#.	Click the New Content List button and enter the name of your content list, then click OK. New lists are useful for keeping track of the mods used for different characters or for different games if you play more than one game using OpenMW.
+	#.	In the Content box, select your game file (``.esm`` or ``.omwgame``) from the dropdown menu.
+#.	Now you must activate the plugins you wish to use by checking the box next to their entry in the Content box list.
+#.	Load order can be changed simply by dragging the entries around within the list. Mods are loaded from the top down, so if one plugin depends on another, it must be lower on the list.
+#.	Click Play to run OpenMW with your game and enabled mods!
