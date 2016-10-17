@@ -9,7 +9,7 @@
 #include "Packets/PacketClass.hpp"
 #include "Packets/PacketPosition.hpp"
 #include "Packets/PacketBaseInfo.hpp"
-#include "components/openmw-mp/Packets/PacketEquipment.hpp"
+#include "Packets/PacketEquipment.hpp"
 #include "Packets/PacketAttack.hpp"
 #include "Packets/PacketDynamicStats.hpp"
 #include "Packets/PacketResurrect.hpp"

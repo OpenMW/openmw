@@ -17,7 +17,7 @@ void PlayerPacket::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
     }
 }
 
-PlayerPacket::PlayerPacket(RakNet::RakPeerInterface *peer)
+PlayerPacket::PlayerPacket(RakNet::RakPeerInterface *peer) : BasePacket(peer)
 {
     packetID = 0;
     priority = HIGH_PRIORITY;
@@ -49,28 +49,10 @@ void PlayerPacket::Read(BasePlayer *player)
     Packet(bsRead, player, false);
 }
 
-void PlayerPacket::SetReadStream(RakNet::BitStream *bitStream)
-{
-    bsRead = bitStream;
-}
-
-void PlayerPacket::SetSendStream(RakNet::BitStream *bitStream)
-{
-    bsSend = bitStream;
-}
-
 void PlayerPacket::RequestData(RakNet::RakNetGUID player)
 {
     bsSend->ResetWritePointer();
     bsSend->Write(packetID);
     bsSend->Write(player);
     peer->Send(bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, 0, player, false);
-}
-
-void PlayerPacket::SetStreams(RakNet::BitStream *inStream, RakNet::BitStream *outStream)
-{
-    if (inStream != 0)
-        bsRead = inStream;
-    if (outStream != 0)
-        bsSend = outStream;
 }
