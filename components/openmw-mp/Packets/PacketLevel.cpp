@@ -7,14 +7,14 @@
 
 using namespace mwmp;
 
-PacketLevel::PacketLevel(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+PacketLevel::PacketLevel(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_GAME_LEVEL;
 }
 
 void PacketLevel::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
-    BasePacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, player, send);
 
     RW(player->CreatureStats()->mLevel, send);
 }

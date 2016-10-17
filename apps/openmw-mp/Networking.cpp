@@ -69,7 +69,7 @@ void Networking::Update(RakNet::Packet *packet)
         return;
     }
 
-    BasePacket *myPacket = controller->GetPacket(packet->data[0]);
+    PlayerPacket *myPacket = controller->GetPacket(packet->data[0]);
 
     if (packet->data[0] == ID_HANDSHAKE)
     {

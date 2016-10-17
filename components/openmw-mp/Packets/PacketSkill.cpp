@@ -9,14 +9,14 @@
 
 using namespace mwmp;
 
-PacketSkill::PacketSkill(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+PacketSkill::PacketSkill(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_GAME_SKILL;
 }
 
 void PacketSkill::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
-    BasePacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, player, send);
 
     for (int i = 0; i < SkillCount; ++i)
         RW(player->NpcStats()->mSkills[i], send);

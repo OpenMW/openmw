@@ -7,14 +7,14 @@
 
 using namespace mwmp;
 
-PacketHandshake::PacketHandshake(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+PacketHandshake::PacketHandshake(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_HANDSHAKE;
 }
 
 void PacketHandshake::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
-    BasePacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, player, send);
     RW(player->Npc()->mName, send);
     RW(*player->GetPassw(), send);
 }

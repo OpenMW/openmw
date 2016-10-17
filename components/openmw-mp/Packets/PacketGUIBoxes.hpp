@@ -6,11 +6,11 @@
 #define OPENMW_PACKETGUIBOXES_HPP
 
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketGUIBoxes : public BasePacket
+    class PacketGUIBoxes : public PlayerPacket
     {
     public:
         PacketGUIBoxes(RakNet::RakPeerInterface *peer);

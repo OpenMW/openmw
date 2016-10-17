@@ -7,14 +7,14 @@
 
 using namespace mwmp;
 
-PacketAttack::PacketAttack(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+PacketAttack::PacketAttack(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_GAME_ATTACK;
 }
 
 void PacketAttack::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
 {
-    BasePacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, player, send);
 
     RW(player->GetAttack()->attacker, send);
     RW(player->GetAttack()->target, send);

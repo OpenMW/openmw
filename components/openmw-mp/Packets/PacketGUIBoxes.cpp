@@ -7,14 +7,14 @@
 
 using namespace mwmp;
 
-PacketGUIBoxes::PacketGUIBoxes(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+PacketGUIBoxes::PacketGUIBoxes(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_GUI_MESSAGEBOX;
 }
 
 void PacketGUIBoxes::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
-    BasePacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, player, send);
 
     RW(player->guiMessageBox.id, send);
     RW(player->guiMessageBox.type, send);

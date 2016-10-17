@@ -5,11 +5,11 @@
 #ifndef OPENMW_PACKETEQUIPMENT_HPP
 #define OPENMW_PACKETEQUIPMENT_HPP
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketEquipment : public BasePacket
+    class PacketEquipment : public PlayerPacket
     {
     public:
         PacketEquipment(RakNet::RakPeerInterface *peer);

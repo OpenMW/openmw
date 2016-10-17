@@ -5,11 +5,11 @@
 #ifndef OPENMW_PACKETBASEINFO_HPP
 #define OPENMW_PACKETBASEINFO_HPP
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketBaseInfo : public BasePacket
+    class PacketBaseInfo : public PlayerPacket
     {
     public:
         PacketBaseInfo(RakNet::RakPeerInterface *peer);

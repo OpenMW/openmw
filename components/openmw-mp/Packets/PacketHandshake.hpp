@@ -5,11 +5,11 @@
 #ifndef OPENMW_PACKETHANDSHAKE_HPP
 #define OPENMW_PACKETHANDSHAKE_HPP
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketHandshake : public BasePacket
+    class PacketHandshake : public PlayerPacket
     {
     public:
         PacketHandshake(RakNet::RakPeerInterface *peer);

@@ -5,14 +5,14 @@
 #ifndef OPENMW_PACKETLOADED_HPP
 #define OPENMW_PACKETLOADED_HPP
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketLoaded : public BasePacket
+    class PacketLoaded : public PlayerPacket
     {
     public:
-        PacketLoaded(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+        PacketLoaded(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
         {
             packetID = ID_LOADED;
         }

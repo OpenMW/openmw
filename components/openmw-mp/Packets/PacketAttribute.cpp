@@ -7,14 +7,14 @@
 
 using namespace mwmp;
 
-PacketAttribute::PacketAttribute(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+PacketAttribute::PacketAttribute(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_GAME_ATTRIBUTE;
 }
 
 void PacketAttribute::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
-    BasePacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, player, send);
 
     for (int i = 0; i < AttributeCount; ++i)
         RW(player->CreatureStats()->mAttributes[i], send);

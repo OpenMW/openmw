@@ -178,7 +178,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
     if (id != myid)
         pl = Players::GetPlayer(id);
 
-    BasePacket *myPacket = controller.GetPacket(packet->data[0]);
+    PlayerPacket *myPacket = controller.GetPacket(packet->data[0]);
 
     switch (packet->data[0])
     {
@@ -618,7 +618,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
     }
 }
 
-BasePacket *Networking::GetPacket(RakNet::MessageID id)
+PlayerPacket *Networking::GetPacket(RakNet::MessageID id)
 {
     return controller.GetPacket(id);
 }

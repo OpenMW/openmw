@@ -6,21 +6,21 @@
 #define OPENMW_PACKETRESURRECT_HPP
 
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 
 namespace mwmp
 {
-    class PacketResurrect: public BasePacket
+    class PacketResurrect: public PlayerPacket
     {
     public:
-        PacketResurrect(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+        PacketResurrect(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
         {
             packetID = ID_GAME_RESURRECT;
         }
         void Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
         {
-            BasePacket::Packet(bs, player, send);
+            PlayerPacket::Packet(bs, player, send);
             RW(player->CreatureStats()->mDead, send);
         }
     };

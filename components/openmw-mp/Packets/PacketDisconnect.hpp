@@ -5,15 +5,15 @@
 #ifndef OPENMW_PACKETDISCONNECT_HPP
 #define OPENMW_PACKETDISCONNECT_HPP
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 
 namespace mwmp
 {
-    class PacketDisconnect : public BasePacket
+    class PacketDisconnect : public PlayerPacket
     {
     public:
-        PacketDisconnect(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+        PacketDisconnect(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
         {
             packetID = ID_USER_DISCONNECTED;
         }

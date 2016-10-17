@@ -5,14 +5,14 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include "PacketClass.hpp"
 
-mwmp::PacketClass::PacketClass(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+mwmp::PacketClass::PacketClass(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_GAME_CHARCLASS;
 }
 
 void mwmp::PacketClass::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
 {
-    BasePacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, player, send);
 
     RW(player->charClass.mId, send);
     if (player->charClass.mId.empty()) // custom class

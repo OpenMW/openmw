@@ -8,7 +8,7 @@
 using namespace std;
 using namespace mwmp;
 
-PacketPosition::PacketPosition(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+PacketPosition::PacketPosition(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_GAME_POS;
     priority = MEDIUM_PRIORITY;
@@ -17,7 +17,7 @@ PacketPosition::PacketPosition(RakNet::RakPeerInterface *peer) : BasePacket(peer
 
 void PacketPosition::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
-    BasePacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, player, send);
 
     RW(*player->Position(), send);
     RW(*player->Dir(), send);

@@ -5,11 +5,11 @@
 #ifndef OPENMW_PACKETATTRIBUTE_HPP
 #define OPENMW_PACKETATTRIBUTE_HPP
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketAttribute : public BasePacket
+    class PacketAttribute : public PlayerPacket
     {
     public:
         const static int AttributeCount = 8;

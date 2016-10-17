@@ -33,7 +33,7 @@ namespace mwmp
         void Connect(const std::string& ip, unsigned short port);
         void Update();
         void SendData(RakNet::BitStream *bitStream);
-        BasePacket *GetPacket(RakNet::MessageID id);
+        PlayerPacket *GetPacket(RakNet::MessageID id);
 
         bool isDedicatedPlayer(const MWWorld::Ptr &ptr);
         bool Attack(const MWWorld::Ptr &ptr);

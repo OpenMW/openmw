@@ -6,11 +6,11 @@
 #define OPENMW_TIMEPACKET_HPP
 
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketTime : public BasePacket
+    class PacketTime : public PlayerPacket
     {
     public:
         PacketTime(RakNet::RakPeerInterface *peer);

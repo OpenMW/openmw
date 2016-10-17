@@ -6,11 +6,11 @@
 #define OPENMW_PACKETSKILL_HPP
 
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketSkill : public BasePacket
+    class PacketSkill : public PlayerPacket
     {
     public:
         const static int SkillCount = 27;

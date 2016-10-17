@@ -6,11 +6,11 @@
 #define OPENMW_PACKETDRAWSTATE_HPP
 
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketDrawState : public BasePacket
+    class PacketDrawState : public PlayerPacket
     {
     public:
         PacketDrawState(RakNet::RakPeerInterface *peer);

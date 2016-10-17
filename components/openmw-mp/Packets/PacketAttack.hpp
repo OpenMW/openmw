@@ -6,11 +6,11 @@
 #define OPENMW_PACKETATTACK_HPP
 
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketAttack : public BasePacket
+    class PacketAttack : public PlayerPacket
     {
     public:
         PacketAttack(RakNet::RakPeerInterface *peer);

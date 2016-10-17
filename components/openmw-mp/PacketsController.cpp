@@ -68,7 +68,7 @@ mwmp::PacketsController::PacketsController(RakNet::RakPeerInterface *peer)
 }
 
 
-mwmp::BasePacket *mwmp::PacketsController::GetPacket(RakNet::MessageID id)
+mwmp::PlayerPacket *mwmp::PacketsController::GetPacket(RakNet::MessageID id)
 {
     return packets[(unsigned char)id].get();
 }

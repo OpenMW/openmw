@@ -7,7 +7,7 @@
 
 
 #include <RakPeerInterface.h>
-#include "Packets/BasePacket.hpp"
+#include "Packets/PlayerPacket.hpp"
 #include <map>
 #include <boost/shared_ptr.hpp>
 
@@ -17,10 +17,10 @@ namespace mwmp
     {
     public:
         PacketsController(RakNet::RakPeerInterface *peer);
-        BasePacket *GetPacket(RakNet::MessageID id);
+        PlayerPacket *GetPacket(RakNet::MessageID id);
         void SetStream(RakNet::BitStream *inStream, RakNet::BitStream *outStream);
 
-        typedef std::map<unsigned char, boost::shared_ptr<BasePacket> > packets_t;
+        typedef std::map<unsigned char, boost::shared_ptr<PlayerPacket> > packets_t;
     private:
         packets_t packets;
     };

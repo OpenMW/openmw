@@ -5,11 +5,11 @@
 #ifndef OPENMW_PACKETPOSITION_HPP
 #define OPENMW_PACKETPOSITION_HPP
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketPosition : public BasePacket
+    class PacketPosition : public PlayerPacket
     {
     public:
         PacketPosition(RakNet::RakPeerInterface *peer);

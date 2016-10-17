@@ -6,11 +6,11 @@
 #define OPENMW_PACKETCHARGEN_HPP
 
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketCharGen : public BasePacket
+    class PacketCharGen : public PlayerPacket
     {
     public:
         PacketCharGen(RakNet::RakPeerInterface *peer);

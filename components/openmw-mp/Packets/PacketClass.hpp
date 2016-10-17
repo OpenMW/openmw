@@ -6,11 +6,11 @@
 #define OPENMW_PACKETCLASS_HPP
 
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketClass : public BasePacket
+    class PacketClass : public PlayerPacket
     {
     public:
         PacketClass(RakNet::RakPeerInterface *peer);

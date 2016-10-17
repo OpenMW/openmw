@@ -6,11 +6,11 @@
 #define OPENMW_PACKAGEDYNAMICSTATS_HPP
 
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketDynamicStats : public BasePacket
+    class PacketDynamicStats : public PlayerPacket
     {
     public:
         PacketDynamicStats(RakNet::RakPeerInterface *peer);

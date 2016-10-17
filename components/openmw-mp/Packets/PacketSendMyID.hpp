@@ -5,15 +5,15 @@
 #ifndef OPENMW_PACKETSENDMYID_HPP
 #define OPENMW_PACKETSENDMYID_HPP
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 
 namespace mwmp
 {
-    class PacketSendMyID : public BasePacket
+    class PacketSendMyID : public PlayerPacket
     {
     public:
-        PacketSendMyID(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+        PacketSendMyID(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
         {
             packetID = ID_USER_MYID;
         }

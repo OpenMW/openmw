@@ -1,9 +1,5 @@
-//
-// Created by koncord on 05.01.16.
-//
-
-#ifndef OPENMW_BASEPACKET_HPP
-#define OPENMW_BASEPACKET_HPP
+#ifndef OPENMW_PLAYERPACKET_HPP
+#define OPENMW_PLAYERPACKET_HPP
 
 #include <string>
 #include <RakNetTypes.h>
@@ -14,12 +10,12 @@
 
 namespace mwmp
 {
-    class BasePacket
+    class PlayerPacket
     {
     public:
-        BasePacket(RakNet::RakPeerInterface *peer);
+        PlayerPacket(RakNet::RakPeerInterface *peer);
 
-        ~BasePacket();
+        ~PlayerPacket();
 
         virtual void Packet(RakNet::BitStream *bs, BasePlayer *player, bool send);
 
@@ -106,4 +102,4 @@ namespace mwmp
     };
 }
 
-#endif //OPENMW_BASEPACKET_HPP
+#endif //OPENMW_PLAYERPACKET_HPP

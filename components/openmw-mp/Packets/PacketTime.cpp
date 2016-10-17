@@ -7,14 +7,14 @@
 
 using namespace mwmp;
 
-PacketTime::PacketTime(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+PacketTime::PacketTime(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_GAME_TIME;
 }
 
 void PacketTime::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
-    BasePacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, player, send);
 
     RW(player->month, send);
     RW(player->day, send);

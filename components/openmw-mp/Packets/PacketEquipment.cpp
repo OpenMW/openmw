@@ -7,14 +7,14 @@
 
 using namespace mwmp;
 
-PacketEquipment::PacketEquipment(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+PacketEquipment::PacketEquipment(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_GAME_EQUIPMENT;
 }
 
 void PacketEquipment::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
-    BasePacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, player, send);
 
     for (int i = 0; i < 19; i++)
     {

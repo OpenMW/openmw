@@ -5,11 +5,11 @@
 #ifndef OPENMW_PACKETCHATMESSAGE_HPP
 #define OPENMW_PACKETCHATMESSAGE_HPP
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketChatMessage : public BasePacket
+    class PacketChatMessage : public PlayerPacket
     {
     public:
         PacketChatMessage(RakNet::RakPeerInterface *peer);

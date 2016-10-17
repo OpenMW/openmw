@@ -6,7 +6,7 @@
 #include "PacketCell.hpp"
 
 
-mwmp::PacketCell::PacketCell(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+mwmp::PacketCell::PacketCell(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_GAME_CELL;
     priority = IMMEDIATE_PRIORITY;
@@ -15,7 +15,7 @@ mwmp::PacketCell::PacketCell(RakNet::RakPeerInterface *peer) : BasePacket(peer)
 
 void mwmp::PacketCell::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
 {
-    BasePacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, player, send);
 
     RW(player->GetCell()->mData.mFlags, send);
 
