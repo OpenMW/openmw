@@ -6,6 +6,7 @@
 #include <components/esm/loadench.hpp>
 #include <components/esm/inventorystate.hpp>
 #include <components/misc/rng.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -214,6 +215,26 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
     return mSlots[slot];
 }
 
+bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const MWWorld::Ptr& item)
+{
+    if (!Settings::Manager::getBool("prevent merchant equipping", "Game"))
+        return true;
+
+    // Only autoEquip if we are the original owner of the item.
+    // This stops merchants from auto equipping anything you sell to them.
+    // ...unless this is a companion, he should always equip items given to him.
+    if (!Misc::StringUtils::ciEqual(item.getCellRef().getOwner(), actor.getCellRef().getRefId()) &&
+            (actor.getClass().getScript(actor).empty() ||
+            !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion"))
+            && !actor.getClass().getCreatureStats(actor).isDead() // Corpses can be dressed up by the player as desired
+            )
+    {
+        return false;
+    }
+
+    return true;
+}
+
 void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 {
     if (!actor.getClass().isNpc())
@@ -243,17 +264,8 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     {
         Ptr test = *iter;
 
-        // Only autoEquip if we are the original owner of the item.
-        // This stops merchants from auto equipping anything you sell to them.
-        // ...unless this is a companion, he should always equip items given to him.
-        if (!Misc::StringUtils::ciEqual(test.getCellRef().getOwner(), actor.getCellRef().getRefId()) &&
-                (actor.getClass().getScript(actor).empty() ||
-                !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion"))
-                && !actor.getClass().getCreatureStats(actor).isDead() // Corpses can be dressed up by the player as desired
-                )
-        {
+        if (!canActorAutoEquip(actor, test))
             continue;
-        }
 
         switch(test.getClass().canBeEquipped (test, actor).first)
         {
@@ -355,6 +367,9 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 
         for (ContainerStoreIterator iter(begin(ContainerStore::Type_Weapon)); iter!=end(); ++iter)
         {
+            if (!canActorAutoEquip(actor, *iter))
+                continue;
+
             const ESM::Weapon* esmWeapon = iter->get<ESM::Weapon>()->mBase;
 
             if (esmWeapon->mData.mType == ESM::Weapon::Arrow || esmWeapon->mData.mType == ESM::Weapon::Bolt)
