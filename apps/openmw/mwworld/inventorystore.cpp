@@ -236,9 +236,9 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     // Disable model update during auto-equip
     mUpdatesEnabled = false;
 
-    // Relevant are only clothing and armor items:
-    //  - Equipping lights is handled in Actors::updateEquippedLight based on environment light.
-    //  - Equipping weapons is handled by AiCombat.
+    // Autoequip clothing, armor and weapons.
+    // Equipping lights is handled in Actors::updateEquippedLight based on environment light.
+
     for (ContainerStoreIterator iter (begin(ContainerStore::Type_Clothing | ContainerStore::Type_Armor)); iter!=end(); ++iter)
     {
         Ptr test = *iter;
@@ -316,6 +316,96 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
             slots_[*iter2] = iter;
             break;
         }
+    }
+
+    static const ESM::Skill::SkillEnum weaponSkills[] =
+    {
+        ESM::Skill::LongBlade,
+        ESM::Skill::Axe,
+        ESM::Skill::Spear,
+        ESM::Skill::ShortBlade,
+        ESM::Skill::Marksman,
+        ESM::Skill::BluntWeapon
+    };
+    const size_t weaponSkillsLength = sizeof(weaponSkills) / sizeof(weaponSkills[0]);
+
+    bool weaponSkillVisited[weaponSkillsLength] = { false };
+
+    for (int i = 0; i < static_cast<int>(weaponSkillsLength) - 1; ++i)
+    {
+        int max = 0;
+        int maxWeaponSkill = -1;
+
+        for (int j = 0; j < static_cast<int>(weaponSkillsLength) - 1; ++j)
+        {
+            int skillValue = stats.getSkill(static_cast<int>(weaponSkills[j])).getModified();
+
+            if (skillValue > max && !weaponSkillVisited[j])
+            {
+                max = skillValue;
+                maxWeaponSkill = j;
+            }
+        }
+
+        if (maxWeaponSkill == -1)
+            break;
+
+        max = 0;
+        ContainerStoreIterator weapon(end());
+
+        for (ContainerStoreIterator iter(begin(ContainerStore::Type_Weapon)); iter!=end(); ++iter)
+        {
+            const ESM::Weapon* esmWeapon = iter->get<ESM::Weapon>()->mBase;
+
+            if (esmWeapon->mData.mType == ESM::Weapon::Arrow || esmWeapon->mData.mType == ESM::Weapon::Bolt)
+                continue;
+
+            if (iter->getClass().getEquipmentSkill(*iter) == weaponSkills[maxWeaponSkill])
+            {
+                if (esmWeapon->mData.mChop[1] >= max)
+                {
+                    max = esmWeapon->mData.mChop[1];
+                    weapon = iter;
+                }
+
+                if (esmWeapon->mData.mSlash[1] >= max)
+                {
+                    max = esmWeapon->mData.mSlash[1];
+                    weapon = iter;
+                }
+
+                if (esmWeapon->mData.mThrust[1] >= max)
+                {
+                    max = esmWeapon->mData.mThrust[1];
+                    weapon = iter;
+                }
+            }
+        }
+
+        if (weapon != end() && weapon->getClass().canBeEquipped(*weapon, actor).first)
+        {
+            std::pair<std::vector<int>, bool> itemsSlots =
+                weapon->getClass().getEquipmentSlots (*weapon);
+
+            for (std::vector<int>::const_iterator slot (itemsSlots.first.begin());
+                slot!=itemsSlots.first.end(); ++slot)
+            {
+                if (!itemsSlots.second)
+                {
+                    if (weapon->getRefData().getCount() > 1)
+                    {
+                        unstack(*weapon, actor);
+                    }
+                }
+
+                slots_[*slot] = weapon;
+                break;
+            }
+
+            break;
+        }
+
+        weaponSkillVisited[maxWeaponSkill] = true;
     }
 
     bool changed = false;
