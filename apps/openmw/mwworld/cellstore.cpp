@@ -204,6 +204,14 @@ namespace MWWorld
         return (ref.mRef.mRefnum == pRefnum);
     }
 
+    Ptr CellStore::getCurrentPtr(LiveCellRefBase *ref)
+    {
+        MovedRefTracker::iterator found = mMovedToAnotherCell.find(ref);
+        if (found != mMovedToAnotherCell.end())
+            return Ptr(ref, found->second);
+        return Ptr(ref, this);
+    }
+
     void CellStore::moveFrom(const Ptr &object, CellStore *from)
     {
         if (mState != State_Loaded)
@@ -964,26 +972,26 @@ namespace MWWorld
                 mLastRespawn = MWBase::Environment::get().getWorld()->getTimeStamp();
                 for (CellRefList<ESM::Container>::List::iterator it (mContainers.mList.begin()); it!=mContainers.mList.end(); ++it)
                 {
-                    Ptr ptr (&*it, this);
+                    Ptr ptr = getCurrentPtr(&*it);
                     ptr.getClass().respawn(ptr);
                 }
             }
 
             for (CellRefList<ESM::Creature>::List::iterator it (mCreatures.mList.begin()); it!=mCreatures.mList.end(); ++it)
             {
-                Ptr ptr (&*it, this);
+                Ptr ptr = getCurrentPtr(&*it);
                 clearCorpse(ptr);
                 ptr.getClass().respawn(ptr);
             }
             for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
             {
-                Ptr ptr (&*it, this);
+                Ptr ptr = getCurrentPtr(&*it);
                 clearCorpse(ptr);
                 ptr.getClass().respawn(ptr);
             }
             for (CellRefList<ESM::CreatureLevList>::List::iterator it (mCreatureLists.mList.begin()); it!=mCreatureLists.mList.end(); ++it)
             {
-                Ptr ptr (&*it, this);
+                Ptr ptr = getCurrentPtr(&*it);
                 // no need to clearCorpse, handled as part of mCreatures
                 ptr.getClass().respawn(ptr);
             }
