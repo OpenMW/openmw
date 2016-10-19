@@ -1039,7 +1039,7 @@ namespace MWMechanics
                     mwmp::Main::get().getLocalPlayer()->prepareAttack(2, state);
                 }
 
-                if(mwmp::Main::get().getNetworking()->isDedicatedPlayer(iter->first))
+                if (mwmp::Main::get().getNetworking()->isDedicatedPlayer(iter->first))
                     iter->second->getCharacterController()->setAttackingOrSpell(mwmp::Main::get().getNetworking()->Attack(iter->first));
 
 
