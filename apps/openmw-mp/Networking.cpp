@@ -27,8 +27,11 @@ Networking::Networking(RakNet::RakPeerInterface *peer)
     players = Players::GetPlayers();
 
     playerController = new PlayerPacketController(peer);
+    worldController = new WorldPacketController(peer);
 
-    playerController->SetStream(0, &bsOut); // set send stream
+    // Set send stream
+    playerController->SetStream(0, &bsOut);
+    worldController->SetStream(0, &bsOut);
 
     running = true;
     exitCode = 0;
@@ -414,6 +417,11 @@ void Networking::DisconnectPlayer(RakNet::RakNetGUID guid)
 PlayerPacketController *Networking::GetPlayerController() const
 {
     return playerController;
+}
+
+WorldPacketController *Networking::GetWorldController() const
+{
+    return worldController;
 }
 
 const Networking &Networking::Get()

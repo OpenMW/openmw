@@ -6,6 +6,7 @@
 #define OPENMW_NETWORKING_HPP
 
 #include <components/openmw-mp/Controllers/PlayerPacketController.hpp>
+#include <components/openmw-mp/Controllers/WorldPacketController.hpp>
 #include "Player.hpp"
 
 namespace  mwmp
@@ -28,6 +29,8 @@ namespace  mwmp
         void StopServer(int code);
 
         PlayerPacketController *GetPlayerController() const;
+        WorldPacketController *GetWorldController() const;
+
         static const Networking &Get();
         static Networking *GetPtr();
 
@@ -38,6 +41,7 @@ namespace  mwmp
         TPlayers *players;
 
         PlayerPacketController *playerController;
+        WorldPacketController *worldController;
 
         bool running;
         int exitCode;
