@@ -355,9 +355,36 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     }
 
     default:
-        printf("Message with identifier %i has arrived.\n", packet->data[0]);
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled PlayerPacket with identifier %i has arrived",
+            packet->data[0]);
         break;
     }
+}
+
+void Networking::ProcessWorldPacket(RakNet::Packet *packet)
+{
+    Player *player = Players::GetPlayer(packet->guid);
+
+    if (!player->isHandshaked() || player->LoadedState() != Player::POSTLOADED)
+        return;
+
+    switch (packet->data[0])
+    {
+
+    case ID_WORLD_OBJECT_REMOVAL:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_OBJECT_REMOVAL from %s",
+            player->Npc()->mName.c_str());
+
+        break;
+    }
+
+    default:
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled WorldPacket with identifier %i has arrived",
+            packet->data[0]);
+        break;
+    }
+
 }
 
 void Networking::Update(RakNet::Packet *packet)
@@ -390,6 +417,12 @@ void Networking::Update(RakNet::Packet *packet)
     else if (worldController->ContainsPacket(packet->data[0]))
     {
         worldController->SetStream(&bsIn, 0);
+        ProcessWorldPacket(packet);
+    }
+    else
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled Raknet packet with identifier %i has arrived",
+            packet->data[0]);
     }
 }
 
