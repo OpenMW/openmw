@@ -49,10 +49,10 @@ void PlayerPacket::Read(BasePlayer *player)
     Packet(bsRead, player, false);
 }
 
-void PlayerPacket::RequestData(RakNet::RakNetGUID player)
+void PlayerPacket::RequestData(RakNet::RakNetGUID guid)
 {
     bsSend->ResetWritePointer();
     bsSend->Write(packetID);
     bsSend->Write(player);
-    peer->Send(bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, 0, player, false);
+    peer->Send(bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, 0, guid, false);
 }

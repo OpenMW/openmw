@@ -47,7 +47,6 @@ Networking::~Networking()
 
 void Networking::Update(RakNet::Packet *packet)
 {
-
     Player *player = Players::GetPlayer(packet->guid);
 
     RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
@@ -73,7 +72,6 @@ void Networking::Update(RakNet::Packet *packet)
 
     if (packet->data[0] == ID_HANDSHAKE)
     {
-        DEBUG_PRINTF("ID_HANDSHAKE\n");
         string passw = "SuperPassword";
 
         myPacket->Read(player);
@@ -448,31 +446,37 @@ int Networking::MainLoop()
             switch (packet->data[0])
             {
                 case ID_REMOTE_DISCONNECTION_NOTIFICATION:
-                    printf("Another client has disconnected.\n");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Client at %s has disconnected",
+                        packet->systemAddress.ToString());
                     break;
                 case ID_REMOTE_CONNECTION_LOST:
-                    printf("Another client has lost connection.\n");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Client at %s has lost connection",
+                        packet->systemAddress.ToString());
                     break;
                 case ID_REMOTE_NEW_INCOMING_CONNECTION:
-                    printf("Another client has connected.\n");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Client at %s has connected",
+                        packet->systemAddress.ToString());
                     break;
                 case ID_CONNECTION_REQUEST_ACCEPTED:    // client to server
                 {
-                    printf("Our connection request has been accepted.\n");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Our connection request has been accepted");
                     break;
                 }
                 case ID_NEW_INCOMING_CONNECTION:
-                    printf("A connection is incoming.\n");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "A connection is incoming from %s",
+                        packet->systemAddress.ToString());
                     break;
                 case ID_NO_FREE_INCOMING_CONNECTIONS:
-                    printf("The server is full.\n");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "The server is full");
                     break;
                 case ID_DISCONNECTION_NOTIFICATION:
-                    printf("A client has disconnected.\n");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Client at %s has disconnected",
+                        packet->systemAddress.ToString());
                     DisconnectPlayer(packet->guid);
                     break;
                 case ID_CONNECTION_LOST:
-                    printf("A client has lost connection.\n");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Client at %s has lost connection",
+                        packet->systemAddress.ToString());
                     DisconnectPlayer(packet->guid);
                     break;
                 default:
