@@ -19,3 +19,17 @@ Although this guide attempts to be comprehensive and up to date. You will always
 .. toctree::
    :caption: Table of Contents
    :maxdepth: 2
+
+   camera
+   cells
+   map
+   GUI
+   HUD
+   game
+   general
+   input
+   saves
+   sound
+   video
+   water
+   windows
