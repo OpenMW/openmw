@@ -343,12 +343,12 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 
     bool weaponSkillVisited[weaponSkillsLength] = { false };
 
-    for (int i = 0; i < static_cast<int>(weaponSkillsLength) - 1; ++i)
+    for (int i = 0; i < static_cast<int>(weaponSkillsLength); ++i)
     {
         int max = 0;
         int maxWeaponSkill = -1;
 
-        for (int j = 0; j < static_cast<int>(weaponSkillsLength) - 1; ++j)
+        for (int j = 0; j < static_cast<int>(weaponSkillsLength); ++j)
         {
             int skillValue = stats.getSkill(static_cast<int>(weaponSkills[j])).getModified();
 
