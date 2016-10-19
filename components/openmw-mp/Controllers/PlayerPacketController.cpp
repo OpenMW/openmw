@@ -74,3 +74,12 @@ void mwmp::PlayerPacketController::SetStream(RakNet::BitStream *inStream, RakNet
     BOOST_FOREACH( packets_t::value_type &packet, packets )
         packet.second->SetStreams(inStream, outStream);
 }
+
+bool mwmp::PlayerPacketController::ContainsPacket(RakNet::MessageID id)
+{
+    BOOST_FOREACH(packets_t::value_type &packet, packets) {
+        if (packet.first == id)
+            return true;
+    }
+    return false;
+}
