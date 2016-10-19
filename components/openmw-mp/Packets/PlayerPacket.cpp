@@ -53,6 +53,6 @@ void PlayerPacket::RequestData(RakNet::RakNetGUID guid)
 {
     bsSend->ResetWritePointer();
     bsSend->Write(packetID);
-    bsSend->Write(player);
+    bsSend->Write(guid);
     peer->Send(bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, 0, guid, false);
 }
