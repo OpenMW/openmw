@@ -26,7 +26,7 @@ Networking::Networking(RakNet::RakPeerInterface *peer)
     this->peer = peer;
     players = Players::GetPlayers();
 
-    controller = new PacketsController(peer);
+    controller = new PlayerPacketController(peer);
 
     controller->SetStream(0, &bsOut); // set send stream
 
@@ -411,7 +411,7 @@ void Networking::DisconnectPlayer(RakNet::RakNetGUID guid)
     Players::DeletePlayer(guid);
 }
 
-PacketsController *Networking::GetController() const
+PlayerPacketController *Networking::GetController() const
 {
     return controller;
 }

@@ -147,7 +147,7 @@ add_component_dir (version
 
 add_component_dir (openmw-mp
         Log
-        PacketsController
+        Controllers/PlayerPacketController
         Packets/BasePacket Packets/PlayerPacket Packets/PacketBaseInfo Packets/PacketPosition Packets/PacketEquipment
         Packets/PacketAttack Packets/PacketDynamicStats Packets/PacketCell Packets/PacketDrawState Packets/PacketChatMessage
         Packets/PacketCharGen Packets/PacketAttribute Packets/PacketSkill Packets/PacketLevel Packets/PacketHandshake

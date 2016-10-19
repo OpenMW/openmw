@@ -1,22 +1,18 @@
-//
-// Created by koncord on 15.01.16.
-//
-
-#ifndef OPENMW_PACKETSCONTROLLER_HPP
-#define OPENMW_PACKETSCONTROLLER_HPP
+#ifndef OPENMW_PLAYERPACKETCONTROLLER_HPP
+#define OPENMW_PLAYERPACKETCONTROLLER_HPP
 
 
 #include <RakPeerInterface.h>
-#include "Packets/PlayerPacket.hpp"
+#include "../Packets/PlayerPacket.hpp"
 #include <map>
 #include <boost/shared_ptr.hpp>
 
 namespace mwmp
 {
-    class PacketsController
+    class PlayerPacketController
     {
     public:
-        PacketsController(RakNet::RakPeerInterface *peer);
+        PlayerPacketController(RakNet::RakPeerInterface *peer);
         PlayerPacket *GetPacket(RakNet::MessageID id);
         void SetStream(RakNet::BitStream *inStream, RakNet::BitStream *outStream);
 
@@ -26,4 +22,4 @@ namespace mwmp
     };
 }
 
-#endif //OPENMW_PACKETSCONTROLLER_HPP
+#endif //OPENMW_PLAYERPACKETCONTROLLER_HPP

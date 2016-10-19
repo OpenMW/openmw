@@ -5,7 +5,7 @@
 #ifndef OPENMW_NETWORKING_HPP
 #define OPENMW_NETWORKING_HPP
 
-#include <components/openmw-mp/PacketsController.hpp>
+#include <components/openmw-mp/Controllers/PlayerPacketController.hpp>
 #include "Player.hpp"
 
 namespace  mwmp
@@ -27,7 +27,7 @@ namespace  mwmp
 
         void StopServer(int code);
 
-        PacketsController *GetController() const;
+        PlayerPacketController *GetController() const;
         static const Networking &Get();
         static Networking *GetPtr();
 
@@ -37,7 +37,7 @@ namespace  mwmp
         RakNet::BitStream bsOut;
         TPlayers *players;
 
-        PacketsController *controller;
+        PlayerPacketController *controller;
 
         bool running;
         int exitCode;

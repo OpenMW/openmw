@@ -19,7 +19,7 @@
 #include <components/openmw-mp/Packets/PacketDie.hpp>
 #include <components/openmw-mp/Packets/PacketCell.hpp>
 #include <components/openmw-mp/Packets/PacketDrawState.hpp>
-#include <components/openmw-mp/PacketsController.hpp>
+#include <components/openmw-mp/Controllers/PlayerPacketController.hpp>
 
 namespace mwmp
 {
@@ -51,7 +51,7 @@ namespace mwmp
         RakNet::SystemAddress serverAddr;
         RakNet::BitStream bsOut;
 
-        PacketsController controller;
+        PlayerPacketController controller;
 
         void ReceiveMessage(RakNet::Packet *packet);
         LocalPlayer *getLocalPlayer();
