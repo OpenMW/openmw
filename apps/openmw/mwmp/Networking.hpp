@@ -20,6 +20,7 @@
 #include <components/openmw-mp/Packets/Player/PacketCell.hpp>
 #include <components/openmw-mp/Packets/Player/PacketDrawState.hpp>
 #include <components/openmw-mp/Controllers/PlayerPacketController.hpp>
+#include <components/openmw-mp/Controllers/WorldPacketController.hpp>
 
 namespace mwmp
 {
@@ -33,7 +34,9 @@ namespace mwmp
         void Connect(const std::string& ip, unsigned short port);
         void Update();
         void SendData(RakNet::BitStream *bitStream);
-        PlayerPacket *GetPacket(RakNet::MessageID id);
+
+        PlayerPacket *GetPlayerPacket(RakNet::MessageID id);
+        WorldPacket *GetWorldPacket(RakNet::MessageID id);
 
         bool isDedicatedPlayer(const MWWorld::Ptr &ptr);
         bool Attack(const MWWorld::Ptr &ptr);
@@ -51,7 +54,8 @@ namespace mwmp
         RakNet::SystemAddress serverAddr;
         RakNet::BitStream bsOut;
 
-        PlayerPacketController controller;
+        PlayerPacketController playerController;
+        WorldPacketController worldController;
 
         void ReceiveMessage(RakNet::Packet *packet);
         LocalPlayer *getLocalPlayer();

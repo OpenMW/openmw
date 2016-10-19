@@ -24,7 +24,7 @@
 using namespace std;
 using namespace mwmp;
 
-Networking::Networking(): peer(RakNet::RakPeerInterface::GetInstance()), controller(peer)
+Networking::Networking(): peer(RakNet::RakPeerInterface::GetInstance()), playerController(peer), worldController(peer)
 {
 
     RakNet::SocketDescriptor sd;
@@ -32,7 +32,9 @@ Networking::Networking(): peer(RakNet::RakPeerInterface::GetInstance()), control
     RakNet::StartupResult b = peer->Startup(1,&sd, 1);
     RakAssert(b==RAKNET_STARTED);
 
-    controller.SetStream(0, &bsOut);
+    playerController.SetStream(0, &bsOut);
+    worldController.SetStream(0, &bsOut);
+
     connected = 0;
 }
 
@@ -178,7 +180,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
     if (id != myid)
         pl = Players::GetPlayer(id);
 
-    PlayerPacket *myPacket = controller.GetPacket(packet->data[0]);
+    PlayerPacket *myPacket = playerController.GetPacket(packet->data[0]);
 
     switch (packet->data[0])
     {
@@ -409,7 +411,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 myPacket->Send(getLocalPlayer(), serverAddr);
 
                 getLocalPlayer()->updateDynamicStats(true);
-                controller.GetPacket(ID_GAME_DYNAMICSTATS)->Send(getLocalPlayer(), serverAddr);
+                playerController.GetPacket(ID_GAME_DYNAMICSTATS)->Send(getLocalPlayer(), serverAddr);
             }
             else if (pl != 0)
             {
@@ -618,9 +620,14 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
     }
 }
 
-PlayerPacket *Networking::GetPacket(RakNet::MessageID id)
+PlayerPacket *Networking::GetPlayerPacket(RakNet::MessageID id)
 {
-    return controller.GetPacket(id);
+    return playerController.GetPacket(id);
+}
+
+WorldPacket *Networking::GetWorldPacket(RakNet::MessageID id)
+{
+    return worldController.GetPacket(id);
 }
 
 LocalPlayer *Networking::getLocalPlayer()

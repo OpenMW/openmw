@@ -129,7 +129,7 @@ namespace mwmp
         *localPlayer->ChatMessage() = str;
 
         RakNet::BitStream bs;
-        networking->GetPacket(ID_CHAT_MESSAGE)->Packet(&bs, localPlayer, true);
+        networking->GetPlayerPacket(ID_CHAT_MESSAGE)->Packet(&bs, localPlayer, true);
         networking->SendData(&bs);
     }
 
