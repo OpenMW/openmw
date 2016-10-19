@@ -6,6 +6,7 @@
 #include <components/esm/loadench.hpp>
 #include <components/esm/inventorystate.hpp>
 #include <components/misc/rng.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -214,6 +215,26 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
     return mSlots[slot];
 }
 
+bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const MWWorld::Ptr& item)
+{
+    if (!Settings::Manager::getBool("prevent merchant equipping", "Game"))
+        return true;
+
+    // Only autoEquip if we are the original owner of the item.
+    // This stops merchants from auto equipping anything you sell to them.
+    // ...unless this is a companion, he should always equip items given to him.
+    if (!Misc::StringUtils::ciEqual(item.getCellRef().getOwner(), actor.getCellRef().getRefId()) &&
+            (actor.getClass().getScript(actor).empty() ||
+            !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion"))
+            && !actor.getClass().getCreatureStats(actor).isDead() // Corpses can be dressed up by the player as desired
+            )
+    {
+        return false;
+    }
+
+    return true;
+}
+
 void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 {
     if (!actor.getClass().isNpc())
@@ -236,24 +257,15 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     // Disable model update during auto-equip
     mUpdatesEnabled = false;
 
-    // Relevant are only clothing and armor items:
-    //  - Equipping lights is handled in Actors::updateEquippedLight based on environment light.
-    //  - Equipping weapons is handled by AiCombat.
+    // Autoequip clothing, armor and weapons.
+    // Equipping lights is handled in Actors::updateEquippedLight based on environment light.
+
     for (ContainerStoreIterator iter (begin(ContainerStore::Type_Clothing | ContainerStore::Type_Armor)); iter!=end(); ++iter)
     {
         Ptr test = *iter;
 
-        // Only autoEquip if we are the original owner of the item.
-        // This stops merchants from auto equipping anything you sell to them.
-        // ...unless this is a companion, he should always equip items given to him.
-        if (!Misc::StringUtils::ciEqual(test.getCellRef().getOwner(), actor.getCellRef().getRefId()) &&
-                (actor.getClass().getScript(actor).empty() ||
-                !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion"))
-                && !actor.getClass().getCreatureStats(actor).isDead() // Corpses can be dressed up by the player as desired
-                )
-        {
+        if (!canActorAutoEquip(actor, test))
             continue;
-        }
 
         switch(test.getClass().canBeEquipped (test, actor).first)
         {
@@ -316,6 +328,99 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
             slots_[*iter2] = iter;
             break;
         }
+    }
+
+    static const ESM::Skill::SkillEnum weaponSkills[] =
+    {
+        ESM::Skill::LongBlade,
+        ESM::Skill::Axe,
+        ESM::Skill::Spear,
+        ESM::Skill::ShortBlade,
+        ESM::Skill::Marksman,
+        ESM::Skill::BluntWeapon
+    };
+    const size_t weaponSkillsLength = sizeof(weaponSkills) / sizeof(weaponSkills[0]);
+
+    bool weaponSkillVisited[weaponSkillsLength] = { false };
+
+    for (int i = 0; i < static_cast<int>(weaponSkillsLength) - 1; ++i)
+    {
+        int max = 0;
+        int maxWeaponSkill = -1;
+
+        for (int j = 0; j < static_cast<int>(weaponSkillsLength) - 1; ++j)
+        {
+            int skillValue = stats.getSkill(static_cast<int>(weaponSkills[j])).getModified();
+
+            if (skillValue > max && !weaponSkillVisited[j])
+            {
+                max = skillValue;
+                maxWeaponSkill = j;
+            }
+        }
+
+        if (maxWeaponSkill == -1)
+            break;
+
+        max = 0;
+        ContainerStoreIterator weapon(end());
+
+        for (ContainerStoreIterator iter(begin(ContainerStore::Type_Weapon)); iter!=end(); ++iter)
+        {
+            if (!canActorAutoEquip(actor, *iter))
+                continue;
+
+            const ESM::Weapon* esmWeapon = iter->get<ESM::Weapon>()->mBase;
+
+            if (esmWeapon->mData.mType == ESM::Weapon::Arrow || esmWeapon->mData.mType == ESM::Weapon::Bolt)
+                continue;
+
+            if (iter->getClass().getEquipmentSkill(*iter) == weaponSkills[maxWeaponSkill])
+            {
+                if (esmWeapon->mData.mChop[1] >= max)
+                {
+                    max = esmWeapon->mData.mChop[1];
+                    weapon = iter;
+                }
+
+                if (esmWeapon->mData.mSlash[1] >= max)
+                {
+                    max = esmWeapon->mData.mSlash[1];
+                    weapon = iter;
+                }
+
+                if (esmWeapon->mData.mThrust[1] >= max)
+                {
+                    max = esmWeapon->mData.mThrust[1];
+                    weapon = iter;
+                }
+            }
+        }
+
+        if (weapon != end() && weapon->getClass().canBeEquipped(*weapon, actor).first)
+        {
+            std::pair<std::vector<int>, bool> itemsSlots =
+                weapon->getClass().getEquipmentSlots (*weapon);
+
+            for (std::vector<int>::const_iterator slot (itemsSlots.first.begin());
+                slot!=itemsSlots.first.end(); ++slot)
+            {
+                if (!itemsSlots.second)
+                {
+                    if (weapon->getRefData().getCount() > 1)
+                    {
+                        unstack(*weapon, actor);
+                    }
+                }
+
+                slots_[*slot] = weapon;
+                break;
+            }
+
+            break;
+        }
+
+        weaponSkillVisited[maxWeaponSkill] = true;
     }
 
     bool changed = false;
