@@ -20,7 +20,10 @@ namespace  mwmp
         void NewPlayer(RakNet::RakNetGUID guid);
         void DisconnectPlayer(RakNet::RakNetGUID guid);
         void KickPlayer(RakNet::RakNetGUID guid);
+
+        void ProcessPlayerPacket(RakNet::Packet *packet);
         void Update(RakNet::Packet *packet);
+
         unsigned short NumberOfConnections() const;
         unsigned int MaxConnections() const;
 

@@ -48,28 +48,9 @@ Networking::~Networking()
     LOG_QUIT();
 }
 
-void Networking::Update(RakNet::Packet *packet)
+void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
 {
     Player *player = Players::GetPlayer(packet->guid);
-
-    RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
-
-    {
-        RakNet::RakNetGUID ignoredGUID;
-        bsIn.Read(ignoredGUID);
-        (void)ignoredGUID;
-    }
-
-    playerController->SetStream(&bsIn, 0);
-
-    if (player == 0)
-    {
-        playerController->GetPacket(ID_HANDSHAKE)->RequestData(packet->guid);
-        Players::NewPlayer(packet->guid);
-        player = Players::GetPlayer(packet->guid);
-        playerController->GetPacket(ID_USER_MYID)->Send(Players::GetPlayer(packet->guid), false);
-        return;
-    }
 
     PlayerPacket *myPacket = playerController->GetPacket(packet->data[0]);
 
@@ -127,7 +108,7 @@ void Networking::Update(RakNet::Packet *packet)
     else if (packet->data[0] == ID_GAME_BASE_INFO)
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s",
-                           player->Npc()->mName.c_str());
+            player->Npc()->mName.c_str());
 
         myPacket->Read(player);
         myPacket->Send(player, true);
@@ -146,236 +127,269 @@ void Networking::Update(RakNet::Packet *packet)
     {
         /*case ID_GAME_BASE_INFO:
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s",
-                player->Npc()->mName.c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s",
+        player->Npc()->mName.c_str());
 
-            myPacket->Read(player);
-            myPacket->Send(player, true);
+        myPacket->Read(player);
+        myPacket->Send(player, true);
 
-            break;
+        break;
         }*/
-        case ID_GAME_POS:
+    case ID_GAME_POS:
+    {
+        //DEBUG_PRINTF("ID_GAME_POS \n");
+
+        if (!player->CreatureStats()->mDead)
         {
-            //DEBUG_PRINTF("ID_GAME_POS \n");
-
-            if (!player->CreatureStats()->mDead)
-            {
-                myPacket->Read(player);
-                myPacket->Send(player, true); //send to other clients
-            }
-
-            break;
+            myPacket->Read(player);
+            myPacket->Send(player, true); //send to other clients
         }
-        case ID_GAME_CELL:
+
+        break;
+    }
+    case ID_GAME_CELL:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_CELL from %s",
+            player->Npc()->mName.c_str());
+
+        if (!player->CreatureStats()->mDead)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_CELL from %s",
+            myPacket->Read(player);
+
+            LOG_APPEND(Log::LOG_INFO, "- Moved to %s",
+                player->GetCell()->getDescription().c_str());
+
+            myPacket->Send(player, true); //send to other clients
+            Script::Call<Script::CallbackIdentity("OnPlayerChangeCell")>(player->GetID());
+        }
+        else
+        {
+            LOG_APPEND(Log::LOG_INFO, "- Ignored because %s is dead",
                 player->Npc()->mName.c_str());
-
-            if (!player->CreatureStats()->mDead)
-            {
-                myPacket->Read(player);
-
-                LOG_APPEND(Log::LOG_INFO, "- Moved to %s",
-                    player->GetCell()->getDescription().c_str());
-
-                myPacket->Send(player, true); //send to other clients
-                Script::Call<Script::CallbackIdentity("OnPlayerChangeCell")>(player->GetID());
-            }
-            else
-            {
-                LOG_APPEND(Log::LOG_INFO, "- Ignored because %s is dead",
-                    player->Npc()->mName.c_str());
-            }
-
-            break;
         }
-        case ID_GAME_ATTRIBUTE:
+
+        break;
+    }
+    case ID_GAME_ATTRIBUTE:
+    {
+
+        if (!player->CreatureStats()->mDead)
         {
-
-            if (!player->CreatureStats()->mDead)
-            {
-                myPacket->Read(player);
-                myPacket->Send(player, true);
-
-                Script::Call<Script::CallbackIdentity("OnPlayerChangeAttributes")>(player->GetID());
-            }
-
-            break;
-        }
-        case ID_GAME_SKILL:
-        {
-
-            if (!player->CreatureStats()->mDead)
-            {
-                myPacket->Read(player);
-                myPacket->Send(player, true);
-
-                Script::Call<Script::CallbackIdentity("OnPlayerChangeSkills")>(player->GetID());
-            }
-
-            break;
-        }
-        case ID_GAME_LEVEL:
-        {
-
-            if (!player->CreatureStats()->mDead)
-            {
-                myPacket->Read(player);
-                myPacket->Send(player, true);
-
-                Script::Call<Script::CallbackIdentity("OnPlayerChangeLevel")>(player->GetID());
-            }
-
-            break;
-        }
-        case ID_GAME_EQUIPMENT:
-        {
-            DEBUG_PRINTF("ID_GAME_EQUIPMENT\n");
-
             myPacket->Read(player);
             myPacket->Send(player, true);
 
-            Script::Call<Script::CallbackIdentity("OnPlayerChangeEquipment")>(player->GetID());
-
-            break;
+            Script::Call<Script::CallbackIdentity("OnPlayerChangeAttributes")>(player->GetID());
         }
 
-        case ID_GAME_ATTACK:
+        break;
+    }
+    case ID_GAME_SKILL:
+    {
+
+        if (!player->CreatureStats()->mDead)
         {
-            DEBUG_PRINTF("ID_GAME_ATTACK\n");
+            myPacket->Read(player);
+            myPacket->Send(player, true);
 
-            if (!player->CreatureStats()->mDead)
+            Script::Call<Script::CallbackIdentity("OnPlayerChangeSkills")>(player->GetID());
+        }
+
+        break;
+    }
+    case ID_GAME_LEVEL:
+    {
+
+        if (!player->CreatureStats()->mDead)
+        {
+            myPacket->Read(player);
+            myPacket->Send(player, true);
+
+            Script::Call<Script::CallbackIdentity("OnPlayerChangeLevel")>(player->GetID());
+        }
+
+        break;
+    }
+    case ID_GAME_EQUIPMENT:
+    {
+        DEBUG_PRINTF("ID_GAME_EQUIPMENT\n");
+
+        myPacket->Read(player);
+        myPacket->Send(player, true);
+
+        Script::Call<Script::CallbackIdentity("OnPlayerChangeEquipment")>(player->GetID());
+
+        break;
+    }
+
+    case ID_GAME_ATTACK:
+    {
+        DEBUG_PRINTF("ID_GAME_ATTACK\n");
+
+        if (!player->CreatureStats()->mDead)
+        {
+            myPacket->Read(player);
+
+            Player *target = Players::GetPlayer(player->GetAttack()->target);
+
+            if (target == nullptr)
+                target = player;
+
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player: %s attaked %s state: %d", player->Npc()->mName.c_str(),
+                target->Npc()->mName.c_str(), player->GetAttack()->pressed == 1);
+            if (player->GetAttack()->pressed == 0)
             {
-                myPacket->Read(player);
-
-                Player *target = Players::GetPlayer(player->GetAttack()->target);
-
-                if (target == nullptr)
-                    target = player;
-
-                LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player: %s attaked %s state: %d", player->Npc()->mName.c_str(),
-                                   target->Npc()->mName.c_str(), player->GetAttack()->pressed == 1);
-                if (player->GetAttack()->pressed == 0)
+                LOG_APPEND(Log::LOG_VERBOSE, "success: %d", player->GetAttack()->success == 1);
+                if (player->GetAttack()->success == 1)
                 {
-                    LOG_APPEND(Log::LOG_VERBOSE, "success: %d", player->GetAttack()->success == 1);
-                    if (player->GetAttack()->success == 1)
-                    {
-                        LOG_APPEND(Log::LOG_VERBOSE, "damage: %d", player->GetAttack()->damage == 1);
-                        player->setLastAttackerID(target->GetID());
-                    }
+                    LOG_APPEND(Log::LOG_VERBOSE, "damage: %d", player->GetAttack()->damage == 1);
+                    player->setLastAttackerID(target->GetID());
                 }
-
-                myPacket->Send(player, true);
-                playerController->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(player->GetAttack()->target);
             }
-            break;
-        }
 
-        case ID_GAME_DYNAMICSTATS:
-        {
-            DEBUG_PRINTF("ID_GAME_DYNAMICSTATS\n");
-            myPacket->Read(player);
             myPacket->Send(player, true);
-            break;
+            playerController->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(player->GetAttack()->target);
         }
+        break;
+    }
 
-        case ID_GAME_DIE:
+    case ID_GAME_DYNAMICSTATS:
+    {
+        DEBUG_PRINTF("ID_GAME_DYNAMICSTATS\n");
+        myPacket->Read(player);
+        myPacket->Send(player, true);
+        break;
+    }
+
+    case ID_GAME_DIE:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_DIE from %s",
+            player->Npc()->mName.c_str());
+
+        Player *killer = Players::GetPlayer(player->getLastAttackerID());
+
+        short reason = 0; // unknown;
+
+        if (!killer)
+            killer = player;
+        else if (killer->GetID() == player->GetID())
+            reason = 2; //suicide
+        else
+            reason = 1; //killed
+
+        player->resetLastAttacker();
+
+        player->CreatureStats()->mDead = true;
+        myPacket->Send(player, true);
+
+        Script::Call<Script::CallbackIdentity("OnPlayerDeath")>(player->GetID(), reason, killer->GetID());
+
+        break;
+    }
+
+    case ID_GAME_RESURRECT:
+    {
+        DEBUG_PRINTF("ID_GAME_RESURRECT\n");
+        //packetResurrect.Read(player);
+        player->CreatureStats()->mDead = false;
+        myPacket->Send(player, true);
+        playerController->GetPacket(ID_GAME_POS)->RequestData(player->guid);
+        playerController->GetPacket(ID_GAME_CELL)->RequestData(player->guid);
+
+        Script::Call<Script::CallbackIdentity("OnPlayerResurrect")>(player->GetID());
+
+        break;
+    }
+
+    case ID_GAME_DRAWSTATE:
+    {
+        DEBUG_PRINTF("ID_GAME_DRAWSTATE\n");
+        myPacket->Read(player);
+        myPacket->Send(player, true);
+        break;
+    }
+
+    case ID_CHAT_MESSAGE:
+    {
+        DEBUG_PRINTF("ID_CHAT_MESSAGE\n");
+        myPacket->Read(player);
+        Script::CallBackReturn<Script::CallbackIdentity("OnPlayerSendMessage")> result = true;
+        Script::Call<Script::CallbackIdentity("OnPlayerSendMessage")>(result, player->GetID(), player->ChatMessage()->c_str());
+
+        if (result)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_DIE from %s",
-                player->Npc()->mName.c_str());
-
-            Player *killer = Players::GetPlayer(player->getLastAttackerID());
-
-            short reason = 0; // unknown;
-
-            if (!killer)
-                killer = player;
-            else if (killer->GetID() == player->GetID())
-                reason = 2; //suicide
-            else
-                reason = 1; //killed
-
-            player->resetLastAttacker();
-
-            player->CreatureStats()->mDead = true;
+            *player->ChatMessage() = player->Npc()->mName + " (" + std::to_string(player->GetID()) + "): "
+                + *player->ChatMessage() + "\n";
+            myPacket->Send(player, false);
             myPacket->Send(player, true);
-
-            Script::Call<Script::CallbackIdentity("OnPlayerDeath")>(player->GetID(), reason, killer->GetID());
-
-            break;
         }
+        break;
+    }
+    case ID_GAME_CHARGEN:
+    {
+        DEBUG_PRINTF("ID_GAME_CHARGEN\n");
+        myPacket->Read(player);
 
-        case ID_GAME_RESURRECT:
+        if (player->CharGenStage()->current == player->CharGenStage()->end && player->CharGenStage()->current != 0)
         {
-            DEBUG_PRINTF("ID_GAME_RESURRECT\n");
-            //packetResurrect.Read(player);
-            player->CreatureStats()->mDead = false;
-            myPacket->Send(player, true);
-            playerController->GetPacket(ID_GAME_POS)->RequestData(player->guid);
-            playerController->GetPacket(ID_GAME_CELL)->RequestData(player->guid);
-
-            Script::Call<Script::CallbackIdentity("OnPlayerResurrect")>(player->GetID());
-
-            break;
+            Script::Call<Script::CallbackIdentity("OnPlayerEndCharGen")>(player->GetID());
+            cout << "RACE: " << player->Npc()->mRace << endl;
         }
+        break;
+    }
 
-        case ID_GAME_DRAWSTATE:
-        {
-            DEBUG_PRINTF("ID_GAME_DRAWSTATE\n");
-            myPacket->Read(player);
-            myPacket->Send(player, true);
-            break;
-        }
+    case ID_GUI_MESSAGEBOX:
+    {
+        DEBUG_PRINTF("ID_GUI_MESSAGEBOX\n");
+        myPacket->Read(player);
 
-        case ID_CHAT_MESSAGE:
-        {
-            DEBUG_PRINTF("ID_CHAT_MESSAGE\n");
-            myPacket->Read(player);
-            Script::CallBackReturn<Script::CallbackIdentity("OnPlayerSendMessage")> result = true;
-            Script::Call<Script::CallbackIdentity("OnPlayerSendMessage")>(result, player->GetID(), player->ChatMessage()->c_str());
+        Script::Call<Script::CallbackIdentity("OnGUIAction")>(player->GetID(), (int)player->guiMessageBox.id,
+            player->guiMessageBox.data.c_str());
+        break;
+    }
 
-            if (result)
-            {
-                *player->ChatMessage() = player->Npc()->mName + " (" + std::to_string(player->GetID()) + "): "
-                                         + *player->ChatMessage() + "\n";
-                myPacket->Send(player, false);
-                myPacket->Send(player, true);
-            }
-            break;
-        }
-        case ID_GAME_CHARGEN:
-        {
-            DEBUG_PRINTF("ID_GAME_CHARGEN\n");
-            myPacket->Read(player);
+    case ID_GAME_CHARCLASS:
+    {
+        DEBUG_PRINTF("ID_GAME_CHARCLASS\n");
+        myPacket->Read(player);
+        break;
+    }
 
-            if (player->CharGenStage()->current == player->CharGenStage()->end && player->CharGenStage()->current != 0)
-            {
-                Script::Call<Script::CallbackIdentity("OnPlayerEndCharGen")>(player->GetID());
-                cout << "RACE: " << player->Npc()->mRace << endl;
-            }
-            break;
-        }
+    default:
+        printf("Message with identifier %i has arrived.\n", packet->data[0]);
+        break;
+    }
+}
 
-        case ID_GUI_MESSAGEBOX:
-        {
-            DEBUG_PRINTF("ID_GUI_MESSAGEBOX\n");
-            myPacket->Read(player);
+void Networking::Update(RakNet::Packet *packet)
+{
+    Player *player = Players::GetPlayer(packet->guid);
 
-            Script::Call<Script::CallbackIdentity("OnGUIAction")>(player->GetID(), (int)player->guiMessageBox.id,
-                                                                  player->guiMessageBox.data.c_str());
-            break;
-        }
+    RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
 
-        case ID_GAME_CHARCLASS:
-        {
-            DEBUG_PRINTF("ID_GAME_CHARCLASS\n");
-            myPacket->Read(player);
-            break;
-        }
+    {
+        RakNet::RakNetGUID ignoredGUID;
+        bsIn.Read(ignoredGUID);
+        (void)ignoredGUID;
+    }
 
-        default:
-            printf("Message with identifier %i has arrived.\n", packet->data[0]);
-            break;
+    if (player == 0)
+    {
+        playerController->SetStream(&bsIn, 0);
+
+        playerController->GetPacket(ID_HANDSHAKE)->RequestData(packet->guid);
+        Players::NewPlayer(packet->guid);
+        player = Players::GetPlayer(packet->guid);
+        playerController->GetPacket(ID_USER_MYID)->Send(Players::GetPlayer(packet->guid), false);
+        return;
+    }
+    else if (playerController->ContainsPacket(packet->data[0]))
+    {
+        playerController->SetStream(&bsIn, 0);
+        ProcessPlayerPacket(packet);
+    }
+    else if (worldController->ContainsPacket(packet->data[0]))
+    {
+        worldController->SetStream(&bsIn, 0);
     }
 }
 
