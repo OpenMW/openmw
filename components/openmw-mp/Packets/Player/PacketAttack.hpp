@@ -6,7 +6,7 @@
 #define OPENMW_PACKETATTACK_HPP
 
 
-#include <components/openmw-mp/Packets/PlayerPacket.hpp>
+#include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 
 namespace mwmp
 {

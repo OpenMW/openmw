@@ -6,7 +6,7 @@
 #define OPENMW_PACKETRESURRECT_HPP
 
 
-#include <components/openmw-mp/Packets/PlayerPacket.hpp>
+#include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 
 namespace mwmp

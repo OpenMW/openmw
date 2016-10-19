@@ -5,7 +5,7 @@
 #ifndef OPENMW_PACKETDISCONNECT_HPP
 #define OPENMW_PACKETDISCONNECT_HPP
 
-#include <components/openmw-mp/Packets/PlayerPacket.hpp>
+#include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 
 namespace mwmp

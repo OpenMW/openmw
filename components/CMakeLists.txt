@@ -148,10 +148,13 @@ add_component_dir (version
 add_component_dir (openmw-mp
         Log
         Controllers/PlayerPacketController
-        Packets/BasePacket Packets/PlayerPacket Packets/PacketBaseInfo Packets/PacketPosition Packets/PacketEquipment
-        Packets/PacketAttack Packets/PacketDynamicStats Packets/PacketCell Packets/PacketDrawState Packets/PacketChatMessage
-        Packets/PacketCharGen Packets/PacketAttribute Packets/PacketSkill Packets/PacketLevel Packets/PacketHandshake
-        Packets/PacketGUIBoxes Packets/PacketClass Packets/PacketTime)
+        Packets/BasePacket Packets/Player/PlayerPacket
+        Packets/Player/PacketBaseInfo Packets/Player/PacketPosition Packets/Player/PacketEquipment
+        Packets/Player/PacketAttack Packets/Player/PacketDynamicStats Packets/Player/PacketCell
+        Packets/Player/PacketDrawState Packets/Player/PacketChatMessage Packets/Player/PacketCharGen
+        Packets/Player/PacketAttribute Packets/Player/PacketSkill Packets/Player/PacketLevel
+        Packets/Player/PacketHandshake Packets/Player/PacketGUIBoxes Packets/Player/PacketClass
+        Packets/Player/PacketTime)
 
 add_component_dir (fallback
     fallback validate

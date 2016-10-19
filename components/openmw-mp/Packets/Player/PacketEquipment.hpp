@@ -5,7 +5,7 @@
 #ifndef OPENMW_PACKETEQUIPMENT_HPP
 #define OPENMW_PACKETEQUIPMENT_HPP
 
-#include <components/openmw-mp/Packets/PlayerPacket.hpp>
+#include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 
 namespace mwmp
 {

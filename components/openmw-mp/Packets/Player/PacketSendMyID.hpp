@@ -5,7 +5,7 @@
 #ifndef OPENMW_PACKETSENDMYID_HPP
 #define OPENMW_PACKETSENDMYID_HPP
 
-#include <components/openmw-mp/Packets/PlayerPacket.hpp>
+#include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 
 namespace mwmp

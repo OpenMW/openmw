@@ -7,7 +7,7 @@
 #include <PacketPriority.h>
 #include <components/openmw-mp/Base/BasePlayer.hpp>
 
-#include "BasePacket.hpp"
+#include <components/openmw-mp/Packets/BasePacket.hpp>
 
 
 namespace mwmp

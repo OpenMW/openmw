@@ -3,7 +3,7 @@
 
 
 #include <RakPeerInterface.h>
-#include "../Packets/PlayerPacket.hpp"
+#include "../Packets/Player/PlayerPacket.hpp"
 #include <map>
 #include <boost/shared_ptr.hpp>
 
