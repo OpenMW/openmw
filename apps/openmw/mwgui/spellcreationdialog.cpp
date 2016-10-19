@@ -5,6 +5,7 @@
 
 #include <components/esm/records.hpp>
 #include <components/widgets/list.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -498,6 +499,8 @@ namespace MWGui
         mAddEffectDialog.eventEffectRemoved += MyGUI::newDelegate(this, &EffectEditorBase::onEffectRemoved);
 
         mAddEffectDialog.setVisible (false);
+
+        mUniqueEffectsOnly = Settings::Manager::getBool("unique spell effects", "Game");
     }
 
     EffectEditorBase::~EffectEditorBase()
@@ -638,12 +641,15 @@ namespace MWGui
         }
         else
         {
-            for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+            if (mUniqueEffectsOnly)
             {
-                if (it->mEffectID == mSelectedKnownEffectId)
+                for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
                 {
-                    MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
-                    return;
+                    if (it->mEffectID == mSelectedKnownEffectId)
+                    {
+                        MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
+                        return;
+                    }
                 }
             }
 
