@@ -65,6 +65,6 @@ void ItemFunctions::SendEquipment(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, );
 
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_EQUIPMENT)->Send(player, false);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_EQUIPMENT)->Send(player, true);
+    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_EQUIPMENT)->Send(player, false);
+    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_EQUIPMENT)->Send(player, true);
 }

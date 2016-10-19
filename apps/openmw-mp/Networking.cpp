@@ -26,9 +26,9 @@ Networking::Networking(RakNet::RakPeerInterface *peer)
     this->peer = peer;
     players = Players::GetPlayers();
 
-    controller = new PlayerPacketController(peer);
+    playerController = new PlayerPacketController(peer);
 
-    controller->SetStream(0, &bsOut); // set send stream
+    playerController->SetStream(0, &bsOut); // set send stream
 
     running = true;
     exitCode = 0;
@@ -41,7 +41,7 @@ Networking::~Networking()
     Script::Call<Script::CallbackIdentity("OnServerExit")>(false);
 
     sThis = 0;
-    delete controller;
+    delete playerController;
     LOG_QUIT();
 }
 
@@ -57,18 +57,18 @@ void Networking::Update(RakNet::Packet *packet)
         (void)ignoredGUID;
     }
 
-    controller->SetStream(&bsIn, 0);
+    playerController->SetStream(&bsIn, 0);
 
     if (player == 0)
     {
-        controller->GetPacket(ID_HANDSHAKE)->RequestData(packet->guid);
+        playerController->GetPacket(ID_HANDSHAKE)->RequestData(packet->guid);
         Players::NewPlayer(packet->guid);
         player = Players::GetPlayer(packet->guid);
-        controller->GetPacket(ID_USER_MYID)->Send(Players::GetPlayer(packet->guid), false);
+        playerController->GetPacket(ID_USER_MYID)->Send(Players::GetPlayer(packet->guid), false);
         return;
     }
 
-    PlayerPacket *myPacket = controller->GetPacket(packet->data[0]);
+    PlayerPacket *myPacket = playerController->GetPacket(packet->data[0]);
 
     if (packet->data[0] == ID_HANDSHAKE)
     {
@@ -116,7 +116,7 @@ void Networking::Update(RakNet::Packet *packet)
 
         if (!result)
         {
-            controller->GetPacket(ID_USER_DISCONNECTED)->Send(Players::GetPlayer(packet->guid), false);
+            playerController->GetPacket(ID_USER_DISCONNECTED)->Send(Players::GetPlayer(packet->guid), false);
             Players::DeletePlayer(packet->guid);
             return;
         }
@@ -263,7 +263,7 @@ void Networking::Update(RakNet::Packet *packet)
                 }
 
                 myPacket->Send(player, true);
-                controller->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(player->GetAttack()->target);
+                playerController->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(player->GetAttack()->target);
             }
             break;
         }
@@ -308,8 +308,8 @@ void Networking::Update(RakNet::Packet *packet)
             //packetResurrect.Read(player);
             player->CreatureStats()->mDead = false;
             myPacket->Send(player, true);
-            controller->GetPacket(ID_GAME_POS)->RequestData(player->guid);
-            controller->GetPacket(ID_GAME_CELL)->RequestData(player->guid);
+            playerController->GetPacket(ID_GAME_POS)->RequestData(player->guid);
+            playerController->GetPacket(ID_GAME_CELL)->RequestData(player->guid);
 
             Script::Call<Script::CallbackIdentity("OnPlayerResurrect")>(player->GetID());
 
@@ -378,23 +378,23 @@ void Networking::Update(RakNet::Packet *packet)
 
 void Networking::NewPlayer(RakNet::RakNetGUID guid)
 {
-    controller->GetPacket(ID_GAME_BASE_INFO)->RequestData(guid);
-    controller->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(guid);
-    controller->GetPacket(ID_GAME_POS)->RequestData(guid);
-    controller->GetPacket(ID_GAME_CELL)->RequestData(guid);
-    controller->GetPacket(ID_GAME_EQUIPMENT)->RequestData(guid);
+    playerController->GetPacket(ID_GAME_BASE_INFO)->RequestData(guid);
+    playerController->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(guid);
+    playerController->GetPacket(ID_GAME_POS)->RequestData(guid);
+    playerController->GetPacket(ID_GAME_CELL)->RequestData(guid);
+    playerController->GetPacket(ID_GAME_EQUIPMENT)->RequestData(guid);
 
     for (TPlayers::iterator pl = players->begin(); pl != players->end(); pl++) //sending other players to new player
     {
         if (pl->first == guid) continue;
 
-        controller->GetPacket(ID_GAME_BASE_INFO)->Send(pl->second, guid);
-        controller->GetPacket(ID_GAME_DYNAMICSTATS)->Send(pl->second, guid);
-        controller->GetPacket(ID_GAME_ATTRIBUTE)->Send(pl->second, guid);
-        controller->GetPacket(ID_GAME_SKILL)->Send(pl->second, guid);
-        controller->GetPacket(ID_GAME_POS)->Send(pl->second, guid);
-        controller->GetPacket(ID_GAME_CELL)->Send(pl->second, guid);
-        controller->GetPacket(ID_GAME_EQUIPMENT)->Send(pl->second, guid);
+        playerController->GetPacket(ID_GAME_BASE_INFO)->Send(pl->second, guid);
+        playerController->GetPacket(ID_GAME_DYNAMICSTATS)->Send(pl->second, guid);
+        playerController->GetPacket(ID_GAME_ATTRIBUTE)->Send(pl->second, guid);
+        playerController->GetPacket(ID_GAME_SKILL)->Send(pl->second, guid);
+        playerController->GetPacket(ID_GAME_POS)->Send(pl->second, guid);
+        playerController->GetPacket(ID_GAME_CELL)->Send(pl->second, guid);
+        playerController->GetPacket(ID_GAME_EQUIPMENT)->Send(pl->second, guid);
     }
 
 }
@@ -407,13 +407,13 @@ void Networking::DisconnectPlayer(RakNet::RakNetGUID guid)
     if (!player)
         return;
     Script::Call<Script::CallbackIdentity("OnPlayerDisconnect")>(player->GetID());
-    controller->GetPacket(ID_USER_DISCONNECTED)->Send(player, true);
+    playerController->GetPacket(ID_USER_DISCONNECTED)->Send(player, true);
     Players::DeletePlayer(guid);
 }
 
-PlayerPacketController *Networking::GetController() const
+PlayerPacketController *Networking::GetPlayerController() const
 {
-    return controller;
+    return playerController;
 }
 
 const Networking &Networking::Get()

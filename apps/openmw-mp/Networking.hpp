@@ -27,7 +27,7 @@ namespace  mwmp
 
         void StopServer(int code);
 
-        PlayerPacketController *GetController() const;
+        PlayerPacketController *GetPlayerController() const;
         static const Networking &Get();
         static Networking *GetPtr();
 
@@ -37,7 +37,7 @@ namespace  mwmp
         RakNet::BitStream bsOut;
         TPlayers *players;
 
-        PlayerPacketController *controller;
+        PlayerPacketController *playerController;
 
         bool running;
         int exitCode;
