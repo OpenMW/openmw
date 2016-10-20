@@ -49,7 +49,9 @@ struct PCDT
         PlayerFlags_VanityModeDisabled = 0x4000,
         PlayerFlags_WeaponDrawingDisabled = 0x8000,
         PlayerFlags_SpellDrawingDisabled = 0x10000,
-        PlayerFlags_ThirdPerson = 0x20000
+        PlayerFlags_ThirdPerson = 0x20000,
+        PlayerFlags_TeleportingDisabled = 0x40000,
+        PlayerFlags_LevitationDisabled = 0x80000
     };
 
 #pragma pack(push)

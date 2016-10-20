@@ -5,7 +5,7 @@
 namespace ESSImport
 {
 
-    void convertPCDT(const PCDT& pcdt, ESM::Player& out, std::vector<std::string>& outDialogueTopics, bool& firstPersonCam, ESM::ControlsState& controls)
+    void convertPCDT(const PCDT& pcdt, ESM::Player& out, std::vector<std::string>& outDialogueTopics, bool& firstPersonCam, bool& teleportingEnabled, bool& levitationEnabled, ESM::ControlsState& controls)
     {
         out.mBirthsign = pcdt.mBirthsign;
         out.mObject.mNpcStats.mBounty = pcdt.mBounty;
@@ -31,6 +31,8 @@ namespace ESSImport
             out.mObject.mCreatureStats.mDrawState = 2;
 
         firstPersonCam = !(pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_ThirdPerson);
+        teleportingEnabled = !(pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_TeleportingDisabled);
+        levitationEnabled = !(pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_LevitationDisabled);
 
         for (std::vector<std::string>::const_iterator it = pcdt.mKnownDialogueTopics.begin();
              it != pcdt.mKnownDialogueTopics.end(); ++it)
