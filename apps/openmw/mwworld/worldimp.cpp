@@ -17,6 +17,8 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
+#include "../mwmp/Main.hpp"
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -1103,6 +1105,8 @@ namespace MWWorld
                 && mWorldScene->getActiveCells().find(ptr.getCell()) != mWorldScene->getActiveCells().end()
                 && ptr.getRefData().isEnabled())
             {
+                mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_REMOVAL)->Send(mwmp::Main::get().getLocalPlayer());
+
                 mWorldScene->removeObjectFromScene (ptr);
                 mLocalScripts.remove (ptr);
                 removeContainerScripts (ptr);
