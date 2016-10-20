@@ -278,7 +278,7 @@ public:
         PCDT pcdt;
         pcdt.load(esm);
 
-        convertPCDT(pcdt, mContext->mPlayer, mContext->mDialogueState.mKnownTopics, mFirstPersonCam);
+        convertPCDT(pcdt, mContext->mPlayer, mContext->mDialogueState.mKnownTopics, mFirstPersonCam, mContext->mControlsState);
     }
     virtual void write(ESM::ESMWriter &esm)
     {

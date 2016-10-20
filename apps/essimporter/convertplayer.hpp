@@ -4,11 +4,12 @@
 #include "importplayer.hpp"
 
 #include <components/esm/player.hpp>
+#include <components/esm/controlsstate.hpp>
 
 namespace ESSImport
 {
 
-    void convertPCDT(const PCDT& pcdt, ESM::Player& out, std::vector<std::string>& outDialogueTopics, bool& firstPersonCam);
+    void convertPCDT(const PCDT& pcdt, ESM::Player& out, std::vector<std::string>& outDialogueTopics, bool& firstPersonCam, ESM::ControlsState& controls);
 
 }
 

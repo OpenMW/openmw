@@ -5,7 +5,7 @@
 namespace ESSImport
 {
 
-    void convertPCDT(const PCDT& pcdt, ESM::Player& out, std::vector<std::string>& outDialogueTopics, bool& firstPersonCam)
+    void convertPCDT(const PCDT& pcdt, ESM::Player& out, std::vector<std::string>& outDialogueTopics, bool& firstPersonCam, ESM::ControlsState& controls)
     {
         out.mBirthsign = pcdt.mBirthsign;
         out.mObject.mNpcStats.mBounty = pcdt.mBounty;
@@ -25,18 +25,26 @@ namespace ESSImport
             out.mObject.mNpcStats.mSkills[i].mProgress = pcdt.mPNAM.mSkillProgress[i];
         out.mObject.mNpcStats.mLevelProgress = pcdt.mPNAM.mLevelProgress;
 
-        if (pcdt.mPNAM.mDrawState & PCDT::DrawState_Weapon)
+        if (pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_WeaponDrawn)
             out.mObject.mCreatureStats.mDrawState = 1;
-        if (pcdt.mPNAM.mDrawState & PCDT::DrawState_Spell)
+        if (pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_SpellDrawn)
             out.mObject.mCreatureStats.mDrawState = 2;
 
-        firstPersonCam = !(pcdt.mPNAM.mCameraFlags & PCDT::CameraFlag_ThirdPerson);
+        firstPersonCam = !(pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_ThirdPerson);
 
         for (std::vector<std::string>::const_iterator it = pcdt.mKnownDialogueTopics.begin();
              it != pcdt.mKnownDialogueTopics.end(); ++it)
         {
             outDialogueTopics.push_back(Misc::StringUtils::lowerCase(*it));
         }
+
+        controls.mViewSwitchDisabled = pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_ViewSwitchDisabled;
+        controls.mControlsDisabled = pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_ControlsDisabled;
+        controls.mJumpingDisabled = pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_JumpingDisabled;
+        controls.mLookingDisabled = pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_LookingDisabled;
+        controls.mVanityModeDisabled = pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_VanityModeDisabled;
+        controls.mWeaponDrawingDisabled = pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_WeaponDrawingDisabled;
+        controls.mSpellDrawingDisabled = pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_SpellDrawingDisabled;
     }
 
 }

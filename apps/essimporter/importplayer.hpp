@@ -38,14 +38,18 @@ struct PCDT
 
     std::vector<std::string> mKnownDialogueTopics;
 
-    enum DrawState_
+    enum PlayerFlags
     {
-        DrawState_Weapon = 0x80,
-        DrawState_Spell = 0x100
-    };
-    enum CameraFlags
-    {
-        CameraFlag_ThirdPerson = 0x2
+        PlayerFlags_ViewSwitchDisabled = 0x1,
+        PlayerFlags_ControlsDisabled = 0x4,
+        PlayerFlags_WeaponDrawn = 0x80,
+        PlayerFlags_SpellDrawn = 0x100,
+        PlayerFlags_JumpingDisabled = 0x1000,
+        PlayerFlags_LookingDisabled = 0x2000,
+        PlayerFlags_VanityModeDisabled = 0x4000,
+        PlayerFlags_WeaponDrawingDisabled = 0x8000,
+        PlayerFlags_SpellDrawingDisabled = 0x10000,
+        PlayerFlags_ThirdPerson = 0x20000
     };
 
 #pragma pack(push)
@@ -62,8 +66,7 @@ struct PCDT
 
     struct PNAM
     {
-        short mDrawState; // DrawState
-        short mCameraFlags; // CameraFlags
+        int mPlayerFlags; // controls, camera and draw state
         unsigned int mLevelProgress;
         float mSkillProgress[27]; // skill progress, non-uniform scaled
         unsigned char mSkillIncreases[8]; // number of skill increases for each attribute

@@ -422,6 +422,10 @@ namespace ESSImport
         writer.startRecord (ESM::REC_DIAS);
         context.mDialogueState.save(writer);
         writer.endRecord(ESM::REC_DIAS);
+
+        writer.startRecord(ESM::REC_INPU);
+        context.mControlsState.save(writer);
+        writer.endRecord(ESM::REC_INPU);
     }
 
 
