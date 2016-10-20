@@ -249,7 +249,8 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
                 +MWBase::Environment::get().getScriptManager()->getGlobalScripts().countSavedGameRecords()
                 +MWBase::Environment::get().getDialogueManager()->countSavedGameRecords()
                 +MWBase::Environment::get().getWindowManager()->countSavedGameRecords()
-                +MWBase::Environment::get().getMechanicsManager()->countSavedGameRecords();
+                +MWBase::Environment::get().getMechanicsManager()->countSavedGameRecords()
+                +MWBase::Environment::get().getInputManager()->countSavedGameRecords();
         writer.setRecordCount (recordCount);
 
         writer.save (stream);
@@ -271,6 +272,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().write (writer, listener);
         MWBase::Environment::get().getWindowManager()->write(writer, listener);
         MWBase::Environment::get().getMechanicsManager()->write(writer, listener);
+        MWBase::Environment::get().getInputManager()->write(writer, listener);
 
         // Ensure we have written the number of records that was estimated
         if (writer.getRecordCount() != recordCount+1) // 1 extra for TES3 record
@@ -460,6 +462,10 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 case ESM::REC_STLN:
 
                     MWBase::Environment::get().getMechanicsManager()->readRecord(reader, n.intval);
+                    break;
+
+                case ESM::REC_INPU:
+                    MWBase::Environment::get().getInputManager()->readRecord(reader, n.intval);
                     break;
 
                 default:
