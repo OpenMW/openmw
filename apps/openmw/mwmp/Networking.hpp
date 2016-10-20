@@ -48,6 +48,8 @@ namespace mwmp
 
         bool isConnected();
 
+        WorldEvent *createWorldEvent();
+
     private:
         bool connected;
         RakNet::RakPeerInterface *peer;

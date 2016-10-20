@@ -5,7 +5,7 @@
 #include <RakNetTypes.h>
 #include <BitStream.h>
 #include <PacketPriority.h>
-#include <components/openmw-mp/Base/BasePlayer.hpp>
+#include <components/openmw-mp/Base/WorldEvent.hpp>
 
 #include <components/openmw-mp/Packets/BasePacket.hpp>
 
@@ -19,13 +19,13 @@ namespace mwmp
 
         ~WorldPacket();
 
-        virtual void Packet(RakNet::BitStream *bs, BasePlayer *player, bool send);
+        virtual void Packet(RakNet::BitStream *bs, WorldEvent *event, bool send);
 
-        virtual void Send(BasePlayer *player, bool toOtherPlayers = true);
-        virtual void Send(BasePlayer *player, RakNet::AddressOrGUID destination);
-        virtual void Read(BasePlayer *player);
+        virtual void Send(WorldEvent *event, bool toOtherPlayers = true);
+        virtual void Send(WorldEvent *event, RakNet::AddressOrGUID destination);
+        virtual void Read(WorldEvent *event);
 
-        virtual void RequestData(RakNet::RakNetGUID player);
+        virtual void RequestData(RakNet::RakNetGUID guid);
 
         static size_t headerSize()
         {
@@ -38,7 +38,7 @@ namespace mwmp
         }
 
     protected:
-        BasePlayer *player;
+        WorldEvent *event;
 
     };
 }

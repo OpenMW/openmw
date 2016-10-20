@@ -17,6 +17,7 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
+#include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "../mwmp/Main.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -1105,7 +1106,8 @@ namespace MWWorld
                 && mWorldScene->getActiveCells().find(ptr.getCell()) != mWorldScene->getActiveCells().end()
                 && ptr.getRefData().isEnabled())
             {
-                mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_REMOVAL)->Send(mwmp::Main::get().getLocalPlayer());
+                mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_REMOVAL)->Send(event);
 
                 mWorldScene->removeObjectFromScene (ptr);
                 mLocalScripts.remove (ptr);

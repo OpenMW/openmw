@@ -8,7 +8,7 @@ PacketObjectRemoval::PacketObjectRemoval(RakNet::RakPeerInterface *peer) : World
     packetID = ID_WORLD_OBJECT_REMOVAL;
 }
 
-void PacketObjectRemoval::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketObjectRemoval::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)
 {
-    WorldPacket::Packet(bs, player, send);
+    WorldPacket::Packet(bs, event, send);
 }

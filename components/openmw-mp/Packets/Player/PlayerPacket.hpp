@@ -25,7 +25,7 @@ namespace mwmp
         virtual void Send(BasePlayer *player, RakNet::AddressOrGUID destination);
         virtual void Read(BasePlayer *player);
 
-        virtual void RequestData(RakNet::RakNetGUID player);
+        virtual void RequestData(RakNet::RakNetGUID guid);
 
         static size_t headerSize()
         {

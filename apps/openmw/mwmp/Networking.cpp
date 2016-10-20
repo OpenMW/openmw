@@ -18,6 +18,7 @@
 #include "../mwstate/statemanagerimp.hpp"
 #include <components/openmw-mp/Log.hpp>
 #include <components/openmw-mp/Version.hpp>
+#include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "DedicatedPlayer.hpp"
 #include "Main.hpp"
 
@@ -633,6 +634,11 @@ WorldPacket *Networking::GetWorldPacket(RakNet::MessageID id)
 LocalPlayer *Networking::getLocalPlayer()
 {
     return mwmp::Main::get().getLocalPlayer();
+}
+
+WorldEvent *Networking::createWorldEvent()
+{
+    return new WorldEvent(getLocalPlayer()->guid);
 }
 
 bool Networking::isDedicatedPlayer(const MWWorld::Ptr &ptr)

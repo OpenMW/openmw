@@ -5,15 +5,15 @@
 
 using namespace mwmp;
 
-void WorldPacket::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void WorldPacket::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)
 {
-    this->player = player;
+    this->event = event;
     this->bs = bs;
 
     if (send)
     {
         bs->Write(packetID);
-        bs->Write(player->guid);
+        bs->Write(event->guid);
     }
 }
 
@@ -30,23 +30,23 @@ WorldPacket::~WorldPacket()
 
 }
 
-void WorldPacket::Send(BasePlayer *player, RakNet::AddressOrGUID destination)
+void WorldPacket::Send(WorldEvent *event, RakNet::AddressOrGUID destination)
 {
     bsSend->ResetWritePointer();
-    Packet(bsSend, player, true);
+    Packet(bsSend, event, true);
     peer->Send(bsSend, priority, reliability, 0, destination, false);
 }
 
-void WorldPacket::Send(BasePlayer *player, bool toOther)
+void WorldPacket::Send(WorldEvent *event, bool toOther)
 {
     bsSend->ResetWritePointer();
-    Packet(bsSend, player, true);
-    peer->Send(bsSend, priority, reliability, 0, player->guid, toOther);
+    Packet(bsSend, event, true);
+    peer->Send(bsSend, priority, reliability, 0, event->guid, toOther);
 }
 
-void WorldPacket::Read(BasePlayer *player)
+void WorldPacket::Read(WorldEvent *event)
 {
-    Packet(bsRead, player, false);
+    Packet(bsRead, event, false);
 }
 
 void WorldPacket::RequestData(RakNet::RakNetGUID guid)
