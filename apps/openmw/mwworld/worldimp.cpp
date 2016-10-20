@@ -1106,7 +1106,10 @@ namespace MWWorld
                 && mWorldScene->getActiveCells().find(ptr.getCell()) != mWorldScene->getActiveCells().end()
                 && ptr.getRefData().isEnabled())
             {
+                // Added by tes3mp
                 mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                event->CellRef()->mRefID = ptr.getCellRef().getRefId();
+                event->CellRef()->mRefNum = ptr.getCellRef().getRefNum();
                 mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_REMOVAL)->Send(event);
 
                 mWorldScene->removeObjectFromScene (ptr);

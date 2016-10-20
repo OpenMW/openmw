@@ -11,4 +11,6 @@ PacketObjectRemoval::PacketObjectRemoval(RakNet::RakPeerInterface *peer) : World
 void PacketObjectRemoval::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)
 {
     WorldPacket::Packet(bs, event, send);
+
+    RW(*event->CellRef(), send);
 }

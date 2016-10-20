@@ -368,6 +368,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     if (!player->isHandshaked() || player->LoadedState() != Player::POSTLOADED)
         return;
 
+    WorldPacket *myPacket = worldController->GetPacket(packet->data[0]);
+    WorldEvent *event = new WorldEvent(player->guid);
+
     switch (packet->data[0])
     {
 
@@ -375,6 +378,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_OBJECT_REMOVAL from %s",
             player->Npc()->mName.c_str());
+        
+        myPacket->Read(event);
+        myPacket->Send(event, true);
 
         break;
     }
