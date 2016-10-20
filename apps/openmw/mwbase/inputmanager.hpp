@@ -5,6 +5,19 @@
 #include <set>
 #include <vector>
 
+#include <stdint.h>
+
+namespace Loading
+{
+    class Listener;
+}
+
+namespace ESM
+{
+    class ESMReader;
+    class ESMWriter;
+}
+
 namespace MWBase
 {
     /// \brief Interface for input manager (implemented in MWInput)
@@ -56,6 +69,10 @@ namespace MWBase
             /// Returns if the last used input device was a joystick or a keyboard
             /// @return true if joystick, false otherwise
             virtual bool joystickLastUsed() = 0;
+
+            virtual int countSavedGameRecords() const = 0;
+            virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
+            virtual void readRecord(ESM::ESMReader& reader, uint32_t type) = 0;
     };
 }
 
