@@ -59,6 +59,8 @@ namespace mwmp
         PlayerPacketController playerController;
         WorldPacketController worldController;
 
+        void ProcessPlayerPacket(RakNet::Packet *packet);
+        void ProcessWorldPacket(RakNet::Packet *packet);
         void ReceiveMessage(RakNet::Packet *packet);
         LocalPlayer *getLocalPlayer();
     };

@@ -166,13 +166,9 @@ void Networking::Connect(const std::string &ip, unsigned short port)
     }
 }
 
-void Networking::ReceiveMessage(RakNet::Packet *packet)
+void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
 {
     RakNet::RakNetGUID id;
-
-    if (packet->length < 2)
-        return;
-
     RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
     bsIn.Read(id);
 
@@ -185,439 +181,471 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
 
     switch (packet->data[0])
     {
-        case ID_HANDSHAKE:
-        {
-            (*getLocalPlayer()->GetPassw()) = "SuperPassword";
-            myPacket->Send(getLocalPlayer(), serverAddr);
-            break;
-        }
-        case ID_GAME_BASE_INFO:
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_GAME_BASE_INFO from server");
+    case ID_HANDSHAKE:
+    {
+        (*getLocalPlayer()->GetPassw()) = "SuperPassword";
+        myPacket->Send(getLocalPlayer(), serverAddr);
+        break;
+    }
+    case ID_GAME_BASE_INFO:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_GAME_BASE_INFO from server");
 
-            if (id == myid)
+        if (id == myid)
+        {
+            LOG_APPEND(Log::LOG_INFO, "%s", "- Packet was about my id");
+
+            if (packet->length == myPacket->headerSize())
             {
-                LOG_APPEND(Log::LOG_INFO, "%s", "- Packet was about my id");
+                LOG_APPEND(Log::LOG_INFO, "%s", "- Requesting info");
+                myPacket->Send(getLocalPlayer(), serverAddr);
+            }
+            else
+            {
+                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                LOG_APPEND(Log::LOG_INFO, "%s", "- Updating LocalPlayer");
+                getLocalPlayer()->updateChar();
+            }
+        }
+        else
+        {
+            LOG_APPEND(Log::LOG_INFO, "- Packet was about %s", pl == 0 ? "new player" : pl->Npc()->mName.c_str());
 
-                if (packet->length == myPacket->headerSize())
+            if (pl == 0)
+            {
+                LOG_APPEND(Log::LOG_INFO, "%s", "- Exchanging data with new player");
+                pl = Players::NewPlayer(id);
+            }
+
+            myPacket->Packet(&bsIn, pl, false);
+            Players::CreatePlayer(id);
+        }
+        break;
+    }
+    case ID_GAME_POS:
+    {
+        if (id == myid)
+        {
+            if (packet->length != myPacket->headerSize())
+            {
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "ID_GAME_POS changed by server");
+                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                getLocalPlayer()->setPosition();
+            }
+            else
+                getLocalPlayer()->updatePosition(true);
+        }
+        else if (pl != 0)
+            myPacket->Packet(&bsIn, pl, false);
+        break;
+    }
+    case ID_USER_MYID:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_USER_MYID from server");
+        myid = id;
+        getLocalPlayer()->guid = id;
+        break;
+    }
+    case ID_USER_DISCONNECTED:
+    {
+        if (id == myid)
+            MWBase::Environment::get().getStateManager()->requestQuit();
+        else if (pl != 0)
+            Players::DisconnectPlayer(id);
+
+    }
+    case ID_GAME_EQUIPMENT:
+    {
+        if (id == myid)
+        {
+            if (packet->length == myPacket->headerSize())
+            {
+                getLocalPlayer()->updateInventory(true);
+            }
+            else
+            {
+                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                getLocalPlayer()->setInventory();
+            }
+        }
+        else if (pl != 0)
+        {
+            myPacket->Packet(&bsIn, pl, false);
+            pl->UpdateInventory();
+        }
+        break;
+    }
+    case ID_GAME_ATTACK:
+    {
+        if (pl != 0)
+        {
+            myPacket->Packet(&bsIn, pl, false);
+
+            //cout << "Player: " << pl->Npc()->mName << " pressed: " << (pl->GetAttack()->pressed == 1) << endl;
+            if (pl->GetAttack()->pressed == 0)
+            {
+                LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Attack success: %s",
+                    pl->GetAttack()->success ? "true" : "false");
+
+                if (pl->GetAttack()->success == 1)
                 {
-                    LOG_APPEND(Log::LOG_INFO, "%s", "- Requesting info");
-                    myPacket->Send(getLocalPlayer(), serverAddr);
+                    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Damage: %f",
+                        pl->GetAttack()->damage);
                 }
-                else
+            }
+
+            MWMechanics::CreatureStats &stats = pl->getPtr().getClass().getNpcStats(pl->getPtr());
+            stats.getSpells().setSelectedSpell(pl->GetAttack()->refid);
+
+            MWWorld::Ptr victim;
+            if (pl->GetAttack()->target == getLocalPlayer()->guid)
+                victim = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            else if (Players::GetPlayer(pl->GetAttack()->target) != 0)
+                victim = Players::GetPlayer(pl->GetAttack()->target)->getPtr();
+
+            MWWorld::Ptr attacker;
+            attacker = pl->getPtr();
+
+            // Get the weapon used (if hand-to-hand, weapon = inv.end())
+            if (*pl->DrawState() == 1)
+            {
+                MWWorld::InventoryStore &inv = attacker.getClass().getInventoryStore(attacker);
+                MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(
+                    MWWorld::InventoryStore::Slot_CarriedRight);
+                MWWorld::Ptr weapon = ((weaponslot != inv.end()) ? *weaponslot : MWWorld::Ptr());
+                if (!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
+                    weapon = MWWorld::Ptr();
+
+                if (victim.mRef != 0)
                 {
-                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    LOG_APPEND(Log::LOG_INFO, "%s", "- Updating LocalPlayer");
-                    getLocalPlayer()->updateChar();
+                    bool healthdmg;
+                    if (!weapon.isEmpty())
+                        healthdmg = true;
+                    else
+                    {
+                        MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
+                        healthdmg = otherstats.isParalyzed() || otherstats.getKnockedDown();
+                    }
+
+                    if (!weapon.isEmpty())
+                        MWMechanics::blockMeleeAttack(attacker, victim, weapon, pl->GetAttack()->damage, 1);
+                    pl->getPtr().getClass().onHit(victim, pl->GetAttack()->damage, healthdmg, weapon, attacker, osg::Vec3f(),
+                        pl->GetAttack()->success);
                 }
             }
             else
             {
-                LOG_APPEND(Log::LOG_INFO, "- Packet was about %s", pl == 0 ? "new player" : pl->Npc()->mName.c_str());
-
-                if (pl == 0)
-                {
-                    LOG_APPEND(Log::LOG_INFO, "%s", "- Exchanging data with new player");
-                    pl = Players::NewPlayer(id);
-                }
-
-                myPacket->Packet(&bsIn, pl, false);
-                Players::CreatePlayer(id);
+                LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "SpellId: %s",
+                    pl->GetAttack()->refid.c_str());
             }
-            break;
         }
-        case ID_GAME_POS:
+        break;
+    }
+    case ID_GAME_DYNAMICSTATS:
+    {
+        if (id == myid)
         {
-            if (id == myid)
+            if (packet->length == myPacket->headerSize())
             {
-                if (packet->length != myPacket->headerSize())
-                {
-                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "ID_GAME_POS changed by server");
-                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    getLocalPlayer()->setPosition();
-                }
-                else
-                    getLocalPlayer()->updatePosition(true);
-            }
-            else if (pl != 0)
-                myPacket->Packet(&bsIn, pl, false);
-            break;
-        }
-        case ID_USER_MYID:
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_USER_MYID from server");
-            myid = id;
-            getLocalPlayer()->guid = id;
-            break;
-        }
-        case ID_USER_DISCONNECTED:
-        {
-            if (id == myid)
-                MWBase::Environment::get().getStateManager()->requestQuit();
-            else if (pl != 0)
-                Players::DisconnectPlayer(id);
-
-        }
-        case ID_GAME_EQUIPMENT:
-        {
-            if (id == myid)
-            {
-                if (packet->length == myPacket->headerSize())
-                {
-                    getLocalPlayer()->updateInventory(true);
-                }
-                else
-                {
-                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    getLocalPlayer()->setInventory();
-                }
-            }
-            else if (pl != 0)
-            {
-                myPacket->Packet(&bsIn, pl, false);
-                pl->UpdateInventory();
-            }
-            break;
-        }
-        case ID_GAME_ATTACK:
-        {
-            if (pl != 0)
-            {
-                myPacket->Packet(&bsIn, pl, false);
-
-                //cout << "Player: " << pl->Npc()->mName << " pressed: " << (pl->GetAttack()->pressed == 1) << endl;
-                if (pl->GetAttack()->pressed == 0)
-                {
-                    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Attack success: %s",
-                        pl->GetAttack()->success ? "true" : "false");
-
-                    if (pl->GetAttack()->success == 1)
-                    {
-                        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Damage: %f",
-                            pl->GetAttack()->damage);
-                    }
-                }
-
-                MWMechanics::CreatureStats &stats = pl->getPtr().getClass().getNpcStats(pl->getPtr());
-                stats.getSpells().setSelectedSpell(pl->GetAttack()->refid);
-
-                MWWorld::Ptr victim;
-                if (pl->GetAttack()->target == getLocalPlayer()->guid)
-                    victim = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                else if (Players::GetPlayer(pl->GetAttack()->target) != 0)
-                    victim = Players::GetPlayer(pl->GetAttack()->target)->getPtr();
-
-                MWWorld::Ptr attacker;
-                attacker = pl->getPtr();
-
-                // Get the weapon used (if hand-to-hand, weapon = inv.end())
-                if (*pl->DrawState() == 1)
-                {
-                    MWWorld::InventoryStore &inv = attacker.getClass().getInventoryStore(attacker);
-                    MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(
-                            MWWorld::InventoryStore::Slot_CarriedRight);
-                    MWWorld::Ptr weapon = ((weaponslot != inv.end()) ? *weaponslot : MWWorld::Ptr());
-                    if (!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
-                        weapon = MWWorld::Ptr();
-
-                    if (victim.mRef != 0)
-                    {
-                        bool healthdmg;
-                        if (!weapon.isEmpty())
-                            healthdmg = true;
-                        else
-                        {
-                            MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
-                            healthdmg = otherstats.isParalyzed() || otherstats.getKnockedDown();
-                        }
-
-                        if (!weapon.isEmpty())
-                            MWMechanics::blockMeleeAttack(attacker, victim, weapon, pl->GetAttack()->damage, 1);
-                        pl->getPtr().getClass().onHit(victim, pl->GetAttack()->damage, healthdmg, weapon, attacker, osg::Vec3f(),
-                                                      pl->GetAttack()->success);
-                    }
-                }
-                else
-                {
-                    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "SpellId: %s",
-                        pl->GetAttack()->refid.c_str());
-                }
-            }
-            break;
-        }
-        case ID_GAME_DYNAMICSTATS:
-        {
-            if (id == myid)
-            {
-                if (packet->length == myPacket->headerSize())
-                {
-                    getLocalPlayer()->updateDynamicStats(true);
-                }
-                else
-                {
-                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    getLocalPlayer()->setDynamicStats();
-                }
-            }
-            else if (pl != 0)
-            {
-                myPacket->Packet(&bsIn, pl, false);
-
-                MWWorld::Ptr ptrPlayer = pl->getPtr();
-                MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
-                MWMechanics::DynamicStat<float> value;
-
-                for (int i = 0; i < 3; ++i)
-                {
-                    value.readState(pl->CreatureStats()->mDynamic[i]);
-                    ptrCreatureStats->setDynamic(i, value);
-                }
-            }
-            break;
-        }
-        case ID_GAME_DIE:
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_GAME_DIE from server");
-            if (id == myid)
-            {
-                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                MWMechanics::DynamicStat<float> health = player.getClass().getCreatureStats(player).getHealth();
-                health.setCurrent(0);
-                player.getClass().getCreatureStats(player).setHealth(health);
-                myPacket->Send(getLocalPlayer(), serverAddr);
-            }
-            else if (pl != 0)
-            {
-                LOG_APPEND(Log::LOG_INFO, "- Packet was about %s", pl->Npc()->mName.c_str());
-                MWMechanics::DynamicStat<float> health;
-                pl->CreatureStats()->mDead = true;
-                health.readState(pl->CreatureStats()->mDynamic[0]);
-                health.setCurrent(0);
-                health.writeState(pl->CreatureStats()->mDynamic[0]);
-                pl->getPtr().getClass().getCreatureStats(pl->getPtr()).setHealth(health);
-            }
-            break;
-        }
-        case ID_GAME_RESURRECT:
-        {
-            if (id == myid)
-            {
-                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                player.getClass().getCreatureStats(player).resurrect();
-                ESM::Position pos;
-                MWBase::Environment::get().getWorld()->findInteriorPosition("Pelagiad, Fort Pelagiad", pos);
-                MWBase::Environment::get().getWorld()->changeToInteriorCell("Pelagiad, Fort Pelagiad", pos, true);
-                (*getLocalPlayer()->Position()) = pos;
-                (*getLocalPlayer()->GetCell()) = *player.getCell()->getCell();
-                myPacket->Send(getLocalPlayer(), serverAddr);
-
                 getLocalPlayer()->updateDynamicStats(true);
-                playerController.GetPacket(ID_GAME_DYNAMICSTATS)->Send(getLocalPlayer(), serverAddr);
             }
-            else if (pl != 0)
-            {
-                pl->CreatureStats()->mDead = false;
-                if (pl->CreatureStats()->mDynamic[0].mMod < 1)
-                    pl->CreatureStats()->mDynamic[0].mMod = 1;
-                pl->CreatureStats()->mDynamic[0].mCurrent = pl->CreatureStats()->mDynamic[0].mMod;
-
-                pl->getPtr().getClass().getCreatureStats(pl->getPtr()).resurrect();
-
-                MWMechanics::DynamicStat<float> health;
-                health.readState(pl->CreatureStats()->mDynamic[0]);
-                pl->getPtr().getClass().getCreatureStats(pl->getPtr()).setHealth(health);
-            }
-            break;
-        }
-        case ID_GAME_CELL:
-        {
-            if (id == myid)
-            {
-                if (packet->length == myPacket->headerSize())
-                    getLocalPlayer()->updateCell(true);
-                else
-                {
-                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    getLocalPlayer()->setCell();
-                }
-            }
-            else if (pl != 0)
-            {
-                myPacket->Packet(&bsIn, pl, false);
-                pl->updateCell();
-            }
-            break;
-        }
-        case ID_GAME_DRAWSTATE:
-        {
-            if (id == myid)
-                getLocalPlayer()->updateDrawStateAndFlags(true);
-            else if (pl != 0)
-            {
-                myPacket->Packet(&bsIn, pl, false);
-                pl->UpdateDrawState();
-            }
-            break;
-        }
-        case ID_CHAT_MESSAGE:
-        {
-            std::string message;
-            if (id == myid)
+            else
             {
                 myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                message =  *getLocalPlayer()->ChatMessage();
+                getLocalPlayer()->setDynamicStats();
             }
-            else if (pl != 0)
-            {
-                myPacket->Packet(&bsIn, pl, false);
-                message =  *pl->ChatMessage();
-            }
-            Main::get().getGUIController()->PrintChatMessage(message);
-
-            break;
         }
-        case ID_GAME_CHARGEN:
+        else if (pl != 0)
         {
-            if (id == myid)
+            myPacket->Packet(&bsIn, pl, false);
+
+            MWWorld::Ptr ptrPlayer = pl->getPtr();
+            MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
+            MWMechanics::DynamicStat<float> value;
+
+            for (int i = 0; i < 3; ++i)
+            {
+                value.readState(pl->CreatureStats()->mDynamic[i]);
+                ptrCreatureStats->setDynamic(i, value);
+            }
+        }
+        break;
+    }
+    case ID_GAME_DIE:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_GAME_DIE from server");
+        if (id == myid)
+        {
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWMechanics::DynamicStat<float> health = player.getClass().getCreatureStats(player).getHealth();
+            health.setCurrent(0);
+            player.getClass().getCreatureStats(player).setHealth(health);
+            myPacket->Send(getLocalPlayer(), serverAddr);
+        }
+        else if (pl != 0)
+        {
+            LOG_APPEND(Log::LOG_INFO, "- Packet was about %s", pl->Npc()->mName.c_str());
+            MWMechanics::DynamicStat<float> health;
+            pl->CreatureStats()->mDead = true;
+            health.readState(pl->CreatureStats()->mDynamic[0]);
+            health.setCurrent(0);
+            health.writeState(pl->CreatureStats()->mDynamic[0]);
+            pl->getPtr().getClass().getCreatureStats(pl->getPtr()).setHealth(health);
+        }
+        break;
+    }
+    case ID_GAME_RESURRECT:
+    {
+        if (id == myid)
+        {
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            player.getClass().getCreatureStats(player).resurrect();
+            ESM::Position pos;
+            MWBase::Environment::get().getWorld()->findInteriorPosition("Pelagiad, Fort Pelagiad", pos);
+            MWBase::Environment::get().getWorld()->changeToInteriorCell("Pelagiad, Fort Pelagiad", pos, true);
+            (*getLocalPlayer()->Position()) = pos;
+            (*getLocalPlayer()->GetCell()) = *player.getCell()->getCell();
+            myPacket->Send(getLocalPlayer(), serverAddr);
+
+            getLocalPlayer()->updateDynamicStats(true);
+            playerController.GetPacket(ID_GAME_DYNAMICSTATS)->Send(getLocalPlayer(), serverAddr);
+        }
+        else if (pl != 0)
+        {
+            pl->CreatureStats()->mDead = false;
+            if (pl->CreatureStats()->mDynamic[0].mMod < 1)
+                pl->CreatureStats()->mDynamic[0].mMod = 1;
+            pl->CreatureStats()->mDynamic[0].mCurrent = pl->CreatureStats()->mDynamic[0].mMod;
+
+            pl->getPtr().getClass().getCreatureStats(pl->getPtr()).resurrect();
+
+            MWMechanics::DynamicStat<float> health;
+            health.readState(pl->CreatureStats()->mDynamic[0]);
+            pl->getPtr().getClass().getCreatureStats(pl->getPtr()).setHealth(health);
+        }
+        break;
+    }
+    case ID_GAME_CELL:
+    {
+        if (id == myid)
+        {
+            if (packet->length == myPacket->headerSize())
+                getLocalPlayer()->updateCell(true);
+            else
             {
                 myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                getLocalPlayer()->setCell();
             }
-            break;
         }
-        case ID_GAME_ATTRIBUTE:
+        else if (pl != 0)
         {
-            if (id == myid)
-            {
-                if (packet->length == myPacket->headerSize())
-                {
-                    getLocalPlayer()->updateAttributes(true);
-                }
-                else
-                {
-                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    getLocalPlayer()->setAttributes();
-                }
-            }
-            else if (pl != 0)
-            {
-                myPacket->Packet(&bsIn, pl, false);
-
-                MWWorld::Ptr ptrPlayer = pl->getPtr();
-                MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
-                MWMechanics::AttributeValue attributeValue;
-
-                for (int i = 0; i < 8; ++i)
-                {
-                    attributeValue.readState(pl->CreatureStats()->mAttributes[i]);
-                    ptrCreatureStats->setAttribute(i, attributeValue);
-                }
-            }
-            break;
+            myPacket->Packet(&bsIn, pl, false);
+            pl->updateCell();
         }
-        case ID_GAME_SKILL:
+        break;
+    }
+    case ID_GAME_DRAWSTATE:
+    {
+        if (id == myid)
+            getLocalPlayer()->updateDrawStateAndFlags(true);
+        else if (pl != 0)
         {
-            if (id == myid)
-            {
-                if (packet->length == myPacket->headerSize())
-                {
-                    getLocalPlayer()->updateSkills(true);
-                }
-                else
-                {
-                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    getLocalPlayer()->setSkills();
-                }
-            }
-            else if (pl != 0)
-            {
-                myPacket->Packet(&bsIn, pl, false);
-
-                MWWorld::Ptr ptrPlayer = pl->getPtr();
-                MWMechanics::NpcStats *ptrNpcStats = &ptrPlayer.getClass().getNpcStats(ptrPlayer);
-                MWMechanics::SkillValue skillValue;
-
-                for (int i = 0; i < 27; ++i)
-                {
-                    skillValue.readState(pl->NpcStats()->mSkills[i]);
-                    ptrNpcStats->setSkill(i, skillValue);
-                }
-            }
-            break;
+            myPacket->Packet(&bsIn, pl, false);
+            pl->UpdateDrawState();
         }
-        case ID_GAME_LEVEL:
+        break;
+    }
+    case ID_CHAT_MESSAGE:
+    {
+        std::string message;
+        if (id == myid)
         {
-            if (id == myid)
-            {
-                if (packet->length == myPacket->headerSize())
-                {
-                    getLocalPlayer()->updateLevel(true);
-                }
-                else
-                {
-                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    getLocalPlayer()->setLevel();
-                }
-            }
-            else if (pl != 0)
-            {
-                myPacket->Packet(&bsIn, pl, false);
-
-                MWWorld::Ptr ptrPlayer = pl->getPtr();
-                MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
-
-                ptrCreatureStats->setLevel(pl->CreatureStats()->mLevel);
-            }
-            break;
+            myPacket->Packet(&bsIn, getLocalPlayer(), false);
+            message = *getLocalPlayer()->ChatMessage();
         }
-        case ID_GUI_MESSAGEBOX:
+        else if (pl != 0)
         {
-            if (id == myid)
+            myPacket->Packet(&bsIn, pl, false);
+            message = *pl->ChatMessage();
+        }
+        Main::get().getGUIController()->PrintChatMessage(message);
+
+        break;
+    }
+    case ID_GAME_CHARGEN:
+    {
+        if (id == myid)
+        {
+            myPacket->Packet(&bsIn, getLocalPlayer(), false);
+        }
+        break;
+    }
+    case ID_GAME_ATTRIBUTE:
+    {
+        if (id == myid)
+        {
+            if (packet->length == myPacket->headerSize())
+            {
+                getLocalPlayer()->updateAttributes(true);
+            }
+            else
             {
                 myPacket->Packet(&bsIn, getLocalPlayer(), false);
-
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_GUI_MESSAGEBOX, Type %d, MSG %s",
-                    getLocalPlayer()->guiMessageBox.type,
-                    getLocalPlayer()->guiMessageBox.label.c_str());
-
-                if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::MessageBox)
-                    Main::get().getGUIController()->ShowMessageBox(getLocalPlayer()->guiMessageBox);
-                else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::CustomMessageBox)
-                    Main::get().getGUIController()->ShowCustomMessageBox(getLocalPlayer()->guiMessageBox);
-                else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::InputDialog)
-                    Main::get().getGUIController()->ShowInputBox(getLocalPlayer()->guiMessageBox);
+                getLocalPlayer()->setAttributes();
             }
-            break;
         }
-        case ID_GAME_CHARCLASS:
+        else if (pl != 0)
         {
-            if (id == myid)
+            myPacket->Packet(&bsIn, pl, false);
+
+            MWWorld::Ptr ptrPlayer = pl->getPtr();
+            MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
+            MWMechanics::AttributeValue attributeValue;
+
+            for (int i = 0; i < 8; ++i)
             {
-                if (packet->length == myPacket->headerSize())
-                    getLocalPlayer()->sendClass();
-                else
-                {
-                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                    getLocalPlayer()->setClass();
-                }
+                attributeValue.readState(pl->CreatureStats()->mAttributes[i]);
+                ptrCreatureStats->setAttribute(i, attributeValue);
             }
-            break;
         }
-        case ID_GAME_TIME:
+        break;
+    }
+    case ID_GAME_SKILL:
+    {
+        if (id == myid)
         {
-            if (id == myid)
+            if (packet->length == myPacket->headerSize())
+            {
+                getLocalPlayer()->updateSkills(true);
+            }
+            else
             {
                 myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                MWBase::World *world = MWBase::Environment::get().getWorld();
-                if (getLocalPlayer()->hour != -1)
-                    world->setHour(getLocalPlayer()->hour);
-                else if (getLocalPlayer()->day != -1)
-                    world->setDay(getLocalPlayer()->day);
-                else if (getLocalPlayer()->month != -1)
-                    world->setMonth(getLocalPlayer()->month);
+                getLocalPlayer()->setSkills();
             }
         }
-        default:
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Custom message with identifier %i has arrived in initialization.", packet->data[0]);
+        else if (pl != 0)
+        {
+            myPacket->Packet(&bsIn, pl, false);
+
+            MWWorld::Ptr ptrPlayer = pl->getPtr();
+            MWMechanics::NpcStats *ptrNpcStats = &ptrPlayer.getClass().getNpcStats(ptrPlayer);
+            MWMechanics::SkillValue skillValue;
+
+            for (int i = 0; i < 27; ++i)
+            {
+                skillValue.readState(pl->NpcStats()->mSkills[i]);
+                ptrNpcStats->setSkill(i, skillValue);
+            }
+        }
+        break;
+    }
+    case ID_GAME_LEVEL:
+    {
+        if (id == myid)
+        {
+            if (packet->length == myPacket->headerSize())
+            {
+                getLocalPlayer()->updateLevel(true);
+            }
+            else
+            {
+                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                getLocalPlayer()->setLevel();
+            }
+        }
+        else if (pl != 0)
+        {
+            myPacket->Packet(&bsIn, pl, false);
+
+            MWWorld::Ptr ptrPlayer = pl->getPtr();
+            MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
+
+            ptrCreatureStats->setLevel(pl->CreatureStats()->mLevel);
+        }
+        break;
+    }
+    case ID_GUI_MESSAGEBOX:
+    {
+        if (id == myid)
+        {
+            myPacket->Packet(&bsIn, getLocalPlayer(), false);
+
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_GUI_MESSAGEBOX, Type %d, MSG %s",
+                getLocalPlayer()->guiMessageBox.type,
+                getLocalPlayer()->guiMessageBox.label.c_str());
+
+            if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::MessageBox)
+                Main::get().getGUIController()->ShowMessageBox(getLocalPlayer()->guiMessageBox);
+            else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::CustomMessageBox)
+                Main::get().getGUIController()->ShowCustomMessageBox(getLocalPlayer()->guiMessageBox);
+            else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::InputDialog)
+                Main::get().getGUIController()->ShowInputBox(getLocalPlayer()->guiMessageBox);
+        }
+        break;
+    }
+    case ID_GAME_CHARCLASS:
+    {
+        if (id == myid)
+        {
+            if (packet->length == myPacket->headerSize())
+                getLocalPlayer()->sendClass();
+            else
+            {
+                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                getLocalPlayer()->setClass();
+            }
+        }
+        break;
+    }
+    case ID_GAME_TIME:
+    {
+        if (id == myid)
+        {
+            myPacket->Packet(&bsIn, getLocalPlayer(), false);
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            if (getLocalPlayer()->hour != -1)
+                world->setHour(getLocalPlayer()->hour);
+            else if (getLocalPlayer()->day != -1)
+                world->setDay(getLocalPlayer()->day);
+            else if (getLocalPlayer()->month != -1)
+                world->setMonth(getLocalPlayer()->month);
+        }
+    }
+    default:
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unhandled PlayerPacket with identifier %i has arrived",
+            packet->data[0]);
+    }
+}
+
+void Networking::ProcessWorldPacket(RakNet::Packet *packet)
+{
+    WorldPacket *myPacket = worldController.GetPacket(packet->data[0]);
+
+    switch (packet->data[0])
+    {
+    case ID_WORLD_OBJECT_REMOVAL:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_REMOVAL");
+    }
+    default:
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unhandled WorldPacket with identifier %i has arrived",
+            packet->data[0]);
+    }
+}
+
+void Networking::ReceiveMessage(RakNet::Packet *packet)
+{
+    if (packet->length < 2)
+        return;
+
+    if (playerController.ContainsPacket(packet->data[0]))
+    {
+        ProcessPlayerPacket(packet);
+    }
+    else if (worldController.ContainsPacket(packet->data[0]))
+    {
+        ProcessWorldPacket(packet);
     }
 }
 
