@@ -635,6 +635,10 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
     switch (packet->data[0])
     {
+    case ID_WORLD_OBJECT_CREATION:
+    {
+        break;
+    }
     case ID_WORLD_OBJECT_REMOVAL:
     {
         myPacket->Packet(&bsIn, event, false);

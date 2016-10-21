@@ -2,6 +2,7 @@
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
 
+#include "../Packets/World/PacketObjectCreation.hpp"
 #include "../Packets/World/PacketObjectRemoval.hpp"
 
 #include "WorldPacketController.hpp"
@@ -16,6 +17,7 @@ inline void AddPacket(mwmp::WorldPacketController::packets_t *packets, RakNet::R
 
 mwmp::WorldPacketController::WorldPacketController(RakNet::RakPeerInterface *peer)
 {
+    AddPacket<PacketObjectCreation>(&packets, peer);
     AddPacket<PacketObjectRemoval>(&packets, peer);
 }
 
