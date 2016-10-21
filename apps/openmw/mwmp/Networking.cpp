@@ -611,6 +611,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
             else if (getLocalPlayer()->month != -1)
                 world->setMonth(getLocalPlayer()->month);
         }
+        break;
     }
     default:
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unhandled PlayerPacket with identifier %i has arrived",
@@ -620,13 +621,30 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
 
 void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 {
+    RakNet::RakNetGUID id;
+    RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
+    bsIn.Read(id);
+
+    DedicatedPlayer *pl = 0;
+    static RakNet::RakNetGUID myid = getLocalPlayer()->guid;
+    if (id != myid)
+        pl = Players::GetPlayer(id);
+
     WorldPacket *myPacket = worldController.GetPacket(packet->data[0]);
+    WorldEvent *event = new WorldEvent(id);
 
     switch (packet->data[0])
     {
     case ID_WORLD_OBJECT_REMOVAL:
     {
+        myPacket->Packet(&bsIn, event, false);
+
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_REMOVAL");
+        LOG_APPEND(Log::LOG_WARN, "- cellRefId: %s, %i",
+            event->CellRef()->mRefID.c_str(),
+            event->CellRef()->mRefNum);
+
+        break;
     }
     default:
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unhandled WorldPacket with identifier %i has arrived",
