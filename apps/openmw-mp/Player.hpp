@@ -62,6 +62,8 @@ public:
     unsigned short getLastAttackerID();
 
     virtual ~Player();
+public:
+    mwmp::Inventory inventorySendBuffer;
 private:
     bool handshake;
     int loaded;

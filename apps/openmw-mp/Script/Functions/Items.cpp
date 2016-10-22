@@ -8,22 +8,30 @@
 #include <apps/openmw-mp/Networking.hpp>
 #include <components/misc/stringops.hpp>
 
+using namespace mwmp;
 
-void ItemFunctions::AddItem(unsigned short pid, const char* itemName, unsigned short count) noexcept
+void ItemFunctions::AddItem(unsigned short pid, const char* itemName, unsigned int count, int health) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
 
-    LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");
+    Item item;
+    item.refid = itemName;
+    item.count = count;
+    item.health = health;
+
+    player->inventorySendBuffer.items.push_back(item);
+    player->inventorySendBuffer.action = Inventory::ADDITEM;
 }
 
-void ItemFunctions::EquipItem(unsigned short pid, unsigned short slot, const char *itemName, unsigned short count) noexcept
+void ItemFunctions::EquipItem(unsigned short pid, unsigned short slot, const char *itemName, unsigned int count, int health) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
 
     player->EquipedItem(slot)->refid = itemName;
     player->EquipedItem(slot)->count = count;
+    player->EquipedItem(slot)->health = health;
 }
 
 void ItemFunctions::UnequipItem(unsigned short pid, unsigned short slot) noexcept
@@ -53,11 +61,52 @@ bool ItemFunctions::HasItemEquipped(unsigned short pid, const char* itemName)
 
 void ItemFunctions::RemoveItem(unsigned short pid, const char* itemName, unsigned short count) noexcept
 {
-    LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    Item item;
+    item.refid = itemName;
+    item.count = count;
+
+    player->inventorySendBuffer.items.clear();
+    player->inventorySendBuffer.items.push_back(item);
+    player->inventorySendBuffer.action = Inventory::REMOVEITEM;
 }
 void ItemFunctions::GetItemCount(unsigned short pid, const char* itemName) noexcept
 {
     LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");
+}
+
+const char *ItemFunctions::GetItemName(unsigned short pid, unsigned int i) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, "");
+
+    return player->inventory.items.at(i).refid.c_str();
+}
+
+int ItemFunctions::GetItemCount2(unsigned short pid, unsigned int i) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->inventory.items.at(i).count;
+}
+
+int ItemFunctions::GetItemHealth(unsigned short pid, unsigned int i) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->inventory.items.at(i).health;
+}
+
+unsigned int ItemFunctions::GetInventorySize(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->inventory.count;
 }
 
 void ItemFunctions::SendEquipment(unsigned short pid) noexcept
@@ -67,4 +116,14 @@ void ItemFunctions::SendEquipment(unsigned short pid) noexcept
 
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_EQUIPMENT)->Send(player, false);
     mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_EQUIPMENT)->Send(player, true);
+}
+
+void ItemFunctions::SendInventory(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+    std::swap(player->inventory, player->inventorySendBuffer);
+    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_INVENTORY)->Send(player, false);
+    player->inventory = std::move(player->inventorySendBuffer);
+    player->inventorySendBuffer.items.clear();
 }

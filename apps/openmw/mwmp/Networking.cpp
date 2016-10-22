@@ -261,7 +261,7 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
             {
                 if (packet->length == myPacket->headerSize())
                 {
-                    getLocalPlayer()->updateInventory(true);
+                    getLocalPlayer()->updateEquipped(true);
                 }
                 else
                 {
@@ -612,6 +612,56 @@ void Networking::ReceiveMessage(RakNet::Packet *packet)
                 else if (getLocalPlayer()->month != -1)
                     world->setMonth(getLocalPlayer()->month);
             }
+        }
+        case ID_GAME_INVENTORY:
+        {
+            if (id == myid)
+            {
+                if (packet->length == myPacket->headerSize())
+                {
+                    printf("ID_GAME_INVENTORY update only\n");
+                    getLocalPlayer()->updateInventory(true);
+                    GetPacket(ID_GAME_INVENTORY)->Send(getLocalPlayer());
+                }
+                else
+                {
+                    myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    MWWorld::ContainerStore &conStore = ptr.getClass().getContainerStore(ptr);
+                    if (getLocalPlayer()->inventory.action == Inventory::ADDITEM)
+                    {
+                        for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
+                        {
+                            mwmp::Item item = getLocalPlayer()->inventory.items[i];
+                            MWWorld::Ptr itemPtr = *conStore.add(item.refid, item.count, ptr);
+                            if(item.health != -1)
+                                itemPtr.getCellRef().setCharge(item.health);
+                        }
+                    }
+                    else if (getLocalPlayer()->inventory.action == Inventory::REMOVEITEM)
+                    {
+                        for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
+                        {
+                            mwmp::Item item = getLocalPlayer()->inventory.items[i];
+                            conStore.remove(item.refid, item.count, ptr);
+                        }
+                    }
+                    else // update
+                    {
+                        conStore.clear();
+                        for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
+                        {
+                            mwmp::Item item = getLocalPlayer()->inventory.items[i];
+                            MWWorld::Ptr itemPtr = *conStore.add(item.refid, item.count, ptr);
+                            if(item.health != -1)
+                                itemPtr.getCellRef().setCharge(item.health);
+                            printf("%s %d %d\n", item.refid.c_str(), item.count, item.health);
+                        }
+                        getLocalPlayer()->setInventory(); // restore equipped items
+                    }
+                }
+            }
+            break;
         }
         default:
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Custom message with identifier %i has arrived in initialization.", packet->data[0]);

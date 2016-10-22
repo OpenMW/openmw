@@ -371,6 +371,12 @@ void Networking::Update(RakNet::Packet *packet)
             myPacket->Read(player);
             break;
         }
+        case ID_GAME_INVENTORY:
+        {
+            DEBUG_PRINTF("ID_GAME_INVENTORY\n");
+            myPacket->Read(player);
+            break;
+        }
 
         default:
             printf("Message with identifier %i has arrived.\n", packet->data[0]);

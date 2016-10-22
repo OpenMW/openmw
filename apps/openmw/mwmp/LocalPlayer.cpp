@@ -58,11 +58,12 @@ void LocalPlayer::Update()
     updateDrawStateAndFlags();
     updateAttackState();
     updateDeadState();
-    updateInventory();
+    updateEquipped();
     updateDynamicStats();
     updateAttributes();
     updateSkills();
     updateLevel();
+    updateInventory();
 }
 
 void LocalPlayer::charGen(int stageFirst, int stageEnd)
@@ -355,15 +356,14 @@ void LocalPlayer::updateChar()
     MWBase::Environment::get().getWindowManager()->getInventoryWindow()->rebuildAvatar();
 }
 
-void LocalPlayer::updateInventory(bool forceUpdate)
+void LocalPlayer::updateEquipped(bool forceUpdate)
 {
     MWWorld::Ptr player = GetPlayerPtr();
 
-    static bool invChanged = false;
+    static bool equipChanged = false;
 
     if (forceUpdate)
-        invChanged = true;
-
+        equipChanged = true;
 
     MWWorld::InventoryStore &invStore = player.getClass().getInventoryStore(player);
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
@@ -371,9 +371,10 @@ void LocalPlayer::updateInventory(bool forceUpdate)
         MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
         if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), EquipedItem(slot)->refid))
         {
-            invChanged = true;
+            equipChanged = true;
 
             EquipedItem(slot)->refid = it->getCellRef().getRefId();
+            EquipedItem(slot)->health = it->getCellRef().getCharge();
             if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
             {
                 MWMechanics::WeaponType weaptype;
@@ -386,20 +387,101 @@ void LocalPlayer::updateInventory(bool forceUpdate)
         }
         else if (it == invStore.end() && !EquipedItem(slot)->refid.empty())
         {
-            invChanged = true;
+            equipChanged = true;
             EquipedItem(slot)->refid = "";
             EquipedItem(slot)->count = 0;
+            EquipedItem(slot)->health = 0;
         }
     }
 
-    if (invChanged)
+    if (equipChanged)
     {
         RakNet::BitStream bs;
         bs.ResetWritePointer();
         GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_EQUIPMENT)->Packet(&bs, this, true);
         GetNetworking()->SendData(&bs);
-        invChanged = false;
+        equipChanged = false;
     }
+}
+
+void LocalPlayer::updateInventory(bool forceUpdate)
+{
+    static bool invChanged = false;
+    if (forceUpdate)
+        invChanged = true;
+
+    MWWorld::Ptr player = GetPlayerPtr();
+    MWWorld::InventoryStore &invStore = player.getClass().getInventoryStore(player);
+    mwmp::Item item;
+
+    if(!invChanged)
+        for (vector<Item>::iterator iter = inventory.items.begin(); iter != inventory.items.end(); ++iter)
+        {
+            MWWorld::ContainerStoreIterator result(invStore.begin());
+            for (; result != invStore.end(); ++result)
+            {
+                item.refid = result->getCellRef().getRefId();
+                if(item.refid.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
+                    continue;
+
+                item.count = result->getRefData().getCount();
+                item.health = result->getCellRef().getCharge();
+
+                if(item == (*iter))
+                    break;
+            }
+            if(result == invStore.end())
+            {
+                invChanged = true;
+                break;
+            }
+        }
+    if (!invChanged)
+        for (MWWorld::ContainerStoreIterator iter(invStore.begin()); iter != invStore.end(); ++iter)
+        {
+            item.refid = iter->getCellRef().getRefId();
+            if (item.refid.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
+                continue;
+
+            item.count = iter->getRefData().getCount();
+            item.health = iter->getCellRef().getCharge();
+
+            vector<Item>::iterator result = inventory.items.begin();
+
+            for (; result != inventory.items.end(); result++)
+            {
+                if ((*result) == item)
+                    break;
+            }
+
+            if (result == inventory.items.end())
+            {
+                invChanged = true;
+                break;
+            }
+        }
+
+    if (!invChanged)
+        return;
+
+    invChanged = false;
+
+    inventory.items.clear();
+    for (MWWorld::ContainerStoreIterator iter(invStore.begin()); iter != invStore.end(); ++iter)
+    {
+        item.refid = iter->getCellRef().getRefId();
+        if (item.refid.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
+            continue;
+
+        item.count = iter->getRefData().getCount();
+        item.health = iter->getCellRef().getCharge();
+
+        inventory.items.push_back(item);
+    }
+
+    inventory.count = (unsigned int) inventory.items.size();
+    inventory.action = Inventory::UPDATE;
+    Main::get().getNetworking()->GetPacket(ID_GAME_INVENTORY)->Send(this);
 }
 
 void LocalPlayer::updateAttackState(bool forceUpdate)
@@ -664,17 +746,23 @@ void LocalPlayer::setInventory()
     MWWorld::Ptr ptrPlayer = GetPlayerPtr();
 
     MWWorld::InventoryStore &ptrInventory = ptrPlayer.getClass().getInventoryStore(ptrPlayer);
-    ptrInventory.clear();
 
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
     {
         mwmp::Item *currentItem = EquipedItem(slot);
 
-        //printf("Setting currentItem: %s in slot %i\n", currentItem->refid, slot);
-
         if (!currentItem->refid.empty())
         {
-            ptrInventory.equip(slot, ptrInventory.ContainerStore::add(EquipedItem(slot)->refid.c_str(), 1, ptrPlayer), ptrPlayer);
+            MWWorld::ContainerStoreIterator it = ptrInventory.begin();
+            for (; it != ptrInventory.end(); ++it) // find item in inventory
+            {
+                if (::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), currentItem->refid))
+                    break;
+            }
+            if (it == ptrInventory.end()) // if not exists add item
+                ptrInventory.equip(slot, ptrInventory.ContainerStore::add(EquipedItem(slot)->refid.c_str(), 1, ptrPlayer), ptrPlayer);
+            else
+                ptrInventory.equip(slot, it, ptrPlayer);
         }
     }
 }

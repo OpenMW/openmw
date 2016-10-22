@@ -32,6 +32,24 @@ namespace mwmp
     {
         std::string refid;
         int count;
+        int health;
+        inline bool operator==(const Item& rhs)
+        {
+            return refid == rhs.refid && count == rhs.count && health == rhs.health;
+        }
+    };
+
+    struct Inventory
+    {
+        std::vector<Item> items;
+        unsigned int count;
+        enum ACTION_TYPE
+        {
+            UPDATE = 0,
+            ADDITEM,
+            REMOVEITEM
+        };
+        int action; //0 - FullUpdate, 1 - AddItem, 2 - RemoveItem
     };
 
     class BasePlayer
@@ -62,7 +80,8 @@ namespace mwmp
 
         BasePlayer(RakNet::RakNetGUID guid) : guid(guid)
         {
-
+            inventory.action = 0;
+            inventory.count = 0;
         }
 
         BasePlayer()
@@ -147,6 +166,7 @@ namespace mwmp
         int month;
         int day;
         double hour;
+        Inventory inventory;
 
     protected:
         ESM::Position pos;
@@ -164,7 +184,6 @@ namespace mwmp
         std::string chatMessage;
         CGStage stage;
         std::string passw;
-
     };
 }
 
