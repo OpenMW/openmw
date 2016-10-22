@@ -157,7 +157,7 @@ add_component_dir (openmw-mp
         Packets/Player/PacketHandshake Packets/Player/PacketGUIBoxes Packets/Player/PacketClass
         Packets/Player/PacketTime
 
-        Packets/World/PacketObjectCreation Packets/World/PacketObjectRemoval)
+        Packets/World/PacketObjectDelete Packets/World/PacketObjectPlace)
 
 add_component_dir (fallback
     fallback validate

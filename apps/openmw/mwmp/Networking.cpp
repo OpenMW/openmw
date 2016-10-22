@@ -637,7 +637,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
     switch (packet->data[0])
     {
-    case ID_WORLD_OBJECT_CREATION:
+    case ID_WORLD_OBJECT_PLACE:
     {
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), event->cellRef.mRefID, 1);
 
@@ -645,11 +645,11 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_WORLD_OBJECT_REMOVAL:
+    case ID_WORLD_OBJECT_DELETE:
     {
         myPacket->Packet(&bsIn, event, false);
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_REMOVAL");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_DELETE");
         LOG_APPEND(Log::LOG_WARN, "- cellRefId: %s, %i",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum);

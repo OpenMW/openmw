@@ -27,9 +27,9 @@ namespace MWWorld
 
         event->cellRef.mRefID = getTarget().getCellRef().getRefId();
         event->cellRef.mRefNum = getTarget().getCellRef().getRefNum();
-        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_REMOVAL)->Send(event);
+        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_DELETE)->Send(event);
 
-        printf("Sending ID_WORLD_OBJECT_REMOVAL about %s\n%i\n",
+        printf("Sending ID_WORLD_OBJECT_DELETE about %s\n%i\n",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum);
 

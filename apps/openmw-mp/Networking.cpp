@@ -375,9 +375,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     switch (packet->data[0])
     {
 
-    case ID_WORLD_OBJECT_CREATION:
+    case ID_WORLD_OBJECT_PLACE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_OBJECT_CREATION from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_OBJECT_PLACE from %s",
             player->Npc()->mName.c_str());
 
         myPacket->Read(event);
@@ -386,9 +386,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_WORLD_OBJECT_REMOVAL:
+    case ID_WORLD_OBJECT_DELETE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_OBJECT_REMOVAL from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_OBJECT_DELETE from %s",
             player->Npc()->mName.c_str());
         
         myPacket->Read(event);
