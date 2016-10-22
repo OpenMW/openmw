@@ -17,9 +17,6 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
-#include <components/openmw-mp/Base/WorldEvent.hpp>
-#include "../mwmp/Main.hpp"
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -1106,19 +1103,6 @@ namespace MWWorld
                 && mWorldScene->getActiveCells().find(ptr.getCell()) != mWorldScene->getActiveCells().end()
                 && ptr.getRefData().isEnabled())
             {
-                // Added by tes3mp
-                mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                event->cellRef.blank();
-
-                event->cellRef.mRefID = ptr.getCellRef().getRefId();
-                event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
-                mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_REMOVAL)->Send(event);
-
-                printf("Sending ID_WORLD_OBJECT_REMOVAL about\n%s\n%s\n%i\n",
-                    ptr.getCellRef().getRefId().c_str(),
-                    event->cellRef.mRefID.c_str(),
-                    event->cellRef.mRefNum);
-
                 mWorldScene->removeObjectFromScene (ptr);
                 mLocalScripts.remove (ptr);
                 removeContainerScripts (ptr);

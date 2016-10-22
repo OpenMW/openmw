@@ -660,7 +660,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
             ptrFound.getCellRef().getRefId().c_str(),
             ptrFound.getCellRef().getRefNum());
 
-        //MWBase::Environment::get().getWorld()->deleteObject(object);
+        MWBase::Environment::get().getWorld()->deleteObject(ptrFound);
 
         break;
     }
