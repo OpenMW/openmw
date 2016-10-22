@@ -391,6 +391,11 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
             player->Npc()->mName.c_str());
         
         myPacket->Read(event);
+
+        LOG_APPEND(Log::LOG_WARN, "- %s", event->CellRef()->mRefID.c_str());
+
+        LOG_APPEND(Log::LOG_WARN, "- %i", event->CellRef()->mRefNum);
+
         myPacket->Send(event, true);
 
         break;

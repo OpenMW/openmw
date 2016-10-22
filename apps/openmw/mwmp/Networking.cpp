@@ -633,10 +633,16 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     WorldPacket *myPacket = worldController.GetPacket(packet->data[0]);
     WorldEvent *event = new WorldEvent(id);
 
+    MWWorld::CellStore *ptrCellStore = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
+
     switch (packet->data[0])
     {
     case ID_WORLD_OBJECT_CREATION:
     {
+        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), event->CellRef()->mRefID, 1);
+
+        MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(), ptrCellStore, event->CellRef()->mPos);
+
         break;
     }
     case ID_WORLD_OBJECT_REMOVAL:
@@ -647,6 +653,10 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         LOG_APPEND(Log::LOG_WARN, "- cellRefId: %s, %i",
             event->CellRef()->mRefID.c_str(),
             event->CellRef()->mRefNum);
+
+        //MWWorld::Ptr object = ptrCellStore->search(event->CellRef()->mRefID);
+        //MWBase::Environment::get().getWorld()->deleteObject(object);
+        
 
         break;
     }
