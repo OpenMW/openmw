@@ -366,11 +366,9 @@ namespace MWGui
 
     void MapWindow::updatePlayerMarkers()
     {
-        printf("MapWindow::updatePlayerMarkers!!\n");
         LocalMapBase::updatePlayerMarkers();
 
         mwmp::Main::get().getGUIController()->updateGlobalMapMarkerTooltips(this);
-        printf("End of MapWindow::updatePlayerMarkers!!\n");
     }
 
     void LocalMapBase::setActiveCell(const int x, const int y, bool interior)

@@ -47,13 +47,12 @@ namespace mwmp
         void updatePlayersMarkers(MWGui::LocalMapBase *localMapBase);
         void updateGlobalMapMarkerTooltips(MWGui::MapWindow *pWindow);
 
-        void SetMapVisibility(int pid, bool state);
+        ESM::CustomMarker CreateMarker(const RakNet::RakNetGUID &guid);
         PlayerMarkerCollection mPlayerMarkers;
     private:
         void setGlobalMapMarkerTooltip(MWGui::MapWindow *mapWindow ,MyGUI::Widget* markerWidget, int x, int y);
 
     private:
-        std::vector<MyGUI::Widget*> mPlayerMarkerWidgets;
         GUIChat *mChat;
         int keySay;
         int keyChatMode;

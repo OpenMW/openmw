@@ -72,3 +72,8 @@ size_t PlayerMarkerCollection::size() const
 {
     return mMarkers.size();
 }
+
+bool PlayerMarkerCollection::isExists(const ESM::CustomMarker &marker)
+{
+    return mMarkers.find(marker.mCell) != mMarkers.end();
+}

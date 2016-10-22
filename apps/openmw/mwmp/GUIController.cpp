@@ -21,11 +21,13 @@
 #include <MyGUI_FactoryManager.h>
 #include <apps/openmw/mwgui/mapwindow.hpp>
 #include <MyGUI_TextIterator.h>
+#include <components/openmw-mp/Log.hpp>
 
 
 #include "GUIController.hpp"
 #include "Main.hpp"
 #include "PlayerMarkerCollection.hpp"
+#include "DedicatedPlayer.hpp"
 
 
 mwmp::GUIController::GUIController(): mInputBox(0)
@@ -143,24 +145,8 @@ bool mwmp::GUIController::pressedKey(int key)
     }
     else if (key == keySay)
     {
-        //MyGUI::Widget *oldFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
         mChat->PressedSay();
-        /*MyGUI::Widget *newFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
-        printf("mwmp::GUIController::pressedKey. oldFocus: %s.\n", oldFocus ? oldFocus->getName().c_str() : "nil");
-        printf("mwmp::GUIController::pressedKey.newFocus: %s.\n", newFocus ? newFocus->getName().c_str() : "nil");*/
         return true;
-    }
-    else if(key == SDLK_BACKSPACE)
-    {
-        /*
-        static bool test = true;
-        if(test)
-        {
-            test = false;
-            SetMapVisibility(0, true);
-        }
-        */
-        SetMapVisibility(0, true);
     }
     return false;
 }
@@ -233,38 +219,38 @@ private:
     }
 };
 
-
-void mwmp::GUIController::SetMapVisibility(int pid, bool state)
+ESM::CustomMarker mwmp::GUIController::CreateMarker(const RakNet::RakNetGUID &guid)
 {
+    DedicatedPlayer *player = Players::GetPlayer(guid);
     ESM::CustomMarker mEditingMarker;
-    mEditingMarker.mNote = "TEST";
-    MWBase::World *world = MWBase::Environment::get().getWorld();
-    const ESM::Cell *ptrCell = world->getPlayerPtr().getCell()->getCell();
+    if (!player)
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "Unknown player guid: %lu", guid.g);
+        return mEditingMarker;
+    }
 
-    mEditingMarker.mCell = ptrCell->mCellId;
+    mEditingMarker.mNote = player->Npc()->mName;
 
-    mEditingMarker.mWorldX = world->getPlayerPtr().getRefData().getPosition().pos[0];
-    mEditingMarker.mWorldY = world->getPlayerPtr().getRefData().getPosition().pos[1];
+    const ESM::Cell *ptrCell = player->GetCell();
+
+    mEditingMarker.mCell = player->GetCell()->mCellId;
+
+    mEditingMarker.mWorldX = player->Position()->pos[0];
+    mEditingMarker.mWorldY = player->Position()->pos[1];
 
     mEditingMarker.mCell.mPaged = ptrCell->isExterior();
-
     if (!ptrCell->isExterior())
         mEditingMarker.mCell.mWorldspace = ptrCell->mName;
     else
-    {
         mEditingMarker.mCell.mWorldspace = ESM::CellId::sDefaultWorldspace;
-        mEditingMarker.mCell.mIndex.mX = ptrCell->getGridX();
-        mEditingMarker.mCell.mIndex.mY = ptrCell->getGridY();
-    }
-
-    mPlayerMarkers.addMarker(mEditingMarker, true);
+    return mEditingMarker;
 }
+
 
 void mwmp::GUIController::updatePlayersMarkers(MWGui::LocalMapBase *localMapBase)
 {
-    printf("updatePlayersMarkers!!!\n");
-    for (std::vector<MyGUI::Widget*>::iterator it = localMapBase->mPlayerMarkerWidgets.begin(); it != localMapBase->mPlayerMarkerWidgets.end(); ++it)
-
+    std::vector<MyGUI::Widget*>::iterator it = localMapBase->mPlayerMarkerWidgets.begin();
+    for (; it != localMapBase->mPlayerMarkerWidgets.end(); ++it)
         MyGUI::Gui::getInstance().destroyWidget(*it);
     localMapBase->mPlayerMarkerWidgets.clear();
 
