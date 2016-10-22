@@ -1108,15 +1108,16 @@ namespace MWWorld
             {
                 // Added by tes3mp
                 mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                event->cellRef.blank();
 
-                event->CellRef()->mRefID = ptr.getCellRef().getRefId();
-                event->CellRef()->mRefNum = ptr.getCellRef().getRefNum();
+                event->cellRef.mRefID = ptr.getCellRef().getRefId();
+                event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
                 mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_REMOVAL)->Send(event);
 
                 printf("Sending ID_WORLD_OBJECT_REMOVAL about\n%s\n%s\n%i\n",
                     ptr.getCellRef().getRefId().c_str(),
-                    event->CellRef()->mRefID.c_str(),
-                    event->CellRef()->mRefNum);
+                    event->cellRef.mRefID.c_str(),
+                    event->cellRef.mRefNum);
 
                 mWorldScene->removeObjectFromScene (ptr);
                 mLocalScripts.remove (ptr);

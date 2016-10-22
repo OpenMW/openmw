@@ -12,5 +12,6 @@ void PacketObjectCreation::Packet(RakNet::BitStream *bs, WorldEvent *event, bool
 {
     WorldPacket::Packet(bs, event, send);
 
-    RW(*event->CellRef(), send);
+    RW(event->cellRef.mRefID, send);
+    RW(event->cellRef.mRefNum, send);
 }

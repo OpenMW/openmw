@@ -20,17 +20,8 @@ namespace mwmp
 
         }
 
-        virtual ESM::CellRef *CellRef()
-        {
-            return &ref;
-        }
-
         RakNet::RakNetGUID guid;
-
-    protected:
-
-        ESM::CellRef ref;
-
+        ESM::CellRef cellRef;
     };
 }
 

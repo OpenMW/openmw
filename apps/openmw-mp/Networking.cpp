@@ -370,6 +370,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
     WorldPacket *myPacket = worldController->GetPacket(packet->data[0]);
     WorldEvent *event = new WorldEvent(player->guid);
+    event->cellRef.blank();
 
     switch (packet->data[0])
     {
@@ -392,9 +393,8 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         
         myPacket->Read(event);
 
-        LOG_APPEND(Log::LOG_WARN, "- %s", event->CellRef()->mRefID.c_str());
-
-        LOG_APPEND(Log::LOG_WARN, "- %i", event->CellRef()->mRefNum);
+        LOG_APPEND(Log::LOG_WARN, "- %s", event->cellRef.mRefID.c_str());
+        LOG_APPEND(Log::LOG_WARN, "- %i", event->cellRef.mRefNum);
 
         myPacket->Send(event, true);
 

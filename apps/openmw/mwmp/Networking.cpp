@@ -639,9 +639,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     {
     case ID_WORLD_OBJECT_CREATION:
     {
-        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), event->CellRef()->mRefID, 1);
+        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), event->cellRef.mRefID, 1);
 
-        MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(), ptrCellStore, event->CellRef()->mPos);
+        MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(), ptrCellStore, event->cellRef.mPos);
 
         break;
     }
@@ -651,10 +651,10 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_REMOVAL");
         LOG_APPEND(Log::LOG_WARN, "- cellRefId: %s, %i",
-            event->CellRef()->mRefID.c_str(),
-            event->CellRef()->mRefNum);
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum);
 
-        //MWWorld::Ptr object = ptrCellStore->search(event->CellRef()->mRefID);
+        //MWWorld::Ptr object = ptrCellStore->search(event->cellRef.mRefID);
         //MWBase::Environment::get().getWorld()->deleteObject(object);
         
 
