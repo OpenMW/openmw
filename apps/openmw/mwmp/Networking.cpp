@@ -656,11 +656,14 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
-            ptrFound.getCellRef().getRefId().c_str(),
-            ptrFound.getCellRef().getRefNum());
+        if (ptrFound)
+        {
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+                ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum());
 
-        MWBase::Environment::get().getWorld()->deleteObject(ptrFound);
+            MWBase::Environment::get().getWorld()->deleteObject(ptrFound);
+        }
 
         break;
     }
