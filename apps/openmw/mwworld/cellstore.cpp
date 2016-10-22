@@ -433,6 +433,14 @@ namespace MWWorld
         return Ptr();
     }
 
+    // Added by tes3mp
+    Ptr CellStore::searchByRefNum (ESM::RefNum refNum)
+    {
+        SearchByRefNumVisitor searchVisitor(refNum);
+        forEach(searchVisitor);
+        return searchVisitor.mFound;
+    }
+
     float CellStore::getWaterLevel() const
     {
         if (isExterior())
