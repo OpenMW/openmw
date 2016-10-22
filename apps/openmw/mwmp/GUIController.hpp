@@ -10,6 +10,13 @@
 #include <apps/openmw/mwgui/mode.hpp>
 #include <components/openmw-mp/Base/BasePlayer.hpp>
 #include "GUIChat.hpp"
+#include "PlayerMarkerCollection.hpp"
+
+namespace MWGui
+{
+    class LocalMapBase;
+    class MapWindow;
+}
 
 namespace mwmp
 {
@@ -36,6 +43,15 @@ namespace mwmp
         void update(float dt);
 
         void WM_UpdateVisible(MWGui::GuiMode mode);
+
+        void updatePlayersMarkers(MWGui::LocalMapBase *localMapBase);
+        void updateGlobalMapMarkerTooltips(MWGui::MapWindow *pWindow);
+
+        ESM::CustomMarker CreateMarker(const RakNet::RakNetGUID &guid);
+        PlayerMarkerCollection mPlayerMarkers;
+    private:
+        void setGlobalMapMarkerTooltip(MWGui::MapWindow *mapWindow ,MyGUI::Widget* markerWidget, int x, int y);
+
     private:
         GUIChat *mChat;
         int keySay;

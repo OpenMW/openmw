@@ -17,6 +17,7 @@
 #include "../mwmechanics/mechanicsmanagerimp.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/action.hpp"
+#include "Main.hpp"
 #include <apps/openmw/mwworld/inventorystore.hpp>
 #include <boost/algorithm/clamp.hpp>
 #include <components/openmw-mp/Log.hpp>
@@ -107,6 +108,10 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
     dedicPlayer->state = 2;
 
     world->enable(players[id]->ptr);
+
+    ESM::CustomMarker mEditingMarker = Main::get().getGUIController()->CreateMarker(id);
+    dedicPlayer->marker = mEditingMarker;
+    dedicPlayer->markerEnabled = true;
 }
 
 
@@ -211,6 +216,8 @@ void DedicatedPlayer::Move(float dt)
 
 void Players::Update(float dt)
 {
+    static float timer = 0;
+    timer += dt;
     for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
     {
         DedicatedPlayer *pl = it->second;
@@ -251,7 +258,12 @@ void Players::Update(float dt)
         ptrNpcStats->setBaseDisposition(255);
         pl->Move(dt);
         pl->UpdateDrawState();
+
+        if (timer >= 0.2) // call every 200 msec
+            pl->updateMarker();
     }
+    if (timer >= 0.2)
+        timer = 0;
 }
 
 void DedicatedPlayer::UpdatePtr(MWWorld::Ptr newPtr)
@@ -449,4 +461,36 @@ void DedicatedPlayer::updateCell()
     // a manual cell update has been called
     ptr.getBase()->canChangeCell = true;
     UpdatePtr(world->moveObject(ptr, cellStore, pos.pos[0], pos.pos[1], pos.pos[2]));
+}
+
+
+void DedicatedPlayer::updateMarker()
+{
+    if (!markerEnabled)
+        return;
+    GUIController *gui = Main::get().getGUIController();
+    if (gui->mPlayerMarkers.isExists(marker))
+    {
+        gui->mPlayerMarkers.deleteMarker(marker);
+        marker = gui->CreateMarker(guid);
+        gui->mPlayerMarkers.addMarker(marker);
+    }
+    else
+        gui->mPlayerMarkers.addMarker(marker, true);
+}
+
+void DedicatedPlayer::removeMarker()
+{
+    if (!markerEnabled)
+        return;
+    markerEnabled = false;
+    Main::get().getGUIController()->mPlayerMarkers.deleteMarker(marker);
+}
+
+void DedicatedPlayer::enableMarker(bool enable)
+{
+    if (enable)
+        updateMarker();
+    else
+        removeMarker();
 }

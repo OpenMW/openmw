@@ -12,6 +12,7 @@
 #include <RakNetTypes.h>
 
 #include <components/openmw-mp/Base/BasePlayer.hpp>
+#include <components/esm/custommarkerstate.hpp>
 
 
 namespace mwmp
@@ -46,6 +47,9 @@ namespace mwmp
 
         void updateCell();
 
+        void updateMarker();
+        void removeMarker();
+        void enableMarker(bool enable);
     private:
         DedicatedPlayer(RakNet::RakNetGUID guid);
         virtual ~DedicatedPlayer();
@@ -55,6 +59,9 @@ namespace mwmp
         MWWorld::ManualRef* reference;
 
         MWWorld::Ptr ptr;
+
+        ESM::CustomMarker marker;
+        bool markerEnabled;
     };
 }
 #endif //OPENMW_PLAYER_HPP
