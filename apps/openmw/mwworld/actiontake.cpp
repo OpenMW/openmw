@@ -8,6 +8,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
+#include "../mwworld/cellstore.hpp"
+
 #include "class.hpp"
 #include "containerstore.hpp"
 
@@ -23,8 +25,8 @@ namespace MWWorld
 
         // Added by tes3mp
         mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-        event->cellRef.blank();
 
+        event->cellId = getTarget().getCell()->getCell()->getCellId();
         event->cellRef.mRefID = getTarget().getCellRef().getRefId();
         event->cellRef.mRefNum = getTarget().getCellRef().getRefNum();
         mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_DELETE)->Send(event);

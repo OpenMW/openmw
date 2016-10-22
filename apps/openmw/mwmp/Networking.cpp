@@ -633,7 +633,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     WorldPacket *myPacket = worldController.GetPacket(packet->data[0]);
     WorldEvent *event = new WorldEvent(id);
 
-    MWWorld::CellStore *ptrCellStore = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
+    MWWorld::CellStore *ptrCellStore = MWBase::Environment::get().getWorld()->getCell(event->cellId);
 
     switch (packet->data[0])
     {
