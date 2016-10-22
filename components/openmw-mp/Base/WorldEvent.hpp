@@ -23,7 +23,7 @@ namespace mwmp
 
         RakNet::RakNetGUID guid;
 
-        ESM::CellId cellId;
+        ESM::Cell cell;
         ESM::CellRef cellRef;
     };
 }
