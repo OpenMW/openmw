@@ -2,6 +2,9 @@
 
 #include <cstdlib>
 
+#include <components/openmw-mp/Base/WorldEvent.hpp>
+#include "../mwmp/Main.hpp"
+
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 #include <components/compiler/locals.hpp>
@@ -668,7 +671,16 @@ namespace MWScript
                     runtime.pop();
 
                     if (parameter == 1)
+                    {
+                        // Added by tes3mp
+                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                        event->cell = *ptr.getCell()->getCell();
+                        event->cellRef.mRefID = ptr.getCellRef().getRefId();
+                        event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_DELETE)->Send(event);
+
                         MWBase::Environment::get().getWorld()->deleteObject(ptr);
+                    }
                     else if (parameter == 0)
                         MWBase::Environment::get().getWorld()->undeleteObject(ptr);
                     else
