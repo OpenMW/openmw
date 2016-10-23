@@ -40,6 +40,7 @@ namespace mwmp
         setTitle("Chat");
 
         mHistory->setOverflowToTheLeft(true);
+        mHistory->setEditWordWrap(true);
 
         windowState = 0;
         mCommandLine->setVisible(0);
