@@ -10,16 +10,17 @@
 #include <string>
 
 #include <components/openmw-mp/NetworkMessages.hpp>
-#include <components/openmw-mp/Packets/PacketPosition.hpp>
-#include <components/openmw-mp/Packets/PacketBaseInfo.hpp>
-#include <components/openmw-mp/Packets/PacketEquipment.hpp>
-#include <components/openmw-mp/Packets/PacketAttack.hpp>
-#include <components/openmw-mp/Packets/PacketDynamicStats.hpp>
-#include <components/openmw-mp/Packets/PacketResurrect.hpp>
-#include <components/openmw-mp/Packets/PacketDie.hpp>
-#include <components/openmw-mp/Packets/PacketCell.hpp>
-#include <components/openmw-mp/Packets/PacketDrawState.hpp>
-#include <components/openmw-mp/PacketsController.hpp>
+#include <components/openmw-mp/Packets/Player/PacketPosition.hpp>
+#include <components/openmw-mp/Packets/Player/PacketBaseInfo.hpp>
+#include <components/openmw-mp/Packets/Player/PacketEquipment.hpp>
+#include <components/openmw-mp/Packets/Player/PacketAttack.hpp>
+#include <components/openmw-mp/Packets/Player/PacketDynamicStats.hpp>
+#include <components/openmw-mp/Packets/Player/PacketResurrect.hpp>
+#include <components/openmw-mp/Packets/Player/PacketDie.hpp>
+#include <components/openmw-mp/Packets/Player/PacketCell.hpp>
+#include <components/openmw-mp/Packets/Player/PacketDrawState.hpp>
+#include <components/openmw-mp/Controllers/PlayerPacketController.hpp>
+#include <components/openmw-mp/Controllers/WorldPacketController.hpp>
 
 namespace mwmp
 {
@@ -33,7 +34,9 @@ namespace mwmp
         void Connect(const std::string& ip, unsigned short port);
         void Update();
         void SendData(RakNet::BitStream *bitStream);
-        PlayerPacket *GetPacket(RakNet::MessageID id);
+
+        PlayerPacket *GetPlayerPacket(RakNet::MessageID id);
+        WorldPacket *GetWorldPacket(RakNet::MessageID id);
 
         bool isDedicatedPlayer(const MWWorld::Ptr &ptr);
         bool Attack(const MWWorld::Ptr &ptr);
@@ -45,14 +48,19 @@ namespace mwmp
 
         bool isConnected();
 
+        WorldEvent *createWorldEvent();
+
     private:
         bool connected;
         RakNet::RakPeerInterface *peer;
         RakNet::SystemAddress serverAddr;
         RakNet::BitStream bsOut;
 
-        PacketsController controller;
+        PlayerPacketController playerController;
+        WorldPacketController worldController;
 
+        void ProcessPlayerPacket(RakNet::Packet *packet);
+        void ProcessWorldPacket(RakNet::Packet *packet);
         void ReceiveMessage(RakNet::Packet *packet);
         LocalPlayer *getLocalPlayer();
     };

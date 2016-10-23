@@ -439,7 +439,7 @@ void DedicatedPlayer::updateCell()
     MWWorld::CellStore *cellStore;
 
     if (cell.isExterior() == 1)
-        cellStore = world->getExterior(cell.mCellId.mIndex.mX, cell.mCellId.mIndex.mY);
+        cellStore = world->getExterior(cell.mData.mX, cell.mData.mY);
     else if (!cell.mName.empty())
         cellStore = world->getInterior(cell.mName);
     // Go no further if cell data is invalid

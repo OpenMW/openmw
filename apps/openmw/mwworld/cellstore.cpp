@@ -168,6 +168,30 @@ namespace
             return true;
         }
     };
+
+    // Added by tes3mp
+    template <typename PtrType>
+    struct SearchByRefNumCustomVisitor
+    {
+        PtrType mFound;
+        ESM::RefNum mRefNumToFind;
+
+        SearchByRefNumCustomVisitor(const ESM::RefNum& toFind)
+            : mFound(NULL)
+            , mRefNumToFind(toFind)
+        {
+        }
+
+        bool operator()(const PtrType& ptr)
+        {
+            if (ptr.getCellRef().getRefNum() == mRefNumToFind)
+            {
+                mFound = ptr;
+                return false;
+            }
+            return true;
+        }
+    };
 }
 
 namespace MWWorld
@@ -431,6 +455,14 @@ namespace MWWorld
         }
 
         return Ptr();
+    }
+
+    // Added by tes3mp
+    Ptr CellStore::searchByRefNum (ESM::RefNum refNum)
+    {
+        SearchByRefNumCustomVisitor<MWWorld::Ptr> searchVisitor(refNum);
+        forEach(searchVisitor);
+        return searchVisitor.mFound;
     }
 
     float CellStore::getWaterLevel() const

@@ -551,7 +551,7 @@ namespace MWClass
 
     void Npc::hit(const MWWorld::Ptr& ptr, float attackStrength, int type) const
     {
-        if(mwmp::Main::get().getNetworking()->isDedicatedPlayer(ptr))
+        if (mwmp::Main::get().getNetworking()->isDedicatedPlayer(ptr))
             return;
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -594,16 +594,16 @@ namespace MWClass
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, ptr.getClass().getSkill(ptr, weapskill));
 
-        if(ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
         {
             mwmp::Main::get().getLocalPlayer()->GetAttack()->success = true;
-            if(mwmp::Main::get().getNetworking()->isDedicatedPlayer(victim))
+            if (mwmp::Main::get().getNetworking()->isDedicatedPlayer(victim))
                 mwmp::Main::get().getLocalPlayer()->GetAttack()->target =mwmp::Players::GetPlayer(victim)->guid;
         }
 
         if(Misc::Rng::roll0to99() >= hitchance)
         {
-            if(ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
             {
                 mwmp::Main::get().getLocalPlayer()->GetAttack()->success = false;
                 mwmp::Main::get().getLocalPlayer()->sendAttack(0);
@@ -843,7 +843,7 @@ namespace MWClass
         }
 
 
-        if(attacker == MWMechanics::getPlayer() && mwmp::Main::get().getNetworking()->isDedicatedPlayer(ptr))
+        if (attacker == MWMechanics::getPlayer() && mwmp::Main::get().getNetworking()->isDedicatedPlayer(ptr))
         {
             mwmp::Attack *_atk = mwmp::Main::get().getLocalPlayer()->GetAttack();
             _atk->damage = damage;
@@ -853,7 +853,7 @@ namespace MWClass
             mwmp::Main::get().getLocalPlayer()->sendAttack(0); // todo: make this sensitive to different weapon types
         }
 
-        if(ptr == MWMechanics::getPlayer())
+        if (ptr == MWMechanics::getPlayer())
         {
             mwmp::Main::get().getLocalPlayer()->updateDynamicStats(true);
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after getting damage;
@@ -863,7 +863,7 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        if(actor == MWMechanics::getPlayer() && mwmp::Main::get().getNetworking()->isDedicatedPlayer(ptr))
+        if (actor == MWMechanics::getPlayer() && mwmp::Main::get().getNetworking()->isDedicatedPlayer(ptr))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("Not implemented."));
         // player got activated by another NPC
         if(ptr == MWMechanics::getPlayer())

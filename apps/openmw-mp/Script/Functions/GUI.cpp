@@ -18,7 +18,7 @@ void GUIFunctions::_MessageBox(unsigned short pid, int id, const char *label) no
     player->guiMessageBox.label = label;
     player->guiMessageBox.type = Player::GUIMessageBox::MessageBox;
 
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GUI_MESSAGEBOX)->Send(player, false);
+    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GUI_MESSAGEBOX)->Send(player, false);
 }
 
 void GUIFunctions::CustomMessageBox(unsigned short pid, int id, const char *label, const char *buttons) noexcept
@@ -31,7 +31,7 @@ void GUIFunctions::CustomMessageBox(unsigned short pid, int id, const char *labe
     player->guiMessageBox.buttons = buttons;
     player->guiMessageBox.type = Player::GUIMessageBox::CustomMessageBox;
 
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GUI_MESSAGEBOX)->Send(player, false);
+    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GUI_MESSAGEBOX)->Send(player, false);
 }
 
 void GUIFunctions::InputDialog(unsigned short pid, int id, const char *label) noexcept
@@ -43,7 +43,7 @@ void GUIFunctions::InputDialog(unsigned short pid, int id, const char *label) no
     player->guiMessageBox.label = label;
     player->guiMessageBox.type = Player::GUIMessageBox::InputDialog;
 
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GUI_MESSAGEBOX)->Send(player, false);
+    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GUI_MESSAGEBOX)->Send(player, false);
 }
 
 void GUIFunctions::SetMapVisibility(unsigned short targetPID, unsigned short affectedPID, unsigned short state) noexcept

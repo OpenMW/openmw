@@ -117,13 +117,13 @@ namespace MWMechanics
 
 
         bool isDedicated = mwmp::Main::get().getNetworking()->isDedicatedPlayer(blocker);
-        if(attacker == MWMechanics::getPlayer())
+        if (attacker == MWMechanics::getPlayer())
             mwmp::Main::get().getLocalPlayer()->GetAttack()->block = false;
 
-        if((!isDedicated && Misc::Rng::roll0to99() < x) ||
+        if ((!isDedicated && Misc::Rng::roll0to99() < x) ||
            (isDedicated && mwmp::Players::GetPlayer(blocker)->GetAttack()->block == 1))
         {
-            if(attacker == MWMechanics::getPlayer())
+            if (attacker == MWMechanics::getPlayer())
                 mwmp::Main::get().getLocalPlayer()->GetAttack()->block = true;
 
             // Reduce shield durability by incoming damage
@@ -180,7 +180,7 @@ namespace MWMechanics
     void projectileHit(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, MWWorld::Ptr weapon, const MWWorld::Ptr &projectile,
                        const osg::Vec3f& hitPosition, float attackStrength)
     {
-        if(mwmp::Main::get().getNetworking()->isDedicatedPlayer(attacker))
+        if (mwmp::Main::get().getNetworking()->isDedicatedPlayer(attacker))
             return;
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
@@ -202,7 +202,7 @@ namespace MWMechanics
         int skillValue = attacker.getClass().getSkill(attacker,
                                            weapon.getClass().getEquipmentSkill(weapon));
 
-        if(attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
             mwmp::Main::get().getLocalPlayer()->GetAttack()->success = true;
 
         if (Misc::Rng::roll0to99() >= getHitChance(attacker, victim, skillValue))

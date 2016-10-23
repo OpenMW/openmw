@@ -90,7 +90,7 @@ bool LocalPlayer::charGenThread() // todo: need fix
             (*BirthSign()) = world->getPlayer().getBirthSign();
 
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server with my CharGen info");
-            GetNetworking()->GetPacket(ID_GAME_BASE_INFO)->Send(this);
+            GetNetworking()->GetPlayerPacket(ID_GAME_BASE_INFO)->Send(this);
 
             if (CharGenStage()->end != 1)
             {
@@ -99,11 +99,11 @@ bool LocalPlayer::charGenThread() // todo: need fix
                 updateSkills(true);
                 updateLevel(true);
                 sendClass();
-                GetNetworking()->GetPacket(ID_GAME_CHARGEN)->Send(this);
+                GetNetworking()->GetPlayerPacket(ID_GAME_CHARGEN)->Send(this);
             }
             CharGenStage()->end = 0;
             /*RakNet::BitStream bs;
-            GetNetworking()->GetPacket(ID_GAME_BASE_INFO)->Packet(&bs, this, true);
+            GetNetworking()->GetPlayerPacket(ID_GAME_BASE_INFO)->Packet(&bs, this, true);
             GetNetworking()->SendData(&bs);*/
 
         }
@@ -128,7 +128,7 @@ bool LocalPlayer::charGenThread() // todo: need fix
         windowManager->pushGuiMode(MWGui::GM_Review);
         break;
     }
-    GetNetworking()->GetPacket(ID_GAME_CHARGEN)->Send(this);
+    GetNetworking()->GetPlayerPacket(ID_GAME_CHARGEN)->Send(this);
     CharGenStage()->current++;
 
     return false;
@@ -163,7 +163,7 @@ void LocalPlayer::updateDynamicStats(bool forceUpdate)
 
             timer = 0;
 
-            GetNetworking()->GetPacket(ID_GAME_DYNAMICSTATS)->Send(this);
+            GetNetworking()->GetPlayerPacket(ID_GAME_DYNAMICSTATS)->Send(this);
         }
     }
 }
@@ -185,7 +185,7 @@ void LocalPlayer::updateAttributes(bool forceUpdate)
 
     if (isUpdating || forceUpdate)
     {
-        GetNetworking()->GetPacket(ID_GAME_ATTRIBUTE)->Send(this);
+        GetNetworking()->GetPlayerPacket(ID_GAME_ATTRIBUTE)->Send(this);
     }
 }
 
@@ -221,7 +221,7 @@ void LocalPlayer::updateSkills(bool forceUpdate)
     if (isUpdating || forceUpdate)
     {
         NpcStats()->mLevelProgress = ptrNpcStats.getLevelProgress();
-        GetNetworking()->GetPacket(ID_GAME_SKILL)->Send(this);
+        GetNetworking()->GetPlayerPacket(ID_GAME_SKILL)->Send(this);
     }
 }
 
@@ -233,7 +233,7 @@ void LocalPlayer::updateLevel(bool forceUpdate)
     if (ptrNpcStats.getLevel() != CreatureStats()->mLevel || forceUpdate)
     {
         CreatureStats()->mLevel = ptrNpcStats.getLevel();
-        GetNetworking()->GetPacket(ID_GAME_LEVEL)->Send(this);
+        GetNetworking()->GetPlayerPacket(ID_GAME_LEVEL)->Send(this);
 
         // Also update skills to refresh level progress and attribute bonuses
         // for next level up
@@ -273,7 +273,7 @@ void LocalPlayer::updatePosition(bool forceUpdate)
         Dir()->pos[1] = move.mPosition[1];
         Dir()->pos[2] = move.mPosition[2];
 
-        GetNetworking()->GetPacket(ID_GAME_POS)->Send(this);
+        GetNetworking()->GetPlayerPacket(ID_GAME_POS)->Send(this);
     }
     else if (isJumping && world->isOnGround(player))
     {
@@ -285,7 +285,7 @@ void LocalPlayer::updatePosition(bool forceUpdate)
     {
         sentJumpEnd = true;
         (*Position()) = ptrPos;
-        GetNetworking()->GetPacket(ID_GAME_POS)->Send(this);
+        GetNetworking()->GetPlayerPacket(ID_GAME_POS)->Send(this);
     }
 }
 
@@ -309,11 +309,11 @@ void LocalPlayer::updateCell(bool forceUpdate)
     }
     else if (ptrCell->isExterior())
     {
-        if (ptrCell->mCellId.mIndex.mX != GetCell()->mCellId.mIndex.mX)
+        if (ptrCell->mData.mX != GetCell()->mData.mX)
         {
             shouldUpdate = true;
         }
-        else if (ptrCell->mCellId.mIndex.mY != GetCell()->mCellId.mIndex.mY)
+        else if (ptrCell->mData.mY != GetCell()->mData.mY)
         {
             shouldUpdate = true;
         }
@@ -334,7 +334,7 @@ void LocalPlayer::updateCell(bool forceUpdate)
         updatePosition(true);
 
         RakNet::BitStream bs;
-        GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_CELL)->Packet(&bs, this, true);
+        GetNetworking()->GetPlayerPacket((RakNet::MessageID) ID_GAME_CELL)->Packet(&bs, this, true);
         GetNetworking()->SendData(&bs);
 
         // Also update skill progress
@@ -398,7 +398,7 @@ void LocalPlayer::updateEquipped(bool forceUpdate)
     {
         RakNet::BitStream bs;
         bs.ResetWritePointer();
-        GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_EQUIPMENT)->Packet(&bs, this, true);
+        GetNetworking()->GetPlayerPacket((RakNet::MessageID) ID_GAME_EQUIPMENT)->Packet(&bs, this, true);
         GetNetworking()->SendData(&bs);
         equipChanged = false;
     }
@@ -508,7 +508,7 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
             GetAttack()->refid = spell;
 
             /*RakNet::BitStream bs;
-            GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
+            GetNetworking()->GetPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
             GetNetworking()->SendData(&bs);*/
         }
         else if (state == MWMechanics::DrawState_Weapon)
@@ -539,7 +539,7 @@ void LocalPlayer::updateDeadState(bool forceUpdate)
     {
         CreatureStats()->mDead = true;
         RakNet::BitStream bs;
-        GetNetworking()->GetPacket((RakNet::MessageID)ID_GAME_DIE)->Packet(&bs, this, true);
+        GetNetworking()->GetPlayerPacket((RakNet::MessageID)ID_GAME_DIE)->Packet(&bs, this, true);
         GetNetworking()->SendData(&bs);
         isDead = true;
     }
@@ -606,7 +606,7 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after jump;
 
         RakNet::BitStream bs;
-        GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_DRAWSTATE)->Packet(&bs, this, true);
+        GetNetworking()->GetPlayerPacket((RakNet::MessageID) ID_GAME_DRAWSTATE)->Packet(&bs, this, true);
         GetNetworking()->SendData(&bs);
         //timer = 0;
     }
@@ -695,8 +695,8 @@ void LocalPlayer::setCell()
 
     world->getPlayer().setTeleported(true);
 
-    int x = GetCell()->mCellId.mIndex.mX;
-    int y = GetCell()->mCellId.mIndex.mY;
+    int x = GetCell()->mData.mX;
+    int y = GetCell()->mData.mY;
 
     if (GetCell()->isExterior())
     {
@@ -783,7 +783,7 @@ void LocalPlayer::sendClass()
     else
         charClass.mId = cls->mId;
 
-    GetNetworking()->GetPacket(ID_GAME_CHARCLASS)->Send(this);
+    GetNetworking()->GetPlayerPacket(ID_GAME_CHARCLASS)->Send(this);
 }
 
 void LocalPlayer::sendAttack(char type)
@@ -801,7 +801,7 @@ void LocalPlayer::sendAttack(char type)
     GetAttack()->type = type;
     GetAttack()->pressed = false;
     RakNet::BitStream bs;
-    GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
+    GetNetworking()->GetPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
     GetNetworking()->SendData(&bs);
 }
 
@@ -832,6 +832,6 @@ void LocalPlayer::prepareAttack(char type, bool state)
     GetAttack()->attacker = guid;
 
     RakNet::BitStream bs;
-    GetNetworking()->GetPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
+    GetNetworking()->GetPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
     GetNetworking()->SendData(&bs);
 }

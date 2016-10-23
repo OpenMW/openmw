@@ -1,5 +1,9 @@
 #include "hud.hpp"
 
+#include <components/openmw-mp/Base/WorldEvent.hpp>
+#include "../mwmp/Main.hpp"
+#include "../mwworld/cellstore.hpp"
+
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_Button.h>
@@ -50,6 +54,18 @@ namespace MWGui
                 dropped = world->dropObjectOnGround(world->getPlayerPtr(), item.mBase, count);
             if (setNewOwner)
                 dropped.getCellRef().setOwner("");
+
+            // Added by tes3mp
+            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+            event->cell = *dropped.getCell()->getCell();
+            event->cellRef.mRefID = dropped.getCellRef().getRefId();
+            event->cellRef.mRefNum = dropped.getCellRef().getRefNum();
+            event->cellRef.mPos = dropped.getCellRef().getPosition();
+            mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_PLACE)->Send(event);
+
+            printf("Sending ID_WORLD_OBJECT_PLACE about %s\n%i\n",
+                event->cellRef.mRefID.c_str(),
+                event->cellRef.mRefNum.mIndex);
 
             return dropped;
         }

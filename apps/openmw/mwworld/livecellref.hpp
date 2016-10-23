@@ -28,7 +28,7 @@ namespace MWWorld
          */
         MWWorld::CellRef mRef;
     
-        /* Added by TES3MP to prevent dedicated players' references from automatically
+        /* Added by tes3mp to prevent dedicated players' references from automatically
          * and unpredictably moving across exterior cell boundaries on clients
          */
         bool canChangeCell;

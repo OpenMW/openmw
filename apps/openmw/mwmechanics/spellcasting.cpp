@@ -799,13 +799,13 @@ namespace MWMechanics
 
             bool isDedicated = mwmp::Main::get().getNetworking()->isDedicatedPlayer(mCaster);
 
-            if(mCaster == getPlayer())
+            if (mCaster == getPlayer())
             {
                 mwmp::Main::get().getLocalPlayer()->GetAttack()->success = true;
                 mwmp::Main::get().getLocalPlayer()->GetAttack()->pressed = true;
             }
 
-            if(isDedicated)
+            if (isDedicated)
             {
                 mwmp::Players::GetPlayer(mCaster)->GetAttack()->pressed = false;
             }
@@ -821,7 +821,7 @@ namespace MWMechanics
                 fail = true;
             }
 
-            if(mCaster == getPlayer())
+            if (mCaster == getPlayer())
             {
                 mwmp::Main::get().getLocalPlayer()->sendAttack(1);
                 mwmp::Main::get().getLocalPlayer()->GetAttack()->pressed = false;

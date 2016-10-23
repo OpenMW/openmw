@@ -5,7 +5,8 @@
 #ifndef OPENMW_NETWORKING_HPP
 #define OPENMW_NETWORKING_HPP
 
-#include <components/openmw-mp/PacketsController.hpp>
+#include <components/openmw-mp/Controllers/PlayerPacketController.hpp>
+#include <components/openmw-mp/Controllers/WorldPacketController.hpp>
 #include "Player.hpp"
 
 namespace  mwmp
@@ -19,7 +20,11 @@ namespace  mwmp
         void NewPlayer(RakNet::RakNetGUID guid);
         void DisconnectPlayer(RakNet::RakNetGUID guid);
         void KickPlayer(RakNet::RakNetGUID guid);
+
+        void ProcessPlayerPacket(RakNet::Packet *packet);
+        void ProcessWorldPacket(RakNet::Packet *packet);
         void Update(RakNet::Packet *packet);
+
         unsigned short NumberOfConnections() const;
         unsigned int MaxConnections() const;
 
@@ -27,7 +32,9 @@ namespace  mwmp
 
         void StopServer(int code);
 
-        PacketsController *GetController() const;
+        PlayerPacketController *GetPlayerController() const;
+        WorldPacketController *GetWorldController() const;
+
         static const Networking &Get();
         static Networking *GetPtr();
 
@@ -37,7 +44,8 @@ namespace  mwmp
         RakNet::BitStream bsOut;
         TPlayers *players;
 
-        PacketsController *controller;
+        PlayerPacketController *playerController;
+        WorldPacketController *worldController;
 
         bool running;
         int exitCode;

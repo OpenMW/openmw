@@ -228,6 +228,9 @@ namespace MWWorld
             Ptr searchViaActorId (int id);
             ///< Will return an empty Ptr if cell is not loaded.
 
+            Ptr searchByRefNum (ESM::RefNum refNum);
+            ///< Added by tes3mp
+
             float getWaterLevel() const;
 
             void setWaterLevel (float level);
