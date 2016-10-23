@@ -184,7 +184,7 @@ namespace
 
         bool operator()(const PtrType& ptr)
         {
-            if (ptr.getCellRef().getRefNum() == mRefNumToFind)
+            if (ptr.getCellRef().getRefNum().mIndex == mRefNumToFind.mIndex)
             {
                 mFound = ptr;
                 return false;
