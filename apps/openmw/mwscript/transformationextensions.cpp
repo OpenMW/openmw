@@ -1,5 +1,8 @@
 #include <iostream>
 
+#include <components/openmw-mp/Base/WorldEvent.hpp>
+#include "../mwmp/Main.hpp"
+
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include <components/esm/loadcell.hpp>
@@ -522,7 +525,19 @@ namespace MWScript
                         // create item
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, 1);
 
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(), actor, actor.getCell(), direction, distance);
+                        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(), actor, actor.getCell(), direction, distance);
+
+                        // Added by tes3mp
+                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                        event->cell = *ptr.getCell()->getCell();
+                        event->cellRef.mRefID = ptr.getCellRef().getRefId();
+                        event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                        event->cellRef.mPos = ptr.getCellRef().getPosition();
+                        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_PLACE)->Send(event);
+
+                        printf("Sending ID_WORLD_OBJECT_PLACE about %s\n%i\n",
+                            event->cellRef.mRefID.c_str(),
+                            event->cellRef.mRefNum.mIndex);
                     }
                 }
         };
