@@ -1,6 +1,20 @@
 project(tes3mp-server)
 
 option(BUILD_WITH_PAWN "Enable Pawn language" OFF)
+option(ENABLE_BREAKPAD "Enable Google Breakpad for Crash reporting" OFF)
+
+if(ENABLE_BREAKPAD)
+
+endif(ENABLE_BREAKPAD)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DENABLE_BREAKPAD")
+    if (UNIX)
+        set(Breakpad_Headers "${CMAKE_SOURCE_DIR}/extern/breakpad/src/client/linux")
+        set(Breakpad_Library "${CMAKE_SOURCE_DIR}/extern/breakpad/src/client/linux/libbreakpad_client.a")
+    elseif(WIN32)
+        set(Breakpad_Headers "${CMAKE_SOURCE_DIR}/extern/breakpad/src/client/windows")
+        set(Breakpad_Library "${CMAKE_SOURCE_DIR}/extern/breakpad/src/client/windows/libbreakpad_client.a")
+    endif (UNIX)
+    include_directories(${CMAKE_SOURCE_DIR}/extern/breakpad/src ${Breakpad_Headers})
 if(BUILD_WITH_PAWN)
 
     add_subdirectory(amx)
@@ -90,6 +104,7 @@ target_link_libraries(tes3mp-server
     components
     ${Terra_LIBRARY}
     ${Pawn_LIBRARY}
+    ${Breakpad_Library}
 )
 
 if (UNIX)

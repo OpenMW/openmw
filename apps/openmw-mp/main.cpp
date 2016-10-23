@@ -17,6 +17,10 @@
 #include <boost/filesystem/fstream.hpp>
 #include <components/openmw-mp/Version.hpp>
 
+#ifdef ENABLE_BREAKPAD
+#include <handler/exception_handler.h>
+#endif
+
 using namespace std;
 using namespace mwmp;
 
@@ -46,6 +50,51 @@ void printVersion(string version, int protocol)
 
     cout << "------------------------------------------------------------" << endl;
 }
+
+#ifdef ENABLE_BREAKPAD
+google_breakpad::ExceptionHandler *pHandler = 0;
+#if defined(_WIN32)
+bool DumpCallback(const char* _dump_dir, const char* _minidump_id, void* context, EXCEPTION_POINTERS* exinfo, MDRawAssertionInfo* assertion, bool success)
+#elif defined(__linux)
+bool DumpCallback(const google_breakpad::MinidumpDescriptor &md, void *context, bool success)
+#endif
+{
+    // NO STACK USE, NO HEAP USE THERE !!!
+    return success;
+}
+
+void breakpad(std::string pathToDump)
+{
+#ifdef _WIN32
+    pHandler = new google_breakpad::ExceptionHandler(
+            pathToDump,
+            /*FilterCallback*/ 0,
+            DumpCallback,
+            /*context*/
+            0,
+            true
+            );
+#else
+    google_breakpad::MinidumpDescriptor md(pathToDump);
+    pHandler = new google_breakpad::ExceptionHandler(
+            md,
+            /*FilterCallback*/ 0,
+            DumpCallback,
+            /*context*/ 0,
+            true,
+            -1
+    );
+#endif
+}
+
+void breakpad_close()
+{
+    delete pHandler;
+}
+#else
+void breakpad(std::string pathToDump){}
+void breakpad_close(){}
+#endif
 
 std::string loadSettings (Settings::Manager & settings)
 {
@@ -101,6 +150,8 @@ int main(int argc, char *argv[])
 {
     Settings::Manager mgr;
     Files::ConfigurationManager cfgMgr;
+
+    breakpad(boost::filesystem::path(cfgMgr.getLogPath()).c_str());
 
     loadSettings(mgr);
 
@@ -206,5 +257,6 @@ int main(int argc, char *argv[])
     std::cout.rdbuf(cout_rdbuf);
     std::cerr.rdbuf(cerr_rdbuf);
 
+    breakpad_close();
     return code;
 }
