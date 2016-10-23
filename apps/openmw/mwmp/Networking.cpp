@@ -707,7 +707,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     case ID_WORLD_OBJECT_DELETE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_DELETE");
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %i, %i, %i, %s",
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
             event->cell.getDescription().c_str());
