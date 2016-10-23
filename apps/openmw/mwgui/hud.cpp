@@ -65,7 +65,7 @@ namespace MWGui
 
             printf("Sending ID_WORLD_OBJECT_PLACE about %s\n%i\n",
                 event->cellRef.mRefID.c_str(),
-                event->cellRef.mRefNum);
+                event->cellRef.mRefNum.mIndex);
 
             return dropped;
         }

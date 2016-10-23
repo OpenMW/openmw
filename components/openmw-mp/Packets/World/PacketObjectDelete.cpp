@@ -13,7 +13,7 @@ void PacketObjectDelete::Packet(RakNet::BitStream *bs, WorldEvent *event, bool s
     WorldPacket::Packet(bs, event, send);
 
     RW(event->cellRef.mRefID, send);
-    RW(event->cellRef.mRefNum, send);
+    RW(event->cellRef.mRefNum.mIndex, send);
 
     RW(event->cell.mData.mFlags, send);
     RW(event->cell.mCellId.mIndex.mX, send);

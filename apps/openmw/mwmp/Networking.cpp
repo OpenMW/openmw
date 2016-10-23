@@ -637,9 +637,13 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     MWWorld::CellStore *ptrCellStore;
 
     if (event->cell.isExterior())
+    {
         ptrCellStore = MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY);
+    }
     else
+    {
         ptrCellStore = MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+    }
 
     switch (packet->data[0])
     {
@@ -654,11 +658,13 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     case ID_WORLD_OBJECT_DELETE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_DELETE");
-        LOG_APPEND(Log::LOG_WARN, "- cellRefId: %s, %i",
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %i, %i, %i, %s",
             event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum);
-        LOG_APPEND(Log::LOG_WARN, "- cell: %s",
-            event->cell.getDescription().c_str());
+            event->cellRef.mRefNum.mIndex,
+            event->cell.mData.mFlags,
+            event->cell.mCellId.mIndex.mX,
+            event->cell.mCellId.mIndex.mY,
+            event->cell.mName.c_str());
 
         MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
 

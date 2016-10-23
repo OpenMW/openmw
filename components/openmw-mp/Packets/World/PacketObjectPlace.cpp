@@ -13,7 +13,7 @@ void PacketObjectPlace::Packet(RakNet::BitStream *bs, WorldEvent *event, bool se
     WorldPacket::Packet(bs, event, send);
 
     RW(event->cellRef.mRefID, send);
-    RW(event->cellRef.mRefNum, send);
+    RW(event->cellRef.mRefNum.mIndex, send);
     RW(event->cellRef.mPos, send);
 
     RW(event->cell.mData.mFlags, send);
