@@ -632,8 +632,14 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
     WorldPacket *myPacket = worldController.GetPacket(packet->data[0]);
     WorldEvent *event = new WorldEvent(id);
+    myPacket->Packet(&bsIn, event, false);
 
     MWWorld::CellStore *ptrCellStore;
+
+    if (event->cell.isExterior())
+        ptrCellStore = MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY);
+    else
+        ptrCellStore = MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
 
     switch (packet->data[0])
     {
@@ -647,13 +653,6 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_WORLD_OBJECT_DELETE:
     {
-        myPacket->Packet(&bsIn, event, false);
-
-        if (event->cell.isExterior())
-            ptrCellStore = MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY);
-        else
-            ptrCellStore = MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
-
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_DELETE");
         LOG_APPEND(Log::LOG_WARN, "- cellRefId: %s, %i",
             event->cellRef.mRefID.c_str(),

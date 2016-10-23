@@ -2,13 +2,12 @@
 
 #include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "../mwmp/Main.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-
-#include "../mwworld/cellstore.hpp"
 
 #include "class.hpp"
 #include "containerstore.hpp"
@@ -25,9 +24,7 @@ namespace MWWorld
 
         // Added by tes3mp
         mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-
         event->cell = *getTarget().getCell()->getCell();
-
         event->cellRef.mRefID = getTarget().getCellRef().getRefId();
         event->cellRef.mRefNum = getTarget().getCellRef().getRefNum();
         mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_DELETE)->Send(event);
