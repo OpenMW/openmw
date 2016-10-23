@@ -123,7 +123,7 @@ void ItemFunctions::SendInventory(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, );
     std::swap(player->inventory, player->inventorySendBuffer);
-    mwmp::Networking::Get().GetController()->GetPacket(ID_GAME_INVENTORY)->Send(player, false);
+    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_INVENTORY)->Send(player, false);
     player->inventory = std::move(player->inventorySendBuffer);
     player->inventorySendBuffer.items.clear();
 }
