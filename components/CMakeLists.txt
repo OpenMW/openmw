@@ -155,7 +155,7 @@ add_component_dir (openmw-mp
         Packets/Player/PacketDrawState Packets/Player/PacketChatMessage Packets/Player/PacketCharGen
         Packets/Player/PacketAttribute Packets/Player/PacketSkill Packets/Player/PacketLevel
         Packets/Player/PacketHandshake Packets/Player/PacketGUIBoxes Packets/Player/PacketClass
-        Packets/Player/PacketTime Packets/PacketInventory
+        Packets/Player/PacketTime Packets/Player/PacketInventory
 
         Packets/World/PacketObjectDelete Packets/World/PacketObjectPlace)
 

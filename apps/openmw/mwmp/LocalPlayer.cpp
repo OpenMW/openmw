@@ -481,7 +481,7 @@ void LocalPlayer::updateInventory(bool forceUpdate)
 
     inventory.count = (unsigned int) inventory.items.size();
     inventory.action = Inventory::UPDATE;
-    Main::get().getNetworking()->GetPacket(ID_GAME_INVENTORY)->Send(this);
+    Main::get().getNetworking()->GetPlayerPacket(ID_GAME_INVENTORY)->Send(this);
 }
 
 void LocalPlayer::updateAttackState(bool forceUpdate)

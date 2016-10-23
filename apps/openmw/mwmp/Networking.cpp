@@ -596,6 +596,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
                 getLocalPlayer()->setClass();
             }
         }
+    }
     case ID_GAME_INVENTORY:
     {
         if (id == myid)
@@ -604,7 +605,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
             {
                 printf("ID_GAME_INVENTORY update only\n");
                 getLocalPlayer()->updateInventory(true);
-                GetPacket(ID_GAME_INVENTORY)->Send(getLocalPlayer());
+                GetPlayerPacket(ID_GAME_INVENTORY)->Send(getLocalPlayer());
             }
             else
             {
@@ -727,7 +728,6 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     default:
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unhandled WorldPacket with identifier %i has arrived",
             packet->data[0]);
->>>>>>> refs/remotes/origin/tes3mp-packetexpansion
     }
 }
 
