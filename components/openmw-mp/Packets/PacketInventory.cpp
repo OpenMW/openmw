@@ -8,14 +8,14 @@
 using namespace std;
 using namespace mwmp;
 
-PacketInventory::PacketInventory(RakNet::RakPeerInterface *peer) : BasePacket(peer)
+PacketInventory::PacketInventory(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_GAME_INVENTORY;
 }
 
 void PacketInventory::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
-    BasePacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, player, send);
 
     RW(player->inventory.action, send);
     if (!send)

@@ -5,11 +5,11 @@
 #ifndef OPENMW_PACKETINVENTORY_HPP
 #define OPENMW_PACKETINVENTORY_HPP
 
-#include <components/openmw-mp/Packets/BasePacket.hpp>
+#include <components/openmw-mp/Packets/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketInventory : public BasePacket
+    class PacketInventory : public PlayerPacket
     {
     public:
         PacketInventory(RakNet::RakPeerInterface *peer);
