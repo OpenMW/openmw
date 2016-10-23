@@ -4,8 +4,6 @@ option(BUILD_WITH_PAWN "Enable Pawn language" OFF)
 option(ENABLE_BREAKPAD "Enable Google Breakpad for Crash reporting" OFF)
 
 if(ENABLE_BREAKPAD)
-
-endif(ENABLE_BREAKPAD)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DENABLE_BREAKPAD")
     if (UNIX)
         set(Breakpad_Headers "${CMAKE_SOURCE_DIR}/extern/breakpad/src/client/linux")
@@ -15,6 +13,8 @@ endif(ENABLE_BREAKPAD)
         set(Breakpad_Library "${CMAKE_SOURCE_DIR}/extern/breakpad/src/client/windows/libbreakpad_client.a")
     endif (UNIX)
     include_directories(${CMAKE_SOURCE_DIR}/extern/breakpad/src ${Breakpad_Headers})
+endif(ENABLE_BREAKPAD)
+
 if(BUILD_WITH_PAWN)
 
     add_subdirectory(amx)
