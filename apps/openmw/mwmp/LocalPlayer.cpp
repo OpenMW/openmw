@@ -308,11 +308,11 @@ void LocalPlayer::updateCell(bool forceUpdate)
     }
     else if (ptrCell->isExterior())
     {
-        if (ptrCell->mCellId.mIndex.mX != GetCell()->mCellId.mIndex.mX)
+        if (ptrCell->mData.mX != GetCell()->mData.mX)
         {
             shouldUpdate = true;
         }
-        else if (ptrCell->mCellId.mIndex.mY != GetCell()->mCellId.mIndex.mY)
+        else if (ptrCell->mData.mY != GetCell()->mData.mY)
         {
             shouldUpdate = true;
         }
@@ -613,8 +613,8 @@ void LocalPlayer::setCell()
 
     world->getPlayer().setTeleported(true);
 
-    int x = GetCell()->mCellId.mIndex.mX;
-    int y = GetCell()->mCellId.mIndex.mY;
+    int x = GetCell()->mData.mX;
+    int y = GetCell()->mData.mY;
 
     if (GetCell()->isExterior())
     {

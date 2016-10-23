@@ -661,10 +661,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %i, %i, %i, %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
-            event->cell.mData.mFlags,
-            event->cell.mCellId.mIndex.mX,
-            event->cell.mCellId.mIndex.mY,
-            event->cell.mName.c_str());
+            event->cell.getDescription().c_str());
 
         MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
 

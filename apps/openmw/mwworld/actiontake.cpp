@@ -29,13 +29,10 @@ namespace MWWorld
         event->cellRef.mRefNum = getTarget().getCellRef().getRefNum();
         mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_DELETE)->Send(event);
 
-        printf("Sending ID_WORLD_OBJECT_DELETE about\n- cellRef: %s, %i\n- cell: %i, %i, %i, %s",
+        printf("Sending ID_WORLD_OBJECT_DELETE about\n- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
-            event->cell.mData.mFlags,
-            event->cell.mCellId.mIndex.mX,
-            event->cell.mCellId.mIndex.mY,
-            event->cell.mName.c_str());
+            event->cell.getDescription().c_str());
 
         MWBase::Environment::get().getWorld()->deleteObject (getTarget());
     }

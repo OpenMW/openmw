@@ -393,13 +393,10 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         
         myPacket->Read(event);
 
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %i, %i, %i, %s",
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
-            event->cell.mData.mFlags,
-            event->cell.mCellId.mIndex.mX,
-            event->cell.mCellId.mIndex.mY,
-            event->cell.mName.c_str());
+            event->cell.getDescription().c_str());
 
         myPacket->Send(event, true);
 

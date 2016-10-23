@@ -108,8 +108,8 @@ void TranslocationFunctions::SetExterior(unsigned short pid, int x, int y) noexc
         player->GetCell()->mData.mFlags &= ~ESM::Cell::Interior;
     }
 
-    player->GetCell()->mCellId.mIndex.mX = x;
-    player->GetCell()->mCellId.mIndex.mY = y;
+    player->GetCell()->mData.mX = x;
+    player->GetCell()->mData.mY = y;
 
     mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_CELL)->Send(player, false);
 }
@@ -118,14 +118,14 @@ int TranslocationFunctions::GetExteriorX(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0);
-    return player->GetCell()->mCellId.mIndex.mX;
+    return player->GetCell()->mData.mX;
 }
 
 int TranslocationFunctions::GetExteriorY(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0);
-    return player->GetCell()->mCellId.mIndex.mY;
+    return player->GetCell()->mData.mY;
 }
 
 bool TranslocationFunctions::IsInExterior(unsigned short pid) noexcept
