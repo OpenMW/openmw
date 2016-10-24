@@ -4,6 +4,7 @@
 
 #include "../Packets/World/PacketObjectDelete.hpp"
 #include "../Packets/World/PacketObjectPlace.hpp"
+#include "../Packets/World/PacketObjectLock.hpp"
 #include "../Packets/World/PacketObjectUnlock.hpp"
 
 #include "WorldPacketController.hpp"
@@ -20,6 +21,7 @@ mwmp::WorldPacketController::WorldPacketController(RakNet::RakPeerInterface *pee
 {
     AddPacket<PacketObjectDelete>(&packets, peer);
     AddPacket<PacketObjectPlace>(&packets, peer);
+    AddPacket<PacketObjectLock>(&packets, peer);
     AddPacket<PacketObjectUnlock>(&packets, peer);
 }
 

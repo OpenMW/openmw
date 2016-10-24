@@ -410,6 +410,23 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
+    case ID_WORLD_OBJECT_LOCK:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_OBJECT_LOCK from %s",
+            player->Npc()->mName.c_str());
+
+        myPacket->Read(event);
+
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str());
+
+        myPacket->Send(event, true);
+
+        break;
+    }
+
     case ID_WORLD_OBJECT_UNLOCK:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_OBJECT_UNLOCK from %s",

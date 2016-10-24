@@ -25,6 +25,7 @@ namespace mwmp
 
         ESM::Cell cell;
         ESM::CellRef cellRef;
+        int lockLevel;
     };
 }
 

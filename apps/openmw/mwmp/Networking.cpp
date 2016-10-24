@@ -686,13 +686,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     MWWorld::CellStore *ptrCellStore;
 
     if (event->cell.isExterior())
-    {
         ptrCellStore = MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY);
-    }
     else
-    {
         ptrCellStore = MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
-    }
 
     switch (packet->data[0])
     {
@@ -721,6 +717,27 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
                 ptrFound.getCellRef().getRefNum());
 
             MWBase::Environment::get().getWorld()->deleteObject(ptrFound);
+        }
+
+        break;
+    }
+    case ID_WORLD_OBJECT_LOCK:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_LOCK");
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str());
+
+        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+
+        if (ptrFound)
+        {
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+                ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum());
+
+            ptrFound.getClass().lock(ptrFound, event->lockLevel);
         }
 
         break;
