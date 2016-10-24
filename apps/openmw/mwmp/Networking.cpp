@@ -725,6 +725,27 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         break;
     }
+    case ID_WORLD_OBJECT_UNLOCK:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_UNLOCK");
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str());
+
+        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+
+        if (ptrFound)
+        {
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+                ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum());
+
+            ptrFound.getClass().unlock(ptrFound);
+        }
+
+        break;
+    }
     default:
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unhandled WorldPacket with identifier %i has arrived",
             packet->data[0]);
