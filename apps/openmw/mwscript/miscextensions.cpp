@@ -186,6 +186,14 @@ namespace MWScript
                         runtime.pop();
                     }
 
+                    // Added by tes3mp
+                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                    event->cell = *ptr.getCell()->getCell();
+                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
+                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                    event->lockLevel = lockLevel;
+                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_LOCK)->Send(event);
+
                     ptr.getClass().lock (ptr, lockLevel);
 
                     // Instantly reset door to closed state
