@@ -44,6 +44,15 @@ namespace MWScript
                     Interpreter::Type_Float scale = runtime[0].mFloat;
                     runtime.pop();
 
+                    // Added by tes3mp
+                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                    event->cell = *ptr.getCell()->getCell();
+                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
+                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                    event->cellRef.mPos = ptr.getCellRef().getPosition();
+                    event->scale = scale;
+                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_SCALE)->Send(event);
+
                     MWBase::Environment::get().getWorld()->scaleObject(ptr,scale);
                 }
         };

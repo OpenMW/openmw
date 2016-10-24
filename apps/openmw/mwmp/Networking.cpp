@@ -767,6 +767,27 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         break;
     }
+    case ID_WORLD_OBJECT_SCALE:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_SCALE");
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str());
+
+        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+
+        if (ptrFound)
+        {
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+                ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum());
+
+            MWBase::Environment::get().getWorld()->scaleObject(ptrFound, event->scale);
+        }
+
+        break;
+    }
     case ID_WORLD_VIDEO_PLAY:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_VIDEO_PLAY");

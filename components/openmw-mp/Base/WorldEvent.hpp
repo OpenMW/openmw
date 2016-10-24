@@ -25,7 +25,9 @@ namespace mwmp
 
         ESM::Cell cell;
         ESM::CellRef cellRef;
+        
         int lockLevel;
+        float scale;
 
         std::string video;
         bool allowSkipping;
