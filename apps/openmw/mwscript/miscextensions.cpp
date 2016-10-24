@@ -212,6 +212,13 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    // Added by tes3mp
+                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                    event->cell = *ptr.getCell()->getCell();
+                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
+                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_UNLOCK)->Send(event);
+
                     ptr.getClass().unlock (ptr);
                 }
         };
