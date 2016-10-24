@@ -978,8 +978,8 @@ namespace MWRender
             {
                 const NifOsg::TextKeyMap &keys = (*animiter)->getTextKeys();
 
-                const AnimSource::ControllerMap& ctrls = (*animiter)->mControllerMap[0];
-                for (AnimSource::ControllerMap::const_iterator it = ctrls.begin(); it != ctrls.end(); ++it)
+                const AnimSource::ControllerMap& ctrls2 = (*animiter)->mControllerMap[0];
+                for (AnimSource::ControllerMap::const_iterator it = ctrls2.begin(); it != ctrls2.end(); ++it)
                 {
                     if (Misc::StringUtils::ciEqual(it->first, mAccumRoot->getName()))
                     {

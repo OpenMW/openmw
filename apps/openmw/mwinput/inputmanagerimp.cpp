@@ -16,7 +16,12 @@
 
 #include <components/sdlutil/sdlinputwrapper.hpp>
 #include <components/sdlutil/sdlvideowrapper.hpp>
+
 #include <apps/openmw/mwmp/Main.hpp>
+
+#include <components/esm/esmwriter.hpp>
+#include <components/esm/esmreader.hpp>
+#include <components/esm/controlsstate.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -1574,6 +1579,44 @@ namespace MWInput
             mInputBinder->removeJoystickAxisBinding (mFakeDeviceID, mInputBinder->getJoystickAxisBinding (control, mFakeDeviceID, ICS::Control::INCREASE));
         if (mInputBinder->getJoystickButtonBinding (control, mFakeDeviceID, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
             mInputBinder->removeJoystickButtonBinding (mFakeDeviceID, mInputBinder->getJoystickButtonBinding (control, mFakeDeviceID, ICS::Control::INCREASE));
+    }
+
+    int InputManager::countSavedGameRecords() const
+    {
+        return 1;
+    }
+
+    void InputManager::write(ESM::ESMWriter& writer, Loading::Listener& /*progress*/)
+    {
+        ESM::ControlsState controls;
+        controls.mViewSwitchDisabled = !getControlSwitch("playerviewswitch");
+        controls.mControlsDisabled = !getControlSwitch("playercontrols");
+        controls.mJumpingDisabled = !getControlSwitch("playerjumping");
+        controls.mLookingDisabled = !getControlSwitch("playerlooking");
+        controls.mVanityModeDisabled = !getControlSwitch("vanitymode");
+        controls.mWeaponDrawingDisabled = !getControlSwitch("playerfighting");
+        controls.mSpellDrawingDisabled = !getControlSwitch("playermagic");
+
+        writer.startRecord (ESM::REC_INPU);
+        controls.save(writer);
+        writer.endRecord (ESM::REC_INPU);
+    }
+
+    void InputManager::readRecord(ESM::ESMReader& reader, uint32_t type)
+    {
+        if (type == ESM::REC_INPU)
+        {
+            ESM::ControlsState controls;
+            controls.load(reader);
+
+            toggleControlSwitch("playerviewswitch", !controls.mViewSwitchDisabled);
+            toggleControlSwitch("playercontrols", !controls.mControlsDisabled);
+            toggleControlSwitch("playerjumping", !controls.mJumpingDisabled);
+            toggleControlSwitch("playerlooking", !controls.mLookingDisabled);
+            toggleControlSwitch("vanitymode", !controls.mVanityModeDisabled);
+            toggleControlSwitch("playerfighting", !controls.mWeaponDrawingDisabled);
+            toggleControlSwitch("playermagic", !controls.mSpellDrawingDisabled);
+        }
     }
 
     void InputManager::resetToDefaultKeyBindings()

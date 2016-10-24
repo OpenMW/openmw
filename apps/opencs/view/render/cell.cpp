@@ -219,12 +219,12 @@ bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
     }
 
     // add new objects
-    for (std::map<std::string, bool>::iterator iter (ids.begin()); iter!=ids.end(); ++iter)
+    for (std::map<std::string, bool>::iterator mapIter (ids.begin()); mapIter!=ids.end(); ++mapIter)
     {
-        if (!iter->second)
+        if (!mapIter->second)
         {
             mObjects.insert (std::make_pair (
-                iter->first, new Object (mData, mCellNode, iter->first, false)));
+                mapIter->first, new Object (mData, mCellNode, mapIter->first, false)));
 
             modified = true;
         }

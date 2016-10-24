@@ -115,6 +115,8 @@ namespace MWWorld
             virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
             virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
 
+            bool canActorAutoEquip(const MWWorld::Ptr& actor, const MWWorld::Ptr& item);
+
         public:
 
             InventoryStore();

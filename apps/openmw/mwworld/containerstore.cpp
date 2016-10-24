@@ -450,10 +450,10 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
             }
             else
             {
-                std::string id = MWMechanics::getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
-                if (id.empty())
+                std::string itemId = MWMechanics::getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
+                if (itemId.empty())
                     return;
-                addInitialItem(id, owner, count, false, levItemList->mId);
+                addInitialItem(itemId, owner, count, false, levItemList->mId);
             }
         }
         else

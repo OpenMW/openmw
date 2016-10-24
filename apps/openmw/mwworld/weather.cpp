@@ -832,17 +832,14 @@ bool WeatherManager::readRecord(ESM::ESMReader& reader, uint32_t type)
             mQueuedWeather = state.mQueuedWeather;
 
             mRegions.clear();
-            std::map<std::string, ESM::RegionWeatherState>::iterator it = state.mRegions.begin();
-            if(it == state.mRegions.end())
+            importRegions();
+
+            for(std::map<std::string, ESM::RegionWeatherState>::iterator it = state.mRegions.begin(); it != state.mRegions.end(); ++it)
             {
-                // When loading an imported save, the region modifiers aren't currently being set, so just reset them.
-                importRegions();
-            }
-            else
-            {
-                for(; it != state.mRegions.end(); ++it)
+                std::map<std::string, RegionWeather>::iterator found = mRegions.find(it->first);
+                if (found != mRegions.end())
                 {
-                    mRegions.insert(std::make_pair(it->first, RegionWeather(it->second)));
+                    found->second = RegionWeather(it->second);
                 }
             }
         }

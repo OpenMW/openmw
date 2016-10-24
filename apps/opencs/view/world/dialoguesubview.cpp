@@ -658,8 +658,7 @@ void CSVWorld::EditWidget::remake(int row)
                     int displayRole = tree->nestedHeaderData (i, col,
                             Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt();
 
-                    CSMWorld::ColumnBase::Display display =
-                        static_cast<CSMWorld::ColumnBase::Display> (displayRole);
+                    display = static_cast<CSMWorld::ColumnBase::Display> (displayRole);
 
                    mNestedTableDispatcher->makeDelegate (display);
 
