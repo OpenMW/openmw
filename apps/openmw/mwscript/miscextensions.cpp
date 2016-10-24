@@ -88,6 +88,12 @@ namespace MWScript
                 bool allowSkipping = runtime[0].mInteger != 0;
                 runtime.pop();
 
+                // Added by tes3mp
+                mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                event->video = name;
+                event->allowSkipping = allowSkipping;
+                mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_VIDEO_PLAY)->Send(event);
+
                 MWBase::Environment::get().getWindowManager()->playVideo (name, allowSkipping);
             }
         };
