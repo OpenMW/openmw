@@ -242,7 +242,13 @@ ESM::CustomMarker mwmp::GUIController::CreateMarker(const RakNet::RakNetGUID &gu
     if (!ptrCell->isExterior())
         mEditingMarker.mCell.mWorldspace = ptrCell->mName;
     else
+    {
         mEditingMarker.mCell.mWorldspace = ESM::CellId::sDefaultWorldspace;
+
+        // Don't remove these, or the markers will stop showing up in exteriors
+        mEditingMarker.mCell.mIndex.mX = ptrCell->getGridX();
+        mEditingMarker.mCell.mIndex.mY = ptrCell->getGridY();
+    }
     return mEditingMarker;
 }
 
