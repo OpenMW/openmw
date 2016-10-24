@@ -23,6 +23,8 @@ void Players::DeletePlayer(RakNet::RakNetGUID id)
         players.erase(id);
     }
 
+    LOG_APPEND(Log::LOG_INFO, "- %i remaining",
+        players.size());
 }
 
 void Players::NewPlayer(RakNet::RakNetGUID id)
