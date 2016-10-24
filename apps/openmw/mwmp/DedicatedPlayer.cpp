@@ -472,7 +472,9 @@ void DedicatedPlayer::updateMarker()
 {
     if (!markerEnabled)
         return;
+
     GUIController *gui = Main::get().getGUIController();
+
     if (gui->mPlayerMarkers.isExistent(marker))
     {
         gui->mPlayerMarkers.deleteMarker(marker);
@@ -487,6 +489,7 @@ void DedicatedPlayer::removeMarker()
 {
     if (!markerEnabled)
         return;
+
     markerEnabled = false;
     Main::get().getGUIController()->mPlayerMarkers.deleteMarker(marker);
 }
@@ -494,7 +497,10 @@ void DedicatedPlayer::removeMarker()
 void DedicatedPlayer::setMarkerState(bool state)
 {
     if (state)
+    {
+        markerEnabled = true;
         updateMarker();
+    }
     else
         removeMarker();
 }
