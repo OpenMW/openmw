@@ -111,7 +111,7 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
 
     ESM::CustomMarker mEditingMarker = Main::get().getGUIController()->CreateMarker(id);
     dedicPlayer->marker = mEditingMarker;
-    dedicPlayer->markerEnabled = true;
+    dedicPlayer->setMarkerState(true);
 }
 
 
@@ -126,6 +126,10 @@ void Players::DisconnectPlayer(RakNet::RakNetGUID id)
     if (players[id]->state > 1)
     {
         players[id]->state = 1;
+
+        // Remove player's marker
+        players[id]->setMarkerState(false);
+
         MWBase::World *world = MWBase::Environment::get().getWorld();
         world->disable(players[id]->getPtr());
 
@@ -469,7 +473,7 @@ void DedicatedPlayer::updateMarker()
     if (!markerEnabled)
         return;
     GUIController *gui = Main::get().getGUIController();
-    if (gui->mPlayerMarkers.isExists(marker))
+    if (gui->mPlayerMarkers.isExistent(marker))
     {
         gui->mPlayerMarkers.deleteMarker(marker);
         marker = gui->CreateMarker(guid);
@@ -487,9 +491,9 @@ void DedicatedPlayer::removeMarker()
     Main::get().getGUIController()->mPlayerMarkers.deleteMarker(marker);
 }
 
-void DedicatedPlayer::enableMarker(bool enable)
+void DedicatedPlayer::setMarkerState(bool state)
 {
-    if (enable)
+    if (state)
         updateMarker();
     else
         removeMarker();

@@ -49,7 +49,7 @@ namespace mwmp
 
         void updateMarker();
         void removeMarker();
-        void enableMarker(bool enable);
+        void setMarkerState(bool state);
     private:
         DedicatedPlayer(RakNet::RakNetGUID guid);
         virtual ~DedicatedPlayer();
