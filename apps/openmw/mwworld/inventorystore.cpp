@@ -232,6 +232,12 @@ bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const
         return false;
     }
 
+    // tes3mp needs player-controlled NPCs to wear whatever their players are
+    // actually wearing, so a condition has been added that should return
+    // false only for them
+    else if (!actor.getBase()->canChangeCell)
+        return false;
+
     return true;
 }
 
