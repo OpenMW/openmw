@@ -444,6 +444,22 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
+    case ID_WORLD_VIDEO_PLAY:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_VIDEO_PLAY from %s",
+            player->Npc()->mName.c_str());
+
+        myPacket->Read(event);
+
+        LOG_APPEND(Log::LOG_WARN, "- video: %s\n- allowSkipping: %s",
+            event->video.c_str(),
+            event->allowSkipping ? "true" : "false");
+
+        myPacket->Send(event, true);
+
+        break;
+    }
+
     default:
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled WorldPacket with identifier %i has arrived",
             packet->data[0]);

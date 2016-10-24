@@ -6,6 +6,7 @@
 #include "../Packets/World/PacketObjectPlace.hpp"
 #include "../Packets/World/PacketObjectLock.hpp"
 #include "../Packets/World/PacketObjectUnlock.hpp"
+#include "../Packets/World/PacketVideoPlay.hpp"
 
 #include "WorldPacketController.hpp"
 
@@ -23,6 +24,7 @@ mwmp::WorldPacketController::WorldPacketController(RakNet::RakPeerInterface *pee
     AddPacket<PacketObjectPlace>(&packets, peer);
     AddPacket<PacketObjectLock>(&packets, peer);
     AddPacket<PacketObjectUnlock>(&packets, peer);
+    AddPacket<PacketVideoPlay>(&packets, peer);
 }
 
 

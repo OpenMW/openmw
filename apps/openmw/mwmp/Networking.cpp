@@ -6,13 +6,17 @@
 #include <iostream>
 #include <string>
 #include <components/esm/cellid.hpp>
+
 #include <apps/openmw/mwbase/world.hpp>
 #include <apps/openmw/mwbase/environment.hpp>
+#include <apps/openmw/mwbase/windowmanager.hpp>
+
 #include <apps/openmw/mwworld/cellstore.hpp>
 #include <apps/openmw/mwclass/npc.hpp>
 #include <apps/openmw/mwmechanics/npcstats.hpp>
 #include <apps/openmw/mwworld/inventorystore.hpp>
 #include <apps/openmw/mwmechanics/combat.hpp>
+
 #include <SDL_messagebox.h>
 #include "Networking.hpp"
 #include "../mwstate/statemanagerimp.hpp"
@@ -760,6 +764,17 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
             ptrFound.getClass().unlock(ptrFound);
         }
+
+        break;
+    }
+    case ID_WORLD_VIDEO_PLAY:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_VIDEO_PLAY");
+        LOG_APPEND(Log::LOG_WARN, "- video: %s\n- allowSkipping: %s",
+            event->video.c_str(),
+            event->allowSkipping ? "true" : "false");
+
+        MWBase::Environment::get().getWindowManager()->playVideo(event->video, event->allowSkipping);
 
         break;
     }
