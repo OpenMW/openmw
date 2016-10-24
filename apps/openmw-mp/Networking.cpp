@@ -515,8 +515,12 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
     playerController->GetPacket(ID_GAME_CELL)->RequestData(guid);
     playerController->GetPacket(ID_GAME_EQUIPMENT)->RequestData(guid);
 
+    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Sending info about other players to %lu",
+        guid.g);
+
     for (TPlayers::iterator pl = players->begin(); pl != players->end(); pl++) //sending other players to new player
     {
+        // If we are iterating over the new player, don't send the packets below
         if (pl->first == guid) continue;
 
         playerController->GetPacket(ID_GAME_BASE_INFO)->Send(pl->second, guid);
@@ -527,6 +531,8 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
         playerController->GetPacket(ID_GAME_CELL)->Send(pl->second, guid);
         playerController->GetPacket(ID_GAME_EQUIPMENT)->Send(pl->second, guid);
     }
+
+    LOG_APPEND(Log::LOG_WARN, "%s", "- Done");
 
 }
 
