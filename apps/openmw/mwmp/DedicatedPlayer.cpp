@@ -102,16 +102,16 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
         esm_store->insert(npc);
 
         dedicPlayer->updateCell();
+
+        ESM::CustomMarker mEditingMarker = Main::get().getGUIController()->CreateMarker(id);
+        dedicPlayer->marker = mEditingMarker;
+        dedicPlayer->setMarkerState(true);
     }
 
     dedicPlayer->guid = id;
     dedicPlayer->state = 2;
 
     world->enable(players[id]->ptr);
-
-    ESM::CustomMarker mEditingMarker = Main::get().getGUIController()->CreateMarker(id);
-    dedicPlayer->marker = mEditingMarker;
-    dedicPlayer->setMarkerState(true);
 }
 
 
@@ -284,8 +284,8 @@ void DedicatedPlayer::UpdatePtr(MWWorld::Ptr newPtr)
 
 DedicatedPlayer *Players::NewPlayer(RakNet::RakNetGUID guid)
 {
-    LOG_APPEND(Log::LOG_INFO, "- Creating new DedicatedPlayer with guid %i",
-        guid.ToUint32);
+    LOG_APPEND(Log::LOG_INFO, "- Creating new DedicatedPlayer with guid %lu",
+        guid.g);
 
     players[guid] = new DedicatedPlayer(guid);
     players[guid]->state = 0;

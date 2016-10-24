@@ -10,8 +10,8 @@ TSlots Players::slots;
 
 void Players::DeletePlayer(RakNet::RakNetGUID id)
 {
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Deleting player with guid %s",
-        id.ToString());
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Deleting player with guid %lu",
+        id.g);
 
     if (players[id] != 0)
     {
@@ -27,8 +27,8 @@ void Players::DeletePlayer(RakNet::RakNetGUID id)
 
 void Players::NewPlayer(RakNet::RakNetGUID id)
 {
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Creating new player with guid %s",
-        id.ToString());
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Creating new player with guid %lu",
+        id.g);
 
     players[id] = new Player(id);
     players[id]->GetCell()->blank();
