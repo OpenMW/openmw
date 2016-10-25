@@ -77,6 +77,13 @@ void OMW::Engine::executeLocalScripts()
     {
         MWScript::InterpreterContext interpreterContext (
             &script.second.getRefData().getLocals(), script.second);
+
+        // Added by tes3mp
+        if (mwmp::Main::isValidPacketScript(script.first))
+        {
+            interpreterContext.sendPackets = true;
+        }
+
         mEnvironment.getScriptManager()->run (script.first, interpreterContext);
     }
 }

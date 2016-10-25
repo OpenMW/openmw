@@ -177,6 +177,10 @@ namespace MWScript
             throw std::runtime_error ("local variables not available in this context");
 
         mLocals->mShorts.at (index) = value;
+
+        if (sendPackets)
+            printf("Sending ID_SCRIPT_LOCAL_SHORT for %s\n",
+                this->mReference.getClass().getScript(mReference));
     }
 
     void InterpreterContext::setLocalLong (int index, int value)

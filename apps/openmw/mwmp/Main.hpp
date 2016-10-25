@@ -21,6 +21,8 @@ namespace mwmp
         static void Frame(float dt);
         static void PressedKey(int key);
 
+        static bool isValidPacketScript(std::string script);
+
         Networking *getNetworking() const;
         LocalPlayer *getLocalPlayer() const;
         GUIController *getGUIController() const;
@@ -38,7 +40,6 @@ namespace mwmp
         LocalPlayer *mLocalPlayer;
 
         GUIController *mGUIController;
-
         std::string server;
         unsigned short port;
     };

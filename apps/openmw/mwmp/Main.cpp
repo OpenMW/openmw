@@ -225,3 +225,22 @@ void Main::PressedKey(int key)
     if (get().getGUIController()->pressedKey(key))
         return; // if any gui bind pressed
 }
+
+// When sending packets with ingame script values, certain packets
+// should be ignored because of their potential for spam
+bool Main::isValidPacketScript(std::string script)
+{
+    static const int invalidPacketScriptsCount = 2;
+    static const std::string invalidPacketScripts[invalidPacketScriptsCount] = {
+        "OutsideBanner",
+        "sleeperScript"
+    };
+
+    for (int i = 0; i < invalidPacketScriptsCount; i++)
+    {
+        if (Misc::StringUtils::ciEqual(script, invalidPacketScripts[i]))
+            return false;
+    }
+
+    return true;
+}
