@@ -104,12 +104,14 @@ void OMW::Engine::frame(float frametime)
         mwmp::Main::Frame(frametime);
 
         // Main menu opened? Then scripts are also paused.
-        bool paused = mEnvironment.getWindowManager()->containsMode(MWGui::GM_MainMenu);
+        bool paused = /*mEnvironment.getWindowManager()->containsMode(MWGui::GM_MainMenu);*/ false;
+        // The above is overridden by tes3mp, where the game should never be pausable
 
         // update game state
         mEnvironment.getStateManager()->update (frametime);
 
         bool guiActive = /*mEnvironment.getWindowManager()->isGuiMode()*/ false;
+        // The above is overridden by tes3mp, where the Gui being active doesn't matter
 
         osg::Timer_t beforeScriptTick = osg::Timer::instance()->tick();
         if (mEnvironment.getStateManager()->getState()==
@@ -693,6 +695,8 @@ void OMW::Engine::go()
         dt = std::min(dt, 0.2);
 
         bool guiActive = /*mEnvironment.getWindowManager()->isGuiMode()*/ false;
+        // The above is overridden by tes3mp, where the Gui being active doesn't matter
+
         if (!guiActive)
             simulationTime += dt;
 

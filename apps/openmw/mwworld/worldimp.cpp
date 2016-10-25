@@ -2327,8 +2327,11 @@ namespace MWWorld
 
     void World::hurtStandingActors(const ConstPtr &object, float healthPerSecond)
     {
+        /* Disabled by tes3mp, because being in a menu should not pause the game in it
+
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
             return;
+        */
 
         std::vector<MWWorld::Ptr> actors;
         mPhysics->getActorsStandingOn(object, actors);
@@ -2357,8 +2360,11 @@ namespace MWWorld
 
     void World::hurtCollidingActors(const ConstPtr &object, float healthPerSecond)
     {
+        /* Disabled by tes3mp, because being in a menu should not pause the game in it
+
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
             return;
+        */
 
         std::vector<MWWorld::Ptr> actors;
         mPhysics->getActorsCollidingWith(object, actors);
