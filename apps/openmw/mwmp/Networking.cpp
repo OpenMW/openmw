@@ -814,6 +814,27 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         break;
     }
+    case ID_OBJECT_ROTATE:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_ROTATE");
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str());
+
+        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+
+        if (ptrFound)
+        {
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+                ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum());
+
+            MWBase::Environment::get().getWorld()->rotateObject(ptrFound, event->pos.rot[0], event->pos.rot[1], event->pos.rot[2]);
+        }
+
+        break;
+    }
     case ID_DOOR_ACTIVATE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_DOOR_ACTIVATE");
