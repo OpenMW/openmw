@@ -698,8 +698,13 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     {
     case ID_OBJECT_PLACE:
     {
-        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), event->cellRef.mRefID, 1);
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_PLACE");
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str());
 
+        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), event->cellRef.mRefID, 1);
         MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(), ptrCellStore, event->cellRef.mPos);
 
         break;
@@ -784,6 +789,27 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
                 ptrFound.getCellRef().getRefNum());
 
             MWBase::Environment::get().getWorld()->scaleObject(ptrFound, event->scale);
+        }
+
+        break;
+    }
+    case ID_OBJECT_MOVE:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_MOVE");
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str());
+
+        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+
+        if (ptrFound)
+        {
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+                ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum());
+
+            MWBase::Environment::get().getWorld()->moveObject(ptrFound, event->pos.pos[0], event->pos.pos[1], event->pos.pos[2]);
         }
 
         break;

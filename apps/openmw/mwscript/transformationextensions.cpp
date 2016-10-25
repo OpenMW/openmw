@@ -633,12 +633,21 @@ namespace MWScript
                     float yr = ptr.getCellRef().getPosition().rot[1];
                     float zr = ptr.getCellRef().getPosition().rot[2];
 
+                    // Added by tes3mp
+                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                    event->cell = *ptr.getCell()->getCell();
+                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
+                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                    event->pos.pos[0] = ptr.getCellRef().getPosition().pos[0];
+                    event->pos.pos[1] = ptr.getCellRef().getPosition().pos[1];
+                    event->pos.pos[2] = ptr.getCellRef().getPosition().pos[2];
+                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_MOVE)->Send(event);
+
                     MWBase::Environment::get().getWorld()->rotateObject(ptr, xr, yr, zr);
 
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,
                         MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
                             ptr.getCellRef().getPosition().pos[1], ptr.getCellRef().getPosition().pos[2]));
-
                 }
         };
 
@@ -682,6 +691,21 @@ namespace MWScript
                     osg::Vec3f diff = ptr.getRefData().getBaseNode()->getAttitude() * posChange;
                     osg::Vec3f worldPos(ptr.getRefData().getPosition().asVec3());
                     worldPos += diff;
+
+                    // Added by tes3mp
+                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                    event->cell = *ptr.getCell()->getCell();
+                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
+                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                    event->pos.pos[0] = worldPos.x();
+                    event->pos.pos[1] = worldPos.y();
+                    event->pos.pos[2] = worldPos.z();
+                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_MOVE)->Send(event);
+
+                    printf("Sending ID_OBJECT_MOVE about %s\n%i\n",
+                        event->cellRef.mRefID.c_str(),
+                        event->cellRef.mRefNum.mIndex);
+
                     MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x(), worldPos.y(), worldPos.z());
                 }
         };
@@ -720,6 +744,20 @@ namespace MWScript
                     }
                     else
                         throw std::runtime_error ("invalid movement axis: " + axis);
+
+                    // Added by tes3mp
+                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                    event->cell = *ptr.getCell()->getCell();
+                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
+                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                    event->pos.pos[0] = updated.getRefData().getPosition().pos[0];
+                    event->pos.pos[1] = updated.getRefData().getPosition().pos[1];
+                    event->pos.pos[2] = updated.getRefData().getPosition().pos[2];
+                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_MOVE)->Send(event);
+
+                    printf("Sending ID_OBJECT_MOVE about %s\n%i\n",
+                        event->cellRef.mRefID.c_str(),
+                        event->cellRef.mRefNum.mIndex);
                 }
         };
 
