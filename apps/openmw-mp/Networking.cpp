@@ -461,6 +461,23 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
+    case ID_OBJECT_MOVE:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_MOVE from %s",
+            player->Npc()->mName.c_str());
+
+        myPacket->Read(event);
+
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str());
+
+        myPacket->Send(event, true);
+
+        break;
+    }
+
     case ID_CONTAINER_ADD:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONTAINER_ADD from %s",
@@ -481,23 +498,6 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     case ID_CONTAINER_REMOVE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONTAINER_REMOVE from %s",
-            player->Npc()->mName.c_str());
-
-        myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
-        myPacket->Send(event, true);
-
-        break;
-    }
-
-    case ID_OBJECT_MOVE_WORLD:
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_MOVE_WORLD from %s",
             player->Npc()->mName.c_str());
 
         myPacket->Read(event);
