@@ -5,7 +5,7 @@ using namespace mwmp;
 
 PacketObjectDelete::PacketObjectDelete(RakNet::RakPeerInterface *peer) : WorldPacket(peer)
 {
-    packetID = ID_WORLD_OBJECT_DELETE;
+    packetID = ID_OBJECT_DELETE;
 }
 
 void PacketObjectDelete::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)

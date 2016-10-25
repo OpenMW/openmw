@@ -92,7 +92,7 @@ namespace MWScript
                 mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
                 event->video = name;
                 event->allowSkipping = allowSkipping;
-                mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_VIDEO_PLAY)->Send(event);
+                mwmp::Main::get().getNetworking()->GetWorldPacket(ID_VIDEO_PLAY)->Send(event);
 
                 MWBase::Environment::get().getWindowManager()->playVideo (name, allowSkipping);
             }
@@ -198,7 +198,7 @@ namespace MWScript
                     event->cellRef.mRefID = ptr.getCellRef().getRefId();
                     event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
                     event->lockLevel = lockLevel;
-                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_LOCK)->Send(event);
+                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_LOCK)->Send(event);
 
                     ptr.getClass().lock (ptr, lockLevel);
 
@@ -231,7 +231,7 @@ namespace MWScript
                     event->cell = *ptr.getCell()->getCell();
                     event->cellRef.mRefID = ptr.getCellRef().getRefId();
                     event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
-                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_UNLOCK)->Send(event);
+                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_UNLOCK)->Send(event);
 
                     ptr.getClass().unlock (ptr);
                 }
@@ -698,7 +698,7 @@ namespace MWScript
                         event->cell = *ptr.getCell()->getCell();
                         event->cellRef.mRefID = ptr.getCellRef().getRefId();
                         event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
-                        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_DELETE)->Send(event);
+                        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_DELETE)->Send(event);
 
                         MWBase::Environment::get().getWorld()->deleteObject(ptr);
                     }

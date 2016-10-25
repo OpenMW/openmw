@@ -5,7 +5,7 @@ using namespace mwmp;
 
 PacketContainerAdd::PacketContainerAdd(RakNet::RakPeerInterface *peer) : WorldPacket(peer)
 {
-    packetID = ID_WORLD_CONTAINER_ADD;
+    packetID = ID_CONTAINER_ADD;
 }
 
 void PacketContainerAdd::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)

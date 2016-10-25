@@ -61,9 +61,9 @@ namespace MWGui
             event->cellRef.mRefID = dropped.getCellRef().getRefId();
             event->cellRef.mRefNum = dropped.getCellRef().getRefNum();
             event->cellRef.mPos = dropped.getCellRef().getPosition();
-            mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_PLACE)->Send(event);
+            mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_PLACE)->Send(event);
 
-            printf("Sending ID_WORLD_OBJECT_PLACE about %s\n%i\n",
+            printf("Sending ID_OBJECT_PLACE about %s\n%i\n",
                 event->cellRef.mRefID.c_str(),
                 event->cellRef.mRefNum.mIndex);
 

@@ -5,7 +5,7 @@ using namespace mwmp;
 
 PacketVideoPlay::PacketVideoPlay(RakNet::RakPeerInterface *peer) : WorldPacket(peer)
 {
-    packetID = ID_WORLD_VIDEO_PLAY;
+    packetID = ID_VIDEO_PLAY;
 }
 
 void PacketVideoPlay::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)

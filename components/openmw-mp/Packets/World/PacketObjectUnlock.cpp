@@ -5,7 +5,7 @@ using namespace mwmp;
 
 PacketObjectUnlock::PacketObjectUnlock(RakNet::RakPeerInterface *peer) : WorldPacket(peer)
 {
-    packetID = ID_WORLD_OBJECT_UNLOCK;
+    packetID = ID_OBJECT_UNLOCK;
 }
 
 void PacketObjectUnlock::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)

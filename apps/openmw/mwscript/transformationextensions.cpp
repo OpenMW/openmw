@@ -51,7 +51,7 @@ namespace MWScript
                     event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
                     event->cellRef.mPos = ptr.getCellRef().getPosition();
                     event->scale = scale;
-                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_SCALE)->Send(event);
+                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_SCALE)->Send(event);
 
                     MWBase::Environment::get().getWorld()->scaleObject(ptr,scale);
                 }
@@ -542,9 +542,9 @@ namespace MWScript
                         event->cellRef.mRefID = ptr.getCellRef().getRefId();
                         event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
                         event->cellRef.mPos = ptr.getCellRef().getPosition();
-                        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_OBJECT_PLACE)->Send(event);
+                        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_PLACE)->Send(event);
 
-                        printf("Sending ID_WORLD_OBJECT_PLACE about %s\n%i\n",
+                        printf("Sending ID_OBJECT_PLACE about %s\n%i\n",
                             event->cellRef.mRefID.c_str(),
                             event->cellRef.mRefNum.mIndex);
                     }

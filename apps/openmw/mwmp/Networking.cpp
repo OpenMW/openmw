@@ -696,7 +696,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
     switch (packet->data[0])
     {
-    case ID_WORLD_OBJECT_PLACE:
+    case ID_OBJECT_PLACE:
     {
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), event->cellRef.mRefID, 1);
 
@@ -704,9 +704,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_WORLD_OBJECT_DELETE:
+    case ID_OBJECT_DELETE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_DELETE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_DELETE");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -725,9 +725,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_WORLD_OBJECT_LOCK:
+    case ID_OBJECT_LOCK:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_LOCK");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_LOCK");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -746,9 +746,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_WORLD_OBJECT_UNLOCK:
+    case ID_OBJECT_UNLOCK:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_UNLOCK");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_UNLOCK");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -767,9 +767,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_WORLD_OBJECT_SCALE:
+    case ID_OBJECT_SCALE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_OBJECT_SCALE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_SCALE");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -788,9 +788,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_WORLD_DOOR_ACTIVATE:
+    case ID_DOOR_ACTIVATE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_DOOR_ACTIVATE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_DOOR_ACTIVATE");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -810,9 +810,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_WORLD_VIDEO_PLAY:
+    case ID_VIDEO_PLAY:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_WORLD_VIDEO_PLAY");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_VIDEO_PLAY");
         LOG_APPEND(Log::LOG_WARN, "- video: %s\n- allowSkipping: %s",
             event->video.c_str(),
             event->allowSkipping ? "true" : "false");

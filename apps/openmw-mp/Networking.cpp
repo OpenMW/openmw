@@ -382,9 +382,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     switch (packet->data[0])
     {
 
-    case ID_WORLD_OBJECT_PLACE:
+    case ID_OBJECT_PLACE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_OBJECT_PLACE from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_PLACE from %s",
             player->Npc()->mName.c_str());
 
         myPacket->Read(event);
@@ -393,9 +393,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_WORLD_OBJECT_DELETE:
+    case ID_OBJECT_DELETE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_OBJECT_DELETE from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_DELETE from %s",
             player->Npc()->mName.c_str());
         
         myPacket->Read(event);
@@ -410,9 +410,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_WORLD_OBJECT_LOCK:
+    case ID_OBJECT_LOCK:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_OBJECT_LOCK from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_LOCK from %s",
             player->Npc()->mName.c_str());
 
         myPacket->Read(event);
@@ -427,9 +427,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_WORLD_OBJECT_UNLOCK:
+    case ID_OBJECT_UNLOCK:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_OBJECT_UNLOCK from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_UNLOCK from %s",
             player->Npc()->mName.c_str());
 
         myPacket->Read(event);
@@ -444,9 +444,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_WORLD_OBJECT_SCALE:
+    case ID_OBJECT_SCALE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_OBJECT_SCALE from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_SCALE from %s",
             player->Npc()->mName.c_str());
 
         myPacket->Read(event);
@@ -461,9 +461,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_WORLD_CONTAINER_ADD:
+    case ID_CONTAINER_ADD:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_CONTAINER_ADD from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONTAINER_ADD from %s",
             player->Npc()->mName.c_str());
 
         myPacket->Read(event);
@@ -478,9 +478,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_WORLD_CONTAINER_REMOVE:
+    case ID_CONTAINER_REMOVE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_CONTAINER_REMOVE from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONTAINER_REMOVE from %s",
             player->Npc()->mName.c_str());
 
         myPacket->Read(event);
@@ -495,9 +495,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_WORLD_DOOR_ACTIVATE:
+    case ID_DOOR_ACTIVATE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_DOOR_ACTIVATE from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_ACTIVATE from %s",
             player->Npc()->mName.c_str());
 
         myPacket->Read(event);
@@ -512,9 +512,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_WORLD_ACTIVATOR_ACTIVATE:
+    case ID_ACTIVATOR_ACTIVATE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_ACTIVATOR_ACTIVATE from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_ACTIVATOR_ACTIVATE from %s",
             player->Npc()->mName.c_str());
 
         myPacket->Read(event);
@@ -529,9 +529,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_WORLD_VIDEO_PLAY:
+    case ID_VIDEO_PLAY:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_WORLD_VIDEO_PLAY from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_VIDEO_PLAY from %s",
             player->Npc()->mName.c_str());
 
         myPacket->Read(event);
