@@ -570,18 +570,23 @@ namespace MWScript
                     float az = ptr.getRefData().getPosition().rot[2];
 
                     // Added by tes3mp
-                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                    event->cell = *ptr.getCell()->getCell();
-                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
-                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
-                    event->pos.rot[0] = axis == "x" ? ax + rotation : ax;
-                    event->pos.rot[1] = axis == "y" ? ay + rotation : ay;
-                    event->pos.rot[2] = axis == "z" ? az + rotation : az;
-                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_ROTATE)->Send(event);
+                    //
+                    // Only send packet for objects that don't have the spammy Float script
+                    if (!Misc::StringUtils::ciEqual(ptr.getClass().getScript(ptr), "Float"))
+                    {
+                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                        event->cell = *ptr.getCell()->getCell();
+                        event->cellRef.mRefID = ptr.getCellRef().getRefId();
+                        event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                        event->pos.rot[0] = axis == "x" ? ax + rotation : ax;
+                        event->pos.rot[1] = axis == "y" ? ay + rotation : ay;
+                        event->pos.rot[2] = axis == "z" ? az + rotation : az;
+                        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_ROTATE)->Send(event);
 
-                    printf("Sending ID_OBJECT_ROTATE about %s\n%i\n",
-                        event->cellRef.mRefID.c_str(),
-                        event->cellRef.mRefNum.mIndex);
+                        printf("Sending ID_OBJECT_ROTATE about %s\n%i\n",
+                            event->cellRef.mRefID.c_str(),
+                            event->cellRef.mRefNum.mIndex);
+                    }
 
                     if (axis == "x")
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax+rotation,ay,az);
@@ -662,13 +667,18 @@ namespace MWScript
                     float zr = ptr.getCellRef().getPosition().rot[2];
 
                     // Added by tes3mp
-                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                    event->cell = *ptr.getCell()->getCell();
-                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
-                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
-                    event->pos = ptr.getCellRef().getPosition();
-                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_ROTATE)->Send(event);
-                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_MOVE)->Send(event);
+                    //
+                    // Only send packet for objects that don't have the spammy Float script
+                    if (!Misc::StringUtils::ciEqual(ptr.getClass().getScript(ptr), "Float"))
+                    {
+                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                        event->cell = *ptr.getCell()->getCell();
+                        event->cellRef.mRefID = ptr.getCellRef().getRefId();
+                        event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                        event->pos = ptr.getCellRef().getPosition();
+                        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_ROTATE)->Send(event);
+                        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_MOVE)->Send(event);
+                    }
 
                     MWBase::Environment::get().getWorld()->rotateObject(ptr, xr, yr, zr);
 
