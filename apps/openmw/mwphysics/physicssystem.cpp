@@ -1318,11 +1318,34 @@ namespace MWPhysics
             const MWMechanics::MagicEffects& effects = iter->first.getClass().getCreatureStats(iter->first).getMagicEffects();
 
             bool waterCollision = false;
-            if (effects.get(ESM::MagicEffect::WaterWalking).getMagnitude()
-                    && cell->getCell()->hasWater()
-                    && !world->isUnderwater(iter->first.getCell(),
-                                           osg::Vec3f(iter->first.getRefData().getPosition().asVec3())))
-                waterCollision = true;
+            if (cell->getCell()->hasWater() && effects.get(ESM::MagicEffect::WaterWalking).getMagnitude())
+            {
+                if (!world->isUnderwater(iter->first.getCell(), osg::Vec3f(iter->first.getRefData().getPosition().asVec3())))
+                    waterCollision = true;
+                else
+                {
+                    Actor *actor = getActor(iter->first);
+                    // Actor can collide
+                    if (actor->getCollisionMode())
+                    {
+                        const osg::Vec3f actorPosition = actor->getPosition();
+                        const osg::Vec3f destinationPosition(actorPosition.x(), actorPosition.y(), waterlevel);
+                        ActorTracer tracer;
+                        tracer.doTrace(actor->getCollisionObject(), actorPosition, destinationPosition, mCollisionWorld);
+                        if (tracer.mFraction >= 1.0f)
+                        {
+                            waterCollision = true;
+                            actor->setPosition(destinationPosition);
+                        }
+                        else
+                        {
+                            //Remove the effect to remove the performance hit of casting in a weird spot
+                            //probably makes that Tribunal quest where the water rises a bit safer
+                            iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().purgeEffect(ESM::MagicEffect::WaterWalking);
+                        }
+                    }
+                }
+            }
 
             ActorMap::iterator foundActor = mActors.find(iter->first);
             if (foundActor == mActors.end()) // actor was already removed from the scene
