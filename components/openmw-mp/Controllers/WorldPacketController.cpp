@@ -7,11 +7,11 @@
 #include "../Packets/World/PacketObjectLock.hpp"
 #include "../Packets/World/PacketObjectUnlock.hpp"
 #include "../Packets/World/PacketObjectScale.hpp"
+#include "../Packets/World/PacketObjectMoveWorld.hpp"
 
 #include "../Packets/World/PacketContainerAdd.hpp"
 #include "../Packets/World/PacketContainerRemove.hpp"
 #include "../Packets/World/PacketDoorActivate.hpp"
-#include "../Packets/World/PacketActivatorActivate.hpp"
 #include "../Packets/World/PacketVideoPlay.hpp"
 
 #include "WorldPacketController.hpp"
@@ -31,11 +31,11 @@ mwmp::WorldPacketController::WorldPacketController(RakNet::RakPeerInterface *pee
     AddPacket<PacketObjectLock>(&packets, peer);
     AddPacket<PacketObjectUnlock>(&packets, peer);
     AddPacket<PacketObjectScale>(&packets, peer);
+    AddPacket<PacketObjectMoveWorld>(&packets, peer);
 
     AddPacket<PacketContainerAdd>(&packets, peer);
     AddPacket<PacketContainerRemove>(&packets, peer);
     AddPacket<PacketDoorActivate>(&packets, peer);
-    AddPacket<PacketActivatorActivate>(&packets, peer);
     AddPacket<PacketVideoPlay>(&packets, peer);
 }
 

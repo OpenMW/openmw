@@ -495,9 +495,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_DOOR_ACTIVATE:
+    case ID_OBJECT_MOVE_WORLD:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_ACTIVATE from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_MOVE_WORLD from %s",
             player->Npc()->mName.c_str());
 
         myPacket->Read(event);
@@ -512,9 +512,9 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_ACTIVATOR_ACTIVATE:
+    case ID_DOOR_ACTIVATE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_ACTIVATOR_ACTIVATE from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_ACTIVATE from %s",
             player->Npc()->mName.c_str());
 
         myPacket->Read(event);
