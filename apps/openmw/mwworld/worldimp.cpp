@@ -5,6 +5,9 @@
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
 
+#include <components/openmw-mp/Base/WorldEvent.hpp>
+#include "../mwmp/Main.hpp"
+
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/cellid.hpp>
@@ -2247,13 +2250,50 @@ namespace MWWorld
             state = 2; // if opening, then close
             break;
         }
+
+        // Added by tes3mp
+        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+        event->cell = *door.getCell()->getCell();
+        event->cellRef.mRefID = door.getCellRef().getRefId();
+        event->cellRef.mRefNum = door.getCellRef().getRefNum();
+        event->state = state;
+        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_DOOR_ACTIVATE)->Send(event);
+
+        printf("Door activation 1\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str(),
+            event->state ? "true" : "false");
+
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;
     }
 
     void World::activateDoor(const Ptr &door, int state)
     {
+        // Added by tes3mp
+        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+        event->cell = *door.getCell()->getCell();
+        event->cellRef.mRefID = door.getCellRef().getRefId();
+        event->cellRef.mRefNum = door.getCellRef().getRefNum();
+        event->state = state;
+        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_WORLD_DOOR_ACTIVATE)->Send(event);
+
+        printf("Door activation 2\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str(),
+            event->state ? "true" : "false");
+
         door.getClass().setDoorState(door, state);
+        mDoorStates[door] = state;
+        if (state == 0)
+            mDoorStates.erase(door);
+    }
+
+    // Added by tes3mp to allow saving a door state received from a packet
+    void World::saveDoorState(const Ptr &door, int state)
+    {
         mDoorStates[door] = state;
         if (state == 0)
             mDoorStates.erase(door);

@@ -26,6 +26,7 @@ namespace mwmp
         ESM::Cell cell;
         ESM::CellRef cellRef;
         
+        int state;
         int lockLevel;
         float scale;
 
