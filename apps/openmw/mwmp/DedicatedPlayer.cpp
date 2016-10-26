@@ -42,7 +42,7 @@ MWWorld::Ptr DedicatedPlayer::getPtr()
     return ptr;
 }
 
-void Players::CreatePlayer(RakNet::RakNetGUID id)
+void Players::CreatePlayer(RakNet::RakNetGUID guid)
 {
     LOG_APPEND(Log::LOG_INFO, "%s", "- Setting up character info");
 
@@ -50,7 +50,7 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
     MWWorld::Ptr player = world->getPlayerPtr();
 
     ESM::NPC npc = *player.get<ESM::NPC>()->mBase;
-    DedicatedPlayer *dedicPlayer = players[id];
+    DedicatedPlayer *dedicPlayer = players[guid];
 
     npc.mRace = dedicPlayer->Npc()->mRace;
     npc.mHead = dedicPlayer->Npc()->mHead;
@@ -94,7 +94,7 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
         dedicPlayer->ptr.getBase()->canChangeCell = true;
         dedicPlayer->UpdatePtr(world->moveObject(dedicPlayer->ptr, cellStore, newPos.pos[0], newPos.pos[1], newPos.pos[2]));
 
-        npc.mId = players[id]->ptr.get<ESM::NPC>()->mBase->mId;
+        npc.mId = players[guid]->ptr.get<ESM::NPC>()->mBase->mId;
 
         MWWorld::ESMStore *store = const_cast<MWWorld::ESMStore *>(&world->getStore());
         MWWorld::Store<ESM::NPC> *esm_store = const_cast<MWWorld::Store<ESM::NPC> *> (&store->get<ESM::NPC>());
@@ -103,15 +103,15 @@ void Players::CreatePlayer(RakNet::RakNetGUID id)
 
         dedicPlayer->updateCell();
 
-        ESM::CustomMarker mEditingMarker = Main::get().getGUIController()->CreateMarker(id);
+        ESM::CustomMarker mEditingMarker = Main::get().getGUIController()->CreateMarker(guid);
         dedicPlayer->marker = mEditingMarker;
         dedicPlayer->setMarkerState(true);
     }
 
-    dedicPlayer->guid = id;
+    dedicPlayer->guid = guid;
     dedicPlayer->state = 2;
 
-    world->enable(players[id]->ptr);
+    world->enable(players[guid]->ptr);
 }
 
 
@@ -121,31 +121,31 @@ void Players::CleanUp()
         delete it->second;
 }
 
-void Players::DisconnectPlayer(RakNet::RakNetGUID id)
+void Players::DisconnectPlayer(RakNet::RakNetGUID guid)
 {
-    if (players[id]->state > 1)
+    if (players[guid]->state > 1)
     {
-        players[id]->state = 1;
+        players[guid]->state = 1;
 
         // Remove player's marker
-        players[id]->setMarkerState(false);
+        players[guid]->setMarkerState(false);
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        world->disable(players[id]->getPtr());
+        world->disable(players[guid]->getPtr());
 
         // Move player to ToddTest
         ESM::Position newPos;
         world->findInteriorPosition("ToddTest", newPos);
         MWWorld::CellStore *store = world->getInterior("ToddTest");
 
-        players[id]->getPtr().getBase()->canChangeCell = true;
-        world->moveObject(players[id]->getPtr(), store, newPos.pos[0], newPos.pos[1], newPos.pos[2]);
+        players[guid]->getPtr().getBase()->canChangeCell = true;
+        world->moveObject(players[guid]->getPtr(), store, newPos.pos[0], newPos.pos[1], newPos.pos[2]);
     }
 }
 
-DedicatedPlayer *Players::GetPlayer(RakNet::RakNetGUID id)
+DedicatedPlayer *Players::GetPlayer(RakNet::RakNetGUID guid)
 {
-    return players[id];
+    return players[guid];
 }
 
 MWWorld::Ptr DedicatedPlayer::getLiveCellPtr()

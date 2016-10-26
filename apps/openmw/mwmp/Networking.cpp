@@ -172,14 +172,14 @@ void Networking::Connect(const std::string &ip, unsigned short port)
 
 void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
 {
-    RakNet::RakNetGUID id;
+    RakNet::RakNetGUID guid;
     RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
-    bsIn.Read(id);
+    bsIn.Read(guid);
 
     DedicatedPlayer *pl = 0;
-    static RakNet::RakNetGUID myid = getLocalPlayer()->guid;
-    if (id != myid)
-        pl = Players::GetPlayer(id);
+    static RakNet::RakNetGUID myGuid = getLocalPlayer()->guid;
+    if (guid != myGuid)
+        pl = Players::GetPlayer(guid);
 
     PlayerPacket *myPacket = playerController.GetPacket(packet->data[0]);
 
@@ -195,7 +195,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_GAME_BASE_INFO from server");
 
-        if (id == myid)
+        if (guid == myGuid)
         {
             LOG_APPEND(Log::LOG_INFO, "%s", "- Packet was about my id");
 
@@ -218,17 +218,17 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
             if (pl == 0)
             {
                 LOG_APPEND(Log::LOG_INFO, "%s", "- Exchanging data with new player");
-                pl = Players::NewPlayer(id);
+                pl = Players::NewPlayer(guid);
             }
 
             myPacket->Packet(&bsIn, pl, false);
-            Players::CreatePlayer(id);
+            Players::CreatePlayer(guid);
         }
         break;
     }
     case ID_GAME_POS:
     {
-        if (id == myid)
+        if (guid == myGuid)
         {
             if (packet->length != myPacket->headerSize())
             {
@@ -246,21 +246,21 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     case ID_USER_MYID:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_USER_MYID from server");
-        myid = id;
-        getLocalPlayer()->guid = id;
+        myGuid = guid;
+        getLocalPlayer()->guid = guid;
         break;
     }
     case ID_USER_DISCONNECTED:
     {
-        if (id == myid)
+        if (guid == myGuid)
             MWBase::Environment::get().getStateManager()->requestQuit();
         else if (pl != 0)
-            Players::DisconnectPlayer(id);
+            Players::DisconnectPlayer(guid);
 
     }
     case ID_GAME_EQUIPMENT:
     {
-        if (id == myid)
+        if (guid == myGuid)
         {
             if (packet->length == myPacket->headerSize())
             {
@@ -347,7 +347,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_DYNAMICSTATS:
     {
-        if (id == myid)
+        if (guid == myGuid)
         {
             if (packet->length == myPacket->headerSize())
             {
@@ -378,7 +378,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     case ID_GAME_DIE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_GAME_DIE from server");
-        if (id == myid)
+        if (guid == myGuid)
         {
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             MWMechanics::DynamicStat<float> health = player.getClass().getCreatureStats(player).getHealth();
@@ -400,7 +400,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_RESURRECT:
     {
-        if (id == myid)
+        if (guid == myGuid)
         {
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             player.getClass().getCreatureStats(player).resurrect();
@@ -431,7 +431,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_CELL:
     {
-        if (id == myid)
+        if (guid == myGuid)
         {
             if (packet->length == myPacket->headerSize())
                 getLocalPlayer()->updateCell(true);
@@ -450,7 +450,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_DRAWSTATE:
     {
-        if (id == myid)
+        if (guid == myGuid)
             getLocalPlayer()->updateDrawStateAndFlags(true);
         else if (pl != 0)
         {
@@ -462,7 +462,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     case ID_CHAT_MESSAGE:
     {
         std::string message;
-        if (id == myid)
+        if (guid == myGuid)
         {
             myPacket->Packet(&bsIn, getLocalPlayer(), false);
             message = *getLocalPlayer()->ChatMessage();
@@ -478,7 +478,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_CHARGEN:
     {
-        if (id == myid)
+        if (guid == myGuid)
         {
             myPacket->Packet(&bsIn, getLocalPlayer(), false);
         }
@@ -486,7 +486,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_ATTRIBUTE:
     {
-        if (id == myid)
+        if (guid == myGuid)
         {
             if (packet->length == myPacket->headerSize())
             {
@@ -516,7 +516,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_SKILL:
     {
-        if (id == myid)
+        if (guid == myGuid)
         {
             if (packet->length == myPacket->headerSize())
             {
@@ -546,7 +546,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_LEVEL:
     {
-        if (id == myid)
+        if (guid == myGuid)
         {
             if (packet->length == myPacket->headerSize())
             {
@@ -571,7 +571,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GUI_MESSAGEBOX:
     {
-        if (id == myid)
+        if (guid == myGuid)
         {
             myPacket->Packet(&bsIn, getLocalPlayer(), false);
 
@@ -590,7 +590,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_CHARCLASS:
     {
-        if (id == myid)
+        if (guid == myGuid)
         {
             if (packet->length == myPacket->headerSize())
                 getLocalPlayer()->sendClass();
@@ -603,7 +603,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_INVENTORY:
     {
-        if (id == myid)
+        if (guid == myGuid)
         {
             if (packet->length == myPacket->headerSize())
             {
@@ -653,7 +653,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_TIME:
     {
-        if (id == myid)
+        if (guid == myGuid)
         {
             myPacket->Packet(&bsIn, getLocalPlayer(), false);
             MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -674,17 +674,17 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
 
 void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 {
-    RakNet::RakNetGUID id;
+    RakNet::RakNetGUID guid;
     RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
-    bsIn.Read(id);
+    bsIn.Read(guid);
 
     DedicatedPlayer *pl = 0;
-    static RakNet::RakNetGUID myid = getLocalPlayer()->guid;
-    if (id != myid)
-        pl = Players::GetPlayer(id);
+    static RakNet::RakNetGUID myGuid = getLocalPlayer()->guid;
+    if (guid != myGuid)
+        pl = Players::GetPlayer(guid);
 
     WorldPacket *myPacket = worldController.GetPacket(packet->data[0]);
-    WorldEvent *event = new WorldEvent(id);
+    WorldEvent *event = new WorldEvent(guid);
     myPacket->Packet(&bsIn, event, false);
 
     MWWorld::CellStore *ptrCellStore;

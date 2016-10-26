@@ -8,36 +8,36 @@
 TPlayers Players::players;
 TSlots Players::slots;
 
-void Players::DeletePlayer(RakNet::RakNetGUID id)
+void Players::DeletePlayer(RakNet::RakNetGUID guid)
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Deleting player with guid %lu",
-        id.g);
+        guid.g);
 
-    if (players[id] != 0)
+    if (players[guid] != 0)
     {
         LOG_APPEND(Log::LOG_INFO, "- Emptying slot %i",
-            players[id]->GetID());
+            players[guid]->GetID());
 
-        slots[players[id]->GetID()] = 0;
-        delete players[id];
-        players.erase(id);
+        slots[players[guid]->GetID()] = 0;
+        delete players[guid];
+        players.erase(guid);
     }
 
     LOG_APPEND(Log::LOG_INFO, "- %i remaining",
         players.size());
 }
 
-void Players::NewPlayer(RakNet::RakNetGUID id)
+void Players::NewPlayer(RakNet::RakNetGUID guid)
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Creating new player with guid %lu",
-        id.g);
+        guid.g);
 
-    players[id] = new Player(id);
-    players[id]->GetCell()->blank();
-    players[id]->Npc()->blank();
-    players[id]->NpcStats()->blank();
-    players[id]->CreatureStats()->blank();
-    players[id]->charClass.blank();
+    players[guid] = new Player(guid);
+    players[guid]->GetCell()->blank();
+    players[guid]->Npc()->blank();
+    players[guid]->NpcStats()->blank();
+    players[guid]->CreatureStats()->blank();
+    players[guid]->charClass.blank();
 
     for (int i = 0; i < mwmp::Networking::Get().MaxConnections(); i++)
     {
@@ -46,16 +46,16 @@ void Players::NewPlayer(RakNet::RakNetGUID id)
             LOG_APPEND(Log::LOG_INFO, "- Storing in slot %i",
                 i);
 
-            slots[i] = players[id];
+            slots[i] = players[guid];
             slots[i]->SetID(i);
             break;
         }
     }
 }
 
-Player *Players::GetPlayer(RakNet::RakNetGUID id)
+Player *Players::GetPlayer(RakNet::RakNetGUID guid)
 {
-    return players[id];
+    return players[guid];
 }
 
 std::map<RakNet::RakNetGUID, Player*> *Players::GetPlayers()
@@ -63,7 +63,7 @@ std::map<RakNet::RakNetGUID, Player*> *Players::GetPlayers()
     return &players;
 }
 
-Player::Player(RakNet::RakNetGUID id) : BasePlayer(id)
+Player::Player(RakNet::RakNetGUID guid) : BasePlayer(guid)
 {
     handshake = false;
     loaded = false;

@@ -24,9 +24,9 @@ typedef std::map<unsigned short, Player*> TSlots;
 class Players
 {
 public:
-    static void NewPlayer(RakNet::RakNetGUID id);
-    static void DeletePlayer(RakNet::RakNetGUID id);
-    static Player *GetPlayer(RakNet::RakNetGUID id);
+    static void NewPlayer(RakNet::RakNetGUID guid);
+    static void DeletePlayer(RakNet::RakNetGUID guid);
+    static Player *GetPlayer(RakNet::RakNetGUID guid);
     static Player *GetPlayer(unsigned short id);
     static TPlayers *GetPlayers();
 
@@ -46,7 +46,7 @@ public:
         LOADED,
         POSTLOADED
     };
-    Player(RakNet::RakNetGUID id);
+    Player(RakNet::RakNetGUID guid);
 
     unsigned short GetID();
     void SetID(unsigned short id);
