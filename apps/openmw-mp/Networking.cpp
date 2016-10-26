@@ -234,7 +234,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
             if (target == nullptr)
                 target = player;
 
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player: %s attaked %s state: %d", player->Npc()->mName.c_str(),
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player: %s attacked %s state: %d", player->Npc()->mName.c_str(),
                 target->Npc()->mName.c_str(), player->GetAttack()->pressed == 1);
             if (player->GetAttack()->pressed == 0)
             {
