@@ -230,18 +230,28 @@ void Main::PressedKey(int key)
 // should be ignored because of their potential for spam
 bool Main::isValidPacketScript(std::string script)
 {
-    static const int invalidPacketScriptsCount = 7;
+    static const int invalidPacketScriptsCount = 16;
     static const std::string invalidPacketScripts[invalidPacketScriptsCount] = {
         // Spammy shorts
         "OutsideBanner",
         "sleeperScript",
         "dreamer_talkerEnable",
+        "drenSlaveOwners",
+        "ahnassiScript",
+        "FaluraScript",
+        "hlormarScript",
         // Spammy floats
         "Float",
         "SignRotate",
+        // Spammy globals
+        "wraithguardScript",
         // Spammy globals leading to crashes
         "LegionUniform",
-        "OrdinatorUniform"
+        "OrdinatorUniform",
+        "LorkhanHeart",
+        "ouch_keening",
+        "ouch_sunder",
+        "ouch_wraithguard"
     };
 
     for (int i = 0; i < invalidPacketScriptsCount; i++)
