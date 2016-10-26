@@ -27,6 +27,7 @@ Programmers
     Artem Kotsynyak (greye)
     artemutin
     Arthur Moore (EmperorArthur)
+    Assumeru
     athile
     Ben Shealy (bentsherman)
     Bret Curtis (psi29a)
