@@ -673,7 +673,7 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
     for (TPlayers::iterator pl = players->begin(); pl != players->end(); pl++) //sending other players to new player
     {
         // If we are iterating over the new player, don't send the packets below
-        if (pl->first == guid) continue;
+        if (pl->first == guid.g) continue;
 
         playerController->GetPacket(ID_GAME_BASE_INFO)->Send(pl->second, guid);
         playerController->GetPacket(ID_GAME_DYNAMICSTATS)->Send(pl->second, guid);

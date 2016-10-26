@@ -30,7 +30,7 @@ namespace mwmp
         static DedicatedPlayer *GetPlayer(const MWWorld::Ptr &ptr);
         static void Update(float dt);
     private:
-        static std::map<RakNet::RakNetGUID, DedicatedPlayer *> players;
+        static std::map<uint64_t, DedicatedPlayer *> players;
     };
 
     class DedicatedPlayer : public BasePlayer

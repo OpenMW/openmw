@@ -24,7 +24,7 @@
 using namespace mwmp;
 using namespace std;
 
-std::map<RakNet::RakNetGUID, DedicatedPlayer *> Players::players;
+std::map<uint64_t, DedicatedPlayer *> Players::players;
 
 DedicatedPlayer::DedicatedPlayer(RakNet::RakNetGUID guid) : BasePlayer(guid)
 {
@@ -50,7 +50,7 @@ void Players::CreatePlayer(RakNet::RakNetGUID guid)
     MWWorld::Ptr player = world->getPlayerPtr();
 
     ESM::NPC npc = *player.get<ESM::NPC>()->mBase;
-    DedicatedPlayer *dedicPlayer = players[guid];
+    DedicatedPlayer *dedicPlayer = players[guid.g];
 
     npc.mRace = dedicPlayer->Npc()->mRace;
     npc.mHead = dedicPlayer->Npc()->mHead;
@@ -94,7 +94,7 @@ void Players::CreatePlayer(RakNet::RakNetGUID guid)
         dedicPlayer->ptr.getBase()->canChangeCell = true;
         dedicPlayer->UpdatePtr(world->moveObject(dedicPlayer->ptr, cellStore, newPos.pos[0], newPos.pos[1], newPos.pos[2]));
 
-        npc.mId = players[guid]->ptr.get<ESM::NPC>()->mBase->mId;
+        npc.mId = players[guid.g]->ptr.get<ESM::NPC>()->mBase->mId;
 
         MWWorld::ESMStore *store = const_cast<MWWorld::ESMStore *>(&world->getStore());
         MWWorld::Store<ESM::NPC> *esm_store = const_cast<MWWorld::Store<ESM::NPC> *> (&store->get<ESM::NPC>());
@@ -111,41 +111,41 @@ void Players::CreatePlayer(RakNet::RakNetGUID guid)
     dedicPlayer->guid = guid;
     dedicPlayer->state = 2;
 
-    world->enable(players[guid]->ptr);
+    world->enable(players[guid.g]->ptr);
 }
 
 
 void Players::CleanUp()
 {
-    for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
+    for (std::map <uint64_t, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
         delete it->second;
 }
 
 void Players::DisconnectPlayer(RakNet::RakNetGUID guid)
 {
-    if (players[guid]->state > 1)
+    if (players[guid.g]->state > 1)
     {
-        players[guid]->state = 1;
+        players[guid.g]->state = 1;
 
         // Remove player's marker
-        players[guid]->setMarkerState(false);
+        players[guid.g]->setMarkerState(false);
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        world->disable(players[guid]->getPtr());
+        world->disable(players[guid.g]->getPtr());
 
         // Move player to ToddTest
         ESM::Position newPos;
         world->findInteriorPosition("ToddTest", newPos);
         MWWorld::CellStore *store = world->getInterior("ToddTest");
 
-        players[guid]->getPtr().getBase()->canChangeCell = true;
-        world->moveObject(players[guid]->getPtr(), store, newPos.pos[0], newPos.pos[1], newPos.pos[2]);
+        players[guid.g]->getPtr().getBase()->canChangeCell = true;
+        world->moveObject(players[guid.g]->getPtr(), store, newPos.pos[0], newPos.pos[1], newPos.pos[2]);
     }
 }
 
 DedicatedPlayer *Players::GetPlayer(RakNet::RakNetGUID guid)
 {
-    return players[guid];
+    return players[guid.g];
 }
 
 MWWorld::Ptr DedicatedPlayer::getLiveCellPtr()
@@ -222,7 +222,7 @@ void Players::Update(float dt)
 {
     static float timer = 0;
     timer += dt;
-    for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
+    for (std::map <uint64_t, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
     {
         DedicatedPlayer *pl = it->second;
         if (pl == 0) continue;
@@ -287,9 +287,9 @@ DedicatedPlayer *Players::NewPlayer(RakNet::RakNetGUID guid)
     LOG_APPEND(Log::LOG_INFO, "- Creating new DedicatedPlayer with guid %lu",
         guid.g);
 
-    players[guid] = new DedicatedPlayer(guid);
-    players[guid]->state = 0;
-    return players[guid];
+    players[guid.g] = new DedicatedPlayer(guid);
+    players[guid.g]->state = 0;
+    return players[guid.g];
 }
 
 void DedicatedPlayer::UpdateInventory()
@@ -402,7 +402,7 @@ const std::string DedicatedPlayer::GetAnim()
 
 DedicatedPlayer *Players::GetPlayer(const MWWorld::Ptr &ptr)
 {
-    std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin();
+    std::map <uint64_t, DedicatedPlayer *>::iterator it = players.begin();
 
     for (; it != players.end(); it++)
     {
