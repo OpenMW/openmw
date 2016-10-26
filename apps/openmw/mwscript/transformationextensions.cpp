@@ -569,25 +569,6 @@ namespace MWScript
                     float ay = ptr.getRefData().getPosition().rot[1];
                     float az = ptr.getRefData().getPosition().rot[2];
 
-                    // Added by tes3mp
-                    //
-                    // Only send packet for objects that don't have the spammy Float script
-                    if (!Misc::StringUtils::ciEqual(ptr.getClass().getScript(ptr), "Float"))
-                    {
-                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                        event->cell = *ptr.getCell()->getCell();
-                        event->cellRef.mRefID = ptr.getCellRef().getRefId();
-                        event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
-                        event->pos.rot[0] = axis == "x" ? ax + rotation : ax;
-                        event->pos.rot[1] = axis == "y" ? ay + rotation : ay;
-                        event->pos.rot[2] = axis == "z" ? az + rotation : az;
-                        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_ROTATE)->Send(event);
-
-                        printf("Sending ID_OBJECT_ROTATE about %s\n%i\n",
-                            event->cellRef.mRefID.c_str(),
-                            event->cellRef.mRefNum.mIndex);
-                    }
-
                     if (axis == "x")
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax+rotation,ay,az);
                     else if (axis == "y")
@@ -618,20 +599,6 @@ namespace MWScript
                     float ax = objRot[0];
                     float ay = objRot[1];
                     float az = objRot[2];
-
-                    // Added by tes3mp
-                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                    event->cell = *ptr.getCell()->getCell();
-                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
-                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
-                    event->pos.rot[0] = axis == "x" ? ax + rotation : ax;
-                    event->pos.rot[1] = axis == "y" ? ay + rotation : ay;
-                    event->pos.rot[2] = axis == "z" ? az + rotation : az;
-                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_ROTATE)->Send(event);
-
-                    printf("Sending ID_OBJECT_ROTATE about %s\n%i\n",
-                        event->cellRef.mRefID.c_str(),
-                        event->cellRef.mRefNum.mIndex);
 
                     if (axis == "x")
                     {
@@ -665,20 +632,6 @@ namespace MWScript
                     float xr = ptr.getCellRef().getPosition().rot[0];
                     float yr = ptr.getCellRef().getPosition().rot[1];
                     float zr = ptr.getCellRef().getPosition().rot[2];
-
-                    // Added by tes3mp
-                    //
-                    // Only send packet for objects that don't have the spammy Float script
-                    if (!Misc::StringUtils::ciEqual(ptr.getClass().getScript(ptr), "Float"))
-                    {
-                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                        event->cell = *ptr.getCell()->getCell();
-                        event->cellRef.mRefID = ptr.getCellRef().getRefId();
-                        event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
-                        event->pos = ptr.getCellRef().getPosition();
-                        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_ROTATE)->Send(event);
-                        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_MOVE)->Send(event);
-                    }
 
                     MWBase::Environment::get().getWorld()->rotateObject(ptr, xr, yr, zr);
 
@@ -729,20 +682,6 @@ namespace MWScript
                     osg::Vec3f worldPos(ptr.getRefData().getPosition().asVec3());
                     worldPos += diff;
 
-                    // Added by tes3mp
-                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                    event->cell = *ptr.getCell()->getCell();
-                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
-                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
-                    event->pos.pos[0] = worldPos.x();
-                    event->pos.pos[1] = worldPos.y();
-                    event->pos.pos[2] = worldPos.z();
-                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_MOVE)->Send(event);
-
-                    printf("Sending ID_OBJECT_MOVE about %s\n%i\n",
-                        event->cellRef.mRefID.c_str(),
-                        event->cellRef.mRefNum.mIndex);
-
                     MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x(), worldPos.y(), worldPos.z());
                 }
         };
@@ -765,20 +704,6 @@ namespace MWScript
                     runtime.pop();
 
                     const float *objPos = ptr.getRefData().getPosition().pos;
-
-                    // Added by tes3mp
-                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                    event->cell = *ptr.getCell()->getCell();
-                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
-                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
-                    event->pos.pos[0] = axis == "x" ? objPos[0] + movement : objPos[0];
-                    event->pos.pos[1] = axis == "y" ? objPos[1] + movement : objPos[1];
-                    event->pos.pos[2] = axis == "z" ? objPos[2] + movement : objPos[2];
-                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_MOVE)->Send(event);
-
-                    printf("Sending ID_OBJECT_MOVE about %s\n%i\n",
-                        event->cellRef.mRefID.c_str(),
-                        event->cellRef.mRefNum.mIndex);
 
                     MWWorld::Ptr updated;
                     if (axis == "x")
