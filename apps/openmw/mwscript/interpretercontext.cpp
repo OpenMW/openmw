@@ -283,12 +283,12 @@ namespace MWScript
         if (sendPackets)
         {
             mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-            event->globalName = name;
+            event->varName = name;
             event->shortVal = value;
             mwmp::Main::get().getNetworking()->GetWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->Send(event);
 
-            printf("Sending ID_SCRIPT_GLOBAL_SHORT\n- globalName: %s\n- shortVal: %i\n",
-                event->globalName.c_str(),
+            printf("Sending ID_SCRIPT_GLOBAL_SHORT\n- varName: %s\n- shortVal: %i\n",
+                event->varName.c_str(),
                 event->shortVal);
         }
 
