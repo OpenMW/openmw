@@ -38,7 +38,7 @@ namespace mwmp
         int index;
         int shortVal;
         float floatVal;
-        std::string globalName;
+        std::string varName;
     };
 }
 

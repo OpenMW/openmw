@@ -12,6 +12,6 @@ void PacketScriptGlobalShort::Packet(RakNet::BitStream *bs, WorldEvent *event, b
 {
     WorldPacket::Packet(bs, event, send);
 
-    RW(event->globalName, send);
+    RW(event->varName, send);
     RW(event->shortVal, send);
 }

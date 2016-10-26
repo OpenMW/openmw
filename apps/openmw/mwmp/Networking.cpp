@@ -12,9 +12,11 @@
 #include <apps/openmw/mwbase/windowmanager.hpp>
 
 #include <apps/openmw/mwworld/cellstore.hpp>
+#include <apps/openmw/mwworld/esmstore.hpp>
+#include <apps/openmw/mwworld/inventorystore.hpp>
+
 #include <apps/openmw/mwclass/npc.hpp>
 #include <apps/openmw/mwmechanics/npcstats.hpp>
-#include <apps/openmw/mwworld/inventorystore.hpp>
 #include <apps/openmw/mwmechanics/combat.hpp>
 
 #include <SDL_messagebox.h>
@@ -914,14 +916,42 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         break;
     }
+    case ID_SCRIPT_MEMBER_SHORT:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_SCRIPT_MEMBER_SHORT");
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s\n- index: %i\n- shortVal: %i\n",
+            event->cellRef.mRefID.c_str(),
+            event->index,
+            event->shortVal);
+
+        // Mimic the way a Ptr is fetched in InterpreterContext for similar situations
+        MWWorld::Ptr ptrFound = MWBase::Environment::get().getWorld()->getPtr(event->cellRef.mRefID, false);
+
+        if (ptrFound)
+        {
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+                ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum());
+
+            ptrFound.getRefData().getLocals().mShorts.at(event->index) = event->shortVal;
+            std::string scriptId = ptrFound.getClass().getScript(ptrFound);
+
+            ptrFound.getRefData().setLocals(
+                *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find(scriptId));
+
+            ptrFound.getRefData().getLocals().mShorts[event->index] = event->shortVal;;
+        }
+
+        break;
+    }
     case ID_SCRIPT_GLOBAL_SHORT:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_SCRIPT_GLOBAL_SHORT");
-        LOG_APPEND(Log::LOG_WARN, "- globalName: %s\n- shortVal: %i",
-            event->globalName.c_str(),
+        LOG_APPEND(Log::LOG_WARN, "- varName: %s\n- shortVal: %i",
+            event->varName.c_str(),
             event->shortVal);
 
-        MWBase::Environment::get().getWorld()->setGlobalInt(event->globalName, event->shortVal);
+        MWBase::Environment::get().getWorld()->setGlobalInt(event->varName, event->shortVal);
 
         break;
     }

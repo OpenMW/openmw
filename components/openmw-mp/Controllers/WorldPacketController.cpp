@@ -17,6 +17,7 @@
 
 #include "../Packets/World/PacketScriptLocalShort.hpp"
 #include "../Packets/World/PacketScriptLocalFloat.hpp"
+#include "../Packets/World/PacketScriptMemberShort.hpp"
 #include "../Packets/World/PacketScriptGlobalShort.hpp"
 
 #include "WorldPacketController.hpp"
@@ -46,6 +47,7 @@ mwmp::WorldPacketController::WorldPacketController(RakNet::RakPeerInterface *pee
 
     AddPacket<PacketScriptLocalShort>(&packets, peer);
     AddPacket<PacketScriptLocalFloat>(&packets, peer);
+    AddPacket<PacketScriptMemberShort>(&packets, peer);
     AddPacket<PacketScriptGlobalShort>(&packets, peer);
 }
 
