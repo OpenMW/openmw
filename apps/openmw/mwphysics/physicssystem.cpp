@@ -1309,11 +1309,15 @@ namespace MWPhysics
         PtrVelocityList::iterator iter = mMovementQueue.begin();
         for(;iter != mMovementQueue.end();++iter)
         {
+            ActorMap::iterator foundActor = mActors.find(iter->first);
+            if (foundActor == mActors.end()) // actor was already removed from the scene
+                continue;
+            Actor* physicActor = foundActor->second;
+
             float waterlevel = -std::numeric_limits<float>::max();
             const MWWorld::CellStore *cell = iter->first.getCell();
             if(cell->getCell()->hasWater())
                 waterlevel = cell->getWaterLevel();
-
 
             const MWMechanics::MagicEffects& effects = iter->first.getClass().getCreatureStats(iter->first).getMagicEffects();
 
@@ -1322,35 +1326,25 @@ namespace MWPhysics
             {
                 if (!world->isUnderwater(iter->first.getCell(), osg::Vec3f(iter->first.getRefData().getPosition().asVec3())))
                     waterCollision = true;
-                else
+                else if (physicActor->getCollisionMode())
                 {
-                    Actor *actor = getActor(iter->first);
-                    // Actor can collide
-                    if (actor->getCollisionMode())
+                    const osg::Vec3f actorPosition = physicActor->getPosition();
+                    const osg::Vec3f destinationPosition(actorPosition.x(), actorPosition.y(), waterlevel);
+                    ActorTracer tracer;
+                    tracer.doTrace(physicActor->getCollisionObject(), actorPosition, destinationPosition, mCollisionWorld);
+                    if (tracer.mFraction >= 1.0f)
                     {
-                        const osg::Vec3f actorPosition = actor->getPosition();
-                        const osg::Vec3f destinationPosition(actorPosition.x(), actorPosition.y(), waterlevel);
-                        ActorTracer tracer;
-                        tracer.doTrace(actor->getCollisionObject(), actorPosition, destinationPosition, mCollisionWorld);
-                        if (tracer.mFraction >= 1.0f)
-                        {
-                            waterCollision = true;
-                            actor->setPosition(destinationPosition);
-                        }
-                        else
-                        {
-                            //Remove the effect to remove the performance hit of casting in a weird spot
-                            //probably makes that Tribunal quest where the water rises a bit safer
-                            iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().purgeEffect(ESM::MagicEffect::WaterWalking);
-                        }
+                        waterCollision = true;
+                        physicActor->setPosition(destinationPosition);
+                    }
+                    else
+                    {
+                        //Remove the effect to remove the performance hit of casting in a weird spot
+                        //probably makes that Tribunal quest where the water rises a bit safer
+                        iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().purgeEffect(ESM::MagicEffect::WaterWalking);
                     }
                 }
             }
-
-            ActorMap::iterator foundActor = mActors.find(iter->first);
-            if (foundActor == mActors.end()) // actor was already removed from the scene
-                continue;
-            Actor* physicActor = foundActor->second;
             physicActor->setCanWaterWalk(waterCollision);
 
             // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
