@@ -10,6 +10,9 @@
 
 #include <components/esm/cellid.hpp>
 
+#include <components/openmw-mp/Base/WorldEvent.hpp>
+#include "../mwmp/Main.hpp"
+
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -178,9 +181,24 @@ namespace MWScript
 
         mLocals->mShorts.at (index) = value;
 
+        // Added by tes3mp
         if (sendPackets)
-            printf("Sending ID_SCRIPT_LOCAL_SHORT for %s\n",
-                this->mReference.getClass().getScript(mReference));
+        {
+            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+            event->cell = *mReference.getCell()->getCell();
+            event->cellRef.mRefID = mReference.getCellRef().getRefId();
+            event->cellRef.mRefNum = mReference.getCellRef().getRefNum();
+            event->index = index;
+            event->shortVal = value;
+            mwmp::Main::get().getNetworking()->GetWorldPacket(ID_SCRIPT_LOCAL_SHORT)->Send(event);
+
+            printf("Sending ID_SCRIPT_LOCAL_SHORT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i\n",
+                event->cellRef.mRefID.c_str(),
+                event->cellRef.mRefNum.mIndex,
+                event->cell.getDescription().c_str(),
+                event->index,
+                event->shortVal);
+        }
     }
 
     void InterpreterContext::setLocalLong (int index, int value)
@@ -197,6 +215,27 @@ namespace MWScript
             throw std::runtime_error ("local variables not available in this context");
 
         mLocals->mFloats.at (index) = value;
+
+        // Added by tes3mp
+        //
+        // Only send a packet if this float has no decimals (to avoid spam)
+        if (sendPackets && value == (int) value)
+        {
+            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+            event->cell = *mReference.getCell()->getCell();
+            event->cellRef.mRefID = mReference.getCellRef().getRefId();
+            event->cellRef.mRefNum = mReference.getCellRef().getRefNum();
+            event->index = index;
+            event->floatVal = value;
+            mwmp::Main::get().getNetworking()->GetWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->Send(event);
+
+            printf("Sending ID_SCRIPT_LOCAL_FLOAT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f\n",
+                event->cellRef.mRefID.c_str(),
+                event->cellRef.mRefNum.mIndex,
+                event->cell.getDescription().c_str(),
+                event->index,
+                event->floatVal);
+        }
     }
 
     void InterpreterContext::messageBox (const std::string& message,
@@ -240,6 +279,19 @@ namespace MWScript
 
     void InterpreterContext::setGlobalShort (const std::string& name, int value)
     {
+        // Added by tes3mp
+        if (sendPackets)
+        {
+            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+            event->globalName = name;
+            event->shortVal = value;
+            mwmp::Main::get().getNetworking()->GetWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->Send(event);
+
+            printf("Sending ID_SCRIPT_GLOBAL_SHORT\n- globalName: %s\n- shortVal: %i\n",
+                event->globalName.c_str(),
+                event->shortVal);
+        }
+
         MWBase::Environment::get().getWorld()->setGlobalInt (name, value);
     }
 
