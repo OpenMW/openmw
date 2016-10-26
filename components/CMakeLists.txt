@@ -162,7 +162,9 @@ add_component_dir (openmw-mp
         Packets/World/PacketObjectRotate
 
         Packets/World/PacketContainerAdd Packets/World/PacketContainerRemove Packets/World/PacketDoorActivate
-        Packets/World/PacketVideoPlay)
+        Packets/World/PacketVideoPlay
+
+        Packets/World/PacketScriptLocalShort Packets/World/PacketScriptLocalFloat Packets/World/PacketScriptGlobalShort)
 
 add_component_dir (fallback
     fallback validate

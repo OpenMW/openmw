@@ -691,7 +691,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
     if (event->cell.isExterior())
         ptrCellStore = MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY);
-    else
+    else if (!event->cell.mName.empty())
         ptrCellStore = MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
 
     switch (packet->data[0])
@@ -865,6 +865,63 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
             event->allowSkipping ? "true" : "false");
 
         MWBase::Environment::get().getWindowManager()->playVideo(event->video, event->allowSkipping);
+
+        break;
+    }
+    case ID_SCRIPT_LOCAL_SHORT:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_SCRIPT_LOCAL_SHORT");
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i",
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str(),
+            event->index,
+            event->shortVal);
+
+        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+
+        if (ptrFound)
+        {
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+                ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum());
+
+            ptrFound.getRefData().getLocals().mShorts.at(event->index) = event->shortVal;
+        }
+
+        break;
+    }
+    case ID_SCRIPT_LOCAL_FLOAT:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_SCRIPT_LOCAL_FLOAT");
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f",
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str(),
+            event->index,
+            event->floatVal);
+
+        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+
+        if (ptrFound)
+        {
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+                ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum());
+
+            ptrFound.getRefData().getLocals().mFloats.at(event->index) = event->floatVal;
+        }
+
+        break;
+    }
+    case ID_SCRIPT_GLOBAL_SHORT:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_SCRIPT_GLOBAL_SHORT");
+        LOG_APPEND(Log::LOG_WARN, "- globalName: %s\n- shortVal: %i",
+            event->globalName.c_str(),
+            event->shortVal);
+
+        MWBase::Environment::get().getWorld()->setGlobalInt(event->globalName, event->shortVal);
 
         break;
     }

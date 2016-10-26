@@ -15,6 +15,10 @@
 #include "../Packets/World/PacketDoorActivate.hpp"
 #include "../Packets/World/PacketVideoPlay.hpp"
 
+#include "../Packets/World/PacketScriptLocalShort.hpp"
+#include "../Packets/World/PacketScriptLocalFloat.hpp"
+#include "../Packets/World/PacketScriptGlobalShort.hpp"
+
 #include "WorldPacketController.hpp"
 
 template <typename T>
@@ -39,6 +43,10 @@ mwmp::WorldPacketController::WorldPacketController(RakNet::RakPeerInterface *pee
     AddPacket<PacketContainerRemove>(&packets, peer);
     AddPacket<PacketDoorActivate>(&packets, peer);
     AddPacket<PacketVideoPlay>(&packets, peer);
+
+    AddPacket<PacketScriptLocalShort>(&packets, peer);
+    AddPacket<PacketScriptLocalFloat>(&packets, peer);
+    AddPacket<PacketScriptGlobalShort>(&packets, peer);
 }
 
 

@@ -34,6 +34,11 @@ namespace mwmp
 
         std::string video;
         bool allowSkipping;
+
+        int index;
+        int shortVal;
+        float floatVal;
+        std::string globalName;
     };
 }
 
