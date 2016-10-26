@@ -603,7 +603,25 @@ namespace MWScript
 
         Locals& locals = getMemberLocals (scriptId, global);
 
-        locals.mShorts[findLocalVariableIndex (scriptId, name, 's')] = value;
+        // Added by tes3mp so it can be reused by it
+        int index = findLocalVariableIndex(scriptId, name, 's');
+
+        locals.mShorts[index] = value;
+
+        // Added by tes3mp
+        if (sendPackets && !global)
+        {
+            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+            event->cellRef.mRefID = id;
+            event->varName = name;
+            event->shortVal = value;
+            mwmp::Main::get().getNetworking()->GetWorldPacket(ID_SCRIPT_MEMBER_SHORT)->Send(event);
+
+            printf("Sending ID_SCRIPT_MEMBER_SHORT\n- cellRef: %s\n- index: %i\n- shortVal: %i\n",
+                event->cellRef.mRefID.c_str(),
+                event->index,
+                event->shortVal);
+        }
     }
 
     void InterpreterContext::setMemberLong (const std::string& id, const std::string& name, int value, bool global)

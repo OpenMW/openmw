@@ -933,13 +933,12 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
-            ptrFound.getRefData().getLocals().mShorts.at(event->index) = event->shortVal;
             std::string scriptId = ptrFound.getClass().getScript(ptrFound);
 
             ptrFound.getRefData().setLocals(
                 *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find(scriptId));
 
-            ptrFound.getRefData().getLocals().mShorts[event->index] = event->shortVal;;
+            ptrFound.getRefData().getLocals().mShorts.at(event->index) = event->shortVal;;
         }
 
         break;
