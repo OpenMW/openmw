@@ -243,7 +243,10 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
                 getLocalPlayer()->updatePosition(true);
         }
         else if (pl != 0)
+        {
             myPacket->Packet(&bsIn, pl, false);
+            pl->updateMarker();
+        }
         break;
     }
     case ID_USER_MYID:

@@ -220,8 +220,6 @@ void DedicatedPlayer::Move(float dt)
 
 void Players::Update(float dt)
 {
-    static float timer = 0;
-    timer += dt;
     for (std::map <uint64_t, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
     {
         DedicatedPlayer *pl = it->second;
@@ -262,12 +260,7 @@ void Players::Update(float dt)
         ptrNpcStats->setBaseDisposition(255);
         pl->Move(dt);
         pl->UpdateDrawState();
-
-        if (timer >= 0.2) // call every 200 msec
-            pl->updateMarker();
     }
-    if (timer >= 0.2)
-        timer = 0;
 }
 
 void DedicatedPlayer::UpdatePtr(MWWorld::Ptr newPtr)
