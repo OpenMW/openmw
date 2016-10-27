@@ -613,7 +613,7 @@ namespace MWScript
         {
             mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
             event->cellRef.mRefID = id;
-            event->varName = name;
+            event->index = index;
             event->shortVal = value;
             mwmp::Main::get().getNetworking()->GetWorldPacket(ID_SCRIPT_MEMBER_SHORT)->Send(event);
 
