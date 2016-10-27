@@ -9,6 +9,7 @@
 
 #include <apps/openmw/mwbase/world.hpp>
 #include <apps/openmw/mwbase/environment.hpp>
+#include <apps/openmw/mwbase/mechanicsmanager.hpp>
 #include <apps/openmw/mwbase/windowmanager.hpp>
 
 #include <apps/openmw/mwworld/cellstore.hpp>
@@ -811,7 +812,8 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
-            MWBase::Environment::get().getWorld()->moveObject(ptrFound, event->pos.pos[0], event->pos.pos[1], event->pos.pos[2]);
+            MWBase::Environment::get().getWorld()->moveObject(ptrFound,
+                event->pos.pos[0], event->pos.pos[1], event->pos.pos[2]);
         }
 
         break;
@@ -832,7 +834,30 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
-            MWBase::Environment::get().getWorld()->rotateObject(ptrFound, event->pos.rot[0], event->pos.rot[1], event->pos.rot[2]);
+            MWBase::Environment::get().getWorld()->rotateObject(ptrFound,
+                event->pos.rot[0], event->pos.rot[1], event->pos.rot[2]);
+        }
+
+        break;
+    }
+    case ID_OBJECT_ANIM_PLAY:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_ANIM_PLAY");
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str());
+
+        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+
+        if (ptrFound)
+        {
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+                ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum());
+
+            MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(ptrFound,
+                event->animGroup, event->animMode, std::numeric_limits<int>::max(), true);
         }
 
         break;

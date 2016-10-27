@@ -9,6 +9,7 @@
 #include "../Packets/World/PacketObjectScale.hpp"
 #include "../Packets/World/PacketObjectMove.hpp"
 #include "../Packets/World/PacketObjectRotate.hpp"
+#include "../Packets/World/PacketObjectAnimPlay.hpp"
 
 #include "../Packets/World/PacketContainerAdd.hpp"
 #include "../Packets/World/PacketContainerRemove.hpp"
@@ -39,6 +40,7 @@ mwmp::WorldPacketController::WorldPacketController(RakNet::RakPeerInterface *pee
     AddPacket<PacketObjectScale>(&packets, peer);
     AddPacket<PacketObjectMove>(&packets, peer);
     AddPacket<PacketObjectRotate>(&packets, peer);
+    AddPacket<PacketObjectAnimPlay>(&packets, peer);
 
     AddPacket<PacketContainerAdd>(&packets, peer);
     AddPacket<PacketContainerRemove>(&packets, peer);

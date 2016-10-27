@@ -35,6 +35,9 @@ namespace mwmp
         std::string video;
         bool allowSkipping;
 
+        std::string animGroup;
+        int animMode;
+
         int index;
         int shortVal;
         float floatVal;
