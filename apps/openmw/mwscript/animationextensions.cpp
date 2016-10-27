@@ -3,6 +3,10 @@
 #include <stdexcept>
 #include <limits>
 
+#include <components/openmw-mp/Base/WorldEvent.hpp>
+#include "../mwmp/Main.hpp"
+#include "../mwworld/cellstore.hpp"
+
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 
@@ -55,6 +59,15 @@ namespace MWScript
                         if (mode<0 || mode>2)
                             throw std::runtime_error ("animation mode out of range");
                     }
+
+                    // Added by tes3mp
+                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                    event->cell = *ptr.getCell()->getCell();
+                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
+                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                    event->animGroup = group;
+                    event->animMode = mode;
+                    mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_ANIM_PLAY)->Send(event);
 
                     MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, std::numeric_limits<int>::max(), true);
                }
