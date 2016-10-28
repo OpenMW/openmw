@@ -723,7 +723,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
             event->cellRef.mRefNum.mIndex,
             event->cell.getDescription().c_str());
 
-        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
 
         if (ptrFound)
         {
@@ -744,7 +744,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
             event->cellRef.mRefNum.mIndex,
             event->cell.getDescription().c_str());
 
-        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
 
         if (ptrFound)
         {
@@ -765,7 +765,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
             event->cellRef.mRefNum.mIndex,
             event->cell.getDescription().c_str());
 
-        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
 
         if (ptrFound)
         {
@@ -786,7 +786,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
             event->cellRef.mRefNum.mIndex,
             event->cell.getDescription().c_str());
 
-        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
 
         if (ptrFound)
         {
@@ -807,7 +807,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
             event->cellRef.mRefNum.mIndex,
             event->cell.getDescription().c_str());
 
-        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
 
         if (ptrFound)
         {
@@ -829,7 +829,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
             event->cellRef.mRefNum.mIndex,
             event->cell.getDescription().c_str());
 
-        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
 
         if (ptrFound)
         {
@@ -851,7 +851,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
             event->cellRef.mRefNum.mIndex,
             event->cell.getDescription().c_str());
 
-        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
 
         if (ptrFound)
         {
@@ -873,7 +873,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
             event->cellRef.mRefNum.mIndex,
             event->cell.getDescription().c_str());
 
-        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
 
         if (ptrFound)
         {
@@ -908,7 +908,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
             event->index,
             event->shortVal);
 
-        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
 
         if (ptrFound)
         {
@@ -931,7 +931,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
             event->index,
             event->floatVal);
 
-        MWWorld::Ptr ptrFound = ptrCellStore->searchByRefNum(event->cellRef.mRefNum);
+        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
 
         if (ptrFound)
         {

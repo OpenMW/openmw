@@ -168,30 +168,6 @@ namespace
             return true;
         }
     };
-
-    // Added by tes3mp
-    template <typename PtrType>
-    struct SearchByRefNumCustomVisitor
-    {
-        PtrType mFound;
-        ESM::RefNum mRefNumToFind;
-
-        SearchByRefNumCustomVisitor(const ESM::RefNum& toFind)
-            : mFound(NULL)
-            , mRefNumToFind(toFind)
-        {
-        }
-
-        bool operator()(const PtrType& ptr)
-        {
-            if (ptr.getCellRef().getRefNum().mIndex == mRefNumToFind.mIndex)
-            {
-                mFound = ptr;
-                return false;
-            }
-            return true;
-        }
-    };
 }
 
 namespace MWWorld
@@ -466,9 +442,33 @@ namespace MWWorld
     }
 
     // Added by tes3mp
-    Ptr CellStore::searchByRefNum (ESM::RefNum refNum)
+    template <typename PtrType>
+    struct SearchExactVisitor
     {
-        SearchByRefNumCustomVisitor<MWWorld::Ptr> searchVisitor(refNum);
+        PtrType mFound;
+        std::string mIdToFind;
+        int mRefNumIndexToFind;
+
+        bool operator()(const PtrType& ptr)
+        {
+            if (ptr.getCellRef().getRefNum().mIndex == mRefNumIndexToFind)
+            {
+                if (ptr.getCellRef().getRefId() == mIdToFind)
+                {
+                    mFound = ptr;
+                    return false;
+                }
+            }
+            return true;
+        }
+    };
+
+    ///< Added by tes3mp and used to find an object by both its ID and its reference number
+    Ptr CellStore::searchExact (const std::string& id, int numIndex)
+    {
+        SearchExactVisitor<MWWorld::Ptr> searchVisitor;
+        searchVisitor.mIdToFind = id;
+        searchVisitor.mRefNumIndexToFind = numIndex;
         forEach(searchVisitor);
         return searchVisitor.mFound;
     }

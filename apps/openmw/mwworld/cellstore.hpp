@@ -231,8 +231,8 @@ namespace MWWorld
             Ptr searchViaActorId (int id);
             ///< Will return an empty Ptr if cell is not loaded.
 
-            Ptr searchByRefNum (ESM::RefNum refNum);
-            ///< Added by tes3mp
+            Ptr searchExact (const std::string& id, int numIndex);
+            ///< Added by tes3mp and used to find an object by both its ID and its reference number
 
             float getWaterLevel() const;
 
