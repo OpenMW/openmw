@@ -61,7 +61,14 @@ namespace MWGui
             event->cellRef.mRefID = dropped.getCellRef().getRefId();
             event->cellRef.mRefNum = dropped.getCellRef().getRefNum();
             event->cellRef.mPos = dropped.getCellRef().getPosition();
-            event->count = count;
+            
+            // We have to get the count from the dropped object because it gets changed
+            // automatically for stacks of gold
+            event->count = dropped.getRefData().getCount();
+
+            // For the real count of gold in a stack
+            event->cellRef.mGoldValue = dropped.getCellRef().getGoldValue();
+
             mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_PLACE)->Send(event);
 
             printf("Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i\n",

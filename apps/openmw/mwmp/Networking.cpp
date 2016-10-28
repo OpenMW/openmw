@@ -713,6 +713,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), event->cellRef.mRefID, 1);
         MWWorld::Ptr newPtr = ref.getPtr();
+        newPtr.getCellRef().setGoldValue(event->cellRef.mGoldValue);
 
         if (event->count > 1)
             newPtr.getRefData().setCount(event->count);
