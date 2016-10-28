@@ -20,4 +20,6 @@ void PacketObjectPlace::Packet(RakNet::BitStream *bs, WorldEvent *event, bool se
     RW(event->cell.mData.mX, send);
     RW(event->cell.mData.mY, send);
     RW(event->cell.mName, send);
+
+    RW(event->count, send);
 }

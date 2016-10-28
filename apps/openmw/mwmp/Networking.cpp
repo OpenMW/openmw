@@ -705,13 +705,19 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     case ID_OBJECT_PLACE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_PLACE");
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- count: %i",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
+            event->cell.getDescription().c_str(),
+            event->count);
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), event->cellRef.mRefID, 1);
-        MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(), ptrCellStore, event->cellRef.mPos);
+        MWWorld::Ptr newPtr = ref.getPtr();
+
+        if (event->count > 1)
+            newPtr.getRefData().setCount(event->count);
+
+        MWBase::Environment::get().getWorld()->placeObject(newPtr, ptrCellStore, event->cellRef.mPos);
 
         break;
     }

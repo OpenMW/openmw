@@ -542,11 +542,13 @@ namespace MWScript
                         event->cellRef.mRefID = ptr.getCellRef().getRefId();
                         event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
                         event->cellRef.mPos = ptr.getCellRef().getPosition();
+                        event->count = 1;
                         mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_PLACE)->Send(event);
 
-                        printf("Sending ID_OBJECT_PLACE about %s\n%i\n",
+                        printf("Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i\n",
                             event->cellRef.mRefID.c_str(),
-                            event->cellRef.mRefNum.mIndex);
+                            event->cellRef.mRefNum.mIndex,
+                            event->count);
                     }
                 }
         };
