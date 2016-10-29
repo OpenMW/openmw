@@ -12,9 +12,6 @@ void Players::DeletePlayer(RakNet::RakNetGUID guid)
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Deleting player with guid %lu",
         guid.g);
-
-    LOG_APPEND(Log::LOG_INFO, "- %i players remaining before",
-        players.size());
     
     if (players[guid.g] != 0)
     {
@@ -25,9 +22,6 @@ void Players::DeletePlayer(RakNet::RakNetGUID guid)
         delete players[guid.g];
         players.erase(guid.g);
     }
-
-    LOG_APPEND(Log::LOG_INFO, "- %i players remaining after",
-        players.size());
 }
 
 void Players::NewPlayer(RakNet::RakNetGUID guid)
