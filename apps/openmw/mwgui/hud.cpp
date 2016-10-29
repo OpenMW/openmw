@@ -68,7 +68,10 @@ namespace MWGui
             event->cell = *dropped.getCell()->getCell();
             event->cellRef.mRefID = dropped.getCellRef().getRefId();
             event->cellRef.mRefNum = dropped.getCellRef().getRefNum();
-            event->cellRef.mPos = dropped.getCellRef().getPosition();
+
+            // Make sure we send the RefData position instead of the CellRef one, because that's what
+            // we actually see on this client
+            event->pos = dropped.getRefData().getPosition();
             
             // We have to get the count from the dropped object because it gets changed
             // automatically for stacks of gold

@@ -719,7 +719,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         newPtr.getCellRef().setGoldValue(event->cellRef.mGoldValue);
 
-        newPtr = MWBase::Environment::get().getWorld()->placeObject(newPtr, ptrCellStore, event->cellRef.mPos);
+        newPtr = MWBase::Environment::get().getWorld()->placeObject(newPtr, ptrCellStore, event->pos);
 
         // Change RefNum here because the line above unsets it
         newPtr.getCellRef().setRefNumIndex(event->cellRef.mRefNum.mIndex);

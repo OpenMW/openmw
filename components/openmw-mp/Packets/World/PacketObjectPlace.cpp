@@ -14,7 +14,6 @@ void PacketObjectPlace::Packet(RakNet::BitStream *bs, WorldEvent *event, bool se
 
     RW(event->cellRef.mRefID, send);
     RW(event->cellRef.mRefNum.mIndex, send);
-    RW(event->cellRef.mPos, send);
     RW(event->cellRef.mGoldValue, send);
 
     RW(event->cell.mData.mFlags, send);
@@ -22,5 +21,6 @@ void PacketObjectPlace::Packet(RakNet::BitStream *bs, WorldEvent *event, bool se
     RW(event->cell.mData.mY, send);
     RW(event->cell.mName, send);
 
+    RW(event->pos, send);
     RW(event->count, send);
 }

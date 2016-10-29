@@ -549,7 +549,11 @@ namespace MWScript
                         event->cell = *ptr.getCell()->getCell();
                         event->cellRef.mRefID = ptr.getCellRef().getRefId();
                         event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
-                        event->cellRef.mPos = ptr.getCellRef().getPosition();
+
+                        // Make sure we send the RefData position instead of the CellRef one, because that's what
+                        // we actually see on this client
+                        event->pos = ptr.getRefData().getPosition();
+
                         event->count = 1;
                         mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_PLACE)->Send(event);
 
