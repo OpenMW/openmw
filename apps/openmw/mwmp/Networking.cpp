@@ -713,12 +713,21 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), event->cellRef.mRefID, 1);
         MWWorld::Ptr newPtr = ref.getPtr();
-        newPtr.getCellRef().setGoldValue(event->cellRef.mGoldValue);
 
         if (event->count > 1)
             newPtr.getRefData().setCount(event->count);
 
-        MWBase::Environment::get().getWorld()->placeObject(newPtr, ptrCellStore, event->cellRef.mPos);
+        newPtr.getCellRef().setGoldValue(event->cellRef.mGoldValue);
+
+        newPtr = MWBase::Environment::get().getWorld()->placeObject(newPtr, ptrCellStore, event->cellRef.mPos);
+
+        // Change RefNum here because the line above unsets it
+        newPtr.getCellRef().setRefNumIndex(event->cellRef.mRefNum.mIndex);
+
+        // If this RefNum is higher than the last we've recorded for this CellStore,
+        // start using it as our new last one
+        if (ptrCellStore->getLastRefNumIndex() < event->cellRef.mRefNum.mIndex)
+            ptrCellStore->setLastRefNumIndex(event->cellRef.mRefNum.mIndex);
 
         break;
     }

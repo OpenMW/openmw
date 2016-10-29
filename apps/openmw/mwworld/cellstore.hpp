@@ -75,6 +75,9 @@ namespace MWWorld
             std::vector<std::string> mIds;
             float mWaterLevel;
 
+            // Added by tes3mp
+            int lastRefNumIndex;
+
             MWWorld::TimeStamp mLastRespawn;
 
             // List of refs owned by this cell
@@ -233,6 +236,12 @@ namespace MWWorld
 
             Ptr searchExact (const std::string& id, int numIndex);
             ///< Added by tes3mp and used to find an object by both its ID and its reference number
+
+            int getLastRefNumIndex() const;
+            // Added by tes3mp and used to get the last reference number in the cell
+            
+            void setLastRefNumIndex(int value);
+            // Added by tes3mp and used to record the last reference number in the cell
 
             float getWaterLevel() const;
 

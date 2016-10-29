@@ -55,6 +55,14 @@ namespace MWGui
             if (setNewOwner)
                 dropped.getCellRef().setOwner("");
 
+            // Major change done by tes3mp:
+            // When the object is dropped, generate a new RefNum index for it that follows the last one
+            // in the cell, so that packets can be sent and received specifically about it, instead
+            // of giving it a RefNum index of 0 as in regular OpenMW
+            MWWorld::CellStore *cellStore = dropped.getCell();
+            cellStore->setLastRefNumIndex(cellStore->getLastRefNumIndex() + 1);
+            dropped.getCellRef().setRefNumIndex(cellStore->getLastRefNumIndex());
+
             // Added by tes3mp
             mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
             event->cell = *dropped.getCell()->getCell();
@@ -66,7 +74,7 @@ namespace MWGui
             // automatically for stacks of gold
             event->count = dropped.getRefData().getCount();
 
-            // For the real count of gold in a stack
+            // Get the real count of gold in a stack
             event->cellRef.mGoldValue = dropped.getCellRef().getGoldValue();
 
             mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_PLACE)->Send(event);

@@ -28,6 +28,10 @@ namespace MWWorld
         // Set RefNum to its default state.
         void unsetRefNum();
 
+        // Added by tes3mp to allow creation of new items with RefNum indexes
+        // specific to them
+        void setRefNumIndex(int index);
+
         /// Does the RefNum have a content file?
         bool hasContentFile() const;
 

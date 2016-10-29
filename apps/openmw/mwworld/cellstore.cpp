@@ -265,7 +265,7 @@ namespace MWWorld
         // Objects with no refnum can't be handled correctly in the merging process that happens
         // on a save/load, so do a simple copy & delete for these objects.
 
-        // The code below is disabled for TES3MP for as long as player objects lack refnums,
+        // The code below is disabled for tes3mp for as long as player objects lack refnums,
         // because it will break exterior cell transitions for them
         /*
         if (!object.getCellRef().getRefNum().hasContentFile())
@@ -356,6 +356,9 @@ namespace MWWorld
         : mStore(esmStore), mReader(readerList), mCell (cell), mState (State_Unloaded), mHasState (false), mLastRespawn(0,0)
     {
         mWaterLevel = cell->mWater;
+
+        // Added by tes3mp
+        lastRefNumIndex = 0;
     }
 
     const ESM::Cell *CellStore::getCell() const
@@ -471,6 +474,18 @@ namespace MWWorld
         searchVisitor.mRefNumIndexToFind = numIndex;
         forEach(searchVisitor);
         return searchVisitor.mFound;
+    }
+
+    // Added by tes3mp and used to get the last reference number in the cell
+    int CellStore::getLastRefNumIndex() const
+    {
+        return lastRefNumIndex;
+    }
+
+    // Added by tes3mp and used to record the last reference number in the cell
+    void CellStore::setLastRefNumIndex(int value)
+    {
+        lastRefNumIndex = value;
     }
 
     float CellStore::getWaterLevel() const
@@ -625,6 +640,8 @@ namespace MWWorld
 
             loadRef (ref, deleted, refNumToID);
         }
+
+        setLastRefNumIndex(refNumToID.rbegin()->first.mIndex);
 
         updateMergedRefs();
     }

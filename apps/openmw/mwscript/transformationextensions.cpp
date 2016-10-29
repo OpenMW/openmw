@@ -536,6 +536,14 @@ namespace MWScript
 
                         MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(), actor, actor.getCell(), direction, distance);
 
+                        // Major change done by tes3mp:
+                        // When the object is dropped, generate a new RefNum index for it that follows the last one
+                        // in the cell, so that packets can be sent and received specifically about it, instead
+                        // of giving it a RefNum index of 0 as in regular OpenMW
+                        MWWorld::CellStore *cellStore = ptr.getCell();
+                        cellStore->setLastRefNumIndex(cellStore->getLastRefNumIndex() + 1);
+                        ptr.getCellRef().setRefNumIndex(cellStore->getLastRefNumIndex());
+
                         // Added by tes3mp
                         mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
                         event->cell = *ptr.getCell()->getCell();
