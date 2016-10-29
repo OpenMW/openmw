@@ -16,6 +16,10 @@
 
 #include <components/settings/settings.hpp>
 
+#include <components/openmw-mp/Base/WorldEvent.hpp>
+#include "../mwmp/Main.hpp"
+#include "../mwworld/cellstore.hpp"
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -628,6 +632,14 @@ namespace MWGui
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
         MWWorld::Ptr newObject = *player.getClass().getContainerStore (player).add (object, object.getRefData().getCount(), player);
+
+        // Added by tes3mp
+        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+        event->cell = *object.getCell()->getCell();
+        event->cellRef.mRefID = object.getCellRef().getRefId();
+        event->cellRef.mRefNum = object.getCellRef().getRefNum();
+        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_DELETE)->Send(event);
+
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject (object);
 
