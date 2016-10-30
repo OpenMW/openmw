@@ -274,7 +274,8 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
 
         if (!killer)
             killer = player;
-        else if (secondsSinceLastAttacker < 3)
+
+        if (secondsSinceLastAttacker < 3)
             reason = 1; // killed
         else
             reason = 2; //suicide
