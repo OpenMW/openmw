@@ -458,9 +458,9 @@ namespace MWRender
         {
             mEffectManager->update(dt);
             mSky->update(dt);
+            mWater->update(dt);
         }
 
-        mWater->update(dt);
         mCamera->update(dt, paused);
 
         osg::Vec3f focal, cameraPos;
