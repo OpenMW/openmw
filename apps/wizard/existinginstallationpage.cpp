@@ -63,13 +63,13 @@ bool Wizard::ExistingInstallationPage::validatePage()
                                    The Wizard needs to update settings in this file.<br><br> \
                                    Press \"Browse...\" to specify the location manually.<br>"));
 
-        QAbstractButton *browseButton =
+        QAbstractButton *browseButton2 =
                 msgBox.addButton(QObject::tr("B&rowse..."), QMessageBox::ActionRole);
 
         msgBox.exec();
 
         QString iniFile;
-        if (msgBox.clickedButton() == browseButton) {
+        if (msgBox.clickedButton() == browseButton2) {
             iniFile = QFileDialog::getOpenFileName(
                         this,
                         QObject::tr("Select configuration file"),

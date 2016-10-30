@@ -326,7 +326,7 @@ bool Launcher::MainDialog::setupGameSettings()
     foreach (const QString &path, paths) {
         qDebug() << "Loading config file:" << path.toUtf8().constData();
 
-        QFile file(path);
+        file.setFileName(path);
         if (file.exists()) {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
                 cfgError(tr("Error opening OpenMW configuration file"),

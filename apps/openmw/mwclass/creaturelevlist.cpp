@@ -118,9 +118,9 @@ namespace MWClass
             }
 
             const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-            MWWorld::ManualRef ref(store, id);
-            ref.getPtr().getCellRef().setPosition(ptr.getCellRef().getPosition());
-            MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(), ptr.getCell() , ptr.getCellRef().getPosition());
+            MWWorld::ManualRef manualRef(store, id);
+            manualRef.getPtr().getCellRef().setPosition(ptr.getCellRef().getPosition());
+            MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(manualRef.getPtr(), ptr.getCell() , ptr.getCellRef().getPosition());
             customData.mSpawnActorId = placed.getClass().getCreatureStats(placed).getActorId();
             customData.mSpawn = false;
         }
