@@ -24,7 +24,7 @@ Wizard::ComponentSelectionPage::ComponentSelectionPage(QWidget *parent) :
 
 }
 
-void Wizard::ComponentSelectionPage::updateButton(QListWidgetItem *item)
+void Wizard::ComponentSelectionPage::updateButton(QListWidgetItem*)
 {
     if (field(QLatin1String("installation.new")).toBool() == true)
         return; // Morrowind is always checked here

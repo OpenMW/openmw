@@ -39,11 +39,11 @@ namespace
         {
             std::ostringstream texname;
             texname << "textures/water/" << tex << std::setw(2) << std::setfill('0') << i << ".dds";
-            osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(resourceSystem->getImageManager()->getImage(texname.str())));
-            tex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
-            tex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
-            resourceSystem->getSceneManager()->applyFilterSettings(tex);
-            textures.push_back(tex);
+            osg::ref_ptr<osg::Texture2D> tex2 (new osg::Texture2D(resourceSystem->getImageManager()->getImage(texname.str())));
+            tex2->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+            tex2->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+            resourceSystem->getSceneManager()->applyFilterSettings(tex2);
+            textures.push_back(tex2);
         }
 
         osg::ref_ptr<NifOsg::FlipController> controller (new NifOsg::FlipController(0, 0.3f/rippleFrameCount, textures));
