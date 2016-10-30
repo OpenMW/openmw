@@ -714,13 +714,17 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
         // If an invalid key makes it into the Players map, ignore it
         else if (pl->first == -1) continue;
 
-        playerController->GetPacket(ID_GAME_BASE_INFO)->Send(pl->second, guid);
-        playerController->GetPacket(ID_GAME_DYNAMICSTATS)->Send(pl->second, guid);
-        playerController->GetPacket(ID_GAME_ATTRIBUTE)->Send(pl->second, guid);
-        playerController->GetPacket(ID_GAME_SKILL)->Send(pl->second, guid);
-        playerController->GetPacket(ID_GAME_POS)->Send(pl->second, guid);
-        playerController->GetPacket(ID_GAME_CELL)->Send(pl->second, guid);
-        playerController->GetPacket(ID_GAME_EQUIPMENT)->Send(pl->second, guid);
+        // If we are iterating over a player who has inputted their name, proceed
+        else if (pl->second->LoadedState() == Player::POSTLOADED)
+        {
+            playerController->GetPacket(ID_GAME_BASE_INFO)->Send(pl->second, guid);
+            playerController->GetPacket(ID_GAME_DYNAMICSTATS)->Send(pl->second, guid);
+            playerController->GetPacket(ID_GAME_ATTRIBUTE)->Send(pl->second, guid);
+            playerController->GetPacket(ID_GAME_SKILL)->Send(pl->second, guid);
+            playerController->GetPacket(ID_GAME_POS)->Send(pl->second, guid);
+            playerController->GetPacket(ID_GAME_CELL)->Send(pl->second, guid);
+            playerController->GetPacket(ID_GAME_EQUIPMENT)->Send(pl->second, guid);
+        }
     }
 
     LOG_APPEND(Log::LOG_WARN, "%s", "- Done");
