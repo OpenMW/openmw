@@ -230,6 +230,35 @@ void Main::PressedKey(int key)
 // should be ignored because of their potential for spam
 bool Main::isValidPacketScript(std::string script)
 {
+    static const int validPacketScriptsCount = 21;
+    static const std::string validPacketScripts[validPacketScriptsCount] = {
+        // Ghostgate buttons
+        "GG_OpenGate1", // coc Ghostgate
+        "GG_OpenGate2",
+        // Dwemer ruin cranks
+        "Arkn_doors", // coe 0, -2
+        "nchuleftingthWrong1", // coc "Nchuleftingth, Test of Pattern"
+        "nchuleftingthWrong2",
+        "nchulfetingthRight",
+        "Akula_innerdoors", // coc "Akulakhan's Chamber"
+        "Dagoth_doors", // coe 2, 8
+        // Sotha Sil levers
+        "SothaLever1", // coc "Sotha Sil, Outer Flooded Halls"
+        "SothaLever2",
+        "SothaLever3",
+        "SothaLever4",
+        "SothaLever5",
+        "SothaLever6",
+        "SothaLever7",
+        "SothaLever8",
+        "SothaLever9",
+        "SothaLever10",
+        "SothaLever11",
+        "SothaOilLever", // coc "Sotha Sil, Dome of Udok"
+        // Generic state script
+        "LocalState"
+    };
+
     static const int invalidPacketScriptsCount = 17;
     static const std::string invalidPacketScripts[invalidPacketScriptsCount] = {
         // Spammy shorts
@@ -255,6 +284,15 @@ bool Main::isValidPacketScript(std::string script)
         "ouch_wraithguard"
     };
 
+    for (int i = 0; i < validPacketScriptsCount; i++)
+    {
+        if (Misc::StringUtils::ciEqual(script, validPacketScripts[i]))
+            return true;
+    }
+
+    return false;
+
+    /* Switch over to this when using a blacklist system
     for (int i = 0; i < invalidPacketScriptsCount; i++)
     {
         if (Misc::StringUtils::ciEqual(script, invalidPacketScripts[i]))
@@ -262,4 +300,5 @@ bool Main::isValidPacketScript(std::string script)
     }
 
     return true;
+    */
 }

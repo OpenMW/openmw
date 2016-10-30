@@ -282,9 +282,6 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
 
         player->resetLastAttacker();
 
-        printf("Time since last attack time for %i: %i\n", player->GetID(),
-            secondsSinceLastAttacker);
-
         player->CreatureStats()->mDead = true;
         myPacket->Send(player, true);
 
