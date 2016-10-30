@@ -7,6 +7,7 @@
 
 #include <map>
 #include <string>
+#include <chrono>
 #include <RakNetTypes.h>
 
 #include <components/esm/npcstats.hpp>
@@ -57,9 +58,12 @@ public:
     void Loaded(int state);
     int LoadedState();
 
-    void setLastAttackerID(unsigned short pid);
+    void setLastAttackerId(unsigned short pid);
     void resetLastAttacker();
-    unsigned short getLastAttackerID();
+    unsigned short getLastAttackerId();
+
+    void setLastAttackerTime(std::chrono::steady_clock::time_point time);
+    std::chrono::steady_clock::time_point getLastAttackerTime();
 
     virtual ~Player();
 public:
@@ -68,6 +72,8 @@ private:
     bool handshake;
     int loaded;
     unsigned short lastAttacker;
+    std::chrono::steady_clock::time_point lastAttackerTime;
+
 };
 
 #endif //OPENMW_PLAYER_HPP

@@ -109,7 +109,7 @@ Player *Players::GetPlayer(unsigned short id)
     return slots[id];
 }
 
-void Player::setLastAttackerID(unsigned short pid)
+void Player::setLastAttackerId(unsigned short pid)
 {
     lastAttacker = pid;
 }
@@ -119,7 +119,17 @@ void Player::resetLastAttacker()
     lastAttacker = id;
 }
 
-unsigned short Player::getLastAttackerID()
+unsigned short Player::getLastAttackerId()
 {
     return lastAttacker;
+}
+
+void Player::setLastAttackerTime(std::chrono::steady_clock::time_point time)
+{
+    lastAttackerTime = time;
+}
+
+std::chrono::steady_clock::time_point Player::getLastAttackerTime()
+{
+    return lastAttackerTime;
 }

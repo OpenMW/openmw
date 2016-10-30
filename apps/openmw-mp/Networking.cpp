@@ -242,7 +242,8 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
                 if (player->GetAttack()->success == 1)
                 {
                     LOG_APPEND(Log::LOG_VERBOSE, "damage: %d", player->GetAttack()->damage == 1);
-                    player->setLastAttackerID(target->GetID());
+                    target->setLastAttackerId(player->GetID());
+                    target->setLastAttackerTime(std::chrono::steady_clock::now());
                 }
             }
 
@@ -265,18 +266,23 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_DIE from %s",
             player->Npc()->mName.c_str());
 
-        Player *killer = Players::GetPlayer(player->getLastAttackerID());
+        Player *killer = Players::GetPlayer(player->getLastAttackerId());
 
         short reason = 0; // unknown;
+        int secondsSinceLastAttacker = std::chrono::duration_cast<std::chrono::duration<double>>(
+            std::chrono::steady_clock::now() - player->getLastAttackerTime()).count();
 
         if (!killer)
             killer = player;
-        else if (killer->GetID() == player->GetID())
-            reason = 2; //suicide
+        else if (secondsSinceLastAttacker < 3)
+            reason = 1; // killed
         else
-            reason = 1; //killed
+            reason = 2; //suicide
 
         player->resetLastAttacker();
+
+        printf("Time since last attack time for %i: %i\n", player->GetID(),
+            secondsSinceLastAttacker);
 
         player->CreatureStats()->mDead = true;
         myPacket->Send(player, true);
