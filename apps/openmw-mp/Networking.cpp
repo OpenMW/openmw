@@ -715,7 +715,7 @@ void Networking::NewPlayer(RakNet::RakNetGUID guid)
         if (pl->first == guid.g) continue;
 
         // If an invalid key makes it into the Players map, ignore it
-        else if (pl->first == RakNet::UNASSIGNED_NETWORK_ID) continue;
+        else if (pl->first == -1) continue;
 
         playerController->GetPacket(ID_GAME_BASE_INFO)->Send(pl->second, guid);
         playerController->GetPacket(ID_GAME_DYNAMICSTATS)->Send(pl->second, guid);
