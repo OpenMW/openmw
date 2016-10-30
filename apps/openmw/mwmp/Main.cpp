@@ -60,7 +60,7 @@ std::string loadSettings (Settings::Manager & settings)
 
 Main::Main()
 {
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "TES3MP started");
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "tes3mp started");
     mNetworking = new Networking();
     mLocalPlayer = new LocalPlayer();
     mGUIController = new GUIController();
@@ -72,7 +72,7 @@ Main::Main()
 
 Main::~Main()
 {
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "TES3MP stopped");
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "tes3mp stopped");
     delete mNetworking;
     delete mLocalPlayer;
     Players::CleanUp();
@@ -163,10 +163,6 @@ void Main::Destroy()
 void Main::Frame(float dt)
 {
     const MWBase::Environment &environment = MWBase::Environment::get();
-    if (environment.getWindowManager()->containsMode(MWGui::GM_MainMenu))
-    {
-        //environment.getWindowManager()->exitCurrentGuiMode();
-    }
 
     get().getNetworking()->Update();
 
