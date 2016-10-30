@@ -231,6 +231,16 @@ namespace MWMechanics
         {
             mPath = pathgridGraph.aStarSearch(startNode, endNode.first);
 
+            // If startNode (the closest node to startPoint) is farther from destination than
+            // startPoint and second path node is closer to destination then
+            // drop startNode and use the next path node.
+            if (mPath.size() > 1) {
+                float endTo1stNodeLength2 = DistanceSquared(mPathgrid->mPoints[startNode], endPointInLocalCoords);
+                float endTo2ndNodeLength2 = DistanceSquared(*(++mPath.begin()), endPointInLocalCoords);
+                if (endTo1stNodeLength2 > startToEndLength2 && endTo2ndNodeLength2 < endTo1stNodeLength2)
+                    mPath.pop_front();
+            }
+
             // convert supplied path to world coordinates
             for (std::list<ESM::Pathgrid::Point>::iterator iter(mPath.begin()); iter != mPath.end(); ++iter)
             {
