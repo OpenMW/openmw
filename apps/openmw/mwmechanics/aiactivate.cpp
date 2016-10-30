@@ -41,9 +41,7 @@ namespace MWMechanics
         if (pathTo(actor, dest, duration, MWBase::Environment::get().getWorld()->getMaxActivationDistance())) //Stop when you get in activation range
         {
             // activate when reached
-            MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(mObjectId,false);
             MWBase::Environment::get().getWorld()->activate(target, actor);
-
             return true;
         }
 

@@ -256,7 +256,7 @@ namespace MWGui
                         std::string key = it->first.substr(0, underscorePos);
                         std::string widgetName = it->first.substr(underscorePos+1, it->first.size()-(underscorePos+1));
 
-                        std::string type = "Property";
+                        type = "Property";
                         size_t caretPos = key.find("^");
                         if (caretPos != std::string::npos)
                         {
