@@ -414,23 +414,23 @@ void LocalPlayer::updateInventory(bool forceUpdate)
     MWWorld::InventoryStore &invStore = player.getClass().getInventoryStore(player);
     mwmp::Item item;
 
-    if(!invChanged)
+    if (!invChanged)
         for (vector<Item>::iterator iter = inventory.items.begin(); iter != inventory.items.end(); ++iter)
         {
             MWWorld::ContainerStoreIterator result(invStore.begin());
             for (; result != invStore.end(); ++result)
             {
                 item.refid = result->getCellRef().getRefId();
-                if(item.refid.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
+                if (item.refid.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
                     continue;
 
                 item.count = result->getRefData().getCount();
                 item.health = result->getCellRef().getCharge();
 
-                if(item == (*iter))
+                if (item == (*iter))
                     break;
             }
-            if(result == invStore.end())
+            if (result == invStore.end())
             {
                 invChanged = true;
                 break;
