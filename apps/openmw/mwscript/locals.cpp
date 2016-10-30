@@ -238,7 +238,7 @@ namespace MWScript
                 else
                 {
                     char type =  declarations.getType (iter->first);
-                    char index2 = declarations.getIndex (iter->first);
+                    int index2 = declarations.getIndex (iter->first);
 
                     try
                     {
