@@ -39,7 +39,7 @@ namespace mwmp
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
         EventHandle_Void eventMarkersChanged;
 
-        bool isExistent(const ESM::CustomMarker &marker);
+        bool contains(const ESM::CustomMarker &marker);
     private:
         ContainerType mMarkers;
     };

@@ -468,7 +468,7 @@ void DedicatedPlayer::updateMarker()
 
     GUIController *gui = Main::get().getGUIController();
 
-    if (gui->mPlayerMarkers.isExistent(marker))
+    if (gui->mPlayerMarkers.contains(marker))
     {
         gui->mPlayerMarkers.deleteMarker(marker);
         marker = gui->CreateMarker(guid);

@@ -73,7 +73,15 @@ size_t PlayerMarkerCollection::size() const
     return mMarkers.size();
 }
 
-bool PlayerMarkerCollection::isExistent(const ESM::CustomMarker &marker)
+bool PlayerMarkerCollection::contains(const ESM::CustomMarker &marker)
 {
-    return mMarkers.find(marker.mCell) != mMarkers.end();
+    std::pair<ContainerType::iterator, ContainerType::iterator> range = mMarkers.equal_range(marker.mCell);
+
+    for (ContainerType::iterator it = range.first; it != range.second; ++it)
+    {
+        if (it->second == marker)
+            return true;
+    }
+
+    return false;
 }
