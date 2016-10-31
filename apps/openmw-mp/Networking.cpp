@@ -221,6 +221,13 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
         break;
     }
 
+    case ID_GAME_INVENTORY:
+    {
+        DEBUG_PRINTF("ID_GAME_INVENTORY\n");
+        myPacket->Read(player);
+        break;
+    }
+
     case ID_GAME_ATTACK:
     {
         DEBUG_PRINTF("ID_GAME_ATTACK\n");
@@ -354,13 +361,6 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     case ID_GAME_CHARCLASS:
     {
         DEBUG_PRINTF("ID_GAME_CHARCLASS\n");
-        myPacket->Read(player);
-        break;
-    }
-
-    case ID_GAME_INVENTORY:
-    {
-        DEBUG_PRINTF("ID_GAME_INVENTORY\n");
         myPacket->Read(player);
         break;
     }

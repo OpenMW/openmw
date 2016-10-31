@@ -285,6 +285,56 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
+    case ID_GAME_INVENTORY:
+    {
+        if (guid == myGuid)
+        {
+            if (packet->length == myPacket->headerSize())
+            {
+                printf("ID_GAME_INVENTORY update only\n");
+                getLocalPlayer()->updateInventory(true);
+                GetPlayerPacket(ID_GAME_INVENTORY)->Send(getLocalPlayer());
+            }
+            else
+            {
+                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                MWWorld::ContainerStore &conStore = ptr.getClass().getContainerStore(ptr);
+                if (getLocalPlayer()->inventory.action == Inventory::ADDITEM)
+                {
+                    for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
+                    {
+                        mwmp::Item item = getLocalPlayer()->inventory.items[i];
+                        MWWorld::Ptr itemPtr = *conStore.add(item.refid, item.count, ptr);
+                        if (item.health != -1)
+                            itemPtr.getCellRef().setCharge(item.health);
+                    }
+                }
+                else if (getLocalPlayer()->inventory.action == Inventory::REMOVEITEM)
+                {
+                    for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
+                    {
+                        mwmp::Item item = getLocalPlayer()->inventory.items[i];
+                        conStore.remove(item.refid, item.count, ptr);
+                    }
+                }
+                else // update
+                {
+                    conStore.clear();
+                    for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
+                    {
+                        mwmp::Item item = getLocalPlayer()->inventory.items[i];
+                        MWWorld::Ptr itemPtr = *conStore.add(item.refid, item.count, ptr);
+                        if (item.health != -1)
+                            itemPtr.getCellRef().setCharge(item.health);
+                        printf("%s %d %d\n", item.refid.c_str(), item.count, item.health);
+                    }
+                    getLocalPlayer()->setInventory(); // restore equipped items
+                }
+            }
+        }
+        break;
+    }
     case ID_GAME_ATTACK:
     {
         if (pl != 0)
@@ -606,56 +656,6 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
                 getLocalPlayer()->setClass();
             }
         }
-    }
-    case ID_GAME_INVENTORY:
-    {
-        if (guid == myGuid)
-        {
-            if (packet->length == myPacket->headerSize())
-            {
-                printf("ID_GAME_INVENTORY update only\n");
-                getLocalPlayer()->updateInventory(true);
-                GetPlayerPacket(ID_GAME_INVENTORY)->Send(getLocalPlayer());
-            }
-            else
-            {
-                myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                MWWorld::ContainerStore &conStore = ptr.getClass().getContainerStore(ptr);
-                if (getLocalPlayer()->inventory.action == Inventory::ADDITEM)
-                {
-                    for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
-                    {
-                        mwmp::Item item = getLocalPlayer()->inventory.items[i];
-                        MWWorld::Ptr itemPtr = *conStore.add(item.refid, item.count, ptr);
-                        if(item.health != -1)
-                            itemPtr.getCellRef().setCharge(item.health);
-                    }
-                }
-                else if (getLocalPlayer()->inventory.action == Inventory::REMOVEITEM)
-                {
-                    for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
-                    {
-                        mwmp::Item item = getLocalPlayer()->inventory.items[i];
-                        conStore.remove(item.refid, item.count, ptr);
-                    }
-                }
-                else // update
-                {
-                    conStore.clear();
-                    for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
-                    {
-                        mwmp::Item item = getLocalPlayer()->inventory.items[i];
-                        MWWorld::Ptr itemPtr = *conStore.add(item.refid, item.count, ptr);
-                        if(item.health != -1)
-                            itemPtr.getCellRef().setCharge(item.health);
-                        printf("%s %d %d\n", item.refid.c_str(), item.count, item.health);
-                    }
-                    getLocalPlayer()->setInventory(); // restore equipped items
-                }
-            }
-        }
-        break;
     }
     case ID_GAME_TIME:
     {
