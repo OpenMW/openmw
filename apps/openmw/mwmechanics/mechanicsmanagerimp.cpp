@@ -1117,6 +1117,11 @@ namespace MWMechanics
                 if (playerFollowers.find(*it) != playerFollowers.end())
                     continue;
 
+                // tes3mp needs player-controlled NPCs to not report crimes committed by other players,
+                // so a condition has been added that should be true only for them
+                if (!it->getBase()->canChangeCell)
+                    continue;
+
                 if (type == OT_Theft || type == OT_Pickpocket)
                     MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
                 else if (type == OT_Trespassing)
