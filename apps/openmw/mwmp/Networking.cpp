@@ -656,6 +656,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
                 getLocalPlayer()->setClass();
             }
         }
+        break;
     }
     case ID_GAME_TIME:
     {
