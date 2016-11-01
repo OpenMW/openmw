@@ -466,9 +466,6 @@ namespace MWGui
         else
             actions = MWBase::Environment::get().getInputManager()->getActionControllerSorting();
 
-        const int h = 18;
-        const int w = mControlsBox->getWidth() - 28;
-        int curH = 0;
         for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
         {
             std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
@@ -481,16 +478,15 @@ namespace MWGui
             else
                 binding = MWBase::Environment::get().getInputManager()->getActionControllerBindingName(*it);
 
-            Gui::SharedStateButton* leftText = mControlsBox->createWidget<Gui::SharedStateButton>("SandTextButton", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
+            Gui::SharedStateButton* leftText = mControlsBox->createWidget<Gui::SharedStateButton>("SandTextButton", MyGUI::IntCoord(), MyGUI::Align::Default);
             leftText->setCaptionWithReplacing(desc);
 
-            Gui::SharedStateButton* rightText = mControlsBox->createWidget<Gui::SharedStateButton>("SandTextButton", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
+            Gui::SharedStateButton* rightText = mControlsBox->createWidget<Gui::SharedStateButton>("SandTextButton", MyGUI::IntCoord(), MyGUI::Align::Default);
             rightText->setCaptionWithReplacing(binding);
             rightText->setTextAlign (MyGUI::Align::Right);
             rightText->setUserData(*it); // save the action id for callbacks
             rightText->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onRebindAction);
             rightText->eventMouseWheel += MyGUI::newDelegate(this, &SettingsWindow::onInputTabMouseWheel);
-            curH += h;
 
             Gui::ButtonGroup group;
             group.push_back(leftText);
@@ -498,9 +494,25 @@ namespace MWGui
             Gui::SharedStateButton::createButtonGroup(group);
         }
 
+        layoutControlsBox();
+    }
+
+    void SettingsWindow::layoutControlsBox()
+    {
+        const int h = 18;
+        const int w = mControlsBox->getWidth() - 28;
+        const int noWidgetsInRow = 2;
+        const int totalH = mControlsBox->getChildCount() / noWidgetsInRow * h;
+
+        for (size_t i = 0; i < mControlsBox->getChildCount(); i++)
+        {
+            MyGUI::Widget * widget = mControlsBox->getChildAt(i);
+            widget->setCoord(0, i / noWidgetsInRow * h, w, h);
+        }
+
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
         mControlsBox->setVisibleVScroll(false);
-        mControlsBox->setCanvasSize (mControlsBox->getWidth(), std::max(curH, mControlsBox->getHeight()));
+        mControlsBox->setCanvasSize (mControlsBox->getWidth(), std::max(totalH, mControlsBox->getHeight()));
         mControlsBox->setVisibleVScroll(true);
     }
 
@@ -556,7 +568,7 @@ namespace MWGui
 
     void SettingsWindow::onWindowResize(MyGUI::Window *_sender)
     {
-        updateControlsBox();
+        layoutControlsBox();
     }
 
     void SettingsWindow::resetScrollbars()
