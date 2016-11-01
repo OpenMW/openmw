@@ -237,8 +237,7 @@ namespace MWMechanics
                 osg::Vec3f secondNodeVec3f = MakeOsgVec3(secondNode);
                 osg::Vec3f toSecondNodeVec3f = secondNodeVec3f - firstNodeVec3f;
                 osg::Vec3f toStartPointVec3f = startPointInLocalCoords - firstNodeVec3f;
-                float cos = (toSecondNodeVec3f * toStartPointVec3f) / (toSecondNodeVec3f.length() * toStartPointVec3f.length());
-                if (cos > 0) {
+                if (toSecondNodeVec3f * toStartPointVec3f > 0) {
                     ESM::Pathgrid::Point temp(secondNode);
                     converter.toWorld(temp);
                     bool isPathClear = !MWBase::Environment::get().getWorld()->castRay(
