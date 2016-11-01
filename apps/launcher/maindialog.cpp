@@ -293,6 +293,7 @@ bool Launcher::MainDialog::setupGameSettings()
 {
     mGameSettings.clear();
 
+    QString localPath = QString::fromUtf8(mCfgMgr.getLocalPath().string().c_str());
     QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
     QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str());
 
@@ -320,7 +321,7 @@ bool Launcher::MainDialog::setupGameSettings()
     // Now the rest - priority: user > local > global
     QStringList paths;
     paths.append(globalPath + QString("openmw.cfg"));
-    paths.append(QString("openmw.cfg"));
+    paths.append(localPath + QString("openmw.cfg"));
     paths.append(userPath + QString("openmw.cfg"));
 
     foreach (const QString &path, paths) {
