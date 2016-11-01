@@ -231,14 +231,22 @@ namespace MWMechanics
         {
             mPath = pathgridGraph.aStarSearch(startNode, endNode.first);
 
-            // If startNode (the closest node to startPoint) is farther from destination than
-            // startPoint and second path node is closer to destination then
-            // drop startNode and use the next path node.
             if (mPath.size() > 1) {
-                float endTo1stNodeLength2 = DistanceSquared(mPathgrid->mPoints[startNode], endPointInLocalCoords);
-                float endTo2ndNodeLength2 = DistanceSquared(*(++mPath.begin()), endPointInLocalCoords);
-                if (endTo1stNodeLength2 > startToEndLength2 && endTo2ndNodeLength2 < endTo1stNodeLength2)
-                    mPath.pop_front();
+                ESM::Pathgrid::Point secondNode = *(++mPath.begin());
+                osg::Vec3f firstNodeVec3f = MakeOsgVec3(mPathgrid->mPoints[startNode]);
+                osg::Vec3f secondNodeVec3f = MakeOsgVec3(secondNode);
+                osg::Vec3f toSecondNodeVec3f = secondNodeVec3f - firstNodeVec3f;
+                osg::Vec3f toStartPointVec3f = startPointInLocalCoords - firstNodeVec3f;
+                float cos = (toSecondNodeVec3f * toStartPointVec3f) / (toSecondNodeVec3f.length() * toStartPointVec3f.length());
+                if (cos > 0) {
+                    ESM::Pathgrid::Point temp(secondNode);
+                    converter.toWorld(temp);
+                    bool isPathClear = !MWBase::Environment::get().getWorld()->castRay(
+                        static_cast<float>(startPoint.mX), static_cast<float>(startPoint.mY), static_cast<float>(startPoint.mZ),
+                        static_cast<float>(temp.mX), static_cast<float>(temp.mY), static_cast<float>(temp.mZ));
+                    if (isPathClear)
+                        mPath.pop_front();
+                }
             }
 
             // convert supplied path to world coordinates
