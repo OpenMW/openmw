@@ -59,11 +59,11 @@ void LocalPlayer::Update()
     updateAttackState();
     updateDeadState();
     updateEquipped();
+    updateInventory();
     updateDynamicStats();
     updateAttributes();
     updateSkills();
     updateLevel();
-    updateInventory();
 }
 
 void LocalPlayer::charGen(int stageFirst, int stageEnd)

@@ -225,6 +225,9 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     {
         DEBUG_PRINTF("ID_GAME_INVENTORY\n");
         myPacket->Read(player);
+
+        Script::Call<Script::CallbackIdentity("OnPlayerChangeInventory")>(player->GetID());
+
         break;
     }
 
