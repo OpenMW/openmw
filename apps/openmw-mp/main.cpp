@@ -71,7 +71,7 @@ void breakpad(std::string pathToDump)
             /*FilterCallback*/ 0,
             DumpCallback,
             /*context*/
-            0,
+            google_breakpad::ExceptionHandler::HANDLER_ALL,
             true
             );
 #else
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     Settings::Manager mgr;
     Files::ConfigurationManager cfgMgr;
 
-    breakpad(boost::filesystem::path(cfgMgr.getLogPath()).c_str());
+    breakpad(boost::filesystem::path(cfgMgr.getLogPath()).string());
 
     loadSettings(mgr);
 
