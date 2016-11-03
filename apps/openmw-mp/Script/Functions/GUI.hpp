@@ -11,7 +11,8 @@
     {"InputDialog",         GUIFunctions::InputDialog},\
     {"ListBox",             GUIFunctions::ListBox},\
     {"SetMapVisibility",    GUIFunctions::SetMapVisibility},\
-    {"SetMapVisibilityAll", GUIFunctions::SetMapVisibilityAll}\
+    {"SetMapVisibilityAll", GUIFunctions::SetMapVisibilityAll},\
+    {"SetConsoleAllow", GUIFunctions::SetConsoleAllow}\
 
 class GUIFunctions
 {
@@ -27,6 +28,8 @@ public:
     //state 0 - disallow, 1 - allow
     static void SetMapVisibility(unsigned short targetPID, unsigned short affectedPID, unsigned short state) noexcept;
     static void SetMapVisibilityAll(unsigned short targetPID, unsigned short state) noexcept;
+
+    static void SetConsoleAllow(unsigned short pid, char state);
 };
 
 #endif //OPENMW_GUI_HPP

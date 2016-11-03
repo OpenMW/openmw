@@ -168,6 +168,7 @@ namespace mwmp
         int day;
         double hour;
         Inventory inventory;
+        bool consoleAllowed;
 
     protected:
         ESM::Position pos;

@@ -68,3 +68,13 @@ void GUIFunctions::SetMapVisibilityAll(unsigned short targetPID, unsigned short 
 {
     LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");
 }
+
+void GUIFunctions::SetConsoleAllow(unsigned short pid, char state)
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    player->consoleAllowed = state;
+
+    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_CONSOLE)->Send(player, false);
+}

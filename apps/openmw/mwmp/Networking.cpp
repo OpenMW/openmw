@@ -675,6 +675,11 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
+    case ID_GAME_CONSOLE:
+    {
+        myPacket->Packet(&bsIn, getLocalPlayer(), false);
+        break;
+    }
     default:
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unhandled PlayerPacket with identifier %i has arrived",
             packet->data[0]);

@@ -34,6 +34,7 @@ LocalPlayer::LocalPlayer()
 {
     CharGenStage()->current = 0;
     CharGenStage()->end = 1;
+    consoleAllowed = true;
 }
 
 LocalPlayer::~LocalPlayer()
