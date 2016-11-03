@@ -85,12 +85,8 @@ void mwmp::GUIController::setChatVisible(bool chatVisible)
 void mwmp::GUIController::ShowDialogList(const mwmp::BasePlayer::GUIMessageBox &guiMessageBox)
 {
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
-    windowManager->removeDialog(mInputBox);
-    if(mListBox)
-    {
-        delete mListBox;
-        mListBox = NULL;
-    }
+    windowManager->removeDialog(mListBox);
+    mListBox = NULL;
 
     std::vector<std::string> list;
 
