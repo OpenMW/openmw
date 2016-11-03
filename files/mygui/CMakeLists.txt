@@ -92,6 +92,7 @@ set(MYGUI_FILES
 
     tes3mp_login.layout
     tes3mp_login.skin.xml
+    tes3mp_dialog_list.layout
 )
 
 

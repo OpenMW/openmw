@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 300 300" name="_Main">
+        <Property key="Visible" value="false"/>
+
+        <Widget type="EditBox" skin="MW_TextEditClient" position="16 8 268 48" name="Message" align="Center Top">
+            <Property key="FontName" value="Default"/>
+            <Property key="TextAlign" value="Top HCenter"/>
+            <Property key="Static" value="true"/>
+            <Property key="WordWrap" value="true"/>
+            <Property key="MultiLine" value="true"/>
+        </Widget>
+
+        <Widget type="ListBox" skin="MW_List" position="16 56 268 170" align="Left Top" name="ListBox"/>
+
+        <Widget type="VBox" position="0 262 292 24" align="Right Bottom">
+            <Widget type="HBox">
+                <Property key="Spacing" value="8"/>
+
+                <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton" align="Right Bottom">
+                    <Property key="Caption" value="#{sYes}"/>
+                </Widget>
+                <!--<Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton" align="Right Bottom">
+                    <Property key="Caption" value="#{sNo}"/>
+                </Widget>-->
+            </Widget>
+
+            <Widget type="Widget"/>
+        </Widget>
+    </Widget>
+</MyGUI>

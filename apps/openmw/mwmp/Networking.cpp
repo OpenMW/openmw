@@ -641,6 +641,8 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
                 Main::get().getGUIController()->ShowCustomMessageBox(getLocalPlayer()->guiMessageBox);
             else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::InputDialog)
                 Main::get().getGUIController()->ShowInputBox(getLocalPlayer()->guiMessageBox);
+            else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::ListBox)
+                Main::get().getGUIController()->ShowDialogList(getLocalPlayer()->guiMessageBox);
         }
         break;
     }

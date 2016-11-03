@@ -46,6 +46,19 @@ void GUIFunctions::InputDialog(unsigned short pid, int id, const char *label) no
     mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GUI_MESSAGEBOX)->Send(player, false);
 }
 
+void GUIFunctions::ListBox(unsigned short pid, int id, const char *label, const char *items)
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    player->guiMessageBox.id = id;
+    player->guiMessageBox.label = label;
+    player->guiMessageBox.data = items;
+    player->guiMessageBox.type = Player::GUIMessageBox::ListBox;
+
+    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GUI_MESSAGEBOX)->Send(player, false);
+}
+
 void GUIFunctions::SetMapVisibility(unsigned short targetPID, unsigned short affectedPID, unsigned short state) noexcept
 {
     LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");

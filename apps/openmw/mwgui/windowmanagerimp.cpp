@@ -677,10 +677,8 @@ namespace MWGui
                     mToolTips->setVisible(false);
                     setCursorVisible(mMessageBoxManager && mMessageBoxManager->isInteractiveMessageBox());
                     break;
-                case GM_TES3MPPipe:
-                    mwmp::Main::get().getGUIController()->WM_UpdateVisible(mode);
-                    break;
                 default:
+                    mwmp::Main::get().getGUIController()->WM_UpdateVisible(mode);
                     // Unsupported mode, switch back to game
                     break;
             }

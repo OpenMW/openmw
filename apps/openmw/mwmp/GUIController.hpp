@@ -9,7 +9,6 @@
 #include <apps/openmw/mwgui/textinput.hpp>
 #include <apps/openmw/mwgui/mode.hpp>
 #include <components/openmw-mp/Base/BasePlayer.hpp>
-#include "GUIChat.hpp"
 #include "PlayerMarkerCollection.hpp"
 
 namespace MWGui
@@ -20,9 +19,17 @@ namespace MWGui
 
 namespace mwmp
 {
+    class GUIDialogList;
+    class GUIChat;
     class GUIController
     {
     public:
+        enum GM
+        {
+            GM_TES3MP_InputBox = MWGui::GM_QuickKeysMenu + 1,
+            GM_TES3MP_ListBox
+
+        };
         GUIController();
         ~GUIController();
         void cleanup();
@@ -34,6 +41,8 @@ namespace mwmp
         void ShowMessageBox(const BasePlayer::GUIMessageBox &guiMessageBox);
         void ShowCustomMessageBox(const BasePlayer::GUIMessageBox &guiMessageBox);
         void ShowInputBox(const BasePlayer::GUIMessageBox &guiMessageBox);
+
+        void ShowDialogList(const BasePlayer::GUIMessageBox &guiMessageBox);
 
         /// Return true if any tes3mp gui element in active state
         bool HaveFocusedElement();
@@ -60,6 +69,7 @@ namespace mwmp
         long id;
         bool calledMessageBox;
         MWGui::TextInputDialog *mInputBox;
+        GUIDialogList *mListBox;
         void OnInputBoxDone(MWGui::WindowBase* parWindow);
         //MyGUI::Widget *oldFocusWidget, *currentFocusWidget;
     };

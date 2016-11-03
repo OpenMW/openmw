@@ -28,9 +28,11 @@
 #include "Main.hpp"
 #include "PlayerMarkerCollection.hpp"
 #include "DedicatedPlayer.hpp"
+#include "GUIDialogList.hpp"
+#include "GUIChat.hpp"
 
 
-mwmp::GUIController::GUIController(): mInputBox(0)
+mwmp::GUIController::GUIController(): mInputBox(0), mListBox(0)
 {
     mChat = nullptr;
     keySay = SDLK_y;
@@ -80,6 +82,37 @@ void mwmp::GUIController::setChatVisible(bool chatVisible)
     mChat->setVisible(chatVisible);
 }
 
+void mwmp::GUIController::ShowDialogList(const mwmp::BasePlayer::GUIMessageBox &guiMessageBox)
+{
+    MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
+    windowManager->removeDialog(mInputBox);
+    if(mListBox)
+    {
+        delete mListBox;
+        mListBox = NULL;
+    }
+
+    std::vector<std::string> list;
+
+    std::string buf;
+
+    for(size_t i = 0; i < guiMessageBox.data.size(); i++)
+    {
+        if(guiMessageBox.data[i] == '\n')
+        {
+            list.push_back(buf);
+            buf.erase();
+            continue;
+        }
+        buf += guiMessageBox.data[i];
+    }
+
+    list.push_back(buf);
+
+    mListBox = new GUIDialogList(guiMessageBox.label, list);
+    windowManager->pushGuiMode((MWGui::GuiMode)GM_TES3MP_ListBox);
+}
+
 void mwmp::GUIController::ShowMessageBox(const BasePlayer::GUIMessageBox &guiMessageBox)
 {
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
@@ -112,7 +145,7 @@ void mwmp::GUIController::ShowInputBox(const BasePlayer::GUIMessageBox &guiMessa
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
 
     windowManager->removeDialog(mInputBox);
-    windowManager->pushGuiMode(MWGui::GM_TES3MPPipe);
+    windowManager->pushGuiMode((MWGui::GuiMode)GM_TES3MP_InputBox);
     mInputBox = 0;
     mInputBox = new MWGui::TextInputDialog();
     mInputBox->setTextLabel(guiMessageBox.label);
@@ -175,12 +208,18 @@ void mwmp::GUIController::update(float dt)
 
 void mwmp::GUIController::WM_UpdateVisible(MWGui::GuiMode mode)
 {
-    switch(mode)
+    switch((int)mode)
     {
-        case MWGui::GM_TES3MPPipe:
+        case GM_TES3MP_InputBox:
         {
             if (mInputBox != 0)
                 mInputBox->setVisible(true);
+            break;
+        }
+        case GM_TES3MP_ListBox:
+        {
+            if(mListBox != 0)
+                mListBox->setVisible(true);
             break;
         }
         default:

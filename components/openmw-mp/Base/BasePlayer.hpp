@@ -70,7 +70,8 @@ namespace mwmp
                 MessageBox = 0,
                 CustomMessageBox,
                 InputDialog,
-                PasswordDialog
+                PasswordDialog,
+                ListBox
             };
             std::string label;
             std::string buttons;
