@@ -701,17 +701,16 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     WorldEvent *event = new WorldEvent(guid);
     myPacket->Packet(&bsIn, event, false);
 
-    MWWorld::CellStore *ptrCellStore;
-
-    if (event->cell.isExterior())
-        ptrCellStore = MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY);
-    else if (!event->cell.mName.empty())
-        ptrCellStore = MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
-
     switch (packet->data[0])
     {
     case ID_OBJECT_PLACE:
     {
+        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
+            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
+            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+
+        if (!ptrCellStore) return;
+
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_PLACE");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- count: %i",
             event->cellRef.mRefID.c_str(),
@@ -741,6 +740,12 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_DELETE:
     {
+        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
+            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
+            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+
+        if (!ptrCellStore) return;
+
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_DELETE");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
@@ -762,6 +767,12 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_LOCK:
     {
+        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
+            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
+            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+
+        if (!ptrCellStore) return;
+
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_LOCK");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
@@ -783,6 +794,12 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_UNLOCK:
     {
+        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
+            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
+            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+
+        if (!ptrCellStore) return;
+
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_UNLOCK");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
@@ -804,6 +821,12 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_SCALE:
     {
+        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
+            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
+            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+
+        if (!ptrCellStore) return;
+
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_SCALE");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
@@ -825,6 +848,12 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_MOVE:
     {
+        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
+            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
+            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+
+        if (!ptrCellStore) return;
+
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_MOVE");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
@@ -847,6 +876,12 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_ROTATE:
     {
+        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
+            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
+            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+
+        if (!ptrCellStore) return;
+
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_ROTATE");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
@@ -869,6 +904,12 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_ANIM_PLAY:
     {
+        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
+            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
+            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+
+        if (!ptrCellStore) return;
+
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_ANIM_PLAY");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
@@ -891,6 +932,12 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_DOOR_ACTIVATE:
     {
+        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
+            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
+            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+
+        if (!ptrCellStore) return;
+
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_DOOR_ACTIVATE");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
@@ -924,6 +971,12 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_SCRIPT_LOCAL_SHORT:
     {
+        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
+            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
+            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+
+        if (!ptrCellStore) return;
+
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_SCRIPT_LOCAL_SHORT");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i",
             event->cellRef.mRefID.c_str(),
@@ -947,6 +1000,12 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_SCRIPT_LOCAL_FLOAT:
     {
+        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
+            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
+            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+
+        if (!ptrCellStore) return;
+
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_SCRIPT_LOCAL_FLOAT");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f",
             event->cellRef.mRefID.c_str(),
