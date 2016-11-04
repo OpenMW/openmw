@@ -435,27 +435,30 @@ void DedicatedPlayer::updateCell()
     MWBase::World *world = MWBase::Environment::get().getWorld();
     MWWorld::CellStore *cellStore;
 
-    if (cell.isExterior() == 1)
-        cellStore = world->getExterior(cell.mData.mX, cell.mData.mY);
-    else if (!cell.mName.empty())
-        cellStore = world->getInterior(cell.mName);
-    // Go no further if cell data is invalid
-    else
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Server sent invalid cell change info about %s (%s)!",
-            ptr.getBase()->mRef.getRefId().c_str(),
-            this->Npc()->mName.c_str());
-
-        return;
-    }
 
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server says %s (%s) moved to %s",
         ptr.getBase()->mRef.getRefId().c_str(),
         this->Npc()->mName.c_str(),
-        cellStore->getCell()->getDescription().c_str());
+        cell.getDescription().c_str());
 
-    // Allow this player's reference to move across a cell now that
-    // a manual cell update has been called
+    try
+    {
+        if (cell.isExterior())
+            cellStore = world->getExterior(cell.mData.mX, cell.mData.mY);
+        else
+            cellStore = world->getInterior(cell.mName);
+    }
+    // If the intended cell doesn't exist on this client, use ToddTest as a replacement
+    catch (std::exception&)
+    {
+        cellStore = world->getInterior("ToddTest");
+        LOG_APPEND(Log::LOG_INFO, "%s", "- Cell doesn't exist on this client");
+    }
+
+    if (!cellStore) return;
+
+    // Allow this player's reference to move across a cell now that a manual cell
+    // update has been called
     ptr.getBase()->canChangeCell = true;
     UpdatePtr(world->moveObject(ptr, cellStore, pos.pos[0], pos.pos[1], pos.pos[2]));
 }
