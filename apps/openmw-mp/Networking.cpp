@@ -846,3 +846,8 @@ unsigned int Networking::MaxConnections() const
 {
     return peer->GetMaximumIncomingConnections();
 }
+
+int Networking::GetAvgPing(RakNet::AddressOrGUID addr) const
+{
+    return peer->GetAveragePing(addr);
+}

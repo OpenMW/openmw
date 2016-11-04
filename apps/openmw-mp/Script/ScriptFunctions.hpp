@@ -60,6 +60,7 @@ public:
     static void Kick(unsigned short pid) noexcept;
     static const char *GetServerVersion() noexcept;
     static const char *GetProtocolVersion() noexcept;
+    static int GetAvgPing(unsigned short pid) noexcept;
 
     static constexpr ScriptFunctionData functions[]{
             {"CreateTimer",         ScriptFunctions::CreateTimer},
@@ -80,7 +81,8 @@ public:
             {"SendMessage",         ScriptFunctions::SendMessage},
             {"Kick",                ScriptFunctions::Kick},
             {"GetServerVersion",    ScriptFunctions::GetServerVersion},
-            {"GetProtocolVersion",    ScriptFunctions::GetProtocolVersion},
+            {"GetProtocolVersion",  ScriptFunctions::GetProtocolVersion},
+            {"GetAvgPing",          ScriptFunctions::GetAvgPing},
 
             TRANSLOCATIONFUNCTIONS,
             STATSFUNCTIONS,
