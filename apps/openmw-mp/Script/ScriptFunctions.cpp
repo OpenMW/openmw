@@ -131,3 +131,10 @@ const char *ScriptFunctions::GetProtocolVersion() noexcept
     static string version = to_string(TES3MP_PROTO_VERSION);
     return version.c_str();
 }
+
+int ScriptFunctions::GetAvgPing(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,-1);
+    return mwmp::Networking::Get().GetAvgPing(player->guid);
+}

@@ -27,6 +27,7 @@ namespace  mwmp
 
         unsigned short NumberOfConnections() const;
         unsigned int MaxConnections() const;
+        int GetAvgPing(RakNet::AddressOrGUID) const;
 
         int MainLoop();
 
