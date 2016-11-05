@@ -181,7 +181,7 @@ endif()
 if(APPLE)
     find_library(COCOA_FRAMEWORK Cocoa)
     find_library(IOKIT_FRAMEWORK IOKit)
-    target_link_libraries(openmw z ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
+    target_link_libraries(openmw ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
 
     if (FFmpeg_FOUND)
         find_library(COREVIDEO_FRAMEWORK CoreVideo)
