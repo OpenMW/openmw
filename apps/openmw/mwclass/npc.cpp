@@ -839,7 +839,10 @@ namespace MWClass
             return action;
         }
 
-        if(getCreatureStats(ptr).isDead())
+        const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+        // Allow creature opening only when death animation is finished because
+        // we increment death counter only after it.
+        if(stats.isDead() && stats.isDeathAnimationFinished())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
         if(ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("#{sActorInCombat}"));
