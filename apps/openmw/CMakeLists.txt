@@ -186,7 +186,7 @@ if(APPLE)
     if (FFmpeg_FOUND)
         find_library(COREVIDEO_FRAMEWORK CoreVideo)
         find_library(VDA_FRAMEWORK VideoDecodeAcceleration)
-        target_link_libraries(openmw ${COREVIDEO_FRAMEWORK} ${VDA_FRAMEWORK})
+        target_link_libraries(openmw z ${COREVIDEO_FRAMEWORK} ${VDA_FRAMEWORK})
     endif()
 endif(APPLE)
 
