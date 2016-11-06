@@ -1,27 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 329 253" name="_Main">
+    <Widget type="VBox" skin="MW_Dialog" layer="Windows" position="0 0 329 253" name="_Main">
+        <Property key="Padding" value="12"/>
+        <Property key="Spacing" value="8"/>
 
-        <Widget type="Widget" skin="" position="4 4 321 42" name="GemBox">
-            <Widget type="ItemWidget" skin="MW_ItemIconSmall" position="5 6 32 32" name="GemIcon"/>
+        <Widget type="HBox" name="GemBox">
+            <UserString key="HStretch" value="true"/>
 
-            <Widget type="TextBox" skin="SandText" position="55 13 250 18" name="ChargeLabel">
+            <Widget type="ItemWidget" skin="MW_ItemIconSmall" position="0 0 32 32" name="GemIcon"/>
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+            <Widget type="AutoSizedTextBox" skin="SandText" name="ChargeLabel">
                 <Property key="Caption" value="#{sQuality}"/>
                 <Property key="TextAlign" value="Right"/>
             </Widget>
 
         </Widget>
 
-        <Widget type="Widget" skin="MW_Box" position="6 46 309 160" align="Left Stretch" name="Box">
-            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 301 152" align="Left Top Stretch" name="View">
-                <Property key="CanvasAlign" value="Left"/>
-            </Widget>
+        <Widget type="ItemChargeView" skin="MW_ItemChargeView" align="Left Stretch" name="Box">
+            <UserString key="VStretch" value="true"/>
+            <UserString key="HStretch" value="true"/>
         </Widget>
 
-        <Widget type="AutoSizedButton" skin="MW_Button" position="239 214 75 24" name="CancelButton">
-            <Property key="ExpandDirection" value="Left"/>
-            <Property key="Caption" value="#{sCancel}"/>
+        <Widget type="HBox">
+            <UserString key="HStretch" value="true"/>
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
+                <Property key="Caption" value="#{sCancel}"/>
+            </Widget>
         </Widget>
 
     </Widget>

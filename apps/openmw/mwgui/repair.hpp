@@ -9,6 +9,7 @@ namespace MWGui
 {
 
 class ItemWidget;
+class ItemChargeView;
 
 class Repair : public WindowBase
 {
@@ -22,8 +23,7 @@ public:
     void startRepairItem (const MWWorld::Ptr& item);
 
 protected:
-    MyGUI::Widget* mRepairBox;
-    MyGUI::ScrollView* mRepairView;
+    ItemChargeView* mRepairBox;
 
     MyGUI::Widget* mToolBox;
 
@@ -38,9 +38,8 @@ protected:
 
     void updateRepairView();
 
-    void onRepairItem (MyGUI::Widget* sender);
-    void onCancel (MyGUI::Widget* sender);
-    void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+    void onRepairItem(MyGUI::Widget* sender, const MWWorld::Ptr& ptr);
+    void onCancel(MyGUI::Widget* sender);
 
 };
 
