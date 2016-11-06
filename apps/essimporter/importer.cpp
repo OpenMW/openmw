@@ -51,6 +51,7 @@ namespace
         {
             for (int x=0; x<128; ++x)
             {
+                assert(image->data(x,y));
                 *(image->data(x,y)+2) = *it++;
                 *(image->data(x,y)+1) = *it++;
                 *image->data(x,y) = *it++;
