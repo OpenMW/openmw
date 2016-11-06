@@ -66,6 +66,8 @@ namespace MWGui
 
             void configureWidgets(MyGUI::Widget* widget);
             void updateSliderLabel(MyGUI::ScrollBar* scroller, const std::string& value);
+
+            void layoutControlsBox();
         
         private:
             void resetScrollbars();
