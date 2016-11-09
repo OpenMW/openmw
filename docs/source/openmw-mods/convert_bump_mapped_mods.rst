@@ -35,13 +35,13 @@ So let's get on with it.
 Normal Mapping in OpenMW
 ------------------------
 
-Normal mapping in OpenMW works in a very simple way: The engine just looks for a texture with a "_n.dds" suffix, and you're done.
+Normal mapping in OpenMW works in a very simple way: The engine just looks for a texture with a *_n.dds* suffix, and you're done.
 
 So to expand on this a bit, let's take a look at how a model seeks for textures.
 
-Let us assume we have the model "example.nif". In this model file, there should be a tag (NiSourceTexture) that states what texture it should use and where to find it. Typically, it will point to something like "exampletexture_01.dds". This texture is supposed to be located directly in the Textures folder since it does not state anything else. If the model is a custom made one, modders tend to group their textures in separate folders, just to easily keep track of them. It might be something like "Textures\moddername\exampletexture_02.dds".
+Let us assume we have the model *example.nif*. In this model file, there should be a tag (NiSourceTexture) that states what texture it should use and where to find it. Typically, it will point to something like *exampletexture_01.dds*. This texture is supposed to be located directly in the Textures folder since it does not state anything else. If the model is a custom made one, modders tend to group their textures in separate folders, just to easily keep track of them. It might be something like *Textures\moddername\exampletexture_02.dds*.
 
-When OpenMW finally adds normal mapping, it simply takes the NiSourceTexture file path, e.g., "exampletexture_01.dds", and looks for a "exampletexture_01_n.dds". If it can't find this file, no normal mapping is added. If it *does* find this file, the model will use this texture as a normal map. Simple.
+When OpenMW finally adds normal mapping, it simply takes the NiSourceTexture file path, e.g., *exampletexture_01.dds*, and looks for a *exampletexture_01_n.dds*. If it can't find this file, no normal mapping is added. If it *does* find this file, the model will use this texture as a normal map. Simple.
 
 Activating normal mapping shaders in OpenMW
 *******************************************
@@ -106,7 +106,7 @@ Now, on to the tutorials.
 Mod made for the MGE XE PBR prototype
 -------------------------------------
 
-:Author: Joakim (Lysol) Berg
+:Author(s): Joakim (Lysol) Berg
 :Latest update: 2016-11-09
 
 So, let's say you've found out that PeterBitt_ makes awesome models and textures featuring physically based rendering (PBR) and normal maps. Let's say that you tried to run his `PBR Scamp Replacer`_ in OpenMW and that you were greatly disappointed when the normal map didn't seem to work. Lastly, let's say you came here, looking for some answers. Am I right? Great. Because you've come to the right place!
@@ -124,10 +124,10 @@ So, follow these steps:
 #. Go to the *files* tab and download the main file and the "PBR materials" file.
 #. Extract the main file as if you'd install a normal mod (**Pro tip**: Install using OpenMW's `Multi-data`_ folder function!)
 #. Now, open the PBR materials file:
-    - Go to "Materials/PB/".
-    - Select the "**tx_Scamp_normals.dds**" file, which is, obviously, the normal map texture.
-    - Extract this file to the place you extracted the main file to, but in the subdirectory "Textures/PB/".
-#. Rename your newly extracted file ("**tx_Scamp_normals.dds**") to "**tx_Scamp_n.dds**" (which is exactly the same name as the diffuse texture file, except for the added "**_n**" suffix before the filename extention).
+    - Go to ``Materials/PB/``.
+    - Select the ``tx_Scamp_normals.dds`` file, which is, obviously, the normal map texture.
+    - Extract this file to the place you extracted the main file to, but in the subdirectory ``Textures/PB/``.
+#. Rename your newly extracted file (``tx_Scamp_normals.dds``) to ``tx_Scamp_n.dds`` (which is exactly the same name as the diffuse texture file, except for the added *_n* suffix before the filename extention).
 #. You're actually done!
 
 So as you might notice, converting these mods is very simple and takes just a couple of minutes. It's more or less just a matter of renaming and moving a few files.
@@ -149,15 +149,15 @@ Converting textures made for the Morrowind Code Patch (MCP) fake bump mapping ca
 Tutorial - MCP, Part 1
 ----------------------
 
-We will be converting a quite popular texture replacer of the Hlaalu architecture, namely Lougian's `Hlaalu Bump mapped`_. Since this is just a texture pack and not a model replacer, we can convert the mod in a few minutes by just renaming a few dozen files and by *not* extracting the included model (.nif) files when installing the mod.
+We will be converting a quite popular texture replacer of the Hlaalu architecture, namely Lougian's `Hlaalu Bump mapped`_. Since this is just a texture pack and not a model replacer, we can convert the mod in a few minutes by just renaming a few dozen files and by *not* extracting the included model (``.nif``) files when installing the mod.
 
 #. Download Lougian's `Hlaalu Bump mapped`_.
-#. Install the mod by extracting the Textures folder to a data folder the way you usually install mods (**Pro tip**: Install using OpenMW's `Multi-data`_ folder function!).
-    - Again, yes, *only* the Textures folder. Do *not* extract the Meshes folder. They are only there to make the MCP hack work, which is not of any interest to us.
+#. Install the mod by extracting the ``Textures`` folder to a data folder the way you usually install mods (**Pro tip**: Install using OpenMW's `Multi-data`_ folder function!).
+    - Again, yes, *only* the ``Textures`` folder. Do *not* extract the Meshes folder. They are only there to make the MCP hack work, which is not of any interest to us.
 #. Go to your new texture folder. If you installed the mod like I recommended, you won't have any trouble finding the files. If you instead placed all your files in Morrowinds main Data Files folder (sigh), you need to check with the mod's .rar file to see what files you should look for. Because you'll be scrolling through a lot of files.
-#. Find all the textures related to the texture pack in the Textures folder and take note of all the ones that ends with a "**_nm.dds**".
-#. The "**_nm.dds**" files are normal map files. OpenMW's standard format is to have the normal maps with a "**_n.dds**" instead. Rename all the normal map textures to only have a "**_n.dds**" instead of the "**_nm.dds**".
-    - As a nice bonus to this tutorial, this pack actually included one specularity texture too. We should use it of course. It's the one called "**tx_glass_amber_02_reflection.dds**". For OpenMW to recognize this file and use it as a specular map, you need to change the "**_reflection.dds**" part to "**_spec.dds**".
+#. Find all the textures related to the texture pack in the Textures folder and take note of all the ones that ends with a *_nm.dds*.
+#. The *_nm.dds* files are normal map files. OpenMW's standard format is to have the normal maps with a *_n.dds* instead. Rename all the normal map textures to only have a *_n.dds* instead of the *_nm.dds*.
+    - As a nice bonus to this tutorial, this pack actually included one specularity texture too. We should use it of course. It's the one called "``tx_glass_amber_02_reflection.dds``". For OpenMW to recognize this file and use it as a specular map, you need to change the *_reflection.dds* part to *_spec.dds*, resulting in the name ``tx_glass_amber_01_spec.dds``.
 #. That should be it. Really simple, but I do know that it takes a few minutes to rename all those files.
 
 Now – if the mod you want to change includes custom made models it gets a bit more complicated I'm afraid. But that is for the next tutorial.
@@ -170,7 +170,7 @@ Mod made for MCP's fake bump function, with custom models
 :Author: Joakim (Lysol) Berg
 :Latest update: 2016-11-09
 
-In part one of this tutorial, we converted a mod that only included modified Morrowind model (.nif) files so that the normal maps could be loaded in Morrowind with MCP. We ignored those model files since they are not needed with OpenMW. In this tutorial however, we will convert a mod that includes new, custom made models. In other words, we cannot just ignore those files this time.
+In part one of this tutorial, we converted a mod that only included modified Morrowind model (``.nif``) files so that the normal maps could be loaded in Morrowind with MCP. We ignored those model files since they are not needed with OpenMW. In this tutorial however, we will convert a mod that includes new, custom made models. In other words, we cannot just ignore those files this time.
 
 Before we begin, you need to know that we will be needing a Windows OS for this, unless you can get the application we will be using to work in Wine or something similar.
 
@@ -183,16 +183,16 @@ The sacks included in Apel's `Various Things - Sacks`_ come in two versions – 
 #. Once downloaded, install it the way you'd normally install your mods (**Pro tip**: Install using OpenMW's `Multi-data`_ folder function!).
 #. Now, if you ran the mod right away, your sacks will be made out of lead_. This is because the normal map is loaded as an environment map which MCP fixes so that it looks less shiny. We don't use MCP, so therefore, it looks kind of like the shack was made out of lead.
 #. We need to fix this by removing some tags in the model files. You need to download NifSkope_ for this, which, again, is a Windows-only application.
-#. Go the place where you installed the mod and go to "Meshes/o/" to find the model files.
+#. Go the place where you installed the mod and go to ``Meshes/o/`` to find the model files.
     - If you installed the mod like I suggested, finding the files will be easy as a pie, but if you installed it by dropping everything into your main Morrowind Data Files folder, then you'll have to scroll a lot to find them. Check the mod's zip file for the file names of the models if this is the case. The same thing applies to when fixing the textures.
 #. Open up each of the models in NifSkope and look for these certain blocks_:
     - NiTextureEffect
-    - NiSourceTexture with the value that appears to be a normal map file, in this mod, they have the suffix "**_nm.dds**".
+    - NiSourceTexture with the value that appears to be a normal map file, in this mod, they have the suffix *_nm.dds*.
 #. Remove all these tags by selecting them one at a time and press right click>Block>Remove.
 #. Repeat this on all the affected models.
 #. If you launch OpenMW now, you'll `no longer have shiny models`_. But one thing is missing. Can you see it? It's actually hard to spot on still pictures, but we have no normal maps here.
-#. Now, go back to the root of where you installed the mod. Now go to "Textures/" and you'll find the texture files in question. 
-#. OpenMW detects normal maps if they have the same name as the base diffuse texture, but with a "**_n.dds**" suffix. In this mod, the normal maps has a suffix of "**_nm.dds**". Change all the files that ends with "**_nm.dds**" to instead end with "**_n.dds**".
+#. Now, go back to the root of where you installed the mod. Now go to ``Textures/`` and you'll find the texture files in question. 
+#. OpenMW detects normal maps if they have the same name as the base diffuse texture, but with a *_n.dds* suffix. In this mod, the normal maps has a suffix of *_nm.dds*. Change all the files that ends with *_nm.dds* to instead end with *_n.dds*.
 #. Finally, `we are done`_!
 
 Since these models have one or two textures applied to them, the fix was not that time-consuming. It gets worse when you have to fix a model that uses loads of textures. The principle is the same, it just requires more manual work which is annoying and takes time.
