@@ -1329,13 +1329,13 @@ namespace MWPhysics
                 else if (physicActor->getCollisionMode())
                 {
                     const osg::Vec3f actorPosition = physicActor->getPosition();
-                    const osg::Vec3f destinationPosition(actorPosition.x(), actorPosition.y(), waterlevel);
+                    const osg::Vec3f destinationPosition(actorPosition.x(), actorPosition.y(), waterlevel + physicActor->getHalfExtents().z());
                     ActorTracer tracer;
                     tracer.doTrace(physicActor->getCollisionObject(), actorPosition, destinationPosition, mCollisionWorld);
                     if (tracer.mFraction >= 1.0f)
                     {
                         waterCollision = true;
-                        physicActor->setPosition(destinationPosition);
+                        physicActor->setPosition(osg::Vec3f(actorPosition.x(), actorPosition.y(), waterlevel));
                     }
                     else
                     {
