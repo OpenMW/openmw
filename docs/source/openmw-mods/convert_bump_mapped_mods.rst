@@ -6,7 +6,7 @@ Index:
 
 - `General introduction to normal map conversion`_
     - `Normal Mapping in OpenMW`_
-        - `Activating normal mapping shaders in OpenMW`_
+    - `Activating normal mapping shaders in OpenMW`_
     - `Normal mapping in Morrowind with Morrowind Code Patch`_
     - `Normal mapping in Morrowind with MGE XE (PBR version)`_
 - `Converting PeterBitt's Scamp Replacer`_ (Mod made for the MGE XE PBR prototype)
