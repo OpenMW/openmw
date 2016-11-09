@@ -19,8 +19,8 @@ Index:
 1. General introduction to normal map conversion
 ================================================
 
-:Author(s): Joakim (Lysol) Berg
-:Latest update: 2016-11-09
+:Authors: Joakim (Lysol) Berg
+:Updated: 2016-11-09
 
 Hi.
 
@@ -106,8 +106,8 @@ Now, on to the tutorials.
 Mod made for the MGE XE PBR prototype
 -------------------------------------
 
-:Author(s): Joakim (Lysol) Berg
-:Latest update: 2016-11-09
+:Authors: Joakim (Lysol) Berg
+:Updated: 2016-11-09
 
 So, let's say you've found out that PeterBitt_ makes awesome models and textures featuring physically based rendering (PBR) and normal maps. Let's say that you tried to run his `PBR Scamp Replacer`_ in OpenMW and that you were greatly disappointed when the normal map didn't seem to work. Lastly, let's say you came here, looking for some answers. Am I right? Great. Because you've come to the right place!
 
@@ -141,8 +141,8 @@ And let's hope that some one implements PBR shaders to OpenMW too, so that we ca
 Mod made for MCP's fake bump function, without custom models
 ------------------------------------------------------------
 
-:Author: Joakim (Lysol) Berg
-:Latest update: 2016-11-09
+:Authors: Joakim (Lysol) Berg
+:Updated: 2016-11-09
 
 Converting textures made for the Morrowind Code Patch (MCP) fake bump mapping can be really easy or a real pain, depending on a few circumstances. In this tutorial, we will look at a very easy, although in some cases a bit time-consuming, example.
 
@@ -167,8 +167,8 @@ Now – if the mod you want to change includes custom made models it gets a bit 
 Mod made for MCP's fake bump function, with custom models
 ---------------------------------------------------------
 
-:Author: Joakim (Lysol) Berg
-:Latest update: 2016-11-09
+:Authors: Joakim (Lysol) Berg
+:Updated: 2016-11-09
 
 In part one of this tutorial, we converted a mod that only included modified Morrowind model (``.nif``) files so that the normal maps could be loaded in Morrowind with MCP. We ignored those model files since they are not needed with OpenMW. In this tutorial however, we will convert a mod that includes new, custom made models. In other words, we cannot just ignore those files this time.
 
