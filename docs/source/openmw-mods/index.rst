@@ -14,3 +14,4 @@ The following document is the complete reference guide to modifying, or modding,
    foreword
    differences
    mod-install
+   convert_bump_mapped_mods
