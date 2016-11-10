@@ -1,8 +1,6 @@
 ====================================
 Normal maps from Morrowind to OpenMW
 ====================================
-Index:
-------
 
 - `General introduction to normal map conversion`_
     - `Normal Mapping in OpenMW`_
