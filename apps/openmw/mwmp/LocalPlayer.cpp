@@ -76,63 +76,69 @@ void LocalPlayer::charGen(int stageFirst, int stageEnd)
 bool LocalPlayer::charGenThread() // todo: need fix
 {
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
-    if (windowManager->isGuiMode())
+    
+    // If we haven't finished CharGen and we're in a menu, it must be
+    // one of the CharGen menus, so go no further until it's closed
+    if (windowManager->isGuiMode() && CharGenStage()->end != 0)
         return false;
 
-    if (CharGenStage()->current >= CharGenStage()->end)
+    // If the current stage of CharGen is not the last one,
+    // move to the next one
+    else if (CharGenStage()->current < CharGenStage()->end)
     {
-
-        if (GetNetworking()->isConnected() && CharGenStage()->current == CharGenStage()->end &&
-            CharGenStage()->end != 0)
+        switch (CharGenStage()->current)
         {
-            MWBase::World *world = MWBase::Environment::get().getWorld();
-            MWWorld::Ptr player = world->getPlayerPtr();
-            (*Npc()) = *player.get<ESM::NPC>()->mBase;
-            (*BirthSign()) = world->getPlayer().getBirthSign();
-
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server with my CharGen info");
-            GetNetworking()->GetPlayerPacket(ID_GAME_BASE_INFO)->Send(this);
-
-            if (CharGenStage()->end != 1)
-            {
-                updateDynamicStats(true);
-                updateAttributes(true);
-                updateSkills(true);
-                updateLevel(true);
-                sendClass();
-                GetNetworking()->GetPlayerPacket(ID_GAME_CHARGEN)->Send(this);
-            }
-            CharGenStage()->end = 0;
-            /*RakNet::BitStream bs;
-            GetNetworking()->GetPlayerPacket(ID_GAME_BASE_INFO)->Packet(&bs, this, true);
-            GetNetworking()->SendData(&bs);*/
-
+        case 0:
+            windowManager->pushGuiMode(MWGui::GM_Name);
+            break;
+        case 1:
+            windowManager->pushGuiMode(MWGui::GM_Race);
+            break;
+        case 2:
+            windowManager->pushGuiMode(MWGui::GM_Class);
+            break;
+        case 3:
+            windowManager->pushGuiMode(MWGui::GM_Birth);
+            break;
+        default:
+            windowManager->pushGuiMode(MWGui::GM_Review);
+            break;
         }
-        return true;
-    }
+        GetNetworking()->GetPlayerPacket(ID_GAME_CHARGEN)->Send(this);
+        CharGenStage()->current++;
 
-    switch (CharGenStage()->current)
+        return false;
+    }
+    
+    // If we've reached the last stage of CharGen, send the
+    // corresponding packets and mark CharGen as finished
+    else if (CharGenStage()->end != 0)
     {
-    case 0:
-        windowManager->pushGuiMode(MWGui::GM_Name);
-        break;
-    case 1:
-        windowManager->pushGuiMode(MWGui::GM_Race);
-        break;
-    case 2:
-        windowManager->pushGuiMode(MWGui::GM_Class);
-        break;
-    case 3:
-        windowManager->pushGuiMode(MWGui::GM_Birth);
-        break;
-    default:
-        windowManager->pushGuiMode(MWGui::GM_Review);
-        break;
-    }
-    GetNetworking()->GetPlayerPacket(ID_GAME_CHARGEN)->Send(this);
-    CharGenStage()->current++;
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWWorld::Ptr player = world->getPlayerPtr();
+        (*Npc()) = *player.get<ESM::NPC>()->mBase;
+        (*BirthSign()) = world->getPlayer().getBirthSign();
 
-    return false;
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server with my CharGen info");
+        GetNetworking()->GetPlayerPacket(ID_GAME_BASE_INFO)->Send(this);
+
+        // Send stats packets if this is the 2nd round of CharGen that
+        // only happens for new characters
+        if (CharGenStage()->end != 1)
+        {
+            updateDynamicStats(true);
+            updateAttributes(true);
+            updateSkills(true);
+            updateLevel(true);
+            sendClass();
+            GetNetworking()->GetPlayerPacket(ID_GAME_CHARGEN)->Send(this);
+        }
+
+        // Set the last stage variable to 0 to indicate that CharGen is finished
+        CharGenStage()->end = 0;
+    }
+
+    return true;
 }
 
 void LocalPlayer::updateDynamicStats(bool forceUpdate)
