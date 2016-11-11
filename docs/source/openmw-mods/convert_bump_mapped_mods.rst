@@ -151,7 +151,7 @@ We will be converting a quite popular texture replacer of the Hlaalu architectur
 
 Now – if the mod you want to change includes custom made models it gets a bit more complicated I'm afraid. But that is for the next tutorial.
 
-Converting Apel's Various Things – Sacks
+Converting Apel's Various Things - Sacks
 ----------------------------------------
 **Mod made for MCP's fake bump function, with custom models**
 
