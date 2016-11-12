@@ -175,6 +175,7 @@ namespace mwmp
         double hour;
         Inventory inventory;
         bool consoleAllowed;
+        bool ignorePosPacket;
 
     protected:
         ESM::Position pos;

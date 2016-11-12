@@ -36,6 +36,7 @@ LocalPlayer::LocalPlayer()
     CharGenStage()->current = 0;
     CharGenStage()->end = 1;
     consoleAllowed = true;
+    ignorePosPacket = false;
 }
 
 LocalPlayer::~LocalPlayer()
@@ -74,7 +75,7 @@ void LocalPlayer::charGen(int stageFirst, int stageEnd)
     CharGenStage()->end = stageEnd;
 }
 
-bool LocalPlayer::charGenThread() // todo: need fix
+bool LocalPlayer::charGenThread()
 {
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
     
@@ -688,9 +689,18 @@ void LocalPlayer::setPosition()
     MWBase::World *world = MWBase::Environment::get().getWorld();
     MWWorld::Ptr player = world->getPlayerPtr();
 
-    world->getPlayer().setTeleported(true);
-    world->moveObject(player, Position()->pos[0], Position()->pos[1], Position()->pos[2]);
-    world->rotateObject(player, Position()->rot[0], Position()->rot[1], Position()->rot[2]);
+    // If we're ignoring this position packet because of an invalid cell change,
+    // don't make the next one get ignored as well
+    if (ignorePosPacket)
+    {
+        ignorePosPacket = false;
+    }
+    else
+    {
+        world->getPlayer().setTeleported(true);
+        world->moveObject(player, Position()->pos[0], Position()->pos[1], Position()->pos[2]);
+        world->rotateObject(player, Position()->rot[0], Position()->rot[1], Position()->rot[2]);
+    }
 
     updatePosition(true);
 }
@@ -723,8 +733,18 @@ void LocalPlayer::setCell()
     }
     else
     {
-        world->findInteriorPosition(GetCell()->mName, pos);
-        world->changeToInteriorCell(GetCell()->mName, pos, true);
+        try
+        {
+            world->findInteriorPosition(GetCell()->mName, pos);
+            world->changeToInteriorCell(GetCell()->mName, pos, true);
+        }
+        // If we've been sent to an invalid interior, ignore the incoming
+        // packet about our position in that cell
+        catch (std::exception&)
+        {
+            LOG_APPEND(Log::LOG_INFO, "%s", "- Cell doesn't exist on this client");
+            ignorePosPacket = true;
+        }
     }
 
     updateCell(true);
