@@ -116,12 +116,13 @@ namespace MWMechanics
         x = std::min(iBlockMaxChance, std::max(iBlockMinChance, x));
 
 
-        bool isDedicated = mwmp::Main::get().getNetworking()->isDedicatedPlayer(blocker);
+        mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::GetPlayer(blocker);
+        bool isDedicated = dedicatedPlayer != nullptr;
         if (attacker == MWMechanics::getPlayer())
             mwmp::Main::get().getLocalPlayer()->GetAttack()->block = false;
 
         if ((!isDedicated && Misc::Rng::roll0to99() < x) ||
-           (isDedicated && mwmp::Players::GetPlayer(blocker)->GetAttack()->block == 1))
+           (isDedicated && dedicatedPlayer->GetAttack()->block == 1))
         {
             if (attacker == MWMechanics::getPlayer())
                 mwmp::Main::get().getLocalPlayer()->GetAttack()->block = true;

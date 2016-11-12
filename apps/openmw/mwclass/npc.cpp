@@ -597,8 +597,9 @@ namespace MWClass
         if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
         {
             mwmp::Main::get().getLocalPlayer()->GetAttack()->success = true;
-            if (mwmp::Main::get().getNetworking()->isDedicatedPlayer(victim))
-                mwmp::Main::get().getLocalPlayer()->GetAttack()->target =mwmp::Players::GetPlayer(victim)->guid;
+            mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::GetPlayer(victim);
+            if (dedicatedPlayer != nullptr)
+                mwmp::Main::get().getLocalPlayer()->GetAttack()->target = dedicatedPlayer->guid;
         }
 
         if(Misc::Rng::roll0to99() >= hitchance)
@@ -733,10 +734,11 @@ namespace MWClass
             float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
                     * gmst.iKnockDownOddsMult->getInt() * 0.01f + gmst.iKnockDownOddsBase->getInt();
 
-            bool isDedicated = mwmp::Main::get().getNetworking()->isDedicatedPlayer(attacker);
+            mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::GetPlayer(attacker);
+            bool isDedicated = dedicatedPlayer != nullptr;
             bool _knockdown = false;
             if(isDedicated)
-                _knockdown = mwmp::Players::GetPlayer(attacker)->GetAttack()->knockdown;
+                _knockdown = dedicatedPlayer->GetAttack()->knockdown;
 
             if ((!isDedicated && ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99()) || _knockdown)
             {
@@ -843,12 +845,13 @@ namespace MWClass
         }
 
 
-        if (attacker == MWMechanics::getPlayer() && mwmp::Main::get().getNetworking()->isDedicatedPlayer(ptr))
+        mwmp::DedicatedPlayer *victimPlayer = mwmp::Players::GetPlayer(ptr);
+        if (attacker == MWMechanics::getPlayer() && victimPlayer != nullptr)
         {
             mwmp::Attack *_atk = mwmp::Main::get().getLocalPlayer()->GetAttack();
             _atk->damage = damage;
             _atk->attacker = mwmp::Main::get().getLocalPlayer()->guid;
-            _atk->target = mwmp::Players::GetPlayer(ptr)->guid;
+            _atk->target = victimPlayer->guid;
             _atk->knockdown = getCreatureStats(ptr).getKnockedDown();
             mwmp::Main::get().getLocalPlayer()->sendAttack(mwmp::Attack::MELEE); // todo: make this sensitive to different weapon types
         }
