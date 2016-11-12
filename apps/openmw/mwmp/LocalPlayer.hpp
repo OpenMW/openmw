@@ -46,9 +46,9 @@ namespace mwmp
         void setInventory();
 
         void sendClass();
-        void sendAttack(char type);
+        void sendAttack(Attack::TYPE type);
 
-        void prepareAttack(char type, bool state);
+        void prepareAttack(Attack::TYPE type, bool state);
 
         
 

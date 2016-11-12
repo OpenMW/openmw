@@ -20,6 +20,12 @@ namespace mwmp
         RakNet::RakNetGUID target;
         RakNet::RakNetGUID attacker;
         char type; // 0 - melee, 1 - magic, 2 - throwable
+        enum TYPE
+        {
+            MELEE = 0,
+            MAGIC,
+            THROWABLE
+        };
         std::string refid; // id of spell (e.g. "fireball")
         char success;
         char block;

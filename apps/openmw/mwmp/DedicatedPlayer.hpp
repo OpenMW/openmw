@@ -14,6 +14,10 @@
 #include <components/openmw-mp/Base/BasePlayer.hpp>
 #include <components/esm/custommarkerstate.hpp>
 
+namespace MWMechanics
+{
+    class Actor;
+}
 
 namespace mwmp
 {
@@ -50,6 +54,7 @@ namespace mwmp
         void updateMarker();
         void removeMarker();
         void setMarkerState(bool state);
+        void updateActor(MWMechanics::Actor *actor);
     private:
         DedicatedPlayer(RakNet::RakNetGUID guid);
         virtual ~DedicatedPlayer();

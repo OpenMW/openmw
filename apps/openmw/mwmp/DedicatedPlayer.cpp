@@ -12,6 +12,7 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwclass/npc.hpp"
+#include "../mwmechanics/actor.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/mechanicsmanagerimp.hpp"
@@ -499,4 +500,9 @@ void DedicatedPlayer::setMarkerState(bool state)
     }
     else
         removeMarker();
+}
+
+void DedicatedPlayer::updateActor(MWMechanics::Actor *actor)
+{
+    actor->getCharacterController()->setAttackingOrSpell(GetAttack()->pressed);
 }

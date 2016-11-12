@@ -26,6 +26,7 @@
 #include <components/settings/settings.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <apps/openmw/mwmp/Main.hpp>
 
 #include "../mwrender/animation.hpp"
 
@@ -1233,6 +1234,9 @@ bool CharacterController::updateWeaponState()
 
                 if(!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
                 {
+                    if (mPtr == getPlayer())
+                        mwmp::Main::get().getLocalPlayer()->prepareAttack(mwmp::Attack::MAGIC, true);
+
                     MWMechanics::CastSpell cast(mPtr, NULL);
                     cast.playSpellCastingEffects(spellid);
 

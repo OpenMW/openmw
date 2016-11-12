@@ -23,6 +23,7 @@
 #include <apps/openmw/mwmechanics/spellcasting.hpp>
 #include <apps/openmw/mwgui/inventorywindow.hpp>
 #include <components/openmw-mp/Log.hpp>
+#include <components/misc/rng.hpp>
 
 #include "LocalPlayer.hpp"
 #include "Main.hpp"
@@ -510,7 +511,7 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
             const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
 
             GetAttack()->attacker = guid;
-            GetAttack()->type = 1;
+            GetAttack()->type = Attack::MAGIC;
             GetAttack()->pressed = true;
             GetAttack()->refid = spell;
 
@@ -793,18 +794,11 @@ void LocalPlayer::sendClass()
     GetNetworking()->GetPlayerPacket(ID_GAME_CHARCLASS)->Send(this);
 }
 
-void LocalPlayer::sendAttack(char type)
+void LocalPlayer::sendAttack(Attack::TYPE type)
 {
     MWMechanics::DrawState_ state = GetPlayerPtr().getClass().getNpcStats(GetPlayerPtr()).getDrawState();
 
-    if (state == MWMechanics::DrawState_Spell)
-    {
 
-    }
-    else
-    {
-
-    }
     GetAttack()->type = type;
     GetAttack()->pressed = false;
     RakNet::BitStream bs;
@@ -812,9 +806,9 @@ void LocalPlayer::sendAttack(char type)
     GetNetworking()->SendData(&bs);
 }
 
-void LocalPlayer::prepareAttack(char type, bool state)
+void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
 {
-    if (GetAttack()->pressed == state)
+    if (GetAttack()->pressed == state && type != Attack::MAGIC)
         return;
 
     MWMechanics::DrawState_ dstate = GetPlayerPtr().getClass().getNpcStats(GetPlayerPtr()).getDrawState();
@@ -822,18 +816,18 @@ void LocalPlayer::prepareAttack(char type, bool state)
     if (dstate == MWMechanics::DrawState_Spell)
     {
         const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
-
+        GetAttack()->success = Misc::Rng::roll0to99() >=MWMechanics::getSpellSuccessChance(spell, GetPlayerPtr());
+        state = true;
         GetAttack()->refid = spell;
     }
     else
     {
-
+        GetAttack()->success = false;
     }
 
     GetAttack()->pressed = state;
     GetAttack()->type = type;
     GetAttack()->knockdown = false;
-    GetAttack()->success = false;
     GetAttack()->block = false;
     GetAttack()->target = RakNet::RakNetGUID();
     GetAttack()->attacker = guid;

@@ -397,6 +397,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
             {
                 LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "SpellId: %s",
                     pl->GetAttack()->refid.c_str());
+                LOG_APPEND(Log::LOG_VERBOSE, " - success: %d", pl->GetAttack()->success);
             }
         }
         break;

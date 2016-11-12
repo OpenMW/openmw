@@ -1035,12 +1035,15 @@ namespace MWMechanics
                 if (iter->first == player)
                 {
                     bool state = MWBase::Environment::get().getWorld()->getPlayer().getAttackingOrSpell();
+                    DrawState_ dstate = player.getClass().getNpcStats(player).getDrawState();
                     iter->second->getCharacterController()->setAttackingOrSpell(state);
-                    mwmp::Main::get().getLocalPlayer()->prepareAttack(2, state);
+                    if (dstate == DrawState_Weapon)
+                        mwmp::Main::get().getLocalPlayer()->prepareAttack(mwmp::Attack::MELEE, state);
                 }
 
-                if (mwmp::Main::get().getNetworking()->isDedicatedPlayer(iter->first))
-                    iter->second->getCharacterController()->setAttackingOrSpell(mwmp::Main::get().getNetworking()->Attack(iter->first));
+                mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::GetPlayer(iter->first);
+                if (dedicatedPlayer != nullptr)
+                    dedicatedPlayer->updateActor(iter->second);
 
 
                 if (!iter->first.getClass().getCreatureStats(iter->first).isDead())

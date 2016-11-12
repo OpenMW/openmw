@@ -606,7 +606,7 @@ namespace MWClass
             if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
             {
                 mwmp::Main::get().getLocalPlayer()->GetAttack()->success = false;
-                mwmp::Main::get().getLocalPlayer()->sendAttack(0);
+                mwmp::Main::get().getLocalPlayer()->sendAttack(mwmp::Attack::MELEE);
             }
 
             othercls.onHit(victim, 0.0f, false, weapon, ptr, osg::Vec3f(), false);
@@ -850,7 +850,7 @@ namespace MWClass
             _atk->attacker = mwmp::Main::get().getLocalPlayer()->guid;
             _atk->target = mwmp::Players::GetPlayer(ptr)->guid;
             _atk->knockdown = getCreatureStats(ptr).getKnockedDown();
-            mwmp::Main::get().getLocalPlayer()->sendAttack(0); // todo: make this sensitive to different weapon types
+            mwmp::Main::get().getLocalPlayer()->sendAttack(mwmp::Attack::MELEE); // todo: make this sensitive to different weapon types
         }
 
         if (ptr == MWMechanics::getPlayer())
