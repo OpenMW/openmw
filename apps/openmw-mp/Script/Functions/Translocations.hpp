@@ -28,7 +28,7 @@
     {"GetExteriorY",        TranslocationFunctions::GetExteriorY},\
     {"IsInExterior",        TranslocationFunctions::IsInExterior},\
 \
-    {"SendPos",             TranslocationFunctions::SendPosition},\
+    {"SendPos",             TranslocationFunctions::SendPos},\
     {"SendCell",            TranslocationFunctions::SendCell}
 
 
