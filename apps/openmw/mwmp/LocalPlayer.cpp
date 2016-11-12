@@ -816,7 +816,7 @@ void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
     if (dstate == MWMechanics::DrawState_Spell)
     {
         const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
-        GetAttack()->success = Misc::Rng::roll0to99() >=MWMechanics::getSpellSuccessChance(spell, GetPlayerPtr());
+        GetAttack()->success = Misc::Rng::roll0to99() < MWMechanics::getSpellSuccessChance(spell, GetPlayerPtr());
         state = true;
         GetAttack()->refid = spell;
     }
