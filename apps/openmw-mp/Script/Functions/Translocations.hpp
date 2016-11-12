@@ -35,17 +35,17 @@ public:
     static double GetPosX(unsigned short pid) noexcept;
     static double GetPosY(unsigned short pid) noexcept;
     static double GetPosZ(unsigned short pid) noexcept;
-    static void SetPos(unsigned short pid, double x, double y, double z) noexcept;
 
     static void GetAngle(unsigned short pid, float *x, float *y, float *z) noexcept;
     static double GetAngleX(unsigned short pid) noexcept;
     static double GetAngleY(unsigned short pid) noexcept;
     static double GetAngleZ(unsigned short pid) noexcept;
+
+    static void SetPos(unsigned short pid, double x, double y, double z) noexcept;
     static void SetAngle(unsigned short pid, double x, double y, double z) noexcept;
 
-    static void SetCell(unsigned short pid, const char *name) noexcept;
     static const char *GetCell(unsigned short pid) noexcept;
-
+    static void SetCell(unsigned short pid, const char *name) noexcept;
     static void SetExterior(unsigned short pid, int x, int y) noexcept;
     static int GetExteriorX(unsigned short pid) noexcept;
     static int GetExteriorY(unsigned short pid) noexcept;
