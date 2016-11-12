@@ -12,12 +12,13 @@
     {"GetPosX",             TranslocationFunctions::GetPosX},\
     {"GetPosY",             TranslocationFunctions::GetPosY},\
     {"GetPosZ",             TranslocationFunctions::GetPosZ},\
-    {"SetPos",              TranslocationFunctions::SetPos},\
 \
     {"GetAngle",            TranslocationFunctions::GetAngle},\
     {"GetAngleX",           TranslocationFunctions::GetAngleX},\
     {"GetAngleY",           TranslocationFunctions::GetAngleY},\
     {"GetAngleZ",           TranslocationFunctions::GetAngleZ},\
+\
+    {"SetPos",              TranslocationFunctions::SetPos},\
     {"SetAngle",            TranslocationFunctions::SetAngle},\
 \
     {"GetCell",             TranslocationFunctions::GetCell},\
@@ -25,7 +26,9 @@
     {"SetExterior",         TranslocationFunctions::SetExterior},\
     {"GetExteriorX",        TranslocationFunctions::GetExteriorX},\
     {"GetExteriorY",        TranslocationFunctions::GetExteriorY},\
-    {"IsInExterior",        TranslocationFunctions::IsInExterior}
+    {"IsInExterior",        TranslocationFunctions::IsInExterior}\
+\
+    {"SendPos",        TranslocationFunctions::SendPosition}
 
 
 class TranslocationFunctions
@@ -49,8 +52,9 @@ public:
     static void SetExterior(unsigned short pid, int x, int y) noexcept;
     static int GetExteriorX(unsigned short pid) noexcept;
     static int GetExteriorY(unsigned short pid) noexcept;
-
     static bool IsInExterior(unsigned short pid) noexcept;
+
+    static void SendPos(unsigned short pid) noexcept;
 };
 
 #endif //OPENMW_TRANSLOCATIONS_HPP

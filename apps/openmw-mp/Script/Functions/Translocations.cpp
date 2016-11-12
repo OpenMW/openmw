@@ -95,8 +95,6 @@ void TranslocationFunctions::SetPos(unsigned short pid, double x, double y, doub
     player->Position()->pos[0] = x;
     player->Position()->pos[1] = y;
     player->Position()->pos[2] = z;
-
-    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_POS)->Send(player, false);
 }
 
 void TranslocationFunctions::SetAngle(unsigned short pid, double x, double y, double z) noexcept
@@ -107,8 +105,6 @@ void TranslocationFunctions::SetAngle(unsigned short pid, double x, double y, do
     player->Position()->rot[0] = x;
     player->Position()->rot[1] = y;
     player->Position()->rot[2] = z;
-
-    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_POS)->Send(player, false);
 }
 
 const char* TranslocationFunctions::GetCell(unsigned short pid) noexcept
@@ -184,5 +180,13 @@ bool TranslocationFunctions::IsInExterior(unsigned short pid) noexcept
     GET_PLAYER(pid, player, false);
 
     return player->GetCell()->isExterior();
+}
+
+void TranslocationFunctions::SendPos(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_POS)->Send(player, false);
 }
 
