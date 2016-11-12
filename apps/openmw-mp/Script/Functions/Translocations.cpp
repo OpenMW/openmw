@@ -133,8 +133,6 @@ void TranslocationFunctions::SetCell(unsigned short pid, const char *name) noexc
     }
 
     player->GetCell()->mName = name;
-
-    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_CELL)->Send(player, false);
 }
 
 void TranslocationFunctions::SetExterior(unsigned short pid, int x, int y) noexcept
@@ -156,8 +154,6 @@ void TranslocationFunctions::SetExterior(unsigned short pid, int x, int y) noexc
 
     player->GetCell()->mData.mX = x;
     player->GetCell()->mData.mY = y;
-
-    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_CELL)->Send(player, false);
 }
 
 int TranslocationFunctions::GetExteriorX(unsigned short pid) noexcept
@@ -188,5 +184,13 @@ void TranslocationFunctions::SendPos(unsigned short pid) noexcept
     GET_PLAYER(pid, player, );
 
     mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_POS)->Send(player, false);
+}
+
+void TranslocationFunctions::SendCell(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_CELL)->Send(player, false);
 }
 

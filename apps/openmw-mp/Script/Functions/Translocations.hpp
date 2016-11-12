@@ -26,9 +26,10 @@
     {"SetExterior",         TranslocationFunctions::SetExterior},\
     {"GetExteriorX",        TranslocationFunctions::GetExteriorX},\
     {"GetExteriorY",        TranslocationFunctions::GetExteriorY},\
-    {"IsInExterior",        TranslocationFunctions::IsInExterior}\
+    {"IsInExterior",        TranslocationFunctions::IsInExterior},\
 \
-    {"SendPos",        TranslocationFunctions::SendPosition}
+    {"SendPos",             TranslocationFunctions::SendPosition},\
+    {"SendCell",            TranslocationFunctions::SendCell}
 
 
 class TranslocationFunctions
@@ -55,6 +56,7 @@ public:
     static bool IsInExterior(unsigned short pid) noexcept;
 
     static void SendPos(unsigned short pid) noexcept;
+    static void SendCell(unsigned short pid) noexcept;
 };
 
 #endif //OPENMW_TRANSLOCATIONS_HPP
