@@ -93,7 +93,7 @@ target_link_libraries(openmw-launcher
 )
 
 if(MSVC)
-	target_link_libraries(openmw-launcher imm32.lib winmm.lib version.lib)
+    target_link_libraries(openmw-launcher imm32.lib winmm.lib version.lib)
 endif(MSVC)
 
 if (DESIRED_QT_VERSION MATCHES 4)

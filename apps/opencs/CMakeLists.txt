@@ -230,7 +230,7 @@ if (MSVC)
     if (CMAKE_CL_64)
         set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
     endif (CMAKE_CL_64)
-	target_link_libraries(openmw-cs imm32.lib winmm.lib version.lib)
+    target_link_libraries(openmw-cs imm32.lib winmm.lib version.lib)
 endif (MSVC)
 
 

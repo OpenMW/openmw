@@ -25,7 +25,7 @@ if (WIN32)
 endif()
 
 if(MSVC)
-	target_link_libraries(openmw-iniimporter imm32.lib winmm.lib version.lib)
+    target_link_libraries(openmw-iniimporter imm32.lib winmm.lib version.lib)
 endif(MSVC)
 
 if (MINGW)

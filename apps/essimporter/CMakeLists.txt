@@ -44,5 +44,5 @@ if (BUILD_WITH_CODE_COVERAGE)
 endif()
 
 if (MSVC)
-	target_link_libraries(openmw-essimporter imm32.lib winmm.lib version.lib)
+  target_link_libraries(openmw-essimporter imm32.lib winmm.lib version.lib)
 endif(MSVC)
