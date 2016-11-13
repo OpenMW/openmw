@@ -201,4 +201,6 @@ if (MSVC)
         set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
     endif (CMAKE_CL_64)
     add_definitions("-D_USE_MATH_DEFINES")
+	target_link_libraries(openmw imm32.lib winmm.lib version.lib)
 endif (MSVC)
+

@@ -225,6 +225,15 @@ if (WIN32)
     target_link_libraries(openmw-cs ${Boost_LOCALE_LIBRARY})
 endif()
 
+if (MSVC)
+    # Debug version needs increased number of sections beyond 2^16
+    if (CMAKE_CL_64)
+        set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
+    endif (CMAKE_CL_64)
+    add_definitions("-D_USE_MATH_DEFINES")
+	target_link_libraries(openmw-cs imm32.lib winmm.lib version.lib)
+endif (MSVC)
+
 
 if(APPLE)
     INSTALL(TARGETS openmw-cs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)

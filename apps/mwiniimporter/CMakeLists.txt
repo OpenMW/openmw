@@ -24,6 +24,10 @@ if (WIN32)
     ${Boost_LOCALE_LIBRARY})
 endif()
 
+if(MSVC)
+	target_link_libraries(openmw-iniimporter imm32.lib winmm.lib version.lib)
+endif(MSVC)
+
 if (MINGW)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -municode")
 endif()

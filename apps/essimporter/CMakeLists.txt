@@ -42,3 +42,7 @@ if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
   target_link_libraries(openmw-essimporter gcov)
 endif()
+
+if (MSVC)
+	target_link_libraries(openmw-essimporter imm32.lib winmm.lib version.lib)
+endif(MSVC)
