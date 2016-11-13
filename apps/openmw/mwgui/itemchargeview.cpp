@@ -99,7 +99,7 @@ namespace MWGui
                 line.mIcon->setUserString("ToolTipType", "ItemPtr");
                 line.mIcon->setUserData(line.mItemPtr);
                 line.mIcon->eventMouseButtonClick += MyGUI::newDelegate(this, &ItemChargeView::onIconClicked);
-                line.mIcon->eventMouseWheel += MyGUI::newDelegate(this, &ItemChargeView::onMouseWheel);
+                line.mIcon->eventMouseWheel += MyGUI::newDelegate(this, &ItemChargeView::onMouseWheelMoved);
 
                 line.mCharge = mScrollView->createWidget<Widgets::MWDynamicStat>("MW_ChargeBar", MyGUI::IntCoord(), MyGUI::Align::Default);
                 line.mCharge->setNeedMouseFocus(false);
@@ -202,7 +202,7 @@ namespace MWGui
         eventItemClicked(this, *sender->getUserData<MWWorld::Ptr>());
     }
 
-    void ItemChargeView::onMouseWheel(MyGUI::Widget* /*sender*/, int rel)
+    void ItemChargeView::onMouseWheelMoved(MyGUI::Widget* /*sender*/, int rel)
     {
         if (mScrollView->getViewOffset().top + rel*0.3f > 0)
             mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
