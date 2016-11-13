@@ -18,3 +18,7 @@ if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
   target_link_libraries(bsatool gcov)
 endif()
+
+if(MSVC)
+  target_link_libraries(bsatool imm32.lib winmm.lib version.lib)
+endif(MSVC)
