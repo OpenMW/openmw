@@ -419,7 +419,6 @@ IF(NOT WIN32 AND NOT APPLE)
 ENDIF(NOT WIN32 AND NOT APPLE)
 
 if(WIN32)
-	MESSAGE(${RUNTIME_OUTPUT_DIR})
     FILE(GLOB dll_files_debug "${OpenMW_BINARY_DIR}/Debug/*.dll")
     FILE(GLOB dll_files_release "${OpenMW_BINARY_DIR}/Release/*.dll")
     INSTALL(FILES ${dll_files_debug} DESTINATION "." CONFIGURATIONS Debug)
