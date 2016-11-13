@@ -110,26 +110,26 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
     bool gamefileChecked = (file->gameFiles().count() == 0);
     foreach (const QString &fileName, file->gameFiles())
     {
-        foreach (EsmFile *dependency, mFiles)
+        for (QListIterator<EsmFile *> dependencyIter(mFiles); dependencyIter.hasNext(); dependencyIter.next())
         {
             //compare filenames only.  Multiple instances
             //of the filename (with different paths) is not relevant here.
-            bool depFound = (dependency->fileName().compare(fileName, Qt::CaseInsensitive) == 0);
+            bool depFound = (dependencyIter.peekNext()->fileName().compare(fileName, Qt::CaseInsensitive) == 0);
 
             if (!depFound)
                 continue;
 
             if (!gamefileChecked)
             {
-                if (isChecked (dependency->filePath()))
-                    gamefileChecked = (dependency->isGameFile());
+                if (isChecked (dependencyIter.peekNext()->filePath()))
+                    gamefileChecked = (dependencyIter.peekNext()->isGameFile());
             }
 
             // force it to iterate all files in cases where the current
             // dependency is a game file to ensure that a later duplicate
             // game file is / is not checked.
             // (i.e., break only if it's not a gamefile or the game file has been checked previously)
-            if (gamefileChecked || !(dependency->isGameFile()))
+            if (gamefileChecked || !(dependencyIter.peekNext()->isGameFile()))
                 break;
         }
     }
@@ -283,12 +283,11 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex &index, const
             else
                 return success;
 
-
-            foreach (EsmFile *file, mFiles)
+            foreach (EsmFile *file2, mFiles)
             {
-                if (file->gameFiles().contains(fileName, Qt::CaseInsensitive))
+                if (file2->gameFiles().contains(fileName, Qt::CaseInsensitive))
                 {
-                    QModelIndex idx = indexFromItem(file);
+                    QModelIndex idx = indexFromItem(file2);
                     emit dataChanged(idx, idx);
                 }
             }
@@ -425,9 +424,9 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
     dir.setNameFilters(filters);
 
-    foreach (const QString &path, dir.entryList())
+    foreach (const QString &path2, dir.entryList())
     {
-        QFileInfo info(dir.absoluteFilePath(path));
+        QFileInfo info(dir.absoluteFilePath(path2));
 
         if (item(info.absoluteFilePath()) != 0)
             continue;
@@ -437,12 +436,13 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             ToUTF8::Utf8Encoder encoder =
             ToUTF8::calculateEncoding(mEncoding.toStdString());
             fileReader.setEncoder(&encoder);
-            fileReader.open(std::string(dir.absoluteFilePath(path).toUtf8().constData()));
+            fileReader.open(std::string(dir.absoluteFilePath(path2).toUtf8().constData()));
 
-            EsmFile *file = new EsmFile(path);
-
-            foreach (const ESM::Header::MasterData &item, fileReader.getGameFiles())
-                file->addGameFile(QString::fromUtf8(item.name.c_str()));
+            EsmFile *file = new EsmFile(path2);
+         
+            for (std::vector<ESM::Header::MasterData>::const_iterator itemIter = fileReader.getGameFiles().begin();
+                itemIter != fileReader.getGameFiles().end(); ++itemIter)
+                file->addGameFile(QString::fromUtf8(itemIter->name.c_str()));
 
             file->setAuthor     (QString::fromUtf8(fileReader.getAuthor().c_str()));
             file->setDate       (info.lastModified());

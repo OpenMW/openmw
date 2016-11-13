@@ -324,10 +324,10 @@ bool Launcher::MainDialog::setupGameSettings()
     paths.append(localPath + QString("openmw.cfg"));
     paths.append(userPath + QString("openmw.cfg"));
 
-    foreach (const QString &path, paths) {
-        qDebug() << "Loading config file:" << path.toUtf8().constData();
+    foreach (const QString &path2, paths) {
+        qDebug() << "Loading config file:" << path2.toUtf8().constData();
 
-        file.setFileName(path);
+        file.setFileName(path2);
         if (file.exists()) {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
                 cfgError(tr("Error opening OpenMW configuration file"),
@@ -347,13 +347,13 @@ bool Launcher::MainDialog::setupGameSettings()
     QStringList dataDirs;
 
     // Check if the paths actually contain data files
-    foreach (const QString path, mGameSettings.getDataDirs()) {
-        QDir dir(path);
+    foreach (const QString path3, mGameSettings.getDataDirs()) {
+        QDir dir(path3);
         QStringList filters;
         filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
 
         if (!dir.entryList(filters).isEmpty())
-            dataDirs.append(path);
+            dataDirs.append(path3);
     }
 
     if (dataDirs.isEmpty())
