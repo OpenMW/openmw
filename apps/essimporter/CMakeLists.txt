@@ -46,7 +46,3 @@ endif()
 if (WIN32)
   INSTALL(TARGETS openmw-essimporter RUNTIME DESTINATION ".")
 endif(WIN32)
-
-if (MSVC)
-  target_link_libraries(openmw-essimporter imm32.lib winmm.lib version.lib)
-endif(MSVC)

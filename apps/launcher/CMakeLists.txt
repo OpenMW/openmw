@@ -96,10 +96,6 @@ target_link_libraries(openmw-launcher
     components
 )
 
-if(MSVC)
-    target_link_libraries(openmw-launcher imm32.lib winmm.lib version.lib)
-endif(MSVC)
-
 if (DESIRED_QT_VERSION MATCHES 4)
     target_link_libraries(openmw-launcher ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY})
     if(WIN32)
