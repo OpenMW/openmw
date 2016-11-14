@@ -2078,11 +2078,16 @@ namespace MWWorld
         if (!cell->getCell()->hasWater())
             return true;
 
-        // Based on observations from the original engine, the depth
-        // limit at which water walking can still be cast on a target
-        // in water appears to be the same as what the highest swimmable
-        // z position would be with SwimHeightScale + 1.
-        return !isUnderwater(target, mSwimHeightScale + 1);
+        float waterlevel = cell->getWaterLevel();
+
+        // SwimHeightScale affects the upper z position an actor can swim to 
+        // while in water. Based on observation from the original engine,
+        // the upper z position you get with a +1 SwimHeightScale is the depth
+        // limit for being able to cast water walking on an underwater target.
+        if (isUnderwater(target, mSwimHeightScale + 1) || (isUnderwater(cell, target.getRefData().getPosition().asVec3()) && !mPhysics->canMoveToWaterSurface(target, waterlevel)))
+            return false; // not castable if too deep or if not enough room to move actor to surface
+        else
+            return true;
     }
 
     bool World::isOnGround(const MWWorld::Ptr &ptr) const
