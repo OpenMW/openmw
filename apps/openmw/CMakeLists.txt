@@ -204,3 +204,7 @@ if (MSVC)
     target_link_libraries(openmw imm32.lib winmm.lib version.lib)
 endif (MSVC)
 
+if (WIN32)
+    INSTALL(TARGETS openmw RUNTIME DESTINATION ".")
+endif (WIN32)
+

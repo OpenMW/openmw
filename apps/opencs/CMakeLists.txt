@@ -223,6 +223,8 @@ endif()
 
 if (WIN32)
     target_link_libraries(openmw-cs ${Boost_LOCALE_LIBRARY})
+    INSTALL(TARGETS openmw-cs RUNTIME DESTINATION ".")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw-cs.cfg" DESTINATION ".")
 endif()
 
 if (MSVC)

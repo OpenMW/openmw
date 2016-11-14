@@ -87,6 +87,10 @@ add_executable(openmw-launcher
     ${UI_HDRS}
 )
 
+if (WIN32)
+    INSTALL(TARGETS openmw-launcher RUNTIME DESTINATION ".")
+endif (WIN32)
+
 target_link_libraries(openmw-launcher
     ${SDL2_LIBRARY_ONLY}
     components

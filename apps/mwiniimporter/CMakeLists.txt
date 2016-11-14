@@ -22,7 +22,8 @@ target_link_libraries(openmw-iniimporter
 if (WIN32)
     target_link_libraries(openmw-iniimporter
     ${Boost_LOCALE_LIBRARY})
-endif()
+    INSTALL(TARGETS openmw-iniimporter RUNTIME DESTINATION ".")
+endif(WIN32)
 
 if(MSVC)
     target_link_libraries(openmw-iniimporter imm32.lib winmm.lib version.lib)
