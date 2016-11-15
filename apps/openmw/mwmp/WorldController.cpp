@@ -25,7 +25,16 @@ MWWorld::CellStore *mwmp::WorldController::getCell(const ESM::Cell& cell)
     if (cell.isExterior())
         cellStore = MWBase::Environment::get().getWorld()->getExterior(cell.mData.mX, cell.mData.mY);
     else
-        cellStore = MWBase::Environment::get().getWorld()->getInterior(cell.mName);
+    {
+        try
+        {
+            cellStore = MWBase::Environment::get().getWorld()->getInterior(cell.mName);
+        }
+        catch (std::exception&)
+        {
+            cellStore = NULL;
+        }
+    }
 
     return cellStore;
 }
