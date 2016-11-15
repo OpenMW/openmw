@@ -706,9 +706,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     {
     case ID_OBJECT_PLACE:
     {
-        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
-            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
-            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+        MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event->cell);
 
         if (!ptrCellStore) return;
 
@@ -741,9 +739,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_DELETE:
     {
-        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
-            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
-            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+        MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event->cell);
 
         if (!ptrCellStore) return;
 
@@ -768,9 +764,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_LOCK:
     {
-        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
-            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
-            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+        MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event->cell);
 
         if (!ptrCellStore) return;
 
@@ -795,9 +789,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_UNLOCK:
     {
-        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
-            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
-            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+        MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event->cell);
 
         if (!ptrCellStore) return;
 
@@ -822,9 +814,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_SCALE:
     {
-        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
-            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
-            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+        MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event->cell);
 
         if (!ptrCellStore) return;
 
@@ -849,9 +839,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_MOVE:
     {
-        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
-            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
-            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+        MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event->cell);
 
         if (!ptrCellStore) return;
 
@@ -877,9 +865,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_ROTATE:
     {
-        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
-            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
-            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+        MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event->cell);
 
         if (!ptrCellStore) return;
 
@@ -905,9 +891,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_ANIM_PLAY:
     {
-        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
-            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
-            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+        MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event->cell);
 
         if (!ptrCellStore) return;
 
@@ -933,9 +917,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_DOOR_ACTIVATE:
     {
-        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
-            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
-            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+        MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event->cell);
 
         if (!ptrCellStore) return;
 
@@ -972,9 +954,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_SCRIPT_LOCAL_SHORT:
     {
-        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
-            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
-            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+        MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event->cell);
 
         if (!ptrCellStore) return;
 
@@ -1001,9 +981,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
     case ID_SCRIPT_LOCAL_FLOAT:
     {
-        MWWorld::CellStore *ptrCellStore = event->cell.isExterior() ?
-            MWBase::Environment::get().getWorld()->getExterior(event->cell.mData.mX, event->cell.mData.mY) :
-            MWBase::Environment::get().getWorld()->getInterior(event->cell.mName);
+        MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event->cell);
 
         if (!ptrCellStore) return;
 

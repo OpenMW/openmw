@@ -9,6 +9,8 @@ namespace mwmp
 
         WorldController();
         ~WorldController();
+
+        virtual MWWorld::CellStore *getCell(const ESM::Cell& cell);
     };
 }
 
