@@ -69,12 +69,12 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
             return;
         }
 
-        if (*player->GetPassw() != passw)
+        if (*player->getPassw() != passw)
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong server password for player %d, name: %s (pass: %s)",
                 player->GetID(),
                 player->Npc()->mName.c_str(),
-                player->GetPassw()->c_str());
+                player->getPassw()->c_str());
             KickPlayer(player->guid);
             return;
         }
@@ -239,26 +239,26 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
         {
             myPacket->Read(player);
 
-            Player *target = Players::GetPlayer(player->GetAttack()->target);
+            Player *target = Players::GetPlayer(player->getAttack()->target);
 
             if (target == nullptr)
                 target = player;
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player: %s attacked %s state: %d", player->Npc()->mName.c_str(),
-                target->Npc()->mName.c_str(), player->GetAttack()->pressed == 1);
-            if (player->GetAttack()->pressed == 0)
+                target->Npc()->mName.c_str(), player->getAttack()->pressed == 1);
+            if (player->getAttack()->pressed == 0)
             {
-                LOG_APPEND(Log::LOG_VERBOSE, "success: %d", player->GetAttack()->success == 1);
-                if (player->GetAttack()->success == 1)
+                LOG_APPEND(Log::LOG_VERBOSE, "success: %d", player->getAttack()->success == 1);
+                if (player->getAttack()->success == 1)
                 {
-                    LOG_APPEND(Log::LOG_VERBOSE, "damage: %d", player->GetAttack()->damage == 1);
+                    LOG_APPEND(Log::LOG_VERBOSE, "damage: %d", player->getAttack()->damage == 1);
                     target->setLastAttackerId(player->GetID());
                     target->setLastAttackerTime(std::chrono::steady_clock::now());
                 }
             }
 
             myPacket->Send(player, true);
-            playerController->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(player->GetAttack()->target);
+            playerController->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(player->getAttack()->target);
         }
         break;
     }
