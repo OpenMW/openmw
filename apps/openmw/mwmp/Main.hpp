@@ -3,6 +3,7 @@
 #include "Networking.hpp"
 #include "LocalPlayer.hpp"
 #include "GUIController.hpp"
+#include "WorldController.hpp"
 
 namespace mwmp
 {
@@ -26,6 +27,7 @@ namespace mwmp
         Networking *getNetworking() const;
         LocalPlayer *getLocalPlayer() const;
         GUIController *getGUIController() const;
+        WorldController *getWorldController() const;
 
         void UpdateWorld(float dt) const;
 
@@ -40,6 +42,7 @@ namespace mwmp
         LocalPlayer *mLocalPlayer;
 
         GUIController *mGUIController;
+        WorldController *mWorldController;
         std::string server;
         unsigned short port;
     };

@@ -64,6 +64,7 @@ Main::Main()
     mNetworking = new Networking();
     mLocalPlayer = new LocalPlayer();
     mGUIController = new GUIController();
+    mWorldController = new WorldController();
     //mLocalPlayer->CharGen(0, 4);
 
     server = "mp.tes3mp.com";
@@ -213,6 +214,11 @@ LocalPlayer *Main::getLocalPlayer() const
 GUIController *Main::getGUIController() const
 {
     return mGUIController;
+}
+
+WorldController *Main::getWorldController() const
+{
+    return mWorldController;
 }
 
 void Main::PressedKey(int key)
