@@ -143,7 +143,7 @@ namespace mwmp
             return &dir;
         }
 
-        virtual Attack *GetAttack()
+        virtual Attack *getAttack()
         {
             return &attack;
         }
@@ -163,7 +163,7 @@ namespace mwmp
             return &stage;
         }
 
-        virtual std::string *GetPassw()
+        virtual std::string *getPassw()
         {
             return &passw;
         }

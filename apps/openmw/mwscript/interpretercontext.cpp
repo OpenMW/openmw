@@ -190,7 +190,7 @@ namespace MWScript
             event->cellRef.mRefNum = mReference.getCellRef().getRefNum();
             event->index = index;
             event->shortVal = value;
-            mwmp::Main::get().getNetworking()->GetWorldPacket(ID_SCRIPT_LOCAL_SHORT)->Send(event);
+            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_SHORT)->Send(event);
 
             printf("Sending ID_SCRIPT_LOCAL_SHORT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i\n",
                 event->cellRef.mRefID.c_str(),
@@ -227,7 +227,7 @@ namespace MWScript
             event->cellRef.mRefNum = mReference.getCellRef().getRefNum();
             event->index = index;
             event->floatVal = value;
-            mwmp::Main::get().getNetworking()->GetWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->Send(event);
+            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->Send(event);
 
             printf("Sending ID_SCRIPT_LOCAL_FLOAT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f\n",
                 event->cellRef.mRefID.c_str(),
@@ -285,7 +285,7 @@ namespace MWScript
             mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
             event->varName = name;
             event->shortVal = value;
-            mwmp::Main::get().getNetworking()->GetWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->Send(event);
+            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->Send(event);
 
             printf("Sending ID_SCRIPT_GLOBAL_SHORT\n- varName: %s\n- shortVal: %i\n",
                 event->varName.c_str(),
@@ -615,7 +615,7 @@ namespace MWScript
             event->cellRef.mRefID = id;
             event->index = index;
             event->shortVal = value;
-            mwmp::Main::get().getNetworking()->GetWorldPacket(ID_SCRIPT_MEMBER_SHORT)->Send(event);
+            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_MEMBER_SHORT)->Send(event);
 
             printf("Sending ID_SCRIPT_MEMBER_SHORT\n- cellRef: %s\n- index: %i\n- shortVal: %i\n",
                 event->cellRef.mRefID.c_str(),

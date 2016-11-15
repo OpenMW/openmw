@@ -18,7 +18,7 @@ namespace mwmp
         LocalPlayer();
         virtual ~LocalPlayer();
 
-        void Update();
+        void update();
 
         void charGen(int stageFirst, int stageEnd);
         bool charGenThread(); // return true if CGStage::current == CGStage::end
@@ -53,8 +53,8 @@ namespace mwmp
         
 
     private:
-        Networking *GetNetworking();
-        MWWorld::Ptr GetPlayerPtr();
+        Networking *getNetworking();
+        MWWorld::Ptr getPlayerPtr();
 
     };
 }

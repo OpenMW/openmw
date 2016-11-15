@@ -44,17 +44,17 @@ LocalPlayer::~LocalPlayer()
 
 }
 
-Networking *LocalPlayer::GetNetworking()
+Networking *LocalPlayer::getNetworking()
 {
     return mwmp::Main::get().getNetworking();
 }
 
-MWWorld::Ptr LocalPlayer::GetPlayerPtr()
+MWWorld::Ptr LocalPlayer::getPlayerPtr()
 {
     return MWBase::Environment::get().getWorld()->getPlayerPtr();
 }
 
-void LocalPlayer::Update()
+void LocalPlayer::update()
 {
     updateCell();
     updatePosition();
@@ -106,7 +106,7 @@ bool LocalPlayer::charGenThread()
             windowManager->pushGuiMode(MWGui::GM_Review);
             break;
         }
-        GetNetworking()->GetPlayerPacket(ID_GAME_CHARGEN)->Send(this);
+        getNetworking()->getPlayerPacket(ID_GAME_CHARGEN)->Send(this);
         CharGenStage()->current++;
 
         return false;
@@ -122,7 +122,7 @@ bool LocalPlayer::charGenThread()
         (*BirthSign()) = world->getPlayer().getBirthSign();
 
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server with my CharGen info");
-        GetNetworking()->GetPlayerPacket(ID_GAME_BASE_INFO)->Send(this);
+        getNetworking()->getPlayerPacket(ID_GAME_BASE_INFO)->Send(this);
 
         // Send stats packets if this is the 2nd round of CharGen that
         // only happens for new characters
@@ -133,7 +133,7 @@ bool LocalPlayer::charGenThread()
             updateSkills(true);
             updateLevel(true);
             sendClass();
-            GetNetworking()->GetPlayerPacket(ID_GAME_CHARGEN)->Send(this);
+            getNetworking()->getPlayerPacket(ID_GAME_CHARGEN)->Send(this);
         }
 
         // Set the last stage variable to 0 to indicate that CharGen is finished
@@ -145,7 +145,7 @@ bool LocalPlayer::charGenThread()
 
 void LocalPlayer::updateDynamicStats(bool forceUpdate)
 {
-    MWWorld::Ptr player = GetPlayerPtr();
+    MWWorld::Ptr player = getPlayerPtr();
 
     MWMechanics::CreatureStats *ptrCreatureStats = &player.getClass().getCreatureStats(player);
     MWMechanics::DynamicStat<float> health(ptrCreatureStats->getHealth());
@@ -172,14 +172,14 @@ void LocalPlayer::updateDynamicStats(bool forceUpdate)
 
             timer = 0;
 
-            GetNetworking()->GetPlayerPacket(ID_GAME_DYNAMICSTATS)->Send(this);
+            getNetworking()->getPlayerPacket(ID_GAME_DYNAMICSTATS)->Send(this);
         }
     }
 }
 
 void LocalPlayer::updateAttributes(bool forceUpdate)
 {
-    MWWorld::Ptr player = GetPlayerPtr();
+    MWWorld::Ptr player = getPlayerPtr();
     const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
     bool isUpdating = false;
 
@@ -194,13 +194,13 @@ void LocalPlayer::updateAttributes(bool forceUpdate)
 
     if (isUpdating || forceUpdate)
     {
-        GetNetworking()->GetPlayerPacket(ID_GAME_ATTRIBUTE)->Send(this);
+        getNetworking()->getPlayerPacket(ID_GAME_ATTRIBUTE)->Send(this);
     }
 }
 
 void LocalPlayer::updateSkills(bool forceUpdate)
 {
-    MWWorld::Ptr player = GetPlayerPtr();
+    MWWorld::Ptr player = getPlayerPtr();
     const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
     bool isUpdating = false;
 
@@ -230,19 +230,19 @@ void LocalPlayer::updateSkills(bool forceUpdate)
     if (isUpdating || forceUpdate)
     {
         NpcStats()->mLevelProgress = ptrNpcStats.getLevelProgress();
-        GetNetworking()->GetPlayerPacket(ID_GAME_SKILL)->Send(this);
+        getNetworking()->getPlayerPacket(ID_GAME_SKILL)->Send(this);
     }
 }
 
 void LocalPlayer::updateLevel(bool forceUpdate)
 {
-    MWWorld::Ptr player = GetPlayerPtr();
+    MWWorld::Ptr player = getPlayerPtr();
     const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
 
     if (ptrNpcStats.getLevel() != CreatureStats()->mLevel || forceUpdate)
     {
         CreatureStats()->mLevel = ptrNpcStats.getLevel();
-        GetNetworking()->GetPlayerPacket(ID_GAME_LEVEL)->Send(this);
+        getNetworking()->getPlayerPacket(ID_GAME_LEVEL)->Send(this);
 
         // Also update skills to refresh level progress and attribute bonuses
         // for next level up
@@ -282,7 +282,7 @@ void LocalPlayer::updatePosition(bool forceUpdate)
         Dir()->pos[1] = move.mPosition[1];
         Dir()->pos[2] = move.mPosition[2];
 
-        GetNetworking()->GetPlayerPacket(ID_GAME_POS)->Send(this);
+        getNetworking()->getPlayerPacket(ID_GAME_POS)->Send(this);
     }
     else if (isJumping && world->isOnGround(player))
     {
@@ -294,7 +294,7 @@ void LocalPlayer::updatePosition(bool forceUpdate)
     {
         sentJumpEnd = true;
         (*Position()) = ptrPos;
-        GetNetworking()->GetPlayerPacket(ID_GAME_POS)->Send(this);
+        getNetworking()->getPlayerPacket(ID_GAME_POS)->Send(this);
     }
 }
 
@@ -343,8 +343,8 @@ void LocalPlayer::updateCell(bool forceUpdate)
         updatePosition(true);
 
         RakNet::BitStream bs;
-        GetNetworking()->GetPlayerPacket((RakNet::MessageID) ID_GAME_CELL)->Packet(&bs, this, true);
-        GetNetworking()->SendData(&bs);
+        getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_CELL)->Packet(&bs, this, true);
+        getNetworking()->sendData(&bs);
 
         // Also update skill progress
         updateSkills(true);
@@ -367,7 +367,7 @@ void LocalPlayer::updateChar()
 
 void LocalPlayer::updateEquipped(bool forceUpdate)
 {
-    MWWorld::Ptr player = GetPlayerPtr();
+    MWWorld::Ptr player = getPlayerPtr();
 
     static bool equipChanged = false;
 
@@ -407,8 +407,8 @@ void LocalPlayer::updateEquipped(bool forceUpdate)
     {
         RakNet::BitStream bs;
         bs.ResetWritePointer();
-        GetNetworking()->GetPlayerPacket((RakNet::MessageID) ID_GAME_EQUIPMENT)->Packet(&bs, this, true);
-        GetNetworking()->SendData(&bs);
+        getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_EQUIPMENT)->Packet(&bs, this, true);
+        getNetworking()->sendData(&bs);
         equipChanged = false;
     }
 }
@@ -419,7 +419,7 @@ void LocalPlayer::updateInventory(bool forceUpdate)
     if (forceUpdate)
         invChanged = true;
 
-    MWWorld::Ptr player = GetPlayerPtr();
+    MWWorld::Ptr player = getPlayerPtr();
     MWWorld::InventoryStore &invStore = player.getClass().getInventoryStore(player);
     mwmp::Item item;
 
@@ -490,13 +490,13 @@ void LocalPlayer::updateInventory(bool forceUpdate)
 
     inventory.count = (unsigned int) inventory.items.size();
     inventory.action = Inventory::UPDATE;
-    Main::get().getNetworking()->GetPlayerPacket(ID_GAME_INVENTORY)->Send(this);
+    Main::get().getNetworking()->getPlayerPacket(ID_GAME_INVENTORY)->Send(this);
 }
 
 void LocalPlayer::updateAttackState(bool forceUpdate)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = GetPlayerPtr();
+    MWWorld::Ptr player = getPlayerPtr();
 
     using namespace MWMechanics;
 
@@ -511,14 +511,14 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
         {
             const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
 
-            GetAttack()->attacker = guid;
-            GetAttack()->type = Attack::MAGIC;
-            GetAttack()->pressed = true;
-            GetAttack()->refid = spell;
+            getAttack()->attacker = guid;
+            getAttack()->type = Attack::MAGIC;
+            getAttack()->pressed = true;
+            getAttack()->refid = spell;
 
             /*RakNet::BitStream bs;
-            GetNetworking()->GetPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
-            GetNetworking()->SendData(&bs);*/
+            getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
+            getNetworking()->SendData(&bs);*/
         }
         else if (state == MWMechanics::DrawState_Weapon)
         {
@@ -530,7 +530,7 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
     {
         if (/*state == MWMechanics::DrawState_Spell ||*/ state == MWMechanics::DrawState_Weapon)
         {
-            //localNetPlayer->GetAttack()->success = false;
+            //localNetPlayer->getAttack()->success = false;
             //SendAttack(0);
         }
         attackPressed = false;
@@ -539,7 +539,7 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
 
 void LocalPlayer::updateDeadState(bool forceUpdate)
 {
-    MWWorld::Ptr player = GetPlayerPtr();
+    MWWorld::Ptr player = getPlayerPtr();
 
     MWMechanics::NpcStats *ptrNpcStats = &player.getClass().getNpcStats(player);
     static bool isDead = false;
@@ -548,8 +548,8 @@ void LocalPlayer::updateDeadState(bool forceUpdate)
     {
         CreatureStats()->mDead = true;
         RakNet::BitStream bs;
-        GetNetworking()->GetPlayerPacket((RakNet::MessageID)ID_GAME_DIE)->Packet(&bs, this, true);
-        GetNetworking()->SendData(&bs);
+        getNetworking()->getPlayerPacket((RakNet::MessageID)ID_GAME_DIE)->Packet(&bs, this, true);
+        getNetworking()->sendData(&bs);
         isDead = true;
     }
     else if (ptrNpcStats->getHealth().getCurrent() > 0 && isDead)
@@ -615,8 +615,8 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after jump;
 
         RakNet::BitStream bs;
-        GetNetworking()->GetPlayerPacket((RakNet::MessageID) ID_GAME_DRAWSTATE)->Packet(&bs, this, true);
-        GetNetworking()->SendData(&bs);
+        getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_DRAWSTATE)->Packet(&bs, this, true);
+        getNetworking()->sendData(&bs);
         //timer = 0;
     }
 }
@@ -771,7 +771,7 @@ void LocalPlayer::setClass()
 
 void LocalPlayer::setInventory()
 {
-    MWWorld::Ptr ptrPlayer = GetPlayerPtr();
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
 
     MWWorld::InventoryStore &ptrInventory = ptrPlayer.getClass().getInventoryStore(ptrPlayer);
 
@@ -811,48 +811,48 @@ void LocalPlayer::sendClass()
     else
         charClass.mId = cls->mId;
 
-    GetNetworking()->GetPlayerPacket(ID_GAME_CHARCLASS)->Send(this);
+    getNetworking()->getPlayerPacket(ID_GAME_CHARCLASS)->Send(this);
 }
 
 void LocalPlayer::sendAttack(Attack::TYPE type)
 {
-    MWMechanics::DrawState_ state = GetPlayerPtr().getClass().getNpcStats(GetPlayerPtr()).getDrawState();
+    MWMechanics::DrawState_ state = getPlayerPtr().getClass().getNpcStats(getPlayerPtr()).getDrawState();
 
 
-    GetAttack()->type = type;
-    GetAttack()->pressed = false;
+    getAttack()->type = type;
+    getAttack()->pressed = false;
     RakNet::BitStream bs;
-    GetNetworking()->GetPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
-    GetNetworking()->SendData(&bs);
+    getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
+    getNetworking()->sendData(&bs);
 }
 
 void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
 {
-    if (GetAttack()->pressed == state && type != Attack::MAGIC)
+    if (getAttack()->pressed == state && type != Attack::MAGIC)
         return;
 
-    MWMechanics::DrawState_ dstate = GetPlayerPtr().getClass().getNpcStats(GetPlayerPtr()).getDrawState();
+    MWMechanics::DrawState_ dstate = getPlayerPtr().getClass().getNpcStats(getPlayerPtr()).getDrawState();
 
     if (dstate == MWMechanics::DrawState_Spell)
     {
         const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
-        GetAttack()->success = Misc::Rng::roll0to99() < MWMechanics::getSpellSuccessChance(spell, GetPlayerPtr());
+        getAttack()->success = Misc::Rng::roll0to99() < MWMechanics::getSpellSuccessChance(spell, getPlayerPtr());
         state = true;
-        GetAttack()->refid = spell;
+        getAttack()->refid = spell;
     }
     else
     {
-        GetAttack()->success = false;
+        getAttack()->success = false;
     }
 
-    GetAttack()->pressed = state;
-    GetAttack()->type = type;
-    GetAttack()->knockdown = false;
-    GetAttack()->block = false;
-    GetAttack()->target = RakNet::RakNetGUID();
-    GetAttack()->attacker = guid;
+    getAttack()->pressed = state;
+    getAttack()->type = type;
+    getAttack()->knockdown = false;
+    getAttack()->block = false;
+    getAttack()->target = RakNet::RakNetGUID();
+    getAttack()->attacker = guid;
 
     RakNet::BitStream bs;
-    GetNetworking()->GetPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
-    GetNetworking()->SendData(&bs);
+    getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
+    getNetworking()->sendData(&bs);
 }

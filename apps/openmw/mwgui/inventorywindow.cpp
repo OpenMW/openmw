@@ -638,7 +638,7 @@ namespace MWGui
         event->cell = *object.getCell()->getCell();
         event->cellRef.mRefID = object.getCellRef().getRefId();
         event->cellRef.mRefNum = object.getCellRef().getRefNum();
-        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_DELETE)->Send(event);
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(event);
 
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject (object);

@@ -157,7 +157,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
         ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override");
 
-    mwmp::Main::OptionsDesc(&desc);
+    mwmp::Main::optionsDesc(&desc);
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
         .options(desc).allow_unregistered().run();
@@ -256,7 +256,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
     engine.enableFontExport(variables["export-fonts"].as<bool>());
 
-    mwmp::Main::Configure(&variables);
+    mwmp::Main::configure(&variables);
 
     return true;
 }

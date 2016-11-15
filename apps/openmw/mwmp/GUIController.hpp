@@ -32,20 +32,20 @@ namespace mwmp
         };
         GUIController();
         ~GUIController();
-        void cleanup();
+        void cleanUp();
         void setupChat(const Settings::Manager &manager);
 
-        void PrintChatMessage(std::string &msg);
+        void printChatMessage(std::string &msg);
         void setChatVisible(bool chatVisible);
 
-        void ShowMessageBox(const BasePlayer::GUIMessageBox &guiMessageBox);
-        void ShowCustomMessageBox(const BasePlayer::GUIMessageBox &guiMessageBox);
-        void ShowInputBox(const BasePlayer::GUIMessageBox &guiMessageBox);
+        void showMessageBox(const BasePlayer::GUIMessageBox &guiMessageBox);
+        void showCustomMessageBox(const BasePlayer::GUIMessageBox &guiMessageBox);
+        void showInputBox(const BasePlayer::GUIMessageBox &guiMessageBox);
 
-        void ShowDialogList(const BasePlayer::GUIMessageBox &guiMessageBox);
+        void showDialogList(const BasePlayer::GUIMessageBox &guiMessageBox);
 
         /// Return true if any tes3mp gui element in active state
-        bool HaveFocusedElement();
+        bool hasFocusedElement();
         /// Returns 0 if there was no events
         bool pressedKey(int key);
 
@@ -70,7 +70,7 @@ namespace mwmp
         bool calledMessageBox;
         MWGui::TextInputDialog *mInputBox;
         GUIDialogList *mListBox;
-        void OnInputBoxDone(MWGui::WindowBase* parWindow);
+        void onInputBoxDone(MWGui::WindowBase* parWindow);
         //MyGUI::Widget *oldFocusWidget, *currentFocusWidget;
         void blockConsole();
     };

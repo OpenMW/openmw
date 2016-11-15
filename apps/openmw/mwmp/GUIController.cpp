@@ -45,7 +45,7 @@ mwmp::GUIController::~GUIController()
 
 }
 
-void mwmp::GUIController::cleanup()
+void mwmp::GUIController::cleanUp()
 {
     mPlayerMarkers.clear();
     if (mChat != nullptr)
@@ -67,10 +67,10 @@ void mwmp::GUIController::setupChat(const Settings::Manager &mgr)
     keyChatMode = SDL_GetKeyFromName(mgr.getString("keyChatMode", "Chat").c_str());
 
     mChat = new GUIChat(chatX, chatY, chatW, chatH);
-    mChat->SetDelay(chatDelay);
+    mChat->setDelay(chatDelay);
 }
 
-void mwmp::GUIController::PrintChatMessage(std::string &msg)
+void mwmp::GUIController::printChatMessage(std::string &msg)
 {
     if (mChat != nullptr)
         mChat->print(msg);
@@ -82,7 +82,7 @@ void mwmp::GUIController::setChatVisible(bool chatVisible)
     mChat->setVisible(chatVisible);
 }
 
-void mwmp::GUIController::ShowDialogList(const mwmp::BasePlayer::GUIMessageBox &guiMessageBox)
+void mwmp::GUIController::showDialogList(const mwmp::BasePlayer::GUIMessageBox &guiMessageBox)
 {
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
     windowManager->removeDialog(mListBox);
@@ -109,7 +109,7 @@ void mwmp::GUIController::ShowDialogList(const mwmp::BasePlayer::GUIMessageBox &
     windowManager->pushGuiMode((MWGui::GuiMode)GM_TES3MP_ListBox);
 }
 
-void mwmp::GUIController::ShowMessageBox(const BasePlayer::GUIMessageBox &guiMessageBox)
+void mwmp::GUIController::showMessageBox(const BasePlayer::GUIMessageBox &guiMessageBox)
 {
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
     std::vector<std::string> buttons;
@@ -128,7 +128,7 @@ std::vector<std::string> splitString(const std::string &str, char delim = ';')
     return result;
 }
 
-void mwmp::GUIController::ShowCustomMessageBox(const BasePlayer::GUIMessageBox &guiMessageBox)
+void mwmp::GUIController::showCustomMessageBox(const BasePlayer::GUIMessageBox &guiMessageBox)
 {
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
     std::vector<std::string> buttons = splitString(guiMessageBox.buttons);
@@ -136,7 +136,7 @@ void mwmp::GUIController::ShowCustomMessageBox(const BasePlayer::GUIMessageBox &
     calledMessageBox = true;
 }
 
-void mwmp::GUIController::ShowInputBox(const BasePlayer::GUIMessageBox &guiMessageBox)
+void mwmp::GUIController::showInputBox(const BasePlayer::GUIMessageBox &guiMessageBox)
 {
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
 
@@ -145,17 +145,17 @@ void mwmp::GUIController::ShowInputBox(const BasePlayer::GUIMessageBox &guiMessa
     mInputBox = 0;
     mInputBox = new MWGui::TextInputDialog();
     mInputBox->setTextLabel(guiMessageBox.label);
-    mInputBox->eventDone += MyGUI::newDelegate(this, &GUIController::OnInputBoxDone);
+    mInputBox->eventDone += MyGUI::newDelegate(this, &GUIController::onInputBoxDone);
 
 }
 
-void mwmp::GUIController::OnInputBoxDone(MWGui::WindowBase *parWindow)
+void mwmp::GUIController::onInputBoxDone(MWGui::WindowBase *parWindow)
 {
     //MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
     printf("GUIController::OnInputBoxDone: %s.\n",mInputBox->getTextInput().c_str());
 
     Main::get().getLocalPlayer()->guiMessageBox.data = mInputBox->getTextInput();
-    Main::get().getNetworking()->GetPlayerPacket(ID_GUI_MESSAGEBOX)->Send(Main::get().getLocalPlayer());
+    Main::get().getNetworking()->getPlayerPacket(ID_GUI_MESSAGEBOX)->Send(Main::get().getLocalPlayer());
 
     MWBase::Environment::get().getWindowManager()->removeDialog(mInputBox);
     mInputBox = 0;
@@ -169,18 +169,18 @@ bool mwmp::GUIController::pressedKey(int key)
         return false;
     if (key == keyChatMode)
     {
-        mChat->PressedChatMode();
+        mChat->pressedChatMode();
         return true;
     }
     else if (key == keySay)
     {
-        mChat->PressedSay();
+        mChat->pressedSay();
         return true;
     }
     return false;
 }
 
-bool mwmp::GUIController::HaveFocusedElement()
+bool mwmp::GUIController::hasFocusedElement()
 {
     return false;
 }
@@ -197,7 +197,7 @@ void mwmp::GUIController::update(float dt)
         printf("Pressed: %d\n", pressedButton);
         calledMessageBox = false;
         Main::get().getLocalPlayer()->guiMessageBox.data = MyGUI::utility::toString(pressedButton);
-        Main::get().getNetworking()->GetPlayerPacket(ID_GUI_MESSAGEBOX)->Send(Main::get().getLocalPlayer());
+        Main::get().getNetworking()->getPlayerPacket(ID_GUI_MESSAGEBOX)->Send(Main::get().getLocalPlayer());
     }
 
     blockConsole();
@@ -258,7 +258,7 @@ private:
 
 ESM::CustomMarker mwmp::GUIController::CreateMarker(const RakNet::RakNetGUID &guid)
 {
-    DedicatedPlayer *player = Players::GetPlayer(guid);
+    DedicatedPlayer *player = Players::getPlayer(guid);
     ESM::CustomMarker mEditingMarker;
     if (!player)
     {

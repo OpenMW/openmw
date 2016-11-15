@@ -29,7 +29,7 @@ std::map<uint64_t, DedicatedPlayer *> Players::players;
 
 DedicatedPlayer::DedicatedPlayer(RakNet::RakNetGUID guid) : BasePlayer(guid)
 {
-    GetAttack()->pressed = 0;
+    getAttack()->pressed = 0;
     CreatureStats()->mDead = false;
     movementFlags = 0;
 }
@@ -43,7 +43,7 @@ MWWorld::Ptr DedicatedPlayer::getPtr()
     return ptr;
 }
 
-void Players::CreatePlayer(RakNet::RakNetGUID guid)
+void Players::createPlayer(RakNet::RakNetGUID guid)
 {
     LOG_APPEND(Log::LOG_INFO, "%s", "- Setting up character info");
 
@@ -93,7 +93,7 @@ void Players::CreatePlayer(RakNet::RakNetGUID guid)
             dedicPlayer->Npc()->mName.c_str());
 
         dedicPlayer->ptr.getBase()->canChangeCell = true;
-        dedicPlayer->UpdatePtr(world->moveObject(dedicPlayer->ptr, cellStore, newPos.pos[0], newPos.pos[1], newPos.pos[2]));
+        dedicPlayer->updatePtr(world->moveObject(dedicPlayer->ptr, cellStore, newPos.pos[0], newPos.pos[1], newPos.pos[2]));
 
         npc.mId = players[guid.g]->ptr.get<ESM::NPC>()->mBase->mId;
 
@@ -116,13 +116,13 @@ void Players::CreatePlayer(RakNet::RakNetGUID guid)
 }
 
 
-void Players::CleanUp()
+void Players::cleanUp()
 {
     for (std::map <uint64_t, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
         delete it->second;
 }
 
-void Players::DisconnectPlayer(RakNet::RakNetGUID guid)
+void Players::disconnectPlayer(RakNet::RakNetGUID guid)
 {
     if (players[guid.g]->state > 1)
     {
@@ -144,7 +144,7 @@ void Players::DisconnectPlayer(RakNet::RakNetGUID guid)
     }
 }
 
-DedicatedPlayer *Players::GetPlayer(RakNet::RakNetGUID guid)
+DedicatedPlayer *Players::getPlayer(RakNet::RakNetGUID guid)
 {
     return players[guid.g];
 }
@@ -195,7 +195,7 @@ osg::Vec3f Lerp(osg::Vec3f start, osg::Vec3f end, float percent)
     return (start + osg::componentMultiply(p, (end - start)));
 }
 
-void DedicatedPlayer::Move(float dt)
+void DedicatedPlayer::move(float dt)
 {
     if (state != 2) return;
 
@@ -219,7 +219,7 @@ void DedicatedPlayer::Move(float dt)
     world->rotateObject(ptr, pos.rot[0], pos.rot[1], pos.rot[2]);
 }
 
-void Players::Update(float dt)
+void Players::update(float dt)
 {
     for (std::map <uint64_t, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
     {
@@ -259,12 +259,12 @@ void Players::Update(float dt)
         ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Hello, 0);
 
         ptrNpcStats->setBaseDisposition(255);
-        pl->Move(dt);
-        pl->UpdateDrawState();
+        pl->move(dt);
+        pl->updateDrawState();
     }
 }
 
-void DedicatedPlayer::UpdatePtr(MWWorld::Ptr newPtr)
+void DedicatedPlayer::updatePtr(MWWorld::Ptr newPtr)
 {
     ptr.mCell = newPtr.mCell;
     ptr.mRef = newPtr.mRef;
@@ -276,7 +276,7 @@ void DedicatedPlayer::UpdatePtr(MWWorld::Ptr newPtr)
 }
 
 
-DedicatedPlayer *Players::NewPlayer(RakNet::RakNetGUID guid)
+DedicatedPlayer *Players::newPlayer(RakNet::RakNetGUID guid)
 {
     LOG_APPEND(Log::LOG_INFO, "- Creating new DedicatedPlayer with guid %lu",
         guid.g);
@@ -286,7 +286,7 @@ DedicatedPlayer *Players::NewPlayer(RakNet::RakNetGUID guid)
     return players[guid.g];
 }
 
-void DedicatedPlayer::UpdateInventory()
+void DedicatedPlayer::updateInventory()
 {
     MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
@@ -326,7 +326,7 @@ void DedicatedPlayer::UpdateInventory()
     }
 }
 
-const std::string DedicatedPlayer::GetAnim()
+const std::string DedicatedPlayer::getAnim()
 {
     static string anim;
     static string animDir;
@@ -394,7 +394,7 @@ const std::string DedicatedPlayer::GetAnim()
     return (anim + animDir + animWeap);
 }
 
-DedicatedPlayer *Players::GetPlayer(const MWWorld::Ptr &ptr)
+DedicatedPlayer *Players::getPlayer(const MWWorld::Ptr &ptr)
 {
     std::map <uint64_t, DedicatedPlayer *>::iterator it = players.begin();
 
@@ -409,7 +409,7 @@ DedicatedPlayer *Players::GetPlayer(const MWWorld::Ptr &ptr)
     return 0;
 }
 
-void DedicatedPlayer::UpdateDrawState()
+void DedicatedPlayer::updateDrawState()
 {
 
     using namespace MWMechanics;
@@ -461,7 +461,7 @@ void DedicatedPlayer::updateCell()
     // Allow this player's reference to move across a cell now that a manual cell
     // update has been called
     ptr.getBase()->canChangeCell = true;
-    UpdatePtr(world->moveObject(ptr, cellStore, pos.pos[0], pos.pos[1], pos.pos[2]));
+    updatePtr(world->moveObject(ptr, cellStore, pos.pos[0], pos.pos[1], pos.pos[2]));
 }
 
 
@@ -504,5 +504,5 @@ void DedicatedPlayer::setMarkerState(bool state)
 
 void DedicatedPlayer::updateActor(MWMechanics::Actor *actor)
 {
-    actor->getCharacterController()->setAttackingOrSpell(GetAttack()->pressed);
+    actor->getCharacterController()->setAttackingOrSpell(getAttack()->pressed);
 }

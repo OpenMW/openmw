@@ -797,14 +797,14 @@ namespace MWMechanics
             // Check success
             float successChance = getSpellSuccessChance(spell, mCaster);
 
-            mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::GetPlayer(mCaster);
+            mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(mCaster);
             bool isDedicated = dedicatedPlayer != nullptr;
 
             if (isDedicated)
-                dedicatedPlayer->GetAttack()->pressed = false;
+                dedicatedPlayer->getAttack()->pressed = false;
 
-            if ((!isDedicated && !mwmp::Main::get().getLocalPlayer()->GetAttack()->success) ||
-                (isDedicated && dedicatedPlayer->GetAttack()->success == 0))
+            if ((!isDedicated && !mwmp::Main::get().getLocalPlayer()->getAttack()->success) ||
+                (isDedicated && dedicatedPlayer->getAttack()->success == 0))
             {
                 if (mCaster == getPlayer())
                 {

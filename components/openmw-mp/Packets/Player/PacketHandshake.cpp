@@ -16,5 +16,5 @@ void PacketHandshake::Packet(RakNet::BitStream *bs, BasePlayer *player, bool sen
 {
     PlayerPacket::Packet(bs, player, send);
     RW(player->Npc()->mName, send);
-    RW(*player->GetPassw(), send);
+    RW(*player->getPassw(), send);
 }

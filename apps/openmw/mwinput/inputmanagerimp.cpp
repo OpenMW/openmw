@@ -664,7 +664,7 @@ namespace MWInput
 
     void InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
-        mwmp::Main::PressedKey(arg.keysym.sym);
+        mwmp::Main::pressedKey(arg.keysym.sym);
         // HACK: to make Morrowind's default keybinding for the console work without printing an extra "^" upon closing
         // This assumes that SDL_TextInput events always come *after* the key event
         // (which is somewhat reasonable, and hopefully true for all SDL platforms)

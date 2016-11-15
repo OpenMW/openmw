@@ -108,7 +108,7 @@ void OMW::Engine::frame(float frametime)
         if (mUseSound)
             mEnvironment.getSoundManager()->update(frametime);
 
-        mwmp::Main::Frame(frametime);
+        mwmp::Main::frame(frametime);
 
         // Main menu opened? Then scripts are also paused.
         bool paused = /*mEnvironment.getWindowManager()->containsMode(MWGui::GM_MainMenu);*/ false;
@@ -240,10 +240,10 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
-    mwmp::Main::get().getGUIController()->cleanup();
+    mwmp::Main::get().getGUIController()->cleanUp();
     mEnvironment.cleanup();
 
-    mwmp::Main::Destroy();
+    mwmp::Main::destroy();
 
     delete mScriptContext;
     mScriptContext = NULL;
@@ -660,9 +660,9 @@ void OMW::Engine::go()
     ToUTF8::Utf8Encoder encoder (mEncoding);
     mEncoder = &encoder;
 
-    mwmp::Main::Init(mContentFiles);
+    mwmp::Main::init(mContentFiles);
     prepareEngine (settings);
-    mwmp::Main::PostInit();
+    mwmp::Main::postInit();
     mSkipMenu = true;
 
     if (!mSaveGameFile.empty())

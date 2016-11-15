@@ -2257,7 +2257,7 @@ namespace MWWorld
         event->cellRef.mRefID = door.getCellRef().getRefId();
         event->cellRef.mRefNum = door.getCellRef().getRefNum();
         event->state = state;
-        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_DOOR_ACTIVATE)->Send(event);
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_ACTIVATE)->Send(event);
 
         printf("Door activation 1\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
             event->cellRef.mRefID.c_str(),
@@ -2277,7 +2277,7 @@ namespace MWWorld
         event->cellRef.mRefID = door.getCellRef().getRefId();
         event->cellRef.mRefNum = door.getCellRef().getRefNum();
         event->state = state;
-        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_DOOR_ACTIVATE)->Send(event);
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_ACTIVATE)->Send(event);
 
         printf("Door activation 2\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
             event->cellRef.mRefID.c_str(),

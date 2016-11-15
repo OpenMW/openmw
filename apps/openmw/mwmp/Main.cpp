@@ -76,17 +76,17 @@ Main::~Main()
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "tes3mp stopped");
     delete mNetworking;
     delete mLocalPlayer;
-    Players::CleanUp();
+    Players::cleanUp();
 }
 
-void Main::OptionsDesc(boost::program_options::options_description *desc)
+void Main::optionsDesc(boost::program_options::options_description *desc)
 {
     namespace bpo = boost::program_options;
     desc->add_options()("connect", bpo::value<std::string>()->default_value(""),
                         "connect to server (e.g. --connect=127.0.0.1:25565)");
 }
 
-void Main::Configure(const boost::program_options::variables_map &variables)
+void Main::configure(const boost::program_options::variables_map &variables)
 {
     Main::addr = variables["connect"].as<string>();
 }
@@ -113,7 +113,7 @@ void RestoreMgr(Settings::Manager &mgr)
     mgr.mChangedSettings = saveChangedSettings;
 }
 
-void Main::Init(std::vector<std::string> &content)
+void Main::init(std::vector<std::string> &content)
 {
     assert(!pMain);
     pMain = new Main();
@@ -136,11 +136,11 @@ void Main::Init(std::vector<std::string> &content)
 
     }
 
-    pMain->mNetworking->Connect(pMain->server, pMain->port);
+    pMain->mNetworking->connect(pMain->server, pMain->port);
     RestoreMgr(mgr);
 }
 
-void Main::PostInit()
+void Main::postInit()
 {
     Settings::Manager mgr;
     InitMgr(mgr);
@@ -153,7 +153,7 @@ void Main::PostInit()
     MWBase::Environment::get().getMechanicsManager()->toggleAI();
 }
 
-void Main::Destroy()
+void Main::destroy()
 {
     assert(pMain);
 
@@ -161,20 +161,20 @@ void Main::Destroy()
     pMain = 0;
 }
 
-void Main::Frame(float dt)
+void Main::frame(float dt)
 {
     const MWBase::Environment &environment = MWBase::Environment::get();
 
-    get().getNetworking()->Update();
+    get().getNetworking()->update();
 
-    Players::Update(dt);
-    get().UpdateWorld(dt);
+    Players::update(dt);
+    get().updateWorld(dt);
 
     get().getGUIController()->update(dt);
 
 }
 
-void Main::UpdateWorld(float dt) const
+void Main::updateWorld(float dt) const
 {
 
     if (!mLocalPlayer->charGenThread())
@@ -186,13 +186,13 @@ void Main::UpdateWorld(float dt) const
         init = false;
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server");
 
-        mNetworking->GetPlayerPacket(ID_GAME_BASE_INFO)->Send(getLocalPlayer());
-        mNetworking->GetPlayerPacket(ID_LOADED)->Send(getLocalPlayer());
+        mNetworking->getPlayerPacket(ID_GAME_BASE_INFO)->Send(getLocalPlayer());
+        mNetworking->getPlayerPacket(ID_LOADED)->Send(getLocalPlayer());
         mLocalPlayer->updateDynamicStats(true);
         get().getGUIController()->setChatVisible(true);
     }
     else
-        mLocalPlayer->Update();
+        mLocalPlayer->update();
 }
 
 const Main &Main::get()
@@ -221,7 +221,7 @@ WorldController *Main::getWorldController() const
     return mWorldController;
 }
 
-void Main::PressedKey(int key)
+void Main::pressedKey(int key)
 {
     if (pMain == nullptr) return;
     if (get().getGUIController()->pressedKey(key))

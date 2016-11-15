@@ -37,7 +37,7 @@ void GUIDialogList::mousePressed(MyGUI::Widget * /*widget*/)
     size_t id = mListBox->getIndexSelected();
 
     Main::get().getLocalPlayer()->guiMessageBox.data = MyGUI::utility::toString(id);
-    Main::get().getNetworking()->GetPlayerPacket(ID_GUI_MESSAGEBOX)->Send(Main::get().getLocalPlayer());
+    Main::get().getNetworking()->getPlayerPacket(ID_GUI_MESSAGEBOX)->Send(Main::get().getLocalPlayer());
 
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Selected id: %d", id);
     if(id == MyGUI::ITEM_NONE)

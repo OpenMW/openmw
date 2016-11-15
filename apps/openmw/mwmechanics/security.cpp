@@ -62,7 +62,7 @@ namespace MWMechanics
                 event->cell = *lock.getCell()->getCell();
                 event->cellRef.mRefID = lock.getCellRef().getRefId();
                 event->cellRef.mRefNum = lock.getCellRef().getRefNum();
-                mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_UNLOCK)->Send(event);
+                mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send(event);
 
                 lock.getClass().unlock(lock);
                 resultMessage = "#{sLockSuccess}";

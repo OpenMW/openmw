@@ -130,8 +130,8 @@ namespace mwmp
         *localPlayer->ChatMessage() = str;
 
         RakNet::BitStream bs;
-        networking->GetPlayerPacket(ID_CHAT_MESSAGE)->Packet(&bs, localPlayer, true);
-        networking->SendData(&bs);
+        networking->getPlayerPacket(ID_CHAT_MESSAGE)->Packet(&bs, localPlayer, true);
+        networking->sendData(&bs);
     }
 
     void GUIChat::clean()
@@ -139,7 +139,7 @@ namespace mwmp
         mHistory->clearUserStrings();
     }
 
-    void GUIChat::PressedChatMode()
+    void GUIChat::pressedChatMode()
     {
         windowState++;
         if (windowState == 3) windowState = 0;
@@ -169,7 +169,7 @@ namespace mwmp
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(editState ? mCommandLine : nullptr);
     }
 
-    void GUIChat::PressedSay()
+    void GUIChat::pressedSay()
     {
         if (windowState == CHAT_DISABLED)
             return;
@@ -232,7 +232,7 @@ namespace mwmp
         }
     }
 
-    void GUIChat::SetDelay(float delay)
+    void GUIChat::setDelay(float delay)
     {
         this->delay = delay;
     }

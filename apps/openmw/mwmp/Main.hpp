@@ -13,14 +13,14 @@ namespace mwmp
         Main();
         ~Main();
 
-        static void OptionsDesc(boost::program_options::options_description *desc);
-        static void Configure(const boost::program_options::variables_map &variables);
-        static void Init(std::vector<std::string> &content);
-        static void PostInit();
-        static void Destroy();
+        static void optionsDesc(boost::program_options::options_description *desc);
+        static void configure(const boost::program_options::variables_map &variables);
+        static void init(std::vector<std::string> &content);
+        static void postInit();
+        static void destroy();
         static const Main &get();
-        static void Frame(float dt);
-        static void PressedKey(int key);
+        static void frame(float dt);
+        static void pressedKey(int key);
 
         static bool isValidPacketScript(std::string script);
 
@@ -29,7 +29,7 @@ namespace mwmp
         GUIController *getGUIController() const;
         WorldController *getWorldController() const;
 
-        void UpdateWorld(float dt) const;
+        void updateWorld(float dt) const;
 
     private:
         static std::string addr;

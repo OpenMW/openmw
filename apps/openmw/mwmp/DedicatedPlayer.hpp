@@ -26,13 +26,13 @@ namespace mwmp
     class Players
     {
     public:
-        static DedicatedPlayer *NewPlayer(RakNet::RakNetGUID guid);
-        static void CreatePlayer(RakNet::RakNetGUID guid);
-        static void DisconnectPlayer(RakNet::RakNetGUID guid);
-        static void CleanUp();
-        static DedicatedPlayer *GetPlayer(RakNet::RakNetGUID guid);
-        static DedicatedPlayer *GetPlayer(const MWWorld::Ptr &ptr);
-        static void Update(float dt);
+        static DedicatedPlayer *newPlayer(RakNet::RakNetGUID guid);
+        static void createPlayer(RakNet::RakNetGUID guid);
+        static void disconnectPlayer(RakNet::RakNetGUID guid);
+        static void cleanUp();
+        static DedicatedPlayer *getPlayer(RakNet::RakNetGUID guid);
+        static DedicatedPlayer *getPlayer(const MWWorld::Ptr &ptr);
+        static void update(float dt);
     private:
         static std::map<uint64_t, DedicatedPlayer *> players;
     };
@@ -45,9 +45,9 @@ namespace mwmp
         MWWorld::Ptr getPtr();
         MWWorld::Ptr getLiveCellPtr();
         MWWorld::ManualRef* getRef();
-        void Move(float dt);
-        void UpdateDrawState();
-        void UpdateInventory();
+        void move(float dt);
+        void updateDrawState();
+        void updateInventory();
 
         void updateCell();
 
@@ -58,8 +58,8 @@ namespace mwmp
     private:
         DedicatedPlayer(RakNet::RakNetGUID guid);
         virtual ~DedicatedPlayer();
-        void UpdatePtr(MWWorld::Ptr newPtr);
-        const std::string GetAnim();
+        void updatePtr(MWWorld::Ptr newPtr);
+        const std::string getAnim();
         int state;
         MWWorld::ManualRef* reference;
 

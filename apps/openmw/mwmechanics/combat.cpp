@@ -116,16 +116,16 @@ namespace MWMechanics
         x = std::min(iBlockMaxChance, std::max(iBlockMinChance, x));
 
 
-        mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::GetPlayer(blocker);
+        mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(blocker);
         bool isDedicated = dedicatedPlayer != nullptr;
         if (attacker == MWMechanics::getPlayer())
-            mwmp::Main::get().getLocalPlayer()->GetAttack()->block = false;
+            mwmp::Main::get().getLocalPlayer()->getAttack()->block = false;
 
         if ((!isDedicated && Misc::Rng::roll0to99() < x) ||
-           (isDedicated && dedicatedPlayer->GetAttack()->block == 1))
+           (isDedicated && dedicatedPlayer->getAttack()->block == 1))
         {
             if (attacker == MWMechanics::getPlayer())
-                mwmp::Main::get().getLocalPlayer()->GetAttack()->block = true;
+                mwmp::Main::get().getLocalPlayer()->getAttack()->block = true;
 
             // Reduce shield durability by incoming damage
             int shieldhealth = shield->getClass().getItemHealth(*shield);
@@ -204,12 +204,12 @@ namespace MWMechanics
                                            weapon.getClass().getEquipmentSkill(weapon));
 
         if (attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
-            mwmp::Main::get().getLocalPlayer()->GetAttack()->success = true;
+            mwmp::Main::get().getLocalPlayer()->getAttack()->success = true;
 
         if (Misc::Rng::roll0to99() >= getHitChance(attacker, victim, skillValue))
         {
             if (attacker == getPlayer())
-                mwmp::Main::get().getLocalPlayer()->GetAttack()->success = false;
+                mwmp::Main::get().getLocalPlayer()->getAttack()->success = false;
             victim.getClass().onHit(victim, 0.0f, false, projectile, attacker, osg::Vec3f(), false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, attacker);
             return;

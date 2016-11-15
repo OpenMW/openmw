@@ -80,7 +80,7 @@ namespace MWGui
             // Get the real count of gold in a stack
             event->cellRef.mGoldValue = dropped.getCellRef().getGoldValue();
 
-            mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_PLACE)->Send(event);
+            mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send(event);
 
             printf("Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i\n",
                 event->cellRef.mRefID.c_str(),

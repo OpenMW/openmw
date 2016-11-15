@@ -1041,7 +1041,7 @@ namespace MWMechanics
                         mwmp::Main::get().getLocalPlayer()->prepareAttack(mwmp::Attack::MELEE, state);
                 }
 
-                mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::GetPlayer(iter->first);
+                mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(iter->first);
                 if (dedicatedPlayer != nullptr)
                     dedicatedPlayer->updateActor(iter->second);
 

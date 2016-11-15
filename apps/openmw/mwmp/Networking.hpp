@@ -31,15 +31,15 @@ namespace mwmp
     public:
         Networking();
         ~Networking();
-        void Connect(const std::string& ip, unsigned short port);
-        void Update();
-        void SendData(RakNet::BitStream *bitStream);
+        void connect(const std::string& ip, unsigned short port);
+        void update();
+        void sendData(RakNet::BitStream *bitStream);
 
-        PlayerPacket *GetPlayerPacket(RakNet::MessageID id);
-        WorldPacket *GetWorldPacket(RakNet::MessageID id);
+        PlayerPacket *getPlayerPacket(RakNet::MessageID id);
+        WorldPacket *getWorldPacket(RakNet::MessageID id);
 
         bool isDedicatedPlayer(const MWWorld::Ptr &ptr);
-        bool Attack(const MWWorld::Ptr &ptr);
+        bool attack(const MWWorld::Ptr &ptr);
 
         RakNet::SystemAddress serverAddress()
         {
@@ -59,9 +59,9 @@ namespace mwmp
         PlayerPacketController playerController;
         WorldPacketController worldController;
 
-        void ProcessPlayerPacket(RakNet::Packet *packet);
-        void ProcessWorldPacket(RakNet::Packet *packet);
-        void ReceiveMessage(RakNet::Packet *packet);
+        void processPlayerPacket(RakNet::Packet *packet);
+        void processWorldPacket(RakNet::Packet *packet);
+        void receiveMessage(RakNet::Packet *packet);
         LocalPlayer *getLocalPlayer();
     };
 }

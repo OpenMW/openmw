@@ -46,9 +46,9 @@ namespace mwmp
 
         GUIChat(int x, int y, int w, int h);
 
-        void PressedChatMode(); //switch chat mode
-        void PressedSay(); // switch chat focus (if chat mode != CHAT_DISABLED)
-        void SetDelay(float delay);
+        void pressedChatMode(); //switch chat mode
+        void pressedSay(); // switch chat focus (if chat mode != CHAT_DISABLED)
+        void setDelay(float delay);
 
         void Update(float dt);
 

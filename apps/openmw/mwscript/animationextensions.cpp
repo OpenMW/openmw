@@ -70,7 +70,7 @@ namespace MWScript
                         event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
                         event->animGroup = group;
                         event->animMode = mode;
-                        mwmp::Main::get().getNetworking()->GetWorldPacket(ID_OBJECT_ANIM_PLAY)->Send(event);
+                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->Send(event);
                     }
 
                     MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, std::numeric_limits<int>::max(), true);

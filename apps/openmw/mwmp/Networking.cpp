@@ -53,7 +53,7 @@ Networking::~Networking()
     RakNet::RakPeerInterface::DestroyInstance(peer);
 }
 
-void Networking::Update()
+void Networking::update()
 {
     RakNet::Packet *packet;
     std::string errmsg = "";
@@ -87,7 +87,7 @@ void Networking::Update()
                 errmsg = "Connection lost.";
                 break;
             default:
-                ReceiveMessage(packet);
+                receiveMessage(packet);
                 //LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Message with identifier %i has arrived.", packet->data[0]);
                 break;
         }
@@ -101,12 +101,12 @@ void Networking::Update()
     }
 }
 
-void Networking::SendData(RakNet::BitStream *bs)
+void Networking::sendData(RakNet::BitStream *bs)
 {
     peer->Send(bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, serverAddr, false);
 }
 
-void Networking::Connect(const std::string &ip, unsigned short port)
+void Networking::connect(const std::string &ip, unsigned short port)
 {
     RakNet::SystemAddress master;
     master.SetBinaryAddress(ip.c_str());
@@ -173,7 +173,7 @@ void Networking::Connect(const std::string &ip, unsigned short port)
     }
 }
 
-void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
+void Networking::processPlayerPacket(RakNet::Packet *packet)
 {
     RakNet::RakNetGUID guid;
     RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
@@ -182,7 +182,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     DedicatedPlayer *pl = 0;
     static RakNet::RakNetGUID myGuid = getLocalPlayer()->guid;
     if (guid != myGuid)
-        pl = Players::GetPlayer(guid);
+        pl = Players::getPlayer(guid);
 
     PlayerPacket *myPacket = playerController.GetPacket(packet->data[0]);
 
@@ -190,7 +190,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     {
     case ID_HANDSHAKE:
     {
-        (*getLocalPlayer()->GetPassw()) = "SuperPassword";
+        (*getLocalPlayer()->getPassw()) = "SuperPassword";
         myPacket->Send(getLocalPlayer(), serverAddr);
         break;
     }
@@ -221,11 +221,11 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
             if (pl == 0)
             {
                 LOG_APPEND(Log::LOG_INFO, "%s", "- Exchanging data with new player");
-                pl = Players::NewPlayer(guid);
+                pl = Players::newPlayer(guid);
             }
 
             myPacket->Packet(&bsIn, pl, false);
-            Players::CreatePlayer(guid);
+            Players::createPlayer(guid);
         }
         break;
     }
@@ -261,7 +261,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
         if (guid == myGuid)
             MWBase::Environment::get().getStateManager()->requestQuit();
         else if (pl != 0)
-            Players::DisconnectPlayer(guid);
+            Players::disconnectPlayer(guid);
 
     }
     case ID_GAME_EQUIPMENT:
@@ -281,7 +281,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
         else if (pl != 0)
         {
             myPacket->Packet(&bsIn, pl, false);
-            pl->UpdateInventory();
+            pl->updateInventory();
         }
         break;
     }
@@ -293,7 +293,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
             {
                 printf("ID_GAME_INVENTORY update only\n");
                 getLocalPlayer()->updateInventory(true);
-                GetPlayerPacket(ID_GAME_INVENTORY)->Send(getLocalPlayer());
+                getPlayerPacket(ID_GAME_INVENTORY)->Send(getLocalPlayer());
             }
             else
             {
@@ -341,27 +341,27 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
         {
             myPacket->Packet(&bsIn, pl, false);
 
-            //cout << "Player: " << pl->Npc()->mName << " pressed: " << (pl->GetAttack()->pressed == 1) << endl;
-            if (pl->GetAttack()->pressed == 0)
+            //cout << "Player: " << pl->Npc()->mName << " pressed: " << (pl->getAttack()->pressed == 1) << endl;
+            if (pl->getAttack()->pressed == 0)
             {
                 LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Attack success: %s",
-                    pl->GetAttack()->success ? "true" : "false");
+                    pl->getAttack()->success ? "true" : "false");
 
-                if (pl->GetAttack()->success == 1)
+                if (pl->getAttack()->success == 1)
                 {
                     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Damage: %f",
-                        pl->GetAttack()->damage);
+                        pl->getAttack()->damage);
                 }
             }
 
             MWMechanics::CreatureStats &stats = pl->getPtr().getClass().getNpcStats(pl->getPtr());
-            stats.getSpells().setSelectedSpell(pl->GetAttack()->refid);
+            stats.getSpells().setSelectedSpell(pl->getAttack()->refid);
 
             MWWorld::Ptr victim;
-            if (pl->GetAttack()->target == getLocalPlayer()->guid)
+            if (pl->getAttack()->target == getLocalPlayer()->guid)
                 victim = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            else if (Players::GetPlayer(pl->GetAttack()->target) != 0)
-                victim = Players::GetPlayer(pl->GetAttack()->target)->getPtr();
+            else if (Players::getPlayer(pl->getAttack()->target) != 0)
+                victim = Players::getPlayer(pl->getAttack()->target)->getPtr();
 
             MWWorld::Ptr attacker;
             attacker = pl->getPtr();
@@ -388,16 +388,16 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
                     }
 
                     if (!weapon.isEmpty())
-                        MWMechanics::blockMeleeAttack(attacker, victim, weapon, pl->GetAttack()->damage, 1);
-                    pl->getPtr().getClass().onHit(victim, pl->GetAttack()->damage, healthdmg, weapon, attacker, osg::Vec3f(),
-                        pl->GetAttack()->success);
+                        MWMechanics::blockMeleeAttack(attacker, victim, weapon, pl->getAttack()->damage, 1);
+                    pl->getPtr().getClass().onHit(victim, pl->getAttack()->damage, healthdmg, weapon, attacker, osg::Vec3f(),
+                        pl->getAttack()->success);
                 }
             }
             else
             {
                 LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "SpellId: %s",
-                    pl->GetAttack()->refid.c_str());
-                LOG_APPEND(Log::LOG_VERBOSE, " - success: %d", pl->GetAttack()->success);
+                    pl->getAttack()->refid.c_str());
+                LOG_APPEND(Log::LOG_VERBOSE, " - success: %d", pl->getAttack()->success);
             }
         }
         break;
@@ -512,7 +512,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
         else if (pl != 0)
         {
             myPacket->Packet(&bsIn, pl, false);
-            pl->UpdateDrawState();
+            pl->updateDrawState();
         }
         break;
     }
@@ -529,7 +529,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
             myPacket->Packet(&bsIn, pl, false);
             message = *pl->ChatMessage();
         }
-        Main::get().getGUIController()->PrintChatMessage(message);
+        Main::get().getGUIController()->printChatMessage(message);
 
         break;
     }
@@ -637,13 +637,13 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
                 getLocalPlayer()->guiMessageBox.label.c_str());
 
             if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::MessageBox)
-                Main::get().getGUIController()->ShowMessageBox(getLocalPlayer()->guiMessageBox);
+                Main::get().getGUIController()->showMessageBox(getLocalPlayer()->guiMessageBox);
             else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::CustomMessageBox)
-                Main::get().getGUIController()->ShowCustomMessageBox(getLocalPlayer()->guiMessageBox);
+                Main::get().getGUIController()->showCustomMessageBox(getLocalPlayer()->guiMessageBox);
             else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::InputDialog)
-                Main::get().getGUIController()->ShowInputBox(getLocalPlayer()->guiMessageBox);
+                Main::get().getGUIController()->showInputBox(getLocalPlayer()->guiMessageBox);
             else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::ListBox)
-                Main::get().getGUIController()->ShowDialogList(getLocalPlayer()->guiMessageBox);
+                Main::get().getGUIController()->showDialogList(getLocalPlayer()->guiMessageBox);
         }
         break;
     }
@@ -687,7 +687,7 @@ void Networking::ProcessPlayerPacket(RakNet::Packet *packet)
     }
 }
 
-void Networking::ProcessWorldPacket(RakNet::Packet *packet)
+void Networking::processWorldPacket(RakNet::Packet *packet)
 {
     RakNet::RakNetGUID guid;
     RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
@@ -696,7 +696,7 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     DedicatedPlayer *pl = 0;
     static RakNet::RakNetGUID myGuid = getLocalPlayer()->guid;
     if (guid != myGuid)
-        pl = Players::GetPlayer(guid);
+        pl = Players::getPlayer(guid);
 
     WorldPacket *myPacket = worldController.GetPacket(packet->data[0]);
     WorldEvent *event = new WorldEvent(guid);
@@ -1050,27 +1050,27 @@ void Networking::ProcessWorldPacket(RakNet::Packet *packet)
     }
 }
 
-void Networking::ReceiveMessage(RakNet::Packet *packet)
+void Networking::receiveMessage(RakNet::Packet *packet)
 {
     if (packet->length < 2)
         return;
 
     if (playerController.ContainsPacket(packet->data[0]))
     {
-        ProcessPlayerPacket(packet);
+        processPlayerPacket(packet);
     }
     else if (worldController.ContainsPacket(packet->data[0]))
     {
-        ProcessWorldPacket(packet);
+        processWorldPacket(packet);
     }
 }
 
-PlayerPacket *Networking::GetPlayerPacket(RakNet::MessageID id)
+PlayerPacket *Networking::getPlayerPacket(RakNet::MessageID id)
 {
     return playerController.GetPacket(id);
 }
 
-WorldPacket *Networking::GetWorldPacket(RakNet::MessageID id)
+WorldPacket *Networking::getWorldPacket(RakNet::MessageID id)
 {
     return worldController.GetPacket(id);
 }
@@ -1089,19 +1089,19 @@ bool Networking::isDedicatedPlayer(const MWWorld::Ptr &ptr)
 {
     if (ptr.mRef == 0)
         return 0;
-    DedicatedPlayer *pl = Players::GetPlayer(ptr);
+    DedicatedPlayer *pl = Players::getPlayer(ptr);
 
     return pl != 0;
 }
 
-bool Networking::Attack(const MWWorld::Ptr &ptr)
+bool Networking::attack(const MWWorld::Ptr &ptr)
 {
-    DedicatedPlayer *pl = Players::GetPlayer(ptr);
+    DedicatedPlayer *pl = Players::getPlayer(ptr);
 
     if (pl == 0)
         return false;
 
-    return pl->GetAttack()->pressed;
+    return pl->getAttack()->pressed;
 }
 
 bool Networking::isConnected()
