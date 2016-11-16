@@ -42,6 +42,7 @@ void applyFatigueLoss(const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, 
 /// e.g. If attacker is a fish, is victim in water? Or, if attacker can't swim, is victim on land?
 bool isEnvironmentCompatible(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim);
 
+float getFightDistanceBias(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2);
 }
 
 #endif
