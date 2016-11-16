@@ -8,55 +8,55 @@
 #include "../Types.hpp"
 
 #define TRANSLOCATIONFUNCTIONS \
-    {"getPos",              TranslocationFunctions::getPos},\
-    {"getPosX",             TranslocationFunctions::getPosX},\
-    {"getPosY",             TranslocationFunctions::getPosY},\
-    {"getPosZ",             TranslocationFunctions::getPosZ},\
+    {"GetPos",              TranslocationFunctions::GetPos},\
+    {"GetPosX",             TranslocationFunctions::GetPosX},\
+    {"GetPosY",             TranslocationFunctions::GetPosY},\
+    {"GetPosZ",             TranslocationFunctions::GetPosZ},\
 \
-    {"getAngle",            TranslocationFunctions::getAngle},\
-    {"getAngleX",           TranslocationFunctions::getAngleX},\
-    {"getAngleY",           TranslocationFunctions::getAngleY},\
-    {"getAngleZ",           TranslocationFunctions::getAngleZ},\
+    {"GetAngle",            TranslocationFunctions::GetAngle},\
+    {"GetAngleX",           TranslocationFunctions::GetAngleX},\
+    {"GetAngleY",           TranslocationFunctions::GetAngleY},\
+    {"GetAngleZ",           TranslocationFunctions::GetAngleZ},\
 \
-    {"setPos",              TranslocationFunctions::setPos},\
-    {"setAngle",            TranslocationFunctions::setAngle},\
+    {"SetPos",              TranslocationFunctions::SetPos},\
+    {"SetAngle",            TranslocationFunctions::SetAngle},\
 \
-    {"getCell",             TranslocationFunctions::getCell},\
-    {"setCell",             TranslocationFunctions::setCell},\
-    {"setExterior",         TranslocationFunctions::setExterior},\
-    {"getExteriorX",        TranslocationFunctions::getExteriorX},\
-    {"getExteriorY",        TranslocationFunctions::getExteriorY},\
-    {"isInExterior",        TranslocationFunctions::isInExterior},\
+    {"GetCell",             TranslocationFunctions::GetCell},\
+    {"SetCell",             TranslocationFunctions::SetCell},\
+    {"SetExterior",         TranslocationFunctions::SetExterior},\
+    {"GetExteriorX",        TranslocationFunctions::GetExteriorX},\
+    {"GetExteriorY",        TranslocationFunctions::GetExteriorY},\
+    {"IsInExterior",        TranslocationFunctions::IsInExterior},\
 \
-    {"sendPos",             TranslocationFunctions::sendPos},\
-    {"sendCell",            TranslocationFunctions::sendCell}
+    {"SendPos",             TranslocationFunctions::SendPos},\
+    {"SendCell",            TranslocationFunctions::SendCell}
 
 
 class TranslocationFunctions
 {
 public:
-    static void getPos(unsigned short pid, float *x, float *y, float *z) noexcept;
-    static double getPosX(unsigned short pid) noexcept;
-    static double getPosY(unsigned short pid) noexcept;
-    static double getPosZ(unsigned short pid) noexcept;
+    static void GetPos(unsigned short pid, float *x, float *y, float *z) noexcept;
+    static double GetPosX(unsigned short pid) noexcept;
+    static double GetPosY(unsigned short pid) noexcept;
+    static double GetPosZ(unsigned short pid) noexcept;
 
-    static void getAngle(unsigned short pid, float *x, float *y, float *z) noexcept;
-    static double getAngleX(unsigned short pid) noexcept;
-    static double getAngleY(unsigned short pid) noexcept;
-    static double getAngleZ(unsigned short pid) noexcept;
+    static void GetAngle(unsigned short pid, float *x, float *y, float *z) noexcept;
+    static double GetAngleX(unsigned short pid) noexcept;
+    static double GetAngleY(unsigned short pid) noexcept;
+    static double GetAngleZ(unsigned short pid) noexcept;
 
-    static void setPos(unsigned short pid, double x, double y, double z) noexcept;
-    static void setAngle(unsigned short pid, double x, double y, double z) noexcept;
+    static void SetPos(unsigned short pid, double x, double y, double z) noexcept;
+    static void SetAngle(unsigned short pid, double x, double y, double z) noexcept;
 
-    static const char *getCell(unsigned short pid) noexcept;
-    static void setCell(unsigned short pid, const char *name) noexcept;
-    static void setExterior(unsigned short pid, int x, int y) noexcept;
-    static int getExteriorX(unsigned short pid) noexcept;
-    static int getExteriorY(unsigned short pid) noexcept;
-    static bool isInExterior(unsigned short pid) noexcept;
+    static const char *GetCell(unsigned short pid) noexcept;
+    static void SetCell(unsigned short pid, const char *name) noexcept;
+    static void SetExterior(unsigned short pid, int x, int y) noexcept;
+    static int GetExteriorX(unsigned short pid) noexcept;
+    static int GetExteriorY(unsigned short pid) noexcept;
+    static bool IsInExterior(unsigned short pid) noexcept;
 
-    static void sendPos(unsigned short pid) noexcept;
-    static void sendCell(unsigned short pid) noexcept;
+    static void SendPos(unsigned short pid) noexcept;
+    static void SendCell(unsigned short pid) noexcept;
 };
 
 #endif //OPENMW_TRANSLOCATIONS_HPP
