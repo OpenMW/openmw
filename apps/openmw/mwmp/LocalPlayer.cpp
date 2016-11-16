@@ -202,6 +202,10 @@ void LocalPlayer::updateSkills(bool forceUpdate)
 {
     MWWorld::Ptr player = getPlayerPtr();
     const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+
+    // Track whether skills have changed their values, but not whether
+    // progress towards skill increases has changed (to not spam server
+    // with packets every time tiny progress is made)
     bool skillsChanged = false;
 
     for (int i = 0; i < 27; ++i)
@@ -211,8 +215,8 @@ void LocalPlayer::updateSkills(bool forceUpdate)
             ptrNpcStats.getSkill(i).writeState(NpcStats()->mSkills[i]);
             skillsChanged = true;
         }
-        // If we only have skill progress, update the state for relevant skills
-        // but don't send a packet just because of this (to avoid spam)
+        // If we only have skill progress, remember it for future packets,
+        // but don't send a packet just because of this
         else if (ptrNpcStats.getSkill(i).getProgress() != NpcStats()->mSkills[i].mProgress)
         {
             ptrNpcStats.getSkill(i).writeState(NpcStats()->mSkills[i]);
@@ -415,18 +419,20 @@ void LocalPlayer::updateEquipped(bool forceUpdate)
 void LocalPlayer::updateInventory(bool forceUpdate)
 {
     static bool invChanged = false;
+    
     if (forceUpdate)
         invChanged = true;
 
-    MWWorld::Ptr player = getPlayerPtr();
-    MWWorld::InventoryStore &invStore = player.getClass().getInventoryStore(player);
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
+    MWWorld::InventoryStore &ptrInventory = ptrPlayer.getClass().getInventoryStore(ptrPlayer);
     mwmp::Item item;
 
     if (!invChanged)
+    {
         for (vector<Item>::iterator iter = inventory.items.begin(); iter != inventory.items.end(); ++iter)
         {
-            MWWorld::ContainerStoreIterator result(invStore.begin());
-            for (; result != invStore.end(); ++result)
+            MWWorld::ContainerStoreIterator result(ptrInventory.begin());
+            for (; result != ptrInventory.end(); ++result)
             {
                 item.refid = result->getCellRef().getRefId();
                 if (item.refid.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
@@ -438,14 +444,17 @@ void LocalPlayer::updateInventory(bool forceUpdate)
                 if (item == (*iter))
                     break;
             }
-            if (result == invStore.end())
+            if (result == ptrInventory.end())
             {
                 invChanged = true;
                 break;
             }
         }
+    }
+    
     if (!invChanged)
-        for (MWWorld::ContainerStoreIterator iter(invStore.begin()); iter != invStore.end(); ++iter)
+    {
+        for (MWWorld::ContainerStoreIterator iter(ptrInventory.begin()); iter != ptrInventory.end(); ++iter)
         {
             item.refid = iter->getCellRef().getRefId();
             if (item.refid.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
@@ -468,28 +477,14 @@ void LocalPlayer::updateInventory(bool forceUpdate)
                 break;
             }
         }
+    }
 
     if (!invChanged)
         return;
 
     invChanged = false;
 
-    inventory.items.clear();
-    for (MWWorld::ContainerStoreIterator iter(invStore.begin()); iter != invStore.end(); ++iter)
-    {
-        item.refid = iter->getCellRef().getRefId();
-        if (item.refid.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
-            continue;
-
-        item.count = iter->getRefData().getCount();
-        item.health = iter->getCellRef().getCharge();
-
-        inventory.items.push_back(item);
-    }
-
-    inventory.count = (unsigned int) inventory.items.size();
-    inventory.action = Inventory::UPDATE;
-    Main::get().getNetworking()->getPlayerPacket(ID_GAME_INVENTORY)->Send(this);
+    sendInventory();
 }
 
 void LocalPlayer::updateAttackState(bool forceUpdate)
@@ -811,6 +806,31 @@ void LocalPlayer::sendClass()
         charClass.mId = cls->mId;
 
     getNetworking()->getPlayerPacket(ID_GAME_CHARCLASS)->Send(this);
+}
+
+void LocalPlayer::sendInventory()
+{
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
+    MWWorld::InventoryStore &ptrInventory = ptrPlayer.getClass().getInventoryStore(ptrPlayer);
+    mwmp::Item item;
+
+    inventory.items.clear();
+
+    for (MWWorld::ContainerStoreIterator iter(ptrInventory.begin()); iter != ptrInventory.end(); ++iter)
+    {
+        item.refid = iter->getCellRef().getRefId();
+        if (item.refid.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
+            continue;
+
+        item.count = iter->getRefData().getCount();
+        item.health = iter->getCellRef().getCharge();
+
+        inventory.items.push_back(item);
+    }
+
+    inventory.count = (unsigned int)inventory.items.size();
+    inventory.action = Inventory::UPDATE;
+    Main::get().getNetworking()->getPlayerPacket(ID_GAME_INVENTORY)->Send(this);
 }
 
 void LocalPlayer::sendAttack(Attack::TYPE type)
