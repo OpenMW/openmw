@@ -181,18 +181,18 @@ void LocalPlayer::updateAttributes(bool forceUpdate)
 {
     MWWorld::Ptr player = getPlayerPtr();
     const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
-    bool isUpdating = false;
+    bool attributesChanged = false;
 
     for (int i = 0; i < 8; ++i)
     {
         if (ptrNpcStats.getAttribute(i).getBase() != CreatureStats()->mAttributes[i].mBase)
         {
             ptrNpcStats.getAttribute(i).writeState(CreatureStats()->mAttributes[i]);
-            isUpdating = true;
+            attributesChanged = true;
         }
     }
 
-    if (isUpdating || forceUpdate)
+    if (attributesChanged || forceUpdate)
     {
         getNetworking()->getPlayerPacket(ID_GAME_ATTRIBUTE)->Send(this);
     }
@@ -202,15 +202,14 @@ void LocalPlayer::updateSkills(bool forceUpdate)
 {
     MWWorld::Ptr player = getPlayerPtr();
     const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
-    bool isUpdating = false;
-
+    bool skillsChanged = false;
 
     for (int i = 0; i < 27; ++i)
     {
         if (ptrNpcStats.getSkill(i).getBase() != NpcStats()->mSkills[i].mBase)
         {
             ptrNpcStats.getSkill(i).writeState(NpcStats()->mSkills[i]);
-            isUpdating = true;
+            skillsChanged = true;
         }
         // If we only have skill progress, update the state for relevant skills
         // but don't send a packet just because of this (to avoid spam)
@@ -227,7 +226,7 @@ void LocalPlayer::updateSkills(bool forceUpdate)
         }
     }
 
-    if (isUpdating || forceUpdate)
+    if (skillsChanged || forceUpdate)
     {
         NpcStats()->mLevelProgress = ptrNpcStats.getLevelProgress();
         getNetworking()->getPlayerPacket(ID_GAME_SKILL)->Send(this);
@@ -301,7 +300,7 @@ void LocalPlayer::updatePosition(bool forceUpdate)
 void LocalPlayer::updateCell(bool forceUpdate)
 {
     const ESM::Cell *ptrCell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell();
-    bool shouldUpdate = false;
+    bool cellChanged = false;
 
     // Send a packet to server to update this LocalPlayer's cell if:
     // 1) forceUpdate is true
@@ -310,25 +309,25 @@ void LocalPlayer::updateCell(bool forceUpdate)
     //    exterior cell coordinates
     if (forceUpdate)
     {
-        shouldUpdate = true;
+        cellChanged = true;
     }
     else if (!Misc::StringUtils::ciEqual(ptrCell->mName, getCell()->mName))
     {
-        shouldUpdate = true;
+        cellChanged = true;
     }
     else if (ptrCell->isExterior())
     {
         if (ptrCell->mData.mX != getCell()->mData.mX)
         {
-            shouldUpdate = true;
+            cellChanged = true;
         }
         else if (ptrCell->mData.mY != getCell()->mData.mY)
         {
-            shouldUpdate = true;
+            cellChanged = true;
         }
     }
 
-    if (shouldUpdate)
+    if (cellChanged)
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_CELL to server");
 
