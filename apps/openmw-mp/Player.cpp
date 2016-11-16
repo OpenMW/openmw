@@ -30,7 +30,7 @@ void Players::newPlayer(RakNet::RakNetGUID guid)
         guid.g);
 
     players[guid.g] = new Player(guid);
-    players[guid.g]->GetCell()->blank();
+    players[guid.g]->getCell()->blank();
     players[guid.g]->Npc()->blank();
     players[guid.g]->NpcStats()->blank();
     players[guid.g]->CreatureStats()->blank();
