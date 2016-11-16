@@ -18,7 +18,7 @@ constexpr ScriptCallbackData ScriptFunctions::callbacks[];
 
 using namespace std;
 
-void ScriptFunctions::getArguments(std::vector<boost::any> &params, va_list args, const std::string &def)
+void ScriptFunctions::GetArguments(std::vector<boost::any> &params, va_list args, const std::string &def)
 {
     params.reserve(def.length());
 
@@ -84,12 +84,12 @@ void ScriptFunctions::getArguments(std::vector<boost::any> &params, va_list args
     va_end(args);
 }
 
-void ScriptFunctions::makePublic(ScriptFunc _public, const char *name, char ret_type, const char *def) noexcept
+void ScriptFunctions::MakePublic(ScriptFunc _public, const char *name, char ret_type, const char *def) noexcept
 {
-    Public::makePublic(_public, name, ret_type, def);
+    Public::MakePublic(_public, name, ret_type, def);
 }
 
-boost::any ScriptFunctions::callPublic(const char *name, ...) noexcept
+boost::any ScriptFunctions::CallPublic(const char *name, ...) noexcept
 {
     vector<boost::any> params;
 
@@ -99,7 +99,7 @@ boost::any ScriptFunctions::callPublic(const char *name, ...) noexcept
 
         va_list args;
         va_start(args, name);
-        getArguments(params, args, def);
+        GetArguments(params, args, def);
         va_end(args);
 
         return Public::Call(name, params);
@@ -109,30 +109,30 @@ boost::any ScriptFunctions::callPublic(const char *name, ...) noexcept
     return 0;
 }
 
-void ScriptFunctions::stopServer(int code) noexcept
+void ScriptFunctions::StopServer(int code) noexcept
 {
     mwmp::Networking::getPtr()->stopServer(code);
 }
 
-void ScriptFunctions::kick(unsigned short pid) noexcept
+void ScriptFunctions::Kick(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
     mwmp::Networking::getPtr()->kickPlayer(player->guid);
 }
 
-const char *ScriptFunctions::getServerVersion() noexcept
+const char *ScriptFunctions::GetServerVersion() noexcept
 {
     return TES3MP_VERSION;
 }
 
-const char *ScriptFunctions::getProtocolVersion() noexcept
+const char *ScriptFunctions::GetProtocolVersion() noexcept
 {
     static string version = to_string(TES3MP_PROTO_VERSION);
     return version.c_str();
 }
 
-int ScriptFunctions::getAvgPing(unsigned short pid) noexcept
+int ScriptFunctions::GetAvgPing(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,-1);

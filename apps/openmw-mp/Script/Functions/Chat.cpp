@@ -6,7 +6,7 @@
 #include <apps/openmw-mp/Networking.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 
-void ScriptFunctions::sendMessage(unsigned short pid, const char *message, bool broadcast) noexcept
+void ScriptFunctions::SendMessage(unsigned short pid, const char *message, bool broadcast) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -20,12 +20,12 @@ void ScriptFunctions::sendMessage(unsigned short pid, const char *message, bool 
         mwmp::Networking::get().getPlayerController()->GetPacket(ID_CHAT_MESSAGE)->Send(player, true);
 }
 
-void ScriptFunctions::cleanChat(unsigned short pid)
+void ScriptFunctions::CleanChat(unsigned short pid)
 {
 
 }
 
-void ScriptFunctions::cleanChat()
+void ScriptFunctions::CleanChat()
 {
 
 }

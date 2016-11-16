@@ -30,10 +30,10 @@ public:
     LangPAWN();
     LangPAWN(AMX *amx);
     ~LangPAWN();
-    static cell makePublic(AMX *amx, const cell *params) noexcept;
-    static cell callPublic(AMX *amx, const cell *params) noexcept;
-    static cell createTimer(AMX *amx, const cell *params) noexcept;
-    static cell createTimerEx(AMX *amx, const cell *params) noexcept;
+    static cell MakePublic(AMX *amx, const cell *params) noexcept;
+    static cell CallPublic(AMX *amx, const cell *params) noexcept;
+    static cell CreateTimer(AMX *amx, const cell *params) noexcept;
+    static cell CreateTimerEx(AMX *amx, const cell *params) noexcept;
 
     virtual void LoadProgram(const char *filename) override;
     virtual int FreeProgram() override;

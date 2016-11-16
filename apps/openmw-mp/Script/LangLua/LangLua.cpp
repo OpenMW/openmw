@@ -73,10 +73,10 @@ struct F_
 };
 
 
-template<> struct F_<0> { static constexpr LuaFuctionData F{"createTimer", LangLua::createTimer}; };
-template<> struct F_<1> { static constexpr LuaFuctionData F{"createTimerEx", LangLua::createTimerEx}; };
-template<> struct F_<2> { static constexpr LuaFuctionData F{"makePublic", LangLua::makePublic}; };
-template<> struct F_<3> { static constexpr LuaFuctionData F{"callPublic", LangLua::callPublic}; };
+template<> struct F_<0> { static constexpr LuaFuctionData F{"CreateTimer", LangLua::CreateTimer}; };
+template<> struct F_<1> { static constexpr LuaFuctionData F{"CreateTimerEx", LangLua::CreateTimerEx}; };
+template<> struct F_<2> { static constexpr LuaFuctionData F{"MakePublic", LangLua::MakePublic}; };
+template<> struct F_<3> { static constexpr LuaFuctionData F{"CallPublic", LangLua::CallPublic}; };
 
 template<size_t... Indices>
 inline LuaFuctionData *LangLua::functions(indices<Indices...>)
@@ -135,7 +135,7 @@ boost::any LangLua::Call(const char *name, const char *argl, int buf, ...)
     va_start(vargs, buf);
     std::vector<boost::any> args;
 
-    ScriptFunctions::getArguments(args, vargs, argl);
+    ScriptFunctions::GetArguments(args, vargs, argl);
 
     return Call(name, argl, args);
 }

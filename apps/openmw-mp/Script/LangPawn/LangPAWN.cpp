@@ -172,10 +172,10 @@ static typename enable_if<ScriptFunctions::functions[I].func.ret != 'v' && Scrip
 }
 
 template<unsigned int I> struct F_ { static constexpr AMX_NATIVE_INFO F{ScriptFunctions::functions[I].name, wrapper<I>}; };
-template<> struct F_<0> { static constexpr AMX_NATIVE_INFO F{"createTimer", LangPAWN::createTimer}; };
-template<> struct F_<1> { static constexpr AMX_NATIVE_INFO F{"createTimerEx", LangPAWN::createTimerEx}; };
-template<> struct F_<2> { static constexpr AMX_NATIVE_INFO F{"makePublic", LangPAWN::makePublic}; };
-template<> struct F_<3> { static constexpr AMX_NATIVE_INFO F{"callPublic", LangPAWN::callPublic}; };
+template<> struct F_<0> { static constexpr AMX_NATIVE_INFO F{"CreateTimer", LangPAWN::CreateTimer}; };
+template<> struct F_<1> { static constexpr AMX_NATIVE_INFO F{"CreateTimerEx", LangPAWN::CreateTimerEx}; };
+template<> struct F_<2> { static constexpr AMX_NATIVE_INFO F{"MakePublic", LangPAWN::MakePublic}; };
+template<> struct F_<3> { static constexpr AMX_NATIVE_INFO F{"CallPublic", LangPAWN::CallPublic}; };
 
 void LangPAWN::LoadProgram(const char *filename)
 {
