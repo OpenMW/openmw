@@ -8,7 +8,7 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include "World.hpp"
 
-void WorldFunctions::SetHour(unsigned short pid, double hour) noexcept
+void WorldFunctions::setHour(unsigned short pid, double hour) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -20,7 +20,7 @@ void WorldFunctions::SetHour(unsigned short pid, double hour) noexcept
     mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_TIME)->Send(player, false);
 }
 
-void WorldFunctions::SetMonth(unsigned short pid, int month) noexcept
+void WorldFunctions::setMonth(unsigned short pid, int month) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -33,7 +33,7 @@ void WorldFunctions::SetMonth(unsigned short pid, int month) noexcept
 
 }
 
-void WorldFunctions::SetDay(unsigned short pid, int day) noexcept
+void WorldFunctions::setDay(unsigned short pid, int day) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);

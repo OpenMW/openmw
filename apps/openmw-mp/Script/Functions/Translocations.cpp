@@ -11,7 +11,7 @@
 #include <iostream>
 using namespace std;
 
-void TranslocationFunctions::GetPos(unsigned short pid, float *x, float *y, float *z) noexcept
+void TranslocationFunctions::getPos(unsigned short pid, float *x, float *y, float *z) noexcept
 {
     *x = 0.00;
     *y = 0.00;
@@ -25,7 +25,7 @@ void TranslocationFunctions::GetPos(unsigned short pid, float *x, float *y, floa
     *z = player->Position()->pos[2];
 }
 
-double TranslocationFunctions::GetPosX(unsigned short pid) noexcept
+double TranslocationFunctions::getPosX(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
@@ -33,7 +33,7 @@ double TranslocationFunctions::GetPosX(unsigned short pid) noexcept
     return player->Position()->pos[0];
 }
 
-double TranslocationFunctions::GetPosY(unsigned short pid) noexcept
+double TranslocationFunctions::getPosY(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
@@ -41,7 +41,7 @@ double TranslocationFunctions::GetPosY(unsigned short pid) noexcept
     return player->Position()->pos[1];
 }
 
-double TranslocationFunctions::GetPosZ(unsigned short pid) noexcept
+double TranslocationFunctions::getPosZ(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
@@ -49,7 +49,7 @@ double TranslocationFunctions::GetPosZ(unsigned short pid) noexcept
     return player->Position()->pos[2];
 }
 
-void TranslocationFunctions::GetAngle(unsigned short pid, float *x, float *y, float *z) noexcept
+void TranslocationFunctions::getAngle(unsigned short pid, float *x, float *y, float *z) noexcept
 {
     *x = 0.00;
     *y = 0.00;
@@ -63,7 +63,7 @@ void TranslocationFunctions::GetAngle(unsigned short pid, float *x, float *y, fl
     *z = player->Position()->rot[2];
 }
 
-double TranslocationFunctions::GetAngleX(unsigned short pid) noexcept
+double TranslocationFunctions::getAngleX(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
@@ -71,7 +71,7 @@ double TranslocationFunctions::GetAngleX(unsigned short pid) noexcept
     return player->Position()->rot[0];
 }
 
-double TranslocationFunctions::GetAngleY(unsigned short pid) noexcept
+double TranslocationFunctions::getAngleY(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
@@ -79,7 +79,7 @@ double TranslocationFunctions::GetAngleY(unsigned short pid) noexcept
     return player->Position()->rot[1];
 }
 
-double TranslocationFunctions::GetAngleZ(unsigned short pid) noexcept
+double TranslocationFunctions::getAngleZ(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
@@ -87,7 +87,7 @@ double TranslocationFunctions::GetAngleZ(unsigned short pid) noexcept
     return player->Position()->rot[2];
 }
 
-void TranslocationFunctions::SetPos(unsigned short pid, double x, double y, double z) noexcept
+void TranslocationFunctions::setPos(unsigned short pid, double x, double y, double z) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -97,7 +97,7 @@ void TranslocationFunctions::SetPos(unsigned short pid, double x, double y, doub
     player->Position()->pos[2] = z;
 }
 
-void TranslocationFunctions::SetAngle(unsigned short pid, double x, double y, double z) noexcept
+void TranslocationFunctions::setAngle(unsigned short pid, double x, double y, double z) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
@@ -107,7 +107,7 @@ void TranslocationFunctions::SetAngle(unsigned short pid, double x, double y, do
     player->Position()->rot[2] = z;
 }
 
-const char* TranslocationFunctions::GetCell(unsigned short pid) noexcept
+const char* TranslocationFunctions::getCell(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -115,7 +115,7 @@ const char* TranslocationFunctions::GetCell(unsigned short pid) noexcept
     return player->GetCell()->mName.c_str();
 }
 
-void TranslocationFunctions::SetCell(unsigned short pid, const char *name) noexcept
+void TranslocationFunctions::setCell(unsigned short pid, const char *name) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -135,7 +135,7 @@ void TranslocationFunctions::SetCell(unsigned short pid, const char *name) noexc
     player->GetCell()->mName = name;
 }
 
-void TranslocationFunctions::SetExterior(unsigned short pid, int x, int y) noexcept
+void TranslocationFunctions::setExterior(unsigned short pid, int x, int y) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -156,21 +156,21 @@ void TranslocationFunctions::SetExterior(unsigned short pid, int x, int y) noexc
     player->GetCell()->mData.mY = y;
 }
 
-int TranslocationFunctions::GetExteriorX(unsigned short pid) noexcept
+int TranslocationFunctions::getExteriorX(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0);
     return player->GetCell()->mData.mX;
 }
 
-int TranslocationFunctions::GetExteriorY(unsigned short pid) noexcept
+int TranslocationFunctions::getExteriorY(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0);
     return player->GetCell()->mData.mY;
 }
 
-bool TranslocationFunctions::IsInExterior(unsigned short pid) noexcept
+bool TranslocationFunctions::isInExterior(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, false);
@@ -178,7 +178,7 @@ bool TranslocationFunctions::IsInExterior(unsigned short pid) noexcept
     return player->GetCell()->isExterior();
 }
 
-void TranslocationFunctions::SendPos(unsigned short pid) noexcept
+void TranslocationFunctions::sendPos(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
@@ -186,7 +186,7 @@ void TranslocationFunctions::SendPos(unsigned short pid) noexcept
     mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_POS)->Send(player, false);
 }
 
-void TranslocationFunctions::SendCell(unsigned short pid) noexcept
+void TranslocationFunctions::sendCell(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );

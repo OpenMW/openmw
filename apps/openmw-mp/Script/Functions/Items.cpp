@@ -10,7 +10,7 @@
 
 using namespace mwmp;
 
-void ItemFunctions::AddItem(unsigned short pid, const char* itemName, unsigned int count, int health) noexcept
+void ItemFunctions::addItem(unsigned short pid, const char* itemName, unsigned int count, int health) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -24,7 +24,7 @@ void ItemFunctions::AddItem(unsigned short pid, const char* itemName, unsigned i
     player->inventorySendBuffer.action = Inventory::ADDITEM;
 }
 
-void ItemFunctions::EquipItem(unsigned short pid, unsigned short slot, const char *itemName, unsigned int count, int health) noexcept
+void ItemFunctions::equipItem(unsigned short pid, unsigned short slot, const char *itemName, unsigned int count, int health) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -34,13 +34,13 @@ void ItemFunctions::EquipItem(unsigned short pid, unsigned short slot, const cha
     player->EquipedItem(slot)->health = health;
 }
 
-void ItemFunctions::UnequipItem(unsigned short pid, unsigned short slot) noexcept
+void ItemFunctions::unequipItem(unsigned short pid, unsigned short slot) noexcept
 {
     LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");
-    //ItemFunctions::EquipItem(pid, slot, "", 0);
+    //ItemFunctions::equipItem(pid, slot, "", 0);
 }
 
-const char *ItemFunctions::GetItemSlot(unsigned short pid, unsigned short slot) noexcept
+const char *ItemFunctions::getItemSlot(unsigned short pid, unsigned short slot) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -48,7 +48,7 @@ const char *ItemFunctions::GetItemSlot(unsigned short pid, unsigned short slot) 
     return player->EquipedItem(slot)->refid.c_str();
 }
 
-bool ItemFunctions::HasItemEquipped(unsigned short pid, const char* itemName)
+bool ItemFunctions::hasItemEquipped(unsigned short pid, const char* itemName)
 {
     Player *player;
     GET_PLAYER(pid, player, false);
@@ -59,7 +59,7 @@ bool ItemFunctions::HasItemEquipped(unsigned short pid, const char* itemName)
     return false;
 }
 
-void ItemFunctions::RemoveItem(unsigned short pid, const char* itemName, unsigned short count) noexcept
+void ItemFunctions::removeItem(unsigned short pid, const char* itemName, unsigned short count) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -72,12 +72,12 @@ void ItemFunctions::RemoveItem(unsigned short pid, const char* itemName, unsigne
     player->inventorySendBuffer.items.push_back(item);
     player->inventorySendBuffer.action = Inventory::REMOVEITEM;
 }
-void ItemFunctions::GetItemCount(unsigned short pid, const char* itemName) noexcept
+void ItemFunctions::getItemCount(unsigned short pid, const char* itemName) noexcept
 {
     LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");
 }
 
-const char *ItemFunctions::GetItemName(unsigned short pid, unsigned int i) noexcept
+const char *ItemFunctions::getItemName(unsigned short pid, unsigned int i) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, "");
@@ -85,7 +85,7 @@ const char *ItemFunctions::GetItemName(unsigned short pid, unsigned int i) noexc
     return player->inventory.items.at(i).refid.c_str();
 }
 
-int ItemFunctions::GetItemCount2(unsigned short pid, unsigned int i) noexcept
+int ItemFunctions::getItemCount2(unsigned short pid, unsigned int i) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -93,7 +93,7 @@ int ItemFunctions::GetItemCount2(unsigned short pid, unsigned int i) noexcept
     return player->inventory.items.at(i).count;
 }
 
-int ItemFunctions::GetItemHealth(unsigned short pid, unsigned int i) noexcept
+int ItemFunctions::getItemHealth(unsigned short pid, unsigned int i) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -101,7 +101,7 @@ int ItemFunctions::GetItemHealth(unsigned short pid, unsigned int i) noexcept
     return player->inventory.items.at(i).health;
 }
 
-unsigned int ItemFunctions::GetInventorySize(unsigned short pid) noexcept
+unsigned int ItemFunctions::getInventorySize(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -109,7 +109,7 @@ unsigned int ItemFunctions::GetInventorySize(unsigned short pid) noexcept
     return player->inventory.count;
 }
 
-void ItemFunctions::SendEquipment(unsigned short pid) noexcept
+void ItemFunctions::sendEquipment(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
@@ -118,7 +118,7 @@ void ItemFunctions::SendEquipment(unsigned short pid) noexcept
     mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_EQUIPMENT)->Send(player, true);
 }
 
-void ItemFunctions::SendInventory(unsigned short pid) noexcept
+void ItemFunctions::sendInventory(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
