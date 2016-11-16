@@ -183,7 +183,7 @@ void TranslocationFunctions::SendPos(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, );
 
-    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_POS)->Send(player, false);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_POS)->Send(player, false);
 }
 
 void TranslocationFunctions::SendCell(unsigned short pid) noexcept
@@ -191,6 +191,6 @@ void TranslocationFunctions::SendCell(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, );
 
-    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_CELL)->Send(player, false);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_CELL)->Send(player, false);
 }
 

@@ -8,7 +8,7 @@
 TPlayers Players::players;
 TSlots Players::slots;
 
-void Players::DeletePlayer(RakNet::RakNetGUID guid)
+void Players::deletePlayer(RakNet::RakNetGUID guid)
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Deleting player with guid %lu",
         guid.g);
@@ -16,15 +16,15 @@ void Players::DeletePlayer(RakNet::RakNetGUID guid)
     if (players[guid.g] != 0)
     {
         LOG_APPEND(Log::LOG_INFO, "- Emptying slot %i",
-            players[guid.g]->GetID());
+            players[guid.g]->getId());
 
-        slots[players[guid.g]->GetID()] = 0;
+        slots[players[guid.g]->getId()] = 0;
         delete players[guid.g];
         players.erase(guid.g);
     }
 }
 
-void Players::NewPlayer(RakNet::RakNetGUID guid)
+void Players::newPlayer(RakNet::RakNetGUID guid)
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Creating new player with guid %lu",
         guid.g);
@@ -36,7 +36,7 @@ void Players::NewPlayer(RakNet::RakNetGUID guid)
     players[guid.g]->CreatureStats()->blank();
     players[guid.g]->charClass.blank();
 
-    for (int i = 0; i < mwmp::Networking::Get().MaxConnections(); i++)
+    for (int i = 0; i < mwmp::Networking::get().maxConnections(); i++)
     {
         if (slots[i] == 0)
         {
@@ -44,26 +44,26 @@ void Players::NewPlayer(RakNet::RakNetGUID guid)
                 i);
 
             slots[i] = players[guid.g];
-            slots[i]->SetID(i);
+            slots[i]->setId(i);
             break;
         }
     }
 }
 
-Player *Players::GetPlayer(RakNet::RakNetGUID guid)
+Player *Players::getPlayer(RakNet::RakNetGUID guid)
 {
     return players[guid.g];
 }
 
-std::map<uint64_t, Player*> *Players::GetPlayers()
+std::map<uint64_t, Player*> *Players::getPlayers()
 {
     return &players;
 }
 
 Player::Player(RakNet::RakNetGUID guid) : BasePlayer(guid)
 {
-    handshake = false;
-    loaded = false;
+    handshakeState = false;
+    loadState = false;
     lastAttacker = 0;
 }
 
@@ -72,37 +72,37 @@ Player::~Player()
 
 }
 
-unsigned short Player::GetID()
+unsigned short Player::getId()
 {
     return id;
 }
 
-void Player::SetID(unsigned short id)
+void Player::setId(unsigned short id)
 {
     this->id = id;
 }
 
-void Player::Handshake()
+void Player::setHandshake()
 {
-    handshake = true;
+    handshakeState = true;
 }
 
 bool Player::isHandshaked()
 {
-    return handshake;
+    return handshakeState;
 }
 
-void Player::Loaded(int state)
+void Player::setLoadState(int state)
 {
-    loaded = state;
+    loadState = state;
 }
 
-int Player::LoadedState()
+int Player::getLoadState()
 {
-    return loaded;
+    return loadState;
 }
 
-Player *Players::GetPlayer(unsigned short id)
+Player *Players::getPlayer(unsigned short id)
 {
     if (slots.find(id) == slots.end())
         return nullptr;

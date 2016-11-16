@@ -150,7 +150,7 @@ void MasterClient::Update()
 
         RakSleep(timeout);
         ;
-        players = mwmp::Networking::Get().NumberOfConnections();
+        players = mwmp::Networking::get().numberOfConnections();
         response = Send(motd, players, maxPlayers, update);
         update = true;
     }

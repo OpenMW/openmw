@@ -111,14 +111,14 @@ boost::any ScriptFunctions::CallPublic(const char *name, ...) noexcept
 
 void ScriptFunctions::StopServer(int code) noexcept
 {
-    mwmp::Networking::GetPtr()->StopServer(code);
+    mwmp::Networking::getPtr()->stopServer(code);
 }
 
 void ScriptFunctions::Kick(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
-    mwmp::Networking::GetPtr()->KickPlayer(player->guid);
+    mwmp::Networking::getPtr()->kickPlayer(player->guid);
 }
 
 const char *ScriptFunctions::GetServerVersion() noexcept
@@ -136,5 +136,5 @@ int ScriptFunctions::GetAvgPing(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,-1);
-    return mwmp::Networking::Get().GetAvgPing(player->guid);
+    return mwmp::Networking::get().getAvgPing(player->guid);
 }

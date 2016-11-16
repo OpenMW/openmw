@@ -19,7 +19,7 @@
 #include "Types.hpp"
 
 #define GET_PLAYER(pid, pl, retvalue) \
-     pl = Players::GetPlayer(pid); \
+     pl = Players::getPlayer(pid); \
      if (player == 0) {\
         fprintf(stderr, "%s: Player with pid \'%d\' not found\n", __PRETTY_FUNCTION__, pid);\
         /*ScriptFunctions::StopServer(1);*/ \

@@ -25,11 +25,11 @@ typedef std::map<unsigned short, Player*> TSlots;
 class Players
 {
 public:
-    static void NewPlayer(RakNet::RakNetGUID guid);
-    static void DeletePlayer(RakNet::RakNetGUID guid);
-    static Player *GetPlayer(RakNet::RakNetGUID guid);
-    static Player *GetPlayer(unsigned short id);
-    static TPlayers *GetPlayers();
+    static void newPlayer(RakNet::RakNetGUID guid);
+    static void deletePlayer(RakNet::RakNetGUID guid);
+    static Player *getPlayer(RakNet::RakNetGUID guid);
+    static Player *getPlayer(unsigned short id);
+    static TPlayers *getPlayers();
 
 private:
     static TPlayers players;
@@ -49,14 +49,14 @@ public:
     };
     Player(RakNet::RakNetGUID guid);
 
-    unsigned short GetID();
-    void SetID(unsigned short id);
+    unsigned short getId();
+    void setId(unsigned short id);
 
     bool isHandshaked();
-    void Handshake();
+    void setHandshake();
 
-    void Loaded(int state);
-    int LoadedState();
+    void setLoadState(int state);
+    int getLoadState();
 
     void setLastAttackerId(unsigned short pid);
     void resetLastAttacker();
@@ -69,8 +69,8 @@ public:
 public:
     mwmp::Inventory inventorySendBuffer;
 private:
-    bool handshake;
-    int loaded;
+    bool handshakeState;
+    int loadState;
     unsigned short lastAttacker;
     std::chrono::steady_clock::time_point lastAttackerTime;
 

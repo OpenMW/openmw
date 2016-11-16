@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
     }
     
 
-    int code = networking.MainLoop();
+    int code = networking.mainLoop();
 
     RakNet::RakPeerInterface::DestroyInstance(peer);
 

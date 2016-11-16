@@ -17,27 +17,27 @@ namespace  mwmp
         Networking(RakNet::RakPeerInterface *peer);
         ~Networking();
 
-        void NewPlayer(RakNet::RakNetGUID guid);
-        void DisconnectPlayer(RakNet::RakNetGUID guid);
-        void KickPlayer(RakNet::RakNetGUID guid);
+        void newPlayer(RakNet::RakNetGUID guid);
+        void disconnectPlayer(RakNet::RakNetGUID guid);
+        void kickPlayer(RakNet::RakNetGUID guid);
 
-        void ProcessPlayerPacket(RakNet::Packet *packet);
-        void ProcessWorldPacket(RakNet::Packet *packet);
-        void Update(RakNet::Packet *packet);
+        void processPlayerPacket(RakNet::Packet *packet);
+        void processWorldPacket(RakNet::Packet *packet);
+        void update(RakNet::Packet *packet);
 
-        unsigned short NumberOfConnections() const;
-        unsigned int MaxConnections() const;
-        int GetAvgPing(RakNet::AddressOrGUID) const;
+        unsigned short numberOfConnections() const;
+        unsigned int maxConnections() const;
+        int getAvgPing(RakNet::AddressOrGUID) const;
 
-        int MainLoop();
+        int mainLoop();
 
-        void StopServer(int code);
+        void stopServer(int code);
 
-        PlayerPacketController *GetPlayerController() const;
-        WorldPacketController *GetWorldController() const;
+        PlayerPacketController *getPlayerController() const;
+        WorldPacketController *getWorldController() const;
 
-        static const Networking &Get();
-        static Networking *GetPtr();
+        static const Networking &get();
+        static Networking *getPtr();
 
     private:
         static Networking *sThis;

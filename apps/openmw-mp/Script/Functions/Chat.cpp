@@ -15,9 +15,9 @@ void ScriptFunctions::SendMessage(unsigned short pid, const char *message, bool 
 
     DEBUG_PRINTF("System: %s", message);
 
-    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_CHAT_MESSAGE)->Send(player, false);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_CHAT_MESSAGE)->Send(player, false);
     if (broadcast)
-        mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_CHAT_MESSAGE)->Send(player, true);
+        mwmp::Networking::get().getPlayerController()->GetPacket(ID_CHAT_MESSAGE)->Send(player, true);
 }
 
 void ScriptFunctions::CleanChat(unsigned short pid)

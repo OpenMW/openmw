@@ -15,7 +15,7 @@ void CharClassFunctions::SendClass(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player,);
 
-    mwmp::Networking::Get().GetPlayerController()->GetPacket(ID_GAME_CHARCLASS)->Send(player, false);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_CHARCLASS)->Send(player, false);
 }
 
 void CharClassFunctions::SetDefaultClass(unsigned short pid, const char *id) noexcept
