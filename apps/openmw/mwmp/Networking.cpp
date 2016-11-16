@@ -465,7 +465,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             MWBase::Environment::get().getWorld()->findInteriorPosition("Pelagiad, Fort Pelagiad", pos);
             MWBase::Environment::get().getWorld()->changeToInteriorCell("Pelagiad, Fort Pelagiad", pos, true);
             (*getLocalPlayer()->Position()) = pos;
-            (*getLocalPlayer()->GetCell()) = *player.getCell()->getCell();
+            (*getLocalPlayer()->getCell()) = *player.getCell()->getCell();
             myPacket->Send(getLocalPlayer(), serverAddr);
 
             getLocalPlayer()->updateDynamicStats(true);

@@ -268,9 +268,9 @@ ESM::CustomMarker mwmp::GUIController::CreateMarker(const RakNet::RakNetGUID &gu
 
     mEditingMarker.mNote = player->Npc()->mName;
 
-    const ESM::Cell *ptrCell = player->GetCell();
+    const ESM::Cell *ptrCell = player->getCell();
 
-    mEditingMarker.mCell = player->GetCell()->mCellId;
+    mEditingMarker.mCell = player->getCell()->mCellId;
 
     mEditingMarker.mWorldX = player->Position()->pos[0];
     mEditingMarker.mWorldY = player->Position()->pos[1];

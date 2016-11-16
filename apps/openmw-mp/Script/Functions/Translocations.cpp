@@ -112,7 +112,7 @@ const char* TranslocationFunctions::getCell(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    return player->GetCell()->mName.c_str();
+    return player->getCell()->mName.c_str();
 }
 
 void TranslocationFunctions::setCell(unsigned short pid, const char *name) noexcept
@@ -122,17 +122,17 @@ void TranslocationFunctions::setCell(unsigned short pid, const char *name) noexc
 
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Script is moving %s from %s to %s",
         player->Npc()->mName.c_str(),
-        player->GetCell()->getDescription().c_str(),
+        player->getCell()->getDescription().c_str(),
         name);
 
     // If the player is currently in an exterior, turn on the interior flag
     // from the  cell so the player doesn't get teleported to their exterior
     // grid position (which we haven't changed)
-    if (player->GetCell()->isExterior()) {
-        player->GetCell()->mData.mFlags |= ESM::Cell::Interior;
+    if (player->getCell()->isExterior()) {
+        player->getCell()->mData.mFlags |= ESM::Cell::Interior;
     }
 
-    player->GetCell()->mName = name;
+    player->getCell()->mName = name;
 }
 
 void TranslocationFunctions::setExterior(unsigned short pid, int x, int y) noexcept
@@ -142,32 +142,32 @@ void TranslocationFunctions::setExterior(unsigned short pid, int x, int y) noexc
 
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Script is moving %s from %s to %i,%i",
         player->Npc()->mName.c_str(),
-        player->GetCell()->getDescription().c_str(),
+        player->getCell()->getDescription().c_str(),
         x,
         y);
 
     // If the player is currently in an interior, turn off the interior flag
     // from the cell
-    if (!player->GetCell()->isExterior()) {
-        player->GetCell()->mData.mFlags &= ~ESM::Cell::Interior;
+    if (!player->getCell()->isExterior()) {
+        player->getCell()->mData.mFlags &= ~ESM::Cell::Interior;
     }
 
-    player->GetCell()->mData.mX = x;
-    player->GetCell()->mData.mY = y;
+    player->getCell()->mData.mX = x;
+    player->getCell()->mData.mY = y;
 }
 
 int TranslocationFunctions::getExteriorX(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0);
-    return player->GetCell()->mData.mX;
+    return player->getCell()->mData.mX;
 }
 
 int TranslocationFunctions::getExteriorY(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0);
-    return player->GetCell()->mData.mY;
+    return player->getCell()->mData.mY;
 }
 
 bool TranslocationFunctions::isInExterior(unsigned short pid) noexcept
@@ -175,7 +175,7 @@ bool TranslocationFunctions::isInExterior(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, false);
 
-    return player->GetCell()->isExterior();
+    return player->getCell()->isExterior();
 }
 
 void TranslocationFunctions::sendPos(unsigned short pid) noexcept

@@ -117,7 +117,7 @@ namespace mwmp
         {
             return &movementFlags;
         }
-        virtual ESM::Cell *GetCell()
+        virtual ESM::Cell *getCell()
         {
             return &cell;
         }

@@ -312,17 +312,17 @@ void LocalPlayer::updateCell(bool forceUpdate)
     {
         shouldUpdate = true;
     }
-    else if (!Misc::StringUtils::ciEqual(ptrCell->mName, GetCell()->mName))
+    else if (!Misc::StringUtils::ciEqual(ptrCell->mName, getCell()->mName))
     {
         shouldUpdate = true;
     }
     else if (ptrCell->isExterior())
     {
-        if (ptrCell->mData.mX != GetCell()->mData.mX)
+        if (ptrCell->mData.mX != getCell()->mData.mX)
         {
             shouldUpdate = true;
         }
-        else if (ptrCell->mData.mY != GetCell()->mData.mY)
+        else if (ptrCell->mData.mY != getCell()->mData.mY)
         {
             shouldUpdate = true;
         }
@@ -333,10 +333,10 @@ void LocalPlayer::updateCell(bool forceUpdate)
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_CELL to server");
 
         LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s",
-            GetCell()->getDescription().c_str(),
+            getCell()->getDescription().c_str(),
             ptrCell->getDescription().c_str());
 
-        (*GetCell()) = *ptrCell;
+        (*getCell()) = *ptrCell;
 
         // Make sure the position is updated before a cell packet is sent, or else
         // cell change events in server scripts will have the wrong player position
@@ -713,10 +713,10 @@ void LocalPlayer::setCell()
 
     world->getPlayer().setTeleported(true);
 
-    int x = GetCell()->mData.mX;
-    int y = GetCell()->mData.mY;
+    int x = getCell()->mData.mX;
+    int y = getCell()->mData.mY;
 
-    if (GetCell()->isExterior())
+    if (getCell()->isExterior())
     {
         world->indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
         pos.pos[2] = 0;
@@ -726,7 +726,7 @@ void LocalPlayer::setCell()
         world->changeToExteriorCell(pos, true);
         world->fixPosition(player);
     }
-    else if (world->findExteriorPosition(GetCell()->mName, pos))
+    else if (world->findExteriorPosition(getCell()->mName, pos))
     {
         world->changeToExteriorCell(pos, true);
         world->fixPosition(player);
@@ -735,8 +735,8 @@ void LocalPlayer::setCell()
     {
         try
         {
-            world->findInteriorPosition(GetCell()->mName, pos);
-            world->changeToInteriorCell(GetCell()->mName, pos, true);
+            world->findInteriorPosition(getCell()->mName, pos);
+            world->changeToInteriorCell(getCell()->mName, pos, true);
         }
         // If we've been sent to an invalid interior, ignore the incoming
         // packet about our position in that cell

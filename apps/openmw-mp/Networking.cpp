@@ -157,7 +157,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Read(player);
 
             LOG_APPEND(Log::LOG_INFO, "- Moved to %s",
-                player->GetCell()->getDescription().c_str());
+                player->getCell()->getDescription().c_str());
 
             myPacket->Send(player, true); //send to other clients
             Script::Call<Script::CallbackIdentity("onPlayerChangeCell")>(player->getId());
