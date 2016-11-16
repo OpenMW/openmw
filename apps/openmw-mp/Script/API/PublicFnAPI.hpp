@@ -26,7 +26,7 @@ private:
 
 public:
     template<typename... Args>
-    static void MakePublic(Args &&... args)
+    static void makePublic(Args &&... args)
     { new Public(std::forward<Args>(args)...); }
 
     static boost::any Call(const std::string &name, const std::vector<boost::any> &args);

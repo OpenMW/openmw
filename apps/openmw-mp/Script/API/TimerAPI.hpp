@@ -46,17 +46,17 @@ namespace mwmp
     {
     public:
 #if defined(ENABLE_PAWN)
-        static int CreateTimerPAWN(AMX *amx, ScriptFuncPAWN callback, long msec, const std::string& def, std::vector<boost::any> args);
+        static int createTimerPAWN(AMX *amx, ScriptFuncPAWN callback, long msec, const std::string& def, std::vector<boost::any> args);
 #endif
 #if defined(ENABLE_LUA)
-        static int CreateTimerLua(lua_State *lua, ScriptFuncLua callback, long msec, const std::string& def, std::vector<boost::any> args);
+        static int createTimerLua(lua_State *lua, ScriptFuncLua callback, long msec, const std::string& def, std::vector<boost::any> args);
 #endif
-        static int CreateTimer(ScriptFunc callback, long msec, const std::string& def, std::vector<boost::any> args);
-        static void FreeTimer(int timerid);
-        static void ResetTimer(int timerid, long msec);
-        static void StartTimer(int timerid);
-        static void StopTimer(int timerid);
-        static bool IsEndTimer(int timerid);
+        static int createTimer(ScriptFunc callback, long msec, const std::string& def, std::vector<boost::any> args);
+        static void freeTimer(int timerid);
+        static void resetTimer(int timerid, long msec);
+        static void startTimer(int timerid);
+        static void stopTimer(int timerid);
+        static bool isEndTimer(int timerid);
 
         static void Terminate();
 

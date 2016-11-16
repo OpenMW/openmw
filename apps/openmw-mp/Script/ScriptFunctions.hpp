@@ -22,7 +22,7 @@
      pl = Players::getPlayer(pid); \
      if (player == 0) {\
         fprintf(stderr, "%s: Player with pid \'%d\' not found\n", __PRETTY_FUNCTION__, pid);\
-        /*ScriptFunctions::StopServer(1);*/ \
+        /*ScriptFunctions::stopServer(1);*/ \
         return retvalue;\
 }
 
@@ -31,16 +31,16 @@ class ScriptFunctions
 {
 public:
 
-    static void GetArguments(std::vector<boost::any> &params, va_list args, const std::string &def);
+    static void getArguments(std::vector<boost::any> &params, va_list args, const std::string &def);
 
-    static void StopServer(int code) noexcept;
+    static void stopServer(int code) noexcept;
 
-    static void MakePublic(ScriptFunc _public, const char *name, char ret_type, const char *def) noexcept;
-    static boost::any CallPublic(const char *name, ...) noexcept;
+    static void makePublic(ScriptFunc _public, const char *name, char ret_type, const char *def) noexcept;
+    static boost::any callPublic(const char *name, ...) noexcept;
 
-    static void SendMessage(unsigned short pid, const char *message, bool broadcast) noexcept;
-    static void CleanChat(unsigned short pid);
-    static void CleanChat();
+    static void sendMessage(unsigned short pid, const char *message, bool broadcast) noexcept;
+    static void cleanChat(unsigned short pid);
+    static void cleanChat();
 
     /**
      * \brief Create timer
@@ -48,41 +48,40 @@ public:
      * \param msec
      * \return return timer id
      */
-    static int CreateTimer(ScriptFunc callback, int msec) noexcept;
-    static int CreateTimerEx(ScriptFunc callback, int msec, const char *types, ...) noexcept;
+    static int createTimer(ScriptFunc callback, int msec) noexcept;
+    static int createTimerEx(ScriptFunc callback, int msec, const char *types, ...) noexcept;
 
-    static void StartTimer(int timerId) noexcept;
-    static void StopTimer(int timerId) noexcept;
-    static void RestartTimer(int timerId, int msec) noexcept;
-    static void FreeTimer(int timerId) noexcept;
-    static bool IsTimerElapsed(int timerId) noexcept;
+    static void startTimer(int timerId) noexcept;
+    static void stopTimer(int timerId) noexcept;
+    static void restartTimer(int timerId, int msec) noexcept;
+    static void freeTimer(int timerId) noexcept;
+    static bool isTimerElapsed(int timerId) noexcept;
 
-    static void Kick(unsigned short pid) noexcept;
-    static const char *GetServerVersion() noexcept;
-    static const char *GetProtocolVersion() noexcept;
-    static int GetAvgPing(unsigned short pid) noexcept;
+    static void kick(unsigned short pid) noexcept;
+    static const char *getServerVersion() noexcept;
+    static const char *getProtocolVersion() noexcept;
+    static int getAvgPing(unsigned short pid) noexcept;
 
     static constexpr ScriptFunctionData functions[]{
-            {"CreateTimer",         ScriptFunctions::CreateTimer},
-            {"CreateTimerEx",       reinterpret_cast<Function<void>>(ScriptFunctions::CreateTimerEx)},
-            {"MakePublic",          ScriptFunctions::MakePublic},
-            {"CallPublic",          reinterpret_cast<Function<void>>(ScriptFunctions::CallPublic)},
+            {"createTimer",         ScriptFunctions::createTimer},
+            {"createTimerEx",       reinterpret_cast<Function<void>>(ScriptFunctions::createTimerEx)},
+            {"makePublic",          ScriptFunctions::makePublic},
+            {"callPublic",          reinterpret_cast<Function<void>>(ScriptFunctions::callPublic)},
 
 
-            {"StartTimer",          ScriptFunctions::StartTimer},
-            {"StopTimer",           ScriptFunctions::StopTimer},
-            {"RestartTimer",        ScriptFunctions::RestartTimer},
-            {"FreeTimer",           ScriptFunctions::FreeTimer},
-            {"IsTimerElapsed",      ScriptFunctions::IsTimerElapsed},
+            {"startTimer",          ScriptFunctions::startTimer},
+            {"stopTimer",           ScriptFunctions::stopTimer},
+            {"restartTimer",        ScriptFunctions::restartTimer},
+            {"freeTimer",           ScriptFunctions::freeTimer},
+            {"isTimerElapsed",      ScriptFunctions::isTimerElapsed},
 
-            {"StopServer",          ScriptFunctions::StopServer},
+            {"stopServer",          ScriptFunctions::stopServer},
 
-//            {"Cast",              ScriptFunctions::Cast},
-            {"SendMessage",         ScriptFunctions::SendMessage},
-            {"Kick",                ScriptFunctions::Kick},
-            {"GetServerVersion",    ScriptFunctions::GetServerVersion},
-            {"GetProtocolVersion",  ScriptFunctions::GetProtocolVersion},
-            {"GetAvgPing",          ScriptFunctions::GetAvgPing},
+            {"sendMessage",         ScriptFunctions::sendMessage},
+            {"kick",                ScriptFunctions::kick},
+            {"getServerVersion",    ScriptFunctions::getServerVersion},
+            {"getProtocolVersion",  ScriptFunctions::getProtocolVersion},
+            {"getAvgPing",          ScriptFunctions::getAvgPing},
 
             TRANSLOCATIONFUNCTIONS,
             STATSFUNCTIONS,
@@ -96,21 +95,21 @@ public:
 
     static constexpr ScriptCallbackData callbacks[]{
             {"Main",                     Function<int, int, int>()},
-            {"OnServerInit",             Function<void>()},
-            {"OnServerExit",             Function<void, bool>()},
-            {"OnPlayerConnect",          Function<bool, unsigned short>()},
-            {"OnPlayerDisconnect",       Function<void, unsigned short>()},
-            {"OnPlayerDeath",            Function<void, unsigned short, short, unsigned short>()},
-            {"OnPlayerResurrect",        Function<void, unsigned short>()},
-            {"OnPlayerChangeCell",       Function<void, unsigned short>()},
-            {"OnPlayerChangeAttributes", Function<void, unsigned short>()},
-            {"OnPlayerChangeSkills",     Function<void, unsigned short>()},
-            {"OnPlayerChangeLevel",      Function<void, unsigned short>()},
-            {"OnPlayerChangeEquipment",  Function<void, unsigned short>()},
-            {"OnPlayerChangeInventory",  Function<void, unsigned short>()},
-            {"OnPlayerSendMessage",      Function<bool, unsigned short, const char*>()},
-            {"OnPlayerEndCharGen",       Function<void, unsigned short>()},
-            {"OnGUIAction",              Function<void, unsigned short, int, const char*>()}
+            {"onServerInit",             Function<void>()},
+            {"onServerExit",             Function<void, bool>()},
+            {"onPlayerConnect",          Function<bool, unsigned short>()},
+            {"onPlayerDisconnect",       Function<void, unsigned short>()},
+            {"onPlayerDeath",            Function<void, unsigned short, short, unsigned short>()},
+            {"onPlayerResurrect",        Function<void, unsigned short>()},
+            {"onPlayerChangeCell",       Function<void, unsigned short>()},
+            {"onPlayerChangeAttributes", Function<void, unsigned short>()},
+            {"onPlayerChangeSkills",     Function<void, unsigned short>()},
+            {"onPlayerChangeLevel",      Function<void, unsigned short>()},
+            {"onPlayerChangeEquipment",  Function<void, unsigned short>()},
+            {"onPlayerChangeInventory",  Function<void, unsigned short>()},
+            {"onPlayerSendMessage",      Function<bool, unsigned short, const char*>()},
+            {"onPlayerEndCharGen",       Function<void, unsigned short>()},
+            {"onGuiAction",              Function<void, unsigned short, int, const char*>()}
     };
 };
 

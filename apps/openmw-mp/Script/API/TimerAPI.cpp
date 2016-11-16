@@ -78,7 +78,7 @@ int TimerAPI::pointer = 0;
 std::unordered_map<int, Timer* > TimerAPI::timers;
 
 #if defined(ENABLE_PAWN)
-int TimerAPI::CreateTimerPAWN(AMX *amx, ScriptFuncPAWN callback, long msec, const string& def, std::vector<boost::any> args)
+int TimerAPI::createTimerPAWN(AMX *amx, ScriptFuncPAWN callback, long msec, const string& def, std::vector<boost::any> args)
 {
     int id = -1;
 
@@ -102,7 +102,7 @@ int TimerAPI::CreateTimerPAWN(AMX *amx, ScriptFuncPAWN callback, long msec, cons
 #endif
 
 #if defined(ENABLE_LUA)
-int TimerAPI::CreateTimerLua(lua_State *lua, ScriptFuncLua callback, long msec, const std::string& def, std::vector<boost::any> args)
+int TimerAPI::createTimerLua(lua_State *lua, ScriptFuncLua callback, long msec, const std::string& def, std::vector<boost::any> args)
 {
     int id = -1;
 
@@ -126,7 +126,7 @@ int TimerAPI::CreateTimerLua(lua_State *lua, ScriptFuncLua callback, long msec, 
 #endif
 
 
-int TimerAPI::CreateTimer(ScriptFunc callback, long msec, const std::string &def, std::vector<boost::any> args)
+int TimerAPI::createTimer(ScriptFunc callback, long msec, const std::string &def, std::vector<boost::any> args)
 {
     int id = -1;
 
@@ -148,7 +148,7 @@ int TimerAPI::CreateTimer(ScriptFunc callback, long msec, const std::string &def
     return id;
 }
 
-void TimerAPI::FreeTimer(int timerid)
+void TimerAPI::freeTimer(int timerid)
 {
 
     try
@@ -165,7 +165,7 @@ void TimerAPI::FreeTimer(int timerid)
     }
 }
 
-void TimerAPI::ResetTimer(int timerid, long msec)
+void TimerAPI::resetTimer(int timerid, long msec)
 {
     try
     {
@@ -177,7 +177,7 @@ void TimerAPI::ResetTimer(int timerid, long msec)
     }
 }
 
-void TimerAPI::StartTimer(int timerid)
+void TimerAPI::startTimer(int timerid)
 {
     try
     {
@@ -192,7 +192,7 @@ void TimerAPI::StartTimer(int timerid)
     }
 }
 
-void TimerAPI::StopTimer(int timerid)
+void TimerAPI::stopTimer(int timerid)
 {
     try
     {
@@ -204,7 +204,7 @@ void TimerAPI::StopTimer(int timerid)
     }
 }
 
-bool TimerAPI::IsEndTimer(int timerid)
+bool TimerAPI::isEndTimer(int timerid)
 {
     bool ret = false;
     try

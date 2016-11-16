@@ -64,19 +64,19 @@ inline vector<boost::any> DefToVec(lua_State *lua, string types, int args_begin,
     return args;
 }
 
-int LangLua::MakePublic(lua_State *lua) noexcept
+int LangLua::makePublic(lua_State *lua) noexcept
 {
     const char * callback = luabridge::Stack<const char*>::get(lua, 1);
     const char * name = luabridge::Stack<const char*>::get(lua, 2);
     char ret_type = luabridge::Stack<char>::get(lua, 3);
     const char * def = luabridge::Stack<const char*>::get(lua, 4);
 
-    Public::MakePublic(callback, lua, name, ret_type, def);
+    Public::makePublic(callback, lua, name, ret_type, def);
     return 0;
 
 }
 
-int LangLua::CallPublic(lua_State *lua)
+int LangLua::callPublic(lua_State *lua)
 {
     const char * name = luabridge::Stack<const char*>::get(lua, 1);
 
@@ -104,18 +104,18 @@ int LangLua::CallPublic(lua_State *lua)
     return 1;
 }
 
-int LangLua::CreateTimer(lua_State *lua) noexcept
+int LangLua::createTimer(lua_State *lua) noexcept
 {
 
     const char * callback= luabridge::Stack<const char*>::get(lua, 1);
     int msec = luabridge::Stack<int>::get(lua, 2);
 
-    int id = mwmp::TimerAPI::CreateTimerLua(lua, callback, msec, "", vector<boost::any>());
+    int id = mwmp::TimerAPI::createTimerLua(lua, callback, msec, "", vector<boost::any>());
     luabridge::push(lua, id);
     return 1;
 }
 
-int LangLua::CreateTimerEx(lua_State *lua)
+int LangLua::createTimerEx(lua_State *lua)
 {
     const char * callback = luabridge::Stack<const char*>::get(lua, 1);
     int msec = luabridge::Stack<int>::get(lua, 2);
@@ -176,7 +176,7 @@ int LangLua::CreateTimerEx(lua_State *lua)
     }
 
 
-    int id = mwmp::TimerAPI::CreateTimerLua(lua, callback, msec, types, args);
+    int id = mwmp::TimerAPI::createTimerLua(lua, callback, msec, types, args);
     luabridge::push(lua, id);
     return 1;
 }

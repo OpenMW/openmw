@@ -36,12 +36,12 @@ Networking::Networking(RakNet::RakPeerInterface *peer)
     running = true;
     exitCode = 0;
 
-    Script::Call<Script::CallbackIdentity("OnServerInit")>();
+    Script::Call<Script::CallbackIdentity("onServerInit")>();
 }
 
 Networking::~Networking()
 {
-    Script::Call<Script::CallbackIdentity("OnServerExit")>(false);
+    Script::Call<Script::CallbackIdentity("onServerExit")>(false);
 
     sThis = 0;
     delete playerController;
@@ -86,7 +86,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Have not completed handshake with player %d",
             player->getId());
-        //KickPlayer(player->guid);
+        //kickPlayer(player->guid);
         return;
     }
 
@@ -94,7 +94,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
         player->setLoadState(Player::LOADED);
 
-        static constexpr unsigned int ident = Script::CallbackIdentity("OnPlayerConnect");
+        static constexpr unsigned int ident = Script::CallbackIdentity("onPlayerConnect");
         Script::CallBackReturn<ident> result = true;
         Script::Call<ident>(result, Players::getPlayer(packet->guid)->getId());
 
@@ -160,7 +160,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 player->GetCell()->getDescription().c_str());
 
             myPacket->Send(player, true); //send to other clients
-            Script::Call<Script::CallbackIdentity("OnPlayerChangeCell")>(player->getId());
+            Script::Call<Script::CallbackIdentity("onPlayerChangeCell")>(player->getId());
         }
         else
         {
@@ -178,7 +178,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Read(player);
             myPacket->Send(player, true);
 
-            Script::Call<Script::CallbackIdentity("OnPlayerChangeAttributes")>(player->getId());
+            Script::Call<Script::CallbackIdentity("onPlayerChangeAttributes")>(player->getId());
         }
 
         break;
@@ -191,7 +191,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Read(player);
             myPacket->Send(player, true);
 
-            Script::Call<Script::CallbackIdentity("OnPlayerChangeSkills")>(player->getId());
+            Script::Call<Script::CallbackIdentity("onPlayerChangeSkills")>(player->getId());
         }
 
         break;
@@ -204,7 +204,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Read(player);
             myPacket->Send(player, true);
 
-            Script::Call<Script::CallbackIdentity("OnPlayerChangeLevel")>(player->getId());
+            Script::Call<Script::CallbackIdentity("onPlayerChangeLevel")>(player->getId());
         }
 
         break;
@@ -216,7 +216,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         myPacket->Read(player);
         myPacket->Send(player, true);
 
-        Script::Call<Script::CallbackIdentity("OnPlayerChangeEquipment")>(player->getId());
+        Script::Call<Script::CallbackIdentity("onPlayerChangeEquipment")>(player->getId());
 
         break;
     }
@@ -226,7 +226,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         DEBUG_PRINTF("ID_GAME_INVENTORY\n");
         myPacket->Read(player);
 
-        Script::Call<Script::CallbackIdentity("OnPlayerChangeInventory")>(player->getId());
+        Script::Call<Script::CallbackIdentity("onPlayerChangeInventory")>(player->getId());
 
         break;
     }
@@ -295,7 +295,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         player->CreatureStats()->mDead = true;
         myPacket->Send(player, true);
 
-        Script::Call<Script::CallbackIdentity("OnPlayerDeath")>(player->getId(), reason, killer->getId());
+        Script::Call<Script::CallbackIdentity("onPlayerDeath")>(player->getId(), reason, killer->getId());
 
         break;
     }
@@ -303,13 +303,12 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     case ID_GAME_RESURRECT:
     {
         DEBUG_PRINTF("ID_GAME_RESURRECT\n");
-        //packetResurrect.Read(player);
         player->CreatureStats()->mDead = false;
         myPacket->Send(player, true);
         playerController->GetPacket(ID_GAME_POS)->RequestData(player->guid);
         playerController->GetPacket(ID_GAME_CELL)->RequestData(player->guid);
 
-        Script::Call<Script::CallbackIdentity("OnPlayerResurrect")>(player->getId());
+        Script::Call<Script::CallbackIdentity("onPlayerResurrect")>(player->getId());
 
         break;
     }
@@ -326,8 +325,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
         DEBUG_PRINTF("ID_CHAT_MESSAGE\n");
         myPacket->Read(player);
-        Script::CallBackReturn<Script::CallbackIdentity("OnPlayerSendMessage")> result = true;
-        Script::Call<Script::CallbackIdentity("OnPlayerSendMessage")>(result, player->getId(), player->ChatMessage()->c_str());
+        Script::CallBackReturn<Script::CallbackIdentity("onPlayerSendMessage")> result = true;
+        Script::Call<Script::CallbackIdentity("onPlayerSendMessage")>(result, player->getId(), player->ChatMessage()->c_str());
 
         if (result)
         {
@@ -345,7 +344,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         if (player->CharGenStage()->current == player->CharGenStage()->end && player->CharGenStage()->current != 0)
         {
-            Script::Call<Script::CallbackIdentity("OnPlayerEndCharGen")>(player->getId());
+            Script::Call<Script::CallbackIdentity("onPlayerEndCharGen")>(player->getId());
             cout << "RACE: " << player->Npc()->mRace << endl;
         }
         break;
@@ -356,7 +355,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         DEBUG_PRINTF("ID_GUI_MESSAGEBOX\n");
         myPacket->Read(player);
 
-        Script::Call<Script::CallbackIdentity("OnGUIAction")>(player->getId(), (int)player->guiMessageBox.id,
+        Script::Call<Script::CallbackIdentity("onGuiAction")>(player->getId(), (int)player->guiMessageBox.id,
             player->guiMessageBox.data.c_str());
         break;
     }
@@ -741,7 +740,7 @@ void Networking::disconnectPlayer(RakNet::RakNetGUID guid)
     Player *player = Players::getPlayer(guid);
     if (!player)
         return;
-    Script::Call<Script::CallbackIdentity("OnPlayerDisconnect")>(player->getId());
+    Script::Call<Script::CallbackIdentity("onPlayerDisconnect")>(player->getId());
     playerController->GetPacket(ID_USER_DISCONNECTED)->Send(player, true);
     Players::deletePlayer(guid);
 }

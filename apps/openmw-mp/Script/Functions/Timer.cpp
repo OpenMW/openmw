@@ -11,39 +11,39 @@
 using namespace std;
 using namespace mwmp;
 
-int ScriptFunctions::CreateTimer(ScriptFunc callback, int msec) noexcept
+int ScriptFunctions::createTimer(ScriptFunc callback, int msec) noexcept
 {
     return -1;
 }
 
-int ScriptFunctions::CreateTimerEx(ScriptFunc callback, int msec, const char *types, ...) noexcept
+int ScriptFunctions::createTimerEx(ScriptFunc callback, int msec, const char *types, ...) noexcept
 {
     return -1;
 }
 
-void ScriptFunctions::StartTimer(int timerId) noexcept
+void ScriptFunctions::startTimer(int timerId) noexcept
 {
-    TimerAPI::StartTimer(timerId);
+    TimerAPI::startTimer(timerId);
 }
 
-void ScriptFunctions::StopTimer(int timerId) noexcept
+void ScriptFunctions::stopTimer(int timerId) noexcept
 {
-    TimerAPI::StopTimer(timerId);
+    TimerAPI::stopTimer(timerId);
 }
 
-void ScriptFunctions::RestartTimer(int timerId, int msec) noexcept
+void ScriptFunctions::restartTimer(int timerId, int msec) noexcept
 {
-    TimerAPI::ResetTimer(timerId, msec);
+    TimerAPI::resetTimer(timerId, msec);
 }
 
-void ScriptFunctions::FreeTimer(int timerId) noexcept
+void ScriptFunctions::freeTimer(int timerId) noexcept
 {
-    TimerAPI::FreeTimer(timerId);
+    TimerAPI::freeTimer(timerId);
 }
 
-bool ScriptFunctions::IsTimerElapsed(int timerId) noexcept
+bool ScriptFunctions::isTimerElapsed(int timerId) noexcept
 {
-    return TimerAPI::IsEndTimer(timerId);
+    return TimerAPI::isEndTimer(timerId);
 }
 
 

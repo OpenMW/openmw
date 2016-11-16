@@ -8,7 +8,7 @@
 
 using namespace std;
 
-cell LangPAWN::MakePublic(AMX *amx, const cell *params) noexcept
+cell LangPAWN::makePublic(AMX *amx, const cell *params) noexcept
 {
     int len;
     cell* source;
@@ -39,12 +39,12 @@ cell LangPAWN::MakePublic(AMX *amx, const cell *params) noexcept
 
 
 
-    Public::MakePublic(&real[0], amx, &name[0], ret_type, &def[0]);
+    Public::makePublic(&real[0], amx, &name[0], ret_type, &def[0]);
 
     return 1;
 }
 
-cell LangPAWN::CallPublic(AMX *amx, const cell *params) noexcept
+cell LangPAWN::callPublic(AMX *amx, const cell *params) noexcept
 {
     int len;
     cell* source;
@@ -143,12 +143,12 @@ cell LangPAWN::CallPublic(AMX *amx, const cell *params) noexcept
     return ret;
 }
 
-cell LangPAWN::CreateTimer(AMX *amx, const cell *params) noexcept
+cell LangPAWN::createTimer(AMX *amx, const cell *params) noexcept
 {
 
 }
 
-cell LangPAWN::CreateTimerEx(AMX *amx, const cell *params) noexcept
+cell LangPAWN::createTimerEx(AMX *amx, const cell *params) noexcept
 {
 
 }
