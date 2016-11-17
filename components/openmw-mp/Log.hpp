@@ -17,9 +17,15 @@
 #else
 #define LOG_INIT(logLevel) Log::Create(logLevel)
 #define LOG_QUIT() Log::Delete()
+#if defined(_MSC_VER)
+#define LOG_MESSAGE(level, msg, ...) Log::Get().print((level), (1), (__FILE__), (__LINE__), (msg), __VA_ARGS__)
+#define LOG_MESSAGE_SIMPLE(level, msg, ...) Log::Get().print((level), (1), (0), (0), (msg), __VA_ARGS__)
+#define LOG_APPEND(level, msg, ...) Log::Get().print((level), (0), (0), (0), (msg), __VA_ARGS__)
+#else
 #define LOG_MESSAGE(level, msg, args...) Log::Get().print((level), (1), (__FILE__), (__LINE__), (msg), ##args)
 #define LOG_MESSAGE_SIMPLE(level, msg, args...) Log::Get().print((level), (1), (0), (0), (msg), ##args)
 #define LOG_APPEND(level, msg, args...) Log::Get().print((level), (0), (0), (0), (msg), ##args)
+#endif
 #endif
 
 class Log
