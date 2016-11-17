@@ -10,7 +10,7 @@
 #include <vector>
 
 #if (!defined(DEBUG_PRINTF) && defined(DEBUG))
-#define DEBUG_PRINTF printf
+#define DEBUG_PRINTF(...) LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, __VA_ARGS__)
 #else
 #define DEBUG_PRINTF(...)
 #endif
