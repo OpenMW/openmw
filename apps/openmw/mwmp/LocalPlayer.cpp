@@ -784,7 +784,13 @@ void LocalPlayer::setEquipment()
                     break;
             }
             if (it == ptrInventory.end()) // if not exists add item
-                ptrInventory.equip(slot, ptrInventory.ContainerStore::add(EquipedItem(slot)->refid.c_str(), 1, ptrPlayer), ptrPlayer);
+                ptrInventory.equip(
+                    slot,
+                    ptrInventory.ContainerStore::add(
+                        EquipedItem(slot)->refid.c_str(),
+                        EquipedItem(slot)->count,
+                        ptrPlayer),
+                    ptrPlayer);
             else
                 ptrInventory.equip(slot, it, ptrPlayer);
         }
