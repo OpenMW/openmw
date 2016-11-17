@@ -13,7 +13,7 @@ void ScriptFunctions::SendMessage(unsigned short pid, const char *message, bool 
 
     *player->ChatMessage() = message;
 
-    DEBUG_PRINTF("System: %s", message);
+    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "System: %s", message);
 
     mwmp::Networking::get().getPlayerController()->GetPacket(ID_CHAT_MESSAGE)->Send(player, false);
     if (broadcast)
