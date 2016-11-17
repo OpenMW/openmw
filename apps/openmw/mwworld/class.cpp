@@ -393,7 +393,26 @@ namespace MWWorld
 
     bool Class::isPureWaterCreature(const MWWorld::Ptr& ptr) const
     {
-        return canSwim(ptr) && !canWalk(ptr);
+        return canSwim(ptr)
+                && !isBipedal(ptr)
+                && !canFly(ptr)
+                && !canWalk(ptr);
+    }
+
+    bool Class::isPureFlyingCreature(const Ptr& ptr) const
+    {
+        return canFly(ptr)
+                && !isBipedal(ptr)
+                && !canSwim(ptr)
+                && !canWalk(ptr);
+    }
+
+    bool Class::isPureLandCreature(const Ptr& ptr) const
+    {
+        return canWalk(ptr)
+                && !isBipedal(ptr)
+                && !canFly(ptr)
+                && !canSwim(ptr);
     }
 
     bool Class::isMobile(const MWWorld::Ptr& ptr) const
