@@ -2,8 +2,8 @@
 // Created by koncord on 24.01.16.
 //
 
-#ifndef SOURCEPAWN_SCRIPTFUNCTIONS_HPP
-#define SOURCEPAWN_SCRIPTFUNCTIONS_HPP
+#ifndef SCRIPTFUNCTIONS_HPP
+#define SCRIPTFUNCTIONS_HPP
 
 #include <Script/Functions/CharClass.hpp>
 #include <Script/Functions/Translocations.hpp>
@@ -114,4 +114,4 @@ public:
     };
 };
 
-#endif //SOURCEPAWN_SCRIPTFUNCTIONS_HPP
+#endif //SCRIPTFUNCTIONS_HPP

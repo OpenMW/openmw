@@ -2,8 +2,8 @@
 // Created by koncord on 24.01.16.
 //
 
-#ifndef SOURCEPAWN_UTILS_HPP
-#define SOURCEPAWN_UTILS_HPP
+#ifndef UTILS_HPP
+#define UTILS_HPP
 
 #include <cstddef>
 #include <string>
@@ -74,4 +74,4 @@ namespace Utils
             F *from)
     { return dynamic_cast<T *>(from); }
 }
-#endif //SOURCEPAWN_UTILS_HPP
+#endif //UTILS_HPP

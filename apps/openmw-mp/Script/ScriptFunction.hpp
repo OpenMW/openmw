@@ -2,8 +2,8 @@
 // Created by koncord on 23.01.16.
 //
 
-#ifndef SOURCEPAWN_SCRIPTFUNCTION_HPP
-#define SOURCEPAWN_SCRIPTFUNCTION_HPP
+#ifndef SCRIPTFUNCTION_HPP
+#define SCRIPTFUNCTION_HPP
 
 #include <boost/any.hpp>
 #include <string>
@@ -69,4 +69,4 @@ protected:
     boost::any Call(const std::vector<boost::any> &args);
 };
 
-#endif //SOURCEPAWN_SCRIPTFUNCTION_HPP
+#endif //SCRIPTFUNCTION_HPP

@@ -2,8 +2,8 @@
 // Created by koncord on 23.01.16.
 //
 
-#ifndef SOURCEPAWN_TMPTYPES_HPP
-#define SOURCEPAWN_TMPTYPES_HPP
+#ifndef TMPTYPES_HPP
+#define TMPTYPES_HPP
 
 
 #include <cstddef>
@@ -108,4 +108,4 @@ struct ScriptCallbackData
     constexpr ScriptCallbackData(const char(&name)[N], ScriptIdentity _callback) : name(name), index(Utils::hash(name)), callback(_callback) {}
 };
 
-#endif //SOURCEPAWN_TMPTYPES_HPP
+#endif //TMPTYPES_HPP

@@ -2,8 +2,8 @@
 // Created by koncord on 23.01.16.
 //
 
-#ifndef SOURCEPAWN_PLATFORM_HPP
-#define SOURCEPAWN_PLATFORM_HPP
+#ifndef PLATFORM_HPP
+#define PLATFORM_HPP
 
 #if _MSC_VER
 #ifdef _M_X86
@@ -17,4 +17,4 @@
 #endif
 #endif
 
-#endif //SOURCEPAWN_PLATFORM_HPP
+#endif //PLATFORM_HPP
