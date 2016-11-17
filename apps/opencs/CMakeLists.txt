@@ -223,7 +223,16 @@ endif()
 
 if (WIN32)
     target_link_libraries(openmw-cs ${Boost_LOCALE_LIBRARY})
+    INSTALL(TARGETS openmw-cs RUNTIME DESTINATION ".")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw-cs.cfg" DESTINATION ".")
 endif()
+
+if (MSVC)
+    # Debug version needs increased number of sections beyond 2^16
+    if (CMAKE_CL_64)
+        set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
+    endif (CMAKE_CL_64)
+endif (MSVC)
 
 
 if(APPLE)

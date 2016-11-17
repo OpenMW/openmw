@@ -434,11 +434,16 @@ namespace MWWorld
         gmst["sBribeFail"] = ESM::Variant("Bribe Fail");
         gmst["fNPCHealthBarTime"] = ESM::Variant(5.f);
         gmst["fNPCHealthBarFade"] = ESM::Variant(1.f);
+        gmst["fFleeDistance"] = ESM::Variant(3000.f);
 
         // Werewolf (BM)
         gmst["fWereWolfRunMult"] = ESM::Variant(1.f);
         gmst["fWereWolfSilverWeaponDamageMult"] = ESM::Variant(1.f);
         gmst["iWerewolfFightMod"] = ESM::Variant(1);
+        gmst["iWereWolfFleeMod"] = ESM::Variant(100);
+        gmst["iWereWolfLevelToAttack"] = ESM::Variant(20);
+        gmst["iWereWolfBounty"] = ESM::Variant(10000);
+        gmst["fCombatDistanceWerewolfMod"] = ESM::Variant(0.3f);
 
         std::map<std::string, ESM::Variant> globals;
         // vanilla Morrowind does not define dayspassed.
@@ -1319,7 +1324,7 @@ namespace MWWorld
 
         float terrainHeight = -std::numeric_limits<float>::max();
         if (ptr.getCell()->isExterior())
-            terrainHeight = mRendering->getTerrainHeightAt(pos.asVec3());
+            terrainHeight = getTerrainHeightAt(pos.asVec3());
 
         if (pos.pos[2] < terrainHeight)
             pos.pos[2] = terrainHeight;
@@ -3186,6 +3191,19 @@ namespace MWWorld
             return true;
 
         return MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Jail);
+    }
+
+    float World::getTerrainHeightAt(const osg::Vec3f& worldPos) const
+    {
+        return mRendering->getTerrainHeightAt(worldPos);
+    }
+
+    osg::Vec3f World::getHalfExtents(const ConstPtr& actor, bool rendering) const
+    {
+        if (rendering)
+            return mPhysics->getRenderingHalfExtents(actor);
+        else
+            return mPhysics->getHalfExtents(actor);
     }
 
     void World::spawnRandomCreature(const std::string &creatureList)

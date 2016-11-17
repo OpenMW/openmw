@@ -42,3 +42,7 @@ if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
   target_link_libraries(openmw-essimporter gcov)
 endif()
+
+if (WIN32)
+  INSTALL(TARGETS openmw-essimporter RUNTIME DESTINATION ".")
+endif(WIN32)
