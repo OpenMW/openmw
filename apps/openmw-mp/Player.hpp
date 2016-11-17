@@ -19,7 +19,7 @@
 #include <components/openmw-mp/Base/BasePlayer.hpp>
 
 struct Player;
-typedef std::map<uint64_t, Player*> TPlayers;
+typedef std::map<RakNet::RakNetGUID, Player*> TPlayers;
 typedef std::map<unsigned short, Player*> TSlots;
 
 class Players

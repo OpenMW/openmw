@@ -13,14 +13,14 @@ void Players::deletePlayer(RakNet::RakNetGUID guid)
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Deleting player with guid %lu",
         guid.g);
     
-    if (players[guid.g] != 0)
+    if (players[guid] != 0)
     {
         LOG_APPEND(Log::LOG_INFO, "- Emptying slot %i",
-            players[guid.g]->getId());
+            players[guid]->getId());
 
-        slots[players[guid.g]->getId()] = 0;
-        delete players[guid.g];
-        players.erase(guid.g);
+        slots[players[guid]->getId()] = 0;
+        delete players[guid];
+        players.erase(guid);
     }
 }
 
@@ -29,12 +29,12 @@ void Players::newPlayer(RakNet::RakNetGUID guid)
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Creating new player with guid %lu",
         guid.g);
 
-    players[guid.g] = new Player(guid);
-    players[guid.g]->getCell()->blank();
-    players[guid.g]->Npc()->blank();
-    players[guid.g]->NpcStats()->blank();
-    players[guid.g]->CreatureStats()->blank();
-    players[guid.g]->charClass.blank();
+    players[guid] = new Player(guid);
+    players[guid]->getCell()->blank();
+    players[guid]->Npc()->blank();
+    players[guid]->NpcStats()->blank();
+    players[guid]->CreatureStats()->blank();
+    players[guid]->charClass.blank();
 
     for (int i = 0; i < mwmp::Networking::get().maxConnections(); i++)
     {
@@ -43,7 +43,7 @@ void Players::newPlayer(RakNet::RakNetGUID guid)
             LOG_APPEND(Log::LOG_INFO, "- Storing in slot %i",
                 i);
 
-            slots[i] = players[guid.g];
+            slots[i] = players[guid];
             slots[i]->setId(i);
             break;
         }
@@ -52,10 +52,10 @@ void Players::newPlayer(RakNet::RakNetGUID guid)
 
 Player *Players::getPlayer(RakNet::RakNetGUID guid)
 {
-    return players[guid.g];
+    return players[guid];
 }
 
-std::map<uint64_t, Player*> *Players::getPlayers()
+TPlayers *Players::getPlayers()
 {
     return &players;
 }

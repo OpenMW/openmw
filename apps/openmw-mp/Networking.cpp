@@ -712,10 +712,10 @@ void Networking::newPlayer(RakNet::RakNetGUID guid)
     for (TPlayers::iterator pl = players->begin(); pl != players->end(); pl++) //sending other players to new player
     {
         // If we are iterating over the new player, don't send the packets below
-        if (pl->first == guid.g) continue;
+        if (pl->first == guid) continue;
 
         // If an invalid key makes it into the Players map, ignore it
-        else if (pl->first == RakNet::UNASSIGNED_RAKNET_GUID.g) continue;
+        else if (pl->first == RakNet::UNASSIGNED_RAKNET_GUID) continue;
 
         // If we are iterating over a player who has inputted their name, proceed
         else if (pl->second->getLoadState() == Player::POSTLOADED)
