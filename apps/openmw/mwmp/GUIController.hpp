@@ -6,8 +6,10 @@
 #define OPENMW_GUICONTROLLER_HPP
 
 #include <components/settings/settings.hpp>
-#include <apps/openmw/mwgui/textinput.hpp>
-#include <apps/openmw/mwgui/mode.hpp>
+
+#include "../mwgui/textinput.hpp"
+#include "../mwgui/mode.hpp"
+
 #include <components/openmw-mp/Base/BasePlayer.hpp>
 #include "PlayerMarkerCollection.hpp"
 

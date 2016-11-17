@@ -45,7 +45,8 @@
 #include <components/sdlutil/sdlcursormanager.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
-#include <apps/openmw/mwmp/Main.hpp>
+
+#include "../mwmp/Main.hpp"
 
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"

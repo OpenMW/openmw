@@ -7,8 +7,10 @@
 #include <MyGUI_EditBox.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_ListBox.h>
-#include <apps/openmw/mwgui/windowmanagerimp.hpp>
-#include <apps/openmw/mwbase/environment.hpp>
+
+#include "../mwgui/windowmanagerimp.hpp"
+#include "../mwbase/environment.hpp"
+
 #include <components/openmw-mp/Log.hpp>
 
 using namespace mwmp;

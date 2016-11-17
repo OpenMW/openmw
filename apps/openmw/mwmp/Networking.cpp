@@ -7,18 +7,18 @@
 #include <string>
 #include <components/esm/cellid.hpp>
 
-#include <apps/openmw/mwbase/world.hpp>
-#include <apps/openmw/mwbase/environment.hpp>
-#include <apps/openmw/mwbase/mechanicsmanager.hpp>
-#include <apps/openmw/mwbase/windowmanager.hpp>
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
-#include <apps/openmw/mwworld/cellstore.hpp>
-#include <apps/openmw/mwworld/esmstore.hpp>
-#include <apps/openmw/mwworld/inventorystore.hpp>
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 
-#include <apps/openmw/mwclass/npc.hpp>
-#include <apps/openmw/mwmechanics/npcstats.hpp>
-#include <apps/openmw/mwmechanics/combat.hpp>
+#include "../mwclass/npc.hpp"
+#include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/combat.hpp"
 
 #include <SDL_messagebox.h>
 #include "Networking.hpp"

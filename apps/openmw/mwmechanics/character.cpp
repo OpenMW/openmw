@@ -26,7 +26,8 @@
 #include <components/settings/settings.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
-#include <apps/openmw/mwmp/Main.hpp>
+
+#include "../mwmp/Main.hpp"
 
 #include "../mwrender/animation.hpp"
 

@@ -6,9 +6,9 @@
 #define OPENMW_PLAYER_HPP
 
 #include <components/esm/loadnpc.hpp>
-#include <apps/openmw/mwworld/manualref.hpp>
+#include "../mwworld/manualref.hpp"
 #include <map>
-#include <apps/openmw/mwmechanics/aisequence.hpp>
+#include "../mwmechanics/aisequence.hpp"
 #include <RakNetTypes.h>
 
 #include <components/openmw-mp/Base/BasePlayer.hpp>

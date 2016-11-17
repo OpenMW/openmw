@@ -3,9 +3,10 @@
 #include <components/misc/rng.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
-#include <apps/openmw/mwmp/Networking.hpp>
-#include <apps/openmw/mwmp/Main.hpp>
-#include <apps/openmw/mwmp/DedicatedPlayer.hpp>
+
+#include "../mwmp/Networking.hpp"
+#include "../mwmp/Main.hpp"
+#include "../mwmp/DedicatedPlayer.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

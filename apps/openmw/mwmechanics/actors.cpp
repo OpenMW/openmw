@@ -8,8 +8,9 @@
 #include <components/esm/loadnpc.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
-#include <apps/openmw/mwmp/Main.hpp>
-#include <apps/openmw/mwmp/DedicatedPlayer.hpp>
+
+#include "../mwmp/Main.hpp"
+#include "../mwmp/DedicatedPlayer.hpp"
 
 
 #include "../mwworld/esmstore.hpp"

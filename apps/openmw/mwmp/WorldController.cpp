@@ -1,5 +1,5 @@
-#include <apps/openmw/mwbase/environment.hpp>
-#include <apps/openmw/mwworld/worldimp.hpp>
+#include "../mwbase/environment.hpp"
+#include "../mwworld/worldimp.hpp"
 #include <components/esm/cellid.hpp>
 #include <components/openmw-mp/Log.hpp>
 

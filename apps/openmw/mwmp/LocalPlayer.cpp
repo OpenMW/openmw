@@ -2,8 +2,8 @@
 // Created by koncord on 14.01.16.
 //
 
-#include <apps/openmw/mwworld/manualref.hpp>
-#include <apps/openmw/mwmechanics/aitravel.hpp>
+#include "../mwworld/manualref.hpp"
+#include "../mwmechanics/aitravel.hpp"
 #include <components/esm/esmwriter.hpp>
 #include "../mwbase/environment.hpp"
 #include "../mwstate/statemanagerimp.hpp"
@@ -18,10 +18,10 @@
 #include "../mwclass/creature.hpp"
 #include "../mwmechanics/mechanicsmanagerimp.hpp"
 #include "../mwworld/cellstore.hpp"
-#include <apps/openmw/mwdialogue/dialoguemanagerimp.hpp>
-#include <apps/openmw/mwworld/inventorystore.hpp>
-#include <apps/openmw/mwmechanics/spellcasting.hpp>
-#include <apps/openmw/mwgui/inventorywindow.hpp>
+#include "../mwdialogue/dialoguemanagerimp.hpp"
+#include "../mwworld/inventorystore.hpp"
+#include "../mwmechanics/spellcasting.hpp"
+#include "../mwgui/inventorywindow.hpp"
 #include <components/openmw-mp/Log.hpp>
 #include <components/misc/rng.hpp>
 

@@ -4,12 +4,14 @@
 
 #include <SDL_system.h>
 #include <MyGUI_InputManager.h>
-#include <apps/openmw/mwbase/environment.hpp>
-#include <apps/openmw/mwbase/windowmanager.hpp>
-#include <apps/openmw/mwbase/inputmanager.hpp>
-#include <apps/openmw/mwworld/worldimp.hpp>
-#include <apps/openmw/mwworld/player.hpp>
-#include <apps/openmw/mwworld/cellstore.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
+#include "../mwbase/inputmanager.hpp"
+#include "../mwworld/worldimp.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwworld/cellstore.hpp"
+
 #include <components/openmw-mp/Base/BasePlayer.hpp>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_ImageBox.h>
@@ -19,7 +21,7 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RotatingSkin.h>
 #include <MyGUI_FactoryManager.h>
-#include <apps/openmw/mwgui/mapwindow.hpp>
+#include "../mwgui/mapwindow.hpp"
 #include <MyGUI_TextIterator.h>
 #include <components/openmw-mp/Log.hpp>
 

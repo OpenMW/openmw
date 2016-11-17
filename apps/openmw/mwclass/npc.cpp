@@ -7,9 +7,10 @@
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/npcstate.hpp>
-#include <apps/openmw/mwmp/DedicatedPlayer.hpp>
-#include <apps/openmw/mwmp/Networking.hpp>
-#include <apps/openmw/mwmp/Main.hpp>
+
+#include "../mwmp/DedicatedPlayer.hpp"
+#include "../mwmp/Networking.hpp"
+#include "../mwmp/Main.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

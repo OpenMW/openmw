@@ -7,8 +7,9 @@
 #include <boost/format.hpp>
 
 #include <components/misc/rng.hpp>
-#include <apps/openmw/mwmp/Main.hpp>
-#include <apps/openmw/mwmp/DedicatedPlayer.hpp>
+
+#include "../mwmp/Main.hpp"
+#include "../mwmp/DedicatedPlayer.hpp"
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"

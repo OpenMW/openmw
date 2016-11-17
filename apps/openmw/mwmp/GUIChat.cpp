@@ -5,13 +5,12 @@
 #include "GUIChat.hpp"
 
 #include <MyGUI_EditBox.h>
-#include <apps/openmw/mwbase/environment.hpp>
-#include <apps/openmw/mwgui/windowmanagerimp.hpp>
-#include <apps/openmw/mwinput/inputmanagerimp.hpp>
+#include "../mwbase/environment.hpp"
+#include "../mwgui/windowmanagerimp.hpp"
+#include "../mwinput/inputmanagerimp.hpp"
 #include <MyGUI_InputManager.h>
 #include <components/openmw-mp/Log.hpp>
 
-#include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwworld/worldimp.hpp"
 #include "../mwworld/player.hpp"

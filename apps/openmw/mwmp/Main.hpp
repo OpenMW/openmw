@@ -1,4 +1,4 @@
-#include <apps/openmw/mwworld/ptr.hpp>
+#include "../mwworld/ptr.hpp"
 #include <boost/program_options.hpp>
 #include "Networking.hpp"
 #include "LocalPlayer.hpp"

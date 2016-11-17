@@ -17,7 +17,7 @@
 #include <components/sdlutil/sdlinputwrapper.hpp>
 #include <components/sdlutil/sdlvideowrapper.hpp>
 
-#include <apps/openmw/mwmp/Main.hpp>
+#include "../mwmp/Main.hpp"
 
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/esmreader.hpp>

@@ -7,7 +7,7 @@
 
 #include <components/openmw-mp/Base/BasePlayer.hpp>
 #include <RakNetTypes.h>
-#include <apps/openmw/mwmp/Networking.hpp>
+#include "Networking.hpp"
 
 namespace mwmp
 {

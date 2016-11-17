@@ -15,7 +15,8 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/settings/settings.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
-#include <apps/openmw/mwmp/Main.hpp>
+
+#include "../mwmp/Main.hpp"
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"

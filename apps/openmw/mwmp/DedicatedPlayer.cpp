@@ -3,7 +3,7 @@
 //
 
 #include "DedicatedPlayer.hpp"
-#include <apps/openmw/mwmechanics/aitravel.hpp>
+#include "../mwmechanics/aitravel.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwstate/statemanagerimp.hpp"
 #include "../mwinput/inputmanagerimp.hpp"
@@ -19,7 +19,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/action.hpp"
 #include "Main.hpp"
-#include <apps/openmw/mwworld/inventorystore.hpp>
+#include "../mwworld/inventorystore.hpp"
 #include <boost/algorithm/clamp.hpp>
 #include <components/openmw-mp/Log.hpp>
 using namespace mwmp;
