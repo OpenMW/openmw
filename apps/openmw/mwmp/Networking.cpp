@@ -63,19 +63,19 @@ void Networking::update()
         switch (packet->data[0])
         {
             case ID_REMOTE_DISCONNECTION_NOTIFICATION:
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Another client has disconnected.");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Another client has disconnected.");
                 break;
             case ID_REMOTE_CONNECTION_LOST:
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Another client has lost connection.");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Another client has lost connection.");
                 break;
             case ID_REMOTE_NEW_INCOMING_CONNECTION:
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Another client has connected.");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Another client has connected.");
                 break;
             case ID_CONNECTION_REQUEST_ACCEPTED:
-                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Our connection request has been accepted.");
+                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Our connection request has been accepted.");
                 break;
             case ID_NEW_INCOMING_CONNECTION:
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "A connection is incoming.");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "A connection is incoming.");
                 break;
             case ID_NO_FREE_INCOMING_CONNECTIONS:
                 errmsg = "The server is full.";   
@@ -95,7 +95,7 @@ void Networking::update()
 
     if (!errmsg.empty())
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "%s", errmsg.c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, errmsg.c_str());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "tes3mp", errmsg.c_str(), 0);
         MWBase::Environment::get().getStateManager()->requestQuit();
     }
@@ -167,7 +167,7 @@ void Networking::connect(const std::string &ip, unsigned short port)
 
     if (!errmsg.empty())
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "%s", errmsg.c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, errmsg.c_str());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "tes3mp", errmsg.c_str(), 0);
         MWBase::Environment::get().getStateManager()->requestQuit();
     }
@@ -196,21 +196,21 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_BASE_INFO:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_GAME_BASE_INFO from server");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO from server");
 
         if (guid == myGuid)
         {
-            LOG_APPEND(Log::LOG_INFO, "%s", "- Packet was about my id");
+            LOG_APPEND(Log::LOG_INFO, "- Packet was about my id");
 
             if (packet->length == myPacket->headerSize())
             {
-                LOG_APPEND(Log::LOG_INFO, "%s", "- Requesting info");
+                LOG_APPEND(Log::LOG_INFO, "- Requesting info");
                 myPacket->Send(getLocalPlayer(), serverAddr);
             }
             else
             {
                 myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                LOG_APPEND(Log::LOG_INFO, "%s", "- Updating LocalPlayer");
+                LOG_APPEND(Log::LOG_INFO, "- Updating LocalPlayer");
                 getLocalPlayer()->updateChar();
             }
         }
@@ -220,7 +220,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
             if (pl == 0)
             {
-                LOG_APPEND(Log::LOG_INFO, "%s", "- Exchanging data with new player");
+                LOG_APPEND(Log::LOG_INFO, "- Exchanging data with new player");
                 pl = Players::newPlayer(guid);
             }
 
@@ -235,7 +235,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         {
             if (packet->length != myPacket->headerSize())
             {
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "ID_GAME_POS changed by server");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_GAME_POS changed by server");
                 myPacket->Packet(&bsIn, getLocalPlayer(), false);
                 getLocalPlayer()->setPosition();
             }
@@ -251,7 +251,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     }
     case ID_USER_MYID:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_USER_MYID from server");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_USER_MYID from server");
         myGuid = guid;
         getLocalPlayer()->guid = guid;
         break;
@@ -434,7 +434,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_DIE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Received ID_GAME_DIE from server");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_DIE from server");
         if (guid == myGuid)
         {
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -710,7 +710,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_PLACE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_PLACE");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- count: %i",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -743,7 +743,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_DELETE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_DELETE");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -768,7 +768,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_LOCK");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_LOCK");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -793,7 +793,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_UNLOCK");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_UNLOCK");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -843,7 +843,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_MOVE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_MOVE");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -869,7 +869,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_ROTATE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ROTATE");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -895,7 +895,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_ANIM_PLAY");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ANIM_PLAY");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -921,7 +921,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_DOOR_ACTIVATE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_ACTIVATE");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -943,7 +943,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_VIDEO_PLAY:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_VIDEO_PLAY");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_VIDEO_PLAY");
         LOG_APPEND(Log::LOG_WARN, "- video: %s\n- allowSkipping: %s",
             event->video.c_str(),
             event->allowSkipping ? "true" : "false");
@@ -958,7 +958,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_SCRIPT_LOCAL_SHORT");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_SHORT");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -985,7 +985,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_SCRIPT_LOCAL_FLOAT");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_FLOAT");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
@@ -1008,7 +1008,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_SCRIPT_MEMBER_SHORT:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_SCRIPT_MEMBER_SHORT");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_MEMBER_SHORT");
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s\n- index: %i\n- shortVal: %i\n",
             event->cellRef.mRefID.c_str(),
             event->index,
@@ -1035,7 +1035,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_SCRIPT_GLOBAL_SHORT:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_SCRIPT_GLOBAL_SHORT");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_GLOBAL_SHORT");
         LOG_APPEND(Log::LOG_WARN, "- varName: %s\n- shortVal: %i",
             event->varName.c_str(),
             event->shortVal);

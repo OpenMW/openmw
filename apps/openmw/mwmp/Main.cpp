@@ -60,7 +60,7 @@ std::string loadSettings (Settings::Manager & settings)
 
 Main::Main()
 {
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "tes3mp started");
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "tes3mp started");
     mNetworking = new Networking();
     mLocalPlayer = new LocalPlayer();
     mGUIController = new GUIController();
@@ -73,7 +73,7 @@ Main::Main()
 
 Main::~Main()
 {
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "tes3mp stopped");
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "tes3mp stopped");
     delete mNetworking;
     delete mLocalPlayer;
     Players::cleanUp();
@@ -184,7 +184,7 @@ void Main::updateWorld(float dt) const
     if (init)
     {
         init = false;
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_GAME_BASE_INFO to server");
 
         mNetworking->getPlayerPacket(ID_GAME_BASE_INFO)->Send(getLocalPlayer());
         mNetworking->getPlayerPacket(ID_LOADED)->Send(getLocalPlayer());

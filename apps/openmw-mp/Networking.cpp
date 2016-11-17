@@ -730,7 +730,7 @@ void Networking::newPlayer(RakNet::RakNetGUID guid)
         }
     }
 
-    LOG_APPEND(Log::LOG_WARN, "%s", "- Done");
+    LOG_APPEND(Log::LOG_WARN, "- Done");
 
 }
 
@@ -799,7 +799,7 @@ int Networking::mainLoop()
                     break;
                 case ID_CONNECTION_REQUEST_ACCEPTED:    // client to server
                 {
-                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Our connection request has been accepted");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Our connection request has been accepted");
                     break;
                 }
                 case ID_NEW_INCOMING_CONNECTION:
@@ -807,10 +807,10 @@ int Networking::mainLoop()
                         packet->systemAddress.ToString());
                     break;
                 case ID_NO_FREE_INCOMING_CONNECTIONS:
-                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "The server is full");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "The server is full");
                     break;
                 case ID_DISCONNECTION_NOTIFICATION:
-                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Client at %s has disconnected",
+                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN,  "Client at %s has disconnected",
                         packet->systemAddress.ToString());
                     disconnectPlayer(packet->guid);
                     break;

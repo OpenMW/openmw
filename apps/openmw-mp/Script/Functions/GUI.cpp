@@ -61,12 +61,12 @@ void GUIFunctions::ListBox(unsigned short pid, int id, const char *label, const 
 
 void GUIFunctions::SetMapVisibility(unsigned short targetPID, unsigned short affectedPID, unsigned short state) noexcept
 {
-    LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");
+    LOG_MESSAGE(Log::LOG_WARN, "stub");
 }
 
 void GUIFunctions::SetMapVisibilityAll(unsigned short targetPID, unsigned short state) noexcept
 {
-    LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");
+    LOG_MESSAGE(Log::LOG_WARN, "stub");
 }
 
 void GUIFunctions::SetConsoleAllow(unsigned short pid, char state)

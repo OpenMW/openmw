@@ -108,7 +108,7 @@ namespace mwmp
             setVisible(true);
         }
         mHistory->addText(color + MyGUI::TextIterator::toTagsString(msg));
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", msg.c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, msg.c_str());
     }
 
     void GUIChat::printOK(const std::string &msg)
@@ -182,7 +182,7 @@ namespace mwmp
         else // CHAT_ENABLED
             editState = true;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "%s", "Opening chat.");
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Opening chat.");
         SetEditState(editState);
     }
 

@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
 
     if (RakNet::NonNumericHostString(addr.c_str()))
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "%s", "You cannot use non-numeric addresses for the server.");
+        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "You cannot use non-numeric addresses for the server.");
         return 1;
     }
 
@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
     MasterClient *mclient;
     if (masterEnabled)
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sharing server query info to master enabled.");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sharing server query info to master enabled.");
         string masterAddr = mgr.getString("address", "MasterServer");
         int masterPort = mgr.getInt("port", "MasterServer");
         mclient = new MasterClient(masterAddr, (unsigned short) masterPort, addr, (unsigned short) port);
@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
     }
 
     if (code == 0)
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Quitting peacefully.");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Quitting peacefully.");
 
     // Restore cout and cerr
     std::cout.rdbuf(cout_rdbuf);

@@ -121,7 +121,7 @@ bool LocalPlayer::charGenThread()
         (*Npc()) = *player.get<ESM::NPC>()->mBase;
         (*BirthSign()) = world->getPlayer().getBirthSign();
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_BASE_INFO to server with my CharGen info");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_GAME_BASE_INFO to server with my CharGen info");
         getNetworking()->getPlayerPacket(ID_GAME_BASE_INFO)->Send(this);
 
         // Send stats packets if this is the 2nd round of CharGen that
@@ -333,7 +333,7 @@ void LocalPlayer::updateCell(bool forceUpdate)
 
     if (cellChanged)
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", "Sending ID_GAME_CELL to server");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_GAME_CELL to server");
 
         LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s",
             getCell()->getDescription().c_str(),

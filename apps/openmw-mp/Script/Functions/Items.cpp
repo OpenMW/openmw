@@ -36,7 +36,7 @@ void ItemFunctions::EquipItem(unsigned short pid, unsigned short slot, const cha
 
 void ItemFunctions::UnequipItem(unsigned short pid, unsigned short slot) noexcept
 {
-    LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");
+    LOG_MESSAGE(Log::LOG_WARN, "stub");
     //ItemFunctions::EquipItem(pid, slot, "", 0);
 }
 
@@ -74,7 +74,7 @@ void ItemFunctions::RemoveItem(unsigned short pid, const char* itemName, unsigne
 }
 void ItemFunctions::GetItemCount(unsigned short pid, const char* itemName) noexcept
 {
-    LOG_MESSAGE(Log::LOG_WARN, "%s", "stub");
+    LOG_MESSAGE(Log::LOG_WARN, "stub");
 }
 
 const char *ItemFunctions::GetItemName(unsigned short pid, unsigned int i) noexcept
