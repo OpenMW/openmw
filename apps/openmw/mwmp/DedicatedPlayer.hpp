@@ -47,7 +47,7 @@ namespace mwmp
         MWWorld::ManualRef* getRef();
         void move(float dt);
         void updateDrawState();
-        void updateInventory();
+        void updateEquipment();
 
         void updateCell();
 

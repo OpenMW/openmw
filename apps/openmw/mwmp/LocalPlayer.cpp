@@ -61,7 +61,7 @@ void LocalPlayer::update()
     updateDrawStateAndFlags();
     updateAttackState();
     updateDeadState();
-    updateEquipped();
+    updateEquipment();
     updateDynamicStats();
     updateAttributes();
     updateSkills();
@@ -370,7 +370,7 @@ void LocalPlayer::updateChar()
     MWBase::Environment::get().getWindowManager()->getInventoryWindow()->rebuildAvatar();
 }
 
-void LocalPlayer::updateEquipped(bool forceUpdate)
+void LocalPlayer::updateEquipment(bool forceUpdate)
 {
     MWWorld::Ptr player = getPlayerPtr();
 
@@ -765,7 +765,7 @@ void LocalPlayer::setClass()
     }
 }
 
-void LocalPlayer::setInventory()
+void LocalPlayer::setEquipment()
 {
     MWWorld::Ptr ptrPlayer = getPlayerPtr();
 

@@ -286,7 +286,7 @@ DedicatedPlayer *Players::newPlayer(RakNet::RakNetGUID guid)
     return players[guid.g];
 }
 
-void DedicatedPlayer::updateInventory()
+void DedicatedPlayer::updateEquipment()
 {
     MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)

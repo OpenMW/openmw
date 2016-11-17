@@ -30,7 +30,7 @@ namespace mwmp
         void updatePosition(bool forceUpdate = false);
         void updateCell(bool forceUpdate = false);
         void updateChar();
-        void updateEquipped(bool forceUpdate = false);
+        void updateEquipment(bool forceUpdate = false);
         void updateInventory(bool forceUpdate = false);
         void updateAttackState(bool forceUpdate = false);
         void updateDeadState(bool forceUpdate = false);
@@ -43,7 +43,7 @@ namespace mwmp
         void setPosition();
         void setCell();
         void setClass();
-        void setInventory();
+        void setEquipment();
 
         void sendClass();
         void sendInventory();

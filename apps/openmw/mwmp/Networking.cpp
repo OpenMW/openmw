@@ -270,18 +270,18 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         {
             if (packet->length == myPacket->headerSize())
             {
-                getLocalPlayer()->updateEquipped(true);
+                getLocalPlayer()->updateEquipment(true);
             }
             else
             {
                 myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                getLocalPlayer()->setInventory();
+                getLocalPlayer()->setEquipment();
             }
         }
         else if (pl != 0)
         {
             myPacket->Packet(&bsIn, pl, false);
-            pl->updateInventory();
+            pl->updateEquipment();
         }
         break;
     }
@@ -329,7 +329,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                             itemPtr.getCellRef().setCharge(item.health);
                         printf("%s %d %d\n", item.refid.c_str(), item.count, item.health);
                     }
-                    getLocalPlayer()->setInventory(); // restore equipped items
+                    getLocalPlayer()->setEquipment(); // restore equipped items
                 }
             }
         }
