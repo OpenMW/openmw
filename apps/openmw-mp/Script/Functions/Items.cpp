@@ -41,7 +41,7 @@ void ItemFunctions::UnequipItem(unsigned short pid, unsigned short slot) noexcep
     //ItemFunctions::EquipItem(pid, slot, "", 0);
 }
 
-int ItemFunctions::GetEquipmentSlotCount() noexcept
+int ItemFunctions::GetEquipmentSize() noexcept
 {
     return MWWorld::InventoryStore::Slots;
 }

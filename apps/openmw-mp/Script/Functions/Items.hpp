@@ -12,7 +12,7 @@
     \
     {"EquipItem",             ItemFunctions::EquipItem},\
     {"UnequipItem",           ItemFunctions::UnequipItem},\
-    {"GetEquipmentSlotCount", ItemFunctions::GetEquipmentSlotCount},\
+    {"GetEquipmentSize",      ItemFunctions::GetEquipmentSize},\
     {"HasItemEquipped",       ItemFunctions::HasItemEquipped},\
     \
     {"GetItemSlot",           ItemFunctions::GetItemSlot},\
@@ -32,7 +32,7 @@ public:
 
     static void EquipItem(unsigned short pid, unsigned short slot, const char* itemName, unsigned int count, int health) noexcept;
     static void UnequipItem(unsigned short pid, unsigned short slot) noexcept;
-    static int GetEquipmentSlotCount() noexcept;
+    static int GetEquipmentSize() noexcept;
     static bool HasItemEquipped(unsigned short pid, const char* itemName);
 
     static const char *GetItemSlot(unsigned short pid, unsigned short slot) noexcept;
