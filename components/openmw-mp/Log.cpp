@@ -97,7 +97,7 @@ void Log::print(int level, bool hasPrefix, const char *file, int line, const cha
         sstr << '\n';
     va_list args;
     va_start(args, message);
-    vector<char> buf(vsnprintf(NULL, 0, sstr.str().c_str(), args) + 1);
+    vector<char> buf((unsigned long) (vsnprintf(NULL, 0, sstr.str().c_str(), args) + 1));
     va_end(args);
     va_start(args, message);
     vsnprintf(buf.data(), buf.size(), sstr.str().c_str(), args);
