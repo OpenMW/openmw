@@ -794,6 +794,10 @@ void LocalPlayer::setEquipment()
             else
                 ptrInventory.equip(slot, it, ptrPlayer);
         }
+        else
+        {
+            ptrInventory.unequipSlot(slot, ptrPlayer);
+        }
     }
 }
 

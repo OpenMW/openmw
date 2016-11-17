@@ -36,8 +36,10 @@ void ItemFunctions::EquipItem(unsigned short pid, unsigned short slot, const cha
 
 void ItemFunctions::UnequipItem(unsigned short pid, unsigned short slot) noexcept
 {
-    LOG_MESSAGE(Log::LOG_WARN, "stub");
-    //ItemFunctions::EquipItem(pid, slot, "", 0);
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    ItemFunctions::EquipItem(pid, slot, "", 0, -1);
 }
 
 void ItemFunctions::AddItem(unsigned short pid, const char* itemName, unsigned int count, int health) noexcept
