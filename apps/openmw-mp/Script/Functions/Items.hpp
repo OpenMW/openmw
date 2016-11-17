@@ -6,40 +6,50 @@
 #define OPENMW_ITEMS_HPP
 
 #define ITEMAPI \
-    {"AddItem",              ItemFunctions::AddItem},\
-    {"RemoveItem",            ItemFunctions::RemoveItem},\
-    {"GetItemCount",          ItemFunctions::GetItemCount2},\
+    {"GetEquipmentSize",       ItemFunctions::GetEquipmentSize},\
+    {"GetInventorySize",       ItemFunctions::GetInventorySize},\
     \
-    {"EquipItem",             ItemFunctions::EquipItem},\
-    {"UnequipItem",           ItemFunctions::UnequipItem},\
-    {"GetEquipmentSize",      ItemFunctions::GetEquipmentSize},\
-    {"HasItemEquipped",       ItemFunctions::HasItemEquipped},\
+    {"EquipItem",              ItemFunctions::EquipItem},\
+    {"UnequipItem",            ItemFunctions::UnequipItem},\
     \
-    {"GetItemSlot",           ItemFunctions::GetItemSlot},\
-    {"GetItemName",           ItemFunctions::GetItemName},\
-    {"GetItemHealth",         ItemFunctions::GetItemHealth},\
-    {"GetInventorySize",      ItemFunctions::GetInventorySize},\
+    {"AddItem",                ItemFunctions::AddItem}, \
+    {"RemoveItem",             ItemFunctions::RemoveItem}, \
     \
-    {"SendEquipment",         ItemFunctions::SendEquipment},\
-    {"SendInventory",         ItemFunctions::SendInventory}
+    {"HasItemEquipped",        ItemFunctions::HasItemEquipped},\
+    \
+    {"GetEquipmentItemId",     ItemFunctions::GetEquipmentItemId},\
+    {"GetEquipmentItemCount",  ItemFunctions::GetEquipmentItemCount},\
+    {"GetEquipmentItemHealth", ItemFunctions::GetEquipmentItemHealth},\
+    \
+    {"GetInventoryItemId",     ItemFunctions::GetInventoryItemId},\
+    {"GetInventoryItemCount",  ItemFunctions::GetInventoryItemCount},\
+    {"GetInventoryItemHealth", ItemFunctions::GetInventoryItemHealth},\
+    \
+    {"SendEquipment",          ItemFunctions::SendEquipment},\
+    {"SendInventory",          ItemFunctions::SendInventory}
 
 class ItemFunctions
 {
 public:
-    static void AddItem(unsigned short pid, const char* itemName, unsigned int count, int health) noexcept;
-    static void RemoveItem(unsigned short pid, const char* itemName, unsigned short count) noexcept;
-    static void GetItemCount(unsigned short pid, const char* itemName) noexcept;
+
+    static int GetEquipmentSize() noexcept;
+    static unsigned int GetInventorySize(unsigned short pid) noexcept;
 
     static void EquipItem(unsigned short pid, unsigned short slot, const char* itemName, unsigned int count, int health) noexcept;
     static void UnequipItem(unsigned short pid, unsigned short slot) noexcept;
-    static int GetEquipmentSize() noexcept;
+
+    static void AddItem(unsigned short pid, const char* itemName, unsigned int count, int health) noexcept;
+    static void RemoveItem(unsigned short pid, const char* itemName, unsigned short count) noexcept;
+
     static bool HasItemEquipped(unsigned short pid, const char* itemName);
 
-    static const char *GetItemSlot(unsigned short pid, unsigned short slot) noexcept;
-    static const char *GetItemName(unsigned short pid, unsigned int i) noexcept;
-    static int GetItemCount2(unsigned short pid, unsigned int i) noexcept;
-    static int GetItemHealth(unsigned short pid, unsigned int i) noexcept;
-    static unsigned int GetInventorySize(unsigned short pid) noexcept;
+    static const char *GetEquipmentItemId(unsigned short pid, unsigned short slot) noexcept;
+    static int GetEquipmentItemCount(unsigned short pid, unsigned short slot) noexcept;
+    static int GetEquipmentItemHealth(unsigned short pid, unsigned short slot) noexcept;
+
+    static const char *GetInventoryItemId(unsigned short pid, unsigned int i) noexcept;
+    static int GetInventoryItemCount(unsigned short pid, unsigned int i) noexcept;
+    static int GetInventoryItemHealth(unsigned short pid, unsigned int i) noexcept;
 
     static void SendEquipment(unsigned short pid) noexcept;
     static void SendInventory(unsigned short pid) noexcept;
