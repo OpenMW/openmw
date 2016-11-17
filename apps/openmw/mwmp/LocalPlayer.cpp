@@ -62,7 +62,6 @@ void LocalPlayer::update()
     updateAttackState();
     updateDeadState();
     updateEquipped();
-    updateInventory();
     updateDynamicStats();
     updateAttributes();
     updateSkills();
@@ -349,8 +348,11 @@ void LocalPlayer::updateCell(bool forceUpdate)
         getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_CELL)->Packet(&bs, this, true);
         getNetworking()->sendData(&bs);
 
-        // Also update skill progress
+        // Also force an update to skills (to send all progress to skill increases)
         updateSkills(true);
+
+        // Also check if the inventory needs to be updated
+        updateInventory();
     }
 }
 
