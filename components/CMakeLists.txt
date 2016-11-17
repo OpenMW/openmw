@@ -206,7 +206,7 @@ target_link_libraries(components
     ${OSGFX_LIBRARIES}
     ${OSGANIMATION_LIBRARIES}
     ${Bullet_LIBRARIES}
-    ${SDL2_LIBRARY}
+    ${SDL2_LIBRARIES}
     # For MyGUI platform
     ${GL_LIB}
     ${MyGUI_LIBRARIES}

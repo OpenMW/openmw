@@ -202,3 +202,8 @@ if (MSVC)
     endif (CMAKE_CL_64)
     add_definitions("-D_USE_MATH_DEFINES")
 endif (MSVC)
+
+if (WIN32)
+    INSTALL(TARGETS openmw RUNTIME DESTINATION ".")
+endif (WIN32)
+
