@@ -6,6 +6,7 @@
 #include <apps/openmw-mp/Script/ScriptFunctions.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <apps/openmw-mp/Networking.hpp>
+#include <apps/openmw/mwworld/inventorystore.hpp>
 #include <components/misc/stringops.hpp>
 
 using namespace mwmp;
@@ -38,6 +39,11 @@ void ItemFunctions::UnequipItem(unsigned short pid, unsigned short slot) noexcep
 {
     LOG_MESSAGE(Log::LOG_WARN, "stub");
     //ItemFunctions::EquipItem(pid, slot, "", 0);
+}
+
+int ItemFunctions::GetEquipmentSlotCount() noexcept
+{
+    return MWWorld::InventoryStore::Slots;
 }
 
 const char *ItemFunctions::GetItemSlot(unsigned short pid, unsigned short slot) noexcept
