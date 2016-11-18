@@ -804,7 +804,11 @@ namespace MWMechanics
         /**
          * Automatically equip NPCs torches at night and unequip them at day
          */
-        if (!isPlayer)
+
+         // tes3mp needs player-controlled NPCs to not automatically unequip
+         // their light-emitting items, so a 2nd condition has been added
+         // that should return false only for them
+        if (!isPlayer && ptr.getBase()->canChangeCell)
         {
             MWWorld::ContainerStoreIterator torch = inventoryStore.end();
             for (MWWorld::ContainerStoreIterator it = inventoryStore.begin(); it != inventoryStore.end(); ++it)
