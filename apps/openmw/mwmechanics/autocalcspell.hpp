@@ -16,6 +16,8 @@ namespace MWMechanics
 
 std::vector<std::string> autoCalcNpcSpells(const int* actorSkills, const int* actorAttributes, const ESM::Race* race);
 
+std::vector<std::string> autoCalcPlayerSpells(const int* actorSkills, const int* actorAttributes, const ESM::Race* race);
+
 // Helpers
 
 bool attrSkillCheck (const ESM::Spell* spell, const int* actorSkills, const int* actorAttributes);

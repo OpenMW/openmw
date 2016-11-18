@@ -1006,6 +1006,9 @@ namespace MWGui
         mScreenFader->update(frameDuration);
 
         mDebugWindow->onFrame(frameDuration);
+
+        if (mCharGen)
+            mCharGen->onFrame(frameDuration);
     }
 
     void WindowManager::changeCell(const MWWorld::CellStore* cell)

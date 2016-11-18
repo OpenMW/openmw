@@ -198,15 +198,6 @@ namespace MWMechanics
         }
 
         // F_PCStart spells
-        static const float fPCbaseMagickaMult = esmStore.get<ESM::GameSetting>().find("fPCbaseMagickaMult")->getFloat();
-
-        float baseMagicka = fPCbaseMagickaMult * creatureStats.getAttribute(ESM::Attribute::Intelligence).getBase();
-        bool reachedLimit = false;
-        const ESM::Spell* weakestSpell = NULL;
-        int minCost = INT_MAX;
-
-        std::vector<std::string> selectedSpells;
-
         const ESM::Race* race = NULL;
         if (mRaceSelected)
             race = esmStore.get<ESM::Race>().find(player->mRace);
@@ -219,61 +210,7 @@ namespace MWMechanics
         for (int i=0; i<ESM::Attribute::Length; ++i)
             attributes[i] = npcStats.getAttribute(i).getBase();
 
-        const MWWorld::Store<ESM::Spell> &spells =
-            esmStore.get<ESM::Spell>();
-        for (MWWorld::Store<ESM::Spell>::iterator iter = spells.begin(); iter != spells.end(); ++iter)
-        {
-            const ESM::Spell* spell = &*iter;
-
-            if (spell->mData.mType != ESM::Spell::ST_Spell)
-                continue;
-            if (!(spell->mData.mFlags & ESM::Spell::F_PCStart))
-                continue;
-            if (reachedLimit && spell->mData.mCost <= minCost)
-                continue;
-            if (race && std::find(race->mPowers.mList.begin(), race->mPowers.mList.end(), spell->mId) != race->mPowers.mList.end())
-                continue;
-            if (baseMagicka < spell->mData.mCost)
-                continue;
-
-            static const float fAutoPCSpellChance = esmStore.get<ESM::GameSetting>().find("fAutoPCSpellChance")->getFloat();
-            if (calcAutoCastChance(spell, skills, attributes, -1) < fAutoPCSpellChance)
-                continue;
-
-            if (!attrSkillCheck(spell, skills, attributes))
-                continue;
-
-            selectedSpells.push_back(spell->mId);
-
-            if (reachedLimit)
-            {
-                std::vector<std::string>::iterator it = std::find(selectedSpells.begin(), selectedSpells.end(), weakestSpell->mId);
-                if (it != selectedSpells.end())
-                    selectedSpells.erase(it);
-
-                minCost = INT_MAX;
-                for (std::vector<std::string>::iterator weakIt = selectedSpells.begin(); weakIt != selectedSpells.end(); ++weakIt)
-                {
-                    const ESM::Spell* testSpell = esmStore.get<ESM::Spell>().find(*weakIt);
-                    if (testSpell->mData.mCost < minCost)
-                    {
-                        minCost = testSpell->mData.mCost;
-                        weakestSpell = testSpell;
-                    }
-                }
-            }
-            else
-            {
-                if (spell->mData.mCost < minCost)
-                {
-                    weakestSpell = spell;
-                    minCost = weakestSpell->mData.mCost;
-                }
-                static const unsigned int iAutoPCSpellMax = esmStore.get<ESM::GameSetting>().find("iAutoPCSpellMax")->getInt();
-                if (selectedSpells.size() == iAutoPCSpellMax)
-                    reachedLimit = true;
-            }
-        }
+        std::vector<std::string> selectedSpells = autoCalcPlayerSpells(skills, attributes, race);
 
         for (std::vector<std::string>::iterator it = selectedSpells.begin(); it != selectedSpells.end(); ++it)
             creatureStats.getSpells().add(*it);

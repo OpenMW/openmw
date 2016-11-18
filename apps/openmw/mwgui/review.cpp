@@ -10,6 +10,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwmechanics/autocalcspell.hpp"
 
 #include "tooltips.hpp"
 
@@ -29,7 +30,8 @@ namespace MWGui
     const int ReviewDialog::sLineHeight = 18;
 
     ReviewDialog::ReviewDialog()
-        : WindowModal("openmw_chargen_review.layout")
+        : WindowModal("openmw_chargen_review.layout"),
+          mUpdateSkillArea(false)
     {
         // Centre dialog
         center();
@@ -102,7 +104,16 @@ namespace MWGui
     void ReviewDialog::open()
     {
         WindowModal::open();
-        updateSkillArea();
+        mUpdateSkillArea = true;
+    }
+
+    void ReviewDialog::onFrame(float /*duration*/)
+    {
+        if (mUpdateSkillArea)
+        {
+            updateSkillArea();
+            mUpdateSkillArea = false;
+        }
     }
 
     void ReviewDialog::setPlayerName(const std::string &name)
@@ -121,6 +132,8 @@ namespace MWGui
             ToolTips::createRaceToolTip(mRaceWidget, race);
             mRaceWidget->setCaption(race->mName);
         }
+
+        mUpdateSkillArea = true;
     }
 
     void ReviewDialog::setClass(const ESM::Class& class_)
@@ -141,6 +154,8 @@ namespace MWGui
             mBirthSignWidget->setCaption(sign->mName);
             ToolTips::createBirthsignToolTip(mBirthSignWidget, mBirthSignId);
         }
+
+        mUpdateSkillArea = true;
     }
 
     void ReviewDialog::setHealth(const MWMechanics::DynamicStat<float>& value)
@@ -170,7 +185,11 @@ namespace MWGui
         if (attr == mAttributeWidgets.end())
             return;
 
-        attr->second->setAttributeValue(value);
+        if (attr->second->getAttributeValue() != value)
+        {
+            attr->second->setAttributeValue(value);
+            mUpdateSkillArea = true;
+        }
     }
 
     void ReviewDialog::setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::SkillValue& value)
@@ -191,6 +210,7 @@ namespace MWGui
             widget->_setWidgetState(state);
         }
 
+        mUpdateSkillArea = true;
     }
 
     void ReviewDialog::configureSkills(const std::vector<int>& major, const std::vector<int>& minor)
@@ -211,7 +231,7 @@ namespace MWGui
                 mMiscSkills.push_back(skill);
         }
 
-        updateSkillArea();
+        mUpdateSkillArea = true;
     }
 
     void ReviewDialog::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
@@ -245,7 +265,7 @@ namespace MWGui
         skillNameWidget->setCaption(text);
         skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
-        skillValueWidget = mSkillView->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Top | MyGUI::Align::Right);
+        skillValueWidget = mSkillView->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Default);
         skillValueWidget->setCaption(value);
         skillValueWidget->_setWidgetState(state);
         skillValueWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
@@ -268,6 +288,20 @@ namespace MWGui
         skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
         mSkillWidgets.push_back(skillNameWidget);
+
+        coord1.top += sLineHeight;
+        coord2.top += sLineHeight;
+    }
+
+    void ReviewDialog::addItem(const ESM::Spell* spell, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
+    {
+        Widgets::MWSpellPtr widget = mSkillView->createWidget<Widgets::MWSpell>("MW_StatName", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
+        widget->setSpellId(spell->mId);
+        widget->setUserString("ToolTipType", "Spell");
+        widget->setUserString("Spell", spell->mId);
+        widget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
+
+        mSkillWidgets.push_back(widget);
 
         coord1.top += sLineHeight;
         coord2.top += sLineHeight;
@@ -331,6 +365,80 @@ namespace MWGui
 
         if (!mMiscSkills.empty())
             addSkills(mMiscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
+
+        // starting spells
+        std::vector<std::string> spells;
+
+        const ESM::Race* race = NULL;
+        if (!mRaceId.empty())
+            race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(mRaceId);
+
+        int skills[ESM::Skill::Length];
+        for (int i=0; i<ESM::Skill::Length; ++i)
+            skills[i] = mSkillValues.find(i)->second.getBase();
+
+        int attributes[ESM::Attribute::Length];
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+            attributes[i] = mAttributeWidgets[i]->getAttributeValue().getBase();
+
+        std::vector<std::string> selectedSpells = MWMechanics::autoCalcPlayerSpells(skills, attributes, race);
+        for (std::vector<std::string>::iterator iter = selectedSpells.begin(); iter != selectedSpells.end(); ++iter)
+        {
+            std::string lower = Misc::StringUtils::lowerCase(*iter);
+            if (std::find(spells.begin(), spells.end(), lower) == spells.end())
+                spells.push_back(lower);
+        }
+
+        if (race)
+        {
+            for (std::vector<std::string>::const_iterator iter = race->mPowers.mList.begin();
+                 iter != race->mPowers.mList.end(); ++iter)
+            {
+                std::string lower = Misc::StringUtils::lowerCase(*iter);
+                if (std::find(spells.begin(), spells.end(), lower) == spells.end())
+                    spells.push_back(lower);
+            }
+        }
+
+        if (!mBirthSignId.empty())
+        {
+            const ESM::BirthSign* sign = MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().find(mBirthSignId);
+            for (std::vector<std::string>::const_iterator iter = sign->mPowers.mList.begin();
+                 iter != sign->mPowers.mList.end(); ++iter)
+            {
+                std::string lower = Misc::StringUtils::lowerCase(*iter);
+                if (std::find(spells.begin(), spells.end(), lower) == spells.end())
+                    spells.push_back(lower);
+            }
+        }
+
+        if (!mSkillWidgets.empty())
+            addSeparator(coord1, coord2);
+        addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypeAbility", "Abilities"), coord1, coord2);
+        for (std::vector<std::string>::const_iterator iter = spells.begin(); iter != spells.end(); ++iter)
+        {
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(*iter);
+            if (spell->mData.mType == ESM::Spell::ST_Ability)
+                addItem(spell, coord1, coord2);
+        }
+
+        addSeparator(coord1, coord2);
+        addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypePower", "Powers"), coord1, coord2);
+        for (std::vector<std::string>::const_iterator iter = spells.begin(); iter != spells.end(); ++iter)
+        {
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(*iter);
+            if (spell->mData.mType == ESM::Spell::ST_Power)
+                addItem(spell, coord1, coord2);
+        }
+
+        addSeparator(coord1, coord2);
+        addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypeSpell", "Spells"), coord1, coord2);
+        for (std::vector<std::string>::const_iterator iter = spells.begin(); iter != spells.end(); ++iter)
+        {
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(*iter);
+            if (spell->mData.mType == ESM::Spell::ST_Spell)
+                addItem(spell, coord1, coord2);
+        }
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
         mSkillView->setVisibleVScroll(false);
