@@ -435,14 +435,15 @@ namespace MWWorld
         gmst["fNPCHealthBarTime"] = ESM::Variant(5.f);
         gmst["fNPCHealthBarFade"] = ESM::Variant(1.f);
         gmst["fFleeDistance"] = ESM::Variant(3000.f);
+        gmst["sMaxSale"] = ESM::Variant("Max Sale");
 
         // Werewolf (BM)
-        gmst["fWereWolfRunMult"] = ESM::Variant(1.f);
-        gmst["fWereWolfSilverWeaponDamageMult"] = ESM::Variant(1.f);
-        gmst["iWerewolfFightMod"] = ESM::Variant(1);
+        gmst["fWereWolfRunMult"] = ESM::Variant(1.3f);
+        gmst["fWereWolfSilverWeaponDamageMult"] = ESM::Variant(2.f);
+        gmst["iWerewolfFightMod"] = ESM::Variant(100);
         gmst["iWereWolfFleeMod"] = ESM::Variant(100);
         gmst["iWereWolfLevelToAttack"] = ESM::Variant(20);
-        gmst["iWereWolfBounty"] = ESM::Variant(10000);
+        gmst["iWereWolfBounty"] = ESM::Variant(1000);
         gmst["fCombatDistanceWerewolfMod"] = ESM::Variant(0.3f);
 
         std::map<std::string, ESM::Variant> globals;
