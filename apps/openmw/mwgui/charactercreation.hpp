@@ -50,6 +50,8 @@ namespace MWGui
     void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value);
     void configureSkills (const SkillList& major, const SkillList& minor);
 
+    void onFrame(float duration);
+
     private:
     osg::Group* mParent;
     Resource::ResourceSystem* mResourceSystem;
