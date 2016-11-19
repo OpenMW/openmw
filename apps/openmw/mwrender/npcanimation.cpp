@@ -403,6 +403,9 @@ void NpcAnimation::rebuild()
 {
     updateNpcBase();
 
+    if (mAlpha != 1.f)
+        mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
+
     MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);
 }
 
