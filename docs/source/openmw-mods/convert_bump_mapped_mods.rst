@@ -22,7 +22,7 @@ General introduction to normal map conversion
 
 This page has general information and tutorials on how normal mapping works in OpenMW and how you can make mods using the old fake normal mapping technique (such as `Netch Bump mapped`_ and `Hlaalu Bump mapped`_, and maybe the most (in)famous one to give shiny rocks in OpenMW, the mod `On the Rocks`_!, featured in MGSO and Morrowind Rebirth) work in OpenMW. 
 
-*Note:* The conversion made in the `Converting Apel's Various Things - Sacks`_-part of this tutorial require the use of the application NifSkope, which is a Windows-only application. Please inform us if you get that application to work on other OS:es via Wine or similar.
+*Note:* The conversion made in the `Converting Apel's Various Things - Sacks`_-part of this tutorial require the use of the application NifSkope. There are binaries available for Windows, but not for Mac or Linux. Reports say that NifSkope versions 1.X will compile on Linux as long as you have Qt packages installed, while the later 2.X versions will not compile.
 
 *Another note:* I will use the terms bump mapping and normal mapping simultaneously. Normal mapping is one form of bump mapping. In other words, normal mapping is bump mapping, but bump mapping isn't necessarily normal mapping. There are several techniques for bump mapping, and normal mapping is the most common one today.
 
@@ -160,7 +160,7 @@ Converting Apel's Various Things - Sacks
 
 In part one of this tutorial, we converted a mod that only included modified Morrowind model (``.nif``) files so that the normal maps could be loaded in Morrowind with MCP. We ignored those model files since they are not needed with OpenMW. In this tutorial however, we will convert a mod that includes new, custom made models. In other words, we cannot just ignore those files this time.
 
-Before we begin, you need to know that we will be needing a Windows OS for this, unless you can get the application we will be using to work in Wine or something similar.
+Before we begin, you need to know that unless you want to build the NifSkope application from source yourself, you will be needing a Windows OS to do this part, since the application only has binaries available for Windows.
 
 Tutorial - MCP, Part 2
 **********************
@@ -170,7 +170,7 @@ The sacks included in Apel's `Various Things - Sacks`_ come in two versions – 
 #. Start by downloading Apel's `Various Things - Sacks`_ from Nexus.
 #. Once downloaded, install it the way you'd normally install your mods (**Pro tip**: Install using OpenMW's `Multiple data folders`_ function!).
 #. Now, if you ran the mod right away, your sacks will be made out of lead_. This is because the normal map is loaded as an environment map which MCP fixes so that it looks less shiny. We don't use MCP, so therefore, it looks kind of like the shack was made out of lead.
-#. We need to fix this by removing some tags in the model files. You need to download NifSkope_ for this, which, again, is a Windows-only application.
+#. We need to fix this by removing some tags in the model files. You need to download NifSkope_ for this, which, again, only have binaries available for Windows.
 #. Go the place where you installed the mod and go to ``./Meshes/o/`` to find the model files.
     - If you installed the mod like I suggested, finding the files will be easy as a pie, but if you installed it by dropping everything into your main Morrowind Data Files folder, then you'll have to scroll a lot to find them. Check the mod's zip file for the file names of the models if this is the case. The same thing applies to when fixing the textures.
 #. Open up each of the models in NifSkope and look for these certain blocks_:
