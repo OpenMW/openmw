@@ -8,7 +8,7 @@
 
 namespace ESM
 {
-    class Spell;
+    struct Spell;
 }
 
 namespace MWGui

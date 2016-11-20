@@ -226,7 +226,7 @@ namespace MWMechanics
         return 1 - resistance / 100.f;
     }
 
-    /// Check if the given affect can be applied to the target. If \a castByPlayer, emits a message box on failure.
+    /// Check if the given effect can be applied to the target. If \a castByPlayer, emits a message box on failure.
     bool checkEffectTarget (int effectId, const MWWorld::Ptr& target, const MWWorld::Ptr& caster, bool castByPlayer)
     {
         switch (effectId)
