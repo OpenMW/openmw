@@ -67,7 +67,7 @@ void breakpad(std::string pathToDump)
 {
 #ifdef _WIN32
     pHandler = new google_breakpad::ExceptionHandler(
-            L"dumps\\",
+            L"crashdumps\\",
             /*FilterCallback*/ 0,
             DumpCallback,
             0,
