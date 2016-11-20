@@ -65,7 +65,6 @@ void ItemFunctions::RemoveItem(unsigned short pid, const char* itemName, unsigne
     item.refid = itemName;
     item.count = count;
 
-    player->inventorySendBuffer.items.clear();
     player->inventorySendBuffer.items.push_back(item);
     player->inventorySendBuffer.action = Inventory::REMOVEITEM;
 }
