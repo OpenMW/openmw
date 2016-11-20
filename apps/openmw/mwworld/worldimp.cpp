@@ -3380,7 +3380,7 @@ namespace MWWorld
         }
     }
 
-    bool World::isWalkingOnWater(const ConstPtr &actor)
+    bool World::isWalkingOnWater(const ConstPtr &actor) const
     {
         const MWPhysics::Actor* physicActor = mPhysics->getActor(actor);
         if (physicActor && physicActor->isWalkingOnWater())
