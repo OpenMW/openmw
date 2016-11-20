@@ -35,3 +35,11 @@ void BasePacket::SetStreams(RakNet::BitStream *inStream, RakNet::BitStream *outS
     if (outStream != 0)
         bsSend = outStream;
 }
+
+void BasePacket::RequestData(RakNet::RakNetGUID guid)
+{
+    bsSend->ResetWritePointer();
+    bsSend->Write(packetID);
+    bsSend->Write(guid);
+    peer->Send(bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, 0, guid, false);
+}

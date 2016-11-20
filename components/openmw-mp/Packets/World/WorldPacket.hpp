@@ -25,8 +25,6 @@ namespace mwmp
         virtual void Send(WorldEvent *event, RakNet::AddressOrGUID destination);
         virtual void Read(WorldEvent *event);
 
-        virtual void RequestData(RakNet::RakNetGUID guid);
-
         static size_t headerSize()
         {
             return (size_t)(1 + RakNet::RakNetGUID::size()); // packetID + RakNetGUID (uint64_t)

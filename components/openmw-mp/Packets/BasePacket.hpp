@@ -20,6 +20,7 @@ namespace mwmp
         void SetReadStream(RakNet::BitStream *bitStream);
         void SetSendStream(RakNet::BitStream *bitStream);
         void SetStreams(RakNet::BitStream *inStream, RakNet::BitStream *outStream);
+        virtual void RequestData(RakNet::RakNetGUID guid);
 
         static size_t headerSize()
         {
@@ -64,7 +65,6 @@ namespace mwmp
                 data = _data;
             }
         }
-
 
         void RW(std::string &str, bool write)
         {
