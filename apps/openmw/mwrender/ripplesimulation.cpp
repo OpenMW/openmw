@@ -117,6 +117,7 @@ RippleSimulation::~RippleSimulation()
 
 void RippleSimulation::update(float dt)
 {
+    const MWBase::World* world = MWBase::Environment::get().getWorld();
     for (std::vector<Emitter>::iterator it=mEmitters.begin(); it !=mEmitters.end(); ++it)
     {
         if (it->mPtr == MWBase::Environment::get().getWorld ()->getPlayerPtr())
@@ -128,10 +129,8 @@ void RippleSimulation::update(float dt)
 
         osg::Vec3f currentPos (it->mPtr.getRefData().getPosition().asVec3());
 
-        if ( (currentPos - it->mLastEmitPosition).length() > 10
-             // Only emit when close to the water surface, not above it and not too deep in the water
-            && MWBase::Environment::get().getWorld ()->isUnderwater (it->mPtr.getCell(), it->mPtr.getRefData().getPosition().asVec3())
-             && !MWBase::Environment::get().getWorld()->isSubmerged(it->mPtr))
+        bool shouldEmit = ( world->isUnderwater (it->mPtr.getCell(), it->mPtr.getRefData().getPosition().asVec3()) && !world->isSubmerged(it->mPtr) ) || world->isWalkingOnWater(it->mPtr);
+        if ( shouldEmit && (currentPos - it->mLastEmitPosition).length() > 10 )
         {
             it->mLastEmitPosition = currentPos;
 
