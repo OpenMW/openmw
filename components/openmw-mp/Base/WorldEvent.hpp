@@ -32,7 +32,7 @@ namespace mwmp
         int lockLevel;
         float scale;
 
-        std::string video;
+        std::string filename;
         bool allowSkipping;
 
         std::string animGroup;

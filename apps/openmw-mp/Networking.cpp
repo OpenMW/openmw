@@ -570,6 +570,21 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         break;
     }
 
+    case ID_MUSIC_PLAY:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_MUSIC_PLAY from %s",
+            player->Npc()->mName.c_str());
+
+        myPacket->Read(event);
+
+        LOG_APPEND(Log::LOG_WARN, "- filename: %s",
+            event->filename.c_str());
+
+        myPacket->Send(event, true);
+
+        break;
+    }
+
     case ID_VIDEO_PLAY:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_VIDEO_PLAY from %s",
@@ -577,8 +592,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         myPacket->Read(event);
 
-        LOG_APPEND(Log::LOG_WARN, "- video: %s\n- allowSkipping: %s",
-            event->video.c_str(),
+        LOG_APPEND(Log::LOG_WARN, "- filename: %s\n- allowSkipping: %s",
+            event->filename.c_str(),
             event->allowSkipping ? "true" : "false");
 
         myPacket->Send(event, true);

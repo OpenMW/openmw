@@ -12,6 +12,6 @@ void PacketVideoPlay::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send
 {
     WorldPacket::Packet(bs, event, send);
 
-    RW(event->video, send);
+    RW(event->filename, send);
     RW(event->allowSkipping, send);
 }

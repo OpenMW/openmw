@@ -10,6 +10,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/cellstore.hpp"
@@ -946,14 +947,24 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         break;
     }
+    case ID_MUSIC_PLAY:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_MUSIC_PLAY");
+        LOG_APPEND(Log::LOG_WARN, "- filename: %s",
+            event->filename.c_str());
+
+        MWBase::Environment::get().getSoundManager()->streamMusic(event->filename);
+
+        break;
+    }
     case ID_VIDEO_PLAY:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_VIDEO_PLAY");
-        LOG_APPEND(Log::LOG_WARN, "- video: %s\n- allowSkipping: %s",
-            event->video.c_str(),
+        LOG_APPEND(Log::LOG_WARN, "- filename: %s\n- allowSkipping: %s",
+            event->filename.c_str(),
             event->allowSkipping ? "true" : "false");
 
-        MWBase::Environment::get().getWindowManager()->playVideo(event->video, event->allowSkipping);
+        MWBase::Environment::get().getWindowManager()->playVideo(event->filename, event->allowSkipping);
 
         break;
     }
