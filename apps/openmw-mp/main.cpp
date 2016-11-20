@@ -54,7 +54,7 @@ void printVersion(string version, int protocol)
 #ifdef ENABLE_BREAKPAD
 google_breakpad::ExceptionHandler *pHandler = 0;
 #if defined(_WIN32)
-bool DumpCallback(const char* _dump_dir, const char* _minidump_id, void* context, EXCEPTION_POINTERS* exinfo, MDRawAssertionInfo* assertion, bool success)
+bool DumpCallback(const wchar_t* _dump_dir,const wchar_t* _minidump_id,void* context,EXCEPTION_POINTERS* exinfo,MDRawAssertionInfo* assertion,bool success)
 #elif defined(__linux)
 bool DumpCallback(const google_breakpad::MinidumpDescriptor &md, void *context, bool success)
 #endif
@@ -67,13 +67,11 @@ void breakpad(std::string pathToDump)
 {
 #ifdef _WIN32
     pHandler = new google_breakpad::ExceptionHandler(
-            pathToDump,
+            L"dumps\\",
             /*FilterCallback*/ 0,
             DumpCallback,
-            /*context*/
-            google_breakpad::ExceptionHandler::HANDLER_ALL,
-            true
-            );
+            0,
+            google_breakpad::ExceptionHandler::HANDLER_ALL);
 #else
     google_breakpad::MinidumpDescriptor md(pathToDump);
     pHandler = new google_breakpad::ExceptionHandler(
