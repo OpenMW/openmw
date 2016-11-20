@@ -291,9 +291,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         {
             if (packet->length == myPacket->headerSize())
             {
-                printf("ID_GAME_INVENTORY update only\n");
                 getLocalPlayer()->updateInventory(true);
-                getPlayerPacket(ID_GAME_INVENTORY)->Send(getLocalPlayer());
             }
             else
             {
