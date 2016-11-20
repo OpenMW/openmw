@@ -69,6 +69,15 @@ void ItemFunctions::RemoveItem(unsigned short pid, const char* itemName, unsigne
     player->inventorySendBuffer.action = Inventory::REMOVEITEM;
 }
 
+void ItemFunctions::ClearInventory(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->inventorySendBuffer.items.clear();
+    player->inventorySendBuffer.action = Inventory::UPDATE;
+}
+
 bool ItemFunctions::HasItemEquipped(unsigned short pid, const char* itemName)
 {
     Player *player;

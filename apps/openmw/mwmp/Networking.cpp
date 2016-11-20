@@ -296,14 +296,15 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             else
             {
                 myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                MWWorld::ContainerStore &conStore = ptr.getClass().getContainerStore(ptr);
+                MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                MWWorld::ContainerStore &conStore = ptrPlayer.getClass().getContainerStore(ptrPlayer);
+
                 if (getLocalPlayer()->inventory.action == Inventory::ADDITEM)
                 {
                     for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
                     {
                         mwmp::Item item = getLocalPlayer()->inventory.items[i];
-                        MWWorld::Ptr itemPtr = *conStore.add(item.refid, item.count, ptr);
+                        MWWorld::Ptr itemPtr = *conStore.add(item.refid, item.count, ptrPlayer);
                         if (item.health != -1)
                             itemPtr.getCellRef().setCharge(item.health);
                     }
@@ -313,21 +314,27 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                     for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
                     {
                         mwmp::Item item = getLocalPlayer()->inventory.items[i];
-                        conStore.remove(item.refid, item.count, ptr);
+                        conStore.remove(item.refid, item.count, ptrPlayer);
                     }
                 }
                 else // update
                 {
+                    // Clear items in inventory
                     conStore.clear();
+
                     for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
                     {
                         mwmp::Item item = getLocalPlayer()->inventory.items[i];
-                        MWWorld::Ptr itemPtr = *conStore.add(item.refid, item.count, ptr);
+                        MWWorld::Ptr itemPtr = *conStore.add(item.refid, item.count, ptrPlayer);
                         if (item.health != -1)
                             itemPtr.getCellRef().setCharge(item.health);
-                        printf("%s %d %d\n", item.refid.c_str(), item.count, item.health);
                     }
-                    getLocalPlayer()->setEquipment(); // restore equipped items
+
+                    // Don't automatically setEquipment() here, or the player could end
+                    // up getting a new set of their starting clothes, or other items
+                    // supposed to no longer exist
+                    //
+                    // Instead, expect server scripts to do that manually
                 }
             }
         }

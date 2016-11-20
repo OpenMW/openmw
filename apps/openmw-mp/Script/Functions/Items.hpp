@@ -12,8 +12,9 @@
     {"EquipItem",              ItemFunctions::EquipItem},\
     {"UnequipItem",            ItemFunctions::UnequipItem},\
     \
-    {"AddItem",                ItemFunctions::AddItem}, \
-    {"RemoveItem",             ItemFunctions::RemoveItem}, \
+    {"AddItem",                ItemFunctions::AddItem},\
+    {"RemoveItem",             ItemFunctions::RemoveItem},\
+    {"ClearInventory",         ItemFunctions::ClearInventory},\
     \
     {"HasItemEquipped",        ItemFunctions::HasItemEquipped},\
     \
@@ -40,6 +41,7 @@ public:
 
     static void AddItem(unsigned short pid, const char* itemName, unsigned int count, int health) noexcept;
     static void RemoveItem(unsigned short pid, const char* itemName, unsigned short count) noexcept;
+    static void ClearInventory(unsigned short pid) noexcept;
 
     static bool HasItemEquipped(unsigned short pid, const char* itemName);
 
