@@ -231,6 +231,14 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         break;
     }
 
+    case ID_GAME_SPELLBOOK:
+    {
+        DEBUG_PRINTF("ID_GAME_SPELLBOOK\n");
+        myPacket->Read(player);
+
+        break;
+    }
+
     case ID_GAME_ATTACK:
     {
         DEBUG_PRINTF("ID_GAME_ATTACK\n");

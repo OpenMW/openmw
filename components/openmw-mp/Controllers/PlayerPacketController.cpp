@@ -24,6 +24,7 @@
 #include "../Packets/Player/PacketTime.hpp"
 #include "../Packets/Player/PacketLoaded.hpp"
 #include "../Packets/Player/PacketInventory.hpp"
+#include "../Packets/Player/PacketSpellbook.hpp"
 #include "../Packets/Player/PacketConsole.hpp"
 
 #include "PlayerPacketController.hpp"
@@ -64,6 +65,7 @@ mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *p
     AddPacket<PacketTime>(&packets, peer);
     AddPacket<PacketLoaded>(&packets, peer);
     AddPacket<PacketInventory>(&packets, peer);
+    AddPacket<PacketSpellbook>(&packets, peer);
 
     AddPacket<PacketConsole>(&packets, peer);
 }

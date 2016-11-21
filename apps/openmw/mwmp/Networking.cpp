@@ -341,6 +341,10 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
+    case ID_GAME_SPELLBOOK:
+    {
+        break;
+    }
     case ID_GAME_ATTACK:
     {
         if (pl != 0)
