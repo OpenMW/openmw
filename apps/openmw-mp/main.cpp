@@ -236,7 +236,6 @@ int main(int argc, char *argv[])
         mclient->SetMOTD(motd);
         thrQuery = thread(queryThread, mclient);
     }
-    
 
     int code = networking.mainLoop();
 

@@ -12,7 +12,7 @@ void Players::deletePlayer(RakNet::RakNetGUID guid)
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Deleting player with guid %lu",
         guid.g);
-    
+
     if (players[guid] != 0)
     {
         LOG_APPEND(Log::LOG_INFO, "- Emptying slot %i",

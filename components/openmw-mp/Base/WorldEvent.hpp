@@ -26,7 +26,7 @@ namespace mwmp
         ESM::Cell cell;
         ESM::CellRef cellRef;
         ESM::Position pos;
-        
+
         int count;
         int state;
         int lockLevel;

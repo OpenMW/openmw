@@ -53,8 +53,6 @@ namespace mwmp
 
         void prepareAttack(Attack::TYPE type, bool state);
 
-        
-
     private:
         Networking *getNetworking();
         MWWorld::Ptr getPlayerPtr();

@@ -77,7 +77,7 @@ void LocalPlayer::charGen(int stageFirst, int stageEnd)
 bool LocalPlayer::charGenThread()
 {
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
-    
+
     // If we haven't finished CharGen and we're in a menu, it must be
     // one of the CharGen menus, so go no further until it's closed
     if (windowManager->isGuiMode() && CharGenStage()->end != 0)
@@ -110,7 +110,7 @@ bool LocalPlayer::charGenThread()
 
         return false;
     }
-    
+
     // If we've reached the last stage of CharGen, send the
     // corresponding packets and mark CharGen as finished
     else if (CharGenStage()->end != 0)
@@ -219,7 +219,7 @@ void LocalPlayer::updateSkills(bool forceUpdate)
         else if (ptrNpcStats.getSkill(i).getProgress() != NpcStats()->mSkills[i].mProgress)
         {
             ptrNpcStats.getSkill(i).writeState(NpcStats()->mSkills[i]);
-        }    
+        }
     }
 
     for (int i = 0; i < 8; i++)
@@ -421,7 +421,7 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
 void LocalPlayer::updateInventory(bool forceUpdate)
 {
     static bool invChanged = false;
-    
+
     if (forceUpdate)
         invChanged = true;
 
@@ -453,7 +453,7 @@ void LocalPlayer::updateInventory(bool forceUpdate)
             }
         }
     }
-    
+
     if (!invChanged)
     {
         for (MWWorld::ContainerStoreIterator iter(ptrInventory.begin()); iter != ptrInventory.end(); ++iter)
@@ -848,7 +848,7 @@ void LocalPlayer::sendInventory()
 void LocalPlayer::sendSpellAddition(std::string id)
 {
     spellbook.spells.clear();
-    
+
     mwmp::Spell spell;
     spell.id = id;
     spellbook.spells.push_back(spell);

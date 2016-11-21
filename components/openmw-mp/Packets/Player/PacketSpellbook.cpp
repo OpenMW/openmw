@@ -19,7 +19,7 @@ void PacketSpellbook::Packet(RakNet::BitStream *bs, BasePlayer *player, bool sen
         player->spellbook.spells.clear();
     else
         player->spellbook.count = (unsigned int) (player->spellbook.spells.size());
-    
+
     RW(player->spellbook.count, send);
 
     for (int i = 0; i < player->spellbook.count; i++)

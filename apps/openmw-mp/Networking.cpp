@@ -414,7 +414,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_DELETE from %s",
             player->Npc()->mName.c_str());
-        
+
         myPacket->Read(event);
 
         LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",

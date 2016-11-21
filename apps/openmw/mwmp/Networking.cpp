@@ -79,7 +79,7 @@ void Networking::update()
                 LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "A connection is incoming.");
                 break;
             case ID_NO_FREE_INCOMING_CONNECTIONS:
-                errmsg = "The server is full.";   
+                errmsg = "The server is full.";
                 break;
             case ID_DISCONNECTION_NOTIFICATION:
                 errmsg = "We have been disconnected.";
