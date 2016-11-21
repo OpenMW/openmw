@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cmath>
 
+#include "../mwmp/Main.hpp"
+
 #include <components/esm/loadnpc.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -442,6 +444,11 @@ namespace MWScript
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (id);
 
                     ptr.getClass().getCreatureStats (ptr).getSpells().add (id);
+
+                    // Added by tes3mp
+                    //
+                    // LocalPlayer has gained a spell, so send a packet with it
+                    mwmp::Main::get().getLocalPlayer()->sendSpellAddition(id);
                 }
         };
 
@@ -466,6 +473,11 @@ namespace MWScript
                     {
                         wm->unsetSelectedSpell();
                     }
+
+                    // Added by tes3mp
+                    //
+                    // LocalPlayer has lost a spell, so send a packet with it
+                    mwmp::Main::get().getLocalPlayer()->sendSpellRemoval(id);
                 }
         };
 

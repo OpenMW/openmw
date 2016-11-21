@@ -18,14 +18,18 @@ void PacketInventory::Packet(RakNet::BitStream *bs, BasePlayer *player, bool sen
     PlayerPacket::Packet(bs, player, send);
 
     RW(player->inventory.action, send);
+
     if (!send)
         player->inventory.items.clear();
     else
         player->inventory.count = (unsigned int) (player->inventory.items.size());
+    
     RW(player->inventory.count, send);
+    
     for (int i = 0; i < player->inventory.count; i++)
     {
         Item item;
+
         if (send)
         {
             item = player->inventory.items[i];

@@ -58,6 +58,24 @@ namespace mwmp
         int action; //0 - FullUpdate, 1 - AddItem, 2 - RemoveItem
     };
 
+    struct Spell
+    {
+        std::string id;
+    };
+
+    struct Spellbook
+    {
+        std::vector<Spell> spells;
+        unsigned int count;
+        enum ACTION_TYPE
+        {
+            UPDATE = 0,
+            ADD,
+            REMOVE
+        };
+        int action; //0 - Update, 1 - Add, 2 - Remove
+    };
+
     class BasePlayer
     {
     public:
@@ -89,6 +107,7 @@ namespace mwmp
         {
             inventory.action = 0;
             inventory.count = 0;
+            spellbook.action = 0;
         }
 
         BasePlayer()
@@ -174,6 +193,7 @@ namespace mwmp
         int day;
         double hour;
         Inventory inventory;
+        Spellbook spellbook;
         bool consoleAllowed;
         bool ignorePosPacket;
 

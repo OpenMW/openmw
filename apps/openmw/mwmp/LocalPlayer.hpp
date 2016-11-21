@@ -47,6 +47,8 @@ namespace mwmp
 
         void sendClass();
         void sendInventory();
+        void sendSpellAddition(std::string id);
+        void sendSpellRemoval(std::string id);
         void sendAttack(Attack::TYPE type);
 
         void prepareAttack(Attack::TYPE type, bool state);

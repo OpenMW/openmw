@@ -845,6 +845,30 @@ void LocalPlayer::sendInventory()
     Main::get().getNetworking()->getPlayerPacket(ID_GAME_INVENTORY)->Send(this);
 }
 
+void LocalPlayer::sendSpellAddition(std::string id)
+{
+    spellbook.spells.clear();
+    
+    mwmp::Spell spell;
+    spell.id = id;
+    spellbook.spells.push_back(spell);
+
+    spellbook.action = Spellbook::ADD;
+    Main::get().getNetworking()->getPlayerPacket(ID_GAME_SPELLBOOK)->Send(this);
+}
+
+void LocalPlayer::sendSpellRemoval(std::string id)
+{
+    spellbook.spells.clear();
+
+    mwmp::Spell spell;
+    spell.id = id;
+    spellbook.spells.push_back(spell);
+
+    spellbook.action = Spellbook::REMOVE;
+    Main::get().getNetworking()->getPlayerPacket(ID_GAME_SPELLBOOK)->Send(this);
+}
+
 void LocalPlayer::sendAttack(Attack::TYPE type)
 {
     MWMechanics::DrawState_ state = getPlayerPtr().getClass().getNpcStats(getPlayerPtr()).getDrawState();

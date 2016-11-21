@@ -236,6 +236,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         DEBUG_PRINTF("ID_GAME_SPELLBOOK\n");
         myPacket->Read(player);
 
+        Script::Call<Script::CallbackIdentity("OnPlayerChangeSpellbook")>(player->getId());
+
         break;
     }
 
