@@ -24,12 +24,12 @@ unsigned int ItemFunctions::GetInventorySize(unsigned short pid) noexcept
     return player->inventory.count;
 }
 
-void ItemFunctions::EquipItem(unsigned short pid, unsigned short slot, const char *itemName, unsigned int count, int health) noexcept
+void ItemFunctions::EquipItem(unsigned short pid, unsigned short slot, const char *itemId, unsigned int count, int health) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
 
-    player->EquipedItem(slot)->refid = itemName;
+    player->EquipedItem(slot)->refid = itemId;
     player->EquipedItem(slot)->count = count;
     player->EquipedItem(slot)->health = health;
 }
@@ -42,13 +42,13 @@ void ItemFunctions::UnequipItem(unsigned short pid, unsigned short slot) noexcep
     ItemFunctions::EquipItem(pid, slot, "", 0, -1);
 }
 
-void ItemFunctions::AddItem(unsigned short pid, const char* itemName, unsigned int count, int health) noexcept
+void ItemFunctions::AddItem(unsigned short pid, const char* itemId, unsigned int count, int health) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
 
     Item item;
-    item.refid = itemName;
+    item.refid = itemId;
     item.count = count;
     item.health = health;
 
@@ -56,13 +56,13 @@ void ItemFunctions::AddItem(unsigned short pid, const char* itemName, unsigned i
     player->inventorySendBuffer.action = Inventory::ADDITEM;
 }
 
-void ItemFunctions::RemoveItem(unsigned short pid, const char* itemName, unsigned short count) noexcept
+void ItemFunctions::RemoveItem(unsigned short pid, const char* itemId, unsigned short count) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
 
     Item item;
-    item.refid = itemName;
+    item.refid = itemId;
     item.count = count;
 
     player->inventorySendBuffer.items.push_back(item);
@@ -78,13 +78,13 @@ void ItemFunctions::ClearInventory(unsigned short pid) noexcept
     player->inventorySendBuffer.action = Inventory::UPDATE;
 }
 
-bool ItemFunctions::HasItemEquipped(unsigned short pid, const char* itemName)
+bool ItemFunctions::HasItemEquipped(unsigned short pid, const char* itemId)
 {
     Player *player;
     GET_PLAYER(pid, player, false);
 
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
-        if (Misc::StringUtils::ciEqual(player->EquipedItem(slot)->refid, itemName))
+        if (Misc::StringUtils::ciEqual(player->EquipedItem(slot)->refid, itemId))
             return true;
     return false;
 }

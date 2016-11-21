@@ -66,8 +66,11 @@ public:
     std::chrono::steady_clock::time_point getLastAttackerTime();
 
     virtual ~Player();
+
 public:
     mwmp::Inventory inventorySendBuffer;
+    mwmp::Spellbook spellbookSendBuffer;
+
 private:
     bool handshakeState;
     int loadState;

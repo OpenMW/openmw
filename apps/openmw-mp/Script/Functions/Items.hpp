@@ -36,14 +36,14 @@ public:
     static int GetEquipmentSize() noexcept;
     static unsigned int GetInventorySize(unsigned short pid) noexcept;
 
-    static void EquipItem(unsigned short pid, unsigned short slot, const char* itemName, unsigned int count, int health) noexcept;
+    static void EquipItem(unsigned short pid, unsigned short slot, const char* itemId, unsigned int count, int health) noexcept;
     static void UnequipItem(unsigned short pid, unsigned short slot) noexcept;
 
-    static void AddItem(unsigned short pid, const char* itemName, unsigned int count, int health) noexcept;
-    static void RemoveItem(unsigned short pid, const char* itemName, unsigned short count) noexcept;
+    static void AddItem(unsigned short pid, const char* itemId, unsigned int count, int health) noexcept;
+    static void RemoveItem(unsigned short pid, const char* itemId, unsigned short count) noexcept;
     static void ClearInventory(unsigned short pid) noexcept;
 
-    static bool HasItemEquipped(unsigned short pid, const char* itemName);
+    static bool HasItemEquipped(unsigned short pid, const char* itemId);
 
     static const char *GetEquipmentItemId(unsigned short pid, unsigned short slot) noexcept;
     static int GetEquipmentItemCount(unsigned short pid, unsigned short slot) noexcept;

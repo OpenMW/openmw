@@ -10,6 +10,7 @@
 #include <Script/Functions/GUI.hpp>
 #include <Script/Functions/Stats.hpp>
 #include <Script/Functions/Items.hpp>
+#include <Script/Functions/Spells.hpp>
 #include <Script/Functions/World.hpp>
 #include <RakNetTypes.h>
 //#include <amx/amx.h>
@@ -68,7 +69,6 @@ public:
             {"MakePublic",          ScriptFunctions::MakePublic},
             {"CallPublic",          reinterpret_cast<Function<void>>(ScriptFunctions::CallPublic)},
 
-
             {"StartTimer",          ScriptFunctions::StartTimer},
             {"StopTimer",           ScriptFunctions::StopTimer},
             {"RestartTimer",        ScriptFunctions::RestartTimer},
@@ -77,7 +77,6 @@ public:
 
             {"StopServer",          ScriptFunctions::StopServer},
 
-//            {"Cast",              ScriptFunctions::Cast},
             {"SendMessage",         ScriptFunctions::SendMessage},
             {"Kick",                ScriptFunctions::Kick},
             {"GetServerVersion",    ScriptFunctions::GetServerVersion},
@@ -87,11 +86,10 @@ public:
             TRANSLOCATIONFUNCTIONS,
             STATSFUNCTIONS,
             ITEMAPI,
+            SPELLAPI,
             GUIFUNCTIONS,
             CHARCLASSFUNCTIONS,
             WORLDFUNCTIONS,
-
-
     };
 
     static constexpr ScriptCallbackData callbacks[]{
