@@ -6,7 +6,7 @@
     \
     {"AddSpell",         SpellFunctions::AddSpell},\
     {"RemoveSpell",      SpellFunctions::RemoveSpell},\
-    {"ClearSpellbook",   SpellFunctions::ClearInventory},\
+    {"ClearSpellbook",   SpellFunctions::ClearSpellbook},\
     \
     {"HasSpell",         SpellFunctions::HasSpell},\
     {"GetSpellId",       SpellFunctions::GetSpellId},\
