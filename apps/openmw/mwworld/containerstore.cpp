@@ -553,14 +553,14 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
             if(listInMap != allowedForReplace.end())
                 restockNum -= std::min(restockNum, listInMap->second);
             //restock
-            addInitialItem(itemOrList, owner, restockNum, true);
+            addInitialItem(itemOrList, owner, -restockNum, true);
         }
         else
         {
             //Restocking static item - just restock to the max count
             int currentCount = count(itemOrList);
             if (currentCount < std::abs(it->mCount))
-                addInitialItem(itemOrList, owner, std::abs(it->mCount) - currentCount, true);
+                addInitialItem(itemOrList, owner, -(std::abs(it->mCount) - currentCount), true);
         }
     }
     flagAsModified();
