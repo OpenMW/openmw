@@ -5,11 +5,11 @@
 namespace MWMechanics
 {
     template<typename T>
-    Stat<T>::Stat() : mBase (0), mModified (0) {}
+    Stat<T>::Stat() : mBase (0), mModified (0), mCurrentModified (0) {}
     template<typename T>
-    Stat<T>::Stat(T base) : mBase (base), mModified (base) {}
+    Stat<T>::Stat(T base) : mBase (base), mModified (base), mCurrentModified (base) {}
     template<typename T>
-    Stat<T>::Stat(T base, T modified) : mBase (base), mModified (modified) {}
+    Stat<T>::Stat(T base, T modified) : mBase (base), mModified (modified), mCurrentModified (modified) {}
 
     template<typename T>
     const T& Stat<T>::getBase() const
@@ -22,23 +22,42 @@ namespace MWMechanics
     {
         return std::max(static_cast<T>(0), mModified);
     }
+
+    template<typename T>
+    T Stat<T>::getCurrentModified() const
+    {
+        return mCurrentModified;
+    }
+
     template<typename T>
     T Stat<T>::getModifier() const
     {
         return mModified-mBase;
     }
+
+    template<typename T>
+    T Stat<T>::getCurrentModifier() const
+    {
+        return mCurrentModified - mModified;
+    }
+
     template<typename T>
     void Stat<T>::set (const T& value)
     {
+        T diff = value - mBase;
         mBase = mModified = value;
+        mCurrentModified += diff;
     }
+
     template<typename T>
     void Stat<T>::setBase (const T& value)
     {
         T diff = value - mBase;
         mBase = value;
         mModified += diff;
+        mCurrentModified += diff;
     }
+
     template<typename T>
     void Stat<T>::setModified (T value, const T& min, const T& max)
     {
@@ -57,7 +76,15 @@ namespace MWMechanics
 
         mModified = value;
         mBase += diff;
+        mCurrentModified += diff;
     }
+
+    template<typename T>
+    void Stat<T>::setCurrentModified(T value)
+    {
+        mCurrentModified = value;
+    }
+
     template<typename T>
     void Stat<T>::setModifier (const T& modifier)
     {
@@ -65,16 +92,23 @@ namespace MWMechanics
     }
 
     template<typename T>
+    void Stat<T>::setCurrentModifier(const T& modifier)
+    {
+        mCurrentModified = mModified + modifier;
+    }
+
+    template<typename T>
     void Stat<T>::writeState (ESM::StatState<T>& state) const
     {
         state.mBase = mBase;
-        state.mMod = mModified;
+        state.mMod = mCurrentModified;
     }
     template<typename T>
     void Stat<T>::readState (const ESM::StatState<T>& state)
     {
         mBase = state.mBase;
-        mModified = state.mMod;
+        mModified = state.mBase;
+        mCurrentModified = state.mMod;
     }
 
 
@@ -98,6 +132,12 @@ namespace MWMechanics
     {
         return mStatic.getModified();
     }
+    template<typename T>
+    T DynamicStat<T>::getCurrentModified() const
+    {
+        return mStatic.getCurrentModified();
+    }
+
     template<typename T>
     const T& DynamicStat<T>::getCurrent() const
     {
@@ -127,14 +167,21 @@ namespace MWMechanics
             mCurrent = getModified();
     }
     template<typename T>
-    void DynamicStat<T>::setCurrent (const T& value, bool allowDecreaseBelowZero)
+    void DynamicStat<T>::setCurrentModified(T value)
+    {
+        mStatic.setCurrentModified(value);
+    }
+    template<typename T>
+    void DynamicStat<T>::setCurrent (const T& value, bool allowDecreaseBelowZero, bool allowIncreaseAboveModified)
     {
         if (value > mCurrent)
         {
             // increase
-            mCurrent = value;
-
-            if (mCurrent > getModified())
+            if (value <= getModified() || allowIncreaseAboveModified)
+                mCurrent = value;
+            else if (mCurrent > getModified())
+                return;
+            else
                 mCurrent = getModified();
         }
         else if (value > 0 || allowDecreaseBelowZero)
@@ -154,6 +201,16 @@ namespace MWMechanics
         T diff =  modifier - mStatic.getModifier();
         mStatic.setModifier (modifier);
         setCurrent (getCurrent()+diff, allowCurrentDecreaseBelowZero);
+    }
+
+    template<typename T>
+    void DynamicStat<T>::setCurrentModifier(const T& modifier, bool allowCurrentDecreaseBelowZero)
+    {
+        T diff = modifier - mStatic.getCurrentModifier();
+        mStatic.setCurrentModifier(modifier);
+
+        // The (modifier > 0) check here allows increase over modified only if the modifier is positive (a fortify effect is active).
+        setCurrent (getCurrent() + diff, allowCurrentDecreaseBelowZero, (modifier > 0));
     }
 
     template<typename T>
