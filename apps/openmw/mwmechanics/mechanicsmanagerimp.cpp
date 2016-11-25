@@ -1536,27 +1536,23 @@ namespace MWMechanics
                 player->restoreSkillsAttributes();
         }
 
-        // Equipped items other than WerewolfRobe may reference bones that do not even
-        // exist with the werewolf object root, so make sure to unequip all items
-        // *before* we become a werewolf.
-        MWWorld::InventoryStore& invStore = actor.getClass().getInventoryStore(actor);
-        invStore.unequipAll(actor);
-
         // Werewolfs can not cast spells, so we need to unset the prepared spell if there is one.
         if (npcStats.getDrawState() == MWMechanics::DrawState_Spell)
             npcStats.setDrawState(MWMechanics::DrawState_Nothing);
 
         npcStats.setWerewolf(werewolf);
 
+        MWWorld::InventoryStore &inv = actor.getClass().getInventoryStore(actor);
+
         if(werewolf)
         {
-            MWWorld::InventoryStore &inv = actor.getClass().getInventoryStore(actor);
-
+            inv.unequipAll(actor);
             inv.equip(MWWorld::InventoryStore::Slot_Robe, inv.ContainerStore::add("werewolfrobe", 1, actor), actor);
         }
         else
         {
-            actor.getClass().getContainerStore(actor).remove("werewolfrobe", 1, actor);
+            inv.unequipSlot(MWWorld::InventoryStore::Slot_Robe, actor);
+            inv.ContainerStore::remove("werewolfrobe", 1, actor);
         }
 
         if(actor == player->getPlayer())

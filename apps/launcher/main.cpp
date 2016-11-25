@@ -35,14 +35,6 @@ int main(int argc, char *argv[])
         // Now we make sure the current dir is set to application path
         QDir dir(QCoreApplication::applicationDirPath());
 
-        #ifdef Q_OS_MAC
-        if (dir.dirName() == "MacOS") {
-            dir.cdUp();
-            dir.cdUp();
-            dir.cdUp();
-        }
-        #endif
-
         QDir::setCurrent(dir.absolutePath());
 
         Launcher::MainDialog mainWin;

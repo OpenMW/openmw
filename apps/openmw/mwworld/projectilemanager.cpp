@@ -369,7 +369,7 @@ namespace MWWorld
 
                     // Try to get a Ptr to the bow that was used. It might no longer exist.
                     MWWorld::Ptr bow = projectileRef.getPtr();
-                    if (!caster.isEmpty())
+                    if (!caster.isEmpty() && it->mIdArrow != it->mBowId)
                     {
                         MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
                         MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);

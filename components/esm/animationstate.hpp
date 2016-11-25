@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <stdint.h>
 
 namespace ESM
 {
@@ -20,7 +21,7 @@ namespace ESM
             std::string mGroup;
             float mTime;
             bool mAbsolute;
-            size_t mLoopCount;
+            uint64_t mLoopCount;
         };
 
         typedef std::vector<ScriptedAnimation> ScriptedAnimations;

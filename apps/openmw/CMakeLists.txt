@@ -182,6 +182,21 @@ target_link_libraries(tes3mp ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 if(APPLE)
+    set(BUNDLE_RESOURCES_DIR "${APP_BUNDLE_DIR}/Contents/Resources")
+
+    set(OPENMW_MYGUI_FILES_ROOT ${BUNDLE_RESOURCES_DIR})
+    set(OPENMW_SHADERS_ROOT ${BUNDLE_RESOURCES_DIR})
+
+    add_subdirectory(../../files/ ${CMAKE_CURRENT_BINARY_DIR}/files)
+
+    configure_file("${OpenMW_BINARY_DIR}/settings-default.cfg" ${BUNDLE_RESOURCES_DIR} COPYONLY)
+    configure_file("${OpenMW_BINARY_DIR}/openmw.cfg" ${BUNDLE_RESOURCES_DIR} COPYONLY)
+    configure_file("${OpenMW_BINARY_DIR}/gamecontrollerdb.txt" ${BUNDLE_RESOURCES_DIR} COPYONLY)
+
+    add_custom_command(TARGET openmw
+        POST_BUILD
+        COMMAND cp "${OpenMW_BINARY_DIR}/resources/version" "${BUNDLE_RESOURCES_DIR}/resources")
+
     find_library(COCOA_FRAMEWORK Cocoa)
     find_library(IOKIT_FRAMEWORK IOKit)
     target_link_libraries(tes3mp ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
