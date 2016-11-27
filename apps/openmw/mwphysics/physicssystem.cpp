@@ -450,8 +450,8 @@ namespace MWPhysics
                 if (inertia.z() < 0)
                     inertia.z() *= slowFall;
                 if (slowFall < 1.f) {
-                    inertia.x() = 0;
-                    inertia.y() = 0;
+                    inertia.x() *= slowFall;
+                    inertia.y() *= slowFall;
                 }
                 physicActor->setInertialForce(inertia);
             }
