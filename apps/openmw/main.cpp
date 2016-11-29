@@ -352,9 +352,8 @@ int main(int argc, char**argv)
 #endif
 
 #ifdef __APPLE__
-        // FIXME: set current dir to bundle path
-        //boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
-        //boost::filesystem::current_path(bundlePath);
+        boost::filesystem::path binary_path = boost::filesystem::system_complete(boost::filesystem::path(argv[0]));
+        boost::filesystem::current_path(binary_path.parent_path());
 #endif
 
         engine.reset(new OMW::Engine(cfgMgr));
