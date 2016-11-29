@@ -120,6 +120,7 @@ Programmers
     Scott Howard
     Sebastian Wick (swick)
     Sergey Shambir
+    ShadowRadiance
     sir_herrbatka
     smbas
     Stefan Galowicz (bogglez)
