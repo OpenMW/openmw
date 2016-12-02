@@ -11,6 +11,8 @@
 
 #include <components/settings/settings.hpp>
 
+#include <components/fallback/fallback.hpp>
+
 #include "../mwbase/soundmanager.hpp"
 
 namespace VFS
@@ -44,6 +46,8 @@ namespace MWSound
     {
         const VFS::Manager* mVFS;
 
+        Fallback::Map mFallback;
+
         std::auto_ptr<Sound_Output> mOutput;
 
         // Caches available music tracks by <playlist name, (sound files) >
@@ -55,6 +59,13 @@ namespace MWSound
         float mMusicVolume;
         float mVoiceVolume;
         float mFootstepsVolume;
+
+        int mNearWaterRadius;
+        int mNearWaterPoints;
+        float mNearWaterIndoorTolerance;
+        float mNearWaterOutdoorTolerance;
+        std::string mNearWaterIndoorID;
+        std::string mNearWaterOutdoorID;
 
         typedef std::auto_ptr<std::deque<Sound_Buffer> > SoundBufferList;
         // List of sound buffers, grown as needed. New enties are added to the
@@ -94,6 +105,7 @@ namespace MWSound
         int mPausedSoundTypes;
 
         MWBase::SoundPtr mUnderwaterSound;
+        MWBase::SoundPtr mNearWaterSound;
 
         Sound_Buffer *insertSound(const std::string &soundId, const ESM::Sound *sound);
 
@@ -108,6 +120,7 @@ namespace MWSound
         void streamMusicFull(const std::string& filename);
         void updateSounds(float duration);
         void updateRegionSound(float duration);
+        void updateWaterSound(float duration);
 
         float volumeFromType(PlayType type) const;
 
@@ -119,7 +132,7 @@ namespace MWSound
         friend class OpenAL_Output;
 
     public:
-        SoundManager(const VFS::Manager* vfs, bool useSound);
+        SoundManager(const VFS::Manager* vfs, const std::map<std::string, std::string>& fallbackMap, bool useSound);
         virtual ~SoundManager();
 
         virtual void processChangedSettings(const Settings::CategorySettingVector& settings);
