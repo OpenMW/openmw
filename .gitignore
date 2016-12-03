@@ -22,6 +22,7 @@ Doxygen
 .settings
 .directory
 .idea
+cmake-build-*
 ## qt-creator
 CMakeLists.txt.user*
 
