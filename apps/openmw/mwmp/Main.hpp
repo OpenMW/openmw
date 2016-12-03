@@ -15,7 +15,7 @@ namespace mwmp
 
         static void optionsDesc(boost::program_options::options_description *desc);
         static void configure(const boost::program_options::variables_map &variables);
-        static void init(std::vector<std::string> &content);
+        static bool init(std::vector<std::string> &content);
         static void postInit();
         static void destroy();
         static const Main &get();

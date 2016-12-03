@@ -632,6 +632,8 @@ private:
 void OMW::Engine::go()
 {
     assert (!mContentFiles.empty());
+    if(!mwmp::Main::init(mContentFiles))
+        return;
 
     mViewer = new osgViewer::Viewer;
 
@@ -660,7 +662,6 @@ void OMW::Engine::go()
     ToUTF8::Utf8Encoder encoder (mEncoding);
     mEncoder = &encoder;
 
-    mwmp::Main::init(mContentFiles);
     prepareEngine (settings);
     mwmp::Main::postInit();
     mSkipMenu = true;

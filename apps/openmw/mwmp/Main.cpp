@@ -113,7 +113,7 @@ void RestoreMgr(Settings::Manager &mgr)
     mgr.mChangedSettings = saveChangedSettings;
 }
 
-void Main::init(std::vector<std::string> &content)
+bool Main::init(std::vector<std::string> &content)
 {
     assert(!pMain);
     pMain = new Main();
@@ -138,6 +138,7 @@ void Main::init(std::vector<std::string> &content)
 
     pMain->mNetworking->connect(pMain->server, pMain->port);
     RestoreMgr(mgr);
+    return pMain->mNetworking->isConnected();
 }
 
 void Main::postInit()
