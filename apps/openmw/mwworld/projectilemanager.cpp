@@ -138,7 +138,7 @@ namespace MWWorld
     };
 
 
-    void ProjectileManager::createModel(State &state, const std::string &model, const osg::Vec3f& pos, const osg::Quat& orient, bool rotate, std::string texture)
+    void ProjectileManager::createModel(State &state, const std::string &model, const osg::Vec3f& pos, const osg::Quat& orient, bool rotate, bool isMagic, std::string texture)
     {
         state.mNode = new osg::PositionAttitudeTransform;
         state.mNode->setNodeMask(MWRender::Mask_Effect);
@@ -169,21 +169,25 @@ namespace MWWorld
                     mResourceSystem->getSceneManager()->getInstance("meshes\\" + weapon->mModel, findVisitor.mFoundNode);
             }
 
-		// Add projectile light
-		osg::ref_ptr<osg::Light> projectileLight(new osg::Light);
-		projectileLight->setDiffuse(osg::Vec4(0.95f, 0.71f, 0.25f, 1.0f));
-		projectileLight->setAmbient(osg::Vec4(0.32f, 0.08f, 0.01f, 1.0f));
-		projectileLight->setSpecular(osg::Vec4(0, 0, 0, 0));
-		projectileLight->setLinearAttenuation(0.5f / 15);
-		projectileLight->setPosition(osg::Vec4(pos, 1.0));
+		if (isMagic)
+		{
+			// Add magic bolt light
+			osg::ref_ptr<osg::Light> projectileLight(new osg::Light);
+			projectileLight->setDiffuse(osg::Vec4(0.95f, 0.71f, 0.25f, 1.0f));
+			projectileLight->setAmbient(osg::Vec4(0.32f, 0.08f, 0.01f, 1.0f));
+			projectileLight->setSpecular(osg::Vec4(0, 0, 0, 0));
+			projectileLight->setLinearAttenuation(0.5f / 15);
+			projectileLight->setPosition(osg::Vec4(pos, 1.0));
 
-		// Add projectile light source
-		SceneUtil::LightSource* projectileLightSource = new SceneUtil::LightSource;
-		projectileLightSource->setNodeMask(MWRender::Mask_Lighting);
-		projectileLightSource->setRadius(66.f);
+			// Add magic bolt light source
+			SceneUtil::LightSource* projectileLightSource = new SceneUtil::LightSource;
+			projectileLightSource->setNodeMask(MWRender::Mask_Lighting);
+			projectileLightSource->setRadius(66.f);
 
-		state.mNode->addChild(projectileLightSource);
-		projectileLightSource->setLight(projectileLight);
+			// Attach to scene node
+			state.mNode->addChild(projectileLightSource);
+			projectileLightSource->setLight(projectileLight);
+		}
 
 		
         SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
@@ -248,7 +252,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), state.mIdMagic.at(0));
         MWWorld::Ptr ptr = ref.getPtr();
 
-        createModel(state, ptr.getClass().getModel(ptr), pos, orient, true, texture);
+        createModel(state, ptr.getClass().getModel(ptr), pos, orient, true, true, texture);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         for (size_t it = 0; it != state.mSoundIds.size(); it++)
@@ -272,7 +276,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
 
-        createModel(state, ptr.getClass().getModel(ptr), pos, orient, false);
+        createModel(state, ptr.getClass().getModel(ptr), pos, orient, false, false);
 
         mProjectiles.push_back(state);
     }
@@ -478,9 +482,9 @@ namespace MWWorld
 
     bool ProjectileManager::readRecord(ESM::ESMReader &reader, uint32_t type)
     {
-        if (type == ESM::REC_PROJ)
+		if (type == ESM::REC_PROJ)
         {
-            ESM::ProjectileState esm;
+			ESM::ProjectileState esm;
             esm.load(reader);
 
             ProjectileState state;
@@ -502,14 +506,14 @@ namespace MWWorld
                 return true;
             }
 
-            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), false);
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), false, false);
 
             mProjectiles.push_back(state);
             return true;
         }
         else if (type == ESM::REC_MPRJ)
         {
-            ESM::MagicBoltState esm;
+			ESM::MagicBoltState esm;
             esm.load(reader);
 
             MagicBoltState state;
@@ -537,7 +541,7 @@ namespace MWWorld
                 return true;
             }
 
-            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true, texture);
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true, true, texture);
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             
