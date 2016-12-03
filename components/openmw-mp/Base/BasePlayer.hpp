@@ -196,6 +196,7 @@ namespace mwmp
         Spellbook spellbook;
         bool consoleAllowed;
         bool ignorePosPacket;
+        ESM::ActiveSpells activeSpells;
 
     protected:
         ESM::Position pos;

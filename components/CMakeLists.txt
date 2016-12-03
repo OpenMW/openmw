@@ -156,6 +156,7 @@ add_component_dir (openmw-mp
         Packets/Player/PacketAttribute Packets/Player/PacketSkill Packets/Player/PacketLevel
         Packets/Player/PacketHandshake Packets/Player/PacketGUIBoxes Packets/Player/PacketClass
         Packets/Player/PacketTime Packets/Player/PacketInventory Packets/Player/PacketSpellbook
+        Packets/Player/PacketActiveSkills
 
         Packets/World/PacketObjectDelete Packets/World/PacketObjectPlace Packets/World/PacketObjectLock
         Packets/World/PacketObjectUnlock Packets/World/PacketObjectScale Packets/World/PacketObjectMove
