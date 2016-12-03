@@ -2,6 +2,8 @@
 
 #include <iomanip>
 
+#include <osg/Light>
+#include <osg/LightSource>
 #include <osg/PositionAttitudeTransform>
 
 #include <components/esm/esmwriter.hpp>
@@ -142,8 +144,8 @@ namespace MWWorld
         state.mNode->setNodeMask(MWRender::Mask_Effect);
         state.mNode->setPosition(pos);
         state.mNode->setAttitude(orient);
-
-        osg::Group* attachTo = state.mNode;
+		
+		osg::Group* attachTo = state.mNode;
 
         if (rotate)
         {
@@ -167,6 +169,23 @@ namespace MWWorld
                     mResourceSystem->getSceneManager()->getInstance("meshes\\" + weapon->mModel, findVisitor.mFoundNode);
             }
 
+		// Add projectile light
+		osg::ref_ptr<osg::Light> projectileLight(new osg::Light);
+		projectileLight->setDiffuse(osg::Vec4(0.95f, 0.71f, 0.25f, 1.0f));
+		projectileLight->setAmbient(osg::Vec4(0.32f, 0.08f, 0.01f, 1.0f));
+		projectileLight->setSpecular(osg::Vec4(0, 0, 0, 0));
+		projectileLight->setLinearAttenuation(0.5f / 15);
+		projectileLight->setPosition(osg::Vec4(pos, 1.0));
+
+		// Add projectile light source
+		SceneUtil::LightSource* projectileLightSource = new SceneUtil::LightSource;
+		projectileLightSource->setNodeMask(MWRender::Mask_Lighting);
+		projectileLightSource->setRadius(66.f);
+
+		state.mNode->addChild(projectileLightSource);
+		projectileLightSource->setLight(projectileLight);
+
+		
         SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
         state.mNode->accept(disableFreezeOnCullVisitor);
 
