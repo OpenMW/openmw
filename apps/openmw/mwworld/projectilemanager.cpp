@@ -169,7 +169,7 @@ namespace MWWorld
 
         if (createLight)
         {
-            // Combine colors of individual effects
+            // Case: magical effects (combine colors of individual effects)
             osg::Vec4 lightDiffuseColor;
             if (state.mIdMagic.size() > 0)
             {
@@ -189,14 +189,14 @@ namespace MWWorld
                     , lightDiffuseGreen / numberOfEffects
                     , lightDiffuseBlue / numberOfEffects
                     , 1.0f);
-                printf("%f, %f, %f", (lightDiffuseRed / numberOfEffects), (lightDiffuseGreen / numberOfEffects), (lightDiffuseBlue / numberOfEffects));
             }
             else
             {
+                // Case: no magical effects, but still creating light
                 lightDiffuseColor = osg::Vec4(0.814f, 0.682f, 0.652f, 1.0f);
             }
 
-            // Add magic bolt light
+            // Add light
             osg::ref_ptr<osg::Light> projectileLight(new osg::Light);
             projectileLight->setAmbient(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
             projectileLight->setDiffuse(lightDiffuseColor);
@@ -206,7 +206,7 @@ namespace MWWorld
             projectileLight->setQuadraticAttenuation(0.f);
             projectileLight->setPosition(osg::Vec4(pos, 1.0));
             
-            // Add magic bolt light source
+            // Add light source
             SceneUtil::LightSource* projectileLightSource = new SceneUtil::LightSource;
             projectileLightSource->setNodeMask(MWRender::Mask_Lighting);
             projectileLightSource->setRadius(66.f);
