@@ -173,10 +173,12 @@ namespace MWWorld
         {
             // Add magic bolt light
             osg::ref_ptr<osg::Light> projectileLight(new osg::Light);
-            projectileLight->setDiffuse(osg::Vec4(0.95f, 0.71f, 0.25f, 1.0f));
-            projectileLight->setAmbient(osg::Vec4(0.32f, 0.08f, 0.01f, 1.0f));
-            projectileLight->setSpecular(osg::Vec4(0, 0, 0, 0));
-            projectileLight->setLinearAttenuation(0.5f / 15);
+            projectileLight->setAmbient(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+            projectileLight->setDiffuse(osg::Vec4(0.814f, 0.682f, 0.652f, 1.0f));
+            projectileLight->setSpecular(osg::Vec4(30.0f, 30.0f, 30.0f, 1.0f));
+            projectileLight->setConstantAttenuation(0.f);
+            projectileLight->setLinearAttenuation(0.1f);
+            projectileLight->setQuadraticAttenuation(0.f);
             projectileLight->setPosition(osg::Vec4(pos, 1.0));
             
             // Add magic bolt light source
