@@ -913,7 +913,7 @@ namespace MWMechanics
 
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
 
-            if (mCaster.getClass().isActor()) // TODO: Non-actors should also create a spell cast vfx
+            if (animation && mCaster.getClass().isActor()) // TODO: Non-actors should also create a spell cast vfx even if they are disabled (animation == NULL)
             {
                 const ESM::Static* castStatic;
 
@@ -927,7 +927,7 @@ namespace MWMechanics
                 animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex, false, "", texture);
             }
 
-            if (!mCaster.getClass().isActor())
+            if (animation && !mCaster.getClass().isActor())
                 animation->addSpellCastGlow(effect);
 
             static const std::string schools[] = {
