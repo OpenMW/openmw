@@ -74,6 +74,7 @@ Programmers
     Karl-Felix Glatzer (k1ll)
     Kevin Poitra (PuppyKevin)
     Koncord
+    Kurnevsky Evgeny (kurnevsky)
     Lars Söderberg (Lazaroth)
     lazydev
     Leon Saunders (emoose)
