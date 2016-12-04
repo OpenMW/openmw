@@ -2,8 +2,6 @@
 
 #include <iomanip>
 
-#include <osg/Light>
-#include <osg/LightSource>
 #include <osg/PositionAttitudeTransform>
 
 #include <components/esm/esmwriter.hpp>
@@ -138,7 +136,7 @@ namespace MWWorld
     };
 
 
-    void ProjectileManager::createModel(State &state, const std::string &model, const osg::Vec3f& pos, const osg::Quat& orient, bool rotate, bool isMagic, std::string texture)
+    void ProjectileManager::createModel(State &state, const std::string &model, const osg::Vec3f& pos, const osg::Quat& orient, bool rotate, bool createLight, std::string texture)
     {
         state.mNode = new osg::PositionAttitudeTransform;
         state.mNode->setNodeMask(MWRender::Mask_Effect);
@@ -169,13 +167,40 @@ namespace MWWorld
                     mResourceSystem->getSceneManager()->getInstance("meshes\\" + weapon->mModel, findVisitor.mFoundNode);
             }
 
-        if (isMagic)
+        if (createLight)
         {
+            // Combine colors of individual effects
+            osg::Vec4 lightDiffuseColor;
+            if (state.mIdMagic.size() > 0)
+            {
+                float lightDiffuseRed = 0.0f;
+                float lightDiffuseGreen = 0.0f;
+                float lightDiffuseBlue = 0.0f;
+                for (std::vector<ESM::ENAMstruct>::const_iterator it = ((MagicBoltState&)state).mEffects.mList.begin(); it != ((MagicBoltState&)state).mEffects.mList.end(); ++it)
+                {
+                    const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
+                        it->mEffectID);
+                    lightDiffuseRed += ((float) magicEffect->mData.mRed / 255.f);
+                    lightDiffuseGreen += ((float) magicEffect->mData.mGreen / 255.f);
+                    lightDiffuseBlue += ((float) magicEffect->mData.mBlue / 255.f);
+                }
+                int numberOfEffects = ((MagicBoltState&)state).mEffects.mList.size();
+                lightDiffuseColor = osg::Vec4(lightDiffuseRed / numberOfEffects
+                    , lightDiffuseGreen / numberOfEffects
+                    , lightDiffuseBlue / numberOfEffects
+                    , 1.0f);
+                printf("%f, %f, %f", (lightDiffuseRed / numberOfEffects), (lightDiffuseGreen / numberOfEffects), (lightDiffuseBlue / numberOfEffects));
+            }
+            else
+            {
+                lightDiffuseColor = osg::Vec4(0.814f, 0.682f, 0.652f, 1.0f);
+            }
+
             // Add magic bolt light
             osg::ref_ptr<osg::Light> projectileLight(new osg::Light);
             projectileLight->setAmbient(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
-            projectileLight->setDiffuse(osg::Vec4(0.814f, 0.682f, 0.652f, 1.0f));
-            projectileLight->setSpecular(osg::Vec4(30.0f, 30.0f, 30.0f, 1.0f));
+            projectileLight->setDiffuse(lightDiffuseColor);
+            projectileLight->setSpecular(osg::Vec4(0.0f, 0.0f, 0.0f, 0.0f));
             projectileLight->setConstantAttenuation(0.f);
             projectileLight->setLinearAttenuation(0.1f);
             projectileLight->setQuadraticAttenuation(0.f);
