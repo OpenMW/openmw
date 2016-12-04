@@ -144,7 +144,7 @@ namespace MWWorld
         state.mNode->setNodeMask(MWRender::Mask_Effect);
         state.mNode->setPosition(pos);
         state.mNode->setAttitude(orient);
-        
+
         osg::Group* attachTo = state.mNode;
 
         if (rotate)
