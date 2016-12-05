@@ -196,7 +196,15 @@ int main(int argc, char *argv[])
     setenv("AMXFILE", moddir.c_str(), 1);
     setenv("MOD_DIR", moddir.c_str(), 1); // hack for lua
 
-    setenv("LUA_PATH", Utils::convertPath(plugin_home + "/scripts/?.lua" + ";" + plugin_home + "/scripts/?.t").c_str(), 1);
+    setenv("LUA_PATH", Utils::convertPath(plugin_home + "/scripts/?.lua" + ";"
+                                          + plugin_home + "/scripts/?.t" + ";"
+                                          + plugin_home + "/lib/lua/?.lua" + ";"
+                                          + plugin_home + "/lib/lua/?.t").c_str(), 1);
+#ifdef _WIN32
+    setenv("LUA_CPATH", Utils::convertPath(plugin_home + "/lib/?.dll").c_str(), 1);
+#else
+    setenv("LUA_CPATH", Utils::convertPath(plugin_home + "/lib/?.so").c_str(), 1);
+#endif
 
     for (auto plugin : plugins)
         Script::LoadScript(plugin.c_str(), plugin_home.c_str());
