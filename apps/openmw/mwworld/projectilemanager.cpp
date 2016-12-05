@@ -284,7 +284,7 @@ namespace MWWorld
         float volumeCalculation = 1.0f;
         if (state.mSoundIds.size() > 1)
         {
-            volumeCalculation = (1.0f / (std::log10(state.mSoundIds.size() + 1.0f)));
+            volumeCalculation = (1.0f / (std::log10(state.mSoundIds.size()) + 1.0f));
         }
         for (size_t it = 0; it != state.mSoundIds.size(); it++)
         {
@@ -578,7 +578,7 @@ namespace MWWorld
             float volumeCalculation = 1.0f;
             if (state.mSoundIds.size() > 1)
             {
-                volumeCalculation = (1.0f / (std::log10(state.mSoundIds.size() + 1.0f)));
+                volumeCalculation = (1.0f / (std::log10(state.mSoundIds.size()) + 1.0f));
             }
             for (size_t soundIter = 0; soundIter != state.mSoundIds.size(); soundIter++)
             {
