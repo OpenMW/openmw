@@ -281,9 +281,14 @@ namespace MWWorld
         createModel(state, ptr.getClass().getModel(ptr), pos, orient, true, true, texture);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+        float volumeCalculation = 1.0f;
+        if (state.mSoundIds.size() > 1)
+        {
+            volumeCalculation = (1.0f / (std::log10(state.mSoundIds.size() + 1.0f)));
+        }
         for (size_t it = 0; it != state.mSoundIds.size(); it++)
         {
-            state.mSounds.push_back(sndMgr->playSound3D(pos, state.mSoundIds.at(it), 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop));
+            state.mSounds.push_back(sndMgr->playSound3D(pos, state.mSoundIds.at(it), volumeCalculation, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop));
         }
             
         mMagicBolts.push_back(state);
@@ -570,10 +575,14 @@ namespace MWWorld
             createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true, true, texture);
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            
+            float volumeCalculation = 1.0f;
+            if (state.mSoundIds.size() > 1)
+            {
+                volumeCalculation = (1.0f / (std::log10(state.mSoundIds.size() + 1.0f)));
+            }
             for (size_t soundIter = 0; soundIter != state.mSoundIds.size(); soundIter++)
             {
-                state.mSounds.push_back(sndMgr->playSound3D(esm.mPosition, state.mSoundIds.at(soundIter), 1.0f, 1.0f,
+                state.mSounds.push_back(sndMgr->playSound3D(esm.mPosition, state.mSoundIds.at(soundIter), volumeCalculation, 1.0f,
                                         MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop));
             }
 
