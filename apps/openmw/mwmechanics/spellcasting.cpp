@@ -1009,10 +1009,10 @@ namespace MWMechanics
         creatureStats.setDynamic(index, stat);
     }
 
-    void effectTick(CreatureStats& creatureStats, const MWWorld::Ptr& actor, const EffectKey &effectKey, float magnitude)
+    bool effectTick(CreatureStats& creatureStats, const MWWorld::Ptr& actor, const EffectKey &effectKey, float magnitude)
     {
         if (magnitude == 0.f)
-            return;
+            return false;
 
         bool receivedMagicDamage = false;
 
@@ -1144,10 +1144,13 @@ namespace MWMechanics
         case ESM::MagicEffect::RemoveCurse:
             actor.getClass().getCreatureStats(actor).getSpells().purgeCurses();
             break;
+        default:
+            return false;
         }
 
         if (receivedMagicDamage && actor == getPlayer())
             MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
+        return true;
     }
 
 }
