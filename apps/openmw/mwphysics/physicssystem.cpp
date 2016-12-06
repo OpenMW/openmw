@@ -63,10 +63,11 @@ namespace MWPhysics
     class MovementSolver
     {
     private:
-        static float getSlope(osg::Vec3f normal)
+        template <class Vec3>
+        static bool isWalkableSlope(const Vec3 &normal)
         {
-            normal.normalize();
-            return osg::RadiansToDegrees(std::acos(normal * osg::Vec3f(0.f, 0.f, 1.f)));
+            static const float sMaxSlopeCos = std::cos(osg::DegreesToRadians(sMaxSlope));
+            return (normal.z() > sMaxSlopeCos);
         }
 
         enum StepMoveResult
@@ -163,7 +164,7 @@ namespace MWPhysics
              *    ==============================================
              */
             stepper.doTrace(colobj, tracer.mEndPos, tracer.mEndPos-osg::Vec3f(0.0f,0.0f,sStepSizeDown), collisionWorld);
-            if (getSlope(stepper.mPlaneNormal) > sMaxSlope)
+            if (!isWalkableSlope(stepper.mPlaneNormal))
                 return Result_MaxSlope;
             if(stepper.mFraction < 1.0f)
             {
@@ -230,13 +231,13 @@ namespace MWPhysics
 
                 if (resultCallback1.hasHit() &&
                         ( (toOsg(resultCallback1.m_hitPointWorld) - tracer.mEndPos).length2() > 35*35
-                        || getSlope(tracer.mPlaneNormal) > sMaxSlope))
+                        || !isWalkableSlope(tracer.mPlaneNormal)))
                 {
-                    actor->setOnGround(getSlope(toOsg(resultCallback1.m_hitNormalWorld)) <= sMaxSlope);
+                    actor->setOnGround(isWalkableSlope(resultCallback1.m_hitNormalWorld));
                     return toOsg(resultCallback1.m_hitPointWorld) + osg::Vec3f(0.f, 0.f, 1.f);
                 }
 
-                actor->setOnGround(getSlope(tracer.mPlaneNormal) <= sMaxSlope);
+                actor->setOnGround(isWalkableSlope(tracer.mPlaneNormal));
 
                 return tracer.mEndPos;
             }
@@ -413,7 +414,7 @@ namespace MWPhysics
                 osg::Vec3f to = newPosition - (physicActor->getOnGround() ?
                              osg::Vec3f(0,0,sStepSizeDown+2.f) : osg::Vec3f(0,0,2.f));
                 tracer.doTrace(colobj, from, to, collisionWorld);
-                if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope
+                if(tracer.mFraction < 1.0f && isWalkableSlope(tracer.mPlaneNormal)
                         && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != CollisionType_Actor)
                 {
                     const btCollisionObject* standingOn = tracer.mHitObject;
