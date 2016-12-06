@@ -111,6 +111,16 @@ public:
     float mPlaneDistance;
 };
 
+class NiSphericalCollider : public Controlled
+{
+public:
+    float mBounceFactor;
+    float mRadius;
+    osg::Vec3f mCenter;
+
+    void read(NIFStream *nif);
+};
+
 class NiParticleRotation : public Controlled
 {
 public:
