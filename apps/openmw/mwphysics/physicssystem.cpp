@@ -229,7 +229,7 @@ namespace MWPhysics
                 collisionWorld->rayTest(from, to, resultCallback1);
 
                 if (resultCallback1.hasHit() &&
-                        ( (toOsg(resultCallback1.m_hitPointWorld) - tracer.mEndPos).length() > 35
+                        ( (toOsg(resultCallback1.m_hitPointWorld) - tracer.mEndPos).length2() > 35*35
                         || getSlope(tracer.mPlaneNormal) > sMaxSlope))
                 {
                     actor->setOnGround(getSlope(toOsg(resultCallback1.m_hitNormalWorld)) <= sMaxSlope);
@@ -370,7 +370,7 @@ namespace MWPhysics
                 // NOTE: stepMove modifies newPosition if successful
                 const float minStep = 10.f;
                 StepMoveResult result = stepMove(colobj, newPosition, velocity*remainingTime, remainingTime, collisionWorld);
-                if (result == Result_MaxSlope && (velocity*remainingTime).length() < minStep) // to make sure the maximum stepping distance isn't framerate-dependent or movement-speed dependent
+                if (result == Result_MaxSlope && (velocity*remainingTime).length2() < minStep*minStep) // to make sure the maximum stepping distance isn't framerate-dependent or movement-speed dependent
                 {
                     osg::Vec3f normalizedVelocity = velocity;
                     normalizedVelocity.normalize();
