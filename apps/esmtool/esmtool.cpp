@@ -269,7 +269,7 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
         std::cout << "    Faction: '" << ref.mFaction << "'" << std::endl;
         std::cout << "    Faction rank: '" << ref.mFactionRank << "'" << std::endl;
         std::cout << "    Enchantment charge: '" << ref.mEnchantmentCharge << "'\n";
-        std::cout << "    Uses/health: '" << ref.mChargeInt << "'\n";
+        std::cout << "    Uses/health: '" << ref.mCharge << "'\n";
         std::cout << "    Gold value: '" << ref.mGoldValue << "'\n";
         std::cout << "    Blocked: '" << static_cast<int>(ref.mReferenceBlocked) << "'" << std::endl;
         std::cout << "    Deleted: " << deleted << std::endl;

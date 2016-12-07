@@ -15,7 +15,7 @@ namespace
         cellRef.mRefID = name;
         cellRef.mScale = 1;
         cellRef.mFactionRank = 0;
-        cellRef.mChargeInt = -1;
+        cellRef.mCharge = -1;
         cellRef.mGoldValue = 1;
         cellRef.mEnchantmentCharge = -1;
         cellRef.mTeleport = false;

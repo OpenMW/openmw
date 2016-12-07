@@ -89,7 +89,7 @@ void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
                 esm.getHT(mEnchantmentCharge);
                 break;
             case ESM::FourCC<'I','N','T','V'>::value:
-                esm.getHT(mChargeInt);
+                esm.getHT(mCharge);
                 break;
             case ESM::FourCC<'N','A','M','9'>::value:
                 esm.getHT(mGoldValue);
@@ -155,8 +155,8 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool
     if (mEnchantmentCharge != -1)
         esm.writeHNT("XCHG", mEnchantmentCharge);
 
-    if (mChargeInt != -1)
-        esm.writeHNT("INTV", mChargeInt);
+    if (std::abs(mCharge - -1) > .00001f)
+        esm.writeHNT("INTV", mCharge);
 
     if (mGoldValue != 1) {
         esm.writeHNT("NAM9", mGoldValue);
@@ -195,7 +195,7 @@ void ESM::CellRef::blank()
     mSoul.clear();
     mFaction.clear();
     mFactionRank = -2;
-    mChargeInt = -1;
+    mCharge = -1;
     mEnchantmentCharge = -1;
     mGoldValue = 0;
     mDestCell.clear();

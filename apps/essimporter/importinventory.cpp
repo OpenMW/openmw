@@ -40,9 +40,9 @@ namespace ESSImport
                 bool isDeleted = false;
                 item.ESM::CellRef::loadData(esm, isDeleted);
 
-                int charge=-1;
+                float charge = -1;
                 esm.getHNOT(charge, "XHLT");
-                item.mChargeInt = charge;
+                item.mCharge = charge;
 
                 if (newStack)
                     mItems.push_back(item);
