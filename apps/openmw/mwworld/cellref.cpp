@@ -81,7 +81,7 @@ namespace MWWorld
 
     int CellRef::getCharge() const
     {
-        return (int) std::round(mCellRef.mCharge);
+        return (int) round(mCellRef.mCharge);
     }
 
     float CellRef::getChargeFloat() const
