@@ -81,29 +81,20 @@ namespace MWWorld
 
     int CellRef::getCharge() const
     {
-        return mCellRef.mChargeInt;
-    }
-
-    void CellRef::setCharge(int charge)
-    {
-        if (charge != mCellRef.mChargeInt)
-        {
-            mChanged = true;
-            mCellRef.mChargeInt = charge;
-        }
+        return (int) round(mCellRef.mCharge);
     }
 
     float CellRef::getChargeFloat() const
     {
-        return mCellRef.mChargeFloat;
+        return mCellRef.mCharge;
     }
 
-    void CellRef::setChargeFloat(float charge)
+    void CellRef::setCharge(float charge)
     {
-        if (charge != mCellRef.mChargeFloat)
+        if (std::abs(charge - mCellRef.mCharge) > .00001f)
         {
             mChanged = true;
-            mCellRef.mChargeFloat = charge;
+            mCellRef.mCharge = charge;
         }
     }
 

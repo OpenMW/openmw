@@ -975,19 +975,25 @@ namespace MWMechanics
             {
                 if (!item->getClass().hasItemHealth(*item))
                     return false;
-                int charge = item->getClass().getItemHealth(*item);
+                int itemHealth = item->getClass().getItemHealth(*item);
 
-                if (charge == 0)
+                if (itemHealth == 0)
                     return false;
 
-                // FIXME: charge should be a float, not int so that damage < 1 per frame can be applied.
-                // This was also a bug in the original engine.
+                float charge = item->getCellRef().getChargeFloat();
+                if (std::abs(charge - -1) < .00001f) {
+                    charge = item->getClass().getItemMaxHealth(*item);
+                }
+
                 charge -=
-                        std::min(static_cast<int>(disintegrate),
+                        std::min((disintegrate),
                                  charge);
+                if (charge < 0.5f) {
+                    charge = 0;
+                }
                 item->getCellRef().setCharge(charge);
 
-                if (charge == 0)
+                if (item->getClass().getItemHealth(*item) == 0)
                 {
                     // Will unequip the broken item and try to find a replacement
                     if (ptr != getPlayer())

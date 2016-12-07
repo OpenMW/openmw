@@ -194,7 +194,7 @@ namespace MWClass
 
     void Light::setRemainingUsageTime (const MWWorld::Ptr& ptr, float duration) const
     {
-        ptr.getCellRef().setChargeFloat(duration);
+        ptr.getCellRef().setCharge(duration);
     }
 
     float Light::getRemainingUsageTime (const MWWorld::ConstPtr& ptr) const
