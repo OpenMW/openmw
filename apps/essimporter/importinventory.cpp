@@ -40,7 +40,7 @@ namespace ESSImport
                 bool isDeleted = false;
                 item.ESM::CellRef::loadData(esm, isDeleted);
 
-                float charge = -1;
+                int charge = -1;
                 esm.getHNOT(charge, "XHLT");
                 item.mCharge = charge;
 
