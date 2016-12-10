@@ -262,7 +262,7 @@ namespace MWWorld
             lightDiffuseGreen += (static_cast<float>(magicEffect->mData.mGreen) / 255.f);
             lightDiffuseBlue += (static_cast<float>(magicEffect->mData.mBlue) / 255.f);
         }
-        int numberOfEffects = ((MagicBoltState&)state).mEffects.mList.size();
+        int numberOfEffects = state.mEffects.mList.size();
         lightDiffuseColor = osg::Vec4(lightDiffuseRed / numberOfEffects
             , lightDiffuseGreen / numberOfEffects
             , lightDiffuseBlue / numberOfEffects
@@ -572,7 +572,7 @@ namespace MWWorld
                 lightDiffuseGreen += (static_cast<float>(magicEffect->mData.mGreen) / 255.f);
                 lightDiffuseBlue += (static_cast<float>(magicEffect->mData.mBlue) / 255.f);
             }
-            int numberOfEffects = ((MagicBoltState&)state).mEffects.mList.size();
+            int numberOfEffects = state.mEffects.mList.size();
             lightDiffuseColor = osg::Vec4(lightDiffuseRed / numberOfEffects
                 , lightDiffuseGreen / numberOfEffects
                 , lightDiffuseBlue / numberOfEffects
