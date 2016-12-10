@@ -69,7 +69,7 @@ namespace ESM
                 int mChargeInt;     // Used by everything except lights
                 float mChargeFloat; // Used only by lights
             };
-            float mChargeIntRemainder; // Used by everythign except lights (amount of charge not applied to mChargeInt)
+            float mChargeIntRemainder; // Stores amount of charge not subtracted from mChargeInt
 
             // Remaining enchantment charge. This could be -1 if the charge was not touched yet (i.e. full).
             float mEnchantmentCharge;

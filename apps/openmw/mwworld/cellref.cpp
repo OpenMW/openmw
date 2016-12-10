@@ -107,7 +107,6 @@ namespace MWWorld
             {
                 mCellRef.mChargeInt -= static_cast<int>(mCellRef.mChargeIntRemainder);
             }
-               
             mCellRef.mChargeIntRemainder = newChargeRemainder;
         }
     }
