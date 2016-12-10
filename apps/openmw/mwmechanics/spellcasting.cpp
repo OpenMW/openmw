@@ -980,8 +980,10 @@ namespace MWMechanics
                 if (charge == 0)
                     return false;
 
-                // FIXME: charge should be a float, not int so that damage < 1 per frame can be applied.
-                // This was also a bug in the original engine.
+                // Store remainder of disintegrate amount (automatically subtracted if > 1)
+                item->getCellRef().applyChargeRemainderToBeSubtracted(disintegrate - std::floor(disintegrate));
+
+                charge = item->getClass().getItemHealth(*item);
                 charge -=
                         std::min(static_cast<int>(disintegrate),
                                  charge);
