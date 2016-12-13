@@ -32,7 +32,7 @@ We want to edit an existing game, so choose the second option. When you save you
 addon you can use the third option to open it again.
 
 You will be presented with another window where you get to choose the content to
-edit and the name of your project. Then we have to select at least the base game, and
+edit and the name of your project. Then we have to select at least the base game and
 optionally a number of other addons we want to depend on. The name of the
 project is arbitrary, it will be used to identify the addon later in the OpenMW
 launcher.
@@ -58,7 +58,7 @@ detached panel can be re-attached to a window by dragging it by the title bar
 on top of the window.
 
 Now let's look at the panel itself: we have a filter text field, a very large
-table, and a status bar. The filter will be very useful when we want to find an
+table and a status bar. The filter will be very useful when we want to find an
 entry in the table, but for now it is irrelevant. The table you are looking at
 contains all objects in the game, these can be items, NPCs, creatures,
 whatever. Every object is an entry in that table, visible as a row. The columns
@@ -67,7 +67,7 @@ of the table are the attributes of each object.
 Morrowind uses something called a *relational database* for game data. If you
 are not familiar with the term, it means that every type of thing can be
 expressed as a *table*: there is a table for objects, a table for enchantments,
-a table for icons, one for meshes, and so on. Properties of an entry must be
+a table for icons, one for meshes and so on. Properties of an entry must be
 simple values, like numbers or text strings. If we want a more complicated
 property we need to reference an entry from another table. There are a few
 exceptions to this though, some tables do have subtables. The effects of
