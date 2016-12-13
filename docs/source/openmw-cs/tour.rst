@@ -3,7 +3,7 @@ A Tour through OpenMW CS: making a magic ring
 
 In this first chapter we will create a mod that adds a new ring with a simple
 enchantment to the game. The ring will give its wearer a permanent Night Vision
-effect while being worn. You do not need prior Morrowind modding experience, 
+effect while being worn. You do not need previous Morrowind modding experience, 
 but you should be familiar with the game itself. There will be no
 scripting necessary, we chan achieve everything using just what the base game
 offers out of the box. Before continuing make sure that OpenMW is properly
