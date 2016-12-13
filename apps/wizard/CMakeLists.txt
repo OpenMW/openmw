@@ -140,3 +140,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
 target_link_libraries(openmw-wizard dl Xt)
 endif()
 
+if (WIN32)
+    INSTALL(TARGETS openmw-wizard RUNTIME DESTINATION ".")
+endif(WIN32)

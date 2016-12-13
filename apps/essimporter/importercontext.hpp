@@ -9,6 +9,7 @@
 #include <components/esm/globalmap.hpp>
 #include <components/esm/loadcrea.hpp>
 #include <components/esm/loadnpc.hpp>
+#include <components/esm/controlsstate.hpp>
 
 #include "importnpcc.hpp"
 #include "importcrec.hpp"
@@ -31,6 +32,8 @@ namespace ESSImport
         std::string mCustomPlayerClassName;
 
         ESM::DialogueState mDialogueState;
+
+        ESM::ControlsState mControlsState;
 
         // cells which should show an explored overlay on the global map
         std::set<std::pair<int, int> > mExploredCells;

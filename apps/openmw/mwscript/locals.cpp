@@ -238,15 +238,15 @@ namespace MWScript
                 else
                 {
                     char type =  declarations.getType (iter->first);
-                    char index = declarations.getIndex (iter->first);
+                    int index2 = declarations.getIndex (iter->first);
 
                     try
                     {
                         switch (type)
                         {
-                            case 's': mShorts.at (index) = iter->second.getInteger(); break;
-                            case 'l': mLongs.at (index) = iter->second.getInteger(); break;
-                            case 'f': mFloats.at (index) = iter->second.getFloat(); break;
+                            case 's': mShorts.at (index2) = iter->second.getInteger(); break;
+                            case 'l': mLongs.at (index2) = iter->second.getInteger(); break;
+                            case 'f': mFloats.at (index2) = iter->second.getFloat(); break;
 
                             // silently ignore locals that don't exist anymore
                         }

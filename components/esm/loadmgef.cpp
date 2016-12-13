@@ -298,10 +298,10 @@ short MagicEffect::getResistanceEffect(short effect)
 
     for (int i=0; i<2; ++i)
     {
-        effects[CalmHumanoid] = ResistMagicka;
-        effects[FrenzyHumanoid] = ResistMagicka;
-        effects[DemoralizeHumanoid] = ResistMagicka;
-        effects[RallyHumanoid] = ResistMagicka;
+        effects[CalmHumanoid+i] = ResistMagicka;
+        effects[FrenzyHumanoid+i] = ResistMagicka;
+        effects[DemoralizeHumanoid+i] = ResistMagicka;
+        effects[RallyHumanoid+i] = ResistMagicka;
     }
 
     effects[TurnUndead] = ResistMagicka;
@@ -341,10 +341,10 @@ short MagicEffect::getWeaknessEffect(short effect)
 
     for (int i=0; i<2; ++i)
     {
-        effects[CalmHumanoid] = WeaknessToMagicka;
-        effects[FrenzyHumanoid] = WeaknessToMagicka;
-        effects[DemoralizeHumanoid] = WeaknessToMagicka;
-        effects[RallyHumanoid] = WeaknessToMagicka;
+        effects[CalmHumanoid+i] = WeaknessToMagicka;
+        effects[FrenzyHumanoid+i] = WeaknessToMagicka;
+        effects[DemoralizeHumanoid+i] = WeaknessToMagicka;
+        effects[RallyHumanoid+i] = WeaknessToMagicka;
     }
 
     effects[TurnUndead] = WeaknessToMagicka;

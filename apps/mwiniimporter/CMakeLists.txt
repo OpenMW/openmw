@@ -22,7 +22,8 @@ target_link_libraries(openmw-iniimporter
 if (WIN32)
     target_link_libraries(openmw-iniimporter
     ${Boost_LOCALE_LIBRARY})
-endif()
+    INSTALL(TARGETS openmw-iniimporter RUNTIME DESTINATION ".")
+endif(WIN32)
 
 if (MINGW)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -municode")

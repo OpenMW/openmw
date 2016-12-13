@@ -63,7 +63,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
                     std::cerr << "Position: #" << index.first << " " << index.second
                         <<", Target #"<< mref.mTarget[0] << " " << mref.mTarget[1] << std::endl;
 
-                    std::ostringstream stream;
+                    stream.clear();
                     stream << "#" << mref.mTarget[0] << " " << mref.mTarget[1];
                     ref.mCell = stream.str(); // overwrite
                 }

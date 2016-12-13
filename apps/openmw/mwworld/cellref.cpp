@@ -93,6 +93,24 @@ namespace MWWorld
         }
     }
 
+    void CellRef::applyChargeRemainderToBeSubtracted(float chargeRemainder)
+    {
+        mCellRef.mChargeIntRemainder += std::abs(chargeRemainder);
+        if (mCellRef.mChargeIntRemainder > 1.0f)
+        {
+            float newChargeRemainder = (mCellRef.mChargeIntRemainder - std::floor(mCellRef.mChargeIntRemainder));
+            if (mCellRef.mChargeInt <= static_cast<int>(mCellRef.mChargeIntRemainder))
+            {
+                mCellRef.mChargeInt = 0;
+            }
+            else
+            {
+                mCellRef.mChargeInt -= static_cast<int>(mCellRef.mChargeIntRemainder);
+            }
+            mCellRef.mChargeIntRemainder = newChargeRemainder;
+        }
+    }
+
     float CellRef::getChargeFloat() const
     {
         return mCellRef.mChargeFloat;

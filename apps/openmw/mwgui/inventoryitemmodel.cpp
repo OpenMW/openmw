@@ -85,8 +85,8 @@ void InventoryItemModel::update()
 
         if (mActor.getClass().hasInventoryStore(mActor))
         {
-            MWWorld::InventoryStore& store = mActor.getClass().getInventoryStore(mActor);
-            if (store.isEquipped(newItem.mBase))
+            MWWorld::InventoryStore& invStore = mActor.getClass().getInventoryStore(mActor);
+            if (invStore.isEquipped(newItem.mBase))
                 newItem.mType = ItemStack::Type_Equipped;
         }
 

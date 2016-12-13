@@ -162,10 +162,10 @@ void Wizard::MainWizard::setupGameSettings()
     paths.append(QLatin1String("openmw.cfg"));
     paths.append(globalPath + QLatin1String("openmw.cfg"));
 
-    foreach (const QString &path, paths) {
-        qDebug() << "Loading config file:" << path.toUtf8().constData();
+    foreach (const QString &path2, paths) {
+        qDebug() << "Loading config file:" << path2.toUtf8().constData();
 
-        QFile file(path);
+        file.setFileName(path2);
         if (file.exists()) {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
                 QMessageBox msgBox;

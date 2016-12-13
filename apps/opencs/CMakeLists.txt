@@ -162,9 +162,15 @@ endif()
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if(APPLE)
-    set (OPENCS_MAC_ICON ${CMAKE_SOURCE_DIR}/files/mac/openmw-cs.icns)
+    set (OPENCS_MAC_ICON "${CMAKE_SOURCE_DIR}/files/mac/openmw-cs.icns")
+    set (OPENCS_CFG "${OpenMW_BINARY_DIR}/openmw-cs.cfg")
+    set (OPENCS_DEFAULT_FILTERS_FILE "${OpenMW_BINARY_DIR}/resources/defaultfilters")
+    set (OPENCS_OPENMW_CFG "${OpenMW_BINARY_DIR}/openmw.cfg")
 else()
     set (OPENCS_MAC_ICON "")
+    set (OPENCS_CFG "")
+    set (OPENCS_DEFAULT_FILTERS_FILE "")
+    set (OPENCS_OPENMW_CFG "")
 endif(APPLE)
 
 add_executable(openmw-cs
@@ -174,12 +180,23 @@ add_executable(openmw-cs
     ${OPENCS_MOC_SRC}
     ${OPENCS_RES_SRC}
     ${OPENCS_MAC_ICON}
+    ${OPENCS_CFG}
+    ${OPENCS_DEFAULT_FILTERS_FILE}
+    ${OPENCS_OPENMW_CFG}
 )
 
 if(APPLE)
+    set(OPENCS_BUNDLE_NAME "OpenMW-CS")
+    set(OPENCS_BUNDLE_RESOURCES_DIR "${OpenMW_BINARY_DIR}/${OPENCS_BUNDLE_NAME}.app/Contents/Resources")
+
+    set(OPENMW_MYGUI_FILES_ROOT ${OPENCS_BUNDLE_RESOURCES_DIR})
+    set(OPENMW_SHADERS_ROOT ${OPENCS_BUNDLE_RESOURCES_DIR})
+
+    add_subdirectory(../../files/ ${CMAKE_CURRENT_BINARY_DIR}/files)
+
     set_target_properties(openmw-cs PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}"
-        OUTPUT_NAME "OpenMW-CS"
+        OUTPUT_NAME ${OPENCS_BUNDLE_NAME}
         MACOSX_BUNDLE_ICON_FILE "openmw-cs.icns"
         MACOSX_BUNDLE_BUNDLE_NAME "OpenCS"
         MACOSX_BUNDLE_GUI_IDENTIFIER "org.openmw.opencs"
@@ -190,6 +207,16 @@ if(APPLE)
 
     set_source_files_properties(${OPENCS_MAC_ICON} PROPERTIES
         MACOSX_PACKAGE_LOCATION Resources)
+    set_source_files_properties(${OPENCS_CFG} PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources)
+    set_source_files_properties(${OPENCS_DEFAULT_FILTERS_FILE} PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources/resources)
+    set_source_files_properties(${OPENCS_OPENMW_CFG} PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources)
+
+    add_custom_command(TARGET openmw-cs
+        POST_BUILD
+        COMMAND cp "${OpenMW_BINARY_DIR}/resources/version" "${OPENCS_BUNDLE_RESOURCES_DIR}/resources")
 endif(APPLE)
 
 target_link_libraries(openmw-cs
@@ -223,9 +250,18 @@ endif()
 
 if (WIN32)
     target_link_libraries(openmw-cs ${Boost_LOCALE_LIBRARY})
+    INSTALL(TARGETS openmw-cs RUNTIME DESTINATION ".")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw-cs.cfg" DESTINATION ".")
 endif()
+
+if (MSVC)
+    # Debug version needs increased number of sections beyond 2^16
+    if (CMAKE_CL_64)
+        set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
+    endif (CMAKE_CL_64)
+endif (MSVC)
 
 
 if(APPLE)
-    INSTALL(TARGETS openmw-cs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)
+    INSTALL(TARGETS openmw-cs BUNDLE DESTINATION "." COMPONENT BUNDLE)
 endif()

@@ -62,11 +62,6 @@ int main(int argc, char *argv[])
 
     #ifdef Q_OS_MAC
         QDir dir(QCoreApplication::applicationDirPath());
-        if (dir.dirName() == "MacOS") {
-            dir.cdUp();
-            dir.cdUp();
-            dir.cdUp();
-        }
         QDir::setCurrent(dir.absolutePath());
     #endif
 

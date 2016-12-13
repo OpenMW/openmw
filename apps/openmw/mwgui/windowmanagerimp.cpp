@@ -109,6 +109,7 @@
 #include "container.hpp"
 #include "controllers.hpp"
 #include "jailscreen.hpp"
+#include "itemchargeview.hpp"
 
 namespace MWGui
 {
@@ -223,6 +224,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::ScalingLayer>("Layer");
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
+        ItemChargeView::registerComponents();
         ItemWidget::registerComponents();
         SpellView::registerComponents();
         Gui::registerAllWidgets();
@@ -1004,6 +1006,9 @@ namespace MWGui
         mScreenFader->update(frameDuration);
 
         mDebugWindow->onFrame(frameDuration);
+
+        if (mCharGen)
+            mCharGen->onFrame(frameDuration);
     }
 
     void WindowManager::changeCell(const MWWorld::CellStore* cell)

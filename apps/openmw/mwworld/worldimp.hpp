@@ -651,7 +651,7 @@ namespace MWWorld
             /// Resets all actors in the current active cells to their original location within that cell.
             virtual void resetActors();
 
-            virtual bool isWalkingOnWater (const MWWorld::ConstPtr& actor);
+            virtual bool isWalkingOnWater (const MWWorld::ConstPtr& actor) const;
 
             /// Return a vector aiming the actor's weapon towards a target.
             /// @note The length of the vector is the distance between actor and target.
@@ -661,6 +661,12 @@ namespace MWWorld
             virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target);
 
             virtual bool isPlayerInJail() const;
+
+            /// Return terrain height at \a worldPos position.
+            virtual float getTerrainHeightAt(const osg::Vec3f& worldPos) const;
+
+            /// Return physical or rendering half extents of the given actor.
+            virtual osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& actor, bool rendering=false) const;
     };
 }
 

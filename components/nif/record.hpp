@@ -92,7 +92,8 @@ enum RecordType
   RC_NiSequenceStreamHelper,
   RC_NiSourceTexture,
   RC_NiSkinInstance,
-  RC_RootCollisionNode
+  RC_RootCollisionNode,
+  RC_NiSphericalCollider
 };
 
 /// Base class for all records

@@ -132,6 +132,12 @@ namespace MWGui
             mReviewDialog->configureSkills(major, minor);
     }
 
+    void CharacterCreation::onFrame(float duration)
+    {
+        if (mReviewDialog)
+            mReviewDialog->onFrame(duration);
+    }
+
     void CharacterCreation::spawnDialog(const char id)
     {
         try

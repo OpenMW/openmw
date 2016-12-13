@@ -221,10 +221,10 @@ namespace MWRender
             groupname = "inventoryhandtohand";
         else
         {
-            const std::string &type = iter->getTypeName();
-            if(type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
+            const std::string &typeName = iter->getTypeName();
+            if(typeName == typeid(ESM::Lockpick).name() || typeName == typeid(ESM::Probe).name())
                 groupname = "inventoryweapononehand";
-            else if(type == typeid(ESM::Weapon).name())
+            else if(typeName == typeid(ESM::Weapon).name())
             {
                 MWWorld::LiveCellRef<ESM::Weapon> *ref = iter->get<ESM::Weapon>();
 
