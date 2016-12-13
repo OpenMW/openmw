@@ -3,8 +3,8 @@ A Tour through OpenMW CS: making a magic ring
 
 In this first chapter we will create a mod that adds a new ring with a simple
 enchantment to the game. The ring will give its wearer a permanent Night Vision
-effect while being worn. You don't need prior knowledge about modding
-Morrowind, but you should be familiar with the game itself. There will be no
+effect while being worn. You do not need previous Morrowind modding experience, 
+but you should be familiar with the game itself. There will be no
 scripting necessary, we can achieve everything using just what the base game
 offers out of the box. Before continuing make sure that OpenMW is properly
 installed and playable.
@@ -13,7 +13,7 @@ installed and playable.
 Adding the ring to the game's records
 *************************************
 
-In this first section we will define what our new ring is, what it looks like
+In this first section we will define what our new ring is, what it looks like,
 and what it does. Getting it to work is the first step before we go further.
 
 
@@ -28,11 +28,11 @@ options: create a new game, create a new addon, edit a content file.
    :alt: Opening dialogue with three option and setting button (the wrench)
 
 The first option is for creating an entirely new game, that's not what we want.
-We want to edit an existing game, so choose the second one. When you save your
+We want to edit an existing game, so choose the second option. When you save your
 addon you can use the third option to open it again.
 
-You will be presented with another window where you get to chose the content to
-edit and the name of your project. We have to chose at least a base game, and
+You will be presented with another window where you get to choose the content to
+edit and the name of your project. Then we have to select at least the base game and
 optionally a number of other addons we want to depend on. The name of the
 project is arbitrary, it will be used to identify the addon later in the OpenMW
 launcher.
@@ -41,7 +41,7 @@ launcher.
    :alt: Creation dialogue for a new project, pick content modules and name
 
 Choose Morrowind as your content file and enter `Ring of Night Vision` as the
-name. We could also chose further content files as dependencies if we wanted
+name. We could also choose further content files as dependencies if we wanted
 to, but for this mod the base game is enough.
 
 Once the addon has been created you will be presented with a table. If you see
@@ -67,7 +67,7 @@ of the table are the attributes of each object.
 Morrowind uses something called a *relational database* for game data. If you
 are not familiar with the term, it means that every type of thing can be
 expressed as a *table*: there is a table for objects, a table for enchantments,
-a table for icons, one for meshes, and so on. Properties of an entry must be
+a table for icons, one for meshes and so on. Properties of an entry must be
 simple values, like numbers or text strings. If we want a more complicated
 property we need to reference an entry from another table. There are a few
 exceptions to this though, some tables do have subtables. The effects of
@@ -95,7 +95,7 @@ holding Shift to edit it (this is a configurable shortcut), but there is a
 better way: right-click the row of our new record and chose *Edit Record*, a
 new panel will open.
 
-We can right-click the row of our new record and chose *Edit Record*, a
+We can right-click the row of our new record and select *Edit Record*, a
 new panel will open. Alternatively we can also define a configurable shortcut
 instead of using the context menu; the default is double-clicking while
 holding down the shift key.
