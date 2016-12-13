@@ -95,7 +95,7 @@ holding Shift to edit it (this is a configurable shortcut), but there is a
 better way: right-click the row of our new record and chose *Edit Record*, a
 new panel will open.
 
-We can right-click the row of our new record and choose *Edit Record*, a
+We can right-click the row of our new record and select *Edit Record*, a
 new panel will open. Alternatively we can also define a configurable shortcut
 instead of using the context menu; the default is double-clicking while
 holding down the shift key.
