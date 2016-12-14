@@ -45,8 +45,8 @@ namespace CSVWorld
             ///< \note Non-existent cells are not listed.
 
             QModelIndexList getSelectedCells (bool existent = true, bool nonExistent = false) const;
-            ///< \param existant Include existant cells.
-            /// \param nonExistant Include non-existant cells.
+            ///< \param existent Include existent cells.
+            /// \param nonExistent Include non-existent cells.
 
             QModelIndexList getMissingRegionCells() const;
             ///< Unselected cells within all regions that have at least one selected cell.
