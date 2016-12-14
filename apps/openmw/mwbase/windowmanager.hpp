@@ -233,7 +233,7 @@ namespace MWBase
             virtual void removeDialog(MWGui::Layout* dialog) = 0;
 
             ///Gracefully attempts to exit the topmost GUI mode
-            /** No guarentee of actually closing the window **/
+            /** No guarantee of actually closing the window **/
             virtual void exitCurrentGuiMode() = 0;
 
             virtual void messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;

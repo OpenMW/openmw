@@ -174,7 +174,7 @@ namespace MWDialogue
                     executeScript (info->mResultScript);
                     mLastTopic = Misc::StringUtils::lowerCase(it->mId);
 
-                    // update topics again to accomodate changes resulting from executeScript
+                    // update topics again to accommodate changes resulting from executeScript
                     updateTopics();
 
                     return;

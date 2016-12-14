@@ -516,7 +516,7 @@ void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
                 // Current coordinate
                 int x, y;
 
-                // Loop throught all the coordinates to add them to selection
+                // Loop through all the coordinates to add them to selection
                 while (stream >> ignore1 >> ignore2 >> x >> y)
                     selection.add (CSMWorld::CellCoordinates (x, y));
                                

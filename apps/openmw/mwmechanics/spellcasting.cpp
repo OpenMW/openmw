@@ -491,7 +491,7 @@ namespace MWMechanics
                         appliedLastingEffects.push_back(effect);
 
                         // For absorb effects, also apply the effect to the caster - but with a negative
-                        // magnitude, since we're transfering stats from the target to the caster
+                        // magnitude, since we're transferring stats from the target to the caster
                         if (!caster.isEmpty() && caster.getClass().isActor())
                         {
                             for (int i=0; i<5; ++i)
