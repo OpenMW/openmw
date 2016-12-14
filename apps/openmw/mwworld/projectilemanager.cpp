@@ -93,6 +93,31 @@ namespace
         }
         return projectileEffects;
     }
+
+    osg::Vec4 getMagicBoltLightDiffuseColor(const ESM::EffectList& effects)
+    {
+        // Calculate combined light diffuse color from magical effects
+        osg::Vec4 lightDiffuseColor;
+        float lightDiffuseRed = 0.0f;
+        float lightDiffuseGreen = 0.0f;
+        float lightDiffuseBlue = 0.0f;
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter(effects.mList.begin());
+            iter != effects.mList.end(); ++iter)
+        {
+            const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
+                iter->mEffectID);
+            lightDiffuseRed += (static_cast<float>(magicEffect->mData.mRed) / 255.f);
+            lightDiffuseGreen += (static_cast<float>(magicEffect->mData.mGreen) / 255.f);
+            lightDiffuseBlue += (static_cast<float>(magicEffect->mData.mBlue) / 255.f);
+        }
+        int numberOfEffects = effects.mList.size();
+        lightDiffuseColor = osg::Vec4(lightDiffuseRed / numberOfEffects
+            , lightDiffuseGreen / numberOfEffects
+            , lightDiffuseBlue / numberOfEffects
+            , 1.0f);
+
+        return lightDiffuseColor;
+    }
 }
 
 namespace MWWorld
@@ -136,7 +161,8 @@ namespace MWWorld
     };
 
 
-    void ProjectileManager::createModel(State &state, const std::string &model, const osg::Vec3f& pos, const osg::Quat& orient, bool rotate, bool createLight, std::string texture)
+    void ProjectileManager::createModel(State &state, const std::string &model, const osg::Vec3f& pos, const osg::Quat& orient,
+                                        bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, std::string texture)
     {
         state.mNode = new osg::PositionAttitudeTransform;
         state.mNode->setNodeMask(MWRender::Mask_Effect);
@@ -169,34 +195,6 @@ namespace MWWorld
 
         if (createLight)
         {
-            // Case: magical effects (combine colors of individual effects)
-            osg::Vec4 lightDiffuseColor;
-            if (state.mIdMagic.size() > 0)
-            {
-                float lightDiffuseRed = 0.0f;
-                float lightDiffuseGreen = 0.0f;
-                float lightDiffuseBlue = 0.0f;
-                for (std::vector<ESM::ENAMstruct>::const_iterator it = ((MagicBoltState&)state).mEffects.mList.begin(); it != ((MagicBoltState&)state).mEffects.mList.end(); ++it)
-                {
-                    const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
-                        it->mEffectID);
-                    lightDiffuseRed += ((float) magicEffect->mData.mRed / 255.f);
-                    lightDiffuseGreen += ((float) magicEffect->mData.mGreen / 255.f);
-                    lightDiffuseBlue += ((float) magicEffect->mData.mBlue / 255.f);
-                }
-                int numberOfEffects = ((MagicBoltState&)state).mEffects.mList.size();
-                lightDiffuseColor = osg::Vec4(lightDiffuseRed / numberOfEffects
-                    , lightDiffuseGreen / numberOfEffects
-                    , lightDiffuseBlue / numberOfEffects
-                    , 1.0f);
-            }
-            else
-            {
-                // Case: no magical effects, but still creating light
-                lightDiffuseColor = osg::Vec4(0.814f, 0.682f, 0.652f, 1.0f);
-            }
-
-            // Add light
             osg::ref_ptr<osg::Light> projectileLight(new osg::Light);
             projectileLight->setAmbient(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
             projectileLight->setDiffuse(lightDiffuseColor);
@@ -206,12 +204,10 @@ namespace MWWorld
             projectileLight->setQuadraticAttenuation(0.f);
             projectileLight->setPosition(osg::Vec4(pos, 1.0));
             
-            // Add light source
             SceneUtil::LightSource* projectileLightSource = new SceneUtil::LightSource;
             projectileLightSource->setNodeMask(MWRender::Mask_Lighting);
             projectileLightSource->setRadius(66.f);
             
-            // Attach to scene node
             state.mNode->addChild(projectileLightSource);
             projectileLightSource->setLight(projectileLight);
         }
@@ -278,7 +274,8 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), state.mIdMagic.at(0));
         MWWorld::Ptr ptr = ref.getPtr();
 
-        createModel(state, ptr.getClass().getModel(ptr), pos, orient, true, true, texture);
+        osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(effects);
+        createModel(state, ptr.getClass().getModel(ptr), pos, orient, true, true, lightDiffuseColor, texture);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         for (size_t it = 0; it != state.mSoundIds.size(); it++)
@@ -302,7 +299,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
 
-        createModel(state, ptr.getClass().getModel(ptr), pos, orient, false, false);
+        createModel(state, ptr.getClass().getModel(ptr), pos, orient, false, false, osg::Vec4(0,0,0,0));
 
         mProjectiles.push_back(state);
     }
@@ -532,7 +529,7 @@ namespace MWWorld
                 return true;
             }
 
-            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), false, false);
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), false, false, osg::Vec4(0,0,0,0));
 
             mProjectiles.push_back(state);
             return true;
@@ -567,7 +564,8 @@ namespace MWWorld
                 return true;
             }
 
-            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true, true, texture);
+            osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(esm.mEffects);
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true, true, lightDiffuseColor, texture);
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             
