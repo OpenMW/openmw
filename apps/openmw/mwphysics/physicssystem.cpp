@@ -55,6 +55,7 @@ namespace MWPhysics
     static const float sMaxSlope = 49.0f;
     static const float sStepSizeUp = 34.0f;
     static const float sStepSizeDown = 62.0f;
+    static const float sMinStep = 10.f;
 
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;
@@ -63,6 +64,12 @@ namespace MWPhysics
     class MovementSolver
     {
     private:
+        static bool isActor(const btCollisionObject *obj)
+        {
+            assert(obj);
+            return obj->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor;
+        }
+
         template <class Vec3>
         static bool isWalkableSlope(const Vec3 &normal)
         {
@@ -70,14 +77,12 @@ namespace MWPhysics
             return (normal.z() > sMaxSlopeCos);
         }
 
-        enum StepMoveResult
+        static bool canStepDown(const ActorTracer &stepper)
         {
-            Result_Blocked, // unable to move over obstacle
-            Result_MaxSlope, // unable to end movement on this slope
-            Result_Success
-        };
+            return stepper.mHitObject && isWalkableSlope(stepper.mPlaneNormal) && !isActor(stepper.mHitObject);
+        }
 
-        static StepMoveResult stepMove(const btCollisionObject *colobj, osg::Vec3f &position,
+        static bool stepMove(const btCollisionObject *colobj, osg::Vec3f &position,
                              const osg::Vec3f &toMove, float &remainingTime, const btCollisionWorld* collisionWorld)
         {
             /*
@@ -128,7 +133,7 @@ namespace MWPhysics
 
             stepper.doTrace(colobj, position, position+osg::Vec3f(0.0f,0.0f,sStepSizeUp), collisionWorld);
             if(stepper.mFraction < std::numeric_limits<float>::epsilon())
-                return Result_Blocked; // didn't even move the smallest representable amount
+                return false; // didn't even move the smallest representable amount
                               // (TODO: shouldn't this be larger? Why bother with such a small amount?)
 
             /*
@@ -144,9 +149,10 @@ namespace MWPhysics
              *          +--+
              *    ==============================================
              */
-            tracer.doTrace(colobj, stepper.mEndPos, stepper.mEndPos + toMove, collisionWorld);
+            osg::Vec3f tracerPos = stepper.mEndPos;
+            tracer.doTrace(colobj, tracerPos, tracerPos + toMove, collisionWorld);
             if(tracer.mFraction < std::numeric_limits<float>::epsilon())
-                return Result_Blocked; // didn't even move the smallest representable amount
+                return false; // didn't even move the smallest representable amount
 
             /*
              * Try moving back down sStepSizeDown using stepper.
@@ -164,22 +170,32 @@ namespace MWPhysics
              *    ==============================================
              */
             stepper.doTrace(colobj, tracer.mEndPos, tracer.mEndPos-osg::Vec3f(0.0f,0.0f,sStepSizeDown), collisionWorld);
-            if (!isWalkableSlope(stepper.mPlaneNormal))
-                return Result_MaxSlope;
-            if(stepper.mFraction < 1.0f)
+            if (!canStepDown(stepper))
             {
-                // don't allow stepping up other actors
-                if (stepper.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor)
-                    return Result_Blocked;
+                // Try again with increased step length
+                if (tracer.mFraction < 1.0f || toMove.length2() > sMinStep*sMinStep)
+                    return false;
+
+                osg::Vec3f direction = toMove;
+                direction.normalize();
+                tracer.doTrace(colobj, tracerPos, tracerPos + direction*sMinStep, collisionWorld);
+                if (tracer.mFraction < 0.001f)
+                    return false;
+
+                stepper.doTrace(colobj, tracer.mEndPos, tracer.mEndPos-osg::Vec3f(0.0f,0.0f,sStepSizeDown), collisionWorld);
+                if (!canStepDown(stepper))
+                    return false;
+            }
+            if (stepper.mFraction < 1.0f)
+            {
                 // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
                 // TODO: stepper.mPlaneNormal does not appear to be reliable - needs more testing
                 // NOTE: caller's variables 'position' & 'remainingTime' are modified here
                 position = stepper.mEndPos;
                 remainingTime *= (1.0f-tracer.mFraction); // remaining time is proportional to remaining distance
-                return Result_Success;
+                return true;
             }
-
-            return Result_Blocked;
+            return false;
         }
 
 
@@ -369,15 +385,8 @@ namespace MWPhysics
                 osg::Vec3f oldPosition = newPosition;
                 // We hit something. Try to step up onto it. (NOTE: stepMove does not allow stepping over)
                 // NOTE: stepMove modifies newPosition if successful
-                const float minStep = 10.f;
-                StepMoveResult result = stepMove(colobj, newPosition, velocity*remainingTime, remainingTime, collisionWorld);
-                if (result == Result_MaxSlope && (velocity*remainingTime).length2() < minStep*minStep) // to make sure the maximum stepping distance isn't framerate-dependent or movement-speed dependent
-                {
-                    osg::Vec3f normalizedVelocity = velocity;
-                    normalizedVelocity.normalize();
-                    result = stepMove(colobj, newPosition, normalizedVelocity*minStep, remainingTime, collisionWorld);
-                }
-                if(result == Result_Success)
+                bool result = stepMove(colobj, newPosition, velocity*remainingTime, remainingTime, collisionWorld);
+                if (result)
                 {
                     // don't let pure water creatures move out of water after stepMove
                     if (ptr.getClass().isPureWaterCreature(ptr)
