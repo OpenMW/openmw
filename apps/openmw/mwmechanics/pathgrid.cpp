@@ -225,7 +225,7 @@ namespace MWMechanics
      * Should be possible to make this MT safe.
      *
      * Returns path which may be empty.  path contains pathgrid points in local
-     * cell co-ordinates (indoors) or world co-ordinates (external).
+     * cell coordinates (indoors) or world coordinates (external).
      *
      * Input params:
      *   start, goal - pathgrid point indexes (for this cell)
@@ -239,7 +239,7 @@ namespace MWMechanics
      * TODO: An intersting exercise might be to cache the paths created for a
      *       start/goal pair.  To cache the results the paths need to be in
      *       pathgrid points form (currently they are converted to world
-     *       co-ordinates).  Essentially trading speed w/ memory.
+     *       coordinates).  Essentially trading speed w/ memory.
      */
     std::list<ESM::Pathgrid::Point> PathgridGraph::aStarSearch(const int start,
                                                                const int goal) const
@@ -312,7 +312,7 @@ namespace MWMechanics
         if(current != goal)
             return path; // for some reason couldn't build a path
 
-        // reconstruct path to return, using local co-ordinates
+        // reconstruct path to return, using local coordinates
         while(graphParent[current] != -1)
         {
             path.push_front(mPathgrid->mPoints[current]);
