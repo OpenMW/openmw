@@ -93,6 +93,31 @@ namespace
         }
         return projectileEffects;
     }
+
+    osg::Vec4 getMagicBoltLightDiffuseColor(const ESM::EffectList& effects)
+    {
+        // Calculate combined light diffuse color from magical effects
+        osg::Vec4 lightDiffuseColor;
+        float lightDiffuseRed = 0.0f;
+        float lightDiffuseGreen = 0.0f;
+        float lightDiffuseBlue = 0.0f;
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter(effects.mList.begin());
+            iter != effects.mList.end(); ++iter)
+        {
+            const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
+                iter->mEffectID);
+            lightDiffuseRed += (static_cast<float>(magicEffect->mData.mRed) / 255.f);
+            lightDiffuseGreen += (static_cast<float>(magicEffect->mData.mGreen) / 255.f);
+            lightDiffuseBlue += (static_cast<float>(magicEffect->mData.mBlue) / 255.f);
+        }
+        int numberOfEffects = effects.mList.size();
+        lightDiffuseColor = osg::Vec4(lightDiffuseRed / numberOfEffects
+            , lightDiffuseGreen / numberOfEffects
+            , lightDiffuseBlue / numberOfEffects
+            , 1.0f);
+
+        return lightDiffuseColor;
+    }
 }
 
 namespace MWWorld
@@ -249,25 +274,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), state.mIdMagic.at(0));
         MWWorld::Ptr ptr = ref.getPtr();
 
-        // Calculate combined light color from magical effects
-        osg::Vec4 lightDiffuseColor;
-        float lightDiffuseRed = 0.0f;
-        float lightDiffuseGreen = 0.0f;
-        float lightDiffuseBlue = 0.0f;
-        for (std::vector<ESM::ENAMstruct>::const_iterator it = state.mEffects.mList.begin(); it != state.mEffects.mList.end(); ++it)
-        {
-            const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
-                it->mEffectID);
-            lightDiffuseRed += (static_cast<float>(magicEffect->mData.mRed) / 255.f);
-            lightDiffuseGreen += (static_cast<float>(magicEffect->mData.mGreen) / 255.f);
-            lightDiffuseBlue += (static_cast<float>(magicEffect->mData.mBlue) / 255.f);
-        }
-        int numberOfEffects = state.mEffects.mList.size();
-        lightDiffuseColor = osg::Vec4(lightDiffuseRed / numberOfEffects
-            , lightDiffuseGreen / numberOfEffects
-            , lightDiffuseBlue / numberOfEffects
-            , 1.0f);
-
+        osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(effects);
         createModel(state, ptr.getClass().getModel(ptr), pos, orient, true, true, lightDiffuseColor, texture);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -292,8 +299,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
 
-        osg::Vec4 lightDiffuseColor = osg::Vec4(0.814f, 0.682f, 0.652f, 1.0f);
-        createModel(state, ptr.getClass().getModel(ptr), pos, orient, false, false, lightDiffuseColor);
+        createModel(state, ptr.getClass().getModel(ptr), pos, orient, false, false, osg::Vec4(0,0,0,0));
 
         mProjectiles.push_back(state);
     }
@@ -523,8 +529,7 @@ namespace MWWorld
                 return true;
             }
 
-            osg::Vec4 lightDiffuseColor = osg::Vec4(0.814f, 0.682f, 0.652f, 1.0f);
-            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), false, false, lightDiffuseColor);
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), false, false, osg::Vec4(0,0,0,0));
 
             mProjectiles.push_back(state);
             return true;
@@ -559,25 +564,7 @@ namespace MWWorld
                 return true;
             }
 
-            // Calculate combined light color from magical effects
-            osg::Vec4 lightDiffuseColor;
-            float lightDiffuseRed = 0.0f;
-            float lightDiffuseGreen = 0.0f;
-            float lightDiffuseBlue = 0.0f;
-            for (std::vector<ESM::ENAMstruct>::const_iterator it = state.mEffects.mList.begin(); it != state.mEffects.mList.end(); ++it)
-            {
-                const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
-                    it->mEffectID);
-                lightDiffuseRed += (static_cast<float>(magicEffect->mData.mRed) / 255.f);
-                lightDiffuseGreen += (static_cast<float>(magicEffect->mData.mGreen) / 255.f);
-                lightDiffuseBlue += (static_cast<float>(magicEffect->mData.mBlue) / 255.f);
-            }
-            int numberOfEffects = state.mEffects.mList.size();
-            lightDiffuseColor = osg::Vec4(lightDiffuseRed / numberOfEffects
-                , lightDiffuseGreen / numberOfEffects
-                , lightDiffuseBlue / numberOfEffects
-                , 1.0f);
-
+            osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(esm.mEffects);
             createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true, true, lightDiffuseColor, texture);
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
