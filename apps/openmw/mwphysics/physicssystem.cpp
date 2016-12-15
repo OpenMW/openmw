@@ -1463,7 +1463,10 @@ namespace MWPhysics
     {
         if (mWaterCollisionObject.get())
         {
-            mCollisionWorld->removeCollisionObject(mWaterCollisionObject.get());
+            if (mWaterCollisionObject.get()->getWorldArrayIndex() >= 0)
+            {
+                mCollisionWorld->removeCollisionObject(mWaterCollisionObject.get());
+            }
         }
 
         if (!mWaterEnabled)
