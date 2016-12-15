@@ -45,6 +45,9 @@ namespace ESM
                 case ESM::FourCC<'T','E','X','T'>::value:
                     mText = esm.getHString();
                     break;
+                case ESM::FourCC<'F','T','X','T'>::value:
+                    mFlavorText = esm.getHString();
+                    break;
                 case ESM::SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
@@ -77,6 +80,7 @@ namespace ESM
         esm.writeHNOCString("ITEX", mIcon);
         esm.writeHNOString("TEXT", mText);
         esm.writeHNOCString("ENAM", mEnchant);
+        esm.writeHNOCString("FTXT", mFlavorText);
     }
 
     void Book::blank()
@@ -92,5 +96,6 @@ namespace ESM
         mScript.clear();
         mEnchant.clear();
         mText.clear();
+        mFlavorText.clear();
     }
 }

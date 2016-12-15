@@ -39,6 +39,9 @@ namespace ESM
                 case ESM::FourCC<'I','T','E','X'>::value:
                     mIcon = esm.getHString();
                     break;
+                case ESM::FourCC<'F','T','X','T'>::value:
+                    mFlavorText = esm.getHString();
+                    break;
                 case ESM::SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
@@ -70,6 +73,7 @@ namespace ESM
         esm.writeHNT("AADT", mData, 16);
         esm.writeHNOCString("SCRI", mScript);
         esm.writeHNCString("ITEX", mIcon);
+        esm.writeHNOCString("FTXT", mFlavorText);
     }
 
     void Apparatus::blank()
@@ -82,5 +86,6 @@ namespace ESM
         mIcon.clear();
         mScript.clear();
         mName.clear();
+        mFlavorText.clear();
     }
 }

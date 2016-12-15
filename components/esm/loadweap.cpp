@@ -42,6 +42,9 @@ namespace ESM
                 case ESM::FourCC<'E','N','A','M'>::value:
                     mEnchant = esm.getHString();
                     break;
+                case ESM::FourCC<'F','T','X','T'>::value:
+                    mFlavorText = esm.getHString();
+                    break;
                 case ESM::SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
@@ -72,6 +75,7 @@ namespace ESM
         esm.writeHNOCString("SCRI", mScript);
         esm.writeHNOCString("ITEX", mIcon);
         esm.writeHNOCString("ENAM", mEnchant);
+        esm.writeHNOCString("FTXT", mFlavorText);
     }
 
     void Weapon::blank()
@@ -93,5 +97,6 @@ namespace ESM
         mIcon.clear();
         mEnchant.clear();
         mScript.clear();
+        mFlavorText.clear();
     }
 }

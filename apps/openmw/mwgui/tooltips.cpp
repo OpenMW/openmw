@@ -35,6 +35,9 @@ namespace MWGui
         , mHorizontalScrollIndex(0)
         , mDelay(0.0)
         , mRemainingDelay(0.0)
+        , mFlavorDelay(0.0)
+        , mRemainingFlavorDelay(0.0)
+        , mFlavorWidth(300)
         , mLastMouseX(0)
         , mLastMouseY(0)
         , mEnabled(true)
@@ -52,12 +55,15 @@ namespace MWGui
 
         mDelay = Settings::Manager::getFloat("tooltip delay", "GUI");
         mRemainingDelay = mDelay;
+        mFlavorDelay = Settings::Manager::getFloat("tooltip flavor delay", "GUI");
+        mRemainingFlavorDelay = mDelay+mFlavorDelay;
+        mFlavorWidth = Settings::Manager::getInt("tooltip flavor width", "GUI");
 
         for (unsigned int i=0; i < mMainWidget->getChildCount(); ++i)
         {
             mMainWidget->getChildAt(i)->setVisible(false);
         }
-        
+
         mShowOwned = Settings::Manager::getInt("show owned", "Game");
     }
 
@@ -80,13 +86,10 @@ namespace MWGui
             mMainWidget->getChildAt(i)->setVisible(false);
         }
 
-        const MyGUI::IntSize &viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-
         if (!mEnabled)
-        {
             return;
-        }
 
+        const MyGUI::IntSize &viewSize = MyGUI::RenderManager::getInstance().getViewSize();
         bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
 
         if (guiMode)
@@ -112,15 +115,10 @@ namespace MWGui
                     if (info.caption.empty())
                         info.caption=mFocusObject.getCellRef().getRefId();
                     info.icon="";
-                    tooltipSize = createToolTip(info, true);
+                    createToolTip(info, true);
                 }
                 else
-                    tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), true);
-
-                MyGUI::IntPoint tooltipPosition = MyGUI::InputManager::getInstance().getMousePosition();
-                position(tooltipPosition, tooltipSize, viewSize);
-
-                setCoord(tooltipPosition.left, tooltipPosition.top, tooltipSize.width, tooltipSize.height);
+                    getToolTipViaPtr(mFocusObject.getRefData().getCount(), true);
             }
 
             else
@@ -128,24 +126,24 @@ namespace MWGui
                 if (mousePos.left == mLastMouseX && mousePos.top == mLastMouseY)
                 {
                     mRemainingDelay -= frameDuration;
+                    mRemainingFlavorDelay -= frameDuration;
                 }
                 else
                 {
                     mHorizontalScrollIndex = 0;
                     mRemainingDelay = mDelay;
+                    mRemainingFlavorDelay = mDelay+mFlavorDelay;
                 }
                 mLastMouseX = mousePos.left;
                 mLastMouseY = mousePos.top;
 
-
                 if (mRemainingDelay > 0)
                     return;
+                bool showFlavorText = (mRemainingFlavorDelay <= 0) ? true : false;
 
                 MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getMouseFocusWidget();
                 if (focus == 0)
                     return;
-
-                MyGUI::IntSize tooltipSize;
 
                 // try to go 1 level up until there is a widget that has tooltip
                 // this is necessary because some skin elements are actually separate widgets
@@ -178,22 +176,22 @@ namespace MWGui
                     ToolTipInfo info;
                     info.text = data.caption;
                     info.notes = data.notes;
-                    tooltipSize = createToolTip(info, false);
+                    createToolTip(info, false);
                 }
                 else if (type == "ItemPtr")
                 {
                     mFocusObject = *focus->getUserData<MWWorld::Ptr>();
-                    tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), false);
+                    getToolTipViaPtr(mFocusObject.getRefData().getCount(), false);
                 }
                 else if (type == "ItemModelIndex")
                 {
                     std::pair<ItemModel::ModelIndex, ItemModel*> pair = *focus->getUserData<std::pair<ItemModel::ModelIndex, ItemModel*> >();
                     mFocusObject = pair.second->getItem(pair.first).mBase;
-                    tooltipSize = getToolTipViaPtr(pair.second->getItem(pair.first).mCount, false);
+                    getToolTipViaPtr(pair.second->getItem(pair.first).mCount, false, showFlavorText);
                 }
                 else if (type == "ToolTipInfo")
                 {
-                    tooltipSize = createToolTip(*focus->getUserData<MWGui::ToolTipInfo>(), false);
+                    createToolTip(*focus->getUserData<MWGui::ToolTipInfo>(), false);
                 }
                 else if (type == "AvatarItemSelection")
                 {
@@ -203,7 +201,7 @@ namespace MWGui
 
                     mFocusObject = item;
                     if (!mFocusObject.isEmpty ())
-                        tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), false);
+                        getToolTipViaPtr(mFocusObject.getRefData().getCount(), false, showFlavorText);
                 }
                 else if (type == "Spell")
                 {
@@ -236,7 +234,7 @@ namespace MWGui
                         info.text = "#{sSchool}: " + sSchoolNames[school];
                     }
                     info.effects = effects;
-                    tooltipSize = createToolTip(info, false);
+                    createToolTip(info, false);
                 }
                 else if (type == "Layout")
                 {
@@ -272,18 +270,17 @@ namespace MWGui
                             w->setUserString(key, it->second);
                     }
 
-                    tooltipSize = tooltip->getSize();
+                    MyGUI::IntSize tooltipSize = tooltip->getSize();
 
                     tooltip->setCoord(0, 0, tooltipSize.width, tooltipSize.height);
+
+                    // get postion and set cordinates
+                    MyGUI::IntPoint tooltipPosition = MyGUI::InputManager::getInstance().getMousePosition();
+                    position(tooltipPosition, tooltipSize, viewSize);
+                    setCoord(tooltipPosition.left, tooltipPosition.top, tooltipSize.width, tooltipSize.height);
                 }
                 else
                     throw std::runtime_error ("unknown tooltip type");
-
-                MyGUI::IntPoint tooltipPosition = MyGUI::InputManager::getInstance().getMousePosition();
-
-                position(tooltipPosition, tooltipSize, viewSize);
-
-                setCoord(tooltipPosition.left, tooltipPosition.top, tooltipSize.width, tooltipSize.height);
             }
         }
         else
@@ -322,7 +319,7 @@ namespace MWGui
         mFocusObject = focus;
     }
 
-    MyGUI::IntSize ToolTips::getToolTipViaPtr (int count, bool image)
+    MyGUI::IntSize ToolTips::getToolTipViaPtr (int count, bool image, bool showFlavorText)
     {
         // this the maximum width of the tooltip before it starts word-wrapping
         setCoord(0, 0, 300, 300);
@@ -341,12 +338,12 @@ namespace MWGui
             ToolTipInfo info = object.getToolTipInfo(mFocusObject, count);
             if (!image)
                 info.icon = "";
-            tooltipSize = createToolTip(info, true);
+            tooltipSize = createToolTip(info, true, showFlavorText);
         }
 
         return tooltipSize;
     }
-    
+
     bool ToolTips::checkOwned()
     {
         if(!mFocusObject.isEmpty())
@@ -354,9 +351,9 @@ namespace MWGui
             const MWWorld::CellRef& cellref = mFocusObject.getCellRef();
             MWWorld::Ptr ptr = MWMechanics::getPlayer();
             MWWorld::Ptr victim;
-            
+
             MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
-            bool allowed = mm->isAllowedToUse(ptr, cellref, victim); 
+            bool allowed = mm->isAllowedToUse(ptr, cellref, victim);
 
             return !allowed;
         }
@@ -366,21 +363,17 @@ namespace MWGui
         }
     }
 
-    MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info, bool isFocusObject)
+    MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info, bool isFocusObject, bool showFlavorText)
     {
         mDynamicToolTipBox->setVisible(true);
-        
+        MyGUI::Widget* toolTipWidget = mDynamicToolTipBox->createWidget<MyGUI::Widget>("Widget",
+            MyGUI::IntCoord(0, 0, 300, 300), MyGUI::Align::Left | MyGUI::Align::Top, "toolTipWidget");
+
+        // get and set tooltip skin name
+        std::string boxSkin = "HUD_Box_NoTransp";
         if(mShowOwned == 1 || mShowOwned == 3)
-        {
-            if(isFocusObject && checkOwned())
-            {
-                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp_Owned");
-            }
-            else
-            {
-                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp");
-            }
-        }
+            boxSkin = (isFocusObject && checkOwned()) ? "HUD_Box_NoTransp_Owned" : "HUD_Box_NoTransp";
+        toolTipWidget->changeWidgetSkin(boxSkin);
 
         std::string caption = info.caption;
         std::string image = info.icon;
@@ -421,14 +414,14 @@ namespace MWGui
 
         std::string realImage = MWBase::Environment::get().getWindowManager()->correctIconPath(image);
 
-        MyGUI::EditBox* captionWidget = mDynamicToolTipBox->createWidget<MyGUI::EditBox>("NormalText", MyGUI::IntCoord(0, 0, 300, 300), MyGUI::Align::Left | MyGUI::Align::Top, "ToolTipCaption");
+        MyGUI::EditBox* captionWidget = toolTipWidget->createWidget<MyGUI::EditBox>("NormalText", MyGUI::IntCoord(0, 0, 300, 300), MyGUI::Align::Left | MyGUI::Align::Top, "ToolTipCaption");
         captionWidget->setProperty("Static", "true");
         captionWidget->setCaptionWithReplacing(caption);
         MyGUI::IntSize captionSize = captionWidget->getTextSize();
 
         int captionHeight = std::max(caption != "" ? captionSize.height : 0, imageSize);
 
-        MyGUI::EditBox* textWidget = mDynamicToolTipBox->createWidget<MyGUI::EditBox>("SandText", MyGUI::IntCoord(0, captionHeight+imageCaptionVPadding, 300, 300-captionHeight-imageCaptionVPadding), MyGUI::Align::Stretch, "ToolTipText");
+        MyGUI::EditBox* textWidget = toolTipWidget->createWidget<MyGUI::EditBox>("SandText", MyGUI::IntCoord(0, captionHeight+imageCaptionVPadding, 300, 300-captionHeight-imageCaptionVPadding), MyGUI::Align::Stretch, "ToolTipText");
         textWidget->setProperty("Static", "true");
         textWidget->setProperty("MultiLine", "true");
         textWidget->setProperty("WordWrap", info.wordWrap ? "true" : "false");
@@ -442,10 +435,10 @@ namespace MWGui
 
         for (std::vector<std::string>::const_iterator it = info.notes.begin(); it != info.notes.end(); ++it)
         {
-            MyGUI::ImageBox* icon = mDynamicToolTipBox->createWidget<MyGUI::ImageBox>("MarkerButton",
+            MyGUI::ImageBox* icon = toolTipWidget->createWidget<MyGUI::ImageBox>("MarkerButton",
                 MyGUI::IntCoord(padding.left, totalSize.height+padding.top, 8, 8), MyGUI::Align::Default);
             icon->setColour(MyGUI::Colour(1.0f, 0.3f, 0.3f));
-            MyGUI::EditBox* edit = mDynamicToolTipBox->createWidget<MyGUI::EditBox>("SandText",
+            MyGUI::EditBox* edit = toolTipWidget->createWidget<MyGUI::EditBox>("SandText",
                 MyGUI::IntCoord(padding.left+8+4, totalSize.height+padding.top, 300-padding.left-8-4, 300-totalSize.height),
                                                                                     MyGUI::Align::Default);
             edit->setEditMultiLine(true);
@@ -459,7 +452,7 @@ namespace MWGui
 
         if (!info.effects.empty())
         {
-            MyGUI::Widget* effectArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>("",
+            MyGUI::Widget* effectArea = toolTipWidget->createWidget<MyGUI::Widget>("",
                 MyGUI::IntCoord(padding.left, totalSize.height, 300-padding.left, 300-totalSize.height),
                 MyGUI::Align::Stretch);
 
@@ -477,7 +470,7 @@ namespace MWGui
 
         if (enchant)
         {
-            MyGUI::Widget* enchantArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>("",
+            MyGUI::Widget* enchantArea = toolTipWidget->createWidget<MyGUI::Widget>("",
                 MyGUI::IntCoord(padding.left, totalSize.height, 300-padding.left, 300-totalSize.height),
                 MyGUI::Align::Stretch);
 
@@ -556,7 +549,7 @@ namespace MWGui
 
         if (image != "")
         {
-            MyGUI::ImageBox* imageWidget = mDynamicToolTipBox->createWidget<MyGUI::ImageBox>("ImageBox",
+            MyGUI::ImageBox* imageWidget = toolTipWidget->createWidget<MyGUI::ImageBox>("ImageBox",
                 MyGUI::IntCoord((totalSize.width - captionSize.width - imageCaptionHPadding)/2, 0, imageSize, imageSize),
                 MyGUI::Align::Left | MyGUI::Align::Top);
             imageWidget->setImageTexture(realImage);
@@ -564,6 +557,63 @@ namespace MWGui
         }
 
         totalSize += MyGUI::IntSize(padding.left*2, padding.top*2);
+
+        // make sure that stretched text doesn't overflow out of widget (into flavor text)
+        toolTipWidget->setSize(totalSize);
+
+        // get default tooltip position
+        const MyGUI::IntSize viewportSize = MyGUI::RenderManager::getInstance().getViewSize();
+        const MyGUI::IntPoint mousePos = MyGUI::InputManager::getInstance().getMousePosition();
+        MyGUI::IntPoint tooltipPosition = MyGUI::IntPoint(mousePos.left, mousePos.top);
+        position(tooltipPosition, totalSize, viewportSize);
+
+        if(showFlavorText && info.flavorText != "")
+        {
+            const int flavorTextMargin = 4; // space between general tooltip and flavor text tooltip
+
+            MyGUI::Widget* toolTipFlavorWidget = mDynamicToolTipBox->createWidget<MyGUI::Widget>("Widget",
+                MyGUI::IntCoord(0, 0, 300, 300), MyGUI::Align::Left | MyGUI::Align::Top, "toolTipFlavorWidget");
+            toolTipFlavorWidget->changeWidgetSkin(boxSkin);
+
+            MyGUI::EditBox* flavorText = toolTipFlavorWidget->createWidget<MyGUI::EditBox>("SandText",
+                MyGUI::IntCoord(padding.left, padding.top, mFlavorWidth-padding.left*2, viewportSize.height), MyGUI::Align::Default, "ToolTipFlavorText");
+            flavorText->setProperty("MultiLine", "true");
+            flavorText->setProperty("WordWrap", "true");
+            flavorText->setProperty("TextAlign", "Left Top");
+            flavorText->setCaptionWithReplacing(info.flavorText);
+            flavorText->setSize(flavorText->getTextSize()); // set height of EditBox to height of text
+            toolTipFlavorWidget->setSize(MyGUI::IntSize(mFlavorWidth, flavorText->getTextSize().height+padding.top*2));
+
+            // update total tooltip size
+            totalSize.width += mFlavorWidth+flavorTextMargin;
+            totalSize.height = std::max(totalSize.height, toolTipFlavorWidget->getHeight());
+
+            // move widget to different sides depending on where is the most free space
+            MyGUI::IntPoint toolTipWidgetPos = MyGUI::IntPoint(0, 0);
+            MyGUI::IntPoint toolTipFlavorWidgetPos = MyGUI::IntPoint(0, 0);
+
+            if( tooltipPosition.left > (viewportSize.width - tooltipPosition.left - toolTipWidget->getWidth()) )
+                toolTipWidgetPos.left = toolTipFlavorWidget->getWidth()+flavorTextMargin; // left
+            else
+                toolTipFlavorWidgetPos.left = toolTipWidget->getWidth()+flavorTextMargin; // right
+
+            if(toolTipWidget->getHeight() < toolTipFlavorWidget->getHeight())
+            {
+                // if bottom cut, move up
+                if( (tooltipPosition.top + toolTipFlavorWidget->getHeight()) > viewportSize.height )
+                    toolTipWidgetPos.top = (tooltipPosition.top + toolTipFlavorWidget->getHeight()) - viewportSize.height;
+                // if top cut, move down
+                if( (tooltipPosition.top - toolTipWidgetPos.top) < 0 )
+                    toolTipWidgetPos.top = tooltipPosition.top;
+            }
+
+            toolTipWidget->setPosition(toolTipWidgetPos);
+            toolTipFlavorWidget->setPosition(toolTipFlavorWidgetPos);
+            tooltipPosition -= toolTipWidgetPos;
+        }
+
+        // Set position and size of tooltip
+        setCoord(tooltipPosition.left, tooltipPosition.top, totalSize.width, totalSize.height);
 
         return totalSize;
     }
@@ -834,6 +884,13 @@ namespace MWGui
     {
         mDelay = delay;
         mRemainingDelay = mDelay;
+        mRemainingFlavorDelay = mDelay+mFlavorDelay;
+    }
+
+    void ToolTips::setFlavorDelay(float delay)
+    {
+        mFlavorDelay = delay;
+        mRemainingFlavorDelay = mDelay+mFlavorDelay;
     }
 
 }

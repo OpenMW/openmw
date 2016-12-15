@@ -247,6 +247,7 @@ namespace CSMWorld
         const RefIdColumn *mIcon;
         const RefIdColumn *mWeight;
         const RefIdColumn *mValue;
+        const RefIdColumn *mFlavorText;
 
         InventoryColumns (const NameColumns& base) : NameColumns (base) {}
     };
@@ -291,6 +292,9 @@ namespace CSMWorld
         if (column==mInventory.mValue)
             return record.get().mData.mValue;
 
+        if (column==mInventory.mFlavorText)
+            return QString::fromUtf8 (record.get().mFlavorText.c_str());
+
         return NameRefIdAdapter<RecordT>::getData (column, data, index);
     }
 
@@ -308,6 +312,8 @@ namespace CSMWorld
             record2.mData.mWeight = value.toFloat();
         else if (column==mInventory.mValue)
             record2.mData.mValue = value.toInt();
+        else if (column==mInventory.mFlavorText)
+            record2.mFlavorText = value.toString().toUtf8().constData();
         else
         {
             NameRefIdAdapter<RecordT>::setData (column, data, index, value);

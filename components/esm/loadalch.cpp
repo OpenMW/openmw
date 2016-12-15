@@ -44,6 +44,9 @@ namespace ESM
                 case ESM::FourCC<'E','N','A','M'>::value:
                     mEffects.add(esm);
                     break;
+                case ESM::FourCC<'F','T','X','T'>::value:
+                    mFlavorText = esm.getHString();
+                    break;
                 case ESM::SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
@@ -74,6 +77,7 @@ namespace ESM
         esm.writeHNOCString("SCRI", mScript);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("ALDT", mData, 12);
+        esm.writeHNOCString("FTXT", mFlavorText);
         mEffects.save(esm);
     }
 
@@ -87,5 +91,6 @@ namespace ESM
         mIcon.clear();
         mScript.clear();
         mEffects.mList.clear();
+        mFlavorText.clear();
     }
 }

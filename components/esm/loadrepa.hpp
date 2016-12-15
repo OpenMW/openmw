@@ -25,7 +25,7 @@ struct Repair
     }; // Size = 16
 
     Data mData;
-    std::string mId, mName, mModel, mIcon, mScript;
+    std::string mId, mName, mModel, mIcon, mScript, mFlavorText;
 
     void load(ESMReader &esm, bool &isDeleted);
     void save(ESMWriter &esm, bool isDeleted = false) const;

@@ -256,6 +256,7 @@ namespace MWClass
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
+        info.flavorText = ref->mBase->mFlavorText;
 
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 

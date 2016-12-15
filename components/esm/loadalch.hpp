@@ -30,7 +30,7 @@ struct Potion
     };
     ALDTstruct mData;
 
-    std::string mId, mName, mModel, mIcon, mScript;
+    std::string mId, mName, mModel, mIcon, mScript, mFlavorText;
     EffectList mEffects;
 
     void load(ESMReader &esm, bool &isDeleted);

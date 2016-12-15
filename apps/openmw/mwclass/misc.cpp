@@ -150,6 +150,7 @@ namespace MWClass
 
         info.caption = ref->mBase->mName + countString;
         info.icon = ref->mBase->mIcon;
+        info.flavorText = ref->mBase->mFlavorText;
 
         if (ref->mRef.getSoul() != "")
         {

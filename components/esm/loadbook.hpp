@@ -25,7 +25,7 @@ struct Book
     };
 
     BKDTstruct mData;
-    std::string mName, mModel, mIcon, mScript, mEnchant, mText;
+    std::string mName, mModel, mIcon, mScript, mEnchant, mText, mFlavorText;
     std::string mId;
 
     void load(ESMReader &esm, bool &isDeleted);

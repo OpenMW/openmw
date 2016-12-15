@@ -4,7 +4,7 @@
     <Widget type="Widget" layer="Popup" position="0 0 300 300" name="_Main">
 
         <!-- Dynamically constructed tooltip goes here -->
-        <Widget type="Widget" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="DynamicToolTipBox">
+        <Widget type="Widget" position="0 0 300 300" align="Stretch" name="DynamicToolTipBox">
         </Widget>
 
         <!-- Text tooltip, one line -->
