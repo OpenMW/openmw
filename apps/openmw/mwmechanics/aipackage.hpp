@@ -32,7 +32,7 @@ namespace MWMechanics
     class AiPackage
     {
         public:
-            ///Enumerates the various AITypes availible.
+            ///Enumerates the various AITypes available
             enum TypeId {
                 TypeIdNone = -1,
                 TypeIdWander = 0,

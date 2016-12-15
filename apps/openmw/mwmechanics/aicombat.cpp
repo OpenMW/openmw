@@ -157,7 +157,7 @@ namespace MWMechanics
      *
      * TODO:
      *
-     * Use the Observer Pattern to co-ordinate attacks, provide intelligence on
+     * Use the observer pattern to coordinate attacks, provide intelligence on
      * whether the target was hit, etc.
      */
 

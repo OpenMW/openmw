@@ -8,9 +8,9 @@
 /*! \brief
  * Class for holding the model. Uses typical qt table abstraction/interface for granting access
  * to the individiual fields of the records, Some records are holding nested data (for instance
- * inventory list of the npc). In casses like this, table model offers interface to access
+ * inventory list of the npc). In cases like this, table model offers interface to access
  * nested data in the qt way - that is specify parent. Since some of those nested data require
- * multiple columns to represent informations, single int (default way to index model in the
+ * multiple columns to represent information, single int (default way to index model in the
  * qmodelindex) is not sufficiant. Therefore tablemodelindex class can hold two ints for the
  * sake of indexing two dimensions of the table. This model does not support multiple levels of
  * the nested data. Vast majority of methods makes sense only for the top level data.

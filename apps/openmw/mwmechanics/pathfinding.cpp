@@ -139,7 +139,7 @@ namespace MWMechanics
      * NOTE: It may be desirable to simply go directly to the endPoint if for
      *       example there are no pathgrids in this cell.
      *
-     * NOTE: startPoint & endPoint are in world co-ordinates
+     * NOTE: startPoint & endPoint are in world coordinates
      *
      * Updates mPath using aStarSearch() or ray test (if shortcut allowed).
      * mPath consists of pathgrid points, except the last element which is
@@ -148,7 +148,7 @@ namespace MWMechanics
      * pathgrid point (e.g. wander) then it may be worth while to call
      * pop_back() to remove the redundant entry.
      *
-     * NOTE: co-ordinates must be converted prior to calling GetClosestPoint()
+     * NOTE: coordinates must be converted prior to calling GetClosestPoint()
      *
      *    |
      *    |       cell
@@ -164,8 +164,8 @@ namespace MWMechanics
      *    +-----------------------------
      *
      *    i = x value of cell itself (multiply by ESM::Land::REAL_SIZE to convert)
-     *    j = @.x in local co-ordinates (i.e. within the cell)
-     *    k = @.x in world co-ordinates
+     *    j = @.x in local coordinates (i.e. within the cell)
+     *    k = @.x in world coordinates
      */
     void PathFinder::buildPath(const ESM::Pathgrid::Point &startPoint,
                                const ESM::Pathgrid::Point &endPoint,
@@ -188,7 +188,7 @@ namespace MWMechanics
             return;
         }
 
-        // NOTE: GetClosestPoint expects local co-ordinates
+        // NOTE: GetClosestPoint expects local coordinates
         CoordinateConverter converter(mCell->getCell());
 
         // NOTE: It is possible that GetClosestPoint returns a pathgrind point index
@@ -230,7 +230,7 @@ namespace MWMechanics
         {
             mPath = mCell->aStarSearch(startNode, endNode.first);
 
-            // convert supplied path to world co-ordinates
+            // convert supplied path to world coordinates
             for (std::list<ESM::Pathgrid::Point>::iterator iter(mPath.begin()); iter != mPath.end(); ++iter)
             {
                 converter.toWorld(*iter);
