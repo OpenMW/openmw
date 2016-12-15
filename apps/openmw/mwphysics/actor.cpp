@@ -72,7 +72,10 @@ void Actor::enableCollisionBody(bool collision)
 
 void Actor::updateCollisionMask()
 {
-    mCollisionWorld->removeCollisionObject(mCollisionObject.get());
+    if (mCollisionObject.get()->getWorldArrayIndex() >= 0)
+    {
+        mCollisionWorld->removeCollisionObject(mCollisionObject.get());
+    }
     int collisionMask = CollisionType_World | CollisionType_HeightMap;
     if (mExternalCollisionMode)
         collisionMask |= CollisionType_Actor | CollisionType_Projectile | CollisionType_Door;
