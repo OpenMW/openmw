@@ -120,12 +120,16 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
         setVertexArray(vertexArray);
     }
 
-    osg::ref_ptr<osg::Array> normalArray = osg::clone(from.getNormalArray(), osg::CopyOp::DEEP_COPY_ALL);
-    if (normalArray)
+    if (osg::Array* normals = from.getNormalArray())
     {
-        normalArray->setVertexBufferObject(vbo);
-        setNormalArray(normalArray, osg::Array::BIND_PER_VERTEX);
+        osg::ref_ptr<osg::Array> normalArray = osg::clone(normals, osg::CopyOp::DEEP_COPY_ALL);
+        if (normalArray)
+        {
+            normalArray->setVertexBufferObject(vbo);
+            setNormalArray(normalArray, osg::Array::BIND_PER_VERTEX);
+        }
     }
+
 
     if (osg::Vec4Array* tangents = dynamic_cast<osg::Vec4Array*>(from.getTexCoordArray(7)))
     {
@@ -273,7 +277,8 @@ void RigGeometry::update(osg::NodeVisitor* nv)
         {
             unsigned short vertex = *vertexIt;
             (*positionDst)[vertex] = resultMat.preMult((*positionSrc)[vertex]);
-            (*normalDst)[vertex] = osg::Matrix::transform3x3((*normalSrc)[vertex], resultMat);
+            if (normalDst)
+                (*normalDst)[vertex] = osg::Matrix::transform3x3((*normalSrc)[vertex], resultMat);
             if (tangentDst)
             {
                 osg::Vec4f srcTangent = (*tangentSrc)[vertex];
@@ -284,7 +289,8 @@ void RigGeometry::update(osg::NodeVisitor* nv)
     }
 
     positionDst->dirty();
-    normalDst->dirty();
+    if (normalDst)
+        normalDst->dirty();
     if (tangentDst)
         tangentDst->dirty();
 }
