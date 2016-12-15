@@ -402,17 +402,18 @@ namespace MWPhysics
                     reflectdir.normalize();
 
                     osg::Vec3f newVelocity = slide(reflectdir, tracer.mPlaneNormal)*movelen;
+
+                    // Do not allow sliding upward if there is gravity.
+                    // Stepping will have taken care of that.
+                    if(!(newPosition.z() < swimlevel || isFlying))
+                        newVelocity.z() = std::min(newVelocity.z(), 0.0f);
+
                     if ((newVelocity-velocity).length2() < 0.01)
                         break;
                     if ((velocity * origVelocity) <= 0.f)
                         break; // ^ dot product
 
                     velocity = newVelocity;
-
-                    // Do not allow sliding upward if there is gravity. Stepping will have taken
-                    // care of that.
-                    if(!(newPosition.z() < swimlevel || isFlying))
-                        velocity.z() = std::min(velocity.z(), 0.0f);
                 }
             }
 
