@@ -742,6 +742,9 @@ void Networking::newPlayer(RakNet::RakNetGUID guid)
         // If an invalid key makes it into the Players map, ignore it
         else if (pl->first == RakNet::UNASSIGNED_RAKNET_GUID) continue;
 
+        // if player not fully connected
+        else if (pl->second == nullptr) continue;
+
         // If we are iterating over a player who has inputted their name, proceed
         else if (pl->second->getLoadState() == Player::POSTLOADED)
         {
