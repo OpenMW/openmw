@@ -1159,9 +1159,10 @@ namespace NifOsg
             morphGeom->setUpdateCallback(NULL);
             morphGeom->setCullCallback(new UpdateMorphGeometry);
             morphGeom->setUseVertexBufferObjects(true);
-            morphGeom->getOrCreateVertexBufferObject()->setUsage(GL_DYNAMIC_DRAW_ARB);
 
             triShapeToGeometry(triShape, morphGeom, parentNode, composite, boundTextures, animflags);
+
+            morphGeom->getOrCreateVertexBufferObject()->setUsage(GL_DYNAMIC_DRAW_ARB);
 
             const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
             if (morphs.empty())
