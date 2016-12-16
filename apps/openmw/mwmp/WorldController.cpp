@@ -4,7 +4,6 @@
 #include <components/openmw-mp/Log.hpp>
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
-#include <components/openmw-mp/Log.hpp>
 
 #include "WorldController.hpp"
 #include "Main.hpp"
