@@ -1467,7 +1467,10 @@ namespace MWPhysics
         }
 
         if (!mWaterEnabled)
+        {
+            mWaterCollisionObject.reset();
             return;
+        }
 
         mWaterCollisionObject.reset(new btCollisionObject());
         mWaterCollisionShape.reset(new btStaticPlaneShape(btVector3(0,0,1), mWaterHeight));
