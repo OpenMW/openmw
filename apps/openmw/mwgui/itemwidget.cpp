@@ -101,6 +101,8 @@ namespace MWGui
         {
             if (mFrame)
                 mFrame->setImageTexture("");
+            if (mItemShadow)
+                mItemShadow->setImageTexture("");
             mItem->setImageTexture("");
             mText->setCaption("");
             return;

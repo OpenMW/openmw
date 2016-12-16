@@ -23,6 +23,7 @@ Programmers
     Alexander Olofsson (Ace)
     Allofich
     AnyOldName3
+    Aussiemon
     Austin Salgat (Salgat)
     Artem Kotsynyak (greye)
     artemutin
@@ -74,6 +75,7 @@ Programmers
     Karl-Felix Glatzer (k1ll)
     Kevin Poitra (PuppyKevin)
     Koncord
+    Kurnevsky Evgeny (kurnevsky)
     Lars Söderberg (Lazaroth)
     lazydev
     Leon Saunders (emoose)
@@ -120,6 +122,7 @@ Programmers
     Scott Howard
     Sebastian Wick (swick)
     Sergey Shambir
+    ShadowRadiance
     sir_herrbatka
     smbas
     Stefan Galowicz (bogglez)

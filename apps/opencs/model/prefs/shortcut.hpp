@@ -29,7 +29,7 @@ namespace CSMPrefs
             enum SecondaryMode
             {
                 SM_Replace, ///< The secondary signal replaces the regular signal when the modifier is active
-                SM_Detach,  ///< The secondary signal is emitted independant of the regular signal, even if not active
+                SM_Detach,  ///< The secondary signal is emitted independent of the regular signal, even if not active
                 SM_Ignore   ///< The secondary signal will not ever be emitted
             };
 

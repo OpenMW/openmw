@@ -211,7 +211,7 @@ namespace MWRender
 
         osg::Vec3f mStormDirection;
 
-        // remember some settings so we don't have to apply them again if they didnt change
+        // remember some settings so we don't have to apply them again if they didn't change
         std::string mClouds;
         std::string mNextClouds;
         float mCloudBlendFactor;

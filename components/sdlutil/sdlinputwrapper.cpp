@@ -103,6 +103,8 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                         mViewer->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KEY_F3);
 
                     break;
+                case SDL_TEXTEDITING:
+                    break;
                 case SDL_TEXTINPUT:
                     mKeyboardListener->textInput(evt.text);
                     break;

@@ -122,7 +122,7 @@ namespace MWClass
 
         info.effects = MWGui::Widgets::MWEffectList::effectListFromESM(&ref->mBase->mEffects);
 
-        // hide effects the player doesnt know about
+        // hide effects the player doesn't know about
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         for (unsigned int i=0; i<info.effects.size(); ++i)
             info.effects[i].mKnown = MWMechanics::Alchemy::knownEffect(i, player);

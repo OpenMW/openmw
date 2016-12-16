@@ -1,6 +1,10 @@
+if (NOT DEFINED OPENMW_SHADERS_ROOT)
+    return()
+endif()
+
 # Copy resource files into the build directory
 set(SDIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(DDIR ${OpenMW_BINARY_DIR}/resources/shaders)
+set(DDIR ${OPENMW_SHADERS_ROOT}/resources/shaders)
 
 set(SHADER_FILES
     water_vertex.glsl

@@ -20,12 +20,6 @@ int main(int argc, char *argv[])
     QDir dir(QCoreApplication::applicationDirPath());
 
     #ifdef Q_OS_MAC
-    if (dir.dirName() == "MacOS") {
-        dir.cdUp();
-        dir.cdUp();
-        dir.cdUp();
-    }
-
     // force Qt to load only LOCAL plugins, don't touch system Qt installation
     QDir pluginsPath(QCoreApplication::applicationDirPath());
     pluginsPath.cdUp();

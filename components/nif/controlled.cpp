@@ -87,6 +87,15 @@ namespace Nif
         nif->skip(17);
     }
 
+    void NiSphericalCollider::read(NIFStream* nif)
+    {
+        Controlled::read(nif);
+
+        mBounceFactor = nif->getFloat();
+        mRadius = nif->getFloat();
+        mCenter = nif->getVector3();
+    }
+
 
 
 

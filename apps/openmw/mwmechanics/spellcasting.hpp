@@ -63,7 +63,9 @@ namespace MWMechanics
 
     int getEffectiveEnchantmentCastCost (float castCost, const MWWorld::Ptr& actor);
 
-    void effectTick(CreatureStats& creatureStats, const MWWorld::Ptr& actor, const MWMechanics::EffectKey& effectKey, float magnitude);
+    /// Apply a magic effect that is applied in tick intervals until its remaining time ends or it is removed
+    /// @return Was the effect a tickable effect with a magnitude?
+    bool effectTick(CreatureStats& creatureStats, const MWWorld::Ptr& actor, const MWMechanics::EffectKey& effectKey, float magnitude);
 
     class CastSpell
     {
