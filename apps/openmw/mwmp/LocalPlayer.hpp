@@ -7,10 +7,10 @@
 
 #include <components/openmw-mp/Base/BasePlayer.hpp>
 #include <RakNetTypes.h>
-#include "Networking.hpp"
 
 namespace mwmp
 {
+    class Networking;
     class LocalPlayer : public BasePlayer
     {
     public:

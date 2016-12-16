@@ -29,6 +29,8 @@
 #include "GUIController.hpp"
 #include "Main.hpp"
 #include "PlayerMarkerCollection.hpp"
+#include "LocalPlayer.hpp"
+#include "Networking.hpp"
 #include "DedicatedPlayer.hpp"
 #include "GUIDialogList.hpp"
 #include "GUIChat.hpp"

@@ -4,6 +4,8 @@
 
 #include "GUIDialogList.hpp"
 #include "Main.hpp"
+#include "LocalPlayer.hpp"
+#include "Networking.hpp"
 #include <MyGUI_EditBox.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_ListBox.h>

@@ -11,11 +11,9 @@
 #include <MyGUI_InputManager.h>
 #include <components/openmw-mp/Log.hpp>
 
-#include "../mwbase/windowmanager.hpp"
-#include "../mwworld/worldimp.hpp"
-#include "../mwworld/player.hpp"
 #include "Networking.hpp"
 #include "Main.hpp"
+#include "LocalPlayer.hpp"
 
 #include "GUIController.hpp"
 

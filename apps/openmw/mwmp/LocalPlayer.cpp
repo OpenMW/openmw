@@ -26,6 +26,7 @@
 #include <components/misc/rng.hpp>
 
 #include "LocalPlayer.hpp"
+#include "Networking.hpp"
 #include "Main.hpp"
 
 using namespace mwmp;

@@ -2,6 +2,7 @@
 
 #include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "../mwmp/Main.hpp"
+#include "../mwmp/Networking.hpp"
 
 #include "../mwworld/cellstore.hpp"
 

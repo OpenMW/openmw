@@ -47,6 +47,7 @@
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwmp/Main.hpp"
+#include "../mwmp/GUIController.hpp"
 
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"

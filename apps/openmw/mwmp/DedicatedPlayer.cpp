@@ -19,6 +19,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/action.hpp"
 #include "Main.hpp"
+#include "GUIController.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include <boost/algorithm/clamp.hpp>
 #include <components/openmw-mp/Log.hpp>

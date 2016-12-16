@@ -26,8 +26,11 @@
 #include <components/openmw-mp/Log.hpp>
 #include <cstdlib>
 
-#include "DedicatedPlayer.hpp"
+#include "Networking.hpp"
 #include "LocalPlayer.hpp"
+#include "DedicatedPlayer.hpp"
+#include "GUIController.hpp"
+#include "WorldController.hpp"
 
 using namespace mwmp;
 using namespace std;

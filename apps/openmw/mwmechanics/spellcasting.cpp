@@ -10,6 +10,7 @@
 
 #include "../mwmp/Main.hpp"
 #include "../mwmp/DedicatedPlayer.hpp"
+#include "../mwmp/LocalPlayer.hpp"
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -799,7 +800,7 @@ namespace MWMechanics
             float successChance = getSpellSuccessChance(spell, mCaster);
 
             mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(mCaster);
-            bool isDedicated = dedicatedPlayer != nullptr;
+            bool isDedicated = dedicatedPlayer != NULL;
 
             if (isDedicated)
                 dedicatedPlayer->getAttack()->pressed = false;

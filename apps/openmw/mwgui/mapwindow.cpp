@@ -17,6 +17,7 @@
 #include <components/myguiplatform/myguitexture.hpp>
 
 #include "../mwmp/Main.hpp"
+#include "../mwmp/GUIController.hpp"
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"

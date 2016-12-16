@@ -28,6 +28,9 @@
 #include <components/openmw-mp/Version.hpp>
 #include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "DedicatedPlayer.hpp"
+#include "LocalPlayer.hpp"
+#include "GUIController.hpp"
+#include "WorldController.hpp"
 #include "Main.hpp"
 
 using namespace std;

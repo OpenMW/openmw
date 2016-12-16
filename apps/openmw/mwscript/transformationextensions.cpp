@@ -2,6 +2,7 @@
 
 #include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "../mwmp/Main.hpp"
+#include "../mwmp/Networking.hpp"
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 

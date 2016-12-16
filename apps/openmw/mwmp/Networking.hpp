@@ -10,15 +10,6 @@
 #include <string>
 
 #include <components/openmw-mp/NetworkMessages.hpp>
-#include <components/openmw-mp/Packets/Player/PacketPosition.hpp>
-#include <components/openmw-mp/Packets/Player/PacketBaseInfo.hpp>
-#include <components/openmw-mp/Packets/Player/PacketEquipment.hpp>
-#include <components/openmw-mp/Packets/Player/PacketAttack.hpp>
-#include <components/openmw-mp/Packets/Player/PacketDynamicStats.hpp>
-#include <components/openmw-mp/Packets/Player/PacketResurrect.hpp>
-#include <components/openmw-mp/Packets/Player/PacketDie.hpp>
-#include <components/openmw-mp/Packets/Player/PacketCell.hpp>
-#include <components/openmw-mp/Packets/Player/PacketDrawState.hpp>
 #include <components/openmw-mp/Controllers/PlayerPacketController.hpp>
 #include <components/openmw-mp/Controllers/WorldPacketController.hpp>
 

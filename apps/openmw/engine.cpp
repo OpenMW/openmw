@@ -57,6 +57,7 @@
 #include "mwstate/statemanagerimp.hpp"
 
 #include "mwmp/Main.hpp"
+#include "mwmp/GUIController.hpp"
 
 namespace
 {

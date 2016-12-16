@@ -7,6 +7,7 @@
 
 #include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "../mwmp/Main.hpp"
+#include "../mwmp/Networking.hpp"
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>

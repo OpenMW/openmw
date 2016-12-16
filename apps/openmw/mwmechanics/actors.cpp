@@ -11,6 +11,7 @@
 
 #include "../mwmp/Main.hpp"
 #include "../mwmp/DedicatedPlayer.hpp"
+#include "../mwmp/LocalPlayer.hpp"
 
 
 #include "../mwworld/esmstore.hpp"
@@ -1047,7 +1048,7 @@ namespace MWMechanics
                 }
 
                 mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(iter->first);
-                if (dedicatedPlayer != nullptr)
+                if (dedicatedPlayer != NULL)
                     dedicatedPlayer->updateActor(iter->second);
 
 

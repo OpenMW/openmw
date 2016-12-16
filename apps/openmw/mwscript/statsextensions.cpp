@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
 
 #include <components/esm/loadnpc.hpp>
 

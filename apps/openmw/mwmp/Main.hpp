@@ -1,12 +1,13 @@
 #include "../mwworld/ptr.hpp"
 #include <boost/program_options.hpp>
-#include "Networking.hpp"
-#include "LocalPlayer.hpp"
-#include "GUIController.hpp"
-#include "WorldController.hpp"
 
 namespace mwmp
 {
+    class WorldController;
+    class GUIController;
+    class LocalPlayer;
+    class Networking;
+
     class Main
     {
     public:

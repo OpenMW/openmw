@@ -28,6 +28,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
 
 #include "../mwrender/animation.hpp"
 

@@ -11,6 +11,7 @@
 #include "../mwmp/DedicatedPlayer.hpp"
 #include "../mwmp/Networking.hpp"
 #include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

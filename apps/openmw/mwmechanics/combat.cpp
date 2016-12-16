@@ -7,6 +7,7 @@
 #include "../mwmp/Networking.hpp"
 #include "../mwmp/Main.hpp"
 #include "../mwmp/DedicatedPlayer.hpp"
+#include "../mwmp/LocalPlayer.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -118,7 +119,7 @@ namespace MWMechanics
 
 
         mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(blocker);
-        bool isDedicated = dedicatedPlayer != nullptr;
+        bool isDedicated = dedicatedPlayer != NULL;
         if (attacker == MWMechanics::getPlayer())
             mwmp::Main::get().getLocalPlayer()->getAttack()->block = false;
 
