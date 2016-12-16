@@ -14,12 +14,8 @@ using namespace std;
 #ifdef _WIN32
 int setenv(const char *name, const char *value, int overwrite)
 {
-    std::unique_ptr<char> tmp(new char[strlen(name) + strlen(value) + 1]);
-    sprintf(tmp.get(), "%s=%s", name, value);
-
-    printf("%s\n",tmp.get());
-
-    return putenv((const char*)tmp.get());
+    printf("%s: %s\n", name, value);
+    return _putenv_s(name, value);
 }
 #endif
 
