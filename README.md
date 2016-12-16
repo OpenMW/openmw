@@ -15,12 +15,14 @@ Font Licenses:
 Project Status
 --------------
 
-We are still in a very early phase of development, at the moment we have synchronization of character appearance, character skills, stats, attributes and death as well as movement on interiors and exteriors, melee and ranged combat.
+[Version changelog](https://github.com/TES3MP/openmw-tes3mp/blob/master/tes3mp-changelog.md)
+
+We are still in an early phase of development. At the moment we have synchronization of character appearance, character skills, stats, attributes and death as well as movement on interiors and exteriors, melee and ranged combat, picking up and dropping items in the world and using doors and levers.
 
 Contributing
 --------------
 
-Development has been somewhat fast but we are severely understaffed, any contribution regarding [code](https://github.com/TES3MP/openmw-tes3mp/blob/master/CONTRIBUTING.md), documentation, bug hunting, artwork or nice Jobasha's gift cards are greatly appreciated.
+Development has been somewhat fast, but any contribution regarding [code](https://github.com/TES3MP/openmw-tes3mp/blob/master/CONTRIBUTING.md), documentation, bug hunting, artwork or nice Jobasha's gift cards are greatly appreciated.
 Test sessions are often advertised in our Steam Group, there is also a chat room there.
 Feel free to contact any of the [team members](https://github.com/TES3MP/openmw-tes3mp/blob/master/TES3MPTeam.md) for any questions you might have.
 
