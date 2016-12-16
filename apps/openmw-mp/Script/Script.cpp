@@ -96,7 +96,7 @@ void Script::UnloadScripts()
 {
     //Public::DeleteAll();
     scripts.clear();
-#if defined (ENABLE_LUA)
+#if defined (ENABLE_TERRA)
     terra_llvmshutdown();
 #endif
 }

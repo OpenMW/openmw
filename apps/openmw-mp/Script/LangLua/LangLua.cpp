@@ -23,7 +23,9 @@ LangLua::LangLua()
 {
     lua = luaL_newstate();
     luaL_openlibs(lua); // load all lua std libs
+#if defined(ENABLE_TERRA)
     terra_init(lua);
+#endif
 }
 
 LangLua::~LangLua()
@@ -98,7 +100,11 @@ void LangLua::LoadProgram(const char *filename)
 {
     int err = 0;
 
+#if defined(ENABLE_TERRA)
     if ((err = terra_loadfile(lua, filename)) != 0)
+#else
+	if ((err =luaL_loadfile(lua, filename)) != 0)
+#endif
         throw runtime_error("Lua script " + string(filename) + " error (" + to_string(err) + "): \"" +
                             string(lua_tostring(lua, -1)) + "\"");
 

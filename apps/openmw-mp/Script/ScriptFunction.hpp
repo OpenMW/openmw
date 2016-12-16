@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 #if defined (ENABLE_LUA)
-#include <terra/terra.h>
+#include "LangLua/LangLua.hpp"
 #endif
 
 #if defined (ENABLE_PAWN)

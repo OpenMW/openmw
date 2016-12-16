@@ -37,15 +37,20 @@ endif(BUILD_WITH_PAWN)
 option(BUILD_WITH_LUA "Enable Terra/Lua language" ON)
 if(BUILD_WITH_LUA)
     #set(Terra_ROOT ${CMAKE_SOURCE_DIR}/external/terra/)
-    find_package(Terra REQUIRED)
+	if(WIN32)
+		find_package(Lua REQUIRED)
+	else()
+		find_package(Terra REQUIRED)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DENABLE_TERRA")
+	endif()
     set(LuaScript_Sources
             Script/LangLua/LangLua.cpp
             Script/LangLua/LuaFunc.cpp)
-    set(LuaScript_Headers ${Terra_INCLUDES} ${CMAKE_SOURCE_DIR}/extern/LuaBridge ${CMAKE_SOURCE_DIR}/extern/LuaBridge/detail
+    set(LuaScript_Headers ${Terra_INCLUDES} ${Lua_INCLUDES} ${CMAKE_SOURCE_DIR}/extern/LuaBridge ${CMAKE_SOURCE_DIR}/extern/LuaBridge/detail
             Script/LangLua/LangLua.hpp)
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DENABLE_LUA")
-    include_directories(${Terra_INCLUDES} ${CMAKE_SOURCE_DIR}/extern/LuaBridge)
+    include_directories(${Terra_INCLUDES} ${Lua_INCLUDES} ${CMAKE_SOURCE_DIR}/extern/LuaBridge)
 endif(BUILD_WITH_LUA)
 
 set(NativeScript_Sources
@@ -105,6 +110,7 @@ target_link_libraries(tes3mp-server
     ${RakNet_LIBRARY}
     components
     ${Terra_LIBRARY}
+	${Lua_LIBRARY}
     ${Pawn_LIBRARY}
     ${Breakpad_Library}
 )

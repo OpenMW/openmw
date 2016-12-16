@@ -15,11 +15,6 @@
 #include <unordered_map>
 #include <memory>
 
-#if defined (ENABLE_LUA)
-#include <terra/terra.h>
-#include <extern/LuaBridge/LuaBridge.h>
-#endif
-
 class Script : private ScriptFunctions
 {
     // http://imgur.com/hU0N4EH
