@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <set>
 #include <stdint.h>
 
 namespace osg
@@ -199,6 +200,8 @@ namespace MWBase
             virtual std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor) = 0;
 
             virtual std::list<MWWorld::Ptr> getEnemiesNearby(const MWWorld::Ptr& actor) = 0;
+
+            virtual void getFollowers(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr> &out) = 0;
 
             virtual void playerLoaded() = 0;
 

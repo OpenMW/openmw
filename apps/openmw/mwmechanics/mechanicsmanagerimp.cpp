@@ -977,19 +977,6 @@ namespace MWMechanics
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
 
-
-    void getFollowers (const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out)
-    {
-        std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(actor);
-        for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
-        {
-            if (out.insert(*it).second)
-            {
-                getFollowers(*it, out);
-            }
-        }
-    }
-
     bool MechanicsManager::commitCrime(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, OffenseType type, int arg, bool victimAware)
     {
         // NOTE: victim may be empty
@@ -1467,6 +1454,10 @@ namespace MWMechanics
 
     std::list<MWWorld::Ptr> MechanicsManager::getEnemiesNearby(const MWWorld::Ptr& actor) {
         return mActors.getEnemiesNearby(actor);
+    }
+
+    void MechanicsManager::getFollowers(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr> &out) {
+        mActors.getFollowers(actor, out);
     }
 
     int MechanicsManager::countSavedGameRecords() const
