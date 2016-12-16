@@ -1463,14 +1463,14 @@ namespace MWPhysics
     {
         if (mWaterCollisionObject.get())
         {
-            if (mWaterCollisionObject.get()->getWorldArrayIndex() >= 0)
-            {
-                mCollisionWorld->removeCollisionObject(mWaterCollisionObject.get());
-            }
+            mCollisionWorld->removeCollisionObject(mWaterCollisionObject.get());
         }
 
         if (!mWaterEnabled)
+        {
+            mWaterCollisionObject.reset();
             return;
+        }
 
         mWaterCollisionObject.reset(new btCollisionObject());
         mWaterCollisionShape.reset(new btStaticPlaneShape(btVector3(0,0,1), mWaterHeight));
