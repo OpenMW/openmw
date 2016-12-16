@@ -7,6 +7,7 @@
 
 #include "WorldController.hpp"
 #include "Main.hpp"
+#include "LocalPlayer.hpp"
 
 
 mwmp::WorldController::WorldController()
@@ -74,4 +75,5 @@ void mwmp::WorldController::closeContainer(const MWWorld::Ptr &container)
         LOG_APPEND(Log::LOG_VERBOSE, " - Item. Refid: \"%s\" Count: %d",
                    iter->getCellRef().getRefId().c_str(), iter->getRefData().getCount());
     }
+    mwmp::Main::get().getLocalPlayer()->sendInventory(); // FIXME: must send only if there is a changes in the inventory.
 }
