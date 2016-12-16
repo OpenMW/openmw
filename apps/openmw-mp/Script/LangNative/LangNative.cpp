@@ -50,7 +50,7 @@ void LangNative::LoadProgram(const char *filename)
 
         for (const auto &function : ScriptFunctions::functions)
             if (!SetScript(lib, string(pf + function.name).c_str(), function.func.addr))
-                printf("Script function pointer not found: %s\n", function.name);
+                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Script function pointer not found: %s", function.name);
     }
     catch (...)
     {

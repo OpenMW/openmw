@@ -1,6 +1,7 @@
 #include "actiontake.hpp"
 
 #include <components/openmw-mp/Base/WorldEvent.hpp>
+#include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
 #include "../mwmp/LocalPlayer.hpp"
@@ -31,7 +32,7 @@ namespace MWWorld
         event->cellRef.mRefNum = getTarget().getCellRef().getRefNum();
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(event);
 
-        printf("Sending ID_OBJECT_DELETE about\n- cellRef: %s, %i\n- cell: %s\n",
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_DELETE about\n- cellRef: %s, %i\n- cell: %s.",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
             event->cell.getDescription().c_str());

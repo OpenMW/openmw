@@ -156,7 +156,7 @@ void mwmp::GUIController::showInputBox(const BasePlayer::GUIMessageBox &guiMessa
 void mwmp::GUIController::onInputBoxDone(MWGui::WindowBase *parWindow)
 {
     //MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
-    printf("GUIController::OnInputBoxDone: %s.\n",mInputBox->getTextInput().c_str());
+    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "GUIController::OnInputBoxDone: %s.",mInputBox->getTextInput().c_str());
 
     Main::get().getLocalPlayer()->guiMessageBox.data = mInputBox->getTextInput();
     Main::get().getNetworking()->getPlayerPacket(ID_GUI_MESSAGEBOX)->Send(Main::get().getLocalPlayer());
@@ -198,7 +198,7 @@ void mwmp::GUIController::update(float dt)
     int pressedButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
     if (pressedButton != -1 && calledMessageBox)
     {
-        printf("Pressed: %d\n", pressedButton);
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Pressed: %d", pressedButton);
         calledMessageBox = false;
         Main::get().getLocalPlayer()->guiMessageBox.data = MyGUI::utility::toString(pressedButton);
         Main::get().getNetworking()->getPlayerPacket(ID_GUI_MESSAGEBOX)->Send(Main::get().getLocalPlayer());

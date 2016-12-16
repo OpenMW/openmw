@@ -20,6 +20,7 @@
 #include <components/resource/resourcesystem.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/openmw-mp/Log.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -1158,8 +1159,8 @@ namespace MWWorld
         
         // tes3mp debug start
         if (currCell != newCell) {
-            
-            printf("Tick: %s was %s move from %s to %s\n",
+
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Tick: %s was %s move from %s to %s",
                    ptr.getBase()->mRef.getRefId().c_str(),
                    ptr.getBase()->canChangeCell ? "allowed" : "denied",
                    currCell->getCell()->getDescription().c_str(),
@@ -2271,7 +2272,7 @@ namespace MWWorld
         event->state = state;
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_ACTIVATE)->Send(event);
 
-        printf("Door activation 1\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 1\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
             event->cell.getDescription().c_str(),
@@ -2291,7 +2292,7 @@ namespace MWWorld
         event->state = state;
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_ACTIVATE)->Send(event);
 
-        printf("Door activation 2\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 2\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
             event->cellRef.mRefID.c_str(),
             event->cellRef.mRefNum.mIndex,
             event->cell.getDescription().c_str(),

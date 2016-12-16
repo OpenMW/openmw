@@ -11,6 +11,7 @@
 #include <components/esm/cellid.hpp>
 
 #include <components/openmw-mp/Base/WorldEvent.hpp>
+#include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
 
@@ -193,7 +194,7 @@ namespace MWScript
             event->shortVal = value;
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_SHORT)->Send(event);
 
-            printf("Sending ID_SCRIPT_LOCAL_SHORT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i\n",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_SHORT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i",
                 event->cellRef.mRefID.c_str(),
                 event->cellRef.mRefNum.mIndex,
                 event->cell.getDescription().c_str(),
@@ -230,7 +231,7 @@ namespace MWScript
             event->floatVal = value;
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->Send(event);
 
-            printf("Sending ID_SCRIPT_LOCAL_FLOAT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f\n",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_FLOAT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f",
                 event->cellRef.mRefID.c_str(),
                 event->cellRef.mRefNum.mIndex,
                 event->cell.getDescription().c_str(),
@@ -288,7 +289,7 @@ namespace MWScript
             event->shortVal = value;
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->Send(event);
 
-            printf("Sending ID_SCRIPT_GLOBAL_SHORT\n- varName: %s\n- shortVal: %i\n",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_GLOBAL_SHORT\n- varName: %s\n- shortVal: %i",
                 event->varName.c_str(),
                 event->shortVal);
         }
@@ -618,7 +619,7 @@ namespace MWScript
             event->shortVal = value;
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_MEMBER_SHORT)->Send(event);
 
-            printf("Sending ID_SCRIPT_MEMBER_SHORT\n- cellRef: %s\n- index: %i\n- shortVal: %i\n",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_MEMBER_SHORT\n- cellRef: %s\n- index: %i\n- shortVal: %i",
                 event->cellRef.mRefID.c_str(),
                 event->index,
                 event->shortVal);

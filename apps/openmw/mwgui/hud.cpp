@@ -13,6 +13,7 @@
 #include <MyGUI_ScrollView.h>
 
 #include <components/settings/settings.hpp>
+#include <components/openmw-mp/Log.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -83,7 +84,7 @@ namespace MWGui
 
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send(event);
 
-            printf("Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i\n",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
                 event->cellRef.mRefID.c_str(),
                 event->cellRef.mRefNum.mIndex,
                 event->count);
