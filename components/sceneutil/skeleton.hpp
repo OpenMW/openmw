@@ -53,10 +53,12 @@ namespace SceneUtil
 
         bool getActive() const;
 
-        /// If a new RigGeometry is added after the Skeleton has already been rendered, you must call markDirty().
+        void traverse(osg::NodeVisitor& nv);
+
         void markDirty();
 
-        void traverse(osg::NodeVisitor& nv);
+        virtual void childInserted(unsigned int);
+        virtual void childRemoved(unsigned int, unsigned int);
 
     private:
         // The root bone is not a "real" bone, it has no corresponding node in the scene graph.
