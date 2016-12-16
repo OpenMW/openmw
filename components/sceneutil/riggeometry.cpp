@@ -320,11 +320,14 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
         box.expandBy(bs);
     }
 
-    _boundingBox = box;
-    _boundingSphere = osg::BoundingSphere(_boundingBox);
-    _boundingSphereComputed = true;
-    for (unsigned int i=0; i<getNumParents(); ++i)
-        getParent(i)->dirtyBound();
+    if (box != _boundingBox)
+    {
+        _boundingBox = box;
+        _boundingSphere = osg::BoundingSphere(_boundingBox);
+        _boundingSphereComputed = true;
+        for (unsigned int i=0; i<getNumParents(); ++i)
+            getParent(i)->dirtyBound();
+    }
 }
 
 void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
