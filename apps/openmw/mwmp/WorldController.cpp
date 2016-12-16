@@ -50,7 +50,7 @@ void mwmp::WorldController::openContainer(const MWWorld::Ptr &container, bool lo
                        loot ? "true" : "false");
 
     MWWorld::ContainerStore &cont = container.getClass().getContainerStore(container);
-    for(MWWorld::ContainerStoreIterator iter = cont.begin(); iter != cont.end(); iter++)
+    for (MWWorld::ContainerStoreIterator iter = cont.begin(); iter != cont.end(); iter++)
     {
         int count = iter->getRefData().getCount();
         const std::string &name = iter->getCellRef().getRefId();
@@ -70,7 +70,7 @@ void mwmp::WorldController::closeContainer(const MWWorld::Ptr &container)
                        container.getCellRef().getRefNum().mIndex);
 
     MWWorld::ContainerStore &cont = container.getClass().getContainerStore(container);
-    for(MWWorld::ContainerStoreIterator iter = cont.begin(); iter != cont.end(); iter++)
+    for (MWWorld::ContainerStoreIterator iter = cont.begin(); iter != cont.end(); iter++)
     {
         LOG_APPEND(Log::LOG_VERBOSE, " - Item. Refid: \"%s\" Count: %d",
                    iter->getCellRef().getRefId().c_str(), iter->getRefData().getCount());
