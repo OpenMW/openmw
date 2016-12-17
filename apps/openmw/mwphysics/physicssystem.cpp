@@ -52,7 +52,7 @@
 namespace MWPhysics
 {
 
-    static const float sMaxSlope = 49.0f;
+    static const float sMaxSlopeCos = std::cos(osg::DegreesToRadians(49.0f));
     static const float sStepSizeUp = 34.0f;
     static const float sStepSizeDown = 62.0f;
 
@@ -63,12 +63,6 @@ namespace MWPhysics
     class MovementSolver
     {
     private:
-        static float getSlope(osg::Vec3f normal)
-        {
-            normal.normalize();
-            return osg::RadiansToDegrees(std::acos(normal * osg::Vec3f(0.f, 0.f, 1.f)));
-        }
-
         enum StepMoveResult
         {
             Result_Blocked, // unable to move over obstacle
@@ -163,7 +157,7 @@ namespace MWPhysics
              *    ==============================================
              */
             stepper.doTrace(colobj, tracer.mEndPos, tracer.mEndPos-osg::Vec3f(0.0f,0.0f,sStepSizeDown), collisionWorld);
-            if (getSlope(stepper.mPlaneNormal) > sMaxSlope)
+            if (stepper.mPlaneNormal.z() < sMaxSlopeCos)
                 return Result_MaxSlope;
             if(stepper.mFraction < 1.0f)
             {
@@ -229,14 +223,14 @@ namespace MWPhysics
                 collisionWorld->rayTest(from, to, resultCallback1);
 
                 if (resultCallback1.hasHit() &&
-                        ( (toOsg(resultCallback1.m_hitPointWorld) - tracer.mEndPos).length() > 35
-                        || getSlope(tracer.mPlaneNormal) > sMaxSlope))
+                        ( (toOsg(resultCallback1.m_hitPointWorld) - tracer.mEndPos).length2() > 35*35
+                        || tracer.mPlaneNormal.z() < sMaxSlopeCos))
                 {
-                    actor->setOnGround(getSlope(toOsg(resultCallback1.m_hitNormalWorld)) <= sMaxSlope);
+                    actor->setOnGround(resultCallback1.m_hitNormalWorld.z() > sMaxSlopeCos);
                     return toOsg(resultCallback1.m_hitPointWorld) + osg::Vec3f(0.f, 0.f, 1.f);
                 }
 
-                actor->setOnGround(getSlope(tracer.mPlaneNormal) <= sMaxSlope);
+                actor->setOnGround(tracer.mPlaneNormal.z() > sMaxSlopeCos);
 
                 return tracer.mEndPos;
             }
@@ -370,7 +364,7 @@ namespace MWPhysics
                 // NOTE: stepMove modifies newPosition if successful
                 const float minStep = 10.f;
                 StepMoveResult result = stepMove(colobj, newPosition, velocity*remainingTime, remainingTime, collisionWorld);
-                if (result == Result_MaxSlope && (velocity*remainingTime).length() < minStep) // to make sure the maximum stepping distance isn't framerate-dependent or movement-speed dependent
+                if (result == Result_MaxSlope && (velocity*remainingTime).length2() < minStep*minStep) // to make sure the maximum stepping distance isn't framerate-dependent or movement-speed dependent
                 {
                     osg::Vec3f normalizedVelocity = velocity;
                     normalizedVelocity.normalize();
@@ -413,7 +407,7 @@ namespace MWPhysics
                 osg::Vec3f to = newPosition - (physicActor->getOnGround() ?
                              osg::Vec3f(0,0,sStepSizeDown+2.f) : osg::Vec3f(0,0,2.f));
                 tracer.doTrace(colobj, from, to, collisionWorld);
-                if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope
+                if(tracer.mFraction < 1.0f && tracer.mPlaneNormal.z() > sMaxSlopeCos
                         && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != CollisionType_Actor)
                 {
                     const btCollisionObject* standingOn = tracer.mHitObject;
@@ -1349,7 +1343,7 @@ namespace MWPhysics
                 else if (physicActor->getCollisionMode() && canMoveToWaterSurface(iter->first, waterlevel))
                 {
                     const osg::Vec3f actorPosition = physicActor->getPosition();
-                    physicActor->setPosition(osg::Vec3f(actorPosition.x(), actorPosition.y(), waterlevel));            
+                    physicActor->setPosition(osg::Vec3f(actorPosition.x(), actorPosition.y(), waterlevel));
                 }
             }
             physicActor->setCanWaterWalk(waterCollision);
