@@ -41,4 +41,4 @@
 
 /// \namespace MWScript
 /// \ingroup openmw
-/// \brief MW-specific script extentions and integration of the script system into OpenMW
+/// \brief MW-specific script extensions and integration of the script system into OpenMW

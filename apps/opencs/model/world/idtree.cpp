@@ -198,12 +198,12 @@ QModelIndex CSMWorld::IdTree::parent (const QModelIndex& index) const
         return QModelIndex();
 
     unsigned int id = index.internalId();
-    const std::pair<int, int>& adress(unfoldIndexAddress(id));
+    const std::pair<int, int>& address(unfoldIndexAddress(id));
 
-    if (adress.first >= this->rowCount() || adress.second >= this->columnCount())
+    if (address.first >= this->rowCount() || address.second >= this->columnCount())
         throw "Parent index is not present in the model";
 
-    return createIndex(adress.first, adress.second);
+    return createIndex(address.first, address.second);
 }
 
 unsigned int CSMWorld::IdTree::foldIndexAddress (const QModelIndex& index) const

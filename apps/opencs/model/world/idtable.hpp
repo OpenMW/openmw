@@ -65,7 +65,7 @@ namespace CSMWorld
 
             void setRecord (const std::string& id, const RecordBase& record,
                     UniversalId::Type type = UniversalId::Type_None);
-            ///< Add record or overwrite existing recrod.
+            ///< Add record or overwrite existing record.
 
             const RecordBase& getRecord (const std::string& id) const;
 

@@ -1069,7 +1069,7 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
         mResult.mSunDiscColor = lerp(osg::Vec4f(1,1,1,1), current.mSunDiscSunsetColor, factor);
         // The SunDiscSunsetColor in the INI isn't exactly the resulting color on screen, most likely because
         // MW applied the color to the ambient term as well. After the ambient and emissive terms are added together, the fixed pipeline
-        // would then clamp the total lighting to (1,1,1). A noticable change in color tone can be observed when only one of the color components gets clamped.
+        // would then clamp the total lighting to (1,1,1). A noticeable change in color tone can be observed when only one of the color components gets clamped.
         // Unfortunately that means we can't use the INI color as is, have to replicate the above nonsense.
         mResult.mSunDiscColor = mResult.mSunDiscColor + osg::componentMultiply(mResult.mSunDiscColor, mResult.mAmbientColor);
         for (int i=0; i<3; ++i)

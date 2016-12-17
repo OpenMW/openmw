@@ -495,7 +495,7 @@ namespace MWMechanics
                         appliedLastingEffects.push_back(effect);
 
                         // For absorb effects, also apply the effect to the caster - but with a negative
-                        // magnitude, since we're transfering stats from the target to the caster
+                        // magnitude, since we're transferring stats from the target to the caster
                         if (!caster.isEmpty() && caster.getClass().isActor())
                         {
                             for (int i=0; i<5; ++i)
@@ -927,7 +927,7 @@ namespace MWMechanics
 
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
 
-            if (mCaster.getClass().isActor()) // TODO: Non-actors should also create a spell cast vfx
+            if (animation && mCaster.getClass().isActor()) // TODO: Non-actors should also create a spell cast vfx even if they are disabled (animation == NULL)
             {
                 const ESM::Static* castStatic;
 
@@ -941,7 +941,7 @@ namespace MWMechanics
                 animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex, false, "", texture);
             }
 
-            if (!mCaster.getClass().isActor())
+            if (animation && !mCaster.getClass().isActor())
                 animation->addSpellCastGlow(effect);
 
             static const std::string schools[] = {
@@ -994,8 +994,10 @@ namespace MWMechanics
                 if (charge == 0)
                     return false;
 
-                // FIXME: charge should be a float, not int so that damage < 1 per frame can be applied.
-                // This was also a bug in the original engine.
+                // Store remainder of disintegrate amount (automatically subtracted if > 1)
+                item->getCellRef().applyChargeRemainderToBeSubtracted(disintegrate - std::floor(disintegrate));
+
+                charge = item->getClass().getItemHealth(*item);
                 charge -=
                         std::min(static_cast<int>(disintegrate),
                                  charge);
@@ -1023,10 +1025,10 @@ namespace MWMechanics
         creatureStats.setDynamic(index, stat);
     }
 
-    void effectTick(CreatureStats& creatureStats, const MWWorld::Ptr& actor, const EffectKey &effectKey, float magnitude)
+    bool effectTick(CreatureStats& creatureStats, const MWWorld::Ptr& actor, const EffectKey &effectKey, float magnitude)
     {
         if (magnitude == 0.f)
-            return;
+            return false;
 
         bool receivedMagicDamage = false;
 
@@ -1158,10 +1160,13 @@ namespace MWMechanics
         case ESM::MagicEffect::RemoveCurse:
             actor.getClass().getCreatureStats(actor).getSpells().purgeCurses();
             break;
+        default:
+            return false;
         }
 
         if (receivedMagicDamage && actor == getPlayer())
             MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
+        return true;
     }
 
 }

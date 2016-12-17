@@ -8,7 +8,7 @@
  * Adapters acts as indirection layer, abstracting details of the record types (in the wrappers) from the higher levels of model.
  * Please notice that nested adaptor uses helper classes for actually performing any actions. Different record types require different helpers (needs to be created in the subclass and then fetched via member function).
  *
- * Important point: don't forget to make sure that getData on the nestedColumn returns true (otherwise code will not treat the index pointing to the column as having childs!
+ * Important point: don't forget to make sure that getData on the nestedColumn returns true (otherwise code will not treat the index pointing to the column as having children!
  */
 
 class QVariant;

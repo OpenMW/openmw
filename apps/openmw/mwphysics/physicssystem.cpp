@@ -69,7 +69,14 @@ namespace MWPhysics
             return osg::RadiansToDegrees(std::acos(normal * osg::Vec3f(0.f, 0.f, 1.f)));
         }
 
-        static bool stepMove(const btCollisionObject *colobj, osg::Vec3f &position,
+        enum StepMoveResult
+        {
+            Result_Blocked, // unable to move over obstacle
+            Result_MaxSlope, // unable to end movement on this slope
+            Result_Success
+        };
+
+        static StepMoveResult stepMove(const btCollisionObject *colobj, osg::Vec3f &position,
                              const osg::Vec3f &toMove, float &remainingTime, const btCollisionWorld* collisionWorld)
         {
             /*
@@ -120,7 +127,7 @@ namespace MWPhysics
 
             stepper.doTrace(colobj, position, position+osg::Vec3f(0.0f,0.0f,sStepSizeUp), collisionWorld);
             if(stepper.mFraction < std::numeric_limits<float>::epsilon())
-                return false; // didn't even move the smallest representable amount
+                return Result_Blocked; // didn't even move the smallest representable amount
                               // (TODO: shouldn't this be larger? Why bother with such a small amount?)
 
             /*
@@ -138,7 +145,7 @@ namespace MWPhysics
              */
             tracer.doTrace(colobj, stepper.mEndPos, stepper.mEndPos + toMove, collisionWorld);
             if(tracer.mFraction < std::numeric_limits<float>::epsilon())
-                return false; // didn't even move the smallest representable amount
+                return Result_Blocked; // didn't even move the smallest representable amount
 
             /*
              * Try moving back down sStepSizeDown using stepper.
@@ -156,22 +163,22 @@ namespace MWPhysics
              *    ==============================================
              */
             stepper.doTrace(colobj, tracer.mEndPos, tracer.mEndPos-osg::Vec3f(0.0f,0.0f,sStepSizeDown), collisionWorld);
-            if(stepper.mFraction < 1.0f && getSlope(stepper.mPlaneNormal) <= sMaxSlope)
+            if (getSlope(stepper.mPlaneNormal) > sMaxSlope)
+                return Result_MaxSlope;
+            if(stepper.mFraction < 1.0f)
             {
                 // don't allow stepping up other actors
                 if (stepper.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor)
-                    return false;
+                    return Result_Blocked;
                 // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
                 // TODO: stepper.mPlaneNormal does not appear to be reliable - needs more testing
                 // NOTE: caller's variables 'position' & 'remainingTime' are modified here
                 position = stepper.mEndPos;
                 remainingTime *= (1.0f-tracer.mFraction); // remaining time is proportional to remaining distance
-                return true;
+                return Result_Success;
             }
 
-            // moved between 0 and just under sStepSize distance but slope was too great,
-            // or moved full sStepSize distance (FIXME: is this a bug?)
-            return false;
+            return Result_Blocked;
         }
 
 
@@ -361,14 +368,15 @@ namespace MWPhysics
                 osg::Vec3f oldPosition = newPosition;
                 // We hit something. Try to step up onto it. (NOTE: stepMove does not allow stepping over)
                 // NOTE: stepMove modifies newPosition if successful
-                bool result = stepMove(colobj, newPosition, velocity*remainingTime, remainingTime, collisionWorld);
-                if (!result) // to make sure the maximum stepping distance isn't framerate-dependent or movement-speed dependent
+                const float minStep = 10.f;
+                StepMoveResult result = stepMove(colobj, newPosition, velocity*remainingTime, remainingTime, collisionWorld);
+                if (result == Result_MaxSlope && (velocity*remainingTime).length() < minStep) // to make sure the maximum stepping distance isn't framerate-dependent or movement-speed dependent
                 {
                     osg::Vec3f normalizedVelocity = velocity;
                     normalizedVelocity.normalize();
-                    result = stepMove(colobj, newPosition, normalizedVelocity*10.f, remainingTime, collisionWorld);
+                    result = stepMove(colobj, newPosition, normalizedVelocity*minStep, remainingTime, collisionWorld);
                 }
-                if(result)
+                if(result == Result_Success)
                 {
                     // don't let pure water creatures move out of water after stepMove
                     if (ptr.getClass().isPureWaterCreature(ptr)
@@ -1459,7 +1467,10 @@ namespace MWPhysics
         }
 
         if (!mWaterEnabled)
+        {
+            mWaterCollisionObject.reset();
             return;
+        }
 
         mWaterCollisionObject.reset(new btCollisionObject());
         mWaterCollisionShape.reset(new btStaticPlaneShape(btVector3(0,0,1), mWaterHeight));

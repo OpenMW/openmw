@@ -16,6 +16,7 @@ namespace Nif
 {
     class NiGravity;
     class NiPlanarCollider;
+    class NiSphericalCollider;
     class NiColorData;
 }
 
@@ -108,6 +109,23 @@ namespace NifOsg
         float mBounceFactor;
         osg::Plane mPlane;
         osg::Plane mPlaneInParticleSpace;
+    };
+
+    class SphericalCollider : public osgParticle::Operator
+    {
+    public:
+        SphericalCollider(const Nif::NiSphericalCollider* collider);
+        SphericalCollider();
+        SphericalCollider(const SphericalCollider& copy, const osg::CopyOp& copyop);
+
+        META_Object(NifOsg, SphericalCollider)
+
+        virtual void beginOperate(osgParticle::Program* program);
+        virtual void operate(osgParticle::Particle* particle, double dt);
+    private:
+        float mBounceFactor;
+        osg::BoundingSphere mSphere;
+        osg::BoundingSphere mSphereInParticleSpace;
     };
 
     class GrowFadeAffector : public osgParticle::Operator

@@ -696,11 +696,12 @@ namespace CSMWorld
     {
             const RefIdColumn *mScroll;
             const RefIdColumn *mSkill;
+            const RefIdColumn *mText;
 
         public:
 
             BookRefIdAdapter (const EnchantableColumns& columns, const RefIdColumn *scroll,
-                const RefIdColumn *skill);
+                const RefIdColumn *skill, const RefIdColumn *text);
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
                 const;

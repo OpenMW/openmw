@@ -13,7 +13,7 @@ namespace ESM
 namespace ESSImport
 {
 
-    /// Local variable assigments for a running script
+    /// Local variable assignments for a running script
     struct SCRI
     {
         std::string mScript;

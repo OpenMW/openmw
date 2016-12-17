@@ -425,7 +425,7 @@ void CSMTools::ReferenceableCheckStage::creatureCheck (
 
     //stats checks
     if (creature.mData.mLevel < 1)
-        messages.push_back (std::make_pair (id, creature.mId + " has non-postive level"));
+        messages.push_back (std::make_pair (id, creature.mId + " has non-positive level"));
 
     if (creature.mData.mStrength < 0)
         messages.push_back (std::make_pair (id, creature.mId + " has negative strength"));
@@ -659,7 +659,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
     {
         if ((npc.mFlags & ESM::NPC::Autocalc) == 0) //0x0010 = autocalculated flag
         {
-            messages.push_back (std::make_pair (id, npc.mId + " mNpdtType or flags mismatch!")); //should not happend?
+            messages.push_back (std::make_pair (id, npc.mId + " mNpdtType or flags mismatch!")); //should not happen?
             return;
         }
 
@@ -915,7 +915,7 @@ void CSMTools::ReferenceableCheckStage::inventoryListCheck(
                 id + " contains non-existing item (" + itemName + ")"));
         else
         {
-            // Needs to accomodate Containers, Creatures, and NPCs
+            // Needs to accommodate containers, creatures, and NPCs
             switch (localIndex.second)
             {
             case CSMWorld::UniversalId::Type_Potion:
