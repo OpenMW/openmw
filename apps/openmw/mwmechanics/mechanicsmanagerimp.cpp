@@ -982,20 +982,13 @@ namespace MWMechanics
         // NOTE: victim may be empty
         const MWWorld::Ptr& player = getPlayer();
 
-        // Only player, his followers & summoned creatures, his follower followers & summoned creatures, and so on ... can commit crime
+        // Only player and his followers can commit crime
         bool accusePlayer = attacker == player;
 
         std::set<MWWorld::Ptr> playerFollowers;
         getFollowers(player, playerFollowers);
 
-        if (!accusePlayer)
-        {
-            std::set<MWWorld::Ptr>::const_iterator it = playerFollowers.begin();
-            for (; !accusePlayer && it != playerFollowers.end(); ++it)
-                accusePlayer = *it == attacker || it->getClass().getCreatureStats(*it).hasSummonedCreature(attacker);
-        }
-
-        if (!accusePlayer)
+        if (!accusePlayer && playerFollowers.find(attacker) == playerFollowers.end())
             return false;
 
         // Find all the actors within the alarm radius
@@ -1018,13 +1011,8 @@ namespace MWMechanics
             if (*it == player)
                 continue; // skip player
 
-            // Skip if neighbor is player follower or his summoned creature
-            bool skipSeen = false;
-            std::set<MWWorld::Ptr>::const_iterator followers_it = playerFollowers.begin();
-            for (; !skipSeen && followers_it != playerFollowers.end(); ++followers_it)
-                skipSeen = *followers_it == *it || followers_it->getClass().getCreatureStats(*followers_it).hasSummonedCreature(*it);
-
-            if (skipSeen || it->getClass().getCreatureStats(*it).isDead())
+            // Skip if neighbor actor is dead or is one of the player followers
+            if (it->getClass().getCreatureStats(*it).isDead() || playerFollowers.find(*it) != playerFollowers.end())
                 continue;
 
             if ((*it == victim && victimAware)
@@ -1038,9 +1026,6 @@ namespace MWMechanics
                     continue;
 
                 if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
-                    continue;
-
-                if (playerFollowers.find(*it) != playerFollowers.end())
                     continue;
 
                 if (type == OT_Theft || type == OT_Pickpocket)
@@ -1150,14 +1135,8 @@ namespace MWMechanics
             if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
                 continue;
 
-            bool skipReport = false;
-
-            // Player followers, summoned creatures, follower followers & summoned creatures, and so on should not stand against the player
-            std::set<MWWorld::Ptr>::const_iterator followers_it = playerFollowers.begin();
-            for (; !skipReport && followers_it != playerFollowers.end(); ++followers_it)
-                skipReport = *followers_it == *it || followers_it->getClass().getCreatureStats(*followers_it).hasSummonedCreature(*it);
-
-            if (skipReport)
+            // Player followers should not stand against the player
+            if (playerFollowers.find(*it) != playerFollowers.end())
                 continue;
 
             // Will the witness report the crime?

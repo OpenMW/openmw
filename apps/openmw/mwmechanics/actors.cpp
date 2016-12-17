@@ -376,17 +376,10 @@ namespace MWMechanics
                 MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
                 if (!againstPlayer) // start combat between each other if engaging actor is not one of the player followers
                 {
-                    bool playerFollowerIsEngaging = false;
-
                     std::set<MWWorld::Ptr> playerFollowers;
                     getFollowers(getPlayer(), playerFollowers);
 
-                    std::set<MWWorld::Ptr>::const_iterator it = playerFollowers.begin();
-                    for (; !playerFollowerIsEngaging && it != playerFollowers.end(); ++it)
-                        if (*it == actor1 || it->getClass().getCreatureStats(*it).hasSummonedCreature(actor1))
-                            playerFollowerIsEngaging = true;
-
-                    if (!playerFollowerIsEngaging)
+                    if (playerFollowers.find(actor1) == playerFollowers.end())
                         MWBase::Environment::get().getMechanicsManager()->startCombat(actor2, actor1);
                 }
             }
