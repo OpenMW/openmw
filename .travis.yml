@@ -15,6 +15,7 @@ env:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
    - secure: "jybGzAdUbqt9vWR/GEnRd96BgAi/7Zd1+2HK68j/i/8+/1YH2XxLOy4Jv/DUBhBlJIkxs/Xv8dRcUlFOclZDHX1d/9Qnsqd3oUVkD7k1y7cTOWy9TBQaE/v/kZo3LpzA3xPwwthrb0BvqIbOfIELi5fS5s8ba85WFRg3AX70wWE="
+   - macos_qt_formula=qt@5.5
 addons:
   apt:
     sources:
