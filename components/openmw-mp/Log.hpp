@@ -5,6 +5,8 @@
 #ifndef OPENMW_LOG_HPP
 #define OPENMW_LOG_HPP
 
+#include <boost/filesystem.hpp>
+
 #ifdef __GNUC__
 #pragma GCC system_header
 #endif
@@ -44,6 +46,8 @@ public:
     static const Log &Get();
     static void SetLevel(int level);
     void print(int level, bool hasPrefix, const char *file, int line, const char *message, ...) const;
+
+    static std::string copyOldLog(boost::filesystem::path path, std::string name, std::string extension);
 private:
     Log(int logLevel);
     /// Not implemented

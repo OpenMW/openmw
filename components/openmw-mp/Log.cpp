@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <sstream>
 #include <vector>
+#include <boost/lexical_cast.hpp>
 #include "Log.hpp"
 
 using namespace std;
@@ -103,4 +104,22 @@ void Log::print(int level, bool hasPrefix, const char *file, int line, const cha
     vsnprintf(buf.data(), buf.size(), sstr.str().c_str(), args);
     va_end(args);
     cout << buf.data() << flush;
+}
+
+string Log::copyOldLog(boost::filesystem::path path, string name, string extension)
+{
+    namespace fs = boost::filesystem;
+    fs::directory_iterator end_iter;
+
+    std::string fullname = name + "." + extension;
+
+    if (fs::exists(path / fullname))
+    {
+        std::string newname;
+        for (int i = 1; fs::exists(path / (newname = name + boost::lexical_cast<string>(i++) + "." + extension)););
+
+        fs::rename(path / fullname, path / newname);
+        return newname;
+    }
+    return fullname;
 }
