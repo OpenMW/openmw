@@ -106,7 +106,7 @@ void Log::print(int level, bool hasPrefix, const char *file, int line, const cha
     cout << buf.data() << flush;
 }
 
-string Log::copyOldLog(boost::filesystem::path path, string name, string extension)
+string Log::renameOldLog(boost::filesystem::path path, string name, string extension)
 {
     namespace fs = boost::filesystem;
     fs::directory_iterator end_iter;

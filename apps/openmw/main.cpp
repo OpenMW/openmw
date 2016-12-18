@@ -335,7 +335,7 @@ int main(int argc, char**argv)
         std::cerr.rdbuf (&sb);
 #else
         // Redirect cout and cerr to openmw.log
-        Log::copyOldLog(cfgMgr.getLogPath(), "openmw", "log");
+        Log::renameOldLog(cfgMgr.getLogPath(), "openmw", "log");
         logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / "/openmw.log"));
 
         coutsb.open (Tee(logfile, oldcout));

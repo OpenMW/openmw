@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
     boost::filesystem::ofstream logfile;
 
     // Redirect cout and cerr to openmw.log
-    cout << Log::copyOldLog(cfgMgr.getLogPath(), "server", "log") << endl;
+    cout << Log::renameOldLog(cfgMgr.getLogPath(), "server", "log") << endl;
 
     logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / "/server.log"));
 

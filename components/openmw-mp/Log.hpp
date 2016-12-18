@@ -47,7 +47,7 @@ public:
     static void SetLevel(int level);
     void print(int level, bool hasPrefix, const char *file, int line, const char *message, ...) const;
 
-    static std::string copyOldLog(boost::filesystem::path path, std::string name, std::string extension);
+    static std::string renameOldLog(boost::filesystem::path path, std::string name, std::string extension);
 private:
     Log(int logLevel);
     /// Not implemented
