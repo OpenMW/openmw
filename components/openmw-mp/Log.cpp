@@ -109,7 +109,6 @@ void Log::print(int level, bool hasPrefix, const char *file, int line, const cha
 string Log::renameOldLog(boost::filesystem::path path, string name, string extension)
 {
     namespace fs = boost::filesystem;
-    fs::directory_iterator end_iter;
 
     std::string fullname = name + "." + extension;
 
