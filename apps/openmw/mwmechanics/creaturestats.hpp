@@ -12,8 +12,6 @@
 #include "aisequence.hpp"
 #include "drawstate.hpp"
 
-#include "../mwworld/class.hpp"
-
 namespace ESM
 {
     struct CreatureStats;
