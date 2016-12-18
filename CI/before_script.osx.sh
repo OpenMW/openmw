@@ -4,7 +4,7 @@ export CXX=clang++
 export CC=clang
 
 DEPENDENCIES_ROOT="/private/tmp/openmw-deps/openmw-deps"
-QT_PATH="/usr/local/opt/qt55"
+QT_PATH=`brew --prefix qt@5.5`
 
 mkdir build
 cd build
