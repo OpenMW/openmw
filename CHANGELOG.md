@@ -12,7 +12,7 @@
     Bug #2716: [OSG] Water surface is too transparent from some angles
     Bug #2859: [MAC OS X] Cannot exit fullscreen once enabled
     Bug #3091: Editor: will not save addon if global variable value type is null
-    Bug #3277: Editor: Disabled nested tables in subviews aren't scrollable
+    Bug #3277: Editor: Non-functional nested tables in subviews need to be hidden instead of being disabled
     Bug #3348: Disabled map markers show on minimap
     Bug #3350: Extending selection to instances with same object results in duplicates.
     Bug #3353: [Mod] Romance version 3.7 script failed
