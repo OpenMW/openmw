@@ -409,25 +409,22 @@ namespace MWWorld
             bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos);
             if (result.mHit || underwater)
             {
-                if (result.mHit)
+                MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
+
+                // Try to get a Ptr to the bow that was used. It might no longer exist.
+                MWWorld::Ptr bow = projectileRef.getPtr();
+                if (!caster.isEmpty() && it->mIdArrow != it->mBowId)
                 {
-                    MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
-
-                    // Try to get a Ptr to the bow that was used. It might no longer exist.
-                    MWWorld::Ptr bow = projectileRef.getPtr();
-                    if (!caster.isEmpty() && it->mIdArrow != it->mBowId)
-                    {
-                        MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
-                        MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                        if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
-                            bow = *invIt;
-                    }
-
-                    if (caster.isEmpty())
-                        caster = result.mHitObject;
-
-                    MWMechanics::projectileHit(caster, result.mHitObject, bow, projectileRef.getPtr(), result.mHitPos, it->mAttackStrength);
+                    MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
+                    MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                    if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
+                        bow = *invIt;
                 }
+
+                if (caster.isEmpty())
+                    caster = result.mHitObject;
+
+                MWMechanics::projectileHit(caster, result.mHitObject, bow, projectileRef.getPtr(), result.mHit ? result.mHitPos : newPos, it->mAttackStrength);
 
                 if (underwater)
                     mRendering->emitWaterRipple(newPos);
