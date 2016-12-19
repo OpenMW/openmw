@@ -110,8 +110,6 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(item.getClass().getModel(item));
     osg::ref_ptr<osg::Node> attached = SceneUtil::attach(node, mObjectRoot, bonename, bonename);
     mResourceSystem->getSceneManager()->notifyAttached(attached);
-    if (mSkeleton)
-        mSkeleton->markDirty();
 
     scene.reset(new PartHolder(attached));
 
