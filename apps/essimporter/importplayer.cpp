@@ -23,9 +23,12 @@ namespace ESSImport
             mKnownDialogueTopics.push_back(esm.getHString());
         }
 
+        mHasMark = false;
         if (esm.isNextSub("MNAM"))
-            esm.skipHSub(); // If this field is here it seems to specify the interior cell the player is in,
-                            // but it's not always here, so it's kinda useless
+        {
+            mHasMark = true;
+            mMNAM = esm.getHString();
+        }
 
         esm.getHNT(mPNAM, "PNAM");
 
@@ -50,8 +53,12 @@ namespace ESSImport
         if (esm.isNextSub("NAM3"))
             esm.skipHSub();
 
+        mHasENAM = false;
         if (esm.isNextSub("ENAM"))
-            esm.skipHSub();
+        {
+            mHasENAM = true;
+            esm.getHT(mENAM);
+        }
 
         if (esm.isNextSub("LNAM"))
             esm.skipHSub();
