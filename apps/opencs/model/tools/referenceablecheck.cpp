@@ -425,7 +425,7 @@ void CSMTools::ReferenceableCheckStage::creatureCheck (
 
     //stats checks
     if (creature.mData.mLevel < 1)
-        messages.push_back (std::make_pair (id, creature.mId + " has non-postive level"));
+        messages.push_back (std::make_pair (id, creature.mId + " has non-positive level"));
 
     if (creature.mData.mStrength < 0)
         messages.push_back (std::make_pair (id, creature.mId + " has negative strength"));

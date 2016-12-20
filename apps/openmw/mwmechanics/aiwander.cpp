@@ -336,7 +336,7 @@ namespace MWMechanics
         {
             ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(mReturnPosition));
 
-            // actor position is already in world co-ordinates
+            // actor position is already in world coordinates
             ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
             // don't take shortcuts for wandering
@@ -473,8 +473,8 @@ namespace MWMechanics
     void AiWander::onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, 
         float duration, AiWanderStorage& storage, ESM::Position& pos)
     {
-        // Are we there yet?
-        if (pathTo(actor, mPathFinder.getPath().back(), duration, DESTINATION_TOLERANCE))
+        // Is there no destination or are we there yet?
+        if ((!mPathFinder.isPathConstructed()) || pathTo(actor, mPathFinder.getPath().back(), duration, DESTINATION_TOLERANCE))
         {
             stopWalking(actor, storage);
             storage.setState(Wander_ChooseAction);
@@ -649,7 +649,7 @@ namespace MWMechanics
         ESM::Pathgrid::Point dest(storage.mAllowedNodes[randNode]);
         ToWorldCoordinates(dest, storage.mCell->getCell());
 
-        // actor position is already in world co-ordinates
+        // actor position is already in world coordinates
         ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(actorPos));
 
         // don't take shortcuts for wandering
@@ -693,8 +693,8 @@ namespace MWMechanics
             ESM::Pathgrid::Point pt = paths.back();
             for(unsigned int j = 0; j < nodes.size(); j++)
             {
-                // FIXME: doesn't hadle a door with the same X/Y
-                //        co-ordinates but with a different Z
+                // FIXME: doesn't handle a door with the same X/Y
+                //        coordinates but with a different Z
                 if(nodes[j].mX == pt.mX && nodes[j].mY == pt.mY)
                 {
                     nodes.erase(nodes.begin() + j);
@@ -828,7 +828,7 @@ namespace MWMechanics
         // ... pathgrids don't usually include water, so swimmers ignore them
         if (mDistance && storage.mCanWanderAlongPathGrid && !actor.getClass().isPureWaterCreature(actor))
         {
-            // get NPC's position in local (i.e. cell) co-ordinates
+            // get NPC's position in local (i.e. cell) coordinates
             osg::Vec3f npcPos(mInitialActorPosition);
             CoordinateConverter(cell).toLocal(npcPos);
             
@@ -837,7 +837,7 @@ namespace MWMechanics
 
             // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
             // and if the point is connected to the closest current point
-            // NOTE: mPoints and mAllowedNodes are in local co-ordinates
+            // NOTE: mPoints and mAllowedNodes are in local coordinates
             int pointIndex = 0;
             for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
             {

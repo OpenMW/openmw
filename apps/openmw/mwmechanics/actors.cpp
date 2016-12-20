@@ -1271,8 +1271,6 @@ namespace MWMechanics
                 stats.getActiveSpells().clear();
                 calculateCreatureStatModifiers(iter->first, 0);
 
-                MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, false);
-
                 if (cls.isEssential(iter->first))
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
             }
@@ -1289,6 +1287,11 @@ namespace MWMechanics
                 {
                     //player's death animation is over
                     MWBase::Environment::get().getStateManager()->askLoadRecent();
+                }
+                else
+                {
+                    // NPC death animation is over, disable actor collision
+                    MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, false);
                 }
 
                 // Play Death Music if it was the player dying

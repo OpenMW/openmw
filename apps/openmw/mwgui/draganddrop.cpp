@@ -36,7 +36,6 @@ void DragAndDrop::startDrag (int index, SortFilterItemModel* sortModel, ItemMode
     mSourceModel = sourceModel;
     mSourceView = sourceView;
     mSourceSortModel = sortModel;
-    mIsOnDragAndDrop = true;
 
     // If picking up an item that isn't from the player's inventory, the item gets added to player inventory backend
     // immediately, even though it's still floating beneath the mouse cursor. A bit counterintuitive,
@@ -88,6 +87,8 @@ void DragAndDrop::startDrag (int index, SortFilterItemModel* sortModel, ItemMode
     sourceView->update();
 
     MWBase::Environment::get().getWindowManager()->setDragDrop(true);
+
+    mIsOnDragAndDrop = true;
 }
 
 void DragAndDrop::drop(ItemModel *targetModel, ItemView *targetView)

@@ -47,7 +47,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     updateScale();
     updatePosition();
 
-    updateCollisionMask();
+    addCollisionMask(getCollisionMask());
 }
 
 Actor::~Actor()
@@ -70,15 +70,26 @@ void Actor::enableCollisionBody(bool collision)
     }
 }
 
+void Actor::addCollisionMask(int collisionMask)
+{
+    mCollisionWorld->addCollisionObject(mCollisionObject.get(), CollisionType_Actor, collisionMask);
+}
+
 void Actor::updateCollisionMask()
 {
     mCollisionWorld->removeCollisionObject(mCollisionObject.get());
+    addCollisionMask(getCollisionMask());
+}
+
+int Actor::getCollisionMask()
+{
     int collisionMask = CollisionType_World | CollisionType_HeightMap;
     if (mExternalCollisionMode)
         collisionMask |= CollisionType_Actor | CollisionType_Projectile | CollisionType_Door;
     if (mCanWaterWalk)
         collisionMask |= CollisionType_Water;
-    mCollisionWorld->addCollisionObject(mCollisionObject.get(), CollisionType_Actor, collisionMask);
+    return collisionMask;
+    
 }
 
 void Actor::updatePosition()

@@ -1349,7 +1349,8 @@ namespace MWPhysics
                 else if (physicActor->getCollisionMode() && canMoveToWaterSurface(iter->first, waterlevel))
                 {
                     const osg::Vec3f actorPosition = physicActor->getPosition();
-                    physicActor->setPosition(osg::Vec3f(actorPosition.x(), actorPosition.y(), waterlevel));            
+                    physicActor->setPosition(osg::Vec3f(actorPosition.x(), actorPosition.y(), waterlevel));
+                    waterCollision = true;
                 }
             }
             physicActor->setCanWaterWalk(waterCollision);
@@ -1467,7 +1468,10 @@ namespace MWPhysics
         }
 
         if (!mWaterEnabled)
+        {
+            mWaterCollisionObject.reset();
             return;
+        }
 
         mWaterCollisionObject.reset(new btCollisionObject());
         mWaterCollisionShape.reset(new btStaticPlaneShape(btVector3(0,0,1), mWaterHeight));

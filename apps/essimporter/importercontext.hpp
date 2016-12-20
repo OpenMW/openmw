@@ -63,7 +63,7 @@ namespace ESSImport
             playerCellId.mIndex.mX = playerCellId.mIndex.mY = 0;
             mPlayer.mCellId = playerCellId;
             //mPlayer.mLastKnownExteriorPosition
-            mPlayer.mHasMark = 0; // TODO
+            mPlayer.mHasMark = 0;
             mPlayer.mCurrentCrimeId = 0; // TODO
             mPlayer.mObject.blank();
             mPlayer.mObject.mRef.mRefID = "player"; // REFR.mRefID would be PlayerSaveGame

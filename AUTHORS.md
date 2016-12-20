@@ -78,6 +78,7 @@ Programmers
     Kurnevsky Evgeny (kurnevsky)
     Lars Söderberg (Lazaroth)
     lazydev
+    Leon Krieg (lkrieg)
     Leon Saunders (emoose)
     lohikaarme
     Lukasz Gromanowski (lgro)
