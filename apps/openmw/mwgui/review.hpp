@@ -6,6 +6,11 @@
 #include "windowbase.hpp"
 #include "widgets.hpp"
 
+namespace ESM
+{
+    struct Spell;
+}
+
 namespace MWGui
 {
     class WindowManager;
@@ -42,6 +47,8 @@ namespace MWGui
 
         virtual void open();
 
+        void onFrame(float duration);
+
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
         typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
@@ -75,6 +82,7 @@ namespace MWGui
         void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         MyGUI::TextBox* addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+        void addItem(const ESM::Spell* spell, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void updateSkillArea();
 
         static const int sLineHeight;
@@ -92,6 +100,8 @@ namespace MWGui
         std::string mName, mRaceId, mBirthSignId;
         ESM::Class mKlass;
         std::vector<MyGUI::Widget*> mSkillWidgets; //< Skills and other information
+
+        bool mUpdateSkillArea;
     };
 }
 #endif

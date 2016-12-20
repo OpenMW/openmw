@@ -226,7 +226,7 @@ namespace MWGui
                 coord.top += lineHeight;
 
                 end = categories[category].spells.end();
-                for (std::vector<std::string>::const_iterator it = categories[category].spells.begin(); it != end; ++it)
+                for (it = categories[category].spells.begin(); it != end; ++it)
                 {
                     const std::string &spellId = *it;
                     spellWidget = mSpellArea->createWidget<Widgets::MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("Spell") + MyGUI::utility::toString(i));

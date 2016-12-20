@@ -16,6 +16,7 @@ namespace
         cellRef.mScale = 1;
         cellRef.mFactionRank = 0;
         cellRef.mChargeInt = -1;
+        cellRef.mChargeIntRemainder = 0.0f;
         cellRef.mGoldValue = 1;
         cellRef.mEnchantmentCharge = -1;
         cellRef.mTeleport = false;

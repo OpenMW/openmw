@@ -61,6 +61,10 @@ namespace MWMechanics
 
             void attack(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, AiCombatStorage& storage, CharacterController& characterController);
 
+            void updateLOS(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, float duration, AiCombatStorage& storage);
+
+            void updateFleeing(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, float duration, AiCombatStorage& storage);
+
             /// Transfer desired movement (from AiCombatStorage) to Actor
             void updateActorsMovement(const MWWorld::Ptr& actor, float duration, AiCombatStorage& storage);
             void rotateActorOnAxis(const MWWorld::Ptr& actor, int axis, 

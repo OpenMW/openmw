@@ -421,11 +421,17 @@ namespace MWWorld
         gmst["sBribeFail"] = ESM::Variant("Bribe Fail");
         gmst["fNPCHealthBarTime"] = ESM::Variant(5.f);
         gmst["fNPCHealthBarFade"] = ESM::Variant(1.f);
+        gmst["fFleeDistance"] = ESM::Variant(3000.f);
+        gmst["sMaxSale"] = ESM::Variant("Max Sale");
 
         // Werewolf (BM)
-        gmst["fWereWolfRunMult"] = ESM::Variant(1.f);
-        gmst["fWereWolfSilverWeaponDamageMult"] = ESM::Variant(1.f);
-        gmst["iWerewolfFightMod"] = ESM::Variant(1);
+        gmst["fWereWolfRunMult"] = ESM::Variant(1.3f);
+        gmst["fWereWolfSilverWeaponDamageMult"] = ESM::Variant(2.f);
+        gmst["iWerewolfFightMod"] = ESM::Variant(100);
+        gmst["iWereWolfFleeMod"] = ESM::Variant(100);
+        gmst["iWereWolfLevelToAttack"] = ESM::Variant(20);
+        gmst["iWereWolfBounty"] = ESM::Variant(1000);
+        gmst["fCombatDistanceWerewolfMod"] = ESM::Variant(0.3f);
 
         std::map<std::string, ESM::Variant> globals;
         // vanilla Morrowind does not define dayspassed.
@@ -1295,7 +1301,7 @@ namespace MWWorld
 
         float terrainHeight = -std::numeric_limits<float>::max();
         if (ptr.getCell()->isExterior())
-            terrainHeight = mRendering->getTerrainHeightAt(pos.asVec3());
+            terrainHeight = getTerrainHeightAt(pos.asVec3());
 
         if (pos.pos[2] < terrainHeight)
             pos.pos[2] = terrainHeight;
@@ -2078,11 +2084,16 @@ namespace MWWorld
         if (!cell->getCell()->hasWater())
             return true;
 
-        // Based on observations from the original engine, the depth
-        // limit at which water walking can still be cast on a target
-        // in water appears to be the same as what the highest swimmable
-        // z position would be with SwimHeightScale + 1.
-        return !isUnderwater(target, mSwimHeightScale + 1);
+        float waterlevel = cell->getWaterLevel();
+
+        // SwimHeightScale affects the upper z position an actor can swim to 
+        // while in water. Based on observation from the original engine,
+        // the upper z position you get with a +1 SwimHeightScale is the depth
+        // limit for being able to cast water walking on an underwater target.
+        if (isUnderwater(target, mSwimHeightScale + 1) || (isUnderwater(cell, target.getRefData().getPosition().asVec3()) && !mPhysics->canMoveToWaterSurface(target, waterlevel)))
+            return false; // not castable if too deep or if not enough room to move actor to surface
+        else
+            return true;
     }
 
     bool World::isOnGround(const MWWorld::Ptr &ptr) const
@@ -2183,7 +2194,7 @@ namespace MWWorld
         if (!actor)
             throw std::runtime_error("can't find player");
 
-        if ((actor->getCollisionMode() && !mPhysics->isOnSolidGround(player)) || isUnderwater(currentCell, playerPos))
+        if ((actor->getCollisionMode() && !mPhysics->isOnSolidGround(player)) || isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
             return 2;
 
         if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) || player.getClass().getNpcStats(player).isWerewolf())
@@ -3121,6 +3132,19 @@ namespace MWWorld
         return MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Jail);
     }
 
+    float World::getTerrainHeightAt(const osg::Vec3f& worldPos) const
+    {
+        return mRendering->getTerrainHeightAt(worldPos);
+    }
+
+    osg::Vec3f World::getHalfExtents(const ConstPtr& actor, bool rendering) const
+    {
+        if (rendering)
+            return mPhysics->getRenderingHalfExtents(actor);
+        else
+            return mPhysics->getHalfExtents(actor);
+    }
+
     void World::spawnRandomCreature(const std::string &creatureList)
     {
         const ESM::CreatureLevList* list = getStore().get<ESM::CreatureLevList>().find(creatureList);
@@ -3289,7 +3313,7 @@ namespace MWWorld
         }
     }
 
-    bool World::isWalkingOnWater(const ConstPtr &actor)
+    bool World::isWalkingOnWater(const ConstPtr &actor) const
     {
         const MWPhysics::Actor* physicActor = mPhysics->getActor(actor);
         if (physicActor && physicActor->isWalkingOnWater())

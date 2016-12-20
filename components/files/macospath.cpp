@@ -68,7 +68,7 @@ boost::filesystem::path MacOsPath::getCachePath() const
 
 boost::filesystem::path MacOsPath::getLocalPath() const
 {
-    return boost::filesystem::path("./");
+    return boost::filesystem::path("../Resources/");
 }
 
 boost::filesystem::path MacOsPath::getGlobalDataPath() const

@@ -34,8 +34,9 @@
 
 namespace MWSound
 {
-    SoundManager::SoundManager(const VFS::Manager* vfs, bool useSound)
+    SoundManager::SoundManager(const VFS::Manager* vfs, const std::map<std::string,std::string>& fallbackMap, bool useSound)
         : mVFS(vfs)
+        , mFallback(fallbackMap)
         , mOutput(new DEFAULT_OUTPUT(*this))
         , mMasterVolume(1.0f)
         , mSFXVolume(1.0f)
@@ -60,6 +61,13 @@ namespace MWSound
         mVoiceVolume = std::min(std::max(mVoiceVolume, 0.0f), 1.0f);
         mFootstepsVolume = Settings::Manager::getFloat("footsteps volume", "Sound");
         mFootstepsVolume = std::min(std::max(mFootstepsVolume, 0.0f), 1.0f);
+
+        mNearWaterRadius = mFallback.getFallbackInt("Water_NearWaterRadius");
+        mNearWaterPoints = mFallback.getFallbackInt("Water_NearWaterPoints");
+        mNearWaterIndoorTolerance = mFallback.getFallbackFloat("Water_NearWaterIndoorTolerance");
+        mNearWaterOutdoorTolerance = mFallback.getFallbackFloat("Water_NearWaterOutdoorTolerance");
+        mNearWaterIndoorID = mFallback.getFallbackString("Water_NearWaterIndoorID");
+        mNearWaterOutdoorID = mFallback.getFallbackString("Water_NearWaterOutdoorID");
 
         mBufferCacheMin = std::max(Settings::Manager::getInt("buffer cache min", "Sound"), 1);
         mBufferCacheMax = std::max(Settings::Manager::getInt("buffer cache max", "Sound"), 1);
@@ -796,6 +804,96 @@ namespace MWSound
         }
     }
 
+    void SoundManager::updateWaterSound(float /*duration*/)
+    {
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        const MWWorld::ConstPtr player = world->getPlayerPtr();
+        osg::Vec3f pos = player.getRefData().getPosition().asVec3();
+
+        float volume = 0.0f;
+        const std::string& soundId = player.getCell()->isExterior() ? mNearWaterOutdoorID : mNearWaterIndoorID;
+
+        if (!mListenerUnderwater)
+        {
+            if (player.getCell()->getCell()->hasWater())
+            {
+                float dist = std::abs(player.getCell()->getWaterLevel() - pos.z());
+
+                if (player.getCell()->isExterior() && dist < mNearWaterOutdoorTolerance)
+                {
+                    volume = (mNearWaterOutdoorTolerance - dist) / mNearWaterOutdoorTolerance;
+
+                    if (mNearWaterPoints > 1)
+                    {
+                        int underwaterPoints = 0;
+
+                        float step = mNearWaterRadius * 2.0f / (mNearWaterPoints - 1);
+
+                        for (int x = 0; x < mNearWaterPoints; x++)
+                        {
+                            for (int y = 0; y < mNearWaterPoints; y++)
+                            {
+                                float height = world->getTerrainHeightAt(
+                                            osg::Vec3f(pos.x() - mNearWaterRadius + x*step, pos.y() - mNearWaterRadius + y*step, 0.0f));
+
+                                if (height < 0)
+                                    underwaterPoints++;
+                            }
+                        }
+
+                        volume *= underwaterPoints * 2.0f / (mNearWaterPoints*mNearWaterPoints);
+                    }
+                }
+                else if (!player.getCell()->isExterior() && dist < mNearWaterIndoorTolerance)
+                {
+                    volume = (mNearWaterIndoorTolerance - dist) / mNearWaterIndoorTolerance;
+                }
+            }
+        }
+        else
+            volume = 1.0f;
+
+        volume = std::min(volume, 1.0f);
+
+        if (mNearWaterSound)
+        {
+            if (volume == 0.0f)
+            {
+                mOutput->finishSound(mNearWaterSound);
+                mNearWaterSound.reset();
+            }
+            else
+            {
+                bool soundIdChanged = false;
+
+                Sound_Buffer* sfx = lookupSound(Misc::StringUtils::lowerCase(soundId));
+
+                for (SoundMap::const_iterator snditer = mActiveSounds.begin(); snditer != mActiveSounds.end(); ++snditer)
+                {
+                    for (SoundBufferRefPairList::const_iterator pairiter = snditer->second.begin(); pairiter != snditer->second.end(); ++pairiter)
+                    {
+                        if (pairiter->first == mNearWaterSound)
+                        {
+                            if (pairiter->second != sfx)
+                                soundIdChanged = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (soundIdChanged)
+                {
+                    mOutput->finishSound(mNearWaterSound);
+                    mNearWaterSound = playSound(soundId, volume, 1.0f, Play_TypeSfx, Play_Loop);
+                }
+                else if (sfx)
+                    mNearWaterSound->setVolume(volume * sfx->mVolume);
+            }
+        }
+        else if (volume > 0.0f)
+            mNearWaterSound = playSound(soundId, volume, 1.0f, Play_TypeSfx, Play_Loop);
+    }
+
     void SoundManager::updateSounds(float duration)
     {
         static float timePassed = 0.0;
@@ -941,6 +1039,7 @@ namespace MWSound
         {
             updateSounds(duration);
             updateRegionSound(duration);
+            updateWaterSound(duration);
         }
     }
 
@@ -1105,6 +1204,7 @@ namespace MWSound
             mOutput->finishStream(*trkiter);
         mActiveTracks.clear();
         mUnderwaterSound.reset();
+        mNearWaterSound.reset();
         stopMusic();
     }
 }

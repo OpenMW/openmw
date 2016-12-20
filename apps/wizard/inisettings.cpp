@@ -198,8 +198,8 @@ bool Wizard::IniSettings::parseInx(const QString &path)
             const QString section(array.left(index));
 
             // Figure how many characters to read for the key
-            int lenght = array.indexOf("\x06", section.length() + 3) - (section.length() + 3);
-            const QString key(array.mid(section.length() + 3, lenght));
+            int length = array.indexOf("\x06", section.length() + 3) - (section.length() + 3);
+            const QString key(array.mid(section.length() + 3, length));
 
             QString value(array.mid(section.length() + key.length() + 6));
 

@@ -871,6 +871,13 @@ namespace NifOsg
                     const Nif::NiPlanarCollider* planarcollider = static_cast<const Nif::NiPlanarCollider*>(colliders.getPtr());
                     program->addOperator(new PlanarCollider(planarcollider));
                 }
+                else if (colliders->recType == Nif::RC_NiSphericalCollider)
+                {
+                    const Nif::NiSphericalCollider* sphericalcollider = static_cast<const Nif::NiSphericalCollider*>(colliders.getPtr());
+                    program->addOperator(new SphericalCollider(sphericalcollider));
+                }
+                else
+                    std::cerr << "Unhandled particle collider " << colliders->recName << " in " << mFilename << std::endl;
             }
         }
 
