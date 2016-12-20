@@ -78,7 +78,7 @@ namespace MWGui
         std::set<MWWorld::Ptr> followers;
         MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(player, followers);
 
-        unsigned int travellingFollowers = 0;
+        int travellingFollowers = 0;
         for(std::set<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
         {
             MWWorld::Ptr follower = *it;
@@ -92,7 +92,7 @@ namespace MWGui
         }
 
         // Apply followers cost, in vanilla one follower travels for free
-        price *= travellingFollowers;
+        price *= std::max(1, travellingFollowers);
 
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
