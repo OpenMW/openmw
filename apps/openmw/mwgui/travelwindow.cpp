@@ -55,7 +55,7 @@ namespace MWGui
 
     void TravelWindow::addDestination(const std::string& name,ESM::Position pos,bool interior)
     {
-        int price = 0;
+        int price;
 
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -70,14 +70,34 @@ namespace MWGui
         else
         {
             ESM::Position PlayerPos = player.getRefData().getPosition();
-            float d = sqrt( pow(pos.pos[0] - PlayerPos.pos[0],2) + pow(pos.pos[1] - PlayerPos.pos[1],2) + pow(pos.pos[2] - PlayerPos.pos[2],2)   );
+            float d = sqrt(pow(pos.pos[0] - PlayerPos.pos[0], 2) + pow(pos.pos[1] - PlayerPos.pos[1], 2) + pow(pos.pos[2] - PlayerPos.pos[2], 2));
             price = static_cast<int>(d / gmst.find("fTravelMult")->getFloat());
         }
 
-        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
+        // Add price for the followers in range
+        std::set<MWWorld::Ptr> followers;
+        MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(player, followers);
+
+        unsigned int travellingFollowers = 0;
+        for(std::set<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
+        {
+            MWWorld::Ptr follower = *it;
+
+            std::string script = follower.getClass().getScript(follower);
+            if (!script.empty() && follower.getRefData().getLocals().getIntVar(script, "stayoutside") == 1)
+                continue;
+
+            if ((follower.getRefData().getPosition().asVec3() - player.getRefData().getPosition().asVec3()).length2() <= 800*800)
+                ++travellingFollowers;
+        }
+
+        // Apply followers cost, in vanilla one follower travels for free
+        price *= travellingFollowers;
+
+        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
         MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>("SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
-        toAdd->setEnabled(price<=playerGold);
+        toAdd->setEnabled(price <= playerGold);
         mCurrentY += sLineHeight;
         if(interior)
             toAdd->setUserString("interior","y");
