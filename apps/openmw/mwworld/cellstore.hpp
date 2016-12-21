@@ -76,7 +76,7 @@ namespace MWWorld
             float mWaterLevel;
 
             // Added by tes3mp
-            int lastRefNumIndex;
+            unsigned int lastRefNumIndex;
 
             MWWorld::TimeStamp mLastRespawn;
 
@@ -234,13 +234,13 @@ namespace MWWorld
             Ptr searchViaActorId (int id);
             ///< Will return an empty Ptr if cell is not loaded.
 
-            Ptr searchExact (const std::string& id, int numIndex);
+            Ptr searchExact (const std::string& id, unsigned int numIndex);
             ///< Added by tes3mp and used to find an object by both its ID and its reference number
 
-            int getLastRefNumIndex() const;
+            unsigned int getLastRefNumIndex() const;
             // Added by tes3mp and used to get the last reference number in the cell
             
-            void setLastRefNumIndex(int value);
+            void setLastRefNumIndex(unsigned int value);
             // Added by tes3mp and used to record the last reference number in the cell
 
             float getWaterLevel() const;

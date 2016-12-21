@@ -36,7 +36,7 @@ void Players::newPlayer(RakNet::RakNetGUID guid)
     players[guid]->CreatureStats()->blank();
     players[guid]->charClass.blank();
 
-    for (int i = 0; i < mwmp::Networking::get().maxConnections(); i++)
+    for (unsigned int i = 0; i < mwmp::Networking::get().maxConnections(); i++)
     {
         if (slots[i] == 0)
         {
@@ -63,7 +63,7 @@ TPlayers *Players::getPlayers()
 Player::Player(RakNet::RakNetGUID guid) : BasePlayer(guid)
 {
     handshakeState = false;
-    loadState = false;
+    loadState = NOTLOADED;
     lastAttacker = 0;
 }
 

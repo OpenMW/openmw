@@ -22,7 +22,7 @@ void PacketSpellbook::Packet(RakNet::BitStream *bs, BasePlayer *player, bool sen
 
     RW(player->spellbook.count, send);
 
-    for (int i = 0; i < player->spellbook.count; i++)
+    for (unsigned int i = 0; i < player->spellbook.count; i++)
     {
         Spell spell;
 

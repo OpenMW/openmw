@@ -52,7 +52,7 @@ bool SpellFunctions::HasSpell(unsigned short pid, const char* spellId)
     Player *player;
     GET_PLAYER(pid, player, false);
 
-    for (int i = 0; i < player->spellbook.count; i++)
+    for (unsigned int i = 0; i < player->spellbook.count; i++)
         if (Misc::StringUtils::ciEqual(player->spellbook.spells.at(i).id, spellId))
             return true;
     return false;

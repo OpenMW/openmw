@@ -450,7 +450,7 @@ namespace MWWorld
     {
         PtrType mFound;
         std::string mIdToFind;
-        int mRefNumIndexToFind;
+        unsigned int mRefNumIndexToFind;
 
         bool operator()(const PtrType& ptr)
         {
@@ -467,7 +467,7 @@ namespace MWWorld
     };
 
     ///< Added by tes3mp and used to find an object by both its ID and its reference number
-    Ptr CellStore::searchExact (const std::string& id, int numIndex)
+    Ptr CellStore::searchExact (const std::string& id, unsigned int numIndex)
     {
         SearchExactVisitor<MWWorld::Ptr> searchVisitor;
         searchVisitor.mIdToFind = id;
@@ -477,13 +477,13 @@ namespace MWWorld
     }
 
     // Added by tes3mp and used to get the last reference number in the cell
-    int CellStore::getLastRefNumIndex() const
+    unsigned int CellStore::getLastRefNumIndex() const
     {
         return lastRefNumIndex;
     }
 
     // Added by tes3mp and used to record the last reference number in the cell
-    void CellStore::setLastRefNumIndex(int value)
+    void CellStore::setLastRefNumIndex(unsigned int value)
     {
         lastRefNumIndex = value;
     }
