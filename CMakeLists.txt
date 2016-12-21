@@ -183,7 +183,7 @@ if (WIN32)
     add_definitions(-DSDL_MAIN_HANDLED)
 
     # Get rid of useless crud from windows.h
-    add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
+    add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_USE_MATH_DEFINES)
 endif()
 
 if (NOT WIN32 AND BUILD_WIZARD) # windows users can just run the morrowind installer
