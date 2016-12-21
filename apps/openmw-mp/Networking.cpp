@@ -289,13 +289,13 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         Player *killer = Players::getPlayer(player->getLastAttackerId());
 
         short reason = 0; // unknown;
-        int secondsSinceLastAttacker = std::chrono::duration_cast<std::chrono::duration<double>>(
-            std::chrono::steady_clock::now() - player->getLastAttackerTime()).count();
+        double secondsSinceLastAttacker = chrono::duration_cast<chrono::duration<double>>(
+            chrono::steady_clock::now() - player->getLastAttackerTime()).count();
 
         if (!killer)
             killer = player;
 
-        if (secondsSinceLastAttacker < 3)
+        if (secondsSinceLastAttacker < 3.0f)
             reason = 1; // killed
         else
             reason = 2; //suicide
