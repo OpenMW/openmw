@@ -125,16 +125,16 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
     switch (packet->data[0])
     {
-        /*case ID_GAME_BASE_INFO:
+        case ID_GAME_BASE_INFO:
         {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s",
+        /*LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s",
         player->Npc()->mName.c_str());
 
         myPacket->Read(player);
-        myPacket->Send(player, true);
+        myPacket->Send(player, true);*/
 
         break;
-        }*/
+        }
     case ID_GAME_POS:
     {
         //DEBUG_PRINTF("ID_GAME_POS \n");
