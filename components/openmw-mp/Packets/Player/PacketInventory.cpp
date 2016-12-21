@@ -26,7 +26,7 @@ void PacketInventory::Packet(RakNet::BitStream *bs, BasePlayer *player, bool sen
 
     RW(player->inventory.count, send);
 
-    for (int i = 0; i < player->inventory.count; i++)
+    for (unsigned int i = 0; i < player->inventory.count; i++)
     {
         Item item;
 
