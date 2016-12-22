@@ -1,5 +1,5 @@
 Input Settings
-############
+##############
 
 grab cursor
 -----------

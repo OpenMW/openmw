@@ -1,5 +1,5 @@
 General Settings
-############
+################
 
 anisotropy
 ----------
