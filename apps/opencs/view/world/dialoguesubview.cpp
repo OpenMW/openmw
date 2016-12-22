@@ -578,35 +578,31 @@ void CSVWorld::EditWidget::remake(int row)
                         fixedRows = true;
                 }
 
-                NestedTable* table =
-                    new NestedTable(mDocument, id, mNestedModels.back(), this, editable, fixedRows);
-                table->resizeColumnsToContents();
-                if (!editable)
+                // Create and display nested table only if it's editable.
+                if (editable)
                 {
-                    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
-                    table->setEnabled(false);
+                    NestedTable* table =
+                        new NestedTable(mDocument, id, mNestedModels.back(), this, editable, fixedRows);
+                    table->resizeColumnsToContents();
+
+                    int rows = mTable->rowCount(mTable->index(row, i));
+                    int rowHeight = (rows == 0) ? table->horizontalHeader()->height() : table->rowHeight(0);
+                    int headerHeight = table->horizontalHeader()->height();
+                    int tableMaxHeight = (5 * rowHeight) + headerHeight + (2 * table->frameWidth());
+                    table->setMinimumHeight(tableMaxHeight);
+
+                    QString headerText = mTable->headerData (i, Qt::Horizontal, Qt::DisplayRole).toString();
+                    QLabel* label = new QLabel (headerText, mMainWidget);
+                    label->setSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+                    tablesLayout->addWidget(label);
+                    tablesLayout->addWidget(table);
+
+                    connect(table,
+                            SIGNAL(editRequest(const CSMWorld::UniversalId &, const std::string &)),
+                            this,
+                            SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)));
                 }
-
-                int rows = mTable->rowCount(mTable->index(row, i));
-                int rowHeight = (rows == 0) ? table->horizontalHeader()->height() : table->rowHeight(0);
-                int tableMaxHeight = (5 * rowHeight)
-                    + table->horizontalHeader()->height() + 2 * table->frameWidth();
-                table->setMinimumHeight(tableMaxHeight);
-
-                QLabel* label =
-                    new QLabel (mTable->headerData (i, Qt::Horizontal, Qt::DisplayRole).toString(), mMainWidget);
-
-                label->setSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed);
-                if(!editable)
-                    label->setEnabled(false);
-
-                tablesLayout->addWidget(label);
-                tablesLayout->addWidget(table);
-
-                connect(table,
-                        SIGNAL(editRequest(const CSMWorld::UniversalId &, const std::string &)),
-                        this,
-                        SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)));
             }
             else if (!(flags & CSMWorld::ColumnBase::Flag_Dialogue_List))
             {
@@ -662,8 +658,7 @@ void CSVWorld::EditWidget::remake(int row)
                     int displayRole = tree->nestedHeaderData (i, col,
                             Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt();
 
-                    CSMWorld::ColumnBase::Display display =
-                        static_cast<CSMWorld::ColumnBase::Display> (displayRole);
+                    display = static_cast<CSMWorld::ColumnBase::Display> (displayRole);
 
                    mNestedTableDispatcher->makeDelegate (display);
 

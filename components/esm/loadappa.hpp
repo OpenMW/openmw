@@ -22,7 +22,7 @@ struct Apparatus
     enum AppaType
     {
         MortarPestle = 0,
-        Albemic = 1,
+        Alembic = 1,
         Calcinator = 2,
         Retort = 3
     };

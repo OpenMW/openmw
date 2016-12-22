@@ -38,6 +38,10 @@ namespace MWClass
         virtual bool allowTelekinesis(const MWWorld::ConstPtr& ptr) const;
         ///< Return whether this class of object can be activated with telekinesis
 
+        virtual bool isActor() const;
+
+        virtual bool canBeActivated(const MWWorld::Ptr& ptr) const;
+
         // not implemented
         Actor(const Actor&);
         Actor& operator= (const Actor&);

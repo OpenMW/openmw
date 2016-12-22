@@ -31,6 +31,13 @@ namespace MWWorld
 {
     class ContainerStoreIterator;
 
+    class ContainerStoreListener
+    {
+        public:
+            virtual void itemAdded(const ConstPtr& item, int count) {}
+            virtual void itemRemoved(const ConstPtr& item, int count) {}
+    };
+
     class ContainerStore
     {
         public:
@@ -72,6 +79,8 @@ namespace MWWorld
             std::map<std::pair<std::string, std::string>, int> mLevelledItemMap;
             ///< Stores result of levelled item spawns. <(refId, spawningGroup), count>
             /// This is used to restock levelled items(s) if the old item was sold.
+
+            ContainerStoreListener* mListener;
 
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
@@ -142,6 +151,9 @@ namespace MWWorld
 
             /// @return How many items with refID \a id are in this container?
             int count (const std::string& id);
+
+            ContainerStoreListener* getContListener() const;
+            void setContListener(ContainerStoreListener* listener);
 
         protected:
             ContainerStoreIterator addNewStack (const ConstPtr& ptr, int count);

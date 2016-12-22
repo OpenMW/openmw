@@ -148,6 +148,8 @@ void Skeleton::markDirty()
 {
     mTraversedEvenFrame = false;
     mTraversedOddFrame = false;
+    mBoneCache.clear();
+    mBoneCacheInit = false;
 }
 
 void Skeleton::traverse(osg::NodeVisitor& nv)
@@ -158,6 +160,16 @@ void Skeleton::traverse(osg::NodeVisitor& nv)
             && mLastFrameNumber != 0 && mTraversedEvenFrame && mTraversedOddFrame)
         return;
     osg::Group::traverse(nv);
+}
+
+void Skeleton::childInserted(unsigned int)
+{
+    markDirty();
+}
+
+void Skeleton::childRemoved(unsigned int, unsigned int)
+{
+    markDirty();
 }
 
 Bone::Bone()

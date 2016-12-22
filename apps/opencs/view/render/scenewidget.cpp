@@ -10,6 +10,7 @@
 #include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osg/LightModel>
+#include <osg/Version>
 
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -130,6 +131,10 @@ CompositeViewer::CompositeViewer()
 
     setThreadingModel(threadingModel);
 
+#if OSG_VERSION_GREATER_OR_EQUAL(3,5,5)
+    setUseConfigureAffinity(false);
+#endif
+
     // disable the default setting of viewer.done() by pressing Escape.
     setKeyEventSetsDone(0);
 
@@ -209,7 +214,7 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
 
 SceneWidget::~SceneWidget()
 {
-    // Since we're holding on to the scene templates past the existance of this graphics context, we'll need to manually release the created objects
+    // Since we're holding on to the scene templates past the existence of this graphics context, we'll need to manually release the created objects
     mResourceSystem->getSceneManager()->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
 }
 

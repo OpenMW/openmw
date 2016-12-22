@@ -476,16 +476,16 @@ namespace MWGui
                 MWWorld::Ptr player = MWMechanics::getPlayer();
                 MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
                 MWWorld::Ptr item;
-                for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+                for (MWWorld::ContainerStoreIterator iter = store.begin(); iter != store.end(); ++iter)
                 {
-                    if (Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), id))
+                    if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), id))
                     {
                         if (item.isEmpty() ||
                             // Prefer the stack with the lowest remaining uses
-                                !item.getClass().hasItemHealth(*it) ||
-                                it->getClass().getItemHealth(*it) < item.getClass().getItemHealth(item))
+                                !item.getClass().hasItemHealth(*iter) ||
+                                iter->getClass().getItemHealth(*iter) < item.getClass().getItemHealth(item))
                         {
-                            item = *it;
+                            item = *iter;
                         }
                     }
                 }

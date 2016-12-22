@@ -30,6 +30,7 @@
 #include "../mwrender/animation.hpp"
 #include "../mwrender/vismask.hpp"
 #include "../mwrender/renderingmanager.hpp"
+#include "../mwrender/util.hpp"
 
 #include "../mwsound/sound.hpp"
 
@@ -37,9 +38,10 @@
 
 namespace
 {
-    ESM::EffectList getMagicBoltData(std::vector<std::string>& projectileIDs, std::vector<std::string>& sounds, float& speed, const ESM::EffectList& effects)
+    ESM::EffectList getMagicBoltData(std::vector<std::string>& projectileIDs, std::vector<std::string>& sounds, float& speed, std::string& texture, const ESM::EffectList& effects)
     {
         int count = 0;
+        speed = 0.0f;
         ESM::EffectList projectileEffects;
         for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
             iter!=effects.mList.end(); ++iter)
@@ -72,6 +74,14 @@ namespace
         
         if (count != 0)
             speed /= count;
+
+        // the particle texture is only used if there is only one projectile
+        if (projectileEffects.mList.size() == 1) 
+        {
+            const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
+                effects.mList.begin()->mEffectID);
+            texture = magicEffect->mParticle;
+        }
         
         if (projectileEffects.mList.size() > 1) // insert a VFX_Multiple projectile if there are multiple projectile effects
         {
@@ -82,6 +92,31 @@ namespace
             it = projectileIDs.insert(it, ID.str());
         }
         return projectileEffects;
+    }
+
+    osg::Vec4 getMagicBoltLightDiffuseColor(const ESM::EffectList& effects)
+    {
+        // Calculate combined light diffuse color from magical effects
+        osg::Vec4 lightDiffuseColor;
+        float lightDiffuseRed = 0.0f;
+        float lightDiffuseGreen = 0.0f;
+        float lightDiffuseBlue = 0.0f;
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter(effects.mList.begin());
+            iter != effects.mList.end(); ++iter)
+        {
+            const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
+                iter->mEffectID);
+            lightDiffuseRed += (static_cast<float>(magicEffect->mData.mRed) / 255.f);
+            lightDiffuseGreen += (static_cast<float>(magicEffect->mData.mGreen) / 255.f);
+            lightDiffuseBlue += (static_cast<float>(magicEffect->mData.mBlue) / 255.f);
+        }
+        int numberOfEffects = effects.mList.size();
+        lightDiffuseColor = osg::Vec4(lightDiffuseRed / numberOfEffects
+            , lightDiffuseGreen / numberOfEffects
+            , lightDiffuseBlue / numberOfEffects
+            , 1.0f);
+
+        return lightDiffuseColor;
     }
 }
 
@@ -126,7 +161,8 @@ namespace MWWorld
     };
 
 
-    void ProjectileManager::createModel(State &state, const std::string &model, const osg::Vec3f& pos, const osg::Quat& orient, bool rotate)
+    void ProjectileManager::createModel(State &state, const std::string &model, const osg::Vec3f& pos, const osg::Quat& orient,
+                                        bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, std::string texture)
     {
         state.mNode = new osg::PositionAttitudeTransform;
         state.mNode->setNodeMask(MWRender::Mask_Effect);
@@ -143,7 +179,7 @@ namespace MWWorld
             attachTo = rotateNode;
         }
 
-        mResourceSystem->getSceneManager()->getInstance(model, attachTo);
+        osg::ref_ptr<osg::Node> projectile = mResourceSystem->getSceneManager()->getInstance(model, attachTo);
 
         if (state.mIdMagic.size() > 1)
             for (size_t iter = 1; iter != state.mIdMagic.size(); ++iter)
@@ -157,6 +193,25 @@ namespace MWWorld
                     mResourceSystem->getSceneManager()->getInstance("meshes\\" + weapon->mModel, findVisitor.mFoundNode);
             }
 
+        if (createLight)
+        {
+            osg::ref_ptr<osg::Light> projectileLight(new osg::Light);
+            projectileLight->setAmbient(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+            projectileLight->setDiffuse(lightDiffuseColor);
+            projectileLight->setSpecular(osg::Vec4(0.0f, 0.0f, 0.0f, 0.0f));
+            projectileLight->setConstantAttenuation(0.f);
+            projectileLight->setLinearAttenuation(0.1f);
+            projectileLight->setQuadraticAttenuation(0.f);
+            projectileLight->setPosition(osg::Vec4(pos, 1.0));
+            
+            SceneUtil::LightSource* projectileLightSource = new SceneUtil::LightSource;
+            projectileLightSource->setNodeMask(MWRender::Mask_Lighting);
+            projectileLightSource->setRadius(66.f);
+            
+            state.mNode->addChild(projectileLightSource);
+            projectileLightSource->setLight(projectileLight);
+        }
+        
         SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
         state.mNode->accept(disableFreezeOnCullVisitor);
 
@@ -168,6 +223,8 @@ namespace MWWorld
 
         SceneUtil::AssignControllerSourcesVisitor assignVisitor (state.mEffectAnimationTime);
         state.mNode->accept(assignVisitor);
+
+        MWRender::overrideFirstRootTexture(texture, mResourceSystem, projectile);
     }
 
     void ProjectileManager::update(State& state, float duration)
@@ -206,7 +263,9 @@ namespace MWWorld
             state.mActorId = -1;
         state.mStack = stack;
 
-        state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, effects);
+        std::string texture = "";
+
+        state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, texture, effects);
 
         // Non-projectile should have been removed by getMagicBoltData
         if (state.mEffects.mList.empty())
@@ -215,7 +274,8 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), state.mIdMagic.at(0));
         MWWorld::Ptr ptr = ref.getPtr();
 
-        createModel(state, ptr.getClass().getModel(ptr), pos, orient, true);
+        osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(effects);
+        createModel(state, ptr.getClass().getModel(ptr), pos, orient, true, true, lightDiffuseColor, texture);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         for (size_t it = 0; it != state.mSoundIds.size(); it++)
@@ -239,7 +299,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
 
-        createModel(state, ptr.getClass().getModel(ptr), pos, orient, false);
+        createModel(state, ptr.getClass().getModel(ptr), pos, orient, false, false, osg::Vec4(0,0,0,0));
 
         mProjectiles.push_back(state);
     }
@@ -355,7 +415,7 @@ namespace MWWorld
 
                     // Try to get a Ptr to the bow that was used. It might no longer exist.
                     MWWorld::Ptr bow = projectileRef.getPtr();
-                    if (!caster.isEmpty())
+                    if (!caster.isEmpty() && it->mIdArrow != it->mBowId)
                     {
                         MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
                         MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
@@ -469,7 +529,7 @@ namespace MWWorld
                 return true;
             }
 
-            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), false);
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), false, false, osg::Vec4(0,0,0,0));
 
             mProjectiles.push_back(state);
             return true;
@@ -485,7 +545,8 @@ namespace MWWorld
             state.mSpellId = esm.mSpellId;
             state.mActorId = esm.mActorId;
             state.mStack = esm.mStack;
-            state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, esm.mEffects);
+            std::string texture = "";
+            state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, texture, esm.mEffects);
             state.mSpeed = esm.mSpeed; // speed is derived from non-projectile effects as well as
                                        // projectile effects, so we can't calculate it from the save
                                        // file's effect list, which is already trimmed of non-projectile
@@ -503,7 +564,8 @@ namespace MWWorld
                 return true;
             }
 
-            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true);
+            osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(esm.mEffects);
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true, true, lightDiffuseColor, texture);
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             

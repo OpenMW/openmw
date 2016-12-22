@@ -159,6 +159,39 @@ bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info, bool invert
                   : (actorDisposition >= info.mData.mDisposition);
 }
 
+bool MWDialogue::Filter::testFunctionLocal(const MWDialogue::SelectWrapper& select) const
+{
+    std::string scriptName = mActor.getClass().getScript (mActor);
+
+    if (scriptName.empty())
+        return false; // no script
+
+    std::string name = Misc::StringUtils::lowerCase (select.getName());
+
+    const Compiler::Locals& localDefs =
+        MWBase::Environment::get().getScriptManager()->getLocals (scriptName);
+
+    char type = localDefs.getType (name);
+
+    if (type==' ')
+        return false; // script does not have a variable of this name.
+
+    int index = localDefs.getIndex (name);
+    if (index < 0)
+        return false; // shouldn't happen, we checked that variable has a type above, so must exist
+
+    const MWScript::Locals& locals = mActor.getRefData().getLocals();
+
+    switch (type)
+    {
+        case 's': return select.selectCompare (static_cast<int> (locals.mShorts[index]));
+        case 'l': return select.selectCompare (locals.mLongs[index]);
+        case 'f': return select.selectCompare (locals.mFloats[index]);
+    }
+
+    throw std::logic_error ("unknown local variable type in dialogue filter");
+}
+
 bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
 {
     if (select.isNpcOnly() && (mActor.getTypeName() != typeid (ESM::NPC).name()))
@@ -200,35 +233,12 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
 
         case SelectWrapper::Function_Local:
         {
-            std::string scriptName = mActor.getClass().getScript (mActor);
+            return testFunctionLocal(select);
+        }
 
-            if (scriptName.empty())
-                return false; // no script
-
-            std::string name = Misc::StringUtils::lowerCase (select.getName());
-
-            const Compiler::Locals& localDefs =
-                MWBase::Environment::get().getScriptManager()->getLocals (scriptName);
-
-            char type = localDefs.getType (name);
-
-            if (type==' ')
-                return false; // script does not have a variable of this name.
-
-            int index = localDefs.getIndex (name);
-            if (index < 0)
-                return false; // shouldn't happen, we checked that variable has a type above, so must exist
-
-            const MWScript::Locals& locals = mActor.getRefData().getLocals();
-
-            switch (type)
-            {
-                case 's': return select.selectCompare (static_cast<int> (locals.mShorts[index]));
-                case 'l': return select.selectCompare (locals.mLongs[index]);
-                case 'f': return select.selectCompare (locals.mFloats[index]);
-            }
-
-            throw std::logic_error ("unknown local variable type in dialogue filter");
+        case SelectWrapper::Function_NotLocal:
+        {
+            return !testFunctionLocal(select);
         }
 
         case SelectWrapper::Function_PcHealthPercent:
@@ -471,20 +481,6 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
             return !Misc::StringUtils::ciEqual(MWBase::Environment::get().getWorld()->getCellName(mActor.getCell())
                                                , select.getName());
-
-        case SelectWrapper::Function_NotLocal:
-        {
-            std::string scriptName = mActor.getClass().getScript (mActor);
-
-            if (scriptName.empty())
-                // This actor has no attached script, so there is no local variable
-                return true;
-
-            const Compiler::Locals& localDefs =
-                MWBase::Environment::get().getScriptManager()->getLocals (scriptName);
-
-            return localDefs.getIndex (Misc::StringUtils::lowerCase (select.getName()))==-1;
-        }
 
         case SelectWrapper::Function_SameGender:
 

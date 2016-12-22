@@ -111,6 +111,9 @@ namespace MWWorld
             // Merged list of ref's currently in this cell - i.e. with added refs from mMovedHere, removed refs from mMovedToAnotherCell
             std::vector<LiveCellRefBase*> mMergedRefs;
 
+            // Get the Ptr for the given ref which originated from this cell (possibly moved to another cell at this point).
+            Ptr getCurrentPtr(MWWorld::LiveCellRefBase* ref);
+
             /// Moves object from the given cell to this cell.
             void moveFrom(const MWWorld::Ptr& object, MWWorld::CellStore* from);
 

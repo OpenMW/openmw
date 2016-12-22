@@ -512,8 +512,8 @@ namespace MWMechanics
                 if (magnitude > 0 && remainingTime > 0 && remainingTime < mDuration)
                 {
                     CreatureStats& creatureStats = mActor.getClass().getCreatureStats(mActor);
-                    effectTick(creatureStats, mActor, key, magnitude * remainingTime);
-                    creatureStats.getMagicEffects().add(key, -magnitude);
+                    if (effectTick(creatureStats, mActor, key, magnitude * remainingTime))
+                        creatureStats.getMagicEffects().add(key, -magnitude);
                 }
             }
     };
@@ -527,8 +527,10 @@ namespace MWMechanics
 
         if (duration > 0)
         {
-            // apply correct magnitude for tickable effects that have just expired,
-            // in case duration > remaining time of effect
+            // Apply correct magnitude for tickable effects that have just expired,
+            // in case duration > remaining time of effect.
+            // One case where this will happen is when the player uses the rest/wait command
+            // while there is a tickable effect active that should expire before the end of the rest/wait.
             ExpiryVisitor visitor(ptr, duration);
             creatureStats.getActiveSpells().visitEffectSources(visitor);
 
@@ -1035,8 +1037,9 @@ namespace MWMechanics
                 if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
                 {
                     MWWorld::Ptr actor = iter->first; // make a copy of the map key to avoid it being invalidated when the player teleports
+                    bool cellChanged = MWBase::Environment::get().getWorld()->hasCellChanged();
                     updateActor(actor, duration);
-                    if (MWBase::Environment::get().getWorld()->hasCellChanged())
+                    if (!cellChanged && MWBase::Environment::get().getWorld()->hasCellChanged())
                     {
                         return; // for now abort update of the old cell when cell changes by teleportation magic effect
                                 // a better solution might be to apply cell changes at the end of the frame
@@ -1268,8 +1271,6 @@ namespace MWMechanics
                 stats.getActiveSpells().clear();
                 calculateCreatureStatModifiers(iter->first, 0);
 
-                MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, false);
-
                 if (cls.isEssential(iter->first))
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
             }
@@ -1286,6 +1287,11 @@ namespace MWMechanics
                 {
                     //player's death animation is over
                     MWBase::Environment::get().getStateManager()->askLoadRecent();
+                }
+                else
+                {
+                    // NPC death animation is over, disable actor collision
+                    MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, false);
                 }
 
                 // Play Death Music if it was the player dying
@@ -1535,7 +1541,7 @@ namespace MWMechanics
         for(std::vector<MWWorld::Ptr>::const_iterator iter(neighbors.begin());iter != neighbors.end();++iter)
         {
             const CreatureStats &stats = iter->getClass().getCreatureStats(*iter);
-            if (stats.isDead() || *iter == actor)
+            if (stats.isDead() || *iter == actor || iter->getClass().isPureWaterCreature(*iter))
                 continue;
             const bool isFollower = std::find(followers.begin(), followers.end(), *iter) != followers.end();
             if (stats.getAiSequence().isInCombat(actor) || (MWBase::Environment::get().getMechanicsManager()->isAggressive(*iter, actor) && !isFollower))

@@ -25,24 +25,10 @@
 #include "autocalcspell.hpp"
 #include "npcstats.hpp"
 #include "actorutil.hpp"
+#include "combat.hpp"
 
 namespace
 {
-
-    float getFightDistanceBias(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2)
-    {
-        osg::Vec3f pos1 (actor1.getRefData().getPosition().asVec3());
-        osg::Vec3f pos2 (actor2.getRefData().getPosition().asVec3());
-
-        float d = (pos1 - pos2).length();
-
-        static const int iFightDistanceBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                    "iFightDistanceBase")->getInt();
-        static const float fFightDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                    "fFightDistanceMultiplier")->getFloat();
-
-        return (iFightDistanceBase - fFightDistanceMultiplier * d);
-    }
 
     float getFightDispositionBias(float disposition)
     {
@@ -212,15 +198,6 @@ namespace MWMechanics
         }
 
         // F_PCStart spells
-        static const float fPCbaseMagickaMult = esmStore.get<ESM::GameSetting>().find("fPCbaseMagickaMult")->getFloat();
-
-        float baseMagicka = fPCbaseMagickaMult * creatureStats.getAttribute(ESM::Attribute::Intelligence).getBase();
-        bool reachedLimit = false;
-        const ESM::Spell* weakestSpell = NULL;
-        int minCost = INT_MAX;
-
-        std::vector<std::string> selectedSpells;
-
         const ESM::Race* race = NULL;
         if (mRaceSelected)
             race = esmStore.get<ESM::Race>().find(player->mRace);
@@ -233,61 +210,7 @@ namespace MWMechanics
         for (int i=0; i<ESM::Attribute::Length; ++i)
             attributes[i] = npcStats.getAttribute(i).getBase();
 
-        const MWWorld::Store<ESM::Spell> &spells =
-            esmStore.get<ESM::Spell>();
-        for (MWWorld::Store<ESM::Spell>::iterator iter = spells.begin(); iter != spells.end(); ++iter)
-        {
-            const ESM::Spell* spell = &*iter;
-
-            if (spell->mData.mType != ESM::Spell::ST_Spell)
-                continue;
-            if (!(spell->mData.mFlags & ESM::Spell::F_PCStart))
-                continue;
-            if (reachedLimit && spell->mData.mCost <= minCost)
-                continue;
-            if (race && std::find(race->mPowers.mList.begin(), race->mPowers.mList.end(), spell->mId) != race->mPowers.mList.end())
-                continue;
-            if (baseMagicka < spell->mData.mCost)
-                continue;
-
-            static const float fAutoPCSpellChance = esmStore.get<ESM::GameSetting>().find("fAutoPCSpellChance")->getFloat();
-            if (calcAutoCastChance(spell, skills, attributes, -1) < fAutoPCSpellChance)
-                continue;
-
-            if (!attrSkillCheck(spell, skills, attributes))
-                continue;
-
-            selectedSpells.push_back(spell->mId);
-
-            if (reachedLimit)
-            {
-                std::vector<std::string>::iterator it = std::find(selectedSpells.begin(), selectedSpells.end(), weakestSpell->mId);
-                if (it != selectedSpells.end())
-                    selectedSpells.erase(it);
-
-                minCost = INT_MAX;
-                for (std::vector<std::string>::iterator weakIt = selectedSpells.begin(); weakIt != selectedSpells.end(); ++weakIt)
-                {
-                    const ESM::Spell* testSpell = esmStore.get<ESM::Spell>().find(*weakIt);
-                    if (testSpell->mData.mCost < minCost)
-                    {
-                        minCost = testSpell->mData.mCost;
-                        weakestSpell = testSpell;
-                    }
-                }
-            }
-            else
-            {
-                if (spell->mData.mCost < minCost)
-                {
-                    weakestSpell = spell;
-                    minCost = weakestSpell->mData.mCost;
-                }
-                static const unsigned int iAutoPCSpellMax = esmStore.get<ESM::GameSetting>().find("iAutoPCSpellMax")->getInt();
-                if (selectedSpells.size() == iAutoPCSpellMax)
-                    reachedLimit = true;
-            }
-        }
+        std::vector<std::string> selectedSpells = autoCalcPlayerSpells(skills, attributes, race);
 
         for (std::vector<std::string>::iterator it = selectedSpells.begin(); it != selectedSpells.end(); ++it)
             creatureStats.getSpells().add(*it);
@@ -313,7 +236,7 @@ namespace MWMechanics
     : mWatchedTimeToStartDrowning(0), mWatchedStatsEmpty (true), mUpdatePlayer (true), mClassSelected (false),
       mRaceSelected (false), mAI(true)
     {
-        //buildPlayer no longer here, needs to be done explicitely after all subsystems are up and running
+        //buildPlayer no longer here, needs to be done explicitly after all subsystems are up and running
     }
 
     void MechanicsManager::add(const MWWorld::Ptr& ptr)
@@ -1608,27 +1531,23 @@ namespace MWMechanics
                 player->restoreSkillsAttributes();
         }
 
-        // Equipped items other than WerewolfRobe may reference bones that do not even
-        // exist with the werewolf object root, so make sure to unequip all items
-        // *before* we become a werewolf.
-        MWWorld::InventoryStore& invStore = actor.getClass().getInventoryStore(actor);
-        invStore.unequipAll(actor);
-
         // Werewolfs can not cast spells, so we need to unset the prepared spell if there is one.
         if (npcStats.getDrawState() == MWMechanics::DrawState_Spell)
             npcStats.setDrawState(MWMechanics::DrawState_Nothing);
 
         npcStats.setWerewolf(werewolf);
 
+        MWWorld::InventoryStore &inv = actor.getClass().getInventoryStore(actor);
+
         if(werewolf)
         {
-            MWWorld::InventoryStore &inv = actor.getClass().getInventoryStore(actor);
-
+            inv.unequipAll(actor);
             inv.equip(MWWorld::InventoryStore::Slot_Robe, inv.ContainerStore::add("werewolfrobe", 1, actor), actor);
         }
         else
         {
-            actor.getClass().getContainerStore(actor).remove("werewolfrobe", 1, actor);
+            inv.unequipSlot(MWWorld::InventoryStore::Slot_Robe, actor);
+            inv.ContainerStore::remove("werewolfrobe", 1, actor);
         }
 
         if(actor == player->getPlayer())

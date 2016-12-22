@@ -25,12 +25,12 @@ CSMWorld::Resources::Resources (const VFS::Manager* vfs, const std::string& base
 
         if (extensions)
         {
-            std::string::size_type index = filepath.find_last_of ('.');
+            std::string::size_type extensionIndex = filepath.find_last_of ('.');
 
-            if (index==std::string::npos)
+            if (extensionIndex==std::string::npos)
                 continue;
 
-            std::string extension = filepath.substr (index+1);
+            std::string extension = filepath.substr (extensionIndex+1);
 
             int i = 0;
 

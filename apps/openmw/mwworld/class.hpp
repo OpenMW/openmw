@@ -98,6 +98,11 @@ namespace MWWorld
             virtual MWGui::ToolTipInfo getToolTipInfo (const ConstPtr& ptr, int count) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
+            virtual bool showsInInventory (const ConstPtr& ptr) const;
+            ///< Return whether ptr shows in inventory views.
+            /// Hidden items are not displayed and cannot be (re)moved by the user.
+            /// \return True if shown, false if hidden.
+
             virtual MWMechanics::NpcStats& getNpcStats (const Ptr& ptr) const;
             ///< Return NPC stats or throw an exception, if class does not have NPC stats
             /// (default implementation: throw an exception)
@@ -120,7 +125,7 @@ namespace MWWorld
             ///               enums. ignored for creature attacks.
             /// (default implementation: throw an exception)
 
-            virtual void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const;
+            virtual void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) const;
             ///< Alerts \a ptr that it's being hit for \a damage points to health if \a ishealth is
             /// true (else fatigue) by \a object (sword, arrow, etc). \a attacker specifies the
             /// actor responsible for the attack, and \a successful specifies if the hit is
@@ -129,6 +134,10 @@ namespace MWWorld
             virtual void block (const Ptr& ptr) const;
             ///< Play the appropriate sound for a blocked attack, depending on the currently equipped shield
             /// (default implementation: throw an exception)
+
+            virtual bool canBeActivated(const Ptr& ptr) const;
+            ///< \return Can the player activate this object?
+            /// (default implementation: true if object's user-readable name is not empty, false otherwise)
 
             virtual boost::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
             ///< Generate action for activation (default implementation: return a null action).
@@ -303,6 +312,8 @@ namespace MWWorld
             virtual bool canSwim(const MWWorld::ConstPtr& ptr) const;
             virtual bool canWalk(const MWWorld::ConstPtr& ptr) const;
             bool isPureWaterCreature(const MWWorld::Ptr& ptr) const;
+            bool isPureFlyingCreature(const MWWorld::Ptr& ptr) const;
+            bool isPureLandCreature(const MWWorld::Ptr& ptr) const;
             bool isMobile(const MWWorld::Ptr& ptr) const;
 
             virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;

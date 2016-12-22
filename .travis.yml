@@ -1,7 +1,7 @@
 os:
  - linux
  - osx
-osx_image: xcode7.2
+osx_image: xcode7.3
 language: cpp
 sudo: required
 dist: trusty
@@ -15,6 +15,7 @@ env:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
    - secure: "jybGzAdUbqt9vWR/GEnRd96BgAi/7Zd1+2HK68j/i/8+/1YH2XxLOy4Jv/DUBhBlJIkxs/Xv8dRcUlFOclZDHX1d/9Qnsqd3oUVkD7k1y7cTOWy9TBQaE/v/kZo3LpzA3xPwwthrb0BvqIbOfIELi5fS5s8ba85WFRg3AX70wWE="
+   - macos_qt_formula=qt@5.5
 addons:
   apt:
     sources:
@@ -62,9 +63,9 @@ script:
  - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./openmw_test_suite; fi
  - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then cd .. && ./CI/check_tabs.sh; fi
 notifications:
-  recipients:
-    - corrmage+travis-ci@gmail.com
   email:
+    recipients:
+      - corrmage+travis-ci@gmail.com
     on_success: change
     on_failure: always
   irc:

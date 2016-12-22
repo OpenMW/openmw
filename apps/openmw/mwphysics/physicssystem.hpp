@@ -123,6 +123,8 @@ namespace MWPhysics
 
             bool isOnGround (const MWWorld::Ptr& actor);
 
+            bool canMoveToWaterSurface (const MWWorld::ConstPtr &actor, const float waterlevel);
+
             /// Get physical half extents (scaled) of the given actor.
             osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& actor) const;
 
@@ -198,7 +200,7 @@ namespace MWPhysics
             typedef std::map<MWWorld::Ptr, MWWorld::Ptr> CollisionMap;
             CollisionMap mStandingCollisions;
 
-            // replaces all occurences of 'old' in the map by 'updated', no matter if its a key or value
+            // replaces all occurrences of 'old' in the map by 'updated', no matter if it's a key or value
             void updateCollisionMapPtr(CollisionMap& map, const MWWorld::Ptr &old, const MWWorld::Ptr &updated);
 
             PtrVelocityList mMovementQueue;

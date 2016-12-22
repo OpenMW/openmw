@@ -157,7 +157,7 @@ struct TypesetBookImpl : TypesetBook
     StyleImpl * hitTestWithMargin (int left, int top)
     {
         StyleImpl * hit = hitTest(left, top);
-        if (hit && hit->mInteractiveId > 0)
+        if (hit && hit->mInteractiveId != 0)
             return hit;
 
         const int maxMargin = 10;
@@ -174,7 +174,7 @@ struct TypesetBookImpl : TypesetBook
                 else
                     hit = hitTest(left+margin, top);
 
-                if (hit && hit->mInteractiveId > 0)
+                if (hit && hit->mInteractiveId != 0)
                     return hit;
             }
         }
@@ -275,9 +275,12 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             if (i->match (fontName, fontColour, fontColour, fontColour, 0))
                 return &*i;
 
-        StyleImpl & style = *mBook->mStyles.insert (mBook->mStyles.end (), StyleImpl ());
+        MyGUI::IFont* font = MyGUI::FontManager::getInstance().getByName(fontName);
+        if (!font)
+            throw std::runtime_error(std::string("can't find font ") + fontName);
 
-        style.mFont = MyGUI::FontManager::getInstance().getByName(fontName);
+        StyleImpl & style = *mBook->mStyles.insert (mBook->mStyles.end (), StyleImpl ());
+        style.mFont = font;
         style.mHotColour = fontColour;
         style.mActiveColour = fontColour;
         style.mNormalColour = fontColour;

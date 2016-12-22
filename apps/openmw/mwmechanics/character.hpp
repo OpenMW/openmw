@@ -198,7 +198,6 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     bool mAttackingOrSpell;
 
     void setAttackTypeBasedOnMovement();
-    void setAttackTypeRandomly();
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
     void refreshHitRecoilAnims();
@@ -270,6 +269,7 @@ public:
 
     void setAttackingOrSpell(bool attackingOrSpell);
     void setAIAttackType(std::string attackType); // set and used by AiCombat
+    static void setAttackTypeRandomly(std::string& attackType);
 
     bool readyToPrepareAttack() const;
     bool readyToStartAttack() const;
@@ -281,6 +281,8 @@ public:
 
     /// Make this character turn its head towards \a target. To turn off head tracking, pass an empty Ptr.
     void setHeadTrackTarget(const MWWorld::ConstPtr& target);
+
+    void playSwishSound(float attackStrength);
 };
 
     MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype);

@@ -46,7 +46,7 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
     else(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
         message(STATUS "Shallow Git clone detected, not attempting to retrieve version info")
     endif(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
-endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
+endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)	
 
 # Macros
 include(OpenMWMacros)
@@ -96,7 +96,7 @@ endif()
 # Set up common paths
 if (APPLE)
     set(MORROWIND_DATA_FILES "./data" CACHE PATH "location of Morrowind data files")
-    set(OPENMW_RESOURCE_FILES "./resources" CACHE PATH "location of OpenMW resources files")
+    set(OPENMW_RESOURCE_FILES "../Resources/resources" CACHE PATH "location of OpenMW resources files")
 elseif(UNIX)
     # Paths
     SET(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
@@ -211,17 +211,18 @@ if(NOT HAVE_STDINT_H)
 endif()
 
 
-set(BOOST_COMPONENTS system filesystem program_options thread)
-if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
-endif(WIN32)
-
-IF(BOOST_STATIC)
-    set(Boost_USE_STATIC_LIBS   ON)
-endif()
-
 find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgUtil osgFX)
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+
+set(USED_OSG_PLUGINS
+                    osgdb_bmp
+                    osgdb_dds
+                    osgdb_jpeg
+                    osgdb_osg
+                    osgdb_png
+                    osgdb_serializers_osg
+                    osgdb_tga
+                  )
 
 get_filename_component(OSG_LIB_DIR ${OSGDB_LIBRARY} DIRECTORY)
 set(OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
@@ -229,7 +230,7 @@ set(OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
 if(OSG_STATIC)
     add_definitions(-DOSG_LIBRARY_STATIC)
 
-    find_package(OSGPlugins REQUIRED COMPONENTS osgdb_png osgdb_tga osgdb_dds osgdb_jpeg)
+    find_package(OSGPlugins REQUIRED COMPONENTS ${USED_OSG_PLUGINS})
     list(APPEND OPENSCENEGRAPH_LIBRARIES ${OSGPlugins_LIBRARIES})
 endif()
 
@@ -243,8 +244,18 @@ if(QT_STATIC)
    endif()
 endif()
 
-find_package(MyGUI 3.2.1 REQUIRED)
+
+set(BOOST_COMPONENTS system filesystem program_options)
+if(WIN32)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
+endif(WIN32)
+
+IF(BOOST_STATIC)
+    set(Boost_USE_STATIC_LIBS   ON)
+endif()
+
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+find_package(MyGUI 3.2.1 REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet 283 REQUIRED COMPONENTS BulletCollision LinearMath)
@@ -275,6 +286,11 @@ endif (APPLE)
 # Set up DEBUG define
 set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_DEBUG DEBUG=1)
 
+if (NOT APPLE)
+    set(OPENMW_MYGUI_FILES_ROOT ${OpenMW_BINARY_DIR})
+    set(OPENMW_SHADERS_ROOT ${OpenMW_BINARY_DIR})
+endif ()
+
 add_subdirectory(files/)
 
 # Specify build paths
@@ -296,11 +312,15 @@ endif (APPLE)
 configure_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
     "${OpenMW_BINARY_DIR}/settings-default.cfg")
 
-configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
-    "${OpenMW_BINARY_DIR}/openmw.cfg")
-
-configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
-    "${OpenMW_BINARY_DIR}/openmw.cfg.install")
+if (NOT APPLE)
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
+        "${OpenMW_BINARY_DIR}/openmw.cfg")
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+        "${OpenMW_BINARY_DIR}/openmw.cfg.install")
+else ()
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+        "${OpenMW_BINARY_DIR}/openmw.cfg")
+endif ()
 
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
     "${OpenMW_BINARY_DIR}/openmw-cs.cfg")
@@ -408,8 +428,10 @@ IF(NOT WIN32 AND NOT APPLE)
 ENDIF(NOT WIN32 AND NOT APPLE)
 
 if(WIN32)
-    FILE(GLOB dll_files "${OpenMW_BINARY_DIR}/Release/*.dll")
-    INSTALL(FILES ${dll_files} DESTINATION ".")
+    FILE(GLOB dll_files_debug "${OpenMW_BINARY_DIR}/Debug/*.dll")
+    FILE(GLOB dll_files_release "${OpenMW_BINARY_DIR}/Release/*.dll")
+    INSTALL(FILES ${dll_files_debug} DESTINATION "." CONFIGURATIONS Debug)
+    INSTALL(FILES ${dll_files_release} DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
@@ -418,36 +440,23 @@ if(WIN32)
         "${OpenMW_SOURCE_DIR}/Docs/license/DejaVu Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt"
-        "${OpenMW_BINARY_DIR}/Release/openmw.exe"
         DESTINATION ".")
 
-    IF(BUILD_LAUNCHER)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/openmw-launcher.exe" DESTINATION ".")
-    ENDIF(BUILD_LAUNCHER)
-    IF(BUILD_MWINIIMPORTER)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/openmw-iniimporter.exe" DESTINATION ".")
-    ENDIF(BUILD_MWINIIMPORTER)
-    IF(BUILD_ESSIMPORTER)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/openmw-essimporter.exe" DESTINATION ".")
-    ENDIF(BUILD_ESSIMPORTER)
-    IF(BUILD_OPENCS)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/openmw-cs.exe" DESTINATION ".")
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw-cs.cfg" DESTINATION ".")
-    ENDIF(BUILD_OPENCS)
-    IF(BUILD_WIZARD)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/openmw-wizard.exe" DESTINATION ".")
-    ENDIF(BUILD_WIZARD)
     if(BUILD_MYGUI_PLUGIN)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/Plugin_MyGUI_OpenMW_Resources.dll" DESTINATION ".")
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Debug/Plugin_MyGUI_OpenMW_Resources.dll" DESTINATION "." CONFIGURATIONS Debug)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/Plugin_MyGUI_OpenMW_Resources.dll" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
     ENDIF(BUILD_MYGUI_PLUGIN)
 
     IF(DESIRED_QT_VERSION MATCHES 5)
-        INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Release/platforms" DESTINATION ".")
+        INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Debug/platforms" DESTINATION "." CONFIGURATIONS Debug)
+        INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Release/platforms" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
     ENDIF()
 
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
-    FILE(GLOB plugin_dir "${OpenMW_BINARY_DIR}/Release/osgPlugins-*")
-    INSTALL(DIRECTORY ${plugin_dir} DESTINATION ".")
+    FILE(GLOB plugin_dir_debug "${OpenMW_BINARY_DIR}/Debug/osgPlugins-*")
+    FILE(GLOB plugin_dir_release "${OpenMW_BINARY_DIR}/Release/osgPlugins-*")
+    INSTALL(DIRECTORY ${plugin_dir_debug} DESTINATION "." CONFIGURATIONS Debug)
+    INSTALL(DIRECTORY ${plugin_dir_release} DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
 
     SET(CPACK_GENERATOR "NSIS")
     SET(CPACK_PACKAGE_NAME "OpenMW")
@@ -511,7 +520,7 @@ endif(WIN32)
 # Extern
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
-if (USE_QT)
+if (BUILD_OPENCS)
     add_subdirectory (extern/osgQt)
 endif()
 
@@ -714,14 +723,7 @@ if (APPLE)
       configure_file("${QT_COCOA_PLUGIN_PATH}" "${OPENCS_BUNDLE_NAME}/Contents/MacOS/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}" COPYONLY)
     endif ()
 
-    set(INSTALL_SUBDIR OpenMW)
-
-    install(DIRECTORY "${APP_BUNDLE_DIR}" USE_SOURCE_PERMISSIONS DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-    install(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-    install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-    install(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-    install(FILES "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-    install(FILES "${OpenMW_BINARY_DIR}/openmw-cs.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(DIRECTORY "${APP_BUNDLE_DIR}" USE_SOURCE_PERMISSIONS DESTINATION "." COMPONENT Runtime)
 
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
@@ -729,8 +731,8 @@ if (APPLE)
     set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINOR})
     set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
 
-    set(INSTALLED_OPENMW_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
-    set(INSTALLED_OPENCS_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}")
+    set(INSTALLED_OPENMW_APP "\${CMAKE_INSTALL_PREFIX}/${APP_BUNDLE_NAME}")
+    set(INSTALLED_OPENCS_APP "\${CMAKE_INSTALL_PREFIX}/${OPENCS_BUNDLE_NAME}")
 
     install(CODE "
         set(BU_CHMOD_BUNDLE_ITEMS ON)
@@ -740,12 +742,6 @@ if (APPLE)
     " COMPONENT Runtime)
 
     set(ABSOLUTE_PLUGINS "")
-    set(USED_OSG_PLUGINS
-                        osgdb_dds
-                        osgdb_jpeg
-                        osgdb_png
-                        osgdb_tga
-                      )
 
     foreach (PLUGIN_NAME ${USED_OSG_PLUGINS})
       set(PLUGIN_ABS "${OSGPlugins_LIB_DIR}/${PLUGIN_NAME}.so")
@@ -780,8 +776,8 @@ if (APPLE)
         set(${plugins_var} ${PLUGINS} PARENT_SCOPE)
     endfunction (install_plugins_for_bundle)
 
-    install_plugins_for_bundle("${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}" PLUGINS)
-    install_plugins_for_bundle("${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}" OPENCS_PLUGINS)
+    install_plugins_for_bundle("${APP_BUNDLE_NAME}" PLUGINS)
+    install_plugins_for_bundle("${OPENCS_BUNDLE_NAME}" OPENCS_PLUGINS)
 
     set(PLUGINS ${PLUGINS} "${INSTALLED_OPENMW_APP}/Contents/MacOS/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}")
     set(OPENCS_PLUGINS ${OPENCS_PLUGINS} "${INSTALLED_OPENCS_APP}/Contents/MacOS/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}")
@@ -823,3 +819,4 @@ if (DOXYGEN_FOUND)
         WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
         COMMENT "Generating documentation for the github-pages at ${DOXYGEN_PAGES_OUTPUT_DIR}" VERBATIM)
 endif ()
+

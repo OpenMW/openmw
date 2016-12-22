@@ -545,10 +545,7 @@ namespace MWGui
         if(invStore.getSlot(slot) != invStore.end())
         {
             MWWorld::Ptr item = *invStore.getSlot(slot);
-            // NOTE: Don't allow users to select WerewolfRobe objects in the inventory. Vanilla
-            // likely uses a hack like this since there's no other way to prevent it from being
-            // taken.
-            if(item.getCellRef().getRefId() == "werewolfrobe")
+            if (!item.getClass().showsInInventory(item))
                 return MWWorld::Ptr();
             return item;
         }

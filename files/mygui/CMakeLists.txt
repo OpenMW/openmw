@@ -1,6 +1,10 @@
+if (NOT DEFINED OPENMW_MYGUI_FILES_ROOT)
+    return()
+endif()
+
 # Copy resource files into the build directory
 set(SDIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
+set(DDIR ${OPENMW_MYGUI_FILES_ROOT}/resources/mygui)
 
 set(MYGUI_FILES
     core.skin

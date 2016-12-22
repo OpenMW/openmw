@@ -429,6 +429,8 @@ namespace MWRender
     {
         for(size_t i = 0;i < sNumBlendMasks;i++)
             mAnimationTimePtr[i].reset(new AnimationTime);
+
+        mLightListCallback = new SceneUtil::LightListCallback;
     }
 
     Animation::~Animation()
@@ -684,9 +686,9 @@ namespace MWRender
                 state.mAutoDisable = autodisable;
                 mStates[groupname] = state;
 
-                NifOsg::TextKeyMap::const_iterator textkey(textkeys.lower_bound(state.getTime()));
                 if (state.mPlaying)
                 {
+                    NifOsg::TextKeyMap::const_iterator textkey(textkeys.lower_bound(state.getTime()));
                     while(textkey != textkeys.end() && textkey->first <= state.getTime())
                     {
                         handleTextKey(state, groupname, textkey, textkeys);
@@ -974,14 +976,14 @@ namespace MWRender
 
             while(!(velocity > 1.0f) && ++animiter != mAnimSources.rend())
             {
-                const NifOsg::TextKeyMap &keys = (*animiter)->getTextKeys();
+                const NifOsg::TextKeyMap &keys2 = (*animiter)->getTextKeys();
 
-                const AnimSource::ControllerMap& ctrls = (*animiter)->mControllerMap[0];
-                for (AnimSource::ControllerMap::const_iterator it = ctrls.begin(); it != ctrls.end(); ++it)
+                const AnimSource::ControllerMap& ctrls2 = (*animiter)->mControllerMap[0];
+                for (AnimSource::ControllerMap::const_iterator it = ctrls2.begin(); it != ctrls2.end(); ++it)
                 {
                     if (Misc::StringUtils::ciEqual(it->first, mAccumRoot->getName()))
                     {
-                        velocity = calcAnimVelocity(keys, it->second, mAccumulate, groupname);
+                        velocity = calcAnimVelocity(keys2, it->second, mAccumulate, groupname);
                         break;
                     }
                 }
@@ -1095,6 +1097,8 @@ namespace MWRender
         osg::ref_ptr<osg::StateSet> previousStateset;
         if (mObjectRoot)
         {
+            if (mLightListCallback)
+                mObjectRoot->removeCullCallback(mLightListCallback);
             previousStateset = mObjectRoot->getStateSet();
             mObjectRoot->getParent(0)->removeChild(mObjectRoot);
         }
@@ -1150,7 +1154,9 @@ namespace MWRender
             removeTriBipVisitor.remove();
         }
 
-        mObjectRoot->addCullCallback(new SceneUtil::LightListCallback);
+        if (!mLightListCallback)
+            mLightListCallback = new SceneUtil::LightListCallback;
+        mObjectRoot->addCullCallback(mLightListCallback);
     }
 
     osg::Group* Animation::getObjectRoot()
@@ -1342,7 +1348,7 @@ namespace MWRender
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
         node->accept(assignVisitor);
 
-        overrideTexture(texture, mResourceSystem, node);
+        overrideFirstRootTexture(texture, mResourceSystem, node);
 
         // TODO: in vanilla morrowind the effect is scaled based on the host object's bounding box.
 

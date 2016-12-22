@@ -163,6 +163,10 @@ namespace MWGui
                 MWWorld::Ptr base = item.mBase;
                 if(Misc::StringUtils::ciEqual(base.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
                     continue;
+
+                if (!base.getClass().showsInInventory(base))
+                    return;
+
                 if(!base.getClass().canSell(base, services))
                     continue;
 

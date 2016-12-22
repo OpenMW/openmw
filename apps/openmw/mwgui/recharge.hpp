@@ -12,6 +12,7 @@ namespace MWGui
 {
 
 class ItemWidget;
+class ItemChargeView;
 
 class Recharge : public WindowBase
 {
@@ -25,8 +26,7 @@ public:
     void start (const MWWorld::Ptr& gem);
 
 protected:
-    MyGUI::Widget* mBox;
-    MyGUI::ScrollView* mView;
+    ItemChargeView* mBox;
 
     MyGUI::Widget* mGemBox;
 
@@ -38,7 +38,7 @@ protected:
 
     void updateView();
 
-    void onItemClicked (MyGUI::Widget* sender);
+    void onItemClicked (MyGUI::Widget* sender, const MWWorld::Ptr& item);
     void onCancel (MyGUI::Widget* sender);
     void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 

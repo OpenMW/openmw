@@ -695,9 +695,9 @@ void WeatherManager::update(float duration, bool paused)
 
         double theta;
         if ( !is_night ) {
-            theta = M_PI * (adjustedHour - mSunriseTime) / dayDuration;
+            theta = static_cast<float>(osg::PI) * (adjustedHour - mSunriseTime) / dayDuration;
         } else {
-            theta = M_PI * (1.f - (adjustedHour - adjustedNightStart) / nightDuration);
+            theta = static_cast<float>(osg::PI) * (1.f - (adjustedHour - adjustedNightStart) / nightDuration);
         }
 
         osg::Vec3f final(
@@ -832,17 +832,14 @@ bool WeatherManager::readRecord(ESM::ESMReader& reader, uint32_t type)
             mQueuedWeather = state.mQueuedWeather;
 
             mRegions.clear();
-            std::map<std::string, ESM::RegionWeatherState>::iterator it = state.mRegions.begin();
-            if(it == state.mRegions.end())
+            importRegions();
+
+            for(std::map<std::string, ESM::RegionWeatherState>::iterator it = state.mRegions.begin(); it != state.mRegions.end(); ++it)
             {
-                // When loading an imported save, the region modifiers aren't currently being set, so just reset them.
-                importRegions();
-            }
-            else
-            {
-                for(; it != state.mRegions.end(); ++it)
+                std::map<std::string, RegionWeather>::iterator found = mRegions.find(it->first);
+                if (found != mRegions.end())
                 {
-                    mRegions.insert(std::make_pair(it->first, RegionWeather(it->second)));
+                    found->second = RegionWeather(it->second);
                 }
             }
         }
@@ -1072,7 +1069,7 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
         mResult.mSunDiscColor = lerp(osg::Vec4f(1,1,1,1), current.mSunDiscSunsetColor, factor);
         // The SunDiscSunsetColor in the INI isn't exactly the resulting color on screen, most likely because
         // MW applied the color to the ambient term as well. After the ambient and emissive terms are added together, the fixed pipeline
-        // would then clamp the total lighting to (1,1,1). A noticable change in color tone can be observed when only one of the color components gets clamped.
+        // would then clamp the total lighting to (1,1,1). A noticeable change in color tone can be observed when only one of the color components gets clamped.
         // Unfortunately that means we can't use the INI color as is, have to replicate the above nonsense.
         mResult.mSunDiscColor = mResult.mSunDiscColor + osg::componentMultiply(mResult.mSunDiscColor, mResult.mAmbientColor);
         for (int i=0; i<3; ++i)

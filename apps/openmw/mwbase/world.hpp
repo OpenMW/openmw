@@ -217,7 +217,7 @@ namespace MWBase
             virtual bool toggleSky() = 0;
             ///< \return Resulting mode
 
-            virtual void changeWeather(const std::string& region, unsigned int id) = 0;
+            virtual void changeWeather(const std::string& region, const unsigned int id) = 0;
 
             virtual int getCurrentWeather() const = 0;
 
@@ -548,7 +548,7 @@ namespace MWBase
             /// Resets all actors in the current active cells to their original location within that cell.
             virtual void resetActors() = 0;
 
-            virtual bool isWalkingOnWater (const MWWorld::ConstPtr& actor) = 0;
+            virtual bool isWalkingOnWater (const MWWorld::ConstPtr& actor) const = 0;
 
             /// Return a vector aiming the actor's weapon towards a target.
             /// @note The length of the vector is the distance between actor and target.
@@ -560,6 +560,12 @@ namespace MWBase
             virtual void removeContainerScripts(const MWWorld::Ptr& reference) = 0;
 
             virtual bool isPlayerInJail() const = 0;
+
+            /// Return terrain height at \a worldPos position.
+            virtual float getTerrainHeightAt(const osg::Vec3f& worldPos) const = 0;
+
+            /// Return physical or rendering half extents of the given actor.
+            virtual osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& actor, bool rendering=false) const = 0;
     };
 }
 

@@ -113,7 +113,7 @@ void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
 
 const std::string MWWorld::ContainerStore::sGoldId = "gold_001";
 
-MWWorld::ContainerStore::ContainerStore() : mCachedWeight (0), mWeightUpToDate (false) {}
+MWWorld::ContainerStore::ContainerStore() : mListener(NULL), mCachedWeight (0), mWeightUpToDate (false) {}
 
 MWWorld::ContainerStore::~ContainerStore() {}
 
@@ -134,6 +134,17 @@ int MWWorld::ContainerStore::count(const std::string &id)
         if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), id))
             total += iter->getRefData().getCount();
     return total;
+}
+
+MWWorld::ContainerStoreListener* MWWorld::ContainerStore::getContListener() const
+{
+    return mListener;
+}
+
+
+void MWWorld::ContainerStore::setContListener(MWWorld::ContainerStoreListener* listener)
+{
+    mListener = listener;
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container, int count)
@@ -292,6 +303,9 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
             item.getRefData().getLocals().setVarByInt(script, "onpcadd", 1);
     }
 
+    if (mListener)
+        mListener->itemAdded(item, count);
+
     return it;
 }
 
@@ -398,6 +412,9 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
 
     flagAsModified();
 
+    if (mListener)
+        mListener->itemRemoved(item, count - toRemove);
+
     // number of removed items
     return count - toRemove;
 }
@@ -423,20 +440,20 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 
         if (ref.getPtr().getTypeName()==typeid (ESM::ItemLevList).name())
         {
-            const ESM::ItemLevList* levItem = ref.getPtr().get<ESM::ItemLevList>()->mBase;
+            const ESM::ItemLevList* levItemList = ref.getPtr().get<ESM::ItemLevList>()->mBase;
 
-            if (topLevel && std::abs(count) > 1 && levItem->mFlags & ESM::ItemLevList::Each)
+            if (topLevel && std::abs(count) > 1 && levItemList->mFlags & ESM::ItemLevList::Each)
             {
                 for (int i=0; i<std::abs(count); ++i)
-                    addInitialItem(id, owner, count > 0 ? 1 : -1, true, levItem->mId);
+                    addInitialItem(id, owner, count > 0 ? 1 : -1, true, levItemList->mId);
                 return;
             }
             else
             {
-                std::string id = MWMechanics::getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
-                if (id.empty())
+                std::string itemId = MWMechanics::getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
+                if (itemId.empty())
                     return;
-                addInitialItem(id, owner, count, false, levItem->mId);
+                addInitialItem(itemId, owner, count, false, levItemList->mId);
             }
         }
         else
@@ -536,14 +553,14 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
             if(listInMap != allowedForReplace.end())
                 restockNum -= std::min(restockNum, listInMap->second);
             //restock
-            addInitialItem(itemOrList, owner, restockNum, true);
+            addInitialItem(itemOrList, owner, -restockNum, true);
         }
         else
         {
             //Restocking static item - just restock to the max count
             int currentCount = count(itemOrList);
             if (currentCount < std::abs(it->mCount))
-                addInitialItem(itemOrList, owner, std::abs(it->mCount) - currentCount, true);
+                addInitialItem(itemOrList, owner, -(std::abs(it->mCount) - currentCount), true);
         }
     }
     flagAsModified();

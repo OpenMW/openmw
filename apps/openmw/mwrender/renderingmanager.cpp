@@ -458,9 +458,9 @@ namespace MWRender
         {
             mEffectManager->update(dt);
             mSky->update(dt);
+            mWater->update(dt);
         }
 
-        mWater->update(dt);
         mCamera->update(dt, paused);
 
         osg::Vec3f focal, cameraPos;
@@ -742,9 +742,9 @@ namespace MWRender
         mObjects->updatePtr(old, updated);
     }
 
-    void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale)
+    void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale, bool isMagicVFX)
     {
-        mEffectManager->addEffect(model, texture, worldPosition, scale);
+        mEffectManager->addEffect(model, texture, worldPosition, scale, isMagicVFX);
     }
 
     void RenderingManager::notifyWorldSpaceChanged()

@@ -120,6 +120,10 @@
                     <Property key="TextShadow" value="true"/>
                 </Widget>
                 <Widget type="ImageBox" skin="ImageBox" position="5 5 32 32" align="Stretch" name="Item"/>
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" align="Stretch" name="ItemShadow">
+                    <Property key="Colour" value="0 0 0"/>
+                    <Property key="Alpha" value="0.5"/>
+                </Widget>
             </Widget>
         </Widget>
     </Resource>
@@ -128,6 +132,10 @@
         <Widget type="Widget" skin="" position="0 0 32 32" name="Root">
             <Widget type="ImageBox" skin="ImageBox" position="0 0 32 32" align="Stretch" name="Frame">
                 <Widget type="ImageBox" skin="ImageBox" position="0 0 32 32" align="Stretch" name="Item"/>
+                <Widget type="ImageBox" skin="ImageBox" position="4 4 32 32" align="Stretch" name="ItemShadow">
+                    <Property key="Colour" value="0 0 0"/>
+                    <Property key="Alpha" value="0.5"/>
+                </Widget>
             </Widget>
         </Widget>
     </Resource>
@@ -140,6 +148,10 @@
                     <Property key="TextShadow" value="true"/>
                 </Widget>
                 <Widget type="ImageBox" skin="ImageBox" position="5 5 32 32" align="Center" name="Item"/>
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" align="Stretch" name="ItemShadow">
+                    <Property key="Colour" value="0 0 0"/>
+                    <Property key="Alpha" value="0.5"/>
+                </Widget>
             </Widget>
 
             <Widget type="Widget" skin="MW_Box_Overlay" position="0 0 50 50" align="Stretch"/>

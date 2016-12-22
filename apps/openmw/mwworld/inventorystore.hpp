@@ -32,7 +32,7 @@ namespace MWWorld
          *              If it isn't new, non-looping VFX should not be played.
          * @param playSound Play effect sound?
          */
-        virtual void permanentEffectAdded (const ESM::MagicEffect *magicEffect, bool isNew, bool playSound) {}
+        virtual void permanentEffectAdded (const ESM::MagicEffect *magicEffect, bool isNew) {}
 
     };
 
@@ -114,6 +114,8 @@ namespace MWWorld
 
             virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
             virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
+
+            bool canActorAutoEquip(const MWWorld::Ptr& actor, const MWWorld::Ptr& item);
 
         public:
 
@@ -197,10 +199,10 @@ namespace MWWorld
             /// in the slot (they can be re-stacked so its count may be different
             /// than the requested count).
 
-            void setListener (InventoryStoreListener* listener, const Ptr& actor);
+            void setInvListener (InventoryStoreListener* listener, const Ptr& actor);
             ///< Set a listener for various events, see \a InventoryStoreListener
 
-            InventoryStoreListener* getListener();
+            InventoryStoreListener* getInvListener();
 
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor);
 

@@ -259,8 +259,8 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (const QPoint& pos)
                 mDragMode = DragMode_Scale;
 
                 // Calculate scale factor
-                std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getEdited (Mask_Reference);
-                osg::Vec3f center = getScreenCoords(getSelectionCenter(selection));
+                std::vector<osg::ref_ptr<TagBase> > editedSelection = getWorldspaceWidget().getEdited (Mask_Reference);
+                osg::Vec3f center = getScreenCoords(getSelectionCenter(editedSelection));
 
                 int widgetHeight = getWorldspaceWidget().height();
 

@@ -824,8 +824,8 @@ void MwIniImporter::importArchives(multistrmap &cfg, const multistrmap &ini) con
     // does not appears in the ini file
     cfg["fallback-archive"].push_back("Morrowind.bsa");
 
-    for(std::vector<std::string>::const_iterator it=archives.begin(); it!=archives.end(); ++it) {
-        cfg["fallback-archive"].push_back(*it);
+    for(std::vector<std::string>::const_iterator iter=archives.begin(); iter!=archives.end(); ++iter) {
+        cfg["fallback-archive"].push_back(*iter);
     }
 }
 
@@ -865,8 +865,8 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
 
     // this will sort files by time order first, then alphabetical (maybe), I suspect non ASCII filenames will be stuffed.
     sort(contentFiles.begin(), contentFiles.end());
-    for(std::vector<std::pair<std::time_t, std::string> >::const_iterator it=contentFiles.begin(); it!=contentFiles.end(); ++it) {
-        cfg["content"].push_back(it->second);
+    for(std::vector<std::pair<std::time_t, std::string> >::const_iterator iter=contentFiles.begin(); iter!=contentFiles.end(); ++iter) {
+        cfg["content"].push_back(iter->second);
     }
 }
 

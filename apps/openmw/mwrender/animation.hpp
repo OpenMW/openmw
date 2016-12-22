@@ -25,6 +25,7 @@ namespace NifOsg
 namespace SceneUtil
 {
     class LightSource;
+    class LightListCallback;
     class Skeleton;
 }
 
@@ -273,6 +274,8 @@ protected:
 
     float mAlpha;
 
+    osg::ref_ptr<SceneUtil::LightListCallback> mLightListCallback;
+
     const NodeMap& getNodeMap() const;
 
     /* Sets the appropriate animations on the bone groups based on priority.
@@ -299,7 +302,7 @@ protected:
 
     /** Sets the root model of the object.
      *
-     * Note that you must make sure all animation sources are cleared before reseting the object
+     * Note that you must make sure all animation sources are cleared before resetting the object
      * root. All nodes previously retrieved with getNode will also become invalidated.
      * @param forceskeleton Wrap the object root in a Skeleton, even if it contains no skinned parts. Use this if you intend to add skinned parts manually.
      * @param baseonly If true, then any meshes or particle systems in the model are ignored

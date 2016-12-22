@@ -516,7 +516,7 @@ void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
                 // Current coordinate
                 int x, y;
 
-                // Loop throught all the coordinates to add them to selection
+                // Loop through all the coordinates to add them to selection
                 while (stream >> ignore1 >> ignore2 >> x >> y)
                     selection.add (CSMWorld::CellCoordinates (x, y));
                                
@@ -558,18 +558,18 @@ std::pair< int, int > CSVRender::PagedWorldspaceWidget::getCoordinatesFromId (co
 }
 
 bool CSVRender::PagedWorldspaceWidget::handleDrop (
-    const std::vector< CSMWorld::UniversalId >& data, DropType type)
+    const std::vector< CSMWorld::UniversalId >& universalIdData, DropType type)
 {
-    if (WorldspaceWidget::handleDrop (data, type))
+    if (WorldspaceWidget::handleDrop (universalIdData, type))
         return true;
 
     if (type!=Type_CellsExterior)
         return false;
 
     bool selectionChanged = false;
-    for (unsigned i = 0; i < data.size(); ++i)
+    for (unsigned i = 0; i < universalIdData.size(); ++i)
     {
-        std::pair<int, int> coordinates(getCoordinatesFromId(data[i].getId()));
+        std::pair<int, int> coordinates(getCoordinatesFromId(universalIdData[i].getId()));
         if (mSelection.add(CSMWorld::CellCoordinates(coordinates.first, coordinates.second)))
         {
             selectionChanged = true;

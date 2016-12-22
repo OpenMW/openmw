@@ -1,6 +1,8 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_LIGHTMANAGER_H
 #define OPENMW_COMPONENTS_SCENEUTIL_LIGHTMANAGER_H
 
+#include <set>
+
 #include <osg/Light>
 
 #include <osg/Group>
@@ -157,16 +159,20 @@ namespace SceneUtil
             : osg::Object(copy, copyop), osg::NodeCallback(copy, copyop)
             , mLightManager(copy.mLightManager)
             , mLastFrameNumber(0)
+            , mIgnoredLightSources(copy.mIgnoredLightSources)
         {}
 
         META_Object(SceneUtil, LightListCallback)
 
         void operator()(osg::Node* node, osg::NodeVisitor* nv);
 
+        std::set<SceneUtil::LightSource*>& getIgnoredLightSources() { return mIgnoredLightSources; }
+
     private:
         LightManager* mLightManager;
         unsigned int mLastFrameNumber;
         LightManager::LightList mLightList;
+        std::set<SceneUtil::LightSource*> mIgnoredLightSources;
     };
 
 }

@@ -6,6 +6,7 @@
 #include <osg/Array>
 #include <osg/LOD>
 #include <osg/TexGen>
+#include <osg/ValueObject>
 
 // resource
 #include <components/misc/stringops.hpp>
@@ -276,11 +277,13 @@ namespace NifOsg
     public:
         /// @param filename used for warning messages.
         LoaderImpl(const std::string& filename)
-            : mFilename(filename)
+            : mFilename(filename), mFirstRootTextureIndex(-1), mFoundFirstRootTexturingProperty(false)
         {
 
         }
         std::string mFilename;
+        size_t mFirstRootTextureIndex;
+        bool mFoundFirstRootTexturingProperty;
 
         static void loadKf(Nif::NIFFilePtr nif, KeyframeHolder& target)
         {
@@ -371,10 +374,24 @@ namespace NifOsg
         void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<int>& boundTextures, int animflags)
         {
             const Nif::PropertyList& props = nifNode->props;
-            for (size_t i = 0; i <props.length();++i)
+            for (size_t i = 0; i <props.length(); ++i)
             {
                 if (!props[i].empty())
+                {
+                    // Get the lowest numbered recIndex of the NiTexturingProperty root node.
+                    // This is what is overridden when a spell effect "particle texture" is used.
+                    if (nifNode->parent == NULL && !mFoundFirstRootTexturingProperty && props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
+                    {
+                        mFirstRootTextureIndex = props[i].getPtr()->recIndex;
+                        mFoundFirstRootTexturingProperty = true;
+                    }
+                    else if (props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
+                    {
+                        if (props[i].getPtr()->recIndex == mFirstRootTextureIndex)
+                            applyTo->setUserValue("overrideFx", 1);                
+                    }
                     handleProperty(props[i].getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
+                }              
             }
         }
 
@@ -760,16 +777,16 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiAlphaController)
                 {
                     const Nif::NiAlphaController* alphactrl = static_cast<const Nif::NiAlphaController*>(ctrl.getPtr());
-                    osg::ref_ptr<AlphaController> ctrl(new AlphaController(alphactrl->data.getPtr()));
-                    setupController(alphactrl, ctrl, animflags);
-                    composite->addController(ctrl);
+                    osg::ref_ptr<AlphaController> osgctrl(new AlphaController(alphactrl->data.getPtr()));
+                    setupController(alphactrl, osgctrl, animflags);
+                    composite->addController(osgctrl);
                 }
                 else if (ctrl->recType == Nif::RC_NiMaterialColorController)
                 {
                     const Nif::NiMaterialColorController* matctrl = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
-                    osg::ref_ptr<MaterialColorController> ctrl(new MaterialColorController(matctrl->data.getPtr()));
-                    setupController(matctrl, ctrl, animflags);
-                    composite->addController(ctrl);
+                    osg::ref_ptr<MaterialColorController> osgctrl(new MaterialColorController(matctrl->data.getPtr()));
+                    setupController(matctrl, osgctrl, animflags);
+                    composite->addController(osgctrl);
                 }
                 else
                     std::cerr << "Unexpected material controller " << ctrl->recType << " in " << mFilename << std::endl;
@@ -854,6 +871,13 @@ namespace NifOsg
                     const Nif::NiPlanarCollider* planarcollider = static_cast<const Nif::NiPlanarCollider*>(colliders.getPtr());
                     program->addOperator(new PlanarCollider(planarcollider));
                 }
+                else if (colliders->recType == Nif::RC_NiSphericalCollider)
+                {
+                    const Nif::NiSphericalCollider* sphericalcollider = static_cast<const Nif::NiSphericalCollider*>(colliders.getPtr());
+                    program->addOperator(new SphericalCollider(sphericalcollider));
+                }
+                else
+                    std::cerr << "Unhandled particle collider " << colliders->recName << " in " << mFilename << std::endl;
             }
         }
 
@@ -1135,9 +1159,10 @@ namespace NifOsg
             morphGeom->setUpdateCallback(NULL);
             morphGeom->setCullCallback(new UpdateMorphGeometry);
             morphGeom->setUseVertexBufferObjects(true);
-            morphGeom->getOrCreateVertexBufferObject()->setUsage(GL_DYNAMIC_DRAW_ARB);
 
             triShapeToGeometry(triShape, morphGeom, parentNode, composite, boundTextures, animflags);
+
+            morphGeom->getOrCreateVertexBufferObject()->setUsage(GL_DYNAMIC_DRAW_ARB);
 
             const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
             if (morphs.empty())

@@ -122,7 +122,8 @@ namespace MWWorld
         void moveProjectiles(float dt);
         void moveMagicBolts(float dt);
 
-        void createModel (State& state, const std::string& model, const osg::Vec3f& pos, const osg::Quat& orient, bool rotate);
+        void createModel (State& state, const std::string& model, const osg::Vec3f& pos, const osg::Quat& orient,
+                            bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, std::string texture = "");
         void update (State& state, float duration);
 
         void operator=(const ProjectileManager&);

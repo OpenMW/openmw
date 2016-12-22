@@ -48,7 +48,7 @@ namespace Compiler
             extensions.registerFunction ("getaipackagedone", 'l', "", opcodeGetAiPackageDone,
                 opcodeGetAiPackageDoneExplicit);
             extensions.registerFunction ("getcurrentaipackage", 'l', "", opcodeGetCurrentAiPackage,
-                opcodeGetAiPackageDoneExplicit);
+                opcodeGetCurrentAiPackageExplicit);
             extensions.registerFunction ("getdetected", 'l', "c", opcodeGetDetected,
                 opcodeGetDetectedExplicit);
             extensions.registerInstruction ("sethello", "l", opcodeSetHello, opcodeSetHelloExplicit);

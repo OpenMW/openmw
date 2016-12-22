@@ -139,6 +139,8 @@ namespace MWPhysics
     private:
         /// Removes then re-adds the collision object to the dynamics world
         void updateCollisionMask();
+        void addCollisionMask(int collisionMask);
+        int getCollisionMask();
 
         bool mCanWaterWalk;
         bool mWalkingOnWater;

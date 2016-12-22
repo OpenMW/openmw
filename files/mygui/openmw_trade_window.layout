@@ -61,7 +61,7 @@
             </Widget>
 
             <Widget type="AutoSizedButton" skin="MW_Button" position="0 60 60 24" name="MaxSaleButton" align="Left Top">
-                <Property key="Caption" value="Max. Sale"/> <!-- GMST sMaxSale doesn't work -->
+                <Property key="Caption" value="#{sMaxSale}"/>
             </Widget>
         </Widget>
 

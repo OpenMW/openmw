@@ -18,7 +18,7 @@ namespace MWRender
 
 CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr,
                                      const std::string& model, Resource::ResourceSystem* resourceSystem)
-  : Animation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), resourceSystem)
+  : ActorAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), resourceSystem)
 {
     MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
 
@@ -34,7 +34,7 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr,
 
 
 CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const std::string& model, Resource::ResourceSystem* resourceSystem)
-    : Animation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), resourceSystem)
+    : ActorAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), resourceSystem)
     , mShowWeapons(false)
     , mShowCarriedLeft(false)
 {
@@ -48,7 +48,7 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const 
             addAnimSource("meshes\\xbase_anim.nif");
         addAnimSource(model);
 
-        mPtr.getClass().getInventoryStore(mPtr).setListener(this, mPtr);
+        mPtr.getClass().getInventoryStore(mPtr).setInvListener(this, mPtr);
 
         updateParts();
     }
@@ -110,8 +110,6 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(item.getClass().getModel(item));
     osg::ref_ptr<osg::Node> attached = SceneUtil::attach(node, mObjectRoot, bonename, bonename);
     mResourceSystem->getSceneManager()->notifyAttached(attached);
-    if (mSkeleton)
-        mSkeleton->markDirty();
 
     scene.reset(new PartHolder(attached));
 

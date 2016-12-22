@@ -16,6 +16,7 @@
 #include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/skeleton.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 #include <components/nifosg/nifloader.hpp> // TextKeyMapHolder
 
@@ -272,8 +273,8 @@ NpcAnimation::~NpcAnimation()
             // No need to getInventoryStore() to reset, if none exists
             // This is to avoid triggering the listener via ensureCustomData()->autoEquip()->fireEquipmentChanged()
             // all from within this destructor. ouch!
-           && mPtr.getRefData().getCustomData() && mPtr.getClass().getInventoryStore(mPtr).getListener() == this)
-        mPtr.getClass().getInventoryStore(mPtr).setListener(NULL, mPtr);
+           && mPtr.getRefData().getCustomData() && mPtr.getClass().getInventoryStore(mPtr).getInvListener() == this)
+        mPtr.getClass().getInventoryStore(mPtr).setInvListener(NULL, mPtr);
 
     // do not detach (delete) parts yet, this is done so the background thread can handle the deletion
     for(size_t i = 0;i < ESM::PRT_Count;i++)
@@ -285,7 +286,7 @@ NpcAnimation::~NpcAnimation()
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem,
                            bool disableListener, bool disableSounds, ViewMode viewMode, float firstPersonFieldOfView)
-  : Animation(ptr, parentNode, resourceSystem),
+  : ActorAnimation(ptr, parentNode, resourceSystem, disableListener),
     mListenerDisabled(disableListener),
     mViewMode(viewMode),
     mShowWeapons(false),
@@ -310,7 +311,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
     updateNpcBase();
 
     if (!disableListener)
-        mPtr.getClass().getInventoryStore(mPtr).setListener(this, mPtr);
+        mPtr.getClass().getInventoryStore(mPtr).setInvListener(this, mPtr);
 }
 
 void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
@@ -401,6 +402,9 @@ void NpcAnimation::setRenderBin()
 void NpcAnimation::rebuild()
 {
     updateNpcBase();
+
+    if (mAlpha != 1.f)
+        mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
 
     MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);
 }
@@ -502,10 +506,10 @@ void NpcAnimation::updateNpcBase()
 
         if(!isWerewolf)
         {
-            if(Misc::StringUtils::lowerCase(mNpc->mRace).find("argonian") != std::string::npos)
-                addAnimSource("meshes\\xargonian_swimkna.nif");
             if(mNpc->mModel.length() > 0)
                 addAnimSource(Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS()));
+            if(Misc::StringUtils::lowerCase(mNpc->mRace).find("argonian") != std::string::npos)
+                addAnimSource("meshes\\xargonian_swimkna.nif");
         }
     }
     else
@@ -667,8 +671,6 @@ PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const st
 {
     osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->getInstance(model);
     osg::ref_ptr<osg::Node> attached = SceneUtil::attach(instance, mObjectRoot, bonefilter, bonename);
-    if (mSkeleton)
-        mSkeleton->markDirty();
     mResourceSystem->getSceneManager()->notifyAttached(attached);
     if (enchantedGlow)
         addGlow(attached, *glowColor);
@@ -970,12 +972,12 @@ Resource::ResourceSystem* NpcAnimation::getResourceSystem()
     return mResourceSystem;
 }
 
-void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound)
+void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew)
 {
     // During first auto equip, we don't play any sounds.
     // Basically we don't want sounds when the actor is first loaded,
     // the items should appear as if they'd always been equipped.
-    if (playSound)
+    if (isNew)
     {
         static const std::string schools[] = {
             "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
@@ -994,7 +996,7 @@ void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, boo
         bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
         // Don't play particle VFX unless the effect is new or it should be looping.
         if (isNew || loop)
-            addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
+            addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "", magicEffect->mParticle);
     }
 }
 
