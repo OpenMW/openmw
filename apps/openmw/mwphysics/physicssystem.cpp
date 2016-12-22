@@ -996,6 +996,8 @@ namespace MWPhysics
     bool PhysicsSystem::canMoveToWaterSurface(const MWWorld::ConstPtr &actor, const float waterlevel)
     {
         const Actor* physicActor = getActor(actor);
+        if (!physicActor)
+            return false;
         const float halfZ = physicActor->getHalfExtents().z();
         const osg::Vec3f actorPosition = physicActor->getPosition();
         const osg::Vec3f startingPosition(actorPosition.x(), actorPosition.y(), actorPosition.z() + halfZ);
