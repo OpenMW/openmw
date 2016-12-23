@@ -74,27 +74,14 @@ namespace MWGui
             price = static_cast<int>(d / gmst.find("fTravelMult")->getFloat());
         }
 
-        // Add price for the followers in range
+        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
+
+        // Add price for the travelling followers
         std::set<MWWorld::Ptr> followers;
-        MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(player, followers);
-
-        int travellingFollowers = 0;
-        for(std::set<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
-        {
-            MWWorld::Ptr follower = *it;
-
-            std::string script = follower.getClass().getScript(follower);
-            if (!script.empty() && follower.getRefData().getLocals().getIntVar(script, "stayoutside") == 1)
-                continue;
-
-            if ((follower.getRefData().getPosition().asVec3() - player.getRefData().getPosition().asVec3()).length2() <= 800*800)
-                ++travellingFollowers;
-        }
+        MWWorld::ActionTeleport::getFollowersToTeleport(player, followers);
 
         // Apply followers cost, in vanilla one follower travels for free
-        price *= std::max(1, travellingFollowers);
-
-        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
+        price *= std::max(1, static_cast<int>(followers.size()));
 
         MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>("SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
         toAdd->setEnabled(price <= playerGold);
