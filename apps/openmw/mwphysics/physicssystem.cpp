@@ -419,7 +419,7 @@ namespace MWPhysics
 
                     if ((newVelocity-velocity).length2() < 0.01)
                         break;
-                    if ((velocity * origVelocity) <= 0.f)
+                    if ((newVelocity * origVelocity) <= 0.f)
                         break; // ^ dot product
 
                     velocity = newVelocity;
