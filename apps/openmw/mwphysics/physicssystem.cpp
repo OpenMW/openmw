@@ -396,10 +396,16 @@ namespace MWPhysics
                 }
 
 
+                // We hit something. Check if we can step up.
+                float hitHeight = tracer.mHitPoint.z() - tracer.mEndPos.z() + halfExtents.z();
                 osg::Vec3f oldPosition = newPosition;
-                // We hit something. Try to step up onto it. (NOTE: stepMove does not allow stepping over)
-                // NOTE: stepMove modifies newPosition if successful
-                bool result = stepper.step(newPosition, velocity*remainingTime, remainingTime);
+                bool result = false;
+                if (hitHeight < sStepSizeUp)
+                {
+                    // Try to step up onto it.
+                    // NOTE: stepMove does not allow stepping over, modifies newPosition if successful
+                    result = stepper.step(newPosition, velocity*remainingTime, remainingTime);
+                }
                 if (result)
                 {
                     // don't let pure water creatures move out of water after stepMove
