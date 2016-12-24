@@ -62,7 +62,10 @@ namespace ESSImport
             playerCellId.mPaged = true;
             playerCellId.mIndex.mX = playerCellId.mIndex.mY = 0;
             mPlayer.mCellId = playerCellId;
-            //mPlayer.mLastKnownExteriorPosition
+            mPlayer.mLastKnownExteriorPosition[0]
+                = mPlayer.mLastKnownExteriorPosition[1]
+                = mPlayer.mLastKnownExteriorPosition[2]
+                = 0.0f;
             mPlayer.mHasMark = 0;
             mPlayer.mCurrentCrimeId = 0; // TODO
             mPlayer.mObject.blank();
