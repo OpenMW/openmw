@@ -54,6 +54,7 @@ namespace MWMechanics
         std::string mLastHitAttemptObject; // The last object to attempt to hit this actor
 
         bool mRecalcMagicka;
+        bool mRecalcFatigue;
 
         // For merchants: the last time items were restocked and gold pool refilled.
         MWWorld::TimeStamp mLastRestock;
