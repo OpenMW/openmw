@@ -366,10 +366,7 @@ namespace MWPhysics
                    newPosition.z() <= swimlevel)
                 {
                     const osg::Vec3f down(0,0,-1);
-                    float movelen = velocity.normalize();
-                    osg::Vec3f reflectdir = reflect(velocity, down);
-                    reflectdir.normalize();
-                    velocity = slide(reflectdir, down)*movelen;
+                    velocity = slide(velocity, down);
                     // NOTE: remainingTime is unchanged before the loop continues
                     continue; // velocity updated, calculate nextpos again
                 }
@@ -413,12 +410,7 @@ namespace MWPhysics
                 else
                 {
                     // Can't move this way, try to find another spot along the plane
-                    osg::Vec3f direction = velocity;
-                    float movelen = direction.normalize();
-                    osg::Vec3f reflectdir = reflect(velocity, tracer.mPlaneNormal);
-                    reflectdir.normalize();
-
-                    osg::Vec3f newVelocity = slide(reflectdir, tracer.mPlaneNormal)*movelen;
+                    osg::Vec3f newVelocity = slide(velocity, tracer.mPlaneNormal);
 
                     // Do not allow sliding upward if there is gravity.
                     // Stepping will have taken care of that.
