@@ -990,18 +990,25 @@ namespace MWMechanics
         }
     }
 
-    bool MechanicsManager::commitCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg, bool victimAware)
+    bool MechanicsManager::commitCrime(const MWWorld::Ptr &offender, const MWWorld::Ptr &victim, OffenseType type, int arg, bool victimAware)
     {
         // NOTE: victim may be empty
 
-        // Only player can commit crime
-        if (player != getPlayer())
+        const MWWorld::Ptr player = getPlayer();
+
+        // Get the player's followers / allies (works recursively)
+        // They can commit crimes for the player but will not report them
+        std::set<MWWorld::Ptr> playerFollowers;
+        getFollowers(player, playerFollowers);
+
+        // Only player and player followers can commit crimes
+        if (offender != player && playerFollowers.find(offender) == playerFollowers.end())
             return false;
 
         // Find all the actors within the alarm radius
         std::vector<MWWorld::Ptr> neighbors;
 
-        osg::Vec3f from (player.getRefData().getPosition().asVec3());
+        osg::Vec3f from (offender.getRefData().getPosition().asVec3());
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
         float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
 
@@ -1011,21 +1018,17 @@ namespace MWMechanics
         if (!victim.isEmpty() && (from - victim.getRefData().getPosition().asVec3()).length2() > radius*radius)
             neighbors.push_back(victim);
 
-        // get the player's followers / allies (works recursively) that will not report crimes
-        std::set<MWWorld::Ptr> playerFollowers;
-        getFollowers(player, playerFollowers);
-
         // Did anyone see it?
         bool crimeSeen = false;
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
-            if (*it == player)
-                continue; // skip player
+            if (*it == player || *it == offender)
+                continue; // Skip player or player follower
             if (it->getClass().getCreatureStats(*it).isDead())
                 continue;
 
             if ((*it == victim && victimAware)
-                    || (MWBase::Environment::get().getWorld()->getLOS(player, *it) && awarenessCheck(player, *it) )
+                    || (MWBase::Environment::get().getWorld()->getLOS(offender, *it) && awarenessCheck(offender, *it) )
                     // Murder crime can be reported even if no one saw it (hearing is enough, I guess).
                     // TODO: Add mod support for stealth executions!
                     || (type == OT_Murder && *it != victim))
@@ -1281,8 +1284,12 @@ namespace MWMechanics
 
     void MechanicsManager::actorKilled(const MWWorld::Ptr &victim, const MWWorld::Ptr &attacker)
     {
-        if (attacker.isEmpty() || attacker != getPlayer())
-            return;
+        const MWWorld::Ptr player = getPlayer();
+        std::set<MWWorld::Ptr> playerFollowers;
+        getFollowers(player, playerFollowers);
+
+        if (attacker != player && playerFollowers.find(attacker) == playerFollowers.end())
+            return; // attacker is not player or player follower
 
         if (victim == attacker)
             return; // known to happen
