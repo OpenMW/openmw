@@ -338,11 +338,24 @@ namespace MWMechanics
                 aggressive = true;
         }
 
+        // Initiate combat with the player if we are already in combat with a player follower or escorter
+        const std::list<MWWorld::Ptr>& playerFollowersAndEscorters = getActorsSidingWith(getPlayer());
+        if (!aggressive && againstPlayer)
+        {
+            for (std::list<MWWorld::Ptr>::const_iterator it = playerFollowersAndEscorters.begin(); it != playerFollowersAndEscorters.end(); ++it)
+            {
+                if (creatureStats1.getAiSequence().isInCombat(*it))
+                {
+                    MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
+                    return;
+                }
+            }
+        }
+
         // Otherwise, don't initiate combat with an unreachable target
         if (!aggressive && !MWMechanics::canFight(actor1,actor2))
             return;
 
-        const std::list<MWWorld::Ptr>& playerFollowersAndEscorters = getActorsSidingWith(getPlayer());
         if (!aggressive && (againstPlayer || std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), actor2) != playerFollowersAndEscorters.end()))
         {
             // Player followers and escorters with high fight should not initiate combat here with the player or with
