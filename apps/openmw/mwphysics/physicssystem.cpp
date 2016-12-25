@@ -395,6 +395,13 @@ namespace MWPhysics
                     break;
                 }
 
+                // We are touching something.
+                if (tracer.mFraction < 1E-9f)
+                {
+                    // Try to separate by backing off slighly to unstuck the solver
+                    const osg::Vec3f backOff = (newPosition - tracer.mHitPoint) * 1E-3f;
+                    newPosition += backOff;
+                }
 
                 // We hit something. Check if we can step up.
                 float hitHeight = tracer.mHitPoint.z() - tracer.mEndPos.z() + halfExtents.z();
