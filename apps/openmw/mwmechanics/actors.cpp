@@ -310,13 +310,14 @@ namespace MWMechanics
         if (!actor1.getClass().isMobile(actor1))
             return;
 
+        const std::list<MWWorld::Ptr>& playerFollowersAndEscorters = getActorsSidingWith(getPlayer());
         bool aggressive;
 
-        if (againstPlayer)
+        if (againstPlayer || std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), actor2) != playerFollowersAndEscorters.end())
         {
-            // followers with high fight should not engage in combat with the player (e.g. bm_bear_black_summon)
-            const std::list<MWWorld::Ptr>& followers = getActorsSidingWith(actor2);
-            if (std::find(followers.begin(), followers.end(), actor1) != followers.end())
+            // Player followers and escorters with high fight should not initiate combat with the player or with
+            // other player followers or escorters
+            if (std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), actor1) != playerFollowersAndEscorters.end())
                 return;
 
             aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
@@ -369,7 +370,8 @@ namespace MWMechanics
         {
             bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor1, actor2);
 
-            if (againstPlayer) LOS &= MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor2, actor1);
+            if (againstPlayer || std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), actor2) != playerFollowersAndEscorters.end())
+                LOS &= MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor2, actor1);
 
             if (LOS)
             {
