@@ -29,6 +29,7 @@
 #include "movement.hpp"
 #include "character.hpp"
 #include "aicombat.hpp"
+#include "aicombataction.hpp"
 #include "aifollow.hpp"
 #include "aipursue.hpp"
 #include "actor.hpp"
@@ -298,41 +299,12 @@ namespace MWMechanics
         if (sqrDist > sqrAiProcessingDistance)
             return;
 
-        // pure water creatures won't try to fight with the target on the ground
-        // except that creature is already hostile
-        if ((againstPlayer || !creatureStats.getAiSequence().isInCombat())
-            && !MWMechanics::isEnvironmentCompatible(actor1, actor2)) // creature can't swim to target
-        {
-            return;
-        }
-
         // no combat for totally static creatures (they have no movement or attack animations anyway)
         if (!actor1.getClass().isMobile(actor1))
             return;
 
         const std::list<MWWorld::Ptr>& playerFollowersAndEscorters = getActorsSidingWith(getPlayer());
-        bool aggressive;
-
-        if (againstPlayer || std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), actor2) != playerFollowersAndEscorters.end())
-        {
-            // Player followers and escorters with high fight should not initiate combat with the player or with
-            // other player followers or escorters
-            if (std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), actor1) != playerFollowersAndEscorters.end())
-                return;
-
-            aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
-        }
-        else
-        {
-            aggressive = false;
-
-            // Make guards fight aggressive creatures
-            if (!actor1.getClass().isNpc() && actor2.getClass().isClass(actor2, "Guard"))
-            {
-                if (creatureStats.getAiSequence().isInCombat() && MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2))
-                    aggressive = true;
-            }
-        }
+        bool aggressive = false;
 
         // start combat if target actor is in combat with one of our followers
         const std::list<MWWorld::Ptr>& followers = getActorsSidingWith(actor1);
@@ -364,6 +336,33 @@ namespace MWMechanics
             if (creatureStats2.getAiSequence().isInCombat(followTarget)
                     || followTarget.getClass().getCreatureStats(followTarget).getAiSequence().isInCombat(actor2))
                 aggressive = true;
+        }
+
+        // pure water creatures won't try to fight with the target on the ground
+        // except that creature is already hostile
+        if (!aggressive && (againstPlayer || !creatureStats.getAiSequence().isInCombat())
+            && !MWMechanics::canFight(actor1,actor2)) // creature can't swim to target
+        {
+            return;
+        }
+
+        if (!aggressive && againstPlayer || std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), actor2) != playerFollowersAndEscorters.end())
+        {
+            // Player followers and escorters with high fight should not initiate combat with the player or with
+            // other player followers or escorters
+            if (std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), actor1) != playerFollowersAndEscorters.end())
+                return;
+
+            aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
+        }
+        else
+        {
+            // Make guards fight aggressive creatures
+            if (!actor1.getClass().isNpc() && actor2.getClass().isClass(actor2, "Guard"))
+            {
+                if (creatureStats.getAiSequence().isInCombat() && MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2))
+                    aggressive = true;
+            }
         }
 
         if(aggressive)
