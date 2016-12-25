@@ -75,6 +75,14 @@ namespace ESSImport
             out.mMarkedPosition.rot[0] = out.mMarkedPosition.rot[1] = 0.0f;
             out.mMarkedPosition.rot[2] = mark.mRotZ;
         }
+
+        if (pcdt.mHasENAM)
+        {
+            const int cellSize = 8192;
+            out.mLastKnownExteriorPosition[0] = (pcdt.mENAM.mCellX + 0.5f) * cellSize;
+            out.mLastKnownExteriorPosition[1] = (pcdt.mENAM.mCellY + 0.5f) * cellSize;
+            out.mLastKnownExteriorPosition[2] = 0.0f;
+        }
     }
 
 }

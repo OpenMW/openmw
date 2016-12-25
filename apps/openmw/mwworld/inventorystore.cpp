@@ -408,8 +408,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
             std::pair<std::vector<int>, bool> itemsSlots =
                 weapon->getClass().getEquipmentSlots (*weapon);
 
-            for (std::vector<int>::const_iterator slot (itemsSlots.first.begin());
-                slot!=itemsSlots.first.end(); ++slot)
+            if (!itemsSlots.first.empty())
             {
                 if (!itemsSlots.second)
                 {
@@ -419,8 +418,8 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                     }
                 }
 
-                slots_[*slot] = weapon;
-                break;
+                int slot = itemsSlots.first.front();
+                slots_[slot] = weapon;
             }
 
             break;
