@@ -37,6 +37,14 @@ namespace ESSImport
         if (esm.isNextSub("NAM9"))
             esm.skipHSub();
 
+        // Rest state. You shouldn't even be able to save during rest, but skip just in case.
+        if (esm.isNextSub("RNAM"))
+            /*
+                int hoursLeft;
+                float x, y, z; // resting position
+            */
+            esm.skipHSub(); // 16 bytes
+
         mBounty = 0;
         esm.getHNOT(mBounty, "CNAM");
 
@@ -70,11 +78,18 @@ namespace ESSImport
             mFactions.push_back(fnam);
         }
 
-        if (esm.isNextSub("AADT"))
-            esm.skipHSub(); // 44 bytes, no clue
+        mHasAADT = false;
+        if (esm.isNextSub("AADT")) // Attack animation data?
+        {
+            mHasAADT = true;
+            esm.getHT(mAADT);
+        }
 
         if (esm.isNextSub("KNAM"))
             esm.skipHSub(); // assigned Quick Keys, I think
+
+        if (esm.isNextSub("ANIS"))
+            esm.skipHSub(); // 16 bytes
 
         if (esm.isNextSub("WERE"))
         {
@@ -83,10 +98,6 @@ namespace ESSImport
             esm.getSubHeader();
             esm.skip(152);
         }
-
-        // unsure if before or after WERE
-        if (esm.isNextSub("ANIS"))
-            esm.skipHSub();
     }
 
 }
