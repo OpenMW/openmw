@@ -24,7 +24,7 @@ namespace MWWorld
 
         public:
 
-            ///< If cellName is empty, an exterior cell is assumed.
+            /// If cellName is empty, an exterior cell is assumed.
             /// @param teleportFollowers Whether to teleport any following actors of the target actor as well.
             ActionTeleport (const std::string& cellName, const ESM::Position& position, bool teleportFollowers);
 
