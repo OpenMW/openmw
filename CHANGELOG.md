@@ -1,3 +1,78 @@
+0.41.0
+------
+
+    Bug #1138: Casting water walking doesn't move the player out of the water
+    Bug #1931: Rocks from blocked passage in Bamz-Amschend, Radacs Forge can reset and cant be removed again.
+    Bug #2048: Almvisi and Divine Intervention display wrong spell effect
+    Bug #2054: Show effect-indicator for "instant effect" spells and potions
+    Bug #2150: Clockwork City door animation problem
+    Bug #2288: Playback of weapon idle animation not correct
+    Bug #2410: Stat-review window doesn't display starting spells, powers, or abilities
+    Bug #2493: Repairing occasionally very slow
+    Bug #2716: [OSG] Water surface is too transparent from some angles
+    Bug #2859: [MAC OS X] Cannot exit fullscreen once enabled
+    Bug #3091: Editor: will not save addon if global variable value type is null
+    Bug #3277: Editor: Non-functional nested tables in subviews need to be hidden instead of being disabled
+    Bug #3348: Disabled map markers show on minimap
+    Bug #3350: Extending selection to instances with same object results in duplicates.
+    Bug #3353: [Mod] Romance version 3.7 script failed
+    Bug #3376: [Mod] Vampire Embrace script fails to execute
+    Bug #3385: Banners don't animate in stormy weather as they do in the original game
+    Bug #3393: Akulakhan re-enabled after main quest
+    Bug #3427: Editor: OpenMW-CS instances won´t get deleted
+    Bug #3451: Feril Salmyn corpse isn't where it is supposed to be
+    Bug #3497: Zero-weight armor is displayed as "heavy" in inventory tooltip
+    Bug #3499: Idle animations don't always loop
+    Bug #3500: Spark showers at Sotha Sil do not appear until you look at the ceiling
+    Bug #3515: Editor: Moved objects in interior cells are teleported to exterior cells.
+    Bug #3520: Editor: OpenMW-CS cannot find project file when launching the game
+    Bug #3521: Armed NPCs don't use correct melee attacks
+    Bug #3535: Changing cell immediately after dying causes character to freeze.
+    Bug #3542: Unable to rest if unalerted slaughterfish are in the cell with you
+    Bug #3549: Blood effects occur even when a hit is resisted
+    Bug #3551: NPC Todwendy in german version can't interact
+    Bug #3552: Opening the journal when fonts are missing results in a crash
+    Bug #3555: SetInvisible command should not apply graphic effect
+    Bug #3561: Editor: changes from omwaddon are not loaded in [New Addon] mode
+    Bug #3562: Non-hostile NPCs can be disarmed by stealing their weapons via sneaking
+    Bug #3564: Editor: openmw-cs verification results
+    Bug #3568: Items that should be invisible are shown in the inventory
+    Bug #3574: Alchemy: Alembics and retorts are used in reverse
+    Bug #3575: Diaglog choices don't work in mw 0.40
+    Bug #3576: Minor differences in AI reaction to hostile spell effects
+    Bug #3577: not local nolore dialog test
+    Bug #3578: Animation Replacer hangs after one cicle/step
+    Bug #3579: Bound Armor skillups and sounds
+    Bug #3583: Targetted GetCurrentAiPackage returns 0
+    Bug #3584: Persuasion bug
+    Bug #3590: Vendor, Ilen Faveran, auto equips items from stock
+    Bug #3594: Weather doesn't seem to update correctly in Mournhold
+    Bug #3598: Saving doesn't save status of objects
+    Bug #3600: Screen goes black when trying to travel to Sadrith Mora
+    Bug #3608: Water ripples aren't created when walking on water
+    Bug #3626: Argonian NPCs swim like khajiits
+    Bug #3627: Cannot delete "Blessed touch" spell from spellbook
+    Bug #3634: An enchanted throwing weapon consumes charges from the stack in your inventory. (0.40.0)
+    Bug #3635: Levelled items in merchants are "re-rolled" (not bug 2952, see inside)
+    Feature #1118: AI combat: flee
+    Feature #1596: Editor: Render water
+    Feature #2042: Adding a non-portable Light to the inventory should cause the player to glow
+    Feature #3166: Editor: Instance editing mode - rotate sub mode
+    Feature #3167: Editor: Instance editing mode - scale sub mode
+    Feature #3420: ess-Importer: player control flags
+    Feature #3489: You shouldn't be be able to re-cast a bound equipment spell
+    Feature #3496: Zero-weight boots should play light boot footsteps
+    Feature #3516: Water Walking should give a "can't cast" message and fail when you are too deep
+    Feature #3519: Play audio and visual effects for all effects in a spell
+    Feature #3527: Double spell explosion scaling
+    Feature #3534: Play particle textures for spell effects
+    Feature #3539: Make NPCs use opponent's weapon range to decide whether to dodge
+    Feature #3540: Allow dodging for creatures with "biped" flag
+    Feature #3545: Drop shadow for items in menu
+    Feature #3558: Implement same spell range for "on touch" spells as original engine
+    Feature #3560: Allow using telekinesis with touch spells on objects
+    Task #3585: Some objects added by Morrowind Rebirth do not display properly their texture
+
 0.40.0
 ------
 
