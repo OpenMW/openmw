@@ -978,18 +978,6 @@ namespace MWMechanics
     }
 
 
-    void getFollowers (const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out)
-    {
-        std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(actor);
-        for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
-        {
-            if (out.insert(*it).second)
-            {
-                getFollowers(*it, out);
-            }
-        }
-    }
-
     bool MechanicsManager::commitCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg, bool victimAware)
     {
         // NOTE: victim may be empty
@@ -1013,7 +1001,7 @@ namespace MWMechanics
 
         // get the player's followers / allies (works recursively) that will not report crimes
         std::set<MWWorld::Ptr> playerFollowers;
-        getFollowers(player, playerFollowers);
+        getActorsSidingWith(player, playerFollowers);
 
         // Did anyone see it?
         bool crimeSeen = false;
@@ -1440,6 +1428,14 @@ namespace MWMechanics
 
     std::list<MWWorld::Ptr> MechanicsManager::getEnemiesNearby(const MWWorld::Ptr& actor) {
         return mActors.getEnemiesNearby(actor);
+    }
+
+    void MechanicsManager::getActorsFollowing(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out) {
+        mActors.getActorsFollowing(actor, out);
+    }
+
+    void MechanicsManager::getActorsSidingWith(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out) {
+        mActors.getActorsSidingWith(actor, out);
     }
 
     int MechanicsManager::countSavedGameRecords() const

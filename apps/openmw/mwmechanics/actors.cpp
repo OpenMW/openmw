@@ -1502,6 +1502,20 @@ namespace MWMechanics
         return list;
     }
 
+    void Actors::getActorsFollowing(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out) {
+        std::list<MWWorld::Ptr> followers = getActorsFollowing(actor);
+        for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
+            if (out.insert(*it).second)
+                getActorsFollowing(*it, out);
+    }
+
+    void Actors::getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out) {
+        std::list<MWWorld::Ptr> followers = getActorsSidingWith(actor);
+        for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
+            if (out.insert(*it).second)
+                getActorsSidingWith(*it, out);
+    }
+
     std::list<int> Actors::getActorsFollowingIndices(const MWWorld::Ptr &actor)
     {
         std::list<int> list;
