@@ -25,6 +25,9 @@ Doxygen
 ## qt-creator
 CMakeLists.txt.user*
 
+## CLion's default build directories
+cmake-build-*/
+
 ## resources
 data
 resources
