@@ -201,7 +201,9 @@ namespace MWBase
 
             virtual std::list<MWWorld::Ptr> getEnemiesNearby(const MWWorld::Ptr& actor) = 0;
 
-            virtual void getFollowers(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr> &out) = 0;
+            /// Recursive versions of above methods
+            virtual void getActorsFollowing(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out) = 0;
+            virtual void getActorsSidingWith(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out) = 0;
 
             virtual void playerLoaded() = 0;
 

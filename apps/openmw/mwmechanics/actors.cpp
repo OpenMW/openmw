@@ -377,7 +377,7 @@ namespace MWMechanics
                 if (!againstPlayer) // start combat between each other if engaging actor is not one of the player followers
                 {
                     std::set<MWWorld::Ptr> playerFollowers;
-                    getFollowers(getPlayer(), playerFollowers);
+                    getActorsSidingWith(getPlayer(), playerFollowers);
 
                     if (playerFollowers.find(actor1) == playerFollowers.end())
                         MWBase::Environment::get().getMechanicsManager()->startCombat(actor2, actor1);
@@ -1489,16 +1489,18 @@ namespace MWMechanics
         return list;
     }
 
-    void Actors::getFollowers(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out)
-    {
-        std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(actor);
+    void Actors::getActorsFollowing(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out) {
+        std::list<MWWorld::Ptr> followers = getActorsFollowing(actor);
         for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
-        {
             if (out.insert(*it).second)
-            {
-                getFollowers(*it, out);
-            }
-        }
+                getActorsFollowing(*it, out);
+    }
+
+    void Actors::getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out) {
+        std::list<MWWorld::Ptr> followers = getActorsSidingWith(actor);
+        for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
+            if (out.insert(*it).second)
+                getActorsSidingWith(*it, out);
     }
 
     std::list<int> Actors::getActorsFollowingIndices(const MWWorld::Ptr &actor)

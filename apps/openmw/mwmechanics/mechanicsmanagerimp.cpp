@@ -986,7 +986,7 @@ namespace MWMechanics
         bool accusePlayer = attacker == player;
 
         std::set<MWWorld::Ptr> playerFollowers;
-        getFollowers(player, playerFollowers);
+        getActorsSidingWith(player, playerFollowers);
 
         if (!accusePlayer && playerFollowers.find(attacker) == playerFollowers.end())
             return false;
@@ -1122,7 +1122,7 @@ namespace MWMechanics
 
         // Get player followers, summoned creatures, follower followers, and so on that will not react to player crime
         std::set<MWWorld::Ptr> playerFollowers;
-        getFollowers(player, playerFollowers);
+        getActorsSidingWith(player, playerFollowers);
 
         // Tell everyone (including the original reporter) in alarm range
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
@@ -1435,8 +1435,12 @@ namespace MWMechanics
         return mActors.getEnemiesNearby(actor);
     }
 
-    void MechanicsManager::getFollowers(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr> &out) {
-        mActors.getFollowers(actor, out);
+    void MechanicsManager::getActorsFollowing(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out) {
+        mActors.getActorsFollowing(actor, out);
+    }
+
+    void MechanicsManager::getActorsSidingWith(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out) {
+        mActors.getActorsSidingWith(actor, out);
     }
 
     int MechanicsManager::countSavedGameRecords() const

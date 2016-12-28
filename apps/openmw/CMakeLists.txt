@@ -215,7 +215,6 @@ if (MSVC)
     if (CMAKE_CL_64)
         set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
     endif (CMAKE_CL_64)
-    add_definitions("-D_USE_MATH_DEFINES")
 endif (MSVC)
 
 if (WIN32)

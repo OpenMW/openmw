@@ -123,8 +123,10 @@ namespace MWMechanics
             std::list<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor);
             std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
 
-            // Recursive version of getActorsSidingWith
-            void getFollowers(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr> &out);
+            /// Recursive version of getActorsFollowing
+            void getActorsFollowing(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out);
+            /// Recursive version of getActorsSidingWith
+            void getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out);
 
             /// Get the list of AiFollow::mFollowIndex for all actors following this target
             std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor);

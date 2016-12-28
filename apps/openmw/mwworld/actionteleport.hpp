@@ -1,6 +1,7 @@
 #ifndef GAME_MWWORLD_ACTIONTELEPORT_H
 #define GAME_MWWORLD_ACTIONTELEPORT_H
 
+#include <set>
 #include <string>
 
 #include <components/esm/defs.hpp>
@@ -23,9 +24,12 @@ namespace MWWorld
 
         public:
 
-            ActionTeleport (const std::string& cellName, const ESM::Position& position, bool teleportFollowers);
-            ///< If cellName is empty, an exterior cell is assumed.
+            /// If cellName is empty, an exterior cell is assumed.
             /// @param teleportFollowers Whether to teleport any following actors of the target actor as well.
+            ActionTeleport (const std::string& cellName, const ESM::Position& position, bool teleportFollowers);
+
+            /// Outputs every actor follower who is in teleport range and wasn't ordered to not enter interiors
+            static void getFollowersToTeleport(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out);
     };
 }
 

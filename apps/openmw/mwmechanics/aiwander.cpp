@@ -473,8 +473,8 @@ namespace MWMechanics
     void AiWander::onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, 
         float duration, AiWanderStorage& storage, ESM::Position& pos)
     {
-        // Are we there yet?
-        if (pathTo(actor, mPathFinder.getPath().back(), duration, DESTINATION_TOLERANCE))
+        // Is there no destination or are we there yet?
+        if ((!mPathFinder.isPathConstructed()) || pathTo(actor, mPathFinder.getPath().back(), duration, DESTINATION_TOLERANCE))
         {
             stopWalking(actor, storage);
             storage.setState(Wander_ChooseAction);
