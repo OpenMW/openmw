@@ -10,6 +10,7 @@
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/creaturestats.hpp>
 #include <components/esm/loadclas.hpp>
+#include <components/esm/loadspel.hpp>
 #include <RakNetTypes.h>
 
 namespace mwmp
@@ -58,14 +59,9 @@ namespace mwmp
         int action; //0 - FullUpdate, 1 - AddItem, 2 - RemoveItem
     };
 
-    struct Spell
-    {
-        std::string id;
-    };
-
     struct Spellbook
     {
-        std::vector<Spell> spells;
+        std::vector<ESM::Spell> spells;
         unsigned int count;
         enum ACTION_TYPE
         {

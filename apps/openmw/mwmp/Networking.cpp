@@ -345,6 +345,38 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_SPELLBOOK:
     {
+        if (guid == myGuid)
+        {
+            if (packet->length == myPacket->headerSize())
+            {
+
+            }
+            else
+            {
+                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                const Spellbook& spellbook = getLocalPlayer()->spellbook;
+                MWWorld::Ptr playerptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                MWMechanics::Spells &spells = playerptr.getClass().getCreatureStats (playerptr).getSpells();
+                if (spellbook.action == Spellbook::ADD)
+                    for (vector<ESM::Spell>::const_iterator spell = spellbook.spells.begin(); spell != spellbook.spells.end(); spell++)
+                        spells.add (spell->mId);
+                else if (spellbook.action == Spellbook::REMOVE)
+                    for (vector<ESM::Spell>::const_iterator spell = spellbook.spells.begin(); spell != spellbook.spells.end(); spell++)
+                    {
+                        spells.remove (spell->mId);
+
+                        MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
+                        if (spell->mId == wm->getSelectedSpell())
+                            wm->unsetSelectedSpell();
+                    }
+                else // Spellbook::UPDATE
+                {
+                    spells.clear();
+                    for (vector<ESM::Spell>::const_iterator spell = spellbook.spells.begin(); spell != spellbook.spells.end(); spell++)
+                        spells.add (spell->mId);
+                }
+            }
+        }
         break;
     }
     case ID_GAME_ATTACK:

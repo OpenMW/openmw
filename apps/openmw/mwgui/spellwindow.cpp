@@ -22,6 +22,9 @@
 #include "confirmationdialog.hpp"
 #include "spellview.hpp"
 
+#include"../mwmp/Main.hpp"
+#include"../mwmp/LocalPlayer.hpp"
+
 namespace MWGui
 {
 
@@ -185,6 +188,11 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
 
         spells.remove(mSpellToDelete);
+
+        // Added by tes3mp
+        //
+        // LocalPlayer has lost a spell, so send a packet with it
+        mwmp::Main::get().getLocalPlayer()->sendSpellRemoval(mSpellToDelete);
 
         updateSpells();
     }

@@ -848,10 +848,13 @@ void LocalPlayer::sendInventory()
 
 void LocalPlayer::sendSpellAddition(std::string id)
 {
+    if (id.find("$dynamic") != string::npos) // skip custom spells
+        return;
+
     spellbook.spells.clear();
 
-    mwmp::Spell spell;
-    spell.id = id;
+    ESM::Spell spell;
+    spell.mId = id;
     spellbook.spells.push_back(spell);
 
     spellbook.action = Spellbook::ADD;
@@ -860,14 +863,27 @@ void LocalPlayer::sendSpellAddition(std::string id)
 
 void LocalPlayer::sendSpellRemoval(std::string id)
 {
+    if (id.find("$dynamic") != string::npos) // skip custom spells
+        return;
+
     spellbook.spells.clear();
 
-    mwmp::Spell spell;
-    spell.id = id;
+    ESM::Spell spell;
+    spell.mId = id;
     spellbook.spells.push_back(spell);
 
     spellbook.action = Spellbook::REMOVE;
     Main::get().getNetworking()->getPlayerPacket(ID_GAME_SPELLBOOK)->Send(this);
+}
+
+void LocalPlayer::sendSpellAddition(const ESM::Spell &spell)
+{
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Not implemented.");
+}
+
+void LocalPlayer::sendSpellRemoval(const ESM::Spell &spell)
+{
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Not implemented.");
 }
 
 void LocalPlayer::sendAttack(Attack::TYPE type)

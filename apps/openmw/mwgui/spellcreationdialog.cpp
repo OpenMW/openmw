@@ -6,6 +6,9 @@
 #include <components/esm/records.hpp>
 #include <components/widgets/list.hpp>
 
+#include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -403,6 +406,11 @@ namespace MWGui
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
         spells.add (spell->mId);
+
+        // Added by tes3mp
+        //
+        // LocalPlayer has gained a spell, so send a packet with it
+        mwmp::Main::get().getLocalPlayer()->sendSpellAddition(*spell);
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_SpellCreation);
     }

@@ -17,6 +17,9 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
+#include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
+
 namespace MWGui
 {
     const int SpellBuyingWindow::sLineHeight = 18;
@@ -140,6 +143,12 @@ namespace MWGui
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
         spells.add (mSpellsWidgetMap.find(_sender)->second);
+
+        // Added by tes3mp
+        //
+        // LocalPlayer has gained a spell, so send a packet with it
+        mwmp::Main::get().getLocalPlayer()->sendSpellAddition(mSpellsWidgetMap.find(_sender)->second);
+
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
         // add gold to NPC trading gold pool

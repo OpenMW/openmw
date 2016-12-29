@@ -70,6 +70,7 @@ public:
 public:
     mwmp::Inventory inventorySendBuffer;
     mwmp::Spellbook spellbookSendBuffer;
+    std::vector<ESM::Spell> realSpellbook;
 
 private:
     bool handshakeState;

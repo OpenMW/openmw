@@ -24,16 +24,16 @@ void PacketSpellbook::Packet(RakNet::BitStream *bs, BasePlayer *player, bool sen
 
     for (unsigned int i = 0; i < player->spellbook.count; i++)
     {
-        Spell spell;
+        ESM::Spell spell;
 
         if (send)
         {
             spell = player->spellbook.spells[i];
-            RW(spell.id, send);
+            RW(spell.mId, send);
         }
         else
         {
-            RW(spell.id, send);
+            RW(spell.mId, send);
             player->spellbook.spells.push_back(spell);
         }
     }
