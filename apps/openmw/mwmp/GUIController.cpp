@@ -39,8 +39,8 @@
 mwmp::GUIController::GUIController(): mInputBox(0), mListBox(0)
 {
     mChat = nullptr;
-    keySay = SDLK_y;
-    keyChatMode = SDLK_F2;
+    keySay = SDL_SCANCODE_Y;
+    keyChatMode = SDL_SCANCODE_F2;
     calledMessageBox = false;
 }
 
@@ -67,8 +67,8 @@ void mwmp::GUIController::setupChat(const Settings::Manager &mgr)
     int chatW = mgr.getInt("w", "Chat");
     int chatH = mgr.getInt("h", "Chat");
 
-    keySay =      SDL_GetKeyFromName(mgr.getString("keySay", "Chat").c_str());
-    keyChatMode = SDL_GetKeyFromName(mgr.getString("keyChatMode", "Chat").c_str());
+    keySay =      SDL_GetScancodeFromName(mgr.getString("keySay", "Chat").c_str());
+    keyChatMode = SDL_GetScancodeFromName(mgr.getString("keyChatMode", "Chat").c_str());
 
     mChat = new GUIChat(chatX, chatY, chatW, chatH);
     mChat->setDelay(chatDelay);
