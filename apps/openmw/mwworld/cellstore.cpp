@@ -139,6 +139,9 @@ namespace
                     iter->load (state);
                     return;
                 }
+
+            std::cerr << "Dropping reference to " << state.mRef.mRefID << " (invalid content file link)" << std::endl;
+            return;
         }
 
         // new reference

@@ -24,7 +24,7 @@ Contributing
 
 Development has been somewhat fast, but any contribution regarding [code](https://github.com/TES3MP/openmw-tes3mp/blob/master/CONTRIBUTING.md), documentation, bug hunting, artwork or nice Jobasha's gift cards are greatly appreciated.
 Test sessions are often advertised in our Steam Group, there is also a chat room there.
-Feel free to contact any of the [team members](https://github.com/TES3MP/openmw-tes3mp/blob/master/TES3MPTeam.md) for any questions you might have.
+Feel free to contact any of the [team members](https://github.com/TES3MP/openmw-tes3mp/blob/master/tes3mp-team.md) for any questions you might have.
 
 Getting Started
 ---------------
