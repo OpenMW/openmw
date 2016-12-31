@@ -407,7 +407,7 @@ namespace MWPhysics
                 float hitHeight = tracer.mHitPoint.z() - tracer.mEndPos.z() + halfExtents.z();
                 osg::Vec3f oldPosition = newPosition;
                 bool result = false;
-                if (hitHeight < sStepSizeUp)
+                if (hitHeight < sStepSizeUp && !isActor(tracer.mHitObject))
                 {
                     // Try to step up onto it.
                     // NOTE: stepMove does not allow stepping over, modifies newPosition if successful
