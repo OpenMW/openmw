@@ -81,6 +81,7 @@ Programmers
     lazydev
     Leon Krieg (lkrieg)
     Leon Saunders (emoose)
+    logzero
     lohikaarme
     Lukasz Gromanowski (lgro)
     Manuel Edelmann (vorenon)
