@@ -318,10 +318,15 @@ namespace MWRender
             if (mAlphaTexture)
             {
                 osg::ref_ptr<osg::Vec2Array> texcoords = new osg::Vec2Array;
-                texcoords->push_back(osg::Vec2f(0.f, 0.f));
-                texcoords->push_back(osg::Vec2f(0.f, 1.f));
-                texcoords->push_back(osg::Vec2f(1.f, 1.f));
-                texcoords->push_back(osg::Vec2f(1.f, 0.f));
+
+                float x1 = x / static_cast<float>(mWidth);
+                float x2 = (x + width) / static_cast<float>(mWidth);
+                float y1 = y / static_cast<float>(mHeight);
+                float y2 = (y + height) / static_cast<float>(mHeight);
+                texcoords->push_back(osg::Vec2f(x1, y1));
+                texcoords->push_back(osg::Vec2f(x1, y2));
+                texcoords->push_back(osg::Vec2f(x2, y2));
+                texcoords->push_back(osg::Vec2f(x2, y1));
                 geom->setTexCoordArray(1, texcoords, osg::Array::BIND_PER_VERTEX);
 
                 stateset->setTextureAttributeAndModes(1, mAlphaTexture, osg::StateAttribute::ON);
