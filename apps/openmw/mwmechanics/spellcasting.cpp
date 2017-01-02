@@ -613,6 +613,14 @@ namespace MWMechanics
                 return true;
             }
         }
+        else if (target.getClass().isActor())
+        {
+            if (effectId == ESM::MagicEffect::Dispel)
+            {
+                target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude);
+                return true;
+            }        
+        }
         else if (target.getClass().isActor() && target == getPlayer())
         {
             MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
@@ -1139,9 +1147,6 @@ namespace MWMechanics
             break;
         case ESM::MagicEffect::CureCorprusDisease:
             actor.getClass().getCreatureStats(actor).getSpells().purgeCorprusDisease();
-            break;
-        case ESM::MagicEffect::Dispel:
-            actor.getClass().getCreatureStats(actor).getActiveSpells().purgeAll(magnitude);
             break;
         case ESM::MagicEffect::RemoveCurse:
             actor.getClass().getCreatureStats(actor).getSpells().purgeCurses();
