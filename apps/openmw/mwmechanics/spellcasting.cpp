@@ -613,13 +613,10 @@ namespace MWMechanics
                 return true;
             }
         }
-        else if (target.getClass().isActor())
+        else if (target.getClass().isActor() && effectId == ESM::MagicEffect::Dispel)
         {
-            if (effectId == ESM::MagicEffect::Dispel)
-            {
-                target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude);
-                return true;
-            }        
+            target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude);
+            return true;
         }
         else if (target.getClass().isActor() && target == getPlayer())
         {
