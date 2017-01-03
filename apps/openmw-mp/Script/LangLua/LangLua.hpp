@@ -8,7 +8,7 @@
 #ifdef ENABLE_TERRA
 #include <terra/terra.h>
 #else
-#include <lua5.1/lua.hpp>
+#include "lua.hpp"
 #endif
 
 #include <extern/LuaBridge/LuaBridge.h>
