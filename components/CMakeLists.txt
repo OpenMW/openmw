@@ -20,11 +20,13 @@ else (GIT_CHECKOUT)
     configure_file(${VERSION_IN_FILE} ${VERSION_FILE})
 endif (GIT_CHECKOUT)
 
-if (OPENGL_ES)
-    find_package(OpenGLES REQUIRED)
-else()
-    find_package(OpenGL REQUIRED)
-endif()
+if(BUILD_OPENMW OR BUILD_OPENCS)
+    if (OPENGL_ES)
+        find_package(OpenGLES REQUIRED)
+    else()
+        find_package(OpenGL REQUIRED)
+    endif()
+endif(BUILD_OPENMW OR BUILD_OPENCS)
 
 # source files
 
@@ -215,11 +217,13 @@ include_directories(${Bullet_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
-if (OPENGL_ES)
-    set(GL_LIB ${OPENGLES_gl_LIBRARY})
-else()
-    set(GL_LIB ${OPENGL_gl_LIBRARY})
-endif()
+if(BUILD_OPENMW OR BUILD_OPENCS)
+    if (OPENGL_ES)
+        set(GL_LIB ${OPENGLES_gl_LIBRARY})
+    else()
+        set(GL_LIB ${OPENGL_gl_LIBRARY})
+    endif()
+endif(BUILD_OPENMW OR BUILD_OPENCS)
 
 target_link_libraries(components
     ${Boost_SYSTEM_LIBRARY}
