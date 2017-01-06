@@ -1346,7 +1346,7 @@ namespace MWPhysics
         mMovementResults.clear();
 
         mTimeAccum += dt;
-        const float physicsDt = 1.f/60.0f;
+        const float physicsDt = dt;//1.f/60.0f;
 
         const int maxAllowedSteps = 20;
         int numSteps = mTimeAccum / (physicsDt);
