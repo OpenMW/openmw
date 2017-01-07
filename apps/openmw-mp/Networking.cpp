@@ -862,6 +862,9 @@ int Networking::mainLoop()
                         packet->systemAddress.ToString());
                     disconnectPlayer(packet->guid);
                     break;
+                case ID_CONNECTED_PING:
+                case ID_UNCONNECTED_PING:
+                    break;
                 default:
                     update(packet);
                     break;
