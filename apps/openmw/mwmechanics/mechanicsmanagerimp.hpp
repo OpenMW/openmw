@@ -165,6 +165,11 @@ namespace MWMechanics
             virtual std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor);
             virtual std::list<MWWorld::Ptr> getEnemiesNearby(const MWWorld::Ptr& actor);
 
+            /// Recursive version of getActorsFollowing
+            virtual void getActorsFollowing(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out);
+            /// Recursive version of getActorsSidingWith
+            virtual void getActorsSidingWith(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out);
+
             virtual bool toggleAI();
             virtual bool isAIActive();
 

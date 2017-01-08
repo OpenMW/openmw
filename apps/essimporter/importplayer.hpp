@@ -98,6 +98,12 @@ struct PCDT
         int mCellX;
         int mCellY;
     };
+
+    struct AADT // 44 bytes
+    {
+        int animGroupIndex; // See convertANIS() for the mapping.
+        unsigned char mUnknown5[40];
+    };
 #pragma pack(pop)
 
     std::vector<FNAM> mFactions;
@@ -108,6 +114,9 @@ struct PCDT
 
     bool mHasENAM;
     ENAM mENAM; // last exterior cell
+
+    bool mHasAADT;
+    AADT mAADT;
 
     void load(ESM::ESMReader& esm);
 };

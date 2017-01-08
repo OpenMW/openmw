@@ -107,12 +107,24 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
 {
     const MWWorld::Ptr player = MWMechanics::getPlayer();
+    MWMechanics::NpcStats& stats = player.getClass().getNpcStats (player);
 
-    // check player faction
+    // check player faction and rank
     if (!info.mPcFaction.empty())
     {
-        MWMechanics::NpcStats& stats = player.getClass().getNpcStats (player);
         std::map<std::string,int>::const_iterator iter = stats.getFactionRanks().find (Misc::StringUtils::lowerCase (info.mPcFaction));
+
+        if(iter==stats.getFactionRanks().end())
+            return false;
+
+        // check rank
+        if (iter->second < info.mData.mPCrank)
+            return false;
+    }
+    else if (info.mData.mPCrank != -1)
+    {
+        // required PC faction is not specified but PC rank is; use speaker's faction
+        std::map<std::string,int>::const_iterator iter = stats.getFactionRanks().find (Misc::StringUtils::lowerCase (mActor.getClass().getPrimaryFaction(mActor)));
 
         if(iter==stats.getFactionRanks().end())
             return false;
