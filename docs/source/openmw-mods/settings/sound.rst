@@ -80,6 +80,17 @@ This integer setting determines the minimum size of the sound buffer cache in me
 
 The default value is 14. This setting can only be configured by editing the settings configuration file. This setting was added in OpenMW version 0.38.
 
+buffer cache max
+----------------
+
+:Type:		integer
+:Range:		> 0
+:Default:	16
+
+This integer setting determines the maximum size of the sound buffer cache in megabytes. When the cache reaches this size, old buffers will be unloaded until it reaches the size specified by the buffer cache min setting. This setting must be greater than or equal to the buffer cache min setting.
+
+The default value is 16. This setting can only be configured by editing the settings configuration file. This setting was added in OpenMW version 0.38.
+
 hrtf enable
 -----------
 

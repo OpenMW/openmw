@@ -14,7 +14,7 @@ Install
    
 .. note::
 	There may be multiple levels of folders, but the location of the plugins must be the same as the resource folders.
-3.	Open your ``openmw.cfg`` file in your preferred plain text editor. It is located as described in https://wiki.openmw.org/index.php?title=Paths and *not* in your OpenMW root directory.
+3.	Open your ``openmw.cfg`` file in your preferred plain text editor. It is located as described in :doc:`paths` and *not* in your OpenMW root directory.
 #.	Find or search for ``data=``. This is located very near the bottom of the file. If you are using Morrowind, this first entry should already point to your Morrowind data directory, ``Data Files``; otherwise it will point to your game file, ``.omwgame``.
 #.	Create a new line underneath and type: ``data="path/to/your/data folder"`` Remember, the *data folder* is where your mod's plugin files are. The double quotes around this path name are *required*.
 #.	Save your ``openmw.cfg`` file.
