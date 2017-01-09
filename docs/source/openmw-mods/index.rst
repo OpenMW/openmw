@@ -16,3 +16,4 @@ The following document is the complete reference guide to modifying, or modding,
    mod-install
    settings/index
    convert_bump_mapped_mods
+   paths

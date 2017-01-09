@@ -2,14 +2,7 @@
 Advanced Settings Configuration
 ###############################
 
-This part of the guide will cover how to make modifications to the more arcane settings in OpenMW, most of which are not available from in-game menus, to optimize or customize your OpenMW experience. If you are familiar with ``.ini`` tweaks in Morrowind or the other games, this will be quite similar. All settings described in this section are changed in ``settings.cfg``, located in your OpenMW user directory. This directory is located differently depending on your operating system, shown below:
-
-Windows:
-	``C:\Users\<username>\Documents\my games\openmw`` (hard drive, username and language may vary)
-Mac OSX:
-	``$HOME/Library/Preferences/openmw``
-Linux:
-	``$HOME/.config/openmw``
+This part of the guide will cover how to make modifications to the more arcane settings in OpenMW, most of which are not available from in-game menus, to optimize or customize your OpenMW experience. If you are familiar with ``.ini`` tweaks in Morrowind or the other games, this will be quite similar. All settings described in this section are changed in ``settings.cfg``, located in your OpenMW user directory. See :doc:`paths` for this location.
 
 Although this guide attempts to be comprehensive and up to date. You will always be able to find the full list of settings available and their default values in ``settings-default.cfg`` in your main OpenMW installation directory. The ranges I have included with each setting are the physically possible ranges, not recommendations.
 
