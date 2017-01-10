@@ -865,6 +865,19 @@ int Networking::mainLoop()
                 case ID_CONNECTED_PING:
                 case ID_UNCONNECTED_PING:
                     break;
+                case ID_MASTER_QUERY:
+                {
+                    LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Query request from %s",
+                                       packet->systemAddress.ToString());
+                    RakNet::BitStream bs;
+                    bs.Write((unsigned char) ID_MASTER_QUERY);
+                    bs.Write(Players::getPlayers()->size());
+                    for(auto player : *Players::getPlayers())
+                        bs.Write(RakNet::RakString(player.second->Npc()->mName.c_str()));
+                    bs.Write(0); // plugins
+                    peer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
+                        break;
+                }
                 default:
                     update(packet);
                     break;
