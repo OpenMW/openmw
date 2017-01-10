@@ -10,6 +10,7 @@
 #include <apps/openmw-mp/Networking.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Version.hpp>
+#include "MasterClient.hpp"
 
 template<typename... Types>
 constexpr char TypeString<Types...>::value[];
@@ -137,4 +138,14 @@ int ScriptFunctions::GetAvgPing(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player,-1);
     return mwmp::Networking::get().getAvgPing(player->guid);
+}
+
+void ScriptFunctions::SetModname(const char *name) noexcept
+{
+    mwmp::Networking::getPtr()->getMasterClient()->SetModname(name);
+}
+
+void ScriptFunctions::SetHostname(const char *name) noexcept
+{
+    mwmp::Networking::getPtr()->getMasterClient()->SetHostname(name);
 }

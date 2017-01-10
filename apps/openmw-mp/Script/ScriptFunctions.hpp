@@ -62,6 +62,8 @@ public:
     static const char *GetServerVersion() noexcept;
     static const char *GetProtocolVersion() noexcept;
     static int GetAvgPing(unsigned short pid) noexcept;
+    static void SetModname(const char* name) noexcept;
+    static void SetHostname(const char* name) noexcept;
 
     static constexpr ScriptFunctionData functions[]{
             {"CreateTimer",         ScriptFunctions::CreateTimer},
@@ -82,6 +84,8 @@ public:
             {"GetServerVersion",    ScriptFunctions::GetServerVersion},
             {"GetProtocolVersion",  ScriptFunctions::GetProtocolVersion},
             {"GetAvgPing",          ScriptFunctions::GetAvgPing},
+            {"SetModname",          ScriptFunctions::SetModname},
+            {"SetHostname",         ScriptFunctions::SetHostname},
 
             TRANSLOCATIONFUNCTIONS,
             STATSFUNCTIONS,
