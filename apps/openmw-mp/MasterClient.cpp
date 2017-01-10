@@ -147,7 +147,7 @@ void MasterClient::Update()
         if (response == "Created")
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server registered on the master server.");
         else if (response == "Accepted")
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server updated information about himself on the master server.");
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Server updated information about himself on the master server.");
         else if (response == "bad request")
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Update rate is too low, and the master server has deleted information about"
