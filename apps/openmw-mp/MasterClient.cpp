@@ -67,7 +67,7 @@ MasterClient::Send(std::string hostname, std::string modname, unsigned maxPlayer
     sstr << "\"port\": " << serverPort << ", ";
     sstr << "\"query_port\": " << queryPort << ", ";
     sstr << "\"hostname\": \"" << hostname.c_str() << "\", ";
-    sstr << "\"hostname\": \"" << modname.c_str() << "\", ";
+    sstr << "\"modname\": \"" << modname.c_str() << "\", ";
     sstr << "\"players\": " << players << ", ";
     sstr << "\"max_players\": " << maxPlayers;
     sstr << "}";
