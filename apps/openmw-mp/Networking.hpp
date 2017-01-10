@@ -9,6 +9,7 @@
 #include <components/openmw-mp/Controllers/WorldPacketController.hpp>
 #include "Player.hpp"
 
+class MasterClient;
 namespace  mwmp
 {
     class Networking
@@ -36,6 +37,9 @@ namespace  mwmp
         PlayerPacketController *getPlayerController() const;
         WorldPacketController *getWorldController() const;
 
+        MasterClient *getMasterClient();
+        void InitQuery(std::string queryAddr, unsigned short queryPort, std::string serverAddr, unsigned short serverPort);
+
         static const Networking &get();
         static Networking *getPtr();
 
@@ -44,6 +48,7 @@ namespace  mwmp
         RakNet::RakPeerInterface *peer;
         RakNet::BitStream bsOut;
         TPlayers *players;
+        MasterClient *mclient;
 
         PlayerPacketController *playerController;
         WorldPacketController *worldController;

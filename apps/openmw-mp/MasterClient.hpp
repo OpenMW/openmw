@@ -9,6 +9,7 @@
 #include <HTTPConnection2.h>
 #include <TCPInterface.h>
 #include <mutex>
+#include <thread>
 
 class MasterClient
 {
@@ -20,25 +21,30 @@ public:
     MasterClient(std::string queryAddr, unsigned short queryPort, std::string serverAddr, unsigned short serverPort);
     void SetPlayers(unsigned pl);
     void SetMaxPlayers(unsigned pl);
-    void SetMOTD(std::string &motd);
+    void SetHostname(std::string hostname);
+    void SetModname(std::string hostname);
     void Update();
+    void Start();
     void Stop();
     void SetUpdateRate(unsigned int rate);
 
 private:
-    RakNet::RakString Send(std::string motd, unsigned players, unsigned maxPlayers, bool update = true);
+    RakNet::RakString
+    Send(std::string hostname, std::string modname, unsigned maxPlayers, bool update, unsigned players);
 private:
     std::string queryAddr;
     unsigned short queryPort;
     std::string serverAddr;
     unsigned short serverPort;
-    std::string motd;
+    std::string hostname;
+    std::string modname;
     unsigned players, maxPlayers;
     RakNet::HTTPConnection2 *httpConnection;
     RakNet::TCPInterface tcpInterface;
     unsigned int timeout;
     static bool sRun;
     std::mutex mutexData;
+    std::thread thrQuery;
 
 };
 

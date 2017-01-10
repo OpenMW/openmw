@@ -14,6 +14,7 @@
 #include <thread>
 
 #include "Networking.hpp"
+#include "MasterClient.hpp"
 
 using namespace mwmp;
 using namespace std;
@@ -909,4 +910,15 @@ unsigned int Networking::maxConnections() const
 int Networking::getAvgPing(RakNet::AddressOrGUID addr) const
 {
     return peer->GetAveragePing(addr);
+}
+
+MasterClient *Networking::getMasterClient()
+{
+    return mclient;
+}
+
+void Networking::InitQuery(std::string queryAddr, unsigned short queryPort, std::string serverAddr,
+                           unsigned short serverPort)
+{
+    mclient = new MasterClient(queryAddr, (unsigned short) queryPort, serverAddr, (unsigned short) serverPort);
 }

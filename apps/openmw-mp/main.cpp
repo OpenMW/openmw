@@ -11,11 +11,12 @@
 #include <iostream>
 #include <components/files/configurationmanager.hpp>
 #include <components/settings/settings.hpp>
-#include <thread>
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <components/openmw-mp/Version.hpp>
+
+#include "MasterClient.hpp"
 
 #ifdef ENABLE_BREAKPAD
 #include <handler/exception_handler.h>
@@ -232,30 +233,25 @@ int main(int argc, char *argv[])
 
     Networking networking(peer);
 
-    bool masterEnabled = mgr.getBool("enabled", "MasterServer");
-    thread thrQuery;
-    MasterClient *mclient;
-    if (masterEnabled)
+    if ( mgr.getBool("enabled", "MasterServer"))
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sharing server query info to master enabled.");
         string masterAddr = mgr.getString("address", "MasterServer");
         int masterPort = mgr.getInt("port", "MasterServer");
-        mclient = new MasterClient(masterAddr, (unsigned short) masterPort, addr, (unsigned short) port);
-        mclient->SetMaxPlayers((unsigned)players);
-        string motd = mgr.getString("motd", "General");
-        mclient->SetMOTD(motd);
-        thrQuery = thread(queryThread, mclient);
+
+        networking.InitQuery(masterAddr, (unsigned short) masterPort, addr, (unsigned short) port);
+        networking.getMasterClient()->SetMaxPlayers((unsigned)players);
+        string hostname = mgr.getString("hostname", "General");
+        networking.getMasterClient()->SetHostname(hostname);
+
+        networking.getMasterClient()->Start();
     }
 
     int code = networking.mainLoop();
 
     RakNet::RakPeerInterface::DestroyInstance(peer);
 
-    if (thrQuery.joinable())
-    {
-        mclient->Stop();
-        thrQuery.join();
-    }
+    networking.getMasterClient()->Stop();
 
     if (code == 0)
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Quitting peacefully.");

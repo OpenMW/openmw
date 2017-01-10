@@ -6,6 +6,7 @@
 #include <Getche.h>
 #include <sstream>
 #include <iostream>
+#include <thread>
 #include <RakPeerInterface.h>
 #include "MasterClient.hpp"
 #include <components/openmw-mp/Log.hpp>
@@ -19,12 +20,10 @@ MasterClient::MasterClient(std::string queryAddr, unsigned short queryPort, std:
                            unsigned short serverPort) : queryAddr(queryAddr), queryPort(queryPort),
                                                         serverAddr(serverAddr), serverPort(serverPort)
 {
-    httpConnection = RakNet::HTTPConnection2::GetInstance();
-    tcpInterface.Start(0, 64);
-    tcpInterface.AttachPlugin(httpConnection);
     players = 0;
     maxPlayers = 0;
-    motd = "";
+    hostname = "";
+    modname = "";
     timeout = 1000; // every 1 seconds
 }
 
@@ -42,14 +41,22 @@ void MasterClient::SetMaxPlayers(unsigned pl)
     mutexData.unlock();
 }
 
-void MasterClient::SetMOTD(std::string &motd)
+void MasterClient::SetHostname(std::string hostname)
 {
     mutexData.lock();
-    this->motd = motd.substr(0, 200);
+    this->hostname = hostname.substr(0, 200);
     mutexData.unlock();
 }
 
-RakNet::RakString MasterClient::Send(std::string motd, unsigned players, unsigned maxPlayers, bool update)
+void MasterClient::SetModname(std::string modname)
+{
+    mutexData.lock();
+    this->modname = modname.substr(0, 200);
+    mutexData.unlock();
+}
+
+RakNet::RakString
+MasterClient::Send(std::string hostname, std::string modname, unsigned maxPlayers, bool update, unsigned players)
 {
     /*static unsigned short oldServerPort, oldQueryPort;
     static string oldMotd;
@@ -59,7 +66,8 @@ RakNet::RakString MasterClient::Send(std::string motd, unsigned players, unsigne
     sstr << "{";
     sstr << "\"port\": " << serverPort << ", ";
     sstr << "\"query_port\": " << queryPort << ", ";
-    sstr << "\"motd\": \"" << motd << "\", ";
+    sstr << "\"hostname\": \"" << hostname.c_str() << "\", ";
+    sstr << "\"hostname\": \"" << modname.c_str() << "\", ";
     sstr << "\"players\": " << players << ", ";
     sstr << "\"max_players\": " << maxPlayers;
     sstr << "}";
@@ -126,7 +134,12 @@ RakNet::RakString MasterClient::Send(std::string motd, unsigned players, unsigne
 void MasterClient::Update()
 {
     assert(!sRun);
-    RakNet::RakString response = Send(motd, players, maxPlayers, false);
+
+    httpConnection = RakNet::HTTPConnection2::GetInstance();
+    tcpInterface.Start(0, 64);
+    tcpInterface.AttachPlugin(httpConnection);
+
+    RakNet::RakString response = Send(hostname, std::__cxx11::string(), maxPlayers, false, players);
     bool update = true;
     sRun = true;
     while (sRun)
@@ -151,15 +164,22 @@ void MasterClient::Update()
         RakSleep(timeout);
         ;
         players = mwmp::Networking::get().numberOfConnections();
-        response = Send(motd, players, maxPlayers, update);
+        response = Send(hostname, std::__cxx11::string(), maxPlayers, update, players);
         update = true;
     }
 
 }
 
+void MasterClient::Start()
+{
+    thrQuery = thread(&MasterClient::Update, this);
+}
+
 void MasterClient::Stop()
 {
     sRun = false;
+    if(thrQuery.joinable())
+        thrQuery.join();
 }
 
 void MasterClient::SetUpdateRate(unsigned int rate)
