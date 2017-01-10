@@ -52,6 +52,8 @@ void Players::newPlayer(RakNet::RakNetGUID guid)
 
 Player *Players::getPlayer(RakNet::RakNetGUID guid)
 {
+    if(players.count(guid) == 0)
+        return nullptr;
     return players[guid];
 }
 
