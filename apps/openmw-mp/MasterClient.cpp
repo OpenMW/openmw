@@ -139,7 +139,7 @@ void MasterClient::Update()
     tcpInterface.Start(0, 64);
     tcpInterface.AttachPlugin(httpConnection);
 
-    RakNet::RakString response = Send(hostname, std::__cxx11::string(), maxPlayers, false, players);
+    RakNet::RakString response = Send(hostname, modname, maxPlayers, false, players);
     bool update = true;
     sRun = true;
     while (sRun)
@@ -162,12 +162,11 @@ void MasterClient::Update()
         }
 
         RakSleep(timeout);
-        ;
+
         players = mwmp::Networking::get().numberOfConnections();
-        response = Send(hostname, std::__cxx11::string(), maxPlayers, update, players);
+        response = Send(hostname, modname, maxPlayers, update, players);
         update = true;
     }
-
 }
 
 void MasterClient::Start()
