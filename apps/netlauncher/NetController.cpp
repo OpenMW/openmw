@@ -26,10 +26,10 @@ NetController *NetController::get()
     return mThis;
 }
 
-void NetController::Create()
+void NetController::Create(std::string addr, unsigned short port)
 {
     assert(!mThis);
-    mThis = new NetController;
+    mThis = new NetController(addr, port);
 }
 
 void NetController::Destroy()
@@ -39,7 +39,7 @@ void NetController::Destroy()
     mThis = nullptr;
 }
 
-NetController::NetController() : httpNetwork("127.0.0.1", 8080)
+NetController::NetController(std::string addr, unsigned short port) : httpNetwork(addr, port)
 {
 
 }
@@ -116,30 +116,19 @@ void NetController::downloadInfo(QAbstractItemModel *pModel, QModelIndex index)
         model->setData(mi, PingRakNetServer(addr[0].toLatin1().data(), addr[1].toUShort()));
     }
 
-    //qDebug() << data;
-
-    if (model->rowCount() != 0)
-        return;
-
-    /*model->insertRows(0, 6);
-    model->myData[0] = {"127.0.0.1:25565", 0, 20, 1, "Super Server"};
-    model->myData[1] = {"127.0.0.1:25565", 5, 20, 2, "Koncord's server"};
-    model->myData[2] = {"server.local:8888", 15, 15, 15, "tes3mp server", "custom mode"};
-    model->myData[3] = {"127.0.0.1:25562", 1, 2, 5, "Server"};
-    model->myData[4] = {"tes3mp.com:22222", 8, 9, 1000, "Antoher Server", "super duper mod"};
-    model->myData[5] = {"localhost:24", 1, 5, 5, "Test Server", "Another mod 0.1"};*/
 }
 
-void NetController::updateInfo(QAbstractItemModel *pModel, QModelIndex index)
+bool NetController::updateInfo(QAbstractItemModel *pModel, QModelIndex index)
 {
     qDebug() << "TODO: \"NetController::updateInfo(QAbstractItemModel *, QModelIndex)\" is not completed";
     ServerModel *model = ((ServerModel*)pModel);
 
+    bool result;
     if (index.isValid() && index.row() >= 0)
     {
         //ServerData &sd = model->myData[index.row()];
         //qDebug() << sd.addr;
-        downloadInfo(pModel, index);
+        result = downloadInfo(pModel, index);
     }
     else
     {

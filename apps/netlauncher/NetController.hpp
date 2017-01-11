@@ -16,7 +16,7 @@ class NetController
 {
 public:
     static NetController *get();
-    static void Create();
+    static void Create(std::string addr, unsigned short port);
     static void Destroy();
     void updateInfo(QAbstractItemModel *pModel, QModelIndex index= QModelIndex());
     void updateInfo();
@@ -25,7 +25,7 @@ public:
     void selectServer(ServerData *pServerData);
     ServerData *selectedServer();
 protected:
-    NetController();
+    NetController(std::string addr, unsigned short port);
     ~NetController();
 private:
     NetController(const NetController &controller);
