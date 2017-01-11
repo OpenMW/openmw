@@ -84,10 +84,8 @@ public:
                              const std::string& sourceName, const std::string& sourceId, int casterActorId,
                         float magnitude, float remainingTime = -1, float totalTime = -1)
     {
-        MWWorld::Ptr player = MWMechanics::getPlayer();
-        if (    ((key.mId == ESM::MagicEffect::CommandHumanoid && mActor.getClass().isNpc())
-                || (key.mId == ESM::MagicEffect::CommandCreature && mActor.getTypeName() == typeid(ESM::Creature).name()))
-            && casterActorId == player.getClass().getCreatureStats(player).getActorId()
+        if (((key.mId == ESM::MagicEffect::CommandHumanoid && mActor.getClass().isNpc())
+            || (key.mId == ESM::MagicEffect::CommandCreature && mActor.getTypeName() == typeid(ESM::Creature).name()))
             && magnitude >= mActor.getClass().getCreatureStats(mActor).getLevel())
                 mCommanded = true;
     }
