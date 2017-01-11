@@ -15,6 +15,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <memory>
+#include <QtWidgets/QMessageBox>
 
 using namespace std;
 
@@ -59,7 +60,7 @@ struct pattern
     QString value;
 };
 
-void NetController::downloadInfo(QAbstractItemModel *pModel, QModelIndex index)
+bool NetController::downloadInfo(QAbstractItemModel *pModel, QModelIndex index)
 {
     ServerModel *model = ((ServerModel *) pModel);
 
@@ -74,6 +75,12 @@ void NetController::downloadInfo(QAbstractItemModel *pModel, QModelIndex index)
         if (!data.isEmpty() && data != "NO_CONTENT" && data != "LOST_CONNECTION")
             break;
         RakSleep(30);
+    }
+
+    if(data == "UNKNOWN_ADDRESS")
+    {
+        QMessageBox::critical(0, "Error", "Cannot connect to the master server!");
+        return false;
     }
 
     qDebug() << "Content: " << data;
@@ -116,6 +123,7 @@ void NetController::downloadInfo(QAbstractItemModel *pModel, QModelIndex index)
         model->setData(mi, PingRakNetServer(addr[0].toLatin1().data(), addr[1].toUShort()));
     }
 
+    return true;
 }
 
 bool NetController::updateInfo(QAbstractItemModel *pModel, QModelIndex index)
@@ -137,8 +145,9 @@ bool NetController::updateInfo(QAbstractItemModel *pModel, QModelIndex index)
             qDebug() << iter->addr;
         }
         model->removeRows(0, model->rowCount(index));
-        downloadInfo(pModel, index);
+        result = downloadInfo(pModel, index);
     }
+    return result;
 }
 
 void NetController::updateInfo()
@@ -151,6 +160,12 @@ void NetController::updateInfo()
         if (!data.isEmpty() && data != "NO_CONTENT" && data != "LOST_CONNECTION")
             break;
         RakSleep(30);
+    }
+
+    if(data == "UNKNOWN_ADDRESS")
+    {
+        QMessageBox::critical(0, "Error", "Cannot connect to the master server!");
+        return;
     }
 
     qDebug() << "Content: " << data;

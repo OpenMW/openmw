@@ -18,7 +18,7 @@ public:
     static NetController *get();
     static void Create(std::string addr, unsigned short port);
     static void Destroy();
-    void updateInfo(QAbstractItemModel *pModel, QModelIndex index= QModelIndex());
+    bool updateInfo(QAbstractItemModel *pModel, QModelIndex index= QModelIndex());
     void updateInfo();
     QStringList players();
     QStringList plugins();
@@ -29,7 +29,7 @@ protected:
     ~NetController();
 private:
     NetController(const NetController &controller);
-    void downloadInfo(QAbstractItemModel *pModel, QModelIndex index);
+    bool downloadInfo(QAbstractItemModel *pModel, QModelIndex index);
 
     static NetController *mThis;
     ServerData *sd;

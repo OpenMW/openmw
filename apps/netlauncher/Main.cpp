@@ -26,8 +26,6 @@ Main::Main(QWidget *parent)
     tblServerBrowser->hideColumn(ServerData::ADDR);
     tblFavorites->hideColumn(ServerData::ADDR);
 
-    refresh();
-
     connect(tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabSwitched(int)));
     connect(actionAdd, SIGNAL(triggered(bool)), this, SLOT(addServer()));
     connect(actionAdd_by_IP, SIGNAL(triggered(bool)), this, SLOT(addServerByIP()));
@@ -81,9 +79,9 @@ void Main::deleteServer()
     }
 }
 
-void Main::refresh()
+bool Main::refresh()
 {
-    NetController::get()->updateInfo(proxyModel->sourceModel());
+    return NetController::get()->updateInfo(proxyModel->sourceModel());
     /*tblServerBrowser->resizeColumnToContents(ServerData::HOSTNAME);
     tblServerBrowser->resizeColumnToContents(ServerData::MODNAME);
     tblFavorites->resizeColumnToContents(ServerData::HOSTNAME);

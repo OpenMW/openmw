@@ -18,12 +18,13 @@ public:
     explicit Main(QWidget *parent = 0);
     virtual ~Main();
 protected:
+public slots:
+    bool refresh();
 protected slots:
     void tabSwitched(int index);
     void addServer();
     void addServerByIP();
     void deleteServer();
-    void refresh();
     void play();
     void serverSelected();
 private:

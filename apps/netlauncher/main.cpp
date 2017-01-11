@@ -44,7 +44,14 @@ int main(int argc, char *argv[])
     atexit(NetController::Destroy);
     QApplication app(argc, argv);
     Main d;
-    d.show();
-    // create and show your widgets here
-    return app.exec();
+    if (d.refresh())
+    {
+        d.show();
+        return app.exec();
+    }
+    else
+    {
+        app.exit();
+        return 0;
+    }
 }

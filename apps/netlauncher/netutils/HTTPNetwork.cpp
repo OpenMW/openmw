@@ -75,7 +75,8 @@ std::string HTTPNetwork::getData(const char *uri)
 {
     RakNet::RakString createRequest = RakNet::RakString::FormatForGET(uri);
 
-    httpConnection->TransmitRequest(createRequest, address.c_str(), port);
+    if (!httpConnection->TransmitRequest(createRequest, address.c_str(), port))
+        return "UNKNOWN_ADDRESS";
     return answer();
 }
 
@@ -83,7 +84,8 @@ std::string HTTPNetwork::getDataPOST(const char *uri, const char* body, const ch
 {
     RakNet::RakString createRequest = RakNet::RakString::FormatForPOST(uri, contentType, body);
 
-    httpConnection->TransmitRequest(createRequest, address.c_str(), port);
+    if (!httpConnection->TransmitRequest(createRequest, address.c_str(), port))
+        return "UNKNOWN_ADDRESS";
     return answer();
 }
 
@@ -91,6 +93,7 @@ std::string HTTPNetwork::getDataPUT(const char *uri, const char* body, const cha
 {
     RakNet::RakString createRequest = RakNet::RakString::FormatForPUT(uri, contentType, body);
 
-    httpConnection->TransmitRequest(createRequest, address.c_str(), port);
+    if (!httpConnection->TransmitRequest(createRequest, address.c_str(), port))
+        return "UNKNOWN_ADDRESS";
     return answer();
 }
