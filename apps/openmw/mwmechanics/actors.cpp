@@ -93,6 +93,7 @@ public:
     }
 };
 
+// Check for command effects having ended and remove package if necessary
 void adjustCommandedActor (const MWWorld::Ptr& actor)
 {
     CheckActorCommanded check(actor);
@@ -112,13 +113,7 @@ void adjustCommandedActor (const MWWorld::Ptr& actor)
         }
     }
 
-    if (check.mCommanded && !hasCommandPackage)
-    {
-        // FIXME: don't use refid string
-        MWMechanics::AiFollow package("player", true);
-        stats.getAiSequence().stack(package, actor);
-    }
-    else if (!check.mCommanded && hasCommandPackage)
+    if (!check.mCommanded && hasCommandPackage)
     {
         stats.getAiSequence().erase(it);
     }
