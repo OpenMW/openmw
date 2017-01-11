@@ -34,6 +34,7 @@
 #include "movement.hpp"
 #include "character.hpp"
 #include "aicombat.hpp"
+#include "aicombataction.hpp"
 #include "aifollow.hpp"
 #include "aipursue.hpp"
 #include "actor.hpp"
@@ -291,10 +292,12 @@ namespace MWMechanics
 
     void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer)
     {
-        CreatureStats& creatureStats = actor1.getClass().getCreatureStats(actor1);
+        const CreatureStats& creatureStats1 = actor1.getClass().getCreatureStats(actor1);
+        if (creatureStats1.getAiSequence().isInCombat(actor2))
+            return;
 
-        if (actor2.getClass().getCreatureStats(actor2).isDead()
-                || actor1.getClass().getCreatureStats(actor1).isDead())
+        const CreatureStats& creatureStats2 = actor2.getClass().getCreatureStats(actor2);
+        if (creatureStats1.isDead() || creatureStats2.isDead())
             return;
 
         const ESM::Position& actor1Pos = actor1.getRefData().getPosition();
@@ -303,55 +306,26 @@ namespace MWMechanics
         if (sqrDist > sqrAiProcessingDistance)
             return;
 
-        // pure water creatures won't try to fight with the target on the ground
-        // except that creature is already hostile
-        if ((againstPlayer || !creatureStats.getAiSequence().isInCombat())
-            && !MWMechanics::isEnvironmentCompatible(actor1, actor2)) // creature can't swim to target
-        {
-            return;
-        }
-
-        // no combat for totally static creatures (they have no movement or attack animations anyway)
+        // No combat for totally static creatures
         if (!actor1.getClass().isMobile(actor1))
             return;
 
-        bool aggressive;
-
-        if (againstPlayer)
+        // Start combat if target actor is in combat with one of our followers or escorters
+        const std::list<MWWorld::Ptr>& followersAndEscorters = getActorsSidingWith(actor1);
+        for (std::list<MWWorld::Ptr>::const_iterator it = followersAndEscorters.begin(); it != followersAndEscorters.end(); ++it)
         {
-            // followers with high fight should not engage in combat with the player (e.g. bm_bear_black_summon)
-            const std::list<MWWorld::Ptr>& followers = getActorsSidingWith(actor2);
-            if (std::find(followers.begin(), followers.end(), actor1) != followers.end())
-                return;
-
-            aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
-        }
-        else
-        {
-            aggressive = false;
-
-            // Make guards fight aggressive creatures
-            if (!actor1.getClass().isNpc() && actor2.getClass().isClass(actor2, "Guard"))
+            // Need to check both ways since player doesn't use AI packages
+            if ((creatureStats2.getAiSequence().isInCombat(*it)
+                    || it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(actor2))
+                    && !creatureStats1.getAiSequence().isInCombat(*it))
             {
-                if (creatureStats.getAiSequence().isInCombat() && MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2))
-                    aggressive = true;
+                MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
+                return;
             }
         }
 
-        // start combat if target actor is in combat with one of our followers
-        const std::list<MWWorld::Ptr>& followers = getActorsSidingWith(actor1);
-        const CreatureStats& creatureStats2 = actor2.getClass().getCreatureStats(actor2);
-        for (std::list<MWWorld::Ptr>::const_iterator it = followers.begin(); it != followers.end(); ++it)
-        {
-            // need to check both ways since player doesn't use AI packages
-            if ((creatureStats2.getAiSequence().isInCombat(*it)
-                    || it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(actor2))
-                    && !creatureStats.getAiSequence().isInCombat(*it))
-                aggressive = true;
-        }
-
-        // start combat if target actor is in combat with someone we are following
-        for (std::list<MWMechanics::AiPackage*>::const_iterator it = creatureStats.getAiSequence().begin(); it != creatureStats.getAiSequence().end(); ++it)
+        // Start combat if target actor is in combat with someone we are following through a follow package
+        for (std::list<MWMechanics::AiPackage*>::const_iterator it = creatureStats1.getAiSequence().begin(); it != creatureStats1.getAiSequence().end(); ++it)
         {
             if (!(*it)->sideWithTarget())
                 continue;
@@ -361,20 +335,63 @@ namespace MWMechanics
             if (followTarget.isEmpty())
                 continue;
 
-            if (creatureStats.getAiSequence().isInCombat(followTarget))
+            if (creatureStats1.getAiSequence().isInCombat(followTarget))
                 continue;
 
-            // need to check both ways since player doesn't use AI packages
+            // Need to check both ways since player doesn't use AI packages
             if (creatureStats2.getAiSequence().isInCombat(followTarget)
                     || followTarget.getClass().getCreatureStats(followTarget).getAiSequence().isInCombat(actor2))
-                aggressive = true;
+            {
+                MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
+                return;
+            }
+        }
+      
+        // Start combat with the player if we are already in combat with a player follower or escorter
+        const std::list<MWWorld::Ptr>& playerFollowersAndEscorters = getActorsSidingWith(getPlayer());
+        if (againstPlayer)
+        {
+            for (std::list<MWWorld::Ptr>::const_iterator it = playerFollowersAndEscorters.begin(); it != playerFollowersAndEscorters.end(); ++it)
+            {
+                if (creatureStats1.getAiSequence().isInCombat(*it))
+                {
+                    MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
+                    return;
+                }
+            }
         }
 
-        if(aggressive)
+        // Otherwise, don't initiate combat with an unreachable target
+        if (!MWMechanics::canFight(actor1,actor2))
+            return;
+
+        bool aggressive = false;
+
+        if (againstPlayer || std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), actor2) != playerFollowersAndEscorters.end())
+        {
+            // Player followers and escorters with high fight should not initiate combat here with the player or with
+            // other player followers or escorters
+            if (std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), actor1) != playerFollowersAndEscorters.end())
+                return;
+
+            aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
+        }
+        else
+        {
+            // Make guards fight aggressive creatures
+            if (!actor1.getClass().isNpc() && actor2.getClass().isClass(actor2, "Guard"))
+            {
+                if (creatureStats1.getAiSequence().isInCombat() && MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2))
+                    aggressive = true;
+            }
+        }
+
+        if (aggressive)
         {
             bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor1, actor2);
 
-            if (againstPlayer) LOS &= MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor2, actor1);
+            if (againstPlayer || std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), actor2) != playerFollowersAndEscorters.end())
+                LOS &= MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor2, actor1);
 
             if (LOS)
             {

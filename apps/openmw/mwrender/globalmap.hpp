@@ -107,6 +107,7 @@ namespace MWRender
         std::vector< std::pair<int,int> > mExploredCells;
 
         osg::ref_ptr<osg::Texture2D> mBaseTexture;
+        osg::ref_ptr<osg::Texture2D> mAlphaTexture;
 
         // GPU copy of overlay
         // Note, uploads are pushed through a Camera, instead of through mOverlayImage

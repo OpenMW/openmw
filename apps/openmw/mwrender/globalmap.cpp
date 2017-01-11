@@ -7,6 +7,7 @@
 #include <osg/Group>
 #include <osg/Geometry>
 #include <osg/Depth>
+#include <osg/TexEnvCombine>
 
 #include <osgDB/WriteFile>
 
@@ -144,6 +145,10 @@ namespace MWRender
         image->allocateImage(mWidth, mHeight, 1, GL_RGB, GL_UNSIGNED_BYTE);
         unsigned char* data = image->data();
 
+        osg::ref_ptr<osg::Image> alphaImage = new osg::Image;
+        alphaImage->allocateImage(mWidth, mHeight, 1, GL_ALPHA, GL_UNSIGNED_BYTE);
+        unsigned char* alphaData = alphaImage->data();
+
         for (int x = mMinX; x <= mMaxX; ++x)
         {
             for (int y = mMinY; y <= mMaxY; ++y)
@@ -208,6 +213,8 @@ namespace MWRender
                         data[texelY * mWidth * 3 + texelX * 3] = r;
                         data[texelY * mWidth * 3 + texelX * 3+1] = g;
                         data[texelY * mWidth * 3 + texelX * 3+2] = b;
+
+                        alphaData[texelY * mWidth+ texelX] = (y2 < 0) ? static_cast<unsigned char>(0) : static_cast<unsigned char>(255);
                     }
                 }
                 loadingListener->increaseProgress();
@@ -223,6 +230,14 @@ namespace MWRender
         mBaseTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
         mBaseTexture->setImage(image);
         mBaseTexture->setResizeNonPowerOfTwoHint(false);
+
+        mAlphaTexture = new osg::Texture2D;
+        mAlphaTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        mAlphaTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        mAlphaTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+        mAlphaTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        mAlphaTexture->setImage(alphaImage);
+        mAlphaTexture->setResizeNonPowerOfTwoHint(false);
 
         clear();
 
@@ -299,6 +314,28 @@ namespace MWRender
             stateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
             stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
             stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+
+            if (mAlphaTexture)
+            {
+                osg::ref_ptr<osg::Vec2Array> texcoords = new osg::Vec2Array;
+
+                float x1 = x / static_cast<float>(mWidth);
+                float x2 = (x + width) / static_cast<float>(mWidth);
+                float y1 = y / static_cast<float>(mHeight);
+                float y2 = (y + height) / static_cast<float>(mHeight);
+                texcoords->push_back(osg::Vec2f(x1, y1));
+                texcoords->push_back(osg::Vec2f(x1, y2));
+                texcoords->push_back(osg::Vec2f(x2, y2));
+                texcoords->push_back(osg::Vec2f(x2, y1));
+                geom->setTexCoordArray(1, texcoords, osg::Array::BIND_PER_VERTEX);
+
+                stateset->setTextureAttributeAndModes(1, mAlphaTexture, osg::StateAttribute::ON);
+                osg::ref_ptr<osg::TexEnvCombine> texEnvCombine = new osg::TexEnvCombine;
+                texEnvCombine->setCombine_RGB(osg::TexEnvCombine::REPLACE);
+                texEnvCombine->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+                stateset->setTextureAttributeAndModes(1, texEnvCombine);
+            }
+
             camera->addChild(geom);
         }
 

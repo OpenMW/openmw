@@ -437,7 +437,9 @@ bool OpenAL_SoundStream::process()
             alGetSourcei(mSource, AL_SOURCE_STATE, &state);
             if(state != AL_PLAYING && state != AL_PAUSED)
             {
+                // Ensure all processed buffers are removed so we don't replay them.
                 refillQueue();
+
                 alSourcePlay(mSource);
             }
         }
@@ -906,7 +908,10 @@ void OpenAL_Output::finishSound(MWBase::SoundPtr sound)
     ALuint source = GET_PTRID(sound->mHandle);
     sound->mHandle = 0;
 
-    alSourceStop(source);
+    // Rewind the stream instead of stopping it, this puts the source into an AL_INITIAL state,
+    // which works around a bug in the MacOS OpenAL implementation which would otherwise think
+    // the initial queue already played when it hasn't.
+    alSourceRewind(source);
     alSourcei(source, AL_BUFFER, 0);
 
     mFreeSources.push_back(source);
@@ -1006,7 +1011,10 @@ void OpenAL_Output::finishStream(MWBase::SoundStreamPtr sound)
     sound->mHandle = 0;
     mStreamThread->remove(stream);
 
-    alSourceStop(source);
+    // Rewind the stream instead of stopping it, this puts the source into an AL_INITIAL state,
+    // which works around a bug in the MacOS OpenAL implementation which would otherwise think
+    // the initial queue already played when it hasn't.
+    alSourceRewind(source);
     alSourcei(source, AL_BUFFER, 0);
 
     mFreeSources.push_back(source);
