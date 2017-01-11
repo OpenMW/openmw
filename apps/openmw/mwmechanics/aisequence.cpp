@@ -281,6 +281,10 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
         }
     }
 
+    // Stop combat when a non-combat AI package is added
+    if (isActualAiPackage(package.getTypeId()))
+        stopCombat();
+
     // remove previous packages if required
     if (package.shouldCancelPreviousAi())
     {
