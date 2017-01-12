@@ -73,12 +73,14 @@ std::string getBestAttack (const ESM::Weapon* weapon)
     int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
     int chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1])/2;
     int thrust = (weapon->mData.mThrust[0] + weapon->mData.mThrust[1])/2;
-    if (slash >= chop && slash >= thrust)
+    if (slash == chop && slash == thrust)
         return "slash";
-    else if (chop >= slash && chop >= thrust)
-        return "chop";
-    else
+    else if (thrust >= chop && thrust >= slash)
         return "thrust";
+    else if (slash >= chop && slash >= thrust)
+        return "slash";
+    else
+        return "chop";
 }
 
 // Converts a movement Run state to its equivalent Walk state.
