@@ -56,7 +56,7 @@ if(NOT WIN32)
 endif(NOT WIN32)
 
 # Main executable
-add_executable(openmw-netlauncher
+add_executable(tes3mp-netlauncher
         ${GUI_TYPE}
         ${NETLAUNCHER}
         ${NETLAUNCHER_HEADER}
@@ -66,25 +66,25 @@ add_executable(openmw-netlauncher
         )
 
 if (WIN32)
-    INSTALL(TARGETS openmw-netlauncher RUNTIME DESTINATION ".")
+    INSTALL(TARGETS tes3mp-netlauncher RUNTIME DESTINATION ".")
 endif (WIN32)
 
-target_link_libraries(openmw-netlauncher
+target_link_libraries(tes3mp-netlauncher
         ${SDL2_LIBRARY_ONLY}
         ${RakNet_LIBRARY}
         components
         )
 
 if (DESIRED_QT_VERSION MATCHES 4)
-#    target_link_libraries(openmw-netlauncher ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY})
+#    target_link_libraries(tes3mp-netlauncher ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY})
 #    if(WIN32)
-#        target_link_libraries(openmw-netlauncher ${QT_QTMAIN_LIBRARY})
+#        target_link_libraries(tes3mp-netlauncher ${QT_QTMAIN_LIBRARY})
 #    endif(WIN32)
 else()
-    qt5_use_modules(openmw-netlauncher Widgets Core)
+    qt5_use_modules(tes3mp-netlauncher Widgets Core)
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
     add_definitions (--coverage)
-    target_link_libraries(openmw-netlauncher gcov)
+    target_link_libraries(tes3mp-netlauncher gcov)
 endif()
