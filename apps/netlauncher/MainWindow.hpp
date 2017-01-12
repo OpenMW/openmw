@@ -11,12 +11,12 @@
 #include <QSortFilterProxyModel>
 #include <components/process/processinvoker.hpp>
 
-class Main : public QMainWindow,  private Ui::MainWindow
+class MainWindow : public QMainWindow,  private Ui::MainWindow
 {
     Q_OBJECT
 public:
-    explicit Main(QWidget *parent = 0);
-    virtual ~Main();
+    explicit MainWindow(QWidget *parent = 0);
+    virtual ~MainWindow();
 protected:
 public slots:
     bool refresh();

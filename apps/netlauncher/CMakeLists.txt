@@ -6,7 +6,7 @@ set(NETLAUNCHER_UI
         )
 set(NETLAUNCHER
         main.cpp
-        Main.cpp
+        MainWindow.cpp
         ServerModel.cpp
         NetController.cpp
         ServerInfoDialog.cpp
@@ -16,7 +16,7 @@ set(NETLAUNCHER
         )
 
 set(NETLAUNCHER_HEADER_MOC
-        Main.hpp
+        MainWindow.hpp
         ServerModel.hpp
         ServerInfoDialog.hpp
         )

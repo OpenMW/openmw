@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <components/settings/settings.hpp>
 #include <components/files/configurationmanager.hpp>
-#include "Main.hpp"
+#include "MainWindow.hpp"
 #include "NetController.hpp"
 
 std::string loadSettings (Settings::Manager & settings)
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     NetController::Create(addr, port);
     atexit(NetController::Destroy);
     QApplication app(argc, argv);
-    Main d;
+    MainWindow d;
     if (d.refresh())
     {
         d.show();

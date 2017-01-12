@@ -2,7 +2,7 @@
 // Created by koncord on 06.01.17.
 //
 
-#include "Main.hpp"
+#include "MainWindow.hpp"
 #include "NetController.hpp"
 #include "ServerInfoDialog.hpp"
 #include <qdebug.h>
@@ -10,7 +10,7 @@
 
 using namespace Process;
 
-Main::Main(QWidget *parent)
+MainWindow::MainWindow(QWidget *parent)
 {
     setupUi(this);
 
@@ -36,12 +36,12 @@ Main::Main(QWidget *parent)
     connect(tblFavorites, SIGNAL(clicked(QModelIndex)), this, SLOT(serverSelected()));
 }
 
-Main::~Main()
+MainWindow::~MainWindow()
 {
     delete mGameInvoker;
 }
 
-void Main::addServer()
+void MainWindow::addServer()
 {
     int id = tblServerBrowser->selectionModel()->currentIndex().row();
 
@@ -52,7 +52,7 @@ void Main::addServer()
     }
 }
 
-void Main::addServerByIP()
+void MainWindow::addServerByIP()
 {
     bool ok;
     QString text = QInputDialog::getText(this, tr("Add Server by address"), tr("Address:"), QLineEdit::Normal, "", &ok);
@@ -65,7 +65,7 @@ void Main::addServerByIP()
     }
 }
 
-void Main::deleteServer()
+void MainWindow::deleteServer()
 {
     if(tabWidget->currentIndex() != 1)
         return;
@@ -79,7 +79,7 @@ void Main::deleteServer()
     }
 }
 
-bool Main::refresh()
+bool MainWindow::refresh()
 {
     return NetController::get()->updateInfo(proxyModel->sourceModel());
     /*tblServerBrowser->resizeColumnToContents(ServerData::HOSTNAME);
@@ -88,7 +88,7 @@ bool Main::refresh()
     tblFavorites->resizeColumnToContents(ServerData::MODNAME);*/
 }
 
-void Main::play()
+void MainWindow::play()
 {
     QTableView *curTable = tabWidget->currentIndex() ? tblFavorites : tblServerBrowser;
     int id = curTable->selectionModel()->currentIndex().row();
@@ -111,7 +111,7 @@ void Main::play()
         return qApp->quit();
 }
 
-void Main::tabSwitched(int index)
+void MainWindow::tabSwitched(int index)
 {
     if(index == 0)
     {
@@ -127,7 +127,7 @@ void Main::tabSwitched(int index)
     actionAdd->setEnabled(false);
 }
 
-void Main::serverSelected()
+void MainWindow::serverSelected()
 {
     actionPlay->setEnabled(true);
     if(tabWidget->currentIndex() == 0)
