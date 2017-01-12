@@ -16,7 +16,7 @@ FIND_LIBRARY (Terra_LIBRARY_RELEASE NAMES terra
     /opt/local/lib
     $ENV{Terra_ROOT}/lib
     )
-	
+
 FIND_LIBRARY (Terra_LIBRARY_DEBUG NAMES terra
     PATHS
     ENV LD_LIBRARY_PATH
@@ -27,9 +27,7 @@ FIND_LIBRARY (Terra_LIBRARY_DEBUG NAMES terra
     /usr/local/lib
     /opt/local/lib
     $ENV{Terra_ROOT}/lib
-    )	
-	
-	
+    )
 
 FIND_PATH (Terra_INCLUDES terra/terra.h
     ENV CPATH
@@ -60,7 +58,8 @@ IF(Terra_FOUND)
         SET(Terra_LIBRARY ${Terra_LIBRARY_RELEASE} ${ZLIB_LIBRARIES} dl tinfo)
       ENDIF()
   IF(NOT Terra_FIND_QUIETLY)
-    MESSAGE(STATUS "Found Terra: ${Terra_LIBRARIES}")
+    MESSAGE(STATUS "Found Terra_LIBRARIES: ${Terra_LIBRARIES}")
+    MESSAGE(STATUS "Found Terra_INCLUDES: ${Terra_INCLUDES}")
   ENDIF(NOT Terra_FIND_QUIETLY)
 ELSE(Terra_FOUND)
   IF(Terra_FIND_REQUIRED)

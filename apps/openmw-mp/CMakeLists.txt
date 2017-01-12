@@ -37,12 +37,14 @@ endif(BUILD_WITH_PAWN)
 option(BUILD_WITH_LUA "Enable Terra/Lua language" ON)
 if(BUILD_WITH_LUA)
     #set(Terra_ROOT ${CMAKE_SOURCE_DIR}/external/terra/)
-	if(WIN32)
-		find_package(Lua51 REQUIRED)
-	else()
-		find_package(Terra REQUIRED)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DENABLE_TERRA")
-	endif()
+    if(WIN32)
+        find_package(Lua51 REQUIRED)
+        MESSAGE(STATUS "Found LUA_LIBRARY: ${LUA_LIBRARY}")
+        MESSAGE(STATUS "Found LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
+    else()
+        find_package(Terra REQUIRED)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DENABLE_TERRA")
+    endif()
     set(LuaScript_Sources
             Script/LangLua/LangLua.cpp
             Script/LangLua/LuaFunc.cpp)
@@ -110,7 +112,7 @@ target_link_libraries(tes3mp-server
     ${RakNet_LIBRARY}
     components
     ${Terra_LIBRARY}
-	${LUA_LIBRARIES}
+    ${LUA_LIBRARIES}
     ${Pawn_LIBRARY}
     ${Breakpad_Library}
 )
