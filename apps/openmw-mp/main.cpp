@@ -9,7 +9,6 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <apps/openmw-mp/Script/Script.hpp>
 #include <iostream>
-#include <ctime>
 #include <components/files/configurationmanager.hpp>
 #include <components/settings/settings.hpp>
 #include <boost/iostreams/concepts.hpp>
@@ -172,15 +171,8 @@ int main(int argc, char *argv[])
 
     boost::filesystem::ofstream logfile;
 
-    // Get timestamp to add at the end of the log's filename
-    time_t rawtime = time(0);
-    struct tm *timeinfo = localtime(&rawtime);
-    char buffer[25];
-    strftime(buffer, 25, "%Y-%m-%d-%I_%M_%S", timeinfo);
-    std::string timestamp(buffer);
-
     // Redirect cout and cerr to tes3mp server log
-    logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / "/tes3mp-server-" += timestamp += ".log"));
+    logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / "/tes3mp-server-" += Log::getFilenameTimestamp() += ".log"));
 
     coutsb.open (Tee(logfile, oldcout));
     cerrsb.open (Tee(logfile, oldcerr));

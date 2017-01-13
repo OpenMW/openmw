@@ -46,6 +46,8 @@ public:
     static const Log &Get();
     static void SetLevel(int level);
     void print(int level, bool hasPrefix, const char *file, int line, const char *message, ...) const;
+
+    static std::string getFilenameTimestamp();
 private:
     Log(int logLevel);
     /// Not implemented

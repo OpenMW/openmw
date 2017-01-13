@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cstdio>
-#include <ctime>
 
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
@@ -335,15 +334,8 @@ int main(int argc, char**argv)
         std::cout.rdbuf (&sb);
         std::cerr.rdbuf (&sb);
 #else
-        // Get timestamp to add at the end of the log's filename
-        time_t rawtime = time(0);
-        struct tm *timeinfo = localtime(&rawtime);
-        char buffer[25];
-        strftime(buffer, 25, "%Y-%m-%d-%I_%M_%S", timeinfo);
-        std::string timestamp(buffer);
-
         // Redirect cout and cerr to tes3mp client log
-        logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / "/tes3mp-client-" += timestamp += ".log"));
+        logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / "/tes3mp-client-" += Log::getFilenameTimestamp() += ".log"));
 
         coutsb.open (Tee(logfile, oldcout));
         cerrsb.open (Tee(logfile, oldcerr));

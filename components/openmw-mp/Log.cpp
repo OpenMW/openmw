@@ -105,3 +105,13 @@ void Log::print(int level, bool hasPrefix, const char *file, int line, const cha
     va_end(args);
     cout << buf.data() << flush;
 }
+
+string Log::getFilenameTimestamp()
+{
+    time_t rawtime = time(0);
+    struct tm *timeinfo = localtime(&rawtime);
+    char buffer[25];
+    strftime(buffer, 25, "%Y-%m-%d-%I_%M_%S", timeinfo);
+    std::string timestamp(buffer);
+    return timestamp;
+}
