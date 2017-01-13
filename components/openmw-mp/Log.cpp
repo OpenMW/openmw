@@ -105,20 +105,3 @@ void Log::print(int level, bool hasPrefix, const char *file, int line, const cha
     va_end(args);
     cout << buf.data() << flush;
 }
-
-string Log::renameOldLog(boost::filesystem::path path, string name, string extension)
-{
-    namespace fs = boost::filesystem;
-
-    std::string fullname = name + "." + extension;
-
-    if (fs::exists(path / fullname))
-    {
-        std::string newname;
-        for (int i = 1; fs::exists(path / (newname = name + boost::lexical_cast<string>(i++) + "." + extension)););
-
-        fs::rename(path / fullname, path / newname);
-        return newname;
-    }
-    return fullname;
-}
