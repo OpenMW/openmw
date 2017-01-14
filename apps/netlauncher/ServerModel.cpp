@@ -162,6 +162,9 @@ bool ServerModel::insertRows(int position, int count, const QModelIndex &index)
 
 bool ServerModel::removeRows(int position, int count, const QModelIndex &parent)
 {
+    if (count == 0)
+        return false;
+
     beginRemoveRows(parent, position, position + count - 1);
     myData.erase(myData.begin()+position, myData.begin() + position + count);
     endRemoveRows();
