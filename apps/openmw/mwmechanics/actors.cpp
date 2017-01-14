@@ -84,15 +84,14 @@ public:
                              const std::string& sourceName, const std::string& sourceId, int casterActorId,
                         float magnitude, float remainingTime = -1, float totalTime = -1)
     {
-        MWWorld::Ptr player = MWMechanics::getPlayer();
-        if (    ((key.mId == ESM::MagicEffect::CommandHumanoid && mActor.getClass().isNpc())
-                || (key.mId == ESM::MagicEffect::CommandCreature && mActor.getTypeName() == typeid(ESM::Creature).name()))
-            && casterActorId == player.getClass().getCreatureStats(player).getActorId()
+        if (((key.mId == ESM::MagicEffect::CommandHumanoid && mActor.getClass().isNpc())
+            || (key.mId == ESM::MagicEffect::CommandCreature && mActor.getTypeName() == typeid(ESM::Creature).name()))
             && magnitude >= mActor.getClass().getCreatureStats(mActor).getLevel())
                 mCommanded = true;
     }
 };
 
+// Check for command effects having ended and remove package if necessary
 void adjustCommandedActor (const MWWorld::Ptr& actor)
 {
     CheckActorCommanded check(actor);
@@ -112,13 +111,7 @@ void adjustCommandedActor (const MWWorld::Ptr& actor)
         }
     }
 
-    if (check.mCommanded && !hasCommandPackage)
-    {
-        // FIXME: don't use refid string
-        MWMechanics::AiFollow package("player", true);
-        stats.getAiSequence().stack(package, actor);
-    }
-    else if (!check.mCommanded && hasCommandPackage)
+    if (!check.mCommanded && hasCommandPackage)
     {
         stats.getAiSequence().erase(it);
     }
