@@ -137,7 +137,7 @@ endif()
 
 # Dependencies
 if (USE_QT)
-    set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
+    set(DESIRED_QT_VERSION 5 CACHE STRING "The QT version OpenMW should use (4 or 5)")
     set_property(CACHE DESIRED_QT_VERSION PROPERTY STRINGS 4 5)
     message(STATUS "Using Qt${DESIRED_QT_VERSION}")
 
