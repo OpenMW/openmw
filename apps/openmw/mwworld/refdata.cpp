@@ -84,6 +84,7 @@ namespace MWWorld
         try
         {
             copy (refData);
+            mFlags &= ~(Flag_SuppressActivate|Flag_OnActivate|Flag_ActivationBuffered);
         }
         catch (...)
         {
