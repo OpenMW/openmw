@@ -1,5 +1,3 @@
-set(CMAKE_CXX_STANDARD 14)
-
 set(NETLAUNCHER_UI
         ${CMAKE_SOURCE_DIR}/files/ui/Main.ui
         ${CMAKE_SOURCE_DIR}/files/ui/ServerInfo.ui
