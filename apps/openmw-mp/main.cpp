@@ -29,11 +29,11 @@ void printVersion(string version, int protocol)
 {
     cout << "TES3:MP dedicated server " << version;
     cout << " (";
-#ifdef _WIN32
+#if defined(_WIN32)
     cout << "Windows";
-#elif __linux
+#elif defined(__linux)
     cout << "Linux";
-#elif __APPLE__
+#elif defined(__APPLE__)
     cout << "OS X";
 #else
     cout << "Unknown OS";
@@ -41,8 +41,10 @@ void printVersion(string version, int protocol)
     cout << " ";
 #ifdef __x86_64__
     cout << "64-bit";
-#elif defined __i386__ || defined _M_I86
+#elif defined(__i386__) || defined(_M_I86)
     cout << "32-bit";
+#elif defined(__arm__)
+    cout << "ARMv" << __ARM_ARCH << " " << (__aarch64__ ? "64-bit" : "32-bit");
 #else
     cout << "Unknown architecture";
 #endif
