@@ -31,6 +31,7 @@
 #include "magiceffects.hpp"
 #include "npcstats.hpp"
 #include "actorutil.hpp"
+#include "aifollow.hpp"
 
 namespace MWMechanics
 {
@@ -493,6 +494,15 @@ namespace MWMechanics
                         targetEffects.add(MWMechanics::EffectKey(*effectIt), MWMechanics::EffectParam(effect.mMagnitude));
 
                         appliedLastingEffects.push_back(effect);
+
+                        // Command spells should have their effect, including taking the target out of combat, each time the spell successfully affects the target
+                        if (((effectIt->mEffectID == ESM::MagicEffect::CommandHumanoid && target.getClass().isNpc())
+                        || (effectIt->mEffectID == ESM::MagicEffect::CommandCreature && target.getTypeName() == typeid(ESM::Creature).name()))
+                        && !caster.isEmpty() && caster.getClass().isActor() && target != getPlayer() && magnitude >= target.getClass().getCreatureStats(target).getLevel())
+                        {
+                            MWMechanics::AiFollow package(caster.getCellRef().getRefId(), true);
+                            target.getClass().getCreatureStats(target).getAiSequence().stack(package, target);
+                        }
 
                         // For absorb effects, also apply the effect to the caster - but with a negative
                         // magnitude, since we're transferring stats from the target to the caster
