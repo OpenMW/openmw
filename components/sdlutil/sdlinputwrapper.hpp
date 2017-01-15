@@ -6,6 +6,7 @@
 #include <osg/ref_ptr>
 
 #include <SDL_events.h>
+#include <SDL_version.h>
 
 #include "OISCompat.hpp"
 #include "events.hpp"

@@ -27,6 +27,7 @@
 #include "magiceffects.hpp"
 #include "npcstats.hpp"
 #include "actorutil.hpp"
+#include "aifollow.hpp"
 
 namespace MWMechanics
 {
@@ -491,6 +492,15 @@ namespace MWMechanics
 
                         appliedLastingEffects.push_back(effect);
 
+                        // Command spells should have their effect, including taking the target out of combat, each time the spell successfully affects the target
+                        if (((effectIt->mEffectID == ESM::MagicEffect::CommandHumanoid && target.getClass().isNpc())
+                        || (effectIt->mEffectID == ESM::MagicEffect::CommandCreature && target.getTypeName() == typeid(ESM::Creature).name()))
+                        && !caster.isEmpty() && caster.getClass().isActor() && target != getPlayer() && magnitude >= target.getClass().getCreatureStats(target).getLevel())
+                        {
+                            MWMechanics::AiFollow package(caster.getCellRef().getRefId(), true);
+                            target.getClass().getCreatureStats(target).getAiSequence().stack(package, target);
+                        }
+
                         // For absorb effects, also apply the effect to the caster - but with a negative
                         // magnitude, since we're transferring stats from the target to the caster
                         if (!caster.isEmpty() && caster.getClass().isActor())
@@ -615,6 +625,11 @@ namespace MWMechanics
                     MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
                 return true;
             }
+        }
+        else if (target.getClass().isActor() && effectId == ESM::MagicEffect::Dispel)
+        {
+            target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude);
+            return true;
         }
         else if (target.getClass().isActor() && target == getPlayer())
         {
@@ -1147,9 +1162,6 @@ namespace MWMechanics
             break;
         case ESM::MagicEffect::CureCorprusDisease:
             actor.getClass().getCreatureStats(actor).getSpells().purgeCorprusDisease();
-            break;
-        case ESM::MagicEffect::Dispel:
-            actor.getClass().getCreatureStats(actor).getActiveSpells().purgeAll(magnitude);
             break;
         case ESM::MagicEffect::RemoveCurse:
             actor.getClass().getCreatureStats(actor).getSpells().purgeCurses();

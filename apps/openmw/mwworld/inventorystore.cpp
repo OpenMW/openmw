@@ -139,7 +139,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
 
     // Auto-equip items if an armor/clothing or weapon item is added, but not for the player nor werewolves
     if (actorPtr != MWMechanics::getPlayer()
-            && !(actorPtr.getClass().isNpc() && actorPtr.getClass().getNpcStats(actorPtr).isWerewolf()))
+            && actorPtr.getClass().isNpc() && !actorPtr.getClass().getNpcStats(actorPtr).isWerewolf())
     {
         std::string type = itemPtr.getTypeName();
         if (type == typeid(ESM::Armor).name() || type == typeid(ESM::Clothing).name())
@@ -237,10 +237,6 @@ bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const
 
 void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 {
-    if (!actor.getClass().isNpc())
-        // autoEquip is no-op for creatures
-        return;
-
     const MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
     MWMechanics::NpcStats& stats = actor.getClass().getNpcStats(actor);
@@ -402,8 +398,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
             std::pair<std::vector<int>, bool> itemsSlots =
                 weapon->getClass().getEquipmentSlots (*weapon);
 
-            for (std::vector<int>::const_iterator slot (itemsSlots.first.begin());
-                slot!=itemsSlots.first.end(); ++slot)
+            if (!itemsSlots.first.empty())
             {
                 if (!itemsSlots.second)
                 {
@@ -413,8 +408,8 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                     }
                 }
 
-                slots_[*slot] = weapon;
-                break;
+                int slot = itemsSlots.first.front();
+                slots_[slot] = weapon;
             }
 
             break;
@@ -441,6 +436,50 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         fireEquipmentChangedEvent(actor);
         updateMagicEffects(actor);
         flagAsModified();
+    }
+}
+
+void MWWorld::InventoryStore::autoEquipShield(const MWWorld::Ptr& actor)
+{
+    bool updated = false;
+
+    mUpdatesEnabled = false;
+    for (ContainerStoreIterator iter(begin(ContainerStore::Type_Armor)); iter != end(); ++iter)
+    {
+        if (iter->get<ESM::Armor>()->mBase->mData.mType != ESM::Armor::Shield)
+            continue;
+
+        if (iter->getClass().canBeEquipped(*iter, actor).first != 1)
+            continue;
+
+        if (iter->getClass().getItemHealth(*iter) <= 0)
+            continue;
+
+        std::pair<std::vector<int>, bool> shieldSlots =
+            iter->getClass().getEquipmentSlots(*iter);
+
+        if (shieldSlots.first.empty())
+            continue;
+
+        int slot = shieldSlots.first[0];
+        const ContainerStoreIterator& shield = mSlots[slot];
+
+        if (shield != end()
+                && shield.getType() == Type_Armor && shield->get<ESM::Armor>()->mBase->mData.mType == ESM::Armor::Shield)
+        {
+            if (shield->getClass().getItemHealth(*shield) >= iter->getClass().getItemHealth(*iter))
+                continue;
+        }
+
+        equip(slot, iter, actor);
+        updated = true;
+    }
+    mUpdatesEnabled = true;
+
+    if (updated)
+    {
+        fireEquipmentChangedEvent(actor);
+        updateMagicEffects(actor);
     }
 }
 
@@ -623,7 +662,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
     // If an armor/clothing item is removed, try to find a replacement,
     // but not for the player nor werewolves.
     if (wasEquipped && (actor != MWMechanics::getPlayer())
-            && !(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf()))
+            && actor.getClass().isNpc() && !actor.getClass().getNpcStats(actor).isWerewolf())
     {
         std::string type = item.getTypeName();
         if (type == typeid(ESM::Armor).name() || type == typeid(ESM::Clothing).name())

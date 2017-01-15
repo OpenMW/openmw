@@ -162,6 +162,9 @@ namespace MWWorld
             void autoEquip (const MWWorld::Ptr& actor);
             ///< Auto equip items according to stats and item value.
 
+            void autoEquipShield(const MWWorld::Ptr& actor);
+            ///< Auto-equip the shield with most health.
+
             const MWMechanics::MagicEffects& getMagicEffects() const;
             ///< Return magic effects from worn items.
 

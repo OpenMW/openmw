@@ -47,6 +47,42 @@ namespace ESSImport
         controls.mVanityModeDisabled = pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_VanityModeDisabled;
         controls.mWeaponDrawingDisabled = pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_WeaponDrawingDisabled;
         controls.mSpellDrawingDisabled = pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_SpellDrawingDisabled;
+
+        if (pcdt.mHasMark)
+        {
+            out.mHasMark = 1;
+
+            const PCDT::PNAM::MarkLocation& mark = pcdt.mPNAM.mMarkLocation;
+
+            ESM::CellId cell;
+            cell.mWorldspace = ESM::CellId::sDefaultWorldspace;
+            cell.mPaged = true;
+
+            cell.mIndex.mX = mark.mCellX;
+            cell.mIndex.mY = mark.mCellY;
+
+            // TODO: Figure out a better way to detect interiors. (0, 0) is a valid exterior cell.
+            if (mark.mCellX == 0 && mark.mCellY == 0)
+            {
+                cell.mWorldspace = pcdt.mMNAM;
+                cell.mPaged = false;
+            }
+
+            out.mMarkedCell = cell;
+            out.mMarkedPosition.pos[0] = mark.mX;
+            out.mMarkedPosition.pos[1] = mark.mY;
+            out.mMarkedPosition.pos[2] = mark.mZ;
+            out.mMarkedPosition.rot[0] = out.mMarkedPosition.rot[1] = 0.0f;
+            out.mMarkedPosition.rot[2] = mark.mRotZ;
+        }
+
+        if (pcdt.mHasENAM)
+        {
+            const int cellSize = 8192;
+            out.mLastKnownExteriorPosition[0] = (pcdt.mENAM.mCellX + 0.5f) * cellSize;
+            out.mLastKnownExteriorPosition[1] = (pcdt.mENAM.mCellY + 0.5f) * cellSize;
+            out.mLastKnownExteriorPosition[2] = 0.0f;
+        }
     }
 
 }

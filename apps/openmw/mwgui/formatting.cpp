@@ -428,7 +428,9 @@ namespace MWGui
         {
             // split lines
             const int lineHeight = currentFontHeight();
-            unsigned int lastLine = (mPaginator.getStartTop() + mPaginator.getPageHeight() - mPaginator.getCurrentTop()) / lineHeight;
+            unsigned int lastLine = (mPaginator.getStartTop() + mPaginator.getPageHeight() - mPaginator.getCurrentTop());
+            if (lineHeight > 0)
+                lastLine /= lineHeight;
             int ret = mPaginator.getCurrentTop() + lastLine * lineHeight;
 
             // first empty lines that would go to the next page should be ignored

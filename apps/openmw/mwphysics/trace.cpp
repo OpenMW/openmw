@@ -78,6 +78,7 @@ void ActorTracer::doTrace(const btCollisionObject *actor, const osg::Vec3f& star
         mFraction = newTraceCallback.m_closestHitFraction;
         mPlaneNormal = osg::Vec3f(tracehitnormal.x(), tracehitnormal.y(), tracehitnormal.z());
         mEndPos = (end-start)*mFraction + start;
+        mHitPoint = toOsg(newTraceCallback.m_hitPointWorld);
         mHitObject = newTraceCallback.m_hitCollisionObject;
     }
     else
@@ -85,6 +86,7 @@ void ActorTracer::doTrace(const btCollisionObject *actor, const osg::Vec3f& star
         mEndPos = end;
         mPlaneNormal = osg::Vec3f(0.0f, 0.0f, 1.0f);
         mFraction = 1.0f;
+        mHitPoint = end;
         mHitObject = NULL;
     }
 }
