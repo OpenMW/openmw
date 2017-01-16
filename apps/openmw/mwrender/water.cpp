@@ -30,6 +30,8 @@
 #include <components/nifosg/controller.hpp>
 #include <components/sceneutil/controller.hpp>
 
+#include <components/shader/shadermanager.hpp>
+
 #include <components/settings/settings.hpp>
 
 #include <components/esm/loadcell.hpp>
@@ -188,29 +190,6 @@ public:
             traverse(node, nv);
     }
 };
-
-osg::ref_ptr<osg::Shader> readShader (osg::Shader::Type type, const std::string& file, const std::map<std::string, std::string>& defineMap = std::map<std::string, std::string>())
-{
-    osg::ref_ptr<osg::Shader> shader (new osg::Shader(type));
-
-    // use boost in favor of osg::Shader::readShaderFile, to handle utf-8 path issues on Windows
-    boost::filesystem::ifstream inStream;
-    inStream.open(boost::filesystem::path(file));
-    std::stringstream strstream;
-    strstream << inStream.rdbuf();
-
-    std::string shaderSource = strstream.str();
-
-    for (std::map<std::string, std::string>::const_iterator it = defineMap.begin(); it != defineMap.end(); ++it)
-    {
-        size_t pos = shaderSource.find(it->first);
-        if (pos != std::string::npos)
-            shaderSource.replace(pos, it->first.length(), it->second);
-    }
-
-    shader->setShaderSource(shaderSource);
-    return shader;
-}
 
 osg::ref_ptr<osg::Image> readPngImage (const std::string& file)
 {
@@ -524,10 +503,11 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
 {
     // use a define map to conditionally compile the shader
     std::map<std::string, std::string> defineMap;
-    defineMap.insert(std::make_pair(std::string("@refraction_enabled"), std::string(refraction ? "1" : "0")));
+    defineMap.insert(std::make_pair(std::string("refraction_enabled"), std::string(refraction ? "1" : "0")));
 
-    osg::ref_ptr<osg::Shader> vertexShader (readShader(osg::Shader::VERTEX, mResourcePath + "/shaders/water_vertex.glsl", defineMap));
-    osg::ref_ptr<osg::Shader> fragmentShader (readShader(osg::Shader::FRAGMENT, mResourcePath + "/shaders/water_fragment.glsl", defineMap));
+    Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
+    osg::ref_ptr<osg::Shader> vertexShader (shaderMgr.getShader("water_vertex.glsl", defineMap, osg::Shader::VERTEX));
+    osg::ref_ptr<osg::Shader> fragmentShader (shaderMgr.getShader("water_fragment.glsl", defineMap, osg::Shader::FRAGMENT));
 
     osg::ref_ptr<osg::Texture2D> normalMap (new osg::Texture2D(readPngImage(mResourcePath + "/shaders/water_nm.png")));
     if (normalMap->getImage())
