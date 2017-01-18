@@ -10,7 +10,7 @@ set(NETLAUNCHER
         ServerInfoDialog.cpp
         netutils/HTTPNetwork.cpp
         netutils/Utils.cpp
-        ${CMAKE_SOURCE_DIR}/files/windows/launcher.rc
+        ${CMAKE_SOURCE_DIR}/files/tes3mp/netlauncher.rc
         )
 
 set(NETLAUNCHER_HEADER_MOC
