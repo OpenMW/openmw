@@ -12,6 +12,11 @@ const MWWorld::Ptr& MWWorld::Action::getTarget() const
     return mTarget;
 }
 
+void MWWorld::Action::setTarget(const MWWorld::Ptr& target)
+{
+    mTarget = target;
+}
+
 MWWorld::Action::Action (bool keepSound, const Ptr& target) : mKeepSound (keepSound), mSoundOffset(0), mTarget (target)
 {}
 

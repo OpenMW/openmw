@@ -16,7 +16,8 @@ namespace MWWorld
     {
         MWBase::Environment::get().getMechanicsManager()->itemTaken(
                     actor, getTarget(), MWWorld::Ptr(), getTarget().getRefData().getCount());
-        actor.getClass().getContainerStore (actor).add (getTarget(), getTarget().getRefData().getCount(), actor);
+        MWWorld::Ptr newitem = *actor.getClass().getContainerStore (actor).add (getTarget(), getTarget().getRefData().getCount(), actor);
         MWBase::Environment::get().getWorld()->deleteObject (getTarget());
+        setTarget(newitem);
     }
 }

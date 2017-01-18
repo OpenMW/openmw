@@ -480,6 +480,10 @@ namespace MWScript
     {
         boost::shared_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, actor));
         action->execute (actor);
+        if (action->getTarget() != MWWorld::Ptr() && action->getTarget() != ptr)
+        {
+            updatePtr(ptr, action->getTarget());
+        }
     }
 
     float InterpreterContext::getSecondsPassed() const
