@@ -38,7 +38,7 @@ float signedAngleRadians (const osg::Vec3f& v1, const osg::Vec3f& v2, const osg:
 namespace MWMechanics
 {
 
-    bool applyOnStrikeEnchantment (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object, const osg::Vec3f& hitPosition)
+    bool applyOnStrikeEnchantment(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object, const osg::Vec3f& hitPosition, const bool fromProjectile)
     {
         std::string enchantmentName = !object.isEmpty() ? object.getClass().getEnchantment(object) : "";
         if (!enchantmentName.empty())
@@ -47,7 +47,7 @@ namespace MWMechanics
                         enchantmentName);
             if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
             {
-                MWMechanics::CastSpell cast(attacker, victim);
+                MWMechanics::CastSpell cast(attacker, victim, fromProjectile);
                 cast.mHitPosition = hitPosition;
                 cast.cast(object, false);
                 return true;
@@ -180,7 +180,7 @@ namespace MWMechanics
             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResistsWeapons}");
     }
 
-    void projectileHit(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, MWWorld::Ptr weapon, const MWWorld::Ptr &projectile,
+    void projectileHit(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, MWWorld::Ptr weapon, const MWWorld::Ptr& projectile,
                        const osg::Vec3f& hitPosition, float attackStrength)
     {
         if (mwmp::Main::get().getNetworking()->isDedicatedPlayer(attacker))
@@ -188,68 +188,68 @@ namespace MWMechanics
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
 
-        if(victim.isEmpty() || !victim.getClass().isActor() || victim.getClass().getCreatureStats(victim).isDead())
-            // Can't hit non-actors or dead actors
-        {
-            reduceWeaponCondition(0.f, false, weapon, attacker);
-            return;
-        }
+        bool validVictim = !victim.isEmpty() && victim.getClass().isActor();
 
-        if(attacker == getPlayer())
-            MWBase::Environment::get().getWindowManager()->setEnemy(victim);
-
-        int weapskill = ESM::Skill::Marksman;
-        if(!weapon.isEmpty())
-            weapskill = weapon.getClass().getEquipmentSkill(weapon);
-
-        int skillValue = attacker.getClass().getSkill(attacker,
-                                           weapon.getClass().getEquipmentSkill(weapon));
-
-        if (attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
-            mwmp::Main::get().getLocalPlayer()->getAttack()->success = true;
-
-        if (Misc::Rng::roll0to99() >= getHitChance(attacker, victim, skillValue))
+        float damage = 0.f;
+        if (validVictim)
         {
             if (attacker == getPlayer())
-                mwmp::Main::get().getLocalPlayer()->getAttack()->success = false;
-            victim.getClass().onHit(victim, 0.0f, false, projectile, attacker, osg::Vec3f(), false);
-            MWMechanics::reduceWeaponCondition(0.f, false, weapon, attacker);
-            return;
+                MWBase::Environment::get().getWindowManager()->setEnemy(victim);
+
+            int weaponSkill = ESM::Skill::Marksman;
+            if (!weapon.isEmpty())
+                weaponSkill = weapon.getClass().getEquipmentSkill(weapon);
+
+            int skillValue = attacker.getClass().getSkill(attacker, weapon.getClass().getEquipmentSkill(weapon));
+
+            if (attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                mwmp::Main::get().getLocalPlayer()->getAttack()->success = true;
+
+            if (Misc::Rng::roll0to99() >= getHitChance(attacker, victim, skillValue))
+            {
+                if (attacker == getPlayer())
+                    mwmp::Main::get().getLocalPlayer()->getAttack()->success = false;
+                victim.getClass().onHit(victim, damage, false, projectile, attacker, osg::Vec3f(), false);
+                MWMechanics::reduceWeaponCondition(damage, false, weapon, attacker);
+                return;
+            }
+
+            const unsigned char* attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
+            damage = attack[0] + ((attack[1] - attack[0]) * attackStrength); // Bow/crossbow damage
+
+            // Arrow/bolt damage
+            // NB in case of thrown weapons, we are applying the damage twice since projectile == weapon
+            attack = projectile.get<ESM::Weapon>()->mBase->mData.mChop;
+            damage += attack[0] + ((attack[1] - attack[0]) * attackStrength);
+
+            adjustWeaponDamage(damage, weapon, attacker);
+
+            if(attacker == getPlayer())
+                attacker.getClass().skillUsageSucceeded(attacker, weaponSkill, 0);
+
+            if (victim.getClass().getCreatureStats(victim).getKnockedDown())
+                damage *= gmst.find("fCombatKODamageMult")->getFloat();
         }
 
+        reduceWeaponCondition(damage, validVictim, weapon, attacker);
 
-        const unsigned char* attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
-        float damage = attack[0] + ((attack[1]-attack[0])*attackStrength); // Bow/crossbow damage
-
-        // Arrow/bolt damage
-        // NB in case of thrown weapons, we are applying the damage twice since projectile == weapon
-        attack = projectile.get<ESM::Weapon>()->mBase->mData.mChop;
-        damage += attack[0] + ((attack[1]-attack[0])*attackStrength);
-
-        adjustWeaponDamage(damage, weapon, attacker);
-        reduceWeaponCondition(damage, true, weapon, attacker);
-
-        if(attacker == getPlayer())
-            attacker.getClass().skillUsageSucceeded(attacker, weapskill, 0);
-
-        if (victim.getClass().getCreatureStats(victim).getKnockedDown())
-            damage *= gmst.find("fCombatKODamageMult")->getFloat();
-
-        // Apply "On hit" effect of the weapon
-        bool appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, weapon, hitPosition);
+        // Apply "On hit" effect of the weapon & projectile
+        bool appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, weapon, hitPosition, true);
         if (weapon != projectile)
-            appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, projectile, hitPosition);
+            appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, projectile, hitPosition, true);
 
-        // Non-enchanted arrows shot at enemies have a chance to turn up in their inventory
-        if (victim != getPlayer()
-                && !appliedEnchantment)
+        if (validVictim)
         {
-            float fProjectileThrownStoreChance = gmst.find("fProjectileThrownStoreChance")->getFloat();
-            if (Misc::Rng::rollProbability() < fProjectileThrownStoreChance / 100.f)
-                victim.getClass().getContainerStore(victim).add(projectile, 1, victim);
-        }
+            // Non-enchanted arrows shot at enemies have a chance to turn up in their inventory
+            if (victim != getPlayer() && !appliedEnchantment)
+            {
+                float fProjectileThrownStoreChance = gmst.find("fProjectileThrownStoreChance")->getFloat();
+                if (Misc::Rng::rollProbability() < fProjectileThrownStoreChance / 100.f)
+                    victim.getClass().getContainerStore(victim).add(projectile, 1, victim);
+            }
 
-        victim.getClass().onHit(victim, damage, true, projectile, attacker, hitPosition, true);
+            victim.getClass().onHit(victim, damage, true, projectile, attacker, hitPosition, true);
+        }
     }
 
     float getHitChance(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, int skillValue)
