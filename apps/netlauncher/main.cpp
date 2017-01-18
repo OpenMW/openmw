@@ -44,6 +44,8 @@ int main(int argc, char *argv[])
     atexit(NetController::Destroy);
     QApplication app(argc, argv);
     MainWindow d;
+    d.setWindowTitle("tes3mp Server Browser");
+
     if (d.refresh())
     {
         d.show();
