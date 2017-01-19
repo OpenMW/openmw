@@ -44,7 +44,7 @@ MWWorld::CellStore *mwmp::WorldController::getCell(const ESM::Cell& cell)
 
 void mwmp::WorldController::openContainer(const MWWorld::Ptr &container, bool loot)
 {
-    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Container \"%s\" (%d) is openned. Loot: %s",
+    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Container \"%s\" (%d) is opened. Loot: %s",
                        container.getCellRef().getRefId().c_str(),
                        container.getCellRef().getRefNum().mIndex,
                        loot ? "true" : "false");
@@ -75,5 +75,5 @@ void mwmp::WorldController::closeContainer(const MWWorld::Ptr &container)
         LOG_APPEND(Log::LOG_VERBOSE, " - Item. Refid: \"%s\" Count: %d",
                    iter->getCellRef().getRefId().c_str(), iter->getRefData().getCount());
     }
-    mwmp::Main::get().getLocalPlayer()->sendInventory(); // FIXME: must send only if there is a changes in the inventory.
+    mwmp::Main::get().getLocalPlayer()->updateInventory();
 }
