@@ -46,7 +46,7 @@ namespace mwmp
         }
     };
 
-    struct Inventory
+    struct PacketItems
     {
         std::vector<Item> items;
         unsigned int count;
@@ -59,7 +59,7 @@ namespace mwmp
         int action; //0 - Full update, 1 - Add item, 2 - Remove item
     };
 
-    struct Spellbook
+    struct PacketSpells
     {
         std::vector<ESM::Spell> spells;
         unsigned int count;
@@ -101,9 +101,9 @@ namespace mwmp
 
         BasePlayer(RakNet::RakNetGUID guid) : guid(guid)
         {
-            inventory.action = 0;
-            inventory.count = 0;
-            spellbook.action = 0;
+            packetItems.action = 0;
+            packetItems.count = 0;
+            packetItems.action = 0;
         }
 
         BasePlayer()
@@ -188,8 +188,8 @@ namespace mwmp
         int month;
         int day;
         double hour;
-        Inventory inventory;
-        Spellbook spellbook;
+        PacketItems packetItems;
+        PacketSpells packetSpells;
         bool consoleAllowed;
         bool ignorePosPacket;
         ESM::ActiveSpells activeSpells;

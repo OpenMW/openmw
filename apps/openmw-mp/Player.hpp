@@ -68,9 +68,9 @@ public:
     virtual ~Player();
 
 public:
-    mwmp::Inventory inventorySendBuffer;
-    mwmp::Spellbook spellbookSendBuffer;
-    std::vector<ESM::Spell> realSpellbook;
+    mwmp::PacketItems packetItemsBuffer;
+    mwmp::PacketSpells packetSpellsBuffer;
+    std::vector<ESM::Spell> spellbook;
 
 private:
     bool handshakeState;

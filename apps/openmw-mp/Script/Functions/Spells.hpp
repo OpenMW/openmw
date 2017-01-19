@@ -11,7 +11,7 @@
     {"HasSpell",         SpellFunctions::HasSpell},\
     {"GetSpellId",       SpellFunctions::GetSpellId},\
     \
-    {"SendSpellbook",    SpellFunctions::SendSpellbook}
+    {"SendSpellbook",    SpellFunctions::SendSpells}
 
 class SpellFunctions
 {
@@ -26,7 +26,7 @@ public:
     static bool HasSpell(unsigned short pid, const char* itemName);
     static const char *GetSpellId(unsigned short pid, unsigned int i) noexcept;
 
-    static void SendSpellbook(unsigned short pid) noexcept;
+    static void SendSpells(unsigned short pid) noexcept;
 private:
 
 };

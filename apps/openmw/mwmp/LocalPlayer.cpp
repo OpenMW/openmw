@@ -432,7 +432,7 @@ void LocalPlayer::updateInventory(bool forceUpdate)
 
     if (!invChanged)
     {
-        for (vector<Item>::iterator iter = inventory.items.begin(); iter != inventory.items.end(); ++iter)
+        for (vector<Item>::iterator iter = packetItems.items.begin(); iter != packetItems.items.end(); ++iter)
         {
             MWWorld::ContainerStoreIterator result(ptrInventory.begin());
             for (; result != ptrInventory.end(); ++result)
@@ -466,15 +466,15 @@ void LocalPlayer::updateInventory(bool forceUpdate)
             item.count = iter->getRefData().getCount();
             item.health = iter->getCellRef().getCharge();
 
-            vector<Item>::iterator result = inventory.items.begin();
+            vector<Item>::iterator result = packetItems.items.begin();
 
-            for (; result != inventory.items.end(); result++)
+            for (; result != packetItems.items.end(); result++)
             {
                 if ((*result) == item)
                     break;
             }
 
-            if (result == inventory.items.end())
+            if (result == packetItems.items.end())
             {
                 invChanged = true;
                 break;
@@ -623,9 +623,9 @@ void LocalPlayer::addItems()
     MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
     MWWorld::ContainerStore &ptrStore = ptrPlayer.getClass().getContainerStore(ptrPlayer);
 
-    for (unsigned int i = 0; i < inventory.count; i++)
+    for (unsigned int i = 0; i < packetItems.count; i++)
     {
-        mwmp::Item item = inventory.items[i];
+        mwmp::Item item = packetItems.items[i];
         MWWorld::Ptr itemPtr = *ptrStore.add(item.refid, item.count, ptrPlayer);
         if (item.health != -1)
             itemPtr.getCellRef().setCharge(item.health);
@@ -637,7 +637,7 @@ void LocalPlayer::addSpells()
     MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
     MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
 
-    for (vector<ESM::Spell>::const_iterator spell = spellbook.spells.begin(); spell != spellbook.spells.end(); spell++)
+    for (vector<ESM::Spell>::const_iterator spell = packetSpells.spells.begin(); spell != packetSpells.spells.end(); spell++)
         ptrSpells.add(spell->mId);
 }
 
@@ -646,9 +646,9 @@ void LocalPlayer::removeItems()
     MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
     MWWorld::ContainerStore &ptrStore = ptrPlayer.getClass().getContainerStore(ptrPlayer);
 
-    for (unsigned int i = 0; i < inventory.count; i++)
+    for (unsigned int i = 0; i < packetItems.count; i++)
     {
-        mwmp::Item item = inventory.items[i];
+        mwmp::Item item = packetItems.items[i];
         ptrStore.remove(item.refid, item.count, ptrPlayer);
     }
 }
@@ -658,7 +658,7 @@ void LocalPlayer::removeSpells()
     MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
     MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
 
-    for (vector<ESM::Spell>::const_iterator spell = spellbook.spells.begin(); spell != spellbook.spells.end(); spell++)
+    for (vector<ESM::Spell>::const_iterator spell = packetSpells.spells.begin(); spell != packetSpells.spells.end(); spell++)
     {
         ptrSpells.remove(spell->mId);
 
@@ -907,7 +907,7 @@ void LocalPlayer::sendInventory()
     MWWorld::InventoryStore &ptrInventory = ptrPlayer.getClass().getInventoryStore(ptrPlayer);
     mwmp::Item item;
 
-    inventory.items.clear();
+    packetItems.items.clear();
 
     for (MWWorld::ContainerStoreIterator iter(ptrInventory.begin()); iter != ptrInventory.end(); ++iter)
     {
@@ -918,11 +918,11 @@ void LocalPlayer::sendInventory()
         item.count = iter->getRefData().getCount();
         item.health = iter->getCellRef().getCharge();
 
-        inventory.items.push_back(item);
+        packetItems.items.push_back(item);
     }
 
-    inventory.count = (unsigned int)inventory.items.size();
-    inventory.action = Inventory::UPDATE;
+    packetItems.count = (unsigned int) packetItems.items.size();
+    packetItems.action = PacketItems::UPDATE;
     Main::get().getNetworking()->getPlayerPacket(ID_GAME_INVENTORY)->Send(this);
 }
 
@@ -931,13 +931,13 @@ void LocalPlayer::sendSpellAddition(std::string id)
     if (id.find("$dynamic") != string::npos) // skip custom spells
         return;
 
-    spellbook.spells.clear();
+    packetSpells.spells.clear();
 
     ESM::Spell spell;
     spell.mId = id;
-    spellbook.spells.push_back(spell);
+    packetSpells.spells.push_back(spell);
 
-    spellbook.action = Spellbook::ADD;
+    packetSpells.action = PacketSpells::ADD;
     Main::get().getNetworking()->getPlayerPacket(ID_GAME_SPELLBOOK)->Send(this);
 }
 
@@ -946,13 +946,13 @@ void LocalPlayer::sendSpellRemoval(std::string id)
     if (id.find("$dynamic") != string::npos) // skip custom spells
         return;
 
-    spellbook.spells.clear();
+    packetSpells.spells.clear();
 
     ESM::Spell spell;
     spell.mId = id;
-    spellbook.spells.push_back(spell);
+    packetSpells.spells.push_back(spell);
 
-    spellbook.action = Spellbook::REMOVE;
+    packetSpells.action = PacketSpells::REMOVE;
     Main::get().getNetworking()->getPlayerPacket(ID_GAME_SPELLBOOK)->Send(this);
 }
 

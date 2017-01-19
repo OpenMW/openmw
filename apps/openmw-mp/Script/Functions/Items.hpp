@@ -27,7 +27,7 @@
     {"GetInventoryItemHealth", ItemFunctions::GetInventoryItemHealth},\
     \
     {"SendEquipment",          ItemFunctions::SendEquipment},\
-    {"SendInventory",          ItemFunctions::SendInventory}
+    {"SendInventory",          ItemFunctions::SendItems}
 
 class ItemFunctions
 {
@@ -54,7 +54,7 @@ public:
     static int GetInventoryItemHealth(unsigned short pid, unsigned int i) noexcept;
 
     static void SendEquipment(unsigned short pid) noexcept;
-    static void SendInventory(unsigned short pid) noexcept;
+    static void SendItems(unsigned short pid) noexcept;
 private:
 
 };

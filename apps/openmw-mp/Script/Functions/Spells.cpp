@@ -11,7 +11,7 @@ unsigned int SpellFunctions::GetSpellbookSize(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    return player->realSpellbook.size();
+    return player->spellbook.size();
 }
 
 void SpellFunctions::AddSpell(unsigned short pid, const char* spellId) noexcept
@@ -22,8 +22,8 @@ void SpellFunctions::AddSpell(unsigned short pid, const char* spellId) noexcept
     ESM::Spell spell;
     spell.mId = spellId;
 
-    player->spellbookSendBuffer.spells.push_back(spell);
-    player->spellbookSendBuffer.action = Spellbook::ADD;
+    player->packetSpellsBuffer.spells.push_back(spell);
+    player->packetSpellsBuffer.action = PacketSpells::ADD;
 }
 
 void SpellFunctions::RemoveSpell(unsigned short pid, const char* spellId) noexcept
@@ -34,8 +34,8 @@ void SpellFunctions::RemoveSpell(unsigned short pid, const char* spellId) noexce
     ESM::Spell spell;
     spell.mId = spellId;
 
-    player->spellbookSendBuffer.spells.push_back(spell);
-    player->spellbookSendBuffer.action = Spellbook::REMOVE;
+    player->packetSpellsBuffer.spells.push_back(spell);
+    player->packetSpellsBuffer.action = PacketSpells::REMOVE;
 }
 
 void SpellFunctions::ClearSpellbook(unsigned short pid) noexcept
@@ -43,8 +43,8 @@ void SpellFunctions::ClearSpellbook(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, );
 
-    player->spellbookSendBuffer.spells.clear();
-    player->spellbookSendBuffer.action = Spellbook::UPDATE;
+    player->packetSpellsBuffer.spells.clear();
+    player->packetSpellsBuffer.action = PacketSpells::UPDATE;
 }
 
 bool SpellFunctions::HasSpell(unsigned short pid, const char* spellId)
@@ -52,8 +52,8 @@ bool SpellFunctions::HasSpell(unsigned short pid, const char* spellId)
     Player *player;
     GET_PLAYER(pid, player, false);
 
-    for (unsigned int i = 0; i < player->realSpellbook.size(); i++)
-        if (Misc::StringUtils::ciEqual(player->realSpellbook.at(i).mId, spellId))
+    for (unsigned int i = 0; i < player->spellbook.size(); i++)
+        if (Misc::StringUtils::ciEqual(player->spellbook.at(i).mId, spellId))
             return true;
     return false;
 }
@@ -63,28 +63,28 @@ const char *SpellFunctions::GetSpellId(unsigned short pid, unsigned int i) noexc
     Player *player;
     GET_PLAYER(pid, player, "");
 
-    if (i >= player->realSpellbook.size())
+    if (i >= player->spellbook.size())
         return "invalid";
 
-    return player->realSpellbook.at(i).mId.c_str();
+    return player->spellbook.at(i).mId.c_str();
 }
 
-void SpellFunctions::SendSpellbook(unsigned short pid) noexcept
+void SpellFunctions::SendSpells(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
 
-    for (auto spell : player->spellbookSendBuffer.spells)
+    for (auto spell : player->packetSpellsBuffer.spells)
     {
-        if (player->spellbookSendBuffer.action == Spellbook::ADD)
-            player->realSpellbook.push_back(spell);
-        else if (player->spellbook.action == Spellbook::REMOVE)
-            player->realSpellbook.erase(remove_if(player->realSpellbook.begin(), player->realSpellbook.end(), [&spell](ESM::Spell s)->bool
-            {return spell.mId == s.mId; }), player->realSpellbook.end());
+        if (player->packetSpellsBuffer.action == PacketSpells::ADD)
+            player->spellbook.push_back(spell);
+        else if (player->packetSpells.action == PacketSpells::REMOVE)
+            player->spellbook.erase(remove_if(player->spellbook.begin(), player->spellbook.end(), [&spell](ESM::Spell s)->bool
+            {return spell.mId == s.mId; }), player->spellbook.end());
     }
 
-    std::swap(player->spellbook, player->spellbookSendBuffer);
+    std::swap(player->packetSpells, player->packetSpellsBuffer);
     mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_SPELLBOOK)->Send(player, false);
-    player->spellbook = std::move(player->spellbookSendBuffer);
-    player->spellbookSendBuffer.spells.clear();
+    player->packetSpells = std::move(player->packetSpellsBuffer);
+    player->packetSpellsBuffer.spells.clear();
 }
