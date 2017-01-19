@@ -11,7 +11,7 @@
     {"HasSpell",         SpellFunctions::HasSpell},\
     {"GetSpellId",       SpellFunctions::GetSpellId},\
     \
-    {"SendSpellbook",    SpellFunctions::SendSpells}
+    {"SendSpells",       SpellFunctions::SendSpells}
 
 class SpellFunctions
 {

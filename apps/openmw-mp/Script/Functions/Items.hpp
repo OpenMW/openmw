@@ -27,7 +27,7 @@
     {"GetInventoryItemHealth", ItemFunctions::GetInventoryItemHealth},\
     \
     {"SendEquipment",          ItemFunctions::SendEquipment},\
-    {"SendInventory",          ItemFunctions::SendItems}
+    {"SendItems",              ItemFunctions::SendItems}
 
 class ItemFunctions
 {
