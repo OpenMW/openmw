@@ -23,7 +23,7 @@ namespace MWWorld
     {
         MWBase::Environment::get().getMechanicsManager()->itemTaken(
                     actor, getTarget(), MWWorld::Ptr(), getTarget().getRefData().getCount());
-        actor.getClass().getContainerStore (actor).add (getTarget(), getTarget().getRefData().getCount(), actor);
+        MWWorld::Ptr newitem = *actor.getClass().getContainerStore (actor).add (getTarget(), getTarget().getRefData().getCount(), actor);
 
         // Added by tes3mp
         mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
@@ -41,5 +41,6 @@ namespace MWWorld
         mwmp::Main::get().getLocalPlayer()->sendInventory();
 
         MWBase::Environment::get().getWorld()->deleteObject (getTarget());
+        setTarget(newitem);
     }
 }
