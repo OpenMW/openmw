@@ -53,10 +53,10 @@ namespace mwmp
         enum ACTION_TYPE
         {
             UPDATE = 0,
-            ADDITEM,
-            REMOVEITEM
+            ADD,
+            REMOVE
         };
-        int action; //0 - FullUpdate, 1 - AddItem, 2 - RemoveItem
+        int action; //0 - Full update, 1 - Add item, 2 - Remove item
     };
 
     struct Spellbook
@@ -69,7 +69,7 @@ namespace mwmp
             ADD,
             REMOVE
         };
-        int action; //0 - Update, 1 - Add, 2 - Remove
+        int action; //0 - Full update, 1 - Add spell, 2 - Remove spell
     };
 
     class BasePlayer

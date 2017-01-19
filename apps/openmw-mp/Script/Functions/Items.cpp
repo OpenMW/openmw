@@ -53,7 +53,7 @@ void ItemFunctions::AddItem(unsigned short pid, const char* itemId, unsigned int
     item.health = health;
 
     player->inventorySendBuffer.items.push_back(item);
-    player->inventorySendBuffer.action = Inventory::ADDITEM;
+    player->inventorySendBuffer.action = Inventory::ADD;
 }
 
 void ItemFunctions::RemoveItem(unsigned short pid, const char* itemId, unsigned short count) noexcept
@@ -66,7 +66,7 @@ void ItemFunctions::RemoveItem(unsigned short pid, const char* itemId, unsigned 
     item.count = count;
 
     player->inventorySendBuffer.items.push_back(item);
-    player->inventorySendBuffer.action = Inventory::REMOVEITEM;
+    player->inventorySendBuffer.action = Inventory::REMOVE;
 }
 
 void ItemFunctions::ClearInventory(unsigned short pid) noexcept

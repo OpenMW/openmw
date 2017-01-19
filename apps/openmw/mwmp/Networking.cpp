@@ -299,45 +299,19 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             else
             {
                 myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                MWWorld::ContainerStore &conStore = ptrPlayer.getClass().getContainerStore(ptrPlayer);
+                int inventoryAction = getLocalPlayer()->inventory.action;
 
-                if (getLocalPlayer()->inventory.action == Inventory::ADDITEM)
+                if (inventoryAction == Inventory::ADD)
                 {
-                    for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
-                    {
-                        mwmp::Item item = getLocalPlayer()->inventory.items[i];
-                        MWWorld::Ptr itemPtr = *conStore.add(item.refid, item.count, ptrPlayer);
-                        if (item.health != -1)
-                            itemPtr.getCellRef().setCharge(item.health);
-                    }
+                    getLocalPlayer()->addItems();
                 }
-                else if (getLocalPlayer()->inventory.action == Inventory::REMOVEITEM)
+                else if (inventoryAction == Inventory::REMOVE)
                 {
-                    for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
-                    {
-                        mwmp::Item item = getLocalPlayer()->inventory.items[i];
-                        conStore.remove(item.refid, item.count, ptrPlayer);
-                    }
+                    getLocalPlayer()->removeItems();
                 }
-                else // update
+                else // Inventory::UPDATE
                 {
-                    // Clear items in inventory
-                    conStore.clear();
-
-                    for (unsigned int i = 0; i < getLocalPlayer()->inventory.count; i++)
-                    {
-                        mwmp::Item item = getLocalPlayer()->inventory.items[i];
-                        MWWorld::Ptr itemPtr = *conStore.add(item.refid, item.count, ptrPlayer);
-                        if (item.health != -1)
-                            itemPtr.getCellRef().setCharge(item.health);
-                    }
-
-                    // Don't automatically setEquipment() here, or the player could end
-                    // up getting a new set of their starting clothes, or other items
-                    // supposed to no longer exist
-                    //
-                    // Instead, expect server scripts to do that manually
+                    getLocalPlayer()->setInventory();
                 }
             }
         }
@@ -354,26 +328,19 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             else
             {
                 myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                const Spellbook& spellbook = getLocalPlayer()->spellbook;
-                MWWorld::Ptr playerptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                MWMechanics::Spells &spells = playerptr.getClass().getCreatureStats (playerptr).getSpells();
-                if (spellbook.action == Spellbook::ADD)
-                    for (vector<ESM::Spell>::const_iterator spell = spellbook.spells.begin(); spell != spellbook.spells.end(); spell++)
-                        spells.add (spell->mId);
-                else if (spellbook.action == Spellbook::REMOVE)
-                    for (vector<ESM::Spell>::const_iterator spell = spellbook.spells.begin(); spell != spellbook.spells.end(); spell++)
-                    {
-                        spells.remove (spell->mId);
+                int spellbookAction = getLocalPlayer()->spellbook.action;
 
-                        MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
-                        if (spell->mId == wm->getSelectedSpell())
-                            wm->unsetSelectedSpell();
-                    }
+                if (spellbookAction == Spellbook::ADD)
+                {
+                    getLocalPlayer()->addSpells();
+                }
+                else if (spellbookAction == Spellbook::REMOVE)
+                {
+                    getLocalPlayer()->removeSpells();
+                }
                 else // Spellbook::UPDATE
                 {
-                    spells.clear();
-                    for (vector<ESM::Spell>::const_iterator spell = spellbook.spells.begin(); spell != spellbook.spells.end(); spell++)
-                        spells.add (spell->mId);
+                    getLocalPlayer()->setSpellbook();
                 }
             }
         }

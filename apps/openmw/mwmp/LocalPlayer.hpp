@@ -36,6 +36,12 @@ namespace mwmp
         void updateDeadState(bool forceUpdate = false);
         void updateDrawStateAndFlags(bool forceUpdate = false);
 
+        void addItems();
+        void addSpells();
+
+        void removeItems();
+        void removeSpells();
+
         void setDynamicStats();
         void setAttributes();
         void setSkills();
@@ -44,6 +50,8 @@ namespace mwmp
         void setCell();
         void setClass();
         void setEquipment();
+        void setInventory();
+        void setSpellbook();
 
         void sendClass();
         void sendInventory();

@@ -618,6 +618,56 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
     }
 }
 
+void LocalPlayer::addItems()
+{
+    MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::ContainerStore &ptrStore = ptrPlayer.getClass().getContainerStore(ptrPlayer);
+
+    for (unsigned int i = 0; i < inventory.count; i++)
+    {
+        mwmp::Item item = inventory.items[i];
+        MWWorld::Ptr itemPtr = *ptrStore.add(item.refid, item.count, ptrPlayer);
+        if (item.health != -1)
+            itemPtr.getCellRef().setCharge(item.health);
+    }
+}
+
+void LocalPlayer::addSpells()
+{
+    MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
+
+    for (vector<ESM::Spell>::const_iterator spell = spellbook.spells.begin(); spell != spellbook.spells.end(); spell++)
+        ptrSpells.add(spell->mId);
+}
+
+void LocalPlayer::removeItems()
+{
+    MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::ContainerStore &ptrStore = ptrPlayer.getClass().getContainerStore(ptrPlayer);
+
+    for (unsigned int i = 0; i < inventory.count; i++)
+    {
+        mwmp::Item item = inventory.items[i];
+        ptrStore.remove(item.refid, item.count, ptrPlayer);
+    }
+}
+
+void LocalPlayer::removeSpells()
+{
+    MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
+
+    for (vector<ESM::Spell>::const_iterator spell = spellbook.spells.begin(); spell != spellbook.spells.end(); spell++)
+    {
+        ptrSpells.remove(spell->mId);
+
+        MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
+        if (spell->mId == wm->getSelectedSpell())
+            wm->unsetSelectedSpell();
+    }
+}
+
 void LocalPlayer::setDynamicStats()
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -800,6 +850,36 @@ void LocalPlayer::setEquipment()
             ptrInventory.unequipSlot(slot, ptrPlayer);
         }
     }
+}
+
+void LocalPlayer::setInventory()
+{
+    MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::ContainerStore &ptrStore = ptrPlayer.getClass().getContainerStore(ptrPlayer);
+
+    // Clear items in inventory
+    ptrStore.clear();
+
+    // Proceed by adding items
+    addItems();
+
+    // Don't automatically setEquipment() here, or the player could end
+    // up getting a new set of their starting clothes, or other items
+    // supposed to no longer exist
+    //
+    // Instead, expect server scripts to do that manually
+}
+
+void LocalPlayer::setSpellbook()
+{
+    MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
+
+    // Clear spells in spellbook
+    ptrSpells.clear();
+
+    // Proceed by adding spells
+    addSpells();
 }
 
 void LocalPlayer::sendClass()
