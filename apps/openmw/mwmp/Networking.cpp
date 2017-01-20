@@ -323,7 +323,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         {
             if (packet->length == myPacket->headerSize())
             {
-
+                getLocalPlayer()->sendSpellbook();
             }
             else
             {

@@ -46,6 +46,24 @@ namespace mwmp
         }
     };
 
+    struct JournalItem
+    {
+        std::string quest;
+        int index;
+        enum JOURNAL_ITEM_TYPE
+        {
+            ENTRY = 0,
+            INDEX = 1
+        };
+        int type; // 0 - An entire entry, 1 - An index
+    };
+
+    struct JournalChanges
+    {
+        std::vector<JournalItem> journalItems;
+        unsigned int count;
+    };
+
     struct PacketItems
     {
         std::vector<Item> items;

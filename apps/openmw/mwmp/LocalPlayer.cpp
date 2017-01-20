@@ -998,6 +998,16 @@ void LocalPlayer::sendSpellRemoval(const ESM::Spell &spell)
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Not implemented.");
 }
 
+void LocalPlayer::sendJournalEntry(const std::string& id, int index, const MWWorld::Ptr& actor)
+{
+    Main::get().getNetworking()->getPlayerPacket(ID_GAME_JOURNAL)->Send(this);
+}
+
+void LocalPlayer::sendJournalIndex(const std::string& id, int index)
+{
+    Main::get().getNetworking()->getPlayerPacket(ID_GAME_JOURNAL)->Send(this);
+}
+
 void LocalPlayer::sendAttack(Attack::TYPE type)
 {
     MWMechanics::DrawState_ state = getPlayerPtr().getClass().getNpcStats(getPlayerPtr()).getDrawState();

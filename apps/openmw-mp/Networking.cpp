@@ -247,6 +247,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         DEBUG_PRINTF("ID_GAME_JOURNAL\n");
         myPacket->Read(player);
 
+        Script::Call<Script::CallbackIdentity("OnPlayerChangeJournal")>(player->getId(), player->packetSpells.action);
+
         break;
     }
 

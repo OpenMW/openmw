@@ -1,5 +1,8 @@
 #include "dialogueextensions.hpp"
 
+#include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
+
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 
@@ -43,6 +46,11 @@ namespace MWScript
                     try
                     {
                         MWBase::Environment::get().getJournal()->addEntry (quest, index, ptr);
+
+                        // Added by tes3mp
+                        //
+                        // LocalPlayer has gained a journal entry, so send a packet with it
+                        mwmp::Main::get().getLocalPlayer()->sendJournalEntry(quest, index, ptr);
                     }
                     catch (...)
                     {
@@ -65,6 +73,11 @@ namespace MWScript
                     runtime.pop();
 
                     MWBase::Environment::get().getJournal()->setJournalIndex (quest, index);
+
+                    // Added by tes3mp
+                    //
+                    // LocalPlayer has gained a journal index, so send a packet with it
+                    mwmp::Main::get().getLocalPlayer()->sendJournalIndex(quest, index);
                 }
         };
 
