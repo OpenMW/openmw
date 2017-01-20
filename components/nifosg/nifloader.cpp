@@ -894,6 +894,10 @@ namespace NifOsg
 
             osg::BoundingBox box;
 
+            osg::Vec3Array* verts = particledata->vertices;
+            if (!verts)
+                return;
+
             int i=0;
             for (std::vector<Nif::NiParticleSystemController::Particle>::const_iterator it = partctrl->particles.begin();
                  i<particledata->activeCount && it != partctrl->particles.end(); ++it, ++i)
@@ -908,11 +912,11 @@ namespace NifOsg
                 // Note this position and velocity is not correct for a particle system with absolute reference frame,
                 // which can not be done in this loader since we are not attached to the scene yet. Will be fixed up post-load in the SceneManager.
                 created->setVelocity(particle.velocity);
-                const osg::Vec3f& position = particledata->vertices->at(particle.vertex);
+                const osg::Vec3f& position = verts->at(particle.vertex);
                 created->setPosition(position);
 
                 osg::Vec4f partcolor (1.f,1.f,1.f,1.f);
-                if (particle.vertex < int(particledata->colors->size()))
+                if (particledata->colors.valid() && particle.vertex < int(particledata->colors->size()))
                     partcolor = particledata->colors->at(particle.vertex);
 
                 float size = particledata->sizes.at(particle.vertex) * partctrl->size;
@@ -1074,7 +1078,7 @@ namespace NifOsg
 
             geometry->setVertexArray(data->vertices);
 
-            if (!data->normals->empty())
+            if (data->normals)
                 geometry->setNormalArray(data->normals);
 
             int textureStage = 0;
@@ -1092,10 +1096,10 @@ namespace NifOsg
                 geometry->setTexCoordArray(textureStage, data->uvlist[uvSet]);
             }
 
-            if (!data->colors->empty())
+            if (data->colors)
                 geometry->setColorArray(data->colors);
 
-            if (!data->triangles->empty())
+            if (data->triangles)
                 geometry->addPrimitiveSet(data->triangles);
 
             // osg::Material properties are handled here for two reasons:
@@ -1104,7 +1108,7 @@ namespace NifOsg
             //   above the actual renderable would be tedious.
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(triShape, drawableProps);
-            applyDrawableProperties(parentNode, drawableProps, composite, !data->colors->empty(), animflags, false);
+            applyDrawableProperties(parentNode, drawableProps, composite, data->colors.valid(), animflags, false);
         }
 
         void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
