@@ -10,7 +10,6 @@
 #include "../Packets/Player/PacketDynamicStats.hpp"
 #include "../Packets/Player/PacketResurrect.hpp"
 #include "../Packets/Player/PacketDie.hpp"
-#include "../Packets/Player/PacketCell.hpp"
 #include "../Packets/Player/PacketSendMyID.hpp"
 #include "../Packets/Player/PacketDisconnect.hpp"
 #include "../Packets/Player/PacketDrawState.hpp"
@@ -27,6 +26,7 @@
 #include "../Packets/Player/PacketSpellbook.hpp"
 #include "../Packets/Player/PacketConsole.hpp"
 #include "../Packets/Player/PacketActiveSkills.hpp"
+#include "../Packets/Player/PacketPlayerCellChange.hpp"
 
 #include "PlayerPacketController.hpp"
 
@@ -41,7 +41,7 @@ inline void AddPacket(mwmp::PlayerPacketController::packets_t *packets, RakNet::
 mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *peer)
 {
     AddPacket<PacketPosition>(&packets, peer);
-    AddPacket<PacketCell>(&packets, peer);
+    AddPacket<PacketPlayerCellChange>(&packets, peer);
     AddPacket<PacketBaseInfo>(&packets, peer);
     AddPacket<PacketEquipment>(&packets, peer);
 

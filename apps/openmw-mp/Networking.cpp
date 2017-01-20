@@ -148,9 +148,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_GAME_CELL:
+    case ID_PLAYER_CELL_CHANGE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_CELL from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_CELL_CHANGE from %s",
             player->Npc()->mName.c_str());
 
         if (!player->CreatureStats()->mDead)
@@ -318,7 +318,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         player->CreatureStats()->mDead = false;
         myPacket->Send(player, true);
         playerController->GetPacket(ID_GAME_POS)->RequestData(player->guid);
-        playerController->GetPacket(ID_GAME_CELL)->RequestData(player->guid);
+        playerController->GetPacket(ID_PLAYER_CELL_CHANGE)->RequestData(player->guid);
 
         Script::Call<Script::CallbackIdentity("OnPlayerResurrect")>(player->getId());
 
@@ -729,7 +729,7 @@ void Networking::newPlayer(RakNet::RakNetGUID guid)
     playerController->GetPacket(ID_GAME_BASE_INFO)->RequestData(guid);
     playerController->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(guid);
     playerController->GetPacket(ID_GAME_POS)->RequestData(guid);
-    playerController->GetPacket(ID_GAME_CELL)->RequestData(guid);
+    playerController->GetPacket(ID_PLAYER_CELL_CHANGE)->RequestData(guid);
     playerController->GetPacket(ID_GAME_EQUIPMENT)->RequestData(guid);
 
     LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Sending info about other players to %lu",
@@ -754,7 +754,7 @@ void Networking::newPlayer(RakNet::RakNetGUID guid)
             playerController->GetPacket(ID_GAME_ATTRIBUTE)->Send(pl->second, guid);
             playerController->GetPacket(ID_GAME_SKILL)->Send(pl->second, guid);
             playerController->GetPacket(ID_GAME_POS)->Send(pl->second, guid);
-            playerController->GetPacket(ID_GAME_CELL)->Send(pl->second, guid);
+            playerController->GetPacket(ID_PLAYER_CELL_CHANGE)->Send(pl->second, guid);
             playerController->GetPacket(ID_GAME_EQUIPMENT)->Send(pl->second, guid);
         }
     }

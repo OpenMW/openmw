@@ -334,7 +334,7 @@ void LocalPlayer::updateCell(bool forceUpdate)
 
     if (cellChanged)
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_GAME_CELL to server");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_CELL_CHANGE to server");
 
         LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s",
             getCell()->getDescription().c_str(),
@@ -347,7 +347,7 @@ void LocalPlayer::updateCell(bool forceUpdate)
         updatePosition(true);
 
         RakNet::BitStream bs;
-        getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_CELL)->Packet(&bs, this, true);
+        getNetworking()->getPlayerPacket((RakNet::MessageID) ID_PLAYER_CELL_CHANGE)->Packet(&bs, this, true);
         getNetworking()->sendData(&bs);
 
         // Also force an update to skills (to send all progress to skill increases)

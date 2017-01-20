@@ -153,12 +153,12 @@ add_component_dir (openmw-mp
         Packets/BasePacket Packets/Player/PlayerPacket Packets/World/WorldPacket
 
         Packets/Player/PacketBaseInfo Packets/Player/PacketPosition Packets/Player/PacketEquipment
-        Packets/Player/PacketAttack Packets/Player/PacketDynamicStats Packets/Player/PacketCell
-        Packets/Player/PacketDrawState Packets/Player/PacketChatMessage Packets/Player/PacketCharGen
-        Packets/Player/PacketAttribute Packets/Player/PacketSkill Packets/Player/PacketLevel
-        Packets/Player/PacketHandshake Packets/Player/PacketGUIBoxes Packets/Player/PacketClass
-        Packets/Player/PacketTime Packets/Player/PacketInventory Packets/Player/PacketSpellbook
-        Packets/Player/PacketActiveSkills
+        Packets/Player/PacketAttack Packets/Player/PacketDynamicStats Packets/Player/PacketDrawState
+        Packets/Player/PacketChatMessage Packets/Player/PacketCharGen Packets/Player/PacketAttribute
+        Packets/Player/PacketSkill Packets/Player/PacketLevel Packets/Player/PacketHandshake
+        Packets/Player/PacketGUIBoxes Packets/Player/PacketClass Packets/Player/PacketTime
+        Packets/Player/PacketInventory Packets/Player/PacketSpellbook Packets/Player/PacketActiveSkills
+        Packets/Player/PacketPlayerCellChange
 
         Packets/World/PacketObjectDelete Packets/World/PacketObjectPlace Packets/World/PacketObjectLock
         Packets/World/PacketObjectUnlock Packets/World/PacketObjectScale Packets/World/PacketObjectMove
