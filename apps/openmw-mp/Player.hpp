@@ -68,8 +68,8 @@ public:
     virtual ~Player();
 
 public:
-    mwmp::PacketItems packetItemsBuffer;
-    mwmp::PacketSpells packetSpellsBuffer;
+    mwmp::InventoryChanges inventoryChangesBuffer;
+    mwmp::SpellbookChanges spellbookChangesBuffer;
 
 private:
     bool handshakeState;

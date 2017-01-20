@@ -2,21 +2,21 @@
 #define OPENMW_SPELLS_HPP
 
 #define SPELLAPI \
-    {"GetSpellbookSize", SpellFunctions::GetSpellbookSize},\
+    {"GetSpellbookChangesSize", SpellFunctions::GetSpellbookChangesSize},\
     \
-    {"AddSpell",         SpellFunctions::AddSpell},\
-    {"RemoveSpell",      SpellFunctions::RemoveSpell},\
-    {"ClearSpellbook",   SpellFunctions::ClearSpellbook},\
+    {"AddSpell",                SpellFunctions::AddSpell},\
+    {"RemoveSpell",             SpellFunctions::RemoveSpell},\
+    {"ClearSpellbook",          SpellFunctions::ClearSpellbook},\
     \
-    {"GetSpellId",       SpellFunctions::GetSpellId},\
+    {"GetSpellId",              SpellFunctions::GetSpellId},\
     \
-    {"SendSpells",       SpellFunctions::SendSpells}
+    {"SendSpellbookChanges",    SpellFunctions::SendSpellbookChanges}
 
 class SpellFunctions
 {
 public:
 
-    static unsigned int GetSpellbookSize(unsigned short pid) noexcept;
+    static unsigned int GetSpellbookChangesSize(unsigned short pid) noexcept;
 
     static void AddSpell(unsigned short pid, const char* spellId) noexcept;
     static void RemoveSpell(unsigned short pid, const char* spellId) noexcept;
@@ -24,7 +24,7 @@ public:
 
     static const char *GetSpellId(unsigned short pid, unsigned int i) noexcept;
 
-    static void SendSpells(unsigned short pid) noexcept;
+    static void SendSpellbookChanges(unsigned short pid) noexcept;
 private:
 
 };

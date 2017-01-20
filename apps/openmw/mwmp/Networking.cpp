@@ -299,17 +299,17 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             else
             {
                 myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                int inventoryAction = getLocalPlayer()->packetItems.action;
+                int inventoryAction = getLocalPlayer()->inventoryChanges.action;
 
-                if (inventoryAction == PacketItems::ADD)
+                if (inventoryAction == InventoryChanges::ADD)
                 {
                     getLocalPlayer()->addItems();
                 }
-                else if (inventoryAction == PacketItems::REMOVE)
+                else if (inventoryAction == InventoryChanges::REMOVE)
                 {
                     getLocalPlayer()->removeItems();
                 }
-                else // PacketItems::SET
+                else // InventoryChanges::SET
                 {
                     getLocalPlayer()->setInventory();
                 }
@@ -328,17 +328,17 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             else
             {
                 myPacket->Packet(&bsIn, getLocalPlayer(), false);
-                int spellbookAction = getLocalPlayer()->packetSpells.action;
+                int spellbookAction = getLocalPlayer()->spellbookChanges.action;
 
-                if (spellbookAction == PacketSpells::ADD)
+                if (spellbookAction == SpellbookChanges::ADD)
                 {
                     getLocalPlayer()->addSpells();
                 }
-                else if (spellbookAction == PacketSpells::REMOVE)
+                else if (spellbookAction == SpellbookChanges::REMOVE)
                 {
                     getLocalPlayer()->removeSpells();
                 }
-                else // PacketSpells::SET
+                else // SpellbookChanges::SET
                 {
                     getLocalPlayer()->setSpellbook();
                 }

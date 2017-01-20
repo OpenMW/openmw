@@ -16,12 +16,12 @@ int ItemFunctions::GetEquipmentSize() noexcept
     return MWWorld::InventoryStore::Slots;
 }
 
-unsigned int ItemFunctions::GetInventorySize(unsigned short pid) noexcept
+unsigned int ItemFunctions::GetInventoryChangesSize(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    return player->packetItems.count;
+    return player->inventoryChanges.count;
 }
 
 void ItemFunctions::EquipItem(unsigned short pid, unsigned short slot, const char *itemId, unsigned int count, int health) noexcept
@@ -52,8 +52,8 @@ void ItemFunctions::AddItem(unsigned short pid, const char* itemId, unsigned int
     item.count = count;
     item.health = health;
 
-    player->packetItemsBuffer.items.push_back(item);
-    player->packetItemsBuffer.action = PacketItems::ADD;
+    player->inventoryChangesBuffer.items.push_back(item);
+    player->inventoryChangesBuffer.action = InventoryChanges::ADD;
 }
 
 void ItemFunctions::RemoveItem(unsigned short pid, const char* itemId, unsigned short count) noexcept
@@ -65,8 +65,8 @@ void ItemFunctions::RemoveItem(unsigned short pid, const char* itemId, unsigned 
     item.refid = itemId;
     item.count = count;
 
-    player->packetItemsBuffer.items.push_back(item);
-    player->packetItemsBuffer.action = PacketItems::REMOVE;
+    player->inventoryChangesBuffer.items.push_back(item);
+    player->inventoryChangesBuffer.action = InventoryChanges::REMOVE;
 }
 
 void ItemFunctions::ClearInventory(unsigned short pid) noexcept
@@ -74,8 +74,8 @@ void ItemFunctions::ClearInventory(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, );
 
-    player->packetItemsBuffer.items.clear();
-    player->packetItemsBuffer.action = PacketItems::SET;
+    player->inventoryChangesBuffer.items.clear();
+    player->inventoryChangesBuffer.action = InventoryChanges::SET;
 }
 
 bool ItemFunctions::HasItemEquipped(unsigned short pid, const char* itemId)
@@ -118,10 +118,10 @@ const char *ItemFunctions::GetInventoryItemId(unsigned short pid, unsigned int i
     Player *player;
     GET_PLAYER(pid, player, "");
 
-    if (i >= player->packetItems.count)
+    if (i >= player->inventoryChanges.count)
         return "invalid";
 
-    return player->packetItems.items.at(i).refid.c_str();
+    return player->inventoryChanges.items.at(i).refid.c_str();
 }
 
 int ItemFunctions::GetInventoryItemCount(unsigned short pid, unsigned int i) noexcept
@@ -129,7 +129,7 @@ int ItemFunctions::GetInventoryItemCount(unsigned short pid, unsigned int i) noe
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    return player->packetItems.items.at(i).count;
+    return player->inventoryChanges.items.at(i).count;
 }
 
 int ItemFunctions::GetInventoryItemHealth(unsigned short pid, unsigned int i) noexcept
@@ -137,7 +137,7 @@ int ItemFunctions::GetInventoryItemHealth(unsigned short pid, unsigned int i) no
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    return player->packetItems.items.at(i).health;
+    return player->inventoryChanges.items.at(i).health;
 }
 
 void ItemFunctions::SendEquipment(unsigned short pid) noexcept
@@ -149,13 +149,13 @@ void ItemFunctions::SendEquipment(unsigned short pid) noexcept
     mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_EQUIPMENT)->Send(player, true);
 }
 
-void ItemFunctions::SendItems(unsigned short pid) noexcept
+void ItemFunctions::SendInventoryChanges(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
 
-    std::swap(player->packetItems, player->packetItemsBuffer);
+    std::swap(player->inventoryChanges, player->inventoryChangesBuffer);
     mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_INVENTORY)->Send(player, false);
-    player->packetItems = std::move(player->packetItemsBuffer);
-    player->packetItemsBuffer.items.clear();
+    player->inventoryChanges = std::move(player->inventoryChangesBuffer);
+    player->inventoryChangesBuffer.items.clear();
 }

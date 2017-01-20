@@ -6,35 +6,35 @@
 #define OPENMW_ITEMS_HPP
 
 #define ITEMAPI \
-    {"GetEquipmentSize",       ItemFunctions::GetEquipmentSize},\
-    {"GetInventorySize",       ItemFunctions::GetInventorySize},\
+    {"GetEquipmentSize",        ItemFunctions::GetEquipmentSize},\
+    {"GetInventoryChangesSize", ItemFunctions::GetInventoryChangesSize},\
     \
-    {"EquipItem",              ItemFunctions::EquipItem},\
-    {"UnequipItem",            ItemFunctions::UnequipItem},\
+    {"EquipItem",               ItemFunctions::EquipItem},\
+    {"UnequipItem",             ItemFunctions::UnequipItem},\
     \
-    {"AddItem",                ItemFunctions::AddItem},\
-    {"RemoveItem",             ItemFunctions::RemoveItem},\
-    {"ClearInventory",         ItemFunctions::ClearInventory},\
+    {"AddItem",                 ItemFunctions::AddItem},\
+    {"RemoveItem",              ItemFunctions::RemoveItem},\
+    {"ClearInventory",          ItemFunctions::ClearInventory},\
     \
-    {"HasItemEquipped",        ItemFunctions::HasItemEquipped},\
+    {"HasItemEquipped",         ItemFunctions::HasItemEquipped},\
     \
-    {"GetEquipmentItemId",     ItemFunctions::GetEquipmentItemId},\
-    {"GetEquipmentItemCount",  ItemFunctions::GetEquipmentItemCount},\
-    {"GetEquipmentItemHealth", ItemFunctions::GetEquipmentItemHealth},\
+    {"GetEquipmentItemId",      ItemFunctions::GetEquipmentItemId},\
+    {"GetEquipmentItemCount",   ItemFunctions::GetEquipmentItemCount},\
+    {"GetEquipmentItemHealth",  ItemFunctions::GetEquipmentItemHealth},\
     \
-    {"GetInventoryItemId",     ItemFunctions::GetInventoryItemId},\
-    {"GetInventoryItemCount",  ItemFunctions::GetInventoryItemCount},\
-    {"GetInventoryItemHealth", ItemFunctions::GetInventoryItemHealth},\
+    {"GetInventoryItemId",      ItemFunctions::GetInventoryItemId},\
+    {"GetInventoryItemCount",   ItemFunctions::GetInventoryItemCount},\
+    {"GetInventoryItemHealth",  ItemFunctions::GetInventoryItemHealth},\
     \
-    {"SendEquipment",          ItemFunctions::SendEquipment},\
-    {"SendItems",              ItemFunctions::SendItems}
+    {"SendEquipment",           ItemFunctions::SendEquipment},\
+    {"SendInventoryChanges",    ItemFunctions::SendInventoryChanges}
 
 class ItemFunctions
 {
 public:
 
     static int GetEquipmentSize() noexcept;
-    static unsigned int GetInventorySize(unsigned short pid) noexcept;
+    static unsigned int GetInventoryChangesSize(unsigned short pid) noexcept;
 
     static void EquipItem(unsigned short pid, unsigned short slot, const char* itemId, unsigned int count, int health) noexcept;
     static void UnequipItem(unsigned short pid, unsigned short slot) noexcept;
@@ -54,7 +54,7 @@ public:
     static int GetInventoryItemHealth(unsigned short pid, unsigned int i) noexcept;
 
     static void SendEquipment(unsigned short pid) noexcept;
-    static void SendItems(unsigned short pid) noexcept;
+    static void SendInventoryChanges(unsigned short pid) noexcept;
 private:
 
 };

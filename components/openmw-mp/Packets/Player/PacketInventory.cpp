@@ -17,22 +17,22 @@ void PacketInventory::Packet(RakNet::BitStream *bs, BasePlayer *player, bool sen
 {
     PlayerPacket::Packet(bs, player, send);
 
-    RW(player->packetItems.action, send);
+    RW(player->inventoryChanges.action, send);
 
     if (!send)
-        player->packetItems.items.clear();
+        player->inventoryChanges.items.clear();
     else
-        player->packetItems.count = (unsigned int) (player->packetItems.items.size());
+        player->inventoryChanges.count = (unsigned int) (player->inventoryChanges.items.size());
 
-    RW(player->packetItems.count, send);
+    RW(player->inventoryChanges.count, send);
 
-    for (unsigned int i = 0; i < player->packetItems.count; i++)
+    for (unsigned int i = 0; i < player->inventoryChanges.count; i++)
     {
         Item item;
 
         if (send)
         {
-            item = player->packetItems.items[i];
+            item = player->inventoryChanges.items[i];
             RW(item.refid, send);
             RW(item.count, send);
             RW(item.health, send);
@@ -42,7 +42,7 @@ void PacketInventory::Packet(RakNet::BitStream *bs, BasePlayer *player, bool sen
             RW(item.refid, send);
             RW(item.count, send);
             RW(item.health, send);
-            player->packetItems.items.push_back(item);
+            player->inventoryChanges.items.push_back(item);
         }
     }
 }

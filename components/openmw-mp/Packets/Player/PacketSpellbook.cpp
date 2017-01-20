@@ -13,28 +13,28 @@ void PacketSpellbook::Packet(RakNet::BitStream *bs, BasePlayer *player, bool sen
 {
     PlayerPacket::Packet(bs, player, send);
 
-    RW(player->packetSpells.action, send);
+    RW(player->spellbookChanges.action, send);
 
     if (!send)
-        player->packetSpells.spells.clear();
+        player->spellbookChanges.spells.clear();
     else
-        player->packetSpells.count = (unsigned int) (player->packetSpells.spells.size());
+        player->spellbookChanges.count = (unsigned int) (player->spellbookChanges.spells.size());
 
-    RW(player->packetSpells.count, send);
+    RW(player->spellbookChanges.count, send);
 
-    for (unsigned int i = 0; i < player->packetSpells.count; i++)
+    for (unsigned int i = 0; i < player->spellbookChanges.count; i++)
     {
         ESM::Spell spell;
 
         if (send)
         {
-            spell = player->packetSpells.spells[i];
+            spell = player->spellbookChanges.spells[i];
             RW(spell.mId, send);
         }
         else
         {
             RW(spell.mId, send);
-            player->packetSpells.spells.push_back(spell);
+            player->spellbookChanges.spells.push_back(spell);
         }
     }
 
