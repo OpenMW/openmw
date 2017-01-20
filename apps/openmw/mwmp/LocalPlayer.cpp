@@ -639,6 +639,7 @@ void LocalPlayer::addSpells()
 
     for (vector<ESM::Spell>::const_iterator spell = packetSpells.spells.begin(); spell != packetSpells.spells.end(); spell++)
         ptrSpells.add(spell->mId);
+        
 }
 
 void LocalPlayer::removeItems()
@@ -875,8 +876,16 @@ void LocalPlayer::setSpellbook()
     MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
     MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
 
-    // Clear spells in spellbook
-    ptrSpells.clear();
+    // Clear spells in spellbook, while ignoring abilities, powers, etc.
+    for (MWMechanics::Spells::TIterator iter = ptrSpells.begin(); iter != ptrSpells.end(); ++iter)
+    {
+        const ESM::Spell *spell = iter->first;
+
+        if (spell->mData.mType == ESM::Spell::ST_Spell)
+        {
+            ptrSpells.remove(spell->mId);
+        }
+    }
 
     // Proceed by adding spells
     addSpells();
