@@ -55,6 +55,7 @@ namespace mwmp
 
         void sendClass();
         void sendInventory();
+        void sendSpellbook();
         void sendSpellAddition(std::string id);
         void sendSpellAddition(const ESM::Spell &spell);
         void sendSpellRemoval(std::string id);

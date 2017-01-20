@@ -44,7 +44,7 @@ void SpellFunctions::ClearSpellbook(unsigned short pid) noexcept
     GET_PLAYER(pid, player, );
 
     player->packetSpellsBuffer.spells.clear();
-    player->packetSpellsBuffer.action = PacketSpells::UPDATE;
+    player->packetSpellsBuffer.action = PacketSpells::SET;
 }
 
 const char *SpellFunctions::GetSpellId(unsigned short pid, unsigned int i) noexcept

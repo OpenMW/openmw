@@ -309,7 +309,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 {
                     getLocalPlayer()->removeItems();
                 }
-                else // PacketItems::UPDATE
+                else // PacketItems::SET
                 {
                     getLocalPlayer()->setInventory();
                 }
@@ -338,7 +338,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 {
                     getLocalPlayer()->removeSpells();
                 }
-                else // PacketSpells::UPDATE
+                else // PacketSpells::SET
                 {
                     getLocalPlayer()->setSpellbook();
                 }

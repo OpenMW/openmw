@@ -27,9 +27,6 @@
 #include "actorutil.hpp"
 #include "combat.hpp"
 
-#include "../mwmp/Main.hpp"
-#include "../mwmp/LocalPlayer.hpp"
-
 namespace
 {
 
@@ -216,14 +213,7 @@ namespace MWMechanics
         std::vector<std::string> selectedSpells = autoCalcPlayerSpells(skills, attributes, race);
 
         for (std::vector<std::string>::iterator it = selectedSpells.begin(); it != selectedSpells.end(); ++it)
-        {
             creatureStats.getSpells().add(*it);
-
-            // Added by tes3mp
-            //
-            // LocalPlayer has gained a spell, so send a packet with it
-            mwmp::Main::get().getLocalPlayer()->sendSpellAddition(*it);
-        }
 
         // forced update and current value adjustments
         mActors.updateActor (ptr, 0);

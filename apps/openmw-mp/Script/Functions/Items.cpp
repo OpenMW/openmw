@@ -75,7 +75,7 @@ void ItemFunctions::ClearInventory(unsigned short pid) noexcept
     GET_PLAYER(pid, player, );
 
     player->packetItemsBuffer.items.clear();
-    player->packetItemsBuffer.action = PacketItems::UPDATE;
+    player->packetItemsBuffer.action = PacketItems::SET;
 }
 
 bool ItemFunctions::HasItemEquipped(unsigned short pid, const char* itemId)

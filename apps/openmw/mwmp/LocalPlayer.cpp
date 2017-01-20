@@ -133,6 +133,7 @@ bool LocalPlayer::charGenThread()
             updateSkills(true);
             updateLevel(true);
             sendClass();
+            sendSpellbook();
             getNetworking()->getPlayerPacket(ID_GAME_CHARGEN)->Send(this);
         }
 
@@ -620,7 +621,7 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
 
 void LocalPlayer::addItems()
 {
-    MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
     MWWorld::ContainerStore &ptrStore = ptrPlayer.getClass().getContainerStore(ptrPlayer);
 
     for (unsigned int i = 0; i < packetItems.count; i++)
@@ -634,7 +635,7 @@ void LocalPlayer::addItems()
 
 void LocalPlayer::addSpells()
 {
-    MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
     MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
 
     for (vector<ESM::Spell>::const_iterator spell = packetSpells.spells.begin(); spell != packetSpells.spells.end(); spell++)
@@ -644,7 +645,7 @@ void LocalPlayer::addSpells()
 
 void LocalPlayer::removeItems()
 {
-    MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
     MWWorld::ContainerStore &ptrStore = ptrPlayer.getClass().getContainerStore(ptrPlayer);
 
     for (unsigned int i = 0; i < packetItems.count; i++)
@@ -656,7 +657,7 @@ void LocalPlayer::removeItems()
 
 void LocalPlayer::removeSpells()
 {
-    MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
     MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
 
     for (vector<ESM::Spell>::const_iterator spell = packetSpells.spells.begin(); spell != packetSpells.spells.end(); spell++)
@@ -855,7 +856,7 @@ void LocalPlayer::setEquipment()
 
 void LocalPlayer::setInventory()
 {
-    MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
     MWWorld::ContainerStore &ptrStore = ptrPlayer.getClass().getContainerStore(ptrPlayer);
 
     // Clear items in inventory
@@ -873,7 +874,7 @@ void LocalPlayer::setInventory()
 
 void LocalPlayer::setSpellbook()
 {
-    MWWorld::Ptr ptrPlayer = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
     MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
 
     // Clear spells in spellbook, while ignoring abilities, powers, etc.
@@ -931,8 +932,30 @@ void LocalPlayer::sendInventory()
     }
 
     packetItems.count = (unsigned int) packetItems.items.size();
-    packetItems.action = PacketItems::UPDATE;
+    packetItems.action = PacketItems::SET;
     Main::get().getNetworking()->getPlayerPacket(ID_GAME_INVENTORY)->Send(this);
+}
+
+void LocalPlayer::sendSpellbook()
+{
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
+    MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
+
+    packetSpells.spells.clear();
+
+    // Send spells in spellbook, while ignoring abilities, powers, etc.
+    for (MWMechanics::Spells::TIterator iter = ptrSpells.begin(); iter != ptrSpells.end(); ++iter)
+    {
+        const ESM::Spell *spell = iter->first;
+
+        if (spell->mData.mType == ESM::Spell::ST_Spell)
+        {
+            packetSpells.spells.push_back(*spell);
+        }
+    }
+
+    packetSpells.action = PacketSpells::SET;
+    Main::get().getNetworking()->getPlayerPacket(ID_GAME_SPELLBOOK)->Send(this);
 }
 
 void LocalPlayer::sendSpellAddition(std::string id)

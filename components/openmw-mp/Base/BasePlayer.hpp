@@ -52,11 +52,11 @@ namespace mwmp
         unsigned int count;
         enum ACTION_TYPE
         {
-            UPDATE = 0,
+            SET = 0,
             ADD,
             REMOVE
         };
-        int action; //0 - Full update, 1 - Add item, 2 - Remove item
+        int action; //0 - Clear and set in entirety, 1 - Add item, 2 - Remove item
     };
 
     struct PacketSpells
@@ -65,11 +65,11 @@ namespace mwmp
         unsigned int count;
         enum ACTION_TYPE
         {
-            UPDATE = 0,
+            SET = 0,
             ADD,
             REMOVE
         };
-        int action; //0 - Full update, 1 - Add spell, 2 - Remove spell
+        int action; //0 - Clear and set in entirety, 1 - Add spell, 2 - Remove spell
     };
 
     class BasePlayer
