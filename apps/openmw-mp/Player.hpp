@@ -70,7 +70,6 @@ public:
 public:
     mwmp::PacketItems packetItemsBuffer;
     mwmp::PacketSpells packetSpellsBuffer;
-    std::vector<ESM::Spell> spellbook;
 
 private:
     bool handshakeState;

@@ -153,6 +153,7 @@ void ItemFunctions::SendItems(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
+
     std::swap(player->packetItems, player->packetItemsBuffer);
     mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_INVENTORY)->Send(player, false);
     player->packetItems = std::move(player->packetItemsBuffer);

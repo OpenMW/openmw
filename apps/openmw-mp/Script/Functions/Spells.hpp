@@ -8,7 +8,6 @@
     {"RemoveSpell",      SpellFunctions::RemoveSpell},\
     {"ClearSpellbook",   SpellFunctions::ClearSpellbook},\
     \
-    {"HasSpell",         SpellFunctions::HasSpell},\
     {"GetSpellId",       SpellFunctions::GetSpellId},\
     \
     {"SendSpells",       SpellFunctions::SendSpells}
@@ -23,7 +22,6 @@ public:
     static void RemoveSpell(unsigned short pid, const char* spellId) noexcept;
     static void ClearSpellbook(unsigned short pid) noexcept;
 
-    static bool HasSpell(unsigned short pid, const char* itemName);
     static const char *GetSpellId(unsigned short pid, unsigned int i) noexcept;
 
     static void SendSpells(unsigned short pid) noexcept;

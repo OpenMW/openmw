@@ -237,22 +237,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         DEBUG_PRINTF("ID_GAME_SPELLBOOK\n");
         myPacket->Read(player);
 
-        string str;
-        for (auto spell : player->packetSpells.spells)
-        {
-            str += spell.mId;
-            if (spell.mId != player->packetSpells.spells.back().mId)
-                str += ";";
-            if (player->packetSpells.action == PacketSpells::ADD)
-                player->spellbook.push_back(spell);
-            else if (player->packetSpells.action == PacketSpells::REMOVE)
-            {
-                player->spellbook.erase(remove_if(player->spellbook.begin(), player->spellbook.end(), [&spell](ESM::Spell s)->bool
-                {return spell.mId == s.mId; }), player->spellbook.end());
-            }
-        }
-
-        Script::Call<Script::CallbackIdentity("OnPlayerChangeSpellbook")>(player->getId(), player->packetSpells.action, str.c_str());
+        Script::Call<Script::CallbackIdentity("OnPlayerChangeSpellbook")>(player->getId(), player->packetSpells.action);
 
         break;
     }

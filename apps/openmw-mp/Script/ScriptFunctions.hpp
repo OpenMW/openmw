@@ -110,7 +110,7 @@ public:
             {"OnPlayerChangeLevel",      Function<void, unsigned short>()},
             {"OnPlayerChangeEquipment",  Function<void, unsigned short>()},
             {"OnPlayerChangeInventory",  Function<void, unsigned short>()},
-            {"OnPlayerChangeSpellbook",  Function<void, unsigned short, int, const char*>()},
+            {"OnPlayerChangeSpellbook",  Function<void, unsigned short, int>()},
             {"OnPlayerSendMessage",      Function<bool, unsigned short, const char*>()},
             {"OnPlayerEndCharGen",       Function<void, unsigned short>()},
             {"OnGUIAction",              Function<void, unsigned short, int, const char*>()}
