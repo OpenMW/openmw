@@ -328,6 +328,12 @@ namespace MWWorld
                 throw std::runtime_error ("invalid player state record (object state)");
             }
 
+            if (!player.mObject.mEnabled)
+            {
+                std::cerr << "Savegame attempted to disable the player." << std::endl;
+                player.mObject.mEnabled = true;
+            }
+
             mPlayer.load (player.mObject);
 
             for (int i=0; i<ESM::Attribute::Length; ++i)
