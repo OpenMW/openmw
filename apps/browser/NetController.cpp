@@ -14,6 +14,7 @@
 
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QJsonObject>
 #include <memory>
 #include <QtWidgets/QMessageBox>
 
@@ -60,6 +61,29 @@ struct pattern
     QString value;
 };
 
+void NetController::setData(QString address, QJsonObject server, ServerModel *model)
+{
+    QModelIndex mi = model->index(0, ServerData::ADDR);
+    model->setData(mi, address);
+
+    mi = model->index(0, ServerData::PLAYERS);
+    model->setData(mi, server["players"].toInt());
+
+    mi = model->index(0, ServerData::MAX_PLAYERS);
+    model->setData(mi, server["max_players"].toInt());
+
+    mi = model->index(0, ServerData::HOSTNAME);
+    model->setData(mi, server["hostname"].toString());
+
+    mi = model->index(0, ServerData::MODNAME);
+    model->setData(mi, server["modname"].toString());
+
+    mi = model->index(0, ServerData::PING);
+
+    QStringList addr = address.split(":");
+    model->setData(mi, PingRakNetServer(addr[0].toLatin1().data(), addr[1].toUShort()));
+}
+
 bool NetController::downloadInfo(QAbstractItemModel *pModel, QModelIndex index)
 {
     ServerModel *model = ((ServerModel *) pModel);
@@ -69,6 +93,34 @@ bool NetController::downloadInfo(QAbstractItemModel *pModel, QModelIndex index)
      */
 
     QString data;
+    QJsonParseError err;
+
+    if(index.isValid() && index.row() >= 0)
+    {
+        ServerData &sd = model->myData[index.row()];
+        while(true)
+        {
+            data = QString::fromStdString(httpNetwork.getData((QString("/api/servers/") + sd.addr).toLatin1()));
+            if (!data.isEmpty() && data != "NO_CONTENT" && data != "LOST_CONNECTION")
+                break;
+            RakSleep(30);
+        }
+        qDebug() << "Content for \"" <<  sd.addr << "\": " << data;
+
+        if(data == "bad request" or data == "not found") // TODO: if server is not registered we should download info directly from the server
+        {
+            qDebug() << "Server is not registered";
+            return false;
+        }
+
+        QJsonDocument jsonDocument = QJsonDocument::fromJson(data.toLatin1(), &err);
+        QJsonObject server = jsonDocument.object()["server"].toObject();
+
+        setData(sd.addr, server, model);
+
+        return true;
+    }
+
     while (true)
     {
         data = QString::fromStdString(httpNetwork.getData("/api/servers"));
@@ -85,42 +137,24 @@ bool NetController::downloadInfo(QAbstractItemModel *pModel, QModelIndex index)
 
     qDebug() << "Content: " << data;
 
-    QJsonParseError err;
     QJsonDocument jsonDocument = QJsonDocument::fromJson(data.toLatin1(), &err);
 
-    QMap<QString, QVariant> map = jsonDocument.toVariant().toMap()["list servers"].toMap();
+    QJsonObject listServers = jsonDocument.object()["list servers"].toObject();
 
-    for(QMap<QString, QVariant>::Iterator iter = map.begin(); iter != map.end(); iter++)
+    for(auto iter = listServers.begin(); iter != listServers.end(); iter++)
     {
+        QJsonObject server = iter->toObject();
         qDebug() << iter.key();
-        qDebug() << iter.value().toMap()["hostname"].toString();
-        qDebug() << iter.value().toMap()["modname"].toString();
-        qDebug() << iter.value().toMap()["players"].toInt();
-        qDebug() << iter.value().toMap()["max_players"].toInt();
+        qDebug() << server["hostname"].toString();
+        qDebug() << server["modname"].toString();
+        qDebug() << server["players"].toInt();
+        qDebug() << server["max_players"].toInt();
 
         QVector<ServerData>::Iterator value = std::find_if(model->myData.begin(), model->myData.end(), pattern(iter.key()));
         if(value == model->myData.end())
             model->insertRow(0);
 
-        QModelIndex mi = model->index(0, ServerData::ADDR);
-        model->setData(mi, iter.key());
-
-        mi = model->index(0, ServerData::PLAYERS);
-        model->setData(mi, iter.value().toMap()["players"].toInt());
-
-        mi = model->index(0, ServerData::MAX_PLAYERS);
-        model->setData(mi, iter.value().toMap()["max_players"].toInt());
-
-        mi = model->index(0, ServerData::HOSTNAME);
-        model->setData(mi, iter.value().toMap()["hostname"].toString());
-
-        mi = model->index(0, ServerData::MODNAME);
-        model->setData(mi, iter.value().toMap()["modname"].toString());
-
-        mi = model->index(0, ServerData::PING);
-
-        QStringList addr = iter.key().split(":");
-        model->setData(mi, PingRakNetServer(addr[0].toLatin1().data(), addr[1].toUShort()));
+        setData(iter.key(), server, model);
     }
 
     return true;
@@ -128,16 +162,11 @@ bool NetController::downloadInfo(QAbstractItemModel *pModel, QModelIndex index)
 
 bool NetController::updateInfo(QAbstractItemModel *pModel, QModelIndex index)
 {
-    qDebug() << "TODO: \"NetController::updateInfo(QAbstractItemModel *, QModelIndex)\" is not completed";
     ServerModel *model = ((ServerModel*)pModel);
 
     bool result;
     if (index.isValid() && index.row() >= 0)
-    {
-        //ServerData &sd = model->myData[index.row()];
-        //qDebug() << sd.addr;
         result = downloadInfo(pModel, index);
-    }
     else
     {
         for (QVector<ServerData>::Iterator iter = model->myData.begin(); iter != model->myData.end(); iter++)

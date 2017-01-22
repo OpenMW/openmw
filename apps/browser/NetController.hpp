@@ -30,6 +30,7 @@ protected:
 private:
     NetController(const NetController &controller);
     bool downloadInfo(QAbstractItemModel *pModel, QModelIndex index);
+    void setData(QString addr, QJsonObject server, ServerModel *model);
 
     static NetController *mThis;
     ServerData *sd;
