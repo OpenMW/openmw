@@ -147,7 +147,7 @@ void MainWindow::serverSelected()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     Files::ConfigurationManager cfgMgr;
-    QString cfgPath = (cfgMgr.getUserConfigPath() / "favorites.dat").c_str();
+    QString cfgPath = QString::fromStdString((cfgMgr.getUserConfigPath() / "favorites.dat").string());
 
     QJsonArray saveData;
     for(auto server : favorites->myData)
@@ -169,7 +169,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::loadFavorites()
 {
     Files::ConfigurationManager cfgMgr;
-    QString cfgPath = (cfgMgr.getUserConfigPath() / "favorites.dat").c_str();
+    QString cfgPath = QString::fromStdString((cfgMgr.getUserConfigPath() / "favorites.dat").string());
 
     QFile file(cfgPath);
     if(!file.open(QIODevice::ReadOnly))
