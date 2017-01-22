@@ -149,9 +149,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
     Files::ConfigurationManager cfgMgr;
     QString cfgPath = (cfgMgr.getUserConfigPath() / "favorites.dat").c_str();
 
-    QJsonArray data;
+    QJsonArray saveData;
     for(auto server : favorites->myData)
-        data.push_back(server.addr);
+        saveData.push_back(server.addr);
 
     QFile file(cfgPath);
 
@@ -161,7 +161,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
         return;
     }
 
-    file.write(QJsonDocument(data).toJson());
+    file.write(QJsonDocument(saveData).toJson());
     file.close();
 }
 
