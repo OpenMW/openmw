@@ -30,7 +30,6 @@ std::string loadSettings (Settings::Manager & settings)
 int main(int argc, char *argv[])
 {
     Settings::Manager mgr;
-    Files::ConfigurationManager cfgMgr;
 
     loadSettings(mgr);
 

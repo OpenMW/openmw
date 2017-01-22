@@ -32,6 +32,7 @@ private:
     Process::ProcessInvoker *mGameInvoker;
     ServerModel *browser, *favorites;
     QSortFilterProxyModel *proxyModel;
+    void loadFavorites();
 };
 
 

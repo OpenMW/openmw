@@ -5,8 +5,13 @@
 #include "MainWindow.hpp"
 #include "NetController.hpp"
 #include "ServerInfoDialog.hpp"
+#include "components/files/configurationmanager.hpp"
 #include <qdebug.h>
 #include <QInputDialog>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QFile>
+#include <QJsonDocument>
 
 using namespace Process;
 
@@ -34,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(actionPlay, SIGNAL(triggered(bool)), this, SLOT(play()));
     connect(tblServerBrowser, SIGNAL(clicked(QModelIndex)), this, SLOT(serverSelected()));
     connect(tblFavorites, SIGNAL(clicked(QModelIndex)), this, SLOT(serverSelected()));
+
+    loadFavorites();
 }
 
 MainWindow::~MainWindow()
@@ -58,7 +65,7 @@ void MainWindow::addServerByIP()
     QString text = QInputDialog::getText(this, tr("Add Server by address"), tr("Address:"), QLineEdit::Normal, "", &ok);
     if(ok && !text.isEmpty())
     {
-        favorites->insertRows(0, 1);
+        favorites->insertRow(0);
         QModelIndex mi = favorites->index(0, ServerData::ADDR);
         favorites->setData(mi, text, Qt::EditRole);
         NetController::get()->updateInfo(favorites, mi);
@@ -136,5 +143,47 @@ void MainWindow::serverSelected()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    Files::ConfigurationManager cfgMgr;
+    QString cfgPath = (cfgMgr.getUserConfigPath() / "favorites.dat").c_str();
 
+    QJsonArray data;
+    for(auto server : favorites->myData)
+        data.push_back(server.addr);
+
+    QFile file(cfgPath);
+
+    if(!file.open(QIODevice::WriteOnly))
+    {
+        qDebug() << "Cannot save " << cfgPath;
+        return;
+    }
+
+    file.write(QJsonDocument(data).toJson());
+    file.close();
+}
+
+
+void MainWindow::loadFavorites()
+{
+    Files::ConfigurationManager cfgMgr;
+    QString cfgPath = (cfgMgr.getUserConfigPath() / "favorites.dat").c_str();
+
+    QFile file(cfgPath);
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "Cannot open " << cfgPath;
+        return;
+    }
+
+    QJsonDocument jsonDoc(QJsonDocument::fromJson(file.readAll()));
+
+    for(auto server : jsonDoc.array())
+    {
+        favorites->insertRows(0, 1);
+        QModelIndex mi = favorites->index(0, ServerData::ADDR);
+        favorites->setData(mi, server.toString(), Qt::EditRole);
+        NetController::get()->updateInfo(favorites, mi);
+    }
+
+    file.close();
 }
