@@ -152,7 +152,7 @@ bool ServerModel::insertRows(int position, int count, const QModelIndex &index)
     beginInsertRows(QModelIndex(), position, position + count - 1);
 
     for (int row = 0; row < count; ++row) {
-        ServerData sd {"", -1, -1, -1, ""};
+        ServerData sd {"", -1, -1, -1, "", ""};
         myData.insert(position, sd);
     }
 
