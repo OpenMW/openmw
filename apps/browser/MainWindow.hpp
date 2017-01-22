@@ -19,6 +19,7 @@ public:
     virtual ~MainWindow();
 protected:
     void closeEvent(QCloseEvent * event) Q_DECL_OVERRIDE;
+    void addServer(QString addr);
 public slots:
     bool refresh();
 protected slots:
