@@ -1,6 +1,6 @@
 set(BROWSER_UI
-        ${CMAKE_SOURCE_DIR}/files/ui/Main.ui
-        ${CMAKE_SOURCE_DIR}/files/ui/ServerInfo.ui
+        ${CMAKE_SOURCE_DIR}/files/tes3mp/ui/Main.ui
+        ${CMAKE_SOURCE_DIR}/files/tes3mp/ui/ServerInfo.ui
         )
 set(BROWSER
         main.cpp
