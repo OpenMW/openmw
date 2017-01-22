@@ -22,7 +22,7 @@ unsigned int PingRakNetServer(const char *addr, unsigned short port)
     int attempts = 0;
     RakNet::TimeMS time = 999;
 
-    RakNet::SocketDescriptor socketDescriptor = {0, ""};
+    RakNet::SocketDescriptor socketDescriptor {0, ""};
     RakNet::RakPeerInterface *peer =  RakNet::RakPeerInterface::GetInstance();
     peer->Startup(1,&socketDescriptor, 1);
 

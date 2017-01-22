@@ -1,3 +1,6 @@
+
+set (CMAKE_CXX_STANDARD 11)
+
 set(BROWSER_UI
         ${CMAKE_SOURCE_DIR}/files/tes3mp/ui/Main.ui
         ${CMAKE_SOURCE_DIR}/files/tes3mp/ui/ServerInfo.ui
