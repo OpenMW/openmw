@@ -69,6 +69,7 @@ namespace ESSImport
             mPlayer.mHasMark = 0;
             mPlayer.mCurrentCrimeId = 0; // TODO
             mPlayer.mObject.blank();
+            mPlayer.mObject.mEnabled = true;
             mPlayer.mObject.mRef.mRefID = "player"; // REFR.mRefID would be PlayerSaveGame
 
             mGlobalMapState.mBounds.mMinX = 0;
