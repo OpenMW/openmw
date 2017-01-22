@@ -48,7 +48,7 @@ MainWindow::~MainWindow()
     delete mGameInvoker;
 }
 
-void MainWindow::addServer(QString addr)
+void MainWindow::addServerAndUpdate(QString addr)
 {
     favorites->insertRow(0);
     QModelIndex mi = favorites->index(0, ServerData::ADDR);
@@ -72,7 +72,7 @@ void MainWindow::addServerByIP()
     bool ok;
     QString text = QInputDialog::getText(this, tr("Add Server by address"), tr("Address:"), QLineEdit::Normal, "", &ok);
     if(ok && !text.isEmpty())
-        addServer(text);
+        addServerAndUpdate(text);
 }
 
 void MainWindow::deleteServer()
@@ -181,7 +181,7 @@ void MainWindow::loadFavorites()
     QJsonDocument jsonDoc(QJsonDocument::fromJson(file.readAll()));
 
     for(auto server : jsonDoc.array())
-        addServer(server.toString());
+        addServerAndUpdate(server.toString());
 
     file.close();
 }
