@@ -97,7 +97,7 @@ bool NetController::downloadInfo(QAbstractItemModel *pModel, QModelIndex index)
 
     if(index.isValid() && index.row() >= 0)
     {
-        ServerData &sd = model->myData[index.row()];
+        const ServerData &sd = model->myData[index.row()];
         while(true)
         {
             data = QString::fromStdString(httpNetwork.getData((QString("/api/servers/") + sd.addr).toLatin1()));
@@ -107,7 +107,7 @@ bool NetController::downloadInfo(QAbstractItemModel *pModel, QModelIndex index)
         }
         qDebug() << "Content for \"" <<  sd.addr << "\": " << data;
 
-        if(data == "bad request" or data == "not found") // TODO: if server is not registered we should download info directly from the server
+        if(data == "bad request" || data == "not found") // TODO: if server is not registered we should download info directly from the server
         {
             qDebug() << "Server is not registered";
             return false;
