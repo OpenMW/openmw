@@ -169,7 +169,7 @@ bool NetController::updateInfo(QAbstractItemModel *pModel, QModelIndex index)
         result = downloadInfo(pModel, index);
     else
     {
-        for (QVector<ServerData>::Iterator iter = model->myData.begin(); iter != model->myData.end(); iter++)
+        for (auto iter = model->myData.begin(); iter != model->myData.end(); iter++)
         {
             qDebug() << iter->addr;
         }
@@ -223,7 +223,7 @@ void NetController::updateInfo()
 QStringList NetController::players()
 {
     QStringList listPlayers;
-    for(vector<string>::iterator player = sed.players.begin(); player != sed.players.end(); player++)
+    for(auto player = sed.players.begin(); player != sed.players.end(); player++)
         listPlayers.push_back(player->c_str());
     return listPlayers;
 }
@@ -231,7 +231,7 @@ QStringList NetController::players()
 QStringList NetController::plugins()
 {
     QStringList listPlugins;
-    for(vector<string>::iterator plugin = sed.plugins.begin(); plugin != sed.plugins.end(); plugin++)
+    for(auto plugin = sed.plugins.begin(); plugin != sed.plugins.end(); plugin++)
         listPlugins.push_back(plugin->c_str());
     return listPlugins;
 }
