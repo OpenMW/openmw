@@ -18,6 +18,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     virtual ~MainWindow();
 protected:
+    void closeEvent(QCloseEvent * event) Q_DECL_OVERRIDE;
 public slots:
     bool refresh();
 protected slots:

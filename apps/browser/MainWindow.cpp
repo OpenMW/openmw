@@ -133,3 +133,8 @@ void MainWindow::serverSelected()
     if(tabWidget->currentIndex() == 0)
         actionAdd->setEnabled(true);
 }
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+
+}
