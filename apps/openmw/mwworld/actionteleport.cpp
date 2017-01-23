@@ -8,23 +8,6 @@
 
 #include "player.hpp"
 
-namespace
-{
-
-    void getFollowers (const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out)
-    {
-        std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(actor);
-        for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
-        {
-            if (out.insert(*it).second)
-            {
-                getFollowers(*it, out);
-            }
-        }
-    }
-
-}
-
 namespace MWWorld
 {
     ActionTeleport::ActionTeleport (const std::string& cellName,
@@ -37,21 +20,12 @@ namespace MWWorld
     {
         if (mTeleportFollowers)
         {
-            //find any NPC that is following the actor and teleport him too
+            // Find any NPCs that are following the actor and teleport them with him
             std::set<MWWorld::Ptr> followers;
-            getFollowers(actor, followers);
-            for(std::set<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
-            {
-                MWWorld::Ptr follower = *it;
+            getFollowersToTeleport(actor, followers);
 
-                std::string script = follower.getClass().getScript(follower);
-                if (!script.empty() && follower.getRefData().getLocals().getIntVar(script, "stayoutside") == 1)
-                    continue;
-
-                if ((follower.getRefData().getPosition().asVec3() - actor.getRefData().getPosition().asVec3()).length2()
-                        <= 800*800)
-                    teleport(*it);
-            }
+            for (std::set<MWWorld::Ptr>::iterator it = followers.begin(); it != followers.end(); ++it)
+                teleport(*it);
         }
 
         teleport(actor);
@@ -80,6 +54,23 @@ namespace MWWorld
             }
             else
                 world->moveObject(actor,world->getInterior(mCellName),mPosition.pos[0],mPosition.pos[1],mPosition.pos[2]);
+        }
+    }
+
+    void ActionTeleport::getFollowersToTeleport(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out) {
+        std::set<MWWorld::Ptr> followers;
+        MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(actor, followers);
+
+        for(std::set<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
+        {
+            MWWorld::Ptr follower = *it;
+
+            std::string script = follower.getClass().getScript(follower);
+            if (!script.empty() && follower.getRefData().getLocals().getIntVar(script, "stayoutside") == 1)
+                continue;
+
+            if ((follower.getRefData().getPosition().asVec3() - actor.getRefData().getPosition().asVec3()).length2() <= 800*800)
+                out.insert(follower);
         }
     }
 }

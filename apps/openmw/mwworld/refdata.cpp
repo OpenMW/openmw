@@ -13,7 +13,8 @@ namespace
 enum RefDataFlags
 {
     Flag_SuppressActivate = 1, // If set, activation will be suppressed and redirected to the OnActivate flag, which can then be handled by a script.
-    Flag_OnActivate = 2
+    Flag_OnActivate = 2,
+    Flag_ActivationBuffered = 4
 };
 }
 
@@ -83,6 +84,7 @@ namespace MWWorld
         try
         {
             copy (refData);
+            mFlags &= ~(Flag_SuppressActivate|Flag_OnActivate|Flag_ActivationBuffered);
         }
         catch (...)
         {
@@ -241,38 +243,32 @@ namespace MWWorld
         return mChanged || !mAnimationState.empty();
     }
 
+    bool RefData::activateByScript()
+    {
+        bool ret = (mFlags & Flag_ActivationBuffered);
+        mFlags &= ~(Flag_SuppressActivate|Flag_OnActivate);
+        return ret;
+    }
+
     bool RefData::activate()
     {
-        if (!(mFlags & Flag_SuppressActivate))
-            return true;
+        if (mFlags & Flag_SuppressActivate)
+        {
+            mFlags |= Flag_OnActivate|Flag_ActivationBuffered;
+            return false;
+        }
         else
         {
-            mFlags |= Flag_OnActivate;
-            return false;
+            return true;
         }
     }
 
     bool RefData::onActivate()
     {
+        bool ret = mFlags & Flag_OnActivate;
         mFlags |= Flag_SuppressActivate;
-
-        if (mFlags & Flag_OnActivate)
-        {
-            mFlags &= (~Flag_OnActivate);
-            return true;
-        }
-        return false;
-    }
-
-    bool RefData::activateByScript()
-    {
-        if (mFlags & Flag_SuppressActivate)
-        {
-            mFlags &= (~Flag_SuppressActivate);
-            return true;
-        }
-        else
-            return false;
+        mFlags &= (~Flag_OnActivate);
+        return ret;
     }
 
     const ESM::AnimationState& RefData::getAnimationState() const

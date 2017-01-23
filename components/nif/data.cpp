@@ -40,32 +40,45 @@ void ShapeData::read(NIFStream *nif)
 {
     int verts = nif->getUShort();
 
-    vertices = new osg::Vec3Array;
-    if(nif->getInt())
-        nif->getVector3s(vertices, verts);
+    // Assign a VBO right off the bat to avoid race conditions later, in case two threads load this data into a Geometry at the same time
+    osg::ref_ptr<osg::VertexBufferObject> vbo = new osg::VertexBufferObject;
 
-    normals = new osg::Vec3Array(osg::Array::BIND_PER_VERTEX);
-    if(nif->getInt())
+    if(nif->getInt() && verts)
+    {
+        vertices = new osg::Vec3Array;
+        nif->getVector3s(vertices, verts);
+        vertices->setVertexBufferObject(vbo);
+    }
+
+    if(nif->getInt() && verts)
+    {
+        normals = new osg::Vec3Array(osg::Array::BIND_PER_VERTEX);
         nif->getVector3s(normals, verts);
+        normals->setVertexBufferObject(vbo);
+    }
 
     center = nif->getVector3();
     radius = nif->getFloat();
 
-    colors = new osg::Vec4Array(osg::Array::BIND_PER_VERTEX);
-    if(nif->getInt())
+    if(nif->getInt() && verts)
+    {
+        colors = new osg::Vec4Array(osg::Array::BIND_PER_VERTEX);
         nif->getVector4s(colors, verts);
+        colors->setVertexBufferObject(vbo);
+    }
 
     // Only the first 6 bits are used as a count. I think the rest are
     // flags of some sort.
     int uvs = nif->getUShort();
     uvs &= 0x3f;
 
-    if(nif->getInt())
+    if(nif->getInt() && verts)
     {
         uvlist.resize(uvs);
         for(int i = 0;i < uvs;i++)
         {
             osg::Vec2Array* list = uvlist[i] = new osg::Vec2Array(osg::Array::BIND_PER_VERTEX);
+            list->setVertexBufferObject(vbo);
             nif->getVector2s(list, verts);
 
             // flip the texture coordinates to convert them to the OpenGL convention of bottom-left image origin
@@ -86,8 +99,14 @@ void NiTriShapeData::read(NIFStream *nif)
     // We have three times as many vertices as triangles, so this
     // is always equal to tris*3.
     int cnt = nif->getInt();
-    triangles = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES);
-    nif->getUShorts(triangles, cnt);
+    if (cnt)
+    {
+        triangles = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES);
+        nif->getUShorts(triangles, cnt);
+
+        // Assign an EBO right off the bat to avoid race conditions later, in case two threads load this data into a Geometry at the same time
+        triangles->setElementBufferObject(new osg::ElementBufferObject);
+    }
 
     // Read the match list, which lists the vertices that are equal to
     // vertices. We don't actually need need this for anything, so

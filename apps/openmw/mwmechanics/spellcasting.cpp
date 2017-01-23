@@ -27,6 +27,7 @@
 #include "magiceffects.hpp"
 #include "npcstats.hpp"
 #include "actorutil.hpp"
+#include "aifollow.hpp"
 
 namespace MWMechanics
 {
@@ -273,12 +274,13 @@ namespace MWMechanics
         return true;
     }
 
-    CastSpell::CastSpell(const MWWorld::Ptr &caster, const MWWorld::Ptr &target)
+    CastSpell::CastSpell(const MWWorld::Ptr &caster, const MWWorld::Ptr &target, const bool fromProjectile)
         : mCaster(caster)
         , mTarget(target)
         , mStack(false)
         , mHitPosition(0,0,0)
         , mAlwaysSucceed(false)
+        , mFromProjectile(fromProjectile)
     {
     }
 
@@ -300,7 +302,7 @@ namespace MWMechanics
     void CastSpell::inflict(const MWWorld::Ptr &target, const MWWorld::Ptr &caster,
                             const ESM::EffectList &effects, ESM::RangeType range, bool reflected, bool exploded)
     {
-        if (target.getClass().isActor() && target.getClass().getCreatureStats(target).isDead())
+        if (!target.isEmpty() && target.getClass().isActor() && target.getClass().getCreatureStats(target).isDead())
             return;
 
         // If none of the effects need to apply, we can early-out
@@ -318,7 +320,7 @@ namespace MWMechanics
             return;
 
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (mId);
-        if (spell && (spell->mData.mType == ESM::Spell::ST_Disease || spell->mData.mType == ESM::Spell::ST_Blight))
+        if (spell && !target.isEmpty() && (spell->mData.mType == ESM::Spell::ST_Disease || spell->mData.mType == ESM::Spell::ST_Blight))
         {
             int requiredResistance = (spell->mData.mType == ESM::Spell::ST_Disease) ?
                 ESM::MagicEffect::ResistCommonDisease
@@ -341,13 +343,13 @@ namespace MWMechanics
         // This is required for Weakness effects in a spell to apply to any subsequent effects in the spell.
         // Otherwise, they'd only apply after the whole spell was added.
         MagicEffects targetEffects;
-        if (target.getClass().isActor())
+        if (!target.isEmpty() && target.getClass().isActor())
             targetEffects += target.getClass().getCreatureStats(target).getMagicEffects();
 
         bool castByPlayer = (!caster.isEmpty() && caster == getPlayer());
 
         ActiveSpells targetSpells;
-        if (target.getClass().isActor())
+        if (!target.isEmpty() && target.getClass().isActor())
             targetSpells = target.getClass().getCreatureStats(target).getActiveSpells();
 
         bool canCastAnEffect = false;    // For bound equipment.If this remains false
@@ -355,7 +357,7 @@ namespace MWMechanics
                                          // effects, we display a "can't re-cast" message
 
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (effects.mList.begin());
-            effectIt!=effects.mList.end(); ++effectIt)
+             !target.isEmpty() && effectIt != effects.mList.end(); ++effectIt)
         {
             if (effectIt->mRange != range)
                 continue;
@@ -490,6 +492,15 @@ namespace MWMechanics
 
                         appliedLastingEffects.push_back(effect);
 
+                        // Command spells should have their effect, including taking the target out of combat, each time the spell successfully affects the target
+                        if (((effectIt->mEffectID == ESM::MagicEffect::CommandHumanoid && target.getClass().isNpc())
+                        || (effectIt->mEffectID == ESM::MagicEffect::CommandCreature && target.getTypeName() == typeid(ESM::Creature).name()))
+                        && !caster.isEmpty() && caster.getClass().isActor() && target != getPlayer() && magnitude >= target.getClass().getCreatureStats(target).getLevel())
+                        {
+                            MWMechanics::AiFollow package(caster.getCellRef().getRefId(), true);
+                            target.getClass().getCreatureStats(target).getAiSequence().stack(package, target);
+                        }
+
                         // For absorb effects, also apply the effect to the caster - but with a negative
                         // magnitude, since we're transferring stats from the target to the caster
                         if (!caster.isEmpty() && caster.getClass().isActor())
@@ -555,18 +566,20 @@ namespace MWMechanics
         }
 
         if (!exploded)
-            MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, effects, caster, target, range, mId, mSourceName);
+            MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, effects, caster, target, range, mId, mSourceName, mFromProjectile);
 
-        if (!reflectedEffects.mList.empty())
-            inflict(caster, target, reflectedEffects, range, true, exploded);
+        if (!target.isEmpty()) {
+            if (!reflectedEffects.mList.empty())
+                inflict(caster, target, reflectedEffects, range, true, exploded);
 
-        if (!appliedLastingEffects.empty())
-        {
-            int casterActorId = -1;
-            if (!caster.isEmpty() && caster.getClass().isActor())
-                casterActorId = caster.getClass().getCreatureStats(caster).getActorId();
-            target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
-                                                                                  mSourceName, casterActorId);
+            if (!appliedLastingEffects.empty())
+            {
+                int casterActorId = -1;
+                if (!caster.isEmpty() && caster.getClass().isActor())
+                    casterActorId = caster.getClass().getCreatureStats(caster).getActorId();
+                target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
+                                                                                      mSourceName, casterActorId);
+            }
         }
     }
 
@@ -612,6 +625,11 @@ namespace MWMechanics
                     MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
                 return true;
             }
+        }
+        else if (target.getClass().isActor() && effectId == ESM::MagicEffect::Dispel)
+        {
+            target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude);
+            return true;
         }
         else if (target.getClass().isActor() && target == getPlayer())
         {
@@ -742,14 +760,19 @@ namespace MWMechanics
 
         inflict(mCaster, mCaster, enchantment->mEffects, ESM::RT_Self);
 
-        if (!mTarget.isEmpty())
+        bool isProjectile = false;
+        if (item.getTypeName() == typeid(ESM::Weapon).name())
         {
-            inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Touch);
+            const MWWorld::LiveCellRef<ESM::Weapon> *ref = item.get<ESM::Weapon>();
+            isProjectile = ref->mBase->mData.mType == ESM::Weapon::Arrow || ref->mBase->mData.mType == ESM::Weapon::Bolt || ref->mBase->mData.mType == ESM::Weapon::MarksmanThrown;
         }
+
+        if (isProjectile || !mTarget.isEmpty())
+            inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Touch);
 
         if (launchProjectile)
             launchMagicBolt(enchantment->mEffects);
-        else if (!mTarget.isEmpty())
+        else if (isProjectile || !mTarget.isEmpty())
             inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Target);
 
         return true;
@@ -1139,9 +1162,6 @@ namespace MWMechanics
             break;
         case ESM::MagicEffect::CureCorprusDisease:
             actor.getClass().getCreatureStats(actor).getSpells().purgeCorprusDisease();
-            break;
-        case ESM::MagicEffect::Dispel:
-            actor.getClass().getCreatureStats(actor).getActiveSpells().purgeAll(magnitude);
             break;
         case ESM::MagicEffect::RemoveCurse:
             actor.getClass().getCreatureStats(actor).getSpells().purgeCurses();

@@ -19,6 +19,7 @@
 #include "aicombataction.hpp"
 #include "combat.hpp"
 #include "coordinateconverter.hpp"
+#include "actorutil.hpp"
 
 namespace
 {
@@ -210,13 +211,14 @@ namespace MWMechanics
         else
         {
             timerReact = 0;
-            attack(actor, target, storage, characterController);
+            if (attack(actor, target, storage, characterController))
+                return true;
         }
 
         return false;
     }
 
-    void AiCombat::attack(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, AiCombatStorage& storage, CharacterController& characterController)
+    bool AiCombat::attack(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, AiCombatStorage& storage, CharacterController& characterController)
     {
         const MWWorld::CellStore*& currentCell = storage.mCell;
         bool cellChange = currentCell && (actor.getCell() != currentCell);
@@ -231,7 +233,10 @@ namespace MWMechanics
             storage.stopAttack();
             characterController.setAttackingOrSpell(false);
             storage.mActionCooldown = 0.f;
-            forceFlee = true;
+            if (target == MWMechanics::getPlayer())
+                forceFlee = true;
+            else
+                return true;
         }
 
         const MWWorld::Class& actorClass = actor.getClass();
@@ -243,7 +248,7 @@ namespace MWMechanics
         if (!forceFlee)
         {
             if (actionCooldown > 0)
-                return;
+                return false;
 
             if (characterController.readyToPrepareAttack())
             {
@@ -258,7 +263,7 @@ namespace MWMechanics
         }
 
         if (!currentAction)
-            return;
+            return false;
 
         if (storage.isFleeing() != currentAction->isFleeing())
         {
@@ -266,7 +271,7 @@ namespace MWMechanics
             {
                 storage.startFleeing();
                 MWBase::Environment::get().getDialogueManager()->say(actor, "flee");
-                return;
+                return false;
             }
             else
                 storage.stopFleeing();
@@ -311,6 +316,7 @@ namespace MWMechanics
                 storage.mMovement.mRotation[2] = getZAngleToDir((vTargetPos-vActorPos)); // using vAimDir results in spastic movements since the head is animated
             }
         }
+        return false;
     }
 
     void MWMechanics::AiCombat::updateLOS(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, float duration, MWMechanics::AiCombatStorage& storage)
