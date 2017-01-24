@@ -38,6 +38,7 @@ namespace mwmp
 
         void addItems();
         void addSpells();
+        void addJournalItems();
 
         void removeItems();
         void removeSpells();

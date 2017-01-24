@@ -70,6 +70,7 @@ public:
 public:
     mwmp::InventoryChanges inventoryChangesBuffer;
     mwmp::SpellbookChanges spellbookChangesBuffer;
+    mwmp::JournalChanges journalChangesBuffer;
 
 private:
     bool handshakeState;

@@ -6,6 +6,7 @@
 #include "../mwmechanics/aitravel.hpp"
 #include <components/esm/esmwriter.hpp>
 #include "../mwbase/environment.hpp"
+#include "../mwbase/journal.hpp"
 #include "../mwstate/statemanagerimp.hpp"
 #include "../mwinput/inputmanagerimp.hpp"
 #include "../mwscript/scriptmanagerimp.hpp"
@@ -27,6 +28,7 @@
 
 #include "LocalPlayer.hpp"
 #include "Networking.hpp"
+#include "WorldController.hpp"
 #include "Main.hpp"
 
 using namespace mwmp;
@@ -643,6 +645,34 @@ void LocalPlayer::addSpells()
         
 }
 
+void LocalPlayer::addJournalItems()
+{
+    for (unsigned int i = 0; i < journalChanges.count; i++)
+    {
+        mwmp::JournalItem journalItem = journalChanges.journalItems[i];
+        
+        if (journalItem.type == JournalItem::ENTRY)
+        {
+            MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(journalItem.actorCell);
+
+            if (!ptrCellStore) continue;
+
+            MWWorld::Ptr ptrFound = ptrCellStore->searchExact(journalItem.actorCellRef.mRefID, journalItem.actorCellRef.mRefNum.mIndex);
+
+            if (!ptrFound)
+            {
+                ptrFound = getPlayerPtr();
+            }
+
+            MWBase::Environment::get().getJournal()->addEntry(journalItem.quest, journalItem.index, ptrFound);
+        }
+        else
+        {
+            MWBase::Environment::get().getJournal()->setJournalIndex(journalItem.quest, journalItem.index);
+        }
+    }
+}
+
 void LocalPlayer::removeItems()
 {
     MWWorld::Ptr ptrPlayer = getPlayerPtr();
@@ -998,13 +1028,35 @@ void LocalPlayer::sendSpellRemoval(const ESM::Spell &spell)
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Not implemented.");
 }
 
-void LocalPlayer::sendJournalEntry(const std::string& id, int index, const MWWorld::Ptr& actor)
+void LocalPlayer::sendJournalEntry(const std::string& quest, int index, const MWWorld::Ptr& actor)
 {
+    journalChanges.journalItems.clear();
+
+    mwmp::JournalItem journalItem;
+    journalItem.type = JournalItem::ENTRY;
+    journalItem.quest = quest;
+    journalItem.index = index;
+
+    journalItem.actorCell = *actor.getCell()->getCell();
+    journalItem.actorCellRef.mRefID = actor.getCellRef().getRefId();
+    journalItem.actorCellRef.mRefNum = actor.getCellRef().getRefNum();
+
+    journalChanges.journalItems.push_back(journalItem);
+
     Main::get().getNetworking()->getPlayerPacket(ID_GAME_JOURNAL)->Send(this);
 }
 
-void LocalPlayer::sendJournalIndex(const std::string& id, int index)
+void LocalPlayer::sendJournalIndex(const std::string& quest, int index)
 {
+    journalChanges.journalItems.clear();
+
+    mwmp::JournalItem journalItem;
+    journalItem.type = JournalItem::INDEX;
+    journalItem.quest = quest;
+    journalItem.index = index;
+
+    journalChanges.journalItems.push_back(journalItem);
+
     Main::get().getNetworking()->getPlayerPacket(ID_GAME_JOURNAL)->Send(this);
 }
 

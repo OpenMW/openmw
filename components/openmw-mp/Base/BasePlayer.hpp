@@ -55,6 +55,10 @@ namespace mwmp
             ENTRY = 0,
             INDEX = 1
         };
+
+        ESM::Cell actorCell;
+        ESM::CellRef actorCellRef;
+
         int type; // 0 - An entire entry, 1 - An index
     };
 
@@ -209,6 +213,7 @@ namespace mwmp
         double hour;
         InventoryChanges inventoryChanges;
         SpellbookChanges spellbookChanges;
+        JournalChanges journalChanges;
         bool consoleAllowed;
         bool ignorePosPacket;
         ESM::ActiveSpells activeSpells;

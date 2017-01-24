@@ -348,6 +348,18 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_JOURNAL:
     {
+        if (guid == myGuid)
+        {
+            if (packet->length == myPacket->headerSize())
+            {
+                // Entire journal cannot currently be requested from players
+            }
+            else
+            {
+                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                getLocalPlayer()->addJournalItems();
+            }
+        }
         break;
     }
     case ID_GAME_ATTACK:

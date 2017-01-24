@@ -10,6 +10,7 @@
 #include <Script/Functions/GUI.hpp>
 #include <Script/Functions/Stats.hpp>
 #include <Script/Functions/Items.hpp>
+#include <Script/Functions/Quests.hpp>
 #include <Script/Functions/Spells.hpp>
 #include <Script/Functions/World.hpp>
 #include <RakNetTypes.h>
@@ -90,6 +91,7 @@ public:
             TRANSLOCATIONFUNCTIONS,
             STATSFUNCTIONS,
             ITEMAPI,
+            QUESTAPI,
             SPELLAPI,
             GUIFUNCTIONS,
             CHARCLASSFUNCTIONS,
