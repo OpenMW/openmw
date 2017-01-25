@@ -246,6 +246,11 @@ endif()
 
 
 set(BOOST_COMPONENTS system filesystem program_options)
+
+if (ANDROID)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} thread)
+endif (ANDROID) 
+
 if(WIN32)
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
 endif(WIN32)
@@ -522,6 +527,11 @@ add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
 if (BUILD_OPENCS)
     add_subdirectory (extern/osgQt)
+endif()
+
+#android
+if (ANDROID)
+    add_subdirectory (android)
 endif()
 
 # Components
