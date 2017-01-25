@@ -11,7 +11,7 @@ void ScriptFunctions::SendMessage(unsigned short pid, const char *message, bool 
     Player *player;
     GET_PLAYER(pid, player,);
 
-    *player->ChatMessage() = message;
+    player->chatMessage = message;
 
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "System: %s", message);
 

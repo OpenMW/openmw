@@ -70,12 +70,12 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             return;
         }
 
-        if (*player->getPassw() != passw)
+        if (player->passw != passw)
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong server password for player %d, name: %s (pass: %s)",
                 player->getId(),
                 player->npc.mName.c_str(),
-                player->getPassw()->c_str());
+                player->passw.c_str());
             kickPlayer(player->guid);
             return;
         }
@@ -158,7 +158,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Read(player);
 
             LOG_APPEND(Log::LOG_INFO, "- Moved to %s",
-                player->getCell()->getDescription().c_str());
+                player->cell.getDescription().c_str());
 
             myPacket->Send(player, true); //send to other clients
             Script::Call<Script::CallbackIdentity("OnPlayerCellChange")>(player->getId());
@@ -275,7 +275,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 target = player;
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player: %s attacked %s state: %d", player->npc.mName.c_str(),
-                target->Npc()->mName.c_str(), player->attack.pressed == 1);
+                target->npc.mName.c_str(), player->attack.pressed == 1);
             if (player->attack.pressed == 0)
             {
                 LOG_APPEND(Log::LOG_VERBOSE, "success: %d", player->attack.success == 1);
@@ -357,7 +357,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         DEBUG_PRINTF("ID_CHAT_MESSAGE\n");
         myPacket->Read(player);
         Script::CallBackReturn<Script::CallbackIdentity("OnPlayerSendMessage")> result = true;
-        Script::Call<Script::CallbackIdentity("OnPlayerSendMessage")>(result, player->getId(), player->ChatMessage()->c_str());
+        Script::Call<Script::CallbackIdentity("OnPlayerSendMessage")>(result, player->getId(), player->chatMessage.c_str());
 
         if (result)
         {
