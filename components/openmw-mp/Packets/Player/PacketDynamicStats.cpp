@@ -15,7 +15,7 @@ PacketDynamicStats::PacketDynamicStats(RakNet::RakPeerInterface *peer) : PlayerP
 void PacketDynamicStats::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
     PlayerPacket::Packet(bs, player, send);
-    RW(player->CreatureStats()->mDynamic[0], send); // health
-    RW(player->CreatureStats()->mDynamic[1], send); // magic
-    RW(player->CreatureStats()->mDynamic[2], send); // fatigue
+    RW(player->creatureStats.mDynamic[0], send); // health
+    RW(player->creatureStats.mDynamic[1], send); // magic
+    RW(player->creatureStats.mDynamic[2], send); // fatigue
 }

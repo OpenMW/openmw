@@ -270,25 +270,25 @@ ESM::CustomMarker mwmp::GUIController::CreateMarker(const RakNet::RakNetGUID &gu
         return mEditingMarker;
     }
 
-    mEditingMarker.mNote = player->Npc()->mName;
+    mEditingMarker.mNote = player->npc.mName;
 
-    const ESM::Cell *ptrCell = player->getCell();
+    const ESM::Cell *playerCell = &player->cell;
 
-    mEditingMarker.mCell = player->getCell()->mCellId;
+    mEditingMarker.mCell = player->cell.mCellId;
 
-    mEditingMarker.mWorldX = player->Position()->pos[0];
-    mEditingMarker.mWorldY = player->Position()->pos[1];
+    mEditingMarker.mWorldX = player->position.pos[0];
+    mEditingMarker.mWorldY = player->position.pos[1];
 
-    mEditingMarker.mCell.mPaged = ptrCell->isExterior();
-    if (!ptrCell->isExterior())
-        mEditingMarker.mCell.mWorldspace = ptrCell->mName;
+    mEditingMarker.mCell.mPaged = playerCell->isExterior();
+    if (!playerCell->isExterior())
+        mEditingMarker.mCell.mWorldspace = playerCell->mName;
     else
     {
         mEditingMarker.mCell.mWorldspace = ESM::CellId::sDefaultWorldspace;
 
         // Don't remove these, or the markers will stop showing up in exteriors
-        mEditingMarker.mCell.mIndex.mX = ptrCell->getGridX();
-        mEditingMarker.mCell.mIndex.mY = ptrCell->getGridY();
+        mEditingMarker.mCell.mIndex.mX = playerCell->getGridX();
+        mEditingMarker.mCell.mIndex.mY = playerCell->getGridY();
     }
     return mEditingMarker;
 }

@@ -65,7 +65,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong handshake with player %d, name: %s",
                 player->getId(),
-                player->Npc()->mName.c_str());
+                player->npc.mName.c_str());
             kickPlayer(player->guid);
             return;
         }
@@ -74,7 +74,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong server password for player %d, name: %s (pass: %s)",
                 player->getId(),
-                player->Npc()->mName.c_str(),
+                player->npc.mName.c_str(),
                 player->getPassw()->c_str());
             kickPlayer(player->guid);
             return;
@@ -109,7 +109,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     else if (packet->data[0] == ID_GAME_BASE_INFO)
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(player);
         myPacket->Send(player, true);
@@ -129,7 +129,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         case ID_GAME_BASE_INFO:
         {
         /*LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s",
-        player->Npc()->mName.c_str());
+        player->npc.mName.c_str());
 
         myPacket->Read(player);
         myPacket->Send(player, true);*/
@@ -140,7 +140,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
         //DEBUG_PRINTF("ID_GAME_POS \n");
 
-        if (!player->CreatureStats()->mDead)
+        if (!player->creatureStats.mDead)
         {
             myPacket->Read(player);
             myPacket->Send(player, true); //send to other clients
@@ -151,9 +151,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     case ID_PLAYER_CELL_CHANGE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_CELL_CHANGE from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
-        if (!player->CreatureStats()->mDead)
+        if (!player->creatureStats.mDead)
         {
             myPacket->Read(player);
 
@@ -166,7 +166,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         else
         {
             LOG_APPEND(Log::LOG_INFO, "- Ignored because %s is dead",
-                player->Npc()->mName.c_str());
+                player->npc.mName.c_str());
         }
 
         break;
@@ -174,7 +174,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     case ID_PLAYER_CELL_LOAD:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_CELL_LOAD from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         Script::Call<Script::CallbackIdentity("OnPlayerCellLoad")>(player->getId());
 
@@ -183,7 +183,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     case ID_GAME_ATTRIBUTE:
     {
 
-        if (!player->CreatureStats()->mDead)
+        if (!player->creatureStats.mDead)
         {
             myPacket->Read(player);
             myPacket->Send(player, true);
@@ -196,7 +196,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     case ID_GAME_SKILL:
     {
 
-        if (!player->CreatureStats()->mDead)
+        if (!player->creatureStats.mDead)
         {
             myPacket->Read(player);
             myPacket->Send(player, true);
@@ -209,7 +209,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     case ID_GAME_LEVEL:
     {
 
-        if (!player->CreatureStats()->mDead)
+        if (!player->creatureStats.mDead)
         {
             myPacket->Read(player);
             myPacket->Send(player, true);
@@ -265,30 +265,30 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
         DEBUG_PRINTF("ID_GAME_ATTACK\n");
 
-        if (!player->CreatureStats()->mDead)
+        if (!player->creatureStats.mDead)
         {
             myPacket->Read(player);
 
-            Player *target = Players::getPlayer(player->getAttack()->target);
+            Player *target = Players::getPlayer(player->attack.target);
 
             if (target == nullptr)
                 target = player;
 
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player: %s attacked %s state: %d", player->Npc()->mName.c_str(),
-                target->Npc()->mName.c_str(), player->getAttack()->pressed == 1);
-            if (player->getAttack()->pressed == 0)
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player: %s attacked %s state: %d", player->npc.mName.c_str(),
+                target->Npc()->mName.c_str(), player->attack.pressed == 1);
+            if (player->attack.pressed == 0)
             {
-                LOG_APPEND(Log::LOG_VERBOSE, "success: %d", player->getAttack()->success == 1);
-                if (player->getAttack()->success == 1)
+                LOG_APPEND(Log::LOG_VERBOSE, "success: %d", player->attack.success == 1);
+                if (player->attack.success == 1)
                 {
-                    LOG_APPEND(Log::LOG_VERBOSE, "damage: %d", player->getAttack()->damage == 1);
+                    LOG_APPEND(Log::LOG_VERBOSE, "damage: %d", player->attack.damage == 1);
                     target->setLastAttackerId(player->getId());
                     target->setLastAttackerTime(std::chrono::steady_clock::now());
                 }
             }
 
             myPacket->Send(player, true);
-            playerController->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(player->getAttack()->target);
+            playerController->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(player->attack.target);
         }
         break;
     }
@@ -304,7 +304,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     case ID_GAME_DIE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_DIE from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         Player *killer = Players::getPlayer(player->getLastAttackerId());
 
@@ -322,7 +322,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         player->resetLastAttacker();
 
-        player->CreatureStats()->mDead = true;
+        player->creatureStats.mDead = true;
         myPacket->Send(player, true);
 
         Script::Call<Script::CallbackIdentity("OnPlayerDeath")>(player->getId(), reason, killer->getId());
@@ -334,7 +334,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
         DEBUG_PRINTF("ID_GAME_RESURRECT\n");
         //packetResurrect.Read(player);
-        player->CreatureStats()->mDead = false;
+        player->creatureStats.mDead = false;
         myPacket->Send(player, true);
         playerController->GetPacket(ID_GAME_POS)->RequestData(player->guid);
         playerController->GetPacket(ID_PLAYER_CELL_CHANGE)->RequestData(player->guid);
@@ -361,8 +361,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         if (result)
         {
-            *player->ChatMessage() = player->Npc()->mName + " (" + std::to_string(player->getId()) + "): "
-                + *player->ChatMessage() + "\n";
+            player->chatMessage = player->npc.mName + " (" + std::to_string(player->getId()) + "): "
+                + player->chatMessage + "\n";
             myPacket->Send(player, false);
             myPacket->Send(player, true);
         }
@@ -373,10 +373,10 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         DEBUG_PRINTF("ID_GAME_CHARGEN\n");
         myPacket->Read(player);
 
-        if (player->CharGenStage()->current == player->CharGenStage()->end && player->CharGenStage()->current != 0)
+        if (player->charGenStage.current == player->charGenStage.end && player->charGenStage.current != 0)
         {
             Script::Call<Script::CallbackIdentity("OnPlayerEndCharGen")>(player->getId());
-            cout << "RACE: " << player->Npc()->mRace << endl;
+            cout << "RACE: " << player->npc.mRace << endl;
         }
         break;
     }
@@ -422,7 +422,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_OBJECT_PLACE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_PLACE from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
         myPacket->Send(event, true);
@@ -439,7 +439,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_OBJECT_DELETE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_DELETE from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -462,7 +462,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_OBJECT_LOCK:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_LOCK from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -479,7 +479,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_OBJECT_UNLOCK:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_UNLOCK from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -496,7 +496,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_OBJECT_SCALE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_SCALE from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -513,7 +513,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_OBJECT_MOVE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_MOVE from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -530,7 +530,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_OBJECT_ROTATE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ROTATE from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -547,7 +547,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_OBJECT_ANIM_PLAY:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ANIM_PLAY from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -564,7 +564,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_CONTAINER_ADD:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONTAINER_ADD from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -581,7 +581,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_CONTAINER_REMOVE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONTAINER_REMOVE from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -598,7 +598,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_DOOR_ACTIVATE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_ACTIVATE from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -615,7 +615,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_MUSIC_PLAY:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_MUSIC_PLAY from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -630,7 +630,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_VIDEO_PLAY:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_VIDEO_PLAY from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -646,7 +646,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_SCRIPT_LOCAL_SHORT:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_SHORT from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -663,7 +663,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_SCRIPT_LOCAL_FLOAT:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_FLOAT from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -680,7 +680,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_SCRIPT_MEMBER_SHORT:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_MEMBER_SHORT from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -695,7 +695,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     case ID_SCRIPT_GLOBAL_SHORT:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_GLOBAL_SHORT from %s",
-            player->Npc()->mName.c_str());
+            player->npc.mName.c_str());
 
         myPacket->Read(event);
 
@@ -890,7 +890,7 @@ int Networking::mainLoop()
                     bs.Write((unsigned char) ID_MASTER_QUERY);
                     bs.Write(Players::getPlayers()->size());
                     for(auto player : *Players::getPlayers())
-                        bs.Write(RakNet::RakString(player.second->Npc()->mName.c_str()));
+                        bs.Write(RakNet::RakString(player.second->npc.mName.c_str()));
                     bs.Write(0); // plugins
                     peer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
                         break;

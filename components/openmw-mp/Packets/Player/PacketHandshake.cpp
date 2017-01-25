@@ -15,6 +15,6 @@ PacketHandshake::PacketHandshake(RakNet::RakPeerInterface *peer) : PlayerPacket(
 void PacketHandshake::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
     PlayerPacket::Packet(bs, player, send);
-    RW(player->Npc()->mName, send);
-    RW(*player->getPassw(), send);
+    RW(player->npc.mName, send);
+    RW(player->passw, send);
 }

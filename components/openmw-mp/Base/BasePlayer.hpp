@@ -134,77 +134,6 @@ namespace mwmp
 
         }
 
-        virtual ESM::Position *Position()
-        {
-            return &pos;
-        }
-        virtual ESM::NPC *Npc()
-        {
-            return &npc;
-        }
-        virtual ESM::NpcStats *NpcStats()
-        {
-            return &npcStats;
-        }
-        virtual ESM::CreatureStats *CreatureStats()
-        {
-            return &creatureStats;
-        }
-
-        virtual unsigned int *MovementFlags()
-        {
-            return &movementFlags;
-        }
-        virtual ESM::Cell *getCell()
-        {
-            return &cell;
-        }
-
-        virtual Item *EquipedItem(int id)
-        {
-            if (id >= 18) return &equipedItems[18];
-            return &equipedItems[id];
-        }
-
-        virtual char *MovementAnim()
-        {
-            return &movementAnim;
-        }
-
-        virtual char *DrawState()
-        {
-            return &drawState;
-        }
-
-        virtual ESM::Position *Dir()
-        {
-            return &dir;
-        }
-
-        virtual Attack *getAttack()
-        {
-            return &attack;
-        }
-
-        virtual std::string *BirthSign()
-        {
-            return &birthSign;
-        }
-
-        virtual std::string *ChatMessage()
-        {
-            return &chatMessage;
-        }
-
-        virtual CGStage *CharGenStage()
-        {
-            return &stage;
-        }
-
-        virtual std::string *getPassw()
-        {
-            return &passw;
-        }
         RakNet::RakNetGUID guid;
         GUIMessageBox guiMessageBox;
         ESM::Class charClass;
@@ -218,9 +147,8 @@ namespace mwmp
         bool ignorePosPacket;
         ESM::ActiveSpells activeSpells;
 
-    protected:
-        ESM::Position pos;
-        ESM::Position dir;
+        ESM::Position position;
+        ESM::Position direction;
         ESM::Cell cell;
         ESM::NPC npc;
         ESM::NpcStats npcStats;
@@ -230,9 +158,9 @@ namespace mwmp
         char movementAnim;
         char drawState;
         Attack attack;
-        std::string birthSign;
+        std::string birthsign;
         std::string chatMessage;
-        CGStage stage;
+        CGStage charGenStage;
         std::string passw;
     };
 }

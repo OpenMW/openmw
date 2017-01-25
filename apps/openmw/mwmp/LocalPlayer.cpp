@@ -36,8 +36,8 @@ using namespace std;
 
 LocalPlayer::LocalPlayer()
 {
-    CharGenStage()->current = 0;
-    CharGenStage()->end = 1;
+    charGenStage.current = 0;
+    charGenStage.end = 1;
     consoleAllowed = true;
     ignorePosPacket = false;
 }
@@ -73,8 +73,8 @@ void LocalPlayer::update()
 
 void LocalPlayer::charGen(int stageFirst, int stageEnd)
 {
-    CharGenStage()->current = stageFirst;
-    CharGenStage()->end = stageEnd;
+    charGenStage.current = stageFirst;
+    charGenStage.end = stageEnd;
 }
 
 bool LocalPlayer::charGenThread()
@@ -83,14 +83,14 @@ bool LocalPlayer::charGenThread()
 
     // If we haven't finished CharGen and we're in a menu, it must be
     // one of the CharGen menus, so go no further until it's closed
-    if (windowManager->isGuiMode() && CharGenStage()->end != 0)
+    if (windowManager->isGuiMode() && charGenStage.end != 0)
         return false;
 
     // If the current stage of CharGen is not the last one,
     // move to the next one
-    else if (CharGenStage()->current < CharGenStage()->end)
+    else if (charGenStage.current < charGenStage.end)
     {
-        switch (CharGenStage()->current)
+        switch (charGenStage.current)
         {
         case 0:
             windowManager->pushGuiMode(MWGui::GM_Name);
@@ -109,26 +109,26 @@ bool LocalPlayer::charGenThread()
             break;
         }
         getNetworking()->getPlayerPacket(ID_GAME_CHARGEN)->Send(this);
-        CharGenStage()->current++;
+        charGenStage.current++;
 
         return false;
     }
 
     // If we've reached the last stage of CharGen, send the
     // corresponding packets and mark CharGen as finished
-    else if (CharGenStage()->end != 0)
+    else if (charGenStage.end != 0)
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
-        (*Npc()) = *player.get<ESM::NPC>()->mBase;
-        (*BirthSign()) = world->getPlayer().getBirthSign();
+        npc = *player.get<ESM::NPC>()->mBase;
+        birthsign = world->getPlayer().getBirthSign();
 
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_GAME_BASE_INFO to server with my CharGen info");
         getNetworking()->getPlayerPacket(ID_GAME_BASE_INFO)->Send(this);
 
         // Send stats packets if this is the 2nd round of CharGen that
         // only happens for new characters
-        if (CharGenStage()->end != 1)
+        if (charGenStage.end != 1)
         {
             updateDynamicStats(true);
             updateAttributes(true);
@@ -140,7 +140,7 @@ bool LocalPlayer::charGenThread()
         }
 
         // Set the last stage variable to 0 to indicate that CharGen is finished
-        CharGenStage()->end = 0;
+        charGenStage.end = 0;
     }
 
     return true;
@@ -169,9 +169,9 @@ void LocalPlayer::updateDynamicStats(bool forceUpdate)
             oldMagicka = magicka;
             oldFatigue = fatigue;
 
-            health.writeState(CreatureStats()->mDynamic[0]);
-            magicka.writeState(CreatureStats()->mDynamic[1]);
-            fatigue.writeState(CreatureStats()->mDynamic[2]);
+            health.writeState(creatureStats.mDynamic[0]);
+            magicka.writeState(creatureStats.mDynamic[1]);
+            fatigue.writeState(creatureStats.mDynamic[2]);
 
             timer = 0;
 
@@ -188,9 +188,9 @@ void LocalPlayer::updateAttributes(bool forceUpdate)
 
     for (int i = 0; i < 8; ++i)
     {
-        if (ptrNpcStats.getAttribute(i).getBase() != CreatureStats()->mAttributes[i].mBase)
+        if (ptrNpcStats.getAttribute(i).getBase() != creatureStats.mAttributes[i].mBase)
         {
-            ptrNpcStats.getAttribute(i).writeState(CreatureStats()->mAttributes[i]);
+            ptrNpcStats.getAttribute(i).writeState(creatureStats.mAttributes[i]);
             attributesChanged = true;
         }
     }
@@ -213,29 +213,29 @@ void LocalPlayer::updateSkills(bool forceUpdate)
 
     for (int i = 0; i < 27; ++i)
     {
-        if (ptrNpcStats.getSkill(i).getBase() != NpcStats()->mSkills[i].mBase)
+        if (ptrNpcStats.getSkill(i).getBase() != npcStats.mSkills[i].mBase)
         {
-            ptrNpcStats.getSkill(i).writeState(NpcStats()->mSkills[i]);
+            ptrNpcStats.getSkill(i).writeState(npcStats.mSkills[i]);
             skillsChanged = true;
         }
         // If we only have skill progress, remember it for future packets,
         // but don't send a packet just because of this
-        else if (ptrNpcStats.getSkill(i).getProgress() != NpcStats()->mSkills[i].mProgress)
+        else if (ptrNpcStats.getSkill(i).getProgress() != npcStats.mSkills[i].mProgress)
         {
-            ptrNpcStats.getSkill(i).writeState(NpcStats()->mSkills[i]);
+            ptrNpcStats.getSkill(i).writeState(npcStats.mSkills[i]);
         }
     }
 
     for (int i = 0; i < 8; i++)
     {
-        if (ptrNpcStats.getSkillIncrease(i) != NpcStats()->mSkillIncrease[i]) {
-            NpcStats()->mSkillIncrease[i] = ptrNpcStats.getSkillIncrease(i);
+        if (ptrNpcStats.getSkillIncrease(i) != npcStats.mSkillIncrease[i]) {
+            npcStats.mSkillIncrease[i] = ptrNpcStats.getSkillIncrease(i);
         }
     }
 
     if (skillsChanged || forceUpdate)
     {
-        NpcStats()->mLevelProgress = ptrNpcStats.getLevelProgress();
+        npcStats.mLevelProgress = ptrNpcStats.getLevelProgress();
         getNetworking()->getPlayerPacket(ID_GAME_SKILL)->Send(this);
     }
 }
@@ -245,9 +245,9 @@ void LocalPlayer::updateLevel(bool forceUpdate)
     MWWorld::Ptr player = getPlayerPtr();
     const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
 
-    if (ptrNpcStats.getLevel() != CreatureStats()->mLevel || forceUpdate)
+    if (ptrNpcStats.getLevel() != creatureStats.mLevel || forceUpdate)
     {
-        CreatureStats()->mLevel = ptrNpcStats.getLevel();
+        creatureStats.mLevel = ptrNpcStats.getLevel();
         getNetworking()->getPlayerPacket(ID_GAME_LEVEL)->Send(this);
 
         // Also update skills to refresh level progress and attribute bonuses
@@ -282,11 +282,11 @@ void LocalPlayer::updatePosition(bool forceUpdate)
             isJumping = true;
         }
 
-        (*Position()) = ptrPos;
+        position = ptrPos;
 
-        Dir()->pos[0] = move.mPosition[0];
-        Dir()->pos[1] = move.mPosition[1];
-        Dir()->pos[2] = move.mPosition[2];
+        direction.pos[0] = move.mPosition[0];
+        direction.pos[1] = move.mPosition[1];
+        direction.pos[2] = move.mPosition[2];
 
         getNetworking()->getPlayerPacket(ID_GAME_POS)->Send(this);
     }
@@ -299,7 +299,7 @@ void LocalPlayer::updatePosition(bool forceUpdate)
     else if (!sentJumpEnd)
     {
         sentJumpEnd = true;
-        (*Position()) = ptrPos;
+        position = ptrPos;
         getNetworking()->getPlayerPacket(ID_GAME_POS)->Send(this);
     }
 }
@@ -318,17 +318,17 @@ void LocalPlayer::updateCell(bool forceUpdate)
     {
         cellChanged = true;
     }
-    else if (!Misc::StringUtils::ciEqual(ptrCell->mName, getCell()->mName))
+    else if (!Misc::StringUtils::ciEqual(ptrCell->mName, cell.mName))
     {
         cellChanged = true;
     }
     else if (ptrCell->isExterior())
     {
-        if (ptrCell->mData.mX != getCell()->mData.mX)
+        if (ptrCell->mData.mX != cell.mData.mX)
         {
             cellChanged = true;
         }
-        else if (ptrCell->mData.mY != getCell()->mData.mY)
+        else if (ptrCell->mData.mY != cell.mData.mY)
         {
             cellChanged = true;
         }
@@ -339,10 +339,10 @@ void LocalPlayer::updateCell(bool forceUpdate)
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_CELL_CHANGE to server");
 
         LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s",
-            getCell()->getDescription().c_str(),
-            ptrCell->getDescription().c_str());
+            cell.getDescription().c_str(),
+            cell.getDescription().c_str());
 
-        (*getCell()) = *ptrCell;
+        cell = *ptrCell;
 
         // Make sure the position is updated before a cell packet is sent, or else
         // cell change events in server scripts will have the wrong player position
@@ -363,13 +363,13 @@ void LocalPlayer::updateCell(bool forceUpdate)
 void LocalPlayer::updateChar()
 {
     MWBase::Environment::get().getMechanicsManager()->setPlayerRace(
-        Npc()->mRace,
-        Npc()->isMale(),
-        Npc()->mHead,
-        Npc()->mHair
+        npc.mRace,
+        npc.isMale(),
+        npc.mHead,
+        npc.mHair
     );
 
-    MWBase::Environment::get().getMechanicsManager()->setPlayerBirthsign(*BirthSign());
+    MWBase::Environment::get().getMechanicsManager()->setPlayerBirthsign(birthsign);
 
     MWBase::Environment::get().getWindowManager()->getInventoryWindow()->rebuildAvatar();
 }
@@ -387,28 +387,28 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
     {
         MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
-        if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), EquipedItem(slot)->refid))
+        if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), equipedItems[slot].refid))
         {
             equipChanged = true;
 
-            EquipedItem(slot)->refid = it->getCellRef().getRefId();
-            EquipedItem(slot)->health = it->getCellRef().getCharge();
+            equipedItems[slot].refid = it->getCellRef().getRefId();
+            equipedItems[slot].health = it->getCellRef().getCharge();
             if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
             {
                 MWMechanics::WeaponType weaptype;
                 MWMechanics::getActiveWeapon(player.getClass().getCreatureStats(player), player.getClass().getInventoryStore(player), &weaptype);
                 if (weaptype != MWMechanics::WeapType_Thrown)
-                    EquipedItem(slot)->count = 1;
+                    equipedItems[slot].count = 1;
             }
             else
-                EquipedItem(slot)->count = invStore.count(it->getCellRef().getRefId());
+                equipedItems[slot].count = invStore.count(it->getCellRef().getRefId());
         }
-        else if (it == invStore.end() && !EquipedItem(slot)->refid.empty())
+        else if (it == invStore.end() && !equipedItems[slot].refid.empty())
         {
             equipChanged = true;
-            EquipedItem(slot)->refid = "";
-            EquipedItem(slot)->count = 0;
-            EquipedItem(slot)->health = 0;
+            equipedItems[slot].refid = "";
+            equipedItems[slot].count = 0;
+            equipedItems[slot].health = 0;
         }
     }
 
@@ -511,10 +511,10 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
         {
             const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
 
-            getAttack()->attacker = guid;
-            getAttack()->type = Attack::MAGIC;
-            getAttack()->pressed = true;
-            getAttack()->refid = spell;
+            attack.attacker = guid;
+            attack.type = Attack::MAGIC;
+            attack.pressed = true;
+            attack.refid = spell;
 
             /*RakNet::BitStream bs;
             getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
@@ -546,7 +546,7 @@ void LocalPlayer::updateDeadState(bool forceUpdate)
 
     if (ptrNpcStats->isDead() && !isDead)
     {
-        CreatureStats()->mDead = true;
+        creatureStats.mDead = true;
         RakNet::BitStream bs;
         getNetworking()->getPlayerPacket((RakNet::MessageID)ID_GAME_DIE)->Packet(&bs, this, true);
         getNetworking()->sendData(&bs);
@@ -605,11 +605,11 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
 #undef __SETFLAG
 
         if (state == MWMechanics::DrawState_Nothing)
-            (*DrawState()) = 0;
+            drawState = 0;
         else if (state == MWMechanics::DrawState_Weapon)
-            (*DrawState()) = 1;
+            drawState = 1;
         else if (state == MWMechanics::DrawState_Spell)
-            (*DrawState()) = 2;
+            drawState = 2;
 
         if (jump)
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after jump;
@@ -711,8 +711,8 @@ void LocalPlayer::setDynamicStats()
     for (int i = 0; i < 3; ++i)
     {
         dynamicStat = ptrCreatureStats->getDynamic(i);
-        dynamicStat.setBase(CreatureStats()->mDynamic[i].mBase);
-        dynamicStat.setCurrent(CreatureStats()->mDynamic[i].mCurrent);
+        dynamicStat.setBase(creatureStats.mDynamic[i].mBase);
+        dynamicStat.setCurrent(creatureStats.mDynamic[i].mCurrent);
         ptrCreatureStats->setDynamic(i, dynamicStat);
     }
 }
@@ -727,7 +727,7 @@ void LocalPlayer::setAttributes()
 
     for (int i = 0; i < 8; ++i)
     {
-        attributeValue.readState(CreatureStats()->mAttributes[i]);
+        attributeValue.readState(creatureStats.mAttributes[i]);
         ptrCreatureStats->setAttribute(i, attributeValue);
     }
 }
@@ -742,16 +742,16 @@ void LocalPlayer::setSkills()
 
     for (int i = 0; i < 27; ++i)
     {
-        skillValue.readState(NpcStats()->mSkills[i]);
+        skillValue.readState(npcStats.mSkills[i]);
         ptrNpcStats->setSkill(i, skillValue);
     }
 
     for (int i = 0; i < 8; ++i)
     {
-        ptrNpcStats->setSkillIncrease(i, NpcStats()->mSkillIncrease[i]);
+        ptrNpcStats->setSkillIncrease(i, npcStats.mSkillIncrease[i]);
     }
 
-    ptrNpcStats->setLevelProgress(NpcStats()->mLevelProgress);
+    ptrNpcStats->setLevelProgress(npcStats.mLevelProgress);
 }
 
 void LocalPlayer::setLevel()
@@ -760,7 +760,7 @@ void LocalPlayer::setLevel()
     MWWorld::Ptr player = world->getPlayerPtr();
 
     MWMechanics::CreatureStats *ptrCreatureStats = &player.getClass().getCreatureStats(player);
-    ptrCreatureStats->setLevel(CreatureStats()->mLevel);
+    ptrCreatureStats->setLevel(creatureStats.mLevel);
 }
 
 void LocalPlayer::setPosition()
@@ -777,8 +777,8 @@ void LocalPlayer::setPosition()
     else
     {
         world->getPlayer().setTeleported(true);
-        world->moveObject(player, Position()->pos[0], Position()->pos[1], Position()->pos[2]);
-        world->rotateObject(player, Position()->rot[0], Position()->rot[1], Position()->rot[2]);
+        world->moveObject(player, position.pos[0], position.pos[1], position.pos[2]);
+        world->rotateObject(player, position.rot[0], position.rot[1], position.rot[2]);
     }
 
     updatePosition(true);
@@ -792,10 +792,10 @@ void LocalPlayer::setCell()
 
     world->getPlayer().setTeleported(true);
 
-    int x = getCell()->mData.mX;
-    int y = getCell()->mData.mY;
+    int x = cell.mData.mX;
+    int y = cell.mData.mY;
 
-    if (getCell()->isExterior())
+    if (cell.isExterior())
     {
         world->indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
         pos.pos[2] = 0;
@@ -805,7 +805,7 @@ void LocalPlayer::setCell()
         world->changeToExteriorCell(pos, true);
         world->fixPosition(player);
     }
-    else if (world->findExteriorPosition(getCell()->mName, pos))
+    else if (world->findExteriorPosition(cell.mName, pos))
     {
         world->changeToExteriorCell(pos, true);
         world->fixPosition(player);
@@ -814,8 +814,8 @@ void LocalPlayer::setCell()
     {
         try
         {
-            world->findInteriorPosition(getCell()->mName, pos);
-            world->changeToInteriorCell(getCell()->mName, pos, true);
+            world->findInteriorPosition(cell.mName, pos);
+            world->changeToInteriorCell(cell.mName, pos, true);
         }
         // If we've been sent to an invalid interior, ignore the incoming
         // packet about our position in that cell
@@ -856,7 +856,7 @@ void LocalPlayer::setEquipment()
 
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
     {
-        mwmp::Item *currentItem = EquipedItem(slot);
+        mwmp::Item *currentItem = &equipedItems[slot];
 
         if (!currentItem->refid.empty())
         {
@@ -870,8 +870,8 @@ void LocalPlayer::setEquipment()
                 ptrInventory.equip(
                     slot,
                     ptrInventory.ContainerStore::add(
-                        EquipedItem(slot)->refid.c_str(),
-                        EquipedItem(slot)->count,
+                        equipedItems[slot].refid.c_str(),
+                        equipedItems[slot].count,
                         ptrPlayer),
                     ptrPlayer);
             else
@@ -1064,9 +1064,8 @@ void LocalPlayer::sendAttack(Attack::TYPE type)
 {
     MWMechanics::DrawState_ state = getPlayerPtr().getClass().getNpcStats(getPlayerPtr()).getDrawState();
 
-
-    getAttack()->type = type;
-    getAttack()->pressed = false;
+    attack.type = type;
+    attack.pressed = false;
     RakNet::BitStream bs;
     getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
     getNetworking()->sendData(&bs);
@@ -1074,7 +1073,7 @@ void LocalPlayer::sendAttack(Attack::TYPE type)
 
 void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
 {
-    if (getAttack()->pressed == state && type != Attack::MAGIC)
+    if (attack.pressed == state && type != Attack::MAGIC)
         return;
 
     MWMechanics::DrawState_ dstate = getPlayerPtr().getClass().getNpcStats(getPlayerPtr()).getDrawState();
@@ -1082,21 +1081,21 @@ void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
     if (dstate == MWMechanics::DrawState_Spell)
     {
         const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
-        getAttack()->success = Misc::Rng::roll0to99() < MWMechanics::getSpellSuccessChance(spell, getPlayerPtr());
+        attack.success = Misc::Rng::roll0to99() < MWMechanics::getSpellSuccessChance(spell, getPlayerPtr());
         state = true;
-        getAttack()->refid = spell;
+        attack.refid = spell;
     }
     else
     {
-        getAttack()->success = false;
+        attack.success = false;
     }
 
-    getAttack()->pressed = state;
-    getAttack()->type = type;
-    getAttack()->knockdown = false;
-    getAttack()->block = false;
-    getAttack()->target = RakNet::RakNetGUID();
-    getAttack()->attacker = guid;
+    attack.pressed = state;
+    attack.type = type;
+    attack.knockdown = false;
+    attack.block = false;
+    attack.target = RakNet::RakNetGUID();
+    attack.attacker = guid;
 
     RakNet::BitStream bs;
     getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);

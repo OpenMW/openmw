@@ -29,9 +29,9 @@ void ItemFunctions::EquipItem(unsigned short pid, unsigned short slot, const cha
     Player *player;
     GET_PLAYER(pid, player,);
 
-    player->EquipedItem(slot)->refid = itemId;
-    player->EquipedItem(slot)->count = count;
-    player->EquipedItem(slot)->health = health;
+    player->equipedItems[slot].refid = itemId;
+    player->equipedItems[slot].count = count;
+    player->equipedItems[slot].health = health;
 }
 
 void ItemFunctions::UnequipItem(unsigned short pid, unsigned short slot) noexcept
@@ -84,7 +84,7 @@ bool ItemFunctions::HasItemEquipped(unsigned short pid, const char* itemId)
     GET_PLAYER(pid, player, false);
 
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
-        if (Misc::StringUtils::ciEqual(player->EquipedItem(slot)->refid, itemId))
+        if (Misc::StringUtils::ciEqual(player->equipedItems[slot].refid, itemId))
             return true;
     return false;
 }
@@ -94,7 +94,7 @@ const char *ItemFunctions::GetEquipmentItemId(unsigned short pid, unsigned short
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    return player->EquipedItem(slot)->refid.c_str();
+    return player->equipedItems[slot].refid.c_str();
 }
 
 int ItemFunctions::GetEquipmentItemCount(unsigned short pid, unsigned short slot) noexcept
@@ -102,7 +102,7 @@ int ItemFunctions::GetEquipmentItemCount(unsigned short pid, unsigned short slot
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    return player->EquipedItem(slot)->count;
+    return player->equipedItems[slot].count;
 }
 
 int ItemFunctions::GetEquipmentItemHealth(unsigned short pid, unsigned short slot) noexcept
@@ -110,7 +110,7 @@ int ItemFunctions::GetEquipmentItemHealth(unsigned short pid, unsigned short slo
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    return player->EquipedItem(slot)->health;
+    return player->equipedItems[slot].health;
 }
 
 const char *ItemFunctions::GetInventoryItemId(unsigned short pid, unsigned int i) noexcept

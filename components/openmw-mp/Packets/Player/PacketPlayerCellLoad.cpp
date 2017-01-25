@@ -12,9 +12,4 @@ mwmp::PacketPlayerCellLoad::PacketPlayerCellLoad(RakNet::RakPeerInterface *peer)
 void mwmp::PacketPlayerCellLoad::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
 {
     PlayerPacket::Packet(bs, player, send);
-
-    RW(player->getCell()->mData.mFlags, send);
-    RW(player->getCell()->mData.mX, send);
-    RW(player->getCell()->mData.mY, send);
-    RW(player->getCell()->mName, send);
 }

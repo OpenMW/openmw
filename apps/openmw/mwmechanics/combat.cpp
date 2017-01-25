@@ -121,13 +121,13 @@ namespace MWMechanics
         mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(blocker);
         bool isDedicated = dedicatedPlayer != NULL;
         if (attacker == MWMechanics::getPlayer())
-            mwmp::Main::get().getLocalPlayer()->getAttack()->block = false;
+            mwmp::Main::get().getLocalPlayer()->attack.block = false;
 
         if ((!isDedicated && Misc::Rng::roll0to99() < x) ||
-           (isDedicated && dedicatedPlayer->getAttack()->block == 1))
+           (isDedicated && dedicatedPlayer->attack.block == 1))
         {
             if (attacker == MWMechanics::getPlayer())
-                mwmp::Main::get().getLocalPlayer()->getAttack()->block = true;
+                mwmp::Main::get().getLocalPlayer()->attack.block = true;
 
             // Reduce shield durability by incoming damage
             int shieldhealth = shield->getClass().getItemHealth(*shield);
@@ -203,12 +203,12 @@ namespace MWMechanics
             int skillValue = attacker.getClass().getSkill(attacker, weapon.getClass().getEquipmentSkill(weapon));
 
             if (attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
-                mwmp::Main::get().getLocalPlayer()->getAttack()->success = true;
+                mwmp::Main::get().getLocalPlayer()->attack.success = true;
 
             if (Misc::Rng::roll0to99() >= getHitChance(attacker, victim, skillValue))
             {
                 if (attacker == getPlayer())
-                    mwmp::Main::get().getLocalPlayer()->getAttack()->success = false;
+                    mwmp::Main::get().getLocalPlayer()->attack.success = false;
                 victim.getClass().onHit(victim, damage, false, projectile, attacker, osg::Vec3f(), false);
                 MWMechanics::reduceWeaponCondition(damage, false, weapon, attacker);
                 return;

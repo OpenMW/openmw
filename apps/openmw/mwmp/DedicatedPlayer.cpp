@@ -30,8 +30,8 @@ std::map<RakNet::RakNetGUID, DedicatedPlayer *> Players::players;
 
 DedicatedPlayer::DedicatedPlayer(RakNet::RakNetGUID guid) : BasePlayer(guid)
 {
-    getAttack()->pressed = 0;
-    CreatureStats()->mDead = false;
+    attack.pressed = 0;
+    creatureStats.mDead = false;
     movementFlags = 0;
 }
 DedicatedPlayer::~DedicatedPlayer()
@@ -54,12 +54,12 @@ void Players::createPlayer(RakNet::RakNetGUID guid)
     ESM::NPC npc = *player.get<ESM::NPC>()->mBase;
     DedicatedPlayer *dedicPlayer = players[guid];
 
-    npc.mRace = dedicPlayer->Npc()->mRace;
-    npc.mHead = dedicPlayer->Npc()->mHead;
-    npc.mHair = dedicPlayer->Npc()->mHair;
-    npc.mClass = dedicPlayer->Npc()->mClass;
-    npc.mName = dedicPlayer->Npc()->mName;
-    npc.mFlags = dedicPlayer->Npc()->mFlags;
+    npc.mRace = dedicPlayer->npc.mRace;
+    npc.mHead = dedicPlayer->npc.mHead;
+    npc.mHair = dedicPlayer->npc.mHair;
+    npc.mClass = dedicPlayer->npc.mClass;
+    npc.mName = dedicPlayer->npc.mName;
+    npc.mFlags = dedicPlayer->npc.mFlags;
 
     if (dedicPlayer->state == 0)
     {
@@ -78,7 +78,7 @@ void Players::createPlayer(RakNet::RakNetGUID guid)
     if (dedicPlayer->state == 0)
     {
         LOG_APPEND(Log::LOG_INFO, "- Creating new reference pointer for %s",
-            dedicPlayer->Npc()->mName.c_str());
+            dedicPlayer->npc.mName.c_str());
 
         MWWorld::Ptr tmp = world->placeObject(dedicPlayer->reference->getPtr(), cellStore, newPos);
 
@@ -86,12 +86,12 @@ void Players::createPlayer(RakNet::RakNetGUID guid)
         dedicPlayer->ptr.mRef = tmp.mRef;
 
         dedicPlayer->cell = *dedicPlayer->ptr.getCell()->getCell();
-        dedicPlayer->pos = dedicPlayer->ptr.getRefData().getPosition();
+        dedicPlayer->position = dedicPlayer->ptr.getRefData().getPosition();
     }
     else
     {
         LOG_APPEND(Log::LOG_INFO, "- Updating reference pointer for %s",
-            dedicPlayer->Npc()->mName.c_str());
+            dedicPlayer->npc.mName.c_str());
 
         dedicPlayer->ptr.getBase()->canChangeCell = true;
         dedicPlayer->updatePtr(world->moveObject(dedicPlayer->ptr, cellStore, newPos.pos[0], newPos.pos[1], newPos.pos[2]));
@@ -205,7 +205,7 @@ void DedicatedPlayer::move(float dt)
 
 
     {
-        osg::Vec3f lerp = Lerp(refPos.asVec3(), pos.asVec3(), dt * 15);
+        osg::Vec3f lerp = Lerp(refPos.asVec3(), position.asVec3(), dt * 15);
         refPos.pos[0] = lerp.x();
         refPos.pos[1] = lerp.y();
         refPos.pos[2] = lerp.z();
@@ -213,11 +213,11 @@ void DedicatedPlayer::move(float dt)
     }
 
     MWMechanics::Movement *move = &ptr.getClass().getMovementSettings(ptr);
-    move->mPosition[0] = dir.pos[0];
-    move->mPosition[1] = dir.pos[1];
-    move->mPosition[2] = dir.pos[2];
+    move->mPosition[0] = direction.pos[0];
+    move->mPosition[1] = direction.pos[1];
+    move->mPosition[2] = direction.pos[2];
 
-    world->rotateObject(ptr, pos.rot[0], pos.rot[1], pos.rot[2]);
+    world->rotateObject(ptr, position.rot[0], position.rot[1], position.rot[2]);
 }
 
 void Players::update(float dt)
@@ -231,18 +231,18 @@ void Players::update(float dt)
 
         MWMechanics::DynamicStat<float> value;
 
-        if (pl->CreatureStats()->mDead)
+        if (pl->creatureStats.mDead)
         {
-            value.readState(pl->CreatureStats()->mDynamic[0]);
+            value.readState(pl->creatureStats.mDynamic[0]);
             ptrNpcStats->setHealth(value);
             continue;
         }
 
-        value.readState(pl->CreatureStats()->mDynamic[0]);
+        value.readState(pl->creatureStats.mDynamic[0]);
         ptrNpcStats->setHealth(value);
-        value.readState(pl->CreatureStats()->mDynamic[1]);
+        value.readState(pl->creatureStats.mDynamic[1]);
         ptrNpcStats->setMagicka(value);
-        value.readState(pl->CreatureStats()->mDynamic[2]);
+        value.readState(pl->creatureStats.mDynamic[2]);
         ptrNpcStats->setFatigue(value);
 
         if (ptrNpcStats->isDead())
@@ -294,7 +294,7 @@ void DedicatedPlayer::updateEquipment()
     {
         MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
 
-        const string &dedicItem = EquipedItem(slot)->refid;
+        const string &dedicItem = equipedItems[slot].refid;
         std::string item = "";
         bool equal = false;
         if (it != invStore.end())
@@ -312,7 +312,7 @@ void DedicatedPlayer::updateEquipment()
         if (dedicItem.empty() || equal)
             continue;
 
-        const int count = EquipedItem(slot)->count;
+        const int count = equipedItems[slot].count;
         ptr.getClass().getContainerStore(ptr).add(dedicItem, count, ptr);
 
         for (MWWorld::ContainerStoreIterator it2 = invStore.begin(); it2 != invStore.end(); ++it2)
@@ -440,7 +440,7 @@ void DedicatedPlayer::updateCell()
 
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server says %s (%s) moved to %s",
         ptr.getBase()->mRef.getRefId().c_str(),
-        this->Npc()->mName.c_str(),
+        this->npc.mName.c_str(),
         cell.getDescription().c_str());
 
     try
@@ -462,7 +462,7 @@ void DedicatedPlayer::updateCell()
     // Allow this player's reference to move across a cell now that a manual cell
     // update has been called
     ptr.getBase()->canChangeCell = true;
-    updatePtr(world->moveObject(ptr, cellStore, pos.pos[0], pos.pos[1], pos.pos[2]));
+    updatePtr(world->moveObject(ptr, cellStore, position.pos[0], position.pos[1], position.pos[2]));
 }
 
 
@@ -505,5 +505,5 @@ void DedicatedPlayer::setMarkerState(bool state)
 
 void DedicatedPlayer::updateActor(MWMechanics::Actor *actor)
 {
-    actor->getCharacterController()->setAttackingOrSpell(getAttack()->pressed);
+    actor->getCharacterController()->setAttackingOrSpell(attack.pressed);
 }

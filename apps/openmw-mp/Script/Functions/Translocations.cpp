@@ -20,9 +20,9 @@ void TranslocationFunctions::GetPos(unsigned short pid, float *x, float *y, floa
     Player *player;
     GET_PLAYER(pid, player,);
 
-    *x = player->Position()->pos[0];
-    *y = player->Position()->pos[1];
-    *z = player->Position()->pos[2];
+    *x = player->position.pos[0];
+    *y = player->position.pos[1];
+    *z = player->position.pos[2];
 }
 
 double TranslocationFunctions::GetPosX(unsigned short pid) noexcept
@@ -30,7 +30,7 @@ double TranslocationFunctions::GetPosX(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
 
-    return player->Position()->pos[0];
+    return player->position.pos[0];
 }
 
 double TranslocationFunctions::GetPosY(unsigned short pid) noexcept
@@ -38,7 +38,7 @@ double TranslocationFunctions::GetPosY(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
 
-    return player->Position()->pos[1];
+    return player->position.pos[1];
 }
 
 double TranslocationFunctions::GetPosZ(unsigned short pid) noexcept
@@ -46,7 +46,7 @@ double TranslocationFunctions::GetPosZ(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
 
-    return player->Position()->pos[2];
+    return player->position.pos[2];
 }
 
 void TranslocationFunctions::GetAngle(unsigned short pid, float *x, float *y, float *z) noexcept
@@ -58,9 +58,9 @@ void TranslocationFunctions::GetAngle(unsigned short pid, float *x, float *y, fl
     Player *player;
     GET_PLAYER(pid, player, );
 
-    *x = player->Position()->rot[0];
-    *y = player->Position()->rot[1];
-    *z = player->Position()->rot[2];
+    *x = player->position.rot[0];
+    *y = player->position.rot[1];
+    *z = player->position.rot[2];
 }
 
 double TranslocationFunctions::GetAngleX(unsigned short pid) noexcept
@@ -68,7 +68,7 @@ double TranslocationFunctions::GetAngleX(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
 
-    return player->Position()->rot[0];
+    return player->position.rot[0];
 }
 
 double TranslocationFunctions::GetAngleY(unsigned short pid) noexcept
@@ -76,7 +76,7 @@ double TranslocationFunctions::GetAngleY(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
 
-    return player->Position()->rot[1];
+    return player->position.rot[1];
 }
 
 double TranslocationFunctions::GetAngleZ(unsigned short pid) noexcept
@@ -84,7 +84,7 @@ double TranslocationFunctions::GetAngleZ(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
 
-    return player->Position()->rot[2];
+    return player->position.rot[2];
 }
 
 void TranslocationFunctions::SetPos(unsigned short pid, double x, double y, double z) noexcept
@@ -92,9 +92,9 @@ void TranslocationFunctions::SetPos(unsigned short pid, double x, double y, doub
     Player *player;
     GET_PLAYER(pid, player,);
 
-    player->Position()->pos[0] = x;
-    player->Position()->pos[1] = y;
-    player->Position()->pos[2] = z;
+    player->position.pos[0] = x;
+    player->position.pos[1] = y;
+    player->position.pos[2] = z;
 }
 
 void TranslocationFunctions::SetAngle(unsigned short pid, double x, double y, double z) noexcept
@@ -102,9 +102,9 @@ void TranslocationFunctions::SetAngle(unsigned short pid, double x, double y, do
     Player *player;
     GET_PLAYER(pid, player, );
 
-    player->Position()->rot[0] = x;
-    player->Position()->rot[1] = y;
-    player->Position()->rot[2] = z;
+    player->position.rot[0] = x;
+    player->position.rot[1] = y;
+    player->position.rot[2] = z;
 }
 
 const char* TranslocationFunctions::GetCell(unsigned short pid) noexcept
@@ -112,7 +112,7 @@ const char* TranslocationFunctions::GetCell(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    return player->getCell()->mName.c_str();
+    return player->cell.mName.c_str();
 }
 
 void TranslocationFunctions::SetCell(unsigned short pid, const char *name) noexcept
@@ -121,18 +121,18 @@ void TranslocationFunctions::SetCell(unsigned short pid, const char *name) noexc
     GET_PLAYER(pid, player,);
 
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Script is moving %s from %s to %s",
-        player->Npc()->mName.c_str(),
-        player->getCell()->getDescription().c_str(),
+        player->npc.mName.c_str(),
+        player->cell.getDescription().c_str(),
         name);
 
     // If the player is currently in an exterior, turn on the interior flag
     // from the  cell so the player doesn't get teleported to their exterior
     // grid position (which we haven't changed)
-    if (player->getCell()->isExterior()) {
-        player->getCell()->mData.mFlags |= ESM::Cell::Interior;
+    if (player->cell.isExterior()) {
+        player->cell.mData.mFlags |= ESM::Cell::Interior;
     }
 
-    player->getCell()->mName = name;
+    player->cell.mName = name;
 }
 
 void TranslocationFunctions::SetExterior(unsigned short pid, int x, int y) noexcept
@@ -141,33 +141,33 @@ void TranslocationFunctions::SetExterior(unsigned short pid, int x, int y) noexc
     GET_PLAYER(pid, player,);
 
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Script is moving %s from %s to %i,%i",
-        player->Npc()->mName.c_str(),
-        player->getCell()->getDescription().c_str(),
+        player->npc.mName.c_str(),
+        player->cell.getDescription().c_str(),
         x,
         y);
 
     // If the player is currently in an interior, turn off the interior flag
     // from the cell
-    if (!player->getCell()->isExterior()) {
-        player->getCell()->mData.mFlags &= ~ESM::Cell::Interior;
+    if (!player->cell.isExterior()) {
+        player->cell.mData.mFlags &= ~ESM::Cell::Interior;
     }
 
-    player->getCell()->mData.mX = x;
-    player->getCell()->mData.mY = y;
+    player->cell.mData.mX = x;
+    player->cell.mData.mY = y;
 }
 
 int TranslocationFunctions::GetExteriorX(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0);
-    return player->getCell()->mData.mX;
+    return player->cell.mData.mX;
 }
 
 int TranslocationFunctions::GetExteriorY(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0);
-    return player->getCell()->mData.mY;
+    return player->cell.mData.mY;
 }
 
 bool TranslocationFunctions::IsInExterior(unsigned short pid) noexcept
@@ -175,7 +175,7 @@ bool TranslocationFunctions::IsInExterior(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, false);
 
-    return player->getCell()->isExterior();
+    return player->cell.isExterior();
 }
 
 void TranslocationFunctions::SendPos(unsigned short pid) noexcept

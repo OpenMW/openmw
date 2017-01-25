@@ -16,14 +16,14 @@ void PacketAttack::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool 
 {
     PlayerPacket::Packet(bs, player, send);
 
-    RW(player->getAttack()->attacker, send);
-    RW(player->getAttack()->target, send);
-    RW(player->getAttack()->refid, send);
-    RW(player->getAttack()->type, send);
-    RW(player->getAttack()->success, send);
-    RW(player->getAttack()->damage, send);
+    RW(player->attack.attacker, send);
+    RW(player->attack.target, send);
+    RW(player->attack.refid, send);
+    RW(player->attack.type, send);
+    RW(player->attack.success, send);
+    RW(player->attack.damage, send);
     //
-    RW(player->getAttack()->pressed, send);
-    RW(player->getAttack()->knockdown, send);
-    RW(player->getAttack()->block, send);
+    RW(player->attack.pressed, send);
+    RW(player->attack.knockdown, send);
+    RW(player->attack.block, send);
 }

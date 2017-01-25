@@ -193,7 +193,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
     case ID_HANDSHAKE:
     {
-        (*getLocalPlayer()->getPassw()) = "SuperPassword";
+        getLocalPlayer()->passw = "SuperPassword";
         myPacket->Send(getLocalPlayer(), serverAddr);
         break;
     }
@@ -219,7 +219,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         else
         {
-            LOG_APPEND(Log::LOG_INFO, "- Packet was about %s", pl == 0 ? "new player" : pl->Npc()->mName.c_str());
+            LOG_APPEND(Log::LOG_INFO, "- Packet was about %s", pl == 0 ? "new player" : pl->npc.mName.c_str());
 
             if (pl == 0)
             {
@@ -369,32 +369,32 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Packet(&bsIn, pl, false);
 
             //cout << "Player: " << pl->Npc()->mName << " pressed: " << (pl->getAttack()->pressed == 1) << endl;
-            if (pl->getAttack()->pressed == 0)
+            if (pl->attack.pressed == 0)
             {
                 LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Attack success: %s",
-                    pl->getAttack()->success ? "true" : "false");
+                    pl->attack.success ? "true" : "false");
 
-                if (pl->getAttack()->success == 1)
+                if (pl->attack.success == 1)
                 {
                     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Damage: %f",
-                        pl->getAttack()->damage);
+                        pl->attack.damage);
                 }
             }
 
             MWMechanics::CreatureStats &stats = pl->getPtr().getClass().getNpcStats(pl->getPtr());
-            stats.getSpells().setSelectedSpell(pl->getAttack()->refid);
+            stats.getSpells().setSelectedSpell(pl->attack.refid);
 
             MWWorld::Ptr victim;
-            if (pl->getAttack()->target == getLocalPlayer()->guid)
+            if (pl->attack.target == getLocalPlayer()->guid)
                 victim = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            else if (Players::getPlayer(pl->getAttack()->target) != 0)
-                victim = Players::getPlayer(pl->getAttack()->target)->getPtr();
+            else if (Players::getPlayer(pl->attack.target) != 0)
+                victim = Players::getPlayer(pl->attack.target)->getPtr();
 
             MWWorld::Ptr attacker;
             attacker = pl->getPtr();
 
             // Get the weapon used (if hand-to-hand, weapon = inv.end())
-            if (*pl->DrawState() == 1)
+            if (pl->drawState == 1)
             {
                 MWWorld::InventoryStore &inv = attacker.getClass().getInventoryStore(attacker);
                 MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(
@@ -415,16 +415,16 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                     }
 
                     if (!weapon.isEmpty())
-                        MWMechanics::blockMeleeAttack(attacker, victim, weapon, pl->getAttack()->damage, 1);
-                    pl->getPtr().getClass().onHit(victim, pl->getAttack()->damage, healthdmg, weapon, attacker, osg::Vec3f(),
-                        pl->getAttack()->success);
+                        MWMechanics::blockMeleeAttack(attacker, victim, weapon, pl->attack.damage, 1);
+                    pl->getPtr().getClass().onHit(victim, pl->attack.damage, healthdmg, weapon, attacker, osg::Vec3f(),
+                        pl->attack.success);
                 }
             }
             else
             {
                 LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "SpellId: %s",
-                    pl->getAttack()->refid.c_str());
-                LOG_APPEND(Log::LOG_VERBOSE, " - success: %d", pl->getAttack()->success);
+                    pl->attack.refid.c_str());
+                LOG_APPEND(Log::LOG_VERBOSE, " - success: %d", pl->attack.success);
             }
         }
         break;
@@ -453,7 +453,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
             for (int i = 0; i < 3; ++i)
             {
-                value.readState(pl->CreatureStats()->mDynamic[i]);
+                value.readState(pl->creatureStats.mDynamic[i]);
                 ptrCreatureStats->setDynamic(i, value);
             }
         }
@@ -472,12 +472,12 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         else if (pl != 0)
         {
-            LOG_APPEND(Log::LOG_INFO, "- Packet was about %s", pl->Npc()->mName.c_str());
+            LOG_APPEND(Log::LOG_INFO, "- Packet was about %s", pl->npc.mName.c_str());
             MWMechanics::DynamicStat<float> health;
-            pl->CreatureStats()->mDead = true;
-            health.readState(pl->CreatureStats()->mDynamic[0]);
+            pl->creatureStats.mDead = true;
+            health.readState(pl->creatureStats.mDynamic[0]);
             health.setCurrent(0);
-            health.writeState(pl->CreatureStats()->mDynamic[0]);
+            health.writeState(pl->creatureStats.mDynamic[0]);
             pl->getPtr().getClass().getCreatureStats(pl->getPtr()).setHealth(health);
         }
         break;
@@ -488,11 +488,11 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         {
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             player.getClass().getCreatureStats(player).resurrect();
-            ESM::Position pos;
-            MWBase::Environment::get().getWorld()->findInteriorPosition("Pelagiad, Fort Pelagiad", pos);
-            MWBase::Environment::get().getWorld()->changeToInteriorCell("Pelagiad, Fort Pelagiad", pos, true);
-            (*getLocalPlayer()->Position()) = pos;
-            (*getLocalPlayer()->getCell()) = *player.getCell()->getCell();
+            ESM::Position resurrectPos;
+            MWBase::Environment::get().getWorld()->findInteriorPosition("Pelagiad, Fort Pelagiad", resurrectPos);
+            MWBase::Environment::get().getWorld()->changeToInteriorCell("Pelagiad, Fort Pelagiad", resurrectPos, true);
+            getLocalPlayer()->position = resurrectPos;
+            getLocalPlayer()->cell = *player.getCell()->getCell();
             myPacket->Send(getLocalPlayer(), serverAddr);
 
             getLocalPlayer()->updateDynamicStats(true);
@@ -500,15 +500,15 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         else if (pl != 0)
         {
-            pl->CreatureStats()->mDead = false;
-            if (pl->CreatureStats()->mDynamic[0].mMod < 1)
-                pl->CreatureStats()->mDynamic[0].mMod = 1;
-            pl->CreatureStats()->mDynamic[0].mCurrent = pl->CreatureStats()->mDynamic[0].mMod;
+            pl->creatureStats.mDead = false;
+            if (pl->creatureStats.mDynamic[0].mMod < 1)
+                pl->creatureStats.mDynamic[0].mMod = 1;
+            pl->creatureStats.mDynamic[0].mCurrent = pl->creatureStats.mDynamic[0].mMod;
 
             pl->getPtr().getClass().getCreatureStats(pl->getPtr()).resurrect();
 
             MWMechanics::DynamicStat<float> health;
-            health.readState(pl->CreatureStats()->mDynamic[0]);
+            health.readState(pl->creatureStats.mDynamic[0]);
             pl->getPtr().getClass().getCreatureStats(pl->getPtr()).setHealth(health);
         }
         break;
@@ -553,12 +553,12 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         if (guid == myGuid)
         {
             myPacket->Packet(&bsIn, getLocalPlayer(), false);
-            message = *getLocalPlayer()->ChatMessage();
+            message = getLocalPlayer()->chatMessage;
         }
         else if (pl != 0)
         {
             myPacket->Packet(&bsIn, pl, false);
-            message = *pl->ChatMessage();
+            message = pl->chatMessage;
         }
         Main::get().getGUIController()->printChatMessage(message);
 
@@ -596,7 +596,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
             for (int i = 0; i < 8; ++i)
             {
-                attributeValue.readState(pl->CreatureStats()->mAttributes[i]);
+                attributeValue.readState(pl->creatureStats.mAttributes[i]);
                 ptrCreatureStats->setAttribute(i, attributeValue);
             }
         }
@@ -626,7 +626,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
             for (int i = 0; i < 27; ++i)
             {
-                skillValue.readState(pl->NpcStats()->mSkills[i]);
+                skillValue.readState(pl->npcStats.mSkills[i]);
                 ptrNpcStats->setSkill(i, skillValue);
             }
         }
@@ -653,7 +653,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             MWWorld::Ptr ptrPlayer = pl->getPtr();
             MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
 
-            ptrCreatureStats->setLevel(pl->CreatureStats()->mLevel);
+            ptrCreatureStats->setLevel(pl->creatureStats.mLevel);
         }
         break;
     }
@@ -1142,7 +1142,7 @@ bool Networking::attack(const MWWorld::Ptr &ptr)
     if (pl == 0)
         return false;
 
-    return pl->getAttack()->pressed;
+    return pl->attack.pressed;
 }
 
 bool Networking::isConnected()

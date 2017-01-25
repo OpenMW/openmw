@@ -826,10 +826,10 @@ namespace MWMechanics
             bool isDedicated = dedicatedPlayer != NULL;
 
             if (isDedicated)
-                dedicatedPlayer->getAttack()->pressed = false;
+                dedicatedPlayer->attack.pressed = false;
 
-            if ((!isDedicated && !mwmp::Main::get().getLocalPlayer()->getAttack()->success) ||
-                (isDedicated && dedicatedPlayer->getAttack()->success == 0))
+            if ((!isDedicated && !mwmp::Main::get().getLocalPlayer()->attack.success) ||
+                (isDedicated && dedicatedPlayer->attack.success == 0))
             {
                 if (mCaster == getPlayer())
                 {

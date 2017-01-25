@@ -19,10 +19,10 @@ void PacketSkill::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
     PlayerPacket::Packet(bs, player, send);
 
     for (int i = 0; i < SkillCount; ++i)
-        RW(player->NpcStats()->mSkills[i], send);
+        RW(player->npcStats.mSkills[i], send);
 
     for (int i = 0; i < AttributeCount; ++i)
-        RW(player->NpcStats()->mSkillIncrease[i], send);
+        RW(player->npcStats.mSkillIncrease[i], send);
 
-    RW(player->NpcStats()->mLevelProgress, send);
+    RW(player->npcStats.mLevelProgress, send);
 }

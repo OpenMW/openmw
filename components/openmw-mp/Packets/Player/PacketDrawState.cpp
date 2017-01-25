@@ -14,7 +14,7 @@ void mwmp::PacketDrawState::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *play
 {
     PlayerPacket::Packet(bs, player, send);
 
-    RW(*player->MovementFlags(), send);
+    RW(player->movementFlags, send);
 
-    RW(*player->DrawState(), send);
+    RW(player->drawState, send);
 }

@@ -30,10 +30,10 @@ void Players::newPlayer(RakNet::RakNetGUID guid)
         guid.g);
 
     players[guid] = new Player(guid);
-    players[guid]->getCell()->blank();
-    players[guid]->Npc()->blank();
-    players[guid]->NpcStats()->blank();
-    players[guid]->CreatureStats()->blank();
+    players[guid]->cell.blank();
+    players[guid]->npc.blank();
+    players[guid]->npcStats.blank();
+    players[guid]->creatureStats.blank();
     players[guid]->charClass.blank();
 
     for (unsigned int i = 0; i < mwmp::Networking::get().maxConnections(); i++)

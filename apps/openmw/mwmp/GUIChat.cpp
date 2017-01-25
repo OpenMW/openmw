@@ -124,7 +124,7 @@ namespace mwmp
 
         Networking *networking = Main::get().getNetworking();
 
-        *localPlayer->ChatMessage() = str;
+        localPlayer->chatMessage = str;
 
         RakNet::BitStream bs;
         networking->getPlayerPacket(ID_CHAT_MESSAGE)->Packet(&bs, localPlayer, true);
