@@ -12,6 +12,7 @@
 #include <components/files/collections.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -3344,4 +3345,8 @@ namespace MWWorld
         mRendering->preloadCommonAssets();
     }
 
+    void World::reloadShaders()
+    {
+        mRendering->getResourceSystem()->getSceneManager()->reloadShaders();
+    }
 }

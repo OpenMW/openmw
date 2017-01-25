@@ -21,7 +21,7 @@ namespace Shader
         mPath = path;
     }
 
-    bool parseIncludes(boost::filesystem::path shaderPath, std::string& source)
+    static bool parseIncludes(boost::filesystem::path shaderPath, std::string& source)
     {
         boost::replace_all(source, "\r\n", "\n");
 
@@ -74,7 +74,7 @@ namespace Shader
         return true;
     }
 
-    bool parseDefines(std::string& source, const ShaderManager::DefineMap& defines)
+    static bool parseDefines(std::string& source, const ShaderManager::DefineMap& defines)
     {
         const char escapeCharacter = '@';
         size_t foundPos = 0;
@@ -101,6 +101,27 @@ namespace Shader
         return true;
     }
 
+    static std::string readSourceCode(const std::string& directory, const std::string& filename)
+    {
+        boost::filesystem::path p = (boost::filesystem::path(directory) / filename);
+        boost::filesystem::ifstream stream;
+        stream.open(p);
+        if (stream.fail())
+        {
+            std::cerr << "Failed to open " << p.string() << std::endl;
+            return "";
+        }
+        std::stringstream buffer;
+        buffer << stream.rdbuf();
+
+        // parse includes
+        std::string source = buffer.str();
+        if (!parseIncludes(boost::filesystem::path(directory), source))
+            return "";
+
+        return source;
+    }
+
     osg::ref_ptr<osg::Shader> ShaderManager::getShader(const std::string &shaderTemplate, const ShaderManager::DefineMap &defines, osg::Shader::Type shaderType)
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
@@ -109,22 +130,7 @@ namespace Shader
         TemplateMap::iterator templateIt = mShaderTemplates.find(shaderTemplate);
         if (templateIt == mShaderTemplates.end())
         {
-            boost::filesystem::path p = (boost::filesystem::path(mPath) / shaderTemplate);
-            boost::filesystem::ifstream stream;
-            stream.open(p);
-            if (stream.fail())
-            {
-                std::cerr << "Failed to open " << p.string() << std::endl;
-                return NULL;
-            }
-            std::stringstream buffer;
-            buffer << stream.rdbuf();
-
-            // parse includes
-            std::string source = buffer.str();
-            if (!parseIncludes(boost::filesystem::path(mPath), source))
-                return NULL;
-
+            std::string source = readSourceCode(mPath, shaderTemplate);
             templateIt = mShaderTemplates.insert(std::make_pair(shaderTemplate, source)).first;
         }
 
@@ -160,4 +166,27 @@ namespace Shader
         return found->second;
     }
 
+    void ShaderManager::reloadShaders()
+    {
+        for (const auto& shader : mShaders)
+        {
+            const std::string& shaderFilename = shader.first.first;
+            const std::map<std::string, std::string>& shaderDefines = shader.first.second;
+            const osg::ref_ptr<osg::Shader> shaderObject = shader.second;
+            std::string newSource = readSourceCode(mPath, shaderFilename);
+            if (newSource.empty())
+            {
+                std::cerr << "ShaderManager: could not reload shader file '" << shaderFilename << "' so it will not be reloaded." << std::endl;
+                continue;
+            }
+
+            if (!parseDefines(newSource, shaderDefines))
+            {
+                std::cerr << "ShaderManager: invalid defines detected at shader'" << shaderFilename << "' so it will not be reloaded." << std::endl;
+            }
+
+            shaderObject->setShaderSource(newSource);
+            shaderObject->dirtyShader();
+        }
+    }
 }

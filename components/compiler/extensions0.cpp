@@ -316,6 +316,7 @@ namespace Compiler
             extensions.registerInstruction ("removefromlevcreature", "ccl", opcodeRemoveFromLevCreature);
             extensions.registerInstruction ("addtolevitem", "ccl", opcodeAddToLevItem);
             extensions.registerInstruction ("removefromlevitem", "ccl", opcodeRemoveFromLevItem);
+            extensions.registerInstruction ("reloadshaders", "", opcodeReloadShaders);
         }
     }
 

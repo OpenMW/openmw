@@ -72,6 +72,8 @@ namespace Resource
 
         void setShaderPath(const std::string& path);
 
+        void reloadShaders();
+
         /// Get a read-only copy of this scene "template"
         /// @note If the given filename does not exist or fails to load, an error marker mesh will be used instead.
         ///  If even the error marker mesh can not be found, an exception is thrown.

@@ -32,6 +32,7 @@ namespace Shader
 
         osg::ref_ptr<osg::Program> getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader);
 
+        void reloadShaders();
 
     private:
         std::string mPath;
