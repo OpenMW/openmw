@@ -850,11 +850,11 @@ namespace MWClass
         mwmp::DedicatedPlayer *victimPlayer = mwmp::Players::getPlayer(ptr);
         if (attacker == MWMechanics::getPlayer() && victimPlayer != nullptr)
         {
-            mwmp::Attack attack = mwmp::Main::get().getLocalPlayer()->attack;
-            attack.damage = damage;
-            attack.attacker = mwmp::Main::get().getLocalPlayer()->guid;
-            attack.target = victimPlayer->guid;
-            attack.knockdown = getCreatureStats(ptr).getKnockedDown();
+            mwmp::Attack *attack = &mwmp::Main::get().getLocalPlayer()->attack;
+            attack->damage = damage;
+            attack->attacker = mwmp::Main::get().getLocalPlayer()->guid;
+            attack->target = victimPlayer->guid;
+            attack->knockdown = getCreatureStats(ptr).getKnockedDown();
             mwmp::Main::get().getLocalPlayer()->sendAttack(mwmp::Attack::MELEE); // todo: make this sensitive to different weapon types
         }
 
