@@ -418,6 +418,12 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         myPacket->Read(event);
         myPacket->Send(event, true);
 
+        Script::Call<Script::CallbackIdentity("OnObjectPlace")>(
+            player->getId(),
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str());
+
         break;
     }
 
@@ -434,6 +440,12 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             event->cell.getDescription().c_str());
 
         myPacket->Send(event, true);
+
+        Script::Call<Script::CallbackIdentity("OnObjectDelete")>(
+            player->getId(),
+            event->cellRef.mRefID.c_str(),
+            event->cellRef.mRefNum.mIndex,
+            event->cell.getDescription().c_str());
 
         break;
     }

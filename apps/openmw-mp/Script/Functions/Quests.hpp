@@ -4,6 +4,7 @@
 #define QUESTAPI \
     {"GetJournalChangesSize",   QuestFunctions::GetJournalChangesSize},\
     \
+    {"AddJournalEntry",         QuestFunctions::AddJournalEntry},\
     {"AddJournalIndex",         QuestFunctions::AddJournalIndex},\
     \
     {"GetJournalItemQuest",     QuestFunctions::GetJournalItemQuest},\
