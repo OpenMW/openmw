@@ -161,7 +161,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 player->getCell()->getDescription().c_str());
 
             myPacket->Send(player, true); //send to other clients
-            Script::Call<Script::CallbackIdentity("OnPlayerChangeCell")>(player->getId());
+            Script::Call<Script::CallbackIdentity("OnPlayerCellChange")>(player->getId());
         }
         else
         {
@@ -188,7 +188,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Read(player);
             myPacket->Send(player, true);
 
-            Script::Call<Script::CallbackIdentity("OnPlayerChangeAttributes")>(player->getId());
+            Script::Call<Script::CallbackIdentity("OnPlayerAttributesChange")>(player->getId());
         }
 
         break;
@@ -201,7 +201,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Read(player);
             myPacket->Send(player, true);
 
-            Script::Call<Script::CallbackIdentity("OnPlayerChangeSkills")>(player->getId());
+            Script::Call<Script::CallbackIdentity("OnPlayerSkillsChange")>(player->getId());
         }
 
         break;
@@ -214,7 +214,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Read(player);
             myPacket->Send(player, true);
 
-            Script::Call<Script::CallbackIdentity("OnPlayerChangeLevel")>(player->getId());
+            Script::Call<Script::CallbackIdentity("OnPlayerLevelChange")>(player->getId());
         }
 
         break;
@@ -226,7 +226,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         myPacket->Read(player);
         myPacket->Send(player, true);
 
-        Script::Call<Script::CallbackIdentity("OnPlayerChangeEquipment")>(player->getId());
+        Script::Call<Script::CallbackIdentity("OnPlayerEquipmentChange")>(player->getId());
 
         break;
     }
@@ -236,7 +236,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         DEBUG_PRINTF("ID_GAME_INVENTORY\n");
         myPacket->Read(player);
 
-        Script::Call<Script::CallbackIdentity("OnPlayerChangeInventory")>(player->getId());
+        Script::Call<Script::CallbackIdentity("OnPlayerInventoryChange")>(player->getId());
 
         break;
     }
@@ -246,7 +246,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         DEBUG_PRINTF("ID_GAME_SPELLBOOK\n");
         myPacket->Read(player);
 
-        Script::Call<Script::CallbackIdentity("OnPlayerChangeSpellbook")>(player->getId(), player->spellbookChanges.action);
+        Script::Call<Script::CallbackIdentity("OnPlayerSpellbookChange")>(player->getId(), player->spellbookChanges.action);
 
         break;
     }
@@ -256,7 +256,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         DEBUG_PRINTF("ID_GAME_JOURNAL\n");
         myPacket->Read(player);
 
-        Script::Call<Script::CallbackIdentity("OnPlayerChangeJournal")>(player->getId());
+        Script::Call<Script::CallbackIdentity("OnPlayerJournalChange")>(player->getId());
 
         break;
     }
