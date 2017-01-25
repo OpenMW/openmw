@@ -532,6 +532,10 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
+    case ID_PLAYER_CELL_LOAD:
+    {
+        break;
+    }
     case ID_GAME_DRAWSTATE:
     {
         if (guid == myGuid)

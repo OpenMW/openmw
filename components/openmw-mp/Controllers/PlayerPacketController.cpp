@@ -4,6 +4,8 @@
 
 #include "../Packets/Player/PacketClass.hpp"
 #include "../Packets/Player/PacketPosition.hpp"
+#include "../Packets/Player/PacketPlayerCellChange.hpp"
+#include "../Packets/Player/PacketPlayerCellLoad.hpp"
 #include "../Packets/Player/PacketBaseInfo.hpp"
 #include "../Packets/Player/PacketEquipment.hpp"
 #include "../Packets/Player/PacketAttack.hpp"
@@ -27,7 +29,6 @@
 #include "../Packets/Player/PacketJournal.hpp"
 #include "../Packets/Player/PacketConsole.hpp"
 #include "../Packets/Player/PacketActiveSkills.hpp"
-#include "../Packets/Player/PacketPlayerCellChange.hpp"
 
 #include "PlayerPacketController.hpp"
 
@@ -43,6 +44,8 @@ mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *p
 {
     AddPacket<PacketPosition>(&packets, peer);
     AddPacket<PacketPlayerCellChange>(&packets, peer);
+    AddPacket<PacketPlayerCellLoad>(&packets, peer);
+
     AddPacket<PacketBaseInfo>(&packets, peer);
     AddPacket<PacketEquipment>(&packets, peer);
 

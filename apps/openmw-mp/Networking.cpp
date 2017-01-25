@@ -171,6 +171,15 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         break;
     }
+    case ID_PLAYER_CELL_LOAD:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_CELL_LOAD from %s",
+            player->Npc()->mName.c_str());
+
+        Script::Call<Script::CallbackIdentity("OnPlayerCellLoad")>(player->getId());
+
+        break;
+    }
     case ID_GAME_ATTRIBUTE:
     {
 
