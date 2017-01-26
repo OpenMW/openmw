@@ -8,6 +8,25 @@
 #include <iostream>
 using namespace std;
 
+unsigned int CellFunctions::GetCellStateChangesSize(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->cellStateChanges.count;
+}
+
+const char* CellFunctions::GetCellStateDescription(unsigned short pid, unsigned int i) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, "");
+
+    if (i >= player->cellStateChanges.count)
+        return "invalid";
+
+    return player->cellStateChanges.cells.at(i).getDescription().c_str();
+}
+
 const char* CellFunctions::GetCell(unsigned short pid) noexcept
 {
     Player *player;

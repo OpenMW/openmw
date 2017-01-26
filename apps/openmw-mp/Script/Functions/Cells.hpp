@@ -4,19 +4,27 @@
 #include "../Types.hpp"
 
 #define CELLAPI \
-    {"GetCell",             CellFunctions::GetCell},\
-    {"SetCell",             CellFunctions::SetCell},\
-    {"SetExterior",         CellFunctions::SetExterior},\
-    {"GetExteriorX",        CellFunctions::GetExteriorX},\
-    {"GetExteriorY",        CellFunctions::GetExteriorY},\
-    {"IsInExterior",        CellFunctions::IsInExterior},\
+    {"GetCellStateChangesSize", CellFunctions:GetCellStateChangesSize},\
 \
-    {"SendCell",            CellFunctions::SendCell}
+    {"GetCellStateDescription", CellFunctions:GetCellStateDescription},\
+\
+    {"GetCell",                 CellFunctions::GetCell},\
+    {"SetCell",                 CellFunctions::SetCell},\
+    {"SetExterior",             CellFunctions::SetExterior},\
+    {"GetExteriorX",            CellFunctions::GetExteriorX},\
+    {"GetExteriorY",            CellFunctions::GetExteriorY},\
+    {"IsInExterior",            CellFunctions::IsInExterior},\
+\
+    {"SendCell",                CellFunctions::SendCell}
 
 
 class CellFunctions
 {
 public:
+    static unsigned int GetCellStateChangesSize(unsigned short pid) noexcept;
+
+    static const char *GetCellStateDescription(unsigned short pid, unsigned int i) noexcept;
+
     static const char *GetCell(unsigned short pid) noexcept;
     static void SetCell(unsigned short pid, const char *name) noexcept;
     static void SetExterior(unsigned short pid, int x, int y) noexcept;
