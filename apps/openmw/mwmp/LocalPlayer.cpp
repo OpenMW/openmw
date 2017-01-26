@@ -148,10 +148,7 @@ bool LocalPlayer::charGenThread()
 
 bool LocalPlayer::hasFinishedCharGen()
 {
-    if (charGenStage.end == 0)
-        return true;
-
-    return false;
+    return charGenStage.end == 0;
 }
 
 void LocalPlayer::updateDynamicStats(bool forceUpdate)
