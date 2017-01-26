@@ -165,8 +165,9 @@ void LocalPlayer::updateDynamicStats(bool forceUpdate)
     static MWMechanics::DynamicStat<float> oldFatigue(ptrCreatureStats->getFatigue());
 
     static float timer = 0;
+    const float timeoutSec = 0.5;
 
-    if ((timer += MWBase::Environment::get().getFrameDuration()) >= 0.5 || forceUpdate)
+    if ((timer += MWBase::Environment::get().getFrameDuration()) >= timeoutSec || forceUpdate)
     {
         if (oldHealth != health || oldMagicka != magicka || oldFatigue != fatigue || forceUpdate)
         {
