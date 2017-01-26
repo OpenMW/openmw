@@ -246,8 +246,9 @@ namespace MWWorld
 
         // Added by tes3mp
         //
-        // LocalPlayer has unloaded a cell, so send a packet with it
-        mwmp::Main::get().getLocalPlayer()->sendCellUnload(*(*iter)->getCell());
+        // LocalPlayer has unloaded a cell, so send a packet with it, but only if CharGen is over
+        if (mwmp::Main::get().getLocalPlayer()->hasFinishedCharGen())
+            mwmp::Main::get().getLocalPlayer()->sendCellUnload(*(*iter)->getCell());
     }
 
     void Scene::loadCell (CellStore *cell, Loading::Listener* loadingListener, bool respawn)
@@ -315,8 +316,9 @@ namespace MWWorld
 
             // Added by tes3mp
             //
-            // LocalPlayer has loaded a cell, so send a packet with it
-            mwmp::Main::get().getLocalPlayer()->sendCellLoad(*cell->getCell());
+            // LocalPlayer has loaded a cell, so send a packet with it, but only if CharGen is over
+            if (mwmp::Main::get().getLocalPlayer()->hasFinishedCharGen())
+                mwmp::Main::get().getLocalPlayer()->sendCellLoad(*cell->getCell());
         }
 
         mPreloader->notifyLoaded(cell);
