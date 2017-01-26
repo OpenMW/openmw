@@ -107,7 +107,7 @@ public:
             {"OnPlayerDeath",            Function<void, unsigned short, short, unsigned short>()},
             {"OnPlayerResurrect",        Function<void, unsigned short>()},
             {"OnPlayerCellChange",       Function<void, unsigned short>()},
-            {"OnPlayerCellLoad",         Function<void, unsigned short>()},
+            {"OnPlayerCellState",        Function<void, unsigned short, int>()},
             {"OnPlayerAttributesChange", Function<void, unsigned short>()},
             {"OnPlayerSkillsChange",     Function<void, unsigned short>()},
             {"OnPlayerLevelChange",      Function<void, unsigned short>()},
