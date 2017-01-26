@@ -4,9 +4,9 @@
 #include "../Types.hpp"
 
 #define CELLAPI \
-    {"GetCellStateChangesSize", CellFunctions:GetCellStateChangesSize},\
+    {"GetCellStateChangesSize", CellFunctions::GetCellStateChangesSize},\
 \
-    {"GetCellStateDescription", CellFunctions:GetCellStateDescription},\
+    {"GetCellStateDescription", CellFunctions::GetCellStateDescription},\
 \
     {"GetCell",                 CellFunctions::GetCell},\
     {"SetCell",                 CellFunctions::SetCell},\
