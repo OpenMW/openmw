@@ -7,6 +7,7 @@
 
 #include <Script/Functions/CharClass.hpp>
 #include <Script/Functions/Positions.hpp>
+#include <Script/Functions/Cells.hpp>
 #include <Script/Functions/GUI.hpp>
 #include <Script/Functions/Stats.hpp>
 #include <Script/Functions/Items.hpp>
@@ -89,6 +90,7 @@ public:
             {"SetHostname",         ScriptFunctions::SetHostname},
 
             POSITIONAPI,
+            CELLAPI,
             STATSFUNCTIONS,
             ITEMAPI,
             QUESTAPI,
