@@ -4,7 +4,7 @@
 
 mwmp::PacketPlayerCellLoad::PacketPlayerCellLoad(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
-    packetID = ID_PLAYER_CELL_CHANGE;
+    packetID = ID_PLAYER_CELL_LOAD;
     priority = IMMEDIATE_PRIORITY;
     reliability = RELIABLE_ORDERED;
 }
