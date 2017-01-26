@@ -146,6 +146,14 @@ bool LocalPlayer::charGenThread()
     return true;
 }
 
+bool LocalPlayer::hasFinishedCharGen()
+{
+    if (charGenStage.end == 0)
+        return true;
+
+    return false;
+}
+
 void LocalPlayer::updateDynamicStats(bool forceUpdate)
 {
     MWWorld::Ptr player = getPlayerPtr();
