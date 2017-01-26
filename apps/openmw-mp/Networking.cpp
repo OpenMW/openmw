@@ -171,9 +171,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_PLAYER_CELL_LOAD:
+    case ID_PLAYER_CELL_STATE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_CELL_LOAD from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_CELL_STATE from %s",
             player->npc.mName.c_str());
 
         Script::Call<Script::CallbackIdentity("OnPlayerCellLoad")>(player->getId());

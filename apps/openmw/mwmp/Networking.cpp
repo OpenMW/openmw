@@ -532,7 +532,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_PLAYER_CELL_LOAD:
+    case ID_PLAYER_CELL_STATE:
     {
         break;
     }

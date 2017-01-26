@@ -94,7 +94,7 @@ namespace mwmp
         int action; //0 - Clear and set in entirety, 1 - Add spell, 2 - Remove spell
     };
 
-    struct CellLoadChanges
+    struct CellStateChanges
     {
         std::vector<ESM::Cell> cells;
         unsigned int count;
@@ -157,7 +157,7 @@ namespace mwmp
         InventoryChanges inventoryChanges;
         SpellbookChanges spellbookChanges;
         JournalChanges journalChanges;
-        CellLoadChanges cellLoadChanges;
+        CellStateChanges cellStateChanges;
         bool consoleAllowed;
         bool ignorePosPacket;
         ESM::ActiveSpells activeSpells;

@@ -1070,22 +1070,22 @@ void LocalPlayer::sendJournalIndex(const std::string& quest, int index)
 
 void LocalPlayer::sendCellLoad(ESM::Cell cellLoaded)
 {
-    cellLoadChanges.cells.clear();
+    cellStateChanges.cells.clear();
 
-    cellLoadChanges.cells.push_back(cellLoaded);
+    cellStateChanges.cells.push_back(cellLoaded);
 
-    cellLoadChanges.action = CellLoadChanges::LOAD;
-    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_CELL_LOAD)->Send(this);
+    cellStateChanges.action = CellStateChanges::LOAD;
+    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_CELL_STATE)->Send(this);
 }
 
 void LocalPlayer::sendCellUnload(ESM::Cell cellUnloaded)
 {
-    cellLoadChanges.cells.clear();
+    cellStateChanges.cells.clear();
 
-    cellLoadChanges.cells.push_back(cellUnloaded);
+    cellStateChanges.cells.push_back(cellUnloaded);
 
-    cellLoadChanges.action = CellLoadChanges::UNLOAD;
-    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_CELL_LOAD)->Send(this);
+    cellStateChanges.action = CellStateChanges::UNLOAD;
+    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_CELL_STATE)->Send(this);
 }
 
 void LocalPlayer::sendAttack(Attack::TYPE type)
