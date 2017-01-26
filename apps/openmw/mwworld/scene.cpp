@@ -3,6 +3,9 @@
 #include <limits>
 #include <iostream>
 
+#include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
+
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
@@ -240,6 +243,11 @@ namespace MWWorld
 
         MWBase::Environment::get().getSoundManager()->stopSound (*iter);
         mActiveCells.erase(*iter);
+
+        // Added by tes3mp
+        //
+        // LocalPlayer has unloaded a cell, so send a packet with it
+        mwmp::Main::get().getLocalPlayer()->sendCellUnload(*(*iter)->getCell());
     }
 
     void Scene::loadCell (CellStore *cell, Loading::Listener* loadingListener, bool respawn)
@@ -304,6 +312,11 @@ namespace MWWorld
 
             if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
                 mRendering.configureAmbient(cell->getCell());
+
+            // Added by tes3mp
+            //
+            // LocalPlayer has loaded a cell, so send a packet with it
+            mwmp::Main::get().getLocalPlayer()->sendCellLoad(*cell->getCell());
         }
 
         mPreloader->notifyLoaded(cell);

@@ -1060,6 +1060,26 @@ void LocalPlayer::sendJournalIndex(const std::string& quest, int index)
     Main::get().getNetworking()->getPlayerPacket(ID_GAME_JOURNAL)->Send(this);
 }
 
+void LocalPlayer::sendCellLoad(ESM::Cell cellLoaded)
+{
+    cellLoadChanges.cells.clear();
+
+    cellLoadChanges.cells.push_back(cellLoaded);
+
+    cellLoadChanges.action = CellLoadChanges::LOAD;
+    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_CELL_LOAD)->Send(this);
+}
+
+void LocalPlayer::sendCellUnload(ESM::Cell cellUnloaded)
+{
+    cellLoadChanges.cells.clear();
+
+    cellLoadChanges.cells.push_back(cellUnloaded);
+
+    cellLoadChanges.action = CellLoadChanges::UNLOAD;
+    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_CELL_LOAD)->Send(this);
+}
+
 void LocalPlayer::sendAttack(Attack::TYPE type)
 {
     MWMechanics::DrawState_ state = getPlayerPtr().getClass().getNpcStats(getPlayerPtr()).getDrawState();

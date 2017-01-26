@@ -94,6 +94,20 @@ namespace mwmp
         int action; //0 - Clear and set in entirety, 1 - Add spell, 2 - Remove spell
     };
 
+    struct CellLoadChanges
+    {
+        std::vector<ESM::Cell> cells;
+        unsigned int count;
+
+        enum ACTION_TYPE
+        {
+            LOAD = 0,
+            UNLOAD = 1
+        };
+
+        int action; // 0 - Load a cell, 1 - Unload a cell
+    };
+
     class BasePlayer
     {
     public:
@@ -143,6 +157,7 @@ namespace mwmp
         InventoryChanges inventoryChanges;
         SpellbookChanges spellbookChanges;
         JournalChanges journalChanges;
+        CellLoadChanges cellLoadChanges;
         bool consoleAllowed;
         bool ignorePosPacket;
         ESM::ActiveSpells activeSpells;

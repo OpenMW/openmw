@@ -63,6 +63,8 @@ namespace mwmp
         void sendSpellRemoval(const ESM::Spell &spell);
         void sendJournalEntry(const std::string& id, int index, const MWWorld::Ptr& actor);
         void sendJournalIndex(const std::string& id, int index);
+        void sendCellLoad(ESM::Cell cellLoaded);
+        void sendCellUnload(ESM::Cell cellUnloaded);
         void sendAttack(Attack::TYPE type);
 
         void prepareAttack(Attack::TYPE type, bool state);
