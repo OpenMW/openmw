@@ -3,7 +3,7 @@
 
 #include "../Types.hpp"
 
-#define POSITIONAPI \
+#define CELLAPI \
     {"GetCell",             CellFunctions::GetCell},\
     {"SetCell",             CellFunctions::SetCell},\
     {"SetExterior",         CellFunctions::SetExterior},\
