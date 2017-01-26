@@ -222,4 +222,3 @@ boost::any ScriptFunction::Call(const vector<boost::any> &args)
 
     return result;
 }
-

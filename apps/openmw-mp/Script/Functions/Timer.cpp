@@ -45,5 +45,3 @@ bool ScriptFunctions::IsTimerElapsed(int timerId) noexcept
 {
     return TimerAPI::IsEndTimer(timerId);
 }
-
-

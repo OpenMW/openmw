@@ -193,4 +193,3 @@ void TranslocationFunctions::SendCell(unsigned short pid) noexcept
 
     mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_CELL_CHANGE)->Send(player, false);
 }
-
