@@ -6,7 +6,7 @@
 #define SCRIPTFUNCTIONS_HPP
 
 #include <Script/Functions/CharClass.hpp>
-#include <Script/Functions/Translocations.hpp>
+#include <Script/Functions/Positions.hpp>
 #include <Script/Functions/GUI.hpp>
 #include <Script/Functions/Stats.hpp>
 #include <Script/Functions/Items.hpp>
@@ -88,7 +88,7 @@ public:
             {"SetModname",          ScriptFunctions::SetModname},
             {"SetHostname",         ScriptFunctions::SetHostname},
 
-            TRANSLOCATIONFUNCTIONS,
+            POSITIONAPI,
             STATSFUNCTIONS,
             ITEMAPI,
             QUESTAPI,

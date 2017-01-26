@@ -74,7 +74,7 @@ set(SERVER
 
     Script/Functions/CharClass.cpp Script/Functions/Chat.cpp Script/Functions/GUI.cpp
     Script/Functions/Items.cpp Script/Functions/Quests.cpp Script/Functions/Stats.cpp
-    Script/Functions/Spells.cpp Script/Functions/Timer.cpp Script/Functions/Translocations.cpp
+    Script/Functions/Spells.cpp Script/Functions/Timer.cpp Script/Functions/Positions.cpp
     Script/Functions/World.cpp
 
     Script/API/TimerAPI.cpp Script/API/PublicFnAPI.cpp

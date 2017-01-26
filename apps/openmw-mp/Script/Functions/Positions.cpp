@@ -1,7 +1,4 @@
-//
-// Created by koncord on 29.02.16.
-//
-#include "Translocations.hpp"
+#include "Positions.hpp"
 #include <apps/openmw-mp/Script/ScriptFunctions.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <apps/openmw-mp/Player.hpp>
@@ -11,7 +8,7 @@
 #include <iostream>
 using namespace std;
 
-void TranslocationFunctions::GetPos(unsigned short pid, float *x, float *y, float *z) noexcept
+void PositionFunctions::GetPos(unsigned short pid, float *x, float *y, float *z) noexcept
 {
     *x = 0.00;
     *y = 0.00;
@@ -25,7 +22,7 @@ void TranslocationFunctions::GetPos(unsigned short pid, float *x, float *y, floa
     *z = player->position.pos[2];
 }
 
-double TranslocationFunctions::GetPosX(unsigned short pid) noexcept
+double PositionFunctions::GetPosX(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
@@ -33,7 +30,7 @@ double TranslocationFunctions::GetPosX(unsigned short pid) noexcept
     return player->position.pos[0];
 }
 
-double TranslocationFunctions::GetPosY(unsigned short pid) noexcept
+double PositionFunctions::GetPosY(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
@@ -41,7 +38,7 @@ double TranslocationFunctions::GetPosY(unsigned short pid) noexcept
     return player->position.pos[1];
 }
 
-double TranslocationFunctions::GetPosZ(unsigned short pid) noexcept
+double PositionFunctions::GetPosZ(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
@@ -49,7 +46,7 @@ double TranslocationFunctions::GetPosZ(unsigned short pid) noexcept
     return player->position.pos[2];
 }
 
-void TranslocationFunctions::GetAngle(unsigned short pid, float *x, float *y, float *z) noexcept
+void PositionFunctions::GetAngle(unsigned short pid, float *x, float *y, float *z) noexcept
 {
     *x = 0.00;
     *y = 0.00;
@@ -63,7 +60,7 @@ void TranslocationFunctions::GetAngle(unsigned short pid, float *x, float *y, fl
     *z = player->position.rot[2];
 }
 
-double TranslocationFunctions::GetAngleX(unsigned short pid) noexcept
+double PositionFunctions::GetAngleX(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
@@ -71,7 +68,7 @@ double TranslocationFunctions::GetAngleX(unsigned short pid) noexcept
     return player->position.rot[0];
 }
 
-double TranslocationFunctions::GetAngleY(unsigned short pid) noexcept
+double PositionFunctions::GetAngleY(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
@@ -79,7 +76,7 @@ double TranslocationFunctions::GetAngleY(unsigned short pid) noexcept
     return player->position.rot[1];
 }
 
-double TranslocationFunctions::GetAngleZ(unsigned short pid) noexcept
+double PositionFunctions::GetAngleZ(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
@@ -87,7 +84,7 @@ double TranslocationFunctions::GetAngleZ(unsigned short pid) noexcept
     return player->position.rot[2];
 }
 
-void TranslocationFunctions::SetPos(unsigned short pid, double x, double y, double z) noexcept
+void PositionFunctions::SetPos(unsigned short pid, double x, double y, double z) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -97,7 +94,7 @@ void TranslocationFunctions::SetPos(unsigned short pid, double x, double y, doub
     player->position.pos[2] = z;
 }
 
-void TranslocationFunctions::SetAngle(unsigned short pid, double x, double y, double z) noexcept
+void PositionFunctions::SetAngle(unsigned short pid, double x, double y, double z) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
@@ -107,7 +104,7 @@ void TranslocationFunctions::SetAngle(unsigned short pid, double x, double y, do
     player->position.rot[2] = z;
 }
 
-const char* TranslocationFunctions::GetCell(unsigned short pid) noexcept
+const char* PositionFunctions::GetCell(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
@@ -115,7 +112,7 @@ const char* TranslocationFunctions::GetCell(unsigned short pid) noexcept
     return player->cell.mName.c_str();
 }
 
-void TranslocationFunctions::SetCell(unsigned short pid, const char *name) noexcept
+void PositionFunctions::SetCell(unsigned short pid, const char *name) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -135,7 +132,7 @@ void TranslocationFunctions::SetCell(unsigned short pid, const char *name) noexc
     player->cell.mName = name;
 }
 
-void TranslocationFunctions::SetExterior(unsigned short pid, int x, int y) noexcept
+void PositionFunctions::SetExterior(unsigned short pid, int x, int y) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -156,21 +153,21 @@ void TranslocationFunctions::SetExterior(unsigned short pid, int x, int y) noexc
     player->cell.mData.mY = y;
 }
 
-int TranslocationFunctions::GetExteriorX(unsigned short pid) noexcept
+int PositionFunctions::GetExteriorX(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0);
     return player->cell.mData.mX;
 }
 
-int TranslocationFunctions::GetExteriorY(unsigned short pid) noexcept
+int PositionFunctions::GetExteriorY(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,0);
     return player->cell.mData.mY;
 }
 
-bool TranslocationFunctions::IsInExterior(unsigned short pid) noexcept
+bool PositionFunctions::IsInExterior(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, false);
@@ -178,7 +175,7 @@ bool TranslocationFunctions::IsInExterior(unsigned short pid) noexcept
     return player->cell.isExterior();
 }
 
-void TranslocationFunctions::SendPos(unsigned short pid) noexcept
+void PositionFunctions::SendPos(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
@@ -186,7 +183,7 @@ void TranslocationFunctions::SendPos(unsigned short pid) noexcept
     mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_POS)->Send(player, false);
 }
 
-void TranslocationFunctions::SendCell(unsigned short pid) noexcept
+void PositionFunctions::SendCell(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
