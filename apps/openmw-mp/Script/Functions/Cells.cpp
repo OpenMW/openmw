@@ -16,7 +16,7 @@ unsigned int CellFunctions::GetCellStateChangesSize(unsigned short pid) noexcept
     return player->cellStateChanges.count;
 }
 
-char *CellFunctions::GetCellStateDescription(unsigned short pid, unsigned int i) noexcept
+const char *CellFunctions::GetCellStateDescription(unsigned short pid, unsigned int i) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, "");
@@ -24,12 +24,13 @@ char *CellFunctions::GetCellStateDescription(unsigned short pid, unsigned int i)
     if (i >= player->cellStateChanges.count)
         return "invalid";
 
-    std::string cellDescription = player->cellStateChanges.cells.at(i).getDescription();
+    string cellDescription = player->cellStateChanges.cells.at(i).getDescription();
 
-    char *cstrDescription = new char[cellDescription.length() + 1];
-    std::strcpy(cstrDescription, cellDescription.c_str());
+    static vector<char> cstrDescription;
+    cstrDescription.reserve(cellDescription.size());
+    strncpy(&cstrDescription[0], cellDescription.c_str(), cstrDescription.capacity());
 
-    return cstrDescription;
+    return &cstrDescription[0];
 }
 
 const char *CellFunctions::GetCell(unsigned short pid) noexcept
