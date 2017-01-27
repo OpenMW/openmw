@@ -667,13 +667,15 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 getLocalPlayer()->guiMessageBox.type,
                 getLocalPlayer()->guiMessageBox.label.c_str());
 
-            if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::MessageBox)
+            int messageBoxType = getLocalPlayer()->guiMessageBox.type;
+
+            if (messageBoxType == BasePlayer::GUIMessageBox::MessageBox)
                 Main::get().getGUIController()->showMessageBox(getLocalPlayer()->guiMessageBox);
-            else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::CustomMessageBox)
+            else if (messageBoxType == BasePlayer::GUIMessageBox::CustomMessageBox)
                 Main::get().getGUIController()->showCustomMessageBox(getLocalPlayer()->guiMessageBox);
-            else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::InputDialog)
+            else if (messageBoxType == BasePlayer::GUIMessageBox::InputDialog)
                 Main::get().getGUIController()->showInputBox(getLocalPlayer()->guiMessageBox);
-            else if (getLocalPlayer()->guiMessageBox.type == BasePlayer::GUIMessageBox::ListBox)
+            else if (messageBoxType == BasePlayer::GUIMessageBox::ListBox)
                 Main::get().getGUIController()->showDialogList(getLocalPlayer()->guiMessageBox);
         }
         break;
