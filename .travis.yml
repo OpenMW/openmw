@@ -1,6 +1,6 @@
 os:
  - linux
- - osx
+# - osx
 osx_image: xcode8.2
 language: cpp
 sudo: required
