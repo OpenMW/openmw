@@ -150,6 +150,9 @@ namespace MWScript
         // targeted scripts started from this one.
         if (targetId.empty() && !reference.isEmpty())
             mTargetId = reference.getCellRef().getRefId();
+
+        // Added by tes3mp
+        sendPackets = false;
     }
 
     int InterpreterContext::getLocalShort (int index) const

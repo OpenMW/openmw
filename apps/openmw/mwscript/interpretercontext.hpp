@@ -56,7 +56,7 @@ namespace MWScript
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
 
             // Added by tes3mp
-            bool sendPackets = false;
+            bool sendPackets;
 
             virtual int getLocalShort (int index) const;
 
