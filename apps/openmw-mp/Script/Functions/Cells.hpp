@@ -23,7 +23,7 @@ class CellFunctions
 public:
     static unsigned int GetCellStateChangesSize(unsigned short pid) noexcept;
 
-    static const char *GetCellStateDescription(unsigned short pid, unsigned int i) noexcept;
+    static char *GetCellStateDescription(unsigned short pid, unsigned int i) noexcept;
 
     static const char *GetCell(unsigned short pid) noexcept;
     static void SetCell(unsigned short pid, const char *name) noexcept;
