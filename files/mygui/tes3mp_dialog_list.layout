@@ -19,11 +19,8 @@
                 <Property key="Spacing" value="8"/>
 
                 <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton" align="Right Bottom">
-                    <Property key="Caption" value="#{sYes}"/>
+                    <Property key="Caption" value="OK"/>
                 </Widget>
-                <!--<Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton" align="Right Bottom">
-                    <Property key="Caption" value="#{sNo}"/>
-                </Widget>-->
             </Widget>
 
             <Widget type="Widget"/>
