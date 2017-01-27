@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
+#include "../mwmp/LocalEvent.hpp"
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -47,10 +47,9 @@ namespace MWScript
                     runtime.pop();
 
                     // Added by tes3mp
-                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                    mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
                     event->cell = *ptr.getCell()->getCell();
-                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
-                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                    event->addCellRef(ptr.getCellRef());
                     event->cellRef.mPos = ptr.getCellRef().getPosition();
                     event->scale = scale;
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->Send(event);
@@ -547,10 +546,9 @@ namespace MWScript
                         ptr.getCellRef().setRefNumIndex(cellStore->getLastRefNumIndex());
 
                         // Added by tes3mp
-                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
                         event->cell = *ptr.getCell()->getCell();
-                        event->cellRef.mRefID = ptr.getCellRef().getRefId();
-                        event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                        event->addCellRef(ptr.getCellRef());
 
                         // Make sure we send the RefData position instead of the CellRef one, because that's what
                         // we actually see on this client
@@ -560,8 +558,8 @@ namespace MWScript
                         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send(event);
 
                         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
-                            event->cellRef.mRefID.c_str(),
-                            event->cellRef.mRefNum.mIndex,
+                            ptr.getCellRef().getRefId().c_str(),
+                            ptr.getCellRef().getRefNum().mIndex,
                             event->count);
                     }
                 }

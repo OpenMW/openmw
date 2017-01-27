@@ -1,8 +1,8 @@
 #include "extensions.hpp"
 
-#include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
+#include "../mwmp/LocalEvent.hpp"
 
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
@@ -71,7 +71,7 @@ namespace MWScript
                     runtime.pop();
 
                     // Added by tes3mp
-                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                    mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
                     event->filename = sound;
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->Send(event);
 

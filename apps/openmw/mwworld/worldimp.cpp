@@ -5,9 +5,9 @@
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
 
-#include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
+#include "../mwmp/LocalEvent.hpp"
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
@@ -2266,16 +2266,15 @@ namespace MWWorld
         }
 
         // Added by tes3mp
-        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
         event->cell = *door.getCell()->getCell();
-        event->cellRef.mRefID = door.getCellRef().getRefId();
-        event->cellRef.mRefNum = door.getCellRef().getRefNum();
+        event->addCellRef(door.getCellRef());
         event->state = state;
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_ACTIVATE)->Send(event);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 1\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
+            door.getCellRef().getRefId().c_str(),
+            door.getCellRef().getRefNum().mIndex,
             event->cell.getDescription().c_str(),
             event->state ? "true" : "false");
 
@@ -2286,16 +2285,15 @@ namespace MWWorld
     void World::activateDoor(const Ptr &door, int state)
     {
         // Added by tes3mp
-        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
         event->cell = *door.getCell()->getCell();
-        event->cellRef.mRefID = door.getCellRef().getRefId();
-        event->cellRef.mRefNum = door.getCellRef().getRefNum();
+        event->addCellRef(door.getCellRef());
         event->state = state;
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_ACTIVATE)->Send(event);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 2\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
+            door.getCellRef().getRefId().c_str(),
+            door.getCellRef().getRefNum().mIndex,
             event->cell.getDescription().c_str(),
             event->state ? "true" : "false");
 

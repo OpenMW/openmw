@@ -3,9 +3,9 @@
 #include <stdexcept>
 #include <limits>
 
-#include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
+#include "../mwmp/LocalEvent.hpp"
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
@@ -66,10 +66,9 @@ namespace MWScript
                     // Added by tes3mp to check and set whether packets should be sent about this script
                     if (mwmp::Main::isValidPacketScript(ptr.getClass().getScript(ptr)))
                     {
-                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
                         event->cell = *ptr.getCell()->getCell();
-                        event->cellRef.mRefID = ptr.getCellRef().getRefId();
-                        event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                        event->addCellRef(ptr.getCellRef());
                         event->animGroup = group;
                         event->animMode = mode;
                         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->Send(event);

@@ -1,8 +1,8 @@
 #include "security.hpp"
 
-#include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
+#include "../mwmp/LocalEvent.hpp"
 
 #include "../mwworld/cellstore.hpp"
 
@@ -59,10 +59,9 @@ namespace MWMechanics
             if (Misc::Rng::roll0to99() <= x)
             {
                 // Added by tes3mp
-                mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
                 event->cell = *lock.getCell()->getCell();
-                event->cellRef.mRefID = lock.getCellRef().getRefId();
-                event->cellRef.mRefNum = lock.getCellRef().getRefNum();
+                event->addCellRef(lock.getCellRef());
                 mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send(event);
 
                 lock.getClass().unlock(lock);

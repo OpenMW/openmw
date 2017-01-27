@@ -2,9 +2,9 @@
 
 #include <cstdlib>
 
-#include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
+#include "../mwmp/LocalEvent.hpp"
 
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
@@ -90,7 +90,7 @@ namespace MWScript
                 runtime.pop();
 
                 // Added by tes3mp
-                mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
                 event->filename = name;
                 event->allowSkipping = allowSkipping;
                 mwmp::Main::get().getNetworking()->getWorldPacket(ID_VIDEO_PLAY)->Send(event);
@@ -194,10 +194,9 @@ namespace MWScript
                     }
 
                     // Added by tes3mp
-                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                    mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
                     event->cell = *ptr.getCell()->getCell();
-                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
-                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                    event->addCellRef(ptr.getCellRef());
                     event->lockLevel = lockLevel;
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->Send(event);
 
@@ -228,10 +227,9 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
 
                     // Added by tes3mp
-                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                    mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
                     event->cell = *ptr.getCell()->getCell();
-                    event->cellRef.mRefID = ptr.getCellRef().getRefId();
-                    event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                    event->addCellRef(ptr.getCellRef());
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send(event);
 
                     ptr.getClass().unlock (ptr);
@@ -695,10 +693,9 @@ namespace MWScript
                     if (parameter == 1)
                     {
                         // Added by tes3mp
-                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
                         event->cell = *ptr.getCell()->getCell();
-                        event->cellRef.mRefID = ptr.getCellRef().getRefId();
-                        event->cellRef.mRefNum = ptr.getCellRef().getRefNum();
+                        event->addCellRef(ptr.getCellRef());
                         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(event);
 
                         MWBase::Environment::get().getWorld()->deleteObject(ptr);

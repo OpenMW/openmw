@@ -16,9 +16,9 @@
 
 #include <components/settings/settings.hpp>
 
-#include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
+#include "../mwmp/LocalEvent.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwbase/world.hpp"
@@ -635,10 +635,9 @@ namespace MWGui
         MWWorld::Ptr newObject = *player.getClass().getContainerStore (player).add (object, object.getRefData().getCount(), player);
 
         // Added by tes3mp
-        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
         event->cell = *object.getCell()->getCell();
-        event->cellRef.mRefID = object.getCellRef().getRefId();
-        event->cellRef.mRefNum = object.getCellRef().getRefNum();
+        event->addCellRef(object.getCellRef());
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(event);
 
         // remove from world

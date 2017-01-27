@@ -1,8 +1,8 @@
 #include "hud.hpp"
 
-#include <components/openmw-mp/Base/WorldEvent.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
+#include "../mwmp/LocalEvent.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include <MyGUI_RenderManager.h>
@@ -66,10 +66,9 @@ namespace MWGui
             dropped.getCellRef().setRefNumIndex(cellStore->getLastRefNumIndex());
 
             // Added by tes3mp
-            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+            mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
             event->cell = *dropped.getCell()->getCell();
-            event->cellRef.mRefID = dropped.getCellRef().getRefId();
-            event->cellRef.mRefNum = dropped.getCellRef().getRefNum();
+            event->addCellRef(dropped.getCellRef());
 
             // Make sure we send the RefData position instead of the CellRef one, because that's what
             // we actually see on this client
@@ -79,14 +78,11 @@ namespace MWGui
             // automatically for stacks of gold
             event->count = dropped.getRefData().getCount();
 
-            // Get the real count of gold in a stack
-            event->cellRef.mGoldValue = dropped.getCellRef().getGoldValue();
-
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send(event);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
-                event->cellRef.mRefID.c_str(),
-                event->cellRef.mRefNum.mIndex,
+                dropped.getCellRef().getRefId().c_str(),
+                dropped.getCellRef().getRefNum().mIndex,
                 event->count);
 
             return dropped;

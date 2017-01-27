@@ -10,10 +10,10 @@
 
 #include <components/esm/cellid.hpp>
 
-#include <components/openmw-mp/Base/WorldEvent.hpp>
 #include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
+#include "../mwmp/LocalEvent.hpp"
 
 #include "../mwworld/esmstore.hpp"
 
@@ -189,17 +189,16 @@ namespace MWScript
         // Added by tes3mp
         if (sendPackets)
         {
-            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+            mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
             event->cell = *mReference.getCell()->getCell();
-            event->cellRef.mRefID = mReference.getCellRef().getRefId();
-            event->cellRef.mRefNum = mReference.getCellRef().getRefNum();
+            event->addCellRef(mReference.getCellRef());
             event->index = index;
             event->shortVal = value;
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_SHORT)->Send(event);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_SHORT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i",
-                event->cellRef.mRefID.c_str(),
-                event->cellRef.mRefNum.mIndex,
+                mReference.getCellRef().getRefId().c_str(),
+                mReference.getCellRef().getRefNum().mIndex,
                 event->cell.getDescription().c_str(),
                 event->index,
                 event->shortVal);
@@ -226,17 +225,16 @@ namespace MWScript
         // Only send a packet if this float has no decimals (to avoid spam)
         if (sendPackets && value == (int) value)
         {
-            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+            mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
             event->cell = *mReference.getCell()->getCell();
-            event->cellRef.mRefID = mReference.getCellRef().getRefId();
-            event->cellRef.mRefNum = mReference.getCellRef().getRefNum();
+            event->addCellRef(mReference.getCellRef());
             event->index = index;
             event->floatVal = value;
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->Send(event);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_FLOAT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f",
-                event->cellRef.mRefID.c_str(),
-                event->cellRef.mRefNum.mIndex,
+                mReference.getCellRef().getRefId().c_str(),
+                mReference.getCellRef().getRefNum().mIndex,
                 event->cell.getDescription().c_str(),
                 event->index,
                 event->floatVal);
@@ -287,7 +285,7 @@ namespace MWScript
         // Added by tes3mp
         if (sendPackets)
         {
-            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+            mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
             event->varName = name;
             event->shortVal = value;
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->Send(event);
@@ -620,14 +618,14 @@ namespace MWScript
         // Added by tes3mp
         if (sendPackets && !global)
         {
-            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-            event->cellRef.mRefID = id;
+            mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+            event->addRefId(id);
             event->index = index;
             event->shortVal = value;
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_MEMBER_SHORT)->Send(event);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_MEMBER_SHORT\n- cellRef: %s\n- index: %i\n- shortVal: %i",
-                event->cellRef.mRefID.c_str(),
+                id.c_str(),
                 event->index,
                 event->shortVal);
         }

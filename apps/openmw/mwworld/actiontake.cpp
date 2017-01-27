@@ -1,9 +1,9 @@
 #include "actiontake.hpp"
 
-#include <components/openmw-mp/Base/WorldEvent.hpp>
 #include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
+#include "../mwmp/LocalEvent.hpp"
 #include "../mwmp/LocalPlayer.hpp"
 #include "../mwworld/cellstore.hpp"
 
@@ -26,15 +26,14 @@ namespace MWWorld
         MWWorld::Ptr newitem = *actor.getClass().getContainerStore (actor).add (getTarget(), getTarget().getRefData().getCount(), actor);
 
         // Added by tes3mp
-        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
         event->cell = *getTarget().getCell()->getCell();
-        event->cellRef.mRefID = getTarget().getCellRef().getRefId();
-        event->cellRef.mRefNum = getTarget().getCellRef().getRefNum();
+        event->addCellRef(getTarget().getCellRef());
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(event);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_DELETE about\n- cellRef: %s, %i\n- cell: %s.",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
+            getTarget().getCellRef().getRefId().c_str(),
+            getTarget().getCellRef().getRefNum().mIndex,
             event->cell.getDescription().c_str());
 
         // LocalPlayer's inventory has changed, so send a packet with it
