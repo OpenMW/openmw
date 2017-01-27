@@ -103,7 +103,7 @@ void LangLua::LoadProgram(const char *filename)
 #if defined(ENABLE_TERRA)
     if ((err = terra_loadfile(lua, filename)) != 0)
 #else
-	if ((err =luaL_loadfile(lua, filename)) != 0)
+    if ((err =luaL_loadfile(lua, filename)) != 0)
 #endif
         throw runtime_error("Lua script " + string(filename) + " error (" + to_string(err) + "): \"" +
                             string(lua_tostring(lua, -1)) + "\"");
