@@ -1,6 +1,6 @@
 os:
  - linux
- - osx
+# - osx
 osx_image: xcode8.2
 language: cpp
 sudo: required
@@ -33,7 +33,7 @@ addons:
       # FFmpeg
       libavcodec-dev, libavformat-dev, libavutil-dev, libswscale-dev,
       # Audio & Video
-      libsdl2-dev, libqt4-dev, libopenal-dev,
+      libsdl2-dev, qtbase5-dev, libopenal-dev,
       # The other ones from OpenMW ppa
       libbullet-dev, libswresample-dev, libopenscenegraph-3.4-dev, libmygui-dev
     ]
