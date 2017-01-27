@@ -27,7 +27,7 @@ const char *CellFunctions::GetCellStateDescription(unsigned short pid, unsigned 
     string cellDescription = player->cellStateChanges.cells.at(i).getDescription();
 
     static vector<char> cstrDescription;
-    cstrDescription.reserve(cellDescription.size());
+    cstrDescription.reserve(cellDescription.size() + 1);
     strncpy(&cstrDescription[0], cellDescription.c_str(), cstrDescription.capacity());
 
     return &cstrDescription[0];
