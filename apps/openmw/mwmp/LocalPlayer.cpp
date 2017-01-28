@@ -346,7 +346,7 @@ void LocalPlayer::updateCell(bool forceUpdate)
 
         LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s",
             cell.getDescription().c_str(),
-            cell.getDescription().c_str());
+            ptrCell->getDescription().c_str());
 
         cell = *ptrCell;
 
