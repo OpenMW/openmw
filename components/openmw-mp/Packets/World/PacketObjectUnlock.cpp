@@ -12,8 +12,6 @@ void PacketObjectUnlock::Packet(RakNet::BitStream *bs, WorldEvent *event, bool s
 {
     WorldPacket::Packet(bs, event, send);
 
-    WorldPacket::Packet(bs, event, send);
-
     if (!send)
         event->objectChanges.objects.clear();
     else
