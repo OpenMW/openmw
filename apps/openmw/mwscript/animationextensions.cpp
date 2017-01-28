@@ -68,9 +68,14 @@ namespace MWScript
                     {
                         mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
                         event->cell = *ptr.getCell()->getCell();
-                        event->addCellRef(ptr.getCellRef());
-                        event->animGroup = group;
-                        event->animMode = mode;
+
+                        mwmp::WorldObject worldObject;
+                        worldObject.refId = ptr.getCellRef().getRefId();
+                        worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+                        worldObject.animGroup = group;
+                        worldObject.animMode = mode;
+                        event->addObject(worldObject);
+
                         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->Send(event);
                     }
 

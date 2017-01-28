@@ -416,7 +416,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
     WorldPacket *myPacket = worldController->GetPacket(packet->data[0]);
     WorldEvent *event = new WorldEvent(player->guid);
-    event->cellRef.blank();
+    mwmp::WorldObject worldObject;
 
     switch (packet->data[0])
     {
@@ -429,11 +429,16 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         myPacket->Read(event);
         myPacket->Send(event, true);
 
-        Script::Call<Script::CallbackIdentity("OnObjectPlace")>(
-            player->getId(),
-            event->cellRef.mRefID.c_str(),
-            (int) event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
+        for (unsigned int i = 0; i < event->objectChanges.count; i++)
+        {    
+            worldObject = event->objectChanges.objects[i];
+
+            Script::Call<Script::CallbackIdentity("OnObjectPlace")>(
+                player->getId(),
+                worldObject.refId.c_str(),
+                (int) worldObject.refNumIndex,
+                event->cell.getDescription().c_str());
+        }
 
         break;
     }
@@ -444,19 +449,20 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
         myPacket->Send(event, true);
 
-        Script::Call<Script::CallbackIdentity("OnObjectDelete")>(
-            player->getId(),
-            event->cellRef.mRefID.c_str(),
-            (int) event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
+        ESM::CellRef cellRef;
+
+        for (unsigned int i = 0; i < event->objectChanges.count; i++)
+        {
+            worldObject = event->objectChanges.objects[i];
+
+            Script::Call<Script::CallbackIdentity("OnObjectDelete")>(
+                player->getId(),
+                worldObject.refId.c_str(),
+                (int) worldObject.refNumIndex,
+                event->cell.getDescription().c_str());
+        }
 
         break;
     }
@@ -467,12 +473,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
         myPacket->Send(event, true);
 
         break;
@@ -484,12 +484,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
         myPacket->Send(event, true);
 
         break;
@@ -501,12 +495,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
         myPacket->Send(event, true);
 
         break;
@@ -518,12 +506,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
         myPacket->Send(event, true);
 
         break;
@@ -535,12 +517,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
         myPacket->Send(event, true);
 
         break;
@@ -552,12 +528,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
         myPacket->Send(event, true);
 
         break;
@@ -569,12 +539,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
         myPacket->Send(event, true);
 
         break;
@@ -586,12 +550,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
         myPacket->Send(event, true);
 
         break;
@@ -603,43 +561,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
-        myPacket->Send(event, true);
-
-        break;
-    }
-
-    case ID_MUSIC_PLAY:
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_MUSIC_PLAY from %s",
-            player->npc.mName.c_str());
-
-        myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- filename: %s",
-            event->filename.c_str());
-
-        myPacket->Send(event, true);
-
-        break;
-    }
-
-    case ID_VIDEO_PLAY:
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_VIDEO_PLAY from %s",
-            player->npc.mName.c_str());
-
-        myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- filename: %s\n- allowSkipping: %s",
-            event->filename.c_str(),
-            event->allowSkipping ? "true" : "false");
-
         myPacket->Send(event, true);
 
         break;
@@ -651,12 +572,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
         myPacket->Send(event, true);
 
         break;
@@ -668,12 +583,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
         myPacket->Send(event, true);
 
         break;
@@ -685,10 +594,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(event);
-
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s",
-            event->cellRef.mRefID.c_str());
-
         myPacket->Send(event, true);
 
         break;
@@ -700,11 +605,28 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(event);
+        myPacket->Send(event, true);
 
-        LOG_APPEND(Log::LOG_WARN, "- varName: %s\n- shortVal: %i",
-            event->varName.c_str(),
-            event->shortVal);
+        break;
+    }
 
+    case ID_MUSIC_PLAY:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_MUSIC_PLAY from %s",
+            player->npc.mName.c_str());
+
+        myPacket->Read(event);
+        myPacket->Send(event, true);
+
+        break;
+    }
+
+    case ID_VIDEO_PLAY:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_VIDEO_PLAY from %s",
+            player->npc.mName.c_str());
+
+        myPacket->Read(event);
         myPacket->Send(event, true);
 
         break;

@@ -68,22 +68,30 @@ namespace MWGui
             // Added by tes3mp
             mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
             event->cell = *dropped.getCell()->getCell();
-            event->addCellRef(dropped.getCellRef());
+
+            mwmp::WorldObject worldObject;
+            worldObject.refId = dropped.getCellRef().getRefId();
+            worldObject.refNumIndex = dropped.getCellRef().getRefNum().mIndex;
 
             // Make sure we send the RefData position instead of the CellRef one, because that's what
             // we actually see on this client
-            event->pos = dropped.getRefData().getPosition();
-            
+            worldObject.pos = dropped.getRefData().getPosition();
+
             // We have to get the count from the dropped object because it gets changed
             // automatically for stacks of gold
-            event->count = dropped.getRefData().getCount();
+            worldObject.count = dropped.getRefData().getCount();
+
+            // Get the real count of gold in a stack		
+            worldObject.goldValue = dropped.getCellRef().getGoldValue();
+
+            event->addObject(worldObject);
 
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send(event);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
-                dropped.getCellRef().getRefId().c_str(),
-                dropped.getCellRef().getRefNum().mIndex,
-                event->count);
+                worldObject.refId.c_str(),
+                worldObject.refNumIndex,
+                worldObject.count);
 
             return dropped;
         }

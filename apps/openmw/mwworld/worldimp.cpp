@@ -2268,15 +2268,20 @@ namespace MWWorld
         // Added by tes3mp
         mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
         event->cell = *door.getCell()->getCell();
-        event->addCellRef(door.getCellRef());
-        event->state = state;
+
+        mwmp::WorldObject worldObject;
+        worldObject.refId = door.getCellRef().getRefId();
+        worldObject.refNumIndex = door.getCellRef().getRefNum().mIndex;
+        worldObject.state = state;
+        event->addObject(worldObject);
+
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_ACTIVATE)->Send(event);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 1\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
-            door.getCellRef().getRefId().c_str(),
-            door.getCellRef().getRefNum().mIndex,
+            worldObject.refId.c_str(),
+            worldObject.refNumIndex,
             event->cell.getDescription().c_str(),
-            event->state ? "true" : "false");
+            worldObject.state ? "true" : "false");
 
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;
@@ -2287,15 +2292,20 @@ namespace MWWorld
         // Added by tes3mp
         mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
         event->cell = *door.getCell()->getCell();
-        event->addCellRef(door.getCellRef());
-        event->state = state;
+
+        mwmp::WorldObject worldObject;
+        worldObject.refId = door.getCellRef().getRefId();
+        worldObject.refNumIndex = door.getCellRef().getRefNum().mIndex;
+        worldObject.state = state;
+        event->addObject(worldObject);
+
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_ACTIVATE)->Send(event);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 2\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
-            door.getCellRef().getRefId().c_str(),
-            door.getCellRef().getRefNum().mIndex,
+            worldObject.refId.c_str(),
+            worldObject.refNumIndex,
             event->cell.getDescription().c_str(),
-            event->state ? "true" : "false");
+            worldObject.state ? "true" : "false");
 
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;

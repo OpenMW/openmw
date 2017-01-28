@@ -7,27 +7,14 @@
 
 namespace mwmp
 {
-    class WorldEvent
+    struct WorldObject
     {
-    public:
-
-        WorldEvent(RakNet::RakNetGUID guid) : guid(guid)
-        {
-
-        }
-
-        WorldEvent()
-        {
-
-        }
-
-        RakNet::RakNetGUID guid;
-
-        ESM::Cell cell;
-        ESM::CellRef cellRef;
+        std::string refId;
+        int refNumIndex;
+        int goldValue;
+        int count;
         ESM::Position pos;
 
-        int count;
         int state;
         int lockLevel;
         float scale;
@@ -42,6 +29,32 @@ namespace mwmp
         int shortVal;
         float floatVal;
         std::string varName;
+    };
+
+    class WorldEvent
+    {
+    public:
+
+        WorldEvent(RakNet::RakNetGUID guid) : guid(guid)
+        {
+
+        }
+
+        WorldEvent()
+        {
+
+        }
+
+        struct ObjectChanges
+        {
+            std::vector<WorldObject> objects;
+            unsigned int count;
+        };
+
+        RakNet::RakNetGUID guid;
+        ObjectChanges objectChanges;
+
+        ESM::Cell cell;
     };
 }
 

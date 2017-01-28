@@ -28,7 +28,12 @@ namespace MWWorld
         // Added by tes3mp
         mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
         event->cell = *getTarget().getCell()->getCell();
-        event->addCellRef(getTarget().getCellRef());
+
+        mwmp::WorldObject worldObject;
+        worldObject.refId = getTarget().getCellRef().getRefId();
+        worldObject.refNumIndex = getTarget().getCellRef().getRefNum().mIndex;
+        event->addObject(worldObject);
+
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(event);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_DELETE about\n- cellRef: %s, %i\n- cell: %s.",

@@ -12,15 +12,36 @@ void PacketObjectPlace::Packet(RakNet::BitStream *bs, WorldEvent *event, bool se
 {
     WorldPacket::Packet(bs, event, send);
 
-    RW(event->cellRef.mRefID, send);
-    RW(event->cellRef.mRefNum.mIndex, send);
-    RW(event->cellRef.mGoldValue, send);
+    if (!send)
+        event->objectChanges.objects.clear();
+    else
+        event->objectChanges.count = (unsigned int)(event->objectChanges.objects.size());
+
+    RW(event->objectChanges.count, send);
 
     RW(event->cell.mData.mFlags, send);
     RW(event->cell.mData.mX, send);
     RW(event->cell.mData.mY, send);
     RW(event->cell.mName, send);
 
-    RW(event->pos, send);
-    RW(event->count, send);
+    WorldObject worldObject;
+
+    for (unsigned int i = 0; i < event->objectChanges.count; i++)
+    {
+        if (send)
+        {
+            worldObject = event->objectChanges.objects[i];
+        }
+
+        RW(worldObject.refId, send);
+        RW(worldObject.refNumIndex, send);
+        RW(worldObject.goldValue, send);
+        RW(worldObject.pos, send);
+        RW(worldObject.count, send);
+
+        if (!send)
+        {
+            event->objectChanges.objects.push_back(worldObject);
+        }
+    }
 }

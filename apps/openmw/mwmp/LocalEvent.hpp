@@ -15,8 +15,25 @@ namespace mwmp
         LocalEvent(RakNet::RakNetGUID guid);
         virtual ~LocalEvent();
 
-        void addCellRef(MWWorld::CellRef worldCellRef);
-        void addRefId(std::string refId);
+        void addObject(WorldObject worldObject);
+
+        void placeObjects(MWWorld::CellStore* cellStore);
+        void deleteObjects(MWWorld::CellStore* cellStore);
+        void lockObjects(MWWorld::CellStore* cellStore);
+        void unlockObjects(MWWorld::CellStore* cellStore);
+        void scaleObjects(MWWorld::CellStore* cellStore);
+        void moveObjects(MWWorld::CellStore* cellStore);
+        void rotateObjects(MWWorld::CellStore* cellStore);
+        void animateObjects(MWWorld::CellStore* cellStore);
+        void activateDoors(MWWorld::CellStore* cellStore);
+
+        void setLocalShorts(MWWorld::CellStore* cellStore);
+        void setLocalFloats(MWWorld::CellStore* cellStore);
+        void setMemberShorts();
+        void setGlobalShorts();
+
+        void playMusic();
+        void playVideo();
 
     private:
         Networking *getNetworking();

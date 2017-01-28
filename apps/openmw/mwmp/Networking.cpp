@@ -9,9 +9,6 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
-#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -743,29 +740,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         if (!ptrCellStore) return;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_PLACE");
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- count: %i",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str(),
-            event->count);
-
-        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), event->cellRef.mRefID, 1);
-        MWWorld::Ptr newPtr = ref.getPtr();
-
-        if (event->count > 1)
-            newPtr.getRefData().setCount(event->count);
-
-        newPtr.getCellRef().setGoldValue(event->cellRef.mGoldValue);
-
-        newPtr = MWBase::Environment::get().getWorld()->placeObject(newPtr, ptrCellStore, event->pos);
-
-        // Change RefNum here because the line above unsets it
-        newPtr.getCellRef().setRefNumIndex(event->cellRef.mRefNum.mIndex);
-
-        // If this RefNum is higher than the last we've recorded for this CellStore,
-        // start using it as our new last one
-        if (ptrCellStore->getLastRefNumIndex() < event->cellRef.mRefNum.mIndex)
-            ptrCellStore->setLastRefNumIndex(event->cellRef.mRefNum.mIndex);
+        event->placeObjects(ptrCellStore);
 
         break;
     }
@@ -776,21 +751,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         if (!ptrCellStore) return;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_DELETE");
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
-        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
-
-        if (ptrFound)
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
-                ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum());
-
-            MWBase::Environment::get().getWorld()->deleteObject(ptrFound);
-        }
+        event->deleteObjects(ptrCellStore);
 
         break;
     }
@@ -801,21 +762,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         if (!ptrCellStore) return;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_LOCK");
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
-        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
-
-        if (ptrFound)
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
-                ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum());
-
-            ptrFound.getClass().lock(ptrFound, event->lockLevel);
-        }
+        event->lockObjects(ptrCellStore);
 
         break;
     }
@@ -826,21 +773,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         if (!ptrCellStore) return;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_UNLOCK");
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
-        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
-
-        if (ptrFound)
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
-                ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum());
-
-            ptrFound.getClass().unlock(ptrFound);
-        }
+        event->unlockObjects(ptrCellStore);
 
         break;
     }
@@ -851,21 +784,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         if (!ptrCellStore) return;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_SCALE");
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
-        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
-
-        if (ptrFound)
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
-                ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum());
-
-            MWBase::Environment::get().getWorld()->scaleObject(ptrFound, event->scale);
-        }
+        event->scaleObjects(ptrCellStore);
 
         break;
     }
@@ -876,22 +795,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         if (!ptrCellStore) return;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_MOVE");
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
-        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
-
-        if (ptrFound)
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
-                ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum());
-
-            MWBase::Environment::get().getWorld()->moveObject(ptrFound,
-                event->pos.pos[0], event->pos.pos[1], event->pos.pos[2]);
-        }
+        event->moveObjects(ptrCellStore);
 
         break;
     }
@@ -902,22 +806,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         if (!ptrCellStore) return;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ROTATE");
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
-        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
-
-        if (ptrFound)
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
-                ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum());
-
-            MWBase::Environment::get().getWorld()->rotateObject(ptrFound,
-                event->pos.rot[0], event->pos.rot[1], event->pos.rot[2]);
-        }
+        event->rotateObjects(ptrCellStore);
 
         break;
     }
@@ -928,22 +817,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         if (!ptrCellStore) return;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ANIM_PLAY");
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
-        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
-
-        if (ptrFound)
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
-                ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum());
-
-            MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(ptrFound,
-                event->animGroup, event->animMode, std::numeric_limits<int>::max(), true);
-        }
+        event->animateObjects(ptrCellStore);
 
         break;
     }
@@ -954,43 +828,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         if (!ptrCellStore) return;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_ACTIVATE");
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str());
-
-        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
-
-        if (ptrFound)
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
-                ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum());
-
-            ptrFound.getClass().setDoorState(ptrFound, event->state);
-            MWBase::Environment::get().getWorld()->saveDoorState(ptrFound, event->state);
-        }
-
-        break;
-    }
-    case ID_MUSIC_PLAY:
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_MUSIC_PLAY");
-        LOG_APPEND(Log::LOG_WARN, "- filename: %s",
-            event->filename.c_str());
-
-        MWBase::Environment::get().getSoundManager()->streamMusic(event->filename);
-
-        break;
-    }
-    case ID_VIDEO_PLAY:
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_VIDEO_PLAY");
-        LOG_APPEND(Log::LOG_WARN, "- filename: %s\n- allowSkipping: %s",
-            event->filename.c_str(),
-            event->allowSkipping ? "true" : "false");
-
-        MWBase::Environment::get().getWindowManager()->playVideo(event->filename, event->allowSkipping);
+        event->activateDoors(ptrCellStore);
 
         break;
     }
@@ -1001,23 +839,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         if (!ptrCellStore) return;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_SHORT");
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str(),
-            event->index,
-            event->shortVal);
-
-        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
-
-        if (ptrFound)
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
-                ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum());
-
-            ptrFound.getRefData().getLocals().mShorts.at(event->index) = event->shortVal;
-        }
+        event->setLocalShorts(ptrCellStore);
 
         break;
     }
@@ -1028,61 +850,35 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         if (!ptrCellStore) return;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_FLOAT");
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f",
-            event->cellRef.mRefID.c_str(),
-            event->cellRef.mRefNum.mIndex,
-            event->cell.getDescription().c_str(),
-            event->index,
-            event->floatVal);
-
-        MWWorld::Ptr ptrFound = ptrCellStore->searchExact(event->cellRef.mRefID, event->cellRef.mRefNum.mIndex);
-
-        if (ptrFound)
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
-                ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum());
-
-            ptrFound.getRefData().getLocals().mFloats.at(event->index) = event->floatVal;
-        }
+        event->setLocalFloats(ptrCellStore);
 
         break;
     }
     case ID_SCRIPT_MEMBER_SHORT:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_MEMBER_SHORT");
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s\n- index: %i\n- shortVal: %i\n",
-            event->cellRef.mRefID.c_str(),
-            event->index,
-            event->shortVal);
-
-        // Mimic the way a Ptr is fetched in InterpreterContext for similar situations
-        MWWorld::Ptr ptrFound = MWBase::Environment::get().getWorld()->getPtr(event->cellRef.mRefID, false);
-
-        if (ptrFound)
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
-                ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum());
-
-            std::string scriptId = ptrFound.getClass().getScript(ptrFound);
-
-            ptrFound.getRefData().setLocals(
-                *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find(scriptId));
-
-            ptrFound.getRefData().getLocals().mShorts.at(event->index) = event->shortVal;;
-        }
+        event->setMemberShorts();
 
         break;
     }
     case ID_SCRIPT_GLOBAL_SHORT:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_GLOBAL_SHORT");
-        LOG_APPEND(Log::LOG_WARN, "- varName: %s\n- shortVal: %i",
-            event->varName.c_str(),
-            event->shortVal);
+        event->setGlobalShorts();
 
-        MWBase::Environment::get().getWorld()->setGlobalInt(event->varName, event->shortVal);
+        break;
+    }
+    case ID_MUSIC_PLAY:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_MUSIC_PLAY");
+        event->playMusic();
+
+        break;
+    }
+    case ID_VIDEO_PLAY:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_VIDEO_PLAY");
+        event->playVideo();
 
         break;
     }

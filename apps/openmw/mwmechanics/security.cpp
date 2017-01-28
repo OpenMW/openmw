@@ -61,7 +61,12 @@ namespace MWMechanics
                 // Added by tes3mp
                 mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
                 event->cell = *lock.getCell()->getCell();
-                event->addCellRef(lock.getCellRef());
+
+                mwmp::WorldObject worldObject;
+                worldObject.refId = lock.getCellRef().getRefId();
+                worldObject.refNumIndex = lock.getCellRef().getRefNum().mIndex;
+                event->addObject(worldObject);
+                
                 mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send(event);
 
                 lock.getClass().unlock(lock);

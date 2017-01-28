@@ -49,9 +49,13 @@ namespace MWScript
                     // Added by tes3mp
                     mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
                     event->cell = *ptr.getCell()->getCell();
-                    event->addCellRef(ptr.getCellRef());
-                    event->cellRef.mPos = ptr.getCellRef().getPosition();
-                    event->scale = scale;
+
+                    mwmp::WorldObject worldObject;
+                    worldObject.refId = ptr.getCellRef().getRefId();
+                    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+                    worldObject.scale = scale;
+                    event->addObject(worldObject);
+
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->Send(event);
 
                     MWBase::Environment::get().getWorld()->scaleObject(ptr,scale);
@@ -548,19 +552,24 @@ namespace MWScript
                         // Added by tes3mp
                         mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
                         event->cell = *ptr.getCell()->getCell();
-                        event->addCellRef(ptr.getCellRef());
+
+                        mwmp::WorldObject worldObject;
+                        worldObject.refId = ptr.getCellRef().getRefId();
+                        worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+                        worldObject.count = 1;
 
                         // Make sure we send the RefData position instead of the CellRef one, because that's what
                         // we actually see on this client
-                        event->pos = ptr.getRefData().getPosition();
+                        worldObject.pos = ptr.getRefData().getPosition();
 
-                        event->count = 1;
+                        event->addObject(worldObject);
+
                         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send(event);
 
                         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
-                            ptr.getCellRef().getRefId().c_str(),
-                            ptr.getCellRef().getRefNum().mIndex,
-                            event->count);
+                            worldObject.refId.c_str(),
+                            worldObject.refNumIndex,
+                            worldObject.count);
                     }
                 }
         };

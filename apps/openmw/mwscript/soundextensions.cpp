@@ -72,7 +72,11 @@ namespace MWScript
 
                     // Added by tes3mp
                     mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
-                    event->filename = sound;
+                    
+                    mwmp::WorldObject worldObject;
+                    worldObject.filename = sound;
+                    event->addObject(worldObject);
+
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->Send(event);
 
                     MWBase::Environment::get().getSoundManager()->streamMusic (sound);
