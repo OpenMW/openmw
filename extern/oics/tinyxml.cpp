@@ -48,7 +48,7 @@ FILE* TiXmlFOpen( const char* filename, const char* mode )
 		memset(wname, 0, sizeof(*wname) * (len + 1));
 		wchar_t wmode[32] = { 0 };
 
-		MultiByteToWideChar(CP_UTF8, 0, filename, len, wname, len);
+		MultiByteToWideChar(CP_UTF8, 0, filename, static_cast<int>(len), wname, static_cast<int>(len));
 		MultiByteToWideChar(CP_UTF8, 0, mode, -1, wmode, sizeof(wmode) / sizeof(*wmode));
 
 		#if defined(_MSC_VER) && (_MSC_VER >= 1400 )

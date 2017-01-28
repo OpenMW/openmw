@@ -155,7 +155,7 @@ namespace ESMTerrain
                                             osg::ref_ptr<osg::Vec4Array> colours)
     {
         // LOD level n means every 2^n-th vertex is kept
-        size_t increment = 1 << lodLevel;
+        size_t increment = static_cast<size_t>(1) << lodLevel;
 
         osg::Vec2f origin = center - osg::Vec2f(size/2.f, size/2.f);
 
