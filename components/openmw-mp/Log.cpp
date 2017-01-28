@@ -111,7 +111,7 @@ string Log::getFilenameTimestamp()
     time_t rawtime = time(0);
     struct tm *timeinfo = localtime(&rawtime);
     char buffer[25];
-    strftime(buffer, 25, "%Y-%m-%d-%I_%M_%S", timeinfo);
+    strftime(buffer, 25, "%Y-%m-%d-%H_%M_%S", timeinfo);
     std::string timestamp(buffer);
     return timestamp;
 }
