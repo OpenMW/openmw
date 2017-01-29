@@ -21,7 +21,7 @@ using namespace std;
 
 Networking *Networking::sThis = 0;
 
-static WorldEvent *worldEvent;
+static WorldEvent *worldEvent = nullptr;
 
 Networking::Networking(RakNet::RakPeerInterface *peer)
 {
@@ -417,6 +417,13 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         return;
 
     WorldPacket *myPacket = worldController->GetPacket(packet->data[0]);
+
+    if (worldEvent)
+    {
+        delete worldEvent;
+        worldEvent = nullptr;
+    }
+
     worldEvent = new WorldEvent(player->guid);
     mwmp::WorldObject worldObject;
 

@@ -9,7 +9,7 @@
 
 using namespace mwmp;
 
-static WorldEvent *worldEvent;
+static WorldEvent *worldEvent = nullptr;
 
 std::regex exteriorCellPattern("^(-?\\d+), (-?\\d+)$");
 
@@ -17,6 +17,12 @@ void WorldFunctions::CreateWorldEvent(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
+
+    if (worldEvent)
+    {
+        delete worldEvent;
+        worldEvent = nullptr;
+    }
 
     worldEvent = new WorldEvent(player->guid);
 }
