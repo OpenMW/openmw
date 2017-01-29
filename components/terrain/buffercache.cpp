@@ -23,7 +23,7 @@ osg::ref_ptr<IndexArrayType> createIndexBuffer(unsigned int flags, unsigned int 
 
     bool anyDeltas = (lodDeltas[Terrain::North] || lodDeltas[Terrain::South] || lodDeltas[Terrain::West] || lodDeltas[Terrain::East]);
 
-    size_t increment = 1 << lodLevel;
+    size_t increment = static_cast<size_t>(1) << lodLevel;
     assert(increment < verts);
 
     osg::ref_ptr<IndexArrayType> indices (new IndexArrayType(osg::PrimitiveSet::TRIANGLES));
@@ -75,7 +75,7 @@ osg::ref_ptr<IndexArrayType> createIndexBuffer(unsigned int flags, unsigned int 
 
         // South
         size_t row = 0;
-        size_t outerStep = 1 << (lodDeltas[Terrain::South] + lodLevel);
+        size_t outerStep = static_cast<size_t>(1) << (lodDeltas[Terrain::South] + lodLevel);
         for (size_t col = 0; col < verts-1; col += outerStep)
         {
             indices->push_back(verts*col+row);
