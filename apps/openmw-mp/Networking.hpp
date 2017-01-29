@@ -36,6 +36,7 @@ namespace  mwmp
 
         PlayerPacketController *getPlayerController() const;
         WorldPacketController *getWorldController() const;
+        WorldEvent *getLastEvent();
 
         MasterClient *getMasterClient();
         void InitQuery(std::string queryAddr, unsigned short queryPort, std::string serverAddr, unsigned short serverPort);
