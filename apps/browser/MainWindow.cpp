@@ -39,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(actionPlay, SIGNAL(triggered(bool)), this, SLOT(play()));
     connect(tblServerBrowser, SIGNAL(clicked(QModelIndex)), this, SLOT(serverSelected()));
     connect(tblFavorites, SIGNAL(clicked(QModelIndex)), this, SLOT(serverSelected()));
+    connect(tblFavorites, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(play()));
+    connect(tblServerBrowser, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(play()));
 
     loadFavorites();
 }
