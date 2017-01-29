@@ -78,6 +78,13 @@ void WorldFunctions::SetObjectPosition(unsigned int i, double x, double y, doubl
     worldEvent->objectChanges.objects[i].pos.pos[2] = z;
 }
 
+void WorldFunctions::SetObjectRotation(unsigned int i, double x, double y, double z) noexcept
+{
+    worldEvent->objectChanges.objects[i].pos.rot[0] = x;
+    worldEvent->objectChanges.objects[i].pos.rot[1] = y;
+    worldEvent->objectChanges.objects[i].pos.rot[2] = z;
+}
+
 unsigned int WorldFunctions::GetObjectChangesSize() noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.count;
@@ -116,6 +123,21 @@ double WorldFunctions::GetObjectPosY(unsigned int i) noexcept
 double WorldFunctions::GetObjectPosZ(unsigned int i) noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].pos.pos[2];
+}
+
+double WorldFunctions::GetObjectRotX(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].pos.rot[0];
+}
+
+double WorldFunctions::GetObjectRotY(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].pos.rot[1];
+}
+
+double WorldFunctions::GetObjectRotZ(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].pos.rot[2];
 }
 
 void WorldFunctions::SendObjectDelete() noexcept

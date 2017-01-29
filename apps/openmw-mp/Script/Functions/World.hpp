@@ -12,6 +12,7 @@
     {"SetObjectCount",       WorldFunctions::SetObjectCount},\
     {"SetObjectGoldValue",   WorldFunctions::SetObjectGoldValue},\
     {"SetObjectPosition",    WorldFunctions::SetObjectPosition},\
+    {"SetObjectRotation",    WorldFunctions::SetObjectRotation},\
     \
     {"GetObjectChangesSize", WorldFunctions::GetObjectChangesSize},\
     \
@@ -22,6 +23,9 @@
     {"GetObjectPosX",        WorldFunctions::GetObjectPosX},\
     {"GetObjectPosY",        WorldFunctions::GetObjectPosY},\
     {"GetObjectPosZ",        WorldFunctions::GetObjectPosZ},\
+    {"GetObjectRotX",        WorldFunctions::GetObjectRotX},\
+    {"GetObjectRotY",        WorldFunctions::GetObjectRotY},\
+    {"GetObjectRotZ",        WorldFunctions::GetObjectRotZ},\
     \
     {"SendObjectDelete",     WorldFunctions::SendObjectDelete},\
     {"SendObjectPlace",      WorldFunctions::SendObjectPlace},\
@@ -44,6 +48,7 @@ public:
     static void SetObjectCount(unsigned int i, int count) noexcept;
     static void SetObjectGoldValue(unsigned int i, int goldValue) noexcept;
     static void SetObjectPosition(unsigned int i, double x, double y, double z) noexcept;
+    static void SetObjectRotation(unsigned int i, double x, double y, double z) noexcept;
 
     static unsigned int GetObjectChangesSize() noexcept;
 
@@ -54,6 +59,9 @@ public:
     static double GetObjectPosX(unsigned int i) noexcept;
     static double GetObjectPosY(unsigned int i) noexcept;
     static double GetObjectPosZ(unsigned int i) noexcept;
+    static double GetObjectRotX(unsigned int i) noexcept;
+    static double GetObjectRotY(unsigned int i) noexcept;
+    static double GetObjectRotZ(unsigned int i) noexcept;
 
     static void SendObjectDelete() noexcept;
     static void SendObjectPlace() noexcept;
