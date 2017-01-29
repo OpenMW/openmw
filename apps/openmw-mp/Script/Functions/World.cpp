@@ -61,6 +61,16 @@ void WorldFunctions::SetObjectRefNumIndex(unsigned int i, int refNumIndex) noexc
     worldEvent->objectChanges.objects[i].refNumIndex = refNumIndex;
 }
 
+void WorldFunctions::SetObjectCount(unsigned int i, int count) noexcept
+{
+    worldEvent->objectChanges.objects[i].count = count;
+}
+
+void WorldFunctions::SetObjectGoldValue(unsigned int i, int goldValue) noexcept
+{
+    worldEvent->objectChanges.objects[i].goldValue = goldValue;
+}
+
 void WorldFunctions::SetObjectPosition(unsigned int i, double x, double y, double z) noexcept
 {
     worldEvent->objectChanges.objects[i].pos.pos[0] = x;

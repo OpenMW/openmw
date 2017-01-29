@@ -9,6 +9,8 @@
     \
     {"SetObjectRefId",       WorldFunctions::SetObjectRefId},\
     {"SetObjectRefNumIndex", WorldFunctions::SetObjectRefNumIndex},\
+    {"SetObjectCount",       WorldFunctions::SetObjectCount},\
+    {"SetObjectGoldValue",   WorldFunctions::SetObjectGoldValue},\
     {"SetObjectPosition",    WorldFunctions::SetObjectPosition},\
     \
     {"GetObjectChangesSize", WorldFunctions::GetObjectChangesSize},\
@@ -39,6 +41,8 @@ public:
 
     static void SetObjectRefId(unsigned int i, const char* refId) noexcept;
     static void SetObjectRefNumIndex(unsigned int i, int refNumIndex) noexcept;
+    static void SetObjectCount(unsigned int i, int count) noexcept;
+    static void SetObjectGoldValue(unsigned int i, int goldValue) noexcept;
     static void SetObjectPosition(unsigned int i, double x, double y, double z) noexcept;
 
     static unsigned int GetObjectChangesSize() noexcept;
