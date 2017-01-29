@@ -11,6 +11,7 @@ set(BROWSER
         ServerModel.cpp
         NetController.cpp
         ServerInfoDialog.cpp
+        MySortFilterProxyModel.cpp
         netutils/HTTPNetwork.cpp
         netutils/Utils.cpp
         ${CMAKE_SOURCE_DIR}/files/tes3mp/browser.rc
@@ -20,6 +21,7 @@ set(BROWSER_HEADER_MOC
         MainWindow.hpp
         ServerModel.hpp
         ServerInfoDialog.hpp
+        MySortFilterProxyModel.hpp
         )
 
 set(BROWSER_HEADER
