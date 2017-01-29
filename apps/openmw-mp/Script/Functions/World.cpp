@@ -68,6 +68,21 @@ void WorldFunctions::SetObjectPosition(unsigned int i, double x, double y, doubl
     worldEvent->objectChanges.objects[i].pos.pos[2] = z;
 }
 
+unsigned int WorldFunctions::GetObjectChangesSize() noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.count;
+}
+
+const char *WorldFunctions::GetObjectRefId(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].refId.c_str();
+}
+
+int WorldFunctions::GetObjectRefNumIndex(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].refNumIndex;
+}
+
 void WorldFunctions::SendObjectDelete() noexcept
 {
     mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_DELETE)->Send(worldEvent, worldEvent->guid);

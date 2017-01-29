@@ -5,16 +5,16 @@
 
 #define CELLAPI \
     {"GetCellStateChangesSize", CellFunctions::GetCellStateChangesSize},\
-\
+    \
     {"GetCellStateDescription", CellFunctions::GetCellStateDescription},\
-\
+    \
     {"GetCell",                 CellFunctions::GetCell},\
     {"SetCell",                 CellFunctions::SetCell},\
     {"SetExterior",             CellFunctions::SetExterior},\
     {"GetExteriorX",            CellFunctions::GetExteriorX},\
     {"GetExteriorY",            CellFunctions::GetExteriorY},\
     {"IsInExterior",            CellFunctions::IsInExterior},\
-\
+    \
     {"SendCell",                CellFunctions::SendCell}
 
 

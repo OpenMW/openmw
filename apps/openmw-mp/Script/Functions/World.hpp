@@ -11,6 +11,11 @@
     {"SetObjectRefNumIndex", WorldFunctions::SetObjectRefNumIndex},\
     {"SetObjectPosition",    WorldFunctions::SetObjectPosition},\
     \
+    {"GetObjectChangesSize", WorldFunctions::GetObjectChangesSize},\
+    \
+    {"GetObjectRefId",       WorldFunctions::GetObjectRefId},\
+    {"GetObjectRefNumIndex", WorldFunctions::GetObjectRefNumIndex},\
+    \
     {"SendObjectDelete",     WorldFunctions::SendObjectDelete},\
     {"SendObjectPlace",      WorldFunctions::SendObjectPlace},\
     \
@@ -30,6 +35,11 @@ public:
     static void SetObjectRefId(unsigned int i, const char* refId) noexcept;
     static void SetObjectRefNumIndex(unsigned int i, int refNumIndex) noexcept;
     static void SetObjectPosition(unsigned int i, double x, double y, double z) noexcept;
+
+    static unsigned int GetObjectChangesSize() noexcept;
+
+    static const char *GetObjectRefId(unsigned int i) noexcept;
+    static int GetObjectRefNumIndex(unsigned int i) noexcept;
 
     static void SendObjectDelete() noexcept;
     static void SendObjectPlace() noexcept;
