@@ -20,7 +20,7 @@ unsigned int PingRakNetServer(const char *addr, unsigned short port)
     RakNet::Packet *packet;
     bool done = false;
     int attempts = 0;
-    RakNet::TimeMS time = 999;
+    RakNet::TimeMS time = PING_UNREACHABLE;
 
     RakNet::SocketDescriptor socketDescriptor {0, ""};
     RakNet::RakPeerInterface *peer =  RakNet::RakPeerInterface::GetInstance();

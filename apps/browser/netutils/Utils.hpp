@@ -9,6 +9,8 @@
 #include <string>
 
 
+#define PING_UNREACHABLE 999
+
 unsigned int PingRakNetServer(const char *addr, unsigned short port);
 
 struct ServerExtendedData
