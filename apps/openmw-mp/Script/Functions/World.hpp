@@ -15,6 +15,11 @@
     \
     {"GetObjectRefId",       WorldFunctions::GetObjectRefId},\
     {"GetObjectRefNumIndex", WorldFunctions::GetObjectRefNumIndex},\
+    {"GetObjectCount",       WorldFunctions::GetObjectCount},\
+    {"GetObjectGoldValue",   WorldFunctions::GetObjectGoldValue},\
+    {"GetObjectPosX",        WorldFunctions::GetObjectPosX},\
+    {"GetObjectPosY",        WorldFunctions::GetObjectPosY},\
+    {"GetObjectPosZ",        WorldFunctions::GetObjectPosZ},\
     \
     {"SendObjectDelete",     WorldFunctions::SendObjectDelete},\
     {"SendObjectPlace",      WorldFunctions::SendObjectPlace},\
@@ -40,6 +45,11 @@ public:
 
     static const char *GetObjectRefId(unsigned int i) noexcept;
     static int GetObjectRefNumIndex(unsigned int i) noexcept;
+    static int GetObjectCount(unsigned int i) noexcept;
+    static int GetObjectGoldValue(unsigned int i) noexcept;
+    static double GetObjectPosX(unsigned int i) noexcept;
+    static double GetObjectPosY(unsigned int i) noexcept;
+    static double GetObjectPosZ(unsigned int i) noexcept;
 
     static void SendObjectDelete() noexcept;
     static void SendObjectPlace() noexcept;

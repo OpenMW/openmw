@@ -83,6 +83,31 @@ int WorldFunctions::GetObjectRefNumIndex(unsigned int i) noexcept
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].refNumIndex;
 }
 
+int WorldFunctions::GetObjectCount(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].count;
+}
+
+int WorldFunctions::GetObjectGoldValue(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].goldValue;
+}
+
+double WorldFunctions::GetObjectPosX(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].pos.pos[0];
+}
+
+double WorldFunctions::GetObjectPosY(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].pos.pos[1];
+}
+
+double WorldFunctions::GetObjectPosZ(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].pos.pos[2];
+}
+
 void WorldFunctions::SendObjectDelete() noexcept
 {
     mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_DELETE)->Send(worldEvent, worldEvent->guid);
