@@ -435,7 +435,9 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         {
             worldObject = worldEvent->objectChanges.objects[i];
 
-            Script::Call<Script::CallbackIdentity("OnObjectPlace")>(player->getId());
+            Script::Call<Script::CallbackIdentity("OnObjectPlace")>(
+                player->getId(),
+                worldEvent->cell.getDescription().c_str());
         }
 
         break;
@@ -455,7 +457,9 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         {
             worldObject = worldEvent->objectChanges.objects[i];
 
-            Script::Call<Script::CallbackIdentity("OnObjectDelete")>(player->getId());
+            Script::Call<Script::CallbackIdentity("OnObjectDelete")>(
+                player->getId(),
+                worldEvent->cell.getDescription().c_str());
         }
 
         break;
