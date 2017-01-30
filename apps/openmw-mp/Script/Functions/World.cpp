@@ -50,8 +50,8 @@ void WorldFunctions::SetWorldEventCell(const char* cellDescription) noexcept
         worldEvent->cell.mData.mFlags &= ~ESM::Cell::Interior;
 
         // The first sub match is the whole string, so check for a length of 3
-        if (baseMatch.size() == 3) {
-
+        if (baseMatch.size() == 3)
+        {
             worldEvent->cell.mData.mX = stoi(baseMatch[1].str());
             worldEvent->cell.mData.mY = stoi(baseMatch[2].str());
         }
@@ -65,6 +65,7 @@ void WorldFunctions::SetWorldEventCell(const char* cellDescription) noexcept
 
 void WorldFunctions::SetObjectRefId(unsigned int i, const char* refId) noexcept
 {
+    printf("SetObjectRefId(%i, %s)\n", i, refId);
     tempWorldObject.refId = refId;
 }
 
@@ -104,52 +105,52 @@ unsigned int WorldFunctions::GetObjectChangesSize() noexcept
 
 const char *WorldFunctions::GetObjectRefId(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].refId.c_str();
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).refId.c_str();
 }
 
 int WorldFunctions::GetObjectRefNumIndex(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].refNumIndex;
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).refNumIndex;
 }
 
 int WorldFunctions::GetObjectCount(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].count;
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).count;
 }
 
 int WorldFunctions::GetObjectGoldValue(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].goldValue;
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).goldValue;
 }
 
 double WorldFunctions::GetObjectPosX(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].pos.pos[0];
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).pos.pos[0];
 }
 
 double WorldFunctions::GetObjectPosY(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].pos.pos[1];
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).pos.pos[1];
 }
 
 double WorldFunctions::GetObjectPosZ(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].pos.pos[2];
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).pos.pos[2];
 }
 
 double WorldFunctions::GetObjectRotX(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].pos.rot[0];
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).pos.rot[0];
 }
 
 double WorldFunctions::GetObjectRotY(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].pos.rot[1];
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).pos.rot[1];
 }
 
 double WorldFunctions::GetObjectRotZ(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects[i].pos.rot[2];
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).pos.rot[2];
 }
 
 void WorldFunctions::SendObjectDelete() noexcept
