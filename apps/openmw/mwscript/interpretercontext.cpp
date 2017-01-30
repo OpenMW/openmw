@@ -682,7 +682,8 @@ namespace MWScript
         if (!mReference.isEmpty() && base == mReference)
         {
             mReference = updated;
-            mLocals = &mReference.getRefData().getLocals();
+            if (mLocals == &base.getRefData().getLocals())
+                mLocals = &mReference.getRefData().getLocals();
         }
     }
 }
