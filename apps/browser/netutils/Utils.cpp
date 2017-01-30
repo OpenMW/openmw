@@ -46,6 +46,8 @@ unsigned int PingRakNetServer(const char *addr, unsigned short port)
         attempts++;
         RakSleep(5);
     }
+
+    peer->Shutdown(0);
     RakNet::RakPeerInterface::DestroyInstance(peer);
     return time;
 }
@@ -144,7 +146,7 @@ ServerExtendedData getExtendedData(const char *addr, unsigned short port)
         }
     }
 
-    peer->Shutdown(1);
+    peer->Shutdown(0);
     RakSleep(10);
     RakNet::RakPeerInterface::DestroyInstance(peer);
     return data;
