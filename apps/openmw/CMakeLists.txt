@@ -164,7 +164,7 @@ if (ANDROID)
         ${OSG_PLUGINS}
         jpeg
         gif
-    	png
+        png
     )
 endif (ANDROID)
 

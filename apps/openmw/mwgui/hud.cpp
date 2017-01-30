@@ -81,7 +81,7 @@ namespace MWGui
             // automatically for stacks of gold
             worldObject.count = dropped.getRefData().getCount();
 
-            // Get the real count of gold in a stack		
+            // Get the real count of gold in a stack
             worldObject.goldValue = dropped.getCellRef().getGoldValue();
 
             event->addObject(worldObject);
