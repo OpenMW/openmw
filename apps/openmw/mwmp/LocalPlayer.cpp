@@ -914,7 +914,7 @@ void LocalPlayer::setSpellbook()
     MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
 
     // Clear spells in spellbook, while ignoring abilities, powers, etc.
-    while(true)
+    while (true)
     {
         MWMechanics::Spells::TIterator iter = ptrSpells.begin();
         for (; iter != ptrSpells.end(); iter++)
@@ -926,7 +926,7 @@ void LocalPlayer::setSpellbook()
                 break;
             }
         }
-        if(iter == ptrSpells.end())
+        if (iter == ptrSpells.end())
             break;
     }
 
