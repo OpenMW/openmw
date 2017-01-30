@@ -217,7 +217,10 @@ void NetController::updateInfo()
 
     QStringList addr = sd->addr.split(":");
     sd->ping = PingRakNetServer(addr[0].toLatin1(), addr[1].toUShort());
-    sed = getExtendedData(addr[0].toLatin1(), addr[1].toUShort());
+    if(sd->ping != PING_UNREACHABLE)
+        sed = getExtendedData(addr[0].toLatin1(), addr[1].toUShort());
+    else
+        qDebug() << "Server is unreachable";
 }
 
 QStringList NetController::players()

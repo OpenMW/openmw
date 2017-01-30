@@ -8,7 +8,7 @@
 
 #include "ui_Main.h"
 #include "ServerModel.hpp"
-#include <QSortFilterProxyModel>
+#include "MySortFilterProxyModel.hpp"
 #include <components/process/processinvoker.hpp>
 
 class MainWindow : public QMainWindow,  private Ui::MainWindow
@@ -29,10 +29,14 @@ protected slots:
     void deleteServer();
     void play();
     void serverSelected();
+    void notFullySwitch(bool state);
+    void havePlayersSwitch(bool state);
+    void maxLatencyChanged(int index);
+    void gamemodeChanged(const QString &text);
 private:
     Process::ProcessInvoker *mGameInvoker;
     ServerModel *browser, *favorites;
-    QSortFilterProxyModel *proxyModel;
+    MySortFilterProxyModel *proxyModel;
     void loadFavorites();
 };
 

@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     browser = new ServerModel;
     favorites = new ServerModel;
-    proxyModel = new QSortFilterProxyModel;
+    proxyModel = new MySortFilterProxyModel(this);
     proxyModel->setSourceModel(browser);
     tblServerBrowser->setModel(proxyModel);
     tblFavorites->setModel(proxyModel);
@@ -39,7 +39,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(actionPlay, SIGNAL(triggered(bool)), this, SLOT(play()));
     connect(tblServerBrowser, SIGNAL(clicked(QModelIndex)), this, SLOT(serverSelected()));
     connect(tblFavorites, SIGNAL(clicked(QModelIndex)), this, SLOT(serverSelected()));
-
+    connect(tblFavorites, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(play()));
+    connect(tblServerBrowser, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(play()));
+    connect(cBoxNotFully, SIGNAL(toggled(bool)), this, SLOT(notFullySwitch(bool)));
+    connect(cBoxWithPlayers, SIGNAL(toggled(bool)), this, SLOT(havePlayersSwitch(bool)));
+    connect(comboLatency, SIGNAL(currentIndexChanged(int)), this, SLOT(maxLatencyChanged(int)));
+    connect(leGamemode, SIGNAL(textChanged(const QString &)), this, SLOT(gamemodeChanged(const QString &)));
     loadFavorites();
 }
 
@@ -184,4 +189,27 @@ void MainWindow::loadFavorites()
         addServerAndUpdate(server.toString());
 
     file.close();
+}
+
+void MainWindow::notFullySwitch(bool state)
+{
+    proxyModel->filterFullServer(state);
+}
+
+void MainWindow::havePlayersSwitch(bool state)
+{
+    proxyModel->filterEmptyServers(state);
+}
+
+void MainWindow::maxLatencyChanged(int index)
+{
+    int maxLatency = index * 50;
+    proxyModel->pingLessThan(maxLatency);
+
+}
+
+void MainWindow::gamemodeChanged(const QString &text)
+{
+    proxyModel->setFilterFixedString(text);
+    proxyModel->setFilterKeyColumn(ServerData::MODNAME);
 }
