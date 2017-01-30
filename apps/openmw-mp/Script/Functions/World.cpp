@@ -59,7 +59,7 @@ void WorldFunctions::SetWorldEventCell(const char* cellDescription) noexcept
 
 void WorldFunctions::SetObjectRefId(unsigned int i, const char* refId) noexcept
 {
-    worldEvent->objectChanges.objects[i].refId = refId;
+    worldEvent->objectChanges.objects[i].refId = std::string(refId);
 }
 
 void WorldFunctions::SetObjectRefNumIndex(unsigned int i, int refNumIndex) noexcept
