@@ -43,12 +43,12 @@ public:
     static void AddWorldObject() noexcept;
     static void SetWorldEventCell(const char* cellDescription) noexcept;
 
-    static void SetObjectRefId(unsigned int i, const char* refId) noexcept;
-    static void SetObjectRefNumIndex(unsigned int i, int refNumIndex) noexcept;
-    static void SetObjectCount(unsigned int i, int count) noexcept;
-    static void SetObjectGoldValue(unsigned int i, int goldValue) noexcept;
-    static void SetObjectPosition(unsigned int i, double x, double y, double z) noexcept;
-    static void SetObjectRotation(unsigned int i, double x, double y, double z) noexcept;
+    static void SetObjectRefId(const char* refId) noexcept;
+    static void SetObjectRefNumIndex(int refNumIndex) noexcept;
+    static void SetObjectCount(int count) noexcept;
+    static void SetObjectGoldValue(int goldValue) noexcept;
+    static void SetObjectPosition(double x, double y, double z) noexcept;
+    static void SetObjectRotation(double x, double y, double z) noexcept;
 
     static unsigned int GetObjectChangesSize() noexcept;
 

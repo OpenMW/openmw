@@ -63,35 +63,34 @@ void WorldFunctions::SetWorldEventCell(const char* cellDescription) noexcept
     }
 }
 
-void WorldFunctions::SetObjectRefId(unsigned int i, const char* refId) noexcept
+void WorldFunctions::SetObjectRefId(const char* refId) noexcept
 {
-    printf("SetObjectRefId(%i, %s)\n", i, refId);
     tempWorldObject.refId = refId;
 }
 
-void WorldFunctions::SetObjectRefNumIndex(unsigned int i, int refNumIndex) noexcept
+void WorldFunctions::SetObjectRefNumIndex(int refNumIndex) noexcept
 {
     tempWorldObject.refNumIndex = refNumIndex;
 }
 
-void WorldFunctions::SetObjectCount(unsigned int i, int count) noexcept
+void WorldFunctions::SetObjectCount(int count) noexcept
 {
     tempWorldObject.count = count;
 }
 
-void WorldFunctions::SetObjectGoldValue(unsigned int i, int goldValue) noexcept
+void WorldFunctions::SetObjectGoldValue(int goldValue) noexcept
 {
     tempWorldObject.goldValue = goldValue;
 }
 
-void WorldFunctions::SetObjectPosition(unsigned int i, double x, double y, double z) noexcept
+void WorldFunctions::SetObjectPosition(double x, double y, double z) noexcept
 {
     tempWorldObject.pos.pos[0] = x;
     tempWorldObject.pos.pos[1] = y;
     tempWorldObject.pos.pos[2] = z;
 }
 
-void WorldFunctions::SetObjectRotation(unsigned int i, double x, double y, double z) noexcept
+void WorldFunctions::SetObjectRotation(double x, double y, double z) noexcept
 {
     tempWorldObject.pos.rot[0] = x;
     tempWorldObject.pos.rot[1] = y;
