@@ -10,6 +10,7 @@
 using namespace mwmp;
 
 static WorldEvent *worldEvent = nullptr;
+static WorldObject tempWorldObject;
 
 std::regex exteriorCellPattern("^(-?\\d+), (-?\\d+)$");
 
@@ -30,6 +31,11 @@ void WorldFunctions::CreateWorldEvent(unsigned short pid) noexcept
 void WorldFunctions::AddWorldObject() noexcept
 {
     WorldObject worldObject;
+    worldObject.refId = tempWorldObject.refId;
+    worldObject.refNumIndex = tempWorldObject.refNumIndex;
+    worldObject.count = tempWorldObject.count;
+    worldObject.goldValue = tempWorldObject.goldValue;
+    worldObject.pos = tempWorldObject.pos;
 
     worldEvent->objectChanges.objects.push_back(worldObject);
 }
@@ -59,36 +65,36 @@ void WorldFunctions::SetWorldEventCell(const char* cellDescription) noexcept
 
 void WorldFunctions::SetObjectRefId(unsigned int i, const char* refId) noexcept
 {
-    worldEvent->objectChanges.objects[i].refId = std::string(refId);
+    tempWorldObject.refId = refId;
 }
 
 void WorldFunctions::SetObjectRefNumIndex(unsigned int i, int refNumIndex) noexcept
 {
-    worldEvent->objectChanges.objects[i].refNumIndex = refNumIndex;
+    tempWorldObject.refNumIndex = refNumIndex;
 }
 
 void WorldFunctions::SetObjectCount(unsigned int i, int count) noexcept
 {
-    worldEvent->objectChanges.objects[i].count = count;
+    tempWorldObject.count = count;
 }
 
 void WorldFunctions::SetObjectGoldValue(unsigned int i, int goldValue) noexcept
 {
-    worldEvent->objectChanges.objects[i].goldValue = goldValue;
+    tempWorldObject.goldValue = goldValue;
 }
 
 void WorldFunctions::SetObjectPosition(unsigned int i, double x, double y, double z) noexcept
 {
-    worldEvent->objectChanges.objects[i].pos.pos[0] = x;
-    worldEvent->objectChanges.objects[i].pos.pos[1] = y;
-    worldEvent->objectChanges.objects[i].pos.pos[2] = z;
+    tempWorldObject.pos.pos[0] = x;
+    tempWorldObject.pos.pos[1] = y;
+    tempWorldObject.pos.pos[2] = z;
 }
 
 void WorldFunctions::SetObjectRotation(unsigned int i, double x, double y, double z) noexcept
 {
-    worldEvent->objectChanges.objects[i].pos.rot[0] = x;
-    worldEvent->objectChanges.objects[i].pos.rot[1] = y;
-    worldEvent->objectChanges.objects[i].pos.rot[2] = z;
+    tempWorldObject.pos.rot[0] = x;
+    tempWorldObject.pos.rot[1] = y;
+    tempWorldObject.pos.rot[2] = z;
 }
 
 unsigned int WorldFunctions::GetObjectChangesSize() noexcept
