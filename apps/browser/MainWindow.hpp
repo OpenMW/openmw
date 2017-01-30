@@ -29,7 +29,7 @@ protected slots:
     void deleteServer();
     void play();
     void serverSelected();
-    void notFullySwitch(bool state);
+    void notFullSwitch(bool state);
     void havePlayersSwitch(bool state);
     void maxLatencyChanged(int index);
     void gamemodeChanged(const QString &text);

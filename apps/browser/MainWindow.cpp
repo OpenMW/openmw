@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(tblFavorites, SIGNAL(clicked(QModelIndex)), this, SLOT(serverSelected()));
     connect(tblFavorites, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(play()));
     connect(tblServerBrowser, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(play()));
-    connect(cBoxNotFully, SIGNAL(toggled(bool)), this, SLOT(notFullySwitch(bool)));
+    connect(cBoxNotFull, SIGNAL(toggled(bool)), this, SLOT(notFullSwitch(bool)));
     connect(cBoxWithPlayers, SIGNAL(toggled(bool)), this, SLOT(havePlayersSwitch(bool)));
     connect(comboLatency, SIGNAL(currentIndexChanged(int)), this, SLOT(maxLatencyChanged(int)));
     connect(leGamemode, SIGNAL(textChanged(const QString &)), this, SLOT(gamemodeChanged(const QString &)));
@@ -191,7 +191,7 @@ void MainWindow::loadFavorites()
     file.close();
 }
 
-void MainWindow::notFullySwitch(bool state)
+void MainWindow::notFullSwitch(bool state)
 {
     proxyModel->filterFullServer(state);
 }

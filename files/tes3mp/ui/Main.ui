@@ -153,9 +153,9 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_7">
          <item>
-          <widget class="QCheckBox" name="cBoxNotFully">
+          <widget class="QCheckBox" name="cBoxNotFull">
            <property name="text">
-            <string>Not fully</string>
+            <string>Not full</string>
            </property>
           </widget>
          </item>
