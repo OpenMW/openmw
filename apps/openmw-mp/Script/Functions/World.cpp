@@ -83,6 +83,11 @@ void WorldFunctions::SetObjectGoldValue(int goldValue) noexcept
     tempWorldObject.goldValue = goldValue;
 }
 
+void WorldFunctions::SetObjectScale(int scale) noexcept
+{
+    tempWorldObject.scale = scale;
+}
+
 void WorldFunctions::SetObjectPosition(double x, double y, double z) noexcept
 {
     tempWorldObject.pos.pos[0] = x;
@@ -120,6 +125,11 @@ int WorldFunctions::GetObjectCount(unsigned int i) noexcept
 int WorldFunctions::GetObjectGoldValue(unsigned int i) noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).goldValue;
+}
+
+int WorldFunctions::GetObjectScale(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).scale;
 }
 
 double WorldFunctions::GetObjectPosX(unsigned int i) noexcept

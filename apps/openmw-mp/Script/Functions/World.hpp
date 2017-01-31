@@ -11,6 +11,7 @@
     {"SetObjectRefNumIndex", WorldFunctions::SetObjectRefNumIndex},\
     {"SetObjectCount",       WorldFunctions::SetObjectCount},\
     {"SetObjectGoldValue",   WorldFunctions::SetObjectGoldValue},\
+    {"SetObjectScale",       WorldFunctions::SetObjectScale},\
     {"SetObjectPosition",    WorldFunctions::SetObjectPosition},\
     {"SetObjectRotation",    WorldFunctions::SetObjectRotation},\
     \
@@ -20,6 +21,7 @@
     {"GetObjectRefNumIndex", WorldFunctions::GetObjectRefNumIndex},\
     {"GetObjectCount",       WorldFunctions::GetObjectCount},\
     {"GetObjectGoldValue",   WorldFunctions::GetObjectGoldValue},\
+    {"GetObjectScale",       WorldFunctions::GetObjectScale},\
     {"GetObjectPosX",        WorldFunctions::GetObjectPosX},\
     {"GetObjectPosY",        WorldFunctions::GetObjectPosY},\
     {"GetObjectPosZ",        WorldFunctions::GetObjectPosZ},\
@@ -47,6 +49,7 @@ public:
     static void SetObjectRefNumIndex(int refNumIndex) noexcept;
     static void SetObjectCount(int count) noexcept;
     static void SetObjectGoldValue(int goldValue) noexcept;
+    static void SetObjectScale(int scale) noexcept;
     static void SetObjectPosition(double x, double y, double z) noexcept;
     static void SetObjectRotation(double x, double y, double z) noexcept;
 
@@ -56,6 +59,7 @@ public:
     static int GetObjectRefNumIndex(unsigned int i) noexcept;
     static int GetObjectCount(unsigned int i) noexcept;
     static int GetObjectGoldValue(unsigned int i) noexcept;
+    static int GetObjectScale(unsigned int i) noexcept;
     static double GetObjectPosX(unsigned int i) noexcept;
     static double GetObjectPosY(unsigned int i) noexcept;
     static double GetObjectPosZ(unsigned int i) noexcept;
