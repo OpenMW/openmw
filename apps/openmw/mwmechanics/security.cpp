@@ -68,6 +68,8 @@ namespace MWMechanics
                 event->addObject(worldObject);
                 
                 mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send(event);
+                delete event;
+                event = nullptr;
 
                 lock.getClass().unlock(lock);
                 resultMessage = "#{sLockSuccess}";

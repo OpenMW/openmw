@@ -78,6 +78,8 @@ namespace MWScript
                     event->addObject(worldObject);
 
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->Send(event);
+                    delete event;
+                    event = nullptr;
 
                     MWBase::Environment::get().getSoundManager()->streamMusic (sound);
                 }

@@ -77,6 +77,8 @@ namespace MWScript
                         event->addObject(worldObject);
 
                         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->Send(event);
+                        delete event;
+                        event = nullptr;
                     }
 
                     MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, std::numeric_limits<int>::max(), true);

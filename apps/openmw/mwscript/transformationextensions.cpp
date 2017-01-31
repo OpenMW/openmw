@@ -57,6 +57,8 @@ namespace MWScript
                     event->addObject(worldObject);
 
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->Send(event);
+                    delete event;
+                    event = nullptr;
 
                     MWBase::Environment::get().getWorld()->scaleObject(ptr,scale);
                 }
@@ -570,6 +572,9 @@ namespace MWScript
                             worldObject.refId.c_str(),
                             worldObject.refNumIndex,
                             worldObject.count);
+
+                        delete event;
+                        event = nullptr;
                     }
                 }
         };

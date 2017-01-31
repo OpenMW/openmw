@@ -644,6 +644,8 @@ namespace MWGui
         event->addObject(worldObject);
 
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(event);
+        delete event;
+        event = nullptr;
 
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject (object);

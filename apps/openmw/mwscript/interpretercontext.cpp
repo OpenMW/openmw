@@ -207,6 +207,9 @@ namespace MWScript
                 event->cell.getDescription().c_str(),
                 worldObject.index,
                 worldObject.shortVal);
+
+            delete event;
+            event = nullptr;
         }
     }
 
@@ -248,6 +251,9 @@ namespace MWScript
                 event->cell.getDescription().c_str(),
                 worldObject.index,
                 worldObject.floatVal);
+
+            delete event;
+            event = nullptr;
         }
     }
 
@@ -307,6 +313,9 @@ namespace MWScript
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_GLOBAL_SHORT\n- varName: %s\n- shortVal: %i",
                 worldObject.varName.c_str(),
                 worldObject.shortVal);
+
+            delete event;
+            event = nullptr;
         }
 
         MWBase::Environment::get().getWorld()->setGlobalInt (name, value);
@@ -646,6 +655,9 @@ namespace MWScript
                 worldObject.refId.c_str(),
                 worldObject.index,
                 worldObject.shortVal);
+
+            delete event;
+            event = nullptr;
         }
     }
 

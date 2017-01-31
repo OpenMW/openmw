@@ -2283,6 +2283,9 @@ namespace MWWorld
             event->cell.getDescription().c_str(),
             worldObject.state ? "true" : "false");
 
+        delete event;
+        event = nullptr;
+
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;
     }
@@ -2306,6 +2309,9 @@ namespace MWWorld
             worldObject.refNumIndex,
             event->cell.getDescription().c_str(),
             worldObject.state ? "true" : "false");
+
+        delete event;
+        event = nullptr;
 
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;

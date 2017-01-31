@@ -93,6 +93,9 @@ namespace MWGui
                 worldObject.refNumIndex,
                 worldObject.count);
 
+            delete event;
+            event = nullptr;
+
             return dropped;
         }
 
