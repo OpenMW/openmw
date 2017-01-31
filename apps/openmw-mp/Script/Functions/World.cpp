@@ -172,6 +172,11 @@ void WorldFunctions::SendObjectPlace() noexcept
     mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_PLACE)->Send(worldEvent, worldEvent->guid);
 }
 
+void WorldFunctions::SendObjectScale() noexcept
+{
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_SCALE)->Send(worldEvent, worldEvent->guid);
+}
+
 void WorldFunctions::SetHour(unsigned short pid, double hour) noexcept
 {
     Player *player;

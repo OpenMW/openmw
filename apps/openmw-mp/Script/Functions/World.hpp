@@ -31,6 +31,7 @@
     \
     {"SendObjectDelete",     WorldFunctions::SendObjectDelete},\
     {"SendObjectPlace",      WorldFunctions::SendObjectPlace},\
+    {"SendObjectScale",      WorldFunctions::SendObjectScale},\
     \
     {"SetHour",              WorldFunctions::SetHour},\
     {"SetMonth",             WorldFunctions::SetMonth},\
@@ -69,6 +70,7 @@ public:
 
     static void SendObjectDelete() noexcept;
     static void SendObjectPlace() noexcept;
+    static void SendObjectScale() noexcept;
 
     static void SetHour(unsigned short pid, double hour) noexcept;
     static void SetMonth(unsigned short pid, int month) noexcept;
