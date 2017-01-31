@@ -425,7 +425,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
 
     worldEvent = new WorldEvent(player->guid);
-    mwmp::WorldObject worldObject;
 
     switch (packet->data[0])
     {
@@ -438,14 +437,9 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         myPacket->Read(worldEvent);
         myPacket->Send(worldEvent, true);
 
-        for (unsigned int i = 0; i < worldEvent->objectChanges.count; i++)
-        {
-            worldObject = worldEvent->objectChanges.objects[i];
-
-            Script::Call<Script::CallbackIdentity("OnObjectPlace")>(
-                player->getId(),
-                worldEvent->cell.getDescription().c_str());
-        }
+        Script::Call<Script::CallbackIdentity("OnObjectPlace")>(
+            player->getId(),
+            worldEvent->cell.getDescription().c_str());
 
         break;
     }
@@ -458,16 +452,9 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         myPacket->Read(worldEvent);
         myPacket->Send(worldEvent, true);
 
-        ESM::CellRef cellRef;
-
-        for (unsigned int i = 0; i < worldEvent->objectChanges.count; i++)
-        {
-            worldObject = worldEvent->objectChanges.objects[i];
-
-            Script::Call<Script::CallbackIdentity("OnObjectDelete")>(
-                player->getId(),
-                worldEvent->cell.getDescription().c_str());
-        }
+        Script::Call<Script::CallbackIdentity("OnObjectDelete")>(
+            player->getId(),
+            worldEvent->cell.getDescription().c_str());
 
         break;
     }
