@@ -292,6 +292,7 @@ namespace Compiler
         const int opcodeRemoveFromLevCreature = 0x20002fc;
         const int opcodeAddToLevItem = 0x20002fd;
         const int opcodeRemoveFromLevItem = 0x20002fe;
+        const int opcodeReloadShaders = 0x2000306;
     }
 
     namespace Sky

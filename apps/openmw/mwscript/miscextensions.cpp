@@ -1251,6 +1251,18 @@ namespace MWScript
                 MWBase::Environment::get().getWorld()->createOverrideRecord(listCopy);
             }
         };
+        
+        class OpReloadShaders : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute(Interpreter::Runtime& runtime)
+            {
+                MWBase::Environment::get().getWorld()->reloadShaders();
+
+                runtime.getContext().report("Reloading shaders...");
+            }
+        };
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -1348,6 +1360,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeRemoveFromLevCreature, new OpRemoveFromLevCreature);
             interpreter.installSegment5 (Compiler::Misc::opcodeAddToLevItem, new OpAddToLevItem);
             interpreter.installSegment5 (Compiler::Misc::opcodeRemoveFromLevItem, new OpRemoveFromLevItem);
+            interpreter.installSegment5(Compiler::Misc::opcodeReloadShaders, new OpReloadShaders);
         }
     }
 }

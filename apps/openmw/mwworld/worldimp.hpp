@@ -668,6 +668,9 @@ namespace MWWorld
 
             /// Return physical or rendering half extents of the given actor.
             virtual osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& actor, bool rendering=false) const;
+
+            /// Trying to reload all loaded shaders, could be very useful for developlent purposes
+            virtual void reloadShaders();
     };
 }
 

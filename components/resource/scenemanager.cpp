@@ -271,6 +271,11 @@ namespace Resource
         mShaderManager->setShaderPath(path);
     }
 
+    void SceneManager::reloadShaders()
+    {
+        mShaderManager->reloadShaders();
+    }
+
     /// @brief Callback to read image files from the VFS.
     class ImageReadCallback : public osgDB::ReadFileCallback
     {
