@@ -27,6 +27,7 @@ template<> struct sizeof_void<void> { enum { value = 0 }; };
 
 
 template<typename T, size_t t> struct TypeChar { static_assert(!t, "Unsupported type in variadic type list"); };
+template<> struct TypeChar<bool, sizeof(bool)> { enum { value = 'b' }; };
 template<typename T> struct TypeChar<T*, sizeof(void*)> { enum { value = 'p' }; };
 template<> struct TypeChar<double*, sizeof(double*)> { enum { value = 'd' }; };
 template<> struct TypeChar<RakNet::NetworkID**, sizeof(RakNet::NetworkID**)> { enum { value = 'n' }; };
@@ -40,6 +41,7 @@ template<> struct TypeChar<const char*, sizeof(const char*)> { enum { value = 's
 template<> struct TypeChar<void, sizeof_void<void>::value> { enum { value = 'v' }; };
 
 template<const char t> struct CharType { static_assert(!t, "Unsupported type in variadic type list"); };
+template<> struct CharType<'b'> { typedef bool type; };
 template<> struct CharType<'p'> { typedef void* type; };
 template<> struct CharType<'d'> { typedef double* type; };
 template<> struct CharType<'n'> { typedef RakNet::NetworkID** type; };
