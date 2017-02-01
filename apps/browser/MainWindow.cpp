@@ -90,7 +90,10 @@ void MainWindow::deleteServer()
         int sourceId = proxyModel->mapToSource(proxyModel->index(id, ServerData::ADDR)).row();
         favorites->removeRow(sourceId);
         if(favorites->myData.isEmpty())
+        {
             actionPlay->setEnabled(false);
+            actionDelete->setEnabled(false);
+        }
     }
 }
 
@@ -136,7 +139,6 @@ void MainWindow::tabSwitched(int index)
     else
     {
         proxyModel->setSourceModel(favorites);
-        actionDelete->setEnabled(true);
     }
     actionPlay->setEnabled(false);
     actionAdd->setEnabled(false);
@@ -147,6 +149,8 @@ void MainWindow::serverSelected()
     actionPlay->setEnabled(true);
     if(tabWidget->currentIndex() == 0)
         actionAdd->setEnabled(true);
+    if(tabWidget->currentIndex() == 1)
+        actionDelete->setEnabled(true);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

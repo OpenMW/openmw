@@ -235,6 +235,9 @@
    </property>
   </action>
   <action name="actionPlay">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Play</string>
    </property>

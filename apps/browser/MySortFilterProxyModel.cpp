@@ -30,7 +30,9 @@ bool MySortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &
 
 MySortFilterProxyModel::MySortFilterProxyModel(QObject *parent) : QSortFilterProxyModel(parent)
 {
-
+    filterEmpty = false;
+    filterFull = false;
+    maxPing = 0;
 }
 
 void MySortFilterProxyModel::filterEmptyServers(bool state)
