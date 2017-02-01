@@ -19,9 +19,20 @@ small feature culling
 :Range:		True/False
 :Default:	True
 
-This boolean setting determines whether objects that render to a few pixels or smaller will be culled (not drawn). It generally improves performance to enable this feature, and by definition the culled objects will be very small on screen. It appears that the default definition of "small" in OpenSceneGraph is 2x2 pixels.
+This boolean setting determines whether objects that render to a few pixels or smaller will be culled (not drawn). It generally improves performance to enable this feature, and by definition the culled objects will be very small on screen. The size in pixels for an object to be considered 'small' is controlled by a separate setting.
 
 The default value is true. This setting can only be configured by editing the settings configuration file.
+
+small feature culling pixel size
+---------------------
+
+:Type:		floating point
+:Range:		> 0
+:Default:	2.0
+
+Controls the cutoff in pixels for the 'small feature culling' setting which will have no effect if 'small feature culling' is disabled.
+
+This setting can only be configured by editing the settings configuration file.
 
 viewing distance
 ----------------

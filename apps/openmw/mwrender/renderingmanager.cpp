@@ -244,7 +244,10 @@ namespace MWRender
         if (!Settings::Manager::getBool("small feature culling", "Camera"))
             cullingMode &= ~(osg::CullStack::SMALL_FEATURE_CULLING);
         else
+        {
+            mViewer->getCamera()->setSmallFeatureCullingPixelSize(Settings::Manager::getFloat("small feature culling pixel size", "Camera"));
             cullingMode |= osg::CullStack::SMALL_FEATURE_CULLING;
+        }
 
         mViewer->getCamera()->setCullingMode( cullingMode );
 
