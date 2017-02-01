@@ -29,7 +29,7 @@ public:
     static void SetMapVisibility(unsigned short targetPID, unsigned short affectedPID, unsigned short state) noexcept;
     static void SetMapVisibilityAll(unsigned short targetPID, unsigned short state) noexcept;
 
-    static void SetConsoleAllow(unsigned short pid, char state);
+    static void SetConsoleAllow(unsigned short pid, bool state);
 };
 
 #endif //OPENMW_GUI_HPP

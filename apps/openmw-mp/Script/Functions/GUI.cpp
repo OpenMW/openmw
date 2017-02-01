@@ -69,7 +69,7 @@ void GUIFunctions::SetMapVisibilityAll(unsigned short targetPID, unsigned short 
     LOG_MESSAGE(Log::LOG_WARN, "stub");
 }
 
-void GUIFunctions::SetConsoleAllow(unsigned short pid, char state)
+void GUIFunctions::SetConsoleAllow(unsigned short pid, bool state)
 {
     Player *player;
     GET_PLAYER(pid, player,);
