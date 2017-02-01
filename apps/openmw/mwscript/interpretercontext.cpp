@@ -209,7 +209,7 @@ namespace MWScript
                 worldObject.shortVal);
 
             delete event;
-            event = nullptr;
+            event = NULL;
         }
     }
 
@@ -253,7 +253,7 @@ namespace MWScript
                 worldObject.floatVal);
 
             delete event;
-            event = nullptr;
+            event = NULL;
         }
     }
 
@@ -315,7 +315,7 @@ namespace MWScript
                 worldObject.shortVal);
 
             delete event;
-            event = nullptr;
+            event = NULL;
         }
 
         MWBase::Environment::get().getWorld()->setGlobalInt (name, value);
@@ -657,7 +657,7 @@ namespace MWScript
                 worldObject.shortVal);
 
             delete event;
-            event = nullptr;
+            event = NULL;
         }
     }
 

@@ -2284,7 +2284,7 @@ namespace MWWorld
             worldObject.state ? "true" : "false");
 
         delete event;
-        event = nullptr;
+        event = NULL;
 
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;
@@ -2311,7 +2311,7 @@ namespace MWWorld
             worldObject.state ? "true" : "false");
 
         delete event;
-        event = nullptr;
+        event = NULL;
 
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;

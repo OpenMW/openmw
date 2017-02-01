@@ -42,7 +42,7 @@ namespace MWWorld
             event->cell.getDescription().c_str());
 
         delete event;
-        event = nullptr;
+        event = NULL;
 
         // LocalPlayer's inventory has changed, so send a packet with it
         mwmp::Main::get().getLocalPlayer()->sendInventory();

@@ -99,7 +99,7 @@ namespace MWScript
 
                 mwmp::Main::get().getNetworking()->getWorldPacket(ID_VIDEO_PLAY)->Send(event);
                 delete event;
-                event = nullptr;
+                event = NULL;
 
                 MWBase::Environment::get().getWindowManager()->playVideo (name, allowSkipping);
             }
@@ -211,7 +211,7 @@ namespace MWScript
 
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->Send(event);
                     delete event;
-                    event = nullptr;
+                    event = NULL;
 
                     ptr.getClass().lock (ptr, lockLevel);
 
@@ -250,7 +250,7 @@ namespace MWScript
 
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send(event);
                     delete event;
-                    event = nullptr;
+                    event = NULL;
 
                     ptr.getClass().unlock (ptr);
                 }
@@ -723,7 +723,7 @@ namespace MWScript
 
                         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(event);
                         delete event;
-                        event = nullptr;
+                        event = NULL;
 
                         MWBase::Environment::get().getWorld()->deleteObject(ptr);
                     }
