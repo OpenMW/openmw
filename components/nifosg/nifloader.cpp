@@ -1643,10 +1643,12 @@ namespace NifOsg
         osg::Material* shareMaterial(osg::Material* mat)
         {
             typedef std::set<osg::ref_ptr<osg::Material>, CompareMaterial> MatCache;
-            static MatCache mats;
-            MatCache::iterator found = mats.find(mat);
-            if (found == mats.end())
-                found = mats.insert(mat).first;
+            static MatCache sMats;
+            static OpenThreads::Mutex sMutex;
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(sMutex);
+            MatCache::iterator found = sMats.find(mat);
+            if (found == sMats.end())
+                found = sMats.insert(mat).first;
             return *found;
         }
 
