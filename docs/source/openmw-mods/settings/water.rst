@@ -41,3 +41,18 @@ This boolean setting enables the refraction rendering feature of the water shade
 This setting has no effect if the shader setting is false.
 
 The default setting is false. This setting can be toggled with the Refraction button in the Water tab of the Video panel of the Options menu.
+
+small feature culling pixel size
+--------------------------------
+
+:Type:		floating point
+:Range:		> 0
+:Default:	20.0
+
+Controls the cutoff in pixels for small feature culling - see the 'Camera' section for more details, however this setting in the 'Water' section applies specifically to objects rendered in water reflection and refraction textures.
+
+The setting 'rtt size' interacts with this setting because it controls how large a pixel on the water texture (technically called a texel) is in pixels on the screen.
+
+This setting will have no effect if the shader setting is false, or the 'small feature culling' (in the 'Camera' section) is disabled.
+
+This setting can only be configured by editing the settings configuration file.
