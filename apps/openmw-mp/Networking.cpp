@@ -459,6 +459,21 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         break;
     }
 
+    case ID_OBJECT_SCALE:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_SCALE from %s",
+            player->npc.mName.c_str());
+
+        myPacket->Read(worldEvent);
+        myPacket->Send(worldEvent, true);
+
+        Script::Call<Script::CallbackIdentity("OnObjectScale")>(
+            player->getId(),
+            worldEvent->cell.getDescription().c_str());
+
+        break;
+    }
+
     case ID_OBJECT_LOCK:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_LOCK from %s",
@@ -466,6 +481,10 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         myPacket->Read(worldEvent);
         myPacket->Send(worldEvent, true);
+
+        Script::Call<Script::CallbackIdentity("OnObjectLock")>(
+            player->getId(),
+            worldEvent->cell.getDescription().c_str());
 
         break;
     }
@@ -478,18 +497,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         myPacket->Read(worldEvent);
         myPacket->Send(worldEvent, true);
 
-        break;
-    }
-
-    case ID_OBJECT_SCALE:
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_SCALE from %s",
-            player->npc.mName.c_str());
-
-        myPacket->Read(worldEvent);
-        myPacket->Send(worldEvent, true);
-
-        Script::Call<Script::CallbackIdentity("OnObjectScale")>(
+        Script::Call<Script::CallbackIdentity("OnObjectUnlock")>(
             player->getId(),
             worldEvent->cell.getDescription().c_str());
 
@@ -558,6 +566,10 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         myPacket->Read(worldEvent);
         myPacket->Send(worldEvent, true);
+
+        Script::Call<Script::CallbackIdentity("OnDoorState")>(
+            player->getId(),
+            worldEvent->cell.getDescription().c_str());
 
         break;
     }

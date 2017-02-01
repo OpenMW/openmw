@@ -35,8 +35,10 @@ void WorldFunctions::AddWorldObject() noexcept
     worldObject.refNumIndex = tempWorldObject.refNumIndex;
     worldObject.count = tempWorldObject.count;
     worldObject.goldValue = tempWorldObject.goldValue;
-    worldObject.pos = tempWorldObject.pos;
     worldObject.scale = tempWorldObject.scale;
+    worldObject.state = tempWorldObject.state;
+    worldObject.lockLevel = tempWorldObject.lockLevel;
+    worldObject.pos = tempWorldObject.pos;
 
     worldEvent->objectChanges.objects.push_back(worldObject);
 }
@@ -89,6 +91,16 @@ void WorldFunctions::SetObjectScale(int scale) noexcept
     tempWorldObject.scale = scale;
 }
 
+void WorldFunctions::SetObjectState(int state) noexcept
+{
+    tempWorldObject.state = state;
+}
+
+void WorldFunctions::SetObjectLockLevel(int lockLevel) noexcept
+{
+    tempWorldObject.lockLevel = lockLevel;
+}
+
 void WorldFunctions::SetObjectPosition(double x, double y, double z) noexcept
 {
     tempWorldObject.pos.pos[0] = x;
@@ -131,6 +143,16 @@ int WorldFunctions::GetObjectGoldValue(unsigned int i) noexcept
 int WorldFunctions::GetObjectScale(unsigned int i) noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).scale;
+}
+
+int WorldFunctions::GetObjectState(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).state;
+}
+
+int WorldFunctions::GetObjectLockLevel(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).lockLevel;
 }
 
 double WorldFunctions::GetObjectPosX(unsigned int i) noexcept
@@ -176,6 +198,21 @@ void WorldFunctions::SendObjectPlace() noexcept
 void WorldFunctions::SendObjectScale() noexcept
 {
     mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_SCALE)->Send(worldEvent, worldEvent->guid);
+}
+
+void WorldFunctions::SendObjectLock() noexcept
+{
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_LOCK)->Send(worldEvent, worldEvent->guid);
+}
+
+void WorldFunctions::SendObjectUnlock() noexcept
+{
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_UNLOCK)->Send(worldEvent, worldEvent->guid);
+}
+
+void WorldFunctions::SendDoorState() noexcept
+{
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_DOOR_STATE)->Send(worldEvent, worldEvent->guid);
 }
 
 void WorldFunctions::SetHour(unsigned short pid, double hour) noexcept
