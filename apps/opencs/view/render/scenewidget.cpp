@@ -10,6 +10,7 @@
 #include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osg/LightModel>
+#include <osg/Material>
 #include <osg/Version>
 
 #include <components/resource/scenemanager.hpp>
@@ -74,6 +75,12 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
 
     mView->getCamera()->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
     mView->getCamera()->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+    osg::ref_ptr<osg::Material> defaultMat (new osg::Material);
+    defaultMat->setColorMode(osg::Material::OFF);
+    defaultMat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+    defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+    defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+    mView->getCamera()->getOrCreateStateSet()->getOrCreateStateSet()->setAttribute(defaultMat);
 
     mView->setSceneData(mRootNode);
 

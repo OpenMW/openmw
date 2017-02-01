@@ -1758,6 +1758,15 @@ namespace NifOsg
                 mat->setColorMode(osg::Material::AMBIENT);
             }
 
+            if (mat->getColorMode() == osg::Material::OFF
+                    && mat->getDiffuse(osg::Material::FRONT_AND_BACK) == osg::Vec4f(1,1,1,1)
+                    && mat->getAmbient(osg::Material::FRONT_AND_BACK) == osg::Vec4f(1,1,1,1)
+                    && mat->getSpecular(osg::Material::FRONT_AND_BACK) == osg::Vec4f(0.f, 0.f, 0.f, 0.f))
+            {
+                // default state, skip
+                return;
+            }
+
             // TODO: this could be replaced by a more generic mechanism of sharing any type of State Attribute
             // apply only for Materials for now
             mat = shareMaterial(mat);

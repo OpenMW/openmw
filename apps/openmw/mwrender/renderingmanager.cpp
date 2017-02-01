@@ -6,6 +6,7 @@
 #include <osg/Light>
 #include <osg/LightModel>
 #include <osg/Fog>
+#include <osg/Material>
 #include <osg/PolygonMode>
 #include <osg/Group>
 #include <osg/UserDataContainer>
@@ -221,6 +222,12 @@ namespace MWRender
         sceneRoot->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
         sceneRoot->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::ON);
         sceneRoot->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+        osg::ref_ptr<osg::Material> defaultMat (new osg::Material);
+        defaultMat->setColorMode(osg::Material::OFF);
+        defaultMat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+        defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+        defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+        sceneRoot->getOrCreateStateSet()->setAttribute(defaultMat);
 
         sceneRoot->setNodeMask(Mask_Scene);
         sceneRoot->setName("Scene Root");
