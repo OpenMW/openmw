@@ -101,6 +101,8 @@ namespace MWWorld
             bool mScriptsEnabled;
             std::vector<std::string> mContentFiles;
 
+            std::string mUserDataPath;
+
             // not implemented
             World (const World&);
             World& operator= (const World&);
@@ -182,7 +184,7 @@ namespace MWWorld
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& contentFiles,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
-                int activationDistanceOverride, const std::string& startCell, const std::string& startupScript, const std::string& resourcePath);
+                int activationDistanceOverride, const std::string& startCell, const std::string& startupScript, const std::string& resourcePath, const std::string& userDataPath);
 
             virtual ~World();
 
@@ -671,6 +673,10 @@ namespace MWWorld
 
             /// Return physical or rendering half extents of the given actor.
             virtual osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& actor, bool rendering=false) const;
+
+            /// Export scene graph to a file and return the filename.
+            /// \param ptr object to export scene graph for (if empty, export entire scene graph)
+            virtual std::string exportSceneGraph(const MWWorld::Ptr& ptr);
     };
 }
 

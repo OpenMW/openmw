@@ -6,6 +6,7 @@
 #include <osg/Light>
 #include <osg/LightModel>
 #include <osg/Fog>
+#include <osg/Material>
 #include <osg/PolygonMode>
 #include <osg/Group>
 #include <osg/UserDataContainer>
@@ -28,6 +29,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
+#include <components/sceneutil/writescene.hpp>
 
 #include <components/terrain/terraingrid.hpp>
 
@@ -220,6 +222,12 @@ namespace MWRender
         sceneRoot->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
         sceneRoot->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::ON);
         sceneRoot->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+        osg::ref_ptr<osg::Material> defaultMat (new osg::Material);
+        defaultMat->setColorMode(osg::Material::OFF);
+        defaultMat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+        defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+        defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+        sceneRoot->getOrCreateStateSet()->setAttribute(defaultMat);
 
         sceneRoot->setNodeMask(Mask_Scene);
         sceneRoot->setName("Scene Root");
@@ -236,7 +244,10 @@ namespace MWRender
         if (!Settings::Manager::getBool("small feature culling", "Camera"))
             cullingMode &= ~(osg::CullStack::SMALL_FEATURE_CULLING);
         else
+        {
+            mViewer->getCamera()->setSmallFeatureCullingPixelSize(Settings::Manager::getFloat("small feature culling pixel size", "Camera"));
             cullingMode |= osg::CullStack::SMALL_FEATURE_CULLING;
+        }
 
         mViewer->getCamera()->setCullingMode( cullingMode );
 
@@ -1002,8 +1013,17 @@ namespace MWRender
         if (mFieldOfViewOverridden == true)
         {
             mFieldOfViewOverridden = false;
+
             updateProjectionMatrix();
         }
+    }
+    void RenderingManager::exportSceneGraph(const MWWorld::Ptr &ptr, const std::string &filename, const std::string &format)
+    {
+        osg::Node* node = mViewer->getSceneData();
+        if (!ptr.isEmpty())
+            node = ptr.getRefData().getBaseNode();
+
+        SceneUtil::writeScene(node, filename, format);
     }
 
 }

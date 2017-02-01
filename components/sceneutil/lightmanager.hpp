@@ -32,7 +32,7 @@ namespace SceneUtil
 
     public:
 
-        META_Node(SceneUtil, SceneUtil::LightSource)
+        META_Node(SceneUtil, LightSource)
 
         LightSource();
 
@@ -79,7 +79,7 @@ namespace SceneUtil
     {
     public:
 
-        META_Node(SceneUtil, SceneUtil::LightManager)
+        META_Node(SceneUtil, LightManager)
 
         LightManager();
 

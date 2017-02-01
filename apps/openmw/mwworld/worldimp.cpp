@@ -152,10 +152,10 @@ namespace MWWorld
         const std::vector<std::string>& contentFiles,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
         int activationDistanceOverride, const std::string& startCell, const std::string& startupScript,
-            const std::string& resourcePath)
+            const std::string& resourcePath, const std::string& userDataPath)
     : mResourceSystem(resourceSystem), mFallback(fallbackMap), mPlayer (0), mLocalScripts (mStore),
       mSky (true), mCells (mStore, mEsm),
-      mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles),
+      mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles), mUserDataPath(userDataPath),
       mActivationDistanceOverride (activationDistanceOverride), mStartupScript(startupScript),
       mStartCell (startCell), mDistanceToFacedObject(-1), mTeleportEnabled(true),
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0)
@@ -3227,6 +3227,13 @@ namespace MWWorld
             return mPhysics->getRenderingHalfExtents(actor);
         else
             return mPhysics->getHalfExtents(actor);
+    }
+
+    std::string World::exportSceneGraph(const Ptr &ptr)
+    {
+        std::string file = mUserDataPath + "/openmw.osgt";
+        mRendering->exportSceneGraph(ptr, file, "Ascii");
+        return file;
     }
 
     void World::spawnRandomCreature(const std::string &creatureList)

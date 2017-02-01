@@ -312,6 +312,8 @@ namespace Compiler
             extensions.registerInstruction ("betacomment", "/S", opcodeBetaComment, opcodeBetaCommentExplicit);
             extensions.registerInstruction ("bc", "/S", opcodeBetaComment, opcodeBetaCommentExplicit);
             extensions.registerInstruction ("ori", "/S", opcodeBetaComment, opcodeBetaCommentExplicit); // 'ori' stands for 'ObjectReferenceInfo'
+            extensions.registerInstruction ("showscenegraph", "/l", opcodeShowSceneGraph, opcodeShowSceneGraphExplicit);
+            extensions.registerInstruction ("ssg", "/l", opcodeShowSceneGraph, opcodeShowSceneGraphExplicit);
             extensions.registerInstruction ("addtolevcreature", "ccl", opcodeAddToLevCreature);
             extensions.registerInstruction ("removefromlevcreature", "ccl", opcodeRemoveFromLevCreature);
             extensions.registerInstruction ("addtolevitem", "ccl", opcodeAddToLevItem);

@@ -413,13 +413,27 @@ namespace Resource
         return node;
     }
 
+    class TemplateRef : public osg::Object
+    {
+    public:
+        TemplateRef(const Object* object)
+            : mObject(object) {}
+        TemplateRef() {}
+        TemplateRef(const TemplateRef& copy, const osg::CopyOp&) : mObject(copy.mObject) {}
+
+        META_Object(Resource, TemplateRef)
+
+    private:
+        osg::ref_ptr<const Object> mObject;
+    };
+
     osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string& name)
     {
         osg::ref_ptr<const osg::Node> scene = getTemplate(name);
         osg::ref_ptr<osg::Node> cloned = osg::clone(scene.get(), SceneUtil::CopyOp());
 
         // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
-        cloned->getOrCreateUserDataContainer()->addUserObject(const_cast<osg::Node*>(scene.get()));
+        cloned->getOrCreateUserDataContainer()->addUserObject(new TemplateRef(scene));
 
         return cloned;
     }

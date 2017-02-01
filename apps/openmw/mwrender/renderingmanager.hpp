@@ -188,6 +188,8 @@ namespace MWRender
         /// reset a previous overrideFieldOfView() call, i.e. revert to field of view specified in the settings file.
         void resetFieldOfView();
 
+        void exportSceneGraph(const MWWorld::Ptr& ptr, const std::string& filename, const std::string& format);
+
     private:
         void updateProjectionMatrix();
         void updateTextureFiltering();

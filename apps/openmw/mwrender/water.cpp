@@ -222,6 +222,7 @@ public:
         setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         setReferenceFrame(osg::Camera::RELATIVE_RF);
+        setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
 
         setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting);
         setNodeMask(Mask_RenderToTexture);
@@ -303,6 +304,7 @@ public:
         setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         setReferenceFrame(osg::Camera::RELATIVE_RF);
+        setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
 
         bool reflectActors = Settings::Manager::getBool("reflect actors", "Water");
 

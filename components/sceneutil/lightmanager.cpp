@@ -132,7 +132,7 @@ namespace SceneUtil
             : osg::NodeCallback(copy, copyop)
             { }
 
-        META_Object(SceneUtil, SceneUtil::LightManagerUpdateCallback)
+        META_Object(SceneUtil, LightManagerUpdateCallback)
 
         virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
