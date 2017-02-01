@@ -1,14 +1,14 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
-#include "PacketDoorActivate.hpp"
+#include "PacketDoorState.hpp"
 
 using namespace mwmp;
 
-PacketDoorActivate::PacketDoorActivate(RakNet::RakPeerInterface *peer) : WorldPacket(peer)
+PacketDoorState::PacketDoorState(RakNet::RakPeerInterface *peer) : WorldPacket(peer)
 {
-    packetID = ID_DOOR_ACTIVATE;
+    packetID = ID_DOOR_STATE;
 }
 
-void PacketDoorActivate::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)
+void PacketDoorState::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)
 {
     WorldPacket::Packet(bs, event, send);
 

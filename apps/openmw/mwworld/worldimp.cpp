@@ -2275,7 +2275,7 @@ namespace MWWorld
         worldObject.state = state;
         event->addObject(worldObject);
 
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_ACTIVATE)->Send(event);
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send(event);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 1\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
             worldObject.refId.c_str(),
@@ -2302,7 +2302,7 @@ namespace MWWorld
         worldObject.state = state;
         event->addObject(worldObject);
 
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_ACTIVATE)->Send(event);
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send(event);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 2\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
             worldObject.refId.c_str(),

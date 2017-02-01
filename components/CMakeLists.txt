@@ -165,7 +165,7 @@ add_component_dir (openmw-mp
         Packets/World/PacketObjectUnlock Packets/World/PacketObjectScale Packets/World/PacketObjectMove
         Packets/World/PacketObjectRotate Packets/World/PacketObjectAnimPlay
 
-        Packets/World/PacketContainerAdd Packets/World/PacketContainerRemove Packets/World/PacketDoorActivate
+        Packets/World/PacketContainerAdd Packets/World/PacketContainerRemove Packets/World/PacketDoorState
         Packets/World/PacketMusicPlay Packets/World/PacketVideoPlay
 
         Packets/World/PacketScriptLocalShort Packets/World/PacketScriptLocalFloat Packets/World/PacketScriptMemberShort

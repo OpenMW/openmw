@@ -821,13 +821,13 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_DOOR_ACTIVATE:
+    case ID_DOOR_STATE:
     {
         MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event->cell);
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_ACTIVATE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_STATE");
         event->activateDoors(ptrCellStore);
 
         break;

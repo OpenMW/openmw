@@ -50,7 +50,7 @@ enum GameMessages
 
     ID_CONTAINER_ADD,
     ID_CONTAINER_REMOVE,
-    ID_DOOR_ACTIVATE,
+    ID_DOOR_STATE,
     ID_MUSIC_PLAY,
     ID_VIDEO_PLAY,
 

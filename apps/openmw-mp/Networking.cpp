@@ -551,9 +551,9 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_DOOR_ACTIVATE:
+    case ID_DOOR_STATE:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_ACTIVATE from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_STATE from %s",
             player->npc.mName.c_str());
 
         myPacket->Read(worldEvent);
