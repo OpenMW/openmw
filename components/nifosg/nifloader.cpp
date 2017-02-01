@@ -1551,7 +1551,7 @@ namespace NifOsg
             case Nif::RC_NiStencilProperty:
             {
                 const Nif::NiStencilProperty* stencilprop = static_cast<const Nif::NiStencilProperty*>(property);
-                osg::FrontFace* frontFace = new osg::FrontFace;
+                osg::ref_ptr<osg::FrontFace> frontFace = new osg::FrontFace;
                 switch (stencilprop->data.drawMode)
                 {
                 case 2:
@@ -1563,6 +1563,7 @@ namespace NifOsg
                     frontFace->setMode(osg::FrontFace::COUNTER_CLOCKWISE);
                     break;
                 }
+                frontFace = shareAttribute(frontFace);
 
                 osg::StateSet* stateset = node->getOrCreateStateSet();
                 stateset->setAttribute(frontFace, osg::StateAttribute::ON);
@@ -1571,11 +1572,12 @@ namespace NifOsg
 
                 if (stencilprop->data.enabled != 0)
                 {
-                    osg::Stencil* stencil = new osg::Stencil;
+                    osg::ref_ptr<osg::Stencil> stencil = new osg::Stencil;
                     stencil->setFunction(getStencilFunction(stencilprop->data.compareFunc), stencilprop->data.stencilRef, stencilprop->data.stencilMask);
                     stencil->setStencilFailOperation(getStencilOperation(stencilprop->data.failAction));
                     stencil->setStencilPassAndDepthFailOperation(getStencilOperation(stencilprop->data.zFailAction));
                     stencil->setStencilPassAndDepthPassOperation(getStencilOperation(stencilprop->data.zPassAction));
+                    stencil = shareAttribute(stencil);
 
                     stateset->setAttributeAndModes(stencil, osg::StateAttribute::ON);
                 }
@@ -1584,9 +1586,10 @@ namespace NifOsg
             case Nif::RC_NiWireframeProperty:
             {
                 const Nif::NiWireframeProperty* wireprop = static_cast<const Nif::NiWireframeProperty*>(property);
-                osg::PolygonMode* mode = new osg::PolygonMode;
+                osg::ref_ptr<osg::PolygonMode> mode = new osg::PolygonMode;
                 mode->setMode(osg::PolygonMode::FRONT_AND_BACK, wireprop->flags == 0 ? osg::PolygonMode::FILL
                                                                                      : osg::PolygonMode::LINE);
+                mode = shareAttribute(mode);
                 node->getOrCreateStateSet()->setAttributeAndModes(mode, osg::StateAttribute::ON);
                 break;
             }
@@ -1594,8 +1597,12 @@ namespace NifOsg
             {
                 const Nif::NiZBufferProperty* zprop = static_cast<const Nif::NiZBufferProperty*>(property);
                 // VER_MW doesn't support a DepthFunction according to NifSkope
-                osg::Depth* depth = new osg::Depth;
-                depth->setWriteMask((zprop->flags>>1)&1);
+                static osg::ref_ptr<osg::Depth> depth;
+                if (!depth)
+                {
+                    depth = new osg::Depth;
+                    depth->setWriteMask((zprop->flags>>1)&1);
+                }
                 node->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
                 break;
             }
@@ -1632,23 +1639,25 @@ namespace NifOsg
             }
         }
 
-        struct CompareMaterial
+        struct CompareStateAttribute
         {
-            bool operator() (const osg::ref_ptr<osg::Material>& left, const osg::ref_ptr<osg::Material>& right) const
+            bool operator() (const osg::ref_ptr<osg::StateAttribute>& left, const osg::ref_ptr<osg::StateAttribute>& right) const
             {
                 return left->compare(*right) < 0;
             }
         };
 
-        osg::Material* shareMaterial(osg::Material* mat)
+        // global sharing of State Attributes will reduce the number of GL calls as the osg::State will check by pointer to see if state is the same
+        template <class Attribute>
+        Attribute* shareAttribute(const osg::ref_ptr<Attribute>& attr)
         {
-            typedef std::set<osg::ref_ptr<osg::Material>, CompareMaterial> MatCache;
-            static MatCache sMats;
+            typedef std::set<osg::ref_ptr<Attribute>, CompareStateAttribute> Cache;
+            static Cache sCache;
             static OpenThreads::Mutex sMutex;
             OpenThreads::ScopedLock<OpenThreads::Mutex> lock(sMutex);
-            MatCache::iterator found = sMats.find(mat);
-            if (found == sMats.end())
-                found = sMats.insert(mat).first;
+            typename Cache::iterator found = sCache.find(attr);
+            if (found == sCache.end())
+                found = sCache.insert(attr).first;
             return *found;
         }
 
@@ -1715,9 +1724,10 @@ namespace NifOsg
                     const Nif::NiAlphaProperty* alphaprop = static_cast<const Nif::NiAlphaProperty*>(property);
                     if (alphaprop->flags&1)
                     {
-                        stateset->setAttributeAndModes(new osg::BlendFunc(getBlendMode((alphaprop->flags>>1)&0xf),
-                                                                          getBlendMode((alphaprop->flags>>5)&0xf)),
-                                                       osg::StateAttribute::ON);
+                        osg::ref_ptr<osg::BlendFunc> blendFunc (new osg::BlendFunc(getBlendMode((alphaprop->flags>>1)&0xf),
+                                                                                   getBlendMode((alphaprop->flags>>5)&0xf)));
+                        blendFunc = shareAttribute(blendFunc);
+                        stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
 
                         bool noSort = (alphaprop->flags>>13)&1;
                         if (!noSort)
@@ -1734,8 +1744,9 @@ namespace NifOsg
 
                     if((alphaprop->flags>>9)&1)
                     {
-                        stateset->setAttributeAndModes(new osg::AlphaFunc(getTestMode((alphaprop->flags>>10)&0x7),
-                                                                          alphaprop->data.threshold/255.f), osg::StateAttribute::ON);
+                        osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(getTestMode((alphaprop->flags>>10)&0x7), alphaprop->data.threshold/255.f));
+                        alphaFunc = shareAttribute(alphaFunc);
+                        stateset->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
                     }
                     else
                     {
@@ -1767,9 +1778,7 @@ namespace NifOsg
                 return;
             }
 
-            // TODO: this could be replaced by a more generic mechanism of sharing any type of State Attribute
-            // apply only for Materials for now
-            mat = shareMaterial(mat);
+            mat = shareAttribute(mat);
 
             stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
         }
