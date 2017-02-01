@@ -371,6 +371,16 @@ namespace MWMechanics
         return mLastHitAttemptObject;
     }
 
+    void CreatureStats::setHitAttemptActor(const MWWorld::Ptr& actor)
+    {
+        mHitAttemptActor = actor;
+    }
+
+    const MWWorld::Ptr &CreatureStats::getHitAttemptActor() const
+    {
+        return mHitAttemptActor;
+    }
+
     void CreatureStats::addToFallHeight(float height)
     {
         mFallHeight += height;

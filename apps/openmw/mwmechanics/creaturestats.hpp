@@ -53,6 +53,9 @@ namespace MWMechanics
         std::string mLastHitObject; // The last object to hit this actor
         std::string mLastHitAttemptObject; // The last object to attempt to hit this actor
 
+        MWWorld::Ptr mHitAttemptActor; // Stores an actor that attacked this actor. Only one is stored at a time,
+                                       // and it is not changed if a different actor attacks. It is cleared when combat ends.
+
         bool mRecalcMagicka;
 
         // For merchants: the last time items were restocked and gold pool refilled.
@@ -241,9 +244,11 @@ namespace MWMechanics
         bool getStance (Stance flag) const;
 
         void setLastHitObject(const std::string &objectid);
-        void setLastHitAttemptObject(const std::string &objectid);
         const std::string &getLastHitObject() const;
+        void setLastHitAttemptObject(const std::string &objectid);
         const std::string &getLastHitAttemptObject() const;
+        void setHitAttemptActor(const MWWorld::Ptr &actor);
+        const MWWorld::Ptr &getHitAttemptActor() const;
 
         // Note, this is just a cache to avoid checking the whole container store every frame. We don't need to store it in saves.
         // TODO: Put it somewhere else?
