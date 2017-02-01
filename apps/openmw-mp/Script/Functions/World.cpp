@@ -36,6 +36,7 @@ void WorldFunctions::AddWorldObject() noexcept
     worldObject.count = tempWorldObject.count;
     worldObject.goldValue = tempWorldObject.goldValue;
     worldObject.pos = tempWorldObject.pos;
+    worldObject.scale = tempWorldObject.scale;
 
     worldEvent->objectChanges.objects.push_back(worldObject);
 }

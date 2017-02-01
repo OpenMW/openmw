@@ -489,6 +489,10 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         myPacket->Read(worldEvent);
         myPacket->Send(worldEvent, true);
 
+        Script::Call<Script::CallbackIdentity("OnObjectScale")>(
+            player->getId(),
+            worldEvent->cell.getDescription().c_str());
+
         break;
     }
 
