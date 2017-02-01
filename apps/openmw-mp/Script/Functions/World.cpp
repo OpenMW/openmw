@@ -86,7 +86,7 @@ void WorldFunctions::SetObjectGoldValue(int goldValue) noexcept
     tempWorldObject.goldValue = goldValue;
 }
 
-void WorldFunctions::SetObjectScale(int scale) noexcept
+void WorldFunctions::SetObjectScale(double scale) noexcept
 {
     tempWorldObject.scale = scale;
 }
@@ -140,7 +140,7 @@ int WorldFunctions::GetObjectGoldValue(unsigned int i) noexcept
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).goldValue;
 }
 
-int WorldFunctions::GetObjectScale(unsigned int i) noexcept
+double WorldFunctions::GetObjectScale(unsigned int i) noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).scale;
 }

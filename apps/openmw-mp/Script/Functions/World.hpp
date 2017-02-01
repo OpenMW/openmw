@@ -57,7 +57,7 @@ public:
     static void SetObjectRefNumIndex(int refNumIndex) noexcept;
     static void SetObjectCount(int count) noexcept;
     static void SetObjectGoldValue(int goldValue) noexcept;
-    static void SetObjectScale(int scale) noexcept;
+    static void SetObjectScale(double scale) noexcept;
     static void SetObjectState(int scale) noexcept;
     static void SetObjectLockLevel(int lockLevel) noexcept;
     static void SetObjectPosition(double x, double y, double z) noexcept;
@@ -69,7 +69,7 @@ public:
     static int GetObjectRefNumIndex(unsigned int i) noexcept;
     static int GetObjectCount(unsigned int i) noexcept;
     static int GetObjectGoldValue(unsigned int i) noexcept;
-    static int GetObjectScale(unsigned int i) noexcept;
+    static double GetObjectScale(unsigned int i) noexcept;
     static int GetObjectState(unsigned int i) noexcept;
     static int GetObjectLockLevel(unsigned int i) noexcept;
     static double GetObjectPosX(unsigned int i) noexcept;
