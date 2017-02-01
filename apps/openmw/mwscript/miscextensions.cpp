@@ -1252,6 +1252,31 @@ namespace MWScript
             }
         };
 
+        template <class R>
+        class OpShowSceneGraph : public Interpreter::Opcode1
+        {
+        public:
+            virtual void execute(Interpreter::Runtime &runtime, unsigned int arg0)
+            {
+                MWWorld::Ptr ptr = R()(runtime, false);
+
+                int confirmed = 0;
+                if (arg0==1)
+                {
+                    confirmed = runtime[0].mInteger;
+                    runtime.pop();
+                }
+
+                if (ptr.isEmpty() && !confirmed)
+                    runtime.getContext().report("Exporting the entire scene graph will result in a large file. Confirm this action using 'showscenegraph 1' or select an object instead.");
+                else
+                {
+                    const std::string& filename = MWBase::Environment::get().getWorld()->exportSceneGraph(ptr);
+                    runtime.getContext().report("Wrote '" + filename + "'");
+                }
+            }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -1348,6 +1373,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeRemoveFromLevCreature, new OpRemoveFromLevCreature);
             interpreter.installSegment5 (Compiler::Misc::opcodeAddToLevItem, new OpAddToLevItem);
             interpreter.installSegment5 (Compiler::Misc::opcodeRemoveFromLevItem, new OpRemoveFromLevItem);
+            interpreter.installSegment3 (Compiler::Misc::opcodeShowSceneGraph, new OpShowSceneGraph<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Misc::opcodeShowSceneGraphExplicit, new OpShowSceneGraph<ExplicitRef>);
         }
     }
 }

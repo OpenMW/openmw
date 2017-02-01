@@ -28,6 +28,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
+#include <components/sceneutil/writescene.hpp>
 
 #include <components/terrain/terraingrid.hpp>
 
@@ -1002,8 +1003,17 @@ namespace MWRender
         if (mFieldOfViewOverridden == true)
         {
             mFieldOfViewOverridden = false;
+
             updateProjectionMatrix();
         }
+    }
+    void RenderingManager::exportSceneGraph(const MWWorld::Ptr &ptr, const std::string &filename, const std::string &format)
+    {
+        osg::Node* node = mViewer->getSceneData();
+        if (!ptr.isEmpty())
+            node = ptr.getRefData().getBaseNode();
+
+        SceneUtil::writeScene(node, filename, format);
     }
 
 }
