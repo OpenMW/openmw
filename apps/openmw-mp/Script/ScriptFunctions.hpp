@@ -119,6 +119,7 @@ public:
             {"OnPlayerJournalChange",    Function<void, unsigned short>()},
             {"OnObjectPlace",            Function<void, unsigned short, const char*>()},
             {"OnObjectDelete",           Function<void, unsigned short, const char*>()},
+            {"OnObjectScale",            Function<void, unsigned short, const char*>()},
             {"OnPlayerSendMessage",      Function<bool, unsigned short, const char*>()},
             {"OnPlayerEndCharGen",       Function<void, unsigned short>()},
             {"OnGUIAction",              Function<void, unsigned short, int, const char*>()}
