@@ -828,7 +828,8 @@ int Networking::mainLoop()
                         bs.Write(RakNet::RakString(player.second->npc.mName.c_str()));
                     bs.Write(0); // plugins
                     peer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
-                        break;
+                    peer->CloseConnection(packet->guid, false);
+                    break;
                 }
                 default:
                     update(packet);

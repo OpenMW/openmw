@@ -164,7 +164,7 @@ void MasterClient::Update()
 
         RakSleep(timeout);
 
-        players = mwmp::Networking::get().numberOfConnections();
+        players = Players::getPlayers()->size();
         response = Send(hostname, modname, maxPlayers, update, players);
         update = true;
     }

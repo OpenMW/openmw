@@ -120,11 +120,6 @@ std::string loadSettings (Settings::Manager & settings)
     return settingspath;
 }
 
-void queryThread(MasterClient *mclient)
-{
-    mclient->Update();
-}
-
 class Tee : public boost::iostreams::sink
 {
 public:
