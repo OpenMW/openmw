@@ -615,6 +615,7 @@ void OMW::Engine::go()
     assert (!mContentFiles.empty());
 
     mViewer = new osgViewer::Viewer;
+    mViewer->setReleaseContextAtEndOfFrameHint(false);
 
     osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
     statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
