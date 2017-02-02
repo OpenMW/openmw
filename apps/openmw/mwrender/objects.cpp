@@ -46,6 +46,7 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
     if (found == mCellSceneNodes.end())
     {
         cellnode = new osg::Group;
+        cellnode->setName("Cell Root");
         mRootNode->addChild(cellnode);
         mCellSceneNodes[ptr.getCell()] = cellnode;
     }

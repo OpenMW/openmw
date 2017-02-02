@@ -793,6 +793,7 @@ namespace MWRender
         {
             mPlayerNode = new SceneUtil::PositionAttitudeTransform;
             mPlayerNode->setNodeMask(Mask_Player);
+            mPlayerNode->setName("Player Root");
             mSceneRoot->addChild(mPlayerNode);
         }
 
