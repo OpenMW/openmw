@@ -95,7 +95,7 @@ namespace MWPhysics
             std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::ConstPtr& actor,
                                                                const osg::Vec3f &origin,
                                                                const osg::Quat &orientation,
-                                                               float queryDistance);
+                                                               float queryDistance, std::vector<MWWorld::Ptr> targets = std::vector<MWWorld::Ptr>());
 
 
             /// Get distance from \a point to the collision shape of \a target. Uses a raycast to find where the
@@ -112,9 +112,10 @@ namespace MWPhysics
                 MWWorld::Ptr mHitObject;
             };
 
-            /// @param me Optional, a Ptr to ignore in the list of results
-            RayResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::ConstPtr ignore = MWWorld::ConstPtr(), int mask =
-                    CollisionType_World|CollisionType_HeightMap|CollisionType_Actor|CollisionType_Door, int group=0xff) const;
+            /// @param me Optional, a Ptr to ignore in the list of results. targets are actors to filter for, ignoring all other actors.
+            RayResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::ConstPtr ignore = MWWorld::ConstPtr(),
+                    std::vector<MWWorld::Ptr> targets = std::vector<MWWorld::Ptr>(),
+                    int mask = CollisionType_World|CollisionType_HeightMap|CollisionType_Actor|CollisionType_Door, int group=0xff) const;
 
             RayResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius);
 

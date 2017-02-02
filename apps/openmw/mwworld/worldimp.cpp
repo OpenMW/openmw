@@ -7,10 +7,11 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/cellid.hpp>
 
+#include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
 
 #include <components/files/collections.hpp>
-#include <components/misc/resourcehelpers.hpp>
+
 #include <components/resource/resourcesystem.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -1064,7 +1065,7 @@ namespace MWWorld
         return osg::Matrixf::translate(actor.getRefData().getPosition().asVec3());
     }
 
-    std::pair<MWWorld::Ptr,osg::Vec3f> World::getHitContact(const MWWorld::ConstPtr &ptr, float distance)
+    std::pair<MWWorld::Ptr,osg::Vec3f> World::getHitContact(const MWWorld::ConstPtr &ptr, float distance, std::vector<MWWorld::Ptr> &targets)
     {
         const ESM::Position &posdata = ptr.getRefData().getPosition();
 
@@ -1084,7 +1085,7 @@ namespace MWWorld
             distance += halfExtents.y();
         }
 
-        std::pair<MWWorld::Ptr,osg::Vec3f> result = mPhysics->getHitContact(ptr, pos, rot, distance);
+        std::pair<MWWorld::Ptr,osg::Vec3f> result = mPhysics->getHitContact(ptr, pos, rot, distance, targets);
         if(result.first.isEmpty())
             return std::make_pair(MWWorld::Ptr(), osg::Vec3f());
 
@@ -1450,7 +1451,7 @@ namespace MWWorld
     {
         osg::Vec3f a(x1,y1,z1);
         osg::Vec3f b(x2,y2,z2);
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), MWPhysics::CollisionType_World|MWPhysics::CollisionType_Door);
+        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), MWPhysics::CollisionType_World|MWPhysics::CollisionType_Door);
         return result.mHit;
     }
 
@@ -2443,7 +2444,7 @@ namespace MWWorld
         if (includeWater) {
             collisionTypes |= MWPhysics::CollisionType_Water;
         }
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(from, to, MWWorld::Ptr(), collisionTypes);
+        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(from, to, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), collisionTypes);
 
         if (!result.mHit)
             return maxDist;
@@ -2664,12 +2665,17 @@ namespace MWWorld
         osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
         osg::Vec3f dest = origin + direction * distance;
 
+        // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
+        std::vector<MWWorld::Ptr> targetActors;
+        if (!actor.isEmpty() && actor != MWMechanics::getPlayer())
+            actor.getClass().getCreatureStats(actor).getAiSequence().getCombatTargets(targetActors);
+
         // For actor targets, we want to use bounding boxes (physics raycast).
         // This is to give a slight tolerance for errors, especially with creatures like the Skeleton that would be very hard to aim at otherwise.
         // For object targets, we want the detailed shapes (rendering raycast).
         // If we used the bounding boxes for static objects, then we would not be able to target e.g. objects lying on a shelf.
 
-        MWPhysics::PhysicsSystem::RayResult result1 = mPhysics->castRay(origin, dest, actor, MWPhysics::CollisionType_Actor);
+        MWPhysics::PhysicsSystem::RayResult result1 = mPhysics->castRay(origin, dest, actor, targetActors, MWPhysics::CollisionType_Actor);
 
         MWRender::RenderingManager::RayResult result2 = mRendering->castRay(origin, dest, true, true);
 
@@ -2681,7 +2687,7 @@ namespace MWWorld
         if (result2.mHit)
             dist2 = (origin - result2.mHitPointWorld).length();
 
-        if (dist1 <= dist2 && result1.mHit)
+        if (result1.mHit)
         {
             target = result1.mHitObject;
             hitPosition = result1.mHitPos;
@@ -2692,7 +2698,7 @@ namespace MWWorld
         {
             target = result2.mHitObject;
             hitPosition = result2.mHitPointWorld;
-            if (dist2 > getMaxActivationDistance() && !target.isEmpty() && (target.getClass().isActor() || !target.getClass().canBeActivated(target)))
+            if (dist2 > getMaxActivationDistance() && !target.isEmpty() && !target.getClass().canBeActivated(target))
                 target = NULL;
         }
 
@@ -2702,7 +2708,7 @@ namespace MWWorld
         if (!target.isEmpty() && target.getClass().isActor() && target.getClass().getCreatureStats (target).getAiSequence().isInCombat()) 
         {
             distance = std::min (distance, getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat());
-            if (distance < dist1 && distance < dist2)
+            if (distance < dist1)
                 target = NULL;
         }
 
