@@ -1674,6 +1674,8 @@ namespace NifOsg
             mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
             mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
 
+            bool hasMatCtrl = false;
+
             for (std::vector<const Nif::Property*>::const_reverse_iterator it = properties.rbegin(); it != properties.rend(); ++it)
             {
                 const Nif::Property* property = *it;
@@ -1696,7 +1698,10 @@ namespace NifOsg
                     mat->setShininess(osg::Material::FRONT_AND_BACK, matprop->data.glossiness);
 
                     if (!matprop->controller.empty())
+                    {
+                        hasMatCtrl = true;
                         handleMaterialControllers(matprop, composite, animflags);
+                    }
 
                     break;
                 }
@@ -1769,7 +1774,7 @@ namespace NifOsg
                 mat->setColorMode(osg::Material::AMBIENT);
             }
 
-            if (mat->getColorMode() == osg::Material::OFF
+            if (!hasMatCtrl && mat->getColorMode() == osg::Material::OFF
                     && mat->getDiffuse(osg::Material::FRONT_AND_BACK) == osg::Vec4f(1,1,1,1)
                     && mat->getAmbient(osg::Material::FRONT_AND_BACK) == osg::Vec4f(1,1,1,1)
                     && mat->getSpecular(osg::Material::FRONT_AND_BACK) == osg::Vec4f(0.f, 0.f, 0.f, 0.f))

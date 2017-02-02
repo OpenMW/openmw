@@ -80,7 +80,7 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     defaultMat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
     defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
     defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
-    mView->getCamera()->getOrCreateStateSet()->getOrCreateStateSet()->setAttribute(defaultMat);
+    mView->getCamera()->getOrCreateStateSet()->setAttribute(defaultMat);
 
     mView->setSceneData(mRootNode);
 
