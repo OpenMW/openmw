@@ -56,8 +56,7 @@ namespace SceneUtil
         osg::ref_ptr<osg::Vec4Array> mSourceTangents;
         Skeleton* mSkeleton;
 
-        osg::NodePath mSkelToGeomPath;
-        osg::Matrixf mGeomToSkelMatrix;
+        osg::ref_ptr<osg::RefMatrix> mGeomToSkelMatrix;
 
         osg::ref_ptr<InfluenceMap> mInfluenceMap;
 

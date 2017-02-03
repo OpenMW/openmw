@@ -223,6 +223,7 @@ public:
         setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         setReferenceFrame(osg::Camera::RELATIVE_RF);
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
+        setName("RefractionCamera");
 
         setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting);
         setNodeMask(Mask_RenderToTexture);
@@ -305,6 +306,7 @@ public:
         setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         setReferenceFrame(osg::Camera::RELATIVE_RF);
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
+        setName("ReflectionCamera");
 
         bool reflectActors = Settings::Manager::getBool("reflect actors", "Water");
 
@@ -405,6 +407,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
         ico->add(mWaterGeom);
 
     mWaterNode = new osg::PositionAttitudeTransform;
+    mWaterNode->setName("Water Root");
     mWaterNode->addChild(mWaterGeom);
     mWaterNode->addCullCallback(new FudgeCallback);
 

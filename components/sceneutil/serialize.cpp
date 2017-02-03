@@ -64,6 +64,15 @@ public:
     }
 };
 
+class CameraRelativeTransformSerializer : public osgDB::ObjectWrapper
+{
+public:
+    CameraRelativeTransformSerializer()
+        : osgDB::ObjectWrapper(createInstanceFunc<osg::Group>, "MWRender::CameraRelativeTransform", "osg::Object osg::Node osg::Group MWRender::CameraRelativeTransform")
+    {
+    }
+};
+
 osgDB::ObjectWrapper* makeDummySerializer(const std::string& classname)
 {
     return new osgDB::ObjectWrapper(createInstanceFunc<osg::DummyObject>, classname, "osg::Object");
@@ -80,17 +89,18 @@ void registerSerializers()
         osgDB::Registry::instance()->getObjectWrapperManager()->addWrapper(new FrameSwitchSerializer);
         osgDB::Registry::instance()->getObjectWrapperManager()->addWrapper(new RigGeometrySerializer);
         osgDB::Registry::instance()->getObjectWrapperManager()->addWrapper(new LightManagerSerializer);
+        osgDB::Registry::instance()->getObjectWrapperManager()->addWrapper(new CameraRelativeTransformSerializer);
 
         // ignore the below for now to avoid warning spam
         const char* ignore[] = {
             "MWRender::PtrHolder",
-            "MWRender::CameraRelativeTransform",
             "Resource::TemplateRef",
             "SceneUtil::LightListCallback",
             "SceneUtil::LightManagerUpdateCallback",
             "SceneUtil::UpdateRigBounds",
             "SceneUtil::UpdateRigGeometry",
             "SceneUtil::LightSource",
+            "SceneUtil::StateSetUpdater",
             "NifOsg::NodeUserData",
             "NifOsg::FlipController",
             "NifOsg::KeyframeController",
@@ -104,6 +114,8 @@ void registerSerializers()
             "NifOsg::UpdateMorphGeometry",
             "osgMyGUI::Drawable",
             "osg::DrawCallback",
+            "osgOQ::ClearQueriesCallback",
+            "osgOQ::RetrieveQueriesCallback",
             "osg::DummyObject"
         };
         for (size_t i=0; i<sizeof(ignore)/sizeof(ignore[0]); ++i)

@@ -505,6 +505,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     std::string myguiResources = (mResDir / "mygui").string();
     osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
+    guiRoot->setName("GUI Root");
     guiRoot->setNodeMask(MWRender::Mask_GUI);
     rootNode->addChild(guiRoot);
     MWGui::WindowManager* window = new MWGui::WindowManager(mViewer, guiRoot, mResourceSystem.get(),
@@ -637,6 +638,7 @@ void OMW::Engine::go()
         return;
 
     mViewer = new osgViewer::Viewer;
+    mViewer->setReleaseContextAtEndOfFrameHint(false);
 
     osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
     statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);

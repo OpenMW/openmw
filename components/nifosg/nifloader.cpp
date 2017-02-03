@@ -1597,12 +1597,9 @@ namespace NifOsg
             {
                 const Nif::NiZBufferProperty* zprop = static_cast<const Nif::NiZBufferProperty*>(property);
                 // VER_MW doesn't support a DepthFunction according to NifSkope
-                static osg::ref_ptr<osg::Depth> depth;
-                if (!depth)
-                {
-                    depth = new osg::Depth;
-                    depth->setWriteMask((zprop->flags>>1)&1);
-                }
+                osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+                depth->setWriteMask((zprop->flags>>1)&1);
+                depth = shareAttribute(depth);
                 node->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
                 break;
             }

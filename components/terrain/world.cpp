@@ -18,6 +18,7 @@ World::World(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUt
     mTerrainRoot = new osg::Group;
     mTerrainRoot->setNodeMask(nodeMask);
     mTerrainRoot->getOrCreateStateSet()->setRenderingHint(osg::StateSet::OPAQUE_BIN);
+    mTerrainRoot->setName("Terrain Root");
 
     mParent->addChild(mTerrainRoot);
 }

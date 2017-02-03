@@ -179,6 +179,7 @@ namespace MWWorld
         , mMinCacheSize(0)
         , mMaxCacheSize(0)
         , mPreloadInstances(true)
+        , mLastResourceCacheUpdate(0.0)
     {
     }
 
@@ -252,8 +253,12 @@ namespace MWWorld
                 ++it;
         }
 
-        // the resource cache is cleared from the worker thread so that we're not holding up the main thread with delete operations
-        mWorkQueue->addWorkItem(new UpdateCacheItem(mResourceSystem, mTerrain, timestamp), true);
+        if (timestamp - mLastResourceCacheUpdate > 1.0)
+        {
+            // the resource cache is cleared from the worker thread so that we're not holding up the main thread with delete operations
+            mWorkQueue->addWorkItem(new UpdateCacheItem(mResourceSystem, mTerrain, timestamp), true);
+            mLastResourceCacheUpdate = timestamp;
+        }
     }
 
     void CellPreloader::setExpiryDelay(double expiryDelay)

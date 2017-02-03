@@ -22,6 +22,11 @@ namespace osgUtil
     class IncrementalCompileOperation;
 }
 
+namespace osgDB
+{
+    class SharedStateManager;
+}
+
 namespace Shader
 {
     class ShaderManager;
@@ -147,6 +152,7 @@ namespace Resource
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 
+        osg::ref_ptr<osgDB::SharedStateManager> mSharedStateManager;
         OpenThreads::Mutex mSharedStateMutex;
 
         Resource::ImageManager* mImageManager;
