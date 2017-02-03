@@ -181,6 +181,7 @@ namespace Resource
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
         , mInstanceCache(new MultiObjectCache)
+        , mSharedStateManager(new osgDB::SharedStateManager)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
         , mMinFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
@@ -392,7 +393,7 @@ namespace Resource
 
             // share state
             mSharedStateMutex.lock();
-            osgDB::Registry::instance()->getOrCreateSharedStateManager()->share(loaded.get());
+            mSharedStateManager->share(loaded.get());
             mSharedStateMutex.unlock();
 
             if (mIncrementalCompileOperation)
@@ -549,6 +550,10 @@ namespace Resource
 
     void SceneManager::updateCache(double referenceTime)
     {
+        mSharedStateMutex.lock();
+        mSharedStateManager->prune();
+        mSharedStateMutex.unlock();
+
         ResourceManager::updateCache(referenceTime);
 
         mInstanceCache->removeUnreferencedObjectsInCache();
