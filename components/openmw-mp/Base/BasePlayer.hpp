@@ -62,6 +62,19 @@ namespace mwmp
         int type; // 0 - An entire entry, 1 - An index
     };
 
+    struct CellState
+    {
+        ESM::Cell cell;
+
+        enum CELl_STATE_ACTION
+        {
+            LOAD = 0,
+            UNLOAD = 1
+        };
+
+        int type; // 0 - Cell load, 1 - Cell unload
+    };
+
     struct JournalChanges
     {
         std::vector<JournalItem> journalItems;
@@ -96,16 +109,8 @@ namespace mwmp
 
     struct CellStateChanges
     {
-        std::vector<ESM::Cell> cells;
+        std::vector<CellState> cellStates;
         unsigned int count;
-
-        enum ACTION_TYPE
-        {
-            LOAD = 0,
-            UNLOAD = 1
-        };
-
-        int action; // 0 - Load a cell, 1 - Unload a cell
     };
 
     class BasePlayer

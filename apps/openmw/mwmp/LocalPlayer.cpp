@@ -1000,6 +1000,11 @@ void LocalPlayer::sendSpellbook()
     Main::get().getNetworking()->getPlayerPacket(ID_GAME_SPELLBOOK)->Send(this);
 }
 
+void LocalPlayer::sendCellStates()
+{
+    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_CELL_STATE)->Send(this);
+}
+
 void LocalPlayer::sendSpellAddition(std::string id)
 {
     if (id.find("$dynamic") != string::npos) // skip custom spells
@@ -1072,26 +1077,6 @@ void LocalPlayer::sendJournalIndex(const std::string& quest, int index)
     Main::get().getNetworking()->getPlayerPacket(ID_GAME_JOURNAL)->Send(this);
 }
 
-void LocalPlayer::sendCellLoad(ESM::Cell cellLoaded)
-{
-    cellStateChanges.cells.clear();
-
-    cellStateChanges.cells.push_back(cellLoaded);
-
-    cellStateChanges.action = CellStateChanges::LOAD;
-    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_CELL_STATE)->Send(this);
-}
-
-void LocalPlayer::sendCellUnload(ESM::Cell cellUnloaded)
-{
-    cellStateChanges.cells.clear();
-
-    cellStateChanges.cells.push_back(cellUnloaded);
-
-    cellStateChanges.action = CellStateChanges::UNLOAD;
-    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_CELL_STATE)->Send(this);
-}
-
 void LocalPlayer::sendAttack(Attack::TYPE type)
 {
     MWMechanics::DrawState_ state = getPlayerPtr().getClass().getNpcStats(getPlayerPtr()).getDrawState();
@@ -1101,6 +1086,20 @@ void LocalPlayer::sendAttack(Attack::TYPE type)
     RakNet::BitStream bs;
     getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
     getNetworking()->sendData(&bs);
+}
+
+void LocalPlayer::clearCellStates()
+{
+    cellStateChanges.cellStates.clear();
+}
+
+void LocalPlayer::storeCellState(ESM::Cell cell, int stateType)
+{
+    CellState cellState;
+    cellState.cell = cell;
+    cellState.type = stateType;
+
+    cellStateChanges.cellStates.push_back(cellState);
 }
 
 void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)

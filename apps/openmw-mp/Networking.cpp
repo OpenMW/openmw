@@ -180,7 +180,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         myPacket->Read(player);
 
-        Script::Call<Script::CallbackIdentity("OnPlayerCellState")>(player->getId(), player->cellStateChanges.action);
+        Script::Call<Script::CallbackIdentity("OnPlayerCellState")>(player->getId());
 
         break;
     }

@@ -6,6 +6,7 @@
 #define CELLAPI \
     {"GetCellStateChangesSize", CellFunctions::GetCellStateChangesSize},\
     \
+    {"GetCellStateType",        CellFunctions::GetCellStateType},\
     {"GetCellStateDescription", CellFunctions::GetCellStateDescription},\
     \
     {"GetCell",                 CellFunctions::GetCell},\
@@ -23,6 +24,7 @@ class CellFunctions
 public:
     static unsigned int GetCellStateChangesSize(unsigned short pid) noexcept;
 
+    static unsigned int GetCellStateType(unsigned short pid, unsigned int i) noexcept;
     static const char *GetCellStateDescription(unsigned short pid, unsigned int i) noexcept;
 
     static const char *GetCell(unsigned short pid) noexcept;

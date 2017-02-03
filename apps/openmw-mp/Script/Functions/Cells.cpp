@@ -16,6 +16,14 @@ unsigned int CellFunctions::GetCellStateChangesSize(unsigned short pid) noexcept
     return player->cellStateChanges.count;
 }
 
+unsigned int CellFunctions::GetCellStateType(unsigned short pid, unsigned int i) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->cellStateChanges.cellStates.at(i).type;
+}
+
 const char *CellFunctions::GetCellStateDescription(unsigned short pid, unsigned int i) noexcept
 {
     Player *player;
@@ -24,7 +32,7 @@ const char *CellFunctions::GetCellStateDescription(unsigned short pid, unsigned 
     if (i >= player->cellStateChanges.count)
         return "invalid";
 
-    string cellDescription = player->cellStateChanges.cells.at(i).getDescription();
+    string cellDescription = player->cellStateChanges.cellStates.at(i).cell.getDescription();
 
     static vector<char> cstrDescription;
     cstrDescription.reserve(cellDescription.size() + 1);
