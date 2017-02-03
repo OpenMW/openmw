@@ -271,7 +271,8 @@ void RigGeometry::update(osg::NodeVisitor* nv)
             const osg::Matrixf& boneMatrix = bone->mMatrixInSkeletonSpace;
             accumulateMatrix(invBindMatrix, boneMatrix, weight, resultMat);
         }
-        resultMat = resultMat * mGeomToSkelMatrix;
+        if (mGeomToSkelMatrix)
+            resultMat *= (*mGeomToSkelMatrix);
 
         for (std::vector<unsigned short>::const_iterator vertexIt = it->second.begin(); vertexIt != it->second.end(); ++vertexIt)
         {
@@ -316,7 +317,10 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
     {
         Bone* bone = it->first;
         osg::BoundingSpheref bs = it->second;
-        transformBoundingSphere(bone->mMatrixInSkeletonSpace * mGeomToSkelMatrix, bs);
+        if (mGeomToSkelMatrix)
+            transformBoundingSphere(bone->mMatrixInSkeletonSpace * (*mGeomToSkelMatrix), bs);
+        else
+            transformBoundingSphere(bone->mMatrixInSkeletonSpace, bs);
         box.expandBy(bs);
     }
 
@@ -332,19 +336,28 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
 
 void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
 {
-    mSkelToGeomPath.clear();
     bool foundSkel = false;
+    osg::ref_ptr<osg::RefMatrixf> geomToSkelMatrix;
     for (osg::NodePath::const_iterator it = nodePath.begin(); it != nodePath.end(); ++it)
     {
+        osg::Node* node = *it;
         if (!foundSkel)
         {
-            if (*it == mSkeleton)
+            if (node == mSkeleton)
                 foundSkel = true;
         }
         else
-            mSkelToGeomPath.push_back(*it);
+        {
+            if (osg::Transform* trans = node->asTransform())
+            {
+                if (!geomToSkelMatrix)
+                    geomToSkelMatrix = new osg::RefMatrixf;
+                trans->computeWorldToLocalMatrix(*geomToSkelMatrix, NULL);
+            }
+        }
     }
-    mGeomToSkelMatrix = osg::computeWorldToLocal(mSkelToGeomPath);
+    if (geomToSkelMatrix && !geomToSkelMatrix->isIdentity())
+        mGeomToSkelMatrix = geomToSkelMatrix;
 }
 
 void RigGeometry::setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap)
