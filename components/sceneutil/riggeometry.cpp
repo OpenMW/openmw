@@ -337,7 +337,7 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
 void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
 {
     bool foundSkel = false;
-    osg::ref_ptr<osg::RefMatrixf> geomToSkelMatrix;
+    osg::ref_ptr<osg::RefMatrix> geomToSkelMatrix;
     for (osg::NodePath::const_iterator it = nodePath.begin(); it != nodePath.end(); ++it)
     {
         osg::Node* node = *it;
@@ -351,7 +351,7 @@ void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
             if (osg::Transform* trans = node->asTransform())
             {
                 if (!geomToSkelMatrix)
-                    geomToSkelMatrix = new osg::RefMatrixf;
+                    geomToSkelMatrix = new osg::RefMatrix;
                 trans->computeWorldToLocalMatrix(*geomToSkelMatrix, NULL);
             }
         }
