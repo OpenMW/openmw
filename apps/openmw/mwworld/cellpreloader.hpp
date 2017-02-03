@@ -61,6 +61,8 @@ namespace MWWorld
         unsigned int mMaxCacheSize;
         bool mPreloadInstances;
 
+        double mLastResourceCacheUpdate;
+
         struct PreloadEntry
         {
             PreloadEntry(double timestamp, osg::ref_ptr<SceneUtil::WorkItem> workItem)
