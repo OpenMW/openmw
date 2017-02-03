@@ -81,7 +81,8 @@ namespace SceneUtil
             callback = callback->getNestedCallback();
         }
 
-        traverse(node);
+        if (node.getNumChildrenRequiringUpdateTraversal() > 0)
+            traverse(node);
     }
 
     AssignControllerSourcesVisitor::AssignControllerSourcesVisitor()
