@@ -123,6 +123,12 @@ namespace MWGui
         int mWidth, mHeight;
     };
 
+    class DontComputeBoundCallback : public osg::Node::ComputeBoundingSphereCallback
+    {
+    public:
+        virtual osg::BoundingSphere computeBound(const osg::Node&) const { return osg::BoundingSphere(); }
+    };
+
     void LoadingScreen::loadingOn()
     {
         mLoadingOnTime = mTimer.time_m();
@@ -135,6 +141,10 @@ namespace MWGui
             mViewer->getIncrementalCompileOperation()->setMaximumNumOfObjectsToCompilePerFrame(100);
             mViewer->getIncrementalCompileOperation()->setTargetFrameRate(mTargetFrameRate);
         }
+
+        // Assign dummy bounding sphere callback to avoid the bounding sphere of the entire scene being recomputed after each frame of loading
+        // We are already using node masks to avoid the scene from being updated/rendered, but node masks don't work for computeBound()
+        mViewer->getSceneData()->setComputeBoundingSphereCallback(new DontComputeBoundCallback);
 
         bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
                 == MWBase::StateManager::State_NoGame);
@@ -191,6 +201,9 @@ namespace MWGui
         }
         else
             mImportantLabel = false; // label was already shown on loading screen
+
+        mViewer->getSceneData()->setComputeBoundingSphereCallback(NULL);
+        mViewer->getSceneData()->dirtyBound();
 
         //std::cout << "loading took " << mTimer.time_m() - mLoadingOnTime << std::endl;
         setVisible(false);
