@@ -8,7 +8,7 @@ exterior cell load distance
 :Range:		>= 1
 :Default:	1
 
-This integer setting determines the number of exterior cells adjacent to the character that will be loaded for rendering. Values greater than one may significantly affect loading times when exiting interior spaces or loading additional exterior cells. Caution is advised when increasing this setting.
+This setting determines the number of exterior cells adjacent to the character that will be loaded for rendering. Values greater than one may significantly affect loading times when exiting interior spaces or loading additional exterior cells. Caution is advised when increasing this setting.
 
 This setting interacts with viewing distance and field of view settings.
 

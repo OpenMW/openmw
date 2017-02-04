@@ -8,7 +8,7 @@ scaling factor
 :Range:		> 0.0
 :Default:	1.0
 
-This floating point setting scales the GUI interface windows. The value must be greater than 0.0. A value of 1.0 results in the normal scale. Values much larger than 2.0 may result in user interface components being inaccessible. Until a gamepad interface is created, increasing this setting is helpful for simulating the larger interface used in console games.
+This setting scales the GUI interface windows. The value must be greater than 0.0. A value of 1.0 results in the normal scale. Values much larger than 2.0 may result in user interface components being inaccessible. Until a gamepad interface is created, increasing this setting is helpful for simulating the larger interface used in console games.
 
 The default value is 1.0. This setting can only be configured by editing the settings configuration file.
 
@@ -19,7 +19,7 @@ menu transparency
 :Range:		0.0 (transparent) to 1.0 (opaque)
 :Default:	0.84
 
-This floating point setting controls the transparency of the GUI windows. The value should be between 0.0 (transparent) and 1.0 (opaque).
+This setting controls the transparency of the GUI windows. The value should be between 0.0 (transparent) and 1.0 (opaque).
 The default value is 0.84. This setting can be adjusted in game with the Menu Transparency slider in the Prefs panel of the Options menu.
 
 tooltip delay
@@ -29,7 +29,7 @@ tooltip delay
 :Range:		> 0.0
 :Default:	0.0
 
-This floating point value determines the number of seconds between when you begin hovering over an item and when its tooltip appears. This setting only affects the tooltip delay for objects under the crosshair in GUI mode windows. There does not appear to be a setting to control the tool tip delay in outside of GUI mode.
+This value determines the number of seconds between when you begin hovering over an item and when its tooltip appears. This setting only affects the tooltip delay for objects under the crosshair in GUI mode windows. There does not appear to be a setting to control the tool tip delay in outside of GUI mode.
 
 The tooltip displays context sensitive information on the selected GUI element, such as weight, value, damage, armor rating, magical effects, and detailed description.
 
@@ -64,7 +64,7 @@ hit fader
 :Range:		True/False
 :Default:	True
 
-This boolean setting enables or disables the "red flash" overlay that provides a visual clue when the character has taken damage.
+This setting enables or disables the "red flash" overlay that provides a visual clue when the character has taken damage.
 
 If this setting is disabled, the player will "bleed" like NPCs do.
 
