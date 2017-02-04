@@ -9,6 +9,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/nifosg/nifloader.hpp>
 #include <components/terrain/world.hpp>
+#include <components/sceneutil/unrefqueue.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -240,7 +241,15 @@ namespace MWWorld
 
     void CellPreloader::notifyLoaded(CellStore *cell)
     {
-        mPreloadCells.erase(cell);
+        PreloadMap::iterator found = mPreloadCells.find(cell);
+        if (found != mPreloadCells.end())
+        {
+            // do the deletion in the background thread
+            if (found->second.mWorkItem)
+                mUnrefQueue->push(mPreloadCells[cell].mWorkItem);
+
+            mPreloadCells.erase(found);
+        }
     }
 
     void CellPreloader::updateCache(double timestamp)
@@ -289,6 +298,11 @@ namespace MWWorld
     void CellPreloader::setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue)
     {
         mWorkQueue = workQueue;
+    }
+
+    void CellPreloader::setUnrefQueue(SceneUtil::UnrefQueue* unrefQueue)
+    {
+        mUnrefQueue = unrefQueue;
     }
 
 }
