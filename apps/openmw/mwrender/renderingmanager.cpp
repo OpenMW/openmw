@@ -158,7 +158,7 @@ namespace MWRender
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
-        , mWorkQueue(new SceneUtil::WorkQueue)
+        , mWorkQueue(new SceneUtil::WorkQueue(Settings::Manager::getInt("preload num threads", "Cells")))
         , mUnrefQueue(new SceneUtil::UnrefQueue)
         , mFogDepth(0.f)
         , mUnderwaterColor(fallback->getFallbackColour("Water_UnderwaterColor"))
