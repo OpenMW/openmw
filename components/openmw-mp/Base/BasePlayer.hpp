@@ -66,7 +66,7 @@ namespace mwmp
     {
         ESM::Cell cell;
 
-        enum CELl_STATE_ACTION
+        enum CELL_STATE_ACTION
         {
             LOAD = 0,
             UNLOAD = 1
@@ -91,7 +91,7 @@ namespace mwmp
             ADD,
             REMOVE
         };
-        int action; //0 - Clear and set in entirety, 1 - Add item, 2 - Remove item
+        int action; // 0 - Clear and set in entirety, 1 - Add item, 2 - Remove item
     };
 
     struct SpellbookChanges
@@ -104,7 +104,7 @@ namespace mwmp
             ADD,
             REMOVE
         };
-        int action; //0 - Clear and set in entirety, 1 - Add spell, 2 - Remove spell
+        int action; // 0 - Clear and set in entirety, 1 - Add spell, 2 - Remove spell
     };
 
     struct CellStateChanges

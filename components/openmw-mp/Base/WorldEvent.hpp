@@ -36,10 +36,32 @@ namespace mwmp
         std::string refId;
         int count;
         int health;
+
         inline bool operator==(const ContainerItem& rhs)
         {
             return refId == rhs.refId && count == rhs.count && health == rhs.health;
         }
+    };
+
+    struct ObjectChanges
+    {
+        std::vector<WorldObject> objects;
+        unsigned int count;
+    };
+
+    struct ContainerChanges
+    {
+        std::vector<ContainerItem> items;
+        unsigned int count;
+
+        enum CONTAINER_ACTION
+        {
+            SET = 0,
+            ADD = 1,
+            REMOVE = 2
+        };
+
+        int action; // 0 - Clear and set in entirety, 1 - Add item, 2 - Remove item
     };
 
     class WorldEvent
@@ -55,18 +77,6 @@ namespace mwmp
         {
 
         }
-
-        struct ObjectChanges
-        {
-            std::vector<WorldObject> objects;
-            unsigned int count;
-        };
-
-        struct ContainerChanges
-        {
-            std::vector<ContainerItem> items;
-            unsigned int count;
-        };
 
         RakNet::RakNetGUID guid;
         ObjectChanges objectChanges;
