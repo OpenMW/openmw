@@ -1098,6 +1098,20 @@ void LocalPlayer::clearCellStates()
 
 void LocalPlayer::storeCellState(ESM::Cell cell, int stateType)
 {
+    std::vector<CellState>::iterator iter;
+
+    for (iter = cellStateChanges.cellStates.begin(); iter != cellStateChanges.cellStates.end(); )
+    {
+        // If there's already a cell state recorded for this particular cell,
+        // remove it
+        if (cell.getDescription() == (*iter).cell.getDescription())
+        {
+            iter = cellStateChanges.cellStates.erase(iter);
+        }
+        else
+            ++iter;
+    }
+
     CellState cellState;
     cellState.cell = cell;
     cellState.type = stateType;
