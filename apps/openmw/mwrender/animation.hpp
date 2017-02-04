@@ -274,6 +274,8 @@ protected:
 
     float mAlpha;
 
+    mutable std::map<std::string, float> mAnimVelocities;
+
     osg::ref_ptr<SceneUtil::LightListCallback> mLightListCallback;
 
     const NodeMap& getNodeMap() const;
