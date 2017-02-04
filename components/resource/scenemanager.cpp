@@ -478,8 +478,12 @@ namespace Resource
 
     void SceneManager::notifyAttached(osg::Node *node) const
     {
-        InitWorldSpaceParticlesVisitor visitor (mParticleSystemMask);
-        node->accept(visitor);
+        // we can skip any scene graphs without update callbacks since we know that particle emitters will have an update callback set
+        if (node->getNumChildrenRequiringUpdateTraversal() > 0)
+        {
+            InitWorldSpaceParticlesVisitor visitor (mParticleSystemMask);
+            node->accept(visitor);
+        }
     }
 
     Resource::ImageManager* SceneManager::getImageManager()
