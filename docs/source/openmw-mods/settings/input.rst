@@ -8,7 +8,7 @@ grab cursor
 :Range:		True/False
 :Default:	True
 
-OpenMW will capture control of the cursor if this boolean setting is true.
+OpenMW will capture control of the cursor if this setting is true.
 
 In "look mode", OpenMW will center the cursor regardless of the value of this setting (since the cursor/crosshair is always centered in the OpenMW window). However, in GUI mode, this setting determines the behavior when the cursor is moved outside the OpenMW window. If true, the cursor movement stops at the edge of the window preventing access to other applications. If false, the cursor is allowed to move freely on the desktop.
 
@@ -25,7 +25,7 @@ toggle sneak
 :Range:		True/False
 :Default:	False
 
-This boolean setting causes the behavior of the sneak key (bound to Ctrl by default) to toggle sneaking on and off rather than requiring the key to be held down while sneaking. Players that spend significant time sneaking may find the character easier to control with this option enabled.
+This setting causes the behavior of the sneak key (bound to Ctrl by default) to toggle sneaking on and off rather than requiring the key to be held down while sneaking. Players that spend significant time sneaking may find the character easier to control with this option enabled.
 
 The default value is false. This setting can only be configured by editing the settings configuration file.
 
@@ -36,7 +36,7 @@ always run
 :Range:		True/False
 :Default:	False
 
-If this boolean setting is true, the character is running by default, otherwise the character is walking by default. The shift key will temporarily invert this setting, and the caps lock key will invert this setting while it's "locked". This setting is updated every time you exit the game, based on whether the caps lock key was on or off at the time you exited.
+If this setting is true, the character is running by default, otherwise the character is walking by default. The shift key will temporarily invert this setting, and the caps lock key will invert this setting while it's "locked". This setting is updated every time you exit the game, based on whether the caps lock key was on or off at the time you exited.
 
 The default value is false. This settings can be toggled in game by pressing the CapsLock key and exiting.
 
@@ -56,7 +56,7 @@ camera sensitivity
 :Range:		> 0
 :Default:	1.0
 
-This floating point setting controls the overall camera/mouse sensitivity when not in GUI mode. The default sensitivity is 1.0, with smaller values requiring more mouse movement, and larger values requiring less. This setting is multiplicative in magnitude. This setting does not affect mouse speed in GUI mode, which is instead controlled by your operating system mouse speed setting.
+This setting controls the overall camera/mouse sensitivity when not in GUI mode. The default sensitivity is 1.0, with smaller values requiring more mouse movement, and larger values requiring less. This setting is multiplicative in magnitude. This setting does not affect mouse speed in GUI mode, which is instead controlled by your operating system mouse speed setting.
 
 The default value is 1.0. This setting can be changed with the Camera Sensitivity slider in the Controls panel of the Options menu.
 
@@ -67,7 +67,7 @@ camera y multiplier
 :Range:		> 0
 :Default:	1.0
 
-This floating point setting controls the vertical camera/mouse sensitivity relative to the horizontal sensitivity (see camera sensitivity above). It is multiplicative with the previous setting, meaning that it should remain set at 1.0 unless the player desires to have different sensitivities in the two axes.
+This setting controls the vertical camera/mouse sensitivity relative to the horizontal sensitivity (see camera sensitivity above). It is multiplicative with the previous setting, meaning that it should remain set at 1.0 unless the player desires to have different sensitivities in the two axes.
 
 The default value is 1.0. This setting can only be configured by editing the settings configuration file.
 

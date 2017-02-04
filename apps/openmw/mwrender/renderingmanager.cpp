@@ -158,7 +158,6 @@ namespace MWRender
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
-        , mWorkQueue(new SceneUtil::WorkQueue)
         , mUnrefQueue(new SceneUtil::UnrefQueue)
         , mFogDepth(0.f)
         , mUnderwaterColor(fallback->getFallbackColour("Water_UnderwaterColor"))
@@ -169,6 +168,11 @@ namespace MWRender
         , mFieldOfViewOverride(0.f)
         , mFieldOfViewOverridden(false)
     {
+        int numThreads = Settings::Manager::getInt("preload num threads", "Cells");
+        if (numThreads <= 0)
+            throw std::runtime_error("Invalid setting: 'preload num threads' must be >0");
+        mWorkQueue = new SceneUtil::WorkQueue(numThreads);
+
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
         resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders"));

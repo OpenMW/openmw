@@ -38,6 +38,7 @@ namespace MWGui
         , mLoadingOnTime(0.0)
         , mImportantLabel(false)
         , mProgress(0)
+        , mShowWallpaper(true)
     {
         mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
 
@@ -104,14 +105,16 @@ namespace MWGui
     class CopyFramebufferToTextureCallback : public osg::Camera::DrawCallback
     {
     public:
-        CopyFramebufferToTextureCallback(osg::Texture2D* texture, int w, int h)
-            : mTexture(texture), mWidth(w), mHeight(h)
+        CopyFramebufferToTextureCallback(osg::Texture2D* texture)
+            : mTexture(texture)
         {
         }
 
         virtual void operator () (osg::RenderInfo& renderInfo) const
         {
-            mTexture->copyTexImage2D(*renderInfo.getState(), 0, 0, mWidth, mHeight);
+            int w = renderInfo.getCurrentCamera()->getViewport()->width();
+            int h = renderInfo.getCurrentCamera()->getViewport()->height();
+            mTexture->copyTexImage2D(*renderInfo.getState(), 0, 0, w, h);
 
             // Callback removes itself when done
             if (renderInfo.getCurrentCamera())
@@ -120,7 +123,12 @@ namespace MWGui
 
     private:
         osg::ref_ptr<osg::Texture2D> mTexture;
-        int mWidth, mHeight;
+    };
+
+    class DontComputeBoundCallback : public osg::Node::ComputeBoundingSphereCallback
+    {
+    public:
+        virtual osg::BoundingSphere computeBound(const osg::Node&) const { return osg::BoundingSphere(); }
     };
 
     void LoadingScreen::loadingOn()
@@ -136,45 +144,21 @@ namespace MWGui
             mViewer->getIncrementalCompileOperation()->setTargetFrameRate(mTargetFrameRate);
         }
 
-        bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
+        // Assign dummy bounding sphere callback to avoid the bounding sphere of the entire scene being recomputed after each frame of loading
+        // We are already using node masks to avoid the scene from being updated/rendered, but node masks don't work for computeBound()
+        mViewer->getSceneData()->setComputeBoundingSphereCallback(new DontComputeBoundCallback);
+
+        mShowWallpaper = (MWBase::Environment::get().getStateManager()->getState()
                 == MWBase::StateManager::State_NoGame);
-
-        if (!showWallpaper)
-        {
-            // Copy the current framebuffer onto a texture and display that texture as the background image
-            // Note, we could also set the camera to disable clearing and have the background image transparent,
-            // but then we get shaking effects on buffer swaps.
-
-            if (!mTexture)
-            {
-                mTexture = new osg::Texture2D;
-                mTexture->setInternalFormat(GL_RGB);
-                mTexture->setResizeNonPowerOfTwoHint(false);
-            }
-
-            int width = mViewer->getCamera()->getViewport()->width();
-            int height = mViewer->getCamera()->getViewport()->height();
-            mViewer->getCamera()->setInitialDrawCallback(new CopyFramebufferToTextureCallback(mTexture, width, height));
-
-            if (!mGuiTexture.get())
-            {
-                mGuiTexture.reset(new osgMyGUI::OSGTexture(mTexture));
-            }
-
-            mBackgroundImage->setBackgroundImage("");
-
-            mBackgroundImage->setRenderItemTexture(mGuiTexture.get());
-            mBackgroundImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
-        }
 
         setVisible(true);
 
-        if (showWallpaper)
+        if (mShowWallpaper)
         {
             changeWallpaper();
         }
 
-        MWBase::Environment::get().getWindowManager()->pushGuiMode(showWallpaper ? GM_LoadingWallpaper : GM_Loading);
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(mShowWallpaper ? GM_LoadingWallpaper : GM_Loading);
     }
 
     void LoadingScreen::loadingOff()
@@ -191,6 +175,9 @@ namespace MWGui
         }
         else
             mImportantLabel = false; // label was already shown on loading screen
+
+        mViewer->getSceneData()->setComputeBoundingSphereCallback(NULL);
+        mViewer->getSceneData()->dirtyBound();
 
         //std::cout << "loading took " << mTimer.time_m() - mLoadingOnTime << std::endl;
         setVisible(false);
@@ -260,11 +247,35 @@ namespace MWGui
             diff -= mProgress / static_cast<float>(mProgressBar->getScrollRange()) * 100.f;
         }
 
-        bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
-                == MWBase::StateManager::State_NoGame);
-        if (!showWallpaper && diff < initialDelay*1000)
+        if (!mShowWallpaper && diff < initialDelay*1000)
             return false;
         return true;
+    }
+
+    void LoadingScreen::setupCopyFramebufferToTextureCallback()
+    {
+        // Copy the current framebuffer onto a texture and display that texture as the background image
+        // Note, we could also set the camera to disable clearing and have the background image transparent,
+        // but then we get shaking effects on buffer swaps.
+
+        if (!mTexture)
+        {
+            mTexture = new osg::Texture2D;
+            mTexture->setInternalFormat(GL_RGB);
+            mTexture->setResizeNonPowerOfTwoHint(false);
+        }
+
+        if (!mGuiTexture.get())
+        {
+            mGuiTexture.reset(new osgMyGUI::OSGTexture(mTexture));
+        }
+
+        mViewer->getCamera()->setInitialDrawCallback(new CopyFramebufferToTextureCallback(mTexture));
+
+        mBackgroundImage->setBackgroundImage("");
+
+        mBackgroundImage->setRenderItemTexture(mGuiTexture.get());
+        mBackgroundImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
     }
 
     void LoadingScreen::draw()
@@ -272,12 +283,15 @@ namespace MWGui
         if (!needToDrawLoadingScreen())
             return;
 
-        bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
-                == MWBase::StateManager::State_NoGame);
-        if (showWallpaper && mTimer.time_m() > mLastWallpaperChangeTime + 5000*1)
+        if (mShowWallpaper && mTimer.time_m() > mLastWallpaperChangeTime + 5000*1)
         {
             mLastWallpaperChangeTime = mTimer.time_m();
             changeWallpaper();
+        }
+
+        if (!mShowWallpaper && mLastRenderTime < mLoadingOnTime)
+        {
+            setupCopyFramebufferToTextureCallback();
         }
 
         // Turn off rendering except the GUI

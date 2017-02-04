@@ -196,7 +196,14 @@ namespace NifOsg
     public:
         FindGroupByRecIndex(int recIndex);
 
-        virtual void apply(osg::Node &searchNode);
+        virtual void apply(osg::Node &node);
+
+        // Technically not required as the default implementation would trickle down to apply(Node&) anyway,
+        // but we'll shortcut instead to avoid the chain of virtual function calls
+        virtual void apply(osg::MatrixTransform& node);
+        virtual void apply(osg::Geometry& node);
+
+        void applyNode(osg::Node& searchNode);
 
         osg::Group* mFound;
         osg::NodePath mFoundPath;

@@ -667,10 +667,18 @@ void NpcAnimation::updateParts()
         attachArrow();
 }
 
+
+
 PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor)
 {
     osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->getInstance(model);
-    osg::ref_ptr<osg::Node> attached = SceneUtil::attach(instance, mObjectRoot, bonefilter, bonename);
+
+    const NodeMap& nodeMap = getNodeMap();
+    NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(bonename));
+    if (found == nodeMap.end())
+        throw std::runtime_error("Can't find attachment node " + bonename);
+
+    osg::ref_ptr<osg::Node> attached = SceneUtil::attach(instance, mObjectRoot, bonefilter, found->second);
     mResourceSystem->getSceneManager()->notifyAttached(attached);
     if (enchantedGlow)
         addGlow(attached, *glowColor);
@@ -770,43 +778,46 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
         }
     }
 
-    boost::shared_ptr<SceneUtil::ControllerSource> src;
-    if (type == ESM::PRT_Head)
+    osg::Node* node = mObjectParts[type]->getNode();
+    if (node->getNumChildrenRequiringUpdateTraversal() > 0)
     {
-        src = mHeadAnimationTime;
-
-        osg::Node* node = mObjectParts[type]->getNode();
-        if (node->getUserDataContainer())
+        boost::shared_ptr<SceneUtil::ControllerSource> src;
+        if (type == ESM::PRT_Head)
         {
-            for (unsigned int i=0; i<node->getUserDataContainer()->getNumUserObjects(); ++i)
-            {
-                osg::Object* obj = node->getUserDataContainer()->getUserObject(i);
-                if (NifOsg::TextKeyMapHolder* keys = dynamic_cast<NifOsg::TextKeyMapHolder*>(obj))
-                {
-                    for (NifOsg::TextKeyMap::const_iterator it = keys->mTextKeys.begin(); it != keys->mTextKeys.end(); ++it)
-                    {
-                        if (Misc::StringUtils::ciEqual(it->second, "talk: start"))
-                            mHeadAnimationTime->setTalkStart(it->first);
-                        if (Misc::StringUtils::ciEqual(it->second, "talk: stop"))
-                            mHeadAnimationTime->setTalkStop(it->first);
-                        if (Misc::StringUtils::ciEqual(it->second, "blink: start"))
-                            mHeadAnimationTime->setBlinkStart(it->first);
-                        if (Misc::StringUtils::ciEqual(it->second, "blink: stop"))
-                            mHeadAnimationTime->setBlinkStop(it->first);
-                    }
+            src = mHeadAnimationTime;
 
-                    break;
+            if (node->getUserDataContainer())
+            {
+                for (unsigned int i=0; i<node->getUserDataContainer()->getNumUserObjects(); ++i)
+                {
+                    osg::Object* obj = node->getUserDataContainer()->getUserObject(i);
+                    if (NifOsg::TextKeyMapHolder* keys = dynamic_cast<NifOsg::TextKeyMapHolder*>(obj))
+                    {
+                        for (NifOsg::TextKeyMap::const_iterator it = keys->mTextKeys.begin(); it != keys->mTextKeys.end(); ++it)
+                        {
+                            if (Misc::StringUtils::ciEqual(it->second, "talk: start"))
+                                mHeadAnimationTime->setTalkStart(it->first);
+                            if (Misc::StringUtils::ciEqual(it->second, "talk: stop"))
+                                mHeadAnimationTime->setTalkStop(it->first);
+                            if (Misc::StringUtils::ciEqual(it->second, "blink: start"))
+                                mHeadAnimationTime->setBlinkStart(it->first);
+                            if (Misc::StringUtils::ciEqual(it->second, "blink: stop"))
+                                mHeadAnimationTime->setBlinkStop(it->first);
+                        }
+
+                        break;
+                    }
                 }
             }
         }
-    }
-    else if (type == ESM::PRT_Weapon)
-        src = mWeaponAnimationTime;
-    else
-        src.reset(new NullAnimationTime);
+        else if (type == ESM::PRT_Weapon)
+            src = mWeaponAnimationTime;
+        else
+            src.reset(new NullAnimationTime);
 
-    SceneUtil::AssignControllerSourcesVisitor assignVisitor(src);
-    mObjectParts[type]->getNode()->accept(assignVisitor);
+        SceneUtil::AssignControllerSourcesVisitor assignVisitor(src);
+        node->accept(assignVisitor);
+    }
 
     return true;
 }

@@ -16,6 +16,11 @@ namespace Terrain
     class World;
 }
 
+namespace SceneUtil
+{
+    class UnrefQueue;
+}
+
 namespace MWWorld
 {
     class CellStore;
@@ -51,11 +56,14 @@ namespace MWWorld
 
         void setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue);
 
+        void setUnrefQueue(SceneUtil::UnrefQueue* unrefQueue);
+
     private:
         Resource::ResourceSystem* mResourceSystem;
         Resource::BulletShapeManager* mBulletShapeManager;
         Terrain::World* mTerrain;
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
+        osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
         double mExpiryDelay;
         unsigned int mMinCacheSize;
         unsigned int mMaxCacheSize;

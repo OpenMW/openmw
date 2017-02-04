@@ -30,7 +30,7 @@ fullscreen
 :Range:		True/False
 :Default:	False
 
-This boolean setting determines whether the entire screen is used for the specified resolution.
+This setting determines whether the entire screen is used for the specified resolution.
 
 The default value is false. This setting can be toggled in game using the Fullscreen button in the Video tab of the Video panel in the Options menu. It can also be toggled with the Full Screen check box in the Graphics tab of the OpenMW Launcher.
 
@@ -41,7 +41,7 @@ screen
 :Range:		>= 0
 :Default:	0
 
-This integer setting determines which screen the game will open on in multi-monitor configurations. This setting is particularly important when the fullscreen setting is true, since this is the only way to control which screen is used, but it can also be used to control which screen a normal window or a borderless window opens on as well. The screens are numbered in increasing order, beginning with 0.
+This setting determines which screen the game will open on in multi-monitor configurations. This setting is particularly important when the fullscreen setting is true, since this is the only way to control which screen is used, but it can also be used to control which screen a normal window or a borderless window opens on as well. The screens are numbered in increasing order, beginning with 0.
 
 The default value is 0. This setting can be selected from a pull down menu in the Graphics tab of the OpenMW Launcher, but cannot be changed during game play.
 
@@ -69,7 +69,7 @@ window border
 :Range:		True/False
 :Default:	True
 
-This boolean setting determines whether there's an operating system border drawn around the OpenMW window. If this setting is true, the window can be moved and resized with the operating system window controls. If this setting is false, the window has no operating system border.
+This setting determines whether there's an operating system border drawn around the OpenMW window. If this setting is true, the window can be moved and resized with the operating system window controls. If this setting is false, the window has no operating system border.
 
 This setting has no effect if the fullscreen setting is true.
 
@@ -82,7 +82,7 @@ antialiasing
 :Range:		0, 2, 4, 8, 16
 :Default:	0
 
-This integer setting controls anti-aliasing. Anti-aliasing is a technique designed to improve the appearance of polygon edges, so they do not appear to be "jagged". Anti-aliasing can smooth these edges at the cost of a minor reduction in the frame rate. A value of 0 disables anti-aliasing. Other powers of two (e.g. 2, 4, 8, 16) are supported according to the capabilities of your graphics hardware. Higher values do a better job of smoothing out the image but have a greater impact on frame rate.
+This setting controls anti-aliasing. Anti-aliasing is a technique designed to improve the appearance of polygon edges, so they do not appear to be "jagged". Anti-aliasing can smooth these edges at the cost of a minor reduction in the frame rate. A value of 0 disables anti-aliasing. Other powers of two (e.g. 2, 4, 8, 16) are supported according to the capabilities of your graphics hardware. Higher values do a better job of smoothing out the image but have a greater impact on frame rate.
 
 This setting can be configured from a list of valid choices in the Graphics panel of the OpenMW Launcher, but cannot be changed during game play - due to a technical limitation that may be addressed in a future version of OpenMW.
 
@@ -93,7 +93,7 @@ vsync
 :Range:		True/False
 :Default:	False
 
-This boolean setting determines whether frame draws are synchronized with the vertical refresh rate of your monitor. Enabling this setting can reduce screen tearing, a visual defect caused by updating the image buffer in the middle of a screen draw. Enabling this option typically implies limiting the framerate to 60 frames per second, but may also introduce additional delays caused by having to wait until the appropriate time (the vertical blanking interval) to draw a frame.
+This setting determines whether frame draws are synchronized with the vertical refresh rate of your monitor. Enabling this setting can reduce screen tearing, a visual defect caused by updating the image buffer in the middle of a screen draw. Enabling this option typically implies limiting the framerate to 60 frames per second, but may also introduce additional delays caused by having to wait until the appropriate time (the vertical blanking interval) to draw a frame.
 
 The default value is false. This setting can be adjusted in game using the VSync button in the Video tab of the Video panel in the Options menu. It can also be changed by toggling the Vertical Sync check box in the Graphics tab of the OpenMW Launcher.
 
@@ -104,13 +104,13 @@ framerate limit
 :Range:		>= 0.0
 :Default:	0.0
 
-This floating point setting determines the maximum frame rate in frames per second. If this setting is 0.0, the frame rate is unlimited.
+This setting determines the maximum frame rate in frames per second. If this setting is 0.0, the frame rate is unlimited.
 
 There are several reasons to consider capping your frame rate, especially if you're already experiencing a relatively high frame rate (greater than 60 frames per second). Lower frame rates will consume less power and generate less heat and noise. Frame rates above 60 frames per second rarely produce perceptible improvements in visual quality, but may improve input responsiveness. Capping the frame rate may in some situations reduce the perception of choppiness (highly variable frame rates during game play) by lowering the peak frame rates.
 
 This setting interacts with the vsync setting in the Video section in the sense that enabling vertical sync limits the frame rate to the refresh rate of your monitor (often 60 frames per second). Choosing to limit the frame rate using this setting instead of vsync may reduce input lag due to the game not having to wait for the vertical blanking interval.
 
-The default value is 0.0. This setting can only be configured by editing the settings configuration file. This setting was added in OpenMW 0.37.
+The default value is 0.0. This setting can only be configured by editing the settings configuration file.
 
 contrast
 --------
@@ -119,7 +119,7 @@ contrast
 :Range:		> 0.0
 :Default:	1.0
 
-This floating point setting controls the contrast correction for all video in the game.
+This setting controls the contrast correction for all video in the game.
 
 The default value is 1.0. This setting can only be configured by editing the settings configuration file. This setting does not currently work under Linux.
 
@@ -130,6 +130,6 @@ gamma
 :Range:		> 0.0
 :Default:	1.0
 
-This floating point setting controls the gamma correction for all video in the game. Gamma is an exponent that makes colors brighter if greater than 1.0 and darker if less than 1.0.
+This setting controls the gamma correction for all video in the game. Gamma is an exponent that makes colors brighter if greater than 1.0 and darker if less than 1.0.
 
 The default value is 1.0. This setting can be changed in the Detail tab of the Video panel of the Options menu. This setting does not currently work under Linux, and the in-game setting in the Options menu has been disabled.

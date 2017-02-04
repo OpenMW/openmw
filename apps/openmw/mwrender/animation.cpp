@@ -179,6 +179,15 @@ namespace
         {
         }
 
+        virtual void apply(osg::Group& node)
+        {
+            traverse(node);
+        }
+        virtual void apply(osg::MatrixTransform& node)
+        {
+            traverse(node);
+        }
+
         void remove()
         {
             for (RemoveVec::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)

@@ -47,6 +47,8 @@ namespace MWGui
         void findSplashScreens();
         bool needToDrawLoadingScreen();
 
+        void setupCopyFramebufferToTextureCallback();
+
         const VFS::Manager* mVFS;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
 
@@ -60,6 +62,8 @@ namespace MWGui
         bool mImportantLabel;
 
         size_t mProgress;
+
+        bool mShowWallpaper;
 
         MyGUI::Widget* mLoadingBox;
 

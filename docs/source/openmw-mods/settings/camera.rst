@@ -8,7 +8,7 @@ near clip
 :Range:		> 0
 :Default:	1.0
 
-This floating point setting controls the distance to the near clipping plane. The value must be greater than zero. Values greater than approximately 18.0 will occasionally clip objects in the world in front of the character. Values greater than approximately 8.0 will clip the character's hands in first person view and/or the back of their head in third person view.
+This setting controls the distance to the near clipping plane. The value must be greater than zero. Values greater than approximately 18.0 will occasionally clip objects in the world in front of the character. Values greater than approximately 8.0 will clip the character's hands in first person view and/or the back of their head in third person view.
 
 The default value is 1.0. This setting can only be configured by editing the settings configuration file. The value must be greater than 0.0, but it's unclear if the engine enforces this limitation.
 
@@ -19,7 +19,7 @@ small feature culling
 :Range:		True/False
 :Default:	True
 
-This boolean setting determines whether objects that render to a few pixels or smaller will be culled (not drawn). It generally improves performance to enable this feature, and by definition the culled objects will be very small on screen. The size in pixels for an object to be considered 'small' is controlled by a separate setting.
+This setting determines whether objects that render to a few pixels or smaller will be culled (not drawn). It generally improves performance to enable this feature, and by definition the culled objects will be very small on screen. The size in pixels for an object to be considered 'small' is controlled by a separate setting.
 
 The default value is true. This setting can only be configured by editing the settings configuration file.
 
@@ -41,7 +41,7 @@ viewing distance
 :Range:		> 0
 :Default:	6666.0
 
-This floating point values controls the maximum visible distance (also called the far clipping plane). Larger values significantly improve rendering in exterior spaces, but also increase the amount of rendered geometry and significantly reduce the frame rate. This value interacts with the exterior cell load distance setting in that it's probably undesired for this value to provide visibility into cells that have not yet been loaded. When cells are visible before loading, the geometry will "pop-in" suddenly, creating a jarring visual effect. To prevent this effect, this value must be less than::
+This value controls the maximum visible distance (also called the far clipping plane). Larger values significantly improve rendering in exterior spaces, but also increase the amount of rendered geometry and significantly reduce the frame rate. This value interacts with the exterior cell load distance setting in that it's probably undesired for this value to provide visibility into cells that have not yet been loaded. When cells are visible before loading, the geometry will "pop-in" suddenly, creating a jarring visual effect. To prevent this effect, this value must be less than::
 
 	(8192 * exterior cell load distance - 1024) * 0.93
 
@@ -81,6 +81,6 @@ first person field of view
 :Range:		0-360
 :Default:	55.0
 
-The floating point setting controls the field of view for first person meshes such as the player's hands and held objects. It is not recommended to change this value from its default value because the Bethesda provided Morrowind assets do not adapt well to large values, while small values can result in the hands not being visible.
+This setting controls the field of view for first person meshes such as the player's hands and held objects. It is not recommended to change this value from its default value because the Bethesda provided Morrowind assets do not adapt well to large values, while small values can result in the hands not being visible.
 
 The default value is 55.0. This setting can only be configured by editing the settings configuration file.
