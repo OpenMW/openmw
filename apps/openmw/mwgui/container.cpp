@@ -2,7 +2,11 @@
 
 #include <MyGUI_InputManager.h>
 #include <MyGUI_Button.h>
+
+#include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
+#include "../mwmp/Networking.hpp"
+#include "../mwmp/LocalEvent.hpp"
 #include "../mwmp/WorldController.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -96,6 +100,33 @@ namespace MWGui
     {
         if (!onTakeItem(mModel->getItem(mSelectedItem), count))
             return;
+
+        // Added by tes3mp
+        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+        event->cell = *mPtr.getCell()->getCell();
+
+        mwmp::WorldObject worldObject;
+        worldObject.refId = mPtr.getCellRef().getRefId();
+        worldObject.refNumIndex = mPtr.getCellRef().getRefNum().mIndex;
+        event->addObject(worldObject);
+
+        mwmp::ContainerItem containerItem;
+        containerItem.refId = mModel->getItem(mSelectedItem).mBase.getCellRef().getRefId();
+        containerItem.count = count;
+        event->addContainerItem(containerItem);
+        event->containerChanges.action = mwmp::ContainerChanges::REMOVE;
+
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(event);
+
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_CONTAINER about\n- Ptr cellRef: %s, %i\n- cell: %s\n- item: %s, %i",
+            worldObject.refId.c_str(),
+            worldObject.refNumIndex,
+            event->cell.getDescription().c_str(),
+            containerItem.refId,
+            containerItem.count);
+
+        delete event;
+        event = NULL;
 
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
     }

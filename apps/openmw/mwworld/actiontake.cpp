@@ -36,9 +36,9 @@ namespace MWWorld
 
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(event);
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_DELETE about\n- cellRef: %s, %i\n- cell: %s.",
-            getTarget().getCellRef().getRefId().c_str(),
-            getTarget().getCellRef().getRefNum().mIndex,
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_DELETE about\n- cellRef: %s, %i\n- cell: %s",
+            worldObject.refId.c_str(),
+            worldObject.refNumIndex,
             event->cell.getDescription().c_str());
 
         delete event;
