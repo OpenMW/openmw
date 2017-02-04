@@ -33,7 +33,7 @@ preload num threads
 -------------------
 
 :Type:		integer
-:Range:		>1
+:Range:		>=1
 :Default:	1
 
 Controls the number of worker threads used for preloading operations. In addition to the preloading threads, OpenMW uses a main thread, a sound streaming thread, and a graphics thread. Therefore, the default setting of one preloading thread will result in a total of 4 threads used which should work well with quad-core CPUs. If you have additional cores to spare, consider increasing the number of preloading threads to 2 or 3 for a boost in preloading performance. Faster preloading will reduce the chance that a cell could not be completely loaded before the player moves into it, and hence reduce the chance of seeing loading screens or frame drops. This may be especially relevant when the player moves at high speed and/or a large number of cells are loaded in via 'exterior cell load distance'.
@@ -96,7 +96,7 @@ preload cell cache min
 :Range:		>0
 :Default:	12
 
-The minimum amount of preloaded cells that will be kept in the cache. Once the number of preloaded cells in the cache exceeds this number, the game may start to expire preloaded cells, based on the 'preload cell expiry delay' setting, starting with the oldest cell. When a preloaded cell expires, all the assets that were loaded for it will also expire and will have to be loaded again the next time the cell is requested for preloading.
+The minimum number of preloaded cells that will be kept in the cache. Once the number of preloaded cells in the cache exceeds this setting, the game may start to expire preloaded cells, based on the 'preload cell expiry delay' setting, starting with the oldest cell. When a preloaded cell expires, all the assets that were loaded for it will also expire and will have to be loaded again the next time the cell is requested for preloading.
 
 preload cell cache max
 ----------------------
@@ -105,12 +105,12 @@ preload cell cache max
 :Range:		>0
 :Default:	20
 
-The maximum amount of cells that will ever be in pre-loaded state simultaneously. This setting is intended to put a cap on the amount of memory that could potentially be used by preload state.
+The maximum number of cells that will ever be in pre-loaded state simultaneously. This setting is intended to put a cap on the amount of memory that could potentially be used by preload state.
 
 preload cell expiry delay
 -------------------------
 
-:Type:		integer
+:Type:		floating point
 :Range:		>=0
 :Default:	5
 
@@ -119,7 +119,7 @@ The amount of time (in seconds) that a preloaded cell will stay in cache after i
 cache expiry delay
 ------------------
 
-:Type:		integer
+:Type:		floating point
 :Range:		>=0
 :Default:	5
 
