@@ -530,6 +530,12 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     }
     case ID_PLAYER_CELL_STATE:
     {
+        if (guid == myGuid)
+        {
+            if (packet->length == myPacket->headerSize())
+                getLocalPlayer()->sendCellStates();
+        }
+
         break;
     }
     case ID_GAME_DRAWSTATE:

@@ -354,9 +354,6 @@ namespace MWWorld
 
     void Scene::changeCellGrid (int X, int Y, bool changeEvent)
     {
-        // Added by tes3mp
-        mwmp::Main::get().getLocalPlayer()->clearCellStates();
-
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
 
@@ -436,7 +433,10 @@ namespace MWWorld
 
         // Added by tes3mp
         if (mwmp::Main::get().getLocalPlayer()->hasFinishedCharGen())
+        {
             mwmp::Main::get().getLocalPlayer()->sendCellStates();
+            mwmp::Main::get().getLocalPlayer()->clearCellStates();
+        }
 
         CellStore* current = MWBase::Environment::get().getWorld()->getExterior(X,Y);
         MWBase::Environment::get().getWindowManager()->changeCell(current);
@@ -518,9 +518,6 @@ namespace MWWorld
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
-        // Added by tes3mp
-        mwmp::Main::get().getLocalPlayer()->clearCellStates();
-
         CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
         bool loadcell = (mCurrentCell == NULL);
         if(!loadcell)
@@ -570,7 +567,10 @@ namespace MWWorld
 
         // Added by tes3mp
         if (mwmp::Main::get().getLocalPlayer()->hasFinishedCharGen())
+        {
             mwmp::Main::get().getLocalPlayer()->sendCellStates();
+            mwmp::Main::get().getLocalPlayer()->clearCellStates();
+        }
 
         changePlayerCell(cell, position, adjustPlayerPos);
 

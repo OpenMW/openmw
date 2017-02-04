@@ -139,6 +139,8 @@ bool LocalPlayer::charGenThread()
             getNetworking()->getPlayerPacket(ID_GAME_CHARGEN)->Send(this);
         }
 
+        sendCellStates();
+
         // Set the last stage variable to 0 to indicate that CharGen is finished
         charGenStage.end = 0;
     }
@@ -1003,6 +1005,7 @@ void LocalPlayer::sendSpellbook()
 void LocalPlayer::sendCellStates()
 {
     Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_CELL_STATE)->Send(this);
+
 }
 
 void LocalPlayer::sendSpellAddition(std::string id)
