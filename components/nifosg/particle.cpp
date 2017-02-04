@@ -3,6 +3,7 @@
 #include <limits>
 
 #include <osg/MatrixTransform>
+#include <osg/Geometry>
 
 #include <components/nif/controlled.hpp>
 #include <components/nif/nifkey.hpp>
@@ -315,7 +316,22 @@ FindGroupByRecIndex::FindGroupByRecIndex(int recIndex)
 {
 }
 
-void FindGroupByRecIndex::apply(osg::Node &searchNode)
+void FindGroupByRecIndex::apply(osg::Node &node)
+{
+    applyNode(node);
+}
+
+void FindGroupByRecIndex::apply(osg::MatrixTransform &node)
+{
+    applyNode(node);
+}
+
+void FindGroupByRecIndex::apply(osg::Geometry &node)
+{
+    applyNode(node);
+}
+
+void FindGroupByRecIndex::applyNode(osg::Node &searchNode)
 {
     if (searchNode.getUserDataContainer() && searchNode.getUserDataContainer()->getNumUserObjects())
     {

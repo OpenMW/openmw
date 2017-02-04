@@ -5,6 +5,7 @@
 
 #include <osg/NodeVisitor>
 #include <osg/Group>
+#include <osg/Geometry>
 #include <osg/FrontFace>
 #include <osg/PositionAttitudeTransform>
 #include <osg/MatrixTransform>
@@ -29,7 +30,24 @@ namespace SceneUtil
             mFilter2 = "tri " + mFilter;
         }
 
+        virtual void apply(osg::MatrixTransform& node)
+        {
+            applyNode(node);
+        }
+        virtual void apply(osg::Geometry& node)
+        {
+            applyNode(node);
+        }
         virtual void apply(osg::Node& node)
+        {
+            applyNode(node);
+        }
+        virtual void apply(osg::Group& node)
+        {
+            applyNode(node);
+        }
+
+        void applyNode(osg::Node& node)
         {
             std::string lowerName = Misc::StringUtils::lowerCase(node.getName());
             if ((lowerName.size() >= mFilter.size() && lowerName.compare(0, mFilter.size(), mFilter) == 0)

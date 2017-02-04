@@ -3,6 +3,8 @@
 #include "statesetupdater.hpp"
 
 #include <osg/Drawable>
+#include <osg/Geometry>
+#include <osg/MatrixTransform>
 #include <osg/NodeCallback>
 
 namespace SceneUtil
@@ -62,6 +64,21 @@ namespace SceneUtil
     }
 
     void ControllerVisitor::apply(osg::Node &node)
+    {
+        applyNode(node);
+    }
+
+    void ControllerVisitor::apply(osg::MatrixTransform &node)
+    {
+        applyNode(node);
+    }
+
+    void ControllerVisitor::apply(osg::Geometry &node)
+    {
+        applyNode(node);
+    }
+
+    void ControllerVisitor::applyNode(osg::Node &node)
     {
         osg::Callback* callback = node.getUpdateCallback();
         while (callback)
