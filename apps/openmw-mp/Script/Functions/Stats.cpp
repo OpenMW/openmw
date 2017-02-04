@@ -485,8 +485,8 @@ void StatsFunctions::SendAttributes(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player,);
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_ATTRIBUTE)->Send(player, false);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_ATTRIBUTE)->Send(player, true);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(player, false);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(player, true);
 }
 
 void StatsFunctions::SendSkills(unsigned short pid) noexcept
@@ -494,8 +494,8 @@ void StatsFunctions::SendSkills(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player,);
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_SKILL)->Send(player, false);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_SKILL)->Send(player, true);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_SKILL)->Send(player, false);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_SKILL)->Send(player, true);
 }
 
 void StatsFunctions::SendLevel(unsigned short pid) noexcept

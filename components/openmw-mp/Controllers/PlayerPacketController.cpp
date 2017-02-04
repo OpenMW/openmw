@@ -17,8 +17,8 @@
 #include "../Packets/Player/PacketDrawState.hpp"
 #include "../Packets/Player/PacketChatMessage.hpp"
 #include "../Packets/Player/PacketCharGen.hpp"
-#include "../Packets/Player/PacketAttribute.hpp"
-#include "../Packets/Player/PacketSkill.hpp"
+#include "../Packets/Player/PacketPlayerAttribute.hpp"
+#include "../Packets/Player/PacketPlayerSkill.hpp"
 #include "../Packets/Player/PacketLevel.hpp"
 #include "../Packets/Player/PacketHandshake.hpp"
 #include "../Packets/Player/PacketGUIBoxes.hpp"
@@ -60,8 +60,8 @@ mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *p
 
     AddPacket<PacketChatMessage>(&packets, peer);
     AddPacket<PacketCharGen>(&packets, peer);
-    AddPacket<PacketAttribute>(&packets, peer);
-    AddPacket<PacketSkill>(&packets, peer);
+    AddPacket<PacketPlayerAttribute>(&packets, peer);
+    AddPacket<PacketPlayerSkill>(&packets, peer);
     AddPacket<PacketLevel>(&packets, peer);
 
     AddPacket<PacketHandshake>(&packets, peer);

@@ -184,7 +184,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_GAME_ATTRIBUTE:
+    case ID_PLAYER_ATTRIBUTE:
     {
 
         if (!player->creatureStats.mDead)
@@ -197,7 +197,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_GAME_SKILL:
+    case ID_PLAYER_SKILL:
     {
 
         if (!player->creatureStats.mDead)
@@ -714,8 +714,8 @@ void Networking::newPlayer(RakNet::RakNetGUID guid)
         {
             playerController->GetPacket(ID_GAME_BASE_INFO)->Send(pl->second, guid);
             playerController->GetPacket(ID_GAME_DYNAMICSTATS)->Send(pl->second, guid);
-            playerController->GetPacket(ID_GAME_ATTRIBUTE)->Send(pl->second, guid);
-            playerController->GetPacket(ID_GAME_SKILL)->Send(pl->second, guid);
+            playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(pl->second, guid);
+            playerController->GetPacket(ID_PLAYER_SKILL)->Send(pl->second, guid);
             playerController->GetPacket(ID_GAME_POS)->Send(pl->second, guid);
             playerController->GetPacket(ID_PLAYER_CELL_CHANGE)->Send(pl->second, guid);
             playerController->GetPacket(ID_GAME_EQUIPMENT)->Send(pl->second, guid);

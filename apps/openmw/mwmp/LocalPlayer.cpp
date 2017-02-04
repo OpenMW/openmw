@@ -205,7 +205,7 @@ void LocalPlayer::updateAttributes(bool forceUpdate)
 
     if (attributesChanged || forceUpdate)
     {
-        getNetworking()->getPlayerPacket(ID_GAME_ATTRIBUTE)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_ATTRIBUTE)->Send(this);
     }
 }
 
@@ -244,7 +244,7 @@ void LocalPlayer::updateSkills(bool forceUpdate)
     if (skillsChanged || forceUpdate)
     {
         npcStats.mLevelProgress = ptrNpcStats.getLevelProgress();
-        getNetworking()->getPlayerPacket(ID_GAME_SKILL)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_SKILL)->Send(this);
     }
 }
 

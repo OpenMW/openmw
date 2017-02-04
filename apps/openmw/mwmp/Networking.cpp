@@ -574,7 +574,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_GAME_ATTRIBUTE:
+    case ID_PLAYER_ATTRIBUTE:
     {
         if (guid == myGuid)
         {
@@ -604,7 +604,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_GAME_SKILL:
+    case ID_PLAYER_SKILL:
     {
         if (guid == myGuid)
         {
