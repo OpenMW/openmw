@@ -37,6 +37,11 @@ void LocalEvent::addObject(WorldObject worldObject)
     objectChanges.objects.push_back(worldObject);
 }
 
+void LocalEvent::addContainerItem(ContainerItem containerItem)
+{
+    containerChanges.items.push_back(containerItem);
+}
+
 void LocalEvent::placeObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;

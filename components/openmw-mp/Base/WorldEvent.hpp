@@ -31,6 +31,17 @@ namespace mwmp
         std::string varName;
     };
 
+    struct ContainerItem
+    {
+        std::string refId;
+        int count;
+        int health;
+        inline bool operator==(const ContainerItem& rhs)
+        {
+            return refId == rhs.refId && count == rhs.count && health == rhs.health;
+        }
+    };
+
     class WorldEvent
     {
     public:
@@ -51,8 +62,15 @@ namespace mwmp
             unsigned int count;
         };
 
+        struct ContainerChanges
+        {
+            std::vector<ContainerItem> items;
+            unsigned int count;
+        };
+
         RakNet::RakNetGUID guid;
         ObjectChanges objectChanges;
+        ContainerChanges containerChanges;
 
         ESM::Cell cell;
     };
