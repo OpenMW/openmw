@@ -110,7 +110,7 @@ There are several reasons to consider capping your frame rate, especially if you
 
 This setting interacts with the vsync setting in the Video section in the sense that enabling vertical sync limits the frame rate to the refresh rate of your monitor (often 60 frames per second). Choosing to limit the frame rate using this setting instead of vsync may reduce input lag due to the game not having to wait for the vertical blanking interval.
 
-The default value is 0.0. This setting can only be configured by editing the settings configuration file. This setting was added in OpenMW 0.37.
+The default value is 0.0. This setting can only be configured by editing the settings configuration file.
 
 contrast
 --------

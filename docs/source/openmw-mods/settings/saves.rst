@@ -32,4 +32,4 @@ timeplayed
 
 This setting determines whether the amount of the time the player has spent playing will be displayed for each saved game in the Load menu.
 
-The default value is false. This setting can only be configured by editing the settings configuration file. This setting was added in OpenMW 0.37.
+The default value is false. This setting can only be configured by editing the settings configuration file.

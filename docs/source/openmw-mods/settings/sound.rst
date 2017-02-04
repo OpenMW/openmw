@@ -78,7 +78,7 @@ buffer cache min
 
 This setting determines the minimum size of the sound buffer cache in megabytes. When the cache reaches the size specified by the buffer cache max setting, old buffers will be unloaded until it's using no more memory than specified by this setting. This setting must be less than or equal to the buffer cache max setting.
 
-The default value is 14. This setting can only be configured by editing the settings configuration file. This setting was added in OpenMW version 0.38.
+The default value is 14. This setting can only be configured by editing the settings configuration file.
 
 buffer cache max
 ----------------
@@ -89,7 +89,7 @@ buffer cache max
 
 This setting determines the maximum size of the sound buffer cache in megabytes. When the cache reaches this size, old buffers will be unloaded until it reaches the size specified by the buffer cache min setting. This setting must be greater than or equal to the buffer cache min setting.
 
-The default value is 16. This setting can only be configured by editing the settings configuration file. This setting was added in OpenMW version 0.38.
+The default value is 16. This setting can only be configured by editing the settings configuration file.
 
 hrtf enable
 -----------
@@ -99,7 +99,7 @@ hrtf enable
 :Default:	-1
 
 This setting determines whether to enable head-related transfer function (HRTF) audio processing. HRTF audio processing creates the perception of sounds occurring in a three dimensional space when wearing headphones. Enabling HRTF may also require an OpenAL Soft version greater than 1.17.0, and possibly some operating system configuration. A value of 0 disables HRTF processing, while a value of 1 explicitly enables HRTF processing.
-The default value is -1, which should enable the feature automatically for most users when possible. This setting can only be configured by editing the settings configuration file. This setting was added in OpenMW version 0.38.
+The default value is -1, which should enable the feature automatically for most users when possible. This setting can only be configured by editing the settings configuration file.
 
 hrtf
 ----
@@ -110,4 +110,4 @@ hrtf
 
 This setting specifies which HRTF profile to use when HRTF is enabled. Blank means use the default. This setting has no effect if HRTF is not enabled based on the hrtf enable setting. Allowed values for this field are enumerated in openmw.log file is an HRTF enabled ausio system is installed.
 
-The default value is the empty string, which uses the default profile. This setting can only be configured by editing the settings configuration file. This setting was added in OpenMW version 0.38.
+The default value is the empty string, which uses the default profile. This setting can only be configured by editing the settings configuration file.
