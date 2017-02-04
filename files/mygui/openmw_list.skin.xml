@@ -9,6 +9,7 @@
         <Property key="MinTrackSize" value="14"/>
         <Property key="VerticalAlignment" value="false"/>
         <Property key="MoveToClick" value="true"/>
+        <Property key="TrackFill" value="1"/>
 
         <Property key="WheelPage" value="36"/>
         <Property key="ViewPage" value="36"/>
@@ -50,6 +51,7 @@
         <Property key="TrackRangeMargins" value="20 19"/>
         <Property key="MinTrackSize" value="14"/>
         <Property key="MoveToClick" value="true"/>
+        <Property key="TrackFill" value="1"/>
 
         <Property key="WheelPage" value="36"/>
         <Property key="ViewPage" value="36"/>
