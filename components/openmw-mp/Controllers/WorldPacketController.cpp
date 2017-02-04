@@ -12,7 +12,7 @@
 #include "../Packets/World/PacketObjectAnimPlay.hpp"
 
 #include "../Packets/World/PacketContainerAdd.hpp"
-#include "../Packets/World/PacketContainerRemove.hpp"
+#include "../Packets/World/PacketObjectHealth.hpp"
 #include "../Packets/World/PacketDoorState.hpp"
 #include "../Packets/World/PacketMusicPlay.hpp"
 #include "../Packets/World/PacketVideoPlay.hpp"
@@ -44,7 +44,7 @@ mwmp::WorldPacketController::WorldPacketController(RakNet::RakPeerInterface *pee
     AddPacket<PacketObjectAnimPlay>(&packets, peer);
 
     AddPacket<PacketContainerAdd>(&packets, peer);
-    AddPacket<PacketContainerRemove>(&packets, peer);
+    AddPacket<PacketObjectHealth>(&packets, peer);
     AddPacket<PacketDoorState>(&packets, peer);
     AddPacket<PacketMusicPlay>(&packets, peer);
     AddPacket<PacketVideoPlay>(&packets, peer);
