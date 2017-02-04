@@ -1872,10 +1872,14 @@ void CharacterController::update(float duration)
         {
             if(mHitState != CharState_KnockDown && mHitState != CharState_KnockOut)
             {
-                world->rotateObject(mPtr, rot.x(), rot.y(), rot.z(), true);
+                if (rot != osg::Vec3f())
+                    world->rotateObject(mPtr, rot.x(), rot.y(), rot.z(), true);
             }
             else //avoid z-rotating for knockdown
-                world->rotateObject(mPtr, rot.x(), rot.y(), 0.0f, true);
+            {
+                if (rot.x() != 0 && rot.y() != 0)
+                    world->rotateObject(mPtr, rot.x(), rot.y(), 0.0f, true);
+            }
 
             if (!mMovementAnimationControlled)
                 world->queueMovement(mPtr, vec);
