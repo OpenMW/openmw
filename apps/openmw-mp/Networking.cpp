@@ -537,9 +537,9 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_CONTAINER_ADD:
+    case ID_CONTAINER:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONTAINER_ADD from %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONTAINER from %s",
             player->npc.mName.c_str());
 
         myPacket->Read(worldEvent);

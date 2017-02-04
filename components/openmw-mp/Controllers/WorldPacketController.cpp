@@ -4,15 +4,15 @@
 
 #include "../Packets/World/PacketObjectDelete.hpp"
 #include "../Packets/World/PacketObjectPlace.hpp"
+#include "../Packets/World/PacketObjectScale.hpp"
+#include "../Packets/World/PacketObjectHealth.hpp"
 #include "../Packets/World/PacketObjectLock.hpp"
 #include "../Packets/World/PacketObjectUnlock.hpp"
-#include "../Packets/World/PacketObjectScale.hpp"
 #include "../Packets/World/PacketObjectMove.hpp"
 #include "../Packets/World/PacketObjectRotate.hpp"
 #include "../Packets/World/PacketObjectAnimPlay.hpp"
 
-#include "../Packets/World/PacketContainerAdd.hpp"
-#include "../Packets/World/PacketObjectHealth.hpp"
+#include "../Packets/World/PacketContainer.hpp"
 #include "../Packets/World/PacketDoorState.hpp"
 #include "../Packets/World/PacketMusicPlay.hpp"
 #include "../Packets/World/PacketVideoPlay.hpp"
@@ -36,15 +36,15 @@ mwmp::WorldPacketController::WorldPacketController(RakNet::RakPeerInterface *pee
 {
     AddPacket<PacketObjectDelete>(&packets, peer);
     AddPacket<PacketObjectPlace>(&packets, peer);
+    AddPacket<PacketObjectScale>(&packets, peer);
+    AddPacket<PacketObjectHealth>(&packets, peer);
     AddPacket<PacketObjectLock>(&packets, peer);
     AddPacket<PacketObjectUnlock>(&packets, peer);
-    AddPacket<PacketObjectScale>(&packets, peer);
     AddPacket<PacketObjectMove>(&packets, peer);
     AddPacket<PacketObjectRotate>(&packets, peer);
     AddPacket<PacketObjectAnimPlay>(&packets, peer);
 
-    AddPacket<PacketContainerAdd>(&packets, peer);
-    AddPacket<PacketObjectHealth>(&packets, peer);
+    AddPacket<PacketContainer>(&packets, peer);
     AddPacket<PacketDoorState>(&packets, peer);
     AddPacket<PacketMusicPlay>(&packets, peer);
     AddPacket<PacketVideoPlay>(&packets, peer);
