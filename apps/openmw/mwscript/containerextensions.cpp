@@ -6,6 +6,9 @@
 
 #include <MyGUI_LanguageManager.h>
 
+#include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
+
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 
@@ -67,6 +70,11 @@ namespace MWScript
                     // Spawn a messagebox (only for items added to player's inventory and if player is talking to someone)
                     if (ptr == MWBase::Environment::get().getWorld ()->getPlayerPtr() )
                     {
+                        // Added by tes3mp
+                        //
+                        // LocalPlayer's inventory has changed, so send a packet with it
+                        mwmp::Main::get().getLocalPlayer()->sendInventory();
+
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been added to their inventory
                         std::string msgBox;
                         std::string itemName = itemPtr.getClass().getName(itemPtr);

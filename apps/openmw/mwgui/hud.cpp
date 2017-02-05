@@ -291,6 +291,8 @@ namespace MWGui
             WorldItemModel drop (mouseX, mouseY);
             mDragAndDrop->drop(&drop, NULL);
 
+            // Added by tes3mp
+            //
             // LocalPlayer's inventory has changed, so send a packet with it
             mwmp::Main::get().getLocalPlayer()->sendInventory();
 
@@ -326,6 +328,9 @@ namespace MWGui
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(event);
                     delete event;
                     event = nullptr;
+
+                    // LocalPlayer's inventory has changed, so send a packet with it
+                    mwmp::Main::get().getLocalPlayer()->sendInventory();
                 }
             }
         }
