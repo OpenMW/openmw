@@ -108,9 +108,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             return;
         }
     }
-    else if (packet->data[0] == ID_GAME_BASE_INFO)
+    else if (packet->data[0] == ID_PLAYER_BASEINFO)
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_BASEINFO about %s",
             player->npc.mName.c_str());
 
         myPacket->Read(player);
@@ -128,9 +128,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
     switch (packet->data[0])
     {
-        case ID_GAME_BASE_INFO:
+        case ID_PLAYER_BASEINFO:
         {
-        /*LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO about %s",
+        /*LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_BASEINFO about %s",
         player->npc.mName.c_str());
 
         myPacket->Read(player);
@@ -138,9 +138,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         break;
         }
-    case ID_GAME_POS:
+    case ID_PLAYER_POS:
     {
-        //DEBUG_PRINTF("ID_GAME_POS \n");
+        //DEBUG_PRINTF("ID_PLAYER_POS \n");
 
         if (!player->creatureStats.mDead)
         {
@@ -210,7 +210,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_GAME_LEVEL:
+    case ID_PLAYER_LEVEL:
     {
 
         if (!player->creatureStats.mDead)
@@ -223,9 +223,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_GAME_EQUIPMENT:
+    case ID_PLAYER_EQUIPMENT:
     {
-        DEBUG_PRINTF("ID_GAME_EQUIPMENT\n");
+        DEBUG_PRINTF("ID_PLAYER_EQUIPMENT\n");
 
         myPacket->Read(player);
         myPacket->Send(player, true);
@@ -235,9 +235,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_GAME_INVENTORY:
+    case ID_PLAYER_INVENTORY:
     {
-        DEBUG_PRINTF("ID_GAME_INVENTORY\n");
+        DEBUG_PRINTF("ID_PLAYER_INVENTORY\n");
         myPacket->Read(player);
 
         Script::Call<Script::CallbackIdentity("OnPlayerInventoryChange")>(player->getId());
@@ -245,9 +245,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_GAME_SPELLBOOK:
+    case ID_PLAYER_SPELLBOOK:
     {
-        DEBUG_PRINTF("ID_GAME_SPELLBOOK\n");
+        DEBUG_PRINTF("ID_PLAYER_SPELLBOOK\n");
         myPacket->Read(player);
 
         Script::Call<Script::CallbackIdentity("OnPlayerSpellbookChange")>(player->getId(), player->spellbookChanges.action);
@@ -255,9 +255,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_GAME_JOURNAL:
+    case ID_PLAYER_JOURNAL:
     {
-        DEBUG_PRINTF("ID_GAME_JOURNAL\n");
+        DEBUG_PRINTF("ID_PLAYER_JOURNAL\n");
         myPacket->Read(player);
 
         Script::Call<Script::CallbackIdentity("OnPlayerJournalChange")>(player->getId());
@@ -265,9 +265,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_GAME_ATTACK:
+    case ID_PLAYER_ATTACK:
     {
-        DEBUG_PRINTF("ID_GAME_ATTACK\n");
+        DEBUG_PRINTF("ID_PLAYER_ATTACK\n");
 
         if (!player->creatureStats.mDead)
         {
@@ -292,14 +292,14 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             }
 
             myPacket->Send(player, true);
-            playerController->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(player->attack.target);
+            playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->RequestData(player->attack.target);
         }
         break;
     }
 
-    case ID_GAME_DYNAMICSTATS:
+    case ID_PLAYER_DYNAMICSTATS:
     {
-        DEBUG_PRINTF("ID_GAME_DYNAMICSTATS\n");
+        DEBUG_PRINTF("ID_PLAYER_DYNAMICSTATS\n");
         myPacket->Read(player);
         myPacket->Send(player, true);
         break;
@@ -340,7 +340,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         //packetResurrect.Read(player);
         player->creatureStats.mDead = false;
         myPacket->Send(player, true);
-        playerController->GetPacket(ID_GAME_POS)->RequestData(player->guid);
+        playerController->GetPacket(ID_PLAYER_POS)->RequestData(player->guid);
         playerController->GetPacket(ID_PLAYER_CELL_CHANGE)->RequestData(player->guid);
 
         Script::Call<Script::CallbackIdentity("OnPlayerResurrect")>(player->getId());
@@ -348,9 +348,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_GAME_DRAWSTATE:
+    case ID_PLAYER_DRAWSTATE:
     {
-        DEBUG_PRINTF("ID_GAME_DRAWSTATE\n");
+        DEBUG_PRINTF("ID_PLAYER_DRAWSTATE\n");
         myPacket->Read(player);
         myPacket->Send(player, true);
         break;
@@ -372,9 +372,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_GAME_CHARGEN:
+    case ID_PLAYER_CHARGEN:
     {
-        DEBUG_PRINTF("ID_GAME_CHARGEN\n");
+        DEBUG_PRINTF("ID_PLAYER_CHARGEN\n");
         myPacket->Read(player);
 
         if (player->charGenStage.current == player->charGenStage.end && player->charGenStage.current != 0)
@@ -395,9 +395,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_GAME_CHARCLASS:
+    case ID_PLAYER_CHARCLASS:
     {
-        DEBUG_PRINTF("ID_GAME_CHARCLASS\n");
+        DEBUG_PRINTF("ID_PLAYER_CHARCLASS\n");
         myPacket->Read(player);
         break;
     }
@@ -689,11 +689,11 @@ void Networking::update(RakNet::Packet *packet)
 
 void Networking::newPlayer(RakNet::RakNetGUID guid)
 {
-    playerController->GetPacket(ID_GAME_BASE_INFO)->RequestData(guid);
-    playerController->GetPacket(ID_GAME_DYNAMICSTATS)->RequestData(guid);
-    playerController->GetPacket(ID_GAME_POS)->RequestData(guid);
+    playerController->GetPacket(ID_PLAYER_BASEINFO)->RequestData(guid);
+    playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->RequestData(guid);
+    playerController->GetPacket(ID_PLAYER_POS)->RequestData(guid);
     playerController->GetPacket(ID_PLAYER_CELL_CHANGE)->RequestData(guid);
-    playerController->GetPacket(ID_GAME_EQUIPMENT)->RequestData(guid);
+    playerController->GetPacket(ID_PLAYER_EQUIPMENT)->RequestData(guid);
 
     LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Sending info about other players to %lu",
         guid.g);
@@ -712,13 +712,13 @@ void Networking::newPlayer(RakNet::RakNetGUID guid)
         // If we are iterating over a player who has inputted their name, proceed
         else if (pl->second->getLoadState() == Player::POSTLOADED)
         {
-            playerController->GetPacket(ID_GAME_BASE_INFO)->Send(pl->second, guid);
-            playerController->GetPacket(ID_GAME_DYNAMICSTATS)->Send(pl->second, guid);
+            playerController->GetPacket(ID_PLAYER_BASEINFO)->Send(pl->second, guid);
+            playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(pl->second, guid);
             playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(pl->second, guid);
             playerController->GetPacket(ID_PLAYER_SKILL)->Send(pl->second, guid);
-            playerController->GetPacket(ID_GAME_POS)->Send(pl->second, guid);
+            playerController->GetPacket(ID_PLAYER_POS)->Send(pl->second, guid);
             playerController->GetPacket(ID_PLAYER_CELL_CHANGE)->Send(pl->second, guid);
-            playerController->GetPacket(ID_GAME_EQUIPMENT)->Send(pl->second, guid);
+            playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(pl->second, guid);
         }
     }
 

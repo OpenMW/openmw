@@ -2,17 +2,17 @@
 // Created by koncord on 07.01.16.
 //
 
-#include "PacketBaseInfo.hpp"
+#include "PacketPlayerBaseInfo.hpp"
 #include <components/openmw-mp/NetworkMessages.hpp>
 
 using namespace mwmp;
 
-PacketBaseInfo::PacketBaseInfo(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
+PacketPlayerBaseInfo::PacketPlayerBaseInfo(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
-    packetID = ID_GAME_BASE_INFO;
+    packetID = ID_PLAYER_BASEINFO;
 }
 
-void PacketBaseInfo::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketPlayerBaseInfo::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
     PlayerPacket::Packet(bs, player, send);
 

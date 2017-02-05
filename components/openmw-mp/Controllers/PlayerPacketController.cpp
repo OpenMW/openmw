@@ -2,33 +2,33 @@
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
 
-#include "../Packets/Player/PacketClass.hpp"
-#include "../Packets/Player/PacketPosition.hpp"
+#include "../Packets/Player/PacketPlayerClass.hpp"
+#include "../Packets/Player/PacketPlayerPosition.hpp"
 #include "../Packets/Player/PacketPlayerCellChange.hpp"
 #include "../Packets/Player/PacketPlayerCellState.hpp"
-#include "../Packets/Player/PacketBaseInfo.hpp"
-#include "../Packets/Player/PacketEquipment.hpp"
-#include "../Packets/Player/PacketAttack.hpp"
-#include "../Packets/Player/PacketDynamicStats.hpp"
+#include "../Packets/Player/PacketPlayerBaseInfo.hpp"
+#include "../Packets/Player/PacketPlayerEquipment.hpp"
+#include "../Packets/Player/PacketPlayerAttack.hpp"
+#include "../Packets/Player/PacketPlayerDynamicStats.hpp"
 #include "../Packets/Player/PacketResurrect.hpp"
 #include "../Packets/Player/PacketDie.hpp"
 #include "../Packets/Player/PacketSendMyID.hpp"
 #include "../Packets/Player/PacketDisconnect.hpp"
-#include "../Packets/Player/PacketDrawState.hpp"
+#include "../Packets/Player/PacketPlayerDrawState.hpp"
 #include "../Packets/Player/PacketChatMessage.hpp"
-#include "../Packets/Player/PacketCharGen.hpp"
+#include "../Packets/Player/PacketPlayerCharGen.hpp"
 #include "../Packets/Player/PacketPlayerAttribute.hpp"
 #include "../Packets/Player/PacketPlayerSkill.hpp"
-#include "../Packets/Player/PacketLevel.hpp"
+#include "../Packets/Player/PacketPlayerLevel.hpp"
 #include "../Packets/Player/PacketHandshake.hpp"
 #include "../Packets/Player/PacketGUIBoxes.hpp"
 #include "../Packets/Player/PacketTime.hpp"
 #include "../Packets/Player/PacketLoaded.hpp"
-#include "../Packets/Player/PacketInventory.hpp"
-#include "../Packets/Player/PacketSpellbook.hpp"
-#include "../Packets/Player/PacketJournal.hpp"
+#include "../Packets/Player/PacketPlayerInventory.hpp"
+#include "../Packets/Player/PacketPlayerSpellbook.hpp"
+#include "../Packets/Player/PacketPlayerJournal.hpp"
 #include "../Packets/Player/PacketConsole.hpp"
-#include "../Packets/Player/PacketActiveSkills.hpp"
+#include "../Packets/Player/PacketPlayerActiveSkills.hpp"
 
 #include "PlayerPacketController.hpp"
 
@@ -42,38 +42,38 @@ inline void AddPacket(mwmp::PlayerPacketController::packets_t *packets, RakNet::
 
 mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *peer)
 {
-    AddPacket<PacketPosition>(&packets, peer);
+    AddPacket<PacketPlayerPosition>(&packets, peer);
     AddPacket<PacketPlayerCellChange>(&packets, peer);
     AddPacket<PacketPlayerCellState>(&packets, peer);
 
-    AddPacket<PacketBaseInfo>(&packets, peer);
-    AddPacket<PacketEquipment>(&packets, peer);
+    AddPacket<PacketPlayerBaseInfo>(&packets, peer);
+    AddPacket<PacketPlayerEquipment>(&packets, peer);
 
-    AddPacket<PacketAttack>(&packets, peer);
-    AddPacket<PacketDynamicStats>(&packets, peer);
+    AddPacket<PacketPlayerAttack>(&packets, peer);
+    AddPacket<PacketPlayerDynamicStats>(&packets, peer);
     AddPacket<PacketResurrect>(&packets, peer);
 
     AddPacket<PacketDie>(&packets, peer);
-    AddPacket<PacketDrawState>(&packets, peer);
+    AddPacket<PacketPlayerDrawState>(&packets, peer);
     AddPacket<PacketSendMyID>(&packets, peer);
     AddPacket<PacketDisconnect>(&packets, peer);
 
     AddPacket<PacketChatMessage>(&packets, peer);
-    AddPacket<PacketCharGen>(&packets, peer);
+    AddPacket<PacketPlayerCharGen>(&packets, peer);
     AddPacket<PacketPlayerAttribute>(&packets, peer);
     AddPacket<PacketPlayerSkill>(&packets, peer);
-    AddPacket<PacketLevel>(&packets, peer);
+    AddPacket<PacketPlayerLevel>(&packets, peer);
 
     AddPacket<PacketHandshake>(&packets, peer);
     AddPacket<PacketGUIBoxes>(&packets, peer);
-    AddPacket<PacketClass>(&packets, peer);
+    AddPacket<PacketPlayerClass>(&packets, peer);
     AddPacket<PacketTime>(&packets, peer);
     AddPacket<PacketLoaded>(&packets, peer);
-    AddPacket<PacketInventory>(&packets, peer);
-    AddPacket<PacketSpellbook>(&packets, peer);
-    AddPacket<PacketJournal>(&packets, peer);
+    AddPacket<PacketPlayerInventory>(&packets, peer);
+    AddPacket<PacketPlayerSpellbook>(&packets, peer);
+    AddPacket<PacketPlayerJournal>(&packets, peer);
 
-    AddPacket<PacketActiveSkills>(&packets, peer);
+    AddPacket<PacketPlayerActiveSkills>(&packets, peer);
 
     AddPacket<PacketConsole>(&packets, peer);
 }

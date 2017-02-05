@@ -3,16 +3,16 @@
 //
 
 #include <components/openmw-mp/NetworkMessages.hpp>
-#include "PacketAttack.hpp"
+#include "PacketPlayerAttack.hpp"
 
 using namespace mwmp;
 
-PacketAttack::PacketAttack(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
+PacketPlayerAttack::PacketPlayerAttack(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
-    packetID = ID_GAME_ATTACK;
+    packetID = ID_PLAYER_ATTACK;
 }
 
-void PacketAttack::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
+void PacketPlayerAttack::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
 {
     PlayerPacket::Packet(bs, player, send);
 

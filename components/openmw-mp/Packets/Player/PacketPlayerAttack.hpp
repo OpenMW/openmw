@@ -2,21 +2,21 @@
 // Created by koncord on 13.01.16.
 //
 
-#ifndef OPENMW_PACKETATTACK_HPP
-#define OPENMW_PACKETATTACK_HPP
+#ifndef OPENMW_PACKETPLAYERATTACK_HPP
+#define OPENMW_PACKETPLAYERATTACK_HPP
 
 
 #include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketAttack : public PlayerPacket
+    class PacketPlayerAttack : public PlayerPacket
     {
     public:
-        PacketAttack(RakNet::RakPeerInterface *peer);
+        PacketPlayerAttack(RakNet::RakPeerInterface *peer);
 
         virtual void Packet(RakNet::BitStream *bs, BasePlayer *player, bool send);
     };
 }
 
-#endif //OPENMW_PACKETATTACK_HPP
+#endif //OPENMW_PACKETPLAYERATTACK_HPP

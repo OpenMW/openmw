@@ -2,17 +2,17 @@
 // Created by koncord on 03.12.16.
 //
 
-#include "PacketActiveSkills.hpp"
+#include "PacketPlayerActiveSkills.hpp"
 #include <components/openmw-mp/NetworkMessages.hpp>
 
 using namespace mwmp;
 
-PacketActiveSkills::PacketActiveSkills(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
+PacketPlayerActiveSkills::PacketPlayerActiveSkills(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
-    packetID = ID_GAME_ACTIVESKILLS;
+    packetID = ID_PLAYER_ACTIVESKILLS;
 }
 
-void PacketActiveSkills::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
+void PacketPlayerActiveSkills::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
 {
     PlayerPacket::Packet(bs, player, send);
 

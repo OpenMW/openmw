@@ -3,14 +3,14 @@
 //
 
 #include <components/openmw-mp/NetworkMessages.hpp>
-#include "PacketClass.hpp"
+#include "PacketPlayerClass.hpp"
 
-mwmp::PacketClass::PacketClass(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
+mwmp::PacketPlayerClass::PacketPlayerClass(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
-    packetID = ID_GAME_CHARCLASS;
+    packetID = ID_PLAYER_CHARCLASS;
 }
 
-void mwmp::PacketClass::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
+void mwmp::PacketPlayerClass::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
 {
     PlayerPacket::Packet(bs, player, send);
 

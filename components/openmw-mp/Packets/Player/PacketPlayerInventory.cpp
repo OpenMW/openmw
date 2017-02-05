@@ -3,17 +3,17 @@
 //
 
 #include <components/openmw-mp/NetworkMessages.hpp>
-#include "PacketInventory.hpp"
+#include "PacketPlayerInventory.hpp"
 
 using namespace std;
 using namespace mwmp;
 
-PacketInventory::PacketInventory(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
+PacketPlayerInventory::PacketPlayerInventory(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
-    packetID = ID_GAME_INVENTORY;
+    packetID = ID_PLAYER_INVENTORY;
 }
 
-void PacketInventory::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketPlayerInventory::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
     PlayerPacket::Packet(bs, player, send);
 
@@ -33,13 +33,13 @@ void PacketInventory::Packet(RakNet::BitStream *bs, BasePlayer *player, bool sen
         if (send)
         {
             item = player->inventoryChanges.items[i];
-            RW(item.refid, send);
+            RW(item.refId, send);
             RW(item.count, send);
             RW(item.health, send);
         }
         else
         {
-            RW(item.refid, send);
+            RW(item.refId, send);
             RW(item.count, send);
             RW(item.health, send);
             player->inventoryChanges.items.push_back(item);

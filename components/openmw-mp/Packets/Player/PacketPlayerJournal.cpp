@@ -1,15 +1,15 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
-#include "PacketJournal.hpp"
+#include "PacketPlayerJournal.hpp"
 
 using namespace std;
 using namespace mwmp;
 
-PacketJournal::PacketJournal(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
+PacketPlayerJournal::PacketPlayerJournal(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
-    packetID = ID_GAME_JOURNAL;
+    packetID = ID_PLAYER_JOURNAL;
 }
 
-void PacketJournal::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketPlayerJournal::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
     PlayerPacket::Packet(bs, player, send);
 

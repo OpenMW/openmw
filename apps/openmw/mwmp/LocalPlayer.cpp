@@ -108,7 +108,7 @@ bool LocalPlayer::charGenThread()
             windowManager->pushGuiMode(MWGui::GM_Review);
             break;
         }
-        getNetworking()->getPlayerPacket(ID_GAME_CHARGEN)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_CHARGEN)->Send(this);
         charGenStage.current++;
 
         return false;
@@ -123,8 +123,8 @@ bool LocalPlayer::charGenThread()
         npc = *player.get<ESM::NPC>()->mBase;
         birthsign = world->getPlayer().getBirthSign();
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_GAME_BASE_INFO to server with my CharGen info");
-        getNetworking()->getPlayerPacket(ID_GAME_BASE_INFO)->Send(this);
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_BASEINFO to server with my CharGen info");
+        getNetworking()->getPlayerPacket(ID_PLAYER_BASEINFO)->Send(this);
 
         // Send stats packets if this is the 2nd round of CharGen that
         // only happens for new characters
@@ -136,7 +136,7 @@ bool LocalPlayer::charGenThread()
             updateLevel(true);
             sendClass();
             sendSpellbook();
-            getNetworking()->getPlayerPacket(ID_GAME_CHARGEN)->Send(this);
+            getNetworking()->getPlayerPacket(ID_PLAYER_CHARGEN)->Send(this);
         }
 
         sendCellStates();
@@ -183,7 +183,7 @@ void LocalPlayer::updateDynamicStats(bool forceUpdate)
 
             timer = 0;
 
-            getNetworking()->getPlayerPacket(ID_GAME_DYNAMICSTATS)->Send(this);
+            getNetworking()->getPlayerPacket(ID_PLAYER_DYNAMICSTATS)->Send(this);
         }
     }
 }
@@ -256,7 +256,7 @@ void LocalPlayer::updateLevel(bool forceUpdate)
     if (ptrNpcStats.getLevel() != creatureStats.mLevel || forceUpdate)
     {
         creatureStats.mLevel = ptrNpcStats.getLevel();
-        getNetworking()->getPlayerPacket(ID_GAME_LEVEL)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_LEVEL)->Send(this);
 
         // Also update skills to refresh level progress and attribute bonuses
         // for next level up
@@ -296,7 +296,7 @@ void LocalPlayer::updatePosition(bool forceUpdate)
         direction.pos[1] = move.mPosition[1];
         direction.pos[2] = move.mPosition[2];
 
-        getNetworking()->getPlayerPacket(ID_GAME_POS)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_POS)->Send(this);
     }
     else if (isJumping && world->isOnGround(player))
     {
@@ -308,7 +308,7 @@ void LocalPlayer::updatePosition(bool forceUpdate)
     {
         sentJumpEnd = true;
         position = ptrPos;
-        getNetworking()->getPlayerPacket(ID_GAME_POS)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_POS)->Send(this);
     }
 }
 
@@ -395,11 +395,11 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
     {
         MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
-        if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), equipedItems[slot].refid))
+        if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), equipedItems[slot].refId))
         {
             equipChanged = true;
 
-            equipedItems[slot].refid = it->getCellRef().getRefId();
+            equipedItems[slot].refId = it->getCellRef().getRefId();
             equipedItems[slot].health = it->getCellRef().getCharge();
             if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
             {
@@ -411,10 +411,10 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
             else
                 equipedItems[slot].count = invStore.count(it->getCellRef().getRefId());
         }
-        else if (it == invStore.end() && !equipedItems[slot].refid.empty())
+        else if (it == invStore.end() && !equipedItems[slot].refId.empty())
         {
             equipChanged = true;
-            equipedItems[slot].refid = "";
+            equipedItems[slot].refId = "";
             equipedItems[slot].count = 0;
             equipedItems[slot].health = 0;
         }
@@ -424,7 +424,7 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
     {
         RakNet::BitStream bs;
         bs.ResetWritePointer();
-        getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_EQUIPMENT)->Packet(&bs, this, true);
+        getNetworking()->getPlayerPacket((RakNet::MessageID) ID_PLAYER_EQUIPMENT)->Packet(&bs, this, true);
         getNetworking()->sendData(&bs);
         equipChanged = false;
     }
@@ -448,8 +448,8 @@ void LocalPlayer::updateInventory(bool forceUpdate)
             MWWorld::ContainerStoreIterator result(ptrInventory.begin());
             for (; result != ptrInventory.end(); ++result)
             {
-                item.refid = result->getCellRef().getRefId();
-                if (item.refid.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
+                item.refId = result->getCellRef().getRefId();
+                if (item.refId.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
                     continue;
 
                 item.count = result->getRefData().getCount();
@@ -470,8 +470,8 @@ void LocalPlayer::updateInventory(bool forceUpdate)
     {
         for (MWWorld::ContainerStoreIterator iter(ptrInventory.begin()); iter != ptrInventory.end(); ++iter)
         {
-            item.refid = iter->getCellRef().getRefId();
-            if (item.refid.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
+            item.refId = iter->getCellRef().getRefId();
+            if (item.refId.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
                 continue;
 
             item.count = iter->getRefData().getCount();
@@ -525,7 +525,7 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
             attack.refid = spell;
 
             /*RakNet::BitStream bs;
-            getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
+            getNetworking()->getPlayerPacket((RakNet::MessageID) ID_PLAYER_ATTACK)->Packet(&bs, this, true);
             getNetworking()->SendData(&bs);*/
         }
         else if (state == MWMechanics::DrawState_Weapon)
@@ -623,7 +623,7 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after jump;
 
         RakNet::BitStream bs;
-        getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_DRAWSTATE)->Packet(&bs, this, true);
+        getNetworking()->getPlayerPacket((RakNet::MessageID) ID_PLAYER_DRAWSTATE)->Packet(&bs, this, true);
         getNetworking()->sendData(&bs);
         //timer = 0;
     }
@@ -637,7 +637,7 @@ void LocalPlayer::addItems()
     for (unsigned int i = 0; i < inventoryChanges.count; i++)
     {
         mwmp::Item item = inventoryChanges.items[i];
-        MWWorld::Ptr itemPtr = *ptrStore.add(item.refid, item.count, ptrPlayer);
+        MWWorld::Ptr itemPtr = *ptrStore.add(item.refId, item.count, ptrPlayer);
         if (item.health != -1)
             itemPtr.getCellRef().setCharge(item.health);
     }
@@ -689,7 +689,7 @@ void LocalPlayer::removeItems()
     for (unsigned int i = 0; i < inventoryChanges.count; i++)
     {
         mwmp::Item item = inventoryChanges.items[i];
-        ptrStore.remove(item.refid, item.count, ptrPlayer);
+        ptrStore.remove(item.refId, item.count, ptrPlayer);
     }
 }
 
@@ -866,19 +866,19 @@ void LocalPlayer::setEquipment()
     {
         mwmp::Item *currentItem = &equipedItems[slot];
 
-        if (!currentItem->refid.empty())
+        if (!currentItem->refId.empty())
         {
             MWWorld::ContainerStoreIterator it = ptrInventory.begin();
             for (; it != ptrInventory.end(); ++it) // find item in inventory
             {
-                if (::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), currentItem->refid))
+                if (::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), currentItem->refId))
                     break;
             }
             if (it == ptrInventory.end()) // if not exists add item
                 ptrInventory.equip(
                     slot,
                     ptrInventory.ContainerStore::add(
-                        equipedItems[slot].refid.c_str(),
+                        equipedItems[slot].refId.c_str(),
                         equipedItems[slot].count,
                         ptrPlayer),
                     ptrPlayer);
@@ -952,7 +952,7 @@ void LocalPlayer::sendClass()
     else
         charClass.mId = cls->mId;
 
-    getNetworking()->getPlayerPacket(ID_GAME_CHARCLASS)->Send(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_CHARCLASS)->Send(this);
 }
 
 void LocalPlayer::sendInventory()
@@ -965,8 +965,8 @@ void LocalPlayer::sendInventory()
 
     for (MWWorld::ContainerStoreIterator iter(ptrInventory.begin()); iter != ptrInventory.end(); ++iter)
     {
-        item.refid = iter->getCellRef().getRefId();
-        if (item.refid.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
+        item.refId = iter->getCellRef().getRefId();
+        if (item.refId.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
             continue;
 
         item.count = iter->getRefData().getCount();
@@ -977,7 +977,7 @@ void LocalPlayer::sendInventory()
 
     inventoryChanges.count = (unsigned int) inventoryChanges.items.size();
     inventoryChanges.action = InventoryChanges::SET;
-    Main::get().getNetworking()->getPlayerPacket(ID_GAME_INVENTORY)->Send(this);
+    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_INVENTORY)->Send(this);
 }
 
 void LocalPlayer::sendSpellbook()
@@ -999,7 +999,7 @@ void LocalPlayer::sendSpellbook()
     }
 
     spellbookChanges.action = SpellbookChanges::SET;
-    Main::get().getNetworking()->getPlayerPacket(ID_GAME_SPELLBOOK)->Send(this);
+    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send(this);
 }
 
 void LocalPlayer::sendCellStates()
@@ -1020,7 +1020,7 @@ void LocalPlayer::sendSpellAddition(std::string id)
     spellbookChanges.spells.push_back(spell);
 
     spellbookChanges.action = SpellbookChanges::ADD;
-    Main::get().getNetworking()->getPlayerPacket(ID_GAME_SPELLBOOK)->Send(this);
+    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send(this);
 }
 
 void LocalPlayer::sendSpellRemoval(std::string id)
@@ -1035,7 +1035,7 @@ void LocalPlayer::sendSpellRemoval(std::string id)
     spellbookChanges.spells.push_back(spell);
 
     spellbookChanges.action = SpellbookChanges::REMOVE;
-    Main::get().getNetworking()->getPlayerPacket(ID_GAME_SPELLBOOK)->Send(this);
+    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send(this);
 }
 
 void LocalPlayer::sendSpellAddition(const ESM::Spell &spell)
@@ -1063,7 +1063,7 @@ void LocalPlayer::sendJournalEntry(const std::string& quest, int index, const MW
 
     journalChanges.journalItems.push_back(journalItem);
 
-    Main::get().getNetworking()->getPlayerPacket(ID_GAME_JOURNAL)->Send(this);
+    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_JOURNAL)->Send(this);
 }
 
 void LocalPlayer::sendJournalIndex(const std::string& quest, int index)
@@ -1077,7 +1077,7 @@ void LocalPlayer::sendJournalIndex(const std::string& quest, int index)
 
     journalChanges.journalItems.push_back(journalItem);
 
-    Main::get().getNetworking()->getPlayerPacket(ID_GAME_JOURNAL)->Send(this);
+    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_JOURNAL)->Send(this);
 }
 
 void LocalPlayer::sendAttack(Attack::TYPE type)
@@ -1087,7 +1087,7 @@ void LocalPlayer::sendAttack(Attack::TYPE type)
     attack.type = type;
     attack.pressed = false;
     RakNet::BitStream bs;
-    getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
+    getNetworking()->getPlayerPacket((RakNet::MessageID) ID_PLAYER_ATTACK)->Packet(&bs, this, true);
     getNetworking()->sendData(&bs);
 }
 
@@ -1146,6 +1146,6 @@ void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
     attack.attacker = guid;
 
     RakNet::BitStream bs;
-    getNetworking()->getPlayerPacket((RakNet::MessageID) ID_GAME_ATTACK)->Packet(&bs, this, true);
+    getNetworking()->getPlayerPacket((RakNet::MessageID) ID_PLAYER_ATTACK)->Packet(&bs, this, true);
     getNetworking()->sendData(&bs);
 }

@@ -1,15 +1,15 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
-#include "PacketSpellbook.hpp"
+#include "PacketPlayerSpellbook.hpp"
 
 using namespace std;
 using namespace mwmp;
 
-PacketSpellbook::PacketSpellbook(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
+PacketPlayerSpellbook::PacketPlayerSpellbook(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
-    packetID = ID_GAME_SPELLBOOK;
+    packetID = ID_PLAYER_SPELLBOOK;
 }
 
-void PacketSpellbook::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketPlayerSpellbook::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
     PlayerPacket::Packet(bs, player, send);
 

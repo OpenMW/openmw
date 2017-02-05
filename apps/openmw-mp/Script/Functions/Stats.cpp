@@ -453,7 +453,7 @@ void StatsFunctions::SetCharGenStage(unsigned short pid, int start, int end) noe
     player->charGenStage.current = start;
     player->charGenStage.end = end;
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_CHARGEN)->Send(player, false);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_CHARGEN)->Send(player, false);
 }
 
 void StatsFunctions::Resurrect(unsigned short pid)
@@ -468,16 +468,16 @@ void StatsFunctions::SendBaseInfo(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player,);
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, false);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_BASE_INFO)->Send(player, true);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_BASEINFO)->Send(player, false);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_BASEINFO)->Send(player, true);
 }
 
 void StatsFunctions::SendDynamicStats(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_DYNAMICSTATS)->Send(player, false);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_DYNAMICSTATS)->Send(player, true);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(player, false);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(player, true);
 }
 
 void StatsFunctions::SendAttributes(unsigned short pid) noexcept
@@ -503,6 +503,6 @@ void StatsFunctions::SendLevel(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, );
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_LEVEL)->Send(player, false);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_LEVEL)->Send(player, true);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_LEVEL)->Send(player, false);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_LEVEL)->Send(player, true);
 }

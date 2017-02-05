@@ -2,20 +2,20 @@
 // Created by koncord on 05.01.16.
 //
 
-#ifndef OPENMW_PACKETPOSITION_HPP
-#define OPENMW_PACKETPOSITION_HPP
+#ifndef OPENMW_PACKETPLAYERPOSITION_HPP
+#define OPENMW_PACKETPLAYERPOSITION_HPP
 
 #include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketPosition : public PlayerPacket
+    class PacketPlayerPosition : public PlayerPacket
     {
     public:
-        PacketPosition(RakNet::RakPeerInterface *peer);
+        PacketPlayerPosition(RakNet::RakPeerInterface *peer);
 
         virtual void Packet(RakNet::BitStream *bs, BasePlayer *player, bool send);
     };
 }
 
-#endif //OPENMW_PACKETPOSITION_HPP
+#endif //OPENMW_PACKETPLAYERPOSITION_HPP

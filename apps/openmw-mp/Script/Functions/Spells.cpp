@@ -64,7 +64,7 @@ void SpellFunctions::SendSpellbookChanges(unsigned short pid) noexcept
     GET_PLAYER(pid, player, );
 
     std::swap(player->spellbookChanges, player->spellbookChangesBuffer);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_SPELLBOOK)->Send(player, false);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_SPELLBOOK)->Send(player, false);
     player->spellbookChanges = std::move(player->spellbookChangesBuffer);
     player->spellbookChangesBuffer.spells.clear();
 }

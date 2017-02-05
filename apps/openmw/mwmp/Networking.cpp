@@ -193,9 +193,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         myPacket->Send(getLocalPlayer(), serverAddr);
         break;
     }
-    case ID_GAME_BASE_INFO:
+    case ID_PLAYER_BASEINFO:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_BASE_INFO from server");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_BASEINFO from server");
 
         if (guid == myGuid)
         {
@@ -228,13 +228,13 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_GAME_POS:
+    case ID_PLAYER_POS:
     {
         if (guid == myGuid)
         {
             if (packet->length != myPacket->headerSize())
             {
-                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_GAME_POS changed by server");
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_PLAYER_POS changed by server");
                 myPacket->Packet(&bsIn, getLocalPlayer(), false);
                 getLocalPlayer()->setPosition();
             }
@@ -263,7 +263,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             Players::disconnectPlayer(guid);
 
     }
-    case ID_GAME_EQUIPMENT:
+    case ID_PLAYER_EQUIPMENT:
     {
         if (guid == myGuid)
         {
@@ -284,7 +284,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_GAME_INVENTORY:
+    case ID_PLAYER_INVENTORY:
     {
         if (guid == myGuid)
         {
@@ -313,7 +313,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_GAME_SPELLBOOK:
+    case ID_PLAYER_SPELLBOOK:
     {
         if (guid == myGuid)
         {
@@ -342,7 +342,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_GAME_JOURNAL:
+    case ID_PLAYER_JOURNAL:
     {
         if (guid == myGuid)
         {
@@ -358,7 +358,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_GAME_ATTACK:
+    case ID_PLAYER_ATTACK:
     {
         if (pl != 0)
         {
@@ -425,7 +425,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_GAME_DYNAMICSTATS:
+    case ID_PLAYER_DYNAMICSTATS:
     {
         if (guid == myGuid)
         {
@@ -492,7 +492,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Send(getLocalPlayer(), serverAddr);
 
             getLocalPlayer()->updateDynamicStats(true);
-            playerController.GetPacket(ID_GAME_DYNAMICSTATS)->Send(getLocalPlayer(), serverAddr);
+            playerController.GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(getLocalPlayer(), serverAddr);
         }
         else if (pl != 0)
         {
@@ -538,7 +538,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_GAME_DRAWSTATE:
+    case ID_PLAYER_DRAWSTATE:
     {
         if (guid == myGuid)
             getLocalPlayer()->updateDrawStateAndFlags(true);
@@ -566,7 +566,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_GAME_CHARGEN:
+    case ID_PLAYER_CHARGEN:
     {
         if (guid == myGuid)
         {
@@ -634,7 +634,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_GAME_LEVEL:
+    case ID_PLAYER_LEVEL:
     {
         if (guid == myGuid)
         {
@@ -682,7 +682,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_GAME_CHARCLASS:
+    case ID_PLAYER_CHARCLASS:
     {
         if (guid == myGuid)
         {

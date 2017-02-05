@@ -37,12 +37,12 @@ namespace mwmp
 
     struct Item
     {
-        std::string refid;
+        std::string refId;
         int count;
         int health;
         inline bool operator==(const Item& rhs)
         {
-            return refid == rhs.refid && count == rhs.count && health == rhs.health;
+            return refId == rhs.refId && count == rhs.count && health == rhs.health;
         }
     };
 

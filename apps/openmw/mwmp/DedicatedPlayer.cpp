@@ -294,7 +294,7 @@ void DedicatedPlayer::updateEquipment()
     {
         MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
 
-        const string &dedicItem = equipedItems[slot].refid;
+        const string &dedicItem = equipedItems[slot].refId;
         std::string item = "";
         bool equal = false;
         if (it != invStore.end())

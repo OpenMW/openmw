@@ -2,20 +2,20 @@
 // Created by koncord on 07.01.16.
 //
 
-#ifndef OPENMW_PACKETBASEINFO_HPP
-#define OPENMW_PACKETBASEINFO_HPP
+#ifndef OPENMW_PACKETPLAYERBASEINFO_HPP
+#define OPENMW_PACKETPLAYERBASEINFO_HPP
 
 #include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketBaseInfo : public PlayerPacket
+    class PacketPlayerBaseInfo : public PlayerPacket
     {
     public:
-        PacketBaseInfo(RakNet::RakPeerInterface *peer);
+        PacketPlayerBaseInfo(RakNet::RakPeerInterface *peer);
 
         virtual void Packet(RakNet::BitStream *bs, BasePlayer *player, bool send);
     };
 }
 
-#endif //OPENMW_PACKETBASEINFO_HPP
+#endif //OPENMW_PACKETPLAYERBASEINFO_HPP

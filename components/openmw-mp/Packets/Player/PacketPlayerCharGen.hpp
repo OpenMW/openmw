@@ -2,18 +2,18 @@
 // Created by koncord on 08.03.16.
 //
 
-#ifndef OPENMW_PACKETCHARGEN_HPP
-#define OPENMW_PACKETCHARGEN_HPP
+#ifndef OPENMW_PACKETPLAYERCHARGEN_HPP
+#define OPENMW_PACKETPLAYERCHARGEN_HPP
 
 
 #include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 
 namespace mwmp
 {
-    class PacketCharGen : public PlayerPacket
+    class PacketPlayerCharGen : public PlayerPacket
     {
     public:
-        PacketCharGen(RakNet::RakPeerInterface *peer);
+        PacketPlayerCharGen(RakNet::RakPeerInterface *peer);
 
         virtual void Packet(RakNet::BitStream *bs, BasePlayer *player, bool send);
     };
@@ -21,4 +21,4 @@ namespace mwmp
 
 
 
-#endif //OPENMW_PACKETCHARGEN_HPP
+#endif //OPENMW_PACKETPLAYERCHARGEN_HPP

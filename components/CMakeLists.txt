@@ -152,14 +152,16 @@ add_component_dir (openmw-mp
         Controllers/PlayerPacketController Controllers/WorldPacketController
         Packets/BasePacket Packets/Player/PlayerPacket Packets/World/WorldPacket
 
-        Packets/Player/PacketBaseInfo Packets/Player/PacketPosition Packets/Player/PacketEquipment
-        Packets/Player/PacketAttack Packets/Player/PacketDynamicStats Packets/Player/PacketDrawState
-        Packets/Player/PacketChatMessage Packets/Player/PacketCharGen Packets/Player/PacketPlayerAttribute
-        Packets/Player/PacketPlayerSkill Packets/Player/PacketLevel Packets/Player/PacketHandshake
-        Packets/Player/PacketGUIBoxes Packets/Player/PacketClass Packets/Player/PacketTime
-        Packets/Player/PacketInventory Packets/Player/PacketSpellbook Packets/Player/PacketJournal
-        Packets/Player/PacketActiveSkills Packets/Player/PacketPlayerCellChange
-        Packets/Player/PacketPlayerCellState
+        Packets/Player/PacketHandshake Packets/Player/PacketChatMessage
+
+        Packets/Player/PacketPlayerBaseInfo Packets/Player/PacketPlayerPosition Packets/Player/PacketPlayerEquipment
+        Packets/Player/PacketPlayerAttack Packets/Player/PacketPlayerDynamicStats Packets/Player/PacketPlayerDrawState
+        Packets/Player/PacketPlayerCharGen Packets/Player/PacketPlayerAttribute Packets/Player/PacketPlayerSkill
+        Packets/Player/PacketPlayerLevel Packets/Player/PacketPlayerClass Packets/Player/PacketPlayerInventory
+        Packets/Player/PacketPlayerSpellbook Packets/Player/PacketPlayerJournal Packets/Player/PacketPlayerActiveSkills
+        Packets/Player/PacketPlayerCellChange Packets/Player/PacketPlayerCellState
+
+        Packets/Player/PacketGUIBoxes Packets/Player/PacketTime
 
         Packets/World/PacketObjectDelete Packets/World/PacketObjectPlace Packets/World/PacketObjectScale
         Packets/World/PacketObjectHealth Packets/World/PacketObjectLock Packets/World/PacketObjectUnlock
