@@ -30,7 +30,7 @@ void PacketObjectLock::Packet(RakNet::BitStream *bs, WorldEvent *event, bool sen
     {
         if (send)
         {
-            worldObject = event->objectChanges.objects[i];
+            worldObject = event->objectChanges.objects.at(i);
         }
 
         RW(worldObject.refId, send);

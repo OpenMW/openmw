@@ -636,7 +636,7 @@ void LocalPlayer::addItems()
 
     for (unsigned int i = 0; i < inventoryChanges.count; i++)
     {
-        mwmp::Item item = inventoryChanges.items[i];
+        mwmp::Item item = inventoryChanges.items.at(i);
         MWWorld::Ptr itemPtr = *ptrStore.add(item.refId, item.count, ptrPlayer);
         if (item.charge != -1)
             itemPtr.getCellRef().setCharge(item.charge);
@@ -657,7 +657,7 @@ void LocalPlayer::addJournalItems()
 {
     for (unsigned int i = 0; i < journalChanges.count; i++)
     {
-        mwmp::JournalItem journalItem = journalChanges.journalItems[i];
+        mwmp::JournalItem journalItem = journalChanges.journalItems.at(i);
         
         if (journalItem.type == JournalItem::ENTRY)
         {
@@ -688,7 +688,7 @@ void LocalPlayer::removeItems()
 
     for (unsigned int i = 0; i < inventoryChanges.count; i++)
     {
-        mwmp::Item item = inventoryChanges.items[i];
+        mwmp::Item item = inventoryChanges.items.at(i);
         ptrStore.remove(item.refId, item.count, ptrPlayer);
     }
 }

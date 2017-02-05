@@ -25,7 +25,7 @@ void PacketScriptGlobalShort::Packet(RakNet::BitStream *bs, WorldEvent *event, b
     {
         if (send)
         {
-            worldObject = event->objectChanges.objects[i];
+            worldObject = event->objectChanges.objects.at(i);
         }
 
         RW(worldObject.varName, send);

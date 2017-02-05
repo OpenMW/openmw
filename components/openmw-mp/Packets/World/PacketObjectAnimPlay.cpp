@@ -30,7 +30,7 @@ void PacketObjectAnimPlay::Packet(RakNet::BitStream *bs, WorldEvent *event, bool
     {
         if (send)
         {
-            worldObject = event->objectChanges.objects[i];
+            worldObject = event->objectChanges.objects.at(i);
         }
 
         RW(worldObject.refId, send);

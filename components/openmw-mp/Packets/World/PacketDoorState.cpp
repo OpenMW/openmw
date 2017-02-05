@@ -30,7 +30,7 @@ void PacketDoorState::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send
     {
         if (send)
         {
-            worldObject = event->objectChanges.objects[i];
+            worldObject = event->objectChanges.objects.at(i);
         }
 
         RW(worldObject.refId, send);

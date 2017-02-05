@@ -30,7 +30,7 @@ void PacketScriptLocalFloat::Packet(RakNet::BitStream *bs, WorldEvent *event, bo
     {
         if (send)
         {
-            worldObject = event->objectChanges.objects[i];
+            worldObject = event->objectChanges.objects.at(i);
         }
 
         RW(worldObject.refId, send);

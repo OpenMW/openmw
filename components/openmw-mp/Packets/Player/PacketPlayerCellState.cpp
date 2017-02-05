@@ -26,7 +26,7 @@ void mwmp::PacketPlayerCellState::Packet(RakNet::BitStream *bs, mwmp::BasePlayer
 
         if (send)
         {
-            cellState = player->cellStateChanges.cellStates[i];
+            cellState = player->cellStateChanges.cellStates.at(i);
         }
         
         RW(cellState.type, send);

@@ -39,7 +39,7 @@ void PacketContainer::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send
     {
         if (send)
         {
-            worldObject = event->objectChanges.objects[i];
+            worldObject = event->objectChanges.objects.at(i);
         }
 
         RW(worldObject.refId, send);
@@ -57,7 +57,7 @@ void PacketContainer::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send
     {
         if (send)
         {
-            containerItem = event->containerChanges.items[i];
+            containerItem = event->containerChanges.items.at(i);
         }
 
         RW(containerItem.refId, send);

@@ -28,7 +28,7 @@ void PacketPlayerSpellbook::Packet(RakNet::BitStream *bs, BasePlayer *player, bo
 
         if (send)
         {
-            spell = player->spellbookChanges.spells[i];
+            spell = player->spellbookChanges.spells.at(i);
         }
 
         RW(spell.mId, send);

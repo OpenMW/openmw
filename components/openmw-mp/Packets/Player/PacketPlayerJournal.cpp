@@ -25,7 +25,7 @@ void PacketPlayerJournal::Packet(RakNet::BitStream *bs, BasePlayer *player, bool
         JournalItem journalItem;
 
         if (send)
-            journalItem = player->journalChanges.journalItems[i];
+            journalItem = player->journalChanges.journalItems.at(i);
 
         RW(journalItem.type, send);
         RW(journalItem.quest, send);
