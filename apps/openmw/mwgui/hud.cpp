@@ -88,8 +88,6 @@ namespace MWGui
 
             event->addObject(worldObject);
 
-            // LocalPlayer's inventory has changed, so send a packet with it
-            mwmp::Main::get().getLocalPlayer()->sendInventory();
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send(event);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
@@ -292,6 +290,9 @@ namespace MWGui
 
             WorldItemModel drop (mouseX, mouseY);
             mDragAndDrop->drop(&drop, NULL);
+
+            // LocalPlayer's inventory has changed, so send a packet with it
+            mwmp::Main::get().getLocalPlayer()->sendInventory();
 
             MWBase::Environment::get().getWindowManager()->changePointer("arrow");
         }
