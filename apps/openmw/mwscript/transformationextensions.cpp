@@ -558,6 +558,7 @@ namespace MWScript
                         mwmp::WorldObject worldObject;
                         worldObject.refId = ptr.getCellRef().getRefId();
                         worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+                        worldObject.charge = ptr.getCellRef().getCharge();
                         worldObject.count = 1;
 
                         // Make sure we send the RefData position instead of the CellRef one, because that's what

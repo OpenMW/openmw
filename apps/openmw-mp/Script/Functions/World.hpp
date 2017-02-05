@@ -9,6 +9,7 @@
     \
     {"SetObjectRefId",       WorldFunctions::SetObjectRefId},\
     {"SetObjectRefNumIndex", WorldFunctions::SetObjectRefNumIndex},\
+    {"SetObjectCharge",      WorldFunctions::SetObjectCharge},\
     {"SetObjectCount",       WorldFunctions::SetObjectCount},\
     {"SetObjectGoldValue",   WorldFunctions::SetObjectGoldValue},\
     {"SetObjectScale",       WorldFunctions::SetObjectScale},\
@@ -21,6 +22,7 @@
     \
     {"GetObjectRefId",       WorldFunctions::GetObjectRefId},\
     {"GetObjectRefNumIndex", WorldFunctions::GetObjectRefNumIndex},\
+    {"GetObjectCharge",      WorldFunctions::GetObjectCharge},\
     {"GetObjectCount",       WorldFunctions::GetObjectCount},\
     {"GetObjectGoldValue",   WorldFunctions::GetObjectGoldValue},\
     {"GetObjectScale",       WorldFunctions::GetObjectScale},\
@@ -55,6 +57,7 @@ public:
 
     static void SetObjectRefId(const char* refId) noexcept;
     static void SetObjectRefNumIndex(int refNumIndex) noexcept;
+    static void SetObjectCharge(int charge) noexcept;
     static void SetObjectCount(int count) noexcept;
     static void SetObjectGoldValue(int goldValue) noexcept;
     static void SetObjectScale(double scale) noexcept;
@@ -67,6 +70,7 @@ public:
 
     static const char *GetObjectRefId(unsigned int i) noexcept;
     static int GetObjectRefNumIndex(unsigned int i) noexcept;
+    static int GetObjectCharge(unsigned int i) noexcept;
     static int GetObjectCount(unsigned int i) noexcept;
     static int GetObjectGoldValue(unsigned int i) noexcept;
     static double GetObjectScale(unsigned int i) noexcept;

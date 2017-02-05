@@ -11,8 +11,9 @@ namespace mwmp
     {
         std::string refId;
         int refNumIndex;
-        int goldValue;
+        int charge;
         int count;
+        int goldValue;
         ESM::Position pos;
 
         int state;

@@ -59,6 +59,7 @@ void LocalEvent::placeObjects(MWWorld::CellStore* cellStore)
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), worldObject.refId, 1);
 
         MWWorld::Ptr newPtr = ref.getPtr();
+        newPtr.getCellRef().setCharge(worldObject.charge);
 
         if (worldObject.count > 1)
             newPtr.getRefData().setCount(worldObject.count);

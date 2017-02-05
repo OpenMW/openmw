@@ -33,6 +33,7 @@ void WorldFunctions::AddWorldObject() noexcept
     WorldObject worldObject;
     worldObject.refId = tempWorldObject.refId;
     worldObject.refNumIndex = tempWorldObject.refNumIndex;
+    worldObject.charge = tempWorldObject.charge;
     worldObject.count = tempWorldObject.count;
     worldObject.goldValue = tempWorldObject.goldValue;
     worldObject.scale = tempWorldObject.scale;
@@ -74,6 +75,11 @@ void WorldFunctions::SetObjectRefId(const char* refId) noexcept
 void WorldFunctions::SetObjectRefNumIndex(int refNumIndex) noexcept
 {
     tempWorldObject.refNumIndex = refNumIndex;
+}
+
+void WorldFunctions::SetObjectCharge(int charge) noexcept
+{
+    tempWorldObject.charge = charge;
 }
 
 void WorldFunctions::SetObjectCount(int count) noexcept
@@ -128,6 +134,11 @@ const char *WorldFunctions::GetObjectRefId(unsigned int i) noexcept
 int WorldFunctions::GetObjectRefNumIndex(unsigned int i) noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).refNumIndex;
+}
+
+int WorldFunctions::GetObjectCharge(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).charge;
 }
 
 int WorldFunctions::GetObjectCount(unsigned int i) noexcept
