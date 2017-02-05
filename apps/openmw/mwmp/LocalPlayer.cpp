@@ -400,7 +400,7 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
             equipChanged = true;
 
             equipedItems[slot].refId = it->getCellRef().getRefId();
-            equipedItems[slot].health = it->getCellRef().getCharge();
+            equipedItems[slot].charge = it->getCellRef().getCharge();
             if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
             {
                 MWMechanics::WeaponType weaptype;
@@ -416,7 +416,7 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
             equipChanged = true;
             equipedItems[slot].refId = "";
             equipedItems[slot].count = 0;
-            equipedItems[slot].health = 0;
+            equipedItems[slot].charge = 0;
         }
     }
 
@@ -453,7 +453,7 @@ void LocalPlayer::updateInventory(bool forceUpdate)
                     continue;
 
                 item.count = result->getRefData().getCount();
-                item.health = result->getCellRef().getCharge();
+                item.charge = result->getCellRef().getCharge();
 
                 if (item == (*iter))
                     break;
@@ -475,7 +475,7 @@ void LocalPlayer::updateInventory(bool forceUpdate)
                 continue;
 
             item.count = iter->getRefData().getCount();
-            item.health = iter->getCellRef().getCharge();
+            item.charge = iter->getCellRef().getCharge();
 
             vector<Item>::iterator result = inventoryChanges.items.begin();
 
@@ -638,8 +638,8 @@ void LocalPlayer::addItems()
     {
         mwmp::Item item = inventoryChanges.items[i];
         MWWorld::Ptr itemPtr = *ptrStore.add(item.refId, item.count, ptrPlayer);
-        if (item.health != -1)
-            itemPtr.getCellRef().setCharge(item.health);
+        if (item.charge != -1)
+            itemPtr.getCellRef().setCharge(item.charge);
     }
 }
 
@@ -970,7 +970,7 @@ void LocalPlayer::sendInventory()
             continue;
 
         item.count = iter->getRefData().getCount();
-        item.health = iter->getCellRef().getCharge();
+        item.charge = iter->getCellRef().getCharge();
 
         inventoryChanges.items.push_back(item);
     }

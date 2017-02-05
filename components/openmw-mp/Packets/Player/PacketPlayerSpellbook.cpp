@@ -29,11 +29,12 @@ void PacketPlayerSpellbook::Packet(RakNet::BitStream *bs, BasePlayer *player, bo
         if (send)
         {
             spell = player->spellbookChanges.spells[i];
-            RW(spell.mId, send);
         }
-        else
+
+        RW(spell.mId, send);
+
+        if (!send)
         {
-            RW(spell.mId, send);
             player->spellbookChanges.spells.push_back(spell);
         }
     }

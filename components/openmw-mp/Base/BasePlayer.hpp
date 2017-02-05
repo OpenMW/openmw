@@ -39,10 +39,11 @@ namespace mwmp
     {
         std::string refId;
         int count;
-        int health;
+        int charge;
+
         inline bool operator==(const Item& rhs)
         {
-            return refId == rhs.refId && count == rhs.count && health == rhs.health;
+            return refId == rhs.refId && count == rhs.count && charge == rhs.charge;
         }
     };
 

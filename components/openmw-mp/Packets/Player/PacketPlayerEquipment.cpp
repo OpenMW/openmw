@@ -20,6 +20,6 @@ void PacketPlayerEquipment::Packet(RakNet::BitStream *bs, BasePlayer *player, bo
     {
         RW(player->equipedItems[i].refId, send);
         RW(player->equipedItems[i].count, send);
-        RW(player->equipedItems[i].health, send);
+        RW(player->equipedItems[i].charge, send);
     }
 }

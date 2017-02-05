@@ -24,14 +24,14 @@ unsigned int ItemFunctions::GetInventoryChangesSize(unsigned short pid) noexcept
     return player->inventoryChanges.count;
 }
 
-void ItemFunctions::EquipItem(unsigned short pid, unsigned short slot, const char *itemId, unsigned int count, int health) noexcept
+void ItemFunctions::EquipItem(unsigned short pid, unsigned short slot, const char *itemId, unsigned int count, int charge) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
 
     player->equipedItems[slot].refId = itemId;
     player->equipedItems[slot].count = count;
-    player->equipedItems[slot].health = health;
+    player->equipedItems[slot].charge = charge;
 }
 
 void ItemFunctions::UnequipItem(unsigned short pid, unsigned short slot) noexcept
@@ -42,7 +42,7 @@ void ItemFunctions::UnequipItem(unsigned short pid, unsigned short slot) noexcep
     ItemFunctions::EquipItem(pid, slot, "", 0, -1);
 }
 
-void ItemFunctions::AddItem(unsigned short pid, const char* itemId, unsigned int count, int health) noexcept
+void ItemFunctions::AddItem(unsigned short pid, const char* itemId, unsigned int count, int charge) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
@@ -50,7 +50,7 @@ void ItemFunctions::AddItem(unsigned short pid, const char* itemId, unsigned int
     Item item;
     item.refId = itemId;
     item.count = count;
-    item.health = health;
+    item.charge = charge;
 
     player->inventoryChangesBuffer.items.push_back(item);
     player->inventoryChangesBuffer.action = InventoryChanges::ADD;
@@ -105,12 +105,12 @@ int ItemFunctions::GetEquipmentItemCount(unsigned short pid, unsigned short slot
     return player->equipedItems[slot].count;
 }
 
-int ItemFunctions::GetEquipmentItemHealth(unsigned short pid, unsigned short slot) noexcept
+int ItemFunctions::GetEquipmentItemCharge(unsigned short pid, unsigned short slot) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    return player->equipedItems[slot].health;
+    return player->equipedItems[slot].charge;
 }
 
 const char *ItemFunctions::GetInventoryItemId(unsigned short pid, unsigned int i) noexcept
@@ -132,12 +132,12 @@ int ItemFunctions::GetInventoryItemCount(unsigned short pid, unsigned int i) noe
     return player->inventoryChanges.items.at(i).count;
 }
 
-int ItemFunctions::GetInventoryItemHealth(unsigned short pid, unsigned int i) noexcept
+int ItemFunctions::GetInventoryItemCharge(unsigned short pid, unsigned int i) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    return player->inventoryChanges.items.at(i).health;
+    return player->inventoryChanges.items.at(i).charge;
 }
 
 void ItemFunctions::SendEquipment(unsigned short pid) noexcept

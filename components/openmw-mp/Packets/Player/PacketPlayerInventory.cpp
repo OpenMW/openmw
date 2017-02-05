@@ -33,15 +33,14 @@ void PacketPlayerInventory::Packet(RakNet::BitStream *bs, BasePlayer *player, bo
         if (send)
         {
             item = player->inventoryChanges.items[i];
-            RW(item.refId, send);
-            RW(item.count, send);
-            RW(item.health, send);
         }
-        else
+
+        RW(item.refId, send);
+        RW(item.count, send);
+        RW(item.charge, send);
+
+        if (!send)
         {
-            RW(item.refId, send);
-            RW(item.count, send);
-            RW(item.health, send);
             player->inventoryChanges.items.push_back(item);
         }
     }
