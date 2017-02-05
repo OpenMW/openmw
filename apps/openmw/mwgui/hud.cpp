@@ -311,7 +311,22 @@ namespace MWGui
             {
                 // pick up object
                 if (!object.isEmpty())
+                {
                     MWBase::Environment::get().getWindowManager()->getInventoryWindow()->pickUpObject(object);
+
+                    // Added by tes3mp
+                    mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+                    event->cell = *object.getCell()->getCell();
+
+                    mwmp::WorldObject worldObject;
+                    worldObject.refId = object.getCellRef().getRefId();
+                    worldObject.refNumIndex = object.getCellRef().getRefNum().mIndex;
+                    event->addObject(worldObject);
+
+                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(event);
+                    delete event;
+                    event = nullptr;
+                }
             }
         }
     }
