@@ -401,7 +401,6 @@ namespace MWMechanics
     {
         updateDrowning(ptr, duration);
         calculateNpcStatModifiers(ptr, duration);
-        updateEquippedLight(ptr, duration);
     }
 
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
@@ -738,11 +737,19 @@ namespace MWMechanics
             }
         }
 
-        UpdateSummonedCreatures updateSummonedCreatures(ptr);
-        creatureStats.getActiveSpells().visitEffectSources(updateSummonedCreatures);
-        if (ptr.getClass().hasInventoryStore(ptr))
-            ptr.getClass().getInventoryStore(ptr).visitEffectSources(updateSummonedCreatures);
-        updateSummonedCreatures.process();
+        bool hasSummonEffect = false;
+        for (MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
+            if (it->first.mId >= ESM::MagicEffect::SummonScamp && it->first.mId <= ESM::MagicEffect::SummonStormAtronach)
+                hasSummonEffect = true;
+
+        if (!creatureStats.getSummonedCreatureMap().empty() || !creatureStats.getSummonedCreatureGraveyard().empty() || hasSummonEffect)
+        {
+            UpdateSummonedCreatures updateSummonedCreatures(ptr);
+            creatureStats.getActiveSpells().visitEffectSources(updateSummonedCreatures);
+            if (ptr.getClass().hasInventoryStore(ptr))
+                ptr.getClass().getInventoryStore(ptr).visitEffectSources(updateSummonedCreatures);
+            updateSummonedCreatures.process();
+        }
     }
 
     void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr, float duration)
@@ -1027,10 +1034,13 @@ namespace MWMechanics
         {
             static float timerUpdateAITargets = 0;
             static float timerUpdateHeadTrack = 0;
+            static float timerUpdateEquippedLight = 0;
+            const float updateEquippedLightInterval = 1.0f;
 
             // target lists get updated once every 1.0 sec
             if (timerUpdateAITargets >= 1.0f) timerUpdateAITargets = 0;
             if (timerUpdateHeadTrack >= 0.3f) timerUpdateHeadTrack = 0;
+            if (timerUpdateEquippedLight >= updateEquippedLightInterval) timerUpdateEquippedLight = 0;
 
             MWWorld::Ptr player = getPlayer();
 
@@ -1116,7 +1126,12 @@ namespace MWMechanics
                     }
 
                     if(iter->first.getTypeName() == typeid(ESM::NPC).name())
+                    {
                         updateNpc(iter->first, duration);
+
+                        if (timerUpdateEquippedLight == 0)
+                            updateEquippedLight(iter->first, updateEquippedLightInterval);
+                    }
                 }
             }
 

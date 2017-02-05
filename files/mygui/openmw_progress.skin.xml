@@ -54,7 +54,7 @@
 
     <Resource type="ResourceSkin" name="MW_Progress_Red" size="64 12">
         <Property key="TrackSkin" value="MW_Track_Red"/>
-        <Property key="TrackWidth" value="1"/>
+        <Property key="TrackFill" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
@@ -62,7 +62,7 @@
 
     <Resource type="ResourceSkin" name="MW_Progress_Green" size="64 12">
         <Property key="TrackSkin" value="MW_Track_Green"/>
-        <Property key="TrackWidth" value="1"/>
+        <Property key="TrackFill" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
@@ -70,7 +70,7 @@
 
     <Resource type="ResourceSkin" name="MW_Progress_Blue" size="64 12">
         <Property key="TrackSkin" value="MW_Track_Blue"/>
-        <Property key="TrackWidth" value="1"/>
+        <Property key="TrackFill" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
@@ -78,18 +78,19 @@
 
     <Resource type="ResourceSkin" name="MW_Progress_LightBlue" size="64 6">
         <Property key="TrackSkin" value="MW_BigTrack_Progress_Blue_Small"/>
-        <Property key="TrackWidth" value="1"/>
+        <Property key="TrackFill" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 6" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 2" align="Stretch" name="Client"/>
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_Progress_Drowning" size="64 6">
-        <Child type="Widget" skin="MW_BigTrack_Progress_Red_Small" offset="0 0 64 6" align="Stretch"/>
+        <Property key="TrackSkin" value="MW_BigTrack_Progress_Red_Small"/>
+        <Property key="TrackFill" value="1"/>
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_ProgressScroll_Loading" size="64 6">
-        <Property key="TrackWidth" value="1"/>
+        <Property key="TrackFill" value="1"/>
         <Property key="TrackRangeMargins" value="0 0"/>
         <Property key="MinTrackSize" value="1"/>
         <Property key="VerticalAlignment" value="false"/>

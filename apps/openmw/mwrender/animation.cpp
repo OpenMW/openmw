@@ -575,6 +575,8 @@ namespace MWRender
         mAccumCtrl = NULL;
 
         mAnimSources.clear();
+
+        mAnimVelocities.clear();
     }
 
     bool Animation::hasAnimation(const std::string &anim) const
@@ -952,6 +954,10 @@ namespace MWRender
         if (!mAccumRoot)
             return 0.0f;
 
+        std::map<std::string, float>::const_iterator found = mAnimVelocities.find(groupname);
+        if (found != mAnimVelocities.end())
+            return found->second;
+
         // Look in reverse; last-inserted source has priority.
         AnimSourceList::const_reverse_iterator animsrc(mAnimSources.rbegin());
         for(;animsrc != mAnimSources.rend();++animsrc)
@@ -998,6 +1004,8 @@ namespace MWRender
                 }
             }
         }
+
+        mAnimVelocities.insert(std::make_pair(groupname, velocity));
 
         return velocity;
     }

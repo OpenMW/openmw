@@ -32,6 +32,26 @@
 namespace
 {
 
+    void setNodeRotation(const MWWorld::Ptr& ptr, MWRender::RenderingManager& rendering, bool inverseRotationOrder)
+    {
+        if (!ptr.getRefData().getBaseNode())
+            return;
+
+        osg::Quat worldRotQuat(ptr.getRefData().getPosition().rot[2], osg::Vec3(0,0,-1));
+        if (!ptr.getClass().isActor())
+        {
+            float xr = ptr.getRefData().getPosition().rot[0];
+            float yr = ptr.getRefData().getPosition().rot[1];
+            if (!inverseRotationOrder)
+                worldRotQuat = worldRotQuat * osg::Quat(yr, osg::Vec3(0,-1,0)) *
+                    osg::Quat(xr, osg::Vec3(-1,0,0));
+            else
+                worldRotQuat = osg::Quat(xr, osg::Vec3(-1,0,0)) * osg::Quat(yr, osg::Vec3(0,-1,0)) * worldRotQuat;
+        }
+
+        rendering.rotateObject(ptr, worldRotQuat);
+    }
+
     void addObject(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
                    MWRender::RenderingManager& rendering)
     {
@@ -40,6 +60,8 @@ namespace
         if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
             model = ""; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
         ptr.getClass().insertObjectRendering(ptr, model, rendering);
+        setNodeRotation(ptr, rendering, false);
+
         ptr.getClass().insertObject (ptr, model, physics);
 
         if (ptr.getClass().isActor())
@@ -49,23 +71,8 @@ namespace
     void updateObjectRotation (const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
                                     MWRender::RenderingManager& rendering, bool inverseRotationOrder)
     {
-        if (ptr.getRefData().getBaseNode() != NULL)
-        {
-            osg::Quat worldRotQuat(ptr.getRefData().getPosition().rot[2], osg::Vec3(0,0,-1));
-            if (!ptr.getClass().isActor())
-            {
-                float xr = ptr.getRefData().getPosition().rot[0];
-                float yr = ptr.getRefData().getPosition().rot[1];
-                if (!inverseRotationOrder)
-                    worldRotQuat = worldRotQuat * osg::Quat(yr, osg::Vec3(0,-1,0)) *
-                        osg::Quat(xr, osg::Vec3(-1,0,0));
-                else
-                    worldRotQuat = osg::Quat(xr, osg::Vec3(-1,0,0)) * osg::Quat(yr, osg::Vec3(0,-1,0)) * worldRotQuat;
-            }
-
-            rendering.rotateObject(ptr, worldRotQuat);
-            physics.updateRotation(ptr);
-        }
+        setNodeRotation(ptr, rendering, inverseRotationOrder);
+        physics.updateRotation(ptr);
     }
 
     void updateObjectScale(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
@@ -133,7 +140,6 @@ namespace
                 try
                 {
                     addObject(ptr, mPhysics, mRendering);
-                    updateObjectRotation(ptr, mPhysics, mRendering, false);
                 }
                 catch (const std::exception& e)
                 {
@@ -629,7 +635,6 @@ namespace MWWorld
         try
         {
             addObject(ptr, *mPhysics, mRendering);
-            updateObjectRotation(ptr, false);
             MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
         }
         catch (std::exception& e)
