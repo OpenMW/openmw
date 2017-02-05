@@ -739,6 +739,17 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
     switch (packet->data[0])
     {
+    case ID_CONTAINER:
+    {
+        MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event->cell);
+
+        if (!ptrCellStore) return;
+
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONTAINER");
+        event->editContainer(ptrCellStore);
+
+        break;
+    }
     case ID_OBJECT_PLACE:
     {
         MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event->cell);

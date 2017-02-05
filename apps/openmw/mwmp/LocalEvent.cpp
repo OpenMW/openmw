@@ -1,6 +1,8 @@
 #include "LocalEvent.hpp"
-#include "Networking.hpp"
 #include "Main.hpp"
+#include "Networking.hpp"
+#include "LocalPlayer.hpp"
+#include "DedicatedPlayer.hpp"
 
 #include <components/openmw-mp/Log.hpp>
 
@@ -11,6 +13,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/manualref.hpp"
 
@@ -40,6 +43,55 @@ void LocalEvent::addObject(WorldObject worldObject)
 void LocalEvent::addContainerItem(ContainerItem containerItem)
 {
     containerChanges.items.push_back(containerItem);
+}
+
+void LocalEvent::editContainer(MWWorld::CellStore* cellStore)
+{
+    WorldObject worldObject;
+
+    for (unsigned int i = 0; i < objectChanges.count; i++)
+    {
+        worldObject = objectChanges.objects[i];
+
+        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+            worldObject.refId.c_str(),
+            worldObject.refNumIndex,
+            cell.getDescription().c_str());
+
+        MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex);
+
+        if (ptrFound)
+        {
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+                ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum());
+
+            MWWorld::ContainerStore& containerStore = ptrFound.getClass().getContainerStore(ptrFound);
+
+            for (unsigned int i = 0; i < containerChanges.count; i++)
+            {
+                ContainerItem item = containerChanges.items.at(i);
+
+                if (containerChanges.action == ContainerChanges::REMOVE)
+                {
+                    containerStore.remove(item.refId, item.count, mwmp::Players::getPlayer(guid)->getPtr());
+                }
+            }
+
+            // If we are in a container, and it happens to be this container, update its view
+            if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Container))
+            {
+                CurrentContainer *currentContainer = &mwmp::Main::get().getLocalPlayer()->currentContainer;
+
+                if (currentContainer->refNumIndex == ptrFound.getCellRef().getRefNum().mIndex &&
+                    Misc::StringUtils::ciEqual(currentContainer->refId, ptrFound.getCellRef().getRefId()))
+                {
+                    MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
+                    MWBase::Environment::get().getWindowManager()->openContainer(ptrFound, currentContainer->loot);
+                }
+            }
+        }
+    }
 }
 
 void LocalEvent::placeObjects(MWWorld::CellStore* cellStore)

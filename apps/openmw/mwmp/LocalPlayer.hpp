@@ -68,8 +68,10 @@ namespace mwmp
         void sendAttack(Attack::TYPE type);
 
         void clearCellStates();
+        void clearCurrentContainer();
 
         void storeCellState(ESM::Cell cell, int stateType);
+        void storeCurrentContainer(const MWWorld::Ptr& container, bool loot);
 
         void prepareAttack(Attack::TYPE type, bool state);
 

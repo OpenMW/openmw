@@ -35,6 +35,13 @@ namespace mwmp
         char knockdown;
     };
 
+    struct CurrentContainer
+    {
+        std::string refId;
+        int refNumIndex;
+        bool loot;
+    };
+
     struct Item
     {
         std::string refId;
@@ -160,13 +167,16 @@ namespace mwmp
         int month;
         int day;
         double hour;
+
         InventoryChanges inventoryChanges;
         SpellbookChanges spellbookChanges;
         JournalChanges journalChanges;
         CellStateChanges cellStateChanges;
+        ESM::ActiveSpells activeSpells;
+        CurrentContainer currentContainer;
+
         bool consoleAllowed;
         bool ignorePosPacket;
-        ESM::ActiveSpells activeSpells;
 
         ESM::Position position;
         ESM::Position direction;

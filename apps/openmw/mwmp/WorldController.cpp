@@ -44,6 +44,9 @@ MWWorld::CellStore *mwmp::WorldController::getCell(const ESM::Cell& cell)
 
 void mwmp::WorldController::openContainer(const MWWorld::Ptr &container, bool loot)
 {
+    // Record this as the player's current open container
+    mwmp::Main::get().getLocalPlayer()->storeCurrentContainer(container, loot);
+
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Container \"%s\" (%d) is opened. Loot: %s",
                        container.getCellRef().getRefId().c_str(),
                        container.getCellRef().getRefNum().mIndex,
@@ -65,6 +68,8 @@ void mwmp::WorldController::openContainer(const MWWorld::Ptr &container, bool lo
 
 void mwmp::WorldController::closeContainer(const MWWorld::Ptr &container)
 {
+    mwmp::Main::get().getLocalPlayer()->clearCurrentContainer();
+
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Container \"%s\" (%d) is closed.",
                        container.getCellRef().getRefId().c_str(),
                        container.getCellRef().getRefNum().mIndex);

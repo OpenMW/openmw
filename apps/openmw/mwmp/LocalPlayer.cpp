@@ -1096,6 +1096,12 @@ void LocalPlayer::clearCellStates()
     cellStateChanges.cellStates.clear();
 }
 
+void LocalPlayer::clearCurrentContainer()
+{
+    currentContainer.refId = "";
+    currentContainer.refNumIndex = 0;
+}
+
 void LocalPlayer::storeCellState(ESM::Cell cell, int stateType)
 {
     std::vector<CellState>::iterator iter;
@@ -1117,6 +1123,13 @@ void LocalPlayer::storeCellState(ESM::Cell cell, int stateType)
     cellState.type = stateType;
 
     cellStateChanges.cellStates.push_back(cellState);
+}
+
+void LocalPlayer::storeCurrentContainer(const MWWorld::Ptr &container, bool loot)
+{
+    currentContainer.refId = container.getCellRef().getRefId();
+    currentContainer.refNumIndex = container.getCellRef().getRefNum().mIndex;
+    currentContainer.loot = loot;
 }
 
 void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
