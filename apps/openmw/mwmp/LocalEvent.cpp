@@ -72,7 +72,11 @@ void LocalEvent::editContainer(MWWorld::CellStore* cellStore)
             {
                 ContainerItem item = containerChanges.items.at(i);
 
-                if (containerChanges.action == ContainerChanges::REMOVE)
+                if (containerChanges.action == ContainerChanges::ADD)
+                {
+                    containerStore.add(item.refId, item.count, mwmp::Players::getPlayer(guid)->getPtr());
+                }
+                else if (containerChanges.action == ContainerChanges::REMOVE)
                 {
                     containerStore.remove(item.refId, item.count, mwmp::Players::getPlayer(guid)->getPtr());
                 }

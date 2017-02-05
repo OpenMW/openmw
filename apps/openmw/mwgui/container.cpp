@@ -154,6 +154,33 @@ namespace MWGui
             }
         }
 
+        // Added by tes3mp
+        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+        event->cell = *mPtr.getCell()->getCell();
+
+        mwmp::WorldObject worldObject;
+        worldObject.refId = mPtr.getCellRef().getRefId();
+        worldObject.refNumIndex = mPtr.getCellRef().getRefNum().mIndex;
+        event->addObject(worldObject);
+
+        mwmp::ContainerItem containerItem;
+        containerItem.refId = mDragAndDrop->mItem.mBase.getCellRef().getRefId();
+        containerItem.count = mDragAndDrop->mItem.mBase.getRefData().getCount();
+        event->addContainerItem(containerItem);
+        event->containerChanges.action = mwmp::ContainerChanges::ADD;
+
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(event);
+
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_CONTAINER about\n- Ptr cellRef: %s, %i\n- cell: %s\n- item: %s, %i",
+            worldObject.refId.c_str(),
+            worldObject.refNumIndex,
+            event->cell.getDescription().c_str(),
+            containerItem.refId,
+            containerItem.count);
+
+        delete event;
+        event = NULL;
+
         mDragAndDrop->drop(mModel, mItemView);
     }
 
