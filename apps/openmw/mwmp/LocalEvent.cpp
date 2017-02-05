@@ -67,16 +67,21 @@ void LocalEvent::editContainer(MWWorld::CellStore* cellStore)
                 ptrFound.getCellRef().getRefNum());
 
             MWWorld::ContainerStore& containerStore = ptrFound.getClass().getContainerStore(ptrFound);
+            int action = containerChanges.action;
+
+            // If we are setting the entire contents, clear the current ones
+            if (action == ContainerChanges::SET)
+                containerStore.clear();
 
             for (unsigned int i = 0; i < containerChanges.count; i++)
             {
                 ContainerItem item = containerChanges.items.at(i);
 
-                if (containerChanges.action == ContainerChanges::ADD)
+                if (action == ContainerChanges::ADD || action == ContainerChanges::SET)
                 {
                     containerStore.add(item.refId, item.count, mwmp::Players::getPlayer(guid)->getPtr());
                 }
-                else if (containerChanges.action == ContainerChanges::REMOVE)
+                else if (action == ContainerChanges::REMOVE)
                 {
                     containerStore.remove(item.refId, item.count, mwmp::Players::getPlayer(guid)->getPtr());
                 }

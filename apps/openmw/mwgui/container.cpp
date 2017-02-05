@@ -299,6 +299,26 @@ namespace MWGui
             }
 
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
+
+            // Added by tes3mp
+            mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+            event->cell = *mPtr.getCell()->getCell();
+
+            mwmp::WorldObject worldObject;
+            worldObject.refId = mPtr.getCellRef().getRefId();
+            worldObject.refNumIndex = mPtr.getCellRef().getRefNum().mIndex;
+            event->addObject(worldObject);
+            event->containerChanges.action = mwmp::ContainerChanges::SET;
+
+            mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(event);
+
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_CONTAINER about\n- Ptr cellRef: %s, %i\n- cell: %s\n- item: %s, %i",
+                worldObject.refId.c_str(),
+                worldObject.refNumIndex,
+                event->cell.getDescription().c_str());
+
+            delete event;
+            event = NULL;
         }
     }
 
