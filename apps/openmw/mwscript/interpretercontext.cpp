@@ -13,7 +13,7 @@
 #include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
-#include "../mwmp/LocalEvent.hpp"
+#include "../mwmp/WorldEvent.hpp"
 
 #include "../mwworld/esmstore.hpp"
 
@@ -189,7 +189,7 @@ namespace MWScript
         // Added by tes3mp
         if (sendPackets)
         {
-            mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
             event->cell = *mReference.getCell()->getCell();
 
             mwmp::WorldObject worldObject;
@@ -233,7 +233,7 @@ namespace MWScript
         // Only send a packet if this float has no decimals (to avoid spam)
         if (sendPackets && value == (int) value)
         {
-            mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
             event->cell = *mReference.getCell()->getCell();
 
             mwmp::WorldObject worldObject;
@@ -301,7 +301,7 @@ namespace MWScript
         // Added by tes3mp
         if (sendPackets)
         {
-            mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
 
             mwmp::WorldObject worldObject;
             worldObject.varName = name;
@@ -641,7 +641,7 @@ namespace MWScript
         // Added by tes3mp
         if (sendPackets && !global)
         {
-            mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
 
             mwmp::WorldObject worldObject;
             worldObject.refId = id;

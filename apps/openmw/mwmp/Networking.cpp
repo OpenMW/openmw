@@ -734,7 +734,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         pl = Players::getPlayer(guid);
 
     WorldPacket *myPacket = worldController.GetPacket(packet->data[0]);
-    LocalEvent *event = new LocalEvent(guid);
+    WorldEvent *event = new WorldEvent(guid);
     myPacket->Packet(&bsIn, event, false);
 
     switch (packet->data[0])
@@ -935,9 +935,9 @@ LocalPlayer *Networking::getLocalPlayer()
     return mwmp::Main::get().getLocalPlayer();
 }
 
-LocalEvent *Networking::createLocalEvent()
+WorldEvent *Networking::createWorldEvent()
 {
-    return new LocalEvent(getLocalPlayer()->guid);
+    return new WorldEvent(getLocalPlayer()->guid);
 }
 
 bool Networking::isDedicatedPlayer(const MWWorld::Ptr &ptr)

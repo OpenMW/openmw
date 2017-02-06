@@ -9,7 +9,7 @@
 #include <BitStream.h>
 #include <string>
 
-#include "LocalEvent.hpp"
+#include "WorldEvent.hpp"
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Controllers/PlayerPacketController.hpp>
 #include <components/openmw-mp/Controllers/WorldPacketController.hpp>
@@ -40,7 +40,7 @@ namespace mwmp
 
         bool isConnected();
 
-        LocalEvent *createLocalEvent();
+        WorldEvent *createWorldEvent();
 
     private:
         bool connected;

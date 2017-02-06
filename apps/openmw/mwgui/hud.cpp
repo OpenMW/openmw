@@ -2,7 +2,7 @@
 
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
-#include "../mwmp/LocalEvent.hpp"
+#include "../mwmp/WorldEvent.hpp"
 #include "../mwmp/LocalPlayer.hpp"
 #include "../mwworld/cellstore.hpp"
 
@@ -67,7 +67,7 @@ namespace MWGui
             dropped.getCellRef().setRefNumIndex(cellStore->getLastRefNumIndex());
 
             // Added by tes3mp
-            mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
             event->cell = *dropped.getCell()->getCell();
 
             mwmp::WorldObject worldObject;

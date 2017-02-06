@@ -5,7 +5,7 @@
 
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
-#include "../mwmp/LocalEvent.hpp"
+#include "../mwmp/WorldEvent.hpp"
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
@@ -66,7 +66,7 @@ namespace MWScript
                     // Added by tes3mp to check and set whether packets should be sent about this script
                     if (mwmp::Main::isValidPacketScript(ptr.getClass().getScript(ptr)))
                     {
-                        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
                         event->cell = *ptr.getCell()->getCell();
 
                         mwmp::WorldObject worldObject;

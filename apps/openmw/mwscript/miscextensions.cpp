@@ -4,7 +4,7 @@
 
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
-#include "../mwmp/LocalEvent.hpp"
+#include "../mwmp/WorldEvent.hpp"
 
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
@@ -90,7 +90,7 @@ namespace MWScript
                 runtime.pop();
 
                 // Added by tes3mp
-                mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+                mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
 
                 mwmp::WorldObject worldObject;
                 worldObject.filename = name;
@@ -200,7 +200,7 @@ namespace MWScript
                     }
 
                     // Added by tes3mp
-                    mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
                     event->cell = *ptr.getCell()->getCell();
 
                     mwmp::WorldObject worldObject;
@@ -240,7 +240,7 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
 
                     // Added by tes3mp
-                    mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
                     event->cell = *ptr.getCell()->getCell();
 
                     mwmp::WorldObject worldObject;
@@ -713,7 +713,7 @@ namespace MWScript
                     if (parameter == 1)
                     {
                         // Added by tes3mp
-                        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
                         event->cell = *ptr.getCell()->getCell();
 
                         mwmp::WorldObject worldObject;

@@ -2,7 +2,7 @@
 
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
-#include "../mwmp/LocalEvent.hpp"
+#include "../mwmp/WorldEvent.hpp"
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -47,7 +47,7 @@ namespace MWScript
                     runtime.pop();
 
                     // Added by tes3mp
-                    mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
                     event->cell = *ptr.getCell()->getCell();
 
                     mwmp::WorldObject worldObject;
@@ -552,7 +552,7 @@ namespace MWScript
                         ptr.getCellRef().setRefNumIndex(cellStore->getLastRefNumIndex());
 
                         // Added by tes3mp
-                        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
                         event->cell = *ptr.getCell()->getCell();
 
                         mwmp::WorldObject worldObject;

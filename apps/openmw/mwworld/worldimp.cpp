@@ -7,7 +7,7 @@
 
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
-#include "../mwmp/LocalEvent.hpp"
+#include "../mwmp/WorldEvent.hpp"
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
@@ -2266,7 +2266,7 @@ namespace MWWorld
         }
 
         // Added by tes3mp
-        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
         event->cell = *door.getCell()->getCell();
 
         mwmp::WorldObject worldObject;
@@ -2293,7 +2293,7 @@ namespace MWWorld
     void World::activateDoor(const Ptr &door, int state)
     {
         // Added by tes3mp
-        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
         event->cell = *door.getCell()->getCell();
 
         mwmp::WorldObject worldObject;

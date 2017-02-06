@@ -1,5 +1,5 @@
-#ifndef OPENMW_LOCALEVENT_HPP
-#define OPENMW_LOCALEVENT_HPP
+#ifndef OPENMW_WORLDEVENT_HPP
+#define OPENMW_WORLDEVENT_HPP
 
 #include <components/openmw-mp/Base/BaseEvent.hpp>
 #include "../mwworld/cellstore.hpp"
@@ -8,12 +8,12 @@
 namespace mwmp
 {
     class Networking;
-    class LocalEvent : public BaseEvent
+    class WorldEvent : public BaseEvent
     {
     public:
 
-        LocalEvent(RakNet::RakNetGUID guid);
-        virtual ~LocalEvent();
+        WorldEvent(RakNet::RakNetGUID guid);
+        virtual ~WorldEvent();
 
         void addObject(WorldObject worldObject);
         void addContainerItem(ContainerItem containerItem);
@@ -43,4 +43,4 @@ namespace mwmp
     };
 }
 
-#endif //OPENMW_LOCALEVENT_HPP
+#endif //OPENMW_WORLDEVENT_HPP

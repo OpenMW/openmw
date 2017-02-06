@@ -18,7 +18,7 @@
 
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
-#include "../mwmp/LocalEvent.hpp"
+#include "../mwmp/WorldEvent.hpp"
 #include "../mwmp/LocalPlayer.hpp"
 #include "../mwworld/cellstore.hpp"
 
@@ -636,7 +636,7 @@ namespace MWGui
         MWWorld::Ptr newObject = *player.getClass().getContainerStore (player).add (object, object.getRefData().getCount(), player);
 
         // Added by tes3mp
-        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
         event->cell = *object.getCell()->getCell();
 
         mwmp::WorldObject worldObject;

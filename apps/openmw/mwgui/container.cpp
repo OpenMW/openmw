@@ -6,7 +6,7 @@
 #include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
-#include "../mwmp/LocalEvent.hpp"
+#include "../mwmp/WorldEvent.hpp"
 #include "../mwmp/WorldController.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -102,7 +102,7 @@ namespace MWGui
             return;
 
         // Added by tes3mp
-        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
         event->cell = *mPtr.getCell()->getCell();
 
         mwmp::WorldObject worldObject;
@@ -155,7 +155,7 @@ namespace MWGui
         }
 
         // Added by tes3mp
-        mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
         event->cell = *mPtr.getCell()->getCell();
 
         mwmp::WorldObject worldObject;
@@ -301,7 +301,7 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
 
             // Added by tes3mp
-            mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
             event->cell = *mPtr.getCell()->getCell();
 
             mwmp::WorldObject worldObject;

@@ -1,4 +1,4 @@
-#include "LocalEvent.hpp"
+#include "WorldEvent.hpp"
 #include "Main.hpp"
 #include "Networking.hpp"
 #include "LocalPlayer.hpp"
@@ -20,32 +20,32 @@
 using namespace mwmp;
 using namespace std;
 
-LocalEvent::LocalEvent(RakNet::RakNetGUID guid)
+WorldEvent::WorldEvent(RakNet::RakNetGUID guid)
 {
     this->guid = guid;
 }
 
-LocalEvent::~LocalEvent()
+WorldEvent::~WorldEvent()
 {
 
 }
 
-Networking *LocalEvent::getNetworking()
+Networking *WorldEvent::getNetworking()
 {
     return mwmp::Main::get().getNetworking();
 }
 
-void LocalEvent::addObject(WorldObject worldObject)
+void WorldEvent::addObject(WorldObject worldObject)
 {
     objectChanges.objects.push_back(worldObject);
 }
 
-void LocalEvent::addContainerItem(ContainerItem containerItem)
+void WorldEvent::addContainerItem(ContainerItem containerItem)
 {
     containerChanges.items.push_back(containerItem);
 }
 
-void LocalEvent::editContainer(MWWorld::CellStore* cellStore)
+void WorldEvent::editContainer(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
@@ -103,7 +103,7 @@ void LocalEvent::editContainer(MWWorld::CellStore* cellStore)
     }
 }
 
-void LocalEvent::placeObjects(MWWorld::CellStore* cellStore)
+void WorldEvent::placeObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
@@ -141,7 +141,7 @@ void LocalEvent::placeObjects(MWWorld::CellStore* cellStore)
     }
 }
 
-void LocalEvent::deleteObjects(MWWorld::CellStore* cellStore)
+void WorldEvent::deleteObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
@@ -167,7 +167,7 @@ void LocalEvent::deleteObjects(MWWorld::CellStore* cellStore)
     }
 }
 
-void LocalEvent::lockObjects(MWWorld::CellStore* cellStore)
+void WorldEvent::lockObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
@@ -193,7 +193,7 @@ void LocalEvent::lockObjects(MWWorld::CellStore* cellStore)
     }
 }
 
-void LocalEvent::unlockObjects(MWWorld::CellStore* cellStore)
+void WorldEvent::unlockObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
@@ -219,7 +219,7 @@ void LocalEvent::unlockObjects(MWWorld::CellStore* cellStore)
     }
 }
 
-void LocalEvent::scaleObjects(MWWorld::CellStore* cellStore)
+void WorldEvent::scaleObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
@@ -245,7 +245,7 @@ void LocalEvent::scaleObjects(MWWorld::CellStore* cellStore)
     }
 }
 
-void LocalEvent::moveObjects(MWWorld::CellStore* cellStore)
+void WorldEvent::moveObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
@@ -272,7 +272,7 @@ void LocalEvent::moveObjects(MWWorld::CellStore* cellStore)
     }
 }
 
-void LocalEvent::rotateObjects(MWWorld::CellStore* cellStore)
+void WorldEvent::rotateObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
@@ -299,7 +299,7 @@ void LocalEvent::rotateObjects(MWWorld::CellStore* cellStore)
     }
 }
 
-void LocalEvent::animateObjects(MWWorld::CellStore* cellStore)
+void WorldEvent::animateObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
@@ -326,7 +326,7 @@ void LocalEvent::animateObjects(MWWorld::CellStore* cellStore)
     }
 }
 
-void LocalEvent::activateDoors(MWWorld::CellStore* cellStore)
+void WorldEvent::activateDoors(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
@@ -353,7 +353,7 @@ void LocalEvent::activateDoors(MWWorld::CellStore* cellStore)
     }
 }
 
-void LocalEvent::playMusic()
+void WorldEvent::playMusic()
 {
     WorldObject worldObject;
 
@@ -368,7 +368,7 @@ void LocalEvent::playMusic()
     }
 }
 
-void LocalEvent::playVideo()
+void WorldEvent::playVideo()
 {
     WorldObject worldObject;
 
@@ -384,7 +384,7 @@ void LocalEvent::playVideo()
     }
 }
 
-void LocalEvent::setLocalShorts(MWWorld::CellStore* cellStore)
+void WorldEvent::setLocalShorts(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
@@ -412,7 +412,7 @@ void LocalEvent::setLocalShorts(MWWorld::CellStore* cellStore)
     }
 }
 
-void LocalEvent::setLocalFloats(MWWorld::CellStore* cellStore)
+void WorldEvent::setLocalFloats(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
@@ -440,7 +440,7 @@ void LocalEvent::setLocalFloats(MWWorld::CellStore* cellStore)
     }
 }
 
-void LocalEvent::setMemberShorts()
+void WorldEvent::setMemberShorts()
 {
     WorldObject worldObject;
 
@@ -472,7 +472,7 @@ void LocalEvent::setMemberShorts()
     }
 }
 
-void LocalEvent::setGlobalShorts()
+void WorldEvent::setGlobalShorts()
 {
     WorldObject worldObject;
 

@@ -2,7 +2,7 @@
 
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
-#include "../mwmp/LocalEvent.hpp"
+#include "../mwmp/WorldEvent.hpp"
 
 #include "../mwworld/cellstore.hpp"
 
@@ -59,7 +59,7 @@ namespace MWMechanics
             if (Misc::Rng::roll0to99() <= x)
             {
                 // Added by tes3mp
-                mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+                mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
                 event->cell = *lock.getCell()->getCell();
 
                 mwmp::WorldObject worldObject;

@@ -2,7 +2,7 @@
 
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
-#include "../mwmp/LocalEvent.hpp"
+#include "../mwmp/WorldEvent.hpp"
 
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
@@ -71,7 +71,7 @@ namespace MWScript
                     runtime.pop();
 
                     // Added by tes3mp
-                    mwmp::LocalEvent *event = mwmp::Main::get().getNetworking()->createLocalEvent();
+                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
                     
                     mwmp::WorldObject worldObject;
                     worldObject.filename = sound;
