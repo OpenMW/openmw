@@ -909,13 +909,17 @@ namespace MWInput
     }
 
     void InputManager::quickLoad() {
+        /* Disabled by tes3mp
         if (!MyGUI::InputManager::getInstance().isModalAny())
             MWBase::Environment::get().getStateManager()->quickLoad();
+        */
     }
 
     void InputManager::quickSave() {
+        /* Disabled by tes3mp
         if (!MyGUI::InputManager::getInstance().isModalAny())
             MWBase::Environment::get().getStateManager()->quickSave();
+        */
     }
     void InputManager::toggleSpell()
     {
