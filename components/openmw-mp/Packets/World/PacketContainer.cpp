@@ -62,6 +62,9 @@ void PacketContainer::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
 
         RW(containerItem.refId, send);
         RW(containerItem.count, send);
+        RW(containerItem.charge, send);
+        RW(containerItem.goldValue, send);
+        RW(containerItem.actionCount, send);
 
         if (!send)
         {

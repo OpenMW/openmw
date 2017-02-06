@@ -110,9 +110,14 @@ namespace MWGui
         worldObject.refNumIndex = mPtr.getCellRef().getRefNum().mIndex;
         event->addObject(worldObject);
 
+        MWWorld::Ptr itemPtr = mModel->getItem(mSelectedItem).mBase;
+
         mwmp::ContainerItem containerItem;
-        containerItem.refId = mModel->getItem(mSelectedItem).mBase.getCellRef().getRefId();
-        containerItem.count = count;
+        containerItem.refId =itemPtr.getCellRef().getRefId();
+        containerItem.count = itemPtr.getRefData().getCount();
+        containerItem.charge = itemPtr.getCellRef().getCharge();
+        containerItem.goldValue = itemPtr.getCellRef().getGoldValue();
+        containerItem.actionCount = count;
         event->addContainerItem(containerItem);
         event->containerChanges.action = mwmp::ContainerChanges::REMOVE;
 
@@ -166,6 +171,8 @@ namespace MWGui
         mwmp::ContainerItem containerItem;
         containerItem.refId = mDragAndDrop->mItem.mBase.getCellRef().getRefId();
         containerItem.count = mDragAndDrop->mItem.mBase.getRefData().getCount();
+        containerItem.charge = mDragAndDrop->mItem.mBase.getCellRef().getCharge();
+        containerItem.goldValue = mDragAndDrop->mItem.mBase.getCellRef().getGoldValue();
         event->addContainerItem(containerItem);
         event->containerChanges.action = mwmp::ContainerChanges::ADD;
 

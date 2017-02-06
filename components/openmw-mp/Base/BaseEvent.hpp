@@ -11,8 +11,8 @@ namespace mwmp
     {
         std::string refId;
         int refNumIndex;
-        int charge;
         int count;
+        int charge;
         int goldValue;
         ESM::Position pos;
 
@@ -36,11 +36,14 @@ namespace mwmp
     {
         std::string refId;
         int count;
-        int health;
+        int charge;
+        int goldValue;
+
+        int actionCount;
 
         inline bool operator==(const ContainerItem& rhs)
         {
-            return refId == rhs.refId && count == rhs.count && health == rhs.health;
+            return refId == rhs.refId && count == rhs.count && charge == rhs.charge && goldValue && rhs.goldValue;
         }
     };
 

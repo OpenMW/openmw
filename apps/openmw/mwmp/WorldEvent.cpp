@@ -75,15 +75,40 @@ void WorldEvent::editContainer(MWWorld::CellStore* cellStore)
 
             for (unsigned int i = 0; i < containerChanges.count; i++)
             {
-                ContainerItem item = containerChanges.items.at(i);
+                ContainerItem containerItem = containerChanges.items.at(i);
 
                 if (action == ContainerChanges::ADD || action == ContainerChanges::SET)
                 {
-                    containerStore.add(item.refId, item.count, mwmp::Players::getPlayer(guid)->getPtr());
+                    // Create a ManualRef to be able to set item charge
+                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), containerItem.refId, 1);
+                    MWWorld::Ptr newPtr = ref.getPtr();
+
+                    if (containerItem.count > 1)
+                        newPtr.getRefData().setCount(containerItem.count);
+
+                    if (containerItem.charge > -1)
+                        newPtr.getCellRef().setCharge(containerItem.charge);
+
+                    newPtr.getCellRef().setGoldValue(containerItem.goldValue);
+
+                    containerStore.add(newPtr, containerItem.count, mwmp::Players::getPlayer(guid)->getPtr(), true);
                 }
                 else if (action == ContainerChanges::REMOVE)
                 {
-                    containerStore.remove(item.refId, item.count, mwmp::Players::getPlayer(guid)->getPtr());
+                    // We have to find the right item ourselves because ContainerStore has no method
+                    // accounting for charge
+                    for (MWWorld::ContainerStoreIterator iter(containerStore.begin()); iter != containerStore.end(); ++iter)
+                    {
+                        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), containerItem.refId))
+                        {
+                            if (iter->getCellRef().getCharge() == containerItem.charge &&
+                                iter->getCellRef().getGoldValue() == containerItem.goldValue &&
+                                iter->getRefData().getCount() == containerItem.count)
+                            {
+                                containerStore.remove(*iter, containerItem.actionCount, mwmp::Players::getPlayer(guid)->getPtr());
+                            }
+                        }
+                    }
                 }
             }
 
@@ -119,7 +144,6 @@ void WorldEvent::placeObjects(MWWorld::CellStore* cellStore)
             worldObject.count);
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), worldObject.refId, 1);
-
         MWWorld::Ptr newPtr = ref.getPtr();
 
         if (worldObject.charge > -1)
