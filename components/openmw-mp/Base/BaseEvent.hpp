@@ -1,5 +1,5 @@
-#ifndef OPENMW_WORLDEVENT_HPP
-#define OPENMW_WORLDEVENT_HPP
+#ifndef OPENMW_BASEEVENT_HPP
+#define OPENMW_BASEEVENT_HPP
 
 #include <components/esm/loadcell.hpp>
 #include <components/esm/cellref.hpp>
@@ -65,16 +65,16 @@ namespace mwmp
         int action; // 0 - Clear and set in entirety, 1 - Add item, 2 - Remove item
     };
 
-    class WorldEvent
+    class BaseEvent
     {
     public:
 
-        WorldEvent(RakNet::RakNetGUID guid) : guid(guid)
+        BaseEvent(RakNet::RakNetGUID guid) : guid(guid)
         {
 
         }
 
-        WorldEvent()
+        BaseEvent()
         {
 
         }
@@ -87,4 +87,4 @@ namespace mwmp
     };
 }
 
-#endif //OPENMW_WORLDEVENT_HPP
+#endif //OPENMW_BASEEVENT_HPP

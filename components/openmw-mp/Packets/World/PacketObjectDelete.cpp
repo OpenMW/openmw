@@ -8,7 +8,7 @@ PacketObjectDelete::PacketObjectDelete(RakNet::RakPeerInterface *peer) : WorldPa
     packetID = ID_OBJECT_DELETE;
 }
 
-void PacketObjectDelete::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)
+void PacketObjectDelete::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
 {
     WorldPacket::Packet(bs, event, send);
 

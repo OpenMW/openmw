@@ -8,7 +8,7 @@ PacketScriptGlobalShort::PacketScriptGlobalShort(RakNet::RakPeerInterface *peer)
     packetID = ID_SCRIPT_GLOBAL_SHORT;
 }
 
-void PacketScriptGlobalShort::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)
+void PacketScriptGlobalShort::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
 {
     WorldPacket::Packet(bs, event, send);
 

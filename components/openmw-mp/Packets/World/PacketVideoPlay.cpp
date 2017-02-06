@@ -8,7 +8,7 @@ PacketVideoPlay::PacketVideoPlay(RakNet::RakPeerInterface *peer) : WorldPacket(p
     packetID = ID_VIDEO_PLAY;
 }
 
-void PacketVideoPlay::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)
+void PacketVideoPlay::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
 {
     WorldPacket::Packet(bs, event, send);
 

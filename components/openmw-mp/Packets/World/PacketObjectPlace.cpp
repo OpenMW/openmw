@@ -8,7 +8,7 @@ PacketObjectPlace::PacketObjectPlace(RakNet::RakPeerInterface *peer) : WorldPack
     packetID = ID_OBJECT_PLACE;
 }
 
-void PacketObjectPlace::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)
+void PacketObjectPlace::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
 {
     WorldPacket::Packet(bs, event, send);
 

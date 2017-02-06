@@ -8,7 +8,7 @@ PacketObjectScale::PacketObjectScale(RakNet::RakPeerInterface *peer) : WorldPack
     packetID = ID_OBJECT_SCALE;
 }
 
-void PacketObjectScale::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)
+void PacketObjectScale::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
 {
     WorldPacket::Packet(bs, event, send);
 

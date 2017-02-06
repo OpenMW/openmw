@@ -8,7 +8,7 @@ PacketObjectRotate::PacketObjectRotate(RakNet::RakPeerInterface *peer) : WorldPa
     packetID = ID_OBJECT_ROTATE;
 }
 
-void PacketObjectRotate::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)
+void PacketObjectRotate::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
 {
     WorldPacket::Packet(bs, event, send);
 

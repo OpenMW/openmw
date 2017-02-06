@@ -8,7 +8,7 @@ PacketMusicPlay::PacketMusicPlay(RakNet::RakPeerInterface *peer) : WorldPacket(p
     packetID = ID_MUSIC_PLAY;
 }
 
-void PacketMusicPlay::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)
+void PacketMusicPlay::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
 {
     WorldPacket::Packet(bs, event, send);
 

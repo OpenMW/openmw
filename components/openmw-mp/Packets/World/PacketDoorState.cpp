@@ -8,7 +8,7 @@ PacketDoorState::PacketDoorState(RakNet::RakPeerInterface *peer) : WorldPacket(p
     packetID = ID_DOOR_STATE;
 }
 
-void PacketDoorState::Packet(RakNet::BitStream *bs, WorldEvent *event, bool send)
+void PacketDoorState::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
 {
     WorldPacket::Packet(bs, event, send);
 

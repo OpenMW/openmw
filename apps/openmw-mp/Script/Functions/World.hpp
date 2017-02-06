@@ -2,10 +2,10 @@
 #define OPENMW_WORLD_HPP
 
 #define WORLDFUNCTIONS \
-    {"CreateWorldEvent",     WorldFunctions::CreateWorldEvent},\
+    {"CreateBaseEvent",     WorldFunctions::CreateBaseEvent},\
     \
     {"AddWorldObject",       WorldFunctions::AddWorldObject},\
-    {"SetWorldEventCell",    WorldFunctions::SetWorldEventCell},\
+    {"SetBaseEventCell",    WorldFunctions::SetBaseEventCell},\
     \
     {"SetObjectRefId",       WorldFunctions::SetObjectRefId},\
     {"SetObjectRefNumIndex", WorldFunctions::SetObjectRefNumIndex},\
@@ -50,10 +50,10 @@ class WorldFunctions
 {
 public:
 
-    static void CreateWorldEvent(unsigned short pid) noexcept;
+    static void CreateBaseEvent(unsigned short pid) noexcept;
 
     static void AddWorldObject() noexcept;
-    static void SetWorldEventCell(const char* cellDescription) noexcept;
+    static void SetBaseEventCell(const char* cellDescription) noexcept;
 
     static void SetObjectRefId(const char* refId) noexcept;
     static void SetObjectRefNumIndex(int refNumIndex) noexcept;

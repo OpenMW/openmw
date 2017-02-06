@@ -1,14 +1,14 @@
 #ifndef OPENMW_LOCALEVENT_HPP
 #define OPENMW_LOCALEVENT_HPP
 
-#include <components/openmw-mp/Base/WorldEvent.hpp>
+#include <components/openmw-mp/Base/BaseEvent.hpp>
 #include "../mwworld/cellstore.hpp"
 #include <RakNetTypes.h>
 
 namespace mwmp
 {
     class Networking;
-    class LocalEvent : public WorldEvent
+    class LocalEvent : public BaseEvent
     {
     public:
 

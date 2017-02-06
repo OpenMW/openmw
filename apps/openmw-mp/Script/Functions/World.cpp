@@ -4,28 +4,28 @@
 #include <apps/openmw-mp/Script/ScriptFunctions.hpp>
 #include <apps/openmw-mp/Networking.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
-#include <components/openmw-mp/Base/WorldEvent.hpp>
+#include <components/openmw-mp/Base/BaseEvent.hpp>
 #include "World.hpp"
 
 using namespace mwmp;
 
-static WorldEvent *worldEvent = nullptr;
+static BaseEvent *baseEvent = nullptr;
 static WorldObject tempWorldObject;
 
 std::regex exteriorCellPattern("^(-?\\d+), (-?\\d+)$");
 
-void WorldFunctions::CreateWorldEvent(unsigned short pid) noexcept
+void WorldFunctions::CreateBaseEvent(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
 
-    if (worldEvent)
+    if (baseEvent)
     {
-        delete worldEvent;
-        worldEvent = nullptr;
+        delete baseEvent;
+        baseEvent = nullptr;
     }
 
-    worldEvent = new WorldEvent(player->guid);
+    baseEvent = new BaseEvent(player->guid);
 }
 
 void WorldFunctions::AddWorldObject() noexcept
@@ -41,29 +41,29 @@ void WorldFunctions::AddWorldObject() noexcept
     worldObject.lockLevel = tempWorldObject.lockLevel;
     worldObject.pos = tempWorldObject.pos;
 
-    worldEvent->objectChanges.objects.push_back(worldObject);
+    baseEvent->objectChanges.objects.push_back(worldObject);
 }
 
-void WorldFunctions::SetWorldEventCell(const char* cellDescription) noexcept
+void WorldFunctions::SetBaseEventCell(const char* cellDescription) noexcept
 {
     std::string description = cellDescription;
     std::smatch baseMatch;
 
     if (std::regex_match(description, baseMatch, exteriorCellPattern))
     {
-        worldEvent->cell.mData.mFlags &= ~ESM::Cell::Interior;
+        baseEvent->cell.mData.mFlags &= ~ESM::Cell::Interior;
 
         // The first sub match is the whole string, so check for a length of 3
         if (baseMatch.size() == 3)
         {
-            worldEvent->cell.mData.mX = stoi(baseMatch[1].str());
-            worldEvent->cell.mData.mY = stoi(baseMatch[2].str());
+            baseEvent->cell.mData.mX = stoi(baseMatch[1].str());
+            baseEvent->cell.mData.mY = stoi(baseMatch[2].str());
         }
     }
     else
     {
-        worldEvent->cell.mData.mFlags |= ESM::Cell::Interior;
-        worldEvent->cell.mName = description;
+        baseEvent->cell.mData.mFlags |= ESM::Cell::Interior;
+        baseEvent->cell.mName = description;
     }
 }
 
@@ -198,32 +198,32 @@ double WorldFunctions::GetObjectRotZ(unsigned int i) noexcept
 
 void WorldFunctions::SendObjectDelete() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_DELETE)->Send(worldEvent, worldEvent->guid);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_DELETE)->Send(baseEvent, baseEvent->guid);
 }
 
 void WorldFunctions::SendObjectPlace() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_PLACE)->Send(worldEvent, worldEvent->guid);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_PLACE)->Send(baseEvent, baseEvent->guid);
 }
 
 void WorldFunctions::SendObjectScale() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_SCALE)->Send(worldEvent, worldEvent->guid);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_SCALE)->Send(baseEvent, baseEvent->guid);
 }
 
 void WorldFunctions::SendObjectLock() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_LOCK)->Send(worldEvent, worldEvent->guid);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_LOCK)->Send(baseEvent, baseEvent->guid);
 }
 
 void WorldFunctions::SendObjectUnlock() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_UNLOCK)->Send(worldEvent, worldEvent->guid);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_UNLOCK)->Send(baseEvent, baseEvent->guid);
 }
 
 void WorldFunctions::SendDoorState() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_DOOR_STATE)->Send(worldEvent, worldEvent->guid);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_DOOR_STATE)->Send(baseEvent, baseEvent->guid);
 }
 
 void WorldFunctions::SetHour(unsigned short pid, double hour) noexcept
