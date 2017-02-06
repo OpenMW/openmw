@@ -1117,6 +1117,7 @@ namespace MWMechanics
 
             timerUpdateAITargets += duration;
             timerUpdateHeadTrack += duration;
+            timerUpdateEquippedLight += duration;
 
             // Looping magic VFX update
             // Note: we need to do this before any of the animations are updated.
