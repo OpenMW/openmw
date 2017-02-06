@@ -1487,6 +1487,10 @@ namespace MWInput
         ret.push_back(A_QuickKey8);
         ret.push_back(A_QuickKey9);
         ret.push_back(A_QuickKey10);
+        ret.push_back(A_CycleSpellLeft);
+        ret.push_back(A_CycleSpellRight);
+        ret.push_back(A_CycleWeaponLeft);
+        ret.push_back(A_CycleWeaponRight);
 
         return ret;
     }

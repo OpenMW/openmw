@@ -250,6 +250,8 @@ namespace MWPhysics
             }
             else
             {
+                actor->setOnGround(true);
+
                 // Check if we actually found a valid spawn point (use an infinitely thin ray this time).
                 // Required for some broken door destinations in Morrowind.esm, where the spawn point
                 // intersects with other geometry if the actor's base is taken into account
@@ -266,11 +268,13 @@ namespace MWPhysics
                         ( (toOsg(resultCallback1.m_hitPointWorld) - tracer.mEndPos).length2() > 35*35
                         || !isWalkableSlope(tracer.mPlaneNormal)))
                 {
-                    actor->setOnGround(isWalkableSlope(resultCallback1.m_hitNormalWorld));
+                    actor->setOnSlope(isWalkableSlope(resultCallback1.m_hitNormalWorld));
                     return toOsg(resultCallback1.m_hitPointWorld) + osg::Vec3f(0.f, 0.f, 1.f);
                 }
-
-                actor->setOnGround(isWalkableSlope(tracer.mPlaneNormal));
+                else
+                {
+                    actor->setOnSlope(isWalkableSlope(tracer.mPlaneNormal));
+                }
 
                 return tracer.mEndPos;
             }
@@ -322,12 +326,10 @@ namespace MWPhysics
             {
                 velocity = (osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))) * movement;
 
-                if (velocity.z() > 0.f && physicActor->getOnGround())
+                if (velocity.z() > 0.f && physicActor->getOnGround() && !physicActor->getOnSlope())
                     inertia = velocity;
-                else if(!physicActor->getOnGround())
-                {
+                else if(!physicActor->getOnGround() || physicActor->getOnSlope())
                     velocity = velocity + physicActor->getInertialForce();
-                }
             }
 
             // dead actors underwater will float to the surface, if the CharacterController tells us to do so
@@ -440,13 +442,14 @@ namespace MWPhysics
             }
 
             bool isOnGround = false;
+            bool isOnSlope = false;
             if (!(inertia.z() > 0.f) && !(newPosition.z() < swimlevel))
             {
                 osg::Vec3f from = newPosition;
                 osg::Vec3f to = newPosition - (physicActor->getOnGround() ?
                              osg::Vec3f(0,0,sStepSizeDown+2.f) : osg::Vec3f(0,0,2.f));
                 tracer.doTrace(colobj, from, to, collisionWorld);
-                if(tracer.mFraction < 1.0f && isWalkableSlope(tracer.mPlaneNormal)
+                if(tracer.mFraction < 1.0f
                         && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != CollisionType_Actor)
                 {
                     const btCollisionObject* standingOn = tracer.mHitObject;
@@ -460,6 +463,8 @@ namespace MWPhysics
                         newPosition.z() = tracer.mEndPos.z() + 1.0f;
 
                     isOnGround = true;
+
+                    isOnSlope = !isWalkableSlope(tracer.mPlaneNormal);
                 }
                 else
                 {
@@ -483,7 +488,7 @@ namespace MWPhysics
                 }
             }
 
-            if(isOnGround || newPosition.z() < swimlevel || isFlying)
+            if((isOnGround && !isOnSlope) || newPosition.z() < swimlevel || isFlying)
                 physicActor->setInertialForce(osg::Vec3f(0.f, 0.f, 0.f));
             else
             {
@@ -497,6 +502,7 @@ namespace MWPhysics
                 physicActor->setInertialForce(inertia);
             }
             physicActor->setOnGround(isOnGround);
+            physicActor->setOnSlope(isOnSlope);
 
             newPosition.z() -= halfExtents.z(); // remove what was added at the beginning
             return newPosition;
@@ -989,41 +995,10 @@ namespace MWPhysics
         return !result.mHit;
     }
 
-    // physactor->getOnGround() is not a reliable indicator of whether the actor
-    // is on the ground (defaults to false, which means code blocks such as
-    // CharacterController::update() may falsely detect "falling").
-    //
-    // Also, collisions can move z position slightly off zero, giving a false
-    // indication. In order to reduce false detection of jumping, small distance
-    // below the actor is detected and ignored. A value of 1.5 is used here, but
-    // something larger may be more suitable.  This change should resolve Bug#1271.
-    //
-    // TODO: There might be better places to update PhysicActor::mOnGround.
     bool PhysicsSystem::isOnGround(const MWWorld::Ptr &actor)
     {
         Actor* physactor = getActor(actor);
-        if(!physactor)
-            return false;
-        if(physactor->getOnGround())
-            return true;
-        else
-        {
-            osg::Vec3f pos(actor.getRefData().getPosition().asVec3());
-
-            ActorTracer tracer;
-            // a small distance above collision object is considered "on ground"
-            tracer.findGround(physactor,
-                              pos,
-                              pos - osg::Vec3f(0, 0, 1.5f), // trace a small amount down
-                              mCollisionWorld);
-            if(tracer.mFraction < 1.0f) // collision, must be close to something below
-            {
-                physactor->setOnGround(true);
-                return true;
-            }
-            else
-                return false;
-        }
+        return physactor->getOnGround();
     }
 
     bool PhysicsSystem::canMoveToWaterSurface(const MWWorld::ConstPtr &actor, const float waterlevel)

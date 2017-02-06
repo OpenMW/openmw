@@ -43,7 +43,7 @@ namespace MWGui
             void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-            MyGUI::TextBox* addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+            std::pair<MyGUI::TextBox*, MyGUI::TextBox*> addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             MyGUI::Widget* addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
 
             void setFactions (const FactionList& factions);
@@ -62,7 +62,7 @@ namespace MWGui
 
             SkillList mMajorSkills, mMinorSkills, mMiscSkills;
             std::map<int, MWMechanics::SkillValue > mSkillValues;
-            std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
+            std::map<int, std::pair<MyGUI::TextBox*, MyGUI::TextBox*> > mSkillWidgetMap;
             std::map<std::string, MyGUI::Widget*> mFactionWidgetMap;
             FactionList mFactions; ///< Stores a list of factions and the current rank
             std::string mBirthSignId;

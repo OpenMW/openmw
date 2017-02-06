@@ -1,6 +1,6 @@
 #include "actor.hpp"
 
-#include <BulletCollision/CollisionShapes/btCylinderShape.h>
+#include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
@@ -18,7 +18,7 @@ namespace MWPhysics
 
 Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> shape, btCollisionWorld* world)
   : mCanWaterWalk(false), mWalkingOnWater(false)
-  , mCollisionObject(0), mForce(0.f, 0.f, 0.f), mOnGround(false)
+  , mCollisionObject(0), mForce(0.f, 0.f, 0.f), mOnGround(true), mOnSlope(false)
   , mInternalCollisionMode(true)
   , mExternalCollisionMode(true)
   , mCollisionWorld(world)
@@ -31,8 +31,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     // Use capsule shape only if base is square (nonuniform scaling apparently doesn't work on it)
     if (std::abs(mHalfExtents.x()-mHalfExtents.y())<mHalfExtents.x()*0.05 && mHalfExtents.z() >= mHalfExtents.x())
     {
-        // Could also be btCapsuleShapeZ, but the movement solver seems to have issues with it (jumping on slopes doesn't work)
-        mShape.reset(new btCylinderShapeZ(toBullet(mHalfExtents)));
+        mShape.reset(new btCapsuleShapeZ(mHalfExtents.x(), 2*mHalfExtents.z() - 2*mHalfExtents.x()));
     }
     else
         mShape.reset(new btBoxShape(toBullet(mHalfExtents)));
@@ -178,6 +177,11 @@ void Actor::setInertialForce(const osg::Vec3f &force)
 void Actor::setOnGround(bool grounded)
 {
     mOnGround = grounded;
+}
+
+void Actor::setOnSlope(bool slope)
+{
+    mOnSlope = slope;
 }
 
 bool Actor::isWalkingOnWater() const
