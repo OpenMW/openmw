@@ -18,7 +18,7 @@ namespace MWPhysics
 
 Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> shape, btCollisionWorld* world)
   : mCanWaterWalk(false), mWalkingOnWater(false)
-  , mCollisionObject(0), mForce(0.f, 0.f, 0.f), mOnGround(false)
+  , mCollisionObject(0), mForce(0.f, 0.f, 0.f), mOnGround(false), mOnSlope(false)
   , mInternalCollisionMode(true)
   , mExternalCollisionMode(true)
   , mCollisionWorld(world)
@@ -178,6 +178,11 @@ void Actor::setInertialForce(const osg::Vec3f &force)
 void Actor::setOnGround(bool grounded)
 {
     mOnGround = grounded;
+}
+
+void Actor::setOnSlope(bool slope)
+{
+    mOnSlope = slope;
 }
 
 bool Actor::isWalkingOnWater() const

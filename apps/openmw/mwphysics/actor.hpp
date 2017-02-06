@@ -124,6 +124,13 @@ namespace MWPhysics
             return mInternalCollisionMode && mOnGround;
         }
 
+        void setOnSlope(bool slope);
+
+        bool getOnSlope() const
+        {
+            return mInternalCollisionMode && mOnSlope;
+        }
+
         btCollisionObject* getCollisionObject() const
         {
             return mCollisionObject.get();
@@ -160,6 +167,7 @@ namespace MWPhysics
 
         osg::Vec3f mForce;
         bool mOnGround;
+        bool mOnSlope;
         bool mInternalCollisionMode;
         bool mExternalCollisionMode;
 
