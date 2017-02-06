@@ -76,6 +76,10 @@ void WorldEvent::editContainer(MWWorld::CellStore* cellStore)
             for (unsigned int i = 0; i < containerChanges.count; i++)
             {
                 ContainerItem containerItem = containerChanges.items.at(i);
+                MWWorld::Ptr ownerPtr = MWBase::Environment::get().getWorld()->searchPtr(containerItem.owner, false);
+
+                if (ownerPtr.isEmpty())
+                    ownerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
                 if (action == ContainerChanges::ADD || action == ContainerChanges::SET)
                 {
@@ -91,7 +95,7 @@ void WorldEvent::editContainer(MWWorld::CellStore* cellStore)
 
                     newPtr.getCellRef().setGoldValue(containerItem.goldValue);
 
-                    containerStore.add(newPtr, containerItem.count, mwmp::Players::getPlayer(guid)->getPtr(), true);
+                    containerStore.add(newPtr, containerItem.count, ownerPtr, true);
                 }
                 else if (action == ContainerChanges::REMOVE)
                 {
@@ -103,9 +107,10 @@ void WorldEvent::editContainer(MWWorld::CellStore* cellStore)
                         {
                             if (iter->getCellRef().getCharge() == containerItem.charge &&
                                 iter->getCellRef().getGoldValue() == containerItem.goldValue &&
-                                iter->getRefData().getCount() == containerItem.count)
+                                iter->getRefData().getCount() == containerItem.count &&
+                                iter->getCellRef().getOwner() == containerItem.owner)
                             {
-                                containerStore.remove(*iter, containerItem.actionCount, mwmp::Players::getPlayer(guid)->getPtr());
+                                containerStore.remove(*iter, containerItem.actionCount, ownerPtr);
                             }
                         }
                     }
@@ -478,9 +483,9 @@ void WorldEvent::setMemberShorts()
             worldObject.shortVal);
 
         // Mimic the way a Ptr is fetched in InterpreterContext for similar situations
-        MWWorld::Ptr ptrFound = MWBase::Environment::get().getWorld()->getPtr(worldObject.refId, false);
+        MWWorld::Ptr ptrFound = MWBase::Environment::get().getWorld()->searchPtr(worldObject.refId, false);
 
-        if (ptrFound)
+        if (!ptrFound.isEmpty())
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
                 ptrFound.getCellRef().getRefId().c_str(),

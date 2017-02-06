@@ -39,6 +39,7 @@ namespace mwmp
         int charge;
         int goldValue;
 
+        std::string owner;
         int actionCount;
 
         inline bool operator==(const ContainerItem& rhs)

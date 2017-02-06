@@ -117,6 +117,7 @@ namespace MWGui
         containerItem.count = itemPtr.getRefData().getCount();
         containerItem.charge = itemPtr.getCellRef().getCharge();
         containerItem.goldValue = itemPtr.getCellRef().getGoldValue();
+        containerItem.owner = itemPtr.getCellRef().getOwner();
         containerItem.actionCount = count;
         event->addContainerItem(containerItem);
         event->containerChanges.action = mwmp::ContainerChanges::REMOVE;
@@ -168,11 +169,14 @@ namespace MWGui
         worldObject.refNumIndex = mPtr.getCellRef().getRefNum().mIndex;
         event->addObject(worldObject);
 
+        MWWorld::Ptr itemPtr = mDragAndDrop->mItem.mBase;
+
         mwmp::ContainerItem containerItem;
-        containerItem.refId = mDragAndDrop->mItem.mBase.getCellRef().getRefId();
-        containerItem.count = mDragAndDrop->mItem.mBase.getRefData().getCount();
-        containerItem.charge = mDragAndDrop->mItem.mBase.getCellRef().getCharge();
-        containerItem.goldValue = mDragAndDrop->mItem.mBase.getCellRef().getGoldValue();
+        containerItem.refId = itemPtr.getCellRef().getRefId();
+        containerItem.count = itemPtr.getRefData().getCount();
+        containerItem.charge = itemPtr.getCellRef().getCharge();
+        containerItem.goldValue = itemPtr.getCellRef().getGoldValue();
+        containerItem.owner = itemPtr.getCellRef().getOwner();
         event->addContainerItem(containerItem);
         event->containerChanges.action = mwmp::ContainerChanges::ADD;
 
