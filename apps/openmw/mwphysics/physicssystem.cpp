@@ -995,41 +995,10 @@ namespace MWPhysics
         return !result.mHit;
     }
 
-    // physactor->getOnGround() is not a reliable indicator of whether the actor
-    // is on the ground (defaults to false, which means code blocks such as
-    // CharacterController::update() may falsely detect "falling").
-    //
-    // Also, collisions can move z position slightly off zero, giving a false
-    // indication. In order to reduce false detection of jumping, small distance
-    // below the actor is detected and ignored. A value of 1.5 is used here, but
-    // something larger may be more suitable.  This change should resolve Bug#1271.
-    //
-    // TODO: There might be better places to update PhysicActor::mOnGround.
     bool PhysicsSystem::isOnGround(const MWWorld::Ptr &actor)
     {
         Actor* physactor = getActor(actor);
-        if(!physactor)
-            return false;
-        if(physactor->getOnGround())
-            return true;
-        else
-        {
-            osg::Vec3f pos(actor.getRefData().getPosition().asVec3());
-
-            ActorTracer tracer;
-            // a small distance above collision object is considered "on ground"
-            tracer.findGround(physactor,
-                              pos,
-                              pos - osg::Vec3f(0, 0, 1.5f), // trace a small amount down
-                              mCollisionWorld);
-            if(tracer.mFraction < 1.0f) // collision, must be close to something below
-            {
-                physactor->setOnGround(true);
-                return true;
-            }
-            else
-                return false;
-        }
+        return physactor->getOnGround();
     }
 
     bool PhysicsSystem::canMoveToWaterSurface(const MWWorld::ConstPtr &actor, const float waterlevel)
