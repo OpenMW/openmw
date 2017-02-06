@@ -37,7 +37,7 @@ void WorldFunctions::AddWorldObject() noexcept
     worldObject.count = tempWorldObject.count;
     worldObject.goldValue = tempWorldObject.goldValue;
     worldObject.scale = tempWorldObject.scale;
-    worldObject.state = tempWorldObject.state;
+    worldObject.doorState = tempWorldObject.doorState;
     worldObject.lockLevel = tempWorldObject.lockLevel;
     worldObject.pos = tempWorldObject.pos;
 
@@ -97,9 +97,9 @@ void WorldFunctions::SetObjectScale(double scale) noexcept
     tempWorldObject.scale = scale;
 }
 
-void WorldFunctions::SetObjectState(int state) noexcept
+void WorldFunctions::SetObjectDoorState(int doorState) noexcept
 {
-    tempWorldObject.state = state;
+    tempWorldObject.doorState = doorState;
 }
 
 void WorldFunctions::SetObjectLockLevel(int lockLevel) noexcept
@@ -156,9 +156,9 @@ double WorldFunctions::GetObjectScale(unsigned int i) noexcept
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).scale;
 }
 
-int WorldFunctions::GetObjectState(unsigned int i) noexcept
+int WorldFunctions::GetObjectDoorState(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).state;
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).doorState;
 }
 
 int WorldFunctions::GetObjectLockLevel(unsigned int i) noexcept

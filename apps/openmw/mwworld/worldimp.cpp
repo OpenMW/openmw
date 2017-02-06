@@ -2272,7 +2272,7 @@ namespace MWWorld
         mwmp::WorldObject worldObject;
         worldObject.refId = door.getCellRef().getRefId();
         worldObject.refNumIndex = door.getCellRef().getRefNum().mIndex;
-        worldObject.state = state;
+        worldObject.doorState = state;
         event->addObject(worldObject);
 
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send(event);
@@ -2281,7 +2281,7 @@ namespace MWWorld
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             event->cell.getDescription().c_str(),
-            worldObject.state ? "true" : "false");
+            worldObject.doorState ? "true" : "false");
 
         delete event;
         event = NULL;
@@ -2299,7 +2299,7 @@ namespace MWWorld
         mwmp::WorldObject worldObject;
         worldObject.refId = door.getCellRef().getRefId();
         worldObject.refNumIndex = door.getCellRef().getRefNum().mIndex;
-        worldObject.state = state;
+        worldObject.doorState = state;
         event->addObject(worldObject);
 
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send(event);
@@ -2308,7 +2308,7 @@ namespace MWWorld
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             event->cell.getDescription().c_str(),
-            worldObject.state ? "true" : "false");
+            worldObject.doorState ? "true" : "false");
 
         delete event;
         event = NULL;

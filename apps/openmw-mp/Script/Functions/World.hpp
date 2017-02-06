@@ -13,7 +13,7 @@
     {"SetObjectCount",       WorldFunctions::SetObjectCount},\
     {"SetObjectGoldValue",   WorldFunctions::SetObjectGoldValue},\
     {"SetObjectScale",       WorldFunctions::SetObjectScale},\
-    {"SetObjectState",       WorldFunctions::SetObjectState},\
+    {"SetObjectDoorState",   WorldFunctions::SetObjectDoorState},\
     {"SetObjectLockLevel",   WorldFunctions::SetObjectLockLevel},\
     {"SetObjectPosition",    WorldFunctions::SetObjectPosition},\
     {"SetObjectRotation",    WorldFunctions::SetObjectRotation},\
@@ -26,7 +26,7 @@
     {"GetObjectCount",       WorldFunctions::GetObjectCount},\
     {"GetObjectGoldValue",   WorldFunctions::GetObjectGoldValue},\
     {"GetObjectScale",       WorldFunctions::GetObjectScale},\
-    {"GetObjectState",       WorldFunctions::GetObjectState},\
+    {"GetObjectDoorState",   WorldFunctions::GetObjectDoorState},\
     {"GetObjectLockLevel",   WorldFunctions::GetObjectLockLevel},\
     {"GetObjectPosX",        WorldFunctions::GetObjectPosX},\
     {"GetObjectPosY",        WorldFunctions::GetObjectPosY},\
@@ -61,7 +61,7 @@ public:
     static void SetObjectCount(int count) noexcept;
     static void SetObjectGoldValue(int goldValue) noexcept;
     static void SetObjectScale(double scale) noexcept;
-    static void SetObjectState(int scale) noexcept;
+    static void SetObjectDoorState(int doorState) noexcept;
     static void SetObjectLockLevel(int lockLevel) noexcept;
     static void SetObjectPosition(double x, double y, double z) noexcept;
     static void SetObjectRotation(double x, double y, double z) noexcept;
@@ -74,7 +74,7 @@ public:
     static int GetObjectCount(unsigned int i) noexcept;
     static int GetObjectGoldValue(unsigned int i) noexcept;
     static double GetObjectScale(unsigned int i) noexcept;
-    static int GetObjectState(unsigned int i) noexcept;
+    static int GetObjectDoorState(unsigned int i) noexcept;
     static int GetObjectLockLevel(unsigned int i) noexcept;
     static double GetObjectPosX(unsigned int i) noexcept;
     static double GetObjectPosY(unsigned int i) noexcept;

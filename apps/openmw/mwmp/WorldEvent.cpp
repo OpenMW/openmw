@@ -376,8 +376,8 @@ void WorldEvent::activateDoors(MWWorld::CellStore* cellStore)
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
-            ptrFound.getClass().setDoorState(ptrFound, worldObject.state);
-            MWBase::Environment::get().getWorld()->saveDoorState(ptrFound, worldObject.state);
+            ptrFound.getClass().setDoorState(ptrFound, worldObject.doorState);
+            MWBase::Environment::get().getWorld()->saveDoorState(ptrFound, worldObject.doorState);
         }
     }
 }

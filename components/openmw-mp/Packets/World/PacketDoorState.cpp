@@ -35,7 +35,7 @@ void PacketDoorState::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
 
         RW(worldObject.refId, send);
         RW(worldObject.refNumIndex, send);
-        RW(worldObject.state, send);
+        RW(worldObject.doorState, send);
 
         if (!send)
         {

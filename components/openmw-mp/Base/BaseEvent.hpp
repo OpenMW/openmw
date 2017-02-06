@@ -16,7 +16,7 @@ namespace mwmp
         int goldValue;
         ESM::Position pos;
 
-        int state;
+        int doorState;
         int lockLevel;
         float scale;
 
