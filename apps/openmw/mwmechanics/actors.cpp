@@ -314,13 +314,12 @@ namespace MWMechanics
             if (creatureStats1.getAiSequence().isInCombat(*it))
                 continue;
 
-            if (!it->getClass().getCreatureStats(*it).getHitAttemptActor().isEmpty()
-                && it->getClass().getCreatureStats(*it).getHitAttemptActor() == actor2)
+            if (creatureStats2.matchesActorId(it->getClass().getCreatureStats(*it).getHitAttemptActorId()))
             {
                 MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
                 // Also set the same hit attempt actor. Otherwise, if fighting the player, they may stop combat
                 // if the player gets out of reach, while the ally would continue combat with the player
-                creatureStats1.setHitAttemptActor(actor2);
+                creatureStats1.setHitAttemptActorId(it->getClass().getCreatureStats(*it).getHitAttemptActorId());
                 return;             
             }
 
@@ -963,7 +962,7 @@ namespace MWMechanics
                     if (player.getClass().getNpcStats(player).getBounty() >= cutoff * iCrimeThresholdMultiplier)
                     {
                         MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, player);
-                        creatureStats.setHitAttemptActor(player); // Stops the guard from quitting combat if player is unreachable
+                        creatureStats.setHitAttemptActorId(player.getClass().getCreatureStats(player).getActorId()); // Stops the guard from quitting combat if player is unreachable
                     }
                     else
                         creatureStats.getAiSequence().stack(AiPursue(player), ptr);
@@ -1092,9 +1091,9 @@ namespace MWMechanics
                     || !iter->first.getClass().getCreatureStats(iter->first).getAiSequence().isInCombat()
                     || !inProcessingRange))
                 {
-                    iter->first.getClass().getCreatureStats(iter->first).setHitAttemptActor(NULL);
-                    if (player.getClass().getCreatureStats(player).getHitAttemptActor() == iter->first)
-                        player.getClass().getCreatureStats(player).setHitAttemptActor(NULL);
+                    iter->first.getClass().getCreatureStats(iter->first).setHitAttemptActorId(-1);
+                    if (player.getClass().getCreatureStats(player).getHitAttemptActorId() == iter->first.getClass().getCreatureStats(iter->first).getActorId())
+                        player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
                 }
 
                 const MWWorld::Ptr playerHitAttemptActor = MWBase::Environment::get().getWorld()->searchPtrViaActorId(player.getClass().getCreatureStats(player).getHitAttemptActorId());

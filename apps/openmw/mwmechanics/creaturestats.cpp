@@ -21,7 +21,7 @@ namespace MWMechanics
           mTalkedTo (false), mAlarmed (false), mAttacked (false),
           mKnockdown(false), mKnockdownOneFrame(false), mKnockdownOverOneFrame(false),
           mHitRecovery(false), mBlock(false), mMovementFlags(0),
-          mFallHeight(0), mRecalcMagicka(false), mLastRestock(0,0), mGoldPool(0), mActorId(-1),
+          mFallHeight(0), mRecalcMagicka(false), mLastRestock(0,0), mGoldPool(0), mActorId(-1), mHitAttemptActorId(-1),
           mDeathAnimation(-1), mTimeOfDeath(), mLevel (0)
     {
         for (int i=0; i<4; ++i)
@@ -371,14 +371,14 @@ namespace MWMechanics
         return mLastHitAttemptObject;
     }
 
-    void CreatureStats::setHitAttemptActor(const MWWorld::Ptr& actor)
+    void CreatureStats::setHitAttemptActorId(int actorId)
     {
-        mHitAttemptActor = actor;
+        mHitAttemptActorId = actorId;
     }
 
-    const MWWorld::Ptr &CreatureStats::getHitAttemptActor() const
+    int CreatureStats::getHitAttemptActorId() const
     {
-        return mHitAttemptActor;
+        return mHitAttemptActorId;
     }
 
     void CreatureStats::addToFallHeight(float height)
@@ -531,6 +531,7 @@ namespace MWMechanics
         state.mActorId = mActorId;
         state.mDeathAnimation = mDeathAnimation;
         state.mTimeOfDeath = mTimeOfDeath.toEsm();
+        state.mHitAttemptActorId = mHitAttemptActorId;
 
         mSpells.writeState(state.mSpells);
         mActiveSpells.writeState(state.mActiveSpells);
@@ -579,6 +580,7 @@ namespace MWMechanics
         mActorId = state.mActorId;
         mDeathAnimation = state.mDeathAnimation;
         mTimeOfDeath = MWWorld::TimeStamp(state.mTimeOfDeath);
+        mHitAttemptActorId = state.mHitAttemptActorId;
 
         mSpells.readState(state.mSpells);
         mActiveSpells.readState(state.mActiveSpells);
