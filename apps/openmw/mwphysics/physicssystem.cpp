@@ -268,12 +268,12 @@ namespace MWPhysics
                         ( (toOsg(resultCallback1.m_hitPointWorld) - tracer.mEndPos).length2() > 35*35
                         || !isWalkableSlope(tracer.mPlaneNormal)))
                 {
-                    actor->setOnSlope(isWalkableSlope(resultCallback1.m_hitNormalWorld));
+                    actor->setOnSlope(!isWalkableSlope(resultCallback1.m_hitNormalWorld));
                     return toOsg(resultCallback1.m_hitPointWorld) + osg::Vec3f(0.f, 0.f, 1.f);
                 }
                 else
                 {
-                    actor->setOnSlope(isWalkableSlope(tracer.mPlaneNormal));
+                    actor->setOnSlope(!isWalkableSlope(tracer.mPlaneNormal));
                 }
 
                 return tracer.mEndPos;
