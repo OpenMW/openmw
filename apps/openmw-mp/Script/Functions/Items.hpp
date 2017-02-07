@@ -18,11 +18,11 @@
     \
     {"HasItemEquipped",         ItemFunctions::HasItemEquipped},\
     \
-    {"GetEquipmentItemId",      ItemFunctions::GetEquipmentItemId},\
+    {"GetEquipmentItemRefId",   ItemFunctions::GetEquipmentItemRefId},\
     {"GetEquipmentItemCount",   ItemFunctions::GetEquipmentItemCount},\
     {"GetEquipmentItemCharge",  ItemFunctions::GetEquipmentItemCharge},\
     \
-    {"GetInventoryItemId",      ItemFunctions::GetInventoryItemId},\
+    {"GetInventoryItemRefId",   ItemFunctions::GetInventoryItemRefId},\
     {"GetInventoryItemCount",   ItemFunctions::GetInventoryItemCount},\
     {"GetInventoryItemCharge",  ItemFunctions::GetInventoryItemCharge},\
     \
@@ -36,20 +36,20 @@ public:
     static int GetEquipmentSize() noexcept;
     static unsigned int GetInventoryChangesSize(unsigned short pid) noexcept;
 
-    static void EquipItem(unsigned short pid, unsigned short slot, const char* itemId, unsigned int count, int charge) noexcept;
+    static void EquipItem(unsigned short pid, unsigned short slot, const char* refId, unsigned int count, int charge) noexcept;
     static void UnequipItem(unsigned short pid, unsigned short slot) noexcept;
 
-    static void AddItem(unsigned short pid, const char* itemId, unsigned int count, int charge) noexcept;
-    static void RemoveItem(unsigned short pid, const char* itemId, unsigned short count) noexcept;
+    static void AddItem(unsigned short pid, const char* refId, unsigned int count, int charge) noexcept;
+    static void RemoveItem(unsigned short pid, const char* refId, unsigned short count) noexcept;
     static void ClearInventory(unsigned short pid) noexcept;
 
-    static bool HasItemEquipped(unsigned short pid, const char* itemId);
+    static bool HasItemEquipped(unsigned short pid, const char* refId);
 
-    static const char *GetEquipmentItemId(unsigned short pid, unsigned short slot) noexcept;
+    static const char *GetEquipmentItemRefId(unsigned short pid, unsigned short slot) noexcept;
     static int GetEquipmentItemCount(unsigned short pid, unsigned short slot) noexcept;
     static int GetEquipmentItemCharge(unsigned short pid, unsigned short slot) noexcept;
 
-    static const char *GetInventoryItemId(unsigned short pid, unsigned int i) noexcept;
+    static const char *GetInventoryItemRefId(unsigned short pid, unsigned int i) noexcept;
     static int GetInventoryItemCount(unsigned short pid, unsigned int i) noexcept;
     static int GetInventoryItemCharge(unsigned short pid, unsigned int i) noexcept;
 
