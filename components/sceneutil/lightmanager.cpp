@@ -262,18 +262,56 @@ namespace SceneUtil
         return it->second;
     }
 
+    class DisableLight : public osg::StateAttribute
+    {
+    public:
+        DisableLight() : mIndex(0) {}
+        DisableLight(int index) : mIndex(index) {}
+
+        DisableLight(const DisableLight& copy,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
+            : osg::StateAttribute(copy,copyop), mIndex(copy.mIndex) {}
+
+        unsigned int getMember() const
+        {
+            return mIndex;
+        }
+
+        virtual bool getModeUsage(ModeUsage & usage) const
+        {
+            usage.usesMode(GL_LIGHT0 + mIndex);
+            return true;
+        }
+
+        virtual int compare(const StateAttribute &sa) const
+        {
+            throw std::runtime_error("DisableLight::compare: unimplemented");
+        }
+
+        META_StateAttribute(SceneUtil, DisableLight, osg::StateAttribute::LIGHT)
+
+        virtual void apply(osg::State&) const
+        {
+            int lightNum = GL_LIGHT0 + mIndex;
+            glLightfv( lightNum, GL_AMBIENT,               mNull.ptr() );
+            glLightfv( lightNum, GL_DIFFUSE,               mNull.ptr() );
+            glLightfv( lightNum, GL_SPECULAR,              mNull.ptr() );
+        }
+
+    private:
+        unsigned int mIndex;
+        osg::Vec4f mNull;
+    };
+
     void LightManager::setStartLight(int start)
     {
         mStartLight = start;
 
         // Set default light state to zero
+        // This is necessary because shaders don't respect glDisable(GL_LIGHTX) so in addition to disabling
+        // we'll have to set a light state that has no visible effect
         for (int i=start; i<8; ++i)
         {
-            osg::ref_ptr<osg::Light> defaultLight (new osg::Light(i));
-            defaultLight->setAmbient(osg::Vec4());
-            defaultLight->setDiffuse(osg::Vec4());
-            defaultLight->setSpecular(osg::Vec4());
-            defaultLight->setConstantAttenuation(0.f);
+            osg::ref_ptr<DisableLight> defaultLight (new DisableLight(i));
             getOrCreateStateSet()->setAttributeAndModes(defaultLight, osg::StateAttribute::OFF);
         }
     }
