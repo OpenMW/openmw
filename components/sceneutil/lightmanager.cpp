@@ -13,6 +13,20 @@
 namespace SceneUtil
 {
 
+    class LightStateCache
+    {
+    public:
+        osg::Light* lastAppliedLight[8];
+    };
+
+    LightStateCache* getLightStateCache(unsigned int contextid)
+    {
+        static std::vector<LightStateCache> cacheVector;
+        if (cacheVector.size() < contextid+1)
+            cacheVector.resize(contextid+1);
+        return &cacheVector[contextid];
+    }
+
     // Resets the modelview matrix to just the view matrix before applying lights.
     class LightStateAttribute : public osg::StateAttribute
     {
@@ -50,8 +64,17 @@ namespace SceneUtil
 
             state.applyModelViewMatrix(state.getInitialViewMatrix());
 
+            LightStateCache* cache = getLightStateCache(state.getContextID());
+
             for (unsigned int i=0; i<mLights.size(); ++i)
-                applyLight((GLenum)((int)GL_LIGHT0 + i + mIndex), mLights[i].get());
+            {
+                osg::Light* current = cache->lastAppliedLight[i+mIndex];
+                if (current != mLights[i].get())
+                {
+                    applyLight((GLenum)((int)GL_LIGHT0 + i + mIndex), mLights[i].get());
+                    cache->lastAppliedLight[i+mIndex] = mLights[i].get();
+                }
+            }
 
             state.applyModelViewMatrix(modelViewMatrix);
         }
@@ -289,12 +312,15 @@ namespace SceneUtil
 
         META_StateAttribute(SceneUtil, DisableLight, osg::StateAttribute::LIGHT)
 
-        virtual void apply(osg::State&) const
+        virtual void apply(osg::State& state) const
         {
             int lightNum = GL_LIGHT0 + mIndex;
             glLightfv( lightNum, GL_AMBIENT,               mNull.ptr() );
             glLightfv( lightNum, GL_DIFFUSE,               mNull.ptr() );
             glLightfv( lightNum, GL_SPECULAR,              mNull.ptr() );
+
+            LightStateCache* cache = getLightStateCache(state.getContextID());
+            cache->lastAppliedLight[mIndex] = NULL;
         }
 
     private:
