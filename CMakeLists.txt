@@ -255,7 +255,7 @@ IF(BOOST_STATIC)
 endif()
 
 set(REQUIRED_BULLET_VERSION 286) # Bullet 286 required due to runtime bugfixes for btCapsuleShape
-if (DEFINED ENV{TRAVIS_BRANCH})
+if (DEFINED ENV{TRAVIS_BRANCH} OR DEFINED ENV{APPVEYOR})
     set(REQUIRED_BULLET_VERSION 283) # but for build testing, 283 is fine
 endif()
 
