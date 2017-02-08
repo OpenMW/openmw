@@ -361,7 +361,19 @@ namespace NifOsg
             if (nif->getUseSkinning())
             {
                 osg::ref_ptr<SceneUtil::Skeleton> skel = new SceneUtil::Skeleton;
-                skel->addChild(created);
+
+                osg::Group* root = created->asGroup();
+                if (root && root->getDataVariance() == osg::Object::STATIC)
+                {
+                    skel->setStateSet(root->getStateSet());
+                    skel->setName(root->getName());
+                    for (unsigned int i=0; i<root->getNumChildren(); ++i)
+                        skel->addChild(root->getChild(i));
+                    root->removeChildren(0, root->getNumChildren());
+                    created = skel;
+                }
+                else
+                    skel->addChild(created);
                 created = skel;
             }
 
