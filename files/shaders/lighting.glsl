@@ -5,7 +5,10 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor)
     vec3 lightDir;
     float d;
 
-#if @colorMode == 2
+#if @colorMode == 3
+    vec4 diffuse = gl_FrontMaterial.diffuse;
+    vec3 ambient = vertexColor.xyz;
+#elif @colorMode == 2
     vec4 diffuse = vertexColor;
     vec3 ambient = vertexColor.xyz;
 #else

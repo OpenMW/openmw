@@ -272,6 +272,9 @@ namespace Shader
         {
             switch (reqs.mVertexColorMode)
             {
+            case GL_AMBIENT:
+                defineMap["colorMode"] = "3";
+                break;
             default:
             case GL_AMBIENT_AND_DIFFUSE:
                 defineMap["colorMode"] = "2";
