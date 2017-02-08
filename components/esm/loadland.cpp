@@ -51,7 +51,7 @@ namespace ESM
             esm.writeHNT("VCLR", mColours, 3*LAND_NUM_VERTS);
         }
         if (mDataTypes & Land::DATA_VTEX) {
-            static uint16_t vtex[LAND_NUM_TEXTURES];
+            uint16_t vtex[LAND_NUM_TEXTURES];
             transposeTextureData(mTextures, vtex);
             esm.writeHNT("VTEX", vtex, sizeof(vtex));
         }
@@ -202,7 +202,7 @@ namespace ESM
         }
 
         if (reader.isNextSub("VHGT")) {
-            static VHGT vhgt;
+            VHGT vhgt;
             if (condLoad(reader, flags, DATA_VHGT, &vhgt, sizeof(vhgt))) {
                 float rowOffset = vhgt.mHeightOffset;
                 for (int y = 0; y < LAND_SIZE; y++) {
@@ -227,7 +227,7 @@ namespace ESM
         if (reader.isNextSub("VCLR"))
             condLoad(reader, flags, DATA_VCLR, mLandData->mColours, 3 * LAND_NUM_VERTS);
         if (reader.isNextSub("VTEX")) {
-            static uint16_t vtex[LAND_NUM_TEXTURES];
+            uint16_t vtex[LAND_NUM_TEXTURES];
             if (condLoad(reader, flags, DATA_VTEX, vtex, sizeof(vtex))) {
                 LandData::transposeTextureData(vtex, mLandData->mTextures);
             }
