@@ -1438,20 +1438,27 @@ namespace NifOsg
                     }
 
                     const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
-                    if(tex.texture.empty())
+                    if(tex.texture.empty() && texprop->controller.empty())
                     {
                         std::cerr << "Warning: texture layer " << i << " is in use but empty in " << mFilename << std::endl;
                         continue;
                     }
-                    const Nif::NiSourceTexture *st = tex.texture.getPtr();
-                    osg::ref_ptr<osg::Image> image = handleSourceTexture(st, imageManager);
+
+                    // create a new texture, will later attempt to share using the SharedStateManager
+                    osg::ref_ptr<osg::Texture2D> texture2d;
+                    if (!tex.texture.empty())
+                    {
+                        const Nif::NiSourceTexture *st = tex.texture.getPtr();
+                        osg::ref_ptr<osg::Image> image = handleSourceTexture(st, imageManager);
+                        texture2d = new osg::Texture2D(image);
+                    }
+                    else
+                        texture2d = new osg::Texture2D;
 
                     unsigned int clamp = static_cast<unsigned int>(tex.clamp);
                     int wrapT = (clamp) & 0x1;
                     int wrapS = (clamp >> 1) & 0x1;
 
-                    // create a new texture, will later attempt to share using the SharedStateManager
-                    osg::ref_ptr<osg::Texture2D> texture2d (new osg::Texture2D(image));
                     texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP);
                     texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
 
