@@ -1442,8 +1442,6 @@ namespace MWWorld
         }
         if(player != results.end())
             moveObjectImp(player->first, player->second.x(), player->second.y(), player->second.z(), false);
-
-        mPhysics->debugDraw();
     }
 
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
@@ -1616,6 +1614,8 @@ namespace MWWorld
 
         if (!paused)
             doPhysics (duration);
+
+        mPhysics->debugDraw();
 
         mWorldScene->update (duration, paused);
 
