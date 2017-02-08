@@ -152,7 +152,7 @@ namespace Shader
                 }
             }
 
-            if (mAutoUseNormalMaps && diffuseMap != NULL && normalMap == NULL)
+            if (mAutoUseNormalMaps && diffuseMap != NULL && normalMap == NULL && diffuseMap->getImage(0))
             {
                 std::string normalMapFileName = diffuseMap->getImage(0)->getFileName();
 
@@ -194,7 +194,7 @@ namespace Shader
                     mRequirements.back().mNormalHeight = normalHeight;
                 }
             }
-            if (mAutoUseSpecularMaps && diffuseMap != NULL && specularMap == NULL)
+            if (mAutoUseSpecularMaps && diffuseMap != NULL && specularMap == NULL && diffuseMap->getImage(0))
             {
                 std::string specularMapFileName = diffuseMap->getImage(0)->getFileName();
                 boost::replace_last(specularMapFileName, ".", mSpecularMapPattern + ".");
