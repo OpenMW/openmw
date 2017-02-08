@@ -235,10 +235,10 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     bool enabled =
-                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_BoundingBoxes);
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_CollisionDebug);
 
                     runtime.getContext().report (enabled ?
-                        "Bounding Box Rendering -> On" : "Bounding Box Rendering -> Off");
+                        "Collision Mesh Rendering -> On" : "Collision Mesh Rendering -> Off");
                 }
         };
 

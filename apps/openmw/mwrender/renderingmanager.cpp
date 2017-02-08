@@ -435,14 +435,6 @@ namespace MWRender
             mViewer->getCamera()->setCullMask(mask);
             return enabled;
         }
-        /*
-        else //if (mode == Render_BoundingBoxes)
-        {
-            bool show = !mRendering.getScene()->getShowBoundingBoxes();
-            mRendering.getScene()->showBoundingBoxes(show);
-            return show;
-        }
-        */
         return false;
     }
 
