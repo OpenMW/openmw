@@ -609,7 +609,7 @@ namespace NifOsg
             }
 
             if (nifNode->recType == Nif::RC_NiBSAnimationNode || nifNode->recType == Nif::RC_NiBSParticleNode)
-                animflags |= nifNode->flags;
+                animflags = nifNode->flags;
 
             // Hide collision shapes, but don't skip the subgraph
             // We still need to animate the hidden bones so the physics system can access them
