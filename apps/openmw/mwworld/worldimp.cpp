@@ -2174,6 +2174,8 @@ namespace MWWorld
 
         scaleObject(getPlayerPtr(), 1.f); // apply race height
 
+        rotateObject(getPlayerPtr(), 0.f, 0.f, 0.f, true);
+
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
         MWBase::Environment::get().getMechanicsManager()->watchActor(getPlayerPtr());
 
