@@ -294,6 +294,13 @@ namespace SceneUtil
         DisableLight(const DisableLight& copy,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
             : osg::StateAttribute(copy,copyop), mIndex(copy.mIndex) {}
 
+        virtual osg::Object* cloneType() const { return new DisableLight(mIndex); }
+        virtual osg::Object* clone(const osg::CopyOp& copyop) const { return new DisableLight(*this,copyop); }
+        virtual bool isSameKindAs(const osg::Object* obj) const { return dynamic_cast<const DisableLight *>(obj)!=NULL; }
+        virtual const char* libraryName() const { return "SceneUtil"; }
+        virtual const char* className() const { return "DisableLight"; }
+        virtual Type getType() const { return LIGHT; }
+
         unsigned int getMember() const
         {
             return mIndex;
@@ -309,8 +316,6 @@ namespace SceneUtil
         {
             throw std::runtime_error("DisableLight::compare: unimplemented");
         }
-
-        META_StateAttribute(SceneUtil, DisableLight, osg::StateAttribute::LIGHT)
 
         virtual void apply(osg::State& state) const
         {
