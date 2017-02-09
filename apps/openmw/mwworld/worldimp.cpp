@@ -374,10 +374,13 @@ namespace MWWorld
                 reader.getHNT(mTeleportEnabled, "TELE");
                 reader.getHNT(mLevitationEnabled, "LEVT");
                 return;
+            case ESM::REC_PLAY:
+                mPlayer->readRecord(reader, type);
+                mWorldScene->preloadCell(getPlayerPtr().getCell(), true);
+                break;
             default:
                 if (!mStore.readRecord (reader, type) &&
                     !mGlobalVariables.readRecord (reader, type) &&
-                    !mPlayer->readRecord (reader, type) &&
                     !mWeatherManager->readRecord (reader, type) &&
                     !mCells.readRecord (reader, type, contentFileMap)
                      && !mProjectileManager->readRecord (reader, type)

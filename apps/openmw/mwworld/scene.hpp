@@ -82,13 +82,13 @@ namespace MWWorld
             void preloadExteriorGrid(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos);
             void preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos);
 
-            void preloadCell(MWWorld::CellStore* cell, bool preloadSurrounding=false);
-
         public:
 
             Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics);
 
             ~Scene();
+
+            void preloadCell(MWWorld::CellStore* cell, bool preloadSurrounding=false);
 
             void unloadCell (CellStoreCollection::iterator iter);
 
