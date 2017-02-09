@@ -128,7 +128,7 @@ namespace MWGui
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             event->cell.getDescription().c_str(),
-            containerItem.refId,
+            containerItem.refId.c_str(),
             containerItem.count);
 
         delete event;
@@ -189,7 +189,7 @@ namespace MWGui
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             event->cell.getDescription().c_str(),
-            containerItem.refId,
+            containerItem.refId.c_str(),
             containerItem.count);
 
         delete event;
@@ -326,7 +326,7 @@ namespace MWGui
 
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(event);
 
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_CONTAINER about\n- Ptr cellRef: %s, %i\n- cell: %s\n- item: %s, %i",
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_CONTAINER about\n- Ptr cellRef: %s, %i\n- cell: %s",
                 worldObject.refId.c_str(),
                 worldObject.refNumIndex,
                 event->cell.getDescription().c_str());
