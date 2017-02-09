@@ -79,6 +79,17 @@ namespace MWWorld
         /// Preload work to be called from the worker thread.
         virtual void doWork()
         {
+            if (mIsExterior)
+            {
+                try
+                {
+                    mPreloadedObjects.push_back(mTerrain->cacheCell(mX, mY));
+                }
+                catch(std::exception& e)
+                {
+                }
+            }
+
             for (MeshList::const_iterator it = mMeshes.begin(); it != mMeshes.end(); ++it)
             {
                 try
@@ -117,17 +128,6 @@ namespace MWWorld
                 {
                     // ignore error for now, would spam the log too much
                     // error will be shown when visiting the cell
-                }
-            }
-
-            if (mIsExterior)
-            {
-                try
-                {
-                    mPreloadedObjects.push_back(mTerrain->cacheCell(mX, mY));
-                }
-                catch(std::exception& e)
-                {
                 }
             }
         }
