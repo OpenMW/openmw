@@ -164,6 +164,8 @@ namespace MWWorld
         mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem, &mFallback, resourcePath);
         mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering, mPhysics));
 
+        mRendering->preloadCommonAssets();
+
         mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
@@ -303,7 +305,7 @@ namespace MWWorld
         mProjectileManager->clear();
         mLocalScripts.clear();
 
-        mWorldScene->changeToVoid();
+        mWorldScene->clear();
 
         mStore.clearDynamic();
         mStore.setUp();
@@ -359,9 +361,9 @@ namespace MWWorld
 
         mStore.write (writer, progress); // dynamic Store must be written (and read) before Cells, so that
                                          // references to custom made records will be recognized
+        mPlayer->write (writer, progress);
         mCells.write (writer, progress);
         mGlobalVariables.write (writer, progress);
-        mPlayer->write (writer, progress);
         mWeatherManager->write (writer, progress);
         mProjectileManager->write (writer, progress);
 
@@ -387,10 +389,13 @@ namespace MWWorld
                 reader.getHNT(mTeleportEnabled, "TELE");
                 reader.getHNT(mLevitationEnabled, "LEVT");
                 return;
+            case ESM::REC_PLAY:
+                mPlayer->readRecord(reader, type);
+                mWorldScene->preloadCell(getPlayerPtr().getCell(), true);
+                break;
             default:
                 if (!mStore.readRecord (reader, type) &&
                     !mGlobalVariables.readRecord (reader, type) &&
-                    !mPlayer->readRecord (reader, type) &&
                     !mWeatherManager->readRecord (reader, type) &&
                     !mCells.readRecord (reader, type, contentFileMap)
                      && !mProjectileManager->readRecord (reader, type)
@@ -1468,8 +1473,6 @@ namespace MWWorld
         }
         if(player != results.end())
             moveObjectImp(player->first, player->second.x(), player->second.y(), player->second.z(), false);
-
-        mPhysics->debugDraw();
     }
 
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
@@ -1642,6 +1645,8 @@ namespace MWWorld
 
         if (!paused)
             doPhysics (duration);
+
+        mPhysics->debugDraw();
 
         mWorldScene->update (duration, paused);
 
@@ -2199,6 +2204,8 @@ namespace MWWorld
         mRendering->renderPlayer(getPlayerPtr());
 
         scaleObject(getPlayerPtr(), 1.f); // apply race height
+
+        rotateObject(getPlayerPtr(), 0.f, 0.f, 0.f, true);
 
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
         MWBase::Environment::get().getMechanicsManager()->watchActor(getPlayerPtr());
@@ -3427,11 +3434,6 @@ namespace MWWorld
         weaponPos.z() += halfExtents.z() * 2 * 0.75;
 
         return mPhysics->getHitDistance(weaponPos, target) - halfExtents.y();
-    }
-
-    void World::preloadCommonAssets()
-    {
-        mRendering->preloadCommonAssets();
     }
 
 }

@@ -675,8 +675,6 @@ void OMW::Engine::go()
     }
     else if (!mSkipMenu)
     {
-        mEnvironment.getWorld()->preloadCommonAssets();
-
         // start in main menu
         mEnvironment.getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         try

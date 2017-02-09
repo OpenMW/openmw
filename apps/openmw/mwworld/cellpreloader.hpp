@@ -37,6 +37,8 @@ namespace MWWorld
 
         void notifyLoaded(MWWorld::CellStore* cell);
 
+        void clear();
+
         /// Removes preloaded cells that have not had a preload request for a while.
         void updateCache(double timestamp);
 

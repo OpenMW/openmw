@@ -1,7 +1,6 @@
 #include "keyframemanager.hpp"
 
 #include <components/vfs/manager.hpp>
-#include <components/nifosg/nifloader.hpp>
 
 #include "objectcache.hpp"
 

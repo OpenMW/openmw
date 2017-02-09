@@ -55,6 +55,7 @@ namespace MWWorld
             , mKeyframeManager(keyframeManager)
             , mTerrain(terrain)
             , mPreloadInstances(preloadInstances)
+            , mAbort(false)
         {
             ListModelsVisitor visitor (mMeshes);
             if (cell->getState() == MWWorld::CellStore::State_Loaded)
@@ -76,11 +77,30 @@ namespace MWWorld
             }
         }
 
+        virtual void abort()
+        {
+            mAbort = true;
+        }
+
         /// Preload work to be called from the worker thread.
         virtual void doWork()
         {
+            if (mIsExterior)
+            {
+                try
+                {
+                    mPreloadedObjects.push_back(mTerrain->cacheCell(mX, mY));
+                }
+                catch(std::exception& e)
+                {
+                }
+            }
+
             for (MeshList::const_iterator it = mMeshes.begin(); it != mMeshes.end(); ++it)
             {
+                if (mAbort)
+                    break;
+
                 try
                 {
                     std::string mesh  = *it;
@@ -119,17 +139,6 @@ namespace MWWorld
                     // error will be shown when visiting the cell
                 }
             }
-
-            if (mIsExterior)
-            {
-                try
-                {
-                    mPreloadedObjects.push_back(mTerrain->cacheCell(mX, mY));
-                }
-                catch(std::exception& e)
-                {
-                }
-            }
         }
 
     private:
@@ -143,6 +152,8 @@ namespace MWWorld
         Resource::KeyframeManager* mKeyframeManager;
         Terrain::World* mTerrain;
         bool mPreloadInstances;
+
+        volatile bool mAbort;
 
         // keep a ref to the loaded objects to make sure it stays loaded as long as this cell is in the preloaded state
         std::vector<osg::ref_ptr<const osg::Object> > mPreloadedObjects;
@@ -187,7 +198,10 @@ namespace MWWorld
     CellPreloader::~CellPreloader()
     {
         for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end();++it)
+        {
+            it->second.mWorkItem->abort();
             it->second.mWorkItem->waitTillDone();
+        }
         mPreloadCells.clear();
     }
 
@@ -228,7 +242,10 @@ namespace MWWorld
             }
 
             if (oldestTimestamp + threshold < timestamp)
+            {
+                oldestCell->second.mWorkItem->abort();
                 mPreloadCells.erase(oldestCell);
+            }
             else
                 return;
         }
@@ -246,9 +263,26 @@ namespace MWWorld
         {
             // do the deletion in the background thread
             if (found->second.mWorkItem)
+            {
+                found->second.mWorkItem->abort();
                 mUnrefQueue->push(mPreloadCells[cell].mWorkItem);
+            }
 
             mPreloadCells.erase(found);
+        }
+    }
+
+    void CellPreloader::clear()
+    {
+        for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end();)
+        {
+            if (it->second.mWorkItem)
+            {
+                it->second.mWorkItem->abort();
+                mUnrefQueue->push(it->second.mWorkItem);
+            }
+
+            mPreloadCells.erase(it++);
         }
     }
 
@@ -257,7 +291,14 @@ namespace MWWorld
         for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end();)
         {
             if (mPreloadCells.size() >= mMinCacheSize && it->second.mTimeStamp < timestamp - mExpiryDelay)
+            {
+                if (it->second.mWorkItem)
+                {
+                    it->second.mWorkItem->abort();
+                    mUnrefQueue->push(it->second.mWorkItem);
+                }
                 mPreloadCells.erase(it++);
+            }
             else
                 ++it;
         }

@@ -4,12 +4,9 @@
 #include <osg/ref_ptr>
 #include <string>
 
-#include "resourcemanager.hpp"
+#include <components/nifosg/nifloader.hpp>
 
-namespace NifOsg
-{
-    class KeyframeHolder;
-}
+#include "resourcemanager.hpp"
 
 namespace Resource
 {

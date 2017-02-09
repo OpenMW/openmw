@@ -124,6 +124,8 @@ namespace MWRender
             osg::ref_ptr<osg::Texture2D> mFogOfWarTexture;
             osg::ref_ptr<osg::Image> mFogOfWarImage;
 
+            std::set<std::pair<int, int> > mGrid; // the grid that was active at the time of rendering this segment
+
             bool mHasFogState;
         };
 

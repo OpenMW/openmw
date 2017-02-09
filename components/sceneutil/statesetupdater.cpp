@@ -15,7 +15,7 @@ namespace SceneUtil
             for (int i=0; i<2; ++i) // Using SHALLOW_COPY for StateAttributes, if users want to modify it is their responsibility to set a non-shared one first
                                     // This can be done conveniently in user implementations of the setDefaults() method
             {
-                mStateSets[i] = osg::clone(src, osg::CopyOp::SHALLOW_COPY);
+                mStateSets[i] = new osg::StateSet(*src, osg::CopyOp::SHALLOW_COPY);
                 setDefaults(mStateSets[i]);
             }
         }

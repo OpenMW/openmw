@@ -85,7 +85,7 @@ namespace Shader
         if (!node.getStateSet())
             return node.getOrCreateStateSet();
 
-        osg::ref_ptr<osg::StateSet> newStateSet = osg::clone(node.getStateSet(), osg::CopyOp::SHALLOW_COPY);
+        osg::ref_ptr<osg::StateSet> newStateSet = new osg::StateSet(*node.getStateSet(), osg::CopyOp::SHALLOW_COPY);
         node.setStateSet(newStateSet);
         return newStateSet.get();
     }
@@ -152,7 +152,7 @@ namespace Shader
                 }
             }
 
-            if (mAutoUseNormalMaps && diffuseMap != NULL && normalMap == NULL)
+            if (mAutoUseNormalMaps && diffuseMap != NULL && normalMap == NULL && diffuseMap->getImage(0))
             {
                 std::string normalMapFileName = diffuseMap->getImage(0)->getFileName();
 
@@ -194,7 +194,7 @@ namespace Shader
                     mRequirements.back().mNormalHeight = normalHeight;
                 }
             }
-            if (mAutoUseSpecularMaps && diffuseMap != NULL && specularMap == NULL)
+            if (mAutoUseSpecularMaps && diffuseMap != NULL && specularMap == NULL && diffuseMap->getImage(0))
             {
                 std::string specularMapFileName = diffuseMap->getImage(0)->getFileName();
                 boost::replace_last(specularMapFileName, ".", mSpecularMapPattern + ".");
@@ -272,6 +272,9 @@ namespace Shader
         {
             switch (reqs.mVertexColorMode)
             {
+            case GL_AMBIENT:
+                defineMap["colorMode"] = "3";
+                break;
             default:
             case GL_AMBIENT_AND_DIFFUSE:
                 defineMap["colorMode"] = "2";

@@ -95,8 +95,6 @@ namespace MWBase
 
             virtual ~World() {}
 
-            virtual void preloadCommonAssets() = 0;
-
             virtual void startNewGame (bool bypass) = 0;
             ///< \param bypass Bypass regular game start.
 

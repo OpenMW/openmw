@@ -231,13 +231,51 @@ void LocalMap::setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int
     segment.mMapTexture = texture;
 }
 
+bool needUpdate(std::set<std::pair<int, int> >& renderedGrid, std::set<std::pair<int, int> >& currentGrid, int cellX, int cellY)
+{
+    // if all the cells of the current grid are contained in the rendered grid then we can keep the old render
+    for (int dx=-1;dx<2;dx+=1)
+    {
+        for (int dy=-1;dy<2;dy+=1)
+        {
+            bool haveInRenderedGrid = renderedGrid.find(std::make_pair(cellX+dx,cellY+dy)) != renderedGrid.end();
+            bool haveInCurrentGrid = currentGrid.find(std::make_pair(cellX+dx,cellY+dy)) != currentGrid.end();
+            if (haveInCurrentGrid && !haveInRenderedGrid)
+                return true;
+        }
+    }
+    return false;
+}
+
 void LocalMap::requestMap(std::set<const MWWorld::CellStore*> cells)
 {
+    std::set<std::pair<int, int> > grid;
     for (std::set<const MWWorld::CellStore*>::iterator it = cells.begin(); it != cells.end(); ++it)
     {
         const MWWorld::CellStore* cell = *it;
         if (cell->isExterior())
-            requestExteriorMap(cell);
+            grid.insert(std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY()));
+    }
+
+    for (std::set<const MWWorld::CellStore*>::iterator it = cells.begin(); it != cells.end(); ++it)
+    {
+        const MWWorld::CellStore* cell = *it;
+        if (cell->isExterior())
+        {
+            int cellX = cell->getCell()->getGridX();
+            int cellY = cell->getCell()->getGridY();
+
+            MapSegment& segment = mSegments[std::make_pair(cellX, cellY)];
+            if (!needUpdate(segment.mGrid, grid, cellX, cellY))
+            {
+                continue;
+            }
+            else
+            {
+                segment.mGrid = grid;
+                requestExteriorMap(cell);
+            }
+        }
         else
             requestInteriorMap(cell);
     }

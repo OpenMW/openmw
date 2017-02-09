@@ -356,12 +356,24 @@ namespace NifOsg
 
             osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
 
-            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, imageManager, std::vector<int>(), 0, 0, false, &textkeys->mTextKeys);
+            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, imageManager, std::vector<int>(), 0, false, &textkeys->mTextKeys);
 
             if (nif->getUseSkinning())
             {
                 osg::ref_ptr<SceneUtil::Skeleton> skel = new SceneUtil::Skeleton;
-                skel->addChild(created);
+
+                osg::Group* root = created->asGroup();
+                if (root && root->getDataVariance() == osg::Object::STATIC)
+                {
+                    skel->setStateSet(root->getStateSet());
+                    skel->setName(root->getName());
+                    for (unsigned int i=0; i<root->getNumChildren(); ++i)
+                        skel->addChild(root->getChild(i));
+                    root->removeChildren(0, root->getNumChildren());
+                    created = skel;
+                }
+                else
+                    skel->addChild(created);
                 created = skel;
             }
 
@@ -398,15 +410,6 @@ namespace NifOsg
         void setupController(const Nif::Controller* ctrl, SceneUtil::Controller* toSetup, int animflags)
         {
             bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
-            if (autoPlay)
-                toSetup->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
-
-            toSetup->setFunction(boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl)));
-        }
-
-        void setupParticleController(const Nif::Controller* ctrl, SceneUtil::Controller* toSetup, int particleflags)
-        {
-            bool autoPlay = particleflags & Nif::NiNode::ParticleFlag_AutoPlay;
             if (autoPlay)
                 toSetup->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
 
@@ -547,7 +550,7 @@ namespace NifOsg
         }
 
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
-                                std::vector<int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
+                                std::vector<int> boundTextures, int animflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
             osg::ref_ptr<osg::Group> node = new osg::MatrixTransform(nifNode->trafo.toMatrix());
 
@@ -617,10 +620,8 @@ namespace NifOsg
                 }
             }
 
-            if (nifNode->recType == Nif::RC_NiBSAnimationNode)
-                animflags |= nifNode->flags;
-            if (nifNode->recType == Nif::RC_NiBSParticleNode)
-                particleflags |= nifNode->flags;
+            if (nifNode->recType == Nif::RC_NiBSAnimationNode || nifNode->recType == Nif::RC_NiBSParticleNode)
+                animflags = nifNode->flags;
 
             // Hide collision shapes, but don't skip the subgraph
             // We still need to animate the hidden bones so the physics system can access them
@@ -663,7 +664,7 @@ namespace NifOsg
             }
 
             if(nifNode->recType == Nif::RC_NiAutoNormalParticles || nifNode->recType == Nif::RC_NiRotatingParticles)
-                handleParticleSystem(nifNode, node, composite, animflags, particleflags, rootNode);
+                handleParticleSystem(nifNode, node, composite, animflags, rootNode);
 
             if (composite->getNumControllers() > 0)
                 node->addUpdateCallback(composite);
@@ -700,7 +701,7 @@ namespace NifOsg
                 for(size_t i = 0;i < children.length();++i)
                 {
                     if(!children[i].empty())
-                        handleNode(children[i].getPtr(), node, imageManager, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode);
+                        handleNode(children[i].getPtr(), node, imageManager, boundTextures, animflags, skipMeshes, textKeys, rootNode);
                 }
             }
 
@@ -965,7 +966,7 @@ namespace NifOsg
             return emitter;
         }
 
-        void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite, int animflags, int particleflags, osg::Node* rootNode)
+        void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite, int animflags, osg::Node* rootNode)
         {
             osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
             partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
@@ -986,7 +987,7 @@ namespace NifOsg
                 return;
             }
 
-            osgParticle::ParticleProcessor::ReferenceFrame rf = (particleflags & Nif::NiNode::ParticleFlag_LocalSpace)
+            osgParticle::ParticleProcessor::ReferenceFrame rf = (animflags & Nif::NiNode::ParticleFlag_LocalSpace)
                     ? osgParticle::ParticleProcessor::RELATIVE_RF
                     : osgParticle::ParticleProcessor::ABSOLUTE_RF;
 
@@ -1032,10 +1033,10 @@ namespace NifOsg
                 emitterNode->addChild(emitter);
 
                 osg::ref_ptr<ParticleSystemController> callback(new ParticleSystemController(partctrl));
-                setupParticleController(partctrl, callback, particleflags);
+                setupController(partctrl, callback, animflags);
                 emitter->setUpdateCallback(callback);
 
-                if (!(particleflags & Nif::NiNode::ParticleFlag_AutoPlay))
+                if (!(animflags & Nif::NiNode::ParticleFlag_AutoPlay))
                 {
                     partsys->setFrozen(true);
                     // HACK: particle system will not render in Frozen state if there was no update
@@ -1438,20 +1439,27 @@ namespace NifOsg
                     }
 
                     const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
-                    if(tex.texture.empty())
+                    if(tex.texture.empty() && texprop->controller.empty())
                     {
                         std::cerr << "Warning: texture layer " << i << " is in use but empty in " << mFilename << std::endl;
                         continue;
                     }
-                    const Nif::NiSourceTexture *st = tex.texture.getPtr();
-                    osg::ref_ptr<osg::Image> image = handleSourceTexture(st, imageManager);
+
+                    // create a new texture, will later attempt to share using the SharedStateManager
+                    osg::ref_ptr<osg::Texture2D> texture2d;
+                    if (!tex.texture.empty())
+                    {
+                        const Nif::NiSourceTexture *st = tex.texture.getPtr();
+                        osg::ref_ptr<osg::Image> image = handleSourceTexture(st, imageManager);
+                        texture2d = new osg::Texture2D(image);
+                    }
+                    else
+                        texture2d = new osg::Texture2D;
 
                     unsigned int clamp = static_cast<unsigned int>(tex.clamp);
                     int wrapT = (clamp) & 0x1;
                     int wrapS = (clamp >> 1) & 0x1;
 
-                    // create a new texture, will later attempt to share using the SharedStateManager
-                    osg::ref_ptr<osg::Texture2D> texture2d (new osg::Texture2D(image));
                     texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP);
                     texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
 

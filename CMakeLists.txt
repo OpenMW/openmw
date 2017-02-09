@@ -46,7 +46,7 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
     else(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
         message(STATUS "Shallow Git clone detected, not attempting to retrieve version info")
     endif(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
-endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)	
+endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)    
 
 # Macros
 include(OpenMWMacros)
@@ -165,10 +165,10 @@ else()
 endif()
 
 IF(BUILD_OPENMW OR BUILD_OPENCS)
-	# Sound setup
-	find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)
-	# Required for building the FFmpeg headers
-	add_definitions(-D__STDC_CONSTANT_MACROS)
+    # Sound setup
+    find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)
+    # Required for building the FFmpeg headers
+    add_definitions(-D__STDC_CONSTANT_MACROS)
 
 # TinyXML
 option(USE_SYSTEM_TINYXML "Use system TinyXML library instead of internal." OFF)
@@ -252,10 +252,15 @@ IF(BUILD_OPENMW OR BUILD_OPENCS)
        endif()
     endif()
 
+    set(REQUIRED_BULLET_VERSION 286) # Bullet 286 required due to runtime bugfixes for btCapsuleShape
+    if (DEFINED ENV{TRAVIS_BRANCH} OR DEFINED ENV{APPVEYOR})
+        set(REQUIRED_BULLET_VERSION 283) # but for build testing, 283 is fine
+    endif()
+
     find_package(MyGUI 3.2.1 REQUIRED)
     find_package(SDL2 REQUIRED)
     find_package(OpenAL REQUIRED)
-    find_package(Bullet 283 REQUIRED COMPONENTS BulletCollision LinearMath)
+    find_package(Bullet ${REQUIRED_BULLET_VERSION} REQUIRED COMPONENTS BulletCollision LinearMath)
 
 ENDIF(BUILD_OPENMW OR BUILD_OPENCS)
 

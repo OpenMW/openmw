@@ -13,6 +13,20 @@
 namespace SceneUtil
 {
 
+    class LightStateCache
+    {
+    public:
+        osg::Light* lastAppliedLight[8];
+    };
+
+    LightStateCache* getLightStateCache(unsigned int contextid)
+    {
+        static std::vector<LightStateCache> cacheVector;
+        if (cacheVector.size() < contextid+1)
+            cacheVector.resize(contextid+1);
+        return &cacheVector[contextid];
+    }
+
     // Resets the modelview matrix to just the view matrix before applying lights.
     class LightStateAttribute : public osg::StateAttribute
     {
@@ -50,8 +64,17 @@ namespace SceneUtil
 
             state.applyModelViewMatrix(state.getInitialViewMatrix());
 
+            LightStateCache* cache = getLightStateCache(state.getContextID());
+
             for (unsigned int i=0; i<mLights.size(); ++i)
-                applyLight((GLenum)((int)GL_LIGHT0 + i + mIndex), mLights[i].get());
+            {
+                osg::Light* current = cache->lastAppliedLight[i+mIndex];
+                if (current != mLights[i].get())
+                {
+                    applyLight((GLenum)((int)GL_LIGHT0 + i + mIndex), mLights[i].get());
+                    cache->lastAppliedLight[i+mIndex] = mLights[i].get();
+                }
+            }
 
             state.applyModelViewMatrix(modelViewMatrix);
         }
@@ -262,18 +285,64 @@ namespace SceneUtil
         return it->second;
     }
 
+    class DisableLight : public osg::StateAttribute
+    {
+    public:
+        DisableLight() : mIndex(0) {}
+        DisableLight(int index) : mIndex(index) {}
+
+        DisableLight(const DisableLight& copy,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
+            : osg::StateAttribute(copy,copyop), mIndex(copy.mIndex) {}
+
+        virtual osg::Object* cloneType() const { return new DisableLight(mIndex); }
+        virtual osg::Object* clone(const osg::CopyOp& copyop) const { return new DisableLight(*this,copyop); }
+        virtual bool isSameKindAs(const osg::Object* obj) const { return dynamic_cast<const DisableLight *>(obj)!=NULL; }
+        virtual const char* libraryName() const { return "SceneUtil"; }
+        virtual const char* className() const { return "DisableLight"; }
+        virtual Type getType() const { return LIGHT; }
+
+        unsigned int getMember() const
+        {
+            return mIndex;
+        }
+
+        virtual bool getModeUsage(ModeUsage & usage) const
+        {
+            usage.usesMode(GL_LIGHT0 + mIndex);
+            return true;
+        }
+
+        virtual int compare(const StateAttribute &sa) const
+        {
+            throw std::runtime_error("DisableLight::compare: unimplemented");
+        }
+
+        virtual void apply(osg::State& state) const
+        {
+            int lightNum = GL_LIGHT0 + mIndex;
+            glLightfv( lightNum, GL_AMBIENT,               mNull.ptr() );
+            glLightfv( lightNum, GL_DIFFUSE,               mNull.ptr() );
+            glLightfv( lightNum, GL_SPECULAR,              mNull.ptr() );
+
+            LightStateCache* cache = getLightStateCache(state.getContextID());
+            cache->lastAppliedLight[mIndex] = NULL;
+        }
+
+    private:
+        unsigned int mIndex;
+        osg::Vec4f mNull;
+    };
+
     void LightManager::setStartLight(int start)
     {
         mStartLight = start;
 
         // Set default light state to zero
+        // This is necessary because shaders don't respect glDisable(GL_LIGHTX) so in addition to disabling
+        // we'll have to set a light state that has no visible effect
         for (int i=start; i<8; ++i)
         {
-            osg::ref_ptr<osg::Light> defaultLight (new osg::Light(i));
-            defaultLight->setAmbient(osg::Vec4());
-            defaultLight->setDiffuse(osg::Vec4());
-            defaultLight->setSpecular(osg::Vec4());
-            defaultLight->setConstantAttenuation(0.f);
+            osg::ref_ptr<DisableLight> defaultLight (new DisableLight(i));
             getOrCreateStateSet()->setAttributeAndModes(defaultLight, osg::StateAttribute::OFF);
         }
     }
@@ -299,7 +368,7 @@ namespace SceneUtil
         mId = sLightId++;
 
         for (int i=0; i<2; ++i)
-            mLight[i] = osg::clone(copy.mLight[i].get(), copyop);
+            mLight[i] = new osg::Light(*copy.mLight[i].get(), copyop);
     }
 
 
