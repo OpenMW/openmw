@@ -20,6 +20,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/resource/keyframemanager.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -140,14 +141,24 @@ namespace MWRender
 
         virtual void doWork()
         {
-            for (std::vector<std::string>::const_iterator it = mModels.begin(); it != mModels.end(); ++it)
-                mResourceSystem->getSceneManager()->getTemplate(*it);
-            for (std::vector<std::string>::const_iterator it = mTextures.begin(); it != mTextures.end(); ++it)
-                mResourceSystem->getImageManager()->getImage(*it);
+            try
+            {
+                for (std::vector<std::string>::const_iterator it = mModels.begin(); it != mModels.end(); ++it)
+                    mResourceSystem->getSceneManager()->cacheInstance(*it);
+                for (std::vector<std::string>::const_iterator it = mTextures.begin(); it != mTextures.end(); ++it)
+                    mResourceSystem->getImageManager()->getImage(*it);
+                for (std::vector<std::string>::const_iterator it = mKeyframes.begin(); it != mKeyframes.end(); ++it)
+                    mResourceSystem->getKeyframeManager()->get(*it);
+            }
+            catch (std::exception&)
+            {
+                // ignore error (will be shown when these are needed proper)
+            }
         }
 
         std::vector<std::string> mModels;
         std::vector<std::string> mTextures;
+        std::vector<std::string> mKeyframes;
 
     private:
         Resource::ResourceSystem* mResourceSystem;
@@ -307,6 +318,13 @@ namespace MWRender
         osg::ref_ptr<PreloadCommonAssetsWorkItem> workItem (new PreloadCommonAssetsWorkItem(mResourceSystem));
         mSky->listAssetsToPreload(workItem->mModels, workItem->mTextures);
         mWater->listAssetsToPreload(workItem->mTextures);
+
+        const char* basemodels[] = {"xbase_anim", "xbase_anim.1st", "xbase_anim_female", "xbase_animkna"};
+        for (size_t i=0; i<sizeof(basemodels)/sizeof(basemodels[0]); ++i)
+        {
+            workItem->mModels.push_back(std::string("meshes/") + basemodels[i] + ".nif");
+            workItem->mKeyframes.push_back(std::string("meshes/") + basemodels[i] + ".kf");
+        }
 
         workItem->mTextures.push_back("textures/_land_default.dds");
 
