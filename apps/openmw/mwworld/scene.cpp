@@ -202,9 +202,9 @@ namespace MWWorld
         if (mPreloadEnabled)
         {
             mPreloadTimer += duration;
-            if (mPreloadTimer > 0.25f)
+            if (mPreloadTimer > 0.1f)
             {
-                preloadCells();
+                preloadCells(0.1f);
                 mPreloadTimer = 0.f;
             }
         }
@@ -461,6 +461,8 @@ namespace MWWorld
         mechMgr->watchActor(player);
 
         MWBase::Environment::get().getWorld()->adjustSky();
+
+        mLastPlayerPos = pos.asVec3();
     }
 
     Scene::Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics)
@@ -648,17 +650,24 @@ namespace MWWorld
         return Ptr();
     }
 
-    void Scene::preloadCells()
+    void Scene::preloadCells(float dt)
     {
+        const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
+        osg::Vec3f moved = playerPos - mLastPlayerPos;
+        osg::Vec3f predictedPos = playerPos + moved / dt;
+
+        mLastPlayerPos = playerPos;
+
         if (mPreloadDoors)
-            preloadTeleportDoorDestinations();
+            preloadTeleportDoorDestinations(playerPos, predictedPos);
         if (mPreloadExteriorGrid)
-            preloadExteriorGrid();
+            preloadExteriorGrid(playerPos, predictedPos);
         if (mPreloadFastTravel)
-            preloadFastTravelDestinations();
+            preloadFastTravelDestinations(playerPos, predictedPos);
     }
 
-    void Scene::preloadTeleportDoorDestinations()
+    void Scene::preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos)
     {
         std::vector<MWWorld::ConstPtr> teleportDoors;
         for (CellStoreCollection::const_iterator iter (mActiveCells.begin());
@@ -676,11 +685,11 @@ namespace MWWorld
             }
         }
 
-        const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         for (std::vector<MWWorld::ConstPtr>::iterator it = teleportDoors.begin(); it != teleportDoors.end(); ++it)
         {
             const MWWorld::ConstPtr& door = *it;
-            float sqrDistToPlayer = (player.getRefData().getPosition().asVec3() - door.getRefData().getPosition().asVec3()).length2();
+            float sqrDistToPlayer = (playerPos - door.getRefData().getPosition().asVec3()).length2();
+            sqrDistToPlayer = std::min(sqrDistToPlayer, (predictedPos - door.getRefData().getPosition().asVec3()).length2());
 
             if (sqrDistToPlayer < mPreloadDistance*mPreloadDistance)
             {
@@ -703,15 +712,13 @@ namespace MWWorld
         }
     }
 
-    void Scene::preloadExteriorGrid()
+    void Scene::preloadExteriorGrid(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos)
     {
         if (!MWBase::Environment::get().getWorld()->isCellExterior())
             return;
 
         int halfGridSizePlusOne = mHalfGridSize + 1;
 
-        const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
 
         int cellX,cellY;
         getGridCenter(cellX,cellY);
@@ -730,6 +737,7 @@ namespace MWWorld
                 MWBase::Environment::get().getWorld()->indexToPosition(cellX+dx, cellY+dy, thisCellCenterX, thisCellCenterY, true);
 
                 float dist = std::max(std::abs(thisCellCenterX - playerPos.x()), std::abs(thisCellCenterY - playerPos.y()));
+                dist = std::min(dist,std::max(std::abs(thisCellCenterX - predictedPos.x()), std::abs(thisCellCenterY - predictedPos.y())));
                 float loadDist = 8192/2 + 8192 - mCellLoadingThreshold + mPreloadDistance;
 
                 if (dist < loadDist)
@@ -789,7 +797,7 @@ namespace MWWorld
         std::vector<ESM::Transport::Dest> mList;
     };
 
-    void Scene::preloadFastTravelDestinations()
+    void Scene::preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& /*predictedPos*/) // ignore predictedPos here since opening dialogue with travel service takes extra time
     {
         const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         ListFastTravelDestinationsVisitor listVisitor(mPreloadDistance, player.getRefData().getPosition().asVec3());

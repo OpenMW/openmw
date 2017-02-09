@@ -68,6 +68,8 @@ namespace MWWorld
             bool mPreloadDoors;
             bool mPreloadFastTravel;
 
+            osg::Vec3f mLastPlayerPos;
+
             void insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener);
 
             // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center
@@ -75,10 +77,10 @@ namespace MWWorld
 
             void getGridCenter(int& cellX, int& cellY);
 
-            void preloadCells();
-            void preloadTeleportDoorDestinations();
-            void preloadExteriorGrid();
-            void preloadFastTravelDestinations();
+            void preloadCells(float dt);
+            void preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos);
+            void preloadExteriorGrid(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos);
+            void preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos);
 
             void preloadCell(MWWorld::CellStore* cell, bool preloadSurrounding=false);
 
