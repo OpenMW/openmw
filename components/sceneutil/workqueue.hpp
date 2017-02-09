@@ -31,6 +31,9 @@ namespace SceneUtil
         /// Internal use by the WorkQueue.
         void signalDone();
 
+        /// Set abort flag in order to return from doWork() as soon as possible. May not be respected by all WorkItems.
+        virtual void abort() {}
+
     protected:
         OpenThreads::Atomic mDone;
         OpenThreads::Mutex mMutex;
