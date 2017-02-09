@@ -64,7 +64,7 @@ namespace SceneUtil
         void setLight(osg::Light* light)
         {
             mLight[0] = light;
-            mLight[1] = osg::clone(light);
+            mLight[1] = new osg::Light(*light);
         }
 
         /// Get the unique ID for this light source.

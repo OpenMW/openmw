@@ -368,7 +368,7 @@ namespace SceneUtil
         mId = sLightId++;
 
         for (int i=0; i<2; ++i)
-            mLight[i] = osg::clone(copy.mLight[i].get(), copyop);
+            mLight[i] = new osg::Light(*copy.mLight[i].get(), copyop);
     }
 
 

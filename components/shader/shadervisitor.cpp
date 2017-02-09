@@ -85,7 +85,7 @@ namespace Shader
         if (!node.getStateSet())
             return node.getOrCreateStateSet();
 
-        osg::ref_ptr<osg::StateSet> newStateSet = osg::clone(node.getStateSet(), osg::CopyOp::SHALLOW_COPY);
+        osg::ref_ptr<osg::StateSet> newStateSet = new osg::StateSet(*node.getStateSet(), osg::CopyOp::SHALLOW_COPY);
         node.setStateSet(newStateSet);
         return newStateSet.get();
     }
