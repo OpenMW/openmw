@@ -157,6 +157,8 @@ namespace MWWorld
         mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem, &mFallback, resourcePath);
         mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering, mPhysics));
 
+        mRendering->preloadCommonAssets();
+
         mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
@@ -3346,11 +3348,6 @@ namespace MWWorld
         weaponPos.z() += halfExtents.z() * 2 * 0.75;
 
         return mPhysics->getHitDistance(weaponPos, target) - halfExtents.y();
-    }
-
-    void World::preloadCommonAssets()
-    {
-        mRendering->preloadCommonAssets();
     }
 
 }
