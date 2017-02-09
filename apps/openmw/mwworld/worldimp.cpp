@@ -290,7 +290,7 @@ namespace MWWorld
         mProjectileManager->clear();
         mLocalScripts.clear();
 
-        mWorldScene->changeToVoid();
+        mWorldScene->clear();
 
         mStore.clearDynamic();
         mStore.setUp();

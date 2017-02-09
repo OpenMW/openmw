@@ -272,13 +272,31 @@ namespace MWWorld
         }
     }
 
+    void CellPreloader::clear()
+    {
+        for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end();)
+        {
+            if (it->second.mWorkItem)
+            {
+                it->second.mWorkItem->abort();
+                mUnrefQueue->push(it->second.mWorkItem);
+            }
+
+            mPreloadCells.erase(it++);
+        }
+    }
+
     void CellPreloader::updateCache(double timestamp)
     {
         for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end();)
         {
             if (mPreloadCells.size() >= mMinCacheSize && it->second.mTimeStamp < timestamp - mExpiryDelay)
             {
-                it->second.mWorkItem->abort();
+                if (it->second.mWorkItem)
+                {
+                    it->second.mWorkItem->abort();
+                    mUnrefQueue->push(it->second.mWorkItem);
+                }
                 mPreloadCells.erase(it++);
             }
             else

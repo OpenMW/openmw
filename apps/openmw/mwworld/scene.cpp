@@ -315,13 +315,15 @@ namespace MWWorld
         mPreloader->notifyLoaded(cell);
     }
 
-    void Scene::changeToVoid()
+    void Scene::clear()
     {
         CellStoreCollection::iterator active = mActiveCells.begin();
         while (active!=mActiveCells.end())
             unloadCell (active++);
         assert(mActiveCells.empty());
         mCurrentCell = NULL;
+
+        mPreloader->clear();
     }
 
     void Scene::playerMoved(const osg::Vec3f &pos)

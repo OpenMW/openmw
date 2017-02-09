@@ -113,7 +113,7 @@ namespace MWWorld
             ///< Move to exterior cell.
             /// @param changeEvent Set cellChanged flag?
 
-            void changeToVoid();
+            void clear();
             ///< Change into a void
 
             void markCellAsUnchanged();
