@@ -401,7 +401,7 @@ namespace MWPhysics
                 if (tracer.mFraction < 1E-9f)
                 {
                     // Try to separate by backing off slighly to unstuck the solver
-                    const osg::Vec3f backOff = (newPosition - tracer.mHitPoint) * 1E-3f;
+                    osg::Vec3f backOff = (newPosition - tracer.mHitPoint) * 1E-2f;
                     newPosition += backOff;
                 }
 
