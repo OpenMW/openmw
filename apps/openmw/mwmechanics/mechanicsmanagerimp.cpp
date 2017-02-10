@@ -1214,48 +1214,51 @@ namespace MWMechanics
         }
     }
 
-    bool MechanicsManager::actorAttacked(const MWWorld::Ptr &ptr, const MWWorld::Ptr &attacker)
+    bool MechanicsManager::actorAttacked(const MWWorld::Ptr &target, const MWWorld::Ptr &attacker)
     {
-        if (ptr == getPlayer())
+        std::list<MWWorld::Ptr> followersAttacker = getActorsSidingWith(attacker);
+        std::list<MWWorld::Ptr> followersTarget = getActorsSidingWith(target);
+
+        MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
+
+        if (target == getPlayer())
             return false;
 
-        std::list<MWWorld::Ptr> followers = getActorsSidingWith(attacker);
-        MWMechanics::CreatureStats& targetStats = ptr.getClass().getCreatureStats(ptr);
-        if (std::find(followers.begin(), followers.end(), ptr) != followers.end())
+        if (std::find(followersAttacker.begin(), followersAttacker.end(), target) != followersAttacker.end())
         {
-            targetStats.friendlyHit();
+            statsTarget.friendlyHit();
 
-            if (targetStats.getFriendlyHits() < 4)
+            if (statsTarget.getFriendlyHits() < 4)
             {
-                MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
+                MWBase::Environment::get().getDialogueManager()->say(target, "hit");
                 return false;
             }
         }
 
         // Attacking an NPC that is already in combat with any other NPC is not a crime
-        AiSequence& seq = targetStats.getAiSequence();
+        AiSequence& seq = statsTarget.getAiSequence();
         bool isFightingNpc = false;
         for (std::list<AiPackage*>::const_iterator it = seq.begin(); it != seq.end(); ++it)
         {
             if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
             {
-                MWWorld::Ptr target = (*it)->getTarget();
-                if (!target.isEmpty() && target.getClass().isNpc())
+                MWWorld::Ptr target2 = (*it)->getTarget();
+                if (!target2.isEmpty() && target2.getClass().isNpc())
                     isFightingNpc = true;
             }
         }
 
-        if (ptr.getClass().isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker)
-                && !isAggressive(ptr, attacker) && !isFightingNpc)
-            commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
+        if (target.getClass().isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker)
+                && !isAggressive(target, attacker) && !isFightingNpc)
+            commitCrime(attacker, target, MWBase::MechanicsManager::OT_Assault);
 
-        if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr)
+        if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(target)
                                     || attacker == getPlayer())
                 && !seq.isInCombat(attacker))
         {
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
             // Note: accidental or collateral damage attacks are ignored.
-            startCombat(ptr, attacker);
+            startCombat(target, attacker);
         }
 
         return true;
@@ -1365,6 +1368,7 @@ namespace MWMechanics
             // if guard starts combat with player, guards pursuing player should do the same
             if (ptr.getClass().isClass(ptr, "Guard"))
             {
+                ptr.getClass().getCreatureStats(ptr).setHitAttemptActorId(target.getClass().getCreatureStats(target).getActorId()); // Stops guard from ending combat if player is unreachable
                 for (Actors::PtrActorMap::const_iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
                 {
                     if (iter->first.getClass().isClass(iter->first, "Guard"))
@@ -1374,6 +1378,7 @@ namespace MWMechanics
                         {
                             aiSeq.stopPursuit();
                             aiSeq.stack(MWMechanics::AiCombat(target), ptr);
+                            iter->first.getClass().getCreatureStats(iter->first).setHitAttemptActorId(target.getClass().getCreatureStats(target).getActorId()); // Stops guard from ending combat if player is unreachable
                         }
                     }
                 }

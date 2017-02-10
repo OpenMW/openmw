@@ -325,22 +325,38 @@ namespace MWClass
 
     void Creature::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) const
     {
-        // NOTE: 'object' and/or 'attacker' may be empty.
+        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-        if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker))
-            getCreatureStats(ptr).setAttacked(true);
+        // NOTE: 'object' and/or 'attacker' may be empty.        
+        if (!attacker.isEmpty() && !stats.getAiSequence().isInCombat(attacker))
+            stats.setAttacked(true);
 
         // Self defense
         bool setOnPcHitMe = true; // Note OnPcHitMe is not set for friendly hits.
         
         // No retaliation for totally static creatures (they have no movement or attacks anyway)
         if (isMobile(ptr) && !attacker.isEmpty())
-        {
             setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
+
+        // Attacker and target store each other as hitattemptactor if they have no one stored yet
+        if (!attacker.isEmpty() && !ptr.isEmpty())
+        {
+            MWMechanics::CreatureStats& statsAttacker = attacker.getClass().getCreatureStats(attacker);
+            // First handle the attacked actor
+            if ((stats.getHitAttemptActorId() == -1)
+                && (statsAttacker.getAiSequence().isInCombat(ptr)
+                    || attacker == MWMechanics::getPlayer()))
+                stats.setHitAttemptActorId(statsAttacker.getActorId());
+
+            // Next handle the attacking actor
+            if ((statsAttacker.getHitAttemptActorId() == -1)
+                && (statsAttacker.getAiSequence().isInCombat(ptr)
+                    || attacker == MWMechanics::getPlayer()))
+                statsAttacker.setHitAttemptActorId(stats.getActorId());
         }
 
         if (!object.isEmpty())
-            getCreatureStats(ptr).setLastHitAttemptObject(object.getCellRef().getRefId());
+            stats.setLastHitAttemptObject(object.getCellRef().getRefId());
 
         if (setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
         {
@@ -358,7 +374,7 @@ namespace MWClass
         }
 
         if (!object.isEmpty())
-            getCreatureStats(ptr).setLastHitObject(object.getCellRef().getRefId());
+            stats.setLastHitObject(object.getCellRef().getRefId());
 
         if (damage > 0.0f && !object.isEmpty())
             MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
@@ -371,16 +387,13 @@ namespace MWClass
             if (!attacker.isEmpty())
             {
                 // Check for knockdown
-                float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
-                float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
+                float agilityTerm = stats.getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
+                float knockdownTerm = stats.getAttribute(ESM::Attribute::Agility).getModified()
                         * getGmst().iKnockDownOddsMult->getInt() * 0.01f + getGmst().iKnockDownOddsBase->getInt();
                 if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99())
-                {
-                    getCreatureStats(ptr).setKnockedDown(true);
-
-                }
+                    stats.setKnockedDown(true);
                 else
-                    getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
+                    stats.setHitRecovery(true); // Is this supposed to always occur?
             }
 
             damage = std::max(1.f, damage);
@@ -395,15 +408,15 @@ namespace MWClass
 
                 MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
 
-                MWMechanics::DynamicStat<float> health(getCreatureStats(ptr).getHealth());
+                MWMechanics::DynamicStat<float> health(stats.getHealth());
                 health.setCurrent(health.getCurrent() - damage);
-                getCreatureStats(ptr).setHealth(health);
+                stats.setHealth(health);
             }
             else
             {
-                MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
+                MWMechanics::DynamicStat<float> fatigue(stats.getFatigue());
                 fatigue.setCurrent(fatigue.getCurrent() - damage, true);
-                getCreatureStats(ptr).setFatigue(fatigue);
+                stats.setFatigue(fatigue);
             }
         }
     }

@@ -20,6 +20,7 @@
 #include "combat.hpp"
 #include "coordinateconverter.hpp"
 #include "actorutil.hpp"
+#include "mechanicsmanagerimp.hpp"
 
 namespace
 {
@@ -233,9 +234,14 @@ namespace MWMechanics
             storage.stopAttack();
             characterController.setAttackingOrSpell(false);
             storage.mActionCooldown = 0.f;
-            if (target == MWMechanics::getPlayer())
+            // Continue combat if target is player or player follower/escorter and an attack has been attempted
+            const std::list<MWWorld::Ptr>& playerFollowersAndEscorters = MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(MWMechanics::getPlayer());
+            bool targetSidesWithPlayer = (std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), target) != playerFollowersAndEscorters.end());
+            if ((target == MWMechanics::getPlayer() || targetSidesWithPlayer)
+                && ((actor.getClass().getCreatureStats(actor).getHitAttemptActorId() == target.getClass().getCreatureStats(target).getActorId())
+                || (target.getClass().getCreatureStats(target).getHitAttemptActorId() == actor.getClass().getCreatureStats(actor).getActorId())))
                 forceFlee = true;
-            else
+            else // Otherwise end combat
                 return true;
         }
 
