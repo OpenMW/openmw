@@ -35,6 +35,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     }
     else
         mShape.reset(new btBoxShape(toBullet(mHalfExtents)));
+    mConvexShape = static_cast<btConvexShape*>(mShape.get());
 
     mCollisionObject.reset(new btCollisionObject);
     mCollisionObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);

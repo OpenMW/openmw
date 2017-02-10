@@ -239,7 +239,7 @@ namespace MWPhysics
     public:
         static osg::Vec3f traceDown(const MWWorld::Ptr &ptr, Actor* actor, btCollisionWorld* collisionWorld, float maxHeight)
         {
-            osg::Vec3f position(ptr.getRefData().getPosition().asVec3());
+            osg::Vec3f position(actor->getCollisionObjectPosition());
 
             ActorTracer tracer;
             tracer.findGround(actor, position, position-osg::Vec3f(0,0,maxHeight), collisionWorld);

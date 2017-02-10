@@ -4,7 +4,6 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionShapes/btConvexShape.h>
-#include <BulletCollision/CollisionShapes/btCylinderShape.h>
 
 #include "collisiontype.hpp"
 #include "actor.hpp"
@@ -106,12 +105,7 @@ void ActorTracer::findGround(const Actor* actor, const osg::Vec3f& start, const 
     newTraceCallback.m_collisionFilterMask = actor->getCollisionObject()->getBroadphaseHandle()->m_collisionFilterMask;
     newTraceCallback.m_collisionFilterMask &= ~CollisionType_Actor;
 
-    btVector3 halfExtents = toBullet(actor->getHalfExtents());
-
-    halfExtents[2] = 1.0f;
-    btCylinderShapeZ base(halfExtents);
-
-    world->convexSweepTest(&base, from, to, newTraceCallback);
+    world->convexSweepTest(actor->getConvexShape(), from, to, newTraceCallback);
     if(newTraceCallback.hasHit())
     {
         const btVector3& tracehitnormal = newTraceCallback.m_hitNormalWorld;
