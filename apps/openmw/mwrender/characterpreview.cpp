@@ -184,7 +184,7 @@ namespace MWRender
 
     void CharacterPreview::redraw()
     {
-        mCamera->setNodeMask(~0);
+        mCamera->setNodeMask(Mask_RenderToTexture);
         mDrawOnceCallback->redrawNextFrame();
     }
 
