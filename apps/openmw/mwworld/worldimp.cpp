@@ -1322,7 +1322,7 @@ namespace MWWorld
 
     void World::adjustPosition(const Ptr &ptr, bool force)
     {
-        ESM::Position pos (ptr.getRefData().getPosition());
+        osg::Vec3f pos (ptr.getRefData().getPosition().asVec3());
 
         if(!ptr.getRefData().getBaseNode())
         {
@@ -1332,34 +1332,31 @@ namespace MWWorld
 
         float terrainHeight = -std::numeric_limits<float>::max();
         if (ptr.getCell()->isExterior())
-            terrainHeight = getTerrainHeightAt(pos.asVec3());
+            terrainHeight = getTerrainHeightAt(pos);
 
-        if (pos.pos[2] < terrainHeight)
-            pos.pos[2] = terrainHeight;
+        if (pos.z() < terrainHeight)
+            pos.z() = terrainHeight;
 
-        pos.pos[2] += 20; // place slightly above. will snap down to ground with code below
-
-        ptr.getRefData().setPosition(pos);
+        pos.z() += 20; // place slightly above. will snap down to ground with code below
 
         if (force || !isFlying(ptr))
         {
-            osg::Vec3f traced = mPhysics->traceDown(ptr, 500);
-            if (traced.z() < pos.pos[2])
-                pos.pos[2] = traced.z();
+            osg::Vec3f traced = mPhysics->traceDown(ptr, pos, 500);
+            if (traced.z() < pos.z())
+                pos.z() = traced.z();
         }
 
-        moveObject(ptr, ptr.getCell(), pos.pos[0], pos.pos[1], pos.pos[2]);
+        moveObject(ptr, ptr.getCell(), pos.x(), pos.y(), pos.z());
     }
 
     void World::fixPosition(const Ptr &actor)
     {
         const float dist = 8000;
-        ESM::Position pos (actor.getRefData().getPosition());
-        pos.pos[2] += dist;
-        actor.getRefData().setPosition(pos);
+        osg::Vec3f pos (actor.getRefData().getPosition().asVec3());
+        pos.z() += dist;
 
-        osg::Vec3f traced = mPhysics->traceDown(actor, dist*1.1f);
-        if (traced != pos.asVec3())
+        osg::Vec3f traced = mPhysics->traceDown(actor, pos, dist*1.1f);
+        if (traced != pos)
             moveObject(actor, actor.getCell(), traced.x(), traced.y(), traced.z());
     }
 

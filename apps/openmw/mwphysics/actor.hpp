@@ -12,6 +12,7 @@
 class btCollisionWorld;
 class btCollisionShape;
 class btCollisionObject;
+class btConvexShape;
 
 namespace Resource
 {
@@ -60,6 +61,8 @@ namespace MWPhysics
         {
             return mInternalCollisionMode;
         }
+
+        btConvexShape* getConvexShape() const { return mConvexShape; }
 
         /**
          * Enables or disables the *external* collision body. If disabled, other actors will not collide with this actor.
@@ -153,6 +156,7 @@ namespace MWPhysics
         bool mWalkingOnWater;
 
         std::auto_ptr<btCollisionShape> mShape;
+        btConvexShape* mConvexShape;
 
         std::auto_ptr<btCollisionObject> mCollisionObject;
 

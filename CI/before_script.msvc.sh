@@ -300,9 +300,9 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	fi
 
 	# Bullet
-	download "Bullet 2.83.7" \
-		"http://www.lysator.liu.se/~ace/OpenMW/deps/Bullet-2.83.7-msvc${MSVC_YEAR}-win${BITS}.7z" \
-		"Bullet-2.83.7-msvc${MSVC_YEAR}-win${BITS}.7z"
+	download "Bullet 2.86" \
+		"http://www.lysator.liu.se/~ace/OpenMW/deps/Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}.7z" \
+		"Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}.7z"
 
 	# FFmpeg
 	download "FFmpeg 3.0.1" \
@@ -414,7 +414,7 @@ cd $DEPS
 echo
 
 # Bullet
-printf "Bullet 2.83.7... "
+printf "Bullet 2.86... "
 {
 	cd $DEPS_INSTALL
 
@@ -422,8 +422,8 @@ printf "Bullet 2.83.7... "
 		printf -- "Exists. (No version checking) "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf Bullet
-		eval 7z x -y "${DEPS}/Bullet-2.83.7-msvc${MSVC_YEAR}-win${BITS}.7z" $STRIP
-		mv "Bullet-2.83.7-msvc${MSVC_YEAR}-win${BITS}" Bullet
+		eval 7z x -y "${DEPS}/Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}.7z" $STRIP
+		mv "Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}" Bullet
 	fi
 
 	export BULLET_ROOT="$(real_pwd)/Bullet"

@@ -62,6 +62,8 @@ namespace MWMechanics
         int mGoldPool;
 
         int mActorId;
+        int mHitAttemptActorId; // Stores an actor that attacked this actor. Only one is stored at a time,
+                                // and it is not changed if a different actor attacks. It is cleared when combat ends.
 
         // The index of the death animation that was played, or -1 if none played
         signed char mDeathAnimation;
@@ -241,9 +243,11 @@ namespace MWMechanics
         bool getStance (Stance flag) const;
 
         void setLastHitObject(const std::string &objectid);
-        void setLastHitAttemptObject(const std::string &objectid);
         const std::string &getLastHitObject() const;
+        void setLastHitAttemptObject(const std::string &objectid);
         const std::string &getLastHitAttemptObject() const;
+        void setHitAttemptActorId(const int actorId);
+        int getHitAttemptActorId() const;
 
         // Note, this is just a cache to avoid checking the whole container store every frame. We don't need to store it in saves.
         // TODO: Put it somewhere else?

@@ -237,9 +237,10 @@ namespace MWPhysics
 
 
     public:
-        static osg::Vec3f traceDown(const MWWorld::Ptr &ptr, Actor* actor, btCollisionWorld* collisionWorld, float maxHeight)
+        static osg::Vec3f traceDown(const MWWorld::Ptr &ptr, osg::Vec3f position, Actor* actor, btCollisionWorld* collisionWorld, float maxHeight)
         {
-            osg::Vec3f position(ptr.getRefData().getPosition().asVec3());
+            osg::Vec3f offset = actor->getCollisionObjectPosition() - ptr.getRefData().getPosition().asVec3();
+            position += offset;
 
             ActorTracer tracer;
             tracer.findGround(actor, position, position-osg::Vec3f(0,0,maxHeight), collisionWorld);
@@ -401,7 +402,7 @@ namespace MWPhysics
                 if (tracer.mFraction < 1E-9f)
                 {
                     // Try to separate by backing off slighly to unstuck the solver
-                    const osg::Vec3f backOff = (newPosition - tracer.mHitPoint) * 1E-3f;
+                    osg::Vec3f backOff = (newPosition - tracer.mHitPoint) * 1E-2f;
                     newPosition += backOff;
                 }
 
@@ -1085,13 +1086,13 @@ namespace MWPhysics
         return resultCallback.mResult;
     }
 
-    osg::Vec3f PhysicsSystem::traceDown(const MWWorld::Ptr &ptr, float maxHeight)
+    osg::Vec3f PhysicsSystem::traceDown(const MWWorld::Ptr &ptr, const osg::Vec3f& position, float maxHeight)
     {
         ActorMap::iterator found = mActors.find(ptr);
         if (found ==  mActors.end())
             return ptr.getRefData().getPosition().asVec3();
         else
-            return MovementSolver::traceDown(ptr, found->second, mCollisionWorld, maxHeight);
+            return MovementSolver::traceDown(ptr, position, found->second, mCollisionWorld, maxHeight);
     }
 
     void PhysicsSystem::addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts)
