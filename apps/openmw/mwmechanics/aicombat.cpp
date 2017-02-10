@@ -9,6 +9,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -20,7 +21,6 @@
 #include "combat.hpp"
 #include "coordinateconverter.hpp"
 #include "actorutil.hpp"
-#include "mechanicsmanagerimp.hpp"
 
 namespace
 {
