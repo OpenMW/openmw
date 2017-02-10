@@ -92,8 +92,8 @@ void ActorTracer::doTrace(const btCollisionObject *actor, const osg::Vec3f& star
 
 void ActorTracer::findGround(const Actor* actor, const osg::Vec3f& start, const osg::Vec3f& end, const btCollisionWorld* world)
 {
-    const btVector3 btstart(start.x(), start.y(), start.z()+1.0f);
-    const btVector3 btend(end.x(), end.y(), end.z()+1.0f);
+    const btVector3 btstart(start.x(), start.y(), start.z());
+    const btVector3 btend(end.x(), end.y(), end.z());
 
     const btTransform &trans = actor->getCollisionObject()->getWorldTransform();
     btTransform from(trans.getBasis(), btstart);
@@ -112,7 +112,6 @@ void ActorTracer::findGround(const Actor* actor, const osg::Vec3f& start, const 
         mFraction = newTraceCallback.m_closestHitFraction;
         mPlaneNormal = osg::Vec3f(tracehitnormal.x(), tracehitnormal.y(), tracehitnormal.z());
         mEndPos = (end-start)*mFraction + start;
-        mEndPos[2] += 1.0f;
     }
     else
     {

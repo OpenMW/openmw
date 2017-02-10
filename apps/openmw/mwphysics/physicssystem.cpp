@@ -56,6 +56,7 @@ namespace MWPhysics
     static const float sStepSizeUp = 34.0f;
     static const float sStepSizeDown = 62.0f;
     static const float sMinStep = 10.f;
+    static const float sGroundOffset = 1.0f;
 
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;
@@ -237,13 +238,12 @@ namespace MWPhysics
 
 
     public:
-        static osg::Vec3f traceDown(const MWWorld::Ptr &ptr, osg::Vec3f position, Actor* actor, btCollisionWorld* collisionWorld, float maxHeight)
+        static osg::Vec3f traceDown(const MWWorld::Ptr &ptr, const osg::Vec3f& position, Actor* actor, btCollisionWorld* collisionWorld, float maxHeight)
         {
             osg::Vec3f offset = actor->getCollisionObjectPosition() - ptr.getRefData().getPosition().asVec3();
-            position += offset;
 
             ActorTracer tracer;
-            tracer.findGround(actor, position, position-osg::Vec3f(0,0,maxHeight), collisionWorld);
+            tracer.findGround(actor, position + offset, position + offset - osg::Vec3f(0,0,maxHeight), collisionWorld);
             if(tracer.mFraction >= 1.0f)
             {
                 actor->setOnGround(false);
@@ -266,18 +266,18 @@ namespace MWPhysics
                 collisionWorld->rayTest(from, to, resultCallback1);
 
                 if (resultCallback1.hasHit() &&
-                        ( (toOsg(resultCallback1.m_hitPointWorld) - tracer.mEndPos).length2() > 35*35
+                        ( (toOsg(resultCallback1.m_hitPointWorld) - (tracer.mEndPos-offset)).length2() > 35*35
                         || !isWalkableSlope(tracer.mPlaneNormal)))
                 {
                     actor->setOnSlope(!isWalkableSlope(resultCallback1.m_hitNormalWorld));
-                    return toOsg(resultCallback1.m_hitPointWorld) + osg::Vec3f(0.f, 0.f, 1.f);
+                    return toOsg(resultCallback1.m_hitPointWorld) + osg::Vec3f(0.f, 0.f, sGroundOffset);
                 }
                 else
                 {
                     actor->setOnSlope(!isWalkableSlope(tracer.mPlaneNormal));
                 }
 
-                return tracer.mEndPos;
+                return tracer.mEndPos-offset + osg::Vec3f(0.f, 0.f, sGroundOffset);
             }
         }
 
@@ -448,7 +448,7 @@ namespace MWPhysics
             {
                 osg::Vec3f from = newPosition;
                 osg::Vec3f to = newPosition - (physicActor->getOnGround() ?
-                             osg::Vec3f(0,0,sStepSizeDown+2.f) : osg::Vec3f(0,0,2.f));
+                             osg::Vec3f(0,0,sStepSizeDown + 2*sGroundOffset) : osg::Vec3f(0,0,2*sGroundOffset));
                 tracer.doTrace(colobj, from, to, collisionWorld);
                 if(tracer.mFraction < 1.0f
                         && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != CollisionType_Actor)
@@ -461,7 +461,7 @@ namespace MWPhysics
                     if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
                         physicActor->setWalkingOnWater(true);
                     if (!isFlying)
-                        newPosition.z() = tracer.mEndPos.z() + 1.0f;
+                        newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
 
                     isOnGround = true;
 
