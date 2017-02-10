@@ -38,7 +38,7 @@ namespace ESM
         ESM::TimeStamp mTradeTime;
         int mGoldPool;
         int mActorId;
-        int mHitAttemptActorId;
+        //int mHitAttemptActorId;
 
         bool mDead;
         bool mDeathAnimationFinished;

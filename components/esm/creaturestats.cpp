@@ -90,8 +90,8 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mActorId = -1;
     esm.getHNOT (mActorId, "ACID");
 
-    mHitAttemptActorId = -1;
-    esm.getHNOT(mHitAttemptActorId, "HAID");
+    //mHitAttemptActorId = -1;
+    //esm.getHNOT(mHitAttemptActorId, "HAID");
 
     mDeathAnimation = -1;
     esm.getHNOT (mDeathAnimation, "DANM");
@@ -206,8 +206,8 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mActorId != -1)
         esm.writeHNT ("ACID", mActorId);
 
-    if (mHitAttemptActorId != -1)
-        esm.writeHNT("HAID", mHitAttemptActorId);
+    //if (mHitAttemptActorId != -1)
+    //    esm.writeHNT("HAID", mHitAttemptActorId);
 
     if (mDeathAnimation != -1)
         esm.writeHNT ("DANM", mDeathAnimation);
@@ -246,7 +246,7 @@ void ESM::CreatureStats::blank()
     mTradeTime.mDay = 0;
     mGoldPool = 0;
     mActorId = -1;
-    mHitAttemptActorId = -1;
+    //mHitAttemptActorId = -1;
     mHasAiSettings = false;
     mDead = false;
     mDeathAnimationFinished = false;

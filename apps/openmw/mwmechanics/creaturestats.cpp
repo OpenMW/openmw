@@ -531,7 +531,7 @@ namespace MWMechanics
         state.mActorId = mActorId;
         state.mDeathAnimation = mDeathAnimation;
         state.mTimeOfDeath = mTimeOfDeath.toEsm();
-        state.mHitAttemptActorId = mHitAttemptActorId;
+        //state.mHitAttemptActorId = mHitAttemptActorId;
 
         mSpells.writeState(state.mSpells);
         mActiveSpells.writeState(state.mActiveSpells);
@@ -580,7 +580,7 @@ namespace MWMechanics
         mActorId = state.mActorId;
         mDeathAnimation = state.mDeathAnimation;
         mTimeOfDeath = MWWorld::TimeStamp(state.mTimeOfDeath);
-        mHitAttemptActorId = state.mHitAttemptActorId;
+        //mHitAttemptActorId = state.mHitAttemptActorId;
 
         mSpells.readState(state.mSpells);
         mActiveSpells.readState(state.mActiveSpells);
