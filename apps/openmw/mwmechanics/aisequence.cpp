@@ -1,6 +1,7 @@
 #include "aisequence.hpp"
 
 #include <limits>
+#include <iostream>
 
 #include <components/esm/aisequence.hpp>
 
@@ -229,26 +230,33 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
             }
         }
 
-        if (package->execute (actor,characterController,state,duration))
+        try
         {
-            // Put repeating noncombat AI packages on the end of the stack so they can be used again
-            if (isActualAiPackage(packageTypeId) && (mRepeat || package->getRepeat()))
+            if (package->execute (actor,characterController,state,duration))
             {
-                package->reset();
-                mPackages.push_back(package->clone());
+                // Put repeating noncombat AI packages on the end of the stack so they can be used again
+                if (isActualAiPackage(packageTypeId) && (mRepeat || package->getRepeat()))
+                {
+                    package->reset();
+                    mPackages.push_back(package->clone());
+                }
+                // To account for the rare case where AiPackage::execute() queued another AI package
+                // (e.g. AiPursue executing a dialogue script that uses startCombat)
+                std::list<MWMechanics::AiPackage*>::iterator toRemove =
+                        std::find(mPackages.begin(), mPackages.end(), package);
+                mPackages.erase(toRemove);
+                delete package;
+                if (isActualAiPackage(packageTypeId))
+                    mDone = true;
             }
-            // To account for the rare case where AiPackage::execute() queued another AI package
-            // (e.g. AiPursue executing a dialogue script that uses startCombat)
-            std::list<MWMechanics::AiPackage*>::iterator toRemove =
-                    std::find(mPackages.begin(), mPackages.end(), package);
-            mPackages.erase(toRemove);
-            delete package;
-            if (isActualAiPackage(packageTypeId))
-                mDone = true;
+            else
+            {
+                mDone = false;
+            }
         }
-        else
+        catch (std::exception& e)
         {
-            mDone = false;
+            std::cerr << "Error during AiSequence::execute: " << e.what() << std::endl;
         }
     }
 }
