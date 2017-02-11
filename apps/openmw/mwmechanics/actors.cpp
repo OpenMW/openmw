@@ -304,10 +304,6 @@ namespace MWMechanics
         if (!actor1.getClass().isMobile(actor1))
             return;
 
-        // Stop here if target is unreachable
-        if (!MWMechanics::canFight(actor1, actor2))
-            return;
-
         // If this is set to true, actor1 will start combat with actor2 if the awareness check at the end of the method returns true
         bool aggressive = false;
 
@@ -382,6 +378,10 @@ namespace MWMechanics
                 }
             }
         }
+
+        // Stop here if target is unreachable
+        if (!MWMechanics::canFight(actor1, actor2))
+            return;
 
         // Do aggression check if actor2 is the player or a player follower or escorter
         if (!aggressive)

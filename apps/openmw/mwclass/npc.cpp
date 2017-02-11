@@ -682,14 +682,14 @@ namespace MWClass
         bool setOnPcHitMe = true;
 
         // NOTE: 'object' and/or 'attacker' may be empty.
-        if (!attacker.isEmpty() && !stats.getAiSequence().isInCombat(attacker))
+        if (!attacker.isEmpty() && attacker.getClass().isActor() && !stats.getAiSequence().isInCombat(attacker))
         {
             stats.setAttacked(true);
             setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
         // Attacker and target store each other as hitattemptactor if they have no one stored yet
-        if (!attacker.isEmpty() && !ptr.isEmpty())
+        if (!attacker.isEmpty() && attacker.getClass().isActor() && !ptr.isEmpty() && ptr.getClass().isActor())
         {
             MWMechanics::CreatureStats& statsAttacker = attacker.getClass().getCreatureStats(attacker);
             // First handle the attacked actor
