@@ -1216,13 +1216,12 @@ namespace MWMechanics
 
     bool MechanicsManager::actorAttacked(const MWWorld::Ptr &target, const MWWorld::Ptr &attacker)
     {
+        if (target == getPlayer() || !attacker.getClass().isActor())
+            return false;
+
         std::list<MWWorld::Ptr> followersAttacker = getActorsSidingWith(attacker);
-        std::list<MWWorld::Ptr> followersTarget = getActorsSidingWith(target);
 
         MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
-
-        if (target == getPlayer())
-            return false;
 
         if (std::find(followersAttacker.begin(), followersAttacker.end(), target) != followersAttacker.end())
         {
