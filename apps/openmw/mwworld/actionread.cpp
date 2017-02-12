@@ -44,7 +44,7 @@ namespace MWWorld
         MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats (actor);
 
         // Skill gain from books
-        if (ref->mBase->mData.mSkillId >= 0 && ref->mBase->mData.mSkillID < ESM::Skill::Length
+        if (ref->mBase->mData.mSkillId >= 0 && ref->mBase->mData.mSkillId < ESM::Skill::Length
                 && !npcStats.hasBeenUsed (ref->mBase->mId))
         {
             MWWorld::LiveCellRef<ESM::NPC> *playerRef = actor.get<ESM::NPC>();
