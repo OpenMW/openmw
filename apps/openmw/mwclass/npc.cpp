@@ -566,8 +566,13 @@ namespace MWClass
                                weapon.get<ESM::Weapon>()->mBase->mData.mReach :
                                store.find("fHandToHandReach")->getFloat());
 
+        // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
+        std::vector<MWWorld::Ptr> targetActors;
+        if (!ptr.isEmpty() && ptr.getClass().isActor() && ptr != MWMechanics::getPlayer())
+            ptr.getClass().getCreatureStats(ptr).getAiSequence().getCombatTargets(targetActors);
+
         // TODO: Use second to work out the hit angle
-        std::pair<MWWorld::Ptr, osg::Vec3f> result = world->getHitContact(ptr, dist);
+        std::pair<MWWorld::Ptr, osg::Vec3f> result = world->getHitContact(ptr, dist, targetActors);
         MWWorld::Ptr victim = result.first;
         osg::Vec3f hitPosition (result.second);
         if(victim.isEmpty()) // Didn't hit anything

@@ -6,8 +6,10 @@
 
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/projectilestate.hpp>
+
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
@@ -25,6 +27,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/aipackage.hpp"
 
 #include "../mwrender/effectmanager.hpp"
 #include "../mwrender/animation.hpp"
@@ -49,8 +52,8 @@ namespace
             const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 iter->mEffectID);
 
-            // All the projectiles should use the same speed. From observations in the
-            // original engine, this seems to be the average of the constituent effects.
+            // Speed of multi-effect projectiles should be the average of the constituent effects,
+            // based on observation of the original engine.
             speed += magicEffect->mData.mSpeed;
             count++;
 
@@ -337,9 +340,14 @@ namespace MWWorld
 
             MWWorld::Ptr caster = it->getCaster();
 
+            // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
+            std::vector<MWWorld::Ptr> targetActors;
+            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
+                caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
+
             // Check for impact
             // TODO: use a proper btRigidBody / btGhostObject?
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, 0xff, MWPhysics::CollisionType_Projectile);
+            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
 
             bool hit = false;
             if (result.mHit)
@@ -404,11 +412,17 @@ namespace MWWorld
 
             MWWorld::Ptr caster = it->getCaster();
 
+            // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
+            std::vector<MWWorld::Ptr> targetActors;
+            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
+                caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
+
             // Check for impact
             // TODO: use a proper btRigidBody / btGhostObject?
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, 0xff, MWPhysics::CollisionType_Projectile);
+            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
 
             bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos);
+
             if (result.mHit || underwater)
             {
                 MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);

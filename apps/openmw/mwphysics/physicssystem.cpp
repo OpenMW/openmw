@@ -798,6 +798,7 @@ namespace MWPhysics
     class DeepestNotMeContactTestResultCallback : public btCollisionWorld::ContactResultCallback
     {
         const btCollisionObject* mMe;
+        const std::vector<const btCollisionObject*> mTargets;
 
         // Store the real origin, since the shape's origin is its center
         btVector3 mOrigin;
@@ -807,8 +808,8 @@ namespace MWPhysics
         btVector3 mContactPoint;
         btScalar mLeastDistSqr;
 
-        DeepestNotMeContactTestResultCallback(const btCollisionObject* me, const btVector3 &origin)
-          : mMe(me), mOrigin(origin), mObject(NULL), mContactPoint(0,0,0),
+        DeepestNotMeContactTestResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*> targets, const btVector3 &origin)
+          : mMe(me), mTargets(targets), mOrigin(origin), mObject(NULL), mContactPoint(0,0,0),
             mLeastDistSqr(std::numeric_limits<float>::max())
         { }
 
@@ -819,6 +820,16 @@ namespace MWPhysics
             const btCollisionObject* collisionObject = col1Wrap->m_collisionObject;
             if (collisionObject != mMe)
             {
+                if (!mTargets.empty())
+                {
+                    if ((std::find(mTargets.begin(), mTargets.end(), collisionObject) == mTargets.end()))
+                    {
+                        PtrHolder* holder = static_cast<PtrHolder*>(collisionObject->getUserPointer());
+                        if (holder && !holder->getPtr().isEmpty() && holder->getPtr().getClass().isActor())
+                            return 0.f;
+                    }
+                }
+
                 btScalar distsqr = mOrigin.distance2(cp.getPositionWorldOnA());
                 if(!mObject || distsqr < mLeastDistSqr)
                 {
@@ -835,7 +846,7 @@ namespace MWPhysics
     std::pair<MWWorld::Ptr, osg::Vec3f> PhysicsSystem::getHitContact(const MWWorld::ConstPtr& actor,
                                                                      const osg::Vec3f &origin,
                                                                      const osg::Quat &orient,
-                                                                      float queryDistance)
+                                                                     float queryDistance, std::vector<MWWorld::Ptr> targets)
     {
         const MWWorld::Store<ESM::GameSetting> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
@@ -852,11 +863,23 @@ namespace MWPhysics
         object.setWorldTransform(btTransform(toBullet(orient), toBullet(center)));
 
         const btCollisionObject* me = NULL;
+        std::vector<const btCollisionObject*> targetCollisionObjects;
+
         const Actor* physactor = getActor(actor);
         if (physactor)
             me = physactor->getCollisionObject();
 
-        DeepestNotMeContactTestResultCallback resultCallback(me, toBullet(origin));
+        if (!targets.empty())
+        {
+            for (std::vector<MWWorld::Ptr>::const_iterator it = targets.begin(); it != targets.end(); ++it)
+            {
+                const Actor* physactor2 = getActor(*it);
+                if (physactor2)
+                    targetCollisionObjects.push_back(physactor2->getCollisionObject());
+            }
+        }
+
+        DeepestNotMeContactTestResultCallback resultCallback(me, targetCollisionObjects, toBullet(origin));
         resultCallback.m_collisionFilterGroup = CollisionType_Actor;
         resultCallback.m_collisionFilterMask = CollisionType_World | CollisionType_Door | CollisionType_HeightMap | CollisionType_Actor;
         mCollisionWorld->contactTest(&object, resultCallback);
@@ -903,28 +926,40 @@ namespace MWPhysics
     class ClosestNotMeRayResultCallback : public btCollisionWorld::ClosestRayResultCallback
     {
     public:
-        ClosestNotMeRayResultCallback(const btCollisionObject* me, const btVector3& from, const btVector3& to)
+        ClosestNotMeRayResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*> targets, const btVector3& from, const btVector3& to)
             : btCollisionWorld::ClosestRayResultCallback(from, to)
-            , mMe(me)
+            , mMe(me), mTargets(targets)
         {
         }
 
-        virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult,bool normalInWorldSpace)
+        virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace)
         {
             if (rayResult.m_collisionObject == mMe)
                 return 1.f;
+            if (!mTargets.empty())
+            {
+                if ((std::find(mTargets.begin(), mTargets.end(), rayResult.m_collisionObject) == mTargets.end()))
+                {
+                    PtrHolder* holder = static_cast<PtrHolder*>(rayResult.m_collisionObject->getUserPointer());
+                    if (holder && !holder->getPtr().isEmpty() && holder->getPtr().getClass().isActor())
+                        return 1.f;
+                }
+            }
             return btCollisionWorld::ClosestRayResultCallback::addSingleResult(rayResult, normalInWorldSpace);
         }
     private:
         const btCollisionObject* mMe;
+        const std::vector<const btCollisionObject*> mTargets;
     };
 
-    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::ConstPtr ignore, int mask, int group) const
+    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::ConstPtr ignore, std::vector<MWWorld::Ptr> targets, int mask, int group) const
     {
         btVector3 btFrom = toBullet(from);
         btVector3 btTo = toBullet(to);
 
         const btCollisionObject* me = NULL;
+        std::vector<const btCollisionObject*> targetCollisionObjects;
+
         if (!ignore.isEmpty())
         {
             const Actor* actor = getActor(ignore);
@@ -938,7 +973,17 @@ namespace MWPhysics
             }
         }
 
-        ClosestNotMeRayResultCallback resultCallback(me, btFrom, btTo);
+        if (!targets.empty())
+        {
+            for (std::vector<MWWorld::Ptr>::const_iterator it = targets.begin(); it != targets.end(); ++it)
+            {
+                const Actor* actor = getActor(*it);
+                if (actor)
+                    targetCollisionObjects.push_back(actor->getCollisionObject());
+            }
+        }
+
+        ClosestNotMeRayResultCallback resultCallback(me, targetCollisionObjects, btFrom, btTo);
         resultCallback.m_collisionFilterGroup = group;
         resultCallback.m_collisionFilterMask = mask;
 
@@ -991,7 +1036,7 @@ namespace MWPhysics
         osg::Vec3f pos1 (physactor1->getCollisionObjectPosition() + osg::Vec3f(0,0,physactor1->getHalfExtents().z() * 0.9)); // eye level
         osg::Vec3f pos2 (physactor2->getCollisionObjectPosition() + osg::Vec3f(0,0,physactor2->getHalfExtents().z() * 0.9));
 
-        RayResult result = castRay(pos1, pos2, MWWorld::Ptr(), CollisionType_World|CollisionType_HeightMap|CollisionType_Door);
+        RayResult result = castRay(pos1, pos2, MWWorld::ConstPtr(), std::vector<MWWorld::Ptr>(), CollisionType_World|CollisionType_HeightMap|CollisionType_Door);
 
         return !result.mHit;
     }

@@ -75,6 +75,17 @@ bool AiSequence::getCombatTarget(MWWorld::Ptr &targetActor) const
     return !targetActor.isEmpty();
 }
 
+bool AiSequence::getCombatTargets(std::vector<MWWorld::Ptr> &targetActors) const
+{
+    for (std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+    {
+        if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdCombat)
+            targetActors.push_back((*it)->getTarget());
+    }
+
+    return !targetActors.empty();
+}
+
 std::list<AiPackage*>::const_iterator AiSequence::begin() const
 {
     return mPackages.begin();
