@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 320 97" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 320 97" align="Center" name="_Main">
 
         <!-- Appearance -->
         <Widget type="TextBox" skin="ProgressText" position="6 6 300 18" name="LabelT" align="Left Top">

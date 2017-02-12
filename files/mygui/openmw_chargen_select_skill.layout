@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 477 270" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 477 270" align="Center" name="_Main">
         <Widget type="Widget" skin="" position="17 14 447 239" align="Stretch">
 
             <!-- Label -->

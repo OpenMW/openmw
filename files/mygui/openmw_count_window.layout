@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout" version="3.2.0">
-    <Widget type="Window" skin="MW_Dialog" position="0 0 600 128" layer="Windows" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" position="0 0 600 128" align="Center" layer="Windows" name="_Main">
         <Property key="Visible" value="false"/>
         <Widget type="TextBox" skin="SandText" position="4 4 592 24" align="Left Top HStretch" name="LabelText">
             <Property key="TextAlign" value="Center"/>

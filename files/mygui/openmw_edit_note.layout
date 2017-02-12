@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 336 242" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 336 242" align="Center" name="_Main">
 
         <Widget type="AutoSizedTextBox" skin="SandText" position="13 13 200 16">
             <Property key="Caption" value="#{sEditNote}"/>
