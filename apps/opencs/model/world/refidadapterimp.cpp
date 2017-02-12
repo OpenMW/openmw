@@ -316,7 +316,7 @@ QVariant CSMWorld::BookRefIdAdapter::getData (const RefIdColumn *column,
         return record.get().mData.mIsScroll!=0;
 
     if (column==mSkill)
-        return record.get().mData.mSkillID;
+        return record.get().mData.mSkillId;
 
     if (column==mText)
         return QString::fromUtf8 (record.get().mText.c_str());
@@ -335,7 +335,7 @@ void CSMWorld::BookRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
     if (column==mScroll)
         book.mData.mIsScroll = value.toInt();
     else if (column==mSkill)
-        book.mData.mSkillID = value.toInt();
+        book.mData.mSkillId = value.toInt();
     else if (column==mText)
         book.mText = value.toString().toUtf8().data();
     else
