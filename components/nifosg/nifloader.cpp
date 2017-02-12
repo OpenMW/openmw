@@ -552,6 +552,9 @@ namespace NifOsg
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
                                 std::vector<int> boundTextures, int animflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
+            if (rootNode != NULL && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
+                return NULL;
+
             osg::ref_ptr<osg::Group> node = new osg::MatrixTransform(nifNode->trafo.toMatrix());
 
             // Set a default DataVariance (used as hint by optimization routines).
