@@ -6,6 +6,7 @@ OpenMW Source Documentation
   :maxdepth: 2
 
   mwbase
+  mwclass
 
 .. autodoxygenfile:: engine.hpp
   :project: openmw

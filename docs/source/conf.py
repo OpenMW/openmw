@@ -38,20 +38,28 @@ extensions = [
 ]
 
 try:
-    import breath
-
+    import breathe
     extensions.append('breathe')
-
-    # Where breathe can find the source files
-    breathe_projects_source = {
-        "openmw": (project_root+"/apps/openmw", ["engine.hpp",
-        "mwbase/dialoguemanager.hpp", "mwbase/environment.hpp",
-        "mwbase/inputmanager.hpp", "mwbase/journal.hpp", "mwbase/mechanicsmanager.hpp",
-        "mwbase/scriptmanager.hpp", "mwbase/soundmanager.hpp", "mwbase/statemanager.hpp",
-        "mwbase/windowmanager.hpp", "mwbase/world.hpp"])
-        }
 except ImportError:
     print("WARNING: Unable to import breathe, code documentation won't be generated.")
+
+# Where breathe can find the source files
+breathe_projects_source = {
+    "openmw": (project_root+"/apps/openmw",
+               ["engine.hpp",
+                "mwbase/dialoguemanager.hpp", "mwbase/environment.hpp", "mwbase/inputmanager.hpp", "mwbase/journal.hpp",
+                "mwbase/mechanicsmanager.hpp", "mwbase/scriptmanager.hpp", "mwbase/soundmanager.hpp",
+                "mwbase/statemanager.hpp", "mwbase/windowmanager.hpp", "mwbase/world.hpp",
+                "mwclass/activator.hpp", "mwclass/book.hpp", "mwclass/creaturelevlist.hpp", "mwclass/lockpick.hpp",
+                "mwclass/repair.hpp", "mwclass/actor.hpp", "mwclass/classes.hpp", "mwclass/door.hpp",
+                "mwclass/misc.hpp", "mwclass/static.hpp", "mwclass/apparatus.hpp", "mwclass/clothing.hpp",
+                "mwclass/ingredient.hpp", "mwclass/npc.hpp", "mwclass/weapon.hpp", "mwclass/armor.hpp",
+                "mwclass/container.hpp", "mwclass/itemlevlist.hpp", "mwclass/potion.hpp",
+                "mwclass/bodypart.hpp", "mwclass/creature.hpp", "mwclass/light.hpp", "mwclass/probe.hpp",
+
+
+                                             ])
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -81,9 +89,9 @@ try:
     from parse_cmake import parsing
     cmake_raw = open(project_root+'/CMakeLists.txt', 'r').read()
     cmake_data = parsing.parse(cmake_raw)
-    release = version = '.'.join(int(cmake_data[24][1][1].contents),
-                                 int(cmake_data[25][1][1].contents),
-                                 int(cmake_data[26][1][1].contents))
+    release = version = '.'.join([cmake_data[24][1][1].contents,
+                                 cmake_data[25][1][1].contents,
+                                 cmake_data[26][1][1].contents])
 except ImportError:
     release = "UNRELEASED"
     print("WARNING: Unable to import parse_cmake, version will be set to: {0}.".format(release))
