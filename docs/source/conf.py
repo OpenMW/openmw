@@ -11,15 +11,21 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
-
-import sys
+import glob
 import os
+import sys
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 project_root = os.path.abspath('../../')
 sys.path.insert(0, project_root)
+
+
+def insensitive_glob(pattern):
+    def either(c):
+        return '[%s%s]' % (c.lower(), c.upper()) if c.isalpha() else c
+    return glob.glob(''.join(map(either, pattern)))
 
 # -- General configuration ------------------------------------------------
 
@@ -45,20 +51,11 @@ except ImportError:
 
 # Where breathe can find the source files
 breathe_projects_source = {
-    "openmw": (project_root+"/apps/openmw",
-               ["engine.hpp",
-                "mwbase/dialoguemanager.hpp", "mwbase/environment.hpp", "mwbase/inputmanager.hpp", "mwbase/journal.hpp",
-                "mwbase/mechanicsmanager.hpp", "mwbase/scriptmanager.hpp", "mwbase/soundmanager.hpp",
-                "mwbase/statemanager.hpp", "mwbase/windowmanager.hpp", "mwbase/world.hpp",
-                "mwclass/activator.hpp", "mwclass/book.hpp", "mwclass/creaturelevlist.hpp", "mwclass/lockpick.hpp",
-                "mwclass/repair.hpp", "mwclass/actor.hpp", "mwclass/classes.hpp", "mwclass/door.hpp",
-                "mwclass/misc.hpp", "mwclass/static.hpp", "mwclass/apparatus.hpp", "mwclass/clothing.hpp",
-                "mwclass/ingredient.hpp", "mwclass/npc.hpp", "mwclass/weapon.hpp", "mwclass/armor.hpp",
-                "mwclass/container.hpp", "mwclass/itemlevlist.hpp", "mwclass/potion.hpp",
-                "mwclass/bodypart.hpp", "mwclass/creature.hpp", "mwclass/light.hpp", "mwclass/probe.hpp",
-
-
-                                             ])
+    "openmw": (os.path.join(project_root, "apps", "openmw"),
+               insensitive_glob(os.path.join(project_root, "apps", "openmw", "*.hpp")) +
+               insensitive_glob(os.path.join(project_root, "apps", "openmw", "mwbase", "*.hpp")) +
+               insensitive_glob(os.path.join(project_root, "apps", "openmw", "mwclass", "*.hpp"))
+               )
 }
 
 # Add any paths that contain templates here, relative to this directory.
