@@ -565,11 +565,6 @@ namespace MWRender
         }
     }
 
-    bool Animation::hasAnimSources() const
-    {
-        return !mAnimSources.empty();
-    }
-
     void Animation::clearAnimSources()
     {
         mStates.clear();

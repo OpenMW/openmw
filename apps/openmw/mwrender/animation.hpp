@@ -341,8 +341,6 @@ public:
     Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem);
     virtual ~Animation();
 
-    bool hasAnimSources() const;
-
     MWWorld::ConstPtr getPtr() const;
 
     /// Set active flag on the object skeleton, if one exists.
