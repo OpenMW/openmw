@@ -90,6 +90,7 @@ Programmers
     Mark Siewert (mark76)
     Marco Melletti (mellotanica)
     Marco Schulze
+    MAtahualpa
     Mateusz Kołaczek (PL_kolek)
     Mateusz Malisz (malice)
     megaton
