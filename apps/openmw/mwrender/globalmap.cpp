@@ -153,7 +153,7 @@ namespace MWRender
         {
             for (int y = mMinY; y <= mMaxY; ++y)
             {
-                ESM::Land* land = esmStore.get<ESM::Land>().search (x,y);
+                const ESM::Land* land = esmStore.get<ESM::Land>().search (x,y);
 
                 if (land)
                 {

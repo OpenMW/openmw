@@ -234,7 +234,7 @@ namespace ESM
         }
     }
 
-    void Land::unloadData()
+    void Land::unloadData() const
     {
         if (mDataLoaded)
         {

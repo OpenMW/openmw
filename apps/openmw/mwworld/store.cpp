@@ -436,7 +436,7 @@ namespace MWWorld
     {
         return iterator(mStatic.end());
     }
-    ESM::Land *Store<ESM::Land>::search(int x, int y) const
+    const ESM::Land *Store<ESM::Land>::search(int x, int y) const
     {
         ESM::Land land;
         land.mX = x, land.mY = y;
@@ -445,13 +445,13 @@ namespace MWWorld
             std::lower_bound(mStatic.begin(), mStatic.end(), &land, Compare());
 
         if (it != mStatic.end() && (*it)->mX == x && (*it)->mY == y) {
-            return const_cast<ESM::Land *>(*it);
+            return *it;
         }
         return 0;
     }
-    ESM::Land *Store<ESM::Land>::find(int x, int y) const
+    const ESM::Land *Store<ESM::Land>::find(int x, int y) const
     {
-        ESM::Land *ptr = search(x, y);
+        const ESM::Land *ptr = search(x, y);
         if (ptr == 0) {
             std::ostringstream msg;
             msg << "Land at (" << x << ", " << y << ") not found";

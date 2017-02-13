@@ -123,7 +123,7 @@ struct Land
     /**
      * Frees memory allocated for land data
      */
-    void unloadData();
+    void unloadData() const;
 
     /// Check if given data type is loaded
     /// @note We only check data types that *can* be loaded (present in mDataTypes)

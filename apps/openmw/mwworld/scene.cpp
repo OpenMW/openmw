@@ -228,7 +228,7 @@ namespace MWWorld
 
         if ((*iter)->getCell()->isExterior())
         {
-            ESM::Land* land =
+            const ESM::Land* land =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(
                     (*iter)->getCell()->getGridX(),
                     (*iter)->getCell()->getGridY()
@@ -262,7 +262,7 @@ namespace MWWorld
             // Load terrain physics first...
             if (cell->getCell()->isExterior())
             {
-                ESM::Land* land =
+                const ESM::Land* land =
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(
                         cell->getCell()->getGridX(),
                         cell->getCell()->getGridY()

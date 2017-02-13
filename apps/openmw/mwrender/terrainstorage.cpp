@@ -43,7 +43,8 @@ namespace MWRender
     {
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
-        ESM::Land* land = esmStore.get<ESM::Land>().search(cellX, cellY);
+
+        const ESM::Land* land = esmStore.get<ESM::Land>().search(cellX, cellY);
         if (!land)
             return NULL;
 
