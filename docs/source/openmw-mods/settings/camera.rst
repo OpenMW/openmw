@@ -24,7 +24,7 @@ This setting determines whether objects that render to a few pixels or smaller w
 The default value is true. This setting can only be configured by editing the settings configuration file.
 
 small feature culling pixel size
----------------------
+--------------------------------
 
 :Type:		floating point
 :Range:		> 0
@@ -48,8 +48,8 @@ This value controls the maximum visible distance (also called the far clipping p
 The constant 8192 is the size of a cell, and 1024 is the threshold distance for loading a new cell. Additionally, the field of view setting also interacts with this setting because the view frustrum end is a plane, so you can see further at the edges of the screen than you should be able to. This can be observed in game by looking at distant objects and rotating the camera so the objects are near the edge of the screen. As a result, this setting should further be reduced by a factor that depends on the field of view setting. In the default configuration this reduction is 7%, hence the factor of 0.93 above. Using this factor, approximate values recommended for other exterior cell load distance settings are:
 
 ======= ========
- Cells	Viewing
- 		Distance
+Cells	Viewing
+        Distance
 =======	========
 2		14285
 3		21903
