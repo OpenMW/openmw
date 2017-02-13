@@ -50,12 +50,15 @@ except ImportError:
     print("WARNING: Unable to import breathe, code documentation won't be generated.")
 
 # Where breathe can find the source files
+openmw_path = os.path.join(project_root, "apps", "openmw")
+openmw_headers = insensitive_glob(os.path.join(openmw_path, "*.hpp")) + \
+                insensitive_glob(os.path.join(openmw_path, "mwbase", "*.hpp")) + \
+                insensitive_glob(os.path.join(openmw_path, "mwclass", "*.hpp"))
+
+openmw_headers = [os.path.relpath(x, openmw_path) for x in openmw_headers]
+
 breathe_projects_source = {
-    "openmw": (os.path.join(project_root, "apps", "openmw"),
-               insensitive_glob(os.path.join(project_root, "apps", "openmw", "*.hpp")) +
-               insensitive_glob(os.path.join(project_root, "apps", "openmw", "mwbase", "*.hpp")) +
-               insensitive_glob(os.path.join(project_root, "apps", "openmw", "mwclass", "*.hpp"))
-               )
+    "openmw": (openmw_path, openmw_headers)
 }
 
 # Add any paths that contain templates here, relative to this directory.
