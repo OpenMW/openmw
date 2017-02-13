@@ -1,5 +1,5 @@
 Windows Settings
-############
+################
 
 :Type:	floating point
 :Range:	0.0 to 1.0
