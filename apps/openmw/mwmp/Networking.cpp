@@ -735,6 +735,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
     WorldPacket *myPacket = worldController.GetPacket(packet->data[0]);
     WorldEvent *event = new WorldEvent(guid);
+
     myPacket->Packet(&bsIn, event, false);
 
     switch (packet->data[0])
@@ -746,7 +747,13 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         if (!ptrCellStore) return;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONTAINER");
-        event->editContainer(ptrCellStore);
+
+        // If we've received a request for information, comply with it
+        if (event->containerChanges.action == mwmp::ContainerChanges::REQUEST)
+            event->sendContainers(ptrCellStore);
+        // Otherwise, edit containers based on the information received
+        else
+            event->editContainers(ptrCellStore);
 
         break;
     }

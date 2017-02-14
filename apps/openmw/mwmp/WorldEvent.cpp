@@ -45,7 +45,12 @@ void WorldEvent::addContainerItem(ContainerItem containerItem)
     containerChanges.items.push_back(containerItem);
 }
 
-void WorldEvent::editContainer(MWWorld::CellStore* cellStore)
+void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
+{
+
+}
+
+void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 

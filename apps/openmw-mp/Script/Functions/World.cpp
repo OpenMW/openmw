@@ -67,6 +67,11 @@ void WorldFunctions::SetBaseEventCell(const char* cellDescription) noexcept
     }
 }
 
+void WorldFunctions::SetContainerChangesAction(int action) noexcept
+{
+    baseEvent->containerChanges.action = action;
+}
+
 void WorldFunctions::SetObjectRefId(const char* refId) noexcept
 {
     tempWorldObject.refId = refId;
@@ -194,6 +199,11 @@ double WorldFunctions::GetObjectRotY(unsigned int i) noexcept
 double WorldFunctions::GetObjectRotZ(unsigned int i) noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).pos.rot[2];
+}
+
+void WorldFunctions::SendContainer() noexcept
+{
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_CONTAINER)->Send(baseEvent, baseEvent->guid);
 }
 
 void WorldFunctions::SendObjectDelete() noexcept

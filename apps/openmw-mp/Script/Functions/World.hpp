@@ -2,38 +2,41 @@
 #define OPENMW_WORLD_HPP
 
 #define WORLDFUNCTIONS \
-    {"CreateBaseEvent",     WorldFunctions::CreateBaseEvent},\
+    {"CreateBaseEvent",           WorldFunctions::CreateBaseEvent},\
     \
-    {"AddWorldObject",       WorldFunctions::AddWorldObject},\
-    {"SetBaseEventCell",    WorldFunctions::SetBaseEventCell},\
+    {"AddWorldObject",            WorldFunctions::AddWorldObject},\
+    {"SetBaseEventCell",          WorldFunctions::SetBaseEventCell},\
+    {"SetContainerChangesAction", WorldFunctions::SetContainerChangesAction},\
     \
-    {"SetObjectRefId",       WorldFunctions::SetObjectRefId},\
-    {"SetObjectRefNumIndex", WorldFunctions::SetObjectRefNumIndex},\
-    {"SetObjectCharge",      WorldFunctions::SetObjectCharge},\
-    {"SetObjectCount",       WorldFunctions::SetObjectCount},\
-    {"SetObjectGoldValue",   WorldFunctions::SetObjectGoldValue},\
-    {"SetObjectScale",       WorldFunctions::SetObjectScale},\
-    {"SetObjectDoorState",   WorldFunctions::SetObjectDoorState},\
-    {"SetObjectLockLevel",   WorldFunctions::SetObjectLockLevel},\
-    {"SetObjectPosition",    WorldFunctions::SetObjectPosition},\
-    {"SetObjectRotation",    WorldFunctions::SetObjectRotation},\
+    {"SetObjectRefId",            WorldFunctions::SetObjectRefId},\
+    {"SetObjectRefNumIndex",      WorldFunctions::SetObjectRefNumIndex},\
+    {"SetObjectCharge",           WorldFunctions::SetObjectCharge},\
+    {"SetObjectCount",            WorldFunctions::SetObjectCount},\
+    {"SetObjectGoldValue",        WorldFunctions::SetObjectGoldValue},\
+    {"SetObjectScale",            WorldFunctions::SetObjectScale},\
+    {"SetObjectDoorState",        WorldFunctions::SetObjectDoorState},\
+    {"SetObjectLockLevel",        WorldFunctions::SetObjectLockLevel},\
+    {"SetObjectPosition",         WorldFunctions::SetObjectPosition},\
+    {"SetObjectRotation",         WorldFunctions::SetObjectRotation},\
     \
-    {"GetObjectChangesSize", WorldFunctions::GetObjectChangesSize},\
+    {"GetObjectChangesSize",      WorldFunctions::GetObjectChangesSize},\
     \
-    {"GetObjectRefId",       WorldFunctions::GetObjectRefId},\
-    {"GetObjectRefNumIndex", WorldFunctions::GetObjectRefNumIndex},\
-    {"GetObjectCharge",      WorldFunctions::GetObjectCharge},\
-    {"GetObjectCount",       WorldFunctions::GetObjectCount},\
-    {"GetObjectGoldValue",   WorldFunctions::GetObjectGoldValue},\
-    {"GetObjectScale",       WorldFunctions::GetObjectScale},\
-    {"GetObjectDoorState",   WorldFunctions::GetObjectDoorState},\
-    {"GetObjectLockLevel",   WorldFunctions::GetObjectLockLevel},\
-    {"GetObjectPosX",        WorldFunctions::GetObjectPosX},\
-    {"GetObjectPosY",        WorldFunctions::GetObjectPosY},\
-    {"GetObjectPosZ",        WorldFunctions::GetObjectPosZ},\
-    {"GetObjectRotX",        WorldFunctions::GetObjectRotX},\
-    {"GetObjectRotY",        WorldFunctions::GetObjectRotY},\
-    {"GetObjectRotZ",        WorldFunctions::GetObjectRotZ},\
+    {"GetObjectRefId",            WorldFunctions::GetObjectRefId},\
+    {"GetObjectRefNumIndex",      WorldFunctions::GetObjectRefNumIndex},\
+    {"GetObjectCharge",           WorldFunctions::GetObjectCharge},\
+    {"GetObjectCount",            WorldFunctions::GetObjectCount},\
+    {"GetObjectGoldValue",        WorldFunctions::GetObjectGoldValue},\
+    {"GetObjectScale",            WorldFunctions::GetObjectScale},\
+    {"GetObjectDoorState",        WorldFunctions::GetObjectDoorState},\
+    {"GetObjectLockLevel",        WorldFunctions::GetObjectLockLevel},\
+    {"GetObjectPosX",             WorldFunctions::GetObjectPosX},\
+    {"GetObjectPosY",             WorldFunctions::GetObjectPosY},\
+    {"GetObjectPosZ",             WorldFunctions::GetObjectPosZ},\
+    {"GetObjectRotX",             WorldFunctions::GetObjectRotX},\
+    {"GetObjectRotY",             WorldFunctions::GetObjectRotY},\
+    {"GetObjectRotZ",             WorldFunctions::GetObjectRotZ},\
+    \
+    {"SendContainer",             WorldFunctions::SendContainer},\
     \
     {"SendObjectDelete",     WorldFunctions::SendObjectDelete},\
     {"SendObjectPlace",      WorldFunctions::SendObjectPlace},\
@@ -54,6 +57,7 @@ public:
 
     static void AddWorldObject() noexcept;
     static void SetBaseEventCell(const char* cellDescription) noexcept;
+    static void SetContainerChangesAction(int action) noexcept;
 
     static void SetObjectRefId(const char* refId) noexcept;
     static void SetObjectRefNumIndex(int refNumIndex) noexcept;
@@ -82,6 +86,8 @@ public:
     static double GetObjectRotX(unsigned int i) noexcept;
     static double GetObjectRotY(unsigned int i) noexcept;
     static double GetObjectRotZ(unsigned int i) noexcept;
+
+    static void SendContainer() noexcept;
 
     static void SendObjectDelete() noexcept;
     static void SendObjectPlace() noexcept;

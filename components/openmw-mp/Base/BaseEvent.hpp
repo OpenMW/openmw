@@ -63,10 +63,11 @@ namespace mwmp
         {
             SET = 0,
             ADD = 1,
-            REMOVE = 2
+            REMOVE = 2,
+            REQUEST = 3
         };
 
-        int action; // 0 - Clear and set in entirety, 1 - Add item, 2 - Remove item
+        int action; // 0 - Clear and set in entirety, 1 - Add item, 2 - Remove item, 3 - Request items
     };
 
     class BaseEvent

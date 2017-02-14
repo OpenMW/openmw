@@ -277,7 +277,7 @@ namespace MWScript
         return MWBase::Environment::get().getWindowManager()->isGuiMode();
         */
 
-        return 0;
+        return false;
     }
 
     int InterpreterContext::getGlobalShort (const std::string& name) const
