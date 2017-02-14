@@ -34,6 +34,11 @@ namespace Resource
     class ResourceSystem;
 }
 
+namespace SceneUtil
+{
+    class WorkQueue;
+}
+
 namespace ESM
 {
     struct Position;
@@ -180,7 +185,7 @@ namespace MWWorld
             World (
                 osgViewer::Viewer* viewer,
                 osg::ref_ptr<osg::Group> rootNode,
-                Resource::ResourceSystem* resourceSystem,
+                Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& contentFiles,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,

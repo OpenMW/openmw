@@ -141,7 +141,7 @@ namespace MWWorld
     World::World (
         osgViewer::Viewer* viewer,
         osg::ref_ptr<osg::Group> rootNode,
-        Resource::ResourceSystem* resourceSystem,
+        Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
         const Files::Collections& fileCollections,
         const std::vector<std::string>& contentFiles,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
@@ -155,7 +155,7 @@ namespace MWWorld
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0)
     {
         mPhysics = new MWPhysics::PhysicsSystem(resourceSystem, rootNode);
-        mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem, &mFallback, resourcePath);
+        mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath);
         mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering, mPhysics));
 
         mRendering->preloadCommonAssets();
