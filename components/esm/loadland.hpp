@@ -96,18 +96,12 @@ struct Land
         // 24-bit RGB color for each vertex
         unsigned char mColours[3 * LAND_NUM_VERTS];
 
-        // DataTypes available in this LandData, accessing data that is not available is an undefined operation
-        int mDataTypes;
-
         // low-LOD heightmap (used for rendering the global map)
         signed char mWnam[81];
 
         // ???
         short mUnk1;
         uint8_t mUnk2;
-
-        void save(ESMWriter &esm) const;
-        static void transposeTextureData(const uint16_t *in, uint16_t *out);
     };
 
     void load(ESMReader &esm, bool &isDeleted);

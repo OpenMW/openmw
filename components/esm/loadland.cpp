@@ -12,51 +12,6 @@ namespace ESM
 {
     unsigned int Land::sRecordId = REC_LAND;
 
-    void Land::LandData::save(ESMWriter &esm) const
-    {
-        if (mDataTypes & Land::DATA_VNML) {
-            esm.writeHNT("VNML", mNormals, sizeof(mNormals));
-        }
-        if (mDataTypes & Land::DATA_VHGT) {
-            VHGT offsets;
-            offsets.mHeightOffset = mHeights[0] / HEIGHT_SCALE;
-            offsets.mUnk1 = mUnk1;
-            offsets.mUnk2 = mUnk2;
-
-            float prevY = mHeights[0];
-            int number = 0; // avoid multiplication
-            for (int i = 0; i < LAND_SIZE; ++i) {
-                float diff = (mHeights[number] - prevY) / HEIGHT_SCALE;
-                offsets.mHeightData[number] =
-                    (diff >= 0) ? (int8_t) (diff + 0.5) : (int8_t) (diff - 0.5);
-
-                float prevX = prevY = mHeights[number];
-                ++number;
-
-                for (int j = 1; j < LAND_SIZE; ++j) {
-                    diff = (mHeights[number] - prevX) / HEIGHT_SCALE;
-                    offsets.mHeightData[number] =
-                        (diff >= 0) ? (int8_t) (diff + 0.5) : (int8_t) (diff - 0.5);
-
-                    prevX = mHeights[number];
-                    ++number;
-                }
-            }
-            esm.writeHNT("VHGT", offsets, sizeof(VHGT));
-        }
-        if (mDataTypes & Land::DATA_WNAM) {
-            esm.writeHNT("WNAM", mWnam, 81);
-        }
-        if (mDataTypes & Land::DATA_VCLR) {
-            esm.writeHNT("VCLR", mColours, 3*LAND_NUM_VERTS);
-        }
-        if (mDataTypes & Land::DATA_VTEX) {
-            uint16_t vtex[LAND_NUM_TEXTURES];
-            transposeTextureData(mTextures, vtex);
-            esm.writeHNT("VTEX", vtex, sizeof(vtex));
-        }
-    }
-
     Land::Land()
         : mFlags(0)
         , mX(0)
@@ -68,7 +23,7 @@ namespace ESM
     {
     }
 
-    void Land::LandData::transposeTextureData(const uint16_t *in, uint16_t *out)
+    void transposeTextureData(const uint16_t *in, uint16_t *out)
     {
         int readPos = 0; //bit ugly, but it works
         for ( int y1 = 0; y1 < 4; y1++ )
@@ -174,8 +129,49 @@ namespace ESM
 
         if (mLandData)
         {
-            mLandData->save(esm);
+            if (mDataTypes & Land::DATA_VNML) {
+                esm.writeHNT("VNML", mLandData->mNormals, sizeof(mLandData->mNormals));
+            }
+            if (mDataTypes & Land::DATA_VHGT) {
+                VHGT offsets;
+                offsets.mHeightOffset = mLandData->mHeights[0] / HEIGHT_SCALE;
+                offsets.mUnk1 = mLandData->mUnk1;
+                offsets.mUnk2 = mLandData->mUnk2;
+
+                float prevY = mLandData->mHeights[0];
+                int number = 0; // avoid multiplication
+                for (int i = 0; i < LAND_SIZE; ++i) {
+                    float diff = (mLandData->mHeights[number] - prevY) / HEIGHT_SCALE;
+                    offsets.mHeightData[number] =
+                        (diff >= 0) ? (int8_t) (diff + 0.5) : (int8_t) (diff - 0.5);
+
+                    float prevX = prevY = mLandData->mHeights[number];
+                    ++number;
+
+                    for (int j = 1; j < LAND_SIZE; ++j) {
+                        diff = (mLandData->mHeights[number] - prevX) / HEIGHT_SCALE;
+                        offsets.mHeightData[number] =
+                            (diff >= 0) ? (int8_t) (diff + 0.5) : (int8_t) (diff - 0.5);
+
+                        prevX = mLandData->mHeights[number];
+                        ++number;
+                    }
+                }
+                esm.writeHNT("VHGT", offsets, sizeof(VHGT));
+            }
+            if (mDataTypes & Land::DATA_WNAM) {
+                esm.writeHNT("WNAM", mLandData->mWnam, 81);
+            }
+            if (mDataTypes & Land::DATA_VCLR) {
+                esm.writeHNT("VCLR", mLandData->mColours, 3*LAND_NUM_VERTS);
+            }
+            if (mDataTypes & Land::DATA_VTEX) {
+                uint16_t vtex[LAND_NUM_TEXTURES];
+                transposeTextureData(mLandData->mTextures, vtex);
+                esm.writeHNT("VTEX", vtex, sizeof(vtex));
+            }
         }
+
     }
 
     void Land::loadData(int flags) const
@@ -191,7 +187,6 @@ namespace ESM
         // Create storage if nothing is loaded
         if (mLandData == NULL) {
             mLandData = new LandData;
-            mLandData->mDataTypes = mDataTypes;
         }
 
         ESM::ESMReader reader;
@@ -229,7 +224,7 @@ namespace ESM
         if (reader.isNextSub("VTEX")) {
             uint16_t vtex[LAND_NUM_TEXTURES];
             if (condLoad(reader, flags, DATA_VTEX, vtex, sizeof(vtex))) {
-                LandData::transposeTextureData(vtex, mLandData->mTextures);
+                transposeTextureData(vtex, mLandData->mTextures);
             }
         }
     }
