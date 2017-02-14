@@ -13,6 +13,8 @@
 
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwworld/ptr.hpp"
+
 #include <components/settings/settings.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
@@ -244,7 +246,9 @@ namespace MWGui
     virtual std::string getSelectedSpell() { return mSelectedSpell; }
     virtual void setSelectedSpell(const std::string& spellId, int successChancePercent);
     virtual void setSelectedEnchantItem(const MWWorld::Ptr& item);
+    virtual const MWWorld::Ptr& getSelectedEnchantItem() const;
     virtual void setSelectedWeapon(const MWWorld::Ptr& item);
+    virtual const MWWorld::Ptr& getSelectedWeapon() const;
     virtual void unsetSelectedSpell();
     virtual void unsetSelectedWeapon();
 
@@ -403,6 +407,8 @@ namespace MWGui
     void onWindowChangeCoord(MyGUI::Window* _sender);
 
     std::string mSelectedSpell;
+    MWWorld::Ptr mSelectedEnchantItem;
+    MWWorld::Ptr mSelectedWeapon;
 
     std::stack<WindowModal*> mCurrentModals;
 

@@ -49,6 +49,18 @@ osg::ref_ptr<osg::Object> ObjectCache::getRefFromObjectCache(const std::string& 
     else return 0;
 }
 
+bool ObjectCache::checkInObjectCache(const std::string &fileName, double timeStamp)
+{
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_objectCacheMutex);
+    ObjectCacheMap::iterator itr = _objectCache.find(fileName);
+    if (itr!=_objectCache.end())
+    {
+        itr->second.second = timeStamp;
+        return true;
+    }
+    else return false;
+}
+
 void ObjectCache::updateTimeStampOfObjectsInCacheWithExternalReferences(double referenceTime)
 {
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_objectCacheMutex);

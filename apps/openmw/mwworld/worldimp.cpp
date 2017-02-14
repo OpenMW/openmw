@@ -152,7 +152,7 @@ namespace MWWorld
       mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles), mUserDataPath(userDataPath),
       mActivationDistanceOverride (activationDistanceOverride), mStartupScript(startupScript),
       mStartCell (startCell), mDistanceToFacedObject(-1), mTeleportEnabled(true),
-      mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0)
+      mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0), mSpellPreloadTimer(0.f)
     {
         mPhysics = new MWPhysics::PhysicsSystem(resourceSystem, rootNode);
         mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath);
@@ -1627,6 +1627,13 @@ namespace MWWorld
         updateSoundListener();
 
         updatePlayer(paused);
+
+        mSpellPreloadTimer -= duration;
+        if (mSpellPreloadTimer <= 0.f)
+        {
+            mSpellPreloadTimer = 0.1f;
+            preloadSpells();
+        }
     }
 
     void World::updatePlayer(bool paused)
@@ -1683,7 +1690,39 @@ namespace MWWorld
             if (result.mHit)
                 mRendering->getCamera()->setCameraDistance((result.mHitPos - focal).length() - radius, false, false);
         }
+    }
 
+    void World::preloadSpells()
+    {
+        std::string selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
+        if (!selectedSpell.empty())
+        {
+            const ESM::Spell* spell = mStore.get<ESM::Spell>().search(selectedSpell);
+            if (spell)
+                preloadEffects(&spell->mEffects);
+        }
+        const MWWorld::Ptr& selectedEnchantItem = MWBase::Environment::get().getWindowManager()->getSelectedEnchantItem();
+        if (!selectedEnchantItem.isEmpty())
+        {
+            std::string enchantId = selectedEnchantItem.getClass().getEnchantment(selectedEnchantItem);
+            if (!enchantId.empty())
+            {
+                const ESM::Enchantment* ench = mStore.get<ESM::Enchantment>().search(selectedEnchantItem.getClass().getEnchantment(selectedEnchantItem));
+                if (ench)
+                    preloadEffects(&ench->mEffects);
+            }
+        }
+        const MWWorld::Ptr& selectedWeapon = MWBase::Environment::get().getWindowManager()->getSelectedWeapon();
+        if (!selectedWeapon.isEmpty())
+        {
+            std::string enchantId = selectedWeapon.getClass().getEnchantment(selectedWeapon);
+            if (!enchantId.empty())
+            {
+                const ESM::Enchantment* ench = mStore.get<ESM::Enchantment>().search(enchantId);
+                if (ench && ench->mData.mType == ESM::Enchantment::WhenStrikes)
+                    preloadEffects(&ench->mEffects);
+            }
+        }
     }
 
     void World::updateSoundListener()
@@ -2720,7 +2759,6 @@ namespace MWWorld
         if (!selectedSpell.empty())
         {
             const ESM::Spell* spell = getStore().get<ESM::Spell>().find(selectedSpell);
-
             cast.cast(spell);
         }
         else if (actor.getClass().hasInventoryStore(actor))
@@ -3354,6 +3392,32 @@ namespace MWWorld
         weaponPos.z() += halfExtents.z() * 2 * 0.75;
 
         return mPhysics->getHitDistance(weaponPos, target) - halfExtents.y();
+    }
+
+    void preload(MWWorld::Scene* scene, const ESMStore& store, const std::string& obj)
+    {
+        if (obj.empty())
+            return;
+        MWWorld::ManualRef ref(store, obj);
+        std::string model = ref.getPtr().getClass().getModel(ref.getPtr());
+        if (!model.empty())
+            scene->preload(model);
+    }
+
+    void World::preloadEffects(const ESM::EffectList *effectList)
+    {
+        for (std::vector<ESM::ENAMstruct>::const_iterator it = effectList->mList.begin(); it != effectList->mList.end(); ++it)
+        {
+            const ESM::MagicEffect *effect = mStore.get<ESM::MagicEffect>().find(it->mEffectID);
+
+            preload(mWorldScene, mStore, effect->mCasting);
+            preload(mWorldScene, mStore, effect->mHit);
+
+            if (it->mArea > 0)
+                preload(mWorldScene, mStore, effect->mArea);
+            if (it->mRange == ESM::RT_Target)
+                preload(mWorldScene, mStore, effect->mBolt);
+        }
     }
 
 }

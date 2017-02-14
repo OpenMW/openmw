@@ -135,6 +135,8 @@ namespace MWWorld
             void updateWindowManager ();
             void updatePlayer(bool paused);
 
+            void preloadSpells();
+
             MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer=true);
 
     public: // FIXME
@@ -173,6 +175,8 @@ namespace MWWorld
             bool mLevitationEnabled;
             bool mGoToJail;
             int mDaysInPrison;
+
+            float mSpellPreloadTimer;
 
             float feetToGameUnits(float feet);
             float getActivationDistancePlusTelekinesis();
@@ -677,6 +681,9 @@ namespace MWWorld
             /// Export scene graph to a file and return the filename.
             /// \param ptr object to export scene graph for (if empty, export entire scene graph)
             virtual std::string exportSceneGraph(const MWWorld::Ptr& ptr);
+
+            /// Preload VFX associated with this effect list
+            virtual void preloadEffects(const ESM::EffectList* effectList);
     };
 }
 
