@@ -763,7 +763,7 @@ namespace MWMechanics
 
         bool hasSummonEffect = false;
         for (MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
-            if (it->first.mId >= ESM::MagicEffect::SummonScamp && it->first.mId <= ESM::MagicEffect::SummonStormAtronach)
+            if (isSummoningEffect(it->first.mId))
                 hasSummonEffect = true;
 
         if (!creatureStats.getSummonedCreatureMap().empty() || !creatureStats.getSummonedCreatureGraveyard().empty() || hasSummonEffect)
