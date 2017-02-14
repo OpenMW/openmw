@@ -38,6 +38,12 @@ namespace
             }
             return x->mX < y->mX;
         }
+        bool operator()(const ESM::Land *x, const std::pair<int, int>& y) {
+            if (x->mX == y.first) {
+                return x->mY < y.second;
+            }
+            return x->mX < y.first;
+        }
     };
 }
 
@@ -438,11 +444,10 @@ namespace MWWorld
     }
     const ESM::Land *Store<ESM::Land>::search(int x, int y) const
     {
-        ESM::Land land;
-        land.mX = x, land.mY = y;
+        std::pair<int, int> comp(x,y);
 
         std::vector<ESM::Land *>::const_iterator it =
-            std::lower_bound(mStatic.begin(), mStatic.end(), &land, Compare());
+            std::lower_bound(mStatic.begin(), mStatic.end(), comp, Compare());
 
         if (it != mStatic.end() && (*it)->mX == x && (*it)->mY == y) {
             return *it;
