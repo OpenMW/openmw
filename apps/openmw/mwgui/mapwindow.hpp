@@ -33,6 +33,11 @@ namespace Loading
     class Listener;
 }
 
+namespace SceneUtil
+{
+    class WorkQueue;
+}
+
 namespace MWGui
 {
 
@@ -193,14 +198,14 @@ namespace MWGui
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase, public NoDrop
     {
     public:
-        MapWindow(CustomMarkerCollection& customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender);
+        MapWindow(CustomMarkerCollection& customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender, SceneUtil::WorkQueue* workQueue);
         virtual ~MapWindow();
 
         void setCellName(const std::string& cellName);
 
         virtual void setAlpha(float alpha);
 
-        void renderGlobalMap(Loading::Listener* loadingListener);
+        void renderGlobalMap();
 
         /// adds the marker to the global map
         /// @param name The ESM::Cell::mName
@@ -211,6 +216,8 @@ namespace MWGui
 
         void setGlobalMapPlayerPosition (float worldX, float worldY);
         void setGlobalMapPlayerDir(const float x, const float y);
+
+        void ensureGlobalMapLoaded();
 
         virtual void open();
 

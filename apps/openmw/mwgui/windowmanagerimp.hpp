@@ -9,6 +9,8 @@
 
 #include <stack>
 
+#include <osg/ref_ptr>
+
 #include "../mwbase/windowmanager.hpp"
 
 #include <components/settings/settings.hpp>
@@ -55,6 +57,11 @@ namespace osgViewer
 namespace Resource
 {
     class ResourceSystem;
+}
+
+namespace SceneUtil
+{
+    class WorkQueue;
 }
 
 namespace SDLUtil
@@ -119,7 +126,7 @@ namespace MWGui
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
-    WindowManager(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem,
+    WindowManager(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                   const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
                   Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap, const std::string& versionDescription);
     virtual ~WindowManager();
@@ -382,6 +389,7 @@ namespace MWGui
   private:
     const MWWorld::ESMStore* mStore;
     Resource::ResourceSystem* mResourceSystem;
+    osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
 
     osgMyGUI::Platform* mGuiPlatform;
     osgViewer::Viewer* mViewer;

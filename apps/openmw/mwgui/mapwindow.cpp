@@ -622,7 +622,7 @@ namespace MWGui
 
     // ------------------------------------------------------------------------------------------
 
-    MapWindow::MapWindow(CustomMarkerCollection &customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender)
+    MapWindow::MapWindow(CustomMarkerCollection &customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender, SceneUtil::WorkQueue* workQueue)
         : WindowPinnableBase("openmw_map_window.layout")
         , LocalMapBase(customMarkers, localMapRender)
         , NoDrop(drag, mMainWidget)
@@ -632,7 +632,7 @@ namespace MWGui
         , mGlobal(false)
         , mEventBoxGlobal(NULL)
         , mEventBoxLocal(NULL)
-        , mGlobalMapRender(new MWRender::GlobalMap(localMapRender->getRoot()))
+        , mGlobalMapRender(new MWRender::GlobalMap(localMapRender->getRoot(), workQueue))
         , mEditNoteDialog()
     {
         static bool registered = false;
@@ -774,19 +774,11 @@ namespace MWGui
         mLastScrollWindowCoordinates = currentCoordinates;
     }
 
-    void MapWindow::renderGlobalMap(Loading::Listener* loadingListener)
+    void MapWindow::renderGlobalMap()
     {
-        mGlobalMapRender->render(loadingListener);
+        mGlobalMapRender->render();
         mGlobalMap->setCanvasSize (mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
         mGlobalMapImage->setSize(mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
-
-        mGlobalMapTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getBaseTexture()));
-        mGlobalMapImage->setRenderItemTexture(mGlobalMapTexture.get());
-        mGlobalMapImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
-
-        mGlobalMapOverlayTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getOverlayTexture()));
-        mGlobalMapOverlay->setRenderItemTexture(mGlobalMapOverlayTexture.get());
-        mGlobalMapOverlay->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
     }
 
     MapWindow::~MapWindow()
@@ -940,6 +932,8 @@ namespace MWGui
 
     void MapWindow::open()
     {
+        ensureGlobalMapLoaded();
+
         globalMapUpdatePlayer();
     }
 
@@ -982,6 +976,20 @@ namespace MWGui
         rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
         float angle = std::atan2(x,y);
         rotatingSubskin->setAngle(angle);
+    }
+
+    void MapWindow::ensureGlobalMapLoaded()
+    {
+        if (!mGlobalMapTexture.get())
+        {
+            mGlobalMapTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getBaseTexture()));
+            mGlobalMapImage->setRenderItemTexture(mGlobalMapTexture.get());
+            mGlobalMapImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+
+            mGlobalMapOverlayTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getOverlayTexture()));
+            mGlobalMapOverlay->setRenderItemTexture(mGlobalMapOverlayTexture.get());
+            mGlobalMapOverlay->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+        }
     }
 
     void MapWindow::clear()
