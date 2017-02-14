@@ -70,6 +70,14 @@ const MWWorld::LiveCellRefBase *MWWorld::ConstPtr::getBase() const
     return mRef;
 }
 
+void MWWorld::ConstPtr::setContainerStore (const ContainerStore *store)
+{
+    assert (store);
+    assert (!mCell);
+
+    mContainerStore = store;
+}
+
 const MWWorld::ContainerStore *MWWorld::ConstPtr::getContainerStore() const
 {
     return mContainerStore;

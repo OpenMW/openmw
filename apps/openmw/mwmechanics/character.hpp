@@ -6,12 +6,12 @@
 #include <components/esm/loadmgef.hpp>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "../mwrender/animation.hpp"
 
 namespace MWWorld
 {
-    class ContainerStoreIterator;
     class InventoryStore;
 }
 

@@ -158,7 +158,10 @@ namespace MWWorld
         {
             return (mContainerStore == 0) && (mCell != 0);
         }
-
+        
+        void setContainerStore (const ContainerStore *store);
+        ///< Must not be called on references that are in a cell.
+        
         const ContainerStore *getContainerStore() const;
         ///< May return a 0-pointer, if reference is not in a container.
 
