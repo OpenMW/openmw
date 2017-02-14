@@ -491,6 +491,12 @@ namespace MWWorld
         lastRefNumIndex = value;
     }
 
+    // Added by tes3mp and used to get all the containers in the cell
+    CellRefList<ESM::Container> *CellStore::getContainers()
+    {
+        return &mContainers;
+    }
+
     float CellStore::getWaterLevel() const
     {
         if (isExterior())

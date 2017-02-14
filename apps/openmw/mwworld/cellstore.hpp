@@ -243,6 +243,9 @@ namespace MWWorld
             void setLastRefNumIndex(unsigned int value);
             // Added by tes3mp and used to record the last reference number in the cell
 
+            CellRefList<ESM::Container> *getContainers();
+            // Added by tes3mp and used to get all the containers in the cell
+
             float getWaterLevel() const;
 
             void setWaterLevel (float level);

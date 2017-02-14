@@ -47,6 +47,20 @@ void WorldEvent::addContainerItem(ContainerItem containerItem)
 
 void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
 {
+    MWWorld::CellRefList<ESM::Container> *containerList = cellStore->getContainers();
+
+    for (typename MWWorld::CellRefList<ESM::Container>::List::iterator listIter(containerList->mList.begin());
+        listIter != containerList->mList.end(); ++listIter)
+    {
+        MWWorld::Ptr container(&*listIter, 0);
+
+        MWWorld::ContainerStore& containerStore = container.getClass().getContainerStore(container);
+
+        for (MWWorld::ContainerStoreIterator storeIter = containerStore.begin(); storeIter != containerStore.end(); ++storeIter)
+        {
+            MWWorld::Ptr itemPtr = *storeIter;
+        }
+    }
 
 }
 
