@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 491 316" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 491 316" align="Center" name="_Main">
 
         <!-- Class list -->
         <Widget type="ListBox" skin="MW_List" position="8 8 194 138" name="ClassList"/>

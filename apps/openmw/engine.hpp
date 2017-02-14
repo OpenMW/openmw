@@ -18,6 +18,11 @@ namespace Resource
     class ResourceSystem;
 }
 
+namespace SceneUtil
+{
+    class WorkQueue;
+}
+
 namespace VFS
 {
     class Manager;
@@ -68,6 +73,7 @@ namespace OMW
             SDL_Window* mWindow;
             std::auto_ptr<VFS::Manager> mVFS;
             std::auto_ptr<Resource::ResourceSystem> mResourceSystem;
+            osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
             MWBase::Environment mEnvironment;
             ToUTF8::FromType mEncoding;
             ToUTF8::Utf8Encoder* mEncoder;

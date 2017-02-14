@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Window_NoCaption" layer="Windows" position="0 0 588 444" name="_Main">
+    <Widget type="Window" skin="MW_Window_NoCaption" layer="Windows" align="Center" position="0 0 588 444" name="_Main">
        <Property key="MinSize" value="425 360"/>
 
         <!-- Name -->

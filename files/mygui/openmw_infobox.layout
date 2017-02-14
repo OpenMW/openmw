@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 545 265" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 545 265" align="Center" name="_Main">
 
         <!-- Edit box -->
         <Widget type="Widget" skin="" position="14 14 516 70" name="TextBox" align="Top HCenter">

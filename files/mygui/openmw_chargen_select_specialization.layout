@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout">
     <!-- correct size is 247 144, adjust when skin is changed to a dialog -->
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 247 144" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 247 144" align="Center" name="_Main">
         <Widget type="Widget" skin="" position="14 14 216 113" align="Stretch">
 
             <!-- Label -->

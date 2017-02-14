@@ -164,11 +164,12 @@ namespace MWRender
         Resource::ResourceSystem* mResourceSystem;
     };
 
-    RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem,
+    RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                                        const Fallback::Map* fallback, const std::string& resourcePath)
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
+        , mWorkQueue(workQueue)
         , mUnrefQueue(new SceneUtil::UnrefQueue)
         , mFogDepth(0.f)
         , mUnderwaterColor(fallback->getFallbackColour("Water_UnderwaterColor"))
@@ -179,11 +180,6 @@ namespace MWRender
         , mFieldOfViewOverride(0.f)
         , mFieldOfViewOverridden(false)
     {
-        int numThreads = Settings::Manager::getInt("preload num threads", "Cells");
-        if (numThreads <= 0)
-            throw std::runtime_error("Invalid setting: 'preload num threads' must be >0");
-        mWorkQueue = new SceneUtil::WorkQueue(numThreads);
-
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
         resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders"));

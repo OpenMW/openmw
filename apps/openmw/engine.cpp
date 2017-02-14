@@ -24,6 +24,8 @@
 
 #include <components/compiler/extensions0.hpp>
 
+#include <components/sceneutil/workqueue.hpp>
+
 #include <components/files/configurationmanager.hpp>
 #include <components/translation/translation.hpp>
 
@@ -248,6 +250,8 @@ OMW::Engine::~Engine()
 
     delete mScriptContext;
     mScriptContext = NULL;
+
+    mWorkQueue = NULL;
 
     mResourceSystem.reset();
 
@@ -475,6 +479,11 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         Settings::Manager::getInt("anisotropy", "General")
     );
 
+    int numThreads = Settings::Manager::getInt("preload num threads", "Cells");
+    if (numThreads <= 0)
+        throw std::runtime_error("Invalid setting: 'preload num threads' must be >0");
+    mWorkQueue = new SceneUtil::WorkQueue(numThreads);
+
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
@@ -508,7 +517,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     guiRoot->setName("GUI Root");
     guiRoot->setNodeMask(MWRender::Mask_GUI);
     rootNode->addChild(guiRoot);
-    MWGui::WindowManager* window = new MWGui::WindowManager(mViewer, guiRoot, mResourceSystem.get(),
+    MWGui::WindowManager* window = new MWGui::WindowManager(mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
                 mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap,
                 Version::getOpenmwVersionDescription(mResDir.string()));
@@ -525,7 +534,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     }
 
     // Create the world
-    mEnvironment.setWorld( new MWWorld::World (mViewer, rootNode, mResourceSystem.get(),
+    mEnvironment.setWorld( new MWWorld::World (mViewer, rootNode, mResourceSystem.get(), mWorkQueue.get(),
         mFileCollections, mContentFiles, mEncoder, mFallbackMap,
         mActivationDistanceOverride, mCellName, mStartupScript, mResDir.string(), mCfgMgr.getUserDataPath().string()));
     mEnvironment.getWorld()->setupPlayer();

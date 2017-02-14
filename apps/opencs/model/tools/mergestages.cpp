@@ -129,7 +129,7 @@ void CSMTools::ListLandTexturesMergeStage::perform (int stage, CSMDoc::Messages&
 
         // make sure record is loaded
         land.loadData (ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML |
-            ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX | ESM::Land::DATA_WNAM);
+            ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX);
 
         if (const ESM::Land::LandData *data = land.getLandData (ESM::Land::DATA_VTEX))
         {
@@ -221,7 +221,7 @@ void CSMTools::MergeLandStage::perform (int stage, CSMDoc::Messages& messages)
         const CSMWorld::Land& land = record.get();
 
         land.loadData (ESM::Land::DATA_VCLR | ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML |
-            ESM::Land::DATA_VTEX | ESM::Land::DATA_WNAM);
+            ESM::Land::DATA_VTEX);
 
         CSMWorld::Land newLand (land);
 

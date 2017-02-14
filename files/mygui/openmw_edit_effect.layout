@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 362 310" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 362 310" align="Center" name="_Main">
 
         <Widget type="ImageBox" skin="ImageBox" position="8 12 16 16" name="EffectImage">
         </Widget>
