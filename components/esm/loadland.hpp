@@ -96,13 +96,13 @@ struct Land
         // 24-bit RGB color for each vertex
         unsigned char mColours[3 * LAND_NUM_VERTS];
 
-        // low-LOD heightmap (used for rendering the global map)
-        signed char mWnam[81];
-
         // ???
         short mUnk1;
         uint8_t mUnk2;
     };
+
+    // low-LOD heightmap (used for rendering the global map)
+    signed char mWnam[81];
 
     void load(ESMReader &esm, bool &isDeleted);
     void save(ESMWriter &esm, bool isDeleted = false) const;

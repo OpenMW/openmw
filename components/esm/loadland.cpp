@@ -76,6 +76,9 @@ namespace ESM
 
         mContext = esm.getContext();
 
+        mDataLoaded = 0;
+        mLandData = NULL;
+
         // Skip the land data here. Load it when the cell is loaded.
         while (esm.hasMoreSubs())
         {
@@ -91,7 +94,7 @@ namespace ESM
                     mDataTypes |= DATA_VHGT;
                     break;
                 case ESM::FourCC<'W','N','A','M'>::value:
-                    esm.skipHSub();
+                    esm.getHExact(mWnam, sizeof(mWnam));
                     mDataTypes |= DATA_WNAM;
                     break;
                 case ESM::FourCC<'V','C','L','R'>::value:
@@ -107,9 +110,6 @@ namespace ESM
                     break;
             }
         }
-
-        mDataLoaded = 0;
-        mLandData = NULL;
     }
 
     void Land::save(ESMWriter &esm, bool isDeleted) const
@@ -159,9 +159,14 @@ namespace ESM
                 }
                 esm.writeHNT("VHGT", offsets, sizeof(VHGT));
             }
-            if (mDataTypes & Land::DATA_WNAM) {
-                esm.writeHNT("WNAM", mLandData->mWnam, 81);
-            }
+        }
+
+        if (mDataTypes & Land::DATA_WNAM) {
+            esm.writeHNT("WNAM", mWnam, 81);
+        }
+
+        if (mLandData)
+        {
             if (mDataTypes & Land::DATA_VCLR) {
                 esm.writeHNT("VCLR", mLandData->mColours, 3*LAND_NUM_VERTS);
             }
@@ -216,9 +221,9 @@ namespace ESM
             }
         }
 
-        if (reader.isNextSub("WNAM")) {
-            condLoad(reader, flags, DATA_WNAM, mLandData->mWnam, 81);
-        }
+        if (reader.isNextSub("WNAM"))
+            reader.skipHSub();
+
         if (reader.isNextSub("VCLR"))
             condLoad(reader, flags, DATA_VCLR, mLandData->mColours, 3 * LAND_NUM_VERTS);
         if (reader.isNextSub("VTEX")) {

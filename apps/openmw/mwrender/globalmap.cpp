@@ -155,16 +155,6 @@ namespace MWRender
             {
                 const ESM::Land* land = esmStore.get<ESM::Land>().search (x,y);
 
-                if (land)
-                {
-                    int mask = ESM::Land::DATA_WNAM;
-                    if (!land->isDataLoaded(mask))
-                        land->loadData(mask);
-                }
-
-                const ESM::Land::LandData *landData =
-                    land ? land->getLandData (ESM::Land::DATA_WNAM) : 0;
-
                 for (int cellY=0; cellY<mCellSize; ++cellY)
                 {
                     for (int cellX=0; cellX<mCellSize; ++cellX)
@@ -178,8 +168,8 @@ namespace MWRender
                         unsigned char r,g,b;
 
                         float y2 = 0;
-                        if (landData)
-                            y2 = (landData->mWnam[vertexY * 9 + vertexX] << 4) / 2048.f;
+                        if (land && (land->mDataTypes & ESM::Land::DATA_WNAM))
+                            y2 = (land->mWnam[vertexY * 9 + vertexX] << 4) / 2048.f;
                         else
                             y2 = (SCHAR_MIN << 4) / 2048.f;
                         if (y2 < 0)
@@ -218,8 +208,6 @@ namespace MWRender
                     }
                 }
                 loadingListener->increaseProgress();
-                if (land)
-                    land->unloadData();
             }
         }
 

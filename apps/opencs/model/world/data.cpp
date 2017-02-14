@@ -993,7 +993,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             if (index!=-1/* && !mBase*/)
                 mLand.getRecord (index).get().loadData (
                     ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR |
-                    ESM::Land::DATA_VTEX | ESM::Land::DATA_WNAM);
+                    ESM::Land::DATA_VTEX);
 
             break;
         }
