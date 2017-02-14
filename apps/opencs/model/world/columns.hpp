@@ -92,7 +92,7 @@ namespace CSMWorld
             ColumnId_ArmorType = 77,
             ColumnId_Health = 78,
             ColumnId_ArmorValue = 79,
-            ColumnId_Scroll = 80,
+            ColumnId_BookType = 80,
             ColumnId_ClothingType = 81,
             ColumnId_WeightCapacity = 82,
             ColumnId_OrganicContainer = 83,

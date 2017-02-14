@@ -98,7 +98,7 @@ namespace CSMWorld
             { ColumnId_ArmorType, "Armor Type" },
             { ColumnId_Health, "Health" },
             { ColumnId_ArmorValue, "Armor Value" },
-            { ColumnId_Scroll, "Scroll" },
+            { ColumnId_BookType, "Book Type" },
             { ColumnId_ClothingType, "Clothing Type" },
             { ColumnId_WeightCapacity, "Weight Capacity" },
             { ColumnId_OrganicContainer, "Organic Container" },
@@ -553,6 +553,11 @@ namespace
         "AI Wander", "AI Travel", "AI Follow", "AI Escort", "AI Activate", 0
     };
 
+    static const char *sBookType[] =
+    {
+        "Book", "Scroll", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -582,6 +587,7 @@ namespace
             case CSMWorld::Columns::ColumnId_AiPackageType: return sAiPackageType;
             case CSMWorld::Columns::ColumnId_InfoCondFunc: return CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings;
             case CSMWorld::Columns::ColumnId_InfoCondComp: return CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings;
+            case CSMWorld::Columns::ColumnId_BookType: return sBookType;
 
             default: return 0;
         }
