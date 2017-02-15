@@ -144,19 +144,21 @@ Programmers
     vocollapse
     zelurker
 
-Manual
-------
+Documentation
+-------------
 
-    Bodillium
-    Cramal
     Alejandro Sanchez (HiPhish)
+    Bodillium
+    Bret Curtis (psi29a)
+    Cramal
+    Ryan Tucker (Ravenwing)
     sir_herrbatka
 
 Packagers
 ---------
 
     Alexander Olofsson (Ace) - Windows
-    Bret Curtis (psi29a) - Ubuntu Linux
+    Bret Curtis (psi29a) - Debian and Ubuntu Linux
     Edmondo Tommasina (edmondo) - Gentoo Linux
     Julian Ospald (hasufell) - Gentoo Linux
     Karl-Felix Glatzer (k1ll) - Linux Binaries
@@ -226,7 +228,6 @@ Inactive Contributors
     Nekochan
     pchan3
     penguinroad
-    psi29a
     sergoz
     spyboot
     Star-Demon
