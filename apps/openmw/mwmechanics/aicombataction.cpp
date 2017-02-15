@@ -426,6 +426,9 @@ namespace MWMechanics
             MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
             inv.setSelectedEnchantItem(inv.end());
         }
+
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(mSpellId);
+        MWBase::Environment::get().getWorld()->preloadEffects(&spell->mEffects);
     }
 
     float ActionSpell::getCombatRange (bool& isRanged) const
