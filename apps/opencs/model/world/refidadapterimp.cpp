@@ -313,7 +313,7 @@ QVariant CSMWorld::BookRefIdAdapter::getData (const RefIdColumn *column,
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Book)));
 
     if (column==mBookType)
-        return record.get().mData.mIsScroll!=0;
+        return record.get().mData.mIsScroll;
 
     if (column==mSkill)
         return record.get().mData.mSkillId;
