@@ -16,7 +16,6 @@ namespace mwmp
         virtual ~WorldEvent();
 
         void addObject(WorldObject worldObject);
-        void addContainerItem(ContainerItem containerItem);
 
         void sendContainers(MWWorld::CellStore* cellStore);
 

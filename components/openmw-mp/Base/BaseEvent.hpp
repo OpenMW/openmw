@@ -7,6 +7,28 @@
 
 namespace mwmp
 {
+    struct ContainerItem
+    {
+        std::string refId;
+        int count;
+        int charge;
+        int goldValue;
+
+        std::string owner;
+        int actionCount;
+
+        inline bool operator==(const ContainerItem& rhs)
+        {
+            return refId == rhs.refId && count == rhs.count && charge == rhs.charge && goldValue && rhs.goldValue;
+        }
+    };
+
+    struct ContainerChanges
+    {
+        std::vector<ContainerItem> items;
+        unsigned int count;
+    };
+
     struct WorldObject
     {
         std::string refId;
@@ -30,44 +52,14 @@ namespace mwmp
         int shortVal;
         float floatVal;
         std::string varName;
-    };
 
-    struct ContainerItem
-    {
-        std::string refId;
-        int count;
-        int charge;
-        int goldValue;
-
-        std::string owner;
-        int actionCount;
-
-        inline bool operator==(const ContainerItem& rhs)
-        {
-            return refId == rhs.refId && count == rhs.count && charge == rhs.charge && goldValue && rhs.goldValue;
-        }
+        ContainerChanges containerChanges;
     };
 
     struct ObjectChanges
     {
         std::vector<WorldObject> objects;
         unsigned int count;
-    };
-
-    struct ContainerChanges
-    {
-        std::vector<ContainerItem> items;
-        unsigned int count;
-
-        enum CONTAINER_ACTION
-        {
-            SET = 0,
-            ADD = 1,
-            REMOVE = 2,
-            REQUEST = 3
-        };
-
-        int action; // 0 - Clear and set in entirety, 1 - Add item, 2 - Remove item, 3 - Request items
     };
 
     class BaseEvent
@@ -84,11 +76,20 @@ namespace mwmp
 
         }
 
+        enum WORLD_ACTION
+        {
+            SET = 0,
+            ADD = 1,
+            REMOVE = 2,
+            REQUEST = 3
+        };
+
         RakNet::RakNetGUID guid;
         ObjectChanges objectChanges;
-        ContainerChanges containerChanges;
 
         ESM::Cell cell;
+
+        int action; // 0 - Clear and set in entirety, 1 - Add item, 2 - Remove item, 3 - Request items
     };
 }
 

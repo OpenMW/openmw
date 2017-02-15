@@ -12,21 +12,18 @@ void PacketContainer::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
 {
     WorldPacket::Packet(bs, event, send);
 
-    RW(event->containerChanges.action, send);
+    RW(event->action, send);
 
-    if (!send)
+    if (send)
     {
-        event->objectChanges.objects.clear();
-        event->containerChanges.items.clear();
+        event->objectChanges.count = (unsigned int)(event->objectChanges.objects.size());
     }
     else
     {
-        event->objectChanges.count = (unsigned int)(event->objectChanges.objects.size());
-        event->containerChanges.count = (unsigned int)(event->containerChanges.items.size());
+        event->objectChanges.objects.clear();
     }
 
     RW(event->objectChanges.count, send);
-    RW(event->containerChanges.count, send);
 
     RW(event->cell.mData.mFlags, send);
     RW(event->cell.mData.mX, send);
@@ -40,37 +37,42 @@ void PacketContainer::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
         if (send)
         {
             worldObject = event->objectChanges.objects.at(i);
+            worldObject.containerChanges.count = (unsigned int)(worldObject.containerChanges.items.size());
+        }
+        else
+        {
+            worldObject.containerChanges.items.clear();
         }
 
         RW(worldObject.refId, send);
         RW(worldObject.refNumIndex, send);
+        RW(worldObject.containerChanges.count, send);
+
+        ContainerItem containerItem;
+
+        for (unsigned int i = 0; i < worldObject.containerChanges.count; i++)
+        {
+            if (send)
+            {
+                containerItem = worldObject.containerChanges.items.at(i);
+            }
+
+            RW(containerItem.refId, send);
+            RW(containerItem.count, send);
+            RW(containerItem.charge, send);
+            RW(containerItem.goldValue, send);
+            RW(containerItem.owner, send);
+            RW(containerItem.actionCount, send);
+
+            if (!send)
+            {
+                worldObject.containerChanges.items.push_back(containerItem);
+            }
+        }
 
         if (!send)
         {
             event->objectChanges.objects.push_back(worldObject);
         }
     }
-
-    ContainerItem containerItem;
-
-    for (unsigned int i = 0; i < event->containerChanges.count; i++)
-    {
-        if (send)
-        {
-            containerItem = event->containerChanges.items.at(i);
-        }
-
-        RW(containerItem.refId, send);
-        RW(containerItem.count, send);
-        RW(containerItem.charge, send);
-        RW(containerItem.goldValue, send);
-        RW(containerItem.owner, send);
-        RW(containerItem.actionCount, send);
-
-        if (!send)
-        {
-            event->containerChanges.items.push_back(containerItem);
-        }
-    }
-
 }

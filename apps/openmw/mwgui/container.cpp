@@ -104,11 +104,11 @@ namespace MWGui
         // Added by tes3mp
         mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
         event->cell = *mPtr.getCell()->getCell();
+        event->action = mwmp::BaseEvent::REMOVE;
 
         mwmp::WorldObject worldObject;
         worldObject.refId = mPtr.getCellRef().getRefId();
         worldObject.refNumIndex = mPtr.getCellRef().getRefNum().mIndex;
-        event->addObject(worldObject);
 
         MWWorld::Ptr itemPtr = mModel->getItem(mSelectedItem).mBase;
 
@@ -119,8 +119,9 @@ namespace MWGui
         containerItem.goldValue = itemPtr.getCellRef().getGoldValue();
         containerItem.owner = itemPtr.getCellRef().getOwner();
         containerItem.actionCount = count;
-        event->addContainerItem(containerItem);
-        event->containerChanges.action = mwmp::ContainerChanges::REMOVE;
+
+        worldObject.containerChanges.items.push_back(containerItem);
+        event->addObject(worldObject);
 
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(event);
 
@@ -163,11 +164,11 @@ namespace MWGui
         // Added by tes3mp
         mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
         event->cell = *mPtr.getCell()->getCell();
+        event->action = mwmp::BaseEvent::ADD;
 
         mwmp::WorldObject worldObject;
         worldObject.refId = mPtr.getCellRef().getRefId();
         worldObject.refNumIndex = mPtr.getCellRef().getRefNum().mIndex;
-        event->addObject(worldObject);
 
         MWWorld::Ptr itemPtr = mDragAndDrop->mItem.mBase;
 
@@ -180,8 +181,9 @@ namespace MWGui
         containerItem.charge = itemPtr.getCellRef().getCharge();
         containerItem.goldValue = itemPtr.getCellRef().getGoldValue();
         containerItem.owner = itemPtr.getCellRef().getOwner();
-        event->addContainerItem(containerItem);
-        event->containerChanges.action = mwmp::ContainerChanges::ADD;
+
+        worldObject.containerChanges.items.push_back(containerItem);
+        event->addObject(worldObject);
 
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(event);
 
@@ -317,12 +319,12 @@ namespace MWGui
             // Added by tes3mp
             mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
             event->cell = *mPtr.getCell()->getCell();
+            event->action = mwmp::BaseEvent::SET;
 
             mwmp::WorldObject worldObject;
             worldObject.refId = mPtr.getCellRef().getRefId();
             worldObject.refNumIndex = mPtr.getCellRef().getRefNum().mIndex;
             event->addObject(worldObject);
-            event->containerChanges.action = mwmp::ContainerChanges::SET;
 
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(event);
 

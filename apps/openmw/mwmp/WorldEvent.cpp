@@ -40,11 +40,6 @@ void WorldEvent::addObject(WorldObject worldObject)
     objectChanges.objects.push_back(worldObject);
 }
 
-void WorldEvent::addContainerItem(ContainerItem containerItem)
-{
-    containerChanges.items.push_back(containerItem);
-}
-
 void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
 {
     MWWorld::CellRefList<ESM::Container> *containerList = cellStore->getContainers();
@@ -86,21 +81,20 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
                 ptrFound.getCellRef().getRefNum());
 
             MWWorld::ContainerStore& containerStore = ptrFound.getClass().getContainerStore(ptrFound);
-            int action = containerChanges.action;
 
             // If we are setting the entire contents, clear the current ones
-            if (action == ContainerChanges::SET)
+            if (action == BaseEvent::SET)
                 containerStore.clear();
 
-            for (unsigned int i = 0; i < containerChanges.count; i++)
+            for (unsigned int i = 0; i < worldObject.containerChanges.count; i++)
             {
-                ContainerItem containerItem = containerChanges.items.at(i);
+                ContainerItem containerItem = worldObject.containerChanges.items.at(i);
                 MWWorld::Ptr ownerPtr = MWBase::Environment::get().getWorld()->searchPtr(containerItem.owner, false);
 
                 if (ownerPtr.isEmpty())
                     ownerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
-                if (action == ContainerChanges::ADD || action == ContainerChanges::SET)
+                if (action == BaseEvent::ADD || action == BaseEvent::SET)
                 {
                     // Create a ManualRef to be able to set item charge
                     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), containerItem.refId, 1);
@@ -116,7 +110,7 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
 
                     containerStore.add(newPtr, containerItem.count, ownerPtr, true);
                 }
-                else if (action == ContainerChanges::REMOVE)
+                else if (action == BaseEvent::REMOVE)
                 {
                     // We have to find the right item ourselves because ContainerStore has no method
                     // accounting for charge

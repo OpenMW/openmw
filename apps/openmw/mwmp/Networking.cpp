@@ -749,7 +749,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONTAINER");
 
         // If we've received a request for information, comply with it
-        if (event->containerChanges.action == mwmp::ContainerChanges::REQUEST)
+        if (event->action == mwmp::BaseEvent::REQUEST)
             event->sendContainers(ptrCellStore);
         // Otherwise, edit containers based on the information received
         else

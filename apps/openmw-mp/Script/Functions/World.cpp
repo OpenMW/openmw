@@ -67,9 +67,9 @@ void WorldFunctions::SetBaseEventCell(const char* cellDescription) noexcept
     }
 }
 
-void WorldFunctions::SetContainerChangesAction(int action) noexcept
+void WorldFunctions::SetBaseEventAction(int action) noexcept
 {
-    baseEvent->containerChanges.action = action;
+    baseEvent->action = action;
 }
 
 void WorldFunctions::SetObjectRefId(const char* refId) noexcept
