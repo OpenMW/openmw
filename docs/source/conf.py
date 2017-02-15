@@ -51,10 +51,12 @@ except ImportError:
 
 # Where breathe can find the source files
 openmw_path = os.path.join(project_root, "apps", "openmw")
-openmw_headers = insensitive_glob(os.path.join(openmw_path, "*.hpp")) + \
-                insensitive_glob(os.path.join(openmw_path, "mwbase", "*.hpp")) + \
-                insensitive_glob(os.path.join(openmw_path, "mwclass", "*.hpp"))
+openmw_sub_dirs = os.walk(openmw_path).next()[1]
+openmw_headers = insensitive_glob(os.path.join(openmw_path, "*.hpp"))
+for dir in openmw_sub_dirs:
+    openmw_headers += insensitive_glob(os.path.join(openmw_path, dir, "*.hpp"))
 
+# massage the headers to get the relative path needed
 openmw_headers = [os.path.relpath(x, openmw_path) for x in openmw_headers]
 
 breathe_projects_source = {
