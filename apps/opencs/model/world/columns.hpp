@@ -107,8 +107,8 @@ namespace CSMWorld
             ColumnId_Flies = 92,
             ColumnId_Walks = 93,
             ColumnId_Essential = 94,
-            ColumnId_SkeletonBlood = 95,
-            ColumnId_MetalBlood = 96,
+            ColumnId_BloodType = 95,
+            // unused
             ColumnId_OpenSound = 97,
             ColumnId_CloseSound = 98,
             ColumnId_Duration = 99,

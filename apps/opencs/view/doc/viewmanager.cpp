@@ -108,6 +108,7 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         { CSMWorld::ColumnBase::Display_EffectSkill, CSMWorld::Columns::ColumnId_Skill, false },
         { CSMWorld::ColumnBase::Display_EffectAttribute, CSMWorld::Columns::ColumnId_Attribute, false },
         { CSMWorld::ColumnBase::Display_BookType, CSMWorld::Columns::ColumnId_BookType, false},
+        { CSMWorld::ColumnBase::Display_BloodType, CSMWorld::Columns::ColumnId_BloodType, false}
     };
 
     for (std::size_t i=0; i<sizeof (sMapping)/sizeof (Mapping); ++i)

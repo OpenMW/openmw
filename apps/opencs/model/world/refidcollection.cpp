@@ -346,15 +346,11 @@ CSMWorld::RefIdCollection::RefIdCollection()
         { Columns::ColumnId_Flies, ESM::Creature::Flies },
         { Columns::ColumnId_Walks, ESM::Creature::Walks },
         { Columns::ColumnId_Essential, ESM::Creature::Essential },
-        { Columns::ColumnId_SkeletonBlood, ESM::Creature::Skeleton },
-        { Columns::ColumnId_MetalBlood, ESM::Creature::Metal },
         { -1, 0 }
     };
 
     // for re-use in NPC records
     const RefIdColumn *essential = 0;
-    const RefIdColumn *skeletonBlood = 0;
-    const RefIdColumn *metalBlood = 0;
 
     for (int i=0; sCreatureFlagTable[i].mName!=-1; ++i)
     {
@@ -364,10 +360,13 @@ CSMWorld::RefIdCollection::RefIdCollection()
         switch (sCreatureFlagTable[i].mFlag)
         {
             case ESM::Creature::Essential: essential = &mColumns.back(); break;
-            case ESM::Creature::Skeleton: skeletonBlood = &mColumns.back(); break;
-            case ESM::Creature::Metal: metalBlood = &mColumns.back(); break;
         }
     }
+
+    mColumns.push_back(RefIdColumn(Columns::ColumnId_BloodType, ColumnBase::Display_BloodType));
+    // For re-use in NPC records.
+    const RefIdColumn *bloodType = &mColumns.back();
+    creatureColumns.mBloodType = bloodType;
 
     creatureColumns.mFlags.insert (std::make_pair (respawn, ESM::Creature::Respawn));
 
@@ -497,9 +496,8 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     npcColumns.mFlags.insert (std::make_pair (autoCalc, ESM::NPC::Autocalc));
 
-    npcColumns.mFlags.insert (std::make_pair (skeletonBlood, ESM::NPC::Skeleton));
-
-    npcColumns.mFlags.insert (std::make_pair (metalBlood, ESM::NPC::Metal));
+    // Re-used from Creature records.
+    npcColumns.mBloodType = bloodType;
 
     // Need a way to add a table of stats and values (rather than adding a long list of
     // entries in the dialogue subview) E.g. attributes+stats(health, mana, fatigue), skills

@@ -757,6 +757,7 @@ namespace CSMWorld
         const RefIdColumn *mAttributes;
         const RefIdColumn *mAttacks;
         const RefIdColumn *mMisc;
+        const RefIdColumn *mBloodType;
 
         CreatureColumns (const ActorColumns& actorColumns);
     };
@@ -849,6 +850,7 @@ namespace CSMWorld
         const RefIdColumn *mAttributes; // depends on npc type
         const RefIdColumn *mSkills;     // depends on npc type
         const RefIdColumn *mMisc;       // may depend on npc type, e.g. FactionID
+        const RefIdColumn *mBloodType;
 
         NpcColumns (const ActorColumns& actorColumns);
     };
