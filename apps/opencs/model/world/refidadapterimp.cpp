@@ -492,12 +492,12 @@ QVariant CSMWorld::CreatureRefIdAdapter::getData (const RefIdColumn *column, con
 
     if (column == mColumns.mBloodType)
     {
-        int mask = ESM::Creature::Flags::Skeleton | ESM::Creature::Flags::Metal;
+        int mask = ESM::Creature::Skeleton | ESM::Creature::Metal;
 
-        if ((record.get().mFlags & mask) == ESM::Creature::Flags::Skeleton)
+        if ((record.get().mFlags & mask) == ESM::Creature::Skeleton)
             return 1;
 
-        if ((record.get().mFlags & mask) == ESM::Creature::Flags::Metal)
+        if ((record.get().mFlags & mask) == ESM::Creature::Metal)
             return 2;
 
         return 0;
@@ -528,12 +528,12 @@ void CSMWorld::CreatureRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
         creature.mOriginal = value.toString().toUtf8().constData();
     else if (column == mColumns.mBloodType)
     {
-        int mask = !(ESM::Creature::Flags::Skeleton | ESM::Creature::Flags::Metal);
+        int mask = ~(ESM::Creature::Skeleton | ESM::Creature::Metal);
 
         if (value.toInt() == 1)
-            creature.mFlags = (creature.mFlags & mask) | ESM::Creature::Flags::Skeleton;
+            creature.mFlags = (creature.mFlags & mask) | ESM::Creature::Skeleton;
         else if (value.toInt() == 2)
-            creature.mFlags = (creature.mFlags & mask) | ESM::Creature::Flags::Metal;
+            creature.mFlags = (creature.mFlags & mask) | ESM::Creature::Metal;
         else
             creature.mFlags = creature.mFlags & mask;
     }
@@ -763,12 +763,12 @@ QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const Re
 
     if (column == mColumns.mBloodType)
     {
-        int mask = ESM::NPC::Flags::Skeleton | ESM::NPC::Flags::Metal;
+        int mask = ESM::NPC::Skeleton | ESM::NPC::Metal;
 
-        if ((record.get().mFlags & mask) == ESM::NPC::Flags::Skeleton)
+        if ((record.get().mFlags & mask) == ESM::NPC::Skeleton)
             return 1;
 
-        if ((record.get().mFlags & mask) == ESM::NPC::Flags::Metal)
+        if ((record.get().mFlags & mask) == ESM::NPC::Metal)
             return 2;
 
         return 0;
@@ -803,12 +803,12 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
         npc.mHead = value.toString().toUtf8().constData();
     else if (column == mColumns.mBloodType)
     {
-        int mask = !(ESM::NPC::Flags::Skeleton | ESM::NPC::Flags::Metal);
+        int mask = ~(ESM::NPC::Skeleton | ESM::NPC::Metal);
 
         if (value.toInt() == 1)
-            npc.mFlags = (npc.mFlags & mask) | ESM::NPC::Flags::Skeleton;
+            npc.mFlags = (npc.mFlags & mask) | ESM::NPC::Skeleton;
         else if (value.toInt() == 2)
-            npc.mFlags = (npc.mFlags & mask) | ESM::NPC::Flags::Metal;
+            npc.mFlags = (npc.mFlags & mask) | ESM::NPC::Metal;
         else
             npc.mFlags = npc.mFlags & mask;
     }
