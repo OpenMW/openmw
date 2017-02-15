@@ -7,6 +7,7 @@ OpenMW Source Documentation
 
   mwbase
   mwclass
+  mwdialogue
 
 .. autodoxygenfile:: engine.hpp
   :project: openmw
