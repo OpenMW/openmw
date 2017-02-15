@@ -291,8 +291,8 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_ArmorValue, ColumnBase::Display_Integer));
     const RefIdColumn *armor = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Scroll, ColumnBase::Display_Boolean));
-    const RefIdColumn *scroll = &mColumns.back();
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_BookType, ColumnBase::Display_BookType));
+    const RefIdColumn *bookType = &mColumns.back();
 
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Skill, ColumnBase::Display_SkillId));
     const RefIdColumn *skill = &mColumns.back();
@@ -659,7 +659,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Armor,
         new ArmorRefIdAdapter (enchantableColumns, armorType, health, armor, partRef)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Book,
-        new BookRefIdAdapter (enchantableColumns, scroll, skill, text)));
+        new BookRefIdAdapter (enchantableColumns, bookType, skill, text)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Clothing,
         new ClothingRefIdAdapter (enchantableColumns, clothingType, partRef)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Container,

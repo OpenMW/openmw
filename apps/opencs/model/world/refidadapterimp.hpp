@@ -694,13 +694,13 @@ namespace CSMWorld
 
     class BookRefIdAdapter : public EnchantableRefIdAdapter<ESM::Book>
     {
-            const RefIdColumn *mScroll;
+            const RefIdColumn *mBookType;
             const RefIdColumn *mSkill;
             const RefIdColumn *mText;
 
         public:
 
-            BookRefIdAdapter (const EnchantableColumns& columns, const RefIdColumn *scroll,
+            BookRefIdAdapter (const EnchantableColumns& columns, const RefIdColumn *bookType,
                 const RefIdColumn *skill, const RefIdColumn *text);
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)

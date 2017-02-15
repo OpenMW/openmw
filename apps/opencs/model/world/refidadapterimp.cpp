@@ -301,9 +301,9 @@ void CSMWorld::ArmorRefIdAdapter::setData (const RefIdColumn *column, RefIdData&
 }
 
 CSMWorld::BookRefIdAdapter::BookRefIdAdapter (const EnchantableColumns& columns,
-    const RefIdColumn *scroll, const RefIdColumn *skill, const RefIdColumn *text)
+    const RefIdColumn *bookType, const RefIdColumn *skill, const RefIdColumn *text)
 : EnchantableRefIdAdapter<ESM::Book> (UniversalId::Type_Book, columns),
-    mScroll (scroll), mSkill (skill), mText (text)
+    mBookType (bookType), mSkill (skill), mText (text)
 {}
 
 QVariant CSMWorld::BookRefIdAdapter::getData (const RefIdColumn *column,
@@ -312,8 +312,8 @@ QVariant CSMWorld::BookRefIdAdapter::getData (const RefIdColumn *column,
     const Record<ESM::Book>& record = static_cast<const Record<ESM::Book>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Book)));
 
-    if (column==mScroll)
-        return record.get().mData.mIsScroll!=0;
+    if (column==mBookType)
+        return record.get().mData.mIsScroll;
 
     if (column==mSkill)
         return record.get().mData.mSkillId;
@@ -332,7 +332,7 @@ void CSMWorld::BookRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
 
     ESM::Book book = record.get();
 
-    if (column==mScroll)
+    if (column==mBookType)
         book.mData.mIsScroll = value.toInt();
     else if (column==mSkill)
         book.mData.mSkillId = value.toInt();
