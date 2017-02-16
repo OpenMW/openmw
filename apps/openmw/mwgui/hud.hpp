@@ -39,6 +39,7 @@ namespace MWGui
 
         void setSelectedSpell(const std::string& spellId, int successChancePercent);
         void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent);
+        const MWWorld::Ptr& getSelectedEnchantItem();
         void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent);
         void unsetSelectedSpell();
         void unsetSelectedWeapon();

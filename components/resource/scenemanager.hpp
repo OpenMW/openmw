@@ -77,6 +77,9 @@ namespace Resource
 
         void setShaderPath(const std::string& path);
 
+        /// Check if a given scene is loaded and if so, update its usage timestamp to prevent it from being unloaded
+        bool checkLoaded(const std::string& name, double referenceTime);
+
         /// Get a read-only copy of this scene "template"
         /// @note If the given filename does not exist or fails to load, an error marker mesh will be used instead.
         ///  If even the error marker mesh can not be found, an exception is thrown.

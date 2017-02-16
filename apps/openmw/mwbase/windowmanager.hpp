@@ -215,7 +215,9 @@ namespace MWBase
             virtual std::string getSelectedSpell() = 0;
             virtual void setSelectedSpell(const std::string& spellId, int successChancePercent) = 0;
             virtual void setSelectedEnchantItem(const MWWorld::Ptr& item) = 0;
+            virtual const MWWorld::Ptr& getSelectedEnchantItem() const = 0;
             virtual void setSelectedWeapon(const MWWorld::Ptr& item) = 0;
+            virtual const MWWorld::Ptr& getSelectedWeapon() const = 0;
             virtual void unsetSelectedSpell() = 0;
             virtual void unsetSelectedWeapon() = 0;
 

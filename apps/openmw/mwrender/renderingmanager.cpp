@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <limits>
+#include <cstdlib>
 
 #include <osg/Light>
 #include <osg/LightModel>
@@ -202,7 +203,8 @@ namespace MWRender
 
         mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));
 
-        mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
+        if (getenv("OPENMW_DONT_PRECOMPILE") == NULL)
+            mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
 
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 

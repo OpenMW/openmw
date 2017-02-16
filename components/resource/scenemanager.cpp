@@ -272,6 +272,14 @@ namespace Resource
         mShaderManager->setShaderPath(path);
     }
 
+    bool SceneManager::checkLoaded(const std::string &name, double timeStamp)
+    {
+        std::string normalized = name;
+        mVFS->normalizeFilename(normalized);
+
+        return mCache->checkInObjectCache(normalized, timeStamp);
+    }
+
     /// @brief Callback to read image files from the VFS.
     class ImageReadCallback : public osgDB::ReadFileCallback
     {

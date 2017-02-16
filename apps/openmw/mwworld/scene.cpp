@@ -10,6 +10,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -677,6 +678,35 @@ namespace MWWorld
                 return ptr;
 
         return Ptr();
+    }
+
+    class PreloadMeshItem : public SceneUtil::WorkItem
+    {
+    public:
+        PreloadMeshItem(const std::string& mesh, Resource::SceneManager* sceneManager)
+            : mMesh(mesh), mSceneManager(sceneManager)
+        {
+        }
+
+        virtual void doWork()
+        {
+            try
+            {
+                mSceneManager->getTemplate(mMesh);
+            }
+            catch (std::exception& e)
+            {
+            }
+        }
+    private:
+        std::string mMesh;
+        Resource::SceneManager* mSceneManager;
+    };
+
+    void Scene::preload(const std::string &mesh)
+    {
+        if (!mRendering.getResourceSystem()->getSceneManager()->checkLoaded(mesh, mRendering.getReferenceTime()))
+            mRendering.getWorkQueue()->addWorkItem(new PreloadMeshItem(mesh, mRendering.getResourceSystem()->getSceneManager()));
     }
 
     void Scene::preloadCells(float dt)

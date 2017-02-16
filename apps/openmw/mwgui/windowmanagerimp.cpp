@@ -1286,6 +1286,7 @@ namespace MWGui
     void WindowManager::setSelectedSpell(const std::string& spellId, int successChancePercent)
     {
         mSelectedSpell = spellId;
+        mSelectedEnchantItem = MWWorld::Ptr();
         mHud->setSelectedSpell(spellId, successChancePercent);
 
         const ESM::Spell* spell = mStore->get<ESM::Spell>().find(spellId);
@@ -1295,6 +1296,7 @@ namespace MWGui
 
     void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item)
     {
+        mSelectedEnchantItem = item;
         mSelectedSpell = "";
         const ESM::Enchantment* ench = mStore->get<ESM::Enchantment>()
                 .find(item.getClass().getEnchantment(item));
@@ -1305,17 +1307,29 @@ namespace MWGui
         mSpellWindow->setTitle(item.getClass().getName(item));
     }
 
+    const MWWorld::Ptr &WindowManager::getSelectedEnchantItem() const
+    {
+        return mSelectedEnchantItem;
+    }
+
     void WindowManager::setSelectedWeapon(const MWWorld::Ptr& item)
     {
+        mSelectedWeapon = item;
         int durabilityPercent =
              static_cast<int>(item.getClass().getItemHealth(item) / static_cast<float>(item.getClass().getItemMaxHealth(item)) * 100);
         mHud->setSelectedWeapon(item, durabilityPercent);
         mInventoryWindow->setTitle(item.getClass().getName(item));
     }
 
+    const MWWorld::Ptr &WindowManager::getSelectedWeapon() const
+    {
+        return mSelectedWeapon;
+    }
+
     void WindowManager::unsetSelectedSpell()
     {
         mSelectedSpell = "";
+        mSelectedEnchantItem = MWWorld::Ptr();
         mHud->unsetSelectedSpell();
 
         MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
@@ -1327,6 +1341,7 @@ namespace MWGui
 
     void WindowManager::unsetSelectedWeapon()
     {
+        mSelectedWeapon = MWWorld::Ptr();
         mHud->unsetSelectedWeapon();
         mInventoryWindow->setTitle("#{sSkillHandtohand}");
     }

@@ -98,7 +98,7 @@ namespace CSMWorld
             { ColumnId_ArmorType, "Armor Type" },
             { ColumnId_Health, "Health" },
             { ColumnId_ArmorValue, "Armor Value" },
-            { ColumnId_Scroll, "Scroll" },
+            { ColumnId_BookType, "Book Type" },
             { ColumnId_ClothingType, "Clothing Type" },
             { ColumnId_WeightCapacity, "Weight Capacity" },
             { ColumnId_OrganicContainer, "Organic Container" },
@@ -112,8 +112,8 @@ namespace CSMWorld
             { ColumnId_Flies, "Flies" },
             { ColumnId_Walks, "Walks" },
             { ColumnId_Essential, "Essential" },
-            { ColumnId_SkeletonBlood, "Skeleton Blood" },
-            { ColumnId_MetalBlood, "Metal Blood" },
+            { ColumnId_BloodType, "Blood Type" },
+
             { ColumnId_OpenSound, "Open Sound" },
             { ColumnId_CloseSound, "Close Sound" },
             { ColumnId_Duration, "Duration" },
@@ -553,6 +553,16 @@ namespace
         "AI Wander", "AI Travel", "AI Follow", "AI Escort", "AI Activate", 0
     };
 
+    static const char *sBookType[] =
+    {
+        "Book", "Scroll", 0
+    };
+
+    static const char *sBloodType[] =
+    {
+        "Default (Red)", "Skeleton Blood (White)", "Metal Blood (Golden)", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -582,6 +592,8 @@ namespace
             case CSMWorld::Columns::ColumnId_AiPackageType: return sAiPackageType;
             case CSMWorld::Columns::ColumnId_InfoCondFunc: return CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings;
             case CSMWorld::Columns::ColumnId_InfoCondComp: return CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings;
+            case CSMWorld::Columns::ColumnId_BookType: return sBookType;
+            case CSMWorld::Columns::ColumnId_BloodType: return sBloodType;
 
             default: return 0;
         }

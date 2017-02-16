@@ -572,6 +572,9 @@ namespace MWBase
             /// Export scene graph to a file and return the filename.
             /// \param ptr object to export scene graph for (if empty, export entire scene graph)
             virtual std::string exportSceneGraph(const MWWorld::Ptr& ptr) = 0;
+
+            /// Preload VFX associated with this effect list
+            virtual void preloadEffects(const ESM::EffectList* effectList) = 0;
     };
 }
 

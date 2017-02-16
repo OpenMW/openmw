@@ -301,9 +301,9 @@ void CSMWorld::ArmorRefIdAdapter::setData (const RefIdColumn *column, RefIdData&
 }
 
 CSMWorld::BookRefIdAdapter::BookRefIdAdapter (const EnchantableColumns& columns,
-    const RefIdColumn *scroll, const RefIdColumn *skill, const RefIdColumn *text)
+    const RefIdColumn *bookType, const RefIdColumn *skill, const RefIdColumn *text)
 : EnchantableRefIdAdapter<ESM::Book> (UniversalId::Type_Book, columns),
-    mScroll (scroll), mSkill (skill), mText (text)
+    mBookType (bookType), mSkill (skill), mText (text)
 {}
 
 QVariant CSMWorld::BookRefIdAdapter::getData (const RefIdColumn *column,
@@ -312,8 +312,8 @@ QVariant CSMWorld::BookRefIdAdapter::getData (const RefIdColumn *column,
     const Record<ESM::Book>& record = static_cast<const Record<ESM::Book>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Book)));
 
-    if (column==mScroll)
-        return record.get().mData.mIsScroll!=0;
+    if (column==mBookType)
+        return record.get().mData.mIsScroll;
 
     if (column==mSkill)
         return record.get().mData.mSkillId;
@@ -332,7 +332,7 @@ void CSMWorld::BookRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
 
     ESM::Book book = record.get();
 
-    if (column==mScroll)
+    if (column==mBookType)
         book.mData.mIsScroll = value.toInt();
     else if (column==mSkill)
         book.mData.mSkillId = value.toInt();
@@ -458,7 +458,8 @@ CSMWorld::CreatureColumns::CreatureColumns (const ActorColumns& actorColumns)
   mOriginal(NULL),
   mAttributes(NULL),
   mAttacks(NULL),
-  mMisc(NULL)
+  mMisc(NULL),
+  mBloodType(NULL)
 {}
 
 CSMWorld::CreatureRefIdAdapter::CreatureRefIdAdapter (const CreatureColumns& columns)
@@ -489,6 +490,19 @@ QVariant CSMWorld::CreatureRefIdAdapter::getData (const RefIdColumn *column, con
     if (column==mColumns.mMisc)
         return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
+    if (column == mColumns.mBloodType)
+    {
+        int mask = ESM::Creature::Skeleton | ESM::Creature::Metal;
+
+        if ((record.get().mFlags & mask) == ESM::Creature::Skeleton)
+            return 1;
+
+        if ((record.get().mFlags & mask) == ESM::Creature::Metal)
+            return 2;
+
+        return 0;
+    }
+
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
 
@@ -512,6 +526,17 @@ void CSMWorld::CreatureRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
         creature.mScale = value.toFloat();
     else if (column==mColumns.mOriginal)
         creature.mOriginal = value.toString().toUtf8().constData();
+    else if (column == mColumns.mBloodType)
+    {
+        int mask = ~(ESM::Creature::Skeleton | ESM::Creature::Metal);
+
+        if (value.toInt() == 1)
+            creature.mFlags = (creature.mFlags & mask) | ESM::Creature::Skeleton;
+        else if (value.toInt() == 2)
+            creature.mFlags = (creature.mFlags & mask) | ESM::Creature::Metal;
+        else
+            creature.mFlags = creature.mFlags & mask;
+    }
     else
     {
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
@@ -696,7 +721,8 @@ CSMWorld::NpcColumns::NpcColumns (const ActorColumns& actorColumns)
   mHead(NULL),
   mAttributes(NULL),
   mSkills(NULL),
-  mMisc(NULL)
+  mMisc(NULL),
+  mBloodType(NULL)
 {}
 
 CSMWorld::NpcRefIdAdapter::NpcRefIdAdapter (const NpcColumns& columns)
@@ -735,6 +761,19 @@ QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const Re
     if (column==mColumns.mMisc)
         return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
+    if (column == mColumns.mBloodType)
+    {
+        int mask = ESM::NPC::Skeleton | ESM::NPC::Metal;
+
+        if ((record.get().mFlags & mask) == ESM::NPC::Skeleton)
+            return 1;
+
+        if ((record.get().mFlags & mask) == ESM::NPC::Metal)
+            return 2;
+
+        return 0;
+    }
+
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
 
@@ -762,6 +801,17 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
         npc.mHair = value.toString().toUtf8().constData();
     else if (column==mColumns.mHead)
         npc.mHead = value.toString().toUtf8().constData();
+    else if (column == mColumns.mBloodType)
+    {
+        int mask = ~(ESM::NPC::Skeleton | ESM::NPC::Metal);
+
+        if (value.toInt() == 1)
+            npc.mFlags = (npc.mFlags & mask) | ESM::NPC::Skeleton;
+        else if (value.toInt() == 2)
+            npc.mFlags = (npc.mFlags & mask) | ESM::NPC::Metal;
+        else
+            npc.mFlags = npc.mFlags & mask;
+    }
     else
     {
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
