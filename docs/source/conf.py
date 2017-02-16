@@ -55,12 +55,23 @@ openmw_sub_dirs = os.walk(openmw_path).next()[1]
 openmw_headers = insensitive_glob(os.path.join(openmw_path, "*.hpp"))
 for dir in openmw_sub_dirs:
     openmw_headers += insensitive_glob(os.path.join(openmw_path, dir, "*.hpp"))
-
 # massage the headers to get the relative path needed
 openmw_headers = [os.path.relpath(x, openmw_path) for x in openmw_headers]
 
+opencs_path = os.path.join(project_root, "apps", "opencs")
+opencs_sub_dirs = os.walk(opencs_path).next()[1]
+opencs_headers = insensitive_glob(os.path.join(opencs_path, "*.hpp"))
+opencs_sub_sub_dirs = []
+for dir in opencs_sub_dirs:
+    opencs_headers += insensitive_glob(os.path.join(opencs_path, dir, "*.hpp"))
+    opencs_sub_sub_dirs += os.walk(os.path.join(opencs_path, dir)).next()[1]
+    for sub_dir in opencs_sub_sub_dirs:
+        opencs_headers += insensitive_glob(os.path.join(opencs_path, dir, sub_dir, "*.hpp"))
+opencs_headers = [os.path.relpath(x, opencs_path) for x in opencs_headers]
+
 breathe_projects_source = {
-    "openmw": (openmw_path, openmw_headers)
+    "openmw": (openmw_path, openmw_headers),
+    "opencs": (opencs_path, opencs_headers),
 }
 
 # Add any paths that contain templates here, relative to this directory.

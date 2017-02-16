@@ -5,3 +5,4 @@ Project Source Documentation
     :maxdepth: 2
 
     openmw/index
+    opencs/index
