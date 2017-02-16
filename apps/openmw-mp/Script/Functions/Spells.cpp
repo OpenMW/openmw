@@ -14,6 +14,14 @@ unsigned int SpellFunctions::GetSpellbookChangesSize(unsigned short pid) noexcep
     return player->spellbookChanges.count;
 }
 
+unsigned int SpellFunctions::GetSpellbookAction(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->spellbookChanges.action;
+}
+
 void SpellFunctions::AddSpell(unsigned short pid, const char* spellId) noexcept
 {
     Player *player;

@@ -250,7 +250,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         DEBUG_PRINTF("ID_PLAYER_SPELLBOOK\n");
         myPacket->Read(player);
 
-        Script::Call<Script::CallbackIdentity("OnPlayerSpellbookChange")>(player->getId(), player->spellbookChanges.action);
+        Script::Call<Script::CallbackIdentity("OnPlayerSpellbookChange")>(player->getId());
 
         break;
     }

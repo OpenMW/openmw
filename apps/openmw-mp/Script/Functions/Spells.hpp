@@ -3,6 +3,7 @@
 
 #define SPELLAPI \
     {"GetSpellbookChangesSize", SpellFunctions::GetSpellbookChangesSize},\
+    {"GetSpellbookAction",      SpellFunctions::GetSpellbookAction},\
     \
     {"AddSpell",                SpellFunctions::AddSpell},\
     {"RemoveSpell",             SpellFunctions::RemoveSpell},\
@@ -17,6 +18,7 @@ class SpellFunctions
 public:
 
     static unsigned int GetSpellbookChangesSize(unsigned short pid) noexcept;
+    static unsigned int GetSpellbookAction(unsigned short pid) noexcept;
 
     static void AddSpell(unsigned short pid, const char* spellId) noexcept;
     static void RemoveSpell(unsigned short pid, const char* spellId) noexcept;
