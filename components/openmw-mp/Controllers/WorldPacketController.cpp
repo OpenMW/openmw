@@ -5,7 +5,6 @@
 #include "../Packets/World/PacketObjectDelete.hpp"
 #include "../Packets/World/PacketObjectPlace.hpp"
 #include "../Packets/World/PacketObjectScale.hpp"
-#include "../Packets/World/PacketObjectHealth.hpp"
 #include "../Packets/World/PacketObjectLock.hpp"
 #include "../Packets/World/PacketObjectUnlock.hpp"
 #include "../Packets/World/PacketObjectMove.hpp"
@@ -37,7 +36,6 @@ mwmp::WorldPacketController::WorldPacketController(RakNet::RakPeerInterface *pee
     AddPacket<PacketObjectDelete>(&packets, peer);
     AddPacket<PacketObjectPlace>(&packets, peer);
     AddPacket<PacketObjectScale>(&packets, peer);
-    AddPacket<PacketObjectHealth>(&packets, peer);
     AddPacket<PacketObjectLock>(&packets, peer);
     AddPacket<PacketObjectUnlock>(&packets, peer);
     AddPacket<PacketObjectMove>(&packets, peer);

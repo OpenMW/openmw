@@ -537,17 +537,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_OBJECT_HEALTH:
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_HEALTH from %s",
-            player->npc.mName.c_str());
-
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
-
-        break;
-    }
-
     case ID_DOOR_STATE:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_STATE from %s",
