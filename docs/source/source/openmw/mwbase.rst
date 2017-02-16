@@ -1,4 +1,3 @@
-########
 ./mwbase
 ########
 
@@ -31,4 +30,3 @@
 
 .. autodoxygenfile:: mwbase/world.hpp
   :project: openmw
-

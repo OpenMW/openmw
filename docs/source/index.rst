@@ -1,19 +1,18 @@
+Welcome to OpenMW's Documentation!
+==================================
 
-Welcome to OpenMW's documentation!
-=====================================
-
-Components
-----------
+Sections
+--------
 
 .. toctree::
     :maxdepth: 2
 
-    openmw/index
-    openmw-cs/index
-    openmw-mods/index
+    manuals/index
+    reference/index
+    source/index
 
 
-Indices and tables
+Indices and Tables
 ==================
 
 * :ref:`genindex`
