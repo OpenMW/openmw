@@ -179,15 +179,6 @@ namespace
         {
         }
 
-        virtual void apply(osg::Group& node)
-        {
-            traverse(node);
-        }
-        virtual void apply(osg::MatrixTransform& node)
-        {
-            traverse(node);
-        }
-
         void remove()
         {
             for (RemoveVec::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
@@ -207,6 +198,15 @@ namespace
         virtual void apply(osg::Drawable& drw)
         {
             applyImpl(drw);
+        }
+
+        virtual void apply(osg::Group& node)
+        {
+            traverse(node);
+        }
+        virtual void apply(osg::MatrixTransform& node)
+        {
+            traverse(node);
         }
 
         void applyImpl(osg::Node& node)
@@ -238,6 +238,15 @@ namespace
         virtual void apply(osg::Drawable& drw)
         {
             applyImpl(drw);
+        }
+
+        virtual void apply(osg::Group& node)
+        {
+            traverse(node);
+        }
+        virtual void apply(osg::MatrixTransform& node)
+        {
+            traverse(node);
         }
 
         void applyImpl(osg::Node& node)
