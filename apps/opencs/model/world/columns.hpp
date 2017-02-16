@@ -118,10 +118,8 @@ namespace CSMWorld
             ColumnId_Dynamic = 103,
             ColumnId_Portable = 104,
             ColumnId_NegativeLight = 105,
-            ColumnId_Flickering = 106,
-            ColumnId_SlowFlickering = 107,
-            ColumnId_Pulsing = 108,
-            ColumnId_SlowPulsing = 109,
+            ColumnId_EmitterType = 106,
+            // unused (3x)
             ColumnId_Fire = 110,
             ColumnId_OffByDefault = 111,
             ColumnId_IsKey = 112,

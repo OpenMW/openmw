@@ -443,6 +443,9 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Sound, ColumnBase::Display_Sound));
     lightColumns.mSound = &mColumns.back();
 
+    mColumns.push_back(RefIdColumn(Columns::ColumnId_EmitterType, ColumnBase::Display_EmitterType));
+    lightColumns.mEmitterType = &mColumns.back();
+
     static const struct
     {
         int mName;
@@ -452,10 +455,6 @@ CSMWorld::RefIdCollection::RefIdCollection()
         { Columns::ColumnId_Dynamic, ESM::Light::Dynamic },
         { Columns::ColumnId_Portable, ESM::Light::Carry },
         { Columns::ColumnId_NegativeLight, ESM::Light::Negative },
-        { Columns::ColumnId_Flickering, ESM::Light::Flicker },
-        { Columns::ColumnId_SlowFlickering, ESM::Light::FlickerSlow },
-        { Columns::ColumnId_Pulsing, ESM::Light::Pulse },
-        { Columns::ColumnId_SlowPulsing, ESM::Light::PulseSlow },
         { Columns::ColumnId_Fire, ESM::Light::Fire },
         { Columns::ColumnId_OffByDefault, ESM::Light::OffDefault },
         { -1, 0 }

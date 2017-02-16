@@ -123,10 +123,8 @@ namespace CSMWorld
             { ColumnId_Dynamic, "Dynamic" },
             { ColumnId_Portable, "Portable" },
             { ColumnId_NegativeLight, "Negative Light" },
-            { ColumnId_Flickering, "Flickering" },
-            { ColumnId_SlowFlickering, "Slow Flickering" },
-            { ColumnId_Pulsing, "Pulsing" },
-            { ColumnId_SlowPulsing, "Slow Pulsing" },
+            { ColumnId_EmitterType, "Emitter Type" },
+            
             { ColumnId_Fire, "Fire" },
             { ColumnId_OffByDefault, "Off by default" },
             { ColumnId_IsKey, "Is Key" },
@@ -563,6 +561,11 @@ namespace
         "Default (Red)", "Skeleton Blood (White)", "Metal Blood (Golden)", 0
     };
 
+    static const char *sEmitterType[] =
+    {
+        "<None>", "Flickering", "Flickering (Slow)", "Pulsing", "Pulsing (Slow)", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -594,6 +597,7 @@ namespace
             case CSMWorld::Columns::ColumnId_InfoCondComp: return CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings;
             case CSMWorld::Columns::ColumnId_BookType: return sBookType;
             case CSMWorld::Columns::ColumnId_BloodType: return sBloodType;
+            case CSMWorld::Columns::ColumnId_EmitterType: return sEmitterType;
 
             default: return 0;
         }
