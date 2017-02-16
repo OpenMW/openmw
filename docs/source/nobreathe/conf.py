@@ -18,7 +18,7 @@ import os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-project_root = os.path.abspath('../../')
+project_root = os.path.abspath('../../../')
 sys.path.insert(0, project_root)
 
 # -- General configuration ------------------------------------------------
@@ -35,7 +35,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
-    'breathe',
+#    'breathe',
 ]
 
 # Where breathe can find the source files
