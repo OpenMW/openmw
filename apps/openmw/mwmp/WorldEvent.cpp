@@ -42,6 +42,10 @@ void WorldEvent::addObject(WorldObject worldObject)
 
 void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
 {
+    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+    event->cell = *cellStore->getCell();
+    event->action = BaseEvent::SET;
+
     MWWorld::CellRefList<ESM::Container> *containerList = cellStore->getContainers();
 
     for (typename MWWorld::CellRefList<ESM::Container>::List::iterator listIter(containerList->mList.begin());
@@ -49,14 +53,30 @@ void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
     {
         MWWorld::Ptr container(&*listIter, 0);
 
+        mwmp::WorldObject worldObject;
+        worldObject.refId = container.getCellRef().getRefId();
+        worldObject.refNumIndex = container.getCellRef().getRefNum().mIndex;
+
         MWWorld::ContainerStore& containerStore = container.getClass().getContainerStore(container);
 
         for (MWWorld::ContainerStoreIterator storeIter = containerStore.begin(); storeIter != containerStore.end(); ++storeIter)
         {
             MWWorld::Ptr itemPtr = *storeIter;
+
+            mwmp::ContainerItem containerItem;
+            containerItem.refId = itemPtr.getCellRef().getRefId();
+            containerItem.count = itemPtr.getRefData().getCount();
+            containerItem.charge = itemPtr.getCellRef().getCharge();
+            containerItem.goldValue = itemPtr.getCellRef().getGoldValue();
+            containerItem.owner = itemPtr.getCellRef().getOwner();
+
+            worldObject.containerChanges.items.push_back(containerItem);
         }
+
+        event->addObject(worldObject);
     }
 
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(event);
 }
 
 void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
