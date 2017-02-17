@@ -802,6 +802,7 @@ namespace CSMWorld
         const RefIdColumn *mRadius;
         const RefIdColumn *mColor;
         const RefIdColumn *mSound;
+        const RefIdColumn *mEmitterType;
         std::map<const RefIdColumn *, unsigned int> mFlags;
 
         LightColumns (const InventoryColumns& columns);

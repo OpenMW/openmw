@@ -628,6 +628,25 @@ QVariant CSMWorld::LightRefIdAdapter::getData (const RefIdColumn *column, const 
     if (column==mColumns.mSound)
         return QString::fromUtf8 (record.get().mSound.c_str());
 
+    if (column == mColumns.mEmitterType)
+    {
+        int mask = ESM::Light::Flicker | ESM::Light::FlickerSlow | ESM::Light::Pulse | ESM::Light::PulseSlow;
+
+        if ((record.get().mData.mFlags & mask) == ESM::Light::Flicker)
+            return 1;
+
+        if ((record.get().mData.mFlags & mask) == ESM::Light::FlickerSlow)
+            return 2;
+
+        if ((record.get().mData.mFlags & mask) == ESM::Light::Pulse)
+            return 3;
+
+        if ((record.get().mData.mFlags & mask) == ESM::Light::PulseSlow)
+            return 4;
+
+        return 0;
+    }
+
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
 
@@ -653,6 +672,21 @@ void CSMWorld::LightRefIdAdapter::setData (const RefIdColumn *column, RefIdData&
         light.mData.mColor = value.toInt();
     else if (column==mColumns.mSound)
         light.mSound = value.toString().toUtf8().constData();
+    else if (column == mColumns.mEmitterType)
+    {
+        int mask = ~(ESM::Light::Flicker | ESM::Light::FlickerSlow | ESM::Light::Pulse | ESM::Light::PulseSlow);
+
+        if (value.toInt() == 0)
+            light.mData.mFlags = light.mData.mFlags & mask;
+        else if (value.toInt() == 1)
+            light.mData.mFlags = (light.mData.mFlags & mask) | ESM::Light::Flicker;
+        else if (value.toInt() == 2)
+            light.mData.mFlags = (light.mData.mFlags & mask) | ESM::Light::FlickerSlow;
+        else if (value.toInt() == 3)
+            light.mData.mFlags = (light.mData.mFlags & mask) | ESM::Light::Pulse;
+        else
+            light.mData.mFlags = (light.mData.mFlags & mask) | ESM::Light::PulseSlow;
+    }
     else
     {
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =

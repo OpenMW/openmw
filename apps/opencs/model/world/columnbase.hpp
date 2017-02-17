@@ -133,6 +133,7 @@ namespace CSMWorld
             Display_LongString256,
             Display_BookType,
             Display_BloodType,
+            Display_EmitterType,
 
             Display_EffectSkill,     // must display at least one, unlike Display_Skill
             Display_EffectAttribute, // must display at least one, unlike Display_Attribute

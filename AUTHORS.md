@@ -90,7 +90,7 @@ Programmers
     Mark Siewert (mark76)
     Marco Melletti (mellotanica)
     Marco Schulze
-    MAtahualpa
+    Martin Otto (MAtahualpa)
     Mateusz Kołaczek (PL_kolek)
     Mateusz Malisz (malice)
     megaton
@@ -170,14 +170,15 @@ Public Relations and Translations
 ---------------------------------
 
     Artem Kotsynyak (greye) - Russian News Writer
+    Dawid Lakomy (Vedyimyn) - Polish News Writer
     Jim Clauwaert (Zedd) - Public Outreach
     Julien Voisin (jvoisin/ap0) - French News Writer
-    Tom Koenderink (Okulo) - English News Writer
     Lukasz Gromanowski (lgro) - English News Writer
+    Martin Otto (Atahualpa) - Podcaster, Public Outreach, German Translator
     Mickey Lyle (raevol) - Release Manager
     Pithorn - Chinese News Writer
     sir_herrbatka - Polish News Writer
-    Dawid Lakomy (Vedyimyn) - Polish News Writer
+    Tom Koenderink (Okulo) - English News Writer
 
 Website
 -------
