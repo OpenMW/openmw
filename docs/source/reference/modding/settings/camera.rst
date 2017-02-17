@@ -24,7 +24,7 @@ This setting determines whether objects that render to a few pixels or smaller w
 The default value is true. This setting can only be configured by editing the settings configuration file.
 
 small feature culling pixel size
----------------------
+--------------------------------
 
 :Type:		floating point
 :Range:		> 0

@@ -1,5 +1,5 @@
 Water Settings
-############
+##############
 
 .. note::
 	The settings for the water shader are difficult to describe, but can be seen immediately in the Water tab of the Video panel in the Options menu. Changes there will be saved to these settings. It is suggested to stand on the shore of a moderately broad body of water with trees or other objects on the far shore to test reflection textures, underwater plants in shallow water near by to test refraction textures, and some deep water visible from your location to test deep water visibility.
