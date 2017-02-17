@@ -35,8 +35,8 @@ void PacketObjectPlace::Packet(RakNet::BitStream *bs, BaseEvent *event, bool sen
 
         RW(worldObject.refId, send);
         RW(worldObject.refNumIndex, send);
-        RW(worldObject.charge, send);
         RW(worldObject.count, send);
+        RW(worldObject.charge, send);
         RW(worldObject.goldValue, send);
         RW(worldObject.pos, send);
 
