@@ -283,6 +283,7 @@ namespace CSMWorld
             { ColumnId_NpcMisc, "NPC Misc" },
             { ColumnId_Level, "Level" },
             { ColumnId_NpcFactionID, "Faction ID" },
+            { ColumnId_GenderNpc, "Gender"},
             { ColumnId_Mana, "Mana" },
             { ColumnId_Fatigue, "Fatigue" },
             { ColumnId_NpcDisposition, "NPC Disposition" },
