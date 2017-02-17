@@ -52,9 +52,9 @@ AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
     , mActorRefId(follow->mTargetId), mActorId(-1)
     , mCellId(follow->mCellId), mActive(follow->mActive), mFollowIndex(mFollowIndexCounter++)
 {
-// mDuration isn't saved in the save file, so just giving it "1" for now if the package has a duration.
-// The exact value of mDuration only matters for repeating packages
-    if (mRemainingDuration != 0)
+// mDuration isn't saved in the save file, so just giving it "1" for now if the package had a duration.
+// The exact value of mDuration only matters for repeating packages.
+    if (mRemainingDuration > 0) // Previously mRemainingDuration could be negative even when mDuration was 0. Checking for > 0 should fix old saves.
        mDuration = 1;
     else
        mDuration = 0;
@@ -104,10 +104,10 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
         ++i;
     }
 
-    if(!mAlwaysFollow) //Update if you only follow for a bit
+    if (!mAlwaysFollow) //Update if you only follow for a bit
     {
          //Check if we've run out of time
-        if (mDuration != 0)
+        if (mDuration > 0)
         {
             mRemainingDuration -= ((duration*MWBase::Environment::get().getWorld()->getTimeScaleFactor()) / 3600);
             if (mRemainingDuration <= 0)
@@ -117,18 +117,18 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
             }
         }
 
-        if((pos.pos[0]-mX)*(pos.pos[0]-mX) +
+        if ((pos.pos[0]-mX)*(pos.pos[0]-mX) +
             (pos.pos[1]-mY)*(pos.pos[1]-mY) +
             (pos.pos[2]-mZ)*(pos.pos[2]-mZ) < followDistance*followDistance) //Close-ish to final position
         {
-            if(actor.getCell()->isExterior()) //Outside?
+            if (actor.getCell()->isExterior()) //Outside?
             {
-                if(mCellId == "") //No cell to travel to
+                if (mCellId == "") //No cell to travel to
                     return true;
             }
             else
             {
-                if(mCellId == actor.getCell()->getCell()->mName) //Cell to travel to
+                if (mCellId == actor.getCell()->getCell()->mName) //Cell to travel to
                     return true;
             }
         }
@@ -228,8 +228,9 @@ int AiFollow::getFollowIndex() const
 
 void AiFollow::fastForward(const MWWorld::Ptr& actor, AiState &state)
 {
-    // Update duration counter
-    mRemainingDuration--;
+    // Update duration counter if this package has a duration
+    if (mDuration > 0)
+        mRemainingDuration--;
 }
 
 }

@@ -251,7 +251,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     static float fUnarmoredBase2 = store.find("fUnarmoredBase2")->getFloat();
     int unarmoredSkill = stats.getSkill(ESM::Skill::Unarmored).getModified();
 
-    float unarmoredRating = static_cast<int>((fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill));
+    float unarmoredRating = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
 
     TSlots slots_;
     initSlots (slots_);
