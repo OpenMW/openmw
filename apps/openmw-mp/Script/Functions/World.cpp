@@ -11,6 +11,7 @@ using namespace mwmp;
 
 static BaseEvent *baseEvent = nullptr;
 static WorldObject tempWorldObject;
+static ContainerItem tempContainerItem;
 
 std::regex exteriorCellPattern("^(-?\\d+), (-?\\d+)$");
 
@@ -143,22 +144,6 @@ const char *WorldFunctions::GetContainerItemOwner(unsigned int objectIndex, unsi
         .containerChanges.items.at(itemIndex).owner.c_str();
 }
 
-void WorldFunctions::AddWorldObject() noexcept
-{
-    WorldObject worldObject;
-    worldObject.refId = tempWorldObject.refId;
-    worldObject.refNumIndex = tempWorldObject.refNumIndex;
-    worldObject.charge = tempWorldObject.charge;
-    worldObject.count = tempWorldObject.count;
-    worldObject.goldValue = tempWorldObject.goldValue;
-    worldObject.scale = tempWorldObject.scale;
-    worldObject.doorState = tempWorldObject.doorState;
-    worldObject.lockLevel = tempWorldObject.lockLevel;
-    worldObject.pos = tempWorldObject.pos;
-
-    baseEvent->objectChanges.objects.push_back(worldObject);
-}
-
 void WorldFunctions::SetBaseEventCell(const char* cellDescription) noexcept
 {
     std::string description = cellDescription;
@@ -197,14 +182,14 @@ void WorldFunctions::SetObjectRefNumIndex(int refNumIndex) noexcept
     tempWorldObject.refNumIndex = refNumIndex;
 }
 
-void WorldFunctions::SetObjectCharge(int charge) noexcept
-{
-    tempWorldObject.charge = charge;
-}
-
 void WorldFunctions::SetObjectCount(int count) noexcept
 {
     tempWorldObject.count = count;
+}
+
+void WorldFunctions::SetObjectCharge(int charge) noexcept
+{
+    tempWorldObject.charge = charge;
 }
 
 void WorldFunctions::SetObjectGoldValue(int goldValue) noexcept
@@ -241,9 +226,48 @@ void WorldFunctions::SetObjectRotation(double x, double y, double z) noexcept
     tempWorldObject.pos.rot[2] = z;
 }
 
-void WorldFunctions::SendContainer() noexcept
+void WorldFunctions::SetContainerItemRefId(const char* refId) noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_CONTAINER)->Send(baseEvent, baseEvent->guid);
+    tempContainerItem.refId = refId;
+}
+
+void WorldFunctions::SetContainerItemCount(int count) noexcept
+{
+    tempContainerItem.count = count;
+}
+
+void WorldFunctions::SetContainerItemCharge(int charge) noexcept
+{
+    tempContainerItem.charge = charge;
+}
+
+void WorldFunctions::AddWorldObject() noexcept
+{
+    WorldObject worldObject;
+    worldObject.refId = tempWorldObject.refId;
+    worldObject.refNumIndex = tempWorldObject.refNumIndex;
+    worldObject.count = tempWorldObject.count;
+    worldObject.charge = tempWorldObject.charge;
+    worldObject.goldValue = tempWorldObject.goldValue;
+    worldObject.scale = tempWorldObject.scale;
+    worldObject.doorState = tempWorldObject.doorState;
+    worldObject.lockLevel = tempWorldObject.lockLevel;
+    worldObject.pos = tempWorldObject.pos;
+    worldObject.containerChanges.items = tempWorldObject.containerChanges.items;
+
+    baseEvent->objectChanges.objects.push_back(worldObject);
+
+    tempWorldObject.containerChanges.items.clear();
+}
+
+void WorldFunctions::AddContainerItem() noexcept
+{
+    ContainerItem containerItem;
+    containerItem.refId = tempContainerItem.refId;
+    containerItem.count = tempContainerItem.count;
+    containerItem.charge = tempContainerItem.charge;
+
+    tempWorldObject.containerChanges.items.push_back(containerItem);
 }
 
 void WorldFunctions::SendObjectDelete() noexcept
@@ -274,6 +298,11 @@ void WorldFunctions::SendObjectUnlock() noexcept
 void WorldFunctions::SendDoorState() noexcept
 {
     mwmp::Networking::get().getWorldController()->GetPacket(ID_DOOR_STATE)->Send(baseEvent, baseEvent->guid);
+}
+
+void WorldFunctions::SendContainer() noexcept
+{
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_CONTAINER)->Send(baseEvent, baseEvent->guid);
 }
 
 void WorldFunctions::SetHour(unsigned short pid, double hour) noexcept

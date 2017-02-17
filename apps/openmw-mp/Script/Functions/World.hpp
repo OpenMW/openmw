@@ -29,14 +29,13 @@
     {"GetContainerItemGoldValue", WorldFunctions::GetContainerItemGoldValue},\
     {"GetContainerItemOwner",     WorldFunctions::GetContainerItemOwner},\
     \
-    {"AddWorldObject",            WorldFunctions::AddWorldObject},\
     {"SetBaseEventCell",          WorldFunctions::SetBaseEventCell},\
     {"SetBaseEventAction",        WorldFunctions::SetBaseEventAction},\
     \
     {"SetObjectRefId",            WorldFunctions::SetObjectRefId},\
     {"SetObjectRefNumIndex",      WorldFunctions::SetObjectRefNumIndex},\
-    {"SetObjectCharge",           WorldFunctions::SetObjectCharge},\
     {"SetObjectCount",            WorldFunctions::SetObjectCount},\
+    {"SetObjectCharge",           WorldFunctions::SetObjectCharge},\
     {"SetObjectGoldValue",        WorldFunctions::SetObjectGoldValue},\
     {"SetObjectScale",            WorldFunctions::SetObjectScale},\
     {"SetObjectDoorState",        WorldFunctions::SetObjectDoorState},\
@@ -44,7 +43,12 @@
     {"SetObjectPosition",         WorldFunctions::SetObjectPosition},\
     {"SetObjectRotation",         WorldFunctions::SetObjectRotation},\
     \
-    {"SendContainer",             WorldFunctions::SendContainer},\
+    {"SetContainerItemRefId",     WorldFunctions::SetContainerItemRefId},\
+    {"SetContainerItemCount",     WorldFunctions::SetContainerItemCount},\
+    {"SetContainerItemCharge",    WorldFunctions::SetContainerItemCharge},\
+    \
+    {"AddWorldObject",            WorldFunctions::AddWorldObject},\
+    {"AddContainerItem",          WorldFunctions::AddContainerItem},\
     \
     {"SendObjectDelete",          WorldFunctions::SendObjectDelete},\
     {"SendObjectPlace",           WorldFunctions::SendObjectPlace},\
@@ -52,6 +56,7 @@
     {"SendObjectLock",            WorldFunctions::SendObjectLock},\
     {"SendObjectUnlock",          WorldFunctions::SendObjectUnlock},\
     {"SendDoorState",             WorldFunctions::SendDoorState},\
+    {"SendContainer",             WorldFunctions::SendContainer},\
     \
     {"SetHour",                   WorldFunctions::SetHour},\
     {"SetMonth",                  WorldFunctions::SetMonth},\
@@ -88,14 +93,13 @@ public:
     static int GetContainerItemGoldValue(unsigned int objectIndex, unsigned int itemIndex) noexcept;
     static const char *GetContainerItemOwner(unsigned int objectIndex, unsigned int itemIndex) noexcept;
 
-    static void AddWorldObject() noexcept;
     static void SetBaseEventCell(const char* cellDescription) noexcept;
     static void SetBaseEventAction(int action) noexcept;
 
     static void SetObjectRefId(const char* refId) noexcept;
     static void SetObjectRefNumIndex(int refNumIndex) noexcept;
-    static void SetObjectCharge(int charge) noexcept;
     static void SetObjectCount(int count) noexcept;
+    static void SetObjectCharge(int charge) noexcept;
     static void SetObjectGoldValue(int goldValue) noexcept;
     static void SetObjectScale(double scale) noexcept;
     static void SetObjectDoorState(int doorState) noexcept;
@@ -103,7 +107,12 @@ public:
     static void SetObjectPosition(double x, double y, double z) noexcept;
     static void SetObjectRotation(double x, double y, double z) noexcept;
 
-    static void SendContainer() noexcept;
+    static void SetContainerItemRefId(const char* refId) noexcept;
+    static void SetContainerItemCount(int count) noexcept;
+    static void SetContainerItemCharge(int charge) noexcept;
+
+    static void AddWorldObject() noexcept;
+    static void AddContainerItem() noexcept;
 
     static void SendObjectDelete() noexcept;
     static void SendObjectPlace() noexcept;
@@ -111,6 +120,7 @@ public:
     static void SendObjectLock() noexcept;
     static void SendObjectUnlock() noexcept;
     static void SendDoorState() noexcept;
+    static void SendContainer() noexcept;
 
     static void SetHour(unsigned short pid, double hour) noexcept;
     static void SetMonth(unsigned short pid, int month) noexcept;
