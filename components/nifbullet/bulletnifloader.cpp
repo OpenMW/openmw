@@ -268,7 +268,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
 
     if (shape->data.empty())
         return;
-    if (shape->data->triangles->empty())
+    if (shape->data->triangles.empty())
         return;
 
     if (isAnimated)
@@ -280,14 +280,13 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
 
         const Nif::NiTriShapeData *data = shape->data.getPtr();
 
-        childMesh->preallocateVertices(data->vertices->size());
-        childMesh->preallocateIndices(data->triangles->size());
+        childMesh->preallocateVertices(data->vertices.size());
+        childMesh->preallocateIndices(data->triangles.size());
 
-        const osg::Vec3Array& vertices = *data->vertices;
-        const osg::DrawElementsUShort& triangles = *data->triangles;
+        const std::vector<osg::Vec3f> &vertices = data->vertices;
+        const std::vector<unsigned short> &triangles = data->triangles;
 
-        size_t numtris = data->triangles->size();
-        for(size_t i = 0;i < numtris;i+=3)
+        for(size_t i = 0;i < data->triangles.size();i+=3)
         {
             osg::Vec3f b1 = vertices[triangles[i+0]];
             osg::Vec3f b2 = vertices[triangles[i+1]];
@@ -321,13 +320,13 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
 
         // Static shape, just transform all vertices into position
         const Nif::NiTriShapeData *data = shape->data.getPtr();
-        const osg::Vec3Array& vertices = *data->vertices;
-        const osg::DrawElementsUShort& triangles = *data->triangles;
+        const std::vector<osg::Vec3f> &vertices = data->vertices;
+        const std::vector<unsigned short> &triangles = data->triangles;
 
-        mStaticMesh->preallocateVertices(data->vertices->size());
-        mStaticMesh->preallocateIndices(data->triangles->size());
+        mStaticMesh->preallocateVertices(data->vertices.size());
+        mStaticMesh->preallocateIndices(data->triangles.size());
 
-        size_t numtris = data->triangles->size();
+        size_t numtris = data->triangles.size();
         for(size_t i = 0;i < numtris;i+=3)
         {
             osg::Vec3f b1 = vertices[triangles[i+0]]*transform;

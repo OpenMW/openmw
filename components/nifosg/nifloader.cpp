@@ -912,12 +912,12 @@ namespace NifOsg
                 // Note this position and velocity is not correct for a particle system with absolute reference frame,
                 // which can not be done in this loader since we are not attached to the scene yet. Will be fixed up post-load in the SceneManager.
                 created->setVelocity(particle.velocity);
-                const osg::Vec3f& position = particledata->vertices->at(particle.vertex);
+                const osg::Vec3f& position = particledata->vertices.at(particle.vertex);
                 created->setPosition(position);
 
                 osg::Vec4f partcolor (1.f,1.f,1.f,1.f);
-                if (particle.vertex < int(particledata->colors->size()))
-                    partcolor = particledata->colors->at(particle.vertex);
+                if (particle.vertex < int(particledata->colors.size()))
+                    partcolor = particledata->colors.at(particle.vertex);
 
                 float size = particledata->sizes.at(particle.vertex) * partctrl->size;
 
@@ -1076,10 +1076,11 @@ namespace NifOsg
         {
             const Nif::NiTriShapeData* data = triShape->data.getPtr();
 
-            geometry->setVertexArray(data->vertices);
-
-            if (!data->normals->empty())
-                geometry->setNormalArray(data->normals);
+            {
+                geometry->setVertexArray(new osg::Vec3Array(data->vertices.size(), &data->vertices[0]));
+                if (!data->normals.empty())
+                    geometry->setNormalArray(new osg::Vec3Array(data->normals.size(), &data->normals[0]), osg::Array::BIND_PER_VERTEX);
+            }
 
             int textureStage = 0;
             for (std::vector<int>::const_iterator it = boundTextures.begin(); it != boundTextures.end(); ++it,++textureStage)
@@ -1089,18 +1090,19 @@ namespace NifOsg
                 {
                     std::cerr << "Warning: out of bounds UV set " << uvSet << " on TriShape \"" << triShape->name << "\" in " << mFilename << std::endl;
                     if (!data->uvlist.empty())
-                        geometry->setTexCoordArray(textureStage, data->uvlist[0]);
+                        geometry->setTexCoordArray(textureStage, new osg::Vec2Array(data->uvlist[0].size(), &data->uvlist[0][0]), osg::Array::BIND_PER_VERTEX);
                     continue;
                 }
 
-                geometry->setTexCoordArray(textureStage, data->uvlist[uvSet]);
+                geometry->setTexCoordArray(textureStage, new osg::Vec2Array(data->uvlist[uvSet].size(), &data->uvlist[uvSet][0]), osg::Array::BIND_PER_VERTEX);
             }
 
-            if (!data->colors->empty())
-                geometry->setColorArray(data->colors);
+            if (!data->colors.empty())
+                geometry->setColorArray(new osg::Vec4Array(data->colors.size(), &data->colors[0]), osg::Array::BIND_PER_VERTEX);
 
-            if (!data->triangles->empty())
-                geometry->addPrimitiveSet(data->triangles);
+            geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES,
+                                                                  data->triangles.size(),
+                                                                  (unsigned short*)&data->triangles[0]));
 
             // osg::Material properties are handled here for two reasons:
             // - if there are no vertex colors, we need to disable colorMode.
@@ -1108,7 +1110,7 @@ namespace NifOsg
             //   above the actual renderable would be tedious.
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(triShape, drawableProps);
-            applyDrawableProperties(parentNode, drawableProps, composite, !data->colors->empty(), animflags, false);
+            applyDrawableProperties(parentNode, drawableProps, composite, !data->colors.empty(), animflags, false);
         }
 
         void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
@@ -1175,13 +1177,13 @@ namespace NifOsg
             for (unsigned int i = 1; i < morphs.size(); ++i)
             {
                 osg::ref_ptr<osg::Geometry> morphTarget = new osg::Geometry;
-                morphTarget->setVertexArray(morphs[i].mVertices);
+                morphTarget->setVertexArray(new osg::Vec3Array(morphs[i].mVertices.size(), &morphs[i].mVertices[0]));
                 morphGeom->addMorphTarget(morphTarget, 0.f);
             }
 
             // build the bounding box containing all possible morph combinations
 
-            std::vector<osg::BoundingBox> vertBounds(morphs[0].mVertices->size());
+            std::vector<osg::BoundingBox> vertBounds(morphs[0].mVertices.size());
 
             // Since we don't know what combinations of morphs are being applied we need to keep track of a bounding box for each vertex.
             // The minimum/maximum of the box is the minimum/maximum offset the vertex can have from its starting position.
@@ -1192,19 +1194,19 @@ namespace NifOsg
 
             for (unsigned int i = 1; i < morphs.size(); ++i)
             {
-                for (unsigned int j=0; j<morphs[i].mVertices->size() && vertBounds.size(); ++j)
+                for (unsigned int j=0; j<morphs[i].mVertices.size() && vertBounds.size(); ++j)
                 {
                     osg::BoundingBox& bounds = vertBounds[j];
-                    bounds.expandBy(bounds._max + (*morphs[i].mVertices)[j]);
-                    bounds.expandBy(bounds._min + (*morphs[i].mVertices)[j]);
+                    bounds.expandBy(bounds._max + morphs[i].mVertices[j]);
+                    bounds.expandBy(bounds._min + morphs[i].mVertices[j]);
                 }
             }
 
             osg::BoundingBox box;
             for (unsigned int i=0; i<vertBounds.size(); ++i)
             {
-                vertBounds[i]._max += (*morphs[0].mVertices)[i];
-                vertBounds[i]._min += (*morphs[0].mVertices)[i];
+                vertBounds[i]._max += morphs[0].mVertices[i];
+                vertBounds[i]._min += morphs[0].mVertices[i];
                 box.expandBy(vertBounds[i]);
             }
 
