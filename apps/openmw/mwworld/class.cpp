@@ -482,7 +482,7 @@ namespace MWWorld
         return -1;
     }
 
-    int Class::getEffectiveArmorRating(const ConstPtr &armor, const Ptr &actor) const
+    float Class::getEffectiveArmorRating(const ConstPtr &armor, const Ptr &actor) const
     {
         throw std::runtime_error("class does not support armor ratings");
     }
