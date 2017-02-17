@@ -268,9 +268,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
 
     if (shape->data.empty())
         return;
-
-    const Nif::NiTriShapeData *data = shape->data.getPtr();
-    if (!data->triangles || !data->vertices)
+    if (shape->data->triangles->empty())
         return;
 
     if (isAnimated)
@@ -279,6 +277,8 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
             mCompoundShape = new btCompoundShape();
 
         btTriangleMesh* childMesh = new btTriangleMesh();
+
+        const Nif::NiTriShapeData *data = shape->data.getPtr();
 
         childMesh->preallocateVertices(data->vertices->size());
         childMesh->preallocateIndices(data->triangles->size());
@@ -320,6 +320,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
             mStaticMesh = new btTriangleMesh(false);
 
         // Static shape, just transform all vertices into position
+        const Nif::NiTriShapeData *data = shape->data.getPtr();
         const osg::Vec3Array& vertices = *data->vertices;
         const osg::DrawElementsUShort& triangles = *data->triangles;
 
