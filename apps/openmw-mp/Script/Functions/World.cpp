@@ -131,6 +131,11 @@ unsigned int WorldFunctions::GetObjectChangesSize() noexcept
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.count;
 }
 
+unsigned int WorldFunctions::GetBaseEventAction() noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->action;
+}
+
 const char *WorldFunctions::GetObjectRefId(unsigned int i) noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).refId.c_str();

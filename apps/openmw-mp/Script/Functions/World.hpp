@@ -20,6 +20,7 @@
     {"SetObjectRotation",    WorldFunctions::SetObjectRotation},\
     \
     {"GetObjectChangesSize", WorldFunctions::GetObjectChangesSize},\
+    {"GetBaseEventAction",   WorldFunctions::GetBaseEventAction},\
     \
     {"GetObjectRefId",       WorldFunctions::GetObjectRefId},\
     {"GetObjectRefNumIndex", WorldFunctions::GetObjectRefNumIndex},\
@@ -71,6 +72,7 @@ public:
     static void SetObjectRotation(double x, double y, double z) noexcept;
 
     static unsigned int GetObjectChangesSize() noexcept;
+    static unsigned int GetBaseEventAction() noexcept;
 
     static const char *GetObjectRefId(unsigned int i) noexcept;
     static int GetObjectRefNumIndex(unsigned int i) noexcept;
