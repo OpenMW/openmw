@@ -48,14 +48,14 @@ int WorldFunctions::GetObjectRefNumIndex(unsigned int i) noexcept
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).refNumIndex;
 }
 
-int WorldFunctions::GetObjectCharge(unsigned int i) noexcept
-{
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).charge;
-}
-
 int WorldFunctions::GetObjectCount(unsigned int i) noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).count;
+}
+
+int WorldFunctions::GetObjectCharge(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).charge;
 }
 
 int WorldFunctions::GetObjectGoldValue(unsigned int i) noexcept
@@ -106,6 +106,41 @@ double WorldFunctions::GetObjectRotY(unsigned int i) noexcept
 double WorldFunctions::GetObjectRotZ(unsigned int i) noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).pos.rot[2];
+}
+
+unsigned int WorldFunctions::GetContainerChangesSize(unsigned int objectIndex) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(objectIndex).containerChanges.count;
+}
+
+const char *WorldFunctions::GetContainerItemRefId(unsigned int objectIndex, unsigned int itemIndex) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(objectIndex)
+        .containerChanges.items.at(itemIndex).refId.c_str();
+}
+
+int WorldFunctions::GetContainerItemCount(unsigned int objectIndex, unsigned int itemIndex) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(objectIndex)
+        .containerChanges.items.at(itemIndex).count;
+}
+
+int WorldFunctions::GetContainerItemCharge(unsigned int objectIndex, unsigned int itemIndex) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(objectIndex)
+        .containerChanges.items.at(itemIndex).charge;
+}
+
+int WorldFunctions::GetContainerItemGoldValue(unsigned int objectIndex, unsigned int itemIndex) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(objectIndex)
+        .containerChanges.items.at(itemIndex).goldValue;
+}
+
+const char *WorldFunctions::GetContainerItemOwner(unsigned int objectIndex, unsigned int itemIndex) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(objectIndex)
+        .containerChanges.items.at(itemIndex).owner.c_str();
 }
 
 void WorldFunctions::AddWorldObject() noexcept
