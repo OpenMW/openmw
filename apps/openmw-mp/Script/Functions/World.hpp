@@ -4,21 +4,6 @@
 #define WORLDFUNCTIONS \
     {"CreateBaseEvent",      WorldFunctions::CreateBaseEvent},\
     \
-    {"AddWorldObject",       WorldFunctions::AddWorldObject},\
-    {"SetBaseEventCell",     WorldFunctions::SetBaseEventCell},\
-    {"SetBaseEventAction",   WorldFunctions::SetBaseEventAction},\
-    \
-    {"SetObjectRefId",       WorldFunctions::SetObjectRefId},\
-    {"SetObjectRefNumIndex", WorldFunctions::SetObjectRefNumIndex},\
-    {"SetObjectCharge",      WorldFunctions::SetObjectCharge},\
-    {"SetObjectCount",       WorldFunctions::SetObjectCount},\
-    {"SetObjectGoldValue",   WorldFunctions::SetObjectGoldValue},\
-    {"SetObjectScale",       WorldFunctions::SetObjectScale},\
-    {"SetObjectDoorState",   WorldFunctions::SetObjectDoorState},\
-    {"SetObjectLockLevel",   WorldFunctions::SetObjectLockLevel},\
-    {"SetObjectPosition",    WorldFunctions::SetObjectPosition},\
-    {"SetObjectRotation",    WorldFunctions::SetObjectRotation},\
-    \
     {"GetObjectChangesSize", WorldFunctions::GetObjectChangesSize},\
     {"GetBaseEventAction",   WorldFunctions::GetBaseEventAction},\
     \
@@ -36,6 +21,21 @@
     {"GetObjectRotX",        WorldFunctions::GetObjectRotX},\
     {"GetObjectRotY",        WorldFunctions::GetObjectRotY},\
     {"GetObjectRotZ",        WorldFunctions::GetObjectRotZ},\
+    \
+    {"AddWorldObject",       WorldFunctions::AddWorldObject},\
+    {"SetBaseEventCell",     WorldFunctions::SetBaseEventCell},\
+    {"SetBaseEventAction",   WorldFunctions::SetBaseEventAction},\
+    \
+    {"SetObjectRefId",       WorldFunctions::SetObjectRefId},\
+    {"SetObjectRefNumIndex", WorldFunctions::SetObjectRefNumIndex},\
+    {"SetObjectCharge",      WorldFunctions::SetObjectCharge},\
+    {"SetObjectCount",       WorldFunctions::SetObjectCount},\
+    {"SetObjectGoldValue",   WorldFunctions::SetObjectGoldValue},\
+    {"SetObjectScale",       WorldFunctions::SetObjectScale},\
+    {"SetObjectDoorState",   WorldFunctions::SetObjectDoorState},\
+    {"SetObjectLockLevel",   WorldFunctions::SetObjectLockLevel},\
+    {"SetObjectPosition",    WorldFunctions::SetObjectPosition},\
+    {"SetObjectRotation",    WorldFunctions::SetObjectRotation},\
     \
     {"SendContainer",        WorldFunctions::SendContainer},\
     \
@@ -56,21 +56,6 @@ public:
 
     static void CreateBaseEvent(unsigned short pid) noexcept;
 
-    static void AddWorldObject() noexcept;
-    static void SetBaseEventCell(const char* cellDescription) noexcept;
-    static void SetBaseEventAction(int action) noexcept;
-
-    static void SetObjectRefId(const char* refId) noexcept;
-    static void SetObjectRefNumIndex(int refNumIndex) noexcept;
-    static void SetObjectCharge(int charge) noexcept;
-    static void SetObjectCount(int count) noexcept;
-    static void SetObjectGoldValue(int goldValue) noexcept;
-    static void SetObjectScale(double scale) noexcept;
-    static void SetObjectDoorState(int doorState) noexcept;
-    static void SetObjectLockLevel(int lockLevel) noexcept;
-    static void SetObjectPosition(double x, double y, double z) noexcept;
-    static void SetObjectRotation(double x, double y, double z) noexcept;
-
     static unsigned int GetObjectChangesSize() noexcept;
     static unsigned int GetBaseEventAction() noexcept;
 
@@ -88,6 +73,21 @@ public:
     static double GetObjectRotX(unsigned int i) noexcept;
     static double GetObjectRotY(unsigned int i) noexcept;
     static double GetObjectRotZ(unsigned int i) noexcept;
+
+    static void AddWorldObject() noexcept;
+    static void SetBaseEventCell(const char* cellDescription) noexcept;
+    static void SetBaseEventAction(int action) noexcept;
+
+    static void SetObjectRefId(const char* refId) noexcept;
+    static void SetObjectRefNumIndex(int refNumIndex) noexcept;
+    static void SetObjectCharge(int charge) noexcept;
+    static void SetObjectCount(int count) noexcept;
+    static void SetObjectGoldValue(int goldValue) noexcept;
+    static void SetObjectScale(double scale) noexcept;
+    static void SetObjectDoorState(int doorState) noexcept;
+    static void SetObjectLockLevel(int lockLevel) noexcept;
+    static void SetObjectPosition(double x, double y, double z) noexcept;
+    static void SetObjectRotation(double x, double y, double z) noexcept;
 
     static void SendContainer() noexcept;
 
