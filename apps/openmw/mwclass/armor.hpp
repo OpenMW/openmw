@@ -84,7 +84,7 @@ namespace MWClass
             virtual bool canSell (const MWWorld::ConstPtr& item, int npcServices) const;
 
             /// Get the effective armor rating, factoring in the actor's skills, for the given armor.
-            virtual int getEffectiveArmorRating(const MWWorld::ConstPtr& armor, const MWWorld::Ptr& actor) const;
+            virtual float getEffectiveArmorRating(const MWWorld::ConstPtr& armor, const MWWorld::Ptr& actor) const;
     };
 }
 

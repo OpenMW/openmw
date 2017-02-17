@@ -231,8 +231,8 @@ namespace MWClass
                 typeText = "#{sHeavy}";
         }
 
-        text += "\n#{sArmorRating}: " + MWGui::ToolTips::toString(getEffectiveArmorRating(ptr,
-            MWMechanics::getPlayer()));
+        text += "\n#{sArmorRating}: " + MWGui::ToolTips::toString(static_cast<int>(getEffectiveArmorRating(ptr,
+            MWMechanics::getPlayer())));
 
         int remainingHealth = getItemHealth(ptr);
         text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
@@ -277,7 +277,7 @@ namespace MWClass
         return record->mId;
     }
 
-    int Armor::getEffectiveArmorRating(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &actor) const
+    float Armor::getEffectiveArmorRating(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &actor) const
     {
         const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
@@ -290,7 +290,7 @@ namespace MWClass
         if(ref->mBase->mData.mWeight == 0)
             return ref->mBase->mData.mArmor;
         else
-            return ref->mBase->mData.mArmor * armorSkill / iBaseArmorSkill;
+            return ref->mBase->mData.mArmor * armorSkill / static_cast<float>(iBaseArmorSkill);
     }
 
     std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const

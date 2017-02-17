@@ -1085,14 +1085,14 @@ namespace MWClass
         float fUnarmoredBase2 = store.find("fUnarmoredBase2")->getFloat();
         int unarmoredSkill = stats.getSkill(ESM::Skill::Unarmored).getModified();
 
-        int ratings[MWWorld::InventoryStore::Slots];
+        float ratings[MWWorld::InventoryStore::Slots];
         for(int i = 0;i < MWWorld::InventoryStore::Slots;i++)
         {
             MWWorld::ContainerStoreIterator it = invStore.getSlot(i);
             if (it == invStore.end() || it->getTypeName() != typeid(ESM::Armor).name())
             {
                 // unarmored
-                ratings[i] = static_cast<int>((fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill));
+                ratings[i] = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
             }
             else
             {
