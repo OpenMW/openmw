@@ -12,11 +12,8 @@
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 #include <osg/Quat>
-#include <osg/Array>
-#include <osg/PrimitiveSet>
 
 #include "niftypes.hpp"
-
 
 namespace Nif
 {
@@ -62,11 +59,11 @@ public:
     ///This is special since the version string doesn't start with a number, and ends with "\n"
     std::string getVersionString();
 
-    void getUShorts(osg::VectorGLushort* vec, size_t size);
+    void getUShorts(std::vector<unsigned short> &vec, size_t size);
     void getFloats(std::vector<float> &vec, size_t size);
-    void getVector2s(osg::Vec2Array* vec, size_t size);
-    void getVector3s(osg::Vec3Array* vec, size_t size);
-    void getVector4s(osg::Vec4Array* vec, size_t size);
+    void getVector2s(std::vector<osg::Vec2f> &vec, size_t size);
+    void getVector3s(std::vector<osg::Vec3f> &vec, size_t size);
+    void getVector4s(std::vector<osg::Vec4f> &vec, size_t size);
     void getQuaternions(std::vector<osg::Quat> &quat, size_t size);
 };
 

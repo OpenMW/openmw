@@ -1,9 +1,6 @@
 #include "data.hpp"
 #include "node.hpp"
 
-#include <osg/Array>
-#include <osg/PrimitiveSet>
-
 namespace Nif
 {
 void NiSkinInstance::read(NIFStream *nif)
@@ -40,51 +37,33 @@ void ShapeData::read(NIFStream *nif)
 {
     int verts = nif->getUShort();
 
-    // Assign a VBO right off the bat to avoid race conditions later, in case two threads load this data into a Geometry at the same time
-    osg::ref_ptr<osg::VertexBufferObject> vbo = new osg::VertexBufferObject;
-
-    if(nif->getInt() && verts)
-    {
-        vertices = new osg::Vec3Array;
+    if(nif->getInt())
         nif->getVector3s(vertices, verts);
-        vertices->setVertexBufferObject(vbo);
-    }
 
-    if(nif->getInt() && verts)
-    {
-        normals = new osg::Vec3Array(osg::Array::BIND_PER_VERTEX);
+    if(nif->getInt())
         nif->getVector3s(normals, verts);
-        normals->setVertexBufferObject(vbo);
-    }
 
     center = nif->getVector3();
     radius = nif->getFloat();
 
-    if(nif->getInt() && verts)
-    {
-        colors = new osg::Vec4Array(osg::Array::BIND_PER_VERTEX);
+    if(nif->getInt())
         nif->getVector4s(colors, verts);
-        colors->setVertexBufferObject(vbo);
-    }
 
     // Only the first 6 bits are used as a count. I think the rest are
     // flags of some sort.
     int uvs = nif->getUShort();
     uvs &= 0x3f;
 
-    if(nif->getInt() && verts)
+    if(nif->getInt())
     {
         uvlist.resize(uvs);
         for(int i = 0;i < uvs;i++)
         {
-            osg::Vec2Array* list = uvlist[i] = new osg::Vec2Array(osg::Array::BIND_PER_VERTEX);
-            list->setVertexBufferObject(vbo);
-            nif->getVector2s(list, verts);
-
+            nif->getVector2s(uvlist[i], verts);
             // flip the texture coordinates to convert them to the OpenGL convention of bottom-left image origin
-            for (unsigned int uv=0; uv<list->size(); ++uv)
+            for (unsigned int uv=0; uv<uvlist[i].size(); ++uv)
             {
-                (*list)[uv] = osg::Vec2((*list)[uv].x(), 1.f - (*list)[uv].y());
+                uvlist[i][uv] = osg::Vec2f(uvlist[i][uv].x(), 1.f - uvlist[i][uv].y());
             }
         }
     }
@@ -99,14 +78,7 @@ void NiTriShapeData::read(NIFStream *nif)
     // We have three times as many vertices as triangles, so this
     // is always equal to tris*3.
     int cnt = nif->getInt();
-    if (cnt)
-    {
-        triangles = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES);
-        nif->getUShorts(triangles, cnt);
-
-        // Assign an EBO right off the bat to avoid race conditions later, in case two threads load this data into a Geometry at the same time
-        triangles->setElementBufferObject(new osg::ElementBufferObject);
-    }
+    nif->getUShorts(triangles, cnt);
 
     // Read the match list, which lists the vertices that are equal to
     // vertices. We don't actually need need this for anything, so
@@ -132,9 +104,8 @@ void NiAutoNormalParticlesData::read(NIFStream *nif)
 
     if(nif->getInt())
     {
-        int numVerts = vertices->size();
         // Particle sizes
-        nif->getFloats(sizes, numVerts);
+        nif->getFloats(sizes, vertices.size());
     }
 }
 
@@ -144,9 +115,8 @@ void NiRotatingParticlesData::read(NIFStream *nif)
 
     if(nif->getInt())
     {
-        int numVerts = vertices->size();
         // Rotation quaternions.
-        nif->getQuaternions(rotations, numVerts);
+        nif->getQuaternions(rotations, vertices.size());
     }
 }
 
@@ -265,7 +235,6 @@ void NiMorphData::read(NIFStream *nif)
     {
         mMorphs[i].mKeyFrames.reset(new FloatKeyMap);
         mMorphs[i].mKeyFrames->read(nif, true);
-        mMorphs[i].mVertices = new osg::Vec3Array;
         nif->getVector3s(mMorphs[i].mVertices, vertCount);
     }
 }
