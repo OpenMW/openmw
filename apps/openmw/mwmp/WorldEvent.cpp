@@ -68,7 +68,6 @@ void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
             containerItem.count = itemPtr.getRefData().getCount();
             containerItem.charge = itemPtr.getCellRef().getCharge();
             containerItem.goldValue = itemPtr.getCellRef().getGoldValue();
-            containerItem.owner = itemPtr.getCellRef().getOwner();
 
             worldObject.containerChanges.items.push_back(containerItem);
         }
@@ -109,10 +108,7 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
             for (unsigned int i = 0; i < worldObject.containerChanges.count; i++)
             {
                 ContainerItem containerItem = worldObject.containerChanges.items.at(i);
-                MWWorld::Ptr ownerPtr = MWBase::Environment::get().getWorld()->searchPtr(containerItem.owner, false);
-
-                if (ownerPtr.isEmpty())
-                    ownerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                MWWorld::Ptr ownerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
                 if (action == BaseEvent::ADD || action == BaseEvent::SET)
                 {
@@ -140,8 +136,7 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
                         {
                             if (iter->getCellRef().getCharge() == containerItem.charge &&
                                 iter->getCellRef().getGoldValue() == containerItem.goldValue &&
-                                iter->getRefData().getCount() == containerItem.count &&
-                                iter->getCellRef().getOwner() == containerItem.owner)
+                                iter->getRefData().getCount() == containerItem.count)
                             {
                                 containerStore.remove(*iter, containerItem.actionCount, ownerPtr);
                             }

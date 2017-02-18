@@ -27,7 +27,6 @@
     {"GetContainerItemCount",     WorldFunctions::GetContainerItemCount},\
     {"GetContainerItemCharge",    WorldFunctions::GetContainerItemCharge},\
     {"GetContainerItemGoldValue", WorldFunctions::GetContainerItemGoldValue},\
-    {"GetContainerItemOwner",     WorldFunctions::GetContainerItemOwner},\
     \
     {"SetBaseEventCell",          WorldFunctions::SetBaseEventCell},\
     {"SetBaseEventAction",        WorldFunctions::SetBaseEventAction},\
@@ -91,7 +90,6 @@ public:
     static int GetContainerItemCount(unsigned int objectIndex, unsigned int itemIndex) noexcept;
     static int GetContainerItemCharge(unsigned int objectIndex, unsigned int itemIndex) noexcept;
     static int GetContainerItemGoldValue(unsigned int objectIndex, unsigned int itemIndex) noexcept;
-    static const char *GetContainerItemOwner(unsigned int objectIndex, unsigned int itemIndex) noexcept;
 
     static void SetBaseEventCell(const char* cellDescription) noexcept;
     static void SetBaseEventAction(int action) noexcept;

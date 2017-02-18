@@ -138,12 +138,6 @@ int WorldFunctions::GetContainerItemGoldValue(unsigned int objectIndex, unsigned
         .containerChanges.items.at(itemIndex).goldValue;
 }
 
-const char *WorldFunctions::GetContainerItemOwner(unsigned int objectIndex, unsigned int itemIndex) noexcept
-{
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(objectIndex)
-        .containerChanges.items.at(itemIndex).owner.c_str();
-}
-
 void WorldFunctions::SetBaseEventCell(const char* cellDescription) noexcept
 {
     std::string description = cellDescription;
