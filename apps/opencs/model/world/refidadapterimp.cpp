@@ -756,7 +756,8 @@ CSMWorld::NpcColumns::NpcColumns (const ActorColumns& actorColumns)
   mAttributes(NULL),
   mSkills(NULL),
   mMisc(NULL),
-  mBloodType(NULL)
+  mBloodType(NULL),
+  mGender(NULL)
 {}
 
 CSMWorld::NpcRefIdAdapter::NpcRefIdAdapter (const NpcColumns& columns)
@@ -808,6 +809,15 @@ QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const Re
         return 0;
     }
 
+    if (column == mColumns.mGender)
+    {
+        // Implemented this way to allow additional gender types in the future.
+        if ((record.get().mFlags & ESM::NPC::Female) == ESM::NPC::Female)
+            return 1;
+
+        return 0;
+    }
+
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
 
@@ -845,6 +855,14 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
             npc.mFlags = (npc.mFlags & mask) | ESM::NPC::Metal;
         else
             npc.mFlags = npc.mFlags & mask;
+    }
+    else if (column == mColumns.mGender)
+    {
+        // Implemented this way to allow additional gender types in the future.
+        if (value.toInt() == 1)
+            npc.mFlags = (npc.mFlags & ~ESM::NPC::Female) | ESM::NPC::Female;
+        else
+            npc.mFlags = npc.mFlags & ~ESM::NPC::Female;
     }
     else
     {
