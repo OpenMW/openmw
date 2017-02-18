@@ -852,6 +852,7 @@ namespace CSMWorld
         const RefIdColumn *mSkills;     // depends on npc type
         const RefIdColumn *mMisc;       // may depend on npc type, e.g. FactionID
         const RefIdColumn *mBloodType;
+        const RefIdColumn *mGender;
 
         NpcColumns (const ActorColumns& actorColumns);
     };

@@ -276,7 +276,7 @@ namespace CSMWorld
             ColumnId_NpcMisc = 251,
             ColumnId_Level = 252,
             ColumnId_NpcFactionID = 253,
-            // unused
+            ColumnId_GenderNpc = 254,
             ColumnId_Mana = 255,
             ColumnId_Fatigue = 256,
             ColumnId_NpcDisposition = 257,
