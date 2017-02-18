@@ -177,6 +177,8 @@ void MasterClient::Start()
 
 void MasterClient::Stop()
 {
+    if(!sRun)
+        return;
     sRun = false;
     if(thrQuery.joinable())
         thrQuery.join();
