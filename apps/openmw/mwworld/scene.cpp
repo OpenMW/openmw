@@ -254,7 +254,7 @@ namespace MWWorld
         // Added by tes3mp
         //
         // LocalPlayer has unloaded a cell, so store it
-        mwmp::Main::get().getLocalPlayer()->storeCellState(*(*iter)->getCell(), 1);
+        mwmp::Main::get().getLocalPlayer()->storeCellState(*(*iter)->getCell(), mwmp::CellState::UNLOAD);
     }
 
     void Scene::loadCell (CellStore *cell, Loading::Listener* loadingListener, bool respawn)
@@ -323,7 +323,7 @@ namespace MWWorld
             // Added by tes3mp
             //
             // LocalPlayer has loaded a cell, so store it
-            mwmp::Main::get().getLocalPlayer()->storeCellState(*cell->getCell(), 0);
+            mwmp::Main::get().getLocalPlayer()->storeCellState(*cell->getCell(), mwmp::CellState::LOAD);
         }
 
         mPreloader->notifyLoaded(cell);
