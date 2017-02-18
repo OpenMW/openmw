@@ -30,46 +30,36 @@ void ScriptFunctions::GetArguments(std::vector<boost::any> &params, va_list args
             switch (c)
             {
                 case 'i':
-                {
                     params.emplace_back(va_arg(args, unsigned int));
                     break;
-                }
 
                 case 'q':
-                {
                     params.emplace_back(va_arg(args, signed int));
                     break;
-                }
 
                 case 'l':
-                {
                     params.emplace_back(va_arg(args, unsigned long long));
                     break;
-                }
 
                 case 'w':
-                {
                     params.emplace_back(va_arg(args, signed long long));
                     break;
-                }
 
                 case 'f':
-                {
                     params.emplace_back(va_arg(args, double));
                     break;
-                }
 
                 case 'p':
-                {
                     params.emplace_back(va_arg(args, void*));
                     break;
-                }
 
                 case 's':
-                {
                     params.emplace_back(va_arg(args, const char*));
                     break;
-                }
+
+                case 'b':
+                    params.emplace_back(va_arg(args, int));
+                    break;
 
                 default:
                     throw runtime_error("C++ call: Unknown argument identifier " + c);

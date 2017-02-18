@@ -184,6 +184,9 @@ boost::any LangLua::Call(const char *name, const char *argl, const std::vector<b
                 luabridge::Stack<const char *>::push(lua, boost::any_cast<const char *>(args.at(i)));
                 break;
 
+            case 'b':
+                luabridge::Stack<bool>::push(lua, boost::any_cast<int>(args.at(i)));
+                break;
             default:
                 throw runtime_error("Lua call: Unknown argument identifier " + argl[i]);
         }
