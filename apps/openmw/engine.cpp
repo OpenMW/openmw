@@ -623,6 +623,8 @@ void OMW::Engine::go()
 {
     assert (!mContentFiles.empty());
 
+    std::cout << "OSG version: " << osgGetVersion() << std::endl;
+
     mViewer = new osgViewer::Viewer;
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
