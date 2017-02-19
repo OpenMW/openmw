@@ -598,7 +598,14 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+
+        // Until we have a timestamp-based system, send packets pertaining to more
+        // than one container (i.e. replies to server requests for container contents)
+        // only to players who have the container's cell loaded
+        if (baseEvent->action == BaseEvent::SET && baseEvent->objectChanges.count > 1)
+            CellController::get()->getCell(&baseEvent->cell)->sendToLoaded(myPacket, baseEvent);
+        else
+            myPacket->Send(baseEvent, true);
 
         Script::Call<Script::CallbackIdentity("OnContainer")>(
             player->getId(),
