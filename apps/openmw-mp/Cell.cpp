@@ -133,7 +133,7 @@ void CellController::removePlayer(Cell *cell, Player *player)
 
     if(cell->players.empty())
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Deleting empty cell from memory: %s", player->npc.mName, player->getId(), cell->cell.getDescription());
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Deleting empty cell from memory: %s", player->npc.mName, player->getId(), cell->cell.getDescription().c_str());
         auto it = find(cells.begin(), cells.end(), cell);
         delete *it;
         cells.erase(it);
@@ -151,7 +151,7 @@ void CellController::update(Player *player)
         }
         else
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player %s (%d) unloaded cell: %s", player->npc.mName, player->getId(), cell.cell.getDescription());
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player %s (%d) unloaded cell: %s", player->npc.mName, player->getId(), cell.cell.getDescription().c_str());
             Cell *c;
             if(!cell.cell.isExterior())
                 c = getCellByID(cell.cell.mName);
