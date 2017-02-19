@@ -135,7 +135,7 @@ namespace MWClass
         const std::string trapActivationSound = "Disarm Trap Fail";
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
+        const MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
 
         bool isLocked = ptr.getCellRef().getLockLevel() > 0;
         bool isTrapped = !ptr.getCellRef().getTrap().empty();

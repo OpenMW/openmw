@@ -140,7 +140,7 @@ namespace MWScript
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
                     std::string itemName;
-                    for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
+                    for (MWWorld::ConstContainerStoreIterator iter(store.cbegin()); iter != store.cend(); ++iter)
                         if (::Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), item))
                             itemName = iter->getClass().getName(*iter);
 
@@ -316,9 +316,9 @@ namespace MWScript
                     runtime.pop();
 
                     int count = 0;
-                    MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
-                    for (MWWorld::ContainerStoreIterator it = invStore.begin(MWWorld::ContainerStore::Type_Miscellaneous);
-                         it != invStore.end(); ++it)
+                    const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
+                    for (MWWorld::ConstContainerStoreIterator it = invStore.cbegin(MWWorld::ContainerStore::Type_Miscellaneous);
+                         it != invStore.cend(); ++it)
                     {
                         if (::Misc::StringUtils::ciEqual(it->getCellRef().getSoul(), name))
                             count += it->getRefData().getCount();

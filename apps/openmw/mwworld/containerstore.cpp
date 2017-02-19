@@ -117,16 +117,6 @@ MWWorld::ContainerStore::ContainerStore() : mListener(NULL), mCachedWeight (0), 
 
 MWWorld::ContainerStore::~ContainerStore() {}
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::begin (int mask)
-{
-    return ContainerStoreIterator (mask, this);
-}
-
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
-{
-    return ContainerStoreIterator (this);
-}
-
 MWWorld::ConstContainerStoreIterator MWWorld::ContainerStore::cbegin (int mask) const
 {
     return ConstContainerStoreIterator (mask, this);
@@ -135,6 +125,26 @@ MWWorld::ConstContainerStoreIterator MWWorld::ContainerStore::cbegin (int mask) 
 MWWorld::ConstContainerStoreIterator MWWorld::ContainerStore::cend() const
 {
     return ConstContainerStoreIterator (this);
+}
+
+MWWorld::ConstContainerStoreIterator MWWorld::ContainerStore::begin (int mask) const
+{
+    return cbegin(mask);
+}
+
+MWWorld::ConstContainerStoreIterator MWWorld::ContainerStore::end() const
+{
+    return cend();
+}
+
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::begin (int mask)
+{
+    return ContainerStoreIterator (mask, this);
+}
+
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
+{
+    return ContainerStoreIterator (this);
 }
 
 int MWWorld::ContainerStore::count(const std::string &id)
@@ -199,7 +209,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::
     return retval;
 }
 
-bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
+bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2) const
 {
     const MWWorld::Class& cls1 = ptr1.getClass();
     const MWWorld::Class& cls2 = ptr2.getClass();
@@ -800,7 +810,7 @@ void MWWorld::ContainerStore::readState (const ESM::InventoryState& inventory)
 
 template<class PtrType>
 template<class T>
-void MWWorld::ContainerStoreIteratorBase<PtrType>::copy(const ContainerStoreIteratorBase<T>& src)
+void MWWorld::ContainerStoreIteratorBase<PtrType>::copy (const ContainerStoreIteratorBase<T>& src)
 {
     mType = src.mType;
     mMask = src.mMask;

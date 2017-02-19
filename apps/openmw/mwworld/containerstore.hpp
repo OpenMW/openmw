@@ -119,13 +119,13 @@ namespace MWWorld
 
             virtual ContainerStore* clone() { return new ContainerStore(*this); }
 
-            ContainerStoreIterator begin (int mask = Type_All);
-
-            ContainerStoreIterator end();
-
             ConstContainerStoreIterator cbegin (int mask = Type_All) const;
-            
             ConstContainerStoreIterator cend() const;
+            ConstContainerStoreIterator begin (int mask = Type_All) const;
+            ConstContainerStoreIterator end() const;
+            
+            ContainerStoreIterator begin (int mask = Type_All);
+            ContainerStoreIterator end();
 
             virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner=false);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
@@ -176,7 +176,7 @@ namespace MWWorld
 
         public:
 
-            virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2);
+            virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;
             ///< @return true if the two specified objects can stack with each other
 
             void fill (const ESM::InventoryList& items, const std::string& owner);
