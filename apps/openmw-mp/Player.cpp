@@ -135,3 +135,8 @@ std::chrono::steady_clock::time_point Player::getLastAttackerTime()
 {
     return lastAttackerTime;
 }
+
+CellController::TContainer Player::GetCells()
+{
+    return cells;
+}
