@@ -141,7 +141,7 @@ CellController::TContainer Player::getCells()
     return cells;
 }
 
-void Player::sendToNearest(mwmp::PlayerPacket *myPacket)
+void Player::sendToLoaded(mwmp::PlayerPacket *myPacket)
 {
     std::list <Player*> plList;
 

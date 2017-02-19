@@ -152,7 +152,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Read(player);
             //myPacket->Send(player, true); //send to other clients
 
-            player->sendToNearest(myPacket);
+            player->sendToLoaded(myPacket);
 
         }
 
@@ -213,7 +213,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Read(player);
             //myPacket->Send(player, true);
 
-            player->sendToNearest(myPacket);
+            player->sendToLoaded(myPacket);
 
             Script::Call<Script::CallbackIdentity("OnPlayerAttributesChange")>(player->getId());
         }
@@ -227,7 +227,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         {
             myPacket->Read(player);
             //myPacket->Send(player, true);
-            player->sendToNearest(myPacket);
+            player->sendToLoaded(myPacket);
 
             Script::Call<Script::CallbackIdentity("OnPlayerSkillsChange")>(player->getId());
         }
@@ -254,7 +254,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         myPacket->Read(player);
         //myPacket->Send(player, true);
 
-        player->sendToNearest(myPacket);
+        player->sendToLoaded(myPacket);
 
         Script::Call<Script::CallbackIdentity("OnPlayerEquipmentChange")>(player->getId());
 
@@ -318,7 +318,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             }
 
             //myPacket->Send(player, true);
-            player->sendToNearest(myPacket);
+            player->sendToLoaded(myPacket);
             playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->RequestData(player->attack.target);
         }
         break;
@@ -330,7 +330,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         myPacket->Read(player);
         //myPacket->Send(player, true);
 
-        player->sendToNearest(myPacket);
+        player->sendToLoaded(myPacket);
 
         break;
     }
@@ -384,7 +384,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         myPacket->Read(player);
         //myPacket->Send(player, true);
 
-        player->sendToNearest(myPacket);
+        player->sendToLoaded(myPacket);
 
         break;
     }

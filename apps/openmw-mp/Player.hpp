@@ -71,7 +71,7 @@ public:
     virtual ~Player();
 
     CellController::TContainer getCells();
-    void sendToNearest(mwmp::PlayerPacket *myPacket);
+    void sendToLoaded(mwmp::PlayerPacket *myPacket);
 
     void doForNearest(std::function<void (Player *pl, Player *other)> func);
 
