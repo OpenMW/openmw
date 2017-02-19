@@ -189,6 +189,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             });
 
             myPacket->Send(player, true); //send to other clients
+
             Script::Call<Script::CallbackIdentity("OnPlayerCellChange")>(player->getId());
         }
         else
@@ -598,6 +599,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(baseEvent);
+
+        LOG_APPEND(Log::LOG_WARN, "- action: %i", baseEvent->action);
 
         // Until we have a timestamp-based system, send packets pertaining to more
         // than one container (i.e. replies to server requests for container contents)

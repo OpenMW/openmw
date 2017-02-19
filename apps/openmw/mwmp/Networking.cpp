@@ -747,6 +747,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         if (!ptrCellStore) return;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONTAINER");
+        LOG_APPEND(Log::LOG_WARN, "- action: %i", event->action);
 
         // If we've received a request for information, comply with it
         if (event->action == mwmp::BaseEvent::REQUEST)
