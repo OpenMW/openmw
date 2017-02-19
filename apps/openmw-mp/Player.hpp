@@ -17,6 +17,8 @@
 
 #include <components/openmw-mp/Log.hpp>
 #include <components/openmw-mp/Base/BasePlayer.hpp>
+#include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
+#include "Cell.hpp"
 
 struct Player;
 typedef std::map<RakNet::RakNetGUID, Player*> TPlayers;
@@ -38,6 +40,7 @@ private:
 
 class Player : public mwmp::BasePlayer
 {
+    friend class Cell;
     unsigned short id;
 public:
 
@@ -67,12 +70,18 @@ public:
 
     virtual ~Player();
 
+    CellController::TContainer getCells();
+    void sendToLoaded(mwmp::PlayerPacket *myPacket);
+
+    void forEachLoaded(std::function<void(Player *pl, Player *other)> func);
+
 public:
     mwmp::InventoryChanges inventoryChangesBuffer;
     mwmp::SpellbookChanges spellbookChangesBuffer;
     mwmp::JournalChanges journalChangesBuffer;
 
 private:
+    CellController::TContainer cells;
     bool handshakeState;
     int loadState;
     unsigned short lastAttacker;

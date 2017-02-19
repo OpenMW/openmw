@@ -69,6 +69,7 @@ set(SERVER
     Networking.cpp
     Utils.cpp
     MasterClient.cpp
+    Cell.cpp
     Script/Script.cpp Script/ScriptFunction.cpp
     Script/ScriptFunctions.cpp
 
