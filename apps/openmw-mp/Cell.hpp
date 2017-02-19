@@ -8,6 +8,8 @@
 #include <deque>
 #include <string>
 #include <components/esm/records.hpp>
+#include <components/openmw-mp/Base/BaseEvent.hpp>
+#include <components/openmw-mp/Packets/World/WorldPacket.hpp>
 
 class Player;
 class Cell;
@@ -60,8 +62,10 @@ public:
     void removePlayer(Player *player);
 
     TPlayers getPlayers();
+    void sendToLoaded(mwmp::WorldPacket *worldPacket, mwmp::BaseEvent *baseEvent);
 
     std::string getDescription() const;
+
 
 private:
     TPlayers players;

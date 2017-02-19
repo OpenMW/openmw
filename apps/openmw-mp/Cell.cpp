@@ -37,6 +37,23 @@ Cell::TPlayers Cell::getPlayers()
     return players;
 }
 
+void Cell::sendToLoaded(mwmp::WorldPacket *worldPacket, mwmp::BaseEvent *baseEvent)
+{
+    std::list <Player*> plList;
+
+    for (auto pl :getPlayers())
+        plList.push_back(pl);
+
+    plList.sort();
+    plList.unique();
+
+    for (auto pl : plList)
+    {
+        if (pl->guid == baseEvent->guid) continue;
+            worldPacket->Send(baseEvent, pl->guid);
+    }
+}
+
 std::string Cell::getDescription() const
 {
     return cell.getDescription();
