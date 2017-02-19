@@ -15,6 +15,7 @@
 
 #include "Networking.hpp"
 #include "MasterClient.hpp"
+#include "Cell.hpp"
 
 using namespace mwmp;
 using namespace std;
@@ -28,6 +29,8 @@ Networking::Networking(RakNet::RakPeerInterface *peer)
     sThis = this;
     this->peer = peer;
     players = Players::getPlayers();
+
+    CellController::Create();
 
     playerController = new PlayerPacketController(peer);
     worldController = new WorldPacketController(peer);
@@ -45,6 +48,8 @@ Networking::Networking(RakNet::RakPeerInterface *peer)
 Networking::~Networking()
 {
     Script::Call<Script::CallbackIdentity("OnServerExit")>(false);
+
+    CellController::Destroy();
 
     sThis = 0;
     delete playerController;
@@ -179,6 +184,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             player->npc.mName.c_str());
 
         myPacket->Read(player);
+
+        CellController::Get()->update(player);
 
         Script::Call<Script::CallbackIdentity("OnPlayerCellState")>(player->getId());
 
