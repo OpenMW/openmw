@@ -59,6 +59,8 @@ public:
     void removePlayer(Player *player);
 
     TPlayers getPlayers();
+
+    std::string getDescription() const;
 private:
     TPlayers players;
     ESM::Cell cell;

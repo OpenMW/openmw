@@ -29,14 +29,17 @@ void Cell::removePlayer(Player *player)
             players.erase(it);
             return;
         }
-
     }
-
 }
 
 Cell::TPlayers Cell::getPlayers()
 {
     return players;
+}
+
+std::string Cell::getDescription() const
+{
+    return cell.getDescription();
 }
 
 CellController::CellController()
@@ -90,7 +93,6 @@ Cell *CellController::getCellByID(std::string cellid)
 
 Cell *CellController::addCell(ESM::Cell cellData)
 {
-    
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Loaded cells: %d", cells.size());
     auto it = find_if(cells.begin(), cells.end(), [cellData](const Cell *c) {
         //return c->cell.sRecordId == cellData.sRecordId; // Currently we cannot compare because plugin lists can be loaded in different order
@@ -128,7 +130,6 @@ void CellController::removeCell(Cell *cell)
 
 void CellController::removePlayer(Cell *cell, Player *player)
 {
-
     cell->removePlayer(player);
 
     if (cell->players.empty())
