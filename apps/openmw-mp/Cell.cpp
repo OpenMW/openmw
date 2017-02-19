@@ -142,7 +142,7 @@ void CellController::removePlayer(Cell *cell, Player *player)
 
 void CellController::deletePlayer(Player *player)
 {
-    for_each (cells.begin(), cells.end(), [&player](Cell *cell) {
+    for_each (player->getCells().begin(), player->getCells().end(), [&player](Cell *cell) {
         for (auto it = cell->begin(); it != cell->end(); ++it)
         {
             if (*it == player)
