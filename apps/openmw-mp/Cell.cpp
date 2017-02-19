@@ -19,7 +19,7 @@ void Cell::addPlayer(Player *player)
 
 void Cell::removePlayer(Player *player)
 {
-    for(Iterator it = players.begin(); it != players.end(); it++)
+    for(Iterator it = begin(); it != end(); it++)
     {
         if(*it == player)
         {
@@ -166,4 +166,14 @@ void CellController::update(Player *player)
 Cell::Cell(ESM::Cell cell): cell(cell)
 {
 
+}
+
+Cell::Iterator Cell::begin()
+{
+    return players.begin();
+}
+
+Cell::Iterator Cell::end()
+{
+    return players.end();
 }

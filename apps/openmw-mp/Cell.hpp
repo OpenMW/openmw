@@ -50,6 +50,9 @@ public:
     Cell(ESM::Cell cell);
     typedef std::deque<Player*> TPlayers;
     typedef TPlayers::iterator Iterator;
+    
+    Iterator begin();
+    Iterator end();
 
     void addPlayer(Player *player);
     void removePlayer(Player *player);
