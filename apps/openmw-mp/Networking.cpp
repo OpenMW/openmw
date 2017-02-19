@@ -171,14 +171,21 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 player->cell.getDescription().c_str());
 
             player->doForNearest([this](Player *pl, Player *other){
-                const RakNet::RakNetGUID &guid = pl->guid;
-                playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(other, guid);
-                playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(other, guid);
-                playerController->GetPacket(ID_PLAYER_SKILL)->Send(other, guid);
-                //playerController->GetPacket(ID_PLAYER_POS)->Send(pl, guid);
-                playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(other, guid);
-                playerController->GetPacket(ID_PLAYER_ATTACK)->Send(other, guid);
-                playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(other, guid);
+                playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(other, pl->guid);
+                playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(other, pl->guid);
+                playerController->GetPacket(ID_PLAYER_SKILL)->Send(other, pl->guid);
+                playerController->GetPacket(ID_PLAYER_POS)->Send(pl, pl->guid);
+                playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(other, pl->guid);
+                playerController->GetPacket(ID_PLAYER_ATTACK)->Send(other, pl->guid);
+                playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(other, pl->guid);
+
+                playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(pl, other->guid);
+                playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(pl, other->guid);
+                playerController->GetPacket(ID_PLAYER_SKILL)->Send(pl, other->guid);
+                playerController->GetPacket(ID_PLAYER_POS)->Send(pl, other->guid);
+                playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(pl, other->guid);
+                playerController->GetPacket(ID_PLAYER_ATTACK)->Send(pl, other->guid);
+                playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(pl, other->guid);
             });
 
             myPacket->Send(player, true); //send to other clients
