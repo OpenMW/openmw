@@ -34,6 +34,7 @@ public:
     void removePlayer(Cell *cell, Player *player);
     void deletePlayer(Player *player);
 
+    Cell *getCell(ESM::Cell *esmCell);
     Cell *getCellByXY(int x, int y);
     Cell *getCellByName(std::string cellName);
 
@@ -61,6 +62,7 @@ public:
     TPlayers getPlayers();
 
     std::string getDescription() const;
+
 private:
     TPlayers players;
     ESM::Cell cell;

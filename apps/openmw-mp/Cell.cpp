@@ -71,6 +71,15 @@ CellController *CellController::get()
     return sThis;
 }
 
+Cell *CellController::getCell(ESM::Cell *esmCell)
+{
+    if (esmCell->isExterior())
+        return getCellByXY(esmCell->mData.mX, esmCell->mData.mY);
+    else
+        return getCellByName(esmCell->mName);
+}
+
+
 Cell *CellController::getCellByXY(int x, int y)
 {
     auto it = find_if(cells.begin(), cells.end(), [x, y](const Cell *c) {
