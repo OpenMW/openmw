@@ -35,7 +35,7 @@ public:
     void deletePlayer(Player *player);
 
     Cell *getCellByXY(int x, int y);
-    Cell *getCellByID(std::string cellid);
+    Cell *getCellByName(std::string cellName);
 
     void update(Player *player);
 

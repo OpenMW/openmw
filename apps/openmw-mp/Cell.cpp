@@ -81,10 +81,10 @@ Cell *CellController::getCellByXY(int x, int y)
     return *it;
 }
 
-Cell *CellController::getCellByID(std::string cellid)
+Cell *CellController::getCellByName(std::string cellName)
 {
-    auto it = find_if(cells.begin(), cells.end(), [cellid](const Cell *c) {
-        return c->cell.mName == cellid;
+    auto it = find_if(cells.begin(), cells.end(), [cellName](const Cell *c) {
+        return c->cell.mName == cellName;
     });
     if (it == cells.end())
         return nullptr;
@@ -169,7 +169,7 @@ void CellController::update(Player *player)
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player %s (%d) unloaded cell: %s", player->npc.mName, player->getId(), cell.cell.getDescription().c_str());
             Cell *c;
             if (!cell.cell.isExterior())
-                c = getCellByID(cell.cell.mName);
+                c = getCellByName(cell.cell.mName);
             else
                 c = getCellByXY(cell.cell.getGridX(), cell.cell.getGridY());
 
