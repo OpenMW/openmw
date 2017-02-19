@@ -54,7 +54,7 @@ void Players::newPlayer(RakNet::RakNetGUID guid)
 
 Player *Players::getPlayer(RakNet::RakNetGUID guid)
 {
-    if(players.count(guid) == 0)
+    if (players.count(guid) == 0)
         return nullptr;
     return players[guid];
 }
@@ -147,16 +147,16 @@ void Player::sendToLoaded(mwmp::PlayerPacket *myPacket)
 {
     std::list <Player*> plList;
 
-    for(auto cell : getCells())
+    for (auto cell : getCells())
         for (auto pl : *cell)
             plList.push_back(pl);
 
     plList.sort();
     plList.unique();
 
-    for(auto pl : plList)
+    for (auto pl : plList)
     {
-        if(pl == this) continue;
+        if (pl == this) continue;
         myPacket->Send(this, pl->guid);
     }
 }
@@ -165,16 +165,16 @@ void Player::forEachLoaded(std::function<void(Player *pl, Player *other)> func)
 {
     std::list <Player*> plList;
 
-    for(auto cell : getCells())
+    for (auto cell : getCells())
         for (auto pl : *cell)
             plList.push_back(pl);
 
     plList.sort();
     plList.unique();
 
-    for(auto pl : plList)
+    for (auto pl : plList)
     {
-        if(pl == this) continue;
+        if (pl == this) continue;
         func(this, pl);
     }
 }

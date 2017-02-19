@@ -152,7 +152,7 @@ void MasterClient::Update()
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Update rate is too low, and the master server has deleted information about"
                     " the server. Trying low rate...");
-            if((timeout - step_rate) >= step_rate)
+            if ((timeout - step_rate) >= step_rate)
                 SetUpdateRate(timeout - step_rate);
             update = false;
         }
@@ -177,10 +177,10 @@ void MasterClient::Start()
 
 void MasterClient::Stop()
 {
-    if(!sRun)
+    if (!sRun)
         return;
     sRun = false;
-    if(thrQuery.joinable())
+    if (thrQuery.joinable())
         thrQuery.join();
 }
 

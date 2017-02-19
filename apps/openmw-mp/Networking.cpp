@@ -857,7 +857,7 @@ int Networking::mainLoop()
                     RakNet::BitStream bs;
                     bs.Write((unsigned char) ID_MASTER_QUERY);
                     bs.Write(Players::getPlayers()->size());
-                    for(auto player : *Players::getPlayers())
+                    for (auto player : *Players::getPlayers())
                         bs.Write(RakNet::RakString(player.second->npc.mName.c_str()));
                     bs.Write(0); // plugins
                     peer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
