@@ -15,6 +15,8 @@ void Players::deletePlayer(RakNet::RakNetGUID guid)
 
     if (players[guid] != 0)
     {
+        CellController::get()->deletePlayer(players[guid]);
+
         LOG_APPEND(Log::LOG_INFO, "- Emptying slot %i",
             players[guid]->getId());
 

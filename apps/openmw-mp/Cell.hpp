@@ -32,6 +32,7 @@ public:
     void removeCell(Cell *);
 
     void removePlayer(Cell *cell, Player *player);
+    void deletePlayer(Player *player);
 
     Cell *getCellByXY(int x, int y);
     Cell *getCellByID(std::string cellid);
