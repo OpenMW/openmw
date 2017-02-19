@@ -136,7 +136,21 @@ std::chrono::steady_clock::time_point Player::getLastAttackerTime()
     return lastAttackerTime;
 }
 
-CellController::TContainer Player::GetCells()
+CellController::TContainer Player::getCells()
 {
     return cells;
+}
+
+void Player::sendToNearest(mwmp::PlayerPacket *myPacket)
+{
+    for(auto cell : getCells())
+    {
+        for(auto pl : *cell)
+        {
+            if(pl == this)
+                continue;
+
+            myPacket->Send(this, pl->guid);
+        }
+    }
 }

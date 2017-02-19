@@ -150,7 +150,10 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         if (!player->creatureStats.mDead)
         {
             myPacket->Read(player);
-            myPacket->Send(player, true); //send to other clients
+            //myPacket->Send(player, true); //send to other clients
+
+            player->sendToNearest(myPacket);
+
         }
 
         break;
@@ -197,7 +200,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         if (!player->creatureStats.mDead)
         {
             myPacket->Read(player);
-            myPacket->Send(player, true);
+            //myPacket->Send(player, true);
+
+            player->sendToNearest(myPacket);
 
             Script::Call<Script::CallbackIdentity("OnPlayerAttributesChange")>(player->getId());
         }
@@ -210,7 +215,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         if (!player->creatureStats.mDead)
         {
             myPacket->Read(player);
-            myPacket->Send(player, true);
+            //myPacket->Send(player, true);
+            player->sendToNearest(myPacket);
 
             Script::Call<Script::CallbackIdentity("OnPlayerSkillsChange")>(player->getId());
         }
@@ -223,7 +229,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         if (!player->creatureStats.mDead)
         {
             myPacket->Read(player);
-            myPacket->Send(player, true);
+            //myPacket->Send(player, true);
 
             Script::Call<Script::CallbackIdentity("OnPlayerLevelChange")>(player->getId());
         }
@@ -235,7 +241,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         DEBUG_PRINTF("ID_PLAYER_EQUIPMENT\n");
 
         myPacket->Read(player);
-        myPacket->Send(player, true);
+        //myPacket->Send(player, true);
+
+        player->sendToNearest(myPacket);
 
         Script::Call<Script::CallbackIdentity("OnPlayerEquipmentChange")>(player->getId());
 
@@ -298,7 +306,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 }
             }
 
-            myPacket->Send(player, true);
+            //myPacket->Send(player, true);
+            player->sendToNearest(myPacket);
             playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->RequestData(player->attack.target);
         }
         break;
@@ -308,7 +317,10 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
         DEBUG_PRINTF("ID_PLAYER_DYNAMICSTATS\n");
         myPacket->Read(player);
-        myPacket->Send(player, true);
+        //myPacket->Send(player, true);
+
+        player->sendToNearest(myPacket);
+
         break;
     }
 
@@ -359,7 +371,10 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
         DEBUG_PRINTF("ID_PLAYER_DRAWSTATE\n");
         myPacket->Read(player);
-        myPacket->Send(player, true);
+        //myPacket->Send(player, true);
+
+        player->sendToNearest(myPacket);
+
         break;
     }
 
