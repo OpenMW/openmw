@@ -143,28 +143,36 @@ CellController::TContainer Player::getCells()
 
 void Player::sendToNearest(mwmp::PlayerPacket *myPacket)
 {
-    for(auto cell : getCells())
-    {
-        for(auto pl : *cell)
-        {
-            if(pl == this)
-                continue;
+    std::list <Player*> plList;
 
-            myPacket->Send(this, pl->guid);
-        }
+    for(auto cell : getCells())
+        for (auto pl : *cell)
+            plList.push_back(pl);
+
+    plList.sort();
+    plList.unique();
+
+    for(auto pl : plList)
+    {
+        if(pl == this) continue;
+        myPacket->Send(this, pl->guid);
     }
 }
 
 void Player::doForNearest(std::function<void (Player *pl, Player *other)> func)
 {
-    for(auto cell : getCells())
-    {
-        for(auto pl : *cell)
-        {
-            if(pl == this)
-                continue;
+    std::list <Player*> plList;
 
-            func(this, pl);
-        }
+    for(auto cell : getCells())
+        for (auto pl : *cell)
+            plList.push_back(pl);
+
+    plList.sort();
+    plList.unique();
+
+    for(auto pl : plList)
+    {
+        if(pl == this) continue;
+        func(this, pl);
     }
 }
