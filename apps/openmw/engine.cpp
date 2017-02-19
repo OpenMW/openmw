@@ -646,6 +646,8 @@ void OMW::Engine::go()
     if(!mwmp::Main::init(mContentFiles))
         return;
 
+    std::cout << "OSG version: " << osgGetVersion() << std::endl;
+
     mViewer = new osgViewer::Viewer;
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
