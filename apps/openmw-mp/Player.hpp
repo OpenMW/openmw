@@ -73,7 +73,7 @@ public:
     CellController::TContainer getCells();
     void sendToLoaded(mwmp::PlayerPacket *myPacket);
 
-    void doForNearest(std::function<void (Player *pl, Player *other)> func);
+    void forEachLoaded(std::function<void(Player *pl, Player *other)> func);
 
 public:
     mwmp::InventoryChanges inventoryChangesBuffer;

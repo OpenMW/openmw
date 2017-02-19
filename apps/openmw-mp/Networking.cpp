@@ -170,7 +170,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             LOG_APPEND(Log::LOG_INFO, "- Moved to %s",
                 player->cell.getDescription().c_str());
 
-            player->doForNearest([this](Player *pl, Player *other){
+            player->forEachLoaded([this](Player *pl, Player *other) {
                 playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(other, pl->guid);
                 playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(other, pl->guid);
                 playerController->GetPacket(ID_PLAYER_SKILL)->Send(other, pl->guid);

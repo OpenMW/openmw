@@ -159,7 +159,7 @@ void Player::sendToLoaded(mwmp::PlayerPacket *myPacket)
     }
 }
 
-void Player::doForNearest(std::function<void (Player *pl, Player *other)> func)
+void Player::forEachLoaded(std::function<void(Player *pl, Player *other)> func)
 {
     std::list <Player*> plList;
 
