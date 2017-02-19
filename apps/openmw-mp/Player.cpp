@@ -154,3 +154,17 @@ void Player::sendToNearest(mwmp::PlayerPacket *myPacket)
         }
     }
 }
+
+void Player::doForNearest(std::function<void (Player *pl, Player *other)> func)
+{
+    for(auto cell : getCells())
+    {
+        for(auto pl : *cell)
+        {
+            if(pl == this)
+                continue;
+
+            func(this, pl);
+        }
+    }
+}

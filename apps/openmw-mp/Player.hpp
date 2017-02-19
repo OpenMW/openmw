@@ -73,6 +73,8 @@ public:
     CellController::TContainer getCells();
     void sendToNearest(mwmp::PlayerPacket *myPacket);
 
+    void doForNearest(std::function<void (Player *pl, Player *other)> func);
+
 public:
     mwmp::InventoryChanges inventoryChangesBuffer;
     mwmp::SpellbookChanges spellbookChangesBuffer;

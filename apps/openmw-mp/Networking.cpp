@@ -170,6 +170,17 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             LOG_APPEND(Log::LOG_INFO, "- Moved to %s",
                 player->cell.getDescription().c_str());
 
+            player->doForNearest([this](Player *pl, Player *other){
+                const RakNet::RakNetGUID &guid = pl->guid;
+                playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(other, guid);
+                playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(other, guid);
+                playerController->GetPacket(ID_PLAYER_SKILL)->Send(other, guid);
+                //playerController->GetPacket(ID_PLAYER_POS)->Send(pl, guid);
+                playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(other, guid);
+                playerController->GetPacket(ID_PLAYER_ATTACK)->Send(other, guid);
+                playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(other, guid);
+            });
+
             myPacket->Send(player, true); //send to other clients
             Script::Call<Script::CallbackIdentity("OnPlayerCellChange")>(player->getId());
         }
