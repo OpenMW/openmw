@@ -91,7 +91,7 @@ Cell *CellController::getCellByID(std::string cellid)
 Cell *CellController::addCell(ESM::Cell cellData)
 {
     
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Loaded cells: %d", cells.size());
+    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Loaded cells: %d", cells.size());
     auto it = find_if(cells.begin(), cells.end(), [cellData](const Cell *c) {
         //return c->cell.sRecordId == cellData.sRecordId; // Currently we cannot compare because plugin lists can be loaded in different order
         return c->cell.mData.mX == cellData.mData.mX && c->cell.mData.mY == cellData.mData.mY &&
@@ -133,6 +133,7 @@ void CellController::removePlayer(Cell *cell, Player *player)
 
     if(cell->players.empty())
     {
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Deleting empty cell from memory: %s", player->npc.mName, player->getId(), cell->cell.getDescription());
         auto it = find(cells.begin(), cells.end(), cell);
         delete *it;
         cells.erase(it);
@@ -150,7 +151,7 @@ void CellController::update(Player *player)
         }
         else
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unload cell: %d %d %s", cell.cell.mData.mX, cell.cell.mData.mY, cell.cell.mName.c_str());
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player %s (%d) unloaded cell: %s", player->npc.mName, player->getId(), cell.cell.getDescription());
             Cell *c;
             if(!cell.cell.isExterior())
                 c = getCellByID(cell.cell.mName);
