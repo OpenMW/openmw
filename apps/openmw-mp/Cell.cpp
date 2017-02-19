@@ -9,7 +9,7 @@
 
 using namespace std;
 
-void Cell::AddPlayer(Player *player)
+void Cell::addPlayer(Player *player)
 {
     auto it = find(player->cells.begin(), player->cells.end(), this);
     if(it == player->cells.end())
@@ -17,7 +17,7 @@ void Cell::AddPlayer(Player *player)
     players.push_back(player);
 }
 
-void Cell::RemovePlayer(Player *player)
+void Cell::removePlayer(Player *player)
 {
     for(Iterator it = players.begin(); it != players.end(); it++)
     {
@@ -51,24 +51,24 @@ CellController::~CellController()
 
 CellController *CellController::sThis = nullptr;
 
-void CellController::Create()
+void CellController::create()
 {
     sThis = new CellController;
 }
 
-void CellController::Destroy()
+void CellController::destroy()
 {
     assert(sThis);
     delete sThis;
     sThis = nullptr;
 }
 
-CellController *CellController::Get()
+CellController *CellController::get()
 {
     return sThis;
 }
 
-Cell *CellController::GetCellByXY(int x, int y)
+Cell *CellController::getCellByXY(int x, int y)
 {
     auto it = find_if(cells.begin(), cells.end(), [x, y](const Cell *c) {
         return c->cell.mData.mX == x && c->cell.mData.mY == y;
@@ -78,7 +78,7 @@ Cell *CellController::GetCellByXY(int x, int y)
     return *it;
 }
 
-Cell *CellController::GetCellByID(std::string cellid)
+Cell *CellController::getCellByID(std::string cellid)
 {
     auto it = find_if(cells.begin(), cells.end(), [cellid](const Cell *c) {
         return c->cell.mName == cellid;
@@ -88,7 +88,7 @@ Cell *CellController::GetCellByID(std::string cellid)
     return *it;
 }
 
-Cell *CellController::AddCell(ESM::Cell cellData)
+Cell *CellController::addCell(ESM::Cell cellData)
 {
     
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Loaded cells: %d", cells.size());
@@ -110,7 +110,7 @@ Cell *CellController::AddCell(ESM::Cell cellData)
 
 }
 
-void CellController::RemoveCell(Cell *cell)
+void CellController::removeCell(Cell *cell)
 {
     if(cell == nullptr)
         return;
@@ -126,10 +126,10 @@ void CellController::RemoveCell(Cell *cell)
     }
 }
 
-void CellController::RemovePlayer(Cell *cell, Player *player)
+void CellController::removePlayer(Cell *cell, Player *player)
 {
 
-    cell->RemovePlayer(player);
+    cell->removePlayer(player);
 
     if(cell->players.empty())
     {
@@ -145,20 +145,20 @@ void CellController::update(Player *player)
     {
         if(cell.type == mwmp::CellState::LOAD)
         {
-            Cell *c = AddCell(cell.cell);
-            c->AddPlayer(player);
+            Cell *c = addCell(cell.cell);
+            c->addPlayer(player);
         }
         else
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unload cell: %d %d %s", cell.cell.mData.mX, cell.cell.mData.mY, cell.cell.mName.c_str());
             Cell *c;
             if(!cell.cell.isExterior())
-                c = GetCellByID(cell.cell.mName);
+                c = getCellByID(cell.cell.mName);
             else
-                c = GetCellByXY(cell.cell.getGridX(), cell.cell.getGridY());
+                c = getCellByXY(cell.cell.getGridX(), cell.cell.getGridY());
 
             if(c != nullptr)
-                RemovePlayer(c, player);
+                removePlayer(c, player);
         }
     }
 }

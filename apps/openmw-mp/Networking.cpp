@@ -30,7 +30,7 @@ Networking::Networking(RakNet::RakPeerInterface *peer)
     this->peer = peer;
     players = Players::getPlayers();
 
-    CellController::Create();
+    CellController::create();
 
     playerController = new PlayerPacketController(peer);
     worldController = new WorldPacketController(peer);
@@ -49,7 +49,7 @@ Networking::~Networking()
 {
     Script::Call<Script::CallbackIdentity("OnServerExit")>(false);
 
-    CellController::Destroy();
+    CellController::destroy();
 
     sThis = 0;
     delete playerController;
@@ -185,7 +185,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         myPacket->Read(player);
 
-        CellController::Get()->update(player);
+        CellController::get()->update(player);
 
         Script::Call<Script::CallbackIdentity("OnPlayerCellState")>(player->getId());
 

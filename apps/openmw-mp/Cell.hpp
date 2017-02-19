@@ -21,20 +21,20 @@ private:
 
     CellController(CellController&); // not used
 public:
-    static void Create();
-    static void Destroy();
-    static CellController *Get();
+    static void create();
+    static void destroy();
+    static CellController *get();
 public:
     typedef std::deque<Cell*> TContainer;
     typedef TContainer::iterator TIter;
 
-    Cell * AddCell(ESM::Cell cell);
-    void RemoveCell(Cell *);
+    Cell * addCell(ESM::Cell cell);
+    void removeCell(Cell *);
 
-    void RemovePlayer(Cell *cell, Player *player);
+    void removePlayer(Cell *cell, Player *player);
 
-    Cell *GetCellByXY(int x, int y);
-    Cell *GetCellByID(std::string cellid);
+    Cell *getCellByXY(int x, int y);
+    Cell *getCellByID(std::string cellid);
 
     void update(Player *player);
 
@@ -51,8 +51,8 @@ public:
     typedef std::deque<Player*> TPlayers;
     typedef TPlayers::iterator Iterator;
 
-    void AddPlayer(Player *player);
-    void RemovePlayer(Player *player);
+    void addPlayer(Player *player);
+    void removePlayer(Player *player);
 
     TPlayers getPlayers();
 private:
