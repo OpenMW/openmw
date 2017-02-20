@@ -304,6 +304,11 @@ namespace MWWorld
         return "";
     }
 
+    bool Class::useAnim() const
+    {
+        return false;
+    }
+
     void Class::getModelsToPreload(const Ptr &ptr, std::vector<std::string> &models) const
     {
         std::string model = getModel(ptr);

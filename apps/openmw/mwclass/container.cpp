@@ -100,7 +100,6 @@ namespace MWClass
     {
         if(!model.empty())
             physics.addObject(ptr, model);
-        MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
     std::string Container::getModel(const MWWorld::ConstPtr &ptr) const
@@ -112,6 +111,11 @@ namespace MWClass
             return "meshes\\" + model;
         }
         return "";
+    }
+
+    bool Container::useAnim() const
+    {
+        return true;
     }
 
     boost::shared_ptr<MWWorld::Action> Container::activate (const MWWorld::Ptr& ptr,
