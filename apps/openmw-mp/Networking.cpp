@@ -64,6 +64,11 @@ void Networking::setServerPassword(std::string passw) noexcept
     serverPassword = passw.empty() ? TES3MP_DEFAULT_PASSW : passw;
 }
 
+bool Networking::isPassworded() const
+{
+    return serverPassword != TES3MP_DEFAULT_PASSW;
+}
+
 void Networking::processPlayerPacket(RakNet::Packet *packet)
 {
     Player *player = Players::getPlayer(packet->guid);

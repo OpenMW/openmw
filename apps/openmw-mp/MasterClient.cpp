@@ -10,6 +10,7 @@
 #include <RakPeerInterface.h>
 #include "MasterClient.hpp"
 #include <components/openmw-mp/Log.hpp>
+#include <components/openmw-mp/Version.hpp>
 #include "Networking.hpp"
 
 using namespace std;
@@ -69,7 +70,9 @@ MasterClient::Send(std::string hostname, std::string modname, unsigned maxPlayer
     sstr << "\"hostname\": \"" << hostname.c_str() << "\", ";
     sstr << "\"modname\": \"" << modname.c_str() << "\", ";
     sstr << "\"players\": " << players << ", ";
-    sstr << "\"max_players\": " << maxPlayers;
+    sstr << "\"max_players\": " << maxPlayers << ", ";
+    sstr << "\"version\": " << TES3MP_VERSION << ", ";
+    sstr << "\"passw\": " << mwmp::Networking::get().isPassworded();
     sstr << "}";
     mutexData.unlock();
 
