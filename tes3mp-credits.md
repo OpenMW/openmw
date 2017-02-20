@@ -4,20 +4,20 @@ tes3mp Credits
 Programmers
 -----------
 
-    Stanislav Zhukov (Koncord) - The main loafer and Project Leader
-    David Cernat - The person pulling the strings in the shadows
+    Stanislav Zhukov (Koncord) - Overall architecture, networking & scripting systems, player sync, server browser
+    David Cernat - World sync & state saving/loading, player state saving/loading, general bug fixes
 
 
 Script developers
 -----------------
 
-    Grim Kriegor
+    Grim Kriegor - Teleportation commands, various early script fixes
 
 
 Testers
 -------
 
-    Volk Milit (Ja'Virr-Dar) - Team Manager, Debian Linux
+    Volk Milit (Ja'Virr-Dar) - Team manager, Debian Linux
     Shnatsel - Debian Linux
     Goodevil - Mint and Xubuntu Linux
 
@@ -25,8 +25,8 @@ Testers
 Public Relations and Translations
 ---------------------------------
 
-    Volk Milit (Ja'Virr-Dar) - Public relations & News Writer
-    Shnatsel - Translator & News Writer
+    Volk Milit (Ja'Virr-Dar) - Public relations & news writer
+    Shnatsel - Translator & news writer
 
 
 Art
