@@ -82,7 +82,7 @@ QVariant ServerModel::headerData(int section, Qt::Orientation orientation, int r
                     var = "Address";
                     break;
                 case ServerData::PASSW:
-                    var = "Password?";
+                    var = "Password required";
                     break;
                 case ServerData::VERSION:
                     var = "Version";
@@ -94,7 +94,7 @@ QVariant ServerModel::headerData(int section, Qt::Orientation orientation, int r
                     var = "Players";
                     break;
                 case ServerData::MAX_PLAYERS:
-                    var = "Player Max";
+                    var = "Max players";
                     break;
                 case ServerData::PING:
                     var = "Ping";
