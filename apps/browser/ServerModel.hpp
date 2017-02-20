@@ -13,6 +13,7 @@ struct ServerData
     int ping;
     QString hostName;
     QString modName;
+    QString version;
     enum IDS
     {
         ADDR,
@@ -21,6 +22,7 @@ struct ServerData
         MAX_PLAYERS,
         MODNAME,
         PING,
+        VERSION,
         LAST
     };
 };

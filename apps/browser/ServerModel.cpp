@@ -33,6 +33,9 @@ QVariant ServerModel::data(const QModelIndex &index, int role) const
             case ServerData::ADDR:
                 var = sd.addr;
                 break;
+            case ServerData::VERSION:
+                var = sd.version;
+                break;
             case ServerData::PLAYERS:
                 var = sd.players;
                 break;
@@ -74,6 +77,9 @@ QVariant ServerModel::headerData(int section, Qt::Orientation orientation, int r
             {
                 case ServerData::ADDR:
                     var = "Address";
+                    break;
+                case ServerData::VERSION:
+                    var = "Version";
                     break;
                 case ServerData::HOSTNAME:
                     var = "Host name";
@@ -118,6 +124,10 @@ bool ServerModel::setData(const QModelIndex &index, const QVariant &value, int r
         {
             case ServerData::ADDR:
                 sd.addr = value.toString();
+                ok = !sd.addr.isEmpty();
+                break;
+            case ServerData::VERSION:
+                sd.version = value.toString();
                 ok = !sd.addr.isEmpty();
                 break;
             case ServerData::PLAYERS:
