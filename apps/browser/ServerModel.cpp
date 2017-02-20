@@ -34,7 +34,7 @@ QVariant ServerModel::data(const QModelIndex &index, int role) const
                 var = sd.addr;
                 break;
             case ServerData::PASSW:
-                var = sd.needPassw;
+                var = sd.needPassw ? "Yes" : "No";
                 break;
             case ServerData::VERSION:
                 var = sd.version;
@@ -82,7 +82,7 @@ QVariant ServerModel::headerData(int section, Qt::Orientation orientation, int r
                     var = "Address";
                     break;
                 case ServerData::PASSW:
-                    var = "P";
+                    var = "Password?";
                     break;
                 case ServerData::VERSION:
                     var = "Version";
