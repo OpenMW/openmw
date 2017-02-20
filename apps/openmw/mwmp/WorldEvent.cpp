@@ -85,10 +85,9 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i",
             worldObject.refId.c_str(),
-            worldObject.refNumIndex,
-            cell.getDescription().c_str());
+            worldObject.refNumIndex);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex);
 
@@ -165,10 +164,9 @@ void WorldEvent::placeObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s\n- charge: %i\n- count: %i",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- charge: %i\n- count: %i",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
-            cell.getDescription().c_str(),
             worldObject.charge,
             worldObject.count);
 
@@ -202,10 +200,9 @@ void WorldEvent::deleteObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i",
             worldObject.refId.c_str(),
-            worldObject.refNumIndex,
-            cell.getDescription().c_str());
+            worldObject.refNumIndex);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex);
 
@@ -228,10 +225,9 @@ void WorldEvent::lockObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i",
             worldObject.refId.c_str(),
-            worldObject.refNumIndex,
-            cell.getDescription().c_str());
+            worldObject.refNumIndex);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex);
 
@@ -254,10 +250,9 @@ void WorldEvent::unlockObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i",
             worldObject.refId.c_str(),
-            worldObject.refNumIndex,
-            cell.getDescription().c_str());
+            worldObject.refNumIndex);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex);
 
@@ -280,10 +275,9 @@ void WorldEvent::scaleObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i",
             worldObject.refId.c_str(),
-            worldObject.refNumIndex,
-            cell.getDescription().c_str());
+            worldObject.refNumIndex);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex);
 
@@ -306,10 +300,9 @@ void WorldEvent::moveObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i",
             worldObject.refId.c_str(),
-            worldObject.refNumIndex,
-            cell.getDescription().c_str());
+            worldObject.refNumIndex);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex);
 
@@ -333,10 +326,9 @@ void WorldEvent::rotateObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i",
             worldObject.refId.c_str(),
-            worldObject.refNumIndex,
-            cell.getDescription().c_str());
+            worldObject.refNumIndex);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex);
 
@@ -360,10 +352,9 @@ void WorldEvent::animateObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i",
             worldObject.refId.c_str(),
-            worldObject.refNumIndex,
-            cell.getDescription().c_str());
+            worldObject.refNumIndex);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex);
 
@@ -387,10 +378,9 @@ void WorldEvent::activateDoors(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i",
             worldObject.refId.c_str(),
-            worldObject.refNumIndex,
-            cell.getDescription().c_str());
+            worldObject.refNumIndex);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex);
 
@@ -445,10 +435,9 @@ void WorldEvent::setLocalShorts(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- index: %i\n- shortVal: %i",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
-            cell.getDescription().c_str(),
             worldObject.index,
             worldObject.shortVal);
 
@@ -473,10 +462,9 @@ void WorldEvent::setLocalFloats(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- index: %i\n- floatVal: %f",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
-            cell.getDescription().c_str(),
             worldObject.index,
             worldObject.floatVal);
 
