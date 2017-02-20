@@ -71,8 +71,8 @@ MasterClient::Send(std::string hostname, std::string modname, unsigned maxPlayer
     sstr << "\"modname\": \"" << modname.c_str() << "\", ";
     sstr << "\"players\": " << players << ", ";
     sstr << "\"max_players\": " << maxPlayers << ", ";
-    sstr << "\"version\": " << TES3MP_VERSION << ", ";
-    sstr << "\"passw\": " << mwmp::Networking::get().isPassworded();
+    sstr << "\"version\": \"" << TES3MP_VERSION << "\", ";
+    sstr << "\"passw\": " << (mwmp::Networking::get().isPassworded() ? "true" : "false");
     sstr << "}";
     mutexData.unlock();
 
