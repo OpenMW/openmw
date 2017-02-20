@@ -85,7 +85,7 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             cell.getDescription().c_str());
@@ -94,7 +94,7 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i",
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
@@ -165,7 +165,7 @@ void WorldEvent::placeObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- charge: %i\n- count: %i",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s\n- charge: %i\n- count: %i",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             cell.getDescription().c_str(),
@@ -202,7 +202,7 @@ void WorldEvent::deleteObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             cell.getDescription().c_str());
@@ -211,7 +211,7 @@ void WorldEvent::deleteObjects(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i",
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
@@ -228,7 +228,7 @@ void WorldEvent::lockObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             cell.getDescription().c_str());
@@ -237,7 +237,7 @@ void WorldEvent::lockObjects(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i",
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
@@ -254,7 +254,7 @@ void WorldEvent::unlockObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             cell.getDescription().c_str());
@@ -263,7 +263,7 @@ void WorldEvent::unlockObjects(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i",
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
@@ -280,7 +280,7 @@ void WorldEvent::scaleObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             cell.getDescription().c_str());
@@ -289,7 +289,7 @@ void WorldEvent::scaleObjects(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i",
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
@@ -306,7 +306,7 @@ void WorldEvent::moveObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             cell.getDescription().c_str());
@@ -315,7 +315,7 @@ void WorldEvent::moveObjects(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i",
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
@@ -333,7 +333,7 @@ void WorldEvent::rotateObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             cell.getDescription().c_str());
@@ -342,7 +342,7 @@ void WorldEvent::rotateObjects(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i",
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
@@ -360,7 +360,7 @@ void WorldEvent::animateObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             cell.getDescription().c_str());
@@ -369,7 +369,7 @@ void WorldEvent::animateObjects(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i",
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
@@ -387,7 +387,7 @@ void WorldEvent::activateDoors(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             cell.getDescription().c_str());
@@ -396,7 +396,7 @@ void WorldEvent::activateDoors(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i",
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
@@ -414,7 +414,7 @@ void WorldEvent::playMusic()
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- filename: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- filename: %s",
             worldObject.filename.c_str());
 
         MWBase::Environment::get().getSoundManager()->streamMusic(worldObject.filename);
@@ -429,7 +429,7 @@ void WorldEvent::playVideo()
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- filename: %s\n- allowSkipping: %s",
+        LOG_APPEND(Log::LOG_VERBOSE, "- filename: %s\n- allowSkipping: %s",
             worldObject.filename.c_str(),
             worldObject.allowSkipping ? "true" : "false");
 
@@ -445,7 +445,7 @@ void WorldEvent::setLocalShorts(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             cell.getDescription().c_str(),
@@ -456,7 +456,7 @@ void WorldEvent::setLocalShorts(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i",
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
@@ -473,7 +473,7 @@ void WorldEvent::setLocalFloats(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
             cell.getDescription().c_str(),
@@ -484,7 +484,7 @@ void WorldEvent::setLocalFloats(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i",
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
@@ -501,7 +501,7 @@ void WorldEvent::setMemberShorts()
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- cellRef: %s\n- index: %i\n- shortVal: %i\n",
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s\n- index: %i\n- shortVal: %i\n",
             worldObject.refId.c_str(),
             worldObject.index,
             worldObject.shortVal);
@@ -511,7 +511,7 @@ void WorldEvent::setMemberShorts()
 
         if (!ptrFound.isEmpty())
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Found %s, %i",
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i",
                 ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum());
 
@@ -533,7 +533,7 @@ void WorldEvent::setGlobalShorts()
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_WARN, "- varName: %s\n- shortVal: %i",
+        LOG_APPEND(Log::LOG_VERBOSE, "- varName: %s\n- shortVal: %i",
             worldObject.varName.c_str(),
             worldObject.shortVal);
 
