@@ -13,10 +13,12 @@ struct ServerData
     int ping;
     QString hostName;
     QString modName;
+    bool needPassw;
     QString version;
     enum IDS
     {
         ADDR,
+        PASSW,
         HOSTNAME,
         PLAYERS,
         MAX_PLAYERS,

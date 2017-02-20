@@ -125,6 +125,15 @@ void MainWindow::play()
     QStringList arguments;
     arguments.append(QLatin1String("--connect=") + sm->myData[sourceId].addr.toLatin1());
 
+    if(sm->myData[sourceId].needPassw)
+    {
+        bool ok;
+        QString passw = QInputDialog::getText(this, "Connecting to: " + sm->myData[sourceId].addr, "Password: ", QLineEdit::Password, "", &ok);
+        if(!ok)
+            return;
+        arguments.append(QLatin1String("--password=") + passw.toLatin1());
+    }
+
     if (mGameInvoker->startProcess(QLatin1String("tes3mp"), arguments, true))
         return qApp->quit();
 }
