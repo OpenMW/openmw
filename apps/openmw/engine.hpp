@@ -84,7 +84,6 @@ namespace OMW
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
             std::string mCellName;
             std::vector<std::string> mContentFiles;
-            bool mVerboseScripts;
             bool mSkipMenu;
             bool mUseSound;
             bool mCompileAll;
@@ -157,9 +156,6 @@ namespace OMW
              * @param file - filename (extension is required)
              */
             void addContentFile(const std::string& file);
-
-            /// Enable or disable verbose script output
-            void setScriptsVerbosity(bool scriptsVerbosity);
 
             /// Disable or enable all sounds
             void setSoundUsage(bool soundUsage);

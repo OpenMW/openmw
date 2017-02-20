@@ -21,10 +21,10 @@
 
 namespace MWScript
 {
-    ScriptManager::ScriptManager (const MWWorld::ESMStore& store, bool verbose,
+    ScriptManager::ScriptManager (const MWWorld::ESMStore& store,
         Compiler::Context& compilerContext, int warningsMode,
         const std::vector<std::string>& scriptBlacklist)
-    : mErrorHandler (std::cerr), mStore (store), mVerbose (verbose),
+    : mErrorHandler (std::cerr), mStore (store),
       mCompilerContext (compilerContext), mParser (mErrorHandler, mCompilerContext),
       mOpcodesInstalled (false), mGlobalScripts (store)
     {
@@ -44,8 +44,7 @@ namespace MWScript
 
         if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
         {
-            if (mVerbose)
-                std::cout << "compiling script: " << name << std::endl;
+            mErrorHandler.setContext(name);
 
             bool Success = true;
             try
@@ -74,8 +73,6 @@ namespace MWScript
             {
                 std::cerr
                     << "compiling failed: " << name << std::endl;
-                if (mVerbose)
-                    std::cerr << script->mScriptText << std::endl << std::endl;
             }
 
             if (Success)
@@ -172,12 +169,9 @@ namespace MWScript
 
         if (const ESM::Script *script = mStore.get<ESM::Script>().search (name2))
         {
-            if (mVerbose)
-                std::cout
-                    << "scanning script for local variable declarations: " << name2
-                    << std::endl;
-
             Compiler::Locals locals;
+
+            mErrorHandler.setContext(name2 + "[local variables]");
 
             std::istringstream stream (script->mScriptText);
             Compiler::QuickFileParser parser (mErrorHandler, mCompilerContext, locals);

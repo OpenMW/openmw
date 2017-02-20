@@ -58,7 +58,7 @@ namespace MWDialogue
 
         public:
 
-            DialogueManager (const Compiler::Extensions& extensions, bool scriptVerbose, Translation::Storage& translationDataStorage);
+            DialogueManager (const Compiler::Extensions& extensions, Translation::Storage& translationDataStorage);
 
             virtual void clear();
 
