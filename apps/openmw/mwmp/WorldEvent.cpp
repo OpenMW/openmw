@@ -67,7 +67,6 @@ void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
             containerItem.refId = itemPtr.getCellRef().getRefId();
             containerItem.count = itemPtr.getRefData().getCount();
             containerItem.charge = itemPtr.getCellRef().getCharge();
-            containerItem.goldValue = itemPtr.getCellRef().getGoldValue();
 
             worldObject.containerChanges.items.push_back(containerItem);
         }
@@ -122,8 +121,6 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
                     if (containerItem.charge > -1)
                         newPtr.getCellRef().setCharge(containerItem.charge);
 
-                    newPtr.getCellRef().setGoldValue(containerItem.goldValue);
-
                     containerStore.add(newPtr, containerItem.count, ownerPtr, true);
                 }
                 else if (action == BaseEvent::REMOVE)
@@ -135,7 +132,6 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
                         if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), containerItem.refId))
                         {
                             if (iter->getCellRef().getCharge() == containerItem.charge &&
-                                iter->getCellRef().getGoldValue() == containerItem.goldValue &&
                                 iter->getRefData().getCount() == containerItem.count)
                             {
                                 containerStore.remove(*iter, containerItem.actionCount, ownerPtr);

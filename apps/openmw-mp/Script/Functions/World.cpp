@@ -132,12 +132,6 @@ int WorldFunctions::GetContainerItemCharge(unsigned int objectIndex, unsigned in
         .containerChanges.items.at(itemIndex).charge;
 }
 
-int WorldFunctions::GetContainerItemGoldValue(unsigned int objectIndex, unsigned int itemIndex) noexcept
-{
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(objectIndex)
-        .containerChanges.items.at(itemIndex).goldValue;
-}
-
 int WorldFunctions::GetContainerItemActionCount(unsigned int objectIndex, unsigned int itemIndex) noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(objectIndex)
