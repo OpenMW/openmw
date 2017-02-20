@@ -374,7 +374,7 @@ namespace SceneUtil
 
     bool sortLights (const LightManager::LightSourceViewBound* left, const LightManager::LightSourceViewBound* right)
     {
-        return left->mViewBound.center().length2() - left->mViewBound.radius2()/4.f < right->mViewBound.center().length2() - right->mViewBound.radius2()/4.f;
+        return left->mViewBound.center().length2() - left->mViewBound.radius2()*81 < right->mViewBound.center().length2() - right->mViewBound.radius2()*81;
     }
 
     void LightListCallback::operator()(osg::Node *node, osg::NodeVisitor *nv)
