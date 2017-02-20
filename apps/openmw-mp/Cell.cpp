@@ -194,7 +194,7 @@ void CellController::update(Player *player)
         }
         else
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player %s (%d) unloaded cell: %s", player->npc.mName, player->getId(), cell.cell.getDescription().c_str());
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player %s (%d) unloaded cell: %s", player->npc.mName.c_str(), player->getId(), cell.cell.getDescription().c_str());
             Cell *c;
             if (!cell.cell.isExterior())
                 c = getCellByName(cell.cell.mName);
