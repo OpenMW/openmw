@@ -40,32 +40,7 @@ namespace MWMechanics
 
     void UpdateSummonedCreatures::process()
     {
-        static std::map<int, std::string> summonMap;
-        if (summonMap.empty())
-        {
-            summonMap[ESM::MagicEffect::SummonAncestralGhost] = "sMagicAncestralGhostID";
-            summonMap[ESM::MagicEffect::SummonBonelord] = "sMagicBonelordID";
-            summonMap[ESM::MagicEffect::SummonBonewalker] = "sMagicLeastBonewalkerID";
-            summonMap[ESM::MagicEffect::SummonCenturionSphere] = "sMagicCenturionSphereID";
-            summonMap[ESM::MagicEffect::SummonClannfear] = "sMagicClannfearID";
-            summonMap[ESM::MagicEffect::SummonDaedroth] = "sMagicDaedrothID";
-            summonMap[ESM::MagicEffect::SummonDremora] = "sMagicDremoraID";
-            summonMap[ESM::MagicEffect::SummonFabricant] = "sMagicFabricantID";
-            summonMap[ESM::MagicEffect::SummonFlameAtronach] = "sMagicFlameAtronachID";
-            summonMap[ESM::MagicEffect::SummonFrostAtronach] = "sMagicFrostAtronachID";
-            summonMap[ESM::MagicEffect::SummonGoldenSaint] = "sMagicGoldenSaintID";
-            summonMap[ESM::MagicEffect::SummonGreaterBonewalker] = "sMagicGreaterBonewalkerID";
-            summonMap[ESM::MagicEffect::SummonHunger] = "sMagicHungerID";
-            summonMap[ESM::MagicEffect::SummonScamp] = "sMagicScampID";
-            summonMap[ESM::MagicEffect::SummonSkeletalMinion] = "sMagicSkeletalMinionID";
-            summonMap[ESM::MagicEffect::SummonStormAtronach] = "sMagicStormAtronachID";
-            summonMap[ESM::MagicEffect::SummonWingedTwilight] = "sMagicWingedTwilightID";
-            summonMap[ESM::MagicEffect::SummonWolf] = "sMagicCreature01ID";
-            summonMap[ESM::MagicEffect::SummonBear] = "sMagicCreature02ID";
-            summonMap[ESM::MagicEffect::SummonBonewolf] = "sMagicCreature03ID";
-            summonMap[ESM::MagicEffect::SummonCreature04] = "sMagicCreature04ID";
-            summonMap[ESM::MagicEffect::SummonCreature05] = "sMagicCreature05ID";
-        }
+
 
         MWMechanics::CreatureStats& creatureStats = mActor.getClass().getCreatureStats(mActor);
 
@@ -89,10 +64,7 @@ namespace MWMechanics
             bool found = creatureMap.find(std::make_pair(it->first, it->second)) != creatureMap.end();
             if (!found)
             {
-                const std::string& creatureGmst = summonMap[it->first];
-                std::string creatureID =
-                        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(creatureGmst)->getString();
-
+                std::string creatureID = getSummonedCreature(it->first);
                 if (!creatureID.empty())
                 {
                     int creatureActorId = -1;

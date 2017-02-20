@@ -684,10 +684,14 @@ namespace MWWorld
         Resource::SceneManager* mSceneManager;
     };
 
-    void Scene::preload(const std::string &mesh)
+    void Scene::preload(const std::string &mesh, bool useAnim)
     {
-        if (!mRendering.getResourceSystem()->getSceneManager()->checkLoaded(mesh, mRendering.getReferenceTime()))
-            mRendering.getWorkQueue()->addWorkItem(new PreloadMeshItem(mesh, mRendering.getResourceSystem()->getSceneManager()));
+        std::string mesh_ = mesh;
+        if (useAnim)
+            mesh_ = Misc::ResourceHelpers::correctActorModelPath(mesh_, mRendering.getResourceSystem()->getVFS());
+
+        if (!mRendering.getResourceSystem()->getSceneManager()->checkLoaded(mesh_, mRendering.getReferenceTime()))
+            mRendering.getWorkQueue()->addWorkItem(new PreloadMeshItem(mesh_, mRendering.getResourceSystem()->getSceneManager()));
     }
 
     void Scene::preloadCells(float dt)
