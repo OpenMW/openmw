@@ -147,7 +147,7 @@ void Player::sendToLoaded(mwmp::PlayerPacket *myPacket)
 {
     std::list <Player*> plList;
 
-    for (auto cell : *getCells())
+    for (auto cell : cells)
         for (auto pl : *cell)
             plList.push_back(pl);
 
@@ -165,7 +165,7 @@ void Player::forEachLoaded(std::function<void(Player *pl, Player *other)> func)
 {
     std::list <Player*> plList;
 
-    for (auto cell : *getCells())
+    for (auto cell : cells)
         for (auto pl : *cell)
             plList.push_back(pl);
 
