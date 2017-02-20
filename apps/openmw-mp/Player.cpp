@@ -138,16 +138,16 @@ std::chrono::steady_clock::time_point Player::getLastAttackerTime()
     return lastAttackerTime;
 }
 
-CellController::TContainer Player::getCells()
+CellController::TContainer *Player::getCells()
 {
-    return cells;
+    return &cells;
 }
 
 void Player::sendToLoaded(mwmp::PlayerPacket *myPacket)
 {
     std::list <Player*> plList;
 
-    for (auto cell : getCells())
+    for (auto cell : *getCells())
         for (auto pl : *cell)
             plList.push_back(pl);
 
@@ -165,7 +165,7 @@ void Player::forEachLoaded(std::function<void(Player *pl, Player *other)> func)
 {
     std::list <Player*> plList;
 
-    for (auto cell : getCells())
+    for (auto cell : *getCells())
         for (auto pl : *cell)
             plList.push_back(pl);
 

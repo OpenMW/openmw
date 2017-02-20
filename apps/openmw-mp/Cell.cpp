@@ -169,9 +169,8 @@ void CellController::removePlayer(Cell *cell, Player *player)
 
 void CellController::deletePlayer(Player *player)
 {
-    std::deque<Cell *> playerCells = player->getCells();
 
-    for_each(playerCells.begin(), playerCells.end(), [&player](Cell *cell) {
+    for_each(player->getCells()->begin(), player->getCells()->end(), [&player](Cell *cell) {
         for (auto it = cell->begin(); it != cell->end(); ++it)
         {
             if (*it == player)
