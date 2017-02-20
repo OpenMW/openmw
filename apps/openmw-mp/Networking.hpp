@@ -40,11 +40,13 @@ namespace  mwmp
 
         MasterClient *getMasterClient();
         void InitQuery(std::string queryAddr, unsigned short queryPort, std::string serverAddr, unsigned short serverPort);
+        void setServerPassword(std::string passw) noexcept;
 
         static const Networking &get();
         static Networking *getPtr();
 
     private:
+        std::string serverPassword;
         static Networking *sThis;
         RakNet::RakPeerInterface *peer;
         RakNet::BitStream bsOut;

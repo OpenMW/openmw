@@ -16,6 +16,7 @@
 #include "Networking.hpp"
 #include "MasterClient.hpp"
 #include "Cell.hpp"
+#include <components/openmw-mp/Version.hpp>
 
 using namespace mwmp;
 using namespace std;
@@ -43,6 +44,8 @@ Networking::Networking(RakNet::RakPeerInterface *peer)
     exitCode = 0;
 
     Script::Call<Script::CallbackIdentity("OnServerInit")>();
+
+    serverPassword = TES3MP_DEFAULT_PASSW;
 }
 
 Networking::~Networking()
@@ -56,6 +59,11 @@ Networking::~Networking()
     LOG_QUIT();
 }
 
+void Networking::setServerPassword(std::string passw) noexcept
+{
+    serverPassword = passw.empty() ? TES3MP_DEFAULT_PASSW : passw;
+}
+
 void Networking::processPlayerPacket(RakNet::Packet *packet)
 {
     Player *player = Players::getPlayer(packet->guid);
@@ -64,7 +72,6 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
     if (packet->data[0] == ID_HANDSHAKE)
     {
-        string passw = "SuperPassword";
 
         myPacket->Read(player);
 
@@ -77,7 +84,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             return;
         }
 
-        if (player->passw != passw)
+        if (player->passw != serverPassword)
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Wrong server password for player %d, name: %s (pass: %s)",
                 player->getId(),

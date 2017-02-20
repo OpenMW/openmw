@@ -183,6 +183,8 @@ int main(int argc, char *argv[])
     string addr = mgr.getString("address", "General");
     int port = mgr.getInt("port", "General");
 
+    string passw = mgr.getString("password", "General");
+
     string plugin_home = mgr.getString("home", "Plugins");
     string moddir = Utils::convertPath(plugin_home + "/data");
 
@@ -227,6 +229,7 @@ int main(int argc, char *argv[])
     peer->SetMaximumIncomingConnections((unsigned short)(players));
 
     Networking networking(peer);
+    networking.setServerPassword(passw);
 
     if ( mgr.getBool("enabled", "MasterServer"))
     {
