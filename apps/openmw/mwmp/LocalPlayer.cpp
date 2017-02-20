@@ -798,6 +798,12 @@ void LocalPlayer::setCell()
     MWWorld::Ptr player = world->getPlayerPtr();
     ESM::Position pos;
 
+    // To avoid crashes, close any container menus this player may be in
+    if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Container))
+    {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
+    }
+
     world->getPlayer().setTeleported(true);
 
     int x = cell.mData.mX;
