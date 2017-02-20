@@ -25,6 +25,7 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include <components/openmw-mp/Log.hpp>
 #include <cstdlib>
+#include <components/openmw-mp/Version.hpp>
 
 #include "Networking.hpp"
 #include "LocalPlayer.hpp"
@@ -37,6 +38,7 @@ using namespace std;
 
 Main *Main::pMain = 0;
 std::string Main::addr = "";
+std::string Main::passw = TES3MP_DEFAULT_PASSW;
 
 std::string loadSettings (Settings::Manager & settings)
 {
@@ -85,13 +87,17 @@ Main::~Main()
 void Main::optionsDesc(boost::program_options::options_description *desc)
 {
     namespace bpo = boost::program_options;
-    desc->add_options()("connect", bpo::value<std::string>()->default_value(""),
-                        "connect to server (e.g. --connect=127.0.0.1:25565)");
+    desc->add_options()
+            ("connect", bpo::value<std::string>()->default_value(""),
+                        "connect to server (e.g. --connect=127.0.0.1:25565)")
+            ("password", bpo::value<std::string>()->default_value(TES3MP_DEFAULT_PASSW),
+                        "сonnect to a secured server. (e.g. --password=AnyPassword");
 }
 
 void Main::configure(const boost::program_options::variables_map &variables)
 {
     Main::addr = variables["connect"].as<string>();
+    Main::passw = variables["password"].as<string>();
 }
 
 static Settings::CategorySettingValueMap saveUserSettings;
@@ -130,15 +136,19 @@ bool Main::init(std::vector<std::string> &content)
     {
         pMain->server = mgr.getString("server", "General");
         pMain->port = (unsigned short) mgr.getInt("port", "General");
+
+        passw = mgr.getString("password", "General");
+        if (passw.empty())
+            passw = TES3MP_DEFAULT_PASSW;
     }
     else
     {
         size_t delim_pos = addr.find(':');
         pMain->server = addr.substr(0, delim_pos);
         pMain->port = atoi(addr.substr(delim_pos + 1).c_str());
-
     }
-
+    get().mLocalPlayer->passw = passw;
+    
     pMain->mNetworking->connect(pMain->server, pMain->port);
     RestoreMgr(mgr);
     return pMain->mNetworking->isConnected();

@@ -34,6 +34,7 @@ namespace mwmp
 
     private:
         static std::string addr;
+        static std::string passw;
         Main (const Main&);
         ///< not implemented
         Main& operator= (const Main&);

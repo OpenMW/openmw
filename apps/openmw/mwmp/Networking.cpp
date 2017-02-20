@@ -189,7 +189,6 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
     case ID_HANDSHAKE:
     {
-        getLocalPlayer()->passw = "SuperPassword";
         myPacket->Send(getLocalPlayer(), serverAddr);
         break;
     }
