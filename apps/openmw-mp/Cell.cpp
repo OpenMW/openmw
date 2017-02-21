@@ -160,7 +160,8 @@ void CellController::removePlayer(Cell *cell, Player *player)
 
     if (cell->players.empty())
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Deleting empty cell from memory: %s", player->npc.mName, player->getId(), cell->cell.getDescription().c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Deleting empty cell from memory: %s", player->npc.mName.c_str(),
+                           player->getId(), cell->cell.getDescription().c_str());
         auto it = find(cells.begin(), cells.end(), cell);
         delete *it;
         cells.erase(it);
