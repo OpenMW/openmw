@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <osg/Fog>
+#include <osg/BlendFunc>
 #include <osg/Texture2D>
 #include <osg/Camera>
 #include <osg/PositionAttitudeTransform>
@@ -72,6 +73,35 @@ namespace MWRender
     private:
         bool mRendered;
         unsigned int mLastRenderedFrame;
+    };
+
+
+    // Set up alpha blending to Additive mode to avoid issues caused by transparent objects writing onto the alpha value of the FBO
+    class SetUpBlendVisitor : public osg::NodeVisitor
+    {
+    public:
+        SetUpBlendVisitor(): osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
+
+        virtual void apply(osg::Node& node)
+        {
+            if (osg::StateSet* stateset = node.getStateSet())
+            {
+                if (stateset->getAttribute(osg::StateAttribute::BLENDFUNC) || stateset->getBinNumber() == osg::StateSet::TRANSPARENT_BIN)
+                {
+                    osg::ref_ptr<osg::StateSet> newStateSet = new osg::StateSet(*stateset, osg::CopyOp::SHALLOW_COPY);
+                    osg::BlendFunc* blendFunc = static_cast<osg::BlendFunc*>(stateset->getAttribute(osg::StateAttribute::BLENDFUNC));
+                    osg::ref_ptr<osg::BlendFunc> newBlendFunc = blendFunc ? new osg::BlendFunc(*blendFunc) : new osg::BlendFunc;
+                    newBlendFunc->setDestinationAlpha(osg::BlendFunc::ONE);
+                    newBlendFunc->setDestinationRGB(osg::BlendFunc::ONE);
+                    newStateSet->setAttribute(newBlendFunc, osg::StateAttribute::ON);
+                    node.setStateSet(newStateSet);
+                }
+
+            }
+            traverse(node);
+        }
     };
 
     CharacterPreview::CharacterPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem,
@@ -170,8 +200,15 @@ namespace MWRender
         return mSizeY;
     }
 
+    void CharacterPreview::setBlendMode()
+    {
+        SetUpBlendVisitor visitor;
+        mNode->accept(visitor);
+    }
+
     void CharacterPreview::onSetup()
     {
+        setBlendMode();
     }
 
     osg::ref_ptr<osg::Texture2D> CharacterPreview::getTexture()
@@ -280,6 +317,8 @@ namespace MWRender
 
         mAnimation->runAnimation(0.0f);
 
+        setBlendMode();
+
         redraw();
     }
 
@@ -319,6 +358,7 @@ namespace MWRender
 
     void InventoryPreview::onSetup()
     {
+        CharacterPreview::onSetup();
         osg::Vec3f scale (1.f, 1.f, 1.f);
         mCharacter.getClass().adjustScale(mCharacter, scale, true);
 
@@ -392,6 +432,7 @@ namespace MWRender
 
     void RaceSelectionPreview::onSetup ()
     {
+        CharacterPreview::onSetup();
         mAnimation->play("idle", 1, Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
         mAnimation->runAnimation(0.f);
 

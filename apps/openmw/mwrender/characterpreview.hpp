@@ -47,6 +47,7 @@ namespace MWRender
 
     protected:
         virtual bool renderHeadOnly() { return false; }
+        void setBlendMode();
         virtual void onSetup();
 
         osg::ref_ptr<osg::Group> mParent;
