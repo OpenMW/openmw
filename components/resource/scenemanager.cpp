@@ -31,37 +31,18 @@
 namespace
 {
 
-    /// @todo Do this in updateCallback so that animations are accounted for.
-    class InitWorldSpaceParticlesVisitor : public osg::NodeVisitor
+    class InitWorldSpaceParticlesCallback : public osg::NodeCallback
     {
     public:
-        /// @param mask The node mask to set on ParticleSystem nodes.
-        InitWorldSpaceParticlesVisitor(unsigned int mask)
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mMask(mask)
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
-        }
+            osgParticle::ParticleSystem* partsys = static_cast<osgParticle::ParticleSystem*>(node);
 
-        bool isWorldSpaceParticleSystem(osgParticle::ParticleSystem* partsys)
-        {
-            // HACK: ParticleSystem has no getReferenceFrame()
-            return (partsys->getUserDataContainer()
-                    && partsys->getUserDataContainer()->getNumDescriptions() > 0
-                    && partsys->getUserDataContainer()->getDescriptions()[0] == "worldspace");
-        }
+            // HACK: Ignore the InverseWorldMatrix transform the particle system is attached to
+            if (partsys->getNumParents() && partsys->getParent(0)->getNumParents())
+                transformInitialParticles(partsys, partsys->getParent(0)->getParent(0));
 
-        void apply(osg::Drawable& drw)
-        {
-            if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
-            {
-                if (isWorldSpaceParticleSystem(partsys))
-                {
-                    // HACK: Ignore the InverseWorldMatrix transform the particle system is attached to
-                    if (partsys->getNumParents() && partsys->getParent(0)->getNumParents())
-                        transformInitialParticles(partsys, partsys->getParent(0)->getParent(0));
-                }
-                partsys->setNodeMask(mMask);
-            }
+            node->removeUpdateCallback(this);
         }
 
         void transformInitialParticles(osgParticle::ParticleSystem* partsys, osg::Node* node)
@@ -83,6 +64,39 @@ namespace
             box.expandBy(sphere);
             partsys->setInitialBound(box);
         }
+
+    };
+
+    class InitParticlesVisitor : public osg::NodeVisitor
+    {
+    public:
+        /// @param mask The node mask to set on ParticleSystem nodes.
+        InitParticlesVisitor(unsigned int mask)
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mMask(mask)
+        {
+        }
+
+        bool isWorldSpaceParticleSystem(osgParticle::ParticleSystem* partsys)
+        {
+            // HACK: ParticleSystem has no getReferenceFrame()
+            return (partsys->getUserDataContainer()
+                    && partsys->getUserDataContainer()->getNumDescriptions() > 0
+                    && partsys->getUserDataContainer()->getDescriptions()[0] == "worldspace");
+        }
+
+        void apply(osg::Drawable& drw)
+        {
+            if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
+            {
+                if (isWorldSpaceParticleSystem(partsys))
+                {
+                    partsys->addUpdateCallback(new InitWorldSpaceParticlesCallback);
+                }
+                partsys->setNodeMask(mMask);
+            }
+        }
+
     private:
         unsigned int mMask;
     };
@@ -489,7 +503,7 @@ namespace Resource
         // we can skip any scene graphs without update callbacks since we know that particle emitters will have an update callback set
         if (node->getNumChildrenRequiringUpdateTraversal() > 0)
         {
-            InitWorldSpaceParticlesVisitor visitor (mParticleSystemMask);
+            InitParticlesVisitor visitor (mParticleSystemMask);
             node->accept(visitor);
         }
     }
