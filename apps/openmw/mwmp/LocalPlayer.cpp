@@ -1063,7 +1063,9 @@ void LocalPlayer::sendJournalEntry(const std::string& quest, int index, const MW
     journalItem.quest = quest;
     journalItem.index = index;
 
-    journalItem.actorCell = *actor.getCell()->getCell();
+    if (actor.getCell() != nullptr)
+        journalItem.actorCell = *actor.getCell()->getCell();
+
     journalItem.actorCellRef.mRefID = actor.getCellRef().getRefId();
     journalItem.actorCellRef.mRefNum = actor.getCellRef().getRefNum();
 
