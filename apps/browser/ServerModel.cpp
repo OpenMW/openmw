@@ -82,7 +82,7 @@ QVariant ServerModel::headerData(int section, Qt::Orientation orientation, int r
                     var = "Address";
                     break;
                 case ServerData::PASSW:
-                    var = "Password required";
+                    var = "Password";
                     break;
                 case ServerData::VERSION:
                     var = "Version";

@@ -18,10 +18,10 @@ struct ServerData
     enum IDS
     {
         ADDR,
-        PASSW,
         HOSTNAME,
         PLAYERS,
         MAX_PLAYERS,
+        PASSW,
         MODNAME,
         PING,
         VERSION,
