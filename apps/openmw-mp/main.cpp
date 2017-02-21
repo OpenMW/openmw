@@ -44,7 +44,12 @@ void printVersion(string version, int protocol)
 #elif defined(__i386__) || defined(_M_I86)
     cout << "32-bit";
 #elif defined(__arm__)
-    cout << "ARMv" << __ARM_ARCH << " " << (__aarch64__ ? "64-bit" : "32-bit");
+    cout << "ARMv" << __ARM_ARCH << " ";
+    #ifdef __aarch64__
+        cout << "64-bit";
+    #else
+        cout << "32-bit";
+    #endif
 #else
     cout << "Unknown architecture";
 #endif
