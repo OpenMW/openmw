@@ -2659,8 +2659,9 @@ namespace MWWorld
             const ESM::Spell* spell = getStore().get<ESM::Spell>().find(selectedSpell);
 
             // Check mana
+            bool godmode = (isPlayer && getGodModeState());
             MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
-            if (magicka.getCurrent() < spell->mData.mCost && !(isPlayer && getGodModeState()))
+            if (magicka.getCurrent() < spell->mData.mCost && !godmode)
             {
                 message = "#{sMagicInsufficientSP}";
                 fail = true;
@@ -2674,7 +2675,7 @@ namespace MWWorld
             }
 
             // Reduce mana
-            if (!fail)
+            if (!fail && !godmode)
             {
                 magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
                 stats.setMagicka(magicka);
