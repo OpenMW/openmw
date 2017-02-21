@@ -196,6 +196,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 playerController->GetPacket(ID_PLAYER_POS)->Send(pl, other->guid);
                 playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(pl, other->guid);
                 playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(pl, other->guid);
+                
+                LOG_APPEND(Log::LOG_INFO, "- Exchanged information with %s",
+                    other->npc.mName.c_str());
             });
 
             myPacket->Send(player, true); //send to other clients
