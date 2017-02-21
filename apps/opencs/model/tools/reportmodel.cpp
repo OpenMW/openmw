@@ -37,7 +37,7 @@ int CSMTools::ReportModel::columnCount (const QModelIndex & parent) const
 
 QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
 {
-	if (role!=Qt::DisplayRole && role!=Qt::UserRole)
+    if (role!=Qt::DisplayRole && role!=Qt::UserRole)
         return QVariant();
 
     switch (index.column())
