@@ -44,11 +44,11 @@ QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
     {
         case Column_Type:
 
-        	if(role == Qt::UserRole)
-        		return QString::fromUtf8 (
-        				mRows.at (index.row()).mId.getTypeName().c_str());
-        	else
-        		return static_cast<int> (mRows.at (index.row()).mId.getType());
+            if(role == Qt::UserRole)
+                return QString::fromUtf8 (
+                    mRows.at (index.row()).mId.getTypeName().c_str());
+            else
+                return static_cast<int> (mRows.at (index.row()).mId.getType());
 
         case Column_Id:
         {
