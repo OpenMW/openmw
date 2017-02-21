@@ -42,7 +42,16 @@ namespace MWRender
                 mRendered = true;
 
                 mLastRenderedFrame = nv->getTraversalNumber();
+
+                osg::ref_ptr<osg::FrameStamp> previousFramestamp = const_cast<osg::FrameStamp*>(nv->getFrameStamp());
+                osg::FrameStamp* fs = new osg::FrameStamp(*previousFramestamp);
+                fs->setSimulationTime(0.0);
+
+                nv->setFrameStamp(fs);
+
                 traverse(node, nv);
+
+                nv->setFrameStamp(previousFramestamp);
             }
             else
             {
