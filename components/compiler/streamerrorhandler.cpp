@@ -14,6 +14,9 @@ namespace Compiler
         else
             mStream << "warning ";
 
+        if (!mContext.empty())
+            mStream << mContext << " ";
+
         mStream
             << "line " << loc.mLine+1 << ", column " << loc.mColumn+1
             << " (" << loc.mLiteral << ")" << std::endl
@@ -32,6 +35,11 @@ namespace Compiler
         mStream
             << "file:" << std::endl
             << "    " << message << std::endl;
+    }
+
+    void StreamErrorHandler::setContext(const std::string &context)
+    {
+        mContext = context;
     }
 
     StreamErrorHandler::StreamErrorHandler (std::ostream& ErrorStream) : mStream (ErrorStream) {}

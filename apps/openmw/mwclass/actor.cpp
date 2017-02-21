@@ -34,7 +34,11 @@ namespace MWClass
             if (getCreatureStats(ptr).isDead())
                 MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
         }
-        MWBase::Environment::get().getMechanicsManager()->add(ptr);
+    }
+
+    bool Actor::useAnim() const
+    {
+        return true;
     }
 
     void Actor::block(const MWWorld::Ptr &ptr) const

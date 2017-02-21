@@ -48,7 +48,7 @@
 
 namespace MWDialogue
 {
-    DialogueManager::DialogueManager (const Compiler::Extensions& extensions, bool scriptVerbose, Translation::Storage& translationDataStorage) :
+    DialogueManager::DialogueManager (const Compiler::Extensions& extensions, Translation::Storage& translationDataStorage) :
       mTranslationDataStorage(translationDataStorage)
       , mCompilerContext (MWScript::CompilerContext::Type_Dialogue)
       , mErrorStream(std::cout.rdbuf())
@@ -197,6 +197,8 @@ namespace MWDialogue
         try
         {
             mErrorHandler.reset();
+
+            mErrorHandler.setContext("[dialogue script]");
 
             std::istringstream input (cmd + "\n");
 
