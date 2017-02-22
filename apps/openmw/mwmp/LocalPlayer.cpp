@@ -802,6 +802,7 @@ void LocalPlayer::setCell()
     if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Container))
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
+        MWBase::Environment::get().getWindowManager()->setDragDrop(false);
     }
 
     world->getPlayer().setTeleported(true);

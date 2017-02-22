@@ -812,7 +812,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_SCALE about %s",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_SCALE about %s",
             event->cell.getDescription().c_str());
         event->scaleObjects(ptrCellStore);
 
