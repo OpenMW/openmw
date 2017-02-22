@@ -44,7 +44,7 @@ add_component_dir (vfs
 	
 IF(BUILD_OPENMW OR BUILD_OPENCS)
 add_component_dir (resource
-    scenemanager keyframemanager imagemanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem resourcemanager
+    scenemanager keyframemanager imagemanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem resourcemanager stats
     )
 
 add_component_dir (shader
@@ -239,6 +239,7 @@ target_link_libraries(components
     ${OSGUTIL_LIBRARIES}
     ${OSGDB_LIBRARIES}
     ${OSGVIEWER_LIBRARIES}
+    ${OSGTEXT_LIBRARIES}
     ${OSGGA_LIBRARIES}
     ${OSGFX_LIBRARIES}
     ${OSGANIMATION_LIBRARIES}

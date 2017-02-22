@@ -464,6 +464,11 @@ namespace MWRender
         return mPtr;
     }
 
+    MWWorld::Ptr Animation::getPtr()
+    {
+        return mPtr;
+    }
+
     void Animation::setActive(bool active)
     {
         if (mSkeleton)
@@ -1666,11 +1671,6 @@ namespace MWRender
                 std::cerr << "Warning: part has multiple parents " << mNode->getNumParents() << " " << mNode.get() << std::endl;
             mNode->getParent(0)->removeChild(mNode);
         }
-    }
-
-    void PartHolder::unlink()
-    {
-        mNode = NULL;
     }
 
 }

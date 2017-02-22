@@ -1,6 +1,7 @@
 #include "niffilemanager.hpp"
 
 #include <osg/Object>
+#include <osg/Stats>
 
 #include <components/vfs/manager.hpp>
 
@@ -53,6 +54,11 @@ namespace Resource
             mCache->addEntryToObjectCache(name, obj);
             return file;
         }
+    }
+
+    void NifFileManager::reportStats(unsigned int frameNumber, osg::Stats *stats)
+    {
+        stats->setAttribute(frameNumber, "Nif", mCache->getCacheSize());
     }
 
 }

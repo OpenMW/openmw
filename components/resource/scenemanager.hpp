@@ -139,6 +139,8 @@ namespace Resource
         /// @see ResourceManager::updateCache
         virtual void updateCache(double referenceTime);
 
+        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats);
+
     private:
 
         osg::ref_ptr<osg::Node> createInstance(const std::string& name);

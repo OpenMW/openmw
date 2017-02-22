@@ -314,4 +314,16 @@ void TerrainGrid::updateTextureFiltering()
         mResourceSystem->getSceneManager()->applyFilterSettings(it->second);
 }
 
+void TerrainGrid::reportStats(unsigned int frameNumber, osg::Stats *stats)
+{
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
+        stats->setAttribute(frameNumber, "Terrain Cell", mGridCache.size());
+    }
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mTextureCacheMutex);
+        stats->setAttribute(frameNumber, "Terrain Texture", mTextureCache.size());
+    }
+}
+
 }

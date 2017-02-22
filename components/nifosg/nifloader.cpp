@@ -1038,10 +1038,12 @@ namespace NifOsg
                 if (!(animflags & Nif::NiNode::ParticleFlag_AutoPlay))
                 {
                     partsys->setFrozen(true);
-                    // HACK: particle system will not render in Frozen state if there was no update
-                    osg::NodeVisitor nv;
-                    partsys->update(0.0, nv);
                 }
+
+                // Due to odd code in the ParticleSystemUpdater, particle systems will not be updated in the first frame
+                // So do that update manually
+                osg::NodeVisitor nv;
+                partsys->update(0.0, nv);
             }
 
             // affectors must be attached *after* the emitter in the scene graph for correct update order
