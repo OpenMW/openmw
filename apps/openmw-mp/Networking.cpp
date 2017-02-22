@@ -185,6 +185,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             player->forEachLoaded([this](Player *pl, Player *other) {
                 playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(other, pl->guid);
                 playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(other, pl->guid);
+                playerController->GetPacket(ID_PLAYER_POS)->Send(other, pl->guid);
                 playerController->GetPacket(ID_PLAYER_SKILL)->Send(other, pl->guid);
                 playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(other, pl->guid);
                 playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(other, pl->guid);
