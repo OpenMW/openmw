@@ -147,6 +147,21 @@ void CSMTools::ReportModel::add (const CSMDoc::Message& message)
     endInsertRows();
 }
 
+void CSMTools::ReportModel::addSorted (const CSMDoc::Message& message)
+{
+    beginInsertRows (QModelIndex(), mRows.size(), mRows.size());
+
+    std::vector<CSMDoc::Message>::iterator it = mRows.begin();
+    for(; it < mRows.end(); ++it)
+    {
+        if(message.mId.getTypeName().compare(it->mId.getTypeName()) > 0)
+            break;
+    }
+    mRows.insert(it, message);
+
+    endInsertRows();
+}
+
 void CSMTools::ReportModel::flagAsReplaced (int index)
 {
     CSMDoc::Message& line = mRows.at (index);

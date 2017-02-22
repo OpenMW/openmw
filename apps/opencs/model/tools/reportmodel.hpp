@@ -45,6 +45,8 @@ namespace CSMTools
             
             void add (const CSMDoc::Message& message);
 
+            void addSorted (const CSMDoc::Message& message);
+
             void flagAsReplaced (int index);
                 
             const CSMWorld::UniversalId& getUniversalId (int row) const;

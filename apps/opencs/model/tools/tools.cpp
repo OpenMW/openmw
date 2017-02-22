@@ -276,5 +276,5 @@ void CSMTools::Tools::verifierMessage (const CSMDoc::Message& message, int type)
     std::map<int, int>::iterator iter = mActiveReports.find (type);
 
     if (iter!=mActiveReports.end())
-        mReports[iter->second]->add (message);
+        mReports[iter->second]->addSorted (message);
 }
