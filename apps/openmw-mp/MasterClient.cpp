@@ -10,6 +10,7 @@
 #include <RakPeerInterface.h>
 #include "MasterClient.hpp"
 #include <components/openmw-mp/Log.hpp>
+#include <components/openmw-mp/Version.hpp>
 #include "Networking.hpp"
 
 using namespace std;
@@ -69,7 +70,9 @@ MasterClient::Send(std::string hostname, std::string modname, unsigned maxPlayer
     sstr << "\"hostname\": \"" << hostname.c_str() << "\", ";
     sstr << "\"modname\": \"" << modname.c_str() << "\", ";
     sstr << "\"players\": " << players << ", ";
-    sstr << "\"max_players\": " << maxPlayers;
+    sstr << "\"max_players\": " << maxPlayers << ", ";
+    sstr << "\"version\": \"" << TES3MP_VERSION << "\", ";
+    sstr << "\"passw\": " << (mwmp::Networking::get().isPassworded() ? "true" : "false");
     sstr << "}";
     mutexData.unlock();
 
@@ -152,7 +155,7 @@ void MasterClient::Update()
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Update rate is too low, and the master server has deleted information about"
                     " the server. Trying low rate...");
-            if((timeout - step_rate) >= step_rate)
+            if ((timeout - step_rate) >= step_rate)
                 SetUpdateRate(timeout - step_rate);
             update = false;
         }
@@ -177,10 +180,10 @@ void MasterClient::Start()
 
 void MasterClient::Stop()
 {
-    if(!sRun)
+    if (!sRun)
         return;
     sRun = false;
-    if(thrQuery.joinable())
+    if (thrQuery.joinable())
         thrQuery.join();
 }
 

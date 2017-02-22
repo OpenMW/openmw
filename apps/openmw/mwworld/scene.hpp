@@ -133,7 +133,7 @@ namespace MWWorld
 
             Ptr searchPtrViaActorId (int actorId);
 
-            void preload(const std::string& mesh);
+            void preload(const std::string& mesh, bool useAnim=false);
     };
 }
 

@@ -33,6 +33,12 @@ QVariant ServerModel::data(const QModelIndex &index, int role) const
             case ServerData::ADDR:
                 var = sd.addr;
                 break;
+            case ServerData::PASSW:
+                var = sd.needPassw ? "Yes" : "No";
+                break;
+            case ServerData::VERSION:
+                var = sd.version;
+                break;
             case ServerData::PLAYERS:
                 var = sd.players;
                 break;
@@ -75,6 +81,12 @@ QVariant ServerModel::headerData(int section, Qt::Orientation orientation, int r
                 case ServerData::ADDR:
                     var = "Address";
                     break;
+                case ServerData::PASSW:
+                    var = "Password";
+                    break;
+                case ServerData::VERSION:
+                    var = "Version";
+                    break;
                 case ServerData::HOSTNAME:
                     var = "Host name";
                     break;
@@ -82,7 +94,7 @@ QVariant ServerModel::headerData(int section, Qt::Orientation orientation, int r
                     var = "Players";
                     break;
                 case ServerData::MAX_PLAYERS:
-                    var = "Player Max";
+                    var = "Max players";
                     break;
                 case ServerData::PING:
                     var = "Ping";
@@ -120,6 +132,13 @@ bool ServerModel::setData(const QModelIndex &index, const QVariant &value, int r
                 sd.addr = value.toString();
                 ok = !sd.addr.isEmpty();
                 break;
+            case ServerData::PASSW:
+                sd.needPassw = value.toBool();
+                break;
+            case ServerData::VERSION:
+                sd.version = value.toString();
+                ok = !sd.addr.isEmpty();
+                break;
             case ServerData::PLAYERS:
                 sd.players = value.toInt(&ok);
                 break;
@@ -152,7 +171,7 @@ bool ServerModel::insertRows(int position, int count, const QModelIndex &index)
     beginInsertRows(QModelIndex(), position, position + count - 1);
 
     for (int row = 0; row < count; ++row) {
-        ServerData sd {"", -1, -1, -1, "", ""};
+        ServerData sd {"", -1, -1, -1, "", "", false, 0};
         myData.insert(position, sd);
     }
 

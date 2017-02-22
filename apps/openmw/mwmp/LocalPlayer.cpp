@@ -798,6 +798,13 @@ void LocalPlayer::setCell()
     MWWorld::Ptr player = world->getPlayerPtr();
     ESM::Position pos;
 
+    // To avoid crashes, close any container menus this player may be in
+    if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Container))
+    {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
+        MWBase::Environment::get().getWindowManager()->setDragDrop(false);
+    }
+
     world->getPlayer().setTeleported(true);
 
     int x = cell.mData.mX;
@@ -1057,7 +1064,9 @@ void LocalPlayer::sendJournalEntry(const std::string& quest, int index, const MW
     journalItem.quest = quest;
     journalItem.index = index;
 
-    journalItem.actorCell = *actor.getCell()->getCell();
+    if (actor.getCell() != nullptr)
+        journalItem.actorCell = *actor.getCell()->getCell();
+
     journalItem.actorCellRef.mRefID = actor.getCellRef().getRefId();
     journalItem.actorCellRef.mRefNum = actor.getCellRef().getRefNum();
 

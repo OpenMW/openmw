@@ -26,6 +26,8 @@ namespace MWClass
 
         virtual void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const;
 
+        virtual bool useAnim() const;
+
         virtual void block(const MWWorld::Ptr &ptr) const;
 
         virtual osg::Vec3f getRotationVector(const MWWorld::Ptr& ptr) const;

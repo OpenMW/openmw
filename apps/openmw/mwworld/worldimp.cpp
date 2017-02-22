@@ -3481,10 +3481,16 @@ namespace MWWorld
     {
         if (obj.empty())
             return;
-        MWWorld::ManualRef ref(store, obj);
-        std::string model = ref.getPtr().getClass().getModel(ref.getPtr());
-        if (!model.empty())
-            scene->preload(model);
+        try
+        {
+            MWWorld::ManualRef ref(store, obj);
+            std::string model = ref.getPtr().getClass().getModel(ref.getPtr());
+            if (!model.empty())
+                scene->preload(model, ref.getPtr().getClass().useAnim());
+        }
+        catch(std::exception& e)
+        {
+        }
     }
 
     void World::preloadEffects(const ESM::EffectList *effectList)
@@ -3492,6 +3498,12 @@ namespace MWWorld
         for (std::vector<ESM::ENAMstruct>::const_iterator it = effectList->mList.begin(); it != effectList->mList.end(); ++it)
         {
             const ESM::MagicEffect *effect = mStore.get<ESM::MagicEffect>().find(it->mEffectID);
+
+            if (MWMechanics::isSummoningEffect(it->mEffectID))
+            {
+                preload(mWorldScene, mStore, "VFX_Summon_Start");
+                preload(mWorldScene, mStore, MWMechanics::getSummonedCreature(it->mEffectID));
+            }
 
             preload(mWorldScene, mStore, effect->mCasting);
             preload(mWorldScene, mStore, effect->mHit);

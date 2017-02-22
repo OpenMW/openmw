@@ -531,7 +531,7 @@ namespace MWPhysics
             mShape = new btHeightfieldTerrainShape(
                 sqrtVerts, sqrtVerts, heights, 1,
                 minh, maxh, 2,
-                PHY_FLOAT, true
+                PHY_FLOAT, false
             );
             mShape->setUseDiamondSubdivision(true);
             mShape->setLocalScaling(btVector3(triSize, triSize, 1));

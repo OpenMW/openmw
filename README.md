@@ -3,9 +3,9 @@ TES3MP
 
 [![Build Status](https://travis-ci.org/TES3MP/openmw-tes3mp.svg?branch=master)](https://travis-ci.org/TES3MP/openmw-tes3mp)
 
-TES3MP is a project aiming to add multiplayer functionality to [OpenMW](https://github.com/OpenMW/openmw), a free and open source recreation of the popular Bethesda Softworks' game "The Elder Scrolls III: Morrowind".
+TES3MP is a project aiming to add multiplayer functionality to [OpenMW](https://github.com/OpenMW/openmw), a free and open source recreation of the popular Bethesda Softworks game "The Elder Scrolls III: Morrowind".
 
-* Version: 0.4.2
+* Version: 0.5.0
 * License: GPLv3 (see docs/license/GPL3.txt for more information)
 * Website: https://steamcommunity.com/groups/mwmulti
 
@@ -17,14 +17,16 @@ Project Status
 
 [Version changelog](https://github.com/TES3MP/openmw-tes3mp/blob/master/tes3mp-changelog.md)
 
-We are still in an early phase of development. At the moment we have synchronization of character appearance, character skills, stats, attributes and death as well as movement on interiors and exteriors, melee and ranged combat, picking up and dropping items in the world and using doors and levers.
+Our project is not yet in a playable state, though we are getting close. At the moment we have synchronization of character appearance, character skills, stats, attributes and death, movement in interiors and exteriors, melee and ranged combat, spell casting, picking up and dropping items in the world, using doors and levers, and adding and removing items from containers, as well as [serverside Lua scripts](https://github.com/TES3MP/PluginExamples) used to save and load the state of most of the aforementioned.
 
 Contributing
 --------------
 
-Development has been somewhat fast, but any contribution regarding [code](https://github.com/TES3MP/openmw-tes3mp/blob/master/CONTRIBUTING.md), documentation, bug hunting, artwork or nice Jobasha's gift cards are greatly appreciated.
-Test sessions are often advertised in our Steam Group, there is also a chat room there.
-Feel free to contact any of the [team members](https://github.com/TES3MP/openmw-tes3mp/blob/master/tes3mp-credits.md) for any questions you might have.
+Development has been relatively fast, but any contribution regarding [code](https://github.com/TES3MP/openmw-tes3mp/blob/master/CONTRIBUTING.md), documentation, bug hunting or video showcases is greatly appreciated.
+
+Test sessions are often advertised in [our Steam group](https://steamcommunity.com/groups/mwmulti) or [our Discord server](https://discord.gg/H8zhhuk).
+
+Feel free to contact the [team members](https://github.com/TES3MP/openmw-tes3mp/blob/master/tes3mp-credits.md) for any questions you might have.
 
 Getting Started
 ---------------
@@ -36,4 +38,4 @@ Getting Started
 Donations
 ---------------
 
-You can benefit the project by supporting OpenMW and or by [becoming Koncord's patron](https://www.patreon.com/Koncord).
+You can benefit the project by supporting OpenMW and/or by [becoming Koncord's patron](https://www.patreon.com/Koncord).

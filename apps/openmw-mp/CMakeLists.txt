@@ -35,9 +35,10 @@ if(BUILD_WITH_PAWN)
 endif(BUILD_WITH_PAWN)
 
 option(BUILD_WITH_LUA "Enable Terra/Lua language" ON)
+option(FORCE_LUA "Use Lua instead Terra" OFF)
 if(BUILD_WITH_LUA)
     #set(Terra_ROOT ${CMAKE_SOURCE_DIR}/external/terra/)
-    if(WIN32)
+    if(WIN32 OR FORCE_LUA)
         find_package(Lua51 REQUIRED)
         MESSAGE(STATUS "Found LUA_LIBRARY: ${LUA_LIBRARY}")
         MESSAGE(STATUS "Found LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
@@ -69,6 +70,7 @@ set(SERVER
     Networking.cpp
     Utils.cpp
     MasterClient.cpp
+    Cell.cpp
     Script/Script.cpp Script/ScriptFunction.cpp
     Script/ScriptFunctions.cpp
 

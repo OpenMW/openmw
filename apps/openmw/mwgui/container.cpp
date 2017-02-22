@@ -116,7 +116,6 @@ namespace MWGui
         containerItem.refId =itemPtr.getCellRef().getRefId();
         containerItem.count = itemPtr.getRefData().getCount();
         containerItem.charge = itemPtr.getCellRef().getCharge();
-        containerItem.goldValue = itemPtr.getCellRef().getGoldValue();
         containerItem.actionCount = count;
 
         worldObject.containerChanges.items.push_back(containerItem);
@@ -176,9 +175,8 @@ namespace MWGui
         
         // Make sure we get the drag and drop count, not the count of the original item
         containerItem.count = mDragAndDrop->mDraggedCount;
-        
+
         containerItem.charge = itemPtr.getCellRef().getCharge();
-        containerItem.goldValue = itemPtr.getCellRef().getGoldValue();
 
         worldObject.containerChanges.items.push_back(containerItem);
         event->addObject(worldObject);

@@ -297,9 +297,15 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 {
                     if (old.getTypeName() == typeid(ESM::Armor).name())
                     {
-                        if (old.getClass().getEffectiveArmorRating(old, actor) >= test.getClass().getEffectiveArmorRating(test, actor))
-                            // old armor had better armor rating
+                        if (old.get<ESM::Armor>()->mBase->mData.mType < test.get<ESM::Armor>()->mBase->mData.mType)
                             continue;
+
+                        if (old.get<ESM::Armor>()->mBase->mData.mType == test.get<ESM::Armor>()->mBase->mData.mType)
+                        {
+                            if (old.getClass().getEffectiveArmorRating(old, actor) >= test.getClass().getEffectiveArmorRating(test, actor))
+                                // old armor had better armor rating
+                                continue;
+                        }
                     }
                     // suitable armor should replace already equipped clothing
                 }

@@ -15,6 +15,8 @@ void Players::deletePlayer(RakNet::RakNetGUID guid)
 
     if (players[guid] != 0)
     {
+        CellController::get()->deletePlayer(players[guid]);
+
         LOG_APPEND(Log::LOG_INFO, "- Emptying slot %i",
             players[guid]->getId());
 
@@ -52,7 +54,7 @@ void Players::newPlayer(RakNet::RakNetGUID guid)
 
 Player *Players::getPlayer(RakNet::RakNetGUID guid)
 {
-    if(players.count(guid) == 0)
+    if (players.count(guid) == 0)
         return nullptr;
     return players[guid];
 }
@@ -134,4 +136,45 @@ void Player::setLastAttackerTime(std::chrono::steady_clock::time_point time)
 std::chrono::steady_clock::time_point Player::getLastAttackerTime()
 {
     return lastAttackerTime;
+}
+
+CellController::TContainer *Player::getCells()
+{
+    return &cells;
+}
+
+void Player::sendToLoaded(mwmp::PlayerPacket *myPacket)
+{
+    std::list <Player*> plList;
+
+    for (auto cell : cells)
+        for (auto pl : *cell)
+            plList.push_back(pl);
+
+    plList.sort();
+    plList.unique();
+
+    for (auto pl : plList)
+    {
+        if (pl == this) continue;
+        myPacket->Send(this, pl->guid);
+    }
+}
+
+void Player::forEachLoaded(std::function<void(Player *pl, Player *other)> func)
+{
+    std::list <Player*> plList;
+
+    for (auto cell : cells)
+        for (auto pl : *cell)
+            plList.push_back(pl);
+
+    plList.sort();
+    plList.unique();
+
+    for (auto pl : plList)
+    {
+        if (pl == this) continue;
+        func(this, pl);
+    }
 }

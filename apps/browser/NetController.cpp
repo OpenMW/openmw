@@ -78,6 +78,12 @@ void NetController::setData(QString address, QJsonObject server, ServerModel *mo
     mi = model->index(0, ServerData::MODNAME);
     model->setData(mi, server["modname"].toString());
 
+    mi = model->index(0, ServerData::VERSION);
+    model->setData(mi, server["version"].toString());
+
+    mi = model->index(0, ServerData::PASSW);
+    model->setData(mi, server["passw"].toBool());
+
     mi = model->index(0, ServerData::PING);
 
     QStringList addr = address.split(":");
@@ -149,6 +155,8 @@ bool NetController::downloadInfo(QAbstractItemModel *pModel, QModelIndex index)
         qDebug() << server["modname"].toString();
         qDebug() << server["players"].toInt();
         qDebug() << server["max_players"].toInt();
+        qDebug() << server["version"].toString();
+        qDebug() << server["passw"].toBool();
 
         QVector<ServerData>::Iterator value = std::find_if(model->myData.begin(), model->myData.end(), pattern(iter.key()));
         if(value == model->myData.end())
@@ -209,6 +217,8 @@ void NetController::updateInfo()
     qDebug() << map["modname"].toString();
     qDebug() << map["players"].toInt();
     qDebug() << map["max_players"].toInt();
+    qDebug() << map["version"].toString();
+    qDebug() << map["passw"].toBool();
 
     sd->hostName = map["hostname"].toString();
     sd->modName = map["modname"].toString();

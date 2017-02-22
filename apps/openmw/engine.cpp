@@ -209,7 +209,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   : mWindow(NULL)
   , mEncoding(ToUTF8::WINDOWS_1252)
   , mEncoder(NULL)
-  , mVerboseScripts (false)
   , mSkipMenu (false)
   , mUseSound (true)
   , mCompileAll (false)
@@ -303,11 +302,6 @@ void OMW::Engine::setCell (const std::string& cellName)
 void OMW::Engine::addContentFile(const std::string& file)
 {
     mContentFiles.push_back(file);
-}
-
-void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
-{
-    mVerboseScripts = scriptsVerbosity;
 }
 
 void OMW::Engine::setSkipMenu (bool skipMenu, bool newGame)
@@ -555,8 +549,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full);
     mScriptContext->setExtensions (&mExtensions);
 
-    mEnvironment.setScriptManager (new MWScript::ScriptManager (mEnvironment.getWorld()->getStore(),
-        mVerboseScripts, *mScriptContext, mWarningsMode,
+    mEnvironment.setScriptManager (new MWScript::ScriptManager (mEnvironment.getWorld()->getStore(), *mScriptContext, mWarningsMode,
         mScriptBlacklistUse ? mScriptBlacklist : std::vector<std::string>()));
 
     // Create game mechanics system
@@ -565,7 +558,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     // Create dialog system
     mEnvironment.setJournal (new MWDialogue::Journal);
-    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts, mTranslationDataStorage));
+    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mTranslationDataStorage));
 
     // scripts
     if (mCompileAll)
@@ -645,6 +638,8 @@ void OMW::Engine::go()
     assert (!mContentFiles.empty());
     if(!mwmp::Main::init(mContentFiles))
         return;
+
+    std::cout << "OSG version: " << osgGetVersion() << std::endl;
 
     mViewer = new osgViewer::Viewer;
     mViewer->setReleaseContextAtEndOfFrameHint(false);

@@ -39,6 +39,9 @@ namespace MWClass
             static void registerSelf();
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
+
+            virtual bool useAnim() const;
+            ///< Whether or not to use animated variant of model (default false)
     };
 }
 

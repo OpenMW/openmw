@@ -449,7 +449,8 @@ namespace MWScript
                     // Added by tes3mp
                     //
                     // LocalPlayer has gained a spell, so send a packet with it
-                    mwmp::Main::get().getLocalPlayer()->sendSpellAddition(id);
+                    if (ptr == MWMechanics::getPlayer())
+                        mwmp::Main::get().getLocalPlayer()->sendSpellAddition(id);
                 }
         };
 
@@ -478,7 +479,8 @@ namespace MWScript
                     // Added by tes3mp
                     //
                     // LocalPlayer has lost a spell, so send a packet with it
-                    mwmp::Main::get().getLocalPlayer()->sendSpellRemoval(id);
+                    if (ptr == MWMechanics::getPlayer())
+                        mwmp::Main::get().getLocalPlayer()->sendSpellRemoval(id);
                 }
         };
 

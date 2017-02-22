@@ -1,13 +1,34 @@
+0.5.0
+-----
+
+* Server browser
+* Synchronization of containers
+* Reworked world packets allowing for the saving and loading of world state, including container state
+* Bandwidth optimization by forwarding the most frequent player packets only to other players in the same loaded cells
+
+0.4.1
+-----
+
+* Packet for saving and loading spellbooks
+
+0.4.0
+-----
+
+* Synchronization of spells
+* Packet for saving and loading inventories
+* Being in a menu no longer prevents you from sending packets about your client
+* Fixes to freezes and problems caused by players moving around in cells from expansions/plugins that are not loaded by others
+
 0.3.0
 -----
 
-* Fixed client freezes related to players logging in at the same time
-* Fixed server crashes related to sending information about invalid players
-* Synchronization of world object removal, placement and scaling
+* Synchronization of world object removal, placement, scaling, locking and unlocking
 * Synchronization of local, global and member script variables for specific scripts
 * Synchronization for the setdelete, placeat, setscale, lock and unlock console commands
 * Player markers on minimap
 * Death reasons in chat
+* Fixes to client freezes related to players logging in at the same time
+* Fixes to server crashes related to sending information about invalid players
 
 0.2.0
 -----
@@ -19,9 +40,9 @@
 ------
 
 * Synchronization of attributes and skills
-* Fixed memory leaks related to player initialization on Windows servers
-* Fixed various graphical glitches
-* Disabled main menu buttons for starting, saving and loading games
+* Fixes to memory leaks related to player initialization on Windows servers
+* Fixes to various graphical glitches
+* Main menu buttons for starting, saving and loading games are now disabled
 
 0.0.1a
 ------
@@ -36,6 +57,7 @@
 0.0.1
 -----
 
+* Initial networking and packet architecture
 * Synchronization of player character generation
 * Synchronization of player position
 * Synchronization of player attack states (unarmed, armed with a weapon, using a spell)

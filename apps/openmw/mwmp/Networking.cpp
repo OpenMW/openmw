@@ -189,7 +189,6 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
     case ID_HANDSHAKE:
     {
-        getLocalPlayer()->passw = "SuperPassword";
         myPacket->Send(getLocalPlayer(), serverAddr);
         break;
     }
@@ -746,7 +745,9 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONTAINER");
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_CONTAINER about %s",
+            event->cell.getDescription().c_str());
+        LOG_APPEND(Log::LOG_VERBOSE, "- action: %i", event->action);
 
         // If we've received a request for information, comply with it
         if (event->action == mwmp::BaseEvent::REQUEST)
@@ -763,7 +764,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_PLACE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_PLACE about %s",
+            event->cell.getDescription().c_str());
         event->placeObjects(ptrCellStore);
 
         break;
@@ -774,7 +776,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_DELETE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_DELETE about %s",
+            event->cell.getDescription().c_str());
         event->deleteObjects(ptrCellStore);
 
         break;
@@ -785,7 +788,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_LOCK");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_LOCK about %s",
+            event->cell.getDescription().c_str());
         event->lockObjects(ptrCellStore);
 
         break;
@@ -796,7 +800,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_UNLOCK");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_UNLOCK about %s",
+            event->cell.getDescription().c_str());
         event->unlockObjects(ptrCellStore);
 
         break;
@@ -807,7 +812,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "%s", "Received ID_OBJECT_SCALE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_SCALE about %s",
+            event->cell.getDescription().c_str());
         event->scaleObjects(ptrCellStore);
 
         break;
@@ -818,7 +824,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_MOVE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_MOVE about %s",
+            event->cell.getDescription().c_str());
         event->moveObjects(ptrCellStore);
 
         break;
@@ -829,7 +836,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ROTATE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ROTATE about %s",
+            event->cell.getDescription().c_str());
         event->rotateObjects(ptrCellStore);
 
         break;
@@ -840,7 +848,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ANIM_PLAY");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ANIM_PLAY about %s",
+            event->cell.getDescription().c_str());
         event->animateObjects(ptrCellStore);
 
         break;
@@ -851,7 +860,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_STATE");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_STATE about %s",
+            event->cell.getDescription().c_str());
         event->activateDoors(ptrCellStore);
 
         break;
@@ -862,7 +872,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_SHORT");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_SHORT about %s",
+            event->cell.getDescription().c_str());
         event->setLocalShorts(ptrCellStore);
 
         break;
@@ -873,7 +884,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_FLOAT");
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_FLOAT about %s",
+            event->cell.getDescription().c_str());
         event->setLocalFloats(ptrCellStore);
 
         break;

@@ -70,15 +70,20 @@ void mwmp::WorldController::closeContainer(const MWWorld::Ptr &container)
 {
     mwmp::Main::get().getLocalPlayer()->clearCurrentContainer();
 
-    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Container \"%s\" (%d) is closed.",
-                       container.getCellRef().getRefId().c_str(),
-                       container.getCellRef().getRefNum().mIndex);
-
-    MWWorld::ContainerStore &cont = container.getClass().getContainerStore(container);
-    for (MWWorld::ContainerStoreIterator iter = cont.begin(); iter != cont.end(); iter++)
+    // If the player died while in a container, the container's Ptr could be invalid now
+    if (!container.isEmpty())
     {
-        LOG_APPEND(Log::LOG_VERBOSE, " - Item. Refid: \"%s\" Count: %d",
-                   iter->getCellRef().getRefId().c_str(), iter->getRefData().getCount());
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Container \"%s\" (%d) is closed.",
+            container.getCellRef().getRefId().c_str(),
+            container.getCellRef().getRefNum().mIndex);
+
+        MWWorld::ContainerStore &cont = container.getClass().getContainerStore(container);
+        for (MWWorld::ContainerStoreIterator iter = cont.begin(); iter != cont.end(); iter++)
+        {
+            LOG_APPEND(Log::LOG_VERBOSE, " - Item. Refid: \"%s\" Count: %d",
+                iter->getCellRef().getRefId().c_str(), iter->getRefData().getCount());
+        }
     }
+
     mwmp::Main::get().getLocalPlayer()->updateInventory();
 }
