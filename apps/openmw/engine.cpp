@@ -402,6 +402,8 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     camera->setViewport(0, 0, width, height);
 
     mViewer->realize();
+
+    mViewer->getEventQueue()->getCurrentEventState()->setWindowRectangle(0, 0, width, height);
 }
 
 void OMW::Engine::setWindowIcon()
