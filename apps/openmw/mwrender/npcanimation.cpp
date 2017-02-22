@@ -269,25 +269,11 @@ const NpcAnimation::PartBoneMap NpcAnimation::sPartList = createPartListMap();
 
 NpcAnimation::~NpcAnimation()
 {
-    if (!mListenerDisabled
-            // No need to getInventoryStore() to reset, if none exists
-            // This is to avoid triggering the listener via ensureCustomData()->autoEquip()->fireEquipmentChanged()
-            // all from within this destructor. ouch!
-           && mPtr.getRefData().getCustomData() && mPtr.getClass().getInventoryStore(mPtr).getInvListener() == this)
-        mPtr.getClass().getInventoryStore(mPtr).setInvListener(NULL, mPtr);
-
-    // do not detach (delete) parts yet, this is done so the background thread can handle the deletion
-    for(size_t i = 0;i < ESM::PRT_Count;i++)
-    {
-        if (mObjectParts[i].get())
-            mObjectParts[i]->unlink();
-    }
 }
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem,
-                           bool disableListener, bool disableSounds, ViewMode viewMode, float firstPersonFieldOfView)
-  : ActorAnimation(ptr, parentNode, resourceSystem, disableListener),
-    mListenerDisabled(disableListener),
+                           bool disableSounds, ViewMode viewMode, float firstPersonFieldOfView)
+  : ActorAnimation(ptr, parentNode, resourceSystem),
     mViewMode(viewMode),
     mShowWeapons(false),
     mShowCarriedLeft(true),
@@ -309,9 +295,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
     }
 
     updateNpcBase();
-
-    if (!disableListener)
-        mPtr.getClass().getInventoryStore(mPtr).setInvListener(this, mPtr);
 }
 
 void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)

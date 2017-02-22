@@ -99,8 +99,6 @@ namespace MWMechanics
         int actorLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
 
         float castChance = (lowestSkill - spell->mData.mCost + castBonus + 0.2f * actorWillpower + 0.1f * actorLuck) * stats.getFatigueTerm();
-        if (MWBase::Environment::get().getWorld()->getGodModeState() && actor == getPlayer())
-            castChance = 100;
 
         if (!cap)
             return std::max(0.f, castChance);
@@ -820,8 +818,14 @@ namespace MWMechanics
             bool fail = false;
 
             // Check success
-            float successChance = getSpellSuccessChance(spell, mCaster);
 
+            // Major change done by tes3mp:
+            // Instead of checking whether the caster is a player or an NPC,
+            // check whether it's the LocalPlayer or a DedicatedPlayer and calculate
+            // calculate the success chance in clients' LocalPlayer::prepareAttack()
+            // TODO: Make this make sense for NPCs too
+            // TODO: See if LocalPlayer being the target and having godmode on
+            // can be accounted for like it is in OpenMW's corresponding code
             mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(mCaster);
             bool isDedicated = dedicatedPlayer != NULL;
 
