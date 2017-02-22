@@ -68,7 +68,15 @@ namespace mwmp
     void GUIChat::acceptCommand(MyGUI::EditBox *_sender)
     {
         const std::string &cm = mCommandLine->getOnlyText();
-        if (cm.empty()) return;
+        
+		// If they enter nothing, then it should be canceled.
+		// Otherwise, there's no way of closing without having text.
+		if (cm.empty()) 
+		{
+			mCommandLine->setCaption("");
+			SetEditState(0);
+			return;
+		}
 
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Player: %s", cm.c_str());
 
