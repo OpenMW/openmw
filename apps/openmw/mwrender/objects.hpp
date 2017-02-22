@@ -62,7 +62,7 @@ public:
 };
 
 class Objects{
-    typedef std::map<MWWorld::ConstPtr,Animation*> PtrAnimationMap;
+    typedef std::map<MWWorld::ConstPtr,osg::ref_ptr<Animation> > PtrAnimationMap;
 
     typedef std::map<const MWWorld::CellStore*, osg::ref_ptr<osg::Group> > CellMap;
     CellMap mCellSceneNodes;

@@ -1673,9 +1673,4 @@ namespace MWRender
         }
     }
 
-    void PartHolder::unlink()
-    {
-        mNode = NULL;
-    }
-
 }

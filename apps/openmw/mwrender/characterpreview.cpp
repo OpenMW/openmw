@@ -218,10 +218,10 @@ namespace MWRender
 
     void CharacterPreview::rebuild()
     {
-        mAnimation.reset(NULL);
+        mAnimation = NULL;
 
-        mAnimation.reset(new NpcAnimation(mCharacter, mNode, mResourceSystem, true,
-                                      (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal)));
+        mAnimation = new NpcAnimation(mCharacter, mNode, mResourceSystem, true,
+                                      (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
 
         onSetup();
 

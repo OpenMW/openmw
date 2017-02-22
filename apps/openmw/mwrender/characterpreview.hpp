@@ -61,7 +61,7 @@ namespace MWRender
 
         MWWorld::Ptr mCharacter;
 
-        std::auto_ptr<MWRender::NpcAnimation> mAnimation;
+        osg::ref_ptr<MWRender::NpcAnimation> mAnimation;
         osg::ref_ptr<osg::PositionAttitudeTransform> mNode;
         std::string mCurrentAnimGroup;
 
