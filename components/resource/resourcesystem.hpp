@@ -9,6 +9,11 @@ namespace VFS
     class Manager;
 }
 
+namespace osg
+{
+    class Stats;
+}
+
 namespace Resource
 {
 
@@ -48,6 +53,8 @@ namespace Resource
 
         /// @note May be called from any thread.
         const VFS::Manager* getVFS() const;
+
+        void reportStats(unsigned int frameNumber, osg::Stats* stats);
 
     private:
         std::auto_ptr<SceneManager> mSceneManager;

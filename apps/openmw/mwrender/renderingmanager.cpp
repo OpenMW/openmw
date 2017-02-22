@@ -475,6 +475,8 @@ namespace MWRender
 
     void RenderingManager::update(float dt, bool paused)
     {
+        reportStats();
+
         mUnrefQueue->flush(mWorkQueue.get());
 
         if (!paused)
@@ -819,8 +821,8 @@ namespace MWRender
 
     void RenderingManager::renderPlayer(const MWWorld::Ptr &player)
     {
-        mPlayerAnimation.reset(new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0, false, NpcAnimation::VM_Normal,
-                                                mFirstPersonFieldOfView));
+        mPlayerAnimation = new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0, NpcAnimation::VM_Normal,
+                                                mFirstPersonFieldOfView);
 
         mCamera->setAnimation(mPlayerAnimation.get());
         mCamera->attachTo(player);
@@ -899,6 +901,18 @@ namespace MWRender
         mViewer->getCamera()->setClearColor(color);
 
         mStateUpdater->setFogColor(color);
+    }
+
+    void RenderingManager::reportStats()
+    {
+        osg::Stats* stats = mViewer->getViewerStats();
+        unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+        if (stats->collectStats("resource"))
+        {
+            stats->setAttribute(frameNumber, "UnrefQueue", mUnrefQueue->getNumItems());
+
+            mTerrain->reportStats(frameNumber, stats);
+        }
     }
 
     void RenderingManager::processChangedSettings(const Settings::CategorySettingVector &changed)

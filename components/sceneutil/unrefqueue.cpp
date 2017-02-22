@@ -44,4 +44,9 @@ namespace SceneUtil
         mWorkItem = new UnrefWorkItem;
     }
 
+    unsigned int UnrefQueue::getNumItems() const
+    {
+        return mWorkItem->mObjects.size();
+    }
+
 }

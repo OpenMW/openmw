@@ -76,4 +76,10 @@ namespace Resource
         }
     }
 
+    unsigned int MultiObjectCache::getCacheSize() const
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_objectCacheMutex);
+        return _objectCache.size();
+    }
+
 }

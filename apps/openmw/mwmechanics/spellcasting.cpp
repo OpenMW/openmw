@@ -99,8 +99,6 @@ namespace MWMechanics
         int actorLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
 
         float castChance = (lowestSkill - spell->mData.mCost + castBonus + 0.2f * actorWillpower + 0.1f * actorLuck) * stats.getFatigueTerm();
-        if (MWBase::Environment::get().getWorld()->getGodModeState() && actor == getPlayer())
-            castChance = 100;
 
         if (!cap)
             return std::max(0.f, castChance);
@@ -820,7 +818,6 @@ namespace MWMechanics
             bool fail = false;
 
             // Check success
-            float successChance = getSpellSuccessChance(spell, mCaster);
 
             mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(mCaster);
             bool isDedicated = dedicatedPlayer != NULL;

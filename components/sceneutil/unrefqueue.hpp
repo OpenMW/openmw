@@ -23,6 +23,8 @@ namespace SceneUtil
         /// Call from the main thread.
         void flush(SceneUtil::WorkQueue* workQueue);
 
+        unsigned int getNumItems() const;
+
     private:
         osg::ref_ptr<UnrefWorkItem> mWorkItem;
     };
