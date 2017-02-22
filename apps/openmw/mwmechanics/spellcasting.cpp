@@ -819,6 +819,13 @@ namespace MWMechanics
 
             // Check success
 
+            // Major change done by tes3mp:
+            // Instead of checking whether the caster is a player or an NPC,
+            // check whether it's the LocalPlayer or a DedicatedPlayer and calculate
+            // calculate the success chance in clients' LocalPlayer::prepareAttack()
+            // TODO: Make this make sense for NPCs too
+            // TODO: See if LocalPlayer being the target and having godmode on
+            // can be accounted for like it is in OpenMW's corresponding code
             mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(mCaster);
             bool isDedicated = dedicatedPlayer != NULL;
 
