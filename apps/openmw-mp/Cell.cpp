@@ -212,12 +212,12 @@ Cell::Cell(ESM::Cell cell): cell(cell)
 
 }
 
-Cell::Iterator Cell::begin()
+Cell::Iterator Cell::begin() const
 {
     return players.begin();
 }
 
-Cell::Iterator Cell::end()
+Cell::Iterator Cell::end() const
 {
     return players.end();
 }

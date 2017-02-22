@@ -53,10 +53,10 @@ class Cell
 public:
     Cell(ESM::Cell cell);
     typedef std::deque<Player*> TPlayers;
-    typedef TPlayers::iterator Iterator;
-    
-    Iterator begin();
-    Iterator end();
+    typedef TPlayers::const_iterator Iterator;
+
+    Iterator begin() const;
+    Iterator end() const;
 
     void addPlayer(Player *player);
     void removePlayer(Player *player);
