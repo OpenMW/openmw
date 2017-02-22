@@ -202,7 +202,7 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     PtrAnimationMap::iterator iter = mObjects.find(old);
     if(iter != mObjects.end())
     {
-        Animation *anim = iter->second;
+        osg::ref_ptr<Animation> anim = iter->second;
         mObjects.erase(iter);
         anim->updatePtr(cur);
         mObjects[cur] = anim;
