@@ -464,6 +464,11 @@ namespace MWRender
         return mPtr;
     }
 
+    MWWorld::Ptr Animation::getPtr()
+    {
+        return mPtr;
+    }
+
     void Animation::setActive(bool active)
     {
         if (mSkeleton)

@@ -31,6 +31,7 @@
 #include "../mwmechanics/aiavoiddoor.hpp" //Used to tell actors to avoid doors
 
 #include "../mwrender/animation.hpp"
+#include "../mwrender/npcanimation.hpp"
 #include "../mwrender/renderingmanager.hpp"
 #include "../mwrender/camera.hpp"
 #include "../mwrender/vismask.hpp"
@@ -2212,7 +2213,12 @@ namespace MWWorld
     {
         MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr());
 
-        mRendering->renderPlayer(getPlayerPtr());
+        MWWorld::Ptr player = getPlayerPtr();
+
+        mRendering->renderPlayer(player);
+        MWRender::NpcAnimation* anim = static_cast<MWRender::NpcAnimation*>(mRendering->getAnimation(player));
+        player.getClass().getInventoryStore(player).setInvListener(anim, player);
+        player.getClass().getInventoryStore(player).setContListener(anim);
 
         scaleObject(getPlayerPtr(), 1.f); // apply race height
 

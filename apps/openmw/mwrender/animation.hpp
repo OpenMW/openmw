@@ -343,6 +343,8 @@ public:
 
     MWWorld::ConstPtr getPtr() const;
 
+    MWWorld::Ptr getPtr();
+
     /// Set active flag on the object skeleton, if one exists.
     /// @see SceneUtil::Skeleton::setActive
     void setActive(bool active);

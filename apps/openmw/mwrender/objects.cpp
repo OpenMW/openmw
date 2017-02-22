@@ -92,6 +92,8 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
     else
         anim.reset(new CreatureAnimation(ptr, mesh, mResourceSystem));
 
+    ptr.getClass().getContainerStore(ptr).setContListener(static_cast<ActorAnimation*>(anim.get()));
+
     mObjects.insert(std::make_pair(ptr, anim.release()));
 }
 
@@ -101,6 +103,9 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
     ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
     std::auto_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem));
+
+    ptr.getClass().getInventoryStore(ptr).setInvListener(anim.get(), ptr);
+    ptr.getClass().getInventoryStore(ptr).setContListener(anim.get());
 
     mObjects.insert(std::make_pair(ptr, anim.release()));
 }
@@ -119,6 +124,13 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
         delete iter->second;
         mObjects.erase(iter);
 
+        if (ptr.getClass().isNpc())
+        {
+            MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
+            store.setInvListener(NULL, ptr);
+            store.setContListener(NULL);
+        }
+
         ptr.getRefData().getBaseNode()->getParent(0)->removeChild(ptr.getRefData().getBaseNode());
 
         ptr.getRefData().setBaseNode(NULL);
@@ -132,10 +144,19 @@ void Objects::removeCell(const MWWorld::CellStore* store)
 {
     for(PtrAnimationMap::iterator iter = mObjects.begin();iter != mObjects.end();)
     {
-        if(iter->first.getCell() == store)
+        MWWorld::Ptr ptr = iter->second->getPtr();
+        if(ptr.getCell() == store)
         {
             if (mUnrefQueue.get())
                 mUnrefQueue->push(iter->second->getObjectRoot());
+
+            if (ptr.getClass().isNpc() && ptr.getRefData().getCustomData())
+            {
+                MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
+                store.setInvListener(NULL, ptr);
+                store.setContListener(NULL);
+            }
+
             delete iter->second;
             mObjects.erase(iter++);
         }

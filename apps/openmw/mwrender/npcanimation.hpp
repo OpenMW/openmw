@@ -38,8 +38,6 @@ public:
 private:
     static const PartBoneMap sPartList;
 
-    bool mListenerDisabled;
-
     // Bounded Parts
     PartHolderPtr mObjectParts[ESM::PRT_Count];
     std::string mSoundIds[ESM::PRT_Count];
@@ -105,7 +103,7 @@ public:
      * @param disableSounds    Same as \a disableListener but for playing items sounds
      * @param viewMode
      */
-    NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem, bool disableListener = false,
+    NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem,
                  bool disableSounds = false, ViewMode viewMode=VM_Normal, float firstPersonFieldOfView=55.f);
     virtual ~NpcAnimation();
 

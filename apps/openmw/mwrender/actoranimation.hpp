@@ -31,8 +31,7 @@ namespace MWRender
 class ActorAnimation : public Animation, public MWWorld::ContainerStoreListener
 {
     public:
-        ActorAnimation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem,
-                       bool disableListener=false);
+        ActorAnimation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem);
         virtual ~ActorAnimation();
 
         virtual void itemAdded(const MWWorld::ConstPtr& item, int count);
@@ -44,8 +43,6 @@ class ActorAnimation : public Animation, public MWWorld::ContainerStoreListener
 
         typedef std::map<MWWorld::ConstPtr, osg::ref_ptr<SceneUtil::LightSource> > ItemLightMap;
         ItemLightMap mItemLights;
-
-        bool mListenerDisabled;
 };
 
 }

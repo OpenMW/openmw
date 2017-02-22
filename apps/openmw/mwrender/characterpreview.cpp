@@ -220,7 +220,7 @@ namespace MWRender
     {
         mAnimation.reset(NULL);
 
-        mAnimation.reset(new NpcAnimation(mCharacter, mNode, mResourceSystem, true, true,
+        mAnimation.reset(new NpcAnimation(mCharacter, mNode, mResourceSystem, true,
                                       (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal)));
 
         onSetup();
