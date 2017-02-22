@@ -186,14 +186,12 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(other, pl->guid);
                 playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(other, pl->guid);
                 playerController->GetPacket(ID_PLAYER_SKILL)->Send(other, pl->guid);
-                playerController->GetPacket(ID_PLAYER_POS)->Send(other, pl->guid);
                 playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(other, pl->guid);
                 playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(other, pl->guid);
 
                 playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(pl, other->guid);
                 playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(pl, other->guid);
                 playerController->GetPacket(ID_PLAYER_SKILL)->Send(pl, other->guid);
-                playerController->GetPacket(ID_PLAYER_POS)->Send(pl, other->guid);
                 playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(pl, other->guid);
                 playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(pl, other->guid);
                 
@@ -201,6 +199,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                     other->npc.mName.c_str());
             });
 
+            playerController->GetPacket(ID_PLAYER_POS)->Send(player);
             myPacket->Send(player, true); //send to other clients
 
             Script::Call<Script::CallbackIdentity("OnPlayerCellChange")>(player->getId());
