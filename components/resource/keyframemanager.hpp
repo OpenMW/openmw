@@ -22,6 +22,8 @@ namespace Resource
         /// Retrieve a read-only keyframe resource by name (case-insensitive).
         /// @note Throws an exception if the resource is not found.
         osg::ref_ptr<const NifOsg::KeyframeHolder> get(const std::string& name);
+
+        void reportStats(unsigned int frameNumber, osg::Stats* stats);
     };
 
 }

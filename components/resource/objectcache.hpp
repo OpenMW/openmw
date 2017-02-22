@@ -73,6 +73,9 @@ class ObjectCache : public osg::Referenced
         /** call node->accept(nv); for all nodes in the objectCache. */
         void accept(osg::NodeVisitor& nv);
 
+        /** Get the number of objects in the cache. */
+        unsigned int getCacheSize() const;
+
     protected:
 
         virtual ~ObjectCache();
@@ -81,7 +84,7 @@ class ObjectCache : public osg::Referenced
         typedef std::map<std::string, ObjectTimeStampPair >             ObjectCacheMap;
 
         ObjectCacheMap                          _objectCache;
-        OpenThreads::Mutex                      _objectCacheMutex;
+        mutable OpenThreads::Mutex              _objectCacheMutex;
 
 };
 

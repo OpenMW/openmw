@@ -8,6 +8,11 @@ namespace VFS
     class Manager;
 }
 
+namespace osg
+{
+    class Stats;
+}
+
 namespace Resource
 {
     class ObjectCache;
@@ -27,6 +32,8 @@ namespace Resource
         void setExpiryDelay (double expiryDelay);
 
         const VFS::Manager* getVFS() const;
+
+        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}
 
     protected:
         const VFS::Manager* mVFS;

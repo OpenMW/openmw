@@ -185,4 +185,10 @@ void BulletShapeManager::updateCache(double referenceTime)
     mInstanceCache->removeUnreferencedObjectsInCache();
 }
 
+void BulletShapeManager::reportStats(unsigned int frameNumber, osg::Stats *stats)
+{
+    stats->setAttribute(frameNumber, "Shape", mCache->getCacheSize());
+    stats->setAttribute(frameNumber, "Shape Instance", mInstanceCache->getCacheSize());
+}
+
 }

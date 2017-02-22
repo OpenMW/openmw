@@ -100,6 +100,23 @@ osg::ref_ptr<WorkItem> WorkQueue::removeWorkItem()
         return NULL;
 }
 
+unsigned int WorkQueue::getNumItems() const
+{
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+    return mQueue.size();
+}
+
+unsigned int WorkQueue::getNumActiveThreads() const
+{
+    unsigned int count = 0;
+    for (unsigned int i=0; i<mThreads.size(); ++i)
+    {
+        if (mThreads[i]->isActive())
+            ++count;
+    }
+    return count;
+}
+
 WorkThread::WorkThread(WorkQueue *workQueue)
     : mWorkQueue(workQueue)
 {
@@ -112,9 +129,16 @@ void WorkThread::run()
         osg::ref_ptr<WorkItem> item = mWorkQueue->removeWorkItem();
         if (!item)
             return;
+        mActive = true;
         item->doWork();
         item->signalDone();
+        mActive = false;
     }
+}
+
+bool WorkThread::isActive() const
+{
+    return mActive;
 }
 
 }

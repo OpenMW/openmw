@@ -475,6 +475,8 @@ namespace MWRender
 
     void RenderingManager::update(float dt, bool paused)
     {
+        reportStats();
+
         mUnrefQueue->flush(mWorkQueue.get());
 
         if (!paused)
@@ -899,6 +901,18 @@ namespace MWRender
         mViewer->getCamera()->setClearColor(color);
 
         mStateUpdater->setFogColor(color);
+    }
+
+    void RenderingManager::reportStats()
+    {
+        osg::Stats* stats = mViewer->getViewerStats();
+        unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+        if (stats->collectStats("resource"))
+        {
+            stats->setAttribute(frameNumber, "UnrefQueue", mUnrefQueue->getNumItems());
+
+            mTerrain->reportStats(frameNumber, stats);
+        }
     }
 
     void RenderingManager::processChangedSettings(const Settings::CategorySettingVector &changed)

@@ -585,4 +585,15 @@ namespace Resource
         mInstanceCache->removeUnreferencedObjectsInCache();
     }
 
+    void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats)
+    {
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(*mIncrementalCompileOperation->getToCompiledMutex());
+            stats->setAttribute(frameNumber, "Compiling", mIncrementalCompileOperation->getToCompile().size());
+        }
+
+        stats->setAttribute(frameNumber, "Node", mCache->getCacheSize());
+        stats->setAttribute(frameNumber, "Node Instance", mInstanceCache->getCacheSize());
+    }
+
 }

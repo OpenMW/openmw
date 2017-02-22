@@ -26,6 +26,8 @@ preload enabled
 
 Controls whether textures and objects will be pre-loaded in background threads. This setting being enabled should result in a reduced amount of loading screens, no impact on frame rate and a varying amount of additional RAM usage, depending on how the preloader was configured (see the below settings). The default preloading settings with vanilla game files should only use negligible amounts of RAM, however, when using high-res texture and model replacers it may be necessary to tweak these settings to prevent the game from running out of memory.
 
+The effects of (pre-)loading can be observed on the in-game statistics panel brought up with the 'F4' key.
+
 All settings starting with 'preload' in this section will have no effect if preloading is disabled, and can only be configured by editing the settings configuration file.
 
 
