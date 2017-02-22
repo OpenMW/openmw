@@ -650,7 +650,8 @@ namespace MWWorld
             loadRef (ref, deleted, refNumToID);
         }
 
-        setLastRefNumIndex(refNumToID.rbegin()->first.mIndex);
+        if(refNumToID.size() != 0)
+            setLastRefNumIndex(refNumToID.rbegin()->first.mIndex);
 
         updateMergedRefs();
     }
