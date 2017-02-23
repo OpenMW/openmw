@@ -234,12 +234,15 @@ class CollectLowestTransformsVisitor : public BaseOptimizerVisitor
 
         inline bool isOperationPermissibleForObject(const osg::Object* object) const
         {
-            const osg::Drawable* drawable = dynamic_cast<const osg::Drawable*>(object);
-            if (drawable) return isOperationPermissibleForObject(drawable);
-
-            const osg::Node* node = dynamic_cast<const osg::Node*>(object);
-            if (node) return isOperationPermissibleForObject(node);
-
+            const osg::Node* node = object->asNode();
+            if (node)
+            {
+                const osg::Drawable* drawable = node->asDrawable();
+                if (drawable)
+                     return isOperationPermissibleForObject(drawable);
+                else
+                    return isOperationPermissibleForObject(node);
+            }
             return true;
         }
 
@@ -343,7 +346,10 @@ class CollectLowestTransformsVisitor : public BaseOptimizerVisitor
 
 void CollectLowestTransformsVisitor::doTransform(osg::Object* obj,osg::Matrix& matrix)
 {
-    osg::Drawable* drawable = dynamic_cast<osg::Drawable*>(obj);
+    osg::Node* node = obj->asNode();
+    if (!node)
+        return;
+    osg::Drawable* drawable = node->asDrawable();
     if (drawable)
     {
         osgUtil::TransformAttributeFunctor tf(matrix);
@@ -543,11 +549,11 @@ bool CollectLowestTransformsVisitor::removeTransforms(osg::Node* nodeWeCannotRem
             }
             else
             {
-                osg::MatrixTransform* mt = dynamic_cast<osg::MatrixTransform*>(titr->first);
+                osg::MatrixTransform* mt = titr->first->asMatrixTransform();
                 if (mt) mt->setMatrix(osg::Matrix::identity());
                 else
                 {
-                    osg::PositionAttitudeTransform* pat = dynamic_cast<osg::PositionAttitudeTransform*>(titr->first);
+                    osg::PositionAttitudeTransform* pat = titr->first->asPositionAttitudeTransform();
                     if (pat)
                     {
                         pat->setPosition(osg::Vec3(0.0f,0.0f,0.0f));
@@ -732,7 +738,7 @@ void Optimizer::RemoveEmptyNodesVisitor::apply(osg::Group& group)
     {
         // only remove empty groups, but not empty occluders.
         if (group.getNumChildren()==0 && isOperationPermissibleForObject(&group) &&
-            (typeid(group)==typeid(osg::Group) || (dynamic_cast<osg::Transform*>(&group))) &&
+            (typeid(group)==typeid(osg::Group) || (group.asTransform())) &&
             (group.getNumChildrenRequiringUpdateTraversal()==0 && group.getNumChildrenRequiringEventTraversal()==0) )
         {
             _redundantNodeList.insert(&group);
@@ -828,7 +834,7 @@ void Optimizer::RemoveRedundantNodesVisitor::removeRedundantNodes()
         itr!=_redundantNodeList.end();
         ++itr)
     {
-        osg::ref_ptr<osg::Group> group = dynamic_cast<osg::Group*>(*itr);
+        osg::ref_ptr<osg::Group> group = (*itr)->asGroup();
         if (group.valid())
         {
             // take a copy of parents list since subsequent removes will modify the original one.
@@ -1288,7 +1294,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGeode(osg::Geode& geode)
     unsigned int i;
     for(i=0;i<geode.getNumDrawables();++i)
     {
-        osg::Geometry* geom = dynamic_cast<osg::Geometry*>(geode.getDrawable(i));
+        osg::Geometry* geom = geode.getDrawable(i)->asGeometry();
         if (geom)
         {
             osg::Geometry::PrimitiveSetList& primitives = geom->getPrimitiveSetList();
@@ -1315,7 +1321,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGeode(osg::Geode& geode)
     // now merge any compatible primitives.
     for(i=0;i<geode.getNumDrawables();++i)
     {
-        osg::Geometry* geom = dynamic_cast<osg::Geometry*>(geode.getDrawable(i));
+        osg::Geometry* geom = geode.getDrawable(i)->asGeometry();
         if (geom)
         {
             if (geom->getNumPrimitiveSets()>0 &&
