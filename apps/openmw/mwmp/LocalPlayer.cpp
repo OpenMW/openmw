@@ -790,6 +790,9 @@ void LocalPlayer::setPosition()
     }
 
     updatePosition(true);
+
+    // Make sure we update our draw state, or we'll end up with the wrong one
+    updateDrawStateAndFlags(true);
 }
 
 void LocalPlayer::setCell()
