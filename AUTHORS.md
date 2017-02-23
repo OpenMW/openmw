@@ -53,6 +53,7 @@ Programmers
     eroen
     escondida
     Evgeniy Mineev (sandstranger)
+    Federico Guerra (FedeWar)
     Fil Krynicki (filkry)
     Gašper Sedej
     gugus/gus

@@ -37,14 +37,18 @@ int CSMTools::ReportModel::columnCount (const QModelIndex & parent) const
 
 QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
 {
-    if (role!=Qt::DisplayRole)
+    if (role!=Qt::DisplayRole && role!=Qt::UserRole)
         return QVariant();
 
     switch (index.column())
     {
         case Column_Type:
 
-            return static_cast<int> (mRows.at (index.row()).mId.getType());
+            if(role == Qt::UserRole)
+                return QString::fromUtf8 (
+                    mRows.at (index.row()).mId.getTypeName().c_str());
+            else
+                return static_cast<int> (mRows.at (index.row()).mId.getType());
 
         case Column_Id:
         {
