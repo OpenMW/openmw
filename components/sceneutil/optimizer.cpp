@@ -1031,14 +1031,13 @@ bool isAbleToMerge(const osg::Geometry& g1, const osg::Geometry& g2)
     return true;
 }
 
-bool Optimizer::MergeGeometryVisitor::mergeGeode(osg::Geode& geode)
+
+bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
 {
-    if (!isOperationPermissibleForObject(&geode)) return false;
+    if (!isOperationPermissibleForObject(&group)) return false;
 
-    if (geode.getNumDrawables()>=2)
+    if (group.getNumChildren()>=2)
     {
-
-        // OSG_NOTICE<<"Before "<<geode.getNumDrawables()<<std::endl;
 
         typedef std::vector<osg::Geometry*>                         DuplicateList;
         typedef std::vector< osg::ref_ptr<osg::Drawable> >          DrawableList;
@@ -1050,9 +1049,9 @@ bool Optimizer::MergeGeometryVisitor::mergeGeode(osg::Geode& geode)
         DrawableList standardDrawables;
 
         unsigned int i;
-        for(i=0;i<geode.getNumDrawables();++i)
+        for(i=0;i<group.getNumChildren();++i)
         {
-            osg::Drawable* drawable = geode.getDrawable(i);
+            osg::Drawable* drawable = group.getChild(i)->asDrawable();
             if (drawable)
             {
                 osg::Geometry* geom = drawable->asGeometry();
@@ -1194,27 +1193,6 @@ bool Optimizer::MergeGeometryVisitor::mergeGeode(osg::Geode& geode)
 
         if (needToDoMerge)
         {
-            // first take a reference to all the drawables to prevent them being deleted prematurely
-            typedef std::vector< osg::ref_ptr<osg::Drawable> >          DrawableList;
-            DrawableList keepDrawables;
-            keepDrawables.resize(geode.getNumDrawables());
-            for(i=0; i<geode.getNumDrawables(); ++i)
-            {
-                osg::Drawable* drawable = geode.getDrawable(i);
-                if (drawable) keepDrawables[i] = geode.getDrawable(i);
-            }
-
-            // now clear the drawable list of the Geode so we don't have to remove items one by one (which is slow)
-            geode.removeDrawables(0, geode.getNumDrawables());
-
-            // add back in the standard drawables which arn't possible to merge.
-            for(DrawableList::iterator sitr = standardDrawables.begin();
-                sitr != standardDrawables.end();
-                ++sitr)
-            {
-                geode.addDrawable(sitr->get());
-            }
-
             // now do the merging of geometries
             for(MergeList::iterator mitr = mergeList.begin();
                 mitr != mergeList.end();
@@ -1224,17 +1202,14 @@ bool Optimizer::MergeGeometryVisitor::mergeGeode(osg::Geode& geode)
                 if (duplicateList.size()>1)
                 {
                     osg::Geometry* lhs = duplicateList.front();
-                    geode.addDrawable(lhs);
                     for(DuplicateList::iterator ditr = duplicateList.begin()+1;
                         ditr != duplicateList.end();
                         ++ditr)
                     {
                         mergeGeometry(*lhs,**ditr);
+
+                        group.removeChild(*ditr);
                     }
-                }
-                else if (duplicateList.size()>0)
-                {
-                    geode.addDrawable(duplicateList.front());
                 }
             }
         }
@@ -1285,16 +1260,17 @@ bool Optimizer::MergeGeometryVisitor::mergeGeode(osg::Geode& geode)
         }
 #endif
 
-        // OSG_NOTICE<<"After "<<geode.getNumDrawables()<<std::endl;
-
     }
 
 
     // convert all polygon primitives which has 3 indices into TRIANGLES, 4 indices into QUADS.
     unsigned int i;
-    for(i=0;i<geode.getNumDrawables();++i)
+    for(i=0;i<group.getNumChildren();++i)
     {
-        osg::Geometry* geom = geode.getDrawable(i)->asGeometry();
+        osg::Drawable* drawable = group.getChild(i)->asDrawable();
+        if (!drawable)
+            continue;
+        osg::Geometry* geom = drawable->asGeometry();
         if (geom)
         {
             osg::Geometry::PrimitiveSetList& primitives = geom->getPrimitiveSetList();
@@ -1319,9 +1295,12 @@ bool Optimizer::MergeGeometryVisitor::mergeGeode(osg::Geode& geode)
     }
 
     // now merge any compatible primitives.
-    for(i=0;i<geode.getNumDrawables();++i)
+    for(i=0;i<group.getNumChildren();++i)
     {
-        osg::Geometry* geom = geode.getDrawable(i)->asGeometry();
+        osg::Drawable* drawable = group.getChild(i)->asDrawable();
+        if (!drawable)
+            continue;
+        osg::Geometry* geom = drawable->asGeometry();
         if (geom)
         {
             if (geom->getNumPrimitiveSets()>0 &&

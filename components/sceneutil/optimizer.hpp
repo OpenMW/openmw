@@ -379,10 +379,10 @@ class Optimizer
                     return _targetMaximumNumberOfVertices;
                 }
 
-                virtual void apply(osg::Geode& geode) { mergeGeode(geode); }
+                virtual void apply(osg::Group& group) { mergeGroup(group); traverse(group); }
                 virtual void apply(osg::Billboard&) { /* don't do anything*/ }
 
-                bool mergeGeode(osg::Geode& geode);
+                bool mergeGroup(osg::Group& group);
 
                 static bool geometryContainsSharedArrays(osg::Geometry& geom);
 
