@@ -78,18 +78,31 @@ osgDB::ObjectWrapper* makeDummySerializer(const std::string& classname)
     return new osgDB::ObjectWrapper(createInstanceFunc<osg::DummyObject>, classname, "osg::Object");
 }
 
+class GeometrySerializer : public osgDB::ObjectWrapper
+{
+public:
+    GeometrySerializer()
+        : osgDB::ObjectWrapper(createInstanceFunc<osg::Drawable>, "osg::Geometry", "osg::Object osg::Drawable osg::Geometry")
+    {
+    }
+};
 
 void registerSerializers()
 {
     static bool done = false;
     if (!done)
     {
-        osgDB::Registry::instance()->getObjectWrapperManager()->addWrapper(new PositionAttitudeTransformSerializer);
-        osgDB::Registry::instance()->getObjectWrapperManager()->addWrapper(new SkeletonSerializer);
-        osgDB::Registry::instance()->getObjectWrapperManager()->addWrapper(new FrameSwitchSerializer);
-        osgDB::Registry::instance()->getObjectWrapperManager()->addWrapper(new RigGeometrySerializer);
-        osgDB::Registry::instance()->getObjectWrapperManager()->addWrapper(new LightManagerSerializer);
-        osgDB::Registry::instance()->getObjectWrapperManager()->addWrapper(new CameraRelativeTransformSerializer);
+        osgDB::ObjectWrapperManager* mgr = osgDB::Registry::instance()->getObjectWrapperManager();
+        mgr->addWrapper(new PositionAttitudeTransformSerializer);
+        mgr->addWrapper(new SkeletonSerializer);
+        mgr->addWrapper(new FrameSwitchSerializer);
+        mgr->addWrapper(new RigGeometrySerializer);
+        mgr->addWrapper(new LightManagerSerializer);
+        mgr->addWrapper(new CameraRelativeTransformSerializer);
+
+        // Don't serialize Geometry data as we are more interested in the overall structure rather than tons of vertex data that would make the file large and hard to read.
+        mgr->removeWrapper(mgr->findWrapper("osg::Geometry"));
+        mgr->addWrapper(new GeometrySerializer);
 
         // ignore the below for now to avoid warning spam
         const char* ignore[] = {
@@ -120,7 +133,7 @@ void registerSerializers()
         };
         for (size_t i=0; i<sizeof(ignore)/sizeof(ignore[0]); ++i)
         {
-            osgDB::Registry::instance()->getObjectWrapperManager()->addWrapper(makeDummySerializer(ignore[i]));
+            mgr->addWrapper(makeDummySerializer(ignore[i]));
         }
 
 
