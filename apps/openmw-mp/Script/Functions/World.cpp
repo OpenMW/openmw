@@ -9,24 +9,16 @@
 
 using namespace mwmp;
 
-static BaseEvent *baseEvent = nullptr;
-static WorldObject tempWorldObject;
-static ContainerItem tempContainerItem;
+BaseEvent scriptEvent = BaseEvent();
+WorldObject tempWorldObject;
+ContainerItem tempContainerItem;
 
 std::regex exteriorCellPattern("^(-?\\d+), (-?\\d+)$");
 
-void WorldFunctions::CreateBaseEvent(unsigned short pid) noexcept
+void WorldFunctions::ClearScriptEvent() noexcept
 {
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    if (baseEvent)
-    {
-        delete baseEvent;
-        baseEvent = nullptr;
-    }
-
-    baseEvent = new BaseEvent(player->guid);
+    scriptEvent.cell.blank();
+    scriptEvent.objectChanges.objects.clear();
 }
 
 unsigned int WorldFunctions::GetObjectChangesSize() noexcept
@@ -34,7 +26,7 @@ unsigned int WorldFunctions::GetObjectChangesSize() noexcept
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.count;
 }
 
-unsigned int WorldFunctions::GetBaseEventAction() noexcept
+unsigned int WorldFunctions::GetLastEventAction() noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->action;
 }
@@ -138,32 +130,32 @@ int WorldFunctions::GetContainerItemActionCount(unsigned int objectIndex, unsign
         .containerChanges.items.at(itemIndex).actionCount;
 }
 
-void WorldFunctions::SetBaseEventCell(const char* cellDescription) noexcept
+void WorldFunctions::SetScriptEventCell(const char* cellDescription) noexcept
 {
     std::string description = cellDescription;
     std::smatch baseMatch;
 
     if (std::regex_match(description, baseMatch, exteriorCellPattern))
     {
-        baseEvent->cell.mData.mFlags &= ~ESM::Cell::Interior;
+        scriptEvent.cell.mData.mFlags &= ~ESM::Cell::Interior;
 
         // The first sub match is the whole string, so check for a length of 3
         if (baseMatch.size() == 3)
         {
-            baseEvent->cell.mData.mX = stoi(baseMatch[1].str());
-            baseEvent->cell.mData.mY = stoi(baseMatch[2].str());
+            scriptEvent.cell.mData.mX = stoi(baseMatch[1].str());
+            scriptEvent.cell.mData.mY = stoi(baseMatch[2].str());
         }
     }
     else
     {
-        baseEvent->cell.mData.mFlags |= ESM::Cell::Interior;
-        baseEvent->cell.mName = description;
+        scriptEvent.cell.mData.mFlags |= ESM::Cell::Interior;
+        scriptEvent.cell.mName = description;
     }
 }
 
-void WorldFunctions::SetBaseEventAction(int action) noexcept
+void WorldFunctions::SetScriptEventAction(int action) noexcept
 {
-    baseEvent->action = action;
+    scriptEvent.action = action;
 }
 
 void WorldFunctions::SetObjectRefId(const char* refId) noexcept
@@ -249,7 +241,7 @@ void WorldFunctions::AddWorldObject() noexcept
     worldObject.pos = tempWorldObject.pos;
     worldObject.containerChanges.items = tempWorldObject.containerChanges.items;
 
-    baseEvent->objectChanges.objects.push_back(worldObject);
+    scriptEvent.objectChanges.objects.push_back(worldObject);
 
     tempWorldObject.containerChanges.items.clear();
 }
@@ -264,39 +256,60 @@ void WorldFunctions::AddContainerItem() noexcept
     tempWorldObject.containerChanges.items.push_back(containerItem);
 }
 
-void WorldFunctions::SendObjectDelete() noexcept
+void WorldFunctions::SendObjectDelete(unsigned short pid) noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_DELETE)->Send(baseEvent, baseEvent->guid);
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_DELETE)->Send(&scriptEvent, player->guid);
 }
 
-void WorldFunctions::SendObjectPlace() noexcept
+void WorldFunctions::SendObjectPlace(unsigned short pid) noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_PLACE)->Send(baseEvent, baseEvent->guid);
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_PLACE)->Send(&scriptEvent, player->guid);
 }
 
-void WorldFunctions::SendObjectScale() noexcept
+void WorldFunctions::SendObjectScale(unsigned short pid) noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_SCALE)->Send(baseEvent, baseEvent->guid);
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_SCALE)->Send(&scriptEvent, player->guid);
 }
 
-void WorldFunctions::SendObjectLock() noexcept
+void WorldFunctions::SendObjectLock(unsigned short pid) noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_LOCK)->Send(baseEvent, baseEvent->guid);
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_LOCK)->Send(&scriptEvent, player->guid);
 }
 
-void WorldFunctions::SendObjectUnlock() noexcept
+void WorldFunctions::SendObjectUnlock(unsigned short pid) noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_UNLOCK)->Send(baseEvent, baseEvent->guid);
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_UNLOCK)->Send(&scriptEvent, player->guid);
 }
 
-void WorldFunctions::SendDoorState() noexcept
+void WorldFunctions::SendDoorState(unsigned short pid) noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_DOOR_STATE)->Send(baseEvent, baseEvent->guid);
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_DOOR_STATE)->Send(&scriptEvent, player->guid);
 }
 
-void WorldFunctions::SendContainer() noexcept
+void WorldFunctions::SendContainer(unsigned short pid) noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_CONTAINER)->Send(baseEvent, baseEvent->guid);
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_CONTAINER)->Send(&scriptEvent, player->guid);
 }
 
 void WorldFunctions::SetHour(unsigned short pid, double hour) noexcept

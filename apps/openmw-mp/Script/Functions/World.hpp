@@ -2,10 +2,10 @@
 #define OPENMW_WORLD_HPP
 
 #define WORLDFUNCTIONS \
-    {"CreateBaseEvent",             WorldFunctions::CreateBaseEvent},\
+    {"ClearScriptEvent",            WorldFunctions::ClearScriptEvent},\
     \
     {"GetObjectChangesSize",        WorldFunctions::GetObjectChangesSize},\
-    {"GetBaseEventAction",          WorldFunctions::GetBaseEventAction},\
+    {"GetLastEventAction",          WorldFunctions::GetLastEventAction},\
     \
     {"GetObjectRefId",              WorldFunctions::GetObjectRefId},\
     {"GetObjectRefNumIndex",        WorldFunctions::GetObjectRefNumIndex},\
@@ -28,8 +28,8 @@
     {"GetContainerItemCharge",      WorldFunctions::GetContainerItemCharge},\
     {"GetContainerItemActionCount", WorldFunctions::GetContainerItemActionCount},\
     \
-    {"SetBaseEventCell",            WorldFunctions::SetBaseEventCell},\
-    {"SetBaseEventAction",          WorldFunctions::SetBaseEventAction},\
+    {"SetScriptEventCell",          WorldFunctions::SetScriptEventCell},\
+    {"SetScriptEventAction",        WorldFunctions::SetScriptEventAction},\
     \
     {"SetObjectRefId",              WorldFunctions::SetObjectRefId},\
     {"SetObjectRefNumIndex",        WorldFunctions::SetObjectRefNumIndex},\
@@ -65,10 +65,10 @@ class WorldFunctions
 {
 public:
 
-    static void CreateBaseEvent(unsigned short pid) noexcept;
+    static void ClearScriptEvent() noexcept;
 
     static unsigned int GetObjectChangesSize() noexcept;
-    static unsigned int GetBaseEventAction() noexcept;
+    static unsigned int GetLastEventAction() noexcept;
 
     static const char *GetObjectRefId(unsigned int i) noexcept;
     static int GetObjectRefNumIndex(unsigned int i) noexcept;
@@ -91,8 +91,8 @@ public:
     static int GetContainerItemCharge(unsigned int objectIndex, unsigned int itemIndex) noexcept;
     static int GetContainerItemActionCount(unsigned int objectIndex, unsigned int itemIndex) noexcept;
 
-    static void SetBaseEventCell(const char* cellDescription) noexcept;
-    static void SetBaseEventAction(int action) noexcept;
+    static void SetScriptEventCell(const char* cellDescription) noexcept;
+    static void SetScriptEventAction(int action) noexcept;
 
     static void SetObjectRefId(const char* refId) noexcept;
     static void SetObjectRefNumIndex(int refNumIndex) noexcept;
@@ -112,13 +112,13 @@ public:
     static void AddWorldObject() noexcept;
     static void AddContainerItem() noexcept;
 
-    static void SendObjectDelete() noexcept;
-    static void SendObjectPlace() noexcept;
-    static void SendObjectScale() noexcept;
-    static void SendObjectLock() noexcept;
-    static void SendObjectUnlock() noexcept;
-    static void SendDoorState() noexcept;
-    static void SendContainer() noexcept;
+    static void SendObjectDelete(unsigned short pid) noexcept;
+    static void SendObjectPlace(unsigned short pid) noexcept;
+    static void SendObjectScale(unsigned short pid) noexcept;
+    static void SendObjectLock(unsigned short pid) noexcept;
+    static void SendObjectUnlock(unsigned short pid) noexcept;
+    static void SendDoorState(unsigned short pid) noexcept;
+    static void SendContainer(unsigned short pid) noexcept;
 
     static void SetHour(unsigned short pid, double hour) noexcept;
     static void SetMonth(unsigned short pid, int month) noexcept;

@@ -22,8 +22,7 @@ using namespace mwmp;
 using namespace std;
 
 Networking *Networking::sThis = 0;
-
-static BaseEvent *baseEvent = nullptr;
+BaseEvent baseEvent = BaseEvent();
 
 Networking::Networking(RakNet::RakPeerInterface *peer)
 {
@@ -472,13 +471,9 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
     WorldPacket *myPacket = worldController->GetPacket(packet->data[0]);
 
-    if (baseEvent)
-    {
-        delete baseEvent;
-        baseEvent = nullptr;
-    }
-
-    baseEvent = new BaseEvent(player->guid);
+    // Clear our baseEvent before loading new data in it
+    baseEvent.cell.blank();
+    baseEvent.objectChanges.objects.clear();
 
     switch (packet->data[0])
     {
@@ -488,12 +483,12 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_PLACE from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         Script::Call<Script::CallbackIdentity("OnObjectPlace")>(
             player->getId(),
-            baseEvent->cell.getDescription().c_str());
+            baseEvent.cell.getDescription().c_str());
 
         break;
     }
@@ -503,12 +498,12 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_DELETE from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         Script::Call<Script::CallbackIdentity("OnObjectDelete")>(
             player->getId(),
-            baseEvent->cell.getDescription().c_str());
+            baseEvent.cell.getDescription().c_str());
 
         break;
     }
@@ -518,12 +513,12 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_SCALE from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         Script::Call<Script::CallbackIdentity("OnObjectScale")>(
             player->getId(),
-            baseEvent->cell.getDescription().c_str());
+            baseEvent.cell.getDescription().c_str());
 
         break;
     }
@@ -533,12 +528,12 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_LOCK from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         Script::Call<Script::CallbackIdentity("OnObjectLock")>(
             player->getId(),
-            baseEvent->cell.getDescription().c_str());
+            baseEvent.cell.getDescription().c_str());
 
         break;
     }
@@ -548,12 +543,12 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_UNLOCK from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         Script::Call<Script::CallbackIdentity("OnObjectUnlock")>(
             player->getId(),
-            baseEvent->cell.getDescription().c_str());
+            baseEvent.cell.getDescription().c_str());
 
         break;
     }
@@ -563,8 +558,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_MOVE from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         break;
     }
@@ -574,8 +569,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ROTATE from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         break;
     }
@@ -585,8 +580,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ANIM_PLAY from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         break;
     }
@@ -596,12 +591,12 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_STATE from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         Script::Call<Script::CallbackIdentity("OnDoorState")>(
             player->getId(),
-            baseEvent->cell.getDescription().c_str());
+            baseEvent.cell.getDescription().c_str());
 
         break;
     }
@@ -611,21 +606,21 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONTAINER from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
+        myPacket->Read(&baseEvent);
 
-        LOG_APPEND(Log::LOG_WARN, "- action: %i", baseEvent->action);
+        LOG_APPEND(Log::LOG_WARN, "- action: %i", baseEvent.action);
 
         // Until we have a timestamp-based system, send packets pertaining to more
         // than one container (i.e. replies to server requests for container contents)
         // only to players who have the container's cell loaded
-        if (baseEvent->action == BaseEvent::SET && baseEvent->objectChanges.count > 1)
-            CellController::get()->getCell(&baseEvent->cell)->sendToLoaded(myPacket, baseEvent);
+        if (baseEvent.action == BaseEvent::SET && baseEvent.objectChanges.count > 1)
+            CellController::get()->getCell(&baseEvent.cell)->sendToLoaded(myPacket, &baseEvent);
         else
-            myPacket->Send(baseEvent, true);
+            myPacket->Send(&baseEvent, true);
 
         Script::Call<Script::CallbackIdentity("OnContainer")>(
             player->getId(),
-            baseEvent->cell.getDescription().c_str());
+            baseEvent.cell.getDescription().c_str());
 
         break;
     }
@@ -635,8 +630,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_SHORT from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         break;
     }
@@ -646,8 +641,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_FLOAT from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         break;
     }
@@ -657,8 +652,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_MEMBER_SHORT from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         break;
     }
@@ -668,8 +663,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_GLOBAL_SHORT from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         break;
     }
@@ -679,8 +674,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_MUSIC_PLAY from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         break;
     }
@@ -690,8 +685,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_VIDEO_PLAY from %s",
             player->npc.mName.c_str());
 
-        myPacket->Read(baseEvent);
-        myPacket->Send(baseEvent, true);
+        myPacket->Read(&baseEvent);
+        myPacket->Send(&baseEvent, true);
 
         break;
     }
@@ -804,7 +799,7 @@ WorldPacketController *Networking::getWorldController() const
 
 BaseEvent *Networking::getLastEvent()
 {
-    return baseEvent;
+    return &baseEvent;
 }
 
 const Networking &Networking::get()
