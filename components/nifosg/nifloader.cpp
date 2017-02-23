@@ -527,6 +527,8 @@ namespace NifOsg
             case Nif::RC_NiRotatingParticles:
                 // Leaf nodes in the NIF hierarchy, so won't be able to dynamically attach children.
                 // No support for keyframe controllers (just crashes in the original engine).
+                if (nifNode->trafo.isIdentity())
+                    node = new osg::Group;
                 node->setDataVariance(osg::Object::STATIC);
                 break;
             default:
