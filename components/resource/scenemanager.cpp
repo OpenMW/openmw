@@ -392,6 +392,18 @@ namespace Resource
             return reservedNames.find(name) != reservedNames.end();
         }
 
+        virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Drawable* node,unsigned int option) const
+        {
+            if (option & SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS)
+            {
+                if (node->asGeometry() && node->className() == std::string("Geometry"))
+                    return true;
+                else
+                    return false; //ParticleSystem would have to convert space of all the processors, RigGeometry would have to convert bones... theoretically possible, but very complicated
+            }
+            return (option & optimizer->getPermissibleOptimizationsForObject(node))!=0;
+        }
+
         virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Node* node,unsigned int option) const
         {
             if (node->getNumDescriptions()>0) return false;
