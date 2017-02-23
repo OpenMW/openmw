@@ -269,6 +269,7 @@ const NpcAnimation::PartBoneMap NpcAnimation::sPartList = createPartListMap();
 
 NpcAnimation::~NpcAnimation()
 {
+    mAmmunition.reset();
 }
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem,
@@ -880,6 +881,7 @@ void NpcAnimation::addControllers()
 void NpcAnimation::showWeapons(bool showWeapon)
 {
     mShowWeapons = showWeapon;
+    mAmmunition.reset();
     if(showWeapon)
     {
         MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
@@ -898,11 +900,7 @@ void NpcAnimation::showWeapons(bool showWeapon)
                 MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
                 if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt)
                     attachArrow();
-                else
-                    mAmmunition.reset();
             }
-            else
-                mAmmunition.reset();
         }
     }
     else
