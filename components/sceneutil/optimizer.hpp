@@ -346,6 +346,20 @@ class Optimizer
 
         };
 
+        /** Merge adjacent Groups that have the same StateSet. */
+        class MergeGroupsVisitor : public SceneUtil::BaseOptimizerVisitor
+        {
+        public:
+            MergeGroupsVisitor(SceneUtil::Optimizer* optimizer)
+                : BaseOptimizerVisitor(optimizer, REMOVE_REDUNDANT_NODES)
+            {
+            }
+
+            bool isOperationPermissible(osg::Group& node);
+
+            virtual void apply(osg::Group& group);
+        };
+
         class MergeGeometryVisitor : public BaseOptimizerVisitor
         {
             public:

@@ -109,6 +109,8 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
         node->accept(rrnv);
         rrnv.removeRedundantNodes();
 
+        MergeGroupsVisitor mgrp(this);
+        node->accept(mgrp);
     }
 
     if (options & VERTEX_POSTTRANSFORM)
@@ -1805,6 +1807,57 @@ bool Optimizer::MergeGeometryVisitor::mergePrimitive(osg::DrawElementsUInt& lhs,
 {
     lhs.insert(lhs.end(),rhs.begin(),rhs.end());
     return true;
+}
+
+
+
+bool Optimizer::MergeGroupsVisitor::isOperationPermissible(osg::Group& node)
+{
+    return !node.asTransform() &&
+           !node.getCullCallback() &&
+           !node.getEventCallback() &&
+           !node.getUpdateCallback() &&
+            isOperationPermissibleForObject(&node);
+}
+
+void Optimizer::MergeGroupsVisitor::apply(osg::Group &group)
+{
+    if (group.getNumChildren() <= 1)
+        traverse(group);
+    else
+    {
+        typedef std::map<osg::StateSet*, std::set<osg::Group*> > GroupMap;
+        GroupMap childGroups;
+        for (unsigned int i=0; i<group.getNumChildren(); ++i)
+        {
+            osg::Node* child = group.getChild(i);
+            osg::Group* childGroup = child->asGroup();
+            if (childGroup && isOperationPermissible(*childGroup))
+            {
+                childGroups[childGroup->getStateSet()].insert(childGroup);
+            }
+        }
+
+        for (GroupMap::iterator it = childGroups.begin(); it != childGroups.end(); ++it)
+        {
+            const std::set<osg::Group*>& groupSet = it->second;
+            if (groupSet.size() <= 1)
+                continue;
+            else
+            {
+                osg::Group* first = *groupSet.begin();
+                for (std::set<osg::Group*>::const_iterator groupIt = ++groupSet.begin(); groupIt != groupSet.end(); ++groupIt)
+                {
+                    osg::Group* toMerge = *groupIt;
+                    for (unsigned int i=0; i<toMerge->getNumChildren(); ++i)
+                        first->addChild(toMerge->getChild(i));
+                    toMerge->removeChildren(0, toMerge->getNumChildren());
+                    group.removeChild(toMerge);
+                }
+            }
+        }
+        traverse(group);
+    }
 }
 
 }
