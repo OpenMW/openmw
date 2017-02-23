@@ -150,4 +150,10 @@ void ObjectCache::accept(osg::NodeVisitor &nv)
     }
 }
 
+unsigned int ObjectCache::getCacheSize() const
+{
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_objectCacheMutex);
+    return _objectCache.size();
+}
+
 }

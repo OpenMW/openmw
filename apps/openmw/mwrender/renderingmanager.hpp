@@ -196,6 +196,8 @@ namespace MWRender
         void updateAmbient();
         void setFogColor(const osg::Vec4f& color);
 
+        void reportStats();
+
         osg::ref_ptr<osgViewer::Viewer> mViewer;
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Group> mSceneRoot;
@@ -212,7 +214,7 @@ namespace MWRender
         std::auto_ptr<Terrain::World> mTerrain;
         std::auto_ptr<SkyManager> mSky;
         std::auto_ptr<EffectManager> mEffectManager;
-        std::auto_ptr<NpcAnimation> mPlayerAnimation;
+        osg::ref_ptr<NpcAnimation> mPlayerAnimation;
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mPlayerNode;
         std::auto_ptr<Camera> mCamera;
         osg::Vec3f mCurrentCameraPos;

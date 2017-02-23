@@ -58,9 +58,6 @@ public:
 
     ~PartHolder();
 
-    /// Unreferences mNode *without* detaching it from the graph. Only use if you know what you are doing.
-    void unlink();
-
     osg::ref_ptr<osg::Node> getNode()
     {
         return mNode;
@@ -74,7 +71,7 @@ private:
 };
 typedef boost::shared_ptr<PartHolder> PartHolderPtr;
 
-class Animation
+class Animation : public osg::Referenced
 {
 public:
     enum BoneGroup {
@@ -339,9 +336,13 @@ protected:
 public:
 
     Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem);
+
+    /// Must be thread safe
     virtual ~Animation();
 
     MWWorld::ConstPtr getPtr() const;
+
+    MWWorld::Ptr getPtr();
 
     /// Set active flag on the object skeleton, if one exists.
     /// @see SceneUtil::Skeleton::setActive

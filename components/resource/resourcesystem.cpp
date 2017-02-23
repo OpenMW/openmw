@@ -85,4 +85,10 @@ namespace Resource
         return mVFS;
     }
 
+    void ResourceSystem::reportStats(unsigned int frameNumber, osg::Stats *stats)
+    {
+        for (std::vector<ResourceManager*>::iterator it = mResourceManagers.begin(); it != mResourceManagers.end(); ++it)
+            (*it)->reportStats(frameNumber, stats);
+    }
+
 }

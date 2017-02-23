@@ -141,4 +141,9 @@ namespace Resource
         return mWarningImage;
     }
 
+    void ImageManager::reportStats(unsigned int frameNumber, osg::Stats *stats)
+    {
+        stats->setAttribute(frameNumber, "Image", mCache->getCacheSize());
+    }
+
 }

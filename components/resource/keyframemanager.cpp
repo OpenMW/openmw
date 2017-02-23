@@ -34,6 +34,11 @@ namespace Resource
         }
     }
 
+    void KeyframeManager::reportStats(unsigned int frameNumber, osg::Stats *stats)
+    {
+        stats->setAttribute(frameNumber, "Keyframe", mCache->getCacheSize());
+    }
+
 
 
 }

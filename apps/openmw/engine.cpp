@@ -21,6 +21,7 @@
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/resource/stats.hpp>
 
 #include <components/compiler/extensions0.hpp>
 
@@ -169,7 +170,7 @@ void OMW::Engine::frame(float frametime)
             mEnvironment.getWindowManager()->update();
         }
 
-        int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+        unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
         osg::Stats* stats = mViewer->getViewerStats();
         stats->setAttribute(frameNumber, "script_time_begin", osg::Timer::instance()->delta_s(mStartTick, beforeScriptTick));
         stats->setAttribute(frameNumber, "script_time_taken", osg::Timer::instance()->delta_s(beforeScriptTick, afterScriptTick));
@@ -182,6 +183,14 @@ void OMW::Engine::frame(float frametime)
         stats->setAttribute(frameNumber, "physics_time_begin", osg::Timer::instance()->delta_s(mStartTick, beforePhysicsTick));
         stats->setAttribute(frameNumber, "physics_time_taken", osg::Timer::instance()->delta_s(beforePhysicsTick, afterPhysicsTick));
         stats->setAttribute(frameNumber, "physics_time_end", osg::Timer::instance()->delta_s(mStartTick, afterPhysicsTick));
+
+        if (stats->collectStats("resource"))
+        {
+            mResourceSystem->reportStats(frameNumber, stats);
+
+            stats->setAttribute(frameNumber, "WorkQueue", mWorkQueue->getNumItems());
+            stats->setAttribute(frameNumber, "WorkThread", mWorkQueue->getNumActiveThreads());
+        }
 
     }
     catch (const std::exception& e)
@@ -402,6 +411,8 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     camera->setViewport(0, 0, width, height);
 
     mViewer->realize();
+
+    mViewer->getEventQueue()->getCurrentEventState()->setWindowRectangle(0, 0, width, height);
 }
 
 void OMW::Engine::setWindowIcon()
@@ -632,6 +643,8 @@ void OMW::Engine::go()
                                    "physics_time_taken", 1000.0, true, false, "physics_time_begin", "physics_time_end", 10000);
 
     mViewer->addEventHandler(statshandler);
+
+    mViewer->addEventHandler(new Resource::StatsHandler);
 
     Settings::Manager settings;
     std::string settingspath;
