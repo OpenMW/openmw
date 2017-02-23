@@ -485,7 +485,7 @@ namespace Resource
                 SceneUtil::Optimizer optimizer;
                 optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
 
-                optimizer.optimize(loaded, SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS|SceneUtil::Optimizer::REMOVE_REDUNDANT_NODES); //MERGE_GEOMETRY
+                optimizer.optimize(loaded, SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS|SceneUtil::Optimizer::REMOVE_REDUNDANT_NODES|SceneUtil::Optimizer::MERGE_GEOMETRY);
             }
 
             if (mIncrementalCompileOperation)

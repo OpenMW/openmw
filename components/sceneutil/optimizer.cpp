@@ -82,21 +82,6 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
         cstv.removeTransforms(node);
     }
 
-    if (options & MERGE_GEOMETRY)
-    {
-        OSG_INFO<<"Optimizer::optimize() doing MERGE_GEOMETRY"<<std::endl;
-
-        osg::Timer_t startTick = osg::Timer::instance()->tick();
-
-        MergeGeometryVisitor mgv(this);
-        mgv.setTargetMaximumNumberOfVertices(10000);
-        node->accept(mgv);
-
-        osg::Timer_t endTick = osg::Timer::instance()->tick();
-
-        OSG_INFO<<"MERGE_GEOMETRY took "<<osg::Timer::instance()->delta_s(startTick,endTick)<<std::endl;
-    }
-
     if (options & REMOVE_REDUNDANT_NODES)
     {
         OSG_INFO<<"Optimizer::optimize() doing REMOVE_REDUNDANT_NODES"<<std::endl;
@@ -111,6 +96,21 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
 
         MergeGroupsVisitor mgrp(this);
         node->accept(mgrp);
+    }
+
+    if (options & MERGE_GEOMETRY)
+    {
+        OSG_INFO<<"Optimizer::optimize() doing MERGE_GEOMETRY"<<std::endl;
+
+        osg::Timer_t startTick = osg::Timer::instance()->tick();
+
+        MergeGeometryVisitor mgv(this);
+        mgv.setTargetMaximumNumberOfVertices(10000);
+        node->accept(mgv);
+
+        osg::Timer_t endTick = osg::Timer::instance()->tick();
+
+        OSG_INFO<<"MERGE_GEOMETRY took "<<osg::Timer::instance()->delta_s(startTick,endTick)<<std::endl;
     }
 
     if (options & VERTEX_POSTTRANSFORM)
