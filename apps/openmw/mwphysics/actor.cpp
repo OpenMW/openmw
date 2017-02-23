@@ -32,9 +32,14 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     if (std::abs(mHalfExtents.x()-mHalfExtents.y())<mHalfExtents.x()*0.05 && mHalfExtents.z() >= mHalfExtents.x())
     {
         mShape.reset(new btCapsuleShapeZ(mHalfExtents.x(), 2*mHalfExtents.z() - 2*mHalfExtents.x()));
+        mRotationallyInvariant = true;
     }
     else
+    {
         mShape.reset(new btBoxShape(toBullet(mHalfExtents)));
+        mRotationallyInvariant = false;
+    }
+
     mConvexShape = static_cast<btConvexShape*>(mShape.get());
 
     mCollisionObject.reset(new btCollisionObject);
@@ -142,6 +147,11 @@ void Actor::updateRotation ()
     mCollisionObject->setWorldTransform(tr);
 
     updateCollisionObjectPosition();
+}
+
+bool Actor::isRotationallyInvariant() const
+{
+    return mRotationallyInvariant;
 }
 
 void Actor::updateScale()

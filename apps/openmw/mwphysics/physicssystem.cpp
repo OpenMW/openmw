@@ -1294,8 +1294,11 @@ namespace MWPhysics
         ActorMap::iterator foundActor = mActors.find(ptr);
         if (foundActor != mActors.end())
         {
-            foundActor->second->updateRotation();
-            mCollisionWorld->updateSingleAabb(foundActor->second->getCollisionObject());
+            if (!foundActor->second->isRotationallyInvariant())
+            {
+                foundActor->second->updateRotation();
+                mCollisionWorld->updateSingleAabb(foundActor->second->getCollisionObject());
+            }
             return;
         }
     }
