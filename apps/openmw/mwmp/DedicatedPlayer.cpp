@@ -113,6 +113,10 @@ void Players::createPlayer(RakNet::RakNetGUID guid)
     dedicPlayer->guid = guid;
     dedicPlayer->state = 2;
 
+    // Give this new character a fatigue of at least 1 so it doesn't spawn
+    // on the ground
+    dedicPlayer->creatureStats.mDynamic[2].mBase = 1;
+
     world->enable(players[guid]->ptr);
 }
 
