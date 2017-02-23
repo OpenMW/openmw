@@ -2,7 +2,7 @@
 #define OPENMW_WORLD_HPP
 
 #define WORLDFUNCTIONS \
-    {"ClearScriptEvent",            WorldFunctions::ClearScriptEvent},\
+    {"InitScriptEvent",             WorldFunctions::InitScriptEvent},\
     \
     {"GetObjectChangesSize",        WorldFunctions::GetObjectChangesSize},\
     {"GetLastEventAction",          WorldFunctions::GetLastEventAction},\
@@ -65,7 +65,7 @@ class WorldFunctions
 {
 public:
 
-    static void ClearScriptEvent() noexcept;
+    static void InitScriptEvent(unsigned short pid) noexcept;
 
     static unsigned int GetObjectChangesSize() noexcept;
     static unsigned int GetLastEventAction() noexcept;
@@ -112,13 +112,13 @@ public:
     static void AddWorldObject() noexcept;
     static void AddContainerItem() noexcept;
 
-    static void SendObjectDelete(unsigned short pid) noexcept;
-    static void SendObjectPlace(unsigned short pid) noexcept;
-    static void SendObjectScale(unsigned short pid) noexcept;
-    static void SendObjectLock(unsigned short pid) noexcept;
-    static void SendObjectUnlock(unsigned short pid) noexcept;
-    static void SendDoorState(unsigned short pid) noexcept;
-    static void SendContainer(unsigned short pid) noexcept;
+    static void SendObjectDelete() noexcept;
+    static void SendObjectPlace() noexcept;
+    static void SendObjectScale() noexcept;
+    static void SendObjectLock() noexcept;
+    static void SendObjectUnlock() noexcept;
+    static void SendDoorState() noexcept;
+    static void SendContainer() noexcept;
 
     static void SetHour(unsigned short pid, double hour) noexcept;
     static void SetMonth(unsigned short pid, int month) noexcept;

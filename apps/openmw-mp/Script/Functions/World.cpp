@@ -15,10 +15,14 @@ ContainerItem tempContainerItem;
 
 std::regex exteriorCellPattern("^(-?\\d+), (-?\\d+)$");
 
-void WorldFunctions::ClearScriptEvent() noexcept
+void WorldFunctions::InitScriptEvent(unsigned short pid) noexcept
 {
+    Player *player;
+    GET_PLAYER(pid, player, );
+
     scriptEvent.cell.blank();
     scriptEvent.objectChanges.objects.clear();
+    scriptEvent.guid = player->guid;
 }
 
 unsigned int WorldFunctions::GetObjectChangesSize() noexcept
@@ -256,60 +260,39 @@ void WorldFunctions::AddContainerItem() noexcept
     tempWorldObject.containerChanges.items.push_back(containerItem);
 }
 
-void WorldFunctions::SendObjectDelete(unsigned short pid) noexcept
+void WorldFunctions::SendObjectDelete() noexcept
 {
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_DELETE)->Send(&scriptEvent, player->guid);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_DELETE)->Send(&scriptEvent, scriptEvent.guid);
 }
 
-void WorldFunctions::SendObjectPlace(unsigned short pid) noexcept
+void WorldFunctions::SendObjectPlace() noexcept
 {
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_PLACE)->Send(&scriptEvent, player->guid);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_PLACE)->Send(&scriptEvent, scriptEvent.guid);
 }
 
-void WorldFunctions::SendObjectScale(unsigned short pid) noexcept
+void WorldFunctions::SendObjectScale() noexcept
 {
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_SCALE)->Send(&scriptEvent, player->guid);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_SCALE)->Send(&scriptEvent, scriptEvent.guid);
 }
 
-void WorldFunctions::SendObjectLock(unsigned short pid) noexcept
+void WorldFunctions::SendObjectLock() noexcept
 {
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_LOCK)->Send(&scriptEvent, player->guid);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_LOCK)->Send(&scriptEvent, scriptEvent.guid);
 }
 
-void WorldFunctions::SendObjectUnlock(unsigned short pid) noexcept
+void WorldFunctions::SendObjectUnlock() noexcept
 {
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_UNLOCK)->Send(&scriptEvent, player->guid);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_UNLOCK)->Send(&scriptEvent, scriptEvent.guid);
 }
 
-void WorldFunctions::SendDoorState(unsigned short pid) noexcept
+void WorldFunctions::SendDoorState() noexcept
 {
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_DOOR_STATE)->Send(&scriptEvent, player->guid);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_DOOR_STATE)->Send(&scriptEvent, scriptEvent.guid);
 }
 
-void WorldFunctions::SendContainer(unsigned short pid) noexcept
+void WorldFunctions::SendContainer() noexcept
 {
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_CONTAINER)->Send(&scriptEvent, player->guid);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_CONTAINER)->Send(&scriptEvent, scriptEvent.guid);
 }
 
 void WorldFunctions::SetHour(unsigned short pid, double hour) noexcept
