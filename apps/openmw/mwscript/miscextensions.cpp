@@ -90,16 +90,14 @@ namespace MWScript
                 runtime.pop();
 
                 // Added by tes3mp
-                mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
 
                 mwmp::WorldObject worldObject;
                 worldObject.filename = name;
                 worldObject.allowSkipping = allowSkipping;
-                event->addObject(worldObject);
+                worldEvent->addObject(worldObject);
 
-                mwmp::Main::get().getNetworking()->getWorldPacket(ID_VIDEO_PLAY)->Send(event);
-                delete event;
-                event = NULL;
+                mwmp::Main::get().getNetworking()->getWorldPacket(ID_VIDEO_PLAY)->Send(worldEvent);
 
                 MWBase::Environment::get().getWindowManager()->playVideo (name, allowSkipping);
             }
@@ -200,18 +198,16 @@ namespace MWScript
                     }
 
                     // Added by tes3mp
-                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                    event->cell = *ptr.getCell()->getCell();
+                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                    worldEvent->cell = *ptr.getCell()->getCell();
 
                     mwmp::WorldObject worldObject;
                     worldObject.refId = ptr.getCellRef().getRefId();
                     worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
                     worldObject.lockLevel = lockLevel;
-                    event->addObject(worldObject);
+                    worldEvent->addObject(worldObject);
 
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->Send(event);
-                    delete event;
-                    event = NULL;
+                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->Send(worldEvent);
 
                     ptr.getClass().lock (ptr, lockLevel);
 
@@ -240,17 +236,15 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
 
                     // Added by tes3mp
-                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                    event->cell = *ptr.getCell()->getCell();
+                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                    worldEvent->cell = *ptr.getCell()->getCell();
 
                     mwmp::WorldObject worldObject;
                     worldObject.refId = ptr.getCellRef().getRefId();
                     worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-                    event->addObject(worldObject);
+                    worldEvent->addObject(worldObject);
 
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send(event);
-                    delete event;
-                    event = NULL;
+                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send(worldEvent);
 
                     ptr.getClass().unlock (ptr);
                 }
@@ -713,17 +707,15 @@ namespace MWScript
                     if (parameter == 1)
                     {
                         // Added by tes3mp
-                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                        event->cell = *ptr.getCell()->getCell();
+                        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                        worldEvent->cell = *ptr.getCell()->getCell();
 
                         mwmp::WorldObject worldObject;
                         worldObject.refId = ptr.getCellRef().getRefId();
                         worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-                        event->addObject(worldObject);
+                        worldEvent->addObject(worldObject);
 
-                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(event);
-                        delete event;
-                        event = NULL;
+                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(worldEvent);
 
                         MWBase::Environment::get().getWorld()->deleteObject(ptr);
                     }

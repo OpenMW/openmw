@@ -12,7 +12,7 @@ namespace mwmp
     {
     public:
 
-        WorldEvent(RakNet::RakNetGUID guid);
+        WorldEvent();
         virtual ~WorldEvent();
 
         void addObject(WorldObject worldObject);

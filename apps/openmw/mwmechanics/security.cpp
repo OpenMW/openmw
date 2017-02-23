@@ -59,17 +59,15 @@ namespace MWMechanics
             if (Misc::Rng::roll0to99() <= x)
             {
                 // Added by tes3mp
-                mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                event->cell = *lock.getCell()->getCell();
+                mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                worldEvent->cell = *lock.getCell()->getCell();
 
                 mwmp::WorldObject worldObject;
                 worldObject.refId = lock.getCellRef().getRefId();
                 worldObject.refNumIndex = lock.getCellRef().getRefNum().mIndex;
-                event->addObject(worldObject);
+                worldEvent->addObject(worldObject);
                 
-                mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send(event);
-                delete event;
-                event = NULL;
+                mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send(worldEvent);
 
                 lock.getClass().unlock(lock);
                 resultMessage = "#{sLockSuccess}";

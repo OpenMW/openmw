@@ -40,7 +40,7 @@ namespace mwmp
 
         bool isConnected();
 
-        WorldEvent *createWorldEvent();
+        WorldEvent *resetWorldEvent();
 
     private:
         bool connected;
@@ -50,6 +50,7 @@ namespace mwmp
 
         PlayerPacketController playerController;
         WorldPacketController worldController;
+        WorldEvent worldEvent;
 
         void processPlayerPacket(RakNet::Packet *packet);
         void processWorldPacket(RakNet::Packet *packet);

@@ -67,8 +67,8 @@ namespace MWGui
             dropped.getCellRef().setRefNumIndex(cellStore->getLastRefNumIndex());
 
             // Added by tes3mp
-            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-            event->cell = *dropped.getCell()->getCell();
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+            worldEvent->cell = *dropped.getCell()->getCell();
 
             mwmp::WorldObject worldObject;
             worldObject.refId = dropped.getCellRef().getRefId();
@@ -86,17 +86,14 @@ namespace MWGui
             // Get the real count of gold in a stack
             worldObject.goldValue = dropped.getCellRef().getGoldValue();
 
-            event->addObject(worldObject);
+            worldEvent->addObject(worldObject);
 
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send(event);
+            mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send(worldEvent);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
                 worldObject.refId.c_str(),
                 worldObject.refNumIndex,
                 worldObject.count);
-
-            delete event;
-            event = nullptr;
 
             return dropped;
         }

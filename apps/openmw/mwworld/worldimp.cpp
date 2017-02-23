@@ -2316,25 +2316,22 @@ namespace MWWorld
         }
 
         // Added by tes3mp
-        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-        event->cell = *door.getCell()->getCell();
+        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+        worldEvent->cell = *door.getCell()->getCell();
 
         mwmp::WorldObject worldObject;
         worldObject.refId = door.getCellRef().getRefId();
         worldObject.refNumIndex = door.getCellRef().getRefNum().mIndex;
         worldObject.doorState = state;
-        event->addObject(worldObject);
+        worldEvent->addObject(worldObject);
 
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send(event);
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send(worldEvent);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 1\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
-            event->cell.getDescription().c_str(),
+            worldEvent->cell.getDescription().c_str(),
             worldObject.doorState ? "true" : "false");
-
-        delete event;
-        event = NULL;
 
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;
@@ -2343,25 +2340,22 @@ namespace MWWorld
     void World::activateDoor(const Ptr &door, int state)
     {
         // Added by tes3mp
-        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-        event->cell = *door.getCell()->getCell();
+        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+        worldEvent->cell = *door.getCell()->getCell();
 
         mwmp::WorldObject worldObject;
         worldObject.refId = door.getCellRef().getRefId();
         worldObject.refNumIndex = door.getCellRef().getRefNum().mIndex;
         worldObject.doorState = state;
-        event->addObject(worldObject);
+        worldEvent->addObject(worldObject);
 
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send(event);
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send(worldEvent);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 2\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
-            event->cell.getDescription().c_str(),
+            worldEvent->cell.getDescription().c_str(),
             worldObject.doorState ? "true" : "false");
-
-        delete event;
-        event = NULL;
 
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;

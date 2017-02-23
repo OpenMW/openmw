@@ -71,15 +71,13 @@ namespace MWScript
                     runtime.pop();
 
                     // Added by tes3mp
-                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
                     
                     mwmp::WorldObject worldObject;
                     worldObject.filename = sound;
-                    event->addObject(worldObject);
+                    worldEvent->addObject(worldObject);
 
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->Send(event);
-                    delete event;
-                    event = NULL;
+                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->Send(worldEvent);
 
                     MWBase::Environment::get().getSoundManager()->streamMusic (sound);
                 }

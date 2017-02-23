@@ -20,9 +20,9 @@
 using namespace mwmp;
 using namespace std;
 
-WorldEvent::WorldEvent(RakNet::RakNetGUID guid)
+WorldEvent::WorldEvent()
 {
-    this->guid = guid;
+
 }
 
 WorldEvent::~WorldEvent()
@@ -42,9 +42,9 @@ void WorldEvent::addObject(WorldObject worldObject)
 
 void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
 {
-    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-    event->cell = *cellStore->getCell();
-    event->action = BaseEvent::SET;
+    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+    worldEvent->cell = *cellStore->getCell();
+    worldEvent->action = BaseEvent::SET;
 
     MWWorld::CellRefList<ESM::Container> *containerList = cellStore->getContainers();
 
@@ -71,10 +71,10 @@ void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
             worldObject.containerChanges.items.push_back(containerItem);
         }
 
-        event->addObject(worldObject);
+        worldEvent->addObject(worldObject);
     }
 
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(event);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(worldEvent);
 }
 
 void WorldEvent::editContainers(MWWorld::CellStore* cellStore)

@@ -102,9 +102,9 @@ namespace MWGui
             return;
 
         // Added by tes3mp
-        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-        event->cell = *mPtr.getCell()->getCell();
-        event->action = mwmp::BaseEvent::REMOVE;
+        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+        worldEvent->cell = *mPtr.getCell()->getCell();
+        worldEvent->action = mwmp::BaseEvent::REMOVE;
 
         mwmp::WorldObject worldObject;
         worldObject.refId = mPtr.getCellRef().getRefId();
@@ -119,19 +119,16 @@ namespace MWGui
         containerItem.actionCount = count;
 
         worldObject.containerChanges.items.push_back(containerItem);
-        event->addObject(worldObject);
+        worldEvent->addObject(worldObject);
 
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(event);
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(worldEvent);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_CONTAINER about\n- Ptr cellRef: %s, %i\n- cell: %s\n- item: %s, %i",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
-            event->cell.getDescription().c_str(),
+            worldEvent->cell.getDescription().c_str(),
             containerItem.refId.c_str(),
             containerItem.count);
-
-        delete event;
-        event = NULL;
 
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
     }
@@ -160,9 +157,9 @@ namespace MWGui
         }
 
         // Added by tes3mp
-        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-        event->cell = *mPtr.getCell()->getCell();
-        event->action = mwmp::BaseEvent::ADD;
+        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+        worldEvent->cell = *mPtr.getCell()->getCell();
+        worldEvent->action = mwmp::BaseEvent::ADD;
 
         mwmp::WorldObject worldObject;
         worldObject.refId = mPtr.getCellRef().getRefId();
@@ -179,19 +176,16 @@ namespace MWGui
         containerItem.charge = itemPtr.getCellRef().getCharge();
 
         worldObject.containerChanges.items.push_back(containerItem);
-        event->addObject(worldObject);
+        worldEvent->addObject(worldObject);
 
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(event);
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(worldEvent);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_CONTAINER about\n- Ptr cellRef: %s, %i\n- cell: %s\n- item: %s, %i",
             worldObject.refId.c_str(),
             worldObject.refNumIndex,
-            event->cell.getDescription().c_str(),
+            worldEvent->cell.getDescription().c_str(),
             containerItem.refId.c_str(),
             containerItem.count);
-
-        delete event;
-        event = NULL;
 
         mDragAndDrop->drop(mModel, mItemView);
     }
@@ -313,24 +307,21 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
 
             // Added by tes3mp
-            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-            event->cell = *mPtr.getCell()->getCell();
-            event->action = mwmp::BaseEvent::SET;
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+            worldEvent->cell = *mPtr.getCell()->getCell();
+            worldEvent->action = mwmp::BaseEvent::SET;
 
             mwmp::WorldObject worldObject;
             worldObject.refId = mPtr.getCellRef().getRefId();
             worldObject.refNumIndex = mPtr.getCellRef().getRefNum().mIndex;
-            event->addObject(worldObject);
+            worldEvent->addObject(worldObject);
 
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(event);
+            mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(worldEvent);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_CONTAINER about\n- Ptr cellRef: %s, %i\n- cell: %s",
                 worldObject.refId.c_str(),
                 worldObject.refNumIndex,
-                event->cell.getDescription().c_str());
-
-            delete event;
-            event = NULL;
+                worldEvent->cell.getDescription().c_str());
         }
     }
 

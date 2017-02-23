@@ -636,17 +636,15 @@ namespace MWGui
         MWWorld::Ptr newObject = *player.getClass().getContainerStore (player).add (object, object.getRefData().getCount(), player);
 
         // Added by tes3mp
-        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-        event->cell = *object.getCell()->getCell();
+        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+        worldEvent->cell = *object.getCell()->getCell();
 
         mwmp::WorldObject worldObject;
         worldObject.refId = object.getCellRef().getRefId();
         worldObject.refNumIndex = object.getCellRef().getRefNum().mIndex;
-        event->addObject(worldObject);
+        worldEvent->addObject(worldObject);
 
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(event);
-        delete event;
-        event = nullptr;
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(worldEvent);
 
         // LocalPlayer's inventory has changed, so send a packet with it
         mwmp::Main::get().getLocalPlayer()->sendInventory();

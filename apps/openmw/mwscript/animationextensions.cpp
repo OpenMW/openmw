@@ -66,19 +66,17 @@ namespace MWScript
                     // Added by tes3mp to check and set whether packets should be sent about this script
                     if (mwmp::Main::isValidPacketScript(ptr.getClass().getScript(ptr)))
                     {
-                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                        event->cell = *ptr.getCell()->getCell();
+                        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                        worldEvent->cell = *ptr.getCell()->getCell();
 
                         mwmp::WorldObject worldObject;
                         worldObject.refId = ptr.getCellRef().getRefId();
                         worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
                         worldObject.animGroup = group;
                         worldObject.animMode = mode;
-                        event->addObject(worldObject);
+                        worldEvent->addObject(worldObject);
 
-                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->Send(event);
-                        delete event;
-                        event = NULL;
+                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->Send(worldEvent);
                     }
 
                     MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, std::numeric_limits<int>::max(), true);

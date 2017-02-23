@@ -189,27 +189,24 @@ namespace MWScript
         // Added by tes3mp
         if (sendPackets)
         {
-            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-            event->cell = *mReference.getCell()->getCell();
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+            worldEvent->cell = *mReference.getCell()->getCell();
 
             mwmp::WorldObject worldObject;
             worldObject.refId = mReference.getCellRef().getRefId();
             worldObject.refNumIndex = mReference.getCellRef().getRefNum().mIndex;
             worldObject.index = index;
             worldObject.shortVal = value;
-            event->addObject(worldObject);
+            worldEvent->addObject(worldObject);
 
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_SHORT)->Send(event);
+            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_SHORT)->Send(worldEvent);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_SHORT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i",
                 worldObject.refId.c_str(),
                 worldObject.refNumIndex,
-                event->cell.getDescription().c_str(),
+                worldEvent->cell.getDescription().c_str(),
                 worldObject.index,
                 worldObject.shortVal);
-
-            delete event;
-            event = NULL;
         }
     }
 
@@ -233,27 +230,24 @@ namespace MWScript
         // Only send a packet if this float has no decimals (to avoid spam)
         if (sendPackets && value == (int) value)
         {
-            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-            event->cell = *mReference.getCell()->getCell();
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+            worldEvent->cell = *mReference.getCell()->getCell();
 
             mwmp::WorldObject worldObject;
             worldObject.refId = mReference.getCellRef().getRefId();
             worldObject.refNumIndex = mReference.getCellRef().getRefNum().mIndex;
             worldObject.index = index;
             worldObject.floatVal = value;
-            event->addObject(worldObject);
+            worldEvent->addObject(worldObject);
 
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->Send(event);
+            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->Send(worldEvent);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_FLOAT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f",
                 worldObject.refId.c_str(),
                 worldObject.refNumIndex,
-                event->cell.getDescription().c_str(),
+                worldEvent->cell.getDescription().c_str(),
                 worldObject.index,
                 worldObject.floatVal);
-
-            delete event;
-            event = NULL;
         }
     }
 
@@ -301,21 +295,18 @@ namespace MWScript
         // Added by tes3mp
         if (sendPackets)
         {
-            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
 
             mwmp::WorldObject worldObject;
             worldObject.varName = name;
             worldObject.shortVal = value;
-            event->addObject(worldObject);
+            worldEvent->addObject(worldObject);
 
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->Send(event);
+            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->Send(worldEvent);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_GLOBAL_SHORT\n- varName: %s\n- shortVal: %i",
                 worldObject.varName.c_str(),
                 worldObject.shortVal);
-
-            delete event;
-            event = NULL;
         }
 
         MWBase::Environment::get().getWorld()->setGlobalInt (name, value);
@@ -641,23 +632,20 @@ namespace MWScript
         // Added by tes3mp
         if (sendPackets && !global)
         {
-            mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
 
             mwmp::WorldObject worldObject;
             worldObject.refId = id;
             worldObject.index = index;
             worldObject.shortVal = value;
-            event->addObject(worldObject);
+            worldEvent->addObject(worldObject);
 
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_MEMBER_SHORT)->Send(event);
+            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_MEMBER_SHORT)->Send(worldEvent);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_MEMBER_SHORT\n- cellRef: %s\n- index: %i\n- shortVal: %i",
                 worldObject.refId.c_str(),
                 worldObject.index,
                 worldObject.shortVal);
-
-            delete event;
-            event = NULL;
         }
     }
 

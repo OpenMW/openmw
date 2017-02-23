@@ -47,18 +47,16 @@ namespace MWScript
                     runtime.pop();
 
                     // Added by tes3mp
-                    mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                    event->cell = *ptr.getCell()->getCell();
+                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                    worldEvent->cell = *ptr.getCell()->getCell();
 
                     mwmp::WorldObject worldObject;
                     worldObject.refId = ptr.getCellRef().getRefId();
                     worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
                     worldObject.scale = scale;
-                    event->addObject(worldObject);
+                    worldEvent->addObject(worldObject);
 
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->Send(event);
-                    delete event;
-                    event = NULL;
+                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->Send(worldEvent);
 
                     MWBase::Environment::get().getWorld()->scaleObject(ptr,scale);
                 }
@@ -552,8 +550,8 @@ namespace MWScript
                         ptr.getCellRef().setRefNumIndex(cellStore->getLastRefNumIndex());
 
                         // Added by tes3mp
-                        mwmp::WorldEvent *event = mwmp::Main::get().getNetworking()->createWorldEvent();
-                        event->cell = *ptr.getCell()->getCell();
+                        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                        worldEvent->cell = *ptr.getCell()->getCell();
 
                         mwmp::WorldObject worldObject;
                         worldObject.refId = ptr.getCellRef().getRefId();
@@ -565,17 +563,14 @@ namespace MWScript
                         // we actually see on this client
                         worldObject.pos = ptr.getRefData().getPosition();
 
-                        event->addObject(worldObject);
+                        worldEvent->addObject(worldObject);
 
-                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send(event);
+                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send(worldEvent);
 
                         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
                             worldObject.refId.c_str(),
                             worldObject.refNumIndex,
                             worldObject.count);
-
-                        delete event;
-                        event = NULL;
                     }
                 }
         };
