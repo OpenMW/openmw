@@ -1423,6 +1423,7 @@ namespace MWPhysics
                                                 waterlevel, slowFall, mCollisionWorld, mStandingCollisions);
                 physicActor->setPosition(position);
             }
+            mCollisionWorld->updateSingleAabb(physicActor->getCollisionObject());
 
             float interpolationFactor = mTimeAccum / physicsDt;
             osg::Vec3f interpolated = position * interpolationFactor + physicActor->getPreviousPosition() * (1.f - interpolationFactor);
