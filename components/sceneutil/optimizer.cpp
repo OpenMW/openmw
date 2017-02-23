@@ -18,29 +18,18 @@
 
 #include "optimizer.hpp"
 
-#include <osg/ApplicationUsage>
 #include <osg/Transform>
 #include <osg/MatrixTransform>
 #include <osg/PositionAttitudeTransform>
 #include <osg/LOD>
 #include <osg/Billboard>
-#include <osg/CameraView>
 #include <osg/Geometry>
 #include <osg/Notify>
-#include <osg/OccluderNode>
-#include <osg/Sequence>
-#include <osg/Switch>
 #include <osg/Texture>
-#include <osg/PagedLOD>
-#include <osg/ProxyNode>
-#include <osg/ImageStream>
 #include <osg/Timer>
-#include <osg/TexMat>
 #include <osg/io_utils>
 
 #include <osgUtil/TransformAttributeFunctor>
-#include <osgUtil/TriStripVisitor>
-#include <osgUtil/Tessellator>
 #include <osgUtil/Statistics>
 #include <osgUtil/MeshOptimizers>
 
@@ -52,6 +41,9 @@
 #include <iterator>
 
 using namespace osgUtil;
+
+namespace SceneUtil
+{
 
 void Optimizer::reset()
 {
@@ -90,20 +82,6 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
         cstv.removeTransforms(node);
     }
 
-    if (options & MERGE_GEODES)
-    {
-        OSG_INFO<<"Optimizer::optimize() doing MERGE_GEODES"<<std::endl;
-
-        osg::Timer_t startTick = osg::Timer::instance()->tick();
-
-        MergeGeodesVisitor visitor;
-        node->accept(visitor);
-
-        osg::Timer_t endTick = osg::Timer::instance()->tick();
-
-        OSG_INFO<<"MERGE_GEODES took "<<osg::Timer::instance()->delta_s(startTick,endTick)<<std::endl;
-    }
-
     if (options & MERGE_GEOMETRY)
     {
         OSG_INFO<<"Optimizer::optimize() doing MERGE_GEOMETRY"<<std::endl;
@@ -119,15 +97,6 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
         OSG_INFO<<"MERGE_GEOMETRY took "<<osg::Timer::instance()->delta_s(startTick,endTick)<<std::endl;
     }
 
-    if (options & TRISTRIP_GEOMETRY)
-    {
-        OSG_INFO<<"Optimizer::optimize() doing TRISTRIP_GEOMETRY"<<std::endl;
-
-        TriStripVisitor tsv(this);
-        node->accept(tsv);
-        tsv.stripify();
-    }
-
     if (options & REMOVE_REDUNDANT_NODES)
     {
         OSG_INFO<<"Optimizer::optimize() doing REMOVE_REDUNDANT_NODES"<<std::endl;
@@ -140,30 +109,6 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
         node->accept(rrnv);
         rrnv.removeRedundantNodes();
 
-    }
-
-    if (options & FLATTEN_BILLBOARDS)
-    {
-        FlattenBillboardVisitor fbv(this);
-        node->accept(fbv);
-        fbv.process();
-    }
-
-    if (options & SPATIALIZE_GROUPS)
-    {
-        OSG_INFO<<"Optimizer::optimize() doing SPATIALIZE_GROUPS"<<std::endl;
-
-        SpatializeGroupsVisitor sv(this);
-        node->accept(sv);
-        sv.divide();
-    }
-
-    if (options & INDEX_MESH)
-    {
-        OSG_INFO<<"Optimizer::optimize() doing INDEX_MESH"<<std::endl;
-        IndexMeshVisitor imv(this);
-        node->accept(imv);
-        imv.makeMesh();
     }
 
     if (options & VERTEX_POSTTRANSFORM)
@@ -300,17 +245,11 @@ class CollectLowestTransformsVisitor : public BaseOptimizerVisitor
 
         inline bool isOperationPermissibleForObject(const osg::Drawable* drawable) const
         {
-            // disable if cannot apply transform functor.
-            if (drawable && !drawable->supports(_transformFunctor)) return false;
             return BaseOptimizerVisitor::isOperationPermissibleForObject(drawable);
         }
 
         inline bool isOperationPermissibleForObject(const osg::Node* node) const
         {
-            // disable if object is a light point node.
-            if (strcmp(node->className(),"LightPointNode")==0) return false;
-            if (dynamic_cast<const osg::ProxyNode*>(node)) return false;
-            if (dynamic_cast<const osg::PagedLOD*>(node)) return false;
             return BaseOptimizerVisitor::isOperationPermissibleForObject(node);
         }
 
@@ -634,27 +573,9 @@ bool CollectLowestTransformsVisitor::removeTransforms(osg::Node* nodeWeCannotRem
 
 void Optimizer::FlattenStaticTransformsVisitor::apply(osg::Node& node)
 {
-    if (strcmp(node.className(),"LightPointNode")==0)
-    {
-        _excludedNodeSet.insert(&node);
-    }
     traverse(node);
 }
 
-
-void Optimizer::FlattenStaticTransformsVisitor::apply(osg::ProxyNode& node)
-{
-    _excludedNodeSet.insert(&node);
-
-    traverse(node);
-}
-
-void Optimizer::FlattenStaticTransformsVisitor::apply(osg::PagedLOD& node)
-{
-    _excludedNodeSet.insert(&node);
-
-    traverse(node);
-}
 
 void Optimizer::FlattenStaticTransformsVisitor::apply(osg::Drawable& drawable)
 {
@@ -811,7 +732,7 @@ void Optimizer::RemoveEmptyNodesVisitor::apply(osg::Group& group)
     {
         // only remove empty groups, but not empty occluders.
         if (group.getNumChildren()==0 && isOperationPermissibleForObject(&group) &&
-            (typeid(group)==typeid(osg::Group) || (dynamic_cast<osg::Transform*>(&group) && !dynamic_cast<osg::CameraView*>(&group))) &&
+            (typeid(group)==typeid(osg::Group) || (dynamic_cast<osg::Transform*>(&group))) &&
             (group.getNumChildrenRequiringUpdateTraversal()==0 && group.getNumChildrenRequiringEventTraversal()==0) )
         {
             _redundantNodeList.insert(&group);
@@ -843,13 +764,8 @@ void Optimizer::RemoveEmptyNodesVisitor::removeEmptyNodes()
                 ++pitr)
             {
                 osg::Group* parent = *pitr;
-                if (!dynamic_cast<osg::Sequence*>(parent) &&
-                    !dynamic_cast<osg::Switch*>(parent) &&
-                    strcmp(parent->className(),"MultiSwitch")!=0)
-                {
-                    parent->removeChild(nodeToRemove.get());
-                    if (parent->getNumChildren()==0 && isOperationPermissibleForObject(parent)) newEmptyGroups.insert(parent);
-                }
+                parent->removeChild(nodeToRemove.get());
+                if (parent->getNumChildren()==0 && isOperationPermissibleForObject(parent)) newEmptyGroups.insert(parent);
             }
         }
 
@@ -1887,3 +1803,4 @@ bool Optimizer::MergeGeometryVisitor::mergePrimitive(osg::DrawElementsUInt& lhs,
     return true;
 }
 
+}

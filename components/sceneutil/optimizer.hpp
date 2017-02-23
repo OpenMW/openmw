@@ -270,8 +270,6 @@ class Optimizer
                 virtual void apply(osg::Node& geode);
                 virtual void apply(osg::Drawable& drawable);
                 virtual void apply(osg::Billboard& geode);
-                virtual void apply(osg::ProxyNode& node);
-                virtual void apply(osg::PagedLOD& node);
                 virtual void apply(osg::Transform& transform);
 
                 bool removeTransforms(osg::Node* nodeWeCannotRemove);
