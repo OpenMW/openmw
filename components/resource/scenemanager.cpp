@@ -7,7 +7,6 @@
 #include <osgParticle/ParticleSystem>
 
 #include <osgUtil/IncrementalCompileOperation>
-#include <osgUtil/Optimizer>
 
 #include <osgDB/SharedStateManager>
 #include <osgDB/Registry>
@@ -22,6 +21,7 @@
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/controller.hpp>
+#include <components/sceneutil/optimizer.hpp>
 
 #include <components/shader/shadervisitor.hpp>
 #include <components/shader/shadermanager.hpp>
@@ -376,7 +376,7 @@ namespace Resource
         }
     }
 
-    class CanOptimizeCallback : public osgUtil::Optimizer::IsOperationPermissibleForObjectCallback
+    class CanOptimizeCallback : public SceneUtil::Optimizer::IsOperationPermissibleForObjectCallback
     {
     public:
         bool isReservedName(const std::string& name) const
@@ -392,7 +392,7 @@ namespace Resource
             return reservedNames.find(name) != reservedNames.end();
         }
 
-        virtual bool isOperationPermissibleForObjectImplementation(const osgUtil::Optimizer* optimizer, const osg::Node* node,unsigned int option) const
+        virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Node* node,unsigned int option) const
         {
             if (node->getNumDescriptions()>0) return false;
             if (node->getDataVariance() == osg::Object::DYNAMIC) return false;
@@ -482,10 +482,10 @@ namespace Resource
 
             if (canOptimize(normalized))
             {
-                osgUtil::Optimizer optimizer;
+                SceneUtil::Optimizer optimizer;
                 optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
 
-                optimizer.optimize(loaded, osgUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS|osgUtil::Optimizer::REMOVE_REDUNDANT_NODES); //MERGE_GEOMETRY
+                optimizer.optimize(loaded, SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS|SceneUtil::Optimizer::REMOVE_REDUNDANT_NODES); //MERGE_GEOMETRY
             }
 
             if (mIncrementalCompileOperation)

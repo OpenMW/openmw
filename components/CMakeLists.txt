@@ -50,7 +50,7 @@ add_component_dir (shader
 
 add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry lightcontroller
-    lightmanager lightutil positionattitudetransform workqueue unrefqueue pathgridutil waterutil writescene serialize
+    lightmanager lightutil positionattitudetransform workqueue unrefqueue pathgridutil waterutil writescene serialize optimizer
     )
 
 add_component_dir (nif
