@@ -789,8 +789,6 @@ bool Optimizer::RemoveRedundantNodesVisitor::isOperationPermissible(osg::Node& n
 {
     return node.getNumParents()>0 &&
            !node.getStateSet() &&
-           node.getName().empty() &&
-           !node.getUserDataContainer() &&
            !node.getCullCallback() &&
            !node.getEventCallback() &&
            !node.getUpdateCallback() &&
