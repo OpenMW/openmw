@@ -9,7 +9,7 @@
 
 using namespace mwmp;
 
-BaseEvent scriptEvent = BaseEvent();
+BaseEvent scriptEvent;
 WorldObject tempWorldObject;
 ContainerItem tempContainerItem;
 
