@@ -22,7 +22,6 @@ using namespace mwmp;
 using namespace std;
 
 Networking *Networking::sThis = 0;
-BaseEvent baseEvent = BaseEvent();
 
 Networking::Networking(RakNet::RakPeerInterface *peer)
 {

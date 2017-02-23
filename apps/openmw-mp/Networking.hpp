@@ -49,6 +49,7 @@ namespace  mwmp
     private:
         std::string serverPassword;
         static Networking *sThis;
+        BaseEvent baseEvent;
         RakNet::RakPeerInterface *peer;
         RakNet::BitStream bsOut;
         TPlayers *players;
