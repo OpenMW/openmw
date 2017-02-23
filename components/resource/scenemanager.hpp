@@ -15,6 +15,7 @@ namespace Resource
 {
     class ImageManager;
     class NifFileManager;
+    class SharedStateManager;
 }
 
 namespace osgUtil
@@ -157,7 +158,7 @@ namespace Resource
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 
-        osg::ref_ptr<osgDB::SharedStateManager> mSharedStateManager;
+        osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
         OpenThreads::Mutex mSharedStateMutex;
 
         Resource::ImageManager* mImageManager;

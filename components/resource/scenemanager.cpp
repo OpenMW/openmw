@@ -105,6 +105,20 @@ namespace
 namespace Resource
 {
 
+    class SharedStateManager : public osgDB::SharedStateManager
+    {
+    public:
+        unsigned int getNumSharedTextures() const
+        {
+            return _sharedTextureList.size();
+        }
+
+        unsigned int getNumSharedStateSets() const
+        {
+            return _sharedStateSetList.size();
+        }
+    };
+
     /// Set texture filtering settings on textures contained in a FlipController.
     class SetFilterSettingsControllerVisitor : public SceneUtil::ControllerVisitor
     {
@@ -195,7 +209,7 @@ namespace Resource
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
         , mInstanceCache(new MultiObjectCache)
-        , mSharedStateManager(new osgDB::SharedStateManager)
+        , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
         , mMinFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
@@ -590,6 +604,12 @@ namespace Resource
         {
             OpenThreads::ScopedLock<OpenThreads::Mutex> lock(*mIncrementalCompileOperation->getToCompiledMutex());
             stats->setAttribute(frameNumber, "Compiling", mIncrementalCompileOperation->getToCompile().size());
+        }
+
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSharedStateMutex);
+            stats->setAttribute(frameNumber, "Texture", mSharedStateManager->getNumSharedTextures());
+            stats->setAttribute(frameNumber, "StateSet", mSharedStateManager->getNumSharedStateSets());
         }
 
         stats->setAttribute(frameNumber, "Node", mCache->getCacheSize());
