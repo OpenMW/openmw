@@ -367,7 +367,7 @@ class Optimizer
                 /// default to traversing all children.
                 MergeGeometryVisitor(Optimizer* optimizer=0) :
                     BaseOptimizerVisitor(optimizer, MERGE_GEOMETRY),
-                    _targetMaximumNumberOfVertices(10000) {}
+                    _targetMaximumNumberOfVertices(10000), _allowedToMerge(true) {}
 
                 void setTargetMaximumNumberOfVertices(unsigned int num)
                 {
@@ -379,7 +379,11 @@ class Optimizer
                     return _targetMaximumNumberOfVertices;
                 }
 
-                virtual void apply(osg::Group& group) { mergeGroup(group); traverse(group); }
+                void pushStateSet(osg::StateSet* stateSet);
+                void popStateSet();
+                void checkAllowedToMerge();
+
+                virtual void apply(osg::Group& group);
                 virtual void apply(osg::Billboard&) { /* don't do anything*/ }
 
                 bool mergeGroup(osg::Group& group);
@@ -397,7 +401,8 @@ class Optimizer
             protected:
 
                 unsigned int _targetMaximumNumberOfVertices;
-
+                std::vector<osg::StateSet*> _stateSetStack;
+                bool _allowedToMerge;
         };
 
 };

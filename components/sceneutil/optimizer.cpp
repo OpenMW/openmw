@@ -1032,6 +1032,51 @@ bool isAbleToMerge(const osg::Geometry& g1, const osg::Geometry& g2)
 }
 
 
+void Optimizer::MergeGeometryVisitor::pushStateSet(osg::StateSet *stateSet)
+{
+    _stateSetStack.push_back(stateSet);
+    checkAllowedToMerge();
+}
+
+void Optimizer::MergeGeometryVisitor::popStateSet()
+{
+    _stateSetStack.pop_back();
+    checkAllowedToMerge();
+}
+
+void Optimizer::MergeGeometryVisitor::checkAllowedToMerge()
+{
+    int renderingHint = 0;
+    bool override = false;
+    for (std::vector<osg::StateSet*>::const_iterator it = _stateSetStack.begin(); it != _stateSetStack.end(); ++it)
+    {
+        osg::StateSet* stateSet = *it;
+        osg::StateSet::RenderBinMode mode = stateSet->getRenderBinMode();
+        if (override && (!mode & osg::StateSet::PROTECTED_RENDERBIN_DETAILS))
+            continue;
+        if (mode & osg::StateSet::USE_RENDERBIN_DETAILS)
+            renderingHint = stateSet->getRenderingHint();
+        if (mode & osg::StateSet::OVERRIDE_RENDERBIN_DETAILS)
+            override = true;
+    }
+    // Can't merge Geometry that are using a transparent sorting bin as that would cause the sorting to break.
+    _allowedToMerge = renderingHint != osg::StateSet::TRANSPARENT_BIN;
+}
+
+void Optimizer::MergeGeometryVisitor::apply(osg::Group &group)
+{
+    if (group.getStateSet())
+        pushStateSet(group.getStateSet());
+
+    if (_allowedToMerge)
+        mergeGroup(group);
+
+    traverse(group);
+
+    if (group.getStateSet())
+        popStateSet();
+}
+
 bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
 {
     if (!isOperationPermissibleForObject(&group)) return false;
