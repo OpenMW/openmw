@@ -416,44 +416,6 @@ namespace NifOsg
             toSetup->setFunction(boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl)));
         }
 
-        void optimize (const Nif::Node* nifNode, osg::Group* node, bool skipMeshes)
-        {
-            // For nodes with an identity transform, remove the redundant Transform node
-            if (node->getDataVariance() == osg::Object::STATIC
-                    // For TriShapes, we can only collapse the node, but not completely remove it,
-                    // if the link to animated collision shapes is supposed to stay intact.
-                    && (nifNode->recType != Nif::RC_NiTriShape || !skipMeshes)
-                    // Don't optimize drawables with controllers, that creates issues when we want to deep copy controllers without deep copying the drawable that holds the controller.
-                    // A deep copy of controllers may be needed to independently animate multiple copies of the same mesh.
-                    && !node->getUpdateCallback())
-            {
-                if (node->getNumParents() && nifNode->trafo.isIdentity())
-                {
-                    osg::Group* parent = node->getParent(0);
-
-                     // can be multiple children in case of ParticleSystems, with the extra ParticleSystemUpdater node
-                    for (unsigned int i=0; i<node->getNumChildren(); ++i)
-                    {
-                        osg::Node* child = node->getChild(i);
-                        if (i == node->getNumChildren()-1) // FIXME: some nicer way to determine where our actual Drawable resides...
-                        {
-                            child->addUpdateCallback(node->getUpdateCallback());
-                            child->setStateSet(node->getStateSet());
-                            child->setName(node->getName());
-                            // make sure to copy the UserDataContainer with the record index, so that connections to an animated collision shape don't break
-                            child->setUserDataContainer(node->getUserDataContainer());
-                        }
-                        parent->addChild(child);
-                    }
-
-                    node->removeChildren(0, node->getNumChildren());
-                    parent->removeChild(node);
-                }
-            }
-            // For NiTriShapes *with* a valid transform, perhaps we could apply the transform to the vertices.
-            // Need to make sure that won't break transparency sorting. Check what the original engine is doing?
-        }
-
         osg::ref_ptr<osg::LOD> handleLodNode(const Nif::NiLODNode* niLodNode)
         {
             osg::ref_ptr<osg::LOD> lod (new osg::LOD);
@@ -677,9 +639,6 @@ namespace NifOsg
             // We can take advantage of this constraint for optimizations later.
             if (!nifNode->controller.empty() && node->getDataVariance() == osg::Object::DYNAMIC)
                 handleNodeControllers(nifNode, static_cast<osg::MatrixTransform*>(node.get()), animflags);
-
-            // Optimization pass
-            optimize(nifNode, node, skipMeshes);
 
 
             if (nifNode->recType == Nif::RC_NiLODNode)
