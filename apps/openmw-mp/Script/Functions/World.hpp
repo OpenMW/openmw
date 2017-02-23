@@ -68,7 +68,7 @@ public:
     static void InitScriptEvent(unsigned short pid) noexcept;
 
     static unsigned int GetObjectChangesSize() noexcept;
-    static unsigned int GetLastEventAction() noexcept;
+    static unsigned char GetLastEventAction() noexcept;
 
     static const char *GetObjectRefId(unsigned int i) noexcept;
     static int GetObjectRefNumIndex(unsigned int i) noexcept;
@@ -92,7 +92,7 @@ public:
     static int GetContainerItemActionCount(unsigned int objectIndex, unsigned int itemIndex) noexcept;
 
     static void SetScriptEventCell(const char* cellDescription) noexcept;
-    static void SetScriptEventAction(int action) noexcept;
+    static void SetScriptEventAction(unsigned char action) noexcept;
 
     static void SetObjectRefId(const char* refId) noexcept;
     static void SetObjectRefNumIndex(int refNumIndex) noexcept;

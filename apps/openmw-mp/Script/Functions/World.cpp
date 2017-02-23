@@ -30,7 +30,7 @@ unsigned int WorldFunctions::GetObjectChangesSize() noexcept
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.count;
 }
 
-unsigned int WorldFunctions::GetLastEventAction() noexcept
+unsigned char WorldFunctions::GetLastEventAction() noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->action;
 }
@@ -157,7 +157,7 @@ void WorldFunctions::SetScriptEventCell(const char* cellDescription) noexcept
     }
 }
 
-void WorldFunctions::SetScriptEventAction(int action) noexcept
+void WorldFunctions::SetScriptEventAction(unsigned char action) noexcept
 {
     scriptEvent.action = action;
 }
