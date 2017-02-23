@@ -7,12 +7,15 @@
 #include <osgParticle/ParticleSystem>
 
 #include <osgUtil/IncrementalCompileOperation>
+#include <osgUtil/Optimizer>
 
 #include <osgDB/SharedStateManager>
 #include <osgDB/Registry>
 
 #include <components/nifosg/nifloader.hpp>
 #include <components/nif/niffile.hpp>
+
+#include <components/misc/stringops.hpp>
 
 #include <components/vfs/manager.hpp>
 
@@ -373,6 +376,49 @@ namespace Resource
         }
     }
 
+    class CanOptimizeCallback : public osgUtil::Optimizer::IsOperationPermissibleForObjectCallback
+    {
+    public:
+        bool isReservedName(const std::string& name) const
+        {
+            static std::set<std::string, Misc::StringUtils::CiComp> reservedNames;
+            if (reservedNames.empty())
+            {
+                const char* reserved[] = {"Head", "Neck", "Chest", "Groin", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist", "Shield Bone", "Right Forearm", "Left Forearm", "Right Upper Arm", "Left Upper Arm", "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee", "Left Knee", "Right Upper Leg", "Left Upper Leg", "Right Clavicle", "Left Clavicle", "Weapon Bone", "Tail",
+                                         "Bip01 L Hand", "Bip01 R Hand", "Bip01 Head", "Bip01 Spine1", "Bip01 Spine2", "Bip01 L Clavicle", "Bip01 R Clavicle", "bip01", "Root Bone", "Bip01 Neck",
+                                         "BoneOffset", "AttachLight", "ArrowBone", "Camera"};
+                reservedNames = std::set<std::string, Misc::StringUtils::CiComp>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
+            }
+            return reservedNames.find(name) != reservedNames.end();
+        }
+
+        virtual bool isOperationPermissibleForObjectImplementation(const osgUtil::Optimizer* optimizer, const osg::Node* node,unsigned int option) const
+        {
+            if (node->getNumDescriptions()>0) return false;
+            if (node->getDataVariance() == osg::Object::DYNAMIC) return false;
+            if (isReservedName(node->getName())) return false;
+
+            return (option & optimizer->getPermissibleOptimizationsForObject(node))!=0;
+        }
+    };
+
+    bool canOptimize(const std::string& filename)
+    {
+        // xmesh.nif can not be optimized because there are keyframes added in post
+        size_t slashpos = filename.find_last_of("\\/");
+        if (slashpos != std::string::npos && slashpos+1 < filename.size())
+        {
+            std::string basename = filename.substr(slashpos+1);
+            if (!basename.empty() && basename[0] == 'x')
+                return false;
+        }
+
+        // For spell VFX, DummyXX nodes must remain intact. Not adding those to reservedNames to avoid being overly cautious - instead, decide on filename
+        if (filename.find("vfx_pattern") != std::string::npos)
+            return false;
+        return true;
+    }
+
     osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string &name)
     {
         std::string normalized = name;
@@ -428,9 +474,19 @@ namespace Resource
             loaded->accept(shaderVisitor);
 
             // share state
+            // do this before optimizing so the optimizer will be able to combine nodes more aggressively
+            // note, because StateSets will be shared at this point, StateSets can not be modified inside the optimizer
             mSharedStateMutex.lock();
             mSharedStateManager->share(loaded.get());
             mSharedStateMutex.unlock();
+
+            if (canOptimize(normalized))
+            {
+                osgUtil::Optimizer optimizer;
+                optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
+
+                optimizer.optimize(loaded, osgUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS|osgUtil::Optimizer::REMOVE_REDUNDANT_NODES); //MERGE_GEOMETRY
+            }
 
             if (mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);
