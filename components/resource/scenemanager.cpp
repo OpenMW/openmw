@@ -540,6 +540,13 @@ namespace Resource
         // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
         cloned->getOrCreateUserDataContainer()->addUserObject(new TemplateRef(scene));
 
+        // we can skip any scene graphs without update callbacks since we know that particle emitters will have an update callback set
+        if (cloned->getNumChildrenRequiringUpdateTraversal() > 0)
+        {
+            InitParticlesVisitor visitor (mParticleSystemMask);
+            cloned->accept(visitor);
+        }
+
         return cloned;
     }
 
@@ -566,7 +573,6 @@ namespace Resource
     void SceneManager::attachTo(osg::Node *instance, osg::Group *parentNode) const
     {
         parentNode->addChild(instance);
-        notifyAttached(instance);
     }
 
     void SceneManager::releaseGLObjects(osg::State *state)
@@ -578,16 +584,6 @@ namespace Resource
     void SceneManager::setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation *ico)
     {
         mIncrementalCompileOperation = ico;
-    }
-
-    void SceneManager::notifyAttached(osg::Node *node) const
-    {
-        // we can skip any scene graphs without update callbacks since we know that particle emitters will have an update callback set
-        if (node->getNumChildrenRequiringUpdateTraversal() > 0)
-        {
-            InitParticlesVisitor visitor (mParticleSystemMask);
-            node->accept(visitor);
-        }
     }
 
     Resource::ImageManager* SceneManager::getImageManager()

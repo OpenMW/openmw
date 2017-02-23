@@ -122,7 +122,6 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         if (found == nodeMap.end())
             throw std::runtime_error("Can't find attachment node " + bonename);
         osg::ref_ptr<osg::Node> attached = SceneUtil::attach(node, mObjectRoot, bonename, found->second.get());
-        mResourceSystem->getSceneManager()->notifyAttached(attached);
 
         scene.reset(new PartHolder(attached));
 

@@ -663,7 +663,6 @@ PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const st
         throw std::runtime_error("Can't find attachment node " + bonename);
 
     osg::ref_ptr<osg::Node> attached = SceneUtil::attach(instance, mObjectRoot, bonefilter, found->second);
-    mResourceSystem->getSceneManager()->notifyAttached(attached);
     if (enchantedGlow)
         addGlow(attached, *glowColor);
 
