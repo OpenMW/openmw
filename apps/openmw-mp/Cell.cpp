@@ -32,16 +32,16 @@ void Cell::removePlayer(Player *player)
     }
 }
 
-Cell::TPlayers Cell::getPlayers()
+Cell::TPlayers Cell::getPlayers() const
 {
     return players;
 }
 
-void Cell::sendToLoaded(mwmp::WorldPacket *worldPacket, mwmp::BaseEvent *baseEvent)
+void Cell::sendToLoaded(mwmp::WorldPacket *worldPacket, mwmp::BaseEvent *baseEvent) const
 {
     std::list <Player*> plList;
 
-    for (auto pl :getPlayers())
+    for (auto pl : players)
         plList.push_back(pl);
 
     plList.sort();
@@ -73,6 +73,7 @@ CellController *CellController::sThis = nullptr;
 
 void CellController::create()
 {
+    assert(!sThis);
     sThis = new CellController;
 }
 
@@ -85,6 +86,7 @@ void CellController::destroy()
 
 CellController *CellController::get()
 {
+    assert(sThis);
     return sThis;
 }
 
