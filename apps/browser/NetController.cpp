@@ -85,14 +85,13 @@ void NetController::setData(QString address, QJsonObject server, ServerModel *mo
     model->setData(mi, server["passw"].toBool());
 
     mi = model->index(0, ServerData::PING);
-	
-    // This *should* fix a crash when a port isn't returned by data.
-    if(!address.contains(":"))
-    {
-        address.append(":25565");
-    }
-    QStringList addr = address.split(":");
-    model->setData(mi, PingRakNetServer(addr[0].toLatin1().data(), addr[1].toUShort()));
+	// This *should* fix a crash when a port isn't returned by data.
+	if(!address.contains(":"))
+	{
+		address.append(":25565");
+	}
+	QStringList addr = address.split(":");
+	model->setData(mi, PingRakNetServer(addr[0].toLatin1().data(), addr[1].toUShort()));
 }
 
 bool NetController::downloadInfo(QAbstractItemModel *pModel, QModelIndex index)
