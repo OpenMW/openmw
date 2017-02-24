@@ -356,7 +356,7 @@ namespace NifOsg
 
             osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
 
-            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, imageManager, std::vector<int>(), 0, false, &textkeys->mTextKeys);
+            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, imageManager, std::vector<int>(), 0, false, false, &textkeys->mTextKeys);
 
             if (nif->getUseSkinning())
             {
@@ -414,44 +414,6 @@ namespace NifOsg
                 toSetup->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
 
             toSetup->setFunction(boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl)));
-        }
-
-        void optimize (const Nif::Node* nifNode, osg::Group* node, bool skipMeshes)
-        {
-            // For nodes with an identity transform, remove the redundant Transform node
-            if (node->getDataVariance() == osg::Object::STATIC
-                    // For TriShapes, we can only collapse the node, but not completely remove it,
-                    // if the link to animated collision shapes is supposed to stay intact.
-                    && (nifNode->recType != Nif::RC_NiTriShape || !skipMeshes)
-                    // Don't optimize drawables with controllers, that creates issues when we want to deep copy controllers without deep copying the drawable that holds the controller.
-                    // A deep copy of controllers may be needed to independently animate multiple copies of the same mesh.
-                    && !node->getUpdateCallback())
-            {
-                if (node->getNumParents() && nifNode->trafo.isIdentity())
-                {
-                    osg::Group* parent = node->getParent(0);
-
-                     // can be multiple children in case of ParticleSystems, with the extra ParticleSystemUpdater node
-                    for (unsigned int i=0; i<node->getNumChildren(); ++i)
-                    {
-                        osg::Node* child = node->getChild(i);
-                        if (i == node->getNumChildren()-1) // FIXME: some nicer way to determine where our actual Drawable resides...
-                        {
-                            child->addUpdateCallback(node->getUpdateCallback());
-                            child->setStateSet(node->getStateSet());
-                            child->setName(node->getName());
-                            // make sure to copy the UserDataContainer with the record index, so that connections to an animated collision shape don't break
-                            child->setUserDataContainer(node->getUserDataContainer());
-                        }
-                        parent->addChild(child);
-                    }
-
-                    node->removeChildren(0, node->getNumChildren());
-                    parent->removeChild(node);
-                }
-            }
-            // For NiTriShapes *with* a valid transform, perhaps we could apply the transform to the vertices.
-            // Need to make sure that won't break transparency sorting. Check what the original engine is doing?
         }
 
         osg::ref_ptr<osg::LOD> handleLodNode(const Nif::NiLODNode* niLodNode)
@@ -549,15 +511,12 @@ namespace NifOsg
             stateset->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1,1,1,1)));
         }
 
-        osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
-                                std::vector<int> boundTextures, int animflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
+        // Get a default dataVariance for this node to be used as a hint by optimization (post)routines
+        osg::Object::DataVariance getDataVariance(const Nif::Node* nifNode)
         {
-            if (rootNode != NULL && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
-                return NULL;
+            if (nifNode->boneTrafo || nifNode->boneIndex != -1)
+                return osg::Object::DYNAMIC;
 
-            osg::ref_ptr<osg::Group> node = new osg::MatrixTransform(nifNode->trafo.toMatrix());
-
-            // Set a default DataVariance (used as hint by optimization routines).
             switch (nifNode->recType)
             {
             case Nif::RC_NiTriShape:
@@ -565,13 +524,29 @@ namespace NifOsg
             case Nif::RC_NiRotatingParticles:
                 // Leaf nodes in the NIF hierarchy, so won't be able to dynamically attach children.
                 // No support for keyframe controllers (just crashes in the original engine).
-                node->setDataVariance(osg::Object::STATIC);
-                break;
+                return osg::Object::STATIC;
             default:
-                // could have new children attached at any time, or added external keyframe controllers from .kf files
-                node->setDataVariance(osg::Object::DYNAMIC);
-                break;
+                return osg::Object::DYNAMIC;
             }
+        }
+
+        osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
+                                std::vector<int> boundTextures, int animflags, bool skipMeshes, bool isAnimated, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
+        {
+            if (rootNode != NULL && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
+                return NULL;
+
+            osg::Object::DataVariance dataVariance = getDataVariance(nifNode);
+
+            osg::ref_ptr<osg::Group> node;
+            if (dataVariance == osg::Object::STATIC && nifNode->trafo.isIdentity())
+                node = new osg::Group;
+            else
+                node = new osg::MatrixTransform(nifNode->trafo.toMatrix());
+            node->setDataVariance(dataVariance);
+
+            if (nifNode->controller.empty())
+                node->setDataVariance(osg::Object::STATIC);
 
             if (nifNode->recType == Nif::RC_NiBillboardNode)
             {
@@ -585,6 +560,9 @@ namespace NifOsg
                 node = new osg::Group;
                 node->setDataVariance(osg::Object::STATIC);
             }
+
+            if (!nifNode->controller.empty() && nifNode->controller->recType == Nif::RC_NiKeyframeController)
+                isAnimated = true;
 
             node->setName(nifNode->name);
 
@@ -635,6 +613,11 @@ namespace NifOsg
                 node->setNodeMask(0x1);
             }
 
+            if (skipMeshes && isAnimated) // make sure the empty node is not optimized away so the physicssystem can find it.
+            {
+                node->setDataVariance(osg::Object::DYNAMIC);
+            }
+
             // We can skip creating meshes for hidden nodes if they don't have a VisController that
             // might make them visible later
             if (nifNode->flags & Nif::NiNode::Flag_Hidden)
@@ -678,9 +661,6 @@ namespace NifOsg
             if (!nifNode->controller.empty() && node->getDataVariance() == osg::Object::DYNAMIC)
                 handleNodeControllers(nifNode, static_cast<osg::MatrixTransform*>(node.get()), animflags);
 
-            // Optimization pass
-            optimize(nifNode, node, skipMeshes);
-
 
             if (nifNode->recType == Nif::RC_NiLODNode)
             {
@@ -704,7 +684,7 @@ namespace NifOsg
                 for(size_t i = 0;i < children.length();++i)
                 {
                     if(!children[i].empty())
-                        handleNode(children[i].getPtr(), node, imageManager, boundTextures, animflags, skipMeshes, textKeys, rootNode);
+                        handleNode(children[i].getPtr(), node, imageManager, boundTextures, animflags, skipMeshes, isAnimated, textKeys, rootNode);
                 }
             }
 

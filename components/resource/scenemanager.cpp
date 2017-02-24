@@ -14,11 +14,14 @@
 #include <components/nifosg/nifloader.hpp>
 #include <components/nif/niffile.hpp>
 
+#include <components/misc/stringops.hpp>
+
 #include <components/vfs/manager.hpp>
 
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/controller.hpp>
+#include <components/sceneutil/optimizer.hpp>
 
 #include <components/shader/shadervisitor.hpp>
 #include <components/shader/shadermanager.hpp>
@@ -104,6 +107,20 @@ namespace
 
 namespace Resource
 {
+
+    class SharedStateManager : public osgDB::SharedStateManager
+    {
+    public:
+        unsigned int getNumSharedTextures() const
+        {
+            return _sharedTextureList.size();
+        }
+
+        unsigned int getNumSharedStateSets() const
+        {
+            return _sharedStateSetList.size();
+        }
+    };
 
     /// Set texture filtering settings on textures contained in a FlipController.
     class SetFilterSettingsControllerVisitor : public SceneUtil::ControllerVisitor
@@ -195,7 +212,7 @@ namespace Resource
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
         , mInstanceCache(new MultiObjectCache)
-        , mSharedStateManager(new osgDB::SharedStateManager)
+        , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
         , mMinFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
@@ -359,6 +376,61 @@ namespace Resource
         }
     }
 
+    class CanOptimizeCallback : public SceneUtil::Optimizer::IsOperationPermissibleForObjectCallback
+    {
+    public:
+        bool isReservedName(const std::string& name) const
+        {
+            static std::set<std::string, Misc::StringUtils::CiComp> reservedNames;
+            if (reservedNames.empty())
+            {
+                const char* reserved[] = {"Head", "Neck", "Chest", "Groin", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist", "Shield Bone", "Right Forearm", "Left Forearm", "Right Upper Arm", "Left Upper Arm", "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee", "Left Knee", "Right Upper Leg", "Left Upper Leg", "Right Clavicle", "Left Clavicle", "Weapon Bone", "Tail",
+                                         "Bip01 L Hand", "Bip01 R Hand", "Bip01 Head", "Bip01 Spine1", "Bip01 Spine2", "Bip01 L Clavicle", "Bip01 R Clavicle", "bip01", "Root Bone", "Bip01 Neck",
+                                         "BoneOffset", "AttachLight", "ArrowBone", "Camera"};
+                reservedNames = std::set<std::string, Misc::StringUtils::CiComp>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
+            }
+            return reservedNames.find(name) != reservedNames.end();
+        }
+
+        virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Drawable* node,unsigned int option) const
+        {
+            if (option & SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS)
+            {
+                if (node->asGeometry() && node->className() == std::string("Geometry"))
+                    return true;
+                else
+                    return false; //ParticleSystem would have to convert space of all the processors, RigGeometry would have to convert bones... theoretically possible, but very complicated
+            }
+            return (option & optimizer->getPermissibleOptimizationsForObject(node))!=0;
+        }
+
+        virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Node* node,unsigned int option) const
+        {
+            if (node->getNumDescriptions()>0) return false;
+            if (node->getDataVariance() == osg::Object::DYNAMIC) return false;
+            if (isReservedName(node->getName())) return false;
+
+            return (option & optimizer->getPermissibleOptimizationsForObject(node))!=0;
+        }
+    };
+
+    bool canOptimize(const std::string& filename)
+    {
+        // xmesh.nif can not be optimized because there are keyframes added in post
+        size_t slashpos = filename.find_last_of("\\/");
+        if (slashpos != std::string::npos && slashpos+1 < filename.size())
+        {
+            std::string basename = filename.substr(slashpos+1);
+            if (!basename.empty() && basename[0] == 'x')
+                return false;
+        }
+
+        // For spell VFX, DummyXX nodes must remain intact. Not adding those to reservedNames to avoid being overly cautious - instead, decide on filename
+        if (filename.find("vfx_pattern") != std::string::npos)
+            return false;
+        return true;
+    }
+
     osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string &name)
     {
         std::string normalized = name;
@@ -414,9 +486,19 @@ namespace Resource
             loaded->accept(shaderVisitor);
 
             // share state
+            // do this before optimizing so the optimizer will be able to combine nodes more aggressively
+            // note, because StateSets will be shared at this point, StateSets can not be modified inside the optimizer
             mSharedStateMutex.lock();
             mSharedStateManager->share(loaded.get());
             mSharedStateMutex.unlock();
+
+            if (canOptimize(normalized))
+            {
+                SceneUtil::Optimizer optimizer;
+                optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
+
+                optimizer.optimize(loaded, SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS|SceneUtil::Optimizer::REMOVE_REDUNDANT_NODES|SceneUtil::Optimizer::MERGE_GEOMETRY);
+            }
 
             if (mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);
@@ -458,6 +540,13 @@ namespace Resource
         // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
         cloned->getOrCreateUserDataContainer()->addUserObject(new TemplateRef(scene));
 
+        // we can skip any scene graphs without update callbacks since we know that particle emitters will have an update callback set
+        if (cloned->getNumChildrenRequiringUpdateTraversal() > 0)
+        {
+            InitParticlesVisitor visitor (mParticleSystemMask);
+            cloned->accept(visitor);
+        }
+
         return cloned;
     }
 
@@ -484,7 +573,6 @@ namespace Resource
     void SceneManager::attachTo(osg::Node *instance, osg::Group *parentNode) const
     {
         parentNode->addChild(instance);
-        notifyAttached(instance);
     }
 
     void SceneManager::releaseGLObjects(osg::State *state)
@@ -496,16 +584,6 @@ namespace Resource
     void SceneManager::setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation *ico)
     {
         mIncrementalCompileOperation = ico;
-    }
-
-    void SceneManager::notifyAttached(osg::Node *node) const
-    {
-        // we can skip any scene graphs without update callbacks since we know that particle emitters will have an update callback set
-        if (node->getNumChildrenRequiringUpdateTraversal() > 0)
-        {
-            InitParticlesVisitor visitor (mParticleSystemMask);
-            node->accept(visitor);
-        }
     }
 
     Resource::ImageManager* SceneManager::getImageManager()
@@ -590,6 +668,12 @@ namespace Resource
         {
             OpenThreads::ScopedLock<OpenThreads::Mutex> lock(*mIncrementalCompileOperation->getToCompiledMutex());
             stats->setAttribute(frameNumber, "Compiling", mIncrementalCompileOperation->getToCompile().size());
+        }
+
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSharedStateMutex);
+            stats->setAttribute(frameNumber, "Texture", mSharedStateManager->getNumSharedTextures());
+            stats->setAttribute(frameNumber, "StateSet", mSharedStateManager->getNumSharedStateSets());
         }
 
         stats->setAttribute(frameNumber, "Node", mCache->getCacheSize());

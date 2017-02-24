@@ -106,6 +106,14 @@ public:
         lowerCaseInPlace(out);
         return out;
     }
+
+    struct CiComp
+    {
+        bool operator()(const std::string& left, const std::string& right) const
+        {
+            return ciLess(left, right);
+        }
+    };
 };
 
 }

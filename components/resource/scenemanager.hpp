@@ -15,6 +15,7 @@ namespace Resource
 {
     class ImageManager;
     class NifFileManager;
+    class SharedStateManager;
 }
 
 namespace osgUtil
@@ -116,9 +117,6 @@ namespace Resource
         /// Set up an IncrementalCompileOperation for background compiling of loaded scenes.
         void setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation* ico);
 
-        /// @note SceneManager::attachTo calls this method automatically, only needs to be called by users if manually attaching
-        void notifyAttached(osg::Node* node) const;
-
         Resource::ImageManager* getImageManager();
 
         /// @param mask The node mask to apply to loaded particle system nodes.
@@ -157,7 +155,7 @@ namespace Resource
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 
-        osg::ref_ptr<osgDB::SharedStateManager> mSharedStateManager;
+        osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
         OpenThreads::Mutex mSharedStateMutex;
 
         Resource::ImageManager* mImageManager;

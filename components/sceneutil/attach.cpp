@@ -121,6 +121,10 @@ namespace SceneUtil
                 trans->setPosition(boneOffset->getMatrix().getTrans());
                 // The BoneOffset rotation seems to be incorrect
                 trans->setAttitude(osg::Quat(osg::DegreesToRadians(-90.f), osg::Vec3f(1,0,0)));
+
+                // Now that we used it, get rid of the redundant node.
+                if (boneOffset->getNumChildren() == 0 && boneOffset->getNumParents() == 1)
+                    boneOffset->getParent(0)->removeChild(boneOffset);
             }
 
             if (attachNode->getName().find("Left") != std::string::npos)

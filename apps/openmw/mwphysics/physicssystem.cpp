@@ -1294,8 +1294,11 @@ namespace MWPhysics
         ActorMap::iterator foundActor = mActors.find(ptr);
         if (foundActor != mActors.end())
         {
-            foundActor->second->updateRotation();
-            mCollisionWorld->updateSingleAabb(foundActor->second->getCollisionObject());
+            if (!foundActor->second->isRotationallyInvariant())
+            {
+                foundActor->second->updateRotation();
+                mCollisionWorld->updateSingleAabb(foundActor->second->getCollisionObject());
+            }
             return;
         }
     }
@@ -1416,13 +1419,18 @@ namespace MWPhysics
 
             osg::Vec3f position = physicActor->getPosition();
             float oldHeight = position.z();
+            bool positionChanged = false;
             for (int i=0; i<numSteps; ++i)
             {
                 position = MovementSolver::move(position, physicActor->getPtr(), physicActor, iter->second, physicsDt,
                                                 world->isFlying(iter->first),
                                                 waterlevel, slowFall, mCollisionWorld, mStandingCollisions);
-                physicActor->setPosition(position);
+                if (position != physicActor->getPosition())
+                    positionChanged = true;
+                physicActor->setPosition(position); // always set even if unchanged to make sure interpolation is correct
             }
+            if (positionChanged)
+                mCollisionWorld->updateSingleAabb(physicActor->getCollisionObject());
 
             float interpolationFactor = mTimeAccum / physicsDt;
             osg::Vec3f interpolated = position * interpolationFactor + physicActor->getPreviousPosition() * (1.f - interpolationFactor);

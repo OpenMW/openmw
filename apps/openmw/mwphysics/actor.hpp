@@ -73,6 +73,11 @@ namespace MWPhysics
         void updateRotation();
 
         /**
+         * Return true if the collision shape looks the same no matter how its Z rotated.
+         */
+        bool isRotationallyInvariant() const;
+
+        /**
          * Set mPosition and mPreviousPosition to the position in the Ptr's RefData. This should be used
          * when an object is "instantly" moved/teleported as opposed to being moved by the physics simulation.
          */
@@ -154,6 +159,8 @@ namespace MWPhysics
 
         bool mCanWaterWalk;
         bool mWalkingOnWater;
+
+        bool mRotationallyInvariant;
 
         std::auto_ptr<btCollisionShape> mShape;
         btConvexShape* mConvexShape;

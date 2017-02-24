@@ -136,15 +136,14 @@ namespace MWWorld
     template<typename T>
     const T *Store<T>::search(const std::string &id) const
     {
-        T item;
-        item.mId = Misc::StringUtils::lowerCase(id);
+        std::string idLower = Misc::StringUtils::lowerCase(id);
 
-        typename Dynamic::const_iterator dit = mDynamic.find(item.mId);
+        typename Dynamic::const_iterator dit = mDynamic.find(idLower);
         if (dit != mDynamic.end()) {
             return &dit->second;
         }
 
-        typename std::map<std::string, T>::const_iterator it = mStatic.find(item.mId);
+        typename std::map<std::string, T>::const_iterator it = mStatic.find(idLower);
 
         if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
             return &(it->second);
@@ -274,10 +273,9 @@ namespace MWWorld
     template<typename T>
     bool Store<T>::eraseStatic(const std::string &id)
     {
-        T item;
-        item.mId = Misc::StringUtils::lowerCase(id);
+        std::string idLower = Misc::StringUtils::lowerCase(id);
 
-        typename std::map<std::string, T>::iterator it = mStatic.find(item.mId);
+        typename std::map<std::string, T>::iterator it = mStatic.find(idLower);
 
         if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
             // delete from the static part of mShared
@@ -285,7 +283,7 @@ namespace MWWorld
             typename std::vector<T *>::iterator end = sharedIter + mStatic.size();
 
             while (sharedIter != mShared.end() && sharedIter != end) {
-                if((*sharedIter)->mId == item.mId) {
+                if((*sharedIter)->mId == idLower) {
                     mShared.erase(sharedIter);
                     break;
                 }
