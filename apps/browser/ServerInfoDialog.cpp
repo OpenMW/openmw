@@ -22,15 +22,18 @@ void ServerInfoDialog::refresh()
 {
     NetController::get()->updateInfo();
     ServerData *sd = NetController::get()->selectedServer();
-    leAddr->setText(sd->addr);
-    lblName->setText(sd->hostName);
-    lblPing->setNum(sd->ping);
+    if (sd)
+    {
+        leAddr->setText(sd->addr);
+        lblName->setText(sd->hostName);
+        lblPing->setNum(sd->ping);
 
-    listPlayers->clear();
-    QStringList players = NetController::get()->players();
-    listPlayers->addItems(players);
-    listPlugins->clear();
-    listPlugins->addItems(NetController::get()->plugins());
+        listPlayers->clear();
+        QStringList players = NetController::get()->players();
+        listPlayers->addItems(players);
+        listPlugins->clear();
+        listPlugins->addItems(NetController::get()->plugins());
 
-    lblPlayers->setText(QString::number(players.size()) + " / " + QString::number(sd->maxPlayers));
+        lblPlayers->setText(QString::number(players.size()) + " / " + QString::number(sd->maxPlayers));
+    }
 }
