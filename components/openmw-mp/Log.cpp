@@ -31,7 +31,7 @@ void Log::Create(int logLevel)
 void Log::Delete()
 {
     if (sLog == NULL)
-        return
+        return;
     delete sLog;
     sLog = NULL;
 }
