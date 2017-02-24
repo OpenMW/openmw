@@ -267,21 +267,26 @@ namespace MWWorld
             {
                 ESM::Position pos;
 
-                /* Disabled by tes3mp
+                // Major change made by tes3mp
+                //
+                // If Pelagiad exists, spawn there; otherwise, spawn at 0,0
 
-                const int cellSize = 8192;
-                pos.pos[0] = cellSize/2;
-                pos.pos[1] = cellSize/2;
-                pos.pos[2] = 0;
-                pos.rot[0] = 0;
-                pos.rot[1] = 0;
-                pos.rot[2] = 0;
-                mWorldScene->changeToExteriorCell(pos, true);
-                */
-
-                findExteriorPosition("Pelagiad", pos);
-                changeToExteriorCell(pos, true);
-                fixPosition(getPlayerPtr());
+                if (findExteriorPosition("Pelagiad", pos))
+                {
+                    changeToExteriorCell(pos, true);
+                    fixPosition(getPlayerPtr());
+                }
+                else
+                {
+                    const int cellSize = 8192;
+                    pos.pos[0] = cellSize / 2;
+                    pos.pos[1] = cellSize / 2;
+                    pos.pos[2] = 0;
+                    pos.rot[0] = 0;
+                    pos.rot[1] = 0;
+                    pos.rot[2] = 0;
+                    mWorldScene->changeToExteriorCell(pos, true);
+                }
             }
         }
 
