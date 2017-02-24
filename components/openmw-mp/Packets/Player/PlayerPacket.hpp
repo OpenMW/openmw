@@ -25,16 +25,6 @@ namespace mwmp
         virtual void Send(BasePlayer *player, RakNet::AddressOrGUID destination);
         virtual void Read(BasePlayer *player);
 
-        static size_t headerSize()
-        {
-            return (size_t)(1 + RakNet::RakNetGUID::size()); // packetID + RakNetGUID (uint64_t)
-        }
-
-        unsigned char GetPacketID()
-        {
-            return packetID;
-        }
-
     protected:
         BasePlayer *player;
 
