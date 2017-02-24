@@ -537,7 +537,10 @@ bool CollectLowestTransformsVisitor::removeTransforms(osg::Node* nodeWeCannotRem
                 group->setDataVariance(osg::Object::STATIC);
                 group->setNodeMask(transform->getNodeMask());
                 group->setStateSet(transform->getStateSet());
-                group->setUserData(transform->getUserData());
+                group->setUpdateCallback(transform->getUpdateCallback());
+                group->setEventCallback(transform->getEventCallback());
+                group->setCullCallback(transform->getCullCallback());
+                group->setUserDataContainer(transform->getUserDataContainer());
                 group->setDescriptions(transform->getDescriptions());
                 for(unsigned int i=0;i<transform->getNumChildren();++i)
                 {
