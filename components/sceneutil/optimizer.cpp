@@ -840,18 +840,20 @@ void Optimizer::RemoveRedundantNodesVisitor::removeRedundantNodes()
             // take a copy of parents list since subsequent removes will modify the original one.
             osg::Node::ParentList parents = group->getParents();
 
-            if (group->getNumChildren()==1)
+            for(osg::Node::ParentList::iterator pitr=parents.begin();
+                pitr!=parents.end();
+                ++pitr)
             {
-                osg::Node* child = group->getChild(0);
-                for(osg::Node::ParentList::iterator pitr=parents.begin();
-                    pitr!=parents.end();
-                    ++pitr)
+                for (unsigned int i=0; i<group->getNumChildren(); ++i)
                 {
-                    (*pitr)->replaceChild(group.get(),child);
+                    osg::Node* child = group->getChild(i);
+                    (*pitr)->addChild(child);
                 }
 
+                (*pitr)->removeChild(group);
             }
 
+            group->removeChildren(0, group->getNumChildren());
         }
         else
         {
