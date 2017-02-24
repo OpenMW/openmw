@@ -66,7 +66,10 @@ CellController::CellController()
 
 CellController::~CellController()
 {
-
+    for(auto cell : cells)
+    {
+        delete cell;
+    }
 }
 
 CellController *CellController::sThis = nullptr;
