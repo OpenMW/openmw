@@ -54,6 +54,7 @@ Networking::~Networking()
 
     sThis = 0;
     delete playerController;
+    delete worldController;
     LOG_QUIT();
 }
 
