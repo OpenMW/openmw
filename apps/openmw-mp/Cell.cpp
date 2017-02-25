@@ -39,6 +39,13 @@ Cell::TPlayers Cell::getPlayers() const
 
 void Cell::sendToLoaded(mwmp::WorldPacket *worldPacket, mwmp::BaseEvent *baseEvent) const
 {
+    if (players.empty())
+    {
+        // Remove this once we are sure it can't happen
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "- Attempt to send packet to players in Cell::sendToLoaded when there are no players!\n- Please report to a developer");
+        return;
+    }
+
     std::list <Player*> plList;
 
     for (auto pl : players)
