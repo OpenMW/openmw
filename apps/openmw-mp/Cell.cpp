@@ -127,8 +127,8 @@ Cell *CellController::addCell(ESM::Cell cellData)
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Loaded cells: %d", cells.size());
     auto it = find_if(cells.begin(), cells.end(), [cellData](const Cell *c) {
         //return c->cell.sRecordId == cellData.sRecordId; // Currently we cannot compare because plugin lists can be loaded in different order
-        return c->cell.mData.mX == cellData.mData.mX && c->cell.mData.mY == cellData.mData.mY &&
-                c->cell.mCellId.mWorldspace == cellData.mCellId.mWorldspace;
+        return c->cell.isExterior() ? (c->cell.mData.mX == cellData.mData.mX && c->cell.mData.mY == cellData.mData.mY) :
+               (c->cell.mName == cellData.mName);
     });
     Cell *cell;
     if (it == cells.end())
