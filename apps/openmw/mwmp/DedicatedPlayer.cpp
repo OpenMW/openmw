@@ -70,17 +70,17 @@ void Players::createPlayer(RakNet::RakNetGUID guid)
         dedicPlayer->reference = new MWWorld::ManualRef(world->getStore(), recid, 1);
     }
 
-    // Temporarily spawn or move player to ToddTest whenever setting base info
-    ESM::Position newPos;
-    world->findInteriorPosition("ToddTest", newPos);
-    MWWorld::CellStore *cellStore = world->getInterior("ToddTest");
+    // Temporarily spawn or move player to exterior 0,0 whenever setting base info
+    ESM::Position spawnPos;
+    spawnPos.pos[0] = spawnPos.pos[1] = spawnPos.pos[2] = 0;
+    MWWorld::CellStore *cellStore = world->getExterior(0, 0);
 
     if (dedicPlayer->state == 0)
     {
         LOG_APPEND(Log::LOG_INFO, "- Creating new reference pointer for %s",
             dedicPlayer->npc.mName.c_str());
 
-        MWWorld::Ptr tmp = world->placeObject(dedicPlayer->reference->getPtr(), cellStore, newPos);
+        MWWorld::Ptr tmp = world->placeObject(dedicPlayer->reference->getPtr(), cellStore, spawnPos);
 
         dedicPlayer->ptr.mCell = tmp.mCell;
         dedicPlayer->ptr.mRef = tmp.mRef;
@@ -94,7 +94,7 @@ void Players::createPlayer(RakNet::RakNetGUID guid)
             dedicPlayer->npc.mName.c_str());
 
         dedicPlayer->ptr.getBase()->canChangeCell = true;
-        dedicPlayer->updatePtr(world->moveObject(dedicPlayer->ptr, cellStore, newPos.pos[0], newPos.pos[1], newPos.pos[2]));
+        dedicPlayer->updatePtr(world->moveObject(dedicPlayer->ptr, cellStore, spawnPos.pos[0], spawnPos.pos[1], spawnPos.pos[2]));
 
         npc.mId = players[guid]->ptr.get<ESM::NPC>()->mBase->mId;
 
@@ -139,13 +139,13 @@ void Players::disconnectPlayer(RakNet::RakNetGUID guid)
         MWBase::World *world = MWBase::Environment::get().getWorld();
         world->disable(players[guid]->getPtr());
 
-        // Move player to ToddTest
+        // Move player to exterior 0,0
         ESM::Position newPos;
-        world->findInteriorPosition("ToddTest", newPos);
-        MWWorld::CellStore *store = world->getInterior("ToddTest");
+        newPos.pos[0] = newPos.pos[1] = newPos.pos[2] = 0;
+        MWWorld::CellStore *cellStore = world->getExterior(0, 0);
 
         players[guid]->getPtr().getBase()->canChangeCell = true;
-        world->moveObject(players[guid]->getPtr(), store, newPos.pos[0], newPos.pos[1], newPos.pos[2]);
+        world->moveObject(players[guid]->getPtr(), cellStore, newPos.pos[0], newPos.pos[1], newPos.pos[2]);
     }
 }
 
