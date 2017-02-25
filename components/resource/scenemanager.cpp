@@ -388,6 +388,9 @@ namespace Resource
                                          "Bip01 L Hand", "Bip01 R Hand", "Bip01 Head", "Bip01 Spine1", "Bip01 Spine2", "Bip01 L Clavicle", "Bip01 R Clavicle", "bip01", "Root Bone", "Bip01 Neck",
                                          "BoneOffset", "AttachLight", "ArrowBone", "Camera"};
                 reservedNames = std::set<std::string, Misc::StringUtils::CiComp>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
+
+                for (unsigned int i=0; i<sizeof(reserved)/sizeof(reserved[0]); ++i)
+                    reservedNames.insert(std::string("Tri ") + reserved[i]);
             }
             return reservedNames.find(name) != reservedNames.end();
         }
