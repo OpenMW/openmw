@@ -6,7 +6,7 @@ Programmers
 
     Stanislav Zhukov (Koncord) - Overall architecture, networking & scripting systems, player sync, server browser
     David Cernat - World sync & state saving/loading, player state saving/loading, general bug fixes
-    Battlerax
+    Battlerax - Various fixes
 
 
 Script developers

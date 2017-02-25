@@ -1,3 +1,9 @@
+0.5.1
+-----
+
+* Fixes to server crashes caused by incorrect cell comparison added by bandwidth optimization changes
+* Fixes to server browser freezes caused by incomplete data received from master server
+
 0.5.0
 -----
 
