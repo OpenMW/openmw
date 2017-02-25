@@ -182,6 +182,10 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 player->cell.getDescription().c_str());
 
             player->forEachLoaded([this](Player *pl, Player *other) {
+
+                LOG_APPEND(Log::LOG_INFO, "- Started information exchange with %s",
+                    other->npc.mName.c_str());
+
                 playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(other, pl->guid);
                 playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(other, pl->guid);
                 playerController->GetPacket(ID_PLAYER_POS)->Send(other, pl->guid);
@@ -195,7 +199,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(pl, other->guid);
                 playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(pl, other->guid);
                 
-                LOG_APPEND(Log::LOG_INFO, "- Exchanged information with %s",
+                LOG_APPEND(Log::LOG_INFO, "- Finished information exchange with %s",
                     other->npc.mName.c_str());
             });
 
@@ -203,6 +207,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Send(player, true); //send to other clients
 
             Script::Call<Script::CallbackIdentity("OnPlayerCellChange")>(player->getId());
+
+            LOG_APPEND(Log::LOG_INFO, "- Finished processing ID_PLAYER_CELL_CHANGE",
+                player->cell.getDescription().c_str());
         }
         else
         {
@@ -622,6 +629,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         Script::Call<Script::CallbackIdentity("OnContainer")>(
             player->getId(),
             baseEvent.cell.getDescription().c_str());
+
+        LOG_APPEND(Log::LOG_INFO, "- Finished processing ID_CONTAINER");
 
         break;
     }
