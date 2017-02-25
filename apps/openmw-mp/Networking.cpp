@@ -474,6 +474,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     // Clear our baseEvent before loading new data in it
     baseEvent.cell.blank();
     baseEvent.objectChanges.objects.clear();
+    baseEvent.guid = packet->guid;
 
     switch (packet->data[0])
     {
