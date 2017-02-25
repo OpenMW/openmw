@@ -68,8 +68,8 @@ ServerExtendedData getExtendedData(const char *addr, unsigned short port)
         msg = "Connection attempt failed.\n";
 
 
-    bool queue = true;
-    while (queue)
+    int queue = 0;
+    while (queue == 0)
     {
         for (RakNet::Packet *packet = peer->Receive(); packet; peer->DeallocatePacket(
                 packet), packet = peer->Receive())
@@ -81,20 +81,20 @@ ServerExtendedData getExtendedData(const char *addr, unsigned short port)
                     msg = "Connection failed.\n"
                             "Either the IP address is wrong or a firewall on either system is blocking\n"
                             "UDP packets on the port you have chosen.";
-                    queue = false;
+                    queue = -1;
                     break;
                 }
                 case ID_INVALID_PASSWORD:
                 {
                     msg = "Connection failed.\n"
                             "The client or server is outdated.\n";
-                    queue = false;
+                    queue = -1;
                     break;
                 }
                 case ID_CONNECTION_REQUEST_ACCEPTED:
                 {
                     msg = "Connection accepted.\n";
-                    queue = false;
+                    queue = 1;
                     break;
                 }
                 case ID_DISCONNECTION_NOTIFICATION:
@@ -109,6 +109,9 @@ ServerExtendedData getExtendedData(const char *addr, unsigned short port)
         }
     }
     puts(msg.c_str());
+
+    if(queue == -1) // connection is failed
+        return data;
 
     {
         RakNet::BitStream bs;
