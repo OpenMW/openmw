@@ -2744,6 +2744,18 @@ namespace MWWorld
 
         if (!selectedSpell.empty())
         {
+            /*
+                Start of tes3mp addition
+
+                If the spell being cast does not exist on our client, ignore it
+                to avoid framelistener errors
+            */
+            if (getStore().get<ESM::Spell>().search(selectedSpell) == 0)
+                return false;
+            /*
+                End of tes3mp addition
+            */
+
             const ESM::Spell* spell = getStore().get<ESM::Spell>().find(selectedSpell);
 
             // Check mana
