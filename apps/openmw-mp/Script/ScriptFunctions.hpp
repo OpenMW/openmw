@@ -101,7 +101,7 @@ public:
             GUIFUNCTIONS,
             CHARCLASSFUNCTIONS,
             WORLDFUNCTIONS,
-            MISCELLANEOUSFUNCTIONS
+            MISCELLANEOUSAPI
     };
 
     static constexpr ScriptCallbackData callbacks[]{
