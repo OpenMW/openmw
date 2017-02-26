@@ -94,7 +94,7 @@ namespace SceneUtil
 
     osgParticle::ParticleProcessor* CopyOp::operator() (const osgParticle::ParticleProcessor* processor) const
     {
-        osgParticle::ParticleProcessor* cloned = osg::clone(processor, osg::CopyOp::SHALLOW_COPY);
+        osgParticle::ParticleProcessor* cloned = osg::clone(processor, osg::CopyOp::DEEP_COPY_CALLBACKS);
         mMap[cloned] = processor->getParticleSystem();
         return cloned;
     }

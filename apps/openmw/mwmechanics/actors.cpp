@@ -362,7 +362,8 @@ namespace MWMechanics
         }
 
         // If set in the settings file, player followers and escorters will become aggressive toward enemies in combat with them or the player
-        if (!aggressive && isPlayerFollowerOrEscorter && Settings::Manager::getBool("followers attack on sight", "Game"))
+        static const bool followersAttackOnSight = Settings::Manager::getBool("followers attack on sight", "Game");
+        if (!aggressive && isPlayerFollowerOrEscorter && followersAttackOnSight)
         {
             if (actor2.getClass().getCreatureStats(actor2).getAiSequence().isInCombat(actor1))
                 aggressive = true;

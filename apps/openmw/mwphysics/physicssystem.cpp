@@ -1338,6 +1338,7 @@ namespace MWPhysics
             bool cmode = found->second->getCollisionMode();
             cmode = !cmode;
             found->second->enableCollisionMode(cmode);
+            found->second->enableCollisionBody(cmode);
             return cmode;
         }
 
