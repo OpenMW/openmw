@@ -194,10 +194,10 @@ namespace MWClass
         // FIXME: use const version of InventoryStore functions once they are available
         if (ptr.getClass().hasInventoryStore(ptr))
         {
-            MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
+            const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
             for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
             {
-                MWWorld::ContainerStoreIterator equipped = invStore.getSlot(slot);
+                MWWorld::ConstContainerStoreIterator equipped = invStore.getSlot(slot);
                 if (equipped != invStore.end())
                 {
                     model = equipped->getClass().getModel(*equipped);

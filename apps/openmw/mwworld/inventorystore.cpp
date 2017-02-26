@@ -215,6 +215,11 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
     return mSlots[slot];
 }
 
+MWWorld::ConstContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot) const
+{
+    return const_cast<InventoryStore*>(this)->getSlot (slot);
+}
+
 bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const MWWorld::Ptr& item)
 {
     if (!Settings::Manager::getBool("prevent merchant equipping", "Game"))

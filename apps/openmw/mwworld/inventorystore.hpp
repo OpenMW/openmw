@@ -155,6 +155,7 @@ namespace MWWorld
             /// \note if no item selected, return end() iterator
 
             ContainerStoreIterator getSlot (int slot);
+            ConstContainerStoreIterator getSlot(int slot) const;
 
             void unequipAll(const MWWorld::Ptr& actor);
             ///< Unequip all currently equipped items.
