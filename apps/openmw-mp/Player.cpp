@@ -64,6 +64,11 @@ TPlayers *Players::getPlayers()
     return &players;
 }
 
+unsigned short Players::getLastPlayerId()
+{
+    return slots.rbegin()->first;
+}
+
 Player::Player(RakNet::RakNetGUID guid) : BasePlayer(guid)
 {
     handshakeState = false;

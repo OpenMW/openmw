@@ -14,6 +14,7 @@
 #include <Script/Functions/Quests.hpp>
 #include <Script/Functions/Spells.hpp>
 #include <Script/Functions/World.hpp>
+#include <Script/Functions/Miscellaneous.hpp>
 #include <RakNetTypes.h>
 //#include <amx/amx.h>
 #include <tuple>
@@ -100,6 +101,7 @@ public:
             GUIFUNCTIONS,
             CHARCLASSFUNCTIONS,
             WORLDFUNCTIONS,
+            MISCELLANEOUSFUNCTIONS
     };
 
     static constexpr ScriptCallbackData callbacks[]{

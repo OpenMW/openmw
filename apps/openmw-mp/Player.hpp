@@ -32,6 +32,7 @@ public:
     static Player *getPlayer(RakNet::RakNetGUID guid);
     static Player *getPlayer(unsigned short id);
     static TPlayers *getPlayers();
+    static unsigned short getLastPlayerId();
 
 private:
     static TPlayers players;
