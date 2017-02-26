@@ -38,7 +38,7 @@ namespace SceneUtil
             return operator()(processor);
         if (const osgParticle::ParticleSystemUpdater* updater = dynamic_cast<const osgParticle::ParticleSystemUpdater*>(node))
         {
-            osgParticle::ParticleSystemUpdater* cloned = osg::clone(updater, *this);
+            osgParticle::ParticleSystemUpdater* cloned = new osgParticle::ParticleSystemUpdater(*updater, osg::CopyOp::SHALLOW_COPY);
             mMap2[cloned] = updater->getParticleSystem(0);
             return cloned;
         }
@@ -94,7 +94,7 @@ namespace SceneUtil
 
     osgParticle::ParticleProcessor* CopyOp::operator() (const osgParticle::ParticleProcessor* processor) const
     {
-        osgParticle::ParticleProcessor* cloned = osg::clone(processor, *this);
+        osgParticle::ParticleProcessor* cloned = osg::clone(processor, osg::CopyOp::SHALLOW_COPY);
         mMap[cloned] = processor->getParticleSystem();
         return cloned;
     }
