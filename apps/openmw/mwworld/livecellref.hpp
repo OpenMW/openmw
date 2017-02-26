@@ -28,10 +28,15 @@ namespace MWWorld
          */
         MWWorld::CellRef mRef;
     
-        /* Added by tes3mp to prevent dedicated players' references from automatically
-         * and unpredictably moving across exterior cell boundaries on clients
+        /*
+            Start of tes3mp addition
+
+            Useful boolean for stopping momentum-based cell changes not approved by server
          */
         bool canChangeCell;
+        /*
+            End of tes3mp addition
+        */
 
         /** runtime-data */
         RefData mData;

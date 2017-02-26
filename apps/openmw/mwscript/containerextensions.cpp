@@ -70,10 +70,16 @@ namespace MWScript
                     // Spawn a messagebox (only for items added to player's inventory and if player is talking to someone)
                     if (ptr == MWBase::Environment::get().getWorld ()->getPlayerPtr() )
                     {
-                        // Added by tes3mp
-                        //
-                        // LocalPlayer's inventory has changed, so send a packet with it
+                        /*
+                            Start of tes3mp addition
+
+                            Send an ID_PLAYER_INVENTORY packet every time a player gains an item
+                            through a script
+                        */
                         mwmp::Main::get().getLocalPlayer()->sendInventory();
+                        /*
+                            End of tes3mp addition
+                        */
 
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been added to their inventory
                         std::string msgBox;

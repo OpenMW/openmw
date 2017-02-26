@@ -101,7 +101,12 @@ namespace MWGui
         if (!onTakeItem(mModel->getItem(mSelectedItem), count))
             return;
 
-        // Added by tes3mp
+        /*
+            Start of tes3mp addition
+
+            Send an ID_CONTAINER packet every time an item starts being dragged
+            from a container
+        */
         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
         worldEvent->cell = *mPtr.getCell()->getCell();
         worldEvent->action = mwmp::BaseEvent::REMOVE;
@@ -129,6 +134,9 @@ namespace MWGui
             worldEvent->cell.getDescription().c_str(),
             containerItem.refId.c_str(),
             containerItem.count);
+        /*
+            End of tes3mp addition
+        */
 
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
     }
@@ -156,7 +164,11 @@ namespace MWGui
             }
         }
 
-        // Added by tes3mp
+        /*
+            Start of tes3mp addition
+
+            Send an ID_CONTAINER packet every time an item is dropped in a container
+        */
         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
         worldEvent->cell = *mPtr.getCell()->getCell();
         worldEvent->action = mwmp::BaseEvent::ADD;
@@ -186,6 +198,9 @@ namespace MWGui
             worldEvent->cell.getDescription().c_str(),
             containerItem.refId.c_str(),
             containerItem.count);
+        /*
+            End of tes3mp addition
+        */
 
         mDragAndDrop->drop(mModel, mItemView);
     }
@@ -306,7 +321,12 @@ namespace MWGui
 
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
 
-            // Added by tes3mp
+            /*
+                Start of tes3mp addition
+
+                Send an ID_CONTAINER packet every time the Take All button is used on
+                a container
+            */
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
             worldEvent->cell = *mPtr.getCell()->getCell();
             worldEvent->action = mwmp::BaseEvent::SET;
@@ -322,6 +342,9 @@ namespace MWGui
                 worldObject.refId.c_str(),
                 worldObject.refNumIndex,
                 worldEvent->cell.getDescription().c_str());
+            /*
+                End of tes3mp addition
+            */
         }
     }
 

@@ -70,7 +70,12 @@ namespace MWScript
                     std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    // Added by tes3mp
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_MUSIC_PLAY packet every time new music is streamed through
+                        a script
+                    */
                     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
                     
                     mwmp::WorldObject worldObject;
@@ -78,6 +83,9 @@ namespace MWScript
                     worldEvent->addObject(worldObject);
 
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->Send(worldEvent);
+                    /*
+                        End of tes3mp addition
+                    */
 
                     MWBase::Environment::get().getSoundManager()->streamMusic (sound);
                 }

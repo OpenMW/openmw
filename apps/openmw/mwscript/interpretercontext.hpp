@@ -55,8 +55,15 @@ namespace MWScript
                 const std::string& targetId = "");
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
 
-            // Added by tes3mp
+            /*
+                Start of tes3mp addition
+
+                Useful boolean for setting whether scripts send packets
+            */
             bool sendPackets;
+            /*
+                End of tes3mp addition
+            */
 
             virtual int getLocalShort (int index) const;
 

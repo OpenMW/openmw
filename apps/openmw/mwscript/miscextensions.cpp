@@ -89,7 +89,12 @@ namespace MWScript
                 bool allowSkipping = runtime[0].mInteger != 0;
                 runtime.pop();
 
-                // Added by tes3mp
+                /*
+                    Start of tes3mp addition
+
+                    Send an ID_VIDEO_PLAY packet every time a video is played
+                    through a script
+                */
                 mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
 
                 mwmp::WorldObject worldObject;
@@ -98,6 +103,9 @@ namespace MWScript
                 worldEvent->addObject(worldObject);
 
                 mwmp::Main::get().getNetworking()->getWorldPacket(ID_VIDEO_PLAY)->Send(worldEvent);
+                /*
+                    End of tes3mp addition
+                */
 
                 MWBase::Environment::get().getWindowManager()->playVideo (name, allowSkipping);
             }
@@ -197,7 +205,12 @@ namespace MWScript
                         runtime.pop();
                     }
 
-                    // Added by tes3mp
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_OBJECT_LOCK packet every time an object is locked
+                        through a script
+                    */
                     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
                     worldEvent->cell = *ptr.getCell()->getCell();
 
@@ -208,6 +221,9 @@ namespace MWScript
                     worldEvent->addObject(worldObject);
 
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->Send(worldEvent);
+                    /*
+                        End of tes3mp addition
+                    */
 
                     ptr.getClass().lock (ptr, lockLevel);
 
@@ -235,7 +251,12 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    // Added by tes3mp
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_OBJECT_UNLOCK packet every time an object is unlocked
+                        through a script
+                    */
                     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
                     worldEvent->cell = *ptr.getCell()->getCell();
 
@@ -245,6 +266,9 @@ namespace MWScript
                     worldEvent->addObject(worldObject);
 
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send(worldEvent);
+                    /*
+                        End of tes3mp addition
+                    */
 
                     ptr.getClass().unlock (ptr);
                 }
@@ -706,7 +730,12 @@ namespace MWScript
 
                     if (parameter == 1)
                     {
-                        // Added by tes3mp
+                        /*
+                            Start of tes3mp addition
+
+                            Send an ID_OBJECT_DELETE packet every time an object is deleted
+                            through a script
+                        */
                         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
                         worldEvent->cell = *ptr.getCell()->getCell();
 
@@ -716,6 +745,9 @@ namespace MWScript
                         worldEvent->addObject(worldObject);
 
                         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(worldEvent);
+                        /*
+                            End of tes3mp addition
+                        */
 
                         MWBase::Environment::get().getWorld()->deleteObject(ptr);
                     }

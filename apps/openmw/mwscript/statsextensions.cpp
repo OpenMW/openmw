@@ -446,11 +446,17 @@ namespace MWScript
 
                     ptr.getClass().getCreatureStats (ptr).getSpells().add (id);
 
-                    // Added by tes3mp
-                    //
-                    // LocalPlayer has gained a spell, so send a packet with it
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_PLAYER_SPELLBOOK packet every time a player gains a spell
+                        through a script
+                    */
                     if (ptr == MWMechanics::getPlayer())
                         mwmp::Main::get().getLocalPlayer()->sendSpellAddition(id);
+                    /*
+                        End of tes3mp addition
+                    */
                 }
         };
 
@@ -476,11 +482,17 @@ namespace MWScript
                         wm->unsetSelectedSpell();
                     }
 
-                    // Added by tes3mp
-                    //
-                    // LocalPlayer has lost a spell, so send a packet with it
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_PLAYER_SPELLBOOK packet every time a player loses a spell
+                        through a script
+                    */
                     if (ptr == MWMechanics::getPlayer())
                         mwmp::Main::get().getLocalPlayer()->sendSpellRemoval(id);
+                    /*
+                        End of tes3mp addition
+                    */
                 }
         };
 

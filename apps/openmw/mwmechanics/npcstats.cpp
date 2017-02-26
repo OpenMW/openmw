@@ -284,23 +284,47 @@ int MWMechanics::NpcStats::getLevelProgress () const
     return mLevelProgress;
 }
 
-// Added by tes3mp
+/*
+    Start of tes3mp addition
+
+    Make it possible to set a player's level progress directly instead of going
+    through other methods
+*/
 void MWMechanics::NpcStats::setLevelProgress(int value)
 {
     mLevelProgress = value;
 }
+/*
+    End of tes3mp addition
+*/
 
-// Added by tes3mp
+/*
+    Start of tes3mp addition
+
+    Make it possible to get a player's skill increases for an attribute directly
+    instead of going through other methods
+*/
 int MWMechanics::NpcStats::getSkillIncrease(int attribute) const
 {
     return mSkillIncreases[attribute];
 }
+/*
+    End of tes3mp addition
+*/
 
-// Added by tes3mp
+/*
+    Start of tes3mp addition
+
+    Make it possible to set a player's skill increases for an attribute directly
+    instead of going through other methods
+*/
 void MWMechanics::NpcStats::setSkillIncrease(int attribute, int value)
 {
     mSkillIncreases[attribute] = value;
 }
+/*
+    End of tes3mp addition
+*/
 
 void MWMechanics::NpcStats::levelUp()
 {

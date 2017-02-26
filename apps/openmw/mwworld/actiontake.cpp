@@ -25,7 +25,15 @@ namespace MWWorld
                     actor, getTarget(), MWWorld::Ptr(), getTarget().getRefData().getCount());
         MWWorld::Ptr newitem = *actor.getClass().getContainerStore (actor).add (getTarget(), getTarget().getRefData().getCount(), actor);
 
-        // Added by tes3mp
+        /*
+            Start of tes3mp addition
+
+            Send an ID_OBJECT_DELETE packet every time an item is taken from the world
+            by the player outside of the inventory screen
+
+            Send an ID_PLAYER_INVENTORY packet as well because of the item thus gained
+            by the player
+        */
         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
         worldEvent->cell = *getTarget().getCell()->getCell();
 
@@ -41,8 +49,10 @@ namespace MWWorld
             worldObject.refNumIndex,
             worldEvent->cell.getDescription().c_str());
 
-        // LocalPlayer's inventory has changed, so send a packet with it
         mwmp::Main::get().getLocalPlayer()->sendInventory();
+        /*
+            End of tes3mp addition
+        */
 
         MWBase::Environment::get().getWorld()->deleteObject (getTarget());
         setTarget(newitem);

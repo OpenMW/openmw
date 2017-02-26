@@ -82,11 +82,21 @@ void OMW::Engine::executeLocalScripts()
         MWScript::InterpreterContext interpreterContext (
             &script.second.getRefData().getLocals(), script.second);
 
-        // Added by tes3mp to check and set whether packets should be sent about this script
+        /*
+            Start of tes3mp addition
+
+            By comparing its name with a list of script names, check if this script
+            is allowed to send packets about its value changes
+
+            If it is, set a tes3mp-only boolean to true in its interpreterContext
+        */
         if (mwmp::Main::isValidPacketScript(script.first))
         {
             interpreterContext.sendPackets = true;
         }
+        /*
+            End of tes3mp addition
+        */
 
         mEnvironment.getScriptManager()->run (script.first, interpreterContext);
     }

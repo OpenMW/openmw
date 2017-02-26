@@ -407,10 +407,16 @@ namespace MWGui
         MWMechanics::Spells& spells = stats.getSpells();
         spells.add (spell->mId);
 
-        // Added by tes3mp
-        //
-        // LocalPlayer has gained a spell, so send a packet with it
+        /*
+            Start of tes3mp addition
+
+            Send an ID_PLAYER_SPELLBOOK packet every time a player buys a custom spell from
+            the Spellmaking screen
+        */
         mwmp::Main::get().getLocalPlayer()->sendSpellAddition(*spell);
+        /*
+            End of tes3mp addition
+        */
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_SpellCreation);
     }

@@ -66,7 +66,12 @@ namespace MWGui
             cellStore->setLastRefNumIndex(cellStore->getLastRefNumIndex() + 1);
             dropped.getCellRef().setRefNumIndex(cellStore->getLastRefNumIndex());
 
-            // Added by tes3mp
+            /*
+                Start of tes3mp addition
+
+                Send an ID_OBJECT_PLACE packet every time an object is dropped into the world from
+                the inventory screen
+            */
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
             worldEvent->cell = *dropped.getCell()->getCell();
 
@@ -94,6 +99,9 @@ namespace MWGui
                 worldObject.refId.c_str(),
                 worldObject.refNumIndex,
                 worldObject.count);
+            /*
+                End of tes3mp addition
+            */
 
             return dropped;
         }
@@ -288,10 +296,16 @@ namespace MWGui
             WorldItemModel drop (mouseX, mouseY);
             mDragAndDrop->drop(&drop, NULL);
 
-            // Added by tes3mp
-            //
-            // LocalPlayer's inventory has changed, so send a packet with it
+            /*
+                Start of tes3mp addition
+
+                Send an ID_PLAYER_INVENTORY packet every time a player loses an item
+                by dropping it in the world
+            */
             mwmp::Main::get().getLocalPlayer()->sendInventory();
+            /*
+                End of tes3mp addition
+            */
 
             MWBase::Environment::get().getWindowManager()->changePointer("arrow");
         }

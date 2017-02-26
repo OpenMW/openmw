@@ -47,10 +47,16 @@ namespace MWScript
                     {
                         MWBase::Environment::get().getJournal()->addEntry (quest, index, ptr);
 
-                        // Added by tes3mp
-                        //
-                        // LocalPlayer has gained a journal entry, so send a packet with it
+                        /*
+                            Start of tes3mp addition
+
+                            Send an ID_PLAYER_JOURNAL packet every time a journal entry is added
+                            through a script
+                        */
                         mwmp::Main::get().getLocalPlayer()->sendJournalEntry(quest, index, ptr);
+                        /*
+                            End of tes3mp addition
+                        */
                     }
                     catch (...)
                     {
@@ -74,10 +80,16 @@ namespace MWScript
 
                     MWBase::Environment::get().getJournal()->setJournalIndex (quest, index);
 
-                    // Added by tes3mp
-                    //
-                    // LocalPlayer has gained a journal index, so send a packet with it
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_PLAYER_JOURNAL packet every time a journal index is set
+                        through a script
+                    */
                     mwmp::Main::get().getLocalPlayer()->sendJournalIndex(quest, index);
+                    /*
+                        End of tes3mp addition
+                    */
                 }
         };
 

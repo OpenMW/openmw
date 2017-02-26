@@ -259,10 +259,15 @@ namespace MWWorld
         MWBase::Environment::get().getSoundManager()->stopSound (*iter);
         mActiveCells.erase(*iter);
 
-        // Added by tes3mp
-        //
-        // LocalPlayer has unloaded a cell, so store it
+        /*
+            Start of tes3mp addition
+
+            Store a cell unload for the LocalPlayer
+        */
         mwmp::Main::get().getLocalPlayer()->storeCellState(*(*iter)->getCell(), mwmp::CellState::UNLOAD);
+        /*
+            End of tes3mp addition
+        */
     }
 
     void Scene::loadCell (CellStore *cell, Loading::Listener* loadingListener, bool respawn)
@@ -332,10 +337,15 @@ namespace MWWorld
             if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
                 mRendering.configureAmbient(cell->getCell());
 
-            // Added by tes3mp
-            //
-            // LocalPlayer has loaded a cell, so store it
+            /*
+                Start of tes3mp addition
+
+                Store a cell load for the LocalPlayer
+            */
             mwmp::Main::get().getLocalPlayer()->storeCellState(*cell->getCell(), mwmp::CellState::LOAD);
+            /*
+                End of tes3mp addition
+            */
         }
 
         mPreloader->notifyLoaded(cell);
@@ -452,12 +462,20 @@ namespace MWWorld
             }
         }
 
-        // Added by tes3mp
+        /*
+            Start of tes3mp addition
+
+            Send an ID_PLAYER_CELL_STATE packet with all cell states stored in LocalPlayer
+            and then clear them, but only if the player has finished character generation
+        */
         if (mwmp::Main::get().getLocalPlayer()->hasFinishedCharGen())
         {
             mwmp::Main::get().getLocalPlayer()->sendCellStates();
             mwmp::Main::get().getLocalPlayer()->clearCellStates();
         }
+        /*
+            End of tes3mp addition
+        */
 
         CellStore* current = MWBase::Environment::get().getWorld()->getExterior(X,Y);
         MWBase::Environment::get().getWindowManager()->changeCell(current);
@@ -588,12 +606,20 @@ namespace MWWorld
         // Load cell.
         loadCell (cell, loadingListener, changeEvent);
 
-        // Added by tes3mp
+        /*
+            Start of tes3mp addition
+
+            Send an ID_PLAYER_CELL_STATE packet with all cell states stored in LocalPlayer
+            and then clear them, but only if the player has finished character generation
+        */
         if (mwmp::Main::get().getLocalPlayer()->hasFinishedCharGen())
         {
             mwmp::Main::get().getLocalPlayer()->sendCellStates();
             mwmp::Main::get().getLocalPlayer()->clearCellStates();
         }
+        /*
+            End of tes3mp addition
+        */
 
         changePlayerCell(cell, position, adjustPlayerPos);
 

@@ -524,8 +524,15 @@ namespace MWWorld
             /// @note throws an exception when invoked on a teleport door
             virtual void activateDoor(const MWWorld::Ptr& door, int state);
 
-            // Added by tes3mp to allow saving a door state received from a packet
+            /*
+                Start of tes3mp addition
+
+                Useful self-contained method for saving door states
+            */
             virtual void saveDoorState(const MWWorld::Ptr& door, int state);
+            /*
+                End of tes3mp addition
+            */
 
             virtual bool getPlayerStandingOn (const MWWorld::ConstPtr& object); ///< @return true if the player is standing on \a object
             virtual bool getActorStandingOn (const MWWorld::ConstPtr& object); ///< @return true if any actor is standing on \a object

@@ -58,7 +58,11 @@ namespace MWMechanics
             MWBase::Environment::get().getMechanicsManager()->objectOpened(mActor, lock);
             if (Misc::Rng::roll0to99() <= x)
             {
-                // Added by tes3mp
+                /*
+                    Start of tes3mp addition
+
+                    Send an ID_OBJECT_UNLOCK packet every time an object is unlocked
+                */
                 mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
                 worldEvent->cell = *lock.getCell()->getCell();
 
@@ -68,6 +72,9 @@ namespace MWMechanics
                 worldEvent->addObject(worldObject);
                 
                 mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send(worldEvent);
+                /*
+                    End of tes3mp addition
+                */
 
                 lock.getClass().unlock(lock);
                 resultMessage = "#{sLockSuccess}";

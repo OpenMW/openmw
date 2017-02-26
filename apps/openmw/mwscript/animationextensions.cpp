@@ -63,7 +63,12 @@ namespace MWScript
                             throw std::runtime_error ("animation mode out of range");
                     }
 
-                    // Added by tes3mp to check and set whether packets should be sent about this script
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_OBJECT_ANIM_PLAY every time an animation is played for an object
+                        through an approved script
+                    */
                     if (mwmp::Main::isValidPacketScript(ptr.getClass().getScript(ptr)))
                     {
                         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
@@ -78,6 +83,9 @@ namespace MWScript
 
                         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->Send(worldEvent);
                     }
+                    /*
+                        End of tes3mp addition
+                    */
 
                     MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, std::numeric_limits<int>::max(), true);
                }

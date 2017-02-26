@@ -84,10 +84,18 @@ namespace MWMechanics
             void increaseSkill (int skillIndex, const ESM::Class& class_, bool preserveProgress);
 
             int getLevelProgress() const;
-            void setLevelProgress(int value); // Added by tes3mp
 
-            int getSkillIncrease(int attribute) const; // Added by tes3mp
-            void setSkillIncrease(int attribute, int value); // Added by tes3mp
+            /*
+                Start of tes3mp addition
+
+                Useful methods for setting player stats
+            */
+            void setLevelProgress(int value);
+            int getSkillIncrease(int attribute) const;
+            void setSkillIncrease(int attribute, int value);
+            /*
+                End of tes3mp addition
+            */
 
             int getLevelupAttributeMultiplier(int attribute) const;
 

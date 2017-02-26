@@ -46,7 +46,12 @@ namespace MWScript
                     Interpreter::Type_Float scale = runtime[0].mFloat;
                     runtime.pop();
 
-                    // Added by tes3mp
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_OBJECT_SCALE every time an object's scale is changed
+                        through a script
+                    */
                     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
                     worldEvent->cell = *ptr.getCell()->getCell();
 
@@ -57,6 +62,9 @@ namespace MWScript
                     worldEvent->addObject(worldObject);
 
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->Send(worldEvent);
+                    /*
+                        End of tes3mp addition
+                    */
 
                     MWBase::Environment::get().getWorld()->scaleObject(ptr,scale);
                 }
@@ -549,7 +557,12 @@ namespace MWScript
                         cellStore->setLastRefNumIndex(cellStore->getLastRefNumIndex() + 1);
                         ptr.getCellRef().setRefNumIndex(cellStore->getLastRefNumIndex());
 
-                        // Added by tes3mp
+                        /*
+                            Start of tes3mp addition
+
+                            Send an ID_OBJECT_PLACE packet every time an object is placed in the world
+                            through a script
+                        */
                         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
                         worldEvent->cell = *ptr.getCell()->getCell();
 
@@ -571,6 +584,9 @@ namespace MWScript
                             worldObject.refId.c_str(),
                             worldObject.refNumIndex,
                             worldObject.count);
+                        /*
+                            End of tes3mp addition
+                        */
                     }
                 }
         };

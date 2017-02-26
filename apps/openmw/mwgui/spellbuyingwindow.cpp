@@ -144,10 +144,15 @@ namespace MWGui
         MWMechanics::Spells& spells = stats.getSpells();
         spells.add (mSpellsWidgetMap.find(_sender)->second);
 
-        // Added by tes3mp
-        //
-        // LocalPlayer has gained a spell, so send a packet with it
+        /*
+            Start of tes3mp addition
+
+            Send an ID_PLAYER_SPELLBOOK packet every time a player buys a spell
+        */
         mwmp::Main::get().getLocalPlayer()->sendSpellAddition(mSpellsWidgetMap.find(_sender)->second);
+        /*
+            End of tes3mp addition
+        */
 
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 

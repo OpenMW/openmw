@@ -189,10 +189,15 @@ namespace MWGui
 
         spells.remove(mSpellToDelete);
 
-        // Added by tes3mp
-        //
-        // LocalPlayer has lost a spell, so send a packet with it
+        /*
+            Start of tes3mp addition
+
+            Send an ID_PLAYER_SPELLBOOK packet every time a player deletes one of their spells
+        */
         mwmp::Main::get().getLocalPlayer()->sendSpellRemoval(mSpellToDelete);
+        /*
+            End of tes3mp addition
+        */
 
         updateSpells();
     }

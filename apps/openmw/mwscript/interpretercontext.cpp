@@ -151,8 +151,16 @@ namespace MWScript
         if (targetId.empty() && !reference.isEmpty())
             mTargetId = reference.getCellRef().getRefId();
 
-        // Added by tes3mp
+        /*
+            Start of tes3mp addition
+
+            Boolean used to check whether value change packets should be sent for the
+            script being processed by the InterpreterContext
+        */
         sendPackets = false;
+        /*
+            End of tes3mp addition
+        */
     }
 
     int InterpreterContext::getLocalShort (int index) const
@@ -186,7 +194,12 @@ namespace MWScript
 
         mLocals->mShorts.at (index) = value;
 
-        // Added by tes3mp
+        /*
+            Start of tes3mp addition
+
+            Send an ID_SCRIPT_LOCAL_SHORT packet every time a local short changes its value
+            in a script approved for packet sending
+        */
         if (sendPackets)
         {
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
@@ -208,6 +221,9 @@ namespace MWScript
                 worldObject.index,
                 worldObject.shortVal);
         }
+        /*
+            End of tes3mp addition
+        */
     }
 
     void InterpreterContext::setLocalLong (int index, int value)
@@ -225,9 +241,13 @@ namespace MWScript
 
         mLocals->mFloats.at (index) = value;
 
-        // Added by tes3mp
-        //
-        // Only send a packet if this float has no decimals (to avoid spam)
+        /*
+            Start of tes3mp addition
+
+            Send an ID_SCRIPT_LOCAL_FLOAT packet every time a local float changes its value
+            to one without decimals (to avoid packet spam for timers) in a script approved
+            for packet sending
+        */
         if (sendPackets && value == (int) value)
         {
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
@@ -249,6 +269,9 @@ namespace MWScript
                 worldObject.index,
                 worldObject.floatVal);
         }
+        /*
+            End of tes3mp addition
+        */
     }
 
     void InterpreterContext::messageBox (const std::string& message,
@@ -292,7 +315,12 @@ namespace MWScript
 
     void InterpreterContext::setGlobalShort (const std::string& name, int value)
     {
-        // Added by tes3mp
+        /*
+            Start of tes3mp addition
+
+            Send an ID_SCRIPT_GLOBAL_SHORT packet every time a global short changes its value
+            in a script approved for packet sending
+        */
         if (sendPackets)
         {
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
@@ -308,6 +336,9 @@ namespace MWScript
                 worldObject.varName.c_str(),
                 worldObject.shortVal);
         }
+        /*
+            End of tes3mp addition
+        */
 
         MWBase::Environment::get().getWorld()->setGlobalInt (name, value);
     }
@@ -629,7 +660,12 @@ namespace MWScript
 
         locals.mShorts[index] = value;
 
-        // Added by tes3mp
+        /*
+            Start of tes3mp addition
+
+            Send an ID_SCRIPT_MEMBER_SHORT packet every time a member short changes its value
+            in a script approved for packet sending
+        */
         if (sendPackets && !global)
         {
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
@@ -647,6 +683,9 @@ namespace MWScript
                 worldObject.index,
                 worldObject.shortVal);
         }
+        /*
+            End of tes3mp addition
+        */
     }
 
     void InterpreterContext::setMemberLong (const std::string& id, const std::string& name, int value, bool global)

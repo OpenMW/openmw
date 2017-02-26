@@ -2320,7 +2320,11 @@ namespace MWWorld
             break;
         }
 
-        // Added by tes3mp
+        /*
+            Start of tes3mp addition
+
+            Send an ID_DOOR_STATE packet every time a door is activated
+        */
         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
         worldEvent->cell = *door.getCell()->getCell();
 
@@ -2337,6 +2341,9 @@ namespace MWWorld
             worldObject.refNumIndex,
             worldEvent->cell.getDescription().c_str(),
             worldObject.doorState ? "true" : "false");
+        /*
+            End of tes3mp addition
+        */
 
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;
@@ -2344,7 +2351,11 @@ namespace MWWorld
 
     void World::activateDoor(const Ptr &door, int state)
     {
-        // Added by tes3mp
+        /*
+            Start of tes3mp addition
+
+            Send an ID_DOOR_STATE packet every time a door is activated
+        */
         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
         worldEvent->cell = *door.getCell()->getCell();
 
@@ -2361,6 +2372,9 @@ namespace MWWorld
             worldObject.refNumIndex,
             worldEvent->cell.getDescription().c_str(),
             worldObject.doorState ? "true" : "false");
+        /*
+            End of tes3mp addition
+        */
 
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;
@@ -2368,13 +2382,20 @@ namespace MWWorld
             mDoorStates.erase(door);
     }
 
-    // Added by tes3mp to allow saving a door state received from a packet
+    /*
+        Start of tes3mp addition
+
+        Allow the saving of door states without going through World::activateDoor()
+    */
     void World::saveDoorState(const Ptr &door, int state)
     {
         mDoorStates[door] = state;
         if (state == 0)
             mDoorStates.erase(door);
     }
+    /*
+        End of tes3mp addition
+    */
 
     bool World::getPlayerStandingOn (const MWWorld::ConstPtr& object)
     {
