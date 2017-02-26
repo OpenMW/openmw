@@ -512,10 +512,10 @@ namespace NifOsg
         }
 
         // Get a default dataVariance for this node to be used as a hint by optimization (post)routines
-        osg::Object::DataVariance getDataVariance(const Nif::Node* nifNode)
+        osg::ref_ptr<osg::Group> createNode(const Nif::Node* nifNode)
         {
-            if (nifNode->boneTrafo || nifNode->boneIndex != -1)
-                return osg::Object::DYNAMIC;
+            osg::ref_ptr<osg::Group> node;
+            osg::Object::DataVariance dataVariance = osg::Object::UNSPECIFIED;
 
             switch (nifNode->recType)
             {
@@ -524,10 +524,35 @@ namespace NifOsg
             case Nif::RC_NiRotatingParticles:
                 // Leaf nodes in the NIF hierarchy, so won't be able to dynamically attach children.
                 // No support for keyframe controllers (just crashes in the original engine).
-                return osg::Object::STATIC;
+                if (nifNode->trafo.isIdentity())
+                    node = new osg::Group;
+                dataVariance = osg::Object::STATIC;
+                break;
             default:
-                return osg::Object::DYNAMIC;
+                // The Root node can be created as a Group if no transformation is required.
+                // This takes advantage of the fact root nodes can't have additional controllers
+                // loaded from an external .kf file (original engine just throws "can't find node" errors if you try).
+                if (!nifNode->parent && nifNode->controller.empty())
+                {
+                    node = new osg::Group;
+                    dataVariance = osg::Object::STATIC;
+                }
+                else
+                {
+                    dataVariance = (nifNode->controller.empty() ? osg::Object::STATIC : osg::Object::DYNAMIC);
+                }
+
+                if (nifNode->boneTrafo || nifNode->boneIndex != -1)
+                    dataVariance = osg::Object::DYNAMIC;
+
+                break;
             }
+            if (!node)
+                node = new osg::MatrixTransform(nifNode->trafo.toMatrix());
+
+            node->setDataVariance(dataVariance);
+
+            return node;
         }
 
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
@@ -536,29 +561,11 @@ namespace NifOsg
             if (rootNode != NULL && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
                 return NULL;
 
-            osg::Object::DataVariance dataVariance = getDataVariance(nifNode);
-
-            osg::ref_ptr<osg::Group> node;
-            if (dataVariance == osg::Object::STATIC && nifNode->trafo.isIdentity())
-                node = new osg::Group;
-            else
-                node = new osg::MatrixTransform(nifNode->trafo.toMatrix());
-            node->setDataVariance(dataVariance);
-
-            if (nifNode->controller.empty())
-                node->setDataVariance(osg::Object::STATIC);
+            osg::ref_ptr<osg::Group> node = createNode(nifNode);
 
             if (nifNode->recType == Nif::RC_NiBillboardNode)
             {
                 node->addCullCallback(new BillboardCallback);
-            }
-            else if (!rootNode && nifNode->controller.empty() && nifNode->trafo.isIdentity())
-            {
-                // The Root node can be created as a Group if no transformation is required.
-                // This takes advantage of the fact root nodes can't have additional controllers
-                // loaded from an external .kf file (original engine just throws "can't find node" errors if you try).
-                node = new osg::Group;
-                node->setDataVariance(osg::Object::STATIC);
             }
 
             if (!nifNode->controller.empty() && nifNode->controller->recType == Nif::RC_NiKeyframeController)
