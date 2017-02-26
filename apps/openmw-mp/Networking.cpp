@@ -183,24 +183,32 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
             player->forEachLoaded([this](Player *pl, Player *other) {
 
-                LOG_APPEND(Log::LOG_INFO, "- Started information exchange with %s",
-                    other->npc.mName.c_str());
+                if (other == nullptr)
+                {
+                    LOG_APPEND(Log::LOG_INFO, "- Tried to exchange information with nullptr!\n- Please report this to a developer",
+                        other->npc.mName.c_str());
+                }
+                else
+                {
+                    LOG_APPEND(Log::LOG_INFO, "- Started information exchange with %s",
+                        other->npc.mName.c_str());
 
-                playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(other, pl->guid);
-                playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(other, pl->guid);
-                playerController->GetPacket(ID_PLAYER_POS)->Send(other, pl->guid);
-                playerController->GetPacket(ID_PLAYER_SKILL)->Send(other, pl->guid);
-                playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(other, pl->guid);
-                playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(other, pl->guid);
+                    playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(other, pl->guid);
+                    playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(other, pl->guid);
+                    playerController->GetPacket(ID_PLAYER_POS)->Send(other, pl->guid);
+                    playerController->GetPacket(ID_PLAYER_SKILL)->Send(other, pl->guid);
+                    playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(other, pl->guid);
+                    playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(other, pl->guid);
 
-                playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(pl, other->guid);
-                playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(pl, other->guid);
-                playerController->GetPacket(ID_PLAYER_SKILL)->Send(pl, other->guid);
-                playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(pl, other->guid);
-                playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(pl, other->guid);
-                
-                LOG_APPEND(Log::LOG_INFO, "- Finished information exchange with %s",
-                    other->npc.mName.c_str());
+                    playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(pl, other->guid);
+                    playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(pl, other->guid);
+                    playerController->GetPacket(ID_PLAYER_SKILL)->Send(pl, other->guid);
+                    playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(pl, other->guid);
+                    playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(pl, other->guid);
+
+                    LOG_APPEND(Log::LOG_INFO, "- Finished information exchange with %s",
+                        other->npc.mName.c_str());
+                }
             });
 
             playerController->GetPacket(ID_PLAYER_POS)->Send(player);
