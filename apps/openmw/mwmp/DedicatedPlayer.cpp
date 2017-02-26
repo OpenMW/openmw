@@ -53,7 +53,7 @@ MWWorld::Ptr DedicatedPlayer::getPtr()
 
 void Players::createPlayer(RakNet::RakNetGUID guid)
 {
-    LOG_APPEND(Log::LOG_INFO, "%s", "- Setting up character info");
+    LOG_APPEND(Log::LOG_INFO, "- Setting up character info");
 
     MWBase::World *world = MWBase::Environment::get().getWorld();
     MWWorld::Ptr player = world->getPlayerPtr();
@@ -61,7 +61,11 @@ void Players::createPlayer(RakNet::RakNetGUID guid)
     ESM::NPC npc = *player.get<ESM::NPC>()->mBase;
     DedicatedPlayer *dedicPlayer = players[guid];
 
-    npc.mRace = dedicPlayer->npc.mRace;
+    // To avoid freezes caused by invalid races, only set race if we find it
+    // on our client
+    if (world->getStore().get<ESM::Race>().search(dedicPlayer->npc.mRace) != 0)
+        npc.mRace = dedicPlayer->npc.mRace;
+
     npc.mHead = dedicPlayer->npc.mHead;
     npc.mHair = dedicPlayer->npc.mHair;
     npc.mClass = dedicPlayer->npc.mClass;
