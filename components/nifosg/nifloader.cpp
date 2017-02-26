@@ -542,7 +542,7 @@ namespace NifOsg
                     dataVariance = (nifNode->controller.empty() ? osg::Object::STATIC : osg::Object::DYNAMIC);
                 }
 
-                if (nifNode->boneTrafo || nifNode->boneIndex != -1)
+                if (nifNode->isBone)
                     dataVariance = osg::Object::DYNAMIC;
 
                 break;
