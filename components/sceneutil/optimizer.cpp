@@ -847,10 +847,11 @@ void Optimizer::RemoveRedundantNodesVisitor::removeRedundantNodes()
                 pitr!=parents.end();
                 ++pitr)
             {
+                unsigned int childIndex = (*pitr)->getChildIndex(group);
                 for (unsigned int i=0; i<group->getNumChildren(); ++i)
                 {
                     osg::Node* child = group->getChild(i);
-                    (*pitr)->addChild(child);
+                    (*pitr)->insertChild(childIndex++, child);
                 }
 
                 (*pitr)->removeChild(group);
