@@ -20,6 +20,11 @@ mwmp::WorldController::~WorldController()
 
 }
 
+int mwmp::WorldController::getCellSize() const
+{
+    return 8192;
+}
+
 MWWorld::CellStore *mwmp::WorldController::getCell(const ESM::Cell& cell)
 {
     MWWorld::CellStore *cellStore;

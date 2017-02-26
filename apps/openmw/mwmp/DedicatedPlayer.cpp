@@ -3,23 +3,30 @@
 //
 
 #include "DedicatedPlayer.hpp"
-#include "../mwmechanics/aitravel.hpp"
+
 #include "../mwbase/environment.hpp"
 #include "../mwstate/statemanagerimp.hpp"
 #include "../mwinput/inputmanagerimp.hpp"
 #include "../mwgui/windowmanagerimp.hpp"
-#include "../mwworld/worldimp.hpp"
-#include "../mwworld/player.hpp"
-#include "../mwworld/customdata.hpp"
+
 #include "../mwclass/npc.hpp"
+
 #include "../mwmechanics/actor.hpp"
+#include "../mwmechanics/aitravel.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/mechanicsmanagerimp.hpp"
-#include "../mwworld/cellstore.hpp"
+
 #include "../mwworld/action.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/customdata.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwworld/worldimp.hpp"
+
 #include "Main.hpp"
 #include "GUIController.hpp"
+#include "WorldController.hpp"
+
 #include "../mwworld/inventorystore.hpp"
 #include <boost/algorithm/clamp.hpp>
 #include <components/openmw-mp/Log.hpp>
@@ -70,9 +77,10 @@ void Players::createPlayer(RakNet::RakNetGUID guid)
         dedicPlayer->reference = new MWWorld::ManualRef(world->getStore(), recid, 1);
     }
 
-    // Temporarily spawn or move player to exterior 0,0 whenever setting base info
+    // Temporarily spawn or move player to the center of exterior 0,0 whenever setting base info
     ESM::Position spawnPos;
-    spawnPos.pos[0] = spawnPos.pos[1] = spawnPos.pos[2] = 0;
+    spawnPos.pos[0] = spawnPos.pos[1] = Main::get().getWorldController()->getCellSize() / 2;
+    spawnPos.pos[2] = 0;
     MWWorld::CellStore *cellStore = world->getExterior(0, 0);
 
     if (dedicPlayer->state == 0)
@@ -141,7 +149,8 @@ void Players::disconnectPlayer(RakNet::RakNetGUID guid)
 
         // Move player to exterior 0,0
         ESM::Position newPos;
-        newPos.pos[0] = newPos.pos[1] = newPos.pos[2] = 0;
+        newPos.pos[0] = newPos.pos[1] = Main::get().getWorldController()->getCellSize() / 2;
+        newPos.pos[2] = 0;
         MWWorld::CellStore *cellStore = world->getExterior(0, 0);
 
         players[guid]->getPtr().getBase()->canChangeCell = true;

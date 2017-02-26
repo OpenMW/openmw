@@ -12,10 +12,12 @@ namespace mwmp
         WorldController();
         ~WorldController();
 
+        int getCellSize() const;
+        
+        virtual MWWorld::CellStore *getCell(const ESM::Cell& cell);
+
         void openContainer(const MWWorld::Ptr& container,  bool loot);
         void closeContainer(const MWWorld::Ptr& container);
-
-        virtual MWWorld::CellStore *getCell(const ESM::Cell& cell);
     };
 }
 
