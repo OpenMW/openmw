@@ -185,8 +185,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
                 if (other == nullptr)
                 {
-                    LOG_APPEND(Log::LOG_INFO, "- Tried to exchange information with nullptr!\n- Please report this to a developer",
-                        other->npc.mName.c_str());
+                    LOG_APPEND(Log::LOG_INFO, "- Tried to exchange information with nullptr!\n- Please report this to a developer");
                 }
                 else
                 {
