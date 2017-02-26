@@ -229,24 +229,10 @@ void CellController::deletePlayer(Player *player)
     LOG_APPEND(Log::LOG_INFO, "- Iterating through Cells from Player %s",
         player->npc.mName.c_str());
 
-    for_each(player->getCells()->begin(), player->getCells()->end(), [&player](Cell *cell)
+    for (auto it = player->getCells()->begin(); player->getCells()->size() != 0; ++it)
     {
-        LOG_APPEND(Log::LOG_INFO, "-- Found Cell %s",
-            cell->getDescription().c_str());
-
-        for (auto it = cell->begin(); it != cell->end(); ++it)
-        {
-            if (*it == player)
-            {
-                LOG_APPEND(Log::LOG_INFO, "-- Deleting %s from Cell %s",
-                    player->npc.mName.c_str(),
-                    cell->getDescription().c_str());
-
-                cell->players.erase(it);
-                break;
-            }
-        }
-    });
+        removePlayer(*it, player);
+    }
 }
 
 void CellController::update(Player *player)
