@@ -746,7 +746,7 @@ void Networking::update(RakNet::Packet *packet)
     }
     else
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled Raknet packet with identifier %i has arrived",
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled RakNet packet with identifier %i has arrived",
             packet->data[0]);
     }
 }
