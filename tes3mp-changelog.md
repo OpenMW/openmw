@@ -1,8 +1,16 @@
+0.5.2
+-----
+
+* Fix to server crash caused by not deleting empty cells upon players disconnecting
+* Fix to client freezes caused by invalid spells and races
+* Fix to players not being spawned when using other base master files
+* Fix to visual glitch where flying players bounced up and down continuously
+
 0.5.1
 -----
 
-* Fixes to server crashes caused by incorrect cell comparison added by bandwidth optimization changes
-* Fixes to server browser freezes caused by connection failures and incomplete data received from master server
+* Fix to server crash caused by incorrect cell comparison added by bandwidth optimization changes
+* Fix to server browser freeze caused by connection failures and incomplete data received from master server
 
 0.5.0
 -----
@@ -33,8 +41,8 @@
 * Synchronization for the setdelete, placeat, setscale, lock and unlock console commands
 * Player markers on minimap
 * Death reasons in chat
-* Fixes to client freezes related to players logging in at the same time
-* Fixes to server crashes related to sending information about invalid players
+* Fix to client freeze related to players logging in at the same time
+* Fix to server crash related to sending information about invalid players
 
 0.2.0
 -----
@@ -46,8 +54,8 @@
 ------
 
 * Synchronization of attributes and skills
-* Fixes to memory leaks related to player initialization on Windows servers
-* Fixes to various graphical glitches
+* Fix to memory leaks related to player initialization on Windows servers
+* Fix to various graphical glitches
 * Main menu buttons for starting, saving and loading games are now disabled
 
 0.0.1a
