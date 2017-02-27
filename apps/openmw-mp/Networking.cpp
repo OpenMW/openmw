@@ -356,9 +356,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_GAME_DIE:
+    case ID_PLAYER_DEATH:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_DIE from %s", player->npc.mName.c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_DEATH from %s", player->npc.mName.c_str());
 
         Player *killer = Players::getPlayer(player->getLastAttackerId());
 
@@ -384,9 +384,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         break;
     }
 
-    case ID_GAME_RESURRECT:
+    case ID_PLAYER_RESURRECT:
     {
-        DEBUG_PRINTF("ID_GAME_RESURRECT\n");
+        DEBUG_PRINTF("ID_PLAYER_RESURRECT\n");
         //packetResurrect.Read(player);
         player->creatureStats.mDead = false;
         myPacket->Send(player, true);

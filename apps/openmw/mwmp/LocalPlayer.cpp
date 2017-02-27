@@ -556,7 +556,7 @@ void LocalPlayer::updateDeadState(bool forceUpdate)
     {
         creatureStats.mDead = true;
         RakNet::BitStream bs;
-        getNetworking()->getPlayerPacket((RakNet::MessageID)ID_GAME_DIE)->Packet(&bs, this, true);
+        getNetworking()->getPlayerPacket((RakNet::MessageID)ID_PLAYER_DEATH)->Packet(&bs, this, true);
         getNetworking()->sendData(&bs);
         isDead = true;
     }

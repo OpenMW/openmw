@@ -458,7 +458,7 @@ void StatsFunctions::Resurrect(unsigned short pid)
 {
     Player *player;
     GET_PLAYER(pid, player,);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_RESURRECT)->RequestData(player->guid);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_RESURRECT)->RequestData(player->guid);
 }
 
 void StatsFunctions::SendBaseInfo(unsigned short pid) noexcept

@@ -454,9 +454,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_GAME_DIE:
+    case ID_PLAYER_DEATH:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_GAME_DIE from server");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_DEATH from server");
         if (guid == myGuid)
         {
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -477,7 +477,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_GAME_RESURRECT:
+    case ID_PLAYER_RESURRECT:
     {
         if (guid == myGuid)
         {
