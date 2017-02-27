@@ -230,8 +230,8 @@ namespace MWClass
         if (!(ref->mBase->mData.mFlags & ESM::Light::Carry))
             return std::make_pair(0,"");
 
-        MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
-        MWWorld::ContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        const MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
+        MWWorld::ConstContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 
         if(weapon == invStore.end())
             return std::make_pair(1,"");

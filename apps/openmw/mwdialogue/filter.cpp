@@ -350,7 +350,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
             for (int i=0; i<=15; ++i) // everything except things held in hands and ammunition
             {
-                MWWorld::ContainerStoreIterator slot = store.getSlot (i);
+                MWWorld::ConstContainerStoreIterator slot = store.getSlot (i);
 
                 if (slot!=store.end())
                     value += slot->getClass().getValue (*slot);

@@ -1101,7 +1101,7 @@ bool CharacterController::updateWeaponState()
     if (mPtr.getClass().hasInventoryStore(mPtr))
     {
         MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
-        MWWorld::ContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
+        MWWorld::ConstContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
         if(weapon != inv.end() && !(weaptype == WeapType_None && mWeaponType == WeapType_Spell))
         {
             soundid = (weaptype == WeapType_None) ?
@@ -1189,7 +1189,7 @@ bool CharacterController::updateWeaponState()
     if (mPtr.getClass().hasInventoryStore(mPtr))
     {
         MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
-        MWWorld::ContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
+        MWWorld::ConstContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
         isWeapon = (weapon != inv.end() && weapon->getTypeName() == typeid(ESM::Weapon).name());
         if(isWeapon)
             weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;
@@ -1324,7 +1324,7 @@ bool CharacterController::updateWeaponState()
                         {
                             if (Settings::Manager::getBool("best attack", "Game"))        
                             {
-                                MWWorld::ContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                                MWWorld::ConstContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                                 mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
                             }
                             else
@@ -1523,8 +1523,8 @@ bool CharacterController::updateWeaponState()
 
     if (mPtr.getClass().hasInventoryStore(mPtr))
     {
-        MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-        MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+        MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name()
                 && updateCarriedLeftVisible(mWeaponType))
 
