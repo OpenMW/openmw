@@ -935,5 +935,5 @@ MasterClient *Networking::getMasterClient()
 void Networking::InitQuery(std::string queryAddr, unsigned short queryPort, std::string serverAddr,
                            unsigned short serverPort)
 {
-    mclient = new MasterClient(queryAddr, (unsigned short) queryPort, serverAddr, (unsigned short) serverPort);
+    mclient = new MasterClient(queryAddr, queryPort, serverAddr, serverPort);
 }
