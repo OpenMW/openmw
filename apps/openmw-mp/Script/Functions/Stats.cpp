@@ -63,10 +63,8 @@ void StatsFunctions::SetRace(unsigned short pid, const char *race) noexcept
     if (player->npc.mRace == race)
         return;
 
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Setting race for %s: %s -> %s",
-        player->npc.mName.c_str(),
-        player->npc.mRace.c_str(),
-        race);
+    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Setting race for %s: %s -> %s", player->npc.mName.c_str(),
+                       player->npc.mRace.c_str(), race);
 
     player->npc.mRace = race;
 }

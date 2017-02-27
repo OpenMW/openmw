@@ -63,7 +63,8 @@ static typename enable_if<ScriptFunctions::functions[I].func.ret == 'v', int>::t
 
 template<unsigned int I>
 static typename enable_if<ScriptFunctions::functions[I].func.ret != 'v', int>::type wrapper(lua_State* lua) noexcept {
-    auto ret = Lua_dispatch_<ScriptFunctions::functions[I].func.numargs, I>::template Lua_dispatch<typename CharType<ScriptFunctions::functions[I].func.ret>::type>(forward<lua_State*>(lua));
+    auto ret = Lua_dispatch_<ScriptFunctions::functions[I].func.numargs, I>::template Lua_dispatch<
+            typename CharType<ScriptFunctions::functions[I].func.ret>::type>(forward<lua_State*>(lua));
     luabridge::Stack <typename CharType<ScriptFunctions::functions[I].func.ret>::type>::push (lua, ret);
     return 1;
 }

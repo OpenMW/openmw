@@ -14,16 +14,12 @@ void Cell::addPlayer(Player *player)
     auto it = find(player->cells.begin(), player->cells.end(), this);
     if (it == player->cells.end())
     {
-        LOG_APPEND(Log::LOG_INFO, "- Adding %s to Player %s",
-            getDescription().c_str(),
-            player->npc.mName.c_str());
+        LOG_APPEND(Log::LOG_INFO, "- Adding %s to Player %s", getDescription().c_str(), player->npc.mName.c_str());
 
         player->cells.push_back(this);
     }
 
-    LOG_APPEND(Log::LOG_INFO, "- Adding %s to Cell %s",
-        player->npc.mName.c_str(),
-        getDescription().c_str());
+    LOG_APPEND(Log::LOG_INFO, "- Adding %s to Cell %s", player->npc.mName.c_str(), getDescription().c_str());
 
     players.push_back(player);
 }
@@ -37,16 +33,13 @@ void Cell::removePlayer(Player *player)
             auto it2 = find(player->cells.begin(), player->cells.end(), this);
             if (it2 != player->cells.end())
             {
-                LOG_APPEND(Log::LOG_INFO, "- Removing %s from Player %s",
-                    getDescription().c_str(),
-                    player->npc.mName.c_str());
+                LOG_APPEND(Log::LOG_INFO, "- Removing %s from Player %s", getDescription().c_str(),
+                           player->npc.mName.c_str());
 
                 player->cells.erase(it2);
             }
 
-            LOG_APPEND(Log::LOG_INFO, "- Removing %s from Cell %s",
-                player->npc.mName.c_str(),
-                getDescription().c_str());
+            LOG_APPEND(Log::LOG_INFO, "- Removing %s from Cell %s", player->npc.mName.c_str(), getDescription().c_str());
 
             players.erase(it);
             return;
@@ -92,9 +85,7 @@ CellController::CellController()
 CellController::~CellController()
 {
     for (auto cell : cells)
-    {
         delete cell;
-    }
 }
 
 CellController *CellController::sThis = nullptr;
@@ -161,10 +152,10 @@ Cell *CellController::getCellByName(std::string cellName)
 
 Cell *CellController::addCell(ESM::Cell cellData)
 {
-    LOG_APPEND(Log::LOG_INFO, "- Loaded cells: %d",
-        cells.size());
+    LOG_APPEND(Log::LOG_INFO, "- Loaded cells: %d", cells.size());
     auto it = find_if(cells.begin(), cells.end(), [cellData](const Cell *c) {
-        //return c->cell.sRecordId == cellData.sRecordId; // Currently we cannot compare because plugin lists can be loaded in different order
+        // Currently we cannot compare because plugin lists can be loaded in different order
+        //return c->cell.sRecordId == cellData.sRecordId;
         return c->cell.isExterior() ? (c->cell.mData.mX == cellData.mData.mX && c->cell.mData.mY == cellData.mData.mY) :
                (c->cell.mName == cellData.mName);
     });
@@ -172,16 +163,14 @@ Cell *CellController::addCell(ESM::Cell cellData)
     Cell *cell;
     if (it == cells.end())
     {
-        LOG_APPEND(Log::LOG_INFO, "- Adding %s to CellController",
-            cellData.getDescription().c_str());
+        LOG_APPEND(Log::LOG_INFO, "- Adding %s to CellController", cellData.getDescription().c_str());
 
         cell = new Cell(cellData);
         cells.push_back(cell);
     }
     else
     {
-        LOG_APPEND(Log::LOG_INFO, "- Found %s in CellController",
-            cellData.getDescription().c_str());
+        LOG_APPEND(Log::LOG_INFO, "- Found %s in CellController", cellData.getDescription().c_str());
         cell = *it;
     }
 
@@ -199,8 +188,7 @@ void CellController::removeCell(Cell *cell)
     {
         if (*it != nullptr && *it == cell)
         {
-            LOG_APPEND(Log::LOG_INFO, "- Removing %s from CellController",
-                cell->getDescription().c_str());
+            LOG_APPEND(Log::LOG_INFO, "- Removing %s from CellController", cell->getDescription().c_str());
 
             delete *it;
             it = cells.erase(it);
@@ -216,8 +204,7 @@ void CellController::removePlayer(Cell *cell, Player *player)
 
     if (cell->players.empty())
     {
-        LOG_APPEND(Log::LOG_INFO, "- Deleting empty cell from memory: %s",
-            cell->getDescription().c_str());
+        LOG_APPEND(Log::LOG_INFO, "- Deleting empty cell from memory: %s", cell->getDescription().c_str());
         auto it = find(cells.begin(), cells.end(), cell);
         delete *it;
         cells.erase(it);
@@ -226,13 +213,10 @@ void CellController::removePlayer(Cell *cell, Player *player)
 
 void CellController::deletePlayer(Player *player)
 {
-    LOG_APPEND(Log::LOG_INFO, "- Iterating through Cells from Player %s",
-        player->npc.mName.c_str());
+    LOG_APPEND(Log::LOG_INFO, "- Iterating through Cells from Player %s", player->npc.mName.c_str());
 
     for (auto it = player->getCells()->begin(); player->getCells()->size() != 0; ++it)
-    {
         removePlayer(*it, player);
-    }
 }
 
 void CellController::update(Player *player)

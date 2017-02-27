@@ -16,20 +16,22 @@
 
 using namespace std;
 
-ScriptFunction::ScriptFunction(ScriptFunc fCpp,char ret_type, const string &def) : fCpp(fCpp), ret_type(ret_type), def(def), script_type(SCRIPT_CPP)
+ScriptFunction::ScriptFunction(ScriptFunc fCpp,char ret_type, const string &def) :
+        fCpp(fCpp), ret_type(ret_type), def(def), script_type(SCRIPT_CPP)
 {
 
 }
 #if defined (ENABLE_LUA)
-ScriptFunction::ScriptFunction(const ScriptFuncLua &fLua, lua_State *lua, char ret_type, const std::string &def) :fLua({lua, fLua}), ret_type(ret_type), def(def), script_type(SCRIPT_LUA)
+ScriptFunction::ScriptFunction(const ScriptFuncLua &fLua, lua_State *lua, char ret_type, const std::string &def) :
+        fLua({lua, fLua}), ret_type(ret_type), def(def), script_type(SCRIPT_LUA)
 {
 
 }
 #endif
 
 #if defined (ENABLE_PAWN)
-ScriptFunction::ScriptFunction(const ScriptFuncPAWN &fPawn, AMX *amx, char ret_type, const string &def) : fPawn({amx, fPawn}),
-                                                                                           def(def), ret_type(ret_type), script_type(SCRIPT_PAWN)
+ScriptFunction::ScriptFunction(const ScriptFuncPAWN &fPawn, AMX *amx, char ret_type, const string &def) :
+        fPawn({amx, fPawn}), def(def), ret_type(ret_type), script_type(SCRIPT_PAWN)
 {
 
 }

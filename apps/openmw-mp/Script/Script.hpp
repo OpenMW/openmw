@@ -77,7 +77,8 @@ public:
     template<unsigned int I, bool B = false, typename... Args>
     static unsigned int Call(CallBackReturn<I>& result, Args&&... args) {
         constexpr ScriptCallbackData const& data = CallBackData(I);
-        static_assert(data.callback.matches(TypeString<typename std::remove_reference<Args>::type...>::value), "Wrong number or types of arguments");
+        static_assert(data.callback.matches(TypeString<typename std::remove_reference<Args>::type...>::value),
+                      "Wrong number or types of arguments");
 
         unsigned int count = 0;
 
@@ -119,7 +120,8 @@ public:
     template<unsigned int I, bool B = false, typename... Args>
     static unsigned int Call(Args&&... args) {
         constexpr ScriptCallbackData const& data = CallBackData(I);
-        static_assert(data.callback.matches(TypeString<typename std::remove_reference<Args>::type...>::value), "Wrong number or types of arguments");
+        static_assert(data.callback.matches(TypeString<typename std::remove_reference<Args>::type...>::value),
+                      "Wrong number or types of arguments");
 
         unsigned int count = 0;
 
