@@ -16,6 +16,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/mechanicsmanagerimp.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwworld/action.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -220,12 +221,12 @@ void DedicatedPlayer::move(float dt)
     ESM::Position refPos = ptr.getRefData().getPosition();
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
-
     {
         osg::Vec3f lerp = Lerp(refPos.asVec3(), position.asVec3(), dt * 15);
         refPos.pos[0] = lerp.x();
         refPos.pos[1] = lerp.y();
         refPos.pos[2] = lerp.z();
+
         world->moveObject(ptr, refPos.pos[0], refPos.pos[1], refPos.pos[2]);
     }
 
@@ -264,7 +265,6 @@ void Players::update(float dt)
 
         if (ptrNpcStats->isDead())
             ptrNpcStats->resurrect();
-
 
         ptrNpcStats->setAttacked(false);
 
@@ -429,8 +429,24 @@ DedicatedPlayer *Players::getPlayer(const MWWorld::Ptr &ptr)
 
 void DedicatedPlayer::updateDrawState()
 {
-
     using namespace MWMechanics;
+
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+
+    // Until we figure out a better workaround for disabling player gravity,
+    // simply cast Levitate over and over on a player that's supposed to be flying
+    if (!isFlying)
+    {
+        ptr.getClass().getCreatureStats(ptr).getActiveSpells().purgeEffect(ESM::MagicEffect::Levitate);
+    }
+    else if (isFlying && !world->isFlying(ptr))
+    {
+        MWMechanics::CastSpell cast(ptr, ptr);
+        cast.mHitPosition = ptr.getRefData().getPosition().asVec3();
+        cast.mAlwaysSucceed = true;
+        cast.cast("Levitate");
+    }
+
     if (drawState == 0)
         ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Nothing);
     else if (drawState == 1)

@@ -163,7 +163,6 @@ namespace mwmp
 
         RakNet::RakNetGUID guid;
         GUIMessageBox guiMessageBox;
-        ESM::Class charClass;
         int month;
         int day;
         double hour;
@@ -178,16 +177,19 @@ namespace mwmp
         bool consoleAllowed;
         bool ignorePosPacket;
 
+        unsigned int movementFlags;
+        char movementAnim;
+        char drawState;
+        bool isFlying;
+
         ESM::Position position;
         ESM::Position direction;
         ESM::Cell cell;
         ESM::NPC npc;
         ESM::NpcStats npcStats;
         ESM::CreatureStats creatureStats;
+        ESM::Class charClass;
         Item equipedItems[19];
-        unsigned int movementFlags;
-        char movementAnim;
-        char drawState;
         Attack attack;
         std::string birthsign;
         std::string chatMessage;

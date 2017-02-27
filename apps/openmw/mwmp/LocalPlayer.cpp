@@ -582,16 +582,22 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
     bool sneak = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Sneak);
     bool forceJump = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceJump);
     bool forceMoveJump = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceMoveJump);
-    bool jump = !world->isOnGround(player) && !world->isFlying(player);
-    static bool onJump = false;
+    
+    isFlying = world->isFlying(player);
+    bool isJumping = !world->isOnGround(player) && !isFlying;
+
+    // We need to send a new packet at the end of jumping and flying too,
+    // so keep track of what we were doing last frame
+    static bool wasJumping = false;
+    static bool wasFlying = false;
 
     MWMechanics::DrawState_ state = player.getClass().getNpcStats(player).getDrawState();
     static MWMechanics::DrawState_ oldState = player.getClass().getNpcStats(player).getDrawState();
-    //static float timer = 0;
+
     if (oldRun != run
         || oldSneak != sneak || oldForceJump != forceJump
-        || oldForceMoveJump != forceMoveJump || oldState != state ||
-        ((jump || onJump)/* && (timer += MWBase::Environment::get().getFrameDuration() )> 0.5*/)
+        || oldForceMoveJump != forceMoveJump || oldState != state
+        || wasJumping || isJumping || wasFlying || isFlying
         || forceUpdate)
     {
         oldSneak = sneak;
@@ -599,7 +605,9 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
         oldForceJump = forceJump;
         oldForceMoveJump = forceMoveJump;
         oldState = state;
-        onJump = jump;
+        
+        wasFlying = isFlying;
+        wasJumping = isJumping;
 
         movementFlags = 0;
 #define __SETFLAG(flag, value) (value) ? (movementFlags | flag) : (movementFlags & ~flag)
@@ -607,7 +615,7 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
         movementFlags = __SETFLAG(CreatureStats::Flag_Sneak, sneak);
         movementFlags = __SETFLAG(CreatureStats::Flag_Run, run);
         movementFlags = __SETFLAG(CreatureStats::Flag_ForceJump, forceJump);
-        movementFlags = __SETFLAG(CreatureStats::Flag_ForceJump, jump);
+        movementFlags = __SETFLAG(CreatureStats::Flag_ForceJump, isJumping);
         movementFlags = __SETFLAG(CreatureStats::Flag_ForceMoveJump, forceMoveJump);
 
 #undef __SETFLAG
@@ -619,13 +627,12 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
         else if (state == MWMechanics::DrawState_Spell)
             drawState = 2;
 
-        if (jump)
+        if (isJumping)
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after jump;
 
         RakNet::BitStream bs;
         getNetworking()->getPlayerPacket((RakNet::MessageID) ID_PLAYER_DRAWSTATE)->Packet(&bs, this, true);
         getNetworking()->sendData(&bs);
-        //timer = 0;
     }
 }
 

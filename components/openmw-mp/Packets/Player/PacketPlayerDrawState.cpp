@@ -15,6 +15,6 @@ void mwmp::PacketPlayerDrawState::Packet(RakNet::BitStream *bs, mwmp::BasePlayer
     PlayerPacket::Packet(bs, player, send);
 
     RW(player->movementFlags, send);
-
     RW(player->drawState, send);
+    RW(player->isFlying, send);
 }
