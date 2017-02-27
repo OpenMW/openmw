@@ -722,11 +722,7 @@ void Networking::update(RakNet::Packet *packet)
 
     RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
 
-    {
-        RakNet::RakNetGUID ignoredGUID;
-        bsIn.Read(ignoredGUID);
-        (void)ignoredGUID;
-    }
+    bsIn.IgnoreBytes((unsigned int) RakNet::RakNetGUID::size()); // Ignore GUID from received packet
 
     if (player == 0)
     {
@@ -735,7 +731,7 @@ void Networking::update(RakNet::Packet *packet)
         playerController->GetPacket(ID_HANDSHAKE)->RequestData(packet->guid);
         Players::newPlayer(packet->guid);
         player = Players::getPlayer(packet->guid);
-        playerController->GetPacket(ID_USER_MYID)->Send(Players::getPlayer(packet->guid), false);
+        playerController->GetPacket(ID_USER_MYID)->Send(player, false);
         return;
     }
     else if (playerController->ContainsPacket(packet->data[0]))
