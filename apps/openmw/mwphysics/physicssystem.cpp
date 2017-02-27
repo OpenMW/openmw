@@ -652,7 +652,7 @@ namespace MWPhysics
                     mPtr.getRefData().getBaseNode()->accept(visitor);
                     if (!visitor.mFound)
                     {
-                        std::cerr << "animateCollisionShapes: Can't find node " << recIndex << std::endl;
+                        std::cerr << "animateCollisionShapes: Can't find node " << recIndex << " for " << mPtr.getCellRef().getRefId() << std::endl;
                         return;
                     }
                     osg::NodePath nodePath = visitor.mFoundPath;

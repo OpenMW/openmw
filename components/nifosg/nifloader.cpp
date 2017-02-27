@@ -528,6 +528,9 @@ namespace NifOsg
                     node = new osg::Group;
                 dataVariance = osg::Object::STATIC;
                 break;
+            case Nif::RC_NiBillboardNode:
+                dataVariance = osg::Object::DYNAMIC;
+                break;
             default:
                 // The Root node can be created as a Group if no transformation is required.
                 // This takes advantage of the fact root nodes can't have additional controllers
