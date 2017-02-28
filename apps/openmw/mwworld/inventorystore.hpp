@@ -116,6 +116,7 @@ namespace MWWorld
             virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
 
             bool canActorAutoEquip(const MWWorld::Ptr& actor, const MWWorld::Ptr& item);
+            ContainerStoreIterator findSlot (int slot) const;
 
         public:
 

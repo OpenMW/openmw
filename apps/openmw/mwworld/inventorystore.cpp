@@ -199,25 +199,12 @@ void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
 
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
 {
-    if (slot<0 || slot>=static_cast<int> (mSlots.size()))
-        throw std::runtime_error ("slot number out of range");
-
-    if (mSlots[slot]==end())
-        return end();
-
-    if (mSlots[slot]->getRefData().getCount()<1)
-    {
-        // Object has been deleted
-        // This should no longer happen, since the new remove function will unequip first
-        throw std::runtime_error("Invalid slot, make sure you are not calling RefData::setCount for a container object");
-    }
-
-    return mSlots[slot];
+    return findSlot (slot);
 }
 
 MWWorld::ConstContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot) const
 {
-    return const_cast<InventoryStore*>(this)->getSlot (slot);
+    return findSlot (slot);
 }
 
 bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const MWWorld::Ptr& item)
@@ -238,6 +225,24 @@ bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const
     }
 
     return true;
+}
+
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::findSlot (int slot) const
+{
+    if (slot<0 || slot>=static_cast<int> (mSlots.size()))
+        throw std::runtime_error ("slot number out of range");
+
+    if (mSlots[slot]==end())
+        return mSlots[slot];
+
+    if (mSlots[slot]->getRefData().getCount()<1)
+    {
+        // Object has been deleted
+        // This should no longer happen, since the new remove function will unequip first
+        throw std::runtime_error("Invalid slot, make sure you are not calling RefData::setCount for a container object");
+    }
+
+    return mSlots[slot];
 }
 
 void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
