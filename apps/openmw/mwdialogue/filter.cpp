@@ -344,7 +344,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
         case SelectWrapper::Function_PcClothingModifier:
         {
-            MWWorld::InventoryStore& store = player.getClass().getInventoryStore (player);
+            const MWWorld::InventoryStore& store = player.getClass().getInventoryStore (player);
 
             int value = 0;
 

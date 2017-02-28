@@ -574,10 +574,10 @@ void NpcAnimation::updateParts()
     bool wasArrowAttached = (mAmmunition.get() != NULL);
     mAmmunition.reset();
 
-    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+    const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
     {
-        MWWorld::ContainerStoreIterator store = inv.getSlot(slotlist[i].mSlot);
+        MWWorld::ConstContainerStoreIterator store = inv.getSlot(slotlist[i].mSlot);
 
         removePartGroup(slotlist[i].mSlot);
 
@@ -634,8 +634,8 @@ void NpcAnimation::updateParts()
 
     if(mPartPriorities[ESM::PRT_Shield] < 1)
     {
-        MWWorld::ContainerStoreIterator store = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        MWWorld::Ptr part;
+        MWWorld::ConstContainerStoreIterator store = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        MWWorld::ConstPtr part;
         if(store != inv.end() && (part=*store).getTypeName() == typeid(ESM::Light).name())
         {
             const ESM::Light *light = part.get<ESM::Light>()->mBase;

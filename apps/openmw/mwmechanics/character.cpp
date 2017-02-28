@@ -1194,7 +1194,7 @@ bool CharacterController::updateWeaponState()
         if(isWeapon)
             weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;
 
-        MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+        MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
         if (mWeaponType == WeapType_Crossbow)
             ammunition = (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt);
         else if (mWeaponType == WeapType_BowAndArrow)

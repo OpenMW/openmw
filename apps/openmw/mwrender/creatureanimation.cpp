@@ -97,15 +97,15 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     if (!mObjectRoot)
         return;
 
-    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-    MWWorld::ContainerStoreIterator it = inv.getSlot(slot);
+    const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+    MWWorld::ConstContainerStoreIterator it = inv.getSlot(slot);
 
     if (it == inv.end())
     {
         scene.reset();
         return;
     }
-    MWWorld::Ptr item = *it;
+    MWWorld::ConstPtr item = *it;
 
     std::string bonename;
     if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
@@ -135,7 +135,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
                 item.getTypeName() == typeid(ESM::Weapon).name() &&
                 item.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
         {
-            MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+            MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
             if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt)
                 attachArrow();
             else
