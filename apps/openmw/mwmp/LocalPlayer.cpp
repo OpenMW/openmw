@@ -357,7 +357,7 @@ void LocalPlayer::updateCell(bool forceUpdate)
         updatePosition(true);
 
         RakNet::BitStream bs;
-        getNetworking()->getPlayerPacket((RakNet::MessageID) ID_PLAYER_CELL_CHANGE)->Packet(&bs, this, true);
+        getNetworking()->getPlayerPacket(ID_PLAYER_CELL_CHANGE)->Packet(&bs, this, true);
         getNetworking()->sendData(&bs);
 
         // Also force an update to skills (to send all progress to skill increases)
@@ -424,7 +424,7 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
     {
         RakNet::BitStream bs;
         bs.ResetWritePointer();
-        getNetworking()->getPlayerPacket((RakNet::MessageID) ID_PLAYER_EQUIPMENT)->Packet(&bs, this, true);
+        getNetworking()->getPlayerPacket(ID_PLAYER_EQUIPMENT)->Packet(&bs, this, true);
         getNetworking()->sendData(&bs);
         equipChanged = false;
     }
@@ -525,7 +525,7 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
             attack.refid = spell;
 
             /*RakNet::BitStream bs;
-            getNetworking()->getPlayerPacket((RakNet::MessageID) ID_PLAYER_ATTACK)->Packet(&bs, this, true);
+            getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Packet(&bs, this, true);
             getNetworking()->SendData(&bs);*/
         }
         else if (state == MWMechanics::DrawState_Weapon)
@@ -631,7 +631,7 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after jump;
 
         RakNet::BitStream bs;
-        getNetworking()->getPlayerPacket((RakNet::MessageID) ID_PLAYER_DRAWSTATE)->Packet(&bs, this, true);
+        getNetworking()->getPlayerPacket(ID_PLAYER_DRAWSTATE)->Packet(&bs, this, true);
         getNetworking()->sendData(&bs);
     }
 }
@@ -1106,7 +1106,7 @@ void LocalPlayer::sendAttack(Attack::TYPE type)
     attack.type = type;
     attack.pressed = false;
     RakNet::BitStream bs;
-    getNetworking()->getPlayerPacket((RakNet::MessageID) ID_PLAYER_ATTACK)->Packet(&bs, this, true);
+    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Packet(&bs, this, true);
     getNetworking()->sendData(&bs);
 }
 
@@ -1178,6 +1178,6 @@ void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
     attack.attacker = guid;
 
     RakNet::BitStream bs;
-    getNetworking()->getPlayerPacket((RakNet::MessageID) ID_PLAYER_ATTACK)->Packet(&bs, this, true);
+    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Packet(&bs, this, true);
     getNetworking()->sendData(&bs);
 }
