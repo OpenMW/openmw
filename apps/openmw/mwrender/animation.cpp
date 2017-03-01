@@ -192,24 +192,38 @@ namespace
     };
 
     // Removes all drawables from a graph.
-    class RemoveDrawableVisitor : public RemoveVisitor
+    class CleanObjectRootVisitor : public RemoveVisitor
     {
     public:
         virtual void apply(osg::Drawable& drw)
         {
-            applyImpl(drw);
+            applyDrawable(drw);
         }
 
         virtual void apply(osg::Group& node)
         {
-            traverse(node);
+            applyNode(node);
         }
         virtual void apply(osg::MatrixTransform& node)
         {
-            traverse(node);
+            applyNode(node);
+        }
+        virtual void apply(osg::Node& node)
+        {
+            applyNode(node);
         }
 
-        void applyImpl(osg::Node& node)
+        void applyNode(osg::Node& node)
+        {
+            if (node.getStateSet())
+                node.setStateSet(NULL);
+
+            if (node.getNodeMask() == 0x1 && node.getNumParents() == 1)
+                mToRemove.push_back(std::make_pair(&node, node.getParent(0)));
+            else
+                traverse(node);
+        }
+        void applyDrawable(osg::Node& node)
         {
             osg::NodePath::iterator parent = getNodePath().end()-2;
             // We know that the parent is a Group because only Groups can have children.
@@ -1123,6 +1137,32 @@ namespace MWRender
             state->second.mLoopingEnabled = enabled;
     }
 
+    osg::ref_ptr<osg::Node> getModelInstance(Resource::SceneManager* sceneMgr, const std::string& model, bool baseonly)
+    {
+        if (baseonly)
+        {
+            typedef std::map<std::string, osg::ref_ptr<osg::Node> > Cache;
+            static Cache cache;
+            Cache::iterator found = cache.find(model);
+            if (found == cache.end())
+            {
+                osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
+
+                CleanObjectRootVisitor removeDrawableVisitor;
+                created->accept(removeDrawableVisitor);
+                removeDrawableVisitor.remove();
+
+                cache.insert(std::make_pair(model, created));
+
+                return sceneMgr->createInstance(created);
+            }
+            else
+                return sceneMgr->createInstance(found->second);
+        }
+        else
+            return sceneMgr->createInstance(model);
+    }
+
     void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature)
     {
         osg::ref_ptr<osg::StateSet> previousStateset;
@@ -1144,7 +1184,8 @@ namespace MWRender
 
         if (!forceskeleton)
         {
-            osg::ref_ptr<osg::Node> created = mResourceSystem->getSceneManager()->getInstance(model, mInsert);
+            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem->getSceneManager(), model, baseonly);
+            mInsert->addChild(created);
             mObjectRoot = created->asGroup();
             if (!mObjectRoot)
             {
@@ -1156,7 +1197,7 @@ namespace MWRender
         }
         else
         {
-            osg::ref_ptr<osg::Node> created = mResourceSystem->getSceneManager()->getInstance(model);
+            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem->getSceneManager(), model, baseonly);
             osg::ref_ptr<SceneUtil::Skeleton> skel = dynamic_cast<SceneUtil::Skeleton*>(created.get());
             if (!skel)
             {
@@ -1170,13 +1211,6 @@ namespace MWRender
 
         if (previousStateset)
             mObjectRoot->setStateSet(previousStateset);
-
-        if (baseonly)
-        {
-            RemoveDrawableVisitor removeDrawableVisitor;
-            mObjectRoot->accept(removeDrawableVisitor);
-            removeDrawableVisitor.remove();
-        }
 
         if (isCreature)
         {

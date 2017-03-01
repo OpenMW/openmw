@@ -538,10 +538,15 @@ namespace Resource
     osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string& name)
     {
         osg::ref_ptr<const osg::Node> scene = getTemplate(name);
-        osg::ref_ptr<osg::Node> cloned = osg::clone(scene.get(), SceneUtil::CopyOp());
+        return createInstance(scene);
+    }
+
+    osg::ref_ptr<osg::Node> SceneManager::createInstance(const osg::Node *base)
+    {
+        osg::ref_ptr<osg::Node> cloned = osg::clone(base, SceneUtil::CopyOp());
 
         // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
-        cloned->getOrCreateUserDataContainer()->addUserObject(new TemplateRef(scene));
+        cloned->getOrCreateUserDataContainer()->addUserObject(new TemplateRef(base));
 
         // we can skip any scene graphs without update callbacks since we know that particle emitters will have an update callback set
         if (cloned->getNumChildrenRequiringUpdateTraversal() > 0)
