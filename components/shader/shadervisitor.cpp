@@ -317,34 +317,46 @@ namespace Shader
         {
             const ShaderRequirements& reqs = mRequirements.back();
 
-            osg::ref_ptr<osg::Geometry> sourceGeometry = &geometry;
-            SceneUtil::RigGeometry* rig = dynamic_cast<SceneUtil::RigGeometry*>(&geometry);
-            if (rig)
-                sourceGeometry = rig->getSourceGeometry();
+            bool useShader = reqs.mShaderRequired || mForceShaders;
+            bool generateTangents = reqs.mTexStageRequiringTangents != -1 && mAllowedToModifyStateSets;
 
-            if (mAllowedToModifyStateSets)
+            if (useShader || generateTangents)
             {
-                // make sure that all UV sets are there
-                for (std::map<int, std::string>::const_iterator it = reqs.mTextures.begin(); it != reqs.mTextures.end(); ++it)
+                osg::ref_ptr<osg::Geometry> sourceGeometry = &geometry;
+                SceneUtil::RigGeometry* rig = dynamic_cast<SceneUtil::RigGeometry*>(&geometry);
+                if (rig)
+                    sourceGeometry = rig->getSourceGeometry();
+
+                bool requiresSetGeometry = false;
+
+                if (mAllowedToModifyStateSets)
                 {
-                    if (sourceGeometry->getTexCoordArray(it->first) == NULL)
-                        sourceGeometry->setTexCoordArray(it->first, sourceGeometry->getTexCoordArray(0));
+                    // make sure that all UV sets are there
+                    for (std::map<int, std::string>::const_iterator it = reqs.mTextures.begin(); it != reqs.mTextures.end(); ++it)
+                    {
+                        if (sourceGeometry->getTexCoordArray(it->first) == NULL)
+                        {
+                            sourceGeometry->setTexCoordArray(it->first, sourceGeometry->getTexCoordArray(0));
+                            requiresSetGeometry = true;
+                        }
+                    }
                 }
+
+                if (generateTangents)
+                {
+                    osg::ref_ptr<osgUtil::TangentSpaceGenerator> generator (new osgUtil::TangentSpaceGenerator);
+                    generator->generate(sourceGeometry, reqs.mTexStageRequiringTangents);
+
+                    sourceGeometry->setTexCoordArray(7, generator->getTangentArray(), osg::Array::BIND_PER_VERTEX);
+                    requiresSetGeometry = true;
+                }
+
+                if (rig && requiresSetGeometry)
+                    rig->setSourceGeometry(sourceGeometry);
             }
-
-            if (reqs.mTexStageRequiringTangents != -1 && mAllowedToModifyStateSets)
-            {
-                osg::ref_ptr<osgUtil::TangentSpaceGenerator> generator (new osgUtil::TangentSpaceGenerator);
-                generator->generate(sourceGeometry, reqs.mTexStageRequiringTangents);
-
-                sourceGeometry->setTexCoordArray(7, generator->getTangentArray(), osg::Array::BIND_PER_VERTEX);
-            }
-
-            if (rig)
-                rig->setSourceGeometry(sourceGeometry);
 
             // TODO: find a better place for the stateset
-            if (reqs.mShaderRequired || mForceShaders)
+            if (useShader)
                 createProgram(reqs, geometry);
         }
 
