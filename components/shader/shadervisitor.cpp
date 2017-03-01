@@ -318,9 +318,9 @@ namespace Shader
             const ShaderRequirements& reqs = mRequirements.back();
 
             bool useShader = reqs.mShaderRequired || mForceShaders;
-            bool generateTangents = reqs.mTexStageRequiringTangents != -1 && mAllowedToModifyStateSets;
+            bool generateTangents = reqs.mTexStageRequiringTangents != -1;
 
-            if (useShader || generateTangents)
+            if (mAllowedToModifyStateSets && (useShader || generateTangents))
             {
                 osg::ref_ptr<osg::Geometry> sourceGeometry = &geometry;
                 SceneUtil::RigGeometry* rig = dynamic_cast<SceneUtil::RigGeometry*>(&geometry);
@@ -329,16 +329,13 @@ namespace Shader
 
                 bool requiresSetGeometry = false;
 
-                if (mAllowedToModifyStateSets)
+                // make sure that all UV sets are there
+                for (std::map<int, std::string>::const_iterator it = reqs.mTextures.begin(); it != reqs.mTextures.end(); ++it)
                 {
-                    // make sure that all UV sets are there
-                    for (std::map<int, std::string>::const_iterator it = reqs.mTextures.begin(); it != reqs.mTextures.end(); ++it)
+                    if (sourceGeometry->getTexCoordArray(it->first) == NULL)
                     {
-                        if (sourceGeometry->getTexCoordArray(it->first) == NULL)
-                        {
-                            sourceGeometry->setTexCoordArray(it->first, sourceGeometry->getTexCoordArray(0));
-                            requiresSetGeometry = true;
-                        }
+                        sourceGeometry->setTexCoordArray(it->first, sourceGeometry->getTexCoordArray(0));
+                        requiresSetGeometry = true;
                     }
                 }
 
