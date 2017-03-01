@@ -107,10 +107,7 @@ namespace osgMyGUI
         mWidth = image->s();
         mHeight = image->t();
 
-        // FIXME
-        mFormat = MyGUI::PixelFormat::R8G8B8;
-        mUsage = MyGUI::TextureUsage::Static | MyGUI::TextureUsage::Write;
-        mNumElemBytes = 3; // FIXME
+        mUsage = MyGUI::TextureUsage::Static;
     }
 
     void OSGTexture::saveToFile(const std::string &fname)
