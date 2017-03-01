@@ -93,6 +93,10 @@ namespace Resource
         /// @note Thread safe.
         osg::ref_ptr<osg::Node> cacheInstance(const std::string& name);
 
+        osg::ref_ptr<osg::Node> createInstance(const std::string& name);
+
+        osg::ref_ptr<osg::Node> createInstance(const osg::Node* base);
+
         /// Get an instance of the given scene template
         /// @see getTemplate
         /// @note Thread safe.
@@ -140,8 +144,6 @@ namespace Resource
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats);
 
     private:
-
-        osg::ref_ptr<osg::Node> createInstance(const std::string& name);
 
         std::auto_ptr<Shader::ShaderManager> mShaderManager;
         bool mForceShaders;
