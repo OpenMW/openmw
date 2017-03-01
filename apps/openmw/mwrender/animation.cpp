@@ -192,24 +192,38 @@ namespace
     };
 
     // Removes all drawables from a graph.
-    class RemoveDrawableVisitor : public RemoveVisitor
+    class CleanObjectRootVisitor : public RemoveVisitor
     {
     public:
         virtual void apply(osg::Drawable& drw)
         {
-            applyImpl(drw);
+            applyDrawable(drw);
         }
 
         virtual void apply(osg::Group& node)
         {
-            traverse(node);
+            applyNode(node);
         }
         virtual void apply(osg::MatrixTransform& node)
         {
-            traverse(node);
+            applyNode(node);
+        }
+        virtual void apply(osg::Node& node)
+        {
+            applyNode(node);
         }
 
-        void applyImpl(osg::Node& node)
+        void applyNode(osg::Node& node)
+        {
+            if (node.getStateSet())
+                node.setStateSet(NULL);
+
+            if (node.getNodeMask() == 0x1 && node.getNumParents() == 1)
+                mToRemove.push_back(std::make_pair(&node, node.getParent(0)));
+            else
+                traverse(node);
+        }
+        void applyDrawable(osg::Node& node)
         {
             osg::NodePath::iterator parent = getNodePath().end()-2;
             // We know that the parent is a Group because only Groups can have children.
@@ -1134,7 +1148,7 @@ namespace MWRender
             {
                 osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
 
-                RemoveDrawableVisitor removeDrawableVisitor;
+                CleanObjectRootVisitor removeDrawableVisitor;
                 created->accept(removeDrawableVisitor);
                 removeDrawableVisitor.remove();
 
