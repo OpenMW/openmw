@@ -128,7 +128,7 @@ void Skeleton::updateBoneMatrices(unsigned int traversalNumber)
                 mRootBone->mChildren[i]->update(NULL);
         }
         else
-            std::cerr << "no root bone" << std::endl;
+            std::cerr << "Error: no root bone" << std::endl;
 
         mNeedToUpdateBoneMatrices = false;
     }
@@ -188,7 +188,7 @@ void Bone::update(const osg::Matrixf* parentMatrixInSkeletonSpace)
 {
     if (!mNode)
     {
-        std::cerr << "Bone without node " << std::endl;
+        std::cerr << "Error: Bone without node " << std::endl;
         return;
     }
     if (parentMatrixInSkeletonSpace)

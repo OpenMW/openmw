@@ -84,7 +84,7 @@ namespace MWGui
             const ESM::Enchantment* enchant = esmStore.get<ESM::Enchantment>().search(enchantId);
             if (!enchant)
             {
-                std::cerr << "Can't find enchantment '" << enchantId << "' on item " << item.getCellRef().getRefId() << std::endl;
+                std::cerr << "Warning: Can't find enchantment '" << enchantId << "' on item " << item.getCellRef().getRefId() << std::endl;
                 continue;
             }
 

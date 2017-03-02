@@ -1158,7 +1158,7 @@ namespace MWGui
         {
             if (!mStore)
             {
-                std::cerr << "WindowManager::onRetrieveTag: no Store set up yet, can not replace '" << tag << "'" << std::endl;
+                std::cerr << "Error: WindowManager::onRetrieveTag: no Store set up yet, can not replace '" << tag << "'" << std::endl;
                 return;
             }
             const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().find(tag);

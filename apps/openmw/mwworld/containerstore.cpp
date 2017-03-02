@@ -496,7 +496,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Error in MWWorld::ContainerStore::addInitialItem: " << e.what() << std::endl;
+        std::cerr << "Warning: MWWorld::ContainerStore::addInitialItem: " << e.what() << std::endl;
     }
 
 }
@@ -796,10 +796,10 @@ void MWWorld::ContainerStore::readState (const ESM::InventoryState& inventory)
             case ESM::REC_WEAP: readEquipmentState (getState (weapons, state), thisIndex, inventory); break;
             case ESM::REC_LIGH: readEquipmentState (getState (lights, state), thisIndex, inventory); break;
             case 0:
-                std::cerr << "Dropping reference to '" << state.mRef.mRefID << "' (object no longer exists)" << std::endl;
+                std::cerr << "Warning: Dropping reference to '" << state.mRef.mRefID << "' (object no longer exists)" << std::endl;
                 break;
             default:
-                std::cerr << "Invalid item type in inventory state, refid " << state.mRef.mRefID << std::endl;
+                std::cerr << "Warning: Invalid item type in inventory state, refid " << state.mRef.mRefID << std::endl;
                 break;
         }
     }

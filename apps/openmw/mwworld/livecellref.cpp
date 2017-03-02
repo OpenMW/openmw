@@ -39,7 +39,7 @@ void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
                 catch (const std::exception& exception)
                 {
                     std::cerr
-                        << "failed to load state for local script " << scriptId
+                        << "Error: failed to load state for local script " << scriptId
                         << " because an exception has been thrown: " << exception.what()
                         << std::endl;
                 }

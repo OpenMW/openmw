@@ -230,7 +230,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCell(variables["start"].as<Files::EscapeHashString>().toStdString());
     engine.setSkipMenu (variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
     if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
-        std::cerr << "new-game used without skip-menu -> ignoring it" << std::endl;
+        std::cerr << "Warning: new-game used without skip-menu -> ignoring it" << std::endl;
 
     // scripts
     engine.setCompileAll(variables["script-all"].as<bool>());

@@ -319,7 +319,7 @@ namespace ESMTerrain
         const ESM::LandTexture* ltex = getLandTexture(id.first-1, id.second);
         if (!ltex)
         {
-            std::cerr << "Unable to find land texture index " << id.first-1 << " in plugin " << id.second << ", using default texture instead" << std::endl;
+            std::cerr << "Warning: Unable to find land texture index " << id.first-1 << " in plugin " << id.second << ", using default texture instead" << std::endl;
             return defaultTexture;
         }
 

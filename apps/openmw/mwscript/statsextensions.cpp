@@ -235,7 +235,7 @@ namespace MWScript
                         if (R()(runtime, false, true).isEmpty())
                         {
                             std::cerr
-                                << "Compensating for broken script in Morrowind.esm by "
+                                << "Warning: Compensating for broken script in Morrowind.esm by "
                                 << "ignoring remote access to dagoth_ur_1" << std::endl;
                             return;
                         }

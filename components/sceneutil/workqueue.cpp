@@ -71,7 +71,7 @@ void WorkQueue::addWorkItem(osg::ref_ptr<WorkItem> item, bool front)
 {
     if (item->isDone())
     {
-        std::cerr << "warning, trying to add a work item that is already completed" << std::endl;
+        std::cerr << "Error: trying to add a work item that is already completed" << std::endl;
         return;
     }
 

@@ -155,7 +155,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     }
     catch (std::exception& e)
     {
-        std::cerr << "Error adding creature part: " << e.what() << std::endl;
+        std::cerr << "Can not add creature part: " << e.what() << std::endl;
     }
 }
 

@@ -725,7 +725,7 @@ namespace MWMechanics
         }
         else
         {
-            std::cerr<< "Attempted to play out of range idle animation \""<<idleSelect<<"\" for " << actor.getCellRef().getRefId() << std::endl;
+            std::cerr<< "Error: Attempted to play out of range idle animation \""<<idleSelect<<"\" for " << actor.getCellRef().getRefId() << std::endl;
             return false;
         }
     }

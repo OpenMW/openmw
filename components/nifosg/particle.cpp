@@ -284,7 +284,7 @@ void Emitter::emitParticles(double dt)
 
         if (!visitor.mFound)
         {
-            std::cerr << "Emitter: Can't find emitter node" << randomRecIndex << std::endl;
+            std::cerr << "Error: Can't find emitter node" << randomRecIndex << std::endl;
             return;
         }
 

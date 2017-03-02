@@ -149,7 +149,7 @@ namespace
                 }
                 catch (const std::exception& e)
                 {
-                    std::string error ("error during rendering '" + ptr.getCellRef().getRefId() + "': ");
+                    std::string error ("failed to render '" + ptr.getCellRef().getRefId() + "': ");
                     std::cerr << error + e.what() << std::endl;
                 }
             }
@@ -625,7 +625,7 @@ namespace MWWorld
         }
         catch (std::exception& e)
         {
-            std::cerr << "error during rendering '" << ptr.getCellRef().getRefId() << "': " << e.what() << std::endl;
+            std::cerr << "failed to render '" << ptr.getCellRef().getRefId() << "': " << e.what() << std::endl;
         }
     }
 

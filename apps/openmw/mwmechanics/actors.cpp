@@ -1478,7 +1478,7 @@ namespace MWMechanics
         }
         else
         {
-            std::cerr<< "Error in Actors::playAnimationGroup:  Unable to find " << ptr.getCellRef().getRefId() << std::endl;
+            std::cerr<< "Warning: Actors::playAnimationGroup:  Unable to find " << ptr.getCellRef().getRefId() << std::endl;
             return false;
         }
     }

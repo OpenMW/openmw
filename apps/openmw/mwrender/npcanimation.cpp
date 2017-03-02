@@ -435,7 +435,7 @@ void NpcAnimation::updateNpcBase()
             if (bp)
                 mHeadModel = "meshes\\" + bp->mModel;
             else
-                std::cerr << "Failed to load body part '" << mNpc->mHead << "'" << std::endl;
+                std::cerr << "Warning: Failed to load body part '" << mNpc->mHead << "'" << std::endl;
         }
 
         mHairModel = "";
@@ -445,7 +445,7 @@ void NpcAnimation::updateNpcBase()
             if (bp)
                 mHairModel = "meshes\\" + bp->mModel;
             else
-                std::cerr << "Failed to load body part '" << mNpc->mHair << "'" << std::endl;
+                std::cerr << "Warning: Failed to load body part '" << mNpc->mHair << "'" << std::endl;
         }
     }
 
@@ -828,7 +828,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                     bodypart = NULL;
             }
             else if (!bodypart)
-                std::cerr << "Failed to find body part '" << part->mFemale << "'" << std::endl;
+                std::cerr << "Warning: Failed to find body part '" << part->mFemale << "'" << std::endl;
         }
         if(!bodypart && !part->mMale.empty())
         {
@@ -843,7 +843,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                     bodypart = NULL;
             }
             else if (!bodypart)
-                std::cerr << "Failed to find body part '" << part->mMale << "'" << std::endl;
+                std::cerr << "Warning: Failed to find body part '" << part->mMale << "'" << std::endl;
         }
 
         if(bodypart)

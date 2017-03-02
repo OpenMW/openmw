@@ -209,12 +209,12 @@ namespace MWWorld
     {
         if (!mWorkQueue)
         {
-            std::cerr << "can't preload, no work queue set " << std::endl;
+            std::cerr << "Error: can't preload, no work queue set " << std::endl;
             return;
         }
         if (cell->getState() == CellStore::State_Unloaded)
         {
-            std::cerr << "can't preload objects for unloaded cell" << std::endl;
+            std::cerr << "Error: can't preload objects for unloaded cell" << std::endl;
             return;
         }
 

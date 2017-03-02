@@ -851,7 +851,7 @@ void MWWorld::InventoryStore::updateRechargingItems()
                         enchantmentId);
             if (!enchantment)
             {
-                std::cerr << "Can't find enchantment '" << enchantmentId << "' on item " << it->getCellRef().getRefId() << std::endl;
+                std::cerr << "Warning: Can't find enchantment '" << enchantmentId << "' on item " << it->getCellRef().getRefId() << std::endl;
                 continue;
             }
 

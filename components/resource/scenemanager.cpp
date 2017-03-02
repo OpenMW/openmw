@@ -613,12 +613,12 @@ namespace Resource
         if(magfilter == "nearest")
             mag = osg::Texture::NEAREST;
         else if(magfilter != "linear")
-            std::cerr<< "Invalid texture mag filter: "<<magfilter <<std::endl;
+            std::cerr<< "Warning: Invalid texture mag filter: "<<magfilter <<std::endl;
 
         if(minfilter == "nearest")
             min = osg::Texture::NEAREST;
         else if(minfilter != "linear")
-            std::cerr<< "Invalid texture min filter: "<<minfilter <<std::endl;
+            std::cerr<< "Warning: Invalid texture min filter: "<<minfilter <<std::endl;
 
         if(mipmap == "nearest")
         {
@@ -630,7 +630,7 @@ namespace Resource
         else if(mipmap != "none")
         {
             if(mipmap != "linear")
-                std::cerr<< "Invalid texture mipmap: "<<mipmap <<std::endl;
+                std::cerr<< "Warning: Invalid texture mipmap: "<<mipmap <<std::endl;
             if(min == osg::Texture::NEAREST)
                 min = osg::Texture::NEAREST_MIPMAP_LINEAR;
             else if(min == osg::Texture::LINEAR)

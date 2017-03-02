@@ -349,7 +349,7 @@ bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, uint32_t type,
         catch (...)
         {
             // silently drop cells that don't exist anymore
-            std::cerr << "Dropping state for cell " << state.mId.mWorldspace << " (cell no longer exists)" << std::endl;
+            std::cerr << "Warning: Dropping state for cell " << state.mId.mWorldspace << " (cell no longer exists)" << std::endl;
             reader.skipRecord();
             return true;
         }

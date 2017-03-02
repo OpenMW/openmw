@@ -162,7 +162,7 @@ namespace MWGui
             const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchId);
             if (!ench)
             {
-                std::cerr << "Can't find enchantment '" << enchId << "' on item " << base.getCellRef().getRefId() << std::endl;
+                std::cerr << "Warning: Can't find enchantment '" << enchId << "' on item " << base.getCellRef().getRefId() << std::endl;
                 return false;
             }
 

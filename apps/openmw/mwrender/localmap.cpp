@@ -320,7 +320,7 @@ void LocalMap::markForRemoval(osg::Camera *cam)
     CameraVector::iterator found = std::find(mActiveCameras.begin(), mActiveCameras.end(), cam);
     if (found == mActiveCameras.end())
     {
-        std::cerr << "trying to remove an inactive camera" << std::endl;
+        std::cerr << "Error: trying to remove an inactive camera" << std::endl;
         return;
     }
     mActiveCameras.erase(found);
@@ -487,7 +487,7 @@ void LocalMap::requestInteriorMap(const MWWorld::CellStore* cell)
                     // We are using the same bounds and angle as we were using when the textures were originally made. Segments should come out the same.
                     if (i >= int(fog->mFogTextures.size()))
                     {
-                        std::cout << "Warning: fog texture count mismatch" << std::endl;
+                        std::cout << "Error: fog texture count mismatch" << std::endl;
                         break;
                     }
 
@@ -679,7 +679,7 @@ void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
     osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("tga");
     if (!readerwriter)
     {
-        std::cerr << "Unable to load fog, can't find a tga ReaderWriter" << std::endl;
+        std::cerr << "Error: Unable to load fog, can't find a tga ReaderWriter" << std::endl;
         return;
     }
 
@@ -688,7 +688,7 @@ void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
     osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(in);
     if (!result.success())
     {
-        std::cerr << "Failed to read fog: " << result.message() << " code " << result.status() << std::endl;
+        std::cerr << "Error: Failed to read fog: " << result.message() << " code " << result.status() << std::endl;
         return;
     }
 
@@ -711,7 +711,7 @@ void LocalMap::MapSegment::saveFogOfWar(ESM::FogTexture &fog) const
     osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("tga");
     if (!readerwriter)
     {
-        std::cerr << "Unable to write fog, can't find a tga ReaderWriter" << std::endl;
+        std::cerr << "Error: Unable to write fog, can't find a tga ReaderWriter" << std::endl;
         return;
     }
 
@@ -720,7 +720,7 @@ void LocalMap::MapSegment::saveFogOfWar(ESM::FogTexture &fog) const
     osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*mFogOfWarImage, ostream);
     if (!result.success())
     {
-        std::cerr << "Unable to write fog: " << result.message() << " code " << result.status() << std::endl;
+        std::cerr << "Error: Unable to write fog: " << result.message() << " code " << result.status() << std::endl;
         return;
     }
     mFogOfWarImage->flipVertical();

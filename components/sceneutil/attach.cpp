@@ -63,7 +63,7 @@ namespace SceneUtil
             {
                 osg::ref_ptr<osg::Node> node = *it;
                 if (node->getNumParents() > 1)
-                    std::cerr << "CopyRigVisitor warning: node has multiple parents" << std::endl;
+                    std::cerr << "Error CopyRigVisitor: node has multiple parents" << std::endl;
                 while (node->getNumParents())
                     node->getParent(0)->removeChild(node);
 

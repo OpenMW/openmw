@@ -162,13 +162,13 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
 
     if (!mSkeleton)
     {
-        std::cerr << "A RigGeometry did not find its parent skeleton" << std::endl;
+        std::cerr << "Error: A RigGeometry did not find its parent skeleton" << std::endl;
         return false;
     }
 
     if (!mInfluenceMap)
     {
-        std::cerr << "No InfluenceMap set on RigGeometry" << std::endl;
+        std::cerr << "Error: No InfluenceMap set on RigGeometry" << std::endl;
         return false;
     }
 
@@ -179,7 +179,7 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
         Bone* bone = mSkeleton->getBone(it->first);
         if (!bone)
         {
-            std::cerr << "RigGeometry did not find bone " << it->first << std::endl;
+            std::cerr << "Error: RigGeometry did not find bone " << it->first << std::endl;
             continue;
         }
 
@@ -232,7 +232,7 @@ void RigGeometry::update(osg::NodeVisitor* nv)
 {
     if (!mSkeleton)
     {
-        std::cerr << "RigGeometry rendering with no skeleton, should have been initialized by UpdateVisitor" << std::endl;
+        std::cerr << "Error: RigGeometry rendering with no skeleton, should have been initialized by UpdateVisitor" << std::endl;
         // try to recover anyway, though rendering is likely to be incorrect.
         if (!initFromParentSkeleton(nv))
             return;

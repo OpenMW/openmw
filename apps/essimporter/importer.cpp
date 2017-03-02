@@ -38,7 +38,7 @@ namespace
     {
         if (fileHeader.mSCRS.size() != 128*128*4)
         {
-            std::cerr << "unexpected screenshot size " << std::endl;
+            std::cerr << "Error: unexpected screenshot size " << std::endl;
             return;
         }
 
@@ -66,14 +66,14 @@ namespace
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
         if (!readerwriter)
         {
-            std::cerr << "can't write screenshot: no jpg readerwriter found" << std::endl;
+            std::cerr << "Error: can't write screenshot: no jpg readerwriter found" << std::endl;
             return;
         }
 
         osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*image, ostream);
         if (!result.success())
         {
-            std::cerr << "can't write screenshot: " << result.message() << " code " << result.status() << std::endl;
+            std::cerr << "Error: can't write screenshot: " << result.message() << " code " << result.status() << std::endl;
             return;
         }
 
@@ -333,7 +333,7 @@ namespace ESSImport
                 if (unknownRecords.insert(n.intval).second)
                 {
                     std::ios::fmtflags f(std::cerr.flags());
-                    std::cerr << "unknown record " << n.toString() << " (0x" << std::hex << esm.getFileOffset() << ")" << std::endl;
+                    std::cerr << "Error: unknown record " << n.toString() << " (0x" << std::hex << esm.getFileOffset() << ")" << std::endl;
                     std::cerr.flags(f);
                 }
 

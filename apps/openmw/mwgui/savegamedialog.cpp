@@ -405,14 +405,14 @@ namespace MWGui
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
         if (!readerwriter)
         {
-            std::cerr << "Can't open savegame screenshot, no jpg readerwriter found" << std::endl;
+            std::cerr << "Error: Can't open savegame screenshot, no jpg readerwriter found" << std::endl;
             return;
         }
 
         osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(instream);
         if (!result.success())
         {
-            std::cerr << "Failed to read savegame screenshot: " << result.message() << " code " << result.status() << std::endl;
+            std::cerr << "Error: Failed to read savegame screenshot: " << result.message() << " code " << result.status() << std::endl;
             return;
         }
 
