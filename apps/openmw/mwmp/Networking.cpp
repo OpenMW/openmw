@@ -483,16 +483,11 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         {
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             player.getClass().getCreatureStats(player).resurrect();
-            ESM::Position resurrectPos;
-            MWBase::Environment::get().getWorld()->findInteriorPosition("Pelagiad, Fort Pelagiad", resurrectPos);
-            MWBase::Environment::get().getWorld()->changeToInteriorCell("Pelagiad, Fort Pelagiad", resurrectPos, true);
 
             // If this player had a weapon or spell readied when dying, they will
             // still have it readied but be unable to use it unless we clear it here
             player.getClass().getNpcStats(player).setDrawState(MWMechanics::DrawState_Nothing);
 
-            getLocalPlayer()->position = resurrectPos;
-            getLocalPlayer()->cell = *player.getCell()->getCell();
             myPacket->Send(getLocalPlayer(), serverAddr);
 
             getLocalPlayer()->updateDynamicStats(true);
