@@ -21,12 +21,13 @@ namespace Terrain
         osg::ref_ptr<osg::TexMat> texMat = texMatMap[blendmapScale];
         if (!texMat)
         {
-            texMat = new osg::TexMat;
             osg::Matrixf matrix;
             float scale = (blendmapScale/(static_cast<float>(blendmapScale)+1.f));
             matrix.preMultTranslate(osg::Vec3f(0.5f, 0.5f, 0.f));
             matrix.preMultScale(osg::Vec3f(scale, scale, 1.f));
             matrix.preMultTranslate(osg::Vec3f(-0.5f, -0.5f, 0.f));
+
+            texMat = new osg::TexMat(matrix);
 
             texMatMap[blendmapScale] = texMat;
         }
@@ -39,8 +40,7 @@ namespace Terrain
         osg::ref_ptr<osg::TexMat> texMat = texMatMap[layerTileSize];
         if (!texMat)
         {
-            texMat = new osg::TexMat;
-            texMat->setMatrix(osg::Matrix::scale(osg::Vec3f(layerTileSize,layerTileSize,1.f)));
+            texMat = new osg::TexMat(osg::Matrix::scale(osg::Vec3f(layerTileSize,layerTileSize,1.f)));
 
             texMatMap[layerTileSize] = texMat;
         }
