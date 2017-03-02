@@ -295,7 +295,7 @@ namespace MWClass
 
     std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
     {
-        MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
+        const MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
 
         if (ptr.getCellRef().getCharge() == 0)
             return std::make_pair(0, "#{sInventoryMessage1}");
@@ -332,7 +332,7 @@ namespace MWClass
             // If equipping a shield, check if there's a twohanded weapon conflicting with it
             if(*slot == MWWorld::InventoryStore::Slot_CarriedLeft)
             {
-                MWWorld::ContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                MWWorld::ConstContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 
                 if(weapon == invStore.end())
                     return std::make_pair(1,"");

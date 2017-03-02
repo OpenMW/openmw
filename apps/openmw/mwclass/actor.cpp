@@ -43,8 +43,8 @@ namespace MWClass
 
     void Actor::block(const MWWorld::Ptr &ptr) const
     {
-        MWWorld::InventoryStore& inv = getInventoryStore(ptr);
-        MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        const MWWorld::InventoryStore& inv = getInventoryStore(ptr);
+        MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if (shield == inv.end())
             return;
 

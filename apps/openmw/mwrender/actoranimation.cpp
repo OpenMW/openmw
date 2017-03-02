@@ -31,7 +31,8 @@ ActorAnimation::ActorAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group>
 {
     MWWorld::ContainerStore& store = mPtr.getClass().getContainerStore(mPtr);
 
-    for (MWWorld::ContainerStoreIterator iter = store.begin(MWWorld::ContainerStore::Type_Light); iter != store.end(); ++iter)
+    for (MWWorld::ConstContainerStoreIterator iter = store.cbegin(MWWorld::ContainerStore::Type_Light);
+         iter != store.cend(); ++iter)
     {
         const ESM::Light* light = iter->get<ESM::Light>()->mBase;
         if (!(light->mData.mFlags & ESM::Light::Carry))

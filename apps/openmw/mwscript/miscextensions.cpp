@@ -580,7 +580,7 @@ namespace MWScript
                         int numNotEquipped = invStorePtr->count(item);
                         for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
                         {
-                            MWWorld::ContainerStoreIterator it = invStorePtr->getSlot (slot);
+                            MWWorld::ConstContainerStoreIterator it = invStorePtr->getSlot (slot);
                             if (it != invStorePtr->end() && ::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
                             {
                                 numNotEquipped -= it->getRefData().getCount();

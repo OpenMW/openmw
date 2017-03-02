@@ -310,7 +310,7 @@ namespace MWGui
         {
             MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
             MWBase::Environment::get().getWindowManager()->useItem(item);
-            MWWorld::ContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            MWWorld::ConstContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             // change draw state only if the item is in player's right hand
             if (rightHand != store.end() && item == *rightHand)
             {

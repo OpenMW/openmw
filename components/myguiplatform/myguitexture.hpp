@@ -29,6 +29,9 @@ namespace osgMyGUI
         MyGUI::TextureUsage mUsage;
         size_t mNumElemBytes;
 
+        int mWidth;
+        int mHeight;
+
     public:
         OSGTexture(const std::string &name, Resource::ImageManager* imageManager);
         OSGTexture(osg::Texture2D* texture);

@@ -558,10 +558,10 @@ void NpcAnimation::updateParts()
     bool wasArrowAttached = (mAmmunition.get() != NULL);
     mAmmunition.reset();
 
-    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+    const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
     {
-        MWWorld::ContainerStoreIterator store = inv.getSlot(slotlist[i].mSlot);
+        MWWorld::ConstContainerStoreIterator store = inv.getSlot(slotlist[i].mSlot);
 
         removePartGroup(slotlist[i].mSlot);
 
@@ -618,8 +618,8 @@ void NpcAnimation::updateParts()
 
     if(mPartPriorities[ESM::PRT_Shield] < 1)
     {
-        MWWorld::ContainerStoreIterator store = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        MWWorld::Ptr part;
+        MWWorld::ConstContainerStoreIterator store = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        MWWorld::ConstPtr part;
         if(store != inv.end() && (part=*store).getTypeName() == typeid(ESM::Light).name())
         {
             const ESM::Light *light = part.get<ESM::Light>()->mBase;
@@ -748,8 +748,8 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
 
     if (!mSoundsDisabled)
     {
-        MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-        MWWorld::ContainerStoreIterator csi = inv.getSlot(group < 0 ? MWWorld::InventoryStore::Slot_Helmet : group);
+        const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+        MWWorld::ConstContainerStoreIterator csi = inv.getSlot(group < 0 ? MWWorld::InventoryStore::Slot_Helmet : group);
         if (csi != inv.end())
         {
             mSoundIds[type] = csi->getClass().getSound(*csi);
@@ -883,8 +883,8 @@ void NpcAnimation::showWeapons(bool showWeapon)
     mAmmunition.reset();
     if(showWeapon)
     {
-        MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-        MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+        MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         if(weapon != inv.end())
         {
             osg::Vec4f glowColor = getEnchantmentColor(*weapon);
@@ -896,7 +896,7 @@ void NpcAnimation::showWeapons(bool showWeapon)
             if (weapon->getTypeName() == typeid(ESM::Weapon).name() &&
                     weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
             {
-                MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+                MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
                 if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt)
                     attachArrow();
             }
@@ -911,8 +911,8 @@ void NpcAnimation::showWeapons(bool showWeapon)
 void NpcAnimation::showCarriedLeft(bool show)
 {
     mShowCarriedLeft = show;
-    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-    MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+    const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+    MWWorld::ConstContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
     if(show && iter != inv.end())
     {
         osg::Vec4f glowColor = getEnchantmentColor(*iter);

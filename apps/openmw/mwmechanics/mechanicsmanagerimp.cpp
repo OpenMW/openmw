@@ -1315,8 +1315,8 @@ namespace MWMechanics
             float bootWeight = 0;
             if (ptr.getClass().isNpc())
             {
-                MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
-                MWWorld::ContainerStoreIterator it = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
+                const MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
+                MWWorld::ConstContainerStoreIterator it = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
                 if (it != inv.end())
                     bootWeight = it->getClass().getWeight(*it);
             }
