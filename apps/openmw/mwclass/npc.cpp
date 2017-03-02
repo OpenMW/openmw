@@ -466,10 +466,10 @@ namespace MWClass
         // preload equipped items
         if (ptr.getClass().hasInventoryStore(ptr))
         {
-            MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
+            const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
             for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
             {
-                MWWorld::ContainerStoreIterator equipped = invStore.getSlot(slot);
+                MWWorld::ConstContainerStoreIterator equipped = invStore.getSlot(slot);
                 if (equipped != invStore.end())
                 {
                     std::vector<ESM::PartReference> parts;
@@ -1079,7 +1079,7 @@ namespace MWClass
         const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
 
         MWMechanics::NpcStats &stats = getNpcStats(ptr);
-        MWWorld::InventoryStore &invStore = getInventoryStore(ptr);
+        const MWWorld::InventoryStore &invStore = getInventoryStore(ptr);
 
         float fUnarmoredBase1 = store.find("fUnarmoredBase1")->getFloat();
         float fUnarmoredBase2 = store.find("fUnarmoredBase2")->getFloat();
@@ -1088,7 +1088,7 @@ namespace MWClass
         float ratings[MWWorld::InventoryStore::Slots];
         for(int i = 0;i < MWWorld::InventoryStore::Slots;i++)
         {
-            MWWorld::ContainerStoreIterator it = invStore.getSlot(i);
+            MWWorld::ConstContainerStoreIterator it = invStore.getSlot(i);
             if (it == invStore.end() || it->getTypeName() != typeid(ESM::Armor).name())
             {
                 // unarmored
@@ -1169,8 +1169,8 @@ namespace MWClass
                         return "";
                 }
 
-                MWWorld::InventoryStore &inv = Npc::getInventoryStore(ptr);
-                MWWorld::ContainerStoreIterator boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
+                const MWWorld::InventoryStore &inv = Npc::getInventoryStore(ptr);
+                MWWorld::ConstContainerStoreIterator boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
                 if(boots == inv.end() || boots->getTypeName() != typeid(ESM::Armor).name())
                     return (name == "left") ? "FootBareLeft" : "FootBareRight";
 
