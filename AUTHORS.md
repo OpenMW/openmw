@@ -116,6 +116,7 @@ Programmers
     Pieter van der Kloet (pvdk)
     pkubik
     Radu-Marius Popovici (rpopovici)
+    Rafael Moura (dhustkoder)
     rdimesio
     riothamus
     Rob Cutmore (rcutmore)
