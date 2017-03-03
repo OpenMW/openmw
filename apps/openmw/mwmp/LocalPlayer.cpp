@@ -546,7 +546,6 @@ void LocalPlayer::updateDeadState(bool forceUpdate)
     if (ptrNpcStats->isDead() && !isDead)
     {
         creatureStats.mDead = true;
-        RakNet::BitStream bs;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_DEATH to server about myself");
         getNetworking()->getPlayerPacket(ID_PLAYER_DEATH)->Send(this);
@@ -622,7 +621,6 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
         if (isJumping)
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after jump;
 
-        RakNet::BitStream bs;
         getNetworking()->getPlayerPacket(ID_PLAYER_DRAWSTATE)->Send(this);
     }
 }
@@ -1096,7 +1094,6 @@ void LocalPlayer::sendAttack(Attack::TYPE type)
 
     attack.type = type;
     attack.pressed = false;
-    RakNet::BitStream bs;
     getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Send(this);
 }
 
@@ -1167,6 +1164,5 @@ void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
     attack.target = RakNet::RakNetGUID();
     attack.attacker = guid;
 
-    RakNet::BitStream bs;
     getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Send(this);
 }

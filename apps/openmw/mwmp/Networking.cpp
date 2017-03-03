@@ -101,11 +101,6 @@ void Networking::update()
     }
 }
 
-void Networking::sendData(RakNet::BitStream *bs)
-{
-    peer->Send(bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, serverAddr, false);
-}
-
 void Networking::connect(const std::string &ip, unsigned short port)
 {
     RakNet::SystemAddress master;

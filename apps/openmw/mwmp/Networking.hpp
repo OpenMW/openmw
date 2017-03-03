@@ -25,7 +25,6 @@ namespace mwmp
         ~Networking();
         void connect(const std::string& ip, unsigned short port);
         void update();
-        void sendData(RakNet::BitStream *bitStream);
 
         PlayerPacket *getPlayerPacket(RakNet::MessageID id);
         WorldPacket *getWorldPacket(RakNet::MessageID id);
