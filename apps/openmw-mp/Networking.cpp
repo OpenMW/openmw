@@ -386,12 +386,10 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
     case ID_PLAYER_RESURRECT:
     {
-        DEBUG_PRINTF("ID_PLAYER_RESURRECT\n");
-        //packetResurrect.Read(player);
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_RESURRECT from %s", player->npc.mName.c_str());
+
         player->creatureStats.mDead = false;
         myPacket->Send(player, true);
-        playerController->GetPacket(ID_PLAYER_POS)->RequestData(player->guid);
-        playerController->GetPacket(ID_PLAYER_CELL_CHANGE)->RequestData(player->guid);
 
         Script::Call<Script::CallbackIdentity("OnPlayerResurrect")>(player->getId());
 

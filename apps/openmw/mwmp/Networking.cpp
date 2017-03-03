@@ -452,8 +452,11 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     case ID_PLAYER_DEATH:
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_DEATH from server");
+
         if (guid == myGuid)
         {
+            LOG_APPEND(Log::LOG_INFO, "- Packet was about me");
+
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             MWMechanics::DynamicStat<float> health = player.getClass().getCreatureStats(player).getHealth();
             health.setCurrent(0);
@@ -463,6 +466,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         else if (pl != 0)
         {
             LOG_APPEND(Log::LOG_INFO, "- Packet was about %s", pl->npc.mName.c_str());
+
             MWMechanics::DynamicStat<float> health;
             pl->creatureStats.mDead = true;
             health.readState(pl->creatureStats.mDynamic[0]);
@@ -474,8 +478,12 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     }
     case ID_PLAYER_RESURRECT:
     {
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_RESURRECT from server");
+
         if (guid == myGuid)
         {
+            LOG_APPEND(Log::LOG_INFO, "- Packet was about me");
+
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             player.getClass().getCreatureStats(player).resurrect();
 
@@ -490,6 +498,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         else if (pl != 0)
         {
+            LOG_APPEND(Log::LOG_INFO, "- Packet was about %s", pl->npc.mName.c_str());
+
             pl->creatureStats.mDead = false;
             if (pl->creatureStats.mDynamic[0].mMod < 1)
                 pl->creatureStats.mDynamic[0].mMod = 1;

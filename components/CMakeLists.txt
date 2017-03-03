@@ -161,7 +161,7 @@ add_component_dir (openmw-mp
         Packets/Player/PacketPlayerSpellbook Packets/Player/PacketPlayerJournal Packets/Player/PacketPlayerActiveSkills
         Packets/Player/PacketPlayerCellChange Packets/Player/PacketPlayerCellState
 
-        Packets/Player/PacketPlayerResurrect
+        Packets/Player/PacketPlayerDeath Packets/Player/PacketPlayerResurrect
 
         Packets/Player/PacketGUIBoxes Packets/Player/PacketTime
 
