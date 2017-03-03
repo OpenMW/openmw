@@ -134,9 +134,7 @@ namespace mwmp
 
         localPlayer->chatMessage = str;
 
-        RakNet::BitStream bs;
-        networking->getPlayerPacket(ID_CHAT_MESSAGE)->Packet(&bs, localPlayer, true);
-        networking->sendData(&bs);
+        networking->getPlayerPacket(ID_CHAT_MESSAGE)->Send(localPlayer);
     }
 
     void GUIChat::clean()

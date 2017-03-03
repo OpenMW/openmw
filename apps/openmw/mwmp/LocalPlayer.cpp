@@ -356,9 +356,7 @@ void LocalPlayer::updateCell(bool forceUpdate)
         // cell change events in server scripts will have the wrong player position
         updatePosition(true);
 
-        RakNet::BitStream bs;
-        getNetworking()->getPlayerPacket(ID_PLAYER_CELL_CHANGE)->Packet(&bs, this, true);
-        getNetworking()->sendData(&bs);
+        getNetworking()->getPlayerPacket(ID_PLAYER_CELL_CHANGE)->Send(this);
 
         // Also force an update to skills (to send all progress to skill increases)
         updateSkills(true);
@@ -422,10 +420,7 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
 
     if (equipChanged)
     {
-        RakNet::BitStream bs;
-        bs.ResetWritePointer();
-        getNetworking()->getPlayerPacket(ID_PLAYER_EQUIPMENT)->Packet(&bs, this, true);
-        getNetworking()->sendData(&bs);
+        getNetworking()->getPlayerPacket(ID_PLAYER_EQUIPMENT)->Send(this);
         equipChanged = false;
     }
 }
@@ -523,10 +518,6 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
             attack.type = Attack::MAGIC;
             attack.pressed = true;
             attack.refid = spell;
-
-            /*RakNet::BitStream bs;
-            getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Packet(&bs, this, true);
-            getNetworking()->SendData(&bs);*/
         }
         else if (state == MWMechanics::DrawState_Weapon)
         {
@@ -556,8 +547,9 @@ void LocalPlayer::updateDeadState(bool forceUpdate)
     {
         creatureStats.mDead = true;
         RakNet::BitStream bs;
-        getNetworking()->getPlayerPacket((RakNet::MessageID)ID_PLAYER_DEATH)->Packet(&bs, this, true);
-        getNetworking()->sendData(&bs);
+
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_DEATH to server about myself");
+        getNetworking()->getPlayerPacket(ID_PLAYER_DEATH)->Send(this);
         isDead = true;
     }
     else if (ptrNpcStats->getHealth().getCurrent() > 0 && isDead)
@@ -631,8 +623,7 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after jump;
 
         RakNet::BitStream bs;
-        getNetworking()->getPlayerPacket(ID_PLAYER_DRAWSTATE)->Packet(&bs, this, true);
-        getNetworking()->sendData(&bs);
+        getNetworking()->getPlayerPacket(ID_PLAYER_DRAWSTATE)->Send(this);
     }
 }
 
@@ -1106,8 +1097,7 @@ void LocalPlayer::sendAttack(Attack::TYPE type)
     attack.type = type;
     attack.pressed = false;
     RakNet::BitStream bs;
-    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Packet(&bs, this, true);
-    getNetworking()->sendData(&bs);
+    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Send(this);
 }
 
 void LocalPlayer::clearCellStates()
@@ -1178,6 +1168,5 @@ void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
     attack.attacker = guid;
 
     RakNet::BitStream bs;
-    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Packet(&bs, this, true);
-    getNetworking()->sendData(&bs);
+    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Send(this);
 }
