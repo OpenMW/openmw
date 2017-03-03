@@ -417,12 +417,14 @@ namespace SceneUtil
             // get the node bounds in view space
             // NB do not node->getBound() * modelView, that would apply the node's transformation twice
             osg::BoundingSphere nodeBound;
-            osg::Group* group = node->asGroup();
-            if (group)
+            osg::Transform* transform = node->asTransform();
+            if (transform)
             {
-                for (unsigned int i=0; i<group->getNumChildren(); ++i)
-                    nodeBound.expandBy(group->getChild(i)->getBound());
+                for (unsigned int i=0; i<transform->getNumChildren(); ++i)
+                    nodeBound.expandBy(transform->getChild(i)->getBound());
             }
+            else
+                nodeBound = node->getBound();
             osg::Matrixf mat = *cv->getModelViewMatrix();
             transformBoundingSphere(mat, nodeBound);
 
