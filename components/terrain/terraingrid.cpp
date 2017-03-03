@@ -3,6 +3,9 @@
 #include <memory>
 
 #include <osg/Material>
+#include <osg/Geometry>
+
+#include <osgUtil/IncrementalCompileOperation>
 
 #include <OpenThreads/ScopedLock>
 
@@ -16,15 +19,10 @@
 
 #include <components/esm/loadland.hpp>
 
-#include <osg/Geometry>
-#include <osg/KdTree>
-
-#include <osgFX/Effect>
-
-#include <osgUtil/IncrementalCompileOperation>
 
 #include "material.hpp"
 #include "storage.hpp"
+#include "terraindrawable.hpp"
 
 namespace
 {
@@ -124,7 +122,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
 
         mStorage->fillVertexBuffers(0, chunkSize, chunkCenter, positions, normals, colors);
 
-        osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
+        osg::ref_ptr<TerrainDrawable> geometry (new TerrainDrawable);
         geometry->setVertexArray(positions);
         geometry->setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
         geometry->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
@@ -147,10 +145,6 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         std::vector<osg::ref_ptr<osg::Image> > blendmaps;
         mStorage->getBlendmaps(chunkSize, chunkCenter, false, blendmaps, layerList);
 
-        // For compiling textures, I don't think the osgFX::Effect does it correctly
-        osg::ref_ptr<osg::Node> textureCompileDummy (new osg::Node);
-        unsigned int dummyTextureCounter = 0;
-
         bool useShaders = mResourceSystem->getSceneManager()->getForceShaders();
         if (!mResourceSystem->getSceneManager()->getClampLighting())
             useShaders = true; // always use shaders when lighting is unclamped, this is to avoid lighting seams between a terrain chunk with normal maps and one without normal maps
@@ -172,7 +166,6 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
                     mTextureCache[it->mDiffuseMap] = texture;
                 }
                 textureLayer.mDiffuseMap = texture;
-                textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, texture);
 
                 if (!it->mNormalMap.empty())
                 {
@@ -185,7 +178,6 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
                         mResourceSystem->getSceneManager()->applyFilterSettings(texture);
                         mTextureCache[it->mNormalMap] = texture;
                     }
-                    textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, texture);
                     textureLayer.mNormalMap = texture;
                 }
 
@@ -205,8 +197,6 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
             texture->setResizeNonPowerOfTwoHint(false);
             blendmapTextures.push_back(texture);
-
-            textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, blendmapTextures.back());
         }
 
         // use texture coordinates for both texture units, the layer texture and blend texture
@@ -214,21 +204,15 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             geometry->setTexCoordArray(i, mCache.getUVBuffer());
 
         float blendmapScale = ESM::Land::LAND_TEXTURE_SIZE*chunkSize;
-        osg::ref_ptr<osgFX::Effect> effect (new Terrain::Effect(mShaderManager ? useShaders : false, mResourceSystem->getSceneManager()->getForcePerPixelLighting(), mResourceSystem->getSceneManager()->getClampLighting(),
-                                                                mShaderManager, layers, blendmapTextures, blendmapScale, blendmapScale));
 
-        effect->addCullCallback(new SceneUtil::LightListCallback);
+        geometry->setPasses(createPasses(mShaderManager ? useShaders : false, mResourceSystem->getSceneManager()->getForcePerPixelLighting(),
+                                         mResourceSystem->getSceneManager()->getClampLighting(), mShaderManager, layers, blendmapTextures, blendmapScale, blendmapScale));
 
-        transform->addChild(effect);
-
-        osg::Node* toAttach = geometry.get();
-
-        effect->addChild(toAttach);
+        transform->addChild(geometry);
 
         if (mIncrementalCompileOperation)
         {
-            mIncrementalCompileOperation->add(toAttach);
-            mIncrementalCompileOperation->add(textureCompileDummy);
+            mIncrementalCompileOperation->add(geometry);
         }
 
         return transform;
