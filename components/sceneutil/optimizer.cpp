@@ -802,8 +802,7 @@ bool Optimizer::RemoveRedundantNodesVisitor::isOperationPermissible(osg::Node& n
 
 void Optimizer::RemoveRedundantNodesVisitor::apply(osg::Group& group)
 {
-    if (group.getNumChildren()==1 &&
-        typeid(group)==typeid(osg::Group) &&
+    if (typeid(group)==typeid(osg::Group) &&
         isOperationPermissible(group))
     {
         _redundantNodeList.insert(&group);
