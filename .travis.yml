@@ -10,6 +10,7 @@ branches:
     - master
     - coverity_scan
     - /openmw-.*$/
+    - test-release-build-on-travis
 env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
@@ -70,7 +71,7 @@ deploy:
  script: ./CI/deploy.osx.sh
  skip_cleanup: true
  on:
-  branch: master
+  branch: test-release-build-on-travis
   condition: "$TRAVIS_EVENT_TYPE = cron && $TRAVIS_OS_NAME = osx"
 notifications:
   email:
@@ -78,9 +79,9 @@ notifications:
       - corrmage+travis-ci@gmail.com
     on_success: change
     on_failure: always
-  irc:
-    channels:
-      - "chat.freenode.net#openmw"
-    on_success: change
-    on_failure: always
-    use_notice: true
+  # irc:
+  #   channels:
+  #     - "chat.freenode.net#openmw"
+  #   on_success: change
+  #   on_failure: always
+  #   use_notice: true
