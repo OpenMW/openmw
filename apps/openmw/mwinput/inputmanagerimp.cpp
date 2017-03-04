@@ -386,47 +386,44 @@ namespace MWInput
 
         updateCursorMode();
 
-        if(mJoystickLastUsed)
+        if (mGuiCursorEnabled)
         {
-            if (mGuiCursorEnabled)
+            float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue()*2.0f-1.0f;
+            float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue()*2.0f-1.0f;
+            float zAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
+            const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+
+            xAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
+            yAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
+
+            // We keep track of our own mouse position, so that moving the mouse while in
+            // game mode does not move the position of the GUI cursor
+            mGuiCursorX += xAxis * dt * 1500.0f * mInvUiScalingFactor;
+            mGuiCursorY += yAxis * dt * 1500.0f * mInvUiScalingFactor;
+            mMouseWheel -= static_cast<int>(zAxis * dt * 1500.0f);
+
+            mGuiCursorX = std::max(0.f, std::min(mGuiCursorX, float(viewSize.width)));
+            mGuiCursorY = std::max(0.f, std::min(mGuiCursorY, float(viewSize.height)));
+
+            MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
+            mInputManager->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
+        }
+        if (mMouseLookEnabled)
+        {
+            float xAxis = mInputBinder->getChannel(A_LookLeftRight)->getValue()*2.0f-1.0f;
+            float yAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
+            resetIdleTime();
+
+            float rot[3];
+            rot[0] = yAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
+            rot[1] = 0.0f;
+            rot[2] = xAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f);
+
+            // Only actually turn player when we're not in vanity mode
+            if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
             {
-                float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue()*2.0f-1.0f;
-                float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue()*2.0f-1.0f;
-                float zAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
-                const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-
-                xAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
-                yAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
-
-                // We keep track of our own mouse position, so that moving the mouse while in
-                // game mode does not move the position of the GUI cursor
-                mGuiCursorX += xAxis * dt * 1500.0f * mInvUiScalingFactor;
-                mGuiCursorY += yAxis * dt * 1500.0f * mInvUiScalingFactor;
-                mMouseWheel -= static_cast<int>(zAxis * dt * 1500.0f);
-
-                mGuiCursorX = std::max(0.f, std::min(mGuiCursorX, float(viewSize.width)));
-                mGuiCursorY = std::max(0.f, std::min(mGuiCursorY, float(viewSize.height)));
-
-                MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
-                mInputManager->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
-            }
-            if (mMouseLookEnabled)
-            {
-                float xAxis = mInputBinder->getChannel(A_LookLeftRight)->getValue()*2.0f-1.0f;
-                float yAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
-                resetIdleTime();
-
-                float rot[3];
-                rot[0] = yAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
-                rot[1] = 0.0f;
-                rot[2] = xAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f);
-
-                // Only actually turn player when we're not in vanity mode
-                if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
-                {
-                    mPlayer->yaw(rot[2]);
-                    mPlayer->pitch(rot[0]);
-                }
+                mPlayer->yaw(rot[2]);
+                mPlayer->pitch(rot[0]);
             }
         }
 
@@ -440,73 +437,73 @@ namespace MWInput
             {
                 bool triedToMove = false;
                 bool isRunning = false;
-                if(mJoystickLastUsed)
+
+                // joystick movement
+                float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue();
+                float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue();
+                if (xAxis < .5)
                 {
-                    float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue();
-                    float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue();
-                    if (xAxis < .5)
-                    {
-                        triedToMove = true;
-                        mPlayer->setLeftRight (-1);
-                    }
-                    else if (xAxis > .5)
-                    {
-                        triedToMove = true;
-                        mPlayer->setLeftRight (1);
-                    }
-
-                    if (yAxis < .5)
-                    {
-                        triedToMove = true;
-                        mPlayer->setAutoMove (false);
-                        mPlayer->setForwardBackward (1);
-                    }
-                    else if (yAxis > .5)
-                    {
-                        triedToMove = true;
-                        mPlayer->setAutoMove (false);
-                        mPlayer->setForwardBackward (-1);
-                    }
-
-                    else if(mPlayer->getAutoMove())
-                    {
-                        triedToMove = true;
-                        mPlayer->setForwardBackward (1);
-                    }
-                    isRunning = xAxis > .75 || xAxis < .25 || yAxis > .75 || yAxis < .25;
-                    if(triedToMove) resetIdleTime();
+                    triedToMove = true;
+                    mPlayer->setLeftRight (-1);
                 }
-                else
+                else if (xAxis > .5)
                 {
-                    if (actionIsActive(A_MoveLeft))
-                    {
-                        triedToMove = true;
-                        mPlayer->setLeftRight (-1);
-                    }
-                    else if (actionIsActive(A_MoveRight))
-                    {
-                        triedToMove = true;
-                        mPlayer->setLeftRight (1);
-                    }
+                    triedToMove = true;
+                    mPlayer->setLeftRight (1);
+                }
 
-                    if (actionIsActive(A_MoveForward))
-                    {
-                        triedToMove = true;
-                        mPlayer->setAutoMove (false);
-                        mPlayer->setForwardBackward (1);
-                    }
-                    else if (actionIsActive(A_MoveBackward))
-                    {
-                        triedToMove = true;
-                        mPlayer->setAutoMove (false);
-                        mPlayer->setForwardBackward (-1);
-                    }
+                if (yAxis < .5)
+                {
+                    triedToMove = true;
+                    mPlayer->setAutoMove (false);
+                    mPlayer->setForwardBackward (1);
+                }
+                else if (yAxis > .5)
+                {
+                    triedToMove = true;
+                    mPlayer->setAutoMove (false);
+                    mPlayer->setForwardBackward (-1);
+                }
+                else if(mPlayer->getAutoMove())
+                {
+                    triedToMove = true;
+                    mPlayer->setForwardBackward (1);
+                }
+                if (triedToMove)
+                    mJoystickLastUsed = true;
 
-                    else if(mPlayer->getAutoMove())
-                    {
-                        triedToMove = true;
-                        mPlayer->setForwardBackward (1);
-                    }
+                // keyboard movement
+                isRunning = xAxis > .75 || xAxis < .25 || yAxis > .75 || yAxis < .25;
+                if(triedToMove) resetIdleTime();
+
+                if (actionIsActive(A_MoveLeft))
+                {
+                    triedToMove = true;
+                    mPlayer->setLeftRight (-1);
+                }
+                else if (actionIsActive(A_MoveRight))
+                {
+                    triedToMove = true;
+                    mPlayer->setLeftRight (1);
+                }
+
+                if (actionIsActive(A_MoveForward))
+                {
+                    triedToMove = true;
+                    mPlayer->setAutoMove (false);
+                    mPlayer->setForwardBackward (1);
+                }
+                else if (actionIsActive(A_MoveBackward))
+                {
+                    triedToMove = true;
+                    mPlayer->setAutoMove (false);
+                    mPlayer->setForwardBackward (-1);
+                }
+
+                else if(mPlayer->getAutoMove())
+                {
+                    triedToMove = true;
+                    mPlayer->setForwardBackward (1);
                 }
 
                 if (!mSneakToggles)
@@ -851,7 +848,6 @@ namespace MWInput
 
     void InputManager::axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg )
     {
-        mJoystickLastUsed = true;
         if (!mControlsDisabled)
             mInputBinder->axisMoved(deviceID, arg);
     }
