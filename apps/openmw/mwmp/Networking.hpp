@@ -13,6 +13,7 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Controllers/PlayerPacketController.hpp>
 #include <components/openmw-mp/Controllers/WorldPacketController.hpp>
+#include <components/files/collections.hpp>
 
 namespace mwmp
 {
@@ -23,7 +24,7 @@ namespace mwmp
     public:
         Networking();
         ~Networking();
-        void connect(const std::string& ip, unsigned short port);
+        void connect(const std::string& ip, unsigned short port, std::vector<std::string> &content, Files::Collections &collections);
         void update();
 
         PlayerPacket *getPlayerPacket(RakNet::MessageID id);

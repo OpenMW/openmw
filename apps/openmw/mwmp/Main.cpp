@@ -149,7 +149,7 @@ bool Main::init(std::vector<std::string> &content, Files::Collections &collectio
     }
     get().mLocalPlayer->passw = passw;
     
-    pMain->mNetworking->connect(pMain->server, pMain->port);
+    pMain->mNetworking->connect(pMain->server, pMain->port, content, collections);
     RestoreMgr(mgr);
     return pMain->mNetworking->isConnected();
 }

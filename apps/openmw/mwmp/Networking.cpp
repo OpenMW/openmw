@@ -23,6 +23,8 @@
 #include "../mwstate/statemanagerimp.hpp"
 #include <components/openmw-mp/Log.hpp>
 #include <components/openmw-mp/Version.hpp>
+#include <components/files/configurationmanager.hpp>
+#include <components/openmw-mp/Utils.hpp>
 #include "DedicatedPlayer.hpp"
 #include "LocalPlayer.hpp"
 #include "GUIController.hpp"
@@ -101,7 +103,7 @@ void Networking::update()
     }
 }
 
-void Networking::connect(const std::string &ip, unsigned short port)
+void Networking::connect(const std::string &ip, unsigned short port, std::vector<string> &content, Files::Collections &collections)
 {
     RakNet::SystemAddress master;
     master.SetBinaryAddress(ip.c_str());
@@ -157,6 +159,23 @@ void Networking::connect(const std::string &ip, unsigned short port)
                 default:
                     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Connection message with identifier %i has arrived in initialization.", packet->data[0]);
             }
+        }
+    }
+
+
+    vector<string>::const_iterator it(content.begin());
+    for (int idx = 0; it != content.end(); ++it, ++idx)
+    {
+        boost::filesystem::path filename(*it);
+        const Files::MultiDirCollection& col = collections.getCollection(filename.extension().string());
+        if (col.doesExist(*it))
+        {
+            unsigned int crc32 = Utils::crc32checksum(col.getPath(*it).string());
+            printf("idx: %d\tchecksum: %x\tfile:%s\n", idx, crc32, col.getPath(*it).c_str());
+        }
+        else
+        {
+            throw std::runtime_error("Plugin doesn't exists.");
         }
     }
 
