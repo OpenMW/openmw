@@ -122,7 +122,7 @@ void RestoreMgr(Settings::Manager &mgr)
     mgr.mChangedSettings = saveChangedSettings;
 }
 
-bool Main::init(std::vector<std::string> &content)
+bool Main::init(std::vector<std::string> &content, Files::Collections &collections)
 {
     assert(!pMain);
     pMain = new Main();

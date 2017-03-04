@@ -1,5 +1,6 @@
 #include "../mwworld/ptr.hpp"
 #include <boost/program_options.hpp>
+#include <components/files/collections.hpp>
 
 namespace mwmp
 {
@@ -16,7 +17,7 @@ namespace mwmp
 
         static void optionsDesc(boost::program_options::options_description *desc);
         static void configure(const boost::program_options::variables_map &variables);
-        static bool init(std::vector<std::string> &content);
+        static bool init(std::vector<std::string> &content, Files::Collections &collections);
         static void postInit();
         static void destroy();
         static const Main &get();

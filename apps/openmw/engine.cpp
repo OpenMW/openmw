@@ -657,7 +657,7 @@ private:
 void OMW::Engine::go()
 {
     assert (!mContentFiles.empty());
-    if(!mwmp::Main::init(mContentFiles))
+    if(!mwmp::Main::init(mContentFiles, mFileCollections))
         return;
 
     std::cout << "OSG version: " << osgGetVersion() << std::endl;
