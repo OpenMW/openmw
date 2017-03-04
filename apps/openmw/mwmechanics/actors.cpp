@@ -1379,7 +1379,17 @@ namespace MWMechanics
                 if( iter->first == getPlayer())
                 {
                     //player's death animation is over
-                    MWBase::Environment::get().getStateManager()->askLoadRecent();
+
+                    /*
+                        Start of tes3mp change (major)
+
+                        The main menu no longer opens when the local player dies,
+                        because of automatic respawning by default
+                    */
+                    //MWBase::Environment::get().getStateManager()->askLoadRecent();
+                    /*
+                        End of tes3mp change (major)
+                    */
                 }
                 else
                 {
