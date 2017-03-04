@@ -15,6 +15,7 @@
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <components/openmw-mp/Version.hpp>
+#include "Utils.hpp"
 
 #include "MasterClient.hpp"
 

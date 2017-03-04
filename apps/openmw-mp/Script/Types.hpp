@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <RakNetTypes.h>
-#include <Utils.hpp>
+#include "Utils.hpp"
 
 #ifdef _WIN32
 #include <winsock2.h>

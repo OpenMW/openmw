@@ -148,7 +148,7 @@ add_component_dir (version
     )
 
 add_component_dir (openmw-mp
-        Log
+        Log Utils
         Controllers/PlayerPacketController Controllers/WorldPacketController
         Packets/BasePacket Packets/Player/PlayerPacket Packets/World/WorldPacket
 

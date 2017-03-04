@@ -68,9 +68,9 @@ set(SERVER
     main.cpp
     Player.cpp
     Networking.cpp
-    Utils.cpp
     MasterClient.cpp
     Cell.cpp
+    Utils.cpp
     Script/Script.cpp Script/ScriptFunction.cpp
     Script/ScriptFunctions.cpp
 
