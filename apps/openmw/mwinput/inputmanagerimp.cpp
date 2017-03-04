@@ -398,15 +398,20 @@ namespace MWInput
 
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
-            mGuiCursorX += xAxis * dt * 1500.0f * mInvUiScalingFactor;
-            mGuiCursorY += yAxis * dt * 1500.0f * mInvUiScalingFactor;
-            mMouseWheel -= static_cast<int>(zAxis * dt * 1500.0f);
+            float xmove = xAxis * dt * 1500.0f * mInvUiScalingFactor;
+            float ymove = yAxis * dt * 1500.0f * mInvUiScalingFactor;
+            if (xmove != 0|| ymove != 0)
+            {
+                mGuiCursorX += xmove;
+                mGuiCursorY += ymove;
+                mMouseWheel -= static_cast<int>(zAxis * dt * 1500.0f);
 
-            mGuiCursorX = std::max(0.f, std::min(mGuiCursorX, float(viewSize.width)));
-            mGuiCursorY = std::max(0.f, std::min(mGuiCursorY, float(viewSize.height)));
+                mGuiCursorX = std::max(0.f, std::min(mGuiCursorX, float(viewSize.width-1)));
+                mGuiCursorY = std::max(0.f, std::min(mGuiCursorY, float(viewSize.height-1)));
 
-            MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
-            mInputManager->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
+                MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
+                mInputManager->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
+            }
         }
         if (mMouseLookEnabled)
         {
