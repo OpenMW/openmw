@@ -96,9 +96,7 @@ namespace MWGui
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send(worldEvent);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
-                worldObject.refId.c_str(),
-                worldObject.refNumIndex,
-                worldObject.count);
+                               worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.count);
             /*
                 End of tes3mp addition
             */

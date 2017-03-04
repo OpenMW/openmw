@@ -148,7 +148,7 @@ bool Main::init(std::vector<std::string> &content, Files::Collections &collectio
         pMain->port = atoi(addr.substr(delim_pos + 1).c_str());
     }
     get().mLocalPlayer->passw = passw;
-    
+
     pMain->mNetworking->connect(pMain->server, pMain->port, content, collections);
     RestoreMgr(mgr);
     return pMain->mNetworking->isConnected();

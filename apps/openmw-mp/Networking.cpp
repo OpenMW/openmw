@@ -182,8 +182,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 }
                 else
                 {
-                    LOG_APPEND(Log::LOG_INFO, "- Started information exchange with %s",
-                               other->npc.mName.c_str());
+                    LOG_APPEND(Log::LOG_INFO, "- Started information exchange with %s", other->npc.mName.c_str());
 
                     playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(other, pl->guid);
                     playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(other, pl->guid);

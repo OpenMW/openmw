@@ -129,11 +129,8 @@ namespace MWGui
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(worldEvent);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_CONTAINER about\n- Ptr cellRef: %s, %i\n- cell: %s\n- item: %s, %i",
-            worldObject.refId.c_str(),
-            worldObject.refNumIndex,
-            worldEvent->cell.getDescription().c_str(),
-            containerItem.refId.c_str(),
-            containerItem.count);
+                           worldObject.refId.c_str(), worldObject.refNumIndex, worldEvent->cell.getDescription().c_str(),
+                           containerItem.refId.c_str(), containerItem.count);
         /*
             End of tes3mp addition
         */
@@ -193,11 +190,8 @@ namespace MWGui
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(worldEvent);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_CONTAINER about\n- Ptr cellRef: %s, %i\n- cell: %s\n- item: %s, %i",
-            worldObject.refId.c_str(),
-            worldObject.refNumIndex,
-            worldEvent->cell.getDescription().c_str(),
-            containerItem.refId.c_str(),
-            containerItem.count);
+                           worldObject.refId.c_str(), worldObject.refNumIndex, worldEvent->cell.getDescription().c_str(),
+                           containerItem.refId.c_str(), containerItem.count);
         /*
             End of tes3mp addition
         */
@@ -339,9 +333,7 @@ namespace MWGui
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(worldEvent);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_CONTAINER about\n- Ptr cellRef: %s, %i\n- cell: %s",
-                worldObject.refId.c_str(),
-                worldObject.refNumIndex,
-                worldEvent->cell.getDescription().c_str());
+                               worldObject.refId.c_str(), worldObject.refNumIndex, worldEvent->cell.getDescription().c_str());
             /*
                 End of tes3mp addition
             */

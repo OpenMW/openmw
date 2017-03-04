@@ -146,7 +146,7 @@ void Networking::connect(const std::string &ip, unsigned short port, std::vector
                     queue = false;
 
                     LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_CONNECTION_REQUESTED_ACCEPTED from %s",
-                        serverAddr.ToString());
+                                       serverAddr.ToString());
 
                     break;
                 }
@@ -157,7 +157,8 @@ void Networking::connect(const std::string &ip, unsigned short port, std::vector
                 case ID_CONNECTION_LOST:
                     throw runtime_error("ID_CONNECTION_LOST.\n");
                 default:
-                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Connection message with identifier %i has arrived in initialization.", packet->data[0]);
+                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Connection message with identifier %i has arrived in initialization.",
+                                       packet->data[0]);
             }
         }
     }
@@ -380,14 +381,10 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             //cout << "Player: " << pl->Npc()->mName << " pressed: " << (pl->getAttack()->pressed == 1) << endl;
             if (pl->attack.pressed == 0)
             {
-                LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Attack success: %s",
-                    pl->attack.success ? "true" : "false");
+                LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Attack success: %s", pl->attack.success ? "true" : "false");
 
                 if (pl->attack.success == 1)
-                {
-                    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Damage: %f",
-                        pl->attack.damage);
-                }
+                    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Damage: %f", pl->attack.damage);
             }
 
             MWMechanics::CreatureStats &stats = pl->getPtr().getClass().getNpcStats(pl->getPtr());
@@ -431,8 +428,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             }
             else
             {
-                LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "SpellId: %s",
-                    pl->attack.refid.c_str());
+                LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "SpellId: %s", pl->attack.refid.c_str());
                 LOG_APPEND(Log::LOG_VERBOSE, " - success: %d", pl->attack.success);
             }
         }
@@ -688,9 +684,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         {
             myPacket->Packet(&bsIn, getLocalPlayer(), false);
 
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_GUI_MESSAGEBOX, Type %d, MSG %s",
-                getLocalPlayer()->guiMessageBox.type,
-                getLocalPlayer()->guiMessageBox.label.c_str());
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_GUI_MESSAGEBOX, Type %d, MSG %s", getLocalPlayer()->guiMessageBox.type,
+                               getLocalPlayer()->guiMessageBox.label.c_str());
 
             int messageBoxType = getLocalPlayer()->guiMessageBox.type;
 
@@ -740,8 +735,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         break;
     }
     default:
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unhandled PlayerPacket with identifier %i has arrived",
-            packet->data[0]);
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unhandled PlayerPacket with identifier %i has arrived", packet->data[0]);
     }
 }
 
@@ -768,8 +762,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_CONTAINER about %s",
-            worldEvent.cell.getDescription().c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_CONTAINER about %s", worldEvent.cell.getDescription().c_str());
         LOG_APPEND(Log::LOG_VERBOSE, "- action: %i", worldEvent.action);
 
         // If we've received a request for information, comply with it
@@ -787,8 +780,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_PLACE about %s",
-            worldEvent.cell.getDescription().c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_PLACE about %s", worldEvent.cell.getDescription().c_str());
         worldEvent.placeObjects(ptrCellStore);
 
         break;
@@ -799,8 +791,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_DELETE about %s",
-            worldEvent.cell.getDescription().c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_DELETE about %s", worldEvent.cell.getDescription().c_str());
         worldEvent.deleteObjects(ptrCellStore);
 
         break;
@@ -811,8 +802,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_LOCK about %s",
-            worldEvent.cell.getDescription().c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_LOCK about %s", worldEvent.cell.getDescription().c_str());
         worldEvent.lockObjects(ptrCellStore);
 
         break;
@@ -823,8 +813,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_UNLOCK about %s",
-            worldEvent.cell.getDescription().c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_UNLOCK about %s", worldEvent.cell.getDescription().c_str());
         worldEvent.unlockObjects(ptrCellStore);
 
         break;
@@ -835,8 +824,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_SCALE about %s",
-            worldEvent.cell.getDescription().c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_SCALE about %s", worldEvent.cell.getDescription().c_str());
         worldEvent.scaleObjects(ptrCellStore);
 
         break;
@@ -847,8 +835,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_MOVE about %s",
-            worldEvent.cell.getDescription().c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_MOVE about %s", worldEvent.cell.getDescription().c_str());
         worldEvent.moveObjects(ptrCellStore);
 
         break;
@@ -859,8 +846,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ROTATE about %s",
-            worldEvent.cell.getDescription().c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ROTATE about %s", worldEvent.cell.getDescription().c_str());
         worldEvent.rotateObjects(ptrCellStore);
 
         break;
@@ -871,8 +857,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ANIM_PLAY about %s",
-            worldEvent.cell.getDescription().c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ANIM_PLAY about %s", worldEvent.cell.getDescription().c_str());
         worldEvent.animateObjects(ptrCellStore);
 
         break;
@@ -883,8 +868,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_STATE about %s",
-            worldEvent.cell.getDescription().c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_STATE about %s", worldEvent.cell.getDescription().c_str());
         worldEvent.activateDoors(ptrCellStore);
 
         break;
@@ -895,8 +879,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_SHORT about %s",
-            worldEvent.cell.getDescription().c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_SHORT about %s", worldEvent.cell.getDescription().c_str());
         worldEvent.setLocalShorts(ptrCellStore);
 
         break;
@@ -907,8 +890,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_FLOAT about %s",
-            worldEvent.cell.getDescription().c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_FLOAT about %s", worldEvent.cell.getDescription().c_str());
         worldEvent.setLocalFloats(ptrCellStore);
 
         break;
@@ -942,8 +924,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
         break;
     }
     default:
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unhandled WorldPacket with identifier %i has arrived",
-            packet->data[0]);
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unhandled WorldPacket with identifier %i has arrived", packet->data[0]);
     }
 }
 

@@ -1172,11 +1172,9 @@ namespace MWWorld
         // tes3mp debug start
         if (currCell != newCell) {
 
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Tick: %s was %s move from %s to %s",
-                   ptr.getBase()->mRef.getRefId().c_str(),
-                   ptr.getBase()->canChangeCell ? "allowed" : "denied",
-                   currCell->getCell()->getDescription().c_str(),
-                   newCell->getCell()->getDescription().c_str());
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Tick: %s was %s move from %s to %s", ptr.getBase()->mRef.getRefId().c_str(),
+                               ptr.getBase()->canChangeCell ? "allowed" : "denied", currCell->getCell()->getDescription().c_str(),
+                               newCell->getCell()->getDescription().c_str());
         }
         // tes3mp debug end
 
@@ -2337,10 +2335,8 @@ namespace MWWorld
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send(worldEvent);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 1\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
-            worldObject.refId.c_str(),
-            worldObject.refNumIndex,
-            worldEvent->cell.getDescription().c_str(),
-            worldObject.doorState ? "true" : "false");
+                           worldObject.refId.c_str(), worldObject.refNumIndex, worldEvent->cell.getDescription().c_str(),
+                           worldObject.doorState ? "true" : "false");
         /*
             End of tes3mp addition
         */
@@ -2368,10 +2364,8 @@ namespace MWWorld
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send(worldEvent);
 
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 2\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
-            worldObject.refId.c_str(),
-            worldObject.refNumIndex,
-            worldEvent->cell.getDescription().c_str(),
-            worldObject.doorState ? "true" : "false");
+                           worldObject.refId.c_str(), worldObject.refNumIndex, worldEvent->cell.getDescription().c_str(),
+                           worldObject.doorState ? "true" : "false");
         /*
             End of tes3mp addition
         */

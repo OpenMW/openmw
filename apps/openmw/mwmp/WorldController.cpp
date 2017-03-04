@@ -53,8 +53,7 @@ void mwmp::WorldController::openContainer(const MWWorld::Ptr &container, bool lo
     mwmp::Main::get().getLocalPlayer()->storeCurrentContainer(container, loot);
 
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Container \"%s\" (%d) is opened. Loot: %s",
-                       container.getCellRef().getRefId().c_str(),
-                       container.getCellRef().getRefNum().mIndex,
+                       container.getCellRef().getRefId().c_str(), container.getCellRef().getRefNum().mIndex,
                        loot ? "true" : "false");
 
     MWWorld::ContainerStore &cont = container.getClass().getContainerStore(container);
@@ -78,15 +77,14 @@ void mwmp::WorldController::closeContainer(const MWWorld::Ptr &container)
     // If the player died while in a container, the container's Ptr could be invalid now
     if (!container.isEmpty())
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Container \"%s\" (%d) is closed.",
-            container.getCellRef().getRefId().c_str(),
-            container.getCellRef().getRefNum().mIndex);
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Container \"%s\" (%d) is closed.", container.getCellRef().getRefId().c_str(),
+                           container.getCellRef().getRefNum().mIndex);
 
         MWWorld::ContainerStore &cont = container.getClass().getContainerStore(container);
         for (MWWorld::ContainerStoreIterator iter = cont.begin(); iter != cont.end(); iter++)
         {
-            LOG_APPEND(Log::LOG_VERBOSE, " - Item. Refid: \"%s\" Count: %d",
-                iter->getCellRef().getRefId().c_str(), iter->getRefData().getCount());
+            LOG_APPEND(Log::LOG_VERBOSE, " - Item. Refid: \"%s\" Count: %d", iter->getCellRef().getRefId().c_str(),
+                       iter->getRefData().getCount());
         }
     }
 

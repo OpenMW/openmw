@@ -90,8 +90,7 @@ void Players::createPlayer(RakNet::RakNetGUID guid)
 
     if (dedicPlayer->state == 0)
     {
-        LOG_APPEND(Log::LOG_INFO, "- Creating new reference pointer for %s",
-            dedicPlayer->npc.mName.c_str());
+        LOG_APPEND(Log::LOG_INFO, "- Creating new reference pointer for %s", dedicPlayer->npc.mName.c_str());
 
         MWWorld::Ptr tmp = world->placeObject(dedicPlayer->reference->getPtr(), cellStore, spawnPos);
 
@@ -103,8 +102,7 @@ void Players::createPlayer(RakNet::RakNetGUID guid)
     }
     else
     {
-        LOG_APPEND(Log::LOG_INFO, "- Updating reference pointer for %s",
-            dedicPlayer->npc.mName.c_str());
+        LOG_APPEND(Log::LOG_INFO, "- Updating reference pointer for %s", dedicPlayer->npc.mName.c_str());
 
         dedicPlayer->ptr.getBase()->canChangeCell = true;
         dedicPlayer->updatePtr(world->moveObject(dedicPlayer->ptr, cellStore, spawnPos.pos[0], spawnPos.pos[1], spawnPos.pos[2]));
@@ -297,8 +295,7 @@ void DedicatedPlayer::updatePtr(MWWorld::Ptr newPtr)
 
 DedicatedPlayer *Players::newPlayer(RakNet::RakNetGUID guid)
 {
-    LOG_APPEND(Log::LOG_INFO, "- Creating new DedicatedPlayer with guid %lu",
-        guid.g);
+    LOG_APPEND(Log::LOG_INFO, "- Creating new DedicatedPlayer with guid %lu", guid.g);
 
     players[guid] = new DedicatedPlayer(guid);
     players[guid]->state = 0;
@@ -472,10 +469,8 @@ void DedicatedPlayer::updateCell()
     MWWorld::CellStore *cellStore;
 
 
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server says %s (%s) moved to %s",
-        ptr.getBase()->mRef.getRefId().c_str(),
-        this->npc.mName.c_str(),
-        cell.getDescription().c_str());
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server says %s (%s) moved to %s", ptr.getBase()->mRef.getRefId().c_str(),
+                       this->npc.mName.c_str(), cell.getDescription().c_str());
 
     try
     {

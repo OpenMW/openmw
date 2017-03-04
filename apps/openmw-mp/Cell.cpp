@@ -33,8 +33,7 @@ void Cell::removePlayer(Player *player)
             auto it2 = find(player->cells.begin(), player->cells.end(), this);
             if (it2 != player->cells.end())
             {
-                LOG_APPEND(Log::LOG_INFO, "- Removing %s from Player %s", getDescription().c_str(),
-                           player->npc.mName.c_str());
+                LOG_APPEND(Log::LOG_INFO, "- Removing %s from Player %s", getDescription().c_str(), player->npc.mName.c_str());
 
                 player->cells.erase(it2);
             }
