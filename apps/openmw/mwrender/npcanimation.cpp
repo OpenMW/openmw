@@ -435,7 +435,7 @@ void NpcAnimation::updateNpcBase()
             if (bp)
                 mHeadModel = "meshes\\" + bp->mModel;
             else
-                std::cerr << "Failed to load body part '" << mNpc->mHead << "'" << std::endl;
+                std::cerr << "Warning: Failed to load body part '" << mNpc->mHead << "'" << std::endl;
         }
 
         mHairModel = "";
@@ -445,7 +445,7 @@ void NpcAnimation::updateNpcBase()
             if (bp)
                 mHairModel = "meshes\\" + bp->mModel;
             else
-                std::cerr << "Failed to load body part '" << mNpc->mHair << "'" << std::endl;
+                std::cerr << "Warning: Failed to load body part '" << mNpc->mHair << "'" << std::endl;
         }
     }
 
@@ -625,7 +625,8 @@ void NpcAnimation::updateParts()
             const ESM::Light *light = part.get<ESM::Light>()->mBase;
             addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft,
                                        1, "meshes\\"+light->mModel);
-            addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), light);
+            if (mObjectParts[ESM::PRT_Shield])
+                addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), light);
         }
     }
 
@@ -828,7 +829,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                     bodypart = NULL;
             }
             else if (!bodypart)
-                std::cerr << "Failed to find body part '" << part->mFemale << "'" << std::endl;
+                std::cerr << "Warning: Failed to find body part '" << part->mFemale << "'" << std::endl;
         }
         if(!bodypart && !part->mMale.empty())
         {
@@ -843,7 +844,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                     bodypart = NULL;
             }
             else if (!bodypart)
-                std::cerr << "Failed to find body part '" << part->mMale << "'" << std::endl;
+                std::cerr << "Warning: Failed to find body part '" << part->mMale << "'" << std::endl;
         }
 
         if(bodypart)
@@ -920,7 +921,7 @@ void NpcAnimation::showCarriedLeft(bool show)
         if (addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
                                    mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor))
         {
-            if (iter->getTypeName() == typeid(ESM::Light).name())
+            if (iter->getTypeName() == typeid(ESM::Light).name() && mObjectParts[ESM::PRT_Shield])
                 addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), iter->get<ESM::Light>()->mBase);
         }
     }

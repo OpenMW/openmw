@@ -471,7 +471,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 default:
 
                     // ignore invalid records
-                    std::cerr << "Ignoring unknown record: " << n.toString() << std::endl;
+                    std::cerr << "Warning: Ignoring unknown record: " << n.toString() << std::endl;
                     reader.skipRecord();
             }
             int progressPercent = static_cast<int>(float(reader.getFileOffset())/total*100);
@@ -613,7 +613,7 @@ bool MWState::StateManager::verifyProfile(const ESM::SavedGame& profile) const
         if (std::find(selectedContentFiles.begin(), selectedContentFiles.end(), *it)
                 == selectedContentFiles.end())
         {
-            std::cerr << "Savegame dependency " << *it << " is missing." << std::endl;
+            std::cerr << "Warning: Savegame dependency " << *it << " is missing." << std::endl;
             notFound = true;
         }
     }
@@ -641,7 +641,7 @@ void MWState::StateManager::writeScreenshot(std::vector<char> &imageData) const
     osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
     if (!readerwriter)
     {
-        std::cerr << "Unable to write screenshot, can't find a jpg ReaderWriter" << std::endl;
+        std::cerr << "Error: Unable to write screenshot, can't find a jpg ReaderWriter" << std::endl;
         return;
     }
 
@@ -649,7 +649,7 @@ void MWState::StateManager::writeScreenshot(std::vector<char> &imageData) const
     osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*screenshot, ostream);
     if (!result.success())
     {
-        std::cerr << "Unable to write screenshot: " << result.message() << " code " << result.status() << std::endl;
+        std::cerr << "Error: Unable to write screenshot: " << result.message() << " code " << result.status() << std::endl;
         return;
     }
 

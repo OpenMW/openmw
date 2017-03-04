@@ -191,7 +191,7 @@ namespace Interpreter{
                 }
                 catch (std::exception& e)
                 {
-                    std::cerr << "Failed to replace escape character, with the following error: " << e.what() << std::endl;
+                    std::cerr << "Error: Failed to replace escape character, with the following error: " << e.what() << std::endl;
                     std::cerr << "Full text below: " << std::endl << text << std::endl;
                 }
 

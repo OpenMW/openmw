@@ -274,7 +274,7 @@ namespace MWGui
         }
         catch (std::exception& e)
         {
-            std::cerr << "Failed to create chargen window: " << e.what() << std::endl;
+            std::cerr << "Error: Failed to create chargen window: " << e.what() << std::endl;
         }
     }
 
@@ -592,7 +592,7 @@ namespace MWGui
                     mGenerateClass = "Mage";
                 else
                 {
-                    std::cerr << "Failed to deduce class from chosen answers in generate class dialog" << std::endl;
+                    std::cout << "Failed to deduce class from chosen answers in generate class dialog" << std::endl;
                     mGenerateClass = "Thief";
                 }
             }

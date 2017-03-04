@@ -10,6 +10,7 @@ branches:
     - master
     - coverity_scan
     - /openmw-.*$/
+    - test-release-build-on-travis
 env:
   global:
   - macos_qt_formula=qt@5.5

@@ -281,11 +281,11 @@ class CollectLowestTransformsVisitor : public BaseOptimizerVisitor
 
             ObjectStruct():_canBeApplied(true),_moreThanOneMatrixRequired(false) {}
 
-            void add(osg::Transform* transform)
+            void add(osg::Transform* transform, bool canOptimize)
             {
                 if (transform)
                 {
-                    if (transform->getDataVariance()!=osg::Transform::STATIC) _moreThanOneMatrixRequired=true;
+                    if (!canOptimize) _moreThanOneMatrixRequired=true;
                     else if (transform->getReferenceFrame()!=osg::Transform::RELATIVE_RF) _moreThanOneMatrixRequired=true;
                     else
                     {
@@ -322,7 +322,7 @@ class CollectLowestTransformsVisitor : public BaseOptimizerVisitor
                 itr!=_currentObjectList.end();
                 ++itr)
             {
-                _objectMap[*itr].add(transform);
+                _objectMap[*itr].add(transform, transform && isOperationPermissibleForObject(transform));
             }
         }
 
@@ -802,8 +802,7 @@ bool Optimizer::RemoveRedundantNodesVisitor::isOperationPermissible(osg::Node& n
 
 void Optimizer::RemoveRedundantNodesVisitor::apply(osg::Group& group)
 {
-    if (group.getNumChildren()==1 &&
-        typeid(group)==typeid(osg::Group) &&
+    if (typeid(group)==typeid(osg::Group) &&
         isOperationPermissible(group))
     {
         _redundantNodeList.insert(&group);

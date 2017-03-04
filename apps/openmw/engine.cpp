@@ -452,16 +452,16 @@ void OMW::Engine::setWindowIcon()
     std::string windowIcon = (mResDir / "mygui" / "openmw.png").string();
     windowIconStream.open(windowIcon, std::ios_base::in | std::ios_base::binary);
     if (windowIconStream.fail())
-        std::cerr << "Failed to open " << windowIcon << std::endl;
+        std::cerr << "Error: Failed to open " << windowIcon << std::endl;
     osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
     if (!reader)
     {
-        std::cerr << "Failed to read window icon, no png readerwriter found" << std::endl;
+        std::cerr << "Error: Failed to read window icon, no png readerwriter found" << std::endl;
         return;
     }
     osgDB::ReaderWriter::ReadResult result = reader->readImage(windowIconStream);
     if (!result.success())
-        std::cerr << "Failed to read " << windowIcon << ": " << result.message() << " code " << result.status() << std::endl;
+        std::cerr << "Error: Failed to read " << windowIcon << ": " << result.message() << " code " << result.status() << std::endl;
     else
     {
         osg::ref_ptr<osg::Image> image = result.getImage();
@@ -636,14 +636,14 @@ public:
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension(mScreenshotFormat);
         if (!readerwriter)
         {
-            std::cerr << "Can't write screenshot, no '" << mScreenshotFormat << "' readerwriter found" << std::endl;
+            std::cerr << "Error: Can't write screenshot, no '" << mScreenshotFormat << "' readerwriter found" << std::endl;
             return;
         }
 
         osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(image, outStream);
         if (!result.success())
         {
-            std::cerr << "Can't write screenshot: " << result.message() << " code " << result.status() << std::endl;
+            std::cerr << "Error: Can't write screenshot: " << result.message() << " code " << result.status() << std::endl;
         }
     }
 

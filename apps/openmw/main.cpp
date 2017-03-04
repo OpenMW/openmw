@@ -147,7 +147,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             ("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
             ->multitoken()->composing(), "fallback values")
 
-        ("no-grab", "Don't grab mouse cursor")
+        ("no-grab", bpo::value<bool>()->implicit_value(true)->default_value(false), "Don't grab mouse cursor")
 
         ("export-fonts", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "Export Morrowind .fnt fonts to PNG image and XML file in current directory")
@@ -185,7 +185,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapeHashString>().toStdString());
     std::cout << v.describe() << std::endl;
 
-    engine.setGrabMouse(!variables.count("no-grab"));
+    engine.setGrabMouse(!variables["no-grab"].as<bool>());
 
     // Font encoding settings
     std::string encoding(variables["encoding"].as<Files::EscapeHashString>().toStdString());
@@ -234,7 +234,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCell(variables["start"].as<Files::EscapeHashString>().toStdString());
     engine.setSkipMenu (variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
     if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
-        std::cerr << "new-game used without skip-menu -> ignoring it" << std::endl;
+        std::cerr << "Warning: new-game used without skip-menu -> ignoring it" << std::endl;
 
     // scripts
     engine.setCompileAll(variables["script-all"].as<bool>());

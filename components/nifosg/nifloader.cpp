@@ -1364,7 +1364,7 @@ namespace NifOsg
                 size_t mipSize = mip.height * mip.width * pixelData->bpp / 8;
                 if (mipSize + mip.dataOffset > pixelData->data.size())
                 {
-                    std::cerr << "Internal texture's mipmap data out of bounds" << std::endl;
+                    std::cerr << "Warning: Internal texture's mipmap data out of bounds, ignoring texture" << std::endl;
                     return NULL;
                 }
 
@@ -1379,7 +1379,7 @@ namespace NifOsg
 
             if (width <= 0 || height <= 0)
             {
-                std::cerr << "Width and height must be non zero " << std::endl;
+                std::cerr << "Warning: Internal Texture Width and height must be non zero, ignoring texture" << std::endl;
                 return NULL;
             }
 
@@ -1421,7 +1421,7 @@ namespace NifOsg
                         {
                             // Not used by the vanilla engine. MCP (Morrowind Code Patch) adds an option to use Gloss maps:
                             // "- Gloss map fix. Morrowind removed gloss map entries from model files after loading them. This stops Morrowind from removing them."
-                            std::cerr << "NiTexturingProperty::GlossTexture in " << mFilename << " not currently used." << std::endl;
+                            //std::cerr << "NiTexturingProperty::GlossTexture in " << mFilename << " not currently used." << std::endl;
                             continue;
                         }
                         default:

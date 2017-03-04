@@ -65,14 +65,14 @@ namespace MWScript
             }
             catch (const std::exception& error)
             {
-                std::cerr << "An exception has been thrown: " << error.what() << std::endl;
+                std::cerr << "Error: An exception has been thrown: " << error.what() << std::endl;
                 Success = false;
             }
 
             if (!Success)
             {
                 std::cerr
-                    << "compiling failed: " << name << std::endl;
+                    << "Warning: compiling failed: " << name << std::endl;
             }
 
             if (Success)

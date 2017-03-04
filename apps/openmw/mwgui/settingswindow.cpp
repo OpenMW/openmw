@@ -33,7 +33,7 @@ namespace
         if (val == "linear")  return "Trilinear";
         if (val == "nearest") return "Bilinear";
         if (val != "none")
-            std::cerr<< "Invalid texture mipmap option: "<<val <<std::endl;
+            std::cerr<< "Warning: Invalid texture mipmap option: "<<val <<std::endl;
         return "Other";
     }
 
