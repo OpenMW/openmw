@@ -1,6 +1,8 @@
 #include "scenemanager.hpp"
 
 #include <iostream>
+#include <cstdlib>
+
 #include <osg/Node>
 #include <osg/UserDataContainer>
 
@@ -434,6 +436,29 @@ namespace Resource
         return true;
     }
 
+    unsigned int getOptimizationOptions()
+    {
+        using namespace SceneUtil;
+        const char* env = getenv("OPENMW_OPTIMIZE");
+        unsigned int options = Optimizer::FLATTEN_STATIC_TRANSFORMS|Optimizer::REMOVE_REDUNDANT_NODES|Optimizer::MERGE_GEOMETRY;
+        if (env)
+        {
+            std::string str(env);
+
+            if(str.find("OFF")!=std::string::npos) options = 0;
+
+            if(str.find("~FLATTEN_STATIC_TRANSFORMS")!=std::string::npos) options ^= Optimizer::FLATTEN_STATIC_TRANSFORMS;
+            else if(str.find("FLATTEN_STATIC_TRANSFORMS")!=std::string::npos) options |= Optimizer::FLATTEN_STATIC_TRANSFORMS;
+
+            if(str.find("~REMOVE_REDUNDANT_NODES")!=std::string::npos) options ^= Optimizer::REMOVE_REDUNDANT_NODES;
+            else if(str.find("REMOVE_REDUNDANT_NODES")!=std::string::npos) options |= Optimizer::REMOVE_REDUNDANT_NODES;
+
+            if(str.find("~MERGE_GEOMETRY")!=std::string::npos) options ^= Optimizer::MERGE_GEOMETRY;
+            else if(str.find("MERGE_GEOMETRY")!=std::string::npos) options |= Optimizer::MERGE_GEOMETRY;
+        }
+        return options;
+    }
+
     osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string &name)
     {
         std::string normalized = name;
@@ -500,7 +525,9 @@ namespace Resource
                 SceneUtil::Optimizer optimizer;
                 optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
 
-                optimizer.optimize(loaded, SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS|SceneUtil::Optimizer::REMOVE_REDUNDANT_NODES|SceneUtil::Optimizer::MERGE_GEOMETRY);
+                static const unsigned int options = getOptimizationOptions();
+
+                optimizer.optimize(loaded, options);
             }
 
             if (mIncrementalCompileOperation)
