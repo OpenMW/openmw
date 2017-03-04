@@ -5,7 +5,7 @@
 #ifndef OPENMW_STATS_HPP
 #define OPENMW_STATS_HPP
 
-#define STATSFUNCTIONS \
+#define STATSAPI \
     {"GetName",                 StatsFunctions::GetName},\
     {"SetName",                 StatsFunctions::SetName},\
     \

@@ -7,23 +7,23 @@
 
 #include "../Types.hpp"
 
-#define CHARCLASSFUNCTIONS \
-{"SetDefaultClass",     CharClassFunctions::SetDefaultClass},\
-{"SetClassName",        CharClassFunctions::SetClassName},\
-{"SetClassDesc",        CharClassFunctions::SetClassDesc},\
-{"SetClassMajorAttribute", CharClassFunctions::SetClassMajorAttribute},\
-{"SetClassSpecialization", CharClassFunctions::SetClassSpecialization},\
-{"SetClassMajorSkill", CharClassFunctions::SetClassMajorSkill},\
-{"SetClassMinorSkill", CharClassFunctions::SetClassMinorSkill},\
-{"GetDefaultClass",     CharClassFunctions::GetDefaultClass},\
-{"GetClassName",        CharClassFunctions::GetClassName},\
-{"GetClassDesc",        CharClassFunctions::GetClassDesc},\
-{"GetClassMajorAttribute", CharClassFunctions::GetClassMajorAttribute},\
-{"GetClassSpecialization", CharClassFunctions::GetClassSpecialization},\
-{"GetClassMajorSkill", CharClassFunctions::GetClassMajorSkill},\
-{"GetClassMinorSkill", CharClassFunctions::GetClassMinorSkill},\
-{"IsClassDefault", CharClassFunctions::IsClassDefault},\
-{"SendClass",           CharClassFunctions::SendClass}
+#define CHARCLASSAPI \
+    {"SetDefaultClass",        CharClassFunctions::SetDefaultClass},\
+    {"SetClassName",           CharClassFunctions::SetClassName},\
+    {"SetClassDesc",           CharClassFunctions::SetClassDesc},\
+    {"SetClassMajorAttribute", CharClassFunctions::SetClassMajorAttribute},\
+    {"SetClassSpecialization", CharClassFunctions::SetClassSpecialization},\
+    {"SetClassMajorSkill",     CharClassFunctions::SetClassMajorSkill},\
+    {"SetClassMinorSkill",     CharClassFunctions::SetClassMinorSkill},\
+    {"GetDefaultClass",        CharClassFunctions::GetDefaultClass},\
+    {"GetClassName",           CharClassFunctions::GetClassName},\
+    {"GetClassDesc",           CharClassFunctions::GetClassDesc},\
+    {"GetClassMajorAttribute", CharClassFunctions::GetClassMajorAttribute},\
+    {"GetClassSpecialization", CharClassFunctions::GetClassSpecialization},\
+    {"GetClassMajorSkill",     CharClassFunctions::GetClassMajorSkill},\
+    {"GetClassMinorSkill",     CharClassFunctions::GetClassMinorSkill},\
+    {"IsClassDefault",         CharClassFunctions::IsClassDefault},\
+    {"SendClass",              CharClassFunctions::SendClass}
 
 
 class CharClassFunctions

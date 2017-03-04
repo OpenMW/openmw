@@ -5,7 +5,7 @@
 #ifndef OPENMW_GUI_HPP
 #define OPENMW_GUI_HPP
 
-#define GUIFUNCTIONS \
+#define GUIAPI \
     {"MessageBox",          GUIFunctions::_MessageBox},\
     {"CustomMessageBox",    GUIFunctions::CustomMessageBox},\
     {"InputDialog",         GUIFunctions::InputDialog},\

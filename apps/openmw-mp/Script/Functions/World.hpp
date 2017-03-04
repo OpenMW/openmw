@@ -1,7 +1,7 @@
 #ifndef OPENMW_WORLD_HPP
 #define OPENMW_WORLD_HPP
 
-#define WORLDFUNCTIONS \
+#define WORLDAPI \
     {"InitScriptEvent",             WorldFunctions::InitScriptEvent},\
     \
     {"GetObjectChangesSize",        WorldFunctions::GetObjectChangesSize},\

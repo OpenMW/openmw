@@ -94,13 +94,13 @@ public:
 
             POSITIONAPI,
             CELLAPI,
-            STATSFUNCTIONS,
+            STATSAPI,
             ITEMAPI,
             QUESTAPI,
             SPELLAPI,
-            GUIFUNCTIONS,
-            CHARCLASSFUNCTIONS,
-            WORLDFUNCTIONS,
+            GUIAPI,
+            CHARCLASSAPI,
+            WORLDAPI,
             MISCELLANEOUSAPI
     };
 
