@@ -625,7 +625,8 @@ void NpcAnimation::updateParts()
             const ESM::Light *light = part.get<ESM::Light>()->mBase;
             addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft,
                                        1, "meshes\\"+light->mModel);
-            addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), light);
+            if (mObjectParts[ESM::PRT_Shield])
+                addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), light);
         }
     }
 
@@ -920,7 +921,7 @@ void NpcAnimation::showCarriedLeft(bool show)
         if (addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
                                    mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor))
         {
-            if (iter->getTypeName() == typeid(ESM::Light).name())
+            if (iter->getTypeName() == typeid(ESM::Light).name() && mObjectParts[ESM::PRT_Shield])
                 addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), iter->get<ESM::Light>()->mBase);
         }
     }
