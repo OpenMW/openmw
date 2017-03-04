@@ -15,6 +15,8 @@ env:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
    - secure: "jybGzAdUbqt9vWR/GEnRd96BgAi/7Zd1+2HK68j/i/8+/1YH2XxLOy4Jv/DUBhBlJIkxs/Xv8dRcUlFOclZDHX1d/9Qnsqd3oUVkD7k1y7cTOWy9TBQaE/v/kZo3LpzA3xPwwthrb0BvqIbOfIELi5fS5s8ba85WFRg3AX70wWE="
+   - secure: "MegynKyJpyL7XDwdWVEbypQh7CLjqOqOi9lGF97G7Fq0HosVZTmnwjHhmIPZspTP7ES4UbxM3rs/f3ce7sp9JN2ShRJpduD6UEFc8egQXBte9J3obUBIdUxPTRdhnht7VJ+u+pksK1S/Bm1Cs6l0eEluP3vmcaXWMykVQcZsPhY="
+   - secure: "jQcAaWAdDy0+vlNu4POMX8322HanCOQEUTdpviWTAUjWQTjMa0UTM4+zVVgrtEaHMpBaVYYbTT3Rg5BQ9oG+2SiVLJBQQ2XoMcos/YrjPVT6inB02Gs0vFjP29LdPAQVrB8CkAcfQr6u+Z2C+RqAtwhE09LsBUMXjRDzPAtr1CM="
    - macos_qt_formula=qt@5.5
 addons:
   apt:
@@ -62,6 +64,14 @@ script:
  - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then make package; fi
  - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./openmw_test_suite; fi
  - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then cd .. && ./CI/check_tabs.sh; fi
+ - cd "${TRAVIS_BUILD_DIR}"
+deploy:
+ provider: script
+ script: ./CI/deploy.osx.sh
+ skip_cleanup: true
+ on:
+  branch: master
+  condition: "$TRAVIS_EVENT_TYPE = cron && $TRAVIS_OS_NAME = osx"
 notifications:
   email:
     recipients:
