@@ -5,7 +5,6 @@
 #include <RakNetTypes.h>
 #include <BitStream.h>
 #include <PacketPriority.h>
-#include <components/openmw-mp/Base/BasePlayer.hpp>
 
 
 namespace mwmp
@@ -16,6 +15,8 @@ namespace mwmp
         BasePacket(RakNet::RakPeerInterface *peer);
 
         ~BasePacket();
+
+        virtual void Packet(RakNet::BitStream *bs, RakNet::RakNetGUID &guid, bool send);
 
         void SetReadStream(RakNet::BitStream *bitStream);
         void SetSendStream(RakNet::BitStream *bitStream);

@@ -18,6 +18,17 @@ BasePacket::~BasePacket()
 
 }
 
+void BasePacket::Packet(RakNet::BitStream *bs, RakNet::RakNetGUID &guid, bool send)
+{
+    this->bs = bs;
+
+    if (send)
+    {
+        bs->Write(packetID);
+        bs->Write(guid);
+    }
+}
+
 void BasePacket::SetReadStream(RakNet::BitStream *bitStream)
 {
     bsRead = bitStream;

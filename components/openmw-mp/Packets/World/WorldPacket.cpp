@@ -7,14 +7,8 @@ using namespace mwmp;
 
 void WorldPacket::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
 {
+    BasePacket::Packet(bs, event->guid, send);
     this->event = event;
-    this->bs = bs;
-
-    if (send)
-    {
-        bs->Write(packetID);
-        bs->Write(event->guid);
-    }
 }
 
 WorldPacket::WorldPacket(RakNet::RakPeerInterface *peer) : BasePacket(peer)

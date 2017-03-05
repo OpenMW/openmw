@@ -7,14 +7,8 @@ using namespace mwmp;
 
 void PlayerPacket::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
 {
+    BasePacket::Packet(bs, player->guid, send);
     this->player = player;
-    this->bs = bs;
-
-    if (send)
-    {
-        bs->Write(packetID);
-        bs->Write(player->guid);
-    }
 }
 
 PlayerPacket::PlayerPacket(RakNet::RakPeerInterface *peer) : BasePacket(peer)
