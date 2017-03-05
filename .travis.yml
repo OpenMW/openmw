@@ -73,6 +73,7 @@ deploy:
  on:
   branch: test-release-build-on-travis
   condition: "$TRAVIS_EVENT_TYPE = cron && $TRAVIS_OS_NAME = osx"
+  repo: OpenMW/openmw
 notifications:
   email:
     recipients:
