@@ -90,7 +90,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                     {
                         mKeyboardListener->keyPressed(evt.key);
 
-                        if (evt.key.keysym.sym >= SDLK_F1 && evt.key.keysym.sym <= SDLK_F12)
+                        if (!isModifierHeld(KMOD_ALT) && evt.key.keysym.sym >= SDLK_F1 && evt.key.keysym.sym <= SDLK_F12)
                         {
                             mViewer->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KEY_F1 + (evt.key.keysym.sym - SDLK_F1));
                         }
@@ -102,7 +102,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                     {
                         mKeyboardListener->keyReleased(evt.key);
 
-                        if (evt.key.keysym.sym >= SDLK_F1 && evt.key.keysym.sym <= SDLK_F12)
+                        if (!isModifierHeld(KMOD_ALT) && evt.key.keysym.sym >= SDLK_F1 && evt.key.keysym.sym <= SDLK_F12)
                             mViewer->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KEY_F1 + (evt.key.keysym.sym - SDLK_F1));
                     }
 
@@ -231,7 +231,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
         }
     }
 
-    bool InputWrapper::isModifierHeld(SDL_Keymod mod)
+    bool InputWrapper::isModifierHeld(int mod)
     {
         return (SDL_GetModState() & mod) != 0;
     }
