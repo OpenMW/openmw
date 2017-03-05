@@ -173,7 +173,7 @@ add_component_dir (openmw-mp
         Packets/World/PacketVideoPlay
 
         Packets/World/PacketScriptLocalShort Packets/World/PacketScriptLocalFloat Packets/World/PacketScriptMemberShort
-        Packets/World/PacketScriptGlobalShort)
+        Packets/World/PacketScriptGlobalShort Packets/PacketPreInit)
 
 add_component_dir (fallback
     fallback validate
