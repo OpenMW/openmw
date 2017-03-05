@@ -56,6 +56,8 @@ namespace mwmp
         void processWorldPacket(RakNet::Packet *packet);
         void receiveMessage(RakNet::Packet *packet);
         LocalPlayer *getLocalPlayer();
+
+        void preInit(std::vector<std::string> &content, Files::Collections &collections);
     };
 }
 

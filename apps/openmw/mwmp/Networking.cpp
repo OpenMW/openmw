@@ -25,6 +25,7 @@
 #include <components/openmw-mp/Version.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/openmw-mp/Utils.hpp>
+#include <components/openmw-mp/Packets/PacketPreInit.hpp>
 #include "DedicatedPlayer.hpp"
 #include "LocalPlayer.hpp"
 #include "GUIController.hpp"
@@ -163,7 +164,19 @@ void Networking::connect(const std::string &ip, unsigned short port, std::vector
         }
     }
 
+    if (!errmsg.empty())
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, errmsg.c_str());
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "tes3mp", errmsg.c_str(), 0);
+    }
+    else
+        preInit(content, collections);
+}
 
+void Networking::preInit(std::vector<std::string> &content, Files::Collections &collections)
+{
+    std::string errmsg = "";
+    PacketPreInit::PluginContainer checksums;
     vector<string>::const_iterator it(content.begin());
     for (int idx = 0; it != content.end(); ++it, ++idx)
     {
@@ -172,13 +185,44 @@ void Networking::connect(const std::string &ip, unsigned short port, std::vector
         if (col.doesExist(*it))
         {
             unsigned int crc32 = Utils::crc32checksum(col.getPath(*it).string());
-            printf("idx: %d\tchecksum: %x\tfile:%s\n", idx, crc32, col.getPath(*it).c_str());
+            checksums.push_back(make_pair(*it, crc32));
+
+            printf("idx: %d\tchecksum: %x\tfile: %s\n", idx, crc32, col.getPath(*it).c_str());
         }
         else
-        {
             throw std::runtime_error("Plugin doesn't exists.");
+    }
+
+    PacketPreInit packetPreInit(peer);
+    RakNet::BitStream bs;
+    RakNet::RakNetGUID guid;
+    packetPreInit.Packet(&bs, guid, true, checksums);
+
+    bool done = false;
+    PacketPreInit::PluginContainer checksumsResponse;
+    /*while (!done)
+    {
+        for (RakNet::Packet *packet = peer->Receive(); packet; peer->DeallocatePacket(packet), packet = peer->Receive())
+        {
+            if(packet->data[0] == ID_GAME_PREINIT)
+            {
+                RakNet::BitStream bsIn(&packet->data[0], packet->length, false);
+                packetPreInit.Packet(&bsIn, guid, false, checksumsResponse);
+                done = true;
+            }
+        }
+    }*/
+
+    if(!checksumsResponse.empty()) // something wrong
+    {
+        errmsg = "Your plugins\tShould be\n";
+        for(int i = 0; i < checksumsResponse.size(); i++)
+        {
+            errmsg += checksums[i].first + " " + MyGUI::utility::toString(checksums[i].second) + "\t";
+            errmsg += checksumsResponse[i].first + " " + MyGUI::utility::toString(checksumsResponse[i].second) + "\n";
         }
     }
+
 
     if (!errmsg.empty())
     {
