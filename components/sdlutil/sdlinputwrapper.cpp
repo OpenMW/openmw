@@ -87,18 +87,24 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                     break;
                 case SDL_KEYDOWN:
                     if (!evt.key.repeat)
+                    {
                         mKeyboardListener->keyPressed(evt.key);
 
-                    if (evt.key.keysym.sym >= SDLK_F1 && evt.key.keysym.sym <= SDLK_F12)
-                        mViewer->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KEY_F1 + (evt.key.keysym.sym - SDLK_F1));
+                        if (evt.key.keysym.sym >= SDLK_F1 && evt.key.keysym.sym <= SDLK_F12)
+                        {
+                            mViewer->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KEY_F1 + (evt.key.keysym.sym - SDLK_F1));
+                        }
+                    }
 
                     break;
                 case SDL_KEYUP:
                     if (!evt.key.repeat)
+                    {
                         mKeyboardListener->keyReleased(evt.key);
 
-                    if (evt.key.keysym.sym >= SDLK_F1 && evt.key.keysym.sym <= SDLK_F12)
-                        mViewer->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KEY_F1 + (evt.key.keysym.sym - SDLK_F1));
+                        if (evt.key.keysym.sym >= SDLK_F1 && evt.key.keysym.sym <= SDLK_F12)
+                            mViewer->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KEY_F1 + (evt.key.keysym.sym - SDLK_F1));
+                    }
 
                     break;
                 case SDL_TEXTEDITING:
