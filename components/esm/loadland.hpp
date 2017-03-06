@@ -80,6 +80,11 @@ struct Land
 
     struct LandData
     {
+        LandData()
+            : mDataLoaded(0)
+        {
+        }
+
         // Initial reference height for the first vertex, only needed for filling mHeights
         float mHeightOffset;
         // Height in world space for each vertex
@@ -99,6 +104,8 @@ struct Land
         // ???
         short mUnk1;
         uint8_t mUnk2;
+
+        int mDataLoaded;
     };
 
     // low-LOD heightmap (used for rendering the global map)
@@ -156,8 +163,6 @@ struct Land
         bool condLoad(ESM::ESMReader& reader, int flags, int dataFlag, void *ptr, unsigned int size) const;
 
         mutable OpenThreads::Mutex mMutex;
-
-        mutable int mDataLoaded;
 
         mutable LandData *mLandData;
 };

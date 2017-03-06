@@ -18,7 +18,6 @@ namespace ESM
         , mY(0)
         , mPlugin(0)
         , mDataTypes(0)
-        , mDataLoaded(false)
         , mLandData(NULL)
     {
     }
@@ -76,7 +75,6 @@ namespace ESM
 
         mContext = esm.getContext();
 
-        mDataLoaded = 0;
         mLandData = NULL;
 
         // Skip the land data here. Load it when the cell is loaded.
@@ -186,7 +184,7 @@ namespace ESM
         // Try to load only available data
         flags = flags & mDataTypes;
         // Return if all required data is loaded
-        if ((mDataLoaded & flags) == flags) {
+        if (mLandData && (mLandData->mDataLoaded & flags) == flags) {
             return;
         }
         // Create storage if nothing is loaded
@@ -236,19 +234,18 @@ namespace ESM
 
     void Land::unloadData() const
     {
-        if (mDataLoaded)
+        if (mLandData)
         {
             delete mLandData;
             mLandData = NULL;
-            mDataLoaded = 0;
         }
     }
 
     bool Land::condLoad(ESM::ESMReader& reader, int flags, int dataFlag, void *ptr, unsigned int size) const
     {
-        if ((mDataLoaded & dataFlag) == 0 && (flags & dataFlag) != 0) {
+        if ((mLandData->mDataLoaded & dataFlag) == 0 && (flags & dataFlag) != 0) {
             reader.getHExact(ptr, size);
-            mDataLoaded |= dataFlag;
+            mLandData->mDataLoaded |= dataFlag;
             return true;
         }
         reader.skipHSubSize(size);
@@ -258,13 +255,12 @@ namespace ESM
     bool Land::isDataLoaded(int flags) const
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
-        return (mDataLoaded & flags) == (flags & mDataTypes);
+        return mLandData && (mLandData->mDataLoaded & flags) == (flags & mDataTypes);
     }
 
     Land::Land (const Land& land)
     : mFlags (land.mFlags), mX (land.mX), mY (land.mY), mPlugin (land.mPlugin),
       mContext (land.mContext), mDataTypes (land.mDataTypes),
-      mDataLoaded (land.mDataLoaded),
       mLandData (land.mLandData ? new LandData (*land.mLandData) : 0)
     {}
 
@@ -282,7 +278,6 @@ namespace ESM
         std::swap (mPlugin, land.mPlugin);
         std::swap (mContext, land.mContext);
         std::swap (mDataTypes, land.mDataTypes);
-        std::swap (mDataLoaded, land.mDataLoaded);
         std::swap (mLandData, land.mLandData);
     }
 
@@ -311,18 +306,22 @@ namespace ESM
             mLandData = new LandData;
 
         mDataTypes |= flags;
-        mDataLoaded |= flags;
+        mLandData->mDataLoaded |= flags;
     }
 
     void Land::remove (int flags)
     {
         mDataTypes &= ~flags;
-        mDataLoaded &= ~flags;
 
-        if (!mDataLoaded)
+        if (mLandData)
         {
-            delete mLandData;
-            mLandData = 0;
+            mLandData->mDataLoaded &= ~flags;
+
+            if (!mLandData->mDataLoaded)
+            {
+                delete mLandData;
+                mLandData = 0;
+            }
         }
     }
 }
