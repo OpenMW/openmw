@@ -11,9 +11,9 @@ mwmp::PacketPreInit::PacketPreInit(RakNet::RakPeerInterface *peer) : BasePacket(
     packetID = ID_GAME_PREINIT;
 }
 
-void mwmp::PacketPreInit::Packet(RakNet::BitStream *bs, RakNet::RakNetGUID &guid, bool send, PluginContainer &checksums)
+void mwmp::PacketPreInit::Packet(RakNet::BitStream *bs, bool send, PluginContainer &checksums)
 {
-    BasePacket::Packet(bs, guid, send);
+    BasePacket::Packet(bs, send);
 
     unsigned int size = checksums.size();
     RW(size, send);

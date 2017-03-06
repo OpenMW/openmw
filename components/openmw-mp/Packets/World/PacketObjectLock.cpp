@@ -8,9 +8,9 @@ PacketObjectLock::PacketObjectLock(RakNet::RakPeerInterface *peer) : WorldPacket
     packetID = ID_OBJECT_LOCK;
 }
 
-void PacketObjectLock::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
+void PacketObjectLock::Packet(RakNet::BitStream *bs, bool send)
 {
-    WorldPacket::Packet(bs, event, send);
+    WorldPacket::Packet(bs, send);
 
     if (!send)
         event->objectChanges.objects.clear();

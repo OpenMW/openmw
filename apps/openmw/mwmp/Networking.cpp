@@ -196,7 +196,9 @@ void Networking::preInit(std::vector<std::string> &content, Files::Collections &
     PacketPreInit packetPreInit(peer);
     RakNet::BitStream bs;
     RakNet::RakNetGUID guid;
-    packetPreInit.Packet(&bs, guid, true, checksums);
+    packetPreInit.setGUID(guid);
+    packetPreInit.Packet(&bs, true, checksums);
+
 
     bool done = false;
     PacketPreInit::PluginContainer checksumsResponse;
@@ -248,7 +250,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
     case ID_HANDSHAKE:
     {
-        myPacket->Send(getLocalPlayer(), serverAddr);
+        myPacket->setPlayer(getLocalPlayer());
+        myPacket->Send(serverAddr);
         break;
     }
     case ID_PLAYER_BASEINFO:
@@ -262,11 +265,14 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             if (packet->length == myPacket->headerSize())
             {
                 LOG_APPEND(Log::LOG_INFO, "- Requesting info");
-                myPacket->Send(getLocalPlayer(), serverAddr);
+
+                myPacket->setPlayer(getLocalPlayer());
+                myPacket->Send(serverAddr);
             }
             else
             {
-                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                myPacket->setPlayer(getLocalPlayer());
+                myPacket->Packet(&bsIn, false);
                 LOG_APPEND(Log::LOG_INFO, "- Updating LocalPlayer");
                 getLocalPlayer()->updateChar();
             }
@@ -281,7 +287,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 pl = Players::newPlayer(guid);
             }
 
-            myPacket->Packet(&bsIn, pl, false);
+            myPacket->setPlayer(pl);
+            myPacket->Packet(&bsIn, false);
             Players::createPlayer(guid);
         }
         break;
@@ -293,7 +300,9 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             if (packet->length != myPacket->headerSize())
             {
                 LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_PLAYER_POS changed by server");
-                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+
+                myPacket->setPlayer(getLocalPlayer());
+                myPacket->Packet(&bsIn, false);
                 getLocalPlayer()->setPosition();
             }
             else
@@ -301,7 +310,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         else if (pl != 0)
         {
-            myPacket->Packet(&bsIn, pl, false);
+            myPacket->setPlayer(pl);
+            myPacket->Packet(&bsIn, false);
             pl->updateMarker();
         }
         break;
@@ -331,13 +341,15 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             }
             else
             {
-                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                myPacket->setPlayer(getLocalPlayer());
+                myPacket->Packet(&bsIn, false);
                 getLocalPlayer()->setEquipment();
             }
         }
         else if (pl != 0)
         {
-            myPacket->Packet(&bsIn, pl, false);
+            myPacket->setPlayer(pl);
+            myPacket->Packet(&bsIn, false);
             pl->updateEquipment();
         }
         break;
@@ -352,7 +364,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             }
             else
             {
-                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                myPacket->setPlayer(getLocalPlayer());
+                myPacket->Packet(&bsIn, false);
                 int inventoryAction = getLocalPlayer()->inventoryChanges.action;
 
                 if (inventoryAction == InventoryChanges::ADD)
@@ -381,7 +394,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             }
             else
             {
-                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                myPacket->setPlayer(getLocalPlayer());
+                myPacket->Packet(&bsIn, false);
                 int spellbookAction = getLocalPlayer()->spellbookChanges.action;
 
                 if (spellbookAction == SpellbookChanges::ADD)
@@ -410,7 +424,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             }
             else
             {
-                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                myPacket->setPlayer(getLocalPlayer());
+                myPacket->Packet(&bsIn, false);
                 getLocalPlayer()->addJournalItems();
             }
         }
@@ -420,7 +435,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
         if (pl != 0)
         {
-            myPacket->Packet(&bsIn, pl, false);
+            myPacket->setPlayer(pl);
+            myPacket->Packet(&bsIn, false);
 
             //cout << "Player: " << pl->Npc()->mName << " pressed: " << (pl->getAttack()->pressed == 1) << endl;
             if (pl->attack.pressed == 0)
@@ -488,13 +504,15 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             }
             else
             {
-                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                myPacket->setPlayer(getLocalPlayer());
+                myPacket->Packet(&bsIn, false);
                 getLocalPlayer()->setDynamicStats();
             }
         }
         else if (pl != 0)
         {
-            myPacket->Packet(&bsIn, pl, false);
+            myPacket->setPlayer(pl);
+            myPacket->Packet(&bsIn, false);
 
             MWWorld::Ptr ptrPlayer = pl->getPtr();
             MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
@@ -520,7 +538,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             MWMechanics::DynamicStat<float> health = player.getClass().getCreatureStats(player).getHealth();
             health.setCurrent(0);
             player.getClass().getCreatureStats(player).setHealth(health);
-            myPacket->Send(getLocalPlayer(), serverAddr);
+            myPacket->setPlayer(getLocalPlayer());
+            myPacket->Send(serverAddr);
         }
         else if (pl != 0)
         {
@@ -550,10 +569,12 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             // still have it readied but be unable to use it unless we clear it here
             player.getClass().getNpcStats(player).setDrawState(MWMechanics::DrawState_Nothing);
 
-            myPacket->Send(getLocalPlayer(), serverAddr);
+            myPacket->setPlayer(getLocalPlayer());
+            myPacket->Send(serverAddr);
 
             getLocalPlayer()->updateDynamicStats(true);
-            playerController.GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(getLocalPlayer(), serverAddr);
+            playerController.GetPacket(ID_PLAYER_DYNAMICSTATS)->setPlayer(getLocalPlayer());
+            playerController.GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(serverAddr);
         }
         else if (pl != 0)
         {
@@ -580,13 +601,15 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 getLocalPlayer()->updateCell(true);
             else
             {
-                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                myPacket->setPlayer(getLocalPlayer());
+                myPacket->Packet(&bsIn,  false);
                 getLocalPlayer()->setCell();
             }
         }
         else if (pl != 0)
         {
-            myPacket->Packet(&bsIn, pl, false);
+            myPacket->setPlayer(pl);
+            myPacket->Packet(&bsIn, false);
             pl->updateCell();
         }
         break;
@@ -607,7 +630,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             getLocalPlayer()->updateDrawStateAndFlags(true);
         else if (pl != 0)
         {
-            myPacket->Packet(&bsIn, pl, false);
+            myPacket->setPlayer(pl);
+            myPacket->Packet(&bsIn, false);
             pl->updateDrawState();
         }
         break;
@@ -617,12 +641,14 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         std::string message;
         if (guid == myGuid)
         {
-            myPacket->Packet(&bsIn, getLocalPlayer(), false);
+            myPacket->setPlayer(getLocalPlayer());
+            myPacket->Packet(&bsIn, false);
             message = getLocalPlayer()->chatMessage;
         }
         else if (pl != 0)
         {
-            myPacket->Packet(&bsIn, pl, false);
+            myPacket->setPlayer(pl);
+            myPacket->Packet(&bsIn, false);
             message = pl->chatMessage;
         }
         Main::get().getGUIController()->printChatMessage(message);
@@ -633,7 +659,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
         if (guid == myGuid)
         {
-            myPacket->Packet(&bsIn, getLocalPlayer(), false);
+            myPacket->setPlayer(getLocalPlayer());
+            myPacket->Packet(&bsIn, false);
         }
         break;
     }
@@ -647,13 +674,15 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             }
             else
             {
-                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                myPacket->setPlayer(getLocalPlayer());
+                myPacket->Packet(&bsIn, false);
                 getLocalPlayer()->setAttributes();
             }
         }
         else if (pl != 0)
         {
-            myPacket->Packet(&bsIn, pl, false);
+            myPacket->setPlayer(pl);
+            myPacket->Packet(&bsIn, false);
 
             MWWorld::Ptr ptrPlayer = pl->getPtr();
             MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
@@ -677,13 +706,15 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             }
             else
             {
-                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                myPacket->setPlayer(getLocalPlayer());
+                myPacket->Packet(&bsIn, false);
                 getLocalPlayer()->setSkills();
             }
         }
         else if (pl != 0)
         {
-            myPacket->Packet(&bsIn, pl, false);
+            myPacket->setPlayer(pl);
+            myPacket->Packet(&bsIn, false);
 
             MWWorld::Ptr ptrPlayer = pl->getPtr();
             MWMechanics::NpcStats *ptrNpcStats = &ptrPlayer.getClass().getNpcStats(ptrPlayer);
@@ -707,13 +738,15 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             }
             else
             {
-                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                myPacket->setPlayer(getLocalPlayer());
+                myPacket->Packet(&bsIn, false);
                 getLocalPlayer()->setLevel();
             }
         }
         else if (pl != 0)
         {
-            myPacket->Packet(&bsIn, pl, false);
+            myPacket->setPlayer(pl);
+            myPacket->Packet(&bsIn, false);
 
             MWWorld::Ptr ptrPlayer = pl->getPtr();
             MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
@@ -726,7 +759,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
         if (guid == myGuid)
         {
-            myPacket->Packet(&bsIn, getLocalPlayer(), false);
+            myPacket->setPlayer(getLocalPlayer());
+            myPacket->Packet(&bsIn, false);
 
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_GUI_MESSAGEBOX, Type %d, MSG %s", getLocalPlayer()->guiMessageBox.type,
                                getLocalPlayer()->guiMessageBox.label.c_str());
@@ -752,7 +786,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
                 getLocalPlayer()->sendClass();
             else
             {
-                myPacket->Packet(&bsIn, getLocalPlayer(), false);
+                myPacket->setPlayer(getLocalPlayer());
+                myPacket->Packet(&bsIn, false);
                 getLocalPlayer()->setClass();
             }
         }
@@ -762,7 +797,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     {
         if (guid == myGuid)
         {
-            myPacket->Packet(&bsIn, getLocalPlayer(), false);
+            myPacket->setPlayer(getLocalPlayer());
+            myPacket->Packet(&bsIn, false);
             MWBase::World *world = MWBase::Environment::get().getWorld();
             if (getLocalPlayer()->hour != -1)
                 world->setHour(getLocalPlayer()->hour);
@@ -775,7 +811,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     }
     case ID_GAME_CONSOLE:
     {
-        myPacket->Packet(&bsIn, getLocalPlayer(), false);
+        myPacket->setPlayer(getLocalPlayer());
+        myPacket->Packet(&bsIn, false);
         break;
     }
     default:
@@ -796,7 +833,8 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
     WorldPacket *myPacket = worldController.GetPacket(packet->data[0]);
 
-    myPacket->Packet(&bsIn, &worldEvent, false);
+    myPacket->setEvent(&worldEvent);
+    myPacket->Packet(&bsIn, false);
 
     switch (packet->data[0])
     {

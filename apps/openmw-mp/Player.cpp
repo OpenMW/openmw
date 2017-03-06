@@ -158,7 +158,8 @@ void Player::sendToLoaded(mwmp::PlayerPacket *myPacket)
     for (auto pl : plList)
     {
         if (pl == this) continue;
-        myPacket->Send(this, pl->guid);
+        myPacket->setPlayer(this);
+        myPacket->Send();
     }
 }
 

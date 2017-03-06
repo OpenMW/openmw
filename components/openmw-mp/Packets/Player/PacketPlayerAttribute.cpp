@@ -12,9 +12,9 @@ PacketPlayerAttribute::PacketPlayerAttribute(RakNet::RakPeerInterface *peer) : P
     packetID = ID_PLAYER_ATTRIBUTE;
 }
 
-void PacketPlayerAttribute::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketPlayerAttribute::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, send);
 
     for (int i = 0; i < AttributeCount; ++i)
         RW(player->creatureStats.mAttributes[i], send);

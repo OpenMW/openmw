@@ -13,9 +13,9 @@ PacketPlayerInventory::PacketPlayerInventory(RakNet::RakPeerInterface *peer) : P
     packetID = ID_PLAYER_INVENTORY;
 }
 
-void PacketPlayerInventory::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketPlayerInventory::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, send);
 
     RW(player->inventoryChanges.action, send);
 

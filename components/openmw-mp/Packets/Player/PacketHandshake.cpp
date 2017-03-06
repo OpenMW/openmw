@@ -12,9 +12,9 @@ PacketHandshake::PacketHandshake(RakNet::RakPeerInterface *peer) : PlayerPacket(
     packetID = ID_HANDSHAKE;
 }
 
-void PacketHandshake::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketHandshake::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, send);
     RW(player->npc.mName, send);
     RW(player->passw, send);
 }

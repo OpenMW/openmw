@@ -8,9 +8,9 @@ PacketObjectAnimPlay::PacketObjectAnimPlay(RakNet::RakPeerInterface *peer) : Wor
     packetID = ID_OBJECT_ANIM_PLAY;
 }
 
-void PacketObjectAnimPlay::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
+void PacketObjectAnimPlay::Packet(RakNet::BitStream *bs, bool send)
 {
-    WorldPacket::Packet(bs, event, send);
+    WorldPacket::Packet(bs, send);
 
     if (!send)
         event->objectChanges.objects.clear();

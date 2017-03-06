@@ -10,9 +10,9 @@ mwmp::PacketPlayerClass::PacketPlayerClass(RakNet::RakPeerInterface *peer) : Pla
     packetID = ID_PLAYER_CHARCLASS;
 }
 
-void mwmp::PacketPlayerClass::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
+void mwmp::PacketPlayerClass::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs,  send);
 
     RW(player->charClass.mId, send);
     if (player->charClass.mId.empty()) // custom class

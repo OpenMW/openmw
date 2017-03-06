@@ -8,9 +8,9 @@ PacketContainer::PacketContainer(RakNet::RakPeerInterface *peer) : WorldPacket(p
     packetID = ID_CONTAINER;
 }
 
-void PacketContainer::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
+void PacketContainer::Packet(RakNet::BitStream *bs, bool send)
 {
-    WorldPacket::Packet(bs, event, send);
+    WorldPacket::Packet(bs, send);
 
     RW(event->action, send);
 

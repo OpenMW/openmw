@@ -74,7 +74,8 @@ void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
         worldEvent->addObject(worldObject);
     }
 
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send(worldEvent);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->setEvent(worldEvent);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send();
 }
 
 void WorldEvent::editContainers(MWWorld::CellStore* cellStore)

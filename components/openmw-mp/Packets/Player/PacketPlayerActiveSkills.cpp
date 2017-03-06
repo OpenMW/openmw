@@ -12,9 +12,9 @@ PacketPlayerActiveSkills::PacketPlayerActiveSkills(RakNet::RakPeerInterface *pee
     packetID = ID_PLAYER_ACTIVESKILLS;
 }
 
-void PacketPlayerActiveSkills::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
+void PacketPlayerActiveSkills::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, send);
 
     unsigned long spells = 0;
 

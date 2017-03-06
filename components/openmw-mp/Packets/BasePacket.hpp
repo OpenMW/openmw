@@ -14,9 +14,15 @@ namespace mwmp
     public:
         BasePacket(RakNet::RakPeerInterface *peer);
 
-        ~BasePacket();
+        virtual ~BasePacket();
 
-        virtual void Packet(RakNet::BitStream *bs, RakNet::RakNetGUID &guid, bool send);
+        virtual void Packet(RakNet::BitStream *bs, bool send);
+        virtual void Send(bool toOtherPlayers = true);
+        virtual void Send(RakNet::AddressOrGUID destination);
+        virtual void Read();
+
+        void setGUID(RakNet::RakNetGUID guid);
+        RakNet::RakNetGUID getGUID();
 
         void SetReadStream(RakNet::BitStream *bitStream);
         void SetSendStream(RakNet::BitStream *bitStream);
@@ -88,6 +94,7 @@ namespace mwmp
         PacketPriority priority;
         RakNet::BitStream *bsRead, *bsSend, *bs;
         RakNet::RakPeerInterface *peer;
+        RakNet::RakNetGUID guid;
     };
 }
 

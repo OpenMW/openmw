@@ -13,9 +13,9 @@ mwmp::PacketPlayerCellChange::PacketPlayerCellChange(RakNet::RakPeerInterface *p
     reliability = RELIABLE_ORDERED;
 }
 
-void mwmp::PacketPlayerCellChange::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
+void mwmp::PacketPlayerCellChange::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, send);
 
     RW(player->cell.mData.mFlags, send);
     RW(player->cell.mData.mX, send);

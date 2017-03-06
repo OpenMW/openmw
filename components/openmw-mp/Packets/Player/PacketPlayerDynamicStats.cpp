@@ -12,9 +12,9 @@ PacketPlayerDynamicStats::PacketPlayerDynamicStats(RakNet::RakPeerInterface *pee
     packetID = ID_PLAYER_DYNAMICSTATS;
 }
 
-void PacketPlayerDynamicStats::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketPlayerDynamicStats::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, send);
     RW(player->creatureStats.mDynamic[0], send); // health
     RW(player->creatureStats.mDynamic[1], send); // magic
     RW(player->creatureStats.mDynamic[2], send); // fatigue

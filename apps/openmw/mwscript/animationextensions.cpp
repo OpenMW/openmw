@@ -81,7 +81,8 @@ namespace MWScript
                         worldObject.animMode = mode;
                         worldEvent->addObject(worldObject);
 
-                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->Send(worldEvent);
+                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->setEvent(worldEvent);
+                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->Send();
                     }
                     /*
                         End of tes3mp addition

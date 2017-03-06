@@ -12,9 +12,9 @@ PacketPlayerBaseInfo::PacketPlayerBaseInfo(RakNet::RakPeerInterface *peer) : Pla
     packetID = ID_PLAYER_BASEINFO;
 }
 
-void PacketPlayerBaseInfo::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketPlayerBaseInfo::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, send);
 
     RW(player->npc.mName, send);
     RW(player->npc.mModel, send);

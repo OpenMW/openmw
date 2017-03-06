@@ -19,11 +19,8 @@ namespace mwmp
 
         ~PlayerPacket();
 
-        virtual void Packet(RakNet::BitStream *bs, BasePlayer *player, bool send);
-
-        virtual void Send(BasePlayer *player, bool toOtherPlayers = true);
-        virtual void Send(BasePlayer *player, RakNet::AddressOrGUID destination);
-        virtual void Read(BasePlayer *player);
+        void setPlayer(BasePlayer *player);
+        BasePlayer *getPlayer();
 
     protected:
         BasePlayer *player;

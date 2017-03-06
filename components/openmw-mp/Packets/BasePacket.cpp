@@ -18,7 +18,7 @@ BasePacket::~BasePacket()
 
 }
 
-void BasePacket::Packet(RakNet::BitStream *bs, RakNet::RakNetGUID &guid, bool send)
+void BasePacket::Packet(RakNet::BitStream *bs, bool send)
 {
     this->bs = bs;
 
@@ -53,4 +53,33 @@ void BasePacket::RequestData(RakNet::RakNetGUID guid)
     bsSend->Write(packetID);
     bsSend->Write(guid);
     peer->Send(bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, 0, guid, false);
+}
+
+void BasePacket::Send(RakNet::AddressOrGUID destination)
+{
+    bsSend->ResetWritePointer();
+    Packet(bsSend, true);
+    peer->Send(bsSend, priority, reliability, 0, destination, false);
+}
+
+void BasePacket::Send(bool toOther)
+{
+    bsSend->ResetWritePointer();
+    Packet(bsSend, true);
+    peer->Send(bsSend, priority, reliability, 0, guid, toOther);
+}
+
+void BasePacket::Read()
+{
+    Packet(bsRead, false);
+}
+
+void BasePacket::setGUID(RakNet::RakNetGUID guid)
+{
+    this->guid = guid;
+}
+
+RakNet::RakNetGUID BasePacket::getGUID()
+{
+    return guid;
 }

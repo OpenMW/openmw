@@ -10,9 +10,9 @@ mwmp::PacketChatMessage::PacketChatMessage(RakNet::RakPeerInterface *peer) : Pla
     packetID = ID_CHAT_MESSAGE;
 }
 
-void mwmp::PacketChatMessage::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
+void mwmp::PacketChatMessage::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, send);
 
     RW(player->chatMessage, send);
 }

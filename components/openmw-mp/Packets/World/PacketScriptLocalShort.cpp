@@ -8,9 +8,9 @@ PacketScriptLocalShort::PacketScriptLocalShort(RakNet::RakPeerInterface *peer) :
     packetID = ID_SCRIPT_LOCAL_SHORT;
 }
 
-void PacketScriptLocalShort::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
+void PacketScriptLocalShort::Packet(RakNet::BitStream *bs, bool send)
 {
-    WorldPacket::Packet(bs, event, send);
+    WorldPacket::Packet(bs, send);
 
     if (!send)
         event->objectChanges.objects.clear();

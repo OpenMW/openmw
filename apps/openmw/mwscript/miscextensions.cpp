@@ -102,7 +102,8 @@ namespace MWScript
                 worldObject.allowSkipping = allowSkipping;
                 worldEvent->addObject(worldObject);
 
-                mwmp::Main::get().getNetworking()->getWorldPacket(ID_VIDEO_PLAY)->Send(worldEvent);
+                mwmp::Main::get().getNetworking()->getWorldPacket(ID_VIDEO_PLAY)->setEvent(worldEvent);
+                mwmp::Main::get().getNetworking()->getWorldPacket(ID_VIDEO_PLAY)->Send();
                 /*
                     End of tes3mp addition
                 */
@@ -220,7 +221,8 @@ namespace MWScript
                     worldObject.lockLevel = lockLevel;
                     worldEvent->addObject(worldObject);
 
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->Send(worldEvent);
+                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->setEvent(worldEvent);
+                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->Send();
                     /*
                         End of tes3mp addition
                     */
@@ -265,7 +267,8 @@ namespace MWScript
                     worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
                     worldEvent->addObject(worldObject);
 
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send(worldEvent);
+                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->setEvent(worldEvent);
+                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send();
                     /*
                         End of tes3mp addition
                     */
@@ -744,7 +747,8 @@ namespace MWScript
                         worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
                         worldEvent->addObject(worldObject);
 
-                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(worldEvent);
+                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->setEvent(worldEvent);
+                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send();
                         /*
                             End of tes3mp addition
                         */

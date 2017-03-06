@@ -19,11 +19,7 @@ namespace mwmp
 
         ~WorldPacket();
 
-        virtual void Packet(RakNet::BitStream *bs, BaseEvent *event, bool send);
-
-        virtual void Send(BaseEvent *event, bool toOtherPlayers = true);
-        virtual void Send(BaseEvent *event, RakNet::AddressOrGUID destination);
-        virtual void Read(BaseEvent *event);
+        void setEvent(BaseEvent *event);
 
     protected:
         BaseEvent *event;

@@ -14,9 +14,9 @@ PacketPlayerSkill::PacketPlayerSkill(RakNet::RakPeerInterface *peer) : PlayerPac
     packetID = ID_PLAYER_SKILL;
 }
 
-void PacketPlayerSkill::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketPlayerSkill::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, send);
 
     for (int i = 0; i < SkillCount; ++i)
         RW(player->npcStats.mSkills[i], send);

@@ -61,7 +61,8 @@ namespace MWScript
                     worldObject.scale = scale;
                     worldEvent->addObject(worldObject);
 
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->Send(worldEvent);
+                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->setEvent(worldEvent);
+                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->Send();
                     /*
                         End of tes3mp addition
                     */
@@ -578,7 +579,8 @@ namespace MWScript
 
                         worldEvent->addObject(worldObject);
 
-                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send(worldEvent);
+                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->setEvent(worldEvent);
+                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send();
 
                         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
                                            worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.count);

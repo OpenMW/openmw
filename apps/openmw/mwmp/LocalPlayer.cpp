@@ -108,7 +108,8 @@ bool LocalPlayer::charGenThread()
             windowManager->pushGuiMode(MWGui::GM_Review);
             break;
         }
-        getNetworking()->getPlayerPacket(ID_PLAYER_CHARGEN)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_CHARGEN)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_CHARGEN)->Send();
         charGenStage.current++;
 
         return false;
@@ -124,7 +125,8 @@ bool LocalPlayer::charGenThread()
         birthsign = world->getPlayer().getBirthSign();
 
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_BASEINFO to server with my CharGen info");
-        getNetworking()->getPlayerPacket(ID_PLAYER_BASEINFO)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_BASEINFO)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_BASEINFO)->Send();
 
         // Send stats packets if this is the 2nd round of CharGen that
         // only happens for new characters
@@ -136,7 +138,8 @@ bool LocalPlayer::charGenThread()
             updateLevel(true);
             sendClass();
             sendSpellbook();
-            getNetworking()->getPlayerPacket(ID_PLAYER_CHARGEN)->Send(this);
+            getNetworking()->getPlayerPacket(ID_PLAYER_CHARGEN)->setPlayer(this);
+            getNetworking()->getPlayerPacket(ID_PLAYER_CHARGEN)->Send();
         }
 
         sendCellStates();
@@ -183,7 +186,8 @@ void LocalPlayer::updateDynamicStats(bool forceUpdate)
 
             timer = 0;
 
-            getNetworking()->getPlayerPacket(ID_PLAYER_DYNAMICSTATS)->Send(this);
+            getNetworking()->getPlayerPacket(ID_PLAYER_DYNAMICSTATS)->setPlayer(this);
+            getNetworking()->getPlayerPacket(ID_PLAYER_DYNAMICSTATS)->Send();
         }
     }
 }
@@ -205,7 +209,8 @@ void LocalPlayer::updateAttributes(bool forceUpdate)
 
     if (attributesChanged || forceUpdate)
     {
-        getNetworking()->getPlayerPacket(ID_PLAYER_ATTRIBUTE)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_ATTRIBUTE)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_ATTRIBUTE)->Send();
     }
 }
 
@@ -244,7 +249,8 @@ void LocalPlayer::updateSkills(bool forceUpdate)
     if (skillsChanged || forceUpdate)
     {
         npcStats.mLevelProgress = ptrNpcStats.getLevelProgress();
-        getNetworking()->getPlayerPacket(ID_PLAYER_SKILL)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_SKILL)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_SKILL)->Send();
     }
 }
 
@@ -256,7 +262,8 @@ void LocalPlayer::updateLevel(bool forceUpdate)
     if (ptrNpcStats.getLevel() != creatureStats.mLevel || forceUpdate)
     {
         creatureStats.mLevel = ptrNpcStats.getLevel();
-        getNetworking()->getPlayerPacket(ID_PLAYER_LEVEL)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_LEVEL)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_LEVEL)->Send();
 
         // Also update skills to refresh level progress and attribute bonuses
         // for next level up
@@ -296,7 +303,8 @@ void LocalPlayer::updatePosition(bool forceUpdate)
         direction.pos[1] = move.mPosition[1];
         direction.pos[2] = move.mPosition[2];
 
-        getNetworking()->getPlayerPacket(ID_PLAYER_POS)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_POS)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_POS)->Send();
     }
     else if (isJumping && world->isOnGround(player))
     {
@@ -308,7 +316,8 @@ void LocalPlayer::updatePosition(bool forceUpdate)
     {
         sentJumpEnd = true;
         position = ptrPos;
-        getNetworking()->getPlayerPacket(ID_PLAYER_POS)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_POS)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_POS)->Send();
     }
 }
 
@@ -354,7 +363,8 @@ void LocalPlayer::updateCell(bool forceUpdate)
         // cell change events in server scripts will have the wrong player position
         updatePosition(true);
 
-        getNetworking()->getPlayerPacket(ID_PLAYER_CELL_CHANGE)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_CELL_CHANGE)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_CELL_CHANGE)->Send();
 
         // Also force an update to skills (to send all progress to skill increases)
         updateSkills(true);
@@ -418,7 +428,8 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
 
     if (equipChanged)
     {
-        getNetworking()->getPlayerPacket(ID_PLAYER_EQUIPMENT)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_EQUIPMENT)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_EQUIPMENT)->Send();
         equipChanged = false;
     }
 }
@@ -546,7 +557,8 @@ void LocalPlayer::updateDeadState(bool forceUpdate)
         creatureStats.mDead = true;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_DEATH to server about myself");
-        getNetworking()->getPlayerPacket(ID_PLAYER_DEATH)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_DEATH)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_DEATH)->Send();
         isDead = true;
     }
     else if (ptrNpcStats->getHealth().getCurrent() > 0 && isDead)
@@ -619,7 +631,8 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
         if (isJumping)
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after jump;
 
-        getNetworking()->getPlayerPacket(ID_PLAYER_DRAWSTATE)->Send(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_DRAWSTATE)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_DRAWSTATE)->Send();
     }
 }
 
@@ -956,7 +969,8 @@ void LocalPlayer::sendClass()
     else
         charClass.mId = cls->mId;
 
-    getNetworking()->getPlayerPacket(ID_PLAYER_CHARCLASS)->Send(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_CHARCLASS)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_CHARCLASS)->Send();
 }
 
 void LocalPlayer::sendInventory()
@@ -981,7 +995,8 @@ void LocalPlayer::sendInventory()
 
     inventoryChanges.count = (unsigned int) inventoryChanges.items.size();
     inventoryChanges.action = InventoryChanges::SET;
-    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_INVENTORY)->Send(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_INVENTORY)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_INVENTORY)->Send();
 }
 
 void LocalPlayer::sendSpellbook()
@@ -1003,12 +1018,14 @@ void LocalPlayer::sendSpellbook()
     }
 
     spellbookChanges.action = SpellbookChanges::SET;
-    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send();
 }
 
 void LocalPlayer::sendCellStates()
 {
-    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_CELL_STATE)->Send(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_CELL_STATE)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_CELL_STATE)->Send();
 
 }
 
@@ -1024,7 +1041,8 @@ void LocalPlayer::sendSpellAddition(std::string id)
     spellbookChanges.spells.push_back(spell);
 
     spellbookChanges.action = SpellbookChanges::ADD;
-    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send();
 }
 
 void LocalPlayer::sendSpellRemoval(std::string id)
@@ -1039,7 +1057,8 @@ void LocalPlayer::sendSpellRemoval(std::string id)
     spellbookChanges.spells.push_back(spell);
 
     spellbookChanges.action = SpellbookChanges::REMOVE;
-    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send();
 }
 
 void LocalPlayer::sendSpellAddition(const ESM::Spell &spell)
@@ -1069,7 +1088,8 @@ void LocalPlayer::sendJournalEntry(const std::string& quest, int index, const MW
 
     journalChanges.journalItems.push_back(journalItem);
 
-    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_JOURNAL)->Send(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_JOURNAL)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_JOURNAL)->Send();
 }
 
 void LocalPlayer::sendJournalIndex(const std::string& quest, int index)
@@ -1083,7 +1103,8 @@ void LocalPlayer::sendJournalIndex(const std::string& quest, int index)
 
     journalChanges.journalItems.push_back(journalItem);
 
-    Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_JOURNAL)->Send(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_JOURNAL)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_JOURNAL)->Send();
 }
 
 void LocalPlayer::sendAttack(Attack::TYPE type)
@@ -1092,7 +1113,9 @@ void LocalPlayer::sendAttack(Attack::TYPE type)
 
     attack.type = type;
     attack.pressed = false;
-    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Send(this);
+
+    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Send();
 }
 
 void LocalPlayer::clearCellStates()
@@ -1162,5 +1185,6 @@ void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
     attack.target = RakNet::RakNetGUID();
     attack.attacker = guid;
 
-    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Send(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Send();
 }

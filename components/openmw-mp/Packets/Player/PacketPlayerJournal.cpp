@@ -9,9 +9,9 @@ PacketPlayerJournal::PacketPlayerJournal(RakNet::RakPeerInterface *peer) : Playe
     packetID = ID_PLAYER_JOURNAL;
 }
 
-void PacketPlayerJournal::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketPlayerJournal::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, send);
 
     if (!send)
         player->journalChanges.journalItems.clear();

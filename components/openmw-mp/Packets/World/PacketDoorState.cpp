@@ -8,9 +8,9 @@ PacketDoorState::PacketDoorState(RakNet::RakPeerInterface *peer) : WorldPacket(p
     packetID = ID_DOOR_STATE;
 }
 
-void PacketDoorState::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
+void PacketDoorState::Packet(RakNet::BitStream *bs, bool send)
 {
-    WorldPacket::Packet(bs, event, send);
+    WorldPacket::Packet(bs, send);
 
     if (!send)
         event->objectChanges.objects.clear();

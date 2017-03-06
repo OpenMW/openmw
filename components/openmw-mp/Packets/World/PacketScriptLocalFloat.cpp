@@ -8,9 +8,9 @@ PacketScriptLocalFloat::PacketScriptLocalFloat(RakNet::RakPeerInterface *peer) :
     packetID = ID_SCRIPT_LOCAL_FLOAT;
 }
 
-void PacketScriptLocalFloat::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
+void PacketScriptLocalFloat::Packet(RakNet::BitStream *bs, bool send)
 {
-    WorldPacket::Packet(bs, event, send);
+    WorldPacket::Packet(bs, send);
 
     if (!send)
         event->objectChanges.objects.clear();

@@ -110,5 +110,6 @@ void CellFunctions::SendCell(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, );
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_CELL_CHANGE)->Send(player, false);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_CELL_CHANGE)->setPlayer(player);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_CELL_CHANGE)->Send(false);
 }

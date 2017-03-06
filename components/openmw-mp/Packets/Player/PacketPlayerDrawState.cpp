@@ -10,9 +10,9 @@ mwmp::PacketPlayerDrawState::PacketPlayerDrawState(RakNet::RakPeerInterface *pee
     packetID = ID_PLAYER_DRAWSTATE;
 }
 
-void mwmp::PacketPlayerDrawState::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
+void mwmp::PacketPlayerDrawState::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, send);
 
     RW(player->movementFlags, send);
     RW(player->drawState, send);

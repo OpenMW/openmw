@@ -159,7 +159,8 @@ void mwmp::GUIController::onInputBoxDone(MWGui::WindowBase *parWindow)
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "GUIController::OnInputBoxDone: %s.",mInputBox->getTextInput().c_str());
 
     Main::get().getLocalPlayer()->guiMessageBox.data = mInputBox->getTextInput();
-    Main::get().getNetworking()->getPlayerPacket(ID_GUI_MESSAGEBOX)->Send(Main::get().getLocalPlayer());
+    Main::get().getNetworking()->getPlayerPacket(ID_GUI_MESSAGEBOX)->setPlayer(Main::get().getLocalPlayer());
+    Main::get().getNetworking()->getPlayerPacket(ID_GUI_MESSAGEBOX)->Send();
 
     MWBase::Environment::get().getWindowManager()->removeDialog(mInputBox);
     mInputBox = 0;
@@ -201,7 +202,8 @@ void mwmp::GUIController::update(float dt)
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Pressed: %d", pressedButton);
         calledMessageBox = false;
         Main::get().getLocalPlayer()->guiMessageBox.data = MyGUI::utility::toString(pressedButton);
-        Main::get().getNetworking()->getPlayerPacket(ID_GUI_MESSAGEBOX)->Send(Main::get().getLocalPlayer());
+        Main::get().getNetworking()->getPlayerPacket(ID_GUI_MESSAGEBOX)->setPlayer(Main::get().getLocalPlayer());
+        Main::get().getNetworking()->getPlayerPacket(ID_GUI_MESSAGEBOX)->Send();
     }
 
     blockConsole();

@@ -17,7 +17,7 @@ namespace mwmp
         const static int AttributeCount = 8;
         PacketPlayerSkill(RakNet::RakPeerInterface *peer);
 
-        virtual void Packet(RakNet::BitStream *bs, BasePlayer *player, bool send);
+        virtual void Packet(RakNet::BitStream *bs, bool send);
     };
 }
 

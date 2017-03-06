@@ -82,7 +82,8 @@ namespace MWScript
                     worldObject.filename = sound;
                     worldEvent->addObject(worldObject);
 
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->Send(worldEvent);
+                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->setEvent(worldEvent);
+                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->Send();
                     /*
                         End of tes3mp addition
                     */

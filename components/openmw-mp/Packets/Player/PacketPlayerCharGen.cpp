@@ -10,9 +10,9 @@ mwmp::PacketPlayerCharGen::PacketPlayerCharGen(RakNet::RakPeerInterface *peer) :
     packetID = ID_PLAYER_CHARGEN;
 }
 
-void mwmp::PacketPlayerCharGen::Packet(RakNet::BitStream *bs, mwmp::BasePlayer *player, bool send)
+void mwmp::PacketPlayerCharGen::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, send);
 
     RW(player->charGenStage, send);
 

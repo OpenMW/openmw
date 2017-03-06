@@ -67,7 +67,9 @@ void Cell::sendToLoaded(mwmp::WorldPacket *worldPacket, mwmp::BaseEvent *baseEve
     for (auto pl : plList)
     {
         if (pl->guid == baseEvent->guid) continue;
-        worldPacket->Send(baseEvent, pl->guid);
+        worldPacket->setEvent(baseEvent);
+        worldPacket->setGUID(pl->guid);
+        worldPacket->Send();
     }
 }
 

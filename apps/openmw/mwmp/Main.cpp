@@ -200,8 +200,10 @@ void Main::updateWorld(float dt) const
         init = false;
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_BASEINFO to server");
 
-        mNetworking->getPlayerPacket(ID_PLAYER_BASEINFO)->Send(getLocalPlayer());
-        mNetworking->getPlayerPacket(ID_LOADED)->Send(getLocalPlayer());
+        mNetworking->getPlayerPacket(ID_PLAYER_BASEINFO)->setPlayer(getLocalPlayer());
+        mNetworking->getPlayerPacket(ID_LOADED)->setPlayer(getLocalPlayer());
+        mNetworking->getPlayerPacket(ID_PLAYER_BASEINFO)->Send();
+        mNetworking->getPlayerPacket(ID_LOADED)->Send();
         mLocalPlayer->updateDynamicStats(true);
         get().getGUIController()->setChatVisible(true);
     }

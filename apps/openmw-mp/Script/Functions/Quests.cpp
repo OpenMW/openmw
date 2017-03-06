@@ -73,7 +73,8 @@ void QuestFunctions::SendJournalChanges(unsigned short pid) noexcept
     GET_PLAYER(pid, player, );
 
     std::swap(player->journalChanges, player->journalChangesBuffer);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_JOURNAL)->Send(player, false);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_JOURNAL)->setPlayer(player);
+    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_JOURNAL)->Send(false);
     player->journalChanges = std::move(player->journalChangesBuffer);
     player->journalChangesBuffer.journalItems.clear();
 }

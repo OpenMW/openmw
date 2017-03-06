@@ -134,7 +134,8 @@ namespace mwmp
 
         localPlayer->chatMessage = str;
 
-        networking->getPlayerPacket(ID_CHAT_MESSAGE)->Send(localPlayer);
+        networking->getPlayerPacket(ID_CHAT_MESSAGE)->setPlayer(localPlayer);
+        networking->getPlayerPacket(ID_CHAT_MESSAGE)->Send();
     }
 
     void GUIChat::clean()

@@ -15,9 +15,9 @@ PacketPlayerPosition::PacketPlayerPosition(RakNet::RakPeerInterface *peer) : Pla
     //reliability = UNRELIABLE_SEQUENCED;
 }
 
-void PacketPlayerPosition::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketPlayerPosition::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, send);
 
     RW(player->position, send);
     RW(player->direction, send);

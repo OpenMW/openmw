@@ -42,7 +42,8 @@ namespace MWWorld
         worldObject.refNumIndex = getTarget().getCellRef().getRefNum().mIndex;
         worldEvent->addObject(worldObject);
 
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(worldEvent);
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->setEvent(worldEvent);
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send();
 
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_DELETE about\n- cellRef: %s, %i\n- cell: %s",
                            worldObject.refId.c_str(), worldObject.refNumIndex, worldEvent->cell.getDescription().c_str());

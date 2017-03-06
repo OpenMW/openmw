@@ -5,12 +5,6 @@
 
 using namespace mwmp;
 
-void WorldPacket::Packet(RakNet::BitStream *bs, BaseEvent *event, bool send)
-{
-    BasePacket::Packet(bs, event->guid, send);
-    this->event = event;
-}
-
 WorldPacket::WorldPacket(RakNet::RakPeerInterface *peer) : BasePacket(peer)
 {
     packetID = 0;
@@ -24,21 +18,8 @@ WorldPacket::~WorldPacket()
 
 }
 
-void WorldPacket::Send(BaseEvent *event, RakNet::AddressOrGUID destination)
+void WorldPacket::setEvent(BaseEvent *event)
 {
-    bsSend->ResetWritePointer();
-    Packet(bsSend, event, true);
-    peer->Send(bsSend, priority, reliability, 0, destination, false);
-}
-
-void WorldPacket::Send(BaseEvent *event, bool toOther)
-{
-    bsSend->ResetWritePointer();
-    Packet(bsSend, event, true);
-    peer->Send(bsSend, priority, reliability, 0, event->guid, toOther);
-}
-
-void WorldPacket::Read(BaseEvent *event)
-{
-    Packet(bsRead, event, false);
+    this->event = event;
+    guid = event->guid;
 }

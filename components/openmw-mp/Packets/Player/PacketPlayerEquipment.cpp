@@ -12,9 +12,9 @@ PacketPlayerEquipment::PacketPlayerEquipment(RakNet::RakPeerInterface *peer) : P
     packetID = ID_PLAYER_EQUIPMENT;
 }
 
-void PacketPlayerEquipment::Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+void PacketPlayerEquipment::Packet(RakNet::BitStream *bs, bool send)
 {
-    PlayerPacket::Packet(bs, player, send);
+    PlayerPacket::Packet(bs, send);
 
     for (int i = 0; i < 19; i++)
     {

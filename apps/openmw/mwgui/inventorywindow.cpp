@@ -652,7 +652,8 @@ namespace MWGui
         worldObject.refNumIndex = object.getCellRef().getRefNum().mIndex;
         worldEvent->addObject(worldObject);
 
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send(worldEvent);
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->setEvent(worldEvent);
+        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send();
         mwmp::Main::get().getLocalPlayer()->sendInventory();
         /*
             End of tes3mp addition

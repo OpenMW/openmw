@@ -18,9 +18,9 @@ namespace mwmp
         {
             packetID = ID_PLAYER_RESURRECT;
         }
-        void Packet(RakNet::BitStream *bs, BasePlayer *player, bool send)
+        void Packet(RakNet::BitStream *bs, bool send)
         {
-            PlayerPacket::Packet(bs, player, send);
+            PlayerPacket::Packet(bs, send);
             RW(player->creatureStats.mDead, send);
         }
     };

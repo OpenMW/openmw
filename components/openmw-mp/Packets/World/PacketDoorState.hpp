@@ -10,7 +10,7 @@ namespace mwmp
     public:
         PacketDoorState(RakNet::RakPeerInterface *peer);
 
-        virtual void Packet(RakNet::BitStream *bs, BaseEvent *event, bool send);
+        virtual void Packet(RakNet::BitStream *bs, bool send);
     };
 }
 
