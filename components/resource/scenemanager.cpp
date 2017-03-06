@@ -689,13 +689,13 @@ namespace Resource
 
     void SceneManager::updateCache(double referenceTime)
     {
-        mSharedStateMutex.lock();
-        mSharedStateManager->prune();
-        mSharedStateMutex.unlock();
-
         ResourceManager::updateCache(referenceTime);
 
         mInstanceCache->removeUnreferencedObjectsInCache();
+
+        mSharedStateMutex.lock();
+        mSharedStateManager->prune();
+        mSharedStateMutex.unlock();
     }
 
     void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats)
