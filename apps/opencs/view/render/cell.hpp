@@ -6,18 +6,9 @@
 #include <memory>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
 #include <osg/ref_ptr>
 
-#ifndef Q_MOC_RUN
-#include <components/terrain/terraingrid.hpp>
-#endif
-
-#include "object.hpp"
-#include "cellarrow.hpp"
-#include "cellmarker.hpp"
-#include "cellborder.hpp"
+#include "../../model/world/cellcoordinates.hpp"
 
 class QModelIndex;
 
@@ -31,7 +22,11 @@ namespace osg
 namespace CSMWorld
 {
     class Data;
-    class CellCoordinates;
+}
+
+namespace Terrain
+{
+    class TerrainGrid;
 }
 
 namespace CSVRender
@@ -39,6 +34,12 @@ namespace CSVRender
     class CellWater;
     class Pathgrid;
     class TagBase;
+    class Object;
+
+    class CellArrow;
+    class CellBorder;
+    class CellMarker;
+    class CellWater;
 
     class Cell
     {

@@ -20,6 +20,7 @@
 #include "editmode.hpp"
 #include "mask.hpp"
 #include "cameracontroller.hpp"
+#include "cellarrow.hpp"
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {

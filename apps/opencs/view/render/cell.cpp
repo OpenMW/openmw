@@ -9,6 +9,7 @@
 #include <components/esm/loadcell.hpp>
 #include <components/esm/loadland.hpp>
 #include <components/sceneutil/pathgridutil.hpp>
+#include <components/terrain/terraingrid.hpp>
 
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/columns.hpp"
@@ -17,9 +18,13 @@
 #include "../../model/world/cellcoordinates.hpp"
 
 #include "cellwater.hpp"
+#include "cellborder.hpp"
+#include "cellarrow.hpp"
+#include "cellmarker.hpp"
 #include "mask.hpp"
 #include "pathgrid.hpp"
 #include "terrainstorage.hpp"
+#include "object.hpp"
 
 bool CSVRender::Cell::removeObject (const std::string& id)
 {
