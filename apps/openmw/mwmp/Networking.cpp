@@ -187,7 +187,7 @@ void Networking::preInit(std::vector<std::string> &content, Files::Collections &
             unsigned int crc32 = Utils::crc32checksum(col.getPath(*it).string());
             checksums.push_back(make_pair(*it, crc32));
 
-            printf("idx: %d\tchecksum: %x\tfile: %s\n", idx, crc32, col.getPath(*it).c_str());
+            printf("idx: %d\tchecksum: %X\tfile: %s\n", idx, crc32, col.getPath(*it).c_str());
         }
         else
             throw std::runtime_error("Plugin doesn't exists.");
@@ -196,8 +196,10 @@ void Networking::preInit(std::vector<std::string> &content, Files::Collections &
     PacketPreInit packetPreInit(peer);
     RakNet::BitStream bs;
     RakNet::RakNetGUID guid;
+    packetPreInit.setChecksums(&checksums);
     packetPreInit.setGUID(guid);
-    packetPreInit.Packet(&bs, true, checksums);
+    packetPreInit.SetSendStream(&bs);
+    packetPreInit.Send(serverAddr);
 
 
     bool done = false;
