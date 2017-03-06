@@ -21,6 +21,11 @@ namespace SceneUtil
     class UnrefQueue;
 }
 
+namespace MWRender
+{
+    class LandManager;
+}
+
 namespace MWWorld
 {
     class CellStore;
@@ -28,7 +33,7 @@ namespace MWWorld
     class CellPreloader
     {
     public:
-        CellPreloader(Resource::ResourceSystem* resourceSystem, Resource::BulletShapeManager* bulletShapeManager, Terrain::World* terrain);
+        CellPreloader(Resource::ResourceSystem* resourceSystem, Resource::BulletShapeManager* bulletShapeManager, Terrain::World* terrain, MWRender::LandManager* landManager);
         ~CellPreloader();
 
         /// Ask a background thread to preload rendering meshes and collision shapes for objects in this cell.
@@ -64,6 +69,7 @@ namespace MWWorld
         Resource::ResourceSystem* mResourceSystem;
         Resource::BulletShapeManager* mBulletShapeManager;
         Terrain::World* mTerrain;
+        MWRender::LandManager* mLandManager;
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
         osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
         double mExpiryDelay;

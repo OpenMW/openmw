@@ -16,6 +16,39 @@
 namespace ESMTerrain
 {
 
+
+    LandObject::LandObject()
+    {
+    }
+
+    LandObject::LandObject(const ESM::Land *land, int loadFlags)
+        : mLand(land)
+        , mLoadFlags(loadFlags)
+    {
+        mLand->loadData(mLoadFlags);
+    }
+
+    LandObject::LandObject(const LandObject &copy, const osg::CopyOp &copyop)
+    {
+    }
+
+    LandObject::~LandObject()
+    {
+        if (mLand && mLoadFlags) // only unload if we were responsible for loading to begin with.
+            mLand->unloadData();
+    }
+
+    const ESM::Land::LandData *LandObject::getData(int flags) const
+    {
+        return mLand->getLandData(flags);
+    }
+
+    int LandObject::getPlugin() const
+    {
+        return mLand->mPlugin;
+    }
+
+
     const float defaultHeight = ESM::Land::DEFAULT_HEIGHT;
 
     Storage::Storage(const VFS::Manager *vfs, const std::string& normalMapPattern, const std::string& normalHeightMapPattern, bool autoUseNormalMaps, const std::string& specularMapPattern, bool autoUseSpecularMaps)
@@ -26,14 +59,6 @@ namespace ESMTerrain
         , mSpecularMapPattern(specularMapPattern)
         , mAutoUseSpecularMaps(autoUseSpecularMaps)
     {
-    }
-
-    const ESM::Land::LandData *Storage::getLandData (int cellX, int cellY, int flags)
-    {
-        if (const ESM::Land *land = getLand (cellX, cellY))
-            return land->getLandData (flags);
-
-        return 0;
     }
 
     bool Storage::getMinMaxHeights(float size, const osg::Vec2f &center, float &min, float &max)
@@ -53,7 +78,9 @@ namespace ESMTerrain
         int endRow = startRow + size * (ESM::Land::LAND_SIZE-1) + 1;
         int endColumn = startColumn + size * (ESM::Land::LAND_SIZE-1) + 1;
 
-        if (const ESM::Land::LandData *data = getLandData (cellX, cellY, ESM::Land::DATA_VHGT))
+        osg::ref_ptr<const LandObject> land = getLand (cellX, cellY);
+        const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : 0;
+        if (data)
         {
             min = std::numeric_limits<float>::max();
             max = -std::numeric_limits<float>::max();
@@ -99,7 +126,9 @@ namespace ESMTerrain
             row += ESM::Land::LAND_SIZE-1;
         }
 
-        if (const ESM::Land::LandData *data = getLandData (cellX, cellY, ESM::Land::DATA_VNML))
+        osg::ref_ptr<const LandObject> land = getLand(cellX, cellY);
+        const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VNML) : 0;
+        if (data)
         {
             normal.x() = data->mNormals[col*ESM::Land::LAND_SIZE*3+row*3];
             normal.y() = data->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+1];
@@ -134,7 +163,9 @@ namespace ESMTerrain
             row = 0;
         }
 
-        if (const ESM::Land::LandData *data = getLandData (cellX, cellY, ESM::Land::DATA_VCLR))
+        osg::ref_ptr<const LandObject> land = getLand(cellX, cellY);
+        const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VCLR) : 0;
+        if (data)
         {
             color.r() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3] / 255.f;
             color.g() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3+1] / 255.f;
@@ -146,7 +177,6 @@ namespace ESMTerrain
             color.g() = 1;
             color.b() = 1;
         }
-
     }
 
     void Storage::fillVertexBuffers (int lodLevel, float size, const osg::Vec2f& center,
@@ -180,9 +210,16 @@ namespace ESMTerrain
             float vertX_ = 0; // of current cell corner
             for (int cellX = startCellX; cellX < startCellX + std::ceil(size); ++cellX)
             {
-                const ESM::Land::LandData *heightData = getLandData (cellX, cellY, ESM::Land::DATA_VHGT);
-                const ESM::Land::LandData *normalData = getLandData (cellX, cellY, ESM::Land::DATA_VNML);
-                const ESM::Land::LandData *colourData = getLandData (cellX, cellY, ESM::Land::DATA_VCLR);
+                osg::ref_ptr<const LandObject> land = getLand(cellX, cellY);
+                const ESM::Land::LandData *heightData = 0;
+                const ESM::Land::LandData *normalData = 0;
+                const ESM::Land::LandData *colourData = 0;
+                if (land)
+                {
+                    heightData = land->getData(ESM::Land::DATA_VHGT);
+                    normalData = land->getData(ESM::Land::DATA_VNML);
+                    colourData = land->getData(ESM::Land::DATA_VCLR);
+                }
 
                 int rowStart = 0;
                 int colStart = 0;
@@ -298,15 +335,16 @@ namespace ESMTerrain
         assert(x<ESM::Land::LAND_TEXTURE_SIZE);
         assert(y<ESM::Land::LAND_TEXTURE_SIZE);
 
-        if (const ESM::Land::LandData *data = getLandData (cellX, cellY, ESM::Land::DATA_VTEX))
+        osg::ref_ptr<const LandObject> land = getLand(cellX, cellY);
+        const ESM::Land::LandData *data = land ? land->getData(ESM::Land::DATA_VTEX) : 0;
+        if (data)
         {
             int tex = data->mTextures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
             if (tex == 0)
                 return std::make_pair(0,0); // vtex 0 is always the base texture, regardless of plugin
-            return std::make_pair(tex, getLand (cellX, cellY)->mPlugin);
+            return std::make_pair(tex, land->getPlugin());
         }
-        else
-            return std::make_pair(0,0);
+        return std::make_pair(0,0);
     }
 
     std::string Storage::getTextureName(UniqueTextureId id)
@@ -421,8 +459,12 @@ namespace ESMTerrain
         int cellX = static_cast<int>(std::floor(worldPos.x() / 8192.f));
         int cellY = static_cast<int>(std::floor(worldPos.y() / 8192.f));
 
-        const ESM::Land* land = getLand(cellX, cellY);
-        if (!land || !(land->mDataTypes&ESM::Land::DATA_VHGT))
+        osg::ref_ptr<const LandObject> land = getLand(cellX, cellY);
+        if (!land)
+            return defaultHeight;
+
+        const ESM::Land::LandData* data = land->getData(ESM::Land::DATA_VHGT);
+        if (!data)
             return defaultHeight;
 
         // Mostly lifted from Ogre::Terrain::getHeightAtTerrainPosition
@@ -461,10 +503,10 @@ namespace ESMTerrain
         */
 
         // Build all 4 positions in normalized cell space, using point-sampled height
-        osg::Vec3f v0 (startXTS, startYTS, getVertexHeight(land, startX, startY) / 8192.f);
-        osg::Vec3f v1 (endXTS, startYTS, getVertexHeight(land, endX, startY) / 8192.f);
-        osg::Vec3f v2 (endXTS, endYTS, getVertexHeight(land, endX, endY) / 8192.f);
-        osg::Vec3f v3 (startXTS, endYTS, getVertexHeight(land, startX, endY) / 8192.f);
+        osg::Vec3f v0 (startXTS, startYTS, getVertexHeight(data, startX, startY) / 8192.f);
+        osg::Vec3f v1 (endXTS, startYTS, getVertexHeight(data, endX, startY) / 8192.f);
+        osg::Vec3f v2 (endXTS, endYTS, getVertexHeight(data, endX, endY) / 8192.f);
+        osg::Vec3f v3 (startXTS, endYTS, getVertexHeight(data, startX, endY) / 8192.f);
         // define this plane in terrain space
         osg::Plane plane;
         // FIXME: deal with differing triangle alignment
@@ -496,11 +538,11 @@ namespace ESMTerrain
 
     }
 
-    float Storage::getVertexHeight(const ESM::Land *land, int x, int y)
+    float Storage::getVertexHeight(const ESM::Land::LandData* data, int x, int y)
     {
         assert(x < ESM::Land::LAND_SIZE);
         assert(y < ESM::Land::LAND_SIZE);
-        return land->getLandData()->mHeights[y * ESM::Land::LAND_SIZE + x];
+        return data->mHeights[y * ESM::Land::LAND_SIZE + x];
     }
 
     Terrain::LayerInfo Storage::getLayerInfo(const std::string& texture)

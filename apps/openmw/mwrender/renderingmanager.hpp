@@ -59,6 +59,8 @@ namespace MWRender
     class Pathgrid;
     class Camera;
     class Water;
+    class TerrainStorage;
+    class LandManager;
 
     class RenderingManager : public MWRender::RenderingInterface
     {
@@ -190,6 +192,8 @@ namespace MWRender
 
         void exportSceneGraph(const MWWorld::Ptr& ptr, const std::string& filename, const std::string& format);
 
+        LandManager* getLandManager() const;
+
     private:
         void updateProjectionMatrix();
         void updateTextureFiltering();
@@ -212,6 +216,7 @@ namespace MWRender
         std::auto_ptr<Objects> mObjects;
         std::auto_ptr<Water> mWater;
         std::auto_ptr<Terrain::World> mTerrain;
+        TerrainStorage* mTerrainStorage;
         std::auto_ptr<SkyManager> mSky;
         std::auto_ptr<EffectManager> mEffectManager;
         osg::ref_ptr<NpcAnimation> mPlayerAnimation;

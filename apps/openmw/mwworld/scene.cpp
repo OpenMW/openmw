@@ -16,6 +16,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
+#include "../mwrender/landmanager.hpp"
 
 #include "../mwphysics/physicssystem.hpp"
 
@@ -271,26 +272,19 @@ namespace MWWorld
             // Load terrain physics first...
             if (cell->getCell()->isExterior())
             {
-                const ESM::Land* land =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(
-                        cell->getCell()->getGridX(),
-                        cell->getCell()->getGridY()
-                    );
-                if (land && land->mDataTypes&ESM::Land::DATA_VHGT) {
-                    // Actually only VHGT is needed here, but we'll need the rest for rendering anyway.
-                    // Load everything now to reduce IO overhead.
-                    const int flags = ESM::Land::DATA_VCLR|ESM::Land::DATA_VHGT|ESM::Land::DATA_VNML|ESM::Land::DATA_VTEX;
-
-                    const ESM::Land::LandData *data = land->getLandData (flags);
-                    mPhysics->addHeightField (data->mHeights, cell->getCell()->getGridX(), cell->getCell()->getGridY(),
-                        worldsize / (verts-1), verts);
+                int cellX = cell->getCell()->getGridX();
+                int cellY = cell->getCell()->getGridY();
+                osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
+                const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : 0;
+                if (data)
+                {
+                    mPhysics->addHeightField (data->mHeights, cellX, cell->getCell()->getGridY(), worldsize / (verts-1), verts, land.get());
                 }
                 else
                 {
                     static std::vector<float> defaultHeight;
                     defaultHeight.resize(verts*verts, ESM::Land::DEFAULT_HEIGHT);
-                    mPhysics->addHeightField (&defaultHeight[0], cell->getCell()->getGridX(), cell->getCell()->getGridY(),
-                            worldsize / (verts-1), verts);
+                    mPhysics->addHeightField (&defaultHeight[0], cell->getCell()->getGridX(), cell->getCell()->getGridY(), worldsize / (verts-1), verts, land.get());
                 }
             }
 
@@ -487,7 +481,7 @@ namespace MWWorld
     , mPreloadDoors(Settings::Manager::getBool("preload doors", "Cells"))
     , mPreloadFastTravel(Settings::Manager::getBool("preload fast travel", "Cells"))
     {
-        mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager(), rendering.getTerrain()));
+        mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager(), rendering.getTerrain(), rendering.getLandManager()));
         mPreloader->setWorkQueue(mRendering.getWorkQueue());
 
         mPreloader->setUnrefQueue(rendering.getUnrefQueue());
