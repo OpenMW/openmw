@@ -121,6 +121,8 @@ namespace Resource
         /// Set up an IncrementalCompileOperation for background compiling of loaded scenes.
         void setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation* ico);
 
+        osgUtil::IncrementalCompileOperation* getIncrementalCompileOperation();
+
         Resource::ImageManager* getImageManager();
 
         /// @param mask The node mask to apply to loaded particle system nodes.

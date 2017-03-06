@@ -3,47 +3,12 @@
 #include <memory>
 
 #include <osg/Material>
-#include <osg/Geometry>
+#include <osg/Group>
 
-#include <osgUtil/IncrementalCompileOperation>
-
-#include <OpenThreads/ScopedLock>
-
-#include <components/resource/resourcesystem.hpp>
-#include <components/resource/imagemanager.hpp>
-#include <components/resource/scenemanager.hpp>
-
-#include <components/sceneutil/lightmanager.hpp>
-#include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 
-#include <components/esm/loadland.hpp>
-
-
-#include "material.hpp"
-#include "storage.hpp"
-#include "terraindrawable.hpp"
 #include "texturemanager.hpp"
-
-namespace
-{
-    class StaticBoundingBoxCallback : public osg::Drawable::ComputeBoundingBoxCallback
-    {
-    public:
-        StaticBoundingBoxCallback(const osg::BoundingBox& bounds)
-            : mBoundingBox(bounds)
-        {
-        }
-
-        virtual osg::BoundingBox computeBound(const osg::Drawable&) const
-        {
-            return mBoundingBox;
-        }
-
-    private:
-        osg::BoundingBox mBoundingBox;
-    };
-}
+#include "chunkmanager.hpp"
 
 namespace Terrain
 {
@@ -57,6 +22,8 @@ TerrainGrid::TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceS
     osg::ref_ptr<osg::Material> material (new osg::Material);
     material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
     mTerrainRoot->getOrCreateStateSet()->setAttributeAndModes(material, osg::StateAttribute::ON);
+
+    mChunkManager->setShaderManager(mShaderManager);
 }
 
 TerrainGrid::~TerrainGrid()
@@ -69,17 +36,8 @@ TerrainGrid::~TerrainGrid()
 
 osg::ref_ptr<osg::Node> TerrainGrid::cacheCell(int x, int y)
 {
-    {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
-        Grid::iterator found = mGridCache.find(std::make_pair(x,y));
-        if (found != mGridCache.end())
-            return found->second;
-    }
-    osg::ref_ptr<osg::Node> node = buildTerrain(NULL, 1.f, osg::Vec2f(x+0.5, y+0.5));
-
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
-    mGridCache.insert(std::make_pair(std::make_pair(x,y), node));
-    return node;
+    osg::Vec2f center(x+0.5f, y+0.5f);
+    return buildTerrain(NULL, 1.f, center);
 }
 
 osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter)
@@ -100,106 +58,13 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
     }
     else
     {
-        float minH, maxH;
-        if (!mStorage->getMinMaxHeights(chunkSize, chunkCenter, minH, maxH))
-            return NULL; // no terrain defined
-
-        osg::Vec2f worldCenter = chunkCenter*mStorage->getCellWorldSize();
-        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> transform (new SceneUtil::PositionAttitudeTransform);
-        transform->setPosition(osg::Vec3f(worldCenter.x(), worldCenter.y(), 0.f));
-
+        osg::ref_ptr<osg::Node> node = mChunkManager->getChunk(chunkSize, chunkCenter);
+        if (!node)
+            return NULL;
         if (parent)
-            parent->addChild(transform);
+            parent->addChild(node);
 
-        osg::ref_ptr<osg::Vec3Array> positions (new osg::Vec3Array);
-        osg::ref_ptr<osg::Vec3Array> normals (new osg::Vec3Array);
-        osg::ref_ptr<osg::Vec4Array> colors (new osg::Vec4Array);
-
-        osg::ref_ptr<osg::VertexBufferObject> vbo (new osg::VertexBufferObject);
-        positions->setVertexBufferObject(vbo);
-        normals->setVertexBufferObject(vbo);
-        colors->setVertexBufferObject(vbo);
-
-        mStorage->fillVertexBuffers(0, chunkSize, chunkCenter, positions, normals, colors);
-
-        osg::ref_ptr<TerrainDrawable> geometry (new TerrainDrawable);
-        geometry->setVertexArray(positions);
-        geometry->setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
-        geometry->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
-        geometry->setUseDisplayList(false);
-        geometry->setUseVertexBufferObjects(true);
-
-        unsigned int numVerts = (mStorage->getCellVertices()-1) * chunkSize + 1;
-
-        geometry->addPrimitiveSet(mCache.getIndexBuffer(numVerts, 0));
-
-        // we already know the bounding box, so no need to let OSG compute it.
-        osg::Vec3f min(-0.5f*mStorage->getCellWorldSize()*chunkSize,
-                       -0.5f*mStorage->getCellWorldSize()*chunkSize,
-                       minH);
-        osg::Vec3f max (0.5f*mStorage->getCellWorldSize()*chunkSize,
-                           0.5f*mStorage->getCellWorldSize()*chunkSize,
-                           maxH);
-        osg::BoundingBox bounds(min, max);
-        geometry->setComputeBoundingBoxCallback(new StaticBoundingBoxCallback(bounds));
-
-        std::vector<LayerInfo> layerList;
-        std::vector<osg::ref_ptr<osg::Image> > blendmaps;
-        mStorage->getBlendmaps(chunkSize, chunkCenter, false, blendmaps, layerList);
-
-        bool useShaders = mResourceSystem->getSceneManager()->getForceShaders();
-        if (!mResourceSystem->getSceneManager()->getClampLighting())
-            useShaders = true; // always use shaders when lighting is unclamped, this is to avoid lighting seams between a terrain chunk with normal maps and one without normal maps
-        std::vector<TextureLayer> layers;
-        {
-            for (std::vector<LayerInfo>::const_iterator it = layerList.begin(); it != layerList.end(); ++it)
-            {
-                TextureLayer textureLayer;
-                textureLayer.mParallax = it->mParallax;
-                textureLayer.mSpecular = it->mSpecular;
-
-                textureLayer.mDiffuseMap = mTextureManager->getTexture(it->mDiffuseMap);
-
-                if (!it->mNormalMap.empty())
-                {
-                    textureLayer.mNormalMap = mTextureManager->getTexture(it->mNormalMap);
-                }
-
-                if (it->requiresShaders())
-                    useShaders = true;
-
-                layers.push_back(textureLayer);
-            }
-        }
-
-        std::vector<osg::ref_ptr<osg::Texture2D> > blendmapTextures;
-        for (std::vector<osg::ref_ptr<osg::Image> >::const_iterator it = blendmaps.begin(); it != blendmaps.end(); ++it)
-        {
-            osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
-            texture->setImage(*it);
-            texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
-            texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-            texture->setResizeNonPowerOfTwoHint(false);
-            blendmapTextures.push_back(texture);
-        }
-
-        // use texture coordinates for both texture units, the layer texture and blend texture
-        for (unsigned int i=0; i<2; ++i)
-            geometry->setTexCoordArray(i, mCache.getUVBuffer(numVerts));
-
-        float blendmapScale = ESM::Land::LAND_TEXTURE_SIZE*chunkSize;
-
-        geometry->setPasses(createPasses(mShaderManager ? useShaders : false, mResourceSystem->getSceneManager()->getForcePerPixelLighting(),
-                                         mResourceSystem->getSceneManager()->getClampLighting(), mShaderManager, layers, blendmapTextures, blendmapScale, blendmapScale));
-
-        transform->addChild(geometry);
-
-        if (mIncrementalCompileOperation)
-        {
-            mIncrementalCompileOperation->add(geometry);
-        }
-
-        return transform;
+        return node;
     }
 }
 
@@ -208,27 +73,10 @@ void TerrainGrid::loadCell(int x, int y)
     if (mGrid.find(std::make_pair(x, y)) != mGrid.end())
         return; // already loaded
 
-    // try to get it from the cache
-    osg::ref_ptr<osg::Node> terrainNode;
-    {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
-        Grid::const_iterator found = mGridCache.find(std::make_pair(x,y));
-        if (found != mGridCache.end())
-        {
-            terrainNode = found->second;
-            if (!terrainNode)
-                return; // no terrain defined
-        }
-    }
-
-    // didn't find in cache, build it
+    osg::Vec2f center(x+0.5f, y+0.5f);
+    osg::ref_ptr<osg::Node> terrainNode = buildTerrain(NULL, 1.f, center);
     if (!terrainNode)
-    {
-        osg::Vec2f center(x+0.5f, y+0.5f);
-        terrainNode = buildTerrain(NULL, 1.f, center);
-        if (!terrainNode)
-            return; // no terrain defined
-    }
+        return; // no terrain defined
 
     mTerrainRoot->addChild(terrainNode);
 
@@ -250,31 +98,9 @@ void TerrainGrid::unloadCell(int x, int y)
     mGrid.erase(it);
 }
 
-void TerrainGrid::updateCache(double referenceTime)
-{
-    {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
-        for (Grid::iterator it = mGridCache.begin(); it != mGridCache.end();)
-        {
-            if (it->second->referenceCount() <= 1)
-                mGridCache.erase(it++);
-            else
-                ++it;
-        }
-    }
-}
-
 void TerrainGrid::updateTextureFiltering()
 {
     mTextureManager->updateTextureFiltering();
-}
-
-void TerrainGrid::reportStats(unsigned int frameNumber, osg::Stats *stats)
-{
-    {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
-        stats->setAttribute(frameNumber, "Terrain Cell", mGridCache.size());
-    }
 }
 
 }

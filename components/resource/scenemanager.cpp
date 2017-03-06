@@ -621,6 +621,11 @@ namespace Resource
         mIncrementalCompileOperation = ico;
     }
 
+    osgUtil::IncrementalCompileOperation *SceneManager::getIncrementalCompileOperation()
+    {
+        return mIncrementalCompileOperation.get();
+    }
+
     Resource::ImageManager* SceneManager::getImageManager()
     {
         return mImageManager;

@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 

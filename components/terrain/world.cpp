@@ -7,6 +7,7 @@
 
 #include "storage.hpp"
 #include "texturemanager.hpp"
+#include "chunkmanager.hpp"
 
 namespace Terrain
 {
@@ -26,13 +27,16 @@ World::World(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUt
     mParent->addChild(mTerrainRoot);
 
     mTextureManager.reset(new TextureManager(mResourceSystem->getSceneManager()));
-
     mResourceSystem->addResourceManager(mTextureManager.get());
+
+    mChunkManager.reset(new ChunkManager(mStorage, mResourceSystem->getSceneManager(), mTextureManager.get()));
+    mResourceSystem->addResourceManager(mChunkManager.get());
 }
 
 World::~World()
 {
     mResourceSystem->removeResourceManager(mTextureManager.get());
+    mResourceSystem->removeResourceManager(mChunkManager.get());
 
     mParent->removeChild(mTerrainRoot);
 

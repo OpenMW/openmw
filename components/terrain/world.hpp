@@ -2,16 +2,17 @@
 #define COMPONENTS_TERRAIN_WORLD_H
 
 #include <osg/ref_ptr>
+#include <osg/Vec3f>
 
 #include <memory>
 
 #include "defs.hpp"
-#include "buffercache.hpp"
 
 namespace osg
 {
     class Group;
     class Stats;
+    class Node;
 }
 
 namespace osgUtil
@@ -29,6 +30,7 @@ namespace Terrain
     class Storage;
 
     class TextureManager;
+    class ChunkManager;
 
     /**
      * @brief The basic interface for a terrain world. How the terrain chunks are paged and displayed
@@ -45,10 +47,6 @@ namespace Terrain
         virtual ~World();
 
         virtual void updateTextureFiltering() {}
-
-        virtual void updateCache(double referenceTime) {}
-
-        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}
 
         float getHeightAt (const osg::Vec3f& worldPos);
 
@@ -71,6 +69,7 @@ namespace Terrain
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
         std::auto_ptr<TextureManager> mTextureManager;
+        std::auto_ptr<ChunkManager> mChunkManager;
     };
 
 }

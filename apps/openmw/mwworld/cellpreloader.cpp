@@ -168,24 +168,20 @@ namespace MWWorld
     class UpdateCacheItem : public SceneUtil::WorkItem
     {
     public:
-        UpdateCacheItem(Resource::ResourceSystem* resourceSystem, Terrain::World* terrain, double referenceTime)
+        UpdateCacheItem(Resource::ResourceSystem* resourceSystem, double referenceTime)
             : mReferenceTime(referenceTime)
             , mResourceSystem(resourceSystem)
-            , mTerrain(terrain)
         {
         }
 
         virtual void doWork()
         {
             mResourceSystem->updateCache(mReferenceTime);
-
-            mTerrain->updateCache(mReferenceTime);
         }
 
     private:
         double mReferenceTime;
         Resource::ResourceSystem* mResourceSystem;
-        Terrain::World* mTerrain;
     };
 
     CellPreloader::CellPreloader(Resource::ResourceSystem* resourceSystem, Resource::BulletShapeManager* bulletShapeManager, Terrain::World* terrain, MWRender::LandManager* landManager)
@@ -313,7 +309,7 @@ namespace MWWorld
         if (timestamp - mLastResourceCacheUpdate > 1.0)
         {
             // the resource cache is cleared from the worker thread so that we're not holding up the main thread with delete operations
-            mWorkQueue->addWorkItem(new UpdateCacheItem(mResourceSystem, mTerrain, timestamp), true);
+            mWorkQueue->addWorkItem(new UpdateCacheItem(mResourceSystem, timestamp), true);
             mLastResourceCacheUpdate = timestamp;
         }
     }

@@ -1,6 +1,8 @@
 #ifndef COMPONENTS_TERRAIN_TERRAINGRID_H
 #define COMPONENTS_TERRAIN_TERRAINGRID_H
 
+#include <map>
+
 #include <osg/Vec2f>
 
 #include "world.hpp"
@@ -41,15 +43,9 @@ namespace Terrain
         /// @note Not thread safe.
         virtual void unloadCell(int x, int y);
 
-        /// Clear cached objects that are no longer referenced
-        /// @note Thread safe.
-        void updateCache(double referenceTime);
-
         /// Apply the scene manager's texture filtering settings to all cached textures.
         /// @note Thread safe.
         void updateTextureFiltering();
-
-        void reportStats(unsigned int frameNumber, osg::Stats *stats);
 
     private:
         osg::ref_ptr<osg::Node> buildTerrain (osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter);
@@ -59,11 +55,6 @@ namespace Terrain
 
         typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node> > Grid;
         Grid mGrid;
-
-        Grid mGridCache;
-        OpenThreads::Mutex mGridCacheMutex;
-
-        BufferCache mCache;
 
         osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 

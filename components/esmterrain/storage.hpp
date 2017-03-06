@@ -99,6 +99,8 @@ namespace ESMTerrain
         /// Get the number of vertices on one side for each cell. Should be (power of two)+1
         virtual int getCellVertices();
 
+        virtual int getBlendmapScale(float chunkSize);
+
     private:
         const VFS::Manager* mVFS;
 

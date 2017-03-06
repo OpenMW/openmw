@@ -612,4 +612,9 @@ namespace ESMTerrain
         return ESM::Land::LAND_SIZE;
     }
 
+    int Storage::getBlendmapScale(float chunkSize)
+    {
+        return ESM::Land::LAND_TEXTURE_SIZE*chunkSize;
+    }
+
 }
