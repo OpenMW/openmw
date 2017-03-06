@@ -27,16 +27,16 @@ World::World(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUt
     mParent->addChild(mTerrainRoot);
 
     mTextureManager.reset(new TextureManager(mResourceSystem->getSceneManager()));
-    mResourceSystem->addResourceManager(mTextureManager.get());
-
     mChunkManager.reset(new ChunkManager(mStorage, mResourceSystem->getSceneManager(), mTextureManager.get()));
+
     mResourceSystem->addResourceManager(mChunkManager.get());
+    mResourceSystem->addResourceManager(mTextureManager.get());
 }
 
 World::~World()
 {
-    mResourceSystem->removeResourceManager(mTextureManager.get());
     mResourceSystem->removeResourceManager(mChunkManager.get());
+    mResourceSystem->removeResourceManager(mTextureManager.get());
 
     mParent->removeChild(mTerrainRoot);
 
