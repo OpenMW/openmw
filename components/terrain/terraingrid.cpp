@@ -51,7 +51,6 @@ namespace Terrain
 TerrainGrid::TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, Shader::ShaderManager* shaderManager, SceneUtil::UnrefQueue* unrefQueue)
     : Terrain::World(parent, resourceSystem, ico, storage, nodeMask)
     , mNumSplits(4)
-    , mCache((storage->getCellVertices()-1)/static_cast<float>(mNumSplits) + 1)
     , mUnrefQueue(unrefQueue)
     , mShaderManager(shaderManager)
 {
@@ -130,7 +129,9 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         geometry->setUseDisplayList(false);
         geometry->setUseVertexBufferObjects(true);
 
-        geometry->addPrimitiveSet(mCache.getIndexBuffer(0));
+        unsigned int numVerts = (mStorage->getCellVertices()-1) * chunkSize + 1;
+
+        geometry->addPrimitiveSet(mCache.getIndexBuffer(numVerts, 0));
 
         // we already know the bounding box, so no need to let OSG compute it.
         osg::Vec3f min(-0.5f*mStorage->getCellWorldSize()*chunkSize,
@@ -184,7 +185,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
 
         // use texture coordinates for both texture units, the layer texture and blend texture
         for (unsigned int i=0; i<2; ++i)
-            geometry->setTexCoordArray(i, mCache.getUVBuffer());
+            geometry->setTexCoordArray(i, mCache.getUVBuffer(numVerts));
 
         float blendmapScale = ESM::Land::LAND_TEXTURE_SIZE*chunkSize;
 
