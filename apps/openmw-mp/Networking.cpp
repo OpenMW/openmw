@@ -17,6 +17,7 @@
 #include "MasterClient.hpp"
 #include "Cell.hpp"
 #include <components/openmw-mp/Version.hpp>
+#include <components/openmw-mp/Packets/PacketPreInit.hpp>
 
 using namespace mwmp;
 using namespace std;
@@ -740,6 +741,24 @@ void Networking::update(RakNet::Packet *packet)
 
     if (player == 0)
     {
+        if(packet->data[0] == ID_GAME_PREINIT)
+        {
+            DEBUG_PRINTF("ID_GAME_PREINIT");
+            PacketPreInit::PluginContainer plugins;
+
+            PacketPreInit packetPreInit(peer);
+            packetPreInit.SetReadStream(&bsIn);
+            packetPreInit.setChecksums(&plugins);
+            packetPreInit.Read();
+
+            for(auto plugin : plugins)
+            {
+                LOG_APPEND(Log::LOG_VERBOSE, "- %X\t%s", plugin.second, plugin.first.c_str());
+            }
+
+            return;
+        }
+
         playerController->SetStream(&bsIn, 0);
 
         playerController->GetPacket(ID_HANDSHAKE)->RequestData(packet->guid);
