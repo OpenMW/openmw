@@ -43,7 +43,7 @@ namespace Terrain
 
         /// Clear cached objects that are no longer referenced
         /// @note Thread safe.
-        void updateCache();
+        void updateCache(double referenceTime);
 
         /// Apply the scene manager's texture filtering settings to all cached textures.
         /// @note Thread safe.
@@ -56,10 +56,6 @@ namespace Terrain
 
         // split each ESM::Cell into mNumSplits*mNumSplits terrain chunks
         unsigned int mNumSplits;
-
-        typedef std::map<std::string, osg::ref_ptr<osg::Texture2D> >  TextureCache;
-        TextureCache mTextureCache;
-        OpenThreads::Mutex mTextureCacheMutex;
 
         typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node> > Grid;
         Grid mGrid;

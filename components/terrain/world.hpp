@@ -3,6 +3,8 @@
 
 #include <osg/ref_ptr>
 
+#include <memory>
+
 #include "defs.hpp"
 #include "buffercache.hpp"
 
@@ -26,6 +28,8 @@ namespace Terrain
 {
     class Storage;
 
+    class TextureManager;
+
     /**
      * @brief The basic interface for a terrain world. How the terrain chunks are paged and displayed
      *  is up to the implementation.
@@ -42,7 +46,7 @@ namespace Terrain
 
         virtual void updateTextureFiltering() {}
 
-        virtual void updateCache() {}
+        virtual void updateCache(double referenceTime) {}
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}
 
@@ -65,6 +69,8 @@ namespace Terrain
         Resource::ResourceSystem* mResourceSystem;
 
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
+
+        std::auto_ptr<TextureManager> mTextureManager;
     };
 
 }

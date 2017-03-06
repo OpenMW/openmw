@@ -174,7 +174,7 @@ namespace MWWorld
         {
             mResourceSystem->updateCache(mReferenceTime);
 
-            mTerrain->updateCache();
+            mTerrain->updateCache(mReferenceTime);
         }
 
     private:

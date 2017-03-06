@@ -23,6 +23,7 @@
 #include "material.hpp"
 #include "storage.hpp"
 #include "terraindrawable.hpp"
+#include "texturemanager.hpp"
 
 namespace
 {
@@ -150,35 +151,17 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             useShaders = true; // always use shaders when lighting is unclamped, this is to avoid lighting seams between a terrain chunk with normal maps and one without normal maps
         std::vector<TextureLayer> layers;
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mTextureCacheMutex);
             for (std::vector<LayerInfo>::const_iterator it = layerList.begin(); it != layerList.end(); ++it)
             {
                 TextureLayer textureLayer;
                 textureLayer.mParallax = it->mParallax;
                 textureLayer.mSpecular = it->mSpecular;
-                osg::ref_ptr<osg::Texture2D> texture = mTextureCache[it->mDiffuseMap];
-                if (!texture)
-                {
-                    texture = new osg::Texture2D(mResourceSystem->getImageManager()->getImage(it->mDiffuseMap));
-                    texture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
-                    texture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
-                    mResourceSystem->getSceneManager()->applyFilterSettings(texture);
-                    mTextureCache[it->mDiffuseMap] = texture;
-                }
-                textureLayer.mDiffuseMap = texture;
+
+                textureLayer.mDiffuseMap = mTextureManager->getTexture(it->mDiffuseMap);
 
                 if (!it->mNormalMap.empty())
                 {
-                    texture = mTextureCache[it->mNormalMap];
-                    if (!texture)
-                    {
-                        texture = new osg::Texture2D(mResourceSystem->getImageManager()->getImage(it->mNormalMap));
-                        texture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
-                        texture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
-                        mResourceSystem->getSceneManager()->applyFilterSettings(texture);
-                        mTextureCache[it->mNormalMap] = texture;
-                    }
-                    textureLayer.mNormalMap = texture;
+                    textureLayer.mNormalMap = mTextureManager->getTexture(it->mNormalMap);
                 }
 
                 if (it->requiresShaders())
@@ -266,7 +249,7 @@ void TerrainGrid::unloadCell(int x, int y)
     mGrid.erase(it);
 }
 
-void TerrainGrid::updateCache()
+void TerrainGrid::updateCache(double referenceTime)
 {
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
@@ -278,24 +261,11 @@ void TerrainGrid::updateCache()
                 ++it;
         }
     }
-
-    {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mTextureCacheMutex);
-        for (TextureCache::iterator it = mTextureCache.begin(); it != mTextureCache.end();)
-        {
-            if (it->second->referenceCount() <= 1)
-                mTextureCache.erase(it++);
-            else
-                ++it;
-        }
-    }
 }
 
 void TerrainGrid::updateTextureFiltering()
 {
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mTextureCacheMutex);
-    for (TextureCache::iterator it = mTextureCache.begin(); it != mTextureCache.end(); ++it)
-        mResourceSystem->getSceneManager()->applyFilterSettings(it->second);
+    mTextureManager->updateTextureFiltering();
 }
 
 void TerrainGrid::reportStats(unsigned int frameNumber, osg::Stats *stats)
@@ -303,10 +273,6 @@ void TerrainGrid::reportStats(unsigned int frameNumber, osg::Stats *stats)
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mGridCacheMutex);
         stats->setAttribute(frameNumber, "Terrain Cell", mGridCache.size());
-    }
-    {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mTextureCacheMutex);
-        stats->setAttribute(frameNumber, "Terrain Texture", mTextureCache.size());
     }
 }
 

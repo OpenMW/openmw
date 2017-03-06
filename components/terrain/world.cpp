@@ -3,7 +3,10 @@
 #include <osg/Group>
 #include <osgUtil/IncrementalCompileOperation>
 
+#include <components/resource/resourcesystem.hpp>
+
 #include "storage.hpp"
+#include "texturemanager.hpp"
 
 namespace Terrain
 {
@@ -21,10 +24,16 @@ World::World(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUt
     mTerrainRoot->setName("Terrain Root");
 
     mParent->addChild(mTerrainRoot);
+
+    mTextureManager.reset(new TextureManager(mResourceSystem->getSceneManager()));
+
+    mResourceSystem->addResourceManager(mTextureManager.get());
 }
 
 World::~World()
 {
+    mResourceSystem->removeResourceManager(mTextureManager.get());
+
     mParent->removeChild(mTerrainRoot);
 
     delete mStorage;
