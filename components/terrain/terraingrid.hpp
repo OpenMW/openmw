@@ -7,11 +7,6 @@
 
 #include "world.hpp"
 
-namespace SceneUtil
-{
-    class UnrefQueue;
-}
-
 namespace Shader
 {
     class ShaderManager;
@@ -29,7 +24,7 @@ namespace Terrain
     class TerrainGrid : public Terrain::World
     {
     public:
-        TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, Shader::ShaderManager* shaderManager = NULL, SceneUtil::UnrefQueue* unrefQueue = NULL);
+        TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, Shader::ShaderManager* shaderManager = NULL);
         ~TerrainGrid();
 
         /// Load a terrain cell and store it in cache for later use.
@@ -55,8 +50,6 @@ namespace Terrain
 
         typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node> > Grid;
         Grid mGrid;
-
-        osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
         Shader::ShaderManager* mShaderManager;
     };

@@ -5,18 +5,15 @@
 #include <osg/Material>
 #include <osg/Group>
 
-#include <components/sceneutil/unrefqueue.hpp>
-
 #include "texturemanager.hpp"
 #include "chunkmanager.hpp"
 
 namespace Terrain
 {
 
-TerrainGrid::TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, Shader::ShaderManager* shaderManager, SceneUtil::UnrefQueue* unrefQueue)
+TerrainGrid::TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, Shader::ShaderManager* shaderManager)
     : Terrain::World(parent, resourceSystem, ico, storage, nodeMask)
     , mNumSplits(4)
-    , mUnrefQueue(unrefQueue)
     , mShaderManager(shaderManager)
 {
     osg::ref_ptr<osg::Material> material (new osg::Material);
@@ -91,9 +88,6 @@ void TerrainGrid::unloadCell(int x, int y)
 
     osg::ref_ptr<osg::Node> terrainNode = it->second;
     mTerrainRoot->removeChild(terrainNode);
-
-    if (mUnrefQueue.get())
-        mUnrefQueue->push(terrainNode);
 
     mGrid.erase(it);
 }
