@@ -16,24 +16,25 @@ namespace VFS
 namespace ESMTerrain
 {
 
-    /// @brief Wrapper around ESM::Land with reference counting. The wrapper needs to be held as long as the data is still in use
-    /// Data will be unloaded when wrapper object is deleted
+    /// @brief Wrapper around Land Data with reference counting. The wrapper needs to be held as long as the data is still in use
     class LandObject : public osg::Object
     {
-    private:
-        const ESM::Land* mLand;
-        int mLoadFlags;
-
     public:
+        LandObject();
+        LandObject(const ESM::Land* land, int loadFlags);
+        LandObject(const LandObject& copy, const osg::CopyOp& copyop);
+        virtual ~LandObject();
+
         META_Object(ESMTerrain, LandObject)
 
         const ESM::Land::LandData* getData(int flags) const;
         int getPlugin() const;
 
-        LandObject();
-        LandObject(const ESM::Land* land, int loadFlags);
-        LandObject(const LandObject& copy, const osg::CopyOp& copyop);
-        virtual ~LandObject();
+    private:
+        const ESM::Land* mLand;
+        int mLoadFlags;
+
+        ESM::Land::LandData mData;
     };
 
     /// @brief Feeds data from ESM terrain records (ESM::Land, ESM::LandTexture)

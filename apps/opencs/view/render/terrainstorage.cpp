@@ -21,9 +21,7 @@ namespace CSVRender
             return NULL;
 
         const ESM::Land& land = mData.getLand().getRecord(index).get();
-        int mask = ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX;
-        land.loadData (mask);
-        return new ESMTerrain::LandObject(&land, 0);
+        return new ESMTerrain::LandObject(&land, ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX);
     }
 
     const ESM::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)

@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#include <OpenThreads/Mutex>
-
 #include "esmcommon.hpp"
 
 namespace ESM
@@ -117,12 +115,13 @@ struct Land
     void blank() {}
 
     /**
-     * Actually loads data
+     * Actually loads data into target
+     * If target is NULL, assumed target is mLandData
      */
-    void loadData(int flags) const;
+    void loadData(int flags, LandData* target = NULL) const;
 
     /**
-     * Frees memory allocated for land data
+     * Frees memory allocated for mLandData
      */
     void unloadData() const;
 
@@ -160,9 +159,7 @@ struct Land
         /// Loads data and marks it as loaded
         /// \return true if data is actually loaded from file, false otherwise
         /// including the case when data is already loaded
-        bool condLoad(ESM::ESMReader& reader, int flags, int dataFlag, void *ptr, unsigned int size) const;
-
-        mutable OpenThreads::Mutex mMutex;
+        bool condLoad(ESM::ESMReader& reader, int flags, int& targetFlags, int dataFlag, void *ptr, unsigned int size) const;
 
         mutable LandData *mLandData;
 };

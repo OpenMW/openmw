@@ -25,7 +25,7 @@ namespace ESMTerrain
         : mLand(land)
         , mLoadFlags(loadFlags)
     {
-        mLand->loadData(mLoadFlags);
+        mLand->loadData(mLoadFlags, &mData);
     }
 
     LandObject::LandObject(const LandObject &copy, const osg::CopyOp &copyop)
@@ -34,13 +34,13 @@ namespace ESMTerrain
 
     LandObject::~LandObject()
     {
-        if (mLand && mLoadFlags) // only unload if we were responsible for loading to begin with.
-            mLand->unloadData();
     }
 
     const ESM::Land::LandData *LandObject::getData(int flags) const
     {
-        return mLand->getLandData(flags);
+        if ((mData.mDataLoaded & flags) != flags)
+            return NULL;
+        return &mData;
     }
 
     int LandObject::getPlugin() const
