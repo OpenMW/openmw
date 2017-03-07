@@ -114,7 +114,7 @@ add_component_dir (translation
     )
 
 add_component_dir (terrain
-    storage world buffercache defs terraingrid material terraindrawable texturemanager chunkmanager
+    storage world buffercache defs terraingrid material terraindrawable texturemanager chunkmanager compositemaprenderer
     )
 
 add_component_dir (loadinglistener

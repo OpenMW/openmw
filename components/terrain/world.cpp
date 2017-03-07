@@ -8,6 +8,7 @@
 #include "storage.hpp"
 #include "texturemanager.hpp"
 #include "chunkmanager.hpp"
+#include "compositemaprenderer.hpp"
 
 namespace Terrain
 {
@@ -24,10 +25,13 @@ World::World(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUt
     mTerrainRoot->getOrCreateStateSet()->setRenderingHint(osg::StateSet::OPAQUE_BIN);
     mTerrainRoot->setName("Terrain Root");
 
+    osg::ref_ptr<CompositeMapRenderer> renderer (new CompositeMapRenderer);
+    mTerrainRoot->addChild(renderer);
+
     mParent->addChild(mTerrainRoot);
 
     mTextureManager.reset(new TextureManager(mResourceSystem->getSceneManager()));
-    mChunkManager.reset(new ChunkManager(mStorage, mResourceSystem->getSceneManager(), mTextureManager.get()));
+    mChunkManager.reset(new ChunkManager(mStorage, mResourceSystem->getSceneManager(), mTextureManager.get(), renderer));
 
     mResourceSystem->addResourceManager(mChunkManager.get());
     mResourceSystem->addResourceManager(mTextureManager.get());

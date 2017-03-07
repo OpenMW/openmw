@@ -15,6 +15,7 @@
 #include "material.hpp"
 #include "storage.hpp"
 #include "texturemanager.hpp"
+#include "compositemaprenderer.hpp"
 
 namespace
 {
@@ -39,11 +40,13 @@ namespace
 namespace Terrain
 {
 
-ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, TextureManager* textureManager)
+ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, TextureManager* textureManager, CompositeMapRenderer* renderer)
     : ResourceManager(NULL)
     , mStorage(storage)
     , mSceneManager(sceneMgr)
     , mTextureManager(textureManager)
+    , mCompositeMapRenderer(renderer)
+    , mCompositeMapSize(512)
 {
 
 }
@@ -68,6 +71,33 @@ osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &cen
 void ChunkManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
 {
     stats->setAttribute(frameNumber, "Terrain Chunk", mCache->getCacheSize());
+}
+
+osg::ref_ptr<osg::Group> ChunkManager::createCompositeMapRTT(osg::ref_ptr<osg::Texture2D>& texture)
+{
+    texture = new osg::Texture2D;
+    texture->setTextureWidth(mCompositeMapSize);
+    texture->setTextureHeight(mCompositeMapSize);
+    texture->setInternalFormat(GL_RGB);
+    texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+    texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+    texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+    texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+
+    osg::ref_ptr<osg::Camera> camera (new osg::Camera);
+    camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
+    camera->attach(osg::Camera::COLOR_BUFFER, texture);
+    camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
+    camera->setViewMatrix(osg::Matrix::identity());
+    camera->setProjectionMatrix(osg::Matrix::identity());
+    camera->setProjectionResizePolicy(osg::Camera::FIXED);
+    camera->setClearColor(osg::Vec4(0.f, 0.f, 0.f, 1.f));
+    camera->setClearMask(GL_COLOR_BUFFER_BIT);
+    camera->setViewport(0, 0, mCompositeMapSize, mCompositeMapSize);
+    camera->setRenderOrder(osg::Camera::PRE_RENDER);
+    camera->setImplicitBufferAttachmentMask(osg::DisplaySettings::IMPLICIT_COLOR_BUFFER_ATTACHMENT); // no need for a depth buffer
+
+    return camera;
 }
 
 osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f &chunkCenter)
@@ -161,8 +191,36 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     Shader::ShaderManager* shaderManager = &mSceneManager->getShaderManager();
 
-    geometry->setPasses(createPasses(useShaders, mSceneManager->getForcePerPixelLighting(),
-                                     mSceneManager->getClampLighting(), shaderManager, layers, blendmapTextures, blendmapScale, blendmapScale));
+    if (1) // useCompositeMap
+    {
+        osg::ref_ptr<osg::Texture2D> compositeMap;
+        osg::ref_ptr<osg::Group> compositeMapNode = createCompositeMapRTT(compositeMap);
+        osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3(-1,-1,0), osg::Vec3(2,0,0), osg::Vec3(0,2,0));
+        geom->setTexCoordArray(1, geom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
+        std::vector<osg::ref_ptr<osg::StateSet> > passes = createPasses(useShaders, mSceneManager->getForcePerPixelLighting(),
+                                                         mSceneManager->getClampLighting(), shaderManager, layers, blendmapTextures, blendmapScale, blendmapScale, true);
+        for (std::vector<osg::ref_ptr<osg::StateSet> >::iterator it = passes.begin(); it != passes.end(); ++it)
+        {
+            osg::ref_ptr<osg::Group> group = new osg::Group;
+            group->setStateSet(*it);
+            group->addChild(geom);
+            compositeMapNode->addChild(group);
+        }
+
+        compositeMapNode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
+        mCompositeMapRenderer->addCompositeMap(compositeMapNode, true);
+
+        std::vector<osg::ref_ptr<osg::StateSet> > passes2;
+        passes2.push_back(new osg::StateSet);
+        passes2[0]->setTextureAttributeAndModes(0, compositeMap, osg::StateAttribute::ON);
+        geometry->setPasses(passes2);
+    }
+    else
+    {
+        geometry->setPasses(createPasses(useShaders, mSceneManager->getForcePerPixelLighting(),
+                                         mSceneManager->getClampLighting(), shaderManager, layers, blendmapTextures, blendmapScale, blendmapScale));
+    }
 
     transform->addChild(geometry);
 

@@ -368,10 +368,6 @@ namespace ESMTerrain
     void Storage::getBlendmaps(float chunkSize, const osg::Vec2f &chunkCenter,
         bool pack, ImageVector &blendmaps, std::vector<Terrain::LayerInfo> &layerList)
     {
-        // TODO - blending isn't completely right yet; the blending radius appears to be
-        // different at a cell transition (2 vertices, not 4), so we may need to create a larger blendmap
-        // and interpolate the rest of the cell by hand? :/
-
         osg::Vec2f origin = chunkCenter - osg::Vec2f(chunkSize/2.f, chunkSize/2.f);
         int cellX = static_cast<int>(std::floor(origin.x()));
         int cellY = static_cast<int>(std::floor(origin.y()));
@@ -382,10 +378,6 @@ namespace ESMTerrain
         int colStart = (origin.y() - cellY) * realTextureSize;
         int rowEnd = rowStart + chunkSize * (realTextureSize-1) + 1;
         int colEnd = colStart + chunkSize * (realTextureSize-1) + 1;
-
-        assert (rowStart >= 0 && colStart >= 0);
-        assert (rowEnd <= realTextureSize);
-        assert (colEnd <= realTextureSize);
 
         // Save the used texture indices so we know the total number of textures
         // and number of required blend maps
