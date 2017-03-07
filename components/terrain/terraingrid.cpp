@@ -11,8 +11,8 @@
 namespace Terrain
 {
 
-TerrainGrid::TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask)
-    : Terrain::World(parent, resourceSystem, ico, storage, nodeMask)
+TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, int preCompileMask)
+    : Terrain::World(parent, compileRoot, resourceSystem, ico, storage, nodeMask, preCompileMask)
     , mNumSplits(4)
 {
     osg::ref_ptr<osg::Material> material (new osg::Material);

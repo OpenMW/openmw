@@ -19,7 +19,7 @@ namespace Terrain
     class TerrainGrid : public Terrain::World
     {
     public:
-        TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask);
+        TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, int preCompileMask=~0);
         ~TerrainGrid();
 
         /// Load a terrain cell and store it in cache for later use.

@@ -42,8 +42,8 @@ namespace Terrain
         /// @note takes ownership of \a storage
         /// @param storage Storage instance to get terrain data from (heights, normals, colors, textures..)
         /// @param nodeMask mask for the terrain root
-        World(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
-              Storage* storage, int nodeMask);
+        World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
+              Storage* storage, int nodeMask, int preCompileMask);
         virtual ~World();
 
         virtual void updateTextureFiltering() {}
@@ -63,6 +63,7 @@ namespace Terrain
 
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mTerrainRoot;
+        osg::ref_ptr<osg::Node> mCompositeMapRenderer;
 
         Resource::ResourceSystem* mResourceSystem;
 

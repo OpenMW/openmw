@@ -13,8 +13,8 @@
 namespace Terrain
 {
 
-World::World(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
-             Storage* storage, int nodeMask)
+World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
+             Storage* storage, int nodeMask, int preCompileMask)
     : mStorage(storage)
     , mParent(parent)
     , mResourceSystem(resourceSystem)
@@ -26,7 +26,9 @@ World::World(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUt
     mTerrainRoot->setName("Terrain Root");
 
     osg::ref_ptr<CompositeMapRenderer> renderer (new CompositeMapRenderer);
-    mTerrainRoot->addChild(renderer);
+    renderer->setNodeMask(preCompileMask);
+    compileRoot->addChild(renderer);
+    mCompositeMapRenderer = renderer;
 
     mParent->addChild(mTerrainRoot);
 
@@ -43,6 +45,7 @@ World::~World()
     mResourceSystem->removeResourceManager(mTextureManager.get());
 
     mParent->removeChild(mTerrainRoot);
+    mCompositeMapRenderer->getParent(0)->removeChild(mCompositeMapRenderer);
 
     delete mStorage;
 }
