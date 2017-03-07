@@ -31,17 +31,17 @@ namespace MWRender
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
 
-        MWWorld::Store<ESM::Cell>::iterator it = esmStore.get<ESM::Cell>().extBegin();
-        for (; it != esmStore.get<ESM::Cell>().extEnd(); ++it)
+        MWWorld::Store<ESM::Land>::iterator it = esmStore.get<ESM::Land>().begin();
+        for (; it != esmStore.get<ESM::Land>().end(); ++it)
         {
-            if (it->getGridX() < minX)
-                minX = static_cast<float>(it->getGridX());
-            if (it->getGridX() > maxX)
-                maxX = static_cast<float>(it->getGridX());
-            if (it->getGridY() < minY)
-                minY = static_cast<float>(it->getGridY());
-            if (it->getGridY() > maxY)
-                maxY = static_cast<float>(it->getGridY());
+            if (it->mX < minX)
+                minX = static_cast<float>(it->mX);
+            if (it->mX > maxX)
+                maxX = static_cast<float>(it->mX);
+            if (it->mY < minY)
+                minY = static_cast<float>(it->mY);
+            if (it->mY > maxY)
+                maxY = static_cast<float>(it->mY);
         }
 
         // since grid coords are at cell origin, we need to add 1 cell
