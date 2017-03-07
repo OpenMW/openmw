@@ -20,11 +20,6 @@ namespace Resource
     class SceneManager;
 }
 
-namespace Shader
-{
-    class ShaderManager;
-}
-
 namespace Terrain
 {
 
@@ -39,9 +34,6 @@ namespace Terrain
 
         osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center);
 
-        // Optional
-        void setShaderManager(Shader::ShaderManager* shaderManager);
-
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
 
     private:
@@ -50,7 +42,6 @@ namespace Terrain
         Terrain::Storage* mStorage;
         Resource::SceneManager* mSceneManager;
         TextureManager* mTextureManager;
-        Shader::ShaderManager* mShaderManager;
         BufferCache mBufferCache;
     };
 

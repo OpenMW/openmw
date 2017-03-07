@@ -7,11 +7,6 @@
 
 #include "world.hpp"
 
-namespace Shader
-{
-    class ShaderManager;
-}
-
 namespace osg
 {
     class Texture2D;
@@ -24,7 +19,7 @@ namespace Terrain
     class TerrainGrid : public Terrain::World
     {
     public:
-        TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, Shader::ShaderManager* shaderManager = NULL);
+        TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask);
         ~TerrainGrid();
 
         /// Load a terrain cell and store it in cache for later use.
@@ -50,8 +45,6 @@ namespace Terrain
 
         typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node> > Grid;
         Grid mGrid;
-
-        Shader::ShaderManager* mShaderManager;
     };
 
 }

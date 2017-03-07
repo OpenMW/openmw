@@ -44,7 +44,6 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
     , mStorage(storage)
     , mSceneManager(sceneMgr)
     , mTextureManager(textureManager)
-    , mShaderManager(NULL)
 {
 
 }
@@ -64,11 +63,6 @@ osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &cen
         mCache->addEntryToObjectCache(id, node.get());
         return node;
     }
-}
-
-void ChunkManager::setShaderManager(Shader::ShaderManager *shaderManager)
-{
-    mShaderManager = shaderManager;
 }
 
 void ChunkManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
@@ -165,8 +159,10 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     float blendmapScale = mStorage->getBlendmapScale(chunkSize);
 
-    geometry->setPasses(createPasses(mShaderManager ? useShaders : false, mSceneManager->getForcePerPixelLighting(),
-                                     mSceneManager->getClampLighting(), mShaderManager, layers, blendmapTextures, blendmapScale, blendmapScale));
+    Shader::ShaderManager* shaderManager = &mSceneManager->getShaderManager();
+
+    geometry->setPasses(createPasses(useShaders, mSceneManager->getForcePerPixelLighting(),
+                                     mSceneManager->getClampLighting(), shaderManager, layers, blendmapTextures, blendmapScale, blendmapScale));
 
     transform->addChild(geometry);
 

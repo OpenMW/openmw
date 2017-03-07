@@ -218,7 +218,7 @@ namespace MWRender
                                             Settings::Manager::getBool("auto use terrain normal maps", "Shaders"),
                                             Settings::Manager::getString("terrain specular map pattern", "Shaders"), Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
         mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(),
-                                                mTerrainStorage, Mask_Terrain, &mResourceSystem->getSceneManager()->getShaderManager()));
+                                                mTerrainStorage, Mask_Terrain));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 
