@@ -33,7 +33,7 @@ namespace Resource
 
         const VFS::Manager* getVFS() const;
 
-        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}
+        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const {}
 
     protected:
         const VFS::Manager* mVFS;

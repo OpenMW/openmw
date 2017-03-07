@@ -703,7 +703,7 @@ namespace Resource
         mSharedStateMutex.unlock();
     }
 
-    void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats)
+    void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
     {
         {
             OpenThreads::ScopedLock<OpenThreads::Mutex> lock(*mIncrementalCompileOperation->getToCompiledMutex());

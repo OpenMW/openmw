@@ -39,7 +39,7 @@ osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(int x, int y)
     }
 }
 
-void LandManager::reportStats(unsigned int frameNumber, osg::Stats *stats)
+void LandManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
 {
     stats->setAttribute(frameNumber, "Land", mCache->getCacheSize());
 }

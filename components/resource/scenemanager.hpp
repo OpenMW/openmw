@@ -143,7 +143,7 @@ namespace Resource
         /// @see ResourceManager::updateCache
         virtual void updateCache(double referenceTime);
 
-        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats);
+        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
 
     private:
 
@@ -160,7 +160,7 @@ namespace Resource
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
-        OpenThreads::Mutex mSharedStateMutex;
+        mutable OpenThreads::Mutex mSharedStateMutex;
 
         Resource::ImageManager* mImageManager;
         Resource::NifFileManager* mNifFileManager;

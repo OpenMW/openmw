@@ -200,7 +200,7 @@ namespace MWRender
         void updateAmbient();
         void setFogColor(const osg::Vec4f& color);
 
-        void reportStats();
+        void reportStats() const;
 
         osg::ref_ptr<osgViewer::Viewer> mViewer;
         osg::ref_ptr<osg::Group> mRootNode;

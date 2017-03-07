@@ -71,7 +71,7 @@ void ChunkManager::setShaderManager(Shader::ShaderManager *shaderManager)
     mShaderManager = shaderManager;
 }
 
-void ChunkManager::reportStats(unsigned int frameNumber, osg::Stats *stats)
+void ChunkManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
 {
     stats->setAttribute(frameNumber, "Terrain Chunk", mCache->getCacheSize());
 }

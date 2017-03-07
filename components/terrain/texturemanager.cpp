@@ -54,7 +54,7 @@ osg::ref_ptr<osg::Texture2D> TextureManager::getTexture(const std::string &name)
     }
 }
 
-void TextureManager::reportStats(unsigned int frameNumber, osg::Stats *stats)
+void TextureManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
 {
     stats->setAttribute(frameNumber, "Terrain Texture", mCache->getCacheSize());
 }

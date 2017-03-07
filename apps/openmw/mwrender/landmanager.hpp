@@ -22,7 +22,7 @@ namespace MWRender
         /// @note Will return NULL if not found.
         osg::ref_ptr<ESMTerrain::LandObject> getLand(int x, int y);
 
-        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats);
+        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
 
     private:
         int mLoadFlags;

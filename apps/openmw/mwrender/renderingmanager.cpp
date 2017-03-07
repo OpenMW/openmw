@@ -907,7 +907,7 @@ namespace MWRender
         mStateUpdater->setFogColor(color);
     }
 
-    void RenderingManager::reportStats()
+    void RenderingManager::reportStats() const
     {
         osg::Stats* stats = mViewer->getViewerStats();
         unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();

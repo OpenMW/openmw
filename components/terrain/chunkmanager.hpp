@@ -42,7 +42,7 @@ namespace Terrain
         // Optional
         void setShaderManager(Shader::ShaderManager* shaderManager);
 
-        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats);
+        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
 
     private:
         osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center);

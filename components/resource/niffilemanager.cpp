@@ -56,7 +56,7 @@ namespace Resource
         }
     }
 
-    void NifFileManager::reportStats(unsigned int frameNumber, osg::Stats *stats)
+    void NifFileManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
     {
         stats->setAttribute(frameNumber, "Nif", mCache->getCacheSize());
     }
