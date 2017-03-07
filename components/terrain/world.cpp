@@ -1,6 +1,8 @@
 #include "world.hpp"
 
 #include <osg/Group>
+#include <osg/Material>
+
 #include <osgUtil/IncrementalCompileOperation>
 
 #include <components/resource/resourcesystem.hpp>
@@ -23,6 +25,10 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
     mTerrainRoot = new osg::Group;
     mTerrainRoot->setNodeMask(nodeMask);
     mTerrainRoot->getOrCreateStateSet()->setRenderingHint(osg::StateSet::OPAQUE_BIN);
+    osg::ref_ptr<osg::Material> material (new osg::Material);
+    material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+    mTerrainRoot->getOrCreateStateSet()->setAttributeAndModes(material, osg::StateAttribute::ON);
+
     mTerrainRoot->setName("Terrain Root");
 
     osg::ref_ptr<CompositeMapRenderer> renderer (new CompositeMapRenderer);
@@ -53,6 +59,11 @@ World::~World()
 float World::getHeightAt(const osg::Vec3f &worldPos)
 {
     return mStorage->getHeightAt(worldPos);
+}
+
+void World::updateTextureFiltering()
+{
+    mTextureManager->updateTextureFiltering();
 }
 
 }

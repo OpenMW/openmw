@@ -46,7 +46,9 @@ namespace Terrain
               Storage* storage, int nodeMask, int preCompileMask);
         virtual ~World();
 
-        virtual void updateTextureFiltering() {}
+        /// Apply the scene manager's texture filtering settings to all cached textures.
+        /// @note Thread safe.
+        void updateTextureFiltering();
 
         float getHeightAt (const osg::Vec3f& worldPos);
 

@@ -33,10 +33,6 @@ namespace Terrain
         /// @note Not thread safe.
         virtual void unloadCell(int x, int y);
 
-        /// Apply the scene manager's texture filtering settings to all cached textures.
-        /// @note Thread safe.
-        void updateTextureFiltering();
-
     private:
         osg::ref_ptr<osg::Node> buildTerrain (osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter);
 

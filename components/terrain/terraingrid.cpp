@@ -2,10 +2,8 @@
 
 #include <memory>
 
-#include <osg/Material>
 #include <osg/Group>
 
-#include "texturemanager.hpp"
 #include "chunkmanager.hpp"
 
 namespace Terrain
@@ -15,9 +13,6 @@ TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::
     : Terrain::World(parent, compileRoot, resourceSystem, ico, storage, nodeMask, preCompileMask)
     , mNumSplits(4)
 {
-    osg::ref_ptr<osg::Material> material (new osg::Material);
-    material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
-    mTerrainRoot->getOrCreateStateSet()->setAttributeAndModes(material, osg::StateAttribute::ON);
 }
 
 TerrainGrid::~TerrainGrid()
@@ -87,11 +82,6 @@ void TerrainGrid::unloadCell(int x, int y)
     mTerrainRoot->removeChild(terrainNode);
 
     mGrid.erase(it);
-}
-
-void TerrainGrid::updateTextureFiltering()
-{
-    mTextureManager->updateTextureFiltering();
 }
 
 }
