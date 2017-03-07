@@ -278,13 +278,13 @@ namespace MWWorld
                 const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : 0;
                 if (data)
                 {
-                    mPhysics->addHeightField (data->mHeights, cellX, cell->getCell()->getGridY(), worldsize / (verts-1), verts, land.get());
+                    mPhysics->addHeightField (data->mHeights, cellX, cell->getCell()->getGridY(), worldsize / (verts-1), verts, data->mMinHeight, data->mMaxHeight, land.get());
                 }
                 else
                 {
                     static std::vector<float> defaultHeight;
                     defaultHeight.resize(verts*verts, ESM::Land::DEFAULT_HEIGHT);
-                    mPhysics->addHeightField (&defaultHeight[0], cell->getCell()->getGridX(), cell->getCell()->getGridY(), worldsize / (verts-1), verts, land.get());
+                    mPhysics->addHeightField (&defaultHeight[0], cell->getCell()->getGridX(), cell->getCell()->getGridY(), worldsize / (verts-1), verts, ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
                 }
             }
 

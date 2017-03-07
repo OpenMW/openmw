@@ -65,8 +65,6 @@ namespace ESMTerrain
     {
         assert (size <= 1 && "Storage::getMinMaxHeights, chunk size should be <= 1 cell");
 
-        /// \todo investigate if min/max heights should be stored at load time in ESM::Land instead
-
         osg::Vec2f origin = center - osg::Vec2f(size/2.f, size/2.f);
 
         int cellX = static_cast<int>(std::floor(origin.x()));

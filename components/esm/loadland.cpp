@@ -203,16 +203,27 @@ namespace ESM
         if (reader.isNextSub("VHGT")) {
             VHGT vhgt;
             if (condLoad(reader, flags, target->mDataLoaded, DATA_VHGT, &vhgt, sizeof(vhgt))) {
+                target->mMinHeight = FLT_MAX;
+                target->mMaxHeight = -FLT_MAX;
                 float rowOffset = vhgt.mHeightOffset;
                 for (int y = 0; y < LAND_SIZE; y++) {
                     rowOffset += vhgt.mHeightData[y * LAND_SIZE];
 
                     target->mHeights[y * LAND_SIZE] = rowOffset * HEIGHT_SCALE;
+                    if (rowOffset * HEIGHT_SCALE > target->mMaxHeight)
+                        target->mMaxHeight = rowOffset * HEIGHT_SCALE;
+                    if (rowOffset * HEIGHT_SCALE < target->mMinHeight)
+                        target->mMinHeight = rowOffset * HEIGHT_SCALE;
 
                     float colOffset = rowOffset;
                     for (int x = 1; x < LAND_SIZE; x++) {
                         colOffset += vhgt.mHeightData[y * LAND_SIZE + x];
                         target->mHeights[x + y * LAND_SIZE] = colOffset * HEIGHT_SCALE;
+
+                        if (colOffset * HEIGHT_SCALE > target->mMaxHeight)
+                            target->mMaxHeight = colOffset * HEIGHT_SCALE;
+                        if (colOffset * HEIGHT_SCALE < target->mMinHeight)
+                            target->mMinHeight = colOffset * HEIGHT_SCALE;
                     }
                 }
                 target->mUnk1 = vhgt.mUnk1;

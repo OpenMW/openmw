@@ -87,6 +87,8 @@ struct Land
         float mHeightOffset;
         // Height in world space for each vertex
         float mHeights[LAND_NUM_VERTS];
+        float mMinHeight;
+        float mMaxHeight;
 
         // 24-bit normals, these aren't always correct though. Edge and corner normals may be garbage.
         VNML mNormals[LAND_NUM_VERTS * 3];
