@@ -94,7 +94,7 @@ osg::ref_ptr<osg::Group> ChunkManager::createCompositeMapRTT(osg::ref_ptr<osg::T
     camera->setClearColor(osg::Vec4(0.f, 0.f, 0.f, 1.f));
     camera->setClearMask(GL_COLOR_BUFFER_BIT);
     camera->setViewport(0, 0, mCompositeMapSize, mCompositeMapSize);
-    camera->setRenderOrder(osg::Camera::PRE_RENDER);
+    camera->setRenderOrder(osg::Camera::PRE_RENDER, -1);
     camera->setImplicitBufferAttachmentMask(osg::DisplaySettings::IMPLICIT_COLOR_BUFFER_ATTACHMENT); // no need for a depth buffer
 
     return camera;
