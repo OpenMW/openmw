@@ -107,7 +107,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
 
             if (esmLand.getLandData (ESM::Land::DATA_VHGT))
             {
-                mTerrain.reset(new Terrain::TerrainGrid(mCellNode, mCellNode, data.getResourceSystem().get(), NULL, new TerrainStorage(mData), Mask_Terrain));
+                mTerrain.reset(new Terrain::TerrainGrid(mCellNode, mCellNode, data.getResourceSystem().get(), new TerrainStorage(mData), Mask_Terrain));
                 mTerrain->loadCell(esmLand.mX,
                                    esmLand.mY);
 

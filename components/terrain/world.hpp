@@ -15,11 +15,6 @@ namespace osg
     class Node;
 }
 
-namespace osgUtil
-{
-    class IncrementalCompileOperation;
-}
-
 namespace Resource
 {
     class ResourceSystem;
@@ -42,8 +37,8 @@ namespace Terrain
         /// @note takes ownership of \a storage
         /// @param storage Storage instance to get terrain data from (heights, normals, colors, textures..)
         /// @param nodeMask mask for the terrain root
-        World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
-              Storage* storage, int nodeMask, int preCompileMask);
+        /// @param preCompileMask mask for pre compiling textures
+        World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask);
         virtual ~World();
 
         /// Apply the scene manager's texture filtering settings to all cached textures.
@@ -68,8 +63,6 @@ namespace Terrain
         osg::ref_ptr<osg::Node> mCompositeMapRenderer;
 
         Resource::ResourceSystem* mResourceSystem;
-
-        osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
         std::auto_ptr<TextureManager> mTextureManager;
         std::auto_ptr<ChunkManager> mChunkManager;

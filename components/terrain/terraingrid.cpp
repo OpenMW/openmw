@@ -9,8 +9,8 @@
 namespace Terrain
 {
 
-TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, Storage* storage, int nodeMask, int preCompileMask)
-    : Terrain::World(parent, compileRoot, resourceSystem, ico, storage, nodeMask, preCompileMask)
+TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask)
+    : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask)
     , mNumSplits(4)
 {
 }

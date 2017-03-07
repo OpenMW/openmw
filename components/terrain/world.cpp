@@ -3,8 +3,6 @@
 #include <osg/Group>
 #include <osg/Material>
 
-#include <osgUtil/IncrementalCompileOperation>
-
 #include <components/resource/resourcesystem.hpp>
 
 #include "storage.hpp"
@@ -15,12 +13,10 @@
 namespace Terrain
 {
 
-World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
-             Storage* storage, int nodeMask, int preCompileMask)
+World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask)
     : mStorage(storage)
     , mParent(parent)
     , mResourceSystem(resourceSystem)
-    , mIncrementalCompileOperation(ico)
 {
     mTerrainRoot = new osg::Group;
     mTerrainRoot->setNodeMask(nodeMask);

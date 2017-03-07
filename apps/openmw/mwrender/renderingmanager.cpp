@@ -215,10 +215,9 @@ namespace MWRender
 
 
         mTerrainStorage = new TerrainStorage(mResourceSystem, Settings::Manager::getString("normal map pattern", "Shaders"), Settings::Manager::getString("normal height map pattern", "Shaders"),
-                                            Settings::Manager::getBool("auto use terrain normal maps", "Shaders"),
-                                            Settings::Manager::getString("terrain specular map pattern", "Shaders"), Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
-        mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mViewer->getIncrementalCompileOperation(),
-                                                mTerrainStorage, Mask_Terrain, Mask_PreCompile));
+                                            Settings::Manager::getBool("auto use terrain normal maps", "Shaders"), Settings::Manager::getString("terrain specular map pattern", "Shaders"),
+                                             Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
+        mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 
