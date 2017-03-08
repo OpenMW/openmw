@@ -34,14 +34,18 @@ namespace Terrain
     public:
         ChunkManager(Storage* storage, Resource::SceneManager* sceneMgr, TextureManager* textureManager, CompositeMapRenderer* renderer);
 
-        osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center);
+        osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, int lod);
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
 
     private:
-        osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center);
+        osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, int lod);
 
         osg::ref_ptr<osg::Group> createCompositeMapRTT(osg::ref_ptr<osg::Texture2D>& texture);
+
+        void createCompositeMapGeometry(float chunkSize, const osg::Vec2f& chunkCenter, const osg::Vec4f& texCoords, osg::Group* compositeMapNode);
+
+        std::vector<osg::ref_ptr<osg::StateSet> > createPasses(float chunkSize, const osg::Vec2f& chunkCenter, bool forCompositeMap);
 
         Terrain::Storage* mStorage;
         Resource::SceneManager* mSceneManager;
