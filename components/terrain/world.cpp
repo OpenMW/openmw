@@ -57,6 +57,11 @@ float World::getHeightAt(const osg::Vec3f &worldPos)
     return mStorage->getHeightAt(worldPos);
 }
 
+osg::ref_ptr<osg::Node> World::cacheCell(int x, int y)
+{
+    return NULL;
+}
+
 void World::updateTextureFiltering()
 {
     mTextureManager->updateTextureFiltering();

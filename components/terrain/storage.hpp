@@ -18,6 +18,7 @@ namespace osg
 namespace Terrain
 {
     /// We keep storage of terrain data abstract here since we need different implementations for game and editor
+    /// @note The implementation must be thread safe.
     class Storage
     {
     public:

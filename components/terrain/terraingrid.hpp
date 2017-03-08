@@ -7,15 +7,10 @@
 
 #include "world.hpp"
 
-namespace osg
-{
-    class Texture2D;
-}
-
 namespace Terrain
 {
 
-    /// @brief Simple terrain implementation that loads cells in a grid, with no LOD
+    /// @brief Simple terrain implementation that loads cells in a grid, with no LOD. Only requested cells are loaded.
     class TerrainGrid : public Terrain::World
     {
     public:
