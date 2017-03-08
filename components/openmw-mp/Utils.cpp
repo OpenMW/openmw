@@ -32,9 +32,7 @@ std::string Utils::convertPath(std::string str)
 #endif
 
 #if defined(_WIN32) || defined(__APPLE__)
-    for (auto &ch : str)
-        if (ch == '/')
-               ch = _SEP_;
+    replace(str.begin(), str.end(), '/', _SEP_);
 #endif //defined(_WIN32) || defined(__APPLE__)
     return str;
 
