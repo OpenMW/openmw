@@ -58,6 +58,7 @@ QuadTreeNode* searchNeighbour (QuadTreeNode* currentNode, Direction dir)
 QuadTreeNode::QuadTreeNode(QuadTreeNode* parent, ChildDirection direction, float size, const osg::Vec2f& center)
     : mParent(parent)
     , mDirection(direction)
+    , mValidBounds(false)
     , mSize(size)
     , mCenter(center)
 {
@@ -90,6 +91,9 @@ void QuadTreeNode::initNeighbours()
 
 void QuadTreeNode::traverse(osg::NodeVisitor &nv)
 {
+    if (!hasValidBounds())
+        return;
+
     if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
@@ -136,6 +140,7 @@ ViewData* QuadTreeNode::getView(osg::NodeVisitor &nv)
 void QuadTreeNode::setBoundingBox(const osg::BoundingBox &boundingBox)
 {
     mBoundingBox = boundingBox;
+    mValidBounds = boundingBox.valid();
     dirtyBound();
     getBound();
 }

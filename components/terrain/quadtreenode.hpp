@@ -51,6 +51,7 @@ namespace Terrain
 
         void setBoundingBox(const osg::BoundingBox& boundingBox);
         const osg::BoundingBox& getBoundingBox() const;
+        bool hasValidBounds() const { return mValidBounds; }
 
         virtual osg::BoundingSphere computeBound() const;
 
@@ -81,6 +82,7 @@ namespace Terrain
         ChildDirection mDirection;
 
         osg::BoundingBox mBoundingBox;
+        bool mValidBounds;
         float mSize;
         osg::Vec2f mCenter;
 
