@@ -23,8 +23,7 @@ std::string Version::describe()
 {
     std::string str = "OpenMW version " + mVersion;
     std::string rev = mCommitHash;
-    std::string tag = mTagHash;
-    if (!rev.empty() && !tag.empty())
+    if (!rev.empty())
     {
         rev = rev.substr(0, 10);
         str += "\nRevision: " + rev;
