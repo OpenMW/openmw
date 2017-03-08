@@ -17,26 +17,6 @@
 #include "texturemanager.hpp"
 #include "compositemaprenderer.hpp"
 
-namespace
-{
-    class StaticBoundingBoxCallback : public osg::Drawable::ComputeBoundingBoxCallback
-    {
-    public:
-        StaticBoundingBoxCallback(const osg::BoundingBox& bounds)
-            : mBoundingBox(bounds)
-        {
-        }
-
-        virtual osg::BoundingBox computeBound(const osg::Drawable&) const
-        {
-            return mBoundingBox;
-        }
-
-    private:
-        osg::BoundingBox mBoundingBox;
-    };
-}
-
 namespace Terrain
 {
 
@@ -102,10 +82,6 @@ osg::ref_ptr<osg::Group> ChunkManager::createCompositeMapRTT(osg::ref_ptr<osg::T
 
 osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f &chunkCenter)
 {
-    float minH, maxH;
-    if (!mStorage->getMinMaxHeights(chunkSize, chunkCenter, minH, maxH))
-        return NULL; // no terrain defined
-
     osg::Vec2f worldCenter = chunkCenter*mStorage->getCellWorldSize();
     osg::ref_ptr<SceneUtil::PositionAttitudeTransform> transform (new SceneUtil::PositionAttitudeTransform);
     transform->setPosition(osg::Vec3f(worldCenter.x(), worldCenter.y(), 0.f));
@@ -134,16 +110,7 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     geometry->addPrimitiveSet(mBufferCache.getIndexBuffer(numVerts, 0));
 
-
-    // we already know the bounding box, so no need to let OSG compute it.
-    osg::Vec3f min(-0.5f*mStorage->getCellWorldSize()*chunkSize,
-                   -0.5f*mStorage->getCellWorldSize()*chunkSize,
-                   minH);
-    osg::Vec3f max (0.5f*mStorage->getCellWorldSize()*chunkSize,
-                       0.5f*mStorage->getCellWorldSize()*chunkSize,
-                       maxH);
-    osg::BoundingBox bounds(min, max);
-    geometry->setComputeBoundingBoxCallback(new StaticBoundingBoxCallback(bounds));
+    geometry->getBound();
 
     std::vector<LayerInfo> layerList;
     std::vector<osg::ref_ptr<osg::Image> > blendmaps;

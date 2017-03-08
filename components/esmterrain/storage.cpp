@@ -98,7 +98,7 @@ namespace ESMTerrain
 
         min = defaultHeight;
         max = defaultHeight;
-        return true;
+        return false;
     }
 
     void Storage::fixNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row)
