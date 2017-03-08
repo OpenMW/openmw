@@ -17,10 +17,23 @@ namespace Terrain
         Root
     };
 
+    class QuadTreeNode;
+    class LodCallback : public osg::Referenced
+    {
+    public:
+        virtual ~LodCallback() {}
+
+        virtual bool isSufficientDetail(QuadTreeNode *node, osg::NodeVisitor &nv) = 0;
+    };
+
+    class ViewDataMap;
+    class ViewData;
+
     class QuadTreeNode : public osg::Group
     {
     public:
         QuadTreeNode(QuadTreeNode* parent, ChildDirection dir, float size, const osg::Vec2f& center);
+        virtual ~QuadTreeNode();
 
         QuadTreeNode* getParent();
 
@@ -49,6 +62,17 @@ namespace Terrain
 
         virtual void traverse(osg::NodeVisitor& nv);
 
+        /// Set the Lod callback to use for determining when to stop traversing further down the quad tree.
+        void setLodCallback(LodCallback* lodCallback);
+
+        /// Set the view data map that the finally used nodes for a given camera/intersection are pushed onto.
+        void setViewDataMap(ViewDataMap* map);
+
+        ViewDataMap* getViewDataMap();
+
+        /// Create or retrieve a view for the given traversal.
+        ViewData* getView(osg::NodeVisitor& nv);
+
     private:
         QuadTreeNode* mParent;
 
@@ -59,6 +83,10 @@ namespace Terrain
         osg::BoundingBox mBoundingBox;
         float mSize;
         osg::Vec2f mCenter;
+
+        osg::ref_ptr<LodCallback> mLodCallback;
+
+        osg::ref_ptr<ViewDataMap> mViewDataMap;
     };
 
 }

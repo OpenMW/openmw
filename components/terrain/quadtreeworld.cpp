@@ -4,10 +4,8 @@
 
 #include "quadtreenode.hpp"
 #include "storage.hpp"
-
-
-#include <osg/io_utils>
-#include <osg/Timer>
+#include "viewdata.hpp"
+#include "chunkmanager.hpp"
 
 namespace
 {
@@ -29,11 +27,57 @@ namespace
         return 1 << depth;
     }
 
+    int Log2( unsigned int n )
+    {
+        int targetlevel = 0;
+        while (n >>= 1) ++targetlevel;
+        return targetlevel;
+    }
+
+    float distance(const osg::BoundingBox& box, const osg::Vec3f& v)
+    {
+        if (box.contains(v))
+            return 0;
+        else
+        {
+            osg::Vec3f maxDist(0,0,0);
+
+            if (v.x() < box.xMin())
+                maxDist.x() = box.xMin() - v.x();
+            else if (v.x() > box.xMax())
+                maxDist.x() = v.x() - box.xMax();
+
+            if (v.y() < box.yMin())
+                maxDist.y() = box.yMin() - v.y();
+            else if (v.y() > box.yMax())
+                maxDist.y() = v.y() - box.yMax();
+
+            if (v.z() < box.zMin())
+                maxDist.z() = box.zMin() - v.z();
+            else if (v.z() > box.zMax())
+                maxDist.z() = v.z() - box.zMax();
+
+            return maxDist.length();
+        }
+    }
+
 }
 
 namespace Terrain
 {
 
+class DefaultLodCallback : public LodCallback
+{
+public:
+    virtual bool isSufficientDetail(QuadTreeNode* node, osg::NodeVisitor& nv)
+    {
+        float dist = distance(node->getBoundingBox(), nv.getEyePoint());
+        int nativeLodLevel = Log2(static_cast<unsigned int>(node->getSize()*4));
+        int lodLevel = Log2(static_cast<unsigned int>(dist/2048.0));
+
+        return nativeLodLevel <= lodLevel;
+    }
+};
 
 class RootNode : public QuadTreeNode
 {
@@ -84,6 +128,7 @@ public:
         float centerY = (mMinY+mMaxY)/2.f + (size-origSizeY)/2.f;
 
         mRootNode = new RootNode(size, osg::Vec2f(centerX, centerY));
+        mRootNode->setViewDataMap(new ViewDataMap);
         addChildren(mRootNode);
 
         mRootNode->initNeighbours();
@@ -125,6 +170,8 @@ public:
         }
 
         osg::ref_ptr<QuadTreeNode> node = new QuadTreeNode(parent, direction, size, center);
+        node->setLodCallback(new DefaultLodCallback);
+        node->setViewDataMap(parent->getViewDataMap());
         parent->addChild(node);
 
         if (center.x() - size > mMaxX
@@ -190,10 +237,28 @@ QuadTreeWorld::~QuadTreeWorld()
 
 void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
-    if (nv.getVisitorType() != osg::NodeVisitor::CULL_VISITOR && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
+    if (nv.getVisitorType() != osg::NodeVisitor::CULL_VISITOR)// && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
         return;
 
     mRootNode->traverse(nv);
+
+    ViewData* vd = mRootNode->getView(nv);
+
+    for (unsigned int i=0; i<vd->getNumEntries(); ++i)
+    {
+        ViewData::Entry& entry = vd->getEntry(i);
+        if (!entry.mRenderingNode)
+        {
+            int lod = Log2(int(entry.mNode->getSize()));
+            entry.mRenderingNode = mChunkManager->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), lod);
+        }
+
+        entry.mRenderingNode->accept(nv);
+    }
+
+    vd->reset(nv.getTraversalNumber());
+
+    mRootNode->getViewDataMap()->clearUnusedViews(nv.getTraversalNumber());
 }
 
 void QuadTreeWorld::loadCell(int x, int y)

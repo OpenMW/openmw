@@ -5,46 +5,7 @@
 #include <osgUtil/CullVisitor>
 
 #include "defs.hpp"
-
-namespace
-{
-
-    float distance(const osg::BoundingBox& box, const osg::Vec3f& v)
-    {
-        if (box.contains(v))
-            return 0;
-        else
-        {
-            osg::Vec3f maxDist(0,0,0);
-
-            if (v.x() < box.xMin())
-                maxDist.x() = box.xMin() - v.x();
-            else if (v.x() > box.xMax())
-                maxDist.x() = v.x() - box.xMax();
-
-            if (v.y() < box.yMin())
-                maxDist.y() = box.yMin() - v.y();
-            else if (v.y() > box.yMax())
-                maxDist.y() = v.y() - box.yMax();
-
-            if (v.z() < box.zMin())
-                maxDist.z() = box.zMin() - v.z();
-            else if (v.z() > box.zMax())
-                maxDist.z() = v.z() - box.zMax();
-
-            return maxDist.length();
-        }
-    }
-
-    int Log2( int n )
-    {
-        assert(n > 0);
-        int targetlevel = 0;
-        while (n >>= 1) ++targetlevel;
-        return targetlevel;
-    }
-
-}
+#include "viewdata.hpp"
 
 namespace Terrain
 {
@@ -104,6 +65,10 @@ QuadTreeNode::QuadTreeNode(QuadTreeNode* parent, ChildDirection direction, float
         mNeighbours[i] = 0;
 }
 
+QuadTreeNode::~QuadTreeNode()
+{
+}
+
 QuadTreeNode* QuadTreeNode::getParent()
 {
     return mParent;
@@ -125,18 +90,47 @@ void QuadTreeNode::initNeighbours()
 
 void QuadTreeNode::traverse(osg::NodeVisitor &nv)
 {
-    if (nv.getVisitorType() != osg::NodeVisitor::CULL_VISITOR)
-        return;
+    if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+    {
+        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
 
-    osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
+        // do another culling test against bounding box as its much more accurate than the bounding sphere.
+        if (cv->isCulled(mBoundingBox))
+            return;
+    }
 
-    // do another culling test against bounding box as its much more accurate than the bounding sphere.
-    if (cv->isCulled(mBoundingBox))
-        return;
+    if ((mLodCallback && mLodCallback->isSufficientDetail(this, nv)) || !getNumChildren())
+        getView(nv)->add(this);
+    else
+        osg::Group::traverse(nv);
+}
 
-    //float dist = distance(getBoundingBox(), nv.getEyePoint());
+void QuadTreeNode::setLodCallback(LodCallback *lodCallback)
+{
+    mLodCallback = lodCallback;
+}
 
-    osg::Group::traverse(nv);
+void QuadTreeNode::setViewDataMap(ViewDataMap *map)
+{
+    mViewDataMap = map;
+}
+
+ViewDataMap *QuadTreeNode::getViewDataMap()
+{
+    return mViewDataMap;
+}
+
+ViewData* QuadTreeNode::getView(osg::NodeVisitor &nv)
+{
+    if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+    {
+        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
+        return mViewDataMap->getViewData(cv->getCurrentCamera(), true);
+    }
+    else // INTERSECTION_VISITOR
+    {
+        return mViewDataMap->getViewData(&nv, false);
+    }
 }
 
 void QuadTreeNode::setBoundingBox(const osg::BoundingBox &boundingBox)
