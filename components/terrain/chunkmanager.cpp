@@ -31,10 +31,10 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
 
 }
 
-osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &center, int lod)
+osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &center, int lod, unsigned int lodFlags)
 {
     std::ostringstream stream;
-    stream << size << " " << center.x() << " " << center.y();
+    stream << size << " " << center.x() << " " << center.y() << " " << lod << " " << lodFlags;
     std::string id = stream.str();
 
     osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
@@ -42,7 +42,7 @@ osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &cen
         return obj->asNode();
     else
     {
-        osg::ref_ptr<osg::Node> node = createChunk(size, center, lod);
+        osg::ref_ptr<osg::Node> node = createChunk(size, center, lod, lodFlags);
         mCache->addEntryToObjectCache(id, node.get());
         return node;
     }
@@ -156,7 +156,7 @@ std::vector<osg::ref_ptr<osg::StateSet> > ChunkManager::createPasses(float chunk
                                      mSceneManager->getClampLighting(), &mSceneManager->getShaderManager(), layers, blendmapTextures, blendmapScale, blendmapScale);
 }
 
-osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f &chunkCenter, int lod)
+osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f &chunkCenter, int lod, unsigned int lodFlags)
 {
     osg::Vec2f worldCenter = chunkCenter*mStorage->getCellWorldSize();
     osg::ref_ptr<SceneUtil::PositionAttitudeTransform> transform (new SceneUtil::PositionAttitudeTransform);
@@ -182,7 +182,7 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     unsigned int numVerts = (mStorage->getCellVertices()-1) * chunkSize / (1 << lod) + 1;
 
-    geometry->addPrimitiveSet(mBufferCache.getIndexBuffer(numVerts, 0));
+    geometry->addPrimitiveSet(mBufferCache.getIndexBuffer(numVerts, lodFlags));
 
     geometry->getBound();
 

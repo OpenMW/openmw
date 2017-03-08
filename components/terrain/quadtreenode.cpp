@@ -80,6 +80,11 @@ QuadTreeNode *QuadTreeNode::getChild(unsigned int i)
     return static_cast<QuadTreeNode*>(Group::getChild(i));
 }
 
+QuadTreeNode *QuadTreeNode::getNeighbour(Direction dir)
+{
+    return mNeighbours[dir];
+}
+
 void QuadTreeNode::initNeighbours()
 {
     for (int i=0; i<4; ++i)

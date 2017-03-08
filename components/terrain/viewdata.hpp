@@ -22,6 +22,8 @@ namespace Terrain
 
         void clear();
 
+        bool contains(QuadTreeNode* node);
+
         struct Entry
         {
             Entry();

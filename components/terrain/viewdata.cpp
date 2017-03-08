@@ -54,6 +54,14 @@ void ViewData::clear()
     mFrameLastUsed = 0;
 }
 
+bool ViewData::contains(QuadTreeNode *node)
+{
+    for (unsigned int i=0; i<mNumEntries; ++i)
+        if (mEntries[i].mNode == node)
+            return true;
+    return false;
+}
+
 ViewData::Entry::Entry()
     : mNode(NULL)
     , mVisible(true)

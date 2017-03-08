@@ -255,6 +255,34 @@ void traverse(QuadTreeNode* node, ViewData* vd, osgUtil::CullVisitor* cv, bool v
     }
 }
 
+unsigned int getLodFlags(QuadTreeNode* node, int ourLod, ViewData* vd)
+{
+    unsigned int lodFlags = 0;
+    for (unsigned int i=0; i<4; ++i)
+    {
+        QuadTreeNode* neighbour = node->getNeighbour(static_cast<Direction>(i));
+
+        // If the neighbour isn't currently rendering itself,
+        // go up until we find one. NOTE: We don't need to go down,
+        // because in that case neighbour's detail would be higher than
+        // our detail and the neighbour would handle stitching by itself.
+        while (neighbour && !vd->contains(neighbour))
+            neighbour = neighbour->getParent();
+        int lod = 0;
+        if (neighbour)
+            lod = Log2(int(neighbour->getSize()));
+
+        if (lod <= ourLod) // We only need to worry about neighbours less detailed than we are -
+            lod = 0;         // neighbours with more detail will do the stitching themselves
+        // Use 4 bits for each LOD delta
+        if (lod > 0)
+        {
+            lodFlags |= static_cast<unsigned int>(lod - ourLod) << (4*i);
+        }
+    }
+    return lodFlags;
+}
+
 void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
     if (nv.getVisitorType() != osg::NodeVisitor::CULL_VISITOR)// && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
@@ -275,8 +303,9 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         ViewData::Entry& entry = vd->getEntry(i);
         if (!entry.mRenderingNode)
         {
-            int lod = Log2(int(entry.mNode->getSize()));
-            entry.mRenderingNode = mChunkManager->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), lod);
+            int ourLod = Log2(int(entry.mNode->getSize()));
+            unsigned int lodFlags = getLodFlags(entry.mNode, ourLod, vd);
+            entry.mRenderingNode = mChunkManager->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, lodFlags);
         }
 
         if (entry.mVisible)
