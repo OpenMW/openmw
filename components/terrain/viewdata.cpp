@@ -14,9 +14,10 @@ ViewData::ViewData()
 
 void ViewData::add(QuadTreeNode *node, bool visible)
 {
-    int index = mNumEntries++;
+    unsigned int index = mNumEntries++;
 
-    mEntries.resize(index+1);
+    if (index+1 > mEntries.size())
+        mEntries.resize(index+1);
 
     Entry& entry = mEntries[index];
     if (entry.set(node, visible))
