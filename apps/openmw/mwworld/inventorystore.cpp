@@ -623,7 +623,7 @@ void MWWorld::InventoryStore::flagAsModified()
     mRechargingItemsUpToDate = false;
 }
 
-bool MWWorld::InventoryStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
+bool MWWorld::InventoryStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2) const
 {
     bool canStack = MWWorld::ContainerStore::stacks(ptr1, ptr2);
     if (!canStack)
