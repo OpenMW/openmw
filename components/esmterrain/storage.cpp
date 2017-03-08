@@ -324,7 +324,12 @@ namespace ESMTerrain
             --cellX;
             x += ESM::Land::LAND_TEXTURE_SIZE;
         }
-        if (y >= ESM::Land::LAND_TEXTURE_SIZE) // Y appears to be wrapped from the other side because why the hell not?
+        while (x >= ESM::Land::LAND_TEXTURE_SIZE)
+        {
+            ++cellX;
+            x -= ESM::Land::LAND_TEXTURE_SIZE;
+        }
+        while (y >= ESM::Land::LAND_TEXTURE_SIZE) // Y appears to be wrapped from the other side because why the hell not?
         {
             ++cellY;
             y -= ESM::Land::LAND_TEXTURE_SIZE;
