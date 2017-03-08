@@ -47,7 +47,6 @@ namespace Resource
         float                               _statsHeight;
 
         std::string                         _font;
-        float                               _leftPos;
         float                               _characterSize;
 
         int _resourceStatsChildNum;
