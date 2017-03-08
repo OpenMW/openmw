@@ -104,7 +104,7 @@ void QuadTreeNode::traverse(osg::NodeVisitor &nv)
     }
 
     if ((mLodCallback && mLodCallback->isSufficientDetail(this, nv)) || !getNumChildren())
-        getView(nv)->add(this);
+        getView(nv)->add(this, true);
     else
         osg::Group::traverse(nv);
 }
@@ -112,6 +112,11 @@ void QuadTreeNode::traverse(osg::NodeVisitor &nv)
 void QuadTreeNode::setLodCallback(LodCallback *lodCallback)
 {
     mLodCallback = lodCallback;
+}
+
+LodCallback *QuadTreeNode::getLodCallback()
+{
+    return mLodCallback;
 }
 
 void QuadTreeNode::setViewDataMap(ViewDataMap *map)

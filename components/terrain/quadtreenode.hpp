@@ -66,6 +66,8 @@ namespace Terrain
         /// Set the Lod callback to use for determining when to stop traversing further down the quad tree.
         void setLodCallback(LodCallback* lodCallback);
 
+        LodCallback* getLodCallback();
+
         /// Set the view data map that the finally used nodes for a given camera/intersection are pushed onto.
         void setViewDataMap(ViewDataMap* map);
 

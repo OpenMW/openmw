@@ -1,5 +1,7 @@
 #include "quadtreeworld.hpp"
 
+#include <osgUtil/CullVisitor>
+
 #include <components/sceneutil/workqueue.hpp>
 
 #include "quadtreenode.hpp"
@@ -235,14 +237,38 @@ QuadTreeWorld::~QuadTreeWorld()
     }
 }
 
+
+void traverse(QuadTreeNode* node, ViewData* vd, osgUtil::CullVisitor* cv, bool visible)
+{
+    if (!node->hasValidBounds())
+        return;
+
+    visible = visible && !cv->isCulled(node->getBoundingBox());
+    bool stopTraversal = (node->getLodCallback() && node->getLodCallback()->isSufficientDetail(node, *cv)) || !node->getNumChildren();
+
+    if (stopTraversal)
+        vd->add(node, visible);
+    else
+    {
+        for (unsigned int i=0; i<node->getNumChildren(); ++i)
+            traverse(node->getChild(i), vd, cv, visible);
+    }
+}
+
 void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
     if (nv.getVisitorType() != osg::NodeVisitor::CULL_VISITOR)// && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
         return;
 
-    mRootNode->traverse(nv);
-
     ViewData* vd = mRootNode->getView(nv);
+
+    if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+    {
+        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
+        traverse(mRootNode.get(), vd, cv, true);
+    }
+    else
+        mRootNode->traverse(nv);
 
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
@@ -253,7 +279,8 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
             entry.mRenderingNode = mChunkManager->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), lod);
         }
 
-        entry.mRenderingNode->accept(nv);
+        if (entry.mVisible)
+            entry.mRenderingNode->accept(nv);
     }
 
     vd->reset(nv.getTraversalNumber());

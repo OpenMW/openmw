@@ -12,14 +12,14 @@ ViewData::ViewData()
 
 }
 
-void ViewData::add(QuadTreeNode *node)
+void ViewData::add(QuadTreeNode *node, bool visible)
 {
     int index = mNumEntries++;
 
     mEntries.resize(index+1);
 
     Entry& entry = mEntries[index];
-    if (entry.set(node))
+    if (entry.set(node, visible))
         mChanged = true;
 }
 
@@ -37,7 +37,7 @@ void ViewData::reset(unsigned int frame)
 {
     // clear any unused entries
     for (unsigned int i=mNumEntries; i<mEntries.size(); ++i)
-        mEntries[i].set(NULL);
+        mEntries[i].set(NULL, false);
 
     // reset index for next frame
     mNumEntries = 0;
@@ -48,19 +48,21 @@ void ViewData::reset(unsigned int frame)
 void ViewData::clear()
 {
     for (unsigned int i=0; i<mEntries.size(); ++i)
-        mEntries[i].set(NULL);
+        mEntries[i].set(NULL, false);
     mNumEntries = 0;
     mFrameLastUsed = 0;
 }
 
 ViewData::Entry::Entry()
     : mNode(NULL)
+    , mVisible(true)
 {
 
 }
 
-bool ViewData::Entry::set(QuadTreeNode *node)
+bool ViewData::Entry::set(QuadTreeNode *node, bool visible)
 {
+    mVisible = visible;
     if (node == mNode)
         return false;
     else
