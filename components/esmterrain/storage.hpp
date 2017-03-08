@@ -117,7 +117,7 @@ namespace ESMTerrain
         typedef std::pair<short, short> UniqueTextureId;
 
         UniqueTextureId getVtexIndexAt(int cellX, int cellY,
-                                               int x, int y);
+                                               int x, int y, osg::ref_ptr<const LandObject> land);
         std::string getTextureName (UniqueTextureId id);
 
         std::map<std::string, Terrain::LayerInfo> mLayerInfoMap;

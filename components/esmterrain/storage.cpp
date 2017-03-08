@@ -314,7 +314,7 @@ namespace ESMTerrain
     }
 
     Storage::UniqueTextureId Storage::getVtexIndexAt(int cellX, int cellY,
-                                           int x, int y)
+                                           int x, int y, osg::ref_ptr<const LandObject> land)
     {
         // For the first/last row/column, we need to get the texture from the neighbour cell
         // to get consistent blending at the borders
@@ -323,22 +323,27 @@ namespace ESMTerrain
         {
             --cellX;
             x += ESM::Land::LAND_TEXTURE_SIZE;
+            land = NULL;
         }
         while (x >= ESM::Land::LAND_TEXTURE_SIZE)
         {
             ++cellX;
             x -= ESM::Land::LAND_TEXTURE_SIZE;
+            land = NULL;
         }
         while (y >= ESM::Land::LAND_TEXTURE_SIZE) // Y appears to be wrapped from the other side because why the hell not?
         {
             ++cellY;
             y -= ESM::Land::LAND_TEXTURE_SIZE;
+            land = NULL;
         }
 
         assert(x<ESM::Land::LAND_TEXTURE_SIZE);
         assert(y<ESM::Land::LAND_TEXTURE_SIZE);
 
-        osg::ref_ptr<const LandObject> land = getLand(cellX, cellY);
+        if (!land)
+            land = getLand(cellX, cellY);
+
         const ESM::Land::LandData *data = land ? land->getData(ESM::Land::DATA_VTEX) : 0;
         if (data)
         {
@@ -393,10 +398,12 @@ namespace ESMTerrain
         // So we're always adding _land_default.dds as the base layer here, even if it's not referenced in this cell.
         textureIndices.insert(std::make_pair(0,0));
 
+        osg::ref_ptr<const LandObject> land = getLand(cellX, cellY);
+
         for (int y=colStart; y<colEnd; ++y)
             for (int x=rowStart; x<rowEnd; ++x)
             {
-                UniqueTextureId id = getVtexIndexAt(cellX, cellY, x, y);
+                UniqueTextureId id = getVtexIndexAt(cellX, cellY, x, y, land);
                 textureIndices.insert(id);
             }
 
@@ -432,7 +439,7 @@ namespace ESMTerrain
             {
                 for (int x=0; x<blendmapSize; ++x)
                 {
-                    UniqueTextureId id = getVtexIndexAt(cellX, cellY, x+rowStart, y+colStart);
+                    UniqueTextureId id = getVtexIndexAt(cellX, cellY, x+rowStart, y+colStart, land);
                     assert(textureIndicesMap.find(id) != textureIndicesMap.end());
                     int layerIndex = textureIndicesMap.find(id)->second;
                     int blendIndex = (pack ? static_cast<int>(std::floor((layerIndex - 1) / 4.f)) : layerIndex - 1);
