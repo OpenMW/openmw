@@ -26,6 +26,7 @@ namespace Terrain
 
     class TextureManager;
     class ChunkManager;
+    class CompositeMapRenderer;
 
     /**
      * @brief The basic interface for a terrain world. How the terrain chunks are paged and displayed
@@ -70,7 +71,7 @@ namespace Terrain
 
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mTerrainRoot;
-        osg::ref_ptr<osg::Node> mCompositeMapRenderer;
+        osg::ref_ptr<CompositeMapRenderer> mCompositeMapRenderer;
 
         Resource::ResourceSystem* mResourceSystem;
 

@@ -27,15 +27,14 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     mTerrainRoot->setName("Terrain Root");
 
-    osg::ref_ptr<CompositeMapRenderer> renderer (new CompositeMapRenderer);
-    renderer->setNodeMask(preCompileMask);
-    compileRoot->addChild(renderer);
-    mCompositeMapRenderer = renderer;
+    mCompositeMapRenderer = new CompositeMapRenderer;
+    mCompositeMapRenderer->setNodeMask(preCompileMask);
+    compileRoot->addChild(mCompositeMapRenderer);
 
     mParent->addChild(mTerrainRoot);
 
     mTextureManager.reset(new TextureManager(mResourceSystem->getSceneManager()));
-    mChunkManager.reset(new ChunkManager(mStorage, mResourceSystem->getSceneManager(), mTextureManager.get(), renderer));
+    mChunkManager.reset(new ChunkManager(mStorage, mResourceSystem->getSceneManager(), mTextureManager.get(), mCompositeMapRenderer));
 
     mResourceSystem->addResourceManager(mChunkManager.get());
     mResourceSystem->addResourceManager(mTextureManager.get());

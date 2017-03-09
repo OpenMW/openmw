@@ -8,6 +8,7 @@
 #include "storage.hpp"
 #include "viewdata.hpp"
 #include "chunkmanager.hpp"
+#include "compositemaprenderer.hpp"
 
 namespace
 {
@@ -314,7 +315,19 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         }
 
         if (entry.mVisible)
+        {
+            osg::UserDataContainer* udc = entry.mRenderingNode->getUserDataContainer();
+            if (udc && udc->getNumUserObjects() > 0)
+            {
+                osg::Node* compositeMapNode = udc->getUserObject(0)->asNode();
+                if (compositeMapNode)
+                {
+                    mCompositeMapRenderer->setImmediate(compositeMapNode);
+                    udc->removeUserObject(0);
+                }
+            }
             entry.mRenderingNode->accept(nv);
+        }
     }
 
     vd->reset(nv.getTraversalNumber());
