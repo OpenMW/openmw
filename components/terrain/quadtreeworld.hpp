@@ -5,6 +5,8 @@
 
 #include "world.hpp"
 
+#include <OpenThreads/Mutex>
+
 namespace SceneUtil
 {
     class WorkQueue;
@@ -30,12 +32,11 @@ namespace Terrain
 
         void accept(osg::NodeVisitor& nv);
 
-        virtual void loadCell(int x, int y);
-        virtual osg::ref_ptr<osg::Node> cacheCell(int x, int y);
-
         virtual void enable(bool enabled);
 
     private:
+        void ensureQuadTreeBuilt();
+
         osg::ref_ptr<RootNode> mRootNode;
 
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
@@ -44,6 +45,7 @@ namespace Terrain
 
         osg::ref_ptr<ViewDataMap> mViewDataMap;
 
+        OpenThreads::Mutex mQuadTreeMutex;
         bool mQuadTreeBuilt;
     };
 

@@ -337,34 +337,39 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
     mRootNode->getViewDataMap()->clearUnusedViews(nv.getTraversalNumber());
 }
 
-void QuadTreeWorld::loadCell(int x, int y)
+void QuadTreeWorld::ensureQuadTreeBuilt()
 {
-    if (mQuadTreeBuilt && !mRootNode)
     {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mQuadTreeMutex);
+        if (mQuadTreeBuilt)
+            return;
+        if (!mQuadTreeBuilt && !mWorkItem)
+        {
+            const float minSize = 1/4.f;
+            mWorkItem = new BuildQuadTreeItem(mStorage, mViewDataMap.get(), minSize);
+            mWorkQueue->addWorkItem(mWorkItem);
+        }
+    }
+
+    mWorkItem->waitTillDone();
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mQuadTreeMutex);
         mRootNode = mWorkItem->getRootNode();
         mRootNode->setWorld(this);
-        mTerrainRoot->addChild(mRootNode);
-        mWorkItem = NULL;
-    }
-}
-
-osg::ref_ptr<osg::Node> QuadTreeWorld::cacheCell(int x, int y)
-{
-    if (!mQuadTreeBuilt)
-    {
-        const float minSize = 1/4.f;
-        mWorkItem = new BuildQuadTreeItem(mStorage, mViewDataMap.get(), minSize);
-        mWorkQueue->addWorkItem(mWorkItem);
-
-        mWorkItem->waitTillDone();
-
         mQuadTreeBuilt = true;
     }
-    return NULL;
 }
 
 void QuadTreeWorld::enable(bool enabled)
 {
+    if (enabled)
+    {
+        ensureQuadTreeBuilt();
+
+        if (!mRootNode->getNumParents())
+            mTerrainRoot->addChild(mRootNode);
+    }
+
     if (mRootNode)
         mRootNode->setNodeMask(enabled ? ~0 : 0);
 }
