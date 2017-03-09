@@ -34,6 +34,7 @@
 #include <components/sceneutil/writescene.hpp>
 
 #include <components/terrain/terraingrid.hpp>
+#include <components/terrain/quadtreeworld.hpp>
 
 #include <components/esm/loadcell.hpp>
 #include <components/fallback/fallback.hpp>
@@ -212,12 +213,15 @@ namespace MWRender
 
         mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
 
-
-
+        const bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
         mTerrainStorage = new TerrainStorage(mResourceSystem, Settings::Manager::getString("normal map pattern", "Shaders"), Settings::Manager::getString("normal height map pattern", "Shaders"),
                                             Settings::Manager::getBool("auto use terrain normal maps", "Shaders"), Settings::Manager::getString("terrain specular map pattern", "Shaders"),
                                              Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
-        mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
+
+        if (distantTerrain)
+            mTerrain.reset(new Terrain::QuadTreeWorld(mWorkQueue.get(), sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
+        else
+            mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 
