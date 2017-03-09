@@ -20,9 +20,11 @@ namespace Terrain
     class CompositeMap : public osg::Referenced
     {
     public:
+        CompositeMap();
         ~CompositeMap();
         std::vector<osg::ref_ptr<osg::Drawable> > mDrawables;
         osg::ref_ptr<osg::Texture2D> mTexture;
+        unsigned int mCompiled;
     };
 
     /**

@@ -47,8 +47,11 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
 
         compile(*node, renderInfo, &timeLeft);
 
-        mCompiled.insert(node);
-        mCompileSet.erase(mCompileSet.begin());
+        if (node->mCompiled >= node->mDrawables.size())
+        {
+            mCompiled.insert(node);
+            mCompileSet.erase(mCompileSet.begin());
+        }
     }
 }
 
@@ -78,7 +81,7 @@ void CompositeMapRenderer::compile(CompositeMap &compositeMap, osg::RenderInfo &
         return;
     }
 
-    for (unsigned int i=0; i<compositeMap.mDrawables.size(); ++i)
+    for (unsigned int i=compositeMap.mCompiled; i<compositeMap.mDrawables.size(); ++i)
     {
         osg::Drawable* drw = compositeMap.mDrawables[i];
         osg::StateSet* stateset = drw->getStateSet();
@@ -93,15 +96,23 @@ void CompositeMapRenderer::compile(CompositeMap &compositeMap, osg::RenderInfo &
 
         if (stateset)
             renderInfo.getState()->popStateSet();
+
+        ++compositeMap.mCompiled;
+
+        if (timeLeft)
+        {
+            *timeLeft -= timer.time_s();
+            timer.setStartTick();
+
+            if (*timeLeft <= 0)
+                break;
+        }
     }
 
     state.haveAppliedAttribute(osg::StateAttribute::VIEWPORT);
 
     GLuint fboId = state.getGraphicsContext() ? state.getGraphicsContext()->getDefaultFboId() : 0;
     ext->glBindFramebuffer(GL_FRAMEBUFFER_EXT, fboId);
-
-    if (timeLeft)
-        *timeLeft -= timer.time_s();
 }
 
 void CompositeMapRenderer::setTimeAvailableForCompile(double time)
@@ -129,6 +140,11 @@ void CompositeMapRenderer::setImmediate(CompositeMap* compositeMap)
         mImmediateCompileSet.insert(compositeMap);
         mCompileSet.erase(found);
     }
+}
+
+CompositeMap::CompositeMap()
+    : mCompiled(0)
+{
 }
 
 CompositeMap::~CompositeMap()
