@@ -259,7 +259,7 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
         _resourceStatsChildNum = _switch->getNumChildren();
         _switch->addChild(group, false);
 
-        const char* statNames[] = {"Compiling", "WorkQueue", "WorkThread", "", "Texture", "StateSet", "Node", "Node Instance", "Shape", "Shape Instance", "Image", "Nif", "Keyframe", "Terrain Chunk", "Terrain Texture", "Land", "", "UnrefQueue"};
+        const char* statNames[] = {"Compiling", "WorkQueue", "WorkThread", "", "Texture", "StateSet", "Node", "Node Instance", "Shape", "Shape Instance", "Image", "Nif", "Keyframe", "", "Terrain Chunk", "Terrain Texture", "Land", "Composite", "", "UnrefQueue"};
 
         int numLines = sizeof(statNames) / sizeof(statNames[0]);
 

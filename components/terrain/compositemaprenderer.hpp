@@ -48,6 +48,8 @@ namespace Terrain
         /// Mark this composite map to be required for the current frame
         void setImmediate(CompositeMap* map);
 
+        unsigned int getCompileSetSize() const;
+
     private:
         double mTimeAvailable;
 

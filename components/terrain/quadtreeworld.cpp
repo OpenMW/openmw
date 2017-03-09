@@ -398,5 +398,10 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &eyePoint)
     }
 }
 
+void QuadTreeWorld::reportStats(unsigned int frameNumber, osg::Stats *stats)
+{
+    stats->setAttribute(frameNumber, "Composite", mCompositeMapRenderer->getCompileSetSize());
+}
+
 
 }

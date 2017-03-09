@@ -142,6 +142,12 @@ void CompositeMapRenderer::setImmediate(CompositeMap* compositeMap)
     }
 }
 
+unsigned int CompositeMapRenderer::getCompileSetSize() const
+{
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+    return mCompileSet.size();
+}
+
 CompositeMap::CompositeMap()
     : mCompiled(0)
 {

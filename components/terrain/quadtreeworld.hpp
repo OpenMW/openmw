@@ -32,6 +32,8 @@ namespace Terrain
         void removeView(View* view);
         void preload(View* view, const osg::Vec3f& eyePoint);
 
+        void reportStats(unsigned int frameNumber, osg::Stats* stats);
+
     private:
         void ensureQuadTreeBuilt();
 

@@ -922,6 +922,8 @@ namespace MWRender
         if (stats->collectStats("resource"))
         {
             stats->setAttribute(frameNumber, "UnrefQueue", mUnrefQueue->getNumItems());
+
+            mTerrain->reportStats(frameNumber, stats);
         }
     }
 

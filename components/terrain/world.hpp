@@ -90,6 +90,8 @@ namespace Terrain
         /// @note Thread safe, as long as you do not attempt to load into the same view from multiple threads.
         virtual void preload(View* view, const osg::Vec3f& eyePoint) {}
 
+        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}
+
         Storage* getStorage() { return mStorage; }
 
     protected:
