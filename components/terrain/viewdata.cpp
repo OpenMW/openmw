@@ -12,6 +12,11 @@ ViewData::ViewData()
 
 }
 
+ViewData::~ViewData()
+{
+
+}
+
 void ViewData::add(QuadTreeNode *node, bool visible)
 {
     unsigned int index = mNumEntries++;
@@ -119,6 +124,13 @@ ViewData *ViewDataMap::createOrReuseView()
         mViewVector.push_back(ViewData());
         return &mViewVector.back();
     }
+}
+
+void ViewDataMap::removeView(ViewData* vd)
+{
+    vd->setPersistent(false);
+    vd->clear();
+    mUnusedViews.push_back(vd);
 }
 
 void ViewDataMap::clearUnusedViews(unsigned int frame)

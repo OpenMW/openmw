@@ -70,9 +70,9 @@ namespace Terrain
 class DefaultLodCallback : public LodCallback
 {
 public:
-    virtual bool isSufficientDetail(QuadTreeNode* node, osg::NodeVisitor& nv)
+    virtual bool isSufficientDetail(QuadTreeNode* node, const osg::Vec3f& eyePoint)
     {
-        float dist = distance(node->getBoundingBox(), nv.getEyePoint());
+        float dist = distance(node->getBoundingBox(), eyePoint);
         int nativeLodLevel = Log2(static_cast<unsigned int>(node->getSize()*4));
         int lodLevel = Log2(static_cast<unsigned int>(dist/2048.0));
 
@@ -238,20 +238,22 @@ QuadTreeWorld::~QuadTreeWorld()
 }
 
 
-void traverse(QuadTreeNode* node, ViewData* vd, osgUtil::CullVisitor* cv, bool visible)
+void traverse(QuadTreeNode* node, ViewData* vd, osg::NodeVisitor* nv, const osg::Vec3f& eyePoint, bool visible)
 {
     if (!node->hasValidBounds())
         return;
 
-    visible = visible && !cv->isCulled(node->getBoundingBox());
-    bool stopTraversal = (node->getLodCallback() && node->getLodCallback()->isSufficientDetail(node, *cv)) || !node->getNumChildren();
+    if (nv && nv->getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+        visible = visible && !static_cast<osgUtil::CullVisitor*>(nv)->isCulled(node->getBoundingBox());
+
+    bool stopTraversal = (node->getLodCallback() && node->getLodCallback()->isSufficientDetail(node, eyePoint)) || !node->getNumChildren();
 
     if (stopTraversal)
         vd->add(node, visible);
     else
     {
         for (unsigned int i=0; i<node->getNumChildren(); ++i)
-            traverse(node->getChild(i), vd, cv, visible);
+            traverse(node->getChild(i), vd, nv, eyePoint, visible);
     }
 }
 
@@ -313,7 +315,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
     if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
-        traverse(mRootNode.get(), vd, cv, true);
+        traverse(mRootNode.get(), vd, cv, cv->getEyePoint(), true);
     }
     else
         mRootNode->traverse(nv);
@@ -374,6 +376,31 @@ void QuadTreeWorld::enable(bool enabled)
         mRootNode->setNodeMask(enabled ? ~0 : 0);
 }
 
+View* QuadTreeWorld::createView()
+{
+    ViewData* vd = mViewDataMap->createOrReuseView();
+    vd->setPersistent(true);
+    return vd;
+}
+
+void QuadTreeWorld::removeView(View *view)
+{
+    mViewDataMap->removeView(static_cast<ViewData*>(view));
+}
+
+void QuadTreeWorld::preload(View *view, const osg::Vec3f &eyePoint)
+{
+    ensureQuadTreeBuilt();
+
+    ViewData* vd = static_cast<ViewData*>(view);
+    traverse(mRootNode.get(), vd, NULL, eyePoint, false);
+
+    for (unsigned int i=0; i<vd->getNumEntries(); ++i)
+    {
+        ViewData::Entry& entry = vd->getEntry(i);
+        loadRenderingNode(entry, vd, mChunkManager.get());
+    }
+}
 
 
 }

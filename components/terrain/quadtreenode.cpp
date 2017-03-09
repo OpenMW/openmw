@@ -108,7 +108,7 @@ void QuadTreeNode::traverse(osg::NodeVisitor &nv)
             return;
     }
 
-    if ((mLodCallback && mLodCallback->isSufficientDetail(this, nv)) || !getNumChildren())
+    if ((mLodCallback && mLodCallback->isSufficientDetail(this, nv.getEyePoint())) || !getNumChildren())
         getView(nv)->add(this, true);
     else
         osg::Group::traverse(nv);

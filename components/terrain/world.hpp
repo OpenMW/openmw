@@ -29,6 +29,19 @@ namespace Terrain
     class CompositeMapRenderer;
 
     /**
+     * @brief A View is a collection of rendering objects that are visible from a given camera/intersection.
+     * The base View class is part of the interface for usage in conjunction with preload feature.
+     */
+    class View
+    {
+    public:
+        virtual ~View() {}
+
+        /// Reset internal structure so that the next addition to the view will override the previous frame's contents.
+        virtual void reset(unsigned int frame) = 0;
+    };
+
+    /**
      * @brief The basic interface for a terrain world. How the terrain chunks are paged and displayed
      *  is up to the implementation.
      */
@@ -65,6 +78,17 @@ namespace Terrain
         virtual void unloadCell(int x, int y) {}
 
         virtual void enable(bool enabled) {}
+
+        /// Create a View to use with preload feature. If a View is returned, it will remain valid until the user calls 'removeView' or the World is destroyed.
+        /// @note Not thread safe.
+        virtual View* createView() { return NULL; }
+
+        /// Remove a View that was previously created with 'createView'.
+        /// @note Not thread safe.
+        virtual void removeView(View* view) {}
+
+        /// @note Thread safe, as long as you do not attempt to load into the same view from multiple threads.
+        virtual void preload(View* view, const osg::Vec3f& eyePoint) {}
 
         Storage* getStorage() { return mStorage; }
 

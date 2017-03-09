@@ -6,15 +6,18 @@
 
 #include <osg/Node>
 
+#include "world.hpp"
+
 namespace Terrain
 {
 
     class QuadTreeNode;
 
-    class ViewData
+    class ViewData : public View
     {
     public:
         ViewData();
+        ~ViewData();
 
         void add(QuadTreeNode* node, bool visible);
 
@@ -42,6 +45,7 @@ namespace Terrain
         Entry& getEntry(unsigned int i);
 
         bool getPersistent() const { return mPersistent; }
+        void setPersistent(bool persistent) { mPersistent = persistent; }
 
         osg::Object* getViewer() const { return mViewer.get(); }
         void setViewer(osg::Object* viewer) { mViewer = viewer; }
@@ -66,6 +70,7 @@ namespace Terrain
         ViewData* getViewData(osg::Object* viewer, bool ref);
 
         ViewData* createOrReuseView();
+        void removeView(ViewData* view);
 
         void clearUnusedViews(unsigned int frame);
 

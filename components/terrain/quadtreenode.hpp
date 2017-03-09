@@ -23,7 +23,7 @@ namespace Terrain
     public:
         virtual ~LodCallback() {}
 
-        virtual bool isSufficientDetail(QuadTreeNode *node, osg::NodeVisitor &nv) = 0;
+        virtual bool isSufficientDetail(QuadTreeNode *node, const osg::Vec3f& eyePoint) = 0;
     };
 
     class ViewDataMap;

@@ -28,6 +28,10 @@ namespace Terrain
 
         virtual void enable(bool enabled);
 
+        View* createView();
+        void removeView(View* view);
+        void preload(View* view, const osg::Vec3f& eyePoint);
+
     private:
         void ensureQuadTreeBuilt();
 
