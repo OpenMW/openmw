@@ -27,6 +27,7 @@ namespace Terrain
     class TextureManager;
     class CompositeMapRenderer;
     class Storage;
+    class CompositeMap;
 
     /// @brief Handles loading and caching of terrain chunks
     class ChunkManager : public Resource::ResourceManager
@@ -41,9 +42,9 @@ namespace Terrain
     private:
         osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, int lod, unsigned int lodFlags);
 
-        osg::ref_ptr<osg::Group> createCompositeMapRTT(osg::ref_ptr<osg::Texture2D>& texture);
+        osg::ref_ptr<osg::Texture2D> createCompositeMapRTT();
 
-        void createCompositeMapGeometry(float chunkSize, const osg::Vec2f& chunkCenter, const osg::Vec4f& texCoords, osg::Group* compositeMapNode);
+        void createCompositeMapGeometry(float chunkSize, const osg::Vec2f& chunkCenter, const osg::Vec4f& texCoords, CompositeMap& map);
 
         std::vector<osg::ref_ptr<osg::StateSet> > createPasses(float chunkSize, const osg::Vec2f& chunkCenter, bool forCompositeMap);
 

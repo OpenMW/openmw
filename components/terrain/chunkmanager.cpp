@@ -53,9 +53,9 @@ void ChunkManager::reportStats(unsigned int frameNumber, osg::Stats *stats) cons
     stats->setAttribute(frameNumber, "Terrain Chunk", mCache->getCacheSize());
 }
 
-osg::ref_ptr<osg::Group> ChunkManager::createCompositeMapRTT(osg::ref_ptr<osg::Texture2D>& texture)
+osg::ref_ptr<osg::Texture2D> ChunkManager::createCompositeMapRTT()
 {
-    texture = new osg::Texture2D;
+    osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
     texture->setTextureWidth(mCompositeMapSize);
     texture->setTextureHeight(mCompositeMapSize);
     texture->setInternalFormat(GL_RGB);
@@ -64,30 +64,17 @@ osg::ref_ptr<osg::Group> ChunkManager::createCompositeMapRTT(osg::ref_ptr<osg::T
     texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
     texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
-    osg::ref_ptr<osg::Camera> camera (new osg::Camera);
-    camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
-    camera->attach(osg::Camera::COLOR_BUFFER, texture);
-    camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
-    camera->setViewMatrix(osg::Matrix::identity());
-    camera->setProjectionMatrix(osg::Matrix::identity());
-    camera->setProjectionResizePolicy(osg::Camera::FIXED);
-    camera->setClearColor(osg::Vec4(0.f, 0.f, 0.f, 1.f));
-    camera->setClearMask(GL_COLOR_BUFFER_BIT);
-    camera->setViewport(0, 0, mCompositeMapSize, mCompositeMapSize);
-    camera->setRenderOrder(osg::Camera::PRE_RENDER, -1);
-    camera->setImplicitBufferAttachmentMask(osg::DisplaySettings::IMPLICIT_COLOR_BUFFER_ATTACHMENT); // no need for a depth buffer
-
-    return camera;
+    return texture;
 }
 
-void ChunkManager::createCompositeMapGeometry(float chunkSize, const osg::Vec2f& chunkCenter, const osg::Vec4f& texCoords, osg::Group* compositeMapNode)
+void ChunkManager::createCompositeMapGeometry(float chunkSize, const osg::Vec2f& chunkCenter, const osg::Vec4f& texCoords, CompositeMap& compositeMap)
 {
     if (chunkSize > 1.f)
     {
-        createCompositeMapGeometry(chunkSize/2.f, chunkCenter + osg::Vec2f(chunkSize/4.f, chunkSize/4.f), osg::Vec4f(texCoords.x() + texCoords.z()/2.f, texCoords.y(), texCoords.z()/2.f, texCoords.w()/2.f), compositeMapNode);
-        createCompositeMapGeometry(chunkSize/2.f, chunkCenter + osg::Vec2f(-chunkSize/4.f, chunkSize/4.f), osg::Vec4f(texCoords.x(), texCoords.y(), texCoords.z()/2.f, texCoords.w()/2.f), compositeMapNode);
-        createCompositeMapGeometry(chunkSize/2.f, chunkCenter + osg::Vec2f(chunkSize/4.f, -chunkSize/4.f), osg::Vec4f(texCoords.x() + texCoords.z()/2.f, texCoords.y()+texCoords.w()/2.f, texCoords.z()/2.f, texCoords.w()/2.f), compositeMapNode);
-        createCompositeMapGeometry(chunkSize/2.f, chunkCenter + osg::Vec2f(-chunkSize/4.f, -chunkSize/4.f), osg::Vec4f(texCoords.x(), texCoords.y()+ texCoords.w()/2.f, texCoords.z()/2.f, texCoords.w()/2.f), compositeMapNode);
+        createCompositeMapGeometry(chunkSize/2.f, chunkCenter + osg::Vec2f(chunkSize/4.f, chunkSize/4.f), osg::Vec4f(texCoords.x() + texCoords.z()/2.f, texCoords.y(), texCoords.z()/2.f, texCoords.w()/2.f), compositeMap);
+        createCompositeMapGeometry(chunkSize/2.f, chunkCenter + osg::Vec2f(-chunkSize/4.f, chunkSize/4.f), osg::Vec4f(texCoords.x(), texCoords.y(), texCoords.z()/2.f, texCoords.w()/2.f), compositeMap);
+        createCompositeMapGeometry(chunkSize/2.f, chunkCenter + osg::Vec2f(chunkSize/4.f, -chunkSize/4.f), osg::Vec4f(texCoords.x() + texCoords.z()/2.f, texCoords.y()+texCoords.w()/2.f, texCoords.z()/2.f, texCoords.w()/2.f), compositeMap);
+        createCompositeMapGeometry(chunkSize/2.f, chunkCenter + osg::Vec2f(-chunkSize/4.f, -chunkSize/4.f), osg::Vec4f(texCoords.x(), texCoords.y()+texCoords.w()/2.f, texCoords.z()/2.f, texCoords.w()/2.f), compositeMap);
     }
     else
     {
@@ -96,16 +83,17 @@ void ChunkManager::createCompositeMapGeometry(float chunkSize, const osg::Vec2f&
         float width = texCoords.z()*2.f;
         float height = texCoords.w()*2.f;
 
-        osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3(left,top,0), osg::Vec3(width,0,0), osg::Vec3(0,height,0));
-        geom->setTexCoordArray(1, geom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
-
         std::vector<osg::ref_ptr<osg::StateSet> > passes = createPasses(chunkSize, chunkCenter, true);
         for (std::vector<osg::ref_ptr<osg::StateSet> >::iterator it = passes.begin(); it != passes.end(); ++it)
         {
-            osg::ref_ptr<osg::Group> group = new osg::Group;
-            group->setStateSet(*it);
-            group->addChild(geom);
-            compositeMapNode->addChild(group);
+            osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3(left,top,0), osg::Vec3(width,0,0), osg::Vec3(0,height,0));
+            geom->setUseDisplayList(false); // don't bother making a display list for an object that is just rendered once.
+            geom->setUseVertexBufferObjects(false);
+            geom->setTexCoordArray(1, geom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
+
+            geom->setStateSet(*it);
+
+            compositeMap.mDrawables.push_back(geom);
         }
     }
 }
@@ -194,21 +182,19 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     if (useCompositeMap)
     {
-        osg::ref_ptr<osg::Texture2D> compositeMap;
-        osg::ref_ptr<osg::Group> compositeMapNode = createCompositeMapRTT(compositeMap);
+        osg::ref_ptr<CompositeMap> compositeMap = new CompositeMap;
+        compositeMap->mTexture = createCompositeMapRTT();
 
-        createCompositeMapGeometry(chunkSize, chunkCenter, osg::Vec4f(0,0,1,1), compositeMapNode);
+        createCompositeMapGeometry(chunkSize, chunkCenter, osg::Vec4f(0,0,1,1), *compositeMap);
 
-        compositeMapNode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-
-        mCompositeMapRenderer->addCompositeMap(compositeMapNode, false);
+        mCompositeMapRenderer->addCompositeMap(compositeMap.get(), false);
 
         std::vector<osg::ref_ptr<osg::StateSet> > passes2;
         passes2.push_back(new osg::StateSet);
-        passes2[0]->setTextureAttributeAndModes(0, compositeMap, osg::StateAttribute::ON);
+        passes2[0]->setTextureAttributeAndModes(0, compositeMap->mTexture, osg::StateAttribute::ON);
         geometry->setPasses(passes2);
 
-        transform->getOrCreateUserDataContainer()->addUserObject(compositeMapNode);
+        transform->getOrCreateUserDataContainer()->setUserData(compositeMap);
     }
     else
     {

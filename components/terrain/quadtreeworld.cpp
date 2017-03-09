@@ -329,14 +329,10 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         if (entry.mVisible)
         {
             osg::UserDataContainer* udc = entry.mRenderingNode->getUserDataContainer();
-            if (udc && udc->getNumUserObjects() > 0)
+            if (udc && udc->getUserData())
             {
-                osg::Node* compositeMapNode = udc->getUserObject(0)->asNode();
-                if (compositeMapNode)
-                {
-                    mCompositeMapRenderer->setImmediate(compositeMapNode);
-                    udc->removeUserObject(0);
-                }
+                mCompositeMapRenderer->setImmediate(static_cast<CompositeMap*>(udc->getUserData()));
+                udc->setUserData(NULL);
             }
             entry.mRenderingNode->accept(nv);
         }

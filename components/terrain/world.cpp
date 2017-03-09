@@ -2,6 +2,7 @@
 
 #include <osg/Group>
 #include <osg/Material>
+#include <osg/Camera>
 
 #include <components/resource/resourcesystem.hpp>
 
@@ -27,9 +28,20 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     mTerrainRoot->setName("Terrain Root");
 
+    osg::ref_ptr<osg::Camera> compositeCam = new osg::Camera;
+    compositeCam->setRenderOrder(osg::Camera::PRE_RENDER, -1);
+    compositeCam->setProjectionMatrix(osg::Matrix::identity());
+    compositeCam->setViewMatrix(osg::Matrix::identity());
+    compositeCam->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
+    compositeCam->setClearMask(0);
+    compositeCam->setNodeMask(preCompileMask);
+    mCompositeMapCamera = compositeCam;
+
+    compileRoot->addChild(compositeCam);
+
+
     mCompositeMapRenderer = new CompositeMapRenderer;
-    mCompositeMapRenderer->setNodeMask(preCompileMask);
-    compileRoot->addChild(mCompositeMapRenderer);
+    compositeCam->addChild(mCompositeMapRenderer);
 
     mParent->addChild(mTerrainRoot);
 
@@ -46,7 +58,9 @@ World::~World()
     mResourceSystem->removeResourceManager(mTextureManager.get());
 
     mParent->removeChild(mTerrainRoot);
-    mCompositeMapRenderer->getParent(0)->removeChild(mCompositeMapRenderer);
+
+    mCompositeMapCamera->removeChild(mCompositeMapRenderer);
+    mCompositeMapCamera->getParent(0)->removeChild(mCompositeMapCamera);
 
     delete mStorage;
 }

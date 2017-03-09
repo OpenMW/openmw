@@ -97,6 +97,8 @@ namespace Terrain
 
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mTerrainRoot;
+
+        osg::ref_ptr<osg::Group> mCompositeMapCamera;
         osg::ref_ptr<CompositeMapRenderer> mCompositeMapRenderer;
 
         Resource::ResourceSystem* mResourceSystem;
