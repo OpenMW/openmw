@@ -17,16 +17,15 @@ namespace Terrain
         TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask=~0);
         ~TerrainGrid();
 
-        /// Load a terrain cell and store it in cache for later use.
-        /// @note The returned ref_ptr should be kept by the caller to ensure that the terrain stays in cache for as long as needed.
-        /// @note Thread safe.
-        virtual osg::ref_ptr<osg::Node> cacheCell(int x, int y);
+        virtual void cacheCell(View* view, int x, int y);
 
         /// @note Not thread safe.
         virtual void loadCell(int x, int y);
 
         /// @note Not thread safe.
         virtual void unloadCell(int x, int y);
+
+        View* createView();
 
     private:
         osg::ref_ptr<osg::Node> buildTerrain (osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter);

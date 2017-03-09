@@ -62,11 +62,9 @@ namespace Terrain
 
         float getHeightAt (const osg::Vec3f& worldPos);
 
-        /// Load a terrain cell and store it in cache for later use.
-        /// @note The returned ref_ptr should be kept by the caller to ensure that the terrain stays in cache for as long as needed.
+        /// Load a terrain cell at maximum LOD and store it in the View for later use.
         /// @note Thread safe.
-        /// @note May be ignored by derived implementations that don't organize the terrain into cells.
-        virtual osg::ref_ptr<osg::Node> cacheCell(int x, int y);
+        virtual void cacheCell(View* view, int x, int y) {}
 
         /// Load the cell into the scene graph.
         /// @note Not thread safe.

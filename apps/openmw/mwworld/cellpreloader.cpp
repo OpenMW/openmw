@@ -60,6 +60,8 @@ namespace MWWorld
             , mPreloadInstances(preloadInstances)
             , mAbort(false)
         {
+            mTerrainView = mTerrain->createView();
+
             ListModelsVisitor visitor (mMeshes);
             if (cell->getState() == MWWorld::CellStore::State_Loaded)
             {
@@ -92,7 +94,7 @@ namespace MWWorld
             {
                 try
                 {
-                    mPreloadedObjects.push_back(mTerrain->cacheCell(mX, mY));
+                    mTerrain->cacheCell(mTerrainView.get(), mX, mY);
                     mPreloadedObjects.push_back(mLandManager->getLand(mX, mY));
                 }
                 catch(std::exception& e)
@@ -159,6 +161,8 @@ namespace MWWorld
         bool mPreloadInstances;
 
         volatile bool mAbort;
+
+        osg::ref_ptr<Terrain::View> mTerrainView;
 
         // keep a ref to the loaded objects to make sure it stays loaded as long as this cell is in the preloaded state
         std::vector<osg::ref_ptr<const osg::Object> > mPreloadedObjects;

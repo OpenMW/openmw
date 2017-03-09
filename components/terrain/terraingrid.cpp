@@ -9,6 +9,14 @@
 namespace Terrain
 {
 
+class MyView : public View
+{
+public:
+    osg::ref_ptr<osg::Node> mLoaded;
+
+    virtual void reset(unsigned int frame) {}
+};
+
 TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask)
     : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask)
     , mNumSplits(4)
@@ -23,10 +31,10 @@ TerrainGrid::~TerrainGrid()
     }
 }
 
-osg::ref_ptr<osg::Node> TerrainGrid::cacheCell(int x, int y)
+void TerrainGrid::cacheCell(View* view, int x, int y)
 {
     osg::Vec2f center(x+0.5f, y+0.5f);
-    return buildTerrain(NULL, 1.f, center);
+    static_cast<MyView*>(view)->mLoaded =  buildTerrain(NULL, 1.f, center);
 }
 
 osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter)
@@ -82,6 +90,11 @@ void TerrainGrid::unloadCell(int x, int y)
     mTerrainRoot->removeChild(terrainNode);
 
     mGrid.erase(it);
+}
+
+View *TerrainGrid::createView()
+{
+    return new MyView;
 }
 
 }
