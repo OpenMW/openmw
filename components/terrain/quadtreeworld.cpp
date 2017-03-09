@@ -235,6 +235,11 @@ QuadTreeWorld::~QuadTreeWorld()
         mWorkItem->abort();
         mWorkItem->waitTillDone();
     }
+
+    if (mRootNode && mRootNode->getViewDataMap())
+    {
+        mRootNode->getViewDataMap()->clear();
+    }
 }
 
 
