@@ -35,10 +35,10 @@ namespace Terrain
 
         virtual void drawImplementation(osg::RenderInfo& renderInfo) const;
 
-        void compile(CompositeMap& compositeMap, osg::RenderInfo& renderInfo) const;
+        void compile(CompositeMap& compositeMap, osg::RenderInfo& renderInfo, double* timeLeft) const;
 
-        /// Set the maximum number of (non-immediate) composite maps to compile per frame
-        void setNumCompilePerFrame(int num);
+        /// Set the available time in seconds for compiling (non-immediate) composite maps each frame
+        void setTimeAvailableForCompile(double time);
 
         /// Add a composite map to be rendered
         void addCompositeMap(CompositeMap* map, bool immediate=false);
@@ -47,7 +47,7 @@ namespace Terrain
         void setImmediate(CompositeMap* map);
 
     private:
-        unsigned int mNumCompilePerFrame;
+        double mTimeAvailable;
 
         typedef std::set<osg::ref_ptr<CompositeMap> > CompileSet;
 

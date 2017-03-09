@@ -10,7 +10,7 @@ namespace Terrain
 {
 
 CompositeMapRenderer::CompositeMapRenderer()
-    : mNumCompilePerFrame(1)
+    : mTimeAvailable(0.0005)
 {
     setSupportsDisplayList(false);
     setCullingActive(false);
@@ -24,8 +24,6 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
 {
     mCompiled.clear();
 
-    unsigned int numCompiled = 0;
-
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
 
     if (mImmediateCompileSet.empty() && mCompileSet.empty())
@@ -36,28 +34,27 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
         CompositeMap* node = *mImmediateCompileSet.begin();
         mCompiled.insert(node);
 
-        compile(*node, renderInfo);
+        compile(*node, renderInfo, NULL);
 
         mImmediateCompileSet.erase(mImmediateCompileSet.begin());
-
-        ++numCompiled;
     }
 
-    while (!mCompileSet.empty() && numCompiled <= mNumCompilePerFrame)
+    double timeLeft = mTimeAvailable;
+
+    while (!mCompileSet.empty() && timeLeft > 0)
     {
         CompositeMap* node = *mCompileSet.begin();
 
-        compile(*node, renderInfo);
-
-        ++numCompiled;
+        compile(*node, renderInfo, &timeLeft);
 
         mCompiled.insert(node);
         mCompileSet.erase(mCompileSet.begin());
     }
 }
 
-void CompositeMapRenderer::compile(CompositeMap &compositeMap, osg::RenderInfo &renderInfo) const
+void CompositeMapRenderer::compile(CompositeMap &compositeMap, osg::RenderInfo &renderInfo, double* timeLeft) const
 {
+    osg::Timer timer;
     osg::State& state = *renderInfo.getState();
     osg::GLExtensions* ext = state.get<osg::GLExtensions>();
 
@@ -102,11 +99,14 @@ void CompositeMapRenderer::compile(CompositeMap &compositeMap, osg::RenderInfo &
 
     GLuint fboId = state.getGraphicsContext() ? state.getGraphicsContext()->getDefaultFboId() : 0;
     ext->glBindFramebuffer(GL_FRAMEBUFFER_EXT, fboId);
+
+    if (timeLeft)
+        *timeLeft -= timer.time_s();
 }
 
-void CompositeMapRenderer::setNumCompilePerFrame(int num)
+void CompositeMapRenderer::setTimeAvailableForCompile(double time)
 {
-    mNumCompilePerFrame = num;
+    mTimeAvailable = time;
 }
 
 void CompositeMapRenderer::addCompositeMap(CompositeMap* compositeMap, bool immediate)
