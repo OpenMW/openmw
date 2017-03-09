@@ -384,6 +384,41 @@ void QuadTreeWorld::enable(bool enabled)
         mRootNode->setNodeMask(enabled ? ~0 : 0);
 }
 
+void traverseToCell(QuadTreeNode* node, ViewData* vd, int cellX, int cellY)
+{
+    if (!node->hasValidBounds())
+        return;
+
+    if (node->getCenter().x() + node->getSize()/2.f <= cellX
+            || node->getCenter().x() - node->getSize()/2.f >= cellX+1
+            || node->getCenter().y() + node->getSize()/2.f <= cellY
+            || node->getCenter().y() - node->getSize()/2.f >= cellY+1)
+        return;
+
+    bool stopTraversal = !node->getNumChildren();
+
+    if (stopTraversal)
+        vd->add(node, true);
+    else
+    {
+        for (unsigned int i=0; i<node->getNumChildren(); ++i)
+            traverseToCell(node->getChild(i), vd, cellX, cellY);
+    }
+}
+
+void QuadTreeWorld::cacheCell(View *view, int x, int y)
+{
+    ensureQuadTreeBuilt();
+    ViewData* vd = static_cast<ViewData*>(view);
+    traverseToCell(mRootNode.get(), vd, x, y);
+
+    for (unsigned int i=0; i<vd->getNumEntries(); ++i)
+    {
+        ViewData::Entry& entry = vd->getEntry(i);
+        loadRenderingNode(entry, vd, mChunkManager.get());
+    }
+}
+
 View* QuadTreeWorld::createView()
 {
     return new ViewData;

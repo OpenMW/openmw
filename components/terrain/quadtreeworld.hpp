@@ -28,6 +28,8 @@ namespace Terrain
 
         virtual void enable(bool enabled);
 
+        void cacheCell(View *view, int x, int y);
+
         View* createView();
         void preload(View* view, const osg::Vec3f& eyePoint);
 
