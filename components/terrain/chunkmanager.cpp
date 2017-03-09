@@ -105,8 +105,9 @@ std::vector<osg::ref_ptr<osg::StateSet> > ChunkManager::createPasses(float chunk
     mStorage->getBlendmaps(chunkSize, chunkCenter, false, blendmaps, layerList);
 
     bool useShaders = mSceneManager->getForceShaders();
-    if (!mSceneManager->getClampLighting() && !forCompositeMap)
+    if (!mSceneManager->getClampLighting())
         useShaders = true; // always use shaders when lighting is unclamped, this is to avoid lighting seams between a terrain chunk with normal maps and one without normal maps
+
     std::vector<TextureLayer> layers;
     {
         for (std::vector<LayerInfo>::const_iterator it = layerList.begin(); it != layerList.end(); ++it)
@@ -126,6 +127,9 @@ std::vector<osg::ref_ptr<osg::StateSet> > ChunkManager::createPasses(float chunk
             layers.push_back(textureLayer);
         }
     }
+
+    if (forCompositeMap)
+        useShaders = false;
 
     std::vector<osg::ref_ptr<osg::Texture2D> > blendmapTextures;
     for (std::vector<osg::ref_ptr<osg::Image> >::const_iterator it = blendmaps.begin(); it != blendmaps.end(); ++it)
