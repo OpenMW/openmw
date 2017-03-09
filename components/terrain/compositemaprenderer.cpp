@@ -121,8 +121,14 @@ void CompositeMapRenderer::addCompositeMap(CompositeMap* compositeMap, bool imme
 void CompositeMapRenderer::setImmediate(CompositeMap* compositeMap)
 {
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
-    mImmediateCompileSet.insert(compositeMap);
-    mCompileSet.erase(compositeMap);
+    CompileSet::iterator found = mCompileSet.find(compositeMap);
+    if (found == mCompileSet.end())
+        return;
+    else
+    {
+        mImmediateCompileSet.insert(compositeMap);
+        mCompileSet.erase(found);
+    }
 }
 
 CompositeMap::~CompositeMap()
