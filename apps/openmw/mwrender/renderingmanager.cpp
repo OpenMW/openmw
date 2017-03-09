@@ -421,6 +421,11 @@ namespace MWRender
         mWater->removeCell(store);
     }
 
+    void RenderingManager::enableTerrain(bool enable)
+    {
+        mTerrain->enable(enable);
+    }
+
     void RenderingManager::setSkyEnabled(bool enabled)
     {
         mSky->setEnabled(enabled);

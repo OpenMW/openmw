@@ -440,6 +440,8 @@ namespace MWWorld
     {
         mCurrentCell = cell;
 
+        mRendering.enableTerrain(cell->isExterior());
+
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr old = world->getPlayerPtr();
         world->getPlayer().setCell(cell);

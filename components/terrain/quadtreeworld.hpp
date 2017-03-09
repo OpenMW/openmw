@@ -33,6 +33,8 @@ namespace Terrain
         virtual void loadCell(int x, int y);
         virtual osg::ref_ptr<osg::Node> cacheCell(int x, int y);
 
+        virtual void enable(bool enabled);
+
     private:
         osg::ref_ptr<RootNode> mRootNode;
 

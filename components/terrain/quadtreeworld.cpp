@@ -98,6 +98,8 @@ public:
 
     virtual void accept(osg::NodeVisitor &nv)
     {
+        if (!nv.validNodeMask(*this))
+            return;
         nv.pushOntoNodePath(this);
         mWorld->accept(nv);
         nv.popFromNodePath();
@@ -359,6 +361,12 @@ osg::ref_ptr<osg::Node> QuadTreeWorld::cacheCell(int x, int y)
         mQuadTreeBuilt = true;
     }
     return NULL;
+}
+
+void QuadTreeWorld::enable(bool enabled)
+{
+    if (mRootNode)
+        mRootNode->setNodeMask(enabled ? ~0 : 0);
 }
 
 

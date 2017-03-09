@@ -64,6 +64,8 @@ namespace Terrain
         /// @note May be ignored by derived implementations that don't organize the terrain into cells.
         virtual void unloadCell(int x, int y) {}
 
+        virtual void enable(bool enabled) {}
+
         Storage* getStorage() { return mStorage; }
 
     protected:
