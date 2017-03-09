@@ -34,6 +34,11 @@ ViewData::Entry &ViewData::getEntry(unsigned int i)
     return mEntries[i];
 }
 
+bool ViewData::hasChanged() const
+{
+    return mChanged;
+}
+
 void ViewData::reset(unsigned int frame)
 {
     // clear any unused entries
@@ -67,6 +72,7 @@ bool ViewData::contains(QuadTreeNode *node)
 ViewData::Entry::Entry()
     : mNode(NULL)
     , mVisible(true)
+    , mLodFlags(0)
 {
 
 }

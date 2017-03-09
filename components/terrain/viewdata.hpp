@@ -33,6 +33,7 @@ namespace Terrain
             QuadTreeNode* mNode;
             bool mVisible;
 
+            unsigned int mLodFlags;
             osg::ref_ptr<osg::Node> mRenderingNode;
         };
 
@@ -46,6 +47,9 @@ namespace Terrain
         void setViewer(osg::Object* viewer) { mViewer = viewer; }
 
         unsigned int getFrameLastUsed() const { return mFrameLastUsed; }
+
+        /// @return Have any nodes changed since the last frame
+        bool hasChanged() const;
 
     private:
         std::vector<Entry> mEntries;

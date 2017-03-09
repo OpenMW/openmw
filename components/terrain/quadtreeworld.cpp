@@ -283,6 +283,26 @@ unsigned int getLodFlags(QuadTreeNode* node, int ourLod, ViewData* vd)
     return lodFlags;
 }
 
+void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, ChunkManager* chunkManager)
+{
+    if (vd->hasChanged())
+    {
+        // have to recompute the lodFlags in case a neighbour has changed LOD.
+        int ourLod = Log2(int(entry.mNode->getSize()));
+        unsigned int lodFlags = getLodFlags(entry.mNode, ourLod, vd);
+        if (lodFlags != entry.mLodFlags)
+            entry.mRenderingNode = NULL;
+    }
+
+    if (!entry.mRenderingNode)
+    {
+        int ourLod = Log2(int(entry.mNode->getSize()));
+        unsigned int lodFlags = getLodFlags(entry.mNode, ourLod, vd);
+        entry.mRenderingNode = chunkManager->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, lodFlags);
+        entry.mLodFlags = lodFlags;
+    }
+}
+
 void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
     if (nv.getVisitorType() != osg::NodeVisitor::CULL_VISITOR)// && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
@@ -301,12 +321,8 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
         ViewData::Entry& entry = vd->getEntry(i);
-        if (!entry.mRenderingNode)
-        {
-            int ourLod = Log2(int(entry.mNode->getSize()));
-            unsigned int lodFlags = getLodFlags(entry.mNode, ourLod, vd);
-            entry.mRenderingNode = mChunkManager->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, lodFlags);
-        }
+
+        loadRenderingNode(entry, vd, mChunkManager.get());
 
         if (entry.mVisible)
         {
