@@ -7,7 +7,6 @@ ViewData::ViewData()
     : mNumEntries(0)
     , mFrameLastUsed(0)
     , mChanged(false)
-    , mPersistent(false)
 {
 
 }
@@ -126,20 +125,12 @@ ViewData *ViewDataMap::createOrReuseView()
     }
 }
 
-void ViewDataMap::removeView(ViewData* vd)
-{
-    vd->setPersistent(false);
-    vd->clear();
-    mUnusedViews.push_back(vd);
-}
-
 void ViewDataMap::clearUnusedViews(unsigned int frame)
 {
     for (Map::iterator it = mViews.begin(); it != mViews.end(); )
     {
         ViewData* vd = it->second;
-        if (!vd->getPersistent() &&
-                (!vd->getViewer() // if no ref was held, always need to clear to avoid holding a dangling ref.
+        if ((!vd->getViewer() // if no ref was held, always need to clear to avoid holding a dangling ref.
                 || vd->getFrameLastUsed() + 2 < frame))
         {
             vd->setViewer(NULL);

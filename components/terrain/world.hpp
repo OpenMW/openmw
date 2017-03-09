@@ -2,6 +2,7 @@
 #define COMPONENTS_TERRAIN_WORLD_H
 
 #include <osg/ref_ptr>
+#include <osg/Referenced>
 #include <osg/Vec3f>
 
 #include <memory>
@@ -32,7 +33,7 @@ namespace Terrain
      * @brief A View is a collection of rendering objects that are visible from a given camera/intersection.
      * The base View class is part of the interface for usage in conjunction with preload feature.
      */
-    class View
+    class View : public osg::Referenced
     {
     public:
         virtual ~View() {}
@@ -79,13 +80,9 @@ namespace Terrain
 
         virtual void enable(bool enabled) {}
 
-        /// Create a View to use with preload feature. If a View is returned, it will remain valid until the user calls 'removeView' or the World is destroyed.
-        /// @note Not thread safe.
+        /// Create a View to use with preload feature. The caller is responsible for deleting the view.
+        /// @note Thread safe.
         virtual View* createView() { return NULL; }
-
-        /// Remove a View that was previously created with 'createView'.
-        /// @note Not thread safe.
-        virtual void removeView(View* view) {}
 
         /// @note Thread safe, as long as you do not attempt to load into the same view from multiple threads.
         virtual void preload(View* view, const osg::Vec3f& eyePoint) {}

@@ -207,7 +207,6 @@ namespace MWWorld
             mTerrainPreloadItem = NULL;
         }
 
-        mTerrain->removeView(mTerrainView);
         mTerrainView = NULL;
 
         for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end();++it)

@@ -29,7 +29,6 @@ namespace Terrain
         virtual void enable(bool enabled);
 
         View* createView();
-        void removeView(View* view);
         void preload(View* view, const osg::Vec3f& eyePoint);
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats);

@@ -386,14 +386,7 @@ void QuadTreeWorld::enable(bool enabled)
 
 View* QuadTreeWorld::createView()
 {
-    ViewData* vd = mViewDataMap->createOrReuseView();
-    vd->setPersistent(true);
-    return vd;
-}
-
-void QuadTreeWorld::removeView(View *view)
-{
-    mViewDataMap->removeView(static_cast<ViewData*>(view));
+    return new ViewData;
 }
 
 void QuadTreeWorld::preload(View *view, const osg::Vec3f &eyePoint)

@@ -44,9 +44,6 @@ namespace Terrain
 
         Entry& getEntry(unsigned int i);
 
-        bool getPersistent() const { return mPersistent; }
-        void setPersistent(bool persistent) { mPersistent = persistent; }
-
         osg::Object* getViewer() const { return mViewer.get(); }
         void setViewer(osg::Object* viewer) { mViewer = viewer; }
 
@@ -60,7 +57,6 @@ namespace Terrain
         unsigned int mNumEntries;
         unsigned int mFrameLastUsed;
         bool mChanged;
-        bool mPersistent;
         osg::ref_ptr<osg::Object> mViewer;
     };
 
@@ -70,7 +66,6 @@ namespace Terrain
         ViewData* getViewData(osg::Object* viewer, bool ref);
 
         ViewData* createOrReuseView();
-        void removeView(ViewData* view);
 
         void clearUnusedViews(unsigned int frame);
 
