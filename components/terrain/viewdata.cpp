@@ -42,6 +42,7 @@ void ViewData::reset(unsigned int frame)
 
     // reset index for next frame
     mNumEntries = 0;
+    mChanged = false;
 
     mFrameLastUsed = frame;
 }
@@ -52,6 +53,7 @@ void ViewData::clear()
         mEntries[i].set(NULL, false);
     mNumEntries = 0;
     mFrameLastUsed = 0;
+    mChanged = false;
 }
 
 bool ViewData::contains(QuadTreeNode *node)
