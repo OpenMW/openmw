@@ -209,14 +209,11 @@ namespace MWWorld
 
     void Scene::update (float duration, bool paused)
     {
-        if (mPreloadEnabled)
+        mPreloadTimer += duration;
+        if (mPreloadTimer > 0.1f)
         {
-            mPreloadTimer += duration;
-            if (mPreloadTimer > 0.1f)
-            {
-                preloadCells(0.1f);
-                mPreloadTimer = 0.f;
-            }
+            preloadCells(0.1f);
+            mPreloadTimer = 0.f;
         }
 
         mRendering.update (duration, paused);
@@ -704,12 +701,15 @@ namespace MWWorld
 
         mLastPlayerPos = playerPos;
 
-        if (mPreloadDoors)
-            preloadTeleportDoorDestinations(playerPos, predictedPos, exteriorPositions);
-        if (mPreloadExteriorGrid)
-            preloadExteriorGrid(playerPos, predictedPos);
-        if (mPreloadFastTravel)
-            preloadFastTravelDestinations(playerPos, predictedPos);
+        if (mPreloadEnabled)
+        {
+            if (mPreloadDoors)
+                preloadTeleportDoorDestinations(playerPos, predictedPos, exteriorPositions);
+            if (mPreloadExteriorGrid)
+                preloadExteriorGrid(playerPos, predictedPos);
+            if (mPreloadFastTravel)
+                preloadFastTravelDestinations(playerPos, predictedPos);
+        }
 
         mPreloader->setTerrainPreloadPositions(exteriorPositions);
     }
