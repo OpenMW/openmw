@@ -19,6 +19,7 @@ namespace Terrain
 {
     class RootNode;
     class BuildQuadTreeItem;
+    class ViewDataMap;
 
     /// @brief Terrain implementation that loads cells into a Quad Tree, with geometry LOD and texture LOD. The entire world is displayed at all times.
     class QuadTreeWorld : public Terrain::World
@@ -38,6 +39,8 @@ namespace Terrain
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
 
         osg::ref_ptr<BuildQuadTreeItem> mWorkItem;
+
+        osg::ref_ptr<ViewDataMap> mViewDataMap;
 
         bool mQuadTreeBuilt;
     };

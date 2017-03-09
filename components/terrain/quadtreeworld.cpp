@@ -110,10 +110,11 @@ private:
 class BuildQuadTreeItem : public SceneUtil::WorkItem
 {
 public:
-    BuildQuadTreeItem(Terrain::Storage* storage, float minSize)
+    BuildQuadTreeItem(Terrain::Storage* storage, ViewDataMap* viewDataMap, float minSize)
         : mStorage(storage)
         , mMinX(0.f), mMaxX(0.f), mMinY(0.f), mMaxY(0.f)
         , mMinSize(minSize)
+        , mViewDataMap(viewDataMap)
     {
     }
 
@@ -131,7 +132,7 @@ public:
         float centerY = (mMinY+mMaxY)/2.f + (size-origSizeY)/2.f;
 
         mRootNode = new RootNode(size, osg::Vec2f(centerX, centerY));
-        mRootNode->setViewDataMap(new ViewDataMap);
+        mRootNode->setViewDataMap(mViewDataMap);
         addChildren(mRootNode);
 
         mRootNode->initNeighbours();
@@ -174,7 +175,7 @@ public:
 
         osg::ref_ptr<QuadTreeNode> node = new QuadTreeNode(parent, direction, size, center);
         node->setLodCallback(new DefaultLodCallback);
-        node->setViewDataMap(parent->getViewDataMap());
+        node->setViewDataMap(mViewDataMap);
         parent->addChild(node);
 
         if (center.x() - size > mMaxX
@@ -218,6 +219,7 @@ private:
 
     float mMinX, mMaxX, mMinY, mMaxY;
     float mMinSize;
+    ViewDataMap* mViewDataMap;
 
     osg::ref_ptr<RootNode> mRootNode;
 };
@@ -225,6 +227,7 @@ private:
 QuadTreeWorld::QuadTreeWorld(SceneUtil::WorkQueue* workQueue, osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask)
     : World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask)
     , mWorkQueue(workQueue)
+    , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
 {
 }
@@ -237,10 +240,7 @@ QuadTreeWorld::~QuadTreeWorld()
         mWorkItem->waitTillDone();
     }
 
-    if (mRootNode && mRootNode->getViewDataMap())
-    {
-        mRootNode->getViewDataMap()->clear();
-    }
+    mViewDataMap->clear();
 }
 
 
@@ -351,7 +351,7 @@ osg::ref_ptr<osg::Node> QuadTreeWorld::cacheCell(int x, int y)
     if (!mQuadTreeBuilt)
     {
         const float minSize = 1/4.f;
-        mWorkItem = new BuildQuadTreeItem(mStorage, minSize);
+        mWorkItem = new BuildQuadTreeItem(mStorage, mViewDataMap.get(), minSize);
         mWorkQueue->addWorkItem(mWorkItem);
 
         mWorkItem->waitTillDone();

@@ -90,7 +90,7 @@ namespace Terrain
 
         osg::ref_ptr<LodCallback> mLodCallback;
 
-        osg::ref_ptr<ViewDataMap> mViewDataMap;
+        ViewDataMap* mViewDataMap;
     };
 
 }
