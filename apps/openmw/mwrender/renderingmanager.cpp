@@ -219,7 +219,7 @@ namespace MWRender
                                              Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
 
         if (distantTerrain)
-            mTerrain.reset(new Terrain::QuadTreeWorld(mWorkQueue.get(), sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
+            mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
         else
             mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
 

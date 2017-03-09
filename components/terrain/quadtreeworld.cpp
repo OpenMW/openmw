@@ -2,8 +2,6 @@
 
 #include <osgUtil/CullVisitor>
 
-#include <components/sceneutil/workqueue.hpp>
-
 #include "quadtreenode.hpp"
 #include "storage.hpp"
 #include "viewdata.hpp"
@@ -109,10 +107,10 @@ private:
     QuadTreeWorld* mWorld;
 };
 
-class BuildQuadTreeItem : public SceneUtil::WorkItem
+class QuadTreeBuilder
 {
 public:
-    BuildQuadTreeItem(Terrain::Storage* storage, ViewDataMap* viewDataMap, float minSize)
+    QuadTreeBuilder(Terrain::Storage* storage, ViewDataMap* viewDataMap, float minSize)
         : mStorage(storage)
         , mMinX(0.f), mMaxX(0.f), mMinY(0.f), mMaxY(0.f)
         , mMinSize(minSize)
@@ -120,7 +118,7 @@ public:
     {
     }
 
-    virtual void doWork()
+    void build()
     {
         mStorage->getBounds(mMinX, mMaxX, mMinY, mMaxY);
 
@@ -226,9 +224,8 @@ private:
     osg::ref_ptr<RootNode> mRootNode;
 };
 
-QuadTreeWorld::QuadTreeWorld(SceneUtil::WorkQueue* workQueue, osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask)
+QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask)
     : World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask)
-    , mWorkQueue(workQueue)
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
 {
@@ -236,12 +233,7 @@ QuadTreeWorld::QuadTreeWorld(SceneUtil::WorkQueue* workQueue, osg::Group *parent
 
 QuadTreeWorld::~QuadTreeWorld()
 {
-    if (mWorkItem)
-    {
-        mWorkItem->abort();
-        mWorkItem->waitTillDone();
-    }
-
+    ensureQuadTreeBuilt();
     mViewDataMap->clear();
 }
 
@@ -339,25 +331,17 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 
 void QuadTreeWorld::ensureQuadTreeBuilt()
 {
-    {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mQuadTreeMutex);
-        if (mQuadTreeBuilt)
-            return;
-        if (!mQuadTreeBuilt && !mWorkItem)
-        {
-            const float minSize = 1/4.f;
-            mWorkItem = new BuildQuadTreeItem(mStorage, mViewDataMap.get(), minSize);
-            mWorkQueue->addWorkItem(mWorkItem);
-        }
-    }
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mQuadTreeMutex);
+    if (mQuadTreeBuilt)
+        return;
 
-    mWorkItem->waitTillDone();
-    {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mQuadTreeMutex);
-        mRootNode = mWorkItem->getRootNode();
-        mRootNode->setWorld(this);
-        mQuadTreeBuilt = true;
-    }
+    const float minSize = 1/4.f;
+    QuadTreeBuilder builder(mStorage, mViewDataMap.get(), minSize);
+    builder.build();
+
+    mRootNode = builder.getRootNode();
+    mRootNode->setWorld(this);
+    mQuadTreeBuilt = true;
 }
 
 void QuadTreeWorld::enable(bool enabled)
