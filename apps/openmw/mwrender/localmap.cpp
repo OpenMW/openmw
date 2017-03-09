@@ -222,7 +222,7 @@ void LocalMap::setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int
     camera->attach(osg::Camera::COLOR_BUFFER, texture);
 
     camera->addChild(mSceneRoot);
-    mRoot->insertChild(0, camera);
+    mRoot->addChild(camera);
     mActiveCameras.push_back(camera);
 
     MapSegment& segment = mSegments[std::make_pair(x, y)];
