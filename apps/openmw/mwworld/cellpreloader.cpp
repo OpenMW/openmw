@@ -194,11 +194,22 @@ namespace MWWorld
         , mMaxCacheSize(0)
         , mPreloadInstances(true)
         , mLastResourceCacheUpdate(0.0)
+        , mTerrainView(NULL)
     {
+        mTerrainView = mTerrain->createView();
     }
 
     CellPreloader::~CellPreloader()
     {
+        if (mTerrainPreloadItem)
+        {
+            mTerrainPreloadItem->waitTillDone();
+            mTerrainPreloadItem = NULL;
+        }
+
+        mTerrain->removeView(mTerrainView);
+        mTerrainView = NULL;
+
         for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end();++it)
             it->second.mWorkItem->abort();
 
@@ -347,6 +358,46 @@ namespace MWWorld
     void CellPreloader::setUnrefQueue(SceneUtil::UnrefQueue* unrefQueue)
     {
         mUnrefQueue = unrefQueue;
+    }
+
+    class TerrainPreloadItem : public SceneUtil::WorkItem
+    {
+    public:
+        TerrainPreloadItem(Terrain::View* view, Terrain::World* world, const std::vector<osg::Vec3f>& preloadPositions)
+            : mView(view)
+            , mWorld(world)
+            , mPreloadPositions(preloadPositions)
+        {
+        }
+
+        virtual void doWork()
+        {
+            for (std::vector<osg::Vec3f>::const_iterator it = mPreloadPositions.begin(); it != mPreloadPositions.end(); ++it)
+                mWorld->preload(mView, *it);
+
+            mView->reset(0);
+        }
+
+    private:
+        Terrain::View* mView;
+        Terrain::World* mWorld;
+        std::vector<osg::Vec3f> mPreloadPositions;
+    };
+
+    void CellPreloader::setTerrainPreloadPositions(const std::vector<osg::Vec3f> &positions)
+    {
+        if (!mTerrainView)
+            return;
+        if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
+            return;
+        else if (positions == mTerrainPreloadPositions)
+            return;
+        else
+        {
+            mTerrainPreloadPositions = positions;
+            mTerrainPreloadItem = new TerrainPreloadItem(mTerrainView, mTerrain, positions);
+            mWorkQueue->addWorkItem(mTerrainPreloadItem);
+        }
     }
 
 }

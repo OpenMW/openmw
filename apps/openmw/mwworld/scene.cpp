@@ -692,22 +692,29 @@ namespace MWWorld
 
     void Scene::preloadCells(float dt)
     {
+        std::vector<osg::Vec3f> exteriorPositions;
+
         const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
         osg::Vec3f moved = playerPos - mLastPlayerPos;
         osg::Vec3f predictedPos = playerPos + moved / dt;
 
+        if (mCurrentCell->isExterior())
+            exteriorPositions.push_back(predictedPos);
+
         mLastPlayerPos = playerPos;
 
         if (mPreloadDoors)
-            preloadTeleportDoorDestinations(playerPos, predictedPos);
+            preloadTeleportDoorDestinations(playerPos, predictedPos, exteriorPositions);
         if (mPreloadExteriorGrid)
             preloadExteriorGrid(playerPos, predictedPos);
         if (mPreloadFastTravel)
             preloadFastTravelDestinations(playerPos, predictedPos);
+
+        mPreloader->setTerrainPreloadPositions(exteriorPositions);
     }
 
-    void Scene::preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos)
+    void Scene::preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos, std::vector<osg::Vec3f>& exteriorPositions)
     {
         std::vector<MWWorld::ConstPtr> teleportDoors;
         for (CellStoreCollection::const_iterator iter (mActiveCells.begin());
@@ -739,9 +746,11 @@ namespace MWWorld
                         preloadCell(MWBase::Environment::get().getWorld()->getInterior(door.getCellRef().getDestCell()));
                     else
                     {
+                        osg::Vec3f pos = door.getCellRef().getDoorDest().asVec3();
                         int x,y;
-                        MWBase::Environment::get().getWorld()->positionToIndex (door.getCellRef().getDoorDest().pos[0], door.getCellRef().getDoorDest().pos[1], x, y);
+                        MWBase::Environment::get().getWorld()->positionToIndex (pos.x(), pos.y(), x, y);
                         preloadCell(MWBase::Environment::get().getWorld()->getExterior(x,y), true);
+                        exteriorPositions.push_back(pos);
                     }
                 }
                 catch (std::exception& e)

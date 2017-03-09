@@ -3,6 +3,7 @@
 
 #include <map>
 #include <osg/ref_ptr>
+#include <osg/Vec3f>
 #include <components/sceneutil/workqueue.hpp>
 
 namespace Resource
@@ -14,6 +15,7 @@ namespace Resource
 namespace Terrain
 {
     class World;
+    class View;
 }
 
 namespace SceneUtil
@@ -65,6 +67,8 @@ namespace MWWorld
 
         void setUnrefQueue(SceneUtil::UnrefQueue* unrefQueue);
 
+        void setTerrainPreloadPositions(const std::vector<osg::Vec3f>& positions);
+
     private:
         Resource::ResourceSystem* mResourceSystem;
         Resource::BulletShapeManager* mBulletShapeManager;
@@ -98,6 +102,10 @@ namespace MWWorld
 
         // Cells that are currently being preloaded, or have already finished preloading
         PreloadMap mPreloadCells;
+
+        Terrain::View* mTerrainView;
+        std::vector<osg::Vec3f> mTerrainPreloadPositions;
+        osg::ref_ptr<SceneUtil::WorkItem> mTerrainPreloadItem;
     };
 
 }
