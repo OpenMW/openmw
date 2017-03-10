@@ -57,6 +57,13 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
 
 void CompositeMapRenderer::compile(CompositeMap &compositeMap, osg::RenderInfo &renderInfo, double* timeLeft) const
 {
+    // if there are no more external references we can assume the texture is no longer required
+    if (compositeMap.mTexture->referenceCount() <= 1)
+    {
+        compositeMap.mCompiled = compositeMap.mDrawables.size();
+        return;
+    }
+
     osg::Timer timer;
     osg::State& state = *renderInfo.getState();
     osg::GLExtensions* ext = state.get<osg::GLExtensions>();
