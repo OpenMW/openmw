@@ -343,7 +343,6 @@ namespace MWWorld
             int newX, newY;
             MWBase::Environment::get().getWorld()->positionToIndex(pos.x(), pos.y(), newX, newY);
             changeCellGrid(newX, newY);
-            //mRendering.updateTerrain();
         }
     }
 
@@ -351,8 +350,6 @@ namespace MWWorld
     {
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
-
-        //mRendering.enableTerrain(true);
 
         std::string loadingExteriorText = "#{sLoadingMessage3}";
         loadingListener->setLabel(loadingExteriorText);
@@ -522,8 +519,6 @@ namespace MWWorld
         loadingListener->setLabel(loadingInteriorText);
         Loading::ScopedLoad load(loadingListener);
 
-        //mRendering.enableTerrain(false);
-
         if(!loadcell)
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -584,8 +579,6 @@ namespace MWWorld
 
         CellStore* current = MWBase::Environment::get().getWorld()->getExterior(x, y);
         changePlayerCell(current, position, adjustPlayerPos);
-
-        //mRendering.updateTerrain();
     }
 
     CellStore* Scene::getCurrentCell ()
