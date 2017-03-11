@@ -701,7 +701,7 @@ namespace MWWorld
             if (mPreloadExteriorGrid)
                 preloadExteriorGrid(playerPos, predictedPos);
             if (mPreloadFastTravel)
-                preloadFastTravelDestinations(playerPos, predictedPos);
+                preloadFastTravelDestinations(playerPos, predictedPos, exteriorPositions);
         }
 
         mPreloader->setTerrainPreloadPositions(exteriorPositions);
@@ -839,7 +839,7 @@ namespace MWWorld
         std::vector<ESM::Transport::Dest> mList;
     };
 
-    void Scene::preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& /*predictedPos*/) // ignore predictedPos here since opening dialogue with travel service takes extra time
+    void Scene::preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& /*predictedPos*/, std::vector<osg::Vec3f>& exteriorPositions) // ignore predictedPos here since opening dialogue with travel service takes extra time
     {
         const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         ListFastTravelDestinationsVisitor listVisitor(mPreloadDistance, player.getRefData().getPosition().asVec3());
@@ -857,9 +857,11 @@ namespace MWWorld
                 preloadCell(MWBase::Environment::get().getWorld()->getInterior(it->mCellName));
             else
             {
+                osg::Vec3f pos = it->mPos.asVec3();
                 int x,y;
-                MWBase::Environment::get().getWorld()->positionToIndex( it->mPos.pos[0], it->mPos.pos[1], x, y);
+                MWBase::Environment::get().getWorld()->positionToIndex( pos.x(), pos.y(), x, y);
                 preloadCell(MWBase::Environment::get().getWorld()->getExterior(x,y), true);
+                exteriorPositions.push_back(pos);
             }
         }
     }
