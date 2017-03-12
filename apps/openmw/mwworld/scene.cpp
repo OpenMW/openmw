@@ -809,6 +809,13 @@ namespace MWWorld
             mPreloader->preload(cell, mRendering.getReferenceTime());
     }
 
+    void Scene::preloadTerrain(const osg::Vec3f &pos)
+    {
+        std::vector<osg::Vec3f> vec;
+        vec.push_back(pos);
+        mPreloader->setTerrainPreloadPositions(vec);
+    }
+
     struct ListFastTravelDestinationsVisitor
     {
         ListFastTravelDestinationsVisitor(float preloadDist, const osg::Vec3f& playerPos)

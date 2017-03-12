@@ -89,6 +89,7 @@ namespace MWWorld
             ~Scene();
 
             void preloadCell(MWWorld::CellStore* cell, bool preloadSurrounding=false);
+            void preloadTerrain(const osg::Vec3f& pos);
 
             void unloadCell (CellStoreCollection::iterator iter);
 
