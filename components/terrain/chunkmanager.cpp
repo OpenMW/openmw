@@ -222,6 +222,8 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
         transform->setCullingActive(false);
         geometry->setCullingActive(false);
     }
+    else
+        transform->getBound();
 
     if (mSceneManager->getIncrementalCompileOperation())
     {
