@@ -186,8 +186,6 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     geometry->addPrimitiveSet(mBufferCache.getIndexBuffer(numVerts, lodFlags));
 
-    geometry->getBound();
-
     bool useCompositeMap = chunkSize >= 1.f;
     unsigned int numUvSets = useCompositeMap ? 1 : 2;
 

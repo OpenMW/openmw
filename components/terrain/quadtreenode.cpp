@@ -99,15 +99,6 @@ void QuadTreeNode::traverse(osg::NodeVisitor &nv)
     if (!hasValidBounds())
         return;
 
-    if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
-    {
-        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
-
-        // do another culling test against bounding box as its much more accurate than the bounding sphere.
-        if (cv->isCulled(mBoundingBox))
-            return;
-    }
-
     if ((mLodCallback && mLodCallback->isSufficientDetail(this, nv.getEyePoint())) || !getNumChildren())
         getView(nv)->add(this, true);
     else
