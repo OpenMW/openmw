@@ -37,6 +37,8 @@ namespace Terrain
         typedef std::vector<osg::ref_ptr<osg::StateSet> > PassVector;
         void setPasses (const PassVector& passes);
 
+        void setLightListCallback(SceneUtil::LightListCallback* lightListCallback);
+
         virtual void compileGLObjects(osg::RenderInfo& renderInfo) const;
 
     private:

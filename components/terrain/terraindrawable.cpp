@@ -9,7 +9,6 @@ namespace Terrain
 
 TerrainDrawable::TerrainDrawable()
 {
-    mLightListCallback = new SceneUtil::LightListCallback;
 }
 
 TerrainDrawable::TerrainDrawable(const TerrainDrawable &copy, const osg::CopyOp &copyop)
@@ -52,7 +51,7 @@ void TerrainDrawable::cull(osgUtil::CullVisitor *cv)
     if (osg::isNaN(depth))
         return;
 
-    bool pushedLight = mLightListCallback->pushLightState(this, cv);
+    bool pushedLight = mLightListCallback && mLightListCallback->pushLightState(this, cv);
 
     for (PassVector::const_iterator it = mPasses.begin(); it != mPasses.end(); ++it)
     {
@@ -68,6 +67,11 @@ void TerrainDrawable::cull(osgUtil::CullVisitor *cv)
 void TerrainDrawable::setPasses(const TerrainDrawable::PassVector &passes)
 {
     mPasses = passes;
+}
+
+void TerrainDrawable::setLightListCallback(SceneUtil::LightListCallback *lightListCallback)
+{
+    mLightListCallback = lightListCallback;
 }
 
 void TerrainDrawable::compileGLObjects(osg::RenderInfo &renderInfo) const

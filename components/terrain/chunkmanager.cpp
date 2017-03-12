@@ -10,6 +10,7 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 #include "terraindrawable.hpp"
 #include "material.hpp"
@@ -177,6 +178,9 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
     geometry->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
     geometry->setUseDisplayList(false);
     geometry->setUseVertexBufferObjects(true);
+
+    if (chunkSize <= 2.f)
+        geometry->setLightListCallback(new SceneUtil::LightListCallback);
 
     unsigned int numVerts = (mStorage->getCellVertices()-1) * chunkSize / (1 << lod) + 1;
 
