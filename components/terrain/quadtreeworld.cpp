@@ -332,7 +332,7 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, ChunkManager* chunk
 
 void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
-    if (nv.getVisitorType() != osg::NodeVisitor::CULL_VISITOR)// && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
+    if (nv.getVisitorType() != osg::NodeVisitor::CULL_VISITOR && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
         return;
 
     ViewData* vd = mRootNode->getView(nv);
