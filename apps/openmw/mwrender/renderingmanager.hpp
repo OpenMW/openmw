@@ -17,6 +17,12 @@ namespace osg
     class PositionAttitudeTransform;
 }
 
+namespace osgUtil
+{
+    class IntersectionVisitor;
+    class Intersector;
+}
+
 namespace Resource
 {
     class ResourceSystem;
@@ -203,6 +209,10 @@ namespace MWRender
         void setFogColor(const osg::Vec4f& color);
 
         void reportStats() const;
+
+        osg::ref_ptr<osgUtil::IntersectionVisitor> getIntersectionVisitor(osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors);
+
+        osg::ref_ptr<osgUtil::IntersectionVisitor> mIntersectionVisitor;
 
         osg::ref_ptr<osgViewer::Viewer> mViewer;
         osg::ref_ptr<osg::Group> mRootNode;
