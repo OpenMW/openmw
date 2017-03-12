@@ -72,14 +72,22 @@ namespace Terrain
 class DefaultLodCallback : public LodCallback
 {
 public:
+    DefaultLodCallback(float minSize)
+        : mMinSize(minSize)
+    {
+    }
+
     virtual bool isSufficientDetail(QuadTreeNode* node, const osg::Vec3f& eyePoint)
     {
         float dist = distance(node->getBoundingBox(), eyePoint);
-        int nativeLodLevel = Log2(static_cast<unsigned int>(node->getSize()*4));
-        int lodLevel = Log2(static_cast<unsigned int>(dist/2048.0));
+        int nativeLodLevel = Log2(static_cast<unsigned int>(node->getSize()/mMinSize));
+        int lodLevel = Log2(static_cast<unsigned int>(dist/(8192*mMinSize)));
 
         return nativeLodLevel <= lodLevel;
     }
+
+private:
+    float mMinSize;
 };
 
 class RootNode : public QuadTreeNode
@@ -135,7 +143,7 @@ public:
 
         mRootNode = new RootNode(size, osg::Vec2f(centerX, centerY));
         mRootNode->setViewDataMap(mViewDataMap);
-        mRootNode->setLodCallback(new DefaultLodCallback);
+        mRootNode->setLodCallback(new DefaultLodCallback(mMinSize));
         addChildren(mRootNode);
 
         mRootNode->initNeighbours();
@@ -177,7 +185,7 @@ public:
         }
 
         osg::ref_ptr<QuadTreeNode> node = new QuadTreeNode(parent, direction, size, center);
-        node->setLodCallback(new DefaultLodCallback);
+        node->setLodCallback(parent->getLodCallback());
         node->setViewDataMap(mViewDataMap);
         parent->addChild(node);
 
