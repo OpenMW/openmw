@@ -338,19 +338,16 @@ namespace MWMechanics
                 }
             }
 
-            bool updateSkills = false;
             //Loop over ESM::Skill::SkillEnum
             for(int i = 0; i < ESM::Skill::Length; ++i)
             {
                 if(stats.getSkill(i) != mWatchedSkills[i] || mWatchedStatsEmpty)
                 {
-                  updateSkills = true;
                     mWatchedSkills[i] = stats.getSkill(i);
                     winMgr->setValue((ESM::Skill::SkillEnum)i, stats.getSkill(i));
                 }
             }
 
-            if (updateSkills) { winMgr->updateSkillArea(); }
             winMgr->setValue("level", stats.getLevel());
 
             mWatchedStatsEmpty = false;

@@ -237,8 +237,10 @@ namespace MWGui
                 nameWidget->setSize(nameWidget->getWidth() - (widthAfter-widthBefore), nameWidget->getHeight());
             }
 
-            if (value.getBase() < 100)
+            if (value.getBase() < 100) {
+                setSkillProgress(nameWidget, value.getProgress(), parSkill);
                 setSkillProgress(valueWidget, value.getProgress(), parSkill);
+            }
         }
     }
 
