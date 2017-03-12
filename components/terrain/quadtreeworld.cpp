@@ -240,6 +240,8 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
 {
+    // No need for culling on the Drawable / Transform level as the quad tree performs the culling already.
+    mChunkManager->setCullingActive(false);
 }
 
 QuadTreeWorld::~QuadTreeWorld()

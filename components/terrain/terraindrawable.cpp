@@ -43,7 +43,7 @@ void TerrainDrawable::cull(osgUtil::CullVisitor *cv)
 {
     const osg::BoundingBox& bb = getBoundingBox();
 
-    if (cv->isCulled(getBoundingBox()))
+    if (_cullingActive && cv->isCulled(getBoundingBox()))
         return;
 
     osg::RefMatrix& matrix = *cv->getModelViewMatrix();

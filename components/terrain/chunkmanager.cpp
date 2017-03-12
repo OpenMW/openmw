@@ -27,6 +27,7 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
     , mTextureManager(textureManager)
     , mCompositeMapRenderer(renderer)
     , mCompositeMapSize(512)
+    , mCullingActive(true)
 {
 
 }
@@ -51,6 +52,11 @@ osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &cen
 void ChunkManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
 {
     stats->setAttribute(frameNumber, "Terrain Chunk", mCache->getCacheSize());
+}
+
+void ChunkManager::setCullingActive(bool active)
+{
+    mCullingActive = active;
 }
 
 osg::ref_ptr<osg::Texture2D> ChunkManager::createCompositeMapRTT()
@@ -206,6 +212,12 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
     }
 
     transform->addChild(geometry);
+
+    if (!mCullingActive)
+    {
+        transform->setCullingActive(false);
+        geometry->setCullingActive(false);
+    }
 
     if (mSceneManager->getIncrementalCompileOperation())
     {

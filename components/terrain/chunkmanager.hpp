@@ -39,6 +39,8 @@ namespace Terrain
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
 
+        void setCullingActive(bool active);
+
     private:
         osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, int lod, unsigned int lodFlags);
 
@@ -55,6 +57,8 @@ namespace Terrain
         BufferCache mBufferCache;
 
         unsigned int mCompositeMapSize;
+
+        bool mCullingActive;
     };
 
 }
