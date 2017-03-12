@@ -143,7 +143,7 @@ ViewData* QuadTreeNode::getView(osg::NodeVisitor &nv)
     }
     else // INTERSECTION_VISITOR
     {
-        return mViewDataMap->getViewData(&nv, false);
+        return mViewDataMap->getViewData(&nv, (nv.referenceCount() > 0)); // if no referenceCount, the visitor was allocated on the stack
     }
 }
 
