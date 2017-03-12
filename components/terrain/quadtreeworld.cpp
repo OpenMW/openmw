@@ -318,15 +318,16 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, ChunkManager* chunk
         int ourLod = Log2(int(entry.mNode->getSize()));
         unsigned int lodFlags = getLodFlags(entry.mNode, ourLod, vd);
         if (lodFlags != entry.mLodFlags)
+        {
             entry.mRenderingNode = NULL;
+            entry.mLodFlags = lodFlags;
+        }
     }
 
     if (!entry.mRenderingNode)
     {
         int ourLod = Log2(int(entry.mNode->getSize()));
-        unsigned int lodFlags = getLodFlags(entry.mNode, ourLod, vd);
-        entry.mRenderingNode = chunkManager->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, lodFlags);
-        entry.mLodFlags = lodFlags;
+        entry.mRenderingNode = chunkManager->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags);
     }
 }
 
