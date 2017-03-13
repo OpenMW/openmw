@@ -238,7 +238,30 @@ namespace MWGui
             }
 
             if (value.getBase() < 100)
+            {
+                nameWidget->setUserString("Visible_SkillMaxed", "false");
+                nameWidget->setUserString("UserData^Hidden_SkillMaxed", "true");
+                nameWidget->setUserString("Visible_SkillProgressVBox", "true");
+                nameWidget->setUserString("UserData^Hidden_SkillProgressVBox", "false");
+
+                valueWidget->setUserString("Visible_SkillMaxed", "false");
+                valueWidget->setUserString("UserData^Hidden_SkillMaxed", "true");
+                valueWidget->setUserString("Visible_SkillProgressVBox", "true");
+                valueWidget->setUserString("UserData^Hidden_SkillProgressVBox", "false");
+
+                setSkillProgress(nameWidget, value.getProgress(), parSkill);
                 setSkillProgress(valueWidget, value.getProgress(), parSkill);
+            } else {
+                nameWidget->setUserString("Visible_SkillMaxed", "true");
+                nameWidget->setUserString("UserData^Hidden_SkillMaxed", "false");
+                nameWidget->setUserString("Visible_SkillProgressVBox", "false");
+                nameWidget->setUserString("UserData^Hidden_SkillProgressVBox", "true");
+
+                valueWidget->setUserString("Visible_SkillMaxed", "true");
+                valueWidget->setUserString("UserData^Hidden_SkillMaxed", "false");
+                valueWidget->setUserString("Visible_SkillProgressVBox", "false");
+                valueWidget->setUserString("UserData^Hidden_SkillProgressVBox", "true");
+            }
         }
     }
 
