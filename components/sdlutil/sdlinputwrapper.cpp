@@ -329,8 +329,8 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
 
         SDL_GetWindowSize(mSDLWindow, &width, &height);
 
-        const int FUDGE_FACTOR_X = width;
-        const int FUDGE_FACTOR_Y = height;
+        const int FUDGE_FACTOR_X = width/4;
+        const int FUDGE_FACTOR_Y = height/4;
 
         //warp the mouse if it's about to go outside the window
         if(evt.x - FUDGE_FACTOR_X < 0  || evt.x + FUDGE_FACTOR_X > width
