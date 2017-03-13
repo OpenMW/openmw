@@ -102,6 +102,7 @@ Programmers
     Michał Moroz (dragonee)
     Miroslav Puda (pakanek)
     MiroslavR
+    Mitchell Schwitzer (schwitzerm)
     naclander
     Narmo
     Nathan Jeffords (blunted2night)
