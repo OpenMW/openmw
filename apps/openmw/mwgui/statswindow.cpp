@@ -240,6 +240,16 @@ namespace MWGui
             if (value.getBase() < 100) {
                 setSkillProgress(nameWidget, value.getProgress(), parSkill);
                 setSkillProgress(valueWidget, value.getProgress(), parSkill);
+            } else {
+                nameWidget->setUserString("Visible_SkillMaxed", "true");
+                nameWidget->setUserString("UserData^Hidden_SkillMaxed", "false");
+                nameWidget->setUserString("Visible_SkillProgressVBox", "false");
+                nameWidget->setUserString("UserData^Hidden_SkillProgressVBox", "true");
+
+                valueWidget->setUserString("Visible_SkillMaxed", "true");
+                valueWidget->setUserString("UserData^Hidden_SkillMaxed", "false");
+                valueWidget->setUserString("Visible_SkillProgressVBox", "false");
+                valueWidget->setUserString("UserData^Hidden_SkillProgressVBox", "true");
             }
         }
     }
