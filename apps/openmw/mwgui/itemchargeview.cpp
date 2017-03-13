@@ -97,7 +97,7 @@ namespace MWGui
                 line.mIcon = mScrollView->createWidget<ItemWidget>("MW_ItemIconSmall", MyGUI::IntCoord(), MyGUI::Align::Default);
                 line.mIcon->setItem(line.mItemPtr);
                 line.mIcon->setUserString("ToolTipType", "ItemPtr");
-                line.mIcon->setUserData(line.mItemPtr);
+                line.mIcon->setUserData(MWWorld::Ptr(line.mItemPtr));
                 line.mIcon->eventMouseButtonClick += MyGUI::newDelegate(this, &ItemChargeView::onIconClicked);
                 line.mIcon->eventMouseWheel += MyGUI::newDelegate(this, &ItemChargeView::onMouseWheelMoved);
 

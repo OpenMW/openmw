@@ -278,7 +278,7 @@ namespace MWGui
     {
         if (spell.mType == Spell::Type_EnchantedItem)
         {
-            widget->setUserData(spell.mItem);
+            widget->setUserData(MWWorld::Ptr(spell.mItem));
             widget->setUserString("ToolTipType", "ItemPtr");
         }
         else

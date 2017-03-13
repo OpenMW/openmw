@@ -66,7 +66,7 @@ void Repair::startRepairItem(const MWWorld::Ptr &item)
 
     mToolIcon->setItem(item);
     mToolIcon->setUserString("ToolTipType", "ItemPtr");
-    mToolIcon->setUserData(item);
+    mToolIcon->setUserData(MWWorld::Ptr(item));
 
     updateRepairView();
 }
