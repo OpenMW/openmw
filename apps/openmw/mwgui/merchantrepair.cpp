@@ -44,10 +44,9 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
     MWWorld::Ptr player = MWMechanics::getPlayer();
     int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-    const MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
+    MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
     int categories = MWWorld::ContainerStore::Type_Weapon | MWWorld::ContainerStore::Type_Armor;
-    for (MWWorld::ConstContainerStoreIterator iter (store.cbegin(categories));
-         iter!=store.cend(); ++iter)
+    for (MWWorld::ContainerStoreIterator iter (store.begin(categories)); iter!=store.end(); ++iter)
     {
         if (iter->getClass().hasItemHealth(*iter))
         {
@@ -87,7 +86,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
             currentY += 18;
 
             button->setUserString("Price", MyGUI::utility::toString(price));
-            button->setUserData(*iter);
+            button->setUserData(MWWorld::Ptr(*iter));
             button->setCaptionWithReplacing(name);
             button->setSize(button->getTextSize().width,18);
             button->eventMouseWheel += MyGUI::newDelegate(this, &MerchantRepair::onMouseWheel);

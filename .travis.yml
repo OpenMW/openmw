@@ -12,8 +12,8 @@ branches:
     - /openmw-.*$/
 env:
   global:
-  - macos_qt_formula=qt@5.5
   - secure: NZmvVuA0O9NJXVQ12tXQZHDJC2mbFgYNFcsicw0DgW1It2Nk5hxIkF0pfu4/Z59mhQuOPgRVjl5b0FKy2Axh0gkWc1DJEXGwNaiW5lpTMNWR1LJG5rxa8LrDUpFkycpbzfAFuTUZu5z3iYVv64XzELvBuqNGhPMu1LeBnrlech0jFNjkR9p5qtJGWb8zYcPMCC57rig8a9g1ABoVYS6UXjrKpx0946ZLRsE5ukc9pXsypGwPmOMyfzZkxxzIqFaxoE5JIEdaJTWba/6Za315ozYYIi/N35ROI1YAv5GHRe/Iw9XAa4vQpbDzjM7ZSsZdTvvQsSU598gD2xC6jFUKSrpW6GZKwM2x236fZLGnOk5Uw7DUbG+AwpcEmxBwoy9PjBl9ZF3tJykI0gROewCy8MODhdsVMKr1HGIMVBIJySm/RnNqtoDbYV8mYnSl5b8rwJiCajoiR8Zuv4CIfGneeH1a3DOQDPH/qkDsU6ilzF4ANsBlMUUpgY653KBMBmTlNuVZSH527tnD7Fg6JgHVuSQkTbRa1vSkR7Zcre604RZcAoaEdbX3bhVDasPPghU/I742L0RH3oQNlR09pPBDZ8kG7ydl4aPHwpCWnvXNM1vgxtGvnYLztwrse7IoaRXRYiMFmrso78WhMWUDKgvY4wV9aeUu0DtnMezZVIQwCKg=
+  - macos_qt_formula=qt@5.5
 addons:
   apt:
     sources:

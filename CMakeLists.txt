@@ -35,18 +35,14 @@ set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VER
 
 set(GIT_CHECKOUT FALSE)
 if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
-    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
-        find_package(Git)
+    find_package(Git)
 
-        if(GIT_FOUND)
-            set(GIT_CHECKOUT TRUE)
-        else(GIT_FOUND)
-            message(WARNING "Git executable not found")
-        endif(GIT_FOUND)
-    else(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
-        message(STATUS "Shallow Git clone detected, not attempting to retrieve version info")
-    endif(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
-endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)    
+    if(GIT_FOUND)
+        set(GIT_CHECKOUT TRUE)
+    else(GIT_FOUND)
+        message(WARNING "Git executable not found")
+    endif(GIT_FOUND)
+endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 
 # Macros
 include(OpenMWMacros)

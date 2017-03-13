@@ -68,7 +68,7 @@ void Recharge::start (const MWWorld::Ptr &item)
 {
     mGemIcon->setItem(item);
     mGemIcon->setUserString("ToolTipType", "ItemPtr");
-    mGemIcon->setUserData(item);
+    mGemIcon->setUserData(MWWorld::Ptr(item));
 
     updateView();
 }

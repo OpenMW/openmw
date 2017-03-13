@@ -127,8 +127,6 @@ void Skeleton::updateBoneMatrices(unsigned int traversalNumber)
             for (unsigned int i=0; i<mRootBone->mChildren.size(); ++i)
                 mRootBone->mChildren[i]->update(NULL);
         }
-        else
-            std::cerr << "Error: no root bone" << std::endl;
 
         mNeedToUpdateBoneMatrices = false;
     }

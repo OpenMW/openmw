@@ -16,6 +16,9 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwworld/inventorystore.hpp"
+#include "../mwworld/class.hpp"
+
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 
@@ -205,8 +208,22 @@ namespace MWScript
                     int index = runtime[0].mInteger;
                     runtime.pop();
 
-                    runtime.push (MWBase::Environment::get().getSoundManager()->getSoundPlaying (
-                        ptr, runtime.getStringLiteral (index)));
+                    bool ret = MWBase::Environment::get().getSoundManager()->getSoundPlaying (
+                                    ptr, runtime.getStringLiteral (index));
+
+                    // GetSoundPlaying called on an equipped item should also look for sounds played by the equipping actor.
+                    if (!ret && ptr.getContainerStore())
+                    {
+                        MWWorld::Ptr cont = MWBase::Environment::get().getWorld()->findContainer(ptr);
+
+                        if (!cont.isEmpty() && cont.getClass().hasInventoryStore(cont) && cont.getClass().getInventoryStore(cont).isEquipped(ptr))
+                        {
+                            ret = MWBase::Environment::get().getSoundManager()->getSoundPlaying (
+                                        cont, runtime.getStringLiteral (index));
+                        }
+                    }
+
+                    runtime.push(ret);
                 }
         };
 
