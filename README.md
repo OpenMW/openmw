@@ -30,8 +30,9 @@ Feel free to contact the [team members](https://github.com/TES3MP/openmw-tes3mp/
 Getting Started
 ---------------
 
-* [tes3mp section on OpenMW forums](https://forum.openmw.org/viewforum.php?f=44)
+* [TES3MP section on OpenMW forums](https://forum.openmw.org/viewforum.php?f=44)
 * [Steam group](https://steamcommunity.com/groups/mwmulti)
+* [Subreddit](https://www.reddit.com/r/tes3mp)
 * [Installation and build instructions](https://github.com/TES3MP/openmw-tes3mp/wiki/Installation-and-build-instructions)
 * [Known issues and bug reports](https://github.com/TES3MP/openmw-tes3mp/issues)
 
