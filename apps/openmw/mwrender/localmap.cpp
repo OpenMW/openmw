@@ -174,9 +174,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     camera->setNodeMask(Mask_RenderToTexture);
 
     osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
-    stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
-    stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
-    stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+
     // assign large value to effectively turn off fog
     // shaders don't respect glDisable(GL_FOG)
     osg::ref_ptr<osg::Fog> fog (new osg::Fog);
