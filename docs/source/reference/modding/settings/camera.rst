@@ -59,7 +59,7 @@ The constant 8192 is the size of a cell, and 1024 is the threshold distance for 
 
 Reductions of up to 25% or more can be required to completely eliminate pop-in for wide fields of view and long viewing distances near the edges of the screen, but such situations are unusual and probably not worth the performance penalty introduced by loading geometry obscured by fog in the center of the screen. See RenderingManager::configureFog for the relevant source code.
 
-Enabling the distant land setting is an alternative to increasing exterior cell load distance. Note that the distant land setting does not include rendering of distant static objects, so the resulting visual effect is not the same.
+Enabling the distant terrain setting is an alternative to increasing exterior cell load distance. Note that the distant land setting does not include rendering of distant static objects, so the resulting visual effect is not the same.
 
 The default value is 6666.0. This setting can be adjusted in game from the ridiculously low value of 2000.0 to a maximum of 6666.0, using the View Distance slider in the Detail tab of the Video panel of the Options menu.
 

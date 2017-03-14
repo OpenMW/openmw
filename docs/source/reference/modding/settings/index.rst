@@ -23,6 +23,7 @@ Although this guide attempts to be comprehensive and up to date, you will always
    input
    saves
    sound
+   terrain
    video
    water
    windows
