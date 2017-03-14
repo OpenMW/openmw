@@ -201,12 +201,14 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
         mCompositeMapRenderer->addCompositeMap(compositeMap.get(), false);
 
-        std::vector<osg::ref_ptr<osg::StateSet> > passes2;
-        passes2.push_back(new osg::StateSet);
-        passes2[0]->setTextureAttributeAndModes(0, compositeMap->mTexture, osg::StateAttribute::ON);
-        geometry->setPasses(passes2);
-
         transform->getOrCreateUserDataContainer()->setUserData(compositeMap);
+
+        TextureLayer layer;
+        layer.mDiffuseMap = compositeMap->mTexture;
+        layer.mParallax = false;
+        layer.mSpecular = false;
+        geometry->setPasses(::Terrain::createPasses(mSceneManager->getForceShaders() || !mSceneManager->getClampLighting(), mSceneManager->getForcePerPixelLighting(),
+                                                    mSceneManager->getClampLighting(), &mSceneManager->getShaderManager(), std::vector<TextureLayer>(1, layer), std::vector<osg::ref_ptr<osg::Texture2D> >(), 1.f, 1.f));
     }
     else
     {

@@ -81,7 +81,8 @@ namespace Terrain
             {
                 stateset->setTextureAttributeAndModes(texunit, it->mDiffuseMap);
 
-                stateset->setTextureAttributeAndModes(texunit, getLayerTexMat(layerTileSize), osg::StateAttribute::ON);
+                if (layerTileSize != 1.f)
+                    stateset->setTextureAttributeAndModes(texunit, getLayerTexMat(layerTileSize), osg::StateAttribute::ON);
 
                 stateset->addUniform(new osg::Uniform("diffuseMap", texunit));
 
@@ -147,7 +148,8 @@ namespace Terrain
                 osg::ref_ptr<osg::Texture2D> tex = it->mDiffuseMap;
                 stateset->setTextureAttributeAndModes(texunit, tex.get());
 
-                stateset->setTextureAttributeAndModes(texunit, getLayerTexMat(layerTileSize), osg::StateAttribute::ON);
+                if (layerTileSize != 1.f)
+                    stateset->setTextureAttributeAndModes(texunit, getLayerTexMat(layerTileSize), osg::StateAttribute::ON);
             }
 
             firstLayer = false;
