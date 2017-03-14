@@ -1,8 +1,6 @@
 #ifndef COMPONENTS_TERRAIN_QUADTREEWORLD_H
 #define COMPONENTS_TERRAIN_QUADTREEWORLD_H
 
-#include <map>
-
 #include "world.hpp"
 
 #include <OpenThreads/Mutex>

@@ -11,11 +11,6 @@ namespace osg
     class Texture2D;
 }
 
-namespace SceneUtil
-{
-    class PositionAttitudeTransform;
-}
-
 namespace Resource
 {
     class SceneManager;

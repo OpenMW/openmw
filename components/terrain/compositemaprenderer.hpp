@@ -5,7 +5,7 @@
 
 #include <OpenThreads/Mutex>
 
-#include <deque>
+#include <set>
 
 namespace osg
 {

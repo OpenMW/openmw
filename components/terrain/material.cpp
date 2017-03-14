@@ -1,6 +1,5 @@
 #include "material.hpp"
 
-#include <iostream>
 #include <stdexcept>
 
 #include <osg/Depth>
