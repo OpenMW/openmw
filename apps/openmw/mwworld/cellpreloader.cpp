@@ -7,16 +7,16 @@
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/misc/stringops.hpp>
 #include <components/nifosg/nifloader.hpp>
 #include <components/terrain/world.hpp>
 #include <components/esmterrain/storage.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
+#include <components/esm/loadcell.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld/inventorystore.hpp"
-#include "../mwworld/esmstore.hpp"
 #include "../mwrender/landmanager.hpp"
 
 #include "cellstore.hpp"
@@ -205,6 +205,7 @@ namespace MWWorld
     {
         if (mTerrainPreloadItem)
         {
+            mTerrainPreloadItem->abort();
             mTerrainPreloadItem->waitTillDone();
             mTerrainPreloadItem = NULL;
         }
@@ -370,7 +371,8 @@ namespace MWWorld
     {
     public:
         TerrainPreloadItem(const std::vector<osg::ref_ptr<Terrain::View> >& views, Terrain::World* world, const std::vector<osg::Vec3f>& preloadPositions)
-            : mTerrainViews(views)
+            : mAbort(false)
+            , mTerrainViews(views)
             , mWorld(world)
             , mPreloadPositions(preloadPositions)
         {
@@ -378,14 +380,20 @@ namespace MWWorld
 
         virtual void doWork()
         {
-            for (unsigned int i=0; i<mTerrainViews.size() && i<mPreloadPositions.size(); ++i)
+            for (unsigned int i=0; i<mTerrainViews.size() && i<mPreloadPositions.size() && !mAbort; ++i)
             {
                 mWorld->preload(mTerrainViews[i], mPreloadPositions[i]);
                 mTerrainViews[i]->reset(0);
             }
         }
 
+        virtual void abort()
+        {
+            mAbort = true;
+        }
+
     private:
+        volatile bool mAbort;
         std::vector<osg::ref_ptr<Terrain::View> > mTerrainViews;
         Terrain::World* mWorld;
         std::vector<osg::Vec3f> mPreloadPositions;
