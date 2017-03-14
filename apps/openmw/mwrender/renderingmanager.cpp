@@ -493,9 +493,11 @@ namespace MWRender
         mCurrentCameraPos = cameraPos;
         if (mWater->isUnderwater(cameraPos))
         {
+            float viewDistance = mViewDistance;
+            viewDistance = std::min(viewDistance, 6666.f);
             setFogColor(mUnderwaterColor * mUnderwaterWeight + mFogColor * (1.f-mUnderwaterWeight));
-            mStateUpdater->setFogStart(mViewDistance * (1 - mUnderwaterFog));
-            mStateUpdater->setFogEnd(mViewDistance);
+            mStateUpdater->setFogStart(viewDistance * (1 - mUnderwaterFog));
+            mStateUpdater->setFogEnd(viewDistance);
         }
         else
         {
