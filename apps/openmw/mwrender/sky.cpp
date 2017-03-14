@@ -428,10 +428,12 @@ private:
 class CelestialBody
 {
 public:
-    CelestialBody(osg::Group* parentNode, float scaleFactor, int numUvSets)
+    CelestialBody(osg::Group* parentNode, float scaleFactor, int numUvSets, unsigned int visibleMask=~0)
+        : mVisibleMask(visibleMask)
     {
         mGeom = createTexturedQuad(numUvSets);
         mTransform = new osg::PositionAttitudeTransform;
+        mTransform->setNodeMask(mVisibleMask);
         mTransform->setScale(osg::Vec3f(450,450,450) * scaleFactor);
         mTransform->addChild(mGeom);
 
@@ -444,10 +446,11 @@ public:
 
     void setVisible(bool visible)
     {
-        mTransform->setNodeMask(visible ? ~0 : 0);
+        mTransform->setNodeMask(visible ? mVisibleMask : 0);
     }
 
 protected:
+    unsigned int mVisibleMask;
     static const float mDistance;
     osg::ref_ptr<osg::PositionAttitudeTransform> mTransform;
     osg::ref_ptr<osg::Geometry> mGeom;
@@ -459,11 +462,10 @@ class Sun : public CelestialBody
 {
 public:
     Sun(osg::Group* parentNode, Resource::ImageManager& imageManager)
-        : CelestialBody(parentNode, 1.0f, 1)
+        : CelestialBody(parentNode, 1.0f, 1, Mask_Sun)
         , mUpdater(new Updater)
     {
         mTransform->addUpdateCallback(mUpdater);
-        mTransform->setNodeMask(Mask_Sun);
 
         osg::ref_ptr<osg::Texture2D> sunTex (new osg::Texture2D(imageManager.getImage("textures/tx_sun_05.dds")));
         sunTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
