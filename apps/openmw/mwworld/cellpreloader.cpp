@@ -210,8 +210,13 @@ namespace MWWorld
             mTerrainPreloadItem->waitTillDone();
             mTerrainPreloadItem = NULL;
         }
-
         mTerrainView = NULL;
+
+        if (mUpdateCacheItem)
+        {
+            mUpdateCacheItem->waitTillDone();
+            mUpdateCacheItem = NULL;
+        }
 
         for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end();++it)
             it->second.mWorkItem->abort();
@@ -320,10 +325,11 @@ namespace MWWorld
                 ++it;
         }
 
-        if (timestamp - mLastResourceCacheUpdate > 1.0)
+        if (timestamp - mLastResourceCacheUpdate > 1.0 && (!mUpdateCacheItem || mUpdateCacheItem->isDone()))
         {
             // the resource cache is cleared from the worker thread so that we're not holding up the main thread with delete operations
-            mWorkQueue->addWorkItem(new UpdateCacheItem(mResourceSystem, timestamp), true);
+            mUpdateCacheItem = new UpdateCacheItem(mResourceSystem, timestamp);
+            mWorkQueue->addWorkItem(mUpdateCacheItem, true);
             mLastResourceCacheUpdate = timestamp;
         }
     }
@@ -397,6 +403,8 @@ namespace MWWorld
             return;
         else
         {
+            // TODO: provide some way of giving the preloaded view to the main thread when we enter the cell
+            // right now, we just use it to make sure the resources are preloaded
             mTerrainPreloadPositions = positions;
             mTerrainPreloadItem = new TerrainPreloadItem(mTerrainView, mTerrain, positions);
             mWorkQueue->addWorkItem(mTerrainPreloadItem);

@@ -106,6 +106,7 @@ namespace MWWorld
         osg::ref_ptr<Terrain::View> mTerrainView;
         std::vector<osg::Vec3f> mTerrainPreloadPositions;
         osg::ref_ptr<SceneUtil::WorkItem> mTerrainPreloadItem;
+        osg::ref_ptr<SceneUtil::WorkItem> mUpdateCacheItem;
     };
 
 }
