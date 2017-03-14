@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include <osg/Material>
 #include <osg/Fog>
 #include <osg/BlendFunc>
 #include <osg/Texture2D>
@@ -142,6 +143,13 @@ namespace MWRender
         stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
         stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+        osg::ref_ptr<osg::Material> defaultMat (new osg::Material);
+        defaultMat->setColorMode(osg::Material::OFF);
+        defaultMat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+        defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+        defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+        stateset->setAttribute(defaultMat);
+
         // assign large value to effectively turn off fog
         // shaders don't respect glDisable(GL_FOG)
         osg::ref_ptr<osg::Fog> fog (new osg::Fog);
