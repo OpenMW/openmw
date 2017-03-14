@@ -16,6 +16,8 @@ namespace VFS
 namespace ESMTerrain
 {
 
+    class LandCache;
+
     /// @brief Wrapper around Land Data with reference counting. The wrapper needs to be held as long as the data is still in use
     class LandObject : public osg::Object
     {
@@ -105,11 +107,13 @@ namespace ESMTerrain
     private:
         const VFS::Manager* mVFS;
 
-        void fixNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row);
-        void fixColour (osg::Vec4f& colour, int cellX, int cellY, int col, int row);
-        void averageNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row);
+        void fixNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row, LandCache& cache);
+        void fixColour (osg::Vec4f& colour, int cellX, int cellY, int col, int row, LandCache& cache);
+        void averageNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row, LandCache& cache);
 
         float getVertexHeight (const ESM::Land::LandData* data, int x, int y);
+
+        const LandObject* getLand(int cellX, int cellY, LandCache& cache);
 
         // Since plugins can define new texture palettes, we need to know the plugin index too
         // in order to retrieve the correct texture name.
@@ -117,7 +121,7 @@ namespace ESMTerrain
         typedef std::pair<short, short> UniqueTextureId;
 
         UniqueTextureId getVtexIndexAt(int cellX, int cellY,
-                                               int x, int y, osg::ref_ptr<const LandObject> land);
+                                               int x, int y, LandCache&);
         std::string getTextureName (UniqueTextureId id);
 
         std::map<std::string, Terrain::LayerInfo> mLayerInfoMap;
