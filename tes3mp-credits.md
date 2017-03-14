@@ -1,18 +1,18 @@
 tes3mp Credits
 ==============
 
-Programmers
------------
+Lead programmers
+----------------
 
     Stanislav Zhukov (Koncord) - Overall architecture, networking & scripting systems, player sync, server browser
     David Cernat - World sync & state saving/loading, player state saving/loading, general bug fixes
+
+
+Additional programming
+----------------------
+
+    Grim Kriegor - Lua teleportation commands, early script fixes
     Battlerax - Various fixes
-
-
-Script developers
------------------
-
-    Grim Kriegor - Teleportation commands, various early script fixes
 
 
 Testers
@@ -23,7 +23,7 @@ Testers
     Goodevil - Mint and Xubuntu Linux
 
 
-Public Relations and Translations
+Public relations and translations
 ---------------------------------
 
     Volk Milit (Ja'Virr-Dar) - Public relations & news writer
@@ -44,6 +44,5 @@ Special thanks
     Luc Keating
     Norc
     Rhiyo
-
-
-Thanks to the developers of OpenMW. They do amazing things.
+    Texafornian
+    All the developers of OpenMW

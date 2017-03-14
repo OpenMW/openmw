@@ -7,7 +7,6 @@ TES3MP is a project aiming to add multiplayer functionality to [OpenMW](https://
 
 * Version: 0.5.2
 * License: GPLv3 (see docs/license/GPL3.txt for more information)
-* Website: https://steamcommunity.com/groups/mwmulti
 
 Font Licenses:
 * DejaVuLGCSansMono.ttf: custom (see docs/license/DejaVu Font License.txt for more information)
@@ -31,7 +30,8 @@ Feel free to contact the [team members](https://github.com/TES3MP/openmw-tes3mp/
 Getting Started
 ---------------
 
-* [Community forums](https://steamcommunity.com/groups/mwmulti)
+* [tes3mp section on OpenMW forums](https://forum.openmw.org/viewforum.php?f=44)
+* [Steam group](https://steamcommunity.com/groups/mwmulti)
 * [Installation and build instructions](https://github.com/TES3MP/openmw-tes3mp/wiki/Installation-and-build-instructions)
 * [Known issues and bug reports](https://github.com/TES3MP/openmw-tes3mp/issues)
 
