@@ -198,9 +198,7 @@ namespace MWWorld
         , mMaxCacheSize(0)
         , mPreloadInstances(true)
         , mLastResourceCacheUpdate(0.0)
-        , mTerrainView(NULL)
     {
-        mTerrainView = mTerrain->createView();
     }
 
     CellPreloader::~CellPreloader()
@@ -210,7 +208,6 @@ namespace MWWorld
             mTerrainPreloadItem->waitTillDone();
             mTerrainPreloadItem = NULL;
         }
-        mTerrainView = NULL;
 
         if (mUpdateCacheItem)
         {
@@ -372,8 +369,8 @@ namespace MWWorld
     class TerrainPreloadItem : public SceneUtil::WorkItem
     {
     public:
-        TerrainPreloadItem(Terrain::View* view, Terrain::World* world, const std::vector<osg::Vec3f>& preloadPositions)
-            : mView(view)
+        TerrainPreloadItem(const std::vector<osg::ref_ptr<Terrain::View> >& views, Terrain::World* world, const std::vector<osg::Vec3f>& preloadPositions)
+            : mTerrainViews(views)
             , mWorld(world)
             , mPreloadPositions(preloadPositions)
         {
@@ -381,32 +378,43 @@ namespace MWWorld
 
         virtual void doWork()
         {
-            for (std::vector<osg::Vec3f>::const_iterator it = mPreloadPositions.begin(); it != mPreloadPositions.end(); ++it)
-                mWorld->preload(mView, *it);
-
-            mView->reset(0);
+            for (unsigned int i=0; i<mTerrainViews.size() && i<mPreloadPositions.size(); ++i)
+            {
+                mWorld->preload(mTerrainViews[i], mPreloadPositions[i]);
+                mTerrainViews[i]->reset(0);
+            }
         }
 
     private:
-        Terrain::View* mView;
+        std::vector<osg::ref_ptr<Terrain::View> > mTerrainViews;
         Terrain::World* mWorld;
         std::vector<osg::Vec3f> mPreloadPositions;
     };
 
     void CellPreloader::setTerrainPreloadPositions(const std::vector<osg::Vec3f> &positions)
     {
-        if (!mTerrainView)
-            return;
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
             return;
         else if (positions == mTerrainPreloadPositions)
             return;
         else
         {
+            if (mTerrainViews.size() > positions.size())
+            {
+                for (unsigned int i=positions.size(); i<mTerrainViews.size(); ++i)
+                    mUnrefQueue->push(mTerrainViews[i]);
+                mTerrainViews.resize(positions.size());
+            }
+            else if (mTerrainViews.size() < positions.size())
+            {
+                for (unsigned int i=mTerrainViews.size(); i<positions.size(); ++i)
+                    mTerrainViews.push_back(mTerrain->createView());
+            }
+
             // TODO: provide some way of giving the preloaded view to the main thread when we enter the cell
             // right now, we just use it to make sure the resources are preloaded
             mTerrainPreloadPositions = positions;
-            mTerrainPreloadItem = new TerrainPreloadItem(mTerrainView, mTerrain, positions);
+            mTerrainPreloadItem = new TerrainPreloadItem(mTerrainViews, mTerrain, positions);
             mWorkQueue->addWorkItem(mTerrainPreloadItem);
         }
     }

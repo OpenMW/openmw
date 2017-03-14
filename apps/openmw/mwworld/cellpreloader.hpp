@@ -103,7 +103,7 @@ namespace MWWorld
         // Cells that are currently being preloaded, or have already finished preloading
         PreloadMap mPreloadCells;
 
-        osg::ref_ptr<Terrain::View> mTerrainView;
+        std::vector<osg::ref_ptr<Terrain::View> > mTerrainViews;
         std::vector<osg::Vec3f> mTerrainPreloadPositions;
         osg::ref_ptr<SceneUtil::WorkItem> mTerrainPreloadItem;
         osg::ref_ptr<SceneUtil::WorkItem> mUpdateCacheItem;
