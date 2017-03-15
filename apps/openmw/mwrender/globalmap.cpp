@@ -238,6 +238,9 @@ namespace MWRender
             removeCamera(*it);
         for (CameraVector::iterator it = mActiveCameras.begin(); it != mActiveCameras.end(); ++it)
             removeCamera(*it);
+
+        if (mWorkItem)
+            mWorkItem->waitTillDone();
     }
 
     void GlobalMap::render ()

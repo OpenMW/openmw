@@ -15,6 +15,7 @@
 namespace osg
 {
     class Group;
+    class Object;
 }
 
 namespace MWRender
@@ -80,7 +81,7 @@ namespace MWPhysics
             void updatePosition (const MWWorld::Ptr& ptr);
 
 
-            void addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts);
+            void addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject);
 
             void removeHeightField (int x, int y);
 

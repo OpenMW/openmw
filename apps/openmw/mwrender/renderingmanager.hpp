@@ -17,6 +17,12 @@ namespace osg
     class PositionAttitudeTransform;
 }
 
+namespace osgUtil
+{
+    class IntersectionVisitor;
+    class Intersector;
+}
+
 namespace Resource
 {
     class ResourceSystem;
@@ -59,6 +65,8 @@ namespace MWRender
     class Pathgrid;
     class Camera;
     class Water;
+    class TerrainStorage;
+    class LandManager;
 
     class RenderingManager : public MWRender::RenderingInterface
     {
@@ -99,6 +107,8 @@ namespace MWRender
 
         void addCell(const MWWorld::CellStore* store);
         void removeCell(const MWWorld::CellStore* store);
+
+        void enableTerrain(bool enable);
 
         void updatePtr(const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
 
@@ -190,13 +200,19 @@ namespace MWRender
 
         void exportSceneGraph(const MWWorld::Ptr& ptr, const std::string& filename, const std::string& format);
 
+        LandManager* getLandManager() const;
+
     private:
         void updateProjectionMatrix();
         void updateTextureFiltering();
         void updateAmbient();
         void setFogColor(const osg::Vec4f& color);
 
-        void reportStats();
+        void reportStats() const;
+
+        osg::ref_ptr<osgUtil::IntersectionVisitor> getIntersectionVisitor(osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors);
+
+        osg::ref_ptr<osgUtil::IntersectionVisitor> mIntersectionVisitor;
 
         osg::ref_ptr<osgViewer::Viewer> mViewer;
         osg::ref_ptr<osg::Group> mRootNode;
@@ -212,6 +228,7 @@ namespace MWRender
         std::auto_ptr<Objects> mObjects;
         std::auto_ptr<Water> mWater;
         std::auto_ptr<Terrain::World> mTerrain;
+        TerrainStorage* mTerrainStorage;
         std::auto_ptr<SkyManager> mSky;
         std::auto_ptr<EffectManager> mEffectManager;
         osg::ref_ptr<NpcAnimation> mPlayerAnimation;

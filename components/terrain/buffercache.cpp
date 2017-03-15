@@ -178,56 +178,56 @@ osg::ref_ptr<IndexArrayType> createIndexBuffer(unsigned int flags, unsigned int 
 namespace Terrain
 {
 
-    osg::ref_ptr<osg::Vec2Array> BufferCache::getUVBuffer()
+    osg::ref_ptr<osg::Vec2Array> BufferCache::getUVBuffer(unsigned int numVerts)
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mUvBufferMutex);
-        if (mUvBufferMap.find(mNumVerts) != mUvBufferMap.end())
+        if (mUvBufferMap.find(numVerts) != mUvBufferMap.end())
         {
-            return mUvBufferMap[mNumVerts];
+            return mUvBufferMap[numVerts];
         }
 
-        int vertexCount = mNumVerts * mNumVerts;
+        int vertexCount = numVerts * numVerts;
 
         osg::ref_ptr<osg::Vec2Array> uvs (new osg::Vec2Array);
         uvs->reserve(vertexCount);
 
-        for (unsigned int col = 0; col < mNumVerts; ++col)
+        for (unsigned int col = 0; col < numVerts; ++col)
         {
-            for (unsigned int row = 0; row < mNumVerts; ++row)
+            for (unsigned int row = 0; row < numVerts; ++row)
             {
-                uvs->push_back(osg::Vec2f(col / static_cast<float>(mNumVerts-1),
-                                          ((mNumVerts-1) - row) / static_cast<float>(mNumVerts-1)));
+                uvs->push_back(osg::Vec2f(col / static_cast<float>(numVerts-1),
+                                          ((numVerts-1) - row) / static_cast<float>(numVerts-1)));
             }
         }
 
         // Assign a VBO here to enable state sharing between different Geometries.
         uvs->setVertexBufferObject(new osg::VertexBufferObject);
 
-        mUvBufferMap[mNumVerts] = uvs;
+        mUvBufferMap[numVerts] = uvs;
         return uvs;
     }
 
-    osg::ref_ptr<osg::DrawElements> BufferCache::getIndexBuffer(unsigned int flags)
+    osg::ref_ptr<osg::DrawElements> BufferCache::getIndexBuffer(unsigned int numVerts, unsigned int flags)
     {
+        std::pair<int, int> id = std::make_pair(numVerts, flags);
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mIndexBufferMutex);
-        unsigned int verts = mNumVerts;
 
-        if (mIndexBufferMap.find(flags) != mIndexBufferMap.end())
+        if (mIndexBufferMap.find(id) != mIndexBufferMap.end())
         {
-            return mIndexBufferMap[flags];
+            return mIndexBufferMap[id];
         }
 
         osg::ref_ptr<osg::DrawElements> buffer;
 
-        if (verts*verts <= (0xffffu))
-            buffer = createIndexBuffer<osg::DrawElementsUShort>(flags, verts);
+        if (numVerts*numVerts <= (0xffffu))
+            buffer = createIndexBuffer<osg::DrawElementsUShort>(flags, numVerts);
         else
-            buffer = createIndexBuffer<osg::DrawElementsUInt>(flags, verts);
+            buffer = createIndexBuffer<osg::DrawElementsUInt>(flags, numVerts);
 
         // Assign a EBO here to enable state sharing between different Geometries.
         buffer->setElementBufferObject(new osg::ElementBufferObject);
 
-        mIndexBufferMap[flags] = buffer;
+        mIndexBufferMap[id] = buffer;
         return buffer;
     }
 

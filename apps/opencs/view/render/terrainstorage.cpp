@@ -9,7 +9,7 @@ namespace CSVRender
     {
     }
 
-    const ESM::Land* TerrainStorage::getLand(int cellX, int cellY)
+    osg::ref_ptr<const ESMTerrain::LandObject> TerrainStorage::getLand(int cellX, int cellY)
     {
         std::ostringstream stream;
         stream << "#" << cellX << " " << cellY;
@@ -21,9 +21,7 @@ namespace CSVRender
             return NULL;
 
         const ESM::Land& land = mData.getLand().getRecord(index).get();
-        int mask = ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX;
-        land.loadData (mask);
-        return &land;
+        return new ESMTerrain::LandObject(&land, ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX);
     }
 
     const ESM::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)

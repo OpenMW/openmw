@@ -516,21 +516,11 @@ namespace MWPhysics
     class HeightField
     {
     public:
-        HeightField(const float* heights, int x, int y, float triSize, float sqrtVerts)
+        HeightField(const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject)
         {
-            // find the minimum and maximum heights (needed for bullet)
-            float minh = heights[0];
-            float maxh = heights[0];
-            for(int i = 1;i < sqrtVerts*sqrtVerts;++i)
-            {
-                float h = heights[i];
-                if(h > maxh) maxh = h;
-                if(h < minh) minh = h;
-            }
-
             mShape = new btHeightfieldTerrainShape(
                 sqrtVerts, sqrtVerts, heights, 1,
-                minh, maxh, 2,
+                minH, maxH, 2,
                 PHY_FLOAT, false
             );
             mShape->setUseDiamondSubdivision(true);
@@ -539,11 +529,13 @@ namespace MWPhysics
             btTransform transform(btQuaternion::getIdentity(),
                                   btVector3((x+0.5f) * triSize * (sqrtVerts-1),
                                             (y+0.5f) * triSize * (sqrtVerts-1),
-                                            (maxh+minh)*0.5f));
+                                            (maxH+minH)*0.5f));
 
             mCollisionObject = new btCollisionObject;
             mCollisionObject->setCollisionShape(mShape);
             mCollisionObject->setWorldTransform(transform);
+
+            mHoldObject = holdObject;
         }
         ~HeightField()
         {
@@ -558,6 +550,7 @@ namespace MWPhysics
     private:
         btHeightfieldTerrainShape* mShape;
         btCollisionObject* mCollisionObject;
+        osg::ref_ptr<const osg::Object> mHoldObject;
 
         void operator=(const HeightField&);
         HeightField(const HeightField&);
@@ -1140,9 +1133,9 @@ namespace MWPhysics
             return MovementSolver::traceDown(ptr, position, found->second, mCollisionWorld, maxHeight);
     }
 
-    void PhysicsSystem::addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts)
+    void PhysicsSystem::addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject)
     {
-        HeightField *heightfield = new HeightField(heights, x, y, triSize, sqrtVerts);
+        HeightField *heightfield = new HeightField(heights, x, y, triSize, sqrtVerts, minH, maxH, holdObject);
         mHeightFields[std::make_pair(x,y)] = heightfield;
 
         mCollisionWorld->addCollisionObject(heightfield->getCollisionObject(), CollisionType_HeightMap,

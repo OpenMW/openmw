@@ -54,7 +54,7 @@ namespace Resource
         /// @note May be called from any thread.
         const VFS::Manager* getVFS() const;
 
-        void reportStats(unsigned int frameNumber, osg::Stats* stats);
+        void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
 
     private:
         std::auto_ptr<SceneManager> mSceneManager;

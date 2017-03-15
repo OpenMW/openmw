@@ -78,9 +78,9 @@ namespace MWWorld
             void getGridCenter(int& cellX, int& cellY);
 
             void preloadCells(float dt);
-            void preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos);
+            void preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos, std::vector<osg::Vec3f>& exteriorPositions);
             void preloadExteriorGrid(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos);
-            void preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos);
+            void preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos, std::vector<osg::Vec3f>& exteriorPositions);
 
         public:
 
@@ -89,6 +89,7 @@ namespace MWWorld
             ~Scene();
 
             void preloadCell(MWWorld::CellStore* cell, bool preloadSurrounding=false);
+            void preloadTerrain(const osg::Vec3f& pos);
 
             void unloadCell (CellStoreCollection::iterator iter);
 

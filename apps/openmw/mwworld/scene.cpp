@@ -19,6 +19,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
+#include "../mwrender/landmanager.hpp"
 
 #include "../mwphysics/physicssystem.hpp"
 
@@ -211,14 +212,11 @@ namespace MWWorld
 
     void Scene::update (float duration, bool paused)
     {
-        if (mPreloadEnabled)
+        mPreloadTimer += duration;
+        if (mPreloadTimer > 0.1f)
         {
-            mPreloadTimer += duration;
-            if (mPreloadTimer > 0.1f)
-            {
-                preloadCells(0.1f);
-                mPreloadTimer = 0.f;
-            }
+            preloadCells(0.1f);
+            mPreloadTimer = 0.f;
         }
 
         mRendering.update (duration, paused);
@@ -284,26 +282,19 @@ namespace MWWorld
             // Load terrain physics first...
             if (cell->getCell()->isExterior())
             {
-                const ESM::Land* land =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(
-                        cell->getCell()->getGridX(),
-                        cell->getCell()->getGridY()
-                    );
-                if (land && land->mDataTypes&ESM::Land::DATA_VHGT) {
-                    // Actually only VHGT is needed here, but we'll need the rest for rendering anyway.
-                    // Load everything now to reduce IO overhead.
-                    const int flags = ESM::Land::DATA_VCLR|ESM::Land::DATA_VHGT|ESM::Land::DATA_VNML|ESM::Land::DATA_VTEX;
-
-                    const ESM::Land::LandData *data = land->getLandData (flags);
-                    mPhysics->addHeightField (data->mHeights, cell->getCell()->getGridX(), cell->getCell()->getGridY(),
-                        worldsize / (verts-1), verts);
+                int cellX = cell->getCell()->getGridX();
+                int cellY = cell->getCell()->getGridY();
+                osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
+                const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : 0;
+                if (data)
+                {
+                    mPhysics->addHeightField (data->mHeights, cellX, cell->getCell()->getGridY(), worldsize / (verts-1), verts, data->mMinHeight, data->mMaxHeight, land.get());
                 }
                 else
                 {
                     static std::vector<float> defaultHeight;
                     defaultHeight.resize(verts*verts, ESM::Land::DEFAULT_HEIGHT);
-                    mPhysics->addHeightField (&defaultHeight[0], cell->getCell()->getGridX(), cell->getCell()->getGridY(),
-                            worldsize / (verts-1), verts);
+                    mPhysics->addHeightField (&defaultHeight[0], cell->getCell()->getGridX(), cell->getCell()->getGridY(), worldsize / (verts-1), verts, ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
                 }
             }
 
@@ -379,7 +370,6 @@ namespace MWWorld
             int newX, newY;
             MWBase::Environment::get().getWorld()->positionToIndex(pos.x(), pos.y(), newX, newY);
             changeCellGrid(newX, newY);
-            //mRendering.updateTerrain();
         }
     }
 
@@ -387,8 +377,6 @@ namespace MWWorld
     {
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
-
-        //mRendering.enableTerrain(true);
 
         std::string loadingExteriorText = "#{sLoadingMessage3}";
         loadingListener->setLabel(loadingExteriorText);
@@ -488,6 +476,8 @@ namespace MWWorld
     {
         mCurrentCell = cell;
 
+        mRendering.enableTerrain(cell->isExterior());
+
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr old = world->getPlayerPtr();
         world->getPlayer().setCell(cell);
@@ -529,7 +519,7 @@ namespace MWWorld
     , mPreloadDoors(Settings::Manager::getBool("preload doors", "Cells"))
     , mPreloadFastTravel(Settings::Manager::getBool("preload fast travel", "Cells"))
     {
-        mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager(), rendering.getTerrain()));
+        mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager(), rendering.getTerrain(), rendering.getLandManager()));
         mPreloader->setWorkQueue(mRendering.getWorkQueue());
 
         mPreloader->setUnrefQueue(rendering.getUnrefQueue());
@@ -570,8 +560,6 @@ namespace MWWorld
         std::string loadingInteriorText = "#{sLoadingMessage2}";
         loadingListener->setLabel(loadingInteriorText);
         Loading::ScopedLoad load(loadingListener);
-
-        //mRendering.enableTerrain(false);
 
         if(!loadcell)
         {
@@ -648,8 +636,6 @@ namespace MWWorld
 
         CellStore* current = MWBase::Environment::get().getWorld()->getExterior(x, y);
         changePlayerCell(current, position, adjustPlayerPos);
-
-        //mRendering.updateTerrain();
     }
 
     CellStore* Scene::getCurrentCell ()
@@ -753,22 +739,32 @@ namespace MWWorld
 
     void Scene::preloadCells(float dt)
     {
+        std::vector<osg::Vec3f> exteriorPositions;
+
         const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
         osg::Vec3f moved = playerPos - mLastPlayerPos;
         osg::Vec3f predictedPos = playerPos + moved / dt;
 
+        if (mCurrentCell->isExterior())
+            exteriorPositions.push_back(predictedPos);
+
         mLastPlayerPos = playerPos;
 
-        if (mPreloadDoors)
-            preloadTeleportDoorDestinations(playerPos, predictedPos);
-        if (mPreloadExteriorGrid)
-            preloadExteriorGrid(playerPos, predictedPos);
-        if (mPreloadFastTravel)
-            preloadFastTravelDestinations(playerPos, predictedPos);
+        if (mPreloadEnabled)
+        {
+            if (mPreloadDoors)
+                preloadTeleportDoorDestinations(playerPos, predictedPos, exteriorPositions);
+            if (mPreloadExteriorGrid)
+                preloadExteriorGrid(playerPos, predictedPos);
+            if (mPreloadFastTravel)
+                preloadFastTravelDestinations(playerPos, predictedPos, exteriorPositions);
+        }
+
+        mPreloader->setTerrainPreloadPositions(exteriorPositions);
     }
 
-    void Scene::preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos)
+    void Scene::preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos, std::vector<osg::Vec3f>& exteriorPositions)
     {
         std::vector<MWWorld::ConstPtr> teleportDoors;
         for (CellStoreCollection::const_iterator iter (mActiveCells.begin());
@@ -800,9 +796,11 @@ namespace MWWorld
                         preloadCell(MWBase::Environment::get().getWorld()->getInterior(door.getCellRef().getDestCell()));
                     else
                     {
+                        osg::Vec3f pos = door.getCellRef().getDoorDest().asVec3();
                         int x,y;
-                        MWBase::Environment::get().getWorld()->positionToIndex (door.getCellRef().getDoorDest().pos[0], door.getCellRef().getDoorDest().pos[1], x, y);
+                        MWBase::Environment::get().getWorld()->positionToIndex (pos.x(), pos.y(), x, y);
                         preloadCell(MWBase::Environment::get().getWorld()->getExterior(x,y), true);
+                        exteriorPositions.push_back(pos);
                     }
                 }
                 catch (std::exception& e)
@@ -868,6 +866,13 @@ namespace MWWorld
             mPreloader->preload(cell, mRendering.getReferenceTime());
     }
 
+    void Scene::preloadTerrain(const osg::Vec3f &pos)
+    {
+        std::vector<osg::Vec3f> vec;
+        vec.push_back(pos);
+        mPreloader->setTerrainPreloadPositions(vec);
+    }
+
     struct ListFastTravelDestinationsVisitor
     {
         ListFastTravelDestinationsVisitor(float preloadDist, const osg::Vec3f& playerPos)
@@ -898,7 +903,7 @@ namespace MWWorld
         std::vector<ESM::Transport::Dest> mList;
     };
 
-    void Scene::preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& /*predictedPos*/) // ignore predictedPos here since opening dialogue with travel service takes extra time
+    void Scene::preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& /*predictedPos*/, std::vector<osg::Vec3f>& exteriorPositions) // ignore predictedPos here since opening dialogue with travel service takes extra time
     {
         const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         ListFastTravelDestinationsVisitor listVisitor(mPreloadDistance, player.getRefData().getPosition().asVec3());
@@ -916,9 +921,11 @@ namespace MWWorld
                 preloadCell(MWBase::Environment::get().getWorld()->getInterior(it->mCellName));
             else
             {
+                osg::Vec3f pos = it->mPos.asVec3();
                 int x,y;
-                MWBase::Environment::get().getWorld()->positionToIndex( it->mPos.pos[0], it->mPos.pos[1], x, y);
+                MWBase::Environment::get().getWorld()->positionToIndex( pos.x(), pos.y(), x, y);
                 preloadCell(MWBase::Environment::get().getWorld()->getExterior(x,y), true);
+                exteriorPositions.push_back(pos);
             }
         }
     }

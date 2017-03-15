@@ -118,7 +118,7 @@ add_component_dir (translation
     )
 
 add_component_dir (terrain
-    storage world buffercache defs terraingrid material
+    storage world buffercache defs terraingrid material terraindrawable texturemanager chunkmanager compositemaprenderer quadtreeworld quadtreenode viewdata
     )
 
 add_component_dir (loadinglistener
@@ -243,7 +243,6 @@ target_link_libraries(components
     ${OSGVIEWER_LIBRARIES}
     ${OSGTEXT_LIBRARIES}
     ${OSGGA_LIBRARIES}
-    ${OSGFX_LIBRARIES}
     ${OSGANIMATION_LIBRARIES}
     ${Bullet_LIBRARIES}
     ${SDL2_LIBRARIES}

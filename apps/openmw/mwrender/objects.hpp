@@ -15,11 +15,6 @@ namespace osg
     class Group;
 }
 
-namespace osgUtil
-{
-    class IncrementalCompileOperation;
-}
-
 namespace Resource
 {
     class ResourceSystem;

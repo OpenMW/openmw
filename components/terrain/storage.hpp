@@ -18,6 +18,7 @@ namespace osg
 namespace Terrain
 {
     /// We keep storage of terrain data abstract here since we need different implementations for game and editor
+    /// @note The implementation must be thread safe.
     class Storage
     {
     public:
@@ -78,6 +79,8 @@ namespace Terrain
 
         /// Get the number of vertices on one side for each cell. Should be (power of two)+1
         virtual int getCellVertices() = 0;
+
+        virtual int getBlendmapScale(float chunkSize) = 0;
     };
 
 }

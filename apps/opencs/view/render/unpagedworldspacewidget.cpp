@@ -16,6 +16,7 @@
 #include "../widget/scenetooltoggle2.hpp"
 
 #include "mask.hpp"
+#include "tagbase.hpp"
 
 void CSVRender::UnpagedWorldspaceWidget::update()
 {

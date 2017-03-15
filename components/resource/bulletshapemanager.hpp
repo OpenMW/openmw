@@ -42,7 +42,7 @@ namespace Resource
         /// @see ResourceManager::updateCache
         virtual void updateCache(double referenceTime);
 
-        void reportStats(unsigned int frameNumber, osg::Stats *stats);
+        void reportStats(unsigned int frameNumber, osg::Stats *stats) const;
 
     private:
         osg::ref_ptr<BulletShapeInstance> createInstance(const std::string& name);

@@ -174,9 +174,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     camera->setNodeMask(Mask_RenderToTexture);
 
     osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
-    stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
-    stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
-    stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+
     // assign large value to effectively turn off fog
     // shaders don't respect glDisable(GL_FOG)
     osg::ref_ptr<osg::Fog> fog (new osg::Fog);
@@ -351,6 +349,11 @@ void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell)
 
     osg::ref_ptr<osg::Camera> camera = createOrthographicCamera(x*mMapWorldSize + mMapWorldSize/2.f, y*mMapWorldSize + mMapWorldSize/2.f, mMapWorldSize, mMapWorldSize,
                                                                 osg::Vec3d(0,1,0), zmin, zmax);
+    camera->getOrCreateUserDataContainer()->addDescription("NoTerrainLod");
+    std::ostringstream stream;
+    stream << x << " " << y;
+    camera->getOrCreateUserDataContainer()->addDescription(stream.str());
+
     setupRenderToTexture(camera, cell->getCell()->getGridX(), cell->getCell()->getGridY());
 
     MapSegment& segment = mSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())];

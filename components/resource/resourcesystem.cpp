@@ -85,9 +85,9 @@ namespace Resource
         return mVFS;
     }
 
-    void ResourceSystem::reportStats(unsigned int frameNumber, osg::Stats *stats)
+    void ResourceSystem::reportStats(unsigned int frameNumber, osg::Stats *stats) const
     {
-        for (std::vector<ResourceManager*>::iterator it = mResourceManagers.begin(); it != mResourceManagers.end(); ++it)
+        for (std::vector<ResourceManager*>::const_iterator it = mResourceManagers.begin(); it != mResourceManagers.end(); ++it)
             (*it)->reportStats(frameNumber, stats);
     }
 

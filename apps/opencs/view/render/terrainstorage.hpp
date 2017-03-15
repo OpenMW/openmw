@@ -18,7 +18,7 @@ namespace CSVRender
     private:
         const CSMWorld::Data& mData;
 
-        virtual const ESM::Land* getLand (int cellX, int cellY);
+        virtual osg::ref_ptr<const ESMTerrain::LandObject> getLand (int cellX, int cellY);
         virtual const ESM::LandTexture* getLandTexture(int index, short plugin);
 
         virtual void getBounds(float& minX, float& maxX, float& minY, float& maxY);

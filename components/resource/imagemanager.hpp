@@ -32,7 +32,7 @@ namespace Resource
 
         osg::Image* getWarningImage();
 
-        void reportStats(unsigned int frameNumber, osg::Stats* stats);
+        void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
 
     private:
         osg::ref_ptr<osg::Image> mWarningImage;

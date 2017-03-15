@@ -621,6 +621,11 @@ namespace Resource
         mIncrementalCompileOperation = ico;
     }
 
+    osgUtil::IncrementalCompileOperation *SceneManager::getIncrementalCompileOperation()
+    {
+        return mIncrementalCompileOperation.get();
+    }
+
     Resource::ImageManager* SceneManager::getImageManager()
     {
         return mImageManager;
@@ -689,16 +694,16 @@ namespace Resource
 
     void SceneManager::updateCache(double referenceTime)
     {
-        mSharedStateMutex.lock();
-        mSharedStateManager->prune();
-        mSharedStateMutex.unlock();
-
         ResourceManager::updateCache(referenceTime);
 
         mInstanceCache->removeUnreferencedObjectsInCache();
+
+        mSharedStateMutex.lock();
+        mSharedStateManager->prune();
+        mSharedStateMutex.unlock();
     }
 
-    void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats)
+    void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
     {
         {
             OpenThreads::ScopedLock<OpenThreads::Mutex> lock(*mIncrementalCompileOperation->getToCompiledMutex());

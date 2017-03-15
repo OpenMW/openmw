@@ -121,6 +121,8 @@ namespace Resource
         /// Set up an IncrementalCompileOperation for background compiling of loaded scenes.
         void setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation* ico);
 
+        osgUtil::IncrementalCompileOperation* getIncrementalCompileOperation();
+
         Resource::ImageManager* getImageManager();
 
         /// @param mask The node mask to apply to loaded particle system nodes.
@@ -141,7 +143,7 @@ namespace Resource
         /// @see ResourceManager::updateCache
         virtual void updateCache(double referenceTime);
 
-        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats);
+        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
 
     private:
 
@@ -158,7 +160,7 @@ namespace Resource
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
-        OpenThreads::Mutex mSharedStateMutex;
+        mutable OpenThreads::Mutex mSharedStateMutex;
 
         Resource::ImageManager* mImageManager;
         Resource::NifFileManager* mNifFileManager;
