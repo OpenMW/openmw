@@ -1057,7 +1057,7 @@ void Optimizer::MergeGeometryVisitor::checkAllowedToMerge()
     {
         osg::StateSet* stateSet = *it;
         osg::StateSet::RenderBinMode mode = stateSet->getRenderBinMode();
-        if (override && (!mode & osg::StateSet::PROTECTED_RENDERBIN_DETAILS))
+        if (override && !(mode & osg::StateSet::PROTECTED_RENDERBIN_DETAILS))
             continue;
         if (mode & osg::StateSet::USE_RENDERBIN_DETAILS)
             renderingHint = stateSet->getRenderingHint();

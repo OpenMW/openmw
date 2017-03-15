@@ -37,7 +37,7 @@ namespace
         return targetlevel;
     }
 
-    float distance(const osg::BoundingBox& box, const osg::Vec3f& v)
+    float distanceToBox(const osg::BoundingBox& box, const osg::Vec3f& v)
     {
         if (box.contains(v))
             return 0;
@@ -79,7 +79,7 @@ public:
 
     virtual bool isSufficientDetail(QuadTreeNode* node, const osg::Vec3f& eyePoint)
     {
-        float dist = distance(node->getBoundingBox(), eyePoint);
+        float dist = distanceToBox(node->getBoundingBox(), eyePoint);
         int nativeLodLevel = Log2(static_cast<unsigned int>(node->getSize()/mMinSize));
         int lodLevel = Log2(static_cast<unsigned int>(dist/(8192*mMinSize)));
 
