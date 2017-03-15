@@ -1955,12 +1955,14 @@ namespace MWGui
 
     void WindowManager::cycleSpell(bool next)
     {
-        mSpellWindow->cycle(next);
+        if (!isGuiMode())
+            mSpellWindow->cycle(next);
     }
 
     void WindowManager::cycleWeapon(bool next)
     {
-        mInventoryWindow->cycle(next);
+        if (!isGuiMode())
+            mInventoryWindow->cycle(next);
     }
 
     void WindowManager::setConsoleSelectedObject(const MWWorld::Ptr &object)
