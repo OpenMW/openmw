@@ -1,6 +1,7 @@
 #include "weapon.hpp"
 
 #include <components/esm/loadweap.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -261,8 +262,8 @@ namespace MWClass
 
         std::string text;
 
-        // weapon type & damage. arrows / bolts don't have his info.
-        if (ref->mBase->mData.mType < 12)
+        // weapon type & damage
+        if ((ref->mBase->mData.mType < 12 || Settings::Manager::getBool("show projectile damage", "Game")) && ref->mBase->mData.mType < 14)
         {
             text += "\n#{sType} ";
 
@@ -279,6 +280,8 @@ namespace MWClass
             mapping[ESM::Weapon::MarksmanBow] = std::make_pair("sSkillMarksman", "");
             mapping[ESM::Weapon::MarksmanCrossbow] = std::make_pair("sSkillMarksman", "");
             mapping[ESM::Weapon::MarksmanThrown] = std::make_pair("sSkillMarksman", "");
+            mapping[ESM::Weapon::Arrow] = std::make_pair("sSkillMarksman", "");
+            mapping[ESM::Weapon::Bolt] = std::make_pair("sSkillMarksman", "");
 
             std::string type = mapping[ref->mBase->mData.mType].first;
             std::string oneOrTwoHanded = mapping[ref->mBase->mData.mType].second;
