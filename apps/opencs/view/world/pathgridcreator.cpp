@@ -48,6 +48,8 @@ CSVWorld::PathgridCreator::PathgridCreator(
 
     mCell->model()->sort(0);
     mCell->setCurrentIndex(0);
+
+    connect(mCell, SIGNAL (currentIndexChanged(const QString&)), this, SLOT (cellChanged()));
 }
 
 std::string CSVWorld::PathgridCreator::getErrors() const
@@ -72,4 +74,20 @@ std::string CSVWorld::PathgridCreator::getErrors() const
     }
 
     return errors;
+}
+
+void CSVWorld::PathgridCreator::focus()
+{
+    mCell->setFocus();
+}
+
+void CSVWorld::PathgridCreator::reset()
+{
+    CSVWorld::GenericCreator::reset();
+    mCell->setCurrentIndex(0);
+}
+
+void CSVWorld::PathgridCreator::cellChanged()
+{
+    update();
 }

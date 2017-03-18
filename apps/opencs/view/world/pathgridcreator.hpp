@@ -29,6 +29,17 @@ namespace CSVWorld
 
             /// \return Error description for current user input.
             virtual std::string getErrors() const;
+
+            /// \brief Set focus to cell ID input widget.
+            virtual void focus();
+
+            /// \brief Reset selected cell ID.
+            virtual void reset();
+
+        private slots:
+
+            /// \brief Check user input for errors.
+            void cellChanged();
     };
 }
 
