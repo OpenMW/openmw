@@ -40,6 +40,9 @@ namespace CSVWorld
 
             /// \brief Check user input for errors.
             void cellChanged();
+
+            /// \brief Setup cells in combo box.
+            void setupCellsInput();
     };
 }
 

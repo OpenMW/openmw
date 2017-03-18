@@ -33,22 +33,9 @@ CSVWorld::PathgridCreator::PathgridCreator(
     mCell->setModel(proxyModel);
     insertBeforeButtons(mCell, true);
 
-    // Populate combo box with cells that don't have a pathgrid yet.
-    const CSMWorld::IdCollection<CSMWorld::Pathgrid>& pathgrids = getData().getPathgrids();
-    const CSMWorld::IdCollection<CSMWorld::Cell>& cells = getData().getCells();
-    const int cellCount = cells.getSize();
-    for (int i = 0; i < cellCount; ++i)
-    {
-        std::string cellId = cells.getId(i);
-        if (pathgrids.searchId(cellId) == -1)
-        {
-            mCell->addItem(QString::fromStdString(cellId));
-        }
-    }
+    setupCellsInput();
 
-    mCell->model()->sort(0);
-    mCell->setCurrentIndex(0);
-
+    connect(&getData(), SIGNAL (idListChanged()), this, SLOT (setupCellsInput()));
     connect(mCell, SIGNAL (currentIndexChanged(const QString&)), this, SLOT (cellChanged()));
 }
 
@@ -90,4 +77,25 @@ void CSVWorld::PathgridCreator::reset()
 void CSVWorld::PathgridCreator::cellChanged()
 {
     update();
+}
+
+void CSVWorld::PathgridCreator::setupCellsInput()
+{
+    mCell->clear();
+
+    // Populate combo box with cells that don't have a pathgrid yet.
+    const CSMWorld::IdCollection<CSMWorld::Pathgrid>& pathgrids = getData().getPathgrids();
+    const CSMWorld::IdCollection<CSMWorld::Cell>& cells = getData().getCells();
+    const int cellCount = cells.getSize();
+    for (int i = 0; i < cellCount; ++i)
+    {
+        std::string cellId = cells.getId(i);
+        if (pathgrids.searchId(cellId) == -1)
+        {
+            mCell->addItem(QString::fromStdString(cellId));
+        }
+    }
+
+    mCell->model()->sort(0);
+    mCell->setCurrentIndex(0);
 }
