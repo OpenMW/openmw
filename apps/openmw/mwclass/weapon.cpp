@@ -321,6 +321,14 @@ namespace MWClass
                     + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
         }
 
+        // add reach and attack speed for melee weapon
+        if (ref->mBase->mData.mType < 9 && Settings::Manager::getBool("show melee info", "Game"))
+        {
+            text += MWGui::ToolTips::getPercentString(ref->mBase->mData.mReach, "#{sRange}");
+
+            text += MWGui::ToolTips::getPercentString(ref->mBase->mData.mSpeed, "#{sAttributeSpeed}");
+        }
+
         text += MWGui::ToolTips::getWeightString(ref->mBase->mData.mWeight, "#{sWeight}");
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 

@@ -594,6 +594,14 @@ namespace MWGui
             return "\n" + prefix + ": " + toString(weight);
     }
 
+    std::string ToolTips::getPercentString(const float value, const std::string& prefix)
+    {
+        if (value == 0)
+            return "";
+        else
+            return "\n" + prefix + ": " + toString(value*100) +"%";
+    }
+
     std::string ToolTips::getValueString(const int value, const std::string& prefix)
     {
         if (value == 0)
