@@ -88,6 +88,10 @@ void CompositeMapRenderer::compile(CompositeMap &compositeMap, osg::RenderInfo &
         return;
     }
 
+    // inform State that Texture attribute has changed due to compiling of FBO texture
+    // should OSG be doing this on its own?
+    state.haveAppliedTextureAttribute(state.getActiveTextureUnit(), osg::StateAttribute::TEXTURE);
+
     for (unsigned int i=compositeMap.mCompiled; i<compositeMap.mDrawables.size(); ++i)
     {
         osg::Drawable* drw = compositeMap.mDrawables[i];
