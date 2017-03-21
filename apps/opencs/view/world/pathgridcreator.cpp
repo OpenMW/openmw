@@ -1,21 +1,33 @@
 #include "pathgridcreator.hpp"
 
-#include <QComboBox>
 #include <QLabel>
-#include <QSortFilterProxyModel>
-#include <QStringListModel>
 
+#include "../../model/doc/document.hpp"
+
+#include "../../model/world/columns.hpp"
 #include "../../model/world/data.hpp"
+#include "../../model/world/idcompletionmanager.hpp"
+#include "../../model/world/idtable.hpp"
+
+#include "../widget/droplineedit.hpp"
 
 std::string CSVWorld::PathgridCreator::getId() const
 {
-    return mCell->currentText().toUtf8().constData();
+    return mCell->text().toUtf8().constData();
+}
+
+CSMWorld::IdTable& CSVWorld::PathgridCreator::getPathgridsTable() const
+{
+    return dynamic_cast<CSMWorld::IdTable&> (
+        *getData().getTableModel(getCollectionId())
+    );
 }
 
 CSVWorld::PathgridCreator::PathgridCreator(
     CSMWorld::Data& data,
     QUndoStack& undoStack,
     const CSMWorld::UniversalId& id,
+    CSMWorld::IdCompletionManager& completionManager,
     bool relaxedIdRules
 ) : GenericCreator(data, undoStack, id, relaxedIdRules)
 {
@@ -24,19 +36,26 @@ CSVWorld::PathgridCreator::PathgridCreator(
     QLabel *label = new QLabel("Cell ID", this);
     insertBeforeButtons(label, false);
 
-    // Create combo box with case-insensitive sorting.
-    mCell = new QComboBox(this);
-    QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel;
-    QStringListModel *listModel = new QStringListModel;
-    proxyModel->setSourceModel(listModel);
-    proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);
-    mCell->setModel(proxyModel);
+    // Add cell ID input with auto-completion.
+    CSMWorld::ColumnBase::Display displayType = CSMWorld::ColumnBase::Display_Cell;
+    mCell = new CSVWidget::DropLineEdit(displayType, this);
+    mCell->setCompleter(completionManager.getCompleter(displayType).get());
     insertBeforeButtons(mCell, true);
 
-    setupCellsInput();
+    connect(mCell, SIGNAL (textChanged(const QString&)), this, SLOT (cellChanged()));
+    connect(mCell, SIGNAL (returnPressed()), this, SLOT (inputReturnPressed()));
+}
 
-    connect(&getData(), SIGNAL (idListChanged()), this, SLOT (setupCellsInput()));
-    connect(mCell, SIGNAL (currentIndexChanged(const QString&)), this, SLOT (cellChanged()));
+void CSVWorld::PathgridCreator::cloneMode(
+    const std::string& originId,
+    const CSMWorld::UniversalId::Type type)
+{
+    CSVWorld::GenericCreator::cloneMode(originId, type);
+
+    // Look up cloned record in pathgrids table and set cell ID text.
+    CSMWorld::IdTable& table = getPathgridsTable();
+    int column = table.findColumnIndex(CSMWorld::Columns::ColumnId_Id);
+    mCell->setText(table.data(table.getModelIndex(originId, column)).toString());
 }
 
 std::string CSVWorld::PathgridCreator::getErrors() const
@@ -71,7 +90,7 @@ void CSVWorld::PathgridCreator::focus()
 void CSVWorld::PathgridCreator::reset()
 {
     CSVWorld::GenericCreator::reset();
-    mCell->setCurrentIndex(0);
+    mCell->setText("");
 }
 
 void CSVWorld::PathgridCreator::cellChanged()
@@ -79,23 +98,14 @@ void CSVWorld::PathgridCreator::cellChanged()
     update();
 }
 
-void CSVWorld::PathgridCreator::setupCellsInput()
+CSVWorld::Creator *CSVWorld::PathgridCreatorFactory::makeCreator(
+    CSMDoc::Document& document,
+    const CSMWorld::UniversalId& id) const
 {
-    mCell->clear();
-
-    // Populate combo box with cells that don't have a pathgrid yet.
-    const CSMWorld::IdCollection<CSMWorld::Pathgrid>& pathgrids = getData().getPathgrids();
-    const CSMWorld::IdCollection<CSMWorld::Cell>& cells = getData().getCells();
-    const int cellCount = cells.getSize();
-    for (int i = 0; i < cellCount; ++i)
-    {
-        std::string cellId = cells.getId(i);
-        if (pathgrids.searchId(cellId) == -1)
-        {
-            mCell->addItem(QString::fromStdString(cellId));
-        }
-    }
-
-    mCell->model()->sort(0);
-    mCell->setCurrentIndex(0);
+    return new PathgridCreator(
+        document.getData(),
+        document.getUndoStack(),
+        id,
+        document.getIdCompletionManager()
+    );
 }
