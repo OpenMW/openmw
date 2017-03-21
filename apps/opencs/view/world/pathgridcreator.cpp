@@ -10,6 +10,7 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../widget/droplineedit.hpp"
+#include "idvalidator.hpp"
 
 std::string CSVWorld::PathgridCreator::getId() const
 {
@@ -40,6 +41,7 @@ CSVWorld::PathgridCreator::PathgridCreator(
     CSMWorld::ColumnBase::Display displayType = CSMWorld::ColumnBase::Display_Cell;
     mCell = new CSVWidget::DropLineEdit(displayType, this);
     mCell->setCompleter(completionManager.getCompleter(displayType).get());
+    mCell->setValidator(new IdValidator(relaxedIdRules, this));
     insertBeforeButtons(mCell, true);
 
     connect(mCell, SIGNAL (textChanged(const QString&)), this, SLOT (cellChanged()));
