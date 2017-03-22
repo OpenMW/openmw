@@ -546,7 +546,7 @@ namespace MWClass
 
     bool Creature::hasToolTip(const MWWorld::ConstPtr& ptr) const
     {
-        if (!ptr.getRefData().getCustomData())
+        if (!ptr.getRefData().getCustomData() || MWBase::Environment::get().getWindowManager()->isGuiMode())
             return true;
 
         const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();

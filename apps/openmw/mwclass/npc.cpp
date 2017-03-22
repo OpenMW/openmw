@@ -1007,7 +1007,7 @@ namespace MWClass
 
     bool Npc::hasToolTip(const MWWorld::ConstPtr& ptr) const
     {
-        if (!ptr.getRefData().getCustomData())
+        if (!ptr.getRefData().getCustomData() || MWBase::Environment::get().getWindowManager()->isGuiMode())
             return true;
 
         const NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
