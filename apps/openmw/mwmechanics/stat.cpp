@@ -189,7 +189,7 @@ namespace MWMechanics
 
     void AttributeValue::setBase(int base)
     {
-        mBase = std::max(0, base);
+        mBase = base;
     }
 
     void AttributeValue::setModifier(int mod)
