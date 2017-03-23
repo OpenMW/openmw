@@ -364,8 +364,10 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
 {
     if(force || movement != mMovementState)
     {
-        mIdleState = CharState_None;
         mMovementState = movement;
+
+        if (movement != CharState_None)
+            mIdleState = CharState_None;
 
         std::string movementAnimName;
         MWRender::Animation::BlendMask movemask = MWRender::Animation::BlendMask_All;
