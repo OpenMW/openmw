@@ -1834,7 +1834,7 @@ void CharacterController::update(float duration)
         if (onground)
             cls.getCreatureStats(mPtr).land();
 
-        if(movestate != CharState_None)
+        if(movestate != CharState_None && movestate != CharState_TurnLeft && movestate != CharState_TurnRight)
             clearAnimQueue();
 
         if(mAnimQueue.empty() || inwater || sneak)
