@@ -414,10 +414,10 @@ namespace MWGui
 
         const MyGUI::IntPoint padding(8, 8);
 
-        const int maximumWidth = 500;
-
         const int imageCaptionHPadding = (caption != "" ? 8 : 0);
         const int imageCaptionVPadding = (caption != "" ? 4 : 0);
+
+        const int maximumWidth = MyGUI::RenderManager::getInstance().getViewSize().width - imageCaptionHPadding * 2;
 
         std::string realImage = MWBase::Environment::get().getWindowManager()->correctIconPath(image);
 
