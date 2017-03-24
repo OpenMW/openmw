@@ -76,7 +76,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, InfoCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_Pathgrids,
-        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<PathgridCreator> >);
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, PathgridCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_Globals,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GlobalCreator> >);
@@ -174,7 +174,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, JournalCreatorFactory> (false));
 
     manager.add (CSMWorld::UniversalId::Type_Pathgrid,
-        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<PathgridCreator> > (false));
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, PathgridCreatorFactory> (false));
 
     manager.add (CSMWorld::UniversalId::Type_DebugProfile,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> > (false));
