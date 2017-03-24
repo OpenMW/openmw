@@ -9,6 +9,10 @@
         </BasisSkin>
     </Resource>
 
+    <Resource type="ResourceSkin" name="TransparentBG" size="8 8" texture="transparent">
+        <Property key="Colour" value="#{fontcolour=background}"/>
+    </Resource>
+
     <!-- Define the borders for pin button (up) -->
     <Resource type="ResourceSkin" name="PU_B" size="12 2" texture="textures\menu_rightbuttonup_bottom.dds">
         <Property key="NeedMouse" value="false"/>
