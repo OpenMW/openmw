@@ -324,6 +324,9 @@ namespace MWMechanics
                 winMgr->setValue(fbar, stats.getFatigue());
             }
 
+            // FIXME: if game is just started and actor is already drowning (on savegame loading),
+            // drowning bar will be hidden, because
+            // getTimeToStartDrowning = mWatchedTimeToStartDrowning = 0.
             if(stats.getTimeToStartDrowning() != mWatchedTimeToStartDrowning)
             {
                 const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()

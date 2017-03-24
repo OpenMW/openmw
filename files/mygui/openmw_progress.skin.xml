@@ -39,8 +39,18 @@
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
     </Resource>
-
-
+    <Resource type="ResourceSkin" name="MW_Progress_Drowning_Full_Small" size="16 8" texture="white" >
+        <Property key="Colour" value="0.035 0.545 0.545"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="MW_Progress_Drowning_Small" size="16 8" texture="white" >
+        <Property key="Colour" value="0.785 0 0"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
+        </BasisSkin>
+    </Resource>
     <Resource type="ResourceSkin" name="ProgressText" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Top HCenter"/>
@@ -76,17 +86,10 @@
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_Progress_LightBlue" size="64 6">
-        <Property key="TrackSkin" value="MW_BigTrack_Progress_Blue_Small"/>
+    <Resource type="ResourceSkin" name="MW_Progress_Drowning_Full" size="64 6">
+        <Property key="TrackSkin" value="MW_Progress_Drowning_Full_Small"/>
         <Property key="TrackFill" value="1"/>
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 64 6" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 2" align="Stretch" name="Client"/>
-    </Resource>
-
-    <Resource type="ResourceSkin" name="MW_Progress_Drowning" size="64 6">
-        <Property key="TrackSkin" value="MW_BigTrack_Progress_Red_Small"/>
-        <Property key="TrackFill" value="1"/>
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_ProgressScroll_Loading" size="64 6">
