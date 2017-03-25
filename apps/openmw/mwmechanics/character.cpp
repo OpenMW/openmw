@@ -1574,6 +1574,8 @@ void CharacterController::update(float duration)
 
     updateMagicEffects();
 
+    bool godmode = mPtr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+
     if(!cls.isActor())
         updateAnimQueue();
     else if(!cls.getCreatureStats(mPtr).isDead())
@@ -1691,8 +1693,12 @@ void CharacterController::update(float duration)
         }
         fatigueLoss *= duration;
         DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
-        fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss, fatigue.getCurrent() < 0);
-        cls.getCreatureStats(mPtr).setFatigue(fatigue);
+
+        if (!godmode)
+        {
+            fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss, fatigue.getCurrent() < 0);
+            cls.getCreatureStats(mPtr).setFatigue(fatigue);
+        }
 
         if(sneak || inwater || flying)
             vec.z() = 0.0f;
@@ -1748,8 +1754,12 @@ void CharacterController::update(float duration)
                 if (normalizedEncumbrance > 1)
                     normalizedEncumbrance = 1;
                 const float fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
-                fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
-                cls.getCreatureStats(mPtr).setFatigue(fatigue);
+
+                if (!godmode)
+                {
+                    fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
+                    cls.getCreatureStats(mPtr).setFatigue(fatigue);
+                }
             }
         }
         else if(mJumpState == JumpState_InAir)
@@ -1760,16 +1770,22 @@ void CharacterController::update(float duration)
 
             float height = cls.getCreatureStats(mPtr).land();
             float healthLost = getFallDamage(mPtr, height);
+
+            bool godmode = mPtr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState(); 
+
             if (healthLost > 0.0f)
             {
                 const float fatigueTerm = cls.getCreatureStats(mPtr).getFatigueTerm();
 
                 // inflict fall damages
-                DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
-                float realHealthLost = static_cast<float>(healthLost * (1.0f - 0.25f * fatigueTerm));
-                health.setCurrent(health.getCurrent() - realHealthLost);
-                cls.getCreatureStats(mPtr).setHealth(health);
-                cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), osg::Vec3f(), true);
+                if (!godmode)
+                {
+                    DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
+                    float realHealthLost = static_cast<float>(healthLost * (1.0f - 0.25f * fatigueTerm));
+                    health.setCurrent(health.getCurrent() - realHealthLost);
+                    cls.getCreatureStats(mPtr).setHealth(health);
+                    cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), osg::Vec3f(), true);
+                }
 
                 const int acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
                 if (healthLost > (acrobaticsSkill * fatigueTerm))
