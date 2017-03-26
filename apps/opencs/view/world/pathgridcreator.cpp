@@ -32,7 +32,7 @@ CSVWorld::PathgridCreator::PathgridCreator(
 {
     setManualEditing(false);
 
-    QLabel *label = new QLabel("Cell ID", this);
+    QLabel *label = new QLabel("Cell", this);
     insertBeforeButtons(label, false);
 
     // Add cell ID input with auto-completion.

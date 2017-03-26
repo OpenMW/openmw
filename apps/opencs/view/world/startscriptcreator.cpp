@@ -34,7 +34,7 @@ CSVWorld::StartScriptCreator::StartScriptCreator(
     setManualEditing(false);
 
     // Add script ID input label.
-    QLabel *label = new QLabel("Script ID", this);
+    QLabel *label = new QLabel("Script", this);
     insertBeforeButtons(label, false);
 
     // Add script ID input with auto-completion.
