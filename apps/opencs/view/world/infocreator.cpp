@@ -48,6 +48,8 @@ CSVWorld::InfoCreator::InfoCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     QLabel *label = new QLabel ("Topic", this);
     insertBeforeButtons (label, false);
 
+    // Add topic/journal ID input with auto-completion.
+    // Only existing topic/journal IDs are accepted so no ID validation is performed.
     CSMWorld::ColumnBase::Display displayType = CSMWorld::ColumnBase::Display_Topic;
     if (getCollectionId().getType() == CSMWorld::UniversalId::Type_JournalInfos)
     {
