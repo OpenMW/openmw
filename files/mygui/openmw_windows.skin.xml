@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Resource" version="1.1">
-    <!-- Defines a transparent background -->
+    <!-- Defines a partially transparent background -->
     <Resource type="ResourceSkin" name="BlackBG" size="8 8" texture="transparent">
         <Property key="Colour" value="#{fontcolour=background}"/>
         <BasisSkin type="MainSkin" offset="0 0 8 8">
@@ -9,6 +9,14 @@
         </BasisSkin>
     </Resource>
 
+     <!-- Defines a non-transparent background -->
+    <Resource type="ResourceSkin" name="FullBlackBG" size="8 8" texture="black">
+        <BasisSkin type="MainSkin" offset="0 0 8 8">
+            <State name="normal" offset="0 0 8 8"/>
+        </BasisSkin>
+    </Resource>
+
+    <!-- Defines a non-transparent background -->
     <Resource type="ResourceSkin" name="TransparentBG" size="8 8" texture="transparent">
         <Property key="Colour" value="#{fontcolour=background}"/>
     </Resource>
@@ -855,6 +863,37 @@
 
     <Resource type="ResourceSkin" name="MW_Dialog" size="256 54">
         <Child type="Widget" skin="BlackBG" offset="4 4 248 46" align="Stretch" name="Client"/>
+
+        <!-- Outer borders -->
+        <Child type="Widget" skin="DB_T" offset="4 0 248 4" align="Top HStretch" name="Border">
+            <Property key="Scale" value="0 1 0 -1"/>
+        </Child>
+        <Child type="Widget" skin="DB_L" offset="0 4 4 46" align="Left VStretch" name="Border">
+            <Property key="Scale" value="1 0 -1 0"/>
+        </Child>
+        <Child type="Widget" skin="DB_B" offset="4 50 248 4" align="Bottom HStretch" name="Border">
+            <Property key="Scale" value="0 0 0 1"/>
+        </Child>
+        <Child type="Widget" skin="DB_R" offset="252 4 4 46" align="Right VStretch" name="Border">
+            <Property key="Scale" value="0 0 1 0"/>
+        </Child>
+
+        <Child type="Widget" skin="DB_BR" offset="252 50 4 4" align="Right Bottom" name="Border">
+            <Property key="Scale" value="0 0 1 1"/>
+        </Child>
+        <Child type="Widget" skin="DB_BL" offset="0 50 4 4" align="Left Bottom" name="Border">
+            <Property key="Scale" value="1 0 -1 1"/>
+        </Child>
+        <Child type="Widget" skin="DB_TR" offset="252 0 4 4" align="Right Top" name="Border">
+            <Property key="Scale" value="0 1 1 -1"/>
+        </Child>
+        <Child type="Widget" skin="DB_TL" offset="0 0 4 4" align="Left Top" name="Border">
+            <Property key="Scale" value="1 1 -1 -1"/>
+        </Child>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_DialogNoTransp" size="256 54">
+        <Child type="Widget" skin="FullBlackBG" offset="4 4 248 46" align="Stretch" name="Client"/>
 
         <!-- Outer borders -->
         <Child type="Widget" skin="DB_T" offset="4 0 248 4" align="Top HStretch" name="Border">

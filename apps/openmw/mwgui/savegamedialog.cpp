@@ -253,6 +253,21 @@ namespace MWGui
                 return;
             }
         }
+        else
+        {
+            MWBase::StateManager::State state = MWBase::Environment::get().getStateManager()->getState();
+
+            // If game is running, ask for confirmation first
+            if (state == MWBase::StateManager::State_Running && !reallySure)
+            {
+                ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
+                dialog->askForConfirmation("#{sMessage1}");
+                dialog->eventOkClicked.clear();
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onConfirmationGiven);
+                dialog->eventCancelClicked.clear();
+                return;
+            }
+        }
 
         setVisible(false);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_MainMenu);
