@@ -59,7 +59,7 @@
     </Resource>
     <Resource type="ResourceSkin" name="ProgressText" size="16 16">
         <Property key="FontName" value="Default"/>
-        <Property key="TextAlign" value="Top HCenter"/>
+        <Property key="TextAlign" value="VCenter HCenter"/>
         <Property key="TextColour" value="#{fontcolour=normal}"/>
         <Property key="TextShadow" value="true"/>
 

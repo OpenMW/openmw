@@ -167,7 +167,7 @@ namespace MWGui
         Gui::MWList*   mTopicsList;
         MyGUI::ScrollBar* mScrollBar;
         MyGUI::ProgressBar* mDispositionBar;
-        MyGUI::EditBox*     mDispositionText;
+        MyGUI::TextBox*     mDispositionText;
 
         PersuasionDialog mPersuasionDialog;
     };
