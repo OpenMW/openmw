@@ -23,7 +23,7 @@
         <Property key="TextAlign" value="Left VCenter"/>
         <Property key="TextColour" value="#{fontcolour=normal}"/>
 
-        <Child type="TextBox" skin="MW_TextEditClient" offset="4 1 502 18" align="Stretch" name="Client"/>
+        <Child type="TextBox" skin="MW_TextEditClient" offset="4 0 502 18" align="Stretch" name="Client"/>
 
     </Resource>
 

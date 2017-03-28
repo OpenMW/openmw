@@ -37,7 +37,7 @@ namespace MWMechanics
         int b = std::abs(playerOffer);
         int d = (buying)
             ? int(100 * (a - b) / a)
-            : int(100 * (b - a) / a);
+            : int(100 * (b - a) / b);
 
         int clampedDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(merchant);
 

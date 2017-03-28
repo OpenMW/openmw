@@ -95,7 +95,6 @@ namespace MWRender
                     osg::BlendFunc* blendFunc = static_cast<osg::BlendFunc*>(stateset->getAttribute(osg::StateAttribute::BLENDFUNC));
                     osg::ref_ptr<osg::BlendFunc> newBlendFunc = blendFunc ? new osg::BlendFunc(*blendFunc) : new osg::BlendFunc;
                     newBlendFunc->setDestinationAlpha(osg::BlendFunc::ONE);
-                    newBlendFunc->setDestinationRGB(osg::BlendFunc::ONE);
                     newStateSet->setAttribute(newBlendFunc, osg::StateAttribute::ON);
                     node.setStateSet(newStateSet);
                 }

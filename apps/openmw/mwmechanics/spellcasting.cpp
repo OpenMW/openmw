@@ -1081,16 +1081,20 @@ namespace MWMechanics
             adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::RestoreHealth, magnitude);
             break;
         case ESM::MagicEffect::DamageHealth:
-        case ESM::MagicEffect::DamageMagicka:
-        case ESM::MagicEffect::DamageFatigue:
             receivedMagicDamage = true;
             adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
             break;
+        case ESM::MagicEffect::DamageMagicka:
+        case ESM::MagicEffect::DamageFatigue:
+            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
+            break;
         case ESM::MagicEffect::AbsorbHealth:
-        case ESM::MagicEffect::AbsorbMagicka:
-        case ESM::MagicEffect::AbsorbFatigue:
             if (magnitude > 0.f)
                 receivedMagicDamage = true;
+            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
+            break;
+        case ESM::MagicEffect::AbsorbMagicka:
+        case ESM::MagicEffect::AbsorbFatigue:
             adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
             break;
 

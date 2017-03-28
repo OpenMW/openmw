@@ -6,7 +6,7 @@
 
         <Widget type="Widget" skin="MW_Dialog" position="0 245 300 48" align="Bottom HCenter" name="LoadingBox">
 
-            <Widget type="TextBox" skin="SandText" position="20 8 260 18" align="Stretch" name="LoadingText">
+            <Widget type="TextBox" skin="SandText" position="20 9 260 18" align="Stretch" name="LoadingText">
                 <Property key="TextAlign" value="Center"/>
             </Widget>
 

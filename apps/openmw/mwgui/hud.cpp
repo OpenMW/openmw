@@ -671,8 +671,9 @@ namespace MWGui
 
         if (mIsDrowning)
         {
-            float intensity = (cos(mDrowningFlashTheta) + 1.0f) / 2.0f;
-            mDrowningFlash->setColour(MyGUI::Colour(intensity, 0, 0));
+            float intensity = (cos(mDrowningFlashTheta) + 2.0f) / 3.0f;
+
+            mDrowningFlash->setAlpha(intensity);
         }
     }
 

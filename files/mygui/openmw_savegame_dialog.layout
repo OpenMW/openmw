@@ -45,6 +45,7 @@
                 <Widget type="AutoSizedEditBox" skin="SandText" position="0 0 263 0" name="InfoText">
                     <Property key="Static" value="true"/>
                     <Property key="MultiLine" value="true"/>
+                    <Property key="WordWrap" value="true"/>
                 </Widget>
 
 

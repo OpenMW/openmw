@@ -39,11 +39,27 @@
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
     </Resource>
-
-
+    <Resource type="ResourceSkin" name="MW_Progress_Drowning_Full_Small" size="16 8" texture="white" >
+        <Property key="Colour" value="0.035 0.545 0.545"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="MW_Progress_Drowning_Small" size="16 8" texture="white" >
+        <Property key="Colour" value="0.785 0 0"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="MW_Progress_Loading_Small" size="16 8" texture="white" >
+        <Property key="Colour" value="0 0.615 0.620"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
+        </BasisSkin>
+    </Resource>
     <Resource type="ResourceSkin" name="ProgressText" size="16 16">
         <Property key="FontName" value="Default"/>
-        <Property key="TextAlign" value="Top HCenter"/>
+        <Property key="TextAlign" value="VCenter HCenter"/>
         <Property key="TextColour" value="#{fontcolour=normal}"/>
         <Property key="TextShadow" value="true"/>
 
@@ -57,7 +73,7 @@
         <Property key="TrackFill" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
-        <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
+        <Child type="Widget" skin="TransparentBG" offset="2 2 60 8" align="Stretch" name="Client"/>
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_Progress_Green" size="64 12">
@@ -65,7 +81,7 @@
         <Property key="TrackFill" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
-        <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
+        <Child type="Widget" skin="TransparentBG" offset="2 2 60 8" align="Stretch" name="Client"/>
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_Progress_Blue" size="64 12">
@@ -73,20 +89,13 @@
         <Property key="TrackFill" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
-        <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
+        <Child type="Widget" skin="TransparentBG" offset="2 2 60 8" align="Stretch" name="Client"/>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_Progress_LightBlue" size="64 6">
-        <Property key="TrackSkin" value="MW_BigTrack_Progress_Blue_Small"/>
+    <Resource type="ResourceSkin" name="MW_Progress_Drowning_Full" size="64 6">
+        <Property key="TrackSkin" value="MW_Progress_Drowning_Full_Small"/>
         <Property key="TrackFill" value="1"/>
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 64 6" align="Stretch"/>
-        <Child type="Widget" skin="BlackBG" offset="2 2 60 2" align="Stretch" name="Client"/>
-    </Resource>
-
-    <Resource type="ResourceSkin" name="MW_Progress_Drowning" size="64 6">
-        <Property key="TrackSkin" value="MW_BigTrack_Progress_Red_Small"/>
-        <Property key="TrackFill" value="1"/>
+        <Child type="Widget" skin="TransparentBG" offset="2 2 60 2" align="Stretch" name="Client"/>
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_ProgressScroll_Loading" size="64 6">
@@ -96,8 +105,8 @@
         <Property key="VerticalAlignment" value="false"/>
         <Property key="MoveToClick" value="false"/>
 
-        <Child type="Widget" skin="BlackBG" offset="2 2 60 2" align="Stretch" name="Client"/>
-        <Child type="Button" skin="MW_BigTrack_Progress_Green_Small" offset="0 0 1 6" align="Left VStretch" name="Track"/>
+        <Child type="Widget" skin="TransparentBG" offset="2 2 60 2" align="Stretch" name="Client"/>
+        <Child type="Button" skin="MW_Progress_Loading_Small" offset="0 0 1 6" align="Left VStretch" name="Track"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 6" align="Stretch"/>
     </Resource>

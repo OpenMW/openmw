@@ -21,7 +21,7 @@ color_misc=0,205,205 # ????
     <Resource type="ResourceSkin" name="SandText" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>
-        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
+        <BasisSkin type="SimpleText" offset="0 -1 16 16" align="Stretch">
             <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
         </BasisSkin>
     </Resource>
@@ -134,12 +134,12 @@ color_misc=0,205,205 # ????
 
     <Resource type="ResourceSkin" name="MW_ChargeBar" size="204 18">
         <Child type="ProgressBar" skin="MW_Progress_Red" offset="0 0 204 18" align="Right Top Stretch" name="Bar"/>
-        <Child type="TextBox" skin="ProgressText" offset="0 0 204 18" align="Right Top Stretch" name="BarText"/>
+        <Child type="TextBox" skin="ProgressText" offset="0 0 204 14" align="Stretch" name="BarText"/>
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_ChargeBar_Blue" size="204 18">
         <Child type="ProgressBar" skin="MW_Progress_Blue" offset="0 0 204 18" align="Right Top Stretch" name="Bar"/>
-        <Child type="TextBox" skin="ProgressText" offset="0 2 204 18" align="Right Top Stretch" name="BarText"/>
+        <Child type="TextBox" skin="ProgressText" offset="0 1 204 14" align="Right Top Stretch" name="BarText"/>
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_DynamicStat_Red" size="204 18">
