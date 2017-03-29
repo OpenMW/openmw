@@ -335,7 +335,4 @@ namespace ESM
             }
         }
     }
-
-    const int Land::LAND_SIZE;
-
 }
