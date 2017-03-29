@@ -131,14 +131,14 @@ ServerExtendedData getExtendedData(const char *addr, unsigned short port)
                 bs.IgnoreBytes(1);
                 size_t length = 0;
                 bs.Read(length);
-                for(int i = 0; i < length; i++)
+                for(size_t i = 0; i < length; i++)
                 {
                     RakNet::RakString str;
                     bs.Read(str);
                     data.players.push_back(str.C_String());
                 }
                 bs.Read(length);
-                for(int i = 0; i < length; i++)
+                for(size_t i = 0; i < length; i++)
                 {
                     RakNet::RakString str;
                     bs.Read(str);
