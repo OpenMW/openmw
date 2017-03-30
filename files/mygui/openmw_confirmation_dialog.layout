@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_DialogNoTransp" layer="Windows" position="0 0 300 130" align="Center" name="_Main">
+    <Widget type="Window" skin="MW_DialogNoTransp" layer="Windows" position="0 0 360 130" align="Center" name="_Main">
         <Property key="Visible" value="false"/>
 
-        <Widget type="EditBox" skin="MW_TextEditClient" position="16 8 268 130" name="Message" align="Center Top">
+        <Widget type="EditBox" skin="MW_TextEditClient" position="16 8 338 130" name="Message" align="Center Top">
             <Property key="FontName" value="Default"/>
             <Property key="TextAlign" value="Top HCenter"/>
             <Property key="Static" value="true"/>
@@ -12,14 +12,14 @@
             <Property key="MultiLine" value="true"/>
         </Widget>
 
-        <Widget type="VBox" position="0 89 292 24" align="Right Bottom">
+        <Widget type="VBox" position="0 89 352 24" align="Center Bottom">
             <Widget type="HBox">
                 <Property key="Spacing" value="8"/>
 
-                <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton" align="Right Bottom">
+                <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton" align="Center Bottom">
                     <Property key="Caption" value="#{sYes}"/>
                 </Widget>
-                <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton" align="Right Bottom">
+                <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton" align="Center Bottom">
                     <Property key="Caption" value="#{sNo}"/>
                 </Widget>
             </Widget>

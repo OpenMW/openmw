@@ -18,18 +18,25 @@ namespace MWGui
 
     void ConfirmationDialog::askForConfirmation(const std::string& message, const std::string& confirmMessage, const std::string& cancelMessage)
     {
+        mCancelButton->setCaptionWithReplacing(cancelMessage);
+        mOkButton->setCaptionWithReplacing(confirmMessage);
+
+        askForConfirmation(message);
+    }
+
+    void ConfirmationDialog::askForConfirmation(const std::string& message)
+    {
         setVisible(true);
 
         mMessage->setCaptionWithReplacing(message);
 
-        mCancelButton->setCaptionWithReplacing(cancelMessage);
-        mOkButton->setCaptionWithReplacing(confirmMessage);
+        int height = mMessage->getTextSize().height + 60;
 
-        int height = mMessage->getTextSize().height + 72;
+        int width = mMessage->getTextSize().width + 24;
 
-        mMainWidget->setSize(mMainWidget->getWidth(), height);
+        mMainWidget->setSize(width, height);
 
-        mMessage->setSize(mMessage->getWidth(), mMessage->getTextSize().height+24);
+        mMessage->setSize(mMessage->getWidth(), mMessage->getTextSize().height + 24);
 
         center();
     }
