@@ -10,7 +10,6 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../widget/droplineedit.hpp"
-#include "idvalidator.hpp"
 
 std::string CSVWorld::PathgridCreator::getId() const
 {
@@ -28,20 +27,19 @@ CSVWorld::PathgridCreator::PathgridCreator(
     CSMWorld::Data& data,
     QUndoStack& undoStack,
     const CSMWorld::UniversalId& id,
-    CSMWorld::IdCompletionManager& completionManager,
-    bool relaxedIdRules
-) : GenericCreator(data, undoStack, id, relaxedIdRules)
+    CSMWorld::IdCompletionManager& completionManager
+) : GenericCreator(data, undoStack, id)
 {
     setManualEditing(false);
 
-    QLabel *label = new QLabel("Cell ID", this);
+    QLabel *label = new QLabel("Cell", this);
     insertBeforeButtons(label, false);
 
     // Add cell ID input with auto-completion.
+    // Only existing cell IDs are accepted so no ID validation is performed.
     CSMWorld::ColumnBase::Display displayType = CSMWorld::ColumnBase::Display_Cell;
     mCell = new CSVWidget::DropLineEdit(displayType, this);
     mCell->setCompleter(completionManager.getCompleter(displayType).get());
-    mCell->setValidator(new IdValidator(relaxedIdRules, this));
     insertBeforeButtons(mCell, true);
 
     connect(mCell, SIGNAL (textChanged(const QString&)), this, SLOT (cellChanged()));
@@ -65,8 +63,6 @@ std::string CSVWorld::PathgridCreator::getErrors() const
     std::string cellId = getId();
 
     // Check user input for any errors.
-    // The last two checks, cell with existing pathgrid and non-existent cell,
-    // shouldn't be needed but we absolutely want to make sure they never happen.
     std::string errors;
     if (cellId.empty())
     {
