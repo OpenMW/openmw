@@ -6,6 +6,7 @@
 #define OPENMW_UTILS_HPP
 
 #include <components/openmw-mp/Utils.hpp>
+#include <components/openmw-mp/Log.hpp>
 #include <cstddef>
 #include <vector>
 
