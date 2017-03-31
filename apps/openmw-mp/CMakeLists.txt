@@ -80,6 +80,7 @@ set(SERVER
     Script/Functions/Cells.cpp Script/Functions/World.cpp Script/Functions/Miscellaneous.cpp
 
     PlayerProcessor.cpp
+    init_processors.cpp
 
     Script/API/TimerAPI.cpp Script/API/PublicFnAPI.cpp
         ${PawnScript_Sources}
