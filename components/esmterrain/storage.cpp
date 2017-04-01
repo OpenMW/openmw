@@ -240,8 +240,8 @@ namespace ESMTerrain
                 // Only relevant for chunks smaller than (contained in) one cell
                 rowStart += (origin.x() - startCellX) * ESM::Land::LAND_SIZE;
                 colStart += (origin.y() - startCellY) * ESM::Land::LAND_SIZE;
-                int rowEnd = std::min(static_cast<int>(rowStart + std::min(1.f, size) * (ESM::Land::LAND_SIZE-1) + 1), ESM::Land::LAND_SIZE);
-                int colEnd = std::min(static_cast<int>(colStart + std::min(1.f, size) * (ESM::Land::LAND_SIZE-1) + 1), ESM::Land::LAND_SIZE);
+                int rowEnd = std::min(static_cast<int>(rowStart + std::min(1.f, size) * (ESM::Land::LAND_SIZE-1) + 1), static_cast<int>(ESM::Land::LAND_SIZE));
+                int colEnd = std::min(static_cast<int>(colStart + std::min(1.f, size) * (ESM::Land::LAND_SIZE-1) + 1), static_cast<int>(ESM::Land::LAND_SIZE));
 
                 vertY = vertY_;
                 for (int col=colStart; col<colEnd; col += increment)

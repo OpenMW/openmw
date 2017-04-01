@@ -45,14 +45,20 @@ CSVWorld::InfoCreator::InfoCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id, CSMWorld::IdCompletionManager& completionManager)
 : GenericCreator (data, undoStack, id)
 {
-    QLabel *label = new QLabel ("Topic", this);
-    insertBeforeButtons (label, false);
-
+    // Determine if we're dealing with topics or journals.
     CSMWorld::ColumnBase::Display displayType = CSMWorld::ColumnBase::Display_Topic;
+    QString labelText = "Topic";
     if (getCollectionId().getType() == CSMWorld::UniversalId::Type_JournalInfos)
     {
         displayType = CSMWorld::ColumnBase::Display_Journal;
+        labelText = "Journal";
     }
+
+    QLabel *label = new QLabel (labelText, this);
+    insertBeforeButtons (label, false);
+
+    // Add topic/journal ID input with auto-completion.
+    // Only existing topic/journal IDs are accepted so no ID validation is performed.
     mTopic = new CSVWidget::DropLineEdit(displayType, this);
     mTopic->setCompleter(completionManager.getCompleter(displayType).get());
     insertBeforeButtons (mTopic, true);
