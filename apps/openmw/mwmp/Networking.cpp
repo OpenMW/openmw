@@ -187,10 +187,10 @@ void Networking::preInit(std::vector<std::string> &content, Files::Collections &
             unsigned int crc32 = Utils::crc32checksum(col.getPath(*it).string());
             checksums.push_back(make_pair(*it, crc32));
 
-            printf("idx: %d\tchecksum: %X\tfile: %s\n", idx, crc32, col.getPath(*it).c_str());
+            printf("idx: %d\tchecksum: %X\tfile: %s\n", idx, crc32, col.getPath(*it).string().c_str());
         }
         else
-            throw std::runtime_error("Plugin doesn't exists.");
+            throw std::runtime_error("Plugin doesn't exist.");
     }
 
     PacketPreInit packetPreInit(peer);
