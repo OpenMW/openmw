@@ -2,7 +2,7 @@
 // Created by koncord on 31.03.17.
 //
 
-#include "init_processors.hpp"
+#include "ProcessorInitializer.hpp"
 
 #include "PlayerProcessor.hpp"
 #include "processors/ProcessorPlayerPos.hpp"
@@ -28,7 +28,7 @@
 
 using namespace mwmp;
 
-void init_processors()
+void ProcessorInitializer()
 {
     PlayerProcessor::AddProcessor(new ProcessorPlayerPos());
     PlayerProcessor::AddProcessor(new ProcessorPlayerCellChange());

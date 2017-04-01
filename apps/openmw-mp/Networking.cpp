@@ -3,7 +3,7 @@
 //
 
 #include "Player.hpp"
-#include "init_processors.hpp"
+#include "ProcessorInitializer.hpp"
 #include <RakPeer.h>
 #include <Kbhit.h>
 #include <components/openmw-mp/NetworkMessages.hpp>
@@ -49,7 +49,7 @@ Networking::Networking(RakNet::RakPeerInterface *peer)
 
     serverPassword = TES3MP_DEFAULT_PASSW;
 
-    init_processors();
+    ProcessorInitializer();
 }
 
 Networking::~Networking()
