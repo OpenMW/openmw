@@ -41,8 +41,10 @@ bool WorldProcessor::Process(RakNet::Packet &packet) noexcept
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received %s from %s", processor.second->strPacketID.c_str(),
                                player->npc.mName.c_str());
             myPacket->setEvent(&baseEvent);
-            if(!processor.second->dontRead)
+
+            if(!processor.second->avoidReading)
                 myPacket->Read();
+
             processor.second->Do(*myPacket, *player, baseEvent);
             return true;
         }

@@ -17,7 +17,7 @@ namespace mwmp
         ProcessorPlayerDeath()
         {
             BPP_INIT(ID_PLAYER_DEATH)
-            dontRead = true;
+            avoidReading = true;
         }
 
         void Do(PlayerPacket &packet, Player &player) override
