@@ -14,7 +14,7 @@ namespace mwmp
     public:
         ProcessorContainer()
         {
-            BPP_INIT(ID_VIDEO_PLAY)
+            BPP_INIT(ID_CONTAINER)
         }
 
         void Do(WorldPacket &packet, Player &player, BaseEvent &event) override
