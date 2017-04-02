@@ -5,7 +5,7 @@
 #ifndef OPENMW_PROCESSORPLAYERINVENTORY_HPP
 #define OPENMW_PROCESSORPLAYERINVENTORY_HPP
 
-#include "../PlayerProcessor.hpp"
+#include "apps/openmw-mp/PlayerProcessor.hpp"
 
 namespace mwmp
 {

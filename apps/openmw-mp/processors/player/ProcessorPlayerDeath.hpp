@@ -6,7 +6,7 @@
 #define OPENMW_PROCESSORPLAYERDEATH_HPP
 
 
-#include "../PlayerProcessor.hpp"
+#include "apps/openmw-mp/PlayerProcessor.hpp"
 #include <chrono>
 
 namespace mwmp

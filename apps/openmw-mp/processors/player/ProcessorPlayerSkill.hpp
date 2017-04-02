@@ -5,7 +5,7 @@
 #ifndef OPENMW_PROCESSORPLAYERSKILL_HPP
 #define OPENMW_PROCESSORPLAYERSKILL_HPP
 
-#include "../PlayerProcessor.hpp"
+#include "apps/openmw-mp/PlayerProcessor.hpp"
 
 namespace mwmp
 {

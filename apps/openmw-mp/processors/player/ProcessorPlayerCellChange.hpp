@@ -5,9 +5,9 @@
 #ifndef OPENMW_PROCESSORPLAYERCELLCHANGE_HPP
 #define OPENMW_PROCESSORPLAYERCELLCHANGE_HPP
 
-#include "../PlayerProcessor.hpp"
-#include "../Networking.hpp"
-#include "../Script/Script.hpp"
+#include "apps/openmw-mp/PlayerProcessor.hpp"
+#include "apps/openmw-mp/Networking.hpp"
+#include "apps/openmw-mp/Script/Script.hpp"
 #include <components/openmw-mp/Controllers/PlayerPacketController.hpp>
 
 namespace mwmp
@@ -24,7 +24,7 @@ namespace mwmp
 
         void Do(PlayerPacket &packet, Player &player) override
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_CELL_CHANGE from %s", player.npc.mName.c_str());
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received %s from %s", strPacketID.c_str(), player.npc.mName.c_str());
 
             if (!player.creatureStats.mDead)
             {
