@@ -7,7 +7,7 @@
 
 #include <string>
 
-#define BPP_INIT(packet_id) packetID = packet_id; strPacketID = #packet_id; className = typeid(this).name();
+#define BPP_INIT(packet_id) packetID = packet_id; strPacketID = #packet_id; className = typeid(this).name(); dontRead = false;
 
 class BasePacketProcessor
 {
@@ -30,6 +30,7 @@ protected:
     unsigned char packetID;
     std::string strPacketID;
     std::string className;
+    bool dontRead;
 };
 
 
