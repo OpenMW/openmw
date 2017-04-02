@@ -99,6 +99,9 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
             if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), mTool.getCellRef().getRefId()))
             {
                 mTool = *iter;
+
+                MWBase::Environment::get().getSoundManager()->playSound("Item Repair Up",1,1);
+
                 break;
             }
         }
