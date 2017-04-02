@@ -158,8 +158,6 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     if (!player->isHandshaked() || player->getLoadState() != Player::POSTLOADED)
         return;
 
-    WorldPacket *myPacket = worldController->GetPacket(packet->data[0]);
-
     // Clear our baseEvent before loading new data in it
     baseEvent.cell.blank();
     baseEvent.objectChanges.objects.clear();
