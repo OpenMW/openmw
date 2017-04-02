@@ -24,7 +24,6 @@ namespace mwmp
 
             player.creatureStats.mDead = false;
 
-            packet.setPlayer(&player);
             packet.Send(true);
 
             Script::Call<Script::CallbackIdentity("OnPlayerResurrect")>(player.getId());

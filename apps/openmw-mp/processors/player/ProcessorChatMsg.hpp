@@ -22,7 +22,6 @@ namespace mwmp
         {
             DEBUG_PRINTF(strPacketID.c_str());
 
-            packet.setPlayer(&player);
             packet.Read();
             Script::CallBackReturn<Script::CallbackIdentity("OnPlayerSendMessage")> result = true;
             Script::Call<Script::CallbackIdentity("OnPlayerSendMessage")>(result, player.getId(), player.chatMessage.c_str());
@@ -31,8 +30,6 @@ namespace mwmp
             {
                 player.chatMessage = player.npc.mName + " (" + std::to_string(player.getId()) + "): "
                                       + player.chatMessage + "\n";
-
-                packet.setPlayer(&player);
                 packet.Send(false);
                 packet.Send(true);
             }

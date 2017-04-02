@@ -30,6 +30,7 @@ bool PlayerProcessor::Process(RakNet::Packet &packet) noexcept
         {
             Player *player = Players::getPlayer(packet.guid);
             PlayerPacket *myPacket = Networking::get().getPlayerController()->GetPacket(packet.data[0]);
+            myPacket->setPlayer(player);
 
             processor.second->Do(*myPacket, *player);
             return true;

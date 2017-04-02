@@ -22,7 +22,6 @@ namespace mwmp
         {
             DEBUG_PRINTF(strPacketID.c_str());
 
-            packet.setPlayer(&player);
             packet.Read();
 
             Script::Call<Script::CallbackIdentity("OnPlayerJournalChange")>(player.getId());

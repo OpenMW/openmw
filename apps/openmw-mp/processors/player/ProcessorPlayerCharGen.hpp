@@ -22,7 +22,6 @@ namespace mwmp
         {
             DEBUG_PRINTF(strPacketID.c_str());
 
-            packet.setPlayer(&player);
             packet.Read();
 
             if (player.charGenStage.current == player.charGenStage.end && player.charGenStage.current != 0)

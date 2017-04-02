@@ -22,7 +22,6 @@ namespace mwmp
         {
             if (!player.creatureStats.mDead)
             {
-                packet.setPlayer(&player);
                 packet.Read();
                 //packet.Send(&player, true);
 

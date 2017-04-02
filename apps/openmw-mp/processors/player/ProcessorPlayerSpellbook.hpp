@@ -20,8 +20,7 @@ namespace mwmp
         void Do(PlayerPacket &packet, Player &player) override
         {
             DEBUG_PRINTF(strPacketID.c_str());
-
-            packet.setPlayer(&player);
+            
             packet.Read();
 
             Script::Call<Script::CallbackIdentity("OnPlayerSpellbookChange")>(player.getId());

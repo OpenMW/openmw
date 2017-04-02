@@ -41,7 +41,6 @@ namespace mwmp
 
             player.creatureStats.mDead = true;
 
-            packet.setPlayer(&player);
             packet.Send(true);
 
             Script::Call<Script::CallbackIdentity("OnPlayerDeath")>(player.getId(), reason, killer->getId());
