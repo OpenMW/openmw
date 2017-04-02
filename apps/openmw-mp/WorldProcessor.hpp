@@ -23,7 +23,7 @@ namespace mwmp
     {
     public:
 
-        virtual void Do(WorldPacket &packet, Player &player, BaseEvent &event) = 0;
+        virtual void Do(WorldPacket &packet, Player &player, BaseEvent &event);
 
         static bool Process(RakNet::Packet &packet) noexcept;
         static void AddProcessor(WorldProcessor *processor) noexcept;

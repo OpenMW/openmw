@@ -16,11 +16,6 @@ namespace mwmp
         {
             BPP_INIT(ID_SCRIPT_MEMBER_SHORT)
         }
-
-        void Do(WorldPacket &packet, Player &player, BaseEvent &event) override
-        {
-            packet.Send(true);
-        }
     };
 }
 

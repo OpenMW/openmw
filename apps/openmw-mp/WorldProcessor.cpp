@@ -9,6 +9,11 @@ using namespace mwmp;
 
 WorldProcessor::processors_t WorldProcessor::processors;
 
+void WorldProcessor::Do(WorldPacket &packet, Player &player, BaseEvent &event)
+{
+    packet.Send(true);
+}
+
 void WorldProcessor::AddProcessor(mwmp::WorldProcessor *processor) noexcept
 {
     for(auto &p : processors)

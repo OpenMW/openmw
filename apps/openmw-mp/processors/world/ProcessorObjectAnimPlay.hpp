@@ -16,11 +16,6 @@ namespace mwmp
         {
             BPP_INIT(ID_OBJECT_ANIM_PLAY)
         }
-
-        void Do(WorldPacket &packet, Player &player, BaseEvent &event) override
-        {
-            packet.Send(true);
-        }
     };
 }
 
