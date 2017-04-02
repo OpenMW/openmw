@@ -24,6 +24,23 @@
 #include "processors/player/ProcessorPlayerCharGen.hpp"
 #include "processors/player/ProcessorGUIMessageBox.hpp"
 #include "processors/player/ProcessorPlayerCharClass.hpp"
+#include "WorldProcessor.hpp"
+#include "processors/world/ProcessorContainer.hpp"
+#include "processors/world/ProcessorDoorState.hpp"
+#include "processors/world/ProcessorMusicPlay.hpp"
+#include "processors/world/ProcessorObjectAnimPlay.hpp"
+#include "processors/world/ProcessorObjectDelete.hpp"
+#include "processors/world/ProcessorObjectLock.hpp"
+#include "processors/world/ProcessorObjectMove.hpp"
+#include "processors/world/ProcessorObjectPlace.hpp"
+#include "processors/world/ProcessorObjectRotate.hpp"
+#include "processors/world/ProcessorObjectScale.hpp"
+#include "processors/world/ProcessorObjectUnlock.hpp"
+#include "processors/world/ProcessorScriptGlobalShort.hpp"
+#include "processors/world/ProcessorScriptLocalFloat.hpp"
+#include "processors/world/ProcessorScriptLocalShort.hpp"
+#include "processors/world/ProcessorScriptMemberShort.hpp"
+#include "processors/world/ProcessorVideoPlay.hpp"
 
 
 using namespace mwmp;
@@ -49,4 +66,21 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorPlayerCharGen());
     PlayerProcessor::AddProcessor(new ProcessorGUIMessageBox());
     PlayerProcessor::AddProcessor(new ProcessorPlayerCharClass());
+
+    WorldProcessor::AddProcessor(new ProcessorContainer());
+    WorldProcessor::AddProcessor(new ProcessorDoorState());
+    WorldProcessor::AddProcessor(new ProcessorMusicPlay());
+    WorldProcessor::AddProcessor(new ProcessorObjectAnimPlay());
+    WorldProcessor::AddProcessor(new ProcessorObjectDelete());
+    WorldProcessor::AddProcessor(new ProcessorObjectLock());
+    WorldProcessor::AddProcessor(new ProcessorObjectMove());
+    WorldProcessor::AddProcessor(new ProcessorObjectPlace());
+    WorldProcessor::AddProcessor(new ProcessorObjectRotate());
+    WorldProcessor::AddProcessor(new ProcessorObjectScale());
+    WorldProcessor::AddProcessor(new ProcessorObjectUnlock());
+    WorldProcessor::AddProcessor(new ProcessorScriptGlobalShort());
+    WorldProcessor::AddProcessor(new ProcessorScriptLocalFloat());
+    WorldProcessor::AddProcessor(new ProcessorScriptLocalShort());
+    WorldProcessor::AddProcessor(new ProcessorScriptMemberShort());
+    WorldProcessor::AddProcessor(new ProcessorVideoPlay());
 }
