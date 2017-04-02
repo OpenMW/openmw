@@ -80,6 +80,7 @@ set(SERVER
     Script/Functions/Cells.cpp Script/Functions/World.cpp Script/Functions/Miscellaneous.cpp
 
     PlayerProcessor.cpp
+    WorldProcessor.cpp
     ProcessorInitializer.cpp
 
     Script/API/TimerAPI.cpp Script/API/PublicFnAPI.cpp
