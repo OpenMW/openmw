@@ -22,9 +22,6 @@ namespace mwmp
         {
             if (!player.creatureStats.mDead)
             {
-                packet.Read();
-                //packet.Send(&player, true);
-
                 Script::Call<Script::CallbackIdentity("OnPlayerLevelChange")>(player.getId());
             }
         }

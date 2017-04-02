@@ -26,8 +26,6 @@ namespace mwmp
 
             if (!player.creatureStats.mDead)
             {
-                packet.Read();
-
                 Player *target = Players::getPlayer(player.attack.target);
 
                 if (target == nullptr)

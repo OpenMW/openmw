@@ -22,9 +22,6 @@ namespace mwmp
         {
             DEBUG_PRINTF(strPacketID.c_str());
 
-            packet.Read();
-            //myPacket->Send(player, true);
-
             player.sendToLoaded(&packet);
 
             Script::Call<Script::CallbackIdentity("OnPlayerEquipmentChange")>(player.getId());

@@ -22,8 +22,6 @@ namespace mwmp
         {
             DEBUG_PRINTF(strPacketID.c_str());
 
-            packet.Read();
-
             if (player.charGenStage.current == player.charGenStage.end && player.charGenStage.current != 0)
                 Script::Call<Script::CallbackIdentity("OnPlayerEndCharGen")>(player.getId());
         }

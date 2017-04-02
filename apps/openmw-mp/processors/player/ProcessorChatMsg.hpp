@@ -22,7 +22,6 @@ namespace mwmp
         {
             DEBUG_PRINTF(strPacketID.c_str());
 
-            packet.Read();
             Script::CallBackReturn<Script::CallbackIdentity("OnPlayerSendMessage")> result = true;
             Script::Call<Script::CallbackIdentity("OnPlayerSendMessage")>(result, player.getId(), player.chatMessage.c_str());
 

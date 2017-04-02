@@ -21,8 +21,6 @@ namespace mwmp
         {
             DEBUG_PRINTF(strPacketID.c_str());
             
-            packet.Read();
-
             Script::Call<Script::CallbackIdentity("OnPlayerSpellbookChange")>(player.getId());
         }
     };

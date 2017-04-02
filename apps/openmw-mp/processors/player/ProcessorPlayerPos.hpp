@@ -22,9 +22,6 @@ namespace mwmp
             //DEBUG_PRINTF(strPacketID);
             if (!player.creatureStats.mDead)
             {
-                packet.Read();
-                //myPacket.Send(player, true); //send to other clients
-
                 player.sendToLoaded(&packet);
             }
         }

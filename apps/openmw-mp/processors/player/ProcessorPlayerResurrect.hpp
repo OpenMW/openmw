@@ -16,6 +16,7 @@ namespace mwmp
         ProcessorPlayerResurrect()
         {
             BPP_INIT(ID_PLAYER_RESURRECT)
+            dontRead = true;
         }
 
         void Do(PlayerPacket &packet, Player &player) override

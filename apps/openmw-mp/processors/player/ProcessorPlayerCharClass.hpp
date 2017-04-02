@@ -21,8 +21,6 @@ namespace mwmp
         void Do(PlayerPacket &packet, Player &player) override
         {
             DEBUG_PRINTF(strPacketID.c_str());
-
-            packet.Read();
         }
     };
 }

@@ -22,9 +22,6 @@ namespace mwmp
         {
             DEBUG_PRINTF(strPacketID.c_str());
 
-            packet.Read();
-            //packet.Send(&player, true);
-
             player.sendToLoaded(&packet);
         }
     };

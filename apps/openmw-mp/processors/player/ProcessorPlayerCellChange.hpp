@@ -28,8 +28,6 @@ namespace mwmp
 
             if (!player.creatureStats.mDead)
             {
-                packet.Read();
-
                 LOG_APPEND(Log::LOG_INFO, "- Moved to %s", player.cell.getDescription().c_str());
 
                 player.forEachLoaded([this](Player *pl, Player *other) {

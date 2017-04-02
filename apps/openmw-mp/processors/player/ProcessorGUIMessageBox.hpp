@@ -22,8 +22,6 @@ namespace mwmp
         {
             DEBUG_PRINTF(strPacketID.c_str());
 
-            packet.Read();
-
             Script::Call<Script::CallbackIdentity("OnGUIAction")>(player.getId(), (int)player.guiMessageBox.id,
                                                                   player.guiMessageBox.data.c_str());
         }
