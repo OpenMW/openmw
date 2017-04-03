@@ -204,6 +204,7 @@ namespace MWGui
         void setCellName(const std::string& cellName);
 
         virtual void setAlpha(float alpha);
+        void setVisible(bool visible);
 
         void renderGlobalMap();
 
