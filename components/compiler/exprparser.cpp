@@ -311,22 +311,6 @@ namespace Compiler
                 return true;
             }
 
-            // die in a fire, Morrowind script compiler!
-            if (const Extensions *extensions = getContext().getExtensions())
-            {
-                if (getContext().isJournalId (name2))
-                {
-                    // JournalID used as an argument. Use the index of that JournalID
-                    Generator::pushString (mCode, mLiterals, name2);
-                    int keyword = extensions->searchKeyword ("getjournalindex");
-                    extensions->generateFunctionCode (keyword, mCode, mLiterals, mExplicit, 0);
-                    mNextOperand = false;
-                    mOperands.push_back ('l');
-
-                    return true;
-                }
-            }
-
             if (mExplicit.empty() && getContext().isId (name2))
             {
                 mExplicit = name2;
