@@ -16,9 +16,9 @@ void WorldProcessor::Do(WorldPacket &packet, Player &player, BaseEvent &event)
 
 void WorldProcessor::AddProcessor(mwmp::WorldProcessor *processor) noexcept
 {
-    for(auto &p : processors)
+    for (auto &p : processors)
     {
-        if(processor->packetID == p.first)
+        if (processor->packetID == p.first)
             throw std::logic_error("processor " + p.second->strPacketID + " already registered. Check " +
                                    processor->className + " and " + p.second->className);
     }
@@ -31,9 +31,9 @@ bool WorldProcessor::Process(RakNet::Packet &packet) noexcept
     baseEvent.cell.blank();
     baseEvent.objectChanges.objects.clear();
     baseEvent.guid = packet.guid;
-    for(auto &processor : processors)
+    for (auto &processor : processors)
     {
-        if(processor.first == packet.data[0])
+        if (processor.first == packet.data[0])
         {
             Player *player = Players::getPlayer(packet.guid);
             WorldPacket *myPacket = Networking::get().getWorldController()->GetPacket(packet.data[0]);
@@ -42,7 +42,7 @@ bool WorldProcessor::Process(RakNet::Packet &packet) noexcept
                                player->npc.mName.c_str());
             myPacket->setEvent(&baseEvent);
 
-            if(!processor.second->avoidReading)
+            if (!processor.second->avoidReading)
                 myPacket->Read();
 
             processor.second->Do(*myPacket, *player, baseEvent);

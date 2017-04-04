@@ -146,7 +146,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     }
 
 
-    if(!PlayerProcessor::Process(*packet))
+    if (!PlayerProcessor::Process(*packet))
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled PlayerPacket with identifier %i has arrived", packet->data[0]);
 
 }
@@ -163,7 +163,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     baseEvent.objectChanges.objects.clear();
     baseEvent.guid = packet->guid;
 
-    if(!WorldProcessor::Process(*packet))
+    if (!WorldProcessor::Process(*packet))
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled WorldPacket with identifier %i has arrived", packet->data[0]);
 
 }
@@ -178,7 +178,7 @@ void Networking::update(RakNet::Packet *packet)
 
     if (player == 0)
     {
-        if(packet->data[0] == ID_GAME_PREINIT)
+        if (packet->data[0] == ID_GAME_PREINIT)
         {
             DEBUG_PRINTF("ID_GAME_PREINIT");
             PacketPreInit::PluginContainer plugins;
@@ -188,7 +188,7 @@ void Networking::update(RakNet::Packet *packet)
             packetPreInit.setChecksums(&plugins);
             packetPreInit.Read();
 
-            for(auto plugin : plugins)
+            for (auto plugin : plugins)
             {
                 LOG_APPEND(Log::LOG_VERBOSE, "- %X\t%s", plugin.second, plugin.first.c_str());
             }
