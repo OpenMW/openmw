@@ -25,7 +25,12 @@ namespace mwmp
             // than one container (i.e. replies to server requests for container contents)
             // only to players who have the container's cell loaded
             if (event.action == BaseEvent::SET && event.objectChanges.count > 1)
-                CellController::get()->getCell(&event.cell)->sendToLoaded(&packet, &event);
+            {
+                Cell *serverCell = CellController::get()->getCell(&event.cell);
+
+                if (serverCell != nullptr)
+                    serverCell->sendToLoaded(&packet, &event);
+            }
             else
                 packet.Send(true);
 
