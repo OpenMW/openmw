@@ -27,6 +27,8 @@ using namespace std;
 
 Networking *Networking::sThis = 0;
 
+static int currentMpNum = 0;
+
 Networking::Networking(RakNet::RakPeerInterface *peer)
 {
     sThis = this;
@@ -286,6 +288,22 @@ WorldPacketController *Networking::getWorldController() const
 BaseEvent *Networking::getLastEvent()
 {
     return &baseEvent;
+}
+
+int Networking::getCurrentMpNum()
+{
+    return currentMpNum;
+}
+
+void Networking::setCurrentMpNum(int value)
+{
+    currentMpNum = value;
+}
+
+int Networking::getNextMpNum()
+{
+    currentMpNum++;
+    return currentMpNum;
 }
 
 const Networking &Networking::get()

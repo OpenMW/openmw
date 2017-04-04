@@ -162,8 +162,8 @@ void WorldEvent::placeObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i\n- charge: %i\n- count: %i", worldObject.refId.c_str(),
-                   worldObject.refNumIndex, worldObject.charge, worldObject.count);
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i\n- charge: %i\n- count: %i", worldObject.refId.c_str(),
+                   worldObject.refNumIndex, worldObject.mpNum, worldObject.charge, worldObject.count);
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), worldObject.refId, 1);
         MWWorld::Ptr newPtr = ref.getPtr();
@@ -173,6 +173,8 @@ void WorldEvent::placeObjects(MWWorld::CellStore* cellStore)
 
         if (worldObject.count > 1)
             newPtr.getRefData().setCount(worldObject.count);
+
+        newPtr.getCellRef().setMpNum(worldObject.mpNum);
 
         newPtr.getCellRef().setGoldValue(worldObject.goldValue);
         newPtr = MWBase::Environment::get().getWorld()->placeObject(newPtr, cellStore, worldObject.pos);

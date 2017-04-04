@@ -31,6 +31,7 @@ namespace mwmp
     {
         std::string refId;
         int refNumIndex;
+        int mpNum;
         int count;
         int charge;
         int goldValue;

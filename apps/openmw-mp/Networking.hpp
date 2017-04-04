@@ -38,6 +38,10 @@ namespace  mwmp
         WorldPacketController *getWorldController() const;
         BaseEvent *getLastEvent();
 
+        int getCurrentMpNum();
+        void setCurrentMpNum(int value);
+        int getNextMpNum();
+
         MasterClient *getMasterClient();
         void InitQuery(std::string queryAddr, unsigned short queryPort, std::string serverAddr, unsigned short serverPort);
         void setServerPassword(std::string passw) noexcept;
