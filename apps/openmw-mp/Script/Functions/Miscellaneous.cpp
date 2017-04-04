@@ -11,6 +11,16 @@ unsigned int MiscellaneousFunctions::GetLastPlayerId() noexcept
     return Players::getLastPlayerId();
 }
 
+int MiscellaneousFunctions::GetCurrentMpNum() noexcept
+{
+    return mwmp::Networking::getPtr()->getCurrentMpNum();
+}
+
+void MiscellaneousFunctions::SetCurrentMpNum(int mpNum) noexcept
+{
+    mwmp::Networking::getPtr()->setCurrentMpNum(mpNum);
+}
+
 void MiscellaneousFunctions::LogMessage(unsigned short level, const char *message) noexcept
 {
     LOG_MESSAGE_SIMPLE(level, "[Script]: %s", message);
