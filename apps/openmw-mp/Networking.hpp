@@ -40,7 +40,7 @@ namespace  mwmp
 
         int getCurrentMpNum();
         void setCurrentMpNum(int value);
-        int getNextMpNum();
+        int incrementMpNum();
 
         MasterClient *getMasterClient();
         void InitQuery(std::string queryAddr, unsigned short queryPort, std::string serverAddr, unsigned short serverPort);

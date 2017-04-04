@@ -22,7 +22,7 @@ namespace mwmp
         {
             for (unsigned int i = 0; i < event.objectChanges.count; i++)
             {
-                event.objectChanges.objects.at(i).mpNum = mwmp::Networking::getPtr()->getNextMpNum();
+                event.objectChanges.objects.at(i).mpNum = mwmp::Networking::getPtr()->incrementMpNum();
             }
 
             // Send this packet back to the original sender with the mpNum generation from above,
