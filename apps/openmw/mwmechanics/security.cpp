@@ -69,6 +69,7 @@ namespace MWMechanics
                 mwmp::WorldObject worldObject;
                 worldObject.refId = lock.getCellRef().getRefId();
                 worldObject.refNumIndex = lock.getCellRef().getRefNum().mIndex;
+                worldObject.mpNum = lock.getCellRef().getMpNum();
                 worldEvent->addObject(worldObject);
 
                 mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->setEvent(worldEvent);

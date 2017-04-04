@@ -70,6 +70,7 @@ namespace MWGui
             mwmp::WorldObject worldObject;
             worldObject.refId = dropped.getCellRef().getRefId();
             worldObject.refNumIndex = dropped.getCellRef().getRefNum().mIndex;
+            worldObject.mpNum = 0;
             worldObject.charge = dropped.getCellRef().getCharge();
 
             // Make sure we send the RefData position instead of the CellRef one, because that's what

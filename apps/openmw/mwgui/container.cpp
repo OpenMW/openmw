@@ -114,6 +114,7 @@ namespace MWGui
         mwmp::WorldObject worldObject;
         worldObject.refId = mPtr.getCellRef().getRefId();
         worldObject.refNumIndex = mPtr.getCellRef().getRefNum().mIndex;
+        worldObject.mpNum = mPtr.getCellRef().getMpNum();
 
         MWWorld::Ptr itemPtr = mModel->getItem(mSelectedItem).mBase;
 
@@ -174,6 +175,7 @@ namespace MWGui
         mwmp::WorldObject worldObject;
         worldObject.refId = mPtr.getCellRef().getRefId();
         worldObject.refNumIndex = mPtr.getCellRef().getRefNum().mIndex;
+        worldObject.mpNum = mPtr.getCellRef().getMpNum();
 
         MWWorld::Ptr itemPtr = mDragAndDrop->mItem.mBase;
 
@@ -330,6 +332,7 @@ namespace MWGui
             mwmp::WorldObject worldObject;
             worldObject.refId = mPtr.getCellRef().getRefId();
             worldObject.refNumIndex = mPtr.getCellRef().getRefNum().mIndex;
+            worldObject.mpNum = mPtr.getCellRef().getMpNum();
             worldEvent->addObject(worldObject);
 
             mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->setEvent(worldEvent);

@@ -2330,6 +2330,7 @@ namespace MWWorld
         mwmp::WorldObject worldObject;
         worldObject.refId = door.getCellRef().getRefId();
         worldObject.refNumIndex = door.getCellRef().getRefNum().mIndex;
+        worldObject.mpNum = door.getCellRef().getMpNum();
         worldObject.doorState = state;
         worldEvent->addObject(worldObject);
 
@@ -2360,6 +2361,7 @@ namespace MWWorld
         mwmp::WorldObject worldObject;
         worldObject.refId = door.getCellRef().getRefId();
         worldObject.refNumIndex = door.getCellRef().getRefNum().mIndex;
+        worldObject.mpNum = door.getCellRef().getMpNum();
         worldObject.doorState = state;
         worldEvent->addObject(worldObject);
 

@@ -208,6 +208,7 @@ namespace MWScript
             mwmp::WorldObject worldObject;
             worldObject.refId = mReference.getCellRef().getRefId();
             worldObject.refNumIndex = mReference.getCellRef().getRefNum().mIndex;
+            worldObject.mpNum = mReference.getCellRef().getMpNum();
             worldObject.index = index;
             worldObject.shortVal = value;
             worldEvent->addObject(worldObject);
@@ -254,6 +255,7 @@ namespace MWScript
             mwmp::WorldObject worldObject;
             worldObject.refId = mReference.getCellRef().getRefId();
             worldObject.refNumIndex = mReference.getCellRef().getRefNum().mIndex;
+            worldObject.mpNum = mReference.getCellRef().getMpNum();
             worldObject.index = index;
             worldObject.floatVal = value;
             worldEvent->addObject(worldObject);

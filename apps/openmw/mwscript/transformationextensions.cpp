@@ -58,6 +58,7 @@ namespace MWScript
                     mwmp::WorldObject worldObject;
                     worldObject.refId = ptr.getCellRef().getRefId();
                     worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+                    worldObject.mpNum = ptr.getCellRef().getMpNum();
                     worldObject.scale = scale;
                     worldEvent->addObject(worldObject);
 
@@ -562,6 +563,7 @@ namespace MWScript
                         mwmp::WorldObject worldObject;
                         worldObject.refId = ptr.getCellRef().getRefId();
                         worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+                        worldObject.mpNum = 0;
                         worldObject.charge = ptr.getCellRef().getCharge();
                         worldObject.count = 1;
 

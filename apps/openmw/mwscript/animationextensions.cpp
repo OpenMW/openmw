@@ -77,6 +77,7 @@ namespace MWScript
                         mwmp::WorldObject worldObject;
                         worldObject.refId = ptr.getCellRef().getRefId();
                         worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+                        worldObject.mpNum = ptr.getCellRef().getMpNum();
                         worldObject.animGroup = group;
                         worldObject.animMode = mode;
                         worldEvent->addObject(worldObject);

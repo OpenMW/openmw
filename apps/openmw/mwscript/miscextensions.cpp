@@ -218,6 +218,7 @@ namespace MWScript
                     mwmp::WorldObject worldObject;
                     worldObject.refId = ptr.getCellRef().getRefId();
                     worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+                    worldObject.mpNum = ptr.getCellRef().getMpNum();
                     worldObject.lockLevel = lockLevel;
                     worldEvent->addObject(worldObject);
 
@@ -265,6 +266,7 @@ namespace MWScript
                     mwmp::WorldObject worldObject;
                     worldObject.refId = ptr.getCellRef().getRefId();
                     worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+                    worldObject.mpNum = ptr.getCellRef().getMpNum();
                     worldEvent->addObject(worldObject);
 
                     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->setEvent(worldEvent);
@@ -745,6 +747,7 @@ namespace MWScript
                         mwmp::WorldObject worldObject;
                         worldObject.refId = ptr.getCellRef().getRefId();
                         worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+                        worldObject.mpNum = ptr.getCellRef().getMpNum();
                         worldEvent->addObject(worldObject);
 
                         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->setEvent(worldEvent);

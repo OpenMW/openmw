@@ -56,6 +56,7 @@ void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
         mwmp::WorldObject worldObject;
         worldObject.refId = container.getCellRef().getRefId();
         worldObject.refNumIndex = container.getCellRef().getRefNum().mIndex;
+        worldObject.mpNum = container.getCellRef().getMpNum();
 
         MWWorld::ContainerStore& containerStore = container.getClass().getContainerStore(container);
 

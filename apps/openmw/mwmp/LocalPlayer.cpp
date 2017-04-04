@@ -1129,6 +1129,7 @@ void LocalPlayer::clearCurrentContainer()
 {
     currentContainer.refId = "";
     currentContainer.refNumIndex = 0;
+    currentContainer.mpNum = 0;
 }
 
 void LocalPlayer::storeCellState(ESM::Cell cell, int stateType)
@@ -1158,6 +1159,7 @@ void LocalPlayer::storeCurrentContainer(const MWWorld::Ptr &container, bool loot
 {
     currentContainer.refId = container.getCellRef().getRefId();
     currentContainer.refNumIndex = container.getCellRef().getRefNum().mIndex;
+    currentContainer.mpNum = container.getCellRef().getMpNum();
     currentContainer.loot = loot;
 }
 

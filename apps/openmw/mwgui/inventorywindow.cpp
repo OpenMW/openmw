@@ -650,6 +650,7 @@ namespace MWGui
         mwmp::WorldObject worldObject;
         worldObject.refId = object.getCellRef().getRefId();
         worldObject.refNumIndex = object.getCellRef().getRefNum().mIndex;
+        worldObject.mpNum = object.getCellRef().getMpNum();
         worldEvent->addObject(worldObject);
 
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->setEvent(worldEvent);

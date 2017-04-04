@@ -40,6 +40,7 @@ namespace MWWorld
         mwmp::WorldObject worldObject;
         worldObject.refId = getTarget().getCellRef().getRefId();
         worldObject.refNumIndex = getTarget().getCellRef().getRefNum().mIndex;
+        worldObject.mpNum = getTarget().getCellRef().getMpNum();
         worldEvent->addObject(worldObject);
 
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->setEvent(worldEvent);

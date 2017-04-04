@@ -39,6 +39,7 @@ namespace mwmp
     {
         std::string refId;
         int refNumIndex;
+        int mpNum;
         bool loot;
     };
 
