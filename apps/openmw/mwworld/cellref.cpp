@@ -20,6 +20,32 @@ namespace MWWorld
         mCellRef.mRefNum.unset();
     }
 
+    /*
+        Start of tes3mp addition
+
+        Get the mMpNum (unique multiplayer reference number) of a CellRef
+    */
+    int CellRef::getMpNum() const
+    {
+        return mCellRef.mMpNum;
+    }
+    /*
+        End of tes3mp addition
+    */
+
+    /*
+        Start of tes3mp addition
+
+        Set the mMpNum (unique multiplayer reference number) of a CellRef
+    */
+    void CellRef::setMpNum(int index)
+    {
+        mCellRef.mMpNum = index;
+    }
+    /*
+        End of tes3mp addition
+    */
+
     std::string CellRef::getRefId() const
     {
         return mCellRef.mRefID;

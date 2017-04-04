@@ -28,6 +28,26 @@ namespace MWWorld
         // Set RefNum to its default state.
         void unsetRefNum();
 
+        /*
+            Start of tes3mp addition
+
+            Get the mMpNum (unique multiplayer reference number) of a CellRef
+        */
+        int getMpNum() const;
+        /*
+            End of tes3mp addition
+        */
+
+        /*
+            Start of tes3mp addition
+
+            Set the mMpNum (unique multiplayer reference number) of a CellRef
+        */
+        void setMpNum(int index);
+        /*
+            End of tes3mp addition
+        */
+
         /// Does the RefNum have a content file?
         bool hasContentFile() const;
 
