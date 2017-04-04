@@ -237,12 +237,6 @@ namespace MWWorld
             Ptr searchExact (const std::string& id, unsigned int numIndex);
             ///< Added by tes3mp and used to find an object by both its ID and its reference number
 
-            unsigned int getLastRefNumIndex() const;
-            // Added by tes3mp and used to get the last reference number in the cell
-            
-            void setLastRefNumIndex(unsigned int value);
-            // Added by tes3mp and used to record the last reference number in the cell
-
             CellRefList<ESM::Container> *getContainers();
             // Added by tes3mp and used to get all the containers in the cell
 

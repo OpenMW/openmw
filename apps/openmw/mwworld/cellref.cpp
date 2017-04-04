@@ -20,13 +20,6 @@ namespace MWWorld
         mCellRef.mRefNum.unset();
     }
 
-    // Added by tes3mp to allow creation of new items with RefNum indexes
-    // specific to them
-    void CellRef::setRefNumIndex(int index)
-    {
-        mCellRef.mRefNum.mIndex = index;
-    }
-
     std::string CellRef::getRefId() const
     {
         return mCellRef.mRefID;

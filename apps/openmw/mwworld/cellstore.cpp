@@ -479,18 +479,6 @@ namespace MWWorld
         return searchVisitor.mFound;
     }
 
-    // Added by tes3mp and used to get the last reference number in the cell
-    unsigned int CellStore::getLastRefNumIndex() const
-    {
-        return lastRefNumIndex;
-    }
-
-    // Added by tes3mp and used to record the last reference number in the cell
-    void CellStore::setLastRefNumIndex(unsigned int value)
-    {
-        lastRefNumIndex = value;
-    }
-
     // Added by tes3mp and used to get all the containers in the cell
     CellRefList<ESM::Container> *CellStore::getContainers()
     {
@@ -649,9 +637,6 @@ namespace MWWorld
 
             loadRef (ref, deleted, refNumToID);
         }
-
-        if(refNumToID.size() != 0)
-            setLastRefNumIndex(refNumToID.rbegin()->first.mIndex);
 
         updateMergedRefs();
     }

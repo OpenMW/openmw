@@ -176,14 +176,6 @@ void WorldEvent::placeObjects(MWWorld::CellStore* cellStore)
 
         newPtr.getCellRef().setGoldValue(worldObject.goldValue);
         newPtr = MWBase::Environment::get().getWorld()->placeObject(newPtr, cellStore, worldObject.pos);
-
-        // Change RefNum here because the line above unsets it
-        newPtr.getCellRef().setRefNumIndex(worldObject.refNumIndex);
-
-        // If this RefNum is higher than the last we've recorded for this CellStore,
-        // start using it as our new last one
-        if (cellStore->getLastRefNumIndex() < worldObject.refNumIndex)
-            cellStore->setLastRefNumIndex(worldObject.refNumIndex);
     }
 }
 

@@ -58,14 +58,6 @@ namespace MWGui
             if (setNewOwner)
                 dropped.getCellRef().setOwner("");
 
-            // Major change done by tes3mp:
-            // When the object is dropped, generate a new RefNum index for it that follows the last one
-            // in the cell, so that packets can be sent and received specifically about it, instead
-            // of giving it a RefNum index of 0 as in regular OpenMW
-            MWWorld::CellStore *cellStore = dropped.getCell();
-            cellStore->setLastRefNumIndex(cellStore->getLastRefNumIndex() + 1);
-            dropped.getCellRef().setRefNumIndex(cellStore->getLastRefNumIndex());
-
             /*
                 Start of tes3mp addition
 
