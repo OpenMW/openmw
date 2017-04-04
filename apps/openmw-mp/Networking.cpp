@@ -303,6 +303,7 @@ void Networking::setCurrentMpNum(int value)
 int Networking::getNextMpNum()
 {
     currentMpNum++;
+    Script::Call<Script::CallbackIdentity("OnMpNumIncrement")>(currentMpNum);
     return currentMpNum;
 }
 

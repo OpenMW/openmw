@@ -130,7 +130,8 @@ public:
             {"OnContainer",              Function<void, unsigned short, const char*>()},
             {"OnPlayerSendMessage",      Function<bool, unsigned short, const char*>()},
             {"OnPlayerEndCharGen",       Function<void, unsigned short>()},
-            {"OnGUIAction",              Function<void, unsigned short, int, const char*>()}
+            {"OnGUIAction",              Function<void, unsigned short, int, const char*>()},
+            {"OnMpNumIncrement",         Function<void, int>()}
     };
 };
 
