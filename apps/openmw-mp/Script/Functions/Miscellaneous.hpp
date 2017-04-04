@@ -8,7 +8,7 @@
     \
     {"GetCurrentMpNum",  MiscellaneousFunctions::GetCurrentMpNum},\
     {"SetCurrentMpNum",  MiscellaneousFunctions::SetCurrentMpNum},\
-    |
+    \
     {"LogMessage",       MiscellaneousFunctions::LogMessage},\
     {"LogAppend",        MiscellaneousFunctions::LogAppend}
 
