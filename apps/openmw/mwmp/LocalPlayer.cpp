@@ -672,7 +672,8 @@ void LocalPlayer::addJournalItems()
 
             if (!ptrCellStore) continue;
 
-            MWWorld::Ptr ptrFound = ptrCellStore->searchExact(journalItem.actorCellRef.mRefID, journalItem.actorCellRef.mRefNum.mIndex);
+            MWWorld::Ptr ptrFound = ptrCellStore->searchExact(journalItem.actorCellRef.mRefID,
+                journalItem.actorCellRef.mRefNum.mIndex, journalItem.actorCellRef.mMpNum);
 
             if (!ptrFound)
             {

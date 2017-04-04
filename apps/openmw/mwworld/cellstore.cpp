@@ -454,10 +454,11 @@ namespace MWWorld
         PtrType mFound;
         std::string mIdToFind;
         unsigned int mRefNumIndexToFind;
+        unsigned int mMpNumToFind;
 
         bool operator()(const PtrType& ptr)
         {
-            if (ptr.getCellRef().getRefNum().mIndex == mRefNumIndexToFind)
+            if (ptr.getCellRef().getRefNum().mIndex == mRefNumIndexToFind && ptr.getCellRef().getMpNum() == mMpNumToFind)
             {
                 if (ptr.getCellRef().getRefId() == mIdToFind)
                 {
@@ -470,11 +471,12 @@ namespace MWWorld
     };
 
     ///< Added by tes3mp and used to find an object by both its ID and its reference number
-    Ptr CellStore::searchExact (const std::string& id, unsigned int numIndex)
+    Ptr CellStore::searchExact (const std::string& id, unsigned int refNumIndex, unsigned int mpNum)
     {
         SearchExactVisitor<MWWorld::Ptr> searchVisitor;
         searchVisitor.mIdToFind = id;
-        searchVisitor.mRefNumIndexToFind = numIndex;
+        searchVisitor.mRefNumIndexToFind = refNumIndex;
+        searchVisitor.mMpNumToFind = mpNum;
         forEach(searchVisitor);
         return searchVisitor.mFound;
     }
