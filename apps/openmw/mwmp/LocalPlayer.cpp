@@ -1024,6 +1024,7 @@ void LocalPlayer::sendSpellbook()
 
 void LocalPlayer::sendCellStates()
 {
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_CELL_STATE to server");
     getNetworking()->getPlayerPacket(ID_PLAYER_CELL_STATE)->setPlayer(this);
     getNetworking()->getPlayerPacket(ID_PLAYER_CELL_STATE)->Send();
 
