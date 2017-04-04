@@ -45,6 +45,11 @@ int WorldFunctions::GetObjectRefNumIndex(unsigned int i) noexcept
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).refNumIndex;
 }
 
+int WorldFunctions::GetObjectMpNum(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).mpNum;
+}
+
 int WorldFunctions::GetObjectCount(unsigned int i) noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).count;
@@ -170,6 +175,11 @@ void WorldFunctions::SetObjectRefId(const char* refId) noexcept
 void WorldFunctions::SetObjectRefNumIndex(int refNumIndex) noexcept
 {
     tempWorldObject.refNumIndex = refNumIndex;
+}
+
+void WorldFunctions::SetObjectMpNum(int mpNum) noexcept
+{
+    tempWorldObject.mpNum = mpNum;
 }
 
 void WorldFunctions::SetObjectCount(int count) noexcept
