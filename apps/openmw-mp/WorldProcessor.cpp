@@ -25,12 +25,12 @@ void WorldProcessor::AddProcessor(mwmp::WorldProcessor *processor) noexcept
     processors.insert(processors_t::value_type(processor->GetPacketID(), processor));
 }
 
-bool WorldProcessor::Process(RakNet::Packet &packet) noexcept
+bool WorldProcessor::Process(RakNet::Packet &packet, BaseEvent &event) noexcept
 {
-    BaseEvent baseEvent;
-    baseEvent.cell.blank();
-    baseEvent.objectChanges.objects.clear();
-    baseEvent.guid = packet.guid;
+    // Clear our BaseEvent before loading new data in it
+    event.cell.blank();
+    event.objectChanges.objects.clear();
+    event.guid = packet.guid;
     for (auto &processor : processors)
     {
         if (processor.first == packet.data[0])
@@ -40,12 +40,12 @@ bool WorldProcessor::Process(RakNet::Packet &packet) noexcept
 
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received %s from %s", processor.second->strPacketID.c_str(),
                                player->npc.mName.c_str());
-            myPacket->setEvent(&baseEvent);
+            myPacket->setEvent(&event);
 
             if (!processor.second->avoidReading)
                 myPacket->Read();
 
-            processor.second->Do(*myPacket, *player, baseEvent);
+            processor.second->Do(*myPacket, *player, event);
             return true;
         }
     }

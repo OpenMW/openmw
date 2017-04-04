@@ -158,12 +158,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     if (!player->isHandshaked() || player->getLoadState() != Player::POSTLOADED)
         return;
 
-    // Clear our baseEvent before loading new data in it
-    baseEvent.cell.blank();
-    baseEvent.objectChanges.objects.clear();
-    baseEvent.guid = packet->guid;
-
-    if (!WorldProcessor::Process(*packet))
+    if (!WorldProcessor::Process(*packet, baseEvent))
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled WorldPacket with identifier %i has arrived", packet->data[0]);
 
 }

@@ -25,7 +25,7 @@ namespace mwmp
 
         virtual void Do(WorldPacket &packet, Player &player, BaseEvent &event);
 
-        static bool Process(RakNet::Packet &packet) noexcept;
+        static bool Process(RakNet::Packet &packet, BaseEvent &event) noexcept;
         static void AddProcessor(WorldProcessor *processor) noexcept;
 
         //typedef boost::unordered_map<unsigned char, boost::shared_ptr<WorldProcessor> > processors_t;
