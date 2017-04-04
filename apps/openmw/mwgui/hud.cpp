@@ -95,6 +95,17 @@ namespace MWGui
                 End of tes3mp addition
             */
 
+            /*
+                Start of tes3mp change (major)
+
+                Instead of actually keeping this object as is, delete it after sending the packet
+                and wait for the server to send it back with the correct mpNum
+            */
+            MWBase::Environment::get().getWorld()->deleteObject(dropped);
+            /*
+                End of tes3mp change (major)
+            */
+
             return dropped;
         }
 

@@ -25,6 +25,9 @@ namespace mwmp
                 event.objectChanges.objects.at(i).mpNum = mwmp::Networking::getPtr()->getNextMpNum();
             }
 
+            // Send this packet back to the original sender with the mpNum generation from above,
+            // then send it to the other players
+            packet.Send(false);
             packet.Send(true);
 
             Script::Call<Script::CallbackIdentity("OnObjectPlace")>(player.getId(), event.cell.getDescription().c_str());
