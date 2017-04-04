@@ -35,6 +35,7 @@ void PacketObjectMove::Packet(RakNet::BitStream *bs, bool send)
 
         RW(worldObject.refId, send);
         RW(worldObject.refNumIndex, send);
+        RW(worldObject.mpNum, send);
         RW(worldObject.pos.pos[0], send);
         RW(worldObject.pos.pos[1], send);
         RW(worldObject.pos.pos[2], send);

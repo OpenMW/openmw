@@ -35,6 +35,7 @@ void PacketObjectUnlock::Packet(RakNet::BitStream *bs, bool send)
 
         RW(worldObject.refId, send);
         RW(worldObject.refNumIndex, send);
+        RW(worldObject.mpNum, send);
 
         if (!send)
         {

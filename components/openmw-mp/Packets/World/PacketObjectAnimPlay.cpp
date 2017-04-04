@@ -35,6 +35,7 @@ void PacketObjectAnimPlay::Packet(RakNet::BitStream *bs, bool send)
 
         RW(worldObject.refId, send);
         RW(worldObject.refNumIndex, send);
+        RW(worldObject.mpNum, send);
         RW(worldObject.animGroup, send);
         RW(worldObject.animMode, send);
 

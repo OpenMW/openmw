@@ -35,6 +35,7 @@ void PacketScriptLocalFloat::Packet(RakNet::BitStream *bs, bool send)
 
         RW(worldObject.refId, send);
         RW(worldObject.refNumIndex, send);
+        RW(worldObject.mpNum, send);
         RW(worldObject.index, send);
         RW(worldObject.floatVal, send);
 
