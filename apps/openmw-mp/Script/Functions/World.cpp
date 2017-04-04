@@ -246,6 +246,7 @@ void WorldFunctions::AddWorldObject() noexcept
     WorldObject worldObject;
     worldObject.refId = tempWorldObject.refId;
     worldObject.refNumIndex = tempWorldObject.refNumIndex;
+    worldObject.mpNum = tempWorldObject.mpNum;
     worldObject.count = tempWorldObject.count;
     worldObject.charge = tempWorldObject.charge;
     worldObject.goldValue = tempWorldObject.goldValue;
