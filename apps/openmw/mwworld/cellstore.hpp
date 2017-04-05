@@ -240,6 +240,9 @@ namespace MWWorld
             CellRefList<ESM::NPC> *getNpcs();
             // Added by tes3mp and used to get all the NPCs in the cell
 
+            CellRefList<ESM::Creature> *getCreatures();
+            // Added by tes3mp and used to get all the creatures in the cell
+
             CellRefList<ESM::Container> *getContainers();
             // Added by tes3mp and used to get all the containers in the cell
 

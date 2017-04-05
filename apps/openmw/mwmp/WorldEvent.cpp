@@ -51,12 +51,27 @@ void WorldEvent::sendActors(MWWorld::CellStore* cellStore)
     for (typename MWWorld::CellRefList<ESM::NPC>::List::iterator listIter(npcList->mList.begin());
         listIter != npcList->mList.end(); ++listIter)
     {
-        MWWorld::Ptr npc(&*listIter, 0);
+        MWWorld::Ptr ptr(&*listIter, 0);
 
         mwmp::WorldObject worldObject;
-        worldObject.refId = npc.getCellRef().getRefId();
-        worldObject.refNumIndex = npc.getCellRef().getRefNum().mIndex;
-        worldObject.mpNum = npc.getCellRef().getMpNum();
+        worldObject.refId = ptr.getCellRef().getRefId();
+        worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+        worldObject.mpNum = ptr.getCellRef().getMpNum();
+
+        worldEvent->addObject(worldObject);
+    }
+
+    MWWorld::CellRefList<ESM::Creature> *creatureList = cellStore->getCreatures();
+
+    for (typename MWWorld::CellRefList<ESM::Creature>::List::iterator listIter(creatureList->mList.begin());
+        listIter != creatureList->mList.end(); ++listIter)
+    {
+        MWWorld::Ptr ptr(&*listIter, 0);
+
+        mwmp::WorldObject worldObject;
+        worldObject.refId = ptr.getCellRef().getRefId();
+        worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+        worldObject.mpNum = ptr.getCellRef().getMpNum();
 
         worldEvent->addObject(worldObject);
     }
