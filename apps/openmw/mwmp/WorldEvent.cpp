@@ -47,312 +47,6 @@ void WorldEvent::addObject(WorldObject worldObject)
     objectChanges.objects.push_back(worldObject);
 }
 
-void WorldEvent::sendActors(MWWorld::CellStore* cellStore)
-{
-    reset();
-    cell = *cellStore->getCell();
-    action = BaseEvent::SET;
-
-    MWWorld::CellRefList<ESM::NPC> *npcList = cellStore->getNpcs();
-
-    for (typename MWWorld::CellRefList<ESM::NPC>::List::iterator listIter(npcList->mList.begin());
-        listIter != npcList->mList.end(); ++listIter)
-    {
-        MWWorld::Ptr ptr(&*listIter, 0);
-
-        mwmp::WorldObject worldObject;
-        worldObject.refId = ptr.getCellRef().getRefId();
-        worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-        worldObject.mpNum = ptr.getCellRef().getMpNum();
-
-        addObject(worldObject);
-    }
-
-    MWWorld::CellRefList<ESM::Creature> *creatureList = cellStore->getCreatures();
-
-    for (typename MWWorld::CellRefList<ESM::Creature>::List::iterator listIter(creatureList->mList.begin());
-        listIter != creatureList->mList.end(); ++listIter)
-    {
-        MWWorld::Ptr ptr(&*listIter, 0);
-
-        mwmp::WorldObject worldObject;
-        worldObject.refId = ptr.getCellRef().getRefId();
-        worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-        worldObject.mpNum = ptr.getCellRef().getMpNum();
-
-        addObject(worldObject);
-    }
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_ACTOR_LIST)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_ACTOR_LIST)->Send();
-}
-
-void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
-{
-    reset();
-    cell = *cellStore->getCell();
-    action = BaseEvent::SET;
-
-    MWWorld::CellRefList<ESM::Container> *containerList = cellStore->getContainers();
-
-    for (typename MWWorld::CellRefList<ESM::Container>::List::iterator listIter(containerList->mList.begin());
-        listIter != containerList->mList.end(); ++listIter)
-    {
-        MWWorld::Ptr container(&*listIter, 0);
-
-        mwmp::WorldObject worldObject;
-        worldObject.refId = container.getCellRef().getRefId();
-        worldObject.refNumIndex = container.getCellRef().getRefNum().mIndex;
-        worldObject.mpNum = container.getCellRef().getMpNum();
-
-        MWWorld::ContainerStore& containerStore = container.getClass().getContainerStore(container);
-
-        for (MWWorld::ContainerStoreIterator storeIter = containerStore.begin(); storeIter != containerStore.end(); ++storeIter)
-        {
-            MWWorld::Ptr itemPtr = *storeIter;
-
-            mwmp::ContainerItem containerItem;
-            containerItem.refId = itemPtr.getCellRef().getRefId();
-            containerItem.count = itemPtr.getRefData().getCount();
-            containerItem.charge = itemPtr.getCellRef().getCharge();
-
-            worldObject.containerChanges.items.push_back(containerItem);
-        }
-
-        addObject(worldObject);
-    }
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send();
-}
-
-
-void WorldEvent::sendObjectPlace(MWWorld::Ptr ptr)
-{
-    reset();
-    cell = *ptr.getCell()->getCell();
-
-    mwmp::WorldObject worldObject;
-    worldObject.refId = ptr.getCellRef().getRefId();
-    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-    worldObject.mpNum = 0;
-    worldObject.charge = ptr.getCellRef().getCharge();
-
-    // Make sure we send the RefData position instead of the CellRef one, because that's what
-    // we actually see on this client
-    worldObject.pos = ptr.getRefData().getPosition();
-
-    // We have to get the count from the dropped object because it gets changed
-    // automatically for stacks of gold
-    worldObject.count = ptr.getRefData().getCount();
-
-    // Get the real count of gold in a stack
-    worldObject.goldValue = ptr.getCellRef().getGoldValue();
-
-    addObject(worldObject);
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send();
-
-    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
-        worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.count);
-}
-
-void WorldEvent::sendObjectDelete(MWWorld::Ptr ptr)
-{
-    reset();
-    cell = *ptr.getCell()->getCell();
-
-    mwmp::WorldObject worldObject;
-    worldObject.refId = ptr.getCellRef().getRefId();
-    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-    worldObject.mpNum = ptr.getCellRef().getMpNum();
-    addObject(worldObject);
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send();
-}
-
-void WorldEvent::sendObjectLock(MWWorld::Ptr ptr, int lockLevel)
-{
-    reset();
-    cell = *ptr.getCell()->getCell();
-
-    mwmp::WorldObject worldObject;
-    worldObject.refId = ptr.getCellRef().getRefId();
-    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-    worldObject.mpNum = ptr.getCellRef().getMpNum();
-    worldObject.lockLevel = lockLevel;
-    addObject(worldObject);
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->Send();
-}
-
-void WorldEvent::sendObjectUnlock(MWWorld::Ptr ptr)
-{
-    reset();
-    cell = *ptr.getCell()->getCell();
-
-    mwmp::WorldObject worldObject;
-    worldObject.refId = ptr.getCellRef().getRefId();
-    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-    worldObject.mpNum = ptr.getCellRef().getMpNum();
-    addObject(worldObject);
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send();
-}
-
-void WorldEvent::sendObjectScale(MWWorld::Ptr ptr, int scale)
-{
-    reset();
-    cell = *ptr.getCell()->getCell();
-
-    mwmp::WorldObject worldObject;
-    worldObject.refId = ptr.getCellRef().getRefId();
-    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-    worldObject.mpNum = ptr.getCellRef().getMpNum();
-    worldObject.scale = scale;
-    addObject(worldObject);
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->Send();
-}
-
-void WorldEvent::sendObjectAnimPlay(MWWorld::Ptr ptr, std::string group, int mode)
-{
-    reset();
-    cell = *ptr.getCell()->getCell();
-
-    mwmp::WorldObject worldObject;
-    worldObject.refId = ptr.getCellRef().getRefId();
-    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-    worldObject.mpNum = ptr.getCellRef().getMpNum();
-    worldObject.animGroup = group;
-    worldObject.animMode = mode;
-    addObject(worldObject);
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->Send();
-}
-
-void WorldEvent::sendDoorState(MWWorld::Ptr ptr, int state)
-{
-    reset();
-    cell = *ptr.getCell()->getCell();
-
-    mwmp::WorldObject worldObject;
-    worldObject.refId = ptr.getCellRef().getRefId();
-    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-    worldObject.mpNum = ptr.getCellRef().getMpNum();
-    worldObject.doorState = state;
-    addObject(worldObject);
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send();
-
-    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 1\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
-        worldObject.refId.c_str(), worldObject.refNumIndex, cell.getDescription().c_str(),
-        worldObject.doorState ? "true" : "false");
-}
-
-void WorldEvent::sendMusicPlay(std::string filename)
-{
-    reset();
-    mwmp::WorldObject worldObject;
-    worldObject.filename = filename;
-    addObject(worldObject);
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->Send();
-}
-
-void WorldEvent::sendVideoPlay(std::string filename, bool allowSkipping)
-{
-    reset();
-    mwmp::WorldObject worldObject;
-    worldObject.filename = filename;
-    worldObject.allowSkipping = allowSkipping;
-    addObject(worldObject);
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_VIDEO_PLAY)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_VIDEO_PLAY)->Send();
-}
-
-void WorldEvent::sendScriptLocalShort(MWWorld::Ptr ptr, int index, int shortVal)
-{
-    reset();
-    cell = *ptr.getCell()->getCell();
-
-    mwmp::WorldObject worldObject;
-    worldObject.refId = ptr.getCellRef().getRefId();
-    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-    worldObject.mpNum = ptr.getCellRef().getMpNum();
-    worldObject.index = index;
-    worldObject.shortVal = shortVal;
-    addObject(worldObject);
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_SHORT)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_SHORT)->Send();
-
-    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_SHORT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i",
-        worldObject.refId.c_str(), worldObject.refNumIndex, cell.getDescription().c_str(),
-        worldObject.index, worldObject.shortVal);
-}
-
-void WorldEvent::sendScriptLocalFloat(MWWorld::Ptr ptr, int index, float floatVal)
-{
-    reset();
-    cell = *ptr.getCell()->getCell();
-
-    mwmp::WorldObject worldObject;
-    worldObject.refId = ptr.getCellRef().getRefId();
-    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-    worldObject.mpNum = ptr.getCellRef().getMpNum();
-    worldObject.index = index;
-    worldObject.floatVal = floatVal;
-    addObject(worldObject);
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->Send();
-
-    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_FLOAT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f",
-        worldObject.refId.c_str(), worldObject.refNumIndex, cell.getDescription().c_str(),
-        worldObject.index, worldObject.floatVal);
-}
-
-void WorldEvent::sendScriptMemberShort(std::string refId, int index, int shortVal)
-{
-    reset();
-    mwmp::WorldObject worldObject;
-    worldObject.refId = refId;
-    worldObject.index = index;
-    worldObject.shortVal = shortVal;
-    addObject(worldObject);
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_MEMBER_SHORT)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_MEMBER_SHORT)->Send();
-
-    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_MEMBER_SHORT\n- cellRef: %s\n- index: %i\n- shortVal: %i",
-        worldObject.refId.c_str(), worldObject.index, worldObject.shortVal);
-}
-
-void WorldEvent::sendScriptGlobalShort(std::string varName, int shortVal)
-{
-    reset();
-    mwmp::WorldObject worldObject;
-    worldObject.varName = varName;
-    worldObject.shortVal = shortVal;
-    addObject(worldObject);
-
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->Send();
-
-    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_GLOBAL_SHORT\n- varName: %s\n- shortVal: %i",
-        worldObject.varName.c_str(), worldObject.shortVal);
-}
-
 void WorldEvent::editActors(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
@@ -664,35 +358,6 @@ void WorldEvent::activateDoors(MWWorld::CellStore* cellStore)
     }
 }
 
-void WorldEvent::playMusic()
-{
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < objectChanges.count; i++)
-    {
-        worldObject = objectChanges.objects.at(i);
-
-        LOG_APPEND(Log::LOG_VERBOSE, "- filename: %s", worldObject.filename.c_str());
-
-        MWBase::Environment::get().getSoundManager()->streamMusic(worldObject.filename);
-    }
-}
-
-void WorldEvent::playVideo()
-{
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < objectChanges.count; i++)
-    {
-        worldObject = objectChanges.objects.at(i);
-
-        LOG_APPEND(Log::LOG_VERBOSE, "- filename: %s\n- allowSkipping: %s", worldObject.filename.c_str(),
-                   worldObject.allowSkipping ? "true" : "false");
-
-        MWBase::Environment::get().getWindowManager()->playVideo(worldObject.filename, worldObject.allowSkipping);
-    }
-}
-
 void WorldEvent::setLocalShorts(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
@@ -780,4 +445,339 @@ void WorldEvent::setGlobalShorts()
 
         MWBase::Environment::get().getWorld()->setGlobalInt(worldObject.varName, worldObject.shortVal);
     }
+}
+
+void WorldEvent::playMusic()
+{
+    WorldObject worldObject;
+
+    for (unsigned int i = 0; i < objectChanges.count; i++)
+    {
+        worldObject = objectChanges.objects.at(i);
+
+        LOG_APPEND(Log::LOG_VERBOSE, "- filename: %s", worldObject.filename.c_str());
+
+        MWBase::Environment::get().getSoundManager()->streamMusic(worldObject.filename);
+    }
+}
+
+void WorldEvent::playVideo()
+{
+    WorldObject worldObject;
+
+    for (unsigned int i = 0; i < objectChanges.count; i++)
+    {
+        worldObject = objectChanges.objects.at(i);
+
+        LOG_APPEND(Log::LOG_VERBOSE, "- filename: %s\n- allowSkipping: %s", worldObject.filename.c_str(),
+            worldObject.allowSkipping ? "true" : "false");
+
+        MWBase::Environment::get().getWindowManager()->playVideo(worldObject.filename, worldObject.allowSkipping);
+    }
+}
+
+void WorldEvent::sendActors(MWWorld::CellStore* cellStore)
+{
+    reset();
+    cell = *cellStore->getCell();
+    action = BaseEvent::SET;
+
+    MWWorld::CellRefList<ESM::NPC> *npcList = cellStore->getNpcs();
+
+    for (typename MWWorld::CellRefList<ESM::NPC>::List::iterator listIter(npcList->mList.begin());
+        listIter != npcList->mList.end(); ++listIter)
+    {
+        MWWorld::Ptr ptr(&*listIter, 0);
+
+        mwmp::WorldObject worldObject;
+        worldObject.refId = ptr.getCellRef().getRefId();
+        worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+        worldObject.mpNum = ptr.getCellRef().getMpNum();
+
+        addObject(worldObject);
+    }
+
+    MWWorld::CellRefList<ESM::Creature> *creatureList = cellStore->getCreatures();
+
+    for (typename MWWorld::CellRefList<ESM::Creature>::List::iterator listIter(creatureList->mList.begin());
+        listIter != creatureList->mList.end(); ++listIter)
+    {
+        MWWorld::Ptr ptr(&*listIter, 0);
+
+        mwmp::WorldObject worldObject;
+        worldObject.refId = ptr.getCellRef().getRefId();
+        worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+        worldObject.mpNum = ptr.getCellRef().getMpNum();
+
+        addObject(worldObject);
+    }
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_ACTOR_LIST)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_ACTOR_LIST)->Send();
+}
+
+void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
+{
+    reset();
+    cell = *cellStore->getCell();
+    action = BaseEvent::SET;
+
+    MWWorld::CellRefList<ESM::Container> *containerList = cellStore->getContainers();
+
+    for (typename MWWorld::CellRefList<ESM::Container>::List::iterator listIter(containerList->mList.begin());
+        listIter != containerList->mList.end(); ++listIter)
+    {
+        MWWorld::Ptr container(&*listIter, 0);
+
+        mwmp::WorldObject worldObject;
+        worldObject.refId = container.getCellRef().getRefId();
+        worldObject.refNumIndex = container.getCellRef().getRefNum().mIndex;
+        worldObject.mpNum = container.getCellRef().getMpNum();
+
+        MWWorld::ContainerStore& containerStore = container.getClass().getContainerStore(container);
+
+        for (MWWorld::ContainerStoreIterator storeIter = containerStore.begin(); storeIter != containerStore.end(); ++storeIter)
+        {
+            MWWorld::Ptr itemPtr = *storeIter;
+
+            mwmp::ContainerItem containerItem;
+            containerItem.refId = itemPtr.getCellRef().getRefId();
+            containerItem.count = itemPtr.getRefData().getCount();
+            containerItem.charge = itemPtr.getCellRef().getCharge();
+
+            worldObject.containerChanges.items.push_back(containerItem);
+        }
+
+        addObject(worldObject);
+    }
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send();
+}
+
+
+void WorldEvent::sendObjectPlace(MWWorld::Ptr ptr)
+{
+    reset();
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = 0;
+    worldObject.charge = ptr.getCellRef().getCharge();
+
+    // Make sure we send the RefData position instead of the CellRef one, because that's what
+    // we actually see on this client
+    worldObject.pos = ptr.getRefData().getPosition();
+
+    // We have to get the count from the dropped object because it gets changed
+    // automatically for stacks of gold
+    worldObject.count = ptr.getRefData().getCount();
+
+    // Get the real count of gold in a stack
+    worldObject.goldValue = ptr.getCellRef().getGoldValue();
+
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send();
+
+    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
+        worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.count);
+}
+
+void WorldEvent::sendObjectDelete(MWWorld::Ptr ptr)
+{
+    reset();
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = ptr.getCellRef().getMpNum();
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send();
+}
+
+void WorldEvent::sendObjectLock(MWWorld::Ptr ptr, int lockLevel)
+{
+    reset();
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = ptr.getCellRef().getMpNum();
+    worldObject.lockLevel = lockLevel;
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->Send();
+}
+
+void WorldEvent::sendObjectUnlock(MWWorld::Ptr ptr)
+{
+    reset();
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = ptr.getCellRef().getMpNum();
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send();
+}
+
+void WorldEvent::sendObjectScale(MWWorld::Ptr ptr, int scale)
+{
+    reset();
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = ptr.getCellRef().getMpNum();
+    worldObject.scale = scale;
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->Send();
+}
+
+void WorldEvent::sendObjectAnimPlay(MWWorld::Ptr ptr, std::string group, int mode)
+{
+    reset();
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = ptr.getCellRef().getMpNum();
+    worldObject.animGroup = group;
+    worldObject.animMode = mode;
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->Send();
+}
+
+void WorldEvent::sendDoorState(MWWorld::Ptr ptr, int state)
+{
+    reset();
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = ptr.getCellRef().getMpNum();
+    worldObject.doorState = state;
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send();
+
+    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 1\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
+        worldObject.refId.c_str(), worldObject.refNumIndex, cell.getDescription().c_str(),
+        worldObject.doorState ? "true" : "false");
+}
+
+void WorldEvent::sendMusicPlay(std::string filename)
+{
+    reset();
+    mwmp::WorldObject worldObject;
+    worldObject.filename = filename;
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->Send();
+}
+
+void WorldEvent::sendVideoPlay(std::string filename, bool allowSkipping)
+{
+    reset();
+    mwmp::WorldObject worldObject;
+    worldObject.filename = filename;
+    worldObject.allowSkipping = allowSkipping;
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_VIDEO_PLAY)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_VIDEO_PLAY)->Send();
+}
+
+void WorldEvent::sendScriptLocalShort(MWWorld::Ptr ptr, int index, int shortVal)
+{
+    reset();
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = ptr.getCellRef().getMpNum();
+    worldObject.index = index;
+    worldObject.shortVal = shortVal;
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_SHORT)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_SHORT)->Send();
+
+    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_SHORT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i",
+        worldObject.refId.c_str(), worldObject.refNumIndex, cell.getDescription().c_str(),
+        worldObject.index, worldObject.shortVal);
+}
+
+void WorldEvent::sendScriptLocalFloat(MWWorld::Ptr ptr, int index, float floatVal)
+{
+    reset();
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = ptr.getCellRef().getMpNum();
+    worldObject.index = index;
+    worldObject.floatVal = floatVal;
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->Send();
+
+    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_FLOAT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f",
+        worldObject.refId.c_str(), worldObject.refNumIndex, cell.getDescription().c_str(),
+        worldObject.index, worldObject.floatVal);
+}
+
+void WorldEvent::sendScriptMemberShort(std::string refId, int index, int shortVal)
+{
+    reset();
+    mwmp::WorldObject worldObject;
+    worldObject.refId = refId;
+    worldObject.index = index;
+    worldObject.shortVal = shortVal;
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_MEMBER_SHORT)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_MEMBER_SHORT)->Send();
+
+    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_MEMBER_SHORT\n- cellRef: %s\n- index: %i\n- shortVal: %i",
+        worldObject.refId.c_str(), worldObject.index, worldObject.shortVal);
+}
+
+void WorldEvent::sendScriptGlobalShort(std::string varName, int shortVal)
+{
+    reset();
+    mwmp::WorldObject worldObject;
+    worldObject.varName = varName;
+    worldObject.shortVal = shortVal;
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->Send();
+
+    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_GLOBAL_SHORT\n- varName: %s\n- shortVal: %i",
+        worldObject.varName.c_str(), worldObject.shortVal);
 }

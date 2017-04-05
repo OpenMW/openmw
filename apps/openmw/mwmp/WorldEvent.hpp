@@ -18,23 +18,6 @@ namespace mwmp
         void reset();
         void addObject(WorldObject worldObject);
 
-        void sendActors(MWWorld::CellStore* cellStore);
-        void sendContainers(MWWorld::CellStore* cellStore);
-
-        void sendObjectPlace(MWWorld::Ptr ptr);
-        void sendObjectDelete(MWWorld::Ptr ptr);
-        void sendObjectLock(MWWorld::Ptr ptr, int lockLevel);
-        void sendObjectUnlock(MWWorld::Ptr ptr);
-        void sendObjectScale(MWWorld::Ptr ptr, int scale);
-        void sendObjectAnimPlay(MWWorld::Ptr ptr, std::string group, int mode);
-        void sendDoorState(MWWorld::Ptr ptr, int state);
-        void sendMusicPlay(std::string filename);
-        void sendVideoPlay(std::string filename, bool allowSkipping);
-        void sendScriptLocalShort(MWWorld::Ptr ptr, int index, int shortVal);
-        void sendScriptLocalFloat(MWWorld::Ptr ptr, int index, float floatVal);
-        void sendScriptMemberShort(std::string refId, int index, int shortVal);
-        void sendScriptGlobalShort(std::string varName, int shortVal);
-
         void editActors(MWWorld::CellStore* cellStore);
         void editContainers(MWWorld::CellStore* cellStore);
 
@@ -55,6 +38,23 @@ namespace mwmp
 
         void playMusic();
         void playVideo();
+
+        void sendActors(MWWorld::CellStore* cellStore);
+        void sendContainers(MWWorld::CellStore* cellStore);
+
+        void sendObjectPlace(MWWorld::Ptr ptr);
+        void sendObjectDelete(MWWorld::Ptr ptr);
+        void sendObjectLock(MWWorld::Ptr ptr, int lockLevel);
+        void sendObjectUnlock(MWWorld::Ptr ptr);
+        void sendObjectScale(MWWorld::Ptr ptr, int scale);
+        void sendObjectAnimPlay(MWWorld::Ptr ptr, std::string group, int mode);
+        void sendDoorState(MWWorld::Ptr ptr, int state);
+        void sendMusicPlay(std::string filename);
+        void sendVideoPlay(std::string filename, bool allowSkipping);
+        void sendScriptLocalShort(MWWorld::Ptr ptr, int index, int shortVal);
+        void sendScriptLocalFloat(MWWorld::Ptr ptr, int index, float floatVal);
+        void sendScriptMemberShort(std::string refId, int index, int shortVal);
+        void sendScriptGlobalShort(std::string varName, int shortVal);
 
     private:
         Networking *getNetworking();
