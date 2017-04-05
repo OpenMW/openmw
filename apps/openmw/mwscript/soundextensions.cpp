@@ -80,13 +80,7 @@ namespace MWScript
                         a script
                     */
                     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-                    
-                    mwmp::WorldObject worldObject;
-                    worldObject.filename = sound;
-                    worldEvent->addObject(worldObject);
-
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->setEvent(worldEvent);
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_MUSIC_PLAY)->Send();
+                    worldEvent->sendMusicPlay(sound);
                     /*
                         End of tes3mp addition
                     */

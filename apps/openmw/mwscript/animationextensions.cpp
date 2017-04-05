@@ -72,18 +72,7 @@ namespace MWScript
                     if (mwmp::Main::isValidPacketScript(ptr.getClass().getScript(ptr)))
                     {
                         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-                        worldEvent->cell = *ptr.getCell()->getCell();
-
-                        mwmp::WorldObject worldObject;
-                        worldObject.refId = ptr.getCellRef().getRefId();
-                        worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-                        worldObject.mpNum = ptr.getCellRef().getMpNum();
-                        worldObject.animGroup = group;
-                        worldObject.animMode = mode;
-                        worldEvent->addObject(worldObject);
-
-                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->setEvent(worldEvent);
-                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_ANIM_PLAY)->Send();
+                        worldEvent->sendObjectAnimPlay(ptr, group, mode);
                     }
                     /*
                         End of tes3mp addition

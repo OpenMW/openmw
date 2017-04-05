@@ -203,22 +203,7 @@ namespace MWScript
         if (sendPackets)
         {
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-            worldEvent->cell = *mReference.getCell()->getCell();
-
-            mwmp::WorldObject worldObject;
-            worldObject.refId = mReference.getCellRef().getRefId();
-            worldObject.refNumIndex = mReference.getCellRef().getRefNum().mIndex;
-            worldObject.mpNum = mReference.getCellRef().getMpNum();
-            worldObject.index = index;
-            worldObject.shortVal = value;
-            worldEvent->addObject(worldObject);
-
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_SHORT)->setEvent(worldEvent);
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_SHORT)->Send();
-
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_SHORT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- shortVal: %i",
-                               worldObject.refId.c_str(), worldObject.refNumIndex, worldEvent->cell.getDescription().c_str(),
-                               worldObject.index, worldObject.shortVal);
+            worldEvent->sendScriptLocalShort(mReference, index, value);
         }
         /*
             End of tes3mp addition
@@ -250,22 +235,7 @@ namespace MWScript
         if (sendPackets && value == (int) value)
         {
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-            worldEvent->cell = *mReference.getCell()->getCell();
-
-            mwmp::WorldObject worldObject;
-            worldObject.refId = mReference.getCellRef().getRefId();
-            worldObject.refNumIndex = mReference.getCellRef().getRefNum().mIndex;
-            worldObject.mpNum = mReference.getCellRef().getMpNum();
-            worldObject.index = index;
-            worldObject.floatVal = value;
-            worldEvent->addObject(worldObject);
-
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->setEvent(worldEvent);
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->Send();
-
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_FLOAT\n- cellRef: %s, %i\n- cell: %s\n- index: %i\n- floatVal: %f",
-                               worldObject.refId.c_str(), worldObject.refNumIndex, worldEvent->cell.getDescription().c_str(),
-                               worldObject.index, worldObject.floatVal);
+            worldEvent->sendScriptLocalFloat(mReference, index, value);
         }
         /*
             End of tes3mp addition
@@ -322,17 +292,7 @@ namespace MWScript
         if (sendPackets)
         {
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-
-            mwmp::WorldObject worldObject;
-            worldObject.varName = name;
-            worldObject.shortVal = value;
-            worldEvent->addObject(worldObject);
-
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->setEvent(worldEvent);
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->Send();
-
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_GLOBAL_SHORT\n- varName: %s\n- shortVal: %i",
-                               worldObject.varName.c_str(), worldObject.shortVal);
+            worldEvent->sendScriptGlobalShort(name, value);
         }
         /*
             End of tes3mp addition
@@ -667,18 +627,7 @@ namespace MWScript
         if (sendPackets && !global)
         {
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-
-            mwmp::WorldObject worldObject;
-            worldObject.refId = id;
-            worldObject.index = index;
-            worldObject.shortVal = value;
-            worldEvent->addObject(worldObject);
-
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_MEMBER_SHORT)->setEvent(worldEvent);
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_MEMBER_SHORT)->Send();
-
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_MEMBER_SHORT\n- cellRef: %s\n- index: %i\n- shortVal: %i",
-                               worldObject.refId.c_str(), worldObject.index, worldObject.shortVal);
+            worldEvent->sendScriptMemberShort(id, index, value);
         }
         /*
             End of tes3mp addition

@@ -96,14 +96,7 @@ namespace MWScript
                     through a script
                 */
                 mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-
-                mwmp::WorldObject worldObject;
-                worldObject.filename = name;
-                worldObject.allowSkipping = allowSkipping;
-                worldEvent->addObject(worldObject);
-
-                mwmp::Main::get().getNetworking()->getWorldPacket(ID_VIDEO_PLAY)->setEvent(worldEvent);
-                mwmp::Main::get().getNetworking()->getWorldPacket(ID_VIDEO_PLAY)->Send();
+                worldEvent->sendVideoPlay(name, allowSkipping);
                 /*
                     End of tes3mp addition
                 */

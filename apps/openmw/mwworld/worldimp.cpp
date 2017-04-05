@@ -2325,21 +2325,7 @@ namespace MWWorld
             Send an ID_DOOR_STATE packet every time a door is activated
         */
         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-        worldEvent->cell = *door.getCell()->getCell();
-
-        mwmp::WorldObject worldObject;
-        worldObject.refId = door.getCellRef().getRefId();
-        worldObject.refNumIndex = door.getCellRef().getRefNum().mIndex;
-        worldObject.mpNum = door.getCellRef().getMpNum();
-        worldObject.doorState = state;
-        worldEvent->addObject(worldObject);
-
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->setEvent(worldEvent);
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send();
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 1\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
-                           worldObject.refId.c_str(), worldObject.refNumIndex, worldEvent->cell.getDescription().c_str(),
-                           worldObject.doorState ? "true" : "false");
+        worldEvent->sendDoorState(door, state);
         /*
             End of tes3mp addition
         */
@@ -2356,21 +2342,7 @@ namespace MWWorld
             Send an ID_DOOR_STATE packet every time a door is activated
         */
         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-        worldEvent->cell = *door.getCell()->getCell();
-
-        mwmp::WorldObject worldObject;
-        worldObject.refId = door.getCellRef().getRefId();
-        worldObject.refNumIndex = door.getCellRef().getRefNum().mIndex;
-        worldObject.mpNum = door.getCellRef().getMpNum();
-        worldObject.doorState = state;
-        worldEvent->addObject(worldObject);
-
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->setEvent(worldEvent);
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send();
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Door activation 2\n- cellRef: %s, %i\n- cell: %s\n- state: %s",
-                           worldObject.refId.c_str(), worldObject.refNumIndex, worldEvent->cell.getDescription().c_str(),
-                           worldObject.doorState ? "true" : "false");
+        worldEvent->sendDoorState(door, state);
         /*
             End of tes3mp addition
         */
