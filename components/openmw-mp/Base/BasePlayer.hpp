@@ -5,9 +5,9 @@
 #ifndef OPENMW_BASEPLAYER_HPP
 #define OPENMW_BASEPLAYER_HPP
 
-#include <components/esm/npcstats.hpp>
 #include <components/esm/loadcell.hpp>
 #include <components/esm/loadnpc.hpp>
+#include <components/esm/npcstats.hpp>
 #include <components/esm/creaturestats.hpp>
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadspel.hpp>
