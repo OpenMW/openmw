@@ -25,14 +25,17 @@
 #include "processors/player/ProcessorGUIMessageBox.hpp"
 #include "processors/player/ProcessorPlayerCharClass.hpp"
 #include "WorldProcessor.hpp"
+#include "processors/world/ProcessorActorList.hpp"
+#include "processors/world/ProcessorActorAuthority.hpp"
+#include "processors/world/ProcessorActorFrame.hpp"
 #include "processors/world/ProcessorContainer.hpp"
 #include "processors/world/ProcessorDoorState.hpp"
 #include "processors/world/ProcessorMusicPlay.hpp"
 #include "processors/world/ProcessorObjectAnimPlay.hpp"
 #include "processors/world/ProcessorObjectDelete.hpp"
+#include "processors/world/ProcessorObjectPlace.hpp"
 #include "processors/world/ProcessorObjectLock.hpp"
 #include "processors/world/ProcessorObjectMove.hpp"
-#include "processors/world/ProcessorObjectPlace.hpp"
 #include "processors/world/ProcessorObjectRotate.hpp"
 #include "processors/world/ProcessorObjectScale.hpp"
 #include "processors/world/ProcessorObjectUnlock.hpp"
@@ -67,6 +70,9 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorGUIMessageBox());
     PlayerProcessor::AddProcessor(new ProcessorPlayerCharClass());
 
+    WorldProcessor::AddProcessor(new ProcessorActorList());
+    WorldProcessor::AddProcessor(new ProcessorActorAuthority());
+    WorldProcessor::AddProcessor(new ProcessorActorFrame());
     WorldProcessor::AddProcessor(new ProcessorContainer());
     WorldProcessor::AddProcessor(new ProcessorDoorState());
     WorldProcessor::AddProcessor(new ProcessorMusicPlay());

@@ -840,6 +840,21 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
     switch (packet->data[0])
     {
+    case ID_ACTOR_LIST:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_ACTOR_LIST about %s", worldEvent.cell.getDescription().c_str());
+        break;
+    }
+    case ID_ACTOR_AUTHORITY:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_ACTOR_AUTHORITY about %s", worldEvent.cell.getDescription().c_str());
+        break;
+    }
+    case ID_ACTOR_FRAME:
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_ACTOR_FRAME about %s", worldEvent.cell.getDescription().c_str());
+        break;
+    }
     case ID_CONTAINER:
     {
         MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(worldEvent.cell);

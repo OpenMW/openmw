@@ -121,6 +121,8 @@ public:
             {"OnPlayerInventoryChange",  Function<void, unsigned short>()},
             {"OnPlayerSpellbookChange",  Function<void, unsigned short>()},
             {"OnPlayerJournalChange",    Function<void, unsigned short>()},
+            {"OnActorList",              Function<void, unsigned short, const char*>()},
+            {"OnActorFrame",             Function<void, unsigned short, const char*>()},
             {"OnObjectPlace",            Function<void, unsigned short, const char*>()},
             {"OnObjectDelete",           Function<void, unsigned short, const char*>()},
             {"OnObjectScale",            Function<void, unsigned short, const char*>()},
