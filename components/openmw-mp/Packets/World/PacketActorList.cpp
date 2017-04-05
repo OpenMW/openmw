@@ -12,10 +12,16 @@ void PacketActorList::Packet(RakNet::BitStream *bs, bool send)
 {
     WorldPacket::Packet(bs, send);
 
-    if (!send)
-        event->objectChanges.objects.clear();
-    else
+    RW(event->action, send);
+
+    if (send)
+    {
         event->objectChanges.count = (unsigned int)(event->objectChanges.objects.size());
+    }
+    else
+    {
+        event->objectChanges.objects.clear();
+    }
 
     RW(event->objectChanges.count, send);
 
