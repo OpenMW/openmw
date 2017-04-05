@@ -25,6 +25,7 @@ namespace mwmp
         void sendObjectUnlock(MWWorld::Ptr ptr);
         void sendObjectScale(MWWorld::Ptr ptr, int scale);
 
+        void editActors(MWWorld::CellStore* cellStore);
         void editContainers(MWWorld::CellStore* cellStore);
 
         void placeObjects(MWWorld::CellStore* cellStore);

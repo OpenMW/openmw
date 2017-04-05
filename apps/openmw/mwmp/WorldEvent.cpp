@@ -208,6 +208,33 @@ void WorldEvent::sendObjectScale(MWWorld::Ptr ptr, int scale)
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->Send();
 }
 
+void WorldEvent::editActors(MWWorld::CellStore* cellStore)
+{
+    WorldObject worldObject;
+
+    for (unsigned int i = 0; i < objectChanges.count; i++)
+    {
+        worldObject = objectChanges.objects.at(i);
+
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
+
+        return;
+
+        MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex, worldObject.mpNum);
+
+        if (ptrFound)
+        {
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
+        }
+        else
+        {
+            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "-- Could not find %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
+        }
+    }
+}
+
 void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
