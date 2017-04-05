@@ -1,16 +1,16 @@
-#ifndef OPENMW_WORLDCONTROLLER_HPP
-#define OPENMW_WORLDCONTROLLER_HPP
+#ifndef OPENMW_CELLCONTROLLER_HPP
+#define OPENMW_CELLCONTROLLER_HPP
 
 #include "../mwworld/cellstore.hpp"
 
 namespace mwmp
 {
-    class WorldController
+    class CellController
     {
     public:
 
-        WorldController();
-        ~WorldController();
+        CellController();
+        ~CellController();
 
         int getCellSize() const;
         
@@ -21,4 +21,4 @@ namespace mwmp
     };
 }
 
-#endif //OPENMW_WORLDCONTROLLER_HPP
+#endif //OPENMW_CELLCONTROLLER_HPP

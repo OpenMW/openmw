@@ -28,7 +28,7 @@
 
 #include "LocalPlayer.hpp"
 #include "Networking.hpp"
-#include "WorldController.hpp"
+#include "CellController.hpp"
 #include "Main.hpp"
 
 using namespace mwmp;
@@ -668,7 +668,7 @@ void LocalPlayer::addJournalItems()
         
         if (journalItem.type == JournalItem::ENTRY)
         {
-            MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(journalItem.actorCell);
+            MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(journalItem.actorCell);
 
             if (!ptrCellStore) continue;
 

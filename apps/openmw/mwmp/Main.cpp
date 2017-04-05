@@ -31,7 +31,7 @@
 #include "LocalPlayer.hpp"
 #include "DedicatedPlayer.hpp"
 #include "GUIController.hpp"
-#include "WorldController.hpp"
+#include "CellController.hpp"
 
 using namespace mwmp;
 using namespace std;
@@ -69,7 +69,7 @@ Main::Main()
     mNetworking = new Networking();
     mLocalPlayer = new LocalPlayer();
     mGUIController = new GUIController();
-    mWorldController = new WorldController();
+    mCellController = new CellController();
     //mLocalPlayer->CharGen(0, 4);
 
     server = "mp.tes3mp.com";
@@ -208,7 +208,9 @@ void Main::updateWorld(float dt) const
         get().getGUIController()->setChatVisible(true);
     }
     else
+    {
         mLocalPlayer->update();
+    }
 }
 
 const Main &Main::get()
@@ -232,9 +234,9 @@ GUIController *Main::getGUIController() const
     return mGUIController;
 }
 
-WorldController *Main::getWorldController() const
+CellController *Main::getCellController() const
 {
-    return mWorldController;
+    return mCellController;
 }
 
 void Main::pressedKey(int key)

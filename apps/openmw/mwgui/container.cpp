@@ -7,7 +7,7 @@
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
 #include "../mwmp/WorldEvent.hpp"
-#include "../mwmp/WorldController.hpp"
+#include "../mwmp/CellController.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -213,7 +213,7 @@ namespace MWGui
 
     void ContainerWindow::openContainer(const MWWorld::Ptr& container, bool loot)
     {
-        mwmp::Main::get().getWorldController()->openContainer(container, loot);
+        mwmp::Main::get().getCellController()->openContainer(container, loot);
 
         mPickpocketDetected = false;
         mPtr = container;
@@ -258,7 +258,7 @@ namespace MWGui
 
     void ContainerWindow::close()
     {
-        mwmp::Main::get().getWorldController()->closeContainer(mPtr);
+        mwmp::Main::get().getCellController()->closeContainer(mPtr);
         WindowBase::close();
 
         if (dynamic_cast<PickpocketItemModel*>(mModel)

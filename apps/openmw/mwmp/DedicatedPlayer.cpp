@@ -26,7 +26,7 @@
 
 #include "Main.hpp"
 #include "GUIController.hpp"
-#include "WorldController.hpp"
+#include "CellController.hpp"
 
 #include "../mwworld/inventorystore.hpp"
 #include <boost/algorithm/clamp.hpp>
@@ -84,7 +84,7 @@ void Players::createPlayer(RakNet::RakNetGUID guid)
 
     // Temporarily spawn or move player to the center of exterior 0,0 whenever setting base info
     ESM::Position spawnPos;
-    spawnPos.pos[0] = spawnPos.pos[1] = Main::get().getWorldController()->getCellSize() / 2;
+    spawnPos.pos[0] = spawnPos.pos[1] = Main::get().getCellController()->getCellSize() / 2;
     spawnPos.pos[2] = 0;
     MWWorld::CellStore *cellStore = world->getExterior(0, 0);
 
@@ -152,7 +152,7 @@ void Players::disconnectPlayer(RakNet::RakNetGUID guid)
 
         // Move player to exterior 0,0
         ESM::Position newPos;
-        newPos.pos[0] = newPos.pos[1] = Main::get().getWorldController()->getCellSize() / 2;
+        newPos.pos[0] = newPos.pos[1] = Main::get().getCellController()->getCellSize() / 2;
         newPos.pos[2] = 0;
         MWWorld::CellStore *cellStore = world->getExterior(0, 0);
 

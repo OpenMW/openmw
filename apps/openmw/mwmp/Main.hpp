@@ -4,7 +4,7 @@
 
 namespace mwmp
 {
-    class WorldController;
+    class CellController;
     class GUIController;
     class LocalPlayer;
     class Networking;
@@ -29,7 +29,7 @@ namespace mwmp
         Networking *getNetworking() const;
         LocalPlayer *getLocalPlayer() const;
         GUIController *getGUIController() const;
-        WorldController *getWorldController() const;
+        CellController *getCellController() const;
 
         void updateWorld(float dt) const;
 
@@ -45,7 +45,7 @@ namespace mwmp
         LocalPlayer *mLocalPlayer;
 
         GUIController *mGUIController;
-        WorldController *mWorldController;
+        CellController *mCellController;
         std::string server;
         unsigned short port;
     };

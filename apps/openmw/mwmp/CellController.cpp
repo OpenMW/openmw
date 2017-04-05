@@ -5,27 +5,26 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 
-#include "WorldController.hpp"
+#include "CellController.hpp"
 #include "Main.hpp"
 #include "LocalPlayer.hpp"
 
-
-mwmp::WorldController::WorldController()
+mwmp::CellController::CellController()
 {
 
 }
 
-mwmp::WorldController::~WorldController()
+mwmp::CellController::~CellController()
 {
 
 }
 
-int mwmp::WorldController::getCellSize() const
+int mwmp::CellController::getCellSize() const
 {
     return 8192;
 }
 
-MWWorld::CellStore *mwmp::WorldController::getCell(const ESM::Cell& cell)
+MWWorld::CellStore *mwmp::CellController::getCell(const ESM::Cell& cell)
 {
     MWWorld::CellStore *cellStore;
 
@@ -47,7 +46,7 @@ MWWorld::CellStore *mwmp::WorldController::getCell(const ESM::Cell& cell)
 }
 
 
-void mwmp::WorldController::openContainer(const MWWorld::Ptr &container, bool loot)
+void mwmp::CellController::openContainer(const MWWorld::Ptr &container, bool loot)
 {
     // Record this as the player's current open container
     mwmp::Main::get().getLocalPlayer()->storeCurrentContainer(container, loot);
@@ -70,7 +69,7 @@ void mwmp::WorldController::openContainer(const MWWorld::Ptr &container, bool lo
 
 }
 
-void mwmp::WorldController::closeContainer(const MWWorld::Ptr &container)
+void mwmp::CellController::closeContainer(const MWWorld::Ptr &container)
 {
     mwmp::Main::get().getLocalPlayer()->clearCurrentContainer();
 
