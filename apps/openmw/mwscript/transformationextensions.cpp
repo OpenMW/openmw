@@ -53,17 +53,7 @@ namespace MWScript
                         through a script
                     */
                     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-                    worldEvent->cell = *ptr.getCell()->getCell();
-
-                    mwmp::WorldObject worldObject;
-                    worldObject.refId = ptr.getCellRef().getRefId();
-                    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-                    worldObject.mpNum = ptr.getCellRef().getMpNum();
-                    worldObject.scale = scale;
-                    worldEvent->addObject(worldObject);
-
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->setEvent(worldEvent);
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->Send();
+                    worldEvent->sendObjectScale(ptr, scale);
                     /*
                         End of tes3mp addition
                     */
@@ -558,26 +548,7 @@ namespace MWScript
                             through a script
                         */
                         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-                        worldEvent->cell = *ptr.getCell()->getCell();
-
-                        mwmp::WorldObject worldObject;
-                        worldObject.refId = ptr.getCellRef().getRefId();
-                        worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-                        worldObject.mpNum = 0;
-                        worldObject.charge = ptr.getCellRef().getCharge();
-                        worldObject.count = 1;
-
-                        // Make sure we send the RefData position instead of the CellRef one, because that's what
-                        // we actually see on this client
-                        worldObject.pos = ptr.getRefData().getPosition();
-
-                        worldEvent->addObject(worldObject);
-
-                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->setEvent(worldEvent);
-                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send();
-
-                        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
-                                           worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.count);
+                        worldEvent->sendObjectPlace(ptr);
                         /*
                             End of tes3mp addition
                         */

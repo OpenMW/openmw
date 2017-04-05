@@ -65,32 +65,7 @@ namespace MWGui
                 the inventory screen
             */
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-            worldEvent->cell = *dropped.getCell()->getCell();
-
-            mwmp::WorldObject worldObject;
-            worldObject.refId = dropped.getCellRef().getRefId();
-            worldObject.refNumIndex = dropped.getCellRef().getRefNum().mIndex;
-            worldObject.mpNum = 0;
-            worldObject.charge = dropped.getCellRef().getCharge();
-
-            // Make sure we send the RefData position instead of the CellRef one, because that's what
-            // we actually see on this client
-            worldObject.pos = dropped.getRefData().getPosition();
-
-            // We have to get the count from the dropped object because it gets changed
-            // automatically for stacks of gold
-            worldObject.count = dropped.getRefData().getCount();
-
-            // Get the real count of gold in a stack
-            worldObject.goldValue = dropped.getCellRef().getGoldValue();
-
-            worldEvent->addObject(worldObject);
-
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->setEvent(worldEvent);
-            mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send();
-
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
-                               worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.count);
+            worldEvent->sendObjectPlace(dropped);
             /*
                 End of tes3mp addition
             */

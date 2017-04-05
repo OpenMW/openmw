@@ -19,8 +19,14 @@ namespace mwmp
 
         void sendActors(MWWorld::CellStore* cellStore);
         void sendContainers(MWWorld::CellStore* cellStore);
+        void sendObjectPlace(MWWorld::Ptr ptr);
+        void sendObjectDelete(MWWorld::Ptr ptr);
+        void sendObjectLock(MWWorld::Ptr ptr, int lockLevel);
+        void sendObjectUnlock(MWWorld::Ptr ptr);
+        void sendObjectScale(MWWorld::Ptr ptr, int scale);
 
         void editContainers(MWWorld::CellStore* cellStore);
+
         void placeObjects(MWWorld::CellStore* cellStore);
         void deleteObjects(MWWorld::CellStore* cellStore);
         void lockObjects(MWWorld::CellStore* cellStore);

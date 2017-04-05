@@ -35,20 +35,7 @@ namespace MWWorld
             by the player
         */
         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-        worldEvent->cell = *getTarget().getCell()->getCell();
-
-        mwmp::WorldObject worldObject;
-        worldObject.refId = getTarget().getCellRef().getRefId();
-        worldObject.refNumIndex = getTarget().getCellRef().getRefNum().mIndex;
-        worldObject.mpNum = getTarget().getCellRef().getMpNum();
-        worldEvent->addObject(worldObject);
-
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->setEvent(worldEvent);
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send();
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_DELETE about\n- cellRef: %s, %i\n- cell: %s",
-                           worldObject.refId.c_str(), worldObject.refNumIndex, worldEvent->cell.getDescription().c_str());
-
+        worldEvent->sendObjectDelete(getTarget());
         mwmp::Main::get().getLocalPlayer()->sendInventory();
         /*
             End of tes3mp addition

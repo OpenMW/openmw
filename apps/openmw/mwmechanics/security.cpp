@@ -64,16 +64,7 @@ namespace MWMechanics
                     Send an ID_OBJECT_UNLOCK packet every time an object is unlocked
                 */
                 mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-                worldEvent->cell = *lock.getCell()->getCell();
-
-                mwmp::WorldObject worldObject;
-                worldObject.refId = lock.getCellRef().getRefId();
-                worldObject.refNumIndex = lock.getCellRef().getRefNum().mIndex;
-                worldObject.mpNum = lock.getCellRef().getMpNum();
-                worldEvent->addObject(worldObject);
-
-                mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->setEvent(worldEvent);
-                mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send();
+                worldEvent->sendObjectUnlock(lock);
                 /*
                     End of tes3mp addition
                 */

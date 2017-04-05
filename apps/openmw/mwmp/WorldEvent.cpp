@@ -119,6 +119,95 @@ void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send();
 }
 
+
+void WorldEvent::sendObjectPlace(MWWorld::Ptr ptr)
+{
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = 0;
+    worldObject.charge = ptr.getCellRef().getCharge();
+
+    // Make sure we send the RefData position instead of the CellRef one, because that's what
+    // we actually see on this client
+    worldObject.pos = ptr.getRefData().getPosition();
+
+    // We have to get the count from the dropped object because it gets changed
+    // automatically for stacks of gold
+    worldObject.count = ptr.getRefData().getCount();
+
+    // Get the real count of gold in a stack
+    worldObject.goldValue = ptr.getCellRef().getGoldValue();
+
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send();
+
+    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE\n- cellRef: %s, %i\n- count: %i",
+        worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.count);
+}
+
+void WorldEvent::sendObjectDelete(MWWorld::Ptr ptr)
+{
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = ptr.getCellRef().getMpNum();
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send();
+}
+
+void WorldEvent::sendObjectLock(MWWorld::Ptr ptr, int lockLevel)
+{
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = ptr.getCellRef().getMpNum();
+    worldObject.lockLevel = lockLevel;
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->Send();
+}
+
+void WorldEvent::sendObjectUnlock(MWWorld::Ptr ptr)
+{
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = ptr.getCellRef().getMpNum();
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send();
+}
+
+void WorldEvent::sendObjectScale(MWWorld::Ptr ptr, int scale)
+{
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = ptr.getCellRef().getMpNum();
+    worldObject.scale = scale;
+    addObject(worldObject);
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->Send();
+}
+
 void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;

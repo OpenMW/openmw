@@ -213,17 +213,7 @@ namespace MWScript
                         through a script
                     */
                     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-                    worldEvent->cell = *ptr.getCell()->getCell();
-
-                    mwmp::WorldObject worldObject;
-                    worldObject.refId = ptr.getCellRef().getRefId();
-                    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-                    worldObject.mpNum = ptr.getCellRef().getMpNum();
-                    worldObject.lockLevel = lockLevel;
-                    worldEvent->addObject(worldObject);
-
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->setEvent(worldEvent);
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->Send();
+                    worldEvent->sendObjectLock(ptr, lockLevel);
                     /*
                         End of tes3mp addition
                     */
@@ -261,16 +251,7 @@ namespace MWScript
                         through a script
                     */
                     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-                    worldEvent->cell = *ptr.getCell()->getCell();
-
-                    mwmp::WorldObject worldObject;
-                    worldObject.refId = ptr.getCellRef().getRefId();
-                    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-                    worldObject.mpNum = ptr.getCellRef().getMpNum();
-                    worldEvent->addObject(worldObject);
-
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->setEvent(worldEvent);
-                    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send();
+                    worldEvent->sendObjectUnlock(ptr);
                     /*
                         End of tes3mp addition
                     */
@@ -742,16 +723,7 @@ namespace MWScript
                             through a script
                         */
                         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-                        worldEvent->cell = *ptr.getCell()->getCell();
-
-                        mwmp::WorldObject worldObject;
-                        worldObject.refId = ptr.getCellRef().getRefId();
-                        worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-                        worldObject.mpNum = ptr.getCellRef().getMpNum();
-                        worldEvent->addObject(worldObject);
-
-                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->setEvent(worldEvent);
-                        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send();
+                        worldEvent->sendObjectDelete(ptr);
                         /*
                             End of tes3mp addition
                         */

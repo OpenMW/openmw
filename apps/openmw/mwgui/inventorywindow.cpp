@@ -645,16 +645,7 @@ namespace MWGui
             by the player
         */
         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-        worldEvent->cell = *object.getCell()->getCell();
-
-        mwmp::WorldObject worldObject;
-        worldObject.refId = object.getCellRef().getRefId();
-        worldObject.refNumIndex = object.getCellRef().getRefNum().mIndex;
-        worldObject.mpNum = object.getCellRef().getMpNum();
-        worldEvent->addObject(worldObject);
-
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->setEvent(worldEvent);
-        mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_DELETE)->Send();
+        worldEvent->sendObjectDelete(object);
         mwmp::Main::get().getLocalPlayer()->sendInventory();
         /*
             End of tes3mp addition
