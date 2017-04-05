@@ -51,6 +51,7 @@
     {"AddWorldObject",              WorldFunctions::AddWorldObject},\
     {"AddContainerItem",            WorldFunctions::AddContainerItem},\
     \
+    {"SendActorList",               WorldFunctions::SendActorList},\
     {"SendObjectDelete",            WorldFunctions::SendObjectDelete},\
     {"SendObjectPlace",             WorldFunctions::SendObjectPlace},\
     {"SendObjectScale",             WorldFunctions::SendObjectScale},\
@@ -116,6 +117,7 @@ public:
     static void AddWorldObject() noexcept;
     static void AddContainerItem() noexcept;
 
+    static void SendActorList() noexcept;
     static void SendObjectDelete() noexcept;
     static void SendObjectPlace() noexcept;
     static void SendObjectScale() noexcept;

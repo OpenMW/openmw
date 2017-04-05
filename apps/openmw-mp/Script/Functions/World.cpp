@@ -271,6 +271,12 @@ void WorldFunctions::AddContainerItem() noexcept
     tempWorldObject.containerChanges.items.push_back(containerItem);
 }
 
+void WorldFunctions::SendActorList() noexcept
+{
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_ACTOR_LIST)->setEvent(&scriptEvent);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_ACTOR_LIST)->Send(scriptEvent.guid);
+}
+
 void WorldFunctions::SendObjectDelete() noexcept
 {
     mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_DELETE)->setEvent(&scriptEvent);
