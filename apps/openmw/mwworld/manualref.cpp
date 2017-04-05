@@ -23,6 +23,16 @@ namespace
         cellRef.mLockLevel = 0;
         cellRef.mReferenceBlocked = 0;
 
+        /*
+            Start of tes3mp addition
+
+            Set the mMpNum (unique multiplayer reference number) to 0 by default
+        */
+        cellRef.mMpNum = 0;
+        /*
+            End of tes3mp addition
+        */
+
         MWWorld::LiveCellRef<T> ref(cellRef, base);
 
         refValue = ref;
