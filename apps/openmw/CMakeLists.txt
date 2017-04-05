@@ -96,7 +96,7 @@ add_openmw_dir (mwbase
     inputmanager windowmanager statemanager
     )
 
-add_openmw_dir (mwmp Main Networking LocalPlayer DedicatedPlayer WorldEvent LocalActor CellController GUIChat GUILogin GUIController PlayerMarkerCollection GUIDialogList)
+add_openmw_dir (mwmp Main Networking LocalPlayer DedicatedPlayer LocalActor DedicatedActor WorldEvent CellController GUIChat GUILogin GUIController PlayerMarkerCollection GUIDialogList)
 
 # Main executable
 
