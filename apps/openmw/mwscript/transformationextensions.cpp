@@ -52,7 +52,7 @@ namespace MWScript
                         Send an ID_OBJECT_SCALE every time an object's scale is changed
                         through a script
                     */
-                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
                     worldEvent->sendObjectScale(ptr, scale);
                     /*
                         End of tes3mp addition
@@ -547,7 +547,7 @@ namespace MWScript
                             Send an ID_OBJECT_PLACE packet every time an object is placed in the world
                             through a script
                         */
-                        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
                         worldEvent->sendObjectPlace(ptr);
                         /*
                             End of tes3mp addition

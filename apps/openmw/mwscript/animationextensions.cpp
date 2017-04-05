@@ -71,7 +71,7 @@ namespace MWScript
                     */
                     if (mwmp::Main::isValidPacketScript(ptr.getClass().getScript(ptr)))
                     {
-                        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
                         worldEvent->sendObjectAnimPlay(ptr, group, mode);
                     }
                     /*

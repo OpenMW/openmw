@@ -644,7 +644,7 @@ namespace MWGui
             Send an ID_PLAYER_INVENTORY packet as well because of the item thus gained
             by the player
         */
-        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
         worldEvent->sendObjectDelete(object);
         mwmp::Main::get().getLocalPlayer()->sendInventory();
         /*

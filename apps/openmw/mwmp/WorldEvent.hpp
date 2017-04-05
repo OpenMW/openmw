@@ -15,6 +15,7 @@ namespace mwmp
         WorldEvent();
         virtual ~WorldEvent();
 
+        void reset();
         void addObject(WorldObject worldObject);
 
         void sendActors(MWWorld::CellStore* cellStore);

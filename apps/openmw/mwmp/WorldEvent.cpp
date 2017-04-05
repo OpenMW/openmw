@@ -35,6 +35,13 @@ Networking *WorldEvent::getNetworking()
     return mwmp::Main::get().getNetworking();
 }
 
+void WorldEvent::reset()
+{
+    cell.blank();
+    objectChanges.objects.clear();
+    guid = mwmp::Main::get().getNetworking()->getLocalPlayer()->guid;
+}
+
 void WorldEvent::addObject(WorldObject worldObject)
 {
     objectChanges.objects.push_back(worldObject);
@@ -42,9 +49,9 @@ void WorldEvent::addObject(WorldObject worldObject)
 
 void WorldEvent::sendActors(MWWorld::CellStore* cellStore)
 {
-    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-    worldEvent->cell = *cellStore->getCell();
-    worldEvent->action = BaseEvent::SET;
+    reset();
+    cell = *cellStore->getCell();
+    action = BaseEvent::SET;
 
     MWWorld::CellRefList<ESM::NPC> *npcList = cellStore->getNpcs();
 
@@ -58,7 +65,7 @@ void WorldEvent::sendActors(MWWorld::CellStore* cellStore)
         worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
         worldObject.mpNum = ptr.getCellRef().getMpNum();
 
-        worldEvent->addObject(worldObject);
+        addObject(worldObject);
     }
 
     MWWorld::CellRefList<ESM::Creature> *creatureList = cellStore->getCreatures();
@@ -73,18 +80,18 @@ void WorldEvent::sendActors(MWWorld::CellStore* cellStore)
         worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
         worldObject.mpNum = ptr.getCellRef().getMpNum();
 
-        worldEvent->addObject(worldObject);
+        addObject(worldObject);
     }
 
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_ACTOR_LIST)->setEvent(worldEvent);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_ACTOR_LIST)->setEvent(this);
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_ACTOR_LIST)->Send();
 }
 
 void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
 {
-    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
-    worldEvent->cell = *cellStore->getCell();
-    worldEvent->action = BaseEvent::SET;
+    reset();
+    cell = *cellStore->getCell();
+    action = BaseEvent::SET;
 
     MWWorld::CellRefList<ESM::Container> *containerList = cellStore->getContainers();
 
@@ -112,16 +119,17 @@ void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
             worldObject.containerChanges.items.push_back(containerItem);
         }
 
-        worldEvent->addObject(worldObject);
+        addObject(worldObject);
     }
 
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->setEvent(worldEvent);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->setEvent(this);
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->Send();
 }
 
 
 void WorldEvent::sendObjectPlace(MWWorld::Ptr ptr)
 {
+    reset();
     cell = *ptr.getCell()->getCell();
 
     mwmp::WorldObject worldObject;
@@ -152,6 +160,7 @@ void WorldEvent::sendObjectPlace(MWWorld::Ptr ptr)
 
 void WorldEvent::sendObjectDelete(MWWorld::Ptr ptr)
 {
+    reset();
     cell = *ptr.getCell()->getCell();
 
     mwmp::WorldObject worldObject;
@@ -166,6 +175,7 @@ void WorldEvent::sendObjectDelete(MWWorld::Ptr ptr)
 
 void WorldEvent::sendObjectLock(MWWorld::Ptr ptr, int lockLevel)
 {
+    reset();
     cell = *ptr.getCell()->getCell();
 
     mwmp::WorldObject worldObject;
@@ -181,6 +191,7 @@ void WorldEvent::sendObjectLock(MWWorld::Ptr ptr, int lockLevel)
 
 void WorldEvent::sendObjectUnlock(MWWorld::Ptr ptr)
 {
+    reset();
     cell = *ptr.getCell()->getCell();
 
     mwmp::WorldObject worldObject;
@@ -195,6 +206,7 @@ void WorldEvent::sendObjectUnlock(MWWorld::Ptr ptr)
 
 void WorldEvent::sendObjectScale(MWWorld::Ptr ptr, int scale)
 {
+    reset();
     cell = *ptr.getCell()->getCell();
 
     mwmp::WorldObject worldObject;
@@ -210,6 +222,7 @@ void WorldEvent::sendObjectScale(MWWorld::Ptr ptr, int scale)
 
 void WorldEvent::sendObjectAnimPlay(MWWorld::Ptr ptr, std::string group, int mode)
 {
+    reset();
     cell = *ptr.getCell()->getCell();
 
     mwmp::WorldObject worldObject;
@@ -226,6 +239,7 @@ void WorldEvent::sendObjectAnimPlay(MWWorld::Ptr ptr, std::string group, int mod
 
 void WorldEvent::sendDoorState(MWWorld::Ptr ptr, int state)
 {
+    reset();
     cell = *ptr.getCell()->getCell();
 
     mwmp::WorldObject worldObject;
@@ -245,6 +259,7 @@ void WorldEvent::sendDoorState(MWWorld::Ptr ptr, int state)
 
 void WorldEvent::sendMusicPlay(std::string filename)
 {
+    reset();
     mwmp::WorldObject worldObject;
     worldObject.filename = filename;
     addObject(worldObject);
@@ -255,6 +270,7 @@ void WorldEvent::sendMusicPlay(std::string filename)
 
 void WorldEvent::sendVideoPlay(std::string filename, bool allowSkipping)
 {
+    reset();
     mwmp::WorldObject worldObject;
     worldObject.filename = filename;
     worldObject.allowSkipping = allowSkipping;
@@ -266,6 +282,7 @@ void WorldEvent::sendVideoPlay(std::string filename, bool allowSkipping)
 
 void WorldEvent::sendScriptLocalShort(MWWorld::Ptr ptr, int index, int shortVal)
 {
+    reset();
     cell = *ptr.getCell()->getCell();
 
     mwmp::WorldObject worldObject;
@@ -286,6 +303,7 @@ void WorldEvent::sendScriptLocalShort(MWWorld::Ptr ptr, int index, int shortVal)
 
 void WorldEvent::sendScriptLocalFloat(MWWorld::Ptr ptr, int index, float floatVal)
 {
+    reset();
     cell = *ptr.getCell()->getCell();
 
     mwmp::WorldObject worldObject;
@@ -306,6 +324,7 @@ void WorldEvent::sendScriptLocalFloat(MWWorld::Ptr ptr, int index, float floatVa
 
 void WorldEvent::sendScriptMemberShort(std::string refId, int index, int shortVal)
 {
+    reset();
     mwmp::WorldObject worldObject;
     worldObject.refId = refId;
     worldObject.index = index;
@@ -321,6 +340,7 @@ void WorldEvent::sendScriptMemberShort(std::string refId, int index, int shortVa
 
 void WorldEvent::sendScriptGlobalShort(std::string varName, int shortVal)
 {
+    reset();
     mwmp::WorldObject worldObject;
     worldObject.varName = varName;
     worldObject.shortVal = shortVal;

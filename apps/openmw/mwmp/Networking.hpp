@@ -40,7 +40,8 @@ namespace mwmp
 
         bool isConnected();
 
-        WorldEvent *resetWorldEvent();
+        WorldEvent *getWorldEvent();
+        LocalPlayer *getLocalPlayer();
 
     private:
         bool connected;
@@ -55,7 +56,6 @@ namespace mwmp
         void processPlayerPacket(RakNet::Packet *packet);
         void processWorldPacket(RakNet::Packet *packet);
         void receiveMessage(RakNet::Packet *packet);
-        LocalPlayer *getLocalPlayer();
 
         void preInit(std::vector<std::string> &content, Files::Collections &collections);
     };

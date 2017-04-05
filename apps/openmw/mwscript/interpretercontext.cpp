@@ -202,7 +202,7 @@ namespace MWScript
         */
         if (sendPackets)
         {
-            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
             worldEvent->sendScriptLocalShort(mReference, index, value);
         }
         /*
@@ -234,7 +234,7 @@ namespace MWScript
         */
         if (sendPackets && value == (int) value)
         {
-            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
             worldEvent->sendScriptLocalFloat(mReference, index, value);
         }
         /*
@@ -291,7 +291,7 @@ namespace MWScript
         */
         if (sendPackets)
         {
-            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
             worldEvent->sendScriptGlobalShort(name, value);
         }
         /*
@@ -626,7 +626,7 @@ namespace MWScript
         */
         if (sendPackets && !global)
         {
-            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
             worldEvent->sendScriptMemberShort(id, index, value);
         }
         /*

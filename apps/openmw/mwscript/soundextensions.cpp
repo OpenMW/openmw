@@ -79,7 +79,7 @@ namespace MWScript
                         Send an ID_MUSIC_PLAY packet every time new music is streamed through
                         a script
                     */
-                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
                     worldEvent->sendMusicPlay(sound);
                     /*
                         End of tes3mp addition

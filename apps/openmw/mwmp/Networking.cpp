@@ -1067,11 +1067,8 @@ LocalPlayer *Networking::getLocalPlayer()
     return mwmp::Main::get().getLocalPlayer();
 }
 
-WorldEvent *Networking::resetWorldEvent()
+WorldEvent *Networking::getWorldEvent()
 {
-    worldEvent.cell.blank();
-    worldEvent.objectChanges.objects.clear();
-    worldEvent.guid = getLocalPlayer()->guid;
     return &worldEvent;
 }
 

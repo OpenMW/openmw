@@ -95,7 +95,7 @@ namespace MWScript
                     Send an ID_VIDEO_PLAY packet every time a video is played
                     through a script
                 */
-                mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
                 worldEvent->sendVideoPlay(name, allowSkipping);
                 /*
                     End of tes3mp addition
@@ -205,7 +205,7 @@ namespace MWScript
                         Send an ID_OBJECT_LOCK packet every time an object is locked
                         through a script
                     */
-                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
                     worldEvent->sendObjectLock(ptr, lockLevel);
                     /*
                         End of tes3mp addition
@@ -243,7 +243,7 @@ namespace MWScript
                         Send an ID_OBJECT_UNLOCK packet every time an object is unlocked
                         through a script
                     */
-                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
                     worldEvent->sendObjectUnlock(ptr);
                     /*
                         End of tes3mp addition
@@ -715,7 +715,7 @@ namespace MWScript
                             Send an ID_OBJECT_DELETE packet every time an object is deleted
                             through a script
                         */
-                        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+                        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
                         worldEvent->sendObjectDelete(ptr);
                         /*
                             End of tes3mp addition

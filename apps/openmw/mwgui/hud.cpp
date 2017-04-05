@@ -64,7 +64,7 @@ namespace MWGui
                 Send an ID_OBJECT_PLACE packet every time an object is dropped into the world from
                 the inventory screen
             */
-            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
             worldEvent->sendObjectPlace(dropped);
             /*
                 End of tes3mp addition

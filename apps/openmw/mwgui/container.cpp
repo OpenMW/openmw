@@ -107,7 +107,8 @@ namespace MWGui
             Send an ID_CONTAINER packet every time an item starts being dragged
             from a container
         */
-        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+        worldEvent->reset();
         worldEvent->cell = *mPtr.getCell()->getCell();
         worldEvent->action = mwmp::BaseEvent::REMOVE;
 
@@ -168,7 +169,8 @@ namespace MWGui
 
             Send an ID_CONTAINER packet every time an item is dropped in a container
         */
-        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+        worldEvent->reset();
         worldEvent->cell = *mPtr.getCell()->getCell();
         worldEvent->action = mwmp::BaseEvent::ADD;
 
@@ -325,7 +327,8 @@ namespace MWGui
                 Send an ID_CONTAINER packet every time the Take All button is used on
                 a container
             */
-            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+            worldEvent->reset();
             worldEvent->cell = *mPtr.getCell()->getCell();
             worldEvent->action = mwmp::BaseEvent::SET;
 
