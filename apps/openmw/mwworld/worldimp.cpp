@@ -2368,6 +2368,19 @@ namespace MWWorld
         End of tes3mp addition
     */
 
+    /*
+        Start of tes3mp addition
+
+        Make it possible to check whether a cell is active
+    */
+    bool World::isCellActive(MWWorld::CellStore* cell)
+    {
+        return mWorldScene->isCellActive(*cell);
+    }
+    /*
+        End of tes3mp addition
+    */
+
     bool World::getPlayerStandingOn (const MWWorld::ConstPtr& object)
     {
         MWWorld::Ptr player = getPlayerPtr();

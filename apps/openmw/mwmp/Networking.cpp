@@ -857,11 +857,10 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_ACTOR_AUTHORITY:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
-
-        if (!ptrCellStore) return;
-
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_ACTOR_AUTHORITY about %s", worldEvent.cell.getDescription().c_str());
+
+        Main::get().getCellController()->initializeLocalActors(worldEvent.cell);
+
         break;
     }
     case ID_ACTOR_FRAME:

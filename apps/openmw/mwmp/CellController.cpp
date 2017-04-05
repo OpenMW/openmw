@@ -8,6 +8,10 @@
 #include "CellController.hpp"
 #include "Main.hpp"
 #include "LocalPlayer.hpp"
+using namespace mwmp;
+
+std::map<std::string, LocalActor *> CellController::localActors;
+std::map<std::string, DedicatedActor *> CellController::dedicatedActors;
 
 mwmp::CellController::CellController()
 {
@@ -17,6 +21,53 @@ mwmp::CellController::CellController()
 mwmp::CellController::~CellController()
 {
 
+}
+
+void CellController::update()
+{
+    for (std::map<std::string, LocalActor *>::iterator it = localActors.begin(); it != localActors.end();)
+    {
+        LocalActor *actor = it->second;
+
+        if (!MWBase::Environment::get().getWorld()->isCellActive(getCell(actor->cell)))
+        {
+            localActors.erase(it++);
+        }
+        else
+        {
+            printf("Updating %s\n", it->first.c_str());
+            ++it;
+        }
+    }
+}
+
+void CellController::initializeLocalActors(const ESM::Cell& cell)
+{
+    MWWorld::CellStore *cellStore = getCell(cell);
+
+    if (!cellStore) return;
+
+    MWWorld::CellRefList<ESM::NPC> *npcList = cellStore->getNpcs();
+
+    for (typename MWWorld::CellRefList<ESM::NPC>::List::iterator listIter(npcList->mList.begin());
+        listIter != npcList->mList.end(); ++listIter)
+    {
+        MWWorld::Ptr ptr(&*listIter, 0);
+
+        std::string mapIndex = generateMapIndex(ptr);
+        localActors[mapIndex] = new LocalActor();
+        localActors[mapIndex]->cell = cell;
+        printf("Initialized local actor %s\n", mapIndex.c_str());
+    }
+}
+
+std::string CellController::generateMapIndex(MWWorld::Ptr ptr)
+{
+    std::string mapIndex = "";
+    mapIndex += ptr.getCellRef().getRefId();
+    mapIndex += "-" + std::to_string(ptr.getCellRef().getRefNum().mIndex);
+    mapIndex += "-" + std::to_string(ptr.getCellRef().getMpNum());
+    return mapIndex;
 }
 
 int mwmp::CellController::getCellSize() const

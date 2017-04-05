@@ -418,6 +418,16 @@ namespace MWBase
                 End of tes3mp addition
             */
 
+            /*
+                Start of tes3mp addition
+
+                Make it possible to check whether a cell is active
+            */
+            virtual bool isCellActive(MWWorld::CellStore* cell) = 0;
+            /*
+                End of tes3mp addition
+            */
+
             virtual bool getPlayerStandingOn (const MWWorld::ConstPtr& object) = 0; ///< @return true if the player is standing on \a object
             virtual bool getActorStandingOn (const MWWorld::ConstPtr& object) = 0; ///< @return true if any actor is standing on \a object
             virtual bool getPlayerCollidingWith(const MWWorld::ConstPtr& object) = 0; ///< @return true if the player is colliding with \a object
