@@ -133,7 +133,7 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum());
 
             MWWorld::ContainerStore& containerStore = ptrFound.getClass().getContainerStore(ptrFound);
@@ -236,7 +236,7 @@ void WorldEvent::deleteObjects(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum());
 
             MWBase::Environment::get().getWorld()->deleteObject(ptrFound);
@@ -258,7 +258,7 @@ void WorldEvent::lockObjects(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum());
 
             ptrFound.getClass().lock(ptrFound, worldObject.lockLevel);
@@ -280,7 +280,7 @@ void WorldEvent::unlockObjects(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum());
 
             ptrFound.getClass().unlock(ptrFound);
@@ -302,7 +302,7 @@ void WorldEvent::scaleObjects(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum());
 
             MWBase::Environment::get().getWorld()->scaleObject(ptrFound, worldObject.scale);
@@ -324,7 +324,7 @@ void WorldEvent::moveObjects(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum());
 
             MWBase::Environment::get().getWorld()->moveObject(ptrFound, worldObject.pos.pos[0], worldObject.pos.pos[1],
@@ -347,7 +347,7 @@ void WorldEvent::rotateObjects(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum());
 
             MWBase::Environment::get().getWorld()->rotateObject(ptrFound,
@@ -370,7 +370,7 @@ void WorldEvent::animateObjects(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum());
 
             MWBase::MechanicsManager * mechanicsManager = MWBase::Environment::get().getMechanicsManager();
@@ -394,7 +394,7 @@ void WorldEvent::activateDoors(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum());
 
             ptrFound.getClass().setDoorState(ptrFound, worldObject.doorState);
@@ -447,7 +447,7 @@ void WorldEvent::setLocalShorts(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum());
 
             ptrFound.getRefData().getLocals().mShorts.at(worldObject.index) = worldObject.shortVal;
@@ -470,7 +470,7 @@ void WorldEvent::setLocalFloats(MWWorld::CellStore* cellStore)
 
         if (ptrFound)
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum());
 
             ptrFound.getRefData().getLocals().mFloats.at(worldObject.index) = worldObject.floatVal;
@@ -494,7 +494,7 @@ void WorldEvent::setMemberShorts()
 
         if (!ptrFound.isEmpty())
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum());
 
             std::string scriptId = ptrFound.getClass().getScript(ptrFound);
