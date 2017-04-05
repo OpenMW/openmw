@@ -842,7 +842,17 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     {
     case ID_ACTOR_LIST:
     {
+        MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(worldEvent.cell);
+
+        if (!ptrCellStore) return;
+
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_ACTOR_LIST about %s", worldEvent.cell.getDescription().c_str());
+        LOG_APPEND(Log::LOG_VERBOSE, "- action: %i", worldEvent.action);
+
+        // If we've received a request for information, comply with it
+        if (worldEvent.action == mwmp::BaseEvent::REQUEST)
+            worldEvent.sendActors(ptrCellStore);
+
         break;
     }
     case ID_ACTOR_AUTHORITY:

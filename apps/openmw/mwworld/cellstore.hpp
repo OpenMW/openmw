@@ -237,6 +237,9 @@ namespace MWWorld
             Ptr searchExact (const std::string& id, unsigned int refNumIndex, unsigned int mpNum);
             ///< Added by tes3mp and used to find an object by both its ID and its reference number
 
+            CellRefList<ESM::NPC> *getNpcs();
+            // Added by tes3mp and used to get all the NPCs in the cell
+
             CellRefList<ESM::Container> *getContainers();
             // Added by tes3mp and used to get all the containers in the cell
 

@@ -17,6 +17,7 @@ namespace mwmp
 
         void addObject(WorldObject worldObject);
 
+        void sendActors(MWWorld::CellStore* cellStore);
         void sendContainers(MWWorld::CellStore* cellStore);
 
         void editContainers(MWWorld::CellStore* cellStore);

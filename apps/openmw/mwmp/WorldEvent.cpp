@@ -40,6 +40,31 @@ void WorldEvent::addObject(WorldObject worldObject)
     objectChanges.objects.push_back(worldObject);
 }
 
+void WorldEvent::sendActors(MWWorld::CellStore* cellStore)
+{
+    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();
+    worldEvent->cell = *cellStore->getCell();
+    worldEvent->action = BaseEvent::SET;
+
+    MWWorld::CellRefList<ESM::NPC> *npcList = cellStore->getNpcs();
+
+    for (typename MWWorld::CellRefList<ESM::NPC>::List::iterator listIter(npcList->mList.begin());
+        listIter != npcList->mList.end(); ++listIter)
+    {
+        MWWorld::Ptr npc(&*listIter, 0);
+
+        mwmp::WorldObject worldObject;
+        worldObject.refId = npc.getCellRef().getRefId();
+        worldObject.refNumIndex = npc.getCellRef().getRefNum().mIndex;
+        worldObject.mpNum = npc.getCellRef().getMpNum();
+
+        worldEvent->addObject(worldObject);
+    }
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_ACTOR_LIST)->setEvent(worldEvent);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_ACTOR_LIST)->Send();
+}
+
 void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
 {
     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->resetWorldEvent();

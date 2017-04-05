@@ -481,6 +481,12 @@ namespace MWWorld
         return searchVisitor.mFound;
     }
 
+    // Added by tes3mp and used to get all the NPCs in the cell
+    CellRefList<ESM::NPC> *CellStore::getNpcs()
+    {
+        return &mNpcs;
+    }
+
     // Added by tes3mp and used to get all the containers in the cell
     CellRefList<ESM::Container> *CellStore::getContainers()
     {
