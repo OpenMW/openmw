@@ -277,6 +277,12 @@ void WorldFunctions::SendActorList() noexcept
     mwmp::Networking::get().getWorldController()->GetPacket(ID_ACTOR_LIST)->Send(scriptEvent.guid);
 }
 
+void WorldFunctions::SendActorAuthority() noexcept
+{
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_ACTOR_AUTHORITY)->setEvent(&scriptEvent);
+    mwmp::Networking::get().getWorldController()->GetPacket(ID_ACTOR_AUTHORITY)->Send(scriptEvent.guid);
+}
+
 void WorldFunctions::SendObjectDelete() noexcept
 {
     mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_DELETE)->setEvent(&scriptEvent);
