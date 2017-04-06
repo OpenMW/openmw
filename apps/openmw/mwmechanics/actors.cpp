@@ -1131,7 +1131,18 @@ namespace MWMechanics
                         return; // for now abort update of the old cell when cell changes by teleportation magic effect
                                 // a better solution might be to apply cell changes at the end of the frame
                     }
-                    if (MWBase::Environment::get().getMechanicsManager()->isAIActive() && inProcessingRange)
+                    /*
+                        Start of tes3mp change (major)
+
+                        Allow AI processing when LiveCellRefBase's isLocalActor set to true
+                    */
+                    //if (MWBase::Environment::get().getMechanicsManager()->isAIActive() && inProcessingRange)
+
+                    if ((MWBase::Environment::get().getMechanicsManager()->isAIActive() || actor.getBase()->isLocalActor)
+                        && inProcessingRange)
+                    /*
+                        End of tes3mp change (major)
+                    */
                     {
                         if (timerUpdateAITargets == 0)
                         {

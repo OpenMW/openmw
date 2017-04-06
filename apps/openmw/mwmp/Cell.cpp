@@ -54,9 +54,21 @@ void Cell::initializeLocalActors()
         std::string mapIndex = generateMapIndex(ptr);
         localActors[mapIndex] = new LocalActor();
         localActors[mapIndex]->cell = esmCell;
+        ptr.getBase()->isLocalActor = true;
         localActors[mapIndex]->setPtr(ptr);
         LOG_APPEND(Log::LOG_INFO, "- Initialized LocalActor %s", mapIndex.c_str());
     }
+}
+
+void Cell::uninitializeLocalActors()
+{
+    for (std::map<std::string, LocalActor *>::iterator it = localActors.begin(); it != localActors.end(); ++it)
+    {
+        LocalActor *actor = it->second;
+        actor->getPtr().getBase()->isLocalActor = false;
+    }
+
+    localActors.clear();
 }
 
 std::string Cell::generateMapIndex(MWWorld::Ptr ptr)

@@ -30,6 +30,7 @@ void CellController::update()
 
         if (!MWBase::Environment::get().getWorld()->isCellActive(mpCell->getCellStore()))
         {
+            mpCell->uninitializeLocalActors();
             it = cellsActive.erase(it);
         }
         else

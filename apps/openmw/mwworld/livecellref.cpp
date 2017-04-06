@@ -14,7 +14,16 @@
 MWWorld::LiveCellRefBase::LiveCellRefBase(const std::string& type, const ESM::CellRef &cref)
   : mClass(&Class::get(type)), mRef(cref), mData(cref)
 {
+    /*
+        Start of tes3mp addition
+
+        Set default values for tes3mp-only booleans
+    */
     canChangeCell = true;
+    isLocalActor = false;
+    /*
+        End of tes3mp addition
+    */
 }
 
 void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)

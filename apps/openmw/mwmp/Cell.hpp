@@ -16,6 +16,7 @@ namespace mwmp
 
         void update();
         void initializeLocalActors();
+        void uninitializeLocalActors();
 
         std::string generateMapIndex(MWWorld::Ptr ptr);
 
