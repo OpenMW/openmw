@@ -637,11 +637,6 @@ namespace CSVRender
         mInitialized = false;
     }
 
-    void OrbitCameraController::onActivate()
-    {
-        mInitialized = false;
-    }
-
     void OrbitCameraController::initialize()
     {
         static const int DefaultStartDistance = 10000.f;

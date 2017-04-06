@@ -63,8 +63,6 @@ namespace CSVRender
 
         protected:
 
-            virtual void onActivate(){}
-
             void addShortcut(CSMPrefs::Shortcut* shortcut);
 
         private:
@@ -163,8 +161,6 @@ namespace CSVRender
             void reset();
 
         private:
-
-            void onActivate();
 
             void initialize();
 
