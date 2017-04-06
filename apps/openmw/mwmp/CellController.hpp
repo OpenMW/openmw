@@ -1,6 +1,7 @@
 #ifndef OPENMW_CELLCONTROLLER_HPP
 #define OPENMW_CELLCONTROLLER_HPP
 
+#include "Cell.hpp"
 #include "LocalActor.hpp"
 #include "DedicatedActor.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -15,9 +16,8 @@ namespace mwmp
         ~CellController();
 
         void update();
-        void initializeLocalActors(const ESM::Cell& cell);
+        void initializeCell(const ESM::Cell& cell);
 
-        std::string generateMapIndex(MWWorld::Ptr ptr);
         int getCellSize() const;
         virtual MWWorld::CellStore *getCell(const ESM::Cell& cell);
 
@@ -25,8 +25,7 @@ namespace mwmp
         void closeContainer(const MWWorld::Ptr& container);
 
     private:
-        static std::map<std::string, mwmp::LocalActor *> localActors;
-        static std::map<std::string, mwmp::DedicatedActor *> dedicatedActors;
+        static std::deque<mwmp::Cell *> cellsActive;
     };
 }
 

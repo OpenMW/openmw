@@ -539,7 +539,7 @@ namespace MWWorld
 
                 Make it possible to check whether a cell is active
             */
-                virtual bool isCellActive(MWWorld::CellStore* cell);
+            virtual bool isCellActive(MWWorld::CellStore* cell);
             /*
                 End of tes3mp addition
             */
