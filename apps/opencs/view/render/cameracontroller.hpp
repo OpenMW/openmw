@@ -159,6 +159,9 @@ namespace CSVRender
 
             void update(double dt);
 
+            /// \brief Flag controller to be re-initialized.
+            void reset();
+
         private:
 
             void onActivate();
