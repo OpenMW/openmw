@@ -15,7 +15,11 @@ namespace mwmp
 
         void Do(WorldPacket &packet, Player &player, BaseEvent &event) override
         {
-            packet.Send(true);
+            // Send only to players who have the cell loaded
+            Cell *serverCell = CellController::get()->getCell(&event.cell);
+
+            if (serverCell != nullptr)
+                serverCell->sendToLoaded(&packet, &event);
 
             Script::Call<Script::CallbackIdentity("OnActorList")>(player.getId(), event.cell.getDescription().c_str());
         }
