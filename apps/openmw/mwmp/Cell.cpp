@@ -28,7 +28,7 @@ void Cell::update()
         LocalActor *actor = it->second;
 
         // TODO:: Make sure this condition actually works
-        if (actor->getPtr().getCell() != nullptr && actor->getPtr().getCell() != store)
+        if (actor->getPtr().getCell() && actor->getPtr().getCell() != store)
         {
             LOG_APPEND(Log::LOG_INFO, "- Removing LocalActor %s which is no longer in this cell", it->first.c_str());
             localActors.erase(it++);
@@ -37,6 +37,7 @@ void Cell::update()
         {
             LOG_APPEND(Log::LOG_VERBOSE, "- Updating LocalActor %s", it->first.c_str());
             actor->update();
+
             ++it;
         }
     }
