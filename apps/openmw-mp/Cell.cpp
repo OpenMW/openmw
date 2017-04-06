@@ -69,10 +69,9 @@ void Cell::sendToLoaded(mwmp::WorldPacket *worldPacket, mwmp::BaseEvent *baseEve
         if (pl->guid == baseEvent->guid) continue;
 
         worldPacket->setEvent(baseEvent);
-        worldPacket->setGUID(pl->guid);
 
         // Send the packet to this eligible guid
-        worldPacket->Send(false);
+        worldPacket->Send(pl->guid);
     }
 }
 

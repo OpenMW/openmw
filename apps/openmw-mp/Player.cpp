@@ -159,7 +159,7 @@ void Player::sendToLoaded(mwmp::PlayerPacket *myPacket)
     {
         if (pl == this) continue;
         myPacket->setPlayer(this);
-        myPacket->Send();
+        myPacket->Send(pl->guid);
     }
 }
 
