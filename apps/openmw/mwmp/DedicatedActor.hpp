@@ -2,6 +2,7 @@
 #define OPENMW_DEDICATEDACTOR_HPP
 
 #include <components/openmw-mp/Base/BaseActor.hpp>
+#include "../mwmechanics/aisequence.hpp"
 #include "../mwworld/manualref.hpp"
 
 namespace mwmp
@@ -15,6 +16,9 @@ namespace mwmp
 
         void update();
         void move();
+        void setDrawState();
+        void setMovementFlags();
+        void setAnimation();
 
         MWWorld::Ptr getPtr();
         void setPtr(const MWWorld::Ptr& newPtr);

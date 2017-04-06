@@ -35,7 +35,16 @@ namespace mwmp
         int count;
         int charge;
         int goldValue;
+
         ESM::Position pos;
+        ESM::Position direction;
+
+        unsigned int movementFlags;
+        char movementAnim;
+        int drawState;
+
+        float headPitch;
+        float headYaw;
 
         int doorState;
         int lockLevel;

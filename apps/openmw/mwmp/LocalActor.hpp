@@ -15,6 +15,11 @@ namespace mwmp
 
         void update();
 
+        void updatePosition();
+        void updateDrawState();
+        void updateMovementFlags();
+        void updateAnimation();
+
         MWWorld::Ptr getPtr();
         void setPtr(const MWWorld::Ptr& newPtr);
 

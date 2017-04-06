@@ -44,14 +44,19 @@ void Cell::updateLocal()
         else
         {
             //LOG_APPEND(Log::LOG_VERBOSE, "- Updating LocalActor %s", it->first.c_str());
-            //actor->update();
+            actor->update();
             MWWorld::Ptr ptr = actor->getPtr();
 
             mwmp::WorldObject worldObject;
             worldObject.refId = ptr.getCellRef().getRefId();
             worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
             worldObject.mpNum = ptr.getCellRef().getMpNum();
-            worldObject.pos = ptr.getRefData().getPosition();
+            worldObject.pos = actor->position;
+            worldObject.direction = actor->direction;
+            worldObject.drawState = actor->drawState;
+            worldObject.movementFlags = actor->movementFlags;
+            worldObject.headPitch = actor->headPitch;
+            worldObject.headYaw = actor->headYaw;
 
             worldEvent->addObject(worldObject);
 
@@ -121,7 +126,15 @@ void Cell::readCellFrame(mwmp::WorldEvent& worldEvent)
         {
             DedicatedActor *actor = dedicatedActors[mapIndex];
             actor->position = worldObject.pos;
+            actor->direction = worldObject.direction;
+            actor->drawState = worldObject.drawState;
+            actor->movementFlags = worldObject.movementFlags;
+            actor->headPitch = worldObject.headPitch;
+            actor->headYaw = worldObject.headYaw;
             actor->move();
+            actor->setDrawState();
+            actor->setMovementFlags();
+            actor->setAnimation();
         }
     }
 }

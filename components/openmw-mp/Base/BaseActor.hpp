@@ -22,6 +22,9 @@ namespace mwmp
         ESM::Position position;
         ESM::Position direction;
         ESM::Cell cell;
+
+        float headPitch;
+        float headYaw;
     };
 }
 
