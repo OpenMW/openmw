@@ -2,6 +2,7 @@
 #define OPENMW_CELLCONTROLLER_HPP
 
 #include "Cell.hpp"
+#include "WorldEvent.hpp"
 #include "LocalActor.hpp"
 #include "DedicatedActor.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -15,8 +16,9 @@ namespace mwmp
         CellController();
         ~CellController();
 
-        void update();
-        void initializeCell(const ESM::Cell& cell);
+        void updateLocal();
+        void initializeCellLocal(const ESM::Cell& cell);
+        void readCellFrame(mwmp::WorldEvent& worldEvent);
 
         int getCellSize() const;
         virtual MWWorld::CellStore *getCell(const ESM::Cell& cell);

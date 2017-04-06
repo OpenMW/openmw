@@ -22,7 +22,7 @@ mwmp::CellController::~CellController()
 
 }
 
-void CellController::update()
+void CellController::updateLocal()
 {
     for (std::deque<mwmp::Cell *>::iterator it = cellsActive.begin(); it != cellsActive.end();)
     {
@@ -36,15 +36,14 @@ void CellController::update()
         else
         {
             //LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Updating mwmp::Cell %s", mpCell->getDescription().c_str());
-            mpCell->update();
+            mpCell->updateLocal();
             ++it;
         }
     }
 }
 
-void CellController::initializeCell(const ESM::Cell& cell)
+void CellController::initializeCellLocal(const ESM::Cell& cell)
 {
-
     MWWorld::CellStore *cellStore = getCell(cell);
 
     if (!cellStore) return;
@@ -55,6 +54,38 @@ void CellController::initializeCell(const ESM::Cell& cell)
 
     mpCell->initializeLocalActors();
     cellsActive.push_back(mpCell);
+}
+
+void CellController::readCellFrame(mwmp::WorldEvent& worldEvent)
+{
+    bool cellExisted = false;
+
+    // Check if this cell already exists
+    for (std::deque<mwmp::Cell *>::iterator it = cellsActive.begin(); it != cellsActive.end(); ++it)
+    {
+        mwmp::Cell *mpCell = *it;
+
+        if (worldEvent.cell.getDescription() == mpCell->getDescription())
+        {
+            mpCell->readCellFrame(worldEvent);
+            cellExisted = true;
+            break;
+        }
+    }
+
+    if (!cellExisted)
+    {
+        MWWorld::CellStore *cellStore = getCell(worldEvent.cell);
+
+        if (!cellStore) return;
+
+        mwmp::Cell *mpCell = new mwmp::Cell(cellStore);
+
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Initialized mwmp::Cell %s", mpCell->getDescription().c_str());
+
+        cellsActive.push_back(mpCell);
+        mpCell->readCellFrame(worldEvent);
+    }
 }
 
 int mwmp::CellController::getCellSize() const

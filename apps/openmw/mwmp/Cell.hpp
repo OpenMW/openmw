@@ -1,6 +1,7 @@
 #ifndef OPENMW_CELL_HPP
 #define OPENMW_CELL_HPP
 
+#include "WorldEvent.hpp"
 #include "LocalActor.hpp"
 #include "DedicatedActor.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -14,11 +15,13 @@ namespace mwmp
         Cell(MWWorld::CellStore* cellStore);
         ~Cell();
 
-        void update();
+        void updateLocal();
         void initializeLocalActors();
         void uninitializeLocalActors();
+        void readCellFrame(mwmp::WorldEvent& worldEvent);
 
         std::string generateMapIndex(MWWorld::Ptr ptr);
+        std::string generateMapIndex(mwmp::WorldObject object);
 
         MWWorld::CellStore* getCellStore();
         std::string getDescription();
