@@ -1,6 +1,7 @@
 #include "../mwworld/worldimp.hpp"
 #include <components/esm/cellid.hpp>
 #include <components/openmw-mp/Log.hpp>
+#include <components/openmw-mp/Utils.hpp>
 
 #include "Cell.hpp"
 #include "Main.hpp"
@@ -75,8 +76,8 @@ std::string Cell::generateMapIndex(MWWorld::Ptr ptr)
 {
     std::string mapIndex = "";
     mapIndex += ptr.getCellRef().getRefId();
-    mapIndex += "-" + std::to_string(ptr.getCellRef().getRefNum().mIndex);
-    mapIndex += "-" + std::to_string(ptr.getCellRef().getMpNum());
+    mapIndex += "-" + Utils::toString(ptr.getCellRef().getRefNum().mIndex);
+    mapIndex += "-" + Utils::toString(ptr.getCellRef().getMpNum());
     return mapIndex;
 }
 

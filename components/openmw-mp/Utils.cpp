@@ -9,6 +9,7 @@
 #include <ctime>
 #include <cmath>
 #include <memory>
+#include <sstream>
 #include <boost/crc.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -80,6 +81,13 @@ int Utils::progress_func(double TotalToDownload, double NowDownloaded)
 bool Utils::DoubleCompare(double a, double b, double epsilon)
 {
     return fabs(a - b) < epsilon;
+}
+
+std::string Utils::toString(int num)
+{
+    std::ostringstream stream;
+    stream << num;
+    return stream.str();
 }
 
 string Utils::str_replace(const string& source, const char* find, const char* replace)

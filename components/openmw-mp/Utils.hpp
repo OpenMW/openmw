@@ -23,6 +23,8 @@ namespace Utils
 
     std::string str_replace(const std::string &source, const char *find, const char *replace);
 
+    std::string toString(int num);
+
     std::string &RemoveExtension(std::string &file);
 
     long int FileLength(const char *file);
