@@ -147,6 +147,11 @@ void Cell::readCellFrame(WorldEvent& worldEvent)
     }
 }
 
+LocalActor *Cell::getLocalActor(std::string actorIndex)
+{
+    return localActors.at(actorIndex);
+}
+
 MWWorld::CellStore *Cell::getCellStore()
 {
     return store;

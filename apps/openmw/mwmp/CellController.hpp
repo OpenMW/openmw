@@ -24,6 +24,8 @@ namespace mwmp
         void removeLocalActorRecord(std::string actorIndex);
         bool hasLocalActorRecord(MWWorld::Ptr ptr);
 
+        virtual LocalActor *getLocalActor(MWWorld::Ptr ptr);
+
         std::string generateMapIndex(MWWorld::Ptr ptr);
         std::string generateMapIndex(mwmp::WorldObject object);
 

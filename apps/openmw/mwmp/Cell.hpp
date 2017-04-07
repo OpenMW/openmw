@@ -20,6 +20,8 @@ namespace mwmp
         void uninitializeLocalActors();
         void readCellFrame(mwmp::WorldEvent& worldEvent);
 
+        virtual LocalActor *getLocalActor(std::string actorIndex);
+
         MWWorld::CellStore* getCellStore();
         std::string getDescription();
 

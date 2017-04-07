@@ -8,6 +8,7 @@
 
 #include "CellController.hpp"
 #include "Main.hpp"
+#include "LocalActor.hpp"
 #include "LocalPlayer.hpp"
 using namespace mwmp;
 
@@ -97,6 +98,14 @@ bool CellController::hasLocalActorRecord(MWWorld::Ptr ptr)
     std::string mapIndex = generateMapIndex(ptr);
 
     return (localActorsToCells.count(mapIndex) > 0);
+}
+
+LocalActor *CellController::getLocalActor(MWWorld::Ptr ptr)
+{
+    std::string actorIndex = generateMapIndex(ptr);
+    std::string cellIndex = localActorsToCells.at(actorIndex);
+
+    cellsActive.at(cellIndex)->getLocalActor(actorIndex);
 }
 
 std::string CellController::generateMapIndex(MWWorld::Ptr ptr)
