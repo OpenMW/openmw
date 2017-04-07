@@ -16,6 +16,7 @@ namespace mwmp
         ~Cell();
 
         void updateLocal();
+        void updateDedicated(float dt);
         void initializeLocalActors();
         void uninitializeLocalActors();
         void readCellFrame(mwmp::WorldEvent& worldEvent);

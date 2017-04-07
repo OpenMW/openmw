@@ -45,6 +45,14 @@ void CellController::updateLocal()
     }
 }
 
+void CellController::updateDedicated(float dt)
+{
+    for (std::map<std::string, mwmp::Cell *>::iterator it = cellsActive.begin(); it != cellsActive.end(); ++it)
+    {
+        it->second->updateDedicated(dt);
+    }
+}
+
 void CellController::initializeCellLocal(const ESM::Cell& cell)
 {
     MWWorld::CellStore *cellStore = getCell(cell);

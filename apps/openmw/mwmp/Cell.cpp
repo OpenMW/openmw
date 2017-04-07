@@ -68,6 +68,18 @@ void Cell::updateLocal()
     Main::get().getNetworking()->getWorldPacket(ID_ACTOR_FRAME)->Send();
 }
 
+void Cell::updateDedicated(float dt)
+{
+    if (dedicatedActors.empty()) return;
+
+    for (std::map<std::string, DedicatedActor *>::iterator it = dedicatedActors.begin(); it != dedicatedActors.end(); ++it)
+    {
+        DedicatedActor *actor = it->second;
+
+        actor->update(dt);
+    }
+}
+
 void Cell::initializeLocalActors()
 {
     ESM::Cell esmCell = *store->getCell();
@@ -137,12 +149,6 @@ void Cell::readCellFrame(WorldEvent& worldEvent)
             actor->direction = worldObject.direction;
             actor->drawState = worldObject.drawState;
             actor->movementFlags = worldObject.movementFlags;
-            actor->headPitch = worldObject.headPitch;
-            actor->headYaw = worldObject.headYaw;
-            actor->move();
-            actor->setDrawState();
-            actor->setMovementFlags();
-            actor->setAnimation();
         }
     }
 }

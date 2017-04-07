@@ -17,6 +17,8 @@ namespace mwmp
         ~CellController();
 
         void updateLocal();
+        void updateDedicated(float dt);
+
         void initializeCellLocal(const ESM::Cell& cell);
         void readCellFrame(mwmp::WorldEvent& worldEvent);
 

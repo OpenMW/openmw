@@ -182,6 +182,7 @@ void Main::frame(float dt)
     get().getNetworking()->update();
 
     Players::update(dt);
+    get().getCellController()->updateDedicated(dt);
     get().updateWorld(dt);
 
     get().getGUIController()->update(dt);
