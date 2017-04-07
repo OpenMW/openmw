@@ -1,9 +1,9 @@
 #include "../mwworld/worldimp.hpp"
 #include <components/esm/cellid.hpp>
 #include <components/openmw-mp/Log.hpp>
-#include <components/openmw-mp/Utils.hpp>
 
 #include "Cell.hpp"
+#include "CellController.hpp"
 #include "Main.hpp"
 #include "Networking.hpp"
 #include "LocalPlayer.hpp"
@@ -26,7 +26,7 @@ void Cell::updateLocal()
 {
     if (localActors.empty()) return;
 
-    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+    WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
     worldEvent->reset();
     worldEvent->cell = *store->getCell();
 
@@ -47,7 +47,7 @@ void Cell::updateLocal()
             actor->update();
             MWWorld::Ptr ptr = actor->getPtr();
 
-            mwmp::WorldObject worldObject;
+            WorldObject worldObject;
             worldObject.refId = ptr.getCellRef().getRefId();
             worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
             worldObject.mpNum = ptr.getCellRef().getMpNum();
@@ -64,8 +64,8 @@ void Cell::updateLocal()
         }
     }
 
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_ACTOR_FRAME)->setEvent(worldEvent);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_ACTOR_FRAME)->Send();
+    Main::get().getNetworking()->getWorldPacket(ID_ACTOR_FRAME)->setEvent(worldEvent);
+    Main::get().getNetworking()->getWorldPacket(ID_ACTOR_FRAME)->Send();
 }
 
 void Cell::initializeLocalActors()
@@ -83,8 +83,10 @@ void Cell::initializeLocalActors()
         ptr.getBase()->isLocalActor = true;
         actor->setPtr(ptr);
 
-        std::string mapIndex = generateMapIndex(ptr);
+        std::string mapIndex = Main::get().getCellController()->generateMapIndex(ptr);
         localActors[mapIndex] = actor;
+
+        Main::get().getCellController()->setLocalActorRecord(mapIndex, getDescription());
         
         LOG_APPEND(Log::LOG_INFO, "- Initialized LocalActor %s", mapIndex.c_str());
     }
@@ -96,19 +98,21 @@ void Cell::uninitializeLocalActors()
     {
         LocalActor *actor = it->second;
         actor->getPtr().getBase()->isLocalActor = false;
+
+        Main::get().getCellController()->removeLocalActorRecord(it->first);
     }
 
     localActors.clear();
 }
 
-void Cell::readCellFrame(mwmp::WorldEvent& worldEvent)
+void Cell::readCellFrame(WorldEvent& worldEvent)
 {
     WorldObject worldObject;
 
     for (unsigned int i = 0; i < worldEvent.objectChanges.count; i++)
     {
         worldObject = worldEvent.objectChanges.objects.at(i);
-        std::string mapIndex = generateMapIndex(worldObject);
+        std::string mapIndex = Main::get().getCellController()->generateMapIndex(worldObject);
 
         // If this key doesn't exist, create it
         if (dedicatedActors.count(mapIndex) == 0)
@@ -143,30 +147,12 @@ void Cell::readCellFrame(mwmp::WorldEvent& worldEvent)
     }
 }
 
-std::string Cell::generateMapIndex(MWWorld::Ptr ptr)
-{
-    std::string mapIndex = "";
-    mapIndex += ptr.getCellRef().getRefId();
-    mapIndex += "-" + Utils::toString(ptr.getCellRef().getRefNum().mIndex);
-    mapIndex += "-" + Utils::toString(ptr.getCellRef().getMpNum());
-    return mapIndex;
-}
-
-std::string Cell::generateMapIndex(mwmp::WorldObject object)
-{
-    std::string mapIndex = "";
-    mapIndex += object.refId;
-    mapIndex += "-" + Utils::toString(object.refNumIndex);
-    mapIndex += "-" + Utils::toString(object.mpNum);
-    return mapIndex;
-}
-
-MWWorld::CellStore *mwmp::Cell::getCellStore()
+MWWorld::CellStore *Cell::getCellStore()
 {
     return store;
 }
 
-std::string mwmp::Cell::getDescription()
+std::string Cell::getDescription()
 {
     return store->getCell()->getDescription();
 }

@@ -20,9 +20,6 @@ namespace mwmp
         void uninitializeLocalActors();
         void readCellFrame(mwmp::WorldEvent& worldEvent);
 
-        std::string generateMapIndex(MWWorld::Ptr ptr);
-        std::string generateMapIndex(mwmp::WorldObject object);
-
         MWWorld::CellStore* getCellStore();
         std::string getDescription();
 

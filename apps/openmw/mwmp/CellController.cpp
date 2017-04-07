@@ -2,6 +2,7 @@
 #include "../mwworld/worldimp.hpp"
 #include <components/esm/cellid.hpp>
 #include <components/openmw-mp/Log.hpp>
+#include <components/openmw-mp/Utils.hpp>
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 
@@ -11,6 +12,7 @@
 using namespace mwmp;
 
 std::map<std::string, mwmp::Cell *> CellController::cellsActive;
+std::map<std::string, std::string> CellController::localActorsToCells;
 
 mwmp::CellController::CellController()
 {
@@ -58,7 +60,7 @@ void CellController::initializeCellLocal(const ESM::Cell& cell)
     cellsActive[mapIndex] = mpCell;
 }
 
-void CellController::readCellFrame(mwmp::WorldEvent& worldEvent)
+void CellController::readCellFrame(WorldEvent& worldEvent)
 {
     std::string mapIndex = worldEvent.cell.getDescription();
 
@@ -80,12 +82,47 @@ void CellController::readCellFrame(mwmp::WorldEvent& worldEvent)
     }
 }
 
-int mwmp::CellController::getCellSize() const
+void CellController::setLocalActorRecord(std::string actorIndex, std::string cellIndex)
+{
+    localActorsToCells[actorIndex] = cellIndex;
+}
+
+void CellController::removeLocalActorRecord(std::string actorIndex)
+{
+    localActorsToCells.erase(actorIndex);
+}
+
+bool CellController::hasLocalActorRecord(MWWorld::Ptr ptr)
+{
+    std::string mapIndex = generateMapIndex(ptr);
+
+    return (localActorsToCells.count(mapIndex) > 0);
+}
+
+std::string CellController::generateMapIndex(MWWorld::Ptr ptr)
+{
+    std::string mapIndex = "";
+    mapIndex += ptr.getCellRef().getRefId();
+    mapIndex += "-" + Utils::toString(ptr.getCellRef().getRefNum().mIndex);
+    mapIndex += "-" + Utils::toString(ptr.getCellRef().getMpNum());
+    return mapIndex;
+}
+
+std::string CellController::generateMapIndex(WorldObject object)
+{
+    std::string mapIndex = "";
+    mapIndex += object.refId;
+    mapIndex += "-" + Utils::toString(object.refNumIndex);
+    mapIndex += "-" + Utils::toString(object.mpNum);
+    return mapIndex;
+}
+
+int CellController::getCellSize() const
 {
     return 8192;
 }
 
-MWWorld::CellStore *mwmp::CellController::getCell(const ESM::Cell& cell)
+MWWorld::CellStore *CellController::getCell(const ESM::Cell& cell)
 {
     MWWorld::CellStore *cellStore;
 
@@ -107,10 +144,10 @@ MWWorld::CellStore *mwmp::CellController::getCell(const ESM::Cell& cell)
 }
 
 
-void mwmp::CellController::openContainer(const MWWorld::Ptr &container, bool loot)
+void CellController::openContainer(const MWWorld::Ptr &container, bool loot)
 {
     // Record this as the player's current open container
-    mwmp::Main::get().getLocalPlayer()->storeCurrentContainer(container, loot);
+    Main::get().getLocalPlayer()->storeCurrentContainer(container, loot);
 
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Container \"%s\" (%d) is opened. Loot: %s",
                        container.getCellRef().getRefId().c_str(), container.getCellRef().getRefNum().mIndex,
@@ -130,9 +167,9 @@ void mwmp::CellController::openContainer(const MWWorld::Ptr &container, bool loo
 
 }
 
-void mwmp::CellController::closeContainer(const MWWorld::Ptr &container)
+void CellController::closeContainer(const MWWorld::Ptr &container)
 {
-    mwmp::Main::get().getLocalPlayer()->clearCurrentContainer();
+    Main::get().getLocalPlayer()->clearCurrentContainer();
 
     // If the player died while in a container, the container's Ptr could be invalid now
     if (!container.isEmpty())
@@ -148,5 +185,5 @@ void mwmp::CellController::closeContainer(const MWWorld::Ptr &container)
         }
     }
 
-    mwmp::Main::get().getLocalPlayer()->updateInventory();
+    Main::get().getLocalPlayer()->updateInventory();
 }

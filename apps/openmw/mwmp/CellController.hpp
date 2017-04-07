@@ -20,6 +20,13 @@ namespace mwmp
         void initializeCellLocal(const ESM::Cell& cell);
         void readCellFrame(mwmp::WorldEvent& worldEvent);
 
+        void setLocalActorRecord(std::string actorIndex, std::string cellIndex);
+        void removeLocalActorRecord(std::string actorIndex);
+        bool hasLocalActorRecord(MWWorld::Ptr ptr);
+
+        std::string generateMapIndex(MWWorld::Ptr ptr);
+        std::string generateMapIndex(mwmp::WorldObject object);
+
         int getCellSize() const;
         virtual MWWorld::CellStore *getCell(const ESM::Cell& cell);
 
@@ -28,6 +35,7 @@ namespace mwmp
 
     private:
         static std::map<std::string, mwmp::Cell *> cellsActive;
+        static std::map<std::string, std::string> localActorsToCells;
     };
 }
 
