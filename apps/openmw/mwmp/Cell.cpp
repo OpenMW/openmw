@@ -78,11 +78,14 @@ void Cell::initializeLocalActors()
     {
         MWWorld::Ptr ptr(&*listIter, 0);
 
-        std::string mapIndex = generateMapIndex(ptr);
-        localActors[mapIndex] = new LocalActor();
-        localActors[mapIndex]->cell = esmCell;
+        LocalActor *actor = new LocalActor();
+        actor->cell = esmCell;
         ptr.getBase()->isLocalActor = true;
-        localActors[mapIndex]->setPtr(ptr);
+        actor->setPtr(ptr);
+
+        std::string mapIndex = generateMapIndex(ptr);
+        localActors[mapIndex] = actor;
+        
         LOG_APPEND(Log::LOG_INFO, "- Initialized LocalActor %s", mapIndex.c_str());
     }
 }
@@ -112,13 +115,14 @@ void Cell::readCellFrame(mwmp::WorldEvent& worldEvent)
         {
             MWWorld::Ptr ptrFound = store->searchExact(worldObject.refId, worldObject.refNumIndex, worldObject.mpNum);
 
-            if (ptrFound)
-            {
-                dedicatedActors[mapIndex] = new DedicatedActor();
-                dedicatedActors[mapIndex]->cell = worldEvent.cell;
-                dedicatedActors[mapIndex]->setPtr(ptrFound);
-                LOG_APPEND(Log::LOG_INFO, "- Initialized DedicatedActor %s", mapIndex.c_str());
-            }
+            if (!ptrFound) return;
+
+            DedicatedActor *actor = new DedicatedActor();
+            actor->cell = worldEvent.cell;
+            actor->setPtr(ptrFound);
+            dedicatedActors[mapIndex] = actor;
+
+            LOG_APPEND(Log::LOG_INFO, "- Initialized DedicatedActor %s", mapIndex.c_str());
         }
 
         // If this now exists, set its details

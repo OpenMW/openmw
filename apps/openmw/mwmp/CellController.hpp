@@ -27,7 +27,7 @@ namespace mwmp
         void closeContainer(const MWWorld::Ptr& container);
 
     private:
-        static std::deque<mwmp::Cell *> cellsActive;
+        static std::map<std::string, mwmp::Cell *> cellsActive;
     };
 }
 

@@ -10,7 +10,7 @@
 #include "LocalPlayer.hpp"
 using namespace mwmp;
 
-std::deque<mwmp::Cell *> CellController::cellsActive;
+std::map<std::string, mwmp::Cell *> CellController::cellsActive;
 
 mwmp::CellController::CellController()
 {
@@ -24,14 +24,14 @@ mwmp::CellController::~CellController()
 
 void CellController::updateLocal()
 {
-    for (std::deque<mwmp::Cell *>::iterator it = cellsActive.begin(); it != cellsActive.end();)
+    for (std::map<std::string, mwmp::Cell *>::iterator it = cellsActive.begin(); it != cellsActive.end();)
     {
-        mwmp::Cell *mpCell = *it;
+        mwmp::Cell *mpCell = it->second;
 
         if (!MWBase::Environment::get().getWorld()->isCellActive(mpCell->getCellStore()))
         {
             mpCell->uninitializeLocalActors();
-            it = cellsActive.erase(it);
+            cellsActive.erase(it++);
         }
         else
         {
@@ -49,42 +49,34 @@ void CellController::initializeCellLocal(const ESM::Cell& cell)
     if (!cellStore) return;
 
     mwmp::Cell *mpCell = new mwmp::Cell(cellStore);
-    
+
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Initialized mwmp::Cell %s", mpCell->getDescription().c_str());
 
     mpCell->initializeLocalActors();
-    cellsActive.push_back(mpCell);
+
+    std::string mapIndex = mpCell->getDescription();
+    cellsActive[mapIndex] = mpCell;
 }
 
 void CellController::readCellFrame(mwmp::WorldEvent& worldEvent)
 {
-    bool cellExisted = false;
+    std::string mapIndex = worldEvent.cell.getDescription();
 
-    // Check if this cell already exists
-    for (std::deque<mwmp::Cell *>::iterator it = cellsActive.begin(); it != cellsActive.end(); ++it)
-    {
-        mwmp::Cell *mpCell = *it;
-
-        if (worldEvent.cell.getDescription() == mpCell->getDescription())
-        {
-            mpCell->readCellFrame(worldEvent);
-            cellExisted = true;
-            break;
-        }
-    }
-
-    if (!cellExisted)
+    // If this key doesn't exist, create it
+    if (cellsActive.count(mapIndex) == 0)
     {
         MWWorld::CellStore *cellStore = getCell(worldEvent.cell);
 
         if (!cellStore) return;
 
         mwmp::Cell *mpCell = new mwmp::Cell(cellStore);
+        cellsActive[mapIndex] = mpCell;
+    }
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Initialized mwmp::Cell %s", mpCell->getDescription().c_str());
-
-        cellsActive.push_back(mpCell);
-        mpCell->readCellFrame(worldEvent);
+    // If this now exists, send it the data
+    if (cellsActive.count(mapIndex) > 0)
+    {
+        cellsActive[mapIndex]->readCellFrame(worldEvent);
     }
 }
 
