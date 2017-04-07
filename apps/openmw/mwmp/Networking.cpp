@@ -859,13 +859,13 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_ACTOR_AUTHORITY about %s", worldEvent.cell.getDescription().c_str());
 
-        Main::get().getCellController()->initializeCellLocal(worldEvent.cell);
+        //Main::get().getCellController()->initializeCellLocal(worldEvent.cell);
 
         break;
     }
     case ID_ACTOR_FRAME:
     {
-        Main::get().getCellController()->readCellFrame(worldEvent);
+        //Main::get().getCellController()->readCellFrame(worldEvent);
 
         break;
     }
