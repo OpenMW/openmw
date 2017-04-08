@@ -1,10 +1,12 @@
-#include "../mwbase/environment.hpp"
-#include "../mwworld/worldimp.hpp"
 #include <components/esm/cellid.hpp>
 #include <components/openmw-mp/Log.hpp>
 #include <components/openmw-mp/Utils.hpp>
+
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/worldimp.hpp"
 
 #include "CellController.hpp"
 #include "Main.hpp"

@@ -5,11 +5,12 @@
 #include "DedicatedPlayer.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwstate/statemanagerimp.hpp"
-#include "../mwinput/inputmanagerimp.hpp"
+
 #include "../mwgui/windowmanagerimp.hpp"
 
 #include "../mwclass/npc.hpp"
+
+#include "../mwinput/inputmanagerimp.hpp"
 
 #include "../mwmechanics/actor.hpp"
 #include "../mwmechanics/aitravel.hpp"
@@ -17,6 +18,8 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/mechanicsmanagerimp.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+
+#include "../mwstate/statemanagerimp.hpp"
 
 #include "../mwworld/action.hpp"
 #include "../mwworld/cellstore.hpp"

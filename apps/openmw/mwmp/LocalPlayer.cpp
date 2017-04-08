@@ -2,29 +2,38 @@
 // Created by koncord on 14.01.16.
 //
 
-#include "../mwworld/manualref.hpp"
-#include "../mwmechanics/aitravel.hpp"
+#include <components/misc/rng.hpp>
 #include <components/esm/esmwriter.hpp>
+#include <components/openmw-mp/Log.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/journal.hpp"
-#include "../mwstate/statemanagerimp.hpp"
-#include "../mwinput/inputmanagerimp.hpp"
-#include "../mwscript/scriptmanagerimp.hpp"
-#include "../mwgui/windowmanagerimp.hpp"
-#include "../mwworld/worldimp.hpp"
-#include "../mwworld/player.hpp"
-#include "../mwworld/customdata.hpp"
-#include "../mwmechanics/creaturestats.hpp"
-#include "../mwclass/npc.hpp"
+
 #include "../mwclass/creature.hpp"
-#include "../mwmechanics/mechanicsmanagerimp.hpp"
-#include "../mwworld/cellstore.hpp"
+#include "../mwclass/npc.hpp"
+
 #include "../mwdialogue/dialoguemanagerimp.hpp"
-#include "../mwworld/inventorystore.hpp"
-#include "../mwmechanics/spellcasting.hpp"
+
 #include "../mwgui/inventorywindow.hpp"
-#include <components/openmw-mp/Log.hpp>
-#include <components/misc/rng.hpp>
+#include "../mwgui/windowmanagerimp.hpp"
+
+#include "../mwinput/inputmanagerimp.hpp"
+
+#include "../mwmechanics/aitravel.hpp"
+#include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/mechanicsmanagerimp.hpp"
+#include "../mwmechanics/spellcasting.hpp"
+
+#include "../mwscript/scriptmanagerimp.hpp"
+
+#include "../mwstate/statemanagerimp.hpp"
+
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/customdata.hpp"
+#include "../mwworld/inventorystore.hpp"
+#include "../mwworld/manualref.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwworld/worldimp.hpp"
 
 #include "LocalPlayer.hpp"
 #include "Networking.hpp"

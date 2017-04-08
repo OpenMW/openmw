@@ -1,6 +1,7 @@
-#include "../mwworld/worldimp.hpp"
 #include <components/esm/cellid.hpp>
 #include <components/openmw-mp/Log.hpp>
+
+#include "../mwworld/worldimp.hpp"
 
 #include "Cell.hpp"
 #include "CellController.hpp"
