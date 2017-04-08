@@ -36,7 +36,7 @@ void Cell::updateLocal()
         LocalActor *actor = it->second;
 
         // TODO:: Make sure this condition actually works
-        if (actor->getPtr().getCell() && actor->getPtr().getCell() != store)
+        if (actor->getPtr().getCell() != store)
         {
             LOG_APPEND(Log::LOG_INFO, "- Removing LocalActor %s which is no longer in this cell", it->first.c_str());
             actor->getPtr().getBase()->isLocalActor = false;
@@ -168,7 +168,7 @@ void Cell::initializeLocalActors()
     for (typename MWWorld::CellRefList<ESM::NPC>::List::iterator listIter(npcList->mList.begin());
         listIter != npcList->mList.end(); ++listIter)
     {
-        MWWorld::Ptr ptr(&*listIter, 0);
+        MWWorld::Ptr ptr(&*listIter, store);
 
         LocalActor *actor = new LocalActor();
         actor->cell = esmCell;
