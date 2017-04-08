@@ -20,6 +20,8 @@ namespace mwmp
 
         void Do(WorldPacket &packet, Player &player, BaseEvent &event) override
         {
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received %s from %s", strPacketID.c_str(), player.npc.mName.c_str());
+
             for (unsigned int i = 0; i < event.objectChanges.count; i++)
             {
                 event.objectChanges.objects.at(i).mpNum = mwmp::Networking::getPtr()->incrementMpNum();

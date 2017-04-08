@@ -38,8 +38,6 @@ bool WorldProcessor::Process(RakNet::Packet &packet, BaseEvent &event) noexcept
             Player *player = Players::getPlayer(packet.guid);
             WorldPacket *myPacket = Networking::get().getWorldController()->GetPacket(packet.data[0]);
 
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received %s from %s", processor.second->strPacketID.c_str(),
-                               player->npc.mName.c_str());
             myPacket->setEvent(&event);
 
             if (!processor.second->avoidReading)
