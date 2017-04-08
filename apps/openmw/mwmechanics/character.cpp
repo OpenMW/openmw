@@ -1595,8 +1595,8 @@ void CharacterController::update(float duration)
     */
     bool isLocalActor = mwmp::Main::get().getCellController()->isLocalActor(mPtr);
     bool isDedicatedActor = mwmp::Main::get().getCellController()->isDedicatedActor(mPtr);
-    mwmp::LocalActor *localActor = nullptr;
-    mwmp::DedicatedActor *dedicatedActor = nullptr;
+    mwmp::LocalActor *localActor = 0;
+    mwmp::DedicatedActor *dedicatedActor = 0;
 
     if (isLocalActor)
         localActor = mwmp::Main::get().getCellController()->getLocalActor(mPtr);
