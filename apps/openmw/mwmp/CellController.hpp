@@ -19,7 +19,8 @@ namespace mwmp
         void updateLocal();
         void updateDedicated(float dt);
 
-        void initializeCellLocal(const ESM::Cell& cell);
+        void initializeCell(const ESM::Cell& cell);
+        void initializeLocalActors(const ESM::Cell& cell);
         void readCellFrame(mwmp::WorldEvent& worldEvent);
 
         void setLocalActorRecord(std::string actorIndex, std::string cellIndex);

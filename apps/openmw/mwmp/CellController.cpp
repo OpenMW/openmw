@@ -55,36 +55,43 @@ void CellController::updateDedicated(float dt)
     }
 }
 
-void CellController::initializeCellLocal(const ESM::Cell& cell)
+void CellController::initializeCell(const ESM::Cell& cell)
 {
-    MWWorld::CellStore *cellStore = getCell(cell);
+    std::string mapIndex = cell.getDescription();
 
-    if (!cellStore) return;
+    // If this key doesn't exist, create it
+    if (cellsActive.count(mapIndex) == 0)
+    {
+        MWWorld::CellStore *cellStore = getCell(cell);
 
-    mwmp::Cell *mpCell = new mwmp::Cell(cellStore);
+        if (!cellStore) return;
 
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Initialized mwmp::Cell %s", mpCell->getDescription().c_str());
+        mwmp::Cell *mpCell = new mwmp::Cell(cellStore);
+        cellsActive[mapIndex] = mpCell;
 
-    mpCell->initializeLocalActors();
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Initialized mwmp::Cell %s", mpCell->getDescription().c_str());
+    }
+}
 
-    std::string mapIndex = mpCell->getDescription();
-    cellsActive[mapIndex] = mpCell;
+void CellController::initializeLocalActors(const ESM::Cell& cell)
+{
+    std::string mapIndex = cell.getDescription();    
+
+    initializeCell(cell);
+
+    // If this now exists, initialize local actors in it
+    if (cellsActive.count(mapIndex) > 0)
+    {
+        cellsActive[mapIndex]->uninitializeDedicatedActors();
+        cellsActive[mapIndex]->initializeLocalActors();
+    }
 }
 
 void CellController::readCellFrame(WorldEvent& worldEvent)
 {
     std::string mapIndex = worldEvent.cell.getDescription();
 
-    // If this key doesn't exist, create it
-    if (cellsActive.count(mapIndex) == 0)
-    {
-        MWWorld::CellStore *cellStore = getCell(worldEvent.cell);
-
-        if (!cellStore) return;
-
-        mwmp::Cell *mpCell = new mwmp::Cell(cellStore);
-        cellsActive[mapIndex] = mpCell;
-    }
+    initializeCell(worldEvent.cell);
 
     // If this now exists, send it the data
     if (cellsActive.count(mapIndex) > 0)
