@@ -15,7 +15,7 @@ using namespace std;
 
 DedicatedActor::DedicatedActor()
 {
-    movementFlags = 0;
+
 }
 
 DedicatedActor::~DedicatedActor()

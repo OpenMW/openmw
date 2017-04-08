@@ -52,11 +52,11 @@ void Cell::updateLocal()
             worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
             worldObject.mpNum = ptr.getCellRef().getMpNum();
             worldObject.pos = actor->position;
-            worldObject.direction = actor->direction;
             worldObject.drawState = actor->drawState;
-            worldObject.movementFlags = actor->movementFlags;
+
             worldObject.headPitch = actor->headPitch;
             worldObject.headYaw = actor->headYaw;
+
             worldObject.hasAnimation = actor->hasAnimation;
             worldObject.hasAnimStates = actor->hasAnimStates;
             worldObject.hasMovement = actor->hasMovement;
@@ -101,53 +101,6 @@ void Cell::updateDedicated(float dt)
     }
 }
 
-void Cell::initializeLocalActors()
-{
-    ESM::Cell esmCell = *store->getCell();
-    MWWorld::CellRefList<ESM::NPC> *npcList = store->getNpcs();
-
-    for (typename MWWorld::CellRefList<ESM::NPC>::List::iterator listIter(npcList->mList.begin());
-        listIter != npcList->mList.end(); ++listIter)
-    {
-        MWWorld::Ptr ptr(&*listIter, 0);
-
-        LocalActor *actor = new LocalActor();
-        actor->cell = esmCell;
-        ptr.getBase()->isLocalActor = true;
-        actor->setPtr(ptr);
-
-        std::string mapIndex = Main::get().getCellController()->generateMapIndex(ptr);
-        localActors[mapIndex] = actor;
-
-        Main::get().getCellController()->setLocalActorRecord(mapIndex, getDescription());
-        
-        LOG_APPEND(Log::LOG_INFO, "- Initialized LocalActor %s", mapIndex.c_str());
-    }
-}
-
-void Cell::uninitializeLocalActors()
-{
-    for (std::map<std::string, LocalActor *>::iterator it = localActors.begin(); it != localActors.end(); ++it)
-    {
-        LocalActor *actor = it->second;
-        actor->getPtr().getBase()->isLocalActor = false;
-
-        Main::get().getCellController()->removeLocalActorRecord(it->first);
-    }
-
-    localActors.clear();
-}
-
-void Cell::uninitializeDedicatedActors()
-{
-    for (std::map<std::string, DedicatedActor *>::iterator it = dedicatedActors.begin(); it != dedicatedActors.end(); ++it)
-    {
-        Main::get().getCellController()->removeDedicatedActorRecord(it->first);
-    }
-
-    dedicatedActors.clear();
-}
-
 void Cell::readCellFrame(WorldEvent& worldEvent)
 {
     WorldObject worldObject;
@@ -179,9 +132,8 @@ void Cell::readCellFrame(WorldEvent& worldEvent)
         {
             DedicatedActor *actor = dedicatedActors[mapIndex];
             actor->position = worldObject.pos;
-            actor->direction = worldObject.direction;
             actor->drawState = worldObject.drawState;
-            actor->movementFlags = worldObject.movementFlags;
+
             actor->hasAnimation = worldObject.hasAnimation;
             actor->hasAnimStates = worldObject.hasAnimStates;
             actor->hasMovement = worldObject.hasMovement;
@@ -202,6 +154,53 @@ void Cell::readCellFrame(WorldEvent& worldEvent)
             }
         }
     }
+}
+
+void Cell::initializeLocalActors()
+{
+    ESM::Cell esmCell = *store->getCell();
+    MWWorld::CellRefList<ESM::NPC> *npcList = store->getNpcs();
+
+    for (typename MWWorld::CellRefList<ESM::NPC>::List::iterator listIter(npcList->mList.begin());
+        listIter != npcList->mList.end(); ++listIter)
+    {
+        MWWorld::Ptr ptr(&*listIter, 0);
+
+        LocalActor *actor = new LocalActor();
+        actor->cell = esmCell;
+        ptr.getBase()->isLocalActor = true;
+        actor->setPtr(ptr);
+
+        std::string mapIndex = Main::get().getCellController()->generateMapIndex(ptr);
+        localActors[mapIndex] = actor;
+
+        Main::get().getCellController()->setLocalActorRecord(mapIndex, getDescription());
+
+        LOG_APPEND(Log::LOG_INFO, "- Initialized LocalActor %s", mapIndex.c_str());
+    }
+}
+
+void Cell::uninitializeLocalActors()
+{
+    for (std::map<std::string, LocalActor *>::iterator it = localActors.begin(); it != localActors.end(); ++it)
+    {
+        LocalActor *actor = it->second;
+        actor->getPtr().getBase()->isLocalActor = false;
+
+        Main::get().getCellController()->removeLocalActorRecord(it->first);
+    }
+
+    localActors.clear();
+}
+
+void Cell::uninitializeDedicatedActors()
+{
+    for (std::map<std::string, DedicatedActor *>::iterator it = dedicatedActors.begin(); it != dedicatedActors.end(); ++it)
+    {
+        Main::get().getCellController()->removeDedicatedActorRecord(it->first);
+    }
+
+    dedicatedActors.clear();
 }
 
 LocalActor *Cell::getLocalActor(std::string actorIndex)
