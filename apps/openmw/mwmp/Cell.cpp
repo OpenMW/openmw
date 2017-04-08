@@ -134,6 +134,9 @@ void Cell::readCellFrame(WorldEvent& worldEvent)
             actor->position = worldObject.pos;
             actor->drawState = worldObject.drawState;
 
+            actor->headPitch = worldObject.headPitch;
+            actor->headYaw = worldObject.headYaw;
+
             actor->hasAnimation = worldObject.hasAnimation;
             actor->hasAnimStates = worldObject.hasAnimStates;
             actor->hasMovement = worldObject.hasMovement;

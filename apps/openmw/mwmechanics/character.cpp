@@ -1595,8 +1595,8 @@ void CharacterController::update(float duration)
     */
     bool hasLocalActorRecord = mwmp::Main::get().getCellController()->hasLocalActorRecord(mPtr);
     bool hasDedicatedActorRecord = mwmp::Main::get().getCellController()->hasDedicatedActorRecord(mPtr);
-    mwmp::LocalActor *localActor;
-    mwmp::DedicatedActor *dedicatedActor;
+    mwmp::LocalActor *localActor = nullptr;
+    mwmp::DedicatedActor *dedicatedActor = nullptr;
 
     if (hasLocalActorRecord)
         localActor = mwmp::Main::get().getCellController()->getLocalActor(mPtr);
@@ -2453,6 +2453,31 @@ void CharacterController::updateHeadTracking(float duration)
     factor = std::min(factor, 1.f);
     xAngleRadians = (1.f-factor) * mAnimation->getHeadPitch() + factor * (-xAngleRadians);
     zAngleRadians = (1.f-factor) * mAnimation->getHeadYaw() + factor * (-zAngleRadians);
+
+    /*
+        Start of tes3mp addition
+
+        Save or load head pitch and yaw depending on whether this is a local or dedicated actor
+    */
+    if (mwmp::Main::get().getCellController()->hasLocalActorRecord(mPtr))
+    {
+        mwmp::LocalActor *localActor = mwmp::Main::get().getCellController()->getLocalActor(mPtr);
+        localActor->headPitch = xAngleRadians;
+        localActor->headYaw = zAngleRadians;
+    }
+    else if (mwmp::Main::get().getCellController()->hasDedicatedActorRecord(mPtr))
+    {
+        mwmp::DedicatedActor *dedicatedActor = mwmp::Main::get().getCellController()->getDedicatedActor(mPtr);
+
+        if (dedicatedActor->headPitch != -1)
+            xAngleRadians = dedicatedActor->headPitch;
+        
+        if (dedicatedActor->headYaw != -1)
+            zAngleRadians = dedicatedActor->headYaw;
+    }
+    /*
+        End of tes3mp addition
+    */
 
     mAnimation->setHeadPitch(xAngleRadians);
     mAnimation->setHeadYaw(zAngleRadians);
