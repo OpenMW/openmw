@@ -38,8 +38,6 @@ void PacketActorFrame::Packet(RakNet::BitStream *bs, bool send)
         RW(worldObject.refNumIndex, send);
         RW(worldObject.mpNum, send);
         RW(worldObject.pos, send);
-        RW(worldObject.direction, send);
-        RW(worldObject.movementFlags, send);
         RW(worldObject.drawState, send);
 
         RW(worldObject.headPitch, send);

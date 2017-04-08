@@ -15,13 +15,10 @@ namespace mwmp
 
         }
 
-        unsigned int movementFlags;
-        char movementAnim;
         char drawState;
         bool isFlying;
 
         ESM::Position position;
-        ESM::Position direction;
         ESM::Cell cell;
 
         float headPitch;
