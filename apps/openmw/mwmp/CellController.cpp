@@ -112,7 +112,7 @@ void CellController::removeLocalActorRecord(std::string actorIndex)
     localActorsToCells.erase(actorIndex);
 }
 
-bool CellController::hasLocalActorRecord(MWWorld::Ptr ptr)
+bool CellController::isLocalActor(MWWorld::Ptr ptr)
 {
     std::string mapIndex = generateMapIndex(ptr);
 
@@ -137,7 +137,7 @@ void CellController::removeDedicatedActorRecord(std::string actorIndex)
     dedicatedActorsToCells.erase(actorIndex);
 }
 
-bool CellController::hasDedicatedActorRecord(MWWorld::Ptr ptr)
+bool CellController::isDedicatedActor(MWWorld::Ptr ptr)
 {
     std::string mapIndex = generateMapIndex(ptr);
 

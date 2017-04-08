@@ -1593,15 +1593,15 @@ void CharacterController::update(float duration)
 
         Keep track of LocalActor and DedicatedActor objects so as to reuse them
     */
-    bool hasLocalActorRecord = mwmp::Main::get().getCellController()->hasLocalActorRecord(mPtr);
-    bool hasDedicatedActorRecord = mwmp::Main::get().getCellController()->hasDedicatedActorRecord(mPtr);
+    bool isLocalActor = mwmp::Main::get().getCellController()->isLocalActor(mPtr);
+    bool isDedicatedActor = mwmp::Main::get().getCellController()->isDedicatedActor(mPtr);
     mwmp::LocalActor *localActor = nullptr;
     mwmp::DedicatedActor *dedicatedActor = nullptr;
 
-    if (hasLocalActorRecord)
+    if (isLocalActor)
         localActor = mwmp::Main::get().getCellController()->getLocalActor(mPtr);
 
-    if (hasDedicatedActorRecord)
+    if (isDedicatedActor)
         dedicatedActor = mwmp::Main::get().getCellController()->getDedicatedActor(mPtr);
     /*
         End of tes3mp addition
@@ -1898,7 +1898,7 @@ void CharacterController::update(float duration)
                 Save or load animation states for this actor, depending on whether it's a local
                 or dedicated one
             */
-            if (hasLocalActorRecord)
+            if (isLocalActor)
             {
                 localActor->hasAnimStates = true;
                 localActor->animStates.idlestate = idlestate;
@@ -1906,7 +1906,7 @@ void CharacterController::update(float duration)
                 localActor->animStates.jumpstate = jumpstate;
                 localActor->animStates.forcestateupdate = forcestateupdate;
             }
-            else if (hasDedicatedActorRecord)
+            else if (isDedicatedActor)
             {
                 if (dedicatedActor->hasAnimStates)
                 {
@@ -2016,14 +2016,14 @@ void CharacterController::update(float duration)
 
         Save or load movement velocity based on whether this is a local or dedicated actor
     */
-    if (hasLocalActorRecord)
+    if (isLocalActor)
     {
         localActor->hasMovement = true;
         localActor->movement.x = moved.x();
         localActor->movement.y = moved.y();
         localActor->movement.z = moved.z();
     }
-    else if (hasDedicatedActorRecord)
+    else if (isDedicatedActor)
     {
         if (dedicatedActor->hasMovement)
             moved = osg::Vec3f(dedicatedActor->movement.x, dedicatedActor->movement.y, dedicatedActor->movement.z);
@@ -2166,7 +2166,7 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
                 If we are the cell authority over this actor, we need to record this new
                 animation for it
             */
-            if (mwmp::Main::get().getCellController()->hasLocalActorRecord(mPtr))
+            if (mwmp::Main::get().getCellController()->isLocalActor(mPtr))
             {
                 mwmp::LocalActor *actor = mwmp::Main::get().getCellController()->getLocalActor(mPtr);
                 actor->hasAnimation = true;
@@ -2459,13 +2459,13 @@ void CharacterController::updateHeadTracking(float duration)
 
         Save or load head pitch and yaw depending on whether this is a local or dedicated actor
     */
-    if (mwmp::Main::get().getCellController()->hasLocalActorRecord(mPtr))
+    if (mwmp::Main::get().getCellController()->isLocalActor(mPtr))
     {
         mwmp::LocalActor *localActor = mwmp::Main::get().getCellController()->getLocalActor(mPtr);
         localActor->headPitch = xAngleRadians;
         localActor->headYaw = zAngleRadians;
     }
-    else if (mwmp::Main::get().getCellController()->hasDedicatedActorRecord(mPtr))
+    else if (mwmp::Main::get().getCellController()->isDedicatedActor(mPtr))
     {
         mwmp::DedicatedActor *dedicatedActor = mwmp::Main::get().getCellController()->getDedicatedActor(mPtr);
 
