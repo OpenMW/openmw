@@ -27,8 +27,19 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
+#include "../mwmp/CellController.hpp"
 #include "../mwmp/LocalPlayer.hpp"
+#include "../mwmp/LocalActor.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include "../mwrender/animation.hpp"
 
@@ -1577,6 +1588,25 @@ void CharacterController::updateAnimQueue()
 
 void CharacterController::update(float duration)
 {
+    /*
+        Start of tes3mp addition
+
+        Keep track of LocalActor and DedicatedActor objects so as to reuse them
+    */
+    bool hasLocalActorRecord = mwmp::Main::get().getCellController()->hasLocalActorRecord(mPtr);
+    bool hasDedicatedActorRecord = mwmp::Main::get().getCellController()->hasDedicatedActorRecord(mPtr);
+    mwmp::LocalActor *localActor;
+    mwmp::DedicatedActor *dedicatedActor;
+
+    if (hasLocalActorRecord)
+        localActor = mwmp::Main::get().getCellController()->getLocalActor(mPtr);
+
+    if (hasDedicatedActorRecord)
+        dedicatedActor = mwmp::Main::get().getCellController()->getDedicatedActor(mPtr);
+    /*
+        End of tes3mp addition
+    */
+
     MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Class &cls = mPtr.getClass();
     osg::Vec3f movement(0.f, 0.f, 0.f);
@@ -1862,7 +1892,36 @@ void CharacterController::update(float duration)
             else
                 forcestateupdate = updateCreatureState() || forcestateupdate;
 
+            /*
+                Start of tes3mp addition
+
+                Save or load animation states for this actor, depending on whether it's a local
+                or dedicated one
+            */
+            if (hasLocalActorRecord)
+            {
+                localActor->hasAnimStates = true;
+                localActor->animStates.idlestate = idlestate;
+                localActor->animStates.movestate = movestate;
+                localActor->animStates.jumpstate = jumpstate;
+                localActor->animStates.forcestateupdate = forcestateupdate;
+            }
+            else if (hasDedicatedActorRecord)
+            {
+                if (dedicatedActor->hasAnimStates)
+                {
+                    idlestate = CharacterState(dedicatedActor->animStates.idlestate);
+                    movestate = CharacterState(dedicatedActor->animStates.movestate);
+                    jumpstate = JumpingState(dedicatedActor->animStates.jumpstate);
+                    forcestateupdate = dedicatedActor->animStates.forcestateupdate;
+                }
+            }
+            /*
+                End of tes3mp addition
+            */
+
             refreshCurrentAnims(idlestate, movestate, jumpstate, forcestateupdate);
+
             updateIdleStormState(inwater);
         }
 
@@ -1951,6 +2010,27 @@ void CharacterController::update(float duration)
 
     if (mFloatToSurface && cls.isActor() && cls.getCreatureStats(mPtr).isDead() && cls.canSwim(mPtr))
         moved.z() = 1.0;
+
+    /*
+        Start of tes3mp addition
+
+        Save or load movement velocity based on whether this is a local or dedicated actor
+    */
+    if (hasLocalActorRecord)
+    {
+        localActor->hasMovement = true;
+        localActor->movement.x = moved.x();
+        localActor->movement.y = moved.y();
+        localActor->movement.z = moved.z();
+    }
+    else if (hasDedicatedActorRecord)
+    {
+        if (dedicatedActor->hasMovement)
+            moved = osg::Vec3f(dedicatedActor->movement.x, dedicatedActor->movement.y, dedicatedActor->movement.z);
+    }
+    /*
+        End of tes3mp addition
+    */
 
     // Update movement
     if(mMovementAnimationControlled && mPtr.getClass().isActor())
@@ -2079,6 +2159,25 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
             mAnimation->play(groupname, Priority_Default,
                              MWRender::Animation::BlendMask_All, false, 1.0f,
                              ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1, loopfallback);
+
+            /*
+                Start of tes3mp addition
+
+                If we are the cell authority over this actor, we need to record this new
+                animation for it
+            */
+            if (mwmp::Main::get().getCellController()->hasLocalActorRecord(mPtr))
+            {
+                mwmp::LocalActor *actor = mwmp::Main::get().getCellController()->getLocalActor(mPtr);
+                actor->hasAnimation = true;
+                actor->animation.groupname = groupname;
+                actor->animation.mode = mode;
+                actor->animation.count = count;
+                actor->animation.persist = persist;
+            }
+            /*
+                End of tes3mp addition
+            */
         }
         else if(mode == 0)
         {

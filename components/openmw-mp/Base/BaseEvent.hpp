@@ -3,6 +3,7 @@
 
 #include <components/esm/loadcell.hpp>
 #include <components/esm/cellref.hpp>
+#include <components/openmw-mp/Base/BaseStructs.hpp>
 #include <RakNetTypes.h>
 
 namespace mwmp
@@ -62,6 +63,15 @@ namespace mwmp
         std::string varName;
 
         ContainerChanges containerChanges;
+
+        Animation animation;
+        bool hasAnimation;
+
+        AnimStates animStates;
+        bool hasAnimStates;
+
+        Movement movement;
+        bool hasMovement;
     };
 
     struct ObjectChanges

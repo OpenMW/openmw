@@ -57,7 +57,28 @@ void Cell::updateLocal()
             worldObject.movementFlags = actor->movementFlags;
             worldObject.headPitch = actor->headPitch;
             worldObject.headYaw = actor->headYaw;
+            worldObject.hasAnimation = actor->hasAnimation;
+            worldObject.hasAnimStates = actor->hasAnimStates;
+            worldObject.hasMovement = actor->hasMovement;
 
+            if (actor->hasAnimation)
+            {
+                worldObject.animation = actor->animation;
+            }
+
+            if (actor->hasAnimStates)
+            {
+                worldObject.animStates = actor->animStates;
+            }
+
+            if (actor->hasMovement)
+            {
+                worldObject.movement = actor->movement;
+            }
+
+            actor->hasAnimation = false;
+            actor->hasAnimStates = false;
+            actor->hasMovement = false;
             worldEvent->addObject(worldObject);
 
             ++it;
@@ -161,6 +182,24 @@ void Cell::readCellFrame(WorldEvent& worldEvent)
             actor->direction = worldObject.direction;
             actor->drawState = worldObject.drawState;
             actor->movementFlags = worldObject.movementFlags;
+            actor->hasAnimation = worldObject.hasAnimation;
+            actor->hasAnimStates = worldObject.hasAnimStates;
+            actor->hasMovement = worldObject.hasMovement;
+
+            if (actor->hasAnimation)
+            {
+                actor->animation = worldObject.animation;
+            }
+
+            if (actor->hasAnimStates)
+            {
+                actor->animStates = worldObject.animStates;
+            }
+
+            if (actor->hasMovement)
+            {
+                actor->movement = worldObject.movement;
+            }
         }
     }
 }

@@ -2,6 +2,7 @@
 #define OPENMW_BASEACTOR_HPP
 
 #include <components/esm/loadcell.hpp>
+#include <components/openmw-mp/Base/BaseStructs.hpp>
 
 namespace mwmp
 {
@@ -25,6 +26,15 @@ namespace mwmp
 
         float headPitch;
         float headYaw;
+
+        Animation animation;
+        bool hasAnimation;
+
+        AnimStates animStates;
+        bool hasAnimStates;
+
+        Movement movement;
+        bool hasMovement;
     };
 }
 

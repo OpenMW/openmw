@@ -1,4 +1,5 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
+#include <components/openmw-mp/Log.hpp>
 #include "PacketActorFrame.hpp"
 
 using namespace mwmp;
@@ -43,6 +44,33 @@ void PacketActorFrame::Packet(RakNet::BitStream *bs, bool send)
 
         RW(worldObject.headPitch, send);
         RW(worldObject.headYaw, send);
+
+        RW(worldObject.hasAnimation, send);
+        RW(worldObject.hasAnimStates, send);
+        RW(worldObject.hasMovement, send);
+
+        if (worldObject.hasAnimation)
+        {
+            RW(worldObject.animation.groupname, send);
+            RW(worldObject.animation.mode, send);
+            RW(worldObject.animation.count, send);
+            RW(worldObject.animation.persist, send);
+        }
+
+        if (worldObject.hasAnimStates)
+        {
+            RW(worldObject.animStates.idlestate, send);
+            RW(worldObject.animStates.movestate, send);
+            RW(worldObject.animStates.jumpstate, send);
+            RW(worldObject.animStates.forcestateupdate, send);
+        }
+
+        if (worldObject.hasMovement)
+        {
+            RW(worldObject.movement.x, send);
+            RW(worldObject.movement.y, send);
+            RW(worldObject.movement.y, send);
+        }
 
         if (!send)
         {

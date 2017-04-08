@@ -1,3 +1,5 @@
+#include <components/openmw-mp/Log.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwmechanics/mechanicsmanagerimp.hpp"
 #include "../mwmechanics/movement.hpp"
@@ -25,7 +27,6 @@ void DedicatedActor::update(float dt)
 {
     move(dt);
     setDrawState();
-    setMovementFlags();
     setAnimation();
 }
 
@@ -34,11 +35,6 @@ void DedicatedActor::move(float dt)
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
     world->moveObject(ptr, position.pos[0], position.pos[1], position.pos[2]);
-
-    MWMechanics::Movement& move = ptr.getClass().getMovementSettings(ptr);
-    move.mPosition[0] = direction.pos[0];
-    move.mPosition[1] = direction.pos[1];
-    move.mPosition[2] = direction.pos[2];
 
     world->rotateObject(ptr, position.rot[0], position.rot[1], position.rot[2]);
 }
@@ -55,30 +51,12 @@ void DedicatedActor::setDrawState()
         ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Spell);
 }
 
-void DedicatedActor::setMovementFlags()
-{
-    using namespace MWMechanics;
-
-    MWMechanics::NpcStats *ptrNpcStats = &ptr.getClass().getNpcStats(ptr);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_Run, (movementFlags & CreatureStats::Flag_Run) != 0);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_Sneak, (movementFlags & CreatureStats::Flag_Sneak) != 0);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceJump, (movementFlags & CreatureStats::Flag_ForceJump) != 0);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceMoveJump, (movementFlags & CreatureStats::Flag_ForceMoveJump) != 0);
-}
-
 void DedicatedActor::setAnimation()
 {
-    MWBase::World *world = MWBase::Environment::get().getWorld();
-
-    if (headPitch != -1 && headYaw != -1)
+    if (hasAnimation)
     {
-        MWRender::Animation *animation = world->getAnimation(ptr);
-
-        if (animation)
-        {
-            animation->setHeadPitch(headPitch);
-            animation->setHeadYaw(headYaw);
-        }
+        MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(ptr,
+            animation.groupname, animation.mode, animation.count, animation.persist);
     }
 }
 
