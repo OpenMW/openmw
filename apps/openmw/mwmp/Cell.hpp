@@ -17,11 +17,15 @@ namespace mwmp
 
         void updateLocal();
         void updateDedicated(float dt);
+
         void initializeLocalActors();
         void uninitializeLocalActors();
+        void uninitializeDedicatedActors();
+
         void readCellFrame(mwmp::WorldEvent& worldEvent);
 
         virtual LocalActor *getLocalActor(std::string actorIndex);
+        virtual DedicatedActor *getDedicatedActor(std::string actorIndex);
 
         MWWorld::CellStore* getCellStore();
         std::string getDescription();

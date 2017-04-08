@@ -25,8 +25,12 @@ namespace mwmp
         void setLocalActorRecord(std::string actorIndex, std::string cellIndex);
         void removeLocalActorRecord(std::string actorIndex);
         bool hasLocalActorRecord(MWWorld::Ptr ptr);
-
         virtual LocalActor *getLocalActor(MWWorld::Ptr ptr);
+
+        void setDedicatedActorRecord(std::string actorIndex, std::string cellIndex);
+        void removeDedicatedActorRecord(std::string actorIndex);
+        bool hasDedicatedActorRecord(MWWorld::Ptr ptr);
+        virtual DedicatedActor *getDedicatedActor(MWWorld::Ptr ptr);
 
         std::string generateMapIndex(MWWorld::Ptr ptr);
         std::string generateMapIndex(mwmp::WorldObject object);
@@ -40,6 +44,7 @@ namespace mwmp
     private:
         static std::map<std::string, mwmp::Cell *> cellsActive;
         static std::map<std::string, std::string> localActorsToCells;
+        static std::map<std::string, std::string> dedicatedActorsToCells;
     };
 }
 

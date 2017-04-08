@@ -14,6 +14,7 @@ using namespace mwmp;
 
 std::map<std::string, mwmp::Cell *> CellController::cellsActive;
 std::map<std::string, std::string> CellController::localActorsToCells;
+std::map<std::string, std::string> CellController::dedicatedActorsToCells;
 
 mwmp::CellController::CellController()
 {
@@ -34,6 +35,7 @@ void CellController::updateLocal()
         if (!MWBase::Environment::get().getWorld()->isCellActive(mpCell->getCellStore()))
         {
             mpCell->uninitializeLocalActors();
+            mpCell->uninitializeDedicatedActors();
             cellsActive.erase(it++);
         }
         else
@@ -114,6 +116,31 @@ LocalActor *CellController::getLocalActor(MWWorld::Ptr ptr)
     std::string cellIndex = localActorsToCells.at(actorIndex);
 
     return cellsActive.at(cellIndex)->getLocalActor(actorIndex);
+}
+
+void CellController::setDedicatedActorRecord(std::string actorIndex, std::string cellIndex)
+{
+    dedicatedActorsToCells[actorIndex] = cellIndex;
+}
+
+void CellController::removeDedicatedActorRecord(std::string actorIndex)
+{
+    dedicatedActorsToCells.erase(actorIndex);
+}
+
+bool CellController::hasDedicatedActorRecord(MWWorld::Ptr ptr)
+{
+    std::string mapIndex = generateMapIndex(ptr);
+
+    return (dedicatedActorsToCells.count(mapIndex) > 0);
+}
+
+DedicatedActor *CellController::getDedicatedActor(MWWorld::Ptr ptr)
+{
+    std::string actorIndex = generateMapIndex(ptr);
+    std::string cellIndex = dedicatedActorsToCells.at(actorIndex);
+
+    return cellsActive.at(cellIndex)->getDedicatedActor(actorIndex);
 }
 
 std::string CellController::generateMapIndex(MWWorld::Ptr ptr)

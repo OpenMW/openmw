@@ -117,6 +117,16 @@ void Cell::uninitializeLocalActors()
     localActors.clear();
 }
 
+void Cell::uninitializeDedicatedActors()
+{
+    for (std::map<std::string, DedicatedActor *>::iterator it = dedicatedActors.begin(); it != dedicatedActors.end(); ++it)
+    {
+        Main::get().getCellController()->removeDedicatedActorRecord(it->first);
+    }
+
+    dedicatedActors.clear();
+}
+
 void Cell::readCellFrame(WorldEvent& worldEvent)
 {
     WorldObject worldObject;
@@ -138,6 +148,8 @@ void Cell::readCellFrame(WorldEvent& worldEvent)
             actor->setPtr(ptrFound);
             dedicatedActors[mapIndex] = actor;
 
+            Main::get().getCellController()->setDedicatedActorRecord(mapIndex, getDescription());
+
             LOG_APPEND(Log::LOG_INFO, "- Initialized DedicatedActor %s", mapIndex.c_str());
         }
 
@@ -156,6 +168,11 @@ void Cell::readCellFrame(WorldEvent& worldEvent)
 LocalActor *Cell::getLocalActor(std::string actorIndex)
 {
     return localActors.at(actorIndex);
+}
+
+DedicatedActor *Cell::getDedicatedActor(std::string actorIndex)
+{
+    return dedicatedActors.at(actorIndex);
 }
 
 MWWorld::CellStore *Cell::getCellStore()
