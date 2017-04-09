@@ -12,6 +12,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
@@ -137,9 +138,15 @@ void Recharge::onItemClicked(MyGUI::Widget *sender, const MWWorld::Ptr& item)
         item.getCellRef().setEnchantmentCharge(
             std::min(item.getCellRef().getEnchantmentCharge() + restored, static_cast<float>(enchantment->mData.mCharge)));
 
+        MWBase::Environment::get().getSoundManager()->playSound("Enchant Success",1,1);
+
         player.getClass().getContainerStore(player).restack(item);
 
         player.getClass().skillUsageSucceeded (player, ESM::Skill::Enchant, 0);
+    }
+    else
+    {
+        MWBase::Environment::get().getSoundManager()->playSound("Enchant Fail",1,1);
     }
 
     gem.getContainerStore()->remove(gem, 1, player);

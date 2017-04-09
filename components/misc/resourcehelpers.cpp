@@ -127,9 +127,7 @@ std::string Misc::ResourceHelpers::correctBookartPath(const std::string &resPath
 std::string Misc::ResourceHelpers::correctActorModelPath(const std::string &resPath, const VFS::Manager* vfs)
 {
     std::string mdlname = resPath;
-    std::string::size_type p = mdlname.rfind('\\');
-    if(p == std::string::npos)
-        p = mdlname.rfind('/');
+    std::string::size_type p = mdlname.find_last_of("/\\");
     if(p != std::string::npos)
         mdlname.insert(mdlname.begin()+p+1, 'x');
     else
