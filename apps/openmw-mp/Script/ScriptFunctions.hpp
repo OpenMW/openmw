@@ -13,6 +13,7 @@
 #include <Script/Functions/Items.hpp>
 #include <Script/Functions/Quests.hpp>
 #include <Script/Functions/Spells.hpp>
+#include <Script/Functions/Actors.hpp>
 #include <Script/Functions/World.hpp>
 #include <Script/Functions/Miscellaneous.hpp>
 #include <RakNetTypes.h>
@@ -101,6 +102,7 @@ public:
             GUIAPI,
             CHARCLASSAPI,
             WORLDAPI,
+            ACTORAPI,
             MISCELLANEOUSAPI
     };
 
