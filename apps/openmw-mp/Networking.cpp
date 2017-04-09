@@ -164,8 +164,8 @@ void Networking::processActorPacket(RakNet::Packet *packet)
     if (!player->isHandshaked() || player->getLoadState() != Player::POSTLOADED)
         return;
 
-    if (!ActorProcessor::Process(*packet, baseEvent))
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled WorldPacket with identifier %i has arrived", packet->data[0]);
+    if (!ActorProcessor::Process(*packet, baseActorList))
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled ActorPacket with identifier %i has arrived", packet->data[0]);
 
 }
 
@@ -309,6 +309,11 @@ ActorPacketController *Networking::getActorPacketController() const
 WorldPacketController *Networking::getWorldPacketController() const
 {
     return worldPacketController;
+}
+
+BaseActorList *Networking::getLastActorList()
+{
+    return &baseActorList;
 }
 
 BaseEvent *Networking::getLastEvent()

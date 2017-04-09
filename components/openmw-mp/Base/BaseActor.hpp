@@ -16,6 +16,12 @@ namespace mwmp
 
         }
 
+        std::string refId;
+        int refNumIndex;
+        int mpNum;
+
+        ESM::Position pos;
+
         char drawState;
         bool isFlying;
 
@@ -35,14 +41,22 @@ namespace mwmp
         bool hasMovement;
     };
 
-    class ActorList
+    class BaseActorList
     {
     public:
 
-        ActorList()
+        BaseActorList()
         {
 
         }
+
+        enum ACTOR_ACTION
+        {
+            SET = 0,
+            ADD = 1,
+            REMOVE = 2,
+            REQUEST = 3
+        };
 
         RakNet::RakNetGUID guid;
 
@@ -50,6 +64,8 @@ namespace mwmp
         unsigned int count;
 
         ESM::Cell cell;
+
+        unsigned char action; // 0 - Clear and set in entirety, 1 - Add item, 2 - Remove item, 3 - Request items
     };
 }
 

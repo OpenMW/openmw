@@ -13,15 +13,15 @@ namespace mwmp
             BPP_INIT(ID_ACTOR_FRAME)
         }
 
-        void Do(ActorPacket &packet, Player &player, BaseEvent &event) override
+        void Do(ActorPacket &packet, Player &player, BaseActorList &actorList) override
         {
             // Send only to players who have the cell loaded
-            Cell *serverCell = CellController::get()->getCell(&event.cell);
+            Cell *serverCell = CellController::get()->getCell(&actorList.cell);
 
             if (serverCell != nullptr)
-                serverCell->sendToLoaded(&packet, &event);
+                serverCell->sendToLoaded(&packet, &actorList);
 
-            Script::Call<Script::CallbackIdentity("OnActorFrame")>(player.getId(), event.cell.getDescription().c_str());
+            Script::Call<Script::CallbackIdentity("OnActorFrame")>(player.getId(), actorList.cell.getDescription().c_str());
         }
     };
 }

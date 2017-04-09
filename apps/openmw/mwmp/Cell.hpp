@@ -1,7 +1,7 @@
 #ifndef OPENMW_CELL_HPP
 #define OPENMW_CELL_HPP
 
-#include "WorldEvent.hpp"
+#include "ActorList.hpp"
 #include "LocalActor.hpp"
 #include "DedicatedActor.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -18,7 +18,7 @@ namespace mwmp
         void updateLocal();
         void updateDedicated(float dt);
 
-        void readCellFrame(mwmp::WorldEvent& worldEvent);
+        void readCellFrame(mwmp::ActorList& actorList);
 
         void initializeLocalActors();
         void uninitializeLocalActors();

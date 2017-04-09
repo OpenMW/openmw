@@ -13,17 +13,17 @@ namespace mwmp
             BPP_INIT(ID_ACTOR_LIST)
         }
 
-        void Do(ActorPacket &packet, Player &player, BaseEvent &event) override
+        void Do(ActorPacket &packet, Player &player, BaseActorList &actorList) override
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received %s from %s", strPacketID.c_str(), player.npc.mName.c_str());
             
             // Send only to players who have the cell loaded
-            Cell *serverCell = CellController::get()->getCell(&event.cell);
+            Cell *serverCell = CellController::get()->getCell(&actorList.cell);
 
             if (serverCell != nullptr)
-                serverCell->sendToLoaded(&packet, &event);
+                serverCell->sendToLoaded(&packet, &actorList);
 
-            Script::Call<Script::CallbackIdentity("OnActorList")>(player.getId(), event.cell.getDescription().c_str());
+            Script::Call<Script::CallbackIdentity("OnActorList")>(player.getId(), actorList.cell.getDescription().c_str());
         }
     };
 }

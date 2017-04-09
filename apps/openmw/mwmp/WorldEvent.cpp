@@ -47,33 +47,6 @@ void WorldEvent::addObject(WorldObject worldObject)
     objectChanges.objects.push_back(worldObject);
 }
 
-void WorldEvent::editActors(MWWorld::CellStore* cellStore)
-{
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < objectChanges.count; i++)
-    {
-        worldObject = objectChanges.objects.at(i);
-
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
-
-        return;
-
-        MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex, worldObject.mpNum);
-
-        if (ptrFound)
-        {
-            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
-        }
-        else
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "-- Could not find %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
-        }
-    }
-}
-
 void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
@@ -474,46 +447,6 @@ void WorldEvent::playVideo()
 
         MWBase::Environment::get().getWindowManager()->playVideo(worldObject.filename, worldObject.allowSkipping);
     }
-}
-
-void WorldEvent::sendActors(MWWorld::CellStore* cellStore)
-{
-    reset();
-    cell = *cellStore->getCell();
-    action = BaseEvent::SET;
-
-    MWWorld::CellRefList<ESM::NPC> *npcList = cellStore->getNpcs();
-
-    for (typename MWWorld::CellRefList<ESM::NPC>::List::iterator listIter(npcList->mList.begin());
-        listIter != npcList->mList.end(); ++listIter)
-    {
-        MWWorld::Ptr ptr(&*listIter, 0);
-
-        mwmp::WorldObject worldObject;
-        worldObject.refId = ptr.getCellRef().getRefId();
-        worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-        worldObject.mpNum = ptr.getCellRef().getMpNum();
-
-        addObject(worldObject);
-    }
-
-    MWWorld::CellRefList<ESM::Creature> *creatureList = cellStore->getCreatures();
-
-    for (typename MWWorld::CellRefList<ESM::Creature>::List::iterator listIter(creatureList->mList.begin());
-        listIter != creatureList->mList.end(); ++listIter)
-    {
-        MWWorld::Ptr ptr(&*listIter, 0);
-
-        mwmp::WorldObject worldObject;
-        worldObject.refId = ptr.getCellRef().getRefId();
-        worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-        worldObject.mpNum = ptr.getCellRef().getMpNum();
-
-        addObject(worldObject);
-    }
-
-    mwmp::Main::get().getNetworking()->getActorPacket(ID_ACTOR_LIST)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getActorPacket(ID_ACTOR_LIST)->Send();
 }
 
 void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)

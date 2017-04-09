@@ -13,33 +13,33 @@ void PacketActorAuthority::Packet(RakNet::BitStream *bs, bool send)
     ActorPacket::Packet(bs, send);
 
     if (!send)
-        event->objectChanges.objects.clear();
+        actorList->baseActors.clear();
     else
-        event->objectChanges.count = (unsigned int)(event->objectChanges.objects.size());
+        actorList->count = (unsigned int)(actorList->baseActors.size());
 
-    RW(event->objectChanges.count, send);
+    RW(actorList->count, send);
 
-    RW(event->cell.mData.mFlags, send);
-    RW(event->cell.mData.mX, send);
-    RW(event->cell.mData.mY, send);
-    RW(event->cell.mName, send);
+    RW(actorList->cell.mData.mFlags, send);
+    RW(actorList->cell.mData.mX, send);
+    RW(actorList->cell.mData.mY, send);
+    RW(actorList->cell.mName, send);
 
-    WorldObject worldObject;
+    BaseActor actor;
 
-    for (unsigned int i = 0; i < event->objectChanges.count; i++)
+    for (unsigned int i = 0; i < actorList->count; i++)
     {
         if (send)
         {
-            worldObject = event->objectChanges.objects.at(i);
+            actor = actorList->baseActors.at(i);
         }
 
-        RW(worldObject.refId, send);
-        RW(worldObject.refNumIndex, send);
-        RW(worldObject.mpNum, send);
+        RW(actor.refId, send);
+        RW(actor.refNumIndex, send);
+        RW(actor.mpNum, send);
 
         if (!send)
         {
-            event->objectChanges.objects.push_back(worldObject);
+            actorList->baseActors.push_back(actor);
         }
     }
 }

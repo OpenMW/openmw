@@ -24,4 +24,4 @@ namespace mwmp
     };
 }
 
-#endif //OPENMW_WORLDPACKETCONTROLLER_HPP
+#endif //OPENMW_ACTORPACKETCONTROLLER_HPP

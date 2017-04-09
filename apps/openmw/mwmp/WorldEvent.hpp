@@ -18,7 +18,6 @@ namespace mwmp
         void reset();
         void addObject(WorldObject worldObject);
 
-        void editActors(MWWorld::CellStore* cellStore);
         void editContainers(MWWorld::CellStore* cellStore);
 
         void placeObjects(MWWorld::CellStore* cellStore);
@@ -39,7 +38,6 @@ namespace mwmp
         void playMusic();
         void playVideo();
 
-        void sendActors(MWWorld::CellStore* cellStore);
         void sendContainers(MWWorld::CellStore* cellStore);
 
         void sendObjectPlace(MWWorld::Ptr ptr);

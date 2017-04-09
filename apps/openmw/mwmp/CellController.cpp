@@ -89,16 +89,16 @@ void CellController::initializeLocalActors(const ESM::Cell& cell)
     }
 }
 
-void CellController::readCellFrame(WorldEvent& worldEvent)
+void CellController::readCellFrame(ActorList& actorList)
 {
-    std::string mapIndex = worldEvent.cell.getDescription();
+    std::string mapIndex = actorList.cell.getDescription();
 
-    initializeCell(worldEvent.cell);
+    initializeCell(actorList.cell);
 
     // If this now exists, send it the data
     if (cellsActive.count(mapIndex) > 0)
     {
-        cellsActive[mapIndex]->readCellFrame(worldEvent);
+        cellsActive[mapIndex]->readCellFrame(actorList);
     }
 }
 
@@ -161,12 +161,12 @@ std::string CellController::generateMapIndex(MWWorld::Ptr ptr)
     return mapIndex;
 }
 
-std::string CellController::generateMapIndex(WorldObject object)
+std::string CellController::generateMapIndex(BaseActor baseActor)
 {
     std::string mapIndex = "";
-    mapIndex += object.refId;
-    mapIndex += "-" + Utils::toString(object.refNumIndex);
-    mapIndex += "-" + Utils::toString(object.mpNum);
+    mapIndex += baseActor.refId;
+    mapIndex += "-" + Utils::toString(baseActor.refNumIndex);
+    mapIndex += "-" + Utils::toString(baseActor.mpNum);
     return mapIndex;
 }
 

@@ -14,65 +14,65 @@ void PacketActorFrame::Packet(RakNet::BitStream *bs, bool send)
     ActorPacket::Packet(bs, send);
 
     if (!send)
-        event->objectChanges.objects.clear();
+        actorList->baseActors.clear();
     else
-        event->objectChanges.count = (unsigned int)(event->objectChanges.objects.size());
+        actorList->count = (unsigned int)(actorList->baseActors.size());
 
-    RW(event->objectChanges.count, send);
+    RW(actorList->count, send);
 
-    RW(event->cell.mData.mFlags, send);
-    RW(event->cell.mData.mX, send);
-    RW(event->cell.mData.mY, send);
-    RW(event->cell.mName, send);
+    RW(actorList->cell.mData.mFlags, send);
+    RW(actorList->cell.mData.mX, send);
+    RW(actorList->cell.mData.mY, send);
+    RW(actorList->cell.mName, send);
 
-    WorldObject worldObject;
+    BaseActor actor;
 
-    for (unsigned int i = 0; i < event->objectChanges.count; i++)
+    for (unsigned int i = 0; i < actorList->count; i++)
     {
         if (send)
         {
-            worldObject = event->objectChanges.objects.at(i);
+            actor = actorList->baseActors.at(i);
         }
 
-        RW(worldObject.refId, send);
-        RW(worldObject.refNumIndex, send);
-        RW(worldObject.mpNum, send);
-        RW(worldObject.pos, send);
-        RW(worldObject.drawState, send);
+        RW(actor.refId, send);
+        RW(actor.refNumIndex, send);
+        RW(actor.mpNum, send);
+        RW(actor.pos, send);
+        RW(actor.drawState, send);
 
-        RW(worldObject.headPitch, send);
-        RW(worldObject.headYaw, send);
+        RW(actor.headPitch, send);
+        RW(actor.headYaw, send);
 
-        RW(worldObject.hasAnimation, send);
-        RW(worldObject.hasAnimStates, send);
-        RW(worldObject.hasMovement, send);
+        RW(actor.hasAnimation, send);
+        RW(actor.hasAnimStates, send);
+        RW(actor.hasMovement, send);
 
-        if (worldObject.hasAnimation)
+        if (actor.hasAnimation)
         {
-            RW(worldObject.animation.groupname, send);
-            RW(worldObject.animation.mode, send);
-            RW(worldObject.animation.count, send);
-            RW(worldObject.animation.persist, send);
+            RW(actor.animation.groupname, send);
+            RW(actor.animation.mode, send);
+            RW(actor.animation.count, send);
+            RW(actor.animation.persist, send);
         }
 
-        if (worldObject.hasAnimStates)
+        if (actor.hasAnimStates)
         {
-            RW(worldObject.animStates.idlestate, send);
-            RW(worldObject.animStates.movestate, send);
-            RW(worldObject.animStates.jumpstate, send);
-            RW(worldObject.animStates.forcestateupdate, send);
+            RW(actor.animStates.idlestate, send);
+            RW(actor.animStates.movestate, send);
+            RW(actor.animStates.jumpstate, send);
+            RW(actor.animStates.forcestateupdate, send);
         }
 
-        if (worldObject.hasMovement)
+        if (actor.hasMovement)
         {
-            RW(worldObject.movement.x, send);
-            RW(worldObject.movement.y, send);
-            RW(worldObject.movement.y, send);
+            RW(actor.movement.x, send);
+            RW(actor.movement.y, send);
+            RW(actor.movement.y, send);
         }
 
         if (!send)
         {
-            event->objectChanges.objects.push_back(worldObject);
+            actorList->baseActors.push_back(actor);
         }
     }
 }

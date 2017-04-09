@@ -18,8 +18,8 @@ ActorPacket::~ActorPacket()
 
 }
 
-void ActorPacket::setEvent(BaseEvent *event)
+void ActorPacket::setActorList(BaseActorList *actorList)
 {
-    this->event = event;
-    guid = event->guid;
+    this->actorList = actorList;
+    guid = actorList->guid;
 }

@@ -63,7 +63,7 @@ public:
     void removePlayer(Player *player);
 
     TPlayers getPlayers() const;
-    void sendToLoaded(mwmp::ActorPacket *actorPacket, mwmp::BaseEvent *baseEvent) const;
+    void sendToLoaded(mwmp::ActorPacket *actorPacket, mwmp::BaseActorList *baseActorList) const;
     void sendToLoaded(mwmp::WorldPacket *worldPacket, mwmp::BaseEvent *baseEvent) const;
 
     std::string getDescription() const;

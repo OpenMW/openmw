@@ -9,7 +9,7 @@
 
 using namespace mwmp;
 
-ActorList actorList;
+BaseActorList scriptActorList;
 BaseActor tempActor;
 
 void ActorFunctions::InitActorList(unsigned short pid) noexcept
@@ -17,12 +17,25 @@ void ActorFunctions::InitActorList(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, );
 
-    actorList.cell.blank();
-    actorList.baseActors.clear();
-    actorList.guid = player->guid;
+    scriptActorList.cell.blank();
+    scriptActorList.baseActors.clear();
+    scriptActorList.guid = player->guid;
 }
 
 unsigned int ActorFunctions::GetActorListSize() noexcept
 {
     return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.count;
 }
+
+void ActorFunctions::SendActorList() noexcept
+{
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_LIST)->setActorList(&scriptActorList);
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_LIST)->Send(scriptActorList.guid);
+}
+
+void ActorFunctions::SendActorAuthority() noexcept
+{
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_AUTHORITY)->setActorList(&scriptActorList);
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_AUTHORITY)->Send(scriptActorList.guid);
+}
+

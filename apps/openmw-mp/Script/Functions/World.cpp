@@ -271,18 +271,6 @@ void WorldFunctions::AddContainerItem() noexcept
     tempWorldObject.containerChanges.items.push_back(containerItem);
 }
 
-void WorldFunctions::SendActorList() noexcept
-{
-    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_LIST)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_LIST)->Send(scriptEvent.guid);
-}
-
-void WorldFunctions::SendActorAuthority() noexcept
-{
-    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_AUTHORITY)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_AUTHORITY)->Send(scriptEvent.guid);
-}
-
 void WorldFunctions::SendObjectDelete() noexcept
 {
     mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_DELETE)->setEvent(&scriptEvent);

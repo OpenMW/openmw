@@ -17,9 +17,9 @@ namespace mwmp
     {
     public:
 
-        virtual void Do(ActorPacket &packet, Player &player, BaseEvent &event);
+        virtual void Do(ActorPacket &packet, Player &player, BaseActorList &actorList);
 
-        static bool Process(RakNet::Packet &packet, BaseEvent &event) noexcept;
+        static bool Process(RakNet::Packet &packet, BaseActorList &actorList) noexcept;
         static void AddProcessor(ActorProcessor *processor) noexcept;
 
         //typedef boost::unordered_map<unsigned char, boost::shared_ptr<ActorProcessor> > processors_t;

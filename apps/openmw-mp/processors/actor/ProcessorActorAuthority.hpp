@@ -13,7 +13,7 @@ namespace mwmp
             BPP_INIT(ID_ACTOR_AUTHORITY)
         }
 
-        void Do(ActorPacket &packet, Player &player, BaseEvent &event) override
+        void Do(ActorPacket &packet, Player &player, BaseActorList &actorList) override
         {
             packet.Send(true);
         }

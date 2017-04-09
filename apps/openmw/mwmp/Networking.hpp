@@ -9,6 +9,7 @@
 #include <BitStream.h>
 #include <string>
 
+#include "ActorList.hpp"
 #include "WorldEvent.hpp"
 #include <components/openmw-mp/NetworkMessages.hpp>
 
@@ -44,8 +45,9 @@ namespace mwmp
 
         bool isConnected();
 
-        WorldEvent *getWorldEvent();
         LocalPlayer *getLocalPlayer();
+        ActorList *getActorList();
+        WorldEvent *getWorldEvent();
 
     private:
         bool connected;
@@ -57,6 +59,7 @@ namespace mwmp
         ActorPacketController actorPacketController;
         WorldPacketController worldPacketController;
 
+        ActorList actorList;
         WorldEvent worldEvent;
 
         void processPlayerPacket(RakNet::Packet *packet);

@@ -2,7 +2,7 @@
 #define OPENMW_CELLCONTROLLER_HPP
 
 #include "Cell.hpp"
-#include "WorldEvent.hpp"
+#include "ActorList.hpp"
 #include "LocalActor.hpp"
 #include "DedicatedActor.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -21,7 +21,7 @@ namespace mwmp
 
         void initializeCell(const ESM::Cell& cell);
         void initializeLocalActors(const ESM::Cell& cell);
-        void readCellFrame(mwmp::WorldEvent& worldEvent);
+        void readCellFrame(mwmp::ActorList& actorList);
 
         void setLocalActorRecord(std::string actorIndex, std::string cellIndex);
         void removeLocalActorRecord(std::string actorIndex);
@@ -34,7 +34,7 @@ namespace mwmp
         virtual DedicatedActor *getDedicatedActor(MWWorld::Ptr ptr);
 
         std::string generateMapIndex(MWWorld::Ptr ptr);
-        std::string generateMapIndex(mwmp::WorldObject object);
+        std::string generateMapIndex(mwmp::BaseActor baseActor);
 
         int getCellSize() const;
         virtual MWWorld::CellStore *getCell(const ESM::Cell& cell);

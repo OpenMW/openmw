@@ -40,6 +40,7 @@ namespace  mwmp
         ActorPacketController *getActorPacketController() const;
         WorldPacketController *getWorldPacketController() const;
 
+        BaseActorList *getLastActorList();
         BaseEvent *getLastEvent();
 
         int getCurrentMpNum();
@@ -57,11 +58,14 @@ namespace  mwmp
     private:
         std::string serverPassword;
         static Networking *sThis;
-        BaseEvent baseEvent;
+
         RakNet::RakPeerInterface *peer;
         RakNet::BitStream bsOut;
         TPlayers *players;
         MasterClient *mclient;
+
+        BaseActorList baseActorList;
+        BaseEvent baseEvent;
 
         PlayerPacketController *playerPacketController;
         ActorPacketController *actorPacketController;

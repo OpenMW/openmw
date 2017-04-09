@@ -5,7 +5,7 @@
 #include <RakNetTypes.h>
 #include <BitStream.h>
 #include <PacketPriority.h>
-#include <components/openmw-mp/Base/BaseEvent.hpp>
+#include <components/openmw-mp/Base/BaseActor.hpp>
 
 #include <components/openmw-mp/Packets/BasePacket.hpp>
 
@@ -19,10 +19,10 @@ namespace mwmp
 
         ~ActorPacket();
 
-        void setEvent(BaseEvent *event);
+        void setActorList(BaseActorList *actorList);
 
     protected:
-        BaseEvent *event;
+        BaseActorList *actorList;
 
     };
 }

@@ -5,7 +5,7 @@ using namespace mwmp;
 
 ActorProcessor::processors_t ActorProcessor::processors;
 
-void ActorProcessor::Do(ActorPacket &packet, Player &player, BaseEvent &event)
+void ActorProcessor::Do(ActorPacket &packet, Player &player, BaseActorList &actorList)
 {
     packet.Send(true);
 }
@@ -21,12 +21,12 @@ void ActorProcessor::AddProcessor(mwmp::ActorProcessor *processor) noexcept
     processors.insert(processors_t::value_type(processor->GetPacketID(), processor));
 }
 
-bool ActorProcessor::Process(RakNet::Packet &packet, BaseEvent &event) noexcept
+bool ActorProcessor::Process(RakNet::Packet &packet, BaseActorList &actorList) noexcept
 {
-    // Clear our BaseEvent before loading new data in it
-    event.cell.blank();
-    event.objectChanges.objects.clear();
-    event.guid = packet.guid;
+    // Clear our BaseActorList before loading new data in it
+    actorList.cell.blank();
+    actorList.baseActors.clear();
+    actorList.guid = packet.guid;
     for (auto &processor : processors)
     {
         if (processor.first == packet.data[0])
@@ -34,12 +34,12 @@ bool ActorProcessor::Process(RakNet::Packet &packet, BaseEvent &event) noexcept
             Player *player = Players::getPlayer(packet.guid);
             ActorPacket *myPacket = Networking::get().getActorPacketController()->GetPacket(packet.data[0]);
 
-            myPacket->setEvent(&event);
+            myPacket->setActorList(&actorList);
 
             if (!processor.second->avoidReading)
                 myPacket->Read();
 
-            processor.second->Do(*myPacket, *player, event);
+            processor.second->Do(*myPacket, *player, actorList);
             return true;
         }
     }

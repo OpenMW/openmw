@@ -27,9 +27,10 @@ void Cell::updateLocal()
 {
     if (localActors.empty()) return;
 
-    WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-    worldEvent->reset();
-    worldEvent->cell = *store->getCell();
+    ActorList *actorList = mwmp::Main::get().getNetworking()->getActorList();
+    actorList->reset();
+
+    actorList->cell = *store->getCell();
 
     for (std::map<std::string, LocalActor *>::iterator it = localActors.begin(); it != localActors.end();)
     {
@@ -46,47 +47,17 @@ void Cell::updateLocal()
         {
             //LOG_APPEND(Log::LOG_VERBOSE, "- Updating LocalActor %s", it->first.c_str());
             actor->update();
-            MWWorld::Ptr ptr = actor->getPtr();
 
-            WorldObject worldObject;
-            worldObject.refId = ptr.getCellRef().getRefId();
-            worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-            worldObject.mpNum = ptr.getCellRef().getMpNum();
-            worldObject.pos = actor->position;
-            worldObject.drawState = actor->drawState;
-
-            worldObject.headPitch = actor->headPitch;
-            worldObject.headYaw = actor->headYaw;
-
-            worldObject.hasAnimation = actor->hasAnimation;
-            worldObject.hasAnimStates = actor->hasAnimStates;
-            worldObject.hasMovement = actor->hasMovement;
-
-            if (actor->hasAnimation)
-            {
-                worldObject.animation = actor->animation;
-            }
-
-            if (actor->hasAnimStates)
-            {
-                worldObject.animStates = actor->animStates;
-            }
-
-            if (actor->hasMovement)
-            {
-                worldObject.movement = actor->movement;
-            }
-
+            actorList->addActor(*actor);
             actor->hasAnimation = false;
             actor->hasAnimStates = false;
             actor->hasMovement = false;
-            worldEvent->addObject(worldObject);
 
             ++it;
         }
     }
 
-    Main::get().getNetworking()->getActorPacket(ID_ACTOR_FRAME)->setEvent(worldEvent);
+    Main::get().getNetworking()->getActorPacket(ID_ACTOR_FRAME)->setActorList(actorList);
     Main::get().getNetworking()->getActorPacket(ID_ACTOR_FRAME)->Send();
 }
 
@@ -102,24 +73,24 @@ void Cell::updateDedicated(float dt)
     }
 }
 
-void Cell::readCellFrame(WorldEvent& worldEvent)
+void Cell::readCellFrame(ActorList& actorList)
 {
-    WorldObject worldObject;
+    BaseActor baseActor;
 
-    for (unsigned int i = 0; i < worldEvent.objectChanges.count; i++)
+    for (unsigned int i = 0; i < actorList.count; i++)
     {
-        worldObject = worldEvent.objectChanges.objects.at(i);
-        std::string mapIndex = Main::get().getCellController()->generateMapIndex(worldObject);
+        baseActor = actorList.baseActors.at(i);
+        std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
         // If this key doesn't exist, create it
         if (dedicatedActors.count(mapIndex) == 0)
         {
-            MWWorld::Ptr ptrFound = store->searchExact(worldObject.refId, worldObject.refNumIndex, worldObject.mpNum);
+            MWWorld::Ptr ptrFound = store->searchExact(baseActor.refId, baseActor.refNumIndex, baseActor.mpNum);
 
             if (!ptrFound) return;
 
             DedicatedActor *actor = new DedicatedActor();
-            actor->cell = worldEvent.cell;
+            actor->cell = actorList.cell;
             actor->setPtr(ptrFound);
             dedicatedActors[mapIndex] = actor;
 
@@ -132,29 +103,29 @@ void Cell::readCellFrame(WorldEvent& worldEvent)
         if (dedicatedActors.count(mapIndex) > 0)
         {
             DedicatedActor *actor = dedicatedActors[mapIndex];
-            actor->position = worldObject.pos;
-            actor->drawState = worldObject.drawState;
+            actor->position = baseActor.pos;
+            actor->drawState = baseActor.drawState;
 
-            actor->headPitch = worldObject.headPitch;
-            actor->headYaw = worldObject.headYaw;
+            actor->headPitch = baseActor.headPitch;
+            actor->headYaw = baseActor.headYaw;
 
-            actor->hasAnimation = worldObject.hasAnimation;
-            actor->hasAnimStates = worldObject.hasAnimStates;
-            actor->hasMovement = worldObject.hasMovement;
+            actor->hasAnimation = baseActor.hasAnimation;
+            actor->hasAnimStates = baseActor.hasAnimStates;
+            actor->hasMovement = baseActor.hasMovement;
 
             if (actor->hasAnimation)
             {
-                actor->animation = worldObject.animation;
+                actor->animation = baseActor.animation;
             }
 
             if (actor->hasAnimStates)
             {
-                actor->animStates = worldObject.animStates;
+                actor->animStates = baseActor.animStates;
             }
 
             if (actor->hasMovement)
             {
-                actor->movement = worldObject.movement;
+                actor->movement = baseActor.movement;
             }
         }
     }

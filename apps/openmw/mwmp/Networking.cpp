@@ -837,37 +837,37 @@ void Networking::processActorPacket(RakNet::Packet *packet)
 
     ActorPacket *myPacket = actorPacketController.GetPacket(packet->data[0]);
 
-    myPacket->setEvent(&worldEvent);
+    myPacket->setActorList(&actorList);
     myPacket->Packet(&bsIn, false);
 
     switch (packet->data[0])
     {
     case ID_ACTOR_LIST:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(actorList.cell);
 
         if (!ptrCellStore) return;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_ACTOR_LIST about %s", worldEvent.cell.getDescription().c_str());
-        LOG_APPEND(Log::LOG_VERBOSE, "- action: %i", worldEvent.action);
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_ACTOR_LIST about %s", actorList.cell.getDescription().c_str());
+        LOG_APPEND(Log::LOG_VERBOSE, "- action: %i", actorList.action);
 
         // If we've received a request for information, comply with it
-        if (worldEvent.action == mwmp::BaseEvent::REQUEST)
-            worldEvent.sendActors(ptrCellStore);
+        if (actorList.action == mwmp::BaseActorList::REQUEST)
+            actorList.sendActors(ptrCellStore);
 
         break;
     }
     case ID_ACTOR_AUTHORITY:
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_ACTOR_AUTHORITY about %s", worldEvent.cell.getDescription().c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_ACTOR_AUTHORITY about %s", actorList.cell.getDescription().c_str());
 
-        //Main::get().getCellController()->initializeLocalActors(worldEvent.cell);
+        //Main::get().getCellController()->initializeLocalActors(actorList.cell);
 
         break;
     }
     case ID_ACTOR_FRAME:
     {
-        //Main::get().getCellController()->readCellFrame(worldEvent);
+        //Main::get().getCellController()->readCellFrame(actorList);
 
         break;
     }
@@ -1103,6 +1103,11 @@ WorldPacket *Networking::getWorldPacket(RakNet::MessageID id)
 LocalPlayer *Networking::getLocalPlayer()
 {
     return mwmp::Main::get().getLocalPlayer();
+}
+
+ActorList *Networking::getActorList()
+{
+    return &actorList;
 }
 
 WorldEvent *Networking::getWorldEvent()
