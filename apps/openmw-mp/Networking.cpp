@@ -65,6 +65,7 @@ Networking::~Networking()
 
     sThis = 0;
     delete playerPacketController;
+    delete actorPacketController;
     delete worldPacketController;
     LOG_QUIT();
 }

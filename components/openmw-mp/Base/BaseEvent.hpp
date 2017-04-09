@@ -2,7 +2,6 @@
 #define OPENMW_BASEEVENT_HPP
 
 #include <components/esm/loadcell.hpp>
-#include <components/esm/cellref.hpp>
 #include <components/openmw-mp/Base/BaseStructs.hpp>
 #include <RakNetTypes.h>
 

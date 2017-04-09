@@ -3,6 +3,7 @@
 
 #include <components/esm/loadcell.hpp>
 #include <components/openmw-mp/Base/BaseStructs.hpp>
+#include <RakNetTypes.h>
 
 namespace mwmp
 {
@@ -32,6 +33,23 @@ namespace mwmp
 
         Movement movement;
         bool hasMovement;
+    };
+
+    class ActorList
+    {
+    public:
+
+        ActorList()
+        {
+
+        }
+
+        RakNet::RakNetGUID guid;
+
+        std::vector<BaseActor> baseActors;
+        unsigned int count;
+
+        ESM::Cell cell;
     };
 }
 
