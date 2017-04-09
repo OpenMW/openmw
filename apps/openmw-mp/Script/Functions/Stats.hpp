@@ -2,10 +2,10 @@
 // Created by koncord on 30.08.16.
 //
 
-#ifndef OPENMW_STATS_HPP
-#define OPENMW_STATS_HPP
+#ifndef OPENMW_STATAPI_HPP
+#define OPENMW_STATAPI_HPP
 
-#define STATSAPI \
+#define STATAPI \
     {"GetName",                 StatsFunctions::GetName},\
     {"SetName",                 StatsFunctions::SetName},\
     \
@@ -148,4 +148,4 @@ public:
     static void SendLevel(unsigned short pid) noexcept;
 };
 
-#endif //OPENMW_STATS_HPP
+#endif //OPENMW_STATAPI_HPP

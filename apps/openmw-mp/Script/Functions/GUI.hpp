@@ -2,8 +2,8 @@
 // Created by koncord on 30.08.16.
 //
 
-#ifndef OPENMW_GUI_HPP
-#define OPENMW_GUI_HPP
+#ifndef OPENMW_GUIAPI_HPP
+#define OPENMW_GUIAPI_HPP
 
 #define GUIAPI \
     {"MessageBox",          GUIFunctions::_MessageBox},\
@@ -32,4 +32,4 @@ public:
     static void SetConsoleAllow(unsigned short pid, bool state);
 };
 
-#endif //OPENMW_GUI_HPP
+#endif //OPENMW_GUIAPI_HPP

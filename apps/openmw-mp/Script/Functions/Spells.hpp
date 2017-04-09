@@ -1,5 +1,5 @@
-#ifndef OPENMW_SPELLS_HPP
-#define OPENMW_SPELLS_HPP
+#ifndef OPENMW_SPELLAPI_HPP
+#define OPENMW_SPELLAPI_HPP
 
 #define SPELLAPI \
     {"GetSpellbookChangesSize", SpellFunctions::GetSpellbookChangesSize},\
@@ -31,4 +31,4 @@ private:
 
 };
 
-#endif //OPENMW_SPELLS_HPP
+#endif //OPENMW_SPELLAPI_HPP

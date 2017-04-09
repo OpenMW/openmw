@@ -1,5 +1,5 @@
-#ifndef OPENMW_QUESTS_HPP
-#define OPENMW_QUESTS_HPP
+#ifndef OPENMW_QUESTAPI_HPP
+#define OPENMW_QUESTAPI_HPP
 
 #define QUESTAPI \
     {"GetJournalChangesSize",   QuestFunctions::GetJournalChangesSize},\
@@ -31,4 +31,4 @@ private:
 
 };
 
-#endif //OPENMW_QUESTS_HPP
+#endif //OPENMW_QUESTAPI_HPP

@@ -2,8 +2,8 @@
 // Created by koncord on 30.08.16.
 //
 
-#ifndef OPENMW_ITEMS_HPP
-#define OPENMW_ITEMS_HPP
+#ifndef OPENMW_ITEMAPI_HPP
+#define OPENMW_ITEMAPI_HPP
 
 #define ITEMAPI \
     {"GetEquipmentSize",        ItemFunctions::GetEquipmentSize},\
@@ -59,4 +59,4 @@ private:
 
 };
 
-#endif //OPENMW_ITEMS_HPP
+#endif //OPENMW_ITEMAPI_HPP

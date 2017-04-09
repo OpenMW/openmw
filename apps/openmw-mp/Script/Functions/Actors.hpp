@@ -1,5 +1,5 @@
-#ifndef OPENMW_ACTORFUNCTIONS_HPP
-#define OPENMW_ACTORFUNCTIONS_HPP
+#ifndef OPENMW_ACTORAPI_HPP
+#define OPENMW_ACTORAPI_HPP
 
 #define ACTORAPI \
     {"InitActorList",          ActorFunctions::InitActorList},\
@@ -16,4 +16,4 @@ public:
 };
 
 
-#endif //OPENMW_ACTORFUNCTIONS_HPP
+#endif //OPENMW_ACTORAPI_HPP

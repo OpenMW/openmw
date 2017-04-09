@@ -2,8 +2,8 @@
 // Created by koncord on 29.08.16.
 //
 
-#ifndef OPENMW_CHARCLASS_HPP
-#define OPENMW_CHARCLASS_HPP
+#ifndef OPENMW_CHARCLASSAPI_HPP
+#define OPENMW_CHARCLASSAPI_HPP
 
 #include "../Types.hpp"
 
@@ -79,4 +79,4 @@ public:
     static void SendClass(unsigned short pid) noexcept;
 };
 
-#endif //OPENMW_CHARCLASS_HPP
+#endif //OPENMW_CHARCLASSAPI_HPP

@@ -1,5 +1,5 @@
-#ifndef OPENMW_WORLD_HPP
-#define OPENMW_WORLD_HPP
+#ifndef OPENMW_WORLDAPI_HPP
+#define OPENMW_WORLDAPI_HPP
 
 #define WORLDAPI \
     {"InitScriptEvent",             WorldFunctions::InitScriptEvent},\
@@ -134,4 +134,4 @@ public:
 };
 
 
-#endif //OPENMW_WORLD_HPP
+#endif //OPENMW_WORLDAPI_HPP

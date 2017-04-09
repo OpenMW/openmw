@@ -95,7 +95,7 @@ public:
 
             POSITIONAPI,
             CELLAPI,
-            STATSAPI,
+            STATAPI,
             ITEMAPI,
             QUESTAPI,
             SPELLAPI,
