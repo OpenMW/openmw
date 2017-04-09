@@ -10,8 +10,12 @@
 using namespace mwmp;
 
 BaseEvent scriptEvent;
+
 WorldObject tempWorldObject;
+const WorldObject emptyWorldObject = {};
+
 ContainerItem tempContainerItem;
+const ContainerItem emptyContainerItem = {};
 
 std::regex exteriorCellPattern("^(-?\\d+), (-?\\d+)$");
 
@@ -243,32 +247,16 @@ void WorldFunctions::SetContainerItemCharge(int charge) noexcept
 
 void WorldFunctions::AddWorldObject() noexcept
 {
-    WorldObject worldObject;
-    worldObject.refId = tempWorldObject.refId;
-    worldObject.refNumIndex = tempWorldObject.refNumIndex;
-    worldObject.mpNum = tempWorldObject.mpNum;
-    worldObject.count = tempWorldObject.count;
-    worldObject.charge = tempWorldObject.charge;
-    worldObject.goldValue = tempWorldObject.goldValue;
-    worldObject.scale = tempWorldObject.scale;
-    worldObject.doorState = tempWorldObject.doorState;
-    worldObject.lockLevel = tempWorldObject.lockLevel;
-    worldObject.pos = tempWorldObject.pos;
-    worldObject.containerChanges.items = tempWorldObject.containerChanges.items;
+    scriptEvent.objectChanges.objects.push_back(tempWorldObject);
 
-    scriptEvent.objectChanges.objects.push_back(worldObject);
-
-    tempWorldObject.containerChanges.items.clear();
+    tempWorldObject = emptyWorldObject;
 }
 
 void WorldFunctions::AddContainerItem() noexcept
 {
-    ContainerItem containerItem;
-    containerItem.refId = tempContainerItem.refId;
-    containerItem.count = tempContainerItem.count;
-    containerItem.charge = tempContainerItem.charge;
+    tempWorldObject.containerChanges.items.push_back(tempContainerItem);
 
-    tempWorldObject.containerChanges.items.push_back(containerItem);
+    tempContainerItem = emptyContainerItem;
 }
 
 void WorldFunctions::SendObjectDelete() noexcept
