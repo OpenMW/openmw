@@ -6,6 +6,7 @@
 #define OPENMW_NETWORKING_HPP
 
 #include <components/openmw-mp/Controllers/PlayerPacketController.hpp>
+#include <components/openmw-mp/Controllers/ActorPacketController.hpp>
 #include <components/openmw-mp/Controllers/WorldPacketController.hpp>
 #include "Player.hpp"
 
@@ -23,6 +24,7 @@ namespace  mwmp
         void kickPlayer(RakNet::RakNetGUID guid);
 
         void processPlayerPacket(RakNet::Packet *packet);
+        void processActorPacket(RakNet::Packet *packet);
         void processWorldPacket(RakNet::Packet *packet);
         void update(RakNet::Packet *packet);
 
@@ -34,8 +36,10 @@ namespace  mwmp
 
         void stopServer(int code);
 
-        PlayerPacketController *getPlayerController() const;
-        WorldPacketController *getWorldController() const;
+        PlayerPacketController *getPlayerPacketController() const;
+        ActorPacketController *getActorPacketController() const;
+        WorldPacketController *getWorldPacketController() const;
+
         BaseEvent *getLastEvent();
 
         int getCurrentMpNum();
@@ -59,8 +63,9 @@ namespace  mwmp
         TPlayers *players;
         MasterClient *mclient;
 
-        PlayerPacketController *playerController;
-        WorldPacketController *worldController;
+        PlayerPacketController *playerPacketController;
+        ActorPacketController *actorPacketController;
+        WorldPacketController *worldPacketController;
 
         bool running;
         int exitCode;

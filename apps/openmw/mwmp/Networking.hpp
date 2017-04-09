@@ -11,8 +11,11 @@
 
 #include "WorldEvent.hpp"
 #include <components/openmw-mp/NetworkMessages.hpp>
+
 #include <components/openmw-mp/Controllers/PlayerPacketController.hpp>
+#include <components/openmw-mp/Controllers/ActorPacketController.hpp>
 #include <components/openmw-mp/Controllers/WorldPacketController.hpp>
+
 #include <components/files/collections.hpp>
 
 namespace mwmp
@@ -28,6 +31,7 @@ namespace mwmp
         void update();
 
         PlayerPacket *getPlayerPacket(RakNet::MessageID id);
+        ActorPacket *getActorPacket(RakNet::MessageID id);
         WorldPacket *getWorldPacket(RakNet::MessageID id);
 
         bool isDedicatedPlayer(const MWWorld::Ptr &ptr);
@@ -49,12 +53,16 @@ namespace mwmp
         RakNet::SystemAddress serverAddr;
         RakNet::BitStream bsOut;
 
-        PlayerPacketController playerController;
-        WorldPacketController worldController;
+        PlayerPacketController playerPacketController;
+        ActorPacketController actorPacketController;
+        WorldPacketController worldPacketController;
+
         WorldEvent worldEvent;
 
         void processPlayerPacket(RakNet::Packet *packet);
+        void processActorPacket(RakNet::Packet *packet);
         void processWorldPacket(RakNet::Packet *packet);
+
         void receiveMessage(RakNet::Packet *packet);
 
         void preInit(std::vector<std::string> &content, Files::Collections &collections);

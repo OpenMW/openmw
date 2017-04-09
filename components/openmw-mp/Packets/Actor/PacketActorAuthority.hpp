@@ -1,11 +1,11 @@
 #ifndef OPENMW_PACKETACTORAUTHORITY_HPP
 #define OPENMW_PACKETACTORAUTHORITY_HPP
 
-#include <components/openmw-mp/Packets/World/WorldPacket.hpp>
+#include <components/openmw-mp/Packets/Actor/ActorPacket.hpp>
 
 namespace mwmp
 {
-    class PacketActorAuthority : public WorldPacket
+    class PacketActorAuthority : public ActorPacket
     {
     public:
         PacketActorAuthority(RakNet::RakPeerInterface *peer);

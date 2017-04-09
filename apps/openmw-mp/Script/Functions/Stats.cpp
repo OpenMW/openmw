@@ -451,15 +451,15 @@ void StatsFunctions::SetCharGenStage(unsigned short pid, int start, int end) noe
     player->charGenStage.current = start;
     player->charGenStage.end = end;
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_CHARGEN)->setPlayer(player);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_CHARGEN)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_CHARGEN)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_CHARGEN)->Send(false);
 }
 
 void StatsFunctions::Resurrect(unsigned short pid)
 {
     Player *player;
     GET_PLAYER(pid, player,);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_RESURRECT)->RequestData(player->guid);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_RESURRECT)->RequestData(player->guid);
 }
 
 void StatsFunctions::SendBaseInfo(unsigned short pid) noexcept
@@ -467,9 +467,9 @@ void StatsFunctions::SendBaseInfo(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player,);
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_BASEINFO)->setPlayer(player);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_BASEINFO)->Send(false);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_BASEINFO)->Send(true);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_BASEINFO)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_BASEINFO)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_BASEINFO)->Send(true);
 }
 
 void StatsFunctions::SendDynamicStats(unsigned short pid) noexcept
@@ -477,9 +477,9 @@ void StatsFunctions::SendDynamicStats(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, );
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_DYNAMICSTATS)->setPlayer(player);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(false);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(true);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_DYNAMICSTATS)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(true);
 }
 
 void StatsFunctions::SendAttributes(unsigned short pid) noexcept
@@ -487,9 +487,9 @@ void StatsFunctions::SendAttributes(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player,);
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_ATTRIBUTE)->setPlayer(player);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(false);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(true);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_ATTRIBUTE)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(true);
 }
 
 void StatsFunctions::SendSkills(unsigned short pid) noexcept
@@ -497,9 +497,9 @@ void StatsFunctions::SendSkills(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player,);
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_SKILL)->setPlayer(player);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_SKILL)->Send(false);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_SKILL)->Send(true);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_SKILL)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_SKILL)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_SKILL)->Send(true);
 }
 
 void StatsFunctions::SendLevel(unsigned short pid) noexcept
@@ -507,7 +507,7 @@ void StatsFunctions::SendLevel(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, );
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_LEVEL)->setPlayer(player);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_LEVEL)->Send(false);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_LEVEL)->Send(true);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_LEVEL)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_LEVEL)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_LEVEL)->Send(true);
 }

@@ -512,8 +512,8 @@ void WorldEvent::sendActors(MWWorld::CellStore* cellStore)
         addObject(worldObject);
     }
 
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_ACTOR_LIST)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_ACTOR_LIST)->Send();
+    mwmp::Main::get().getNetworking()->getActorPacket(ID_ACTOR_LIST)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getActorPacket(ID_ACTOR_LIST)->Send();
 }
 
 void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)

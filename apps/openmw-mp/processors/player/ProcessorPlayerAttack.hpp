@@ -17,7 +17,7 @@ namespace mwmp
         ProcessorPlayerAttack()
         {
             BPP_INIT(ID_PLAYER_ATTACK)
-            playerController = Networking::get().getPlayerController();
+            playerController = Networking::get().getPlayerPacketController();
         }
 
         void Do(PlayerPacket &packet, Player &player) override

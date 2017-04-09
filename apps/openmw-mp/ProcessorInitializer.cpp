@@ -24,10 +24,11 @@
 #include "processors/player/ProcessorPlayerCharGen.hpp"
 #include "processors/player/ProcessorGUIMessageBox.hpp"
 #include "processors/player/ProcessorPlayerCharClass.hpp"
+#include "ActorProcessor.hpp"
+#include "processors/actor/ProcessorActorList.hpp"
+#include "processors/actor/ProcessorActorAuthority.hpp"
+#include "processors/actor/ProcessorActorFrame.hpp"
 #include "WorldProcessor.hpp"
-#include "processors/world/ProcessorActorList.hpp"
-#include "processors/world/ProcessorActorAuthority.hpp"
-#include "processors/world/ProcessorActorFrame.hpp"
 #include "processors/world/ProcessorContainer.hpp"
 #include "processors/world/ProcessorDoorState.hpp"
 #include "processors/world/ProcessorMusicPlay.hpp"
@@ -70,9 +71,10 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorGUIMessageBox());
     PlayerProcessor::AddProcessor(new ProcessorPlayerCharClass());
 
-    WorldProcessor::AddProcessor(new ProcessorActorList());
-    WorldProcessor::AddProcessor(new ProcessorActorAuthority());
-    WorldProcessor::AddProcessor(new ProcessorActorFrame());
+    ActorProcessor::AddProcessor(new ProcessorActorList());
+    ActorProcessor::AddProcessor(new ProcessorActorAuthority());
+    ActorProcessor::AddProcessor(new ProcessorActorFrame());
+
     WorldProcessor::AddProcessor(new ProcessorContainer());
     WorldProcessor::AddProcessor(new ProcessorDoorState());
     WorldProcessor::AddProcessor(new ProcessorMusicPlay());

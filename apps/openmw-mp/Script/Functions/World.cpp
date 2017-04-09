@@ -273,56 +273,56 @@ void WorldFunctions::AddContainerItem() noexcept
 
 void WorldFunctions::SendActorList() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_ACTOR_LIST)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_ACTOR_LIST)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_LIST)->setEvent(&scriptEvent);
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_LIST)->Send(scriptEvent.guid);
 }
 
 void WorldFunctions::SendActorAuthority() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_ACTOR_AUTHORITY)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_ACTOR_AUTHORITY)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_AUTHORITY)->setEvent(&scriptEvent);
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_AUTHORITY)->Send(scriptEvent.guid);
 }
 
 void WorldFunctions::SendObjectDelete() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_DELETE)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_DELETE)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_DELETE)->setEvent(&scriptEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_DELETE)->Send(scriptEvent.guid);
 }
 
 void WorldFunctions::SendObjectPlace() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_PLACE)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_PLACE)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_PLACE)->setEvent(&scriptEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_PLACE)->Send(scriptEvent.guid);
 }
 
 void WorldFunctions::SendObjectScale() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_SCALE)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_SCALE)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_SCALE)->setEvent(&scriptEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_SCALE)->Send(scriptEvent.guid);
 }
 
 void WorldFunctions::SendObjectLock() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_LOCK)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_LOCK)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_LOCK)->setEvent(&scriptEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_LOCK)->Send(scriptEvent.guid);
 }
 
 void WorldFunctions::SendObjectUnlock() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_UNLOCK)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_OBJECT_UNLOCK)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_UNLOCK)->setEvent(&scriptEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_UNLOCK)->Send(scriptEvent.guid);
 }
 
 void WorldFunctions::SendDoorState() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_DOOR_STATE)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_DOOR_STATE)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_DOOR_STATE)->setEvent(&scriptEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_DOOR_STATE)->Send(scriptEvent.guid);
 }
 
 void WorldFunctions::SendContainer() noexcept
 {
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_CONTAINER)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldController()->GetPacket(ID_CONTAINER)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_CONTAINER)->setEvent(&scriptEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_CONTAINER)->Send(scriptEvent.guid);
 }
 
 void WorldFunctions::SetHour(unsigned short pid, double hour) noexcept
@@ -334,8 +334,8 @@ void WorldFunctions::SetHour(unsigned short pid, double hour) noexcept
     player->month = -1;
     player->day = -1;
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_TIME)->setPlayer(player);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_TIME)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GAME_TIME)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GAME_TIME)->Send(false);
 }
 
 void WorldFunctions::SetMonth(unsigned short pid, int month) noexcept
@@ -347,8 +347,8 @@ void WorldFunctions::SetMonth(unsigned short pid, int month) noexcept
     player->month = month;
     player->day = -1;
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_TIME)->setPlayer(player);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_TIME)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GAME_TIME)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GAME_TIME)->Send(false);
 
 }
 
@@ -361,6 +361,6 @@ void WorldFunctions::SetDay(unsigned short pid, int day) noexcept
     player->month = -1;
     player->day = day;
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_TIME)->setPlayer(player);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_GAME_TIME)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GAME_TIME)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GAME_TIME)->Send(false);
 }

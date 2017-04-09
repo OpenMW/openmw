@@ -18,6 +18,7 @@
 #include "MasterClient.hpp"
 #include "Cell.hpp"
 #include "PlayerProcessor.hpp"
+#include "ActorProcessor.hpp"
 #include "WorldProcessor.hpp"
 #include <components/openmw-mp/Version.hpp>
 #include <components/openmw-mp/Packets/PacketPreInit.hpp>
@@ -37,12 +38,14 @@ Networking::Networking(RakNet::RakPeerInterface *peer)
 
     CellController::create();
 
-    playerController = new PlayerPacketController(peer);
-    worldController = new WorldPacketController(peer);
+    playerPacketController = new PlayerPacketController(peer);
+    actorPacketController = new ActorPacketController(peer);
+    worldPacketController = new WorldPacketController(peer);
 
     // Set send stream
-    playerController->SetStream(0, &bsOut);
-    worldController->SetStream(0, &bsOut);
+    playerPacketController->SetStream(0, &bsOut);
+    actorPacketController->SetStream(0, &bsOut);
+    worldPacketController->SetStream(0, &bsOut);
 
     running = true;
     exitCode = 0;
@@ -61,8 +64,8 @@ Networking::~Networking()
     CellController::destroy();
 
     sThis = 0;
-    delete playerController;
-    delete worldController;
+    delete playerPacketController;
+    delete worldPacketController;
     LOG_QUIT();
 }
 
@@ -80,7 +83,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 {
     Player *player = Players::getPlayer(packet->guid);
 
-    PlayerPacket *myPacket = playerController->GetPacket(packet->data[0]);
+    PlayerPacket *myPacket = playerPacketController->GetPacket(packet->data[0]);
 
     if (packet->data[0] == ID_HANDSHAKE)
     {
@@ -123,8 +126,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         if (!result)
         {
-            playerController->GetPacket(ID_USER_DISCONNECTED)->setPlayer(Players::getPlayer(packet->guid));
-            playerController->GetPacket(ID_USER_DISCONNECTED)->Send(false);
+            playerPacketController->GetPacket(ID_USER_DISCONNECTED)->setPlayer(Players::getPlayer(packet->guid));
+            playerPacketController->GetPacket(ID_USER_DISCONNECTED)->Send(false);
             Players::deletePlayer(packet->guid);
             return;
         }
@@ -150,6 +153,18 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
     if (!PlayerProcessor::Process(*packet))
         LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled PlayerPacket with identifier %i has arrived", packet->data[0]);
+
+}
+
+void Networking::processActorPacket(RakNet::Packet *packet)
+{
+    Player *player = Players::getPlayer(packet->guid);
+
+    if (!player->isHandshaked() || player->getLoadState() != Player::POSTLOADED)
+        return;
+
+    if (!ActorProcessor::Process(*packet, baseEvent))
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled WorldPacket with identifier %i has arrived", packet->data[0]);
 
 }
 
@@ -193,24 +208,29 @@ void Networking::update(RakNet::Packet *packet)
             return;
         }
 
-        playerController->SetStream(&bsIn, 0);
+        playerPacketController->SetStream(&bsIn, 0);
 
-        playerController->GetPacket(ID_HANDSHAKE)->RequestData(packet->guid);
+        playerPacketController->GetPacket(ID_HANDSHAKE)->RequestData(packet->guid);
         Players::newPlayer(packet->guid);
         player = Players::getPlayer(packet->guid);
 
-        playerController->GetPacket(ID_USER_MYID)->setPlayer(player);
-        playerController->GetPacket(ID_USER_MYID)->Send(false);
+        playerPacketController->GetPacket(ID_USER_MYID)->setPlayer(player);
+        playerPacketController->GetPacket(ID_USER_MYID)->Send(false);
         return;
     }
-    else if (playerController->ContainsPacket(packet->data[0]))
+    else if (playerPacketController->ContainsPacket(packet->data[0]))
     {
-        playerController->SetStream(&bsIn, 0);
+        playerPacketController->SetStream(&bsIn, 0);
         processPlayerPacket(packet);
     }
-    else if (worldController->ContainsPacket(packet->data[0]))
+    else if (actorPacketController->ContainsPacket(packet->data[0]))
     {
-        worldController->SetStream(&bsIn, 0);
+        actorPacketController->SetStream(&bsIn, 0);
+        processActorPacket(packet);
+    }
+    else if (worldPacketController->ContainsPacket(packet->data[0]))
+    {
+        worldPacketController->SetStream(&bsIn, 0);
         processWorldPacket(packet);
     }
     else
@@ -219,11 +239,11 @@ void Networking::update(RakNet::Packet *packet)
 
 void Networking::newPlayer(RakNet::RakNetGUID guid)
 {
-    playerController->GetPacket(ID_PLAYER_BASEINFO)->RequestData(guid);
-    playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->RequestData(guid);
-    playerController->GetPacket(ID_PLAYER_POS)->RequestData(guid);
-    playerController->GetPacket(ID_PLAYER_CELL_CHANGE)->RequestData(guid);
-    playerController->GetPacket(ID_PLAYER_EQUIPMENT)->RequestData(guid);
+    playerPacketController->GetPacket(ID_PLAYER_BASEINFO)->RequestData(guid);
+    playerPacketController->GetPacket(ID_PLAYER_DYNAMICSTATS)->RequestData(guid);
+    playerPacketController->GetPacket(ID_PLAYER_POS)->RequestData(guid);
+    playerPacketController->GetPacket(ID_PLAYER_CELL_CHANGE)->RequestData(guid);
+    playerPacketController->GetPacket(ID_PLAYER_EQUIPMENT)->RequestData(guid);
 
     LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Sending info about other players to %lu", guid.g);
 
@@ -241,21 +261,21 @@ void Networking::newPlayer(RakNet::RakNetGUID guid)
         // If we are iterating over a player who has inputted their name, proceed
         else if (pl->second->getLoadState() == Player::POSTLOADED)
         {
-            playerController->GetPacket(ID_PLAYER_BASEINFO)->setPlayer(pl->second);
-            playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->setPlayer(pl->second);
-            playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->setPlayer(pl->second);
-            playerController->GetPacket(ID_PLAYER_SKILL)->setPlayer(pl->second);
-            playerController->GetPacket(ID_PLAYER_POS)->setPlayer(pl->second);
-            playerController->GetPacket(ID_PLAYER_CELL_CHANGE)->setPlayer(pl->second);
-            playerController->GetPacket(ID_PLAYER_EQUIPMENT)->setPlayer(pl->second);
+            playerPacketController->GetPacket(ID_PLAYER_BASEINFO)->setPlayer(pl->second);
+            playerPacketController->GetPacket(ID_PLAYER_DYNAMICSTATS)->setPlayer(pl->second);
+            playerPacketController->GetPacket(ID_PLAYER_ATTRIBUTE)->setPlayer(pl->second);
+            playerPacketController->GetPacket(ID_PLAYER_SKILL)->setPlayer(pl->second);
+            playerPacketController->GetPacket(ID_PLAYER_POS)->setPlayer(pl->second);
+            playerPacketController->GetPacket(ID_PLAYER_CELL_CHANGE)->setPlayer(pl->second);
+            playerPacketController->GetPacket(ID_PLAYER_EQUIPMENT)->setPlayer(pl->second);
 
-            playerController->GetPacket(ID_PLAYER_BASEINFO)->Send(guid);
-            playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(guid);
-            playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(guid);
-            playerController->GetPacket(ID_PLAYER_SKILL)->Send(guid);
-            playerController->GetPacket(ID_PLAYER_POS)->Send(guid);
-            playerController->GetPacket(ID_PLAYER_CELL_CHANGE)->Send(guid);
-            playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(guid);
+            playerPacketController->GetPacket(ID_PLAYER_BASEINFO)->Send(guid);
+            playerPacketController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(guid);
+            playerPacketController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(guid);
+            playerPacketController->GetPacket(ID_PLAYER_SKILL)->Send(guid);
+            playerPacketController->GetPacket(ID_PLAYER_POS)->Send(guid);
+            playerPacketController->GetPacket(ID_PLAYER_CELL_CHANGE)->Send(guid);
+            playerPacketController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(guid);
         }
     }
 
@@ -270,19 +290,24 @@ void Networking::disconnectPlayer(RakNet::RakNetGUID guid)
         return;
     Script::Call<Script::CallbackIdentity("OnPlayerDisconnect")>(player->getId());
 
-    playerController->GetPacket(ID_USER_DISCONNECTED)->setPlayer(player);
-    playerController->GetPacket(ID_USER_DISCONNECTED)->Send(true);
+    playerPacketController->GetPacket(ID_USER_DISCONNECTED)->setPlayer(player);
+    playerPacketController->GetPacket(ID_USER_DISCONNECTED)->Send(true);
     Players::deletePlayer(guid);
 }
 
-PlayerPacketController *Networking::getPlayerController() const
+PlayerPacketController *Networking::getPlayerPacketController() const
 {
-    return playerController;
+    return playerPacketController;
 }
 
-WorldPacketController *Networking::getWorldController() const
+ActorPacketController *Networking::getActorPacketController() const
 {
-    return worldController;
+    return actorPacketController;
+}
+
+WorldPacketController *Networking::getWorldPacketController() const
+{
+    return worldPacketController;
 }
 
 BaseEvent *Networking::getLastEvent()

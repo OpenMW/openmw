@@ -3,14 +3,14 @@
 
 using namespace mwmp;
 
-PacketActorList::PacketActorList(RakNet::RakPeerInterface *peer) : WorldPacket(peer)
+PacketActorList::PacketActorList(RakNet::RakPeerInterface *peer) : ActorPacket(peer)
 {
     packetID = ID_ACTOR_LIST;
 }
 
 void PacketActorList::Packet(RakNet::BitStream *bs, bool send)
 {
-    WorldPacket::Packet(bs, send);
+    ActorPacket::Packet(bs, send);
 
     RW(event->action, send);
 

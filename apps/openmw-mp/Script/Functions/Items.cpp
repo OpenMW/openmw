@@ -145,9 +145,9 @@ void ItemFunctions::SendEquipment(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, );
 
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_EQUIPMENT)->setPlayer(player);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_EQUIPMENT)->Send(false);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_EQUIPMENT)->Send(true);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_EQUIPMENT)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_EQUIPMENT)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_EQUIPMENT)->Send(true);
 }
 
 void ItemFunctions::SendInventoryChanges(unsigned short pid) noexcept
@@ -156,8 +156,8 @@ void ItemFunctions::SendInventoryChanges(unsigned short pid) noexcept
     GET_PLAYER(pid, player, );
 
     std::swap(player->inventoryChanges, player->inventoryChangesBuffer);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_INVENTORY)->setPlayer(player);
-    mwmp::Networking::get().getPlayerController()->GetPacket(ID_PLAYER_INVENTORY)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_INVENTORY)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_INVENTORY)->Send(false);
     player->inventoryChanges = std::move(player->inventoryChangesBuffer);
     player->inventoryChangesBuffer.items.clear();
 }

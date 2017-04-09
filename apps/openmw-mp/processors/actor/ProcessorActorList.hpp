@@ -1,11 +1,11 @@
 #ifndef OPENMW_PROCESSORACTORLIST_HPP
 #define OPENMW_PROCESSORACTORLIST_HPP
 
-#include "apps/openmw-mp/WorldProcessor.hpp"
+#include "apps/openmw-mp/ActorProcessor.hpp"
 
 namespace mwmp
 {
-    class ProcessorActorList : public WorldProcessor
+    class ProcessorActorList : public ActorProcessor
     {
     public:
         ProcessorActorList()
@@ -13,7 +13,7 @@ namespace mwmp
             BPP_INIT(ID_ACTOR_LIST)
         }
 
-        void Do(WorldPacket &packet, Player &player, BaseEvent &event) override
+        void Do(ActorPacket &packet, Player &player, BaseEvent &event) override
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received %s from %s", strPacketID.c_str(), player.npc.mName.c_str());
             

@@ -1,11 +1,11 @@
 #ifndef OPENMW_PROCESSORACTORAUTHORITY_HPP
 #define OPENMW_PROCESSORACTORAUTHORITY_HPP
 
-#include "apps/openmw-mp/WorldProcessor.hpp"
+#include "apps/openmw-mp/ActorProcessor.hpp"
 
 namespace mwmp
 {
-    class ProcessorActorAuthority : public WorldProcessor
+    class ProcessorActorAuthority : public ActorProcessor
     {
     public:
         ProcessorActorAuthority()
@@ -13,7 +13,7 @@ namespace mwmp
             BPP_INIT(ID_ACTOR_AUTHORITY)
         }
 
-        void Do(WorldPacket &packet, Player &player, BaseEvent &event) override
+        void Do(ActorPacket &packet, Player &player, BaseEvent &event) override
         {
             packet.Send(true);
         }

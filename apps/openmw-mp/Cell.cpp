@@ -51,6 +51,30 @@ Cell::TPlayers Cell::getPlayers() const
     return players;
 }
 
+void Cell::sendToLoaded(mwmp::ActorPacket *actorPacket, mwmp::BaseEvent *baseEvent) const
+{
+    if (players.empty())
+        return;
+
+    std::list <Player*> plList;
+
+    for (auto pl : players)
+        plList.push_back(pl);
+
+    plList.sort();
+    plList.unique();
+
+    for (auto pl : plList)
+    {
+        if (pl->guid == baseEvent->guid) continue;
+
+        actorPacket->setEvent(baseEvent);
+
+        // Send the packet to this eligible guid
+        actorPacket->Send(pl->guid);
+    }
+}
+
 void Cell::sendToLoaded(mwmp::WorldPacket *worldPacket, mwmp::BaseEvent *baseEvent) const
 {
     if (players.empty())

@@ -86,8 +86,8 @@ void Cell::updateLocal()
         }
     }
 
-    Main::get().getNetworking()->getWorldPacket(ID_ACTOR_FRAME)->setEvent(worldEvent);
-    Main::get().getNetworking()->getWorldPacket(ID_ACTOR_FRAME)->Send();
+    Main::get().getNetworking()->getActorPacket(ID_ACTOR_FRAME)->setEvent(worldEvent);
+    Main::get().getNetworking()->getActorPacket(ID_ACTOR_FRAME)->Send();
 }
 
 void Cell::updateDedicated(float dt)

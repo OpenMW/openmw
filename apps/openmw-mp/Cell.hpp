@@ -9,6 +9,7 @@
 #include <string>
 #include <components/esm/records.hpp>
 #include <components/openmw-mp/Base/BaseEvent.hpp>
+#include <components/openmw-mp/Packets/Actor/ActorPacket.hpp>
 #include <components/openmw-mp/Packets/World/WorldPacket.hpp>
 
 class Player;
@@ -62,6 +63,7 @@ public:
     void removePlayer(Player *player);
 
     TPlayers getPlayers() const;
+    void sendToLoaded(mwmp::ActorPacket *actorPacket, mwmp::BaseEvent *baseEvent) const;
     void sendToLoaded(mwmp::WorldPacket *worldPacket, mwmp::BaseEvent *baseEvent) const;
 
     std::string getDescription() const;

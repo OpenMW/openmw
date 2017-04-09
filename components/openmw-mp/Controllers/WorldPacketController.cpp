@@ -2,10 +2,6 @@
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
 
-#include "../Packets/World/PacketActorList.hpp"
-#include "../Packets/World/PacketActorAuthority.hpp"
-#include "../Packets/World/PacketActorFrame.hpp"
-
 #include "../Packets/World/PacketObjectDelete.hpp"
 #include "../Packets/World/PacketObjectPlace.hpp"
 #include "../Packets/World/PacketObjectScale.hpp"
@@ -37,10 +33,6 @@ inline void AddPacket(mwmp::WorldPacketController::packets_t *packets, RakNet::R
 
 mwmp::WorldPacketController::WorldPacketController(RakNet::RakPeerInterface *peer)
 {
-    AddPacket<PacketActorList>(&packets, peer);
-    AddPacket<PacketActorAuthority>(&packets, peer);
-    AddPacket<PacketActorFrame>(&packets, peer);
-
     AddPacket<PacketObjectDelete>(&packets, peer);
     AddPacket<PacketObjectPlace>(&packets, peer);
     AddPacket<PacketObjectScale>(&packets, peer);

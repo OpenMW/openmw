@@ -79,9 +79,7 @@ set(SERVER
     Script/Functions/Spells.cpp Script/Functions/Timer.cpp Script/Functions/Positions.cpp
     Script/Functions/Cells.cpp Script/Functions/World.cpp Script/Functions/Miscellaneous.cpp
 
-    PlayerProcessor.cpp
-    WorldProcessor.cpp
-    ProcessorInitializer.cpp
+    ProcessorInitializer.cpp PlayerProcessor.cpp ActorProcessor.cpp WorldProcessor.cpp
 
     Script/API/TimerAPI.cpp Script/API/PublicFnAPI.cpp
         ${PawnScript_Sources}

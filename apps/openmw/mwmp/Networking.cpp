@@ -35,7 +35,8 @@
 using namespace std;
 using namespace mwmp;
 
-Networking::Networking(): peer(RakNet::RakPeerInterface::GetInstance()), playerController(peer), worldController(peer)
+Networking::Networking(): peer(RakNet::RakPeerInterface::GetInstance()), playerPacketController(peer),
+    actorPacketController(peer), worldPacketController(peer)
 {
 
     RakNet::SocketDescriptor sd;
@@ -43,8 +44,9 @@ Networking::Networking(): peer(RakNet::RakPeerInterface::GetInstance()), playerC
     RakNet::StartupResult b = peer->Startup(1,&sd, 1);
     RakAssert(b==RAKNET_STARTED);
 
-    playerController.SetStream(0, &bsOut);
-    worldController.SetStream(0, &bsOut);
+    playerPacketController.SetStream(0, &bsOut);
+    actorPacketController.SetStream(0, &bsOut);
+    worldPacketController.SetStream(0, &bsOut);
 
     connected = 0;
 }
@@ -246,7 +248,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     if (guid != myGuid)
         pl = Players::getPlayer(guid);
 
-    PlayerPacket *myPacket = playerController.GetPacket(packet->data[0]);
+    PlayerPacket *myPacket = playerPacketController.GetPacket(packet->data[0]);
 
     switch (packet->data[0])
     {
@@ -575,8 +577,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Send(serverAddr);
 
             getLocalPlayer()->updateDynamicStats(true);
-            playerController.GetPacket(ID_PLAYER_DYNAMICSTATS)->setPlayer(getLocalPlayer());
-            playerController.GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(serverAddr);
+            playerPacketController.GetPacket(ID_PLAYER_DYNAMICSTATS)->setPlayer(getLocalPlayer());
+            playerPacketController.GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(serverAddr);
         }
         else if (pl != 0)
         {
@@ -822,7 +824,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     }
 }
 
-void Networking::processWorldPacket(RakNet::Packet *packet)
+void Networking::processActorPacket(RakNet::Packet *packet)
 {
     RakNet::RakNetGUID guid;
     RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
@@ -833,7 +835,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     if (guid != myGuid)
         pl = Players::getPlayer(guid);
 
-    WorldPacket *myPacket = worldController.GetPacket(packet->data[0]);
+    ActorPacket *myPacket = actorPacketController.GetPacket(packet->data[0]);
 
     myPacket->setEvent(&worldEvent);
     myPacket->Packet(&bsIn, false);
@@ -869,6 +871,29 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
 
         break;
     }
+    default:
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unhandled ActorPacket with identifier %i has arrived", packet->data[0]);
+    }
+}
+
+void Networking::processWorldPacket(RakNet::Packet *packet)
+{
+    RakNet::RakNetGUID guid;
+    RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
+    bsIn.Read(guid);
+
+    DedicatedPlayer *pl = 0;
+    static RakNet::RakNetGUID myGuid = getLocalPlayer()->guid;
+    if (guid != myGuid)
+        pl = Players::getPlayer(guid);
+
+    WorldPacket *myPacket = worldPacketController.GetPacket(packet->data[0]);
+
+    myPacket->setEvent(&worldEvent);
+    myPacket->Packet(&bsIn, false);
+
+    switch (packet->data[0])
+    {
     case ID_CONTAINER:
     {
         MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
@@ -1046,11 +1071,15 @@ void Networking::receiveMessage(RakNet::Packet *packet)
     if (packet->length < 2)
         return;
 
-    if (playerController.ContainsPacket(packet->data[0]))
+    if (playerPacketController.ContainsPacket(packet->data[0]))
     {
         processPlayerPacket(packet);
     }
-    else if (worldController.ContainsPacket(packet->data[0]))
+    else if (actorPacketController.ContainsPacket(packet->data[0]))
+    {
+        processActorPacket(packet);
+    }
+    else if (worldPacketController.ContainsPacket(packet->data[0]))
     {
         processWorldPacket(packet);
     }
@@ -1058,12 +1087,17 @@ void Networking::receiveMessage(RakNet::Packet *packet)
 
 PlayerPacket *Networking::getPlayerPacket(RakNet::MessageID id)
 {
-    return playerController.GetPacket(id);
+    return playerPacketController.GetPacket(id);
+}
+
+ActorPacket *Networking::getActorPacket(RakNet::MessageID id)
+{
+    return actorPacketController.GetPacket(id);
 }
 
 WorldPacket *Networking::getWorldPacket(RakNet::MessageID id)
 {
-    return worldController.GetPacket(id);
+    return worldPacketController.GetPacket(id);
 }
 
 LocalPlayer *Networking::getLocalPlayer()

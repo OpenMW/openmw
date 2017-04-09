@@ -29,7 +29,7 @@ bool PlayerProcessor::Process(RakNet::Packet &packet) noexcept
         if (processor.first == packet.data[0])
         {
             Player *player = Players::getPlayer(packet.guid);
-            PlayerPacket *myPacket = Networking::get().getPlayerController()->GetPacket(packet.data[0]);
+            PlayerPacket *myPacket = Networking::get().getPlayerPacketController()->GetPacket(packet.data[0]);
             myPacket->setPlayer(player);
 
             if (!processor.second->avoidReading)

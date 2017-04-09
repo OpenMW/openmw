@@ -1,11 +1,11 @@
 #ifndef OPENMW_PACKETACTORLIST_HPP
 #define OPENMW_PACKETACTORLIST_HPP
 
-#include <components/openmw-mp/Packets/World/WorldPacket.hpp>
+#include <components/openmw-mp/Packets/Actor/ActorPacket.hpp>
 
 namespace mwmp
 {
-    class PacketActorList : public WorldPacket
+    class PacketActorList : public ActorPacket
     {
     public:
         PacketActorList(RakNet::RakPeerInterface *peer);

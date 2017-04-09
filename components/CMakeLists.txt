@@ -149,8 +149,10 @@ add_component_dir (version
 
 add_component_dir (openmw-mp
         Log Utils
-        Controllers/PlayerPacketController Controllers/WorldPacketController
-        Packets/BasePacket Packets/Player/PlayerPacket Packets/World/WorldPacket
+        
+        Controllers/PlayerPacketController Controllers/ActorPacketController Controllers/WorldPacketController
+
+        Packets/BasePacket Packets/Player/PlayerPacket Packets/Actor/ActorPacket Packets/World/WorldPacket
 
         Packets/Player/PacketHandshake Packets/Player/PacketChatMessage
 
@@ -165,7 +167,7 @@ add_component_dir (openmw-mp
 
         Packets/Player/PacketGUIBoxes Packets/Player/PacketTime
 
-        Packets/World/PacketActorList Packets/World/PacketActorAuthority Packets/World/PacketActorFrame
+        Packets/Actor/PacketActorList Packets/Actor/PacketActorAuthority Packets/Actor/PacketActorFrame
 
         Packets/World/PacketObjectDelete Packets/World/PacketObjectPlace Packets/World/PacketObjectScale
         Packets/World/PacketObjectLock Packets/World/PacketObjectUnlock Packets/World/PacketObjectMove

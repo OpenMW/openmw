@@ -1,20 +1,16 @@
-//
-// Created by koncord on 03.04.17.
-//
-
-#include "WorldProcessor.hpp"
+#include "ActorProcessor.hpp"
 #include "Networking.hpp"
 
 using namespace mwmp;
 
-WorldProcessor::processors_t WorldProcessor::processors;
+ActorProcessor::processors_t ActorProcessor::processors;
 
-void WorldProcessor::Do(WorldPacket &packet, Player &player, BaseEvent &event)
+void ActorProcessor::Do(ActorPacket &packet, Player &player, BaseEvent &event)
 {
     packet.Send(true);
 }
 
-void WorldProcessor::AddProcessor(mwmp::WorldProcessor *processor) noexcept
+void ActorProcessor::AddProcessor(mwmp::ActorProcessor *processor) noexcept
 {
     for (auto &p : processors)
     {
@@ -25,7 +21,7 @@ void WorldProcessor::AddProcessor(mwmp::WorldProcessor *processor) noexcept
     processors.insert(processors_t::value_type(processor->GetPacketID(), processor));
 }
 
-bool WorldProcessor::Process(RakNet::Packet &packet, BaseEvent &event) noexcept
+bool ActorProcessor::Process(RakNet::Packet &packet, BaseEvent &event) noexcept
 {
     // Clear our BaseEvent before loading new data in it
     event.cell.blank();
@@ -36,7 +32,7 @@ bool WorldProcessor::Process(RakNet::Packet &packet, BaseEvent &event) noexcept
         if (processor.first == packet.data[0])
         {
             Player *player = Players::getPlayer(packet.guid);
-            WorldPacket *myPacket = Networking::get().getWorldPacketController()->GetPacket(packet.data[0]);
+            ActorPacket *myPacket = Networking::get().getActorPacketController()->GetPacket(packet.data[0]);
 
             myPacket->setEvent(&event);
 

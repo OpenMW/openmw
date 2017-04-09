@@ -4,14 +4,14 @@
 
 using namespace mwmp;
 
-PacketActorFrame::PacketActorFrame(RakNet::RakPeerInterface *peer) : WorldPacket(peer)
+PacketActorFrame::PacketActorFrame(RakNet::RakPeerInterface *peer) : ActorPacket(peer)
 {
     packetID = ID_ACTOR_FRAME;
 }
 
 void PacketActorFrame::Packet(RakNet::BitStream *bs, bool send)
 {
-    WorldPacket::Packet(bs, send);
+    ActorPacket::Packet(bs, send);
 
     if (!send)
         event->objectChanges.objects.clear();
