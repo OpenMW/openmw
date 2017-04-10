@@ -20,13 +20,11 @@ namespace mwmp
         int refNumIndex;
         int mpNum;
 
-        ESM::Position pos;
+        ESM::Position position;
+        ESM::Cell cell;
 
         char drawState;
         bool isFlying;
-
-        ESM::Position position;
-        ESM::Cell cell;
 
         float headPitch;
         float headYaw;

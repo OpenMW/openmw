@@ -37,7 +37,7 @@ void PacketActorFrame::Packet(RakNet::BitStream *bs, bool send)
         RW(actor.refId, send);
         RW(actor.refNumIndex, send);
         RW(actor.mpNum, send);
-        RW(actor.pos, send);
+        RW(actor.position, send);
         RW(actor.drawState, send);
 
         RW(actor.headPitch, send);

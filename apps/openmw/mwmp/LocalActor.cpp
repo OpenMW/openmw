@@ -50,4 +50,8 @@ MWWorld::Ptr LocalActor::getPtr()
 void LocalActor::setPtr(const MWWorld::Ptr& newPtr)
 {
     ptr = newPtr;
+
+    refId = newPtr.getCellRef().getRefId();
+    refNumIndex = newPtr.getCellRef().getRefNum().mIndex;
+    mpNum = newPtr.getCellRef().getMpNum();
 }

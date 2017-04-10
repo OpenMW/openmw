@@ -103,7 +103,7 @@ void Cell::readCellFrame(ActorList& actorList)
         if (dedicatedActors.count(mapIndex) > 0)
         {
             DedicatedActor *actor = dedicatedActors[mapIndex];
-            actor->position = baseActor.pos;
+            actor->position = baseActor.position;
             actor->drawState = baseActor.drawState;
 
             actor->headPitch = baseActor.headPitch;
