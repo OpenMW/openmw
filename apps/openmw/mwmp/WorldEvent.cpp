@@ -146,7 +146,7 @@ void WorldEvent::placeObjects(MWWorld::CellStore* cellStore)
         newPtr.getCellRef().setMpNum(worldObject.mpNum);
 
         newPtr.getCellRef().setGoldValue(worldObject.goldValue);
-        newPtr = MWBase::Environment::get().getWorld()->placeObject(newPtr, cellStore, worldObject.pos);
+        newPtr = MWBase::Environment::get().getWorld()->placeObject(newPtr, cellStore, worldObject.position);
     }
 }
 
@@ -255,8 +255,8 @@ void WorldEvent::moveObjects(MWWorld::CellStore* cellStore)
             LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
 
-            MWBase::Environment::get().getWorld()->moveObject(ptrFound, worldObject.pos.pos[0], worldObject.pos.pos[1],
-                                                              worldObject.pos.pos[2]);
+            MWBase::Environment::get().getWorld()->moveObject(ptrFound, worldObject.position.pos[0], worldObject.position.pos[1],
+                                                              worldObject.position.pos[2]);
         }
     }
 }
@@ -279,7 +279,7 @@ void WorldEvent::rotateObjects(MWWorld::CellStore* cellStore)
                                ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
 
             MWBase::Environment::get().getWorld()->rotateObject(ptrFound,
-                worldObject.pos.rot[0], worldObject.pos.rot[1], worldObject.pos.rot[2]);
+                worldObject.position.rot[0], worldObject.position.rot[1], worldObject.position.rot[2]);
         }
     }
 }
@@ -502,7 +502,7 @@ void WorldEvent::sendObjectPlace(MWWorld::Ptr ptr)
 
     // Make sure we send the RefData position instead of the CellRef one, because that's what
     // we actually see on this client
-    worldObject.pos = ptr.getRefData().getPosition();
+    worldObject.position = ptr.getRefData().getPosition();
 
     // We have to get the count from the dropped object because it gets changed
     // automatically for stacks of gold

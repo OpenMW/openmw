@@ -36,7 +36,7 @@ namespace mwmp
         int charge;
         int goldValue;
 
-        ESM::Position pos;
+        ESM::Position position;
 
         int drawState;
 

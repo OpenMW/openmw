@@ -36,9 +36,9 @@ void PacketObjectRotate::Packet(RakNet::BitStream *bs, bool send)
         RW(worldObject.refId, send);
         RW(worldObject.refNumIndex, send);
         RW(worldObject.mpNum, send);
-        RW(worldObject.pos.rot[0], send);
-        RW(worldObject.pos.rot[1], send);
-        RW(worldObject.pos.rot[2], send);
+        RW(worldObject.position.rot[0], send);
+        RW(worldObject.position.rot[1], send);
+        RW(worldObject.position.rot[2], send);
 
         if (!send)
         {

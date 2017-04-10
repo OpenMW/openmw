@@ -84,32 +84,32 @@ int WorldFunctions::GetObjectLockLevel(unsigned int i) noexcept
 
 double WorldFunctions::GetObjectPosX(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).pos.pos[0];
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).position.pos[0];
 }
 
 double WorldFunctions::GetObjectPosY(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).pos.pos[1];
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).position.pos[1];
 }
 
 double WorldFunctions::GetObjectPosZ(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).pos.pos[2];
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).position.pos[2];
 }
 
 double WorldFunctions::GetObjectRotX(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).pos.rot[0];
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).position.rot[0];
 }
 
 double WorldFunctions::GetObjectRotY(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).pos.rot[1];
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).position.rot[1];
 }
 
 double WorldFunctions::GetObjectRotZ(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).pos.rot[2];
+    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).position.rot[2];
 }
 
 unsigned int WorldFunctions::GetContainerChangesSize(unsigned int objectIndex) noexcept
@@ -217,16 +217,16 @@ void WorldFunctions::SetObjectLockLevel(int lockLevel) noexcept
 
 void WorldFunctions::SetObjectPosition(double x, double y, double z) noexcept
 {
-    tempWorldObject.pos.pos[0] = x;
-    tempWorldObject.pos.pos[1] = y;
-    tempWorldObject.pos.pos[2] = z;
+    tempWorldObject.position.pos[0] = x;
+    tempWorldObject.position.pos[1] = y;
+    tempWorldObject.position.pos[2] = z;
 }
 
 void WorldFunctions::SetObjectRotation(double x, double y, double z) noexcept
 {
-    tempWorldObject.pos.rot[0] = x;
-    tempWorldObject.pos.rot[1] = y;
-    tempWorldObject.pos.rot[2] = z;
+    tempWorldObject.position.rot[0] = x;
+    tempWorldObject.position.rot[1] = y;
+    tempWorldObject.position.rot[2] = z;
 }
 
 void WorldFunctions::SetContainerItemRefId(const char* refId) noexcept
