@@ -17,8 +17,6 @@ const WorldObject emptyWorldObject = {};
 ContainerItem tempContainerItem;
 const ContainerItem emptyContainerItem = {};
 
-std::regex exteriorCellPattern("^(-?\\d+), (-?\\d+)$");
-
 void WorldFunctions::InitScriptEvent(unsigned short pid) noexcept
 {
     Player *player;
@@ -145,6 +143,7 @@ int WorldFunctions::GetContainerItemActionCount(unsigned int objectIndex, unsign
 
 void WorldFunctions::SetScriptEventCell(const char* cellDescription) noexcept
 {
+    static std::regex exteriorCellPattern("^(-?\\d+), (-?\\d+)$");
     std::string description = cellDescription;
     std::smatch baseMatch;
 
