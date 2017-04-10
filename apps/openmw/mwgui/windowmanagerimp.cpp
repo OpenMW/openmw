@@ -400,6 +400,11 @@ namespace MWGui
             allow(GW_ALL);
 
         mRestAllowed = !newgame;
+
+        mStatsWindow->setPinned(Settings::Manager::getBool("stats pin", "Windows"));
+        mMap->setPinned(Settings::Manager::getBool("map pin", "Windows"));
+        mSpellWindow->setPinned(Settings::Manager::getBool("spells pin", "Windows"));
+        mInventoryWindow->setPinned(Settings::Manager::getBool("inventory pin", "Windows"));
     }
 
     WindowManager::~WindowManager()
@@ -550,15 +555,23 @@ namespace MWGui
         setSpellVisibility((mAllowed & GW_Magic) && (!mSpellWindow->pinned() || (mForceHidden & GW_Magic)));
         setHMSVisibility((mAllowed & GW_Stats) && (!mStatsWindow->pinned() || (mForceHidden & GW_Stats)));
 
-        // If in game mode, show only the pinned windows
+        // If in game mode (or interactive messagebox), show only the pinned windows
+        if (mGuiModes.empty())
+        {
+            mInventoryWindow->setGuiMode(GM_None);
+
+            mMap->setVisible(mMap->pinned() && !(mForceHidden & GW_Map) && (mAllowed & GW_Map));
+            mStatsWindow->setVisible(mStatsWindow->pinned() && !(mForceHidden & GW_Stats) && (mAllowed & GW_Stats));
+            mInventoryWindow->setVisible(mInventoryWindow->pinned() && !(mForceHidden & GW_Inventory) && (mAllowed & GW_Inventory));
+            mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic) && (mAllowed & GW_Magic));
+
+            return;
+        }
+
+        // No need to check GUI if game mode
         if (gameMode)
         {
             mInventoryWindow->setGuiMode(GM_None);
-            mMap->setVisible(mMap->pinned() && !(mForceHidden & GW_Map));
-            mStatsWindow->setVisible(mStatsWindow->pinned() && !(mForceHidden & GW_Stats));
-            mInventoryWindow->setVisible(mInventoryWindow->pinned() && !(mForceHidden & GW_Inventory));
-            mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic));
-
             return;
         }
 

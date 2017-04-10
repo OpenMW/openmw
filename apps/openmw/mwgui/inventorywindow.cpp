@@ -433,6 +433,8 @@ namespace MWGui
 
     void InventoryWindow::onPinToggled()
     {
+        Settings::Manager::setBool("inventory pin", "Windows", mPinned);
+
         MWBase::Environment::get().getWindowManager()->setWeaponVisibility(!mPinned);
     }
 

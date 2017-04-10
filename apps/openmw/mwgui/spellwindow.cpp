@@ -4,6 +4,8 @@
 
 #include <MyGUI_InputManager.h>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -48,6 +50,8 @@ namespace MWGui
 
     void SpellWindow::onPinToggled()
     {
+        Settings::Manager::setBool("spells pin", "Windows", mPinned);
+
         MWBase::Environment::get().getWindowManager()->setSpellVisibility(!mPinned);
     }
 

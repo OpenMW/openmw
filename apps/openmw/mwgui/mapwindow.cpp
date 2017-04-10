@@ -629,7 +629,7 @@ namespace MWGui
         , mGlobalMap(0)
         , mGlobalMapImage(NULL)
         , mGlobalMapOverlay(NULL)
-        , mGlobal(false)
+        , mGlobal(Settings::Manager::getBool("global", "Map"))
         , mEventBoxGlobal(NULL)
         , mEventBoxLocal(NULL)
         , mGlobalMapRender(new MWRender::GlobalMap(localMapRender->getRoot(), workQueue))
@@ -667,7 +667,7 @@ namespace MWGui
 
         getWidget(mButton, "WorldButton");
         mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
-        mButton->setCaptionWithReplacing("#{sWorld}");
+        mButton->setCaptionWithReplacing( mGlobal ? "#{sLocal}" : "#{sWorld}");
 
         getWidget(mEventBoxGlobal, "EventBoxGlobal");
         mEventBoxGlobal->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
@@ -680,6 +680,9 @@ namespace MWGui
         mEventBoxLocal->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &MapWindow::onMapDoubleClicked);
 
         LocalMapBase::init(mLocalMap, mPlayerArrowLocal, Settings::Manager::getInt("local map widget size", "Map"), Settings::Manager::getInt("local map cell distance", "Map"));
+
+        mGlobalMap->setVisible(mGlobal);
+        mLocalMap->setVisible(!mGlobal);
     }
 
     void MapWindow::onNoteEditOk()
@@ -912,6 +915,8 @@ namespace MWGui
         mGlobalMap->setVisible(mGlobal);
         mLocalMap->setVisible(!mGlobal);
 
+        Settings::Manager::setBool("global", "Map", mGlobal);
+
         mButton->setCaptionWithReplacing( mGlobal ? "#{sLocal}" :
                 "#{sWorld}");
 
@@ -921,6 +926,8 @@ namespace MWGui
 
     void MapWindow::onPinToggled()
     {
+        Settings::Manager::setBool("map pin", "Windows", mPinned);
+
         MWBase::Environment::get().getWindowManager()->setMinimapVisibility(!mPinned);
     }
 
