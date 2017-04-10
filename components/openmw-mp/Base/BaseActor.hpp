@@ -21,6 +21,8 @@ namespace mwmp
         int mpNum;
 
         ESM::Position position;
+        ESM::Position direction;
+        
         ESM::Cell cell;
 
         char drawState;
@@ -34,9 +36,6 @@ namespace mwmp
 
         AnimStates animStates;
         bool hasAnimStates;
-
-        Movement movement;
-        bool hasMovement;
     };
 
     class BaseActorList
