@@ -2,7 +2,8 @@
 // Created by koncord on 02.01.16.
 //
 
-#include "DedicatedPlayer.hpp"
+#include <boost/algorithm/clamp.hpp>
+#include <components/openmw-mp/Log.hpp>
 
 #include "../mwbase/environment.hpp"
 
@@ -24,16 +25,16 @@
 #include "../mwworld/action.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/customdata.hpp"
+#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/worldimp.hpp"
 
+#include "DedicatedPlayer.hpp"
 #include "Main.hpp"
 #include "GUIController.hpp"
 #include "CellController.hpp"
 
-#include "../mwworld/inventorystore.hpp"
-#include <boost/algorithm/clamp.hpp>
-#include <components/openmw-mp/Log.hpp>
+
 using namespace mwmp;
 using namespace std;
 
@@ -495,6 +496,14 @@ void DedicatedPlayer::updateCell()
     // update has been called
     ptr.getBase()->canChangeCell = true;
     updatePtr(world->moveObject(ptr, cellStore, position.pos[0], position.pos[1], position.pos[2]));
+
+    // If this player is now in a cell that is active for us, we should send them all
+    // NPC data in that cell
+    if (MWBase::Environment::get().getWorld()->isCellActive(cellStore))
+    {
+        if (Main::get().getCellController()->isActiveCell(cell))
+            Main::get().getCellController()->getCell(cell)->updateLocal(true);
+    }
 }
 
 

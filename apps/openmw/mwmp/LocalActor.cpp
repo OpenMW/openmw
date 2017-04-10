@@ -36,7 +36,7 @@ void LocalActor::updatePosition(bool forceUpdate)
     bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 || direction.pos[2] != 0 ||
         direction.rot[0] != 0 || direction.rot[1] != 0 || direction.rot[2] != 0);
 
-    if (posIsChanging || posWasChanged)
+    if (posIsChanging || posWasChanged || forceUpdate)
     {
         posWasChanged = posIsChanging;
 
