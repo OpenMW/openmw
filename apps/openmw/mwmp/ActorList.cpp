@@ -27,6 +27,7 @@ void ActorList::reset()
 {
     cell.blank();
     baseActors.clear();
+    positionActors.clear();
     guid = mwmp::Main::get().getNetworking()->getLocalPlayer()->guid;
 }
 
@@ -40,8 +41,20 @@ void ActorList::addActor(LocalActor localActor)
     baseActors.push_back(localActor);
 }
 
+void ActorList::addPositionActor(LocalActor localActor)
+{
+    positionActors.push_back(localActor);
+}
+
+void ActorList::sendPositionActors()
+{
+    baseActors = positionActors;
+    Main::get().getNetworking()->getActorPacket(ID_ACTOR_POSITION)->setActorList(this);
+    Main::get().getNetworking()->getActorPacket(ID_ACTOR_POSITION)->Send();
+}
+
 // TODO: Finish this
-void ActorList::editActors(MWWorld::CellStore* cellStore)
+void ActorList::editActorsInCell(MWWorld::CellStore* cellStore)
 {
     BaseActor actor;
 
@@ -68,7 +81,7 @@ void ActorList::editActors(MWWorld::CellStore* cellStore)
     }
 }
 
-void ActorList::sendActors(MWWorld::CellStore* cellStore)
+void ActorList::sendActorsInCell(MWWorld::CellStore* cellStore)
 {
     reset();
     cell = *cellStore->getCell();

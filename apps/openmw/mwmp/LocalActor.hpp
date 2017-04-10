@@ -13,9 +13,9 @@ namespace mwmp
         LocalActor();
         virtual ~LocalActor();
 
-        void update();
+        void update(bool forceUpdate);
 
-        void updatePosition();
+        void updatePosition(bool forceUpdate);
         void updateDrawState();
 
         MWWorld::Ptr getPtr();
@@ -23,6 +23,8 @@ namespace mwmp
 
     private:
         MWWorld::Ptr ptr;
+
+        bool posWasChanged;
     };
 }
 

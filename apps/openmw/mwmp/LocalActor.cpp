@@ -8,17 +8,16 @@
 #include "../mwworld/worldimp.hpp"
 
 #include "LocalActor.hpp"
+#include "Main.hpp"
+#include "Networking.hpp"
+#include "ActorList.hpp"
 
 using namespace mwmp;
 using namespace std;
 
 LocalActor::LocalActor()
 {
-    headPitch = -1;
-    headYaw = -1;
-    hasAnimation = false;
-    hasAnimStates = false;
-    hasMovement = false;
+    posWasChanged = false;
 }
 
 LocalActor::~LocalActor()
@@ -26,15 +25,26 @@ LocalActor::~LocalActor()
 
 }
 
-void LocalActor::update()
+void LocalActor::update(bool forceUpdate)
 {
-    updatePosition();
+    updatePosition(forceUpdate);
     updateDrawState();
 }
 
-void LocalActor::updatePosition()
+void LocalActor::updatePosition(bool forceUpdate)
 {
-    position = ptr.getRefData().getPosition();
+    bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 || direction.pos[2] != 0 ||
+        direction.rot[0] != 0 || direction.rot[1] != 0 || direction.rot[2] != 0);
+
+    if (posIsChanging || posWasChanged)
+    {
+        posWasChanged = posIsChanging;
+
+        position = ptr.getRefData().getPosition();
+
+        ActorList *actorList = mwmp::Main::get().getNetworking()->getActorList();
+        actorList->addPositionActor(*this);
+    }
 }
 
 void LocalActor::updateDrawState()

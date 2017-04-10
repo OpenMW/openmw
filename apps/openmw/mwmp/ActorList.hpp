@@ -21,13 +21,18 @@ namespace mwmp
         void addActor(BaseActor baseActor);
         void addActor(LocalActor localActor);
 
-        void editActors(MWWorld::CellStore* cellStore);
+        void addPositionActor(LocalActor localActor);
 
-        void sendActors(MWWorld::CellStore* cellStore);
+        void sendPositionActors();
+
+        void editActorsInCell(MWWorld::CellStore* cellStore);
+
+        void sendActorsInCell(MWWorld::CellStore* cellStore);
 
     private:
         Networking *getNetworking();
 
+        std::vector<BaseActor> positionActors;
     };
 }
 

@@ -15,12 +15,14 @@ namespace mwmp
         Cell(MWWorld::CellStore* cellStore);
         ~Cell();
 
-        void updateLocal();
+        void updateLocal(bool forceUpdate);
         void updateDedicated(float dt);
 
-        void readCellFrame(mwmp::ActorList& actorList);
+        void readPositions(ActorList& actorList);
 
         void initializeLocalActors();
+        void initializeDedicatedActors(ActorList& actorList);
+
         void uninitializeLocalActors();
         void uninitializeDedicatedActors();
 
@@ -32,8 +34,8 @@ namespace mwmp
 
     private:
         MWWorld::CellStore* store;
-        std::map<std::string, mwmp::LocalActor *> localActors;
-        std::map<std::string, mwmp::DedicatedActor *> dedicatedActors;
+        std::map<std::string, LocalActor *> localActors;
+        std::map<std::string, DedicatedActor *> dedicatedActors;
     };
 }
 

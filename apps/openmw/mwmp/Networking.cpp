@@ -853,7 +853,7 @@ void Networking::processActorPacket(RakNet::Packet *packet)
 
         // If we've received a request for information, comply with it
         if (actorList.action == mwmp::BaseActorList::REQUEST)
-            actorList.sendActors(ptrCellStore);
+            actorList.sendActorsInCell(ptrCellStore);
 
         break;
     }
@@ -862,6 +862,12 @@ void Networking::processActorPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_ACTOR_AUTHORITY about %s", actorList.cell.getDescription().c_str());
 
         //Main::get().getCellController()->initializeLocalActors(actorList.cell);
+
+        break;
+    }
+    case ID_ACTOR_POSITION:
+    {
+        //Main::get().getCellController()->readPositions(actorList);
 
         break;
     }

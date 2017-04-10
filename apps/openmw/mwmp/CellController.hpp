@@ -16,12 +16,12 @@ namespace mwmp
         CellController();
         ~CellController();
 
-        void updateLocal();
+        void updateLocal(bool forceUpdate);
         void updateDedicated(float dt);
 
         void initializeCell(const ESM::Cell& cell);
         void initializeLocalActors(const ESM::Cell& cell);
-        void readCellFrame(mwmp::ActorList& actorList);
+        void readPositions(mwmp::ActorList& actorList);
 
         void setLocalActorRecord(std::string actorIndex, std::string cellIndex);
         void removeLocalActorRecord(std::string actorIndex);

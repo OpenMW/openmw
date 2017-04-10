@@ -26,8 +26,8 @@ DedicatedActor::~DedicatedActor()
 void DedicatedActor::update(float dt)
 {
     move(dt);
-    setDrawState();
-    setAnimation();
+    //setDrawState();
+    //setAnimation();
 }
 
 void DedicatedActor::move(float dt)
@@ -35,6 +35,11 @@ void DedicatedActor::move(float dt)
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
     world->moveObject(ptr, position.pos[0], position.pos[1], position.pos[2]);
+
+    MWMechanics::Movement *move = &ptr.getClass().getMovementSettings(ptr);
+    move->mPosition[0] = direction.pos[0];
+    move->mPosition[1] = direction.pos[1];
+    move->mPosition[2] = direction.pos[2];
 
     world->rotateObject(ptr, position.rot[0], position.rot[1], position.rot[2]);
 }

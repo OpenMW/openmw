@@ -28,7 +28,7 @@ mwmp::CellController::~CellController()
 
 }
 
-void CellController::updateLocal()
+void CellController::updateLocal(bool forceUpdate)
 {
     for (std::map<std::string, mwmp::Cell *>::iterator it = cellsActive.begin(); it != cellsActive.end();)
     {
@@ -43,7 +43,7 @@ void CellController::updateLocal()
         else
         {
             //LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Updating mwmp::Cell %s", mpCell->getDescription().c_str());
-            mpCell->updateLocal();
+            mpCell->updateLocal(forceUpdate);
             ++it;
         }
     }
@@ -89,7 +89,7 @@ void CellController::initializeLocalActors(const ESM::Cell& cell)
     }
 }
 
-void CellController::readCellFrame(ActorList& actorList)
+void CellController::readPositions(ActorList& actorList)
 {
     std::string mapIndex = actorList.cell.getDescription();
 
@@ -98,7 +98,7 @@ void CellController::readCellFrame(ActorList& actorList)
     // If this now exists, send it the data
     if (cellsActive.count(mapIndex) > 0)
     {
-        cellsActive[mapIndex]->readCellFrame(actorList);
+        cellsActive[mapIndex]->readPositions(actorList);
     }
 }
 

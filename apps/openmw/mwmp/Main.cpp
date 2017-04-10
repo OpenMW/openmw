@@ -211,7 +211,7 @@ void Main::updateWorld(float dt) const
     else
     {
         mLocalPlayer->update();
-        mCellController->updateLocal();
+        mCellController->updateLocal(false);
     }
 }
 

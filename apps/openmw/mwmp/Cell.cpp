@@ -23,7 +23,7 @@ mwmp::Cell::~Cell()
 
 }
 
-void Cell::updateLocal()
+void Cell::updateLocal(bool forceUpdate)
 {
     if (localActors.empty()) return;
 
@@ -45,20 +45,12 @@ void Cell::updateLocal()
         }
         else
         {
-            //LOG_APPEND(Log::LOG_VERBOSE, "- Updating LocalActor %s", it->first.c_str());
-            actor->update();
-
-            actorList->addActor(*actor);
-            actor->hasAnimation = false;
-            actor->hasAnimStates = false;
-            actor->hasMovement = false;
-
+            actor->update(forceUpdate);
             ++it;
         }
     }
 
-    Main::get().getNetworking()->getActorPacket(ID_ACTOR_TEST)->setActorList(actorList);
-    Main::get().getNetworking()->getActorPacket(ID_ACTOR_TEST)->Send();
+    actorList->sendPositionActors();
 }
 
 void Cell::updateDedicated(float dt)
@@ -73,8 +65,10 @@ void Cell::updateDedicated(float dt)
     }
 }
 
-void Cell::readCellFrame(ActorList& actorList)
+void Cell::readPositions(ActorList& actorList)
 {
+    initializeDedicatedActors(actorList);
+    
     BaseActor baseActor;
 
     for (unsigned int i = 0; i < actorList.count; i++)
@@ -82,51 +76,11 @@ void Cell::readCellFrame(ActorList& actorList)
         baseActor = actorList.baseActors.at(i);
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
-        // If this key doesn't exist, create it
-        if (dedicatedActors.count(mapIndex) == 0)
-        {
-            MWWorld::Ptr ptrFound = store->searchExact(baseActor.refId, baseActor.refNumIndex, baseActor.mpNum);
-
-            if (!ptrFound) return;
-
-            DedicatedActor *actor = new DedicatedActor();
-            actor->cell = actorList.cell;
-            actor->setPtr(ptrFound);
-            dedicatedActors[mapIndex] = actor;
-
-            Main::get().getCellController()->setDedicatedActorRecord(mapIndex, getDescription());
-
-            LOG_APPEND(Log::LOG_INFO, "- Initialized DedicatedActor %s", mapIndex.c_str());
-        }
-
-        // If this now exists, set its details
         if (dedicatedActors.count(mapIndex) > 0)
         {
             DedicatedActor *actor = dedicatedActors[mapIndex];
             actor->position = baseActor.position;
-            actor->drawState = baseActor.drawState;
-
-            actor->headPitch = baseActor.headPitch;
-            actor->headYaw = baseActor.headYaw;
-
-            actor->hasAnimation = baseActor.hasAnimation;
-            actor->hasAnimStates = baseActor.hasAnimStates;
-            actor->hasMovement = baseActor.hasMovement;
-
-            if (actor->hasAnimation)
-            {
-                actor->animation = baseActor.animation;
-            }
-
-            if (actor->hasAnimStates)
-            {
-                actor->animStates = baseActor.animStates;
-            }
-
-            if (actor->hasMovement)
-            {
-                actor->movement = baseActor.movement;
-            }
+            actor->direction = baseActor.direction;
         }
     }
 }
@@ -152,6 +106,34 @@ void Cell::initializeLocalActors()
         Main::get().getCellController()->setLocalActorRecord(mapIndex, getDescription());
 
         LOG_APPEND(Log::LOG_INFO, "- Initialized LocalActor %s", mapIndex.c_str());
+    }
+}
+
+void Cell::initializeDedicatedActors(ActorList& actorList)
+{
+    BaseActor baseActor;
+
+    for (unsigned int i = 0; i < actorList.count; i++)
+    {
+        baseActor = actorList.baseActors.at(i);
+        std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
+
+        // If this key doesn't exist, create it
+        if (dedicatedActors.count(mapIndex) == 0)
+        {
+            MWWorld::Ptr ptrFound = store->searchExact(baseActor.refId, baseActor.refNumIndex, baseActor.mpNum);
+
+            if (!ptrFound) return;
+
+            DedicatedActor *actor = new DedicatedActor();
+            actor->cell = actorList.cell;
+            actor->setPtr(ptrFound);
+            dedicatedActors[mapIndex] = actor;
+
+            Main::get().getCellController()->setDedicatedActorRecord(mapIndex, getDescription());
+
+            LOG_APPEND(Log::LOG_INFO, "- Initialized DedicatedActor %s", mapIndex.c_str());
+        }
     }
 }
 
