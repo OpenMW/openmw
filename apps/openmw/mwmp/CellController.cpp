@@ -170,9 +170,14 @@ std::string CellController::generateMapIndex(BaseActor baseActor)
     return mapIndex;
 }
 
-int CellController::getCellSize() const
+bool CellController::isActiveCell(const ESM::Cell& cell)
 {
-    return 8192;
+    return (cellsActive.count(cell.getDescription()) > 0);
+}
+
+Cell *CellController::getCell(const ESM::Cell& cell)
+{
+    return cellsActive.at(cell.getDescription());
 }
 
 MWWorld::CellStore *CellController::getCellStore(const ESM::Cell& cell)
@@ -239,4 +244,9 @@ void CellController::closeContainer(const MWWorld::Ptr &container)
     }
 
     Main::get().getLocalPlayer()->updateInventory();
+}
+
+int CellController::getCellSize() const
+{
+    return 8192;
 }

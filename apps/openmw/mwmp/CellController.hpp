@@ -36,11 +36,15 @@ namespace mwmp
         std::string generateMapIndex(MWWorld::Ptr ptr);
         std::string generateMapIndex(mwmp::BaseActor baseActor);
 
-        int getCellSize() const;
+        bool isActiveCell(const ESM::Cell& cell);
+        virtual Cell *getCell(const ESM::Cell& cell);
+
         virtual MWWorld::CellStore *getCellStore(const ESM::Cell& cell);
 
         void openContainer(const MWWorld::Ptr& container,  bool loot);
         void closeContainer(const MWWorld::Ptr& container);
+
+        int getCellSize() const;
 
     private:
         static std::map<std::string, mwmp::Cell *> cellsActive;
