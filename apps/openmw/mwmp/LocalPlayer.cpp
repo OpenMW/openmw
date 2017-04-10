@@ -287,19 +287,19 @@ void LocalPlayer::updatePosition(bool forceUpdate)
 
     const MWMechanics::Movement &move = player.getClass().getMovementSettings(player);
 
-    static bool posChanged = false;
+    static bool posWasChanged = false;
 
     static bool isJumping = false;
     static bool sentJumpEnd = true;
 
     ESM::Position ptrPos = player.getRefData().getPosition();
 
-    const bool isChangedPos = (move.mPosition[0] != 0 || move.mPosition[1] != 0 || move.mPosition[2] != 0
+    const bool posIsChanging = (move.mPosition[0] != 0 || move.mPosition[1] != 0 || move.mPosition[2] != 0
                                || move.mRotation[0] != 0 || move.mRotation[1] != 0 || move.mRotation[2] != 0);
 
-    if (isChangedPos || posChanged || forceUpdate)
+    if (posIsChanging || posWasChanged || forceUpdate)
     {
-        posChanged = isChangedPos;
+        posWasChanged = posIsChanging;
 
         if (!isJumping && !world->isOnGround(player) && !world->isFlying(player))
         {
