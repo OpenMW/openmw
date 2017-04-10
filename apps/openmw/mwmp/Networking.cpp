@@ -844,7 +844,7 @@ void Networking::processActorPacket(RakNet::Packet *packet)
     {
     case ID_ACTOR_LIST:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(actorList.cell);
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(actorList.cell);
 
         if (!ptrCellStore) return;
 
@@ -902,7 +902,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     {
     case ID_CONTAINER:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
 
         if (!ptrCellStore) return;
 
@@ -920,7 +920,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_PLACE:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
 
         if (!ptrCellStore) return;
 
@@ -931,7 +931,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_DELETE:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
 
         if (!ptrCellStore) return;
 
@@ -942,7 +942,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_LOCK:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
 
         if (!ptrCellStore) return;
 
@@ -953,7 +953,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_UNLOCK:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
 
         if (!ptrCellStore) return;
 
@@ -964,7 +964,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_SCALE:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
 
         if (!ptrCellStore) return;
 
@@ -975,7 +975,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_MOVE:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
 
         if (!ptrCellStore) return;
 
@@ -986,7 +986,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_ROTATE:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
 
         if (!ptrCellStore) return;
 
@@ -997,7 +997,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_OBJECT_ANIM_PLAY:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
 
         if (!ptrCellStore) return;
 
@@ -1008,7 +1008,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_DOOR_STATE:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
 
         if (!ptrCellStore) return;
 
@@ -1019,7 +1019,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_SCRIPT_LOCAL_SHORT:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
 
         if (!ptrCellStore) return;
 
@@ -1030,7 +1030,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     }
     case ID_SCRIPT_LOCAL_FLOAT:
     {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(worldEvent.cell);
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
 
         if (!ptrCellStore) return;
 

@@ -64,7 +64,7 @@ void CellController::initializeCell(const ESM::Cell& cell)
     // If this key doesn't exist, create it
     if (cellsActive.count(mapIndex) == 0)
     {
-        MWWorld::CellStore *cellStore = getCell(cell);
+        MWWorld::CellStore *cellStore = getCellStore(cell);
 
         if (!cellStore) return;
 
@@ -175,7 +175,7 @@ int CellController::getCellSize() const
     return 8192;
 }
 
-MWWorld::CellStore *CellController::getCell(const ESM::Cell& cell)
+MWWorld::CellStore *CellController::getCellStore(const ESM::Cell& cell)
 {
     MWWorld::CellStore *cellStore;
 

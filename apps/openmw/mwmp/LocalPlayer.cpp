@@ -677,7 +677,7 @@ void LocalPlayer::addJournalItems()
         
         if (journalItem.type == JournalItem::ENTRY)
         {
-            MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCell(journalItem.actorCell);
+            MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(journalItem.actorCell);
 
             if (!ptrCellStore) continue;
 
