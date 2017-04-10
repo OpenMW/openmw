@@ -865,7 +865,7 @@ void Networking::processActorPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_ACTOR_FRAME:
+    case ID_ACTOR_TEST:
     {
         //Main::get().getCellController()->readCellFrame(actorList);
 

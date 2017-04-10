@@ -4,7 +4,7 @@
 
 #include "../Packets/Actor/PacketActorList.hpp"
 #include "../Packets/Actor/PacketActorAuthority.hpp"
-#include "../Packets/Actor/PacketActorFrame.hpp"
+#include "../Packets/Actor/PacketActorTest.hpp"
 
 #include "ActorPacketController.hpp"
 
@@ -20,7 +20,7 @@ mwmp::ActorPacketController::ActorPacketController(RakNet::RakPeerInterface *pee
 {
     AddPacket<PacketActorList>(&packets, peer);
     AddPacket<PacketActorAuthority>(&packets, peer);
-    AddPacket<PacketActorFrame>(&packets, peer);
+    AddPacket<PacketActorTest>(&packets, peer);
 }
 
 

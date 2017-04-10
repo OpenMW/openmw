@@ -1,16 +1,16 @@
-#ifndef OPENMW_PROCESSORACTORFRAME_HPP
-#define OPENMW_PROCESSORACTORFRAME_HPP
+#ifndef OPENMW_PROCESSORACTORTEST_HPP
+#define OPENMW_PROCESSORACTORTEST_HPP
 
 #include "apps/openmw-mp/ActorProcessor.hpp"
 
 namespace mwmp
 {
-    class ProcessorActorFrame : public ActorProcessor
+    class ProcessorActorTest : public ActorProcessor
     {
     public:
-        ProcessorActorFrame()
+        ProcessorActorTest()
         {
-            BPP_INIT(ID_ACTOR_FRAME)
+            BPP_INIT(ID_ACTOR_TEST)
         }
 
         void Do(ActorPacket &packet, Player &player, BaseActorList &actorList) override
@@ -21,9 +21,9 @@ namespace mwmp
             if (serverCell != nullptr)
                 serverCell->sendToLoaded(&packet, &actorList);
 
-            Script::Call<Script::CallbackIdentity("OnActorFrame")>(player.getId(), actorList.cell.getDescription().c_str());
+            Script::Call<Script::CallbackIdentity("OnActorTest")>(player.getId(), actorList.cell.getDescription().c_str());
         }
     };
 }
 
-#endif //OPENMW_PROCESSORACTORFRAME_HPP
+#endif //OPENMW_PROCESSORACTORTEST_HPP

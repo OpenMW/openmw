@@ -1,15 +1,15 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Log.hpp>
-#include "PacketActorFrame.hpp"
+#include "PacketActorTest.hpp"
 
 using namespace mwmp;
 
-PacketActorFrame::PacketActorFrame(RakNet::RakPeerInterface *peer) : ActorPacket(peer)
+PacketActorTest::PacketActorTest(RakNet::RakPeerInterface *peer) : ActorPacket(peer)
 {
-    packetID = ID_ACTOR_FRAME;
+    packetID = ID_ACTOR_TEST;
 }
 
-void PacketActorFrame::Packet(RakNet::BitStream *bs, bool send)
+void PacketActorTest::Packet(RakNet::BitStream *bs, bool send)
 {
     ActorPacket::Packet(bs, send);
 

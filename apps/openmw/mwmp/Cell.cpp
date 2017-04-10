@@ -57,8 +57,8 @@ void Cell::updateLocal()
         }
     }
 
-    Main::get().getNetworking()->getActorPacket(ID_ACTOR_FRAME)->setActorList(actorList);
-    Main::get().getNetworking()->getActorPacket(ID_ACTOR_FRAME)->Send();
+    Main::get().getNetworking()->getActorPacket(ID_ACTOR_TEST)->setActorList(actorList);
+    Main::get().getNetworking()->getActorPacket(ID_ACTOR_TEST)->Send();
 }
 
 void Cell::updateDedicated(float dt)
