@@ -1960,7 +1960,28 @@ void CharacterController::update(float duration)
             world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
 
         movement = vec;
+
+        /*
+            Start of tes3mp addition
+
+            Character movement setting positions get reset here, so we have to assign them to a
+            relevant LocalActor now
+        */
+        if (isLocalActor)
+        {
+            localActor->direction.pos[0] = cls.getMovementSettings(mPtr).mPosition[0];
+            localActor->direction.pos[1] = cls.getMovementSettings(mPtr).mPosition[1];
+            localActor->direction.pos[2] = cls.getMovementSettings(mPtr).mPosition[2];
+            localActor->direction.rot[0] = cls.getMovementSettings(mPtr).mRotation[0];
+            localActor->direction.rot[1] = cls.getMovementSettings(mPtr).mRotation[1];
+            localActor->direction.rot[2] = cls.getMovementSettings(mPtr).mRotation[2];
+        }
+        /*
+            End of tes3mp addition
+        */
+
         cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = 0;
+
         // Can't reset jump state (mPosition[2]) here; we don't know for sure whether the PhysicSystem will actually handle it in this frame
         // due to the fixed minimum timestep used for the physics update. It will be reset in PhysicSystem::move once the jump is handled.
 
@@ -2010,27 +2031,6 @@ void CharacterController::update(float duration)
 
     if (mFloatToSurface && cls.isActor() && cls.getCreatureStats(mPtr).isDead() && cls.canSwim(mPtr))
         moved.z() = 1.0;
-
-    /*
-        Start of tes3mp addition
-
-        Save or load movement velocity based on whether this is a local or dedicated actor
-    */
-    if (isLocalActor)
-    {
-        localActor->hasMovement = true;
-        localActor->movement.x = moved.x();
-        localActor->movement.y = moved.y();
-        localActor->movement.z = moved.z();
-    }
-    else if (isDedicatedActor)
-    {
-        if (dedicatedActor->hasMovement)
-            moved = osg::Vec3f(dedicatedActor->movement.x, dedicatedActor->movement.y, dedicatedActor->movement.z);
-    }
-    /*
-        End of tes3mp addition
-    */
 
     // Update movement
     if(mMovementAnimationControlled && mPtr.getClass().isActor())
