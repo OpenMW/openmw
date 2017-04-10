@@ -18,13 +18,6 @@ namespace mwmp
         int jumpstate;
         bool forcestateupdate;
     };
-
-    struct Movement
-    {
-        float x;
-        float y;
-        float z;
-    };
 }
 
 #endif //OPENMW_BASESTRUCTS_HPP

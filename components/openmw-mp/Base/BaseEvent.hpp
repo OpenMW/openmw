@@ -38,11 +38,6 @@ namespace mwmp
 
         ESM::Position position;
 
-        int drawState;
-
-        float headPitch;
-        float headYaw;
-
         int doorState;
         int lockLevel;
         float scale;
@@ -59,15 +54,6 @@ namespace mwmp
         std::string varName;
 
         ContainerChanges containerChanges;
-
-        Animation animation;
-        bool hasAnimation;
-
-        AnimStates animStates;
-        bool hasAnimStates;
-
-        Movement movement;
-        bool hasMovement;
     };
 
     struct ObjectChanges
