@@ -27,6 +27,7 @@
 #include "ActorProcessor.hpp"
 #include "processors/actor/ProcessorActorList.hpp"
 #include "processors/actor/ProcessorActorAuthority.hpp"
+#include "processors/actor/ProcessorActorPosition.hpp"
 #include "processors/actor/ProcessorActorTest.hpp"
 #include "WorldProcessor.hpp"
 #include "processors/world/ProcessorContainer.hpp"
@@ -73,6 +74,7 @@ void ProcessorInitializer()
 
     ActorProcessor::AddProcessor(new ProcessorActorList());
     ActorProcessor::AddProcessor(new ProcessorActorAuthority());
+    ActorProcessor::AddProcessor(new ProcessorActorPosition());
     ActorProcessor::AddProcessor(new ProcessorActorTest());
 
     WorldProcessor::AddProcessor(new ProcessorContainer());

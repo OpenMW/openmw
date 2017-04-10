@@ -41,6 +41,7 @@ enum GameMessages
 
     ID_ACTOR_LIST,
     ID_ACTOR_AUTHORITY,
+    ID_ACTOR_POSITION,
     ID_ACTOR_TEST,
 
     ID_OBJECT_PLACE,
