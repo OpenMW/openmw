@@ -815,7 +815,10 @@ namespace MWMechanics
                     timeLeft = 0.0f;
                 stats.setTimeToStartDrowning(timeLeft);
             }
-            if(timeLeft == 0.0f)
+
+            bool godmode = ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+
+            if(timeLeft == 0.0f && !godmode)
             {
                 // If drowning, apply 3 points of damage per second
                 static const float fSuffocationDamage = world->getStore().get<ESM::GameSetting>().find("fSuffocationDamage")->getFloat();

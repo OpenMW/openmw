@@ -2340,11 +2340,15 @@ namespace MWWorld
             MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
             if (stats.isDead())
                 continue;
+
+            mPhysics->markAsNonSolid (object);
+
+            if (actor == getPlayerPtr() && MWBase::Environment::get().getWorld()->getGodModeState())
+                return;
+
             MWMechanics::DynamicStat<float> health = stats.getHealth();
             health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
             stats.setHealth(health);
-
-            mPhysics->markAsNonSolid (object);
 
             if (healthPerSecond > 0.0f)
             {
@@ -2370,11 +2374,15 @@ namespace MWWorld
             MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
             if (stats.isDead())
                 continue;
+
+            mPhysics->markAsNonSolid (object);
+
+            if (actor == getPlayerPtr() && MWBase::Environment::get().getWorld()->getGodModeState())
+                return;
+
             MWMechanics::DynamicStat<float> health = stats.getHealth();
             health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
             stats.setHealth(health);
-
-            mPhysics->markAsNonSolid (object);
 
             if (healthPerSecond > 0.0f)
             {
