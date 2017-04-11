@@ -865,16 +865,42 @@ void Networking::processActorPacket(RakNet::Packet *packet)
 
         break;
     }
+    case ID_ACTOR_TEST:
+    {
+        break;
+    }
+    case ID_ACTOR_ANIM_PLAY:
+    {
+        break;
+    }
+    case ID_ACTOR_ATTACK:
+    {
+        break;
+    }
+    case ID_ACTOR_CELL_CHANGE:
+    {
+        break;
+    }
+    case ID_ACTOR_DRAW_STATE:
+    {
+        break;
+    }
+    case ID_ACTOR_DYNAMICSTATS:
+    {
+        break;
+    }
+    case ID_ACTOR_HEAD_ROTATION:
+    {
+        break;
+    }
     case ID_ACTOR_POSITION:
     {
         //Main::get().getCellController()->readPositions(actorList);
 
         break;
     }
-    case ID_ACTOR_TEST:
+    case ID_ACTOR_SPEECH:
     {
-        //Main::get().getCellController()->readCellFrame(actorList);
-
         break;
     }
     default:
