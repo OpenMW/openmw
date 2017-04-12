@@ -368,6 +368,8 @@ namespace MWGui
             mPlayerSkillValues.insert(std::make_pair(ESM::Skill::sSkillIds[i], MWMechanics::SkillValue()));
         }
 
+        updatePinnedWindows();
+
         // Set up visibility
         updateVisible();
 
@@ -400,11 +402,6 @@ namespace MWGui
             allow(GW_ALL);
 
         mRestAllowed = !newgame;
-
-        mStatsWindow->setPinned(Settings::Manager::getBool("stats pin", "Windows"));
-        mMap->setPinned(Settings::Manager::getBool("map pin", "Windows"));
-        mSpellWindow->setPinned(Settings::Manager::getBool("spells pin", "Windows"));
-        mInventoryWindow->setPinned(Settings::Manager::getBool("inventory pin", "Windows"));
     }
 
     WindowManager::~WindowManager()
@@ -492,7 +489,6 @@ namespace MWGui
     void WindowManager::update()
     {
         cleanupGarbage();
-
         mHud->update();
     }
 
@@ -559,6 +555,12 @@ namespace MWGui
         if (mGuiModes.empty())
         {
             mInventoryWindow->setGuiMode(GM_None);
+
+            // If game is not running, we can't be sure that widgets are initialized properly
+            MWBase::StateManager::State state = MWBase::Environment::get().getStateManager()->getState();
+
+            if (state != MWBase::StateManager::State_Running)
+                return;
 
             mMap->setVisible(mMap->pinned() && !(mForceHidden & GW_Map) && (mAllowed & GW_Map));
             mStatsWindow->setVisible(mStatsWindow->pinned() && !(mForceHidden & GW_Stats) && (mAllowed & GW_Stats));
@@ -1709,6 +1711,8 @@ namespace MWGui
         mCompanionWindow->resetReference();
         mConsole->resetReference();
 
+        mInventoryWindow->rebuildAvatar();
+
         mSelectedSpell.clear();
 
         mCustomMarkers.clear();
@@ -1866,6 +1870,17 @@ namespace MWGui
     {
         if (_key == MyGUI::KeyCode::Escape)
             mVideoWidget->stop();
+    }
+
+    void WindowManager::updatePinnedWindows()
+    {
+        mInventoryWindow->setPinned(Settings::Manager::getBool("inventory pin", "Windows"));
+
+        mMap->setPinned(Settings::Manager::getBool("map pin", "Windows"));
+
+        mSpellWindow->setPinned(Settings::Manager::getBool("spells pin", "Windows"));
+
+        mStatsWindow->setPinned(Settings::Manager::getBool("stats pin", "Windows"));
     }
 
     void WindowManager::pinWindow(GuiWindow window)

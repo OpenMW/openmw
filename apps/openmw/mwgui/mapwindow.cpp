@@ -780,7 +780,7 @@ namespace MWGui
     void MapWindow::setVisible(bool visible)
     {
         WindowBase::setVisible(visible);
-        mButton->setVisible(visible && MWBase::Environment::get().getWindowManager()->isGuiMode());
+        mButton->setVisible(visible && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_None);
     }
 
     void MapWindow::renderGlobalMap()
