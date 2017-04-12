@@ -1597,17 +1597,16 @@ namespace MWMechanics
     }
 
     void Actors::getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies) {
-        std::list<MWWorld::Ptr> followers = getActorsSidingWith(actor);
-
         // If we have already found actor's allies, use the cache
         std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >::const_iterator search = cachedAllies.find(actor);
         if (search != cachedAllies.end())
-            out = search->second;
+            out.insert(search->second.begin(), search->second.end());
         else
         {
+            std::list<MWWorld::Ptr> followers = getActorsSidingWith(actor);
             for (std::list<MWWorld::Ptr>::iterator it = followers.begin(); it != followers.end(); ++it)
                 if (out.insert(*it).second)
-                    getActorsSidingWith(*it, out);
+                    getActorsSidingWith(*it, out, cachedAllies);
 
             // Cache ptrs and their sets of allies
             cachedAllies.insert(std::make_pair(actor, out));
