@@ -280,7 +280,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer)
+    void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies, bool againstPlayer)
     {
         CreatureStats& creatureStats1 = actor1.getClass().getCreatureStats(actor1);
         if (creatureStats1.getAiSequence().isInCombat(actor2))
@@ -306,7 +306,8 @@ namespace MWMechanics
         // Get actors allied with actor1. Includes those following or escorting actor1, actors following or escorting those actors, (recursive)
         // and any actor currently being followed or escorted by actor1
         std::set<MWWorld::Ptr> allies1;
-        getActorsSidingWith(actor1, allies1);
+
+        getActorsSidingWith(actor1, allies1, cachedAllies);
 
         // If an ally of actor1 has been attacked by actor2 or has attacked actor2, start combat between actor1 and actor2
         for (std::set<MWWorld::Ptr>::const_iterator it = allies1.begin(); it != allies1.end(); ++it)
@@ -328,10 +329,10 @@ namespace MWMechanics
                 aggressive = true;
         }
 
-        std::set<MWWorld::Ptr> playerFollowersAndEscorters;
-        getActorsSidingWith(MWMechanics::getPlayer(), playerFollowersAndEscorters);
+        std::set<MWWorld::Ptr> playerAllies;
+        getActorsSidingWith(MWMechanics::getPlayer(), playerAllies, cachedAllies);
 
-        bool isPlayerFollowerOrEscorter = std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), actor1) != playerFollowersAndEscorters.end();
+        bool isPlayerFollowerOrEscorter = std::find(playerAllies.begin(), playerAllies.end(), actor1) != playerAllies.end();
 
         // If actor2 and at least one actor2 are in combat with actor1, actor1 and its allies start combat with them
         // Doesn't apply for player followers/escorters        
@@ -341,7 +342,9 @@ namespace MWMechanics
             if (actor2.getClass().getCreatureStats(actor2).getAiSequence().isInCombat(actor1))
             {
                 std::set<MWWorld::Ptr> allies2;
-                getActorsSidingWith(actor2, allies2);
+
+                getActorsSidingWith(actor2, allies2, cachedAllies);
+
                 // Check that an ally of actor2 is also in combat with actor1
                 for (std::set<MWWorld::Ptr>::const_iterator it = allies2.begin(); it != allies2.end(); ++it)
                 {
@@ -383,11 +386,11 @@ namespace MWMechanics
         // Do aggression check if actor2 is the player or a player follower or escorter
         if (!aggressive)
         {
-            if (againstPlayer || std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), actor2) != playerFollowersAndEscorters.end())
+            if (againstPlayer || std::find(playerAllies.begin(), playerAllies.end(), actor2) != playerAllies.end())
             {
                 // Player followers and escorters with high fight should not initiate combat with the player or with
                 // other player followers or escorters
-                if (std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), actor1) == playerFollowersAndEscorters.end())
+                if (std::find(playerAllies.begin(), playerAllies.end(), actor1) == playerAllies.end())
                     aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
             }
         }
@@ -1075,6 +1078,8 @@ namespace MWMechanics
 
             /// \todo move update logic to Actor class where appropriate
 
+            std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> > cachedAllies; // will be filled as engageCombat iterates
+
              // AI and magic effects update
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
@@ -1126,7 +1131,7 @@ namespace MWMechanics
                             {
                                 if (it->first == iter->first || iter->first == player) // player is not AI-controlled
                                     continue;
-                                engageCombat(iter->first, it->first, it->first == player);
+                                engageCombat(iter->first, it->first, cachedAllies, it->first == player);
                             }
                         }
                         if (timerUpdateHeadTrack == 0)
@@ -1589,6 +1594,30 @@ namespace MWMechanics
         for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
             if (out.insert(*it).second)
                 getActorsSidingWith(*it, out);
+    }
+
+    void Actors::getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies) {
+        std::list<MWWorld::Ptr> followers = getActorsSidingWith(actor);
+
+        // If we have already found actor's allies, use the cache
+        std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >::const_iterator search = cachedAllies.find(actor);
+        if (search != cachedAllies.end())
+            out = search->second;
+        else
+        {
+            for (std::list<MWWorld::Ptr>::iterator it = followers.begin(); it != followers.end(); ++it)
+                if (out.insert(*it).second)
+                    getActorsSidingWith(*it, out);
+
+            // Cache ptrs and their sets of allies
+            cachedAllies.insert(std::make_pair(actor, out));
+            for (std::set<MWWorld::Ptr>::const_iterator it = out.begin(); it != out.end(); ++it)
+            {
+                search = cachedAllies.find(*it);
+                if (search == cachedAllies.end())
+                    cachedAllies.insert(std::make_pair(*it, out));
+            }
+        }
     }
 
     std::list<int> Actors::getActorsFollowingIndices(const MWWorld::Ptr &actor)
