@@ -44,8 +44,7 @@ namespace CSVWorld
                 CSMWorld::Data& data,
                 QUndoStack& undoStack,
                 const CSMWorld::UniversalId& id,
-                CSMWorld::IdCompletionManager& completionManager,
-                bool relaxedIdRules = false);
+                CSMWorld::IdCompletionManager& completionManager);
 
             /// \brief Set cell ID input widget to ID of record to be cloned.
             /// \param originId Cell ID to be cloned.
