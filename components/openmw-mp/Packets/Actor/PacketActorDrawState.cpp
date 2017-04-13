@@ -37,8 +37,10 @@ void PacketActorDrawState::Packet(RakNet::BitStream *bs, bool send)
         RW(actor.refId, send);
         RW(actor.refNumIndex, send);
         RW(actor.mpNum, send);
-        
-        // TODO: Fill this in
+
+        RW(actor.movementFlags, send);
+        RW(actor.drawState, send);
+        RW(actor.isFlying, send);
 
         if (!send)
         {

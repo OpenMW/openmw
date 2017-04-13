@@ -25,6 +25,7 @@ namespace mwmp
         
         ESM::Cell cell;
 
+        unsigned int movementFlags;
         char drawState;
         bool isFlying;
 

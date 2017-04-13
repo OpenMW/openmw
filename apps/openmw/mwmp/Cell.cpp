@@ -85,6 +85,27 @@ void Cell::readPositions(ActorList& actorList)
     }
 }
 
+void Cell::readDrawStates(ActorList& actorList)
+{
+    initializeDedicatedActors(actorList);
+
+    BaseActor baseActor;
+
+    for (unsigned int i = 0; i < actorList.count; i++)
+    {
+        baseActor = actorList.baseActors.at(i);
+        std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
+
+        if (dedicatedActors.count(mapIndex) > 0)
+        {
+            DedicatedActor *actor = dedicatedActors[mapIndex];
+            actor->movementFlags = baseActor.movementFlags;
+            actor->drawState = baseActor.drawState;
+            actor->isFlying = baseActor.isFlying;
+        }
+    }
+}
+
 void Cell::initializeLocalActors()
 {
     ESM::Cell esmCell = *store->getCell();

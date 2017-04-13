@@ -21,7 +21,9 @@ namespace mwmp
 
         void initializeCell(const ESM::Cell& cell);
         void initializeLocalActors(const ESM::Cell& cell);
+
         void readPositions(mwmp::ActorList& actorList);
+        void readDrawStates(mwmp::ActorList& actorList);
 
         void setLocalActorRecord(std::string actorIndex, std::string cellIndex);
         void removeLocalActorRecord(std::string actorIndex);

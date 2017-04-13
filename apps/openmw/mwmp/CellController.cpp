@@ -102,6 +102,19 @@ void CellController::readPositions(ActorList& actorList)
     }
 }
 
+void CellController::readDrawStates(ActorList& actorList)
+{
+    std::string mapIndex = actorList.cell.getDescription();
+
+    initializeCell(actorList.cell);
+
+    // If this now exists, send it the data
+    if (cellsActive.count(mapIndex) > 0)
+    {
+        cellsActive[mapIndex]->readDrawStates(actorList);
+    }
+}
+
 void CellController::setLocalActorRecord(std::string actorIndex, std::string cellIndex)
 {
     localActorsToCells[actorIndex] = cellIndex;

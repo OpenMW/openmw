@@ -37,6 +37,7 @@ void PacketActorPosition::Packet(RakNet::BitStream *bs, bool send)
         RW(actor.refId, send);
         RW(actor.refNumIndex, send);
         RW(actor.mpNum, send);
+
         RW(actor.position, send);
         RW(actor.direction, send);
 

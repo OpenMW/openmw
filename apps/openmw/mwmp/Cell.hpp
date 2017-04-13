@@ -19,6 +19,7 @@ namespace mwmp
         void updateDedicated(float dt);
 
         void readPositions(ActorList& actorList);
+        void readDrawStates(ActorList& actorList);
 
         void initializeLocalActors();
         void initializeDedicatedActors(ActorList& actorList);

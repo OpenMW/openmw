@@ -26,7 +26,7 @@ DedicatedActor::~DedicatedActor()
 void DedicatedActor::update(float dt)
 {
     move(dt);
-    //setDrawState();
+    setDrawState();
     //setAnimation();
 }
 
@@ -54,6 +54,12 @@ void DedicatedActor::setDrawState()
         ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Weapon);
     else if (drawState == 2)
         ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Spell);
+
+    MWMechanics::NpcStats *ptrNpcStats = &ptr.getClass().getNpcStats(ptr);
+    ptrNpcStats->setMovementFlag(CreatureStats::Flag_Run, (movementFlags & CreatureStats::Flag_Run) != 0);
+    ptrNpcStats->setMovementFlag(CreatureStats::Flag_Sneak, (movementFlags & CreatureStats::Flag_Sneak) != 0);
+    ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceJump, (movementFlags & CreatureStats::Flag_ForceJump) != 0);
+    ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceMoveJump, (movementFlags & CreatureStats::Flag_ForceMoveJump) != 0);
 }
 
 void DedicatedActor::setAnimation()
@@ -73,4 +79,8 @@ MWWorld::Ptr DedicatedActor::getPtr()
 void DedicatedActor::setPtr(const MWWorld::Ptr& newPtr)
 {
     ptr = newPtr;
+
+    refId = ptr.getCellRef().getRefId();
+    refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    mpNum = ptr.getCellRef().getMpNum();
 }
