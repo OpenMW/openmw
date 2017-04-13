@@ -15,7 +15,8 @@ using namespace std;
 
 DedicatedActor::DedicatedActor()
 {
-
+    drawState = 0;
+    movementFlags = 0;
 }
 
 DedicatedActor::~DedicatedActor()

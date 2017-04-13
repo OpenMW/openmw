@@ -66,7 +66,7 @@ void LocalActor::updateDrawStateAndFlags(bool forceUpdate)
     bool isForceMoveJumping = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceMoveJump);
 
     isFlying = world->isFlying(ptr);
-    bool isJumping = ptr.getRefData().isEnabled() && !world->isOnGround(ptr) && !isFlying;
+    bool isJumping = !world->isOnGround(ptr) && !isFlying;
 
     MWMechanics::DrawState_ currentDrawState = ptr.getClass().getNpcStats(ptr).getDrawState();
 

@@ -45,7 +45,9 @@ void Cell::updateLocal(bool forceUpdate)
         }
         else
         {
-            actor->update(forceUpdate);
+            if (actor->getPtr().getRefData().isEnabled())
+                actor->update(forceUpdate);
+
             ++it;
         }
     }

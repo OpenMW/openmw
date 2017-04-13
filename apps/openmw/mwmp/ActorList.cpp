@@ -54,16 +54,22 @@ void ActorList::addDrawStateActor(LocalActor localActor)
 
 void ActorList::sendPositionActors()
 {
-    baseActors = positionActors;
-    Main::get().getNetworking()->getActorPacket(ID_ACTOR_POSITION)->setActorList(this);
-    Main::get().getNetworking()->getActorPacket(ID_ACTOR_POSITION)->Send();
+    if (positionActors.size() > 0)
+    {
+        baseActors = positionActors;
+        Main::get().getNetworking()->getActorPacket(ID_ACTOR_POSITION)->setActorList(this);
+        Main::get().getNetworking()->getActorPacket(ID_ACTOR_POSITION)->Send();
+    }
 }
 
 void ActorList::sendDrawStateActors()
 {
-    baseActors = drawStateActors;
-    Main::get().getNetworking()->getActorPacket(ID_ACTOR_DRAW_STATE)->setActorList(this);
-    Main::get().getNetworking()->getActorPacket(ID_ACTOR_DRAW_STATE)->Send();
+    if (drawStateActors.size() > 0)
+    {
+        baseActors = drawStateActors;
+        Main::get().getNetworking()->getActorPacket(ID_ACTOR_DRAW_STATE)->setActorList(this);
+        Main::get().getNetworking()->getActorPacket(ID_ACTOR_DRAW_STATE)->Send();
+    }
 }
 
 // TODO: Finish this
