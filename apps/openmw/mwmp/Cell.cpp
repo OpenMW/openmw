@@ -51,6 +51,7 @@ void Cell::updateLocal(bool forceUpdate)
     }
 
     actorList->sendPositionActors();
+    actorList->sendDrawStateActors();
 }
 
 void Cell::updateDedicated(float dt)
