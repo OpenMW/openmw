@@ -791,6 +791,12 @@ namespace MWGui
         mLastScrollWindowCoordinates = currentCoordinates;
     }
 
+    void MapWindow::setVisible(bool visible)
+    {
+        WindowBase::setVisible(visible);
+        mButton->setVisible(visible && MWBase::Environment::get().getWindowManager()->isGuiMode());
+    }
+
     void MapWindow::renderGlobalMap()
     {
         mGlobalMapRender->render();

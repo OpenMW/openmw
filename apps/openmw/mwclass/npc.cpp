@@ -672,6 +672,9 @@ namespace MWClass
         if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage, attackStrength))
             damage = 0;
 
+        if (victim == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState())
+            damage = 0;
+
         MWMechanics::diseaseContact(victim, ptr);
 
         othercls.onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true);
@@ -736,6 +739,11 @@ namespace MWClass
             MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
 
         if (damage < 0.001f)
+            damage = 0;
+
+        bool godmode = ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+
+        if (godmode)
             damage = 0;
 
         if (damage > 0.0f && !attacker.isEmpty())
@@ -830,7 +838,7 @@ namespace MWClass
 
         if (ishealth)
         {
-            if (!attacker.isEmpty())
+            if (!attacker.isEmpty() && !godmode)
                 damage = scaleDamage(damage, attacker, ptr);
 
             if (damage > 0.0f)

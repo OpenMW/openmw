@@ -50,11 +50,6 @@ namespace MWMechanics
 
     float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap)
     {
-        CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-
-        if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude())
-            return 0;
-
         float y = std::numeric_limits<float>::max();
         float lowestSkill = 0;
 
@@ -84,6 +79,13 @@ namespace MWMechanics
             }
         }
 
+        bool godmode = actor == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+
+        CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+
+        if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude()&& !godmode)
+            return 0;
+
         if (spell->mData.mType == ESM::Spell::ST_Power)
             return stats.getSpells().canUsePower(spell) ? 100 : 0;
 
@@ -92,6 +94,11 @@ namespace MWMechanics
 
         if (spell->mData.mFlags & ESM::Spell::F_Always)
             return 100;
+
+        if (godmode)
+        {
+            return 100;
+        }
 
         float castBonus = -stats.getMagicEffects().get(ESM::MagicEffect::Sound).getMagnitude();
 
@@ -713,13 +720,18 @@ namespace MWMechanics
 
         mStack = false;
 
+        bool godmode = mCaster == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+
         // Check if there's enough charge left
         if (enchantment->mData.mType == ESM::Enchantment::WhenUsed || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
         {
-            const int castCost = getEffectiveEnchantmentCastCost(static_cast<float>(enchantment->mData.mCost), mCaster);
+            int castCost = getEffectiveEnchantmentCastCost(static_cast<float>(enchantment->mData.mCost), mCaster);
 
             if (item.getCellRef().getEnchantmentCharge() == -1)
                 item.getCellRef().setEnchantmentCharge(static_cast<float>(enchantment->mData.mCharge));
+
+            if (godmode)
+                castCost = 0;
 
             if (item.getCellRef().getEnchantmentCharge() < castCost)
             {
@@ -750,8 +762,10 @@ namespace MWMechanics
             if (mCaster == getPlayer())
                 mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 1);
         }
-        if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
+        if (enchantment->mData.mType == ESM::Enchantment::CastOnce && !godmode)
+        {
             item.getContainerStore()->remove(item, 1, mCaster);
+        }
         else if (enchantment->mData.mType != ESM::Enchantment::WhenStrikes)
         {
             if (mCaster == getPlayer())
@@ -801,57 +815,76 @@ namespace MWMechanics
 
         int school = 0;
 
+        bool godmode = mCaster == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+
         if (mCaster.getClass().isActor() && !mAlwaysSucceed)
         {
             school = getSpellSchool(spell, mCaster);
 
             CreatureStats& stats = mCaster.getClass().getCreatureStats(mCaster);
 
-            // Reduce fatigue (note that in the vanilla game, both GMSTs are 0, and there's no fatigue loss)
-            static const float fFatigueSpellBase = store.get<ESM::GameSetting>().find("fFatigueSpellBase")->getFloat();
-            static const float fFatigueSpellMult = store.get<ESM::GameSetting>().find("fFatigueSpellMult")->getFloat();
-            DynamicStat<float> fatigue = stats.getFatigue();
-            const float normalizedEncumbrance = mCaster.getClass().getNormalizedEncumbrance(mCaster);
-            float fatigueLoss = spell->mData.mCost * (fFatigueSpellBase + normalizedEncumbrance * fFatigueSpellMult);
-            fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss); stats.setFatigue(fatigue);
-
-            bool fail = false;
-
-            // Check success
-
-            // Major change done by tes3mp:
-            // Instead of checking whether the caster is a player or an NPC,
-            // check whether it's the LocalPlayer or a DedicatedPlayer and calculate
-            // calculate the success chance in clients' LocalPlayer::prepareAttack()
-            // TODO: Make this make sense for NPCs too
-            // TODO: See if LocalPlayer being the target and having godmode on
-            // can be accounted for like it is in OpenMW's corresponding code
-            mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(mCaster);
-            bool isDedicated = dedicatedPlayer != NULL;
-
-            if (isDedicated)
-                dedicatedPlayer->attack.pressed = false;
-
-            if ((!isDedicated && !mwmp::Main::get().getLocalPlayer()->attack.success) ||
-                (isDedicated && dedicatedPlayer->attack.success == 0))
+            if (!godmode)
             {
-                if (mCaster == getPlayer())
+                // Reduce fatigue (note that in the vanilla game, both GMSTs are 0, and there's no fatigue loss)
+                static const float fFatigueSpellBase = store.get<ESM::GameSetting>().find("fFatigueSpellBase")->getFloat();
+                static const float fFatigueSpellMult = store.get<ESM::GameSetting>().find("fFatigueSpellMult")->getFloat();
+                DynamicStat<float> fatigue = stats.getFatigue();
+                const float normalizedEncumbrance = mCaster.getClass().getNormalizedEncumbrance(mCaster);
+
+                float fatigueLoss = spell->mData.mCost * (fFatigueSpellBase + normalizedEncumbrance * fFatigueSpellMult);
+                fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss); stats.setFatigue(fatigue);
+
+                bool fail = false;
+
+                // Major change done by tes3mp:
+                //
+                // Instead of checking whether the caster is a player or an NPC,
+                // first check whether it's the LocalPlayer or a DedicatedPlayer and calculate
+                // calculate the success chance in clients' LocalPlayer::prepareAttack()
+                //
+                // TODO: Make this make sense for NPCs too
+                //
+                // TODO: See if LocalPlayer being the target and having godmode on
+                // can be accounted for like it is in OpenMW's corresponding code
+
+                mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(mCaster);
+                bool isDedicated = dedicatedPlayer != NULL;
+
+                if (isDedicated)
+                    dedicatedPlayer->attack.pressed = false;
+
+                // Check success
+                if ((!isDedicated && !mwmp::Main::get().getLocalPlayer()->attack.success) ||
+                    (isDedicated && dedicatedPlayer->attack.success == 0))
                 {
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
+                    if (mCaster == getPlayer())
+                    {
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
+                    }
+                    fail = true;
                 }
-                fail = true;
-            }
+                else if (!(mCaster == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState()))
+                {
+                    float successChance = getSpellSuccessChance(spell, mCaster);
+                    if (Misc::Rng::roll0to99() >= successChance)
+                    {
+                        if (mCaster == getPlayer())
+                            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
+                        fail = true;
+                    }
+                }
 
-            if (fail)
-            {
-                // Failure sound
-                static const std::string schools[] = {
-                    "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-                };
+                if (fail)
+                {
+                    // Failure sound
+                    static const std::string schools[] = {
+                        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+                    };
 
-                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                sndMgr->playSound3D(mCaster, "Spell Failure " + schools[school], 1.0f, 1.0f);
-                return false;
+                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                    sndMgr->playSound3D(mCaster, "Spell Failure " + schools[school], 1.0f, 1.0f);
+                    return false;
+                }
             }
 
             // A power can be used once per 24h
@@ -1059,6 +1092,8 @@ namespace MWMechanics
 
         bool receivedMagicDamage = false;
 
+        bool godmode = actor == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState(); 
+
         switch (effectKey.mId)
         {
         case ESM::MagicEffect::DamageAttribute:
@@ -1081,21 +1116,34 @@ namespace MWMechanics
             adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::RestoreHealth, magnitude);
             break;
         case ESM::MagicEffect::DamageHealth:
-            receivedMagicDamage = true;
-            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
-            break;
+            if (!godmode)
+            {
+                receivedMagicDamage = true;
+                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
+            }
         case ESM::MagicEffect::DamageMagicka:
         case ESM::MagicEffect::DamageFatigue:
-            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
+            if (!godmode)
+            {
+                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
+            }
+
             break;
+
         case ESM::MagicEffect::AbsorbHealth:
-            if (magnitude > 0.f)
-                receivedMagicDamage = true;
-            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
-            break;
+            if (!godmode)
+            {
+                if (magnitude > 0.f)
+                    receivedMagicDamage = true;
+                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
+            }
         case ESM::MagicEffect::AbsorbMagicka:
         case ESM::MagicEffect::AbsorbFatigue:
-            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
+            if (!godmode)
+            {
+                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
+            }
+
             break;
 
         case ESM::MagicEffect::DisintegrateArmor:
@@ -1140,9 +1188,13 @@ namespace MWMechanics
             if (weather > 1)
                 damageScale *= fMagicSunBlockedMult;
 
-            adjustDynamicStat(creatureStats, 0, -magnitude * damageScale);
-            if (magnitude * damageScale > 0.f)
-                receivedMagicDamage = true;
+            if (!godmode)
+            {
+                adjustDynamicStat(creatureStats, 0, -magnitude * damageScale);
+                if (magnitude * damageScale > 0.f)
+                    receivedMagicDamage = true;
+            }
+
             break;
         }
 
@@ -1151,8 +1203,12 @@ namespace MWMechanics
         case ESM::MagicEffect::FrostDamage:
         case ESM::MagicEffect::Poison:
         {
-            adjustDynamicStat(creatureStats, 0, -magnitude);
-            receivedMagicDamage = true;
+            if (!godmode)
+            {
+                adjustDynamicStat(creatureStats, 0, -magnitude);
+                receivedMagicDamage = true;
+            }
+
             break;
         }
 

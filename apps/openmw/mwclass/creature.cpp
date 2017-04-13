@@ -323,6 +323,9 @@ namespace MWClass
         if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage, attackStrength))
             damage = 0;
 
+        if (victim == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState())
+            damage = 0;
+
         MWMechanics::diseaseContact(victim, ptr);
 
         victim.getClass().onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true);
@@ -371,6 +374,11 @@ namespace MWClass
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
 
+        bool godmode = object == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+
+        if (godmode)
+            damage = 0;
+
         if (!successful)
         {
             // Missed
@@ -405,7 +413,7 @@ namespace MWClass
 
             if(ishealth)
             {
-                if (!attacker.isEmpty())
+                if (!attacker.isEmpty() && !godmode)
                 {
                     damage = scaleDamage(damage, attacker, ptr);
                     MWBase::Environment::get().getWorld()->spawnBloodEffect(ptr, hitPosition);
