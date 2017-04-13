@@ -73,6 +73,8 @@ namespace MWMechanics
         MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
         MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats (ptr);
 
+        npcStats.setNeedRecalcDynamicStats(true);
+
         const ESM::NPC *player = ptr.get<ESM::NPC>()->mBase;
 
         // reset
