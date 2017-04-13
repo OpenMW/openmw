@@ -10,14 +10,6 @@ namespace mwmp
         int count;
         bool persist;
     };
-
-    struct AnimStates
-    {
-        int idlestate;
-        int movestate;
-        int jumpstate;
-        bool forcestateupdate;
-    };
 }
 
 #endif //OPENMW_BASESTRUCTS_HPP

@@ -1906,34 +1906,6 @@ void CharacterController::update(float duration)
             else
                 forcestateupdate = updateCreatureState() || forcestateupdate;
 
-            /*
-                Start of tes3mp addition
-
-                Save or load animation states for this actor, depending on whether it's a local
-                or dedicated one
-            */
-            if (isLocalActor)
-            {
-                localActor->hasAnimStates = true;
-                localActor->animStates.idlestate = idlestate;
-                localActor->animStates.movestate = movestate;
-                localActor->animStates.jumpstate = jumpstate;
-                localActor->animStates.forcestateupdate = forcestateupdate;
-            }
-            else if (isDedicatedActor)
-            {
-                if (dedicatedActor->hasAnimStates)
-                {
-                    idlestate = CharacterState(dedicatedActor->animStates.idlestate);
-                    movestate = CharacterState(dedicatedActor->animStates.movestate);
-                    jumpstate = JumpingState(dedicatedActor->animStates.jumpstate);
-                    forcestateupdate = dedicatedActor->animStates.forcestateupdate;
-                }
-            }
-            /*
-                End of tes3mp addition
-            */
-
             refreshCurrentAnims(idlestate, movestate, jumpstate, forcestateupdate);
 
             updateIdleStormState(inwater);
@@ -2483,11 +2455,11 @@ void CharacterController::updateHeadTracking(float duration)
     {
         mwmp::DedicatedActor *dedicatedActor = mwmp::Main::get().getCellController()->getDedicatedActor(mPtr);
 
-        if (dedicatedActor->headPitch != -1)
-            xAngleRadians = dedicatedActor->headPitch;
+        //if (dedicatedActor->headPitch != -1)
+        //    xAngleRadians = dedicatedActor->headPitch;
         
-        if (dedicatedActor->headYaw != -1)
-            zAngleRadians = dedicatedActor->headYaw;
+        //if (dedicatedActor->headYaw != -1)
+        //    zAngleRadians = dedicatedActor->headYaw;
     }
     /*
         End of tes3mp addition

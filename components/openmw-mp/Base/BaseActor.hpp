@@ -33,9 +33,6 @@ namespace mwmp
 
         Animation animation;
         bool hasAnimation;
-
-        AnimStates animStates;
-        bool hasAnimStates;
     };
 
     class BaseActorList

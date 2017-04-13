@@ -44,7 +44,6 @@ void PacketActorTest::Packet(RakNet::BitStream *bs, bool send)
         RW(actor.headYaw, send);
 
         RW(actor.hasAnimation, send);
-        RW(actor.hasAnimStates, send);
 
         if (actor.hasAnimation)
         {
@@ -52,14 +51,6 @@ void PacketActorTest::Packet(RakNet::BitStream *bs, bool send)
             RW(actor.animation.mode, send);
             RW(actor.animation.count, send);
             RW(actor.animation.persist, send);
-        }
-
-        if (actor.hasAnimStates)
-        {
-            RW(actor.animStates.idlestate, send);
-            RW(actor.animStates.movestate, send);
-            RW(actor.animStates.jumpstate, send);
-            RW(actor.animStates.forcestateupdate, send);
         }
 
         if (!send)
