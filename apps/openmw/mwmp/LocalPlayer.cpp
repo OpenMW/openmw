@@ -583,15 +583,15 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
     MWMechanics::NpcStats ptrNpcStats = player.getClass().getNpcStats(player);
     using namespace MWMechanics;
 
-    static bool oldRun = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Run);
-    static bool oldSneak = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Sneak);
-    static bool oldForceJump = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceJump);
-    static bool oldForceMoveJump = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceMoveJump);
+    static bool wasRunning = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Run);
+    static bool wasSneaking = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Sneak);
+    static bool wasForceJumping = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceJump);
+    static bool wasForceMoveJumping = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceMoveJump);
 
-    bool run = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Run);
-    bool sneak = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Sneak);
-    bool forceJump = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceJump);
-    bool forceMoveJump = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceMoveJump);
+    bool isRunning = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Run);
+    bool isSneaking = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Sneak);
+    bool isForceJumping = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceJump);
+    bool isForceMoveJumping = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceMoveJump);
     
     isFlying = world->isFlying(player);
     bool isJumping = !world->isOnGround(player) && !isFlying;
@@ -601,44 +601,45 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
     static bool wasJumping = false;
     static bool wasFlying = false;
 
-    MWMechanics::DrawState_ state = player.getClass().getNpcStats(player).getDrawState();
-    static MWMechanics::DrawState_ oldState = player.getClass().getNpcStats(player).getDrawState();
+    MWMechanics::DrawState_ currentDrawState = player.getClass().getNpcStats(player).getDrawState();
+    static MWMechanics::DrawState_ lastDrawState = player.getClass().getNpcStats(player).getDrawState();
 
-    if (oldRun != run
-        || oldSneak != sneak || oldForceJump != forceJump
-        || oldForceMoveJump != forceMoveJump || oldState != state
+    if (wasRunning != isRunning
+        || wasSneaking != isSneaking || wasForceJumping != isForceJumping
+        || wasForceMoveJumping != isForceMoveJumping || lastDrawState != currentDrawState
         || wasJumping || isJumping || wasFlying || isFlying
         || forceUpdate)
     {
-        oldSneak = sneak;
-        oldRun = run;
-        oldForceJump = forceJump;
-        oldForceMoveJump = forceMoveJump;
-        oldState = state;
+        wasSneaking = isSneaking;
+        wasRunning = isRunning;
+        wasForceJumping = isForceJumping;
+        wasForceMoveJumping = isForceMoveJumping;
+        lastDrawState = currentDrawState;
         
         wasFlying = isFlying;
         wasJumping = isJumping;
 
         movementFlags = 0;
+
 #define __SETFLAG(flag, value) (value) ? (movementFlags | flag) : (movementFlags & ~flag)
 
-        movementFlags = __SETFLAG(CreatureStats::Flag_Sneak, sneak);
-        movementFlags = __SETFLAG(CreatureStats::Flag_Run, run);
-        movementFlags = __SETFLAG(CreatureStats::Flag_ForceJump, forceJump);
+        movementFlags = __SETFLAG(CreatureStats::Flag_Sneak, isSneaking);
+        movementFlags = __SETFLAG(CreatureStats::Flag_Run, isRunning);
+        movementFlags = __SETFLAG(CreatureStats::Flag_ForceJump, isForceJumping);
         movementFlags = __SETFLAG(CreatureStats::Flag_ForceJump, isJumping);
-        movementFlags = __SETFLAG(CreatureStats::Flag_ForceMoveJump, forceMoveJump);
+        movementFlags = __SETFLAG(CreatureStats::Flag_ForceMoveJump, isForceMoveJumping);
 
 #undef __SETFLAG
 
-        if (state == MWMechanics::DrawState_Nothing)
+        if (currentDrawState == MWMechanics::DrawState_Nothing)
             drawState = 0;
-        else if (state == MWMechanics::DrawState_Weapon)
+        else if (currentDrawState == MWMechanics::DrawState_Weapon)
             drawState = 1;
-        else if (state == MWMechanics::DrawState_Spell)
+        else if (currentDrawState == MWMechanics::DrawState_Spell)
             drawState = 2;
 
         if (isJumping)
-            mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after jump;
+            updatePosition(true); // fix position after jump;
 
         getNetworking()->getPlayerPacket(ID_PLAYER_DRAWSTATE)->setPlayer(this);
         getNetworking()->getPlayerPacket(ID_PLAYER_DRAWSTATE)->Send();
