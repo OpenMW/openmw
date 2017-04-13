@@ -81,7 +81,14 @@ void ProcessorInitializer()
 
     ActorProcessor::AddProcessor(new ProcessorActorList());
     ActorProcessor::AddProcessor(new ProcessorActorAuthority());
+    ActorProcessor::AddProcessor(new ProcessorActorAnimPlay());
+    ActorProcessor::AddProcessor(new ProcessorActorAttack());
+    ActorProcessor::AddProcessor(new ProcessorActorCellChange());
+    ActorProcessor::AddProcessor(new ProcessorActorDrawState());
+    ActorProcessor::AddProcessor(new ProcessorActorDynamicStats());
+    ActorProcessor::AddProcessor(new ProcessorActorHeadRotation());
     ActorProcessor::AddProcessor(new ProcessorActorPosition());
+    ActorProcessor::AddProcessor(new ProcessorActorSpeech());
     ActorProcessor::AddProcessor(new ProcessorActorTest());
 
     WorldProcessor::AddProcessor(new ProcessorContainer());
