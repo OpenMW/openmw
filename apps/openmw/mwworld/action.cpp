@@ -22,9 +22,9 @@ MWWorld::Action::Action (bool keepSound, const Ptr& target) : mKeepSound (keepSo
 
 MWWorld::Action::~Action() {}
 
-void MWWorld::Action::execute (const Ptr& actor)
+void MWWorld::Action::execute (const Ptr& actor, bool noSound)
 {
-    if(!mSoundId.empty())
+    if(!mSoundId.empty() && !noSound)
     {
         if(mKeepSound && actor == MWMechanics::getPlayer())
             MWBase::Environment::get().getSoundManager()->playSound(mSoundId, 1.0, 1.0,
