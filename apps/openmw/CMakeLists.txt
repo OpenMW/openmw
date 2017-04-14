@@ -126,6 +126,7 @@ target_link_libraries(openmw
     ${OSGDB_LIBRARIES}
     ${OSGVIEWER_LIBRARIES}
     ${OSGGA_LIBRARIES}
+    ${OSGSHADOW_LIBRARIES}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_THREAD_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}

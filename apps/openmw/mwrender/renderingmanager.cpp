@@ -13,6 +13,13 @@
 #include <osg/UserDataContainer>
 #include <osg/ComputeBoundsVisitor>
 
+#include <osgShadow/ShadowedScene>
+#include <osgShadow/ViewDependentShadowMap>
+#include <osgShadow/ShadowMap>
+#include <osgShadow/ParallelSplitShadowMap>
+#include <osgShadow/ShadowMap>
+#include <osgShadow/LightSpacePerspectiveShadowMap>
+
 #include <osgUtil/LineSegmentIntersector>
 #include <osgUtil/IncrementalCompileOperation>
 
@@ -183,6 +190,7 @@ namespace MWRender
         , mFieldOfViewOverridden(false)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
+
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
         resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders"));
         resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
@@ -198,7 +206,35 @@ namespace MWRender
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);
 
-        mRootNode->addChild(sceneRoot);
+        osg::ref_ptr<osgShadow::ShadowedScene> shadowedScene (new osgShadow::ShadowedScene);
+
+        osgShadow::ShadowSettings* settings = shadowedScene->getShadowSettings();
+        settings->setLightNum(0);
+        settings->setCastsShadowTraversalMask(Mask_Scene|Mask_Actor|Mask_Player);
+        settings->setReceivesShadowTraversalMask(~0u);
+
+        settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::PERSPECTIVE_SHADOW_MAP);
+        settings->setBaseShadowTextureUnit(1);
+        settings->setMinimumShadowMapNearFarRatio(0);
+        settings->setNumShadowMapsPerLight(1);
+        //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::ORTHOGRAPHIC_SHADOW_MAP);
+        //settings->setMultipleShadowMapHint(osgShadow::ShadowSettings::PARALLEL_SPLIT); // ignored
+        //settings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
+        //settings->setDebugDraw(true);
+
+        settings->setPerspectiveShadowMapCutOffAngle(0);
+        settings->setShaderHint(osgShadow::ShadowSettings::PROVIDE_VERTEX_AND_FRAGMENT_SHADER);
+
+        int mapres = 2048;
+        settings->setTextureSize(osg::Vec2s(mapres,mapres));
+
+        osgShadow::ShadowTechnique* tech = new osgShadow::ViewDependentShadowMap;
+        shadowedScene->setShadowTechnique(tech);
+
+        //mRootNode->addChild(sceneRoot);
+        shadowedScene->addChild(sceneRoot);
+        mRootNode->addChild(shadowedScene);
+
 
         mPathgrid.reset(new Pathgrid(mRootNode));
 
@@ -228,7 +264,7 @@ namespace MWRender
         mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
 
         osg::ref_ptr<osg::LightSource> source = new osg::LightSource;
-        source->setNodeMask(Mask_Lighting);
+        //source->setNodeMask(Mask_Lighting);
         mSunLight = new osg::Light;
         source->setLight(mSunLight);
         mSunLight->setDiffuse(osg::Vec4f(0,0,0,1));
@@ -272,7 +308,8 @@ namespace MWRender
         mViewer->getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
         mViewer->getCamera()->setCullingMode(cullingMode);
 
-        mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
+        //mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
+        mViewer->getCamera()->setCullMask(~(Mask_Lighting));
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
