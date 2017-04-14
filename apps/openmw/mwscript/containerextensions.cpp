@@ -158,7 +158,8 @@ namespace MWScript
                         if (::Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), item))
                             itemName = iter->getClass().getName(*iter);
 
-                    int numRemoved = store.remove(item, count, ptr);
+                    // Actors should not equip a replacement when items are removed with RemoveItem
+                    int numRemoved = store.remove(item, count, ptr, false);
 
                     // Spawn a messagebox (only for items removed from player's inventory)
                     if ((numRemoved > 0)
@@ -213,7 +214,8 @@ namespace MWScript
                     else
                     {
                         boost::shared_ptr<MWWorld::Action> action = it->getClass().use(*it);
-                        action->execute(ptr);
+                        // No equip sound for actors other than the player
+                        action->execute(ptr, true);
                     }
                 }
         };
