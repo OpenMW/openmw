@@ -18,6 +18,21 @@ Each window in the GUI mode remembers it's previous location when exiting the ga
 .. note::
 	To scale the windows, making the widgets proportionally larger, see the scaling factor setting instead.
 
+:Type:		boolean
+:Range:		True/False
+
+This section controls the state of pinnable windows: pinned or not. For example, to pin only the map window, the actual settings will be::
+
+	inventory pin = false
+	map pin = true
+	stats pin = false
+	spells pin = false
+
+The pinnable window can be pinned/unpinned by clicking on a button in the right upper corner of the window.
+
+.. note::
+	A world/local map switch button on the map window will be showed only in GUI mode.
+
 stats
 -----
 
@@ -25,6 +40,7 @@ stats
 			y = 0.0
 			h = 0.375
 			w = 0.4275
+			pin = false
 
 The stats window, displaying level, race, class, skills and stats. Activated by clicking on any of the three bars in the lower left corner of the HUD.
 
@@ -35,6 +51,7 @@ spells
 			y = 0.5725
 			h = 0.375
 			w = 0.4275
+			pin = false
 
 The spells window, displaying powers, spells, and magical items. Activated by clicking on the spells widget (third from left) in the bottom left corner of the HUD.
 
@@ -45,38 +62,9 @@ map
 			y = 0.0
 			h = 0.375
 			w = 0.5725
+			pin = false
 
 The local and world map window. Activated by clicking on the map widget in the bottom right corner of the HUD.
-
-dialogue
---------
-
-:Default:	x = 0.095
-			y = 0.095
-			h = 0.810
-			w = 0.810
-
-The dialog window, for talking with NPCs. Activated by clicking on a NPC.
-
-alchemy
--------
-
-:Default:	x = 0.25
-			y = 0.25
-			h = 0.5
-			w = 0.5
-
-The alchemy window, for crafting potions. Activated by dragging an alchemy tool on to the rag doll. Unlike most other windows, this window hides all other windows when opened.
-
-console
--------
-
-:Default:	x = 0.0
-			y = 0.0
-			h = 1.0
-			w = 0.5
-
-The console command window. Activated by pressing the tilde (~) key.
 
 inventory
 ---------
@@ -85,6 +73,7 @@ inventory
 			y = 0.4275
 			h = 0.6225
 			w = 0.5725
+			pin = false
 
 The inventory window, displaying the paper doll and possessions, when activated by clicking on the inventory widget (second from left) in the bottom left corner of the HUD.
 
@@ -147,3 +136,33 @@ companion
 			w = 0.375
 
 The NPC's inventory window while interacting with a companion. The companion windows were added in the Tribunal expansion, but are available everywhere in the OpenMW engine.
+
+dialogue
+--------
+
+:Default:	x = 0.095
+			y = 0.095
+			h = 0.810
+			w = 0.810
+
+The dialog window, for talking with NPCs. Activated by clicking on a NPC.
+
+alchemy
+-------
+
+:Default:	x = 0.25
+			y = 0.25
+			h = 0.5
+			w = 0.5
+
+The alchemy window, for crafting potions. Activated by dragging an alchemy tool on to the rag doll. Unlike most other windows, this window hides all other windows when opened.
+
+console
+-------
+
+:Default:	x = 0.0
+			y = 0.0
+			h = 1.0
+			w = 0.5
+
+The console command window. Activated by pressing the tilde (~) key.

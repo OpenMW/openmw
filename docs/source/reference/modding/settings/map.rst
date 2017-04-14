@@ -51,3 +51,14 @@ local map widget size
 This setting controls the canvas size of the GUI mode local map window. Larger values result in a larger physical map size on screen, and typically require more panning to see all available portions of the map. This larger size also enables an overall greater level of detail if the local map resolution setting is also increased.
 
 The default value for this setting is 512. This setting can not be configured except by editing the settings configuration file.
+
+global
+------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this setting is true, a world map on a map window will be displayed, otherwise a local map will be displayed.
+
+The default value is false. This setting can be toggled with the Local/World map switch button on the map window.
