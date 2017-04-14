@@ -2,20 +2,20 @@
 // Created by koncord on 01.04.17.
 //
 
-#ifndef OPENMW_PROCESSORPLAYERDRAWSTATE_HPP
-#define OPENMW_PROCESSORPLAYERDRAWSTATE_HPP
+#ifndef OPENMW_PROCESSORPLAYERANIMFLAGS_HPP
+#define OPENMW_PROCESSORPLAYERANIMFLAGS_HPP
 
 
 #include "apps/openmw-mp/PlayerProcessor.hpp"
 
 namespace mwmp
 {
-    class ProcessorPlayerDrawState : public PlayerProcessor
+    class ProcessorPlayerAnimFlags : public PlayerProcessor
     {
     public:
-        ProcessorPlayerDrawState()
+        ProcessorPlayerAnimFlags()
         {
-            BPP_INIT(ID_PLAYER_DRAWSTATE)
+            BPP_INIT(ID_PLAYER_ANIM_FLAGS)
         }
 
         void Do(PlayerPacket &packet, Player &player) override
@@ -30,4 +30,4 @@ namespace mwmp
 
 
 
-#endif //OPENMW_PROCESSORPLAYERDRAWSTATE_HPP
+#endif //OPENMW_PROCESSORPLAYERANIMFLAGS_HPP

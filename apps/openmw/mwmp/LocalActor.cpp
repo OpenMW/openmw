@@ -35,7 +35,7 @@ LocalActor::~LocalActor()
 void LocalActor::update(bool forceUpdate)
 {
     updatePosition(forceUpdate);
-    updateDrawStateAndFlags(forceUpdate);
+    updateAnimFlags(forceUpdate);
 }
 
 void LocalActor::updatePosition(bool forceUpdate)
@@ -53,7 +53,7 @@ void LocalActor::updatePosition(bool forceUpdate)
     }
 }
 
-void LocalActor::updateDrawStateAndFlags(bool forceUpdate)
+void LocalActor::updateAnimFlags(bool forceUpdate)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
     MWMechanics::NpcStats ptrNpcStats = ptr.getClass().getNpcStats(ptr);

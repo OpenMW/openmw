@@ -70,7 +70,7 @@ void LocalPlayer::update()
 {
     updateCell();
     updatePosition();
-    updateDrawStateAndFlags();
+    updateAnimFlags();
     updateAttackState();
     updateDeadState();
     updateEquipment();
@@ -574,7 +574,7 @@ void LocalPlayer::updateDeadState(bool forceUpdate)
         isDead = false;
 }
 
-void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
+void LocalPlayer::updateAnimFlags(bool forceUpdate)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
     MWWorld::Ptr player = world->getPlayerPtr();
@@ -641,8 +641,8 @@ void LocalPlayer::updateDrawStateAndFlags(bool forceUpdate)
         if (isJumping)
             updatePosition(true); // fix position after jump;
 
-        getNetworking()->getPlayerPacket(ID_PLAYER_DRAWSTATE)->setPlayer(this);
-        getNetworking()->getPlayerPacket(ID_PLAYER_DRAWSTATE)->Send();
+        getNetworking()->getPlayerPacket(ID_PLAYER_ANIM_FLAGS)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_ANIM_FLAGS)->Send();
     }
 }
 
@@ -810,7 +810,7 @@ void LocalPlayer::setPosition()
     updatePosition(true);
 
     // Make sure we update our draw state, or we'll end up with the wrong one
-    updateDrawStateAndFlags(true);
+    updateAnimFlags(true);
 }
 
 void LocalPlayer::setCell()

@@ -1,15 +1,15 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Log.hpp>
-#include "PacketActorDrawState.hpp"
+#include "PacketActorAnimFlags.hpp"
 
 using namespace mwmp;
 
-PacketActorDrawState::PacketActorDrawState(RakNet::RakPeerInterface *peer) : ActorPacket(peer)
+PacketActorAnimFlags::PacketActorAnimFlags(RakNet::RakPeerInterface *peer) : ActorPacket(peer)
 {
-    packetID = ID_ACTOR_DRAW_STATE;
+    packetID = ID_ACTOR_ANIM_FLAGS;
 }
 
-void PacketActorDrawState::Packet(RakNet::BitStream *bs, bool send)
+void PacketActorAnimFlags::Packet(RakNet::BitStream *bs, bool send)
 {
     ActorPacket::Packet(bs, send);
 

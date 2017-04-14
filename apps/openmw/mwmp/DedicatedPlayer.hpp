@@ -46,7 +46,7 @@ namespace mwmp
         MWWorld::Ptr getLiveCellPtr();
         MWWorld::ManualRef* getRef();
         void move(float dt);
-        void updateDrawState();
+        void updateAnimFlags();
         void updateEquipment();
 
         void updateCell();

@@ -19,7 +19,7 @@
 #include "processors/player/ProcessorPlayerDynamicStats.hpp"
 #include "processors/player/ProcessorPlayerDeath.hpp"
 #include "processors/player/ProcessorPlayerResurrect.hpp"
-#include "processors/player/ProcessorPlayerDrawState.hpp"
+#include "processors/player/ProcessorPlayerAnimFlags.hpp"
 #include "processors/player/ProcessorChatMsg.hpp"
 #include "processors/player/ProcessorPlayerCharGen.hpp"
 #include "processors/player/ProcessorGUIMessageBox.hpp"
@@ -28,10 +28,10 @@
 #include "processors/actor/ProcessorActorList.hpp"
 #include "processors/actor/ProcessorActorAuthority.hpp"
 #include "processors/actor/ProcessorActorTest.hpp"
+#include "processors/actor/ProcessorActorAnimFlags.hpp"
 #include "processors/actor/ProcessorActorAnimPlay.hpp"
 #include "processors/actor/ProcessorActorAttack.hpp"
 #include "processors/actor/ProcessorActorCellChange.hpp"
-#include "processors/actor/ProcessorActorDrawState.hpp"
 #include "processors/actor/ProcessorActorDynamicStats.hpp"
 #include "processors/actor/ProcessorActorHeadRotation.hpp"
 #include "processors/actor/ProcessorActorPosition.hpp"
@@ -73,7 +73,7 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorPlayerDynamicStats());
     PlayerProcessor::AddProcessor(new ProcessorPlayerDeath());
     PlayerProcessor::AddProcessor(new ProcessorPlayerResurrect());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerDrawState());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerAnimFlags());
     PlayerProcessor::AddProcessor(new ProcessorChatMsg());
     PlayerProcessor::AddProcessor(new ProcessorPlayerCharGen());
     PlayerProcessor::AddProcessor(new ProcessorGUIMessageBox());
@@ -81,10 +81,10 @@ void ProcessorInitializer()
 
     ActorProcessor::AddProcessor(new ProcessorActorList());
     ActorProcessor::AddProcessor(new ProcessorActorAuthority());
+    ActorProcessor::AddProcessor(new ProcessorActorAnimFlags());
     ActorProcessor::AddProcessor(new ProcessorActorAnimPlay());
     ActorProcessor::AddProcessor(new ProcessorActorAttack());
     ActorProcessor::AddProcessor(new ProcessorActorCellChange());
-    ActorProcessor::AddProcessor(new ProcessorActorDrawState());
     ActorProcessor::AddProcessor(new ProcessorActorDynamicStats());
     ActorProcessor::AddProcessor(new ProcessorActorHeadRotation());
     ActorProcessor::AddProcessor(new ProcessorActorPosition());

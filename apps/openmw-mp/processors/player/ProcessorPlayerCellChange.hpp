@@ -46,26 +46,26 @@ namespace mwmp
                         playerController->GetPacket(ID_PLAYER_POS)->setPlayer(other);
                         playerController->GetPacket(ID_PLAYER_SKILL)->setPlayer(other);
                         playerController->GetPacket(ID_PLAYER_EQUIPMENT)->setPlayer(other);
-                        playerController->GetPacket(ID_PLAYER_DRAWSTATE)->setPlayer(other);
+                        playerController->GetPacket(ID_PLAYER_ANIM_FLAGS)->setPlayer(other);
 
                         playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(pl->guid);
                         playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(pl->guid);
                         playerController->GetPacket(ID_PLAYER_POS)->Send(pl->guid);
                         playerController->GetPacket(ID_PLAYER_SKILL)->Send(pl->guid);
                         playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(pl->guid);
-                        playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(pl->guid);
+                        playerController->GetPacket(ID_PLAYER_ANIM_FLAGS)->Send(pl->guid);
 
                         playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->setPlayer(pl);
                         playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->setPlayer(pl);
                         playerController->GetPacket(ID_PLAYER_SKILL)->setPlayer(pl);
                         playerController->GetPacket(ID_PLAYER_EQUIPMENT)->setPlayer(pl);
-                        playerController->GetPacket(ID_PLAYER_DRAWSTATE)->setPlayer(pl);
+                        playerController->GetPacket(ID_PLAYER_ANIM_FLAGS)->setPlayer(pl);
 
                         playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(other->guid);
                         playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(other->guid);
                         playerController->GetPacket(ID_PLAYER_SKILL)->Send(other->guid);
                         playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(other->guid);
-                        playerController->GetPacket(ID_PLAYER_DRAWSTATE)->Send(other->guid);
+                        playerController->GetPacket(ID_PLAYER_ANIM_FLAGS)->Send(other->guid);
 
                         LOG_APPEND(Log::LOG_INFO, "- Finished information exchange with %s", other->npc.mName.c_str());
                     }

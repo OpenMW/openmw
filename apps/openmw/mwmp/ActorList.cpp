@@ -67,8 +67,8 @@ void ActorList::sendDrawStateActors()
     if (drawStateActors.size() > 0)
     {
         baseActors = drawStateActors;
-        Main::get().getNetworking()->getActorPacket(ID_ACTOR_DRAW_STATE)->setActorList(this);
-        Main::get().getNetworking()->getActorPacket(ID_ACTOR_DRAW_STATE)->Send();
+        Main::get().getNetworking()->getActorPacket(ID_ACTOR_ANIM_FLAGS)->setActorList(this);
+        Main::get().getNetworking()->getActorPacket(ID_ACTOR_ANIM_FLAGS)->Send();
     }
 }
 

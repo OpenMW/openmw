@@ -14,7 +14,7 @@
 #include "../Packets/Player/PacketPlayerDeath.hpp"
 #include "../Packets/Player/PacketSendMyID.hpp"
 #include "../Packets/Player/PacketDisconnect.hpp"
-#include "../Packets/Player/PacketPlayerDrawState.hpp"
+#include "../Packets/Player/PacketPlayerAnimFlags.hpp"
 #include "../Packets/Player/PacketChatMessage.hpp"
 #include "../Packets/Player/PacketPlayerCharGen.hpp"
 #include "../Packets/Player/PacketPlayerAttribute.hpp"
@@ -54,7 +54,7 @@ mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *p
     AddPacket<PacketPlayerResurrect>(&packets, peer);
 
     AddPacket<PacketPlayerDeath>(&packets, peer);
-    AddPacket<PacketPlayerDrawState>(&packets, peer);
+    AddPacket<PacketPlayerAnimFlags>(&packets, peer);
     AddPacket<PacketSendMyID>(&packets, peer);
     AddPacket<PacketDisconnect>(&packets, peer);
 

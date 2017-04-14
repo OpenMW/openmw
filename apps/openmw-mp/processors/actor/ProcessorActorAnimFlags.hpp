@@ -1,16 +1,16 @@
-#ifndef OPENMW_PROCESSORACTORDRAWSTATE_HPP
-#define OPENMW_PROCESSORACTORDRAWSTATE_HPP
+#ifndef OPENMW_PROCESSORACTORANIMFLAGS_HPP
+#define OPENMW_PROCESSORACTORANIMFLAGS_HPP
 
 #include "apps/openmw-mp/ActorProcessor.hpp"
 
 namespace mwmp
 {
-    class ProcessorActorDrawState : public ActorProcessor
+    class ProcessorActorAnimFlags : public ActorProcessor
     {
     public:
-        ProcessorActorDrawState()
+        ProcessorActorAnimFlags()
         {
-            BPP_INIT(ID_ACTOR_DRAW_STATE)
+            BPP_INIT(ID_ACTOR_ANIM_FLAGS)
         }
 
         void Do(ActorPacket &packet, Player &player, BaseActorList &actorList) override
@@ -21,9 +21,9 @@ namespace mwmp
             if (serverCell != nullptr)
                 serverCell->sendToLoaded(&packet, &actorList);
 
-            //Script::Call<Script::CallbackIdentity("OnActorDrawState")>(player.getId(), actorList.cell.getDescription().c_str());
+            //Script::Call<Script::CallbackIdentity("OnActorAnimFlags")>(player.getId(), actorList.cell.getDescription().c_str());
         }
     };
 }
 
-#endif //OPENMW_PROCESSORACTORDRAWSTATE_HPP
+#endif //OPENMW_PROCESSORACTORANIMFLAGS_HPP

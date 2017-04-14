@@ -281,7 +281,7 @@ void Players::update(float dt)
 
         ptrNpcStats->setBaseDisposition(255);
         pl->move(dt);
-        pl->updateDrawState();
+        pl->updateAnimFlags();
     }
 }
 
@@ -429,7 +429,7 @@ DedicatedPlayer *Players::getPlayer(const MWWorld::Ptr &ptr)
     return 0;
 }
 
-void DedicatedPlayer::updateDrawState()
+void DedicatedPlayer::updateAnimFlags()
 {
     using namespace MWMechanics;
 

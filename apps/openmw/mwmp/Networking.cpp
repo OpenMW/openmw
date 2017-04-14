@@ -628,15 +628,15 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_PLAYER_DRAWSTATE:
+    case ID_PLAYER_ANIM_FLAGS:
     {
         if (guid == myGuid)
-            getLocalPlayer()->updateDrawStateAndFlags(true);
+            getLocalPlayer()->updateAnimFlags(true);
         else if (pl != 0)
         {
             myPacket->setPlayer(pl);
             myPacket->Packet(&bsIn, false);
-            pl->updateDrawState();
+            pl->updateAnimFlags();
         }
         break;
     }
@@ -871,7 +871,7 @@ void Networking::processActorPacket(RakNet::Packet *packet)
 
         break;
     }
-    case ID_ACTOR_DRAW_STATE:
+    case ID_ACTOR_ANIM_FLAGS:
     {
         //Main::get().getCellController()->readDrawStates(actorList);
 
