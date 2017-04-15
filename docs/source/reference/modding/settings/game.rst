@@ -12,6 +12,28 @@ Enable visual clues for items owned by NPCs when the crosshair is on the object.
 
 The default value is 0 (no clues). This setting can only be configured by editing the settings configuration file.
 
+show projectile damage
+----------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this setting is true, damage bonus of arrows and bolts will be showed on item tooltip.
+
+The default value is false. This setting can only be configured by editing the settings configuration file.
+
+show melee info
+---------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this setting is true, melee weapons reach and speed will be showed on item tooltip.
+
+The default value is false. This setting can only be configured by editing the settings configuration file.
+
 best attack
 -----------
 
