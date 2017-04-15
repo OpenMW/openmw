@@ -895,10 +895,6 @@ void Networking::processActorPacket(RakNet::Packet *packet)
     {
         break;
     }
-    case ID_ACTOR_HEAD_ROTATION:
-    {
-        break;
-    }
     case ID_ACTOR_SPEECH:
     {
         break;

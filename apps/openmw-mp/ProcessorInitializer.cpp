@@ -33,7 +33,6 @@
 #include "processors/actor/ProcessorActorAttack.hpp"
 #include "processors/actor/ProcessorActorCellChange.hpp"
 #include "processors/actor/ProcessorActorDynamicStats.hpp"
-#include "processors/actor/ProcessorActorHeadRotation.hpp"
 #include "processors/actor/ProcessorActorPosition.hpp"
 #include "processors/actor/ProcessorActorSpeech.hpp"
 #include "WorldProcessor.hpp"
@@ -86,7 +85,6 @@ void ProcessorInitializer()
     ActorProcessor::AddProcessor(new ProcessorActorAttack());
     ActorProcessor::AddProcessor(new ProcessorActorCellChange());
     ActorProcessor::AddProcessor(new ProcessorActorDynamicStats());
-    ActorProcessor::AddProcessor(new ProcessorActorHeadRotation());
     ActorProcessor::AddProcessor(new ProcessorActorPosition());
     ActorProcessor::AddProcessor(new ProcessorActorSpeech());
     ActorProcessor::AddProcessor(new ProcessorActorTest());

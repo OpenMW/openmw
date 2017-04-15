@@ -29,9 +29,6 @@ namespace mwmp
         char drawState;
         bool isFlying;
 
-        float headPitch;
-        float headYaw;
-
         Animation animation;
     };
 

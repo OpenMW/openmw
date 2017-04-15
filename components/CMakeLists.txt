@@ -169,8 +169,8 @@ add_component_dir (openmw-mp
 
         Packets/Actor/PacketActorList Packets/Actor/PacketActorAuthority Packets/Actor/PacketActorTest
         Packets/Actor/PacketActorAnimPlay Packets/Actor/PacketActorAttack Packets/Actor/PacketActorCellChange
-        Packets/Actor/PacketActorAnimFlags Packets/Actor/PacketActorDynamicStats Packets/Actor/PacketActorHeadRotation
-        Packets/Actor/PacketActorPosition Packets/Actor/PacketActorSpeech
+        Packets/Actor/PacketActorAnimFlags Packets/Actor/PacketActorDynamicStats Packets/Actor/PacketActorPosition
+        Packets/Actor/PacketActorSpeech
 
         Packets/World/PacketObjectDelete Packets/World/PacketObjectPlace Packets/World/PacketObjectScale
         Packets/World/PacketObjectLock Packets/World/PacketObjectUnlock Packets/World/PacketObjectMove

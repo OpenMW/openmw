@@ -2439,31 +2439,6 @@ void CharacterController::updateHeadTracking(float duration)
     xAngleRadians = (1.f-factor) * mAnimation->getHeadPitch() + factor * (-xAngleRadians);
     zAngleRadians = (1.f-factor) * mAnimation->getHeadYaw() + factor * (-zAngleRadians);
 
-    /*
-        Start of tes3mp addition
-
-        Save or load head pitch and yaw depending on whether this is a local or dedicated actor
-    */
-    if (mwmp::Main::get().getCellController()->isLocalActor(mPtr))
-    {
-        mwmp::LocalActor *localActor = mwmp::Main::get().getCellController()->getLocalActor(mPtr);
-        localActor->headPitch = xAngleRadians;
-        localActor->headYaw = zAngleRadians;
-    }
-    else if (mwmp::Main::get().getCellController()->isDedicatedActor(mPtr))
-    {
-        mwmp::DedicatedActor *dedicatedActor = mwmp::Main::get().getCellController()->getDedicatedActor(mPtr);
-
-        //if (dedicatedActor->headPitch != -1)
-        //    xAngleRadians = dedicatedActor->headPitch;
-        
-        //if (dedicatedActor->headYaw != -1)
-        //    zAngleRadians = dedicatedActor->headYaw;
-    }
-    /*
-        End of tes3mp addition
-    */
-
     mAnimation->setHeadPitch(xAngleRadians);
     mAnimation->setHeadYaw(zAngleRadians);
 }
