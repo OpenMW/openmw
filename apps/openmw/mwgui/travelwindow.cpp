@@ -28,8 +28,6 @@ namespace MWGui
         WindowBase("openmw_travel_window.layout")
         , mCurrentY(0)
     {
-        setCoord(0, 0, 450, 300);
-
         getWidget(mCancelButton, "CancelButton");
         getWidget(mPlayerGold, "PlayerGold");
         getWidget(mSelect, "Select");
