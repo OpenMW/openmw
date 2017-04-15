@@ -1,26 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="VBox" skin="MW_Dialog" layer="Windows" position="0 0 329 253" align="Center" name="_Main">
+    <Widget type="VBox" skin="MW_Dialog" layer="Windows" position="0 0 330 385" align="Center" name="_Main">
         <Property key="Padding" value="12"/>
         <Property key="Spacing" value="8"/>
 
-        <Widget type="HBox" name="ToolBox">
-            <UserString key="HStretch" value="true"/>
-
-            <Widget type="ItemWidget" skin="MW_ItemIconSmall" position="0 0 32 32" name="ToolIcon"/>
-
-            <Widget type="AutoSizedTextBox" skin="SandText" name="UsesLabel">
-                <Property key="Caption" value="#{sUses}"/>
-            </Widget>
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
-            <Widget type="AutoSizedTextBox" skin="SandText" name="QualityLabel">
-                <Property key="Caption" value="#{sQuality}"/>
-                <Property key="TextAlign" value="Right"/>
-            </Widget>
-        </Widget>
+        <Widget type="AutoSizedTextBox" skin="SandText" name="Label">
+            <Property key="Caption" value="#{sRepairServiceTitle}"/>
+        </Widget>      
 
         <Widget type="ItemChargeView" skin="MW_ItemChargeView" align="Left Stretch" name="RepairBox">
             <UserString key="VStretch" value="true"/>
@@ -29,14 +16,31 @@
 
         <Widget type="HBox">
             <UserString key="HStretch" value="true"/>
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
-            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
-                <Property key="Caption" value="#{sCancel}"/>
-            </Widget>
+                <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 0 44 44" name="ToolIcon">
+                </Widget>
+
+                <Widget type="HBox" name="ToolBox">
+                    <Widget type="VBox">
+                        <Widget type="AutoSizedTextBox" skin="SandText" name="UsesLabel">
+                            <UserString key="HStretch" value="true"/>
+                            <Property key="Caption" value="#{sUses}"/>
+                            <Property key="TextAlign" value="Left"/>
+                        </Widget>
+                        <Widget type="AutoSizedTextBox" skin="SandText" name="QualityLabel">
+                            <UserString key="HStretch" value="true"/>
+                            <Property key="Caption" value="#{sQuality}"/>
+                            <Property key="TextAlign" value="Left"/>
+                        </Widget>
+                    </Widget>
+                </Widget>
+                
+               <Widget type="Widget">
+                   <UserString key="HStretch" value="true"/>
+               </Widget>
+
+               <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
+                   <Property key="Caption" value="#{sCancel}"/>
+               </Widget>
         </Widget>
-
     </Widget>
-
 </MyGUI>

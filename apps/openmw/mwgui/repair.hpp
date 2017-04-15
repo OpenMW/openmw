@@ -3,11 +3,14 @@
 
 #include "windowbase.hpp"
 
+#include "itemselection.hpp"
+
 #include "../mwmechanics/repair.hpp"
 
 namespace MWGui
 {
 
+class ItemSelectionDialog;
 class ItemWidget;
 class ItemChargeView;
 
@@ -29,6 +32,8 @@ protected:
 
     ItemWidget* mToolIcon;
 
+    ItemSelectionDialog* mItemSelectionDialog;
+
     MyGUI::TextBox* mUsesLabel;
     MyGUI::TextBox* mQualityLabel;
 
@@ -37,6 +42,11 @@ protected:
     MWMechanics::Repair mRepair;
 
     void updateRepairView();
+
+    void onSelectItem(MyGUI::Widget* sender);
+
+    void onItemSelected(MWWorld::Ptr item);
+    void onItemCancel();
 
     void onRepairItem(MyGUI::Widget* sender, const MWWorld::Ptr& ptr);
     void onCancel(MyGUI::Widget* sender);
