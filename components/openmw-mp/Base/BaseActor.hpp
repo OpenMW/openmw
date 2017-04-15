@@ -33,7 +33,6 @@ namespace mwmp
         float headYaw;
 
         Animation animation;
-        bool hasAnimation;
     };
 
     class BaseActorList

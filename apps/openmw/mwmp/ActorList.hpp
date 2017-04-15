@@ -23,9 +23,11 @@ namespace mwmp
 
         void addPositionActor(LocalActor localActor);
         void addAnimFlagsActor(LocalActor localActor);
+        void addAnimPlayActor(LocalActor localActor);
 
         void sendPositionActors();
         void sendAnimFlagsActors();
+        void sendAnimPlayActors();
 
         void editActorsInCell(MWWorld::CellStore* cellStore);
 
@@ -36,6 +38,7 @@ namespace mwmp
 
         std::vector<BaseActor> positionActors;
         std::vector<BaseActor> animFlagsActors;
+        std::vector<BaseActor> animPlayActors;
     };
 }
 

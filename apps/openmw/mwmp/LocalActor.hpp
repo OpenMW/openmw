@@ -18,6 +18,7 @@ namespace mwmp
 
         void updatePosition(bool forceUpdate);
         void updateAnimFlags(bool forceUpdate);
+        void updateAnimPlay();
 
         MWWorld::Ptr getPtr();
         void setPtr(const MWWorld::Ptr& newPtr);

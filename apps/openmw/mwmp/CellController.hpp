@@ -24,6 +24,7 @@ namespace mwmp
 
         void readPositions(mwmp::ActorList& actorList);
         void readAnimFlags(mwmp::ActorList& actorList);
+        void readAnimPlay(mwmp::ActorList& actorList);
 
         void setLocalActorRecord(std::string actorIndex, std::string cellIndex);
         void removeLocalActorRecord(std::string actorIndex);

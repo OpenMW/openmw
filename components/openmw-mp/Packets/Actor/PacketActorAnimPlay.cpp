@@ -38,7 +38,10 @@ void PacketActorAnimPlay::Packet(RakNet::BitStream *bs, bool send)
         RW(actor.refNumIndex, send);
         RW(actor.mpNum, send);
         
-        // TODO: Fill this in
+        RW(actor.animation.groupname, send);
+        RW(actor.animation.mode, send);
+        RW(actor.animation.count, send);
+        RW(actor.animation.persist, send);
 
         if (!send)
         {

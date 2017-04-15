@@ -20,6 +20,7 @@ namespace mwmp
 
         void readPositions(ActorList& actorList);
         void readAnimFlags(ActorList& actorList);
+        void readAnimPlay(ActorList& actorList);
 
         void initializeLocalActors();
         void initializeDedicatedActors(ActorList& actorList);

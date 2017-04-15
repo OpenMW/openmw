@@ -879,6 +879,8 @@ void Networking::processActorPacket(RakNet::Packet *packet)
     }
     case ID_ACTOR_ANIM_PLAY:
     {
+        //Main::get().getCellController()->readAnimPlay(actorList);
+
         break;
     }
     case ID_ACTOR_ATTACK:

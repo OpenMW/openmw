@@ -36,6 +36,7 @@ void LocalActor::update(bool forceUpdate)
 {
     updatePosition(forceUpdate);
     updateAnimFlags(forceUpdate);
+    updateAnimPlay();
 }
 
 void LocalActor::updatePosition(bool forceUpdate)
@@ -108,6 +109,15 @@ void LocalActor::updateAnimFlags(bool forceUpdate)
             updatePosition(true); // fix position after jump;
 
         mwmp::Main::get().getNetworking()->getActorList()->addAnimFlagsActor(*this);
+    }
+}
+
+void LocalActor::updateAnimPlay()
+{
+    if (!animation.groupname.empty())
+    {
+        mwmp::Main::get().getNetworking()->getActorList()->addAnimPlayActor(*this);
+        animation.groupname.clear();
     }
 }
 

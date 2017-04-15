@@ -17,6 +17,7 @@ DedicatedActor::DedicatedActor()
 {
     drawState = 0;
     movementFlags = 0;
+    animation.groupname = "";
 }
 
 DedicatedActor::~DedicatedActor()
@@ -28,7 +29,7 @@ void DedicatedActor::update(float dt)
 {
     move(dt);
     setDrawState();
-    //setAnimation();
+    setAnimation();
 }
 
 void DedicatedActor::move(float dt)
@@ -65,10 +66,12 @@ void DedicatedActor::setDrawState()
 
 void DedicatedActor::setAnimation()
 {
-    if (hasAnimation)
+    if (!animation.groupname.empty())
     {
         MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(ptr,
             animation.groupname, animation.mode, animation.count, animation.persist);
+
+        animation.groupname.clear();
     }
 }
 

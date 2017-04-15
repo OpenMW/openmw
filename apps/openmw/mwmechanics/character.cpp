@@ -2155,7 +2155,6 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
             if (mwmp::Main::get().getCellController()->isLocalActor(mPtr))
             {
                 mwmp::LocalActor *actor = mwmp::Main::get().getCellController()->getLocalActor(mPtr);
-                actor->hasAnimation = true;
                 actor->animation.groupname = groupname;
                 actor->animation.mode = mode;
                 actor->animation.count = count;
