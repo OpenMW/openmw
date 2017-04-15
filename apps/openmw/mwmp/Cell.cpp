@@ -53,7 +53,7 @@ void Cell::updateLocal(bool forceUpdate)
     }
 
     actorList->sendPositionActors();
-    actorList->sendDrawStateActors();
+    actorList->sendAnimFlagsActors();
 }
 
 void Cell::updateDedicated(float dt)

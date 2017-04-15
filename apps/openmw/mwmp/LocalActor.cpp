@@ -107,7 +107,7 @@ void LocalActor::updateAnimFlags(bool forceUpdate)
         if (isJumping)
             updatePosition(true); // fix position after jump;
 
-        mwmp::Main::get().getNetworking()->getActorList()->addDrawStateActor(*this);
+        mwmp::Main::get().getNetworking()->getActorList()->addAnimFlagsActor(*this);
     }
 }
 
