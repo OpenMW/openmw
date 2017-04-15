@@ -88,7 +88,7 @@ void Cell::readPositions(ActorList& actorList)
     }
 }
 
-void Cell::readDrawStates(ActorList& actorList)
+void Cell::readAnimFlags(ActorList& actorList)
 {
     initializeDedicatedActors(actorList);
 

@@ -873,12 +873,8 @@ void Networking::processActorPacket(RakNet::Packet *packet)
     }
     case ID_ACTOR_ANIM_FLAGS:
     {
-        //Main::get().getCellController()->readDrawStates(actorList);
+        //Main::get().getCellController()->readAnimFlags(actorList);
 
-        break;
-    }
-    case ID_ACTOR_TEST:
-    {
         break;
     }
     case ID_ACTOR_ANIM_PLAY:
@@ -902,6 +898,10 @@ void Networking::processActorPacket(RakNet::Packet *packet)
         break;
     }
     case ID_ACTOR_SPEECH:
+    {
+        break;
+    }
+    case ID_ACTOR_TEST:
     {
         break;
     }

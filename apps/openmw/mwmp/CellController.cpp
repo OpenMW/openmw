@@ -102,7 +102,7 @@ void CellController::readPositions(ActorList& actorList)
     }
 }
 
-void CellController::readDrawStates(ActorList& actorList)
+void CellController::readAnimFlags(ActorList& actorList)
 {
     std::string mapIndex = actorList.cell.getDescription();
 
@@ -111,7 +111,7 @@ void CellController::readDrawStates(ActorList& actorList)
     // If this now exists, send it the data
     if (cellsActive.count(mapIndex) > 0)
     {
-        cellsActive[mapIndex]->readDrawStates(actorList);
+        cellsActive[mapIndex]->readAnimFlags(actorList);
     }
 }
 
