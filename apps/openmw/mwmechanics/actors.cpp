@@ -1152,19 +1152,17 @@ namespace MWMechanics
                     /*
                         Start of tes3mp change (major)
 
-                        Allow AI processing when LiveCellRefBase's isLocalActor set to true
+                        Allow AI processing for LocalActors and partially for DedicatedActors
                     */
+                    bool isAIActive = MWBase::Environment::get().getMechanicsManager()->isAIActive();
                     bool isLocalActor = mwmp::Main::get().getCellController()->isLocalActor(actor);
+                    bool isDedicatedActor = mwmp::Main::get().getCellController()->isDedicatedActor(actor);
 
                     //if (MWBase::Environment::get().getMechanicsManager()->isAIActive() && inProcessingRange)
 
-                    if ((MWBase::Environment::get().getMechanicsManager()->isAIActive() || isLocalActor)
-                        && inProcessingRange)
-                    /*
-                        End of tes3mp change (major)
-                    */
+                    if (inProcessingRange && (isAIActive || isLocalActor || isDedicatedActor))
                     {
-                        if (timerUpdateAITargets == 0)
+                        if (timerUpdateAITargets == 0 && (isLocalActor || isAIActive))
                         {
                             if (iter->first != player)
                                 adjustCommandedActor(iter->first);
@@ -1190,10 +1188,10 @@ namespace MWMechanics
                             iter->second->getCharacterController()->setHeadTrackTarget(headTrackTarget);
                         }
 
-                        if (iter->first.getClass().isNpc() && iter->first != player)
+                        if (iter->first.getClass().isNpc() && iter->first != player && (isLocalActor || isAIActive))
                             updateCrimePersuit(iter->first, duration);
 
-                        if (iter->first != player)
+                        if (iter->first != player && (isLocalActor || isAIActive))
                         {
                             CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
                             if (isConscious(iter->first))
@@ -1202,6 +1200,9 @@ namespace MWMechanics
                             if (stats.getAiSequence().isInCombat() && !stats.isDead()) hostilesCount++;
                         }
                     }
+                    /*
+                        End of tes3mp change (major)
+                    */
 
                     if(iter->first.getTypeName() == typeid(ESM::NPC).name())
                     {
