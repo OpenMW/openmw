@@ -885,7 +885,7 @@ namespace MWClass
 
         if (ptr == MWMechanics::getPlayer())
         {
-            mwmp::Main::get().getLocalPlayer()->updateDynamicStats(true);
+            mwmp::Main::get().getLocalPlayer()->updateStatsDynamic(true);
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after getting damage;
         }
     }

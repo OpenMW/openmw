@@ -74,7 +74,7 @@ void LocalPlayer::update()
     updateAttackState();
     updateDeadState();
     updateEquipment();
-    updateDynamicStats();
+    updateStatsDynamic();
     updateAttributes();
     updateSkills();
     updateLevel();
@@ -141,7 +141,7 @@ bool LocalPlayer::charGenThread()
         // only happens for new characters
         if (charGenStage.end != 1)
         {
-            updateDynamicStats(true);
+            updateStatsDynamic(true);
             updateAttributes(true);
             updateSkills(true);
             updateLevel(true);
@@ -165,7 +165,7 @@ bool LocalPlayer::hasFinishedCharGen()
     return charGenStage.end == 0;
 }
 
-void LocalPlayer::updateDynamicStats(bool forceUpdate)
+void LocalPlayer::updateStatsDynamic(bool forceUpdate)
 {
     MWWorld::Ptr player = getPlayerPtr();
 

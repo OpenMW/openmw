@@ -504,7 +504,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         {
             if (packet->length == myPacket->headerSize())
             {
-                getLocalPlayer()->updateDynamicStats(true);
+                getLocalPlayer()->updateStatsDynamic(true);
             }
             else
             {
@@ -576,7 +576,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->setPlayer(getLocalPlayer());
             myPacket->Send(serverAddr);
 
-            getLocalPlayer()->updateDynamicStats(true);
+            getLocalPlayer()->updateStatsDynamic(true);
             playerPacketController.GetPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(getLocalPlayer());
             playerPacketController.GetPacket(ID_PLAYER_STATS_DYNAMIC)->Send(serverAddr);
         }

@@ -24,7 +24,7 @@ namespace mwmp
         bool charGenThread(); // return true if CGStage::current == CGStage::end
         bool hasFinishedCharGen();
 
-        void updateDynamicStats(bool forceUpdate = false);
+        void updateStatsDynamic(bool forceUpdate = false);
         void updateAttributes(bool forceUpdate = false);
         void updateSkills(bool forceUpdate = false);
         void updateLevel(bool forceUpdate = false);
