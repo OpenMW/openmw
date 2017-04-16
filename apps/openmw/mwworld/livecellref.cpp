@@ -20,7 +20,6 @@ MWWorld::LiveCellRefBase::LiveCellRefBase(const std::string& type, const ESM::Ce
         Set default values for tes3mp-only booleans
     */
     canChangeCell = true;
-    isLocalActor = false;
     /*
         End of tes3mp addition
     */

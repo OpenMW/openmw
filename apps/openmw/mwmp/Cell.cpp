@@ -40,7 +40,8 @@ void Cell::updateLocal(bool forceUpdate)
         if (actor->getPtr().getCell() != store)
         {
             LOG_APPEND(Log::LOG_INFO, "- Removing LocalActor %s which is no longer in this cell", it->first.c_str());
-            actor->getPtr().getBase()->isLocalActor = false;
+            
+            Main::get().getCellController()->removeLocalActorRecord(it->first);
             localActors.erase(it++);
         }
         else
@@ -144,7 +145,6 @@ void Cell::initializeLocalActors()
 
         LocalActor *actor = new LocalActor();
         actor->cell = esmCell;
-        ptr.getBase()->isLocalActor = true;
         actor->setPtr(ptr);
 
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(ptr);
@@ -189,7 +189,6 @@ void Cell::uninitializeLocalActors()
     for (std::map<std::string, LocalActor *>::iterator it = localActors.begin(); it != localActors.end(); ++it)
     {
         LocalActor *actor = it->second;
-        actor->getPtr().getBase()->isLocalActor = false;
 
         Main::get().getCellController()->removeLocalActorRecord(it->first);
     }

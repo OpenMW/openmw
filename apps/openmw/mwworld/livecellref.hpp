@@ -38,17 +38,6 @@ namespace MWWorld
             End of tes3mp addition
         */
 
-        /*
-            Start of tes3mp addition
-
-            Useful boolean for quickly establishing which creatures and NPCs should be
-            processed locally by the player
-        */
-        bool isLocalActor;
-        /*
-            End of tes3mp addition
-        */
-
         /** runtime-data */
         RefData mData;
 

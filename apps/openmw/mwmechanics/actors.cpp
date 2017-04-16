@@ -11,9 +11,18 @@
 
 #include <components/settings/settings.hpp>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
 #include "../mwmp/Main.hpp"
+#include "../mwmp/CellController.hpp"
 #include "../mwmp/DedicatedPlayer.hpp"
 #include "../mwmp/LocalPlayer.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -1139,14 +1148,17 @@ namespace MWMechanics
                         return; // for now abort update of the old cell when cell changes by teleportation magic effect
                                 // a better solution might be to apply cell changes at the end of the frame
                     }
+
                     /*
                         Start of tes3mp change (major)
 
                         Allow AI processing when LiveCellRefBase's isLocalActor set to true
                     */
+                    bool isLocalActor = mwmp::Main::get().getCellController()->isLocalActor(actor);
+
                     //if (MWBase::Environment::get().getMechanicsManager()->isAIActive() && inProcessingRange)
 
-                    if ((MWBase::Environment::get().getMechanicsManager()->isAIActive() || actor.getBase()->isLocalActor)
+                    if ((MWBase::Environment::get().getMechanicsManager()->isAIActive() || isLocalActor)
                         && inProcessingRange)
                     /*
                         End of tes3mp change (major)
