@@ -23,6 +23,7 @@ namespace MWGui
 {
 
     const int StatsWindow::sLineHeight = 18;
+    int skillValueTextWidth = 0;
 
     StatsWindow::StatsWindow (DragAndDrop* drag)
       : WindowPinnableBase("openmw_stats_window.layout")
@@ -386,6 +387,7 @@ namespace MWGui
 
         skillValueWidget = mSkillView->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Right | MyGUI::Align::Top);
         skillValueWidget->setCaption(value);
+        skillValueTextWidth = skillValueWidget->getTextSize().width;
         skillValueWidget->_setWidgetState(state);
         skillValueWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
 
@@ -505,7 +507,7 @@ namespace MWGui
         }
         mSkillWidgets.clear();
 
-        const int valueSize = 40;
+        int valueSize = skillValueTextWidth + 40;
         MyGUI::IntCoord coord1(10, 0, mSkillView->getWidth() - (10 + valueSize) - 24, 18);
         MyGUI::IntCoord coord2(coord1.left + coord1.width, coord1.top, valueSize, coord1.height);
 
