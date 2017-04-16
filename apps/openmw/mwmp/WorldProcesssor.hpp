@@ -1,0 +1,50 @@
+//
+// Created by koncord on 16.04.17.
+//
+
+#ifndef OPENMW_WORLDPROCESSSOR_HPP
+#define OPENMW_WORLDPROCESSSOR_HPP
+
+#include <boost/unordered_map.hpp>
+#include <boost/shared_ptr.hpp>
+
+#include <components/openmw-mp/Log.hpp>
+#include <components/openmw-mp/NetworkMessages.hpp>
+#include <components/openmw-mp/Base/BasePacketProcessor.hpp>
+#include <components/openmw-mp/Packets/World/WorldPacket.hpp>
+#include "LocalPlayer.hpp"
+#include "DedicatedPlayer.hpp"
+
+namespace mwmp
+{
+    class WorldProcesssor : public BasePacketProcessor
+    {
+    public:
+        virtual void Do(WorldPacket &packet, BaseEvent &event) = 0;
+
+        static bool Process(RakNet::Packet &packet, BaseEvent &event);
+        static void AddProcessor(WorldProcesssor *processor);
+        static void SetServerAddr(RakNet::SystemAddress addr)
+        {
+            serverAddr = addr;
+        }
+
+        typedef boost::unordered_map<unsigned char, boost::shared_ptr<WorldProcesssor> > processors_t;
+
+    protected:
+        inline bool isRequest()
+        {
+            return request;
+        }
+        LocalPlayer *getLocalPlayer();
+    protected:
+        static RakNet::RakNetGUID guid;
+        static RakNet::SystemAddress serverAddr;
+    private:
+        static processors_t processors;
+        static bool request;
+    };
+}
+
+
+#endif //OPENMW_WORLDPROCESSSOR_HPP
