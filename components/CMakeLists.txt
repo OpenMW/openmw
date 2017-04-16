@@ -157,7 +157,7 @@ add_component_dir (openmw-mp
         Packets/Player/PacketHandshake Packets/Player/PacketChatMessage
 
         Packets/Player/PacketPlayerBaseInfo Packets/Player/PacketPlayerPosition Packets/Player/PacketPlayerEquipment
-        Packets/Player/PacketPlayerAttack Packets/Player/PacketPlayerDynamicStats Packets/Player/PacketPlayerAnimFlags
+        Packets/Player/PacketPlayerAttack Packets/Player/PacketPlayerStatsDynamic Packets/Player/PacketPlayerAnimFlags
         Packets/Player/PacketPlayerCharGen Packets/Player/PacketPlayerAttribute Packets/Player/PacketPlayerSkill
         Packets/Player/PacketPlayerLevel Packets/Player/PacketPlayerClass Packets/Player/PacketPlayerInventory
         Packets/Player/PacketPlayerSpellbook Packets/Player/PacketPlayerJournal Packets/Player/PacketPlayerActiveSkills
@@ -169,7 +169,7 @@ add_component_dir (openmw-mp
 
         Packets/Actor/PacketActorList Packets/Actor/PacketActorAuthority Packets/Actor/PacketActorTest
         Packets/Actor/PacketActorAnimPlay Packets/Actor/PacketActorAttack Packets/Actor/PacketActorCellChange
-        Packets/Actor/PacketActorAnimFlags Packets/Actor/PacketActorDynamicStats Packets/Actor/PacketActorPosition
+        Packets/Actor/PacketActorAnimFlags Packets/Actor/PacketActorStatsDynamic Packets/Actor/PacketActorPosition
         Packets/Actor/PacketActorSpeech
 
         Packets/World/PacketObjectDelete Packets/World/PacketObjectPlace Packets/World/PacketObjectScale
