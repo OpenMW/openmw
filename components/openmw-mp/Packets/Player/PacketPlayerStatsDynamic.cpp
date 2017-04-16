@@ -2,17 +2,17 @@
 // Created by koncord on 13.01.16.
 //
 
-#include "PacketPlayerDynamicStats.hpp"
+#include "PacketPlayerStatsDynamic.hpp"
 #include <components/openmw-mp/NetworkMessages.hpp>
 
 using namespace mwmp;
 
-PacketPlayerDynamicStats::PacketPlayerDynamicStats(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
+PacketPlayerStatsDynamic::PacketPlayerStatsDynamic(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
-    packetID = ID_PLAYER_DYNAMICSTATS;
+    packetID = ID_PLAYER_STATS_DYNAMIC;
 }
 
-void PacketPlayerDynamicStats::Packet(RakNet::BitStream *bs, bool send)
+void PacketPlayerStatsDynamic::Packet(RakNet::BitStream *bs, bool send)
 {
     PlayerPacket::Packet(bs, send);
     RW(player->creatureStats.mDynamic[0], send); // health

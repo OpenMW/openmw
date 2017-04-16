@@ -1,16 +1,16 @@
-#ifndef OPENMW_PROCESSORACTORDYNAMICSTATS_HPP
-#define OPENMW_PROCESSORACTORDYNAMICSTATS_HPP
+#ifndef OPENMW_PROCESSORACTORSTATSDYNAMIC_HPP
+#define OPENMW_PROCESSORACTORSTATSDYNAMIC_HPP
 
 #include "apps/openmw-mp/ActorProcessor.hpp"
 
 namespace mwmp
 {
-    class ProcessorActorDynamicStats : public ActorProcessor
+    class ProcessorActorStatsDynamic : public ActorProcessor
     {
     public:
-        ProcessorActorDynamicStats()
+        ProcessorActorStatsDynamic()
         {
-            BPP_INIT(ID_ACTOR_DYNAMICSTATS)
+            BPP_INIT(ID_ACTOR_STATS_DYNAMIC)
         }
 
         void Do(ActorPacket &packet, Player &player, BaseActorList &actorList) override
@@ -21,9 +21,9 @@ namespace mwmp
             if (serverCell != nullptr)
                 serverCell->sendToLoaded(&packet, &actorList);
 
-            //Script::Call<Script::CallbackIdentity("OnActorDynamicStats")>(player.getId(), actorList.cell.getDescription().c_str());
+            //Script::Call<Script::CallbackIdentity("OnActorStatsDynamic")>(player.getId(), actorList.cell.getDescription().c_str());
         }
     };
 }
 
-#endif //OPENMW_PROCESSORACTORDYNAMICSTATS_HPP
+#endif //OPENMW_PROCESSORACTORSTATSDYNAMIC_HPP

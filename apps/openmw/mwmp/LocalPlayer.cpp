@@ -195,8 +195,8 @@ void LocalPlayer::updateDynamicStats(bool forceUpdate)
 
             timer = 0;
 
-            getNetworking()->getPlayerPacket(ID_PLAYER_DYNAMICSTATS)->setPlayer(this);
-            getNetworking()->getPlayerPacket(ID_PLAYER_DYNAMICSTATS)->Send();
+            getNetworking()->getPlayerPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(this);
+            getNetworking()->getPlayerPacket(ID_PLAYER_STATS_DYNAMIC)->Send();
         }
     }
 }

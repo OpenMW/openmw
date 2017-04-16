@@ -2,20 +2,20 @@
 // Created by koncord on 01.04.17.
 //
 
-#ifndef OPENMW_PROCESSORPLAYERDYNAMICSTATS_HPP
-#define OPENMW_PROCESSORPLAYERDYNAMICSTATS_HPP
+#ifndef OPENMW_PROCESSORPLAYERSTATS_DYNAMIC_HPP
+#define OPENMW_PROCESSORPLAYERSTATS_DYNAMIC_HPP
 
 
 #include "apps/openmw-mp/PlayerProcessor.hpp"
 
 namespace mwmp
 {
-    class ProcessorPlayerDynamicStats : public PlayerProcessor
+    class ProcessorPlayerStatsDynamic : public PlayerProcessor
     {
     public:
-        ProcessorPlayerDynamicStats()
+        ProcessorPlayerStatsDynamic()
         {
-            BPP_INIT(ID_PLAYER_DYNAMICSTATS)
+            BPP_INIT(ID_PLAYER_STATS_DYNAMIC)
         }
 
         void Do(PlayerPacket &packet, Player &player) override
@@ -28,4 +28,4 @@ namespace mwmp
 }
 
 
-#endif //OPENMW_PROCESSORPLAYERDYNAMICSTATS_HPP
+#endif //OPENMW_PROCESSORPLAYERSTATS_DYNAMIC_HPP

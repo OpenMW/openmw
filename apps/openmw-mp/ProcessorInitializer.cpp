@@ -16,7 +16,7 @@
 #include "processors/player/ProcessorPlayerSpellbook.hpp"
 #include "processors/player/ProcessorPlayerJournal.hpp"
 #include "processors/player/ProcessorPlayerAttack.hpp"
-#include "processors/player/ProcessorPlayerDynamicStats.hpp"
+#include "processors/player/ProcessorPlayerStatsDynamic.hpp"
 #include "processors/player/ProcessorPlayerDeath.hpp"
 #include "processors/player/ProcessorPlayerResurrect.hpp"
 #include "processors/player/ProcessorPlayerAnimFlags.hpp"
@@ -32,7 +32,7 @@
 #include "processors/actor/ProcessorActorAnimPlay.hpp"
 #include "processors/actor/ProcessorActorAttack.hpp"
 #include "processors/actor/ProcessorActorCellChange.hpp"
-#include "processors/actor/ProcessorActorDynamicStats.hpp"
+#include "processors/actor/ProcessorActorStatsDynamic.hpp"
 #include "processors/actor/ProcessorActorPosition.hpp"
 #include "processors/actor/ProcessorActorSpeech.hpp"
 #include "WorldProcessor.hpp"
@@ -69,7 +69,7 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorPlayerSpellbook());
     PlayerProcessor::AddProcessor(new ProcessorPlayerJournal());
     PlayerProcessor::AddProcessor(new ProcessorPlayerAttack());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerDynamicStats());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerStatsDynamic());
     PlayerProcessor::AddProcessor(new ProcessorPlayerDeath());
     PlayerProcessor::AddProcessor(new ProcessorPlayerResurrect());
     PlayerProcessor::AddProcessor(new ProcessorPlayerAnimFlags());
@@ -84,7 +84,7 @@ void ProcessorInitializer()
     ActorProcessor::AddProcessor(new ProcessorActorAnimPlay());
     ActorProcessor::AddProcessor(new ProcessorActorAttack());
     ActorProcessor::AddProcessor(new ProcessorActorCellChange());
-    ActorProcessor::AddProcessor(new ProcessorActorDynamicStats());
+    ActorProcessor::AddProcessor(new ProcessorActorStatsDynamic());
     ActorProcessor::AddProcessor(new ProcessorActorPosition());
     ActorProcessor::AddProcessor(new ProcessorActorSpeech());
     ActorProcessor::AddProcessor(new ProcessorActorTest());

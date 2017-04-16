@@ -46,7 +46,7 @@ namespace mwmp
 
                 //packet.Send(player, true);
                 player.sendToLoaded(&packet);
-                playerController->GetPacket(ID_PLAYER_DYNAMICSTATS)->RequestData(player.attack.target);
+                playerController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->RequestData(player.attack.target);
             }
         }
     };

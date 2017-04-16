@@ -9,7 +9,7 @@
 #include "../Packets/Player/PacketPlayerBaseInfo.hpp"
 #include "../Packets/Player/PacketPlayerEquipment.hpp"
 #include "../Packets/Player/PacketPlayerAttack.hpp"
-#include "../Packets/Player/PacketPlayerDynamicStats.hpp"
+#include "../Packets/Player/PacketPlayerStatsDynamic.hpp"
 #include "../Packets/Player/PacketPlayerResurrect.hpp"
 #include "../Packets/Player/PacketPlayerDeath.hpp"
 #include "../Packets/Player/PacketSendMyID.hpp"
@@ -50,7 +50,7 @@ mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *p
     AddPacket<PacketPlayerEquipment>(&packets, peer);
 
     AddPacket<PacketPlayerAttack>(&packets, peer);
-    AddPacket<PacketPlayerDynamicStats>(&packets, peer);
+    AddPacket<PacketPlayerStatsDynamic>(&packets, peer);
     AddPacket<PacketPlayerResurrect>(&packets, peer);
 
     AddPacket<PacketPlayerDeath>(&packets, peer);

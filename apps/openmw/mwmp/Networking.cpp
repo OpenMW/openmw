@@ -498,7 +498,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         }
         break;
     }
-    case ID_PLAYER_DYNAMICSTATS:
+    case ID_PLAYER_STATS_DYNAMIC:
     {
         if (guid == myGuid)
         {
@@ -577,8 +577,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->Send(serverAddr);
 
             getLocalPlayer()->updateDynamicStats(true);
-            playerPacketController.GetPacket(ID_PLAYER_DYNAMICSTATS)->setPlayer(getLocalPlayer());
-            playerPacketController.GetPacket(ID_PLAYER_DYNAMICSTATS)->Send(serverAddr);
+            playerPacketController.GetPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(getLocalPlayer());
+            playerPacketController.GetPacket(ID_PLAYER_STATS_DYNAMIC)->Send(serverAddr);
         }
         else if (pl != 0)
         {
@@ -891,7 +891,7 @@ void Networking::processActorPacket(RakNet::Packet *packet)
     {
         break;
     }
-    case ID_ACTOR_DYNAMICSTATS:
+    case ID_ACTOR_STATS_DYNAMIC:
     {
         break;
     }

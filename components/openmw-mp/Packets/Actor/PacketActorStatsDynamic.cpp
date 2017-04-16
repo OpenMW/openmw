@@ -1,15 +1,15 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Log.hpp>
-#include "PacketActorDynamicStats.hpp"
+#include "PacketActorStatsDynamic.hpp"
 
 using namespace mwmp;
 
-PacketActorDynamicStats::PacketActorDynamicStats(RakNet::RakPeerInterface *peer) : ActorPacket(peer)
+PacketActorStatsDynamic::PacketActorStatsDynamic(RakNet::RakPeerInterface *peer) : ActorPacket(peer)
 {
-    packetID = ID_ACTOR_DYNAMICSTATS;
+    packetID = ID_ACTOR_STATS_DYNAMIC;
 }
 
-void PacketActorDynamicStats::Packet(RakNet::BitStream *bs, bool send)
+void PacketActorStatsDynamic::Packet(RakNet::BitStream *bs, bool send)
 {
     ActorPacket::Packet(bs, send);
 
