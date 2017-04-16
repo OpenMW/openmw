@@ -8,6 +8,16 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include "../mwgui/windowmanagerimp.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include "movement.hpp"
 #include "creaturestats.hpp"
 
@@ -46,10 +56,28 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
     if(target.getClass().getCreatureStats(target).isDead())
         return true;
 
+    /*
+        Start of tes3mp addition
+
+        Because multiplayer does not pause the game, prevent infinite arrest loops by ignoring
+        players already engaged in dialogue
+    */
+    if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
+    {
+        if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Dialogue))
+        {
+            return true;
+        }
+    }
+    /*
+        End of tes3mp addition
+    */
+
     actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
     //Set the target desition from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
+
 
     if (pathTo(actor, dest, duration, 100)) {
         target.getClass().activate(target,actor).get()->execute(actor); //Arrest player when reached
