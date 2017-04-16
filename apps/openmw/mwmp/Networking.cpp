@@ -890,15 +890,17 @@ void Networking::processActorPacket(RakNet::Packet *packet)
 
         break;
     }
+    case ID_ACTOR_SPEECH:
+    {
+        //Main::get().getCellController()->readSpeech(actorList);
+
+        break;
+    }
     case ID_ACTOR_ATTACK:
     {
         break;
     }
     case ID_ACTOR_CELL_CHANGE:
-    {
-        break;
-    }
-    case ID_ACTOR_SPEECH:
     {
         break;
     }

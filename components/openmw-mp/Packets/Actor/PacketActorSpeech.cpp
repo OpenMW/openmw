@@ -38,7 +38,8 @@ void PacketActorSpeech::Packet(RakNet::BitStream *bs, bool send)
         RW(actor.refNumIndex, send);
         RW(actor.mpNum, send);
         
-        // TODO: Fill this in
+        RW(actor.response, send);
+        RW(actor.sound, send);
 
         if (!send)
         {

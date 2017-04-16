@@ -34,6 +34,9 @@ namespace mwmp
         char drawState;
         bool isFlying;
 
+        std::string response;
+        std::string sound;
+
         Animation animation;
     };
 

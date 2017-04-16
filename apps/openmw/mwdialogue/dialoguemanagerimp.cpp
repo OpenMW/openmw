@@ -21,6 +21,18 @@
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/defines.hpp>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include "../mwmp/Main.hpp"
+#include "../mwmp/CellController.hpp"
+#include "../mwmp/LocalActor.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
@@ -646,6 +658,22 @@ namespace MWDialogue
                 winMgr->messageBox(info->mResponse);
             if (!info->mSound.empty())
                 sndMgr->say(actor, info->mSound);
+
+            /*
+                Start of tes3mp addition
+
+                If we are the cell authority over this actor, we need to record this new
+                sound for it
+            */
+            if (mwmp::Main::get().getCellController()->isLocalActor(actor))
+            {
+                mwmp::LocalActor *localActor = mwmp::Main::get().getCellController()->getLocalActor(actor);
+                localActor->response = info->mResponse;
+                localActor->sound = info->mSound;
+            }
+            /*
+                End of tes3mp addition
+            */
         }
     }
 

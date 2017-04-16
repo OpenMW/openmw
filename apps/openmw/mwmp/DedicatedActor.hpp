@@ -18,6 +18,7 @@ namespace mwmp
         void move(float dt);
         void setAnimFlags();
         void playAnimation();
+        void playSound();
         void setStatsDynamic();
 
         MWWorld::Ptr getPtr();

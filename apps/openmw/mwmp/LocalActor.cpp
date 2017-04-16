@@ -45,6 +45,7 @@ void LocalActor::update(bool forceUpdate)
     updatePosition(forceUpdate);
     updateAnimFlags(forceUpdate);
     updateAnimPlay();
+    updateSpeech();
     updateStatsDynamic(forceUpdate);
 }
 
@@ -127,6 +128,15 @@ void LocalActor::updateAnimPlay()
     {
         mwmp::Main::get().getNetworking()->getActorList()->addAnimPlayActor(*this);
         animation.groupname.clear();
+    }
+}
+
+void LocalActor::updateSpeech()
+{
+    if (!sound.empty())
+    {
+        mwmp::Main::get().getNetworking()->getActorList()->addSpeechActor(*this);
+        sound.clear();
     }
 }
 

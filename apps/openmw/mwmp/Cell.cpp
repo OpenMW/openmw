@@ -56,6 +56,7 @@ void Cell::updateLocal(bool forceUpdate)
     actorList->sendPositionActors();
     actorList->sendAnimFlagsActors();
     actorList->sendAnimPlayActors();
+    actorList->sendSpeechActors();
     actorList->sendStatsDynamicActors();
 }
 
@@ -149,6 +150,26 @@ void Cell::readStatsDynamic(ActorList& actorList)
         {
             DedicatedActor *actor = dedicatedActors[mapIndex];
             actor->creatureStats = baseActor.creatureStats;
+        }
+    }
+}
+
+void Cell::readSpeech(ActorList& actorList)
+{
+    initializeDedicatedActors(actorList);
+
+    BaseActor baseActor;
+
+    for (unsigned int i = 0; i < actorList.count; i++)
+    {
+        baseActor = actorList.baseActors.at(i);
+        std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
+
+        if (dedicatedActors.count(mapIndex) > 0)
+        {
+            DedicatedActor *actor = dedicatedActors[mapIndex];
+            actor->response = baseActor.response;
+            actor->sound = baseActor.sound;
         }
     }
 }

@@ -1,10 +1,15 @@
 #include <components/openmw-mp/Log.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwmechanics/mechanicsmanagerimp.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
+
 #include "../mwrender/animation.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/worldimp.hpp"
 
@@ -18,6 +23,7 @@ DedicatedActor::DedicatedActor()
     drawState = 0;
     movementFlags = 0;
     animation.groupname = "";
+    sound = "";
 
     creatureStats = new ESM::CreatureStats();
     creatureStats->blank();
@@ -34,6 +40,7 @@ void DedicatedActor::update(float dt)
     move(dt);
     setAnimFlags();
     playAnimation();
+    playSound();
     setStatsDynamic();
 }
 
@@ -77,6 +84,20 @@ void DedicatedActor::playAnimation()
             animation.groupname, animation.mode, animation.count, animation.persist);
 
         animation.groupname.clear();
+    }
+}
+
+void DedicatedActor::playSound()
+{
+    if (!sound.empty())
+    {
+        MWBase::Environment::get().getSoundManager()->say(ptr, sound);
+
+        MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
+        if (winMgr->getSubtitlesEnabled())
+            winMgr->messageBox(response);
+
+        sound.clear();
     }
 }
 
