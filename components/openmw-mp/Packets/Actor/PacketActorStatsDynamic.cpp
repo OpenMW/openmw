@@ -1,5 +1,6 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Log.hpp>
+#include <components/esm/creaturestats.hpp>
 #include "PacketActorStatsDynamic.hpp"
 
 using namespace mwmp;
@@ -33,12 +34,18 @@ void PacketActorStatsDynamic::Packet(RakNet::BitStream *bs, bool send)
         {
             actor = actorList->baseActors.at(i);
         }
+        else
+        {
+            actor.creatureStats = new ESM::CreatureStats();
+        }
 
         RW(actor.refId, send);
         RW(actor.refNumIndex, send);
         RW(actor.mpNum, send);
         
-        // TODO: Fill this in
+        RW(actor.creatureStats->mDynamic[0], send); // health
+        RW(actor.creatureStats->mDynamic[1], send); // magic
+        RW(actor.creatureStats->mDynamic[2], send); // fatigue
 
         if (!send)
         {

@@ -16,8 +16,9 @@ namespace mwmp
 
         void update(float dt);
         void move(float dt);
-        void setDrawState();
-        void setAnimation();
+        void setAnimFlags();
+        void playAnimation();
+        void setStatsDynamic();
 
         MWWorld::Ptr getPtr();
         void setPtr(const MWWorld::Ptr& newPtr);

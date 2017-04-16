@@ -2,7 +2,10 @@
 #define OPENMW_BASEACTOR_HPP
 
 #include <components/esm/loadcell.hpp>
+#include <components/esm/creaturestats.hpp>
+
 #include <components/openmw-mp/Base/BaseStructs.hpp>
+
 #include <RakNetTypes.h>
 
 namespace mwmp
@@ -22,8 +25,10 @@ namespace mwmp
 
         ESM::Position position;
         ESM::Position direction;
-        
+
         ESM::Cell cell;
+
+        ESM::CreatureStats *creatureStats;
 
         unsigned int movementFlags;
         char drawState;
@@ -52,6 +57,7 @@ namespace mwmp
         RakNet::RakNetGUID guid;
 
         std::vector<BaseActor> baseActors;
+
         unsigned int count;
 
         ESM::Cell cell;

@@ -862,6 +862,7 @@ void Networking::processActorPacket(RakNet::Packet *packet)
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_ACTOR_AUTHORITY about %s", actorList.cell.getDescription().c_str());
 
         Main::get().getCellController()->initializeLocalActors(actorList.cell);
+        Main::get().getCellController()->getCell(actorList.cell)->updateLocal(true);
 
         break;
     }
@@ -883,15 +884,17 @@ void Networking::processActorPacket(RakNet::Packet *packet)
 
         break;
     }
+    case ID_ACTOR_STATS_DYNAMIC:
+    {
+        //Main::get().getCellController()->readStatsDynamic(actorList);
+
+        break;
+    }
     case ID_ACTOR_ATTACK:
     {
         break;
     }
     case ID_ACTOR_CELL_CHANGE:
-    {
-        break;
-    }
-    case ID_ACTOR_STATS_DYNAMIC:
     {
         break;
     }

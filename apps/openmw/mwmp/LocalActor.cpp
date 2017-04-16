@@ -1,8 +1,12 @@
 #include <components/openmw-mp/Log.hpp>
 
 #include "../mwbase/environment.hpp"
+
+#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/movement.hpp"
+
 #include "../mwrender/animation.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/worldimp.hpp"
 
@@ -25,6 +29,10 @@ LocalActor::LocalActor()
 
     wasJumping = false;
     wasFlying = false;
+
+    statTimer = 0;
+
+    creatureStats = new ESM::CreatureStats();
 }
 
 LocalActor::~LocalActor()
@@ -37,6 +45,7 @@ void LocalActor::update(bool forceUpdate)
     updatePosition(forceUpdate);
     updateAnimFlags(forceUpdate);
     updateAnimPlay();
+    updateStatsDynamic(forceUpdate);
 }
 
 void LocalActor::updatePosition(bool forceUpdate)
@@ -121,6 +130,34 @@ void LocalActor::updateAnimPlay()
     }
 }
 
+void LocalActor::updateStatsDynamic(bool forceUpdate)
+{
+    MWMechanics::CreatureStats *ptrCreatureStats = &ptr.getClass().getCreatureStats(ptr);
+    MWMechanics::DynamicStat<float> health(ptrCreatureStats->getHealth());
+    MWMechanics::DynamicStat<float> magicka(ptrCreatureStats->getMagicka());
+    MWMechanics::DynamicStat<float> fatigue(ptrCreatureStats->getFatigue());
+
+    const float timeoutSec = 0.5;
+
+    if ((statTimer += MWBase::Environment::get().getFrameDuration()) >= timeoutSec || forceUpdate)
+    {
+        if (oldHealth != health || oldMagicka != magicka || oldFatigue != fatigue || forceUpdate)
+        {
+            oldHealth = health;
+            oldMagicka = magicka;
+            oldFatigue = fatigue;
+
+            health.writeState(creatureStats->mDynamic[0]);
+            magicka.writeState(creatureStats->mDynamic[1]);
+            fatigue.writeState(creatureStats->mDynamic[2]);
+
+            statTimer = 0;
+
+            mwmp::Main::get().getNetworking()->getActorList()->addStatsDynamicActor(*this);
+        }
+    }
+}
+
 MWWorld::Ptr LocalActor::getPtr()
 {
     return ptr;
@@ -135,4 +172,7 @@ void LocalActor::setPtr(const MWWorld::Ptr& newPtr)
     mpNum = ptr.getCellRef().getMpNum();
 
     lastDrawState = ptr.getClass().getNpcStats(ptr).getDrawState();
+    oldHealth = *(&ptr.getClass().getCreatureStats(ptr).getHealth());
+    oldMagicka = *(&ptr.getClass().getCreatureStats(ptr).getMagicka());
+    oldFatigue = *(&ptr.getClass().getCreatureStats(ptr).getFatigue());
 }

@@ -56,6 +56,7 @@ void Cell::updateLocal(bool forceUpdate)
     actorList->sendPositionActors();
     actorList->sendAnimFlagsActors();
     actorList->sendAnimPlayActors();
+    actorList->sendStatsDynamicActors();
 }
 
 void Cell::updateDedicated(float dt)
@@ -129,6 +130,25 @@ void Cell::readAnimPlay(ActorList& actorList)
             actor->animation.mode = baseActor.animation.mode;
             actor->animation.count = baseActor.animation.count;
             actor->animation.persist = baseActor.animation.persist;
+        }
+    }
+}
+
+void Cell::readStatsDynamic(ActorList& actorList)
+{
+    initializeDedicatedActors(actorList);
+
+    BaseActor baseActor;
+
+    for (unsigned int i = 0; i < actorList.count; i++)
+    {
+        baseActor = actorList.baseActors.at(i);
+        std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
+
+        if (dedicatedActors.count(mapIndex) > 0)
+        {
+            DedicatedActor *actor = dedicatedActors[mapIndex];
+            actor->creatureStats = baseActor.creatureStats;
         }
     }
 }

@@ -19,6 +19,7 @@ namespace mwmp
         void updatePosition(bool forceUpdate);
         void updateAnimFlags(bool forceUpdate);
         void updateAnimPlay();
+        void updateStatsDynamic(bool forceUpdate);
 
         MWWorld::Ptr getPtr();
         void setPtr(const MWWorld::Ptr& newPtr);
@@ -37,6 +38,11 @@ namespace mwmp
         bool wasFlying;
 
         MWMechanics::DrawState_ lastDrawState;
+
+        MWMechanics::DynamicStat<float> oldHealth;
+        MWMechanics::DynamicStat<float> oldMagicka;
+        MWMechanics::DynamicStat<float> oldFatigue;
+        float statTimer;
     };
 }
 

@@ -18,6 +18,10 @@ DedicatedActor::DedicatedActor()
     drawState = 0;
     movementFlags = 0;
     animation.groupname = "";
+
+    creatureStats = new ESM::CreatureStats();
+    creatureStats->blank();
+    creatureStats->mDynamic[0].mBase = -1;
 }
 
 DedicatedActor::~DedicatedActor()
@@ -28,8 +32,9 @@ DedicatedActor::~DedicatedActor()
 void DedicatedActor::update(float dt)
 {
     move(dt);
-    setDrawState();
-    setAnimation();
+    setAnimFlags();
+    playAnimation();
+    setStatsDynamic();
 }
 
 void DedicatedActor::move(float dt)
@@ -46,7 +51,7 @@ void DedicatedActor::move(float dt)
     world->rotateObject(ptr, position.rot[0], position.rot[1], position.rot[2]);
 }
 
-void DedicatedActor::setDrawState()
+void DedicatedActor::setAnimFlags()
 {
     using namespace MWMechanics;
 
@@ -64,7 +69,7 @@ void DedicatedActor::setDrawState()
     ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceMoveJump, (movementFlags & CreatureStats::Flag_ForceMoveJump) != 0);
 }
 
-void DedicatedActor::setAnimation()
+void DedicatedActor::playAnimation()
 {
     if (!animation.groupname.empty())
     {
@@ -72,6 +77,21 @@ void DedicatedActor::setAnimation()
             animation.groupname, animation.mode, animation.count, animation.persist);
 
         animation.groupname.clear();
+    }
+}
+
+void DedicatedActor::setStatsDynamic()
+{
+    // Only set dynamic stats if they have valid values
+    if (creatureStats->mDynamic[0].mBase == -1) return;
+
+    MWMechanics::NpcStats *ptrNpcStats = &ptr.getClass().getNpcStats(ptr);
+    MWMechanics::DynamicStat<float> value;
+
+    for (int i = 0; i < 3; ++i)
+    {
+        value.readState(creatureStats->mDynamic[i]);
+        ptrNpcStats->setDynamic(i, value);
     }
 }
 
