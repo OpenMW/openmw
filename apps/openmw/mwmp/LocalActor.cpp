@@ -172,7 +172,7 @@ void LocalActor::setPtr(const MWWorld::Ptr& newPtr)
     mpNum = ptr.getCellRef().getMpNum();
 
     lastDrawState = ptr.getClass().getNpcStats(ptr).getDrawState();
-    oldHealth = *(&ptr.getClass().getCreatureStats(ptr).getHealth());
-    oldMagicka = *(&ptr.getClass().getCreatureStats(ptr).getMagicka());
-    oldFatigue = *(&ptr.getClass().getCreatureStats(ptr).getFatigue());
+    oldHealth = ptr.getClass().getCreatureStats(ptr).getHealth();
+    oldMagicka = ptr.getClass().getCreatureStats(ptr).getMagicka();
+    oldFatigue = ptr.getClass().getCreatureStats(ptr).getFatigue();
 }

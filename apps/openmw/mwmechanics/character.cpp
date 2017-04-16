@@ -1661,6 +1661,26 @@ void CharacterController::update(float duration)
 
         if(mHitState != CharState_None && mJumpState == JumpState_None)
             vec = osg::Vec3f(0.f, 0.f, 0.f);
+
+        /*
+            Start of tes3mp addition
+
+            Character movement setting rotations get reset here, so we have to assign movement
+            settings to a relevant LocalActor now
+        */
+        if (isLocalActor)
+        {
+            localActor->direction.pos[0] = cls.getMovementSettings(mPtr).mPosition[0];
+            localActor->direction.pos[1] = cls.getMovementSettings(mPtr).mPosition[1];
+            localActor->direction.pos[2] = cls.getMovementSettings(mPtr).mPosition[2];
+            localActor->direction.rot[0] = cls.getMovementSettings(mPtr).mRotation[0];
+            localActor->direction.rot[1] = cls.getMovementSettings(mPtr).mRotation[1];
+            localActor->direction.rot[2] = cls.getMovementSettings(mPtr).mRotation[2];
+        }
+        /*
+            End of tes3mp addition
+        */
+
         osg::Vec3f rot = cls.getRotationVector(mPtr);
 
         speed = cls.getSpeed(mPtr);
@@ -1946,25 +1966,6 @@ void CharacterController::update(float duration)
             world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
 
         movement = vec;
-
-        /*
-            Start of tes3mp addition
-
-            Character movement setting positions get reset here, so we have to assign them to a
-            relevant LocalActor now
-        */
-        if (isLocalActor)
-        {
-            localActor->direction.pos[0] = cls.getMovementSettings(mPtr).mPosition[0];
-            localActor->direction.pos[1] = cls.getMovementSettings(mPtr).mPosition[1];
-            localActor->direction.pos[2] = cls.getMovementSettings(mPtr).mPosition[2];
-            localActor->direction.rot[0] = cls.getMovementSettings(mPtr).mRotation[0];
-            localActor->direction.rot[1] = cls.getMovementSettings(mPtr).mRotation[1];
-            localActor->direction.rot[2] = cls.getMovementSettings(mPtr).mRotation[2];
-        }
-        /*
-            End of tes3mp addition
-        */
 
         cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = 0;
 
