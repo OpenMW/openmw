@@ -33,6 +33,7 @@
 #include "Main.hpp"
 #include "GUIController.hpp"
 #include "CellController.hpp"
+#include "MechanicsHelper.hpp"
 
 
 using namespace mwmp;
@@ -209,13 +210,6 @@ ESM::Position Slerp(ESM::Position start, ESM::Position end, float percent)
     return result;
 }
 
-osg::Vec3f Lerp(osg::Vec3f start, osg::Vec3f end, float percent)
-{
-    osg::Vec3f p(percent, percent, percent);
-
-    return (start + osg::componentMultiply(p, (end - start)));
-}
-
 void DedicatedPlayer::move(float dt)
 {
     if (state != 2) return;
@@ -225,7 +219,7 @@ void DedicatedPlayer::move(float dt)
 
     {
         static const int timeMultiplier = 15;
-        osg::Vec3f lerp = Lerp(refPos.asVec3(), position.asVec3(), dt * timeMultiplier);
+        osg::Vec3f lerp = Main::get().getMechanicsHelper()->getLinearInterpolation(refPos.asVec3(), position.asVec3(), dt * timeMultiplier);
         refPos.pos[0] = lerp.x();
         refPos.pos[1] = lerp.y();
         refPos.pos[2] = lerp.z();

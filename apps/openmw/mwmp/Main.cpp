@@ -32,6 +32,7 @@
 #include "DedicatedPlayer.hpp"
 #include "GUIController.hpp"
 #include "CellController.hpp"
+#include "MechanicsHelper.hpp"
 
 using namespace mwmp;
 using namespace std;
@@ -70,6 +71,7 @@ Main::Main()
     mLocalPlayer = new LocalPlayer();
     mGUIController = new GUIController();
     mCellController = new CellController();
+    mMechanicsHelper = new MechanicsHelper();
     //mLocalPlayer->CharGen(0, 4);
 
     server = "mp.tes3mp.com";
@@ -239,6 +241,11 @@ GUIController *Main::getGUIController() const
 CellController *Main::getCellController() const
 {
     return mCellController;
+}
+
+MechanicsHelper *Main::getMechanicsHelper() const
+{
+    return mMechanicsHelper;
 }
 
 void Main::pressedKey(int key)

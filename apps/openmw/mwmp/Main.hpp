@@ -4,8 +4,9 @@
 
 namespace mwmp
 {
-    class CellController;
     class GUIController;
+    class CellController;
+    class MechanicsHelper;
     class LocalPlayer;
     class Networking;
 
@@ -30,6 +31,7 @@ namespace mwmp
         LocalPlayer *getLocalPlayer() const;
         GUIController *getGUIController() const;
         CellController *getCellController() const;
+        MechanicsHelper *getMechanicsHelper() const;
 
         void updateWorld(float dt) const;
 
@@ -46,6 +48,8 @@ namespace mwmp
 
         GUIController *mGUIController;
         CellController *mCellController;
+        MechanicsHelper *mMechanicsHelper;
+
         std::string server;
         unsigned short port;
     };
