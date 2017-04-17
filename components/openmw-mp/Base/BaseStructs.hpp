@@ -29,11 +29,11 @@ namespace mwmp
         };
 
         std::string spellId; // id of spell (e.g. "fireball")
-        char success;
-        char block;
+        bool success;
+        bool block;
         float damage;
-        char pressed;
-        char knockdown;
+        bool pressed;
+        bool knockdown;
     };
 
     struct Animation
