@@ -2,17 +2,19 @@
 // Created by koncord on 02.01.16.
 //
 
-#ifndef OPENMW_PLAYER_HPP
-#define OPENMW_PLAYER_HPP
+#ifndef OPENMW_DEDICATEDPLAYER_HPP
+#define OPENMW_DEDICATEDPLAYER_HPP
 
-#include <components/esm/loadnpc.hpp>
-#include "../mwworld/manualref.hpp"
-#include <map>
-#include "../mwmechanics/aisequence.hpp"
-#include <RakNetTypes.h>
-
-#include <components/openmw-mp/Base/BasePlayer.hpp>
 #include <components/esm/custommarkerstate.hpp>
+#include <components/esm/loadnpc.hpp>
+#include <components/openmw-mp/Base/BasePlayer.hpp>
+
+#include "../mwmechanics/aisequence.hpp"
+
+#include "../mwworld/manualref.hpp"
+
+#include <map>
+#include <RakNetTypes.h>
 
 namespace MWMechanics
 {
@@ -26,6 +28,7 @@ namespace mwmp
     class Players
     {
     public:
+
         static DedicatedPlayer *newPlayer(RakNet::RakNetGUID guid);
         static void createPlayer(RakNet::RakNetGUID guid);
         static void disconnectPlayer(RakNet::RakNetGUID guid);
@@ -33,13 +36,16 @@ namespace mwmp
         static DedicatedPlayer *getPlayer(RakNet::RakNetGUID guid);
         static DedicatedPlayer *getPlayer(const MWWorld::Ptr &ptr);
         static void update(float dt);
+
     private:
+
         static std::map<RakNet::RakNetGUID, DedicatedPlayer *> players;
     };
 
     class DedicatedPlayer : public BasePlayer
     {
         friend class Players;
+
     public:
 
         MWWorld::Ptr getPtr();
@@ -55,11 +61,13 @@ namespace mwmp
         void removeMarker();
         void setMarkerState(bool state);
         void updateActor(MWMechanics::Actor *actor);
+
     private:
+
         DedicatedPlayer(RakNet::RakNetGUID guid);
         virtual ~DedicatedPlayer();
         void updatePtr(MWWorld::Ptr newPtr);
-        const std::string getAnim();
+
         int state;
         MWWorld::ManualRef* reference;
 
@@ -69,4 +77,4 @@ namespace mwmp
         bool markerEnabled;
     };
 }
-#endif //OPENMW_PLAYER_HPP
+#endif //OPENMW_DEDICATEDPLAYER_HPP

@@ -523,32 +523,22 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
 
     static bool attackPressed = false; // prevent flood
     MWMechanics::DrawState_ state = player.getClass().getNpcStats(player).getDrawState();
-    //player.getClass().hit(player, 1, ESM::Weapon::AT_Chop);
+
     if (world->getPlayer().getAttackingOrSpell() && !attackPressed)
     {
         MWWorld::Ptr weapon = MWWorld::Ptr(); // hand-to-hand
-                                              //player.getClass().onHit(player, 0.5, true, weapon, 0, 1);
+
         if (state == MWMechanics::DrawState_Spell)
         {
-            const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
-
             attack.type = Attack::MAGIC;
             attack.pressed = true;
-            attack.spellId = spell;
+            attack.spellId = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
         }
-        else if (state == MWMechanics::DrawState_Weapon)
-        {
-            //PrepareAttack(2);
-        }
+
         attackPressed = true;
     }
     else if (!world->getPlayer().getAttackingOrSpell() && attackPressed)
     {
-        if (/*state == MWMechanics::DrawState_Spell ||*/ state == MWMechanics::DrawState_Weapon)
-        {
-            //localNetPlayer->getAttack()->success = false;
-            //SendAttack(0);
-        }
         attackPressed = false;
     }
 }
@@ -1181,10 +1171,9 @@ void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
 
     if (dstate == MWMechanics::DrawState_Spell)
     {
-        const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
-        attack.success = Misc::Rng::roll0to99() < MWMechanics::getSpellSuccessChance(spell, getPlayerPtr());
+        attack.spellId = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
+        attack.success = Misc::Rng::roll0to99() < MWMechanics::getSpellSuccessChance(attack.spellId, getPlayerPtr());
         state = true;
-        attack.spellId = spell;
     }
     else
     {

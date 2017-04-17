@@ -181,35 +181,6 @@ MWWorld::ManualRef *DedicatedPlayer::getRef()
     return reference;
 }
 
-ESM::Position Slerp(ESM::Position start, ESM::Position end, float percent)
-{
-    // dot product - the cosine of the angle between 2 vectors.
-    float dot = start.asVec3() * end.asVec3();
-    // clamp it to be in the range of Acos()
-    // This may be unnecessary, but floating point
-    // precision can be a fickle mistress.
-    dot = boost::algorithm::clamp(dot, -1.0f, 1.0f);
-    // acos(dot) returns the angle between start and end,
-    // And multiplying that by percent returns the angle between
-    // start and the final result.
-    float theta = acos(dot) * percent;
-    osg::Vec3f relativeVec = end.asVec3() - start.asVec3() * dot;
-    relativeVec.normalize(); // Orthonormal basis
-
-    // result
-    osg::Vec3f tmp ((start.asVec3() * cos(theta)) + (relativeVec * sin(theta)));
-    ESM::Position result;
-
-    result.pos[0] = tmp.x();
-    result.pos[1] = tmp.y();
-    result.pos[2] = tmp.z();
-
-    result.rot[0] = start.rot[0];
-    result.rot[1] = start.rot[1];
-    result.rot[2] = result.rot[2];
-    return result;
-}
-
 void DedicatedPlayer::move(float dt)
 {
     if (state != 2) return;
@@ -338,74 +309,6 @@ void DedicatedPlayer::updateEquipment()
             }
         }
     }
-}
-
-const std::string DedicatedPlayer::getAnim()
-{
-    static string anim;
-    static string animDir;
-    static string animWeap;
-
-    MWMechanics::NpcStats *npcStats = &ptr.getClass().getNpcStats(ptr);
-
-    if (movementFlags & MWMechanics::CreatureStats::Flag_Run)
-        anim = "run";
-    else if (movementFlags & MWMechanics::CreatureStats::Flag_Sneak)
-        anim = "sneak";
-    else
-        anim = "walk";
-
-    if (movementAnim != 0)
-    {
-
-        if (movementAnim == 3)
-            animDir = "forward";
-        else if (movementAnim == 4)
-            animDir = "back";
-        else if (movementAnim == 2)
-            animDir = "left";
-        else if (movementAnim == 1)
-            animDir = "right";
-    }
-    else
-    {
-        anim = "idle";
-        animDir = "";
-    }
-
-    if (npcStats->getDrawState() == MWMechanics::DrawState_Weapon)
-    {
-        MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
-        MWWorld::ContainerStoreIterator weaponSlot = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-
-        if (weaponSlot != invStore.end() && weaponSlot->getTypeName() == typeid(ESM::Weapon).name())
-        {
-            int type = weaponSlot->get<ESM::Weapon>()->mBase->mData.mType;
-            if (type == ESM::Weapon::ShortBladeOneHand ||
-                type == ESM::Weapon::LongBladeOneHand ||
-                type == ESM::Weapon::BluntOneHand ||
-                type == ESM::Weapon::AxeOneHand /*||
-                type == ESM::Weapon::MarksmanThrown ||
-                type == ESM::Weapon::MarksmanCrossbow ||
-                type == ESM::Weapon::MarksmanBow*/)
-                animWeap = "1h";
-            else if (type == ESM::Weapon::LongBladeTwoHand ||
-                    type == ESM::Weapon::BluntTwoClose ||
-                    type == ESM::Weapon::AxeTwoHand)
-                animWeap = "2c";
-            else if (type == ESM::Weapon::BluntTwoWide ||
-                    type == ESM::Weapon::SpearTwoWide)
-                animWeap = "2w";
-        }
-        else
-            animWeap = "hh";
-    }
-    else if (movementAnim == 0 && npcStats->getDrawState() == MWMechanics::DrawState_Spell)
-        animWeap = "spell";
-    else
-        animWeap = "";
-
-    return (anim + animDir + animWeap);
 }
 
 DedicatedPlayer *Players::getPlayer(const MWWorld::Ptr &ptr)
