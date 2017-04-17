@@ -8,8 +8,9 @@ namespace mwmp
     class Attack
     {
     public:
-        RakNet::RakNetGUID target;
-        RakNet::RakNetGUID attacker;
+        RakNet::RakNetGUID targetGuid;
+        RakNet::RakNetGUID attackerGuid;
+
         char type; // 0 - melee, 1 - magic, 2 - throwable
         enum TYPE
         {
@@ -17,7 +18,8 @@ namespace mwmp
             MAGIC,
             THROWABLE
         };
-        std::string refId; // id of spell (e.g. "fireball")
+
+        std::string spellId; // id of spell (e.g. "fireball")
         char success;
         char block;
         float damage;

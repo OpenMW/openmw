@@ -532,10 +532,10 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
         {
             const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
 
-            attack.attacker = guid;
+            attack.attackerGuid = guid;
             attack.type = Attack::MAGIC;
             attack.pressed = true;
-            attack.refId = spell;
+            attack.spellId = spell;
         }
         else if (state == MWMechanics::DrawState_Weapon)
         {
@@ -1185,7 +1185,7 @@ void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
         const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
         attack.success = Misc::Rng::roll0to99() < MWMechanics::getSpellSuccessChance(spell, getPlayerPtr());
         state = true;
-        attack.refId = spell;
+        attack.spellId = spell;
     }
     else
     {
@@ -1196,8 +1196,8 @@ void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
     attack.type = type;
     attack.knockdown = false;
     attack.block = false;
-    attack.target = RakNet::RakNetGUID();
-    attack.attacker = guid;
+    attack.targetGuid = RakNet::RakNetGUID();
+    attack.attackerGuid = guid;
 
     getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->setPlayer(this);
     getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Send();

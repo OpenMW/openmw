@@ -44,14 +44,14 @@ void MechanicsHelper::processAttack(const MWWorld::Ptr& attacker, Attack attack)
     }
 
     MWMechanics::CreatureStats &attackerStats = attacker.getClass().getNpcStats(attacker);
-    attackerStats.getSpells().setSelectedSpell(attack.refId);
+    attackerStats.getSpells().setSelectedSpell(attack.spellId);
 
     MWWorld::Ptr victim;
     
-    if (attack.target == mwmp::Main::get().getLocalPlayer()->guid)
+    if (attack.targetGuid == mwmp::Main::get().getLocalPlayer()->guid)
         victim = MWBase::Environment::get().getWorld()->getPlayerPtr();
-    else if (Players::getPlayer(attack.target) != 0)
-        victim = Players::getPlayer(attack.target)->getPtr();
+    else if (Players::getPlayer(attack.targetGuid) != 0)
+        victim = Players::getPlayer(attack.targetGuid)->getPtr();
 
     // Get the weapon used (if hand-to-hand, weapon = inv.end())
     if (attackerStats.getDrawState() == MWMechanics::DrawState_Weapon)
@@ -84,7 +84,7 @@ void MechanicsHelper::processAttack(const MWWorld::Ptr& attacker, Attack attack)
     }
     else
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "SpellId: %s", attack.refId.c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "SpellId: %s", attack.spellId.c_str());
         LOG_APPEND(Log::LOG_VERBOSE, " - success: %d", attack.success);
     }
 }
