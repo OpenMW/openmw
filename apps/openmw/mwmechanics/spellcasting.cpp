@@ -848,7 +848,7 @@ namespace MWMechanics
                     TODO: See if LocalPlayer being the target and having godmode on
                     can be accounted for like it is in OpenMW's corresponding code
                 */
-                mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(mCaster);
+                mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::PlayerList::getPlayer(mCaster);
                 bool isDedicated = dedicatedPlayer != NULL;
 
                 if (isDedicated)

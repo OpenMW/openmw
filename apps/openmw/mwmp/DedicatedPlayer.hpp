@@ -25,7 +25,7 @@ namespace mwmp
 {
     struct DedicatedPlayer;
 
-    class Players
+    class PlayerList
     {
     public:
 
@@ -44,7 +44,7 @@ namespace mwmp
 
     class DedicatedPlayer : public BasePlayer
     {
-        friend class Players;
+        friend class PlayerList;
 
     public:
 

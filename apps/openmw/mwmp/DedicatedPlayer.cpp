@@ -39,7 +39,7 @@
 using namespace mwmp;
 using namespace std;
 
-std::map<RakNet::RakNetGUID, DedicatedPlayer *> Players::players;
+std::map<RakNet::RakNetGUID, DedicatedPlayer *> PlayerList::players;
 
 DedicatedPlayer::DedicatedPlayer(RakNet::RakNetGUID guid) : BasePlayer(guid)
 {
@@ -57,7 +57,7 @@ MWWorld::Ptr DedicatedPlayer::getPtr()
     return ptr;
 }
 
-void Players::createPlayer(RakNet::RakNetGUID guid)
+void PlayerList::createPlayer(RakNet::RakNetGUID guid)
 {
     LOG_APPEND(Log::LOG_INFO, "- Setting up character info");
 
@@ -137,13 +137,13 @@ void Players::createPlayer(RakNet::RakNetGUID guid)
 }
 
 
-void Players::cleanUp()
+void PlayerList::cleanUp()
 {
     for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
         delete it->second;
 }
 
-void Players::disconnectPlayer(RakNet::RakNetGUID guid)
+void PlayerList::disconnectPlayer(RakNet::RakNetGUID guid)
 {
     if (players[guid]->state > 1)
     {
@@ -166,7 +166,7 @@ void Players::disconnectPlayer(RakNet::RakNetGUID guid)
     }
 }
 
-DedicatedPlayer *Players::getPlayer(RakNet::RakNetGUID guid)
+DedicatedPlayer *PlayerList::getPlayer(RakNet::RakNetGUID guid)
 {
     return players[guid];
 }
@@ -206,7 +206,7 @@ void DedicatedPlayer::move(float dt)
     world->rotateObject(ptr, position.rot[0], position.rot[1], position.rot[2]);
 }
 
-void Players::update(float dt)
+void PlayerList::update(float dt)
 {
     for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
     {
@@ -262,7 +262,7 @@ void DedicatedPlayer::updatePtr(MWWorld::Ptr newPtr)
 }
 
 
-DedicatedPlayer *Players::newPlayer(RakNet::RakNetGUID guid)
+DedicatedPlayer *PlayerList::newPlayer(RakNet::RakNetGUID guid)
 {
     LOG_APPEND(Log::LOG_INFO, "- Creating new DedicatedPlayer with guid %lu", guid.g);
 
@@ -311,7 +311,7 @@ void DedicatedPlayer::updateEquipment()
     }
 }
 
-DedicatedPlayer *Players::getPlayer(const MWWorld::Ptr &ptr)
+DedicatedPlayer *PlayerList::getPlayer(const MWWorld::Ptr &ptr)
 {
     std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin();
 

@@ -252,7 +252,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
     DedicatedPlayer *pl = 0;
     static RakNet::RakNetGUID myGuid = getLocalPlayer()->guid;
     if (guid != myGuid)
-        pl = Players::getPlayer(guid);
+        pl = PlayerList::getPlayer(guid);
 
     PlayerPacket *myPacket = playerPacketController.GetPacket(packet->data[0]);
 
@@ -294,12 +294,12 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             if (pl == 0)
             {
                 LOG_APPEND(Log::LOG_INFO, "- Exchanging data with new player");
-                pl = Players::newPlayer(guid);
+                pl = PlayerList::newPlayer(guid);
             }
 
             myPacket->setPlayer(pl);
             myPacket->Packet(&bsIn, false);
-            Players::createPlayer(guid);
+            PlayerList::createPlayer(guid);
         }
         break;
     }
@@ -338,7 +338,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
         if (guid == myGuid)
             MWBase::Environment::get().getStateManager()->requestQuit();
         else if (pl != 0)
-            Players::disconnectPlayer(guid);
+            PlayerList::disconnectPlayer(guid);
 
     }
     case ID_PLAYER_EQUIPMENT:
@@ -787,7 +787,7 @@ void Networking::processActorPacket(RakNet::Packet *packet)
     DedicatedPlayer *pl = 0;
     static RakNet::RakNetGUID myGuid = getLocalPlayer()->guid;
     if (guid != myGuid)
-        pl = Players::getPlayer(guid);
+        pl = PlayerList::getPlayer(guid);
 
     ActorPacket *myPacket = actorPacketController.GetPacket(packet->data[0]);
 
@@ -876,7 +876,7 @@ void Networking::processWorldPacket(RakNet::Packet *packet)
     DedicatedPlayer *pl = 0;
     static RakNet::RakNetGUID myGuid = getLocalPlayer()->guid;
     if (guid != myGuid)
-        pl = Players::getPlayer(guid);
+        pl = PlayerList::getPlayer(guid);
 
     WorldPacket *myPacket = worldPacketController.GetPacket(packet->data[0]);
 
@@ -1110,14 +1110,14 @@ bool Networking::isDedicatedPlayer(const MWWorld::Ptr &ptr)
 {
     if (ptr.mRef == 0)
         return 0;
-    DedicatedPlayer *pl = Players::getPlayer(ptr);
+    DedicatedPlayer *pl = PlayerList::getPlayer(ptr);
 
     return pl != 0;
 }
 
 bool Networking::attack(const MWWorld::Ptr &ptr)
 {
-    DedicatedPlayer *pl = Players::getPlayer(ptr);
+    DedicatedPlayer *pl = PlayerList::getPlayer(ptr);
 
     if (pl == 0)
         return false;

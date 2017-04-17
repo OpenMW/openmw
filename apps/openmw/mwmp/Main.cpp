@@ -83,7 +83,7 @@ Main::~Main()
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "tes3mp stopped");
     delete mNetworking;
     delete mLocalPlayer;
-    Players::cleanUp();
+    PlayerList::cleanUp();
 }
 
 void Main::optionsDesc(boost::program_options::options_description *desc)
@@ -183,7 +183,7 @@ void Main::frame(float dt)
 
     get().getNetworking()->update();
 
-    Players::update(dt);
+    PlayerList::update(dt);
     get().getCellController()->updateDedicated(dt);
     get().updateWorld(dt);
 

@@ -1132,7 +1132,7 @@ namespace MWMechanics
 
                     If this actor is a DedicatedPlayer, update their mAttackingOrSpell
                 */
-                mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(iter->first);
+                mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::PlayerList::getPlayer(iter->first);
                 if (dedicatedPlayer != NULL)
                     dedicatedPlayer->updateActor(iter->second);
                 /*

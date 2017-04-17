@@ -123,7 +123,7 @@ namespace MWMechanics
             Only calculate block chance for blockers who are not DedicatedPlayers
             and update block state for LocalPlayer
         */
-        mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(blocker);
+        mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::PlayerList::getPlayer(blocker);
         bool isDedicated = dedicatedPlayer != NULL;
         if (attacker == MWMechanics::getPlayer())
             mwmp::Main::get().getLocalPlayer()->attack.block = false;
