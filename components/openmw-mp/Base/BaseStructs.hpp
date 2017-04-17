@@ -5,10 +5,20 @@
 
 namespace mwmp
 {
+    struct Target
+    {
+        std::string refId;
+        int refNumIndex;
+        int mpNum;
+
+        RakNet::RakNetGUID guid;
+    };
+
     class Attack
     {
     public:
-        RakNet::RakNetGUID targetGuid;
+
+        Target target;
 
         char type; // 0 - melee, 1 - magic, 2 - throwable
         enum TYPE

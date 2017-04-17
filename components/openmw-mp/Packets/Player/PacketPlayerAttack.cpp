@@ -16,7 +16,7 @@ void PacketPlayerAttack::Packet(RakNet::BitStream *bs, bool send)
 {
     PlayerPacket::Packet(bs, send);
 
-    RW(player->attack.targetGuid, send);
+    RW(player->attack.target.guid, send);
 
     RW(player->attack.spellId, send);
     RW(player->attack.type, send);

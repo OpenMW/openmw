@@ -1195,7 +1195,7 @@ void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
     attack.type = type;
     attack.knockdown = false;
     attack.block = false;
-    attack.targetGuid = RakNet::RakNetGUID();
+    attack.target.guid = RakNet::RakNetGUID();
 
     getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->setPlayer(this);
     getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Send();

@@ -26,7 +26,7 @@ namespace mwmp
 
             if (!player.creatureStats.mDead)
             {
-                Player *target = Players::getPlayer(player.attack.targetGuid);
+                Player *target = Players::getPlayer(player.attack.target.guid);
 
                 if (target == nullptr)
                     target = &player;
@@ -46,7 +46,7 @@ namespace mwmp
 
                 //packet.Send(player, true);
                 player.sendToLoaded(&packet);
-                playerController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->RequestData(player.attack.targetGuid);
+                playerController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->RequestData(player.attack.target.guid);
             }
         }
     };

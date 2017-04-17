@@ -48,10 +48,10 @@ void MechanicsHelper::processAttack(const MWWorld::Ptr& attacker, Attack attack)
 
     MWWorld::Ptr victim;
     
-    if (attack.targetGuid == mwmp::Main::get().getLocalPlayer()->guid)
+    if (attack.target.guid == mwmp::Main::get().getLocalPlayer()->guid)
         victim = MWBase::Environment::get().getWorld()->getPlayerPtr();
-    else if (Players::getPlayer(attack.targetGuid) != 0)
-        victim = Players::getPlayer(attack.targetGuid)->getPtr();
+    else if (Players::getPlayer(attack.target.guid) != 0)
+        victim = Players::getPlayer(attack.target.guid)->getPtr();
 
     // Get the weapon used (if hand-to-hand, weapon = inv.end())
     if (attackerStats.getDrawState() == MWMechanics::DrawState_Weapon)
