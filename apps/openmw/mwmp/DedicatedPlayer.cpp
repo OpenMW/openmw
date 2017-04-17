@@ -52,9 +52,48 @@ DedicatedPlayer::~DedicatedPlayer()
 
 }
 
-MWWorld::Ptr DedicatedPlayer::getPtr()
+void PlayerList::update(float dt)
 {
-    return ptr;
+    for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
+    {
+        DedicatedPlayer *pl = it->second;
+        if (pl == 0) continue;
+
+        MWMechanics::NpcStats *ptrNpcStats = &pl->ptr.getClass().getNpcStats(pl->getPtr());
+
+        MWMechanics::DynamicStat<float> value;
+
+        if (pl->creatureStats.mDead)
+        {
+            value.readState(pl->creatureStats.mDynamic[0]);
+            ptrNpcStats->setHealth(value);
+            continue;
+        }
+
+        value.readState(pl->creatureStats.mDynamic[0]);
+        ptrNpcStats->setHealth(value);
+        value.readState(pl->creatureStats.mDynamic[1]);
+        ptrNpcStats->setMagicka(value);
+        value.readState(pl->creatureStats.mDynamic[2]);
+        ptrNpcStats->setFatigue(value);
+
+        if (ptrNpcStats->isDead())
+            ptrNpcStats->resurrect();
+
+        ptrNpcStats->setAttacked(false);
+
+        ptrNpcStats->getAiSequence().stopCombat();
+
+        ptrNpcStats->setAlarmed(false);
+        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Alarm, 0);
+        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Fight, 0);
+        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Flee, 0);
+        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Hello, 0);
+
+        ptrNpcStats->setBaseDisposition(255);
+        pl->move(dt);
+        pl->updateAnimFlags();
+    }
 }
 
 void PlayerList::createPlayer(RakNet::RakNetGUID guid)
@@ -136,11 +175,13 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
     world->enable(players[guid]->ptr);
 }
 
-
-void PlayerList::cleanUp()
+DedicatedPlayer *PlayerList::newPlayer(RakNet::RakNetGUID guid)
 {
-    for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
-        delete it->second;
+    LOG_APPEND(Log::LOG_INFO, "- Creating new DedicatedPlayer with guid %lu", guid.g);
+
+    players[guid] = new DedicatedPlayer(guid);
+    players[guid]->state = 0;
+    return players[guid];
 }
 
 void PlayerList::disconnectPlayer(RakNet::RakNetGUID guid)
@@ -166,19 +207,30 @@ void PlayerList::disconnectPlayer(RakNet::RakNetGUID guid)
     }
 }
 
+void PlayerList::cleanUp()
+{
+    for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
+        delete it->second;
+}
+
 DedicatedPlayer *PlayerList::getPlayer(RakNet::RakNetGUID guid)
 {
     return players[guid];
 }
 
-MWWorld::Ptr DedicatedPlayer::getLiveCellPtr()
+DedicatedPlayer *PlayerList::getPlayer(const MWWorld::Ptr &ptr)
 {
-    return reference->getPtr();
-}
+    std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin();
 
-MWWorld::ManualRef *DedicatedPlayer::getRef()
-{
-    return reference;
+    for (; it != players.end(); it++)
+    {
+        if (it->second == 0 || it->second->getPtr().mRef == 0)
+            continue;
+        string refid = ptr.getCellRef().getRefId();
+        if (it->second->getPtr().getCellRef().getRefId() == refid)
+            return it->second;
+    }
+    return 0;
 }
 
 void DedicatedPlayer::move(float dt)
@@ -206,69 +258,38 @@ void DedicatedPlayer::move(float dt)
     world->rotateObject(ptr, position.rot[0], position.rot[1], position.rot[2]);
 }
 
-void PlayerList::update(float dt)
+void DedicatedPlayer::updateAnimFlags()
 {
-    for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
+    using namespace MWMechanics;
+
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+
+    // Until we figure out a better workaround for disabling player gravity,
+    // simply cast Levitate over and over on a player that's supposed to be flying
+    if (!isFlying)
     {
-        DedicatedPlayer *pl = it->second;
-        if (pl == 0) continue;
-
-        MWMechanics::NpcStats *ptrNpcStats = &pl->ptr.getClass().getNpcStats(pl->getPtr());
-
-        MWMechanics::DynamicStat<float> value;
-
-        if (pl->creatureStats.mDead)
-        {
-            value.readState(pl->creatureStats.mDynamic[0]);
-            ptrNpcStats->setHealth(value);
-            continue;
-        }
-
-        value.readState(pl->creatureStats.mDynamic[0]);
-        ptrNpcStats->setHealth(value);
-        value.readState(pl->creatureStats.mDynamic[1]);
-        ptrNpcStats->setMagicka(value);
-        value.readState(pl->creatureStats.mDynamic[2]);
-        ptrNpcStats->setFatigue(value);
-
-        if (ptrNpcStats->isDead())
-            ptrNpcStats->resurrect();
-
-        ptrNpcStats->setAttacked(false);
-
-        ptrNpcStats->getAiSequence().stopCombat();
-
-        ptrNpcStats->setAlarmed(false);
-        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Alarm, 0);
-        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Fight, 0);
-        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Flee, 0);
-        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Hello, 0);
-
-        ptrNpcStats->setBaseDisposition(255);
-        pl->move(dt);
-        pl->updateAnimFlags();
+        ptr.getClass().getCreatureStats(ptr).getActiveSpells().purgeEffect(ESM::MagicEffect::Levitate);
     }
-}
+    else if (isFlying && !world->isFlying(ptr))
+    {
+        MWMechanics::CastSpell cast(ptr, ptr);
+        cast.mHitPosition = ptr.getRefData().getPosition().asVec3();
+        cast.mAlwaysSucceed = true;
+        cast.cast("Levitate");
+    }
 
-void DedicatedPlayer::updatePtr(MWWorld::Ptr newPtr)
-{
-    ptr.mCell = newPtr.mCell;
-    ptr.mRef = newPtr.mRef;
-    ptr.mContainerStore = newPtr.mContainerStore;
+    if (drawState == 0)
+        ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Nothing);
+    else if (drawState == 1)
+        ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Weapon);
+    else if (drawState == 2)
+        ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Spell);
 
-    // Disallow this player's reference from moving across cells until
-    // the correct packet is sent by the player
-    ptr.getBase()->canChangeCell = false;
-}
-
-
-DedicatedPlayer *PlayerList::newPlayer(RakNet::RakNetGUID guid)
-{
-    LOG_APPEND(Log::LOG_INFO, "- Creating new DedicatedPlayer with guid %lu", guid.g);
-
-    players[guid] = new DedicatedPlayer(guid);
-    players[guid]->state = 0;
-    return players[guid];
+    MWMechanics::NpcStats *ptrNpcStats = &ptr.getClass().getNpcStats(ptr);
+    ptrNpcStats->setMovementFlag(CreatureStats::Flag_Run, (movementFlags & CreatureStats::Flag_Run) != 0);
+    ptrNpcStats->setMovementFlag(CreatureStats::Flag_Sneak, (movementFlags & CreatureStats::Flag_Sneak) != 0);
+    ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceJump, (movementFlags & CreatureStats::Flag_ForceJump) != 0);
+    ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceMoveJump, (movementFlags & CreatureStats::Flag_ForceMoveJump) != 0);
 }
 
 void DedicatedPlayer::updateEquipment()
@@ -311,55 +332,6 @@ void DedicatedPlayer::updateEquipment()
     }
 }
 
-DedicatedPlayer *PlayerList::getPlayer(const MWWorld::Ptr &ptr)
-{
-    std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin();
-
-    for (; it != players.end(); it++)
-    {
-        if (it->second == 0 || it->second->getPtr().mRef == 0)
-            continue;
-        string refid = ptr.getCellRef().getRefId();
-        if (it->second->getPtr().getCellRef().getRefId() == refid)
-            return it->second;
-    }
-    return 0;
-}
-
-void DedicatedPlayer::updateAnimFlags()
-{
-    using namespace MWMechanics;
-
-    MWBase::World *world = MWBase::Environment::get().getWorld();
-
-    // Until we figure out a better workaround for disabling player gravity,
-    // simply cast Levitate over and over on a player that's supposed to be flying
-    if (!isFlying)
-    {
-        ptr.getClass().getCreatureStats(ptr).getActiveSpells().purgeEffect(ESM::MagicEffect::Levitate);
-    }
-    else if (isFlying && !world->isFlying(ptr))
-    {
-        MWMechanics::CastSpell cast(ptr, ptr);
-        cast.mHitPosition = ptr.getRefData().getPosition().asVec3();
-        cast.mAlwaysSucceed = true;
-        cast.cast("Levitate");
-    }
-
-    if (drawState == 0)
-        ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Nothing);
-    else if (drawState == 1)
-        ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Weapon);
-    else if (drawState == 2)
-        ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Spell);
-
-    MWMechanics::NpcStats *ptrNpcStats = &ptr.getClass().getNpcStats(ptr);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_Run, (movementFlags & CreatureStats::Flag_Run) != 0);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_Sneak, (movementFlags & CreatureStats::Flag_Sneak) != 0);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceJump, (movementFlags & CreatureStats::Flag_ForceJump) != 0);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceMoveJump, (movementFlags & CreatureStats::Flag_ForceMoveJump) != 0);
-}
-
 void DedicatedPlayer::updateCell()
 {
     // Prevent cell update when player hasn't been instantiated yet
@@ -371,7 +343,7 @@ void DedicatedPlayer::updateCell()
 
 
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server says %s (%s) moved to %s", ptr.getBase()->mRef.getRefId().c_str(),
-                       this->npc.mName.c_str(), cell.getDescription().c_str());
+        this->npc.mName.c_str(), cell.getDescription().c_str());
 
     try
     {
@@ -402,7 +374,6 @@ void DedicatedPlayer::updateCell()
             Main::get().getCellController()->getCell(cell)->updateLocal(true);
     }
 }
-
 
 void DedicatedPlayer::updateMarker()
 {
@@ -444,4 +415,30 @@ void DedicatedPlayer::setMarkerState(bool state)
 void DedicatedPlayer::updateActor(MWMechanics::Actor *actor)
 {
     actor->getCharacterController()->setAttackingOrSpell(attack.pressed);
+}
+
+MWWorld::Ptr DedicatedPlayer::getPtr()
+{
+    return ptr;
+}
+
+MWWorld::Ptr DedicatedPlayer::getLiveCellPtr()
+{
+    return reference->getPtr();
+}
+
+MWWorld::ManualRef *DedicatedPlayer::getRef()
+{
+    return reference;
+}
+
+void DedicatedPlayer::updatePtr(MWWorld::Ptr newPtr)
+{
+    ptr.mCell = newPtr.mCell;
+    ptr.mRef = newPtr.mRef;
+    ptr.mContainerStore = newPtr.mContainerStore;
+
+    // Disallow this player's reference from moving across cells until
+    // the correct packet is sent by the player
+    ptr.getBase()->canChangeCell = false;
 }

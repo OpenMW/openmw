@@ -29,13 +29,16 @@ namespace mwmp
     {
     public:
 
-        static DedicatedPlayer *newPlayer(RakNet::RakNetGUID guid);
+        static void update(float dt);
+
         static void createPlayer(RakNet::RakNetGUID guid);
+        static DedicatedPlayer *newPlayer(RakNet::RakNetGUID guid);
+
         static void disconnectPlayer(RakNet::RakNetGUID guid);
         static void cleanUp();
+
         static DedicatedPlayer *getPlayer(RakNet::RakNetGUID guid);
         static DedicatedPlayer *getPlayer(const MWWorld::Ptr &ptr);
-        static void update(float dt);
 
     private:
 
@@ -48,13 +51,9 @@ namespace mwmp
 
     public:
 
-        MWWorld::Ptr getPtr();
-        MWWorld::Ptr getLiveCellPtr();
-        MWWorld::ManualRef* getRef();
         void move(float dt);
         void updateAnimFlags();
         void updateEquipment();
-
         void updateCell();
 
         void updateMarker();
@@ -62,10 +61,15 @@ namespace mwmp
         void setMarkerState(bool state);
         void updateActor(MWMechanics::Actor *actor);
 
+        MWWorld::Ptr getPtr();
+        MWWorld::Ptr getLiveCellPtr();
+        MWWorld::ManualRef* getRef();
+
     private:
 
         DedicatedPlayer(RakNet::RakNetGUID guid);
         virtual ~DedicatedPlayer();
+
         void updatePtr(MWWorld::Ptr newPtr);
 
         int state;
