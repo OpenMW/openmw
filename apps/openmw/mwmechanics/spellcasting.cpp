@@ -836,17 +836,18 @@ namespace MWMechanics
 
                 bool fail = false;
 
-                // Major change done by tes3mp:
-                //
-                // Instead of checking whether the caster is a player or an NPC,
-                // first check whether it's the LocalPlayer or a DedicatedPlayer and calculate
-                // calculate the success chance in clients' LocalPlayer::prepareAttack()
-                //
-                // TODO: Make this make sense for NPCs too
-                //
-                // TODO: See if LocalPlayer being the target and having godmode on
-                // can be accounted for like it is in OpenMW's corresponding code
-
+                /*
+                    Start of tes3mp change (major)
+                
+                    Instead of checking whether the caster is a player or an NPC,
+                    first check whether it's the LocalPlayer or a DedicatedPlayer and calculate
+                    calculate the success chance in clients' LocalPlayer::prepareAttack()
+                
+                    TODO: Make this make sense for NPCs too
+                
+                    TODO: See if LocalPlayer being the target and having godmode on
+                    can be accounted for like it is in OpenMW's corresponding code
+                */
                 mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(mCaster);
                 bool isDedicated = dedicatedPlayer != NULL;
 
@@ -864,6 +865,9 @@ namespace MWMechanics
                     fail = true;
                 }
                 else if (!(mCaster == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState()))
+                /*
+                    End of tes3mp change (major)
+                */
                 {
                     float successChance = getSpellSuccessChance(spell, mCaster);
                     if (Misc::Rng::roll0to99() >= successChance)

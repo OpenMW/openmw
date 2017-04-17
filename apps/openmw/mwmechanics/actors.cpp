@@ -1109,6 +1109,12 @@ namespace MWMechanics
 
                 iter->second->getCharacterController()->setActive(inProcessingRange);
 
+                /*
+                    Start of tes3mp change (minor)
+
+                    Instead of merely updating the player character's mAttackingOrSpell here,
+                    send a PlayerAttack packet from LocalPlayer when applicable
+                */
                 if (iter->first == player)
                 {
                     bool state = MWBase::Environment::get().getWorld()->getPlayer().getAttackingOrSpell();
@@ -1117,10 +1123,21 @@ namespace MWMechanics
                     if (dstate == DrawState_Weapon)
                         mwmp::Main::get().getLocalPlayer()->prepareAttack(mwmp::Attack::MELEE, state);
                 }
+                /*
+                    End of tes3mp change (minor)
+                */
 
+                /*
+                    Start of tes3mp addition
+
+                    If this actor is a DedicatedPlayer, update their mAttackingOrSpell
+                */
                 mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(iter->first);
                 if (dedicatedPlayer != NULL)
                     dedicatedPlayer->updateActor(iter->second);
+                /*
+                    End of tes3mp addition
+                */
 
 
                 // If dead or no longer in combat, no longer store any actors who attempted to hit us. Also remove for the player.

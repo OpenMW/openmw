@@ -8,10 +8,18 @@
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/npcstate.hpp>
 
-#include "../mwmp/DedicatedPlayer.hpp"
-#include "../mwmp/Networking.hpp"
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
 #include "../mwmp/Main.hpp"
+#include "../mwmp/Networking.hpp"
 #include "../mwmp/LocalPlayer.hpp"
+#include "../mwmp/DedicatedPlayer.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -553,8 +561,16 @@ namespace MWClass
 
     void Npc::hit(const MWWorld::Ptr& ptr, float attackStrength, int type) const
     {
+        /*
+            Start of tes3mp addition
+
+            Ignore hits from DedicatedPlayers
+        */
         if (mwmp::Main::get().getNetworking()->isDedicatedPlayer(ptr))
             return;
+        /*
+            End of tes3mp addition
+        */
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
@@ -564,15 +580,15 @@ namespace MWClass
         MWWorld::InventoryStore &inv = getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         MWWorld::Ptr weapon = ((weaponslot != inv.end()) ? *weaponslot : MWWorld::Ptr());
-        if (!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
+        if(!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
             weapon = MWWorld::Ptr();
 
         MWMechanics::applyFatigueLoss(ptr, weapon, attackStrength);
 
         const float fCombatDistance = store.find("fCombatDistance")->getFloat();
         float dist = fCombatDistance * (!weapon.isEmpty() ?
-                                        weapon.get<ESM::Weapon>()->mBase->mData.mReach :
-                                        store.find("fHandToHandReach")->getFloat());
+                               weapon.get<ESM::Weapon>()->mBase->mData.mReach :
+                               store.find("fHandToHandReach")->getFloat());
 
         // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
         std::vector<MWWorld::Ptr> targetActors;
@@ -582,16 +598,17 @@ namespace MWClass
         // TODO: Use second to work out the hit angle
         std::pair<MWWorld::Ptr, osg::Vec3f> result = world->getHitContact(ptr, dist, targetActors);
         MWWorld::Ptr victim = result.first;
-        osg::Vec3f hitPosition(result.second);
-        if (victim.isEmpty()) // Didn't hit anything
+        osg::Vec3f hitPosition (result.second);
+        if(victim.isEmpty()) // Didn't hit anything
             return;
 
         const MWWorld::Class &othercls = victim.getClass();
-        if (!othercls.isActor()) // Can't hit non-actors
+        if(!othercls.isActor()) // Can't hit non-actors
             return;
         MWMechanics::CreatureStats &otherstats = othercls.getCreatureStats(victim);
-        if (otherstats.isDead()) // Can't hit dead actors
+        if(otherstats.isDead()) // Can't hit dead actors
             return;
+
         if(ptr == MWMechanics::getPlayer())
             MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
@@ -601,6 +618,12 @@ namespace MWClass
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, ptr.getClass().getSkill(ptr, weapskill));
 
+        /*
+            Start of tes3mp addition
+
+            If the attacker is a LocalPlayer and the target is a DedicatedPlayer,
+            mark that accordingly in the LocalPlayer data
+        */
         if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
         {
             mwmp::Main::get().getLocalPlayer()->attack.success = true;
@@ -608,14 +631,26 @@ namespace MWClass
             if (dedicatedPlayer != nullptr)
                 mwmp::Main::get().getLocalPlayer()->attack.target = dedicatedPlayer->guid;
         }
+        /*
+            End of tes3mp addition
+        */
 
-        if(Misc::Rng::roll0to99() >= hitchance)
+        if (Misc::Rng::roll0to99() >= hitchance)
         {
+            /*
+                Start of tes3mp addition
+
+                If this was a failed attack by the LocalPlayer, send a
+                PlayerAttack packet about it
+            */
             if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
             {
                 mwmp::Main::get().getLocalPlayer()->attack.success = false;
                 mwmp::Main::get().getLocalPlayer()->sendAttack(mwmp::Attack::MELEE);
             }
+            /*
+                End of tes3mp addition
+            */
 
             othercls.onHit(victim, 0.0f, false, weapon, ptr, osg::Vec3f(), false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
@@ -763,13 +798,24 @@ namespace MWClass
             float knockdownTerm = stats.getAttribute(ESM::Attribute::Agility).getModified()
                     * gmst.iKnockDownOddsMult->getInt() * 0.01f + gmst.iKnockDownOddsBase->getInt();
 
+            /*
+                Start of tes3mp change (major)
+
+                If the attacker is a DedicatedPlayer with a successful knockdown, apply the knockdown;
+                otherwise, use default probability roll
+            */
             mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::Players::getPlayer(attacker);
             bool isDedicated = dedicatedPlayer != nullptr;
-            bool _knockdown = false;
-            if(isDedicated)
-                _knockdown = dedicatedPlayer->attack.knockdown;
+            bool isDedicatedKnockdown = false;
+            if (isDedicated)
+                isDedicatedKnockdown = dedicatedPlayer->attack.knockdown;
 
-            if ((!isDedicated && ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99()) || _knockdown)
+            if (isDedicatedKnockdown)
+                stats.setKnockedDown(true);
+            else if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99())
+            /*
+                End of tes3mp change (major)
+            */
                 stats.setKnockedDown(true);
             else
                 stats.setHitRecovery(true); // Is this supposed to always occur?
@@ -871,7 +917,14 @@ namespace MWClass
             MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, attacker);
         }
 
+        /*
+            Start of tes3mp addition
 
+            If the victim was a DedicatedPlayer, send a PlayerAttack packet from LocalPlayer
+
+            If the victim was the LocalPlayer, check whether packets should be sent about
+            their new dynamic stats and position
+        */
         mwmp::DedicatedPlayer *victimPlayer = mwmp::Players::getPlayer(ptr);
         if (attacker == MWMechanics::getPlayer() && victimPlayer != nullptr)
         {
@@ -888,13 +941,25 @@ namespace MWClass
             mwmp::Main::get().getLocalPlayer()->updateStatsDynamic(true);
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after getting damage;
         }
+        /*
+            End of tes3mp addition
+        */
     }
 
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
+        /*
+            Start of tes3mp addition
+
+            Don't display a dialogue screen for two players interacting with each other
+        */
         if (actor == MWMechanics::getPlayer() && mwmp::Main::get().getNetworking()->isDedicatedPlayer(ptr))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("Not implemented."));
+        /*
+            End of tes3mp addition
+        */
+
         // player got activated by another NPC
         if(ptr == MWMechanics::getPlayer())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));

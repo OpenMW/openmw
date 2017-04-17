@@ -1254,8 +1254,16 @@ bool CharacterController::updateWeaponState()
 
                 if(!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
                 {
+                    /*
+                        Start of tes3mp addition
+
+                        Send PlayerAttack packet for this spell
+                    */
                     if (mPtr == getPlayer())
                         mwmp::Main::get().getLocalPlayer()->prepareAttack(mwmp::Attack::MAGIC, true);
+                    /*
+                        End of tes3mp addition
+                    */
 
                     MWMechanics::CastSpell cast(mPtr, NULL);
                     cast.playSpellCastingEffects(spellid);
