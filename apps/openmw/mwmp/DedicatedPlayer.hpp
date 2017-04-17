@@ -40,6 +40,8 @@ namespace mwmp
         static DedicatedPlayer *getPlayer(RakNet::RakNetGUID guid);
         static DedicatedPlayer *getPlayer(const MWWorld::Ptr &ptr);
 
+        static bool isDedicatedPlayer(const MWWorld::Ptr &ptr);
+
     private:
 
         static std::map<RakNet::RakNetGUID, DedicatedPlayer *> players;

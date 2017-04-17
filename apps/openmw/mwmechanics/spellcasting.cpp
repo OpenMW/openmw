@@ -849,14 +849,15 @@ namespace MWMechanics
                     can be accounted for like it is in OpenMW's corresponding code
                 */
                 mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::PlayerList::getPlayer(mCaster);
-                bool isDedicated = dedicatedPlayer != NULL;
+
+                bool isDedicated = mwmp::PlayerList::isDedicatedPlayer(mCaster);
 
                 if (isDedicated)
                     dedicatedPlayer->attack.pressed = false;
 
                 // Check success
                 if ((!isDedicated && !mwmp::Main::get().getLocalPlayer()->attack.success) ||
-                    (isDedicated && dedicatedPlayer->attack.success == 0))
+                    (isDedicated && dedicatedPlayer->attack.success == false))
                 {
                     if (mCaster == getPlayer())
                     {

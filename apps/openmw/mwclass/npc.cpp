@@ -627,9 +627,9 @@ namespace MWClass
         if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
         {
             mwmp::Main::get().getLocalPlayer()->attack.success = true;
-            mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::PlayerList::getPlayer(victim);
-            if (dedicatedPlayer != nullptr)
-                mwmp::Main::get().getLocalPlayer()->attack.target.guid = dedicatedPlayer->guid;
+
+            if (mwmp::PlayerList::isDedicatedPlayer(victim))
+                mwmp::Main::get().getLocalPlayer()->attack.target.guid = mwmp::PlayerList::getPlayer(victim)->guid;
         }
         /*
             End of tes3mp addition
@@ -804,13 +804,7 @@ namespace MWClass
                 If the attacker is a DedicatedPlayer with a successful knockdown, apply the knockdown;
                 otherwise, use default probability roll
             */
-            mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::PlayerList::getPlayer(attacker);
-            bool isDedicated = dedicatedPlayer != nullptr;
-            bool isDedicatedKnockdown = false;
-            if (isDedicated)
-                isDedicatedKnockdown = dedicatedPlayer->attack.knockdown;
-
-            if (isDedicatedKnockdown)
+            if (mwmp::PlayerList::isDedicatedPlayer(attacker) && mwmp::PlayerList::getPlayer(attacker)->attack.knockdown)
                 stats.setKnockedDown(true);
             else if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99())
             /*
@@ -925,13 +919,15 @@ namespace MWClass
             If the victim was the LocalPlayer, check whether packets should be sent about
             their new dynamic stats and position
         */
-        mwmp::DedicatedPlayer *victimPlayer = mwmp::PlayerList::getPlayer(ptr);
-        if (attacker == MWMechanics::getPlayer() && victimPlayer != nullptr)
+        if (attacker == MWMechanics::getPlayer() && mwmp::PlayerList::isDedicatedPlayer(ptr))
         {
+            mwmp::DedicatedPlayer *victimPlayer = mwmp::PlayerList::getPlayer(ptr);
+
             mwmp::Attack *attack = &mwmp::Main::get().getLocalPlayer()->attack;
             attack->damage = damage;
             attack->target.guid = victimPlayer->guid;
             attack->knockdown = getCreatureStats(ptr).getKnockedDown();
+
             mwmp::Main::get().getLocalPlayer()->sendAttack(mwmp::Attack::MELEE); // todo: make this sensitive to different weapon types
         }
 
