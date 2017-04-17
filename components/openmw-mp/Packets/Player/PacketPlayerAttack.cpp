@@ -18,7 +18,7 @@ void PacketPlayerAttack::Packet(RakNet::BitStream *bs, bool send)
 
     RW(player->attack.attacker, send);
     RW(player->attack.target, send);
-    RW(player->attack.refid, send);
+    RW(player->attack.refId, send);
     RW(player->attack.type, send);
     RW(player->attack.success, send);
     RW(player->attack.damage, send);

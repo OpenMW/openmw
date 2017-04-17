@@ -452,7 +452,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             }
 
             MWMechanics::CreatureStats &stats = pl->getPtr().getClass().getNpcStats(pl->getPtr());
-            stats.getSpells().setSelectedSpell(pl->attack.refid);
+            stats.getSpells().setSelectedSpell(pl->attack.refId);
 
             MWWorld::Ptr victim;
             if (pl->attack.target == getLocalPlayer()->guid)
@@ -492,7 +492,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             }
             else
             {
-                LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "SpellId: %s", pl->attack.refid.c_str());
+                LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "SpellId: %s", pl->attack.refId.c_str());
                 LOG_APPEND(Log::LOG_VERBOSE, " - success: %d", pl->attack.success);
             }
         }

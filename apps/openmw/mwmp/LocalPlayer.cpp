@@ -535,7 +535,7 @@ void LocalPlayer::updateAttackState(bool forceUpdate)
             attack.attacker = guid;
             attack.type = Attack::MAGIC;
             attack.pressed = true;
-            attack.refid = spell;
+            attack.refId = spell;
         }
         else if (state == MWMechanics::DrawState_Weapon)
         {
@@ -1185,7 +1185,7 @@ void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
         const string &spell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
         attack.success = Misc::Rng::roll0to99() < MWMechanics::getSpellSuccessChance(spell, getPlayerPtr());
         state = true;
-        attack.refid = spell;
+        attack.refId = spell;
     }
     else
     {

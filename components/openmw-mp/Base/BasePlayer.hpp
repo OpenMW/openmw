@@ -27,7 +27,7 @@ namespace mwmp
             MAGIC,
             THROWABLE
         };
-        std::string refid; // id of spell (e.g. "fireball")
+        std::string refId; // id of spell (e.g. "fireball")
         char success;
         char block;
         float damage;
