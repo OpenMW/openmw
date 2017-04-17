@@ -930,7 +930,6 @@ namespace MWClass
         {
             mwmp::Attack *attack = &mwmp::Main::get().getLocalPlayer()->attack;
             attack->damage = damage;
-            attack->attackerGuid = mwmp::Main::get().getLocalPlayer()->guid;
             attack->targetGuid = victimPlayer->guid;
             attack->knockdown = getCreatureStats(ptr).getKnockedDown();
             mwmp::Main::get().getLocalPlayer()->sendAttack(mwmp::Attack::MELEE); // todo: make this sensitive to different weapon types

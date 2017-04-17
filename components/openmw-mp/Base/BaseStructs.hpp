@@ -9,7 +9,6 @@ namespace mwmp
     {
     public:
         RakNet::RakNetGUID targetGuid;
-        RakNet::RakNetGUID attackerGuid;
 
         char type; // 0 - melee, 1 - magic, 2 - throwable
         enum TYPE
