@@ -5,32 +5,38 @@
 #include <stdexcept>
 #include <iostream>
 #include <string>
-#include <components/esm/cellid.hpp>
 
-#include "../mwbase/world.hpp"
+#include <components/openmw-mp/Log.hpp>
+#include <components/openmw-mp/Utils.hpp>
+#include <components/openmw-mp/Version.hpp>
+#include <components/openmw-mp/Packets/PacketPreInit.hpp>
+
+#include <components/esm/cellid.hpp>
+#include <components/files/configurationmanager.hpp>
+
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
+#include "../mwclass/npc.hpp"
+
+#include "../mwmechanics/combat.hpp"
+#include "../mwmechanics/npcstats.hpp"
+
+#include "../mwstate/statemanagerimp.hpp"
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
-#include "../mwclass/npc.hpp"
-#include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/combat.hpp"
-
 #include <SDL_messagebox.h>
+
 #include "Networking.hpp"
-#include "../mwstate/statemanagerimp.hpp"
-#include <components/openmw-mp/Log.hpp>
-#include <components/openmw-mp/Version.hpp>
-#include <components/files/configurationmanager.hpp>
-#include <components/openmw-mp/Utils.hpp>
-#include <components/openmw-mp/Packets/PacketPreInit.hpp>
-#include "DedicatedPlayer.hpp"
-#include "LocalPlayer.hpp"
+#include "Main.hpp"
 #include "GUIController.hpp"
 #include "CellController.hpp"
-#include "Main.hpp"
+#include "MechanicsHelper.hpp"
+#include "LocalPlayer.hpp"
+#include "DedicatedPlayer.hpp"
 
 using namespace std;
 using namespace mwmp;
@@ -442,59 +448,7 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
             myPacket->setPlayer(pl);
             myPacket->Packet(&bsIn, false);
 
-            //cout << "Player: " << pl->Npc()->mName << " pressed: " << (pl->getAttack()->pressed == 1) << endl;
-            if (pl->attack.pressed == 0)
-            {
-                LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Attack success: %s", pl->attack.success ? "true" : "false");
-
-                if (pl->attack.success == 1)
-                    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Damage: %f", pl->attack.damage);
-            }
-
-            MWMechanics::CreatureStats &stats = pl->getPtr().getClass().getNpcStats(pl->getPtr());
-            stats.getSpells().setSelectedSpell(pl->attack.refId);
-
-            MWWorld::Ptr victim;
-            if (pl->attack.target == getLocalPlayer()->guid)
-                victim = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            else if (Players::getPlayer(pl->attack.target) != 0)
-                victim = Players::getPlayer(pl->attack.target)->getPtr();
-
-            MWWorld::Ptr attacker;
-            attacker = pl->getPtr();
-
-            // Get the weapon used (if hand-to-hand, weapon = inv.end())
-            if (pl->drawState == 1)
-            {
-                MWWorld::InventoryStore &inv = attacker.getClass().getInventoryStore(attacker);
-                MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(
-                    MWWorld::InventoryStore::Slot_CarriedRight);
-                MWWorld::Ptr weapon = ((weaponslot != inv.end()) ? *weaponslot : MWWorld::Ptr());
-                if (!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
-                    weapon = MWWorld::Ptr();
-
-                if (victim.mRef != 0)
-                {
-                    bool healthdmg;
-                    if (!weapon.isEmpty())
-                        healthdmg = true;
-                    else
-                    {
-                        MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
-                        healthdmg = otherstats.isParalyzed() || otherstats.getKnockedDown();
-                    }
-
-                    if (!weapon.isEmpty())
-                        MWMechanics::blockMeleeAttack(attacker, victim, weapon, pl->attack.damage, 1);
-                    pl->getPtr().getClass().onHit(victim, pl->attack.damage, healthdmg, weapon, attacker, osg::Vec3f(),
-                        pl->attack.success);
-                }
-            }
-            else
-            {
-                LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "SpellId: %s", pl->attack.refId.c_str());
-                LOG_APPEND(Log::LOG_VERBOSE, " - success: %d", pl->attack.success);
-            }
+            Main::get().getMechanicsHelper()->processAttack(pl->getPtr(), pl->attack);
         }
         break;
     }
