@@ -32,17 +32,11 @@
 
 #include "Networking.hpp"
 #include "Main.hpp"
+#include "ProcessorInitializer.hpp"
+#include "PlayerProcessor.hpp"
+#include "WorldProcessor.hpp"
 #include "GUIController.hpp"
 #include "CellController.hpp"
-#include "MechanicsHelper.hpp"
-#include "LocalPlayer.hpp"
-#include "DedicatedPlayer.hpp"
-#include "LocalPlayer.hpp"
-#include "GUIController.hpp"
-#include "Main.hpp"
-#include "PlayerProcessor.hpp"
-#include "ProcessorInitializer.hpp"
-#include "WorldProcessor.hpp"
 
 using namespace std;
 using namespace mwmp;
