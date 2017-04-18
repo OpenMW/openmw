@@ -38,6 +38,7 @@ namespace mwmp
         std::string sound;
 
         Animation animation;
+        Attack attack;
     };
 
     class BaseActorList

@@ -37,9 +37,21 @@ void PacketActorAttack::Packet(RakNet::BitStream *bs, bool send)
         RW(actor.refId, send);
         RW(actor.refNumIndex, send);
         RW(actor.mpNum, send);
-        
-        // TODO: Fill this in
 
+        RW(actor.attack.target.refId, send);
+        RW(actor.attack.target.refNumIndex, send);
+        RW(actor.attack.target.mpNum, send);
+        RW(actor.attack.target.guid, send);
+
+        RW(actor.attack.spellId, send);
+        RW(actor.attack.type, send);
+        RW(actor.attack.success, send);
+        RW(actor.attack.damage, send);
+
+        RW(actor.attack.pressed, send);
+        RW(actor.attack.knockdown, send);
+        RW(actor.attack.block, send);
+        
         if (!send)
         {
             actorList->baseActors.push_back(actor);
