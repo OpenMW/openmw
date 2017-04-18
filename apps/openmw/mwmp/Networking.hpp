@@ -62,10 +62,6 @@ namespace mwmp
         ActorList actorList;
         WorldEvent worldEvent;
 
-        void processPlayerPacket(RakNet::Packet *packet);
-        void processActorPacket(RakNet::Packet *packet);
-        void processWorldPacket(RakNet::Packet *packet);
-
         void receiveMessage(RakNet::Packet *packet);
 
         void preInit(std::vector<std::string> &content, Files::Collections &collections);

@@ -249,24 +249,6 @@ void Networking::preInit(std::vector<std::string> &content, Files::Collections &
     }
 }
 
-void Networking::processPlayerPacket(RakNet::Packet *packet)
-{
-    if(!PlayerProcessor::Process(*packet))
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled PlayerPacket with identifier %i has arrived", packet->data[0]);
-}
-
-void Networking::processActorPacket(RakNet::Packet *packet)
-{
-    if (!ActorProcessor::Process(*packet, actorList))
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled ActorPacket with identifier %i has arrived", packet->data[0]);
-}
-
-void Networking::processWorldPacket(RakNet::Packet *packet)
-{
-    if (!WorldProcessor::Process(*packet, worldEvent))
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled WorldPacket with identifier %i has arrived", packet->data[0]);
-}
-
 void Networking::receiveMessage(RakNet::Packet *packet)
 {
     if (packet->length < 2)
@@ -274,15 +256,18 @@ void Networking::receiveMessage(RakNet::Packet *packet)
 
     if (playerPacketController.ContainsPacket(packet->data[0]))
     {
-        processPlayerPacket(packet);
+        if(!PlayerProcessor::Process(*packet))
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled PlayerPacket with identifier %i has arrived", packet->data[0]);
     }
     else if (actorPacketController.ContainsPacket(packet->data[0]))
     {
-        processActorPacket(packet);
+        if (!ActorProcessor::Process(*packet, actorList))
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled ActorPacket with identifier %i has arrived", packet->data[0]);
     }
     else if (worldPacketController.ContainsPacket(packet->data[0]))
     {
-        processWorldPacket(packet);
+        if (!WorldProcessor::Process(*packet, worldEvent))
+            LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled WorldPacket with identifier %i has arrived", packet->data[0]);
     }
 }
 
