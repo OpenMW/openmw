@@ -12,24 +12,25 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Base/BasePacketProcessor.hpp>
 #include <components/openmw-mp/Packets/World/WorldPacket.hpp>
+#include "WorldEvent.hpp"
 #include "LocalPlayer.hpp"
 #include "DedicatedPlayer.hpp"
 
 namespace mwmp
 {
-    class WorldProcesssor : public BasePacketProcessor
+    class WorldProcessor : public BasePacketProcessor
     {
     public:
-        virtual void Do(WorldPacket &packet, BaseEvent &event) = 0;
+        virtual void Do(WorldPacket &packet, WorldEvent &event) = 0;
 
-        static bool Process(RakNet::Packet &packet, BaseEvent &event);
-        static void AddProcessor(WorldProcesssor *processor);
+        static bool Process(RakNet::Packet &packet, WorldEvent &event);
+        static void AddProcessor(WorldProcessor *processor);
         static void SetServerAddr(RakNet::SystemAddress addr)
         {
             serverAddr = addr;
         }
 
-        typedef boost::unordered_map<unsigned char, boost::shared_ptr<WorldProcesssor> > processors_t;
+        typedef boost::unordered_map<unsigned char, boost::shared_ptr<WorldProcessor> > processors_t;
 
     protected:
         inline bool isRequest()

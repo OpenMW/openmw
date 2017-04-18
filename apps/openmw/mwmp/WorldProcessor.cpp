@@ -3,18 +3,18 @@
 //
 
 #include <boost/foreach.hpp>
-#include "WorldProcesssor.hpp"
+#include "WorldProcessor.hpp"
 #include "Main.hpp"
 #include "Networking.hpp"
 
 using namespace mwmp;
 
-WorldProcesssor::processors_t WorldProcesssor::processors;
-RakNet::RakNetGUID WorldProcesssor::guid;
-RakNet::SystemAddress WorldProcesssor::serverAddr;
-bool WorldProcesssor::request;
+WorldProcessor::processors_t WorldProcessor::processors;
+RakNet::RakNetGUID WorldProcessor::guid;
+RakNet::SystemAddress WorldProcessor::serverAddr;
+bool WorldProcessor::request;
 
-bool WorldProcesssor::Process(RakNet::Packet &packet, BaseEvent &event)
+bool WorldProcessor::Process(RakNet::Packet &packet, WorldEvent &event)
 {
     RakNet::BitStream bsIn(&packet.data[1], packet.length, false);
     bsIn.Read(guid);
@@ -43,7 +43,7 @@ bool WorldProcesssor::Process(RakNet::Packet &packet, BaseEvent &event)
     return false;
 }
 
-void WorldProcesssor::AddProcessor(mwmp::WorldProcesssor *processor)
+void WorldProcessor::AddProcessor(mwmp::WorldProcessor *processor)
 {
     BOOST_FOREACH(processors_t::value_type &p, processors)
     {
@@ -51,10 +51,10 @@ void WorldProcesssor::AddProcessor(mwmp::WorldProcesssor *processor)
             throw std::logic_error("processor " + p.second->strPacketID + " already registered. Check " +
                                    processor->className + " and " + p.second->className);
     }
-    processors.insert(processors_t::value_type(processor->GetPacketID(), boost::shared_ptr<WorldProcesssor>(processor)));
+    processors.insert(processors_t::value_type(processor->GetPacketID(), boost::shared_ptr<WorldProcessor>(processor)));
 }
 
-LocalPlayer *WorldProcesssor::getLocalPlayer()
+LocalPlayer *WorldProcessor::getLocalPlayer()
 {
     return Main::get().getLocalPlayer();
 }
