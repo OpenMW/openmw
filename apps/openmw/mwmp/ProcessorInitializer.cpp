@@ -47,6 +47,16 @@
 #include "processors/world/ProcessorScriptMemberShort.hpp"
 #include "processors/world/ProcessorVideoPlay.hpp"
 
+#include "processors/actor/ProcessorActorAnimFlags.hpp"
+#include "processors/actor/ProcessorActorAnimPlay.hpp"
+#include "processors/actor/ProcessorActorAttack.hpp"
+#include "processors/actor/ProcessorActorAuthority.hpp"
+#include "processors/actor/ProcessorActorCellChange.hpp"
+#include "processors/actor/ProcessorActorList.hpp"
+#include "processors/actor/ProcessorActorPosition.hpp"
+#include "processors/actor/ProcessorActorSpeech.hpp"
+#include "processors/actor/ProcessorActorStatsDynamic.hpp"
+#include "processors/actor/ProcessorActorTest.hpp"
 
 using namespace mwmp;
 
@@ -92,4 +102,15 @@ void ProcessorInitializer()
     WorldProcessor::AddProcessor(new ProcessorScriptLocalShort());
     WorldProcessor::AddProcessor(new ProcessorScriptMemberShort());
     WorldProcessor::AddProcessor(new ProcessorVideoPlay());
+
+    ActorProcessor::AddProcessor(new ProcessorActorAnimFlags());
+    ActorProcessor::AddProcessor(new ProcessorActorAnimPlay());
+    ActorProcessor::AddProcessor(new ProcessorActorAttack());
+    ActorProcessor::AddProcessor(new ProcessorActorAuthority());
+    ActorProcessor::AddProcessor(new ProcessorActorCellChange());
+    ActorProcessor::AddProcessor(new ProcessorActorList());
+    ActorProcessor::AddProcessor(new ProcessorActorPosition());
+    ActorProcessor::AddProcessor(new ProcessorActorSpeech());
+    ActorProcessor::AddProcessor(new ProcessorActorStatsDynamic());
+    ActorProcessor::AddProcessor(new ProcessorActorTest());
 }
