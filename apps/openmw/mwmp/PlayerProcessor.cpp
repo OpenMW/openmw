@@ -12,10 +12,6 @@
 using namespace mwmp;
 
 PlayerProcessor::processors_t PlayerProcessor::processors;
-RakNet::RakNetGUID PlayerProcessor::myGuid;
-RakNet::RakNetGUID PlayerProcessor::guid;
-RakNet::SystemAddress PlayerProcessor::serverAddr;
-bool PlayerProcessor::request;
 
 void PlayerProcessor::AddProcessor(PlayerProcessor *processor)
 {
@@ -65,9 +61,4 @@ bool PlayerProcessor::Process(RakNet::Packet &packet)
         }
     }
     return false;
-}
-
-LocalPlayer *PlayerProcessor::getLocalPlayer()
-{
-    return Main::get().getLocalPlayer();
 }

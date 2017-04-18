@@ -153,9 +153,7 @@ void Networking::connect(const std::string &ip, unsigned short port, std::vector
                 case ID_CONNECTION_REQUEST_ACCEPTED:
                 {
                     serverAddr = packet->systemAddress;
-                    PlayerProcessor::SetServerAddr(packet->systemAddress);
-                    WorldProcessor::SetServerAddr(packet->systemAddress);
-                    ActorProcessor::SetServerAddr(packet->systemAddress);
+                    BaseClientPacketProcessor::SetServerAddr(packet->systemAddress);
 
                     connected = true;
                     queue = false;

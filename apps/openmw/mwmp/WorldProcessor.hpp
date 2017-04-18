@@ -10,40 +10,26 @@
 
 #include <components/openmw-mp/Log.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
-#include <components/openmw-mp/Base/BasePacketProcessor.hpp>
 #include <components/openmw-mp/Packets/World/WorldPacket.hpp>
 #include "WorldEvent.hpp"
 #include "LocalPlayer.hpp"
 #include "DedicatedPlayer.hpp"
+#include "BaseClientPacketProcessor.hpp"
 
 namespace mwmp
 {
-    class WorldProcessor : public BasePacketProcessor
+    class WorldProcessor : public BaseClientPacketProcessor
     {
     public:
         virtual void Do(WorldPacket &packet, WorldEvent &event) = 0;
 
         static bool Process(RakNet::Packet &packet, WorldEvent &event);
         static void AddProcessor(WorldProcessor *processor);
-        static void SetServerAddr(RakNet::SystemAddress addr)
-        {
-            serverAddr = addr;
-        }
 
         typedef boost::unordered_map<unsigned char, boost::shared_ptr<WorldProcessor> > processors_t;
 
-    protected:
-        inline bool isRequest()
-        {
-            return request;
-        }
-        LocalPlayer *getLocalPlayer();
-    protected:
-        static RakNet::RakNetGUID guid;
-        static RakNet::SystemAddress serverAddr;
     private:
         static processors_t processors;
-        static bool request;
     };
 }
 

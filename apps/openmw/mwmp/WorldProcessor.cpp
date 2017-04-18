@@ -10,9 +10,6 @@
 using namespace mwmp;
 
 WorldProcessor::processors_t WorldProcessor::processors;
-RakNet::RakNetGUID WorldProcessor::guid;
-RakNet::SystemAddress WorldProcessor::serverAddr;
-bool WorldProcessor::request;
 
 bool WorldProcessor::Process(RakNet::Packet &packet, WorldEvent &event)
 {
@@ -28,6 +25,7 @@ bool WorldProcessor::Process(RakNet::Packet &packet, WorldEvent &event)
     {
         if(processor.first == packet.data[0])
         {
+            myGuid = Main::get().getLocalPlayer()->guid;
             request = packet.length == myPacket->headerSize();
 
             if(!request && !processor.second->avoidReading)
@@ -52,9 +50,4 @@ void WorldProcessor::AddProcessor(mwmp::WorldProcessor *processor)
                                    processor->className + " and " + p.second->className);
     }
     processors.insert(processors_t::value_type(processor->GetPacketID(), boost::shared_ptr<WorldProcessor>(processor)));
-}
-
-LocalPlayer *WorldProcessor::getLocalPlayer()
-{
-    return Main::get().getLocalPlayer();
 }
