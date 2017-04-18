@@ -308,16 +308,6 @@ bool Networking::isDedicatedPlayer(const MWWorld::Ptr &ptr)
     return pl != 0;
 }
 
-bool Networking::attack(const MWWorld::Ptr &ptr)
-{
-    DedicatedPlayer *pl = PlayerList::getPlayer(ptr);
-
-    if (pl == 0)
-        return false;
-
-    return pl->attack.pressed;
-}
-
 bool Networking::isConnected()
 {
     return connected;
