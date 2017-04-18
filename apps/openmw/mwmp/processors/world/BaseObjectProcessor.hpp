@@ -17,7 +17,7 @@ namespace mwmp
     public:
         virtual void Do(WorldPacket &packet, WorldEvent &event)
         {
-            MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(event.cell);
+            ptrCellStore = Main::get().getCellController()->getCellStore(event.cell);
 
             if (!ptrCellStore) return;
 
