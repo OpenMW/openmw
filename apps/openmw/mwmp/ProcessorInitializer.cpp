@@ -29,7 +29,7 @@
 #include "processors/player/ProcessorUserDisconnected.hpp"
 #include "processors/player/ProcessorUserMyID.hpp"
 
-/*#include "WorldProcessor.hpp"
+#include "WorldProcessor.hpp"
 #include "processors/world/ProcessorContainer.hpp"
 #include "processors/world/ProcessorDoorState.hpp"
 #include "processors/world/ProcessorMusicPlay.hpp"
@@ -45,7 +45,7 @@
 #include "processors/world/ProcessorScriptLocalFloat.hpp"
 #include "processors/world/ProcessorScriptLocalShort.hpp"
 #include "processors/world/ProcessorScriptMemberShort.hpp"
-#include "processors/world/ProcessorVideoPlay.hpp"*/
+#include "processors/world/ProcessorVideoPlay.hpp"
 
 
 using namespace mwmp;
@@ -76,7 +76,7 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorUserDisconnected());
     PlayerProcessor::AddProcessor(new ProcessorUserMyID());
 
-    /*WorldProcessor::AddProcessor(new ProcessorContainer());
+    WorldProcessor::AddProcessor(new ProcessorContainer());
     WorldProcessor::AddProcessor(new ProcessorDoorState());
     WorldProcessor::AddProcessor(new ProcessorMusicPlay());
     WorldProcessor::AddProcessor(new ProcessorObjectAnimPlay());
@@ -91,5 +91,5 @@ void ProcessorInitializer()
     WorldProcessor::AddProcessor(new ProcessorScriptLocalFloat());
     WorldProcessor::AddProcessor(new ProcessorScriptLocalShort());
     WorldProcessor::AddProcessor(new ProcessorScriptMemberShort());
-    WorldProcessor::AddProcessor(new ProcessorVideoPlay());*/
+    WorldProcessor::AddProcessor(new ProcessorVideoPlay());
 }
