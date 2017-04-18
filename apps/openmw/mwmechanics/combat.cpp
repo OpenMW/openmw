@@ -4,10 +4,17 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
-#include "../mwmp/Networking.hpp"
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
 #include "../mwmp/Main.hpp"
 #include "../mwmp/DedicatedPlayer.hpp"
 #include "../mwmp/LocalPlayer.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -196,7 +203,7 @@ namespace MWMechanics
 
             Ignore projectiles fired by DedicatedPlayers
         */
-        if (mwmp::Main::get().getNetworking()->isDedicatedPlayer(attacker))
+        if (mwmp::PlayerList::isDedicatedPlayer(attacker))
             return;
         /*
             End of tes3mp addition

@@ -235,10 +235,10 @@ DedicatedPlayer *PlayerList::getPlayer(const MWWorld::Ptr &ptr)
 
 bool PlayerList::isDedicatedPlayer(const MWWorld::Ptr &ptr)
 {
-    if (getPlayer(ptr))
-        return true;
+    if (ptr.mRef == 0)
+        return false;
 
-    return false;
+    return (getPlayer(ptr) != 0);
 }
 
 void DedicatedPlayer::move(float dt)

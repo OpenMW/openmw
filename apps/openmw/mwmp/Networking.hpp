@@ -35,8 +35,6 @@ namespace mwmp
         ActorPacket *getActorPacket(RakNet::MessageID id);
         WorldPacket *getWorldPacket(RakNet::MessageID id);
 
-        bool isDedicatedPlayer(const MWWorld::Ptr &ptr);
-
         RakNet::SystemAddress serverAddress()
         {
             return serverAddr;

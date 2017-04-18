@@ -299,15 +299,6 @@ WorldEvent *Networking::getWorldEvent()
     return &worldEvent;
 }
 
-bool Networking::isDedicatedPlayer(const MWWorld::Ptr &ptr)
-{
-    if (ptr.mRef == 0)
-        return 0;
-    DedicatedPlayer *pl = PlayerList::getPlayer(ptr);
-
-    return pl != 0;
-}
-
 bool Networking::isConnected()
 {
     return connected;

@@ -14,7 +14,6 @@
     Include additional headers for multiplayer purposes
 */
 #include "../mwmp/Main.hpp"
-#include "../mwmp/Networking.hpp"
 #include "../mwmp/LocalPlayer.hpp"
 #include "../mwmp/DedicatedPlayer.hpp"
 /*
@@ -564,9 +563,9 @@ namespace MWClass
         /*
             Start of tes3mp addition
 
-            Ignore hits from DedicatedPlayers
+            Ignore hit calculations on this client from DedicatedPlayers
         */
-        if (mwmp::Main::get().getNetworking()->isDedicatedPlayer(ptr))
+        if (mwmp::PlayerList::isDedicatedPlayer(ptr))
             return;
         /*
             End of tes3mp addition
@@ -949,7 +948,7 @@ namespace MWClass
 
             Don't display a dialogue screen for two players interacting with each other
         */
-        if (actor == MWMechanics::getPlayer() && mwmp::Main::get().getNetworking()->isDedicatedPlayer(ptr))
+        if (actor == MWMechanics::getPlayer() && mwmp::PlayerList::isDedicatedPlayer(ptr))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("Not implemented."));
         /*
             End of tes3mp addition
