@@ -6,6 +6,7 @@
 #define OPENMW_LOCALPLAYER_HPP
 
 #include <components/openmw-mp/Base/BasePlayer.hpp>
+#include "../mwworld/ptr.hpp"
 #include <RakNetTypes.h>
 
 namespace mwmp

@@ -1,3 +1,6 @@
+#ifndef OPENMW_MWMP_MAIN
+#define OPENMW_MWMP_MAIN
+
 #include "../mwworld/ptr.hpp"
 #include <boost/program_options.hpp>
 #include <components/files/collections.hpp>
@@ -54,3 +57,5 @@ namespace mwmp
         unsigned short port;
     };
 }
+
+#endif //OPENMW_MWMP_MAIN
