@@ -100,6 +100,25 @@ add_openmw_dir (mwmp Main Networking LocalPlayer DedicatedPlayer LocalActor Dedi
         CellController MechanicsHelper GUIChat GUILogin GUIController PlayerMarkerCollection GUIDialogList
         BaseClientPacketProcessor PlayerProcessor WorldProcessor ActorProcessor ProcessorInitializer)
 
+add_openmw_dir (mwmp\\processors\\actor ProcessorActorAnimFlags ProcessorActorAnimPlay ProcessorActorAttack
+        ProcessorActorAuthority ProcessorActorCellChange ProcessorActorList ProcessorActorPosition ProcessorActorSpeech
+        ProcessorActorStatsDynamic ProcessorActorTest
+        )
+
+add_openmw_dir (mwmp\\processors\\player ProcessorChatMessage ProcessorGameConsole ProcessorGameTime ProcessorGUIMessageBox
+        ProcessorHandshake ProcessorPlayerAttack ProcessorPlayerAttribute ProcessorPlayerBaseInfo ProcessorPlayerCellChange
+        ProcessorPlayerCellState ProcessorPlayerCharClass ProcessorPlayerCharGen ProcessorPlayerDeath ProcessorPlayerDrawState
+        ProcessorPlayerDynamicStats ProcessorPlayerEquipment ProcessorPlayerInventory ProcessorPlayerJournal
+        ProcessorPlayerLevel ProcessorPlayerPos ProcessorPlayerResurrect ProcessorPlayerSkill ProcessorPlayerSpellbook
+        ProcessorUserDisconnected ProcessorUserMyID
+        )
+
+add_openmw_dir (mwmp\\processors\\world BaseObjectProcessor ProcessorContainer ProcessorDoorState ProcessorMusicPlay
+        ProcessorObjectAnimPlay ProcessorObjectDelete ProcessorObjectLock ProcessorObjectMove ProcessorObjectPlace
+        ProcessorObjectRotate ProcessorObjectScale ProcessorObjectUnlock ProcessorScriptGlobalShort ProcessorScriptLocalFloat
+        ProcessorScriptLocalShort ProcessorScriptMemberShort ProcessorVideoPlay
+        )
+
 # Main executable
 
 if (NOT ANDROID)
