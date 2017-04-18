@@ -19,17 +19,19 @@ endfunction(enable_unity_build)
 macro (add_openmw_dir dir)
     set (files)
     set (cppfiles)
+
+    string(REGEX REPLACE "\\\\" "/" newDir ${dir})
     foreach (u ${ARGN})
 
         # Add cpp and hpp to OPENMW_FILES
-        file (GLOB ALL "${dir}/${u}.[ch]pp")
+        file (GLOB ALL "${newDir}/${u}.[ch]pp")
         foreach (f ${ALL})
             list (APPEND files "${f}")
             list (APPEND OPENMW_FILES "${f}")
         endforeach (f)
 
         # Add cpp to unity build
-        file (GLOB ALL "${dir}/${u}.cpp")
+        file (GLOB ALL "${newDir}/${u}.cpp")
         foreach (f ${ALL})
             list (APPEND cppfiles "${f}")
         endforeach (f)
@@ -37,8 +39,8 @@ macro (add_openmw_dir dir)
     endforeach (u)
 
     if (OPENMW_UNITY_BUILD)
-        enable_unity_build(${dir} "${cppfiles}")
-        list (APPEND OPENMW_FILES ${CMAKE_CURRENT_BINARY_DIR}/ub_${dir}.cpp)
+        enable_unity_build(${newDir} "${cppfiles}")
+        list (APPEND OPENMW_FILES ${CMAKE_CURRENT_BINARY_DIR}/ub_${newDir}.cpp)
     endif()
 
     source_group ("apps\\openmw\\${dir}" FILES ${files})
