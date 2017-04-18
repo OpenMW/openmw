@@ -37,6 +37,13 @@
 #include "MechanicsHelper.hpp"
 #include "LocalPlayer.hpp"
 #include "DedicatedPlayer.hpp"
+#include "LocalPlayer.hpp"
+#include "GUIController.hpp"
+#include "WorldController.hpp"
+#include "Main.hpp"
+#include "PlayerProcessor.hpp"
+#include "ProcessorInitializer.hpp"
+#include "WorldProcessor.hpp"
 
 using namespace std;
 using namespace mwmp;
@@ -153,6 +160,7 @@ void Networking::connect(const std::string &ip, unsigned short port, std::vector
                 {
                     serverAddr = packet->systemAddress;
                     PlayerProcessor::SetServerAddr(packet->systemAddress);
+                    WorldProcessor::SetServerAddr(packet->systemAddress);
                     connected = true;
                     queue = false;
 
@@ -342,192 +350,8 @@ void Networking::processActorPacket(RakNet::Packet *packet)
 
 void Networking::processWorldPacket(RakNet::Packet *packet)
 {
-    RakNet::RakNetGUID guid;
-    RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
-    bsIn.Read(guid);
-
-    DedicatedPlayer *pl = 0;
-    static RakNet::RakNetGUID myGuid = getLocalPlayer()->guid;
-    if (guid != myGuid)
-        pl = PlayerList::getPlayer(guid);
-
-    WorldPacket *myPacket = worldPacketController.GetPacket(packet->data[0]);
-
-    myPacket->setEvent(&worldEvent);
-    myPacket->Packet(&bsIn, false);
-
-    switch (packet->data[0])
-    {
-    case ID_CONTAINER:
-    {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
-
-        if (!ptrCellStore) return;
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_CONTAINER about %s", worldEvent.cell.getDescription().c_str());
-        LOG_APPEND(Log::LOG_VERBOSE, "- action: %i", worldEvent.action);
-
-        // If we've received a request for information, comply with it
-        if (worldEvent.action == mwmp::BaseEvent::REQUEST)
-            worldEvent.sendContainers(ptrCellStore);
-        // Otherwise, edit containers based on the information received
-        else
-            worldEvent.editContainers(ptrCellStore);
-
-        break;
-    }
-    case ID_OBJECT_PLACE:
-    {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
-
-        if (!ptrCellStore) return;
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_PLACE about %s", worldEvent.cell.getDescription().c_str());
-        worldEvent.placeObjects(ptrCellStore);
-
-        break;
-    }
-    case ID_OBJECT_DELETE:
-    {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
-
-        if (!ptrCellStore) return;
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_DELETE about %s", worldEvent.cell.getDescription().c_str());
-        worldEvent.deleteObjects(ptrCellStore);
-
-        break;
-    }
-    case ID_OBJECT_LOCK:
-    {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
-
-        if (!ptrCellStore) return;
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_LOCK about %s", worldEvent.cell.getDescription().c_str());
-        worldEvent.lockObjects(ptrCellStore);
-
-        break;
-    }
-    case ID_OBJECT_UNLOCK:
-    {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
-
-        if (!ptrCellStore) return;
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_UNLOCK about %s", worldEvent.cell.getDescription().c_str());
-        worldEvent.unlockObjects(ptrCellStore);
-
-        break;
-    }
-    case ID_OBJECT_SCALE:
-    {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
-
-        if (!ptrCellStore) return;
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_SCALE about %s", worldEvent.cell.getDescription().c_str());
-        worldEvent.scaleObjects(ptrCellStore);
-
-        break;
-    }
-    case ID_OBJECT_MOVE:
-    {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
-
-        if (!ptrCellStore) return;
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_MOVE about %s", worldEvent.cell.getDescription().c_str());
-        worldEvent.moveObjects(ptrCellStore);
-
-        break;
-    }
-    case ID_OBJECT_ROTATE:
-    {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
-
-        if (!ptrCellStore) return;
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ROTATE about %s", worldEvent.cell.getDescription().c_str());
-        worldEvent.rotateObjects(ptrCellStore);
-
-        break;
-    }
-    case ID_OBJECT_ANIM_PLAY:
-    {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
-
-        if (!ptrCellStore) return;
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_OBJECT_ANIM_PLAY about %s", worldEvent.cell.getDescription().c_str());
-        worldEvent.animateObjects(ptrCellStore);
-
-        break;
-    }
-    case ID_DOOR_STATE:
-    {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
-
-        if (!ptrCellStore) return;
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_DOOR_STATE about %s", worldEvent.cell.getDescription().c_str());
-        worldEvent.activateDoors(ptrCellStore);
-
-        break;
-    }
-    case ID_SCRIPT_LOCAL_SHORT:
-    {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
-
-        if (!ptrCellStore) return;
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_SHORT about %s", worldEvent.cell.getDescription().c_str());
-        worldEvent.setLocalShorts(ptrCellStore);
-
-        break;
-    }
-    case ID_SCRIPT_LOCAL_FLOAT:
-    {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(worldEvent.cell);
-
-        if (!ptrCellStore) return;
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_LOCAL_FLOAT about %s", worldEvent.cell.getDescription().c_str());
-        worldEvent.setLocalFloats(ptrCellStore);
-
-        break;
-    }
-    case ID_SCRIPT_MEMBER_SHORT:
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_MEMBER_SHORT");
-        worldEvent.setMemberShorts();
-
-        break;
-    }
-    case ID_SCRIPT_GLOBAL_SHORT:
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_SCRIPT_GLOBAL_SHORT");
-        worldEvent.setGlobalShorts();
-
-        break;
-    }
-    case ID_MUSIC_PLAY:
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_MUSIC_PLAY");
-        worldEvent.playMusic();
-
-        break;
-    }
-    case ID_VIDEO_PLAY:
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Received ID_VIDEO_PLAY");
-        worldEvent.playVideo();
-
-        break;
-    }
-    default:
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unhandled WorldPacket with identifier %i has arrived", packet->data[0]);
-    }
+    if (!WorldProcessor::Process(*packet, worldEvent))
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled WorldPacket with identifier %i has arrived", packet->data[0]);
 }
 
 void Networking::receiveMessage(RakNet::Packet *packet)
