@@ -37,6 +37,7 @@
 #include "../mwmp/CellController.hpp"
 #include "../mwmp/LocalPlayer.hpp"
 #include "../mwmp/LocalActor.hpp"
+#include "../mwmp/DedicatedPlayer.hpp"
 /*
     End of tes3mp addition
 */
@@ -1345,11 +1346,16 @@ bool CharacterController::updateWeaponState()
                     mAttackType = "shoot";
                 else
                 {
-                    // tes3mp needs player-controlled NPCs to not have their attacks
-                    // cancelled here, so a 2nd condition has been added that should
-                    // return true only for them
-
-                    if(mPtr == getPlayer() || !mPtr.getBase()->canChangeCell)
+                    /*
+                        Start of tes3mp change (major)
+                        
+                        We need player-controlled NPCs to not have their attacks
+                        cancelled here, so a 2nd condition has been added for them
+                    */
+                    if(mPtr == getPlayer() || mwmp::PlayerList::isDedicatedPlayer(mPtr))
+                    /*
+                        End of tes3mp change (major)
+                    */
                     {
                         if (isWeapon)
                         {

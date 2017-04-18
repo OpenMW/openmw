@@ -8,6 +8,16 @@
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include "../mwmp/DedicatedPlayer.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -212,6 +222,18 @@ bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const
     if (!Settings::Manager::getBool("prevent merchant equipping", "Game"))
         return true;
 
+    /*
+        Start of tes3mp addition
+
+        We need player-controlled NPCs to wear whatever their players are
+        actually wearing, so don't autoequip for them
+    */
+    if (mwmp::PlayerList::isDedicatedPlayer(actor))
+        return false;
+    /*
+        End of tes3mp addition
+    */
+
     // Only autoEquip if we are the original owner of the item.
     // This stops merchants from auto equipping anything you sell to them.
     // ...unless this is a companion, he should always equip items given to him.
@@ -223,12 +245,6 @@ bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const
     {
         return false;
     }
-
-    // tes3mp needs player-controlled NPCs to wear whatever their players are
-    // actually wearing, so a condition has been added that should return
-    // false only for them
-    else if (!actor.getBase()->canChangeCell)
-        return false;
 
     return true;
 }

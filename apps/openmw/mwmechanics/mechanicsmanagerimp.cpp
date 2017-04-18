@@ -9,6 +9,16 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include "../mwmp/DedicatedPlayer.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
@@ -1026,10 +1036,16 @@ namespace MWMechanics
                 if (playerFollowers.find(*it) != playerFollowers.end())
                     continue;
 
-                // tes3mp needs player-controlled NPCs to not report crimes committed by other players,
-                // so a condition has been added that should be true only for them
-                if (!it->getBase()->canChangeCell)
+                /*
+                    Start of tes3mp addition
+                
+                    We need player-controlled NPCs to not report crimes committed by other players
+                */
+                if (mwmp::PlayerList::isDedicatedPlayer(*it))
                     continue;
+                /*
+                    End of tes3mp addition
+                */
 
                 if (type == OT_Theft || type == OT_Pickpocket)
                     MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
