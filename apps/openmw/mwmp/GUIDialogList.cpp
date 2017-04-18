@@ -2,18 +2,19 @@
 // Created by koncord on 03.11.16.
 //
 
-#include "GUIDialogList.hpp"
-#include "Main.hpp"
-#include "LocalPlayer.hpp"
-#include "Networking.hpp"
+#include <components/openmw-mp/Log.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwgui/windowmanagerimp.hpp"
+
 #include <MyGUI_EditBox.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_ListBox.h>
 
-#include "../mwgui/windowmanagerimp.hpp"
-#include "../mwbase/environment.hpp"
-
-#include <components/openmw-mp/Log.hpp>
+#include "GUIDialogList.hpp"
+#include "Main.hpp"
+#include "Networking.hpp"
+#include "LocalPlayer.hpp"
 
 using namespace mwmp;
 

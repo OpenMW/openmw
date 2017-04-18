@@ -2,38 +2,39 @@
 // Created by koncord on 20.07.16.
 //
 
+#include <components/openmw-mp/Log.hpp>
+#include <components/openmw-mp/Base/BasePlayer.hpp>
+
 #include <SDL_system.h>
+
+#include <MyGUI_FactoryManager.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_LanguageManager.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_RotatingSkin.h>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_TextIterator.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
+
+#include "../mwgui/mapwindow.hpp"
+
 #include "../mwworld/worldimp.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/cellstore.hpp"
 
-#include <components/openmw-mp/Base/BasePlayer.hpp>
-#include <MyGUI_ScrollView.h>
-#include <MyGUI_ImageBox.h>
-#include <MyGUI_RenderManager.h>
-#include <MyGUI_Gui.h>
-#include <MyGUI_LanguageManager.h>
-#include <MyGUI_InputManager.h>
-#include <MyGUI_RotatingSkin.h>
-#include <MyGUI_FactoryManager.h>
-#include "../mwgui/mapwindow.hpp"
-#include <MyGUI_TextIterator.h>
-#include <components/openmw-mp/Log.hpp>
-
-
 #include "GUIController.hpp"
 #include "Main.hpp"
-#include "PlayerMarkerCollection.hpp"
-#include "LocalPlayer.hpp"
 #include "Networking.hpp"
-#include "DedicatedPlayer.hpp"
+#include "PlayerMarkerCollection.hpp"
 #include "GUIDialogList.hpp"
 #include "GUIChat.hpp"
+#include "LocalPlayer.hpp"
+#include "DedicatedPlayer.hpp"
 
 
 mwmp::GUIController::GUIController(): mInputBox(0), mListBox(0)
