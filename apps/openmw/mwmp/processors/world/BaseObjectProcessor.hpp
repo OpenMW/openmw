@@ -7,7 +7,7 @@
 
 #include "apps/openmw/mwmp/WorldProcessor.hpp"
 #include "apps/openmw/mwmp/Main.hpp"
-#include "apps/openmw/mwmp/WorldController.hpp"
+#include "apps/openmw/mwmp/CellController.hpp"
 #include "apps/openmw/mwworld/cellstore.hpp"
 
 namespace mwmp
@@ -17,7 +17,7 @@ namespace mwmp
     public:
         virtual void Do(WorldPacket &packet, WorldEvent &event)
         {
-            MWWorld::CellStore *ptrCellStore = Main::get().getWorldController()->getCell(event.cell);
+            MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(event.cell);
 
             if (!ptrCellStore) return;
 

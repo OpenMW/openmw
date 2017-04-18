@@ -15,7 +15,7 @@ namespace mwmp
     public:
         ProcessorPlayerDynamicStats()
         {
-            BPP_INIT(ID_PLAYER_DYNAMICSTATS)
+            BPP_INIT(ID_PLAYER_STATS_DYNAMIC)
         }
 
         virtual void Do(PlayerPacket &packet, BasePlayer *player)
@@ -23,7 +23,7 @@ namespace mwmp
             if (isLocal())
             {
                 if (isRequest())
-                    static_cast<LocalPlayer *>(player)->updateDynamicStats(true);
+                    static_cast<LocalPlayer *>(player)->updateStatsDynamic(true);
                 else
                     static_cast<LocalPlayer *>(player)->setDynamicStats();
             }

@@ -39,9 +39,9 @@ namespace mwmp
                 packet.setPlayer(player);
                 packet.Send(serverAddr);
 
-                static_cast<LocalPlayer*>(player)->updateDynamicStats(true);
-                Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_DYNAMICSTATS)->setPlayer(player);
-                Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_DYNAMICSTATS)->Send(serverAddr);
+                static_cast<LocalPlayer*>(player)->updateStatsDynamic(true);
+                Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(player);
+                Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_STATS_DYNAMIC)->Send(serverAddr);
             }
             else
             {

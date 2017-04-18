@@ -43,13 +43,13 @@ namespace mwmp
                 if (player == 0)
                 {
                     LOG_APPEND(Log::LOG_INFO, "- Exchanging data with new player");
-                    player = Players::newPlayer(guid);
+                    player = PlayerList::newPlayer(guid);
 
                     packet.setPlayer(player);
                     packet.Read();
                 }
 
-                Players::createPlayer(guid);
+                PlayerList::createPlayer(guid);
             }
         }
     };

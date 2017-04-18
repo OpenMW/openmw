@@ -50,7 +50,7 @@ bool PlayerProcessor::Process(RakNet::Packet &packet)
 
             BasePlayer *player = 0;
             if (guid != myGuid)
-                player = Players::getPlayer(guid);
+                player = PlayerList::getPlayer(guid);
             else
                 player = Main::get().getLocalPlayer();
 

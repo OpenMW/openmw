@@ -39,7 +39,6 @@
 #include "DedicatedPlayer.hpp"
 #include "LocalPlayer.hpp"
 #include "GUIController.hpp"
-#include "WorldController.hpp"
 #include "Main.hpp"
 #include "PlayerProcessor.hpp"
 #include "ProcessorInitializer.hpp"

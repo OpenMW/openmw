@@ -15,7 +15,7 @@ namespace mwmp
     public:
         ProcessorPlayerDrawState()
         {
-            BPP_INIT(ID_PLAYER_DRAWSTATE)
+            BPP_INIT(ID_PLAYER_ANIM_FLAGS)
         }
 
         virtual void Do(PlayerPacket &packet, BasePlayer *player)
@@ -23,10 +23,10 @@ namespace mwmp
             if (isLocal())
             {
                 if(isRequest())
-                    static_cast<LocalPlayer *>(player)->updateDrawStateAndFlags(true);
+                    static_cast<LocalPlayer *>(player)->updateAnimFlags(true);
             }
             else
-                static_cast<DedicatedPlayer *>(player)->updateDrawState();
+                static_cast<DedicatedPlayer *>(player)->updateAnimFlags();
         }
     };
 }
