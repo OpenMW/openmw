@@ -35,6 +35,7 @@
 #include "ProcessorInitializer.hpp"
 #include "PlayerProcessor.hpp"
 #include "WorldProcessor.hpp"
+#include "ActorProcessor.hpp"
 #include "GUIController.hpp"
 #include "CellController.hpp"
 
@@ -154,6 +155,8 @@ void Networking::connect(const std::string &ip, unsigned short port, std::vector
                     serverAddr = packet->systemAddress;
                     PlayerProcessor::SetServerAddr(packet->systemAddress);
                     WorldProcessor::SetServerAddr(packet->systemAddress);
+                    ActorProcessor::SetServerAddr(packet->systemAddress);
+
                     connected = true;
                     queue = false;
 
@@ -254,91 +257,8 @@ void Networking::processPlayerPacket(RakNet::Packet *packet)
 
 void Networking::processActorPacket(RakNet::Packet *packet)
 {
-    RakNet::RakNetGUID guid;
-    RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
-    bsIn.Read(guid);
-
-    DedicatedPlayer *pl = 0;
-    static RakNet::RakNetGUID myGuid = getLocalPlayer()->guid;
-    if (guid != myGuid)
-        pl = PlayerList::getPlayer(guid);
-
-    ActorPacket *myPacket = actorPacketController.GetPacket(packet->data[0]);
-
-    myPacket->setActorList(&actorList);
-    myPacket->Packet(&bsIn, false);
-
-    switch (packet->data[0])
-    {
-    case ID_ACTOR_LIST:
-    {
-        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(actorList.cell);
-
-        if (!ptrCellStore) return;
-
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_ACTOR_LIST about %s", actorList.cell.getDescription().c_str());
-        LOG_APPEND(Log::LOG_VERBOSE, "- action: %i", actorList.action);
-
-        // If we've received a request for information, comply with it
-        if (actorList.action == mwmp::BaseActorList::REQUEST)
-            actorList.sendActorsInCell(ptrCellStore);
-
-        break;
-    }
-    case ID_ACTOR_AUTHORITY:
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received ID_ACTOR_AUTHORITY about %s", actorList.cell.getDescription().c_str());
-
-        Main::get().getCellController()->initializeLocalActors(actorList.cell);
-        Main::get().getCellController()->getCell(actorList.cell)->updateLocal(true);
-
-        break;
-    }
-    case ID_ACTOR_POSITION:
-    {
-        //Main::get().getCellController()->readPositions(actorList);
-
-        break;
-    }
-    case ID_ACTOR_ANIM_FLAGS:
-    {
-        //Main::get().getCellController()->readAnimFlags(actorList);
-
-        break;
-    }
-    case ID_ACTOR_ANIM_PLAY:
-    {
-        //Main::get().getCellController()->readAnimPlay(actorList);
-
-        break;
-    }
-    case ID_ACTOR_STATS_DYNAMIC:
-    {
-        //Main::get().getCellController()->readStatsDynamic(actorList);
-
-        break;
-    }
-    case ID_ACTOR_SPEECH:
-    {
-        //Main::get().getCellController()->readSpeech(actorList);
-
-        break;
-    }
-    case ID_ACTOR_ATTACK:
-    {
-        break;
-    }
-    case ID_ACTOR_CELL_CHANGE:
-    {
-        break;
-    }
-    case ID_ACTOR_TEST:
-    {
-        break;
-    }
-    default:
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Unhandled ActorPacket with identifier %i has arrived", packet->data[0]);
-    }
+    if (!ActorProcessor::Process(*packet, actorList))
+        LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled ActorPacket with identifier %i has arrived", packet->data[0]);
 }
 
 void Networking::processWorldPacket(RakNet::Packet *packet)
