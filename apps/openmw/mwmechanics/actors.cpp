@@ -803,6 +803,12 @@ namespace MWMechanics
         CharacterController* ctrl = it->second->getCharacterController();
 
         NpcStats &stats = ptr.getClass().getNpcStats(ptr);
+
+        // When npc stats are just initialized, mTimeToStartDrowning == -1 and we should get value from GMST
+        static const int fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->getFloat();
+        if (stats.getTimeToStartDrowning() == -1.f)
+            stats.setTimeToStartDrowning(fHoldBreathTime);
+
         MWBase::World *world = MWBase::Environment::get().getWorld();
         bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
         if((world->isSubmerged(ptr) || knockedOutUnderwater)
