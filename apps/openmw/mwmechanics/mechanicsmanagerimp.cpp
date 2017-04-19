@@ -328,13 +328,13 @@ namespace MWMechanics
                 winMgr->setValue(fbar, stats.getFatigue());
             }
 
-            static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("fHoldBreathTime")->getFloat();
-
             float timeToDrown = stats.getTimeToStartDrowning();
 
             if(timeToDrown != mWatchedTimeToStartDrowning)
             {
+                static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                        .find("fHoldBreathTime")->getFloat();
+
                 mWatchedTimeToStartDrowning = timeToDrown;
 
                 if(timeToDrown >= fHoldBreathTime || timeToDrown == -1.0) // -1.0 is a special value during initialization
