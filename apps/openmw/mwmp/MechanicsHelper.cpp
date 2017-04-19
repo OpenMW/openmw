@@ -59,7 +59,12 @@ Attack *MechanicsHelper::getDedicatedAttack(const MWWorld::Ptr& ptr)
 
 void MechanicsHelper::assignAttackTarget(Attack* attack, const MWWorld::Ptr& target)
 {
-    if (mwmp::PlayerList::isDedicatedPlayer(target))
+    if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
+    {
+        attack->target.guid = mwmp::Main::get().getLocalPlayer()->guid;
+        attack->target.refId.clear();
+    }
+    else if (mwmp::PlayerList::isDedicatedPlayer(target))
     {
         attack->target.guid = mwmp::PlayerList::getPlayer(target)->guid;
         attack->target.refId.clear();
