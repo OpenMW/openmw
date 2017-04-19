@@ -1711,7 +1711,7 @@ namespace MWGui
         mCompanionWindow->resetReference();
         mConsole->resetReference();
 
-        mInventoryWindow->rebuildAvatar();
+        mInventoryWindow->clear();
 
         mSelectedSpell.clear();
 

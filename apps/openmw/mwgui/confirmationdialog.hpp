@@ -9,7 +9,8 @@ namespace MWGui
     {
         public:
             ConfirmationDialog();
-            void askForConfirmation(const std::string& message, const std::string& confirmMessage="#{sOk}", const std::string& cancelMessage="#{sCancel}");
+            void askForConfirmation(const std::string& message);
+            void askForConfirmation(const std::string& message, const std::string& confirmMessage, const std::string& cancelMessage);
             virtual void exit();
 
             typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;

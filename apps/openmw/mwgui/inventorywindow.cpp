@@ -136,6 +136,18 @@ namespace MWGui
         dirtyPreview();
 
         updatePreviewSize();
+
+        updateEncumbranceBar();
+        mItemView->update();
+        notifyContentChanged();
+    }
+
+    void InventoryWindow::clear()
+    {
+        mPtr = MWWorld::Ptr();
+        mTradeModel = NULL;
+        mSortModel = NULL;
+        mItemView->setModel(NULL);
     }
 
     void InventoryWindow::setGuiMode(GuiMode mode)
@@ -340,13 +352,12 @@ namespace MWGui
 
     void InventoryWindow::open()
     {
-        mPtr = MWMechanics::getPlayer();
-
-        updateEncumbranceBar();
-
-        mItemView->update();
-
-        notifyContentChanged();
+        if (!mPtr.isEmpty())
+        {
+            updateEncumbranceBar();
+            mItemView->update();
+            notifyContentChanged();
+        }
         adjustPanes();
     }
 

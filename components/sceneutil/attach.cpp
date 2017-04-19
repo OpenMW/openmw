@@ -87,6 +87,8 @@ namespace SceneUtil
         {
             osg::ref_ptr<osg::Group> handle = new osg::Group;
 
+            osg::UserDataContainer* udc = toAttach->getUserDataContainer();
+
             CopyRigVisitor copyVisitor(handle, filter);
             toAttach->accept(copyVisitor);
             copyVisitor.doCopy();
@@ -96,11 +98,13 @@ namespace SceneUtil
                 osg::ref_ptr<osg::Node> newHandle = handle->getChild(0);
                 handle->removeChild(newHandle);
                 master->asGroup()->addChild(newHandle);
+                newHandle->setUserDataContainer(udc);
                 return newHandle;
             }
             else
             {
                 master->asGroup()->addChild(handle);
+                handle->setUserDataContainer(udc);
                 return handle;
             }
         }

@@ -1771,8 +1771,6 @@ void CharacterController::update(float duration)
             float height = cls.getCreatureStats(mPtr).land();
             float healthLost = getFallDamage(mPtr, height);
 
-            bool godmode = mPtr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState(); 
-
             if (healthLost > 0.0f)
             {
                 const float fatigueTerm = cls.getCreatureStats(mPtr).getFatigueTerm();

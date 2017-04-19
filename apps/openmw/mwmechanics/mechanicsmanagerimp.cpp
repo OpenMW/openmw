@@ -73,6 +73,8 @@ namespace MWMechanics
         MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
         MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats (ptr);
 
+        npcStats.setNeedRecalcDynamicStats(true);
+
         const ESM::NPC *player = ptr.get<ESM::NPC>()->mBase;
 
         // reset
@@ -326,12 +328,16 @@ namespace MWMechanics
                 winMgr->setValue(fbar, stats.getFatigue());
             }
 
-            if(stats.getTimeToStartDrowning() != mWatchedTimeToStartDrowning)
+            float timeToDrown = stats.getTimeToStartDrowning();
+
+            if(timeToDrown != mWatchedTimeToStartDrowning)
             {
-                const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("fHoldBreathTime")->getFloat();
-                mWatchedTimeToStartDrowning = stats.getTimeToStartDrowning();
-                if(stats.getTimeToStartDrowning() >= fHoldBreathTime)
+
+                mWatchedTimeToStartDrowning = timeToDrown;
+
+                if(timeToDrown >= fHoldBreathTime || timeToDrown == -1.0) // -1.0 is a special value during initialization
                     winMgr->setDrowningBarVisibility(false);
                 else
                 {
