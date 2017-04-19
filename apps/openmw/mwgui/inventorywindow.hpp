@@ -60,6 +60,8 @@ namespace MWGui
 
             void updatePlayer();
 
+            void clear();
+
             void useItem(const MWWorld::Ptr& ptr);
 
             void setGuiMode(GuiMode mode);
