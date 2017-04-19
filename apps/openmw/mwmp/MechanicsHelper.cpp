@@ -97,21 +97,48 @@ void MechanicsHelper::processAttack(Attack attack, const MWWorld::Ptr& attacker)
 {
     if (attack.pressed == false)
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Attack success: %s", attack.success ? "true" : "false");
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Processing attack from %s",
+            attacker.getCellRef().getRefId().c_str());
+        LOG_APPEND(Log::LOG_VERBOSE, "- success: %s", attack.success ? "true" : "false");
 
         if (attack.success == true)
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Damage: %f", attack.damage);
+        {
+            LOG_APPEND(Log::LOG_VERBOSE, "- damage: %f", attack.damage);
+        }
     }
 
     MWMechanics::CreatureStats &attackerStats = attacker.getClass().getNpcStats(attacker);
     attackerStats.getSpells().setSelectedSpell(attack.spellId);
 
     MWWorld::Ptr victim;
-    
-    if (attack.target.guid == mwmp::Main::get().getLocalPlayer()->guid)
-        victim = MWBase::Environment::get().getWorld()->getPlayerPtr();
-    else if (PlayerList::getPlayer(attack.target.guid) != 0)
-        victim = PlayerList::getPlayer(attack.target.guid)->getPtr();
+
+    if (attack.target.refId.empty())
+    {
+        if (attack.target.guid == mwmp::Main::get().getLocalPlayer()->guid)
+        {
+            victim = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        }
+        else if (PlayerList::getPlayer(attack.target.guid) != NULL)
+        {
+            victim = PlayerList::getPlayer(attack.target.guid)->getPtr();
+        }
+    }
+    else
+    {
+        if (mwmp::Main::get().getCellController()->isLocalActor(attack.target.refId,
+            attack.target.refNumIndex, attack.target.mpNum))
+        {
+            victim = mwmp::Main::get().getCellController()->getLocalActor(attack.target.refId,
+                attack.target.refNumIndex, attack.target.mpNum)->getPtr();
+        }
+        else if (mwmp::Main::get().getCellController()->isDedicatedActor(attack.target.refId,
+            attack.target.refNumIndex, attack.target.mpNum))
+        {
+            victim = mwmp::Main::get().getCellController()->getDedicatedActor(attack.target.refId,
+                attack.target.refNumIndex, attack.target.mpNum)->getPtr();
+        }
+    }
+
 
     // Get the weapon used (if hand-to-hand, weapon = inv.end())
     if (attackerStats.getDrawState() == MWMechanics::DrawState_Weapon)
@@ -124,7 +151,7 @@ void MechanicsHelper::processAttack(Attack attack, const MWWorld::Ptr& attacker)
         if (!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
             weapon = MWWorld::Ptr();
 
-        if (victim.mRef != 0)
+        if (victim.mRef != NULL)
         {
             bool healthdmg;
             if (!weapon.isEmpty())

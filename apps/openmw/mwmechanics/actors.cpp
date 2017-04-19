@@ -16,10 +16,12 @@
 
     Include additional headers for multiplayer purposes
 */
+#include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
-#include "../mwmp/CellController.hpp"
-#include "../mwmp/DedicatedPlayer.hpp"
 #include "../mwmp/LocalPlayer.hpp"
+#include "../mwmp/DedicatedPlayer.hpp"
+#include "../mwmp/CellController.hpp"
+#include "../mwmp/MechanicsHelper.hpp"
 /*
     End of tes3mp addition
 */
@@ -1120,15 +1122,26 @@ namespace MWMechanics
                     Start of tes3mp change (minor)
 
                     Instead of merely updating the player character's mAttackingOrSpell here,
-                    send a PlayerAttack packet from LocalPlayer when applicable
+                    prepare an Attack packet for the LocalPlayer
                 */
                 if (iter->first == player)
                 {
                     bool state = MWBase::Environment::get().getWorld()->getPlayer().getAttackingOrSpell();
                     DrawState_ dstate = player.getClass().getNpcStats(player).getDrawState();
                     iter->second->getCharacterController()->setAttackingOrSpell(state);
+
                     if (dstate == DrawState_Weapon)
-                        mwmp::Main::get().getLocalPlayer()->prepareAttack(mwmp::Attack::MELEE, state);
+                    {
+                        mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(iter->first);
+
+                        if (localAttack->pressed != state)
+                        {
+                            mwmp::Main::get().getMechanicsHelper()->resetAttack(localAttack);
+                            localAttack->type = mwmp::Attack::MELEE;
+                            localAttack->pressed = state;
+                            localAttack->shouldSend = true;
+                        }
+                    }
                 }
                 /*
                     End of tes3mp change (minor)
@@ -1137,10 +1150,12 @@ namespace MWMechanics
                 /*
                     Start of tes3mp addition
 
-                    If this actor is a DedicatedPlayer, update their mAttackingOrSpell
+                    If this actor is a DedicatedPlayer or DedicatedActor, update their mAttackingOrSpell
                 */
-                if (mwmp::PlayerList::isDedicatedPlayer(iter->first))
-                    mwmp::PlayerList::getPlayer(iter->first)->updateActor(iter->second);
+                mwmp::Attack *dedicatedAttack = mwmp::Main::get().getMechanicsHelper()->getDedicatedAttack(iter->first);
+
+                if (dedicatedAttack)
+                    iter->second->getCharacterController()->setAttackingOrSpell(dedicatedAttack->pressed);
                 /*
                     End of tes3mp addition
                 */

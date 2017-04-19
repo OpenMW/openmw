@@ -34,7 +34,7 @@ namespace mwmp
         void updateChar();
         void updateEquipment(bool forceUpdate = false);
         void updateInventory(bool forceUpdate = false);
-        void updateAttackState(bool forceUpdate = false);
+        void updateAttack();
         void updateDeadState(bool forceUpdate = false);
         void updateAnimFlags(bool forceUpdate = false);
 
@@ -66,15 +66,12 @@ namespace mwmp
         void sendSpellRemoval(const ESM::Spell &spell);
         void sendJournalEntry(const std::string& id, int index, const MWWorld::Ptr& actor);
         void sendJournalIndex(const std::string& id, int index);
-        void sendAttack(Attack::TYPE type);
 
         void clearCellStates();
         void clearCurrentContainer();
 
         void storeCellState(ESM::Cell cell, int stateType);
         void storeCurrentContainer(const MWWorld::Ptr& container, bool loot);
-
-        void prepareAttack(Attack::TYPE type, bool state);
 
     private:
         Networking *getNetworking();

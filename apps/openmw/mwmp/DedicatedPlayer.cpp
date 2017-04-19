@@ -235,7 +235,7 @@ DedicatedPlayer *PlayerList::getPlayer(const MWWorld::Ptr &ptr)
 
 bool PlayerList::isDedicatedPlayer(const MWWorld::Ptr &ptr)
 {
-    if (ptr.mRef == 0)
+    if (ptr.mRef == NULL)
         return false;
 
     return (getPlayer(ptr) != 0);
@@ -418,11 +418,6 @@ void DedicatedPlayer::setMarkerState(bool state)
     }
     else
         removeMarker();
-}
-
-void DedicatedPlayer::updateActor(MWMechanics::Actor *actor)
-{
-    actor->getCharacterController()->setAttackingOrSpell(attack.pressed);
 }
 
 MWWorld::Ptr DedicatedPlayer::getPtr()

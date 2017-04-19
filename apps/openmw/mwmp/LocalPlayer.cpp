@@ -2,7 +2,6 @@
 // Created by koncord on 14.01.16.
 //
 
-#include <components/misc/rng.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/openmw-mp/Log.hpp>
 
@@ -22,7 +21,6 @@
 #include "../mwmechanics/aitravel.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/mechanicsmanagerimp.hpp"
-#include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwscript/scriptmanagerimp.hpp"
 
@@ -36,9 +34,10 @@
 #include "../mwworld/worldimp.hpp"
 
 #include "LocalPlayer.hpp"
+#include "Main.hpp"
 #include "Networking.hpp"
 #include "CellController.hpp"
-#include "Main.hpp"
+#include "MechanicsHelper.hpp"
 
 using namespace mwmp;
 using namespace std;
@@ -49,6 +48,8 @@ LocalPlayer::LocalPlayer()
     charGenStage.end = 1;
     consoleAllowed = true;
     ignorePosPacket = false;
+    
+    attack.shouldSend = false;
 }
 
 LocalPlayer::~LocalPlayer()
@@ -71,7 +72,7 @@ void LocalPlayer::update()
     updateCell();
     updatePosition();
     updateAnimFlags();
-    updateAttackState();
+    updateAttack();
     updateDeadState();
     updateEquipment();
     updateStatsDynamic();
@@ -514,32 +515,20 @@ void LocalPlayer::updateInventory(bool forceUpdate)
     sendInventory();
 }
 
-void LocalPlayer::updateAttackState(bool forceUpdate)
+void LocalPlayer::updateAttack()
 {
-    MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = getPlayerPtr();
-
-    using namespace MWMechanics;
-
-    static bool attackPressed = false; // prevent flood
-    MWMechanics::DrawState_ state = player.getClass().getNpcStats(player).getDrawState();
-
-    if (world->getPlayer().getAttackingOrSpell() && !attackPressed)
+    if (attack.shouldSend)
     {
-        MWWorld::Ptr weapon = MWWorld::Ptr(); // hand-to-hand
-
-        if (state == MWMechanics::DrawState_Spell)
+        if (attack.type == Attack::MAGIC)
         {
-            attack.type = Attack::MAGIC;
-            attack.pressed = true;
             attack.spellId = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
+            attack.success = mwmp::Main::get().getMechanicsHelper()->getSpellSuccess(attack.spellId, getPlayerPtr());
         }
 
-        attackPressed = true;
-    }
-    else if (!world->getPlayer().getAttackingOrSpell() && attackPressed)
-    {
-        attackPressed = false;
+        getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Send();
+
+        attack.shouldSend = false;
     }
 }
 
@@ -1108,17 +1097,6 @@ void LocalPlayer::sendJournalIndex(const std::string& quest, int index)
     getNetworking()->getPlayerPacket(ID_PLAYER_JOURNAL)->Send();
 }
 
-void LocalPlayer::sendAttack(Attack::TYPE type)
-{
-    MWMechanics::DrawState_ state = getPlayerPtr().getClass().getNpcStats(getPlayerPtr()).getDrawState();
-
-    attack.type = type;
-    attack.pressed = false;
-
-    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->setPlayer(this);
-    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Send();
-}
-
 void LocalPlayer::clearCellStates()
 {
     cellStateChanges.cellStates.clear();
@@ -1160,32 +1138,4 @@ void LocalPlayer::storeCurrentContainer(const MWWorld::Ptr &container, bool loot
     currentContainer.refNumIndex = container.getCellRef().getRefNum().mIndex;
     currentContainer.mpNum = container.getCellRef().getMpNum();
     currentContainer.loot = loot;
-}
-
-void LocalPlayer::prepareAttack(Attack::TYPE type, bool state)
-{
-    if (attack.pressed == state && type != Attack::MAGIC)
-        return;
-
-    MWMechanics::DrawState_ dstate = getPlayerPtr().getClass().getNpcStats(getPlayerPtr()).getDrawState();
-
-    if (dstate == MWMechanics::DrawState_Spell)
-    {
-        attack.spellId = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
-        attack.success = Misc::Rng::roll0to99() < MWMechanics::getSpellSuccessChance(attack.spellId, getPlayerPtr());
-        state = true;
-    }
-    else
-    {
-        attack.success = false;
-    }
-
-    attack.pressed = state;
-    attack.type = type;
-    attack.knockdown = false;
-    attack.block = false;
-    attack.target.guid = RakNet::RakNetGUID();
-
-    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->setPlayer(this);
-    getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->Send();
 }

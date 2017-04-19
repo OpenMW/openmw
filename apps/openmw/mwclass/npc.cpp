@@ -13,9 +13,12 @@
 
     Include additional headers for multiplayer purposes
 */
+#include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/LocalPlayer.hpp"
 #include "../mwmp/DedicatedPlayer.hpp"
+#include "../mwmp/CellController.hpp"
+#include "../mwmp/MechanicsHelper.hpp"
 /*
     End of tes3mp addition
 */
@@ -563,10 +566,12 @@ namespace MWClass
         /*
             Start of tes3mp addition
 
-            Ignore hit calculations on this client from DedicatedPlayers
+            Ignore hit calculations on this client from DedicatedPlayers and DedicatedActors
         */
-        if (mwmp::PlayerList::isDedicatedPlayer(ptr))
+        if (mwmp::PlayerList::isDedicatedPlayer(ptr) || mwmp::Main::get().getCellController()->isDedicatedActor(ptr))
+        {
             return;
+        }
         /*
             End of tes3mp addition
         */
@@ -620,15 +625,15 @@ namespace MWClass
         /*
             Start of tes3mp addition
 
-            If the attacker is a LocalPlayer and the target is a DedicatedPlayer,
-            mark that accordingly in the LocalPlayer data
+            If the attacker is a LocalPlayer or LocalActor, get their Attack and
+            assign data for its target
         */
-        if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
-        {
-            mwmp::Main::get().getLocalPlayer()->attack.success = true;
+        mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(ptr);
 
-            if (mwmp::PlayerList::isDedicatedPlayer(victim))
-                mwmp::Main::get().getLocalPlayer()->attack.target.guid = mwmp::PlayerList::getPlayer(victim)->guid;
+        if (localAttack)
+        {
+            localAttack->success = true;
+            mwmp::Main::get().getMechanicsHelper()->assignAttackTarget(localAttack, victim);
         }
         /*
             End of tes3mp addition
@@ -639,13 +644,14 @@ namespace MWClass
             /*
                 Start of tes3mp addition
 
-                If this was a failed attack by the LocalPlayer, send a
-                PlayerAttack packet about it
+                If this was a failed attack by the LocalPlayer or LocalActor, send a
+                packet about it
             */
-            if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            if (localAttack)
             {
-                mwmp::Main::get().getLocalPlayer()->attack.success = false;
-                mwmp::Main::get().getLocalPlayer()->sendAttack(mwmp::Attack::MELEE);
+                localAttack->pressed = false;
+                localAttack->success = false;
+                localAttack->shouldSend = true;
             }
             /*
                 End of tes3mp addition
@@ -800,10 +806,12 @@ namespace MWClass
             /*
                 Start of tes3mp change (major)
 
-                If the attacker is a DedicatedPlayer with a successful knockdown, apply the knockdown;
+                If the attacker is a DedicatedPlayer or DedicatedActor with a successful knockdown, apply the knockdown;
                 otherwise, use default probability roll
             */
-            if (mwmp::PlayerList::isDedicatedPlayer(attacker) && mwmp::PlayerList::getPlayer(attacker)->attack.knockdown)
+            mwmp::Attack *dedicatedAttack = mwmp::Main::get().getMechanicsHelper()->getDedicatedAttack(attacker);
+
+            if (dedicatedAttack && dedicatedAttack->knockdown)
                 stats.setKnockedDown(true);
             else if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99())
             /*
@@ -913,24 +921,24 @@ namespace MWClass
         /*
             Start of tes3mp addition
 
-            If the victim was a DedicatedPlayer, send a PlayerAttack packet from LocalPlayer
+            If the attacker was the LocalPlayer or LocalActor, record their target and send a packet with it
 
             If the victim was the LocalPlayer, check whether packets should be sent about
             their new dynamic stats and position
         */
-        if (attacker == MWMechanics::getPlayer() && mwmp::PlayerList::isDedicatedPlayer(ptr))
+        mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(attacker);
+
+        if (localAttack)
         {
-            mwmp::DedicatedPlayer *victimPlayer = mwmp::PlayerList::getPlayer(ptr);
+            localAttack->pressed = false;
+            localAttack->damage = damage;
+            localAttack->knockdown = getCreatureStats(ptr).getKnockedDown();
 
-            mwmp::Attack *attack = &mwmp::Main::get().getLocalPlayer()->attack;
-            attack->damage = damage;
-            attack->target.guid = victimPlayer->guid;
-            attack->knockdown = getCreatureStats(ptr).getKnockedDown();
+            mwmp::Main::get().getMechanicsHelper()->assignAttackTarget(localAttack, ptr);
 
-            mwmp::Main::get().getLocalPlayer()->sendAttack(mwmp::Attack::MELEE); // todo: make this sensitive to different weapon types
+            localAttack->shouldSend = true;
         }
-
-        if (ptr == MWMechanics::getPlayer())
+        else if (ptr == MWMechanics::getPlayer())
         {
             mwmp::Main::get().getLocalPlayer()->updateStatsDynamic(true);
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after getting damage;

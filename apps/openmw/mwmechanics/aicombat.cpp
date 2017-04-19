@@ -4,6 +4,18 @@
 
 #include <components/esm/aisequence.hpp>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include <components/openmw-mp/Log.hpp>
+#include "../mwmp/Main.hpp"
+#include "../mwmp/MechanicsHelper.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
@@ -233,6 +245,25 @@ namespace MWMechanics
         {
             storage.stopAttack();
             characterController.setAttackingOrSpell(false);
+
+            /*
+                Start of tes3mp addition
+
+                Record that this actor is stopping an attack so that a packet will be sent about it
+            */
+            mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(actor);
+
+            if (localAttack->pressed != false)
+            {
+                mwmp::Main::get().getMechanicsHelper()->resetAttack(localAttack);
+                localAttack->type = mwmp::Attack::MELEE;
+                localAttack->pressed = false;
+                localAttack->shouldSend = true;
+            }
+            /*
+                End of tes3mp addition
+            */
+
             storage.mActionCooldown = 0.f;
             // Continue combat if target is player or player follower/escorter and an attack has been attempted
             const std::list<MWWorld::Ptr>& playerFollowersAndEscorters = MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(MWMechanics::getPlayer());
@@ -565,6 +596,24 @@ namespace MWMechanics
             {
                 mAttack = true; // attack starts just now
                 characterController.setAttackingOrSpell(true);
+
+                /*
+                    Start of tes3mp addition
+
+                    Record that this actor is starting an attack so that a packet will be sent about it
+                */
+                mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(actor);
+
+                if (localAttack->pressed != true)
+                {
+                    mwmp::Main::get().getMechanicsHelper()->resetAttack(localAttack);
+                    localAttack->type = mwmp::Attack::MELEE;
+                    localAttack->pressed = true;
+                    localAttack->shouldSend = true;
+                }
+                /*
+                    End of tes3mp addition
+                */
 
                 if (!distantCombat)
                     characterController.setAIAttackType(chooseBestAttack(weapon));

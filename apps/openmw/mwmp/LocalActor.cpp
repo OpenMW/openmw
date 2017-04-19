@@ -14,6 +14,7 @@
 #include "Main.hpp"
 #include "Networking.hpp"
 #include "ActorList.hpp"
+#include "MechanicsHelper.hpp"
 
 using namespace mwmp;
 using namespace std;
@@ -32,6 +33,9 @@ LocalActor::LocalActor()
 
     statTimer = 0;
 
+    attack.type = Attack::MELEE;
+    attack.shouldSend = false;
+
     creatureStats = new ESM::CreatureStats();
 }
 
@@ -47,6 +51,7 @@ void LocalActor::update(bool forceUpdate)
     updateAnimPlay();
     updateSpeech();
     updateStatsDynamic(forceUpdate);
+    updateAttack();
 }
 
 void LocalActor::updatePosition(bool forceUpdate)
@@ -165,6 +170,22 @@ void LocalActor::updateStatsDynamic(bool forceUpdate)
 
             mwmp::Main::get().getNetworking()->getActorList()->addStatsDynamicActor(*this);
         }
+    }
+}
+
+void LocalActor::updateAttack()
+{
+    if (attack.shouldSend)
+    {
+        if (attack.type == Attack::MAGIC)
+        {
+            MWMechanics::CreatureStats &attackerStats = ptr.getClass().getNpcStats(ptr);
+            attack.spellId = attackerStats.getSpells().getSelectedSpell();
+            attack.success = mwmp::Main::get().getMechanicsHelper()->getSpellSuccess(attack.spellId, ptr);
+        }
+
+        mwmp::Main::get().getNetworking()->getActorList()->addAttackActor(*this);
+        attack.shouldSend = false;
     }
 }
 

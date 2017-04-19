@@ -34,10 +34,11 @@
 */
 #include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
-#include "../mwmp/CellController.hpp"
 #include "../mwmp/LocalPlayer.hpp"
 #include "../mwmp/LocalActor.hpp"
 #include "../mwmp/DedicatedPlayer.hpp"
+#include "../mwmp/CellController.hpp"
+#include "../mwmp/MechanicsHelper.hpp"
 /*
     End of tes3mp addition
 */
@@ -1258,10 +1259,18 @@ bool CharacterController::updateWeaponState()
                     /*
                         Start of tes3mp addition
 
-                        Send PlayerAttack packet for this spell
+                        If this mPtr belongs to a LocalPlayer or LocalActor, get their Attack and prepare
+                        it for sending
                     */
-                    if (mPtr == getPlayer())
-                        mwmp::Main::get().getLocalPlayer()->prepareAttack(mwmp::Attack::MAGIC, true);
+                    mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(mPtr);
+
+                    if (localAttack)
+                    {
+                        mwmp::Main::get().getMechanicsHelper()->resetAttack(localAttack);
+                        localAttack->type = mwmp::Attack::MAGIC;
+                        localAttack->pressed = true;
+                        localAttack->shouldSend = true;
+                    }
                     /*
                         End of tes3mp addition
                     */
@@ -1349,10 +1358,11 @@ bool CharacterController::updateWeaponState()
                     /*
                         Start of tes3mp change (major)
                         
-                        We need player-controlled NPCs to not have their attacks
-                        cancelled here, so a 2nd condition has been added for them
+                        We need DedicatedPlayers and DedicatedActors to not have their attacks
+                        cancelled here, so additional conditions have been added for them
                     */
-                    if(mPtr == getPlayer() || mwmp::PlayerList::isDedicatedPlayer(mPtr))
+                    if(mPtr == getPlayer() || mwmp::PlayerList::isDedicatedPlayer(mPtr) ||
+                        mwmp::Main::get().getCellController()->isDedicatedActor(mPtr))
                     /*
                         End of tes3mp change (major)
                     */

@@ -9,9 +9,12 @@
 
     Include additional headers for multiplayer purposes
 */
+#include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
-#include "../mwmp/DedicatedPlayer.hpp"
 #include "../mwmp/LocalPlayer.hpp"
+#include "../mwmp/DedicatedPlayer.hpp"
+#include "../mwmp/CellController.hpp"
+#include "../mwmp/MechanicsHelper.hpp"
 /*
     End of tes3mp addition
 */
@@ -127,19 +130,25 @@ namespace MWMechanics
         /*
             Start of tes3mp change (major)
 
-            Only calculate block chance for blockers who are not DedicatedPlayers
-            and update block state for LocalPlayer
+            Only calculate block chance for LocalPlayers and LocalActors; otherwise,
+            get the block state from the relevant DedicatedPlayer or DedicatedActor
         */
-        if (attacker == MWMechanics::getPlayer())
-            mwmp::Main::get().getLocalPlayer()->attack.block = false;
+        mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(attacker);
 
-        bool isDedicated = mwmp::PlayerList::isDedicatedPlayer(blocker);
-
-        if ((!isDedicated && Misc::Rng::roll0to99() < x) ||
-           (isDedicated && mwmp::PlayerList::getPlayer(blocker)->attack.block == true))
+        if (localAttack)
         {
-            if (attacker == MWMechanics::getPlayer())
-                mwmp::Main::get().getLocalPlayer()->attack.block = true;
+            localAttack->block = false;
+        }
+
+        mwmp::Attack *dedicatedAttack = mwmp::Main::get().getMechanicsHelper()->getDedicatedAttack(blocker);
+
+        if ((dedicatedAttack && dedicatedAttack->block == true) ||
+            Misc::Rng::roll0to99() < x)
+        {
+            if (localAttack)
+            {
+                localAttack->block = true;
+            }
         /*
             End of tes3mp change (major)
         */

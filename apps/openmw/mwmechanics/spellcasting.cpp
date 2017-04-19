@@ -13,9 +13,11 @@
 
     Include additional headers for multiplayer purposes
 */
+#include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/DedicatedPlayer.hpp"
 #include "../mwmp/LocalPlayer.hpp"
+#include "../mwmp/MechanicsHelper.hpp"
 /*
     End of tes3mp addition
 */
@@ -856,16 +858,17 @@ namespace MWMechanics
                     TODO: See if LocalPlayer being the target and having godmode on
                     can be accounted for like it is in OpenMW's corresponding code
                 */
-                mwmp::DedicatedPlayer *dedicatedPlayer = mwmp::PlayerList::getPlayer(mCaster);
+                mwmp::Attack *localAttack = NULL;
+                mwmp::Attack *dedicatedAttack = mwmp::Main::get().getMechanicsHelper()->getDedicatedAttack(mCaster);
 
-                bool isDedicated = mwmp::PlayerList::isDedicatedPlayer(mCaster);
-
-                if (isDedicated)
-                    dedicatedPlayer->attack.pressed = false;
+                if (dedicatedAttack)
+                    dedicatedAttack->pressed = false;
+                else
+                    localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(mCaster);
 
                 // Check success
-                if ((!isDedicated && !mwmp::Main::get().getLocalPlayer()->attack.success) ||
-                    (isDedicated && dedicatedPlayer->attack.success == false))
+                if ((localAttack && localAttack->success == false) ||
+                    (dedicatedAttack && dedicatedAttack->success == false))
                 {
                     if (mCaster == getPlayer())
                     {

@@ -21,6 +21,7 @@ namespace mwmp
         void updateAnimPlay();
         void updateSpeech();
         void updateStatsDynamic(bool forceUpdate);
+        void updateAttack();
 
         MWWorld::Ptr getPtr();
         void setPtr(const MWWorld::Ptr& newPtr);

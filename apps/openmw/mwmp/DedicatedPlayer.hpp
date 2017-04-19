@@ -61,7 +61,6 @@ namespace mwmp
         void updateMarker();
         void removeMarker();
         void setMarkerState(bool state);
-        void updateActor(MWMechanics::Actor *actor);
 
         MWWorld::Ptr getPtr();
         MWWorld::Ptr getLiveCellPtr();
