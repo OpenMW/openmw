@@ -26,12 +26,14 @@ namespace mwmp
         void addAnimPlayActor(LocalActor localActor);
         void addSpeechActor(LocalActor localActor);
         void addStatsDynamicActor(LocalActor localActor);
+        void addAttackActor(LocalActor localActor);
 
         void sendPositionActors();
         void sendAnimFlagsActors();
         void sendAnimPlayActors();
         void sendSpeechActors();
         void sendStatsDynamicActors();
+        void sendAttackActors();
 
         void editActorsInCell(MWWorld::CellStore* cellStore);
 
@@ -45,6 +47,7 @@ namespace mwmp
         std::vector<BaseActor> animPlayActors;
         std::vector<BaseActor> speechActors;
         std::vector<BaseActor> statsDynamicActors;
+        std::vector<BaseActor> attackActors;
     };
 }
 

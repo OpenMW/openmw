@@ -4,10 +4,12 @@
 #include "../mwworld/worldimp.hpp"
 
 #include "Cell.hpp"
-#include "CellController.hpp"
 #include "Main.hpp"
 #include "Networking.hpp"
 #include "LocalPlayer.hpp"
+#include "CellController.hpp"
+#include "MechanicsHelper.hpp"
+
 using namespace mwmp;
 
 mwmp::Cell::Cell(MWWorld::CellStore* cellStore)
@@ -58,6 +60,7 @@ void Cell::updateLocal(bool forceUpdate)
     actorList->sendAnimPlayActors();
     actorList->sendSpeechActors();
     actorList->sendStatsDynamicActors();
+    actorList->sendAttackActors();
 }
 
 void Cell::updateDedicated(float dt)
@@ -170,6 +173,26 @@ void Cell::readSpeech(ActorList& actorList)
             DedicatedActor *actor = dedicatedActors[mapIndex];
             actor->response = baseActor.response;
             actor->sound = baseActor.sound;
+        }
+    }
+}
+
+void Cell::readAttack(ActorList& actorList)
+{
+    initializeDedicatedActors(actorList);
+
+    BaseActor baseActor;
+
+    for (unsigned int i = 0; i < actorList.count; i++)
+    {
+        baseActor = actorList.baseActors.at(i);
+        std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
+
+        if (dedicatedActors.count(mapIndex) > 0)
+        {
+            DedicatedActor *actor = dedicatedActors[mapIndex];
+            actor->attack = baseActor.attack;
+            mwmp::Main::get().getMechanicsHelper()->processAttack(actor->attack, actor->getPtr());
         }
     }
 }
