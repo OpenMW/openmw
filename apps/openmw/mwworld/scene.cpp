@@ -580,13 +580,9 @@ namespace MWWorld
         std::cout << "Changing to interior\n";
 
         // unload
-        int current = 0;
         CellStoreCollection::iterator active = mActiveCells.begin();
         while (active!=mActiveCells.end())
-        {
             unloadCell (active++);
-            ++current;
-        }
 
         int refsToLoad = cell->count();
         loadingListener->setProgressRange(refsToLoad);

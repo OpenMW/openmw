@@ -1700,6 +1700,8 @@ namespace MWGui
         mCompanionWindow->resetReference();
         mConsole->resetReference();
 
+        mInventoryWindow->clear();
+
         mSelectedSpell.clear();
 
         mCustomMarkers.clear();
