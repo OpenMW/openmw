@@ -19,7 +19,9 @@ namespace mwmp
         Attack *getLocalAttack(const MWWorld::Ptr& ptr);
         Attack *getDedicatedAttack(const MWWorld::Ptr& ptr);
 
-        void processAttack(const MWWorld::Ptr& attacker, Attack attack);
+        void assignAttackTarget(Attack* attack, const MWWorld::Ptr& target);
+
+        void processAttack(Attack attack, const MWWorld::Ptr& attacker);
     };
 }
 

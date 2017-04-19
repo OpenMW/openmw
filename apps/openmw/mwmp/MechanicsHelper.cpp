@@ -54,7 +54,24 @@ Attack *MechanicsHelper::getDedicatedAttack(const MWWorld::Ptr& ptr)
     return NULL;
 }
 
-void MechanicsHelper::processAttack(const MWWorld::Ptr& attacker, Attack attack)
+void MechanicsHelper::assignAttackTarget(Attack* attack, const MWWorld::Ptr& target)
+{
+    if (mwmp::PlayerList::isDedicatedPlayer(target))
+    {
+        attack->target.guid = mwmp::PlayerList::getPlayer(target)->guid;
+        attack->target.refId.clear();
+    }
+    else
+    {
+        MWWorld::CellRef *targetRef = &target.getCellRef();
+
+        attack->target.refId = targetRef->getRefId();
+        attack->target.refNumIndex = targetRef->getRefNum().mIndex;
+        attack->target.mpNum = targetRef->getMpNum();
+    }
+}
+
+void MechanicsHelper::processAttack(Attack attack, const MWWorld::Ptr& attacker)
 {
     if (attack.pressed == false)
     {

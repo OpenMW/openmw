@@ -27,7 +27,7 @@ namespace mwmp
 
         virtual void Do(PlayerPacket &packet, BasePlayer *player)
         {
-            Main::get().getMechanicsHelper()->processAttack(static_cast<DedicatedPlayer*>(player)->getPtr(), player->attack);
+            Main::get().getMechanicsHelper()->processAttack(player->attack, static_cast<DedicatedPlayer*>(player)->getPtr());
         }
     };
 }
