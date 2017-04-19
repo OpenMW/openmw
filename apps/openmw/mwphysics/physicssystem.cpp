@@ -230,13 +230,6 @@ namespace MWPhysics
             return direction - project(direction, planeNormal);
         }
 
-        static inline osg::Vec3f reflect(const osg::Vec3& velocity, const osg::Vec3f& normal)
-        {
-            return velocity - (normal * (normal * velocity)) * 2;
-            //                                  ^ dot product
-        }
-
-
     public:
         static osg::Vec3f traceDown(const MWWorld::Ptr &ptr, const osg::Vec3f& position, Actor* actor, btCollisionWorld* collisionWorld, float maxHeight)
         {

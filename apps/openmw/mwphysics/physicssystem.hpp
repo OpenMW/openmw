@@ -211,7 +211,7 @@ namespace MWPhysics
             float mTimeAccum;
 
             float mWaterHeight;
-            float mWaterEnabled;
+            bool mWaterEnabled;
 
             std::auto_ptr<btCollisionObject> mWaterCollisionObject;
             std::auto_ptr<btCollisionShape> mWaterCollisionShape;
