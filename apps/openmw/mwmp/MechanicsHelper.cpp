@@ -13,6 +13,7 @@
 #include "Main.hpp"
 #include "LocalPlayer.hpp"
 #include "DedicatedPlayer.hpp"
+#include "CellController.hpp"
 
 using namespace mwmp;
 
@@ -33,13 +34,33 @@ osg::Vec3f MechanicsHelper::getLinearInterpolation(osg::Vec3f start, osg::Vec3f 
     return (start + osg::componentMultiply(position, (end - start)));
 }
 
+Attack *MechanicsHelper::getLocalAttack(const MWWorld::Ptr& ptr)
+{
+    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        return &mwmp::Main::get().getLocalPlayer()->attack;
+    else if (mwmp::Main::get().getCellController()->isLocalActor(ptr))
+        return &mwmp::Main::get().getCellController()->getLocalActor(ptr)->attack;
+
+    return NULL;
+}
+
+Attack *MechanicsHelper::getDedicatedAttack(const MWWorld::Ptr& ptr)
+{
+    if (mwmp::PlayerList::isDedicatedPlayer(ptr))
+        return &mwmp::PlayerList::getPlayer(ptr)->attack;
+    else if (mwmp::Main::get().getCellController()->isDedicatedActor(ptr))
+        return &mwmp::Main::get().getCellController()->getDedicatedActor(ptr)->attack;
+
+    return NULL;
+}
+
 void MechanicsHelper::processAttack(const MWWorld::Ptr& attacker, Attack attack)
 {
-    if (attack.pressed == 0)
+    if (attack.pressed == false)
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Attack success: %s", attack.success ? "true" : "false");
 
-        if (attack.success == 1)
+        if (attack.success == true)
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Damage: %f", attack.damage);
     }
 
