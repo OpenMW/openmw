@@ -20,6 +20,9 @@ namespace mwmp
         Attack *getDedicatedAttack(const MWWorld::Ptr& ptr);
 
         void assignAttackTarget(Attack* attack, const MWWorld::Ptr& target);
+        void resetAttack(Attack* attack);
+
+        bool getSpellSuccess(std::string spellId, const MWWorld::Ptr& caster);
 
         void processAttack(Attack attack, const MWWorld::Ptr& attacker);
     };

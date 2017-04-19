@@ -1,10 +1,13 @@
 #include <components/openmw-mp/Log.hpp>
 
+#include <components/misc/rng.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -69,6 +72,20 @@ void MechanicsHelper::assignAttackTarget(Attack* attack, const MWWorld::Ptr& tar
         attack->target.refNumIndex = targetRef->getRefNum().mIndex;
         attack->target.mpNum = targetRef->getMpNum();
     }
+}
+
+void MechanicsHelper::resetAttack(Attack* attack)
+{
+    attack->success = false;
+    attack->knockdown = false;
+    attack->block = false;
+    attack->target.guid = RakNet::RakNetGUID();
+    attack->target.refId.clear();
+}
+
+bool MechanicsHelper::getSpellSuccess(std::string spellId, const MWWorld::Ptr& caster)
+{
+    return Misc::Rng::roll0to99() < MWMechanics::getSpellSuccessChance(spellId, caster);
 }
 
 void MechanicsHelper::processAttack(Attack attack, const MWWorld::Ptr& attacker)
