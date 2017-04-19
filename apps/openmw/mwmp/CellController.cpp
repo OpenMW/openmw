@@ -166,14 +166,31 @@ void CellController::removeLocalActorRecord(std::string actorIndex)
 
 bool CellController::isLocalActor(MWWorld::Ptr ptr)
 {
+    if (ptr.mRef == NULL)
+        return false;
+
     std::string mapIndex = generateMapIndex(ptr);
 
+    return (localActorsToCells.count(mapIndex) > 0);
+}
+
+bool CellController::isLocalActor(std::string refId, int refNumIndex, int mpNum)
+{
+    std::string mapIndex = generateMapIndex(refId, refNumIndex, mpNum);
     return (localActorsToCells.count(mapIndex) > 0);
 }
 
 LocalActor *CellController::getLocalActor(MWWorld::Ptr ptr)
 {
     std::string actorIndex = generateMapIndex(ptr);
+    std::string cellIndex = localActorsToCells.at(actorIndex);
+
+    return cellsActive.at(cellIndex)->getLocalActor(actorIndex);
+}
+
+LocalActor *CellController::getLocalActor(std::string refId, int refNumIndex, int mpNum)
+{
+    std::string actorIndex = generateMapIndex(refId, refNumIndex, mpNum);
     std::string cellIndex = localActorsToCells.at(actorIndex);
 
     return cellsActive.at(cellIndex)->getLocalActor(actorIndex);
@@ -189,8 +206,17 @@ void CellController::removeDedicatedActorRecord(std::string actorIndex)
     dedicatedActorsToCells.erase(actorIndex);
 }
 
+bool CellController::isDedicatedActor(std::string refId, int refNumIndex, int mpNum)
+{
+    std::string mapIndex = generateMapIndex(refId, refNumIndex, mpNum);
+    return (dedicatedActorsToCells.count(mapIndex) > 0);
+}
+
 bool CellController::isDedicatedActor(MWWorld::Ptr ptr)
 {
+    if (ptr.mRef == NULL)
+        return false;
+
     std::string mapIndex = generateMapIndex(ptr);
 
     return (dedicatedActorsToCells.count(mapIndex) > 0);
@@ -204,22 +230,32 @@ DedicatedActor *CellController::getDedicatedActor(MWWorld::Ptr ptr)
     return cellsActive.at(cellIndex)->getDedicatedActor(actorIndex);
 }
 
-std::string CellController::generateMapIndex(MWWorld::Ptr ptr)
+DedicatedActor *CellController::getDedicatedActor(std::string refId, int refNumIndex, int mpNum)
+{
+    std::string actorIndex = generateMapIndex(refId, refNumIndex, mpNum);
+    std::string cellIndex = dedicatedActorsToCells.at(actorIndex);
+
+    return cellsActive.at(cellIndex)->getDedicatedActor(actorIndex);
+}
+
+std::string CellController::generateMapIndex(std::string refId, int refNumIndex, int mpNum)
 {
     std::string mapIndex = "";
-    mapIndex += ptr.getCellRef().getRefId();
-    mapIndex += "-" + Utils::toString(ptr.getCellRef().getRefNum().mIndex);
-    mapIndex += "-" + Utils::toString(ptr.getCellRef().getMpNum());
+    mapIndex += refId;
+    mapIndex += "-" + Utils::toString(refNumIndex);
+    mapIndex += "-" + Utils::toString(mpNum);
     return mapIndex;
+}
+
+std::string CellController::generateMapIndex(MWWorld::Ptr ptr)
+{
+    return generateMapIndex(ptr.getCellRef().getRefId(),
+        ptr.getCellRef().getRefNum().mIndex, ptr.getCellRef().getMpNum());
 }
 
 std::string CellController::generateMapIndex(BaseActor baseActor)
 {
-    std::string mapIndex = "";
-    mapIndex += baseActor.refId;
-    mapIndex += "-" + Utils::toString(baseActor.refNumIndex);
-    mapIndex += "-" + Utils::toString(baseActor.mpNum);
-    return mapIndex;
+    return generateMapIndex(baseActor.refId, baseActor.refNumIndex, baseActor.mpNum);
 }
 
 bool CellController::isActiveCell(const ESM::Cell& cell)
