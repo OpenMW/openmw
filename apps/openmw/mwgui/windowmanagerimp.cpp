@@ -289,6 +289,7 @@ namespace MWGui
         mMenu = new MainMenu(w, h, mResourceSystem->getVFS(), mVersionDescription);
         mLocalMapRender = new MWRender::LocalMap(mViewer->getSceneData()->asGroup());
         mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender, mWorkQueue);
+        mMap->renderGlobalMap();
         trackWindow(mMap, "map");
         mStatsWindow = new StatsWindow(mDragAndDrop);
         trackWindow(mStatsWindow, "stats");
@@ -372,11 +373,6 @@ namespace MWGui
         updateVisible();
 
         MWBase::Environment::get().getInputManager()->changeInputMode(false);
-    }
-
-    void WindowManager::renderWorldMap()
-    {
-        mMap->renderGlobalMap();
     }
 
     void WindowManager::setNewGame(bool newgame)

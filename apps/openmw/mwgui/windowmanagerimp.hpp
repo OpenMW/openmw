@@ -137,7 +137,6 @@ namespace MWGui
     void setStore (const MWWorld::ESMStore& store);
 
     void initUI();
-    void renderWorldMap();
 
     virtual Loading::Listener* getLoadingScreen();
 
