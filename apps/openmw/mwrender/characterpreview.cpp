@@ -105,7 +105,7 @@ namespace MWRender
     };
 
     CharacterPreview::CharacterPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem,
-                                       MWWorld::Ptr character, int sizeX, int sizeY, const osg::Vec3f& position, const osg::Vec3f& lookAt)
+                                       const MWWorld::Ptr& character, int sizeX, int sizeY, const osg::Vec3f& position, const osg::Vec3f& lookAt)
         : mParent(parent)
         , mResourceSystem(resourceSystem)
         , mPosition(position)
@@ -244,7 +244,7 @@ namespace MWRender
     // --------------------------------------------------------------------------------------------------
 
 
-    InventoryPreview::InventoryPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, MWWorld::Ptr character)
+    InventoryPreview::InventoryPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, const MWWorld::Ptr& character)
         : CharacterPreview(parent, resourceSystem, character, 512, 1024, osg::Vec3f(0, 700, 71), osg::Vec3f(0,0,71))
     {
     }

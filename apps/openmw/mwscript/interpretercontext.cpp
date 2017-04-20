@@ -137,7 +137,7 @@ namespace MWScript
 
 
     InterpreterContext::InterpreterContext (
-        MWScript::Locals *locals, MWWorld::Ptr reference, const std::string& targetId)
+        MWScript::Locals *locals, const MWWorld::Ptr& reference, const std::string& targetId)
     : mLocals (locals), mReference (reference), mTargetId (targetId)
     {
         // If we run on a reference (local script, dialogue script or console with object

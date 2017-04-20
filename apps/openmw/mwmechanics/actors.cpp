@@ -78,7 +78,7 @@ class CheckActorCommanded : public MWMechanics::EffectSourceVisitor
     MWWorld::Ptr mActor;
 public:
     bool mCommanded;
-    CheckActorCommanded(MWWorld::Ptr actor)
+    CheckActorCommanded(const MWWorld::Ptr& actor)
         : mActor(actor)
     , mCommanded(false){}
 
@@ -149,7 +149,7 @@ namespace MWMechanics
         MWWorld::Ptr mActor;
         bool mTrapped;
     public:
-        SoulTrap(MWWorld::Ptr trappedCreature)
+        SoulTrap(const MWWorld::Ptr& trappedCreature)
             : mCreature(trappedCreature)
             , mTrapped(false)
         {

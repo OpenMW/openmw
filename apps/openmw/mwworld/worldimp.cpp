@@ -2989,7 +2989,7 @@ namespace MWWorld
 
     struct AddDetectedReferenceVisitor
     {
-        AddDetectedReferenceVisitor(std::vector<Ptr>& out, Ptr detector, World::DetectionType type, float squaredDist)
+        AddDetectedReferenceVisitor(std::vector<Ptr>& out, const Ptr& detector, World::DetectionType type, float squaredDist)
             : mOut(out), mDetector(detector), mSquaredDist(squaredDist), mType(type)
         {
         }

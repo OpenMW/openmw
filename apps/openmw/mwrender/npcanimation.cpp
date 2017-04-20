@@ -99,7 +99,7 @@ private:
 private:
     void resetBlinkTimer();
 public:
-    HeadAnimationTime(MWWorld::Ptr reference);
+    HeadAnimationTime(const MWWorld::Ptr& reference);
 
     void updatePtr(const MWWorld::Ptr& updated);
 
@@ -128,7 +128,7 @@ public:
     {
     }
 
-    void setOffset(osg::Vec3f offset)
+    void setOffset(const osg::Vec3f& offset)
     {
         mOffset = offset;
     }
@@ -155,7 +155,7 @@ private:
 
 // --------------------------------------------------------------------------------------------------------------
 
-HeadAnimationTime::HeadAnimationTime(MWWorld::Ptr reference)
+HeadAnimationTime::HeadAnimationTime(const MWWorld::Ptr& reference)
     : mReference(reference), mTalkStart(0), mTalkStop(0), mBlinkStart(0), mBlinkStop(0), mEnabled(true), mValue(0)
 {
     resetBlinkTimer();
