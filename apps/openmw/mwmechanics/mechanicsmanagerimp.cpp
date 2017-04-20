@@ -14,7 +14,9 @@
 
     Include additional headers for multiplayer purposes
 */
+#include "../mwmp/Main.hpp"
 #include "../mwmp/DedicatedPlayer.hpp"
+#include "../mwmp/CellController.hpp"
 /*
     End of tes3mp addition
 */
@@ -1280,9 +1282,19 @@ namespace MWMechanics
                 && !isAggressive(target, attacker) && !isFightingNpc)
             commitCrime(attacker, target, MWBase::MechanicsManager::OT_Assault);
 
+        /*
+            Start of tes3mp change (major)
+
+            Make it possible to start combat with DedicatedPlayers and DedicatedActors by
+            adding additional conditions for them
+        */
         if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(target)
-                                    || attacker == getPlayer())
+                                    || attacker == getPlayer() || mwmp::PlayerList::isDedicatedPlayer(attacker)
+                                    || mwmp::Main::get().getCellController()->isDedicatedActor(attacker))
                 && !seq.isInCombat(attacker))
+        /*
+            End of tes3mp change (major)
+        */
         {
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
             // Note: accidental or collateral damage attacks are ignored.
