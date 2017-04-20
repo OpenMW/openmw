@@ -23,13 +23,29 @@ Specify the format for screen shots taken by pressing the screen shot key (bound
 
 The default value is "png". This setting can only be configured by editing the settings configuration file.
 
-texture filtering
------------------
+texture mag filter
+------------------
 
 :Type:		string
-:Range:		bilinear, trilinear
-:Default:	trilinear
+:Range:		nearest, linear
+:Default:	linear
 
-Set the isotropic texture filtering mode to bilinear or trilinear. Bilinear filtering is a texture filtering method used to smooth textures when displayed larger or smaller than they actually are. Bilinear filtering is reasonably accurate until the scaling of the texture gets below half or above double the original size of the texture. Trilinear filtering is an extension of the bilinear texture filtering method, which also performs linear interpolation between mipmaps. Both methods use mipmaps in OpenMW, and the corresponding OpenGL modes are LINEAR_MIPMAP_NEAREST and LINEAR_MIPMAP_LINEAR. Trilinear filtering produces better texturing at a minimal cost on modern video cards.
+Set the texture magnification filter type.
 
-The default value is trilinear. This setting can be changed in game using the Texture filtering pull down in the Detail tab of the Video panel of the Options menu.
+texture min filter
+------------------
+
+:Type:		string
+:Range:		nearest, linear
+:Default:	linear
+
+Set the texture minification filter type.
+
+texture mipmap
+--------------
+
+:Type:		string
+:Range:		none, nearest, linear
+:Default:	nearest
+
+Set the texture mipmap type to control the method mipmaps are created. Mipmapping is a way of reducing the processing power needed during minification by pregenerating a series of smaller textures.

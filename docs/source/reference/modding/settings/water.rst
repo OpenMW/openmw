@@ -42,6 +42,15 @@ This setting has no effect if the shader setting is false.
 
 The default setting is false. This setting can be toggled with the Refraction button in the Water tab of the Video panel of the Options menu.
 
+reflect actors
+--------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+This setting controls whether or not NPCs and creatures are drawn in water reflections. Setting this to true will enable actors in reflections and increase realism with a likely decrease in performance. This setting is off by default.
+
 small feature culling pixel size
 --------------------------------
 

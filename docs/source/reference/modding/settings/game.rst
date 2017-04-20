@@ -66,3 +66,21 @@ show effect duration
 Show the remaining duration of magic effects and lights if this setting is true. The remaining duration is displayed in the tooltip by hovering over the magical effect.
 
 The default value is false. This setting can only be configured by editing the settings configuration file.
+
+prevent merchant equipping
+--------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Prevents merchants from equipping items that are sold to them.
+
+followers attack on sight
+-------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Makes player followers and escorters start combat with enemies who have started combat with them or the player. Otherwise they wait for the enemies or the player to do an attack first.
