@@ -1058,11 +1058,9 @@ namespace MWRender
             float timepassed = duration * state.mSpeedMult;
             while(state.mPlaying)
             {
-                float targetTime;
-
                 if (!state.shouldLoop())
                 {
-                    targetTime = state.getTime() + timepassed;
+                    float targetTime = state.getTime() + timepassed;
                     if(textkey == textkeys.end() || textkey->first > targetTime)
                     {
                         if(mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())

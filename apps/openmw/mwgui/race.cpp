@@ -146,6 +146,7 @@ namespace MWGui
 
         const ESM::NPC& proto = mPreview->getPrototype();
         setRaceId(proto.mRace);
+        setGender(proto.isMale() ? GM_Male : GM_Female);
         recountParts();
 
         for (unsigned int i=0; i<mAvailableHeads.size(); ++i)
