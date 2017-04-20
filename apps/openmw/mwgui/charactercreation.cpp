@@ -246,8 +246,8 @@ namespace MWGui
                     mReviewDialog->setBirthSign(player.getBirthSign());
 
                     {
-                        MWWorld::Ptr player = MWMechanics::getPlayer();
-                        const MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
+                        MWWorld::Ptr playerPtr = MWMechanics::getPlayer();
+                        const MWMechanics::CreatureStats& stats = playerPtr.getClass().getCreatureStats(playerPtr);
 
                         mReviewDialog->setHealth ( stats.getHealth()  );
                         mReviewDialog->setMagicka( stats.getMagicka() );

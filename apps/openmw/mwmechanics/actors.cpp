@@ -795,7 +795,7 @@ namespace MWMechanics
         NpcStats &stats = ptr.getClass().getNpcStats(ptr);
 
         // When npc stats are just initialized, mTimeToStartDrowning == -1 and we should get value from GMST
-        static const int fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->getFloat();
+        static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->getFloat();
         if (stats.getTimeToStartDrowning() == -1.f)
             stats.setTimeToStartDrowning(fHoldBreathTime);
 
@@ -835,10 +835,7 @@ namespace MWMechanics
             }
         }
         else
-        {
-            static const float fHoldBreathTime = world->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->getFloat();
             stats.setTimeToStartDrowning(fHoldBreathTime);
-        }
     }
 
     void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)
