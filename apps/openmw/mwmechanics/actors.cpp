@@ -114,9 +114,7 @@ void adjustCommandedActor (const MWWorld::Ptr& actor)
     }
 
     if (!check.mCommanded && hasCommandPackage)
-    {
         stats.getAiSequence().erase(it);
-    }
 }
 
 void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float& magicka)
@@ -707,16 +705,8 @@ namespace MWMechanics
 
         // any value of calm > 0 will stop the actor from fighting
         if ((effects.get(ESM::MagicEffect::CalmHumanoid).getMagnitude() > 0 && ptr.getClass().isNpc())
-                || (effects.get(ESM::MagicEffect::CalmCreature).getMagnitude() > 0 && !ptr.getClass().isNpc()))
-        {
-            for (std::list<AiPackage*>::const_iterator it = creatureStats.getAiSequence().begin(); it != creatureStats.getAiSequence().end(); )
-            {
-                if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
-                    it = creatureStats.getAiSequence().erase(it);
-                else
-                    ++it;
-            }
-        }
+            || (effects.get(ESM::MagicEffect::CalmCreature).getMagnitude() > 0 && !ptr.getClass().isNpc()))
+            creatureStats.getAiSequence().stopCombat();
 
         // Update bound effects
         // Note: in vanilla MW multiple bound items of the same type can be created by different spells.
