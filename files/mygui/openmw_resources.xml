@@ -68,11 +68,13 @@
     <Resource type="ResourceLayout" name="MW_StatNameValue" version="3.2.0">
         <Widget type="Widget" skin="" position="0 0 200 18" name="Root">
             <Property key="NeedMouse" value="true"/>
-            <Widget type="TextBox" skin="SandText" position="0 0 160 18" align="Left HStretch" name="StatName">
+            <Widget type="TextBox" skin="SandText" position="0 0 168 18" align="Left HStretch" name="StatName">
                 <Property key="NeedMouse" value="false"/>
+                <Property key="TextAlign" value="Left"/>
             </Widget>
-            <Widget type="TextBox" skin="SandTextRight" position="160 0 40 18" align="Right Top" name="StatValue">
+            <Widget type="TextBox" skin="SandTextRight" position="168 0 32 18" align="Right Top" name="StatValue">
                 <Property key="NeedMouse" value="false"/>
+                <Property key="TextAlign" value="Right"/>
             </Widget>
         </Widget>
     </Resource>
