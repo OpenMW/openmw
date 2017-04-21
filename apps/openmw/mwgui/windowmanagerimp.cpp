@@ -485,6 +485,7 @@ namespace MWGui
     void WindowManager::update()
     {
         cleanupGarbage();
+
         mHud->update();
     }
 
@@ -556,13 +557,6 @@ namespace MWGui
             mInventoryWindow->setVisible(mInventoryWindow->pinned() && !(mForceHidden & GW_Inventory) && (mAllowed & GW_Inventory));
             mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic) && (mAllowed & GW_Magic));
 
-            return;
-        }
-
-        // No need to check GUI if game mode
-        if (gameMode)
-        {
-            mInventoryWindow->setGuiMode(GM_None);
             return;
         }
 

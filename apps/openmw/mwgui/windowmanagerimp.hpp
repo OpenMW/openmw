@@ -361,7 +361,7 @@ namespace MWGui
 
     virtual void pinWindow (MWGui::GuiWindow window);
 
-    virtual void updatePinnedWindows ();
+    void updatePinnedWindows ();
 
     /// Fade the screen in, over \a time seconds
     virtual void fadeScreenIn(const float time, bool clearQueue);

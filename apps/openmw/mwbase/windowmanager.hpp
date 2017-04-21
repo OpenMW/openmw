@@ -104,7 +104,6 @@ namespace MWBase
              * new dialogs.
              */
             virtual void update() = 0;
-            virtual void updateVisible() = 0;
 
             /// @note This method will block until the video finishes playing
             /// (and will continually update the window while doing so)
