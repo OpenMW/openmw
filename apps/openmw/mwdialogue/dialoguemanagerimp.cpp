@@ -646,10 +646,9 @@ namespace MWDialogue
                 winMgr->messageBox(info->mResponse);
             if (!info->mSound.empty())
                 sndMgr->say(actor, info->mSound);
+            if (!info->mResultScript.empty())
+                executeScript(info->mResultScript, actor);
         }
-
-        if (!info->mResultScript.empty())
-            executeScript(info->mResultScript, actor);
     }
 
     int DialogueManager::countSavedGameRecords() const
