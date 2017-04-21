@@ -500,8 +500,7 @@ namespace MWMechanics
         {
             // get the range of the target's weapon
             float rangeAttackOfTarget = 0.f;
-            bool isRangedCombat = false;
-            MWWorld::Ptr targetWeapon = MWWorld::Ptr();         
+            MWWorld::Ptr targetWeapon = MWWorld::Ptr();
             const MWWorld::Class& targetClass = target.getClass();
 
             if (targetClass.hasInventoryStore(target))
@@ -516,7 +515,10 @@ namespace MWMechanics
             boost::shared_ptr<Action> targetWeaponAction (new ActionWeapon(targetWeapon));
 
             if (targetWeaponAction.get())
+            {
+                bool isRangedCombat = false;
                 rangeAttackOfTarget = targetWeaponAction->getCombatRange(isRangedCombat);
+            }
               
             // apply sideway movement (kind of dodging) with some probability
             // if actor is within range of target's weapon

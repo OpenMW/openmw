@@ -1,8 +1,19 @@
 Map Settings
 ############
 
-global map size
----------------
+global
+------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this setting is true, a world map on a map window will be displayed, otherwise a local map will be displayed.
+
+The default value is false. This setting can be toggled with the local/world map switch button on the map window.
+
+global map cell size
+--------------------
 
 :Type:		integer
 :Range:		>= 1
@@ -10,7 +21,8 @@ global map size
 
 This setting adjusts the scale of the world map in the GUI mode map window. The value is the width in pixels of each cell in the map, so larger values result in larger more detailed world maps, while smaller values result in smaller less detailed world maps. However, the native resolution of the map source material appears to be 9 pixels per unexplored cell and approximately 18 pixels per explored cell, so values larger than 36 don't produce much additional detail. Similarly, the size of place markers is currently fixed at 12 pixels, so values smaller than this result in overlapping place markers. Values from 12 to 36 are recommended. For reference, Vvardenfell is approximately 41x36 cells.
 
-Warning: Changing this setting affects saved games. The currently explored area is stored as an image in the save file that's overlayed on the default world map in game. When you increase the resolution of the map, the overlay of earlier saved games will be scaled up on load, and appear blurry. When you visit the cell again, the overlay for that cell is regenerated at the new resolution, so the blurry areas can be corrected by revisiting all the cells you've already visited.
+.. Warning::
+	Changing this setting affects saved games. The currently explored area is stored as an image in the save file that's overlayed on the default world map in game. When you increase the resolution of the map, the overlay of earlier saved games will be scaled up on load, and appear blurry. When you visit the cell again, the overlay for that cell is regenerated at the new resolution, so the blurry areas can be corrected by revisiting all the cells you've already visited.
 
 The default value for this setting is 18. This setting can not be configured except by editing the settings configuration file.
 
@@ -26,6 +38,15 @@ This setting controls the zoom level for the HUD map widget (the map in the lowe
 Note that the actual size of the widget is always the same on the screen unless the scaling factor setting in the "GUI" section is changed. Increasing both the scaling factor of the GUI and this setting does result in a higher resolution HUD map, but unfortunately with a scaled direction pointer on top of it.
 
 The default value for this setting is 256. This setting can not be configured except by editing the settings configuration file.
+
+local map hud fog of war
+------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+This setting enables fog of war rendering on the HUD map. Default is Off since with default settings the map is so small that the fog would not obscure anything, just darken the edges slightly.
 
 local map resolution
 --------------------
@@ -52,13 +73,11 @@ This setting controls the canvas size of the GUI mode local map window. Larger v
 
 The default value for this setting is 512. This setting can not be configured except by editing the settings configuration file.
 
-global
-------
+local map cell distance
+-----------------------
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+:Type:		integer
+:Range:		>= 1
+:Default:	1
 
-If this setting is true, a world map on a map window will be displayed, otherwise a local map will be displayed.
-
-The default value is false. This setting can be toggled with the Local/World map switch button on the map window.
+Similar to "[Cells] exterior cell load distance", controls how many cells are rendered on the local map. Values higher than the default may result in longer loading times.

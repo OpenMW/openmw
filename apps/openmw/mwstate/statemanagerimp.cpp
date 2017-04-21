@@ -139,7 +139,8 @@ void MWState::StateManager::newGame (bool bypass)
 {
     cleanup();
 
-    MWBase::Environment::get().getWindowManager()->setNewGame (!bypass);
+    if (!bypass)
+        MWBase::Environment::get().getWindowManager()->setNewGame (true);
 
     try
     {
@@ -148,8 +149,6 @@ void MWState::StateManager::newGame (bool bypass)
         MWBase::Environment::get().getWorld()->startNewGame (bypass);
 
         mState = State_Running;
-
-        MWBase::Environment::get().getWindowManager()->updateVisible();
     }
     catch (std::exception& e)
     {

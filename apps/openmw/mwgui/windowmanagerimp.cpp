@@ -289,6 +289,7 @@ namespace MWGui
         mMenu = new MainMenu(w, h, mResourceSystem->getVFS(), mVersionDescription);
         mLocalMapRender = new MWRender::LocalMap(mViewer->getSceneData()->asGroup());
         mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender, mWorkQueue);
+        mMap->renderGlobalMap();
         trackWindow(mMap, "map");
         mStatsWindow = new StatsWindow(mDragAndDrop);
         trackWindow(mStatsWindow, "stats");
@@ -374,11 +375,6 @@ namespace MWGui
         updateVisible();
 
         MWBase::Environment::get().getInputManager()->changeInputMode(false);
-    }
-
-    void WindowManager::renderWorldMap()
-    {
-        mMap->renderGlobalMap();
     }
 
     void WindowManager::setNewGame(bool newgame)
@@ -555,13 +551,6 @@ namespace MWGui
         if (mGuiModes.empty())
         {
             mInventoryWindow->setGuiMode(GM_None);
-
-            // If game is not running, we can't be sure that widgets are initialized properly
-            MWBase::StateManager::State state = MWBase::Environment::get().getStateManager()->getState();
-
-            if (state != MWBase::StateManager::State_Running)
-                return;
-
             mMap->setVisible(mMap->pinned() && !(mForceHidden & GW_Map) && (mAllowed & GW_Map));
             mStatsWindow->setVisible(mStatsWindow->pinned() && !(mForceHidden & GW_Stats) && (mAllowed & GW_Stats));
             mInventoryWindow->setVisible(mInventoryWindow->pinned() && !(mForceHidden & GW_Inventory) && (mAllowed & GW_Inventory));
