@@ -361,8 +361,6 @@ namespace MWGui
 
     virtual void pinWindow (MWGui::GuiWindow window);
 
-    void updatePinnedWindows ();
-
     /// Fade the screen in, over \a time seconds
     virtual void fadeScreenIn(const float time, bool clearQueue);
     /// Fade the screen out to black, over \a time seconds
@@ -541,6 +539,8 @@ namespace MWGui
     void createTextures();
     void createCursors();
     void setMenuTransparency(float value);
+
+    void updatePinnedWindows();
   };
 }
 
