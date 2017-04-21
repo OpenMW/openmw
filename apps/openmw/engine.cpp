@@ -557,7 +557,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     window->setStore(mEnvironment.getWorld()->getStore());
     window->initUI();
-    window->renderWorldMap();
 
     //Load translation data
     mTranslationDataStorage.setEncoder(mEncoder);

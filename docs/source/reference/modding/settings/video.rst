@@ -50,7 +50,7 @@ minimize on focus loss
 
 :Type:		boolean
 :Range:		True/False
-:Default:	False
+:Default:	True
 
 Minimize the OpenMW window if it loses cursor focus. This setting is primarily useful for single screen configurations, so that the OpenMW screen in full screen mode can be minimized when the operating system regains control of the mouse and keyboard. On multiple screen configurations, disabling this option makes it easier to switch between screens while playing OpenMW.
 

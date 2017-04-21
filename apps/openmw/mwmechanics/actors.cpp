@@ -611,6 +611,21 @@ namespace MWMechanics
             }
         }
 
+        // purge levitate effect if levitation is disabled
+        // check only modifier, because base value can be setted from SetFlying console command.
+        if (MWBase::Environment::get().getWorld()->isLevitationEnabled() == false && effects.get(ESM::MagicEffect::Levitate).getModifier() > 0)
+        {
+            creatureStats.getSpells().purgeEffect(ESM::MagicEffect::Levitate);
+            creatureStats.getActiveSpells().purgeEffect(ESM::MagicEffect::Levitate);
+            if (ptr.getClass().hasInventoryStore(ptr))
+                ptr.getClass().getInventoryStore(ptr).purgeEffect(ESM::MagicEffect::Levitate);
+
+            if (ptr == getPlayer())
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox ("#{sLevitateDisabled}");
+            }
+        }
+
         // attributes
         for(int i = 0;i < ESM::Attribute::Length;++i)
         {

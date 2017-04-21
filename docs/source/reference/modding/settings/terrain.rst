@@ -1,5 +1,5 @@
 Terrain Settings
-###############
+################
 
 distant terrain
 ---------------
