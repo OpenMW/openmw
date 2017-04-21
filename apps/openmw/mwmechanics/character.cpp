@@ -2347,7 +2347,7 @@ void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
     mAttackingOrSpell = attackingOrSpell;
 }
 
-void CharacterController::setAIAttackType(std::string attackType)
+void CharacterController::setAIAttackType(const std::string& attackType)
 {
     mAttackType = attackType;
 }

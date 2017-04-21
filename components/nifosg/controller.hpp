@@ -223,7 +223,7 @@ namespace NifOsg
     public:
         UVController();
         UVController(const UVController&,const osg::CopyOp&);
-        UVController(const Nif::NiUVData *data, std::set<int> textureUnits);
+        UVController(const Nif::NiUVData *data, const std::set<int>& textureUnits);
 
         META_Object(NifOsg,UVController)
 
@@ -297,8 +297,8 @@ namespace NifOsg
         std::vector<osg::ref_ptr<osg::Texture2D> > mTextures;
 
     public:
-        FlipController(const Nif::NiFlipController* ctrl, std::vector<osg::ref_ptr<osg::Texture2D> > textures);
-        FlipController(int texSlot, float delta, std::vector<osg::ref_ptr<osg::Texture2D> > textures);
+        FlipController(const Nif::NiFlipController* ctrl, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures);
+        FlipController(int texSlot, float delta, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures);
         FlipController();
         FlipController(const FlipController& copy, const osg::CopyOp& copyop);
 

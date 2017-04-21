@@ -21,7 +21,7 @@ namespace MWMechanics
         , mSelfEnchanting(false)
     {}
 
-    void Enchanting::setOldItem(MWWorld::Ptr oldItem)
+    void Enchanting::setOldItem(const MWWorld::Ptr& oldItem)
     {
         mOldItemPtr=oldItem;
         if(!itemEmpty())
@@ -39,7 +39,7 @@ namespace MWMechanics
         mNewItemName=s;
     }
 
-    void Enchanting::setEffect(ESM::EffectList effectList)
+    void Enchanting::setEffect(const ESM::EffectList& effectList)
     {
         mEffectList=effectList;
     }
@@ -49,7 +49,7 @@ namespace MWMechanics
         return mCastStyle;
     }
 
-    void Enchanting::setSoulGem(MWWorld::Ptr soulGem)
+    void Enchanting::setSoulGem(const MWWorld::Ptr& soulGem)
     {
         mSoulGemPtr=soulGem;
     }
@@ -269,7 +269,7 @@ namespace MWMechanics
         mSelfEnchanting = selfEnchanting;
     }
 
-    void Enchanting::setEnchanter(MWWorld::Ptr enchanter)
+    void Enchanting::setEnchanter(const MWWorld::Ptr& enchanter)
     {
         mEnchanter = enchanter;
     }
