@@ -362,7 +362,7 @@ public:
      * @param texture override the texture specified in the model's materials - if empty, do not override
      * @note Will not add an effect twice.
      */
-    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", std::string texture = "");
+    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", const std::string& texture = "");
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out) const;
 

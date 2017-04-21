@@ -28,7 +28,7 @@ namespace MWRender
     class CharacterPreview
     {
     public:
-        CharacterPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, MWWorld::Ptr character, int sizeX, int sizeY,
+        CharacterPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, const MWWorld::Ptr& character, int sizeX, int sizeY,
                          const osg::Vec3f& position, const osg::Vec3f& lookAt);
         virtual ~CharacterPreview();
 
@@ -73,7 +73,7 @@ namespace MWRender
     {
     public:
 
-        InventoryPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, MWWorld::Ptr character);
+        InventoryPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, const MWWorld::Ptr& character);
 
         void updatePtr(const MWWorld::Ptr& ptr);
 

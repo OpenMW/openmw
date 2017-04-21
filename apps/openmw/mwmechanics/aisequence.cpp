@@ -96,16 +96,16 @@ std::list<AiPackage*>::const_iterator AiSequence::end() const
     return mPackages.end();
 }
 
-std::list<AiPackage*>::const_iterator AiSequence::erase(std::list<AiPackage*>::const_iterator package)
+void AiSequence::erase(std::list<AiPackage*>::const_iterator package)
 {
     // Not sure if manually terminated packages should trigger mDone, probably not?
     for(std::list<AiPackage*>::iterator it = mPackages.begin(); it != mPackages.end(); ++it)
     {
         if (package == it)
         {
-            AiPackage* packagePtr = *it;
-            delete packagePtr;
-            return mPackages.erase(it);
+            delete *it;
+            mPackages.erase(it);
+            return;
         }
     }
     throw std::runtime_error("can't find package to erase");

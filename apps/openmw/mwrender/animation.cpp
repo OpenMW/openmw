@@ -282,7 +282,7 @@ namespace MWRender
     class GlowUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        GlowUpdater(int texUnit, osg::Vec4f color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures,
+        GlowUpdater(int texUnit, const osg::Vec4f& color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures,
             osg::Node* node, float duration, Resource::ResourceSystem* resourcesystem)
             : mTexUnit(texUnit)
             , mColor(color)
@@ -383,7 +383,7 @@ namespace MWRender
             return mDone;
         }
 
-        void setColor(osg::Vec4f color)
+        void setColor(const osg::Vec4f& color)
         {
             mColor = color;
             mColorChanged = true;
@@ -1362,7 +1362,7 @@ namespace MWRender
                             useQuadratic, quadraticValue, quadraticRadiusMult, useLinear, linearRadiusMult, linearValue);
     }
 
-    void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, std::string texture)
+    void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture)
     {
         if (!mObjectRoot.get())
             return;

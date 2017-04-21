@@ -15,7 +15,7 @@ namespace
     // Chooses a reachable end pathgrid point.  start is assumed reachable.
     std::pair<int, bool> getClosestReachablePoint(const ESM::Pathgrid* grid,
                                                   const MWWorld::CellStore *cell,
-                                                  const osg::Vec3f pos, int start)
+                                                  const osg::Vec3f& pos, int start)
     {
         assert(grid && !grid->mPoints.empty());
 

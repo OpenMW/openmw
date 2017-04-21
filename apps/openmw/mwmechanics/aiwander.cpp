@@ -893,7 +893,7 @@ namespace MWMechanics
         storage.mAllowedNodes.push_back(PathFinder::MakePathgridPoint(vectorStart + delta));
     }
 
-    void AiWander::SetCurrentNodeToClosestAllowedNode(osg::Vec3f npcPos, AiWanderStorage& storage)
+    void AiWander::SetCurrentNodeToClosestAllowedNode(const osg::Vec3f& npcPos, AiWanderStorage& storage)
     {
         float distanceToClosestNode = std::numeric_limits<float>::max();
         unsigned int index = 0;

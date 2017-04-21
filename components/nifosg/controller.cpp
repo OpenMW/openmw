@@ -218,7 +218,7 @@ UVController::UVController()
 {
 }
 
-UVController::UVController(const Nif::NiUVData *data, std::set<int> textureUnits)
+UVController::UVController(const Nif::NiUVData *data, const std::set<int>& textureUnits)
     : mUTrans(data->mKeyList[0], 0.f)
     , mVTrans(data->mKeyList[1], 0.f)
     , mUScale(data->mKeyList[2], 1.f)
@@ -381,14 +381,14 @@ void MaterialColorController::apply(osg::StateSet *stateset, osg::NodeVisitor *n
     }
 }
 
-FlipController::FlipController(const Nif::NiFlipController *ctrl, std::vector<osg::ref_ptr<osg::Texture2D> > textures)
+FlipController::FlipController(const Nif::NiFlipController *ctrl, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures)
     : mTexSlot(ctrl->mTexSlot)
     , mDelta(ctrl->mDelta)
     , mTextures(textures)
 {
 }
 
-FlipController::FlipController(int texSlot, float delta, std::vector<osg::ref_ptr<osg::Texture2D> > textures)
+FlipController::FlipController(int texSlot, float delta, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures)
     : mTexSlot(texSlot)
     , mDelta(delta)
     , mTextures(textures)
