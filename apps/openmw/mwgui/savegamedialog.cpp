@@ -169,7 +169,7 @@ namespace MWGui
                         className = "?"; // From an older savegame format that did not support custom classes properly.
                 }
 
-                title << " (#{sLevel} " << it->getSignature().mPlayerLevel << " " << className << ")";
+                title << " (#{sLevel} " << it->getSignature().mPlayerLevel << " " << MyGUI::TextIterator::toTagsString(className) << ")";
 
                 mCharacterSelection->addItem (MyGUI::LanguageManager::getInstance().replaceTags(title.str()));
 
