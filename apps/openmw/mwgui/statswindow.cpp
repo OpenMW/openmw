@@ -6,6 +6,8 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -672,6 +674,8 @@ namespace MWGui
 
     void StatsWindow::onPinToggled()
     {
+        Settings::Manager::setBool("stats pin", "Windows", mPinned);
+
         MWBase::Environment::get().getWindowManager()->setHMSVisibility(!mPinned);
     }
 

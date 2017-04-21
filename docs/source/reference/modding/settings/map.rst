@@ -1,6 +1,17 @@
 Map Settings
 ############
 
+global
+------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this setting is true, a world map on a map window will be displayed, otherwise a local map will be displayed.
+
+The default value is false. This setting can be toggled with the local/world map switch button on the map window.
+
 global map cell size
 --------------------
 
