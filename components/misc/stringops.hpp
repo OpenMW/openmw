@@ -59,6 +59,25 @@ public:
         return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end(), ci());
     }
 
+    static bool ciLessSubstring(const std::string &x, const std::string &y)
+    {
+        int xlen = x.length();
+        int ylen = y.length();
+
+        std::string::const_iterator xit = x.end();
+        std::string::const_iterator yit = y.end();
+        if (xlen > ylen)
+        {
+            xit = x.begin() + ylen;
+        }
+        else if (xlen < ylen)
+        {
+            yit = y.begin() + xlen;
+        }
+
+        return std::lexicographical_compare(x.begin(), xit, y.begin(), yit, ci());
+    };
+
     static bool ciEqual(const std::string &x, const std::string &y) {
         if (x.size() != y.size()) {
             return false;
@@ -112,6 +131,14 @@ public:
         bool operator()(const std::string& left, const std::string& right) const
         {
             return ciLess(left, right);
+        }
+    };
+
+    struct CiStartsWithComp
+    {
+        bool operator()(const std::string& left, const std::string& right) const
+        {
+            return ciLessSubstring(left, right);
         }
     };
 };

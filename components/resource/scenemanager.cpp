@@ -383,18 +383,20 @@ namespace Resource
     public:
         bool isReservedName(const std::string& name) const
         {
-            static std::set<std::string, Misc::StringUtils::CiComp> reservedNames;
+            static std::set<std::string, Misc::StringUtils::CiStartsWithComp> reservedNames;
             if (reservedNames.empty())
             {
-                const char* reserved[] = {"Head", "Neck", "Chest", "Groin", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist", "Shield Bone", "Right Forearm", "Left Forearm", "Right Upper Arm", "Left Upper Arm", "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee", "Left Knee", "Right Upper Leg", "Left Upper Leg", "Right Clavicle", "Left Clavicle", "Weapon Bone", "Tail",
-                                         "Bip01 L Hand", "Bip01 R Hand", "Bip01 Head", "Bip01 Spine1", "Bip01 Spine2", "Bip01 L Clavicle", "Bip01 R Clavicle", "bip01", "Root Bone", "Bip01 Neck",
-                                         "BoneOffset", "AttachLight", "ArrowBone", "Camera"};
-                reservedNames = std::set<std::string, Misc::StringUtils::CiComp>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
+                const char* reserved[] = {"Head", "Neck", "Chest", "Groin", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist", "Shield Bone", "Right Forearm",
+                                          "Left Forearm", "Right Upper Arm", "Left Upper Arm", "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee", "Left Knee", "Right Upper Leg",
+                                          "Left Upper Leg", "Right Clavicle", "Left Clavicle", "Weapon Bone", "Tail", "bip01", "Root Bone", "BoneOffset", "AttachLight", "ArrowBone", "Camera"};
+
+                reservedNames = std::set<std::string, Misc::StringUtils::CiStartsWithComp>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
 
                 for (unsigned int i=0; i<sizeof(reserved)/sizeof(reserved[0]); ++i)
                     reservedNames.insert(std::string("Tri ") + reserved[i]);
             }
-            return reservedNames.find(name) != reservedNames.end();
+
+            return !name.empty() && reservedNames.find(name) != reservedNames.end();
         }
 
         virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Drawable* node,unsigned int option) const
