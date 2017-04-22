@@ -658,6 +658,8 @@ namespace MWDialogue
                 winMgr->messageBox(info->mResponse);
             if (!info->mSound.empty())
                 sndMgr->say(actor, info->mSound);
+            if (!info->mResultScript.empty())
+                executeScript(info->mResultScript, actor);
 
             /*
                 Start of tes3mp addition
@@ -675,9 +677,6 @@ namespace MWDialogue
                 End of tes3mp addition
             */
         }
-
-        if (!info->mResultScript.empty())
-            executeScript(info->mResultScript, actor);
     }
 
     int DialogueManager::countSavedGameRecords() const
