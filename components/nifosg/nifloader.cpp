@@ -1773,8 +1773,10 @@ namespace NifOsg
             }
 
             if (!hasMatCtrl && mat->getColorMode() == osg::Material::OFF
+                    && mat->getEmission(osg::Material::FRONT_AND_BACK) == osg::Vec4f(0,0,0,1)
                     && mat->getDiffuse(osg::Material::FRONT_AND_BACK) == osg::Vec4f(1,1,1,1)
                     && mat->getAmbient(osg::Material::FRONT_AND_BACK) == osg::Vec4f(1,1,1,1)
+                    && mat->getShininess(osg::Material::FRONT_AND_BACK) == 0
                     && mat->getSpecular(osg::Material::FRONT_AND_BACK) == osg::Vec4f(0.f, 0.f, 0.f, 0.f))
             {
                 // default state, skip
