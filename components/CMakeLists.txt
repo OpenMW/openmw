@@ -160,7 +160,7 @@ add_component_dir (openmw-mp\\Controllers
         )
 
 add_component_dir(openmw-mp\\Master
-        MasterData PacketMasterQuery PacketMasterUpdate PacketMasterAnnounce BaseMasterPacket
+        MasterData PacketMasterQuery PacketMasterUpdate PacketMasterAnnounce BaseMasterPacket ProxyMasterPacket
         )
 
 add_component_dir (openmw-mp\\Packets
