@@ -48,7 +48,7 @@ void Cell::updateLocal(bool forceUpdate)
             Main::get().getCellController()->removeLocalActorRecord(it->first);
 
             // If the cell this actor has moved to is active, initialize them in it
-            if (Main::get().getCellController()->isActiveCell(*newStore->getCell()))
+            if (Main::get().getCellController()->isInitializedCell(*newStore->getCell()))
                 Main::get().getCellController()->getCell(*newStore->getCell())->initializeLocalActor(actor->getPtr());
 
             localActors.erase(it++);
@@ -221,7 +221,7 @@ void Cell::readCellChange(ActorList& actorList)
             Main::get().getCellController()->removeDedicatedActorRecord(mapIndex);
             
             // If the cell this actor has moved to is active, initialize them in it
-            if (Main::get().getCellController()->isActiveCell(actor->cell))
+            if (Main::get().getCellController()->isInitializedCell(actor->cell))
                 Main::get().getCellController()->getCell(actor->cell)->initializeDedicatedActor(actor->getPtr());
 
             dedicatedActors.erase(mapIndex);

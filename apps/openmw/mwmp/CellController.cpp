@@ -14,7 +14,7 @@
 #include "LocalPlayer.hpp"
 using namespace mwmp;
 
-std::map<std::string, mwmp::Cell *> CellController::cellsActive;
+std::map<std::string, mwmp::Cell *> CellController::cellsInitialized;
 std::map<std::string, std::string> CellController::localActorsToCells;
 std::map<std::string, std::string> CellController::dedicatedActorsToCells;
 
@@ -30,7 +30,7 @@ mwmp::CellController::~CellController()
 
 void CellController::updateLocal(bool forceUpdate)
 {
-    for (std::map<std::string, mwmp::Cell *>::iterator it = cellsActive.begin(); it != cellsActive.end();)
+    for (std::map<std::string, mwmp::Cell *>::iterator it = cellsInitialized.begin(); it != cellsInitialized.end();)
     {
         mwmp::Cell *mpCell = it->second;
 
@@ -38,7 +38,7 @@ void CellController::updateLocal(bool forceUpdate)
         {
             mpCell->uninitializeLocalActors();
             mpCell->uninitializeDedicatedActors();
-            cellsActive.erase(it++);
+            cellsInitialized.erase(it++);
         }
         else
         {
@@ -51,7 +51,7 @@ void CellController::updateLocal(bool forceUpdate)
 
 void CellController::updateDedicated(float dt)
 {
-    for (std::map<std::string, mwmp::Cell *>::iterator it = cellsActive.begin(); it != cellsActive.end(); ++it)
+    for (std::map<std::string, mwmp::Cell *>::iterator it = cellsInitialized.begin(); it != cellsInitialized.end(); ++it)
     {
         it->second->updateDedicated(dt);
     }
@@ -62,14 +62,14 @@ void CellController::initializeCell(const ESM::Cell& cell)
     std::string mapIndex = cell.getDescription();
 
     // If this key doesn't exist, create it
-    if (cellsActive.count(mapIndex) == 0)
+    if (cellsInitialized.count(mapIndex) == 0)
     {
         MWWorld::CellStore *cellStore = getCellStore(cell);
 
         if (!cellStore) return;
 
         mwmp::Cell *mpCell = new mwmp::Cell(cellStore);
-        cellsActive[mapIndex] = mpCell;
+        cellsInitialized[mapIndex] = mpCell;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Initialized mwmp::Cell %s", mpCell->getDescription().c_str());
     }
@@ -82,10 +82,10 @@ void CellController::initializeLocalActors(const ESM::Cell& cell)
     initializeCell(cell);
 
     // If this now exists, initialize local actors in it
-    if (cellsActive.count(mapIndex) > 0)
+    if (cellsInitialized.count(mapIndex) > 0)
     {
-        cellsActive[mapIndex]->uninitializeDedicatedActors();
-        cellsActive[mapIndex]->initializeLocalActors();
+        cellsInitialized[mapIndex]->uninitializeDedicatedActors();
+        cellsInitialized[mapIndex]->initializeLocalActors();
     }
 }
 
@@ -96,9 +96,9 @@ void CellController::readPositions(ActorList& actorList)
     initializeCell(actorList.cell);
 
     // If this now exists, send it the data
-    if (cellsActive.count(mapIndex) > 0)
+    if (cellsInitialized.count(mapIndex) > 0)
     {
-        cellsActive[mapIndex]->readPositions(actorList);
+        cellsInitialized[mapIndex]->readPositions(actorList);
     }
 }
 
@@ -109,9 +109,9 @@ void CellController::readAnimFlags(ActorList& actorList)
     initializeCell(actorList.cell);
 
     // If this now exists, send it the data
-    if (cellsActive.count(mapIndex) > 0)
+    if (cellsInitialized.count(mapIndex) > 0)
     {
-        cellsActive[mapIndex]->readAnimFlags(actorList);
+        cellsInitialized[mapIndex]->readAnimFlags(actorList);
     }
 }
 
@@ -122,9 +122,9 @@ void CellController::readAnimPlay(ActorList& actorList)
     initializeCell(actorList.cell);
 
     // If this now exists, send it the data
-    if (cellsActive.count(mapIndex) > 0)
+    if (cellsInitialized.count(mapIndex) > 0)
     {
-        cellsActive[mapIndex]->readAnimPlay(actorList);
+        cellsInitialized[mapIndex]->readAnimPlay(actorList);
     }
 }
 
@@ -135,9 +135,9 @@ void CellController::readStatsDynamic(ActorList& actorList)
     initializeCell(actorList.cell);
 
     // If this now exists, send it the data
-    if (cellsActive.count(mapIndex) > 0)
+    if (cellsInitialized.count(mapIndex) > 0)
     {
-        cellsActive[mapIndex]->readStatsDynamic(actorList);
+        cellsInitialized[mapIndex]->readStatsDynamic(actorList);
     }
 }
 
@@ -148,9 +148,9 @@ void CellController::readSpeech(ActorList& actorList)
     initializeCell(actorList.cell);
 
     // If this now exists, send it the data
-    if (cellsActive.count(mapIndex) > 0)
+    if (cellsInitialized.count(mapIndex) > 0)
     {
-        cellsActive[mapIndex]->readSpeech(actorList);
+        cellsInitialized[mapIndex]->readSpeech(actorList);
     }
 }
 
@@ -161,9 +161,9 @@ void CellController::readAttack(ActorList& actorList)
     initializeCell(actorList.cell);
 
     // If this now exists, send it the data
-    if (cellsActive.count(mapIndex) > 0)
+    if (cellsInitialized.count(mapIndex) > 0)
     {
-        cellsActive[mapIndex]->readAttack(actorList);
+        cellsInitialized[mapIndex]->readAttack(actorList);
     }
 }
 
@@ -174,9 +174,9 @@ void CellController::readCellChange(ActorList& actorList)
     initializeCell(actorList.cell);
 
     // If this now exists, send it the data
-    if (cellsActive.count(mapIndex) > 0)
+    if (cellsInitialized.count(mapIndex) > 0)
     {
-        cellsActive[mapIndex]->readCellChange(actorList);
+        cellsInitialized[mapIndex]->readCellChange(actorList);
     }
 }
 
@@ -211,7 +211,7 @@ LocalActor *CellController::getLocalActor(MWWorld::Ptr ptr)
     std::string actorIndex = generateMapIndex(ptr);
     std::string cellIndex = localActorsToCells.at(actorIndex);
 
-    return cellsActive.at(cellIndex)->getLocalActor(actorIndex);
+    return cellsInitialized.at(cellIndex)->getLocalActor(actorIndex);
 }
 
 LocalActor *CellController::getLocalActor(std::string refId, int refNumIndex, int mpNum)
@@ -219,7 +219,7 @@ LocalActor *CellController::getLocalActor(std::string refId, int refNumIndex, in
     std::string actorIndex = generateMapIndex(refId, refNumIndex, mpNum);
     std::string cellIndex = localActorsToCells.at(actorIndex);
 
-    return cellsActive.at(cellIndex)->getLocalActor(actorIndex);
+    return cellsInitialized.at(cellIndex)->getLocalActor(actorIndex);
 }
 
 void CellController::setDedicatedActorRecord(std::string actorIndex, std::string cellIndex)
@@ -253,7 +253,7 @@ DedicatedActor *CellController::getDedicatedActor(MWWorld::Ptr ptr)
     std::string actorIndex = generateMapIndex(ptr);
     std::string cellIndex = dedicatedActorsToCells.at(actorIndex);
 
-    return cellsActive.at(cellIndex)->getDedicatedActor(actorIndex);
+    return cellsInitialized.at(cellIndex)->getDedicatedActor(actorIndex);
 }
 
 DedicatedActor *CellController::getDedicatedActor(std::string refId, int refNumIndex, int mpNum)
@@ -261,7 +261,7 @@ DedicatedActor *CellController::getDedicatedActor(std::string refId, int refNumI
     std::string actorIndex = generateMapIndex(refId, refNumIndex, mpNum);
     std::string cellIndex = dedicatedActorsToCells.at(actorIndex);
 
-    return cellsActive.at(cellIndex)->getDedicatedActor(actorIndex);
+    return cellsInitialized.at(cellIndex)->getDedicatedActor(actorIndex);
 }
 
 std::string CellController::generateMapIndex(std::string refId, int refNumIndex, int mpNum)
@@ -284,14 +284,14 @@ std::string CellController::generateMapIndex(BaseActor baseActor)
     return generateMapIndex(baseActor.refId, baseActor.refNumIndex, baseActor.mpNum);
 }
 
-bool CellController::isActiveCell(const ESM::Cell& cell)
+bool CellController::isInitializedCell(const ESM::Cell& cell)
 {
-    return (cellsActive.count(cell.getDescription()) > 0);
+    return (cellsInitialized.count(cell.getDescription()) > 0);
 }
 
 Cell *CellController::getCell(const ESM::Cell& cell)
 {
-    return cellsActive.at(cell.getDescription());
+    return cellsInitialized.at(cell.getDescription());
 }
 
 MWWorld::CellStore *CellController::getCellStore(const ESM::Cell& cell)

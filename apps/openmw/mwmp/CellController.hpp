@@ -50,7 +50,7 @@ namespace mwmp
         std::string generateMapIndex(MWWorld::Ptr ptr);
         std::string generateMapIndex(mwmp::BaseActor baseActor);
 
-        bool isActiveCell(const ESM::Cell& cell);
+        bool isInitializedCell(const ESM::Cell& cell);
         virtual Cell *getCell(const ESM::Cell& cell);
 
         virtual MWWorld::CellStore *getCellStore(const ESM::Cell& cell);
@@ -63,7 +63,7 @@ namespace mwmp
         int getCellSize() const;
 
     private:
-        static std::map<std::string, mwmp::Cell *> cellsActive;
+        static std::map<std::string, mwmp::Cell *> cellsInitialized;
         static std::map<std::string, std::string> localActorsToCells;
         static std::map<std::string, std::string> dedicatedActorsToCells;
     };

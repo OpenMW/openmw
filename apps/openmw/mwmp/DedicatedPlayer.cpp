@@ -377,7 +377,7 @@ void DedicatedPlayer::updateCell()
     // NPC data in that cell
     if (MWBase::Environment::get().getWorld()->isCellActive(cellStore))
     {
-        if (Main::get().getCellController()->isActiveCell(cell))
+        if (Main::get().getCellController()->isInitializedCell(cell))
             Main::get().getCellController()->getCell(cell)->updateLocal(true);
     }
 }
