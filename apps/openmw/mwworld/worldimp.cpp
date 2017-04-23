@@ -1167,6 +1167,17 @@ namespace MWWorld
 
     MWWorld::Ptr World::moveObject(const Ptr &ptr, CellStore* newCell, float x, float y, float z, bool movePhysics)
     {
+        /*
+            Start of tes3mp addition
+
+            If we choose to deny this move because it's part of an unapproved cell change, we should also revert the Ptr back to its
+            original coordinates, so keep track of them
+        */
+        ESM::Position originalPos = ptr.getRefData().getPosition();
+        /*
+            End of tes3mp addition
+        */
+
         ESM::Position pos = ptr.getRefData().getPosition();
 
         pos.pos[0] = x;
@@ -1187,15 +1198,21 @@ namespace MWWorld
             /*
                 Start of tes3mp addition
 
-                Check if a DedicatedPlayer or DedicatedActor's new Ptr cell is the same as their packet cell, and deny the Ptr's cell change
-                if it is not
+                Check if a DedicatedPlayer or DedicatedActor's new Ptr cell is the same as their packet cell, and deny the Ptr's movement and
+                cell change if it is not
             */
             if (mwmp::PlayerList::isDedicatedPlayer(ptr) &&
                 !mwmp::Main::get().getCellController()->isSameCell(mwmp::PlayerList::getPlayer(ptr)->cell, *newCell->getCell()))
+            {
+                ptr.getRefData().setPosition(originalPos);
                 return ptr;
+            }
             else if (mwmp::Main::get().getCellController()->isDedicatedActor(ptr) &&
                 !mwmp::Main::get().getCellController()->isSameCell(mwmp::Main::get().getCellController()->getDedicatedActor(ptr)->cell, *newCell->getCell()))
+            {
+                ptr.getRefData().setPosition(originalPos);
                 return ptr;
+            }
             /*
                 End of tes3mp addition
             */
