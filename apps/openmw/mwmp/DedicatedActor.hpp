@@ -27,6 +27,8 @@ namespace mwmp
 
     private:
         MWWorld::Ptr ptr;
+
+        bool hasChangedCell;
     };
 }
 

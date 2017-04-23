@@ -17,6 +17,7 @@
 #include "DedicatedActor.hpp"
 #include "Main.hpp"
 #include "CellController.hpp"
+#include "MechanicsHelper.hpp"
 
 using namespace mwmp;
 using namespace std;
@@ -31,6 +32,8 @@ DedicatedActor::DedicatedActor()
     creatureStats = new ESM::CreatureStats();
     creatureStats->blank();
     creatureStats->mDynamic[0].mBase = -1;
+
+    hasChangedCell = true;
 }
 
 DedicatedActor::~DedicatedActor()
@@ -52,13 +55,32 @@ void DedicatedActor::setCell(MWWorld::CellStore *cellStore)
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
     ptr = world->moveObject(ptr, cellStore, position.pos[0], position.pos[1], position.pos[2]);
+
+    hasChangedCell = true;
 }
 
 void DedicatedActor::move(float dt)
 {
+    ESM::Position refPos = ptr.getRefData().getPosition();
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
-    world->moveObject(ptr, position.pos[0], position.pos[1], position.pos[2]);
+    // Don't apply linear interpolation if the DedicatedActor has just gone through a cell change, because
+    // the interpolated position will be invalid, causing a slight hopping glitch
+    if (!hasChangedCell)
+    {
+        static const int timeMultiplier = 15;
+        osg::Vec3f lerp = Main::get().getMechanicsHelper()->getLinearInterpolation(refPos.asVec3(), position.asVec3(), dt * timeMultiplier);
+        refPos.pos[0] = lerp.x();
+        refPos.pos[1] = lerp.y();
+        refPos.pos[2] = lerp.z();
+
+        world->moveObject(ptr, refPos.pos[0], refPos.pos[1], refPos.pos[2]);
+    }
+    else
+    {
+        world->moveObject(ptr, position.pos[0], position.pos[1], position.pos[2]);
+        hasChangedCell = false;
+    }
 
     MWMechanics::Movement *move = &ptr.getClass().getMovementSettings(ptr);
     move->mPosition[0] = direction.pos[0];
