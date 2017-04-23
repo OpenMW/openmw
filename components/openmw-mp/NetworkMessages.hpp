@@ -73,5 +73,14 @@ enum GameMessages
     ID_GAME_PREINIT
 };
 
+enum OrderingChannel
+{
+    CHANNEL_SYSTEM = 0,
+    CHANNEL_ACTOR,
+    CHANNEL_PLAYER,
+    CHANNEL_WORLDEVENT,
+    CHANNEL_MASTER
+};
+
 
 #endif //OPENMW_NETWORKMESSAGES_HPP

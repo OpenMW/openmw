@@ -92,6 +92,7 @@ namespace mwmp
         unsigned char packetID;
         PacketReliability reliability;
         PacketPriority priority;
+        int orderChannel;
         RakNet::BitStream *bsRead, *bsSend, *bs;
         RakNet::RakPeerInterface *peer;
         RakNet::RakNetGUID guid;

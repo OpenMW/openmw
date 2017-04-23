@@ -10,6 +10,7 @@ BasePacket::BasePacket(RakNet::RakPeerInterface *peer)
     packetID = 0;
     priority = HIGH_PRIORITY;
     reliability = RELIABLE_ORDERED;
+    orderChannel = CHANNEL_SYSTEM;
     this->peer = peer;
 }
 
@@ -52,21 +53,21 @@ void BasePacket::RequestData(RakNet::RakNetGUID guid)
     bsSend->ResetWritePointer();
     bsSend->Write(packetID);
     bsSend->Write(guid);
-    peer->Send(bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, 0, guid, false);
+    peer->Send(bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, orderChannel, guid, false);
 }
 
 void BasePacket::Send(RakNet::AddressOrGUID destination)
 {
     bsSend->ResetWritePointer();
     Packet(bsSend, true);
-    peer->Send(bsSend, priority, reliability, 0, destination, false);
+    peer->Send(bsSend, priority, reliability, orderChannel, destination, false);
 }
 
 void BasePacket::Send(bool toOther)
 {
     bsSend->ResetWritePointer();
     Packet(bsSend, true);
-    peer->Send(bsSend, priority, reliability, 0, guid, toOther);
+    peer->Send(bsSend, priority, reliability, orderChannel, guid, toOther);
 }
 
 void BasePacket::Read()
