@@ -27,16 +27,6 @@ namespace MWWorld
          * and individual type-dependent data.
          */
         MWWorld::CellRef mRef;
-    
-        /*
-            Start of tes3mp addition
-
-            Useful boolean for stopping momentum-based cell changes not approved by server
-         */
-        bool canChangeCell;
-        /*
-            End of tes3mp addition
-        */
 
         /** runtime-data */
         RefData mData;

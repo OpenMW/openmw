@@ -66,12 +66,12 @@ namespace mwmp
         MWWorld::Ptr getLiveCellPtr();
         MWWorld::ManualRef* getRef();
 
+        void setPtr(const MWWorld::Ptr& newPtr);
+
     private:
 
         DedicatedPlayer(RakNet::RakNetGUID guid);
         virtual ~DedicatedPlayer();
-
-        void updatePtr(MWWorld::Ptr newPtr);
 
         int state;
         MWWorld::ManualRef* reference;

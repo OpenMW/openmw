@@ -5,9 +5,19 @@
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
+#include "../mwmp/DedicatedPlayer.hpp"
 #include "../mwmp/WorldEvent.hpp"
+#include "../mwmp/CellController.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
@@ -1169,18 +1179,21 @@ namespace MWWorld
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = isPlayer || (currCell && mWorldScene->isCellActive(*currCell));
         MWWorld::Ptr newPtr = ptr;
-        
-        // tes3mp debug start
-        if (currCell != newCell) {
 
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Tick: %s was %s move from %s to %s", ptr.getBase()->mRef.getRefId().c_str(),
-                               ptr.getBase()->canChangeCell ? "allowed" : "denied", currCell->getCell()->getDescription().c_str(),
-                               newCell->getCell()->getDescription().c_str());
-        }
-        // tes3mp debug end
-
-        if (currCell != newCell && ptr.getBase()->canChangeCell)
+        if (currCell != newCell)
         {
+            /*
+                Start of tes3mp addition
+
+                Check if DedicatedPlayer's new Ptr cell is the same as their packet cell, and deny the Ptr's cell change if it is not
+            */
+            if (mwmp::PlayerList::isDedicatedPlayer(ptr) &&
+                !mwmp::Main::get().getCellController()->isSameCell(mwmp::PlayerList::getPlayer(ptr)->cell, *newCell->getCell()))
+                return ptr;
+            /*
+                End of tes3mp addition
+            */
+
             removeContainerScripts(ptr);
 
             if (isPlayer)
@@ -1245,6 +1258,17 @@ namespace MWWorld
                         addContainerScripts (newPtr, newCell);
                     }
                 }
+
+                /*
+                    Start of tes3mp addition
+
+                    Update the Ptrs of DedicatedPlayers
+                */
+                if (mwmp::PlayerList::isDedicatedPlayer(ptr))
+                    mwmp::PlayerList::getPlayer(ptr)->setPtr(newPtr);
+                /*
+                    End of tes3mp addition
+                */
             }
         }
         if (haveToMove && newPtr.getRefData().getBaseNode())
@@ -1257,6 +1281,7 @@ namespace MWWorld
         {
             mWorldScene->playerMoved(vec);
         }
+
         return newPtr;
     }
 

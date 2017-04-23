@@ -148,9 +148,6 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
     {
         LOG_APPEND(Log::LOG_INFO, "- Updating reference pointer for %s", dedicPlayer->npc.mName.c_str());
 
-        dedicPlayer->ptr.getBase()->canChangeCell = true;
-        dedicPlayer->updatePtr(world->moveObject(dedicPlayer->ptr, cellStore, spawnPos.pos[0], spawnPos.pos[1], spawnPos.pos[2]));
-
         npc.mId = players[guid]->ptr.get<ESM::NPC>()->mBase->mId;
 
         MWWorld::ESMStore *store = const_cast<MWWorld::ESMStore *>(&world->getStore());
@@ -158,6 +155,10 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
 
         esm_store->insert(npc);
 
+        // Disable Ptr to avoid graphical glitches caused by race changes
+        world->disable(players[guid]->ptr);
+        
+        dedicPlayer->setPtr(world->moveObject(dedicPlayer->ptr, cellStore, spawnPos.pos[0], spawnPos.pos[1], spawnPos.pos[2]));
         dedicPlayer->updateCell();
 
         ESM::CustomMarker mEditingMarker = Main::get().getGUIController()->CreateMarker(guid);
@@ -202,7 +203,6 @@ void PlayerList::disconnectPlayer(RakNet::RakNetGUID guid)
         newPos.pos[2] = 0;
         MWWorld::CellStore *cellStore = world->getExterior(0, 0);
 
-        players[guid]->getPtr().getBase()->canChangeCell = true;
         world->moveObject(players[guid]->getPtr(), cellStore, newPos.pos[0], newPos.pos[1], newPos.pos[2]);
     }
 }
@@ -350,7 +350,7 @@ void DedicatedPlayer::updateCell()
     MWWorld::CellStore *cellStore;
 
 
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server says %s (%s) moved to %s", ptr.getBase()->mRef.getRefId().c_str(),
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server says DedicatedPlayer %s moved to %s",
         this->npc.mName.c_str(), cell.getDescription().c_str());
 
     try
@@ -371,8 +371,7 @@ void DedicatedPlayer::updateCell()
 
     // Allow this player's reference to move across a cell now that a manual cell
     // update has been called
-    ptr.getBase()->canChangeCell = true;
-    updatePtr(world->moveObject(ptr, cellStore, position.pos[0], position.pos[1], position.pos[2]));
+    setPtr(world->moveObject(ptr, cellStore, position.pos[0], position.pos[1], position.pos[2]));
 
     // If this player is now in a cell that is active for us, we should send them all
     // NPC data in that cell
@@ -435,13 +434,7 @@ MWWorld::ManualRef *DedicatedPlayer::getRef()
     return reference;
 }
 
-void DedicatedPlayer::updatePtr(MWWorld::Ptr newPtr)
+void DedicatedPlayer::setPtr(const MWWorld::Ptr& newPtr)
 {
-    ptr.mCell = newPtr.mCell;
-    ptr.mRef = newPtr.mRef;
-    ptr.mContainerStore = newPtr.mContainerStore;
-
-    // Disallow this player's reference from moving across cells until
-    // the correct packet is sent by the player
-    ptr.getBase()->canChangeCell = false;
+    ptr = newPtr;
 }
