@@ -27,7 +27,7 @@ namespace mwmp
                 else
                     static_cast<LocalPlayer *>(player)->setSkills();
             }
-            else
+            else if (player != 0)
             {
                 MWWorld::Ptr ptrPlayer = static_cast<DedicatedPlayer *>(player)->getPtr();
                 MWMechanics::NpcStats *ptrNpcStats = &ptrPlayer.getClass().getNpcStats(ptrPlayer);

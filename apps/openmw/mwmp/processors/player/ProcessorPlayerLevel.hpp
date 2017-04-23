@@ -27,7 +27,7 @@ namespace mwmp
                 else
                     static_cast<LocalPlayer *>(player)->setLevel();
             }
-            else
+            else if (player != 0)
             {
                 MWWorld::Ptr ptrPlayer =  static_cast<DedicatedPlayer *>(player)->getPtr();
                 MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);

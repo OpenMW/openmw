@@ -27,7 +27,7 @@ namespace mwmp
                 else
                     static_cast<LocalPlayer*>(player)->setEquipment();
             }
-            else
+            else if (player != 0)
                 static_cast<DedicatedPlayer*>(player)->updateEquipment();
         }
     };

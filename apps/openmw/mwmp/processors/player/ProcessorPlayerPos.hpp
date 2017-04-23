@@ -31,7 +31,7 @@ namespace mwmp
                 else
                     static_cast<LocalPlayer*>(player)->updatePosition(true);
             }
-            else // dedicated player
+            else if (player != 0) // dedicated player
                 static_cast<DedicatedPlayer*>(player)->updateMarker();
         }
     };

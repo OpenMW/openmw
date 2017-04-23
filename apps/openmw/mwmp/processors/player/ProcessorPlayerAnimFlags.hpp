@@ -2,18 +2,18 @@
 // Created by koncord on 16.04.17.
 //
 
-#ifndef OPENMW_PROCESSORPLAYERDRAWSTATE_HPP
-#define OPENMW_PROCESSORPLAYERDRAWSTATE_HPP
+#ifndef OPENMW_PROCESSORPLAYERANIMFLAGS_HPP
+#define OPENMW_PROCESSORPLAYERANIMFLAGS_HPP
 
 
 #include "apps/openmw/mwmp/PlayerProcessor.hpp"
 
 namespace mwmp
 {
-    class ProcessorPlayerDrawState : public PlayerProcessor
+    class ProcessorPlayerAnimFlags : public PlayerProcessor
     {
     public:
-        ProcessorPlayerDrawState()
+        ProcessorPlayerAnimFlags()
         {
             BPP_INIT(ID_PLAYER_ANIM_FLAGS)
         }
@@ -25,11 +25,11 @@ namespace mwmp
                 if(isRequest())
                     static_cast<LocalPlayer *>(player)->updateAnimFlags(true);
             }
-            else
+            else if (player != 0)
                 static_cast<DedicatedPlayer *>(player)->updateAnimFlags();
         }
     };
 }
 
 
-#endif //OPENMW_PROCESSORPLAYERDRAWSTATE_HPP
+#endif //OPENMW_PROCESSORPLAYERANIMFLAGS_HPP

@@ -43,7 +43,7 @@ namespace mwmp
                 Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(player);
                 Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_STATS_DYNAMIC)->Send(serverAddr);
             }
-            else
+            else if (player != 0)
             {
                 LOG_APPEND(Log::LOG_INFO, "- Packet was about %s", player->npc.mName.c_str());
 

@@ -33,7 +33,7 @@ namespace mwmp
                 packet.setPlayer(player);
                 packet.Send(serverAddr);
             }
-            else
+            else if (player != 0)
             {
                 LOG_APPEND(Log::LOG_INFO, "- Packet was about %s", player->npc.mName.c_str());
 

@@ -19,7 +19,7 @@
 #include "processors/player/ProcessorPlayerDynamicStats.hpp"
 #include "processors/player/ProcessorPlayerDeath.hpp"
 #include "processors/player/ProcessorPlayerResurrect.hpp"
-#include "processors/player/ProcessorPlayerDrawState.hpp"
+#include "processors/player/ProcessorPlayerAnimFlags.hpp"
 #include "processors/player/ProcessorChatMessage.hpp"
 #include "processors/player/ProcessorPlayerCharGen.hpp"
 #include "processors/player/ProcessorGUIMessageBox.hpp"
@@ -76,7 +76,7 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorPlayerDynamicStats());
     PlayerProcessor::AddProcessor(new ProcessorPlayerDeath());
     PlayerProcessor::AddProcessor(new ProcessorPlayerResurrect());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerDrawState());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerAnimFlags());
     PlayerProcessor::AddProcessor(new ProcessorChatMessage());
     PlayerProcessor::AddProcessor(new ProcessorPlayerCharGen());
     PlayerProcessor::AddProcessor(new ProcessorGUIMessageBox());
