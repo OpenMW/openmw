@@ -10,6 +10,8 @@
 #include "apps/openmw/mwmp/Main.hpp"
 #include "apps/openmw/mwmp/CellController.hpp"
 
+#include "../mwworld/worldimp.hpp"
+
 namespace mwmp
 {
     class ProcessorActorAuthority : public ActorProcessor
@@ -24,8 +26,12 @@ namespace mwmp
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Received %s about %s", strPacketID.c_str(), actorList.cell.getDescription().c_str());
 
-            Main::get().getCellController()->initializeLocalActors(actorList.cell);
-            Main::get().getCellController()->getCell(actorList.cell)->updateLocal(true);
+            // Never initialize LocalActors in a cell that is no longer loaded, if the server's packet arrived too late
+            if (mwmp::Main::get().getCellController()->isActiveWorldCell(actorList.cell))
+            {
+                Main::get().getCellController()->initializeLocalActors(actorList.cell);
+                Main::get().getCellController()->getCell(actorList.cell)->updateLocal(true);
+            }
         }
     };
 }

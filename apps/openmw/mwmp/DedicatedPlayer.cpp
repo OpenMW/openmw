@@ -375,7 +375,7 @@ void DedicatedPlayer::updateCell()
 
     // If this player is now in a cell that is active for us, we should send them all
     // NPC data in that cell
-    if (MWBase::Environment::get().getWorld()->isCellActive(cellStore))
+    if (Main::get().getCellController()->isActiveWorldCell(cell))
     {
         if (Main::get().getCellController()->isInitializedCell(cell))
             Main::get().getCellController()->getCell(cell)->updateLocal(true);

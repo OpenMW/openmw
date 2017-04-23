@@ -289,6 +289,15 @@ bool CellController::isInitializedCell(const ESM::Cell& cell)
     return (cellsInitialized.count(cell.getDescription()) > 0);
 }
 
+bool CellController::isActiveWorldCell(const ESM::Cell& cell)
+{
+    MWWorld::CellStore *cellStore = getCellStore(cell);
+
+    if (!cellStore) return false;
+
+    return MWBase::Environment::get().getWorld()->isCellActive(cellStore);
+}
+
 Cell *CellController::getCell(const ESM::Cell& cell)
 {
     return cellsInitialized.at(cell.getDescription());
