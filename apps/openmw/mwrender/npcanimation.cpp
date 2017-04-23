@@ -726,6 +726,19 @@ void NpcAnimation::removePartGroup(int group)
     }
 }
 
+bool NpcAnimation::isFirstPersonPart(const ESM::BodyPart* bodypart)
+{
+    return (bodypart->mId.size() >= 3)
+        && bodypart->mId[bodypart->mId.size()-3] == '1'
+        && bodypart->mId[bodypart->mId.size()-2] == 's'
+        && bodypart->mId[bodypart->mId.size()-1] == 't';
+}
+
+bool NpcAnimation::isFemalePart(const ESM::BodyPart* bodypart)
+{
+    return bodypart->mData.mFlags & ESM::BodyPart::BPF_Female;
+}
+
 bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh, bool enchantedGlow, osg::Vec4f* glowColor)
 {
     if(priority <= mPartPriorities[type])
@@ -1096,46 +1109,79 @@ const std::vector<const ESM::BodyPart *>& NpcAnimation::getBodyParts(const std::
             if (!Misc::StringUtils::ciEqual(bodypart.mRace, race))
                 continue;
 
-            bool partFirstPerson = (bodypart.mId.size() >= 3)
-                    && bodypart.mId[bodypart.mId.size()-3] == '1'
-                    && bodypart.mId[bodypart.mId.size()-2] == 's'
-                    && bodypart.mId[bodypart.mId.size()-1] == 't';
-            if(partFirstPerson != (firstPerson))
-            {
-                if(firstPerson && (bodypart.mData.mPart == ESM::BodyPart::MP_Hand ||
-                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Wrist ||
-                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Forearm ||
-                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Upperarm))
-                {
-                    /* Allow 3rd person skins as a fallback for the arms if 1st person is missing. */
-                    BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
-                    while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
-                    {
-                        if(!parts[bIt->second])
-                            parts[bIt->second] = &*it;
-                        ++bIt;
-                    }
-                }
-                continue;
-            }
+            bool partFirstPerson = isFirstPersonPart(&bodypart);
 
-            if ((female) != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
+            bool isHand = bodypart.mData.mPart == ESM::BodyPart::MP_Hand ||
+                                    bodypart.mData.mPart == ESM::BodyPart::MP_Wrist ||
+                                    bodypart.mData.mPart == ESM::BodyPart::MP_Forearm ||
+                                    bodypart.mData.mPart == ESM::BodyPart::MP_Upperarm;
+
+            bool isSameGender = isFemalePart(&bodypart) == female;
+
+            /* A fallback for the arms if 1st person is missing:
+             1. Try to use 3d person skin for same gender
+             2. Try to use 1st person skin for male, if female == true
+             3. Try to use 3d person skin for male, if female == true
+
+             A fallback in another cases: allow to use male bodyparts, if female == true
+            */
+            if (firstPerson && isHand && !partFirstPerson)
             {
-                // Allow opposite gender's parts as fallback if parts for our gender are missing
+                // Allow 3rd person skins as a fallback for the arms if 1st person is missing
                 BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
                 while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
                 {
-                    if(!parts[bIt->second])
-                        parts[bIt->second] = &*it;
+                    // If we have no fallback bodypart now and bodypart is for same gender (1)
+                    if(!parts[bIt->second] && isSameGender)
+                       parts[bIt->second] = &bodypart;
+
+                    // If we have fallback bodypart for other gender and found fallback for current gender (1)
+                    else if(isSameGender && isFemalePart(parts[bIt->second]) != female)
+                       parts[bIt->second] = &bodypart;
+
+                    // If we have no fallback bodypart and searching for female bodyparts (3)
+                    else if(!parts[bIt->second] && female)
+                       parts[bIt->second] = &bodypart;
+
                     ++bIt;
                 }
+
                 continue;
             }
 
+            // Don't allow to use podyparts for a different view
+            if (partFirstPerson != firstPerson)
+                continue;
+
+            if (female && !isFemalePart(&bodypart))
+            {
+                // Allow male parts as fallback for females if female parts are missing
+                BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
+                while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
+                {
+                    // If we have no fallback bodypart now
+                    if(!parts[bIt->second])
+                        parts[bIt->second] = &bodypart;
+
+                    // If we have 3d person fallback bodypart for hand and 1st person fallback found (2)
+                    else if(isHand && !isFirstPersonPart(parts[bIt->second]) && partFirstPerson)
+                        parts[bIt->second] = &bodypart;
+
+                    ++bIt;
+                }
+
+                continue;
+            }
+
+            // Don't allow to use podyparts for another gender
+            if (female != isFemalePart(&bodypart))
+                continue;
+
+            // Use properly found bodypart, replacing fallbacks
             BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
             while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
             {
-                parts[bIt->second] = &*it;
+                parts[bIt->second] = &bodypart;
                 ++bIt;
             }
         }

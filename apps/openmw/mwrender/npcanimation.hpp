@@ -90,6 +90,9 @@ private:
 
     osg::ref_ptr<NeckController> mFirstPersonNeckController;
 
+    static bool isFirstPersonPart(const ESM::BodyPart* bodypart);
+    static bool isFemalePart(const ESM::BodyPart* bodypart);
+
 protected:
     virtual void addControllers();
 
