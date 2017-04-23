@@ -12,7 +12,6 @@
         </Widget>
 
         <Widget type="EditBox" skin="MW_TextEdit" position="70 8 492 30" align="Top Left HStretch" name="NameEdit">
-            <Property key="MaxTextLength" value="31"/>
         </Widget>
 
 
