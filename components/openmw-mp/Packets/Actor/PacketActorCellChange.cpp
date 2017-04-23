@@ -37,7 +37,13 @@ void PacketActorCellChange::Packet(RakNet::BitStream *bs, bool send)
         RW(actor.refId, send);
         RW(actor.refNumIndex, send);
         RW(actor.mpNum, send);
-        RW(actor.cell, send);
+
+        RW(actor.cell.mData.mFlags, send);
+        RW(actor.cell.mData.mX, send);
+        RW(actor.cell.mData.mY, send);
+        RW(actor.cell.mName, send);
+
+        RW(actor.position, send);
 
         if (!send)
         {
