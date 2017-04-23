@@ -88,9 +88,22 @@ namespace MWMechanics
         const ESM::Enchantment *enchantmentPtr = MWBase::Environment::get().getWorld()->createRecord (enchantment);
         std::string newItemId = mOldItemPtr.getClass().applyEnchantment(mOldItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
 
-        // Add the new item to player inventory and remove the old one
-        store.remove(mOldItemPtr, 1, player);
+        // Add the new item to player inventory
         store.add(newItemId, 1, player);
+
+        // We should keep the item condition
+        MWWorld::Ptr newItemPtr = store.search(newItemId);
+
+        const bool hasOldItemHealth = mOldItemPtr.getClass().hasItemHealth(mOldItemPtr);
+        const bool hasNewItemHealth = newItemPtr.getClass().hasItemHealth(newItemPtr);
+        if(hasOldItemHealth && hasNewItemHealth)
+        {
+            int itemHealth = mOldItemPtr.getClass().getItemHealth(mOldItemPtr);
+            newItemPtr.getCellRef().setCharge(itemHealth);
+        }
+
+        // Remove the old item from player inventory
+        store.remove(mOldItemPtr, 1, player);
 
         if(!mSelfEnchanting)
             payForEnchantment();
