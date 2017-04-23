@@ -13,6 +13,8 @@
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
 #include "../mwmp/DedicatedPlayer.hpp"
+#include "../mwmp/LocalActor.hpp"
+#include "../mwmp/DedicatedActor.hpp"
 #include "../mwmp/WorldEvent.hpp"
 #include "../mwmp/CellController.hpp"
 /*
@@ -1185,10 +1187,14 @@ namespace MWWorld
             /*
                 Start of tes3mp addition
 
-                Check if DedicatedPlayer's new Ptr cell is the same as their packet cell, and deny the Ptr's cell change if it is not
+                Check if a DedicatedPlayer or DedicatedActor's new Ptr cell is the same as their packet cell, and deny the Ptr's cell change
+                if it is not
             */
             if (mwmp::PlayerList::isDedicatedPlayer(ptr) &&
                 !mwmp::Main::get().getCellController()->isSameCell(mwmp::PlayerList::getPlayer(ptr)->cell, *newCell->getCell()))
+                return ptr;
+            else if (mwmp::Main::get().getCellController()->isDedicatedActor(ptr) &&
+                !mwmp::Main::get().getCellController()->isSameCell(mwmp::Main::get().getCellController()->getDedicatedActor(ptr)->cell, *newCell->getCell()))
                 return ptr;
             /*
                 End of tes3mp addition
@@ -1262,9 +1268,13 @@ namespace MWWorld
                 /*
                     Start of tes3mp addition
 
-                    Update the Ptrs of DedicatedPlayers
+                    Update the Ptrs of LocalActors, DedicatedPlayers and DedicatedActors
                 */
-                if (mwmp::PlayerList::isDedicatedPlayer(ptr))
+                if (mwmp::Main::get().getCellController()->isLocalActor(ptr))
+                    mwmp::Main::get().getCellController()->getLocalActor(ptr)->setPtr(newPtr);
+                else if (mwmp::Main::get().getCellController()->isDedicatedActor(ptr))
+                    mwmp::Main::get().getCellController()->getDedicatedActor(ptr)->setPtr(newPtr);
+                else if (mwmp::PlayerList::isDedicatedPlayer(ptr))
                     mwmp::PlayerList::getPlayer(ptr)->setPtr(newPtr);
                 /*
                     End of tes3mp addition
