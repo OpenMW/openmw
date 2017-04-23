@@ -148,39 +148,46 @@ add_component_dir (version
     )
 
 add_component_dir (openmw-mp
-        Log Utils
-        
-        Controllers/PlayerPacketController Controllers/ActorPacketController Controllers/WorldPacketController
+        Log Utils NetworkMessages Version
+        )
 
-        Packets/BasePacket Packets/Player/PlayerPacket Packets/Actor/ActorPacket Packets/World/WorldPacket
+add_component_dir (openmw-mp\\Base
+        BaseActor BaseEvent BasePacketProcessor BasePlayer BaseStructs
+        )
 
-        Packets/Player/PacketHandshake Packets/Player/PacketChatMessage
+add_component_dir (openmw-mp\\Controllers
+        PlayerPacketController ActorPacketController WorldPacketController
+        )
 
-        Packets/Player/PacketPlayerBaseInfo Packets/Player/PacketPlayerPosition Packets/Player/PacketPlayerEquipment
-        Packets/Player/PacketPlayerAttack Packets/Player/PacketPlayerStatsDynamic Packets/Player/PacketPlayerAnimFlags
-        Packets/Player/PacketPlayerCharGen Packets/Player/PacketPlayerAttribute Packets/Player/PacketPlayerSkill
-        Packets/Player/PacketPlayerLevel Packets/Player/PacketPlayerClass Packets/Player/PacketPlayerInventory
-        Packets/Player/PacketPlayerSpellbook Packets/Player/PacketPlayerJournal Packets/Player/PacketPlayerActiveSkills
-        Packets/Player/PacketPlayerCellChange Packets/Player/PacketPlayerCellState
+add_component_dir(openmw-mp\\Master
+        MasterData PacketMasterQuery PacketMasterUpdate PacketMasterAnnounce BaseMasterPacket
+        )
 
-        Packets/Player/PacketPlayerDeath Packets/Player/PacketPlayerResurrect
+add_component_dir (openmw-mp\\Packets
+        BasePacket PacketPreInit
+        )
 
-        Packets/Player/PacketGUIBoxes Packets/Player/PacketTime
+add_component_dir (openmw-mp\\Packets\\Actor
+        ActorPacket
+        PacketActorList PacketActorAuthority PacketActorTest PacketActorAnimPlay PacketActorAttack PacketActorCellChange
+        PacketActorAnimFlags PacketActorStatsDynamic PacketActorPosition PacketActorSpeech
+        )
 
-        Packets/Actor/PacketActorList Packets/Actor/PacketActorAuthority Packets/Actor/PacketActorTest
-        Packets/Actor/PacketActorAnimPlay Packets/Actor/PacketActorAttack Packets/Actor/PacketActorCellChange
-        Packets/Actor/PacketActorAnimFlags Packets/Actor/PacketActorStatsDynamic Packets/Actor/PacketActorPosition
-        Packets/Actor/PacketActorSpeech
+add_component_dir (openmw-mp\\Packets\\Player
+        PlayerPacket
+        PacketHandshake PacketChatMessage PacketPlayerBaseInfo PacketPlayerPosition PacketPlayerEquipment
+        PacketPlayerAttack PacketPlayerStatsDynamic PacketPlayerAnimFlags PacketPlayerCharGen PacketPlayerAttribute
+        PacketPlayerSkill PacketPlayerLevel PacketPlayerClass PacketPlayerInventory PacketPlayerSpellbook
+        PacketPlayerJournal PacketPlayerActiveSkills PacketPlayerCellChange PacketPlayerCellState PacketPlayerDeath
+        PacketPlayerResurrect PacketGUIBoxes PacketTime
+        )
 
-        Packets/World/PacketObjectDelete Packets/World/PacketObjectPlace Packets/World/PacketObjectScale
-        Packets/World/PacketObjectLock Packets/World/PacketObjectUnlock Packets/World/PacketObjectMove
-        Packets/World/PacketObjectRotate Packets/World/PacketObjectAnimPlay
-
-        Packets/World/PacketContainer Packets/World/PacketDoorState Packets/World/PacketMusicPlay
-        Packets/World/PacketVideoPlay
-
-        Packets/World/PacketScriptLocalShort Packets/World/PacketScriptLocalFloat Packets/World/PacketScriptMemberShort
-        Packets/World/PacketScriptGlobalShort Packets/PacketPreInit)
+add_component_dir (openmw-mp\\Packets\\World
+        WorldPacket
+        PacketObjectDelete PacketObjectPlace PacketObjectScale PacketObjectLock PacketObjectUnlock PacketObjectMove
+        PacketObjectRotate PacketObjectAnimPlay PacketContainer PacketDoorState PacketMusicPlay PacketVideoPlay
+        PacketScriptLocalShort PacketScriptLocalFloat PacketScriptMemberShort PacketScriptGlobalShort
+        )
 
 add_component_dir (fallback
     fallback validate
