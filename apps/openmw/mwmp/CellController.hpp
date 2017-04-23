@@ -54,6 +54,8 @@ namespace mwmp
 
         virtual MWWorld::CellStore *getCellStore(const ESM::Cell& cell);
 
+        bool isSameCell(const ESM::Cell& cell, const ESM::Cell& otherCell);
+
         void openContainer(const MWWorld::Ptr& container,  bool loot);
         void closeContainer(const MWWorld::Ptr& container);
 

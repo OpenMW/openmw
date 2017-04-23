@@ -302,6 +302,18 @@ MWWorld::CellStore *CellController::getCellStore(const ESM::Cell& cell)
     return cellStore;
 }
 
+bool CellController::isSameCell(const ESM::Cell& cell, const ESM::Cell& otherCell)
+{
+    if (cell.isExterior() && otherCell.isExterior())
+    {
+        if (cell.mData.mX == otherCell.mData.mX && cell.mData.mY == otherCell.mData.mY)
+            return true;
+    }
+    else if (Misc::StringUtils::ciEqual(cell.mName, otherCell.mName))
+        return true;
+
+    return false;
+}
 
 void CellController::openContainer(const MWWorld::Ptr &container, bool loot)
 {

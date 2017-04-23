@@ -336,34 +336,10 @@ void LocalPlayer::updateCell(bool forceUpdate)
     const ESM::Cell *ptrCell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell();
     bool cellChanged = false;
 
-    // Send a packet to server to update this LocalPlayer's cell if:
-    // 1) forceUpdate is true
-    // 2) The LocalPlayer's cell name does not equal the World Player's cell name
-    // 3) The LocalPlayer's exterior cell coordinates do not equal the World Player's
-    //    exterior cell coordinates
-    if (forceUpdate)
+    // If the LocalPlayer's Ptr cell is different from the LocalPlayer's packet cell, proceed
+    if (forceUpdate || !Main::get().getCellController()->isSameCell(*ptrCell, cell))
     {
-        cellChanged = true;
-    }
-    else if (!Misc::StringUtils::ciEqual(ptrCell->mName, cell.mName))
-    {
-        cellChanged = true;
-    }
-    else if (ptrCell->isExterior())
-    {
-        if (ptrCell->mData.mX != cell.mData.mX)
-        {
-            cellChanged = true;
-        }
-        else if (ptrCell->mData.mY != cell.mData.mY)
-        {
-            cellChanged = true;
-        }
-    }
-
-    if (cellChanged)
-    {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_CELL_CHANGE to server");
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_CELL_CHANGE about LocalPlayer to server");
 
         LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s", cell.getDescription().c_str(), ptrCell->getDescription().c_str());
 
