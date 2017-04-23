@@ -100,15 +100,53 @@ set(SERVER_HEADER
 )
 source_group(tes3mp-server FILES ${SERVER} ${SERVER_HEADER})
 
+set(PROCESSORS_ACTOR
+        processors/actor/ProcessorActorAnimFlags.hpp processors/actor/ProcessorActorAnimPlay.hpp
+        processors/actor/ProcessorActorAttack.hpp processors/actor/ProcessorActorAuthority.hpp
+        processors/actor/ProcessorActorCellChange.hpp processors/actor/ProcessorActorList.hpp
+        processors/actor/ProcessorActorPosition.hpp processors/actor/ProcessorActorSpeech.hpp
+        processors/actor/ProcessorActorStatsDynamic.hpp processors/actor/ProcessorActorTest.hpp
+        )
+
+source_group(tes3mp-server\\processors\\actor FILES ${PROCESSORS_ACTOR})
+
+set(PROCESSORS_PLAYER
+        processors/player/ProcessorChatMsg.hpp processors/player/ProcessorGUIMessageBox.hpp
+        processors/player/ProcessorLevel.hpp processors/player/ProcessorPlayerAnimFlags.hpp
+        processors/player/ProcessorPlayerAttack.hpp processors/player/ProcessorPlayerAttribute.hpp
+        processors/player/ProcessorPlayerCellChange.hpp processors/player/ProcessorPlayerCellState.hpp
+        processors/player/ProcessorPlayerCharClass.hpp processors/player/ProcessorPlayerCharGen.hpp
+        processors/player/ProcessorPlayerDeath.hpp processors/player/ProcessorPlayerEquipment.hpp
+        processors/player/ProcessorPlayerInventory.hpp processors/player/ProcessorPlayerJournal.hpp
+        processors/player/ProcessorPlayerPos.hpp processors/player/ProcessorPlayerResurrect.hpp
+        processors/player/ProcessorPlayerSkill.hpp processors/player/ProcessorPlayerSpellbook.hpp
+        processors/player/ProcessorPlayerStatsDynamic.hpp
+        )
+
+source_group(tes3mp-server\\processors\\player FILES ${PROCESSORS_PLAYER})
+
+set(PROCESSORS_WORLD
+        processors/world/ProcessorContainer.hpp processors/world/ProcessorDoorState.hpp
+        processors/world/ProcessorMusicPlay.hpp processors/world/ProcessorObjectAnimPlay.hpp
+        processors/world/ProcessorObjectDelete.hpp processors/world/ProcessorObjectLock.hpp
+        processors/world/ProcessorObjectMove.hpp processors/world/ProcessorObjectPlace.hpp
+        processors/world/ProcessorObjectRotate.hpp processors/world/ProcessorObjectScale.hpp
+        processors/world/ProcessorObjectUnlock.hpp processors/world/ProcessorScriptGlobalShort.hpp
+        processors/world/ProcessorScriptLocalFloat.hpp processors/world/ProcessorScriptLocalShort.hpp
+        processors/world/ProcessorScriptMemberShort.hpp processors/world/ProcessorVideoPlay.hpp
+        )
+
+source_group(tes3mp-server\\processors\\world FILES ${PROCESSORS_WORLD})
+
 include_directories("./")
 
 # Main executable
 
 add_executable(tes3mp-server
-${SERVER_FILES}
-${SERVER} ${SERVER_HEADER}
-${APPLE_BUNDLE_RESOURCES}
-)
+        ${SERVER} ${SERVER_HEADER}
+        ${PROCESSORS_ACTOR} ${PROCESSORS_PLAYER} ${PROCESSORS_WORLD}
+        ${APPLE_BUNDLE_RESOURCES}
+        )
 add_definitions(-std=gnu++14 -Wno-ignored-qualifiers)
 
 target_link_libraries(tes3mp-server
