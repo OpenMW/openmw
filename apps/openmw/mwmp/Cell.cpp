@@ -6,7 +6,6 @@
 #include "Cell.hpp"
 #include "Main.hpp"
 #include "Networking.hpp"
-#include "LocalPlayer.hpp"
 #include "CellController.hpp"
 #include "MechanicsHelper.hpp"
 
@@ -38,12 +37,20 @@ void Cell::updateLocal(bool forceUpdate)
     {
         LocalActor *actor = it->second;
 
-        // TODO:: Make sure this condition actually works
-        if (actor->getPtr().getCell() != store)
+        MWWorld::CellStore *newStore = actor->getPtr().getCell();
+
+        if (newStore != store)
         {
+            actor->updateCell();
+
             LOG_APPEND(Log::LOG_INFO, "- Removing LocalActor %s which is no longer in this cell", it->first.c_str());
             
             Main::get().getCellController()->removeLocalActorRecord(it->first);
+
+            // If the cell this actor has moved to is active, initialize them in it
+            if (Main::get().getCellController()->isActiveCell(*newStore->getCell()))
+                Main::get().getCellController()->getCell(*newStore->getCell())->initializeLocalActor(actor->getPtr());
+
             localActors.erase(it++);
         }
         else
@@ -61,6 +68,7 @@ void Cell::updateLocal(bool forceUpdate)
     actorList->sendSpeechActors();
     actorList->sendStatsDynamicActors();
     actorList->sendAttackActors();
+    actorList->sendCellChangeActors();
 }
 
 void Cell::updateDedicated(float dt)
@@ -97,8 +105,6 @@ void Cell::readPositions(ActorList& actorList)
 
 void Cell::readAnimFlags(ActorList& actorList)
 {
-    initializeDedicatedActors(actorList);
-
     BaseActor baseActor;
 
     for (unsigned int i = 0; i < actorList.count; i++)
@@ -118,8 +124,6 @@ void Cell::readAnimFlags(ActorList& actorList)
 
 void Cell::readAnimPlay(ActorList& actorList)
 {
-    initializeDedicatedActors(actorList);
-
     BaseActor baseActor;
 
     for (unsigned int i = 0; i < actorList.count; i++)
@@ -140,8 +144,6 @@ void Cell::readAnimPlay(ActorList& actorList)
 
 void Cell::readStatsDynamic(ActorList& actorList)
 {
-    initializeDedicatedActors(actorList);
-
     BaseActor baseActor;
 
     for (unsigned int i = 0; i < actorList.count; i++)
@@ -159,8 +161,6 @@ void Cell::readStatsDynamic(ActorList& actorList)
 
 void Cell::readSpeech(ActorList& actorList)
 {
-    initializeDedicatedActors(actorList);
-
     BaseActor baseActor;
 
     for (unsigned int i = 0; i < actorList.count; i++)
@@ -179,8 +179,6 @@ void Cell::readSpeech(ActorList& actorList)
 
 void Cell::readAttack(ActorList& actorList)
 {
-    initializeDedicatedActors(actorList);
-
     BaseActor baseActor;
 
     for (unsigned int i = 0; i < actorList.count; i++)
@@ -197,9 +195,56 @@ void Cell::readAttack(ActorList& actorList)
     }
 }
 
+void Cell::readCellChange(ActorList& actorList)
+{
+    initializeDedicatedActors(actorList);
+
+    BaseActor baseActor;
+
+    for (unsigned int i = 0; i < actorList.count; i++)
+    {
+        baseActor = actorList.baseActors.at(i);
+        std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
+
+        if (dedicatedActors.count(mapIndex) > 0)
+        {
+            DedicatedActor *actor = dedicatedActors[mapIndex];
+            actor->cell = baseActor.cell;
+            actor->position = baseActor.position;
+
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server says DedicatedActor %s, %i, %i moved to %s",
+                actor->refId.c_str(), actor->refNumIndex, actor->mpNum, actor->cell.getDescription().c_str());
+
+            MWWorld::CellStore *newStore = Main::get().getCellController()->getCellStore(actor->cell);
+            actor->setCell(newStore);
+
+            Main::get().getCellController()->removeDedicatedActorRecord(mapIndex);
+            
+            // If the cell this actor has moved to is active, initialize them in it
+            if (Main::get().getCellController()->isActiveCell(actor->cell))
+                Main::get().getCellController()->getCell(actor->cell)->initializeDedicatedActor(actor->getPtr());
+
+            dedicatedActors.erase(mapIndex);
+        }
+    }
+}
+
+void Cell::initializeLocalActor(const MWWorld::Ptr& ptr)
+{
+    LocalActor *actor = new LocalActor();
+    actor->cell = *store->getCell();
+    actor->setPtr(ptr);
+
+    std::string mapIndex = Main::get().getCellController()->generateMapIndex(ptr);
+    localActors[mapIndex] = actor;
+
+    Main::get().getCellController()->setLocalActorRecord(mapIndex, getDescription());
+
+    LOG_APPEND(Log::LOG_INFO, "- Initialized LocalActor %s", mapIndex.c_str());
+}
+
 void Cell::initializeLocalActors()
 {
-    ESM::Cell esmCell = *store->getCell();
     MWWorld::CellRefList<ESM::NPC> *npcList = store->getNpcs();
 
     for (typename MWWorld::CellRefList<ESM::NPC>::List::iterator listIter(npcList->mList.begin());
@@ -207,17 +252,22 @@ void Cell::initializeLocalActors()
     {
         MWWorld::Ptr ptr(&*listIter, store);
 
-        LocalActor *actor = new LocalActor();
-        actor->cell = esmCell;
-        actor->setPtr(ptr);
-
-        std::string mapIndex = Main::get().getCellController()->generateMapIndex(ptr);
-        localActors[mapIndex] = actor;
-
-        Main::get().getCellController()->setLocalActorRecord(mapIndex, getDescription());
-
-        LOG_APPEND(Log::LOG_INFO, "- Initialized LocalActor %s", mapIndex.c_str());
+        initializeLocalActor(ptr);
     }
+}
+
+void Cell::initializeDedicatedActor(const MWWorld::Ptr& ptr)
+{
+    DedicatedActor *actor = new DedicatedActor();
+    actor->cell = *store->getCell();
+    actor->setPtr(ptr);
+
+    std::string mapIndex = Main::get().getCellController()->generateMapIndex(ptr);
+    dedicatedActors[mapIndex] = actor;
+
+    Main::get().getCellController()->setDedicatedActorRecord(mapIndex, getDescription());
+
+    LOG_APPEND(Log::LOG_INFO, "- Initialized DedicatedActor %s", mapIndex.c_str());
 }
 
 void Cell::initializeDedicatedActors(ActorList& actorList)
@@ -236,14 +286,7 @@ void Cell::initializeDedicatedActors(ActorList& actorList)
 
             if (!ptrFound) return;
 
-            DedicatedActor *actor = new DedicatedActor();
-            actor->cell = actorList.cell;
-            actor->setPtr(ptrFound);
-            dedicatedActors[mapIndex] = actor;
-
-            Main::get().getCellController()->setDedicatedActorRecord(mapIndex, getDescription());
-
-            LOG_APPEND(Log::LOG_INFO, "- Initialized DedicatedActor %s", mapIndex.c_str());
+            initializeDedicatedActor(ptrFound);
         }
     }
 }

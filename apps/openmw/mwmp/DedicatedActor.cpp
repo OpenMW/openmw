@@ -10,10 +10,13 @@
 
 #include "../mwrender/animation.hpp"
 
+#include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/worldimp.hpp"
 
 #include "DedicatedActor.hpp"
+#include "Main.hpp"
+#include "CellController.hpp"
 
 using namespace mwmp;
 using namespace std;
@@ -42,6 +45,13 @@ void DedicatedActor::update(float dt)
     playAnimation();
     playSound();
     setStatsDynamic();
+}
+
+void DedicatedActor::setCell(MWWorld::CellStore *cellStore)
+{
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+
+    ptr = world->moveObject(ptr, cellStore, position.pos[0], position.pos[1], position.pos[2]);
 }
 
 void DedicatedActor::move(float dt)

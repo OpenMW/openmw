@@ -16,6 +16,7 @@ namespace mwmp
 
         void update(bool forceUpdate);
 
+        void updateCell();
         void updatePosition(bool forceUpdate);
         void updateAnimFlags(bool forceUpdate);
         void updateAnimPlay();

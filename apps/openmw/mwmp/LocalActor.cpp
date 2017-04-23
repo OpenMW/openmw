@@ -54,6 +54,18 @@ void LocalActor::update(bool forceUpdate)
     updateAttack();
 }
 
+void LocalActor::updateCell()
+{
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_ACTOR_CELL_CHANGE about %s, %i, %i to server",
+        refId.c_str(), refNumIndex, mpNum);
+
+    LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s", cell.getDescription().c_str(), ptr.getCell()->getCell()->getDescription().c_str());
+
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::Main::get().getNetworking()->getActorList()->addCellChangeActor(*this);
+}
+
 void LocalActor::updatePosition(bool forceUpdate)
 {
     bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 || direction.pos[2] != 0 ||

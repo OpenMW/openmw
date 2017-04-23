@@ -1,5 +1,5 @@
-#ifndef OPENMW_CELL_HPP
-#define OPENMW_CELL_HPP
+#ifndef OPENMW_MPCELL_HPP
+#define OPENMW_MPCELL_HPP
 
 #include "ActorList.hpp"
 #include "LocalActor.hpp"
@@ -24,8 +24,12 @@ namespace mwmp
         void readStatsDynamic(ActorList& actorList);
         void readSpeech(ActorList& actorList);
         void readAttack(ActorList& actorList);
+        void readCellChange(ActorList& actorList);
 
+        void initializeLocalActor(const MWWorld::Ptr& ptr);
         void initializeLocalActors();
+
+        void initializeDedicatedActor(const MWWorld::Ptr& ptr);
         void initializeDedicatedActors(ActorList& actorList);
 
         void uninitializeLocalActors();
@@ -44,4 +48,4 @@ namespace mwmp
     };
 }
 
-#endif //OPENMW_CELL_HPP
+#endif //OPENMW_MPCELL_HPP

@@ -15,6 +15,7 @@ namespace mwmp
         virtual ~DedicatedActor();
 
         void update(float dt);
+        void setCell(MWWorld::CellStore *cellStore);
         void move(float dt);
         void setAnimFlags();
         void playAnimation();
