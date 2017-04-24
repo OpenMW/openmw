@@ -25,8 +25,9 @@
 
 #include <stdexcept>
 
+#include <osgDB/fstream>
+
 #include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 using namespace std;
 using namespace Bsa;
@@ -74,7 +75,7 @@ void BSAFile::readHeader()
     assert(!isLoaded);
 
     namespace bfs = boost::filesystem;
-    bfs::ifstream input(bfs::path(filename), std::ios_base::binary);
+    osgDB::ifstream input(bfs::path(filename).string().c_str(), std::ios_base::binary);
 
     // Total archive size
     std::streamoff fsize = 0;

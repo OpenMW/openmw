@@ -1,14 +1,14 @@
 #include "shadermanager.hpp"
 
-#include <fstream>
 #include <iostream>
 #include <algorithm>
 
 #include <osg/Program>
 
+#include <osgDB/fstream>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string.hpp>
 
 #include <OpenThreads/ScopedLock>
@@ -44,8 +44,8 @@ namespace Shader
             }
             std::string includeFilename = source.substr(start+1, end-(start+1));
             boost::filesystem::path includePath = shaderPath / includeFilename;
-            boost::filesystem::ifstream includeFstream;
-            includeFstream.open(includePath);
+            osgDB::ifstream includeFstream;
+            includeFstream.open(includePath.string().c_str());
             if (includeFstream.fail())
             {
                 std::cerr << "Failed to open " << includePath.string() << std::endl;
@@ -110,8 +110,8 @@ namespace Shader
         if (templateIt == mShaderTemplates.end())
         {
             boost::filesystem::path p = (boost::filesystem::path(mPath) / shaderTemplate);
-            boost::filesystem::ifstream stream;
-            stream.open(p);
+            osgDB::ifstream stream;
+            stream.open(p.string().c_str());
             if (stream.fail())
             {
                 std::cerr << "Failed to open " << p.string() << std::endl;

@@ -10,9 +10,10 @@
 #include <SDL_main.h>
 #include "engine.hpp"
 
+#include <osgDB/fstream>
+
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #if defined(_WIN32)
 // For OutputDebugString
@@ -308,7 +309,7 @@ int main(int argc, char**argv)
     std::ostream oldcout(cout_rdbuf);
     std::ostream oldcerr(cerr_rdbuf);
 
-    boost::filesystem::ofstream logfile;
+    osgDB::ofstream logfile;
 
     std::auto_ptr<OMW::Engine> engine;
 
@@ -325,7 +326,7 @@ int main(int argc, char**argv)
         std::cerr.rdbuf (&sb);
 #else
         // Redirect cout and cerr to openmw.log
-        logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / "/openmw.log"));
+        logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / "/openmw.log").string().c_str());
 
         coutsb.open (Tee(logfile, oldcout));
         cerrsb.open (Tee(logfile, oldcerr));

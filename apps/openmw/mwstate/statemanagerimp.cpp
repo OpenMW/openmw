@@ -15,7 +15,6 @@
 
 #include <osgDB/Registry>
 
-#include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -284,7 +283,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
             throw std::runtime_error("Write operation failed (memory stream)");
 
         // All good, write to file
-        boost::filesystem::ofstream filestream (slot->mPath, std::ios::binary);
+        osgDB::ofstream filestream (slot->mPath.string().c_str(), std::ios::binary);
         filestream << stream.rdbuf();
 
         if (filestream.fail())

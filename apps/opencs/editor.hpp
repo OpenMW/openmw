@@ -4,7 +4,8 @@
 #include <memory>
 
 #include <boost/interprocess/sync/file_lock.hpp>
-#include <boost/filesystem/fstream.hpp>
+
+#include <osgDB/fstream>
 
 #include <QObject>
 #include <QString>
@@ -61,7 +62,7 @@ namespace CS
             boost::filesystem::path mResources;
             boost::filesystem::path mPid;
             boost::interprocess::file_lock mLock;
-            boost::filesystem::ofstream mPidFile;
+            osgDB::ofstream mPidFile;
             bool mFsStrict;
             CSVTools::Merge mMerge;
 

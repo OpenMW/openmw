@@ -7,7 +7,6 @@
 #include <pwd.h>
 #include "androidpath.h"
 #include <unistd.h>
-#include <boost/filesystem/fstream.hpp>
 
 
 class Buffer {

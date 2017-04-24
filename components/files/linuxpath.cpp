@@ -6,7 +6,8 @@
 #include <cstring>
 #include <pwd.h>
 #include <unistd.h>
-#include <boost/filesystem/fstream.hpp>
+
+#include <osgDB/fstream>
 
 #include <components/misc/stringops.hpp>
 
@@ -99,7 +100,7 @@ boost::filesystem::path LinuxPath::getInstallPath() const
 
         if (boost::filesystem::is_regular_file(wineDefaultRegistry))
         {
-            boost::filesystem::ifstream file(wineDefaultRegistry);
+            osgDB::ifstream file(wineDefaultRegistry.string().c_str());
             bool isRegEntry = false;
             std::string line;
             std::string mwpath;

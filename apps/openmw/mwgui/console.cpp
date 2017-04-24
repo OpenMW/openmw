@@ -2,8 +2,9 @@
 
 #include <MyGUI_EditBox.h>
 
+#include <osgDB/fstream>
+
 #include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/extensions0.hpp>
@@ -214,7 +215,7 @@ namespace MWGui
     void Console::executeFile (const std::string& path)
     {
         namespace bfs = boost::filesystem;
-        bfs::ifstream stream ((bfs::path(path)));
+        osgDB::ifstream stream((bfs::path(path).string().c_str()));
 
         if (!stream.is_open())
             printError ("failed to open file: " + path);
