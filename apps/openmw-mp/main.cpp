@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
         string masterAddr = mgr.getString("address", "MasterServer");
         int masterPort = mgr.getInt("port", "MasterServer");
 
-        networking.InitQuery(masterAddr, (unsigned short) masterPort, addr, (unsigned short) port);
+        networking.InitQuery(masterAddr, (unsigned short) masterPort);
         networking.getMasterClient()->SetMaxPlayers((unsigned)players);
         string hostname = mgr.getString("hostname", "General");
         networking.getMasterClient()->SetHostname(hostname);

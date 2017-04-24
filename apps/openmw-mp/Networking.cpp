@@ -365,6 +365,9 @@ int Networking::mainLoop()
             break;
         for (packet=peer->Receive(); packet; peer->DeallocatePacket(packet), packet=peer->Receive())
         {
+            if (getMasterClient()->Process(packet))
+                continue;
+
             switch (packet->data[0])
             {
                 case ID_REMOTE_DISCONNECTION_NOTIFICATION:
@@ -398,7 +401,7 @@ int Networking::mainLoop()
                 case ID_CONNECTED_PING:
                 case ID_UNCONNECTED_PING:
                     break;
-                case ID_MASTER_QUERY:
+                /*case ID_MASTER_QUERY:
                 {
                     LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Query request from %s", packet->systemAddress.ToString());
                     RakNet::BitStream bs;
@@ -409,7 +412,7 @@ int Networking::mainLoop()
                     bs.Write(0); // plugins
                     peer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, packet->systemAddress, false);
                     break;
-                }
+                }*/
                 default:
                     update(packet);
                     break;
@@ -448,8 +451,7 @@ MasterClient *Networking::getMasterClient()
     return mclient;
 }
 
-void Networking::InitQuery(std::string queryAddr, unsigned short queryPort, std::string serverAddr,
-                           unsigned short serverPort)
+void Networking::InitQuery(std::string queryAddr, unsigned short queryPort)
 {
-    mclient = new MasterClient(queryAddr, queryPort, serverAddr, serverPort);
+    mclient = new MasterClient(peer, queryAddr, queryPort);
 }

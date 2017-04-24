@@ -48,7 +48,7 @@ namespace  mwmp
         int incrementMpNum();
 
         MasterClient *getMasterClient();
-        void InitQuery(std::string queryAddr, unsigned short queryPort, std::string serverAddr, unsigned short serverPort);
+        void InitQuery(std::string queryAddr, unsigned short queryPort);
         void setServerPassword(std::string passw) noexcept;
         bool isPassworded() const;
 
