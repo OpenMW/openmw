@@ -39,6 +39,17 @@ void MasterServer::Thread()
     unsigned char packetId = 0;
 
     auto startTime = chrono::steady_clock::now();
+
+    BitStream send;
+    PacketMasterQuery pmq(peer);
+    pmq.SetSendStream(&send);
+
+    PacketMasterUpdate pmu(peer);
+    pmu.SetSendStream(&send);
+
+    PacketMasterAnnounce pma(peer);
+    pma.SetSendStream(&send);
+
     while (run)
     {
         Packet *packet = peer->Receive();
@@ -76,10 +87,7 @@ void MasterServer::Thread()
                         break;
                     case ID_MASTER_QUERY:
                     {
-                        BitStream send;
-                        PacketMasterQuery pmq(peer);
-                        pmq.SetSendStream(&send);
-                        pmq.SetServers(reinterpret_cast<map<SystemAddress, Server> *>(&servers));
+                        pmq.SetServers(reinterpret_cast<map<SystemAddress, QueryData> *>(&servers));
                         pmq.Send(packet->systemAddress);
 
                         cout << "Sent info about all " << servers.size() << " servers to "
@@ -95,10 +103,7 @@ void MasterServer::Thread()
                         ServerIter it = servers.find(addr);
                         if (it != servers.end())
                         {
-                            mwmp::PacketMasterUpdate pmu(peer);
-                            BitStream send;
-                            pmu.SetSendStream(&send);
-                            pair<SystemAddress, Server> pairPtr(it->first, static_cast<Server>(it->second));
+                            pair<SystemAddress, QueryData> pairPtr(it->first, static_cast<QueryData>(it->second));
                             pmu.SetServer(&pairPtr);
                             pmu.Send(packet->systemAddress);
                             cout << "Sent info about " << addr.ToString() << " to " << packet->systemAddress.ToString()
@@ -111,39 +116,51 @@ void MasterServer::Thread()
                     {
                         ServerIter iter = servers.find(packet->systemAddress);
 
-                        PacketMasterAnnounce pma(peer);
                         pma.SetReadStream(&data);
-
                         SServer server;
                         pma.SetServer(&server);
                         pma.Read();
 
-                        switch (pma.GetFunc())
-                        {
-                            case PacketMasterAnnounce::FUNCTION_DELETE:
-                            {
-                                if (iter != servers.end())
-                                    servers.erase(iter);
-                                cout << "Deleted";
-                                break;
-                            }
-                            case PacketMasterAnnounce::FUNCTION_ANNOUNCE:
-                            {
+                        auto keepAliveFunc = [&]() {
+                            iter->second.lastUpdate = now;
+                            pma.SetFunc(PacketMasterAnnounce::FUNCTION_KEEP);
+                            pma.Send(packet->systemAddress);
+                        };
 
-                                if (iter == servers.end())
-                                    cout << "Added";
-                                else
-                                    cout << "Updated";
-                                iter = servers.insert({packet->systemAddress, server}).first;
-                                break;
+                        if (iter != servers.end())
+                        {
+                            if (pma.GetFunc() == PacketMasterAnnounce::FUNCTION_DELETE)
+                            {
+                                servers.erase(iter);
+                                cout << "Deleted";
+                                pma.Send(packet->systemAddress);
                             }
-                            default:
+                            else if (pma.GetFunc() == PacketMasterAnnounce::FUNCTION_ANNOUNCE)
+                            {
+                                cout << "Updated";
+                                iter = servers.insert({packet->systemAddress, server}).first;
+                                keepAliveFunc();
+                            }
+                            else
+                            {
                                 cout << "Keeping alive";
+                                keepAliveFunc();
+                            }
+                        }
+                        else if(pma.GetFunc() == PacketMasterAnnounce::FUNCTION_ANNOUNCE)
+                        {
+                            cout << "Added";
+                            iter = servers.insert({packet->systemAddress, server}).first;
+                            keepAliveFunc();
+                        }
+                        else
+                        {
+                            cout << "Unknown";
+                            pma.SetFunc(PacketMasterAnnounce::FUNCTION_DELETE);
+                            pma.Send(packet->systemAddress);
                         }
                         cout << " server " << packet->systemAddress.ToString() << endl;
 
-                        if (pma.GetFunc() != PacketMasterAnnounce::FUNCTION_DELETE)
-                            iter->second.lastUpdate = now;
                         peer->CloseConnection(packet->systemAddress, true);
                         break;
                     }

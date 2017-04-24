@@ -32,9 +32,9 @@ struct Plugin
     unsigned long hash;
 };
 
-struct Server
+struct QueryData
 {
-    Server()
+    QueryData()
     {
         rules["name"].type = 's';
         rules["name"].str = "";

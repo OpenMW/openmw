@@ -59,7 +59,7 @@ int main()
             else if (strcmp(message, "send") == 0)
             {
                 puts("Sending data about server");
-                Server server;
+                QueryData server;
                 server.SetName("Super Server");
                 server.SetPlayers(0);
                 server.SetMaxPlayers(0);
@@ -152,7 +152,7 @@ int main()
                     break;
                 case ID_MASTER_QUERY:
                 {
-                    map<SystemAddress, Server> servers;
+                    map<SystemAddress, QueryData> servers;
 
                     pmq.SetReadStream(&data);
                     pmq.SetServers(&servers);
@@ -167,7 +167,7 @@ int main()
                 }
                 case ID_MASTER_UPDATE:
                 {
-                    pair<SystemAddress, Server> serverPair;
+                    pair<SystemAddress, QueryData> serverPair;
                     PacketMasterUpdate pmu(peer);
                     pmu.SetReadStream(&data);
                     pmu.SetServer(&serverPair);

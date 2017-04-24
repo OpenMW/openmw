@@ -29,7 +29,7 @@ void PacketMasterAnnounce::Packet(BitStream *bs, bool send)
         ProxyMasterPacket::addServer(this, *server, send);
 }
 
-void PacketMasterAnnounce::SetServer(Server *_server)
+void PacketMasterAnnounce::SetServer(QueryData *_server)
 {
     server = _server;
 }

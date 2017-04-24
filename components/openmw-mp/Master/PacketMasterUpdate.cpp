@@ -28,7 +28,7 @@ void PacketMasterUpdate::Packet(RakNet::BitStream *bs, bool send)
 
 }
 
-void PacketMasterUpdate::SetServer(std::pair<RakNet::SystemAddress, Server> *serverPair)
+void PacketMasterUpdate::SetServer(std::pair<RakNet::SystemAddress, QueryData> *serverPair)
 {
     server = serverPair;
 }

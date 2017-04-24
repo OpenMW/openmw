@@ -29,11 +29,11 @@ void PacketMasterQuery::Packet(RakNet::BitStream *bs, bool send)
 
     RW(serversCount, send);
 
-    map<SystemAddress, Server>::iterator serverIt;
+    map<SystemAddress, QueryData>::iterator serverIt;
     if(send)
         serverIt = servers->begin();
 
-    Server server;
+    QueryData server;
     SystemAddress sa;
     while(serversCount--)
     {
@@ -49,12 +49,12 @@ void PacketMasterQuery::Packet(RakNet::BitStream *bs, bool send)
         if(send)
             serverIt++;
         else
-            servers->insert(pair<SystemAddress, Server>(sa, server));
+            servers->insert(pair<SystemAddress, QueryData>(sa, server));
     }
 
 }
 
-void PacketMasterQuery::SetServers(map<SystemAddress, Server> *serverMap)
+void PacketMasterQuery::SetServers(map<SystemAddress, QueryData> *serverMap)
 {
     servers = serverMap;
 }

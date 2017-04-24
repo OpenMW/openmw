@@ -19,9 +19,9 @@ namespace mwmp
 
         virtual void Packet(RakNet::BitStream *bs, bool send);
 
-        void SetServers(std::map<RakNet::SystemAddress, Server> *serverMap);
+        void SetServers(std::map<RakNet::SystemAddress, QueryData> *serverMap);
     private:
-        std::map<RakNet::SystemAddress, Server> *servers;
+        std::map<RakNet::SystemAddress, QueryData> *servers;
     };
 }
 

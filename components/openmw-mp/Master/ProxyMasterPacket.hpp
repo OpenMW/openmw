@@ -21,7 +21,7 @@ namespace mwmp
 
     public:
         template<class Packet>
-        static void addServer(Packet *packet, Server &server, bool send)
+        static void addServer(Packet *packet, QueryData &server, bool send)
         {
             using namespace std;
 

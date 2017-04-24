@@ -19,7 +19,7 @@ namespace mwmp
 
         virtual void Packet(RakNet::BitStream *bs, bool send);
 
-        void SetServer(Server *server);
+        void SetServer(QueryData *server);
         void SetFunc(int keep);
         int GetFunc();
 
@@ -30,7 +30,7 @@ namespace mwmp
             FUNCTION_KEEP
         };
     private:
-        Server *server;
+        QueryData *server;
         int func;
     };
 }

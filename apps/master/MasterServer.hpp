@@ -21,7 +21,7 @@ public:
     bool isRunning();
     void Wait();
 
-    struct SServer : Server
+    struct SServer : QueryData
     {
         std::chrono::steady_clock::time_point lastUpdate;
     };
