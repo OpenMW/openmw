@@ -27,8 +27,6 @@ LocalActor::LocalActor()
     wasSneaking = false;
     wasForceJumping = false;
     wasForceMoveJumping = false;
-
-    wasJumping = false;
     wasFlying = false;
 
     statTimer = 0;
@@ -94,15 +92,14 @@ void LocalActor::updateAnimFlags(bool forceUpdate)
     bool isForceMoveJumping = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceMoveJump);
 
     isFlying = world->isFlying(ptr);
-    bool isJumping = !world->isOnGround(ptr) && !isFlying;
 
     MWMechanics::DrawState_ currentDrawState = ptr.getClass().getNpcStats(ptr).getDrawState();
 
-    if (wasRunning != isRunning
-        || wasSneaking != isSneaking || wasForceJumping != isForceJumping
-        || wasForceMoveJumping != isForceMoveJumping || lastDrawState != currentDrawState
-        || wasJumping || isJumping || wasFlying || isFlying
-        || forceUpdate)
+    if (wasRunning != isRunning ||
+        wasSneaking != isSneaking || wasForceJumping != isForceJumping ||
+        wasForceMoveJumping != isForceMoveJumping || lastDrawState != currentDrawState ||
+        wasFlying || isFlying ||
+        forceUpdate)
     {
         wasRunning = isRunning;
         wasSneaking = isSneaking;
@@ -111,7 +108,6 @@ void LocalActor::updateAnimFlags(bool forceUpdate)
         lastDrawState = currentDrawState;
 
         wasFlying = isFlying;
-        wasJumping = isJumping;
 
         movementFlags = 0;
 
@@ -120,7 +116,6 @@ void LocalActor::updateAnimFlags(bool forceUpdate)
         movementFlags = __SETFLAG(CreatureStats::Flag_Sneak, isSneaking);
         movementFlags = __SETFLAG(CreatureStats::Flag_Run, isRunning);
         movementFlags = __SETFLAG(CreatureStats::Flag_ForceJump, isForceJumping);
-        movementFlags = __SETFLAG(CreatureStats::Flag_ForceJump, isJumping);
         movementFlags = __SETFLAG(CreatureStats::Flag_ForceMoveJump, isForceMoveJumping);
 
 #undef __SETFLAG
@@ -131,9 +126,6 @@ void LocalActor::updateAnimFlags(bool forceUpdate)
             drawState = 1;
         else if (currentDrawState == MWMechanics::DrawState_Spell)
             drawState = 2;
-
-        if (isJumping)
-            updatePosition(true); // fix position after jump;
 
         mwmp::Main::get().getNetworking()->getActorList()->addAnimFlagsActor(*this);
     }

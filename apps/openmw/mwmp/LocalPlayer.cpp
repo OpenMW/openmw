@@ -558,11 +558,11 @@ void LocalPlayer::updateAnimFlags(bool forceUpdate)
     MWMechanics::DrawState_ currentDrawState = player.getClass().getNpcStats(player).getDrawState();
     static MWMechanics::DrawState_ lastDrawState = player.getClass().getNpcStats(player).getDrawState();
 
-    if (wasRunning != isRunning
-        || wasSneaking != isSneaking || wasForceJumping != isForceJumping
-        || wasForceMoveJumping != isForceMoveJumping || lastDrawState != currentDrawState
-        || wasJumping || isJumping || wasFlying || isFlying
-        || forceUpdate)
+    if (wasRunning != isRunning ||
+        wasSneaking != isSneaking || wasForceJumping != isForceJumping ||
+        wasForceMoveJumping != isForceMoveJumping || lastDrawState != currentDrawState ||
+        wasJumping || isJumping || wasFlying || isFlying ||
+        forceUpdate)
     {
         wasSneaking = isSneaking;
         wasRunning = isRunning;
