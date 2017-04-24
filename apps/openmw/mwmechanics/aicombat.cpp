@@ -210,6 +210,24 @@ namespace MWMechanics
             storage.updateCombatMove(duration);
             if (storage.mReadyToAttack) updateActorsMovement(actor, duration, storage);
             storage.updateAttack(characterController);
+
+            /*
+                Start of tes3mp addition
+
+                Record that this actor is updating an attack so that a packet will be sent about it
+            */
+            mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(actor);
+
+            if (localAttack && localAttack->pressed != storage.mAttack)
+            {
+                mwmp::Main::get().getMechanicsHelper()->resetAttack(localAttack);
+                localAttack->type = mwmp::Attack::MELEE;
+                localAttack->pressed = storage.mAttack;
+                localAttack->shouldSend = true;
+            }
+            /*
+                End of tes3mp addition
+            */
         }
         else
         {
@@ -272,7 +290,7 @@ namespace MWMechanics
             */
             mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(actor);
 
-            if (localAttack->pressed != false)
+            if (localAttack && localAttack->pressed != false)
             {
                 mwmp::Main::get().getMechanicsHelper()->resetAttack(localAttack);
                 localAttack->type = mwmp::Attack::MELEE;
@@ -625,7 +643,7 @@ namespace MWMechanics
                 */
                 mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(actor);
 
-                if (localAttack->pressed != true)
+                if (localAttack && localAttack->pressed != true)
                 {
                     mwmp::Main::get().getMechanicsHelper()->resetAttack(localAttack);
                     localAttack->type = mwmp::Attack::MELEE;
