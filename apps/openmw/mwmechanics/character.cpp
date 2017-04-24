@@ -1612,25 +1612,6 @@ void CharacterController::updateAnimQueue()
 
 void CharacterController::update(float duration)
 {
-    /*
-        Start of tes3mp addition
-
-        Keep track of LocalActor and DedicatedActor objects so as to reuse them
-    */
-    bool isLocalActor = mwmp::Main::get().getCellController()->isLocalActor(mPtr);
-    bool isDedicatedActor = mwmp::Main::get().getCellController()->isDedicatedActor(mPtr);
-    mwmp::LocalActor *localActor = 0;
-    mwmp::DedicatedActor *dedicatedActor = 0;
-
-    if (isLocalActor)
-        localActor = mwmp::Main::get().getCellController()->getLocalActor(mPtr);
-
-    if (isDedicatedActor)
-        dedicatedActor = mwmp::Main::get().getCellController()->getDedicatedActor(mPtr);
-    /*
-        End of tes3mp addition
-    */
-
     MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Class &cls = mPtr.getClass();
     osg::Vec3f movement(0.f, 0.f, 0.f);
@@ -1692,8 +1673,9 @@ void CharacterController::update(float duration)
             Character movement setting rotations get reset here, so we have to assign movement
             settings to a relevant LocalActor now
         */
-        if (isLocalActor)
+        if (mwmp::Main::get().getCellController()->isLocalActor(mPtr))
         {
+            mwmp::LocalActor *localActor = mwmp::Main::get().getCellController()->getLocalActor(mPtr);
             localActor->direction.pos[0] = cls.getMovementSettings(mPtr).mPosition[0];
             localActor->direction.pos[1] = cls.getMovementSettings(mPtr).mPosition[1];
             localActor->direction.pos[2] = cls.getMovementSettings(mPtr).mPosition[2];

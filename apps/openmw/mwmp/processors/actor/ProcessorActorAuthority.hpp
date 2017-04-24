@@ -10,8 +10,6 @@
 #include "apps/openmw/mwmp/Main.hpp"
 #include "apps/openmw/mwmp/CellController.hpp"
 
-#include "../mwworld/worldimp.hpp"
-
 namespace mwmp
 {
     class ProcessorActorAuthority : public ActorProcessor

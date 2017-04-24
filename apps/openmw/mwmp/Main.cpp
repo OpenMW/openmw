@@ -190,8 +190,6 @@ void Main::destroy()
 
 void Main::frame(float dt)
 {
-    const MWBase::Environment &environment = MWBase::Environment::get();
-
     get().getNetworking()->update();
 
     PlayerList::update(dt);

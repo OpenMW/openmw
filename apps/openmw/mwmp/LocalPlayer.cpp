@@ -334,7 +334,6 @@ void LocalPlayer::updatePosition(bool forceUpdate)
 void LocalPlayer::updateCell(bool forceUpdate)
 {
     const ESM::Cell *ptrCell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell();
-    bool cellChanged = false;
 
     // If the LocalPlayer's Ptr cell is different from the LocalPlayer's packet cell, proceed
     if (forceUpdate || !Main::get().getCellController()->isSameCell(*ptrCell, cell))
