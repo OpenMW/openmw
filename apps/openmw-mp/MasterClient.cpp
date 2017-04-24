@@ -178,11 +178,33 @@ void MasterClient::Thread()
     queryData.SetPassword((int) Networking::get().isPassworded());
     queryData.SetVersion(TES3MP_VERSION);
 
+    auto *players = Players::getPlayers();
     while (sRun)
     {
-        SetPlayers((int) Players::getPlayers()->size());
+        SetPlayers((int) players->size());
+
+        auto pIt = players->begin();
+        for (int i = 0; pIt != players->end(); i++, pIt++)
+        {
+            if (queryData.players[i] != pIt->second->npc.mName)
+            {
+                updated = true;
+                break;
+            }
+        }
+
         if (updated)
+        {
+            if (pIt != players->end())
+            {
+                queryData.players.clear();
+                transform(players->begin(), players->end(), back_inserter(queryData.players), [](auto pair)
+                {
+                    return pair.second->npc.mName;
+                });
+            }
             Send(PacketMasterAnnounce::FUNCTION_ANNOUNCE);
+        }
         else
             Send(PacketMasterAnnounce::FUNCTION_KEEP);
         RakSleep(timeout);
