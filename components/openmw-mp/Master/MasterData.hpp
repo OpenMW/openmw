@@ -68,7 +68,7 @@ struct QueryData
     int GetPassword() { return rules["passw"].val; }
 
 
-    std::list<std::string> players;
+    std::vector<std::string> players;
     std::map<std::string, ServerRule> rules;
     std::vector<Plugin> plugins;
 };

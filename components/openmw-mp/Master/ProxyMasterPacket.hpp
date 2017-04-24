@@ -61,7 +61,7 @@ namespace mwmp
                     ruleIt++;
             }
 
-            list<string>::iterator plIt;
+            vector<string>::iterator plIt;
 
             if (send)
                 plIt = server.players.begin();
