@@ -62,13 +62,13 @@ void Cell::updateLocal(bool forceUpdate)
         }
     }
 
-    actorList->sendCellChangeActors();
     actorList->sendPositionActors();
     actorList->sendAnimFlagsActors();
     actorList->sendAnimPlayActors();
     actorList->sendSpeechActors();
     actorList->sendStatsDynamicActors();
     actorList->sendAttackActors();
+    actorList->sendCellChangeActors();
 }
 
 void Cell::updateDedicated(float dt)
