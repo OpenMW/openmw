@@ -12,6 +12,7 @@
 #include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/MechanicsHelper.hpp"
+#include "../mwgui/windowmanagerimp.hpp"
 /*
     End of tes3mp addition
 */
@@ -239,6 +240,24 @@ namespace MWMechanics
         {
             currentCell = actor.getCell();
         }
+
+        /*
+            Start of tes3mp addition
+
+            Because multiplayer doesn't pause the world during dialogue, disallow attacks on
+            a player engaged in dialogue
+        */
+        if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        {
+            if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Dialogue))
+            {
+                storage.stopAttack();
+                return false;
+            }
+        }
+        /*
+            End of tes3mp addition
+        */
 
         bool forceFlee = false;
         if (!canFight(actor, target))

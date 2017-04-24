@@ -13,16 +13,6 @@
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/cellstore.hpp"
 
-/*
-    Start of tes3mp addition
-
-    Include additional headers for multiplayer purposes
-*/
-#include "../mwgui/windowmanagerimp.hpp"
-/*
-    End of tes3mp addition
-*/
-
 #include "npcstats.hpp"
 #include "spellcasting.hpp"
 #include "combat.hpp"
@@ -763,23 +753,6 @@ namespace MWMechanics
     {
         ESM::Position actorPos = actor.getRefData().getPosition();
         ESM::Position enemyPos = enemy.getRefData().getPosition();
-
-        /*
-            Start of tes3mp addition
-
-            Because multiplayer doesn't pause the world during dialogue, disallow fights with
-            a player engaged in dialogue
-        */
-        if (enemy == MWBase::Environment::get().getWorld()->getPlayerPtr())
-        {
-            if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Dialogue))
-            {
-                return false;
-            }
-        }
-        /*
-            End of tes3mp addition
-        */
 
         const CreatureStats& enemyStats = enemy.getClass().getCreatureStats(enemy);
         if (enemyStats.getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude() > 0
