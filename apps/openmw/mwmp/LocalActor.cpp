@@ -2,7 +2,6 @@
 
 #include "../mwbase/environment.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/movement.hpp"
 
 #include "../mwrender/animation.hpp"

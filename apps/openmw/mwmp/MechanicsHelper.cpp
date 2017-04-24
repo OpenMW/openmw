@@ -5,8 +5,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/combat.hpp"
-#include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwworld/class.hpp"
@@ -107,7 +107,7 @@ void MechanicsHelper::processAttack(Attack attack, const MWWorld::Ptr& attacker)
         }
     }
 
-    MWMechanics::CreatureStats &attackerStats = attacker.getClass().getNpcStats(attacker);
+    MWMechanics::CreatureStats &attackerStats = attacker.getClass().getCreatureStats(attacker);
     attackerStats.getSpells().setSelectedSpell(attack.spellId);
 
     MWWorld::Ptr victim;
@@ -143,29 +143,35 @@ void MechanicsHelper::processAttack(Attack attack, const MWWorld::Ptr& attacker)
     // Get the weapon used (if hand-to-hand, weapon = inv.end())
     if (attackerStats.getDrawState() == MWMechanics::DrawState_Weapon)
     {
-        MWWorld::InventoryStore &inv = attacker.getClass().getInventoryStore(attacker);
-        MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(
-            MWWorld::InventoryStore::Slot_CarriedRight);
+        MWWorld::Ptr weapon;
 
-        MWWorld::Ptr weapon = ((weaponslot != inv.end()) ? *weaponslot : MWWorld::Ptr());
-        if (!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
-            weapon = MWWorld::Ptr();
+        if (attacker.getClass().hasInventoryStore(attacker))
+        {
+            MWWorld::InventoryStore &inv = attacker.getClass().getInventoryStore(attacker);
+            MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(
+                MWWorld::InventoryStore::Slot_CarriedRight);
+
+            weapon = ((weaponslot != inv.end()) ? *weaponslot : MWWorld::Ptr());
+            if (!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
+                weapon = MWWorld::Ptr();
+        }
 
         if (victim.mRef != NULL)
         {
-            bool healthdmg;
-            if (!weapon.isEmpty())
-                healthdmg = true;
-            else
-            {
-                MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
-                healthdmg = otherstats.isParalyzed() || otherstats.getKnockedDown();
-            }
+            bool healthdmg = true;
 
-            if (!weapon.isEmpty())
+            if (weapon.isEmpty())
+            {
+                if (attacker.getClass().isBipedal(attacker))
+                {
+                    MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
+                    healthdmg = otherstats.isParalyzed() || otherstats.getKnockedDown();
+                }
+            }
+            else
                 MWMechanics::blockMeleeAttack(attacker, victim, weapon, attack.damage, 1);
 
-            attacker.getClass().onHit(victim, attack.damage, healthdmg, weapon, attacker, osg::Vec3f(),
+            victim.getClass().onHit(victim, attack.damage, healthdmg, weapon, attacker, osg::Vec3f(),
                 attack.success);
         }
     }

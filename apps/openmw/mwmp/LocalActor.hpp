@@ -2,7 +2,7 @@
 #define OPENMW_LOCALACTOR_HPP
 
 #include <components/openmw-mp/Base/BaseActor.hpp>
-#include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 #include "../mwworld/manualref.hpp"
 
 namespace mwmp

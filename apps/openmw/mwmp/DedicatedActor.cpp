@@ -34,6 +34,8 @@ DedicatedActor::DedicatedActor()
     creatureStats->mDynamic[0].mBase = -1;
 
     hasChangedCell = true;
+
+    attack.pressed = false;
 }
 
 DedicatedActor::~DedicatedActor()
