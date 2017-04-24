@@ -56,43 +56,10 @@ void PlayerList::update(float dt)
 {
     for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
     {
-        DedicatedPlayer *pl = it->second;
-        if (pl == 0) continue;
+        DedicatedPlayer *player = it->second;
+        if (player == 0) continue;
 
-        MWMechanics::NpcStats *ptrNpcStats = &pl->ptr.getClass().getNpcStats(pl->getPtr());
-
-        MWMechanics::DynamicStat<float> value;
-
-        if (pl->creatureStats.mDead)
-        {
-            value.readState(pl->creatureStats.mDynamic[0]);
-            ptrNpcStats->setHealth(value);
-            continue;
-        }
-
-        value.readState(pl->creatureStats.mDynamic[0]);
-        ptrNpcStats->setHealth(value);
-        value.readState(pl->creatureStats.mDynamic[1]);
-        ptrNpcStats->setMagicka(value);
-        value.readState(pl->creatureStats.mDynamic[2]);
-        ptrNpcStats->setFatigue(value);
-
-        if (ptrNpcStats->isDead())
-            ptrNpcStats->resurrect();
-
-        ptrNpcStats->setAttacked(false);
-
-        ptrNpcStats->getAiSequence().stopCombat();
-
-        ptrNpcStats->setAlarmed(false);
-        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Alarm, 0);
-        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Fight, 0);
-        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Flee, 0);
-        ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Hello, 0);
-
-        ptrNpcStats->setBaseDisposition(255);
-        pl->move(dt);
-        pl->updateAnimFlags();
+        player->update(dt);
     }
 }
 
@@ -239,6 +206,44 @@ bool PlayerList::isDedicatedPlayer(const MWWorld::Ptr &ptr)
         return false;
 
     return (getPlayer(ptr) != 0);
+}
+
+void DedicatedPlayer::update(float dt)
+{
+    MWMechanics::NpcStats *ptrNpcStats = &ptr.getClass().getNpcStats(ptr);
+
+    MWMechanics::DynamicStat<float> value;
+
+    if (creatureStats.mDead)
+    {
+        value.readState(creatureStats.mDynamic[0]);
+        ptrNpcStats->setHealth(value);
+        return;
+    }
+
+    value.readState(creatureStats.mDynamic[0]);
+    ptrNpcStats->setHealth(value);
+    value.readState(creatureStats.mDynamic[1]);
+    ptrNpcStats->setMagicka(value);
+    value.readState(creatureStats.mDynamic[2]);
+    ptrNpcStats->setFatigue(value);
+
+    if (ptrNpcStats->isDead())
+        ptrNpcStats->resurrect();
+
+    ptrNpcStats->setAttacked(false);
+
+    ptrNpcStats->getAiSequence().stopCombat();
+
+    ptrNpcStats->setAlarmed(false);
+    ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Alarm, 0);
+    ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Fight, 0);
+    ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Flee, 0);
+    ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Hello, 0);
+
+    ptrNpcStats->setBaseDisposition(255);
+    move(dt);
+    updateAnimFlags();
 }
 
 void DedicatedPlayer::move(float dt)

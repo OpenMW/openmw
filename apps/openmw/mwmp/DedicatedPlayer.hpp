@@ -53,6 +53,8 @@ namespace mwmp
 
     public:
 
+        void update(float dt);
+
         void move(float dt);
         void updateAnimFlags();
         void updateEquipment();
