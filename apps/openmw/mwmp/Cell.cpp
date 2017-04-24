@@ -240,7 +240,7 @@ void Cell::initializeLocalActor(const MWWorld::Ptr& ptr)
 
     Main::get().getCellController()->setLocalActorRecord(mapIndex, getDescription());
 
-    LOG_APPEND(Log::LOG_INFO, "- Initialized LocalActor %s", mapIndex.c_str());
+    LOG_APPEND(Log::LOG_INFO, "- Initialized LocalActor %s in %s", mapIndex.c_str(), getDescription().c_str());
 }
 
 void Cell::initializeLocalActors()
@@ -267,7 +267,7 @@ void Cell::initializeDedicatedActor(const MWWorld::Ptr& ptr)
 
     Main::get().getCellController()->setDedicatedActorRecord(mapIndex, getDescription());
 
-    LOG_APPEND(Log::LOG_INFO, "- Initialized DedicatedActor %s", mapIndex.c_str());
+    LOG_APPEND(Log::LOG_INFO, "- Initialized DedicatedActor %s in %s", mapIndex.c_str(), getDescription().c_str());
 }
 
 void Cell::initializeDedicatedActors(ActorList& actorList)
