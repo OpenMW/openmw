@@ -4,9 +4,9 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/mechanicsmanagerimp.hpp"
 #include "../mwmechanics/movement.hpp"
-#include "../mwmechanics/npcstats.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -95,17 +95,17 @@ void DedicatedActor::setAnimFlags()
     using namespace MWMechanics;
 
     if (drawState == 0)
-        ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Nothing);
+        ptr.getClass().getCreatureStats(ptr).setDrawState(DrawState_Nothing);
     else if (drawState == 1)
-        ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Weapon);
+        ptr.getClass().getCreatureStats(ptr).setDrawState(DrawState_Weapon);
     else if (drawState == 2)
-        ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Spell);
+        ptr.getClass().getCreatureStats(ptr).setDrawState(DrawState_Spell);
 
-    MWMechanics::NpcStats *ptrNpcStats = &ptr.getClass().getNpcStats(ptr);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_Run, (movementFlags & CreatureStats::Flag_Run) != 0);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_Sneak, (movementFlags & CreatureStats::Flag_Sneak) != 0);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceJump, (movementFlags & CreatureStats::Flag_ForceJump) != 0);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceMoveJump, (movementFlags & CreatureStats::Flag_ForceMoveJump) != 0);
+    MWMechanics::CreatureStats *ptrCreatureStats = &ptr.getClass().getCreatureStats(ptr);
+    ptrCreatureStats->setMovementFlag(CreatureStats::Flag_Run, (movementFlags & CreatureStats::Flag_Run) != 0);
+    ptrCreatureStats->setMovementFlag(CreatureStats::Flag_Sneak, (movementFlags & CreatureStats::Flag_Sneak) != 0);
+    ptrCreatureStats->setMovementFlag(CreatureStats::Flag_ForceJump, (movementFlags & CreatureStats::Flag_ForceJump) != 0);
+    ptrCreatureStats->setMovementFlag(CreatureStats::Flag_ForceMoveJump, (movementFlags & CreatureStats::Flag_ForceMoveJump) != 0);
 }
 
 void DedicatedActor::playAnimation()
@@ -138,13 +138,13 @@ void DedicatedActor::setStatsDynamic()
     // Only set dynamic stats if they have valid values
     if (creatureStats->mDynamic[0].mBase == -1) return;
 
-    MWMechanics::NpcStats *ptrNpcStats = &ptr.getClass().getNpcStats(ptr);
+    MWMechanics::CreatureStats *ptrCreatureStats = &ptr.getClass().getCreatureStats(ptr);
     MWMechanics::DynamicStat<float> value;
 
     for (int i = 0; i < 3; ++i)
     {
         value.readState(creatureStats->mDynamic[i]);
-        ptrNpcStats->setDynamic(i, value);
+        ptrCreatureStats->setDynamic(i, value);
     }
 }
 

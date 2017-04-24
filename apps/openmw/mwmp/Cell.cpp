@@ -254,6 +254,16 @@ void Cell::initializeLocalActors()
 
         initializeLocalActor(ptr);
     }
+
+    MWWorld::CellRefList<ESM::Creature> *creatureList = store->getCreatures();
+
+    for (typename MWWorld::CellRefList<ESM::Creature>::List::iterator listIter(creatureList->mList.begin());
+        listIter != creatureList->mList.end(); ++listIter)
+    {
+        MWWorld::Ptr ptr(&*listIter, store);
+
+        initializeLocalActor(ptr);
+    }
 }
 
 void Cell::initializeDedicatedActor(const MWWorld::Ptr& ptr)

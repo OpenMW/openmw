@@ -82,18 +82,18 @@ void LocalActor::updatePosition(bool forceUpdate)
 void LocalActor::updateAnimFlags(bool forceUpdate)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWMechanics::NpcStats ptrNpcStats = ptr.getClass().getNpcStats(ptr);
+    MWMechanics::CreatureStats ptrCreatureStats = ptr.getClass().getCreatureStats(ptr);
 
     using namespace MWMechanics;
 
-    bool isRunning = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Run);
-    bool isSneaking = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Sneak);
-    bool isForceJumping = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceJump);
-    bool isForceMoveJumping = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceMoveJump);
+    bool isRunning = ptrCreatureStats.getMovementFlag(CreatureStats::Flag_Run);
+    bool isSneaking = ptrCreatureStats.getMovementFlag(CreatureStats::Flag_Sneak);
+    bool isForceJumping = ptrCreatureStats.getMovementFlag(CreatureStats::Flag_ForceJump);
+    bool isForceMoveJumping = ptrCreatureStats.getMovementFlag(CreatureStats::Flag_ForceMoveJump);
 
     isFlying = world->isFlying(ptr);
 
-    MWMechanics::DrawState_ currentDrawState = ptr.getClass().getNpcStats(ptr).getDrawState();
+    MWMechanics::DrawState_ currentDrawState = ptr.getClass().getCreatureStats(ptr).getDrawState();
 
     if (wasRunning != isRunning ||
         wasSneaking != isSneaking || wasForceJumping != isForceJumping ||
@@ -183,7 +183,7 @@ void LocalActor::updateAttack()
     {
         if (attack.type == Attack::MAGIC)
         {
-            MWMechanics::CreatureStats &attackerStats = ptr.getClass().getNpcStats(ptr);
+            MWMechanics::CreatureStats &attackerStats = ptr.getClass().getCreatureStats(ptr);
             attack.spellId = attackerStats.getSpells().getSelectedSpell();
             attack.success = mwmp::Main::get().getMechanicsHelper()->getSpellSuccess(attack.spellId, ptr);
         }
@@ -206,7 +206,7 @@ void LocalActor::setPtr(const MWWorld::Ptr& newPtr)
     refNumIndex = ptr.getCellRef().getRefNum().mIndex;
     mpNum = ptr.getCellRef().getMpNum();
 
-    lastDrawState = ptr.getClass().getNpcStats(ptr).getDrawState();
+    lastDrawState = ptr.getClass().getCreatureStats(ptr).getDrawState();
     oldHealth = ptr.getClass().getCreatureStats(ptr).getHealth();
     oldMagicka = ptr.getClass().getCreatureStats(ptr).getMagicka();
     oldFatigue = ptr.getClass().getCreatureStats(ptr).getFatigue();
