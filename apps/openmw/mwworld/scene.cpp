@@ -3,8 +3,16 @@
 #include <limits>
 #include <iostream>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
 #include "../mwmp/Main.hpp"
 #include "../mwmp/LocalPlayer.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/resourcehelpers.hpp>

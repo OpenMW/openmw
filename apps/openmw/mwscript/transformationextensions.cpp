@@ -1,8 +1,17 @@
 #include <iostream>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
 #include "../mwmp/WorldEvent.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -14,7 +23,6 @@
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
-#include <components/openmw-mp/Log.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

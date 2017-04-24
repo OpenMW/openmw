@@ -910,16 +910,36 @@ namespace MWInput
     }
 
     void InputManager::quickLoad() {
-        /* Disabled by tes3mp
+        /*
+            Start of tes3mp change (major)
+
+            It should not be possible to quickload the game in multiplayer, so it has been disabled
+        */
+
+        /*
         if (!MyGUI::InputManager::getInstance().isModalAny())
             MWBase::Environment::get().getStateManager()->quickLoad();
+        */
+
+        /*
+            End of tes3mp change (major)
         */
     }
 
     void InputManager::quickSave() {
-        /* Disabled by tes3mp
+        /*
+            Start of tes3mp change (major)
+
+            It should not be possible to quicksave the game in multiplayer, so it has been disabled
+        */
+
+        /*
         if (!MyGUI::InputManager::getInstance().isModalAny())
             MWBase::Environment::get().getStateManager()->quickSave();
+        */
+
+        /*
+            End of tes3mp change (major)
         */
     }
     void InputManager::toggleSpell()

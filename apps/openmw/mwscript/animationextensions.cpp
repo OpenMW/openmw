@@ -3,9 +3,17 @@
 #include <stdexcept>
 #include <limits>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
 #include "../mwmp/WorldEvent.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"

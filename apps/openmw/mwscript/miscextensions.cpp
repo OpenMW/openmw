@@ -2,9 +2,17 @@
 
 #include <cstdlib>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
 #include "../mwmp/WorldEvent.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>

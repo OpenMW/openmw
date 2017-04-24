@@ -10,10 +10,18 @@
 
 #include <components/esm/cellid.hpp>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
 #include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
 #include "../mwmp/WorldEvent.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include "../mwworld/esmstore.hpp"
 

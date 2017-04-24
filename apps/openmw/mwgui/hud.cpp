@@ -1,10 +1,18 @@
 #include "hud.hpp"
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
 #include "../mwmp/WorldEvent.hpp"
 #include "../mwmp/LocalPlayer.hpp"
 #include "../mwworld/cellstore.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_ProgressBar.h>

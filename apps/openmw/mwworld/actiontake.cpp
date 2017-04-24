@@ -1,11 +1,19 @@
 #include "actiontake.hpp"
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
 #include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
 #include "../mwmp/WorldEvent.hpp"
 #include "../mwmp/LocalPlayer.hpp"
 #include "../mwworld/cellstore.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

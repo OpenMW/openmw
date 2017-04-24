@@ -211,8 +211,14 @@ namespace MWGui
         if (state==MWBase::StateManager::State_Running)
             buttons.push_back("return");
 
-        /* Disabled by tes3mp
+        /*
+            Start of tes3mp change (major)
 
+            In multiplayer, the main menu should not have options for starting, loading or saving the game,
+            so they have been removed
+        */
+
+        /*
         buttons.push_back("newgame");
 
         if (state==MWBase::StateManager::State_Running &&
@@ -223,6 +229,10 @@ namespace MWGui
         if (MWBase::Environment::get().getStateManager()->characterBegin()!=
             MWBase::Environment::get().getStateManager()->characterEnd())
             buttons.push_back("loadgame");
+        */
+
+        /*
+            End of tes3mp change (major)
         */
 
         buttons.push_back("options");

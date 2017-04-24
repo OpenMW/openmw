@@ -6,6 +6,17 @@
 
 #include <components/settings/settings.hpp>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include"../mwmp/Main.hpp"
+#include"../mwmp/LocalPlayer.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -23,9 +34,6 @@
 #include "spellicons.hpp"
 #include "confirmationdialog.hpp"
 #include "spellview.hpp"
-
-#include"../mwmp/Main.hpp"
-#include"../mwmp/LocalPlayer.hpp"
 
 namespace MWGui
 {

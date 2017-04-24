@@ -4,6 +4,17 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_ScrollView.h>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -16,9 +27,6 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
-
-#include "../mwmp/Main.hpp"
-#include "../mwmp/LocalPlayer.hpp"
 
 namespace MWGui
 {
