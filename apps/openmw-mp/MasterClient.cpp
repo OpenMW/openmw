@@ -161,6 +161,9 @@ void MasterClient::Send(mwmp::PacketMasterAnnounce::Func func)
                 LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Cannot connect to master server: %d", masterServer.ToString());
                 return;
             }
+            case IS_PENDING:
+            case IS_CONNECTING:
+                break;
         }
         RakSleep(500);
     }
