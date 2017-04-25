@@ -406,6 +406,18 @@ namespace MWMechanics
                 if (std::find(playerAllies.begin(), playerAllies.end(), actor1) == playerAllies.end())
                     aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
             }
+            /*
+                Start of tes3mp addition
+
+                Make aggressive actors initiate combat with DedicatedPlayers
+            */
+            else if (mwmp::PlayerList::isDedicatedPlayer(actor2))
+            {
+                aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
+            }
+            /*
+                End of tes3mp addition
+            */
         }
         
         // Make guards go aggressive with creatures that are in combat, unless the creature is a follower or escorter
@@ -882,7 +894,7 @@ namespace MWMechanics
         /*
             Start of tes3mp change (major)
 
-            We need player-controlled NPCs to not automatically unequip
+            We need DedicatedPlayers to not automatically unequip
             their light-emitting items, so a 2nd condition has been added
             for them
         */
