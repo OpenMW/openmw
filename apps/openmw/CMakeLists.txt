@@ -109,7 +109,7 @@ add_openmw_dir (mwmp\\processors\\player ProcessorChatMessage ProcessorGameConso
         ProcessorHandshake ProcessorPlayerAttack ProcessorPlayerAttribute ProcessorPlayerBaseInfo ProcessorPlayerBounty
         ProcessorPlayerCellChange ProcessorPlayerCellState ProcessorPlayerCharClass ProcessorPlayerCharGen ProcessorPlayerDeath
         ProcessorPlayerAnimFlags ProcessorPlayerStatsDynamic ProcessorPlayerEquipment ProcessorPlayerInventory
-        ProcessorPlayerJournal ProcessorPlayerLevel ProcessorPlayerPos ProcessorPlayerResurrect ProcessorPlayerSkill
+        ProcessorPlayerJournal ProcessorPlayerLevel ProcessorPlayerPosition ProcessorPlayerResurrect ProcessorPlayerSkill
         ProcessorPlayerSpellbook ProcessorUserDisconnected ProcessorUserMyID
         )
 

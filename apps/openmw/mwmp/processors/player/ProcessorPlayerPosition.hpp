@@ -2,20 +2,20 @@
 // Created by koncord on 16.04.17.
 //
 
-#ifndef OPENMW_PROCESSORPLAYERPOS_HPP
-#define OPENMW_PROCESSORPLAYERPOS_HPP
+#ifndef OPENMW_PROCESSORPLAYERPOSITION_HPP
+#define OPENMW_PROCESSORPLAYERPOSITION_HPP
 
 
 #include "apps/openmw/mwmp/PlayerProcessor.hpp"
 
 namespace mwmp
 {
-    class ProcessorPlayerPos : public PlayerProcessor
+    class ProcessorPlayerPosition : public PlayerProcessor
     {
     public:
-        ProcessorPlayerPos()
+        ProcessorPlayerPosition()
         {
-            BPP_INIT(ID_PLAYER_POS)
+            BPP_INIT(ID_PLAYER_POSITION)
         }
 
         virtual void Do(PlayerPacket &packet, BasePlayer *player)
@@ -24,7 +24,7 @@ namespace mwmp
             {
                 if (!isRequest())
                 {
-                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_PLAYER_POS changed by server");
+                    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_PLAYER_POSITION changed by server");
 
                     static_cast<LocalPlayer*>(player)->setPosition();
                 }
@@ -38,4 +38,4 @@ namespace mwmp
 }
 
 
-#endif //OPENMW_PROCESSORPLAYERPOS_HPP
+#endif //OPENMW_PROCESSORPLAYERPOSITION_HPP

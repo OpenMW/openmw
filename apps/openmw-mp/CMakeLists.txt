@@ -118,7 +118,7 @@ set(PROCESSORS_PLAYER
         processors/player/ProcessorPlayerCharClass.hpp processors/player/ProcessorPlayerCharGen.hpp
         processors/player/ProcessorPlayerDeath.hpp processors/player/ProcessorPlayerEquipment.hpp
         processors/player/ProcessorPlayerInventory.hpp processors/player/ProcessorPlayerJournal.hpp
-        processors/player/ProcessorPlayerLevel.hpp processors/player/ProcessorPlayerPos.hpp
+        processors/player/ProcessorPlayerLevel.hpp processors/player/ProcessorPlayerPosition.hpp
         processors/player/ProcessorPlayerResurrect.hpp processors/player/ProcessorPlayerSkill.hpp
         processors/player/ProcessorPlayerSpellbook.hpp processors/player/ProcessorPlayerStatsDynamic.hpp
         )

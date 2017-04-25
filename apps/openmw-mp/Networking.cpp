@@ -242,7 +242,7 @@ void Networking::newPlayer(RakNet::RakNetGUID guid)
 {
     playerPacketController->GetPacket(ID_PLAYER_BASEINFO)->RequestData(guid);
     playerPacketController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->RequestData(guid);
-    playerPacketController->GetPacket(ID_PLAYER_POS)->RequestData(guid);
+    playerPacketController->GetPacket(ID_PLAYER_POSITION)->RequestData(guid);
     playerPacketController->GetPacket(ID_PLAYER_CELL_CHANGE)->RequestData(guid);
     playerPacketController->GetPacket(ID_PLAYER_EQUIPMENT)->RequestData(guid);
 
@@ -266,7 +266,7 @@ void Networking::newPlayer(RakNet::RakNetGUID guid)
             playerPacketController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(pl->second);
             playerPacketController->GetPacket(ID_PLAYER_ATTRIBUTE)->setPlayer(pl->second);
             playerPacketController->GetPacket(ID_PLAYER_SKILL)->setPlayer(pl->second);
-            playerPacketController->GetPacket(ID_PLAYER_POS)->setPlayer(pl->second);
+            playerPacketController->GetPacket(ID_PLAYER_POSITION)->setPlayer(pl->second);
             playerPacketController->GetPacket(ID_PLAYER_CELL_CHANGE)->setPlayer(pl->second);
             playerPacketController->GetPacket(ID_PLAYER_EQUIPMENT)->setPlayer(pl->second);
 
@@ -274,7 +274,7 @@ void Networking::newPlayer(RakNet::RakNetGUID guid)
             playerPacketController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->Send(guid);
             playerPacketController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(guid);
             playerPacketController->GetPacket(ID_PLAYER_SKILL)->Send(guid);
-            playerPacketController->GetPacket(ID_PLAYER_POS)->Send(guid);
+            playerPacketController->GetPacket(ID_PLAYER_POSITION)->Send(guid);
             playerPacketController->GetPacket(ID_PLAYER_CELL_CHANGE)->Send(guid);
             playerPacketController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(guid);
         }

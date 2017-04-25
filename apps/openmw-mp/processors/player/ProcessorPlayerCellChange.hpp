@@ -43,14 +43,14 @@ namespace mwmp
 
                         playerController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(other);
                         playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->setPlayer(other);
-                        playerController->GetPacket(ID_PLAYER_POS)->setPlayer(other);
+                        playerController->GetPacket(ID_PLAYER_POSITION)->setPlayer(other);
                         playerController->GetPacket(ID_PLAYER_SKILL)->setPlayer(other);
                         playerController->GetPacket(ID_PLAYER_EQUIPMENT)->setPlayer(other);
                         playerController->GetPacket(ID_PLAYER_ANIM_FLAGS)->setPlayer(other);
 
                         playerController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->Send(pl->guid);
                         playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(pl->guid);
-                        playerController->GetPacket(ID_PLAYER_POS)->Send(pl->guid);
+                        playerController->GetPacket(ID_PLAYER_POSITION)->Send(pl->guid);
                         playerController->GetPacket(ID_PLAYER_SKILL)->Send(pl->guid);
                         playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(pl->guid);
                         playerController->GetPacket(ID_PLAYER_ANIM_FLAGS)->Send(pl->guid);
@@ -71,8 +71,8 @@ namespace mwmp
                     }
                 });
 
-                playerController->GetPacket(ID_PLAYER_POS)->setPlayer(&player);
-                playerController->GetPacket(ID_PLAYER_POS)->Send();
+                playerController->GetPacket(ID_PLAYER_POSITION)->setPlayer(&player);
+                playerController->GetPacket(ID_PLAYER_POSITION)->Send();
                 packet.setPlayer(&player);
                 packet.Send(true); //send to other clients
 

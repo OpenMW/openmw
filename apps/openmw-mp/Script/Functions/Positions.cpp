@@ -109,6 +109,6 @@ void PositionFunctions::SendPos(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, );
 
-    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_POS)->setPlayer(player);
-    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_POS)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_POSITION)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_POSITION)->Send(false);
 }

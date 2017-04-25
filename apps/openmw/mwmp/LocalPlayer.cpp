@@ -327,8 +327,8 @@ void LocalPlayer::updatePosition(bool forceUpdate)
         direction.pos[1] = move.mPosition[1];
         direction.pos[2] = move.mPosition[2];
 
-        getNetworking()->getPlayerPacket(ID_PLAYER_POS)->setPlayer(this);
-        getNetworking()->getPlayerPacket(ID_PLAYER_POS)->Send();
+        getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->Send();
     }
     else if (isJumping && world->isOnGround(player))
     {
@@ -340,8 +340,8 @@ void LocalPlayer::updatePosition(bool forceUpdate)
     {
         sentJumpEnd = true;
         position = ptrPos;
-        getNetworking()->getPlayerPacket(ID_PLAYER_POS)->setPlayer(this);
-        getNetworking()->getPlayerPacket(ID_PLAYER_POS)->Send();
+        getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->Send();
     }
 }
 

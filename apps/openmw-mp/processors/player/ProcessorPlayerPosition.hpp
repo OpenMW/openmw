@@ -2,19 +2,19 @@
 // Created by koncord on 31.03.17.
 //
 
-#ifndef OPENMW_PROCESSORPLAYERPOS_HPP
-#define OPENMW_PROCESSORPLAYERPOS_HPP
+#ifndef OPENMW_PROCESSORPLAYERPOSITION_HPP
+#define OPENMW_PROCESSORPLAYERPOSITION_HPP
 
 #include "apps/openmw-mp/PlayerProcessor.hpp"
 
 namespace mwmp
 {
-    class ProcessorPlayerPos : public PlayerProcessor
+    class ProcessorPlayerPosition : public PlayerProcessor
     {
     public:
-        ProcessorPlayerPos()
+        ProcessorPlayerPosition()
         {
-            BPP_INIT(ID_PLAYER_POS)
+            BPP_INIT(ID_PLAYER_POSITION)
         }
 
         void Do(PlayerPacket &packet, Player &player) override
@@ -28,4 +28,4 @@ namespace mwmp
     };
 }
 
-#endif //OPENMW_PROCESSORPLAYERPOS_HPP
+#endif //OPENMW_PROCESSORPLAYERPOSITION_HPP

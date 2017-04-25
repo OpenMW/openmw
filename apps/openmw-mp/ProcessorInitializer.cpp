@@ -5,7 +5,7 @@
 #include "ProcessorInitializer.hpp"
 
 #include "PlayerProcessor.hpp"
-#include "processors/player/ProcessorPlayerPos.hpp"
+#include "processors/player/ProcessorPlayerPosition.hpp"
 #include "processors/player/ProcessorPlayerCellChange.hpp"
 #include "processors/player/ProcessorPlayerCellState.hpp"
 #include "processors/player/ProcessorPlayerAttribute.hpp"
@@ -59,7 +59,7 @@ using namespace mwmp;
 
 void ProcessorInitializer()
 {
-    PlayerProcessor::AddProcessor(new ProcessorPlayerPos());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerPosition());
     PlayerProcessor::AddProcessor(new ProcessorPlayerCellChange());
     PlayerProcessor::AddProcessor(new ProcessorPlayerCellState());
     PlayerProcessor::AddProcessor(new ProcessorPlayerAttribute());
