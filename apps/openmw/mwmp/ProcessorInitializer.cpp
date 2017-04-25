@@ -16,7 +16,7 @@
 #include "processors/player/ProcessorPlayerSpellbook.hpp"
 #include "processors/player/ProcessorPlayerJournal.hpp"
 #include "processors/player/ProcessorPlayerAttack.hpp"
-#include "processors/player/ProcessorPlayerDynamicStats.hpp"
+#include "processors/player/ProcessorPlayerStatsDynamic.hpp"
 #include "processors/player/ProcessorPlayerDeath.hpp"
 #include "processors/player/ProcessorPlayerResurrect.hpp"
 #include "processors/player/ProcessorPlayerAnimFlags.hpp"
@@ -73,7 +73,7 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorPlayerSpellbook());
     PlayerProcessor::AddProcessor(new ProcessorPlayerJournal());
     PlayerProcessor::AddProcessor(new ProcessorPlayerAttack());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerDynamicStats());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerStatsDynamic());
     PlayerProcessor::AddProcessor(new ProcessorPlayerDeath());
     PlayerProcessor::AddProcessor(new ProcessorPlayerResurrect());
     PlayerProcessor::AddProcessor(new ProcessorPlayerAnimFlags());

@@ -2,18 +2,18 @@
 // Created by koncord on 16.04.17.
 //
 
-#ifndef OPENMW_PROCESSORPLAYERDYNAMICSTATS_HPP
-#define OPENMW_PROCESSORPLAYERDYNAMICSTATS_HPP
+#ifndef OPENMW_PROCESSORPLAYERSTATSDYNAMIC_HPP
+#define OPENMW_PROCESSORPLAYERSTATSDYNAMIC_HPP
 
 
 #include "apps/openmw/mwmp/PlayerProcessor.hpp"
 
 namespace mwmp
 {
-    class ProcessorPlayerDynamicStats : public PlayerProcessor
+    class ProcessorPlayerStatsDynamic : public PlayerProcessor
     {
     public:
-        ProcessorPlayerDynamicStats()
+        ProcessorPlayerStatsDynamic()
         {
             BPP_INIT(ID_PLAYER_STATS_DYNAMIC)
         }
@@ -44,4 +44,4 @@ namespace mwmp
 }
 
 
-#endif //OPENMW_PROCESSORPLAYERDYNAMICSTATS_HPP
+#endif //OPENMW_PROCESSORPLAYERSTATSDYNAMIC_HPP

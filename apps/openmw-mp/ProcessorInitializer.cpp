@@ -10,7 +10,7 @@
 #include "processors/player/ProcessorPlayerCellState.hpp"
 #include "processors/player/ProcessorPlayerAttribute.hpp"
 #include "processors/player/ProcessorPlayerSkill.hpp"
-#include "processors/player/ProcessorLevel.hpp"
+#include "processors/player/ProcessorPlayerLevel.hpp"
 #include "processors/player/ProcessorPlayerEquipment.hpp"
 #include "processors/player/ProcessorPlayerInventory.hpp"
 #include "processors/player/ProcessorPlayerSpellbook.hpp"
@@ -63,7 +63,7 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorPlayerCellState());
     PlayerProcessor::AddProcessor(new ProcessorPlayerAttribute());
     PlayerProcessor::AddProcessor(new ProcessorPlayerSkill());
-    PlayerProcessor::AddProcessor(new ProcessorLevel());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerLevel());
     PlayerProcessor::AddProcessor(new ProcessorPlayerEquipment());
     PlayerProcessor::AddProcessor(new ProcessorPlayerInventory());
     PlayerProcessor::AddProcessor(new ProcessorPlayerSpellbook());
