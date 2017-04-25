@@ -17,6 +17,8 @@ namespace mwmp
         {
             // Send this to everyone
             packet.Send(true);
+
+            Script::Call<Script::CallbackIdentity("OnActorCellChange")>(player.getId(), actorList.cell.getDescription().c_str());
         }
     };
 }
