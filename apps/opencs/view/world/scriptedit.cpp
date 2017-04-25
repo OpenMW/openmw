@@ -7,6 +7,7 @@
 #include <QString>
 #include <QPainter>
 #include <QTextDocumentFragment>
+#include <QMenu>
 
 #include "../../model/doc/document.hpp"
 
@@ -284,12 +285,32 @@ void CSVWorld::ScriptEdit::updateLineNumberArea(const QRect &rect, int dy)
         updateLineNumberAreaWidth(0);
 }
 
+void CSVWorld::ScriptEdit::commentSelection()
+{
+
+}
+
+void CSVWorld::ScriptEdit::uncommentSelection()
+{
+
+}
+
 void CSVWorld::ScriptEdit::resizeEvent(QResizeEvent *e)
 {
     QPlainTextEdit::resizeEvent(e);
 
     QRect cr = contentsRect();
     mLineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+}
+
+void CSVWorld::ScriptEdit::contextMenuEvent(QContextMenuEvent *event)
+{
+    QMenu *menu = createStandardContextMenu();
+    menu->addAction("Comment Selection", this, SLOT(commentSelection()));
+    menu->addAction("Uncomment Selection", this, SLOT(uncommentSelection()));
+
+    menu->exec(event->globalPos());
+    delete menu;
 }
 
 void CSVWorld::ScriptEdit::lineNumberAreaPaintEvent(QPaintEvent *event)

@@ -77,6 +77,8 @@ namespace CSVWorld
 
             virtual void resizeEvent(QResizeEvent *e);
 
+            virtual void contextMenuEvent(QContextMenuEvent *event);
+
         private:
 
             QVector<CSMWorld::UniversalId::Type> mAllowedTypes;
@@ -111,6 +113,10 @@ namespace CSVWorld
             void updateLineNumberAreaWidth(int newBlockCount);
 
             void updateLineNumberArea(const QRect &, int);
+
+            void commentSelection();
+
+            void uncommentSelection();
     };
 
     class LineNumberArea : public QWidget
