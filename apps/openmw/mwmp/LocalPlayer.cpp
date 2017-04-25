@@ -79,6 +79,7 @@ void LocalPlayer::update()
     updateAttributes();
     updateSkills();
     updateLevel();
+    updateBounty();
 }
 
 void LocalPlayer::charGen(int stageFirst, int stageEnd)
@@ -267,17 +268,30 @@ void LocalPlayer::updateSkills(bool forceUpdate)
 void LocalPlayer::updateLevel(bool forceUpdate)
 {
     MWWorld::Ptr player = getPlayerPtr();
-    const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+    const MWMechanics::CreatureStats &ptrCreatureStats = player.getClass().getCreatureStats(player);
 
-    if (ptrNpcStats.getLevel() != creatureStats.mLevel || forceUpdate)
+    if (ptrCreatureStats.getLevel() != creatureStats.mLevel || forceUpdate)
     {
-        creatureStats.mLevel = ptrNpcStats.getLevel();
+        creatureStats.mLevel = ptrCreatureStats.getLevel();
         getNetworking()->getPlayerPacket(ID_PLAYER_LEVEL)->setPlayer(this);
         getNetworking()->getPlayerPacket(ID_PLAYER_LEVEL)->Send();
 
         // Also update skills to refresh level progress and attribute bonuses
         // for next level up
         updateSkills(true);
+    }
+}
+
+void LocalPlayer::updateBounty(bool forceUpdate)
+{
+    MWWorld::Ptr player = getPlayerPtr();
+    const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+
+    if (ptrNpcStats.getBounty() != npcStats.mBounty || forceUpdate)
+    {
+        npcStats.mBounty = ptrNpcStats.getBounty();
+        getNetworking()->getPlayerPacket(ID_PLAYER_BOUNTY)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_BOUNTY)->Send();
     }
 }
 
@@ -740,6 +754,15 @@ void LocalPlayer::setLevel()
 
     MWMechanics::CreatureStats *ptrCreatureStats = &player.getClass().getCreatureStats(player);
     ptrCreatureStats->setLevel(creatureStats.mLevel);
+}
+
+void LocalPlayer::setBounty()
+{
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    MWWorld::Ptr player = world->getPlayerPtr();
+
+    MWMechanics::NpcStats *ptrNpcStats = &player.getClass().getNpcStats(player);
+    ptrNpcStats->setBounty(npcStats.mBounty);
 }
 
 void LocalPlayer::setPosition()

@@ -11,6 +11,7 @@
 #include "processors/player/ProcessorPlayerAttribute.hpp"
 #include "processors/player/ProcessorPlayerSkill.hpp"
 #include "processors/player/ProcessorPlayerLevel.hpp"
+#include "processors/player/ProcessorPlayerBounty.hpp"
 #include "processors/player/ProcessorPlayerEquipment.hpp"
 #include "processors/player/ProcessorPlayerInventory.hpp"
 #include "processors/player/ProcessorPlayerSpellbook.hpp"
@@ -68,6 +69,7 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorPlayerAttribute());
     PlayerProcessor::AddProcessor(new ProcessorPlayerSkill());
     PlayerProcessor::AddProcessor(new ProcessorPlayerLevel());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerBounty());
     PlayerProcessor::AddProcessor(new ProcessorPlayerEquipment());
     PlayerProcessor::AddProcessor(new ProcessorPlayerInventory());
     PlayerProcessor::AddProcessor(new ProcessorPlayerSpellbook());

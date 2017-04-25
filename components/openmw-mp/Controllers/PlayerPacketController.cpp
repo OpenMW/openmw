@@ -20,6 +20,7 @@
 #include "../Packets/Player/PacketPlayerAttribute.hpp"
 #include "../Packets/Player/PacketPlayerSkill.hpp"
 #include "../Packets/Player/PacketPlayerLevel.hpp"
+#include "../Packets/Player/PacketPlayerBounty.hpp"
 #include "../Packets/Player/PacketHandshake.hpp"
 #include "../Packets/Player/PacketGUIBoxes.hpp"
 #include "../Packets/Player/PacketTime.hpp"
@@ -63,6 +64,7 @@ mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *p
     AddPacket<PacketPlayerAttribute>(&packets, peer);
     AddPacket<PacketPlayerSkill>(&packets, peer);
     AddPacket<PacketPlayerLevel>(&packets, peer);
+    AddPacket<PacketPlayerBounty>(&packets, peer);
 
     AddPacket<PacketHandshake>(&packets, peer);
     AddPacket<PacketGUIBoxes>(&packets, peer);

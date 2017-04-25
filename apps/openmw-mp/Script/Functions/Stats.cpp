@@ -134,7 +134,7 @@ void StatsFunctions::SetIsMale(unsigned short pid, int value) noexcept
 int StatsFunctions::GetLevel(unsigned short pid) noexcept
 {
     Player *player;
-    GET_PLAYER(pid, player, 0.0f);
+    GET_PLAYER(pid, player, 0);
 
     return player->creatureStats.mLevel;
 }
@@ -150,7 +150,7 @@ void StatsFunctions::SetLevel(unsigned short pid, int value) noexcept
 int StatsFunctions::GetLevelProgress(unsigned short pid) noexcept
 {
     Player *player;
-    GET_PLAYER(pid, player, 0.0f);
+    GET_PLAYER(pid, player, 0);
 
     return player->npcStats.mLevelProgress;
 }
@@ -432,7 +432,7 @@ int StatsFunctions::GetSkillIncrease(unsigned short pid, unsigned int attribute)
     return player->npcStats.mSkillIncrease[attribute];
 }
 
-void StatsFunctions::SetSkillIncrease(unsigned short pid, unsigned int attribute, int value) noexcept // TODO: need packet for transmit it
+void StatsFunctions::SetSkillIncrease(unsigned short pid, unsigned int attribute, int value) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
@@ -441,6 +441,22 @@ void StatsFunctions::SetSkillIncrease(unsigned short pid, unsigned int attribute
         return;
 
     player->npcStats.mSkillIncrease[attribute] = value;
+}
+
+int StatsFunctions::GetBounty(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->npcStats.mBounty;
+}
+
+void StatsFunctions::SetBounty(unsigned short pid, int value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->npcStats.mBounty = value;
 }
 
 void StatsFunctions::SetCharGenStage(unsigned short pid, int start, int end) noexcept
@@ -510,4 +526,14 @@ void StatsFunctions::SendLevel(unsigned short pid) noexcept
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_LEVEL)->setPlayer(player);
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_LEVEL)->Send(false);
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_LEVEL)->Send(true);
+}
+
+void StatsFunctions::SendBounty(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_BOUNTY)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_BOUNTY)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_BOUNTY)->Send(true);
 }

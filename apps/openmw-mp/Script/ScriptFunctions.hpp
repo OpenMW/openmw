@@ -119,6 +119,7 @@ public:
             {"OnPlayerAttributesChange", Function<void, unsigned short>()},
             {"OnPlayerSkillsChange",     Function<void, unsigned short>()},
             {"OnPlayerLevelChange",      Function<void, unsigned short>()},
+            {"OnPlayerBountyChange",     Function<void, unsigned short>()},
             {"OnPlayerEquipmentChange",  Function<void, unsigned short>()},
             {"OnPlayerInventoryChange",  Function<void, unsigned short>()},
             {"OnPlayerSpellbookChange",  Function<void, unsigned short>()},

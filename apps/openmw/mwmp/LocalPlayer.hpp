@@ -29,6 +29,7 @@ namespace mwmp
         void updateAttributes(bool forceUpdate = false);
         void updateSkills(bool forceUpdate = false);
         void updateLevel(bool forceUpdate = false);
+        void updateBounty(bool forceUpdate = false);
         void updatePosition(bool forceUpdate = false);
         void updateCell(bool forceUpdate = false);
         void updateChar();
@@ -49,6 +50,7 @@ namespace mwmp
         void setAttributes();
         void setSkills();
         void setLevel();
+        void setBounty();
         void setPosition();
         void setCell();
         void setClass();

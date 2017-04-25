@@ -58,13 +58,16 @@
     {"GetMagickaCurrent",       StatsFunctions::GetMagickaCurrent},\
     {"SetMagickaCurrent",       StatsFunctions::SetMagickaCurrent},\
     \
-    {"SetFatigueBase",          StatsFunctions::SetFatigueBase},\
     {"GetFatigueBase",          StatsFunctions::GetFatigueBase},\
-    {"SetFatigueCurrent",       StatsFunctions::SetFatigueCurrent},\
+    {"SetFatigueBase",          StatsFunctions::SetFatigueBase},\
     {"GetFatigueCurrent",       StatsFunctions::GetFatigueCurrent},\
+    {"SetFatigueCurrent",       StatsFunctions::SetFatigueCurrent},\
     \
     {"GetSkillIncrease",        StatsFunctions::GetSkillIncrease},\
     {"SetSkillIncrease",        StatsFunctions::SetSkillIncrease},\
+    \
+    {"GetBounty",               StatsFunctions::GetBounty},\
+    {"SetBounty",               StatsFunctions::SetBounty},\
     \
     {"SetCharGenStage",         StatsFunctions::SetCharGenStage},\
     {"Resurrect",               StatsFunctions::Resurrect},\
@@ -73,7 +76,8 @@
     {"SendStatsDynamic",        StatsFunctions::SendStatsDynamic},\
     {"SendAttributes",          StatsFunctions::SendAttributes},\
     {"SendSkills",              StatsFunctions::SendSkills},\
-    {"SendLevel",               StatsFunctions::SendLevel}
+    {"SendLevel",               StatsFunctions::SendLevel},\
+    {"SendBounty",              StatsFunctions::SendBounty}
 
 class StatsFunctions
 {
@@ -138,6 +142,9 @@ public:
     static int GetSkillIncrease(unsigned short pid, unsigned int pos) noexcept;
     static void SetSkillIncrease(unsigned short pid, unsigned int pos, int value) noexcept;
 
+    static int GetBounty(unsigned short pid) noexcept;
+    static void SetBounty(unsigned short pid, int value) noexcept;
+
     static void Resurrect(unsigned short pid);
     static void SetCharGenStage(unsigned short pid, int start, int end) noexcept;
     static void SendBaseInfo(unsigned short pid) noexcept;
@@ -146,6 +153,7 @@ public:
     static void SendAttributes(unsigned short pid) noexcept;
     static void SendSkills(unsigned short pid) noexcept;
     static void SendLevel(unsigned short pid) noexcept;
+    static void SendBounty(unsigned short pid) noexcept;
 };
 
 #endif //OPENMW_STATAPI_HPP
