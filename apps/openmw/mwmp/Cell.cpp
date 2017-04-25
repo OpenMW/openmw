@@ -155,6 +155,7 @@ void Cell::readStatsDynamic(ActorList& actorList)
         {
             DedicatedActor *actor = dedicatedActors[mapIndex];
             actor->creatureStats = baseActor.creatureStats;
+            actor->hasStatsDynamicData = true;
         }
     }
 }

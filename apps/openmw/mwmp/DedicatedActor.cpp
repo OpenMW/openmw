@@ -31,8 +31,8 @@ DedicatedActor::DedicatedActor()
 
     creatureStats = new ESM::CreatureStats();
     creatureStats->blank();
-    creatureStats->mDynamic[0].mBase = -1;
 
+    hasStatsDynamicData = false;
     hasChangedCell = true;
 
     attack.pressed = false;
@@ -137,8 +137,8 @@ void DedicatedActor::playSound()
 
 void DedicatedActor::setStatsDynamic()
 {
-    // Only set dynamic stats if they have valid values
-    if (creatureStats->mDynamic[0].mBase == -1) return;
+    // Only set dynamic stats if we have received at least one packet about them
+    if (!hasStatsDynamicData) return;
 
     MWMechanics::CreatureStats *ptrCreatureStats = &ptr.getClass().getCreatureStats(ptr);
     MWMechanics::DynamicStat<float> value;
