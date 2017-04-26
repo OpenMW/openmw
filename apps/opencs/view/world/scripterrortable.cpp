@@ -52,6 +52,13 @@ void CSVWorld::ScriptErrorTable::addMessage (const std::string& message,
         columnItem->setFlags (columnItem->flags() ^ Qt::ItemIsEditable);
         setItem (row, 3, columnItem);
     }
+    else
+    {
+        QTableWidgetItem *lineItem = new QTableWidgetItem;
+        lineItem->setData (Qt::DisplayRole, "-");
+        lineItem->setFlags (lineItem->flags() ^ Qt::ItemIsEditable);
+        setItem (row, 1, lineItem);
+    }
 
     QTableWidgetItem *messageItem = new QTableWidgetItem (QString::fromUtf8 (message.c_str()));
     messageItem->setFlags (messageItem->flags() ^ Qt::ItemIsEditable);
@@ -141,7 +148,7 @@ void CSVWorld::ScriptErrorTable::settingChanged (const CSMPrefs::Setting *settin
 
 void CSVWorld::ScriptErrorTable::cellClicked (int row, int column)
 {
-    if (item (row, 1))
+    if (item (row, 3))
     {
         int scriptLine = item (row, 1)->data (Qt::DisplayRole).toInt();
         int scriptColumn = item (row, 3)->data (Qt::DisplayRole).toInt();
