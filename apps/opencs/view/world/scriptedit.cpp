@@ -293,9 +293,9 @@ void CSVWorld::ScriptEdit::commentSelection()
     begin.movePosition(QTextCursor::StartOfLine);
 
     end.setPosition(end.selectionEnd());
-    end.movePosition(QTextCursor::StartOfLine);
+    end.movePosition(QTextCursor::EndOfLine);
 
-    for (; begin <= end; begin.movePosition(QTextCursor::StartOfLine), begin.movePosition(QTextCursor::Down))
+    for (; begin < end; begin.movePosition(QTextCursor::StartOfLine), begin.movePosition(QTextCursor::Down))
     {
         begin.insertText(";");
     }
@@ -309,12 +309,14 @@ void CSVWorld::ScriptEdit::uncommentSelection()
     begin.movePosition(QTextCursor::StartOfLine);
 
     end.setPosition(end.selectionEnd());
-    end.movePosition(QTextCursor::StartOfLine);
+    end.movePosition(QTextCursor::EndOfLine);
 
-    for (; begin <= end; begin.movePosition(QTextCursor::StartOfLine), begin.movePosition(QTextCursor::Down)) {
-        // loop through line until a nonspace character is reached
+    for (; begin < end; begin.movePosition(QTextCursor::StartOfLine), begin.movePosition(QTextCursor::Down)) {
         begin.select(QTextCursor::LineUnderCursor);
         QString line = begin.selectedText();
+
+        if (line.size() == 0)
+            continue;
 
         // get first nonspace character in line
         int index;
@@ -326,10 +328,11 @@ void CSVWorld::ScriptEdit::uncommentSelection()
 
         if (index != line.size() && line[index] == ';')
         {
+            // remove the semicolon
             line.remove(index, 1);
+            // put the line back
+            begin.insertText(line);
         }
-
-        begin.insertText(line);
     }
 }
 
