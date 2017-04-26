@@ -54,6 +54,7 @@ namespace CSVWorld
             QFont mDefaultFont;
             QFont mMonoFont;
             int mTabCharCount;
+            QMenu *mContextMenu;
 
         protected:
 

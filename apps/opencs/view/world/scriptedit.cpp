@@ -14,6 +14,7 @@
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/prefs/state.hpp"
+#include "../../model/prefs/shortcut.hpp"
 
 CSVWorld::ScriptEdit::ChangeLock::ChangeLock (ScriptEdit& edit) : mEdit (edit)
 {
@@ -86,6 +87,20 @@ CSVWorld::ScriptEdit::ScriptEdit(
                   <<CSMWorld::UniversalId::Type_Weapon
                   <<CSMWorld::UniversalId::Type_Script
                   <<CSMWorld::UniversalId::Type_Region;
+
+    mContextMenu = createStandardContextMenu();
+
+    QAction* comment = new QAction (tr ("Comment Selection"), this);
+    connect(comment, SIGNAL (triggered()), this, SLOT (commentSelection()));
+    CSMPrefs::Shortcut* commentShortcut = new CSMPrefs::Shortcut("script-editor-comment", this);
+    commentShortcut->associateAction(comment);
+    mContextMenu->addAction(comment);
+
+    QAction* uncomment = new QAction (tr ("Uncomment Selection"), this);
+    connect(uncomment, SIGNAL (triggered()), this, SLOT (uncommentSelection()));
+    CSMPrefs::Shortcut* uncommentShortcut = new CSMPrefs::Shortcut("script-editor-uncomment", this);
+    uncommentShortcut->associateAction(uncomment);
+    mContextMenu->addAction(uncomment);
 
     mHighlighter = new ScriptHighlighter (document.getData(), mode, ScriptEdit::document());
 
@@ -295,7 +310,7 @@ void CSVWorld::ScriptEdit::commentSelection()
     end.setPosition(end.selectionEnd());
     end.movePosition(QTextCursor::EndOfLine);
 
-    for (; begin < end; begin.movePosition(QTextCursor::StartOfLine), begin.movePosition(QTextCursor::Down))
+    for (; begin < end; begin.movePosition(QTextCursor::EndOfLine), begin.movePosition(QTextCursor::Right))
     {
         begin.insertText(";");
     }
@@ -311,7 +326,7 @@ void CSVWorld::ScriptEdit::uncommentSelection()
     end.setPosition(end.selectionEnd());
     end.movePosition(QTextCursor::EndOfLine);
 
-    for (; begin < end; begin.movePosition(QTextCursor::StartOfLine), begin.movePosition(QTextCursor::Down)) {
+    for (; begin < end; begin.movePosition(QTextCursor::EndOfLine), begin.movePosition(QTextCursor::Right)) {
         begin.select(QTextCursor::LineUnderCursor);
         QString line = begin.selectedText();
 
@@ -346,12 +361,7 @@ void CSVWorld::ScriptEdit::resizeEvent(QResizeEvent *e)
 
 void CSVWorld::ScriptEdit::contextMenuEvent(QContextMenuEvent *event)
 {
-    QMenu *menu = createStandardContextMenu();
-    menu->addAction("Comment Selection", this, SLOT(commentSelection()));
-    menu->addAction("Uncomment Selection", this, SLOT(uncommentSelection()));
-
-    menu->exec(event->globalPos());
-    delete menu;
+    mContextMenu->exec(event->globalPos());
 }
 
 void CSVWorld::ScriptEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
