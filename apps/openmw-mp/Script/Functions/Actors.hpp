@@ -11,6 +11,12 @@
     {"GetActorRefId",              ActorFunctions::GetActorRefId},\
     {"GetActorRefNumIndex",        ActorFunctions::GetActorRefNumIndex},\
     {"GetActorMpNum",              ActorFunctions::GetActorMpNum},\
+    {"GetActorPosX",               ActorFunctions::GetActorPosX},\
+    {"GetActorPosY",               ActorFunctions::GetActorPosY},\
+    {"GetActorPosZ",               ActorFunctions::GetActorPosZ},\
+    {"GetActorRotX",               ActorFunctions::GetActorRotX},\
+    {"GetActorRotY",               ActorFunctions::GetActorRotY},\
+    {"GetActorRotZ",               ActorFunctions::GetActorRotZ},\
     \
     {"SetScriptActorListCell",     ActorFunctions::SetScriptActorListCell},\
     {"SetScriptActorListAction",   ActorFunctions::SetScriptActorListAction},\
@@ -37,6 +43,12 @@ public:
     static const char *GetActorRefId(unsigned int i) noexcept;
     static int GetActorRefNumIndex(unsigned int i) noexcept;
     static int GetActorMpNum(unsigned int i) noexcept;
+    static double GetActorPosX(unsigned int i) noexcept;
+    static double GetActorPosY(unsigned int i) noexcept;
+    static double GetActorPosZ(unsigned int i) noexcept;
+    static double GetActorRotX(unsigned int i) noexcept;
+    static double GetActorRotY(unsigned int i) noexcept;
+    static double GetActorRotZ(unsigned int i) noexcept;
 
     static void SetScriptActorListCell(const char* cellDescription) noexcept;
     static void SetScriptActorListAction(unsigned char action) noexcept;

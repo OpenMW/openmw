@@ -54,6 +54,36 @@ int ActorFunctions::GetActorMpNum(unsigned int i) noexcept
     return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).mpNum;
 }
 
+double ActorFunctions::GetActorPosX(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).position.pos[0];
+}
+
+double ActorFunctions::GetActorPosY(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).position.pos[1];
+}
+
+double ActorFunctions::GetActorPosZ(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).position.pos[2];
+}
+
+double ActorFunctions::GetActorRotX(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).position.rot[0];
+}
+
+double ActorFunctions::GetActorRotY(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).position.rot[1];
+}
+
+double ActorFunctions::GetActorRotZ(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).position.rot[2];
+}
+
 void ActorFunctions::SetScriptActorListCell(const char* cellDescription) noexcept
 {
     static std::regex exteriorCellPattern("^(-?\\d+), (-?\\d+)$");
