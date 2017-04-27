@@ -50,6 +50,18 @@ void ServerInfoDialog::refresh()
             listPlugins->addItem(QString::fromStdString(plugin.name));
         }
 
+        auto iter = sd.second.rules.begin();
+        for (int i = 0; iter != sd.second.rules.end(); i++, iter++)
+        {
+            if(i < 6)
+                continue;
+            QString rule = QString::fromStdString(iter->first) + " : ";
+            if(iter->second.type == 's')
+                rule += QString::fromStdString(iter->second.str);
+            else
+                rule += QString::number(iter->second.val);
+            listRules->addItem(rule);
+        }
 
         lblPlayers->setText(QString::number(sd.second.players.size()) + " / " + QString::number(sd.second.GetMaxPlayers()));
     }
