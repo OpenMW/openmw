@@ -68,7 +68,9 @@ namespace mwmp
             else
                 server.players.clear();
 
-            int playersCount = server.GetPlayers();
+            int playersCount = server.players.size();
+            packet->RW(playersCount, send);
+
             while (playersCount--)
             {
                 string player;
