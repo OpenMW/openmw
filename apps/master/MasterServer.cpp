@@ -138,7 +138,7 @@ void MasterServer::Thread()
                             else if (pma.GetFunc() == PacketMasterAnnounce::FUNCTION_ANNOUNCE)
                             {
                                 cout << "Updated";
-                                iter = servers.insert({packet->systemAddress, server}).first;
+                                iter->second = server;
                                 keepAliveFunc();
                             }
                             else
