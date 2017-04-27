@@ -34,28 +34,28 @@ QVariant ServerModel::data(const QModelIndex &index, int role) const
                 var = sd.addr;
                 break;
             case ServerData::PASSW:
-                var = sd.needPassw ? "Yes" : "No";
+                var = (int)(sd.rules.at("passw").val) == 1 ? "Yes" : "No";
                 break;
             case ServerData::VERSION:
-                var = sd.version;
+                var = QString(sd.rules.at("version").str.c_str());
                 break;
             case ServerData::PLAYERS:
-                var = sd.players;
+                var = (int) sd.rules.at("players").val;
                 break;
             case ServerData::MAX_PLAYERS:
-                var = sd.maxPlayers;
+                var = (int) sd.rules.at("maxPlayers").val;
                 break;
             case ServerData::HOSTNAME:
-                var = sd.hostName;
+                var = QString(sd.rules.at("name").str.c_str());
                 break;
             case ServerData::PING:
                 var = sd.ping;
                 break;
             case ServerData::MODNAME:
-                if(sd.modName.isEmpty())
+                if(sd.rules.at("gamemode").str == "")
                     var = "default";
                 else
-                    var = sd.modName;
+                    var = QString(sd.rules.at("gamemode").str.c_str());
                 break;
         }
         return var;
@@ -133,27 +133,27 @@ bool ServerModel::setData(const QModelIndex &index, const QVariant &value, int r
                 ok = !sd.addr.isEmpty();
                 break;
             case ServerData::PASSW:
-                sd.needPassw = value.toBool();
+                sd.SetPassword(value.toBool());
                 break;
             case ServerData::VERSION:
-                sd.version = value.toString();
+                sd.SetVersion(value.toString().toLatin1());
                 ok = !sd.addr.isEmpty();
                 break;
             case ServerData::PLAYERS:
-                sd.players = value.toInt(&ok);
+                sd.SetPlayers(value.toInt(&ok));
                 break;
             case ServerData::MAX_PLAYERS:
-                sd.maxPlayers = value.toInt(&ok);
+                sd.SetMaxPlayers(value.toInt(&ok));
                 break;
             case ServerData::HOSTNAME:
-                sd.hostName = value.toString();
+                sd.SetName(value.toString().toLatin1());
                 ok = !sd.addr.isEmpty();
                 break;
             case ServerData::PING:
                 sd.ping = value.toInt(&ok);
                 break;
             case ServerData::MODNAME:
-                sd.modName = value.toString();
+                sd.SetGameMode(value.toString().toLatin1());
                 break;
             default:
                 return false;
@@ -171,8 +171,7 @@ bool ServerModel::insertRows(int position, int count, const QModelIndex &index)
     beginInsertRows(QModelIndex(), position, position + count - 1);
 
     for (int row = 0; row < count; ++row) {
-        ServerData sd {"", -1, -1, -1, "", "", false, 0};
-        myData.insert(position, sd);
+        myData.insert(position, {});
     }
 
     endInsertRows();
@@ -195,6 +194,5 @@ QModelIndex ServerModel::index(int row, int column, const QModelIndex &parent) c
 {
 
     QModelIndex index = QAbstractTableModel::index(row, column, parent);
-    //qDebug() << "Valid index? " << index.isValid() << "   " << row << "   " << column;
     return index;
 }

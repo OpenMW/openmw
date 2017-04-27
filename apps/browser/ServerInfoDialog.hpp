@@ -13,8 +13,11 @@ class ServerInfoDialog : public QDialog,  public Ui::Dialog
 public:
     explicit ServerInfoDialog(QWidget *parent = 0);
     virtual ~ServerInfoDialog();
+    void Server(QString addr);
 public slots:
     void refresh();
+private:
+    QString addr;
 };
 
 

@@ -1,8 +1,8 @@
 #include <QApplication>
 #include <components/settings/settings.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <apps/browser/netutils/QueryClient.hpp>
 #include "MainWindow.hpp"
-#include "NetController.hpp"
 
 std::string loadSettings (Settings::Manager & settings)
 {
@@ -39,8 +39,7 @@ int main(int argc, char *argv[])
     // initialize resources, if needed
     // Q_INIT_RESOURCE(resfile);
 
-    NetController::Create(addr, port);
-    atexit(NetController::Destroy);
+    QueryClient::Get().SetServer(addr, port);
     QApplication app(argc, argv);
     MainWindow d;
 

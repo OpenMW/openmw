@@ -5,16 +5,12 @@
 #include <vector>
 #include <QString>
 #include <QAbstractTableModel>
+#include <components/openmw-mp/Master/MasterData.hpp>
 
-struct ServerData
+struct ServerData : public QueryData
 {
     QString addr;
-    int players, maxPlayers;
     int ping;
-    QString hostName;
-    QString modName;
-    bool needPassw;
-    QString version;
     enum IDS
     {
         ADDR,

@@ -3,7 +3,6 @@
 //
 
 #include "MainWindow.hpp"
-#include "NetController.hpp"
 #include "ServerInfoDialog.hpp"
 #include "components/files/configurationmanager.hpp"
 #include <qdebug.h>
@@ -12,8 +11,11 @@
 #include <QJsonArray>
 #include <QFile>
 #include <QJsonDocument>
+#include <apps/browser/netutils/QueryClient.hpp>
+#include <apps/browser/netutils/Utils.hpp>
 
 using namespace Process;
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent)
 {
@@ -58,7 +60,12 @@ void MainWindow::addServerAndUpdate(QString addr)
     favorites->insertRow(0);
     QModelIndex mi = favorites->index(0, ServerData::ADDR);
     favorites->setData(mi, addr, Qt::EditRole);
-    NetController::get()->updateInfo(favorites, mi);
+    //NetController::get()->updateInfo(favorites, mi);
+    //QueryClient::Update(RakNet::SystemAddress())
+    /*auto data = QueryClient::Get().Query();
+    if(data.empty())
+       return;
+    transform(data.begin(), data.end(), back_inserter());*/
 }
 
 void MainWindow::addServer()
@@ -99,11 +106,42 @@ void MainWindow::deleteServer()
 
 bool MainWindow::refresh()
 {
-    return NetController::get()->updateInfo(proxyModel->sourceModel());
-    /*tblServerBrowser->resizeColumnToContents(ServerData::HOSTNAME);
-    tblServerBrowser->resizeColumnToContents(ServerData::MODNAME);
-    tblFavorites->resizeColumnToContents(ServerData::HOSTNAME);
-    tblFavorites->resizeColumnToContents(ServerData::MODNAME);*/
+    auto data = QueryClient::Get().Query();
+    if(QueryClient::Get().Status() != ID_MASTER_QUERY)
+        return false;
+
+    ServerModel *model = ((ServerModel*)proxyModel->sourceModel());
+    model->removeRows(0, model->rowCount());
+    for(auto server : data)
+    {
+        model->insertRow(0);
+
+        QModelIndex mi = model->index(0, ServerData::ADDR);
+        model->setData(mi, server.first.ToString(true, ':'));
+
+        mi = model->index(0, ServerData::PLAYERS);
+        model->setData(mi, server.second.GetPlayers());
+
+        mi = model->index(0, ServerData::MAX_PLAYERS);
+        model->setData(mi, server.second.GetMaxPlayers());
+
+        mi = model->index(0, ServerData::HOSTNAME);
+        model->setData(mi, server.second.GetName());
+
+        mi = model->index(0, ServerData::MODNAME);
+        model->setData(mi, server.second.GetGameMode());
+
+        mi = model->index(0, ServerData::VERSION);
+        model->setData(mi, server.second.GetVersion());
+
+        mi = model->index(0, ServerData::PASSW);
+        model->setData(mi, server.second.GetPassword() == 1);
+
+        mi = model->index(0, ServerData::PING);
+        model->setData(mi, PingRakNetServer(server.first.ToString(false), server.first.GetPort()));
+    }
+
+    return true;
 }
 
 void MainWindow::play()
@@ -117,7 +155,7 @@ void MainWindow::play()
     ServerModel *sm = ((ServerModel*)proxyModel->sourceModel());
 
     int sourceId = proxyModel->mapToSource(proxyModel->index(id, ServerData::ADDR)).row();
-    NetController::get()->selectServer(&sm->myData[sourceId]);
+    infoDialog.Server(sm->myData[sourceId].addr);
     infoDialog.refresh();
     if(!infoDialog.exec())
         return;
@@ -125,7 +163,7 @@ void MainWindow::play()
     QStringList arguments;
     arguments.append(QLatin1String("--connect=") + sm->myData[sourceId].addr.toLatin1());
 
-    if(sm->myData[sourceId].needPassw)
+    if(sm->myData[sourceId].GetPassword() == 1)
     {
         bool ok;
         QString passw = QInputDialog::getText(this, "Connecting to: " + sm->myData[sourceId].addr, "Password: ", QLineEdit::Password, "", &ok);

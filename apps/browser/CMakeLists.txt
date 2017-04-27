@@ -9,7 +9,6 @@ set(BROWSER
         main.cpp
         MainWindow.cpp
         ServerModel.cpp
-        NetController.cpp
         ServerInfoDialog.cpp
         MySortFilterProxyModel.cpp
         netutils/HTTPNetwork.cpp
@@ -27,7 +26,6 @@ set(BROWSER_HEADER_MOC
 
 set(BROWSER_HEADER
         ${BROWSER_HEADER_MOC}
-        NetController.hpp
         netutils/HTTPNetwork.hpp
         netutils/Utils.hpp
         netutils/QueryClient.hpp
