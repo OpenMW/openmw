@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QTimer>
 #include <QFont>
+#include <QAction>
 
 #include "../../model/world/universalid.hpp"
 
@@ -54,7 +55,8 @@ namespace CSVWorld
             QFont mDefaultFont;
             QFont mMonoFont;
             int mTabCharCount;
-            QMenu *mContextMenu;
+            QAction *mCommentAction;
+            QAction *mUncommentAction;
 
         protected:
 

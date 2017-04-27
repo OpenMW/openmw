@@ -88,19 +88,15 @@ CSVWorld::ScriptEdit::ScriptEdit(
                   <<CSMWorld::UniversalId::Type_Script
                   <<CSMWorld::UniversalId::Type_Region;
 
-    mContextMenu = createStandardContextMenu();
+    mCommentAction = new QAction (tr ("Comment Selection"), this);
+    connect(mCommentAction, SIGNAL (triggered()), this, SLOT (commentSelection()));
+    CSMPrefs::Shortcut *commentShortcut = new CSMPrefs::Shortcut("script-editor-comment", this);
+    commentShortcut->associateAction(mCommentAction);
 
-    QAction* comment = new QAction (tr ("Comment Selection"), this);
-    connect(comment, SIGNAL (triggered()), this, SLOT (commentSelection()));
-    CSMPrefs::Shortcut* commentShortcut = new CSMPrefs::Shortcut("script-editor-comment", this);
-    commentShortcut->associateAction(comment);
-    mContextMenu->addAction(comment);
-
-    QAction* uncomment = new QAction (tr ("Uncomment Selection"), this);
-    connect(uncomment, SIGNAL (triggered()), this, SLOT (uncommentSelection()));
-    CSMPrefs::Shortcut* uncommentShortcut = new CSMPrefs::Shortcut("script-editor-uncomment", this);
-    uncommentShortcut->associateAction(uncomment);
-    mContextMenu->addAction(uncomment);
+    mUncommentAction = new QAction (tr ("Uncomment Selection"), this);
+    connect(mUncommentAction, SIGNAL (triggered()), this, SLOT (uncommentSelection()));
+    CSMPrefs::Shortcut *uncommentShortcut = new CSMPrefs::Shortcut("script-editor-uncomment", this);
+    uncommentShortcut->associateAction(mUncommentAction);
 
     mHighlighter = new ScriptHighlighter (document.getData(), mode, ScriptEdit::document());
 
@@ -361,7 +357,12 @@ void CSVWorld::ScriptEdit::resizeEvent(QResizeEvent *e)
 
 void CSVWorld::ScriptEdit::contextMenuEvent(QContextMenuEvent *event)
 {
-    mContextMenu->exec(event->globalPos());
+    QMenu *menu = createStandardContextMenu();
+    menu->addAction(mCommentAction);
+    menu->addAction(mUncommentAction);
+
+    menu->exec(event->globalPos());
+    delete menu;
 }
 
 void CSVWorld::ScriptEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
