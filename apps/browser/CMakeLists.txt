@@ -1,5 +1,5 @@
 
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 14)
 
 set(BROWSER_UI
         ${CMAKE_SOURCE_DIR}/files/tes3mp/ui/Main.ui
@@ -14,6 +14,7 @@ set(BROWSER
         MySortFilterProxyModel.cpp
         netutils/HTTPNetwork.cpp
         netutils/Utils.cpp
+        netutils/QueryClient.cpp
         ${CMAKE_SOURCE_DIR}/files/tes3mp/browser.rc
         )
 
@@ -29,6 +30,7 @@ set(BROWSER_HEADER
         NetController.hpp
         netutils/HTTPNetwork.hpp
         netutils/Utils.hpp
+        netutils/QueryClient.hpp
         )
 
 source_group(browser FILES ${BROWSER} ${BROWSER_HEADER})
