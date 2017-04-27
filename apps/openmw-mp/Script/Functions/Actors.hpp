@@ -7,6 +7,7 @@
     {"GetActorListSize",           ActorFunctions::GetActorListSize},\
     {"GetLastActorListAction",     ActorFunctions::GetLastActorListAction},\
     \
+    {"GetActorCell",               ActorFunctions::GetActorCell},\
     {"GetActorRefId",              ActorFunctions::GetActorRefId},\
     {"GetActorRefNumIndex",        ActorFunctions::GetActorRefNumIndex},\
     {"GetActorMpNum",              ActorFunctions::GetActorMpNum},\
@@ -32,6 +33,7 @@ public:
     static unsigned int GetActorListSize() noexcept;
     static unsigned char GetLastActorListAction() noexcept;
 
+    static const char *GetActorCell(unsigned int i) noexcept;
     static const char *GetActorRefId(unsigned int i) noexcept;
     static int GetActorRefNumIndex(unsigned int i) noexcept;
     static int GetActorMpNum(unsigned int i) noexcept;

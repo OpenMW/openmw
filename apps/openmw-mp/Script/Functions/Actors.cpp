@@ -34,6 +34,11 @@ unsigned char ActorFunctions::GetLastActorListAction() noexcept
     return mwmp::Networking::getPtr()->getLastActorList()->action;
 }
 
+const char *ActorFunctions::GetActorCell(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).cell.getDescription().c_str();
+}
+
 const char *ActorFunctions::GetActorRefId(unsigned int i) noexcept
 {
     return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).refId.c_str();
