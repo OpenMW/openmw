@@ -187,24 +187,34 @@ void MasterClient::Thread()
         SetPlayers((int) players->size());
 
         auto pIt = players->begin();
-        for (int i = 0; pIt != players->end(); i++, pIt++)
+        if(queryData.players.size() != players->size())
         {
-            if (queryData.players[i] != pIt->second->npc.mName)
+            queryData.players.clear();
+            updated = true;
+        }
+        else
+        {
+            for (int i = 0; pIt != players->end(); i++, pIt++)
             {
-                updated = true;
-                break;
+                if (queryData.players[i] != pIt->second->npc.mName)
+                {
+                    queryData.players.clear();
+                    updated = true;
+                    break;
+                }
             }
         }
 
         if (updated)
         {
+            updated = false;
             if (pIt != players->end())
             {
-                queryData.players.clear();
-                transform(players->begin(), players->end(), back_inserter(queryData.players), [](auto pair)
+                for(auto player : *players)
                 {
-                    return pair.second->npc.mName;
-                });
+                    if(!player.second->npc.mName.empty())
+                        queryData.players.push_back(player.second->npc.mName);
+                }
             }
             Send(PacketMasterAnnounce::FUNCTION_ANNOUNCE);
         }
