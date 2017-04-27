@@ -306,10 +306,14 @@ void CSVWorld::ScriptEdit::commentSelection()
     end.setPosition(end.selectionEnd());
     end.movePosition(QTextCursor::EndOfLine);
 
+    begin.beginEditBlock();
+
     for (; begin < end; begin.movePosition(QTextCursor::EndOfLine), begin.movePosition(QTextCursor::Right))
     {
         begin.insertText(";");
     }
+
+    begin.endEditBlock();
 }
 
 void CSVWorld::ScriptEdit::uncommentSelection()
@@ -321,6 +325,8 @@ void CSVWorld::ScriptEdit::uncommentSelection()
 
     end.setPosition(end.selectionEnd());
     end.movePosition(QTextCursor::EndOfLine);
+
+    begin.beginEditBlock();
 
     for (; begin < end; begin.movePosition(QTextCursor::EndOfLine), begin.movePosition(QTextCursor::Right)) {
         begin.select(QTextCursor::LineUnderCursor);
@@ -345,6 +351,8 @@ void CSVWorld::ScriptEdit::uncommentSelection()
             begin.insertText(line);
         }
     }
+
+    begin.endEditBlock();
 }
 
 void CSVWorld::ScriptEdit::resizeEvent(QResizeEvent *e)
@@ -358,6 +366,16 @@ void CSVWorld::ScriptEdit::resizeEvent(QResizeEvent *e)
 void CSVWorld::ScriptEdit::contextMenuEvent(QContextMenuEvent *event)
 {
     QMenu *menu = createStandardContextMenu();
+
+    // remove redo/undo since they are disabled
+    QList<QAction*> menuActions = menu->actions();
+    for (QList<QAction*>::iterator i = menuActions.begin(); i < menuActions.end(); ++i)
+    {
+        if ((*i)->text().contains("Undo") || (*i)->text().contains("Redo"))
+        {
+            (*i)->setVisible(false);
+        }
+    }
     menu->addAction(mCommentAction);
     menu->addAction(mUncommentAction);
 
