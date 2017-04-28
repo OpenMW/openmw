@@ -383,20 +383,44 @@ namespace Resource
     public:
         bool isReservedName(const std::string& name) const
         {
-            static std::set<std::string, Misc::StringUtils::CiStartsWithComp> reservedNames;
+            if (name.empty())
+            {
+                return false;
+            }
+
+            static std::set<std::string, Misc::StringUtils::CiComp> reservedNames;
             if (reservedNames.empty())
             {
                 const char* reserved[] = {"Head", "Neck", "Chest", "Groin", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist", "Shield Bone", "Right Forearm",
                                           "Left Forearm", "Right Upper Arm", "Left Upper Arm", "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee", "Left Knee", "Right Upper Leg",
                                           "Left Upper Leg", "Right Clavicle", "Left Clavicle", "Weapon Bone", "Tail", "bip01", "Root Bone", "BoneOffset", "AttachLight", "ArrowBone", "Camera"};
 
-                reservedNames = std::set<std::string, Misc::StringUtils::CiStartsWithComp>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
+                reservedNames = std::set<std::string, Misc::StringUtils::CiComp>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
 
                 for (unsigned int i=0; i<sizeof(reserved)/sizeof(reserved[0]); ++i)
-                    reservedNames.insert(std::string("Tri ") + reserved[i]);
+                    reservedNames.insert(Misc::StringUtils::lowerCase(std::string("Tri ") + reserved[i]));
             }
 
-            return !name.empty() && reservedNames.find(name) != reservedNames.end();
+            std::string lowerName = Misc::StringUtils::lowerCase(name);
+
+            for (std::set<std::string, Misc::StringUtils::CiComp>::iterator it = reservedNames.begin(); it != reservedNames.end(); ++it)
+            {
+                std::string boneName = *it;
+
+                if (name.size() < boneName.size())
+                    continue;
+
+                int result = lowerName.compare(0, boneName.size(), boneName);
+
+                if (result < 0)
+                    break;
+                else if (result > 0)
+                    continue;
+
+                return true;
+            }
+
+            return false;
         }
 
         virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Drawable* node,unsigned int option) const
