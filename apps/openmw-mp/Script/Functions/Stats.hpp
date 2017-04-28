@@ -6,29 +6,6 @@
 #define OPENMW_STATAPI_HPP
 
 #define STATAPI \
-    {"GetName",                 StatsFunctions::GetName},\
-    {"SetName",                 StatsFunctions::SetName},\
-    \
-    {"GetRace",                 StatsFunctions::GetRace},\
-    {"SetRace",                 StatsFunctions::SetRace},\
-    \
-    {"GetHead",                 StatsFunctions::GetHead},\
-    {"SetHead",                 StatsFunctions::SetHead},\
-    \
-    {"GetHair",                 StatsFunctions::GetHairstyle},\
-    {"SetHair",                 StatsFunctions::SetHairstyle},\
-    \
-    {"GetIsMale",               StatsFunctions::GetIsMale},\
-    {"SetIsMale",               StatsFunctions::SetIsMale},\
-    \
-    {"GetLevel",                StatsFunctions::GetLevel},\
-    {"SetLevel",                StatsFunctions::SetLevel},\
-    {"GetLevelProgress",        StatsFunctions::GetLevelProgress},\
-    {"SetLevelProgress",        StatsFunctions::SetLevelProgress},\
-    \
-    {"GetBirthsign",            StatsFunctions::GetBirthsign},\
-    {"SetBirthsign",            StatsFunctions::SetBirthsign},\
-    \
     {"GetAttributeCount",       StatsFunctions::GetAttributeCount},\
     {"GetSkillCount",           StatsFunctions::GetSkillCount},\
     {"GetAttributeId",          StatsFunctions::GetAttributeId},\
@@ -36,40 +13,63 @@
     {"GetAttributeName",        StatsFunctions::GetAttributeName},\
     {"GetSkillName",            StatsFunctions::GetSkillName},\
     \
-    {"GetAttributeBase",        StatsFunctions::GetAttributeBase},\
-    {"SetAttributeBase",        StatsFunctions::SetAttributeBase},\
-    {"GetAttributeCurrent",     StatsFunctions::GetAttributeCurrent},\
-    {"SetAttributeCurrent",     StatsFunctions::SetAttributeCurrent},\
+    {"GetName",                 StatsFunctions::GetName},\
+    {"GetRace",                 StatsFunctions::GetRace},\
+    {"GetHead",                 StatsFunctions::GetHead},\
+    {"GetHair",                 StatsFunctions::GetHairstyle},\
+    {"GetIsMale",               StatsFunctions::GetIsMale},\
+    {"GetBirthsign",            StatsFunctions::GetBirthsign},\
     \
-    {"GetSkillBase",            StatsFunctions::GetSkillBase},\
-    {"SetSkillBase",            StatsFunctions::SetSkillBase},\
-    {"GetSkillCurrent",         StatsFunctions::GetSkillCurrent},\
-    {"SetSkillCurrent",         StatsFunctions::SetSkillCurrent},\
-    {"GetSkillProgress",        StatsFunctions::GetSkillProgress},\
-    {"SetSkillProgress",        StatsFunctions::SetSkillProgress},\
+    {"GetLevel",                StatsFunctions::GetLevel},\
+    {"GetLevelProgress",        StatsFunctions::GetLevelProgress},\
     \
     {"GetHealthBase",           StatsFunctions::GetHealthBase},\
-    {"SetHealthBase",           StatsFunctions::SetHealthBase},\
     {"GetHealthCurrent",        StatsFunctions::GetHealthCurrent},\
-    {"SetHealthCurrent",        StatsFunctions::SetHealthCurrent},\
     \
     {"GetMagickaBase",          StatsFunctions::GetMagickaBase},\
-    {"SetMagickaBase",          StatsFunctions::SetMagickaBase},\
     {"GetMagickaCurrent",       StatsFunctions::GetMagickaCurrent},\
-    {"SetMagickaCurrent",       StatsFunctions::SetMagickaCurrent},\
     \
     {"GetFatigueBase",          StatsFunctions::GetFatigueBase},\
-    {"SetFatigueBase",          StatsFunctions::SetFatigueBase},\
     {"GetFatigueCurrent",       StatsFunctions::GetFatigueCurrent},\
-    {"SetFatigueCurrent",       StatsFunctions::SetFatigueCurrent},\
     \
+    {"GetAttributeBase",        StatsFunctions::GetAttributeBase},\
+    {"GetAttributeCurrent",     StatsFunctions::GetAttributeCurrent},\
+    \
+    {"GetSkillBase",            StatsFunctions::GetSkillBase},\
+    {"GetSkillCurrent",         StatsFunctions::GetSkillCurrent},\
+    {"GetSkillProgress",        StatsFunctions::GetSkillProgress},\
     {"GetSkillIncrease",        StatsFunctions::GetSkillIncrease},\
-    {"SetSkillIncrease",        StatsFunctions::SetSkillIncrease},\
     \
     {"GetBounty",               StatsFunctions::GetBounty},\
-    {"SetBounty",               StatsFunctions::SetBounty},\
     \
+    {"SetName",                 StatsFunctions::SetName},\
+    {"SetRace",                 StatsFunctions::SetRace},\
+    {"SetHead",                 StatsFunctions::SetHead},\
+    {"SetHair",                 StatsFunctions::SetHairstyle},\
+    {"SetIsMale",               StatsFunctions::SetIsMale},\
+    {"SetBirthsign",            StatsFunctions::SetBirthsign},\
+    \
+    {"SetLevel",                StatsFunctions::SetLevel},\
+    {"SetLevelProgress",        StatsFunctions::SetLevelProgress},\
+    \
+    {"SetHealthBase",           StatsFunctions::SetHealthBase},\
+    {"SetHealthCurrent",        StatsFunctions::SetHealthCurrent},\
+    {"SetMagickaBase",          StatsFunctions::SetMagickaBase},\
+    {"SetMagickaCurrent",       StatsFunctions::SetMagickaCurrent},\
+    {"SetFatigueBase",          StatsFunctions::SetFatigueBase},\
+    {"SetFatigueCurrent",       StatsFunctions::SetFatigueCurrent},\
+    \
+    {"SetAttributeBase",        StatsFunctions::SetAttributeBase},\
+    {"SetAttributeCurrent",     StatsFunctions::SetAttributeCurrent},\
+    \
+    {"SetSkillBase",            StatsFunctions::SetSkillBase},\
+    {"SetSkillCurrent",         StatsFunctions::SetSkillCurrent},\
+    {"SetSkillProgress",        StatsFunctions::SetSkillProgress},\
+    {"SetSkillIncrease",        StatsFunctions::SetSkillIncrease},\
+    \
+    {"SetBounty",               StatsFunctions::SetBounty},\
     {"SetCharGenStage",         StatsFunctions::SetCharGenStage},\
+    \
     {"Resurrect",               StatsFunctions::Resurrect},\
     {"SendBaseInfo",            StatsFunctions::SendBaseInfo},\
     \
@@ -82,44 +82,6 @@
 class StatsFunctions
 {
 public:
-    static void SetName(unsigned short pid, const char *name) noexcept;
-    static const char *GetName(unsigned short pid) noexcept;
-
-    static void SetBirthsign(unsigned short pid, const char *name) noexcept;
-    static const char *GetBirthsign(unsigned short pid) noexcept;
-
-    static void SetRace(unsigned short pid, const char *race) noexcept;
-    static const char *GetRace(unsigned short pid) noexcept;
-
-    static void SetHead(unsigned short pid, const char *head) noexcept;
-    static const char *GetHead(unsigned short pid) noexcept;
-
-    static void SetHairstyle(unsigned short pid, const char *style) noexcept;
-    static const char *GetHairstyle(unsigned short pid) noexcept;
-
-    static void SetIsMale(unsigned short pid, int male) noexcept;
-    static int GetIsMale(unsigned short pid) noexcept;
-
-    static int GetLevel(unsigned short pid) noexcept;
-    static void SetLevel(unsigned short pid, int value) noexcept;
-    static int GetLevelProgress(unsigned short pid) noexcept;
-    static void SetLevelProgress(unsigned short pid, int value) noexcept;
-
-    static double GetHealthBase(unsigned short pid) noexcept;
-    static void SetHealthBase(unsigned short pid, double value) noexcept;
-    static double GetHealthCurrent(unsigned short pid) noexcept;
-    static void SetHealthCurrent(unsigned short pid, double value) noexcept;
-
-    static double GetMagickaBase(unsigned short pid) noexcept;
-    static void SetMagickaBase(unsigned short pid, double value) noexcept;
-    static double GetMagickaCurrent(unsigned short pid) noexcept;
-    static void SetMagickaCurrent(unsigned short pid, double value) noexcept;
-
-    static double GetFatigueBase(unsigned short pid) noexcept;
-    static void SetFatigueBase(unsigned short pid, double value) noexcept;
-    static double GetFatigueCurrent(unsigned short pid) noexcept;
-    static void SetFatigueCurrent(unsigned short pid, double value) noexcept;
-
     static int GetAttributeCount() noexcept;
     static int GetSkillCount() noexcept;
     static int GetAttributeId(const char *name) noexcept;
@@ -127,26 +89,62 @@ public:
     static const char *GetAttributeName(unsigned short attribute) noexcept;
     static const char *GetSkillName(unsigned short skill) noexcept;
 
+    static const char *GetName(unsigned short pid) noexcept;
+    static const char *GetRace(unsigned short pid) noexcept;
+    static const char *GetHead(unsigned short pid) noexcept;
+    static const char *GetHairstyle(unsigned short pid) noexcept;
+    static int GetIsMale(unsigned short pid) noexcept;
+    static const char *GetBirthsign(unsigned short pid) noexcept;
+
+    static int GetLevel(unsigned short pid) noexcept;
+    static int GetLevelProgress(unsigned short pid) noexcept;
+
+    static double GetHealthBase(unsigned short pid) noexcept;
+    static double GetHealthCurrent(unsigned short pid) noexcept;
+    static double GetMagickaBase(unsigned short pid) noexcept;
+    static double GetMagickaCurrent(unsigned short pid) noexcept;
+    static double GetFatigueBase(unsigned short pid) noexcept;
+    static double GetFatigueCurrent(unsigned short pid) noexcept;
+
     static int GetAttributeBase(unsigned short pid, unsigned short attribute) noexcept;
-    static void SetAttributeBase(unsigned short pid, unsigned short attribute, int value) noexcept;
     static int GetAttributeCurrent(unsigned short pid, unsigned short attribute) noexcept;
-    static void SetAttributeCurrent(unsigned short pid, unsigned short attribute, int value) noexcept;
 
     static int GetSkillBase(unsigned short pid, unsigned short skill) noexcept;
-    static void SetSkillBase(unsigned short pid, unsigned short skill, int value) noexcept;
     static int GetSkillCurrent(unsigned short pid, unsigned short skill) noexcept;
-    static void SetSkillCurrent(unsigned short pid, unsigned short skill, int value) noexcept;
     static double GetSkillProgress(unsigned short pid, unsigned short skill) noexcept;
-    static void SetSkillProgress(unsigned short pid, unsigned short skill, double value) noexcept;
-
     static int GetSkillIncrease(unsigned short pid, unsigned int pos) noexcept;
-    static void SetSkillIncrease(unsigned short pid, unsigned int pos, int value) noexcept;
 
     static int GetBounty(unsigned short pid) noexcept;
+
+    static void SetName(unsigned short pid, const char *name) noexcept;
+    static void SetRace(unsigned short pid, const char *race) noexcept;
+    static void SetHead(unsigned short pid, const char *head) noexcept;
+    static void SetHairstyle(unsigned short pid, const char *style) noexcept;
+    static void SetIsMale(unsigned short pid, int male) noexcept;
+    static void SetBirthsign(unsigned short pid, const char *name) noexcept;
+    
+    static void SetLevel(unsigned short pid, int value) noexcept;
+    static void SetLevelProgress(unsigned short pid, int value) noexcept;
+
+    static void SetHealthBase(unsigned short pid, double value) noexcept;    
+    static void SetHealthCurrent(unsigned short pid, double value) noexcept;
+    static void SetMagickaBase(unsigned short pid, double value) noexcept;
+    static void SetMagickaCurrent(unsigned short pid, double value) noexcept;
+    static void SetFatigueBase(unsigned short pid, double value) noexcept;
+    static void SetFatigueCurrent(unsigned short pid, double value) noexcept;
+
+    static void SetAttributeBase(unsigned short pid, unsigned short attribute, int value) noexcept;
+    static void SetAttributeCurrent(unsigned short pid, unsigned short attribute, int value) noexcept;
+
+    static void SetSkillBase(unsigned short pid, unsigned short skill, int value) noexcept;    
+    static void SetSkillCurrent(unsigned short pid, unsigned short skill, int value) noexcept;
+    static void SetSkillProgress(unsigned short pid, unsigned short skill, double value) noexcept;
+    static void SetSkillIncrease(unsigned short pid, unsigned int pos, int value) noexcept;
+
     static void SetBounty(unsigned short pid, int value) noexcept;
+    static void SetCharGenStage(unsigned short pid, int start, int end) noexcept;
 
     static void Resurrect(unsigned short pid);
-    static void SetCharGenStage(unsigned short pid, int start, int end) noexcept;
     static void SendBaseInfo(unsigned short pid) noexcept;
 
     static void SendStatsDynamic(unsigned short pid) noexcept;

@@ -15,250 +15,6 @@
 using namespace std;
 using namespace ESM;
 
-void StatsFunctions::SetName(unsigned short pid, const char *name) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    if (player->npc.mName == name)
-        return;
-
-    player->npc.mName = name;
-}
-
-const char *StatsFunctions::GetName(unsigned short pid) noexcept
-{
-
-    Player *player;
-    GET_PLAYER(pid, player, 0);
-
-    return player->npc.mName.c_str();
-}
-
-void StatsFunctions::SetBirthsign(unsigned short pid, const char *sign) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    if (player->birthsign == sign)
-        return;
-
-    player->birthsign = sign;
-}
-
-const char *StatsFunctions::GetBirthsign(unsigned short pid) noexcept
-{
-
-    Player *player;
-    GET_PLAYER(pid, player, 0);
-
-    return player->birthsign.c_str();
-}
-
-void StatsFunctions::SetRace(unsigned short pid, const char *race) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    if (player->npc.mRace == race)
-        return;
-
-    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Setting race for %s: %s -> %s", player->npc.mName.c_str(),
-                       player->npc.mRace.c_str(), race);
-
-    player->npc.mRace = race;
-}
-
-const char *StatsFunctions::GetRace(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0);
-
-    return player->npc.mRace.c_str();
-}
-
-void StatsFunctions::SetHead(unsigned short pid, const char *head) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    if (player->npc.mHead == head)
-        return;
-
-    player->npc.mHead = head;
-}
-
-const char *StatsFunctions::GetHead(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0);
-
-    return player->npc.mHead.c_str();
-}
-
-void StatsFunctions::SetHairstyle(unsigned short pid, const char *style) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    if (player->npc.mHair == style)
-        return;
-
-    player->npc.mHair = style;
-}
-
-const char *StatsFunctions::GetHairstyle(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0);
-
-    return player->npc.mHair.c_str();
-}
-
-int StatsFunctions::GetIsMale(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,false);
-
-    return player->npc.isMale();
-}
-
-void StatsFunctions::SetIsMale(unsigned short pid, int value) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    player->npc.setIsMale(value == true);
-}
-
-int StatsFunctions::GetLevel(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0);
-
-    return player->creatureStats.mLevel;
-}
-
-void StatsFunctions::SetLevel(unsigned short pid, int value) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    player->creatureStats.mLevel = value;
-}
-
-int StatsFunctions::GetLevelProgress(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0);
-
-    return player->npcStats.mLevelProgress;
-}
-
-void StatsFunctions::SetLevelProgress(unsigned short pid, int value) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    player->npcStats.mLevelProgress = value;
-}
-
-double StatsFunctions::GetHealthBase(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0.0f);
-
-    return player->creatureStats.mDynamic[0].mBase;
-}
-
-void StatsFunctions::SetHealthBase(unsigned short pid, double value) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    player->creatureStats.mDynamic[0].mBase = value;
-}
-
-double StatsFunctions::GetHealthCurrent(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0.0f);
-
-    return player->creatureStats.mDynamic[0].mCurrent;
-}
-
-void StatsFunctions::SetHealthCurrent(unsigned short pid, double value) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    player->creatureStats.mDynamic[0].mCurrent = value;
-}
-
-double StatsFunctions::GetMagickaBase(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0.0f);
-
-    return player->creatureStats.mDynamic[1].mBase;
-}
-
-void StatsFunctions::SetMagickaBase(unsigned short pid, double value) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    player->creatureStats.mDynamic[1].mBase = value;
-}
-
-double StatsFunctions::GetMagickaCurrent(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0.0f);
-
-    return player->creatureStats.mDynamic[1].mCurrent;
-}
-
-void StatsFunctions::SetMagickaCurrent(unsigned short pid, double value) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    player->creatureStats.mDynamic[1].mCurrent = value;
-}
-
-double StatsFunctions::GetFatigueBase(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0.0f);
-
-    return player->creatureStats.mDynamic[2].mBase;
-}
-
-void StatsFunctions::SetFatigueBase(unsigned short pid, double value) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    player->creatureStats.mDynamic[2].mBase = value;
-}
-
-double StatsFunctions::GetFatigueCurrent(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0.0f);
-
-    return player->creatureStats.mDynamic[2].mCurrent;
-}
-
-void StatsFunctions::SetFatigueCurrent(unsigned short pid, double value) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    player->creatureStats.mDynamic[2].mCurrent = value;
-}
-
 int StatsFunctions::GetAttributeCount() noexcept
 {
     return Attribute::Length;
@@ -311,6 +67,120 @@ const char *StatsFunctions::GetSkillName(unsigned short skill) noexcept
     return Skill::sSkillNames[skill].c_str();
 }
 
+const char *StatsFunctions::GetName(unsigned short pid) noexcept
+{
+
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->npc.mName.c_str();
+}
+
+const char *StatsFunctions::GetRace(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->npc.mRace.c_str();
+}
+
+const char *StatsFunctions::GetHead(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->npc.mHead.c_str();
+}
+
+const char *StatsFunctions::GetHairstyle(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->npc.mHair.c_str();
+}
+
+int StatsFunctions::GetIsMale(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, false);
+
+    return player->npc.isMale();
+}
+
+const char *StatsFunctions::GetBirthsign(unsigned short pid) noexcept
+{
+
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->birthsign.c_str();
+}
+
+int StatsFunctions::GetLevel(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->creatureStats.mLevel;
+}
+
+int StatsFunctions::GetLevelProgress(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->npcStats.mLevelProgress;
+}
+
+double StatsFunctions::GetHealthBase(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->creatureStats.mDynamic[0].mBase;
+}
+
+double StatsFunctions::GetHealthCurrent(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->creatureStats.mDynamic[0].mCurrent;
+}
+
+double StatsFunctions::GetMagickaBase(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->creatureStats.mDynamic[1].mBase;
+}
+
+double StatsFunctions::GetMagickaCurrent(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->creatureStats.mDynamic[1].mCurrent;
+}
+
+double StatsFunctions::GetFatigueBase(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->creatureStats.mDynamic[2].mBase;
+}
+
+double StatsFunctions::GetFatigueCurrent(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->creatureStats.mDynamic[2].mCurrent;
+}
+
 int StatsFunctions::GetAttributeBase(unsigned short pid, unsigned short attribute) noexcept
 {
     Player *player;
@@ -320,17 +190,6 @@ int StatsFunctions::GetAttributeBase(unsigned short pid, unsigned short attribut
         return 0;
 
     return player->creatureStats.mAttributes[attribute].mBase;
-}
-
-void StatsFunctions::SetAttributeBase(unsigned short pid, unsigned short attribute, int value) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    if (attribute >= Attribute::Length)
-        return;
-
-    player->creatureStats.mAttributes[attribute].mBase = value;
 }
 
 int StatsFunctions::GetAttributeCurrent(unsigned short pid, unsigned short attribute) noexcept
@@ -344,17 +203,6 @@ int StatsFunctions::GetAttributeCurrent(unsigned short pid, unsigned short attri
     return player->creatureStats.mAttributes[attribute].mCurrent;
 }
 
-void StatsFunctions::SetAttributeCurrent(unsigned short pid, unsigned short attribute, int value) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    if (attribute >= Attribute::Length)
-        return;
-
-    player->creatureStats.mAttributes[attribute].mCurrent = value;
-}
-
 int StatsFunctions::GetSkillBase(unsigned short pid, unsigned short skill) noexcept
 {
     Player *player;
@@ -364,17 +212,6 @@ int StatsFunctions::GetSkillBase(unsigned short pid, unsigned short skill) noexc
         return 0;
 
     return player->npcStats.mSkills[skill].mBase;
-}
-
-void StatsFunctions::SetSkillBase(unsigned short pid, unsigned short skill, int value) noexcept  //TODO: need packet for one value
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    if (skill >= Skill::Length)
-        return;
-
-    player->npcStats.mSkills[skill].mBase = value;
 }
 
 int StatsFunctions::GetSkillCurrent(unsigned short pid, unsigned short skill) noexcept
@@ -388,17 +225,6 @@ int StatsFunctions::GetSkillCurrent(unsigned short pid, unsigned short skill) no
     return player->npcStats.mSkills[skill].mCurrent;
 }
 
-void StatsFunctions::SetSkillCurrent(unsigned short pid, unsigned short skill, int value) noexcept //TODO: need packet for one value
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    if (skill >= Skill::Length)
-        return;
-
-    player->npcStats.mSkills[skill].mCurrent = value;
-}
-
 double StatsFunctions::GetSkillProgress(unsigned short pid, unsigned short skill) noexcept
 {
     Player *player;
@@ -408,17 +234,6 @@ double StatsFunctions::GetSkillProgress(unsigned short pid, unsigned short skill
         return 0;
 
     return player->npcStats.mSkills[skill].mProgress;
-}
-
-void StatsFunctions::SetSkillProgress(unsigned short pid, unsigned short skill, double value) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    if (skill >= Skill::Length)
-        return;
-
-    player->npcStats.mSkills[skill].mProgress = value;
 }
 
 int StatsFunctions::GetSkillIncrease(unsigned short pid, unsigned int attribute) noexcept
@@ -432,6 +247,199 @@ int StatsFunctions::GetSkillIncrease(unsigned short pid, unsigned int attribute)
     return player->npcStats.mSkillIncrease[attribute];
 }
 
+int StatsFunctions::GetBounty(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->npcStats.mBounty;
+}
+
+void StatsFunctions::SetName(unsigned short pid, const char *name) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    if (player->npc.mName == name)
+        return;
+
+    player->npc.mName = name;
+}
+
+void StatsFunctions::SetRace(unsigned short pid, const char *race) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    if (player->npc.mRace == race)
+        return;
+
+    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Setting race for %s: %s -> %s", player->npc.mName.c_str(),
+                       player->npc.mRace.c_str(), race);
+
+    player->npc.mRace = race;
+}
+
+void StatsFunctions::SetHead(unsigned short pid, const char *head) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    if (player->npc.mHead == head)
+        return;
+
+    player->npc.mHead = head;
+}
+
+void StatsFunctions::SetHairstyle(unsigned short pid, const char *style) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    if (player->npc.mHair == style)
+        return;
+
+    player->npc.mHair = style;
+}
+
+void StatsFunctions::SetIsMale(unsigned short pid, int value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    player->npc.setIsMale(value == true);
+}
+
+void StatsFunctions::SetBirthsign(unsigned short pid, const char *sign) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    if (player->birthsign == sign)
+        return;
+
+    player->birthsign = sign;
+}
+
+void StatsFunctions::SetLevel(unsigned short pid, int value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->creatureStats.mLevel = value;
+}
+
+void StatsFunctions::SetLevelProgress(unsigned short pid, int value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->npcStats.mLevelProgress = value;
+}
+
+void StatsFunctions::SetHealthBase(unsigned short pid, double value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    player->creatureStats.mDynamic[0].mBase = value;
+}
+
+void StatsFunctions::SetHealthCurrent(unsigned short pid, double value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    player->creatureStats.mDynamic[0].mCurrent = value;
+}
+
+void StatsFunctions::SetMagickaBase(unsigned short pid, double value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    player->creatureStats.mDynamic[1].mBase = value;
+}
+
+void StatsFunctions::SetMagickaCurrent(unsigned short pid, double value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    player->creatureStats.mDynamic[1].mCurrent = value;
+}
+
+void StatsFunctions::SetFatigueBase(unsigned short pid, double value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    player->creatureStats.mDynamic[2].mBase = value;
+}
+
+void StatsFunctions::SetFatigueCurrent(unsigned short pid, double value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    player->creatureStats.mDynamic[2].mCurrent = value;
+}
+
+void StatsFunctions::SetAttributeBase(unsigned short pid, unsigned short attribute, int value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    if (attribute >= Attribute::Length)
+        return;
+
+    player->creatureStats.mAttributes[attribute].mBase = value;
+}
+
+void StatsFunctions::SetAttributeCurrent(unsigned short pid, unsigned short attribute, int value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    if (attribute >= Attribute::Length)
+        return;
+
+    player->creatureStats.mAttributes[attribute].mCurrent = value;
+}
+
+void StatsFunctions::SetSkillBase(unsigned short pid, unsigned short skill, int value) noexcept  //TODO: need packet for one value
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    if (skill >= Skill::Length)
+        return;
+
+    player->npcStats.mSkills[skill].mBase = value;
+}
+
+void StatsFunctions::SetSkillCurrent(unsigned short pid, unsigned short skill, int value) noexcept //TODO: need packet for one value
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    if (skill >= Skill::Length)
+        return;
+
+    player->npcStats.mSkills[skill].mCurrent = value;
+}
+
+void StatsFunctions::SetSkillProgress(unsigned short pid, unsigned short skill, double value) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    if (skill >= Skill::Length)
+        return;
+
+    player->npcStats.mSkills[skill].mProgress = value;
+}
+
 void StatsFunctions::SetSkillIncrease(unsigned short pid, unsigned int attribute, int value) noexcept
 {
     Player *player;
@@ -441,14 +449,6 @@ void StatsFunctions::SetSkillIncrease(unsigned short pid, unsigned int attribute
         return;
 
     player->npcStats.mSkillIncrease[attribute] = value;
-}
-
-int StatsFunctions::GetBounty(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0);
-
-    return player->npcStats.mBounty;
 }
 
 void StatsFunctions::SetBounty(unsigned short pid, int value) noexcept
