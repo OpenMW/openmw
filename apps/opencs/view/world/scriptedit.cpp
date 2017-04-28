@@ -7,12 +7,14 @@
 #include <QString>
 #include <QPainter>
 #include <QTextDocumentFragment>
+#include <QMenu>
 
 #include "../../model/doc/document.hpp"
 
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/prefs/state.hpp"
+#include "../../model/prefs/shortcut.hpp"
 
 CSVWorld::ScriptEdit::ChangeLock::ChangeLock (ScriptEdit& edit) : mEdit (edit)
 {
@@ -89,6 +91,16 @@ CSVWorld::ScriptEdit::ScriptEdit(
                   <<CSMWorld::UniversalId::Type_Region;
     
     connect(this, SIGNAL(selectionChanged()), this, SLOT(markOccurrences()));
+
+    mCommentAction = new QAction (tr ("Comment Selection"), this);
+    connect(mCommentAction, SIGNAL (triggered()), this, SLOT (commentSelection()));
+    CSMPrefs::Shortcut *commentShortcut = new CSMPrefs::Shortcut("script-editor-comment", this);
+    commentShortcut->associateAction(mCommentAction);
+
+    mUncommentAction = new QAction (tr ("Uncomment Selection"), this);
+    connect(mUncommentAction, SIGNAL (triggered()), this, SLOT (uncommentSelection()));
+    CSMPrefs::Shortcut *uncommentShortcut = new CSMPrefs::Shortcut("script-editor-uncomment", this);
+    uncommentShortcut->associateAction(mUncommentAction);
 
     mHighlighter = new ScriptHighlighter (document.getData(), mode, ScriptEdit::document());
 
@@ -317,6 +329,65 @@ void CSVWorld::ScriptEdit::markOccurrences()
         mMarkOccurrencesRunning = false;
     }
 }
+  
+void CSVWorld::ScriptEdit::commentSelection()
+{
+    QTextCursor begin = textCursor();
+    QTextCursor end = begin;
+    begin.setPosition(begin.selectionStart());
+    begin.movePosition(QTextCursor::StartOfLine);
+
+    end.setPosition(end.selectionEnd());
+    end.movePosition(QTextCursor::EndOfLine);
+
+    begin.beginEditBlock();
+
+    for (; begin < end; begin.movePosition(QTextCursor::EndOfLine), begin.movePosition(QTextCursor::Right))
+    {
+        begin.insertText(";");
+    }
+
+    begin.endEditBlock();
+}
+
+void CSVWorld::ScriptEdit::uncommentSelection()
+{
+    QTextCursor begin = textCursor();
+    QTextCursor end = begin;
+    begin.setPosition(begin.selectionStart());
+    begin.movePosition(QTextCursor::StartOfLine);
+
+    end.setPosition(end.selectionEnd());
+    end.movePosition(QTextCursor::EndOfLine);
+
+    begin.beginEditBlock();
+
+    for (; begin < end; begin.movePosition(QTextCursor::EndOfLine), begin.movePosition(QTextCursor::Right)) {
+        begin.select(QTextCursor::LineUnderCursor);
+        QString line = begin.selectedText();
+
+        if (line.size() == 0)
+            continue;
+
+        // get first nonspace character in line
+        int index;
+        for (index = 0; index != line.size(); ++index)
+        {
+            if (!line[index].isSpace())
+                break;
+        }
+
+        if (index != line.size() && line[index] == ';')
+        {
+            // remove the semicolon
+            line.remove(index, 1);
+            // put the line back
+            begin.insertText(line);
+        }
+    }
+
+    begin.endEditBlock();
+}
 
 void CSVWorld::ScriptEdit::resizeEvent(QResizeEvent *e)
 {
@@ -324,6 +395,26 @@ void CSVWorld::ScriptEdit::resizeEvent(QResizeEvent *e)
 
     QRect cr = contentsRect();
     mLineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+}
+
+void CSVWorld::ScriptEdit::contextMenuEvent(QContextMenuEvent *event)
+{
+    QMenu *menu = createStandardContextMenu();
+
+    // remove redo/undo since they are disabled
+    QList<QAction*> menuActions = menu->actions();
+    for (QList<QAction*>::iterator i = menuActions.begin(); i < menuActions.end(); ++i)
+    {
+        if ((*i)->text().contains("Undo") || (*i)->text().contains("Redo"))
+        {
+            (*i)->setVisible(false);
+        }
+    }
+    menu->addAction(mCommentAction);
+    menu->addAction(mUncommentAction);
+
+    menu->exec(event->globalPos());
+    delete menu;
 }
 
 void CSVWorld::ScriptEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
