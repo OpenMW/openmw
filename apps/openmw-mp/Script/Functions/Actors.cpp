@@ -6,6 +6,8 @@
 #include <apps/openmw-mp/Utils.hpp>
 #include <apps/openmw-mp/Script/ScriptFunctions.hpp>
 
+#include <components/esm/creaturestats.hpp>
+
 #include "Actors.hpp"
 
 using namespace mwmp;
@@ -86,6 +88,36 @@ double ActorFunctions::GetActorRotY(unsigned int i) noexcept
 double ActorFunctions::GetActorRotZ(unsigned int i) noexcept
 {
     return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).position.rot[2];
+}
+
+double ActorFunctions::GetActorHealthBase(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).creatureStats->mDynamic[0].mBase;
+}
+
+double ActorFunctions::GetActorHealthCurrent(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).creatureStats->mDynamic[0].mCurrent;
+}
+
+double ActorFunctions::GetActorMagickaBase(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).creatureStats->mDynamic[1].mBase;
+}
+
+double ActorFunctions::GetActorMagickaCurrent(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).creatureStats->mDynamic[1].mCurrent;
+}
+
+double ActorFunctions::GetActorFatigueBase(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).creatureStats->mDynamic[2].mBase;
+}
+
+double ActorFunctions::GetActorFatigueCurrent(unsigned int i) noexcept
+{
+    return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).creatureStats->mDynamic[2].mCurrent;
 }
 
 void ActorFunctions::SetScriptActorListCell(const char* cellDescription) noexcept
