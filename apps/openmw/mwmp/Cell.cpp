@@ -253,6 +253,9 @@ void Cell::initializeLocalActors()
     {
         MWWorld::Ptr ptr(&*listIter, store);
 
+        // If this Ptr is lacking a unique index, ignore it
+        if (ptr.getCellRef().getRefNum().mIndex == 0 && ptr.getCellRef().getMpNum() == 0) continue;
+
         initializeLocalActor(ptr);
     }
 
@@ -262,6 +265,9 @@ void Cell::initializeLocalActors()
         listIter != creatureList->mList.end(); ++listIter)
     {
         MWWorld::Ptr ptr(&*listIter, store);
+
+        // If this Ptr is lacking a unique index, ignore it
+        if (ptr.getCellRef().getRefNum().mIndex == 0 && ptr.getCellRef().getMpNum() == 0) continue;
 
         initializeLocalActor(ptr);
     }

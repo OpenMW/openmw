@@ -193,6 +193,9 @@ void ActorList::sendActorsInCell(MWWorld::CellStore* cellStore)
     {
         MWWorld::Ptr ptr(&*listIter, 0);
 
+        // If this Ptr is lacking a unique index, ignore it
+        if (ptr.getCellRef().getRefNum().mIndex == 0 && ptr.getCellRef().getMpNum() == 0) continue;
+
         BaseActor actor;
         actor.refId = ptr.getCellRef().getRefId();
         actor.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
@@ -207,6 +210,9 @@ void ActorList::sendActorsInCell(MWWorld::CellStore* cellStore)
         listIter != creatureList->mList.end(); ++listIter)
     {
         MWWorld::Ptr ptr(&*listIter, 0);
+
+        // If this Ptr is lacking a unique index, ignore it
+        if (ptr.getCellRef().getRefNum().mIndex == 0 && ptr.getCellRef().getMpNum() == 0) continue;
 
         BaseActor actor;
         actor.refId = ptr.getCellRef().getRefId();
