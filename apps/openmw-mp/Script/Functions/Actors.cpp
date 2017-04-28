@@ -164,6 +164,36 @@ void ActorFunctions::SetActorRotation(double x, double y, double z) noexcept
     tempActor.position.rot[2] = z;
 }
 
+void ActorFunctions::SetActorHealthBase(double value) noexcept
+{
+    tempActor.creatureStats->mDynamic[0].mBase = value;
+}
+
+void ActorFunctions::SetActorHealthCurrent(double value) noexcept
+{
+    tempActor.creatureStats->mDynamic[0].mCurrent = value;
+}
+
+void ActorFunctions::SetActorMagickaBase(double value) noexcept
+{
+    tempActor.creatureStats->mDynamic[1].mBase = value;
+}
+
+void ActorFunctions::SetActorMagickaCurrent(double value) noexcept
+{
+    tempActor.creatureStats->mDynamic[1].mCurrent = value;
+}
+
+void ActorFunctions::SetActorFatigueBase(double value) noexcept
+{
+    tempActor.creatureStats->mDynamic[2].mBase = value;
+}
+
+void ActorFunctions::SetActorFatigueCurrent(double value) noexcept
+{
+    tempActor.creatureStats->mDynamic[2].mCurrent = value;
+}
+
 void ActorFunctions::AddActor() noexcept
 {
     scriptActorList.baseActors.push_back(tempActor);
@@ -181,6 +211,12 @@ void ActorFunctions::SendActorAuthority() noexcept
 {
     mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_AUTHORITY)->setActorList(&scriptActorList);
     mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_AUTHORITY)->Send(scriptActorList.guid);
+}
+
+void ActorFunctions::SendActorStatsDynamic() noexcept
+{
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_STATS_DYNAMIC)->setActorList(&scriptActorList);
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_STATS_DYNAMIC)->Send(scriptActorList.guid);
 }
 
 void ActorFunctions::SendActorCellChange() noexcept

@@ -33,13 +33,22 @@
     {"SetActorRefId",              ActorFunctions::SetActorRefId},\
     {"SetActorRefNumIndex",        ActorFunctions::SetActorRefNumIndex},\
     {"SetActorMpNum",              ActorFunctions::SetActorMpNum},\
+    \
     {"SetActorPosition",           ActorFunctions::SetActorPosition},\
     {"SetActorRotation",           ActorFunctions::SetActorRotation},\
+    \
+    {"SetActorHealthBase",         ActorFunctions::SetActorHealthBase},\
+    {"SetActorHealthCurrent",      ActorFunctions::SetActorHealthCurrent},\
+    {"SetActorMagickaBase",        ActorFunctions::SetActorMagickaBase},\
+    {"SetActorMagickaCurrent",     ActorFunctions::SetActorMagickaCurrent},\
+    {"SetActorFatigueBase",        ActorFunctions::SetActorFatigueBase},\
+    {"SetActorFatigueCurrent",     ActorFunctions::SetActorFatigueCurrent},\
     \
     {"AddActor",                   ActorFunctions::AddActor},\
     \
     {"SendActorList",              ActorFunctions::SendActorList},\
     {"SendActorAuthority",         ActorFunctions::SendActorAuthority},\
+    {"SendActorStatsDynamic",      ActorFunctions::SendActorStatsDynamic},\
     {"SendActorCellChange",        ActorFunctions::SendActorCellChange}
 
 class ActorFunctions
@@ -77,13 +86,22 @@ public:
     static void SetActorRefId(const char* refId) noexcept;
     static void SetActorRefNumIndex(int refNumIndex) noexcept;
     static void SetActorMpNum(int mpNum) noexcept;
+
     static void SetActorPosition(double x, double y, double z) noexcept;
     static void SetActorRotation(double x, double y, double z) noexcept;
+
+    static void SetActorHealthBase(double value) noexcept;
+    static void SetActorHealthCurrent(double value) noexcept;
+    static void SetActorMagickaBase(double value) noexcept;
+    static void SetActorMagickaCurrent(double value) noexcept;
+    static void SetActorFatigueBase(double value) noexcept;
+    static void SetActorFatigueCurrent(double value) noexcept;
 
     static void AddActor() noexcept;
 
     static void SendActorList() noexcept;
     static void SendActorAuthority() noexcept;
+    static void SendActorStatsDynamic() noexcept;
     static void SendActorCellChange() noexcept;
 };
 
