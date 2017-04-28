@@ -152,6 +152,7 @@ void CSMPrefs::State::declare()
         setRange (0, 10000);
     declareInt ("error-height", "Initial height of the error panel", 100).
         setRange (100, 10000);
+    declareBool ("highlight-occurrences", "Highlight other occurrences of selected names", true);
     declareSeparator();
     declareColour ("colour-int", "Highlight Colour: Integer Literals", QColor ("darkmagenta"));
     declareColour ("colour-float", "Highlight Colour: Float Literals", QColor ("magenta"));

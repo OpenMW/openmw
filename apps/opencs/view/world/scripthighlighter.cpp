@@ -73,7 +73,7 @@ void CSVWorld::ScriptHighlighter::highlight (const Compiler::TokenLoc& loc, Type
     index -= length;
 
     QTextCharFormat scheme = mScheme[type];
-    if (loc.mLiteral == mMarkedWord)
+    if (mMarkOccurrences && loc.mLiteral == mMarkedWord)
         scheme.merge(mScheme[Type_Highlight]);
 
     setFormat (index, length, scheme);
@@ -107,6 +107,11 @@ void CSVWorld::ScriptHighlighter::highlightBlock (const QString& text)
         scanner.scan (*this);
     }
     catch (...) {} // ignore syntax errors
+}
+
+void CSVWorld::ScriptHighlighter::setMarkOccurrences(bool flag)
+{
+    mMarkOccurrences = flag;
 }
 
 void CSVWorld::ScriptHighlighter::setMarkedWord(const std::string& name)

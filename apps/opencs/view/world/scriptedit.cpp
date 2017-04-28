@@ -49,6 +49,7 @@ CSVWorld::ScriptEdit::ScriptEdit(
     mDefaultFont(font()),
     mMonoFont(QFont("Monospace")),
     mTabCharCount(4),
+    mMarkOccurrences(true),
     mMarkOccurrencesRunning(false),
     mDocument(document),
     mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive)
@@ -233,6 +234,13 @@ void CSVWorld::ScriptEdit::settingChanged(const CSMPrefs::Setting *setting)
         mTabCharCount = setting->toInt();
         setTabWidth();
     }
+    else if (*setting == "Scripts/highlight-occurrences")
+    {
+        mMarkOccurrences = setting->isTrue();
+        mHighlighter->setMarkedWord("");
+        updateHighlighting();
+        mHighlighter->setMarkOccurrences(mMarkOccurrences);
+    }
 }
 
 void CSVWorld::ScriptEdit::idListChanged()
@@ -295,16 +303,19 @@ void CSVWorld::ScriptEdit::markOccurrences()
     if (mMarkOccurrencesRunning)
         return;
 
-    mMarkOccurrencesRunning = true;
+    if (mMarkOccurrences)
+    {
+        mMarkOccurrencesRunning = true;
 
-    QTextCursor cursor = textCursor();
-    cursor.select(QTextCursor::WordUnderCursor);
-    QString word = cursor.selectedText();
+        QTextCursor cursor = textCursor();
+        cursor.select(QTextCursor::WordUnderCursor);
+        QString word = cursor.selectedText();
 
-    mHighlighter->setMarkedWord(word.toStdString());
-    mHighlighter->rehighlight();
+        mHighlighter->setMarkedWord(word.toStdString());
+        mHighlighter->rehighlight();
 
-    mMarkOccurrencesRunning = false;
+        mMarkOccurrencesRunning = false;
+    }
 }
 
 void CSVWorld::ScriptEdit::resizeEvent(QResizeEvent *e)

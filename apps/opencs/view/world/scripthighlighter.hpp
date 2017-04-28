@@ -49,6 +49,7 @@ namespace CSVWorld
             CSMWorld::ScriptContext mContext;
             std::map<Type, QTextCharFormat> mScheme;
             Mode mMode;
+            bool mMarkOccurrences;
             std::string mMarkedWord;
 
         private:
@@ -93,6 +94,8 @@ namespace CSVWorld
             ScriptHighlighter (const CSMWorld::Data& data, Mode mode, QTextDocument *parent);
 
             virtual void highlightBlock (const QString& text);
+
+            void setMarkOccurrences(bool);
 
             void setMarkedWord(const std::string& name);
 

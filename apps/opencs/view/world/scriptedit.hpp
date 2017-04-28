@@ -54,6 +54,7 @@ namespace CSVWorld
             QFont mDefaultFont;
             QFont mMonoFont;
             int mTabCharCount;
+            bool mMarkOccurrences;
             bool mMarkOccurrencesRunning;
 
         protected:
