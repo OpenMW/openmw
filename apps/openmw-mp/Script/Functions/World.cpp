@@ -1,10 +1,11 @@
-#include <regex>
-
-#include <apps/openmw-mp/Player.hpp>
-#include <apps/openmw-mp/Script/ScriptFunctions.hpp>
-#include <apps/openmw-mp/Networking.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Base/BaseEvent.hpp>
+
+#include <apps/openmw-mp/Networking.hpp>
+#include <apps/openmw-mp/Player.hpp>
+#include <apps/openmw-mp/Utils.hpp>
+#include <apps/openmw-mp/Script/ScriptFunctions.hpp>
+
 #include "World.hpp"
 
 using namespace mwmp;
@@ -143,26 +144,7 @@ int WorldFunctions::GetContainerItemActionCount(unsigned int objectIndex, unsign
 
 void WorldFunctions::SetScriptEventCell(const char* cellDescription) noexcept
 {
-    static std::regex exteriorCellPattern("^(-?\\d+), (-?\\d+)$");
-    std::string description = cellDescription;
-    std::smatch baseMatch;
-
-    if (std::regex_match(description, baseMatch, exteriorCellPattern))
-    {
-        scriptEvent.cell.mData.mFlags &= ~ESM::Cell::Interior;
-
-        // The first sub match is the whole string, so check for a length of 3
-        if (baseMatch.size() == 3)
-        {
-            scriptEvent.cell.mData.mX = stoi(baseMatch[1].str());
-            scriptEvent.cell.mData.mY = stoi(baseMatch[2].str());
-        }
-    }
-    else
-    {
-        scriptEvent.cell.mData.mFlags |= ESM::Cell::Interior;
-        scriptEvent.cell.mName = description;
-    }
+    scriptEvent.cell = Utils::getCellFromDescription(cellDescription);
 }
 
 void WorldFunctions::SetScriptEventAction(unsigned char action) noexcept

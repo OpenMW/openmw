@@ -1,10 +1,11 @@
-#include <regex>
-
-#include <apps/openmw-mp/Player.hpp>
-#include <apps/openmw-mp/Script/ScriptFunctions.hpp>
-#include <apps/openmw-mp/Networking.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Base/BaseActor.hpp>
+
+#include <apps/openmw-mp/Networking.hpp>
+#include <apps/openmw-mp/Player.hpp>
+#include <apps/openmw-mp/Utils.hpp>
+#include <apps/openmw-mp/Script/ScriptFunctions.hpp>
+
 #include "Actors.hpp"
 
 using namespace mwmp;
@@ -86,26 +87,7 @@ double ActorFunctions::GetActorRotZ(unsigned int i) noexcept
 
 void ActorFunctions::SetScriptActorListCell(const char* cellDescription) noexcept
 {
-    static std::regex exteriorCellPattern("^(-?\\d+), (-?\\d+)$");
-    std::string description = cellDescription;
-    std::smatch baseMatch;
-
-    if (std::regex_match(description, baseMatch, exteriorCellPattern))
-    {
-        scriptActorList.cell.mData.mFlags &= ~ESM::Cell::Interior;
-
-        // The first sub match is the whole string, so check for a length of 3
-        if (baseMatch.size() == 3)
-        {
-            scriptActorList.cell.mData.mX = stoi(baseMatch[1].str());
-            scriptActorList.cell.mData.mY = stoi(baseMatch[2].str());
-        }
-    }
-    else
-    {
-        scriptActorList.cell.mData.mFlags |= ESM::Cell::Interior;
-        scriptActorList.cell.mName = description;
-    }
+    scriptActorList.cell = Utils::getCellFromDescription(cellDescription);
 }
 
 void ActorFunctions::SetScriptActorListAction(unsigned char action) noexcept

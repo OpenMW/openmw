@@ -5,10 +5,14 @@
 #ifndef OPENMW_UTILS_HPP
 #define OPENMW_UTILS_HPP
 
+#include <cstddef>
+#include <regex>
+#include <vector>
+
+#include <components/esm/loadcell.hpp>
+
 #include <components/openmw-mp/Utils.hpp>
 #include <components/openmw-mp/Log.hpp>
-#include <cstddef>
-#include <vector>
 
 #if (!defined(DEBUG_PRINTF) && defined(DEBUG))
 #define DEBUG_PRINTF(...) LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, __VA_ARGS__)
@@ -20,6 +24,8 @@
 namespace Utils
 {
     const std::vector<std::string> split(const std::string &str, int delimiter);
+
+    ESM::Cell getCellFromDescription(std::string cellDescription);
 
     template<size_t N>
     constexpr unsigned int hash(const char(&str)[N], size_t I = N)
