@@ -391,9 +391,9 @@ namespace Resource
             static std::set<std::string, Misc::StringUtils::CiComp> reservedNames;
             if (reservedNames.empty())
             {
-                const char* reserved[] = {"Head", "Neck", "Chest", "Groin", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist", "Shield Bone", "Right Forearm",
-                                          "Left Forearm", "Right Upper Arm", "Left Upper Arm", "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee", "Left Knee", "Right Upper Leg",
-                                          "Left Upper Leg", "Right Clavicle", "Left Clavicle", "Weapon Bone", "Tail", "bip01", "Root Bone", "BoneOffset", "AttachLight", "ArrowBone", "Camera"};
+                const char* reserved[] = {"head", "neck", "chest", "groin", "right hand", "left hand", "right wrist", "left wrist", "shield bone", "right forearm",
+                                          "left forearm", "right upper arm", "left upper arm", "right foot", "left foot", "right ankle", "left ankle", "right knee", "left knee", "right upper leg",
+                                          "left upper leg", "right clavicle", "left clavicle", "weapon bone", "tail", "bip01", "root bone", "boneoffset", "attachlight", "arrowbone", "camera"};
 
                 reservedNames = std::set<std::string, Misc::StringUtils::CiComp>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
 
