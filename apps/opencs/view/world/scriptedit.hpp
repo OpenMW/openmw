@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QTimer>
 #include <QFont>
+#include <QAction>
 
 #include "../../model/world/universalid.hpp"
 
@@ -54,6 +55,8 @@ namespace CSVWorld
             QFont mDefaultFont;
             QFont mMonoFont;
             int mTabCharCount;
+            QAction *mCommentAction;
+            QAction *mUncommentAction;
 
         protected:
 
@@ -76,6 +79,8 @@ namespace CSVWorld
         protected:
 
             virtual void resizeEvent(QResizeEvent *e);
+
+            virtual void contextMenuEvent(QContextMenuEvent *event);
 
         private:
 
@@ -111,6 +116,10 @@ namespace CSVWorld
             void updateLineNumberAreaWidth(int newBlockCount);
 
             void updateLineNumberArea(const QRect &, int);
+
+            void commentSelection();
+
+            void uncommentSelection();
     };
 
     class LineNumberArea : public QWidget
