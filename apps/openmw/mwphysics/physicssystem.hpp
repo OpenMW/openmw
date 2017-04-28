@@ -181,7 +181,7 @@ namespace MWPhysics
             btCollisionDispatcher* mDispatcher;
             btCollisionWorld* mCollisionWorld;
 
-            std::auto_ptr<Resource::BulletShapeManager> mShapeManager;
+            std::unique_ptr<Resource::BulletShapeManager> mShapeManager;
             Resource::ResourceSystem* mResourceSystem;
 
             typedef std::map<MWWorld::ConstPtr, Object*> ObjectMap;
@@ -213,10 +213,10 @@ namespace MWPhysics
             float mWaterHeight;
             bool mWaterEnabled;
 
-            std::auto_ptr<btCollisionObject> mWaterCollisionObject;
-            std::auto_ptr<btCollisionShape> mWaterCollisionShape;
+            std::unique_ptr<btCollisionObject> mWaterCollisionObject;
+            std::unique_ptr<btCollisionShape> mWaterCollisionShape;
 
-            std::auto_ptr<MWRender::DebugDrawer> mDebugDrawer;
+            std::unique_ptr<MWRender::DebugDrawer> mDebugDrawer;
 
             osg::ref_ptr<osg::Group> mParentNode;
 

@@ -52,7 +52,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::auto_ptr<ContainerCustomData> data (new ContainerCustomData);
+            std::unique_ptr<ContainerCustomData> data (new ContainerCustomData);
 
             MWWorld::LiveCellRef<ESM::Container> *ref =
                 ptr.get<ESM::Container>();
@@ -308,7 +308,7 @@ namespace MWClass
         if (!ptr.getRefData().getCustomData())
         {
             // Create a CustomData, but don't fill it from ESM records (not needed)
-            std::auto_ptr<ContainerCustomData> data (new ContainerCustomData);
+            std::unique_ptr<ContainerCustomData> data (new ContainerCustomData);
             ptr.getRefData().setCustomData (data.release());
         }
 

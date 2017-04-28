@@ -57,7 +57,7 @@ namespace MWWorld
             bool mCellChanged;
             MWPhysics::PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
-            std::auto_ptr<CellPreloader> mPreloader;
+            std::unique_ptr<CellPreloader> mPreloader;
             float mPreloadTimer;
             int mHalfGridSize;
             float mCellLoadingThreshold;

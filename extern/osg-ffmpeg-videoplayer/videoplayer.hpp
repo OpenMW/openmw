@@ -78,7 +78,7 @@ namespace Video
     private:
         VideoState* mState;
 
-        std::auto_ptr<MovieAudioFactory> mAudioFactory;
+        std::unique_ptr<MovieAudioFactory> mAudioFactory;
     };
 
 }

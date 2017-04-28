@@ -415,9 +415,9 @@ void CSMDoc::Document::runSearch (const CSMWorld::UniversalId& searchId, const C
     emit stateChanged (getState(), this);
 }
 
-void CSMDoc::Document::runMerge (std::auto_ptr<CSMDoc::Document> target)
+void CSMDoc::Document::runMerge (std::unique_ptr<CSMDoc::Document> target)
 {
-    mTools.runMerge (target);
+    mTools.runMerge (std::move(target));
     emit stateChanged (getState(), this);
 }
 

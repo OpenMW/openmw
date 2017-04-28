@@ -108,7 +108,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::auto_ptr<CreatureCustomData> data (new CreatureCustomData);
+            std::unique_ptr<CreatureCustomData> data (new CreatureCustomData);
 
             MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
@@ -742,7 +742,7 @@ namespace MWClass
             if (!ptr.getRefData().getCustomData())
             {
                 // Create a CustomData, but don't fill it from ESM records (not needed)
-                std::auto_ptr<CreatureCustomData> data (new CreatureCustomData);
+                std::unique_ptr<CreatureCustomData> data (new CreatureCustomData);
 
                 if (hasInventoryStore(ptr))
                     data->mContainerStore = new MWWorld::InventoryStore();

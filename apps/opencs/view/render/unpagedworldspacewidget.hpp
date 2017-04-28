@@ -29,7 +29,7 @@ namespace CSVRender
             std::string mCellId;
             CSMWorld::IdTable *mCellsModel;
             CSMWorld::IdTable *mReferenceablesModel;
-            std::auto_ptr<Cell> mCell;
+            std::unique_ptr<Cell> mCell;
 
             void update();
 

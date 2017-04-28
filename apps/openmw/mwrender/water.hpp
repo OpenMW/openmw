@@ -58,7 +58,7 @@ namespace MWRender
         const Fallback::Map* mFallback;
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
-        std::auto_ptr<RippleSimulation> mSimulation;
+        std::unique_ptr<RippleSimulation> mSimulation;
 
         osg::ref_ptr<Refraction> mRefraction;
         osg::ref_ptr<Reflection> mReflection;

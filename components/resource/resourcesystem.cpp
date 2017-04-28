@@ -28,8 +28,6 @@ namespace Resource
         // this has to be defined in the .cpp file as we can't delete incomplete types
 
         mResourceManagers.clear();
-
-        // no delete, all handled by auto_ptr
     }
 
     SceneManager* ResourceSystem::getSceneManager()

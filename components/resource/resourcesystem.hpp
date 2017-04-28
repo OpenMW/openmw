@@ -57,10 +57,10 @@ namespace Resource
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
 
     private:
-        std::auto_ptr<SceneManager> mSceneManager;
-        std::auto_ptr<ImageManager> mImageManager;
-        std::auto_ptr<NifFileManager> mNifFileManager;
-        std::auto_ptr<KeyframeManager> mKeyframeManager;
+        std::unique_ptr<SceneManager> mSceneManager;
+        std::unique_ptr<ImageManager> mImageManager;
+        std::unique_ptr<NifFileManager> mNifFileManager;
+        std::unique_ptr<KeyframeManager> mKeyframeManager;
 
         // Store the base classes separately to get convenient access to the common interface
         // Here users can register their own resourcemanager as well

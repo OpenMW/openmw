@@ -152,8 +152,8 @@ struct VideoState {
     OpenThreads::Mutex pictq_mutex;
     OpenThreads::Condition pictq_cond;
 
-    std::auto_ptr<ParseThread> parse_thread;
-    std::auto_ptr<VideoThread> video_thread;
+    std::unique_ptr<ParseThread> parse_thread;
+    std::unique_ptr<VideoThread> video_thread;
 
     volatile bool mSeekRequested;
     uint64_t mSeekPos;

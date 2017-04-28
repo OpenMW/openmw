@@ -132,7 +132,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::auto_ptr<CreatureLevListCustomData> data (new CreatureLevListCustomData);
+            std::unique_ptr<CreatureLevListCustomData> data (new CreatureLevListCustomData);
             data->mSpawnActorId = -1;
             data->mSpawn = true;
 

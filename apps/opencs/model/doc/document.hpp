@@ -137,7 +137,7 @@ namespace CSMDoc
 
             void runSearch (const CSMWorld::UniversalId& searchId, const CSMTools::Search& search);
 
-            void runMerge (std::auto_ptr<CSMDoc::Document> target);
+            void runMerge (std::unique_ptr<CSMDoc::Document> target);
 
             void abortOperation (int type);
 

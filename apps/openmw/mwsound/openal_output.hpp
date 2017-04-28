@@ -33,7 +33,7 @@ namespace MWSound
         Environment mListenerEnv;
 
         struct StreamThread;
-        std::auto_ptr<StreamThread> mStreamThread;
+        std::unique_ptr<StreamThread> mStreamThread;
 
         void initCommon2D(ALuint source, const osg::Vec3f &pos, ALfloat gain, ALfloat pitch, bool loop, bool useenv);
         void initCommon3D(ALuint source, const osg::Vec3f &pos, ALfloat mindist, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool loop, bool useenv);

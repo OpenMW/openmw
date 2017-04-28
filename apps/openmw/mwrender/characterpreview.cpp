@@ -111,7 +111,7 @@ namespace MWRender
         , mPosition(position)
         , mLookAt(lookAt)
         , mCharacter(character)
-        , mAnimation(NULL)
+        , mAnimation(nullptr)
         , mSizeX(sizeX)
         , mSizeY(sizeY)
     {
@@ -188,7 +188,7 @@ namespace MWRender
 
         mParent->addChild(mCamera);
 
-        mCharacter.mCell = NULL;
+        mCharacter.mCell = nullptr;
     }
 
     CharacterPreview::~CharacterPreview ()

@@ -127,10 +127,10 @@ void CSVTools::Merge::accept()
     {
         std::vector< boost::filesystem::path > files (1, mAdjuster->getPath());
 
-        std::auto_ptr<CSMDoc::Document> target (
+        std::unique_ptr<CSMDoc::Document> target (
             mDocumentManager.makeDocument (files, files[0], true));
 
-        mDocument->runMerge (target);
+        mDocument->runMerge (std::move(target));
 
         hide();
     }

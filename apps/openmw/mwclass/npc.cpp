@@ -303,7 +303,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::auto_ptr<NpcCustomData> data(new NpcCustomData);
+            std::unique_ptr<NpcCustomData> data(new NpcCustomData);
 
             MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
@@ -1259,7 +1259,7 @@ namespace MWClass
             if (!ptr.getRefData().getCustomData())
             {
                 // Create a CustomData, but don't fill it from ESM records (not needed)
-                std::auto_ptr<NpcCustomData> data (new NpcCustomData);
+                std::unique_ptr<NpcCustomData> data (new NpcCustomData);
                 ptr.getRefData().setCustomData (data.release());
             }
         }

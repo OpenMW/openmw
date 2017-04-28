@@ -310,7 +310,7 @@ int main(int argc, char**argv)
 
     boost::filesystem::ofstream logfile;
 
-    std::auto_ptr<OMW::Engine> engine;
+    std::unique_ptr<OMW::Engine> engine;
 
     int ret = 0;
     try
