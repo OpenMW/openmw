@@ -2,6 +2,7 @@
 #define CSV_WORLD_SCRIPTHIGHLIGHTER_H
 
 #include <map>
+#include <string>
 
 #include <QSyntaxHighlighter>
 
@@ -30,7 +31,8 @@ namespace CSVWorld
                 Type_Keyword = 3,
                 Type_Special = 4,
                 Type_Comment = 5,
-                Type_Id = 6
+                Type_Highlight = 6,
+                Type_Id = 7
             };
 
             enum Mode
@@ -47,6 +49,7 @@ namespace CSVWorld
             CSMWorld::ScriptContext mContext;
             std::map<Type, QTextCharFormat> mScheme;
             Mode mMode;
+            std::string mMarkedWord;
 
         private:
 
@@ -90,6 +93,8 @@ namespace CSVWorld
             ScriptHighlighter (const CSMWorld::Data& data, Mode mode, QTextDocument *parent);
 
             virtual void highlightBlock (const QString& text);
+
+            void setMarkedWord(const std::string& name);
 
             void invalidateIds();
 

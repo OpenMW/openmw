@@ -49,6 +49,7 @@ CSVWorld::ScriptEdit::ScriptEdit(
     mDefaultFont(font()),
     mMonoFont(QFont("Monospace")),
     mTabCharCount(4),
+    mMarkOccurrencesRunning(false),
     mDocument(document),
     mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive)
 {
@@ -85,6 +86,8 @@ CSVWorld::ScriptEdit::ScriptEdit(
                   <<CSMWorld::UniversalId::Type_Weapon
                   <<CSMWorld::UniversalId::Type_Script
                   <<CSMWorld::UniversalId::Type_Region;
+    
+    connect(this, SIGNAL(selectionChanged()), this, SLOT(markOccurrences()));
 
     mHighlighter = new ScriptHighlighter (document.getData(), mode, ScriptEdit::document());
 
@@ -282,6 +285,26 @@ void CSVWorld::ScriptEdit::updateLineNumberArea(const QRect &rect, int dy)
 
     if (rect.contains(viewport()->rect()))
         updateLineNumberAreaWidth(0);
+}
+
+void CSVWorld::ScriptEdit::markOccurrences()
+{
+    // prevent infinite recursion with cursor.select(),
+    // which ends up calling this function again
+    // could be fixed with blockSignals, but mDocument is const
+    if (mMarkOccurrencesRunning)
+        return;
+
+    mMarkOccurrencesRunning = true;
+
+    QTextCursor cursor = textCursor();
+    cursor.select(QTextCursor::WordUnderCursor);
+    QString word = cursor.selectedText();
+
+    mHighlighter->setMarkedWord(word.toStdString());
+    mHighlighter->rehighlight();
+
+    mMarkOccurrencesRunning = false;
 }
 
 void CSVWorld::ScriptEdit::resizeEvent(QResizeEvent *e)

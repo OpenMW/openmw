@@ -156,6 +156,7 @@ void CSMPrefs::State::declare()
     declareColour ("colour-int", "Highlight Colour: Integer Literals", QColor ("darkmagenta"));
     declareColour ("colour-float", "Highlight Colour: Float Literals", QColor ("magenta"));
     declareColour ("colour-name", "Highlight Colour: Names", QColor ("grey"));
+    declareColour ("colour-highlight", "Highlight Colour: Highlighting", QColor("palegreen"));
     declareColour ("colour-keyword", "Highlight Colour: Keywords", QColor ("red"));
     declareColour ("colour-special", "Highlight Colour: Special Characters", QColor ("darkorange"));
     declareColour ("colour-comment", "Highlight Colour: Comments", QColor ("green"));

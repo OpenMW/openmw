@@ -54,6 +54,7 @@ namespace CSVWorld
             QFont mDefaultFont;
             QFont mMonoFont;
             int mTabCharCount;
+            bool mMarkOccurrencesRunning;
 
         protected:
 
@@ -111,6 +112,8 @@ namespace CSVWorld
             void updateLineNumberAreaWidth(int newBlockCount);
 
             void updateLineNumberArea(const QRect &, int);
+
+            void markOccurrences();
     };
 
     class LineNumberArea : public QWidget
