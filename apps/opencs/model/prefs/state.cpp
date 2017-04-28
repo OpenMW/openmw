@@ -326,6 +326,10 @@ void CSMPrefs::State::declare()
     declareShortcut ("orbit-roll-right", "Roll Right", QKeySequence(Qt::Key_E));
     declareShortcut ("orbit-speed-mode", "Toggle Speed Mode", QKeySequence(Qt::Key_F));
     declareShortcut ("orbit-center-selection", "Center On Selected", QKeySequence(Qt::Key_C));
+
+    declareSubcategory ("Script Editor");
+    declareShortcut ("script-editor-comment", "Comment Selection", QKeySequence());
+    declareShortcut ("script-editor-uncomment", "Uncomment Selection", QKeySequence());
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)
