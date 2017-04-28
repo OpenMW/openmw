@@ -95,6 +95,11 @@ void ActorFunctions::SetScriptActorListAction(unsigned char action) noexcept
     scriptActorList.action = action;
 }
 
+void ActorFunctions::SetActorCell(const char* cellDescription) noexcept
+{
+    tempActor.cell = Utils::getCellFromDescription(cellDescription);
+}
+
 void ActorFunctions::SetActorRefId(const char* refId) noexcept
 {
     tempActor.refId = refId;
@@ -108,6 +113,20 @@ void ActorFunctions::SetActorRefNumIndex(int refNumIndex) noexcept
 void ActorFunctions::SetActorMpNum(int mpNum) noexcept
 {
     tempActor.mpNum = mpNum;
+}
+
+void ActorFunctions::SetActorPosition(double x, double y, double z) noexcept
+{
+    tempActor.position.pos[0] = x;
+    tempActor.position.pos[1] = y;
+    tempActor.position.pos[2] = z;
+}
+
+void ActorFunctions::SetActorRotation(double x, double y, double z) noexcept
+{
+    tempActor.position.rot[0] = x;
+    tempActor.position.rot[1] = y;
+    tempActor.position.rot[2] = z;
 }
 
 void ActorFunctions::AddActor() noexcept
@@ -127,5 +146,11 @@ void ActorFunctions::SendActorAuthority() noexcept
 {
     mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_AUTHORITY)->setActorList(&scriptActorList);
     mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_AUTHORITY)->Send(scriptActorList.guid);
+}
+
+void ActorFunctions::SendActorCellChange() noexcept
+{
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_CELL_CHANGE)->setActorList(&scriptActorList);
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_CELL_CHANGE)->Send(scriptActorList.guid);
 }
 

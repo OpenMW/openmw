@@ -21,14 +21,18 @@
     {"SetScriptActorListCell",     ActorFunctions::SetScriptActorListCell},\
     {"SetScriptActorListAction",   ActorFunctions::SetScriptActorListAction},\
     \
+    {"SetActorCell",               ActorFunctions::SetActorCell},\
     {"SetActorRefId",              ActorFunctions::SetActorRefId},\
     {"SetActorRefNumIndex",        ActorFunctions::SetActorRefNumIndex},\
     {"SetActorMpNum",              ActorFunctions::SetActorMpNum},\
+    {"SetActorPosition",           ActorFunctions::SetActorPosition},\
+    {"SetActorRotation",           ActorFunctions::SetActorRotation},\
     \
     {"AddActor",                   ActorFunctions::AddActor},\
     \
     {"SendActorList",              ActorFunctions::SendActorList},\
-    {"SendActorAuthority",         ActorFunctions::SendActorAuthority}
+    {"SendActorAuthority",         ActorFunctions::SendActorAuthority},\
+    {"SendActorCellChange",        ActorFunctions::SendActorCellChange}
 
 class ActorFunctions
 {
@@ -53,14 +57,18 @@ public:
     static void SetScriptActorListCell(const char* cellDescription) noexcept;
     static void SetScriptActorListAction(unsigned char action) noexcept;
 
+    static void SetActorCell(const char* cellDescription) noexcept;
     static void SetActorRefId(const char* refId) noexcept;
     static void SetActorRefNumIndex(int refNumIndex) noexcept;
     static void SetActorMpNum(int mpNum) noexcept;
+    static void SetActorPosition(double x, double y, double z) noexcept;
+    static void SetActorRotation(double x, double y, double z) noexcept;
 
     static void AddActor() noexcept;
 
     static void SendActorList() noexcept;
     static void SendActorAuthority() noexcept;
+    static void SendActorCellChange() noexcept;
 };
 
 
