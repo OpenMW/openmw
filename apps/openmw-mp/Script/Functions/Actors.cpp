@@ -15,6 +15,8 @@ BaseActorList scriptActorList;
 BaseActor tempActor;
 const BaseActor emptyActor = {};
 
+static std::string tempCellDescription;
+
 void ActorFunctions::InitScriptActorList(unsigned short pid) noexcept
 {
     Player *player;
@@ -37,7 +39,8 @@ unsigned char ActorFunctions::GetLastActorListAction() noexcept
 
 const char *ActorFunctions::GetActorCell(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).cell.getDescription().c_str();
+    tempCellDescription = mwmp::Networking::getPtr()->getLastActorList()->baseActors.at(i).cell.getDescription();
+    return tempCellDescription.c_str();
 }
 
 const char *ActorFunctions::GetActorRefId(unsigned int i) noexcept
