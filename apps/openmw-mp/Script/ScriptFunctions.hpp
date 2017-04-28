@@ -126,6 +126,7 @@ public:
             {"OnPlayerJournalChange",    Function<void, unsigned short>()},
             {"OnActorList",              Function<void, unsigned short, const char*>()},
             {"OnActorCellChange",        Function<void, unsigned short, const char*>()},
+            {"OnActorStatsDynamic",      Function<void, unsigned short, const char*>()},
             {"OnActorTest",              Function<void, unsigned short, const char*>()},
             {"OnObjectPlace",            Function<void, unsigned short, const char*>()},
             {"OnObjectDelete",           Function<void, unsigned short, const char*>()},

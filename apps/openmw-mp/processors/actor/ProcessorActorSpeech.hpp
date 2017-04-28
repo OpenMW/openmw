@@ -20,8 +20,6 @@ namespace mwmp
 
             if (serverCell != nullptr)
                 serverCell->sendToLoaded(&packet, &actorList);
-
-            //Script::Call<Script::CallbackIdentity("OnActorSpeech")>(player.getId(), actorList.cell.getDescription().c_str());
         }
     };
 }
