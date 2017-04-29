@@ -108,14 +108,14 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
     if (dedicPlayer->state == 0)
     {
         string recid;
-        if (!dedicPlayer->creatureModel.empty())
+        if (dedicPlayer->creatureModel.empty())
         {
-            creature.mId = "Dedicated Player";
+            npc.mId = "Dedicated Player";
             recid = world->createRecord(npc)->mId;
         }
         else
         {
-            npc.mId = "Dedicated Player";
+            creature.mId = "Dedicated Player";
             recid = world->createRecord(creature)->mId;
         }
 
