@@ -17,6 +17,7 @@
 #include "Networking.hpp"
 #include "MasterClient.hpp"
 #include "Cell.hpp"
+#include "CellController.hpp"
 #include "PlayerProcessor.hpp"
 #include "ActorProcessor.hpp"
 #include "WorldProcessor.hpp"

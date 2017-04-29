@@ -19,6 +19,7 @@
 #include <components/openmw-mp/Base/BasePlayer.hpp>
 #include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 #include "Cell.hpp"
+#include "CellController.hpp"
 
 struct Player;
 typedef std::map<RakNet::RakNetGUID, Player*> TPlayers;

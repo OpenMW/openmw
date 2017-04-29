@@ -2,8 +2,8 @@
 // Created by koncord on 18.02.17.
 //
 
-#ifndef OPENMW_CELL_HPP
-#define OPENMW_CELL_HPP
+#ifndef OPENMW_SERVERCELL_HPP
+#define OPENMW_SERVERCELL_HPP
 
 #include <deque>
 #include <string>
@@ -14,39 +14,6 @@
 
 class Player;
 class Cell;
-
-
-class CellController
-{
-private:
-    CellController();
-    ~CellController();
-
-    CellController(CellController&); // not used
-public:
-    static void create();
-    static void destroy();
-    static CellController *get();
-public:
-    typedef std::deque<Cell*> TContainer;
-    typedef TContainer::iterator TIter;
-
-    Cell * addCell(ESM::Cell cell);
-    void removeCell(Cell *);
-
-    void removePlayer(Cell *cell, Player *player);
-    void deletePlayer(Player *player);
-
-    Cell *getCell(ESM::Cell *esmCell);
-    Cell *getCellByXY(int x, int y);
-    Cell *getCellByName(std::string cellName);
-
-    void update(Player *player);
-
-private:
-    static CellController *sThis;
-    TContainer cells;
-};
 
 class Cell
 {
@@ -75,4 +42,4 @@ private:
 };
 
 
-#endif //OPENMW_CELL_HPP
+#endif //OPENMW_SERVERCELL_HPP
