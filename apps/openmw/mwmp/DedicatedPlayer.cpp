@@ -210,38 +210,38 @@ bool PlayerList::isDedicatedPlayer(const MWWorld::Ptr &ptr)
 
 void DedicatedPlayer::update(float dt)
 {
-    MWMechanics::NpcStats *ptrNpcStats = &ptr.getClass().getNpcStats(ptr);
+    MWMechanics::CreatureStats *ptrCreatureStats = &ptr.getClass().getCreatureStats(ptr);
 
     MWMechanics::DynamicStat<float> value;
 
     if (creatureStats.mDead)
     {
         value.readState(creatureStats.mDynamic[0]);
-        ptrNpcStats->setHealth(value);
+        ptrCreatureStats->setHealth(value);
         return;
     }
 
     value.readState(creatureStats.mDynamic[0]);
-    ptrNpcStats->setHealth(value);
+    ptrCreatureStats->setHealth(value);
     value.readState(creatureStats.mDynamic[1]);
-    ptrNpcStats->setMagicka(value);
+    ptrCreatureStats->setMagicka(value);
     value.readState(creatureStats.mDynamic[2]);
-    ptrNpcStats->setFatigue(value);
+    ptrCreatureStats->setFatigue(value);
 
-    if (ptrNpcStats->isDead())
-        ptrNpcStats->resurrect();
+    if (ptrCreatureStats->isDead())
+        ptrCreatureStats->resurrect();
 
-    ptrNpcStats->setAttacked(false);
+    ptrCreatureStats->setAttacked(false);
 
-    ptrNpcStats->getAiSequence().stopCombat();
+    ptrCreatureStats->getAiSequence().stopCombat();
 
-    ptrNpcStats->setAlarmed(false);
-    ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Alarm, 0);
-    ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Fight, 0);
-    ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Flee, 0);
-    ptrNpcStats->setAiSetting(MWMechanics::CreatureStats::AI_Hello, 0);
+    ptrCreatureStats->setAlarmed(false);
+    ptrCreatureStats->setAiSetting(MWMechanics::CreatureStats::AI_Alarm, 0);
+    ptrCreatureStats->setAiSetting(MWMechanics::CreatureStats::AI_Fight, 0);
+    ptrCreatureStats->setAiSetting(MWMechanics::CreatureStats::AI_Flee, 0);
+    ptrCreatureStats->setAiSetting(MWMechanics::CreatureStats::AI_Hello, 0);
 
-    ptrNpcStats->setBaseDisposition(255);
+    //ptrNpcStats->setBaseDisposition(255);
     move(dt);
     updateAnimFlags();
 }
@@ -292,17 +292,17 @@ void DedicatedPlayer::updateAnimFlags()
     }
 
     if (drawState == 0)
-        ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Nothing);
+        ptr.getClass().getCreatureStats(ptr).setDrawState(DrawState_Nothing);
     else if (drawState == 1)
-        ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Weapon);
+        ptr.getClass().getCreatureStats(ptr).setDrawState(DrawState_Weapon);
     else if (drawState == 2)
-        ptr.getClass().getNpcStats(ptr).setDrawState(DrawState_Spell);
+        ptr.getClass().getCreatureStats(ptr).setDrawState(DrawState_Spell);
 
-    MWMechanics::NpcStats *ptrNpcStats = &ptr.getClass().getNpcStats(ptr);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_Run, (movementFlags & CreatureStats::Flag_Run) != 0);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_Sneak, (movementFlags & CreatureStats::Flag_Sneak) != 0);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceJump, (movementFlags & CreatureStats::Flag_ForceJump) != 0);
-    ptrNpcStats->setMovementFlag(CreatureStats::Flag_ForceMoveJump, (movementFlags & CreatureStats::Flag_ForceMoveJump) != 0);
+    MWMechanics::CreatureStats *ptrCreatureStats = &ptr.getClass().getCreatureStats(ptr);
+    ptrCreatureStats->setMovementFlag(CreatureStats::Flag_Run, (movementFlags & CreatureStats::Flag_Run) != 0);
+    ptrCreatureStats->setMovementFlag(CreatureStats::Flag_Sneak, (movementFlags & CreatureStats::Flag_Sneak) != 0);
+    ptrCreatureStats->setMovementFlag(CreatureStats::Flag_ForceJump, (movementFlags & CreatureStats::Flag_ForceJump) != 0);
+    ptrCreatureStats->setMovementFlag(CreatureStats::Flag_ForceMoveJump, (movementFlags & CreatureStats::Flag_ForceMoveJump) != 0);
 }
 
 void DedicatedPlayer::updateEquipment()
