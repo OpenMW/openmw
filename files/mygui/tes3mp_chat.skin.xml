@@ -6,7 +6,7 @@
     <!-- Console Input -->
 
     <Resource type="ResourceSkin" name="TES3MP_EditClient" size="10 10">
-        <Property key="FontName" value="MonoFont"/>
+        <Property key="FontName" value="Russo"/>
         <Property key="TextAlign" value="Left VCenter"/>
         <Property key="TextColour" value="1 1 1"/>
         <BasisSkin type="EditText" offset="0 0 10 10" align="Stretch"/>
