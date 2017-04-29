@@ -138,6 +138,7 @@ namespace mwmp
             inventoryChanges.count = 0;
             spellbookChanges.action = 0;
             spellbookChanges.count = 0;
+            useCreatureName = false;
         }
 
         BasePlayer()
@@ -179,6 +180,8 @@ namespace mwmp
         std::string chatMessage;
         CGStage charGenStage;
         std::string passw;
+        std::string creatureModel;
+        bool useCreatureName;
     };
 }
 

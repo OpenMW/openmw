@@ -68,27 +68,56 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
     LOG_APPEND(Log::LOG_INFO, "- Setting up character info");
 
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = world->getPlayerPtr();
 
-    ESM::NPC npc = *player.get<ESM::NPC>()->mBase;
     DedicatedPlayer *dedicPlayer = players[guid];
 
-    // To avoid freezes caused by invalid races, only set race if we find it
-    // on our client
-    if (world->getStore().get<ESM::Race>().search(dedicPlayer->npc.mRace) != 0)
-        npc.mRace = dedicPlayer->npc.mRace;
+    ESM::Creature creature;
+    ESM::NPC npc;
+    if (!dedicPlayer->creatureModel.empty())
+    {
+        const ESM::Creature *tmpCreature = world->getStore().get<ESM::Creature>().search(dedicPlayer->creatureModel);
+        if(tmpCreature == 0)
+        {
+            dedicPlayer->creatureModel = "";
+            createPlayer(guid);
+            return;
+        }
+        creature = *tmpCreature;
+        creature.mScript = "";
+        if(!dedicPlayer->useCreatureName)
+            creature.mName = dedicPlayer->npc.mName;
+    }
+    else
+    {
+        MWWorld::Ptr player = world->getPlayerPtr();
 
-    npc.mHead = dedicPlayer->npc.mHead;
-    npc.mHair = dedicPlayer->npc.mHair;
-    npc.mClass = dedicPlayer->npc.mClass;
-    npc.mName = dedicPlayer->npc.mName;
-    npc.mFlags = dedicPlayer->npc.mFlags;
+        npc = *player.get<ESM::NPC>()->mBase;
+
+        // To avoid freezes caused by invalid races, only set race if we find it
+        // on our client
+        if (world->getStore().get<ESM::Race>().search(dedicPlayer->npc.mRace) != 0)
+            npc.mRace = dedicPlayer->npc.mRace;
+
+        npc.mHead = dedicPlayer->npc.mHead;
+        npc.mHair = dedicPlayer->npc.mHair;
+        npc.mClass = dedicPlayer->npc.mClass;
+        npc.mName = dedicPlayer->npc.mName;
+        npc.mFlags = dedicPlayer->npc.mFlags;
+    }
 
     if (dedicPlayer->state == 0)
     {
-        npc.mId = "Dedicated Player";
-
-        std::string recid = world->createRecord(npc)->mId;
+        string recid;
+        if (!dedicPlayer->creatureModel.empty())
+        {
+            creature.mId = "Dedicated Player";
+            recid = world->createRecord(npc)->mId;
+        }
+        else
+        {
+            npc.mId = "Dedicated Player";
+            recid = world->createRecord(creature)->mId;
+        }
 
         dedicPlayer->reference = new MWWorld::ManualRef(world->getStore(), recid, 1);
     }
@@ -115,12 +144,21 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
     {
         LOG_APPEND(Log::LOG_INFO, "- Updating reference pointer for %s", dedicPlayer->npc.mName.c_str());
 
-        npc.mId = players[guid]->ptr.get<ESM::NPC>()->mBase->mId;
-
         MWWorld::ESMStore *store = const_cast<MWWorld::ESMStore *>(&world->getStore());
-        MWWorld::Store<ESM::NPC> *esm_store = const_cast<MWWorld::Store<ESM::NPC> *> (&store->get<ESM::NPC>());
 
-        esm_store->insert(npc);
+        if (!dedicPlayer->creatureModel.empty())
+        {
+            creature.mId = players[guid]->ptr.get<ESM::Creature>()->mBase->mId;
+            MWWorld::Store<ESM::Creature> *esm_store = const_cast<MWWorld::Store<ESM::Creature> *> (&store->get<ESM::Creature>());
+            esm_store->insert(creature);
+
+        }
+        else
+        {
+            npc.mId = players[guid]->ptr.get<ESM::NPC>()->mBase->mId;
+            MWWorld::Store<ESM::NPC> *esm_store = const_cast<MWWorld::Store<ESM::NPC> *> (&store->get<ESM::NPC>());
+            esm_store->insert(npc);
+        }
 
         // Disable Ptr to avoid graphical glitches caused by race changes
         world->disable(players[guid]->ptr);
