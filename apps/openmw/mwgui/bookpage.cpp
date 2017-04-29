@@ -1050,7 +1050,7 @@ public:
 
             mActiveTextFormats.clear ();
 
-            if (newBook != NULL)
+            if (newBook != nullptr)
             {
                 createActiveFormats (newBook);
 
