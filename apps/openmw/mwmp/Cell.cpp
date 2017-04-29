@@ -144,6 +144,8 @@ void Cell::readAnimPlay(ActorList& actorList)
 
 void Cell::readStatsDynamic(ActorList& actorList)
 {
+    initializeDedicatedActors(actorList);
+
     BaseActor baseActor;
 
     for (unsigned int i = 0; i < actorList.count; i++)
@@ -155,7 +157,18 @@ void Cell::readStatsDynamic(ActorList& actorList)
         {
             DedicatedActor *actor = dedicatedActors[mapIndex];
             actor->creatureStats = baseActor.creatureStats;
-            actor->hasStatsDynamicData = true;
+
+            if (!actor->hasStatsDynamicData)
+            {
+                actor->hasStatsDynamicData = true;
+
+                // If this is our first packet about this actor's dynamic stats, force an update
+                // now instead of waiting for its frame
+                //
+                // That way, if this actor is about to become a LocalActor, initial data about it
+                // received from the server still gets set
+                actor->setStatsDynamic();
+            }
         }
     }
 }
