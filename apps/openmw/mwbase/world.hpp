@@ -42,6 +42,7 @@ namespace ESM
     struct EffectList;
     struct CreatureLevList;
     struct ItemLevList;
+    struct Creature;
 }
 
 namespace MWRender
@@ -326,6 +327,10 @@ namespace MWBase
 
             virtual const ESM::NPC *createRecord(const ESM::NPC &record) = 0;
             ///< Create a new record (of type npc) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Creature *createRecord (const ESM::Creature &record) = 0;
+            ///< Create a new record (of type creature) in the ESM store.
             /// \return pointer to created record
 
             virtual const ESM::Armor *createRecord (const ESM::Armor& record) = 0;

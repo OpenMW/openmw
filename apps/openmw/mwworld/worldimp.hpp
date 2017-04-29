@@ -436,6 +436,10 @@ namespace MWWorld
             ///< Create a new record (of type npc) in the ESM store.
             /// \return pointer to created record
 
+            virtual const ESM::Creature *createRecord(const ESM::Creature &record);
+            ///< Create a new record (of type creature) in the ESM store.
+            /// \return pointer to created record
+
             virtual const ESM::Armor *createRecord (const ESM::Armor& record);
             ///< Create a new record (of type armor) in the ESM store.
             /// \return pointer to created record

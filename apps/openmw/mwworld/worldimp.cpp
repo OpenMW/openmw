@@ -1666,6 +1666,11 @@ namespace MWWorld
         return ret;
     }
 
+    const ESM::Creature *World::createRecord(const ESM::Creature &record)
+    {
+        return mStore.insert(record);
+    }
+
     const ESM::Armor *World::createRecord (const ESM::Armor& record)
     {
         return mStore.insert(record);
