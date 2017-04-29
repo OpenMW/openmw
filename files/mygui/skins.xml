@@ -20,6 +20,7 @@
         <List file="openmw_dialogue_window.skin.xml"/>
         <List file="openmw_scroll.skin.xml"/>
         <List file="openmw_debug_window.skin.xml" />
+        <List file="tes3mp_chat.skin.xml" />
     </MyGUI>
 </MyGUI>
 
