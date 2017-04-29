@@ -121,6 +121,16 @@ bool AiSequence::isInCombat() const
     return false;
 }
 
+bool AiSequence::hasPackage(int typeId) const
+{
+    for (std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+    {
+        if ((*it)->getTypeId() == typeId)
+            return true;
+    }
+    return false;
+}
+
 bool AiSequence::isInCombat(const MWWorld::Ptr &actor) const
 {
     for(std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)

@@ -85,6 +85,9 @@ namespace MWMechanics
             /// Is there any combat package?
             bool isInCombat () const;
 
+            /// Does this AI sequence have the given package type?
+            bool hasPackage(int typeId) const;
+
             /// Are we in combat with this particular actor?
             bool isInCombat (const MWWorld::Ptr& actor) const;
 

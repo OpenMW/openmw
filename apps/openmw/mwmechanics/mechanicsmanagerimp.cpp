@@ -1042,7 +1042,13 @@ namespace MWMechanics
         if (crimeSeen)
             reportCrime(player, victim, type, arg);
         else if (type == OT_Assault && !victim.isEmpty())
-            startCombat(victim, player); // TODO: combat should be started with an "unaware" flag, which makes the victim flee?
+        {
+            if (victim.getClass().isClass(victim, "guard")
+                && !victim.getClass().getCreatureStats(victim).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                reportCrime(player, victim, type, arg);
+            else
+                startCombat(victim, player); // TODO: combat should be started with an "unaware" flag, which makes the victim flee?
+        }
         return crimeSeen;
     }
 
@@ -1145,7 +1151,8 @@ namespace MWMechanics
                 // once the bounty has been paid.
                 it->getClass().getNpcStats(*it).setCrimeId(id);
 
-                it->getClass().getCreatureStats(*it).getAiSequence().stack(AiPursue(player), *it);
+                if (!it->getClass().getCreatureStats(*it).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                    it->getClass().getCreatureStats(*it).getAiSequence().stack(AiPursue(player), *it);
             }
             else
             {
@@ -1213,7 +1220,8 @@ namespace MWMechanics
             {
                 // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
                 // Note: accidental or collateral damage attacks are ignored.
-                startCombat(victim, player);
+                if (!victim.getClass().getCreatureStats(victim).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                    startCombat(victim, player);
 
                 // Set the crime ID, which we will use to calm down participants
                 // once the bounty has been paid.
@@ -1256,7 +1264,8 @@ namespace MWMechanics
         }
 
         if (target.getClass().isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker)
-                && !isAggressive(target, attacker) && !isFightingNpc)
+                && !isAggressive(target, attacker) && !isFightingNpc
+                && !target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
             commitCrime(attacker, target, MWBase::MechanicsManager::OT_Assault);
 
         if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(target)
@@ -1265,7 +1274,8 @@ namespace MWMechanics
         {
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
             // Note: accidental or collateral damage attacks are ignored.
-            startCombat(target, attacker);
+            if (!target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                startCombat(target, attacker);
         }
 
         return true;
