@@ -27,6 +27,8 @@ void ActorFunctions::InitScriptActorList(unsigned short pid) noexcept
     scriptActorList.cell.blank();
     scriptActorList.baseActors.clear();
     scriptActorList.guid = player->guid;
+
+    tempActor.creatureStats = new ESM::CreatureStats();
 }
 
 unsigned int ActorFunctions::GetActorListSize() noexcept
@@ -199,6 +201,7 @@ void ActorFunctions::AddActor() noexcept
     scriptActorList.baseActors.push_back(tempActor);
 
     tempActor = emptyActor;
+    tempActor.creatureStats = new ESM::CreatureStats();
 }
 
 void ActorFunctions::SendActorList() noexcept
