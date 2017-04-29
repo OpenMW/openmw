@@ -38,6 +38,8 @@ namespace mwmp
 
         mHistory->setOverflowToTheLeft(true);
         mHistory->setEditWordWrap(true);
+        mHistory->setTextShadow(true);
+        mHistory->setTextShadowColour(MyGUI::Colour::Black);
 
         windowState = 0;
         mCommandLine->setVisible(0);
@@ -67,7 +69,7 @@ namespace mwmp
 
     void GUIChat::acceptCommand(MyGUI::EditBox *_sender)
     {
-        const std::string &cm = mCommandLine->getOnlyText();
+        const std::string &cm =  MyGUI::TextIterator::toTagsString(mCommandLine->getCaption());
         
         // If they enter nothing, then it should be canceled.
         // Otherwise, there's no way of closing without having text.
@@ -112,7 +114,7 @@ namespace mwmp
         {
             setVisible(true);
         }
-        mHistory->addText(color + MyGUI::TextIterator::toTagsString(msg));
+        mHistory->addText(color+msg);
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, msg.c_str());
     }
 
