@@ -112,12 +112,11 @@ void CellController::removeCell(Cell *cell)
     if (cell == nullptr)
         return;
 
-    Script::Call<Script::CallbackIdentity("OnCellUnload")>(cell->getDescription().c_str());
-
     for (auto it = cells.begin(); it != cells.end();)
     {
         if (*it != nullptr && *it == cell)
         {
+            Script::Call<Script::CallbackIdentity("OnCellUnload")>(cell->getDescription().c_str());
             LOG_APPEND(Log::LOG_INFO, "- Removing %s from CellController", cell->getDescription().c_str());
 
             delete *it;
@@ -134,10 +133,8 @@ void CellController::removePlayer(Cell *cell, Player *player)
 
     if (cell->players.empty())
     {
-        LOG_APPEND(Log::LOG_INFO, "- Deleting empty cell from memory: %s", cell->getDescription().c_str());
-        auto it = find(cells.begin(), cells.end(), cell);
-        delete *it;
-        cells.erase(it);
+        LOG_APPEND(Log::LOG_INFO, "- Cell %s has no players left", cell->getDescription().c_str());
+        removeCell(cell);
     }
 }
 
