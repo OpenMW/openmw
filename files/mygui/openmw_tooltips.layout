@@ -29,16 +29,33 @@
             </Widget>
         </Widget>
 
-        <!-- Text with centered caption tooltip -->
-        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 300 56" align="Stretch" name="TextWithCenteredCaptionToolTip">
+        <!-- Race tooltip -->
+        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 0 56" align="Stretch" name="RaceToolTip">
             <Property key="AutoResize" value="true"/>
-            <Property key="Padding" value="8"/>
+            <Property key="Padding" value="12"/>
+            <Property key="Spacing" value="8"/>
 
             <Widget type="AutoSizedTextBox" skin="NormalText" position="8 8 284 18" align="Left Top" name="CenteredCaption">
                 <Property key="TextAlign" value="Center"/>
             </Widget>
 
-            <Widget type="AutoSizedEditBox" skin="SandText" position="8 30 330 18" align="Left Top" name="CenteredCaptionText">
+            <Widget type="AutoSizedEditBox" skin="SandText" position="8 30 430 18" align="Left Top" name="CenteredCaptionText">
+                <Property key="MultiLine" value="true"/>
+                <Property key="WordWrap" value="true"/>
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
+        </Widget>
+
+        <!-- Specialization tooltip -->
+        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 0 56" align="Stretch" name="SpecializationToolTip">
+            <Property key="AutoResize" value="true"/>
+            <Property key="Padding" value="12"/>
+
+            <Widget type="AutoSizedTextBox" skin="NormalText" position="8 8 140 18" align="Left Top" name="Caption">
+                <Property key="TextAlign" value="Center"/>
+            </Widget>
+
+            <Widget type="AutoSizedEditBox" skin="SandText" position="0 30 140 18" align="Left Top" name="ColumnText">
                 <Property key="MultiLine" value="true"/>
                 <Property key="WordWrap" value="true"/>
                 <Property key="TextAlign" value="Left Top"/>
@@ -46,15 +63,16 @@
         </Widget>
 
         <!-- Class tooltip -->
-        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 300 78" align="Stretch" name="ClassToolTip">
+        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 0 78" align="Stretch" name="ClassToolTip">
             <Property key="AutoResize" value="true"/>
-            <Property key="Padding" value="8"/>
+            <Property key="Padding" value="12"/>
+            <Property key="Spacing" value="8"/>
 
             <Widget type="AutoSizedTextBox" skin="NormalText" position="8 8 284 18" align="Left Top" name="ClassName">
                 <Property key="TextAlign" value="Center"/>
             </Widget>
 
-            <Widget type="AutoSizedEditBox" skin="SandText" position="8 30 320 18" align="Left Top" name="ClassDescription">
+            <Widget type="AutoSizedEditBox" skin="SandText" position="8 30 430 18" align="Left Top" name="ClassDescription">
                 <Property key="MultiLine" value="true"/>
                 <Property key="WordWrap" value="true"/>
                 <Property key="TextAlign" value="Left Top"/>
@@ -204,15 +222,18 @@
         </Widget>
 
         <!-- Level tooltip -->
-        <Widget type="Widget" skin="HUD_Box_NoTransp" position="0 0 300 58" align="Left Top" name="LevelToolTip">
-            <Widget type="TextBox" skin="NormalText" position="8 8 284 18" align="Left Top HStretch">
+        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 300 58" align="HStretch" name="LevelToolTip">
+            <Property key="AutoResize" value="true"/>
+            <Property key="Padding" value="12"/>
+
+            <Widget type="AutoSizedTextBox" skin="NormalText" position="8 8 284 18" align="Left Top">
                 <Property key="Caption" value="#{sLevelProgress}"/>
                 <Property key="TextAlign" value="Center"/>
             </Widget>
 
-            <Widget type="ProgressBar" skin="MW_Progress_Red" position="50 30 200 20" align="HCenter Bottom" name="LevelProgress">
-                <Widget type="TextBox" skin="ProgressText" position="0 0 200 16" align="Stretch" name="LevelProgressText">
-                    <Property key="TextAlign" value="Center"/>
+            <Widget type="ProgressBar" skin="MW_Progress_Red" position="50 30 180 20" align="HCenter Bottom" name="LevelProgress">
+                <Widget type="TextBox" skin="ProgressText" position="0 0 180 20" align="HCenter" name="LevelProgressText">
+                    <Property key="TextAlign" value="HCenter Top"/>
                 </Widget>
             </Widget>
         </Widget>
