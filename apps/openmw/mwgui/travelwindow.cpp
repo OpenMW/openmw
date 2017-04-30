@@ -28,8 +28,6 @@ namespace MWGui
         WindowBase("openmw_travel_window.layout")
         , mCurrentY(0)
     {
-        setCoord(0, 0, 450, 300);
-
         getWidget(mCancelButton, "CancelButton");
         getWidget(mPlayerGold, "PlayerGold");
         getWidget(mSelect, "Select");
@@ -96,7 +94,7 @@ namespace MWGui
         toAdd->setUserString("price",oss.str());
 
         toAdd->setCaptionWithReplacing("#{sCell=" + name + "}   -   " + MyGUI::utility::toString(price)+"#{sgp}");
-        toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
+        toAdd->setSize(mDestinationsView->getWidth(),sLineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &TravelWindow::onMouseWheel);
         toAdd->setUserString("Destination", name);
         toAdd->setUserData(pos);

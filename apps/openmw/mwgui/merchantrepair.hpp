@@ -30,6 +30,7 @@ protected:
     void onRepairButtonClick(MyGUI::Widget* sender);
     void onOkButtonClick(MyGUI::Widget* sender);
 
+    static const int sLineHeight;
 };
 
 }
