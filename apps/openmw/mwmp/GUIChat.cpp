@@ -150,9 +150,13 @@ namespace mwmp
         windowState++;
         if (windowState == 3) windowState = 0;
 
-        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Switch chat mode to %s", windowState == CHAT_DISABLED ? "CHAT_DISABLED" :
-                                                                       windowState == CHAT_ENABLED ? "CHAT_ENABLED" :
-                                                                       "CHAT_HIDDENMODE");
+        std::string chatMode = windowState == CHAT_DISABLED ? "Chat disabled" :
+                               windowState == CHAT_ENABLED ? "Chat enabled" :
+                               "Chat in hidden mode";
+
+        LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Switch chat mode to %s", chatMode.c_str());
+        MWBase::Environment::get().getWindowManager()->messageBox(chatMode);
+
         switch (windowState)
         {
             case CHAT_DISABLED:
