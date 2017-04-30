@@ -44,10 +44,6 @@ namespace MWMechanics
 
             virtual int getTypeId() const;
 
-            /// Set the position to return to for a stationary (non-wandering) actor
-            /** In case another AI package moved the actor elsewhere **/
-            void setReturnPosition (const osg::Vec3f& position);
-
             virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
             virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
@@ -70,7 +66,7 @@ namespace MWMechanics
         private:
             // NOTE: mDistance and mDuration must be set already
             void init();
-            void stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage);
+            void stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage, bool clearPath = true);
 
             /// Have the given actor play an idle animation
             /// @return Success or error
@@ -87,7 +83,7 @@ namespace MWMechanics
             void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos);
             void onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
-                const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos, float duration);
+            const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos, float duration);
             bool isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void returnToStartLocation(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos);
             void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance);
@@ -102,11 +98,11 @@ namespace MWMechanics
             std::vector<unsigned char> mIdle;
             bool mRepeat;
 
-            bool mHasReturnPosition; // NOTE: Could be removed if mReturnPosition was initialized to actor position,
-                                    // if we had the actor in the AiWander constructor...
-            osg::Vec3f mReturnPosition;
-            osg::Vec3f mInitialActorPosition;
             bool mStoredInitialActorPosition;
+            osg::Vec3f mInitialActorPosition;
+
+            bool mHasDestination;
+            osg::Vec3f mDestination;
 
             void getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell, AiWanderStorage& storage);
 
