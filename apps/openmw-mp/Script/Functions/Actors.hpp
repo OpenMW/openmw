@@ -2,10 +2,11 @@
 #define OPENMW_ACTORAPI_HPP
 
 #define ACTORAPI \
-    {"InitScriptActorList",        ActorFunctions::InitScriptActorList},\
+    {"ReadLastActorList",          ActorFunctions::ReadLastActorList},\
+    {"InitializeActorList",        ActorFunctions::InitializeActorList},\
     \
     {"GetActorListSize",           ActorFunctions::GetActorListSize},\
-    {"GetLastActorListAction",     ActorFunctions::GetLastActorListAction},\
+    {"GetActorListAction",         ActorFunctions::GetActorListAction},\
     \
     {"GetActorCell",               ActorFunctions::GetActorCell},\
     {"GetActorRefId",              ActorFunctions::GetActorRefId},\
@@ -26,8 +27,8 @@
     {"GetActorFatigueBase",        ActorFunctions::GetActorFatigueBase},\
     {"GetActorFatigueCurrent",     ActorFunctions::GetActorFatigueCurrent},\
     \
-    {"SetScriptActorListCell",     ActorFunctions::SetScriptActorListCell},\
-    {"SetScriptActorListAction",   ActorFunctions::SetScriptActorListAction},\
+    {"SetActorListCell",           ActorFunctions::SetActorListCell},\
+    {"SetActorListAction",         ActorFunctions::SetActorListAction},\
     \
     {"SetActorCell",               ActorFunctions::SetActorCell},\
     {"SetActorRefId",              ActorFunctions::SetActorRefId},\
@@ -55,10 +56,11 @@ class ActorFunctions
 {
 public:
 
-    static void InitScriptActorList(unsigned short pid) noexcept;
+    static void ReadLastActorList() noexcept;
+    static void InitializeActorList(unsigned short pid) noexcept;
 
     static unsigned int GetActorListSize() noexcept;
-    static unsigned char GetLastActorListAction() noexcept;
+    static unsigned char GetActorListAction() noexcept;
 
     static const char *GetActorCell(unsigned int i) noexcept;
     static const char *GetActorRefId(unsigned int i) noexcept;
@@ -79,8 +81,8 @@ public:
     static double GetActorFatigueBase(unsigned int i) noexcept;
     static double GetActorFatigueCurrent(unsigned int i) noexcept;
 
-    static void SetScriptActorListCell(const char* cellDescription) noexcept;
-    static void SetScriptActorListAction(unsigned char action) noexcept;
+    static void SetActorListCell(const char* cellDescription) noexcept;
+    static void SetActorListAction(unsigned char action) noexcept;
 
     static void SetActorCell(const char* cellDescription) noexcept;
     static void SetActorRefId(const char* refId) noexcept;
