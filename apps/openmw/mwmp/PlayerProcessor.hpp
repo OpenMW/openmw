@@ -13,6 +13,7 @@
 #include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 #include "LocalPlayer.hpp"
 #include "DedicatedPlayer.hpp"
+#include "PlayerList.hpp"
 #include "BaseClientPacketProcessor.hpp"
 
 namespace mwmp

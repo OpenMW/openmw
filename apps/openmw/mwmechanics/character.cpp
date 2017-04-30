@@ -36,7 +36,7 @@
 #include "../mwmp/Main.hpp"
 #include "../mwmp/LocalPlayer.hpp"
 #include "../mwmp/LocalActor.hpp"
-#include "../mwmp/DedicatedPlayer.hpp"
+#include "../mwmp/PlayerList.hpp"
 #include "../mwmp/CellController.hpp"
 #include "../mwmp/MechanicsHelper.hpp"
 /*

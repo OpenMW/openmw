@@ -25,28 +25,6 @@ namespace mwmp
 {
     struct DedicatedPlayer;
 
-    class PlayerList
-    {
-    public:
-
-        static void update(float dt);
-
-        static void createPlayer(RakNet::RakNetGUID guid);
-        static DedicatedPlayer *newPlayer(RakNet::RakNetGUID guid);
-
-        static void disconnectPlayer(RakNet::RakNetGUID guid);
-        static void cleanUp();
-
-        static DedicatedPlayer *getPlayer(RakNet::RakNetGUID guid);
-        static DedicatedPlayer *getPlayer(const MWWorld::Ptr &ptr);
-
-        static bool isDedicatedPlayer(const MWWorld::Ptr &ptr);
-
-    private:
-
-        static std::map<RakNet::RakNetGUID, DedicatedPlayer *> players;
-    };
-
     class DedicatedPlayer : public BasePlayer
     {
         friend class PlayerList;

@@ -13,7 +13,7 @@
 
     Include additional headers for multiplayer purposes
 */
-#include "../mwmp/DedicatedPlayer.hpp"
+#include "../mwmp/PlayerList.hpp"
 /*
     End of tes3mp addition
 */

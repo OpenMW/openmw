@@ -35,6 +35,7 @@
 #include "GUIChat.hpp"
 #include "LocalPlayer.hpp"
 #include "DedicatedPlayer.hpp"
+#include "PlayerList.hpp"
 
 
 mwmp::GUIController::GUIController(): mInputBox(0), mListBox(0)

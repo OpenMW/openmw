@@ -16,6 +16,7 @@
 #include "Main.hpp"
 #include "LocalPlayer.hpp"
 #include "DedicatedPlayer.hpp"
+#include "PlayerList.hpp"
 #include "CellController.hpp"
 
 using namespace mwmp;

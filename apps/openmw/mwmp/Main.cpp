@@ -41,6 +41,7 @@
 #include "Networking.hpp"
 #include "LocalPlayer.hpp"
 #include "DedicatedPlayer.hpp"
+#include "PlayerList.hpp"
 #include "GUIController.hpp"
 #include "CellController.hpp"
 #include "MechanicsHelper.hpp"

@@ -5,8 +5,6 @@
 #include <boost/foreach.hpp>
 #include "Networking.hpp"
 #include "PlayerProcessor.hpp"
-#include "DedicatedPlayer.hpp"
-#include "LocalPlayer.hpp"
 #include "Main.hpp"
 
 using namespace mwmp;

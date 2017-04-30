@@ -13,6 +13,7 @@
 #include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
+#include "../mwmp/PlayerList.hpp"
 #include "../mwmp/DedicatedPlayer.hpp"
 #include "../mwmp/LocalActor.hpp"
 #include "../mwmp/DedicatedActor.hpp"

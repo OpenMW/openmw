@@ -15,7 +15,7 @@
     Include additional headers for multiplayer purposes
 */
 #include "../mwmp/Main.hpp"
-#include "../mwmp/DedicatedPlayer.hpp"
+#include "../mwmp/PlayerList.hpp"
 #include "../mwmp/CellController.hpp"
 /*
     End of tes3mp addition
