@@ -4,6 +4,8 @@
 
 #include "Cell.hpp"
 
+#include <components/openmw-mp/NetworkMessages.hpp>
+
 #include <iostream>
 #include "Player.hpp"
 
@@ -11,7 +13,7 @@ using namespace std;
 
 Cell::Cell(ESM::Cell cell) : cell(cell)
 {
-
+    cellActorList.count = 0;
 }
 
 Cell::Iterator Cell::begin() const
@@ -59,6 +61,63 @@ void Cell::removePlayer(Player *player)
             return;
         }
     }
+}
+
+void Cell::readActorList(unsigned char packetID, const mwmp::BaseActorList *newActorList)
+{
+    for (unsigned int i = 0; i < newActorList->count; i++)
+    {
+        mwmp::BaseActor newActor = newActorList->baseActors.at(i);
+        mwmp::BaseActor *cellActor;
+
+        if (containsActor(newActor.refNumIndex, newActor.mpNum))
+        {
+            cellActor = getActor(newActor.refNumIndex, newActor.mpNum);
+
+            switch (packetID)
+            {
+            case ID_ACTOR_STATS_DYNAMIC:
+
+                cellActor->creatureStats.mDynamic[0] = newActor.creatureStats.mDynamic[0];
+                cellActor->creatureStats.mDynamic[1] = newActor.creatureStats.mDynamic[1];
+                cellActor->creatureStats.mDynamic[2] = newActor.creatureStats.mDynamic[2];
+                break;
+            }
+        }
+        else
+            cellActorList.baseActors.push_back(newActor);
+    }
+
+    cellActorList.count = cellActorList.baseActors.size();
+}
+
+bool Cell::containsActor(int refNumIndex, int mpNum)
+{
+    for (unsigned int i = 0; i < cellActorList.baseActors.size(); i++)
+    {
+        mwmp::BaseActor actor = cellActorList.baseActors.at(i);
+
+        if (actor.refNumIndex == refNumIndex && actor.mpNum == mpNum)
+            return true;
+    }
+    return false;
+}
+
+mwmp::BaseActor *Cell::getActor(int refNumIndex, int mpNum)
+{
+    for (unsigned int i = 0; i < cellActorList.baseActors.size(); i++)
+    {
+        mwmp::BaseActor *actor = &cellActorList.baseActors.at(i);
+
+        if (actor->refNumIndex == refNumIndex && actor->mpNum == mpNum)
+            return actor;
+    }
+    return 0;
+}
+
+mwmp::BaseActorList *Cell::getActorList()
+{
+    return &cellActorList;
 }
 
 Cell::TPlayers Cell::getPlayers() const
