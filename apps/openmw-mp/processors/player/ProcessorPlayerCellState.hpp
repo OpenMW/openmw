@@ -28,8 +28,6 @@ namespace mwmp
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received %s from %s", strPacketID, player.npc.mName.c_str());
 
             CellController::get()->update(&player);
-
-            Script::Call<Script::CallbackIdentity("OnPlayerCellState")>(player.getId());
         }
     };
 }

@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include "Player.hpp"
+#include "Script/Script.hpp"
 
 using namespace std;
 
@@ -38,6 +39,8 @@ void Cell::addPlayer(Player *player)
 
     LOG_APPEND(Log::LOG_INFO, "- Adding %s to Cell %s", player->npc.mName.c_str(), getDescription().c_str());
 
+    Script::Call<Script::CallbackIdentity("OnCellLoad")>(player->getId(), getDescription().c_str());
+
     players.push_back(player);
 }
 
@@ -56,6 +59,8 @@ void Cell::removePlayer(Player *player)
             }
 
             LOG_APPEND(Log::LOG_INFO, "- Removing %s from Cell %s", player->npc.mName.c_str(), getDescription().c_str());
+
+            Script::Call<Script::CallbackIdentity("OnCellUnload")>(player->getId(), getDescription().c_str());
 
             players.erase(it);
             return;

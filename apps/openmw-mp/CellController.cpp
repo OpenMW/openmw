@@ -116,7 +116,7 @@ void CellController::removeCell(Cell *cell)
     {
         if (*it != nullptr && *it == cell)
         {
-            Script::Call<Script::CallbackIdentity("OnCellUnload")>(cell->getDescription().c_str());
+            Script::Call<Script::CallbackIdentity("OnCellDeletion")>(cell->getDescription().c_str());
             LOG_APPEND(Log::LOG_INFO, "- Removing %s from CellController", cell->getDescription().c_str());
 
             delete *it;
