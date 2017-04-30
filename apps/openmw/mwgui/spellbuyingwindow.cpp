@@ -26,8 +26,6 @@ namespace MWGui
         , mLastPos(0)
         , mCurrentY(0)
     {
-        setCoord(0, 0, 450, 300);
-
         getWidget(mCancelButton, "CancelButton");
         getWidget(mPlayerGold, "PlayerGold");
         getWidget(mSpellsView, "SpellsView");
@@ -68,7 +66,7 @@ namespace MWGui
 
         toAdd->setUserData(price);
         toAdd->setCaptionWithReplacing(spell->mName+"   -   "+MyGUI::utility::toString(price)+"#{sgp}");
-        toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
+        toAdd->setSize(mSpellsView->getWidth(),sLineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");
         toAdd->setUserString("Spell", spellId);
