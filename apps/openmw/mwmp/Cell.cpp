@@ -326,7 +326,6 @@ void Cell::uninitializeLocalActors()
     for (std::map<std::string, LocalActor *>::iterator it = localActors.begin(); it != localActors.end(); ++it)
     {
         Main::get().getCellController()->removeLocalActorRecord(it->first);
-        delete it->second->creatureStats;
         delete it->second;
     }
 
@@ -338,7 +337,6 @@ void Cell::uninitializeDedicatedActors()
     for (std::map<std::string, DedicatedActor *>::iterator it = dedicatedActors.begin(); it != dedicatedActors.end(); ++it)
     {
         Main::get().getCellController()->removeDedicatedActorRecord(it->first);
-        delete it->second->creatureStats;
         delete it->second;
     }
 

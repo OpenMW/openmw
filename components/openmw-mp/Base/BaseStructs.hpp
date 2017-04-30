@@ -1,6 +1,8 @@
 #ifndef OPENMW_BASESTRUCTS_HPP
 #define OPENMW_BASESTRUCTS_HPP
 
+#include <components/esm/statstate.hpp>
+
 #include <RakNetTypes.h>
 
 namespace mwmp
@@ -47,6 +49,11 @@ namespace mwmp
         int mode;
         int count;
         bool persist;
+    };
+
+    struct SimpleCreatureStats
+    {
+        ESM::StatState<float> mDynamic[3];
     };
 }
 

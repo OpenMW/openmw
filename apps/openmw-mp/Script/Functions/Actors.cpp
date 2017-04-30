@@ -33,8 +33,6 @@ void ActorFunctions::InitializeActorList(unsigned short pid) noexcept
     writeActorList.cell.blank();
     writeActorList.baseActors.clear();
     writeActorList.guid = player->guid;
-
-    tempActor.creatureStats = new ESM::CreatureStats();
 }
 
 unsigned int ActorFunctions::GetActorListSize() noexcept
@@ -100,32 +98,32 @@ double ActorFunctions::GetActorRotZ(unsigned int i) noexcept
 
 double ActorFunctions::GetActorHealthBase(unsigned int i) noexcept
 {
-    return readActorList->baseActors.at(i).creatureStats->mDynamic[0].mBase;
+    return readActorList->baseActors.at(i).creatureStats.mDynamic[0].mBase;
 }
 
 double ActorFunctions::GetActorHealthCurrent(unsigned int i) noexcept
 {
-    return readActorList->baseActors.at(i).creatureStats->mDynamic[0].mCurrent;
+    return readActorList->baseActors.at(i).creatureStats.mDynamic[0].mCurrent;
 }
 
 double ActorFunctions::GetActorMagickaBase(unsigned int i) noexcept
 {
-    return readActorList->baseActors.at(i).creatureStats->mDynamic[1].mBase;
+    return readActorList->baseActors.at(i).creatureStats.mDynamic[1].mBase;
 }
 
 double ActorFunctions::GetActorMagickaCurrent(unsigned int i) noexcept
 {
-    return readActorList->baseActors.at(i).creatureStats->mDynamic[1].mCurrent;
+    return readActorList->baseActors.at(i).creatureStats.mDynamic[1].mCurrent;
 }
 
 double ActorFunctions::GetActorFatigueBase(unsigned int i) noexcept
 {
-    return readActorList->baseActors.at(i).creatureStats->mDynamic[2].mBase;
+    return readActorList->baseActors.at(i).creatureStats.mDynamic[2].mBase;
 }
 
 double ActorFunctions::GetActorFatigueCurrent(unsigned int i) noexcept
 {
-    return readActorList->baseActors.at(i).creatureStats->mDynamic[2].mCurrent;
+    return readActorList->baseActors.at(i).creatureStats.mDynamic[2].mCurrent;
 }
 
 void ActorFunctions::SetActorListCell(const char* cellDescription) noexcept
@@ -174,32 +172,32 @@ void ActorFunctions::SetActorRotation(double x, double y, double z) noexcept
 
 void ActorFunctions::SetActorHealthBase(double value) noexcept
 {
-    tempActor.creatureStats->mDynamic[0].mBase = value;
+    tempActor.creatureStats.mDynamic[0].mBase = value;
 }
 
 void ActorFunctions::SetActorHealthCurrent(double value) noexcept
 {
-    tempActor.creatureStats->mDynamic[0].mCurrent = value;
+    tempActor.creatureStats.mDynamic[0].mCurrent = value;
 }
 
 void ActorFunctions::SetActorMagickaBase(double value) noexcept
 {
-    tempActor.creatureStats->mDynamic[1].mBase = value;
+    tempActor.creatureStats.mDynamic[1].mBase = value;
 }
 
 void ActorFunctions::SetActorMagickaCurrent(double value) noexcept
 {
-    tempActor.creatureStats->mDynamic[1].mCurrent = value;
+    tempActor.creatureStats.mDynamic[1].mCurrent = value;
 }
 
 void ActorFunctions::SetActorFatigueBase(double value) noexcept
 {
-    tempActor.creatureStats->mDynamic[2].mBase = value;
+    tempActor.creatureStats.mDynamic[2].mBase = value;
 }
 
 void ActorFunctions::SetActorFatigueCurrent(double value) noexcept
 {
-    tempActor.creatureStats->mDynamic[2].mCurrent = value;
+    tempActor.creatureStats.mDynamic[2].mCurrent = value;
 }
 
 void ActorFunctions::AddActor() noexcept
@@ -207,7 +205,6 @@ void ActorFunctions::AddActor() noexcept
     writeActorList.baseActors.push_back(tempActor);
 
     tempActor = emptyActor;
-    tempActor.creatureStats = new ESM::CreatureStats();
 }
 
 void ActorFunctions::SendActorList() noexcept

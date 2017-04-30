@@ -32,8 +32,6 @@ LocalActor::LocalActor()
 
     attack.type = Attack::MELEE;
     attack.shouldSend = false;
-
-    creatureStats = new ESM::CreatureStats();
 }
 
 LocalActor::~LocalActor()
@@ -165,9 +163,9 @@ void LocalActor::updateStatsDynamic(bool forceUpdate)
             oldMagicka = magicka;
             oldFatigue = fatigue;
 
-            health.writeState(creatureStats->mDynamic[0]);
-            magicka.writeState(creatureStats->mDynamic[1]);
-            fatigue.writeState(creatureStats->mDynamic[2]);
+            health.writeState(creatureStats.mDynamic[0]);
+            magicka.writeState(creatureStats.mDynamic[1]);
+            fatigue.writeState(creatureStats.mDynamic[2]);
 
             statTimer = 0;
 

@@ -29,9 +29,6 @@ DedicatedActor::DedicatedActor()
     animation.groupname = "";
     sound = "";
 
-    creatureStats = new ESM::CreatureStats();
-    creatureStats->blank();
-
     hasStatsDynamicData = false;
     hasChangedCell = true;
 
@@ -145,7 +142,7 @@ void DedicatedActor::setStatsDynamic()
 
     for (int i = 0; i < 3; ++i)
     {
-        value.readState(creatureStats->mDynamic[i]);
+        value.readState(creatureStats.mDynamic[i]);
         ptrCreatureStats->setDynamic(i, value);
     }
 }

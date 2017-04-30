@@ -2,7 +2,6 @@
 #define OPENMW_BASEACTOR_HPP
 
 #include <components/esm/loadcell.hpp>
-#include <components/esm/creaturestats.hpp>
 
 #include <components/openmw-mp/Base/BaseStructs.hpp>
 
@@ -28,14 +27,14 @@ namespace mwmp
 
         ESM::Cell cell;
 
-        ESM::CreatureStats *creatureStats;
-
         unsigned int movementFlags;
         char drawState;
         bool isFlying;
 
         std::string response;
         std::string sound;
+
+        SimpleCreatureStats creatureStats;
 
         Animation animation;
         Attack attack;
