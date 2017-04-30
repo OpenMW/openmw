@@ -10,7 +10,8 @@
 
 using namespace mwmp;
 
-BaseEvent scriptEvent;
+BaseEvent *readEvent;
+BaseEvent writeEvent;
 
 WorldObject tempWorldObject;
 const WorldObject emptyWorldObject = {};
@@ -18,138 +19,143 @@ const WorldObject emptyWorldObject = {};
 ContainerItem tempContainerItem;
 const ContainerItem emptyContainerItem = {};
 
-void WorldFunctions::InitScriptEvent(unsigned short pid) noexcept
+void WorldFunctions::ReadLastEvent() noexcept
+{
+    readEvent = mwmp::Networking::getPtr()->getLastEvent();
+}
+
+void WorldFunctions::InitiateEvent(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
 
-    scriptEvent.cell.blank();
-    scriptEvent.objectChanges.objects.clear();
-    scriptEvent.guid = player->guid;
+    writeEvent.cell.blank();
+    writeEvent.objectChanges.objects.clear();
+    writeEvent.guid = player->guid;
 }
 
 unsigned int WorldFunctions::GetObjectChangesSize() noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.count;
+    return readEvent->objectChanges.count;
 }
 
-unsigned char WorldFunctions::GetLastEventAction() noexcept
+unsigned char WorldFunctions::GetEventAction() noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->action;
+    return readEvent->action;
 }
 
 const char *WorldFunctions::GetObjectRefId(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).refId.c_str();
+    return readEvent->objectChanges.objects.at(i).refId.c_str();
 }
 
 int WorldFunctions::GetObjectRefNumIndex(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).refNumIndex;
+    return readEvent->objectChanges.objects.at(i).refNumIndex;
 }
 
 int WorldFunctions::GetObjectMpNum(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).mpNum;
+    return readEvent->objectChanges.objects.at(i).mpNum;
 }
 
 int WorldFunctions::GetObjectCount(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).count;
+    return readEvent->objectChanges.objects.at(i).count;
 }
 
 int WorldFunctions::GetObjectCharge(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).charge;
+    return readEvent->objectChanges.objects.at(i).charge;
 }
 
 int WorldFunctions::GetObjectGoldValue(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).goldValue;
+    return readEvent->objectChanges.objects.at(i).goldValue;
 }
 
 double WorldFunctions::GetObjectScale(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).scale;
+    return readEvent->objectChanges.objects.at(i).scale;
 }
 
 int WorldFunctions::GetObjectDoorState(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).doorState;
+    return readEvent->objectChanges.objects.at(i).doorState;
 }
 
 int WorldFunctions::GetObjectLockLevel(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).lockLevel;
+    return readEvent->objectChanges.objects.at(i).lockLevel;
 }
 
 double WorldFunctions::GetObjectPosX(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).position.pos[0];
+    return readEvent->objectChanges.objects.at(i).position.pos[0];
 }
 
 double WorldFunctions::GetObjectPosY(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).position.pos[1];
+    return readEvent->objectChanges.objects.at(i).position.pos[1];
 }
 
 double WorldFunctions::GetObjectPosZ(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).position.pos[2];
+    return readEvent->objectChanges.objects.at(i).position.pos[2];
 }
 
 double WorldFunctions::GetObjectRotX(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).position.rot[0];
+    return readEvent->objectChanges.objects.at(i).position.rot[0];
 }
 
 double WorldFunctions::GetObjectRotY(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).position.rot[1];
+    return readEvent->objectChanges.objects.at(i).position.rot[1];
 }
 
 double WorldFunctions::GetObjectRotZ(unsigned int i) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(i).position.rot[2];
+    return readEvent->objectChanges.objects.at(i).position.rot[2];
 }
 
 unsigned int WorldFunctions::GetContainerChangesSize(unsigned int objectIndex) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(objectIndex).containerChanges.count;
+    return readEvent->objectChanges.objects.at(objectIndex).containerChanges.count;
 }
 
 const char *WorldFunctions::GetContainerItemRefId(unsigned int objectIndex, unsigned int itemIndex) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(objectIndex)
+    return readEvent->objectChanges.objects.at(objectIndex)
         .containerChanges.items.at(itemIndex).refId.c_str();
 }
 
 int WorldFunctions::GetContainerItemCount(unsigned int objectIndex, unsigned int itemIndex) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(objectIndex)
+    return readEvent->objectChanges.objects.at(objectIndex)
         .containerChanges.items.at(itemIndex).count;
 }
 
 int WorldFunctions::GetContainerItemCharge(unsigned int objectIndex, unsigned int itemIndex) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(objectIndex)
+    return readEvent->objectChanges.objects.at(objectIndex)
         .containerChanges.items.at(itemIndex).charge;
 }
 
 int WorldFunctions::GetContainerItemActionCount(unsigned int objectIndex, unsigned int itemIndex) noexcept
 {
-    return mwmp::Networking::getPtr()->getLastEvent()->objectChanges.objects.at(objectIndex)
+    return readEvent->objectChanges.objects.at(objectIndex)
         .containerChanges.items.at(itemIndex).actionCount;
 }
 
-void WorldFunctions::SetScriptEventCell(const char* cellDescription) noexcept
+void WorldFunctions::SetEventCell(const char* cellDescription) noexcept
 {
-    scriptEvent.cell = Utils::getCellFromDescription(cellDescription);
+    writeEvent.cell = Utils::getCellFromDescription(cellDescription);
 }
 
-void WorldFunctions::SetScriptEventAction(unsigned char action) noexcept
+void WorldFunctions::SetEventAction(unsigned char action) noexcept
 {
-    scriptEvent.action = action;
+    writeEvent.action = action;
 }
 
 void WorldFunctions::SetObjectRefId(const char* refId) noexcept
@@ -228,7 +234,7 @@ void WorldFunctions::SetContainerItemCharge(int charge) noexcept
 
 void WorldFunctions::AddWorldObject() noexcept
 {
-    scriptEvent.objectChanges.objects.push_back(tempWorldObject);
+    writeEvent.objectChanges.objects.push_back(tempWorldObject);
 
     tempWorldObject = emptyWorldObject;
 }
@@ -242,44 +248,44 @@ void WorldFunctions::AddContainerItem() noexcept
 
 void WorldFunctions::SendObjectDelete() noexcept
 {
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_DELETE)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_DELETE)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_DELETE)->setEvent(&writeEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_DELETE)->Send(writeEvent.guid);
 }
 
 void WorldFunctions::SendObjectPlace() noexcept
 {
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_PLACE)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_PLACE)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_PLACE)->setEvent(&writeEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_PLACE)->Send(writeEvent.guid);
 }
 
 void WorldFunctions::SendObjectScale() noexcept
 {
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_SCALE)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_SCALE)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_SCALE)->setEvent(&writeEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_SCALE)->Send(writeEvent.guid);
 }
 
 void WorldFunctions::SendObjectLock() noexcept
 {
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_LOCK)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_LOCK)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_LOCK)->setEvent(&writeEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_LOCK)->Send(writeEvent.guid);
 }
 
 void WorldFunctions::SendObjectUnlock() noexcept
 {
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_UNLOCK)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_UNLOCK)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_UNLOCK)->setEvent(&writeEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_UNLOCK)->Send(writeEvent.guid);
 }
 
 void WorldFunctions::SendDoorState() noexcept
 {
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_DOOR_STATE)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_DOOR_STATE)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_DOOR_STATE)->setEvent(&writeEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_DOOR_STATE)->Send(writeEvent.guid);
 }
 
 void WorldFunctions::SendContainer() noexcept
 {
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_CONTAINER)->setEvent(&scriptEvent);
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_CONTAINER)->Send(scriptEvent.guid);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_CONTAINER)->setEvent(&writeEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_CONTAINER)->Send(writeEvent.guid);
 }
 
 void WorldFunctions::SetHour(unsigned short pid, double hour) noexcept

@@ -2,10 +2,11 @@
 #define OPENMW_WORLDAPI_HPP
 
 #define WORLDAPI \
-    {"InitScriptEvent",             WorldFunctions::InitScriptEvent},\
+    {"ReadLastEvent",               WorldFunctions::ReadLastEvent},\
+    {"InitiateEvent",               WorldFunctions::InitiateEvent},\
     \
     {"GetObjectChangesSize",        WorldFunctions::GetObjectChangesSize},\
-    {"GetLastEventAction",          WorldFunctions::GetLastEventAction},\
+    {"GetEventAction",              WorldFunctions::GetEventAction},\
     \
     {"GetObjectRefId",              WorldFunctions::GetObjectRefId},\
     {"GetObjectRefNumIndex",        WorldFunctions::GetObjectRefNumIndex},\
@@ -29,8 +30,8 @@
     {"GetContainerItemCharge",      WorldFunctions::GetContainerItemCharge},\
     {"GetContainerItemActionCount", WorldFunctions::GetContainerItemActionCount},\
     \
-    {"SetScriptEventCell",          WorldFunctions::SetScriptEventCell},\
-    {"SetScriptEventAction",        WorldFunctions::SetScriptEventAction},\
+    {"SetEventCell",                WorldFunctions::SetEventCell},\
+    {"SetEventAction",              WorldFunctions::SetEventAction},\
     \
     {"SetObjectRefId",              WorldFunctions::SetObjectRefId},\
     {"SetObjectRefNumIndex",        WorldFunctions::SetObjectRefNumIndex},\
@@ -67,10 +68,11 @@ class WorldFunctions
 {
 public:
 
-    static void InitScriptEvent(unsigned short pid) noexcept;
+    static void ReadLastEvent() noexcept;
+    static void InitiateEvent(unsigned short pid) noexcept;
 
     static unsigned int GetObjectChangesSize() noexcept;
-    static unsigned char GetLastEventAction() noexcept;
+    static unsigned char GetEventAction() noexcept;
 
     static const char *GetObjectRefId(unsigned int i) noexcept;
     static int GetObjectRefNumIndex(unsigned int i) noexcept;
@@ -94,8 +96,8 @@ public:
     static int GetContainerItemCharge(unsigned int objectIndex, unsigned int itemIndex) noexcept;
     static int GetContainerItemActionCount(unsigned int objectIndex, unsigned int itemIndex) noexcept;
 
-    static void SetScriptEventCell(const char* cellDescription) noexcept;
-    static void SetScriptEventAction(unsigned char action) noexcept;
+    static void SetEventCell(const char* cellDescription) noexcept;
+    static void SetEventAction(unsigned char action) noexcept;
 
     static void SetObjectRefId(const char* refId) noexcept;
     static void SetObjectRefNumIndex(int refNumIndex) noexcept;
