@@ -38,6 +38,7 @@ void CellController::updateLocal(bool forceUpdate)
         {
             mpCell->uninitializeLocalActors();
             mpCell->uninitializeDedicatedActors();
+            delete it->second;
             cellsInitialized.erase(it++);
         }
         else
