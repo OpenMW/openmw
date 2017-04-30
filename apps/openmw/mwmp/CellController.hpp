@@ -14,7 +14,6 @@ namespace mwmp
     public:
 
         CellController();
-        ~CellController();
 
         void updateLocal(bool forceUpdate);
         void updateDedicated(float dt);

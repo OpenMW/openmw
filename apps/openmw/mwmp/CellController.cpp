@@ -22,12 +22,6 @@ mwmp::CellController::CellController()
 {
 
 }
-
-mwmp::CellController::~CellController()
-{
-
-}
-
 void CellController::updateLocal(bool forceUpdate)
 {
     for (std::map<std::string, mwmp::Cell *>::iterator it = cellsInitialized.begin(); it != cellsInitialized.end();)

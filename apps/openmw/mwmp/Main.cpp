@@ -94,6 +94,9 @@ Main::~Main()
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "tes3mp stopped");
     delete mNetworking;
     delete mLocalPlayer;
+    delete mCellController;
+    delete mGUIController;
+    delete mMechanicsHelper;
     PlayerList::cleanUp();
 }
 
