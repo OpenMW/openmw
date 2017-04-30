@@ -154,7 +154,7 @@ namespace MWGui
 
         // health, magicka, fatigue tooltip
         MyGUI::Widget* w;
-        std::string valStr =  MyGUI::utility::toString(current) + "/" + MyGUI::utility::toString(modified);
+        std::string valStr =  MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         if (id == "HBar")
         {
             getWidget(w, "Health");
