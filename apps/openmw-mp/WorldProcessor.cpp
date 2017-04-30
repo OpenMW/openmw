@@ -31,6 +31,7 @@ bool WorldProcessor::Process(RakNet::Packet &packet, BaseEvent &event) noexcept
     event.cell.blank();
     event.objectChanges.objects.clear();
     event.guid = packet.guid;
+
     for (auto &processor : processors)
     {
         if (processor.first == packet.data[0])

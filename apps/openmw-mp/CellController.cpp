@@ -3,6 +3,7 @@
 #include <iostream>
 #include "Cell.hpp"
 #include "Player.hpp"
+#include "Script/Script.hpp"
 
 using namespace std;
 
@@ -110,6 +111,8 @@ void CellController::removeCell(Cell *cell)
 {
     if (cell == nullptr)
         return;
+
+    Script::Call<Script::CallbackIdentity("OnCellUnload")>(cell->getDescription().c_str());
 
     for (auto it = cells.begin(); it != cells.end();)
     {

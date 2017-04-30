@@ -27,6 +27,7 @@ bool ActorProcessor::Process(RakNet::Packet &packet, BaseActorList &actorList) n
     actorList.cell.blank();
     actorList.baseActors.clear();
     actorList.guid = packet.guid;
+
     for (auto &processor : processors)
     {
         if (processor.first == packet.data[0])
