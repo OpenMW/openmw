@@ -3,6 +3,7 @@
 
 #define ACTORAPI \
     {"ReadLastActorList",          ActorFunctions::ReadLastActorList},\
+    {"ReadCellActorList",          ActorFunctions::ReadCellActorList},\
     {"InitializeActorList",        ActorFunctions::InitializeActorList},\
     \
     {"GetActorListSize",           ActorFunctions::GetActorListSize},\
@@ -57,6 +58,7 @@ class ActorFunctions
 public:
 
     static void ReadLastActorList() noexcept;
+    static void ReadCellActorList(const char* cellDescription) noexcept;
     static void InitializeActorList(unsigned short pid) noexcept;
 
     static unsigned int GetActorListSize() noexcept;

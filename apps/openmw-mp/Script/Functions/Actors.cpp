@@ -25,6 +25,13 @@ void ActorFunctions::ReadLastActorList() noexcept
     readActorList = mwmp::Networking::getPtr()->getLastActorList();
 }
 
+void ActorFunctions::ReadCellActorList(const char* cellDescription) noexcept
+{
+    ESM::Cell esmCell = Utils::getCellFromDescription(cellDescription);
+    Cell *serverCell = CellController::get()->getCell(&esmCell);
+    readActorList = serverCell->getActorList();
+}
+
 void ActorFunctions::InitializeActorList(unsigned short pid) noexcept
 {
     Player *player;
