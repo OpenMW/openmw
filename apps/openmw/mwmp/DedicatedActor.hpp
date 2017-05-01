@@ -25,8 +25,6 @@ namespace mwmp
         MWWorld::Ptr getPtr();
         void setPtr(const MWWorld::Ptr& newPtr);
 
-        bool hasStatsDynamicData;
-
     private:
         MWWorld::Ptr ptr;
 

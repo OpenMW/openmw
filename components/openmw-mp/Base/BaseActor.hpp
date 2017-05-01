@@ -38,6 +38,9 @@ namespace mwmp
 
         Animation animation;
         Attack attack;
+
+        bool hasPositionData;
+        bool hasStatsDynamicData;
     };
 
     class BaseActorList

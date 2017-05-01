@@ -224,7 +224,7 @@ void WorldEvent::scaleObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i\nscale: %f", worldObject.refId.c_str(), worldObject.refNumIndex,
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i\n- scale: %f", worldObject.refId.c_str(), worldObject.refNumIndex,
             worldObject.mpNum, worldObject.scale);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex, worldObject.mpNum);
