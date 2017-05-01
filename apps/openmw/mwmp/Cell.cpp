@@ -99,6 +99,18 @@ void Cell::readPositions(ActorList& actorList)
             DedicatedActor *actor = dedicatedActors[mapIndex];
             actor->position = baseActor.position;
             actor->direction = baseActor.direction;
+
+            if (!actor->hasPositionData)
+            {
+                actor->hasPositionData = true;
+
+                // If this is our first packet about this actor's position, force an update
+                // now instead of waiting for its frame
+                //
+                // That way, if this actor is about to become a LocalActor, initial data about it
+                // received from the server still gets set
+                actor->setPosition();
+            }
         }
     }
 }
