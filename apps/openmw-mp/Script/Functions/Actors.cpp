@@ -133,6 +133,16 @@ double ActorFunctions::GetActorFatigueCurrent(unsigned int i) noexcept
     return readActorList->baseActors.at(i).creatureStats.mDynamic[2].mCurrent;
 }
 
+bool ActorFunctions::DoesActorHavePosition(unsigned int i) noexcept
+{
+    return readActorList->baseActors.at(i).hasPositionData;
+}
+
+bool ActorFunctions::DoesActorHaveStatsDynamic(unsigned int i) noexcept
+{
+    return readActorList->baseActors.at(i).hasStatsDynamicData;
+}
+
 void ActorFunctions::SetActorListCell(const char* cellDescription) noexcept
 {
     writeActorList.cell = Utils::getCellFromDescription(cellDescription);

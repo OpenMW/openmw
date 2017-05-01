@@ -28,6 +28,9 @@
     {"GetActorFatigueBase",        ActorFunctions::GetActorFatigueBase},\
     {"GetActorFatigueCurrent",     ActorFunctions::GetActorFatigueCurrent},\
     \
+    {"DoesActorHavePosition",      ActorFunctions::DoesActorHavePosition},\
+    {"DoesActorHaveStatsDynamic",  ActorFunctions::DoesActorHaveStatsDynamic},\
+    \
     {"SetActorListCell",           ActorFunctions::SetActorListCell},\
     {"SetActorListAction",         ActorFunctions::SetActorListAction},\
     \
@@ -82,6 +85,9 @@ public:
     static double GetActorMagickaCurrent(unsigned int i) noexcept;
     static double GetActorFatigueBase(unsigned int i) noexcept;
     static double GetActorFatigueCurrent(unsigned int i) noexcept;
+
+    static bool DoesActorHavePosition(unsigned int i) noexcept;
+    static bool DoesActorHaveStatsDynamic(unsigned int i) noexcept;
 
     static void SetActorListCell(const char* cellDescription) noexcept;
     static void SetActorListAction(unsigned char action) noexcept;
