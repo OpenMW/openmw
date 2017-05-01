@@ -25,7 +25,7 @@ namespace mwmp
 
         void Do(PlayerPacket &packet, Player &player) override
         {
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received %s from %s", strPacketID, player.npc.mName.c_str());
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received %s from %s", strPacketID.c_str(), player.npc.mName.c_str());
 
             CellController::get()->update(&player);
         }
