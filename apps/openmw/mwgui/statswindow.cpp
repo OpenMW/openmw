@@ -618,13 +618,13 @@ namespace MWGui
                         if (rankData.mSkill1 > 0)
                             text += "\n#{sNeedOneSkill} " + MyGUI::utility::toString(rankData.mSkill1);
                         if (rankData.mSkill2 > 0)
-                            text += "\n#{sNeedTwoSkills} " + MyGUI::utility::toString(rankData.mSkill2);
+                            text += " #{sand} #{sNeedTwoSkills} " + MyGUI::utility::toString(rankData.mSkill2);
                     }
                 }
 
                 w->setUserString("ToolTipType", "Layout");
-                w->setUserString("ToolTipLayout", "TextToolTip");
-                w->setUserString("Caption_Text", text);
+                w->setUserString("ToolTipLayout", "FactionToolTip");
+                w->setUserString("Caption_FactionText", text);
             }
         }
 
