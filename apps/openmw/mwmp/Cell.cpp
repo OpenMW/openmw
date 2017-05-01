@@ -250,6 +250,7 @@ void Cell::readCellChange(ActorList& actorList)
             if (Main::get().getCellController()->isInitializedCell(actor->cell))
                 Main::get().getCellController()->getCell(actor->cell)->initializeDedicatedActor(actor->getPtr());
 
+            delete actor;
             dedicatedActors.erase(mapIndex);
         }
     }
