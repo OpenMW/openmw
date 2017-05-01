@@ -120,7 +120,7 @@ bool MainWindow::refresh()
         model->setData(mi, server.first.ToString(true, ':'));
 
         mi = model->index(0, ServerData::PLAYERS);
-        model->setData(mi, server.second.GetPlayers());
+        model->setData(mi, (int)server.second.players.size());
 
         mi = model->index(0, ServerData::MAX_PLAYERS);
         model->setData(mi, server.second.GetMaxPlayers());
