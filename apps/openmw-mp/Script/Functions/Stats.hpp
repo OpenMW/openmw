@@ -19,6 +19,8 @@
     {"GetHair",                 StatsFunctions::GetHairstyle},\
     {"GetIsMale",               StatsFunctions::GetIsMale},\
     {"GetBirthsign",            StatsFunctions::GetBirthsign},\
+    {"GetCreatureModel",        StatsFunctions::GetCreatureModel},\
+    {"IsCreatureName",          StatsFunctions::IsCreatureName},\
     \
     {"GetLevel",                StatsFunctions::GetLevel},\
     {"GetLevelProgress",        StatsFunctions::GetLevelProgress},\
@@ -48,6 +50,7 @@
     {"SetHair",                 StatsFunctions::SetHairstyle},\
     {"SetIsMale",               StatsFunctions::SetIsMale},\
     {"SetBirthsign",            StatsFunctions::SetBirthsign},\
+    {"SetCreatureModel",        StatsFunctions::SetCreatureModel},\
     \
     {"SetLevel",                StatsFunctions::SetLevel},\
     {"SetLevelProgress",        StatsFunctions::SetLevelProgress},\
@@ -95,6 +98,8 @@ public:
     static const char *GetHairstyle(unsigned short pid) noexcept;
     static int GetIsMale(unsigned short pid) noexcept;
     static const char *GetBirthsign(unsigned short pid) noexcept;
+    static const char *GetCreatureModel(unsigned short pid) noexcept;
+    static bool IsCreatureName(unsigned short pid) noexcept;
 
     static int GetLevel(unsigned short pid) noexcept;
     static int GetLevelProgress(unsigned short pid) noexcept;
@@ -122,6 +127,7 @@ public:
     static void SetHairstyle(unsigned short pid, const char *style) noexcept;
     static void SetIsMale(unsigned short pid, int male) noexcept;
     static void SetBirthsign(unsigned short pid, const char *name) noexcept;
+    static void SetCreatureModel(unsigned short pid, const char *name, bool useCreatureName) noexcept;
     
     static void SetLevel(unsigned short pid, int value) noexcept;
     static void SetLevelProgress(unsigned short pid, int value) noexcept;

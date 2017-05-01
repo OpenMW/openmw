@@ -117,6 +117,22 @@ const char *StatsFunctions::GetBirthsign(unsigned short pid) noexcept
     return player->birthsign.c_str();
 }
 
+const char *StatsFunctions::GetCreatureModel(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->creatureModel.c_str();
+}
+
+bool StatsFunctions::IsCreatureName(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->useCreatureName;
+}
+
 int StatsFunctions::GetLevel(unsigned short pid) noexcept
 {
     Player *player;
@@ -319,6 +335,16 @@ void StatsFunctions::SetBirthsign(unsigned short pid, const char *sign) noexcept
         return;
 
     player->birthsign = sign;
+}
+
+void StatsFunctions::SetCreatureModel(unsigned short pid, const char *name, bool useCreatureName) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->creatureModel = name;
+    player->useCreatureName = useCreatureName;
+
 }
 
 void StatsFunctions::SetLevel(unsigned short pid, int value) noexcept
