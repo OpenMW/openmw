@@ -26,22 +26,30 @@
                 <Property key="TextAlign" value="Left Top"/>
             </Widget>
 
-            <!-- Favorite Attributes -->
-            <Widget type="TextBox" skin="HeaderText" position="0 41 166 18" name="FavoriteAttributesT" align="Left Top">
-                <Property key="Caption" value="#{sChooseClassMenu2}"/>
-                <Property key="TextAlign" value="Left Top"/>
-                <UserString key="ToolTipType" value="Layout"/>
-                <UserString key="ToolTipLayout" value="TextToolTip"/>
-                <UserString key="Caption_Text" value="#{sCreateClassMenuHelp2}"/>
-            </Widget>
+            <Widget type="VBox" skin="" position="0 41 166 72" align="Stretch">
+                <Property key="Spacing" value="0"/>
 
-            <Widget type="MWAttribute" skin="MW_StatNameButton" position="0 59 166 18" name="FavoriteAttribute0" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButton" position="0 77 166 18" name="FavoriteAttribute1" align="Left Top"/>
+                <!-- Favorite Attributes -->
+                <Widget type="AutoSizedEditBox" skin="HeaderText" position="0 0 166 18" name="FavoriteAttributesT" align="Left Top">
+                    <Property key="Caption" value="#{sChooseClassMenu2}"/>
+                    <Property key="TextAlign" value="Left Top"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="TextToolTip"/>
+                    <UserString key="Caption_Text" value="#{sCreateClassMenuHelp2}"/>
+                    <Property key="MultiLine" value="true"/>
+                    <Property key="WordWrap" value="true"/>
+                </Widget>
+
+                <Widget type="MWAttribute" skin="MW_StatNameButton" position="0 0 166 18" name="FavoriteAttribute0" align="Left Top"/>
+                <Widget type="MWAttribute" skin="MW_StatNameButton" position="0 0 166 18" name="FavoriteAttribute1" align="Left Top"/>
+             </Widget>
 
             <!-- Major Skills -->
             <Widget type="TextBox" skin="HeaderText" position="166 0 166 18" name="MajorSkillT" align="Left Top">
                 <Property key="Caption" value="#{sChooseClassMenu3}"/>
                 <Property key="TextAlign" value="Left Top"/>
+                <Property key="MultiLine" value="true"/>
+                <Property key="WordWrap" value="true"/>
             </Widget>
 
             <Widget type="MWSkill" skin="MW_StatNameButton" position="166 18 166 18" name="MajorSkill0" align="Left Top"/>
