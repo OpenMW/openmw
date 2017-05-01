@@ -25,4 +25,7 @@ void PacketPlayerBaseInfo::Packet(RakNet::BitStream *bs, bool send)
     RW(player->npc.mFlags, send);
 
     RW(player->birthsign, send);
+
+    RW(player->creatureModel, send);
+    RW(player->useCreatureName, send);
 }
