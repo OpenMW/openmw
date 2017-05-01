@@ -1,4 +1,5 @@
 #include <components/openmw-mp/Log.hpp>
+#include <apps/openmw/mwclass/creature.hpp>
 
 #include "../mwbase/environment.hpp"
 
@@ -20,7 +21,7 @@
 using namespace mwmp;
 using namespace std;
 
-std::map<RakNet::RakNetGUID, DedicatedPlayer *> PlayerList::players;
+std::map <RakNet::RakNetGUID, DedicatedPlayer *> PlayerList::players;
 
 void PlayerList::update(float dt)
 {
@@ -46,7 +47,7 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
     if (!dedicPlayer->creatureModel.empty())
     {
         const ESM::Creature *tmpCreature = world->getStore().get<ESM::Creature>().search(dedicPlayer->creatureModel);
-        if(tmpCreature == 0)
+        if (tmpCreature == 0)
         {
             dedicPlayer->creatureModel = "";
             createPlayer(guid);
@@ -54,8 +55,10 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
         }
         creature = *tmpCreature;
         creature.mScript = "";
-        if(!dedicPlayer->useCreatureName)
+        if (!dedicPlayer->useCreatureName)
             creature.mName = dedicPlayer->npc.mName;
+        LOG_APPEND(Log::LOG_INFO, "Player %s looks like %s", dedicPlayer->npc.mName.c_str(),
+                   dedicPlayer->creatureModel.c_str());
     }
     else
     {
@@ -75,21 +78,23 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
         npc.mFlags = dedicPlayer->npc.mFlags;
     }
 
-    if (dedicPlayer->state == 0)
+    bool reset = false;
+    if (dedicPlayer->reference)
     {
-        string recid;
-        if (dedicPlayer->creatureModel.empty())
+        bool isNPC = dedicPlayer->reference->getPtr().getTypeName() == typeid(ESM::NPC).name();
+        if ((!dedicPlayer->creatureModel.empty() && isNPC) ||
+            (dedicPlayer->creatureModel.empty() && !isNPC))
         {
-            npc.mId = "Dedicated Player";
-            recid = world->createRecord(npc)->mId;
+            if (dedicPlayer->reference)
+            {
+                LOG_APPEND(Log::LOG_INFO, "- Deleting old reference");
+                dedicPlayer->state = 0;
+                world->deleteObject(dedicPlayer->ptr);
+                delete dedicPlayer->reference;
+                dedicPlayer->reference = NULL;
+                reset = true;
+            }
         }
-        else
-        {
-            creature.mId = "Dedicated Player";
-            recid = world->createRecord(creature)->mId;
-        }
-
-        dedicPlayer->reference = new MWWorld::ManualRef(world->getStore(), recid, 1);
     }
 
     // Temporarily spawn or move player to the center of exterior 0,0 whenever setting base info
@@ -100,39 +105,83 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
 
     if (dedicPlayer->state == 0)
     {
+        string recid;
+        if (dedicPlayer->creatureModel.empty())
+        {
+            LOG_APPEND(Log::LOG_INFO, "- Creating new NPC record");
+            npc.mId = "Dedicated Player";
+            recid = world->createRecord(npc)->mId;
+        }
+        else
+        {
+            LOG_APPEND(Log::LOG_INFO, "- Creating new Creature record");
+            creature.mId = "Dedicated Player";
+            recid = world->createRecord(creature)->mId;
+        }
+
+        dedicPlayer->reference = new MWWorld::ManualRef(world->getStore(), recid, 1);
+
         LOG_APPEND(Log::LOG_INFO, "- Creating new reference pointer for %s", dedicPlayer->npc.mName.c_str());
 
-        MWWorld::Ptr tmp = world->placeObject(dedicPlayer->reference->getPtr(), cellStore, spawnPos);
+        MWWorld::Ptr tmp;
+
+        if (reset)
+        {
+            if (dedicPlayer->cell.isExterior())
+                cellStore = world->getExterior(dedicPlayer->cell.mData.mX, dedicPlayer->cell.mData.mY);
+            else
+                cellStore = world->getInterior(dedicPlayer->cell.mName);
+
+            spawnPos = dedicPlayer->position;
+        }
+
+        tmp = world->placeObject(dedicPlayer->reference->getPtr(), cellStore, spawnPos);
 
         dedicPlayer->ptr.mCell = tmp.mCell;
         dedicPlayer->ptr.mRef = tmp.mRef;
 
-        dedicPlayer->cell = *dedicPlayer->ptr.getCell()->getCell();
-        dedicPlayer->position = dedicPlayer->ptr.getRefData().getPosition();
+        if (!reset)
+        {
+            dedicPlayer->cell = *dedicPlayer->ptr.getCell()->getCell();
+            dedicPlayer->position = dedicPlayer->ptr.getRefData().getPosition();
+        }
     }
     else
     {
         LOG_APPEND(Log::LOG_INFO, "- Updating reference pointer for %s", dedicPlayer->npc.mName.c_str());
 
         MWWorld::ESMStore *store = const_cast<MWWorld::ESMStore *>(&world->getStore());
+        MWWorld::Store<ESM::Creature> *creature_store = const_cast<MWWorld::Store<ESM::Creature> *> (&store->get<ESM::Creature>());
+        MWWorld::Store<ESM::NPC> *npc_store = const_cast<MWWorld::Store<ESM::NPC> *> (&store->get<ESM::NPC>());
 
         if (!dedicPlayer->creatureModel.empty())
         {
-            creature.mId = players[guid]->ptr.get<ESM::Creature>()->mBase->mId;
-            MWWorld::Store<ESM::Creature> *esm_store = const_cast<MWWorld::Store<ESM::Creature> *> (&store->get<ESM::Creature>());
-            esm_store->insert(creature);
+            if (!npc.mId.empty() || npc.mId != "Dedicated Player")
+            {
+                LOG_APPEND(Log::LOG_INFO, "- Deleting NPC record");
+                npc_store->erase(npc.mId);
+                npc.mId.clear();
 
+
+            }
+            creature.mId = players[guid]->ptr.get<ESM::Creature>()->mBase->mId;
+            creature_store->insert(creature);
         }
         else
         {
+            if (!creature.mId.empty() || creature.mId != "Dedicated Player")
+            {
+                LOG_APPEND(Log::LOG_INFO, "- Deleting Creature record");
+                creature_store->erase(creature.mId);
+                creature.mId.clear();
+            }
             npc.mId = players[guid]->ptr.get<ESM::NPC>()->mBase->mId;
-            MWWorld::Store<ESM::NPC> *esm_store = const_cast<MWWorld::Store<ESM::NPC> *> (&store->get<ESM::NPC>());
-            esm_store->insert(npc);
+            npc_store->insert(npc);
         }
 
         // Disable Ptr to avoid graphical glitches caused by race changes
         world->disable(players[guid]->ptr);
-        
+
         dedicPlayer->setPtr(world->moveObject(dedicPlayer->ptr, cellStore, spawnPos.pos[0], spawnPos.pos[1], spawnPos.pos[2]));
         dedicPlayer->updateCell();
 

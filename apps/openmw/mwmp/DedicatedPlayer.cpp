@@ -41,6 +41,7 @@ using namespace std;
 
 DedicatedPlayer::DedicatedPlayer(RakNet::RakNetGUID guid) : BasePlayer(guid)
 {
+    reference = 0;
     attack.pressed = 0;
     creatureStats.mDead = false;
     movementFlags = 0;
