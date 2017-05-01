@@ -43,6 +43,8 @@ void PacketActorStatsDynamic::Packet(RakNet::BitStream *bs, bool send)
         RW(actor.creatureStats.mDynamic[1], send); // magic
         RW(actor.creatureStats.mDynamic[2], send); // fatigue
 
+        actor.hasStatsDynamicData = true;
+
         if (!send)
         {
             actorList->baseActors.push_back(actor);

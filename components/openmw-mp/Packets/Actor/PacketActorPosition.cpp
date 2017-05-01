@@ -41,6 +41,8 @@ void PacketActorPosition::Packet(RakNet::BitStream *bs, bool send)
         RW(actor.position, send);
         RW(actor.direction, send);
 
+        actor.hasPositionData = true;
+
         if (!send)
         {
             actorList->baseActors.push_back(actor);

@@ -15,7 +15,8 @@ namespace mwmp
 
         BaseActor()
         {
-
+            hasPositionData = false;
+            hasStatsDynamicData = false;
         }
 
         std::string refId;
