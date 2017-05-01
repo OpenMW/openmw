@@ -53,6 +53,7 @@
     \
     {"SendActorList",              ActorFunctions::SendActorList},\
     {"SendActorAuthority",         ActorFunctions::SendActorAuthority},\
+    {"SendActorPosition",          ActorFunctions::SendActorPosition},\
     {"SendActorStatsDynamic",      ActorFunctions::SendActorStatsDynamic},\
     {"SendActorCellChange",        ActorFunctions::SendActorCellChange}
 
@@ -111,6 +112,7 @@ public:
 
     static void SendActorList() noexcept;
     static void SendActorAuthority() noexcept;
+    static void SendActorPosition() noexcept;
     static void SendActorStatsDynamic() noexcept;
     static void SendActorCellChange() noexcept;
 };

@@ -236,6 +236,12 @@ void ActorFunctions::SendActorAuthority() noexcept
     mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_AUTHORITY)->Send(writeActorList.guid);
 }
 
+void ActorFunctions::SendActorPosition() noexcept
+{
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_POSITION)->setActorList(&writeActorList);
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_POSITION)->Send(writeActorList.guid);
+}
+
 void ActorFunctions::SendActorStatsDynamic() noexcept
 {
     mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_STATS_DYNAMIC)->setActorList(&writeActorList);
