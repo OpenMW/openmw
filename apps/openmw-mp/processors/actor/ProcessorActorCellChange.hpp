@@ -15,10 +15,17 @@ namespace mwmp
 
         void Do(ActorPacket &packet, Player &player, BaseActorList &actorList) override
         {
-            // Send this to everyone
-            packet.Send(true);
+            Cell *serverCell = CellController::get()->getCell(&actorList.cell);
 
-            Script::Call<Script::CallbackIdentity("OnActorCellChange")>(player.getId(), actorList.cell.getDescription().c_str());
+            if (serverCell != nullptr)
+            {
+                serverCell->removeActors(&actorList);
+
+                Script::Call<Script::CallbackIdentity("OnActorCellChange")>(player.getId(), actorList.cell.getDescription().c_str());
+
+                // Send this to everyone
+                packet.Send(true);
+            }
         }
     };
 }

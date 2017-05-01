@@ -33,6 +33,7 @@ public:
     void readActorList(unsigned char packetID, const mwmp::BaseActorList *newActorList);
     bool containsActor(int refNumIndex, int mpNum);
     mwmp::BaseActor *getActor(int refNumIndex, int mpNum);
+    void removeActors(const mwmp::BaseActorList *newActorList);
     mwmp::BaseActorList *getActorList();
 
     TPlayers getPlayers() const;

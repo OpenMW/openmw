@@ -127,6 +127,32 @@ mwmp::BaseActor *Cell::getActor(int refNumIndex, int mpNum)
     return 0;
 }
 
+void Cell::removeActors(const mwmp::BaseActorList *newActorList)
+{
+    for (std::vector<mwmp::BaseActor>::iterator it = cellActorList.baseActors.begin(); it != cellActorList.baseActors.end();)
+    {
+        int refNumIndex = (*it).refNumIndex;
+        int mpNum = (*it).mpNum;
+
+        bool foundActor = false;
+
+        for (unsigned int i = 0; i < newActorList->count; i++)
+        {
+            mwmp::BaseActor newActor = newActorList->baseActors.at(i);
+
+            if (newActor.refNumIndex == refNumIndex && newActor.mpNum == mpNum)
+            {
+                it = cellActorList.baseActors.erase(it);
+                foundActor = true;
+                break;
+            }
+        }
+
+        if (!foundActor)
+            it++;
+    }
+}
+
 mwmp::BaseActorList *Cell::getActorList()
 {
     return &cellActorList;
