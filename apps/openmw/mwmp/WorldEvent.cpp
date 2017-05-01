@@ -224,7 +224,8 @@ void WorldEvent::scaleObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = objectChanges.objects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i\nscale: %f", worldObject.refId.c_str(), worldObject.refNumIndex,
+            worldObject.mpNum, worldObject.scale);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex, worldObject.mpNum);
 
@@ -566,7 +567,7 @@ void WorldEvent::sendObjectUnlock(MWWorld::Ptr ptr)
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send();
 }
 
-void WorldEvent::sendObjectScale(MWWorld::Ptr ptr, int scale)
+void WorldEvent::sendObjectScale(MWWorld::Ptr ptr, float scale)
 {
     reset();
     cell = *ptr.getCell()->getCell();

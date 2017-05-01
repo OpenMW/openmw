@@ -44,7 +44,7 @@ namespace mwmp
         void sendObjectDelete(MWWorld::Ptr ptr);
         void sendObjectLock(MWWorld::Ptr ptr, int lockLevel);
         void sendObjectUnlock(MWWorld::Ptr ptr);
-        void sendObjectScale(MWWorld::Ptr ptr, int scale);
+        void sendObjectScale(MWWorld::Ptr ptr, float scale);
         void sendObjectAnimPlay(MWWorld::Ptr ptr, std::string group, int mode);
         void sendDoorState(MWWorld::Ptr ptr, int state);
         void sendMusicPlay(std::string filename);
