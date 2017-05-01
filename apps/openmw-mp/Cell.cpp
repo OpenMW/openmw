@@ -81,8 +81,15 @@ void Cell::readActorList(unsigned char packetID, const mwmp::BaseActorList *newA
 
             switch (packetID)
             {
+            case ID_ACTOR_POSITION:
+
+                cellActor->hasPositionData = true;
+                cellActor->position = newActor.position;
+                break;
+
             case ID_ACTOR_STATS_DYNAMIC:
 
+                cellActor->hasStatsDynamicData = true;
                 cellActor->creatureStats.mDynamic[0] = newActor.creatureStats.mDynamic[0];
                 cellActor->creatureStats.mDynamic[1] = newActor.creatureStats.mDynamic[1];
                 cellActor->creatureStats.mDynamic[2] = newActor.creatureStats.mDynamic[2];
