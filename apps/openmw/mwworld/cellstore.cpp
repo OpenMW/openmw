@@ -359,9 +359,6 @@ namespace MWWorld
         : mStore(esmStore), mReader(readerList), mCell (cell), mState (State_Unloaded), mHasState (false), mLastRespawn(0,0)
     {
         mWaterLevel = cell->mWater;
-
-        // Added by tes3mp
-        lastRefNumIndex = 0;
     }
 
     const ESM::Cell *CellStore::getCell() const

@@ -75,9 +75,6 @@ namespace MWWorld
             std::vector<std::string> mIds;
             float mWaterLevel;
 
-            // Added by tes3mp
-            unsigned int lastRefNumIndex;
-
             MWWorld::TimeStamp mLastRespawn;
 
             // List of refs owned by this cell
