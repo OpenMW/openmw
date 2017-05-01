@@ -112,6 +112,7 @@ bool MasterClient::Process(RakNet::Packet *packet)
     rs.Read(pid);
     switch (pid)
     {
+        case ID_CONNECTION_ATTEMPT_FAILED:
         case ID_CONNECTION_REQUEST_ACCEPTED:
         case ID_DISCONNECTION_NOTIFICATION:
             break;
@@ -158,7 +159,7 @@ void MasterClient::Send(mwmp::PacketMasterAnnounce::Func func)
             case IS_SILENTLY_DISCONNECTING:
             case IS_DISCONNECTING:
             {
-                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Cannot connect to master server: %d", masterServer.ToString());
+                LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Cannot connect to master server: %s", masterServer.ToString());
                 return;
             }
             case IS_PENDING:
