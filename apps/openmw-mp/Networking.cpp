@@ -350,6 +350,33 @@ Networking *Networking::getPtr()
     return sThis;
 }
 
+Networking::PluginListSample Networking::getPluginListSample()
+{
+    PluginListSample pls;
+    unsigned id = 0;
+    while(true)
+    {
+        unsigned field = 0;
+        auto name = "";
+        Script::Call<Script::CallbackIdentity("OnRequestPluginList")>(name, id, field);
+        if(strlen(name) == 0)
+            break;
+        HashList hashList;
+        while(true)
+        {
+            auto hash = "";
+            Script::Call<Script::CallbackIdentity("OnRequestPluginList")>(hash, id, field);
+            if(strlen(hash) == 0)
+                break;
+            hashList.push_back((unsigned)stoul(hash));
+            field++;
+        }
+        pls.push_back({name, hashList});
+        id++;
+    }
+    return pls;
+}
+
 void Networking::stopServer(int code)
 {
     running = false;

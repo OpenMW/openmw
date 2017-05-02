@@ -55,7 +55,10 @@ namespace  mwmp
         static const Networking &get();
         static Networking *getPtr();
 
+        typedef std::vector<unsigned> HashList;
+        typedef std::vector<std::pair<std::string, HashList>> PluginListSample;
     private:
+        PluginListSample getPluginListSample();
         std::string serverPassword;
         static Networking *sThis;
 
