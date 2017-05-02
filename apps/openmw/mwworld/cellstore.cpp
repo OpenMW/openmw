@@ -478,6 +478,12 @@ namespace MWWorld
         return searchVisitor.mFound;
     }
 
+    // Added by tes3mp and used to get all the MergedRefs in the cell
+    std::vector<LiveCellRefBase*> *CellStore::getMergedRefs()
+    {
+        return &mMergedRefs;
+    }
+
     // Added by tes3mp and used to get all the NPCs in the cell
     CellRefList<ESM::NPC> *CellStore::getNpcs()
     {
