@@ -98,9 +98,9 @@ void mwmp::GUIController::showDialogList(const mwmp::BasePlayer::GUIMessageBox &
 
     std::string buf;
 
-    for(size_t i = 0; i < guiMessageBox.data.size(); i++)
+    for (size_t i = 0; i < guiMessageBox.data.size(); i++)
     {
-        if(guiMessageBox.data[i] == '\n')
+        if (guiMessageBox.data[i] == '\n')
         {
             list.push_back(buf);
             buf.erase();
@@ -224,7 +224,7 @@ void mwmp::GUIController::WM_UpdateVisible(MWGui::GuiMode mode)
         }
         case GM_TES3MP_ListBox:
         {
-            if(mListBox != 0)
+            if (mListBox != 0)
                 mListBox->setVisible(true);
             break;
         }

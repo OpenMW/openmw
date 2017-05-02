@@ -18,7 +18,7 @@ namespace mwmp
         {
             if (isLocal())
             {
-                if(isRequest())
+                if (isRequest())
                     static_cast<LocalPlayer *>(player)->updateBounty(true);
                 else
                     static_cast<LocalPlayer *>(player)->setBounty();

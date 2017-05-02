@@ -349,7 +349,7 @@ void CellController::openContainer(const MWWorld::Ptr &container, bool loot)
 
         LOG_APPEND(Log::LOG_VERBOSE, " - Item. Refid: \"%s\" Count: %d", name.c_str(), count);
 
-        /*if(::Misc::StringUtils::ciEqual(name, "gold_001"))
+        /*if (::Misc::StringUtils::ciEqual(name, "gold_001"))
             cont.remove("gold_001", count, container);*/
     }
 

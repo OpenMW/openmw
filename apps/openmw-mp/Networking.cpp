@@ -216,7 +216,7 @@ void Networking::update(RakNet::Packet *packet)
                         if (hashList.empty()) // and server do not allow to have custom hash for plugin
                             continue;
                         auto it = find(hashList.begin(), hashList.end(), plugin->second[0]);
-                        if(it == hashList.end()) // hash not found in sample
+                        if (it == hashList.end()) // hash not found in sample
                             break;
 
                     }
@@ -226,7 +226,7 @@ void Networking::update(RakNet::Packet *packet)
             }
             RakNet::BitStream bs;
             packetPreInit.SetSendStream(&bs);
-            if(plugin != plugins.end()) // if condition is true, then client have wrong plugin list
+            if (plugin != plugins.end()) // if condition is true, then client have wrong plugin list
             {
                 packetPreInit.setChecksums(&samples);
                 packetPreInit.Send(packet->systemAddress);
@@ -390,14 +390,14 @@ PacketPreInit::PluginContainer Networking::getPluginListSample()
         unsigned field = 0;
         auto name = "";
         Script::Call<Script::CallbackIdentity("OnRequestPluginList")>(name, id, field++);
-        if(strlen(name) == 0)
+        if (strlen(name) == 0)
             break;
         PacketPreInit::HashList hashList;
         while(true)
         {
             auto hash = "";
             Script::Call<Script::CallbackIdentity("OnRequestPluginList")>(hash, id, field++);
-            if(strlen(hash) == 0)
+            if (strlen(hash) == 0)
                 break;
             hashList.push_back((unsigned)stoul(hash));
         }

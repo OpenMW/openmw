@@ -25,7 +25,7 @@ void PacketMasterAnnounce::Packet(BitStream *bs, bool send)
 
     RW(func, send);
 
-    if(func == FUNCTION_ANNOUNCE)
+    if (func == FUNCTION_ANNOUNCE)
         ProxyMasterPacket::addServer(this, *server, send);
 }
 

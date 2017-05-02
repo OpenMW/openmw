@@ -30,14 +30,14 @@ void PacketMasterQuery::Packet(RakNet::BitStream *bs, bool send)
     RW(serversCount, send);
 
     map<SystemAddress, QueryData>::iterator serverIt;
-    if(send)
+    if (send)
         serverIt = servers->begin();
 
     QueryData server;
     SystemAddress sa;
     while(serversCount--)
     {
-        if(send)
+        if (send)
         {
             sa = serverIt->first;
             server = serverIt->second;
@@ -46,7 +46,7 @@ void PacketMasterQuery::Packet(RakNet::BitStream *bs, bool send)
         RW(sa, send);
         ProxyMasterPacket::addServer(this, server, send);
 
-        if(send)
+        if (send)
             serverIt++;
         else
             servers->insert(pair<SystemAddress, QueryData>(sa, server));

@@ -23,12 +23,12 @@ bool WorldProcessor::Process(RakNet::Packet &packet, WorldEvent &event)
 
     BOOST_FOREACH(processors_t::value_type &processor, processors)
     {
-        if(processor.first == packet.data[0])
+        if (processor.first == packet.data[0])
         {
             myGuid = Main::get().getLocalPlayer()->guid;
             request = packet.length == myPacket->headerSize();
 
-            if(!request && !processor.second->avoidReading)
+            if (!request && !processor.second->avoidReading)
             {
                 myPacket->Read();
             }
@@ -45,7 +45,7 @@ void WorldProcessor::AddProcessor(mwmp::WorldProcessor *processor)
 {
     BOOST_FOREACH(processors_t::value_type &p, processors)
     {
-        if(processor->packetID == p.first)
+        if (processor->packetID == p.first)
             throw std::logic_error("processor " + p.second->strPacketID + " already registered. Check " +
                                    processor->className + " and " + p.second->className);
     }

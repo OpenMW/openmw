@@ -21,11 +21,11 @@ namespace mwmp
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_BASEINFO from server");
 
-            if(isLocal())
+            if (isLocal())
             {
                 LOG_APPEND(Log::LOG_INFO, "- Packet was about my id");
 
-                if(isRequest())
+                if (isRequest())
                 {
                     LOG_APPEND(Log::LOG_INFO, "- Requesting info");
                     packet.Send(serverAddr);

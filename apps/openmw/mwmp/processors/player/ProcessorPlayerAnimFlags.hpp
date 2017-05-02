@@ -22,7 +22,7 @@ namespace mwmp
         {
             if (isLocal())
             {
-                if(isRequest())
+                if (isRequest())
                     static_cast<LocalPlayer *>(player)->updateAnimFlags(true);
             }
             else if (player != 0)

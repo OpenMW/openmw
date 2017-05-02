@@ -188,7 +188,7 @@ void MasterClient::Thread()
         SetPlayers((int) players->size());
 
         auto pIt = players->begin();
-        if(queryData.players.size() != players->size())
+        if (queryData.players.size() != players->size())
         {
             queryData.players.clear();
             updated = true;
@@ -211,9 +211,9 @@ void MasterClient::Thread()
             updated = false;
             if (pIt != players->end())
             {
-                for(auto player : *players)
+                for (auto player : *players)
                 {
-                    if(!player.second->npc.mName.empty())
+                    if (!player.second->npc.mName.empty())
                         queryData.players.push_back(player.second->npc.mName);
                 }
             }

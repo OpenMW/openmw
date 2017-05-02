@@ -63,12 +63,12 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
     sstr << "Note: Use the same load order as the server.\n";
     size_t pluginNameLen1 = 0;
     size_t pluginNameLen2 = 0;
-    for(size_t i = 0; i < checksums.size(); i++)
-        if(pluginNameLen1 < checksums[i].first.size())
+    for (size_t i = 0; i < checksums.size(); i++)
+        if (pluginNameLen1 < checksums[i].first.size())
             pluginNameLen1 = checksums[i].first.size();
 
-    for(size_t i = 0; i < checksumsResponse.size(); i++)
-        if(pluginNameLen2 < checksumsResponse[i].first.size())
+    for (size_t i = 0; i < checksumsResponse.size(); i++)
+        if (pluginNameLen2 < checksumsResponse[i].first.size())
             pluginNameLen2 = checksumsResponse[i].first.size();
 
     printWithWidth(sstr, "Your current plugins are:", pluginNameLen1 + 16);
@@ -78,7 +78,7 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
     printWithWidth(sstr, "hash", 14);
     printWithWidth(sstr, "name", pluginNameLen2 + 2);
     sstr << "hash\n";
-    for(size_t i = 0; i < checksumsResponse.size(); i++)
+    for (size_t i = 0; i < checksumsResponse.size(); i++)
     {
         string plugin;
         unsigned val;
@@ -95,10 +95,10 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
         printWithWidth(sstr, plugin, pluginNameLen1 + 2);
         printWithWidth(sstr, intToHexStr(val), 14);
         printWithWidth(sstr, checksumsResponse[i].first, pluginNameLen2 + 2);
-        if(checksumsResponse[i].second.size() > 0)
+        if (checksumsResponse[i].second.size() > 0)
         {
-            if(full)
-                for(size_t j = 0; j < checksumsResponse[i].second.size(); j++)
+            if (full)
+                for (size_t j = 0; j < checksumsResponse[i].second.size(); j++)
                     printWithWidth(sstr, intToHexStr(checksumsResponse[i].second[j]), 14);
             else
                 sstr << intToHexStr(checksumsResponse[i].second[0]);
@@ -289,7 +289,7 @@ void Networking::preInit(std::vector<std::string> &content, Files::Collections &
     while (!done)
     {
         RakNet::Packet *packet = peer->Receive();
-        if(!packet)
+        if (!packet)
         {
             RakSleep(500);
             continue;
@@ -315,7 +315,7 @@ void Networking::preInit(std::vector<std::string> &content, Files::Collections &
         peer->DeallocatePacket(packet);
     }
 
-    if(!checksumsResponse.empty()) // something wrong
+    if (!checksumsResponse.empty()) // something wrong
         errmsg = comparePlugins(checksums, checksumsResponse);
 
 
@@ -334,7 +334,7 @@ void Networking::receiveMessage(RakNet::Packet *packet)
 
     if (playerPacketController.ContainsPacket(packet->data[0]))
     {
-        if(!PlayerProcessor::Process(*packet))
+        if (!PlayerProcessor::Process(*packet))
             LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Unhandled PlayerPacket with identifier %i has arrived", packet->data[0]);
     }
     else if (actorPacketController.ContainsPacket(packet->data[0]))

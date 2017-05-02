@@ -24,7 +24,7 @@ namespace mwmp
         {
             if (isLocal())
             {
-                if(isRequest())
+                if (isRequest())
                     static_cast<LocalPlayer *>(player)->updateAttributes(true);
                 else
                     static_cast<LocalPlayer *>(player)->setAttributes();

@@ -29,7 +29,7 @@ GUIDialogList::GUIDialogList(const std::string &message, const std::vector<std::
     mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GUIDialogList::mousePressed);
 
     mMessage->setCaptionWithReplacing(message);
-    for(size_t i = 0; i < list.size(); i++)
+    for (size_t i = 0; i < list.size(); i++)
         mListBox->addItem(list[i]);
 
 }
@@ -46,7 +46,7 @@ void GUIDialogList::mousePressed(MyGUI::Widget * /*widget*/)
     Main::get().getNetworking()->getPlayerPacket(ID_GUI_MESSAGEBOX)->Send();
 
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Selected id: %d", id);
-    if(id == MyGUI::ITEM_NONE)
+    if (id == MyGUI::ITEM_NONE)
         return;
 
     std::string itemName = mListBox->getItemNameAt(mListBox->getIndexSelected()).asUTF8();

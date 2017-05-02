@@ -15,7 +15,7 @@ void PlayerProcessor::AddProcessor(PlayerProcessor *processor)
 {
     BOOST_FOREACH(processors_t::value_type &p, processors)
     {
-        if(processor->packetID == p.first)
+        if (processor->packetID == p.first)
             throw std::logic_error("processor " + p.second->strPacketID + " already registered. Check " +
                                    processor->className + " and " + p.second->className);
     }
@@ -30,14 +30,14 @@ bool PlayerProcessor::Process(RakNet::Packet &packet)
     PlayerPacket *myPacket = Main::get().getNetworking()->getPlayerPacket(packet.data[0]);
     myPacket->SetReadStream(&bsIn);
 
-    /*if(myPacket == 0)
+    /*if (myPacket == 0)
     {
         // error: packet not found
     }*/
 
     BOOST_FOREACH(processors_t::value_type &processor, processors)
     {
-        if(processor.first == packet.data[0])
+        if (processor.first == packet.data[0])
         {
             myGuid = Main::get().getLocalPlayer()->guid;
             request = packet.length == myPacket->headerSize();
@@ -48,7 +48,7 @@ bool PlayerProcessor::Process(RakNet::Packet &packet)
             else
                 player = Main::get().getLocalPlayer();
 
-            if(!request && !processor.second->avoidReading && player != 0)
+            if (!request && !processor.second->avoidReading && player != 0)
             {
                 myPacket->setPlayer(player);
                 myPacket->Read();
