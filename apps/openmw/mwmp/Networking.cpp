@@ -29,6 +29,8 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include <SDL_messagebox.h>
+#include <RakSleep.h>
+#include <iomanip>
 
 #include "Networking.hpp"
 #include "Main.hpp"
@@ -41,6 +43,60 @@
 
 using namespace std;
 using namespace mwmp;
+
+void printWithWidth(ostringstream &sstr, string str, size_t width)
+{
+    sstr << left << setw(width) << setfill(' ') << str;
+}
+
+string intToHexStr(unsigned val)
+{
+    ostringstream sstr;
+    sstr << "0x" << setfill('0') << setw(8) << uppercase << hex << val;
+    return sstr.str();
+}
+
+string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::PluginContainer checksumsResponse,
+                      bool full = false)
+{
+    std::ostringstream sstr;
+    size_t pluginNameLen1 = 0;
+    size_t pluginNameLen2 = 0;
+    for(size_t i = 0; i < checksums.size(); i++)
+        if(pluginNameLen1 < checksums[i].first.size())
+            pluginNameLen1 = checksums[i].first.size();
+
+    for(size_t i = 0; i < checksumsResponse.size(); i++)
+        if(pluginNameLen2 < checksums[i].first.size())
+            pluginNameLen2 = checksums[i].first.size();
+
+    printWithWidth(sstr, "Your current plugins are:", pluginNameLen1 + 16);
+    sstr << "To join this server, use:\n";
+
+    printWithWidth(sstr, "name", pluginNameLen1 + 2);
+    printWithWidth(sstr, "hash", 14);
+    printWithWidth(sstr, "name", pluginNameLen2 + 2);
+    sstr << "hash\n";
+    for(size_t i = 0; i < checksumsResponse.size(); i++)
+    {
+        printWithWidth(sstr, checksums[i].first, pluginNameLen1 + 2);
+        printWithWidth(sstr, intToHexStr(checksums[i].second[0]), 14);
+        printWithWidth(sstr, checksumsResponse[i].first, pluginNameLen2 + 2);
+        if(checksumsResponse[i].second.size() > 0)
+        {
+            if(full)
+                for(int j = 0; j < checksumsResponse[i].second.size(); j++)
+                    printWithWidth(sstr, intToHexStr(checksumsResponse[i].second[j]), 14);
+            else
+                sstr << intToHexStr(checksumsResponse[i].second[0]);
+        }
+        else
+            sstr << "any";
+        sstr << "\n";
+    }
+    sstr << "\nMore info in logs";
+    return sstr.str();
+}
 
 Networking::Networking(): peer(RakNet::RakPeerInterface::GetInstance()), playerPacketController(peer),
     actorPacketController(peer), worldPacketController(peer)
@@ -196,8 +252,10 @@ void Networking::preInit(std::vector<std::string> &content, Files::Collections &
         const Files::MultiDirCollection& col = collections.getCollection(filename.extension().string());
         if (col.doesExist(*it))
         {
-            unsigned int crc32 = Utils::crc32checksum(col.getPath(*it).string());
-            checksums.push_back(make_pair(*it, crc32));
+            PacketPreInit::HashList hashList;
+            unsigned crc32 = Utils::crc32checksum(col.getPath(*it).string());
+            hashList.push_back(crc32);
+            checksums.push_back(make_pair(*it, hashList));
 
             printf("idx: %d\tchecksum: %X\tfile: %s\n", idx, crc32, col.getPath(*it).string().c_str());
         }
@@ -214,34 +272,45 @@ void Networking::preInit(std::vector<std::string> &content, Files::Collections &
     packetPreInit.Send(serverAddr);
 
     PacketPreInit::PluginContainer checksumsResponse;
-    /*while (!done)
+    bool done = false;
+    while (!done)
     {
-        for (RakNet::Packet *packet = peer->Receive(); packet; peer->DeallocatePacket(packet), packet = peer->Receive())
+        RakNet::Packet *packet = peer->Receive();
+        if(!packet)
         {
-            if(packet->data[0] == ID_GAME_PREINIT)
-            {
-                RakNet::BitStream bsIn(&packet->data[0], packet->length, false);
-                packetPreInit.Packet(&bsIn, guid, false, checksumsResponse);
-                done = true;
-            }
+            RakSleep(500);
+            continue;
         }
-    }*/
+
+        RakNet::BitStream bsIn(&packet->data[0], packet->length, false);
+        unsigned char packetId;
+        bsIn.Read(packetId);
+        switch(packetId)
+        {
+            case ID_DISCONNECTION_NOTIFICATION:
+            case ID_CONNECTION_LOST:
+                done = true;
+                break;
+            case ID_GAME_PREINIT:
+                bsIn.IgnoreBytes((unsigned) RakNet::RakNetGUID::size());
+                packetPreInit.setChecksums(&checksumsResponse);
+                packetPreInit.Packet(&bsIn, false);
+                done = true;
+                break;
+        }
+
+        peer->DeallocatePacket(packet);
+    }
 
     if(!checksumsResponse.empty()) // something wrong
-    {
-        errmsg = "Your plugins\tShould be\n";
-        for(int i = 0; i < checksumsResponse.size(); i++)
-        {
-            errmsg += checksums[i].first + " " + MyGUI::utility::toString(checksums[i].second) + "\t";
-            errmsg += checksumsResponse[i].first + " " + MyGUI::utility::toString(checksumsResponse[i].second) + "\n";
-        }
-    }
+        errmsg = comparePlugins(checksums, checksumsResponse);
 
 
     if (!errmsg.empty())
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, errmsg.c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, comparePlugins(checksums, checksumsResponse, true).c_str());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "tes3mp", errmsg.c_str(), 0);
+        MWBase::Environment::get().getStateManager()->requestQuit();
     }
 }
 
