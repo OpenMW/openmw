@@ -86,7 +86,7 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
         if(checksumsResponse[i].second.size() > 0)
         {
             if(full)
-                for(int j = 0; j < checksumsResponse[i].second.size(); j++)
+                for(size_t j = 0; j < checksumsResponse[i].second.size(); j++)
                     printWithWidth(sstr, intToHexStr(checksumsResponse[i].second[j]), 14);
             else
                 sstr << intToHexStr(checksumsResponse[i].second[0]);
