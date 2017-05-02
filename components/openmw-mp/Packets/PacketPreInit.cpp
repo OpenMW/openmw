@@ -15,25 +15,30 @@ void mwmp::PacketPreInit::Packet(RakNet::BitStream *bs, bool send)
 {
     BasePacket::Packet(bs, send);
 
-    unsigned int size = checksums->size();
+    size_t size = checksums->size();
     RW(size, send);
-    if(send)
+
+    for(size_t i = 0; i < size; i++)
     {
-        BOOST_FOREACH(PluginContainer::value_type & checksum, *checksums)
+        PluginPair ppair;
+        if(send)
+            ppair = (*checksums)[i];
+
+        RW(ppair.first, send);
+
+        size_t hashSize = ppair.second.size();
+        RW(hashSize, send);
+        for(size_t j = 0; j < hashSize; j++)
         {
-            RW(checksum.first, true);
-            RW(checksum.second, true);
+            unsigned hash;
+            if(send)
+                hash = ppair.second[j];
+            RW(hash, send);
+            if(!send)
+                ppair.second.push_back(hash);
         }
-    }
-    else
-    {
-        for(unsigned int i = 0; i < size; i++)
-        {
-            PluginPair checksum;
-            RW(checksum.first, false);
-            RW(checksum.second, false);
-            checksums->push_back(checksum);
-        }
+        if(!send)
+            checksums->push_back(ppair);
     }
 }
 

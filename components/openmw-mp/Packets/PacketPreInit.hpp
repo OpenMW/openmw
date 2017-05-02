@@ -14,7 +14,8 @@ namespace mwmp
     class PacketPreInit : public BasePacket
     {
     public:
-        typedef std::pair<std::string, unsigned int> PluginPair;
+        typedef std::vector<unsigned> HashList;
+        typedef std::pair<std::string, HashList> PluginPair;
         typedef std::vector<PluginPair> PluginContainer;
 
         PacketPreInit(RakNet::RakPeerInterface *peer);
