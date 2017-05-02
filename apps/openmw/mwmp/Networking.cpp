@@ -59,6 +59,7 @@ string intToHexStr(unsigned val)
 string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::PluginContainer checksumsResponse)
 {
     std::ostringstream sstr;
+    sstr << "Your plugins or their load order don't match the server's.\n\n";
     sstr << "Your current plugins are:\n";
     
     const int maxLineLength = 100;
@@ -117,7 +118,6 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
         lineLength = lineLength + plugin.size() + 13;
     }
 
-    sstr << "\n\nNote: Use the same load order as the server.";
     return sstr.str();
 }
 
@@ -135,6 +135,7 @@ string comparePluginsMonospaced(PacketPreInit::PluginContainer checksums, Packet
         if (pluginNameLen2 < checksumsResponse[i].first.size())
             pluginNameLen2 = checksumsResponse[i].first.size();
 
+    sstr << "Your plugins or their load order don't match the server's.\n\n";
     printWithWidth(sstr, "Your current plugins are:", pluginNameLen1 + 16);
     sstr << "To join this server, use:\n";
 
@@ -175,7 +176,6 @@ string comparePluginsMonospaced(PacketPreInit::PluginContainer checksums, Packet
         sstr << "\n";
     }
 
-    sstr << "\nNote: Use the same load order as the server.";
     return sstr.str();
 }
 
