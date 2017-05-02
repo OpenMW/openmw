@@ -151,6 +151,8 @@ void Cell::removeActors(const mwmp::BaseActorList *newActorList)
         if (!foundActor)
             it++;
     }
+
+    cellActorList.count = cellActorList.baseActors.size();
 }
 
 mwmp::BaseActorList *Cell::getActorList()
