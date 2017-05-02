@@ -68,8 +68,8 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
             pluginNameLen1 = checksums[i].first.size();
 
     for(size_t i = 0; i < checksumsResponse.size(); i++)
-        if(pluginNameLen2 < checksums[i].first.size())
-            pluginNameLen2 = checksums[i].first.size();
+        if(pluginNameLen2 < checksumsResponse[i].first.size())
+            pluginNameLen2 = checksumsResponse[i].first.size();
 
     printWithWidth(sstr, "Your current plugins are:", pluginNameLen1 + 16);
     sstr << "To join this server, use:\n";
