@@ -60,6 +60,7 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
                       bool full = false)
 {
     std::ostringstream sstr;
+    sstr << "Note: Use the same load order as the server.\n";
     size_t pluginNameLen1 = 0;
     size_t pluginNameLen2 = 0;
     for(size_t i = 0; i < checksums.size(); i++)
