@@ -139,7 +139,8 @@ public:
             {"OnPlayerSendMessage",      Function<bool, unsigned short, const char*>()},
             {"OnPlayerEndCharGen",       Function<void, unsigned short>()},
             {"OnGUIAction",              Function<void, unsigned short, int, const char*>()},
-            {"OnMpNumIncrement",         Function<void, int>()}
+            {"OnMpNumIncrement",         Function<void, int>()},
+            {"OnRequestPluginList",      Function<const char *, unsigned int, unsigned int>()}
     };
 };
 
