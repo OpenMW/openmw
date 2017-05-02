@@ -92,8 +92,17 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
             plugin = "null";
             val = 0;
         }
-        printWithWidth(sstr, plugin, pluginNameLen1 + 2);
-        printWithWidth(sstr, intToHexStr(val), 14);
+
+        if (plugin == "null")
+        {
+            printWithWidth(sstr, "", pluginNameLen1 + 16);
+        }
+        else
+        {
+            printWithWidth(sstr, plugin, pluginNameLen1 + 2);
+            printWithWidth(sstr, intToHexStr(val), 14);
+        }
+        
         printWithWidth(sstr, checksumsResponse[i].first, pluginNameLen2 + 2);
         if (checksumsResponse[i].second.size() > 0)
         {
