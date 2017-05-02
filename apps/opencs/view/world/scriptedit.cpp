@@ -52,7 +52,6 @@ CSVWorld::ScriptEdit::ScriptEdit(
     mMonoFont(QFont("Monospace")),
     mTabCharCount(4),
     mMarkOccurrences(true),
-    mMarkOccurrencesRunning(false),
     mDocument(document),
     mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive)
 {
@@ -90,7 +89,7 @@ CSVWorld::ScriptEdit::ScriptEdit(
                   <<CSMWorld::UniversalId::Type_Script
                   <<CSMWorld::UniversalId::Type_Region;
     
-    connect(this, SIGNAL(selectionChanged()), this, SLOT(markOccurrences()));
+    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(markOccurrences()));
 
     mCommentAction = new QAction (tr ("Comment Selection"), this);
     connect(mCommentAction, SIGNAL (triggered()), this, SLOT (commentSelection()));
@@ -309,24 +308,20 @@ void CSVWorld::ScriptEdit::updateLineNumberArea(const QRect &rect, int dy)
 
 void CSVWorld::ScriptEdit::markOccurrences()
 {
-    // prevent infinite recursion with cursor.select(),
-    // which ends up calling this function again
-    // could be fixed with blockSignals, but mDocument is const
-    if (mMarkOccurrencesRunning)
-        return;
-
     if (mMarkOccurrences)
     {
-        mMarkOccurrencesRunning = true;
-
         QTextCursor cursor = textCursor();
-        cursor.select(QTextCursor::WordUnderCursor);
-        QString word = cursor.selectedText();
 
+        // prevent infinite recursion with cursor.select(),
+        // which ends up calling this function again
+        // could be fixed with blockSignals, but mDocument is const
+        disconnect(this, SIGNAL(cursorPositionChanged()), this, 0);
+        cursor.select(QTextCursor::WordUnderCursor);
+        connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(markOccurrences()));
+
+        QString word = cursor.selectedText();
         mHighlighter->setMarkedWord(word.toStdString());
         mHighlighter->rehighlight();
-
-        mMarkOccurrencesRunning = false;
     }
 }
   
