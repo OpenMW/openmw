@@ -1,6 +1,8 @@
 #include <components/esm/cellid.hpp>
 #include <components/openmw-mp/Log.hpp>
 
+#include "../mwworld/class.hpp"
+#include "../mwworld/livecellref.hpp"
 #include "../mwworld/worldimp.hpp"
 
 #include "Cell.hpp"
@@ -272,30 +274,19 @@ void Cell::initializeLocalActor(const MWWorld::Ptr& ptr)
 
 void Cell::initializeLocalActors()
 {
-    MWWorld::CellRefList<ESM::NPC> *npcList = store->getNpcs();
+    std::vector<MWWorld::LiveCellRefBase*> *mergedRefs = store->getMergedRefs();
 
-    for (typename MWWorld::CellRefList<ESM::NPC>::List::iterator listIter(npcList->mList.begin());
-        listIter != npcList->mList.end(); ++listIter)
+    for (std::vector<MWWorld::LiveCellRefBase*>::iterator it = mergedRefs->begin(); it != mergedRefs->end(); ++it)
     {
-        MWWorld::Ptr ptr(&*listIter, store);
+        if ((*it)->mClass->isActor())
+        {
+            MWWorld::Ptr ptr(*it, store);
 
-        // If this Ptr is lacking a unique index, ignore it
-        if (ptr.getCellRef().getRefNum().mIndex == 0 && ptr.getCellRef().getMpNum() == 0) continue;
+            // If this Ptr is lacking a unique index, ignore it
+            if (ptr.getCellRef().getRefNum().mIndex == 0 && ptr.getCellRef().getMpNum() == 0) continue;
 
-        initializeLocalActor(ptr);
-    }
-
-    MWWorld::CellRefList<ESM::Creature> *creatureList = store->getCreatures();
-
-    for (typename MWWorld::CellRefList<ESM::Creature>::List::iterator listIter(creatureList->mList.begin());
-        listIter != creatureList->mList.end(); ++listIter)
-    {
-        MWWorld::Ptr ptr(&*listIter, store);
-
-        // If this Ptr is lacking a unique index, ignore it
-        if (ptr.getCellRef().getRefNum().mIndex == 0 && ptr.getCellRef().getMpNum() == 0) continue;
-
-        initializeLocalActor(ptr);
+            initializeLocalActor(ptr);
+        }
     }
 }
 
