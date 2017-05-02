@@ -56,7 +56,72 @@ string intToHexStr(unsigned val)
     return sstr.str();
 }
 
-string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::PluginContainer checksumsResponse,
+string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::PluginContainer checksumsResponse)
+{
+    std::ostringstream sstr;
+    sstr << "Your current plugins are:\n";
+    
+    const int maxLineLength = 100;
+    int lineLength = 0;
+
+    for (size_t i = 0; i < checksums.size(); i++)
+    {
+        if (i != 0)
+            sstr << ", ";
+
+        if (lineLength > maxLineLength)
+        {
+            sstr << "\n";
+            lineLength = 0;
+        }
+
+        string plugin = checksums.at(i).first;
+
+        sstr << plugin << " (" << intToHexStr(checksums.at(i).second[0]) << ")";
+
+        lineLength = lineLength + plugin.size() + 13;
+    }
+
+    sstr << "\n\nTo join this server, use:\n";
+    lineLength = 0;
+
+    for (size_t i = 0; i < checksumsResponse.size(); i++)
+    {
+        if (i != 0)
+            sstr << ", ";
+
+        if (lineLength > maxLineLength)
+        {
+            sstr << "\n";
+            lineLength = 0;
+        }
+
+        string plugin = checksumsResponse.at(i).first;
+
+        sstr << plugin << " (";
+
+        int responseHashSize = checksumsResponse[i].second.size();
+        
+        if (responseHashSize > 0)
+        {
+            sstr << intToHexStr(checksumsResponse.at(i).second[0]);
+
+            if (responseHashSize > 1)
+                sstr << " & " << (responseHashSize - 1) << " more";
+        }
+        else
+            sstr << "any";
+
+        sstr << ")";
+
+        lineLength = lineLength + plugin.size() + 13;
+    }
+
+    sstr << "\n\nNote: Use the same load order as the server.";
+    return sstr.str();
+}
+
+string comparePluginsMonospaced(PacketPreInit::PluginContainer checksums, PacketPreInit::PluginContainer checksumsResponse,
                       bool full = false)
 {
     std::ostringstream sstr;
@@ -77,6 +142,7 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
     printWithWidth(sstr, "hash", 14);
     printWithWidth(sstr, "name", pluginNameLen2 + 2);
     sstr << "hash\n";
+
     for (size_t i = 0; i < checksumsResponse.size(); i++)
     {
         string plugin;
@@ -108,6 +174,7 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
             sstr << "any";
         sstr << "\n";
     }
+
     sstr << "\nNote: Use the same load order as the server.";
     return sstr.str();
 }
@@ -317,12 +384,17 @@ void Networking::preInit(std::vector<std::string> &content, Files::Collections &
     }
 
     if (!checksumsResponse.empty()) // something wrong
+    {
+#if defined(_MSC_VER)
         errmsg = comparePlugins(checksums, checksumsResponse);
-
+#else
+        errmsg = comparePluginsMonospaced(checksums, checksumsResponse);
+#endif
+    }
 
     if (!errmsg.empty())
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, comparePlugins(checksums, checksumsResponse, true).c_str());
+        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, comparePluginsMonospaced(checksums, checksumsResponse, true).c_str());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "tes3mp", errmsg.c_str(), 0);
         MWBase::Environment::get().getStateManager()->requestQuit();
     }
