@@ -396,6 +396,9 @@ void Networking::preInit(std::vector<std::string> &content, Files::Collections &
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, comparePluginsMonospaced(checksums, checksumsResponse, true).c_str());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "tes3mp", errmsg.c_str(), 0);
+#if defined(_MSC_VER)
+        throw std::runtime_error("Shutting down.");
+#endif
         MWBase::Environment::get().getStateManager()->requestQuit();
     }
 }
