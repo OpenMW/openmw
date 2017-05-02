@@ -60,7 +60,6 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
                       bool full = false)
 {
     std::ostringstream sstr;
-    sstr << "Note: Use the same load order as the server.\n";
     size_t pluginNameLen1 = 0;
     size_t pluginNameLen2 = 0;
     for (size_t i = 0; i < checksums.size(); i++)
@@ -82,27 +81,20 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
     {
         string plugin;
         unsigned val;
-        try
+
+        if (i < checksums.size())
         {
             plugin = checksums.at(i).first;
             val = checksums.at(i).second[0];
-        }
-        catch(exception &e)
-        {
-            plugin = "null";
-            val = 0;
-        }
 
-        if (plugin == "null")
-        {
-            printWithWidth(sstr, "", pluginNameLen1 + 16);
-        }
-        else
-        {
             printWithWidth(sstr, plugin, pluginNameLen1 + 2);
             printWithWidth(sstr, intToHexStr(val), 14);
         }
-        
+        else
+        {
+            printWithWidth(sstr, "", pluginNameLen1 + 16);
+        }
+
         printWithWidth(sstr, checksumsResponse[i].first, pluginNameLen2 + 2);
         if (checksumsResponse[i].second.size() > 0)
         {
@@ -116,7 +108,7 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
             sstr << "any";
         sstr << "\n";
     }
-    sstr << "\nMore info in logs";
+    sstr << "\nNote: Use the same load order as the server.";
     return sstr.str();
 }
 
