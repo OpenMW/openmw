@@ -8,6 +8,7 @@
 #include <components/openmw-mp/Controllers/PlayerPacketController.hpp>
 #include <components/openmw-mp/Controllers/ActorPacketController.hpp>
 #include <components/openmw-mp/Controllers/WorldPacketController.hpp>
+#include <components/openmw-mp/Packets/PacketPreInit.hpp>
 #include "Player.hpp"
 
 class MasterClient;
@@ -55,10 +56,8 @@ namespace  mwmp
         static const Networking &get();
         static Networking *getPtr();
 
-        typedef std::vector<unsigned> HashList;
-        typedef std::vector<std::pair<std::string, HashList>> PluginListSample;
     private:
-        PluginListSample getPluginListSample();
+        PacketPreInit::PluginContainer getPluginListSample();
         std::string serverPassword;
         static Networking *sThis;
 

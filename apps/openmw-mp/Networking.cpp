@@ -209,13 +209,13 @@ void Networking::update(RakNet::Packet *packet)
             {
                 for (int i = 0; plugin != plugins.end(); plugin++, i++)
                 {
-                    LOG_APPEND(Log::LOG_VERBOSE, "- %X\t%s", plugin->second, plugin->first.c_str());
+                    LOG_APPEND(Log::LOG_VERBOSE, "- %X\t%s", plugin->second[0], plugin->first.c_str());
                     if (samples[i].first == plugin->first) // if name is correct
                     {
                         auto &hashList = samples[i].second;
                         if (hashList.empty()) // and server do not allow to have custom hash for plugin
                             continue;
-                        auto it = find(hashList.begin(), hashList.end(), plugin->second);
+                        auto it = find(hashList.begin(), hashList.end(), plugin->second[0]);
                         if(it == hashList.end()) // hash not found in sample
                             break;
 
@@ -224,12 +224,20 @@ void Networking::update(RakNet::Packet *packet)
                         break;
                 }
             }
+            RakNet::BitStream bs;
+            packetPreInit.SetSendStream(&bs);
             if(plugin != plugins.end()) // if condition is true, then client have wrong plugin list
             {
-                //ToDo: Send our plugin list to player with allowed hashes
-                //peer->CloseConnection(packet->systemAddress, true);
+                packetPreInit.setChecksums(&samples);
+                packetPreInit.Send(packet->systemAddress);
+                peer->CloseConnection(packet->systemAddress, true);
             }
-
+            else
+            {
+                PacketPreInit::PluginContainer tmp;
+                packetPreInit.setChecksums(&tmp);
+                packetPreInit.Send(packet->systemAddress);
+            }
             return;
         }
 
@@ -373,26 +381,25 @@ Networking *Networking::getPtr()
     return sThis;
 }
 
-Networking::PluginListSample Networking::getPluginListSample()
+PacketPreInit::PluginContainer Networking::getPluginListSample()
 {
-    PluginListSample pls;
+    PacketPreInit::PluginContainer pls;
     unsigned id = 0;
     while(true)
     {
         unsigned field = 0;
         auto name = "";
-        Script::Call<Script::CallbackIdentity("OnRequestPluginList")>(name, id, field);
+        Script::Call<Script::CallbackIdentity("OnRequestPluginList")>(name, id, field++);
         if(strlen(name) == 0)
             break;
-        HashList hashList;
+        PacketPreInit::HashList hashList;
         while(true)
         {
             auto hash = "";
-            Script::Call<Script::CallbackIdentity("OnRequestPluginList")>(hash, id, field);
+            Script::Call<Script::CallbackIdentity("OnRequestPluginList")>(hash, id, field++);
             if(strlen(hash) == 0)
                 break;
             hashList.push_back((unsigned)stoul(hash));
-            field++;
         }
         pls.push_back({name, hashList});
         id++;
