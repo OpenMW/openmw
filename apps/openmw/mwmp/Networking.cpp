@@ -80,8 +80,20 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
     sstr << "hash\n";
     for(size_t i = 0; i < checksumsResponse.size(); i++)
     {
-        printWithWidth(sstr, checksums[i].first, pluginNameLen1 + 2);
-        printWithWidth(sstr, intToHexStr(checksums[i].second[0]), 14);
+        string plugin;
+        unsigned val;
+        try
+        {
+            plugin = checksums.at(i).first;
+            val = checksums.at(i).second[0];
+        }
+        catch(exception &e)
+        {
+            plugin = "null";
+            val = 0;
+        }
+        printWithWidth(sstr, plugin, pluginNameLen1 + 2);
+        printWithWidth(sstr, intToHexStr(val), 14);
         printWithWidth(sstr, checksumsResponse[i].first, pluginNameLen2 + 2);
         if(checksumsResponse[i].second.size() > 0)
         {
