@@ -2,8 +2,10 @@
 #define CSV_WORLD_SCRIPTHIGHLIGHTER_H
 
 #include <map>
+#include <string>
 
 #include <QSyntaxHighlighter>
+#include <QColor>
 
 #include <components/compiler/nullerrorhandler.hpp>
 #include <components/compiler/parser.hpp>
@@ -47,6 +49,7 @@ namespace CSVWorld
             CSMWorld::ScriptContext mContext;
             std::map<Type, QTextCharFormat> mScheme;
             Mode mMode;
+            bool mUniqueNameColour;
 
         private:
 
@@ -84,6 +87,8 @@ namespace CSVWorld
             ///< Handle EOF token.
 
             void highlight (const Compiler::TokenLoc& loc, Type type);
+
+            static QColor hashedHighlightColour(const std::string&);
 
         public:
 
