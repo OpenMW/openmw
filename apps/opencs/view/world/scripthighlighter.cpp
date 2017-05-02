@@ -99,7 +99,7 @@ QColor CSVWorld::ScriptHighlighter::hashedHighlightColour(const std::string& nam
 CSVWorld::ScriptHighlighter::ScriptHighlighter (const CSMWorld::Data& data, Mode mode,
     QTextDocument *parent)
 : QSyntaxHighlighter (parent), Compiler::Parser (mErrorHandler, mContext), mContext (data),
-  mMode (mode), mUniqueNameColor (false)
+  mMode (mode), mUniqueNameColour (false)
 {
     QColor color ("black");
     QTextCharFormat format;
