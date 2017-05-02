@@ -202,9 +202,32 @@ void Networking::update(RakNet::Packet *packet)
             packetPreInit.setChecksums(&plugins);
             packetPreInit.Read();
 
-            for (auto plugin : plugins)
+            static auto samples = getPluginListSample();
+
+            auto plugin = plugins.begin();
+            if (samples.size() == plugins.size())
             {
-                LOG_APPEND(Log::LOG_VERBOSE, "- %X\t%s", plugin.second, plugin.first.c_str());
+                for (int i = 0; plugin != plugins.end(); plugin++, i++)
+                {
+                    LOG_APPEND(Log::LOG_VERBOSE, "- %X\t%s", plugin->second, plugin->first.c_str());
+                    if (samples[i].first == plugin->first) // if name is correct
+                    {
+                        auto &hashList = samples[i].second;
+                        if (hashList.empty()) // and server do not allow to have custom hash for plugin
+                            continue;
+                        auto it = find(hashList.begin(), hashList.end(), plugin->second);
+                        if(it == hashList.end()) // hash not found in sample
+                            break;
+
+                    }
+                    else // name is incorrect
+                        break;
+                }
+            }
+            if(plugin != plugins.end()) // if condition is true, then client have wrong plugin list
+            {
+                //ToDo: Send our plugin list to player with allowed hashes
+                //peer->CloseConnection(packet->systemAddress, true);
             }
 
             return;
