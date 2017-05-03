@@ -21,11 +21,6 @@ mwmp::Cell::Cell(MWWorld::CellStore* cellStore)
     std::map<std::string, DedicatedActor *> dedicatedActors;
 }
 
-mwmp::Cell::~Cell()
-{
-
-}
-
 void Cell::updateLocal(bool forceUpdate)
 {
     if (localActors.empty()) return;
