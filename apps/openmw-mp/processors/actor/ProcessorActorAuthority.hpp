@@ -15,7 +15,7 @@ namespace mwmp
 
         void Do(ActorPacket &packet, Player &player, BaseActorList &actorList) override
         {
-            packet.Send(true);
+            // In the current implementation, only the server should be able to send ActorAuthority packets
         }
     };
 }
