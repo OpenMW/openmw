@@ -51,6 +51,7 @@ CSVWorld::ScriptEdit::ScriptEdit(
     mDefaultFont(font()),
     mMonoFont(QFont("Monospace")),
     mTabCharCount(4),
+    mMarkOccurrences(true),
     mDocument(document),
     mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive)
 {
@@ -87,6 +88,8 @@ CSVWorld::ScriptEdit::ScriptEdit(
                   <<CSMWorld::UniversalId::Type_Weapon
                   <<CSMWorld::UniversalId::Type_Script
                   <<CSMWorld::UniversalId::Type_Region;
+    
+    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(markOccurrences()));
 
     mCommentAction = new QAction (tr ("Comment Selection"), this);
     connect(mCommentAction, SIGNAL (triggered()), this, SLOT (commentSelection()));
@@ -242,6 +245,13 @@ void CSVWorld::ScriptEdit::settingChanged(const CSMPrefs::Setting *setting)
         mTabCharCount = setting->toInt();
         setTabWidth();
     }
+    else if (*setting == "Scripts/highlight-occurrences")
+    {
+        mMarkOccurrences = setting->isTrue();
+        mHighlighter->setMarkedWord("");
+        updateHighlighting();
+        mHighlighter->setMarkOccurrences(mMarkOccurrences);
+    }
 }
 
 void CSVWorld::ScriptEdit::idListChanged()
@@ -296,6 +306,25 @@ void CSVWorld::ScriptEdit::updateLineNumberArea(const QRect &rect, int dy)
         updateLineNumberAreaWidth(0);
 }
 
+void CSVWorld::ScriptEdit::markOccurrences()
+{
+    if (mMarkOccurrences)
+    {
+        QTextCursor cursor = textCursor();
+
+        // prevent infinite recursion with cursor.select(),
+        // which ends up calling this function again
+        // could be fixed with blockSignals, but mDocument is const
+        disconnect(this, SIGNAL(cursorPositionChanged()), this, 0);
+        cursor.select(QTextCursor::WordUnderCursor);
+        connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(markOccurrences()));
+
+        QString word = cursor.selectedText();
+        mHighlighter->setMarkedWord(word.toStdString());
+        mHighlighter->rehighlight();
+    }
+}
+  
 void CSVWorld::ScriptEdit::commentSelection()
 {
     QTextCursor begin = textCursor();

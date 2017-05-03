@@ -55,6 +55,7 @@ namespace CSVWorld
             QFont mDefaultFont;
             QFont mMonoFont;
             int mTabCharCount;
+            bool mMarkOccurrences;
             QAction *mCommentAction;
             QAction *mUncommentAction;
 
@@ -117,9 +118,12 @@ namespace CSVWorld
 
             void updateLineNumberArea(const QRect &, int);
 
+            void markOccurrences();
+            
             void commentSelection();
 
             void uncommentSelection();
+            
     };
 
     class LineNumberArea : public QWidget

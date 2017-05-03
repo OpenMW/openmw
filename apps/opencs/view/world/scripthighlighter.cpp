@@ -72,7 +72,11 @@ void CSVWorld::ScriptHighlighter::highlight (const Compiler::TokenLoc& loc, Type
     // compensate for bug in Compiler::Scanner (position of token is the character after the token)
     index -= length;
 
-    setFormat (index, length, mScheme[type]);
+    QTextCharFormat scheme = mScheme[type];
+    if (mMarkOccurrences && type == Type_Name && loc.mLiteral == mMarkedWord)
+        scheme.merge(mScheme[Type_Highlight]);
+
+    setFormat (index, length, scheme);
 }
 
 CSVWorld::ScriptHighlighter::ScriptHighlighter (const CSMWorld::Data& data, Mode mode,
@@ -105,6 +109,16 @@ void CSVWorld::ScriptHighlighter::highlightBlock (const QString& text)
     catch (...) {} // ignore syntax errors
 }
 
+void CSVWorld::ScriptHighlighter::setMarkOccurrences(bool flag)
+{
+    mMarkOccurrences = flag;
+}
+
+void CSVWorld::ScriptHighlighter::setMarkedWord(const std::string& name)
+{
+    mMarkedWord = name;
+}
+
 void CSVWorld::ScriptHighlighter::invalidateIds()
 {
     mContext.invalidateIds();
@@ -117,7 +131,7 @@ bool CSVWorld::ScriptHighlighter::settingChanged (const CSMPrefs::Setting *setti
         static const char *const colours[Type_Id+2] =
         {
             "colour-int", "colour-float", "colour-name", "colour-keyword",
-            "colour-special", "colour-comment", "colour-id",
+            "colour-special", "colour-comment", "colour-highlight", "colour-id",
             0
         };
 
@@ -125,7 +139,10 @@ bool CSVWorld::ScriptHighlighter::settingChanged (const CSMPrefs::Setting *setti
             if (setting->getKey()==colours[i])
             {
                 QTextCharFormat format;
-                format.setForeground (setting->toColor());
+                if (i == Type_Highlight)
+                    format.setBackground (setting->toColor());
+                else
+                    format.setForeground (setting->toColor());
                 mScheme[static_cast<Type> (i)] = format;
                 return true;
             }
