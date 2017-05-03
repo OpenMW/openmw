@@ -8,7 +8,11 @@
 #include <string>
 #include <sstream>
 
-#ifdef _WIN32
+#if (defined __WIN32__ || defined _WIN32 || defined WIN32)
+#define __WINDOWS
+#endif
+
+#ifdef __WINDOWS
 int setenv(const char *name, const char *value, int overwrite);
 #endif
 
