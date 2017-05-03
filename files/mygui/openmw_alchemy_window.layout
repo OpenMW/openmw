@@ -6,12 +6,13 @@
 
         <!-- Name -->
 
-        <Widget type="TextBox" skin="SandText" position="10 10 65 24">
+        <Widget type="TextBox" skin="SandText" position="10 8 65 30">
             <Property key="Caption" value="#{sName}"/>
             <Property key="TextAlign" value="Left"/>
         </Widget>
 
-        <Widget type="EditBox" skin="MW_TextEdit" position="70 10 492 24" align="Top Left HStretch" name="NameEdit"/>
+        <Widget type="EditBox" skin="MW_TextEdit" position="70 8 492 30" align="Top Left HStretch" name="NameEdit">
+        </Widget>
 
 
         <!-- Apparatus -->
