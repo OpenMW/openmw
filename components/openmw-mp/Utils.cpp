@@ -12,6 +12,7 @@
 #include <sstream>
 #include <boost/crc.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <iomanip>
 
 using namespace std;
 
@@ -146,4 +147,16 @@ unsigned int ::Utils::crc32checksum(const std::string &file)
         } while (ifs);
     }
     return crc32.checksum();
+}
+
+void Utils::printWithWidth(ostringstream &sstr, string str, size_t width)
+{
+    sstr << left << setw(width) << setfill(' ') << str;
+}
+
+string Utils::intToHexStr(unsigned val)
+{
+    ostringstream sstr;
+    sstr << "0x" << setfill('0') << setw(8) << uppercase << hex << val;
+    return sstr.str();
 }

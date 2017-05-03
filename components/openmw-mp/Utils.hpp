@@ -6,6 +6,7 @@
 #define UTILS_HPP
 
 #include <string>
+#include <sstream>
 
 #ifdef _WIN32
 int setenv(const char *name, const char *value, int overwrite);
@@ -30,5 +31,9 @@ namespace Utils
     long int FileLength(const char *file);
 
     unsigned int crc32checksum(const std::string &file);
+
+
+    void printWithWidth(std::ostringstream &sstr, std::string str, size_t width);
+    std::string intToHexStr(unsigned val);
 }
 #endif //UTILS_HPP

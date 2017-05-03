@@ -44,18 +44,6 @@
 using namespace std;
 using namespace mwmp;
 
-void printWithWidth(ostringstream &sstr, string str, size_t width)
-{
-    sstr << left << setw(width) << setfill(' ') << str;
-}
-
-string intToHexStr(unsigned val)
-{
-    ostringstream sstr;
-    sstr << "0x" << setfill('0') << setw(8) << uppercase << hex << val;
-    return sstr.str();
-}
-
 string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::PluginContainer checksumsResponse)
 {
     std::ostringstream sstr;
@@ -78,7 +66,7 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
 
         string plugin = checksums.at(i).first;
 
-        sstr << plugin << " (" << intToHexStr(checksums.at(i).second[0]) << ")";
+        sstr << plugin << " (" << Utils::intToHexStr(checksums.at(i).second[0]) << ")";
 
         lineLength = lineLength + plugin.size() + 13;
     }
@@ -105,7 +93,7 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
         
         if (responseHashSize > 0)
         {
-            sstr << intToHexStr(checksumsResponse.at(i).second[0]);
+            sstr << Utils::intToHexStr(checksumsResponse.at(i).second[0]);
 
             if (responseHashSize > 1)
                 sstr << " & " << (responseHashSize - 1) << " more";
@@ -136,12 +124,12 @@ string comparePluginsMonospaced(PacketPreInit::PluginContainer checksums, Packet
             pluginNameLen2 = checksumsResponse[i].first.size();
 
     sstr << "Your plugins or their load order don't match the server's.\n\n";
-    printWithWidth(sstr, "Your current plugins are:", pluginNameLen1 + 16);
+    Utils::printWithWidth(sstr, "Your current plugins are:", pluginNameLen1 + 16);
     sstr << "To join this server, use:\n";
 
-    printWithWidth(sstr, "name", pluginNameLen1 + 2);
-    printWithWidth(sstr, "hash", 14);
-    printWithWidth(sstr, "name", pluginNameLen2 + 2);
+    Utils::printWithWidth(sstr, "name", pluginNameLen1 + 2);
+    Utils::printWithWidth(sstr, "hash", 14);
+    Utils::printWithWidth(sstr, "name", pluginNameLen2 + 2);
     sstr << "hash\n";
 
     for (size_t i = 0; i < checksums.size() || i < checksumsResponse.size(); i++)
@@ -154,24 +142,22 @@ string comparePluginsMonospaced(PacketPreInit::PluginContainer checksums, Packet
             plugin = checksums.at(i).first;
             val = checksums.at(i).second[0];
 
-            printWithWidth(sstr, plugin, pluginNameLen1 + 2);
-            printWithWidth(sstr, intToHexStr(val), 14);
+            Utils::printWithWidth(sstr, plugin, pluginNameLen1 + 2);
+            Utils::printWithWidth(sstr, Utils::intToHexStr(val), 14);
         }
         else
-        {
-            printWithWidth(sstr, "", pluginNameLen1 + 16);
-        }
+            Utils::printWithWidth(sstr, "", pluginNameLen1 + 16);
 
         if (i < checksumsResponse.size())
         {
-            printWithWidth(sstr, checksumsResponse[i].first, pluginNameLen2 + 2);
+            Utils::printWithWidth(sstr, checksumsResponse[i].first, pluginNameLen2 + 2);
             if (checksumsResponse[i].second.size() > 0)
             {
                 if (full)
                     for (size_t j = 0; j < checksumsResponse[i].second.size(); j++)
-                        printWithWidth(sstr, intToHexStr(checksumsResponse[i].second[j]), 14);
+                        Utils::printWithWidth(sstr, Utils::intToHexStr(checksumsResponse[i].second[j]), 14);
                 else
-                    sstr << intToHexStr(checksumsResponse[i].second[0]);
+                    sstr << Utils::intToHexStr(checksumsResponse[i].second[0]);
             }
             else
                 sstr << "any";
