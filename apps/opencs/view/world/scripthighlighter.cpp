@@ -3,7 +3,7 @@
 #include <sstream>
 #include <limits>
 
-#include <boost/functional/hash.hpp>
+#include <QString>
 
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/extensions0.hpp>
@@ -88,11 +88,9 @@ void CSVWorld::ScriptHighlighter::highlight (const Compiler::TokenLoc& loc, Type
 
 QColor CSVWorld::ScriptHighlighter::hashedHighlightColour(const std::string& name)
 {
-    boost::hash<std::string> hash;
-
     // need to scale hash value into range [0, 359]
-    return QColor::fromHsl(static_cast<double>(hash(name))
-                           / std::numeric_limits<size_t>::max() * 359,
+    return QColor::fromHsl(static_cast<double>(qHash(QString::fromStdString(name)))
+                           / std::numeric_limits<unsigned>::max() * 359,
                            255, 240);
 }
 
