@@ -1,6 +1,9 @@
 #include "scripthighlighter.hpp"
 
 #include <sstream>
+#include <limits>
+
+#include <QString>
 
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/extensions0.hpp>
@@ -72,13 +75,29 @@ void CSVWorld::ScriptHighlighter::highlight (const Compiler::TokenLoc& loc, Type
     // compensate for bug in Compiler::Scanner (position of token is the character after the token)
     index -= length;
 
-    setFormat (index, length, mScheme[type]);
+    QTextCharFormat scheme = mScheme[type];
+    if (mUniqueNameColour && type == Type_Name)
+    {
+        QTextCharFormat format;
+        format.setBackground(hashedHighlightColour(loc.mLiteral));
+        scheme.merge(format);
+    }
+
+    setFormat (index, length, scheme);
+}
+
+QColor CSVWorld::ScriptHighlighter::hashedHighlightColour(const std::string& name)
+{
+    // need to scale hash value into range [0, 359]
+    return QColor::fromHsl(static_cast<double>(qHash(QString::fromStdString(name)))
+                           / std::numeric_limits<unsigned>::max() * 359,
+                           255, 240);
 }
 
 CSVWorld::ScriptHighlighter::ScriptHighlighter (const CSMWorld::Data& data, Mode mode,
     QTextDocument *parent)
 : QSyntaxHighlighter (parent), Compiler::Parser (mErrorHandler, mContext), mContext (data),
-  mMode (mode)
+  mMode (mode), mUniqueNameColour (false)
 {
     QColor color ("black");
     QTextCharFormat format;
@@ -114,6 +133,12 @@ bool CSVWorld::ScriptHighlighter::settingChanged (const CSMPrefs::Setting *setti
 {
     if (setting->getParent()->getKey()=="Scripts")
     {
+        if (setting->getKey() == "unique-name-colour")
+        {
+            mUniqueNameColour = setting->isTrue();
+            return true;
+        }
+
         static const char *const colours[Type_Id+2] =
         {
             "colour-int", "colour-float", "colour-name", "colour-keyword",
