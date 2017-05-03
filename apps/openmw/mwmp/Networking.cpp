@@ -144,7 +144,7 @@ string comparePluginsMonospaced(PacketPreInit::PluginContainer checksums, Packet
     printWithWidth(sstr, "name", pluginNameLen2 + 2);
     sstr << "hash\n";
 
-    for (size_t i = 0; i < checksumsResponse.size(); i++)
+    for (size_t i = 0; i < checksums.size() || i < checksumsResponse.size(); i++)
     {
         string plugin;
         unsigned val;
@@ -162,17 +162,21 @@ string comparePluginsMonospaced(PacketPreInit::PluginContainer checksums, Packet
             printWithWidth(sstr, "", pluginNameLen1 + 16);
         }
 
-        printWithWidth(sstr, checksumsResponse[i].first, pluginNameLen2 + 2);
-        if (checksumsResponse[i].second.size() > 0)
+        if (i < checksumsResponse.size())
         {
-            if (full)
-                for (size_t j = 0; j < checksumsResponse[i].second.size(); j++)
-                    printWithWidth(sstr, intToHexStr(checksumsResponse[i].second[j]), 14);
+            printWithWidth(sstr, checksumsResponse[i].first, pluginNameLen2 + 2);
+            if (checksumsResponse[i].second.size() > 0)
+            {
+                if (full)
+                    for (size_t j = 0; j < checksumsResponse[i].second.size(); j++)
+                        printWithWidth(sstr, intToHexStr(checksumsResponse[i].second[j]), 14);
+                else
+                    sstr << intToHexStr(checksumsResponse[i].second[0]);
+            }
             else
-                sstr << intToHexStr(checksumsResponse[i].second[0]);
+                sstr << "any";
         }
-        else
-            sstr << "any";
+
         sstr << "\n";
     }
 
