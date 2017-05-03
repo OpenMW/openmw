@@ -362,9 +362,68 @@ namespace MWMechanics
         case ESM::MagicEffect::CurePoison:
             return 1001.f * numEffectsToCure(actor, ESM::MagicEffect::Poison);
 
-        case ESM::MagicEffect::DisintegrateArmor: // TODO: check if actor is wearing armor
-        case ESM::MagicEffect::DisintegrateWeapon: // TODO: check if actor is wearing weapon
-            break;
+        case ESM::MagicEffect::DisintegrateArmor:
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                // Ignore enemy without inventory
+                if (!enemy.getClass().hasInventoryStore(enemy))
+                    return 0.f;
+
+                MWWorld::InventoryStore& inv = enemy.getClass().getInventoryStore(enemy);
+
+                // According to UESP
+                static const int armorSlots[] = {
+                    MWWorld::InventoryStore::Slot_CarriedLeft,
+                    MWWorld::InventoryStore::Slot_Cuirass,
+                    MWWorld::InventoryStore::Slot_LeftPauldron,
+                    MWWorld::InventoryStore::Slot_RightPauldron,
+                    MWWorld::InventoryStore::Slot_LeftGauntlet,
+                    MWWorld::InventoryStore::Slot_RightGauntlet,
+                    MWWorld::InventoryStore::Slot_Helmet,
+                    MWWorld::InventoryStore::Slot_Greaves,
+                    MWWorld::InventoryStore::Slot_Boots
+                };
+
+                bool enemyHasArmor = false;
+
+                // Ignore enemy without armor
+                for (unsigned int i=0; i<sizeof(armorSlots)/sizeof(int); ++i)
+                {
+                    MWWorld::ContainerStoreIterator item = inv.getSlot(armorSlots[i]);
+
+                    if (item != inv.end() && (item.getType() == MWWorld::ContainerStore::Type_Armor))
+                    {
+                        enemyHasArmor = true;
+                        break;
+                    }
+                }
+
+                if (!enemyHasArmor)
+                    return 0.f;
+
+                break;
+            }
+
+        case ESM::MagicEffect::DisintegrateWeapon:
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                // Ignore enemy without inventory
+                if (!enemy.getClass().hasInventoryStore(enemy))
+                    return 0.f;
+
+                MWWorld::InventoryStore& inv = enemy.getClass().getInventoryStore(enemy);
+                MWWorld::ContainerStoreIterator item = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+
+                // Ignore enemy without weapons
+                if (item == inv.end() || (item.getType() != MWWorld::ContainerStore::Type_Weapon))
+                    return 0.f;
+
+                break;
+            }
 
         case ESM::MagicEffect::DamageAttribute:
         case ESM::MagicEffect::DrainAttribute:
