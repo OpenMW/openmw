@@ -266,6 +266,23 @@ namespace MWMechanics
         case ESM::MagicEffect::Chameleon:
             return 0.f;
 
+        case ESM::MagicEffect::Sound:
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                // there is no need to cast sound if enemy is not able to cast spells
+                CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
+
+                if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude() > 0)
+                    return 0.f;
+
+                if (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+                    return 0.f;
+
+                break;
+            }
+
         case ESM::MagicEffect::RestoreAttribute:
             return 0.f; // TODO: implement based on attribute damage
         case ESM::MagicEffect::RestoreSkill:
@@ -383,21 +400,51 @@ namespace MWMechanics
             break;
         }
 
-        // TODO: for non-cumulative effects (e.g. paralyze), check if the enemy is already suffering from them
-
-        // TODO: could take into account enemy's resistance/weakness against the effect
-
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
 
         rating *= magicEffect->mData.mBaseCost;
 
-        if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
+        if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
+        {
+            rating *= -1.f;
+
+            if (enemy.isEmpty())
+                return 0.f;
+
+            // Check resistance for harmful effects
+            CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
+
+            float resistance = MWMechanics::getEffectResistanceAttribute(effect.mEffectID, &stats.getMagicEffects());
+
+            rating *= (1.f - std::min(resistance, 100.f) / 100.f);
+        }
+
+        // for harmful no-magnitude effects (e.g. silence) check if enemy is already has them
+        // for non-harmful no-magnitude effects (e.g. bound items) check if actor is already has them
+        if (magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude)
+        {
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
+            {
+                CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
+
+                if (stats.getMagicEffects().get(effect.mEffectID).getMagnitude() > 0)
+                    return 0.f;
+            }
+            else
+            {
+                CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+
+                if (stats.getMagicEffects().get(effect.mEffectID).getMagnitude() > 0)
+                    return 0.f;
+            }
+        }
+        else
+        {
             rating *= (effect.mMagnMin + effect.mMagnMax)/2.f;
+        }
+
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
             rating *= effect.mDuration;
-
-        if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
-            rating *= -1.f;
 
         // Currently treating all "on target" or "on touch" effects to target the enemy actor.
         // Combat AI is egoistic, so doesn't consider applying positive effects to friendly actors.
