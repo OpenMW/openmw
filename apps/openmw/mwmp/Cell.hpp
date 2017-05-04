@@ -37,11 +37,18 @@ namespace mwmp
         virtual LocalActor *getLocalActor(std::string actorIndex);
         virtual DedicatedActor *getDedicatedActor(std::string actorIndex);
 
+        bool hasLocalAuthority();
+        void setAuthority(const RakNet::RakNetGUID& guid);
+
         MWWorld::CellStore* getCellStore();
         std::string getDescription();
 
+        bool shouldInitializeActors;
+
     private:
         MWWorld::CellStore* store;
+        RakNet::RakNetGUID authorityGuid;
+
         std::map<std::string, LocalActor *> localActors;
         std::map<std::string, DedicatedActor *> dedicatedActors;
     };

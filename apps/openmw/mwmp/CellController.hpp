@@ -19,7 +19,6 @@ namespace mwmp
         void updateDedicated(float dt);
 
         void initializeCell(const ESM::Cell& cell);
-        void initializeLocalActors(const ESM::Cell& cell);
 
         void readPositions(mwmp::ActorList& actorList);
         void readAnimFlags(mwmp::ActorList& actorList);
@@ -49,6 +48,7 @@ namespace mwmp
         std::string generateMapIndex(MWWorld::Ptr ptr);
         std::string generateMapIndex(mwmp::BaseActor baseActor);
 
+        bool hasLocalAuthority(const ESM::Cell& cell);
         bool isInitializedCell(const ESM::Cell& cell);
         bool isActiveWorldCell(const ESM::Cell& cell);
         virtual Cell *getCell(const ESM::Cell& cell);

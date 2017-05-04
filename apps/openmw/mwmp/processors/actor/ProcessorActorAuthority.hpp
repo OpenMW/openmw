@@ -23,15 +23,21 @@ namespace mwmp
         virtual void Do(ActorPacket &packet, ActorList &actorList)
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received %s about %s", strPacketID.c_str(), actorList.cell.getDescription().c_str());
+            mwmp::CellController *cellController = Main::get().getCellController();
 
             // Never initialize LocalActors in a cell that is no longer loaded, if the server's packet arrived too late
-            if (mwmp::Main::get().getCellController()->isActiveWorldCell(actorList.cell))
+            if (cellController->isActiveWorldCell(actorList.cell))
             {
+                cellController->initializeCell(actorList.cell);
+                mwmp::Cell *cell = cellController->getCell(actorList.cell);
+                cell->setAuthority(guid);
+
                 if (isLocal())
                 {
                     LOG_APPEND(Log::LOG_INFO, "- The new authority is me");
-                    Main::get().getCellController()->initializeLocalActors(actorList.cell);
-                    Main::get().getCellController()->getCell(actorList.cell)->updateLocal(true);
+                    cell->uninitializeDedicatedActors();
+                    cell->initializeLocalActors();
+                    cell->updateLocal(true);
                 }
                 else
                 {
@@ -40,7 +46,7 @@ namespace mwmp
                     if (player != 0)
                         LOG_APPEND(Log::LOG_INFO, "- The new authority is %s", player->npc.mName.c_str());
 
-                    Main::get().getCellController()->getCell(actorList.cell)->uninitializeLocalActors();
+                    cell->uninitializeLocalActors();
                 }
             }
             else

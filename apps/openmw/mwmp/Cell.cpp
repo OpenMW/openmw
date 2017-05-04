@@ -8,6 +8,7 @@
 #include "Cell.hpp"
 #include "Main.hpp"
 #include "Networking.hpp"
+#include "LocalPlayer.hpp"
 #include "CellController.hpp"
 #include "MechanicsHelper.hpp"
 
@@ -16,6 +17,7 @@ using namespace mwmp;
 mwmp::Cell::Cell(MWWorld::CellStore* cellStore)
 {
     store = cellStore;
+    shouldInitializeActors = false;
 
     std::map<std::string, LocalActor *> localActors;
     std::map<std::string, DedicatedActor *> dedicatedActors;
@@ -44,10 +46,7 @@ void Cell::updateLocal(bool forceUpdate)
             
             Main::get().getCellController()->removeLocalActorRecord(it->first);
 
-            // If the cell this actor has moved to is active, initialize them in it
-            if (Main::get().getCellController()->isInitializedCell(*newStore->getCell()))
-                Main::get().getCellController()->getCell(*newStore->getCell())->initializeLocalActor(actor->getPtr());
-
+            delete actor;
             localActors.erase(it++);
         }
         else
@@ -242,7 +241,7 @@ void Cell::readCellChange(ActorList& actorList)
             actor->setCell(newStore);
 
             Main::get().getCellController()->removeDedicatedActorRecord(mapIndex);
-            
+
             // If the cell this actor has moved to is active, initialize them in it
             if (Main::get().getCellController()->isInitializedCell(actor->cell))
                 Main::get().getCellController()->getCell(actor->cell)->initializeDedicatedActor(actor->getPtr());
@@ -280,7 +279,11 @@ void Cell::initializeLocalActors()
             // If this Ptr is lacking a unique index, ignore it
             if (ptr.getCellRef().getRefNum().mIndex == 0 && ptr.getCellRef().getMpNum() == 0) continue;
 
-            initializeLocalActor(ptr);
+            std::string mapIndex = Main::get().getCellController()->generateMapIndex(ptr);
+
+            // Only initialize this actor if it isn't already initialized
+            if (localActors.count(mapIndex) == 0)
+                initializeLocalActor(ptr);
         }
     }
 }
@@ -350,6 +353,16 @@ LocalActor *Cell::getLocalActor(std::string actorIndex)
 DedicatedActor *Cell::getDedicatedActor(std::string actorIndex)
 {
     return dedicatedActors.at(actorIndex);
+}
+
+bool Cell::hasLocalAuthority()
+{
+    return authorityGuid == Main::get().getLocalPlayer()->guid;
+}
+
+void Cell::setAuthority(const RakNet::RakNetGUID& guid)
+{
+    authorityGuid = guid;
 }
 
 MWWorld::CellStore *Cell::getCellStore()

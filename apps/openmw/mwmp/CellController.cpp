@@ -24,6 +24,7 @@ mwmp::CellController::CellController()
 }
 void CellController::updateLocal(bool forceUpdate)
 {
+    // Loop through Cells, deleting inactive ones and updating LocalActors in active ones
     for (std::map<std::string, mwmp::Cell *>::iterator it = cellsInitialized.begin(); it != cellsInitialized.end();)
     {
         mwmp::Cell *mpCell = it->second;
@@ -37,9 +38,22 @@ void CellController::updateLocal(bool forceUpdate)
         }
         else
         {
-            //LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Updating mwmp::Cell %s", mpCell->getDescription().c_str());
             mpCell->updateLocal(forceUpdate);
             ++it;
+        }
+    }
+
+    // Loop through Cells and initialize new LocalActors for eligible ones
+    //
+    // Note: This cannot be combined with the above loop because initializing LocalActors in a Cell before they are
+    //       deleted from their previous one can make their records stay deleted
+    for (std::map<std::string, mwmp::Cell *>::iterator it = cellsInitialized.begin(); it != cellsInitialized.end(); ++it)
+    {
+        mwmp::Cell *mpCell = it->second;
+        if (mpCell->shouldInitializeActors == true)
+        {
+            mpCell->shouldInitializeActors = false;
+            mpCell->initializeLocalActors();
         }
     }
 }
@@ -67,20 +81,6 @@ void CellController::initializeCell(const ESM::Cell& cell)
         cellsInitialized[mapIndex] = mpCell;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "- Initialized mwmp::Cell %s", mpCell->getDescription().c_str());
-    }
-}
-
-void CellController::initializeLocalActors(const ESM::Cell& cell)
-{
-    std::string mapIndex = cell.getDescription();    
-
-    initializeCell(cell);
-
-    // If this now exists, initialize local actors in it
-    if (cellsInitialized.count(mapIndex) > 0)
-    {
-        cellsInitialized[mapIndex]->uninitializeDedicatedActors();
-        cellsInitialized[mapIndex]->initializeLocalActors();
     }
 }
 
@@ -277,6 +277,16 @@ std::string CellController::generateMapIndex(MWWorld::Ptr ptr)
 std::string CellController::generateMapIndex(BaseActor baseActor)
 {
     return generateMapIndex(baseActor.refId, baseActor.refNumIndex, baseActor.mpNum);
+}
+
+bool CellController::hasLocalAuthority(const ESM::Cell& cell)
+{
+    if (isInitializedCell(cell) && isActiveWorldCell(cell))
+    {
+        return getCell(cell)->hasLocalAuthority();
+    }
+
+    return false;
 }
 
 bool CellController::isInitializedCell(const ESM::Cell& cell)

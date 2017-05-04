@@ -5,6 +5,19 @@
 #include <iostream>
 #include <algorithm>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include <components/openmw-mp/Log.hpp>
+#include "../mwmp/Main.hpp"
+#include "../mwmp/Networking.hpp"
+#include "../mwmp/CellController.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include <components/esm/cellstate.hpp>
 #include <components/esm/cellid.hpp>
 #include <components/esm/esmreader.hpp>
@@ -353,6 +366,23 @@ namespace MWWorld
         MergeVisitor visitor(mMergedRefs, mMovedHere, mMovedToAnotherCell);
         forEachInternal(visitor);
         visitor.merge();
+
+        /*
+            Start of tes3mp addition
+
+            If the mwmp::Cell corresponding to this CellStore is under the authority of the LocalPlayer,
+            prepare a new initialization of LocalActors in it
+
+            Warning: Don't directly use initializeLocalActors() from here because that will break any current
+            cell transition that started in World::moveObject()
+        */
+        if (mwmp::Main::get().getCellController()->hasLocalAuthority(*getCell()))
+        {
+            mwmp::Main::get().getCellController()->getCell(*getCell())->shouldInitializeActors = true;
+        }
+        /*
+            End of tes3mp addition
+        */
     }
 
     CellStore::CellStore (const ESM::Cell *cell, const MWWorld::ESMStore& esmStore, std::vector<ESM::ESMReader>& readerList)
