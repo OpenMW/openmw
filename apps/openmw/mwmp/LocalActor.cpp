@@ -155,9 +155,22 @@ void LocalActor::updateStatsDynamic(bool forceUpdate)
 
     const float timeoutSec = 0.5;
 
-    if ((statTimer += MWBase::Environment::get().getFrameDuration()) >= timeoutSec || forceUpdate)
+    if (forceUpdate || (statTimer += MWBase::Environment::get().getFrameDuration()) >= timeoutSec)
     {
-        if (oldHealth != health || oldMagicka != magicka || oldFatigue != fatigue || forceUpdate)
+        // Update stats when they become 0 or they have changed enough
+        //
+        // Also check for an oldHealth of 0 changing to something else for resurrected NPCs
+        bool shouldUpdateHealth = oldHealth != health && (health.getCurrent() == 0 || oldHealth.getCurrent() == 0 || abs(oldHealth.getCurrent() - health.getCurrent()) > 5);
+        bool shouldUpdateMagicka = false;
+        bool shouldUpdateFatigue = false;
+
+        if (!shouldUpdateHealth)
+            shouldUpdateMagicka = oldMagicka != magicka && (magicka.getCurrent() == 0 || abs(oldMagicka.getCurrent() - magicka.getCurrent()) > 10);
+
+        if (!shouldUpdateMagicka)
+            shouldUpdateFatigue = oldFatigue != fatigue && (fatigue.getCurrent() == 0 || abs(oldFatigue.getCurrent() - fatigue.getCurrent()) > 10);
+        
+        if (forceUpdate || shouldUpdateHealth || shouldUpdateMagicka || shouldUpdateFatigue)
         {
             oldHealth = health;
             oldMagicka = magicka;
@@ -170,6 +183,7 @@ void LocalActor::updateStatsDynamic(bool forceUpdate)
             statTimer = 0;
 
             mwmp::Main::get().getNetworking()->getActorList()->addStatsDynamicActor(*this);
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Updating stats for %s-%i-%i: %f, %f, %f", refId.c_str(), refNumIndex, mpNum, health.getCurrent(), magicka.getCurrent(), fatigue.getCurrent());
         }
     }
 }
