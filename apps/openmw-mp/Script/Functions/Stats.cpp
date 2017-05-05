@@ -110,7 +110,6 @@ int StatsFunctions::GetIsMale(unsigned short pid) noexcept
 
 const char *StatsFunctions::GetBirthsign(unsigned short pid) noexcept
 {
-
     Player *player;
     GET_PLAYER(pid, player, 0);
 
@@ -131,6 +130,14 @@ bool StatsFunctions::IsCreatureName(unsigned short pid) noexcept
     GET_PLAYER(pid, player, 0);
 
     return player->useCreatureName;
+}
+
+const char *StatsFunctions::GetDeathReason(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->deathReason.c_str();
 }
 
 int StatsFunctions::GetLevel(unsigned short pid) noexcept

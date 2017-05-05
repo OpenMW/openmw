@@ -182,6 +182,8 @@ namespace mwmp
         std::string passw;
         std::string creatureModel;
         bool useCreatureName;
+
+        std::string deathReason;
     };
 }
 

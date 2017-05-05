@@ -21,6 +21,7 @@
     {"GetBirthsign",            StatsFunctions::GetBirthsign},\
     {"GetCreatureModel",        StatsFunctions::GetCreatureModel},\
     {"IsCreatureName",          StatsFunctions::IsCreatureName},\
+    {"GetDeathReason",          StatsFunctions::GetDeathReason},\
     \
     {"GetLevel",                StatsFunctions::GetLevel},\
     {"GetLevelProgress",        StatsFunctions::GetLevelProgress},\
@@ -100,6 +101,7 @@ public:
     static const char *GetBirthsign(unsigned short pid) noexcept;
     static const char *GetCreatureModel(unsigned short pid) noexcept;
     static bool IsCreatureName(unsigned short pid) noexcept;
+    static const char *GetDeathReason(unsigned short pid) noexcept;
 
     static int GetLevel(unsigned short pid) noexcept;
     static int GetLevelProgress(unsigned short pid) noexcept;

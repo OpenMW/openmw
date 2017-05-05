@@ -63,13 +63,6 @@ public:
     void setLoadState(int state);
     int getLoadState();
 
-    void setLastAttackerId(unsigned short pid);
-    void resetLastAttacker();
-    unsigned short getLastAttackerId();
-
-    void setLastAttackerTime(std::chrono::steady_clock::time_point time);
-    std::chrono::steady_clock::time_point getLastAttackerTime();
-
     virtual ~Player();
 
     CellController::TContainer *getCells();
@@ -86,8 +79,6 @@ private:
     CellController::TContainer cells;
     bool handshakeState;
     int loadState;
-    unsigned short lastAttacker;
-    std::chrono::steady_clock::time_point lastAttackerTime;
 
 };
 

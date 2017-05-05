@@ -50,6 +50,8 @@ LocalPlayer::LocalPlayer()
     ignorePosPacket = false;
     
     attack.shouldSend = false;
+
+    deathReason = "suicide";
 }
 
 LocalPlayer::~LocalPlayer()
@@ -533,12 +535,16 @@ void LocalPlayer::updateDeadState(bool forceUpdate)
         creatureStats.mDead = true;
 
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_DEATH to server about myself");
+        LOG_APPEND(Log::LOG_INFO, "- deathReason was %s", deathReason.c_str());
         getNetworking()->getPlayerPacket(ID_PLAYER_DEATH)->setPlayer(this);
         getNetworking()->getPlayerPacket(ID_PLAYER_DEATH)->Send();
         isDead = true;
     }
     else if (ptrNpcStats->getHealth().getCurrent() > 0 && isDead)
+    {
+        deathReason = "suicide";
         isDead = false;
+    }
 }
 
 void LocalPlayer::updateAnimFlags(bool forceUpdate)

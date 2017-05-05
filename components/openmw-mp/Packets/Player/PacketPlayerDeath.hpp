@@ -22,6 +22,8 @@ namespace mwmp
         {
             PlayerPacket::Packet(bs, send);
             RW(player->creatureStats.mDead, send);
+
+            RW(player->deathReason, send);
         }
     };
 }

@@ -17,34 +17,15 @@ namespace mwmp
         ProcessorPlayerDeath()
         {
             BPP_INIT(ID_PLAYER_DEATH)
-            avoidReading = true;
         }
 
         void Do(PlayerPacket &packet, Player &player) override
         {
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received %s from %s", strPacketID.c_str(), player.npc.mName.c_str());
 
-            Player *killer = Players::getPlayer(player.getLastAttackerId());
-
-            short reason = 0; // unknown;
-            double secondsSinceLastAttacker = std::chrono::duration_cast<std::chrono::duration<double>>(
-                    std::chrono::steady_clock::now() - player.getLastAttackerTime()).count();
-
-            if (!killer)
-                killer = &player;
-
-            if (secondsSinceLastAttacker < 3.0f)
-                reason = 1; // killed
-            else
-                reason = 2; //suicide
-
-            player.resetLastAttacker();
-
-            player.creatureStats.mDead = true;
-
             packet.Send(true);
 
-            Script::Call<Script::CallbackIdentity("OnPlayerDeath")>(player.getId(), reason, killer->getId());
+            Script::Call<Script::CallbackIdentity("OnPlayerDeath")>(player.getId());
         }
     };
 }

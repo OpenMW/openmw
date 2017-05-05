@@ -69,7 +69,6 @@ Player::Player(RakNet::RakNetGUID guid) : BasePlayer(guid)
 {
     handshakeState = false;
     loadState = NOTLOADED;
-    lastAttacker = 0;
 }
 
 Player::~Player()
@@ -112,31 +111,6 @@ Player *Players::getPlayer(unsigned short id)
     if (slots.find(id) == slots.end())
         return nullptr;
     return slots[id];
-}
-
-void Player::setLastAttackerId(unsigned short pid)
-{
-    lastAttacker = pid;
-}
-
-void Player::resetLastAttacker()
-{
-    lastAttacker = id;
-}
-
-unsigned short Player::getLastAttackerId()
-{
-    return lastAttacker;
-}
-
-void Player::setLastAttackerTime(std::chrono::steady_clock::time_point time)
-{
-    lastAttackerTime = time;
-}
-
-std::chrono::steady_clock::time_point Player::getLastAttackerTime()
-{
-    return lastAttackerTime;
 }
 
 CellController::TContainer *Player::getCells()

@@ -938,10 +938,17 @@ namespace MWClass
 
             localAttack->shouldSend = true;
         }
-        else if (ptr == MWMechanics::getPlayer())
+        
+        if (ptr == MWMechanics::getPlayer())
         {
             mwmp::Main::get().getLocalPlayer()->updateStatsDynamic(true);
             mwmp::Main::get().getLocalPlayer()->updatePosition(true); // fix position after getting damage;
+
+            // Record the attacker as the LocalPlayer's death reason
+            if (getCreatureStats(ptr).isDead())
+            {
+                mwmp::Main::get().getLocalPlayer()->deathReason = attacker.getClass().getName(attacker);
+            }
         }
         /*
             End of tes3mp addition

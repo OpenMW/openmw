@@ -26,27 +26,7 @@ namespace mwmp
 
             if (!player.creatureStats.mDead)
             {
-                Player *target = Players::getPlayer(player.attack.target.guid);
-
-                if (target == nullptr)
-                    target = &player;
-
-                LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Player: %s attacked %s state: %d", player.npc.mName.c_str(),
-                                   target->npc.mName.c_str(), player.attack.pressed == 1);
-                if (player.attack.pressed == 0)
-                {
-                    LOG_APPEND(Log::LOG_VERBOSE, "success: %d", player.attack.success == 1);
-                    if (player.attack.success == 1)
-                    {
-                        LOG_APPEND(Log::LOG_VERBOSE, "damage: %d", player.attack.damage == 1);
-                        target->setLastAttackerId(player.getId());
-                        target->setLastAttackerTime(std::chrono::steady_clock::now());
-                    }
-                }
-
-                //packet.Send(player, true);
                 player.sendToLoaded(&packet);
-                playerController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->RequestData(player.attack.target.guid);
             }
         }
     };
