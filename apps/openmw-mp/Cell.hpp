@@ -34,6 +34,9 @@ public:
     bool containsActor(int refNumIndex, int mpNum);
     mwmp::BaseActor *getActor(int refNumIndex, int mpNum);
     void removeActors(const mwmp::BaseActorList *newActorList);
+
+    RakNet::RakNetGUID *getAuthority();
+    void setAuthority(const RakNet::RakNetGUID& guid);
     mwmp::BaseActorList *getActorList();
 
     TPlayers getPlayers() const;
@@ -47,6 +50,7 @@ private:
     TPlayers players;
     ESM::Cell cell;
 
+    RakNet::RakNetGUID authorityGuid;
     mwmp::BaseActorList cellActorList;
 };
 

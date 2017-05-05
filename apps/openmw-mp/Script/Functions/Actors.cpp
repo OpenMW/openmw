@@ -232,15 +232,19 @@ void ActorFunctions::SendActorList() noexcept
 
 void ActorFunctions::SendActorAuthority() noexcept
 {
-    mwmp::ActorPacket *authorityPacket = mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_AUTHORITY);
-    authorityPacket->setActorList(&writeActorList);
-    authorityPacket->Send(writeActorList.guid);
-
-    // Also send this to everyone else who has the cell loaded
     Cell *serverCell = CellController::get()->getCell(&writeActorList.cell);
 
     if (serverCell != nullptr)
+    {
+        serverCell->setAuthority(writeActorList.guid);
+
+        mwmp::ActorPacket *authorityPacket = mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_AUTHORITY);
+        authorityPacket->setActorList(&writeActorList);
+        authorityPacket->Send(writeActorList.guid);
+
+        // Also send this to everyone else who has the cell loaded
         serverCell->sendToLoaded(authorityPacket, &writeActorList);
+    }
 }
 
 void ActorFunctions::SendActorPosition() noexcept

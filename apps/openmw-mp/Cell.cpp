@@ -155,6 +155,16 @@ void Cell::removeActors(const mwmp::BaseActorList *newActorList)
     cellActorList.count = cellActorList.baseActors.size();
 }
 
+RakNet::RakNetGUID *Cell::getAuthority()
+{
+    return &authorityGuid;
+}
+
+void Cell::setAuthority(const RakNet::RakNetGUID& guid)
+{
+    authorityGuid = guid;
+}
+
 mwmp::BaseActorList *Cell::getActorList()
 {
     return &cellActorList;
