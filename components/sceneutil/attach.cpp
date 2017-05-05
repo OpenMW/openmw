@@ -81,13 +81,22 @@ namespace SceneUtil
         std::string mFilter2;
     };
 
+    void mergeUserData(osg::UserDataContainer* source, osg::Object* target)
+    {
+        if (!target->getUserDataContainer())
+            target->setUserDataContainer(source);
+        else
+        {
+            for (unsigned int i=0; i<source->getNumUserObjects(); ++i)
+                target->getUserDataContainer()->addUserObject(source->getUserObject(i));
+        }
+    }
+
     osg::ref_ptr<osg::Node> attach(osg::ref_ptr<osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode)
     {
         if (dynamic_cast<SceneUtil::Skeleton*>(toAttach.get()))
         {
             osg::ref_ptr<osg::Group> handle = new osg::Group;
-
-            osg::UserDataContainer* udc = toAttach->getUserDataContainer();
 
             CopyRigVisitor copyVisitor(handle, filter);
             toAttach->accept(copyVisitor);
@@ -98,13 +107,13 @@ namespace SceneUtil
                 osg::ref_ptr<osg::Node> newHandle = handle->getChild(0);
                 handle->removeChild(newHandle);
                 master->asGroup()->addChild(newHandle);
-                newHandle->setUserDataContainer(udc);
+                mergeUserData(toAttach->getUserDataContainer(), newHandle);
                 return newHandle;
             }
             else
             {
                 master->asGroup()->addChild(handle);
-                handle->setUserDataContainer(udc);
+                handle->setUserDataContainer(toAttach->getUserDataContainer());
                 return handle;
             }
         }
