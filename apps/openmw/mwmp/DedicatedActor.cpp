@@ -80,7 +80,6 @@ void DedicatedActor::move(float dt)
     else
     {
         setPosition();
-        setMovementSettings();
         hasChangedCell = false;
     }
 

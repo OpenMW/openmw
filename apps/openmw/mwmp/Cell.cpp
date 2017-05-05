@@ -257,6 +257,7 @@ void Cell::readCellChange(ActorList& actorList)
             if (cellController->isActiveWorldCell(dedicatedActor->cell) && !cellController->hasLocalAuthority(dedicatedActor->cell))
             {
                 LOG_APPEND(Log::LOG_INFO, "- Moving DedicatedActor %s to our active cell %s", mapIndex.c_str(), dedicatedActor->cell.getDescription().c_str());
+                cellController->initializeCell(dedicatedActor->cell);
                 Cell *newCell = cellController->getCell(dedicatedActor->cell);
                 newCell->dedicatedActors[mapIndex] = dedicatedActor;
                 cellController->setDedicatedActorRecord(mapIndex, newCell->getDescription());
