@@ -152,6 +152,10 @@ void DedicatedActor::setStatsDynamic()
     MWMechanics::CreatureStats *ptrCreatureStats = &ptr.getClass().getCreatureStats(ptr);
     MWMechanics::DynamicStat<float> value;
 
+    // Resurrect this Actor if it's not supposed to be dead according to its authority
+    if (creatureStats.mDynamic[0].mCurrent > 0)
+        ptrCreatureStats->resurrect();
+
     for (int i = 0; i < 3; ++i)
     {
         value.readState(creatureStats.mDynamic[i]);

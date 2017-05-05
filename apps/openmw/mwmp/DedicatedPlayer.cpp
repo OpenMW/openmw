@@ -64,12 +64,11 @@ void DedicatedPlayer::update(float dt)
         return;
     }
 
-    value.readState(creatureStats.mDynamic[0]);
-    ptrCreatureStats->setHealth(value);
-    value.readState(creatureStats.mDynamic[1]);
-    ptrCreatureStats->setMagicka(value);
-    value.readState(creatureStats.mDynamic[2]);
-    ptrCreatureStats->setFatigue(value);
+    for (int i = 0; i < 3; ++i)
+    {
+        value.readState(creatureStats.mDynamic[i]);
+        ptrCreatureStats->setDynamic(i, value);
+    }
 
     if (ptrCreatureStats->isDead())
         ptrCreatureStats->resurrect();
@@ -84,7 +83,6 @@ void DedicatedPlayer::update(float dt)
     ptrCreatureStats->setAiSetting(MWMechanics::CreatureStats::AI_Flee, 0);
     ptrCreatureStats->setAiSetting(MWMechanics::CreatureStats::AI_Hello, 0);
 
-    //ptrNpcStats->setBaseDisposition(255);
     move(dt);
     updateAnimFlags();
 }
