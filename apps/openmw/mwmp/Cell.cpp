@@ -27,6 +27,7 @@ void Cell::updateLocal(bool forceUpdate)
 {
     if (localActors.empty()) return;
 
+    CellController *cellController = Main::get().getCellController();
     ActorList *actorList = mwmp::Main::get().getNetworking()->getActorList();
     actorList->reset();
 
@@ -44,17 +45,17 @@ void Cell::updateLocal(bool forceUpdate)
             std::string mapIndex = it->first;
 
             // If the cell this actor has moved to is under our authority, move them to it
-            if (Main::get().getCellController()->hasLocalAuthority(actor->cell))
+            if (cellController->hasLocalAuthority(actor->cell))
             {
                 LOG_APPEND(Log::LOG_INFO, "- Moving LocalActor %s to our authority in %s", mapIndex.c_str(), actor->cell.getDescription().c_str());
-                Cell *newCell = Main::get().getCellController()->getCell(actor->cell);
+                Cell *newCell = cellController->getCell(actor->cell);
                 newCell->localActors[mapIndex] = actor;
-                Main::get().getCellController()->setLocalActorRecord(mapIndex, newCell->getDescription());
+                cellController->setLocalActorRecord(mapIndex, newCell->getDescription());
             }
             else
             {
                 LOG_APPEND(Log::LOG_INFO, "- Deleting LocalActor %s which is no longer under our authority", mapIndex.c_str(), getDescription().c_str());
-                Main::get().getCellController()->removeLocalActorRecord(mapIndex);
+                cellController->removeLocalActorRecord(mapIndex);
                 delete actor;
             }
 
@@ -233,6 +234,7 @@ void Cell::readCellChange(ActorList& actorList)
     initializeDedicatedActors(actorList);
 
     BaseActor baseActor;
+    CellController *cellController = Main::get().getCellController();
 
     for (unsigned int i = 0; i < actorList.count; i++)
     {
@@ -247,21 +249,21 @@ void Cell::readCellChange(ActorList& actorList)
 
             LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server says DedicatedActor %s moved to %s", mapIndex.c_str(), actor->cell.getDescription().c_str());
 
-            MWWorld::CellStore *newStore = Main::get().getCellController()->getCellStore(actor->cell);
+            MWWorld::CellStore *newStore = cellController->getCellStore(actor->cell);
             actor->setCell(newStore);
 
-            // If the cell this actor has moved to is active, move them to it
-            if (Main::get().getCellController()->isInitializedCell(actor->cell))
+            // If the cell this actor has moved to is active and not under our authority, move them to it
+            if (cellController->isInitializedCell(actor->cell))
             {
                 LOG_APPEND(Log::LOG_INFO, "- Moving DedicatedActor %s to our active cell %s", mapIndex.c_str(), actor->cell.getDescription().c_str());
-                Cell *newCell = Main::get().getCellController()->getCell(actor->cell);
+                Cell *newCell = cellController->getCell(actor->cell);
                 newCell->dedicatedActors[mapIndex] = actor;
-                Main::get().getCellController()->setDedicatedActorRecord(mapIndex, newCell->getDescription());
+                cellController->setDedicatedActorRecord(mapIndex, newCell->getDescription());
             }
             else
             {
                 LOG_APPEND(Log::LOG_INFO, "- Deleting DedicatedActor %s which is no longer in an active cell", mapIndex.c_str(), getDescription().c_str());
-                Main::get().getCellController()->removeDedicatedActorRecord(mapIndex);
+                cellController->removeDedicatedActorRecord(mapIndex);
                 delete actor;
             }
 
