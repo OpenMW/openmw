@@ -654,8 +654,17 @@ namespace MWDialogue
         if(info != NULL)
         {
             MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
-            if(winMgr->getSubtitlesEnabled())
-                winMgr->messageBox(info->mResponse);
+            if (winMgr->getSubtitlesEnabled())
+            /*
+                Start of tes3mp change (minor)
+
+                Prevent subtitles for NPC sounds from being added to a currently open dialogue window,
+                which wasn't a problem in regular OpenMW because time was frozen during dialogue
+            */
+                winMgr->messageBox(info->mResponse, MWGui::ShowInDialogueMode_Never);
+            /*
+                End of tes3mp change (minor)
+            */
             if (!info->mSound.empty())
                 sndMgr->say(actor, info->mSound);
             if (!info->mResultScript.empty())

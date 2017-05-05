@@ -138,7 +138,7 @@ void DedicatedActor::playSound()
 
         MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
         if (winMgr->getSubtitlesEnabled())
-            winMgr->messageBox(response);
+            winMgr->messageBox(response, MWGui::ShowInDialogueMode_Never);
 
         sound.clear();
     }
