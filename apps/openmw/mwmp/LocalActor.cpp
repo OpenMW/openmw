@@ -28,6 +28,7 @@ LocalActor::LocalActor()
     wasForceMoveJumping = false;
     wasFlying = false;
 
+    positionTimer = 0;
     statTimer = 0;
 
     attack.type = Attack::MELEE;
@@ -63,16 +64,23 @@ void LocalActor::updateCell()
 
 void LocalActor::updatePosition(bool forceUpdate)
 {
-    bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 || direction.pos[2] != 0 ||
-        direction.rot[0] != 0 || direction.rot[1] != 0 || direction.rot[2] != 0);
+    const float timeoutSec = 0.03;
 
-    if (posIsChanging || posWasChanged || forceUpdate)
+    if (forceUpdate || (positionTimer += MWBase::Environment::get().getFrameDuration()) >= timeoutSec)
     {
-        posWasChanged = posIsChanging;
+        bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 || direction.pos[2] != 0 ||
+            direction.rot[0] != 0 || direction.rot[1] != 0 || direction.rot[2] != 0);
 
-        position = ptr.getRefData().getPosition();
+        if (forceUpdate || posIsChanging || posWasChanged)
+        {
+            posWasChanged = posIsChanging;
 
-        mwmp::Main::get().getNetworking()->getActorList()->addPositionActor(*this);
+            position = ptr.getRefData().getPosition();
+
+            positionTimer = 0;
+
+            mwmp::Main::get().getNetworking()->getActorList()->addPositionActor(*this);
+        }
     }
 }
 
@@ -183,7 +191,6 @@ void LocalActor::updateStatsDynamic(bool forceUpdate)
             statTimer = 0;
 
             mwmp::Main::get().getNetworking()->getActorList()->addStatsDynamicActor(*this);
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Updating stats for %s-%i-%i: %f, %f, %f", refId.c_str(), refNumIndex, mpNum, health.getCurrent(), magicka.getCurrent(), fatigue.getCurrent());
         }
     }
 }
