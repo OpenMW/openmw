@@ -17,7 +17,7 @@ public:
     virtual ~ConstrainedFileStream();
 };
 
-typedef boost::shared_ptr<std::istream> IStreamPtr;
+typedef std::shared_ptr<std::istream> IStreamPtr;
 
 IStreamPtr openConstrainedFileStream(const char *filename, size_t start=0, size_t length=0xFFFFFFFF);
 

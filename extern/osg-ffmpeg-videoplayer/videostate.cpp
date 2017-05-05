@@ -626,7 +626,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
     return 0;
 }
 
-void VideoState::init(boost::shared_ptr<std::istream> inputstream, const std::string &name)
+void VideoState::init(std::shared_ptr<std::istream> inputstream, const std::string &name)
 {
     int video_index = -1;
     int audio_index = -1;
