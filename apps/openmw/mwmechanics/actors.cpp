@@ -154,8 +154,17 @@ void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float
 
 namespace MWMechanics
 {
+    /*
+        Start of tes3mp change (major)
 
-    const float aiProcessingDistance = 7168;
+        Multiplayer needs AI processing to not have a distance limit, at least until a better authority system
+        is implemented for LocalActors
+    */
+    //const float aiProcessingDistance = 7168;
+    const float aiProcessingDistance = 8192 * 50;
+    /*
+        End of tes3mp change (major)
+    */
     const float sqrAiProcessingDistance = aiProcessingDistance*aiProcessingDistance;
 
     class SoulTrap : public MWMechanics::EffectSourceVisitor
