@@ -276,6 +276,7 @@ namespace MWBase
 
             virtual bool getPlayerSleeping() = 0;
             virtual void wakeUpPlayer() = 0;
+            virtual void toggleMap() = 0;
 
             virtual void showCompanionWindow(MWWorld::Ptr actor) = 0;
             virtual void startSpellMaking(MWWorld::Ptr actor) = 0;

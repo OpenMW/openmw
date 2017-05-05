@@ -308,6 +308,8 @@ namespace MWGui
     virtual bool getPlayerSleeping();
     virtual void wakeUpPlayer();
 
+    virtual void toggleMap();
+
     virtual void updatePlayer();
 
     virtual void showCompanionWindow(MWWorld::Ptr actor);
