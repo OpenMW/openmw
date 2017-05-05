@@ -199,7 +199,7 @@ namespace MWScript
                         MWBase::Environment::get().getWindowManager()->useItem(*it);
                     else
                     {
-                        boost::shared_ptr<MWWorld::Action> action = it->getClass().use(*it);
+                        std::shared_ptr<MWWorld::Action> action = it->getClass().use(*it);
                         // No equip sound for actors other than the player
                         action->execute(ptr, true);
                     }

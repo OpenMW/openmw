@@ -434,7 +434,7 @@ namespace MWClass
         }
     }
 
-    boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
@@ -442,17 +442,17 @@ namespace MWClass
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfCreature");
 
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
 
             return action;
         }
 
         if(getCreatureStats(ptr).isDead())
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
         if(ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat())
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
-        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
+        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
     MWWorld::ContainerStore& Creature::getContainerStore (const MWWorld::Ptr& ptr) const
@@ -489,7 +489,7 @@ namespace MWClass
 
     void Creature::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Creature);
+        std::shared_ptr<Class> instance (new Creature);
 
         registerClass (typeid (ESM::Creature).name(), instance);
     }

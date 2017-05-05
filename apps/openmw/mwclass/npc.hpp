@@ -78,7 +78,7 @@ namespace MWClass
             virtual void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const;
             ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation: list getModel().
 
-            virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            virtual std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
 

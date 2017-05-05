@@ -10,8 +10,6 @@
 
 #include <osg/Texture2D>
 
-#include <boost/shared_ptr.hpp>
-
 namespace osg
 {
     class Texture2D;

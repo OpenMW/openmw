@@ -1,5 +1,7 @@
 #include "resourcesystem.hpp"
 
+#include <algorithm>
+
 #include "scenemanager.hpp"
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"

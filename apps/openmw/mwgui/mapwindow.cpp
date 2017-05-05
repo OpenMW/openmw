@@ -252,7 +252,7 @@ namespace MWGui
                 osg::ref_ptr<osg::Texture2D> tex = mLocalMapRender->getFogOfWarTexture(x, y);
                 if (tex)
                 {
-                    boost::shared_ptr<MyGUI::ITexture> myguitex (new osgMyGUI::OSGTexture(tex));
+                    std::shared_ptr<MyGUI::ITexture> myguitex (new osgMyGUI::OSGTexture(tex));
                     fog->setRenderItemTexture(myguitex.get());
                     fog->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
                     fogTextures.push_back(myguitex);
@@ -382,7 +382,7 @@ namespace MWGui
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(mapX, mapY);
                 if (texture)
                 {
-                    boost::shared_ptr<MyGUI::ITexture> guiTex (new osgMyGUI::OSGTexture(texture));
+                    std::shared_ptr<MyGUI::ITexture> guiTex (new osgMyGUI::OSGTexture(texture));
                     textures.push_back(guiTex);
                     box->setRenderItemTexture(guiTex.get());
                     box->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));

@@ -24,6 +24,7 @@
 #include "bsa_file.hpp"
 
 #include <stdexcept>
+#include <cassert>
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>

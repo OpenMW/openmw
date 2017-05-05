@@ -2,8 +2,7 @@
 #define OPENMW_CONSTRAINEDFILESTREAM_H
 
 #include <istream>
-
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Files
 {

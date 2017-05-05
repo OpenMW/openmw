@@ -5,8 +5,6 @@
 #include <vector>
 #include <memory>
 
-#include <boost/shared_ptr.hpp>
-
 #include <OpenThreads/Thread>
 #include <OpenThreads/Mutex>
 #include <OpenThreads/Condition>

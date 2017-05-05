@@ -65,7 +65,7 @@ namespace MWClass
         return ref->mBase->mName;
     }
 
-    boost::shared_ptr<MWWorld::Action> Miscellaneous::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Miscellaneous::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -97,7 +97,7 @@ namespace MWClass
 
     void Miscellaneous::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Miscellaneous);
+        std::shared_ptr<Class> instance (new Miscellaneous);
 
         registerClass (typeid (ESM::Miscellaneous).name(), instance);
     }
@@ -213,12 +213,12 @@ namespace MWClass
         return newPtr;
     }
 
-    boost::shared_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr) const
     {
         if (ptr.getCellRef().getSoul().empty())
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::NullAction());
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::NullAction());
         else
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionSoulgem(ptr));
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionSoulgem(ptr));
     }
 
     bool Miscellaneous::canSell (const MWWorld::ConstPtr& item, int npcServices) const

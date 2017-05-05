@@ -6,7 +6,6 @@
 #include <functional>
 #include <stdint.h>
 #include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
 
 namespace MWGui
 {
@@ -18,7 +17,7 @@ namespace MWGui
     /// game data store.
     struct JournalViewModel
     {
-        typedef boost::shared_ptr <JournalViewModel> Ptr;
+        typedef std::shared_ptr <JournalViewModel> Ptr;
 
         typedef intptr_t QuestId;
         typedef intptr_t TopicId;

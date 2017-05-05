@@ -1,9 +1,9 @@
 #ifndef GAME_MWBASE_SOUNDMANAGER_H
 #define GAME_MWBASE_SOUNDMANAGER_H
 
+#include <memory>
 #include <string>
 #include <set>
-#include <boost/shared_ptr.hpp>
 
 #include "../mwworld/ptr.hpp"
 

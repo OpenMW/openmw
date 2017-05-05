@@ -8,8 +8,6 @@
 #include <sstream>
 #include <map>
 
-#include <boost/shared_ptr.hpp>
-
 #include "niffile.hpp"
 
 namespace Nif

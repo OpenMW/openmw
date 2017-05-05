@@ -60,7 +60,7 @@ namespace MWClass
 
             virtual void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) const;
 
-            virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            virtual std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
 

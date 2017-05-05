@@ -7,8 +7,6 @@
 #include <deque>
 #include <map>
 
-#include <boost/shared_ptr.hpp>
-
 #include <components/settings/settings.hpp>
 
 #include <components/fallback/fallback.hpp>

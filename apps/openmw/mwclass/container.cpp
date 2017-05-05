@@ -118,18 +118,18 @@ namespace MWClass
         return true;
     }
 
-    boost::shared_ptr<MWWorld::Action> Container::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Container::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
+            return std::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
 
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfContainer");
 
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
 
             return action;
@@ -181,20 +181,20 @@ namespace MWClass
         {
             if(!isTrapped)
             {
-                boost::shared_ptr<MWWorld::Action> action (new MWWorld::ActionOpen(ptr));
+                std::shared_ptr<MWWorld::Action> action (new MWWorld::ActionOpen(ptr));
                 return action;
             }
             else
             {
                 // Activate trap
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(ptr.getCellRef().getTrap(), ptr));
+                std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(ptr.getCellRef().getTrap(), ptr));
                 action->setSound(trapActivationSound);
                 return action;
             }
         }
         else
         {
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction(std::string(), ptr));
+            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction(std::string(), ptr));
             action->setSound(lockedSound);
             return action;
         }
@@ -224,7 +224,7 @@ namespace MWClass
 
     void Container::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Container);
+        std::shared_ptr<Class> instance (new Container);
 
         registerClass (typeid (ESM::Container).name(), instance);
     }

@@ -9,8 +9,6 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 #include <set> //UVController
 
 // FlipController
@@ -100,8 +98,6 @@ namespace NifOsg
 
                 // cache for next time
                 mLastHighKey = it;
-
-                assert (it != keys.begin()); // Shouldn't happen, was checked at beginning of this function
 
                 typename MapT::MapType::const_iterator last = --it;
                 mLastLowKey = last;

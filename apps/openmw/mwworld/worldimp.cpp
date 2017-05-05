@@ -3359,7 +3359,7 @@ namespace MWWorld
 
         if (object.getRefData().activate())
         {
-            boost::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
+            std::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
             action->execute (actor);
         }
     }

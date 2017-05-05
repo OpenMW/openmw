@@ -1,7 +1,7 @@
 #include "videostate.hpp"
 
+#include <cassert>
 #include <iostream>
-#include <stdexcept>
 
 #include <osg/Texture2D>
 
@@ -18,8 +18,6 @@ extern "C"
         LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO)
         #include <libavutil/time.h>
     #endif
-
-    #include <libavutil/mathematics.h>
 
     #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
     #define av_frame_alloc  avcodec_alloc_frame

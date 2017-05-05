@@ -1,7 +1,7 @@
 #include "imagemanager.hpp"
 
+#include <cassert>
 #include <osgDB/Registry>
-#include <osg/GLExtensions>
 
 #include <components/vfs/manager.hpp>
 

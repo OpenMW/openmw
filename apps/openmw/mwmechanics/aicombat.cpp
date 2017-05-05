@@ -47,7 +47,7 @@ namespace MWMechanics
         bool mCombatMove;
         osg::Vec3f mLastTargetPos;
         const MWWorld::CellStore* mCell;
-        boost::shared_ptr<Action> mCurrentAction;
+        std::shared_ptr<Action> mCurrentAction;
         float mActionCooldown;
         float mStrength;
         bool mForceNoShortcut;
@@ -249,7 +249,7 @@ namespace MWMechanics
         actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
         float& actionCooldown = storage.mActionCooldown;
-        boost::shared_ptr<Action>& currentAction = storage.mCurrentAction;
+        std::shared_ptr<Action>& currentAction = storage.mCurrentAction;
 
         if (!forceFlee)
         {
@@ -512,7 +512,7 @@ namespace MWMechanics
                     targetWeapon = *weaponSlot;
             }
 
-            boost::shared_ptr<Action> targetWeaponAction (new ActionWeapon(targetWeapon));
+            std::shared_ptr<Action> targetWeaponAction (new ActionWeapon(targetWeapon));
 
             if (targetWeaponAction.get())
             {
