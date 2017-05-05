@@ -3,7 +3,6 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/filesystem/path.hpp>
 
 #include <QUndoStack>

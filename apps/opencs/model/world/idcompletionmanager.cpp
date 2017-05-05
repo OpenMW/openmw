@@ -77,7 +77,7 @@ bool CSMWorld::IdCompletionManager::hasCompleterFor(CSMWorld::ColumnBase::Displa
     return mCompleters.find(display) != mCompleters.end();
 }
 
-boost::shared_ptr<QCompleter> CSMWorld::IdCompletionManager::getCompleter(CSMWorld::ColumnBase::Display display)
+std::shared_ptr<QCompleter> CSMWorld::IdCompletionManager::getCompleter(CSMWorld::ColumnBase::Display display)
 {
     if (!hasCompleterFor(display))
     {
@@ -99,7 +99,7 @@ void CSMWorld::IdCompletionManager::generateCompleters(CSMWorld::Data &data)
             int idColumn = table->searchColumnIndex(CSMWorld::Columns::ColumnId_Id);
             if (idColumn != -1)
             {
-                boost::shared_ptr<QCompleter> completer = boost::make_shared<QCompleter>(table);
+                std::shared_ptr<QCompleter> completer = std::make_shared<QCompleter>(table);
                 completer->setCompletionColumn(idColumn);
                 // The completion role must be Qt::DisplayRole to get the ID values from the model
                 completer->setCompletionRole(Qt::DisplayRole);

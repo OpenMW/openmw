@@ -28,11 +28,9 @@
 #include <components/sceneutil/waterutil.hpp>
 
 #include <components/nifosg/controller.hpp>
-#include <components/sceneutil/controller.hpp>
 
 #include <components/shader/shadermanager.hpp>
 
-#include <components/settings/settings.hpp>
 
 #include <components/esm/loadcell.hpp>
 

@@ -32,7 +32,7 @@ addons:
       # Tests
       libgtest-dev, google-mock,
       # Boost
-      libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev, libboost-thread-dev,
+      libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
       libavcodec-dev, libavformat-dev, libavutil-dev, libswscale-dev,
       # Audio & Video

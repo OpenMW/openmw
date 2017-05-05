@@ -1,6 +1,7 @@
 #include "audiodecoder.hpp"
 
 #include <stdexcept>
+#include <string>
 
 extern "C"
 {

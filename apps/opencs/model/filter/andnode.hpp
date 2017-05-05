@@ -9,7 +9,7 @@ namespace CSMFilter
     {
         public:
 
-            AndNode (const std::vector<boost::shared_ptr<Node> >& nodes);
+            AndNode (const std::vector<std::shared_ptr<Node> >& nodes);
 
             virtual bool test (const CSMWorld::IdTableBase& table, int row,
                 const std::map<int, int>& columns) const;

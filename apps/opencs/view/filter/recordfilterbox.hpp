@@ -1,8 +1,6 @@
 #ifndef CSV_FILTER_RECORDFILTERBOX_H
 #define CSV_FILTER_RECORDFILTERBOX_H
 
-#include <boost/shared_ptr.hpp>
-
 #include <QWidget>
 #include <QtCore/qnamespace.h>
 
@@ -38,7 +36,7 @@ namespace CSVFilter
 
         signals:
 
-            void filterChanged (boost::shared_ptr<CSMFilter::Node> filter);
+            void filterChanged (std::shared_ptr<CSMFilter::Node> filter);
     };
 
 }

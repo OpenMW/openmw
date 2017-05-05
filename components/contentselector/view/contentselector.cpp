@@ -6,9 +6,11 @@
 
 #include <QMenu>
 #include <QContextMenuEvent>
+
 #include <QGridLayout>
+#include <QMessageBox>
+#include <QModelIndex>
 #include <QDir>
-#include <QtGui/QAbstractItemView>
 
 ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent) :
     QObject(parent)

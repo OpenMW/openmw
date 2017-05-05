@@ -1,6 +1,6 @@
 #include "unarynode.hpp"
 
-CSMFilter::UnaryNode::UnaryNode (boost::shared_ptr<Node> child, const std::string& name)
+CSMFilter::UnaryNode::UnaryNode (std::shared_ptr<Node> child, const std::string& name)
 : mChild (child), mName (name)
 {}
 
