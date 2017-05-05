@@ -41,12 +41,23 @@ void Cell::updateLocal(bool forceUpdate)
         if (newStore != store)
         {
             actor->updateCell();
+            std::string mapIndex = it->first;
 
-            LOG_APPEND(Log::LOG_INFO, "- Removing LocalActor %s which is no longer in this cell", it->first.c_str());
-            
-            Main::get().getCellController()->removeLocalActorRecord(it->first);
+            LOG_APPEND(Log::LOG_INFO, "- Removing LocalActor %s which is no longer in this cell", mapIndex.c_str());
 
-            delete actor;
+            // If the cell this actor has moved to is under our authority, move them to it
+            if (Main::get().getCellController()->hasLocalAuthority(actor->cell))
+            {
+                Cell *newCell = Main::get().getCellController()->getCell(actor->cell);
+                newCell->localActors[mapIndex] = actor;
+                Main::get().getCellController()->setLocalActorRecord(mapIndex, newCell->getDescription());
+            }
+            else
+            {
+                Main::get().getCellController()->removeLocalActorRecord(mapIndex);
+                delete actor;
+            }
+
             localActors.erase(it++);
         }
         else
@@ -240,13 +251,19 @@ void Cell::readCellChange(ActorList& actorList)
             MWWorld::CellStore *newStore = Main::get().getCellController()->getCellStore(actor->cell);
             actor->setCell(newStore);
 
-            Main::get().getCellController()->removeDedicatedActorRecord(mapIndex);
-
-            // If the cell this actor has moved to is active, initialize them in it
+            // If the cell this actor has moved to is active, move them to it
             if (Main::get().getCellController()->isInitializedCell(actor->cell))
-                Main::get().getCellController()->getCell(actor->cell)->initializeDedicatedActor(actor->getPtr());
+            {
+                Cell *newCell = Main::get().getCellController()->getCell(actor->cell);
+                newCell->dedicatedActors[mapIndex] = actor;
+                Main::get().getCellController()->setDedicatedActorRecord(mapIndex, newCell->getDescription());
+            }
+            else
+            {
+                Main::get().getCellController()->removeDedicatedActorRecord(mapIndex);
+                delete actor;
+            }
 
-            delete actor;
             dedicatedActors.erase(mapIndex);
         }
     }
