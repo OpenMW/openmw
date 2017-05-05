@@ -55,6 +55,7 @@ void DedicatedActor::setCell(MWWorld::CellStore *cellStore)
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
     ptr = world->moveObject(ptr, cellStore, position.pos[0], position.pos[1], position.pos[2]);
+    setMovementSettings();
 
     hasChangedCell = true;
 }
@@ -79,15 +80,20 @@ void DedicatedActor::move(float dt)
     else
     {
         setPosition();
+        setMovementSettings();
         hasChangedCell = false;
     }
 
+    setMovementSettings();
+    world->rotateObject(ptr, position.rot[0], position.rot[1], position.rot[2]);
+}
+
+void DedicatedActor::setMovementSettings()
+{
     MWMechanics::Movement *move = &ptr.getClass().getMovementSettings(ptr);
     move->mPosition[0] = direction.pos[0];
     move->mPosition[1] = direction.pos[1];
     move->mPosition[2] = direction.pos[2];
-
-    world->rotateObject(ptr, position.rot[0], position.rot[1], position.rot[2]);
 }
 
 void DedicatedActor::setPosition()

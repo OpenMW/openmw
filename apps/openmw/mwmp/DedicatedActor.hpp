@@ -17,6 +17,7 @@ namespace mwmp
         void update(float dt);
         void move(float dt);
         void setCell(MWWorld::CellStore *cellStore);
+        void setMovementSettings();
         void setPosition();
         void setAnimFlags();
         void playAnimation();
