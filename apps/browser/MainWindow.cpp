@@ -5,6 +5,7 @@
 #include "MainWindow.hpp"
 #include "ServerInfoDialog.hpp"
 #include "components/files/configurationmanager.hpp"
+#include "PingHelper.hpp"
 #include <qdebug.h>
 #include <QInputDialog>
 #include <QJsonObject>
@@ -32,6 +33,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     tblServerBrowser->hideColumn(ServerData::ADDR);
     tblFavorites->hideColumn(ServerData::ADDR);
+
+    PingHelper::Get().SetModel((ServerModel*)proxyModel->sourceModel());
 
     connect(tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabSwitched(int)));
     connect(actionAdd, SIGNAL(triggered(bool)), this, SLOT(addServer()));
@@ -114,31 +117,34 @@ bool MainWindow::refresh()
     model->removeRows(0, model->rowCount());
     for(auto server : data)
     {
-        model->insertRow(0);
+        model->insertRow(model->rowCount());
+        int row = model->rowCount() - 1;
 
-        QModelIndex mi = model->index(0, ServerData::ADDR);
+        QModelIndex mi = model->index(row, ServerData::ADDR);
         model->setData(mi, server.first.ToString(true, ':'));
 
-        mi = model->index(0, ServerData::PLAYERS);
+        mi = model->index(row, ServerData::PLAYERS);
         model->setData(mi, (int)server.second.players.size());
 
-        mi = model->index(0, ServerData::MAX_PLAYERS);
+        mi = model->index(row, ServerData::MAX_PLAYERS);
         model->setData(mi, server.second.GetMaxPlayers());
 
-        mi = model->index(0, ServerData::HOSTNAME);
+        mi = model->index(row, ServerData::HOSTNAME);
         model->setData(mi, server.second.GetName());
 
-        mi = model->index(0, ServerData::MODNAME);
+        mi = model->index(row, ServerData::MODNAME);
         model->setData(mi, server.second.GetGameMode());
 
-        mi = model->index(0, ServerData::VERSION);
+        mi = model->index(row, ServerData::VERSION);
         model->setData(mi, server.second.GetVersion());
 
-        mi = model->index(0, ServerData::PASSW);
+        mi = model->index(row, ServerData::PASSW);
         model->setData(mi, server.second.GetPassword() == 1);
 
-        mi = model->index(0, ServerData::PING);
-        model->setData(mi, PingRakNetServer(server.first.ToString(false), server.first.GetPort()));
+        mi = model->index(row, ServerData::PING);
+        model->setData(mi, PING_UNREACHABLE);
+
+        PingHelper::Get().Add(row, {server.first.ToString(false), server.first.GetPort()});
     }
 
     return true;
