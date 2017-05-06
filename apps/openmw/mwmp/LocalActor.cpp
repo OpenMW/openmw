@@ -125,12 +125,7 @@ void LocalActor::updateAnimFlags(bool forceUpdate)
 
 #undef __SETFLAG
 
-        if (currentDrawState == MWMechanics::DrawState_Nothing)
-            drawState = 0;
-        else if (currentDrawState == MWMechanics::DrawState_Weapon)
-            drawState = 1;
-        else if (currentDrawState == MWMechanics::DrawState_Spell)
-            drawState = 2;
+        drawState = currentDrawState;
 
         mwmp::Main::get().getNetworking()->getActorList()->addAnimFlagsActor(*this);
     }

@@ -175,4 +175,7 @@ void DedicatedActor::setPtr(const MWWorld::Ptr& newPtr)
     refId = ptr.getCellRef().getRefId();
     refNumIndex = ptr.getCellRef().getRefNum().mIndex;
     mpNum = ptr.getCellRef().getMpNum();
+
+    position = ptr.getRefData().getPosition();
+    drawState = ptr.getClass().getCreatureStats(ptr).getDrawState();
 }
