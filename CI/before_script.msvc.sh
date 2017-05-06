@@ -306,10 +306,10 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# FFmpeg
 	download "FFmpeg 3.2.4" \
-		"http://ffmpeg.zeranoe.com/builds/win${BITS}/shared/ffmpeg-3.2.4-win${BITS}-shared.7z" \
-		"ffmpeg-3.2.4-win${BITS}.7z" \
-		"http://ffmpeg.zeranoe.com/builds/win${BITS}/dev/ffmpeg-3.2.4-win${BITS}-dev.7z" \
-		"ffmpeg-3.2.4-dev-win${BITS}.7z"
+		"http://ffmpeg.zeranoe.com/builds/win${BITS}/shared/ffmpeg-3.2.4-win${BITS}-shared.zip" \
+		"ffmpeg-3.2.4-win${BITS}.zip" \
+		"http://ffmpeg.zeranoe.com/builds/win${BITS}/dev/ffmpeg-3.2.4-win${BITS}-dev.zip" \
+		"ffmpeg-3.2.4-dev-win${BITS}.zip"
 
 	# MyGUI
 	download "MyGUI 3.2.3-git" \
@@ -443,8 +443,8 @@ printf "FFmpeg 3.2.4... "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf FFmpeg
 
-		eval 7z x -y "${DEPS}/ffmpeg-3.2.4-win${BITS}.7z" $STRIP
-		eval 7z x -y "${DEPS}/ffmpeg-3.2.4-dev-win${BITS}.7z" $STRIP
+		eval 7z x -y "${DEPS}/ffmpeg-3.2.4-win${BITS}.zip" $STRIP
+		eval 7z x -y "${DEPS}/ffmpeg-3.2.4-dev-win${BITS}.zip" $STRIP
 
 		mv "ffmpeg-3.2.4-win${BITS}-shared" FFmpeg
 		cp -r "ffmpeg-3.2.4-win${BITS}-dev/"* FFmpeg/
