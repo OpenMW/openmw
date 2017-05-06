@@ -202,8 +202,6 @@ void Networking::update(RakNet::Packet *packet)
             packetPreInit.setChecksums(&plugins);
             packetPreInit.Read();
 
-            static auto samples = getPluginListSample();
-
             auto plugin = plugins.begin();
             if (samples.size() == plugins.size())
             {
@@ -500,4 +498,10 @@ MasterClient *Networking::getMasterClient()
 void Networking::InitQuery(std::string queryAddr, unsigned short queryPort)
 {
     mclient = new MasterClient(peer, queryAddr, queryPort);
+}
+
+void Networking::postInit()
+{
+    Script::Call<Script::CallbackIdentity("OnServerPostInit")>();
+    samples = getPluginListSample();
 }

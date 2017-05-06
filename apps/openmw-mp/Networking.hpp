@@ -56,6 +56,7 @@ namespace  mwmp
         static const Networking &get();
         static Networking *getPtr();
 
+        void postInit();
     private:
         PacketPreInit::PluginContainer getPluginListSample();
         std::string serverPassword;
@@ -75,6 +76,7 @@ namespace  mwmp
 
         bool running;
         int exitCode;
+        PacketPreInit::PluginContainer samples;
     };
 }
 

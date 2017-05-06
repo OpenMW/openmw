@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
         networking.getMasterClient()->Start();
     }
 
-    Script::Call<Script::CallbackIdentity("OnServerPostInit")>();
+    networking.postInit();
 
     int code = networking.mainLoop();
 
