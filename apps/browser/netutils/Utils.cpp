@@ -7,7 +7,6 @@
 #include <RakSleep.h>
 #include <GetTime.h>
 
-#include <iostream>
 #include <sstream>
 #include <components/openmw-mp/Version.hpp>
 
@@ -19,32 +18,42 @@ unsigned int PingRakNetServer(const char *addr, unsigned short port)
 {
     RakNet::Packet *packet;
     bool done = false;
-    int attempts = 0;
+    int attempt = 0;
+    static const int timeout = 5;
     RakNet::TimeMS time = PING_UNREACHABLE;
 
-    RakNet::SocketDescriptor socketDescriptor {0, ""};
-    RakNet::RakPeerInterface *peer =  RakNet::RakPeerInterface::GetInstance();
-    peer->Startup(1,&socketDescriptor, 1);
+    RakNet::SocketDescriptor socketDescriptor{0, ""};
+    RakNet::RakPeerInterface *peer = RakNet::RakPeerInterface::GetInstance();
+    peer->Startup(1, &socketDescriptor, 1);
 
     peer->Ping(addr, port, false);
     while (!done)
     {
-        for (packet=peer->Receive(); packet; peer->DeallocatePacket(packet), packet=peer->Receive())
+        packet = peer->Receive();
+        if (!packet)
         {
-            if(packet->data[0] == ID_UNCONNECTED_PONG)
-            {
-                    RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
-                    bsIn.Read(time);
-                    time = RakNet::GetTimeMS() - time - 5;
-                    done = true;
-                    break;
-            }
+            if (attempt > 5)
+                done = true;
+            attempt++;
+            RakSleep(timeout);
+            continue;
         }
 
-        if (attempts >= 60) // wait 300 msec
-            done = true;
-        attempts++;
-        RakSleep(5);
+        switch (packet->data[0])
+        {
+            case ID_DISCONNECTION_NOTIFICATION:
+            case ID_CONNECTION_LOST:
+                done = true;
+                break;
+            case ID_CONNECTED_PING:
+            case ID_UNCONNECTED_PONG:
+                RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
+                bsIn.Read(time);
+                time = RakNet::GetTimeMS() - time - timeout;
+                done = true;
+                break;
+        }
+        peer->DeallocatePacket(packet);
     }
 
     peer->Shutdown(0);
@@ -110,7 +119,7 @@ ServerExtendedData getExtendedData(const char *addr, unsigned short port)
     }
     puts(msg.c_str());
 
-    if(queue == -1) // connection is failed
+    if (queue == -1) // connection is failed
         return data;
 
     {
@@ -125,20 +134,20 @@ ServerExtendedData getExtendedData(const char *addr, unsigned short port)
     {
         for (packet = peer->Receive(); packet; peer->DeallocatePacket(packet), packet = peer->Receive())
         {
-            if(packet->data[0] == (ID_USER_PACKET_ENUM+1))
+            if (packet->data[0] == (ID_USER_PACKET_ENUM + 1))
             {
                 RakNet::BitStream bs(packet->data, packet->length, false);
                 bs.IgnoreBytes(1);
                 size_t length = 0;
                 bs.Read(length);
-                for(size_t i = 0; i < length; i++)
+                for (size_t i = 0; i < length; i++)
                 {
                     RakNet::RakString str;
                     bs.Read(str);
                     data.players.push_back(str.C_String());
                 }
                 bs.Read(length);
-                for(size_t i = 0; i < length; i++)
+                for (size_t i = 0; i < length; i++)
                 {
                     RakNet::RakString str;
                     bs.Read(str);
