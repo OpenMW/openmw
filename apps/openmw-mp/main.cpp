@@ -251,6 +251,8 @@ int main(int argc, char *argv[])
         networking.getMasterClient()->Start();
     }
 
+    Script::Call<Script::CallbackIdentity("OnServerPostInit")>();
+
     int code = networking.mainLoop();
 
     RakNet::RakPeerInterface::DestroyInstance(peer);

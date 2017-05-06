@@ -109,6 +109,7 @@ public:
     static constexpr ScriptCallbackData callbacks[]{
             {"Main",                     Function<int, int, int>()},
             {"OnServerInit",             Function<void>()},
+            {"OnServerPostInit",         Function<void>()},
             {"OnServerExit",             Function<void, bool>()},
             {"OnPlayerConnect",          Function<bool, unsigned short>()},
             {"OnPlayerDisconnect",       Function<void, unsigned short>()},
