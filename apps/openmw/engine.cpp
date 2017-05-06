@@ -1,6 +1,5 @@
 #include "engine.hpp"
 
-#include <stdexcept>
 #include <iomanip>
 
 #include <boost/filesystem/fstream.hpp>
@@ -28,7 +27,6 @@
 #include <components/sceneutil/workqueue.hpp>
 
 #include <components/files/configurationmanager.hpp>
-#include <components/translation/translation.hpp>
 
 #include <components/version/version.hpp>
 

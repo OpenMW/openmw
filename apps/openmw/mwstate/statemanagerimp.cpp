@@ -7,8 +7,6 @@
 
 #include <components/loadinglistener/loadinglistener.hpp>
 
-#include <components/misc/stringops.hpp>
-
 #include <components/settings/settings.hpp>
 
 #include <osg/Image>
@@ -35,7 +33,6 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwscript/globalscripts.hpp"

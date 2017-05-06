@@ -8,6 +8,8 @@
 #include <SDL_messagebox.h>
 #include "engine.hpp"
 
+#include <boost/filesystem/fstream.hpp>
+
 #if defined(_WIN32)
 // For OutputDebugString
 #ifndef WIN32_LEAN_AND_MEAN
@@ -31,7 +33,6 @@ extern int cc_install_handlers(int argc, char **argv, int num_signals, int *sigs
 extern int is_debugger_attached(void);
 #endif
 
-#include <boost/version.hpp>
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */

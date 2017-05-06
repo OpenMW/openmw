@@ -1,14 +1,8 @@
 #include "multidircollection.hpp"
 
-#include <cctype>
-
-#include <algorithm>
-#include <stdexcept>
 #include <iostream>
 
 #include <boost/filesystem.hpp>
-
-#include <components/misc/stringops.hpp>
 
 namespace Files
 {

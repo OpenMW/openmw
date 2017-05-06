@@ -2,12 +2,9 @@
 
 #include <MyGUI_ListBox.h>
 #include <MyGUI_ImageBox.h>
-#include <MyGUI_RenderManager.h>
 #include <MyGUI_Gui.h>
 
 #include <osg/Texture2D>
-
-#include <boost/format.hpp>
 
 #include <components/myguiplatform/myguitexture.hpp>
 

@@ -1,11 +1,9 @@
 #include "importer.hpp"
 
-#include <string>
 #include <iostream>
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 namespace bpo = boost::program_options;

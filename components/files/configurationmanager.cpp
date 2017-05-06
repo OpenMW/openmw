@@ -1,17 +1,12 @@
 #include "configurationmanager.hpp"
 
-#include <string>
 #include <iostream>
-#include <algorithm>
-#include <ctype.h>
 
 #include <components/files/escape.hpp>
 
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-
 /**
  * \namespace Files
  */

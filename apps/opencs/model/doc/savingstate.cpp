@@ -1,5 +1,7 @@
 #include "savingstate.hpp"
 
+#include <boost/filesystem/fstream.hpp>
+
 #include "operation.hpp"
 #include "document.hpp"
 
