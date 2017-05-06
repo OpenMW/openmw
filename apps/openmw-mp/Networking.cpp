@@ -504,4 +504,14 @@ void Networking::postInit()
 {
     Script::Call<Script::CallbackIdentity("OnServerPostInit")>();
     samples = getPluginListSample();
+    if(mclient)
+    {
+        for(auto plugin : samples)
+        {
+            if(!plugin.second.empty())
+                mclient->PushPlugin({plugin.first, plugin.second[0]});
+            else
+                mclient->PushPlugin({plugin.first, 0});
+        }
+    }
 }
