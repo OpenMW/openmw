@@ -7,6 +7,7 @@
 
 #include "ServerInfoDialog.hpp"
 #include <apps/browser/netutils/Utils.hpp>
+#include <algorithm>
 
 using namespace std;
 using namespace RakNet;
@@ -50,10 +51,11 @@ void ServerInfoDialog::refresh()
             listPlugins->addItem(QString::fromStdString(plugin.name));
         }
 
-        auto iter = sd.second.rules.begin();
-        for (int i = 0; iter != sd.second.rules.end(); i++, iter++)
+        listRules->clear();
+        const static vector<std::string> defaultRules {"gamemode", "maxPlayers", "name", "passw", "players", "version"};
+        for (auto iter = sd.second.rules.begin();iter != sd.second.rules.end(); iter++)
         {
-            if(i < 6)
+            if(::find(defaultRules.begin(), defaultRules.end(), iter->first) != defaultRules.end())
                 continue;
             QString rule = QString::fromStdString(iter->first) + " : ";
             if(iter->second.type == 's')
