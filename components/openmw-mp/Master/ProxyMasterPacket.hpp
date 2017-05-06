@@ -81,6 +81,8 @@ namespace mwmp
 
                 if (!send)
                     server.players.push_back(player);
+                else
+                    plIt++;
             }
 
             int pluginsCount = server.plugins.size();
@@ -101,6 +103,10 @@ namespace mwmp
 
                 packet->RW(plugin.name, send);
                 packet->RW(plugin.hash, send);
+                if (!send)
+                    server.plugins.push_back(plugin);
+                else
+                    pluginIt++;
             }
         }
     };
