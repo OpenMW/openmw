@@ -305,11 +305,11 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}.7z"
 
 	# FFmpeg
-	download "FFmpeg 3.0.1" \
-		"http://ffmpeg.zeranoe.com/builds/win${BITS}/shared/ffmpeg-3.0.1-win${BITS}-shared.7z" \
-		"ffmpeg-3.0.1-win${BITS}.7z" \
-		"http://ffmpeg.zeranoe.com/builds/win${BITS}/dev/ffmpeg-3.0.1-win${BITS}-dev.7z" \
-		"ffmpeg-3.0.1-dev-win${BITS}.7z"
+	download "FFmpeg 3.2.4" \
+		"http://ffmpeg.zeranoe.com/builds/win${BITS}/shared/ffmpeg-3.2.4-win${BITS}-shared.zip" \
+		"ffmpeg-3.2.4-win${BITS}.zip" \
+		"http://ffmpeg.zeranoe.com/builds/win${BITS}/dev/ffmpeg-3.2.4-win${BITS}-dev.zip" \
+		"ffmpeg-3.2.4-dev-win${BITS}.zip"
 
 	# MyGUI
 	download "MyGUI 3.2.3-git" \
@@ -434,21 +434,21 @@ cd $DEPS
 echo
 
 # FFmpeg
-printf "FFmpeg 3.0.1... "
+printf "FFmpeg 3.2.4... "
 {
 	cd $DEPS_INSTALL
 
-	if [ -d FFmpeg ] && grep "FFmpeg version: 3.0.1" FFmpeg/README.txt > /dev/null; then
+	if [ -d FFmpeg ] && grep "FFmpeg version: 3.2.4" FFmpeg/README.txt > /dev/null; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf FFmpeg
 
-		eval 7z x -y "${DEPS}/ffmpeg-3.0.1-win${BITS}.7z" $STRIP
-		eval 7z x -y "${DEPS}/ffmpeg-3.0.1-dev-win${BITS}.7z" $STRIP
+		eval 7z x -y "${DEPS}/ffmpeg-3.2.4-win${BITS}.zip" $STRIP
+		eval 7z x -y "${DEPS}/ffmpeg-3.2.4-dev-win${BITS}.zip" $STRIP
 
-		mv "ffmpeg-3.0.1-win${BITS}-shared" FFmpeg
-		cp -r "ffmpeg-3.0.1-win${BITS}-dev/"* FFmpeg/
-		rm -rf "ffmpeg-3.0.1-win${BITS}-dev"
+		mv "ffmpeg-3.2.4-win${BITS}-shared" FFmpeg
+		cp -r "ffmpeg-3.2.4-win${BITS}-dev/"* FFmpeg/
+		rm -rf "ffmpeg-3.2.4-win${BITS}-dev"
 	fi
 
 	export FFMPEG_HOME="$(real_pwd)/FFmpeg"
