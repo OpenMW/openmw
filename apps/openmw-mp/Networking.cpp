@@ -31,7 +31,7 @@ Networking *Networking::sThis = 0;
 
 static int currentMpNum = 0;
 
-Networking::Networking(RakNet::RakPeerInterface *peer)
+Networking::Networking(RakNet::RakPeerInterface *peer) : mclient(nullptr)
 {
     sThis = this;
     this->peer = peer;
