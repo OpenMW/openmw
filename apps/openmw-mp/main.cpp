@@ -242,9 +242,11 @@ int main(int argc, char *argv[])
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sharing server query info to master enabled.");
         string masterAddr = mgr.getString("address", "MasterServer");
         int masterPort = mgr.getInt("port", "MasterServer");
+        int updateRate = mgr.getInt("rate", "MasterServer");
 
         networking.InitQuery(masterAddr, (unsigned short) masterPort);
         networking.getMasterClient()->SetMaxPlayers((unsigned)players);
+        networking.getMasterClient()->SetUpdateRate((unsigned)updateRate);
         string hostname = mgr.getString("hostname", "General");
         networking.getMasterClient()->SetHostname(hostname);
 
