@@ -1,9 +1,5 @@
 #include "inputmanagerimp.hpp"
 
-#include <cmath>
-
-#include <boost/lexical_cast.hpp>
-
 #include <osgViewer/ViewerEventHandlers>
 
 #include <MyGUI_InputManager.h>
@@ -1175,7 +1171,7 @@ namespace MWInput
             bool controlExists = mInputBinder->getChannel(i)->getControlsCount () != 0;
             if (!controlExists)
             {
-                control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, 0, ICS::ICS_MAX, ICS::ICS_MAX);
+                control = new ICS::Control(std::to_string(i), false, true, 0, ICS::ICS_MAX, ICS::ICS_MAX);
                 mInputBinder->addControl(control);
                 control->attachChannel(mInputBinder->getChannel(i), ICS::Channel::DIRECT);
             }
@@ -1247,7 +1243,7 @@ namespace MWInput
                 if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
                     initial = 0.0f;
                 else initial = 0.5f;
-                control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, initial, ICS::ICS_MAX, ICS::ICS_MAX);
+                control = new ICS::Control(std::to_string(i), false, true, initial, ICS::ICS_MAX, ICS::ICS_MAX);
                 mInputBinder->addControl(control);
                 control->attachChannel(mInputBinder->getChannel(i), ICS::Channel::DIRECT);
             }
@@ -1336,7 +1332,7 @@ namespace MWInput
         if (key != SDL_SCANCODE_UNKNOWN)
             return MyGUI::TextIterator::toTagsString(mInputBinder->scancodeToString (key));
         else if (mouse != ICS_MAX_DEVICE_BUTTONS)
-            return "#{sMouse} " + boost::lexical_cast<std::string>(mouse);
+            return "#{sMouse} " + std::to_string(mouse);
         else
             return "#{sNone}";
     }
@@ -1391,7 +1387,7 @@ namespace MWInput
             case SDL_CONTROLLER_BUTTON_Y:
                 return "Y Button";
             default:
-                return "Button " + boost::lexical_cast<std::string>(button);
+                return "Button " + std::to_string(button);
         }
     }
     std::string InputManager::sdlControllerAxisToString(int axis)
@@ -1411,7 +1407,7 @@ namespace MWInput
             case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
                 return "Right Trigger";
             default:
-                return "Axis " + boost::lexical_cast<std::string>(axis);
+                return "Axis " + std::to_string(axis);
         }
      }
 

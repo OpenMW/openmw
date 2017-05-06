@@ -2,16 +2,12 @@
 
 #include <iomanip>
 
-#include <boost/lexical_cast.hpp>
-
 #include <MyGUI_Button.h>
 #include <MyGUI_ScrollView.h>
 
 #include <components/widgets/list.hpp>
 #include <components/settings/settings.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

@@ -1,14 +1,11 @@
 #include "misc.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 #include <components/esm/loadmisc.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -21,8 +18,6 @@
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
-
-#include <boost/lexical_cast.hpp>
 
 namespace MWClass
 {
@@ -146,7 +141,7 @@ namespace MWClass
         if (!gold)
             countString = MWGui::ToolTips::getCountString(count);
         else // gold displays its count also if it's 1.
-            countString = " (" + boost::lexical_cast<std::string>(count) + ")";
+            countString = " (" + std::to_string(count) + ")";
 
         info.caption = ref->mBase->mName + countString;
         info.icon = ref->mBase->mIcon;

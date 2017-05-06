@@ -5,8 +5,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
-
 #include <QColor>
 
 #include <components/esm/loadbody.hpp>

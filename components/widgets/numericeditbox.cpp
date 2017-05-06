@@ -1,7 +1,5 @@
 #include "numericeditbox.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 namespace Gui
 {
 
@@ -30,7 +28,7 @@ namespace Gui
 
         try
         {
-            mValue = boost::lexical_cast<int>(newCaption);
+            mValue = std::stoi(newCaption);
             int capped = std::min(mMaxValue, std::max(mValue, mMinValue));
             if (capped != mValue)
             {
@@ -38,7 +36,7 @@ namespace Gui
                 setCaption(MyGUI::utility::toString(mValue));
             }
         }
-        catch (boost::bad_lexical_cast&)
+        catch (...)
         {
             setCaption(MyGUI::utility::toString(mValue));
         }

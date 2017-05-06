@@ -32,8 +32,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "ICSControl.h"
 #include "ICSChannel.h"
 
-#include "boost/lexical_cast.hpp"
-
 #define ICS_LOG(text) if(mLog) mLog->logMessage( ("ICS: " + std::string(text)).c_str() );
 #define ICS_MAX_JOYSTICK_AXIS 16
 #define ICS_MOUSE_BINDING_MARGIN 30

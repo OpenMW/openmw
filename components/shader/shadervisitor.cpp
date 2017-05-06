@@ -5,11 +5,9 @@
 #include <osg/Texture>
 #include <osg/Material>
 #include <osg/Geometry>
-#include <osg/Image>
 
 #include <osgUtil/TangentSpaceGenerator>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
 #include <components/resource/imagemanager.hpp>
@@ -263,7 +261,7 @@ namespace Shader
         for (std::map<int, std::string>::const_iterator texIt = reqs.mTextures.begin(); texIt != reqs.mTextures.end(); ++texIt)
         {
             defineMap[texIt->second] = "1";
-            defineMap[texIt->second + std::string("UV")] = boost::lexical_cast<std::string>(texIt->first);
+            defineMap[texIt->second + std::string("UV")] = std::to_string(texIt->first);
         }
 
         if (!reqs.mColorMaterial)
