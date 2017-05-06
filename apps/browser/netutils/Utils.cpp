@@ -20,6 +20,7 @@ unsigned int PingRakNetServer(const char *addr, unsigned short port)
     bool done = false;
     int attempt = 0;
     static const int timeout = 5;
+    static const int attempts = 5;
     RakNet::TimeMS time = PING_UNREACHABLE;
 
     RakNet::SocketDescriptor socketDescriptor{0, ""};
@@ -32,7 +33,7 @@ unsigned int PingRakNetServer(const char *addr, unsigned short port)
         packet = peer->Receive();
         if (!packet)
         {
-            if (attempt > 5)
+            if (attempt > attempts)
                 done = true;
             attempt++;
             RakSleep(timeout);
