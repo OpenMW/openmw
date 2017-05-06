@@ -9,8 +9,6 @@
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Button.h>
 
-#include <boost/function.hpp>
-
 #include <components/misc/stringops.hpp>
 #include <components/widgets/imagebutton.hpp>
 #include <components/widgets/list.hpp>

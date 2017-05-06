@@ -892,7 +892,7 @@ public:
     Style* mFocusItem;
     bool mItemActive;
     MyGUI::MouseButton mLastDown;
-    boost::function <void (intptr_t)> mLinkClicked;
+    std::function <void (intptr_t)> mLinkClicked;
 
 
     std::shared_ptr <TypesetBookImpl> mBook;
@@ -1260,14 +1260,14 @@ public:
         mPageDisplay->showPage (book, page);
     }
 
-    void adviseLinkClicked (boost::function <void (InteractiveId)> linkClicked)
+    void adviseLinkClicked (std::function <void (InteractiveId)> linkClicked)
     {
         mPageDisplay->mLinkClicked = linkClicked;
     }
 
     void unadviseLinkClicked ()
     {
-        mPageDisplay->mLinkClicked = boost::function <void (InteractiveId)> ();
+        mPageDisplay->mLinkClicked = std::function <void (InteractiveId)> ();
     }
 
 protected:

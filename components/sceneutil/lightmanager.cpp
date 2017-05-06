@@ -1,14 +1,8 @@
 #include "lightmanager.hpp"
 
-#include <stdexcept>
-
-#include <osg/NodeVisitor>
-
 #include <osgUtil/CullVisitor>
 
 #include <components/sceneutil/util.hpp>
-
-#include <boost/functional/hash.hpp>
 
 namespace SceneUtil
 {
@@ -220,7 +214,8 @@ namespace SceneUtil
         // possible optimization: return a StateSet containing all requested lights plus some extra lights (if a suitable one exists)
         size_t hash = 0;
         for (unsigned int i=0; i<lightList.size();++i)
-            boost::hash_combine(hash, lightList[i]->mLightSource->getId());
+            hash = hash ^ (lightList[i]->mLightSource->getId() << 1); // or use boost::hash_combine
+            // original: boost::hash_combine(hash, lightList[i]->mLightSource->getId());
 
         LightStateSetMap& stateSetCache = mStateSetCache[frameNum%2];
 
