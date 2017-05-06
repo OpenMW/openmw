@@ -7,7 +7,6 @@
 
 #include <components/files/escape.hpp>
 
-#include <boost/bind.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -130,7 +129,7 @@ void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, bool cre
     }
 
     dataDirs.erase(std::remove_if(dataDirs.begin(), dataDirs.end(),
-        boost::bind(&boost::filesystem::path::empty, _1)), dataDirs.end());
+        std::bind(&boost::filesystem::path::empty, std::placeholders::_1)), dataDirs.end());
 }
 
 bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
