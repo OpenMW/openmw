@@ -16,14 +16,14 @@ void PacketContainer::Packet(RakNet::BitStream *bs, bool send)
 
     if (send)
     {
-        event->objectChanges.count = (unsigned int)(event->objectChanges.objects.size());
+        event->worldObjectCount = (unsigned int)(event->worldObjects.size());
     }
     else
     {
-        event->objectChanges.objects.clear();
+        event->worldObjects.clear();
     }
 
-    RW(event->objectChanges.count, send);
+    RW(event->worldObjectCount, send);
 
     RW(event->cell.mData.mFlags, send);
     RW(event->cell.mData.mX, send);
@@ -32,30 +32,30 @@ void PacketContainer::Packet(RakNet::BitStream *bs, bool send)
 
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < event->objectChanges.count; i++)
+    for (unsigned int i = 0; i < event->worldObjectCount; i++)
     {
         if (send)
         {
-            worldObject = event->objectChanges.objects.at(i);
-            worldObject.containerChanges.count = (unsigned int)(worldObject.containerChanges.items.size());
+            worldObject = event->worldObjects.at(i);
+            worldObject.containerItemCount = (unsigned int)(worldObject.containerItems.size());
         }
         else
         {
-            worldObject.containerChanges.items.clear();
+            worldObject.containerItems.clear();
         }
 
         RW(worldObject.refId, send);
         RW(worldObject.refNumIndex, send);
         RW(worldObject.mpNum, send);
-        RW(worldObject.containerChanges.count, send);
+        RW(worldObject.containerItemCount, send);
 
         ContainerItem containerItem;
 
-        for (unsigned int i = 0; i < worldObject.containerChanges.count; i++)
+        for (unsigned int i = 0; i < worldObject.containerItemCount; i++)
         {
             if (send)
             {
-                containerItem = worldObject.containerChanges.items.at(i);
+                containerItem = worldObject.containerItems.at(i);
             }
 
             RW(containerItem.refId, send);
@@ -65,13 +65,13 @@ void PacketContainer::Packet(RakNet::BitStream *bs, bool send)
 
             if (!send)
             {
-                worldObject.containerChanges.items.push_back(containerItem);
+                worldObject.containerItems.push_back(containerItem);
             }
         }
 
         if (!send)
         {
-            event->objectChanges.objects.push_back(worldObject);
+            event->worldObjects.push_back(worldObject);
         }
     }
 }

@@ -13,11 +13,11 @@ void PacketObjectUnlock::Packet(RakNet::BitStream *bs, bool send)
     WorldPacket::Packet(bs, send);
 
     if (!send)
-        event->objectChanges.objects.clear();
+        event->worldObjects.clear();
     else
-        event->objectChanges.count = (unsigned int)(event->objectChanges.objects.size());
+        event->worldObjectCount = (unsigned int)(event->worldObjects.size());
 
-    RW(event->objectChanges.count, send);
+    RW(event->worldObjectCount, send);
 
     RW(event->cell.mData.mFlags, send);
     RW(event->cell.mData.mX, send);
@@ -26,11 +26,11 @@ void PacketObjectUnlock::Packet(RakNet::BitStream *bs, bool send)
 
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < event->objectChanges.count; i++)
+    for (unsigned int i = 0; i < event->worldObjectCount; i++)
     {
         if (send)
         {
-            worldObject = event->objectChanges.objects.at(i);
+            worldObject = event->worldObjects.at(i);
         }
 
         RW(worldObject.refId, send);
@@ -39,7 +39,7 @@ void PacketObjectUnlock::Packet(RakNet::BitStream *bs, bool send)
 
         if (!send)
         {
-            event->objectChanges.objects.push_back(worldObject);
+            event->worldObjects.push_back(worldObject);
         }
     }
 }

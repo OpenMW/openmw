@@ -29,7 +29,7 @@ bool WorldProcessor::Process(RakNet::Packet &packet, BaseEvent &event) noexcept
 {
     // Clear our BaseEvent before loading new data in it
     event.cell.blank();
-    event.objectChanges.objects.clear();
+    event.worldObjects.clear();
     event.guid = packet.guid;
 
     for (auto &processor : processors)

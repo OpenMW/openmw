@@ -38,22 +38,22 @@ Networking *WorldEvent::getNetworking()
 void WorldEvent::reset()
 {
     cell.blank();
-    objectChanges.objects.clear();
+    worldObjects.clear();
     guid = mwmp::Main::get().getNetworking()->getLocalPlayer()->guid;
 }
 
 void WorldEvent::addObject(WorldObject worldObject)
 {
-    objectChanges.objects.push_back(worldObject);
+    worldObjects.push_back(worldObject);
 }
 
 void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
@@ -70,9 +70,9 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
             if (action == BaseEvent::SET)
                 containerStore.clear();
 
-            for (unsigned int i = 0; i < worldObject.containerChanges.count; i++)
+            for (unsigned int i = 0; i < worldObject.containerItemCount; i++)
             {
-                ContainerItem containerItem = worldObject.containerChanges.items.at(i);
+                ContainerItem containerItem = worldObject.containerItems.at(i);
                 MWWorld::Ptr ownerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
                 if (action == BaseEvent::ADD || action == BaseEvent::SET)
@@ -127,9 +127,9 @@ void WorldEvent::placeObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i\n- charge: %i\n- count: %i", worldObject.refId.c_str(),
                    worldObject.refNumIndex, worldObject.mpNum, worldObject.charge, worldObject.count);
@@ -154,9 +154,9 @@ void WorldEvent::deleteObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
@@ -176,9 +176,9 @@ void WorldEvent::lockObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
@@ -198,9 +198,9 @@ void WorldEvent::unlockObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
@@ -220,9 +220,9 @@ void WorldEvent::scaleObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i\n- scale: %f", worldObject.refId.c_str(), worldObject.refNumIndex,
             worldObject.mpNum, worldObject.scale);
@@ -243,9 +243,9 @@ void WorldEvent::moveObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
@@ -266,9 +266,9 @@ void WorldEvent::rotateObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
@@ -289,9 +289,9 @@ void WorldEvent::animateObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
@@ -313,9 +313,9 @@ void WorldEvent::activateDoors(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
@@ -336,9 +336,9 @@ void WorldEvent::setLocalShorts(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i\n- index: %i\n- shortVal: %i", worldObject.refId.c_str(),
                    worldObject.refNumIndex, worldObject.mpNum, worldObject.index, worldObject.shortVal);
@@ -359,9 +359,9 @@ void WorldEvent::setLocalFloats(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i\n- index: %i\n- floatVal: %f", worldObject.refId.c_str(),
                    worldObject.refNumIndex, worldObject.mpNum, worldObject.index, worldObject.floatVal);
@@ -382,9 +382,9 @@ void WorldEvent::setMemberShorts()
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s\n- index: %i\n- shortVal: %i\n", worldObject.refId.c_str(),
                    worldObject.index, worldObject.shortVal);
@@ -411,9 +411,9 @@ void WorldEvent::setGlobalShorts()
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- varName: %s\n- shortVal: %i", worldObject.varName.c_str(), worldObject.shortVal);
 
@@ -425,9 +425,9 @@ void WorldEvent::playMusic()
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- filename: %s", worldObject.filename.c_str());
 
@@ -439,9 +439,9 @@ void WorldEvent::playVideo()
 {
     WorldObject worldObject;
 
-    for (unsigned int i = 0; i < objectChanges.count; i++)
+    for (unsigned int i = 0; i < worldObjectCount; i++)
     {
-        worldObject = objectChanges.objects.at(i);
+        worldObject = worldObjects.at(i);
 
         LOG_APPEND(Log::LOG_VERBOSE, "- filename: %s\n- allowSkipping: %s", worldObject.filename.c_str(),
             worldObject.allowSkipping ? "true" : "false");
@@ -607,7 +607,7 @@ void WorldEvent::sendObjectPlace()
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE about %s", cell.getDescription().c_str());
 
-    for (std::vector<mwmp::WorldObject>::iterator it = objectChanges.objects.begin(); it != objectChanges.objects.end(); ++it)
+    for (std::vector<mwmp::WorldObject>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
     {
         mwmp::WorldObject worldObject = (*it);
 
@@ -653,7 +653,7 @@ void WorldEvent::sendDoorState()
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_DOOR_STATE about %s", cell.getDescription().c_str());
 
-    for (std::vector<mwmp::WorldObject>::iterator it = objectChanges.objects.begin(); it != objectChanges.objects.end(); ++it)
+    for (std::vector<mwmp::WorldObject>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
     {
         mwmp::WorldObject worldObject = (*it);
 
@@ -681,7 +681,7 @@ void WorldEvent::sendScriptLocalShort()
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_SHORT about %s", cell.getDescription().c_str());
 
-    for (std::vector<mwmp::WorldObject>::iterator it = objectChanges.objects.begin(); it != objectChanges.objects.end(); ++it)
+    for (std::vector<mwmp::WorldObject>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
     {
         mwmp::WorldObject worldObject = (*it);
 
@@ -697,7 +697,7 @@ void WorldEvent::sendScriptLocalFloat()
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_FLOAT about %s", cell.getDescription().c_str());
 
-    for (std::vector<mwmp::WorldObject>::iterator it = objectChanges.objects.begin(); it != objectChanges.objects.end(); ++it)
+    for (std::vector<mwmp::WorldObject>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
     {
         mwmp::WorldObject worldObject = (*it);
 
@@ -713,7 +713,7 @@ void WorldEvent::sendScriptMemberShort()
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_MEMBER_SHORT");
 
-    for (std::vector<mwmp::WorldObject>::iterator it = objectChanges.objects.begin(); it != objectChanges.objects.end(); ++it)
+    for (std::vector<mwmp::WorldObject>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
     {
         mwmp::WorldObject worldObject = (*it);
 
@@ -729,7 +729,7 @@ void WorldEvent::sendScriptGlobalShort()
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_GLOBAL_SHORT");
 
-    for (std::vector<mwmp::WorldObject>::iterator it = objectChanges.objects.begin(); it != objectChanges.objects.end(); ++it)
+    for (std::vector<mwmp::WorldObject>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
     {
         mwmp::WorldObject worldObject = (*it);
 
@@ -770,7 +770,7 @@ void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
             containerItem.count = itemPtr.getRefData().getCount();
             containerItem.charge = itemPtr.getCellRef().getCharge();
 
-            worldObject.containerChanges.items.push_back(containerItem);
+            worldObject.containerItems.push_back(containerItem);
         }
 
         addObject(worldObject);

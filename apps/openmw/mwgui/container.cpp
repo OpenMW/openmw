@@ -133,7 +133,7 @@ namespace MWGui
         containerItem.charge = itemPtr.getCellRef().getCharge();
         containerItem.actionCount = count;
 
-        worldObject.containerChanges.items.push_back(containerItem);
+        worldObject.containerItems.push_back(containerItem);
         worldEvent->addObject(worldObject);
 
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->setEvent(worldEvent);
@@ -197,7 +197,7 @@ namespace MWGui
 
         containerItem.charge = itemPtr.getCellRef().getCharge();
 
-        worldObject.containerChanges.items.push_back(containerItem);
+        worldObject.containerItems.push_back(containerItem);
         worldEvent->addObject(worldObject);
 
         mwmp::Main::get().getNetworking()->getWorldPacket(ID_CONTAINER)->setEvent(worldEvent);

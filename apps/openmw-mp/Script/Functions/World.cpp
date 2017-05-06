@@ -30,13 +30,13 @@ void WorldFunctions::InitiateEvent(unsigned short pid) noexcept
     GET_PLAYER(pid, player, );
 
     writeEvent.cell.blank();
-    writeEvent.objectChanges.objects.clear();
+    writeEvent.worldObjects.clear();
     writeEvent.guid = player->guid;
 }
 
 unsigned int WorldFunctions::GetObjectChangesSize() noexcept
 {
-    return readEvent->objectChanges.count;
+    return readEvent->worldObjectCount;
 }
 
 unsigned char WorldFunctions::GetEventAction() noexcept
@@ -46,106 +46,106 @@ unsigned char WorldFunctions::GetEventAction() noexcept
 
 const char *WorldFunctions::GetObjectRefId(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).refId.c_str();
+    return readEvent->worldObjects.at(i).refId.c_str();
 }
 
 int WorldFunctions::GetObjectRefNumIndex(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).refNumIndex;
+    return readEvent->worldObjects.at(i).refNumIndex;
 }
 
 int WorldFunctions::GetObjectMpNum(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).mpNum;
+    return readEvent->worldObjects.at(i).mpNum;
 }
 
 int WorldFunctions::GetObjectCount(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).count;
+    return readEvent->worldObjects.at(i).count;
 }
 
 int WorldFunctions::GetObjectCharge(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).charge;
+    return readEvent->worldObjects.at(i).charge;
 }
 
 int WorldFunctions::GetObjectGoldValue(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).goldValue;
+    return readEvent->worldObjects.at(i).goldValue;
 }
 
 double WorldFunctions::GetObjectScale(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).scale;
+    return readEvent->worldObjects.at(i).scale;
 }
 
 int WorldFunctions::GetObjectDoorState(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).doorState;
+    return readEvent->worldObjects.at(i).doorState;
 }
 
 int WorldFunctions::GetObjectLockLevel(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).lockLevel;
+    return readEvent->worldObjects.at(i).lockLevel;
 }
 
 double WorldFunctions::GetObjectPosX(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).position.pos[0];
+    return readEvent->worldObjects.at(i).position.pos[0];
 }
 
 double WorldFunctions::GetObjectPosY(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).position.pos[1];
+    return readEvent->worldObjects.at(i).position.pos[1];
 }
 
 double WorldFunctions::GetObjectPosZ(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).position.pos[2];
+    return readEvent->worldObjects.at(i).position.pos[2];
 }
 
 double WorldFunctions::GetObjectRotX(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).position.rot[0];
+    return readEvent->worldObjects.at(i).position.rot[0];
 }
 
 double WorldFunctions::GetObjectRotY(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).position.rot[1];
+    return readEvent->worldObjects.at(i).position.rot[1];
 }
 
 double WorldFunctions::GetObjectRotZ(unsigned int i) noexcept
 {
-    return readEvent->objectChanges.objects.at(i).position.rot[2];
+    return readEvent->worldObjects.at(i).position.rot[2];
 }
 
 unsigned int WorldFunctions::GetContainerChangesSize(unsigned int objectIndex) noexcept
 {
-    return readEvent->objectChanges.objects.at(objectIndex).containerChanges.count;
+    return readEvent->worldObjects.at(objectIndex).containerItemCount;
 }
 
 const char *WorldFunctions::GetContainerItemRefId(unsigned int objectIndex, unsigned int itemIndex) noexcept
 {
-    return readEvent->objectChanges.objects.at(objectIndex)
-        .containerChanges.items.at(itemIndex).refId.c_str();
+    return readEvent->worldObjects.at(objectIndex)
+        .containerItems.at(itemIndex).refId.c_str();
 }
 
 int WorldFunctions::GetContainerItemCount(unsigned int objectIndex, unsigned int itemIndex) noexcept
 {
-    return readEvent->objectChanges.objects.at(objectIndex)
-        .containerChanges.items.at(itemIndex).count;
+    return readEvent->worldObjects.at(objectIndex)
+        .containerItems.at(itemIndex).count;
 }
 
 int WorldFunctions::GetContainerItemCharge(unsigned int objectIndex, unsigned int itemIndex) noexcept
 {
-    return readEvent->objectChanges.objects.at(objectIndex)
-        .containerChanges.items.at(itemIndex).charge;
+    return readEvent->worldObjects.at(objectIndex)
+        .containerItems.at(itemIndex).charge;
 }
 
 int WorldFunctions::GetContainerItemActionCount(unsigned int objectIndex, unsigned int itemIndex) noexcept
 {
-    return readEvent->objectChanges.objects.at(objectIndex)
-        .containerChanges.items.at(itemIndex).actionCount;
+    return readEvent->worldObjects.at(objectIndex)
+        .containerItems.at(itemIndex).actionCount;
 }
 
 void WorldFunctions::SetEventCell(const char* cellDescription) noexcept
@@ -234,14 +234,14 @@ void WorldFunctions::SetContainerItemCharge(int charge) noexcept
 
 void WorldFunctions::AddWorldObject() noexcept
 {
-    writeEvent.objectChanges.objects.push_back(tempWorldObject);
+    writeEvent.worldObjects.push_back(tempWorldObject);
 
     tempWorldObject = emptyWorldObject;
 }
 
 void WorldFunctions::AddContainerItem() noexcept
 {
-    tempWorldObject.containerChanges.items.push_back(tempContainerItem);
+    tempWorldObject.containerItems.push_back(tempContainerItem);
 
     tempContainerItem = emptyContainerItem;
 }

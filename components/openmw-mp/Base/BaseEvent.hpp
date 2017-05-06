@@ -21,12 +21,6 @@ namespace mwmp
         }
     };
 
-    struct ContainerChanges
-    {
-        std::vector<ContainerItem> items;
-        unsigned int count;
-    };
-
     struct WorldObject
     {
         std::string refId;
@@ -53,13 +47,8 @@ namespace mwmp
         float floatVal;
         std::string varName;
 
-        ContainerChanges containerChanges;
-    };
-
-    struct ObjectChanges
-    {
-        std::vector<WorldObject> objects;
-        unsigned int count;
+        std::vector<ContainerItem> containerItems;
+        unsigned int containerItemCount;
     };
 
     class BaseEvent
@@ -85,7 +74,9 @@ namespace mwmp
         };
 
         RakNet::RakNetGUID guid;
-        ObjectChanges objectChanges;
+        
+        std::vector<WorldObject> worldObjects;
+        unsigned int worldObjectCount;
 
         ESM::Cell cell;
 
