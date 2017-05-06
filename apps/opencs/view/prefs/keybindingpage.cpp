@@ -6,9 +6,11 @@
 #include <QGridLayout>
 #include <QStackedLayout>
 #include <QVBoxLayout>
+#include <QPushButton>
 
 #include "../../model/prefs/setting.hpp"
 #include "../../model/prefs/category.hpp"
+#include "../../model/prefs/state.hpp"
 
 namespace CSVPrefs
 {
@@ -21,6 +23,10 @@ namespace CSVPrefs
         // Need one widget for scroll area
         QWidget* topWidget = new QWidget();
         QVBoxLayout* topLayout = new QVBoxLayout(topWidget);
+
+        QWidget* resetAll = new QPushButton("Reset all to default", this);
+        connect(resetAll, SIGNAL(clicked()), this, SLOT(resetCategory()));
+        topLayout->addWidget(resetAll);
 
         // Allows switching between "pages"
         QWidget* stackedWidget = new QWidget();

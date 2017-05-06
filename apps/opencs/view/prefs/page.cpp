@@ -2,15 +2,21 @@
 #include "page.hpp"
 
 #include <QGridLayout>
+#include <QPushButton>
 
 #include "../../model/prefs/setting.hpp"
 #include "../../model/prefs/category.hpp"
+#include "../../model/prefs/state.hpp"
 
 CSVPrefs::Page::Page (CSMPrefs::Category& category, QWidget *parent)
 : PageBase (category, parent)
 {
     QWidget *widget = new QWidget (parent);
     mGrid = new QGridLayout (widget);
+
+    QWidget* resetAll = new QPushButton("Reset all to default", this);
+    connect (resetAll, SIGNAL (clicked()), this, SLOT (resetCategory()));
+    mGrid->addWidget(resetAll, 0, 0, 1, 2);
 
     for (CSMPrefs::Category::Iterator iter = category.begin(); iter!=category.end(); ++iter)
         addSetting (*iter);

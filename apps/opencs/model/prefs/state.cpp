@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <sstream>
 
+#include <QMutexLocker>
+
 #include "intsetting.hpp"
 #include "doublesetting.hpp"
 #include "boolsetting.hpp"
@@ -585,6 +587,30 @@ CSMPrefs::State& CSMPrefs::State::get()
         throw std::logic_error ("No instance of CSMPrefs::State");
 
     return *sThis;
+}
+
+void CSMPrefs::State::resetCategory(const std::string& category)
+{
+    {
+        QMutexLocker lock (&mMutex);
+        for (Settings::CategorySettingValueMap::iterator i = mSettings.mUserSettings.begin(); i != mSettings.mUserSettings.end(); ++i)
+        {
+            // if the category matches
+            if (i->first.first == category)
+            {
+                // mark the setting as changed
+                mSettings.mChangedSettings.insert(std::make_pair(i->first.first, i->first.second));
+                // reset the value to the default
+                i->second = mSettings.mDefaultSettings[i->first];
+            }
+        }
+    }
+
+    Collection::iterator iter = mCategories.find(category);
+    if (iter != mCategories.end())
+    {
+        (*iter).second.update();
+    }
 }
 
 

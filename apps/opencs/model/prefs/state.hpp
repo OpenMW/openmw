@@ -106,6 +106,8 @@ namespace CSMPrefs
 
             static State& get();
 
+            void resetCategory(const std::string& category);
+
         signals:
 
             void settingChanged (const CSMPrefs::Setting *setting);
