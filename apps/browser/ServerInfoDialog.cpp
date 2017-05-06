@@ -53,16 +53,16 @@ void ServerInfoDialog::refresh()
 
         listRules->clear();
         const static vector<std::string> defaultRules {"gamemode", "maxPlayers", "name", "passw", "players", "version"};
-        for (auto iter = sd.second.rules.begin();iter != sd.second.rules.end(); iter++)
+        for (auto rule : sd.second.rules)
         {
-            if(::find(defaultRules.begin(), defaultRules.end(), iter->first) != defaultRules.end())
+            if(::find(defaultRules.begin(), defaultRules.end(), rule.first) != defaultRules.end())
                 continue;
-            QString rule = QString::fromStdString(iter->first) + " : ";
-            if(iter->second.type == 's')
-                rule += QString::fromStdString(iter->second.str);
+            QString ruleStr = QString::fromStdString(rule.first) + " : ";
+            if(rule.second.type == 's')
+                ruleStr += QString::fromStdString(rule.second.str);
             else
-                rule += QString::number(iter->second.val);
-            listRules->addItem(rule);
+                ruleStr += QString::number(rule.second.val);
+            listRules->addItem(ruleStr);
         }
 
         lblPlayers->setText(QString::number(sd.second.players.size()) + " / " + QString::number(sd.second.GetMaxPlayers()));
