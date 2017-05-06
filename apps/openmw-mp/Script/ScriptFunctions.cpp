@@ -144,3 +144,17 @@ void ScriptFunctions::SetServerPassword(const char *passw) noexcept
 {
     mwmp::Networking::getPtr()->setServerPassword(passw);
 }
+
+void ScriptFunctions::SetRuleString(const char *key, const char *value) noexcept
+{
+    auto mc = mwmp::Networking::getPtr()->getMasterClient();
+    if(mc)
+        mc->SetRuleString(key, value);
+}
+
+void ScriptFunctions::SetRuleValue(const char *key, double value) noexcept
+{
+    auto mc = mwmp::Networking::getPtr()->getMasterClient();
+    if(mc)
+        mc->SetRuleValue(key, value);
+}

@@ -69,6 +69,8 @@ public:
     static void SetModname(const char* name) noexcept;
     static void SetHostname(const char* name) noexcept;
     static void SetServerPassword(const char *passw) noexcept;
+    static void SetRuleString(const char *key, const char *value) noexcept;
+    static void SetRuleValue(const char *key, double value) noexcept;
 
     static constexpr ScriptFunctionData functions[]{
             {"CreateTimer",         ScriptFunctions::CreateTimer},
@@ -92,6 +94,8 @@ public:
             {"SetModname",          ScriptFunctions::SetModname},
             {"SetHostname",         ScriptFunctions::SetHostname},
             {"SetServerPassword",   ScriptFunctions::SetServerPassword},
+            {"SetRuleString",       ScriptFunctions::SetRuleString},
+            {"SetRuleValue",        ScriptFunctions::SetRuleValue},
 
             POSITIONAPI,
             CELLAPI,
