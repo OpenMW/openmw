@@ -8,6 +8,7 @@
 
     Include additional headers for multiplayer purposes
 */
+#include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/LocalPlayer.hpp"
 /*
@@ -152,6 +153,17 @@ namespace
                 else if (ptr.getCellRef().getScale()>2)
                     ptr.getCellRef().setScale(2);
             }
+
+            /*
+                Start of tes3mp change (major)
+
+                Don't insert leveled creatures; they'll be inserted later on when the server needs them
+            */
+            if (ptr.getTypeName() == typeid(ESM::CreatureLevList).name())
+                continue;
+            /*
+                End of tes3mp change (major)
+            */
 
             if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
             {
