@@ -1,7 +1,7 @@
 #ifndef OPENMW_GUI_SPELLVIEW_H
 #define OPENMW_GUI_SPELLVIEW_H
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 #include <MyGUI_Widget.h>
 
