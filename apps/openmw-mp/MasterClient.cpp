@@ -85,6 +85,7 @@ void MasterClient::SetRuleString(std::string key, std::string value)
         rule.str = value;
         rule.type = 's';
         queryData.rules.insert({key, rule});
+        updated = true;
     }
     mutexData.unlock();
 }
@@ -99,6 +100,7 @@ void MasterClient::SetRuleValue(std::string key, double value)
         rule.val = value;
         rule.type = 'v';
         queryData.rules.insert({key, rule});
+        updated = true;
     }
     mutexData.unlock();
 }
