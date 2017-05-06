@@ -14,6 +14,8 @@ set(BROWSER
         netutils/HTTPNetwork.cpp
         netutils/Utils.cpp
         netutils/QueryClient.cpp
+        PingUpdater.cpp
+        PingHelper.cpp
         ${CMAKE_SOURCE_DIR}/files/tes3mp/browser.rc
         )
 
@@ -22,6 +24,8 @@ set(BROWSER_HEADER_MOC
         ServerModel.hpp
         ServerInfoDialog.hpp
         MySortFilterProxyModel.hpp
+        PingUpdater.hpp
+        PingHelper.hpp
         )
 
 set(BROWSER_HEADER
@@ -29,6 +33,7 @@ set(BROWSER_HEADER
         netutils/HTTPNetwork.hpp
         netutils/Utils.hpp
         netutils/QueryClient.hpp
+        Types.hpp
         )
 
 source_group(browser FILES ${BROWSER} ${BROWSER_HEADER})
