@@ -1,7 +1,5 @@
 #include "idcompletionmanager.hpp"
 
-#include <boost/make_shared.hpp>
-
 #include <QCompleter>
 
 #include "../../view/widget/completerpopup.hpp"

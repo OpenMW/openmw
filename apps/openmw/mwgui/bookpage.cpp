@@ -6,10 +6,6 @@
 #include "MyGUI_TextureUtility.h"
 #include "MyGUI_FactoryManager.h"
 
-#include <stdint.h>
-#include <boost/function.hpp>
-#include <boost/make_shared.hpp>
-
 #include <components/misc/utf8stream.hpp>
 
 namespace MWGui
