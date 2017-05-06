@@ -94,11 +94,12 @@ void MasterClient::SetRuleValue(std::string key, double value)
     mutexData.lock();
     if (queryData.rules.find(key) == queryData.rules.end() || queryData.rules[key].type != 'v'
         || queryData.rules[key].val != value)
-        return;
-    ServerRule rule;
-    rule.str = value;
-    rule.type = 'v';
-    queryData.rules.insert({key, rule});
+    {
+        ServerRule rule;
+        rule.val = value;
+        rule.type = 'v';
+        queryData.rules.insert({key, rule});
+    }
     mutexData.unlock();
 }
 
