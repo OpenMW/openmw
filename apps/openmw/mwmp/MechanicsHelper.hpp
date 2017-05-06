@@ -16,6 +16,8 @@ namespace mwmp
 
         osg::Vec3f getLinearInterpolation(osg::Vec3f start, osg::Vec3f end, float percent);
 
+        void spawnLeveledCreatures(MWWorld::CellStore* cellStore);
+
         Attack *getLocalAttack(const MWWorld::Ptr& ptr);
         Attack *getDedicatedAttack(const MWWorld::Ptr& ptr);
 

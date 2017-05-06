@@ -7,6 +7,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/combat.hpp"
+#include "../mwmechanics/levelledlist.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwworld/class.hpp"
@@ -14,9 +15,11 @@
 
 #include "MechanicsHelper.hpp"
 #include "Main.hpp"
+#include "Networking.hpp"
 #include "LocalPlayer.hpp"
 #include "DedicatedPlayer.hpp"
 #include "PlayerList.hpp"
+#include "WorldEvent.hpp"
 #include "CellController.hpp"
 
 using namespace mwmp;
@@ -36,6 +39,34 @@ osg::Vec3f MechanicsHelper::getLinearInterpolation(osg::Vec3f start, osg::Vec3f 
     osg::Vec3f position(percent, percent, percent);
 
     return (start + osg::componentMultiply(position, (end - start)));
+}
+
+// Inspired by similar code in mwclass\creaturelevlist.cpp
+void MechanicsHelper::spawnLeveledCreatures(MWWorld::CellStore* cellStore)
+{
+    MWWorld::CellRefList<ESM::CreatureLevList> *creatureLevList = cellStore->getCreatureLists();
+
+    for (typename MWWorld::CellRefList<ESM::CreatureLevList>::List::iterator listIter(creatureLevList->mList.begin());
+        listIter != creatureLevList->mList.end(); ++listIter)
+    {
+        MWWorld::Ptr ptr(&*listIter, cellStore);
+
+        MWWorld::LiveCellRef<ESM::CreatureLevList> *ref = ptr.get<ESM::CreatureLevList>();
+
+        std::string id = MWMechanics::getLevelledItem(ref->mBase, true);
+
+        if (!id.empty())
+        {
+            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            MWWorld::ManualRef manualRef(store, id);
+            manualRef.getPtr().getCellRef().setPosition(ptr.getCellRef().getPosition());
+            MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(manualRef.getPtr(), ptr.getCell(), ptr.getCellRef().getPosition());
+
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+            worldEvent->sendObjectPlace(placed);
+            MWBase::Environment::get().getWorld()->deleteObject(placed);
+        }
+    }
 }
 
 Attack *MechanicsHelper::getLocalAttack(const MWWorld::Ptr& ptr)

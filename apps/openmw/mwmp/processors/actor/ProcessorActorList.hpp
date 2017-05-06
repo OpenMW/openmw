@@ -8,6 +8,7 @@
 #include "apps/openmw/mwmp/ActorProcessor.hpp"
 #include "apps/openmw/mwmp/Main.hpp"
 #include "apps/openmw/mwmp/CellController.hpp"
+#include "apps/openmw/mwmp/MechanicsHelper.hpp"
 
 namespace mwmp
 {
@@ -30,7 +31,10 @@ namespace mwmp
 
             // If we've received a request for information, comply with it
             if (actorList.action == mwmp::BaseActorList::REQUEST)
+            {
+                mwmp::Main::get().getMechanicsHelper()->spawnLeveledCreatures(ptrCellStore);
                 actorList.sendActorsInCell(ptrCellStore);
+            }
         }
     };
 }

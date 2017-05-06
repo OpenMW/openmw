@@ -243,6 +243,9 @@ namespace MWWorld
             CellRefList<ESM::Creature> *getCreatures();
             // Added by tes3mp and used to get all the creatures in the cell
 
+            CellRefList<ESM::CreatureLevList> *getCreatureLists();
+            // Added by tes3mp and used to get all the leveled creature lists in the cell
+
             CellRefList<ESM::Container> *getContainers();
             // Added by tes3mp and used to get all the containers in the cell
 
