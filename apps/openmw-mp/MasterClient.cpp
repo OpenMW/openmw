@@ -105,6 +105,14 @@ void MasterClient::SetRuleValue(std::string key, double value)
     mutexData.unlock();
 }
 
+void MasterClient::PushPlugin(Plugin plugin)
+{
+    mutexData.lock();
+    queryData.plugins.push_back(plugin);
+    updated = true;
+    mutexData.unlock();
+}
+
 bool MasterClient::Process(RakNet::Packet *packet)
 {
     if (!sRun || packet->systemAddress != masterServer)
