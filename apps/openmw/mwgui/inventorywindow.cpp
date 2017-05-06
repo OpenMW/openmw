@@ -666,7 +666,9 @@ namespace MWGui
             by the player
         */
         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-        worldEvent->sendObjectDelete(object);
+        worldEvent->reset();
+        worldEvent->addObjectDelete(object);
+        worldEvent->sendObjectDelete();
         mwmp::Main::get().getLocalPlayer()->sendInventory();
         /*
             End of tes3mp addition

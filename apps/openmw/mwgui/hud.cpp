@@ -73,7 +73,9 @@ namespace MWGui
                 the inventory screen
             */
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-            worldEvent->sendObjectPlace(dropped);
+            worldEvent->reset();
+            worldEvent->addObjectPlace(dropped);
+            worldEvent->sendObjectPlace();
             /*
                 End of tes3mp addition
             */

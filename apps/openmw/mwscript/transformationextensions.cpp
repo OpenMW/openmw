@@ -61,7 +61,9 @@ namespace MWScript
                         through a script
                     */
                     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-                    worldEvent->sendObjectScale(ptr, scale);
+                    worldEvent->reset();
+                    worldEvent->addObjectScale(ptr, scale);
+                    worldEvent->sendObjectScale();
                     /*
                         End of tes3mp addition
                     */
@@ -556,7 +558,9 @@ namespace MWScript
                             through a script
                         */
                         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-                        worldEvent->sendObjectPlace(ptr);
+                        worldEvent->reset();
+                        worldEvent->addObjectPlace(ptr);
+                        worldEvent->sendObjectPlace();
                         /*
                             End of tes3mp addition
                         */

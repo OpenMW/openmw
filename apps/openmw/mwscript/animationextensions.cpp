@@ -83,7 +83,9 @@ namespace MWScript
                     if (mwmp::Main::isValidPacketScript(ptr.getClass().getScript(ptr)))
                     {
                         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-                        worldEvent->sendObjectAnimPlay(ptr, group, mode);
+                        worldEvent->reset();
+                        worldEvent->addObjectAnimPlay(ptr, group, mode);
+                        worldEvent->sendObjectAnimPlay();
                     }
                     /*
                         End of tes3mp addition

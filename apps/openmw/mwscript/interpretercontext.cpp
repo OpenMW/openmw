@@ -211,7 +211,9 @@ namespace MWScript
         if (sendPackets)
         {
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-            worldEvent->sendScriptLocalShort(mReference, index, value);
+            worldEvent->reset();
+            worldEvent->addScriptLocalShort(mReference, index, value);
+            worldEvent->sendScriptLocalShort();
         }
         /*
             End of tes3mp addition
@@ -243,7 +245,9 @@ namespace MWScript
         if (sendPackets && value == (int) value)
         {
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-            worldEvent->sendScriptLocalFloat(mReference, index, value);
+            worldEvent->reset();
+            worldEvent->addScriptLocalFloat(mReference, index, value);
+            worldEvent->sendScriptLocalFloat();
         }
         /*
             End of tes3mp addition
@@ -300,7 +304,9 @@ namespace MWScript
         if (sendPackets)
         {
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-            worldEvent->sendScriptGlobalShort(name, value);
+            worldEvent->reset();
+            worldEvent->addScriptGlobalShort(name, value);
+            worldEvent->sendScriptGlobalShort();
         }
         /*
             End of tes3mp addition
@@ -635,7 +641,9 @@ namespace MWScript
         if (sendPackets && !global)
         {
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-            worldEvent->sendScriptMemberShort(id, index, value);
+            worldEvent->reset();
+            worldEvent->addScriptMemberShort(id, index, value);
+            worldEvent->sendScriptMemberShort();
         }
         /*
             End of tes3mp addition

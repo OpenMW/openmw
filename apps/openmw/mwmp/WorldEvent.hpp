@@ -38,21 +38,35 @@ namespace mwmp
         void playMusic();
         void playVideo();
 
-        void sendContainers(MWWorld::CellStore* cellStore);
+        void addObjectPlace(const MWWorld::Ptr& ptr);
+        void addObjectDelete(const MWWorld::Ptr& ptr);
+        void addObjectLock(const MWWorld::Ptr& ptr, int lockLevel);
+        void addObjectUnlock(const MWWorld::Ptr& ptr);
+        void addObjectScale(const MWWorld::Ptr& ptr, float scale);
+        void addObjectAnimPlay(const MWWorld::Ptr& ptr, std::string group, int mode);
+        void addDoorState(const MWWorld::Ptr& ptr, int state);
+        void addMusicPlay(std::string filename);
+        void addVideoPlay(std::string filename, bool allowSkipping);
+        void addScriptLocalShort(const MWWorld::Ptr& ptr, int index, int shortVal);
+        void addScriptLocalFloat(const MWWorld::Ptr& ptr, int index, float floatVal);
+        void addScriptMemberShort(std::string refId, int index, int shortVal);
+        void addScriptGlobalShort(std::string varName, int shortVal);
 
-        void sendObjectPlace(MWWorld::Ptr ptr);
-        void sendObjectDelete(MWWorld::Ptr ptr);
-        void sendObjectLock(MWWorld::Ptr ptr, int lockLevel);
-        void sendObjectUnlock(MWWorld::Ptr ptr);
-        void sendObjectScale(MWWorld::Ptr ptr, float scale);
-        void sendObjectAnimPlay(MWWorld::Ptr ptr, std::string group, int mode);
-        void sendDoorState(MWWorld::Ptr ptr, int state);
-        void sendMusicPlay(std::string filename);
-        void sendVideoPlay(std::string filename, bool allowSkipping);
-        void sendScriptLocalShort(MWWorld::Ptr ptr, int index, int shortVal);
-        void sendScriptLocalFloat(MWWorld::Ptr ptr, int index, float floatVal);
-        void sendScriptMemberShort(std::string refId, int index, int shortVal);
-        void sendScriptGlobalShort(std::string varName, int shortVal);
+        void sendObjectPlace();
+        void sendObjectDelete();
+        void sendObjectLock();
+        void sendObjectUnlock();
+        void sendObjectScale();
+        void sendObjectAnimPlay();
+        void sendDoorState();
+        void sendMusicPlay();
+        void sendVideoPlay();
+        void sendScriptLocalShort();
+        void sendScriptLocalFloat();
+        void sendScriptMemberShort();
+        void sendScriptGlobalShort();
+
+        void sendContainers(MWWorld::CellStore* cellStore);
 
     private:
         Networking *getNetworking();

@@ -43,7 +43,9 @@ namespace MWWorld
             by the player
         */
         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-        worldEvent->sendObjectDelete(getTarget());
+        worldEvent->reset();
+        worldEvent->addObjectDelete(getTarget());
+        worldEvent->sendObjectDelete();
         mwmp::Main::get().getLocalPlayer()->sendInventory();
         /*
             End of tes3mp addition

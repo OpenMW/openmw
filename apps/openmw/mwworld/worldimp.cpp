@@ -2383,7 +2383,9 @@ namespace MWWorld
             Send an ID_DOOR_STATE packet every time a door is activated
         */
         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-        worldEvent->sendDoorState(door, state);
+        worldEvent->reset();
+        worldEvent->addDoorState(door, state);
+        worldEvent->sendDoorState();
         /*
             End of tes3mp addition
         */
@@ -2400,7 +2402,9 @@ namespace MWWorld
             Send an ID_DOOR_STATE packet every time a door is activated
         */
         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-        worldEvent->sendDoorState(door, state);
+        worldEvent->reset();
+        worldEvent->addDoorState(door, state);
+        worldEvent->sendDoorState();
         /*
             End of tes3mp addition
         */

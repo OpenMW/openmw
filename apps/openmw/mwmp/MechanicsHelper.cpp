@@ -45,6 +45,8 @@ osg::Vec3f MechanicsHelper::getLinearInterpolation(osg::Vec3f start, osg::Vec3f 
 void MechanicsHelper::spawnLeveledCreatures(MWWorld::CellStore* cellStore)
 {
     MWWorld::CellRefList<ESM::CreatureLevList> *creatureLevList = cellStore->getCreatureLists();
+    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+    worldEvent->reset();
 
     for (typename MWWorld::CellRefList<ESM::CreatureLevList>::List::iterator listIter(creatureLevList->mList.begin());
         listIter != creatureLevList->mList.end(); ++listIter)
@@ -61,12 +63,12 @@ void MechanicsHelper::spawnLeveledCreatures(MWWorld::CellStore* cellStore)
             MWWorld::ManualRef manualRef(store, id);
             manualRef.getPtr().getCellRef().setPosition(ptr.getCellRef().getPosition());
             MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(manualRef.getPtr(), ptr.getCell(), ptr.getCellRef().getPosition());
-
-            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-            worldEvent->sendObjectPlace(placed);
+            worldEvent->addObjectPlace(placed);
             MWBase::Environment::get().getWorld()->deleteObject(placed);
         }
     }
+
+    worldEvent->sendObjectPlace();
 }
 
 Attack *MechanicsHelper::getLocalAttack(const MWWorld::Ptr& ptr)

@@ -88,7 +88,9 @@ namespace MWScript
                         a script
                     */
                     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-                    worldEvent->sendMusicPlay(sound);
+                    worldEvent->reset();
+                    worldEvent->addMusicPlay(sound);
+                    worldEvent->sendMusicPlay();
                     /*
                         End of tes3mp addition
                     */

@@ -104,7 +104,9 @@ namespace MWScript
                     through a script
                 */
                 mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-                worldEvent->sendVideoPlay(name, allowSkipping);
+                worldEvent->reset();
+                worldEvent->addVideoPlay(name, allowSkipping);
+                worldEvent->sendVideoPlay();
                 /*
                     End of tes3mp addition
                 */
@@ -214,7 +216,9 @@ namespace MWScript
                         through a script
                     */
                     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-                    worldEvent->sendObjectLock(ptr, lockLevel);
+                    worldEvent->reset();
+                    worldEvent->addObjectLock(ptr, lockLevel);
+                    worldEvent->sendObjectLock();
                     /*
                         End of tes3mp addition
                     */
@@ -252,7 +256,9 @@ namespace MWScript
                         through a script
                     */
                     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-                    worldEvent->sendObjectUnlock(ptr);
+                    worldEvent->reset();
+                    worldEvent->addObjectUnlock(ptr);
+                    worldEvent->sendObjectUnlock();
                     /*
                         End of tes3mp addition
                     */
@@ -724,7 +730,9 @@ namespace MWScript
                             through a script
                         */
                         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-                        worldEvent->sendObjectDelete(ptr);
+                        worldEvent->reset();
+                        worldEvent->addObjectDelete(ptr);
+                        worldEvent->sendObjectDelete();
                         /*
                             End of tes3mp addition
                         */

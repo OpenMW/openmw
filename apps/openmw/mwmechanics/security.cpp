@@ -72,7 +72,9 @@ namespace MWMechanics
                     Send an ID_OBJECT_UNLOCK packet every time an object is unlocked
                 */
                 mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-                worldEvent->sendObjectUnlock(lock);
+                worldEvent->reset();
+                worldEvent->addObjectUnlock(lock);
+                worldEvent->sendObjectUnlock();
                 /*
                     End of tes3mp addition
                 */
