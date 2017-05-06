@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstdio>
 
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
@@ -7,12 +6,7 @@
 #include <components/fallback/validate.hpp>
 
 #include <SDL_messagebox.h>
-#include <SDL_main.h>
 #include "engine.hpp"
-
-#include <boost/iostreams/concepts.hpp>
-#include <boost/iostreams/stream_buffer.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #if defined(_WIN32)
 // For OutputDebugString

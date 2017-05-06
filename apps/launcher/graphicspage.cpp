@@ -12,17 +12,11 @@
 
 #include <SDL_video.h>
 
-#include <boost/math/common_factor.hpp>
-
 #include <components/files/configurationmanager.hpp>
-
-#include <components/contentselector/model/naturalsort.hpp>
-
-#include <components/settings/settings.hpp>
 
 QString getAspect(int x, int y)
 {
-    int gcd = boost::math::gcd (x, y);
+    int gcd = std::__gcd (x, y);
     int xaspect = x / gcd;
     int yaspect = y / gcd;
     // special case: 8 : 5 is usually referred to as 16:10
