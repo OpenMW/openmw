@@ -259,7 +259,7 @@ namespace MWSound
         float basevol = volumeFromType(Play_TypeVoice);
         if(playlocal)
         {
-            sound.reset(new Stream(1.0f, basevol, 1.0f, Play_Normal|Play_TypeVoice|Play_2D));
+            sound.reset(new Stream(1.0f, basevol, 1.0f, Play_NoEnv|Play_TypeVoice|Play_2D));
             mOutput->streamSound(decoder, sound);
         }
         else
