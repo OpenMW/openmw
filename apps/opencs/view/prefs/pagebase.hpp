@@ -21,10 +21,10 @@ namespace CSVPrefs
             PageBase (CSMPrefs::Category& category, QWidget *parent);
 
             CSMPrefs::Category& getCategory();
-
-		public slots:
-
-			void resetCategory();
+            
+            public slots:
+            
+            void resetCategory();
 
         private:
 
