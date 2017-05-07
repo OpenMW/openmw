@@ -44,8 +44,8 @@ void Timer::Tick()
 
     if (time - startTime >= targetMsec)
     {
-        Call(args);
         end = true;
+        Call(args);
     }
 }
 
