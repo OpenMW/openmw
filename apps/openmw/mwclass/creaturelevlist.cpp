@@ -120,8 +120,17 @@ namespace MWClass
             const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
             MWWorld::ManualRef manualRef(store, id);
             manualRef.getPtr().getCellRef().setPosition(ptr.getCellRef().getPosition());
-            MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(manualRef.getPtr(), ptr.getCell() , ptr.getCellRef().getPosition());
-            customData.mSpawnActorId = placed.getClass().getCreatureStats(placed).getActorId();
+
+            /*
+                Start of tes3mp change (major)
+
+                Don't spawn leveled creatures in multiplayer; they'll be spawned when the server requests them
+            */
+            //MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(manualRef.getPtr(), ptr.getCell() , ptr.getCellRef().getPosition());
+            //customData.mSpawnActorId = placed.getClass().getCreatureStats(placed).getActorId();
+            /*
+                End of tes3mp change (major)
+            */
             customData.mSpawn = false;
         }
         else
