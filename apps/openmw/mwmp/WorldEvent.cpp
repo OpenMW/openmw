@@ -131,22 +131,32 @@ void WorldEvent::placeObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = worldObjects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i\n- charge: %i\n- count: %i", worldObject.refId.c_str(),
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i, charge: %i, count: %i", worldObject.refId.c_str(),
                    worldObject.refNumIndex, worldObject.mpNum, worldObject.charge, worldObject.count);
 
-        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), worldObject.refId, 1);
-        MWWorld::Ptr newPtr = ref.getPtr();
+        MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, 0, worldObject.mpNum);
 
-        if (worldObject.charge > -1)
-            newPtr.getCellRef().setCharge(worldObject.charge);
+        // Only create this object if it doesn't already exist
+        if (!ptrFound)
+        {
+            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), worldObject.refId, 1);
+            MWWorld::Ptr newPtr = ref.getPtr();
 
-        if (worldObject.count > 1)
-            newPtr.getRefData().setCount(worldObject.count);
+            if (worldObject.charge > -1)
+                newPtr.getCellRef().setCharge(worldObject.charge);
 
-        newPtr.getCellRef().setMpNum(worldObject.mpNum);
+            if (worldObject.count > 1)
+                newPtr.getRefData().setCount(worldObject.count);
 
-        newPtr.getCellRef().setGoldValue(worldObject.goldValue);
-        newPtr = MWBase::Environment::get().getWorld()->placeObject(newPtr, cellStore, worldObject.position);
+            newPtr.getCellRef().setMpNum(worldObject.mpNum);
+
+            newPtr.getCellRef().setGoldValue(worldObject.goldValue);
+            newPtr = MWBase::Environment::get().getWorld()->placeObject(newPtr, cellStore, worldObject.position);
+        }
+        else
+        {
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Object already existed!");
+        }
     }
 }
 
@@ -224,7 +234,7 @@ void WorldEvent::scaleObjects(MWWorld::CellStore* cellStore)
     {
         worldObject = worldObjects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i\n- scale: %f", worldObject.refId.c_str(), worldObject.refNumIndex,
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i, scale: %f", worldObject.refId.c_str(), worldObject.refNumIndex,
             worldObject.mpNum, worldObject.scale);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex, worldObject.mpNum);
@@ -340,7 +350,7 @@ void WorldEvent::setLocalShorts(MWWorld::CellStore* cellStore)
     {
         worldObject = worldObjects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i\n- index: %i\n- shortVal: %i", worldObject.refId.c_str(),
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i, index: %i, shortVal: %i", worldObject.refId.c_str(),
                    worldObject.refNumIndex, worldObject.mpNum, worldObject.index, worldObject.shortVal);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex, worldObject.mpNum);
@@ -363,7 +373,7 @@ void WorldEvent::setLocalFloats(MWWorld::CellStore* cellStore)
     {
         worldObject = worldObjects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i\n- index: %i\n- floatVal: %f", worldObject.refId.c_str(),
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i, index: %i, floatVal: %f", worldObject.refId.c_str(),
                    worldObject.refNumIndex, worldObject.mpNum, worldObject.index, worldObject.floatVal);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex, worldObject.mpNum);
@@ -386,7 +396,7 @@ void WorldEvent::setMemberShorts()
     {
         worldObject = worldObjects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s\n- index: %i\n- shortVal: %i\n", worldObject.refId.c_str(),
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, index: %i, shortVal: %i", worldObject.refId.c_str(),
                    worldObject.index, worldObject.shortVal);
 
         // Mimic the way a Ptr is fetched in InterpreterContext for similar situations
@@ -415,7 +425,7 @@ void WorldEvent::setGlobalShorts()
     {
         worldObject = worldObjects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- varName: %s\n- shortVal: %i", worldObject.varName.c_str(), worldObject.shortVal);
+        LOG_APPEND(Log::LOG_VERBOSE, "- varName: %s, shortVal: %i", worldObject.varName.c_str(), worldObject.shortVal);
 
         MWBase::Environment::get().getWorld()->setGlobalInt(worldObject.varName, worldObject.shortVal);
     }
@@ -443,7 +453,7 @@ void WorldEvent::playVideo()
     {
         worldObject = worldObjects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- filename: %s\n- allowSkipping: %s", worldObject.filename.c_str(),
+        LOG_APPEND(Log::LOG_VERBOSE, "- filename: %s, allowSkipping: %s", worldObject.filename.c_str(),
             worldObject.allowSkipping ? "true" : "false");
 
         MWBase::Environment::get().getWindowManager()->playVideo(worldObject.filename, worldObject.allowSkipping);
