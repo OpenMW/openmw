@@ -23,6 +23,7 @@
 #include "processors/player/ProcessorPlayerAnimFlags.hpp"
 #include "processors/player/ProcessorChatMessage.hpp"
 #include "processors/player/ProcessorGameConsole.hpp"
+#include "processors/player/ProcessorGameTime.hpp"
 #include "processors/player/ProcessorPlayerCharGen.hpp"
 #include "processors/player/ProcessorGUIMessageBox.hpp"
 #include "processors/player/ProcessorPlayerCharClass.hpp"
@@ -82,6 +83,7 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorPlayerAnimFlags());
     PlayerProcessor::AddProcessor(new ProcessorChatMessage());
     PlayerProcessor::AddProcessor(new ProcessorGameConsole());
+    PlayerProcessor::AddProcessor(new ProcessorGameTime());
     PlayerProcessor::AddProcessor(new ProcessorPlayerCharGen());
     PlayerProcessor::AddProcessor(new ProcessorGUIMessageBox());
     PlayerProcessor::AddProcessor(new ProcessorPlayerCharClass());
