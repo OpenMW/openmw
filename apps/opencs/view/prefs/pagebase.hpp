@@ -22,7 +22,7 @@ namespace CSVPrefs
 
             CSMPrefs::Category& getCategory();
             
-            public slots:
+        public slots:
             
             void resetCategory();
 
