@@ -6,7 +6,6 @@
 
 #include "../../model/prefs/setting.hpp"
 #include "../../model/prefs/category.hpp"
-#include "../../model/prefs/state.hpp"
 
 CSVPrefs::Page::Page (CSMPrefs::Category& category, QWidget *parent)
 : PageBase (category, parent)

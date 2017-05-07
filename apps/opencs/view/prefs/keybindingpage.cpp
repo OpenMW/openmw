@@ -10,7 +10,6 @@
 
 #include "../../model/prefs/setting.hpp"
 #include "../../model/prefs/category.hpp"
-#include "../../model/prefs/state.hpp"
 
 namespace CSVPrefs
 {

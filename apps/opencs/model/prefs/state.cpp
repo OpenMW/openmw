@@ -5,8 +5,6 @@
 #include <algorithm>
 #include <sstream>
 
-#include <QMutexLocker>
-
 #include "intsetting.hpp"
 #include "doublesetting.hpp"
 #include "boolsetting.hpp"
