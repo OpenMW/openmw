@@ -6,6 +6,8 @@
 #define OPENMW_PROCESSORGAMETIME_HPP
 
 
+#include <apps/openmw/mwbase/world.hpp>
+#include <apps/openmw/mwbase/environment.hpp>
 #include "apps/openmw/mwmp/PlayerProcessor.hpp"
 
 namespace mwmp
@@ -15,7 +17,7 @@ namespace mwmp
     public:
         ProcessorGameTime()
         {
-            BPP_INIT(ID_PLAYER_CHARCLASS)
+            BPP_INIT(ID_GAME_TIME)
         }
 
         virtual void Do(PlayerPacket &packet, BasePlayer *player)
