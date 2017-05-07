@@ -383,18 +383,44 @@ namespace Resource
     public:
         bool isReservedName(const std::string& name) const
         {
+            if (name.empty())
+            {
+                return false;
+            }
+
             static std::set<std::string, Misc::StringUtils::CiComp> reservedNames;
             if (reservedNames.empty())
             {
-                const char* reserved[] = {"Head", "Neck", "Chest", "Groin", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist", "Shield Bone", "Right Forearm", "Left Forearm", "Right Upper Arm", "Left Upper Arm", "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee", "Left Knee", "Right Upper Leg", "Left Upper Leg", "Right Clavicle", "Left Clavicle", "Weapon Bone", "Tail",
-                                         "Bip01 L Hand", "Bip01 R Hand", "Bip01 Head", "Bip01 Spine1", "Bip01 Spine2", "Bip01 L Clavicle", "Bip01 R Clavicle", "bip01", "Root Bone", "Bip01 Neck",
-                                         "BoneOffset", "AttachLight", "ArrowBone", "Camera"};
+                const char* reserved[] = {"head", "neck", "chest", "groin", "right hand", "left hand", "right wrist", "left wrist", "shield bone", "right forearm",
+                                          "left forearm", "right upper arm", "left upper arm", "right foot", "left foot", "right ankle", "left ankle", "right knee", "left knee", "right upper leg",
+                                          "left upper leg", "right clavicle", "left clavicle", "weapon bone", "tail", "bip01", "root bone", "boneoffset", "attachlight", "arrowbone", "camera"};
+
                 reservedNames = std::set<std::string, Misc::StringUtils::CiComp>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
 
                 for (unsigned int i=0; i<sizeof(reserved)/sizeof(reserved[0]); ++i)
-                    reservedNames.insert(std::string("Tri ") + reserved[i]);
+                    reservedNames.insert(Misc::StringUtils::lowerCase(std::string("Tri ") + reserved[i]));
             }
-            return reservedNames.find(name) != reservedNames.end();
+
+            std::string lowerName = Misc::StringUtils::lowerCase(name);
+
+            for (std::set<std::string, Misc::StringUtils::CiComp>::iterator it = reservedNames.begin(); it != reservedNames.end(); ++it)
+            {
+                std::string boneName = *it;
+
+                if (name.size() < boneName.size())
+                    continue;
+
+                int result = lowerName.compare(0, boneName.size(), boneName);
+
+                if (result < 0)
+                    break;
+                else if (result > 0)
+                    continue;
+
+                return true;
+            }
+
+            return false;
         }
 
         virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Drawable* node,unsigned int option) const
