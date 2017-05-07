@@ -591,18 +591,16 @@ CSMPrefs::State& CSMPrefs::State::get()
 
 void CSMPrefs::State::resetCategory(const std::string& category)
 {
+    for (Settings::CategorySettingValueMap::iterator i = mSettings.mUserSettings.begin();
+        i != mSettings.mUserSettings.end(); ++i)
     {
-        QMutexLocker lock (&mMutex);
-        for (Settings::CategorySettingValueMap::iterator i = mSettings.mUserSettings.begin(); i != mSettings.mUserSettings.end(); ++i)
+        // if the category matches
+        if (i->first.first == category)
         {
-            // if the category matches
-            if (i->first.first == category)
-            {
-                // mark the setting as changed
-                mSettings.mChangedSettings.insert(std::make_pair(i->first.first, i->first.second));
-                // reset the value to the default
-                i->second = mSettings.mDefaultSettings[i->first];
-            }
+            // mark the setting as changed
+            mSettings.mChangedSettings.insert(std::make_pair(i->first.first, i->first.second));
+            // reset the value to the default
+            i->second = mSettings.mDefaultSettings[i->first];
         }
     }
 

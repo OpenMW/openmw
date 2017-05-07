@@ -16,4 +16,5 @@ CSMPrefs::Category& CSVPrefs::PageBase::getCategory()
 void CSVPrefs::PageBase::resetCategory()
 {
     CSMPrefs::get().resetCategory(getCategory().getKey());
+    refresh();
 }

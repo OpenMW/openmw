@@ -10,6 +10,8 @@
 #include "state.hpp"
 #include "shortcutmanager.hpp"
 
+#include <iostream>
+
 namespace CSMPrefs
 {
     const int ShortcutSetting::MaxKeys;

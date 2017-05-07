@@ -2,6 +2,7 @@
 #define CSV_PREFS_PAGEBASE_H
 
 #include <QScrollArea>
+#include <QLayout>
 
 namespace CSMPrefs
 {
@@ -25,6 +26,10 @@ namespace CSVPrefs
 		public slots:
 
 			void resetCategory();
+
+        private:
+
+            virtual void refresh() {};
     };
 }
 

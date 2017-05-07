@@ -3,6 +3,7 @@
 
 #include "pagebase.hpp"
 
+class QWidget;
 class QComboBox;
 class QGridLayout;
 class QStackedLayout;
@@ -26,6 +27,11 @@ namespace CSVPrefs
 
         private:
 
+            void refresh();
+
+            void init();
+
+            QWidget* mTopWidget;
             QStackedLayout* mStackedLayout;
             QGridLayout* mPageLayout;
             QComboBox* mPageSelector;
