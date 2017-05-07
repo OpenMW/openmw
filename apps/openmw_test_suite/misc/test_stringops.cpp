@@ -30,6 +30,7 @@ TEST_F(PartialBinarySearchTest, partial_binary_search_test)
     EXPECT_TRUE( matches("Tri Head") );
     EXPECT_TRUE( matches("tri head") );
 
+    EXPECT_FALSE( matches("Hea") );
     EXPECT_FALSE( matches(" Head") );
     EXPECT_FALSE( matches("Tri  Head") );
 }
