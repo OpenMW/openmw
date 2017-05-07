@@ -2,7 +2,6 @@
 #define CSV_PREFS_PAGEBASE_H
 
 #include <QScrollArea>
-#include <QLayout>
 
 namespace CSMPrefs
 {
