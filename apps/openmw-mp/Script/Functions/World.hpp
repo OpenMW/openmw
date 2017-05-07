@@ -23,6 +23,7 @@
     {"GetObjectRotX",               WorldFunctions::GetObjectRotX},\
     {"GetObjectRotY",               WorldFunctions::GetObjectRotY},\
     {"GetObjectRotZ",               WorldFunctions::GetObjectRotZ},\
+    {"GetObjectIsActor",            WorldFunctions::GetObjectIsActor},\
     \
     {"GetContainerChangesSize",     WorldFunctions::GetContainerChangesSize},\
     {"GetContainerItemRefId",       WorldFunctions::GetContainerItemRefId},\
@@ -89,6 +90,7 @@ public:
     static double GetObjectRotX(unsigned int i) noexcept;
     static double GetObjectRotY(unsigned int i) noexcept;
     static double GetObjectRotZ(unsigned int i) noexcept;
+    static bool GetObjectIsActor(unsigned int i) noexcept;
 
     static unsigned int GetContainerChangesSize(unsigned int objectIndex) noexcept;
     static const char *GetContainerItemRefId(unsigned int objectIndex, unsigned int itemIndex) noexcept;

@@ -47,6 +47,8 @@ namespace mwmp
         float floatVal;
         std::string varName;
 
+        bool isActor;
+
         std::vector<ContainerItem> containerItems;
         unsigned int containerItemCount;
     };

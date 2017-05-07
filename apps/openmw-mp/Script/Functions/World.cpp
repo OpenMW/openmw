@@ -119,6 +119,11 @@ double WorldFunctions::GetObjectRotZ(unsigned int i) noexcept
     return readEvent->worldObjects.at(i).position.rot[2];
 }
 
+bool WorldFunctions::GetObjectIsActor(unsigned int i) noexcept
+{
+    return readEvent->worldObjects.at(i).isActor;
+}
+
 unsigned int WorldFunctions::GetContainerChangesSize(unsigned int objectIndex) noexcept
 {
     return readEvent->worldObjects.at(objectIndex).containerItemCount;

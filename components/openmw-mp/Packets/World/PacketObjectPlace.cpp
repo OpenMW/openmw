@@ -40,6 +40,7 @@ void PacketObjectPlace::Packet(RakNet::BitStream *bs, bool send)
         RW(worldObject.charge, send);
         RW(worldObject.goldValue, send);
         RW(worldObject.position, send);
+        RW(worldObject.isActor, send);
 
         if (!send)
         {

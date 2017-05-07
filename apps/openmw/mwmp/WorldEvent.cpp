@@ -471,6 +471,8 @@ void WorldEvent::addObjectPlace(const MWWorld::Ptr& ptr)
     // Get the real count of gold in a stack
     worldObject.goldValue = ptr.getCellRef().getGoldValue();
 
+    worldObject.isActor = ptr.getClass().isActor();
+
     addObject(worldObject);
 }
 
