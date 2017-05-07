@@ -383,18 +383,25 @@ namespace Resource
     public:
         bool isReservedName(const std::string& name) const
         {
-            static std::set<std::string, Misc::StringUtils::CiComp> reservedNames;
+            if (name.empty())
+                return false;
+
+            static std::vector<std::string> reservedNames;
             if (reservedNames.empty())
             {
                 const char* reserved[] = {"Head", "Neck", "Chest", "Groin", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist", "Shield Bone", "Right Forearm", "Left Forearm", "Right Upper Arm", "Left Upper Arm", "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee", "Left Knee", "Right Upper Leg", "Left Upper Leg", "Right Clavicle", "Left Clavicle", "Weapon Bone", "Tail",
                                          "Bip01 L Hand", "Bip01 R Hand", "Bip01 Head", "Bip01 Spine1", "Bip01 Spine2", "Bip01 L Clavicle", "Bip01 R Clavicle", "bip01", "Root Bone", "Bip01 Neck",
                                          "BoneOffset", "AttachLight", "ArrowBone", "Camera"};
-                reservedNames = std::set<std::string, Misc::StringUtils::CiComp>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
+                reservedNames = std::vector<std::string>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
 
                 for (unsigned int i=0; i<sizeof(reserved)/sizeof(reserved[0]); ++i)
-                    reservedNames.insert(std::string("Tri ") + reserved[i]);
+                    reservedNames.push_back(std::string("Tri ") + reserved[i]);
+
+                std::sort(reservedNames.begin(), reservedNames.end(), Misc::StringUtils::ciLess);
             }
-            return reservedNames.find(name) != reservedNames.end();
+
+            std::vector<std::string>::iterator it = Misc::StringUtils::partialBinarySearch(reservedNames.begin(), reservedNames.end(), name);
+            return it != reservedNames.end();
         }
 
         virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Drawable* node,unsigned int option) const
