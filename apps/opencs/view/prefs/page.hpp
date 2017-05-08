@@ -4,7 +4,6 @@
 #include "pagebase.hpp"
 
 class QGridLayout;
-class QWidget;
 
 namespace CSMPrefs
 {
@@ -18,20 +17,12 @@ namespace CSVPrefs
             Q_OBJECT
 
             QGridLayout *mGrid;
-            QWidget* mParent;
-            QWidget* mWidget;
 
         public:
 
             Page (CSMPrefs::Category& category, QWidget *parent);
 
             void addSetting (CSMPrefs::Setting *setting);
-
-        private:
-
-            void refresh();
-
-            void init();
     };
 }
 
