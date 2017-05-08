@@ -54,6 +54,7 @@ namespace mwmp
     struct SimpleCreatureStats
     {
         ESM::StatState<float> mDynamic[3];
+        bool mDead;
     };
 }
 

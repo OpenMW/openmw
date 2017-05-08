@@ -42,12 +42,16 @@ LocalActor::~LocalActor()
 
 void LocalActor::update(bool forceUpdate)
 {
-    updatePosition(forceUpdate);
-    updateAnimFlags(forceUpdate);
-    updateAnimPlay();
-    updateSpeech();
     updateStatsDynamic(forceUpdate);
-    updateAttack();
+
+    if (forceUpdate || !creatureStats.mDead)
+    {
+        updatePosition(forceUpdate);
+        updateAnimFlags(forceUpdate);
+        updateAnimPlay();
+        updateSpeech();
+        updateAttack();
+    }
 }
 
 void LocalActor::updateCell()
@@ -182,6 +186,8 @@ void LocalActor::updateStatsDynamic(bool forceUpdate)
             health.writeState(creatureStats.mDynamic[0]);
             magicka.writeState(creatureStats.mDynamic[1]);
             fatigue.writeState(creatureStats.mDynamic[2]);
+
+            creatureStats.mDead = ptrCreatureStats->isDead();
 
             statTimer = 0;
 
