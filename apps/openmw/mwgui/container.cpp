@@ -363,6 +363,22 @@ namespace MWGui
         {
             onTakeAllButtonClicked(mTakeButton);
 
+            /*
+                Start of tes3mp addition
+
+                Send an ID_OBJECT_DELETE packet every time a corpse is disposed of
+            */
+            if (!mPtr.getClass().isPersistent(mPtr))
+            {
+                mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+                worldEvent->reset();
+                worldEvent->addObjectDelete(mPtr);
+                worldEvent->sendObjectDelete();
+            }
+            /*
+                End of tes3mp addition
+            */
+
             if (mPtr.getClass().isPersistent(mPtr))
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sDisposeCorpseFail}");
             else
