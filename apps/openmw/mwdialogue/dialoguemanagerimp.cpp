@@ -633,6 +633,12 @@ namespace MWDialogue
             return;
         }
 
+        if (actor.getClass().isNpc() && MWBase::Environment::get().getWorld()->isSwimming(actor))
+        {
+            // NPCs don't talk while submerged
+            return;
+        }
+
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         const ESM::Dialogue *dial = store.get<ESM::Dialogue>().find(topic);
 
