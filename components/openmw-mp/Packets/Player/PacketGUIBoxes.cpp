@@ -10,6 +10,7 @@ using namespace mwmp;
 PacketGUIBoxes::PacketGUIBoxes(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_GUI_MESSAGEBOX;
+    orderChannel = CHANNEL_SYSTEM;
 }
 
 void PacketGUIBoxes::Packet(RakNet::BitStream *bs, bool send)

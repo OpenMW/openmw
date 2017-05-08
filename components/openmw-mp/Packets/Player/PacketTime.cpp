@@ -10,6 +10,7 @@ using namespace mwmp;
 PacketTime::PacketTime(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_GAME_TIME;
+    orderChannel = CHANNEL_SYSTEM;
 }
 
 void PacketTime::Packet(RakNet::BitStream *bs, bool send)

@@ -10,6 +10,7 @@ using namespace mwmp;
 PacketHandshake::PacketHandshake(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
 {
     packetID = ID_HANDSHAKE;
+    orderChannel = CHANNEL_SYSTEM;
 }
 
 void PacketHandshake::Packet(RakNet::BitStream *bs, bool send)

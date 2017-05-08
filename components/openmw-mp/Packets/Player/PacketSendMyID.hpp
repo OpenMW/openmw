@@ -16,6 +16,7 @@ namespace mwmp
         PacketSendMyID(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
         {
             packetID = ID_USER_MYID;
+            orderChannel = CHANNEL_SYSTEM;
         }
     };
 }

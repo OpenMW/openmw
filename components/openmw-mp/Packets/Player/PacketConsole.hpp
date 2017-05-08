@@ -16,6 +16,7 @@ namespace mwmp
         PacketConsole(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
         {
             packetID = ID_GAME_CONSOLE;
+            orderChannel = CHANNEL_SYSTEM;
         }
         void Packet(RakNet::BitStream *bs, bool send)
         {

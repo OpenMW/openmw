@@ -16,6 +16,7 @@ namespace mwmp
         PacketDisconnect(RakNet::RakPeerInterface *peer) : PlayerPacket(peer)
         {
             packetID = ID_USER_DISCONNECTED;
+            orderChannel = CHANNEL_SYSTEM;
         }
     };
 }

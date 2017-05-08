@@ -10,6 +10,7 @@ ActorPacket::ActorPacket(RakNet::RakPeerInterface *peer) : BasePacket(peer)
     packetID = 0;
     priority = HIGH_PRIORITY;
     reliability = RELIABLE_ORDERED;
+    orderChannel = CHANNEL_ACTOR;
     this->peer = peer;
 }
 

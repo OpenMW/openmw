@@ -10,6 +10,7 @@ WorldPacket::WorldPacket(RakNet::RakPeerInterface *peer) : BasePacket(peer)
     packetID = 0;
     priority = HIGH_PRIORITY;
     reliability = RELIABLE_ORDERED;
+    orderChannel = CHANNEL_WORLDEVENT;
     this->peer = peer;
 }
 
