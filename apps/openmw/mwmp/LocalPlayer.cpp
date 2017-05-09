@@ -596,7 +596,7 @@ void LocalPlayer::updateAnimFlags(bool forceUpdate)
     if (wasRunning != isRunning ||
         wasSneaking != isSneaking || wasForceJumping != isForceJumping ||
         wasForceMoveJumping != isForceMoveJumping || lastDrawState != currentDrawState ||
-        wasJumping || isJumping || wasFlying || isFlying ||
+        wasJumping || isJumping || wasFlying != isFlying ||
         forceUpdate)
     {
         wasSneaking = isSneaking;
@@ -1036,7 +1036,6 @@ void LocalPlayer::sendCellStates()
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_CELL_STATE to server");
     getNetworking()->getPlayerPacket(ID_PLAYER_CELL_STATE)->setPlayer(this);
     getNetworking()->getPlayerPacket(ID_PLAYER_CELL_STATE)->Send();
-
 }
 
 void LocalPlayer::sendSpellAddition(std::string id)
