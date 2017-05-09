@@ -5,7 +5,7 @@
 
 #include "../../model/prefs/state.hpp"
 
-CSVPrefs::ContextMenuWidget::ContextMenuWidget(QWidget* parent, const std::string& category)
+CSVPrefs::ContextMenuWidget::ContextMenuWidget(const std::string& category, QWidget* parent)
     :QWidget(parent)
     ,mCategory(category)
 {

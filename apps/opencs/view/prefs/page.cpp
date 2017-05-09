@@ -10,7 +10,7 @@
 CSVPrefs::Page::Page (CSMPrefs::Category& category, QWidget *parent)
 : PageBase (category, parent)
 {
-    CSVPrefs::ContextMenuWidget *widget = new CSVPrefs::ContextMenuWidget (parent, category.getKey());
+    CSVPrefs::ContextMenuWidget *widget = new CSVPrefs::ContextMenuWidget (category.getKey(), parent);
     mGrid = new QGridLayout (widget);
 
     for (CSMPrefs::Category::Iterator iter = category.begin(); iter!=category.end(); ++iter)

@@ -9,6 +9,7 @@
 
 #include "../../model/prefs/setting.hpp"
 #include "../../model/prefs/category.hpp"
+#include "../../view/prefs/contextmenuwidget.hpp"
 
 namespace CSVPrefs
 {
@@ -19,7 +20,7 @@ namespace CSVPrefs
         , mPageSelector(0)
     {
         // Need one widget for scroll area
-        QWidget* topWidget = new QWidget();
+        CSVPrefs::ContextMenuWidget* topWidget = new CSVPrefs::ContextMenuWidget(category.getKey());
         QVBoxLayout* topLayout = new QVBoxLayout(topWidget);
 
         // Allows switching between "pages"

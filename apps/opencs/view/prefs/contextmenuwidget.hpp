@@ -15,7 +15,7 @@ namespace CSVPrefs
     
         public:
     
-            ContextMenuWidget(QWidget* parent, const std::string& category);
+            ContextMenuWidget(const std::string& category, QWidget* parent = 0);
     
         protected:
     
