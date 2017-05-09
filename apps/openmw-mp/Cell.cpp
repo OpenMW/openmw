@@ -183,7 +183,10 @@ void Cell::sendToLoaded(mwmp::ActorPacket *actorPacket, mwmp::BaseActorList *bas
     std::list <Player*> plList;
 
     for (auto pl : players)
-        plList.push_back(pl);
+    {
+        if (pl != nullptr && !pl->npc.mName.empty())
+            plList.push_back(pl);
+    }
 
     plList.sort();
     plList.unique();
@@ -207,7 +210,10 @@ void Cell::sendToLoaded(mwmp::WorldPacket *worldPacket, mwmp::BaseEvent *baseEve
     std::list <Player*> plList;
 
     for (auto pl : players)
-        plList.push_back(pl);
+    {
+        if (pl != nullptr && !pl->npc.mName.empty())
+            plList.push_back(pl);
+    }
 
     plList.sort();
     plList.unique();

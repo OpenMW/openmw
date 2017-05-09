@@ -32,43 +32,35 @@ namespace mwmp
 
                 player.forEachLoaded([this](Player *pl, Player *other) {
 
-                    if (other == nullptr)
-                    {
-                        LOG_APPEND(Log::LOG_INFO, "- Tried to exchange information with nullptr!");
-                        LOG_APPEND(Log::LOG_INFO, "- Please report this to a developer");
-                    }
-                    else
-                    {
-                        LOG_APPEND(Log::LOG_INFO, "- Started information exchange with %s", other->npc.mName.c_str());
+                    LOG_APPEND(Log::LOG_INFO, "- Started information exchange with %s", other->npc.mName.c_str());
 
-                        playerController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(other);
-                        playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->setPlayer(other);
-                        playerController->GetPacket(ID_PLAYER_POSITION)->setPlayer(other);
-                        playerController->GetPacket(ID_PLAYER_SKILL)->setPlayer(other);
-                        playerController->GetPacket(ID_PLAYER_EQUIPMENT)->setPlayer(other);
-                        playerController->GetPacket(ID_PLAYER_ANIM_FLAGS)->setPlayer(other);
+                    playerController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(other);
+                    playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->setPlayer(other);
+                    playerController->GetPacket(ID_PLAYER_POSITION)->setPlayer(other);
+                    playerController->GetPacket(ID_PLAYER_SKILL)->setPlayer(other);
+                    playerController->GetPacket(ID_PLAYER_EQUIPMENT)->setPlayer(other);
+                    playerController->GetPacket(ID_PLAYER_ANIM_FLAGS)->setPlayer(other);
 
-                        playerController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->Send(pl->guid);
-                        playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(pl->guid);
-                        playerController->GetPacket(ID_PLAYER_POSITION)->Send(pl->guid);
-                        playerController->GetPacket(ID_PLAYER_SKILL)->Send(pl->guid);
-                        playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(pl->guid);
-                        playerController->GetPacket(ID_PLAYER_ANIM_FLAGS)->Send(pl->guid);
+                    playerController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->Send(pl->guid);
+                    playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(pl->guid);
+                    playerController->GetPacket(ID_PLAYER_POSITION)->Send(pl->guid);
+                    playerController->GetPacket(ID_PLAYER_SKILL)->Send(pl->guid);
+                    playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(pl->guid);
+                    playerController->GetPacket(ID_PLAYER_ANIM_FLAGS)->Send(pl->guid);
 
-                        playerController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(pl);
-                        playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->setPlayer(pl);
-                        playerController->GetPacket(ID_PLAYER_SKILL)->setPlayer(pl);
-                        playerController->GetPacket(ID_PLAYER_EQUIPMENT)->setPlayer(pl);
-                        playerController->GetPacket(ID_PLAYER_ANIM_FLAGS)->setPlayer(pl);
+                    playerController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(pl);
+                    playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->setPlayer(pl);
+                    playerController->GetPacket(ID_PLAYER_SKILL)->setPlayer(pl);
+                    playerController->GetPacket(ID_PLAYER_EQUIPMENT)->setPlayer(pl);
+                    playerController->GetPacket(ID_PLAYER_ANIM_FLAGS)->setPlayer(pl);
 
-                        playerController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->Send(other->guid);
-                        playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(other->guid);
-                        playerController->GetPacket(ID_PLAYER_SKILL)->Send(other->guid);
-                        playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(other->guid);
-                        playerController->GetPacket(ID_PLAYER_ANIM_FLAGS)->Send(other->guid);
+                    playerController->GetPacket(ID_PLAYER_STATS_DYNAMIC)->Send(other->guid);
+                    playerController->GetPacket(ID_PLAYER_ATTRIBUTE)->Send(other->guid);
+                    playerController->GetPacket(ID_PLAYER_SKILL)->Send(other->guid);
+                    playerController->GetPacket(ID_PLAYER_EQUIPMENT)->Send(other->guid);
+                    playerController->GetPacket(ID_PLAYER_ANIM_FLAGS)->Send(other->guid);
 
-                        LOG_APPEND(Log::LOG_INFO, "- Finished information exchange with %s", other->npc.mName.c_str());
-                    }
+                    LOG_APPEND(Log::LOG_INFO, "- Finished information exchange with %s", other->npc.mName.c_str());
                 });
 
                 playerController->GetPacket(ID_PLAYER_POSITION)->setPlayer(&player);

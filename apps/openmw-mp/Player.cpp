@@ -142,8 +142,13 @@ void Player::forEachLoaded(std::function<void(Player *pl, Player *other)> func)
     std::list <Player*> plList;
 
     for (auto cell : cells)
+    {
         for (auto pl : *cell)
-            plList.push_back(pl);
+        {
+            if (pl != nullptr && !pl->npc.mName.empty())
+                plList.push_back(pl);
+        }
+    }
 
     plList.sort();
     plList.unique();
