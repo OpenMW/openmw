@@ -3,6 +3,7 @@
 
 #include <QLabel>
 #include <QMutexLocker>
+#include <QString>
 
 #include <components/settings/settings.hpp>
 
@@ -13,7 +14,7 @@
 
 CSMPrefs::ColourSetting::ColourSetting (Category *parent, Settings::Manager *values,
   QMutex *mutex, const std::string& key, const std::string& label, QColor default_)
-: Setting (parent, values, mutex, key, label), mDefault (default_)
+: Setting (parent, values, mutex, key, label), mDefault (default_), mWidget(0)
 {}
 
 CSMPrefs::ColourSetting& CSMPrefs::ColourSetting::setTooltip (const std::string& tooltip)
@@ -26,18 +27,27 @@ std::pair<QWidget *, QWidget *> CSMPrefs::ColourSetting::makeWidgets (QWidget *p
 {
     QLabel *label = new QLabel (QString::fromUtf8 (getLabel().c_str()), parent);
 
-    CSVWidget::ColorEditor *widget = new CSVWidget::ColorEditor (mDefault, parent);
+    mWidget = new CSVWidget::ColorEditor (mDefault, parent);
 
     if (!mTooltip.empty())
     {
         QString tooltip = QString::fromUtf8 (mTooltip.c_str());
         label->setToolTip (tooltip);
-        widget->setToolTip (tooltip);
+        mWidget->setToolTip (tooltip);
     }
 
-    connect (widget, SIGNAL (pickingFinished()), this, SLOT (valueChanged()));
+    connect (mWidget, SIGNAL (pickingFinished()), this, SLOT (valueChanged()));
 
-    return std::make_pair (label, widget);
+    return std::make_pair (label, mWidget);
+}
+
+void CSMPrefs::ColourSetting::updateWidget()
+{
+    if (mWidget)
+    {
+        mWidget->setColor(QString::fromStdString
+            (getValues().getString(getKey(), getParent()->getKey())));
+    }
 }
 
 void CSMPrefs::ColourSetting::valueChanged()

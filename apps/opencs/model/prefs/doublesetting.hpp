@@ -3,6 +3,8 @@
 
 #include "setting.hpp"
 
+class QDoubleSpinBox;
+
 namespace CSMPrefs
 {
     class DoubleSetting : public Setting
@@ -14,6 +16,7 @@ namespace CSMPrefs
             double mMax;
             std::string mTooltip;
             double mDefault;
+            QDoubleSpinBox* mWidget;
 
         public:
 
@@ -34,6 +37,8 @@ namespace CSMPrefs
 
             /// Return label, input widget.
             virtual std::pair<QWidget *, QWidget *> makeWidgets (QWidget *parent);
+
+            virtual void updateWidget();
 
         private slots:
 

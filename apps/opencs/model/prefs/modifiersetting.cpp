@@ -39,6 +39,19 @@ namespace CSMPrefs
         return std::make_pair(label, widget);
     }
 
+    void ModifierSetting::updateWidget()
+    {
+        if (mButton)
+        {
+            std::string shortcut = getValues().getString(getKey(), getParent()->getKey());
+
+            int modifier;
+            State::get().getShortcutManager().convertFromString(shortcut, modifier);
+            State::get().getShortcutManager().setModifier(getKey(), modifier);
+            resetState();
+        }
+    }
+
     bool ModifierSetting::eventFilter(QObject* target, QEvent* event)
     {
         if (event->type() == QEvent::KeyPress)

@@ -5,11 +5,12 @@
 
 #include "../../model/prefs/setting.hpp"
 #include "../../model/prefs/category.hpp"
+#include "../../view/prefs/contextmenuwidget.hpp"
 
 CSVPrefs::Page::Page (CSMPrefs::Category& category, QWidget *parent)
 : PageBase (category, parent)
 {
-    QWidget *widget = new QWidget (parent);
+    CSVPrefs::ContextMenuWidget *widget = new CSVPrefs::ContextMenuWidget (parent, category.getKey());
     mGrid = new QGridLayout (widget);
 
     for (CSMPrefs::Category::Iterator iter = category.begin(); iter!=category.end(); ++iter)
