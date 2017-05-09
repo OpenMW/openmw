@@ -40,6 +40,6 @@ TEST_F (PartialBinarySearchTest, ci_test)
     EXPECT_TRUE (Misc::StringUtils::lowerCase("ASD") == "asd");
 
     // test to make sure system locale is not used
-    std::string unicode1 = "\u04151 \u0418"; // CYRILLIC CAPITAL LETTER IE	 CYRILLIC CAPITAL LETTER I
+    std::string unicode1 = "\u04151 \u0418"; // CYRILLIC CAPITAL LETTER IE, CYRILLIC CAPITAL LETTER I
     EXPECT_TRUE( Misc::StringUtils::lowerCase(unicode1) == unicode1 );
 }
