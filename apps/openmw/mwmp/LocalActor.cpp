@@ -33,6 +33,8 @@ LocalActor::LocalActor()
 
     attack.type = Attack::MELEE;
     attack.shouldSend = false;
+
+    creatureStats.mDead = false;
 }
 
 LocalActor::~LocalActor()
