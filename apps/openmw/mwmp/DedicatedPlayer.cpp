@@ -94,6 +94,10 @@ void DedicatedPlayer::move(float dt)
     ESM::Position refPos = ptr.getRefData().getPosition();
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
+    // Apply interpolation only if the position hasn't changed too much from last time
+    bool shouldInterpolate = abs(position.pos[0] - refPos.pos[0]) < 4 && abs(position.pos[1] - refPos.pos[1]) < 4 && abs(position.pos[2] - refPos.pos[2]) < 4;
+
+    if (shouldInterpolate)
     {
         static const int timeMultiplier = 15;
         osg::Vec3f lerp = Main::get().getMechanicsHelper()->getLinearInterpolation(refPos.asVec3(), position.asVec3(), dt * timeMultiplier);
@@ -102,6 +106,10 @@ void DedicatedPlayer::move(float dt)
         refPos.pos[2] = lerp.z();
 
         world->moveObject(ptr, refPos.pos[0], refPos.pos[1], refPos.pos[2]);
+    }
+    else
+    {
+        world->moveObject(ptr, position.pos[0], position.pos[1], position.pos[2]);
     }
 
     MWMechanics::Movement *move = &ptr.getClass().getMovementSettings(ptr);

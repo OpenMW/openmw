@@ -65,9 +65,12 @@ void DedicatedActor::move(float dt)
     ESM::Position refPos = ptr.getRefData().getPosition();
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
+    // Apply interpolation only if the position hasn't changed too much from last time
+    bool shouldInterpolate = abs(position.pos[0] - refPos.pos[0]) < 4 && abs(position.pos[1] - refPos.pos[1]) < 4 && abs(position.pos[2] - refPos.pos[2]) < 4;
+
     // Don't apply linear interpolation if the DedicatedActor has just gone through a cell change, because
     // the interpolated position will be invalid, causing a slight hopping glitch
-    if (!hasChangedCell)
+    if (shouldInterpolate && !hasChangedCell)
     {
         static const int timeMultiplier = 15;
         osg::Vec3f lerp = Main::get().getMechanicsHelper()->getLinearInterpolation(refPos.asVec3(), position.asVec3(), dt * timeMultiplier);
