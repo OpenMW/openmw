@@ -40,6 +40,10 @@ namespace CSMPrefs
 
         widget->setCheckable(true);
         widget->installEventFilter(this);
+
+        // right clicking on button sets shortcut to RMB, so context menu should not appear
+        widget->setContextMenuPolicy(Qt::ContextMenuPolicy::PreventContextMenu);
+
         mButton = widget;
 
         connect(widget, SIGNAL(toggled(bool)), this, SLOT(buttonToggled(bool)));
