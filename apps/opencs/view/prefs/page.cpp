@@ -10,22 +10,20 @@
 CSVPrefs::Page::Page (CSMPrefs::Category& category, QWidget *parent)
 : PageBase (category, parent)
 {
-    CSVPrefs::ContextMenuWidget *widget = new CSVPrefs::ContextMenuWidget (category.getKey(), parent);
+    // topWidget can expand while widget stays the same size
+    // This is so the context menu triggers over the entire page
+    // but the user interface looks the same
+    CSVPrefs::ContextMenuWidget *topWidget = new CSVPrefs::ContextMenuWidget (category.getKey(), parent);
+    topWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    QWidget* widget = new QWidget(topWidget);
     mGrid = new QGridLayout (widget);
 
     for (CSMPrefs::Category::Iterator iter = category.begin(); iter!=category.end(); ++iter)
         addSetting (*iter);
 
-    // HACK to get widget to consume all available page space so context menu clicks
-    // will trigger, but so that setting widgets still only take up the left hand side
-    QWidget* emptyColumn = new QWidget();
-    mGrid->addWidget(emptyColumn, 0, 2, -1, 1);
-    QWidget* emptyRow = new QWidget();
-    emptyRow->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Expanding);
-    mGrid->addWidget(emptyRow, mGrid->rowCount(), 0, 1, -1);
-
     setWidgetResizable(true);
-    setWidget (widget);
+    setWidget (topWidget);
 }
 
 void CSVPrefs::Page::addSetting (CSMPrefs::Setting *setting)
