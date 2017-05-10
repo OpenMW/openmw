@@ -16,6 +16,15 @@ CSVPrefs::Page::Page (CSMPrefs::Category& category, QWidget *parent)
     for (CSMPrefs::Category::Iterator iter = category.begin(); iter!=category.end(); ++iter)
         addSetting (*iter);
 
+    // HACK to get widget to consume all available page space so context menu clicks
+    // will trigger, but so that setting widgets still only take up the left hand side
+    QWidget* emptyColumn = new QWidget();
+    mGrid->addWidget(emptyColumn, 0, 2, -1, 1);
+    QWidget* emptyRow = new QWidget();
+    emptyRow->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Expanding);
+    mGrid->addWidget(emptyRow, mGrid->rowCount(), 0, 1, -1);
+
+    setWidgetResizable(true);
     setWidget (widget);
 }
 
