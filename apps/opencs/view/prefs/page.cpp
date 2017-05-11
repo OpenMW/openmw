@@ -5,25 +5,17 @@
 
 #include "../../model/prefs/setting.hpp"
 #include "../../model/prefs/category.hpp"
-#include "../../view/prefs/contextmenuwidget.hpp"
 
 CSVPrefs::Page::Page (CSMPrefs::Category& category, QWidget *parent)
 : PageBase (category, parent)
 {
-    // topWidget can expand while widget stays the same size
-    // This is so the context menu triggers over the entire page
-    // but the user interface looks the same
-    CSVPrefs::ContextMenuWidget *topWidget = new CSVPrefs::ContextMenuWidget (category.getKey(), parent);
-    topWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    QWidget* widget = new QWidget(topWidget);
+    QWidget *widget = new QWidget (parent);
     mGrid = new QGridLayout (widget);
 
     for (CSMPrefs::Category::Iterator iter = category.begin(); iter!=category.end(); ++iter)
         addSetting (*iter);
 
-    setWidgetResizable(true);
-    setWidget (topWidget);
+    setWidget (widget);
 }
 
 void CSVPrefs::Page::addSetting (CSMPrefs::Setting *setting)
