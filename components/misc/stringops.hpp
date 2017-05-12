@@ -114,6 +114,30 @@ public:
             return ciLess(left, right);
         }
     };
+
+
+    /// Performs a binary search on a sorted container for a string that 'key' starts with
+    template<typename Iterator, typename T>
+    static Iterator partialBinarySearch(Iterator begin, Iterator end, const T& key)
+    {
+        const Iterator notFound = end;
+
+        while(begin < end)
+        {
+            const Iterator middle = begin + (std::distance(begin, end) / 2);
+
+            int comp = Misc::StringUtils::ciCompareLen((*middle), key, (*middle).size());
+
+            if(comp == 0)
+                return middle;
+            else if(comp > 0)
+                end = middle;
+            else
+                begin = middle + 1;
+        }
+
+        return notFound;
+    }
 };
 
 }
