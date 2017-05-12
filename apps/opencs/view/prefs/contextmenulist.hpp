@@ -4,6 +4,7 @@
 #include <QListWidget>
 
 class QContextMenuEvent;
+class QMouseEvent;
 
 namespace CSVPrefs
 {
@@ -18,6 +19,8 @@ namespace CSVPrefs
         protected:
     
             void contextMenuEvent(QContextMenuEvent* e);
+
+            void mousePressEvent(QMouseEvent* e);
     
         private slots:
     
