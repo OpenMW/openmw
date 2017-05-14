@@ -188,6 +188,9 @@ void Cell::readStatsDynamic(ActorList& actorList)
                 // That way, if this actor is about to become a LocalActor, initial data about it
                 // received from the server still gets set
                 actor->setStatsDynamic();
+
+                if (actor->creatureStats.mDynamic[0].mCurrent < 1)
+                    actor->getPtr().getClass().getCreatureStats(actor->getPtr()).setDeathAnimationFinished(true);
             }
         }
     }
