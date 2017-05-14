@@ -43,8 +43,13 @@ DedicatedActor::~DedicatedActor()
 
 void DedicatedActor::update(float dt)
 {
-    move(dt);
-    setAnimFlags();
+    // Only move and set anim flags if the framerate isn't too low
+    if (dt < 0.1)
+    {
+        move(dt);
+        setAnimFlags();
+    }
+
     playAnimation();
     playSound();
     setStatsDynamic();

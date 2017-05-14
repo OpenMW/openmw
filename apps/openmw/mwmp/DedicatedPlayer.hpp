@@ -34,9 +34,9 @@ namespace mwmp
         void update(float dt);
 
         void move(float dt);
-        void updateAnimFlags();
-        void updateEquipment();
-        void updateCell();
+        void setAnimFlags();
+        void setEquipment();
+        void setCell();
 
         void updateMarker();
         void removeMarker();

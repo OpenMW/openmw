@@ -687,7 +687,7 @@ void CharacterController::playRandomDeath(float startpoint)
         Start of tes3mp addition
 
         If this is a LocalActor or DedicatedActor whose death animation is supposed to be finished,
-        set the start point to the animation's end
+        set the startpoint to the animation's end
     */
     if (mPtr.getClass().getCreatureStats(mPtr).isDeathAnimationFinished() && (mwmp::Main::get().getCellController()->isLocalActor(mPtr) || mwmp::Main::get().getCellController()->isDedicatedActor(mPtr)))
     {

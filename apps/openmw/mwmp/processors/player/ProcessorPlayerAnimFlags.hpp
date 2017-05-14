@@ -26,7 +26,7 @@ namespace mwmp
                     static_cast<LocalPlayer *>(player)->updateAnimFlags(true);
             }
             else if (player != 0)
-                static_cast<DedicatedPlayer *>(player)->updateAnimFlags();
+                static_cast<DedicatedPlayer *>(player)->setAnimFlags();
         }
     };
 }

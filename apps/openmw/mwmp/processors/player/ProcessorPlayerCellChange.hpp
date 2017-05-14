@@ -28,7 +28,7 @@ namespace mwmp
                     static_cast<LocalPlayer *>(player)->setCell();
             }
             else if (player != 0)
-                static_cast<DedicatedPlayer*>(player)->updateCell();
+                static_cast<DedicatedPlayer*>(player)->setCell();
         }
     };
 }

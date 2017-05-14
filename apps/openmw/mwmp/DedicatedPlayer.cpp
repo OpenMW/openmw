@@ -83,8 +83,12 @@ void DedicatedPlayer::update(float dt)
     ptrCreatureStats->setAiSetting(MWMechanics::CreatureStats::AI_Flee, 0);
     ptrCreatureStats->setAiSetting(MWMechanics::CreatureStats::AI_Hello, 0);
 
-    move(dt);
-    updateAnimFlags();
+    // Only move and set anim flags if the framerate isn't too low
+    if (dt < 0.1)
+    {
+        move(dt);
+        setAnimFlags();
+    }
 }
 
 void DedicatedPlayer::move(float dt)
@@ -120,7 +124,7 @@ void DedicatedPlayer::move(float dt)
     world->rotateObject(ptr, position.rot[0], position.rot[1], position.rot[2]);
 }
 
-void DedicatedPlayer::updateAnimFlags()
+void DedicatedPlayer::setAnimFlags()
 {
     using namespace MWMechanics;
 
@@ -154,7 +158,7 @@ void DedicatedPlayer::updateAnimFlags()
     ptrCreatureStats->setMovementFlag(CreatureStats::Flag_ForceMoveJump, (movementFlags & CreatureStats::Flag_ForceMoveJump) != 0);
 }
 
-void DedicatedPlayer::updateEquipment()
+void DedicatedPlayer::setEquipment()
 {
     MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
@@ -194,7 +198,7 @@ void DedicatedPlayer::updateEquipment()
     }
 }
 
-void DedicatedPlayer::updateCell()
+void DedicatedPlayer::setCell()
 {
     // Prevent cell update when player hasn't been instantiated yet
     if (state == 0)

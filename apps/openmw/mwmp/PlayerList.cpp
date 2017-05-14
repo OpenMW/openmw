@@ -183,7 +183,7 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
         world->disable(players[guid]->ptr);
 
         dedicPlayer->setPtr(world->moveObject(dedicPlayer->ptr, cellStore, spawnPos.pos[0], spawnPos.pos[1], spawnPos.pos[2]));
-        dedicPlayer->updateCell();
+        dedicPlayer->setCell();
 
         ESM::CustomMarker mEditingMarker = Main::get().getGUIController()->CreateMarker(guid);
         dedicPlayer->marker = mEditingMarker;
