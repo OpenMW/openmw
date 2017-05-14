@@ -28,12 +28,17 @@ bool WorldProcessor::Process(RakNet::Packet &packet, WorldEvent &event)
             myGuid = Main::get().getLocalPlayer()->guid;
             request = packet.length == myPacket->headerSize();
 
+            event.isValid = true;
+
             if (!request && !processor.second->avoidReading)
             {
                 myPacket->Read();
             }
 
-            processor.second->Do(*myPacket, event);
+            if (event.isValid)
+                processor.second->Do(*myPacket, event);
+            else
+                LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "Received %s that failed integrity check and was ignored!", processor.second->strPacketID.c_str());
 
             return true;
         }

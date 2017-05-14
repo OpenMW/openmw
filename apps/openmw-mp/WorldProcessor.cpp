@@ -40,11 +40,16 @@ bool WorldProcessor::Process(RakNet::Packet &packet, BaseEvent &event) noexcept
             WorldPacket *myPacket = Networking::get().getWorldPacketController()->GetPacket(packet.data[0]);
 
             myPacket->setEvent(&event);
+            event.isValid = true;
 
             if (!processor.second->avoidReading)
                 myPacket->Read();
 
-            processor.second->Do(*myPacket, *player, event);
+            if (event.isValid)
+                processor.second->Do(*myPacket, *player, event);
+            else
+                LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "Received %s that failed integrity check and was ignored!", processor.second->strPacketID.c_str());
+            
             return true;
         }
     }

@@ -1,4 +1,5 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
+#include <components/openmw-mp/Log.hpp>
 #include "PacketContainer.hpp"
 
 using namespace mwmp;
@@ -49,13 +50,19 @@ void PacketContainer::Packet(RakNet::BitStream *bs, bool send)
         RW(worldObject.mpNum, send);
         RW(worldObject.containerItemCount, send);
 
+        if (worldObject.containerItemCount > 2000 || worldObject.refId.empty() || (worldObject.refNumIndex != 0 && worldObject.mpNum != 0))
+        {
+            event->isValid = false;
+            return;
+        }
+
         ContainerItem containerItem;
 
-        for (unsigned int i = 0; i < worldObject.containerItemCount; i++)
+        for (unsigned int j = 0; j < worldObject.containerItemCount; j++)
         {
             if (send)
             {
-                containerItem = worldObject.containerItems.at(i);
+                containerItem = worldObject.containerItems.at(j);
             }
 
             RW(containerItem.refId, send);
