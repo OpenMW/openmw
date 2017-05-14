@@ -55,14 +55,14 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
     {
         worldObject = worldObjects.at(i);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
+        //LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex, worldObject.mpNum);
 
         if (ptrFound)
         {
-            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
-                               ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
+            //LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
+            //                   ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
 
             MWWorld::ContainerStore& containerStore = ptrFound.getClass().getContainerStore(ptrFound);
 
