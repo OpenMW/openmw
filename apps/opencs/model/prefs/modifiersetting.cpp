@@ -32,11 +32,28 @@ namespace CSMPrefs
 
         widget->setCheckable(true);
         widget->installEventFilter(this);
+
+        // right clicking on button sets shortcut to RMB, so context menu should not appear
+        widget->setContextMenuPolicy(Qt::PreventContextMenu);
+
         mButton = widget;
 
         connect(widget, SIGNAL(toggled(bool)), this, SLOT(buttonToggled(bool)));
 
         return std::make_pair(label, widget);
+    }
+
+    void ModifierSetting::updateWidget()
+    {
+        if (mButton)
+        {
+            std::string shortcut = getValues().getString(getKey(), getParent()->getKey());
+
+            int modifier;
+            State::get().getShortcutManager().convertFromString(shortcut, modifier);
+            State::get().getShortcutManager().setModifier(getKey(), modifier);
+            resetState();
+        }
     }
 
     bool ModifierSetting::eventFilter(QObject* target, QEvent* event)

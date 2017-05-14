@@ -3,6 +3,8 @@
 
 #include <QScrollArea>
 
+class QContextMenuEvent;
+
 namespace CSMPrefs
 {
     class Category;
@@ -21,6 +23,16 @@ namespace CSVPrefs
             PageBase (CSMPrefs::Category& category, QWidget *parent);
 
             CSMPrefs::Category& getCategory();
+
+        protected:
+
+            void contextMenuEvent(QContextMenuEvent*);
+
+        private slots:
+
+            void resetCategory();
+
+            void resetAll();
     };
 }
 

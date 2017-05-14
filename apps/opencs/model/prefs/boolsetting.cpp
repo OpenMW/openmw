@@ -11,7 +11,7 @@
 
 CSMPrefs::BoolSetting::BoolSetting (Category *parent, Settings::Manager *values,
   QMutex *mutex, const std::string& key, const std::string& label, bool default_)
-: Setting (parent, values, mutex, key, label),  mDefault (default_)
+: Setting (parent, values, mutex, key, label),  mDefault (default_), mWidget(0)
 {}
 
 CSMPrefs::BoolSetting& CSMPrefs::BoolSetting::setTooltip (const std::string& tooltip)
@@ -22,18 +22,28 @@ CSMPrefs::BoolSetting& CSMPrefs::BoolSetting::setTooltip (const std::string& too
 
 std::pair<QWidget *, QWidget *> CSMPrefs::BoolSetting::makeWidgets (QWidget *parent)
 {
-    QCheckBox *widget = new QCheckBox (QString::fromUtf8 (getLabel().c_str()), parent);
-    widget->setCheckState (mDefault ? Qt::Checked : Qt::Unchecked);
+    mWidget = new QCheckBox (QString::fromUtf8 (getLabel().c_str()), parent);
+    mWidget->setCheckState (mDefault ? Qt::Checked : Qt::Unchecked);
 
     if (!mTooltip.empty())
     {
         QString tooltip = QString::fromUtf8 (mTooltip.c_str());
-        widget->setToolTip (tooltip);
+        mWidget->setToolTip (tooltip);
     }
 
-    connect (widget, SIGNAL (stateChanged (int)), this, SLOT (valueChanged (int)));
+    connect (mWidget, SIGNAL (stateChanged (int)), this, SLOT (valueChanged (int)));
 
-    return std::make_pair (static_cast<QWidget *> (0), widget);
+    return std::make_pair (static_cast<QWidget *> (0), mWidget);
+}
+
+void CSMPrefs::BoolSetting::updateWidget()
+{
+    if (mWidget)
+    {
+        mWidget->setCheckState(getValues().getBool(getKey(), getParent()->getKey())
+            ? Qt::Checked
+            : Qt::Unchecked);
+    }
 }
 
 void CSMPrefs::BoolSetting::valueChanged (int value)

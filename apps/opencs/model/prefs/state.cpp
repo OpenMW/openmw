@@ -587,6 +587,41 @@ CSMPrefs::State& CSMPrefs::State::get()
     return *sThis;
 }
 
+void CSMPrefs::State::resetCategory(const std::string& category)
+{
+    for (Settings::CategorySettingValueMap::iterator i = mSettings.mUserSettings.begin();
+         i != mSettings.mUserSettings.end(); ++i)
+    {
+        // if the category matches
+        if (i->first.first == category)
+        {
+            // mark the setting as changed
+            mSettings.mChangedSettings.insert(std::make_pair(i->first.first, i->first.second));
+            // reset the value to the default
+            i->second = mSettings.mDefaultSettings[i->first];
+        }
+    }
+
+    Collection::iterator container = mCategories.find(category);
+    if (container != mCategories.end())
+    {
+        Category settings = container->second;
+        for (Category::Iterator i = settings.begin(); i != settings.end(); ++i)
+        {
+            (*i)->updateWidget();
+            update(**i);
+        }
+    }
+}
+
+void CSMPrefs::State::resetAll()
+{
+    for (Collection::iterator iter = mCategories.begin(); iter != mCategories.end(); ++iter)
+    {
+        resetCategory(iter->first);
+    }
+}
+
 
 CSMPrefs::State& CSMPrefs::get()
 {

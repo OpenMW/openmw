@@ -110,7 +110,7 @@ opencs_units_noqt (view/tools
     )
 
 opencs_units (view/prefs
-    dialogue pagebase page keybindingpage
+    dialogue pagebase page keybindingpage contextmenulist
     )
 
 opencs_units (model/prefs

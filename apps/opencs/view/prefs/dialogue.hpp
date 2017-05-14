@@ -16,7 +16,6 @@ namespace CSVPrefs
     {
             Q_OBJECT
 
-            QListWidget *mList;
             QStackedWidget *mContent;
 
         private:

@@ -47,6 +47,11 @@ namespace CSMPrefs
             /// widget.
             virtual std::pair<QWidget *, QWidget *> makeWidgets (QWidget *parent);
 
+            /// Updates the widget returned by makeWidgets() to the current setting.
+            ///
+            /// \note If make_widgets() has not been called yet then nothing happens.
+            virtual void updateWidget();
+
             const Category *getParent() const;
 
             const std::string& getKey() const;
