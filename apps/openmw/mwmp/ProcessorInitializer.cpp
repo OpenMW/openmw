@@ -24,6 +24,7 @@
 #include "processors/player/ProcessorPlayerCharClass.hpp"
 #include "processors/player/ProcessorPlayerDeath.hpp"
 #include "processors/player/ProcessorPlayerEquipment.hpp"
+#include "processors/player/ProcessorPlayerFaction.hpp"
 #include "processors/player/ProcessorPlayerInventory.hpp"
 #include "processors/player/ProcessorPlayerJournal.hpp"
 #include "processors/player/ProcessorPlayerLevel.hpp"
