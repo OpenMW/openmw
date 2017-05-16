@@ -21,7 +21,7 @@ namespace mwmp
         {
             DEBUG_PRINTF(strPacketID.c_str());
 
-            Script::Call<Script::CallbackIdentity("OnPlayerInventoryChange")>(player.getId());
+            Script::Call<Script::CallbackIdentity("OnPlayerInventory")>(player.getId());
         }
     };
 }

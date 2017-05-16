@@ -26,7 +26,7 @@ namespace mwmp
 
                 player.sendToLoaded(&packet);
 
-                Script::Call<Script::CallbackIdentity("OnPlayerAttributesChange")>(player.getId());
+                Script::Call<Script::CallbackIdentity("OnPlayerAttribute")>(player.getId());
             }
         }
     };

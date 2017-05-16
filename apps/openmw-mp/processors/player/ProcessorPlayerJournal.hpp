@@ -22,7 +22,7 @@ namespace mwmp
         {
             DEBUG_PRINTF(strPacketID.c_str());
 
-            Script::Call<Script::CallbackIdentity("OnPlayerJournalChange")>(player.getId());
+            Script::Call<Script::CallbackIdentity("OnPlayerJournal")>(player.getId());
         }
     };
 }
