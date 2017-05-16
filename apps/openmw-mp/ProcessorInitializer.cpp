@@ -4,6 +4,9 @@
 
 #include "ProcessorInitializer.hpp"
 
+#include "Networking.hpp"
+#include "Script/Script.hpp"
+
 #include "PlayerProcessor.hpp"
 #include "processors/player/ProcessorChatMsg.hpp"
 #include "processors/player/ProcessorGUIMessageBox.hpp"
