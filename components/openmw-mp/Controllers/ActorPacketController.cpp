@@ -9,8 +9,9 @@
 #include "../Packets/Actor/PacketActorAnimPlay.hpp"
 #include "../Packets/Actor/PacketActorAttack.hpp"
 #include "../Packets/Actor/PacketActorCellChange.hpp"
-#include "../Packets/Actor/PacketActorStatsDynamic.hpp"
+#include "../Packets/Actor/PacketActorEquipment.hpp"
 #include "../Packets/Actor/PacketActorPosition.hpp"
+#include "../Packets/Actor/PacketActorStatsDynamic.hpp"
 #include "../Packets/Actor/PacketActorSpeech.hpp"
 
 
@@ -33,9 +34,10 @@ mwmp::ActorPacketController::ActorPacketController(RakNet::RakPeerInterface *pee
     AddPacket<PacketActorAnimPlay>(&packets, peer);
     AddPacket<PacketActorAttack>(&packets, peer);
     AddPacket<PacketActorCellChange>(&packets, peer);
-    AddPacket<PacketActorStatsDynamic>(&packets, peer);
+    AddPacket<PacketActorEquipment>(&packets, peer);
     AddPacket<PacketActorPosition>(&packets, peer);
     AddPacket<PacketActorSpeech>(&packets, peer);
+    AddPacket<PacketActorStatsDynamic>(&packets, peer);
 }
 
 

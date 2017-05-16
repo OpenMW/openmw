@@ -104,9 +104,10 @@ source_group(tes3mp-server FILES ${SERVER} ${SERVER_HEADER})
 set(PROCESSORS_ACTOR
         processors/actor/ProcessorActorAnimFlags.hpp processors/actor/ProcessorActorAnimPlay.hpp
         processors/actor/ProcessorActorAttack.hpp processors/actor/ProcessorActorAuthority.hpp
-        processors/actor/ProcessorActorCellChange.hpp processors/actor/ProcessorActorList.hpp
-        processors/actor/ProcessorActorPosition.hpp processors/actor/ProcessorActorSpeech.hpp
-        processors/actor/ProcessorActorStatsDynamic.hpp processors/actor/ProcessorActorTest.hpp
+        processors/actor/ProcessorActorCellChange.hpp processors/actor/ProcessorActorEquipment.hpp
+        processors/actor/ProcessorActorList.hpp processors/actor/ProcessorActorPosition.hpp
+        processors/actor/ProcessorActorSpeech.hpp processors/actor/ProcessorActorStatsDynamic.hpp
+        processors/actor/ProcessorActorTest.hpp
         )
 
 source_group(tes3mp-server\\processors\\actor FILES ${PROCESSORS_ACTOR})
@@ -118,10 +119,11 @@ set(PROCESSORS_PLAYER
         processors/player/ProcessorPlayerCellChange.hpp processors/player/ProcessorPlayerCellState.hpp
         processors/player/ProcessorPlayerCharClass.hpp processors/player/ProcessorPlayerCharGen.hpp
         processors/player/ProcessorPlayerDeath.hpp processors/player/ProcessorPlayerEquipment.hpp
-        processors/player/ProcessorPlayerInventory.hpp processors/player/ProcessorPlayerJournal.hpp
-        processors/player/ProcessorPlayerLevel.hpp processors/player/ProcessorPlayerPosition.hpp
-        processors/player/ProcessorPlayerResurrect.hpp processors/player/ProcessorPlayerSkill.hpp
-        processors/player/ProcessorPlayerSpellbook.hpp processors/player/ProcessorPlayerStatsDynamic.hpp
+        processors/player/ProcessorPlayerFaction.hpp processors/player/ProcessorPlayerInventory.hpp
+        processors/player/ProcessorPlayerJournal.hpp processors/player/ProcessorPlayerLevel.hpp
+        processors/player/ProcessorPlayerPosition.hpp processors/player/ProcessorPlayerResurrect.hpp
+        processors/player/ProcessorPlayerSkill.hpp processors/player/ProcessorPlayerSpellbook.hpp
+        processors/player/ProcessorPlayerStatsDynamic.hpp
         )
 
 source_group(tes3mp-server\\processors\\player FILES ${PROCESSORS_PLAYER})

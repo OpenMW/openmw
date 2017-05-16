@@ -5,26 +5,27 @@
 #include "ProcessorInitializer.hpp"
 
 #include "PlayerProcessor.hpp"
-#include "processors/player/ProcessorPlayerPosition.hpp"
+#include "processors/player/ProcessorChatMsg.hpp"
+#include "processors/player/ProcessorGUIMessageBox.hpp"
+#include "processors/player/ProcessorPlayerCharGen.hpp"
+#include "processors/player/ProcessorPlayerAnimFlags.hpp"
+#include "processors/player/ProcessorPlayerAttack.hpp"
+#include "processors/player/ProcessorPlayerAttribute.hpp"
+#include "processors/player/ProcessorPlayerBounty.hpp"
 #include "processors/player/ProcessorPlayerCellChange.hpp"
 #include "processors/player/ProcessorPlayerCellState.hpp"
-#include "processors/player/ProcessorPlayerAttribute.hpp"
-#include "processors/player/ProcessorPlayerSkill.hpp"
-#include "processors/player/ProcessorPlayerLevel.hpp"
-#include "processors/player/ProcessorPlayerBounty.hpp"
-#include "processors/player/ProcessorPlayerEquipment.hpp"
-#include "processors/player/ProcessorPlayerInventory.hpp"
-#include "processors/player/ProcessorPlayerSpellbook.hpp"
-#include "processors/player/ProcessorPlayerJournal.hpp"
-#include "processors/player/ProcessorPlayerAttack.hpp"
-#include "processors/player/ProcessorPlayerStatsDynamic.hpp"
-#include "processors/player/ProcessorPlayerDeath.hpp"
-#include "processors/player/ProcessorPlayerResurrect.hpp"
-#include "processors/player/ProcessorPlayerAnimFlags.hpp"
-#include "processors/player/ProcessorChatMsg.hpp"
-#include "processors/player/ProcessorPlayerCharGen.hpp"
-#include "processors/player/ProcessorGUIMessageBox.hpp"
 #include "processors/player/ProcessorPlayerCharClass.hpp"
+#include "processors/player/ProcessorPlayerDeath.hpp"
+#include "processors/player/ProcessorPlayerEquipment.hpp"
+#include "processors/player/ProcessorPlayerFaction.hpp"
+#include "processors/player/ProcessorPlayerInventory.hpp"
+#include "processors/player/ProcessorPlayerJournal.hpp"
+#include "processors/player/ProcessorPlayerLevel.hpp"
+#include "processors/player/ProcessorPlayerPosition.hpp"
+#include "processors/player/ProcessorPlayerResurrect.hpp"
+#include "processors/player/ProcessorPlayerSkill.hpp"
+#include "processors/player/ProcessorPlayerSpellbook.hpp"
+#include "processors/player/ProcessorPlayerStatsDynamic.hpp"
 #include "ActorProcessor.hpp"
 #include "processors/actor/ProcessorActorList.hpp"
 #include "processors/actor/ProcessorActorAuthority.hpp"
@@ -33,6 +34,7 @@
 #include "processors/actor/ProcessorActorAnimPlay.hpp"
 #include "processors/actor/ProcessorActorAttack.hpp"
 #include "processors/actor/ProcessorActorCellChange.hpp"
+#include "processors/actor/ProcessorActorEquipment.hpp"
 #include "processors/actor/ProcessorActorStatsDynamic.hpp"
 #include "processors/actor/ProcessorActorPosition.hpp"
 #include "processors/actor/ProcessorActorSpeech.hpp"
@@ -59,26 +61,27 @@ using namespace mwmp;
 
 void ProcessorInitializer()
 {
-    PlayerProcessor::AddProcessor(new ProcessorPlayerPosition());
+    PlayerProcessor::AddProcessor(new ProcessorChatMsg());
+    PlayerProcessor::AddProcessor(new ProcessorGUIMessageBox());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerCharGen());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerAnimFlags());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerAttack());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerAttribute());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerBounty());
     PlayerProcessor::AddProcessor(new ProcessorPlayerCellChange());
     PlayerProcessor::AddProcessor(new ProcessorPlayerCellState());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerAttribute());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerSkill());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerLevel());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerBounty());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerEquipment());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerInventory());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerSpellbook());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerJournal());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerAttack());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerStatsDynamic());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerDeath());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerResurrect());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerAnimFlags());
-    PlayerProcessor::AddProcessor(new ProcessorChatMsg());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerCharGen());
-    PlayerProcessor::AddProcessor(new ProcessorGUIMessageBox());
     PlayerProcessor::AddProcessor(new ProcessorPlayerCharClass());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerDeath());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerEquipment());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerFaction());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerInventory());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerJournal());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerLevel());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerPosition());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerResurrect());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerSkill());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerSpellbook());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerStatsDynamic());
 
     ActorProcessor::AddProcessor(new ProcessorActorList());
     ActorProcessor::AddProcessor(new ProcessorActorAuthority());
@@ -86,9 +89,10 @@ void ProcessorInitializer()
     ActorProcessor::AddProcessor(new ProcessorActorAnimPlay());
     ActorProcessor::AddProcessor(new ProcessorActorAttack());
     ActorProcessor::AddProcessor(new ProcessorActorCellChange());
-    ActorProcessor::AddProcessor(new ProcessorActorStatsDynamic());
+    ActorProcessor::AddProcessor(new ProcessorActorEquipment());
     ActorProcessor::AddProcessor(new ProcessorActorPosition());
     ActorProcessor::AddProcessor(new ProcessorActorSpeech());
+    ActorProcessor::AddProcessor(new ProcessorActorStatsDynamic());
     ActorProcessor::AddProcessor(new ProcessorActorTest());
 
     WorldProcessor::AddProcessor(new ProcessorContainer());
