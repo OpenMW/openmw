@@ -25,6 +25,12 @@ void PacketActorList::Packet(RakNet::BitStream *bs, bool send)
 
     RW(actorList->count, send);
 
+    if (actorList->count > 2000)
+    {
+        actorList->isValid = false;
+        return;
+    }
+
     RW(actorList->cell.mData.mFlags, send);
     RW(actorList->cell.mData.mX, send);
     RW(actorList->cell.mData.mY, send);
@@ -42,6 +48,12 @@ void PacketActorList::Packet(RakNet::BitStream *bs, bool send)
         RW(actor.refId, send);
         RW(actor.refNumIndex, send);
         RW(actor.mpNum, send);
+
+        if (actor.refId.empty() || (actor.refNumIndex != 0 && actor.mpNum != 0))
+        {
+            actorList->isValid = false;
+            return;
+        }
 
         if (!send)
         {

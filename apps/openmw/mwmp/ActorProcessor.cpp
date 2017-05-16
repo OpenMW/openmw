@@ -22,22 +22,27 @@ bool ActorProcessor::Process(RakNet::Packet &packet, ActorList &actorList)
     myPacket->SetReadStream(&bsIn);
 
     BOOST_FOREACH(processors_t::value_type &processor, processors)
-                {
-                    if (processor.first == packet.data[0])
-                    {
-                        myGuid = Main::get().getLocalPlayer()->guid;
-                        request = packet.length == myPacket->headerSize();
+    {
+        if (processor.first == packet.data[0])
+        {
+            myGuid = Main::get().getLocalPlayer()->guid;
+            request = packet.length == myPacket->headerSize();
 
-                        if (!request && !processor.second->avoidReading)
-                        {
-                            myPacket->Read();
-                        }
+            actorList.isValid = true;
 
-                        processor.second->Do(*myPacket, actorList);
+            if (!request && !processor.second->avoidReading)
+            {
+                myPacket->Read();
+            }
 
-                        return true;
-                    }
-                }
+            if (actorList.isValid)
+                processor.second->Do(*myPacket, actorList);
+            else
+                LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "Received %s that failed integrity check and was ignored!", processor.second->strPacketID.c_str());
+
+            return true;
+        }
+    }
     return false;
 }
 
