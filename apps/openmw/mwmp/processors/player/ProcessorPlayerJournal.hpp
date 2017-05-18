@@ -20,8 +20,6 @@ namespace mwmp
 
         virtual void Do(PlayerPacket &packet, BasePlayer *player)
         {
-            if (!isLocal()) return;
-
             if (isRequest())
             {
                 // Entire journal cannot currently be requested from players
