@@ -12,6 +12,7 @@
 #include <Script/Functions/Stats.hpp>
 #include <Script/Functions/Items.hpp>
 #include <Script/Functions/Quests.hpp>
+#include <Script/Functions/Factions.hpp>
 #include <Script/Functions/Spells.hpp>
 #include <Script/Functions/Actors.hpp>
 #include <Script/Functions/World.hpp>
@@ -102,6 +103,7 @@ public:
             STATAPI,
             ITEMAPI,
             QUESTAPI,
+            FACTIONAPI,
             SPELLAPI,
             GUIAPI,
             CHARCLASSAPI,

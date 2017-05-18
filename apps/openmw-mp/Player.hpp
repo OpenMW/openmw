@@ -74,6 +74,7 @@ public:
     mwmp::InventoryChanges inventoryChangesBuffer;
     mwmp::SpellbookChanges spellbookChangesBuffer;
     mwmp::JournalChanges journalChangesBuffer;
+    mwmp::FactionChanges factionChangesBuffer;
 
 private:
     CellController::TContainer cells;
