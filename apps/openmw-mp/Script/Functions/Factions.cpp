@@ -46,7 +46,7 @@ int FactionFunctions::GetFactionRank(unsigned short pid, unsigned int i) noexcep
     return player->factionChanges.factions.at(i).rank;
 }
 
-int FactionFunctions::GetFactionExpelledState(unsigned short pid, unsigned int i) noexcept
+bool FactionFunctions::GetFactionExpelledState(unsigned short pid, unsigned int i) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);

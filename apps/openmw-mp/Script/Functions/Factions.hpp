@@ -22,7 +22,7 @@ public:
 
     static const char *GetFactionId(unsigned short pid, unsigned int i) noexcept;
     static int GetFactionRank(unsigned short pid, unsigned int i) noexcept;
-    static int GetFactionExpelledState(unsigned short pid, unsigned int i) noexcept;
+    static bool GetFactionExpelledState(unsigned short pid, unsigned int i) noexcept;
 
     static void SendFactionChanges(unsigned short pid) noexcept;
 private:
