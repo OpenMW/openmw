@@ -568,7 +568,6 @@ void LocalPlayer::updateAnimFlags(bool forceUpdate)
     MWBase::World *world = MWBase::Environment::get().getWorld();
     MWWorld::Ptr player = world->getPlayerPtr();
 
-
     MWMechanics::NpcStats ptrNpcStats = player.getClass().getNpcStats(player);
     using namespace MWMechanics;
 
@@ -962,6 +961,41 @@ void LocalPlayer::setSpellbook()
     addSpells();
 }
 
+void LocalPlayer::setFactions()
+{
+    MWWorld::Ptr player = getPlayerPtr();
+    MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+
+    for (unsigned int i = 0; i < factionChanges.count; i++)
+    {
+        mwmp::Faction faction = factionChanges.factions.at(i);
+
+        // If the player isn't in this faction, make them join it
+        if (!ptrNpcStats.isInFaction(faction.factionId))
+            ptrNpcStats.joinFaction(faction.factionId);
+
+        // While the faction rank is different in the packet than in the NpcStats,
+        // adjust the NpcStats accordingly
+        while (faction.rank != ptrNpcStats.getFactionRanks().at(faction.factionId))
+        {
+            if (faction.rank > ptrNpcStats.getFactionRanks().at(faction.factionId))
+                ptrNpcStats.raiseRank(faction.factionId);
+            else
+                ptrNpcStats.lowerRank(faction.factionId);
+        }
+
+        // If the expelled state is different in the packet than in the NpcStats,
+        // adjust the NpcStats accordingly
+        if (faction.isExpelled != ptrNpcStats.getExpelled(faction.factionId))
+        {
+            if (faction.isExpelled)
+                ptrNpcStats.expell(faction.factionId);
+            else
+                ptrNpcStats.clearExpelled(faction.factionId);
+        }
+    }
+}
+
 void LocalPlayer::sendClass()
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -1115,6 +1149,21 @@ void LocalPlayer::sendJournalIndex(const std::string& quest, int index)
 
     getNetworking()->getPlayerPacket(ID_PLAYER_JOURNAL)->setPlayer(this);
     getNetworking()->getPlayerPacket(ID_PLAYER_JOURNAL)->Send();
+}
+
+void LocalPlayer::sendFaction(const std::string& factionId, int rank, bool isExpelled)
+{
+    factionChanges.factions.clear();
+
+    mwmp::Faction faction;
+    faction.factionId = factionId;
+    faction.rank = rank;
+    faction.isExpelled = isExpelled;
+
+    factionChanges.factions.push_back(faction);
+
+    getNetworking()->getPlayerPacket(ID_PLAYER_FACTION)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_FACTION)->Send();
 }
 
 void LocalPlayer::clearCellStates()

@@ -16,7 +16,12 @@ namespace mwmp
 
         virtual void Do(PlayerPacket &packet, BasePlayer *player)
         {
-            if (!isLocal()) return;
+            if (isRequest())
+            {
+                // Entire faction membership cannot currently be requested from players
+            }
+            else
+                static_cast<LocalPlayer*>(player)->setFactions();
         }
     };
 }

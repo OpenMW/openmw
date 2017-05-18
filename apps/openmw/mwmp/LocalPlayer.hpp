@@ -57,6 +57,7 @@ namespace mwmp
         void setEquipment();
         void setInventory();
         void setSpellbook();
+        void setFactions();
 
         void sendClass();
         void sendInventory();
@@ -66,8 +67,9 @@ namespace mwmp
         void sendSpellAddition(const ESM::Spell &spell);
         void sendSpellRemoval(std::string id);
         void sendSpellRemoval(const ESM::Spell &spell);
-        void sendJournalEntry(const std::string& id, int index, const MWWorld::Ptr& actor);
-        void sendJournalIndex(const std::string& id, int index);
+        void sendJournalEntry(const std::string& quest, int index, const MWWorld::Ptr& actor);
+        void sendJournalIndex(const std::string& quest, int index);
+        void sendFaction(const std::string& factionId, int rank, bool isExpelled);
 
         void clearCellStates();
         void clearCurrentContainer();

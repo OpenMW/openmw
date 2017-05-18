@@ -56,6 +56,13 @@ namespace mwmp
         int type; // 0 - An entire entry, 1 - An index
     };
 
+    struct Faction
+    {
+        std::string factionId;
+        int rank;
+        bool isExpelled;
+    };
+
     struct CellState
     {
         ESM::Cell cell;
@@ -72,6 +79,12 @@ namespace mwmp
     struct JournalChanges
     {
         std::vector<JournalItem> journalItems;
+        unsigned int count;
+    };
+
+    struct FactionChanges
+    {
+        std::vector<Faction> factions;
         unsigned int count;
     };
 
@@ -157,6 +170,7 @@ namespace mwmp
         InventoryChanges inventoryChanges;
         SpellbookChanges spellbookChanges;
         JournalChanges journalChanges;
+        FactionChanges factionChanges;
         CellStateChanges cellStateChanges;
         ESM::ActiveSpells activeSpells;
         CurrentContainer currentContainer;

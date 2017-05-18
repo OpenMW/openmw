@@ -3,8 +3,16 @@
 #include <iostream>
 #include <cmath>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
 #include "../mwmp/Main.hpp"
 #include "../mwmp/LocalPlayer.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include <components/esm/loadnpc.hpp>
 
@@ -595,6 +603,16 @@ namespace MWScript
                     {
                         MWWorld::Ptr player = MWMechanics::getPlayer();
                         player.getClass().getNpcStats(player).joinFaction(factionID);
+
+                        /*
+                            Start of tes3mp addition
+
+                            Send an ID_PLAYER_FACTION packet every time a player joins a faction
+                        */
+                        mwmp::Main::get().getLocalPlayer()->sendFaction(factionID, player.getClass().getNpcStats(player).getFactionRanks().at(factionID), false);
+                        /*
+                            End of tes3mp addition
+                        */
                     }
                 }
         };
@@ -634,6 +652,16 @@ namespace MWScript
                         {
                             player.getClass().getNpcStats(player).raiseRank(factionID);
                         }
+
+                        /*
+                            Start of tes3mp addition
+
+                            Send an ID_PLAYER_FACTION packet every time a player rises in a faction
+                        */
+                        mwmp::Main::get().getLocalPlayer()->sendFaction(factionID, player.getClass().getNpcStats(player).getFactionRanks().at(factionID), player.getClass().getNpcStats(player).getExpelled(factionID));
+                        /*
+                            End of tes3mp addition
+                        */
                     }
                 }
         };
@@ -666,6 +694,16 @@ namespace MWScript
                     {
                         MWWorld::Ptr player = MWMechanics::getPlayer();
                         player.getClass().getNpcStats(player).lowerRank(factionID);
+
+                        /*
+                            Start of tes3mp addition
+
+                            Send an ID_PLAYER_FACTION packet every time a player falls in a faction
+                        */
+                        mwmp::Main::get().getLocalPlayer()->sendFaction(factionID, player.getClass().getNpcStats(player).getFactionRanks().at(factionID), player.getClass().getNpcStats(player).getExpelled(factionID));
+                        /*
+                            End of tes3mp addition
+                        */
                     }
                 }
         };
@@ -991,6 +1029,16 @@ namespace MWScript
                     if(factionID!="")
                     {
                         player.getClass().getNpcStats(player).expell(factionID);
+
+                        /*
+                            Start of tes3mp addition
+
+                            Send an ID_PLAYER_FACTION packet every time a player is expelled from a faction
+                        */
+                        mwmp::Main::get().getLocalPlayer()->sendFaction(factionID, player.getClass().getNpcStats(player).getFactionRanks().at(factionID), true);
+                        /*
+                            End of tes3mp addition
+                        */
                     }
                 }
         };
@@ -1017,6 +1065,17 @@ namespace MWScript
                     MWWorld::Ptr player = MWMechanics::getPlayer();
                     if(factionID!="")
                         player.getClass().getNpcStats(player).clearExpelled(factionID);
+
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_PLAYER_FACTION packet every time a player is no longer expelled from a faction
+                    */
+                    if (factionID != "")
+                        mwmp::Main::get().getLocalPlayer()->sendFaction(factionID, player.getClass().getNpcStats(player).getFactionRanks().at(factionID), false);
+                    /*
+                        End of tes3mp addition
+                    */
                 }
         };
 
