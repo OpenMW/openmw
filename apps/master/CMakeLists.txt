@@ -3,7 +3,7 @@ project(masterserver)
 set(CMAKE_CXX_STANDARD 14)
 include_directories("./")
 
-set(SOURCE_FILES main.cpp MasterServer.cpp MasterServer.hpp)
+set(SOURCE_FILES main.cpp MasterServer.cpp MasterServer.hpp RestServer.cpp RestServer.hpp)
 
 add_executable(masterserver ${SOURCE_FILES})
 target_link_libraries(masterserver ${RakNet_LIBRARY} components)

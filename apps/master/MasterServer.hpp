@@ -13,6 +13,22 @@
 class MasterServer
 {
 public:
+    struct Ban
+    {
+        RakNet::SystemAddress sa;
+        bool permanent;
+        struct Date
+        {
+        } date;
+    };
+    struct SServer : QueryData
+    {
+        std::chrono::steady_clock::time_point lastUpdate;
+    };
+    typedef std::map<RakNet::SystemAddress, SServer> ServerMap;
+    //typedef ServerMap::const_iterator ServerCIter;
+    typedef ServerMap::iterator ServerIter;
+
     MasterServer(unsigned short maxConnections, unsigned short port);
     ~MasterServer();
 
@@ -21,24 +37,7 @@ public:
     bool isRunning();
     void Wait();
 
-    struct SServer : QueryData
-    {
-        std::chrono::steady_clock::time_point lastUpdate;
-    };
-
-    struct Ban
-    {
-        RakNet::SystemAddress sa;
-        bool permanent;
-        struct Date
-        {
-
-        } date;
-    };
-
-    typedef std::map<RakNet::SystemAddress, SServer> ServerMap;
-    typedef ServerMap::const_iterator ServerCIter;
-    typedef ServerMap::iterator ServerIter;
+    ServerMap* GetServers();
 
 private:
     void Thread();

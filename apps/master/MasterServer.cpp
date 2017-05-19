@@ -208,3 +208,8 @@ void MasterServer::Wait()
             tMasterThread.join();
     }
 }
+
+MasterServer::ServerMap *MasterServer::GetServers()
+{
+    return &servers;
+}
