@@ -41,16 +41,17 @@ QueryClient &QueryClient::Get()
 
 map<SystemAddress, QueryData> QueryClient::Query()
 {
+    status = -1;
     map<SystemAddress, QueryData> query;
     if (Connect() == IS_NOT_CONNECTED)
-    {
-        status = -1;
         return query;
-    }
 
     BitStream bs;
     bs.Write((unsigned char) (ID_MASTER_QUERY));
-    peer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, CHANNEL_MASTER, masterAddr, false);
+    int code = peer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, CHANNEL_MASTER, masterAddr, false);
+
+    if (code == 0)
+        return query;
 
     pmq->SetServers(&query);
     status = GetAnswer();
@@ -105,6 +106,8 @@ MASTER_PACKETS QueryClient::GetAnswer()
                 case ID_MASTER_ANNOUNCE:
                     update = false;
                     id = pid;
+                    break;
+                case ID_CONNECTION_REQUEST_ACCEPTED:
                     break;
                 default:
                     break;
