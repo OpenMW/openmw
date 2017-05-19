@@ -43,14 +43,6 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     MainWindow d;
 
-    if (d.refresh())
-    {
-        d.show();
-        return app.exec();
-    }
-    else
-    {
-        app.exit();
-        return 0;
-    }
+    d.show();
+    return app.exec();
 }
