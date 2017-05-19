@@ -2,29 +2,37 @@
 #include <Kbhit.h>
 #include <RakSleep.h>
 #include "MasterServer.hpp"
+#include "RestServer.hpp"
 
 using namespace RakNet;
 using namespace std;
 
+unique_ptr<RestServer> restServer;
+unique_ptr<MasterServer> masterServer;
+bool run = true;
+
 int main()
 {
-    MasterServer masterServer(2000, 25560);
+    masterServer.reset(new MasterServer(2000, 25560));
+    restServer.reset(new RestServer(8080, masterServer->GetServers()));
 
-    masterServer.Start();
+    auto onExit = [](int /*sig*/){
+        restServer->stop();
+        masterServer->Stop(false);
+        masterServer->Wait();
+        run = false;
+    };
 
-    /*while(true)
-    {
-        if(kbhit())
-        {
-            if(getch() == 'e')
-            {
-                cout << endl;
-                masterServer.Stop(true);
-                break;
-            }
-        }
-        RakSleep(100);
-    }*/
-    masterServer.Wait();
+    signal(SIGINT, onExit);
+    signal(SIGTERM, onExit);
+    signal(SIGSTOP, onExit);
+
+    masterServer->Start();
+
+    thread server_thread([]() { restServer->start(); });
+
+    server_thread.join();
+    masterServer->Wait();
+
     return 0;
 }
