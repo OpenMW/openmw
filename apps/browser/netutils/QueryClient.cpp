@@ -93,6 +93,10 @@ MASTER_PACKETS QueryClient::GetAnswer()
             data.Read(pid);
             switch(pid)
             {
+                case ID_DISCONNECTION_NOTIFICATION:
+                case ID_CONNECTION_LOST:
+                    update = false;
+                    break;
                 case ID_MASTER_QUERY:
                     pmq->Read();
                     update = false;
