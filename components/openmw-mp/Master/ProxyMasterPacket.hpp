@@ -29,6 +29,9 @@ namespace mwmp
 
             packet->RW(rulesSize, send);
 
+            if (rulesSize > 2000)
+                rulesSize = 0;
+
             map<string, ServerRule>::iterator ruleIt;
             if (send)
                 ruleIt = server.rules.begin();
@@ -71,6 +74,9 @@ namespace mwmp
             int playersCount = server.players.size();
             packet->RW(playersCount, send);
 
+            if (playersCount > 2000)
+                playersCount = 0;
+
             while (playersCount--)
             {
                 string player;
@@ -87,6 +93,9 @@ namespace mwmp
 
             int pluginsCount = server.plugins.size();
             packet->RW(pluginsCount, send);
+
+            if (pluginsCount > 2000)
+                pluginsCount = 0;
 
             vector<Plugin>::iterator pluginIt;
 
