@@ -273,7 +273,9 @@ namespace MWGui
         else
         {
             setSoulGem(MWWorld::Ptr());
+            mEnchanting.nextCastStyle();
             updateLabels();
+            updateEffectsView();
         }
     }
 
