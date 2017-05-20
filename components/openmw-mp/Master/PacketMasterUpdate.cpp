@@ -22,7 +22,14 @@ void PacketMasterUpdate::Packet(RakNet::BitStream *bs, bool send)
     if (send)
         bs->Write(packetID);
 
-    RW(server->first, send);
+    string addr = server->first.ToString(false);
+    unsigned short port = server->first.GetPort();
+
+    RW(addr, send);
+    RW(port, send);
+
+    if(!send)
+        server->first = SystemAddress(addr.c_str(), port);
 
     ProxyMasterPacket::addServer(this, server->second, send);
 

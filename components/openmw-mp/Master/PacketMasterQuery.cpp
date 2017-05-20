@@ -34,22 +34,25 @@ void PacketMasterQuery::Packet(RakNet::BitStream *bs, bool send)
         serverIt = servers->begin();
 
     QueryData server;
-    SystemAddress sa;
+    string addr;
+    unsigned short port;
     while(serversCount--)
     {
         if (send)
         {
-            sa = serverIt->first;
+            addr = serverIt->first.ToString(false);
+            port = serverIt->first.GetPort();
             server = serverIt->second;
         }
+        RW(addr, send);
+        RW(port, send);
 
-        RW(sa, send);
         ProxyMasterPacket::addServer(this, server, send);
 
         if (send)
             serverIt++;
         else
-            servers->insert(pair<SystemAddress, QueryData>(sa, server));
+            servers->insert(pair<SystemAddress, QueryData>(SystemAddress(addr.c_str(), port), server));
     }
 
 }
