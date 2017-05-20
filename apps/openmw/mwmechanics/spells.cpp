@@ -8,6 +8,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwworld/esmstore.hpp"
 
@@ -58,19 +59,34 @@ namespace MWMechanics
                         random = iter->second.mEffectRands.at(i);
 
                     float magnitude = it->mMagnMin + (it->mMagnMax - it->mMagnMin) * random;
+                    float sourcedMagnitude = magnitude;
 
-                    // Only blank out abilities that modify attributes.
+                    // Only blank out birthsign abilities that modify attributes.
                     // Already added to base value.
                     if (spell->mData.mType == ESM::Spell::ST_Ability && it->mAttribute != -1)
                     {
-                        mEffects.add(*it, 0);
-                    }
-                    else
-                    {
-                        mEffects.add(*it, magnitude);
+                        // Birthsign
+                        const std::string &signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
+                        
+                        if (!signId.empty())
+                        {
+                            const ESM::BirthSign *sign =
+                                MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().find(signId);
+
+                            for (std::vector<std::string>::const_iterator iter(sign->mPowers.mList.begin());
+                                iter != sign->mPowers.mList.end(); ++iter)
+                            {
+                                if (spell == getSpell(*iter))
+                                {
+                                    magnitude = 0;
+                                    break;
+                                }
+                            }
+                        }
                     }
 
-                    mSourcedEffects[spell].add(MWMechanics::EffectKey(*it), magnitude);
+                    mEffects.add(*it, magnitude);
+                    mSourcedEffects[spell].add(MWMechanics::EffectKey(*it), sourcedMagnitude);
 
                     ++i;
                 }
