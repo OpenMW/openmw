@@ -25,7 +25,6 @@ int main()
 
     signal(SIGINT, onExit);
     signal(SIGTERM, onExit);
-    signal(SIGSTOP, onExit);
 
     masterServer->Start();
 
