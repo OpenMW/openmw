@@ -95,7 +95,7 @@ namespace MWMechanics
             bool hasSpell(const std::string& spell) const;
             bool hasSpell(const ESM::Spell* spell) const;
 
-            void add (const std::string& spell);
+            const ESM::Spell* add (const std::string& spell);
             ///< Adding a spell that is already listed in *this is a no-op.
 
             void add (const ESM::Spell* spell);

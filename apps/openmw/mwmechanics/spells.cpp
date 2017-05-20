@@ -58,7 +58,18 @@ namespace MWMechanics
                         random = iter->second.mEffectRands.at(i);
 
                     float magnitude = it->mMagnMin + (it->mMagnMax - it->mMagnMin) * random;
-                    mEffects.add (*it, magnitude);
+
+                    // Only blank out abilities that modify attributes.
+                    // Already added to base value.
+                    if (spell->mData.mType == ESM::Spell::ST_Ability && it->mAttribute != -1)
+                    {
+                        mEffects.add(*it, 0);
+                    }
+                    else
+                    {
+                        mEffects.add(*it, magnitude);
+                    }
+
                     mSourcedEffects[spell].add(MWMechanics::EffectKey(*it), magnitude);
 
                     ++i;
@@ -116,9 +127,11 @@ namespace MWMechanics
         }
     }
 
-    void Spells::add (const std::string& spellId)
+    const ESM::Spell* Spells::add (const std::string& spellId)
     {
-        add(getSpell(spellId));
+        const ESM::Spell* spell = getSpell(spellId);
+        add(spell);
+        return spell;
     }
 
     void Spells::remove (const std::string& spellId)
