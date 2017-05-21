@@ -266,6 +266,23 @@ namespace MWMechanics
         case ESM::MagicEffect::Chameleon:
             return 0.f;
 
+        case ESM::MagicEffect::Sound:
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                // there is no need to cast sound if enemy is not able to cast spells
+                CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
+
+                if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude() > 0)
+                    return 0.f;
+
+                if (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+                    return 0.f;
+
+                break;
+            }
+
         case ESM::MagicEffect::RestoreAttribute:
             return 0.f; // TODO: implement based on attribute damage
         case ESM::MagicEffect::RestoreSkill:
@@ -345,9 +362,68 @@ namespace MWMechanics
         case ESM::MagicEffect::CurePoison:
             return 1001.f * numEffectsToCure(actor, ESM::MagicEffect::Poison);
 
-        case ESM::MagicEffect::DisintegrateArmor: // TODO: check if actor is wearing armor
-        case ESM::MagicEffect::DisintegrateWeapon: // TODO: check if actor is wearing weapon
-            break;
+        case ESM::MagicEffect::DisintegrateArmor:
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                // Ignore enemy without inventory
+                if (!enemy.getClass().hasInventoryStore(enemy))
+                    return 0.f;
+
+                MWWorld::InventoryStore& inv = enemy.getClass().getInventoryStore(enemy);
+
+                // According to UESP
+                static const int armorSlots[] = {
+                    MWWorld::InventoryStore::Slot_CarriedLeft,
+                    MWWorld::InventoryStore::Slot_Cuirass,
+                    MWWorld::InventoryStore::Slot_LeftPauldron,
+                    MWWorld::InventoryStore::Slot_RightPauldron,
+                    MWWorld::InventoryStore::Slot_LeftGauntlet,
+                    MWWorld::InventoryStore::Slot_RightGauntlet,
+                    MWWorld::InventoryStore::Slot_Helmet,
+                    MWWorld::InventoryStore::Slot_Greaves,
+                    MWWorld::InventoryStore::Slot_Boots
+                };
+
+                bool enemyHasArmor = false;
+
+                // Ignore enemy without armor
+                for (unsigned int i=0; i<sizeof(armorSlots)/sizeof(int); ++i)
+                {
+                    MWWorld::ContainerStoreIterator item = inv.getSlot(armorSlots[i]);
+
+                    if (item != inv.end() && (item.getType() == MWWorld::ContainerStore::Type_Armor))
+                    {
+                        enemyHasArmor = true;
+                        break;
+                    }
+                }
+
+                if (!enemyHasArmor)
+                    return 0.f;
+
+                break;
+            }
+
+        case ESM::MagicEffect::DisintegrateWeapon:
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                // Ignore enemy without inventory
+                if (!enemy.getClass().hasInventoryStore(enemy))
+                    return 0.f;
+
+                MWWorld::InventoryStore& inv = enemy.getClass().getInventoryStore(enemy);
+                MWWorld::ContainerStoreIterator item = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+
+                // Ignore enemy without weapons
+                if (item == inv.end() || (item.getType() != MWWorld::ContainerStore::Type_Weapon))
+                    return 0.f;
+
+                break;
+            }
 
         case ESM::MagicEffect::DamageAttribute:
         case ESM::MagicEffect::DrainAttribute:
@@ -383,21 +459,51 @@ namespace MWMechanics
             break;
         }
 
-        // TODO: for non-cumulative effects (e.g. paralyze), check if the enemy is already suffering from them
-
-        // TODO: could take into account enemy's resistance/weakness against the effect
-
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
 
         rating *= magicEffect->mData.mBaseCost;
 
-        if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
+        if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
+        {
+            rating *= -1.f;
+
+            if (enemy.isEmpty())
+                return 0.f;
+
+            // Check resistance for harmful effects
+            CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
+
+            float resistance = MWMechanics::getEffectResistanceAttribute(effect.mEffectID, &stats.getMagicEffects());
+
+            rating *= (1.f - std::min(resistance, 100.f) / 100.f);
+        }
+
+        // for harmful no-magnitude effects (e.g. silence) check if enemy is already has them
+        // for non-harmful no-magnitude effects (e.g. bound items) check if actor is already has them
+        if (magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude)
+        {
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
+            {
+                CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
+
+                if (stats.getMagicEffects().get(effect.mEffectID).getMagnitude() > 0)
+                    return 0.f;
+            }
+            else
+            {
+                CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+
+                if (stats.getMagicEffects().get(effect.mEffectID).getMagnitude() > 0)
+                    return 0.f;
+            }
+        }
+        else
+        {
             rating *= (effect.mMagnMin + effect.mMagnMax)/2.f;
+        }
+
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
             rating *= effect.mDuration;
-
-        if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
-            rating *= -1.f;
 
         // Currently treating all "on target" or "on touch" effects to target the enemy actor.
         // Combat AI is egoistic, so doesn't consider applying positive effects to friendly actors.
