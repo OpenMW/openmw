@@ -24,3 +24,7 @@ if (UNIX)
         endif()
     endif(NOT APPLE)
 endif(UNIX)
+
+if(WIN32) 
+    target_link_libraries(masterserver wsock32) 
+endif(WIN32)
