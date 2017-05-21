@@ -1833,7 +1833,7 @@ void CharacterController::update(float duration)
                 float normalizedEncumbrance = mPtr.getClass().getNormalizedEncumbrance(mPtr);
                 if (normalizedEncumbrance > 1)
                     normalizedEncumbrance = 1;
-                const float fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
+                const float fatigueDecrease = fatigueJumpBase + normalizedEncumbrance * fatigueJumpMult;
 
                 if (!godmode)
                 {
