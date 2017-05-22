@@ -80,6 +80,7 @@ namespace MWMechanics
         // reset
         creatureStats.setLevel(player->mNpdt52.mLevel);
         creatureStats.getSpells().clear();
+        creatureStats.updateAbilityAttributeState();
         creatureStats.modifyMagicEffects(MagicEffects());
 
         for (int i=0; i<27; ++i)
@@ -144,21 +145,7 @@ namespace MWMechanics
             for (std::vector<std::string>::const_iterator iter (sign->mPowers.mList.begin());
                 iter!=sign->mPowers.mList.end(); ++iter)
             {
-                const ESM::Spell *spell = creatureStats.getSpells().add (*iter);
-
-                // Make abilities that fortify attributes add to base value rather than modified value.
-                if (spell->mData.mType==ESM::Spell::ST_Ability)
-                {
-                    for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != spell->mEffects.mList.end(); ++it)
-                    {
-                        if (it->mAttribute == -1)
-                            continue; // Only care about attributes.
-
-                        // Birthsigns do not have ranges for attributes.
-                        creatureStats.setAttribute(it->mAttribute,
-                            creatureStats.getAttribute(it->mAttribute).getBase() + it->mMagnMax);
-                    }
-                }
+                creatureStats.getSpells().add (*iter);
             }
         }
 

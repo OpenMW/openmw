@@ -62,6 +62,8 @@ namespace MWMechanics
 
             std::map<SpellKey, CorprusStats> mCorprusSpells;
 
+            std::map<SpellKey, int> mAbilityAttributeStates;
+
             mutable bool mSpellsChanged;
             mutable MagicEffects mEffects;
             mutable std::map<SpellKey, MagicEffects> mSourcedEffects;
@@ -83,6 +85,11 @@ namespace MWMechanics
             bool canUsePower (const ESM::Spell* spell) const;
             void usePower (const ESM::Spell* spell);
 
+            int getSpecificAbilityAttributeState(const ESM::Spell* spell) const;
+            void setSpecificAbilityAttributeState(const ESM::Spell* spell, int state);
+            void removeSpecificAbilityAttributeState(const ESM::Spell* spell);
+            const std::map<SpellKey, int>& getAllAbilityAttributeStates() const;
+
             void purgeCommonDisease();
             void purgeBlightDisease();
             void purgeCorprusDisease();
@@ -95,7 +102,7 @@ namespace MWMechanics
             bool hasSpell(const std::string& spell) const;
             bool hasSpell(const ESM::Spell* spell) const;
 
-            const ESM::Spell* add (const std::string& spell);
+            void add (const std::string& spell);
             ///< Adding a spell that is already listed in *this is a no-op.
 
             void add (const ESM::Spell* spell);
