@@ -8,7 +8,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwworld/esmstore.hpp"
 
@@ -66,7 +65,7 @@ namespace MWMechanics
                     {
                         magnitude = 0;
                     }
-                    
+
                     mEffects.add(*it, magnitude);
                     mSourcedEffects[spell].add(MWMechanics::EffectKey(*it), sourcedMagnitude);
 
