@@ -1,5 +1,17 @@
 #include "door.hpp"
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include "../mwmp/Main.hpp"
+#include "../mwmp/Networking.hpp"
+#include "../mwmp/WorldEvent.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include <components/esm/loaddoor.hpp>
 #include <components/esm/doorstate.hpp>
 
@@ -159,6 +171,22 @@ namespace MWClass
                     MWBase::SoundManager::Play_Normal);
                 isTrapped = false;
             }
+
+            /*
+                Start of tes3mp addition
+
+                Send an ID_OBJECT_LOCK packet every time a door is unlocked here
+            */
+            if (isLocked)
+            {
+                mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+                worldEvent->reset();
+                worldEvent->addObjectLock(ptr, 0);
+                worldEvent->sendObjectLock();
+            }
+            /*
+                End of tes3mp addition
+            */
         }
 
         if (!isLocked || hasKey)

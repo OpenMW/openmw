@@ -66,10 +66,12 @@ namespace MWMechanics
             MWBase::Environment::get().getMechanicsManager()->objectOpened(mActor, lock);
             if (Misc::Rng::roll0to99() <= x)
             {
+                lock.getClass().unlock(lock);
+
                 /*
                     Start of tes3mp addition
 
-                    Send an ID_OBJECT_LOCK packet every time an object is unlocked
+                    Send an ID_OBJECT_LOCK packet every time an object is unlocked here
                 */
                 mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
                 worldEvent->reset();
@@ -79,7 +81,6 @@ namespace MWMechanics
                     End of tes3mp addition
                 */
 
-                lock.getClass().unlock(lock);
                 resultMessage = "#{sLockSuccess}";
                 resultSound = "Open Lock";
                 mActor.getClass().skillUsageSucceeded(mActor, ESM::Skill::Security, 1);

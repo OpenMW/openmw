@@ -15,8 +15,10 @@
 */
 #include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
+#include "../mwmp/Networking.hpp"
 #include "../mwmp/PlayerList.hpp"
 #include "../mwmp/LocalPlayer.hpp"
+#include "../mwmp/WorldEvent.hpp"
 #include "../mwmp/MechanicsHelper.hpp"
 /*
     End of tes3mp addition
@@ -639,6 +641,19 @@ namespace MWMechanics
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicOpenSuccess}");
                     }
                     target.getClass().unlock(target);
+
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_OBJECT_LOCK packet every time an object is unlocked here
+                    */
+                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+                    worldEvent->reset();
+                    worldEvent->addObjectLock(target, 0);
+                    worldEvent->sendObjectLock();
+                    /*
+                        End of tes3mp addition
+                    */
                 }
                 else
                     MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
