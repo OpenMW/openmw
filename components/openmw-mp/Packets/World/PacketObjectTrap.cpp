@@ -12,10 +12,10 @@ void PacketObjectTrap::Packet(RakNet::BitStream *bs, bool send)
 {
     WorldPacket::Packet(bs, send);
 
-    if (!send)
-        event->worldObjects.clear();
-    else
+    if (send)
         event->worldObjectCount = (unsigned int)(event->worldObjects.size());
+    else
+        event->worldObjects.clear();
 
     RW(event->worldObjectCount, send);
 

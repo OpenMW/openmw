@@ -14,10 +14,10 @@ void PacketActorStatsDynamic::Packet(RakNet::BitStream *bs, bool send)
 {
     ActorPacket::Packet(bs, send);
 
-    if (!send)
-        actorList->baseActors.clear();
-    else
+    if (send)
         actorList->count = (unsigned int)(actorList->baseActors.size());
+    else
+        actorList->baseActors.clear();
 
     RW(actorList->count, send);
 

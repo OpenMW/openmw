@@ -13,10 +13,10 @@ void mwmp::PacketPlayerCellState::Packet(RakNet::BitStream *bs, bool send)
 {
     PlayerPacket::Packet(bs, send);
 
-    if (!send)
-        player->cellStateChanges.cellStates.clear();
-    else
+    if (send)
         player->cellStateChanges.count = (unsigned int)(player->cellStateChanges.cellStates.size());
+    else
+        player->cellStateChanges.cellStates.clear();
 
     RW(player->cellStateChanges.count, send);
 

@@ -15,10 +15,10 @@ void PacketPlayerSpellbook::Packet(RakNet::BitStream *bs, bool send)
 
     RW(player->spellbookChanges.action, send);
 
-    if (!send)
-        player->spellbookChanges.spells.clear();
-    else
+    if (send)
         player->spellbookChanges.count = (unsigned int) (player->spellbookChanges.spells.size());
+    else
+        player->spellbookChanges.spells.clear();
 
     RW(player->spellbookChanges.count, send);
 

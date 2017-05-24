@@ -16,13 +16,9 @@ void PacketContainer::Packet(RakNet::BitStream *bs, bool send)
     RW(event->action, send);
 
     if (send)
-    {
         event->worldObjectCount = (unsigned int)(event->worldObjects.size());
-    }
     else
-    {
         event->worldObjects.clear();
-    }
 
     RW(event->worldObjectCount, send);
 

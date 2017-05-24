@@ -19,10 +19,10 @@ void PacketPlayerInventory::Packet(RakNet::BitStream *bs, bool send)
 
     RW(player->inventoryChanges.action, send);
 
-    if (!send)
-        player->inventoryChanges.items.clear();
-    else
+    if (send)
         player->inventoryChanges.count = (unsigned int) (player->inventoryChanges.items.size());
+    else
+        player->inventoryChanges.items.clear();
 
     RW(player->inventoryChanges.count, send);
 

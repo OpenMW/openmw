@@ -15,13 +15,9 @@ void PacketActorList::Packet(RakNet::BitStream *bs, bool send)
     RW(actorList->action, send);
 
     if (send)
-    {
         actorList->count = (unsigned int)(actorList->baseActors.size());
-    }
     else
-    {
         actorList->baseActors.clear();
-    }
 
     RW(actorList->count, send);
 

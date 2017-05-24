@@ -13,10 +13,10 @@ void PacketPlayerJournal::Packet(RakNet::BitStream *bs, bool send)
 {
     PlayerPacket::Packet(bs, send);
 
-    if (!send)
-        player->journalChanges.journalItems.clear();
-    else
+    if (send)
         player->journalChanges.count = (unsigned int)(player->journalChanges.journalItems.size());
+    else
+        player->journalChanges.journalItems.clear();
 
     RW(player->journalChanges.count, send);
 
