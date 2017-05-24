@@ -580,7 +580,16 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
             //Restocking static item - just restock to the max count
             int currentCount = count(itemOrList);
             if (currentCount < std::abs(it->mCount))
+            {
                 addInitialItem(itemOrList, owner, -(std::abs(it->mCount) - currentCount), true);
+            }
+            // Don't need to restock, but should update the amount to be restocked.
+            else if (currentCount > std::abs(it->mCount))
+            {
+                // Removing const here. Unavoidable without major reworks, but mCount was never itself declared const.
+                int& constRemovedCount = const_cast<int&>(it->mCount);
+                constRemovedCount = -currentCount;
+            }
         }
     }
     flagAsModified();
