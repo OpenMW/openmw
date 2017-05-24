@@ -78,9 +78,9 @@ set(SERVER
     Script/Functions/Actors.cpp Script/Functions/World.cpp Script/Functions/Miscellaneous.cpp
 
     Script/Functions/Cells.cpp Script/Functions/CharClass.cpp Script/Functions/Chat.cpp
-    Script/Functions/Factions.cpp Script/Functions/GUI.cpp Script/Functions/Items.cpp
-    Script/Functions/Positions.cpp Script/Functions/Quests.cpp Script/Functions/Spells.cpp
-    Script/Functions/Stats.cpp Script/Functions/Timer.cpp
+    Script/Functions/Dialogue.cpp Script/Functions/Factions.cpp Script/Functions/GUI.cpp
+    Script/Functions/Items.cpp Script/Functions/Positions.cpp Script/Functions/Quests.cpp
+    Script/Functions/Spells.cpp Script/Functions/Stats.cpp Script/Functions/Timer.cpp
 
     ProcessorInitializer.cpp PlayerProcessor.cpp ActorProcessor.cpp WorldProcessor.cpp
 

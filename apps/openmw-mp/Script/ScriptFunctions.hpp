@@ -5,18 +5,19 @@
 #ifndef SCRIPTFUNCTIONS_HPP
 #define SCRIPTFUNCTIONS_HPP
 
-#include <Script/Functions/CharClass.hpp>
-#include <Script/Functions/Positions.hpp>
-#include <Script/Functions/Cells.hpp>
-#include <Script/Functions/GUI.hpp>
-#include <Script/Functions/Stats.hpp>
-#include <Script/Functions/Items.hpp>
-#include <Script/Functions/Quests.hpp>
-#include <Script/Functions/Factions.hpp>
-#include <Script/Functions/Spells.hpp>
 #include <Script/Functions/Actors.hpp>
-#include <Script/Functions/World.hpp>
+#include <Script/Functions/Cells.hpp>
+#include <Script/Functions/CharClass.hpp>
+#include <Script/Functions/Dialogue.hpp>
+#include <Script/Functions/Factions.hpp>
+#include <Script/Functions/GUI.hpp>
+#include <Script/Functions/Items.hpp>
 #include <Script/Functions/Miscellaneous.hpp>
+#include <Script/Functions/Positions.hpp>
+#include <Script/Functions/Quests.hpp>
+#include <Script/Functions/Spells.hpp>
+#include <Script/Functions/Stats.hpp>
+#include <Script/Functions/World.hpp>
 #include <RakNetTypes.h>
 //#include <amx/amx.h>
 #include <tuple>
@@ -104,6 +105,7 @@ public:
             ITEMAPI,
             QUESTAPI,
             FACTIONAPI,
+            DIALOGUEAPI,
             SPELLAPI,
             GUIAPI,
             CHARCLASSAPI,
