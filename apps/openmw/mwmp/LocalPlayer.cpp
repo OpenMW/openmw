@@ -687,6 +687,16 @@ void LocalPlayer::addJournalItems()
     }
 }
 
+void LocalPlayer::addTopics()
+{
+    for (unsigned int i = 0; i < topicChanges.count; i++)
+    {
+        mwmp::Topic topic = topicChanges.topics.at(i);
+
+        MWBase::Environment::get().getDialogueManager()->addTopic(topic.topicId);
+    }
+}
+
 void LocalPlayer::removeItems()
 {
     MWWorld::Ptr ptrPlayer = getPlayerPtr();
@@ -1164,6 +1174,19 @@ void LocalPlayer::sendFaction(const std::string& factionId, int rank, bool isExp
 
     getNetworking()->getPlayerPacket(ID_PLAYER_FACTION)->setPlayer(this);
     getNetworking()->getPlayerPacket(ID_PLAYER_FACTION)->Send();
+}
+
+void LocalPlayer::sendTopic(const std::string& topicId)
+{
+    topicChanges.topics.clear();
+
+    mwmp::Topic topic;
+    topic.topicId = topicId;
+
+    topicChanges.topics.push_back(topic);
+
+    getNetworking()->getPlayerPacket(ID_PLAYER_TOPIC)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_TOPIC)->Send();
 }
 
 void LocalPlayer::clearCellStates()

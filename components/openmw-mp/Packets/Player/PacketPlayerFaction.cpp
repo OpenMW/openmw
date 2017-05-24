@@ -13,10 +13,10 @@ void PacketPlayerFaction::Packet(RakNet::BitStream *bs, bool send)
 {
     PlayerPacket::Packet(bs, send);
 
-    if (!send)
-        player->factionChanges.factions.clear();
-    else
+    if (send)
         player->factionChanges.count = (unsigned int)(player->factionChanges.factions.size());
+    else
+        player->factionChanges.factions.clear();
 
     RW(player->factionChanges.count, send);
 

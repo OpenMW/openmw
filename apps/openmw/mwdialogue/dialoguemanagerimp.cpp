@@ -28,6 +28,7 @@
 */
 #include "../mwmp/Main.hpp"
 #include "../mwmp/CellController.hpp"
+#include "../mwmp/LocalPlayer.hpp"
 #include "../mwmp/LocalActor.hpp"
 /*
     End of tes3mp addition
@@ -116,6 +117,17 @@ namespace MWDialogue
 
             if (tok->isImplicitKeyword() && mTranslationDataStorage.hasTranslation())
                 continue;
+
+            /*
+                Start of tes3mp addition
+
+                Send an ID_PLAYER_TOPIC packet every time a new topic becomes known
+            */
+            if (mActorKnownTopics.count(topicId) && !mKnownTopics.count(topicId))
+                mwmp::Main::get().getLocalPlayer()->sendTopic(topicId);
+            /*
+                End of tes3mp addition
+            */
 
             if (mActorKnownTopics.count( topicId ))
                 mKnownTopics.insert( topicId );

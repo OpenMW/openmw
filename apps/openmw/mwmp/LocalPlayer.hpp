@@ -42,6 +42,7 @@ namespace mwmp
         void addItems();
         void addSpells();
         void addJournalItems();
+        void addTopics();
 
         void removeItems();
         void removeSpells();
@@ -70,6 +71,7 @@ namespace mwmp
         void sendJournalEntry(const std::string& quest, int index, const MWWorld::Ptr& actor);
         void sendJournalIndex(const std::string& quest, int index);
         void sendFaction(const std::string& factionId, int rank, bool isExpelled);
+        void sendTopic(const std::string& topic);
 
         void clearCellStates();
         void clearCurrentContainer();

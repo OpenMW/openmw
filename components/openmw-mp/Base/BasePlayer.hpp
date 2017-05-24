@@ -63,6 +63,11 @@ namespace mwmp
         bool isExpelled;
     };
 
+    struct Topic
+    {
+        std::string topicId;
+    };
+
     struct CellState
     {
         ESM::Cell cell;
@@ -85,6 +90,12 @@ namespace mwmp
     struct FactionChanges
     {
         std::vector<Faction> factions;
+        unsigned int count;
+    };
+
+    struct TopicChanges
+    {
+        std::vector<Topic> topics;
         unsigned int count;
     };
 
@@ -171,6 +182,7 @@ namespace mwmp
         SpellbookChanges spellbookChanges;
         JournalChanges journalChanges;
         FactionChanges factionChanges;
+        TopicChanges topicChanges;
         CellStateChanges cellStateChanges;
         ESM::ActiveSpells activeSpells;
         CurrentContainer currentContainer;

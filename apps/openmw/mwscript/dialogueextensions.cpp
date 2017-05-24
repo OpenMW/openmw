@@ -127,6 +127,17 @@ namespace MWScript
                     runtime.pop();
 
                     MWBase::Environment::get().getDialogueManager()->addTopic(topic);
+
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_PLAYER_TOPIC packet every time a topic is added
+                        through a script
+                    */
+                    mwmp::Main::get().getLocalPlayer()->sendTopic(topic);
+                    /*
+                        End of tes3mp addition
+                    */
                 }
         };
 
