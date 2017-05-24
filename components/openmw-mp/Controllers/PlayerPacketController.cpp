@@ -31,6 +31,7 @@
 #include "../Packets/Player/PacketPlayerSkill.hpp"
 #include "../Packets/Player/PacketPlayerSpellbook.hpp"
 #include "../Packets/Player/PacketPlayerStatsDynamic.hpp"
+#include "../Packets/Player/PacketPlayerTopic.hpp"
 
 #include "PlayerPacketController.hpp"
 
@@ -74,6 +75,7 @@ mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *p
     AddPacket<PacketPlayerSkill>(&packets, peer);
     AddPacket<PacketPlayerSpellbook>(&packets, peer);
     AddPacket<PacketPlayerStatsDynamic>(&packets, peer);
+    AddPacket<PacketPlayerTopic>(&packets, peer);
 }
 
 

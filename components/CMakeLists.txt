@@ -179,13 +179,13 @@ add_component_dir (openmw-mp\\Packets\\Player
         PacketPlayerAttribute PacketPlayerBounty PacketPlayerCellChange PacketPlayerCellState PacketPlayerClass
         PacketPlayerDeath PacketPlayerEquipment PacketPlayerFaction PacketPlayerInventory PacketPlayerJournal PacketPlayerLevel
         PacketPlayerPosition PacketPlayerResurrect PacketPlayerSkill PacketPlayerSpellbook PacketPlayerStatsDynamic
-        PacketPlayerActiveSkills PacketGUIBoxes PacketTime
+        PacketPlayerTopic PacketPlayerActiveSkills PacketGUIBoxes PacketTime
         )
 
 add_component_dir (openmw-mp\\Packets\\World
         WorldPacket
-        PacketObjectDelete PacketObjectPlace PacketObjectScale PacketObjectLock PacketObjectMove PacketObjectRotate
-        PacketObjectAnimPlay PacketContainer PacketDoorState PacketMusicPlay PacketVideoPlay PacketScriptLocalShort
+        PacketContainer PacketObjectAnimPlay PacketObjectDelete PacketDoorState PacketObjectLock PacketObjectMove PacketObjectPlace
+        PacketObjectRotate PacketObjectScale PacketObjectTrap PacketMusicPlay PacketVideoPlay PacketScriptLocalShort
         PacketScriptLocalFloat PacketScriptMemberShort PacketScriptGlobalShort
         )
 

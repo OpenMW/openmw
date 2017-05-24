@@ -33,6 +33,7 @@
 #include "processors/player/ProcessorPlayerSkill.hpp"
 #include "processors/player/ProcessorPlayerSpellbook.hpp"
 #include "processors/player/ProcessorPlayerStatsDynamic.hpp"
+#include "processors/player/ProcessorPlayerTopic.hpp"
 
 #include "WorldProcessor.hpp"
 #include "processors/world/ProcessorContainer.hpp"
@@ -45,6 +46,7 @@
 #include "processors/world/ProcessorObjectPlace.hpp"
 #include "processors/world/ProcessorObjectRotate.hpp"
 #include "processors/world/ProcessorObjectScale.hpp"
+#include "processors/world/ProcessorObjectTrap.hpp"
 #include "processors/world/ProcessorScriptLocalShort.hpp"
 #include "processors/world/ProcessorScriptLocalFloat.hpp"
 #include "processors/world/ProcessorScriptMemberShort.hpp"
@@ -94,6 +96,7 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorPlayerSkill());
     PlayerProcessor::AddProcessor(new ProcessorPlayerSpellbook());
     PlayerProcessor::AddProcessor(new ProcessorPlayerStatsDynamic());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerTopic());
 
     WorldProcessor::AddProcessor(new ProcessorContainer());
     WorldProcessor::AddProcessor(new ProcessorDoorState());
@@ -105,6 +108,7 @@ void ProcessorInitializer()
     WorldProcessor::AddProcessor(new ProcessorObjectPlace());
     WorldProcessor::AddProcessor(new ProcessorObjectRotate());
     WorldProcessor::AddProcessor(new ProcessorObjectScale());
+    WorldProcessor::AddProcessor(new ProcessorObjectTrap());
     WorldProcessor::AddProcessor(new ProcessorScriptLocalShort());
     WorldProcessor::AddProcessor(new ProcessorScriptLocalFloat());
     WorldProcessor::AddProcessor(new ProcessorScriptMemberShort());

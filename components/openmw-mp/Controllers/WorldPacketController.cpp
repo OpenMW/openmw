@@ -2,13 +2,14 @@
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
 
+#include "../Packets/World/PacketObjectAnimPlay.hpp"
 #include "../Packets/World/PacketObjectDelete.hpp"
-#include "../Packets/World/PacketObjectPlace.hpp"
-#include "../Packets/World/PacketObjectScale.hpp"
 #include "../Packets/World/PacketObjectLock.hpp"
 #include "../Packets/World/PacketObjectMove.hpp"
+#include "../Packets/World/PacketObjectPlace.hpp"
 #include "../Packets/World/PacketObjectRotate.hpp"
-#include "../Packets/World/PacketObjectAnimPlay.hpp"
+#include "../Packets/World/PacketObjectScale.hpp"
+#include "../Packets/World/PacketObjectTrap.hpp"
 
 #include "../Packets/World/PacketContainer.hpp"
 #include "../Packets/World/PacketDoorState.hpp"
@@ -32,14 +33,15 @@ inline void AddPacket(mwmp::WorldPacketController::packets_t *packets, RakNet::R
 
 mwmp::WorldPacketController::WorldPacketController(RakNet::RakPeerInterface *peer)
 {
+    AddPacket<PacketObjectAnimPlay>(&packets, peer);
     AddPacket<PacketObjectDelete>(&packets, peer);
-    AddPacket<PacketObjectPlace>(&packets, peer);
-    AddPacket<PacketObjectScale>(&packets, peer);
     AddPacket<PacketObjectLock>(&packets, peer);
     AddPacket<PacketObjectMove>(&packets, peer);
+    AddPacket<PacketObjectPlace>(&packets, peer);
     AddPacket<PacketObjectRotate>(&packets, peer);
-    AddPacket<PacketObjectAnimPlay>(&packets, peer);
-
+    AddPacket<PacketObjectScale>(&packets, peer);
+    AddPacket<PacketObjectTrap>(&packets, peer);
+    
     AddPacket<PacketContainer>(&packets, peer);
     AddPacket<PacketDoorState>(&packets, peer);
     AddPacket<PacketMusicPlay>(&packets, peer);
