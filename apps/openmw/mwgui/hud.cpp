@@ -84,7 +84,7 @@ namespace MWGui
                 Start of tes3mp change (major)
 
                 Instead of actually keeping this object as is, delete it after sending the packet
-                and wait for the server to send it back with the correct mpNum
+                and wait for the server to send it back with a unique mpNum of its own
             */
             MWBase::Environment::get().getWorld()->deleteObject(dropped);
             /*
