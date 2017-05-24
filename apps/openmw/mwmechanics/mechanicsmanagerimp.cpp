@@ -15,6 +15,7 @@
     Include additional headers for multiplayer purposes
 */
 #include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
 #include "../mwmp/PlayerList.hpp"
 #include "../mwmp/CellController.hpp"
 /*
@@ -1226,6 +1227,16 @@ namespace MWMechanics
                 const std::map<std::string, int>& playerRanks = player.getClass().getNpcStats(player).getFactionRanks();
                 if (playerRanks.find(Misc::StringUtils::lowerCase(factionID)) != playerRanks.end())
                 {
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_PLAYER_FACTION packet every time a player is expelled from a faction
+                    */
+                    mwmp::Main::get().getLocalPlayer()->sendFaction(Misc::StringUtils::lowerCase(factionID), playerRanks.at(Misc::StringUtils::lowerCase(factionID)), true);
+                    /*
+                        End of tes3mp addition
+                    */
+
                     player.getClass().getNpcStats(player).expell(factionID);
                 }
             }

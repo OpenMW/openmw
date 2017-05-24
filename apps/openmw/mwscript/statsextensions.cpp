@@ -1035,7 +1035,7 @@ namespace MWScript
 
                             Send an ID_PLAYER_FACTION packet every time a player is expelled from a faction
                         */
-                        mwmp::Main::get().getLocalPlayer()->sendFaction(factionID, player.getClass().getNpcStats(player).getFactionRanks().at(factionID), true);
+                        mwmp::Main::get().getLocalPlayer()->sendFaction(Misc::StringUtils::lowerCase(factionID), player.getClass().getNpcStats(player).getFactionRanks().at(Misc::StringUtils::lowerCase(factionID)), true);
                         /*
                             End of tes3mp addition
                         */
@@ -1072,7 +1072,7 @@ namespace MWScript
                         Send an ID_PLAYER_FACTION packet every time a player is no longer expelled from a faction
                     */
                     if (factionID != "")
-                        mwmp::Main::get().getLocalPlayer()->sendFaction(factionID, player.getClass().getNpcStats(player).getFactionRanks().at(factionID), false);
+                        mwmp::Main::get().getLocalPlayer()->sendFaction(Misc::StringUtils::lowerCase(factionID), player.getClass().getNpcStats(player).getFactionRanks().at(Misc::StringUtils::lowerCase(factionID)), false);
                     /*
                         End of tes3mp addition
                     */
