@@ -211,36 +211,67 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::
 
 bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2) const
 {
+    // an item never stacks onto itself
+    if (ptr1 == ptr2)
+        return false;
+
+    // check IDs
+    const MWWorld::CellRef& cRef1 = ptr1.getCellRef();
+    const MWWorld::CellRef& cRef2 = ptr2.getCellRef();
+
+    // must have same ref ID
+    if (!Misc::StringUtils::ciEqual(cRef1.getRefId(), cRef2.getRefId()))
+        return false;
+
+    // must not have different owners.
+    std::string owner1 = cRef1.getOwner();
+    std::string owner2 = cRef2.getOwner();
+    if (owner1 != owner2)
+    {
+        // Some items do not have an owner, so they can be assumed to be owned by anyone.
+        if (!owner1.empty() && !owner2.empty())
+            return false;
+    }
+
+    // must have same soul ID
+    if (cRef1.getSoul() != cRef2.getSoul())
+        return false;
+
+    // Check values
     const MWWorld::Class& cls1 = ptr1.getClass();
     const MWWorld::Class& cls2 = ptr2.getClass();
 
-    if (!Misc::StringUtils::ciEqual(ptr1.getCellRef().getRefId(), ptr2.getCellRef().getRefId()))
+    // must have same time remaining (?)
+    if (cls1.getRemainingUsageTime(ptr1) != cls1.getRemainingUsageTime(ptr2))
         return false;
 
-    // If it has an enchantment, don't stack when some of the charge is already used
-    if (!ptr1.getClass().getEnchantment(ptr1).empty())
+    // must have same script
+    if (cls1.getScript(ptr1) != cls2.getScript(ptr2))
+        return false;
+
+    // must have full health
+    // alternatively, could allow items of same health to stack.
+    if (cls1.hasItemHealth(ptr1))
     {
-        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
-                    ptr1.getClass().getEnchantment(ptr1));
+        if (cls1.getItemHealth(ptr1) != cls1.getItemMaxHealth(ptr1))
+            return false;
+        if (cls2.getItemHealth(ptr2) != cls2.getItemMaxHealth(ptr2))
+            return false;
+    }
+
+    // must have full charge
+    std::string enchant = cls1.getEnchantment(ptr1);
+    if (!enchant.empty())
+    {
+        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(enchant);
         float maxCharge = static_cast<float>(enchantment->mData.mCharge);
-        float enchantCharge1 = ptr1.getCellRef().getEnchantmentCharge() == -1 ? maxCharge : ptr1.getCellRef().getEnchantmentCharge();
-        float enchantCharge2 = ptr2.getCellRef().getEnchantmentCharge() == -1 ? maxCharge : ptr2.getCellRef().getEnchantmentCharge();
+        float enchantCharge1 = cRef1.getEnchantmentCharge() == -1 ? maxCharge : cRef1.getEnchantmentCharge();
+        float enchantCharge2 = cRef2.getEnchantmentCharge() == -1 ? maxCharge : cRef2.getEnchantmentCharge();
         if (enchantCharge1 != maxCharge || enchantCharge2 != maxCharge)
             return false;
     }
 
-    return ptr1 != ptr2 // an item never stacks onto itself
-        && ptr1.getCellRef().getOwner() == ptr2.getCellRef().getOwner()
-        && ptr1.getCellRef().getSoul() == ptr2.getCellRef().getSoul()
-
-        && ptr1.getClass().getRemainingUsageTime(ptr1) == ptr2.getClass().getRemainingUsageTime(ptr2)
-
-        && cls1.getScript(ptr1) == cls2.getScript(ptr2)
-
-        // item that is already partly used up never stacks
-        && (!cls1.hasItemHealth(ptr1) || (
-                cls1.getItemHealth(ptr1) == cls1.getItemMaxHealth(ptr1)
-            && cls2.getItemHealth(ptr2) == cls2.getItemMaxHealth(ptr2)));
+    return true;
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &id, int count, const Ptr &actorPtr)
