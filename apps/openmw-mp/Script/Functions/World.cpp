@@ -275,12 +275,6 @@ void WorldFunctions::SendObjectLock() noexcept
     mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_LOCK)->Send(writeEvent.guid);
 }
 
-void WorldFunctions::SendObjectUnlock() noexcept
-{
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_UNLOCK)->setEvent(&writeEvent);
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_UNLOCK)->Send(writeEvent.guid);
-}
-
 void WorldFunctions::SendDoorState() noexcept
 {
     mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_DOOR_STATE)->setEvent(&writeEvent);

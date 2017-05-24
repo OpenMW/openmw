@@ -184,9 +184,9 @@ add_component_dir (openmw-mp\\Packets\\Player
 
 add_component_dir (openmw-mp\\Packets\\World
         WorldPacket
-        PacketObjectDelete PacketObjectPlace PacketObjectScale PacketObjectLock PacketObjectUnlock PacketObjectMove
-        PacketObjectRotate PacketObjectAnimPlay PacketContainer PacketDoorState PacketMusicPlay PacketVideoPlay
-        PacketScriptLocalShort PacketScriptLocalFloat PacketScriptMemberShort PacketScriptGlobalShort
+        PacketObjectDelete PacketObjectPlace PacketObjectScale PacketObjectLock PacketObjectMove PacketObjectRotate
+        PacketObjectAnimPlay PacketContainer PacketDoorState PacketMusicPlay PacketVideoPlay PacketScriptLocalShort
+        PacketScriptLocalFloat PacketScriptMemberShort PacketScriptGlobalShort
         )
 
 add_component_dir (fallback

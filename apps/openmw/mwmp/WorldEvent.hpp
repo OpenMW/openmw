@@ -23,7 +23,6 @@ namespace mwmp
         void placeObjects(MWWorld::CellStore* cellStore);
         void deleteObjects(MWWorld::CellStore* cellStore);
         void lockObjects(MWWorld::CellStore* cellStore);
-        void unlockObjects(MWWorld::CellStore* cellStore);
         void scaleObjects(MWWorld::CellStore* cellStore);
         void moveObjects(MWWorld::CellStore* cellStore);
         void rotateObjects(MWWorld::CellStore* cellStore);
@@ -41,7 +40,6 @@ namespace mwmp
         void addObjectPlace(const MWWorld::Ptr& ptr);
         void addObjectDelete(const MWWorld::Ptr& ptr);
         void addObjectLock(const MWWorld::Ptr& ptr, int lockLevel);
-        void addObjectUnlock(const MWWorld::Ptr& ptr);
         void addObjectScale(const MWWorld::Ptr& ptr, float scale);
         void addObjectAnimPlay(const MWWorld::Ptr& ptr, std::string group, int mode);
         void addDoorState(const MWWorld::Ptr& ptr, int state);
@@ -55,7 +53,6 @@ namespace mwmp
         void sendObjectPlace();
         void sendObjectDelete();
         void sendObjectLock();
-        void sendObjectUnlock();
         void sendObjectScale();
         void sendObjectAnimPlay();
         void sendDoorState();

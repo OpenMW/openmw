@@ -141,7 +141,6 @@ public:
             {"OnObjectDelete",           Function<void, unsigned short, const char*>()},
             {"OnObjectScale",            Function<void, unsigned short, const char*>()},
             {"OnObjectLock",             Function<void, unsigned short, const char*>()},
-            {"OnObjectUnlock",           Function<void, unsigned short, const char*>()},
             {"OnDoorState",              Function<void, unsigned short, const char*>()},
             {"OnContainer",              Function<void, unsigned short, const char*>()},
             {"OnPlayerSendMessage",      Function<bool, unsigned short, const char*>()},

@@ -52,11 +52,10 @@
 #include "processors/world/ProcessorObjectMove.hpp"
 #include "processors/world/ProcessorObjectRotate.hpp"
 #include "processors/world/ProcessorObjectScale.hpp"
-#include "processors/world/ProcessorObjectUnlock.hpp"
-#include "processors/world/ProcessorScriptGlobalShort.hpp"
-#include "processors/world/ProcessorScriptLocalFloat.hpp"
 #include "processors/world/ProcessorScriptLocalShort.hpp"
+#include "processors/world/ProcessorScriptLocalFloat.hpp"
 #include "processors/world/ProcessorScriptMemberShort.hpp"
+#include "processors/world/ProcessorScriptGlobalShort.hpp"
 #include "processors/world/ProcessorVideoPlay.hpp"
 
 
@@ -108,10 +107,9 @@ void ProcessorInitializer()
     WorldProcessor::AddProcessor(new ProcessorObjectPlace());
     WorldProcessor::AddProcessor(new ProcessorObjectRotate());
     WorldProcessor::AddProcessor(new ProcessorObjectScale());
-    WorldProcessor::AddProcessor(new ProcessorObjectUnlock());
-    WorldProcessor::AddProcessor(new ProcessorScriptGlobalShort());
-    WorldProcessor::AddProcessor(new ProcessorScriptLocalFloat());
     WorldProcessor::AddProcessor(new ProcessorScriptLocalShort());
+    WorldProcessor::AddProcessor(new ProcessorScriptLocalFloat());
     WorldProcessor::AddProcessor(new ProcessorScriptMemberShort());
+    WorldProcessor::AddProcessor(new ProcessorScriptGlobalShort());
     WorldProcessor::AddProcessor(new ProcessorVideoPlay());
 }

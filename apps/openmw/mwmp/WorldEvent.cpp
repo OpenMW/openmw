@@ -199,29 +199,10 @@ void WorldEvent::lockObjects(MWWorld::CellStore* cellStore)
             LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
 
-            ptrFound.getClass().lock(ptrFound, worldObject.lockLevel);
-        }
-    }
-}
-
-void WorldEvent::unlockObjects(MWWorld::CellStore* cellStore)
-{
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
-    {
-        worldObject = worldObjects.at(i);
-
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
-
-        MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex, worldObject.mpNum);
-
-        if (ptrFound)
-        {
-            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
-                               ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
-
-            ptrFound.getClass().unlock(ptrFound);
+            if (worldObject.lockLevel > 0)
+                ptrFound.getClass().lock(ptrFound, worldObject.lockLevel);
+            else
+                ptrFound.getClass().unlock(ptrFound);
         }
     }
 }
@@ -509,17 +490,6 @@ void WorldEvent::addObjectLock(const MWWorld::Ptr& ptr, int lockLevel)
     addObject(worldObject);
 }
 
-void WorldEvent::addObjectUnlock(const MWWorld::Ptr& ptr)
-{
-    cell = *ptr.getCell()->getCell();
-
-    mwmp::WorldObject worldObject;
-    worldObject.refId = ptr.getCellRef().getRefId();
-    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
-    worldObject.mpNum = ptr.getCellRef().getMpNum();
-    addObject(worldObject);
-}
-
 void WorldEvent::addObjectScale(const MWWorld::Ptr& ptr, float scale)
 {
     cell = *ptr.getCell()->getCell();
@@ -641,12 +611,6 @@ void WorldEvent::sendObjectLock()
 {
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->setEvent(this);
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->Send();
-}
-
-void WorldEvent::sendObjectUnlock()
-{
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->setEvent(this);
-    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_UNLOCK)->Send();
 }
 
 void WorldEvent::sendObjectScale()

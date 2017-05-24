@@ -69,12 +69,12 @@ namespace MWMechanics
                 /*
                     Start of tes3mp addition
 
-                    Send an ID_OBJECT_UNLOCK packet every time an object is unlocked
+                    Send an ID_OBJECT_LOCK packet every time an object is unlocked
                 */
                 mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
                 worldEvent->reset();
-                worldEvent->addObjectUnlock(lock);
-                worldEvent->sendObjectUnlock();
+                worldEvent->addObjectLock(lock, 0);
+                worldEvent->sendObjectLock();
                 /*
                     End of tes3mp addition
                 */

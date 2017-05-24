@@ -252,13 +252,13 @@ namespace MWScript
                     /*
                         Start of tes3mp addition
 
-                        Send an ID_OBJECT_UNLOCK packet every time an object is unlocked
+                        Send an ID_OBJECT_LOCK packet every time an object is unlocked
                         through a script
                     */
                     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
                     worldEvent->reset();
-                    worldEvent->addObjectUnlock(ptr);
-                    worldEvent->sendObjectUnlock();
+                    worldEvent->addObjectLock(ptr, 0);
+                    worldEvent->sendObjectLock();
                     /*
                         End of tes3mp addition
                     */

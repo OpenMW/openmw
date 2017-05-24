@@ -116,7 +116,7 @@ add_openmw_dir (mwmp\\processors\\player ProcessorChatMessage ProcessorGameConso
 
 add_openmw_dir (mwmp\\processors\\world BaseObjectProcessor ProcessorContainer ProcessorDoorState ProcessorMusicPlay
     ProcessorObjectAnimPlay ProcessorObjectDelete ProcessorObjectLock ProcessorObjectMove ProcessorObjectPlace
-    ProcessorObjectRotate ProcessorObjectScale ProcessorObjectUnlock ProcessorScriptGlobalShort ProcessorScriptLocalFloat
+    ProcessorObjectRotate ProcessorObjectScale ProcessorScriptGlobalShort ProcessorScriptLocalFloat
     ProcessorScriptLocalShort ProcessorScriptMemberShort ProcessorVideoPlay
     )
 

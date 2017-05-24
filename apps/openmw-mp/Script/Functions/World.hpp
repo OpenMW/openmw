@@ -57,7 +57,6 @@
     {"SendObjectPlace",             WorldFunctions::SendObjectPlace},\
     {"SendObjectScale",             WorldFunctions::SendObjectScale},\
     {"SendObjectLock",              WorldFunctions::SendObjectLock},\
-    {"SendObjectUnlock",            WorldFunctions::SendObjectUnlock},\
     {"SendDoorState",               WorldFunctions::SendDoorState},\
     {"SendContainer",               WorldFunctions::SendContainer},\
     \
@@ -124,7 +123,6 @@ public:
     static void SendObjectPlace() noexcept;
     static void SendObjectScale() noexcept;
     static void SendObjectLock() noexcept;
-    static void SendObjectUnlock() noexcept;
     static void SendDoorState() noexcept;
     static void SendContainer() noexcept;
 
