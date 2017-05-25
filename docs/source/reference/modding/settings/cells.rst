@@ -164,3 +164,12 @@ cache expiry delay
 
 The amount of time (in seconds) that a preloaded texture or object will stay in cache
 after it is no longer referenced or required, for example, when all cells containing this texture have been unloaded.
+
+pointers cache size
+------------------
+
+:Type:		integer
+:Range:		>0
+:Default:	40
+
+The count of object pointers, that will be saved for a faster search by object ID.
