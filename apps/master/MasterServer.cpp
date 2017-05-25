@@ -11,6 +11,7 @@
 #include <components/openmw-mp/Master/PacketMasterQuery.hpp>
 #include <components/openmw-mp/Master/PacketMasterUpdate.hpp>
 #include <components/openmw-mp/Master/PacketMasterAnnounce.hpp>
+#include <components/openmw-mp/Version.hpp>
 
 using namespace RakNet;
 using namespace std;
@@ -23,7 +24,7 @@ MasterServer::MasterServer(unsigned short maxConnections, unsigned short port)
     peer->Startup(maxConnections, &sockdescr, 1, 1000);
 
     peer->SetMaximumIncomingConnections(maxConnections);
-    peer->SetIncomingPassword("pass", (int) strlen("pass"));
+    peer->SetIncomingPassword(TES3MP_MASTERSERVER_PASSW, (int) strlen(TES3MP_MASTERSERVER_PASSW));
     run = false;
 }
 

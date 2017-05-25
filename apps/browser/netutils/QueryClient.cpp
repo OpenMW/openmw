@@ -6,6 +6,7 @@
 #include <RakSleep.h>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <iostream>
+#include <components/openmw-mp/Version.hpp>
 
 using namespace RakNet;
 using namespace std;
@@ -124,7 +125,8 @@ MASTER_PACKETS QueryClient::GetAnswer()
 
 ConnectionState QueryClient::Connect()
 {
-    ConnectionAttemptResult car = peer->Connect(masterAddr.ToString(false), masterAddr.GetPort(), "pass", strlen("pass"), 0, 0, 5, 500);
+    ConnectionAttemptResult car = peer->Connect(masterAddr.ToString(false), masterAddr.GetPort(), TES3MP_MASTERSERVER_PASSW,
+                                                strlen(TES3MP_MASTERSERVER_PASSW), 0, 0, 5, 500);
 
     while (true)
     {

@@ -155,7 +155,8 @@ bool MasterClient::Process(RakNet::Packet *packet)
 
 void MasterClient::Send(mwmp::PacketMasterAnnounce::Func func)
 {
-    peer->Connect(masterServer.ToString(false), masterServer.GetPort(), "pass", strlen("pass"), 0, 0, 5, 500);
+    peer->Connect(masterServer.ToString(false), masterServer.GetPort(), TES3MP_MASTERSERVER_PASSW,
+                  strlen(TES3MP_MASTERSERVER_PASSW), 0, 0, 5, 500);
     bool waitForConnect = true;
     while (waitForConnect)
     {
