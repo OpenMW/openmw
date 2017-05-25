@@ -185,6 +185,19 @@ namespace MWClass
                     "Disarm Trap", 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
                     MWBase::SoundManager::Play_Normal);
                 isTrapped = false;
+
+                /*
+                    Start of tes3mp addition
+
+                    Send an ID_OBJECT_TRAP packet every time a trap is disarmed
+                */
+                mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+                worldEvent->reset();
+                worldEvent->addObjectTrap(ptr, ptr.getRefData().getPosition(), true);
+                worldEvent->sendObjectTrap();
+                /*
+                    End of tes3mp addition
+                */
             }
 
             /*

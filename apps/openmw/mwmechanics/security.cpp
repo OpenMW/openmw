@@ -126,6 +126,19 @@ namespace MWMechanics
                 resultSound = "Disarm Trap";
                 resultMessage = "#{sTrapSuccess}";
                 mActor.getClass().skillUsageSucceeded(mActor, ESM::Skill::Security, 0);
+
+                /*
+                    Start of tes3mp addition
+
+                    Send an ID_OBJECT_TRAP packet every time a trap is disarmed
+                */
+                mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+                worldEvent->reset();
+                worldEvent->addObjectTrap(trap, trap.getRefData().getPosition(), true);
+                worldEvent->sendObjectTrap();
+                /*
+                    End of tes3mp addition
+                */
             }
             else
                 resultMessage = "#{sTrapFail}";
