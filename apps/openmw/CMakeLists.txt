@@ -101,12 +101,12 @@ add_openmw_dir (mwmp Main Networking LocalPlayer DedicatedPlayer PlayerList Loca
     BaseClientPacketProcessor PlayerProcessor WorldProcessor ActorProcessor ProcessorInitializer
     )
 
-add_openmw_dir (mwmp\\processors\\actor ProcessorActorAnimFlags ProcessorActorAnimPlay ProcessorActorAttack
+add_openmw_dir (mwmp/processors/actor ProcessorActorAnimFlags ProcessorActorAnimPlay ProcessorActorAttack
     ProcessorActorAuthority ProcessorActorCellChange ProcessorActorEquipment ProcessorActorList ProcessorActorPosition
     ProcessorActorSpeech ProcessorActorStatsDynamic ProcessorActorTest
     )
 
-add_openmw_dir (mwmp\\processors\\player ProcessorChatMessage ProcessorGameConsole ProcessorGameTime ProcessorGUIMessageBox
+add_openmw_dir (mwmp/processors/player ProcessorChatMessage ProcessorGameConsole ProcessorGameTime ProcessorGUIMessageBox
     ProcessorHandshake ProcessorUserDisconnected ProcessorUserMyID  ProcessorPlayerBaseInfo ProcessorPlayerAnimFlags
     ProcessorPlayerAttack ProcessorPlayerAttribute ProcessorPlayerBounty ProcessorPlayerCellChange ProcessorPlayerCellState
     ProcessorPlayerCharClass ProcessorPlayerCharGen ProcessorPlayerDeath ProcessorPlayerEquipment ProcessorPlayerFaction
@@ -114,7 +114,7 @@ add_openmw_dir (mwmp\\processors\\player ProcessorChatMessage ProcessorGameConso
     ProcessorPlayerSkill ProcessorPlayerSpellbook ProcessorPlayerStatsDynamic ProcessorPlayerTopic
     )
 
-add_openmw_dir (mwmp\\processors\\world BaseObjectProcessor ProcessorContainer ProcessorDoorState ProcessorMusicPlay
+add_openmw_dir (mwmp/processors/world BaseObjectProcessor ProcessorContainer ProcessorDoorState ProcessorMusicPlay
     ProcessorObjectAnimPlay ProcessorObjectDelete ProcessorObjectLock ProcessorObjectMove ProcessorObjectPlace
     ProcessorObjectRotate ProcessorObjectScale ProcessorObjectTrap ProcessorScriptGlobalShort ProcessorScriptLocalFloat
     ProcessorScriptLocalShort ProcessorScriptMemberShort ProcessorVideoPlay

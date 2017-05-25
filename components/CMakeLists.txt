@@ -151,29 +151,29 @@ add_component_dir (openmw-mp
         Log Utils NetworkMessages Version
         )
 
-add_component_dir (openmw-mp\\Base
+add_component_dir (openmw-mp/Base
         BaseActor BaseEvent BasePacketProcessor BasePlayer BaseStructs
         )
 
-add_component_dir (openmw-mp\\Controllers
+add_component_dir (openmw-mp/Controllers
         PlayerPacketController ActorPacketController WorldPacketController
         )
 
-add_component_dir(openmw-mp\\Master
+add_component_dir(openmw-mp/Master
         MasterData PacketMasterQuery PacketMasterUpdate PacketMasterAnnounce BaseMasterPacket ProxyMasterPacket
         )
 
-add_component_dir (openmw-mp\\Packets
+add_component_dir (openmw-mp/Packets
         BasePacket PacketPreInit
         )
 
-add_component_dir (openmw-mp\\Packets\\Actor
+add_component_dir (openmw-mp/Packets/Actor
         ActorPacket
         PacketActorList PacketActorAuthority PacketActorTest PacketActorAnimPlay PacketActorAttack PacketActorCellChange
         PacketActorAnimFlags PacketActorEquipment PacketActorPosition PacketActorSpeech PacketActorStatsDynamic
         )
 
-add_component_dir (openmw-mp\\Packets\\Player
+add_component_dir (openmw-mp/Packets/Player
         PlayerPacket
         PacketHandshake PacketChatMessage PacketPlayerBaseInfo PacketPlayerCharGen PacketPlayerAnimFlags PacketPlayerAttack
         PacketPlayerAttribute PacketPlayerBounty PacketPlayerCellChange PacketPlayerCellState PacketPlayerClass
@@ -182,7 +182,7 @@ add_component_dir (openmw-mp\\Packets\\Player
         PacketPlayerTopic PacketPlayerActiveSkills PacketGUIBoxes PacketTime
         )
 
-add_component_dir (openmw-mp\\Packets\\World
+add_component_dir (openmw-mp/Packets/World
         WorldPacket
         PacketContainer PacketObjectAnimPlay PacketObjectDelete PacketDoorState PacketObjectLock PacketObjectMove PacketObjectPlace
         PacketObjectRotate PacketObjectScale PacketObjectTrap PacketMusicPlay PacketVideoPlay PacketScriptLocalShort
