@@ -48,6 +48,7 @@ namespace mwmp
         std::string varName;
 
         bool isActor;
+        bool isDisarmed;
 
         std::vector<ContainerItem> containerItems;
         unsigned int containerItemCount;

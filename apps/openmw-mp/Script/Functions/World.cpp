@@ -208,6 +208,11 @@ void WorldFunctions::SetObjectLockLevel(int lockLevel) noexcept
     tempWorldObject.lockLevel = lockLevel;
 }
 
+void WorldFunctions::SetObjectDisarmState(bool disarmState) noexcept
+{
+    tempWorldObject.isDisarmed = disarmState;
+}
+
 void WorldFunctions::SetObjectPosition(double x, double y, double z) noexcept
 {
     tempWorldObject.position.pos[0] = x;

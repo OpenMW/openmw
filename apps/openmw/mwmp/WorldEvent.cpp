@@ -12,6 +12,8 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwmechanics/spellcasting.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -223,6 +225,13 @@ void WorldEvent::triggerTrapObjects(MWWorld::CellStore* cellStore)
         {
             LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
                 ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
+
+            if (!worldObject.isDisarmed)
+            {
+                MWMechanics::CastSpell cast(ptrFound, ptrFound);
+                cast.mHitPosition = worldObject.position.asVec3();
+                cast.cast(ptrFound.getCellRef().getTrap());
+            }
 
             ptrFound.getCellRef().setTrap("");
         }
@@ -512,7 +521,7 @@ void WorldEvent::addObjectLock(const MWWorld::Ptr& ptr, int lockLevel)
     addObject(worldObject);
 }
 
-void WorldEvent::addObjectTrap(const MWWorld::Ptr& ptr)
+void WorldEvent::addObjectTrap(const MWWorld::Ptr& ptr, const ESM::Position& pos, bool isDisarmed)
 {
     cell = *ptr.getCell()->getCell();
 
@@ -520,6 +529,8 @@ void WorldEvent::addObjectTrap(const MWWorld::Ptr& ptr)
     worldObject.refId = ptr.getCellRef().getRefId();
     worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
     worldObject.mpNum = ptr.getCellRef().getMpNum();
+    worldObject.isDisarmed = isDisarmed;
+    worldObject.position = pos;
     addObject(worldObject);
 }
 

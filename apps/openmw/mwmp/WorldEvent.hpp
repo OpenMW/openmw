@@ -41,7 +41,7 @@ namespace mwmp
         void addObjectPlace(const MWWorld::Ptr& ptr);
         void addObjectDelete(const MWWorld::Ptr& ptr);
         void addObjectLock(const MWWorld::Ptr& ptr, int lockLevel);
-        void addObjectTrap(const MWWorld::Ptr& ptr);
+        void addObjectTrap(const MWWorld::Ptr& ptr, const ESM::Position& pos, bool isDisarmed);
         void addObjectScale(const MWWorld::Ptr& ptr, float scale);
         void addObjectAnimPlay(const MWWorld::Ptr& ptr, std::string group, int mode);
         void addDoorState(const MWWorld::Ptr& ptr, int state);

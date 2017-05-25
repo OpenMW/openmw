@@ -46,12 +46,19 @@ namespace MWWorld
         /*
             Start of tes3mp addition
 
-            Send an ID_OBJECT_TRAP packet every time an item is taken from the world
-            by the player outside of the inventory screen
+            Send an ID_OBJECT_TRAP packet every time a trap is triggered
         */
         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
         worldEvent->reset();
-        worldEvent->addObjectTrap(mTrapSource);
+        
+        ESM::Position pos;
+
+        if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr() && MWBase::Environment::get().getWorld()->getDistanceToFacedObject() > trapRange)
+            pos = mTrapSource.getRefData().getPosition();
+        else
+            pos = actor.getRefData().getPosition();
+
+        worldEvent->addObjectTrap(mTrapSource, pos, false);
         worldEvent->sendObjectTrap();
         /*
             End of tes3mp addition
