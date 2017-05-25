@@ -115,7 +115,7 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
                 CurrentContainer *currentContainer = &mwmp::Main::get().getLocalPlayer()->currentContainer;
 
                 if (currentContainer->refNumIndex == ptrFound.getCellRef().getRefNum().mIndex &&
-                    Misc::StringUtils::ciEqual(currentContainer->refId, ptrFound.getCellRef().getRefId()))
+                    currentContainer->mpNum == ptrFound.getCellRef().getMpNum())
                 {
                     MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
                     MWBase::Environment::get().getWindowManager()->openContainer(ptrFound, currentContainer->loot);
@@ -178,6 +178,19 @@ void WorldEvent::deleteObjects(MWWorld::CellStore* cellStore)
         {
             LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
                                ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
+
+            // If we are in a container, and it happens to be this object, exit it
+            if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Container))
+            {
+                CurrentContainer *currentContainer = &mwmp::Main::get().getLocalPlayer()->currentContainer;
+
+                if (currentContainer->refNumIndex == ptrFound.getCellRef().getRefNum().mIndex &&
+                    currentContainer->mpNum == ptrFound.getCellRef().getMpNum())
+                {
+                    MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
+                    MWBase::Environment::get().getWindowManager()->setDragDrop(false);
+                }
+            }
 
             MWBase::Environment::get().getWorld()->deleteObject(ptrFound);
         }
