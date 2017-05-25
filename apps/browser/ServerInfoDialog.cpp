@@ -36,7 +36,9 @@ void ServerInfoDialog::refresh()
     {
         leAddr->setText(sd.first.ToString(true, ':'));
         lblName->setText(sd.second.GetName());
-        lblPing->setNum((int) PingRakNetServer(sd.first.ToString(false), sd.first.GetPort()));
+        int ping = PingRakNetServer(sd.first.ToString(false), sd.first.GetPort());
+        lblPing->setNum(ping);
+        btnConnect->setDisabled(ping == PING_UNREACHABLE);
 
         listPlayers->clear();
 
