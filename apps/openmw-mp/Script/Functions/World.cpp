@@ -263,16 +263,22 @@ void WorldFunctions::SendObjectPlace() noexcept
     mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_PLACE)->Send(writeEvent.guid);
 }
 
-void WorldFunctions::SendObjectScale() noexcept
-{
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_SCALE)->setEvent(&writeEvent);
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_SCALE)->Send(writeEvent.guid);
-}
-
 void WorldFunctions::SendObjectLock() noexcept
 {
     mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_LOCK)->setEvent(&writeEvent);
     mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_LOCK)->Send(writeEvent.guid);
+}
+
+void WorldFunctions::SendObjectTrap() noexcept
+{
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_TRAP)->setEvent(&writeEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_TRAP)->Send(writeEvent.guid);
+}
+
+void WorldFunctions::SendObjectScale() noexcept
+{
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_SCALE)->setEvent(&writeEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_SCALE)->Send(writeEvent.guid);
 }
 
 void WorldFunctions::SendDoorState() noexcept

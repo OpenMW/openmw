@@ -55,8 +55,9 @@
     \
     {"SendObjectDelete",            WorldFunctions::SendObjectDelete},\
     {"SendObjectPlace",             WorldFunctions::SendObjectPlace},\
-    {"SendObjectScale",             WorldFunctions::SendObjectScale},\
     {"SendObjectLock",              WorldFunctions::SendObjectLock},\
+    {"SendObjectTrap",              WorldFunctions::SendObjectTrap},\
+    {"SendObjectScale",             WorldFunctions::SendObjectScale},\
     {"SendDoorState",               WorldFunctions::SendDoorState},\
     {"SendContainer",               WorldFunctions::SendContainer},\
     \
@@ -121,8 +122,9 @@ public:
 
     static void SendObjectDelete() noexcept;
     static void SendObjectPlace() noexcept;
-    static void SendObjectScale() noexcept;
     static void SendObjectLock() noexcept;
+    static void SendObjectTrap() noexcept;
+    static void SendObjectScale() noexcept;
     static void SendDoorState() noexcept;
     static void SendContainer() noexcept;
 
