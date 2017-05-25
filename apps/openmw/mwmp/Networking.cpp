@@ -310,6 +310,8 @@ void Networking::connect(const std::string &ip, unsigned short port, std::vector
     }
     else
         preInit(content, collections);
+
+    getLocalPlayer()->guid = peer->GetMyGUID();
 }
 
 void Networking::preInit(std::vector<std::string> &content, Files::Collections &collections)

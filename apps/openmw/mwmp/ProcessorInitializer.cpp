@@ -12,7 +12,6 @@
 #include "processors/player/ProcessorGUIMessageBox.hpp"
 #include "processors/player/ProcessorHandshake.hpp"
 #include "processors/player/ProcessorUserDisconnected.hpp"
-#include "processors/player/ProcessorUserMyID.hpp"
 #include "processors/player/ProcessorPlayerBaseInfo.hpp"
 #include "processors/player/ProcessorPlayerCharGen.hpp"
 #include "processors/player/ProcessorPlayerAnimFlags.hpp"
@@ -75,7 +74,6 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorGUIMessageBox());
     PlayerProcessor::AddProcessor(new ProcessorHandshake());
     PlayerProcessor::AddProcessor(new ProcessorUserDisconnected());
-    PlayerProcessor::AddProcessor(new ProcessorUserMyID());
     PlayerProcessor::AddProcessor(new ProcessorPlayerBaseInfo());
     PlayerProcessor::AddProcessor(new ProcessorPlayerCharGen());
     PlayerProcessor::AddProcessor(new ProcessorPlayerAnimFlags());

@@ -2,7 +2,6 @@
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
 
-#include "../Packets/Player/PacketSendMyID.hpp"
 #include "../Packets/Player/PacketDisconnect.hpp"
 #include "../Packets/Player/PacketChatMessage.hpp"
 #include "../Packets/Player/PacketPlayerCharGen.hpp"
@@ -45,7 +44,6 @@ inline void AddPacket(mwmp::PlayerPacketController::packets_t *packets, RakNet::
 
 mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *peer)
 {
-    AddPacket<PacketSendMyID>(&packets, peer);
     AddPacket<PacketDisconnect>(&packets, peer);
     AddPacket<PacketChatMessage>(&packets, peer);
     AddPacket<PacketHandshake>(&packets, peer);

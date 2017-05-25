@@ -244,9 +244,6 @@ void Networking::update(RakNet::Packet *packet)
         playerPacketController->GetPacket(ID_HANDSHAKE)->RequestData(packet->guid);
         Players::newPlayer(packet->guid);
         player = Players::getPlayer(packet->guid);
-
-        playerPacketController->GetPacket(ID_USER_MYID)->setPlayer(player);
-        playerPacketController->GetPacket(ID_USER_MYID)->Send(false);
         return;
     }
     else if (playerPacketController->ContainsPacket(packet->data[0]))
