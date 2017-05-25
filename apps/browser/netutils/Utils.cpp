@@ -25,8 +25,13 @@ unsigned int PingRakNetServer(const char *addr, unsigned short port)
     peer->Startup(1, &socketDescriptor, 1);
     if (!peer->Ping(addr, port, false))
         return time;
+    RakNet::TimeMS start = RakNet::GetTimeMS();
     while (!done)
     {
+        RakNet::TimeMS now = RakNet::GetTimeMS();
+        if(now - start >= PING_UNREACHABLE)
+            break;
+
         packet = peer->Receive();
         if (!packet)
             continue;
@@ -41,7 +46,7 @@ unsigned int PingRakNetServer(const char *addr, unsigned short port)
             case ID_UNCONNECTED_PONG:
                 RakNet::BitStream bsIn(&packet->data[1], packet->length, false);
                 bsIn.Read(time);
-                time = RakNet::GetTimeMS() - time;
+                time = now - time;
                 done = true;
                 break;
         }
