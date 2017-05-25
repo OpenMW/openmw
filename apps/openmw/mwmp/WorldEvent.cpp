@@ -207,6 +207,28 @@ void WorldEvent::lockObjects(MWWorld::CellStore* cellStore)
     }
 }
 
+void WorldEvent::triggerTrapObjects(MWWorld::CellStore* cellStore)
+{
+    WorldObject worldObject;
+
+    for (unsigned int i = 0; i < worldObjectCount; i++)
+    {
+        worldObject = worldObjects.at(i);
+
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
+
+        MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refId, worldObject.refNumIndex, worldObject.mpNum);
+
+        if (ptrFound)
+        {
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
+
+            ptrFound.getCellRef().setTrap("");
+        }
+    }
+}
+
 void WorldEvent::scaleObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
@@ -490,6 +512,17 @@ void WorldEvent::addObjectLock(const MWWorld::Ptr& ptr, int lockLevel)
     addObject(worldObject);
 }
 
+void WorldEvent::addObjectTrap(const MWWorld::Ptr& ptr)
+{
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = ptr.getCellRef().getMpNum();
+    addObject(worldObject);
+}
+
 void WorldEvent::addObjectScale(const MWWorld::Ptr& ptr, float scale)
 {
     cell = *ptr.getCell()->getCell();
@@ -611,6 +644,12 @@ void WorldEvent::sendObjectLock()
 {
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->setEvent(this);
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_LOCK)->Send();
+}
+
+void WorldEvent::sendObjectTrap()
+{
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_TRAP)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_TRAP)->Send();
 }
 
 void WorldEvent::sendObjectScale()

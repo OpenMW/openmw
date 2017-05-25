@@ -1,5 +1,17 @@
 #include "actiontrap.hpp"
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include "../mwmp/Main.hpp"
+#include "../mwmp/Networking.hpp"
+#include "../mwmp/WorldEvent.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -30,5 +42,19 @@ namespace MWWorld
             cast.cast(mSpellId);
         }   
         mTrapSource.getCellRef().setTrap("");
+
+        /*
+            Start of tes3mp addition
+
+            Send an ID_OBJECT_TRAP packet every time an item is taken from the world
+            by the player outside of the inventory screen
+        */
+        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+        worldEvent->reset();
+        worldEvent->addObjectTrap(mTrapSource);
+        worldEvent->sendObjectTrap();
+        /*
+            End of tes3mp addition
+        */
     }
 }

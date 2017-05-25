@@ -18,7 +18,7 @@ namespace mwmp
         {
             BaseObjectProcessor::Do(packet, event);
 
-            //event.setObjectTraps(ptrCellStore);
+            event.triggerTrapObjects(ptrCellStore);
         }
     };
 }
