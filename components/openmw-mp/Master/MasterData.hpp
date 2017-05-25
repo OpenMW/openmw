@@ -29,8 +29,8 @@ struct ServerRule
 struct Plugin
 {
     std::string name;
-    unsigned long hash;
-    Plugin(std::string name = "", unsigned long hash = 0): name(name), hash(hash) {};
+    unsigned hash;
+    Plugin(std::string name = "", unsigned hash = 0): name(name), hash(hash) {};
 };
 
 struct QueryData
