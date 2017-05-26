@@ -2,60 +2,64 @@
 #define OPENMW_ACTORAPI_HPP
 
 #define ACTORAPI \
-    {"ReadLastActorList",          ActorFunctions::ReadLastActorList},\
-    {"ReadCellActorList",          ActorFunctions::ReadCellActorList},\
-    {"InitializeActorList",        ActorFunctions::InitializeActorList},\
+    {"ReadLastActorList",           ActorFunctions::ReadLastActorList},\
+    {"ReadCellActorList",           ActorFunctions::ReadCellActorList},\
+    {"InitializeActorList",         ActorFunctions::InitializeActorList},\
     \
-    {"GetActorListSize",           ActorFunctions::GetActorListSize},\
-    {"GetActorListAction",         ActorFunctions::GetActorListAction},\
+    {"GetActorListSize",            ActorFunctions::GetActorListSize},\
+    {"GetActorListAction",          ActorFunctions::GetActorListAction},\
     \
-    {"GetActorCell",               ActorFunctions::GetActorCell},\
-    {"GetActorRefId",              ActorFunctions::GetActorRefId},\
-    {"GetActorRefNumIndex",        ActorFunctions::GetActorRefNumIndex},\
-    {"GetActorMpNum",              ActorFunctions::GetActorMpNum},\
+    {"GetActorCell",                ActorFunctions::GetActorCell},\
+    {"GetActorRefId",               ActorFunctions::GetActorRefId},\
+    {"GetActorRefNumIndex",         ActorFunctions::GetActorRefNumIndex},\
+    {"GetActorMpNum",               ActorFunctions::GetActorMpNum},\
     \
-    {"GetActorPosX",               ActorFunctions::GetActorPosX},\
-    {"GetActorPosY",               ActorFunctions::GetActorPosY},\
-    {"GetActorPosZ",               ActorFunctions::GetActorPosZ},\
-    {"GetActorRotX",               ActorFunctions::GetActorRotX},\
-    {"GetActorRotY",               ActorFunctions::GetActorRotY},\
-    {"GetActorRotZ",               ActorFunctions::GetActorRotZ},\
+    {"GetActorPosX",                ActorFunctions::GetActorPosX},\
+    {"GetActorPosY",                ActorFunctions::GetActorPosY},\
+    {"GetActorPosZ",                ActorFunctions::GetActorPosZ},\
+    {"GetActorRotX",                ActorFunctions::GetActorRotX},\
+    {"GetActorRotY",                ActorFunctions::GetActorRotY},\
+    {"GetActorRotZ",                ActorFunctions::GetActorRotZ},\
     \
-    {"GetActorHealthBase",         ActorFunctions::GetActorHealthBase},\
-    {"GetActorHealthCurrent",      ActorFunctions::GetActorHealthCurrent},\
-    {"GetActorMagickaBase",        ActorFunctions::GetActorMagickaBase},\
-    {"GetActorMagickaCurrent",     ActorFunctions::GetActorMagickaCurrent},\
-    {"GetActorFatigueBase",        ActorFunctions::GetActorFatigueBase},\
-    {"GetActorFatigueCurrent",     ActorFunctions::GetActorFatigueCurrent},\
+    {"GetActorHealthBase",          ActorFunctions::GetActorHealthBase},\
+    {"GetActorHealthCurrent",       ActorFunctions::GetActorHealthCurrent},\
+    {"GetActorMagickaBase",         ActorFunctions::GetActorMagickaBase},\
+    {"GetActorMagickaCurrent",      ActorFunctions::GetActorMagickaCurrent},\
+    {"GetActorFatigueBase",         ActorFunctions::GetActorFatigueBase},\
+    {"GetActorFatigueCurrent",      ActorFunctions::GetActorFatigueCurrent},\
     \
-    {"DoesActorHavePosition",      ActorFunctions::DoesActorHavePosition},\
-    {"DoesActorHaveStatsDynamic",  ActorFunctions::DoesActorHaveStatsDynamic},\
+    {"GetActorEquipmentItemRefId",  ActorFunctions::GetActorEquipmentItemRefId},\
+    {"GetActorEquipmentItemCount",  ActorFunctions::GetActorEquipmentItemCount},\
+    {"GetActorEquipmentItemCharge", ActorFunctions::GetActorEquipmentItemCharge},\
     \
-    {"SetActorListCell",           ActorFunctions::SetActorListCell},\
-    {"SetActorListAction",         ActorFunctions::SetActorListAction},\
+    {"DoesActorHavePosition",       ActorFunctions::DoesActorHavePosition},\
+    {"DoesActorHaveStatsDynamic",   ActorFunctions::DoesActorHaveStatsDynamic},\
     \
-    {"SetActorCell",               ActorFunctions::SetActorCell},\
-    {"SetActorRefId",              ActorFunctions::SetActorRefId},\
-    {"SetActorRefNumIndex",        ActorFunctions::SetActorRefNumIndex},\
-    {"SetActorMpNum",              ActorFunctions::SetActorMpNum},\
+    {"SetActorListCell",            ActorFunctions::SetActorListCell},\
+    {"SetActorListAction",          ActorFunctions::SetActorListAction},\
     \
-    {"SetActorPosition",           ActorFunctions::SetActorPosition},\
-    {"SetActorRotation",           ActorFunctions::SetActorRotation},\
+    {"SetActorCell",                ActorFunctions::SetActorCell},\
+    {"SetActorRefId",               ActorFunctions::SetActorRefId},\
+    {"SetActorRefNumIndex",         ActorFunctions::SetActorRefNumIndex},\
+    {"SetActorMpNum",               ActorFunctions::SetActorMpNum},\
     \
-    {"SetActorHealthBase",         ActorFunctions::SetActorHealthBase},\
-    {"SetActorHealthCurrent",      ActorFunctions::SetActorHealthCurrent},\
-    {"SetActorMagickaBase",        ActorFunctions::SetActorMagickaBase},\
-    {"SetActorMagickaCurrent",     ActorFunctions::SetActorMagickaCurrent},\
-    {"SetActorFatigueBase",        ActorFunctions::SetActorFatigueBase},\
-    {"SetActorFatigueCurrent",     ActorFunctions::SetActorFatigueCurrent},\
+    {"SetActorPosition",            ActorFunctions::SetActorPosition},\
+    {"SetActorRotation",            ActorFunctions::SetActorRotation},\
     \
-    {"AddActor",                   ActorFunctions::AddActor},\
+    {"SetActorHealthBase",          ActorFunctions::SetActorHealthBase},\
+    {"SetActorHealthCurrent",       ActorFunctions::SetActorHealthCurrent},\
+    {"SetActorMagickaBase",         ActorFunctions::SetActorMagickaBase},\
+    {"SetActorMagickaCurrent",      ActorFunctions::SetActorMagickaCurrent},\
+    {"SetActorFatigueBase",         ActorFunctions::SetActorFatigueBase},\
+    {"SetActorFatigueCurrent",      ActorFunctions::SetActorFatigueCurrent},\
     \
-    {"SendActorList",              ActorFunctions::SendActorList},\
-    {"SendActorAuthority",         ActorFunctions::SendActorAuthority},\
-    {"SendActorPosition",          ActorFunctions::SendActorPosition},\
-    {"SendActorStatsDynamic",      ActorFunctions::SendActorStatsDynamic},\
-    {"SendActorCellChange",        ActorFunctions::SendActorCellChange}
+    {"AddActor",                    ActorFunctions::AddActor},\
+    \
+    {"SendActorList",               ActorFunctions::SendActorList},\
+    {"SendActorAuthority",          ActorFunctions::SendActorAuthority},\
+    {"SendActorPosition",           ActorFunctions::SendActorPosition},\
+    {"SendActorStatsDynamic",       ActorFunctions::SendActorStatsDynamic},\
+    {"SendActorCellChange",         ActorFunctions::SendActorCellChange}
 
 class ActorFunctions
 {
@@ -86,6 +90,10 @@ public:
     static double GetActorMagickaCurrent(unsigned int i) noexcept;
     static double GetActorFatigueBase(unsigned int i) noexcept;
     static double GetActorFatigueCurrent(unsigned int i) noexcept;
+
+    static const char *GetActorEquipmentItemRefId(unsigned int i, unsigned short slot) noexcept;
+    static int GetActorEquipmentItemCount(unsigned int i, unsigned short slot) noexcept;
+    static int GetActorEquipmentItemCharge(unsigned int i, unsigned short slot) noexcept;
 
     static bool DoesActorHavePosition(unsigned int i) noexcept;
     static bool DoesActorHaveStatsDynamic(unsigned int i) noexcept;

@@ -19,7 +19,11 @@ namespace mwmp
             Cell *serverCell = CellController::get()->getCell(&actorList.cell);
 
             if (serverCell != nullptr)
+            {
+                Script::Call<Script::CallbackIdentity("OnActorEquipment")>(player.getId(), actorList.cell.getDescription().c_str());
+
                 serverCell->sendToLoaded(&packet, &actorList);
+            }
         }
     };
 }

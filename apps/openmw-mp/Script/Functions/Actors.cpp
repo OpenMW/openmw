@@ -133,6 +133,21 @@ double ActorFunctions::GetActorFatigueCurrent(unsigned int i) noexcept
     return readActorList->baseActors.at(i).creatureStats.mDynamic[2].mCurrent;
 }
 
+const char *ActorFunctions::GetActorEquipmentItemRefId(unsigned int i, unsigned short slot) noexcept
+{
+    return readActorList->baseActors.at(i).equipedItems[slot].refId.c_str();
+}
+
+int ActorFunctions::GetActorEquipmentItemCount(unsigned int i, unsigned short slot) noexcept
+{
+    return readActorList->baseActors.at(i).equipedItems[slot].count;
+}
+
+int ActorFunctions::GetActorEquipmentItemCharge(unsigned int i, unsigned short slot) noexcept
+{
+    return readActorList->baseActors.at(i).equipedItems[slot].charge;
+}
+
 bool ActorFunctions::DoesActorHavePosition(unsigned int i) noexcept
 {
     return readActorList->baseActors.at(i).hasPositionData;
