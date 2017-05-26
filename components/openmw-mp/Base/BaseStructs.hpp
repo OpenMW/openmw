@@ -7,6 +7,18 @@
 
 namespace mwmp
 {
+    struct Item
+    {
+        std::string refId;
+        int count;
+        int charge;
+
+        inline bool operator==(const Item& rhs)
+        {
+            return refId == rhs.refId && count == rhs.count && charge == rhs.charge;
+        }
+    };
+    
     struct Target
     {
         std::string refId;

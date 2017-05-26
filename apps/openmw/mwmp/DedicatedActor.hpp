@@ -20,9 +20,10 @@ namespace mwmp
         void setMovementSettings();
         void setPosition();
         void setAnimFlags();
+        void setStatsDynamic();
+        void setEquipment();
         void playAnimation();
         void playSound();
-        void setStatsDynamic();
 
         MWWorld::Ptr getPtr();
         void setPtr(const MWWorld::Ptr& newPtr);

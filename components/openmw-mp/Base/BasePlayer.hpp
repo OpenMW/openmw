@@ -26,18 +26,6 @@ namespace mwmp
         bool loot;
     };
 
-    struct Item
-    {
-        std::string refId;
-        int count;
-        int charge;
-
-        inline bool operator==(const Item& rhs)
-        {
-            return refId == rhs.refId && count == rhs.count && charge == rhs.charge;
-        }
-    };
-
     struct JournalItem
     {
         std::string quest;

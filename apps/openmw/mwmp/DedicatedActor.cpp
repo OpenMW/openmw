@@ -10,8 +10,10 @@
 
 #include "../mwrender/animation.hpp"
 
+#include "../mwworld/action.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/worldimp.hpp"
 
 #include "DedicatedActor.hpp"
@@ -127,6 +129,68 @@ void DedicatedActor::setAnimFlags()
     ptrCreatureStats->setMovementFlag(CreatureStats::Flag_ForceMoveJump, (movementFlags & CreatureStats::Flag_ForceMoveJump) != 0);
 }
 
+void DedicatedActor::setStatsDynamic()
+{
+    // Only set dynamic stats if we have received at least one packet about them
+    if (!hasStatsDynamicData) return;
+
+    MWMechanics::CreatureStats *ptrCreatureStats = &ptr.getClass().getCreatureStats(ptr);
+    MWMechanics::DynamicStat<float> value;
+
+    // Resurrect this Actor if it's not supposed to be dead according to its authority
+    if (creatureStats.mDynamic[0].mCurrent > 0)
+        ptrCreatureStats->resurrect();
+
+    for (int i = 0; i < 3; ++i)
+    {
+        value.readState(creatureStats.mDynamic[i]);
+        ptrCreatureStats->setDynamic(i, value);
+    }
+}
+
+void DedicatedActor::setEquipment()
+{
+    if (!ptr.getClass().hasInventoryStore(ptr))
+        return;
+
+    MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
+    for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+    {
+        MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
+
+        const string &dedicItem = equipedItems[slot].refId;
+        std::string item = "";
+        bool equal = false;
+        if (it != invStore.end())
+        {
+            item = it->getCellRef().getRefId();
+            if (!Misc::StringUtils::ciEqual(item, dedicItem)) // if other item equiped
+            {
+                MWWorld::ContainerStore &store = ptr.getClass().getContainerStore(ptr);
+                store.remove(item, store.count(item), ptr);
+            }
+            else
+                equal = true;
+        }
+
+        if (dedicItem.empty() || equal)
+            continue;
+
+        int count = equipedItems[slot].count;
+        ptr.getClass().getContainerStore(ptr).add(dedicItem, count, ptr);
+
+        for (MWWorld::ContainerStoreIterator it2 = invStore.begin(); it2 != invStore.end(); ++it2)
+        {
+            if (::Misc::StringUtils::ciEqual(it2->getCellRef().getRefId(), dedicItem)) // equip item
+            {
+                boost::shared_ptr<MWWorld::Action> action = it2->getClass().use(*it2);
+                action->execute(ptr);
+                break;
+            }
+        }
+    }
+}
+
 void DedicatedActor::playAnimation()
 {
     if (!animation.groupname.empty())
@@ -149,25 +213,6 @@ void DedicatedActor::playSound()
             winMgr->messageBox(response, MWGui::ShowInDialogueMode_Never);
 
         sound.clear();
-    }
-}
-
-void DedicatedActor::setStatsDynamic()
-{
-    // Only set dynamic stats if we have received at least one packet about them
-    if (!hasStatsDynamicData) return;
-
-    MWMechanics::CreatureStats *ptrCreatureStats = &ptr.getClass().getCreatureStats(ptr);
-    MWMechanics::DynamicStat<float> value;
-
-    // Resurrect this Actor if it's not supposed to be dead according to its authority
-    if (creatureStats.mDynamic[0].mCurrent > 0)
-        ptrCreatureStats->resurrect();
-
-    for (int i = 0; i < 3; ++i)
-    {
-        value.readState(creatureStats.mDynamic[i]);
-        ptrCreatureStats->setDynamic(i, value);
     }
 }
 

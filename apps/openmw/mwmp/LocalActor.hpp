@@ -22,6 +22,7 @@ namespace mwmp
         void updateAnimPlay();
         void updateSpeech();
         void updateStatsDynamic(bool forceUpdate);
+        void updateEquipment(bool forceUpdate);
         void updateAttack();
 
         MWWorld::Ptr getPtr();
@@ -31,6 +32,7 @@ namespace mwmp
         MWWorld::Ptr ptr;
 
         bool posWasChanged;
+        bool equipmentChanged;
 
         bool wasRunning;
         bool wasSneaking;

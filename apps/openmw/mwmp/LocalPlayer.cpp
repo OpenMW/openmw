@@ -409,10 +409,10 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
 {
     MWWorld::Ptr player = getPlayerPtr();
 
-    static bool equipChanged = false;
+    static bool equipmentChanged = false;
 
     if (forceUpdate)
-        equipChanged = true;
+        equipmentChanged = true;
 
     MWWorld::InventoryStore &invStore = player.getClass().getInventoryStore(player);
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
@@ -420,7 +420,7 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
         MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
         if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), equipedItems[slot].refId))
         {
-            equipChanged = true;
+            equipmentChanged = true;
 
             equipedItems[slot].refId = it->getCellRef().getRefId();
             equipedItems[slot].charge = it->getCellRef().getCharge();
@@ -436,18 +436,18 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
         }
         else if (it == invStore.end() && !equipedItems[slot].refId.empty())
         {
-            equipChanged = true;
+            equipmentChanged = true;
             equipedItems[slot].refId = "";
             equipedItems[slot].count = 0;
             equipedItems[slot].charge = 0;
         }
     }
 
-    if (equipChanged)
+    if (equipmentChanged)
     {
         getNetworking()->getPlayerPacket(ID_PLAYER_EQUIPMENT)->setPlayer(this);
         getNetworking()->getPlayerPacket(ID_PLAYER_EQUIPMENT)->Send();
-        equipChanged = false;
+        equipmentChanged = false;
     }
 }
 

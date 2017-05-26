@@ -75,6 +75,7 @@ void Cell::updateLocal(bool forceUpdate)
     actorList->sendAnimPlayActors();
     actorList->sendSpeechActors();
     actorList->sendStatsDynamicActors();
+    actorList->sendEquipmentActors();
     actorList->sendAttackActors();
     actorList->sendCellChangeActors();
 }
@@ -192,6 +193,29 @@ void Cell::readStatsDynamic(ActorList& actorList)
                 if (actor->creatureStats.mDynamic[0].mCurrent < 1)
                     actor->getPtr().getClass().getCreatureStats(actor->getPtr()).setDeathAnimationFinished(true);
             }
+        }
+    }
+}
+
+void Cell::readEquipment(ActorList& actorList)
+{
+    initializeDedicatedActors(actorList);
+
+    BaseActor baseActor;
+
+    for (unsigned int i = 0; i < actorList.count; i++)
+    {
+        baseActor = actorList.baseActors.at(i);
+        std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
+
+        if (dedicatedActors.count(mapIndex) > 0)
+        {
+            DedicatedActor *actor = dedicatedActors[mapIndex];
+
+            for (int slot = 0; slot < 19; ++slot)
+                actor->equipedItems[slot] = baseActor.equipedItems[slot];
+
+            actor->setEquipment();
         }
     }
 }

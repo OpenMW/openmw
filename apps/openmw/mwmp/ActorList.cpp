@@ -32,6 +32,7 @@ void ActorList::reset()
     animPlayActors.clear();
     speechActors.clear();
     statsDynamicActors.clear();
+    equipmentActors.clear();
     attackActors.clear();
     cellChangeActors.clear();
     guid = mwmp::Main::get().getNetworking()->getLocalPlayer()->guid;
@@ -70,6 +71,11 @@ void ActorList::addSpeechActor(LocalActor localActor)
 void ActorList::addStatsDynamicActor(LocalActor localActor)
 {
     statsDynamicActors.push_back(localActor);
+}
+
+void ActorList::addEquipmentActor(LocalActor localActor)
+{
+    equipmentActors.push_back(localActor);
 }
 
 void ActorList::addAttackActor(LocalActor localActor)
@@ -129,6 +135,16 @@ void ActorList::sendStatsDynamicActors()
         baseActors = statsDynamicActors;
         Main::get().getNetworking()->getActorPacket(ID_ACTOR_STATS_DYNAMIC)->setActorList(this);
         Main::get().getNetworking()->getActorPacket(ID_ACTOR_STATS_DYNAMIC)->Send();
+    }
+}
+
+void ActorList::sendEquipmentActors()
+{
+    if (equipmentActors.size() > 0)
+    {
+        baseActors = equipmentActors;
+        Main::get().getNetworking()->getActorPacket(ID_ACTOR_EQUIPMENT)->setActorList(this);
+        Main::get().getNetworking()->getActorPacket(ID_ACTOR_EQUIPMENT)->Send();
     }
 }
 

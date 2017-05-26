@@ -21,6 +21,7 @@ namespace mwmp
         void readAnimFlags(ActorList& actorList);
         void readAnimPlay(ActorList& actorList);
         void readStatsDynamic(ActorList& actorList);
+        void readEquipment(ActorList& actorList);
         void readSpeech(ActorList& actorList);
         void readAttack(ActorList& actorList);
         void readCellChange(ActorList& actorList);

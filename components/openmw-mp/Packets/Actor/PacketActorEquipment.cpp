@@ -38,6 +38,13 @@ void PacketActorEquipment::Packet(RakNet::BitStream *bs, bool send)
         RW(actor.refNumIndex, send);
         RW(actor.mpNum, send);
 
+        for (int i = 0; i < 19; i++)
+        {
+            RW(actor.equipedItems[i].refId, send);
+            RW(actor.equipedItems[i].count, send);
+            RW(actor.equipedItems[i].charge, send);
+        }
+
         if (!send)
         {
             actorList->baseActors.push_back(actor);

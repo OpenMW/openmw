@@ -136,6 +136,19 @@ void CellController::readStatsDynamic(ActorList& actorList)
     }
 }
 
+void CellController::readEquipment(ActorList& actorList)
+{
+    std::string mapIndex = actorList.cell.getDescription();
+
+    initializeCell(actorList.cell);
+
+    // If this now exists, send it the data
+    if (cellsInitialized.count(mapIndex) > 0)
+    {
+        cellsInitialized[mapIndex]->readEquipment(actorList);
+    }
+}
+
 void CellController::readSpeech(ActorList& actorList)
 {
     std::string mapIndex = actorList.cell.getDescription();

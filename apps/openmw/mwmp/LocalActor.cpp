@@ -2,11 +2,13 @@
 
 #include "../mwbase/environment.hpp"
 
+#include "../mwmechanics/mechanicsmanagerimp.hpp"
 #include "../mwmechanics/movement.hpp"
 
 #include "../mwrender/animation.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/worldimp.hpp"
 
 #include "LocalActor.hpp"
@@ -21,6 +23,7 @@ using namespace std;
 LocalActor::LocalActor()
 {
     posWasChanged = false;
+    equipmentChanged = false;
 
     wasRunning = false;
     wasSneaking = false;
@@ -45,6 +48,7 @@ LocalActor::~LocalActor()
 void LocalActor::update(bool forceUpdate)
 {
     updateStatsDynamic(forceUpdate);
+    updateEquipment(forceUpdate);
 
     if (forceUpdate || !creatureStats.mDead)
     {
@@ -195,6 +199,49 @@ void LocalActor::updateStatsDynamic(bool forceUpdate)
 
             mwmp::Main::get().getNetworking()->getActorList()->addStatsDynamicActor(*this);
         }
+    }
+}
+
+void LocalActor::updateEquipment(bool forceUpdate)
+{
+    if (!ptr.getClass().hasInventoryStore(ptr))
+        return;
+
+    if (forceUpdate)
+        equipmentChanged = true;
+
+    MWWorld::InventoryStore &invStore = ptr.getClass().getInventoryStore(ptr);
+    for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
+    {
+        MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
+        if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), equipedItems[slot].refId))
+        {
+            equipmentChanged = true;
+
+            equipedItems[slot].refId = it->getCellRef().getRefId();
+            equipedItems[slot].charge = it->getCellRef().getCharge();
+            if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
+            {
+                MWMechanics::WeaponType weaptype;
+                MWMechanics::getActiveWeapon(ptr.getClass().getCreatureStats(ptr), ptr.getClass().getInventoryStore(ptr), &weaptype);
+                if (weaptype != MWMechanics::WeapType_Thrown)
+                    equipedItems[slot].count = 1;
+            }
+            else
+                equipedItems[slot].count = invStore.count(it->getCellRef().getRefId());
+        }
+        else if (it == invStore.end() && !equipedItems[slot].refId.empty())
+        {
+            equipmentChanged = true;
+            equipedItems[slot].refId = "";
+            equipedItems[slot].count = 0;
+            equipedItems[slot].charge = 0;
+        }
+    }
+
+    if (equipmentChanged)
+    {
+        mwmp::Main::get().getNetworking()->getActorList()->addEquipmentActor(*this);
     }
 }
 
