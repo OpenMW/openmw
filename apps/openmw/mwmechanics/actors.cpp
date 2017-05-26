@@ -903,11 +903,11 @@ namespace MWMechanics
         /*
             Start of tes3mp change (major)
 
-            We need DedicatedPlayers to not automatically unequip
-            their light-emitting items, so a 2nd condition has been added
-            for them
+            We need DedicatedPlayers and DedicatedActors to not automatically
+            equip their light-emitting items, so additions conditions have been
+            added for them
         */
-        if (!isPlayer && !mwmp::PlayerList::isDedicatedPlayer(ptr))
+        if (!isPlayer && !mwmp::PlayerList::isDedicatedPlayer(ptr) && !mwmp::Main::get().getCellController()->isDedicatedActor(ptr))
         {
         /*
             End of tes3mp change (major)    
