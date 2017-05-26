@@ -242,6 +242,7 @@ void LocalActor::updateEquipment(bool forceUpdate)
     if (equipmentChanged)
     {
         mwmp::Main::get().getNetworking()->getActorList()->addEquipmentActor(*this);
+        equipmentChanged = false;
     }
 }
 
