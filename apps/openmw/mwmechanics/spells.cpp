@@ -91,9 +91,11 @@ namespace MWMechanics
         return mSpells.find(spell) != mSpells.end();
     }
 
-    void Spells::add (const ESM::Spell* spell)
+    void Spells::add(const ESM::Spell* spell)
     {
-        if (mSpells.find (spell)==mSpells.end())
+        bool spellAdded = (mSpells.find(spell) != mSpells.end());
+
+        if (!spellAdded)
         {
             std::map<int, float> random;
 
@@ -101,7 +103,7 @@ namespace MWMechanics
             // they will be determined when the spell is cast)
             if (spell->mData.mType != ESM::Spell::ST_Power && spell->mData.mType != ESM::Spell::ST_Spell)
             {
-                for (unsigned int i=0; i<spell->mEffects.mList.size();++i)
+                for (unsigned int i = 0; i<spell->mEffects.mList.size(); ++i)
                 {
                     if (spell->mEffects.mList[i].mMagnMin != spell->mEffects.mList[i].mMagnMax)
                         random[i] = Misc::Rng::rollClosedProbability();
@@ -117,26 +119,35 @@ namespace MWMechanics
                 mCorprusSpells[spell] = corprus;
             }
 
-            if (spell->mData.mType == ESM::Spell::ST_Ability)
-            {
-                std::map<SpellKey, int>::const_iterator it = mAbilityAttributeStates.find(spell);
-                if (it == mAbilityAttributeStates.end())
-                {
-                    for (unsigned int i = 0; i < spell->mEffects.mList.size(); ++i)
-                    {
-                        if (spell->mEffects.mList[i].mAttribute == -1)
-                            continue; // Only care about attributes.
+            SpellParams params;
+            params.mEffectRands = random;
+            mSpells.insert(std::make_pair(spell, params));
+            mSpellsChanged = true;
+        }
 
+        // mAbilityAttributeStates does not persist through save/load.
+        if (spell->mData.mType == ESM::Spell::ST_Ability)
+        {
+            std::map<SpellKey, int>::const_iterator it = mAbilityAttributeStates.find(spell);
+            if (it == mAbilityAttributeStates.end())
+            {
+                for (unsigned int i = 0; i < spell->mEffects.mList.size(); ++i)
+                {
+                    if (spell->mEffects.mList[i].mAttribute == -1)
+                        continue; // Only care about attributes.
+
+                    if (!spellAdded)
+                    {
                         // Add to spells that can change base attributes if not already in map.
                         mAbilityAttributeStates[spell] = ESM::Spell::AAS_Unchanged;
                     }
+                    else
+                    {
+                        // Rebuilding list through a loaded game.
+                        mAbilityAttributeStates[spell] = ESM::Spell::AAS_Changed;
+                    }
                 }
             }
-
-            SpellParams params;
-            params.mEffectRands = random;
-            mSpells.insert (std::make_pair (spell, params));
-            mSpellsChanged = true;
         }
     }
 
