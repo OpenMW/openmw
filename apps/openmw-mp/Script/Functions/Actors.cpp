@@ -232,6 +232,18 @@ void ActorFunctions::SetActorFatigueCurrent(double value) noexcept
     tempActor.creatureStats.mDynamic[2].mCurrent = value;
 }
 
+void ActorFunctions::EquipActorItem(unsigned short slot, const char *refId, unsigned int count, int charge) noexcept
+{
+    tempActor.equipedItems[slot].refId = refId;
+    tempActor.equipedItems[slot].count = count;
+    tempActor.equipedItems[slot].charge = charge;
+}
+
+void ActorFunctions::UnequipActorItem(unsigned short slot) noexcept
+{
+    ActorFunctions::EquipActorItem(slot, "", 0, -1);
+}
+
 void ActorFunctions::AddActor() noexcept
 {
     writeActorList.baseActors.push_back(tempActor);
@@ -272,6 +284,12 @@ void ActorFunctions::SendActorStatsDynamic() noexcept
 {
     mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_STATS_DYNAMIC)->setActorList(&writeActorList);
     mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_STATS_DYNAMIC)->Send(writeActorList.guid);
+}
+
+void ActorFunctions::SendActorEquipment() noexcept
+{
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_EQUIPMENT)->setActorList(&writeActorList);
+    mwmp::Networking::get().getActorPacketController()->GetPacket(ID_ACTOR_EQUIPMENT)->Send(writeActorList.guid);
 }
 
 void ActorFunctions::SendActorCellChange() noexcept

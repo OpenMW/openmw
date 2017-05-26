@@ -53,12 +53,16 @@
     {"SetActorFatigueBase",         ActorFunctions::SetActorFatigueBase},\
     {"SetActorFatigueCurrent",      ActorFunctions::SetActorFatigueCurrent},\
     \
+    {"EquipActorItem",              ActorFunctions::EquipActorItem},\
+    {"UnequipActorItem",            ActorFunctions::UnequipActorItem},\
+    \
     {"AddActor",                    ActorFunctions::AddActor},\
     \
     {"SendActorList",               ActorFunctions::SendActorList},\
     {"SendActorAuthority",          ActorFunctions::SendActorAuthority},\
     {"SendActorPosition",           ActorFunctions::SendActorPosition},\
     {"SendActorStatsDynamic",       ActorFunctions::SendActorStatsDynamic},\
+    {"SendActorEquipment",          ActorFunctions::SendActorEquipment},\
     {"SendActorCellChange",         ActorFunctions::SendActorCellChange}
 
 class ActorFunctions
@@ -116,12 +120,16 @@ public:
     static void SetActorFatigueBase(double value) noexcept;
     static void SetActorFatigueCurrent(double value) noexcept;
 
+    static void EquipActorItem(unsigned short slot, const char* refId, unsigned int count, int charge) noexcept;
+    static void UnequipActorItem(unsigned short slot) noexcept;
+
     static void AddActor() noexcept;
 
     static void SendActorList() noexcept;
     static void SendActorAuthority() noexcept;
     static void SendActorPosition() noexcept;
     static void SendActorStatsDynamic() noexcept;
+    static void SendActorEquipment() noexcept;
     static void SendActorCellChange() noexcept;
 };
 
