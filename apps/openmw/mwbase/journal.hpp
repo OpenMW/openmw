@@ -50,6 +50,16 @@ namespace MWBase
 
             virtual ~Journal() {}
 
+            /*
+                Start of tes3mp addition
+
+                Make it possible to check whether a journal entry already exists from elsewhere in the code
+            */
+            virtual bool hasEntry(const std::string& id, int index) = 0;
+            /*
+                End of tes3mp addition
+            */
+
             virtual void addEntry (const std::string& id, int index, const MWWorld::Ptr& actor) = 0;
             ///< Add a journal entry.
             /// @param actor Used as context for replacing of escape sequences (%name, etc).

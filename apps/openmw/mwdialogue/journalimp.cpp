@@ -75,6 +75,24 @@ namespace MWDialogue
         mTopics.clear();
     }
 
+    /*
+        Start of tes3mp addition
+
+        Make it possible to check whether a journal entry already exists from elsewhere in the code
+    */
+    bool Journal::hasEntry(const std::string& id, int index)
+    {
+        std::string infoId = JournalEntry::idFromIndex(id, index);
+        for (TEntryIter i = mJournal.begin(); i != mJournal.end(); ++i)
+            if (i->mTopic == id && i->mInfoId == infoId)
+                return true;
+
+        return false;
+    }
+    /*
+        End of tes3mp addition
+    */
+
     void Journal::addEntry (const std::string& id, int index, const MWWorld::Ptr& actor)
     {
         // bail out of we already have heard this...

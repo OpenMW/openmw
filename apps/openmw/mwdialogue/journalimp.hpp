@@ -29,6 +29,16 @@ namespace MWDialogue
 
             virtual void clear();
 
+            /*
+                Start of tes3mp addition
+
+                Make it possible to check whether a journal entry already exists from elsewhere in the code
+            */
+            virtual bool hasEntry(const std::string& id, int index);
+            /*
+                End of tes3mp addition
+            */
+
             virtual void addEntry (const std::string& id, int index, const MWWorld::Ptr& actor);
             ///< Add a journal entry.
             /// @param actor Used as context for replacing of escape sequences (%name, etc).

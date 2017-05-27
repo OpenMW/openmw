@@ -53,18 +53,19 @@ namespace MWScript
                     // Invoking Journal with a non-existing index is allowed, and triggers no errors. Seriously? :(
                     try
                     {
-                        MWBase::Environment::get().getJournal()->addEntry (quest, index, ptr);
-
                         /*
                             Start of tes3mp addition
 
-                            Send an ID_PLAYER_JOURNAL packet every time a journal entry is added
+                            Send an ID_PLAYER_JOURNAL packet every time a new journal entry is added
                             through a script
                         */
-                        mwmp::Main::get().getLocalPlayer()->sendJournalEntry(quest, index, ptr);
+                        if (!MWBase::Environment::get().getJournal()->hasEntry(quest, index))
+                            mwmp::Main::get().getLocalPlayer()->sendJournalEntry(quest, index, ptr);
                         /*
                             End of tes3mp addition
                         */
+
+                        MWBase::Environment::get().getJournal()->addEntry (quest, index, ptr);
                     }
                     catch (...)
                     {
