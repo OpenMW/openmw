@@ -159,17 +159,13 @@ void MechanicsHelper::processAttack(Attack attack, const MWWorld::Ptr& attacker)
     }
     else
     {
-        if (mwmp::Main::get().getCellController()->isLocalActor(attack.target.refId,
-            attack.target.refNumIndex, attack.target.mpNum))
+        if (mwmp::Main::get().getCellController()->isLocalActor(attack.target.refNumIndex, attack.target.mpNum))
         {
-            victim = mwmp::Main::get().getCellController()->getLocalActor(attack.target.refId,
-                attack.target.refNumIndex, attack.target.mpNum)->getPtr();
+            victim = mwmp::Main::get().getCellController()->getLocalActor(attack.target.refNumIndex, attack.target.mpNum)->getPtr();
         }
-        else if (mwmp::Main::get().getCellController()->isDedicatedActor(attack.target.refId,
-            attack.target.refNumIndex, attack.target.mpNum))
+        else if (mwmp::Main::get().getCellController()->isDedicatedActor(attack.target.refNumIndex, attack.target.mpNum))
         {
-            victim = mwmp::Main::get().getCellController()->getDedicatedActor(attack.target.refId,
-                attack.target.refNumIndex, attack.target.mpNum)->getPtr();
+            victim = mwmp::Main::get().getCellController()->getDedicatedActor(attack.target.refNumIndex, attack.target.mpNum)->getPtr();
         }
     }
 

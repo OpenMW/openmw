@@ -474,12 +474,15 @@ namespace MWWorld
         return Ptr();
     }
 
-    // Added by tes3mp
+    /*
+        Start of tes3mp addition
+
+        A custom type of search visitor used to find objects by their reference numbers
+    */
     template <typename PtrType>
     struct SearchExactVisitor
     {
         PtrType mFound;
-        std::string mIdToFind;
         unsigned int mRefNumIndexToFind;
         unsigned int mMpNumToFind;
 
@@ -487,56 +490,97 @@ namespace MWWorld
         {
             if (ptr.getCellRef().getRefNum().mIndex == mRefNumIndexToFind && ptr.getCellRef().getMpNum() == mMpNumToFind)
             {
-                if (ptr.getCellRef().getRefId() == mIdToFind)
-                {
-                    mFound = ptr;
-                    return false;
-                }
+                mFound = ptr;
+                return false;
             }
             return true;
         }
     };
+    /*
+        End of tes3mp addition
+    */
 
-    ///< Added by tes3mp and used to find an object by both its ID and its reference number
-    Ptr CellStore::searchExact (const std::string& id, unsigned int refNumIndex, unsigned int mpNum)
+    /*
+        Start of tes3mp addition
+
+        Allow the searching of objects by their reference numbers
+    */
+    Ptr CellStore::searchExact (unsigned int refNumIndex, unsigned int mpNum)
     {
         SearchExactVisitor<MWWorld::Ptr> searchVisitor;
-        searchVisitor.mIdToFind = id;
         searchVisitor.mRefNumIndexToFind = refNumIndex;
         searchVisitor.mMpNumToFind = mpNum;
         forEach(searchVisitor);
         return searchVisitor.mFound;
     }
+    /*
+        End of tes3mp addition
+    */
 
-    // Added by tes3mp and used to get all the MergedRefs in the cell
+    /*
+        Start of tes3mp addition
+
+        Make it possible to get the mMergedRefs in the CellStore from elsewhere in the code
+    */
     std::vector<LiveCellRefBase*> *CellStore::getMergedRefs()
     {
         return &mMergedRefs;
     }
+    /*
+        End of tes3mp addition
+    */
 
-    // Added by tes3mp and used to get all the NPCs in the cell
+    /*
+        Start of tes3mp addition
+
+        Make it possible to get the mNPCs in the CellStore from elsewhere in the code
+    */
     CellRefList<ESM::NPC> *CellStore::getNpcs()
     {
         return &mNpcs;
     }
+    /*
+        End of tes3mp addition
+    */
 
-    // Added by tes3mp and used to get all the creatures in the cell
+    /*
+        Start of tes3mp addition
+
+        Make it possible to get the mCreatures in the CellStore from elsewhere in the code
+    */
     CellRefList<ESM::Creature> *CellStore::getCreatures()
     {
         return &mCreatures;
     }
+    /*
+        End of tes3mp addition
+    */
 
-    // Added by tes3mp and used to get all the creatures in the cell
+    /*
+        Start of tes3mp addition
+
+        Make it possible to get the mCreatureLists in the CellStore from elsewhere in the code
+    */
     CellRefList<ESM::CreatureLevList> *CellStore::getCreatureLists()
     {
         return &mCreatureLists;
     }
+    /*
+        End of tes3mp addition
+    */
 
-    // Added by tes3mp and used to get all the containers in the cell
+    /*
+        Start of tes3mp addition
+
+        Make it possible to get the mContainers in the CellStore from elsewhere in the code
+    */
     CellRefList<ESM::Container> *CellStore::getContainers()
     {
         return &mContainers;
     }
+    /*
+        End of tes3mp addition
+    */
 
     float CellStore::getWaterLevel() const
     {
