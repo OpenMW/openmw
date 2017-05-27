@@ -20,8 +20,10 @@ namespace mwmp
             {
                 // Entire list of topics cannot currently be requested from players
             }
-            else
+            else if (player != 0)
+            {
                 static_cast<LocalPlayer*>(player)->addTopics();
+            }
         }
     };
 }

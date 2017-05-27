@@ -24,8 +24,10 @@ namespace mwmp
             {
                 // Entire journal cannot currently be requested from players
             }
-            else
+            else if (player != 0)
+            {
                 static_cast<LocalPlayer*>(player)->addJournalItems();
+            }
         }
     };
 }

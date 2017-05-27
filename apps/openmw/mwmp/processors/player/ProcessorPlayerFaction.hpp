@@ -20,8 +20,10 @@ namespace mwmp
             {
                 // Entire faction membership cannot currently be requested from players
             }
-            else
+            else if (player != 0)
+            {
                 static_cast<LocalPlayer*>(player)->setFactions();
+            }
         }
     };
 }
