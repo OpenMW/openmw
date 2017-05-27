@@ -36,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     PingHelper::Get().SetModel((ServerModel*)proxyModel->sourceModel());
     queryHelper = new QueryHelper(proxyModel->sourceModel());
+    connect(queryHelper, &QueryHelper::started, [this](){actionRefresh->setEnabled(false);});
+    connect(queryHelper, &QueryHelper::finished, [this](){actionRefresh->setEnabled(true);});
 
     connect(tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabSwitched(int)));
     connect(actionAdd, SIGNAL(triggered(bool)), this, SLOT(addServer()));

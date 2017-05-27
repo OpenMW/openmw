@@ -18,6 +18,9 @@ public:
 public slots:
     void refresh();
     void terminate();
+signals:
+    void finished();
+    void started();
 private:
     QThread *queryThread;
 };

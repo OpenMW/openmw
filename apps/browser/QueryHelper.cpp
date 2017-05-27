@@ -16,12 +16,14 @@ QueryHelper::QueryHelper(QAbstractItemModel *model)
     queryUpdate->_model = model;
     connect(queryThread, SIGNAL(started()), queryUpdate, SLOT(process()));
     connect(queryUpdate, SIGNAL(finished()), queryThread, SLOT(quit()));
+    connect(queryUpdate, &QueryUpdate::finished, [this](){emit finished();});
     queryUpdate->moveToThread(queryThread);
 }
 
 void QueryHelper::refresh()
 {
     queryThread->start();
+    emit started();
 }
 
 void QueryHelper::terminate()
