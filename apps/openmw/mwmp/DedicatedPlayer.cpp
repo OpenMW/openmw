@@ -231,13 +231,10 @@ void DedicatedPlayer::setCell()
     // update has been called
     setPtr(world->moveObject(ptr, cellStore, position.pos[0], position.pos[1], position.pos[2]));
 
-    // If this player is now in a cell that is active for us, we should send them all
+    // If this player is now in a cell that we are the local authority over, we should send them all
     // NPC data in that cell
-    if (Main::get().getCellController()->isActiveWorldCell(cell))
-    {
-        if (Main::get().getCellController()->isInitializedCell(cell))
-            Main::get().getCellController()->getCell(cell)->updateLocal(true);
-    }
+    if (Main::get().getCellController()->hasLocalAuthority(cell))
+        Main::get().getCellController()->getCell(cell)->updateLocal(true);
 }
 
 void DedicatedPlayer::updateMarker()
