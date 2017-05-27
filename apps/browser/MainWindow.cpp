@@ -121,7 +121,13 @@ void MainWindow::play()
 
     int sourceId = proxyModel->mapToSource(proxyModel->index(id, ServerData::ADDR)).row();
     infoDialog.Server(sm->myData[sourceId].addr);
-    infoDialog.refresh();
+
+    if (!infoDialog.refresh())
+    {
+        queryHelper->refresh();
+        return;
+    }
+
     if(!infoDialog.exec())
         return;
 

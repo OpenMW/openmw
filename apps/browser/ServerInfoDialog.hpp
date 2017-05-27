@@ -15,7 +15,7 @@ public:
     virtual ~ServerInfoDialog();
     void Server(QString addr);
 public slots:
-    void refresh();
+    bool refresh();
 private:
     QString addr;
 };

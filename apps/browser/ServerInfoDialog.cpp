@@ -28,7 +28,7 @@ void ServerInfoDialog::Server(QString addr)
     this->addr = addr;
 }
 
-void ServerInfoDialog::refresh()
+bool ServerInfoDialog::refresh()
 {
     QStringList list = addr.split(':');
     auto sd = QueryClient::Get().Update(SystemAddress(list[0].toLatin1(), list[1].toUShort()));
@@ -43,15 +43,11 @@ void ServerInfoDialog::refresh()
         listPlayers->clear();
 
         for(auto player : sd.second.players)
-        {
             listPlayers->addItem(QString::fromStdString(player));
-        };
 
         listPlugins->clear();
         for(auto plugin : sd.second.plugins)
-        {
             listPlugins->addItem(QString::fromStdString(plugin.name));
-        }
 
         listRules->clear();
         const static vector<std::string> defaultRules {"gamemode", "maxPlayers", "name", "passw", "players", "version"};
@@ -68,5 +64,7 @@ void ServerInfoDialog::refresh()
         }
 
         lblPlayers->setText(QString::number(sd.second.players.size()) + " / " + QString::number(sd.second.GetMaxPlayers()));
+        return true;
     }
+    return false;
 }
