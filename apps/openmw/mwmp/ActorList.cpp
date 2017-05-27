@@ -168,34 +168,6 @@ void ActorList::sendCellChangeActors()
     }
 }
 
-// TODO: Finish this
-void ActorList::editActorsInCell(MWWorld::CellStore* cellStore)
-{
-    BaseActor actor;
-
-    for (unsigned int i = 0; i < count; i++)
-    {
-        actor = baseActors.at(i);
-
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", actor.refId.c_str(), actor.refNumIndex, actor.mpNum);
-
-        return;
-
-        MWWorld::Ptr ptrFound = cellStore->searchExact(actor.refId, actor.refNumIndex, actor.mpNum);
-
-        if (ptrFound)
-        {
-            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
-        }
-        else
-        {
-            LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "-- Could not find %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
-                ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
-        }
-    }
-}
-
 void ActorList::sendActorsInCell(MWWorld::CellStore* cellStore)
 {
     reset();

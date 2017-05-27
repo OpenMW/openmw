@@ -39,8 +39,6 @@ namespace mwmp
         void sendAttackActors();
         void sendCellChangeActors();
 
-        void editActorsInCell(MWWorld::CellStore* cellStore);
-
         void sendActorsInCell(MWWorld::CellStore* cellStore);
 
     private:

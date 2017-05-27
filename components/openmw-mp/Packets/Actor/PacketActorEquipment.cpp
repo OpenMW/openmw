@@ -34,7 +34,6 @@ void PacketActorEquipment::Packet(RakNet::BitStream *bs, bool send)
             actor = actorList->baseActors.at(i);
         }
 
-        RW(actor.refId, send);
         RW(actor.refNumIndex, send);
         RW(actor.mpNum, send);
 
