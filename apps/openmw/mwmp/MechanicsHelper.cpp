@@ -173,9 +173,8 @@ void MechanicsHelper::processAttack(Attack attack, const MWWorld::Ptr& attacker)
         }
     }
 
-
     // Get the weapon used (if hand-to-hand, weapon = inv.end())
-    if (attackerStats.getDrawState() == MWMechanics::DrawState_Weapon)
+    if (attack.type == attack.MELEE)
     {
         MWWorld::Ptr weapon;
 

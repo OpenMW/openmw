@@ -251,6 +251,20 @@ void Cell::readAttack(ActorList& actorList)
         {
             DedicatedActor *actor = dedicatedActors[mapIndex];
             actor->attack = baseActor.attack;
+
+            // Set the correct drawState here if we've somehow we've missed a previous
+            // AnimFlags packet
+            if (actor->attack.type == mwmp::Attack::MELEE && actor->drawState != 1)
+            {
+                actor->drawState = 1;
+                actor->setAnimFlags();
+            }
+            else if (actor->attack.type == mwmp::Attack::MAGIC && actor->drawState != 2)
+            {
+                actor->drawState = 2;
+                actor->setAnimFlags();
+            }
+
             mwmp::Main::get().getMechanicsHelper()->processAttack(actor->attack, actor->getPtr());
         }
     }
