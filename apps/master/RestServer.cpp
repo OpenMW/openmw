@@ -11,9 +11,9 @@ using namespace std;
 using namespace chrono;
 using namespace boost::property_tree;
 
-static string response201 = "HTTP/1.1 201 Created\r\nContent-Length: 11\r\n\r\n201 Created";
-static string response202 = "HTTP/1.1 202 Accepted\r\nContent-Length: 12\r\n\r\n202 Accepted";
-static string response400 = "HTTP/1.1 400 Bad Request\r\nContent-Length: 15\r\n\r\n400 Bad Request";
+static string response201 = "HTTP/1.1 201 Created\r\nContent-Length: 7\r\n\r\nCreated";
+static string response202 = "HTTP/1.1 202 Accepted\r\nContent-Length: 8\r\n\r\nAccepted";
+static string response400 = "HTTP/1.1 400 Bad Request\r\nContent-Length: 11\r\n\r\nbad request";
 
 inline void ResponseStr(HttpServer::Response &response, string content, string type = "", string code = "200 OK")
 {
@@ -67,7 +67,7 @@ void RestServer::start()
                 stringstream ss;
                 ss << "{";
                 auto addr = request->path_match[1].str();
-                auto port = (unsigned short)stoi(&(addr[addr.find(':')]));
+                auto port = (unsigned short)stoi(&(addr[addr.find(':')+1]));
                 queryToStringStream(ss, "server", serverMap->at(RakNet::SystemAddress(addr.c_str(), port)));
                 ss << "}";
                 ResponseStr(*response, ss.str(), "application/json");
@@ -110,7 +110,8 @@ void RestServer::start()
             MasterServer::SServer server;
             ptreeToServer(pt, server);
 
-            unsigned short port = pt.get<unsigned short>("query_port");
+            unsigned short port = pt.get<unsigned short>("port");
+            server.lastUpdate = steady_clock::now();
             serverMap->insert({RakNet::SystemAddress(request->remote_endpoint_address.c_str(), port), server});
             updatedCache = true;
 
@@ -126,9 +127,9 @@ void RestServer::start()
     //Update query for < 0.6 servers
     httpServer.resource[ServersRegex]["PUT"] = [this](auto response, auto request) {
         auto addr = request->path_match[1].str();
-        auto port = (unsigned short)stoi(&(addr[addr.find(':')]));
+        auto port = (unsigned short)stoi(&(addr[addr.find(':')+1]));
 
-        auto query = serverMap->find(RakNet::SystemAddress(addr.c_str(), port));
+        auto query = serverMap->find(RakNet::SystemAddress(request->remote_endpoint_address.c_str(), port));
 
         if(query == serverMap->end())
         {
