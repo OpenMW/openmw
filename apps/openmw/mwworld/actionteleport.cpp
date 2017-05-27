@@ -1,5 +1,16 @@
 #include "actionteleport.hpp"
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include "../mwmp/Main.hpp"
+#include "../mwmp/CellController.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -28,6 +39,17 @@ namespace MWWorld
 
             for (std::set<MWWorld::Ptr>::iterator it = followers.begin(); it != followers.end(); ++it)
                 teleport(*it);
+
+            /*
+                Start of tes3mp addition
+
+                Update LocalActors before we unload their cells, so packets with their cell changes
+                can be sent
+            */
+            mwmp::Main::get().getCellController()->updateLocal(false);
+            /*
+                End of tes3mp addition
+            */
         }
 
         teleport(actor);

@@ -68,6 +68,7 @@ void LocalActor::updateCell()
     LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s", cell.getDescription().c_str(), ptr.getCell()->getCell()->getDescription().c_str());
 
     cell = *ptr.getCell()->getCell();
+    position = ptr.getRefData().getPosition();
 
     mwmp::Main::get().getNetworking()->getActorList()->addCellChangeActor(*this);
 }
