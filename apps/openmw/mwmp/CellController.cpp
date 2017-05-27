@@ -275,8 +275,7 @@ DedicatedActor *CellController::getDedicatedActor(int refNumIndex, int mpNum)
 std::string CellController::generateMapIndex(int refNumIndex, int mpNum)
 {
     std::string mapIndex = "";
-    mapIndex += "-" + Utils::toString(refNumIndex);
-    mapIndex += "-" + Utils::toString(mpNum);
+    mapIndex = Utils::toString(refNumIndex) + "-" + Utils::toString(mpNum);
     return mapIndex;
 }
 
