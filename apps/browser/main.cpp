@@ -44,6 +44,5 @@ int main(int argc, char *argv[])
     MainWindow d;
 
     d.show();
-    d.refresh();
     return app.exec();
 }

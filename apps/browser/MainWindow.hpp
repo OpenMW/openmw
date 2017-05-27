@@ -11,6 +11,8 @@
 #include "MySortFilterProxyModel.hpp"
 #include <components/process/processinvoker.hpp>
 
+class QueryHelper;
+
 class MainWindow : public QMainWindow,  private Ui::MainWindow
 {
     Q_OBJECT
@@ -20,8 +22,6 @@ public:
 protected:
     void closeEvent(QCloseEvent * event) Q_DECL_OVERRIDE;
     void addServerAndUpdate(QString addr);
-public slots:
-    bool refresh();
 protected slots:
     void tabSwitched(int index);
     void addServer();
@@ -34,6 +34,7 @@ protected slots:
     void maxLatencyChanged(int index);
     void gamemodeChanged(const QString &text);
 private:
+    QueryHelper *queryHelper;
     Process::ProcessInvoker *mGameInvoker;
     ServerModel *browser, *favorites;
     MySortFilterProxyModel *proxyModel;

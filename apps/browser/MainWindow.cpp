@@ -3,17 +3,17 @@
 //
 
 #include "MainWindow.hpp"
+#include "QueryHelper.hpp"
+#include "PingHelper.hpp"
 #include "ServerInfoDialog.hpp"
 #include "components/files/configurationmanager.hpp"
-#include "PingHelper.hpp"
 #include <qdebug.h>
 #include <QInputDialog>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFile>
 #include <QJsonDocument>
-#include <apps/browser/netutils/QueryClient.hpp>
-#include <apps/browser/netutils/Utils.hpp>
+
 
 using namespace Process;
 using namespace std;
@@ -35,12 +35,13 @@ MainWindow::MainWindow(QWidget *parent)
     tblFavorites->hideColumn(ServerData::ADDR);
 
     PingHelper::Get().SetModel((ServerModel*)proxyModel->sourceModel());
+    queryHelper = new QueryHelper(proxyModel->sourceModel());
 
     connect(tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabSwitched(int)));
     connect(actionAdd, SIGNAL(triggered(bool)), this, SLOT(addServer()));
     connect(actionAdd_by_IP, SIGNAL(triggered(bool)), this, SLOT(addServerByIP()));
     connect(actionDelete, SIGNAL(triggered(bool)), this, SLOT(deleteServer()));
-    connect(actionRefresh, SIGNAL(triggered(bool)), this, SLOT(refresh()));
+    connect(actionRefresh, SIGNAL(triggered(bool)), queryHelper, SLOT(refresh()));
     connect(actionPlay, SIGNAL(triggered(bool)), this, SLOT(play()));
     connect(tblServerBrowser, SIGNAL(clicked(QModelIndex)), this, SLOT(serverSelected()));
     connect(tblFavorites, SIGNAL(clicked(QModelIndex)), this, SLOT(serverSelected()));
@@ -51,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(comboLatency, SIGNAL(currentIndexChanged(int)), this, SLOT(maxLatencyChanged(int)));
     connect(leGamemode, SIGNAL(textChanged(const QString &)), this, SLOT(gamemodeChanged(const QString &)));
     loadFavorites();
+    queryHelper->refresh();
 }
 
 MainWindow::~MainWindow()
@@ -105,49 +107,6 @@ void MainWindow::deleteServer()
             actionDelete->setEnabled(false);
         }
     }
-}
-
-bool MainWindow::refresh()
-{
-    auto data = QueryClient::Get().Query();
-    if(QueryClient::Get().Status() != ID_MASTER_QUERY)
-        return false;
-
-    ServerModel *model = ((ServerModel*)proxyModel->sourceModel());
-    model->removeRows(0, model->rowCount());
-    for(auto server : data)
-    {
-        model->insertRow(model->rowCount());
-        int row = model->rowCount() - 1;
-
-        QModelIndex mi = model->index(row, ServerData::ADDR);
-        model->setData(mi, server.first.ToString(true, ':'));
-
-        mi = model->index(row, ServerData::PLAYERS);
-        model->setData(mi, (int)server.second.players.size());
-
-        mi = model->index(row, ServerData::MAX_PLAYERS);
-        model->setData(mi, server.second.GetMaxPlayers());
-
-        mi = model->index(row, ServerData::HOSTNAME);
-        model->setData(mi, server.second.GetName());
-
-        mi = model->index(row, ServerData::MODNAME);
-        model->setData(mi, server.second.GetGameMode());
-
-        mi = model->index(row, ServerData::VERSION);
-        model->setData(mi, server.second.GetVersion());
-
-        mi = model->index(row, ServerData::PASSW);
-        model->setData(mi, server.second.GetPassword() == 1);
-
-        mi = model->index(row, ServerData::PING);
-        model->setData(mi, PING_UNREACHABLE);
-
-        PingHelper::Get().Add(row, {server.first.ToString(false), server.first.GetPort()});
-    }
-
-    return true;
 }
 
 void MainWindow::play()
