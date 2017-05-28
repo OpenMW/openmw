@@ -19,6 +19,6 @@ void PacketPlayerPosition::Packet(RakNet::BitStream *bs, bool send)
 {
     PlayerPacket::Packet(bs, send);
 
-    RW(player->position, send);
-    RW(player->direction, send);
+    RW(player->position, send, 1);
+    RW(player->direction.pos, send, 1);
 }
