@@ -276,6 +276,7 @@ int main(int argc, char *argv[])
         networking.getMasterClient()->SetUpdateRate((unsigned)updateRate);
         string hostname = mgr.getString("hostname", "General");
         networking.getMasterClient()->SetHostname(hostname);
+        networking.getMasterClient()->SetRuleString("CommitHash", version.mCommitHash);
 
         networking.getMasterClient()->Start();
     }
