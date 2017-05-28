@@ -59,7 +59,7 @@ void printVersion(string version, Version::Version ver, int protocol)
 #endif
     cout << ")" << endl;
     cout << "Protocol version: " << protocol << endl;
-    cout << "Commit hash: " <<  ver.mCommitHash << endl;
+    cout << "Commit hash: " <<  ver.mCommitHash.substr(0, 10) << endl;
 
     cout << "------------------------------------------------------------" << endl;
 }
@@ -276,7 +276,7 @@ int main(int argc, char *argv[])
         networking.getMasterClient()->SetUpdateRate((unsigned)updateRate);
         string hostname = mgr.getString("hostname", "General");
         networking.getMasterClient()->SetHostname(hostname);
-        networking.getMasterClient()->SetRuleString("CommitHash", version.mCommitHash);
+        networking.getMasterClient()->SetRuleString("CommitHash", version.mCommitHash.substr(0, 10));
 
         networking.getMasterClient()->Start();
     }
