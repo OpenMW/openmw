@@ -4,6 +4,7 @@
 #include <osg/TriangleFunctor>
 #include <osg/Transform>
 #include <osg/Drawable>
+#include <osg/Version>
 
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
@@ -42,7 +43,11 @@ struct GetTriangleFunctor
         return btVector3(vec.x(), vec.y(), vec.z());
     }
 
+#if OSG_MIN_VERSION_REQUIRED(3,5,6)
+    void inline operator()( const osg::Vec3 v1, const osg::Vec3 v2, const osg::Vec3 v3 )
+#else
     void inline operator()( const osg::Vec3 v1, const osg::Vec3 v2, const osg::Vec3 v3, bool _temp )
+#endif
     {
         if (mTriMesh)
             mTriMesh->addTriangle( toBullet(mMatrix.preMult(v1)), toBullet(mMatrix.preMult(v2)), toBullet(mMatrix.preMult(v3)));
