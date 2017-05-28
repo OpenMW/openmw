@@ -31,6 +31,7 @@
 #include <SDL_messagebox.h>
 #include <RakSleep.h>
 #include <iomanip>
+#include <components/version/version.hpp>
 
 #include "Networking.hpp"
 #include "Main.hpp"
@@ -250,6 +251,7 @@ void Networking::connect(const std::string &ip, unsigned short port, std::vector
 
     stringstream sstr(TES3MP_VERSION);
     sstr << TES3MP_PROTO_VERSION;
+    sstr << Version::getOpenmwVersion(Main::getResDir()).mCommitHash;
 
     if (peer->Connect(master.ToString(false), master.GetPort(), sstr.str().c_str(), (int) sstr.str().size(), 0, 0, 3, 500, 0) != RakNet::CONNECTION_ATTEMPT_STARTED)
         errmsg = "Connection attempt failed.\n";

@@ -8,6 +8,7 @@
 #include <components/openmw-mp/Version.hpp>
 
 #include <components/esm/esmwriter.hpp>
+#include <components/files/escape.hpp>
 
 #include "../mwbase/environment.hpp"
 
@@ -52,6 +53,12 @@ using namespace std;
 Main *Main::pMain = 0;
 std::string Main::addr = "";
 std::string Main::passw = TES3MP_DEFAULT_PASSW;
+std::string Main::resourceDir = "";
+
+std::string Main::getResDir()
+{
+    return resourceDir;
+}
 
 std::string loadSettings (Settings::Manager & settings)
 {
@@ -115,6 +122,7 @@ void Main::configure(const boost::program_options::variables_map &variables)
 {
     Main::addr = variables["connect"].as<string>();
     Main::passw = variables["password"].as<string>();
+    resourceDir = variables["resources"].as<Files::EscapeHashString>().toStdString();
 }
 
 static Settings::CategorySettingValueMap saveUserSettings;

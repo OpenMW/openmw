@@ -29,6 +29,7 @@ namespace mwmp
         static void pressedKey(int key);
 
         static bool isValidPacketScript(std::string script);
+        static std::string getResDir();
 
         Networking *getNetworking() const;
         LocalPlayer *getLocalPlayer() const;
@@ -39,6 +40,7 @@ namespace mwmp
         void updateWorld(float dt) const;
 
     private:
+        static std::string resourceDir;
         static std::string addr;
         static std::string passw;
         Main (const Main&);
