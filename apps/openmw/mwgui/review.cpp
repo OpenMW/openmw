@@ -164,7 +164,7 @@ namespace MWGui
         int modified = static_cast<int>(value.getModified());
 
         mHealth->setValue(current, modified);
-        std::string valStr =  MyGUI::utility::toString(current) + "/" + MyGUI::utility::toString(modified);
+        std::string valStr =  MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         mHealth->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
     }
 
@@ -174,7 +174,7 @@ namespace MWGui
         int modified = static_cast<int>(value.getModified());
 
         mMagicka->setValue(current, modified);
-        std::string valStr =  MyGUI::utility::toString(current) + "/" + MyGUI::utility::toString(modified);
+        std::string valStr =  MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         mMagicka->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
     }
 
@@ -184,7 +184,7 @@ namespace MWGui
         int modified = static_cast<int>(value.getModified());
 
         mFatigue->setValue(current, modified);
-        std::string valStr =  MyGUI::utility::toString(current) + "/" + MyGUI::utility::toString(modified);
+        std::string valStr =  MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         mFatigue->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
     }
 
