@@ -50,12 +50,22 @@ namespace mwmp
         }
 
         template<class templateType>
-        void RW(templateType &data, bool write)
+        void RW(templateType &data, bool write, bool compress = 0)
         {
             if (write)
-                bs->Write(data);
+            {
+                if(compress)
+                    bs->WriteCompressed(data);
+                else
+                    bs->Write(data);
+            }
             else
-                bs->Read(data);
+            {
+                if(compress)
+                    bs->ReadCompressed(data);
+                else
+                    bs->Read(data);
+            }
         }
 
         void RW(bool &data, bool write)
@@ -73,17 +83,23 @@ namespace mwmp
             }
         }
 
-        void RW(std::string &str, bool write)
+        void RW(std::string &str, bool write, bool compress = 0)
         {
             if (write)
             {
                 RakNet::RakString rstr(str.c_str());
-                bs->Write(rstr);
+                if(compress)
+                    rstr.SerializeCompressed(bs);
+                else
+                    bs->Write(rstr);
             }
             else
             {
                 RakNet::RakString rstr;
-                bs->Read(rstr);
+                if(compress)
+                    rstr.DeserializeCompressed(bs);
+                else
+                    bs->Read(rstr);
                 str = rstr.C_String();
             }
         }
