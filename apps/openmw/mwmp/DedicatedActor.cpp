@@ -71,9 +71,10 @@ void DedicatedActor::move(float dt)
 {
     ESM::Position refPos = ptr.getRefData().getPosition();
     MWBase::World *world = MWBase::Environment::get().getWorld();
+    const int maxInterpolationDistance = 40;
 
     // Apply interpolation only if the position hasn't changed too much from last time
-    bool shouldInterpolate = abs(position.pos[0] - refPos.pos[0]) < 4 && abs(position.pos[1] - refPos.pos[1]) < 4 && abs(position.pos[2] - refPos.pos[2]) < 4;
+    bool shouldInterpolate = abs(position.pos[0] - refPos.pos[0]) < maxInterpolationDistance && abs(position.pos[1] - refPos.pos[1]) < maxInterpolationDistance && abs(position.pos[2] - refPos.pos[2]) < maxInterpolationDistance;
 
     // Don't apply linear interpolation if the DedicatedActor has just gone through a cell change, because
     // the interpolated position will be invalid, causing a slight hopping glitch
