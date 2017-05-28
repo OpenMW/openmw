@@ -19,6 +19,9 @@
 
 #include "MasterClient.hpp"
 
+#include <components/version/version.hpp>
+#include <components/files/escape.hpp>
+
 #ifdef ENABLE_BREAKPAD
 #include <handler/exception_handler.h>
 #endif
@@ -26,7 +29,7 @@
 using namespace std;
 using namespace mwmp;
 
-void printVersion(string version, int protocol)
+void printVersion(string version, Version::Version ver, int protocol)
 {
     cout << "TES3:MP dedicated server " << version;
     cout << " (";
@@ -56,6 +59,7 @@ void printVersion(string version, int protocol)
 #endif
     cout << ")" << endl;
     cout << "Protocol version: " << protocol << endl;
+    cout << "Commit hash: " <<  ver.mCommitHash << endl;
 
     cout << "------------------------------------------------------------" << endl;
 }
@@ -148,6 +152,21 @@ private:
     std::ostream &out2;
 };
 
+boost::program_options::variables_map launchOptions(Files::ConfigurationManager &cfgMgr)
+{
+    namespace bpo = boost::program_options;
+    bpo::variables_map variables;
+    bpo::options_description desc;
+
+    desc.add_options()
+            ("resources", bpo::value<Files::EscapeHashString>()->default_value("resources"),
+             "set resources directory");
+
+    cfgMgr.readConfiguration(variables, desc, true);
+
+    return variables;
+}
+
 int main(int argc, char *argv[])
 {
     Settings::Manager mgr;
@@ -156,6 +175,12 @@ int main(int argc, char *argv[])
     breakpad(boost::filesystem::path(cfgMgr.getLogPath()).string());
 
     loadSettings(mgr);
+
+    auto variables = launchOptions(cfgMgr);
+
+    auto version = Version::getOpenmwVersion(variables["resources"].as<Files::EscapeHashString>().toStdString());
+
+    cout << version.mCommitHash << endl;
 
     int logLevel = mgr.getInt("loglevel", "General");
     if (logLevel < Log::LOG_VERBOSE || logLevel > Log::LOG_FATAL)
@@ -196,7 +221,8 @@ int main(int argc, char *argv[])
 
     vector<string> plugins (Utils::split(mgr.getString("plugins", "Plugins"), ','));
 
-    printVersion(TES3MP_VERSION, TES3MP_PROTO_VERSION);
+
+    printVersion(TES3MP_VERSION, version, TES3MP_PROTO_VERSION);
 
 
     setenv("AMXFILE", moddir.c_str(), 1);
@@ -219,6 +245,7 @@ int main(int argc, char *argv[])
 
     stringstream sstr(TES3MP_VERSION);
     sstr << TES3MP_PROTO_VERSION;
+    sstr << version.mCommitHash;
 
     peer->SetIncomingPassword(sstr.str().c_str(), (int)sstr.str().size());
 
