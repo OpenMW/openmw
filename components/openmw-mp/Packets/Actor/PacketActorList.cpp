@@ -27,11 +27,6 @@ void PacketActorList::Packet(RakNet::BitStream *bs, bool send)
         return;
     }
 
-    RW(actorList->cell.mData.mFlags, send);
-    RW(actorList->cell.mData.mX, send);
-    RW(actorList->cell.mData.mY, send);
-    RW(actorList->cell.mName, send);
-
     BaseActor actor;
 
     for (unsigned int i = 0; i < actorList->count; i++)

@@ -18,9 +18,4 @@ void PacketActorAuthority::Packet(RakNet::BitStream *bs, bool send)
         actorList->baseActors.clear();
 
     RW(actorList->count, send);
-
-    RW(actorList->cell.mData.mFlags, send);
-    RW(actorList->cell.mData.mX, send);
-    RW(actorList->cell.mData.mY, send);
-    RW(actorList->cell.mName, send);
 }

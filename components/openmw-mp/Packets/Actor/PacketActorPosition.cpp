@@ -20,9 +20,6 @@ void PacketActorPosition::Packet(RakNet::BitStream *bs, bool send)
 
     RW(actorList->count, send);
 
-    RW(actorList->cell.mData, send, 1);
-    RW(actorList->cell.mName, send, 1);
-
     BaseActor actor;
 
     for (unsigned int i = 0; i < actorList->count; i++)

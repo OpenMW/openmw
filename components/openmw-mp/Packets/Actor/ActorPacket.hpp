@@ -20,6 +20,7 @@ namespace mwmp
         ~ActorPacket();
 
         void setActorList(BaseActorList *actorList);
+        virtual void Packet(RakNet::BitStream *bs, bool send);
 
     protected:
         BaseActorList *actorList;

@@ -20,11 +20,6 @@ void PacketActorAnimFlags::Packet(RakNet::BitStream *bs, bool send)
 
     RW(actorList->count, send);
 
-    RW(actorList->cell.mData.mFlags, send);
-    RW(actorList->cell.mData.mX, send);
-    RW(actorList->cell.mData.mY, send);
-    RW(actorList->cell.mName, send);
-
     BaseActor actor;
 
     for (unsigned int i = 0; i < actorList->count; i++)
@@ -46,4 +41,5 @@ void PacketActorAnimFlags::Packet(RakNet::BitStream *bs, bool send)
             actorList->baseActors.push_back(actor);
         }
     }
+    printf("Packet size: %d\n", bs->GetNumberOfBytesUsed());
 }
