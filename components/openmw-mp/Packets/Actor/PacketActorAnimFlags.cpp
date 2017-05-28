@@ -41,5 +41,4 @@ void PacketActorAnimFlags::Packet(RakNet::BitStream *bs, bool send)
             actorList->baseActors.push_back(actor);
         }
     }
-    printf("Packet size: %d\n", bs->GetNumberOfBytesUsed());
 }
