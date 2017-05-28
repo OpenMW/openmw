@@ -152,7 +152,7 @@ private:
     std::ostream &out2;
 };
 
-boost::program_options::variables_map launchOptions(Files::ConfigurationManager &cfgMgr)
+boost::program_options::variables_map launchOptions(int argc, char *argv[], Files::ConfigurationManager cfgMgr)
 {
     namespace bpo = boost::program_options;
     bpo::variables_map variables;
@@ -163,6 +163,11 @@ boost::program_options::variables_map launchOptions(Files::ConfigurationManager 
              "set resources directory");
 
     cfgMgr.readConfiguration(variables, desc, true);
+
+    bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
+
+    bpo::store(valid_opts, variables);
+    bpo::notify(variables);
 
     return variables;
 }
@@ -176,7 +181,7 @@ int main(int argc, char *argv[])
 
     loadSettings(mgr);
 
-    auto variables = launchOptions(cfgMgr);
+    auto variables = launchOptions(argc, argv, cfgMgr);
 
     auto version = Version::getOpenmwVersion(variables["resources"].as<Files::EscapeHashString>().toStdString());
 
