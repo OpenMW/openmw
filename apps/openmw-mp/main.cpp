@@ -159,8 +159,9 @@ boost::program_options::variables_map launchOptions(int argc, char *argv[], File
     bpo::options_description desc;
 
     desc.add_options()
-            ("resources", bpo::value<Files::EscapeHashString>()->default_value("resources"),
-             "set resources directory");
+            ("resources", bpo::value<Files::EscapeHashString>()->default_value("resources"), "set resources directory")
+            ("no-logs", bpo::value<bool>()->implicit_value(true)->default_value(false),
+             "Do not write logs. Useful for daemonizing.");
 
     cfgMgr.readConfiguration(variables, desc, true);
 
@@ -202,14 +203,19 @@ int main(int argc, char *argv[])
 
     boost::filesystem::ofstream logfile;
 
-    // Redirect cout and cerr to tes3mp server log
-    logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / "/tes3mp-server-" += Log::getFilenameTimestamp() += ".log"));
+    if (!variables["no-logs"].as<bool>())
+    {
+        // Redirect cout and cerr to tes3mp server log
 
-    coutsb.open (Tee(logfile, oldcout));
-    cerrsb.open (Tee(logfile, oldcerr));
+        logfile.open(boost::filesystem::path(
+                cfgMgr.getLogPath() / "/tes3mp-server-" += Log::getFilenameTimestamp() += ".log"));
 
-    std::cout.rdbuf (&coutsb);
-    std::cerr.rdbuf (&cerrsb);
+        coutsb.open(Tee(logfile, oldcout));
+        cerrsb.open(Tee(logfile, oldcerr));
+
+        std::cout.rdbuf(&coutsb);
+        std::cerr.rdbuf(&cerrsb);
+    }
 
     LOG_INIT(logLevel);
 
@@ -295,9 +301,12 @@ int main(int argc, char *argv[])
     if (code == 0)
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Quitting peacefully.");
 
-    // Restore cout and cerr
-    std::cout.rdbuf(cout_rdbuf);
-    std::cerr.rdbuf(cerr_rdbuf);
+    if(!variables["no-logs"].as<bool>())
+    {
+        // Restore cout and cerr
+        std::cout.rdbuf(cout_rdbuf);
+        std::cerr.rdbuf(cerr_rdbuf);
+    }
 
     breakpad_close();
     return code;
