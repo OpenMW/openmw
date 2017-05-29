@@ -172,14 +172,14 @@ namespace MWMechanics
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         std::vector<ESM::ENAMstruct> mEffects = mEffectList.mList;
 
-        float enchantmentCost = 0;
-        int effectsLeftCnt = mEffects.size();
+        int enchantmentCost = 0;
+        float cost = 0;
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
             float baseCost = (store.get<ESM::MagicEffect>().find(it->mEffectID))->mData.mBaseCost;
-            int magMin = (it->mMagnMin == 0) ? 1 : it->mMagnMin;
-            int magMax = (it->mMagnMax == 0) ? 1 : it->mMagnMax;
-            int area = (it->mArea == 0) ? 1 : it->mArea;
+            int magMin = std::max(1, it->mMagnMin);
+            int magMax = std::max(1, it->mMagnMax);
+            int area = std::max(1, it->mArea);
 
             float magnitudeCost = (magMin + magMax) * baseCost * 0.05f;
             if (mCastStyle == ESM::Enchantment::ConstantEffect)
@@ -195,16 +195,17 @@ namespace MWMechanics
 
             const float fEffectCostMult = store.get<ESM::GameSetting>().find("fEffectCostMult")->getFloat();
 
-            float cost = (magnitudeCost + areaCost) * fEffectCostMult;
+            cost += (magnitudeCost + areaCost) * fEffectCostMult;
+
+            cost = std::max(1.f, cost);
+
             if (it->mRange == ESM::RT_Target)
                 cost *= 1.5;
 
-            enchantmentCost += cost * effectsLeftCnt;
-            enchantmentCost = std::max(1.f, enchantmentCost);
-            --effectsLeftCnt;
+            enchantmentCost += static_cast<int>(cost);
         }
 
-        return static_cast<int>(enchantmentCost);
+        return enchantmentCost;
     }
 
 
