@@ -47,7 +47,6 @@ namespace mwmp
         float floatVal;
         std::string varName;
 
-        bool isActor;
         bool isDisarmed;
 
         std::vector<ContainerItem> containerItems;

@@ -162,6 +162,36 @@ void WorldEvent::placeObjects(MWWorld::CellStore* cellStore)
     }
 }
 
+void WorldEvent::spawnObjects(MWWorld::CellStore* cellStore)
+{
+    WorldObject worldObject;
+
+    for (unsigned int i = 0; i < worldObjectCount; i++)
+    {
+        worldObject = worldObjects.at(i);
+
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(),
+            worldObject.refNumIndex, worldObject.mpNum);
+
+        MWWorld::Ptr ptrFound = cellStore->searchExact(0, worldObject.mpNum);
+
+        // Only create this object if it doesn't already exist
+        if (!ptrFound)
+        {
+            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), worldObject.refId, 1);
+            MWWorld::Ptr newPtr = ref.getPtr();
+
+            newPtr.getCellRef().setMpNum(worldObject.mpNum);
+
+            newPtr = MWBase::Environment::get().getWorld()->placeObject(newPtr, cellStore, worldObject.position);
+        }
+        else
+        {
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Object already existed!");
+        }
+    }
+}
+
 void WorldEvent::deleteObjects(MWWorld::CellStore* cellStore)
 {
     WorldObject worldObject;
@@ -506,7 +536,21 @@ void WorldEvent::addObjectPlace(const MWWorld::Ptr& ptr)
     // Get the real count of gold in a stack
     worldObject.goldValue = ptr.getCellRef().getGoldValue();
 
-    worldObject.isActor = ptr.getClass().isActor();
+    addObject(worldObject);
+}
+
+void WorldEvent::addObjectSpawn(const MWWorld::Ptr& ptr)
+{
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = 0;
+
+    // Make sure we send the RefData position instead of the CellRef one, because that's what
+    // we actually see on this client
+    worldObject.position = ptr.getRefData().getPosition();
 
     addObject(worldObject);
 }
@@ -656,6 +700,22 @@ void WorldEvent::sendObjectPlace()
 
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->setEvent(this);
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send();
+}
+
+void WorldEvent::sendObjectSpawn()
+{
+    LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_SPAWN about %s", cell.getDescription().c_str());
+
+    for (std::vector<mwmp::WorldObject>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
+    {
+        mwmp::WorldObject worldObject = (*it);
+
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s-%i",
+            worldObject.refId.c_str(), worldObject.refNumIndex);
+    }
+
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SPAWN)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SPAWN)->Send();
 }
 
 void WorldEvent::sendObjectDelete()

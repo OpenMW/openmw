@@ -21,6 +21,7 @@ namespace mwmp
         void editContainers(MWWorld::CellStore* cellStore);
 
         void placeObjects(MWWorld::CellStore* cellStore);
+        void spawnObjects(MWWorld::CellStore* cellStore);
         void deleteObjects(MWWorld::CellStore* cellStore);
         void lockObjects(MWWorld::CellStore* cellStore);
         void triggerTrapObjects(MWWorld::CellStore* cellStore);
@@ -39,6 +40,7 @@ namespace mwmp
         void playVideo();
 
         void addObjectPlace(const MWWorld::Ptr& ptr);
+        void addObjectSpawn(const MWWorld::Ptr& ptr);
         void addObjectDelete(const MWWorld::Ptr& ptr);
         void addObjectLock(const MWWorld::Ptr& ptr, int lockLevel);
         void addObjectTrap(const MWWorld::Ptr& ptr, const ESM::Position& pos, bool isDisarmed);
@@ -53,6 +55,7 @@ namespace mwmp
         void addScriptGlobalShort(std::string varName, int shortVal);
 
         void sendObjectPlace();
+        void sendObjectSpawn();
         void sendObjectDelete();
         void sendObjectLock();
         void sendObjectTrap();

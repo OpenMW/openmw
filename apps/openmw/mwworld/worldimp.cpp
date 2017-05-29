@@ -3402,8 +3402,8 @@ namespace MWWorld
 
             mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
             worldEvent->reset();
-            worldEvent->addObjectPlace(ptr);
-            worldEvent->sendObjectPlace();
+            worldEvent->addObjectSpawn(ptr);
+            worldEvent->sendObjectSpawn();
 
             MWBase::Environment::get().getWorld()->deleteObject(ptr);
             /*

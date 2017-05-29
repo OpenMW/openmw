@@ -17,9 +17,8 @@ namespace mwmp
         {
             BaseObjectProcessor::Do(packet, event);
 
-            //event.spawnObjects(ptrCellStore);
+            event.spawnObjects(ptrCellStore);
         }
-
     };
 }
 

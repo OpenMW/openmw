@@ -554,13 +554,22 @@ namespace MWScript
                         /*
                             Start of tes3mp addition
 
-                            Send an ID_OBJECT_PLACE packet every time an object is placed in the world
-                            through a script
+                            Send an ID_OBJECT_PLACE or ID_OBJECT_SPAWN packet every time an object is placed
+                            in the world through a script
                         */
                         mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
                         worldEvent->reset();
-                        worldEvent->addObjectPlace(ptr);
-                        worldEvent->sendObjectPlace();
+
+                        if (ptr.getClass().isActor())
+                        {
+                            worldEvent->addObjectSpawn(ptr);
+                            worldEvent->sendObjectSpawn();
+                        }
+                        else
+                        {
+                            worldEvent->addObjectPlace(ptr);
+                            worldEvent->sendObjectPlace();
+                        }
                         /*
                             End of tes3mp addition
                         */

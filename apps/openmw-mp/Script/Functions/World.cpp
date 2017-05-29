@@ -119,11 +119,6 @@ double WorldFunctions::GetObjectRotZ(unsigned int i) noexcept
     return readEvent->worldObjects.at(i).position.rot[2];
 }
 
-bool WorldFunctions::GetObjectIsActor(unsigned int i) noexcept
-{
-    return readEvent->worldObjects.at(i).isActor;
-}
-
 unsigned int WorldFunctions::GetContainerChangesSize(unsigned int objectIndex) noexcept
 {
     return readEvent->worldObjects.at(objectIndex).containerItemCount;
@@ -256,16 +251,22 @@ void WorldFunctions::AddContainerItem() noexcept
     tempContainerItem = emptyContainerItem;
 }
 
-void WorldFunctions::SendObjectDelete() noexcept
-{
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_DELETE)->setEvent(&writeEvent);
-    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_DELETE)->Send(writeEvent.guid);
-}
-
 void WorldFunctions::SendObjectPlace() noexcept
 {
     mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_PLACE)->setEvent(&writeEvent);
     mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_PLACE)->Send(writeEvent.guid);
+}
+
+void WorldFunctions::SendObjectSpawn() noexcept
+{
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_SPAWN)->setEvent(&writeEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_SPAWN)->Send(writeEvent.guid);
+}
+
+void WorldFunctions::SendObjectDelete() noexcept
+{
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_DELETE)->setEvent(&writeEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_DELETE)->Send(writeEvent.guid);
 }
 
 void WorldFunctions::SendObjectLock() noexcept

@@ -23,7 +23,6 @@
     {"GetObjectRotX",               WorldFunctions::GetObjectRotX},\
     {"GetObjectRotY",               WorldFunctions::GetObjectRotY},\
     {"GetObjectRotZ",               WorldFunctions::GetObjectRotZ},\
-    {"GetObjectIsActor",            WorldFunctions::GetObjectIsActor},\
     \
     {"GetContainerChangesSize",     WorldFunctions::GetContainerChangesSize},\
     {"GetContainerItemRefId",       WorldFunctions::GetContainerItemRefId},\
@@ -54,8 +53,9 @@
     {"AddWorldObject",              WorldFunctions::AddWorldObject},\
     {"AddContainerItem",            WorldFunctions::AddContainerItem},\
     \
-    {"SendObjectDelete",            WorldFunctions::SendObjectDelete},\
     {"SendObjectPlace",             WorldFunctions::SendObjectPlace},\
+    {"SendObjectSpawn",             WorldFunctions::SendObjectSpawn},\
+    {"SendObjectDelete",            WorldFunctions::SendObjectDelete},\
     {"SendObjectLock",              WorldFunctions::SendObjectLock},\
     {"SendObjectTrap",              WorldFunctions::SendObjectTrap},\
     {"SendObjectScale",             WorldFunctions::SendObjectScale},\
@@ -91,7 +91,6 @@ public:
     static double GetObjectRotX(unsigned int i) noexcept;
     static double GetObjectRotY(unsigned int i) noexcept;
     static double GetObjectRotZ(unsigned int i) noexcept;
-    static bool GetObjectIsActor(unsigned int i) noexcept;
 
     static unsigned int GetContainerChangesSize(unsigned int objectIndex) noexcept;
     static const char *GetContainerItemRefId(unsigned int objectIndex, unsigned int itemIndex) noexcept;
@@ -122,8 +121,9 @@ public:
     static void AddWorldObject() noexcept;
     static void AddContainerItem() noexcept;
 
-    static void SendObjectDelete() noexcept;
     static void SendObjectPlace() noexcept;
+    static void SendObjectSpawn() noexcept;
+    static void SendObjectDelete() noexcept;
     static void SendObjectLock() noexcept;
     static void SendObjectTrap() noexcept;
     static void SendObjectScale() noexcept;
