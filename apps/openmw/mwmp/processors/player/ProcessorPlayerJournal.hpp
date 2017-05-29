@@ -1,10 +1,5 @@
-//
-// Created by koncord on 16.04.17.
-//
-
 #ifndef OPENMW_PROCESSORPLAYERJOURNAL_HPP
 #define OPENMW_PROCESSORPLAYERJOURNAL_HPP
-
 
 #include "apps/openmw/mwmp/PlayerProcessor.hpp"
 
@@ -31,6 +26,5 @@ namespace mwmp
         }
     };
 }
-
 
 #endif //OPENMW_PROCESSORPLAYERJOURNAL_HPP

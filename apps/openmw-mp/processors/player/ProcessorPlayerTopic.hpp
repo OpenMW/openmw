@@ -1,7 +1,6 @@
 #ifndef OPENMW_PROCESSORPLAYERTOPIC_HPP
 #define OPENMW_PROCESSORPLAYERTOPIC_HPP
 
-
 #include "apps/openmw-mp/PlayerProcessor.hpp"
 
 namespace mwmp

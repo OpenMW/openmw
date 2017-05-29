@@ -1,10 +1,5 @@
-//
-// Created by koncord on 16.04.17.
-//
-
 #ifndef OPENMW_PROCESSORPLAYERCELLSTATE_HPP
 #define OPENMW_PROCESSORPLAYERCELLSTATE_HPP
-
 
 #include "apps/openmw/mwmp/PlayerProcessor.hpp"
 

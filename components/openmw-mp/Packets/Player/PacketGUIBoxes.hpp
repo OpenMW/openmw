@@ -5,7 +5,6 @@
 #ifndef OPENMW_PACKETGUIBOXES_HPP
 #define OPENMW_PACKETGUIBOXES_HPP
 
-
 #include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 
 namespace mwmp

@@ -103,26 +103,29 @@ source_group(tes3mp-server FILES ${SERVER} ${SERVER_HEADER})
 
 set(PROCESSORS_ACTOR
         processors/actor/ProcessorActorAnimFlags.hpp processors/actor/ProcessorActorAnimPlay.hpp
-        processors/actor/ProcessorActorAttack.hpp processors/actor/ProcessorActorAuthority.hpp
-        processors/actor/ProcessorActorCellChange.hpp processors/actor/ProcessorActorEquipment.hpp
-        processors/actor/ProcessorActorList.hpp processors/actor/ProcessorActorPosition.hpp
-        processors/actor/ProcessorActorSpeech.hpp processors/actor/ProcessorActorStatsDynamic.hpp
-        processors/actor/ProcessorActorTest.hpp
+        processors/actor/ProcessorActorAttack.hpp processors/actor/ProcessorActorCellChange.hpp
+        processors/actor/ProcessorActorEquipment.hpp processors/actor/ProcessorActorList.hpp
+        processors/actor/ProcessorActorPosition.hpp processors/actor/ProcessorActorSpeech.hpp
+        processors/actor/ProcessorActorStatsDynamic.hpp processors/actor/ProcessorActorTest.hpp
         )
 
 source_group(tes3mp-server\\processors\\actor FILES ${PROCESSORS_ACTOR})
 
 set(PROCESSORS_PLAYER
         processors/player/ProcessorChatMsg.hpp processors/player/ProcessorGUIMessageBox.hpp
-        processors/player/ProcessorPlayerAnimFlags.hpp processors/player/ProcessorPlayerAttack.hpp
-        processors/player/ProcessorPlayerAttribute.hpp processors/player/ProcessorPlayerBounty.hpp
-        processors/player/ProcessorPlayerCellChange.hpp processors/player/ProcessorPlayerCellState.hpp
-        processors/player/ProcessorPlayerCharClass.hpp processors/player/ProcessorPlayerCharGen.hpp
-        processors/player/ProcessorPlayerDeath.hpp processors/player/ProcessorPlayerEquipment.hpp
+        processors/player/ProcessorGameWeather.hpp processors/player/ProcessorPlayerAnimFlags.hpp
+        processors/player/ProcessorPlayerAnimPlay.hpp processors/player/ProcessorPlayerAttack.hpp
+        processors/player/ProcessorPlayerAttribute.hpp processors/player/ProcessorPlayerBook.hpp
+        processors/player/ProcessorPlayerBounty.hpp processors/player/ProcessorPlayerCellChange.hpp
+        processors/player/ProcessorPlayerCellState.hpp processors/player/ProcessorPlayerCharClass.hpp
+        processors/player/ProcessorPlayerCharGen.hpp processors/player/ProcessorPlayerDeath.hpp
+        processors/player/ProcessorPlayerDisposition.hpp processors/player/ProcessorPlayerEquipment.hpp
         processors/player/ProcessorPlayerFaction.hpp processors/player/ProcessorPlayerInventory.hpp
         processors/player/ProcessorPlayerJournal.hpp processors/player/ProcessorPlayerLevel.hpp
-        processors/player/ProcessorPlayerPosition.hpp processors/player/ProcessorPlayerResurrect.hpp
-        processors/player/ProcessorPlayerSkill.hpp processors/player/ProcessorPlayerSpellbook.hpp
+        processors/player/ProcessorPlayerMap.hpp processors/player/ProcessorPlayerPosition.hpp
+        processors/player/ProcessorPlayerRegionChange.hpp processors/player/ProcessorPlayerRest.hpp
+        processors/player/ProcessorPlayerResurrect.hpp processors/player/ProcessorPlayerSkill.hpp
+        processors/player/ProcessorPlayerSpeech.hpp processors/player/ProcessorPlayerSpellbook.hpp
         processors/player/ProcessorPlayerStatsDynamic.hpp processors/player/ProcessorPlayerTopic.hpp
         )
 
@@ -134,9 +137,10 @@ set(PROCESSORS_WORLD
         processors/world/ProcessorObjectDelete.hpp processors/world/ProcessorObjectLock.hpp
         processors/world/ProcessorObjectMove.hpp processors/world/ProcessorObjectPlace.hpp
         processors/world/ProcessorObjectRotate.hpp processors/world/ProcessorObjectScale.hpp
-        processors/world/ProcessorObjectTrap.hpp processors/world/ProcessorScriptLocalShort.hpp
-        processors/world/ProcessorScriptLocalFloat.hpp processors/world/ProcessorScriptMemberShort.hpp
-        processors/world/ProcessorScriptGlobalShort.hpp processors/world/ProcessorVideoPlay.hpp
+        processors/world/ProcessorObjectSpawn.hpp processors/world/ProcessorObjectTrap.hpp
+        processors/world/ProcessorScriptLocalShort.hpp processors/world/ProcessorScriptLocalFloat.hpp
+        processors/world/ProcessorScriptMemberShort.hpp processors/world/ProcessorScriptGlobalShort.hpp
+        processors/world/ProcessorVideoPlay.hpp
         )
 
 source_group(tes3mp-server\\processors\\world FILES ${PROCESSORS_WORLD})

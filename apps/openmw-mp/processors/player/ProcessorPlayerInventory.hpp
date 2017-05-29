@@ -26,6 +26,4 @@ namespace mwmp
     };
 }
 
-
-
 #endif //OPENMW_PROCESSORPLAYERINVENTORY_HPP

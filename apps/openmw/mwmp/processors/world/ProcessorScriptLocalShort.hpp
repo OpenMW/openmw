@@ -1,10 +1,5 @@
-//
-// Created by koncord on 18.04.17.
-//
-
 #ifndef OPENMW_PROCESSORSCRIPTLOCALSHORT_HPP
 #define OPENMW_PROCESSORSCRIPTLOCALSHORT_HPP
-
 
 #include "BaseObjectProcessor.hpp"
 

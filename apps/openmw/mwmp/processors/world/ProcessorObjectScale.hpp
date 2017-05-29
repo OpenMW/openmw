@@ -1,10 +1,5 @@
-//
-// Created by koncord on 18.04.17.
-//
-
 #ifndef OPENMW_PROCESSOROBJECTSCALE_HPP
 #define OPENMW_PROCESSOROBJECTSCALE_HPP
-
 
 #include "BaseObjectProcessor.hpp"
 

@@ -5,7 +5,6 @@
 #ifndef OPENMW_PROCESSORPLAYERCHARCLASS_HPP
 #define OPENMW_PROCESSORPLAYERCHARCLASS_HPP
 
-
 #include "apps/openmw-mp/PlayerProcessor.hpp"
 
 namespace mwmp
@@ -24,6 +23,5 @@ namespace mwmp
         }
     };
 }
-
 
 #endif //OPENMW_PROCESSORPLAYERCHARCLASS_HPP

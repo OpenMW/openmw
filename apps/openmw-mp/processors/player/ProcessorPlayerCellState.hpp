@@ -1,10 +1,5 @@
-//
-// Created by koncord on 01.04.17.
-//
-
 #ifndef OPENMW_PROCESSORPLAYERCELLSTATE_HPP
 #define OPENMW_PROCESSORPLAYERCELLSTATE_HPP
-
 
 #include "apps/openmw-mp/PlayerProcessor.hpp"
 #include "apps/openmw-mp/Networking.hpp"
@@ -31,6 +26,5 @@ namespace mwmp
         }
     };
 }
-
 
 #endif //OPENMW_PROCESSORPLAYERCELLSTATE_HPP

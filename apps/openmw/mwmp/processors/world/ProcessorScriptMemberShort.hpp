@@ -1,10 +1,5 @@
-//
-// Created by koncord on 18.04.17.
-//
-
 #ifndef OPENMW_PROCESSORSCRIPTMEMBERSHORT_HPP
 #define OPENMW_PROCESSORSCRIPTMEMBERSHORT_HPP
-
 
 #include "apps/openmw/mwmp/WorldProcessor.hpp"
 

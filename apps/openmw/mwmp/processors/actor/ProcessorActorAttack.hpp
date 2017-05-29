@@ -1,10 +1,5 @@
-//
-// Created by koncord on 18.04.17.
-//
-
 #ifndef OPENMW_PROCESSORACTORATTACK_HPP
 #define OPENMW_PROCESSORACTORATTACK_HPP
-
 
 #include "apps/openmw/mwmp/ActorProcessor.hpp"
 #include "apps/openmw/mwmp/Main.hpp"

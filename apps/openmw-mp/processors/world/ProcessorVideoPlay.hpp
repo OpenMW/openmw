@@ -1,7 +1,3 @@
-//
-// Created by koncord on 03.04.17.
-//
-
 #ifndef OPENMW_PROCESSORVIDEOPLAY_HPP
 #define OPENMW_PROCESSORVIDEOPLAY_HPP
 

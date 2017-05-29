@@ -78,5 +78,4 @@ namespace mwmp
     };
 }
 
-
 #endif //OPENMW_PROCESSORPLAYERCELLCHANGE_HPP

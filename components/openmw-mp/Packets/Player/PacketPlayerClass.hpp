@@ -5,7 +5,6 @@
 #ifndef OPENMW_PACKETPLAYERCLASS_HPP
 #define OPENMW_PACKETPLAYERCLASS_HPP
 
-
 #include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 
 namespace mwmp
@@ -18,6 +17,5 @@ namespace mwmp
         virtual void Packet(RakNet::BitStream *bs, bool send);
     };
 }
-
 
 #endif //OPENMW_PACKETPLAYERCLASS_HPP

@@ -1,7 +1,3 @@
-//
-// Created by koncord on 03.04.17.
-//
-
 #ifndef OPENMW_PROCESSOROBJECTSCALE_HPP
 #define OPENMW_PROCESSOROBJECTSCALE_HPP
 

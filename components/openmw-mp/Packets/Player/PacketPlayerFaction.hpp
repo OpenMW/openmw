@@ -14,5 +14,4 @@ namespace mwmp
     };
 }
 
-
 #endif //OPENMW_PACKETPLAYERFACTION_HPP

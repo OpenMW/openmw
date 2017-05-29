@@ -1,7 +1,6 @@
 #ifndef OPENMW_PROCESSORPLAYERBOUNTY_HPP
 #define OPENMW_PROCESSORPLAYERBOUNTY_HPP
 
-
 #include "apps/openmw-mp/PlayerProcessor.hpp"
 
 namespace mwmp

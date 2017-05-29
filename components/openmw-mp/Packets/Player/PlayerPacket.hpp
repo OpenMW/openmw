@@ -9,7 +9,6 @@
 
 #include <components/openmw-mp/Packets/BasePacket.hpp>
 
-
 namespace mwmp
 {
     class PlayerPacket : public BasePacket

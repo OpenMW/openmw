@@ -5,7 +5,6 @@
 #ifndef OPENMW_PROCESSORPLAYERCHARGEN_HPP
 #define OPENMW_PROCESSORPLAYERCHARGEN_HPP
 
-
 #include "apps/openmw-mp/PlayerProcessor.hpp"
 
 namespace mwmp
@@ -27,8 +26,5 @@ namespace mwmp
         }
     };
 }
-
-
-
 
 #endif //OPENMW_PROCESSORPLAYERCHARGEN_HPP

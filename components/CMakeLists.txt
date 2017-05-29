@@ -169,24 +169,26 @@ add_component_dir (openmw-mp/Packets
 
 add_component_dir (openmw-mp/Packets/Actor
         ActorPacket
-        PacketActorList PacketActorAuthority PacketActorTest PacketActorAnimPlay PacketActorAttack PacketActorCellChange
-        PacketActorAnimFlags PacketActorEquipment PacketActorPosition PacketActorSpeech PacketActorStatsDynamic
+        PacketActorList PacketActorAuthority PacketActorTest PacketActorAI PacketActorAnimFlags PacketActorAnimPlay
+        PacketActorAttack PacketActorCellChange PacketActorDeath PacketActorEquipment PacketActorPosition PacketActorSpeech
+        PacketActorStatsDynamic
         )
 
 add_component_dir (openmw-mp/Packets/Player
         PlayerPacket
-        PacketHandshake PacketChatMessage PacketPlayerBaseInfo PacketPlayerCharGen PacketPlayerAnimFlags PacketPlayerAttack
-        PacketPlayerAttribute PacketPlayerBounty PacketPlayerCellChange PacketPlayerCellState PacketPlayerClass
-        PacketPlayerDeath PacketPlayerEquipment PacketPlayerFaction PacketPlayerInventory PacketPlayerJournal PacketPlayerLevel
-        PacketPlayerPosition PacketPlayerResurrect PacketPlayerSkill PacketPlayerSpellbook PacketPlayerStatsDynamic
-        PacketPlayerTopic PacketPlayerActiveSkills PacketGUIBoxes PacketTime
+        PacketHandshake PacketChatMessage PacketGUIBoxes PacketGameTime PacketGameWeather PacketPlayerBaseInfo PacketPlayerCharGen
+        PacketPlayerActiveSkills PacketPlayerAnimFlags PacketPlayerAnimPlay PacketPlayerAttack PacketPlayerAttribute
+        PacketPlayerBook PacketPlayerBounty PacketPlayerCellChange PacketPlayerCellState PacketPlayerClass PacketPlayerDeath
+        PacketPlayerEquipment PacketPlayerFaction PacketPlayerInventory PacketPlayerJournal PacketPlayerLevel PacketPlayerMap
+        PacketPlayerPosition PacketPlayerRegionAuthority PacketPlayerRegionChange PacketPlayerRest PacketPlayerResurrect
+        PacketPlayerSkill PacketPlayerSpeech PacketPlayerSpellbook PacketPlayerStatsDynamic PacketPlayerTopic
         )
 
 add_component_dir (openmw-mp/Packets/World
         WorldPacket
         PacketContainer PacketObjectAnimPlay PacketObjectDelete PacketDoorState PacketObjectLock PacketObjectMove PacketObjectPlace
-        PacketObjectRotate PacketObjectScale PacketObjectTrap PacketMusicPlay PacketVideoPlay PacketScriptLocalShort
-        PacketScriptLocalFloat PacketScriptMemberShort PacketScriptGlobalShort
+        PacketObjectRotate PacketObjectScale PacketObjectSpawn PacketObjectTrap PacketMusicPlay PacketVideoPlay
+        PacketScriptLocalShort PacketScriptLocalFloat PacketScriptMemberShort PacketScriptGlobalShort
         )
 
 add_component_dir (fallback

@@ -5,7 +5,6 @@
 #ifndef OPENMW_PROCESSORPLAYERCHATMSG_HPP
 #define OPENMW_PROCESSORPLAYERCHATMSG_HPP
 
-
 #include "apps/openmw-mp/PlayerProcessor.hpp"
 
 namespace mwmp

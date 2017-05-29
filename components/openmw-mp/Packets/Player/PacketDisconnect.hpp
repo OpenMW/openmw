@@ -21,5 +21,4 @@ namespace mwmp
     };
 }
 
-
 #endif //OPENMW_PACKETDISCONNECT_HPP

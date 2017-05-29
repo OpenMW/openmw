@@ -5,7 +5,6 @@
 #ifndef OPENMW_PACKETSTATSDYNAMIC_HPP
 #define OPENMW_PACKETSTATSDYNAMIC_HPP
 
-
 #include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 
 namespace mwmp

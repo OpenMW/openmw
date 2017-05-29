@@ -5,7 +5,6 @@
 #ifndef OPENMW_PACKETPLAYERATTACK_HPP
 #define OPENMW_PACKETPLAYERATTACK_HPP
 
-
 #include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 
 namespace mwmp

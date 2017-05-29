@@ -1,10 +1,5 @@
-//
-// Created by koncord on 01.04.17.
-//
-
 #ifndef OPENMW_PROCESSORPLAYERJOURNAL_HPP
 #define OPENMW_PROCESSORPLAYERJOURNAL_HPP
-
 
 #include "apps/openmw-mp/PlayerProcessor.hpp"
 

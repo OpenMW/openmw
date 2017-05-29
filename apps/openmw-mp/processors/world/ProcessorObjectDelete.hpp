@@ -1,7 +1,3 @@
-//
-// Created by koncord on 03.04.17.
-//
-
 #ifndef OPENMW_PROCESSOROBJECTDELETE_HPP
 #define OPENMW_PROCESSOROBJECTDELETE_HPP
 

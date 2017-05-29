@@ -5,7 +5,6 @@
 #ifndef OPENMW_PROCESSORPLAYERSTATS_DYNAMIC_HPP
 #define OPENMW_PROCESSORPLAYERSTATS_DYNAMIC_HPP
 
-
 #include "apps/openmw-mp/PlayerProcessor.hpp"
 
 namespace mwmp
@@ -26,6 +25,5 @@ namespace mwmp
         }
     };
 }
-
 
 #endif //OPENMW_PROCESSORPLAYERSTATS_DYNAMIC_HPP

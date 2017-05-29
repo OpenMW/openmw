@@ -7,6 +7,7 @@
 
 
 #include "apps/openmw/mwmp/PlayerProcessor.hpp"
+#include <apps/openmw/mwbase/environment.hpp>
 #include "apps/openmw/mwstate/statemanagerimp.hpp"
 
 namespace mwmp

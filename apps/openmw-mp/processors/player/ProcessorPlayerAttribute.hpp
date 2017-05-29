@@ -5,7 +5,6 @@
 #ifndef OPENMW_PROCESSORPLAYERATTRIBUTE_HPP
 #define OPENMW_PROCESSORPLAYERATTRIBUTE_HPP
 
-
 #include "apps/openmw-mp/PlayerProcessor.hpp"
 
 namespace mwmp

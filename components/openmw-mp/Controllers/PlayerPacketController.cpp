@@ -7,14 +7,17 @@
 #include "../Packets/Player/PacketPlayerCharGen.hpp"
 #include "../Packets/Player/PacketHandshake.hpp"
 #include "../Packets/Player/PacketGUIBoxes.hpp"
-#include "../Packets/Player/PacketTime.hpp"
 #include "../Packets/Player/PacketLoaded.hpp"
 #include "../Packets/Player/PacketConsole.hpp"
+#include "../Packets/Player/PacketGameTime.hpp"
+#include "../Packets/Player/PacketGameWeather.hpp"
 #include "../Packets/Player/PacketPlayerActiveSkills.hpp"
 #include "../Packets/Player/PacketPlayerBaseInfo.hpp"
 #include "../Packets/Player/PacketPlayerAnimFlags.hpp"
+#include "../Packets/Player/PacketPlayerAnimPlay.hpp"
 #include "../Packets/Player/PacketPlayerAttack.hpp"
 #include "../Packets/Player/PacketPlayerAttribute.hpp"
+#include "../Packets/Player/PacketPlayerBook.hpp"
 #include "../Packets/Player/PacketPlayerBounty.hpp"
 #include "../Packets/Player/PacketPlayerCellChange.hpp"
 #include "../Packets/Player/PacketPlayerCellState.hpp"
@@ -25,9 +28,14 @@
 #include "../Packets/Player/PacketPlayerInventory.hpp"
 #include "../Packets/Player/PacketPlayerJournal.hpp"
 #include "../Packets/Player/PacketPlayerLevel.hpp"
+#include "../Packets/Player/PacketPlayerMap.hpp"
 #include "../Packets/Player/PacketPlayerPosition.hpp"
+#include "../Packets/Player/PacketPlayerRegionAuthority.hpp"
+#include "../Packets/Player/PacketPlayerRegionChange.hpp"
+#include "../Packets/Player/PacketPlayerRest.hpp"
 #include "../Packets/Player/PacketPlayerResurrect.hpp"
 #include "../Packets/Player/PacketPlayerSkill.hpp"
+#include "../Packets/Player/PacketPlayerSpeech.hpp"
 #include "../Packets/Player/PacketPlayerSpellbook.hpp"
 #include "../Packets/Player/PacketPlayerStatsDynamic.hpp"
 #include "../Packets/Player/PacketPlayerTopic.hpp"
@@ -48,16 +56,19 @@ mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *p
     AddPacket<PacketChatMessage>(&packets, peer);
     AddPacket<PacketHandshake>(&packets, peer);
     AddPacket<PacketGUIBoxes>(&packets, peer);
-    AddPacket<PacketTime>(&packets, peer);
     AddPacket<PacketLoaded>(&packets, peer);
     AddPacket<PacketConsole>(&packets, peer);
+    AddPacket<PacketGameTime>(&packets, peer);
+    AddPacket<PacketGameWeather>(&packets, peer);
     AddPacket<PacketPlayerActiveSkills>(&packets, peer);
 
     AddPacket<PacketPlayerBaseInfo>(&packets, peer);
     AddPacket<PacketPlayerCharGen>(&packets, peer);
     AddPacket<PacketPlayerAnimFlags>(&packets, peer);
+    AddPacket<PacketPlayerAnimPlay>(&packets, peer);
     AddPacket<PacketPlayerAttack>(&packets, peer);
     AddPacket<PacketPlayerAttribute>(&packets, peer);
+    AddPacket<PacketPlayerBook>(&packets, peer);
     AddPacket<PacketPlayerBounty>(&packets, peer);
     AddPacket<PacketPlayerCellChange>(&packets, peer);
     AddPacket<PacketPlayerCellState>(&packets, peer);
@@ -68,9 +79,14 @@ mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *p
     AddPacket<PacketPlayerInventory>(&packets, peer);
     AddPacket<PacketPlayerJournal>(&packets, peer);
     AddPacket<PacketPlayerLevel>(&packets, peer);
+    AddPacket<PacketPlayerMap>(&packets, peer);
     AddPacket<PacketPlayerPosition>(&packets, peer);
+    AddPacket<PacketPlayerRegionAuthority>(&packets, peer);
+    AddPacket<PacketPlayerRegionChange>(&packets, peer);
+    AddPacket<PacketPlayerRest>(&packets, peer);
     AddPacket<PacketPlayerResurrect>(&packets, peer);
     AddPacket<PacketPlayerSkill>(&packets, peer);
+    AddPacket<PacketPlayerSpeech>(&packets, peer);
     AddPacket<PacketPlayerSpellbook>(&packets, peer);
     AddPacket<PacketPlayerStatsDynamic>(&packets, peer);
     AddPacket<PacketPlayerTopic>(&packets, peer);

@@ -1,7 +1,6 @@
 #ifndef OPENMW_PROCESSOROBJECTTRAP_HPP
 #define OPENMW_PROCESSOROBJECTTRAP_HPP
 
-
 #include "BaseObjectProcessor.hpp"
 
 namespace mwmp

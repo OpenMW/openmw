@@ -1,10 +1,5 @@
-//
-// Created by koncord on 18.04.17.
-//
-
 #ifndef OPENMW_PROCESSOROBJECTANIMPLAY_HPP
 #define OPENMW_PROCESSOROBJECTANIMPLAY_HPP
-
 
 #include "BaseObjectProcessor.hpp"
 

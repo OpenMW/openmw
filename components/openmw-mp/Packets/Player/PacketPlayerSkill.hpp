@@ -5,7 +5,6 @@
 #ifndef OPENMW_PACKETPLAYERSKILL_HPP
 #define OPENMW_PACKETPLAYERSKILL_HPP
 
-
 #include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
 
 namespace mwmp
@@ -20,7 +19,5 @@ namespace mwmp
         virtual void Packet(RakNet::BitStream *bs, bool send);
     };
 }
-
-
 
 #endif //OPENMW_PACKETPLAYERSKILL_HPP
