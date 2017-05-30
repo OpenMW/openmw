@@ -324,10 +324,8 @@ void LocalPlayer::updatePosition(bool forceUpdate)
         static bool isJumping = false;
         static bool sentJumpEnd = true;
 
-        const MWMechanics::Movement &move = player.getClass().getMovementSettings(player);
-
-        bool posIsChanging = (move.mPosition[0] != 0 || move.mPosition[1] != 0 || move.mPosition[2] != 0 ||
-            move.mRotation[0] != 0 || move.mRotation[1] != 0 || move.mRotation[2] != 0);
+        bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 || direction.pos[2] != 0 ||
+            direction.rot[0] != 0 || direction.rot[1] != 0 || direction.rot[2] != 0);
 
         if (forceUpdate || posIsChanging || posWasChanged)
         {
@@ -339,10 +337,6 @@ void LocalPlayer::updatePosition(bool forceUpdate)
             }
 
             position = player.getRefData().getPosition();
-
-            direction.pos[0] = move.mPosition[0];
-            direction.pos[1] = move.mPosition[1];
-            direction.pos[2] = move.mPosition[2];
 
             getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->setPlayer(this);
             getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->Send();

@@ -31,7 +31,7 @@ void PacketActorPosition::Packet(RakNet::BitStream *bs, bool send)
         RW(actor.mpNum, send);
 
         RW(actor.position, send, 1);
-        RW(actor.direction.pos, send, 1);
+        RW(actor.direction, send, 1);
 
         actor.hasPositionData = true;
 

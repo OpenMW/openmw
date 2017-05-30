@@ -1685,17 +1685,30 @@ void CharacterController::update(float duration)
             Start of tes3mp addition
 
             Character movement setting rotations get reset here, so we have to assign movement
-            settings to a relevant LocalActor now
+            settings to the LocalPlayer or a LocalActor now
         */
-        if (mwmp::Main::get().getCellController()->isLocalActor(mPtr))
+        if (MWBase::Environment::get().getWorld()->getPlayerPtr() == mPtr)
+        {
+            mwmp::LocalPlayer *localPlayer = mwmp::Main::get().getLocalPlayer();
+            MWMechanics::Movement &movementSettings = mPtr.getClass().getMovementSettings(mPtr);
+            localPlayer->direction.pos[0] = movementSettings.mPosition[0];
+            localPlayer->direction.pos[1] = movementSettings.mPosition[1];
+            localPlayer->direction.pos[2] = movementSettings.mPosition[2];
+            localPlayer->direction.rot[0] = movementSettings.mRotation[0];
+            localPlayer->direction.rot[1] = movementSettings.mRotation[1];
+            localPlayer->direction.rot[2] = movementSettings.mRotation[2];
+        }
+
+        else if (mwmp::Main::get().getCellController()->isLocalActor(mPtr))
         {
             mwmp::LocalActor *localActor = mwmp::Main::get().getCellController()->getLocalActor(mPtr);
-            localActor->direction.pos[0] = cls.getMovementSettings(mPtr).mPosition[0];
-            localActor->direction.pos[1] = cls.getMovementSettings(mPtr).mPosition[1];
-            localActor->direction.pos[2] = cls.getMovementSettings(mPtr).mPosition[2];
-            localActor->direction.rot[0] = cls.getMovementSettings(mPtr).mRotation[0];
-            localActor->direction.rot[1] = cls.getMovementSettings(mPtr).mRotation[1];
-            localActor->direction.rot[2] = cls.getMovementSettings(mPtr).mRotation[2];
+            MWMechanics::Movement &movementSettings = mPtr.getClass().getMovementSettings(mPtr);
+            localActor->direction.pos[0] = movementSettings.mPosition[0];
+            localActor->direction.pos[1] = movementSettings.mPosition[1];
+            localActor->direction.pos[2] = movementSettings.mPosition[2];
+            localActor->direction.rot[0] = movementSettings.mRotation[0];
+            localActor->direction.rot[1] = movementSettings.mRotation[1];
+            localActor->direction.rot[2] = movementSettings.mRotation[2];
         }
         /*
             End of tes3mp addition

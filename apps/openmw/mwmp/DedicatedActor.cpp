@@ -104,6 +104,9 @@ void DedicatedActor::setMovementSettings()
     move->mPosition[0] = direction.pos[0];
     move->mPosition[1] = direction.pos[1];
     move->mPosition[2] = direction.pos[2];
+    move->mRotation[0] = direction.rot[0];
+    move->mRotation[1] = direction.rot[1];
+    move->mRotation[2] = direction.rot[2];
 }
 
 void DedicatedActor::setPosition()
