@@ -3395,7 +3395,7 @@ namespace MWWorld
             /*
                 Start of tes3mp change (major)
 
-                Send an ID_OBJECT_PLACE packet every time a random creature is spawned, then delete
+                Send an ID_OBJECT_SPAWN packet every time a random creature is spawned, then delete
                 the creature and wait for the server to send it back with a unique mpNum of its own
             */
             MWWorld::Ptr ptr = safePlaceObject(ref.getPtr(), getPlayerPtr(), getPlayerPtr().getCell(), 0, 220.f);

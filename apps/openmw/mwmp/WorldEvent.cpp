@@ -1,8 +1,10 @@
 #include "WorldEvent.hpp"
 #include "Main.hpp"
 #include "Networking.hpp"
+#include "MechanicsHelper.hpp"
 #include "LocalPlayer.hpp"
 #include "DedicatedPlayer.hpp"
+#include "PlayerList.hpp"
 
 #include <components/openmw-mp/Log.hpp>
 
@@ -12,7 +14,11 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwmechanics/aifollow.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/summoning.hpp"
+
+#include "../mwrender/animation.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -184,10 +190,42 @@ void WorldEvent::spawnObjects(MWWorld::CellStore* cellStore)
             newPtr.getCellRef().setMpNum(worldObject.mpNum);
 
             newPtr = MWBase::Environment::get().getWorld()->placeObject(newPtr, cellStore, worldObject.position);
+
+            if (worldObject.hasMaster)
+            {
+                MWWorld::Ptr masterPtr;
+
+                if (worldObject.master.refId.empty())
+                    masterPtr = mwmp::Main::get().getMechanicsHelper()->getPlayerPtr(worldObject.master);
+                else
+                    masterPtr = cellStore->searchExact(worldObject.master.refNumIndex, worldObject.master.mpNum);
+
+                if (masterPtr)
+                {
+                    LOG_APPEND(Log::LOG_VERBOSE, "-- Actor has master: %s", masterPtr.getCellRef().getRefId().c_str());
+
+                    MWMechanics::AiFollow package(masterPtr.getCellRef().getRefId());
+                    newPtr.getClass().getCreatureStats(newPtr).getAiSequence().stack(package, newPtr);
+
+                    MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(newPtr);
+                    if (anim)
+                    {
+                        const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
+                            .search("VFX_Summon_Start");
+                        if (fx)
+                            anim->addEffect("meshes\\" + fx->mModel, -1, false);
+                    }
+
+                    int creatureActorId = newPtr.getClass().getCreatureStats(newPtr).getActorId();
+
+                    MWMechanics::CreatureStats& masterCreatureStats = masterPtr.getClass().getCreatureStats(masterPtr);
+                    masterCreatureStats.setSummonedCreatureActorId(worldObject.refId, creatureActorId);
+                }
+            }
         }
         else
         {
-            LOG_APPEND(Log::LOG_VERBOSE, "-- Object already existed!");
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Actor already existed!");
         }
     }
 }
@@ -547,6 +585,44 @@ void WorldEvent::addObjectSpawn(const MWWorld::Ptr& ptr)
     worldObject.refId = ptr.getCellRef().getRefId();
     worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
     worldObject.mpNum = 0;
+    worldObject.hasMaster = false;
+
+    // Make sure we send the RefData position instead of the CellRef one, because that's what
+    // we actually see on this client
+    worldObject.position = ptr.getRefData().getPosition();
+
+    addObject(worldObject);
+}
+
+void WorldEvent::addObjectSpawn(const MWWorld::Ptr& ptr, const MWWorld::Ptr& master)
+{
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = 0;
+
+    worldObject.hasMaster = true;
+
+    if (master == MWBase::Environment::get().getWorld()->getPlayerPtr())
+    {
+        worldObject.master.guid = mwmp::Main::get().getLocalPlayer()->guid;
+        worldObject.master.refId.clear();
+    }
+    else if (mwmp::PlayerList::isDedicatedPlayer(master))
+    {
+        worldObject.master.guid = mwmp::PlayerList::getPlayer(master)->guid;
+        worldObject.master.refId.clear();
+    }
+    else
+    {
+        MWWorld::CellRef *masterRef = &master.getCellRef();
+
+        worldObject.master.refId = masterRef->getRefId();
+        worldObject.master.refNumIndex = masterRef->getRefNum().mIndex;
+        worldObject.master.mpNum = masterRef->getMpNum();
+    }
 
     // Make sure we send the RefData position instead of the CellRef one, because that's what
     // we actually see on this client

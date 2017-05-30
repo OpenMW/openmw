@@ -208,6 +208,11 @@ void WorldFunctions::SetObjectDisarmState(bool disarmState) noexcept
     tempWorldObject.isDisarmed = disarmState;
 }
 
+void WorldFunctions::SetObjectMasterState(bool masterState) noexcept
+{
+    tempWorldObject.hasMaster = masterState;
+}
+
 void WorldFunctions::SetObjectPosition(double x, double y, double z) noexcept
 {
     tempWorldObject.position.pos[0] = x;

@@ -49,6 +49,9 @@ namespace mwmp
 
         bool isDisarmed;
 
+        Target master;
+        bool hasMaster;
+
         std::vector<ContainerItem> containerItems;
         unsigned int containerItemCount;
     };

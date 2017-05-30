@@ -222,6 +222,17 @@ namespace MWMechanics
         std::map<SummonKey, int>& getSummonedCreatureMap(); // <SummonKey, ActorId of summoned creature>
         std::vector<int>& getSummonedCreatureGraveyard(); // ActorIds
 
+         /*
+            Start of tes3mp addition
+
+            Make it possible to set a new actorId for summoned creatures, necessary for properly
+            initializing them after syncing them across players
+         */
+        void setSummonedCreatureActorId(std::string refId, int actorId);
+        /*
+            End of tes3mp addition
+        */
+
         enum Flag
         {
             Flag_ForceRun = 1,

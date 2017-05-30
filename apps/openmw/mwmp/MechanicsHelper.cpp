@@ -91,6 +91,19 @@ Attack *MechanicsHelper::getDedicatedAttack(const MWWorld::Ptr& ptr)
     return NULL;
 }
 
+MWWorld::Ptr MechanicsHelper::getPlayerPtr(const Target& target)
+{
+    if (target.refId.empty())
+    {
+        if (target.guid == mwmp::Main::get().getLocalPlayer()->guid)
+            return MWBase::Environment::get().getWorld()->getPlayerPtr();
+        else if (PlayerList::getPlayer(target.guid) != NULL)
+            return PlayerList::getPlayer(target.guid)->getPtr();
+    }
+
+    return NULL;
+}
+
 void MechanicsHelper::assignAttackTarget(Attack* attack, const MWWorld::Ptr& target)
 {
     if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())

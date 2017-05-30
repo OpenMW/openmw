@@ -21,6 +21,8 @@ namespace mwmp
         Attack *getLocalAttack(const MWWorld::Ptr& ptr);
         Attack *getDedicatedAttack(const MWWorld::Ptr& ptr);
 
+        MWWorld::Ptr getPlayerPtr(const Target& target);
+
         void assignAttackTarget(Attack* attack, const MWWorld::Ptr& target);
         void resetAttack(Attack* attack);
 

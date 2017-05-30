@@ -38,7 +38,14 @@ void PacketObjectSpawn::Packet(RakNet::BitStream *bs, bool send)
         RW(worldObject.mpNum, send);
         RW(worldObject.position, send);
 
-        // Placeholder to be filled in later
+        RW(worldObject.hasMaster, send);
+        
+        if (worldObject.hasMaster)
+        {
+            RW(worldObject.master.refNumIndex, send);
+            RW(worldObject.master.mpNum, send);
+            RW(worldObject.master.guid, send);
+        }
 
         if (!send)
         {

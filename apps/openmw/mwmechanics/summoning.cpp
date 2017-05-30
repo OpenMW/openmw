@@ -2,6 +2,20 @@
 
 #include <iostream>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include <components/openmw-mp/Log.hpp>
+#include "../mwmp/Main.hpp"
+#include "../mwmp/Networking.hpp"
+#include "../mwmp/CellController.hpp"
+#include "../mwmp/WorldEvent.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -68,19 +82,33 @@ namespace MWMechanics
                 if (!creatureID.empty())
                 {
                     int creatureActorId = -1;
+
+                    /*
+                        Start of tes3mp change (major)
+
+                        Send an ID_OBJECT_SPAWN packet every time a creature is summoned in a cell that we hold
+                        authority over, then delete the creature and wait for the server to send it back with a
+                        unique mpNum of its own
+
+                        Comment out most of the code here except for the actual placement of the Ptr and the
+                        creatureActorId insertion into the creatureMap
+                    */
                     try
                     {
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), creatureID, 1);
 
+                        /*
                         MWMechanics::CreatureStats& summonedCreatureStats = ref.getPtr().getClass().getCreatureStats(ref.getPtr());
 
                         // Make the summoned creature follow its master and help in fights
                         AiFollow package(mActor.getCellRef().getRefId());
                         summonedCreatureStats.getAiSequence().stack(package, ref.getPtr());
                         creatureActorId = summonedCreatureStats.getActorId();
+                        */
 
                         MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(), mActor, mActor.getCell(), 0, 120.f);
 
+                        /*
                         MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(placed);
                         if (anim)
                         {
@@ -89,6 +117,17 @@ namespace MWMechanics
                             if (fx)
                                 anim->addEffect("meshes\\" + fx->mModel, -1, false);
                         }
+                        */
+
+                        if (mwmp::Main::get().getCellController()->hasLocalAuthority(*placed.getCell()->getCell()))
+                        {
+                            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+                            worldEvent->reset();
+                            worldEvent->addObjectSpawn(placed, mActor);
+                            worldEvent->sendObjectSpawn();
+                        }
+
+                        MWBase::Environment::get().getWorld()->deleteObject(placed);
                     }
                     catch (std::exception& e)
                     {
@@ -97,6 +136,9 @@ namespace MWMechanics
                     }
 
                     creatureMap.insert(std::make_pair(*it, creatureActorId));
+                    /*
+                        End of tes3mp change (major)
+                    */
                 }
             }
         }

@@ -43,6 +43,7 @@
     {"SetObjectDoorState",          WorldFunctions::SetObjectDoorState},\
     {"SetObjectLockLevel",          WorldFunctions::SetObjectLockLevel},\
     {"SetObjectDisarmState",        WorldFunctions::SetObjectDisarmState},\
+    {"SetObjectMasterState",        WorldFunctions::SetObjectMasterState},\
     {"SetObjectPosition",           WorldFunctions::SetObjectPosition},\
     {"SetObjectRotation",           WorldFunctions::SetObjectRotation},\
     \
@@ -111,6 +112,7 @@ public:
     static void SetObjectDoorState(int doorState) noexcept;
     static void SetObjectLockLevel(int lockLevel) noexcept;
     static void SetObjectDisarmState(bool disarmState) noexcept;
+    static void SetObjectMasterState(bool masterState) noexcept;
     static void SetObjectPosition(double x, double y, double z) noexcept;
     static void SetObjectRotation(double x, double y, double z) noexcept;
 
