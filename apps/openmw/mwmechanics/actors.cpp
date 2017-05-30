@@ -1189,16 +1189,26 @@ namespace MWMechanics
                     End of tes3mp addition
                 */
 
+                /*
+                    Start of tes3mp change (major)
+
+                    Allow this code to use the same logic for DedicatedPlayers as for LocalPlayers
+                */
 
                 // If dead or no longer in combat, no longer store any actors who attempted to hit us. Also remove for the player.
-                if (iter->first != player && (iter->first.getClass().getCreatureStats(iter->first).isDead()
+                if (iter->first != player && !mwmp::PlayerList::isDedicatedPlayer(iter->first) &&(iter->first.getClass().getCreatureStats(iter->first).isDead()
                     || !iter->first.getClass().getCreatureStats(iter->first).getAiSequence().isInCombat()
                     || !inProcessingRange))
                 {
                     iter->first.getClass().getCreatureStats(iter->first).setHitAttemptActorId(-1);
                     if (player.getClass().getCreatureStats(player).getHitAttemptActorId() == iter->first.getClass().getCreatureStats(iter->first).getActorId())
                         player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
+
+                    mwmp::PlayerList::clearHitAttemptActorId(iter->first.getClass().getCreatureStats(iter->first).getActorId());
                 }
+                /*
+                    End of tes3mp change (major)
+                */
 
                 const MWWorld::Ptr playerHitAttemptActor = MWBase::Environment::get().getWorld()->searchPtrViaActorId(player.getClass().getCreatureStats(player).getHitAttemptActorId());
 

@@ -411,17 +411,31 @@ namespace MWClass
         if (!attacker.isEmpty() && attacker.getClass().isActor() && !ptr.isEmpty() && ptr.getClass().isActor())
         {
             MWMechanics::CreatureStats& statsAttacker = attacker.getClass().getCreatureStats(attacker);
+
+            /*
+                Start of tes3mp change (minor)
+
+                Instead of only checking whether an attacker is the LocalPlayer, also
+                check if they are a DedicatedPlayer
+            */
+
             // First handle the attacked actor
             if ((stats.getHitAttemptActorId() == -1)
                 && (statsAttacker.getAiSequence().isInCombat(ptr)
-                    || attacker == MWMechanics::getPlayer()))
+                    || attacker == MWMechanics::getPlayer()
+                    || mwmp::PlayerList::isDedicatedPlayer(attacker)))
                 stats.setHitAttemptActorId(statsAttacker.getActorId());
 
             // Next handle the attacking actor
             if ((statsAttacker.getHitAttemptActorId() == -1)
                 && (statsAttacker.getAiSequence().isInCombat(ptr)
-                    || attacker == MWMechanics::getPlayer()))
+                    || attacker == MWMechanics::getPlayer()
+                    || mwmp::PlayerList::isDedicatedPlayer(attacker)))
                 statsAttacker.setHitAttemptActorId(stats.getActorId());
+
+            /*
+                End of tes3mp change (minor)
+            */
         }
 
         if (!object.isEmpty())

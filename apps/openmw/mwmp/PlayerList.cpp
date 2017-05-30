@@ -264,3 +264,23 @@ bool PlayerList::isDedicatedPlayer(const MWWorld::Ptr &ptr)
 
     return (getPlayer(ptr) != 0);
 }
+
+/*
+    Go through all DedicatedPlayers checking if their mHitAttemptActorId matches this one
+    and set it to -1 if it does
+
+    This resets the combat target for a DedicatedPlayer's followers in Actors::update()
+*/
+void PlayerList::clearHitAttemptActorId(int actorId)
+{
+    for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
+    {
+        if (it->second == 0 || it->second->getPtr().mRef == 0)
+            continue;
+
+        MWMechanics::CreatureStats *playerCreatureStats = &it->second->getPtr().getClass().getCreatureStats(it->second->getPtr());
+
+        if (playerCreatureStats->getHitAttemptActorId() == actorId)
+            playerCreatureStats->setHitAttemptActorId(-1);
+    }
+}

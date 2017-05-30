@@ -38,6 +38,8 @@ namespace mwmp
 
         static bool isDedicatedPlayer(const MWWorld::Ptr &ptr);
 
+        static void clearHitAttemptActorId(int actorId);
+
     private:
 
         static std::map<RakNet::RakNetGUID, DedicatedPlayer *> players;
