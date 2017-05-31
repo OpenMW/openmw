@@ -70,7 +70,7 @@ void MainWindow::addServerAndUpdate(QString addr)
     //NetController::get()->updateInfo(favorites, mi);
     //QueryClient::Update(RakNet::SystemAddress())
     /*auto data = QueryClient::Get().Query();
-    if(data.empty())
+    if (data.empty())
        return;
     transform(data.begin(), data.end(), back_inserter());*/
 }
@@ -79,7 +79,7 @@ void MainWindow::addServer()
 {
     int id = tblServerBrowser->selectionModel()->currentIndex().row();
 
-    if(id >= 0)
+    if (id >= 0)
     {
         int sourceId = proxyModel->mapToSource(proxyModel->index(id, ServerData::ADDR)).row();
         favorites->myData.push_back(browser->myData[sourceId]);
@@ -90,20 +90,20 @@ void MainWindow::addServerByIP()
 {
     bool ok;
     QString text = QInputDialog::getText(this, tr("Add Server by address"), tr("Address:"), QLineEdit::Normal, "", &ok);
-    if(ok && !text.isEmpty())
+    if (ok && !text.isEmpty())
         addServerAndUpdate(text);
 }
 
 void MainWindow::deleteServer()
 {
-    if(tabWidget->currentIndex() != 1)
+    if (tabWidget->currentIndex() != 1)
         return;
     int id = tblFavorites->selectionModel()->currentIndex().row();
-    if(id >= 0)
+    if (id >= 0)
     {
         int sourceId = proxyModel->mapToSource(proxyModel->index(id, ServerData::ADDR)).row();
         favorites->removeRow(sourceId);
-        if(favorites->myData.isEmpty())
+        if (favorites->myData.isEmpty())
         {
             actionPlay->setEnabled(false);
             actionDelete->setEnabled(false);
@@ -115,7 +115,7 @@ void MainWindow::play()
 {
     QTableView *curTable = tabWidget->currentIndex() ? tblFavorites : tblServerBrowser;
     int id = curTable->selectionModel()->currentIndex().row();
-    if(id < 0)
+    if (id < 0)
         return;
 
     ServerInfoDialog infoDialog(this);
@@ -130,17 +130,17 @@ void MainWindow::play()
         return;
     }
 
-    if(!infoDialog.exec())
+    if (!infoDialog.exec())
         return;
 
     QStringList arguments;
     arguments.append(QLatin1String("--connect=") + sm->myData[sourceId].addr.toLatin1());
 
-    if(sm->myData[sourceId].GetPassword() == 1)
+    if (sm->myData[sourceId].GetPassword() == 1)
     {
         bool ok;
         QString passw = QInputDialog::getText(this, "Connecting to: " + sm->myData[sourceId].addr, "Password: ", QLineEdit::Password, "", &ok);
-        if(!ok)
+        if (!ok)
             return;
         arguments.append(QLatin1String("--password=") + passw.toLatin1());
     }
@@ -151,7 +151,7 @@ void MainWindow::play()
 
 void MainWindow::tabSwitched(int index)
 {
-    if(index == 0)
+    if (index == 0)
     {
         proxyModel->setSourceModel(browser);
         actionDelete->setEnabled(false);
@@ -167,9 +167,9 @@ void MainWindow::tabSwitched(int index)
 void MainWindow::serverSelected()
 {
     actionPlay->setEnabled(true);
-    if(tabWidget->currentIndex() == 0)
+    if (tabWidget->currentIndex() == 0)
         actionAdd->setEnabled(true);
-    if(tabWidget->currentIndex() == 1)
+    if (tabWidget->currentIndex() == 1)
         actionDelete->setEnabled(true);
 }
 
@@ -179,12 +179,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
     QString cfgPath = QString::fromStdString((cfgMgr.getUserConfigPath() / "favorites.dat").string());
 
     QJsonArray saveData;
-    for(auto server : favorites->myData)
+    for (auto server : favorites->myData)
         saveData.push_back(server.addr);
 
     QFile file(cfgPath);
 
-    if(!file.open(QIODevice::WriteOnly))
+    if (!file.open(QIODevice::WriteOnly))
     {
         qDebug() << "Cannot save " << cfgPath;
         return;
@@ -201,7 +201,7 @@ void MainWindow::loadFavorites()
     QString cfgPath = QString::fromStdString((cfgMgr.getUserConfigPath() / "favorites.dat").string());
 
     QFile file(cfgPath);
-    if(!file.open(QIODevice::ReadOnly))
+    if (!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "Cannot open " << cfgPath;
         return;
@@ -209,7 +209,7 @@ void MainWindow::loadFavorites()
 
     QJsonDocument jsonDoc(QJsonDocument::fromJson(file.readAll()));
 
-    for(auto server : jsonDoc.array())
+    for (auto server : jsonDoc.array())
         addServerAndUpdate(server.toString());
 
     file.close();

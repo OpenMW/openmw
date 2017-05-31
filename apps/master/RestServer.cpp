@@ -60,7 +60,7 @@ void RestServer::start()
     static const string ServersRegex = "^/api/servers(?:/(" + ValidIpAddressRegex + "\\:" + ValidPortRegex + "))?";
 
     httpServer.resource[ServersRegex]["GET"] = [this](auto response, auto request) {
-        if(request->path_match[1].length() > 0)
+        if (request->path_match[1].length() > 0)
         {
             try
             {
@@ -81,7 +81,7 @@ void RestServer::start()
         {
             static string str;
 
-            //if(updatedCache)
+            //if (updatedCache)
             {
                 stringstream ss;
                 ss << "{";
@@ -131,14 +131,14 @@ void RestServer::start()
 
         auto query = serverMap->find(RakNet::SystemAddress(request->remote_endpoint_address.c_str(), port));
 
-        if(query == serverMap->end())
+        if (query == serverMap->end())
         {
             cout << request->remote_endpoint_address + ": Trying to update a non-existent server or without permissions." << endl;
             *response << response400;
             return;
         }
 
-        if(request->content.size() != 0)
+        if (request->content.size() != 0)
         {
             try
             {
@@ -166,7 +166,7 @@ void RestServer::start()
         ss << '{';
         ss << "servers: " << serverMap->size();
         unsigned int players = 0;
-        for(auto s : *serverMap)
+        for (auto s : *serverMap)
             players += s.second.GetPlayers();
         ss << ", players: " << players;
         ss << "}";

@@ -54,14 +54,14 @@ namespace mwmp
         {
             if (write)
             {
-                if(compress)
+                if (compress)
                     bs->WriteCompressed(data);
                 else
                     bs->Write(data);
             }
             else
             {
-                if(compress)
+                if (compress)
                     bs->ReadCompressed(data);
                 else
                     bs->Read(data);
@@ -88,7 +88,7 @@ namespace mwmp
             if (write)
             {
                 RakNet::RakString rstr(str.c_str());
-                if(compress)
+                if (compress)
                     rstr.SerializeCompressed(bs);
                 else
                     bs->Write(rstr);
@@ -96,7 +96,7 @@ namespace mwmp
             else
             {
                 RakNet::RakString rstr;
-                if(compress)
+                if (compress)
                     rstr.DeserializeCompressed(bs);
                 else
                     bs->Read(rstr);

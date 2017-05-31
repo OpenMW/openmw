@@ -84,7 +84,7 @@ MASTER_PACKETS QueryClient::GetAnswer()
     bool update = true;
     unsigned char pid = 0;
     int id;
-    while(update)
+    while (update)
     {
         for (packet = peer->Receive(); packet; peer->DeallocatePacket(packet), packet = peer->Receive())
         {

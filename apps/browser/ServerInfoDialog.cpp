@@ -42,21 +42,21 @@ bool ServerInfoDialog::refresh()
 
         listPlayers->clear();
 
-        for(auto player : sd.second.players)
+        for (auto player : sd.second.players)
             listPlayers->addItem(QString::fromStdString(player));
 
         listPlugins->clear();
-        for(auto plugin : sd.second.plugins)
+        for (auto plugin : sd.second.plugins)
             listPlugins->addItem(QString::fromStdString(plugin.name));
 
         listRules->clear();
         const static vector<std::string> defaultRules {"gamemode", "maxPlayers", "name", "passw", "players", "version"};
         for (auto rule : sd.second.rules)
         {
-            if(::find(defaultRules.begin(), defaultRules.end(), rule.first) != defaultRules.end())
+            if (::find(defaultRules.begin(), defaultRules.end(), rule.first) != defaultRules.end())
                 continue;
             QString ruleStr = QString::fromStdString(rule.first) + " : ";
-            if(rule.second.type == 's')
+            if (rule.second.type == 's')
                 ruleStr += QString::fromStdString(rule.second.str);
             else
                 ruleStr += QString::number(rule.second.val);

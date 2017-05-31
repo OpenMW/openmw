@@ -29,7 +29,7 @@ unsigned int PingRakNetServer(const char *addr, unsigned short port)
     while (!done)
     {
         RakNet::TimeMS now = RakNet::GetTimeMS();
-        if(now - start >= PING_UNREACHABLE)
+        if (now - start >= PING_UNREACHABLE)
             break;
 
         packet = peer->Receive();

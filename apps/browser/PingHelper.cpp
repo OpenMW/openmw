@@ -10,7 +10,7 @@
 void PingHelper::Add(int row, AddrPair addrPair)
 {
     pingUpdater->addServer(row, addrPair);
-    if(!pingThread->isRunning())
+    if (!pingThread->isRunning())
         pingThread->start();
 }
 

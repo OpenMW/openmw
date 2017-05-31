@@ -36,7 +36,7 @@ void PacketMasterQuery::Packet(RakNet::BitStream *bs, bool send)
     QueryData server;
     string addr;
     unsigned short port;
-    while(serversCount--)
+    while (serversCount--)
     {
         if (send)
         {

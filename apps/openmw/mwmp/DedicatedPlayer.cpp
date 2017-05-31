@@ -252,7 +252,7 @@ void DedicatedPlayer::updateMarker()
     if (gui->mPlayerMarkers.contains(marker))
     {
         gui->mPlayerMarkers.deleteMarker(marker);
-        marker = gui->CreateMarker(guid);
+        marker = gui->createMarker(guid);
         gui->mPlayerMarkers.addMarker(marker);
     }
     else

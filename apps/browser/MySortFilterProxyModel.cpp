@@ -18,11 +18,11 @@ bool MySortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &
     int players =  sourceModel()->data(plIndex).toInt();
     int maxPlayers =  sourceModel()->data(maxPlIndex).toInt();
 
-    if(maxPing > 0 && (ping == -1 || ping > maxPing))
+    if (maxPing > 0 && (ping == -1 || ping > maxPing))
         return false;
-    if(filterEmpty && players == 0)
+    if (filterEmpty && players == 0)
         return false;
-    if(filterFull && players >= maxPlayers)
+    if (filterFull && players >= maxPlayers)
         return false;
 
     return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);

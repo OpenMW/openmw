@@ -23,12 +23,12 @@ void PingUpdater::addServer(int row, AddrPair addr)
 
 void PingUpdater::process()
 {
-    while(run)
+    while (run)
     {
-        if(servers.count() == 0)
+        if (servers.count() == 0)
         {
             QThread::msleep(1000);
-            if(servers.count() == 0)
+            if (servers.count() == 0)
             {
                 qDebug() << "PingUpdater stopped due to inactivity";
                 run = false;

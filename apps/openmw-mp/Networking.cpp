@@ -380,7 +380,7 @@ PacketPreInit::PluginContainer Networking::getPluginListSample()
 {
     PacketPreInit::PluginContainer pls;
     unsigned id = 0;
-    while(true)
+    while (true)
     {
         unsigned field = 0;
         auto name = "";
@@ -388,7 +388,7 @@ PacketPreInit::PluginContainer Networking::getPluginListSample()
         if (strlen(name) == 0)
             break;
         PacketPreInit::HashList hashList;
-        while(true)
+        while (true)
         {
             auto hash = "";
             Script::Call<Script::CallbackIdentity("OnRequestPluginList")>(hash, id, field++);
@@ -501,11 +501,11 @@ void Networking::postInit()
 {
     Script::Call<Script::CallbackIdentity("OnServerPostInit")>();
     samples = getPluginListSample();
-    if(mclient)
+    if (mclient)
     {
-        for(auto plugin : samples)
+        for (auto plugin : samples)
         {
-            if(!plugin.second.empty())
+            if (!plugin.second.empty())
                 mclient->PushPlugin({plugin.first, plugin.second[0]});
             else
                 mclient->PushPlugin({plugin.first, 0});

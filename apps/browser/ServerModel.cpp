@@ -25,7 +25,7 @@ QVariant ServerModel::data(const QModelIndex &index, int role) const
 
     const ServerData &sd = myData.at(index.row());
 
-    if(role == Qt::DisplayRole)
+    if (role == Qt::DisplayRole)
     {
         QVariant var;
         switch (index.column())
@@ -52,7 +52,7 @@ QVariant ServerModel::data(const QModelIndex &index, int role) const
                 var = sd.ping;
                 break;
             case ServerData::MODNAME:
-                if(sd.rules.at("gamemode").str == "")
+                if (sd.rules.at("gamemode").str == "")
                     var = "default";
                 else
                     var = QString(sd.rules.at("gamemode").str.c_str());
@@ -70,7 +70,7 @@ QVariant ServerModel::headerData(int section, Qt::Orientation orientation, int r
     {
         if (role == Qt::SizeHintRole)
         {
-            /*if(section == ServerData::HOSTNAME)
+            /*if (section == ServerData::HOSTNAME)
                 var = QSize(200, 25);*/
         }
         else if (role == Qt::DisplayRole)
@@ -158,7 +158,7 @@ bool ServerModel::setData(const QModelIndex &index, const QVariant &value, int r
             default:
                 return false;
         }
-        if(ok)
+        if (ok)
             emit(dataChanged(index, index));
         return true;
     }

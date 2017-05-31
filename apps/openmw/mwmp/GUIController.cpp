@@ -264,7 +264,7 @@ private:
     }
 };
 
-ESM::CustomMarker mwmp::GUIController::CreateMarker(const RakNet::RakNetGUID &guid)
+ESM::CustomMarker mwmp::GUIController::createMarker(const RakNet::RakNetGUID &guid)
 {
     DedicatedPlayer *player = PlayerList::getPlayer(guid);
     ESM::CustomMarker mEditingMarker;

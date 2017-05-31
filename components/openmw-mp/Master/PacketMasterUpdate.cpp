@@ -28,7 +28,7 @@ void PacketMasterUpdate::Packet(RakNet::BitStream *bs, bool send)
     RW(addr, send);
     RW(port, send);
 
-    if(!send)
+    if (!send)
         server->first = SystemAddress(addr.c_str(), port);
 
     ProxyMasterPacket::addServer(this, server->second, send);

@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
     if (code == 0)
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Quitting peacefully.");
 
-    if(!variables["no-logs"].as<bool>())
+    if (!variables["no-logs"].as<bool>())
     {
         // Restore cout and cerr
         std::cout.rdbuf(cout_rdbuf);

@@ -26,7 +26,7 @@ QueryHelper::QueryHelper(QAbstractItemModel *model)
 
 void QueryHelper::refresh()
 {
-    if(!queryThread->isRunning())
+    if (!queryThread->isRunning())
         _model->removeRows(0, _model->rowCount());
     queryThread->start();
     emit started();
@@ -72,13 +72,13 @@ void QueryHelper::update(QString addr, unsigned short port, QueryData data)
 void QueryUpdate::process()
 {
     auto data = QueryClient::Get().Query();
-    if(QueryClient::Get().Status() != ID_MASTER_QUERY)
+    if (QueryClient::Get().Status() != ID_MASTER_QUERY)
     {
         emit finished();
         return;
     }
 
-    for(auto server : data)
+    for (auto server : data)
         emit updateModel(server.first.ToString(false), server.first.GetPort(), server.second);
     emit finished();
 }
