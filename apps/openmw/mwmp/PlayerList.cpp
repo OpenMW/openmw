@@ -145,6 +145,10 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
             dedicPlayer->cell = *dedicPlayer->ptr.getCell()->getCell();
             dedicPlayer->position = dedicPlayer->ptr.getRefData().getPosition();
         }
+
+        ESM::CustomMarker mEditingMarker = Main::get().getGUIController()->createMarker(guid);
+        dedicPlayer->marker = mEditingMarker;
+        dedicPlayer->setMarkerState(true);
     }
     else
     {
@@ -184,10 +188,6 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
 
         dedicPlayer->setPtr(world->moveObject(dedicPlayer->ptr, cellStore, spawnPos.pos[0], spawnPos.pos[1], spawnPos.pos[2]));
         dedicPlayer->setCell();
-
-        ESM::CustomMarker mEditingMarker = Main::get().getGUIController()->CreateMarker(guid);
-        dedicPlayer->marker = mEditingMarker;
-        dedicPlayer->setMarkerState(true);
     }
 
     dedicPlayer->guid = guid;

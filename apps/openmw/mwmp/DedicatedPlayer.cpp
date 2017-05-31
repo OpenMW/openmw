@@ -210,31 +210,31 @@ void DedicatedPlayer::setCell()
         return;
 
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::CellStore *cellStore;
-
 
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Server says DedicatedPlayer %s moved to %s",
-        this->npc.mName.c_str(), cell.getDescription().c_str());
+        npc.mName.c_str(), cell.getDescription().c_str());
 
-    try
+    MWWorld::CellStore *cellStore = Main::get().getCellController()->getCellStore(cell);
+
+    if (!cellStore)
     {
-        if (cell.isExterior())
-            cellStore = world->getExterior(cell.mData.mX, cell.mData.mY);
-        else
-            cellStore = world->getInterior(cell.mName);
-    }
-    // If the intended cell doesn't exist on this client, use ToddTest as a replacement
-    catch (std::exception&)
-    {
-        cellStore = world->getInterior("ToddTest");
         LOG_APPEND(Log::LOG_INFO, "%s", "- Cell doesn't exist on this client");
+        world->disable(getPtr());
+        return;
     }
-
-    if (!cellStore) return;
+    else
+        world->enable(getPtr());
 
     // Allow this player's reference to move across a cell now that a manual cell
     // update has been called
     setPtr(world->moveObject(ptr, cellStore, position.pos[0], position.pos[1], position.pos[2]));
+
+    // Remove the marker entirely if this player has moved to an interior that is inactive for us
+    if (!cell.isExterior() && !Main::get().getCellController()->isActiveWorldCell(cell))
+        Main::get().getGUIController()->mPlayerMarkers.deleteMarker(marker);
+    // Otherwise, update their marker so the player shows up in the right cell on the world map
+    else
+        updateMarker();
 
     // If this player is now in a cell that we are the local authority over, we should send them all
     // NPC data in that cell
