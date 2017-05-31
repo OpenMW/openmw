@@ -13,6 +13,8 @@
 
     Include additional headers for multiplayer purposes
 */
+#include "../mwmp/Main.hpp"
+#include "../mwmp/CellController.hpp"
 #include "../mwmp/PlayerList.hpp"
 /*
     End of tes3mp addition
@@ -222,18 +224,6 @@ bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const
     if (!Settings::Manager::getBool("prevent merchant equipping", "Game"))
         return true;
 
-    /*
-        Start of tes3mp addition
-
-        We need player-controlled NPCs to wear whatever their players are
-        actually wearing, so don't autoequip for them
-    */
-    if (mwmp::PlayerList::isDedicatedPlayer(actor))
-        return false;
-    /*
-        End of tes3mp addition
-    */
-
     // Only autoEquip if we are the original owner of the item.
     // This stops merchants from auto equipping anything you sell to them.
     // ...unless this is a companion, he should always equip items given to him.
@@ -269,6 +259,18 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::findSlot (int slot) con
 
 void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 {
+    /*
+        Start of tes3mp addition
+
+        We need DedicatedPlayers and DedicatedActors to wear exactly what they're wearing on their
+        authority client, so don't auto-equip for them
+    */
+    if (mwmp::PlayerList::isDedicatedPlayer(actor) || mwmp::Main::get().getCellController()->isDedicatedActor(actor))
+        return;
+    /*
+        End of tes3mp addition
+    */
+
     const MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
     MWMechanics::NpcStats& stats = actor.getClass().getNpcStats(actor);
