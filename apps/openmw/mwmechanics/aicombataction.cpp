@@ -316,11 +316,47 @@ namespace MWMechanics
         case ESM::MagicEffect::FortifyAttack:
             return 0.f;
 
+        case ESM::MagicEffect::Burden:
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                // Ignore enemy without inventory
+                if (!enemy.getClass().hasInventoryStore(enemy))
+                    return 0.f;
+
+                // burden makes sense only to overburden an enemy
+                float burden = enemy.getClass().getEncumbrance(enemy) - enemy.getClass().getCapacity(enemy);
+                if (burden > 0)
+                    return 0.f;
+
+                if ((effect.mMagnMin + effect.mMagnMax)/2.f > -burden)
+                    rating *= 3;
+                else
+                    return 0.f;
+
+                break;
+            }
+
         case ESM::MagicEffect::Feather:
-            if (actor.getClass().getEncumbrance(actor) - actor.getClass().getCapacity(actor) >= 0)
-                return 100.f;
-            else
-                return 0.f;
+            {
+                // Ignore actors without inventory
+                if (!actor.getClass().hasInventoryStore(actor))
+                    return 0.f;
+
+                // feather makes sense only for overburden actors
+                float burden = actor.getClass().getEncumbrance(actor) - actor.getClass().getCapacity(actor);
+                if (burden <= 0)
+                    return 0.f;
+
+                if ((effect.mMagnMin + effect.mMagnMax)/2.f >= burden)
+                    rating *= 3;
+                else
+                    return 0.f;
+
+                break;
+            }
+
         case ESM::MagicEffect::Levitate:
             return 0.f; // AI isn't designed to take advantage of this, and could be perceived as unfair anyway
         case ESM::MagicEffect::BoundBoots:
