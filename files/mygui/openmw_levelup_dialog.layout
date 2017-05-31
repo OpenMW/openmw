@@ -2,7 +2,7 @@
 
 <MyGUI type="Layout">
     <Widget type="VBox" skin="MW_Dialog" layer="Windows" position="0 0 0 0" align="Center" name="_Main">
-        <Property key="Padding" value="12"/>
+        <Property key="Padding" value="10"/>
         <Property key="Spacing" value="8"/>
         <Property key="AutoResize" value="true"/>
 
@@ -22,25 +22,25 @@
             <Property key="Static" value="true"/>
         </Widget>
 
-        <Widget type="Widget" skin="" position="0 0 100 16" name="Coins">
+        <Widget type="Widget" skin="" position="0 0 150 16" name="Coins">
             <UserString key="HStretch" value="true"/>
             <UserString key="VStretch" value="false"/>
         </Widget>
 
-        <Widget type="Widget" skin="" position="0 280 391 100" name="AssignWidget">
+        <Widget type="Widget" skin="" position="0 280 420 84" name="AssignWidget">
             <UserString key="HStretch" value="false"/>
             <UserString key="VStretch" value="false"/>
 
-            <Widget type="TextBox" skin="SandTextVCenter" position="22 0 100 24" name="AttribMultiplier1"/>
-            <Widget type="TextBox" skin="SandTextVCenter" position="22 24 100 24" name="AttribMultiplier2"/>
-            <Widget type="TextBox" skin="SandTextVCenter" position="22 48 100 24" name="AttribMultiplier3"/>
-            <Widget type="TextBox" skin="SandTextVCenter" position="22 72 100 24" name="AttribMultiplier4"/>
-            <Widget type="TextBox" skin="SandTextVCenter" position="218 0 100 24" name="AttribMultiplier5"/>
-            <Widget type="TextBox" skin="SandTextVCenter" position="218 24 100 24" name="AttribMultiplier6"/>
-            <Widget type="TextBox" skin="SandTextVCenter" position="218 48 100 24" name="AttribMultiplier7"/>
-            <Widget type="TextBox" skin="SandTextVCenter" position="218 72 100 24" name="AttribMultiplier8"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="32 0 100 20" name="AttribMultiplier1"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="32 20 100 20" name="AttribMultiplier2"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="32 40 100 20" name="AttribMultiplier3"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="32 60 100 20" name="AttribMultiplier4"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="218 0 100 20" name="AttribMultiplier5"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="218 20 100 20" name="AttribMultiplier6"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="218 40 100 20" name="AttribMultiplier7"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="218 60 100 20" name="AttribMultiplier8"/>
 
-            <Widget type="HBox" position="42 0 200 24">
+            <Widget type="HBox" position="52 0 200 20">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib1">
                     <UserString key="TextPadding" value="0 0"/>
                     <UserString key="ToolTipType" value="Layout"/>
@@ -54,7 +54,7 @@
                 </Widget>
             </Widget>
 
-            <Widget type="HBox" position="42 24 200 24">
+            <Widget type="HBox" position="52 20 200 20">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib2">
                     <UserString key="TextPadding" value="0 0"/>
                     <UserString key="ToolTipType" value="Layout"/>
@@ -68,7 +68,7 @@
                 </Widget>
             </Widget>
 
-            <Widget type="HBox" position="42 48 200 24">
+            <Widget type="HBox" position="52 40 200 20">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib3">
                     <UserString key="TextPadding" value="0 0"/>
                     <UserString key="ToolTipType" value="Layout"/>
@@ -82,7 +82,7 @@
                 </Widget>
             </Widget>
 
-            <Widget type="HBox" position="42 72 200 24">
+            <Widget type="HBox" position="52 60 200 20">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib4">
                     <UserString key="TextPadding" value="0 0"/>
                     <UserString key="ToolTipType" value="Layout"/>
@@ -97,7 +97,7 @@
             </Widget>
 
 
-            <Widget type="HBox" position="238 0 200 24">
+            <Widget type="HBox" position="238 0 200 20">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib5">
                     <UserString key="TextPadding" value="0 0"/>
                     <UserString key="ToolTipType" value="Layout"/>
@@ -111,7 +111,7 @@
                 </Widget>
             </Widget>
 
-            <Widget type="HBox" position="238 24 200 24">
+            <Widget type="HBox" position="238 20 200 20">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib6">
                     <UserString key="TextPadding" value="0 0"/>
                     <UserString key="ToolTipType" value="Layout"/>
@@ -125,7 +125,7 @@
                 </Widget>
             </Widget>
 
-            <Widget type="HBox" position="238 48 200 24">
+            <Widget type="HBox" position="238 40 200 20">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib7">
                 <UserString key="TextPadding" value="0 0"/>
                 <UserString key="ToolTipType" value="Layout"/>
@@ -139,7 +139,7 @@
                 </Widget>
             </Widget>
 
-            <Widget type="HBox" position="238 72 200 24">
+            <Widget type="HBox" position="238 60 200 20">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib8">
                 <UserString key="TextPadding" value="0 0"/>
                 <UserString key="ToolTipType" value="Layout"/>
