@@ -117,4 +117,23 @@ namespace Translation
                !mTopicIDs.empty() ||
                !mPhraseForms.empty();
     }
+
+    /*
+        Start of tes3mp addition
+
+        Get the localized version of an English topic ID
+    */
+    std::string Storage::getLocalizedTopicId(const std::string& englishTopicId) const
+    {
+        for (std::map<std::string, std::string>::const_iterator it = mTopicIDs.begin(); it != mTopicIDs.end(); ++it)
+        {
+            if (Misc::StringUtils::ciEqual(englishTopicId, it->second))
+                return it->first;
+        }
+
+        return "";
+    }
+    /*
+        End of tes3mp addition
+    */
 }

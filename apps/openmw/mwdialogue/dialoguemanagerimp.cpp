@@ -115,9 +115,6 @@ namespace MWDialogue
                 topicId = mTranslationDataStorage.topicStandardForm(topicId);
             }
 
-            if (tok->isImplicitKeyword() && mTranslationDataStorage.hasTranslation())
-                continue;
-
             /*
                 Start of tes3mp addition
 
@@ -128,6 +125,9 @@ namespace MWDialogue
             /*
                 End of tes3mp addition
             */
+
+            if (tok->isImplicitKeyword() && mTranslationDataStorage.hasTranslation())
+                continue;
 
             if (mActorKnownTopics.count( topicId ))
                 mKnownTopics.insert( topicId );

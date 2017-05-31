@@ -685,8 +685,13 @@ void LocalPlayer::addTopics()
     for (unsigned int i = 0; i < topicChanges.count; i++)
     {
         mwmp::Topic topic = topicChanges.topics.at(i);
+        std::string topicId = topic.topicId;
 
-        MWBase::Environment::get().getDialogueManager()->addTopic(topic.topicId);
+        // If we're using a translated version of Morrowind, translate this topic from English into our language
+        if (MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
+            topicId = MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().getLocalizedTopicId(topicId);
+
+        MWBase::Environment::get().getDialogueManager()->addTopic(topicId);
 
         if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Dialogue))
             MWBase::Environment::get().getDialogueManager()->updateTopics();
@@ -1177,7 +1182,14 @@ void LocalPlayer::sendTopic(const std::string& topicId)
     topicChanges.topics.clear();
 
     mwmp::Topic topic;
-    topic.topicId = topicId;
+
+    // For translated versions of the game, make sure we translate the topic back into English first
+    if (MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
+        topic.topicId = MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().topicID(topicId);
+    else
+        topic.topicId = topicId;
+
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_TOPIC with topic %s", topic.topicId.c_str());
 
     topicChanges.topics.push_back(topic);
 
