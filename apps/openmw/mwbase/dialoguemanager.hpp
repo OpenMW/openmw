@@ -81,6 +81,16 @@ namespace MWBase
 
             /// Removes the last added topic response for the given actor from the journal
             virtual void clearInfoActor (const MWWorld::Ptr& actor) const = 0;
+
+            /*
+                Start of tes3mp addition
+
+                Declare this method here so it can be used from outside of MWDialogue::DialogueManager
+            */
+            virtual void updateTopics() = 0;
+            /*
+                End of tes3mp addition
+            */
     };
 }
 

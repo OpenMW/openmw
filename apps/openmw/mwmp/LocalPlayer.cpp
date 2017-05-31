@@ -687,6 +687,9 @@ void LocalPlayer::addTopics()
         mwmp::Topic topic = topicChanges.topics.at(i);
 
         MWBase::Environment::get().getDialogueManager()->addTopic(topic.topicId);
+
+        if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Dialogue))
+            MWBase::Environment::get().getDialogueManager()->updateTopics();
     }
 }
 
