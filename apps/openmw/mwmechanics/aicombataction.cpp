@@ -264,6 +264,13 @@ namespace MWMechanics
         case ESM::MagicEffect::ResistCorprusDisease:
         case ESM::MagicEffect::Invisibility:
         case ESM::MagicEffect::Chameleon:
+        case ESM::MagicEffect::NightEye:
+        case ESM::MagicEffect::Vampirism:
+        case ESM::MagicEffect::StuntedMagicka:
+        case ESM::MagicEffect::ExtraSpell:
+        case ESM::MagicEffect::RemoveCurse:
+        case ESM::MagicEffect::CommandCreature:
+        case ESM::MagicEffect::CommandHumanoid:
             return 0.f;
 
         case ESM::MagicEffect::Sound:
@@ -295,6 +302,8 @@ namespace MWMechanics
         case ESM::MagicEffect::ResistParalysis:
         case ESM::MagicEffect::ResistPoison:
         case ESM::MagicEffect::ResistShock:
+        case ESM::MagicEffect::SpellAbsorption:
+        case ESM::MagicEffect::Reflect:
             return 0.f; // probably useless since we don't know in advance what the enemy will cast
 
         // don't cast these for now as they would make the NPC cast the same effect over and over again, especially when they have potions
@@ -304,13 +313,50 @@ namespace MWMechanics
         case ESM::MagicEffect::FortifyFatigue:
         case ESM::MagicEffect::FortifySkill:
         case ESM::MagicEffect::FortifyMaximumMagicka:
+        case ESM::MagicEffect::FortifyAttack:
             return 0.f;
 
+        case ESM::MagicEffect::Burden:
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                // Ignore enemy without inventory
+                if (!enemy.getClass().hasInventoryStore(enemy))
+                    return 0.f;
+
+                // burden makes sense only to overburden an enemy
+                float burden = enemy.getClass().getEncumbrance(enemy) - enemy.getClass().getCapacity(enemy);
+                if (burden > 0)
+                    return 0.f;
+
+                if ((effect.mMagnMin + effect.mMagnMax)/2.f > -burden)
+                    rating *= 3;
+                else
+                    return 0.f;
+
+                break;
+            }
+
         case ESM::MagicEffect::Feather:
-            if (actor.getClass().getEncumbrance(actor) - actor.getClass().getCapacity(actor) >= 0)
-                return 100.f;
-            else
-                return 0.f;
+            {
+                // Ignore actors without inventory
+                if (!actor.getClass().hasInventoryStore(actor))
+                    return 0.f;
+
+                // feather makes sense only for overburden actors
+                float burden = actor.getClass().getEncumbrance(actor) - actor.getClass().getCapacity(actor);
+                if (burden <= 0)
+                    return 0.f;
+
+                if ((effect.mMagnMin + effect.mMagnMax)/2.f >= burden)
+                    rating *= 3;
+                else
+                    return 0.f;
+
+                break;
+            }
+
         case ESM::MagicEffect::Levitate:
             return 0.f; // AI isn't designed to take advantage of this, and could be perceived as unfair anyway
         case ESM::MagicEffect::BoundBoots:
