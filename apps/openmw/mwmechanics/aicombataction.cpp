@@ -264,6 +264,13 @@ namespace MWMechanics
         case ESM::MagicEffect::ResistCorprusDisease:
         case ESM::MagicEffect::Invisibility:
         case ESM::MagicEffect::Chameleon:
+        case ESM::MagicEffect::NightEye:
+        case ESM::MagicEffect::Vampirism:
+        case ESM::MagicEffect::StuntedMagicka:
+        case ESM::MagicEffect::ExtraSpell:
+        case ESM::MagicEffect::RemoveCurse:
+        case ESM::MagicEffect::CommandCreature:
+        case ESM::MagicEffect::CommandHumanoid:
             return 0.f;
 
         case ESM::MagicEffect::Sound:
@@ -295,6 +302,8 @@ namespace MWMechanics
         case ESM::MagicEffect::ResistParalysis:
         case ESM::MagicEffect::ResistPoison:
         case ESM::MagicEffect::ResistShock:
+        case ESM::MagicEffect::SpellAbsorption:
+        case ESM::MagicEffect::Reflect:
             return 0.f; // probably useless since we don't know in advance what the enemy will cast
 
         // don't cast these for now as they would make the NPC cast the same effect over and over again, especially when they have potions
@@ -304,6 +313,7 @@ namespace MWMechanics
         case ESM::MagicEffect::FortifyFatigue:
         case ESM::MagicEffect::FortifySkill:
         case ESM::MagicEffect::FortifyMaximumMagicka:
+        case ESM::MagicEffect::FortifyAttack:
             return 0.f;
 
         case ESM::MagicEffect::Feather:
