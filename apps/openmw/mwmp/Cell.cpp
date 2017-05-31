@@ -1,6 +1,8 @@
 #include <components/esm/cellid.hpp>
 #include <components/openmw-mp/Log.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/livecellref.hpp"
 #include "../mwworld/worldimp.hpp"
@@ -190,8 +192,13 @@ void Cell::readStatsDynamic(ActorList& actorList)
                 // received from the server still gets set
                 actor->setStatsDynamic();
 
+                // Actors loaded as dead from the server need special handling to skip their death animations
+                // and disable their collision
                 if (actor->creatureStats.mDynamic[0].mCurrent < 1)
+                {
                     actor->getPtr().getClass().getCreatureStats(actor->getPtr()).setDeathAnimationFinished(true);
+                    MWBase::Environment::get().getWorld()->enableActorCollision(actor->getPtr(), false);
+                }
             }
         }
     }
