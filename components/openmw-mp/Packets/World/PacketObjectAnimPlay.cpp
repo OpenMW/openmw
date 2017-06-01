@@ -19,6 +19,12 @@ void PacketObjectAnimPlay::Packet(RakNet::BitStream *bs, bool send)
 
     RW(event->worldObjectCount, send);
 
+    if (event->worldObjectCount > maxObjects)
+    {
+        event->isValid = false;
+        return;
+    }
+
     RW(event->cell.mData.mFlags, send);
     RW(event->cell.mData.mX, send);
     RW(event->cell.mData.mY, send);

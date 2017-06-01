@@ -22,6 +22,12 @@ void PacketContainer::Packet(RakNet::BitStream *bs, bool send)
 
     RW(event->worldObjectCount, send);
 
+    if (event->worldObjectCount > maxObjects)
+    {
+        event->isValid = false;
+        return;
+    }
+
     RW(event->cell.mData.mFlags, send);
     RW(event->cell.mData.mX, send);
     RW(event->cell.mData.mY, send);
@@ -46,7 +52,7 @@ void PacketContainer::Packet(RakNet::BitStream *bs, bool send)
         RW(worldObject.mpNum, send);
         RW(worldObject.containerItemCount, send);
 
-        if (worldObject.containerItemCount > 2000 || worldObject.refId.empty() || (worldObject.refNumIndex != 0 && worldObject.mpNum != 0))
+        if (worldObject.containerItemCount > maxObjects || worldObject.refId.empty() || (worldObject.refNumIndex != 0 && worldObject.mpNum != 0))
         {
             event->isValid = false;
             return;

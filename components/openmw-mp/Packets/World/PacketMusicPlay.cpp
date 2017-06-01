@@ -19,6 +19,12 @@ void PacketMusicPlay::Packet(RakNet::BitStream *bs, bool send)
 
     RW(event->worldObjectCount, send);
 
+    if (event->worldObjectCount > maxObjects)
+    {
+        event->isValid = false;
+        return;
+    }
+
     WorldObject worldObject;
 
     for (unsigned int i = 0; i < event->worldObjectCount; i++)

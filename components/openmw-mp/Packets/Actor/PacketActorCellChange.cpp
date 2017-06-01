@@ -20,6 +20,12 @@ void PacketActorCellChange::Packet(RakNet::BitStream *bs, bool send)
 
     RW(actorList->count, send);
 
+    if (actorList->count > maxActors)
+    {
+        actorList->isValid = false;
+        return;
+    }
+
     BaseActor actor;
 
     for (unsigned int i = 0; i < actorList->count; i++)

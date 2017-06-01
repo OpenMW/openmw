@@ -11,11 +11,4 @@ PacketActorAuthority::PacketActorAuthority(RakNet::RakPeerInterface *peer) : Act
 void PacketActorAuthority::Packet(RakNet::BitStream *bs, bool send)
 {
     ActorPacket::Packet(bs, send);
-
-    if (send)
-        actorList->count = (unsigned int)(actorList->baseActors.size());
-    else
-        actorList->baseActors.clear();
-
-    RW(actorList->count, send);
 }

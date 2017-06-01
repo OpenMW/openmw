@@ -21,7 +21,7 @@ void PacketActorList::Packet(RakNet::BitStream *bs, bool send)
 
     RW(actorList->count, send);
 
-    if (actorList->count > 2000)
+    if (actorList->count > maxActors)
     {
         actorList->isValid = false;
         return;

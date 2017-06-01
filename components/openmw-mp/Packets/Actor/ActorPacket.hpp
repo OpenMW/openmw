@@ -24,7 +24,7 @@ namespace mwmp
 
     protected:
         BaseActorList *actorList;
-
+        static const int maxActors = 3000;
     };
 }
 

@@ -23,7 +23,7 @@ namespace mwmp
 
     protected:
         BaseEvent *event;
-
+        static const int maxObjects = 3000;
     };
 }
 
