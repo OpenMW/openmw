@@ -235,7 +235,7 @@ void DedicatedPlayer::setCell()
 
     // Remove the marker entirely if this player has moved to an interior that is inactive for us
     if (!cell.isExterior() && !Main::get().getCellController()->isActiveWorldCell(cell))
-        Main::get().getGUIController()->mPlayerMarkers.deleteMarker(marker);
+        removeMarker();
     // Otherwise, update their marker so the player shows up in the right cell on the world map
     else
         updateMarker();
@@ -269,7 +269,10 @@ void DedicatedPlayer::removeMarker()
         return;
 
     markerEnabled = false;
-    Main::get().getGUIController()->mPlayerMarkers.deleteMarker(marker);
+    GUIController *gui = Main::get().getGUIController();
+
+    if (gui->mPlayerMarkers.contains(marker))
+        Main::get().getGUIController()->mPlayerMarkers.deleteMarker(marker);
 }
 
 void DedicatedPlayer::setMarkerState(bool state)
