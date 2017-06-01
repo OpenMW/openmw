@@ -611,9 +611,15 @@ fi
 	else
 		QT_SDK="C:/Qt/5.7/msvc${MSVC_YEAR}${SUFFIX}"
 
+		cd $QT_SDK
+
 		add_cmake_opts -DDESIRED_QT_VERSION=5 \
 			-DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
 			-DCMAKE_PREFIX_PATH="$QT_SDK"
+
+		add_runtime_dlls "$(pwd)/bin/lib"{EGL,GLESv2}.dll \
+			"$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}.dll
+		add_qt_platform_dlls "$(pwd)/plugins/platforms/qwindows.dll"
 
 		echo Done.
 	fi
@@ -648,7 +654,8 @@ echo "Setting up OpenMW build..."
 add_cmake_opts -DBUILD_BSATOOL=no \
 	-DBUILD_ESMTOOL=no \
 	-DBUILD_MYGUI_PLUGIN=no \
-	-DOPENMW_MP_BUILD=on
+	-DOPENMW_MP_BUILD=on \
+	-DOPENMW_LTO_BUILD=on
 
 if [ ! -z $CI ]; then
 	case $STEP in
@@ -688,40 +695,37 @@ if [ ! -z $CI ]; then
 	esac
 fi
 
-# NOTE: Disable this when/if we want to run test cases
-if [ -z $CI ]; then
-	echo "- Copying Runtime DLLs..."
-	mkdir -p $BUILD_CONFIG
-	for DLL in $RUNTIME_DLLS; do
-		TARGET="$(basename "$DLL")"
-		if [[ "$DLL" == *":"* ]]; then
-			IFS=':'; SPLIT=( ${DLL} ); unset IFS
+echo "- Copying Runtime DLLs..."
+mkdir -p $BUILD_CONFIG
+for DLL in $RUNTIME_DLLS; do
+	TARGET="$(basename "$DLL")"
+	if [[ "$DLL" == *":"* ]]; then
+		IFS=':'; SPLIT=( ${DLL} ); unset IFS
 
-			DLL=${SPLIT[0]}
-			TARGET=${SPLIT[1]}
-		fi
+		DLL=${SPLIT[0]}
+		TARGET=${SPLIT[1]}
+	fi
 
-		echo "    ${TARGET}."
-		cp "$DLL" "$BUILD_CONFIG/$TARGET"
-	done
-	echo
+	echo "    ${TARGET}."
+	cp "$DLL" "$BUILD_CONFIG/$TARGET"
+done
+echo
 
-	echo "- OSG Plugin DLLs..."
-	mkdir -p $BUILD_CONFIG/osgPlugins-3.4.0
-	for DLL in $OSG_PLUGINS; do
-		echo "    $(basename $DLL)."
-		cp "$DLL" $BUILD_CONFIG/osgPlugins-3.4.0
-	done
-	echo
+echo "- OSG Plugin DLLs..."
+mkdir -p $BUILD_CONFIG/osgPlugins-3.4.0
+for DLL in $OSG_PLUGINS; do
+	echo "    $(basename $DLL)."
+	cp "$DLL" $BUILD_CONFIG/osgPlugins-3.4.0
+done
+echo
 
-	echo "- Qt Platform DLLs..."
-	mkdir -p ${BUILD_CONFIG}/platforms
-	for DLL in $QT_PLATFORMS; do
-		echo "    $(basename $DLL)"
-		cp "$DLL" "${BUILD_CONFIG}/platforms"
-	done
-	echo
-fi
+echo "- Qt Platform DLLs..."
+mkdir -p ${BUILD_CONFIG}/platforms
+for DLL in $QT_PLATFORMS; do
+	echo "    $(basename $DLL)"
+	cp "$DLL" "${BUILD_CONFIG}/platforms"
+done
+echo
 
 if [ -z $VERBOSE ]; then
 	printf -- "- Configuring... "
@@ -740,19 +744,17 @@ if [ -z $VERBOSE ]; then
 	fi
 fi
 
-if [ -z $CI ]; then
-	echo "- Copying Runtime Resources/Config Files"
-	echo "    gamecontrollerdb.txt"
-	cp gamecontrollerdb.txt $BUILD_CONFIG/gamecontrollerdb.txt
-	echo "    openmw.cfg"
-	cp openmw.cfg.install $BUILD_CONFIG/openmw.cfg
-	echo "    openmw-cs.cfg"
-	cp openmw-cs.cfg $BUILD_CONFIG/openmw-cs.cfg
-	echo "    settings-default.cfg"
-	cp settings-default.cfg $BUILD_CONFIG/settings-default.cfg
-	echo "    resources/"
-	cp -r resources $BUILD_CONFIG/resources
-	echo
-fi
+echo "- Copying Runtime Resources/Config Files"
+echo "    gamecontrollerdb.txt"
+cp gamecontrollerdb.txt $BUILD_CONFIG/gamecontrollerdb.txt
+echo "    openmw.cfg"
+cp openmw.cfg.install $BUILD_CONFIG/openmw.cfg
+echo "    openmw-cs.cfg"
+cp openmw-cs.cfg $BUILD_CONFIG/openmw-cs.cfg
+echo "    settings-default.cfg"
+cp settings-default.cfg $BUILD_CONFIG/settings-default.cfg
+echo "    resources/"
+cp -r resources $BUILD_CONFIG/resources
+echo
 
 exit $RET
