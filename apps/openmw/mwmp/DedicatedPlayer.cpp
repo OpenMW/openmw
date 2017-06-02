@@ -4,6 +4,7 @@
 
 #include <boost/algorithm/clamp.hpp>
 #include <components/openmw-mp/Log.hpp>
+#include <apps/openmw/mwmechanics/steering.hpp>
 
 #include "../mwbase/environment.hpp"
 
@@ -117,12 +118,15 @@ void DedicatedPlayer::move(float dt)
         world->moveObject(ptr, position.pos[0], position.pos[1], position.pos[2]);
     }
 
-    world->rotateObject(ptr, position.rot[0], 0, position.rot[2]);
+    float oldZ = ptr.getRefData().getPosition().rot[2];
+    world->rotateObject(ptr, position.rot[0], 0, oldZ);
 
     MWMechanics::Movement *move = &ptr.getClass().getMovementSettings(ptr);
     move->mPosition[0] = direction.pos[0];
     move->mPosition[1] = direction.pos[1];
     move->mPosition[2] = direction.pos[2];
+
+    MWMechanics::zTurn(ptr, position.rot[2], osg::DegreesToRadians(1.0));
 }
 
 void DedicatedPlayer::setAnimFlags()
