@@ -321,18 +321,23 @@ void LocalPlayer::updatePosition(bool forceUpdate)
         static bool posWasChanged = false;
         static bool isJumping = false;
         static bool sentJumpEnd = true;
+        static float oldRot[2] = {0};
+
+        position = player.getRefData().getPosition();
 
         bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 || direction.pos[2] != 0 ||
-                position.rot[0] != 0 || position.rot[1] != 0 || position.rot[2] != 0);
+                position.rot[0] != oldRot[0] || position.rot[2] != oldRot[1]);
 
         if (forceUpdate || posIsChanging || posWasChanged)
         {
+
+            oldRot[0] = position.rot[0];
+            oldRot[1] = position.rot[2];
+
             posWasChanged = posIsChanging;
 
             if (!isJumping && !world->isOnGround(player) && !world->isFlying(player))
                 isJumping = true;
-
-            position = player.getRefData().getPosition();
 
             getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->setPlayer(this);
             getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->Send();
