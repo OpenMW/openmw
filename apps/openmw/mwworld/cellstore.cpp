@@ -241,16 +241,23 @@ namespace MWWorld
         {
             // A cell we had previously moved an object to is returning it to us.
             
-            // tes3mp debug start
-            if (found->second != from) {
-                    
-                printf("Storage: %s owned %s which it gave to %s which isn't %s therefore CRASH\n",
+            /*
+                Start of tes3mp addition
+
+                Add extra debug for multiplayer purposes
+            */
+            if (found->second != from)
+            {
+                
+                LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "Storage: %s owned %s which it gave to %s which isn't %s, which should result in a crash\n",
                     this->getCell()->getDescription().c_str(),
                     object.getBase()->mRef.getRefId().c_str(),
                     found->second->getCell()->getDescription().c_str(),
-                    from->getCell()->getDescription().c_str());   
+                    from->getCell()->getDescription().c_str());
             }
-            // tes3mp debug end
+            /*
+                End of tes3mp addition
+            */
             
             assert (found->second == from);
             mMovedToAnotherCell.erase(found);
@@ -281,8 +288,11 @@ namespace MWWorld
         // Objects with no refnum can't be handled correctly in the merging process that happens
         // on a save/load, so do a simple copy & delete for these objects.
 
-        // The code below is disabled for tes3mp for as long as player objects lack refnums,
-        // because it will break exterior cell transitions for them
+        /*
+            Start of tes3mp change (major)
+
+            Disable the following code because it breaks DedicatedPlayers
+        */
         /*
         if (!object.getCellRef().getRefNum().hasContentFile())
         {
@@ -291,6 +301,9 @@ namespace MWWorld
             object.getRefData().setBaseNode(NULL);
             return copied;
         }
+        */
+        /*
+            End of tes3mp change (major)
         */
 
         MovedRefTracker::iterator found = mMovedHere.find(object.getBase());
@@ -307,13 +320,19 @@ namespace MWWorld
             // Now that object is back to its rightful owner, we can move it
             if (cellToMoveTo != originalCell)
             {
-                // tes3mp debug start
-                printf("Storage: %s's original cell %s gives it from %s to %s\n",
+                /*
+                    Start of tes3mp addition
+
+                    Add extra debug for multiplayer purposes
+                */
+                LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "Storage: %s's original cell %s gives it from %s to %s\n",
                     object.getBase()->mRef.getRefId().c_str(),
                     originalCell->getCell()->getDescription().c_str(),
                     this->getCell()->getDescription().c_str(),
                     cellToMoveTo->getCell()->getDescription().c_str());
-                // tes3mp debug end
+                /*
+                    End of tes3mp addition
+                */
                 
                 originalCell->moveTo(object, cellToMoveTo);
             }
