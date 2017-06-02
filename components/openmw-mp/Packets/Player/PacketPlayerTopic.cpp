@@ -27,7 +27,7 @@ void PacketPlayerTopic::Packet(RakNet::BitStream *bs, bool send)
         if (send)
             topic = player->topicChanges.topics.at(i);
 
-        RW(topic.topicId, send);
+        RW(topic.topicId, send, 1);
 
         if (!send)
             player->topicChanges.topics.push_back(topic);

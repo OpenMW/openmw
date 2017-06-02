@@ -16,6 +16,5 @@ void PacketPlayerAttribute::Packet(RakNet::BitStream *bs, bool send)
 {
     PlayerPacket::Packet(bs, send);
 
-    for (int i = 0; i < AttributeCount; ++i)
-        RW(player->creatureStats.mAttributes[i], send);
+    RW(player->creatureStats.mAttributes, send);
 }

@@ -25,19 +25,13 @@ void mwmp::PacketPlayerCellState::Packet(RakNet::BitStream *bs, bool send)
         CellState cellState;
 
         if (send)
-        {
             cellState = player->cellStateChanges.cellStates.at(i);
-        }
         
         RW(cellState.type, send);
-        RW(cellState.cell.mData.mFlags, send);
-        RW(cellState.cell.mData.mX, send);
-        RW(cellState.cell.mData.mY, send);
-        RW(cellState.cell.mName, send);
+        RW(cellState.cell.mData, send, 1);
+        RW(cellState.cell.mName, send, 1);
 
         if (!send)
-        {
             player->cellStateChanges.cellStates.push_back(cellState);
-        }
     }
 }

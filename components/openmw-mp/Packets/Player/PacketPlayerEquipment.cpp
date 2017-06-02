@@ -18,7 +18,7 @@ void PacketPlayerEquipment::Packet(RakNet::BitStream *bs, bool send)
 
     for (int i = 0; i < 19; i++)
     {
-        RW(player->equipedItems[i].refId, send);
+        RW(player->equipedItems[i].refId, send, 1);
         RW(player->equipedItems[i].count, send);
         RW(player->equipedItems[i].charge, send);
     }

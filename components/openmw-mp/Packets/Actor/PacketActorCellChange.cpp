@@ -31,9 +31,7 @@ void PacketActorCellChange::Packet(RakNet::BitStream *bs, bool send)
     for (unsigned int i = 0; i < actorList->count; i++)
     {
         if (send)
-        {
             actor = actorList->baseActors.at(i);
-        }
 
         RW(actor.refNumIndex, send);
         RW(actor.mpNum, send);
@@ -45,8 +43,6 @@ void PacketActorCellChange::Packet(RakNet::BitStream *bs, bool send)
         RW(actor.direction, send, 1);
 
         if (!send)
-        {
             actorList->baseActors.push_back(actor);
-        }
     }
 }
