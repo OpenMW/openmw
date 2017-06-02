@@ -187,6 +187,7 @@ void LocalPlayer::updateStatsDynamic(bool forceUpdate)
 
     if (forceUpdate || (statTimer += MWBase::Environment::get().getFrameDuration()) >= timeoutSec)
     {
+        statTimer = 0;
         // Update stats when they become 0 or they have changed enough
         bool shouldUpdateHealth = oldHealth != health && (health.getCurrent() == 0 || abs(oldHealth.getCurrent() - health.getCurrent()) > 3);
         bool shouldUpdateMagicka = false;
@@ -207,8 +208,6 @@ void LocalPlayer::updateStatsDynamic(bool forceUpdate)
             health.writeState(creatureStats.mDynamic[0]);
             magicka.writeState(creatureStats.mDynamic[1]);
             fatigue.writeState(creatureStats.mDynamic[2]);
-
-            statTimer = 0;
 
             getNetworking()->getPlayerPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(this);
             getNetworking()->getPlayerPacket(ID_PLAYER_STATS_DYNAMIC)->Send();
