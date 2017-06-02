@@ -21,9 +21,14 @@ namespace mwmp
 
         void setEvent(BaseEvent *event);
 
+        virtual void Packet(RakNet::BitStream *bs, bool send);
+
     protected:
+        virtual void Object(WorldObject &worldObject, bool send);
+        bool PacketHeader(RakNet::BitStream *bs, bool send);
         BaseEvent *event;
         static const int maxObjects = 3000;
+        bool hasCellData;
     };
 }
 

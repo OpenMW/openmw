@@ -10,7 +10,7 @@ namespace mwmp
     public:
         PacketScriptLocalShort(RakNet::RakPeerInterface *peer);
 
-        virtual void Packet(RakNet::BitStream *bs, bool send);
+        virtual void Object(WorldObject &obj, bool send);
     };
 }
 
