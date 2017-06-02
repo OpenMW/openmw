@@ -9,45 +9,12 @@ PacketActorEquipment::PacketActorEquipment(RakNet::RakPeerInterface *peer) : Act
     packetID = ID_ACTOR_EQUIPMENT;
 }
 
-void PacketActorEquipment::Packet(RakNet::BitStream *bs, bool send)
+void PacketActorEquipment::Actor(BaseActor &actor, bool send)
 {
-    ActorPacket::Packet(bs, send);
-
-    if (send)
-        actorList->count = (unsigned int)(actorList->baseActors.size());
-    else
-        actorList->baseActors.clear();
-
-    RW(actorList->count, send);
-
-    if (actorList->count > maxActors)
+    for (int j = 0; j < 19; j++)
     {
-        actorList->isValid = false;
-        return;
-    }
-
-    BaseActor actor;
-
-    for (unsigned int i = 0; i < actorList->count; i++)
-    {
-        if (send)
-        {
-            actor = actorList->baseActors.at(i);
-        }
-
-        RW(actor.refNumIndex, send);
-        RW(actor.mpNum, send);
-
-        for (int j = 0; j < 19; j++)
-        {
-            RW(actor.equipedItems[j].refId, send);
-            RW(actor.equipedItems[j].count, send);
-            RW(actor.equipedItems[j].charge, send);
-        }
-
-        if (!send)
-        {
-            actorList->baseActors.push_back(actor);
-        }
+        RW(actor.equipedItems[j].refId, send);
+        RW(actor.equipedItems[j].count, send);
+        RW(actor.equipedItems[j].charge, send);
     }
 }

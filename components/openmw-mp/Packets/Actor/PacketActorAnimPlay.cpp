@@ -9,43 +9,11 @@ PacketActorAnimPlay::PacketActorAnimPlay(RakNet::RakPeerInterface *peer) : Actor
     packetID = ID_ACTOR_ANIM_PLAY;
 }
 
-void PacketActorAnimPlay::Packet(RakNet::BitStream *bs, bool send)
+void PacketActorAnimPlay::Actor(BaseActor &actor, bool send)
 {
-    ActorPacket::Packet(bs, send);
 
-    if (send)
-        actorList->count = (unsigned int)(actorList->baseActors.size());
-    else
-        actorList->baseActors.clear();
-
-    RW(actorList->count, send);
-
-    if (actorList->count > maxActors)
-    {
-        actorList->isValid = false;
-        return;
-    }
-
-    BaseActor actor;
-
-    for (unsigned int i = 0; i < actorList->count; i++)
-    {
-        if (send)
-        {
-            actor = actorList->baseActors.at(i);
-        }
-
-        RW(actor.refNumIndex, send);
-        RW(actor.mpNum, send);
-        
-        RW(actor.animation.groupname, send);
-        RW(actor.animation.mode, send);
-        RW(actor.animation.count, send);
-        RW(actor.animation.persist, send);
-
-        if (!send)
-        {
-            actorList->baseActors.push_back(actor);
-        }
-    }
+    RW(actor.animation.groupname, send);
+    RW(actor.animation.mode, send);
+    RW(actor.animation.count, send);
+    RW(actor.animation.persist, send);
 }

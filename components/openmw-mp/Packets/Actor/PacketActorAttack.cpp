@@ -9,51 +9,18 @@ PacketActorAttack::PacketActorAttack(RakNet::RakPeerInterface *peer) : ActorPack
     packetID = ID_ACTOR_ATTACK;
 }
 
-void PacketActorAttack::Packet(RakNet::BitStream *bs, bool send)
+void PacketActorAttack::Actor(BaseActor &actor, bool send)
 {
-    ActorPacket::Packet(bs, send);
+    RW(actor.attack.target.refNumIndex, send);
+    RW(actor.attack.target.mpNum, send);
+    RW(actor.attack.target.guid, send);
 
-    if (send)
-        actorList->count = (unsigned int)(actorList->baseActors.size());
-    else
-        actorList->baseActors.clear();
+    RW(actor.attack.spellId, send);
+    RW(actor.attack.type, send);
+    RW(actor.attack.success, send);
+    RW(actor.attack.damage, send);
 
-    RW(actorList->count, send);
-
-    if (actorList->count > maxActors)
-    {
-        actorList->isValid = false;
-        return;
-    }
-
-    BaseActor actor;
-
-    for (unsigned int i = 0; i < actorList->count; i++)
-    {
-        if (send)
-        {
-            actor = actorList->baseActors.at(i);
-        }
-
-        RW(actor.refNumIndex, send);
-        RW(actor.mpNum, send);
-
-        RW(actor.attack.target.refNumIndex, send);
-        RW(actor.attack.target.mpNum, send);
-        RW(actor.attack.target.guid, send);
-
-        RW(actor.attack.spellId, send);
-        RW(actor.attack.type, send);
-        RW(actor.attack.success, send);
-        RW(actor.attack.damage, send);
-
-        RW(actor.attack.pressed, send);
-        RW(actor.attack.knockdown, send);
-        RW(actor.attack.block, send);
-        
-        if (!send)
-        {
-            actorList->baseActors.push_back(actor);
-        }
-    }
+    RW(actor.attack.pressed, send);
+    RW(actor.attack.knockdown, send);
+    RW(actor.attack.block, send);
 }

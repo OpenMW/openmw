@@ -10,5 +10,8 @@ PacketActorAuthority::PacketActorAuthority(RakNet::RakPeerInterface *peer) : Act
 
 void PacketActorAuthority::Packet(RakNet::BitStream *bs, bool send)
 {
-    ActorPacket::Packet(bs, send);
+    BasePacket::Packet(bs, send);
+
+    RW(actorList->cell.mData, send, 1);
+    RW(actorList->cell.mName, send, 1);
 }

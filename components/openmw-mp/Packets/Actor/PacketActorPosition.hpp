@@ -10,7 +10,7 @@ namespace mwmp
     public:
         PacketActorPosition(RakNet::RakPeerInterface *peer);
 
-        virtual void Packet(RakNet::BitStream *bs, bool send);
+        virtual void Actor(BaseActor &actor, bool send);
     };
 }
 
