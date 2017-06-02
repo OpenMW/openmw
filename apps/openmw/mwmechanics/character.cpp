@@ -1693,7 +1693,6 @@ void CharacterController::update(float duration)
             MWMechanics::Movement &movementSettings = cls.getMovementSettings(mPtr);
             localPlayer->direction.pos[0] = movementSettings.mPosition[0];
             localPlayer->direction.pos[1] = movementSettings.mPosition[1];
-            localPlayer->direction.pos[2] = movementSettings.mPosition[2];
         }
         else if (mwmp::Main::get().getCellController()->isLocalActor(mPtr))
         {

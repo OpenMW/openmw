@@ -124,7 +124,6 @@ void DedicatedPlayer::move(float dt)
     MWMechanics::Movement *move = &ptr.getClass().getMovementSettings(ptr);
     move->mPosition[0] = direction.pos[0];
     move->mPosition[1] = direction.pos[1];
-    move->mPosition[2] = direction.pos[2];
 
     MWMechanics::zTurn(ptr, position.rot[2], osg::DegreesToRadians(1.0));
 }

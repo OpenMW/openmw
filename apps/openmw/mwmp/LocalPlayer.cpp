@@ -325,7 +325,7 @@ void LocalPlayer::updatePosition(bool forceUpdate)
 
         position = player.getRefData().getPosition();
 
-        bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 || direction.pos[2] != 0 ||
+        bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 ||
                 position.rot[0] != oldRot[0] || position.rot[2] != oldRot[1]);
 
         if (forceUpdate || posIsChanging || posWasChanged)
