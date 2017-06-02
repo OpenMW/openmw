@@ -27,12 +27,19 @@ void PacketPlayerPosition::Packet(RakNet::BitStream *bs, bool send)
     }
     RW(rot[0], send, 1);
     RW(rot[1], send, 1);
+
+    RW(player->position.pos, send, 1);
+    RW(player->direction.pos[0], send, 1);
+    RW(player->direction.pos[1], send, 1);
+
     if(!send)
     {
         player->position.rot[0] = rot[0] / 0.1f;
         player->position.rot[2] = rot[1] / 0.1f;
-    }
 
-    RW(player->position.pos, send, 1);
-    RW(player->direction.pos, send, 1);
+        if(abs(player->direction.pos[0]) < 1)
+            player->direction.pos[0] = 0;
+        if(abs(player->direction.pos[1]) < 1)
+            player->direction.pos[1] = 0;
+    }
 }
