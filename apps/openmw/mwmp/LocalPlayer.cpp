@@ -71,17 +71,24 @@ MWWorld::Ptr LocalPlayer::getPlayerPtr()
 
 void LocalPlayer::update()
 {
-    updateCell();
-    updatePosition();
-    updateAnimFlags();
-    updateAttack();
-    updateDeadState();
-    updateEquipment();
-    updateStatsDynamic();
-    updateAttributes();
-    updateSkills();
-    updateLevel();
-    updateBounty();
+    static float updateTimer = 0;
+    const float timeoutSec = 0.015;
+
+    if ((updateTimer += MWBase::Environment::get().getFrameDuration()) >= timeoutSec)
+    {
+        updateTimer = 0;
+        updateCell();
+        updatePosition();
+        updateAnimFlags();
+        updateAttack();
+        updateDeadState();
+        updateEquipment();
+        updateStatsDynamic();
+        updateAttributes();
+        updateSkills();
+        updateLevel();
+        updateBounty();
+    }
 }
 
 void LocalPlayer::charGen(int stageFirst, int stageEnd)
@@ -182,36 +189,30 @@ void LocalPlayer::updateStatsDynamic(bool forceUpdate)
     static MWMechanics::DynamicStat<float> oldMagicka(ptrCreatureStats->getMagicka());
     static MWMechanics::DynamicStat<float> oldFatigue(ptrCreatureStats->getFatigue());
 
-    static float statTimer = 0;
-    const float timeoutSec = 0.5;
 
-    if (forceUpdate || (statTimer += MWBase::Environment::get().getFrameDuration()) >= timeoutSec)
+    // Update stats when they become 0 or they have changed enough
+    bool shouldUpdateHealth = oldHealth != health && (health.getCurrent() == 0 || abs(oldHealth.getCurrent() - health.getCurrent()) > 3);
+    bool shouldUpdateMagicka = false;
+    bool shouldUpdateFatigue = false;
+
+    if (!shouldUpdateHealth)
+        shouldUpdateMagicka = oldMagicka != magicka && (magicka.getCurrent() == 0 || abs(oldMagicka.getCurrent() - magicka.getCurrent()) > 10);
+
+    if (!shouldUpdateMagicka)
+        shouldUpdateFatigue = oldFatigue != fatigue && (fatigue.getCurrent() == 0 || abs(oldFatigue.getCurrent() - fatigue.getCurrent()) > 10);
+
+    if (forceUpdate || shouldUpdateHealth || shouldUpdateMagicka || shouldUpdateFatigue)
     {
-        statTimer = 0;
-        // Update stats when they become 0 or they have changed enough
-        bool shouldUpdateHealth = oldHealth != health && (health.getCurrent() == 0 || abs(oldHealth.getCurrent() - health.getCurrent()) > 3);
-        bool shouldUpdateMagicka = false;
-        bool shouldUpdateFatigue = false;
+        oldHealth = health;
+        oldMagicka = magicka;
+        oldFatigue = fatigue;
 
-        if (!shouldUpdateHealth)
-            shouldUpdateMagicka = oldMagicka != magicka && (magicka.getCurrent() == 0 || abs(oldMagicka.getCurrent() - magicka.getCurrent()) > 10);
+        health.writeState(creatureStats.mDynamic[0]);
+        magicka.writeState(creatureStats.mDynamic[1]);
+        fatigue.writeState(creatureStats.mDynamic[2]);
 
-        if (!shouldUpdateMagicka)
-            shouldUpdateFatigue = oldFatigue != fatigue && (fatigue.getCurrent() == 0 || abs(oldFatigue.getCurrent() - fatigue.getCurrent()) > 10);
-
-        if (forceUpdate || shouldUpdateHealth || shouldUpdateMagicka || shouldUpdateFatigue)
-        {
-            oldHealth = health;
-            oldMagicka = magicka;
-            oldFatigue = fatigue;
-
-            health.writeState(creatureStats.mDynamic[0]);
-            magicka.writeState(creatureStats.mDynamic[1]);
-            fatigue.writeState(creatureStats.mDynamic[2]);
-
-            getNetworking()->getPlayerPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(this);
-            getNetworking()->getPlayerPacket(ID_PLAYER_STATS_DYNAMIC)->Send();
-        }
+        getNetworking()->getPlayerPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_STATS_DYNAMIC)->Send();
     }
 }
 
@@ -309,52 +310,45 @@ void LocalPlayer::updateBounty(bool forceUpdate)
 
 void LocalPlayer::updatePosition(bool forceUpdate)
 {
-    static float positionTimer = 0;
-    const float timeoutSec = 0.015;
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    MWWorld::Ptr player = world->getPlayerPtr();
 
-    if (forceUpdate || (positionTimer += MWBase::Environment::get().getFrameDuration()) >= timeoutSec)
+    static bool posWasChanged = false;
+    static bool isJumping = false;
+    static bool sentJumpEnd = true;
+    static float oldRot[2] = {0};
+
+    position = player.getRefData().getPosition();
+
+    bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 ||
+            position.rot[0] != oldRot[0] || position.rot[2] != oldRot[1]);
+
+    if (forceUpdate || posIsChanging || posWasChanged)
     {
-        positionTimer = 0;
-        MWBase::World *world = MWBase::Environment::get().getWorld();
-        MWWorld::Ptr player = world->getPlayerPtr();
 
-        static bool posWasChanged = false;
-        static bool isJumping = false;
-        static bool sentJumpEnd = true;
-        static float oldRot[2] = {0};
+        oldRot[0] = position.rot[0];
+        oldRot[1] = position.rot[2];
 
+        posWasChanged = posIsChanging;
+
+        if (!isJumping && !world->isOnGround(player) && !world->isFlying(player))
+            isJumping = true;
+
+        getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->Send();
+    }
+    else if (isJumping && world->isOnGround(player))
+    {
+        isJumping = false;
+        sentJumpEnd = false;
+    }
+    // Packet with jump end position has to be sent one tick after above check
+    else if (!sentJumpEnd)
+    {
+        sentJumpEnd = true;
         position = player.getRefData().getPosition();
-
-        bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 ||
-                position.rot[0] != oldRot[0] || position.rot[2] != oldRot[1]);
-
-        if (forceUpdate || posIsChanging || posWasChanged)
-        {
-
-            oldRot[0] = position.rot[0];
-            oldRot[1] = position.rot[2];
-
-            posWasChanged = posIsChanging;
-
-            if (!isJumping && !world->isOnGround(player) && !world->isFlying(player))
-                isJumping = true;
-
-            getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->setPlayer(this);
-            getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->Send();
-        }
-        else if (isJumping && world->isOnGround(player))
-        {
-            isJumping = false;
-            sentJumpEnd = false;
-        }
-        // Packet with jump end position has to be sent one tick after above check
-        else if (!sentJumpEnd)
-        {
-            sentJumpEnd = true;
-            position = player.getRefData().getPosition();
-            getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->setPlayer(this);
-            getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->Send();
-        }
+        getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->setPlayer(this);
+        getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->Send();
     }
 }
 
