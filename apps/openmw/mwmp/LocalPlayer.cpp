@@ -315,6 +315,7 @@ void LocalPlayer::updatePosition(bool forceUpdate)
 
     if (forceUpdate || (positionTimer += MWBase::Environment::get().getFrameDuration()) >= timeoutSec)
     {
+        positionTimer = 0;
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
 
