@@ -175,6 +175,19 @@ namespace MWMechanics
                         "", ptr.getRefData().getPosition().asVec3());
 
                 MWBase::Environment::get().getWorld()->deleteObject(ptr);
+
+                /*
+                    Start of tes3mp addition
+
+                    Send an ID_OBJECT_DELETE packet every time a summoned creature despawns
+                */
+                mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+                worldEvent->reset();
+                worldEvent->addObjectDelete(ptr);
+                worldEvent->sendObjectDelete();
+                /*
+                    End of tes3mp addition
+                */
             }
             else
                 ++it;

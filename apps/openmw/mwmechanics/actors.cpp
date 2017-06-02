@@ -22,6 +22,7 @@
 #include "../mwmp/PlayerList.hpp"
 #include "../mwmp/CellController.hpp"
 #include "../mwmp/MechanicsHelper.hpp"
+#include "../mwmp/WorldEvent.hpp"
 /*
     End of tes3mp addition
 */
@@ -1519,6 +1520,19 @@ namespace MWMechanics
         if (!ptr.isEmpty())
         {
             MWBase::Environment::get().getWorld()->deleteObject(ptr);
+
+            /*
+                Start of tes3mp addition
+
+                Send an ID_OBJECT_DELETE packet every time a summoned creature despawns
+            */
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+            worldEvent->reset();
+            worldEvent->addObjectDelete(ptr);
+            worldEvent->sendObjectDelete();
+            /*
+                End of tes3mp addition
+            */
 
             const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
                     .search("VFX_Summon_End");

@@ -3405,7 +3405,7 @@ namespace MWWorld
             worldEvent->addObjectSpawn(ptr);
             worldEvent->sendObjectSpawn();
 
-            MWBase::Environment::get().getWorld()->deleteObject(ptr);
+            deleteObject(ptr);
             /*
                 End of tes3mp change (major)
             */
