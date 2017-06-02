@@ -32,8 +32,18 @@ namespace mwmp
                 MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
                 playerPtr.getClass().getCreatureStats(playerPtr).resurrect();
 
-                // If this player had a weapon or spell readied when dying, they will
-                // still have it readied but be unable to use it unless we clear it here
+                // The player could have died from a hand-to-hand attack, so reset their fatigue
+                // as well
+                if (player->creatureStats.mDynamic[2].mMod < 1)
+                    player->creatureStats.mDynamic[2].mMod = 1;
+
+                player->creatureStats.mDynamic[2].mCurrent = player->creatureStats.mDynamic[2].mMod;
+                MWMechanics::DynamicStat<float> fatigue;
+                fatigue.readState(player->creatureStats.mDynamic[2]);
+                playerPtr.getClass().getCreatureStats(playerPtr).setFatigue(fatigue);
+
+                // If this player had a weapon or spell readied when dying, they will still have it
+                // readied but be unable to use it unless we clear it here
                 playerPtr.getClass().getNpcStats(playerPtr).setDrawState(MWMechanics::DrawState_Nothing);
 
                 packet.setPlayer(player);

@@ -188,9 +188,7 @@ void LocalPlayer::updateStatsDynamic(bool forceUpdate)
     if (forceUpdate || (statTimer += MWBase::Environment::get().getFrameDuration()) >= timeoutSec)
     {
         // Update stats when they become 0 or they have changed enough
-        //
-        // Also check for an oldHealth of 0 changing to something else for resurrected NPCs
-        bool shouldUpdateHealth = oldHealth != health && (health.getCurrent() == 0 || oldHealth.getCurrent() == 0 || abs(oldHealth.getCurrent() - health.getCurrent()) > 3);
+        bool shouldUpdateHealth = oldHealth != health && (health.getCurrent() == 0 || abs(oldHealth.getCurrent() - health.getCurrent()) > 3);
         bool shouldUpdateMagicka = false;
         bool shouldUpdateFatigue = false;
 
