@@ -18,6 +18,7 @@
 */
 #include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
+#include "../mwmp/Networking.hpp"
 #include "../mwmp/LocalPlayer.hpp"
 #include "../mwmp/PlayerList.hpp"
 #include "../mwmp/CellController.hpp"

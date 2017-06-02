@@ -123,14 +123,6 @@ void DedicatedPlayer::move(float dt)
     move->mPosition[0] = direction.pos[0];
     move->mPosition[1] = direction.pos[1];
     move->mPosition[2] = direction.pos[2];
-    
-    // Make sure the values are valid, or we'll get an infinite error loop
-    if (!isnan(direction.rot[0]) && !isnan(direction.rot[1]) && !isnan(direction.rot[2]))
-    {
-        move->mRotation[0] = direction.rot[0];
-        move->mRotation[1] = direction.rot[1];
-        move->mRotation[2] = direction.rot[2];
-    }
 }
 
 void DedicatedPlayer::setAnimFlags()

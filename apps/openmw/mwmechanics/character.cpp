@@ -1687,22 +1687,18 @@ void CharacterController::update(float duration)
             Character movement setting rotations get reset here, so we have to assign movement
             settings to the LocalPlayer or a LocalActor now
         */
-        if (MWBase::Environment::get().getWorld()->getPlayerPtr() == mPtr)
+        if (world->getPlayerPtr() == mPtr)
         {
             mwmp::LocalPlayer *localPlayer = mwmp::Main::get().getLocalPlayer();
-            MWMechanics::Movement &movementSettings = mPtr.getClass().getMovementSettings(mPtr);
+            MWMechanics::Movement &movementSettings = cls.getMovementSettings(mPtr);
             localPlayer->direction.pos[0] = movementSettings.mPosition[0];
             localPlayer->direction.pos[1] = movementSettings.mPosition[1];
             localPlayer->direction.pos[2] = movementSettings.mPosition[2];
-            localPlayer->direction.rot[0] = movementSettings.mRotation[0];
-            localPlayer->direction.rot[1] = movementSettings.mRotation[1];
-            localPlayer->direction.rot[2] = movementSettings.mRotation[2];
         }
-
         else if (mwmp::Main::get().getCellController()->isLocalActor(mPtr))
         {
             mwmp::LocalActor *localActor = mwmp::Main::get().getCellController()->getLocalActor(mPtr);
-            MWMechanics::Movement &movementSettings = mPtr.getClass().getMovementSettings(mPtr);
+            MWMechanics::Movement &movementSettings = cls.getMovementSettings(mPtr);
             localActor->direction.pos[0] = movementSettings.mPosition[0];
             localActor->direction.pos[1] = movementSettings.mPosition[1];
             localActor->direction.pos[2] = movementSettings.mPosition[2];

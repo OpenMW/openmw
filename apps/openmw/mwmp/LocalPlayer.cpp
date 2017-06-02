@@ -323,16 +323,14 @@ void LocalPlayer::updatePosition(bool forceUpdate)
         static bool sentJumpEnd = true;
 
         bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 || direction.pos[2] != 0 ||
-            direction.rot[0] != 0 || direction.rot[1] != 0 || direction.rot[2] != 0);
+                position.rot[0] != 0 || position.rot[1] != 0 || position.rot[2] != 0);
 
         if (forceUpdate || posIsChanging || posWasChanged)
         {
             posWasChanged = posIsChanging;
 
             if (!isJumping && !world->isOnGround(player) && !world->isFlying(player))
-            {
                 isJumping = true;
-            }
 
             position = player.getRefData().getPosition();
 
