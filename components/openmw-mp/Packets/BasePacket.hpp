@@ -70,17 +70,10 @@ namespace mwmp
 
         void RW(bool &data, bool write)
         {
-            char _data;
             if (write)
-            {
-                _data = data;
-                bs->Write(_data);
-            }
+                bs->Write(data);
             else
-            {
-                bs->Read(_data);
-                data = _data;
-            }
+                bs->Read(data);
         }
 
         void RW(std::string &str, bool write, bool compress = 0)
