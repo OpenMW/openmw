@@ -128,8 +128,11 @@ public:
             osg::Texture2D* texture = batch.mTexture;
             if(texture)
                 state->applyTextureAttribute(0, texture);
-
+#if defined (ANDROID) || defined (OPENGL_ES)
+            osg::GLBufferObject* bufferobject = 0;
+#else
             osg::GLBufferObject* bufferobject = state->isVertexBufferObjectSupported() ? vbo->getOrCreateGLBufferObject(state->getContextID()) : 0;
+#endif
             if (bufferobject)
             {
                 state->bindVertexBufferObject(bufferobject);

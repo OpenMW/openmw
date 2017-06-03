@@ -228,6 +228,9 @@ namespace MWGui
     bool LocalMapBase::toggleFogOfWar()
     {
         mFogOfWarToggled = !mFogOfWarToggled;
+#if defined (ANDROID)
+        mFogOfWarEnabled = false;
+#endif
         applyFogOfWar();
         return mFogOfWarToggled;
     }
