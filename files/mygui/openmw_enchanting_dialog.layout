@@ -52,7 +52,7 @@
         </Widget>
 
         <!-- Values -->
-        <Widget type="VBox" position="320 7 222 72">
+        <Widget type="VBox" position="320 7 222 80">
             <Widget type="HBox">
                 <UserString key="HStretch" value="true"/>
                 <Widget type="AutoSizedTextBox" skin="NormalText">
@@ -90,6 +90,17 @@
                     <UserString key="Caption_Text" value="#{sEnchantmentHelp5}"/>
                 </Widget>
                 <Widget type="AutoSizedTextBox" skin="SandText" name="Charge">
+                    <Property key="Caption" value="39"/>
+                    <Property key="TextAlign" value="Right VCenter"/>
+                    <UserString key="HStretch" value="true"/>
+                </Widget>
+            </Widget>
+            <Widget type="HBox" name="ChanceLayout">
+                <UserString key="HStretch" value="true"/>
+                <Widget type="AutoSizedTextBox" skin="NormalText">
+                    <Property key="Caption" value="#{sEnchantmentMenu6}:"/>
+                </Widget>
+                <Widget type="AutoSizedTextBox" skin="SandText" name="SuccessChance">
                     <Property key="Caption" value="39"/>
                     <Property key="TextAlign" value="Right VCenter"/>
                     <UserString key="HStretch" value="true"/>

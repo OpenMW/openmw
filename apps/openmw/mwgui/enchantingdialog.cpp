@@ -8,6 +8,7 @@
 #include <MyGUI_ScrollView.h>
 
 #include <components/widgets/list.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -43,6 +44,8 @@ namespace MWGui
         getWidget(mEnchantmentPoints, "Enchantment");
         getWidget(mCastCost, "CastCost");
         getWidget(mCharge, "Charge");
+        getWidget(mSuccessChance, "SuccessChance");
+        getWidget(mChanceLayout, "ChanceLayout");
         getWidget(mTypeButton, "TypeButton");
         getWidget(mBuyButton, "BuyButton");
         getWidget(mPrice, "PriceLabel");
@@ -115,6 +118,9 @@ namespace MWGui
 
         mCharge->setCaption(MyGUI::utility::toString(mEnchanting.getGemCharge()));
 
+        int successChance = int(mEnchanting.getEnchantChance());
+        mSuccessChance->setCaption(MyGUI::utility::toString(std::max(0, successChance)));
+
         std::stringstream castCost;
         castCost << mEnchanting.getEffectiveCastCost();
         mCastCost->setCaption(castCost.str());
@@ -144,10 +150,14 @@ namespace MWGui
 
     void EnchantingDialog::startEnchanting (MWWorld::Ptr actor)
     {
+        mName->setCaption("");
+
         mEnchanting.setSelfEnchanting(false);
         mEnchanting.setEnchanter(actor);
 
         mBuyButton->setCaptionWithReplacing("#{sBuy}");
+
+        mChanceLayout->setVisible(false);
 
         mPtr = actor;
 
@@ -162,12 +172,18 @@ namespace MWGui
 
     void EnchantingDialog::startSelfEnchanting(MWWorld::Ptr soulgem)
     {
+        mName->setCaption("");
+
         MWWorld::Ptr player = MWMechanics::getPlayer();
 
         mEnchanting.setSelfEnchanting(true);
         mEnchanting.setEnchanter(player);
 
         mBuyButton->setCaptionWithReplacing("#{sCreate}");
+
+        bool enabled = Settings::Manager::getBool("show enchant chance","GUI");
+
+        mChanceLayout->setVisible(enabled);
 
         mPtr = player;
         startEditing();

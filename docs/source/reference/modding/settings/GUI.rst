@@ -127,3 +127,14 @@ The default value is "1.0 0.15 0.15 1.0" which is a bright red color.
 This setting can only be configured by editing the settings configuration file.
 This setting has no effect if the crosshair setting in the HUD Settings Section is false.
 This setting has no effect if the show owned setting in the Game Settings Section is false.
+
+show enchant chance
+----------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Whether or not the chance of success will be displayed in the enchanting menu.
+
+The default value is false. This setting can only be configured by editing the settings configuration file.
