@@ -58,6 +58,10 @@
 
 #include "mwstate/statemanagerimp.hpp"
 
+#if defined(ANDROID)
+#include <components/android/androiddepthbufferhelper.hpp>
+#endif
+
 namespace
 {
     void checkSDLError(int ret)
@@ -329,7 +333,11 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     bool windowBorder = settings.getBool("window border", "Video");
     bool vsync = settings.getBool("vsync", "Video");
     int antialiasing = settings.getInt("antialiasing", "Video");
-
+#if !defined(ANDROID)
+    int depth = 24;
+#else
+    int depth = AndroidDepthBufferHelper::getGlDepthBufferSize();
+#endif
     int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(screen),
         pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
 
@@ -353,8 +361,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0));
-    checkSDLError(SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24));
-
+    checkSDLError(SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depth));
     if (antialiasing > 0)
     {
         checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1));
@@ -397,7 +404,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     traits->green = 8;
     traits->blue = 8;
     traits->alpha = 0; // set to 0 to stop ScreenCaptureHandler reading the alpha channel
-    traits->depth = 24;
+    traits->depth = depth;
     traits->stencil = 8;
     traits->vsync = vsync;
     traits->doubleBuffer = true;
