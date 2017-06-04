@@ -116,10 +116,14 @@ namespace MWGui
     void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
         BookTypesetter::Style* title = typesetter->createStyle("", getDialogueTextColour("header"));
-        typesetter->sectionBreak(9);
+
         if (mTitle != "")
+        {
+            typesetter->sectionBreak(9);
             typesetter->write(title, to_utf8_span(mTitle.c_str()));
-        typesetter->sectionBreak(9);
+        }
+
+        typesetter->sectionBreak();
 
         typedef std::pair<size_t, size_t> Range;
         std::map<Range, intptr_t> hyperLinks;
