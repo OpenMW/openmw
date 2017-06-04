@@ -435,8 +435,6 @@ namespace MWMechanics
             if (diff <= 0)
                 return 0.f;
 
-            int magnitude = (effect.mMagnMin + effect.mMagnMax) / 2;
-
             rating *= (diff) / 5.f;
 
             break;
