@@ -181,7 +181,7 @@ namespace MWGui
 
         mBuyButton->setCaptionWithReplacing("#{sCreate}");
 
-        bool enabled = Settings::Manager::getBool("show enchant chance","GUI");
+        bool enabled = Settings::Manager::getBool("show enchant chance","Game");
 
         mChanceLayout->setVisible(enabled);
 

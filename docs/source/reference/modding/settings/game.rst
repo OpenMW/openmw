@@ -40,6 +40,17 @@ If this setting is true, melee weapons reach and speed will be showed on item to
 
 The default value is false. This setting can only be configured by editing the settings configuration file.
 
+show enchant chance
+-------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Whether or not the chance of success will be displayed in the enchanting menu.
+
+The default value is false. This setting can only be configured by editing the settings configuration file.
+
 best attack
 -----------
 

@@ -61,7 +61,7 @@ float suggestCombatRange(int rangeTypes)
     }
 }
 
-int numEffectsToCure (const MWWorld::Ptr& actor, int effectFilter=-1)
+int numEffectsToDispel (const MWWorld::Ptr& actor, int effectFilter=-1, bool negative = true)
 {
     int toCure=0;
     const MWMechanics::ActiveSpells& activeSpells = actor.getClass().getCreatureStats(actor).getActiveSpells();
@@ -75,9 +75,14 @@ int numEffectsToCure (const MWWorld::Ptr& actor, int effectFilter=-1)
             if (effectFilter != -1 && effectId != effectFilter)
                 continue;
             const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful
-                    && effectIt->mDuration > 3 // Don't attempt to cure if effect runs out shortly anyway
-                    )
+
+            if (effectIt->mDuration <= 3) // Don't attempt to dispel if effect runs out shortly anyway
+                continue;
+
+            if (negative && magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
+                ++toCure;
+
+            if (!negative && !(magicEffect->mData.mFlags & ESM::MagicEffect::Harmful))
                 ++toCure;
         }
     }
@@ -400,14 +405,47 @@ namespace MWMechanics
             }
             break;
 
-        // Prefer Cure effects over Dispel, because Dispel also removes positive effects
         case ESM::MagicEffect::Dispel:
-            return 1000.f * numEffectsToCure(actor);
-        case ESM::MagicEffect::CureParalyzation:
-            return 1001.f * numEffectsToCure(actor, ESM::MagicEffect::Paralyze);
-        case ESM::MagicEffect::CurePoison:
-            return 1001.f * numEffectsToCure(actor, ESM::MagicEffect::Poison);
+        {
+            int numPositive = 0;
+            int numNegative = 0;
+            int diff = 0;
 
+            if (effect.mRange == ESM::RT_Self)
+            {
+                numPositive = numEffectsToDispel(actor, -1, false);
+                numNegative = numEffectsToDispel(actor);
+
+                diff = numNegative - numPositive;
+            }
+            else
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                numPositive = numEffectsToDispel(enemy, -1, false);
+                numNegative = numEffectsToDispel(enemy);
+
+                diff = numPositive - numNegative;
+
+                // if rating < 0 here, the spell will be considered as negative later
+                rating *= -1;
+            }
+
+            if (diff <= 0)
+                return 0.f;
+
+            rating *= (diff) / 5.f;
+
+            break;
+        }
+
+        // Prefer Cure effects over Dispel, because Dispel also removes positive effects
+        case ESM::MagicEffect::CureParalyzation:
+            return 1001.f * numEffectsToDispel(actor, ESM::MagicEffect::Paralyze);
+
+        case ESM::MagicEffect::CurePoison:
+            return 1001.f * numEffectsToDispel(actor, ESM::MagicEffect::Poison);
         case ESM::MagicEffect::DisintegrateArmor:
             {
                 if (enemy.isEmpty())
@@ -555,6 +593,7 @@ namespace MWMechanics
         // Combat AI is egoistic, so doesn't consider applying positive effects to friendly actors.
         if (effect.mRange != ESM::RT_Self)
             rating *= -1.f;
+
         return rating;
     }
 

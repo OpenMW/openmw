@@ -236,7 +236,7 @@ namespace ICS
 
 	};
 
-	static const float ICS_MAX = std::numeric_limits<float>::max();
+	extern const float ICS_MAX;
 }
 
 
