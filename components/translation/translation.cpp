@@ -1,6 +1,6 @@
 #include "translation.hpp"
 
-#include <boost/filesystem/fstream.hpp>
+#include <osgDB/fstream>
 
 #include <components/misc/stringops.hpp>
 
@@ -34,8 +34,8 @@ namespace Translation
 
         if (dataFileCollections.getCollection (extension).doesExist (fileName))
         {
-            boost::filesystem::ifstream stream (
-                dataFileCollections.getCollection (extension).getPath (fileName));
+            osgDB::ifstream stream(
+                dataFileCollections.getCollection(extension).getPath(fileName).string().c_str());
 
             if (!stream.is_open())
                 throw std::runtime_error ("failed to open translation file: " + fileName);

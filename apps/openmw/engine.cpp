@@ -3,8 +3,6 @@
 #include <stdexcept>
 #include <iomanip>
 
-#include <boost/filesystem/fstream.hpp>
-
 #include <osgViewer/ViewerEventHandlers>
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
@@ -417,9 +415,9 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
 
 void OMW::Engine::setWindowIcon()
 {
-    boost::filesystem::ifstream windowIconStream;
+    osgDB::ifstream windowIconStream;
     std::string windowIcon = (mResDir / "mygui" / "openmw.png").string();
-    windowIconStream.open(windowIcon, std::ios_base::in | std::ios_base::binary);
+    windowIconStream.open(windowIcon.c_str(), std::ios_base::in | std::ios_base::binary);
     if (windowIconStream.fail())
         std::cerr << "Error: Failed to open " << windowIcon << std::endl;
     osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
@@ -598,8 +596,8 @@ public:
 
         } while (boost::filesystem::exists(stream.str()));
 
-        boost::filesystem::ofstream outStream;
-        outStream.open(boost::filesystem::path(stream.str()), std::ios::binary);
+        osgDB::ofstream outStream;
+        outStream.open(boost::filesystem::path(stream.str()).string().c_str(), std::ios::binary);
 
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension(mScreenshotFormat);
         if (!readerwriter)

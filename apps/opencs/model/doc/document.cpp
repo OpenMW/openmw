@@ -1,8 +1,9 @@
 #include "document.hpp"
 
 #include <cassert>
-#include <fstream>
 #include <iostream>
+
+#include <osgDB/fstream>
 
 #include <boost/filesystem.hpp>
 
@@ -291,15 +292,15 @@ CSMDoc::Document::Document (const VFS::Manager* vfs, const Files::ConfigurationM
         boost::filesystem::path customFiltersPath (configuration.getUserDataPath());
         customFiltersPath /= "defaultfilters";
 
-        std::ofstream destination (mProjectPath.string().c_str(), std::ios::binary);
+        osgDB::ofstream destination (mProjectPath.string().c_str(), std::ios::binary);
 
         if (boost::filesystem::exists (customFiltersPath))
         {
-            destination << std::ifstream(customFiltersPath.string().c_str(), std::ios::binary).rdbuf();
+            destination << osgDB::ifstream(customFiltersPath.string().c_str(), std::ios::binary).rdbuf();
         }
         else
         {
-            destination << std::ifstream(std::string(mResDir.string() + "/defaultfilters").c_str(), std::ios::binary).rdbuf();
+            destination << osgDB::ifstream(std::string(mResDir.string() + "/defaultfilters").c_str(), std::ios::binary).rdbuf();
         }
     }
 

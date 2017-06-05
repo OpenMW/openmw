@@ -2,8 +2,9 @@
 
 #include <MyGUI_DataFileStream.h>
 
+#include <osgDB/fstream>
+
 #include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #include <iostream>
 
@@ -18,9 +19,9 @@ void DataManager::setResourcePath(const std::string &path)
 MyGUI::IDataStream *DataManager::getData(const std::string &name)
 {
     std::string fullpath = getDataPath(name);
-    std::auto_ptr<boost::filesystem::ifstream> stream;
-    stream.reset(new boost::filesystem::ifstream);
-    stream->open(fullpath, std::ios::binary);
+    std::auto_ptr<osgDB::ifstream> stream;
+    stream.reset(new osgDB::ifstream);
+    stream->open(fullpath.c_str(), std::ios::binary);
     if (stream->fail())
     {
         std::cerr << "DataManager::getData: Failed to open '" << name << "'" << std::endl;

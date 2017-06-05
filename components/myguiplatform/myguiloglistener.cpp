@@ -9,7 +9,7 @@ namespace osgMyGUI
 {
     void CustomLogListener::open()
     {
-        mStream.open(boost::filesystem::path(mFileName), std::ios_base::out);
+        mStream.open(boost::filesystem::path(mFileName).string().c_str(), std::ios_base::out);
     }
 
     void CustomLogListener::close()

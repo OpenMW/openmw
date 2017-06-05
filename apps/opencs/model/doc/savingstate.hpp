@@ -5,8 +5,9 @@
 #include <map>
 #include <deque>
 
+#include <osgDB/fstream>
+
 #include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #include <components/esm/esmwriter.hpp>
 
@@ -23,7 +24,7 @@ namespace CSMDoc
             boost::filesystem::path mPath;
             boost::filesystem::path mTmpPath;
             ToUTF8::Utf8Encoder mEncoder;
-            boost::filesystem::ofstream mStream;
+            osgDB::ofstream mStream;
             ESM::ESMWriter mWriter;
             boost::filesystem::path mProjectPath;
             bool mProjectFile;
@@ -43,7 +44,7 @@ namespace CSMDoc
 
             const boost::filesystem::path& getTmpPath() const;
 
-            boost::filesystem::ofstream& getStream();
+            osgDB::ofstream& getStream();
 
             ESM::ESMWriter& getWriter();
 

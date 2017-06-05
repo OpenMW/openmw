@@ -292,7 +292,7 @@ bool CS::Editor::makeIPCServer()
         mPid /= "openmw-cs.pid";
         bool pidExists = boost::filesystem::exists(mPid);
 
-        mPidFile.open(mPid);
+        mPidFile.open(mPid.string().c_str());
 
         mLock = boost::interprocess::file_lock(mPid.string().c_str());
         if(!mLock.try_lock())

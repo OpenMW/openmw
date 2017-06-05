@@ -7,10 +7,11 @@
 
 #include <components/files/escape.hpp>
 
+#include <osgDB/fstream>
+
 #include <boost/bind.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 
 /**
@@ -144,7 +145,7 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
         if (!mSilent)
             std::cout << "Loading config file: " << cfgFile.string() << "... ";
 
-        boost::filesystem::ifstream configFileStreamUnfiltered(cfgFile);
+        osgDB::ifstream configFileStreamUnfiltered(cfgFile.string().c_str());
         boost::iostreams::filtering_istream configFileStream;
         configFileStream.push(escape_hash_filter());
         configFileStream.push(configFileStreamUnfiltered);

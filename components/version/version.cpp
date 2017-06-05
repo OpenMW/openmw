@@ -1,7 +1,8 @@
 #include "version.hpp"
 
+#include <osgDB/fstream>
+
 #include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 namespace Version
 {
@@ -10,7 +11,7 @@ Version getOpenmwVersion(const std::string &resourcePath)
 {
     boost::filesystem::path path (resourcePath + "/version");
 
-    boost::filesystem::ifstream stream (path);
+    osgDB::ifstream stream (path.string().c_str());
 
     Version v;
     std::getline(stream, v.mVersion);

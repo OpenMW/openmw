@@ -1,7 +1,5 @@
 #include "savingstages.hpp"
 
-#include <fstream>
-
 #include <boost/filesystem.hpp>
 
 #include <QUndoStack>
@@ -30,7 +28,7 @@ void CSMDoc::OpenSaveStage::perform (int stage, Messages& messages)
     mState.start (mDocument, mProjectFile);
 
     mState.getStream().open (
-        mProjectFile ? mState.getPath() : mState.getTmpPath(),
+        mProjectFile ? mState.getPath().string().c_str() : mState.getTmpPath().string().c_str(),
         std::ios::binary);
 
     if (!mState.getStream().is_open())
