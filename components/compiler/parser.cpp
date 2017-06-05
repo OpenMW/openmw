@@ -72,7 +72,7 @@ namespace Compiler
     bool Parser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected numeric value", loc);
+            reportWarning ("Unexpected numeric value, ignoring", loc);
         else
             scanner.putbackInt (value, loc);
 
@@ -87,7 +87,7 @@ namespace Compiler
     bool Parser::parseFloat (float value, const TokenLoc& loc, Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected floating point value", loc);
+            reportWarning ("Unexpected floating point value, ignoring", loc);
         else
             scanner.putbackFloat (value, loc);
 
@@ -103,7 +103,7 @@ namespace Compiler
         Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected name", loc);
+            reportWarning ("Unexpected name, ignoring", loc);
         else
             scanner.putbackName (name, loc);
 
@@ -118,7 +118,7 @@ namespace Compiler
     bool Parser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected keyword", loc);
+            reportWarning ("Unexpected keyword, ignoring", loc);
         else
             scanner.putbackKeyword (keyword, loc);
 
@@ -133,7 +133,7 @@ namespace Compiler
     bool Parser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected special token", loc);
+            reportWarning ("Unexpected special token, ignoring", loc);
         else
             scanner.putbackSpecial (code, loc);
 
