@@ -11,7 +11,6 @@
 \
     {"GetAngle",            PositionFunctions::GetAngle},\
     {"GetAngleX",           PositionFunctions::GetAngleX},\
-    {"GetAngleY",           PositionFunctions::GetAngleY},\
     {"GetAngleZ",           PositionFunctions::GetAngleZ},\
 \
     {"SetPos",              PositionFunctions::SetPos},\
@@ -30,11 +29,10 @@ public:
 
     static void GetAngle(unsigned short pid, float *x, float *y, float *z) noexcept;
     static double GetAngleX(unsigned short pid) noexcept;
-    static double GetAngleY(unsigned short pid) noexcept;
     static double GetAngleZ(unsigned short pid) noexcept;
 
     static void SetPos(unsigned short pid, double x, double y, double z) noexcept;
-    static void SetAngle(unsigned short pid, double x, double y, double z) noexcept;
+    static void SetAngle(unsigned short pid, double x, double z) noexcept;
 
     static void SendPos(unsigned short pid) noexcept;
 };

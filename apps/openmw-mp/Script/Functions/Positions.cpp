@@ -3,7 +3,6 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <apps/openmw-mp/Player.hpp>
 #include <apps/openmw-mp/Networking.hpp>
-#include <components/openmw-mp/Log.hpp>
 
 #include <iostream>
 using namespace std;
@@ -68,14 +67,6 @@ double PositionFunctions::GetAngleX(unsigned short pid) noexcept
     return player->position.rot[0];
 }
 
-double PositionFunctions::GetAngleY(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0.0f);
-
-    return player->position.rot[1];
-}
-
 double PositionFunctions::GetAngleZ(unsigned short pid) noexcept
 {
     Player *player;
@@ -94,13 +85,12 @@ void PositionFunctions::SetPos(unsigned short pid, double x, double y, double z)
     player->position.pos[2] = z;
 }
 
-void PositionFunctions::SetAngle(unsigned short pid, double x, double y, double z) noexcept
+void PositionFunctions::SetAngle(unsigned short pid, double x, double z) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
 
     player->position.rot[0] = x;
-    player->position.rot[1] = y;
     player->position.rot[2] = z;
 }
 
