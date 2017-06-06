@@ -25,10 +25,12 @@
 #include "ScriptFunction.hpp"
 #include "Types.hpp"
 
+#include <components/openmw-mp/Log.hpp>
+
 #define GET_PLAYER(pid, pl, retvalue) \
      pl = Players::getPlayer(pid); \
      if (player == 0) {\
-        fprintf(stderr, "%s: Player with pid \'%d\' not found\n", __PRETTY_FUNCTION__, pid);\
+        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, "%s: Player with pid \'%d\' not found\n", __PRETTY_FUNCTION__, pid);\
         /*ScriptFunctions::StopServer(1);*/ \
         return retvalue;\
 }
