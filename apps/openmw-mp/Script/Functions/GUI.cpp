@@ -49,6 +49,19 @@ void GUIFunctions::InputDialog(unsigned short pid, int id, const char *label) no
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GUI_MESSAGEBOX)->Send(false);
 }
 
+void GUIFunctions::PasswordDialog(unsigned short pid, int id, const char *label) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player,);
+
+    player->guiMessageBox.id = id;
+    player->guiMessageBox.label = label;
+    player->guiMessageBox.type = Player::GUIMessageBox::PasswordDialog;
+
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GUI_MESSAGEBOX)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GUI_MESSAGEBOX)->Send(false);
+}
+
 void GUIFunctions::ListBox(unsigned short pid, int id, const char *label, const char *items)
 {
     Player *player;
