@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORACTORDEATH_HPP
 #define OPENMW_PROCESSORACTORDEATH_HPP
 
-#include "apps/openmw/mwmp/ActorProcessor.hpp"
+#include "../ActorProcessor.hpp"
 #include "apps/openmw/mwmp/Main.hpp"
 #include "apps/openmw/mwmp/CellController.hpp"
 

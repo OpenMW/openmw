@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORSCRIPTMEMBERSHORT_HPP
 #define OPENMW_PROCESSORSCRIPTMEMBERSHORT_HPP
 
-#include "apps/openmw/mwmp/WorldProcessor.hpp"
+#include "../WorldProcessor.hpp"
 
 namespace mwmp
 {

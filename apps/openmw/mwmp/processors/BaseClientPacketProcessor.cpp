@@ -3,7 +3,7 @@
 //
 
 #include "BaseClientPacketProcessor.hpp"
-#include "Main.hpp"
+#include "../Main.hpp"
 
 using namespace mwmp;
 

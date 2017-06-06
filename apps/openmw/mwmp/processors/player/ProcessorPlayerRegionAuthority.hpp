@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORPLAYERREGIONAUTHORITY_HPP
 #define OPENMW_PROCESSORPLAYERREGIONAUTHORITY_HPP
 
-#include "apps/openmw/mwmp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 
 namespace mwmp
 {

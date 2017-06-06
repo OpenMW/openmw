@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORACTORAI_HPP
 #define OPENMW_PROCESSORACTORAI_HPP
 
-#include "apps/openmw/mwmp/ActorProcessor.hpp"
+#include "../ActorProcessor.hpp"
 #include "apps/openmw/mwmp/Main.hpp"
 #include "apps/openmw/mwmp/CellController.hpp"
 

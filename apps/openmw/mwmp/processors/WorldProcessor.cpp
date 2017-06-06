@@ -4,8 +4,8 @@
 
 #include <boost/foreach.hpp>
 #include "WorldProcessor.hpp"
-#include "Main.hpp"
-#include "Networking.hpp"
+#include "../Main.hpp"
+#include "../Networking.hpp"
 
 using namespace mwmp;
 

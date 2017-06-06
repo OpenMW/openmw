@@ -4,8 +4,8 @@
 
 #include <boost/foreach.hpp>
 #include "ActorProcessor.hpp"
-#include "Networking.hpp"
-#include "Main.hpp"
+#include "../Networking.hpp"
+#include "../Main.hpp"
 
 using namespace mwmp;
 

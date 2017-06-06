@@ -4,17 +4,17 @@
 
 #include <components/openmw-mp/Log.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwgui/windowmanagerimp.hpp"
+#include "apps/openmw/mwbase/environment.hpp"
+#include "apps/openmw/mwgui/windowmanagerimp.hpp"
 
 #include <MyGUI_EditBox.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_ListBox.h>
 
 #include "GUIDialogList.hpp"
-#include "Main.hpp"
-#include "Networking.hpp"
-#include "LocalPlayer.hpp"
+#include "../Main.hpp"
+#include "../Networking.hpp"
+#include "../LocalPlayer.hpp"
 
 using namespace mwmp;
 

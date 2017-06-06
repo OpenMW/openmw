@@ -5,7 +5,7 @@
 #ifndef OPENMW_BASEOBJECTPROCESSOR_HPP
 #define OPENMW_BASEOBJECTPROCESSOR_HPP
 
-#include "apps/openmw/mwmp/WorldProcessor.hpp"
+#include "../WorldProcessor.hpp"
 #include "apps/openmw/mwmp/Main.hpp"
 #include "apps/openmw/mwmp/CellController.hpp"
 #include "apps/openmw/mwworld/cellstore.hpp"

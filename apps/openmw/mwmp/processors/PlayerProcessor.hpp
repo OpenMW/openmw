@@ -11,9 +11,9 @@
 #include <components/openmw-mp/Log.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
-#include "LocalPlayer.hpp"
-#include "DedicatedPlayer.hpp"
-#include "PlayerList.hpp"
+#include "../LocalPlayer.hpp"
+#include "../DedicatedPlayer.hpp"
+#include "../PlayerList.hpp"
 #include "BaseClientPacketProcessor.hpp"
 
 namespace mwmp

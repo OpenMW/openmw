@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORGAMEWEATHER_HPP
 #define OPENMW_PROCESSORGAMEWEATHER_HPP
 
-#include "apps/openmw/mwmp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 
 namespace mwmp
 {

@@ -6,7 +6,7 @@
 #define OPENMW_PROCESSORGUIMESSAGEBOX_HPP
 
 
-#include "apps/openmw/mwmp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 
 namespace mwmp
 {

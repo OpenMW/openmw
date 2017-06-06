@@ -7,11 +7,11 @@
 
 #include <components/settings/settings.hpp>
 
-#include "../mwgui/mode.hpp"
+#include "apps/openmw/mwgui/mode.hpp"
 
 #include <components/openmw-mp/Base/BasePlayer.hpp>
-#include "PlayerMarkerCollection.hpp"
-#include "TextInputDialog.hpp"
+#include "GUI/PlayerMarkerCollection.hpp"
+#include "GUI/TextInputDialog.hpp"
 
 namespace MWGui
 {

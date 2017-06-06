@@ -6,7 +6,7 @@
 #define OPENMW_PROCESSORPLAYERATTRIBUTE_HPP
 
 
-#include "apps/openmw/mwmp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 #include "apps/openmw/mwmechanics/npcstats.hpp"
 #include "apps/openmw/mwclass/npc.hpp"
 

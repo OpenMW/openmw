@@ -4,8 +4,8 @@
 
 #include "TextInputDialog.hpp"
 
-#include "../mwbase/windowmanager.hpp"
-#include "../mwbase/environment.hpp"
+#include "apps/openmw/mwbase/windowmanager.hpp"
+#include "apps/openmw/mwbase/environment.hpp"
 
 #include <MyGUI_EditBox.h>
 #include <MyGUI_Button.h>

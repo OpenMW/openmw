@@ -2,7 +2,7 @@
 #define OPENMW_PROCESSORACTORANIMFLAGS_HPP
 
 
-#include "apps/openmw/mwmp/ActorProcessor.hpp"
+#include "../ActorProcessor.hpp"
 #include "apps/openmw/mwmp/Main.hpp"
 #include "apps/openmw/mwmp/CellController.hpp"
 

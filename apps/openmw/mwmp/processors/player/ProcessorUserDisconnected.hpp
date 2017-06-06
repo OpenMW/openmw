@@ -6,7 +6,7 @@
 #define OPENMW_PROCESSORUSERDISCONNECTED_HPP
 
 
-#include "apps/openmw/mwmp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 #include <apps/openmw/mwbase/environment.hpp>
 #include "apps/openmw/mwstate/statemanagerimp.hpp"
 

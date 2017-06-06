@@ -6,7 +6,7 @@
 #define OPENMW_PROCESSORPLAYEREQUIPMENT_HPP
 
 
-#include "apps/openmw/mwmp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 
 namespace mwmp
 {

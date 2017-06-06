@@ -5,7 +5,7 @@
 #ifndef OPENMW_GUILOGIN_HPP
 #define OPENMW_GUILOGIN_HPP
 
-#include "../mwgui/windowbase.hpp"
+#include "apps/openmw/mwgui/windowbase.hpp"
 
 class GUILogin : public MWGui::WindowModal
 {

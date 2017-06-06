@@ -8,7 +8,7 @@
 
 #include <apps/openmw/mwbase/world.hpp>
 #include <apps/openmw/mwbase/environment.hpp>
-#include "apps/openmw/mwmp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 
 namespace mwmp
 {

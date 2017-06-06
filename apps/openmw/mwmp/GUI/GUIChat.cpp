@@ -5,17 +5,17 @@
 #include "GUIChat.hpp"
 
 #include <MyGUI_EditBox.h>
-#include "../mwbase/environment.hpp"
-#include "../mwgui/windowmanagerimp.hpp"
-#include "../mwinput/inputmanagerimp.hpp"
+#include "apps/openmw/mwbase/environment.hpp"
+#include "apps/openmw/mwgui/windowmanagerimp.hpp"
+#include "apps/openmw/mwinput/inputmanagerimp.hpp"
 #include <MyGUI_InputManager.h>
 #include <components/openmw-mp/Log.hpp>
 
-#include "Networking.hpp"
-#include "Main.hpp"
-#include "LocalPlayer.hpp"
+#include "../Networking.hpp"
+#include "../Main.hpp"
+#include "../LocalPlayer.hpp"
 
-#include "GUIController.hpp"
+#include "../GUIController.hpp"
 
 
 namespace mwmp

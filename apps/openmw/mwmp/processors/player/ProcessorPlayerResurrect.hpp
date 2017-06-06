@@ -6,7 +6,7 @@
 #define OPENMW_PROCESSORPLAYERRESURRECT_HPP
 
 
-#include "apps/openmw/mwmp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 #include "apps/openmw/mwmp/Main.hpp"
 #include "apps/openmw/mwmp/Networking.hpp"
 

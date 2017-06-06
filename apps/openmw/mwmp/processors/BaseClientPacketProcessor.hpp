@@ -6,8 +6,8 @@
 #define OPENMW_BASECLIENTPACKETPROCESSOR_HPP
 
 #include <components/openmw-mp/Base/BasePacketProcessor.hpp>
-#include "LocalPlayer.hpp"
-#include "DedicatedPlayer.hpp"
+#include "../LocalPlayer.hpp"
+#include "../DedicatedPlayer.hpp"
 
 namespace mwmp
 {

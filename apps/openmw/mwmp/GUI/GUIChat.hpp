@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "../mwgui/windowbase.hpp"
+#include "apps/openmw/mwgui/windowbase.hpp"
 
 namespace mwmp
 {

@@ -6,7 +6,7 @@
 #ifndef OPENMW_TEXTINPUTDIALOG_HPP
 #define OPENMW_TEXTINPUTDIALOG_HPP
 
-#include "../mwgui/windowbase.hpp"
+#include "apps/openmw/mwgui/windowbase.hpp"
 
 namespace MWGui
 {

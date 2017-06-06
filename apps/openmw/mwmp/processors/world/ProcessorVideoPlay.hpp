@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORVIDEOPLAY_HPP
 #define OPENMW_PROCESSORVIDEOPLAY_HPP
 
-#include "apps/openmw/mwmp/WorldProcessor.hpp"
+#include "../WorldProcessor.hpp"
 
 namespace mwmp
 {

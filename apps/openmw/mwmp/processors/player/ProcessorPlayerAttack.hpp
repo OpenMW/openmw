@@ -6,7 +6,7 @@
 #define OPENMW_PROCESSORPLAYERATTACK_HPP
 
 #include "apps/openmw/mwmp/Main.hpp"
-#include "apps/openmw/mwmp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 #include "apps/openmw/mwmp/MechanicsHelper.hpp"
 #include "apps/openmw/mwbase/world.hpp"
 #include "apps/openmw/mwworld/containerstore.hpp"

@@ -35,10 +35,10 @@
 
 #include "Networking.hpp"
 #include "Main.hpp"
-#include "ProcessorInitializer.hpp"
-#include "PlayerProcessor.hpp"
-#include "WorldProcessor.hpp"
-#include "ActorProcessor.hpp"
+#include "processors/ProcessorInitializer.hpp"
+#include "processors/PlayerProcessor.hpp"
+#include "processors/WorldProcessor.hpp"
+#include "processors/ActorProcessor.hpp"
 #include "GUIController.hpp"
 #include "CellController.hpp"
 

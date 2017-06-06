@@ -3,9 +3,9 @@
 //
 
 #include <boost/foreach.hpp>
-#include "Networking.hpp"
+#include "../Networking.hpp"
 #include "PlayerProcessor.hpp"
-#include "Main.hpp"
+#include "../Main.hpp"
 
 using namespace mwmp;
 

@@ -6,7 +6,7 @@
 #define OPENMW_GUIDIALOGLIST_HPP
 
 
-#include "../mwgui/windowbase.hpp"
+#include "apps/openmw/mwgui/windowbase.hpp"
 
 namespace mwmp
 {

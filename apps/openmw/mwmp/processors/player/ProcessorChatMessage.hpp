@@ -6,7 +6,7 @@
 #define OPENMW_PROCESSORCHATMESSAGE_HPP
 
 
-#include "apps/openmw/mwmp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 #include "apps/openmw/mwmp/Main.hpp"
 #include "apps/openmw/mwmp/GUIController.hpp"
 
