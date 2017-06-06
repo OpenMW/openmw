@@ -69,7 +69,7 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
 
         sstr << plugin << " (" << Utils::intToHexStr(checksums.at(i).second[0]) << ")";
 
-        lineLength = lineLength + plugin.size() + 13;
+        lineLength += + plugin.size() + 13;
     }
 
     sstr << "\n\nTo join this server, use:\n";
@@ -104,7 +104,7 @@ string comparePlugins(PacketPreInit::PluginContainer checksums, PacketPreInit::P
 
         sstr << ")";
 
-        lineLength = lineLength + plugin.size() + 13;
+        lineLength += + plugin.size() + 13;
     }
 
     return sstr.str();

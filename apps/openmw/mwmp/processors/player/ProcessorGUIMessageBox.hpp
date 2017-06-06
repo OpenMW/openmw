@@ -25,16 +25,22 @@ namespace mwmp
                 LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "ID_GUI_MESSAGEBOX, Type %d, MSG %s", player->guiMessageBox.type,
                                    player->guiMessageBox.label.c_str());
 
-                int messageBoxType = player->guiMessageBox.type;
-
-                if (messageBoxType == BasePlayer::GUIMessageBox::MessageBox)
-                    Main::get().getGUIController()->showMessageBox(player->guiMessageBox);
-                else if (messageBoxType == BasePlayer::GUIMessageBox::CustomMessageBox)
-                    Main::get().getGUIController()->showCustomMessageBox(player->guiMessageBox);
-                else if (messageBoxType == BasePlayer::GUIMessageBox::InputDialog)
-                    Main::get().getGUIController()->showInputBox(player->guiMessageBox);
-                else if (messageBoxType == BasePlayer::GUIMessageBox::ListBox)
-                    Main::get().getGUIController()->showDialogList(player->guiMessageBox);
+                switch(player->guiMessageBox.type)
+                {
+                    case BasePlayer::GUIMessageBox::MessageBox:
+                        Main::get().getGUIController()->showMessageBox(player->guiMessageBox);
+                        break;
+                    case BasePlayer::GUIMessageBox::CustomMessageBox:
+                        Main::get().getGUIController()->showCustomMessageBox(player->guiMessageBox);
+                        break;
+                    case BasePlayer::GUIMessageBox::InputDialog:
+                    case BasePlayer::GUIMessageBox::PasswordDialog:
+                        Main::get().getGUIController()->showInputBox(player->guiMessageBox);
+                        break;
+                    case BasePlayer::GUIMessageBox::ListBox:
+                        Main::get().getGUIController()->showDialogList(player->guiMessageBox);
+                        break;
+                }
             }
         }
     };

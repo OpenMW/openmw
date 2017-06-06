@@ -7,11 +7,11 @@
 
 #include <components/settings/settings.hpp>
 
-#include "../mwgui/textinput.hpp"
 #include "../mwgui/mode.hpp"
 
 #include <components/openmw-mp/Base/BasePlayer.hpp>
 #include "PlayerMarkerCollection.hpp"
+#include "TextInputDialog.hpp"
 
 namespace MWGui
 {
@@ -70,7 +70,7 @@ namespace mwmp
 
         long id;
         bool calledMessageBox;
-        MWGui::TextInputDialog *mInputBox;
+        TextInputDialog *mInputBox;
         GUIDialogList *mListBox;
         void onInputBoxDone(MWGui::WindowBase* parWindow);
         //MyGUI::Widget *oldFocusWidget, *currentFocusWidget;

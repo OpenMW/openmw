@@ -149,7 +149,10 @@ void mwmp::GUIController::showInputBox(const BasePlayer::GUIMessageBox &guiMessa
     windowManager->removeDialog(mInputBox);
     windowManager->pushGuiMode((MWGui::GuiMode)GM_TES3MP_InputBox);
     mInputBox = 0;
-    mInputBox = new MWGui::TextInputDialog();
+    mInputBox = new TextInputDialog();
+
+    mInputBox->setEditPassword(guiMessageBox.type == BasePlayer::GUIMessageBox::PasswordDialog);
+
     mInputBox->setTextLabel(guiMessageBox.label);
     mInputBox->eventDone += MyGUI::newDelegate(this, &GUIController::onInputBoxDone);
 

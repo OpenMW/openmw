@@ -97,7 +97,7 @@ add_openmw_dir (mwbase
     )
 
 add_openmw_dir (mwmp Main Networking LocalPlayer DedicatedPlayer PlayerList LocalActor DedicatedActor ActorList WorldEvent
-    Cell CellController MechanicsHelper GUIChat GUILogin GUIController PlayerMarkerCollection GUIDialogList
+    Cell CellController MechanicsHelper GUIChat GUILogin GUIController PlayerMarkerCollection GUIDialogList TextInputDialog
     BaseClientPacketProcessor PlayerProcessor WorldProcessor ActorProcessor ProcessorInitializer
     )
 
