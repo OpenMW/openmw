@@ -170,7 +170,7 @@ namespace MWDialogue
                     parseText (info->mResponse);
 
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
-                    win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+                    win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext), "", false);
                     executeScript (info->mResultScript, mActor);
                     mLastTopic = Misc::StringUtils::lowerCase(it->mId);
 

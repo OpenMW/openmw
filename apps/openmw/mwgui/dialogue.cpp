@@ -107,23 +107,22 @@ namespace MWGui
 
     // --------------------------------------------------------------------------------------------------
 
-    Response::Response(const std::string &text, const std::string &title)
-        : mTitle(title)
+    Response::Response(const std::string &text, const std::string &title, bool needMargin)
+        : mTitle(title), mNeedMargin(needMargin)
     {
         mText = text;
     }
 
     void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
-        BookTypesetter::Style* title = typesetter->createStyle("", getDialogueTextColour("header"));
+        typesetter->sectionBreak(mNeedMargin ? 9 : 0);
 
         if (mTitle != "")
         {
-            typesetter->sectionBreak(9);
+            BookTypesetter::Style* title = typesetter->createStyle("", getDialogueTextColour("header"));
             typesetter->write(title, to_utf8_span(mTitle.c_str()));
+            typesetter->sectionBreak();
         }
-
-        typesetter->sectionBreak();
 
         typedef std::pair<size_t, size_t> Range;
         std::map<Range, intptr_t> hyperLinks;
@@ -554,7 +553,7 @@ namespace MWGui
         mHistory->setPosition(0, static_cast<int>(pos) * -1);
     }
 
-    void DialogueWindow::addResponse(const std::string &text, const std::string &title)
+    void DialogueWindow::addResponse(const std::string &text, const std::string &title, bool needMargin)
     {
         // This is called from the dialogue manager, so text is
         // case-smashed - thus we have to retrieve the correct case
@@ -573,7 +572,7 @@ namespace MWGui
             }
         }
 
-        mHistoryContents.push_back(new Response(text, realTitle));
+        mHistoryContents.push_back(new Response(text, realTitle, needMargin));
         updateHistory();
     }
 
