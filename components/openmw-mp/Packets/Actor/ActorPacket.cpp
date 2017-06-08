@@ -27,7 +27,7 @@ void ActorPacket::setActorList(BaseActorList *actorList)
 
 void ActorPacket::Packet(RakNet::BitStream *bs, bool send)
 {
-    if(!PacketHeader(bs, send))
+    if (!PacketHeader(bs, send))
         return;
 
     BaseActor actor;

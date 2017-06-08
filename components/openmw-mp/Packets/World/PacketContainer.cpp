@@ -12,7 +12,7 @@ PacketContainer::PacketContainer(RakNet::RakPeerInterface *peer) : WorldPacket(p
 
 void PacketContainer::Packet(RakNet::BitStream *bs, bool send)
 {
-    if(!PacketHeader(bs, send))
+    if (!PacketHeader(bs, send))
         return;
 
     RW(event->action, send);

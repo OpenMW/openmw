@@ -10,7 +10,7 @@ PacketActorList::PacketActorList(RakNet::RakPeerInterface *peer) : ActorPacket(p
 
 void PacketActorList::Packet(RakNet::BitStream *bs, bool send)
 {
-    if(!ActorPacket::PacketHeader(bs, send))
+    if (!ActorPacket::PacketHeader(bs, send))
         return;
 
     RW(actorList->action, send);

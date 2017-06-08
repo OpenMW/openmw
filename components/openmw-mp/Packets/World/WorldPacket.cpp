@@ -28,7 +28,7 @@ void WorldPacket::setEvent(BaseEvent *event)
 
 void WorldPacket::Packet(RakNet::BitStream *bs, bool send)
 {
-    if(!PacketHeader(bs, send))
+    if (!PacketHeader(bs, send))
         return;
 
     WorldObject worldObject;
@@ -61,7 +61,7 @@ bool WorldPacket::PacketHeader(RakNet::BitStream *bs, bool send)
         return false;
     }
 
-    if(hasCellData)
+    if (hasCellData)
     {
         RW(event->cell.mData, send, 1);
         RW(event->cell.mName, send, 1);
