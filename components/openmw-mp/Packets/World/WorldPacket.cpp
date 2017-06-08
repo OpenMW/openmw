@@ -66,6 +66,7 @@ bool WorldPacket::PacketHeader(RakNet::BitStream *bs, bool send)
         RW(event->cell.mData, send, 1);
         RW(event->cell.mName, send, 1);
     }
+
     return true;
 }
 
