@@ -501,6 +501,14 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mMetaData.addColumn (new AuthorColumn<MetaData>);
     mMetaData.addColumn (new FileDescriptionColumn<MetaData>);
 
+    mLandTextures.addColumn (new StringIdColumn<LandTexture>);
+    mLandTextures.addColumn (new RecordStateColumn<LandTexture>);
+    mLandTextures.addColumn (new FixedRecordTypeColumn<LandTexture> (UniversalId::Type_LandTexture));
+
+    mLands.addColumn (new StringIdColumn<Land>);
+    mLands.addColumn (new RecordStateColumn<Land>);
+    mLands.addColumn (new FixedRecordTypeColumn<Land> (UniversalId::Type_Land));
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skill);
@@ -542,6 +550,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Videos)),
         UniversalId::Type_Video);
     addModel (new IdTable (&mMetaData), UniversalId::Type_MetaData);
+    addModel (new IdTable (&mLands), UniversalId::Type_Land);
+    addModel (new IdTable (&mLandTextures), UniversalId::Type_LandTexture);
 
     mRefLoadCache.clear(); // clear here rather than startLoading() and continueLoading() for multiple content files
 }
@@ -787,12 +797,12 @@ CSMWorld::IdCollection<ESM::DebugProfile>& CSMWorld::Data::getDebugProfiles()
 
 const CSMWorld::IdCollection<CSMWorld::Land>& CSMWorld::Data::getLand() const
 {
-    return mLand;
+    return mLands;
 }
 
 CSMWorld::IdCollection<CSMWorld::Land>& CSMWorld::Data::getLand()
 {
-    return mLand;
+    return mLands;
 }
 
 const CSMWorld::IdCollection<CSMWorld::LandTexture>& CSMWorld::Data::getLandTextures() const
@@ -986,12 +996,12 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
         case ESM::REC_LAND:
         {
-            int index = mLand.load(*mReader, mBase);
+            int index = mLands.load(*mReader, mBase);
 
             // Load all land data for now. A future optimisation may only load non-base data
             // if a suitable mechanism for avoiding race conditions can be established.
             if (index!=-1/* && !mBase*/)
-                mLand.getRecord (index).get().loadData (
+                mLands.getRecord (index).get().loadData (
                     ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR |
                     ESM::Land::DATA_VTEX);
 
@@ -1179,7 +1189,7 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mCells) +
         count (state, mEnchantments) +
         count (state, mBodyParts) +
-        count (state, mLand) +
+        count (state, mLands) +
         count (state, mLandTextures) +
         count (state, mSoundGens) +
         count (state, mMagicEffects) +
