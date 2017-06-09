@@ -176,10 +176,11 @@ void WorldEvent::placeObjects(MWWorld::CellStore* cellStore)
             if (worldObject.count > 1)
                 newPtr.getRefData().setCount(worldObject.count);
 
-            newPtr.getCellRef().setMpNum(worldObject.mpNum);
-
             newPtr.getCellRef().setGoldValue(worldObject.goldValue);
             newPtr = MWBase::Environment::get().getWorld()->placeObject(newPtr, cellStore, worldObject.position);
+
+            // Because gold automatically gets replaced with a new object, make sure we set the mpNum at the end
+            newPtr.getCellRef().setMpNum(worldObject.mpNum);
         }
         else
         {
@@ -790,8 +791,8 @@ void WorldEvent::sendObjectPlace()
     {
         mwmp::WorldObject worldObject = (*it);
 
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s-%i, count: %i",
-            worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.count);
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, count: %i",
+            worldObject.refId.c_str(), worldObject.count);
     }
 
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->setEvent(this);
