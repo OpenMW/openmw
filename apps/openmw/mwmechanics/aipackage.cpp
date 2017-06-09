@@ -182,7 +182,7 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float dur
         if (getTypeId() != TypeIdWander && !door.getCellRef().getTeleport() && door.getCellRef().getTrap().empty()
                 && door.getCellRef().getLockLevel() <= 0 && door.getClass().getDoorState(door) == 0)
         {
-            MWBase::Environment::get().getWorld()->activateDoor(door, 1);
+            MWBase::Environment::get().getWorld()->activate(door, actor);
         }
     }
     else // any other obstacle (NPC, crate, etc.)
