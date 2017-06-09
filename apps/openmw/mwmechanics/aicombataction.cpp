@@ -545,6 +545,13 @@ namespace MWMechanics
 
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
 
+        // Underwater casting not possible
+        if (effect.mRange == ESM::RT_Target)
+        {
+            if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(actor), 0.75f))
+                return 0;
+        }
+
         rating *= magicEffect->mData.mBaseCost;
 
         if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
