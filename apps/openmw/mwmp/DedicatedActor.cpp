@@ -163,39 +163,39 @@ void DedicatedActor::setEquipment()
         return;
 
     MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
+
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
     {
         MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
 
-        const string &dedicItem = equipedItems[slot].refId;
-        std::string item = "";
+        const string &packetRefId = equipedItems[slot].refId;
+        int packetCharge = equipedItems[slot].charge;
+        std::string storeRefId = "";
         bool equal = false;
+
         if (it != invStore.end())
         {
-            item = it->getCellRef().getRefId();
-            if (!Misc::StringUtils::ciEqual(item, dedicItem)) // if other item equiped
+            storeRefId = it->getCellRef().getRefId();
+
+            if (!Misc::StringUtils::ciEqual(storeRefId, packetRefId)) // if other item equiped
             {
-                MWWorld::ContainerStore &store = ptr.getClass().getContainerStore(ptr);
-                store.remove(item, store.count(item), ptr);
+                invStore.unequipSlot(slot, ptr);
             }
             else
                 equal = true;
         }
 
-        if (dedicItem.empty() || equal)
+        if (packetRefId.empty() || equal)
             continue;
 
         int count = equipedItems[slot].count;
-        ptr.getClass().getContainerStore(ptr).add(dedicItem, count, ptr);
 
-        for (MWWorld::ContainerStoreIterator it2 = invStore.begin(); it2 != invStore.end(); ++it2)
+        if (hasItem(packetRefId, packetCharge))
+            equipItem(packetRefId, packetCharge);
+        else
         {
-            if (::Misc::StringUtils::ciEqual(it2->getCellRef().getRefId(), dedicItem)) // equip item
-            {
-                boost::shared_ptr<MWWorld::Action> action = it2->getClass().use(*it2);
-                action->execute(ptr);
-                break;
-            }
+            ptr.getClass().getContainerStore(ptr).add(packetRefId, count, ptr);
+            equipItem(packetRefId, packetCharge);
         }
     }
 }
@@ -222,6 +222,36 @@ void DedicatedActor::playSound()
             winMgr->messageBox(response, MWGui::ShowInDialogueMode_Never);
 
         sound.clear();
+    }
+}
+
+bool DedicatedActor::hasItem(std::string refId, int charge)
+{
+    MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
+
+    for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
+    {
+        if (::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), refId) && it->getCellRef().getCharge() == charge)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void DedicatedActor::equipItem(std::string refId, int charge)
+{
+    MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
+
+    for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
+    {
+        if (::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), refId) && it->getCellRef().getCharge() == charge)
+        {
+            boost::shared_ptr<MWWorld::Action> action = it->getClass().use(*it);
+            action->execute(ptr);
+            break;
+        }
     }
 }
 

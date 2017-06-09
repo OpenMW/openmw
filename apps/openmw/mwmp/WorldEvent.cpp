@@ -5,6 +5,7 @@
 #include "LocalPlayer.hpp"
 #include "DedicatedPlayer.hpp"
 #include "PlayerList.hpp"
+#include "CellController.hpp"
 
 #include <components/openmw-mp/Log.hpp>
 
@@ -23,6 +24,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
 
 using namespace mwmp;
@@ -108,11 +110,29 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
                             if (iter->getCellRef().getCharge() == containerItem.charge &&
                                 iter->getRefData().getCount() == containerItem.count)
                             {
+                                // Is this an actor's container? If so, unequip this item if it was equipped
+                                if (ptrFound.getClass().isActor())
+                                {
+                                    MWWorld::InventoryStore& invStore = ptrFound.getClass().getInventoryStore(ptrFound);
+
+                                    if (invStore.isEquipped(*iter))
+                                        invStore.unequipItemQuantity(*iter, ptrFound, containerItem.count);
+                                }
+
                                 containerStore.remove(*iter, containerItem.actionCount, ownerPtr);
                             }
                         }
                     }
                 }
+            }
+
+            // Was this a SET or ADD action on an actor's container, and are we the authority
+            // over the actor? If so, autoequip the actor
+            if ((action == BaseEvent::ADD || action == BaseEvent::SET) && ptrFound.getClass().isActor() &&
+                mwmp::Main::get().getCellController()->isLocalActor(ptrFound))
+            {
+                MWWorld::InventoryStore& invStore = ptrFound.getClass().getInventoryStore(ptrFound);
+                invStore.autoEquip(ptrFound);
             }
 
             // If we are in a container, and it happens to be this container, update its view
