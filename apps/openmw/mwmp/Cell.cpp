@@ -102,6 +102,11 @@ void Cell::updateDedicated(float dt)
 
         actor->update(dt);
     }
+
+    // Are we the authority over this cell? If so, uninitialize DedicatedActors
+    // after the above update
+    if (hasLocalAuthority())
+        uninitializeDedicatedActors();
 }
 
 void Cell::readPositions(ActorList& actorList)
