@@ -46,7 +46,13 @@ const char *CellFunctions::GetCell(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    return player->cell.getDescription().c_str();
+    string cellDescription = player->cell.getDescription().c_str();
+
+    static vector<char> cstrDescription;
+    cstrDescription.reserve(cellDescription.size() + 1);
+    strncpy(&cstrDescription[0], cellDescription.c_str(), cstrDescription.capacity());
+
+    return &cstrDescription[0];
 }
 
 void CellFunctions::SetCell(unsigned short pid, const char *cellDescription) noexcept
