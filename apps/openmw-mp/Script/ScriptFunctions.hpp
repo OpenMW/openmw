@@ -126,7 +126,7 @@ public:
             {"OnPlayerDeath",            Function<void, unsigned short>()},
             {"OnPlayerResurrect",        Function<void, unsigned short>()},
             {"OnPlayerCellChange",       Function<void, unsigned short>()},
-            {"OnPlayerRegionChange",     Function<void, unsigned short>()},
+            {"OnPlayerKillCount",     Function<void, unsigned short>()},
             {"OnPlayerAttribute",        Function<void, unsigned short>()},
             {"OnPlayerSkill",            Function<void, unsigned short>()},
             {"OnPlayerLevel",            Function<void, unsigned short>()},

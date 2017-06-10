@@ -5,10 +5,10 @@
 
 namespace mwmp
 {
-    class PacketPlayerRegionChange : public PlayerPacket
+    class PacketPlayerKillCount : public PlayerPacket
     {
     public:
-        PacketPlayerRegionChange(RakNet::RakPeerInterface *peer);
+        PacketPlayerKillCount(RakNet::RakPeerInterface *peer);
 
         virtual void Packet(RakNet::BitStream *bs, bool send);
     };

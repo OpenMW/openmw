@@ -121,9 +121,9 @@ set(PROCESSORS_PLAYER
         processors/player/ProcessorPlayerCharGen.hpp processors/player/ProcessorPlayerDeath.hpp
         processors/player/ProcessorPlayerDisposition.hpp processors/player/ProcessorPlayerEquipment.hpp
         processors/player/ProcessorPlayerFaction.hpp processors/player/ProcessorPlayerInventory.hpp
-        processors/player/ProcessorPlayerJournal.hpp processors/player/ProcessorPlayerLevel.hpp
-        processors/player/ProcessorPlayerMap.hpp processors/player/ProcessorPlayerPosition.hpp
-        processors/player/ProcessorPlayerRegionChange.hpp processors/player/ProcessorPlayerRest.hpp
+        processors/player/ProcessorPlayerJournal.hpp processors/player/ProcessorPlayerKillCount.hpp
+        processors/player/ProcessorPlayerLevel.hpp processors/player/ProcessorPlayerMap.hpp
+        processors/player/ProcessorPlayerPosition.hpp processors/player/ProcessorPlayerRest.hpp
         processors/player/ProcessorPlayerResurrect.hpp processors/player/ProcessorPlayerSkill.hpp
         processors/player/ProcessorPlayerSpeech.hpp processors/player/ProcessorPlayerSpellbook.hpp
         processors/player/ProcessorPlayerStatsDynamic.hpp processors/player/ProcessorPlayerTopic.hpp

@@ -27,10 +27,10 @@
 #include "processors/player/ProcessorPlayerFaction.hpp"
 #include "processors/player/ProcessorPlayerInventory.hpp"
 #include "processors/player/ProcessorPlayerJournal.hpp"
+#include "processors/player/ProcessorPlayerKillCount.hpp"
 #include "processors/player/ProcessorPlayerLevel.hpp"
 #include "processors/player/ProcessorPlayerMap.hpp"
 #include "processors/player/ProcessorPlayerPosition.hpp"
-#include "processors/player/ProcessorPlayerRegionChange.hpp"
 #include "processors/player/ProcessorPlayerRest.hpp"
 #include "processors/player/ProcessorPlayerResurrect.hpp"
 #include "processors/player/ProcessorPlayerSkill.hpp"
@@ -94,10 +94,10 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorPlayerFaction());
     PlayerProcessor::AddProcessor(new ProcessorPlayerInventory());
     PlayerProcessor::AddProcessor(new ProcessorPlayerJournal());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerKillCount());
     PlayerProcessor::AddProcessor(new ProcessorPlayerLevel());
     PlayerProcessor::AddProcessor(new ProcessorPlayerMap());
     PlayerProcessor::AddProcessor(new ProcessorPlayerPosition());
-    PlayerProcessor::AddProcessor(new ProcessorPlayerRegionChange());
     PlayerProcessor::AddProcessor(new ProcessorPlayerRest());
     PlayerProcessor::AddProcessor(new ProcessorPlayerResurrect());
     PlayerProcessor::AddProcessor(new ProcessorPlayerSkill());

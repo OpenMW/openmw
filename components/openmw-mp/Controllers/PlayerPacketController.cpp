@@ -27,11 +27,11 @@
 #include "../Packets/Player/PacketPlayerFaction.hpp"
 #include "../Packets/Player/PacketPlayerInventory.hpp"
 #include "../Packets/Player/PacketPlayerJournal.hpp"
+#include "../Packets/Player/PacketPlayerKillCount.hpp"
 #include "../Packets/Player/PacketPlayerLevel.hpp"
 #include "../Packets/Player/PacketPlayerMap.hpp"
 #include "../Packets/Player/PacketPlayerPosition.hpp"
 #include "../Packets/Player/PacketPlayerRegionAuthority.hpp"
-#include "../Packets/Player/PacketPlayerRegionChange.hpp"
 #include "../Packets/Player/PacketPlayerRest.hpp"
 #include "../Packets/Player/PacketPlayerResurrect.hpp"
 #include "../Packets/Player/PacketPlayerSkill.hpp"
@@ -78,11 +78,11 @@ mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *p
     AddPacket<PacketPlayerFaction>(&packets, peer);
     AddPacket<PacketPlayerInventory>(&packets, peer);
     AddPacket<PacketPlayerJournal>(&packets, peer);
+    AddPacket<PacketPlayerKillCount>(&packets, peer);
     AddPacket<PacketPlayerLevel>(&packets, peer);
     AddPacket<PacketPlayerMap>(&packets, peer);
     AddPacket<PacketPlayerPosition>(&packets, peer);
     AddPacket<PacketPlayerRegionAuthority>(&packets, peer);
-    AddPacket<PacketPlayerRegionChange>(&packets, peer);
     AddPacket<PacketPlayerRest>(&packets, peer);
     AddPacket<PacketPlayerResurrect>(&packets, peer);
     AddPacket<PacketPlayerSkill>(&packets, peer);
