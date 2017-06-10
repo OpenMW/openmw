@@ -113,6 +113,11 @@ double ActorFunctions::GetActorHealthCurrent(unsigned int i) noexcept
     return readActorList->baseActors.at(i).creatureStats.mDynamic[0].mCurrent;
 }
 
+double ActorFunctions::GetActorHealthModified(unsigned int i) noexcept
+{
+    return readActorList->baseActors.at(i).creatureStats.mDynamic[0].mMod;
+}
+
 double ActorFunctions::GetActorMagickaBase(unsigned int i) noexcept
 {
     return readActorList->baseActors.at(i).creatureStats.mDynamic[1].mBase;
@@ -123,6 +128,11 @@ double ActorFunctions::GetActorMagickaCurrent(unsigned int i) noexcept
     return readActorList->baseActors.at(i).creatureStats.mDynamic[1].mCurrent;
 }
 
+double ActorFunctions::GetActorMagickaModified(unsigned int i) noexcept
+{
+    return readActorList->baseActors.at(i).creatureStats.mDynamic[1].mMod;
+}
+
 double ActorFunctions::GetActorFatigueBase(unsigned int i) noexcept
 {
     return readActorList->baseActors.at(i).creatureStats.mDynamic[2].mBase;
@@ -131,6 +141,11 @@ double ActorFunctions::GetActorFatigueBase(unsigned int i) noexcept
 double ActorFunctions::GetActorFatigueCurrent(unsigned int i) noexcept
 {
     return readActorList->baseActors.at(i).creatureStats.mDynamic[2].mCurrent;
+}
+
+double ActorFunctions::GetActorFatigueModified(unsigned int i) noexcept
+{
+    return readActorList->baseActors.at(i).creatureStats.mDynamic[2].mMod;
 }
 
 const char *ActorFunctions::GetActorEquipmentItemRefId(unsigned int i, unsigned short slot) noexcept
@@ -212,6 +227,11 @@ void ActorFunctions::SetActorHealthCurrent(double value) noexcept
     tempActor.creatureStats.mDynamic[0].mCurrent = value;
 }
 
+void ActorFunctions::SetActorHealthModified(double value) noexcept
+{
+    tempActor.creatureStats.mDynamic[0].mMod = value;
+}
+
 void ActorFunctions::SetActorMagickaBase(double value) noexcept
 {
     tempActor.creatureStats.mDynamic[1].mBase = value;
@@ -222,6 +242,11 @@ void ActorFunctions::SetActorMagickaCurrent(double value) noexcept
     tempActor.creatureStats.mDynamic[1].mCurrent = value;
 }
 
+void ActorFunctions::SetActorMagickaModified(double value) noexcept
+{
+    tempActor.creatureStats.mDynamic[1].mMod = value;
+}
+
 void ActorFunctions::SetActorFatigueBase(double value) noexcept
 {
     tempActor.creatureStats.mDynamic[2].mBase = value;
@@ -230,6 +255,11 @@ void ActorFunctions::SetActorFatigueBase(double value) noexcept
 void ActorFunctions::SetActorFatigueCurrent(double value) noexcept
 {
     tempActor.creatureStats.mDynamic[2].mCurrent = value;
+}
+
+void ActorFunctions::SetActorFatigueModified(double value) noexcept
+{
+    tempActor.creatureStats.mDynamic[2].mMod = value;
 }
 
 void ActorFunctions::EquipActorItem(unsigned short slot, const char *refId, unsigned int count, int charge) noexcept

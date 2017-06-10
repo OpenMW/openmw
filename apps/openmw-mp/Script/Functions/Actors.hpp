@@ -23,10 +23,13 @@
     \
     {"GetActorHealthBase",          ActorFunctions::GetActorHealthBase},\
     {"GetActorHealthCurrent",       ActorFunctions::GetActorHealthCurrent},\
+    {"GetActorHealthModified",      ActorFunctions::GetActorHealthModified},\
     {"GetActorMagickaBase",         ActorFunctions::GetActorMagickaBase},\
     {"GetActorMagickaCurrent",      ActorFunctions::GetActorMagickaCurrent},\
+    {"GetActorMagickaModified",     ActorFunctions::GetActorMagickaModified},\
     {"GetActorFatigueBase",         ActorFunctions::GetActorFatigueBase},\
     {"GetActorFatigueCurrent",      ActorFunctions::GetActorFatigueCurrent},\
+    {"GetActorFatigueModified",     ActorFunctions::GetActorFatigueModified},\
     \
     {"GetActorEquipmentItemRefId",  ActorFunctions::GetActorEquipmentItemRefId},\
     {"GetActorEquipmentItemCount",  ActorFunctions::GetActorEquipmentItemCount},\
@@ -48,10 +51,13 @@
     \
     {"SetActorHealthBase",          ActorFunctions::SetActorHealthBase},\
     {"SetActorHealthCurrent",       ActorFunctions::SetActorHealthCurrent},\
+    {"SetActorHealthModified",      ActorFunctions::SetActorHealthModified},\
     {"SetActorMagickaBase",         ActorFunctions::SetActorMagickaBase},\
     {"SetActorMagickaCurrent",      ActorFunctions::SetActorMagickaCurrent},\
+    {"SetActorMagickaModified",     ActorFunctions::SetActorMagickaModified},\
     {"SetActorFatigueBase",         ActorFunctions::SetActorFatigueBase},\
     {"SetActorFatigueCurrent",      ActorFunctions::SetActorFatigueCurrent},\
+    {"SetActorFatigueModified",     ActorFunctions::SetActorFatigueModified},\
     \
     {"EquipActorItem",              ActorFunctions::EquipActorItem},\
     {"UnequipActorItem",            ActorFunctions::UnequipActorItem},\
@@ -90,10 +96,13 @@ public:
 
     static double GetActorHealthBase(unsigned int i) noexcept;
     static double GetActorHealthCurrent(unsigned int i) noexcept;
+    static double GetActorHealthModified(unsigned int i) noexcept;
     static double GetActorMagickaBase(unsigned int i) noexcept;
     static double GetActorMagickaCurrent(unsigned int i) noexcept;
+    static double GetActorMagickaModified(unsigned int i) noexcept;
     static double GetActorFatigueBase(unsigned int i) noexcept;
     static double GetActorFatigueCurrent(unsigned int i) noexcept;
+    static double GetActorFatigueModified(unsigned int i) noexcept;
 
     static const char *GetActorEquipmentItemRefId(unsigned int i, unsigned short slot) noexcept;
     static int GetActorEquipmentItemCount(unsigned int i, unsigned short slot) noexcept;
@@ -115,10 +124,13 @@ public:
 
     static void SetActorHealthBase(double value) noexcept;
     static void SetActorHealthCurrent(double value) noexcept;
+    static void SetActorHealthModified(double value) noexcept;
     static void SetActorMagickaBase(double value) noexcept;
     static void SetActorMagickaCurrent(double value) noexcept;
+    static void SetActorMagickaModified(double value) noexcept;
     static void SetActorFatigueBase(double value) noexcept;
     static void SetActorFatigueCurrent(double value) noexcept;
+    static void SetActorFatigueModified(double value) noexcept;
 
     static void EquipActorItem(unsigned short slot, const char* refId, unsigned int count, int charge) noexcept;
     static void UnequipActorItem(unsigned short slot) noexcept;
