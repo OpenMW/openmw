@@ -3,6 +3,7 @@
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__OpenBSD__)
 
 #include <pwd.h>
+#include <unistd.h>
 #include <boost/filesystem/fstream.hpp>
 
 #include <components/misc/stringops.hpp>
