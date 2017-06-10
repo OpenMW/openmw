@@ -48,6 +48,8 @@ void MechanicsHelper::spawnLeveledCreatures(MWWorld::CellStore* cellStore)
     mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
     worldEvent->reset();
 
+    int spawnCount = 0;
+
     for (typename MWWorld::CellRefList<ESM::CreatureLevList>::List::iterator listIter(creatureLevList->mList.begin());
         listIter != creatureLevList->mList.end(); ++listIter)
     {
@@ -65,10 +67,13 @@ void MechanicsHelper::spawnLeveledCreatures(MWWorld::CellStore* cellStore)
             MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(manualRef.getPtr(), ptr.getCell(), ptr.getCellRef().getPosition());
             worldEvent->addObjectSpawn(placed);
             MWBase::Environment::get().getWorld()->deleteObject(placed);
+
+            spawnCount++;
         }
     }
 
-    worldEvent->sendObjectSpawn();
+    if (spawnCount > 0)
+        worldEvent->sendObjectSpawn();
 }
 
 Attack *MechanicsHelper::getLocalAttack(const MWWorld::Ptr& ptr)
