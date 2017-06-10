@@ -1,5 +1,6 @@
 #include "audiodecoder.hpp"
 
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 

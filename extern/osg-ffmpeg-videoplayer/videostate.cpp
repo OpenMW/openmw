@@ -1,5 +1,6 @@
 #include "videostate.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 
