@@ -45,7 +45,7 @@ double PositionFunctions::GetPosZ(unsigned short pid) noexcept
     return player->position.pos[2];
 }
 
-void PositionFunctions::GetAngle(unsigned short pid, float *x, float *y, float *z) noexcept
+void PositionFunctions::GetRot(unsigned short pid, float *x, float *y, float *z) noexcept
 {
     *x = 0.00;
     *y = 0.00;
@@ -59,7 +59,7 @@ void PositionFunctions::GetAngle(unsigned short pid, float *x, float *y, float *
     *z = player->position.rot[2];
 }
 
-double PositionFunctions::GetAngleX(unsigned short pid) noexcept
+double PositionFunctions::GetRotX(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
@@ -67,7 +67,7 @@ double PositionFunctions::GetAngleX(unsigned short pid) noexcept
     return player->position.rot[0];
 }
 
-double PositionFunctions::GetAngleZ(unsigned short pid) noexcept
+double PositionFunctions::GetRotZ(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0.0f);
@@ -85,7 +85,7 @@ void PositionFunctions::SetPos(unsigned short pid, double x, double y, double z)
     player->position.pos[2] = z;
 }
 
-void PositionFunctions::SetAngle(unsigned short pid, double x, double z) noexcept
+void PositionFunctions::SetRot(unsigned short pid, double x, double z) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
