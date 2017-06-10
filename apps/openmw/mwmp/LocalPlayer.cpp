@@ -1014,6 +1014,18 @@ void LocalPlayer::setFactions()
     }
 }
 
+void LocalPlayer::setKills()
+{
+    for (unsigned int i = 0; i < killChanges.count; i++)
+    {
+        mwmp::Kill kill = killChanges.kills.at(i);
+        std::string refId = kill.refId;
+        int number = kill.number;
+
+        MWBase::Environment::get().getMechanicsManager()->setDeaths(refId, number);
+    }
+}
+
 void LocalPlayer::sendClass()
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -1202,6 +1214,22 @@ void LocalPlayer::sendTopic(const std::string& topicId)
 
     getNetworking()->getPlayerPacket(ID_PLAYER_TOPIC)->setPlayer(this);
     getNetworking()->getPlayerPacket(ID_PLAYER_TOPIC)->Send();
+}
+
+void LocalPlayer::sendKill(const std::string& refId, int number)
+{
+    killChanges.kills.clear();
+
+    mwmp::Kill kill;
+    kill.refId = refId;
+    kill.number = number;
+
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_KILL_COUNT with refId %s, number %i", refId.c_str(), number);
+
+    killChanges.kills.push_back(kill);
+
+    getNetworking()->getPlayerPacket(ID_PLAYER_KILL_COUNT)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_KILL_COUNT)->Send();
 }
 
 void LocalPlayer::clearCellStates()

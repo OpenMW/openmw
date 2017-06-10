@@ -107,6 +107,16 @@ namespace MWMechanics
             virtual int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
 
+            /*
+                Start of tes3mp addition
+
+                Make it possible to set the number of deaths for an actor with the given refId
+            */
+            virtual void setDeaths(const std::string& refId, int number);
+            /*
+                End of tes3mp addition
+            */
+
             virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type, bool& success, float& tempChange, float& permChange);
             ///< Perform a persuasion action on NPC
 

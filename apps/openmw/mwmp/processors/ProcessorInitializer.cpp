@@ -30,6 +30,7 @@
 #include "player/ProcessorPlayerFaction.hpp"
 #include "player/ProcessorPlayerInventory.hpp"
 #include "player/ProcessorPlayerJournal.hpp"
+#include "player/ProcessorPlayerKillCount.hpp"
 #include "player/ProcessorPlayerLevel.hpp"
 #include "player/ProcessorPlayerMap.hpp"
 #include "player/ProcessorPlayerPosition.hpp"
@@ -103,6 +104,7 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorPlayerFaction());
     PlayerProcessor::AddProcessor(new ProcessorPlayerInventory());
     PlayerProcessor::AddProcessor(new ProcessorPlayerJournal());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerKillCount());
     PlayerProcessor::AddProcessor(new ProcessorPlayerLevel());
     PlayerProcessor::AddProcessor(new ProcessorPlayerMap());
     PlayerProcessor::AddProcessor(new ProcessorPlayerPosition());

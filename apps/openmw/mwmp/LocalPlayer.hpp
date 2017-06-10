@@ -59,6 +59,7 @@ namespace mwmp
         void setInventory();
         void setSpellbook();
         void setFactions();
+        void setKills();
 
         void sendClass();
         void sendInventory();
@@ -72,6 +73,7 @@ namespace mwmp
         void sendJournalIndex(const std::string& quest, int index);
         void sendFaction(const std::string& factionId, int rank, bool isExpelled);
         void sendTopic(const std::string& topic);
+        void sendKill(const std::string& refId, int number);
 
         void clearCellStates();
         void clearCurrentContainer();

@@ -76,6 +76,7 @@ public:
     mwmp::JournalChanges journalChangesBuffer;
     mwmp::FactionChanges factionChangesBuffer;
     mwmp::TopicChanges topicChangesBuffer;
+    mwmp::KillChanges killChangesBuffer;
 
 private:
     CellController::TContainer cells;

@@ -56,6 +56,12 @@ namespace mwmp
         std::string topicId;
     };
 
+    struct Kill
+    {
+        std::string refId;
+        int number;
+    };
+
     struct CellState
     {
         ESM::Cell cell;
@@ -84,6 +90,12 @@ namespace mwmp
     struct TopicChanges
     {
         std::vector<Topic> topics;
+        unsigned int count;
+    };
+
+    struct KillChanges
+    {
+        std::vector<Kill> kills;
         unsigned int count;
     };
 
@@ -171,6 +183,7 @@ namespace mwmp
         JournalChanges journalChanges;
         FactionChanges factionChanges;
         TopicChanges topicChanges;
+        KillChanges killChanges;
         CellStateChanges cellStateChanges;
         ESM::ActiveSpells activeSpells;
         CurrentContainer currentContainer;

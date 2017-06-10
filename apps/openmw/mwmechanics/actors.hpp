@@ -107,6 +107,16 @@ namespace MWMechanics
             int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
 
+            /*
+                Start of tes3mp addition
+
+                Make it possible to set the number of deaths for an actor with the given refId
+            */
+            void setDeaths(const std::string& refId, int number);
+            /*
+                End of tes3mp addition
+            */
+
         void forceStateUpdate(const MWWorld::Ptr &ptr);
 
         bool playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist=false);

@@ -637,6 +637,19 @@ namespace MWMechanics
         return mActors.countDeaths (id);
     }
 
+    /*
+        Start of tes3mp addition
+
+        Make it possible to set the number of deaths for an actor with the given refId
+    */
+    void MechanicsManager::setDeaths(const std::string& refId, int number)
+    {
+        mActors.setDeaths(refId, number);
+    }
+    /*
+        End of tes3mp addition
+    */
+
     void MechanicsManager::getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type, bool& success, float& tempChange, float& permChange)
     {
         const MWWorld::Store<ESM::GameSetting> &gmst =

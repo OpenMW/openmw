@@ -1484,6 +1484,23 @@ namespace MWMechanics
 
                 ++mDeathCount[Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId())];
 
+                /*
+                    Start of tes3mp addition
+
+                    Send an ID_PLAYER_KILL_COUNT packet every time the kill count changes,
+                    as long as we are the authority over the actor's cell
+                */
+                if (mwmp::Main::get().getCellController()->isLocalActor(iter->first))
+                {
+                    std::string refId = Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId());
+                    int number = mDeathCount[refId];
+
+                    mwmp::Main::get().getLocalPlayer()->sendKill(refId, number);
+                }
+                /*
+                    End of tes3mp addition
+                */
+
                 // Make sure spell effects are removed
                 purgeSpellEffects(stats.getActorId());
 
@@ -1614,6 +1631,19 @@ namespace MWMechanics
             return iter->second;
         return 0;
     }
+
+    /*
+        Start of tes3mp addition
+
+        Make it possible to set the number of deaths for an actor with the given refId
+    */
+    void Actors::setDeaths(const std::string& refId, int number)
+    {
+        mDeathCount[refId] = number;
+    }
+    /*
+        End of tes3mp addition
+    */
 
     void Actors::forceStateUpdate(const MWWorld::Ptr & ptr)
     {

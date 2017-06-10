@@ -116,8 +116,9 @@ add_openmw_dir (mwmp/processors/player ProcessorChatMessage ProcessorGUIMessageB
     ProcessorPlayerAnimFlags ProcessorPlayerAnimPlay ProcessorPlayerAttack ProcessorPlayerAttribute ProcessorPlayerBook
     ProcessorPlayerBounty ProcessorPlayerCellChange ProcessorPlayerCellState ProcessorPlayerCharClass ProcessorPlayerCharGen
     ProcessorPlayerDeath ProcessorPlayerDisposition ProcessorPlayerEquipment ProcessorPlayerFaction ProcessorPlayerInventory
-    ProcessorPlayerJournal ProcessorPlayerLevel ProcessorPlayerMap ProcessorPlayerPosition ProcessorPlayerResurrect
-    ProcessorPlayerSkill ProcessorPlayerSpeech ProcessorPlayerSpellbook ProcessorPlayerStatsDynamic ProcessorPlayerTopic
+    ProcessorPlayerJournal ProcessorPlayerKillCount ProcessorPlayerLevel ProcessorPlayerMap ProcessorPlayerPosition
+    ProcessorPlayerResurrect ProcessorPlayerSkill ProcessorPlayerSpeech ProcessorPlayerSpellbook ProcessorPlayerStatsDynamic
+    ProcessorPlayerTopic
     )
 
 add_openmw_dir (mwmp/processors/world BaseObjectProcessor ProcessorContainer ProcessorDoorState ProcessorMusicPlay
