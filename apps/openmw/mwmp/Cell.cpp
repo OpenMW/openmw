@@ -23,11 +23,21 @@ mwmp::Cell::Cell(MWWorld::CellStore* cellStore)
 
     std::map<std::string, LocalActor *> localActors;
     std::map<std::string, DedicatedActor *> dedicatedActors;
+
+    updateTimer = 0;
 }
 
 void Cell::updateLocal(bool forceUpdate)
 {
-    if (localActors.empty()) return;
+    if (localActors.empty())
+        return;
+
+    const float timeoutSec = 0.025;
+
+    if (!forceUpdate && (updateTimer += MWBase::Environment::get().getFrameDuration()) < timeoutSec)
+        return;
+    else
+        updateTimer = 0;
 
     CellController *cellController = Main::get().getCellController();
     ActorList *actorList = mwmp::Main::get().getNetworking()->getActorList();

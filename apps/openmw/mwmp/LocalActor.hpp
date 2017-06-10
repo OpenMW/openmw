@@ -47,9 +47,6 @@ namespace mwmp
         MWMechanics::DynamicStat<float> oldHealth;
         MWMechanics::DynamicStat<float> oldMagicka;
         MWMechanics::DynamicStat<float> oldFatigue;
-        
-        float positionTimer;
-        float statTimer;
     };
 }
 

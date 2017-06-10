@@ -52,6 +52,8 @@ namespace mwmp
 
         std::map<std::string, LocalActor *> localActors;
         std::map<std::string, DedicatedActor *> dedicatedActors;
+
+        float updateTimer;
     };
 }
 

@@ -31,9 +31,6 @@ LocalActor::LocalActor()
     wasForceMoveJumping = false;
     wasFlying = false;
 
-    positionTimer = 0;
-    statTimer = 0;
-
     attack.type = Attack::MELEE;
     attack.shouldSend = false;
 
@@ -75,23 +72,16 @@ void LocalActor::updateCell()
 
 void LocalActor::updatePosition(bool forceUpdate)
 {
-    const float timeoutSec = 0.03;
+    bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 || direction.pos[2] != 0 ||
+        direction.rot[0] != 0 || direction.rot[1] != 0 || direction.rot[2] != 0);
 
-    if (forceUpdate || (positionTimer += MWBase::Environment::get().getFrameDuration()) >= timeoutSec)
+    if (forceUpdate || posIsChanging || posWasChanged)
     {
-        bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 || direction.pos[2] != 0 ||
-            direction.rot[0] != 0 || direction.rot[1] != 0 || direction.rot[2] != 0);
+        posWasChanged = posIsChanging;
 
-        if (forceUpdate || posIsChanging || posWasChanged)
-        {
-            posWasChanged = posIsChanging;
+        position = ptr.getRefData().getPosition();
 
-            position = ptr.getRefData().getPosition();
-
-            positionTimer = 0;
-
-            mwmp::Main::get().getNetworking()->getActorList()->addPositionActor(*this);
-        }
+        mwmp::Main::get().getNetworking()->getActorList()->addPositionActor(*this);
     }
 }
 
@@ -167,39 +157,32 @@ void LocalActor::updateStatsDynamic(bool forceUpdate)
     MWMechanics::DynamicStat<float> magicka(ptrCreatureStats->getMagicka());
     MWMechanics::DynamicStat<float> fatigue(ptrCreatureStats->getFatigue());
 
-    const float timeoutSec = 0.5;
+    // Update stats when they become 0 or they have changed enough
+    //
+    // Also check for an oldHealth of 0 changing to something else for resurrected NPCs
+    bool shouldUpdateHealth = oldHealth != health && (health.getCurrent() == 0 || oldHealth.getCurrent() == 0 || abs(oldHealth.getCurrent() - health.getCurrent()) > 5);
+    bool shouldUpdateMagicka = false;
+    bool shouldUpdateFatigue = false;
 
-    if (forceUpdate || (statTimer += MWBase::Environment::get().getFrameDuration()) >= timeoutSec)
-    {
-        // Update stats when they become 0 or they have changed enough
-        //
-        // Also check for an oldHealth of 0 changing to something else for resurrected NPCs
-        bool shouldUpdateHealth = oldHealth != health && (health.getCurrent() == 0 || oldHealth.getCurrent() == 0 || abs(oldHealth.getCurrent() - health.getCurrent()) > 5);
-        bool shouldUpdateMagicka = false;
-        bool shouldUpdateFatigue = false;
+    if (!shouldUpdateHealth)
+        shouldUpdateMagicka = oldMagicka != magicka && (magicka.getCurrent() == 0 || abs(oldMagicka.getCurrent() - magicka.getCurrent()) > 10);
 
-        if (!shouldUpdateHealth)
-            shouldUpdateMagicka = oldMagicka != magicka && (magicka.getCurrent() == 0 || abs(oldMagicka.getCurrent() - magicka.getCurrent()) > 10);
-
-        if (!shouldUpdateMagicka)
-            shouldUpdateFatigue = oldFatigue != fatigue && (fatigue.getCurrent() == 0 || abs(oldFatigue.getCurrent() - fatigue.getCurrent()) > 10);
+    if (!shouldUpdateMagicka)
+        shouldUpdateFatigue = oldFatigue != fatigue && (fatigue.getCurrent() == 0 || abs(oldFatigue.getCurrent() - fatigue.getCurrent()) > 10);
         
-        if (forceUpdate || shouldUpdateHealth || shouldUpdateMagicka || shouldUpdateFatigue)
-        {
-            oldHealth = health;
-            oldMagicka = magicka;
-            oldFatigue = fatigue;
+    if (forceUpdate || shouldUpdateHealth || shouldUpdateMagicka || shouldUpdateFatigue)
+    {
+        oldHealth = health;
+        oldMagicka = magicka;
+        oldFatigue = fatigue;
 
-            health.writeState(creatureStats.mDynamic[0]);
-            magicka.writeState(creatureStats.mDynamic[1]);
-            fatigue.writeState(creatureStats.mDynamic[2]);
+        health.writeState(creatureStats.mDynamic[0]);
+        magicka.writeState(creatureStats.mDynamic[1]);
+        fatigue.writeState(creatureStats.mDynamic[2]);
 
-            creatureStats.mDead = ptrCreatureStats->isDead();
+        creatureStats.mDead = ptrCreatureStats->isDead();
 
-            statTimer = 0;
-
-            mwmp::Main::get().getNetworking()->getActorList()->addStatsDynamicActor(*this);
-        }
+        mwmp::Main::get().getNetworking()->getActorList()->addStatsDynamicActor(*this);
     }
 }
 
