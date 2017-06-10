@@ -46,27 +46,21 @@ const char *CellFunctions::GetCell(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    return player->cell.mName.c_str();
+    return player->cell.getDescription().c_str();
 }
 
-void CellFunctions::SetCell(unsigned short pid, const char *name) noexcept
+void CellFunctions::SetCell(unsigned short pid, const char *cellDescription) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
 
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Script is moving %s from %s to %s", player->npc.mName.c_str(),
-                       player->cell.getDescription().c_str(), name);
+                       player->cell.getDescription().c_str(), cellDescription);
 
-    // If the player is currently in an exterior, turn on the interior flag
-    // from the  cell so the player doesn't get teleported to their exterior
-    // grid position (which we haven't changed)
-    if (player->cell.isExterior())
-        player->cell.mData.mFlags |= ESM::Cell::Interior;
-
-    player->cell.mName = name;
+    player->cell = Utils::getCellFromDescription(cellDescription);
 }
 
-void CellFunctions::SetExterior(unsigned short pid, int x, int y) noexcept
+void CellFunctions::SetExteriorCell(unsigned short pid, int x, int y) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);

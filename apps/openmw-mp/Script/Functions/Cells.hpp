@@ -11,7 +11,7 @@
     \
     {"GetCell",                 CellFunctions::GetCell},\
     {"SetCell",                 CellFunctions::SetCell},\
-    {"SetExterior",             CellFunctions::SetExterior},\
+    {"SetExteriorCell",         CellFunctions::SetExteriorCell},\
     {"GetExteriorX",            CellFunctions::GetExteriorX},\
     {"GetExteriorY",            CellFunctions::GetExteriorY},\
     {"IsInExterior",            CellFunctions::IsInExterior},\
@@ -31,8 +31,8 @@ public:
     static const char *GetCellStateDescription(unsigned short pid, unsigned int i) noexcept;
 
     static const char *GetCell(unsigned short pid) noexcept;
-    static void SetCell(unsigned short pid, const char *name) noexcept;
-    static void SetExterior(unsigned short pid, int x, int y) noexcept;
+    static void SetCell(unsigned short pid, const char *cellDescription) noexcept;
+    static void SetExteriorCell(unsigned short pid, int x, int y) noexcept;
     static int GetExteriorX(unsigned short pid) noexcept;
     static int GetExteriorY(unsigned short pid) noexcept;
     static bool IsInExterior(unsigned short pid) noexcept;
