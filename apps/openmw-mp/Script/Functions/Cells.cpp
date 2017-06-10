@@ -105,6 +105,22 @@ bool CellFunctions::IsInExterior(unsigned short pid) noexcept
     return player->cell.isExterior();
 }
 
+const char *CellFunctions::GetRegion(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->cell.mRegion.c_str();
+}
+
+bool CellFunctions::IsChangingRegion(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, false);
+
+    return player->isChangingRegion;
+}
+
 void CellFunctions::SendCell(unsigned short pid) noexcept
 {
     Player *player;

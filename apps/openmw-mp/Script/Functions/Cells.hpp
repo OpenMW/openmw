@@ -16,6 +16,9 @@
     {"GetExteriorY",            CellFunctions::GetExteriorY},\
     {"IsInExterior",            CellFunctions::IsInExterior},\
     \
+    {"GetRegion",               CellFunctions::GetRegion},\
+    {"IsChangingRegion",        CellFunctions::IsChangingRegion},\
+    \
     {"SendCell",                CellFunctions::SendCell}
 
 
@@ -33,6 +36,9 @@ public:
     static int GetExteriorX(unsigned short pid) noexcept;
     static int GetExteriorY(unsigned short pid) noexcept;
     static bool IsInExterior(unsigned short pid) noexcept;
+
+    static const char *GetRegion(unsigned short pid) noexcept;
+    static bool IsChangingRegion(unsigned short pid) noexcept;
 
     static void SendCell(unsigned short pid) noexcept;
 };

@@ -52,6 +52,7 @@ LocalPlayer::LocalPlayer()
     attack.shouldSend = false;
 
     deathReason = "suicide";
+    isChangingRegion = false;
 }
 
 LocalPlayer::~LocalPlayer()
@@ -363,6 +364,15 @@ void LocalPlayer::updateCell(bool forceUpdate)
 
         LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s", cell.getDescription().c_str(), ptrCell->getDescription().c_str());
 
+        if (!Misc::StringUtils::ciEqual(cell.mRegion, ptrCell->mRegion))
+        {
+            LOG_APPEND(Log::LOG_INFO, "- Changed region from %s to %s",
+                cell.mRegion.empty() ? "none" : cell.mRegion.c_str(),
+                ptrCell->mRegion.empty() ? "none" : ptrCell->mRegion.c_str());
+
+            isChangingRegion = true;
+        }
+
         cell = *ptrCell;
 
         // Make sure the position is updated before a cell packet is sent, or else
@@ -371,6 +381,8 @@ void LocalPlayer::updateCell(bool forceUpdate)
 
         getNetworking()->getPlayerPacket(ID_PLAYER_CELL_CHANGE)->setPlayer(this);
         getNetworking()->getPlayerPacket(ID_PLAYER_CELL_CHANGE)->Send();
+
+        isChangingRegion = false;
 
         // Also force an update to skills (to send all progress to skill increases)
         updateSkills(true);

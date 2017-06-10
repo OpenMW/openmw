@@ -199,6 +199,8 @@ namespace mwmp
         std::string creatureModel;
         bool useCreatureName;
 
+        bool isChangingRegion;
+
         std::string deathReason;
     };
 }
