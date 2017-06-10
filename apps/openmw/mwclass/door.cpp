@@ -132,15 +132,19 @@ namespace MWClass
 
         // make key id lowercase
         std::string keyId = ptr.getCellRef().getKey();
-        Misc::StringUtils::lowerCaseInPlace(keyId);
-        for (MWWorld::ConstContainerStoreIterator it = invStore.cbegin(); it != invStore.cend(); ++it)
+        if (!keyId.empty())
         {
-            std::string refId = it->getCellRef().getRefId();
-            Misc::StringUtils::lowerCaseInPlace(refId);
-            if (refId == keyId)
+            Misc::StringUtils::lowerCaseInPlace(keyId);
+            for (MWWorld::ConstContainerStoreIterator it = invStore.cbegin(); it != invStore.cend(); ++it)
             {
-                hasKey = true;
-                keyName = it->getClass().getName(*it);
+                std::string refId = it->getCellRef().getRefId();
+                Misc::StringUtils::lowerCaseInPlace(refId);
+                if (refId == keyId)
+                {
+                    hasKey = true;
+                    keyName = it->getClass().getName(*it);
+                    break;
+                }
             }
         }
 
