@@ -247,8 +247,7 @@ int main(int argc, char *argv[])
     setenv("LUA_CPATH", Utils::convertPath(plugin_home + "/lib/?.so").c_str(), 1);
 #endif
 
-    for (auto plugin : plugins)
-        Script::LoadScript(plugin.c_str(), plugin_home.c_str());
+    int code;
 
     RakNet::RakPeerInterface *peer = RakNet::RakPeerInterface::GetInstance();
 
@@ -256,7 +255,7 @@ int main(int argc, char *argv[])
     sstr << TES3MP_PROTO_VERSION;
     sstr << version.mCommitHash;
 
-    peer->SetIncomingPassword(sstr.str().c_str(), (int)sstr.str().size());
+    peer->SetIncomingPassword(sstr.str().c_str(), (int) sstr.str().size());
 
     if (RakNet::NonNumericHostString(addr.c_str()))
     {
@@ -264,39 +263,70 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    RakNet::SocketDescriptor sd((unsigned short)port, addr.c_str());
-    if (peer->Startup((unsigned)players, &sd, 1) != RakNet::RAKNET_STARTED)
-        return 1;
+    RakNet::SocketDescriptor sd((unsigned short) port, addr.c_str());
 
-    peer->SetMaximumIncomingConnections((unsigned short)(players));
-
-    Networking networking(peer);
-    networking.setServerPassword(passw);
-
-    if ( mgr.getBool("enabled", "MasterServer"))
+    try
     {
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sharing server query info to master enabled.");
-        string masterAddr = mgr.getString("address", "MasterServer");
-        int masterPort = mgr.getInt("port", "MasterServer");
-        int updateRate = mgr.getInt("rate", "MasterServer");
+        for (auto plugin : plugins)
+            Script::LoadScript(plugin.c_str(), plugin_home.c_str());
 
-        networking.InitQuery(masterAddr, (unsigned short) masterPort);
-        networking.getMasterClient()->SetMaxPlayers((unsigned)players);
-        networking.getMasterClient()->SetUpdateRate((unsigned)updateRate);
-        string hostname = mgr.getString("hostname", "General");
-        networking.getMasterClient()->SetHostname(hostname);
-        networking.getMasterClient()->SetRuleString("CommitHash", version.mCommitHash.substr(0, 10));
+        switch (peer->Startup((unsigned) players, &sd, 1))
+        {
+            case RakNet::RAKNET_STARTED:
+                break;
+            case RakNet::RAKNET_ALREADY_STARTED:
+                throw runtime_error("Already started");
+            case RakNet::INVALID_SOCKET_DESCRIPTORS:
+                throw runtime_error("Incorrect port or address");
+            case RakNet::INVALID_MAX_CONNECTIONS:
+                throw runtime_error("Max players cannot be negative or 0");
+            case RakNet::SOCKET_FAILED_TO_BIND:
+            case RakNet::SOCKET_PORT_ALREADY_IN_USE:
+            case RakNet::PORT_CANNOT_BE_ZERO:
+                throw runtime_error("Failed to bind port");
+            case RakNet::SOCKET_FAILED_TEST_SEND:
+            case RakNet::SOCKET_FAMILY_NOT_SUPPORTED:
+            case RakNet::FAILED_TO_CREATE_NETWORK_THREAD:
+            case RakNet::COULD_NOT_GENERATE_GUID:
+            case RakNet::STARTUP_OTHER_FAILURE:
+                throw runtime_error("Cannot start server");
+        }
 
-        networking.getMasterClient()->Start();
+        peer->SetMaximumIncomingConnections((unsigned short) (players));
+
+        Networking networking(peer);
+        networking.setServerPassword(passw);
+
+        if (mgr.getBool("enabled", "MasterServer"))
+        {
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sharing server query info to master enabled.");
+            string masterAddr = mgr.getString("address", "MasterServer");
+            int masterPort = mgr.getInt("port", "MasterServer");
+            int updateRate = mgr.getInt("rate", "MasterServer");
+
+            networking.InitQuery(masterAddr, (unsigned short) masterPort);
+            networking.getMasterClient()->SetMaxPlayers((unsigned) players);
+            networking.getMasterClient()->SetUpdateRate((unsigned) updateRate);
+            string hostname = mgr.getString("hostname", "General");
+            networking.getMasterClient()->SetHostname(hostname);
+            networking.getMasterClient()->SetRuleString("CommitHash", version.mCommitHash.substr(0, 10));
+
+            networking.getMasterClient()->Start();
+        }
+
+        networking.postInit();
+
+        code = networking.mainLoop();
+
+        networking.getMasterClient()->Stop();
+    }
+    catch (std::exception &e)
+    {
+        LOG_MESSAGE_SIMPLE(Log::LOG_ERROR, e.what());
+        throw; //fall through
     }
 
-    networking.postInit();
-
-    int code = networking.mainLoop();
-
     RakNet::RakPeerInterface::DestroyInstance(peer);
-
-    networking.getMasterClient()->Stop();
 
     if (code == 0)
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Quitting peacefully.");
@@ -307,6 +337,7 @@ int main(int argc, char *argv[])
         std::cout.rdbuf(cout_rdbuf);
         std::cerr.rdbuf(cerr_rdbuf);
     }
+
 
     breakpad_close();
     return code;
