@@ -183,7 +183,10 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float dur
         if (getTypeId() != TypeIdWander && !door.getCellRef().getTeleport() && door.getClass().getDoorState(door) == 0)
         {
             if ((door.getCellRef().getTrap().empty() && door.getCellRef().getLockLevel() <= 0 ))
+            {
                 MWBase::Environment::get().getWorld()->activate(door, actor);
+                return;
+            }
 
             std::string keyId = door.getCellRef().getKey();
             if (keyId.empty())
