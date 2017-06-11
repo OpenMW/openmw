@@ -1,5 +1,8 @@
 #include "fallback.hpp"
 
+#include <boost/lexical_cast.hpp>
+
+
 namespace Fallback
 {
     bool stob(std::string const& s) {
@@ -23,8 +26,9 @@ namespace Fallback
         std::string fallback=getFallbackString(fall);
         if(fallback.empty())
             return 0;
-        else
-            return std::stof(fallback);
+        else {
+            return  boost::lexical_cast<float>(fallback);
+        }
     }
     int Map::getFallbackInt(const std::string& fall) const
     {
