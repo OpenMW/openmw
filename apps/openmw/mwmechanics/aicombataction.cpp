@@ -549,7 +549,13 @@ namespace MWMechanics
         if (effect.mRange == ESM::RT_Target)
         {
             if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(actor), 0.75f))
-                return 0;
+                return 0.f;
+
+            if (enemy.isEmpty())
+                return 0.f;
+
+            if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(enemy), 0.75f))
+                return 0.f;
         }
 
         rating *= magicEffect->mData.mBaseCost;
