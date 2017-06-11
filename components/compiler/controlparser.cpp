@@ -13,6 +13,12 @@ namespace Compiler
 {
     bool ControlParser::parseIfBody (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
+        if (mState == IfElseJunkState) {
+            if (keyword != Scanner::K_if) return false;
+            else {
+                keyword = Scanner::K_elseif;
+            }
+        }
         if (keyword==Scanner::K_endif || keyword==Scanner::K_elseif ||
             keyword==Scanner::K_else)
         {
@@ -71,7 +77,7 @@ namespace Compiler
             }
             else if (keyword==Scanner::K_else)
             {
-                mState = IfElseJunkState; /// \todo should be IfElseEndState; add an option for that
+                mState = IfElseEndState; /// \todo should be IfElseEndState; add an option for that
             }
 
             return true;
@@ -231,14 +237,14 @@ namespace Compiler
                 case IfEndState: mState = IfBodyState; return true;
                 case IfElseifEndState: mState = IfElseifBodyState; return true;
                 case IfElseEndState: mState = IfElseBodyState; return true;
-                case IfElseJunkState: mState = IfElseBodyState; return true;
-
+                
                 case WhileEndState: mState = WhileBodyState; return true;
 
                 case IfBodyState:
                 case IfElseifBodyState:
                 case IfElseBodyState:
                 case WhileBodyState:
+                case IfElseJunkState:
 
                     return true; // empty line
 
@@ -250,11 +256,16 @@ namespace Compiler
                 default: ;
             }
         }
-        else if (code==Scanner::S_open && mState==IfElseJunkState)
+        else if (code==Scanner::S_open && mState==IfElseEndState)
         {
             SkipParser skip (getErrorHandler(), getContext());
             scanner.scan (skip);
             mState = IfElseBodyState;
+            return true;
+        }
+        else if (code == Scanner::S_space && mState == IfElseJunkState)
+        {
+            mState = IfElseJunkState;
             return true;
         }
 
