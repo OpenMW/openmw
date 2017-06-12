@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include "numericeditbox.hpp"
 
 namespace Gui
@@ -36,7 +38,11 @@ namespace Gui
                 setCaption(MyGUI::utility::toString(mValue));
             }
         }
-        catch (...)
+        catch (std::invalid_argument)
+        {
+            setCaption(MyGUI::utility::toString(mValue));
+        }
+        catch (std::out_of_range)
         {
             setCaption(MyGUI::utility::toString(mValue));
         }
