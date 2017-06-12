@@ -114,8 +114,17 @@ namespace mwmp
         {
             setVisible(true);
         }
-        mHistory->addText(color+msg);
-        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, msg.c_str());
+
+        if(msg.size() == 0)
+        {
+            clean();
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Chat cleaned");
+        }
+        else
+        {
+            mHistory->addText(color + msg);
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, msg.c_str());
+        }
     }
 
     void GUIChat::printOK(const std::string &msg)
@@ -142,7 +151,7 @@ namespace mwmp
 
     void GUIChat::clean()
     {
-        mHistory->clearUserStrings();
+        mHistory->setCaption("");
     }
 
     void GUIChat::pressedChatMode()

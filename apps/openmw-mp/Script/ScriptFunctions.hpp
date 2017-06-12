@@ -48,7 +48,7 @@ public:
     static boost::any CallPublic(const char *name, ...) noexcept;
 
     static void SendMessage(unsigned short pid, const char *message, bool broadcast) noexcept;
-    static void CleanChat(unsigned short pid);
+    static void CleanChatByPid(unsigned short pid);
     static void CleanChat();
 
     /**
@@ -100,6 +100,8 @@ public:
             {"SetServerPassword",   ScriptFunctions::SetServerPassword},
             {"SetRuleString",       ScriptFunctions::SetRuleString},
             {"SetRuleValue",        ScriptFunctions::SetRuleValue},
+            {"CleanChatByPid",      ScriptFunctions::CleanChatByPid},
+            {"CleanChat",           ScriptFunctions::CleanChat},
 
             POSITIONAPI,
             CELLAPI,

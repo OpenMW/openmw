@@ -22,12 +22,25 @@ void ScriptFunctions::SendMessage(unsigned short pid, const char *message, bool 
         mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_CHAT_MESSAGE)->Send(true);
 }
 
-void ScriptFunctions::CleanChat(unsigned short pid)
+void ScriptFunctions::CleanChatByPid(unsigned short pid)
 {
+    Player *player;
+    GET_PLAYER(pid, player,);
 
+    player->chatMessage.clear();
+
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_CHAT_MESSAGE)->setPlayer(player);
+
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_CHAT_MESSAGE)->Send(false);
 }
 
 void ScriptFunctions::CleanChat()
 {
+    for (auto player : *Players::getPlayers())
+    {
+        player.second->chatMessage.clear();
+        mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_CHAT_MESSAGE)->setPlayer(player.second);
 
+        mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_CHAT_MESSAGE)->Send(false);
+    }
 }
