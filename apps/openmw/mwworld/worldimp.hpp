@@ -166,9 +166,6 @@ namespace MWWorld
 
             float mDistanceToFacedObject;
 
-            bool isUnderwater(const MWWorld::ConstPtr &object, const float heightRatio) const;
-            ///< helper function for implementing isSwimming(), isSubmerged(), isWading()
-
             bool mTeleportEnabled;
             bool mLevitationEnabled;
             bool mGoToJail;
@@ -488,6 +485,7 @@ namespace MWWorld
             virtual bool isSubmerged(const MWWorld::ConstPtr &object) const;
             virtual bool isSwimming(const MWWorld::ConstPtr &object) const;
             virtual bool isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const;
+            virtual bool isUnderwater(const MWWorld::ConstPtr &object, const float heightRatio) const;
             virtual bool isWading(const MWWorld::ConstPtr &object) const;
             virtual bool isWaterWalkingCastableOnTarget(const MWWorld::ConstPtr &target) const;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;
