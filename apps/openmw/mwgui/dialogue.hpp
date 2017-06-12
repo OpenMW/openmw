@@ -82,10 +82,11 @@ namespace MWGui
 
     struct Response : DialogueText
     {
-        Response(const std::string& text, const std::string& title = "");
+        Response(const std::string& text, const std::string& title = "", bool needMargin = true);
         virtual void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const;
         void addTopicLink (BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const;
         std::string mTitle;
+        bool mNeedMargin;
     };
 
     struct Message : DialogueText
@@ -109,7 +110,7 @@ namespace MWGui
         void startDialogue(MWWorld::Ptr actor, std::string npcName, bool resetHistory);
         void setKeywords(std::list<std::string> keyWord);
 
-        void addResponse (const std::string& text, const std::string& title="");
+        void addResponse (const std::string& text, const std::string& title="", bool needMargin = true);
 
         void addMessageBox(const std::string& text);
 
