@@ -1,5 +1,7 @@
 #include "controller.hpp"
 
+#include <algorithm>
+
 #include "statesetupdater.hpp"
 
 #include <osg/Drawable>

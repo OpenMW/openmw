@@ -4,6 +4,7 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <algorithm>
 
 #include <components/vfs/manager.hpp>
 

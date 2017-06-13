@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <limits>
+#include <algorithm>
 
 #include "soundmanagerimp.hpp"
 
