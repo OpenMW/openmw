@@ -889,7 +889,7 @@ namespace MWMechanics
                 for (std::vector<ESM::ENAMstruct>::const_iterator effectIt =
                      spell->mEffects.mList.begin(); effectIt != spell->mEffects.mList.end(); ++effectIt)
                 {
-                    if (effectIt->mArea == ESM::RT_Target)
+                    if (effectIt->mRange == ESM::RT_Target)
                     {
                         const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
                         dist = effect->mData.mSpeed;
@@ -906,7 +906,7 @@ namespace MWMechanics
                     for (std::vector<ESM::ENAMstruct>::const_iterator effectIt =
                          ench->mEffects.mList.begin(); effectIt != ench->mEffects.mList.end(); ++effectIt)
                     {
-                        if (effectIt->mArea == ESM::RT_Target)
+                        if (effectIt->mRange == ESM::RT_Target)
                         {
                             const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
                             dist = effect->mData.mSpeed;
@@ -1029,7 +1029,7 @@ namespace MWMechanics
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt =
              spell->mEffects.mList.begin(); effectIt != spell->mEffects.mList.end(); ++effectIt)
         {
-            if (effectIt->mArea == ESM::RT_Target)
+            if (effectIt->mRange == ESM::RT_Target)
             {
                 if (!MWBase::Environment::get().getWorld()->isSwimming(enemy))
                     mult = fAIRangeMagicSpellMult;
