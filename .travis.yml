@@ -19,7 +19,7 @@ env:
    - secure: "MegynKyJpyL7XDwdWVEbypQh7CLjqOqOi9lGF97G7Fq0HosVZTmnwjHhmIPZspTP7ES4UbxM3rs/f3ce7sp9JN2ShRJpduD6UEFc8egQXBte9J3obUBIdUxPTRdhnht7VJ+u+pksK1S/Bm1Cs6l0eEluP3vmcaXWMykVQcZsPhY="
    # macOS builds FTP upload password
    - secure: "jQcAaWAdDy0+vlNu4POMX8322HanCOQEUTdpviWTAUjWQTjMa0UTM4+zVVgrtEaHMpBaVYYbTT3Rg5BQ9oG+2SiVLJBQQ2XoMcos/YrjPVT6inB02Gs0vFjP29LdPAQVrB8CkAcfQr6u+Z2C+RqAtwhE09LsBUMXjRDzPAtr1CM="
-   - macos_qt_formula=qt@5.5
+   - macos_qt_formula=qt@5.7
 addons:
   apt:
     sources:
