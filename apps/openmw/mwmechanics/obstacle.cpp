@@ -1,8 +1,11 @@
 #include "obstacle.hpp"
 
+#include <osg/Group>
+
 #include <components/esm/loadcell.hpp>
 
 #include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 
@@ -23,51 +26,34 @@ namespace MWMechanics
         { -1.0f, -1.0f }    // move to side and backwards
     };
 
-    // Proximity check function for interior doors.  Given that most interior cells
-    // do not have many doors performance shouldn't be too much of an issue.
-    //
-    // Limitation: there can be false detections, and does not test whether the
-    // actor is facing the door.
-    bool proximityToDoor(const MWWorld::Ptr& actor, float minSqr)
+    bool proximityToDoor(const MWWorld::Ptr& actor, float minDist)
     {
-        if(getNearbyDoor(actor, minSqr)!=MWWorld::Ptr())
+        if(getNearbyDoor(actor, minDist)!=MWWorld::Ptr())
             return true;
         else
             return false;
     }
 
-    MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minSqr)
+    MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minDist)
     {
-        MWWorld::CellStore *cell = actor.getCell();
+        osg::Vec3f origin = MWBase::Environment::get().getWorld()->getActorHeadTransform(actor).getTrans();
 
-        if(cell->getCell()->isExterior())
-            return MWWorld::Ptr(); // check interior cells only
+        osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0))
+                * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0,0,-1));
 
-        // Check all the doors in this cell
-        const MWWorld::CellRefList<ESM::Door>& doors = cell->getReadOnlyDoors();
-        const MWWorld::CellRefList<ESM::Door>::List& refList = doors.mList;
-        MWWorld::CellRefList<ESM::Door>::List::const_iterator it = refList.begin();
+        osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
+        osg::Vec3f dest = origin + direction * minDist;
+
         osg::Vec3f pos(actor.getRefData().getPosition().asVec3());
+        MWPhysics::PhysicsSystem::RayResult result = MWBase::Environment::get().getWorld()->castRayTest(pos.x(), pos.y(), pos.z(), dest.x(), dest.y(), dest.z());
 
-        /// TODO: How to check whether the actor is facing a door? Below code is for
-        ///       the player, perhaps it can be adapted.
-        //MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getFacedObject();
-        //if(!ptr.isEmpty())
-            //std::cout << "faced door " << ptr.getClass().getName(ptr) << std::endl;
+        if (!result.mHit || result.mHitObject.isEmpty())
+            return MWWorld::Ptr(); // none found
 
-        /// TODO: The in-game observation of rot[2] value seems to be the
-        ///       opposite of the code in World::activateDoor() ::confused::
-        for (; it != refList.end(); ++it)
-        {
-            const MWWorld::LiveCellRef<ESM::Door>& ref = *it;
-            if((pos - ref.mData.getPosition().asVec3()).length2() < minSqr
-                    && ref.mData.getPosition().rot[2] == ref.mRef.getPosition().rot[2])
-            {
-                // FIXME cast
-                return MWWorld::Ptr(&const_cast<MWWorld::LiveCellRef<ESM::Door> &>(ref), actor.getCell()); // found, stop searching
-            }
-        }
-        return MWWorld::Ptr(); // none found
+        if (result.mHitObject.getClass().getTypeName() == typeid(ESM::Door).name() && !result.mHitObject.getCellRef().getTeleport())
+            return result.mHitObject;
+
+        return MWWorld::Ptr();
     }
 
     ObstacleCheck::ObstacleCheck():

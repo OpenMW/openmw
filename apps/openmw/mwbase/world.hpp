@@ -10,6 +10,7 @@
 #include "../mwworld/ptr.hpp"
 
 #include "../mwrender/rendermode.hpp"
+#include "../mwphysics/physicssystem.hpp"
 
 namespace osg
 {
@@ -298,6 +299,9 @@ namespace MWBase
 
             virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
             ///< cast a Ray and return true if there is an object in the ray path.
+
+            virtual MWPhysics::PhysicsSystem::RayResult castRayTest (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
+            ///< cast a rendering ray and return ray result.
 
             virtual bool toggleCollisionMode() = 0;
             ///< Toggle collision mode for player. If disabled player object should ignore

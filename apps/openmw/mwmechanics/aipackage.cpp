@@ -176,7 +176,9 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float dur
     if (!mObstacleCheck.check(actor, duration)) return;
 
     // first check if obstacle is a door
-    MWWorld::Ptr door = getNearbyDoor(actor); // NOTE: checks interior cells only
+    static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
+
+    MWWorld::Ptr door = getNearbyDoor(actor, distance);
     if (door != MWWorld::Ptr())
     {
         // note: AiWander currently does not open doors
