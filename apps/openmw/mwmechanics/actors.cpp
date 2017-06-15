@@ -9,6 +9,8 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -29,6 +31,7 @@
 #include "movement.hpp"
 #include "character.hpp"
 #include "aicombat.hpp"
+#include "aicombataction.hpp"
 #include "aifollow.hpp"
 #include "aipursue.hpp"
 #include "actor.hpp"
@@ -55,7 +58,7 @@ void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& a
             MWWorld::Ptr newPtr = *store.MWWorld::ContainerStore::add(item, 1, actor);
             MWWorld::ActionEquip action(newPtr);
             action.execute(actor);
-            MWWorld::ContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            MWWorld::ConstContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             // change draw state only if the item is in player's right hand
             if (actor == MWMechanics::getPlayer()
                     && rightHand != store.end() && newPtr == *rightHand)
@@ -75,7 +78,7 @@ class CheckActorCommanded : public MWMechanics::EffectSourceVisitor
     MWWorld::Ptr mActor;
 public:
     bool mCommanded;
-    CheckActorCommanded(MWWorld::Ptr actor)
+    CheckActorCommanded(const MWWorld::Ptr& actor)
         : mActor(actor)
     , mCommanded(false){}
 
@@ -83,15 +86,14 @@ public:
                              const std::string& sourceName, const std::string& sourceId, int casterActorId,
                         float magnitude, float remainingTime = -1, float totalTime = -1)
     {
-        MWWorld::Ptr player = MWMechanics::getPlayer();
-        if (    ((key.mId == ESM::MagicEffect::CommandHumanoid && mActor.getClass().isNpc())
-                || (key.mId == ESM::MagicEffect::CommandCreature && mActor.getTypeName() == typeid(ESM::Creature).name()))
-            && casterActorId == player.getClass().getCreatureStats(player).getActorId()
+        if (((key.mId == ESM::MagicEffect::CommandHumanoid && mActor.getClass().isNpc())
+            || (key.mId == ESM::MagicEffect::CommandCreature && mActor.getTypeName() == typeid(ESM::Creature).name()))
             && magnitude >= mActor.getClass().getCreatureStats(mActor).getLevel())
                 mCommanded = true;
     }
 };
 
+// Check for command effects having ended and remove package if necessary
 void adjustCommandedActor (const MWWorld::Ptr& actor)
 {
     CheckActorCommanded check(actor);
@@ -111,16 +113,8 @@ void adjustCommandedActor (const MWWorld::Ptr& actor)
         }
     }
 
-    if (check.mCommanded && !hasCommandPackage)
-    {
-        // FIXME: don't use refid string
-        MWMechanics::AiFollow package("player", true);
-        stats.getAiSequence().stack(package, actor);
-    }
-    else if (!check.mCommanded && hasCommandPackage)
-    {
+    if (!check.mCommanded && hasCommandPackage)
         stats.getAiSequence().erase(it);
-    }
 }
 
 void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float& magicka)
@@ -155,7 +149,7 @@ namespace MWMechanics
         MWWorld::Ptr mActor;
         bool mTrapped;
     public:
-        SoulTrap(MWWorld::Ptr trappedCreature)
+        SoulTrap(const MWWorld::Ptr& trappedCreature)
             : mCreature(trappedCreature)
             , mTrapped(false)
         {
@@ -284,12 +278,14 @@ namespace MWMechanics
         }
     }
 
-    void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer)
+    void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies, bool againstPlayer)
     {
-        CreatureStats& creatureStats = actor1.getClass().getCreatureStats(actor1);
+        CreatureStats& creatureStats1 = actor1.getClass().getCreatureStats(actor1);
+        if (creatureStats1.getAiSequence().isInCombat(actor2))
+            return;
 
-        if (actor2.getClass().getCreatureStats(actor2).isDead()
-                || actor1.getClass().getCreatureStats(actor1).isDead())
+        const CreatureStats& creatureStats2 = actor2.getClass().getCreatureStats(actor2);
+        if (creatureStats1.isDead() || creatureStats2.isDead())
             return;
 
         const ESM::Position& actor1Pos = actor1.getRefData().getPosition();
@@ -298,81 +294,131 @@ namespace MWMechanics
         if (sqrDist > sqrAiProcessingDistance)
             return;
 
-        // pure water creatures won't try to fight with the target on the ground
-        // except that creature is already hostile
-        if ((againstPlayer || !creatureStats.getAiSequence().isInCombat())
-            && !MWMechanics::isEnvironmentCompatible(actor1, actor2)) // creature can't swim to target
-        {
-            return;
-        }
-
-        // no combat for totally static creatures (they have no movement or attack animations anyway)
+        // No combat for totally static creatures
         if (!actor1.getClass().isMobile(actor1))
             return;
 
-        bool aggressive;
+        // If this is set to true, actor1 will start combat with actor2 if the awareness check at the end of the method returns true
+        bool aggressive = false;
 
-        if (againstPlayer)
+        // Get actors allied with actor1. Includes those following or escorting actor1, actors following or escorting those actors, (recursive)
+        // and any actor currently being followed or escorted by actor1
+        std::set<MWWorld::Ptr> allies1;
+
+        getActorsSidingWith(actor1, allies1, cachedAllies);
+
+        // If an ally of actor1 has been attacked by actor2 or has attacked actor2, start combat between actor1 and actor2
+        for (std::set<MWWorld::Ptr>::const_iterator it = allies1.begin(); it != allies1.end(); ++it)
         {
-            // followers with high fight should not engage in combat with the player (e.g. bm_bear_black_summon)
-            const std::list<MWWorld::Ptr>& followers = getActorsSidingWith(actor2);
-            if (std::find(followers.begin(), followers.end(), actor1) != followers.end())
-                return;
+            if (creatureStats1.getAiSequence().isInCombat(*it))
+                continue;
 
-            aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
-        }
-        else
-        {
-            aggressive = false;
-
-            // Make guards fight aggressive creatures
-            if (!actor1.getClass().isNpc() && actor2.getClass().isClass(actor2, "Guard"))
+            if (creatureStats2.matchesActorId(it->getClass().getCreatureStats(*it).getHitAttemptActorId()))
             {
-                if (creatureStats.getAiSequence().isInCombat() && MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2))
-                    aggressive = true;
+                MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
+                // Also set the same hit attempt actor. Otherwise, if fighting the player, they may stop combat
+                // if the player gets out of reach, while the ally would continue combat with the player
+                creatureStats1.setHitAttemptActorId(it->getClass().getCreatureStats(*it).getHitAttemptActorId());
+                return;
+            }
+
+            // If there's been no attack attempt yet but an ally of actor1 is in combat with actor2, become aggressive to actor2
+            if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(actor2))
+                aggressive = true;
+        }
+
+        std::set<MWWorld::Ptr> playerAllies;
+        getActorsSidingWith(MWMechanics::getPlayer(), playerAllies, cachedAllies);
+
+        bool isPlayerFollowerOrEscorter = std::find(playerAllies.begin(), playerAllies.end(), actor1) != playerAllies.end();
+
+        // If actor2 and at least one actor2 are in combat with actor1, actor1 and its allies start combat with them
+        // Doesn't apply for player followers/escorters
+        if (!aggressive && !isPlayerFollowerOrEscorter)
+        {
+            // Check that actor2 is in combat with actor1
+            if (actor2.getClass().getCreatureStats(actor2).getAiSequence().isInCombat(actor1))
+            {
+                std::set<MWWorld::Ptr> allies2;
+
+                getActorsSidingWith(actor2, allies2, cachedAllies);
+
+                // Check that an ally of actor2 is also in combat with actor1
+                for (std::set<MWWorld::Ptr>::const_iterator it = allies2.begin(); it != allies2.end(); ++it)
+                {
+                    if ((it)->getClass().getCreatureStats(*it).getAiSequence().isInCombat(actor1))
+                    {
+                        MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
+                        // Also have actor1's allies start combat
+                        for (std::set<MWWorld::Ptr>::const_iterator it2 = allies1.begin(); it2 != allies1.end(); ++it2)
+                            MWBase::Environment::get().getMechanicsManager()->startCombat(*it2, actor2);
+                        return;
+                    }
+                }
             }
         }
 
-        // start combat if target actor is in combat with one of our followers
-        const std::list<MWWorld::Ptr>& followers = getActorsSidingWith(actor1);
-        const CreatureStats& creatureStats2 = actor2.getClass().getCreatureStats(actor2);
-        for (std::list<MWWorld::Ptr>::const_iterator it = followers.begin(); it != followers.end(); ++it)
+        // If set in the settings file, player followers and escorters will become aggressive toward enemies in combat with them or the player
+        static const bool followersAttackOnSight = Settings::Manager::getBool("followers attack on sight", "Game");
+        if (!aggressive && isPlayerFollowerOrEscorter && followersAttackOnSight)
         {
-            // need to check both ways since player doesn't use AI packages
-            if ((creatureStats2.getAiSequence().isInCombat(*it)
-                    || it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(actor2))
-                    && !creatureStats.getAiSequence().isInCombat(*it))
+            if (actor2.getClass().getCreatureStats(actor2).getAiSequence().isInCombat(actor1))
+                aggressive = true;
+            else
+            {
+                for (std::set<MWWorld::Ptr>::const_iterator it = allies1.begin(); it != allies1.end(); ++it)
+                {
+                    if (actor2.getClass().getCreatureStats(actor2).getAiSequence().isInCombat(*it))
+                    {
+                        aggressive = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Stop here if target is unreachable
+        if (!MWMechanics::canFight(actor1, actor2))
+            return;
+
+        // Do aggression check if actor2 is the player or a player follower or escorter
+        if (!aggressive)
+        {
+            if (againstPlayer || std::find(playerAllies.begin(), playerAllies.end(), actor2) != playerAllies.end())
+            {
+                // Player followers and escorters with high fight should not initiate combat with the player or with
+                // other player followers or escorters
+                if (std::find(playerAllies.begin(), playerAllies.end(), actor1) == playerAllies.end())
+                    aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
+            }
+        }
+
+        // Make guards go aggressive with creatures that are in combat, unless the creature is a follower or escorter
+        if (actor1.getClass().isClass(actor1, "Guard") && !actor2.getClass().isNpc())
+        {
+            bool followerOrEscorter = false;
+            for (std::list<MWMechanics::AiPackage*>::const_iterator it = creatureStats2.getAiSequence().begin(); it != creatureStats2.getAiSequence().end(); ++it)
+            {
+                // The follow package must be first or have nothing but combat before it
+                if ((*it)->sideWithTarget())
+                {
+                    followerOrEscorter = true;
+                    break;
+                }
+                else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
+                    break;
+            }
+            if (!followerOrEscorter && creatureStats2.getAiSequence().isInCombat())
                 aggressive = true;
         }
 
-        // start combat if target actor is in combat with someone we are following
-        for (std::list<MWMechanics::AiPackage*>::const_iterator it = creatureStats.getAiSequence().begin(); it != creatureStats.getAiSequence().end(); ++it)
-        {
-            if (!(*it)->sideWithTarget())
-                continue;
-
-            MWWorld::Ptr followTarget = (*it)->getTarget();
-
-            if (followTarget.isEmpty())
-                continue;
-
-            if (creatureStats.getAiSequence().isInCombat(followTarget))
-                continue;
-
-            // need to check both ways since player doesn't use AI packages
-            if (creatureStats2.getAiSequence().isInCombat(followTarget)
-                    || followTarget.getClass().getCreatureStats(followTarget).getAiSequence().isInCombat(actor2))
-                aggressive = true;
-        }
-
-        if(aggressive)
+        // If any of the above conditions turned actor1 aggressive towards actor2, do an awareness check. If it passes, start combat with actor2.
+        if (aggressive)
         {
             bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor1, actor2);
-
-            if (againstPlayer) LOS &= MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor2, actor1);
+            LOS &= MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor2, actor1);
 
             if (LOS)
-            {
                 MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
                 if (!againstPlayer) // start combat between each other if engaging actor is not one of the player followers
                 {
@@ -390,7 +436,6 @@ namespace MWMechanics
     {
         updateDrowning(ptr, duration);
         calculateNpcStatModifiers(ptr, duration);
-        updateEquippedLight(ptr, duration);
     }
 
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
@@ -558,6 +603,21 @@ namespace MWMechanics
             }
         }
 
+        // purge levitate effect if levitation is disabled
+        // check only modifier, because base value can be setted from SetFlying console command.
+        if (MWBase::Environment::get().getWorld()->isLevitationEnabled() == false && effects.get(ESM::MagicEffect::Levitate).getModifier() > 0)
+        {
+            creatureStats.getSpells().purgeEffect(ESM::MagicEffect::Levitate);
+            creatureStats.getActiveSpells().purgeEffect(ESM::MagicEffect::Levitate);
+            if (ptr.getClass().hasInventoryStore(ptr))
+                ptr.getClass().getInventoryStore(ptr).purgeEffect(ESM::MagicEffect::Levitate);
+
+            if (ptr == getPlayer())
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox ("#{sLevitateDisabled}");
+            }
+        }
+
         // attributes
         for(int i = 0;i < ESM::Attribute::Length;++i)
         {
@@ -672,16 +732,8 @@ namespace MWMechanics
 
         // any value of calm > 0 will stop the actor from fighting
         if ((effects.get(ESM::MagicEffect::CalmHumanoid).getMagnitude() > 0 && ptr.getClass().isNpc())
-                || (effects.get(ESM::MagicEffect::CalmCreature).getMagnitude() > 0 && !ptr.getClass().isNpc()))
-        {
-            for (std::list<AiPackage*>::const_iterator it = creatureStats.getAiSequence().begin(); it != creatureStats.getAiSequence().end(); )
-            {
-                if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
-                    it = creatureStats.getAiSequence().erase(it);
-                else
-                    ++it;
-            }
-        }
+            || (effects.get(ESM::MagicEffect::CalmCreature).getMagnitude() > 0 && !ptr.getClass().isNpc()))
+            creatureStats.getAiSequence().stopCombat();
 
         // Update bound effects
         // Note: in vanilla MW multiple bound items of the same type can be created by different spells.
@@ -730,11 +782,19 @@ namespace MWMechanics
             }
         }
 
-        UpdateSummonedCreatures updateSummonedCreatures(ptr);
-        creatureStats.getActiveSpells().visitEffectSources(updateSummonedCreatures);
-        if (ptr.getClass().hasInventoryStore(ptr))
-            ptr.getClass().getInventoryStore(ptr).visitEffectSources(updateSummonedCreatures);
-        updateSummonedCreatures.process();
+        bool hasSummonEffect = false;
+        for (MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
+            if (isSummoningEffect(it->first.mId))
+                hasSummonEffect = true;
+
+        if (!creatureStats.getSummonedCreatureMap().empty() || !creatureStats.getSummonedCreatureGraveyard().empty() || hasSummonEffect)
+        {
+            UpdateSummonedCreatures updateSummonedCreatures(ptr);
+            creatureStats.getActiveSpells().visitEffectSources(updateSummonedCreatures);
+            if (ptr.getClass().hasInventoryStore(ptr))
+                ptr.getClass().getInventoryStore(ptr).visitEffectSources(updateSummonedCreatures);
+            updateSummonedCreatures.process();
+        }
     }
 
     void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr, float duration)
@@ -760,6 +820,12 @@ namespace MWMechanics
         CharacterController* ctrl = it->second->getCharacterController();
 
         NpcStats &stats = ptr.getClass().getNpcStats(ptr);
+
+        // When npc stats are just initialized, mTimeToStartDrowning == -1 and we should get value from GMST
+        static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->getFloat();
+        if (stats.getTimeToStartDrowning() == -1.f)
+            stats.setTimeToStartDrowning(fHoldBreathTime);
+
         MWBase::World *world = MWBase::Environment::get().getWorld();
         bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
         if((world->isSubmerged(ptr) || knockedOutUnderwater)
@@ -775,7 +841,10 @@ namespace MWMechanics
                     timeLeft = 0.0f;
                 stats.setTimeToStartDrowning(timeLeft);
             }
-            if(timeLeft == 0.0f)
+
+            bool godmode = ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+
+            if(timeLeft == 0.0f && !godmode)
             {
                 // If drowning, apply 3 points of damage per second
                 static const float fSuffocationDamage = world->getStore().get<ESM::GameSetting>().find("fSuffocationDamage")->getFloat();
@@ -793,10 +862,7 @@ namespace MWMechanics
             }
         }
         else
-        {
-            static const float fHoldBreathTime = world->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->getFloat();
             stats.setTimeToStartDrowning(fHoldBreathTime);
-        }
     }
 
     void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)
@@ -921,7 +987,10 @@ namespace MWMechanics
                 {
                     static const int iCrimeThresholdMultiplier = esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->getInt();
                     if (player.getClass().getNpcStats(player).getBounty() >= cutoff * iCrimeThresholdMultiplier)
+                    {
                         MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, player);
+                        creatureStats.setHitAttemptActorId(player.getClass().getCreatureStats(player).getActorId()); // Stops the guard from quitting combat if player is unreachable
+                    }
                     else
                         creatureStats.getAiSequence().stack(AiPursue(player), ptr);
                     creatureStats.setAlarmed(true);
@@ -1015,16 +1084,21 @@ namespace MWMechanics
         {
             static float timerUpdateAITargets = 0;
             static float timerUpdateHeadTrack = 0;
+            static float timerUpdateEquippedLight = 0;
+            const float updateEquippedLightInterval = 1.0f;
 
             // target lists get updated once every 1.0 sec
             if (timerUpdateAITargets >= 1.0f) timerUpdateAITargets = 0;
             if (timerUpdateHeadTrack >= 0.3f) timerUpdateHeadTrack = 0;
+            if (timerUpdateEquippedLight >= updateEquippedLightInterval) timerUpdateEquippedLight = 0;
 
             MWWorld::Ptr player = getPlayer();
 
             int hostilesCount = 0; // need to know this to play Battle music
 
             /// \todo move update logic to Actor class where appropriate
+
+            std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> > cachedAllies; // will be filled as engageCombat iterates
 
              // AI and magic effects update
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
@@ -1041,10 +1115,25 @@ namespace MWMechanics
                 if (iter->first == player)
                     iter->second->getCharacterController()->setAttackingOrSpell(MWBase::Environment::get().getWorld()->getPlayer().getAttackingOrSpell());
 
+                // If dead or no longer in combat, no longer store any actors who attempted to hit us. Also remove for the player.
+                if (iter->first != player && (iter->first.getClass().getCreatureStats(iter->first).isDead()
+                    || !iter->first.getClass().getCreatureStats(iter->first).getAiSequence().isInCombat()
+                    || !inProcessingRange))
+                {
+                    iter->first.getClass().getCreatureStats(iter->first).setHitAttemptActorId(-1);
+                    if (player.getClass().getCreatureStats(player).getHitAttemptActorId() == iter->first.getClass().getCreatureStats(iter->first).getActorId())
+                        player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
+                }
+
+                const MWWorld::Ptr playerHitAttemptActor = MWBase::Environment::get().getWorld()->searchPtrViaActorId(player.getClass().getCreatureStats(player).getHitAttemptActorId());
+
+                if (!playerHitAttemptActor.isInCell())
+                    player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
+
                 if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
                 {
-                    MWWorld::Ptr actor = iter->first; // make a copy of the map key to avoid it being invalidated when the player teleports
                     bool cellChanged = MWBase::Environment::get().getWorld()->hasCellChanged();
+                    MWWorld::Ptr actor = iter->first; // make a copy of the map key to avoid it being invalidated when the player teleports
                     updateActor(actor, duration);
                     if (!cellChanged && MWBase::Environment::get().getWorld()->hasCellChanged())
                     {
@@ -1062,7 +1151,7 @@ namespace MWMechanics
                             {
                                 if (it->first == iter->first || iter->first == player) // player is not AI-controlled
                                     continue;
-                                engageCombat(iter->first, it->first, it->first == player);
+                                engageCombat(iter->first, it->first, cachedAllies, it->first == player);
                             }
                         }
                         if (timerUpdateHeadTrack == 0)
@@ -1093,12 +1182,18 @@ namespace MWMechanics
                     }
 
                     if(iter->first.getTypeName() == typeid(ESM::NPC).name())
+                    {
                         updateNpc(iter->first, duration);
+
+                        if (timerUpdateEquippedLight == 0)
+                            updateEquippedLight(iter->first, updateEquippedLightInterval);
+                    }
                 }
             }
 
             timerUpdateAITargets += duration;
             timerUpdateHeadTrack += duration;
+            timerUpdateEquippedLight += duration;
 
             // Looping magic VFX update
             // Note: we need to do this before any of the animations are updated.
@@ -1411,7 +1506,7 @@ namespace MWMechanics
         }
         else
         {
-            std::cerr<< "Error in Actors::playAnimationGroup:  Unable to find " << ptr.getCellRef().getRefId() << std::endl;
+            std::cerr<< "Warning: Actors::playAnimationGroup:  Unable to find " << ptr.getCellRef().getRefId() << std::endl;
             return false;
         }
     }
@@ -1451,17 +1546,35 @@ namespace MWMechanics
         for(PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
         {
             const MWWorld::Class &cls = iter->first.getClass();
-            CreatureStats &stats = cls.getCreatureStats(iter->first);
+            const CreatureStats &stats = cls.getCreatureStats(iter->first);
             if (stats.isDead())
                 continue;
 
-            // An actor counts as following if AiFollow or AiEscort is the current AiPackage, or there are only Combat packages before the AiFollow/AiEscort package
+            // An actor counts as siding with this actor if Follow or Escort is the current AI package, or there are only Combat packages before the Follow/Escort package
             for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
             {
                 if ((*it)->sideWithTarget() && (*it)->getTarget() == actor)
+                {
                     list.push_back(iter->first);
+                    break;
+                }
                 else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
                     break;
+            }
+            // Actors that are targeted by this actor's Follow or Escort packages also side with them
+            if (actor != getPlayer())
+            {
+                const CreatureStats &stats2 = actor.getClass().getCreatureStats(actor);
+                for (std::list<MWMechanics::AiPackage*>::const_iterator it2 = stats2.getAiSequence().begin(); it2 != stats2.getAiSequence().end(); ++it2)
+                {
+                    if ((*it2)->sideWithTarget() && !(*it2)->getTarget().isEmpty())
+                    {
+                        list.push_back((*it2)->getTarget());
+                        break;
+                    }
+                    else if ((*it2)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
+                        break;
+                }
             }
         }
         return list;
@@ -1503,6 +1616,29 @@ namespace MWMechanics
                 getActorsSidingWith(*it, out);
     }
 
+    void Actors::getActorsSidingWith(const MWWorld::Ptr &actor, std::set<MWWorld::Ptr>& out, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies) {
+        // If we have already found actor's allies, use the cache
+        std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >::const_iterator search = cachedAllies.find(actor);
+        if (search != cachedAllies.end())
+            out.insert(search->second.begin(), search->second.end());
+        else
+        {
+            std::list<MWWorld::Ptr> followers = getActorsSidingWith(actor);
+            for (std::list<MWWorld::Ptr>::iterator it = followers.begin(); it != followers.end(); ++it)
+                if (out.insert(*it).second)
+                    getActorsSidingWith(*it, out, cachedAllies);
+
+            // Cache ptrs and their sets of allies
+            cachedAllies.insert(std::make_pair(actor, out));
+            for (std::set<MWWorld::Ptr>::const_iterator it = out.begin(); it != out.end(); ++it)
+            {
+                search = cachedAllies.find(*it);
+                if (search == cachedAllies.end())
+                    cachedAllies.insert(std::make_pair(*it, out));
+            }
+        }
+    }
+
     std::list<int> Actors::getActorsFollowingIndices(const MWWorld::Ptr &actor)
     {
         std::list<int> list;
@@ -1531,8 +1667,6 @@ namespace MWMechanics
         }
         return list;
     }
-
-
 
     std::list<MWWorld::Ptr> Actors::getActorsFighting(const MWWorld::Ptr& actor) {
         std::list<MWWorld::Ptr> list;

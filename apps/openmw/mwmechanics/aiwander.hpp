@@ -122,7 +122,7 @@ namespace MWMechanics
             /// convert point from local (i.e. cell) to world coordinates
             void ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell * cell);
 
-            void SetCurrentNodeToClosestAllowedNode(osg::Vec3f npcPos, AiWanderStorage& storage);
+            void SetCurrentNodeToClosestAllowedNode(const osg::Vec3f& npcPos, AiWanderStorage& storage);
 
             void AddNonPathGridAllowedPoints(osg::Vec3f npcPos, const ESM::Pathgrid * pathGrid, int pointIndex, AiWanderStorage& storage);
 

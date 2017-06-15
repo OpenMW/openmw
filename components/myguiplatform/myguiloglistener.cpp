@@ -1,9 +1,6 @@
 #include "myguiloglistener.hpp"
 
 #include <iomanip>
-#include <time.h>
-
-#include <boost/filesystem/path.hpp>
 
 namespace osgMyGUI
 {

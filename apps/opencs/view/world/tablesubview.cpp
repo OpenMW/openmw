@@ -78,8 +78,8 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
         mTable, SLOT (requestFocus (const std::string&)));
 
     connect (mFilterBox,
-        SIGNAL (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>)),
-        mTable, SLOT (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>)));
+        SIGNAL (recordFilterChanged (std::shared_ptr<CSMFilter::Node>)),
+        mTable, SLOT (recordFilterChanged (std::shared_ptr<CSMFilter::Node>)));
 
     connect(mFilterBox, SIGNAL(recordDropped(std::vector<CSMWorld::UniversalId>&, Qt::DropAction)),
         this, SLOT(createFilterRequest(std::vector<CSMWorld::UniversalId>&, Qt::DropAction)));

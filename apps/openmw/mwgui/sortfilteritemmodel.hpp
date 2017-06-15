@@ -41,6 +41,7 @@ namespace MWGui
         static const int Filter_OnlyUsableItems = (1<<4); // Only items with a Use action
         static const int Filter_OnlyRepairable = (1<<5);
         static const int Filter_OnlyRechargable = (1<<6);
+        static const int Filter_OnlyRepairTools = (1<<7);
 
 
     private:

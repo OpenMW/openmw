@@ -19,9 +19,9 @@ The largest difference between OpenMW and Morrowind in terms of data structure i
 
 To install mods via this new feature:
 
-#.	Open ``openmw.cfg`` with your preffered text editor. It is located as described in https://wiki.openmw.org/index.php?title=Paths and *not* in your OpenMW root directory.
+#.	Open ``openmw.cfg`` with your preffered text editor. It is located as described in :doc:`paths` and *not* in your OpenMW root directory.
 #.	Find or search for ``data=``. This is located very near the bottom of the file.
-#.	Add a new line below this line and make a new entry of the format ``data=path/to/your/mod``
+#.	Add a new line below this line and make a new entry of the format ``data="path/to/your/mod"``
 #.	Make as many of these entries as you need for each mod folder you want to include.
 #.	Save ``openmw.cfg``
 

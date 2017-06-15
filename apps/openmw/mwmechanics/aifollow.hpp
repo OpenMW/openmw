@@ -37,6 +37,7 @@ namespace MWMechanics
             MWWorld::Ptr getTarget() const;
             virtual bool sideWithTarget() const { return true; }
             virtual bool followTargetThroughDoors() const { return true; }
+            virtual bool shouldCancelPreviousAi() const { return !mCommanded; }
 
             virtual AiFollow *clone() const;
 

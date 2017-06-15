@@ -725,7 +725,7 @@ namespace MWMechanics
         }
         else
         {
-            std::cerr<< "Attempted to play out of range idle animation \""<<idleSelect<<"\" for " << actor.getCellRef().getRefId() << std::endl;
+            std::cerr<< "Error: Attempted to play out of range idle animation \""<<idleSelect<<"\" for " << actor.getCellRef().getRefId() << std::endl;
             return false;
         }
     }
@@ -893,7 +893,7 @@ namespace MWMechanics
         storage.mAllowedNodes.push_back(PathFinder::MakePathgridPoint(vectorStart + delta));
     }
 
-    void AiWander::SetCurrentNodeToClosestAllowedNode(osg::Vec3f npcPos, AiWanderStorage& storage)
+    void AiWander::SetCurrentNodeToClosestAllowedNode(const osg::Vec3f& npcPos, AiWanderStorage& storage)
     {
         float distanceToClosestNode = std::numeric_limits<float>::max();
         unsigned int index = 0;
@@ -919,7 +919,7 @@ namespace MWMechanics
         else
             remainingDuration = mDuration;
 
-        std::auto_ptr<ESM::AiSequence::AiWander> wander(new ESM::AiSequence::AiWander());
+        std::unique_ptr<ESM::AiSequence::AiWander> wander(new ESM::AiSequence::AiWander());
         wander->mData.mDistance = mDistance;
         wander->mData.mDuration = mDuration;
         wander->mData.mTimeOfDay = mTimeOfDay;

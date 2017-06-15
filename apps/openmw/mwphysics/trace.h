@@ -15,6 +15,7 @@ namespace MWPhysics
     {
         osg::Vec3f mEndPos;
         osg::Vec3f mPlaneNormal;
+        osg::Vec3f mHitPoint;
         const btCollisionObject* mHitObject;
 
         float mFraction;

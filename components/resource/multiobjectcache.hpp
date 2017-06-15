@@ -33,12 +33,14 @@ namespace Resource
         /** call releaseGLObjects on all objects attached to the object cache.*/
         void releaseGLObjects(osg::State* state);
 
+        unsigned int getCacheSize() const;
+
     protected:
 
         typedef std::multimap<std::string, osg::ref_ptr<osg::Object> >             ObjectCacheMap;
 
         ObjectCacheMap                          _objectCache;
-        OpenThreads::Mutex                      _objectCacheMutex;
+        mutable OpenThreads::Mutex              _objectCacheMutex;
 
     };
 

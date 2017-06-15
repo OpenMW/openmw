@@ -632,7 +632,7 @@ namespace CSVRender
         getCamera()->getViewMatrix().orthoNormal(getCamera()->getViewMatrix());
     }
 
-    void OrbitCameraController::onActivate()
+    void OrbitCameraController::reset()
     {
         mInitialized = false;
     }

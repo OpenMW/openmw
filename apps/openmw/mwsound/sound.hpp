@@ -1,6 +1,8 @@
 #ifndef GAME_SOUND_SOUND_H
 #define GAME_SOUND_SOUND_H
 
+#include <algorithm>
+
 #include "sound_output.hpp"
 
 namespace MWSound

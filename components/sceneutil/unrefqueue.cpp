@@ -2,7 +2,6 @@
 
 #include <deque>
 
-#include <osg/Object>
 //#include <osg/Timer>
 //#include <iostream>
 
@@ -14,7 +13,7 @@ namespace SceneUtil
     class UnrefWorkItem : public SceneUtil::WorkItem
     {
     public:
-        std::deque<osg::ref_ptr<const osg::Object> > mObjects;
+        std::deque<osg::ref_ptr<const osg::Referenced> > mObjects;
 
         virtual void doWork()
         {
@@ -30,7 +29,7 @@ namespace SceneUtil
         mWorkItem = new UnrefWorkItem;
     }
 
-    void UnrefQueue::push(const osg::Object *obj)
+    void UnrefQueue::push(const osg::Referenced *obj)
     {
         mWorkItem->mObjects.push_back(obj);
     }
@@ -43,6 +42,11 @@ namespace SceneUtil
         workQueue->addWorkItem(mWorkItem, true);
 
         mWorkItem = new UnrefWorkItem;
+    }
+
+    unsigned int UnrefQueue::getNumItems() const
+    {
+        return mWorkItem->mObjects.size();
     }
 
 }

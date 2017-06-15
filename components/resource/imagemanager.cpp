@@ -1,7 +1,7 @@
 #include "imagemanager.hpp"
 
+#include <cassert>
 #include <osgDB/Registry>
-#include <osg/GLExtensions>
 
 #include <components/vfs/manager.hpp>
 
@@ -139,6 +139,11 @@ namespace Resource
     osg::Image *ImageManager::getWarningImage()
     {
         return mWarningImage;
+    }
+
+    void ImageManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
+    {
+        stats->setAttribute(frameNumber, "Image", mCache->getCacheSize());
     }
 
 }

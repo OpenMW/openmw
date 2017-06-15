@@ -10,8 +10,6 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/ClipNode>
 #include <osg/FrontFace>
-#include <osg/Shader>
-#include <osg/GLExtensions>
 
 #include <osgDB/ReadFile>
 
@@ -28,9 +26,9 @@
 #include <components/sceneutil/waterutil.hpp>
 
 #include <components/nifosg/controller.hpp>
-#include <components/sceneutil/controller.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/shader/shadermanager.hpp>
+
 
 #include <components/esm/loadcell.hpp>
 
@@ -189,45 +187,22 @@ public:
     }
 };
 
-osg::ref_ptr<osg::Shader> readShader (osg::Shader::Type type, const std::string& file, const std::map<std::string, std::string>& defineMap = std::map<std::string, std::string>())
-{
-    osg::ref_ptr<osg::Shader> shader (new osg::Shader(type));
-
-    // use boost in favor of osg::Shader::readShaderFile, to handle utf-8 path issues on Windows
-    boost::filesystem::ifstream inStream;
-    inStream.open(boost::filesystem::path(file));
-    std::stringstream strstream;
-    strstream << inStream.rdbuf();
-
-    std::string shaderSource = strstream.str();
-
-    for (std::map<std::string, std::string>::const_iterator it = defineMap.begin(); it != defineMap.end(); ++it)
-    {
-        size_t pos = shaderSource.find(it->first);
-        if (pos != std::string::npos)
-            shaderSource.replace(pos, it->first.length(), it->second);
-    }
-
-    shader->setShaderSource(shaderSource);
-    return shader;
-}
-
 osg::ref_ptr<osg::Image> readPngImage (const std::string& file)
 {
     // use boost in favor of osgDB::readImage, to handle utf-8 path issues on Windows
     boost::filesystem::ifstream inStream;
     inStream.open(file, std::ios_base::in | std::ios_base::binary);
     if (inStream.fail())
-        std::cerr << "Failed to open " << file << std::endl;
+        std::cerr << "Error: Failed to open " << file << std::endl;
     osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
     if (!reader)
     {
-        std::cerr << "Failed to read " << file << ", no png readerwriter found" << std::endl;
+        std::cerr << "Error: Failed to read " << file << ", no png readerwriter found" << std::endl;
         return osg::ref_ptr<osg::Image>();
     }
     osgDB::ReaderWriter::ReadResult result = reader->readImage(inStream);
     if (!result.success())
-        std::cerr << "Failed to read " << file << ": " << result.message() << " code " << result.status() << std::endl;
+        std::cerr << "Error: Failed to read " << file << ": " << result.message() << " code " << result.status() << std::endl;
 
     return result.getImage();
 }
@@ -243,6 +218,8 @@ public:
         setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         setReferenceFrame(osg::Camera::RELATIVE_RF);
+        setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
+        setName("RefractionCamera");
 
         setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting);
         setNodeMask(Mask_RenderToTexture);
@@ -324,6 +301,8 @@ public:
         setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         setReferenceFrame(osg::Camera::RELATIVE_RF);
+        setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
+        setName("ReflectionCamera");
 
         bool reflectActors = Settings::Manager::getBool("reflect actors", "Water");
 
@@ -424,6 +403,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
         ico->add(mWaterGeom);
 
     mWaterNode = new osg::PositionAttitudeTransform;
+    mWaterNode->setName("Water Root");
     mWaterNode->addChild(mWaterGeom);
     mWaterNode->addCullCallback(new FudgeCallback);
 
@@ -504,7 +484,7 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
     float fps = mFallback->getFallbackFloat("Water_SurfaceFPS");
 
     osg::ref_ptr<NifOsg::FlipController> controller (new NifOsg::FlipController(0, 1.f/fps, textures));
-    controller->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
+    controller->setSource(std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
     node->setUpdateCallback(controller);
 
     stateset->setTextureAttributeAndModes(0, textures[0], osg::StateAttribute::ON);
@@ -524,10 +504,11 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
 {
     // use a define map to conditionally compile the shader
     std::map<std::string, std::string> defineMap;
-    defineMap.insert(std::make_pair(std::string("@refraction_enabled"), std::string(refraction ? "1" : "0")));
+    defineMap.insert(std::make_pair(std::string("refraction_enabled"), std::string(refraction ? "1" : "0")));
 
-    osg::ref_ptr<osg::Shader> vertexShader (readShader(osg::Shader::VERTEX, mResourcePath + "/shaders/water_vertex.glsl", defineMap));
-    osg::ref_ptr<osg::Shader> fragmentShader (readShader(osg::Shader::FRAGMENT, mResourcePath + "/shaders/water_fragment.glsl", defineMap));
+    Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
+    osg::ref_ptr<osg::Shader> vertexShader (shaderMgr.getShader("water_vertex.glsl", defineMap, osg::Shader::VERTEX));
+    osg::ref_ptr<osg::Shader> fragmentShader (shaderMgr.getShader("water_fragment.glsl", defineMap, osg::Shader::FRAGMENT));
 
     osg::ref_ptr<osg::Texture2D> normalMap (new osg::Texture2D(readPngImage(mResourcePath + "/shaders/water_nm.png")));
     if (normalMap->getImage())

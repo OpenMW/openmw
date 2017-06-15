@@ -1,7 +1,6 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include <exception>
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>

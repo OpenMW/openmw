@@ -291,11 +291,11 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_ArmorValue, ColumnBase::Display_Integer));
     const RefIdColumn *armor = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Scroll, ColumnBase::Display_Boolean));
-    const RefIdColumn *scroll = &mColumns.back();
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_BookType, ColumnBase::Display_BookType));
+    const RefIdColumn *bookType = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute));
-    const RefIdColumn *attribute = &mColumns.back();
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Skill, ColumnBase::Display_SkillId));
+    const RefIdColumn *skill = &mColumns.back();
 
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Text, ColumnBase::Display_LongString));
     const RefIdColumn *text = &mColumns.back();
@@ -346,15 +346,11 @@ CSMWorld::RefIdCollection::RefIdCollection()
         { Columns::ColumnId_Flies, ESM::Creature::Flies },
         { Columns::ColumnId_Walks, ESM::Creature::Walks },
         { Columns::ColumnId_Essential, ESM::Creature::Essential },
-        { Columns::ColumnId_SkeletonBlood, ESM::Creature::Skeleton },
-        { Columns::ColumnId_MetalBlood, ESM::Creature::Metal },
         { -1, 0 }
     };
 
     // for re-use in NPC records
     const RefIdColumn *essential = 0;
-    const RefIdColumn *skeletonBlood = 0;
-    const RefIdColumn *metalBlood = 0;
 
     for (int i=0; sCreatureFlagTable[i].mName!=-1; ++i)
     {
@@ -364,10 +360,13 @@ CSMWorld::RefIdCollection::RefIdCollection()
         switch (sCreatureFlagTable[i].mFlag)
         {
             case ESM::Creature::Essential: essential = &mColumns.back(); break;
-            case ESM::Creature::Skeleton: skeletonBlood = &mColumns.back(); break;
-            case ESM::Creature::Metal: metalBlood = &mColumns.back(); break;
         }
     }
+
+    mColumns.push_back(RefIdColumn(Columns::ColumnId_BloodType, ColumnBase::Display_BloodType));
+    // For re-use in NPC records.
+    const RefIdColumn *bloodType = &mColumns.back();
+    creatureColumns.mBloodType = bloodType;
 
     creatureColumns.mFlags.insert (std::make_pair (respawn, ESM::Creature::Respawn));
 
@@ -444,6 +443,9 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Sound, ColumnBase::Display_Sound));
     lightColumns.mSound = &mColumns.back();
 
+    mColumns.push_back(RefIdColumn(Columns::ColumnId_EmitterType, ColumnBase::Display_EmitterType));
+    lightColumns.mEmitterType = &mColumns.back();
+
     static const struct
     {
         int mName;
@@ -453,10 +455,6 @@ CSMWorld::RefIdCollection::RefIdCollection()
         { Columns::ColumnId_Dynamic, ESM::Light::Dynamic },
         { Columns::ColumnId_Portable, ESM::Light::Carry },
         { Columns::ColumnId_NegativeLight, ESM::Light::Negative },
-        { Columns::ColumnId_Flickering, ESM::Light::Flicker },
-        { Columns::ColumnId_SlowFlickering, ESM::Light::FlickerSlow },
-        { Columns::ColumnId_Pulsing, ESM::Light::Pulse },
-        { Columns::ColumnId_SlowPulsing, ESM::Light::PulseSlow },
         { Columns::ColumnId_Fire, ESM::Light::Fire },
         { Columns::ColumnId_OffByDefault, ESM::Light::OffDefault },
         { -1, 0 }
@@ -488,8 +486,8 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Head, ColumnBase::Display_BodyPart));
     npcColumns.mHead = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Female, ColumnBase::Display_Boolean));
-    npcColumns.mFlags.insert (std::make_pair (&mColumns.back(), ESM::NPC::Female));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_GenderNpc, ColumnBase::Display_GenderNpc));
+    npcColumns.mGender = &mColumns.back();
 
     npcColumns.mFlags.insert (std::make_pair (essential, ESM::NPC::Essential));
 
@@ -497,9 +495,8 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     npcColumns.mFlags.insert (std::make_pair (autoCalc, ESM::NPC::Autocalc));
 
-    npcColumns.mFlags.insert (std::make_pair (skeletonBlood, ESM::NPC::Skeleton));
-
-    npcColumns.mFlags.insert (std::make_pair (metalBlood, ESM::NPC::Metal));
+    // Re-used from Creature records.
+    npcColumns.mBloodType = bloodType;
 
     // Need a way to add a table of stats and values (rather than adding a long list of
     // entries in the dialogue subview) E.g. attributes+stats(health, mana, fatigue), skills
@@ -659,7 +656,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Armor,
         new ArmorRefIdAdapter (enchantableColumns, armorType, health, armor, partRef)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Book,
-        new BookRefIdAdapter (enchantableColumns, scroll, attribute, text)));
+        new BookRefIdAdapter (enchantableColumns, bookType, skill, text)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Clothing,
         new ClothingRefIdAdapter (enchantableColumns, clothingType, partRef)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Container,
@@ -811,7 +808,7 @@ void CSMWorld::RefIdCollection::cloneRecord(const std::string& origin,
                                      const std::string& destination,
                                      const CSMWorld::UniversalId::Type type)
 {
-        std::auto_ptr<RecordBase> newRecord(mData.getRecord(mData.searchId(origin)).modifiedCopy());
+        std::unique_ptr<RecordBase> newRecord(mData.getRecord(mData.searchId(origin)).modifiedCopy());
         mAdapters.find(type)->second->setId(*newRecord, destination);
         mData.insertRecord(*newRecord, type, destination);
 }

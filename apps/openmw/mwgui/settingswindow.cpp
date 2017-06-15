@@ -3,17 +3,15 @@
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Window.h>
 #include <MyGUI_ComboBox.h>
-#include <MyGUI_ListBox.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_TabControl.h>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/math/common_factor_rt.hpp>
+#include <boost/math/common_factor.hpp>
 
 #include <SDL_video.h>
 
-#include <components/misc/stringops.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 #include <components/settings/settings.hpp>
 
@@ -33,7 +31,7 @@ namespace
         if (val == "linear")  return "Trilinear";
         if (val == "nearest") return "Bilinear";
         if (val != "none")
-            std::cerr<< "Invalid texture mipmap option: "<<val <<std::endl;
+            std::cerr<< "Warning: Invalid texture mipmap option: "<<val <<std::endl;
         return "Other";
     }
 

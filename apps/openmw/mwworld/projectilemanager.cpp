@@ -6,8 +6,10 @@
 
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/projectilestate.hpp>
+
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
@@ -25,6 +27,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/aipackage.hpp"
 
 #include "../mwrender/effectmanager.hpp"
 #include "../mwrender/animation.hpp"
@@ -49,8 +52,8 @@ namespace
             const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 iter->mEffectID);
 
-            // All the projectiles should use the same speed. From observations in the
-            // original engine, this seems to be the average of the constituent effects.
+            // Speed of multi-effect projectiles should be the average of the constituent effects,
+            // based on observation of the original engine.
             speed += magicEffect->mData.mSpeed;
             count++;
 
@@ -280,7 +283,9 @@ namespace MWWorld
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         for (size_t it = 0; it != state.mSoundIds.size(); it++)
         {
-            state.mSounds.push_back(sndMgr->playSound3D(pos, state.mSoundIds.at(it), 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop));
+            MWBase::SoundPtr sound = sndMgr->playSound3D(pos, state.mSoundIds.at(it), 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
+            if (sound)
+                state.mSounds.push_back(sound);
         }
             
         mMagicBolts.push_back(state);
@@ -335,9 +340,14 @@ namespace MWWorld
 
             MWWorld::Ptr caster = it->getCaster();
 
+            // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
+            std::vector<MWWorld::Ptr> targetActors;
+            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
+                caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
+
             // Check for impact
             // TODO: use a proper btRigidBody / btGhostObject?
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, 0xff, MWPhysics::CollisionType_Projectile);
+            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
 
             bool hit = false;
             if (result.mHit)
@@ -402,32 +412,35 @@ namespace MWWorld
 
             MWWorld::Ptr caster = it->getCaster();
 
+            // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
+            std::vector<MWWorld::Ptr> targetActors;
+            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
+                caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
+
             // Check for impact
             // TODO: use a proper btRigidBody / btGhostObject?
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, 0xff, MWPhysics::CollisionType_Projectile);
+            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
 
             bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos);
+
             if (result.mHit || underwater)
             {
-                if (result.mHit)
+                MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
+
+                // Try to get a Ptr to the bow that was used. It might no longer exist.
+                MWWorld::Ptr bow = projectileRef.getPtr();
+                if (!caster.isEmpty() && it->mIdArrow != it->mBowId)
                 {
-                    MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
-
-                    // Try to get a Ptr to the bow that was used. It might no longer exist.
-                    MWWorld::Ptr bow = projectileRef.getPtr();
-                    if (!caster.isEmpty() && it->mIdArrow != it->mBowId)
-                    {
-                        MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
-                        MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                        if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
-                            bow = *invIt;
-                    }
-
-                    if (caster.isEmpty())
-                        caster = result.mHitObject;
-
-                    MWMechanics::projectileHit(caster, result.mHitObject, bow, projectileRef.getPtr(), result.mHitPos, it->mAttackStrength);
+                    MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
+                    MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                    if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
+                        bow = *invIt;
                 }
+
+                if (caster.isEmpty())
+                    caster = result.mHitObject;
+
+                MWMechanics::projectileHit(caster, result.mHitObject, bow, projectileRef.getPtr(), result.mHit ? result.mHitPos : newPos, it->mAttackStrength);
 
                 if (underwater)
                     mRendering->emitWaterRipple(newPos);
@@ -571,8 +584,10 @@ namespace MWWorld
             
             for (size_t soundIter = 0; soundIter != state.mSoundIds.size(); soundIter++)
             {
-                state.mSounds.push_back(sndMgr->playSound3D(esm.mPosition, state.mSoundIds.at(soundIter), 1.0f, 1.0f,
-                                        MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop));
+                MWBase::SoundPtr sound = sndMgr->playSound3D(esm.mPosition, state.mSoundIds.at(soundIter), 1.0f, 1.0f,
+                                                             MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
+                if (sound)
+                    state.mSounds.push_back(sound);
             }
 
             mMagicBolts.push_back(state);

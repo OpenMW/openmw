@@ -5,11 +5,9 @@
 #include <osg/Texture>
 #include <osg/Material>
 #include <osg/Geometry>
-#include <osg/Image>
 
 #include <osgUtil/TangentSpaceGenerator>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
 #include <components/resource/imagemanager.hpp>
@@ -85,7 +83,7 @@ namespace Shader
         if (!node.getStateSet())
             return node.getOrCreateStateSet();
 
-        osg::ref_ptr<osg::StateSet> newStateSet = osg::clone(node.getStateSet(), osg::CopyOp::SHALLOW_COPY);
+        osg::ref_ptr<osg::StateSet> newStateSet = new osg::StateSet(*node.getStateSet(), osg::CopyOp::SHALLOW_COPY);
         node.setStateSet(newStateSet);
         return newStateSet.get();
     }
@@ -152,7 +150,7 @@ namespace Shader
                 }
             }
 
-            if (mAutoUseNormalMaps && diffuseMap != NULL && normalMap == NULL)
+            if (mAutoUseNormalMaps && diffuseMap != NULL && normalMap == NULL && diffuseMap->getImage(0))
             {
                 std::string normalMapFileName = diffuseMap->getImage(0)->getFileName();
 
@@ -194,7 +192,7 @@ namespace Shader
                     mRequirements.back().mNormalHeight = normalHeight;
                 }
             }
-            if (mAutoUseSpecularMaps && diffuseMap != NULL && specularMap == NULL)
+            if (mAutoUseSpecularMaps && diffuseMap != NULL && specularMap == NULL && diffuseMap->getImage(0))
             {
                 std::string specularMapFileName = diffuseMap->getImage(0)->getFileName();
                 boost::replace_last(specularMapFileName, ".", mSpecularMapPattern + ".");
@@ -263,7 +261,7 @@ namespace Shader
         for (std::map<int, std::string>::const_iterator texIt = reqs.mTextures.begin(); texIt != reqs.mTextures.end(); ++texIt)
         {
             defineMap[texIt->second] = "1";
-            defineMap[texIt->second + std::string("UV")] = boost::lexical_cast<std::string>(texIt->first);
+            defineMap[texIt->second + std::string("UV")] = std::to_string(texIt->first);
         }
 
         if (!reqs.mColorMaterial)
@@ -272,6 +270,9 @@ namespace Shader
         {
             switch (reqs.mVertexColorMode)
             {
+            case GL_AMBIENT:
+                defineMap["colorMode"] = "3";
+                break;
             default:
             case GL_AMBIENT_AND_DIFFUSE:
                 defineMap["colorMode"] = "2";
@@ -314,34 +315,43 @@ namespace Shader
         {
             const ShaderRequirements& reqs = mRequirements.back();
 
-            osg::ref_ptr<osg::Geometry> sourceGeometry = &geometry;
-            SceneUtil::RigGeometry* rig = dynamic_cast<SceneUtil::RigGeometry*>(&geometry);
-            if (rig)
-                sourceGeometry = rig->getSourceGeometry();
+            bool useShader = reqs.mShaderRequired || mForceShaders;
+            bool generateTangents = reqs.mTexStageRequiringTangents != -1;
 
-            if (mAllowedToModifyStateSets)
+            if (mAllowedToModifyStateSets && (useShader || generateTangents))
             {
+                osg::ref_ptr<osg::Geometry> sourceGeometry = &geometry;
+                SceneUtil::RigGeometry* rig = dynamic_cast<SceneUtil::RigGeometry*>(&geometry);
+                if (rig)
+                    sourceGeometry = rig->getSourceGeometry();
+
+                bool requiresSetGeometry = false;
+
                 // make sure that all UV sets are there
                 for (std::map<int, std::string>::const_iterator it = reqs.mTextures.begin(); it != reqs.mTextures.end(); ++it)
                 {
                     if (sourceGeometry->getTexCoordArray(it->first) == NULL)
+                    {
                         sourceGeometry->setTexCoordArray(it->first, sourceGeometry->getTexCoordArray(0));
+                        requiresSetGeometry = true;
+                    }
                 }
+
+                if (generateTangents)
+                {
+                    osg::ref_ptr<osgUtil::TangentSpaceGenerator> generator (new osgUtil::TangentSpaceGenerator);
+                    generator->generate(sourceGeometry, reqs.mTexStageRequiringTangents);
+
+                    sourceGeometry->setTexCoordArray(7, generator->getTangentArray(), osg::Array::BIND_PER_VERTEX);
+                    requiresSetGeometry = true;
+                }
+
+                if (rig && requiresSetGeometry)
+                    rig->setSourceGeometry(sourceGeometry);
             }
-
-            if (reqs.mTexStageRequiringTangents != -1 && mAllowedToModifyStateSets)
-            {
-                osg::ref_ptr<osgUtil::TangentSpaceGenerator> generator (new osgUtil::TangentSpaceGenerator);
-                generator->generate(sourceGeometry, reqs.mTexStageRequiringTangents);
-
-                sourceGeometry->setTexCoordArray(7, generator->getTangentArray(), osg::Array::BIND_PER_VERTEX);
-            }
-
-            if (rig)
-                rig->setSourceGeometry(sourceGeometry);
 
             // TODO: find a better place for the stateset
-            if (reqs.mShaderRequired || mForceShaders)
+            if (useShader)
                 createProgram(reqs, geometry);
         }
 

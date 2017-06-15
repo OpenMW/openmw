@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-CSMFilter::OrNode::OrNode (const std::vector<boost::shared_ptr<Node> >& nodes)
+CSMFilter::OrNode::OrNode (const std::vector<std::shared_ptr<Node> >& nodes)
 : NAryNode (nodes, "or")
 {}
 

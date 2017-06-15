@@ -16,25 +16,39 @@ namespace VFS
 namespace ESMTerrain
 {
 
+    class LandCache;
+
+    /// @brief Wrapper around Land Data with reference counting. The wrapper needs to be held as long as the data is still in use
+    class LandObject : public osg::Object
+    {
+    public:
+        LandObject();
+        LandObject(const ESM::Land* land, int loadFlags);
+        LandObject(const LandObject& copy, const osg::CopyOp& copyop);
+        virtual ~LandObject();
+
+        META_Object(ESMTerrain, LandObject)
+
+        const ESM::Land::LandData* getData(int flags) const;
+        int getPlugin() const;
+
+    private:
+        const ESM::Land* mLand;
+        int mLoadFlags;
+
+        ESM::Land::LandData mData;
+    };
+
     /// @brief Feeds data from ESM terrain records (ESM::Land, ESM::LandTexture)
     ///        into the terrain component, converting it on the fly as needed.
     class Storage : public Terrain::Storage
     {
-    private:
-
-        // Not implemented in this class, because we need different Store implementations for game and editor
-        virtual const ESM::Land* getLand (int cellX, int cellY)= 0;
-        virtual const ESM::LandTexture* getLandTexture(int index, short plugin) = 0;
-
     public:
         Storage(const VFS::Manager* vfs, const std::string& normalMapPattern = "", const std::string& normalHeightMapPattern = "", bool autoUseNormalMaps = false, const std::string& specularMapPattern = "", bool autoUseSpecularMaps = false);
 
-        /// Data is loaded first, if necessary. Will return a 0-pointer if there is no data for
-        /// any of the data types specified via \a flags. Will also return a 0-pointer if there
-        /// is no land record for the coordinates \a cellX / \a cellY.
-        const ESM::Land::LandData *getLandData (int cellX, int cellY, int flags);
-
         // Not implemented in this class, because we need different Store implementations for game and editor
+        virtual osg::ref_ptr<const LandObject> getLand (int cellX, int cellY)= 0;
+        virtual const ESM::LandTexture* getLandTexture(int index, short plugin) = 0;
         /// Get bounds of the whole terrain in cell units
         virtual void getBounds(float& minX, float& maxX, float& minY, float& maxY) = 0;
 
@@ -88,14 +102,18 @@ namespace ESMTerrain
         /// Get the number of vertices on one side for each cell. Should be (power of two)+1
         virtual int getCellVertices();
 
+        virtual int getBlendmapScale(float chunkSize);
+
     private:
         const VFS::Manager* mVFS;
 
-        void fixNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row);
-        void fixColour (osg::Vec4f& colour, int cellX, int cellY, int col, int row);
-        void averageNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row);
+        void fixNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row, LandCache& cache);
+        void fixColour (osg::Vec4f& colour, int cellX, int cellY, int col, int row, LandCache& cache);
+        void averageNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row, LandCache& cache);
 
-        float getVertexHeight (const ESM::Land* land, int x, int y);
+        float getVertexHeight (const ESM::Land::LandData* data, int x, int y);
+
+        const LandObject* getLand(int cellX, int cellY, LandCache& cache);
 
         // Since plugins can define new texture palettes, we need to know the plugin index too
         // in order to retrieve the correct texture name.
@@ -103,7 +121,7 @@ namespace ESMTerrain
         typedef std::pair<short, short> UniqueTextureId;
 
         UniqueTextureId getVtexIndexAt(int cellX, int cellY,
-                                               int x, int y);
+                                               int x, int y, LandCache&);
         std::string getTextureName (UniqueTextureId id);
 
         std::map<std::string, Terrain::LayerInfo> mLayerInfoMap;

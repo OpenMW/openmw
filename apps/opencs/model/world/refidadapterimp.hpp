@@ -694,13 +694,13 @@ namespace CSMWorld
 
     class BookRefIdAdapter : public EnchantableRefIdAdapter<ESM::Book>
     {
-            const RefIdColumn *mScroll;
+            const RefIdColumn *mBookType;
             const RefIdColumn *mSkill;
             const RefIdColumn *mText;
 
         public:
 
-            BookRefIdAdapter (const EnchantableColumns& columns, const RefIdColumn *scroll,
+            BookRefIdAdapter (const EnchantableColumns& columns, const RefIdColumn *bookType,
                 const RefIdColumn *skill, const RefIdColumn *text);
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
@@ -757,6 +757,7 @@ namespace CSMWorld
         const RefIdColumn *mAttributes;
         const RefIdColumn *mAttacks;
         const RefIdColumn *mMisc;
+        const RefIdColumn *mBloodType;
 
         CreatureColumns (const ActorColumns& actorColumns);
     };
@@ -801,6 +802,7 @@ namespace CSMWorld
         const RefIdColumn *mRadius;
         const RefIdColumn *mColor;
         const RefIdColumn *mSound;
+        const RefIdColumn *mEmitterType;
         std::map<const RefIdColumn *, unsigned int> mFlags;
 
         LightColumns (const InventoryColumns& columns);
@@ -849,6 +851,8 @@ namespace CSMWorld
         const RefIdColumn *mAttributes; // depends on npc type
         const RefIdColumn *mSkills;     // depends on npc type
         const RefIdColumn *mMisc;       // may depend on npc type, e.g. FactionID
+        const RefIdColumn *mBloodType;
+        const RefIdColumn *mGender;
 
         NpcColumns (const ActorColumns& actorColumns);
     };

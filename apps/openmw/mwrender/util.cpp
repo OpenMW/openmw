@@ -14,7 +14,7 @@ namespace MWRender
 class TextureOverrideVisitor : public osg::NodeVisitor
     {
     public:
-        TextureOverrideVisitor(std::string texture, Resource::ResourceSystem* resourcesystem)
+        TextureOverrideVisitor(const std::string& texture, Resource::ResourceSystem* resourcesystem)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
             , mTexture(texture)
             , mResourcesystem(resourcesystem)
@@ -55,7 +55,7 @@ void overrideTexture(const std::string &texture, Resource::ResourceSystem *resou
 
     osg::ref_ptr<osg::StateSet> stateset;
     if (node->getStateSet())
-        stateset = osg::clone(node->getStateSet(), osg::CopyOp::SHALLOW_COPY);
+        stateset = new osg::StateSet(*node->getStateSet(), osg::CopyOp::SHALLOW_COPY);
     else
         stateset = new osg::StateSet;
 

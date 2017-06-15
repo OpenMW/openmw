@@ -2,10 +2,9 @@
 #define GAME_MWWORLD_CLASS_H
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
-
-#include <boost/shared_ptr.hpp>
 
 #include "ptr.hpp"
 
@@ -51,7 +50,7 @@ namespace MWWorld
     /// \brief Base class for referenceable esm records
     class Class
     {
-            static std::map<std::string, boost::shared_ptr<Class> > sClasses;
+            static std::map<std::string, std::shared_ptr<Class> > sClasses;
 
             std::string mTypeName;
 
@@ -63,7 +62,7 @@ namespace MWWorld
 
             Class();
 
-            boost::shared_ptr<Action> defaultItemActivate(const Ptr &ptr, const Ptr &actor) const;
+            std::shared_ptr<Action> defaultItemActivate(const Ptr &ptr, const Ptr &actor) const;
             ///< Generate default action for activating inventory items
 
             virtual Ptr copyToCellImpl(const ConstPtr &ptr, CellStore &cell) const;
@@ -139,10 +138,10 @@ namespace MWWorld
             ///< \return Can the player activate this object?
             /// (default implementation: true if object's user-readable name is not empty, false otherwise)
 
-            virtual boost::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
+            virtual std::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
             ///< Generate action for activation (default implementation: return a null action).
 
-            virtual boost::shared_ptr<Action> use (const Ptr& ptr)
+            virtual std::shared_ptr<Action> use (const Ptr& ptr)
                 const;
             ///< Generate action for using via inventory menu (default implementation: return a
             /// null action).
@@ -271,6 +270,9 @@ namespace MWWorld
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 
+            virtual bool useAnim() const;
+            ///< Whether or not to use animated variant of model (default false)
+
             virtual void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const;
             ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation: list getModel().
 
@@ -329,7 +331,7 @@ namespace MWWorld
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
 
-            static void registerClass (const std::string& key,  boost::shared_ptr<Class> instance);
+            static void registerClass (const std::string& key,  std::shared_ptr<Class> instance);
 
             virtual int getBaseGold(const MWWorld::ConstPtr& ptr) const;
 
@@ -353,7 +355,7 @@ namespace MWWorld
             virtual int getPrimaryFactionRank (const MWWorld::ConstPtr& ptr) const;
 
             /// Get the effective armor rating, factoring in the actor's skills, for the given armor.
-            virtual int getEffectiveArmorRating(const MWWorld::ConstPtr& armor, const MWWorld::Ptr& actor) const;
+            virtual float getEffectiveArmorRating(const MWWorld::ConstPtr& armor, const MWWorld::Ptr& actor) const;
     };
 }
 

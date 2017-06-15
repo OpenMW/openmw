@@ -1,9 +1,5 @@
 #include "inputmanagerimp.hpp"
 
-#include <cmath>
-
-#include <boost/lexical_cast.hpp>
-
 #include <osgViewer/ViewerEventHandlers>
 
 #include <MyGUI_InputManager.h>
@@ -166,12 +162,12 @@ namespace MWInput
 
     void InputManager::setPlayerControlsEnabled(bool enabled)
     {
-        int nPlayerChannels = 17;
+        int nPlayerChannels = 18;
         int playerChannels[] = {A_Activate, A_AutoMove, A_AlwaysRun, A_ToggleWeapon,
                                 A_ToggleSpell, A_Rest, A_QuickKey1, A_QuickKey2,
                                 A_QuickKey3, A_QuickKey4, A_QuickKey5, A_QuickKey6,
                                 A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10,
-                               A_Use};
+                                A_Use, A_Journal};
 
         for(int i = 0; i < nPlayerChannels; i++) {
             int pc = playerChannels[i];
@@ -386,47 +382,49 @@ namespace MWInput
 
         updateCursorMode();
 
-        if(mJoystickLastUsed)
+        if (mGuiCursorEnabled)
         {
-            if (mGuiCursorEnabled)
+            float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue()*2.0f-1.0f;
+            float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue()*2.0f-1.0f;
+            float zAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
+            const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+
+            xAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
+            yAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
+
+            // We keep track of our own mouse position, so that moving the mouse while in
+            // game mode does not move the position of the GUI cursor
+            float xmove = xAxis * dt * 1500.0f * mInvUiScalingFactor;
+            float ymove = yAxis * dt * 1500.0f * mInvUiScalingFactor;
+            if (xmove != 0|| ymove != 0)
             {
-                float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue()*2.0f-1.0f;
-                float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue()*2.0f-1.0f;
-                float zAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
-                const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-
-                xAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
-                yAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
-
-                // We keep track of our own mouse position, so that moving the mouse while in
-                // game mode does not move the position of the GUI cursor
-                mGuiCursorX += xAxis * dt * 1500.0f * mInvUiScalingFactor;
-                mGuiCursorY += yAxis * dt * 1500.0f * mInvUiScalingFactor;
+                mGuiCursorX += xmove;
+                mGuiCursorY += ymove;
                 mMouseWheel -= static_cast<int>(zAxis * dt * 1500.0f);
 
-                mGuiCursorX = std::max(0.f, std::min(mGuiCursorX, float(viewSize.width)));
-                mGuiCursorY = std::max(0.f, std::min(mGuiCursorY, float(viewSize.height)));
+                mGuiCursorX = std::max(0.f, std::min(mGuiCursorX, float(viewSize.width-1)));
+                mGuiCursorY = std::max(0.f, std::min(mGuiCursorY, float(viewSize.height-1)));
 
                 MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
                 mInputManager->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
             }
-            if (mMouseLookEnabled)
+        }
+        if (mMouseLookEnabled)
+        {
+            float xAxis = mInputBinder->getChannel(A_LookLeftRight)->getValue()*2.0f-1.0f;
+            float yAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
+            resetIdleTime();
+
+            float rot[3];
+            rot[0] = yAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
+            rot[1] = 0.0f;
+            rot[2] = xAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f);
+
+            // Only actually turn player when we're not in vanity mode
+            if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
             {
-                float xAxis = mInputBinder->getChannel(A_LookLeftRight)->getValue()*2.0f-1.0f;
-                float yAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
-                resetIdleTime();
-
-                float rot[3];
-                rot[0] = yAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
-                rot[1] = 0.0f;
-                rot[2] = xAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f);
-
-                // Only actually turn player when we're not in vanity mode
-                if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
-                {
-                    mPlayer->yaw(rot[2]);
-                    mPlayer->pitch(rot[0]);
-                }
+                mPlayer->yaw(rot[2]);
+                mPlayer->pitch(rot[0]);
             }
         }
 
@@ -440,73 +438,73 @@ namespace MWInput
             {
                 bool triedToMove = false;
                 bool isRunning = false;
-                if(mJoystickLastUsed)
+
+                // joystick movement
+                float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue();
+                float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue();
+                if (xAxis < .5)
                 {
-                    float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue();
-                    float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue();
-                    if (xAxis < .5)
-                    {
-                        triedToMove = true;
-                        mPlayer->setLeftRight (-1);
-                    }
-                    else if (xAxis > .5)
-                    {
-                        triedToMove = true;
-                        mPlayer->setLeftRight (1);
-                    }
-
-                    if (yAxis < .5)
-                    {
-                        triedToMove = true;
-                        mPlayer->setAutoMove (false);
-                        mPlayer->setForwardBackward (1);
-                    }
-                    else if (yAxis > .5)
-                    {
-                        triedToMove = true;
-                        mPlayer->setAutoMove (false);
-                        mPlayer->setForwardBackward (-1);
-                    }
-
-                    else if(mPlayer->getAutoMove())
-                    {
-                        triedToMove = true;
-                        mPlayer->setForwardBackward (1);
-                    }
-                    isRunning = xAxis > .75 || xAxis < .25 || yAxis > .75 || yAxis < .25;
-                    if(triedToMove) resetIdleTime();
+                    triedToMove = true;
+                    mPlayer->setLeftRight (-1);
                 }
-                else
+                else if (xAxis > .5)
                 {
-                    if (actionIsActive(A_MoveLeft))
-                    {
-                        triedToMove = true;
-                        mPlayer->setLeftRight (-1);
-                    }
-                    else if (actionIsActive(A_MoveRight))
-                    {
-                        triedToMove = true;
-                        mPlayer->setLeftRight (1);
-                    }
+                    triedToMove = true;
+                    mPlayer->setLeftRight (1);
+                }
 
-                    if (actionIsActive(A_MoveForward))
-                    {
-                        triedToMove = true;
-                        mPlayer->setAutoMove (false);
-                        mPlayer->setForwardBackward (1);
-                    }
-                    else if (actionIsActive(A_MoveBackward))
-                    {
-                        triedToMove = true;
-                        mPlayer->setAutoMove (false);
-                        mPlayer->setForwardBackward (-1);
-                    }
+                if (yAxis < .5)
+                {
+                    triedToMove = true;
+                    mPlayer->setAutoMove (false);
+                    mPlayer->setForwardBackward (1);
+                }
+                else if (yAxis > .5)
+                {
+                    triedToMove = true;
+                    mPlayer->setAutoMove (false);
+                    mPlayer->setForwardBackward (-1);
+                }
+                else if(mPlayer->getAutoMove())
+                {
+                    triedToMove = true;
+                    mPlayer->setForwardBackward (1);
+                }
+                if (triedToMove)
+                    mJoystickLastUsed = true;
 
-                    else if(mPlayer->getAutoMove())
-                    {
-                        triedToMove = true;
-                        mPlayer->setForwardBackward (1);
-                    }
+                // keyboard movement
+                isRunning = xAxis > .75 || xAxis < .25 || yAxis > .75 || yAxis < .25;
+                if(triedToMove) resetIdleTime();
+
+                if (actionIsActive(A_MoveLeft))
+                {
+                    triedToMove = true;
+                    mPlayer->setLeftRight (-1);
+                }
+                else if (actionIsActive(A_MoveRight))
+                {
+                    triedToMove = true;
+                    mPlayer->setLeftRight (1);
+                }
+
+                if (actionIsActive(A_MoveForward))
+                {
+                    triedToMove = true;
+                    mPlayer->setAutoMove (false);
+                    mPlayer->setForwardBackward (1);
+                }
+                else if (actionIsActive(A_MoveBackward))
+                {
+                    triedToMove = true;
+                    mPlayer->setAutoMove (false);
+                    mPlayer->setForwardBackward (-1);
+                }
+
+                else if(mPlayer->getAutoMove())
+                {
+                    triedToMove = true;
+                    mPlayer->setForwardBackward (1);
                 }
 
                 if (!mSneakToggles)
@@ -851,7 +849,6 @@ namespace MWInput
 
     void InputManager::axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg )
     {
-        mJoystickLastUsed = true;
         if (!mControlsDisabled)
             mInputBinder->axisMoved(deviceID, arg);
     }
@@ -1030,6 +1027,7 @@ namespace MWInput
         }
         else if(MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Journal))
         {
+            MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Journal);
         }
     }
@@ -1173,7 +1171,7 @@ namespace MWInput
             bool controlExists = mInputBinder->getChannel(i)->getControlsCount () != 0;
             if (!controlExists)
             {
-                control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, 0, ICS::ICS_MAX, ICS::ICS_MAX);
+                control = new ICS::Control(std::to_string(i), false, true, 0, ICS::ICS_MAX, ICS::ICS_MAX);
                 mInputBinder->addControl(control);
                 control->attachChannel(mInputBinder->getChannel(i), ICS::Channel::DIRECT);
             }
@@ -1245,7 +1243,7 @@ namespace MWInput
                 if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
                     initial = 0.0f;
                 else initial = 0.5f;
-                control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, initial, ICS::ICS_MAX, ICS::ICS_MAX);
+                control = new ICS::Control(std::to_string(i), false, true, initial, ICS::ICS_MAX, ICS::ICS_MAX);
                 mInputBinder->addControl(control);
                 control->attachChannel(mInputBinder->getChannel(i), ICS::Channel::DIRECT);
             }
@@ -1334,7 +1332,7 @@ namespace MWInput
         if (key != SDL_SCANCODE_UNKNOWN)
             return MyGUI::TextIterator::toTagsString(mInputBinder->scancodeToString (key));
         else if (mouse != ICS_MAX_DEVICE_BUTTONS)
-            return "#{sMouse} " + boost::lexical_cast<std::string>(mouse);
+            return "#{sMouse} " + std::to_string(mouse);
         else
             return "#{sNone}";
     }
@@ -1389,7 +1387,7 @@ namespace MWInput
             case SDL_CONTROLLER_BUTTON_Y:
                 return "Y Button";
             default:
-                return "Button " + boost::lexical_cast<std::string>(button);
+                return "Button " + std::to_string(button);
         }
     }
     std::string InputManager::sdlControllerAxisToString(int axis)
@@ -1409,7 +1407,7 @@ namespace MWInput
             case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
                 return "Right Trigger";
             default:
-                return "Axis " + boost::lexical_cast<std::string>(axis);
+                return "Axis " + std::to_string(axis);
         }
      }
 
@@ -1483,6 +1481,10 @@ namespace MWInput
         ret.push_back(A_QuickKey8);
         ret.push_back(A_QuickKey9);
         ret.push_back(A_QuickKey10);
+        ret.push_back(A_CycleSpellLeft);
+        ret.push_back(A_CycleSpellRight);
+        ret.push_back(A_CycleWeaponLeft);
+        ret.push_back(A_CycleWeaponRight);
 
         return ret;
     }

@@ -71,7 +71,7 @@ namespace CSVWorld
 
             /// Allow subclasses to wrap the create command together with additional commands
             /// into a macro.
-            virtual void pushCommand (std::auto_ptr<CSMWorld::CreateCommand> command,
+            virtual void pushCommand (std::unique_ptr<CSMWorld::CreateCommand> command,
                 const std::string& id);
 
             CSMWorld::Data& getData() const;

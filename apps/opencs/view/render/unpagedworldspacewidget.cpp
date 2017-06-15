@@ -15,7 +15,9 @@
 #include "../widget/scenetooltoggle.hpp"
 #include "../widget/scenetooltoggle2.hpp"
 
+#include "cameracontroller.hpp"
 #include "mask.hpp"
+#include "tagbase.hpp"
 
 void CSVRender::UnpagedWorldspaceWidget::update()
 {
@@ -91,6 +93,8 @@ bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld:
     mCellId = universalIdData.begin()->getId();
 
     mCell.reset (new Cell (getDocument().getData(), mRootNode, mCellId));
+    mCamPositionSet = false;
+    mOrbitCamControl->reset();
 
     update();
     emit cellChanged(*universalIdData.begin());

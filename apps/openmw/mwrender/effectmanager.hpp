@@ -1,12 +1,11 @@
 #ifndef OPENMW_MWRENDER_EFFECTMANAGER_H
 #define OPENMW_MWRENDER_EFFECTMANAGER_H
 
-#include <string>
 #include <map>
+#include <memory>
+#include <string>
 
 #include <osg/ref_ptr>
-
-#include <boost/shared_ptr.hpp>
 
 namespace osg
 {
@@ -44,7 +43,7 @@ namespace MWRender
         struct Effect
         {
             float mMaxControllerLength;
-            boost::shared_ptr<EffectAnimationTime> mAnimTime;
+            std::shared_ptr<EffectAnimationTime> mAnimTime;
         };
 
         typedef std::map<osg::ref_ptr<osg::PositionAttitudeTransform>, Effect> EffectMap;

@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "../mwmechanics/alchemy.hpp"
+
 #include "widgets.hpp"
 #include "windowbase.hpp"
 
@@ -48,7 +50,7 @@ namespace MWGui
 
         void update();
 
-        std::auto_ptr<MWMechanics::Alchemy> mAlchemy;
+        std::unique_ptr<MWMechanics::Alchemy> mAlchemy;
 
         std::vector<ItemWidget*> mApparatus;
         std::vector<ItemWidget*> mIngredients;

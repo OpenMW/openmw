@@ -128,7 +128,7 @@ namespace ESM
             return;
         }
 
-        std::cerr << "Failed to insert info " << info.mId << std::endl;
+        std::cerr << "Warning: Failed to insert info " << info.mId << std::endl;
     }
 
     void Dialogue::clearDeletedInfos()

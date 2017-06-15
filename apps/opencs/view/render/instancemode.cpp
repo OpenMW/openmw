@@ -559,7 +559,7 @@ void CSVRender::InstanceMode::dropEvent (QDropEvent* event)
 
             if (mode=="Create cell and insert")
             {
-                std::auto_ptr<CSMWorld::CreateCommand> createCommand (
+                std::unique_ptr<CSMWorld::CreateCommand> createCommand (
                     new CSMWorld::CreateCommand (cellTable, cellId));
 
                 int parentIndex = cellTable.findColumnIndex (CSMWorld::Columns::ColumnId_Cell);
@@ -610,7 +610,7 @@ void CSVRender::InstanceMode::dropEvent (QDropEvent* event)
             if (mime->isReferencable (iter->getType()))
             {
                 // create reference
-                std::auto_ptr<CSMWorld::CreateCommand> createCommand (
+                std::unique_ptr<CSMWorld::CreateCommand> createCommand (
                     new CSMWorld::CreateCommand (
                     referencesTable, document.getData().getReferences().getNewId()));
 

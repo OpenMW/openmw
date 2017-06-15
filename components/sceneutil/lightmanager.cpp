@@ -1,17 +1,25 @@
 #include "lightmanager.hpp"
 
-#include <stdexcept>
-
-#include <osg/NodeVisitor>
-
 #include <osgUtil/CullVisitor>
 
 #include <components/sceneutil/util.hpp>
 
-#include <boost/functional/hash.hpp>
-
 namespace SceneUtil
 {
+
+    class LightStateCache
+    {
+    public:
+        osg::Light* lastAppliedLight[8];
+    };
+
+    LightStateCache* getLightStateCache(unsigned int contextid)
+    {
+        static std::vector<LightStateCache> cacheVector;
+        if (cacheVector.size() < contextid+1)
+            cacheVector.resize(contextid+1);
+        return &cacheVector[contextid];
+    }
 
     // Resets the modelview matrix to just the view matrix before applying lights.
     class LightStateAttribute : public osg::StateAttribute
@@ -50,8 +58,17 @@ namespace SceneUtil
 
             state.applyModelViewMatrix(state.getInitialViewMatrix());
 
+            LightStateCache* cache = getLightStateCache(state.getContextID());
+
             for (unsigned int i=0; i<mLights.size(); ++i)
-                applyLight((GLenum)((int)GL_LIGHT0 + i + mIndex), mLights[i].get());
+            {
+                osg::Light* current = cache->lastAppliedLight[i+mIndex];
+                if (current != mLights[i].get())
+                {
+                    applyLight((GLenum)((int)GL_LIGHT0 + i + mIndex), mLights[i].get());
+                    cache->lastAppliedLight[i+mIndex] = mLights[i].get();
+                }
+            }
 
             state.applyModelViewMatrix(modelViewMatrix);
         }
@@ -132,7 +149,7 @@ namespace SceneUtil
             : osg::NodeCallback(copy, copyop)
             { }
 
-        META_Object(SceneUtil, SceneUtil::LightManagerUpdateCallback)
+        META_Object(SceneUtil, LightManagerUpdateCallback)
 
         virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
@@ -192,12 +209,21 @@ namespace SceneUtil
         mLights.push_back(l);
     }
 
+    /* similar to the boost::hash_combine */
+    template <class T>
+    inline void hash_combine(std::size_t& seed, const T& v)
+    {
+        std::hash<T> hasher;
+        seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+    }
+
     osg::ref_ptr<osg::StateSet> LightManager::getLightListStateSet(const LightList &lightList, unsigned int frameNum)
     {
+
         // possible optimization: return a StateSet containing all requested lights plus some extra lights (if a suitable one exists)
         size_t hash = 0;
         for (unsigned int i=0; i<lightList.size();++i)
-            boost::hash_combine(hash, lightList[i]->mLightSource->getId());
+            hash_combine(hash, lightList[i]->mLightSource->getId());
 
         LightStateSetMap& stateSetCache = mStateSetCache[frameNum%2];
 
@@ -262,18 +288,64 @@ namespace SceneUtil
         return it->second;
     }
 
+    class DisableLight : public osg::StateAttribute
+    {
+    public:
+        DisableLight() : mIndex(0) {}
+        DisableLight(int index) : mIndex(index) {}
+
+        DisableLight(const DisableLight& copy,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
+            : osg::StateAttribute(copy,copyop), mIndex(copy.mIndex) {}
+
+        virtual osg::Object* cloneType() const { return new DisableLight(mIndex); }
+        virtual osg::Object* clone(const osg::CopyOp& copyop) const { return new DisableLight(*this,copyop); }
+        virtual bool isSameKindAs(const osg::Object* obj) const { return dynamic_cast<const DisableLight *>(obj)!=NULL; }
+        virtual const char* libraryName() const { return "SceneUtil"; }
+        virtual const char* className() const { return "DisableLight"; }
+        virtual Type getType() const { return LIGHT; }
+
+        unsigned int getMember() const
+        {
+            return mIndex;
+        }
+
+        virtual bool getModeUsage(ModeUsage & usage) const
+        {
+            usage.usesMode(GL_LIGHT0 + mIndex);
+            return true;
+        }
+
+        virtual int compare(const StateAttribute &sa) const
+        {
+            throw std::runtime_error("DisableLight::compare: unimplemented");
+        }
+
+        virtual void apply(osg::State& state) const
+        {
+            int lightNum = GL_LIGHT0 + mIndex;
+            glLightfv( lightNum, GL_AMBIENT,               mNull.ptr() );
+            glLightfv( lightNum, GL_DIFFUSE,               mNull.ptr() );
+            glLightfv( lightNum, GL_SPECULAR,              mNull.ptr() );
+
+            LightStateCache* cache = getLightStateCache(state.getContextID());
+            cache->lastAppliedLight[mIndex] = NULL;
+        }
+
+    private:
+        unsigned int mIndex;
+        osg::Vec4f mNull;
+    };
+
     void LightManager::setStartLight(int start)
     {
         mStartLight = start;
 
         // Set default light state to zero
+        // This is necessary because shaders don't respect glDisable(GL_LIGHTX) so in addition to disabling
+        // we'll have to set a light state that has no visible effect
         for (int i=start; i<8; ++i)
         {
-            osg::ref_ptr<osg::Light> defaultLight (new osg::Light(i));
-            defaultLight->setAmbient(osg::Vec4());
-            defaultLight->setDiffuse(osg::Vec4());
-            defaultLight->setSpecular(osg::Vec4());
-            defaultLight->setConstantAttenuation(0.f);
+            osg::ref_ptr<DisableLight> defaultLight (new DisableLight(i));
             getOrCreateStateSet()->setAttributeAndModes(defaultLight, osg::StateAttribute::OFF);
         }
     }
@@ -299,34 +371,36 @@ namespace SceneUtil
         mId = sLightId++;
 
         for (int i=0; i<2; ++i)
-            mLight[i] = osg::clone(copy.mLight[i].get(), copyop);
+            mLight[i] = new osg::Light(*copy.mLight[i].get(), copyop);
     }
 
 
     bool sortLights (const LightManager::LightSourceViewBound* left, const LightManager::LightSourceViewBound* right)
     {
-        return left->mViewBound.center().length2() - left->mViewBound.radius2()/4.f < right->mViewBound.center().length2() - right->mViewBound.radius2()/4.f;
+        return left->mViewBound.center().length2() - left->mViewBound.radius2()*81 < right->mViewBound.center().length2() - right->mViewBound.radius2()*81;
     }
 
     void LightListCallback::operator()(osg::Node *node, osg::NodeVisitor *nv)
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
 
+        bool pushedState = pushLightState(node, cv);
+        traverse(node, nv);
+        if (pushedState)
+            cv->popStateSet();
+    }
+
+    bool LightListCallback::pushLightState(osg::Node *node, osgUtil::CullVisitor *cv)
+    {
         if (!mLightManager)
         {
-            mLightManager = findLightManager(nv->getNodePath());
+            mLightManager = findLightManager(cv->getNodePath());
             if (!mLightManager)
-            {
-                traverse(node, nv);
-                return;
-            }
+                return false;
         }
 
         if (!(cv->getCurrentCamera()->getCullMask() & mLightManager->getLightingMask()))
-        {
-            traverse(node, nv);
-            return;
-        }
+            return false;
 
         // Possible optimizations:
         // - cull list of lights by the camera frustum
@@ -335,9 +409,9 @@ namespace SceneUtil
 
         // update light list if necessary
         // makes sure we don't update it more than once per frame when rendering with multiple cameras
-        if (mLastFrameNumber != nv->getTraversalNumber())
+        if (mLastFrameNumber != cv->getTraversalNumber())
         {
-            mLastFrameNumber = nv->getTraversalNumber();
+            mLastFrameNumber = cv->getTraversalNumber();
 
             // Don't use Camera::getViewMatrix, that one might be relative to another camera!
             const osg::RefMatrix* viewMatrix = cv->getCurrentRenderStage()->getInitialViewMatrix();
@@ -346,12 +420,14 @@ namespace SceneUtil
             // get the node bounds in view space
             // NB do not node->getBound() * modelView, that would apply the node's transformation twice
             osg::BoundingSphere nodeBound;
-            osg::Group* group = node->asGroup();
-            if (group)
+            osg::Transform* transform = node->asTransform();
+            if (transform)
             {
-                for (unsigned int i=0; i<group->getNumChildren(); ++i)
-                    nodeBound.expandBy(group->getChild(i)->getBound());
+                for (unsigned int i=0; i<transform->getNumChildren(); ++i)
+                    nodeBound.expandBy(transform->getChild(i)->getBound());
             }
+            else
+                nodeBound = node->getBound();
             osg::Matrixf mat = *cv->getModelViewMatrix();
             transformBoundingSphere(mat, nodeBound);
 
@@ -400,20 +476,16 @@ namespace SceneUtil
                     while (lightList.size() > maxLights)
                         lightList.pop_back();
                 }
-                stateset = mLightManager->getLightListStateSet(lightList, nv->getTraversalNumber());
+                stateset = mLightManager->getLightListStateSet(lightList, cv->getTraversalNumber());
             }
             else
-                stateset = mLightManager->getLightListStateSet(mLightList, nv->getTraversalNumber());
+                stateset = mLightManager->getLightListStateSet(mLightList, cv->getTraversalNumber());
 
 
             cv->pushStateSet(stateset);
-
-            traverse(node, nv);
-
-            cv->popStateSet();
+            return true;
         }
-        else
-            traverse(node, nv);
+        return false;
     }
 
 }

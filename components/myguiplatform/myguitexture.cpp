@@ -16,6 +16,8 @@ namespace osgMyGUI
       , mFormat(MyGUI::PixelFormat::Unknow)
       , mUsage(MyGUI::TextureUsage::Default)
       , mNumElemBytes(0)
+      , mWidth(0)
+      , mHeight(0)
     {
     }
 
@@ -25,6 +27,8 @@ namespace osgMyGUI
         , mFormat(MyGUI::PixelFormat::Unknow)
         , mUsage(MyGUI::TextureUsage::Default)
         , mNumElemBytes(0)
+        , mWidth(texture->getTextureWidth())
+        , mHeight(texture->getTextureHeight())
     {
     }
 
@@ -63,6 +67,9 @@ namespace osgMyGUI
         mTexture->setSourceFormat(glfmt);
         mTexture->setSourceType(GL_UNSIGNED_BYTE);
 
+        mWidth = width;
+        mHeight = height;
+
         mTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
         mTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
@@ -79,6 +86,8 @@ namespace osgMyGUI
         mFormat = MyGUI::PixelFormat::Unknow;
         mUsage = MyGUI::TextureUsage::Default;
         mNumElemBytes = 0;
+        mWidth = 0;
+        mHeight = 0;
     }
 
     void OSGTexture::loadFromFile(const std::string &fname)
@@ -95,10 +104,10 @@ namespace osgMyGUI
         // disable mip-maps
         mTexture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
 
-        // FIXME
-        mFormat = MyGUI::PixelFormat::R8G8B8;
-        mUsage = MyGUI::TextureUsage::Static | MyGUI::TextureUsage::Write;
-        mNumElemBytes = 3; // FIXME
+        mWidth = image->s();
+        mHeight = image->t();
+
+        mUsage = MyGUI::TextureUsage::Static;
     }
 
     void OSGTexture::saveToFile(const std::string &fname)
@@ -108,16 +117,12 @@ namespace osgMyGUI
 
     int OSGTexture::getWidth()
     {
-        if(!mTexture.valid())
-            return 0;
-        return mTexture->getTextureWidth();
+        return mWidth;
     }
 
     int OSGTexture::getHeight()
     {
-        if(!mTexture.valid())
-            return 0;
-        return mTexture->getTextureHeight();
+        return mHeight;
     }
 
     void *OSGTexture::lock(MyGUI::TextureUsage /*access*/)

@@ -21,6 +21,7 @@
 
 namespace MWGui
 {
+const int MerchantRepair::sLineHeight = 18;
 
 MerchantRepair::MerchantRepair()
     : WindowBase("openmw_merchantrepair.layout")
@@ -46,8 +47,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
     MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
     int categories = MWWorld::ContainerStore::Type_Weapon | MWWorld::ContainerStore::Type_Armor;
-    for (MWWorld::ContainerStoreIterator iter (store.begin(categories));
-         iter!=store.end(); ++iter)
+    for (MWWorld::ContainerStoreIterator iter (store.begin(categories)); iter!=store.end(); ++iter)
     {
         if (iter->getClass().hasItemHealth(*iter))
         {
@@ -80,16 +80,16 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
                     0,
                     currentY,
                     0,
-                    18,
+                    sLineHeight,
                     MyGUI::Align::Default
                 );
 
-            currentY += 18;
+            currentY += sLineHeight;
 
             button->setUserString("Price", MyGUI::utility::toString(price));
-            button->setUserData(*iter);
+            button->setUserData(MWWorld::Ptr(*iter));
             button->setCaptionWithReplacing(name);
-            button->setSize(button->getTextSize().width,18);
+            button->setSize(mList->getWidth(),sLineHeight);
             button->eventMouseWheel += MyGUI::newDelegate(this, &MerchantRepair::onMouseWheel);
             button->setUserString("ToolTipType", "ItemPtr");
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &MerchantRepair::onRepairButtonClick);

@@ -252,7 +252,7 @@ namespace MWGui
                 osg::ref_ptr<osg::Texture2D> tex = mLocalMapRender->getFogOfWarTexture(x, y);
                 if (tex)
                 {
-                    boost::shared_ptr<MyGUI::ITexture> myguitex (new osgMyGUI::OSGTexture(tex));
+                    std::shared_ptr<MyGUI::ITexture> myguitex (new osgMyGUI::OSGTexture(tex));
                     fog->setRenderItemTexture(myguitex.get());
                     fog->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
                     fogTextures.push_back(myguitex);
@@ -382,7 +382,7 @@ namespace MWGui
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(mapX, mapY);
                 if (texture)
                 {
-                    boost::shared_ptr<MyGUI::ITexture> guiTex (new osgMyGUI::OSGTexture(texture));
+                    std::shared_ptr<MyGUI::ITexture> guiTex (new osgMyGUI::OSGTexture(texture));
                     textures.push_back(guiTex);
                     box->setRenderItemTexture(guiTex.get());
                     box->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
@@ -622,17 +622,17 @@ namespace MWGui
 
     // ------------------------------------------------------------------------------------------
 
-    MapWindow::MapWindow(CustomMarkerCollection &customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender)
+    MapWindow::MapWindow(CustomMarkerCollection &customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender, SceneUtil::WorkQueue* workQueue)
         : WindowPinnableBase("openmw_map_window.layout")
         , LocalMapBase(customMarkers, localMapRender)
         , NoDrop(drag, mMainWidget)
         , mGlobalMap(0)
         , mGlobalMapImage(NULL)
         , mGlobalMapOverlay(NULL)
-        , mGlobal(false)
+        , mGlobal(Settings::Manager::getBool("global", "Map"))
         , mEventBoxGlobal(NULL)
         , mEventBoxLocal(NULL)
-        , mGlobalMapRender(new MWRender::GlobalMap(localMapRender->getRoot()))
+        , mGlobalMapRender(new MWRender::GlobalMap(localMapRender->getRoot(), workQueue))
         , mEditNoteDialog()
     {
         static bool registered = false;
@@ -667,7 +667,7 @@ namespace MWGui
 
         getWidget(mButton, "WorldButton");
         mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
-        mButton->setCaptionWithReplacing("#{sWorld}");
+        mButton->setCaptionWithReplacing( mGlobal ? "#{sLocal}" : "#{sWorld}");
 
         getWidget(mEventBoxGlobal, "EventBoxGlobal");
         mEventBoxGlobal->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
@@ -680,6 +680,9 @@ namespace MWGui
         mEventBoxLocal->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &MapWindow::onMapDoubleClicked);
 
         LocalMapBase::init(mLocalMap, mPlayerArrowLocal, Settings::Manager::getInt("local map widget size", "Map"), Settings::Manager::getInt("local map cell distance", "Map"));
+
+        mGlobalMap->setVisible(mGlobal);
+        mLocalMap->setVisible(!mGlobal);
     }
 
     void MapWindow::onNoteEditOk()
@@ -774,19 +777,17 @@ namespace MWGui
         mLastScrollWindowCoordinates = currentCoordinates;
     }
 
-    void MapWindow::renderGlobalMap(Loading::Listener* loadingListener)
+    void MapWindow::setVisible(bool visible)
     {
-        mGlobalMapRender->render(loadingListener);
+        WindowBase::setVisible(visible);
+        mButton->setVisible(visible && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_None);
+    }
+
+    void MapWindow::renderGlobalMap()
+    {
+        mGlobalMapRender->render();
         mGlobalMap->setCanvasSize (mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
         mGlobalMapImage->setSize(mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
-
-        mGlobalMapTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getBaseTexture()));
-        mGlobalMapImage->setRenderItemTexture(mGlobalMapTexture.get());
-        mGlobalMapImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
-
-        mGlobalMapOverlayTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getOverlayTexture()));
-        mGlobalMapOverlay->setRenderItemTexture(mGlobalMapOverlayTexture.get());
-        mGlobalMapOverlay->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
     }
 
     MapWindow::~MapWindow()
@@ -920,6 +921,8 @@ namespace MWGui
         mGlobalMap->setVisible(mGlobal);
         mLocalMap->setVisible(!mGlobal);
 
+        Settings::Manager::setBool("global", "Map", mGlobal);
+
         mButton->setCaptionWithReplacing( mGlobal ? "#{sLocal}" :
                 "#{sWorld}");
 
@@ -929,6 +932,8 @@ namespace MWGui
 
     void MapWindow::onPinToggled()
     {
+        Settings::Manager::setBool("map pin", "Windows", mPinned);
+
         MWBase::Environment::get().getWindowManager()->setMinimapVisibility(!mPinned);
     }
 
@@ -940,6 +945,8 @@ namespace MWGui
 
     void MapWindow::open()
     {
+        ensureGlobalMapLoaded();
+
         globalMapUpdatePlayer();
     }
 
@@ -982,6 +989,20 @@ namespace MWGui
         rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
         float angle = std::atan2(x,y);
         rotatingSubskin->setAngle(angle);
+    }
+
+    void MapWindow::ensureGlobalMapLoaded()
+    {
+        if (!mGlobalMapTexture.get())
+        {
+            mGlobalMapTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getBaseTexture()));
+            mGlobalMapImage->setRenderItemTexture(mGlobalMapTexture.get());
+            mGlobalMapImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+
+            mGlobalMapOverlayTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getOverlayTexture()));
+            mGlobalMapOverlay->setRenderItemTexture(mGlobalMapOverlayTexture.get());
+            mGlobalMapOverlay->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+        }
     }
 
     void MapWindow::clear()

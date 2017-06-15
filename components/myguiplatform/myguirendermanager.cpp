@@ -210,7 +210,7 @@ public:
 
         osg::ref_ptr<osg::VertexBufferObject> mVertexBuffer;
         // need to hold on to this too as the mVertexBuffer does not hold a ref to its own array
-        osg::ref_ptr<osg::UByteArray> mArray;
+        osg::ref_ptr<osg::Array> mArray;
 
         // optional
         osg::ref_ptr<osg::StateSet> mStateSet;
@@ -244,21 +244,25 @@ private:
 
 class OSGVertexBuffer : public MyGUI::IVertexBuffer
 {
-    osg::ref_ptr<osg::VertexBufferObject> mBuffer;
-    osg::ref_ptr<osg::UByteArray> mVertexArray;
+    osg::ref_ptr<osg::VertexBufferObject> mBuffer[2];
+    osg::ref_ptr<osg::UByteArray> mVertexArray[2];
 
     size_t mNeedVertexCount;
 
-    bool mQueuedForDrawing;
+    unsigned int mCurrentBuffer;
+    bool mUsed; // has the mCurrentBuffer been submitted to the rendering thread
 
     void destroy();
-    void create();
+    osg::UByteArray* create();
 
 public:
     OSGVertexBuffer();
-    virtual ~OSGVertexBuffer();
+    virtual ~OSGVertexBuffer() {}
 
-    void markAsQueuedForDrawing();
+    void markUsed();
+
+    osg::Array* getVertexArray();
+    osg::VertexBufferObject* getVertexBuffer();
 
     virtual void setVertexCount(size_t count);
     virtual size_t getVertexCount();
@@ -266,26 +270,18 @@ public:
     virtual MyGUI::Vertex *lock();
     virtual void unlock();
 
-/*internal:*/
-
-    osg::VertexBufferObject *getBuffer() const { return mBuffer.get(); }
-    osg::UByteArray *getArray() const { return mVertexArray.get(); }
 };
 
 OSGVertexBuffer::OSGVertexBuffer()
   : mNeedVertexCount(0)
-  , mQueuedForDrawing(false)
+  , mCurrentBuffer(0)
+  , mUsed(false)
 {
 }
 
-OSGVertexBuffer::~OSGVertexBuffer()
+void OSGVertexBuffer::markUsed()
 {
-    destroy();
-}
-
-void OSGVertexBuffer::markAsQueuedForDrawing()
-{
-    mQueuedForDrawing = true;
+    mUsed = true;
 }
 
 void OSGVertexBuffer::setVertexCount(size_t count)
@@ -303,48 +299,51 @@ size_t OSGVertexBuffer::getVertexCount()
 
 MyGUI::Vertex *OSGVertexBuffer::lock()
 {
-    if (mQueuedForDrawing || !mVertexArray)
+    if (mUsed)
     {
-        // Force recreating the buffer, to make sure we are not modifying a buffer currently
-        // queued for rendering in the last frame's draw thread.
-        // a more efficient solution might be double buffering
-        destroy();
-        create();
-        mQueuedForDrawing = false;
+        mCurrentBuffer = (mCurrentBuffer+1)%2;
+        mUsed = false;
     }
-    else
+    osg::UByteArray* array = mVertexArray[mCurrentBuffer];
+    if (!array)
     {
-        mVertexArray->resize(mNeedVertexCount * sizeof(MyGUI::Vertex));
+        array = create();
+    }
+    else if (array->size() != mNeedVertexCount * sizeof(MyGUI::Vertex))
+    {
+        array->resize(mNeedVertexCount * sizeof(MyGUI::Vertex));
     }
 
-    MYGUI_PLATFORM_ASSERT(mBuffer.valid(), "Vertex buffer is not created");
-
-    return (MyGUI::Vertex*)&(*mVertexArray)[0];
+    return (MyGUI::Vertex*)&(*array)[0];
 }
 
 void OSGVertexBuffer::unlock()
 {
-    mVertexArray->dirty();
-    mBuffer->dirty();
+    mVertexArray[mCurrentBuffer]->dirty();
+    mBuffer[mCurrentBuffer]->dirty();
 }
 
-void OSGVertexBuffer::destroy()
+osg::UByteArray* OSGVertexBuffer::create()
 {
-    mBuffer = nullptr;
-    mVertexArray = nullptr;
-}
+    mVertexArray[mCurrentBuffer] = new osg::UByteArray(mNeedVertexCount*sizeof(MyGUI::Vertex));
 
-void OSGVertexBuffer::create()
-{
-    MYGUI_PLATFORM_ASSERT(!mBuffer.valid(), "Vertex buffer already exist");
-
-    mVertexArray = new osg::UByteArray(mNeedVertexCount*sizeof(MyGUI::Vertex));
-
-    mBuffer = new osg::VertexBufferObject;
-    mBuffer->setDataVariance(osg::Object::DYNAMIC);
-    mBuffer->setUsage(GL_DYNAMIC_DRAW);
+    mBuffer[mCurrentBuffer] = new osg::VertexBufferObject;
+    mBuffer[mCurrentBuffer]->setDataVariance(osg::Object::DYNAMIC);
+    mBuffer[mCurrentBuffer]->setUsage(GL_DYNAMIC_DRAW);
     // NB mBuffer does not own the array
-    mBuffer->setArray(0, mVertexArray.get());
+    mBuffer[mCurrentBuffer]->setArray(0, mVertexArray[mCurrentBuffer].get());
+
+    return mVertexArray[mCurrentBuffer];
+}
+
+osg::Array* OSGVertexBuffer::getVertexArray()
+{
+    return mVertexArray[mCurrentBuffer];
+}
+
+osg::VertexBufferObject* OSGVertexBuffer::getVertexBuffer()
+{
+    return mBuffer[mCurrentBuffer];
 }
 
 // ---------------------------------------------------------------------------
@@ -438,9 +437,9 @@ void RenderManager::doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *text
 {
     Drawable::Batch batch;
     batch.mVertexCount = count;
-    batch.mVertexBuffer = static_cast<OSGVertexBuffer*>(buffer)->getBuffer();
-    static_cast<OSGVertexBuffer*>(buffer)->markAsQueuedForDrawing();
-    batch.mArray = static_cast<OSGVertexBuffer*>(buffer)->getArray();
+    batch.mVertexBuffer = static_cast<OSGVertexBuffer*>(buffer)->getVertexBuffer();
+    batch.mArray = static_cast<OSGVertexBuffer*>(buffer)->getVertexArray();
+    static_cast<OSGVertexBuffer*>(buffer)->markUsed();
     if (texture)
     {
         batch.mTexture = static_cast<OSGTexture*>(texture)->getTexture();

@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Window_NoCaption" layer="Windows" position="0 0 588 444" name="_Main">
+    <Widget type="Window" skin="MW_Window_NoCaption" layer="Windows" align="Center" position="0 0 588 444" name="_Main">
        <Property key="MinSize" value="425 360"/>
 
         <!-- Name -->
 
-        <Widget type="TextBox" skin="SandText" position="10 10 65 24">
+        <Widget type="TextBox" skin="SandText" position="10 8 65 30">
             <Property key="Caption" value="#{sName}"/>
             <Property key="TextAlign" value="Left"/>
         </Widget>
 
-        <Widget type="EditBox" skin="MW_TextEdit" position="70 10 492 24" align="Top Left HStretch" name="NameEdit"/>
+        <Widget type="EditBox" skin="MW_TextEdit" position="70 8 492 30" align="Top Left HStretch" name="NameEdit">
+        </Widget>
 
 
         <!-- Apparatus -->

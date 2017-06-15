@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 527 378" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 527 378" align="Center" name="_Main">
 
         <!-- Birthsign list -->
         <Widget type="ListBox" skin="MW_List" position="8 8 232 137" name="BirthsignList"/>

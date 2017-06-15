@@ -136,6 +136,18 @@ namespace MWGui
         dirtyPreview();
 
         updatePreviewSize();
+
+        updateEncumbranceBar();
+        mItemView->update();
+        notifyContentChanged();
+    }
+
+    void InventoryWindow::clear()
+    {
+        mPtr = MWWorld::Ptr();
+        mTradeModel = NULL;
+        mSortModel = NULL;
+        mItemView->setModel(NULL);
     }
 
     void InventoryWindow::setGuiMode(GuiMode mode)
@@ -340,13 +352,12 @@ namespace MWGui
 
     void InventoryWindow::open()
     {
-        mPtr = MWMechanics::getPlayer();
-
-        updateEncumbranceBar();
-
-        mItemView->update();
-
-        notifyContentChanged();
+        if (!mPtr.isEmpty())
+        {
+            updateEncumbranceBar();
+            mItemView->update();
+            notifyContentChanged();
+        }
         adjustPanes();
     }
 
@@ -433,6 +444,8 @@ namespace MWGui
 
     void InventoryWindow::onPinToggled()
     {
+        Settings::Manager::setBool("inventory pin", "Windows", mPinned);
+
         MWBase::Environment::get().getWindowManager()->setWeaponVisibility(!mPinned);
     }
 
@@ -480,7 +493,7 @@ namespace MWGui
         {
             if (script.empty() || ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 0)
             {
-                boost::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr);
+                std::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr);
 
                 action->execute (player);
             }

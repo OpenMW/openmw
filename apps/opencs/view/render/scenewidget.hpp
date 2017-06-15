@@ -10,8 +10,6 @@
 #include <osgViewer/View>
 #include <osgViewer/CompositeViewer>
 
-#include <boost/shared_ptr.hpp>
-
 #include "lightingday.hpp"
 #include "lightingnight.hpp"
 #include "lightingbright.hpp"
@@ -78,7 +76,7 @@ namespace CSVRender
     {
             Q_OBJECT
         public:
-            SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget* parent = 0,
+            SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget* parent = 0,
                     Qt::WindowFlags f = 0, bool retrieveInput = true);
             virtual ~SceneWidget();
 
@@ -98,7 +96,7 @@ namespace CSVRender
             virtual void mouseMoveEvent (QMouseEvent *event);
             virtual void wheelEvent (QWheelEvent *event);
 
-            boost::shared_ptr<Resource::ResourceSystem> mResourceSystem;
+            std::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 
             Lighting* mLighting;
 

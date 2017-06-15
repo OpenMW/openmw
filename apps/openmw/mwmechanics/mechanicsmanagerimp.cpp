@@ -73,6 +73,8 @@ namespace MWMechanics
         MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
         MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats (ptr);
 
+        npcStats.setNeedRecalcDynamicStats(true);
+
         const ESM::NPC *player = ptr.get<ESM::NPC>()->mBase;
 
         // reset
@@ -232,8 +234,10 @@ namespace MWMechanics
         invStore.autoEquip(ptr);
     }
 
+    // mWatchedTimeToStartDrowning = -1 for correct drowning state check,
+    // if stats.getTimeToStartDrowning() == 0 already on game start
     MechanicsManager::MechanicsManager()
-    : mWatchedTimeToStartDrowning(0), mWatchedStatsEmpty (true), mUpdatePlayer (true), mClassSelected (false),
+    : mWatchedTimeToStartDrowning(-1), mWatchedStatsEmpty (true), mUpdatePlayer (true), mClassSelected (false),
       mRaceSelected (false), mAI(true)
     {
         //buildPlayer no longer here, needs to be done explicitly after all subsystems are up and running
@@ -324,12 +328,16 @@ namespace MWMechanics
                 winMgr->setValue(fbar, stats.getFatigue());
             }
 
-            if(stats.getTimeToStartDrowning() != mWatchedTimeToStartDrowning)
+            float timeToDrown = stats.getTimeToStartDrowning();
+
+            if(timeToDrown != mWatchedTimeToStartDrowning)
             {
-                const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("fHoldBreathTime")->getFloat();
-                mWatchedTimeToStartDrowning = stats.getTimeToStartDrowning();
-                if(stats.getTimeToStartDrowning() >= fHoldBreathTime)
+
+                mWatchedTimeToStartDrowning = timeToDrown;
+
+                if(timeToDrown >= fHoldBreathTime || timeToDrown == -1.0) // -1.0 is a special value during initialization
                     winMgr->setDrowningBarVisibility(false);
                 else
                 {
@@ -338,21 +346,15 @@ namespace MWMechanics
                 }
             }
 
-            bool update = false;
-
             //Loop over ESM::Skill::SkillEnum
             for(int i = 0; i < ESM::Skill::Length; ++i)
             {
                 if(stats.getSkill(i) != mWatchedSkills[i] || mWatchedStatsEmpty)
                 {
-                    update = true;
                     mWatchedSkills[i] = stats.getSkill(i);
                     winMgr->setValue((ESM::Skill::SkillEnum)i, stats.getSkill(i));
                 }
             }
-
-            if(update)
-                winMgr->updateSkillArea();
 
             winMgr->setValue("level", stats.getLevel());
 
@@ -1040,7 +1042,13 @@ namespace MWMechanics
         if (crimeSeen)
             reportCrime(player, victim, type, arg);
         else if (type == OT_Assault && !victim.isEmpty())
-            startCombat(victim, player); // TODO: combat should be started with an "unaware" flag, which makes the victim flee?
+        {
+            if (victim.getClass().isClass(victim, "guard")
+                && !victim.getClass().getCreatureStats(victim).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                reportCrime(player, victim, type, arg);
+            else
+                startCombat(victim, player); // TODO: combat should be started with an "unaware" flag, which makes the victim flee?
+        }
         return crimeSeen;
     }
 
@@ -1154,7 +1162,8 @@ namespace MWMechanics
                 // once the bounty has been paid.
                 it->getClass().getNpcStats(*it).setCrimeId(id);
 
-                it->getClass().getCreatureStats(*it).getAiSequence().stack(AiPursue(player), *it);
+                if (!it->getClass().getCreatureStats(*it).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                    it->getClass().getCreatureStats(*it).getAiSequence().stack(AiPursue(player), *it);
             }
             else
             {
@@ -1222,7 +1231,8 @@ namespace MWMechanics
             {
                 // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
                 // Note: accidental or collateral damage attacks are ignored.
-                startCombat(victim, player);
+                if (!victim.getClass().getCreatureStats(victim).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                    startCombat(victim, player);
 
                 // Set the crime ID, which we will use to calm down participants
                 // once the bounty has been paid.
@@ -1231,48 +1241,52 @@ namespace MWMechanics
         }
     }
 
-    bool MechanicsManager::actorAttacked(const MWWorld::Ptr &ptr, const MWWorld::Ptr &attacker)
+    bool MechanicsManager::actorAttacked(const MWWorld::Ptr &target, const MWWorld::Ptr &attacker)
     {
-        if (ptr == getPlayer())
+        if (target == getPlayer() || !attacker.getClass().isActor())
             return false;
 
-        std::list<MWWorld::Ptr> followers = getActorsSidingWith(attacker);
-        MWMechanics::CreatureStats& targetStats = ptr.getClass().getCreatureStats(ptr);
-        if (std::find(followers.begin(), followers.end(), ptr) != followers.end())
-        {
-            targetStats.friendlyHit();
+        std::list<MWWorld::Ptr> followersAttacker = getActorsSidingWith(attacker);
 
-            if (targetStats.getFriendlyHits() < 4)
+        MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
+
+        if (std::find(followersAttacker.begin(), followersAttacker.end(), target) != followersAttacker.end())
+        {
+            statsTarget.friendlyHit();
+
+            if (statsTarget.getFriendlyHits() < 4)
             {
-                MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
+                MWBase::Environment::get().getDialogueManager()->say(target, "hit");
                 return false;
             }
         }
 
         // Attacking an NPC that is already in combat with any other NPC is not a crime
-        AiSequence& seq = targetStats.getAiSequence();
+        AiSequence& seq = statsTarget.getAiSequence();
         bool isFightingNpc = false;
         for (std::list<AiPackage*>::const_iterator it = seq.begin(); it != seq.end(); ++it)
         {
             if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
             {
-                MWWorld::Ptr target = (*it)->getTarget();
-                if (!target.isEmpty() && target.getClass().isNpc())
+                MWWorld::Ptr target2 = (*it)->getTarget();
+                if (!target2.isEmpty() && target2.getClass().isNpc())
                     isFightingNpc = true;
             }
         }
 
-        if (ptr.getClass().isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker)
-                && !isAggressive(ptr, attacker) && !isFightingNpc)
-            commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
+        if (target.getClass().isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker)
+                && !isAggressive(target, attacker) && !isFightingNpc
+                && !target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+            commitCrime(attacker, target, MWBase::MechanicsManager::OT_Assault);
 
-        if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr)
+        if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(target)
                                     || attacker == getPlayer())
                 && !seq.isInCombat(attacker))
         {
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
             // Note: accidental or collateral damage attacks are ignored.
-            startCombat(ptr, attacker);
+            if (!target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                startCombat(target, attacker);
         }
 
         return true;
@@ -1324,8 +1338,8 @@ namespace MWMechanics
             float bootWeight = 0;
             if (ptr.getClass().isNpc())
             {
-                MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
-                MWWorld::ContainerStoreIterator it = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
+                const MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
+                MWWorld::ConstContainerStoreIterator it = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
                 if (it != inv.end())
                     bootWeight = it->getClass().getWeight(*it);
             }
@@ -1381,6 +1395,7 @@ namespace MWMechanics
             // if guard starts combat with player, guards pursuing player should do the same
             if (ptr.getClass().isClass(ptr, "Guard"))
             {
+                ptr.getClass().getCreatureStats(ptr).setHitAttemptActorId(target.getClass().getCreatureStats(target).getActorId()); // Stops guard from ending combat if player is unreachable
                 for (Actors::PtrActorMap::const_iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
                 {
                     if (iter->first.getClass().isClass(iter->first, "Guard"))
@@ -1390,6 +1405,7 @@ namespace MWMechanics
                         {
                             aiSeq.stopPursuit();
                             aiSeq.stack(MWMechanics::AiCombat(target), ptr);
+                            iter->first.getClass().getCreatureStats(iter->first).setHitAttemptActorId(target.getClass().getCreatureStats(target).getActorId()); // Stops guard from ending combat if player is unreachable
                         }
                     }
                 }

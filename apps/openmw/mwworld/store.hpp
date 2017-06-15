@@ -242,8 +242,8 @@ namespace MWWorld
 
         // Must be threadsafe! Called from terrain background loading threads.
         // Not a big deal here, since ESM::Land can never be modified or inserted/erased
-        ESM::Land *search(int x, int y) const;
-        ESM::Land *find(int x, int y) const;
+        const ESM::Land *search(int x, int y) const;
+        const ESM::Land *find(int x, int y) const;
 
         RecordId load(ESM::ESMReader &esm);
         void setUp();

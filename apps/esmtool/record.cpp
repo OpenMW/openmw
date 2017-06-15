@@ -494,7 +494,7 @@ void Record<ESM::Book>::print()
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  IsScroll: " << mData.mData.mIsScroll << std::endl;
-    std::cout << "  SkillID: " << mData.mData.mSkillID << std::endl;
+    std::cout << "  SkillId: " << mData.mData.mSkillId << std::endl;
     std::cout << "  Enchantment Points: " << mData.mData.mEnchant << std::endl;
     if (mPrintPlain)
     {

@@ -7,6 +7,7 @@
 #include <components/esm/defs.hpp>
 #include <components/esm/cellstate.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -88,7 +89,7 @@ void MWWorld::Cells::writeCell (ESM::ESMWriter& writer, CellStore& cell) const
 
 MWWorld::Cells::Cells (const MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& reader)
 : mStore (store), mReader (reader),
-  mIdCache (40, std::pair<std::string, CellStore *> ("", (CellStore*)0)), /// \todo make cache size configurable
+  mIdCache (Settings::Manager::getInt("pointers cache size", "Cells"), std::pair<std::string, CellStore *> ("", (CellStore*)0)),
   mIdCacheIndex (0)
 {}
 
@@ -349,7 +350,7 @@ bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, uint32_t type,
         catch (...)
         {
             // silently drop cells that don't exist anymore
-            std::cerr << "Dropping state for cell " << state.mId.mWorldspace << " (cell no longer exists)" << std::endl;
+            std::cerr << "Warning: Dropping state for cell " << state.mId.mWorldspace << " (cell no longer exists)" << std::endl;
             reader.skipRecord();
             return true;
         }

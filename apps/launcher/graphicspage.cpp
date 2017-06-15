@@ -1,5 +1,6 @@
 #include "graphicspage.hpp"
 
+#include <boost/math/common_factor.hpp>
 #include <QDesktopWidget>
 #include <QMessageBox>
 #include <QDir>
@@ -12,13 +13,7 @@
 
 #include <SDL_video.h>
 
-#include <boost/math/common_factor.hpp>
-
 #include <components/files/configurationmanager.hpp>
-
-#include <components/contentselector/model/naturalsort.hpp>
-
-#include <components/settings/settings.hpp>
 
 QString getAspect(int x, int y)
 {

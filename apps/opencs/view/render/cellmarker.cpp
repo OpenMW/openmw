@@ -1,13 +1,9 @@
 #include "cellmarker.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 #include <osg/AutoTransform>
+#include <osg/Material>
 #include <osg/Geode>
-#include <osg/Group>
 #include <osgText/Text>
-
-#include "mask.hpp"
 
 CSVRender::CellMarkerTag::CellMarkerTag(CellMarker *marker)
 : TagBase(Mask_CellMarker), mMarker(marker)
@@ -41,8 +37,8 @@ void CSVRender::CellMarker::buildMarker()
 
     // Add text containing cell's coordinates.
     std::string coordinatesText =
-        boost::lexical_cast<std::string>(mCoordinates.getX()) + "," +
-        boost::lexical_cast<std::string>(mCoordinates.getY());
+        std::to_string(mCoordinates.getX()) + "," +
+        std::to_string(mCoordinates.getY());
     markerText->setText(coordinatesText);
 
     // Add text to marker node.
@@ -75,7 +71,10 @@ CSVRender::CellMarker::CellMarker(
     mMarkerNode->setAutoRotateMode(osg::AutoTransform::ROTATE_TO_SCREEN);
     mMarkerNode->setAutoScaleToScreen(true);
     mMarkerNode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-    mMarkerNode->getOrCreateStateSet()->setRenderBinDetails(osg::StateSet::TRANSPARENT_BIN + 1, "RenderBin");
+    mMarkerNode->getOrCreateStateSet()->setRenderBinDetails(11, "RenderBin");
+    osg::ref_ptr<osg::Material> mat = new osg::Material;
+    mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+    mMarkerNode->getOrCreateStateSet()->setAttribute(mat);
 
     mMarkerNode->setUserData(new CellMarkerTag(this));
     mMarkerNode->setNodeMask(Mask_CellMarker);

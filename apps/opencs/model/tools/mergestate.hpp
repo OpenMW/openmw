@@ -12,7 +12,7 @@ namespace CSMTools
 {
     struct MergeState
     {
-        std::auto_ptr<CSMDoc::Document> mTarget;
+        std::unique_ptr<CSMDoc::Document> mTarget;
         CSMDoc::Document& mSource;
         bool mCompleted;
         std::map<std::pair<uint16_t, int>, int> mTextureIndices; // (texture, content file) -> new texture

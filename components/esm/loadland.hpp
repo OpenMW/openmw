@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#include <OpenThreads/Mutex>
-
 #include "esmcommon.hpp"
 
 namespace ESM
@@ -80,10 +78,17 @@ struct Land
 
     struct LandData
     {
+        LandData()
+            : mDataLoaded(0)
+        {
+        }
+
         // Initial reference height for the first vertex, only needed for filling mHeights
         float mHeightOffset;
         // Height in world space for each vertex
         float mHeights[LAND_NUM_VERTS];
+        float mMinHeight;
+        float mMaxHeight;
 
         // 24-bit normals, these aren't always correct though. Edge and corner normals may be garbage.
         VNML mNormals[LAND_NUM_VERTS * 3];
@@ -96,19 +101,15 @@ struct Land
         // 24-bit RGB color for each vertex
         unsigned char mColours[3 * LAND_NUM_VERTS];
 
-        // DataTypes available in this LandData, accessing data that is not available is an undefined operation
-        int mDataTypes;
-
-        // low-LOD heightmap (used for rendering the global map)
-        signed char mWnam[81];
-
         // ???
         short mUnk1;
         uint8_t mUnk2;
 
-        void save(ESMWriter &esm) const;
-        static void transposeTextureData(const uint16_t *in, uint16_t *out);
+        int mDataLoaded;
     };
+
+    // low-LOD heightmap (used for rendering the global map)
+    signed char mWnam[81];
 
     void load(ESMReader &esm, bool &isDeleted);
     void save(ESMWriter &esm, bool isDeleted = false) const;
@@ -116,14 +117,15 @@ struct Land
     void blank() {}
 
     /**
-     * Actually loads data
+     * Actually loads data into target
+     * If target is NULL, assumed target is mLandData
      */
-    void loadData(int flags) const;
+    void loadData(int flags, LandData* target = NULL) const;
 
     /**
-     * Frees memory allocated for land data
+     * Frees memory allocated for mLandData
      */
-    void unloadData();
+    void unloadData() const;
 
     /// Check if given data type is loaded
     /// @note We only check data types that *can* be loaded (present in mDataTypes)
@@ -159,11 +161,7 @@ struct Land
         /// Loads data and marks it as loaded
         /// \return true if data is actually loaded from file, false otherwise
         /// including the case when data is already loaded
-        bool condLoad(ESM::ESMReader& reader, int flags, int dataFlag, void *ptr, unsigned int size) const;
-
-        mutable OpenThreads::Mutex mMutex;
-
-        mutable int mDataLoaded;
+        bool condLoad(ESM::ESMReader& reader, int flags, int& targetFlags, int dataFlag, void *ptr, unsigned int size) const;
 
         mutable LandData *mLandData;
 };

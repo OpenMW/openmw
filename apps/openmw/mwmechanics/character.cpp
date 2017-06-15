@@ -70,12 +70,14 @@ std::string getBestAttack (const ESM::Weapon* weapon)
     int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
     int chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1])/2;
     int thrust = (weapon->mData.mThrust[0] + weapon->mData.mThrust[1])/2;
-    if (slash >= chop && slash >= thrust)
+    if (slash == chop && slash == thrust)
         return "slash";
-    else if (chop >= slash && chop >= thrust)
-        return "chop";
-    else
+    else if (thrust >= chop && thrust >= slash)
         return "thrust";
+    else if (slash >= chop && slash >= thrust)
+        return "slash";
+    else
+        return "chop";
 }
 
 // Converts a movement Run state to its equivalent Walk state.
@@ -362,8 +364,10 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
 {
     if(force || movement != mMovementState)
     {
-        mIdleState = CharState_None;
         mMovementState = movement;
+
+        if (movement != CharState_None)
+            mIdleState = CharState_None;
 
         std::string movementAnimName;
         MWRender::Animation::BlendMask movemask = MWRender::Animation::BlendMask_All;
@@ -1099,7 +1103,7 @@ bool CharacterController::updateWeaponState()
     if (mPtr.getClass().hasInventoryStore(mPtr))
     {
         MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
-        MWWorld::ContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
+        MWWorld::ConstContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
         if(weapon != inv.end() && !(weaptype == WeapType_None && mWeaponType == WeapType_Spell))
         {
             soundid = (weaptype == WeapType_None) ?
@@ -1187,12 +1191,12 @@ bool CharacterController::updateWeaponState()
     if (mPtr.getClass().hasInventoryStore(mPtr))
     {
         MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
-        MWWorld::ContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
+        MWWorld::ConstContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
         isWeapon = (weapon != inv.end() && weapon->getTypeName() == typeid(ESM::Weapon).name());
         if(isWeapon)
             weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;
 
-        MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+        MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
         if (mWeaponType == WeapType_Crossbow)
             ammunition = (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt);
         else if (mWeaponType == WeapType_BowAndArrow)
@@ -1322,7 +1326,7 @@ bool CharacterController::updateWeaponState()
                         {
                             if (Settings::Manager::getBool("best attack", "Game"))        
                             {
-                                MWWorld::ContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                                MWWorld::ConstContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                                 mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
                             }
                             else
@@ -1521,8 +1525,8 @@ bool CharacterController::updateWeaponState()
 
     if (mPtr.getClass().hasInventoryStore(mPtr))
     {
-        MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-        MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+        MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name()
                 && updateCarriedLeftVisible(mWeaponType))
 
@@ -1569,6 +1573,8 @@ void CharacterController::update(float duration)
     float speed = 0.f;
 
     updateMagicEffects();
+
+    bool godmode = mPtr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
 
     if(!cls.isActor())
         updateAnimQueue();
@@ -1687,8 +1693,12 @@ void CharacterController::update(float duration)
         }
         fatigueLoss *= duration;
         DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
-        fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss, fatigue.getCurrent() < 0);
-        cls.getCreatureStats(mPtr).setFatigue(fatigue);
+
+        if (!godmode)
+        {
+            fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss, fatigue.getCurrent() < 0);
+            cls.getCreatureStats(mPtr).setFatigue(fatigue);
+        }
 
         if(sneak || inwater || flying)
             vec.z() = 0.0f;
@@ -1743,9 +1753,13 @@ void CharacterController::update(float duration)
                 float normalizedEncumbrance = mPtr.getClass().getNormalizedEncumbrance(mPtr);
                 if (normalizedEncumbrance > 1)
                     normalizedEncumbrance = 1;
-                const float fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
-                fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
-                cls.getCreatureStats(mPtr).setFatigue(fatigue);
+                const float fatigueDecrease = fatigueJumpBase + normalizedEncumbrance * fatigueJumpMult;
+
+                if (!godmode)
+                {
+                    fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
+                    cls.getCreatureStats(mPtr).setFatigue(fatigue);
+                }
             }
         }
         else if(mJumpState == JumpState_InAir)
@@ -1756,16 +1770,20 @@ void CharacterController::update(float duration)
 
             float height = cls.getCreatureStats(mPtr).land();
             float healthLost = getFallDamage(mPtr, height);
+
             if (healthLost > 0.0f)
             {
                 const float fatigueTerm = cls.getCreatureStats(mPtr).getFatigueTerm();
 
                 // inflict fall damages
-                DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
-                float realHealthLost = static_cast<float>(healthLost * (1.0f - 0.25f * fatigueTerm));
-                health.setCurrent(health.getCurrent() - realHealthLost);
-                cls.getCreatureStats(mPtr).setHealth(health);
-                cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), osg::Vec3f(), true);
+                if (!godmode)
+                {
+                    DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
+                    float realHealthLost = static_cast<float>(healthLost * (1.0f - 0.25f * fatigueTerm));
+                    health.setCurrent(health.getCurrent() - realHealthLost);
+                    cls.getCreatureStats(mPtr).setHealth(health);
+                    cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), osg::Vec3f(), true);
+                }
 
                 const int acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
                 if (healthLost > (acrobaticsSkill * fatigueTerm))
@@ -1830,7 +1848,7 @@ void CharacterController::update(float duration)
         if (onground)
             cls.getCreatureStats(mPtr).land();
 
-        if(movestate != CharState_None)
+        if(movestate != CharState_None && movestate != CharState_TurnLeft && movestate != CharState_TurnRight)
             clearAnimQueue();
 
         if(mAnimQueue.empty() || inwater || sneak)
@@ -1870,10 +1888,14 @@ void CharacterController::update(float duration)
         {
             if(mHitState != CharState_KnockDown && mHitState != CharState_KnockOut)
             {
-                world->rotateObject(mPtr, rot.x(), rot.y(), rot.z(), true);
+                if (rot != osg::Vec3f())
+                    world->rotateObject(mPtr, rot.x(), rot.y(), rot.z(), true);
             }
             else //avoid z-rotating for knockdown
-                world->rotateObject(mPtr, rot.x(), rot.y(), 0.0f, true);
+            {
+                if (rot.x() != 0 && rot.y() != 0)
+                    world->rotateObject(mPtr, rot.x(), rot.y(), 0.0f, true);
+            }
 
             if (!mMovementAnimationControlled)
                 world->queueMovement(mPtr, vec);
@@ -2220,7 +2242,7 @@ void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
     mAttackingOrSpell = attackingOrSpell;
 }
 
-void CharacterController::setAIAttackType(std::string attackType)
+void CharacterController::setAIAttackType(const std::string& attackType)
 {
     mAttackType = attackType;
 }

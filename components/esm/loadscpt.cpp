@@ -83,10 +83,24 @@ namespace ESM
                     loadSCVR(esm);
                     break;
                 case ESM::FourCC<'S','C','D','T'>::value:
+                {
                     // compiled script
-                    mScriptData.resize(mData.mScriptDataSize);
-                    esm.getHExact(&mScriptData[0], mScriptData.size());
+                    esm.getSubHeader();
+                    uint32_t subSize = esm.getSubSize();
+
+                    if (subSize != static_cast<uint32_t>(mData.mScriptDataSize))
+                    {
+                        std::stringstream ss;
+                        ss << "ESM Warning: Script data size defined in SCHD subrecord does not match size of SCDT subrecord";
+                        ss << "\n  File: " << esm.getName();
+                        ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
+                        std::cerr << ss.str() << std::endl;
+                    }
+
+                    mScriptData.resize(subSize);
+                    esm.getExact(&mScriptData[0], mScriptData.size());
                     break;
+                }
                 case ESM::FourCC<'S','C','T','X'>::value:
                     mScriptText = esm.getHString();
                     break;

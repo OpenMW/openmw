@@ -8,7 +8,7 @@ namespace MWSound
 
     class MovieAudioFactory : public Video::MovieAudioFactory
     {
-        virtual boost::shared_ptr<Video::MovieAudioDecoder> createDecoder(Video::VideoState* videoState);
+        virtual std::shared_ptr<Video::MovieAudioDecoder> createDecoder(Video::VideoState* videoState);
     };
 
 }

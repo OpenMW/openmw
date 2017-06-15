@@ -15,6 +15,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/actionteleport.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
@@ -46,10 +47,9 @@ namespace MWScript
                     ESM::Position pos;
                     MWBase::World *world = MWBase::Environment::get().getWorld();
 
-                    world->getPlayer().setTeleported(true);
                     if (world->findExteriorPosition(cell, pos))
                     {
-                        world->changeToExteriorCell(pos, true);
+                        MWWorld::ActionTeleport("", pos, false).execute(world->getPlayerPtr());
                         world->fixPosition(world->getPlayerPtr());
                     }
                     else
@@ -57,7 +57,7 @@ namespace MWScript
                         // Change to interior even if findInteriorPosition()
                         // yields false. In this case position will be zero-point.
                         world->findInteriorPosition(cell, pos);
-                        world->changeToInteriorCell(cell, pos, true);
+                        MWWorld::ActionTeleport(cell, pos, false).execute(world->getPlayerPtr());
                     }
                 }
         };
@@ -76,13 +76,13 @@ namespace MWScript
 
                     ESM::Position pos;
                     MWBase::World *world = MWBase::Environment::get().getWorld();
-                    world->getPlayer().setTeleported(true);
+
                     world->indexToPosition (x, y, pos.pos[0], pos.pos[1], true);
                     pos.pos[2] = 0;
 
                     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-                    world->changeToExteriorCell (pos, true);
+                    MWWorld::ActionTeleport("", pos, false).execute(world->getPlayerPtr());
                     world->fixPosition(world->getPlayerPtr());
                 }
         };

@@ -122,7 +122,7 @@ namespace MWGui
             if (!iter->isEmpty())
             {
                 mApparatus.at (index)->setUserString ("ToolTipType", "ItemPtr");
-                mApparatus.at (index)->setUserData (*iter);
+                mApparatus.at (index)->setUserData (MWWorld::Ptr(*iter));
             }
         }
 
@@ -190,9 +190,9 @@ namespace MWGui
                 continue;
 
             ingredient->setUserString("ToolTipType", "ItemPtr");
-            ingredient->setUserData(item);
+            ingredient->setUserData(MWWorld::Ptr(item));
 
-            ingredient->setCount(ingredient->getUserData<MWWorld::Ptr>()->getRefData().getCount());
+            ingredient->setCount(item.getRefData().getCount());
         }
 
         mItemView->update();

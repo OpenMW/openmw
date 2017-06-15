@@ -1,7 +1,5 @@
 #include "dialogue.hpp"
 
-#include <boost/bind.hpp>
-
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_Window.h>
 #include <MyGUI_ProgressBar.h>
@@ -107,19 +105,22 @@ namespace MWGui
 
     // --------------------------------------------------------------------------------------------------
 
-    Response::Response(const std::string &text, const std::string &title)
-        : mTitle(title)
+    Response::Response(const std::string &text, const std::string &title, bool needMargin)
+        : mTitle(title), mNeedMargin(needMargin)
     {
         mText = text;
     }
 
     void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
-        BookTypesetter::Style* title = typesetter->createStyle("", getDialogueTextColour("header"));
-        typesetter->sectionBreak(9);
+        typesetter->sectionBreak(mNeedMargin ? 9 : 0);
+
         if (mTitle != "")
+        {
+            BookTypesetter::Style* title = typesetter->createStyle("", getDialogueTextColour("header"));
             typesetter->write(title, to_utf8_span(mTitle.c_str()));
-        typesetter->sectionBreak(9);
+            typesetter->sectionBreak();
+        }
 
         typedef std::pair<size_t, size_t> Range;
         std::map<Range, intptr_t> hyperLinks;
@@ -277,7 +278,7 @@ namespace MWGui
         mScrollBar->eventScrollChangePosition += MyGUI::newDelegate(this, &DialogueWindow::onScrollbarMoved);
         mHistory->eventMouseWheel += MyGUI::newDelegate(this, &DialogueWindow::onMouseWheel);
 
-        BookPage::ClickCallback callback = boost::bind (&DialogueWindow::notifyLinkClicked, this, _1);
+        BookPage::ClickCallback callback = std::bind (&DialogueWindow::notifyLinkClicked, this, std::placeholders::_1);
         mHistory->adviseLinkClicked(callback);
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
@@ -550,7 +551,7 @@ namespace MWGui
         mHistory->setPosition(0, static_cast<int>(pos) * -1);
     }
 
-    void DialogueWindow::addResponse(const std::string &text, const std::string &title)
+    void DialogueWindow::addResponse(const std::string &text, const std::string &title, bool needMargin)
     {
         // This is called from the dialogue manager, so text is
         // case-smashed - thus we have to retrieve the correct case
@@ -569,7 +570,7 @@ namespace MWGui
             }
         }
 
-        mHistoryContents.push_back(new Response(text, realTitle));
+        mHistoryContents.push_back(new Response(text, realTitle, needMargin));
         updateHistory();
     }
 

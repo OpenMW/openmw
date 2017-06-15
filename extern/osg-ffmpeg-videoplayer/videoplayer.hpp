@@ -10,8 +10,6 @@
 
 #include <osg/Texture2D>
 
-#include <boost/shared_ptr.hpp>
-
 namespace osg
 {
     class Texture2D;
@@ -44,7 +42,7 @@ namespace Video
         /// Play the given video. If a video is already playing, the old video is closed first.
         /// @note The video will be unpaused by default. Use the pause() and play() methods to control pausing.
         /// @param name A name for the video stream - only used for logging purposes.
-        void playVideo (boost::shared_ptr<std::istream> inputstream, const std::string& name);
+        void playVideo (std::shared_ptr<std::istream> inputstream, const std::string& name);
 
         /// Get the current playback time position in the video, in seconds
         double getCurrentTime();
@@ -78,7 +76,7 @@ namespace Video
     private:
         VideoState* mState;
 
-        std::auto_ptr<MovieAudioFactory> mAudioFactory;
+        std::unique_ptr<MovieAudioFactory> mAudioFactory;
     };
 
 }

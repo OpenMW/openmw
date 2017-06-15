@@ -9,7 +9,11 @@
 
 #include <stack>
 
+#include <osg/ref_ptr>
+
 #include "../mwbase/windowmanager.hpp"
+
+#include "../mwworld/ptr.hpp"
 
 #include <components/settings/settings.hpp>
 #include <components/to_utf8/to_utf8.hpp>
@@ -55,6 +59,11 @@ namespace osgViewer
 namespace Resource
 {
     class ResourceSystem;
+}
+
+namespace SceneUtil
+{
+    class WorkQueue;
 }
 
 namespace SDLUtil
@@ -119,7 +128,7 @@ namespace MWGui
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
-    WindowManager(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem,
+    WindowManager(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                   const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
                   Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap, const std::string& versionDescription);
     virtual ~WindowManager();
@@ -128,7 +137,6 @@ namespace MWGui
     void setStore (const MWWorld::ESMStore& store);
 
     void initUI();
-    void renderWorldMap();
 
     virtual Loading::Listener* getLoadingScreen();
 
@@ -237,7 +245,9 @@ namespace MWGui
     virtual std::string getSelectedSpell() { return mSelectedSpell; }
     virtual void setSelectedSpell(const std::string& spellId, int successChancePercent);
     virtual void setSelectedEnchantItem(const MWWorld::Ptr& item);
+    virtual const MWWorld::Ptr& getSelectedEnchantItem() const;
     virtual void setSelectedWeapon(const MWWorld::Ptr& item);
+    virtual const MWWorld::Ptr& getSelectedWeapon() const;
     virtual void unsetSelectedSpell();
     virtual void unsetSelectedWeapon();
 
@@ -382,11 +392,12 @@ namespace MWGui
   private:
     const MWWorld::ESMStore* mStore;
     Resource::ResourceSystem* mResourceSystem;
+    osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
 
     osgMyGUI::Platform* mGuiPlatform;
     osgViewer::Viewer* mViewer;
 
-    std::auto_ptr<Gui::FontLoader> mFontLoader;
+    std::unique_ptr<Gui::FontLoader> mFontLoader;
 
     bool mConsoleOnlyScripts;
 
@@ -395,6 +406,8 @@ namespace MWGui
     void onWindowChangeCoord(MyGUI::Window* _sender);
 
     std::string mSelectedSpell;
+    MWWorld::Ptr mSelectedEnchantItem;
+    MWWorld::Ptr mSelectedWeapon;
 
     std::stack<WindowModal*> mCurrentModals;
 
@@ -526,6 +539,8 @@ namespace MWGui
     void createTextures();
     void createCursors();
     void setMenuTransparency(float value);
+
+    void updatePinnedWindows();
   };
 }
 

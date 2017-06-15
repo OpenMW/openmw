@@ -6,8 +6,6 @@
 
 #include <functional>
 #include <stdint.h>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
 
 namespace MWGui
 {
@@ -15,7 +13,7 @@ namespace MWGui
     /// the book page widget.
     struct TypesetBook
     {
-        typedef boost::shared_ptr <TypesetBook> Ptr;
+        typedef std::shared_ptr <TypesetBook> Ptr;
         typedef intptr_t InteractiveId;
 
         /// Returns the number of pages in the document.
@@ -33,7 +31,7 @@ namespace MWGui
     /// A factory class for creating a typeset book instance.
     struct BookTypesetter
     {
-        typedef boost::shared_ptr <BookTypesetter> Ptr;
+        typedef std::shared_ptr <BookTypesetter> Ptr;
         typedef TypesetBook::InteractiveId InteractiveId;
         typedef MyGUI::Colour Colour;
         typedef uint8_t const * Utf8Point;
@@ -102,7 +100,7 @@ namespace MWGui
     public:
 
         typedef TypesetBook::InteractiveId InteractiveId;
-        typedef boost::function <void (InteractiveId)> ClickCallback;
+        typedef std::function <void (InteractiveId)> ClickCallback;
 
         /// Make the widget display the specified page from the specified book.
         virtual void showPage (TypesetBook::Ptr Book, size_t Page) = 0;

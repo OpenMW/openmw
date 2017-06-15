@@ -12,14 +12,19 @@ const MWWorld::Ptr& MWWorld::Action::getTarget() const
     return mTarget;
 }
 
+void MWWorld::Action::setTarget(const MWWorld::Ptr& target)
+{
+    mTarget = target;
+}
+
 MWWorld::Action::Action (bool keepSound, const Ptr& target) : mKeepSound (keepSound), mSoundOffset(0), mTarget (target)
 {}
 
 MWWorld::Action::~Action() {}
 
-void MWWorld::Action::execute (const Ptr& actor)
+void MWWorld::Action::execute (const Ptr& actor, bool noSound)
 {
-    if(!mSoundId.empty())
+    if(!mSoundId.empty() && !noSound)
     {
         if(mKeepSound && actor == MWMechanics::getPlayer())
             MWBase::Environment::get().getSoundManager()->playSound(mSoundId, 1.0, 1.0,

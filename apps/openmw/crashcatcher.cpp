@@ -160,11 +160,12 @@ static void gdb_info(pid_t pid)
         printf("Executing: %s\n", cmd_buf);
         fflush(stdout);
 
-        {   /* another special exception for "ignoring return value..." */
-            int unused;
-            unused = system(cmd_buf);
-            UNUSED(unused);
-        }
+        int ret = system(cmd_buf);
+
+        if (ret != 0)
+            printf("\nFailed to create a crash report. Please install 'gdb' and crash again!\n");
+        fflush(stdout);
+
         /* Clean up */
         remove(respfile);
     }

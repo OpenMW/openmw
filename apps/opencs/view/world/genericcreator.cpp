@@ -63,7 +63,7 @@ std::string CSVWorld::GenericCreator::getIdValidatorResult() const
 
 void CSVWorld::GenericCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const {}
 
-void CSVWorld::GenericCreator::pushCommand (std::auto_ptr<CSMWorld::CreateCommand> command,
+void CSVWorld::GenericCreator::pushCommand (std::unique_ptr<CSMWorld::CreateCommand> command,
     const std::string& id)
 {
     mUndoStack.push (command.release());
@@ -224,7 +224,7 @@ void CSVWorld::GenericCreator::create()
     {
         std::string id = getId();
 
-        std::auto_ptr<CSMWorld::CreateCommand> command;
+        std::unique_ptr<CSMWorld::CreateCommand> command;
 
         if (mCloneMode)
         {
@@ -239,7 +239,7 @@ void CSVWorld::GenericCreator::create()
         }
 
         configureCreateCommand (*command);
-        pushCommand (command, id);
+        pushCommand (std::move(command), id);
 
         emit done();
         emit requestFocus(id);

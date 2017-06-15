@@ -36,7 +36,6 @@ namespace MWScript
     {
             Compiler::StreamErrorHandler mErrorHandler;
             const MWWorld::ESMStore& mStore;
-            bool mVerbose;
             Compiler::Context& mCompilerContext;
             Compiler::FileParser mParser;
             Interpreter::Interpreter mInterpreter;
@@ -52,7 +51,7 @@ namespace MWScript
 
         public:
 
-            ScriptManager (const MWWorld::ESMStore& store, bool verbose,
+            ScriptManager (const MWWorld::ESMStore& store,
                 Compiler::Context& compilerContext, int warningsMode,
                 const std::vector<std::string>& scriptBlacklist);
 

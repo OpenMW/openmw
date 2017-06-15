@@ -41,7 +41,7 @@ add_component_dir (vfs
     )
 
 add_component_dir (resource
-    scenemanager keyframemanager imagemanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem resourcemanager
+    scenemanager keyframemanager imagemanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem resourcemanager stats
     )
 
 add_component_dir (shader
@@ -50,7 +50,7 @@ add_component_dir (shader
 
 add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry lightcontroller
-    lightmanager lightutil positionattitudetransform workqueue unrefqueue pathgridutil waterutil
+    lightmanager lightutil positionattitudetransform workqueue unrefqueue pathgridutil waterutil writescene serialize optimizer
     )
 
 add_component_dir (nif
@@ -114,7 +114,7 @@ add_component_dir (translation
     )
 
 add_component_dir (terrain
-    storage world buffercache defs terraingrid material
+    storage world buffercache defs terraingrid material terraindrawable texturemanager chunkmanager compositemaprenderer quadtreeworld quadtreenode viewdata
     )
 
 add_component_dir (loadinglistener
@@ -202,8 +202,8 @@ target_link_libraries(components
     ${OSGUTIL_LIBRARIES}
     ${OSGDB_LIBRARIES}
     ${OSGVIEWER_LIBRARIES}
+    ${OSGTEXT_LIBRARIES}
     ${OSGGA_LIBRARIES}
-    ${OSGFX_LIBRARIES}
     ${OSGANIMATION_LIBRARIES}
     ${Bullet_LIBRARIES}
     ${SDL2_LIBRARIES}

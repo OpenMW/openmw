@@ -88,7 +88,7 @@ bool Objects::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& gro
     }
     else
     {
-        std::cerr<< "Error in Objects::playAnimationGroup:  Unable to find " << ptr.getCellRef().getRefId() << std::endl;
+        std::cerr<< "Warning: Objects::playAnimationGroup:  Unable to find " << ptr.getCellRef().getRefId() << std::endl;
         return false;
     }
 }

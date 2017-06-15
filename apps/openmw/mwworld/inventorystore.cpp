@@ -139,7 +139,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
 
     // Auto-equip items if an armor/clothing or weapon item is added, but not for the player nor werewolves
     if (actorPtr != MWMechanics::getPlayer()
-            && !(actorPtr.getClass().isNpc() && actorPtr.getClass().getNpcStats(actorPtr).isWerewolf()))
+            && actorPtr.getClass().isNpc() && !actorPtr.getClass().getNpcStats(actorPtr).isWerewolf())
     {
         std::string type = itemPtr.getTypeName();
         if (type == typeid(ESM::Armor).name() || type == typeid(ESM::Clothing).name())
@@ -199,20 +199,12 @@ void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
 
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
 {
-    if (slot<0 || slot>=static_cast<int> (mSlots.size()))
-        throw std::runtime_error ("slot number out of range");
+    return findSlot (slot);
+}
 
-    if (mSlots[slot]==end())
-        return end();
-
-    if (mSlots[slot]->getRefData().getCount()<1)
-    {
-        // Object has been deleted
-        // This should no longer happen, since the new remove function will unequip first
-        throw std::runtime_error("Invalid slot, make sure you are not calling RefData::setCount for a container object");
-    }
-
-    return mSlots[slot];
+MWWorld::ConstContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot) const
+{
+    return findSlot (slot);
 }
 
 bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const MWWorld::Ptr& item)
@@ -235,12 +227,26 @@ bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const
     return true;
 }
 
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::findSlot (int slot) const
+{
+    if (slot<0 || slot>=static_cast<int> (mSlots.size()))
+        throw std::runtime_error ("slot number out of range");
+
+    if (mSlots[slot]==end())
+        return mSlots[slot];
+
+    if (mSlots[slot]->getRefData().getCount()<1)
+    {
+        // Object has been deleted
+        // This should no longer happen, since the new remove function will unequip first
+        throw std::runtime_error("Invalid slot, make sure you are not calling RefData::setCount for a container object");
+    }
+
+    return mSlots[slot];
+}
+
 void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 {
-    if (!actor.getClass().isNpc())
-        // autoEquip is no-op for creatures
-        return;
-
     const MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
     MWMechanics::NpcStats& stats = actor.getClass().getNpcStats(actor);
@@ -249,7 +255,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     static float fUnarmoredBase2 = store.find("fUnarmoredBase2")->getFloat();
     int unarmoredSkill = stats.getSkill(ESM::Skill::Unarmored).getModified();
 
-    float unarmoredRating = static_cast<int>((fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill));
+    float unarmoredRating = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
 
     TSlots slots_;
     initSlots (slots_);
@@ -295,9 +301,15 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 {
                     if (old.getTypeName() == typeid(ESM::Armor).name())
                     {
-                        if (old.getClass().getEffectiveArmorRating(old, actor) >= test.getClass().getEffectiveArmorRating(test, actor))
-                            // old armor had better armor rating
+                        if (old.get<ESM::Armor>()->mBase->mData.mType < test.get<ESM::Armor>()->mBase->mData.mType)
                             continue;
+
+                        if (old.get<ESM::Armor>()->mBase->mData.mType == test.get<ESM::Armor>()->mBase->mData.mType)
+                        {
+                            if (old.getClass().getEffectiveArmorRating(old, actor) >= test.getClass().getEffectiveArmorRating(test, actor))
+                                // old armor had better armor rating
+                                continue;
+                        }
                     }
                     // suitable armor should replace already equipped clothing
                 }
@@ -443,6 +455,50 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     }
 }
 
+void MWWorld::InventoryStore::autoEquipShield(const MWWorld::Ptr& actor)
+{
+    bool updated = false;
+
+    mUpdatesEnabled = false;
+    for (ContainerStoreIterator iter(begin(ContainerStore::Type_Armor)); iter != end(); ++iter)
+    {
+        if (iter->get<ESM::Armor>()->mBase->mData.mType != ESM::Armor::Shield)
+            continue;
+
+        if (iter->getClass().canBeEquipped(*iter, actor).first != 1)
+            continue;
+
+        if (iter->getClass().getItemHealth(*iter) <= 0)
+            continue;
+
+        std::pair<std::vector<int>, bool> shieldSlots =
+            iter->getClass().getEquipmentSlots(*iter);
+
+        if (shieldSlots.first.empty())
+            continue;
+
+        int slot = shieldSlots.first[0];
+        const ContainerStoreIterator& shield = mSlots[slot];
+
+        if (shield != end()
+                && shield.getType() == Type_Armor && shield->get<ESM::Armor>()->mBase->mData.mType == ESM::Armor::Shield)
+        {
+            if (shield->getClass().getItemHealth(*shield) >= iter->getClass().getItemHealth(*iter))
+                continue;
+        }
+
+        equip(slot, iter, actor);
+        updated = true;
+    }
+    mUpdatesEnabled = true;
+
+    if (updated)
+    {
+        fireEquipmentChangedEvent(actor);
+        updateMagicEffects(actor);
+    }
+}
+
 const MWMechanics::MagicEffects& MWWorld::InventoryStore::getMagicEffects() const
 {
     return mMagicEffects;
@@ -567,7 +623,7 @@ void MWWorld::InventoryStore::flagAsModified()
     mRechargingItemsUpToDate = false;
 }
 
-bool MWWorld::InventoryStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
+bool MWWorld::InventoryStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2) const
 {
     bool canStack = MWWorld::ContainerStore::stacks(ptr1, ptr2);
     if (!canStack)
@@ -598,7 +654,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSelectedEnchantItem(
     return mSelectedEnchantItem;
 }
 
-int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor)
+int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor, bool equipReplacement)
 {
     int retCount = ContainerStore::remove(item, count, actor);
 
@@ -620,9 +676,10 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
     }
 
     // If an armor/clothing item is removed, try to find a replacement,
-    // but not for the player nor werewolves.
-    if (wasEquipped && (actor != MWMechanics::getPlayer())
-            && !(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf()))
+    // but not for the player nor werewolves, and not if the RemoveItem script command
+    // was used (equipReplacement is false)
+    if (equipReplacement && wasEquipped && (actor != MWMechanics::getPlayer())
+            && actor.getClass().isNpc() && !actor.getClass().getNpcStats(actor).isWerewolf())
     {
         std::string type = item.getTypeName();
         if (type == typeid(ESM::Armor).name() || type == typeid(ESM::Clothing).name())
@@ -767,7 +824,7 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
 
         int i=0;
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
-            effectIt!=enchantment.mEffects.mList.end(); ++effectIt)
+            effectIt!=enchantment.mEffects.mList.end(); ++effectIt, ++i)
         {
             // Don't get spell icon display information for enchantments that weren't actually applied
             if (mMagicEffects.get(MWMechanics::EffectKey(*effectIt)).getMagnitude() == 0)
@@ -777,8 +834,6 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
             magnitude *= params.mMultiplier;
             if (magnitude > 0)
                 visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), (**iter).getCellRef().getRefId(), -1, magnitude);
-
-            ++i;
         }
     }
 }
@@ -795,7 +850,7 @@ void MWWorld::InventoryStore::updateRechargingItems()
                         enchantmentId);
             if (!enchantment)
             {
-                std::cerr << "Can't find enchantment '" << enchantmentId << "' on item " << it->getCellRef().getRefId() << std::endl;
+                std::cerr << "Warning: Can't find enchantment '" << enchantmentId << "' on item " << it->getCellRef().getRefId() << std::endl;
                 continue;
             }
 
@@ -883,7 +938,6 @@ void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sou
                     mMagicEffects.add (*effectIt, -magnitude);
 
                 params[i].mMultiplier = 0;
-                break;
             }
         }
     }

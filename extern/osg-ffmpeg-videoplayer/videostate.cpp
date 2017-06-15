@@ -1,7 +1,8 @@
 #include "videostate.hpp"
 
+#include <algorithm>
+#include <cassert>
 #include <iostream>
-#include <stdexcept>
 
 #include <osg/Texture2D>
 
@@ -18,8 +19,6 @@ extern "C"
         LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO)
         #include <libavutil/time.h>
     #endif
-
-    #include <libavutil/mathematics.h>
 
     #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
     #define av_frame_alloc  avcodec_alloc_frame
@@ -626,7 +625,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
     return 0;
 }
 
-void VideoState::init(boost::shared_ptr<std::istream> inputstream, const std::string &name)
+void VideoState::init(std::shared_ptr<std::istream> inputstream, const std::string &name)
 {
     int video_index = -1;
     int audio_index = -1;

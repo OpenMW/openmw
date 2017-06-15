@@ -61,7 +61,7 @@ namespace MWWorld
         void setWerewolfSkillsAttributes();
 
         // For mark/recall magic effects
-        void markPosition (CellStore* markedCell, ESM::Position markedPosition);
+        void markPosition (CellStore* markedCell, const ESM::Position& markedPosition);
         void getMarkedPosition (CellStore*& markedCell, ESM::Position& markedPosition) const;
 
         /// Interiors can not always be mapped to a world position. However

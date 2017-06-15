@@ -60,7 +60,9 @@ op 0x2002b: PCJoinFaction, explicit reference
 op 0x2002c: MenuTest
 op 0x2002d: BetaComment
 op 0x2002e: BetaComment, explicit reference
-opcodes 0x2002d-0x3ffff unused
+op 0x2002f: ShowSceneGraph
+op 0x20030: ShowSceneGraph, explicit
+opcodes 0x20031-0x3ffff unused
 
 Segment 4:
 (not implemented yet)

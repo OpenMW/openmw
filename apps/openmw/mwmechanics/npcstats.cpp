@@ -1,15 +1,9 @@
 #include "npcstats.hpp"
 
-#include <cmath>
-#include <stdexcept>
-#include <vector>
-#include <algorithm>
-
 #include <iomanip>
 
 #include <boost/format.hpp>
 
-#include <components/esm/loadskil.hpp>
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadfact.hpp>
@@ -30,7 +24,7 @@ MWMechanics::NpcStats::NpcStats()
 , mBounty(0)
 , mWerewolfKills (0)
 , mLevelProgress(0)
-, mTimeToStartDrowning(20.0)
+, mTimeToStartDrowning(-1.0) // set breath to special value, it will be replaced during actor update
     , mIsWerewolf(false)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);

@@ -129,6 +129,8 @@ namespace MWGui
         if ((mFilter & Filter_OnlyChargedSoulstones) && (base.getTypeName() != typeid(ESM::Miscellaneous).name()
                                                      || base.getCellRef().getSoul() == ""))
             return false;
+        if ((mFilter & Filter_OnlyRepairTools) && (base.getTypeName() != typeid(ESM::Repair).name()))
+            return false;
         if ((mFilter & Filter_OnlyEnchantable) && (item.mFlags & ItemStack::Flag_Enchanted
                                                || (base.getTypeName() != typeid(ESM::Armor).name()
                                                    && base.getTypeName() != typeid(ESM::Clothing).name()
@@ -141,7 +143,7 @@ namespace MWGui
 
         if ((mFilter & Filter_OnlyUsableItems) && base.getClass().getScript(base).empty())
         {
-            boost::shared_ptr<MWWorld::Action> actionOnUse = base.getClass().use(base);
+            std::shared_ptr<MWWorld::Action> actionOnUse = base.getClass().use(base);
             if (!actionOnUse || actionOnUse->isNullAction())
                 return false;
         }
@@ -162,7 +164,7 @@ namespace MWGui
             const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchId);
             if (!ench)
             {
-                std::cerr << "Can't find enchantment '" << enchId << "' on item " << base.getCellRef().getRefId() << std::endl;
+                std::cerr << "Warning: Can't find enchantment '" << enchId << "' on item " << base.getCellRef().getRefId() << std::endl;
                 return false;
             }
 

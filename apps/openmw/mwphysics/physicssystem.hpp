@@ -15,6 +15,7 @@
 namespace osg
 {
     class Group;
+    class Object;
 }
 
 namespace MWRender
@@ -80,7 +81,7 @@ namespace MWPhysics
             void updatePosition (const MWWorld::Ptr& ptr);
 
 
-            void addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts);
+            void addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject);
 
             void removeHeightField (int x, int y);
 
@@ -90,12 +91,12 @@ namespace MWPhysics
             void debugDraw();
 
             std::vector<MWWorld::Ptr> getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const; ///< get handles this object collides with
-            osg::Vec3f traceDown(const MWWorld::Ptr &ptr, float maxHeight);
+            osg::Vec3f traceDown(const MWWorld::Ptr &ptr, const osg::Vec3f& position, float maxHeight);
 
             std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::ConstPtr& actor,
                                                                const osg::Vec3f &origin,
                                                                const osg::Quat &orientation,
-                                                               float queryDistance);
+                                                               float queryDistance, std::vector<MWWorld::Ptr> targets = std::vector<MWWorld::Ptr>());
 
 
             /// Get distance from \a point to the collision shape of \a target. Uses a raycast to find where the
@@ -112,9 +113,10 @@ namespace MWPhysics
                 MWWorld::Ptr mHitObject;
             };
 
-            /// @param me Optional, a Ptr to ignore in the list of results
-            RayResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::ConstPtr ignore = MWWorld::ConstPtr(), int mask =
-                    CollisionType_World|CollisionType_HeightMap|CollisionType_Actor|CollisionType_Door, int group=0xff) const;
+            /// @param me Optional, a Ptr to ignore in the list of results. targets are actors to filter for, ignoring all other actors.
+            RayResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore = MWWorld::ConstPtr(),
+                    std::vector<MWWorld::Ptr> targets = std::vector<MWWorld::Ptr>(),
+                    int mask = CollisionType_World|CollisionType_HeightMap|CollisionType_Actor|CollisionType_Door, int group=0xff) const;
 
             RayResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius);
 
@@ -179,7 +181,7 @@ namespace MWPhysics
             btCollisionDispatcher* mDispatcher;
             btCollisionWorld* mCollisionWorld;
 
-            std::auto_ptr<Resource::BulletShapeManager> mShapeManager;
+            std::unique_ptr<Resource::BulletShapeManager> mShapeManager;
             Resource::ResourceSystem* mResourceSystem;
 
             typedef std::map<MWWorld::ConstPtr, Object*> ObjectMap;
@@ -209,12 +211,12 @@ namespace MWPhysics
             float mTimeAccum;
 
             float mWaterHeight;
-            float mWaterEnabled;
+            bool mWaterEnabled;
 
-            std::auto_ptr<btCollisionObject> mWaterCollisionObject;
-            std::auto_ptr<btCollisionShape> mWaterCollisionShape;
+            std::unique_ptr<btCollisionObject> mWaterCollisionObject;
+            std::unique_ptr<btCollisionShape> mWaterCollisionShape;
 
-            std::auto_ptr<MWRender::DebugDrawer> mDebugDrawer;
+            std::unique_ptr<MWRender::DebugDrawer> mDebugDrawer;
 
             osg::ref_ptr<osg::Group> mParentNode;
 
