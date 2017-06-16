@@ -135,6 +135,9 @@ namespace MWMechanics
         if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
         {
             rating = (weapon->mData.mChop[0] + weapon->mData.mChop[1]) / 2.f;
+
+            if (weapon->mData.mType >= ESM::Weapon::MarksmanThrown)
+                MWMechanics::resistNormalWeapon(enemy, actor, item, rating);
         }
         else
         {
@@ -145,6 +148,8 @@ namespace MWMechanics
                 rating += weapon->mData.mChop[i];
             }
             rating /= 6.f;
+
+            MWMechanics::resistNormalWeapon(enemy, actor, item, rating);
         }
 
         if (item.getClass().hasItemHealth(item))
@@ -181,6 +186,10 @@ namespace MWMechanics
         int skill = item.getClass().getEquipmentSkill(item);
         if (skill != -1)
             rating *= actor.getClass().getSkill(actor, skill) / 100.f;
+
+        // There is no need to apply bonus if weapon rating == 0
+        if (rating == 0.f)
+            return 0.f;
 
         return rating + bonus;
     }
