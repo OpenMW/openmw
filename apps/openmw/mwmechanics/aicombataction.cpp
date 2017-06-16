@@ -854,6 +854,79 @@ namespace MWMechanics
         return bestAction;
     }
 
+    float getBestActionRating(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
+    {
+        Spells& spells = actor.getClass().getCreatureStats(actor).getSpells();
+
+        float bestActionRating = 0.f;
+        // Default to hand-to-hand combat
+        if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
+        {
+            return bestActionRating;
+        }
+
+        if (actor.getClass().hasInventoryStore(actor))
+        {
+            MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
+
+            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+            {
+                float rating = rateMagicItem(*it, actor, enemy);
+                if (rating > bestActionRating)
+                {
+                    bestActionRating = rating;
+                }
+            }
+
+            float bestArrowRating = 0;
+            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+            {
+                float rating = rateWeapon(*it, actor, enemy, ESM::Weapon::Arrow);
+                if (rating > bestArrowRating)
+                {
+                    bestArrowRating = rating;
+                }
+            }
+
+            float bestBoltRating = 0;
+            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+            {
+                float rating = rateWeapon(*it, actor, enemy, ESM::Weapon::Bolt);
+                if (rating > bestBoltRating)
+                {
+                    bestBoltRating = rating;
+                }
+            }
+
+            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+            {
+                std::vector<int> equipmentSlots = it->getClass().getEquipmentSlots(*it).first;
+                if (std::find(equipmentSlots.begin(), equipmentSlots.end(), (int)MWWorld::InventoryStore::Slot_CarriedRight)
+                        == equipmentSlots.end())
+                    continue;
+
+                float rating = rateWeapon(*it, actor, enemy, -1, bestArrowRating, bestBoltRating);
+                if (rating > bestActionRating)
+                {
+                    bestActionRating = rating;
+                }
+            }
+        }
+
+        for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
+        {
+            const ESM::Spell* spell = it->first;
+
+            float rating = rateSpell(spell, actor, enemy);
+            if (rating > bestActionRating)
+            {
+                bestActionRating = rating;
+            }
+        }
+
+        return bestActionRating;
+    }
+
 
     float getDistanceMinusHalfExtents(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool minusZDist)
     {
