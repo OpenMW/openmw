@@ -118,7 +118,19 @@ namespace MWMechanics
         float bonus=0.f;
 
         if (weapon->mData.mType >= ESM::Weapon::MarksmanBow && weapon->mData.mType <= ESM::Weapon::MarksmanThrown)
+        {
+            // Range weapon is useless under water
+            if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(actor), 0.75f))
+                return 0.f;
+
+            if (enemy.isEmpty())
+                return 0.f;
+
+            if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(enemy), 0.75f))
+                return 0.f;
+
             bonus+=1.5f;
+        }
 
         if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
         {

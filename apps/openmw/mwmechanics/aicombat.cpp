@@ -535,6 +535,10 @@ namespace MWMechanics
         // opponent's weapon range, or not backing up if opponent is also using a ranged weapon
         if (isDistantCombat && distToTarget < rangeAttack / 4)
         {
+            // actor should not back up into water
+            if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(actor), 0.5f))
+                return;
+
             mMovement.mPosition[1] = -1;
         }
     }
