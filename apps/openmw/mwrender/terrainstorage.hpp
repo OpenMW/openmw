@@ -29,7 +29,7 @@ namespace MWRender
         LandManager* getLandManager() const;
 
     private:
-       std::auto_ptr<LandManager> mLandManager;
+       std::unique_ptr<LandManager> mLandManager;
 
        Resource::ResourceSystem* mResourceSystem;
     };

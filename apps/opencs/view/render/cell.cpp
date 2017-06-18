@@ -62,7 +62,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
         {
             std::string id = Misc::StringUtils::lowerCase (collection.getRecord (i).get().mId);
 
-            std::auto_ptr<Object> object (new Object (mData, mCellNode, id, false));
+            std::unique_ptr<Object> object (new Object (mData, mCellNode, id, false));
 
             if (mSubModeElementMask & Mask_Reference)
                 object->setSubMode (mSubMode);

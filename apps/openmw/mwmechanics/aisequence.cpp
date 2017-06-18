@@ -121,6 +121,16 @@ bool AiSequence::isInCombat() const
     return false;
 }
 
+bool AiSequence::hasPackage(int typeId) const
+{
+    for (std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+    {
+        if ((*it)->getTypeId() == typeId)
+            return true;
+    }
+    return false;
+}
+
 bool AiSequence::isInCombat(const MWWorld::Ptr &actor) const
 {
     for(std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
@@ -412,7 +422,7 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
     for (std::vector<ESM::AiSequence::AiPackageContainer>::const_iterator it = sequence.mPackages.begin();
          it != sequence.mPackages.end(); ++it)
     {
-        std::auto_ptr<MWMechanics::AiPackage> package (NULL);
+        std::unique_ptr<MWMechanics::AiPackage> package (nullptr);
         switch (it->mType)
         {
         case ESM::AiSequence::Ai_Wander:

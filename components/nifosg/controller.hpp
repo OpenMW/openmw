@@ -9,8 +9,6 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 #include <set> //UVController
 
 // FlipController
@@ -53,7 +51,7 @@ namespace NifOsg
         {
         }
 
-        ValueInterpolator(boost::shared_ptr<const MapT> keys, ValueT defaultVal = ValueT())
+        ValueInterpolator(std::shared_ptr<const MapT> keys, ValueT defaultVal = ValueT())
             : mKeys(keys)
             , mDefaultVal(defaultVal)
         {
@@ -101,8 +99,6 @@ namespace NifOsg
                 // cache for next time
                 mLastHighKey = it;
 
-                assert (it != keys.begin()); // Shouldn't happen, was checked at beginning of this function
-
                 typename MapT::MapType::const_iterator last = --it;
                 mLastLowKey = last;
                 float aLastTime = last->first;
@@ -125,7 +121,7 @@ namespace NifOsg
         mutable typename MapT::MapType::const_iterator mLastLowKey;
         mutable typename MapT::MapType::const_iterator mLastHighKey;
 
-        boost::shared_ptr<const MapT> mKeys;
+        std::shared_ptr<const MapT> mKeys;
 
         ValueT mDefaultVal;
     };

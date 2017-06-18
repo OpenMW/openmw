@@ -1,15 +1,9 @@
 #include "npcstats.hpp"
 
-#include <cmath>
-#include <stdexcept>
-#include <vector>
-#include <algorithm>
-
 #include <iomanip>
 
 #include <boost/format.hpp>
 
-#include <components/esm/loadskil.hpp>
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadfact.hpp>

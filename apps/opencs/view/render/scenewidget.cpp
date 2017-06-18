@@ -172,7 +172,7 @@ void CompositeViewer::update()
 
 // ---------------------------------------------------
 
-SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget *parent, Qt::WindowFlags f,
+SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget *parent, Qt::WindowFlags f,
     bool retrieveInput)
     : RenderWidget(parent, f)
     , mResourceSystem(resourceSystem)

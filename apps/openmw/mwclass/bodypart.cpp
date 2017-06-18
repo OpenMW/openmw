@@ -33,7 +33,7 @@ namespace MWClass
 
     void BodyPart::registerSelf()
     {
-        boost::shared_ptr<MWWorld::Class> instance (new BodyPart);
+        std::shared_ptr<MWWorld::Class> instance (new BodyPart);
 
         registerClass (typeid (ESM::BodyPart).name(), instance);
     }

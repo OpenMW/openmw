@@ -77,7 +77,7 @@ namespace CSMTools
 
             void runSearch (const CSMWorld::UniversalId& searchId, const Search& search);
 
-            void runMerge (std::auto_ptr<CSMDoc::Document> target);
+            void runMerge (std::unique_ptr<CSMDoc::Document> target);
 
             void abortOperation (int type);
             ///< \attention The operation is not aborted immediately.

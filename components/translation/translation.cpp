@@ -2,8 +2,6 @@
 
 #include <boost/filesystem/fstream.hpp>
 
-#include <components/misc/stringops.hpp>
-
 namespace Translation
 {
     Storage::Storage()

@@ -3,6 +3,7 @@
 #ifndef OPENMW_COMPONENTS_NIF_NIFSTREAM_HPP
 #define OPENMW_COMPONENTS_NIF_NIFSTREAM_HPP
 
+#include <cassert>
 #include <stdint.h>
 #include <stdexcept>
 #include <vector>

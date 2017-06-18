@@ -1,8 +1,5 @@
 #include "documentmanager.hpp"
 
-#include <algorithm>
-#include <stdexcept>
-
 #include <boost/filesystem.hpp>
 
 #ifndef Q_MOC_RUN

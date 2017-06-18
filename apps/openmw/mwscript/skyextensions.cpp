@@ -1,5 +1,7 @@
 #include "skyextensions.hpp"
 
+#include <algorithm>
+
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 

@@ -1,8 +1,6 @@
 #ifndef GAME_MWWORLD_WORLDIMP_H
 #define GAME_MWWORLD_WORLDIMP_H
 
-#include <boost/shared_ptr.hpp>
-
 #include <osg/ref_ptr>
 
 #include <components/settings/settings.hpp>
@@ -100,7 +98,7 @@ namespace MWWorld
 
             std::string mCurrentWorldSpace;
 
-            boost::shared_ptr<ProjectileManager> mProjectileManager;
+            std::shared_ptr<ProjectileManager> mProjectileManager;
 
             bool mGodMode;
             bool mScriptsEnabled;
@@ -167,9 +165,6 @@ namespace MWWorld
             float mSwimHeightScale;
 
             float mDistanceToFacedObject;
-
-            bool isUnderwater(const MWWorld::ConstPtr &object, const float heightRatio) const;
-            ///< helper function for implementing isSwimming(), isSubmerged(), isWading()
 
             bool mTeleportEnabled;
             bool mLevitationEnabled;
@@ -494,6 +489,7 @@ namespace MWWorld
             virtual bool isSubmerged(const MWWorld::ConstPtr &object) const;
             virtual bool isSwimming(const MWWorld::ConstPtr &object) const;
             virtual bool isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const;
+            virtual bool isUnderwater(const MWWorld::ConstPtr &object, const float heightRatio) const;
             virtual bool isWading(const MWWorld::ConstPtr &object) const;
             virtual bool isWaterWalkingCastableOnTarget(const MWWorld::ConstPtr &target) const;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;

@@ -1,5 +1,7 @@
 #include "controller.hpp"
 
+#include <algorithm>
+
 #include "statesetupdater.hpp"
 
 #include <osg/Drawable>
@@ -28,22 +30,22 @@ namespace SceneUtil
             return mSource->getValue(nv);
     }
 
-    void Controller::setSource(boost::shared_ptr<ControllerSource> source)
+    void Controller::setSource(std::shared_ptr<ControllerSource> source)
     {
         mSource = source;
     }
 
-    void Controller::setFunction(boost::shared_ptr<ControllerFunction> function)
+    void Controller::setFunction(std::shared_ptr<ControllerFunction> function)
     {
         mFunction = function;
     }
 
-    boost::shared_ptr<ControllerSource> Controller::getSource() const
+    std::shared_ptr<ControllerSource> Controller::getSource() const
     {
         return mSource;
     }
 
-    boost::shared_ptr<ControllerFunction> Controller::getFunction() const
+    std::shared_ptr<ControllerFunction> Controller::getFunction() const
     {
         return mFunction;
     }
@@ -107,7 +109,7 @@ namespace SceneUtil
     {
     }
 
-    AssignControllerSourcesVisitor::AssignControllerSourcesVisitor(boost::shared_ptr<ControllerSource> toAssign)
+    AssignControllerSourcesVisitor::AssignControllerSourcesVisitor(std::shared_ptr<ControllerSource> toAssign)
         : ControllerVisitor()
         , mToAssign(toAssign)
     {

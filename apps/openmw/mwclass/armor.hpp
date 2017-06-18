@@ -22,7 +22,7 @@ namespace MWClass
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
-            virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            virtual std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
 
@@ -73,7 +73,7 @@ namespace MWClass
             ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that. \n
             ///  Second item in the pair specifies the error message
 
-            virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
+            virtual std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
                 const;
             ///< Generate action for using via inventory menu
 

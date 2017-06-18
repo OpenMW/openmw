@@ -9,9 +9,6 @@
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Button.h>
 
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
-
 #include <components/misc/stringops.hpp>
 #include <components/widgets/imagebutton.hpp>
 #include <components/widgets/list.hpp>
@@ -124,7 +121,7 @@ namespace
             {
                 MWGui::BookPage::ClickCallback callback;
                 
-                callback = boost::bind (&JournalWindowImpl::notifyTopicClicked, this, _1);
+                callback = std::bind (&JournalWindowImpl::notifyTopicClicked, this, std::placeholders::_1);
 
                 getPage (LeftBookPage)->adviseLinkClicked (callback);
                 getPage (RightBookPage)->adviseLinkClicked (callback);
@@ -136,7 +133,7 @@ namespace
             {
                 MWGui::BookPage::ClickCallback callback;
                 
-                callback = boost::bind (&JournalWindowImpl::notifyIndexLinkClicked, this, _1);
+                callback = std::bind(&JournalWindowImpl::notifyIndexLinkClicked, this, std::placeholders::_1);
 
                 getPage (LeftTopicIndex)->adviseLinkClicked (callback);
                 getPage (RightTopicIndex)->adviseLinkClicked (callback);

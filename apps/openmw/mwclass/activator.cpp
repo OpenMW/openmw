@@ -73,7 +73,7 @@ namespace MWClass
 
     void Activator::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Activator);
+        std::shared_ptr<Class> instance (new Activator);
 
         registerClass (typeid (ESM::Activator).name(), instance);
     }
@@ -107,19 +107,19 @@ namespace MWClass
         return info;
     }
 
-    boost::shared_ptr<MWWorld::Action> Activator::activate(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor) const
+    std::shared_ptr<MWWorld::Action> Activator::activate(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor) const
     {
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfActivator");
 
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
 
             return action;
         }
-        return boost::shared_ptr<MWWorld::Action>(new MWWorld::NullAction);
+        return std::shared_ptr<MWWorld::Action>(new MWWorld::NullAction);
     }
 
 

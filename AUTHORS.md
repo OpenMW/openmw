@@ -133,6 +133,7 @@ Programmers
     Sebastian Wick (swick)
     Sergey Shambir
     ShadowRadiance
+    Siimacore
     sir_herrbatka
     smbas
     Stefan Galowicz (bogglez)

@@ -7,8 +7,6 @@
 #include <deque>
 #include <map>
 
-#include <boost/shared_ptr.hpp>
-
 #include <components/settings/settings.hpp>
 
 #include <components/fallback/fallback.hpp>
@@ -47,8 +45,7 @@ namespace MWSound
         const VFS::Manager* mVFS;
 
         Fallback::Map mFallback;
-
-        std::auto_ptr<Sound_Output> mOutput;
+        std::unique_ptr<Sound_Output> mOutput;
 
         // Caches available music tracks by <playlist name, (sound files) >
         std::map<std::string, std::vector<std::string> > mMusicFiles;
@@ -66,8 +63,7 @@ namespace MWSound
         float mNearWaterOutdoorTolerance;
         std::string mNearWaterIndoorID;
         std::string mNearWaterOutdoorID;
-
-        typedef std::auto_ptr<std::deque<Sound_Buffer> > SoundBufferList;
+        typedef std::unique_ptr<std::deque<Sound_Buffer> > SoundBufferList;
         // List of sound buffers, grown as needed. New enties are added to the
         // back, allowing existing Sound_Buffer references/pointers to remain
         // valid.

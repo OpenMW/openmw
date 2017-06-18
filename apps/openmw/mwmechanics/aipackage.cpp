@@ -12,6 +12,7 @@
 #include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "creaturestats.hpp"
 #include "movement.hpp"
@@ -179,10 +180,36 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float dur
     if (door != MWWorld::Ptr())
     {
         // note: AiWander currently does not open doors
-        if (getTypeId() != TypeIdWander && !door.getCellRef().getTeleport() && door.getCellRef().getTrap().empty()
-                && door.getCellRef().getLockLevel() <= 0 && door.getClass().getDoorState(door) == 0)
+        if (getTypeId() != TypeIdWander && !door.getCellRef().getTeleport() && door.getClass().getDoorState(door) == 0)
         {
-            MWBase::Environment::get().getWorld()->activateDoor(door, 1);
+            if ((door.getCellRef().getTrap().empty() && door.getCellRef().getLockLevel() <= 0 ))
+            {
+                MWBase::Environment::get().getWorld()->activate(door, actor);
+                return;
+            }
+
+            std::string keyId = door.getCellRef().getKey();
+            if (keyId.empty())
+                return;
+
+            bool hasKey = false;
+            const MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
+
+            // make key id lowercase
+            Misc::StringUtils::lowerCaseInPlace(keyId);
+            for (MWWorld::ConstContainerStoreIterator it = invStore.cbegin(); it != invStore.cend(); ++it)
+            {
+                std::string refId = it->getCellRef().getRefId();
+                Misc::StringUtils::lowerCaseInPlace(refId);
+                if (refId == keyId)
+                {
+                    hasKey = true;
+                    break;
+                }
+            }
+
+            if (hasKey)
+                MWBase::Environment::get().getWorld()->activate(door, actor);
         }
     }
     else // any other obstacle (NPC, crate, etc.)

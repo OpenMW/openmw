@@ -63,7 +63,7 @@ namespace SceneUtil
     private:
         // The root bone is not a "real" bone, it has no corresponding node in the scene graph.
         // As far as the scene graph goes we support multiple root bones.
-        std::auto_ptr<Bone> mRootBone;
+        std::unique_ptr<Bone> mRootBone;
 
         typedef std::map<std::string, std::pair<osg::NodePath, osg::MatrixTransform*> > BoneCache;
         BoneCache mBoneCache;

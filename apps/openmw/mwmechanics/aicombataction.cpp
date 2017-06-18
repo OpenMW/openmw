@@ -545,6 +545,19 @@ namespace MWMechanics
 
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
 
+        // Underwater casting not possible
+        if (effect.mRange == ESM::RT_Target)
+        {
+            if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(actor), 0.75f))
+                return 0.f;
+
+            if (enemy.isEmpty())
+                return 0.f;
+
+            if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(enemy), 0.75f))
+                return 0.f;
+        }
+
         rating *= magicEffect->mData.mBaseCost;
 
         if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
@@ -709,14 +722,14 @@ namespace MWMechanics
         return mWeapon.get<ESM::Weapon>()->mBase;
     }
 
-    boost::shared_ptr<Action> prepareNextAction(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
+    std::shared_ptr<Action> prepareNextAction(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
     {
         Spells& spells = actor.getClass().getCreatureStats(actor).getSpells();
 
         float bestActionRating = 0.f;
         float antiFleeRating = 0.f;
         // Default to hand-to-hand combat
-        boost::shared_ptr<Action> bestAction (new ActionWeapon(MWWorld::Ptr()));
+        std::shared_ptr<Action> bestAction (new ActionWeapon(MWWorld::Ptr()));
         if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             bestAction->prepare(actor);
@@ -876,7 +889,7 @@ namespace MWMechanics
                 for (std::vector<ESM::ENAMstruct>::const_iterator effectIt =
                      spell->mEffects.mList.begin(); effectIt != spell->mEffects.mList.end(); ++effectIt)
                 {
-                    if (effectIt->mArea == ESM::RT_Target)
+                    if (effectIt->mRange == ESM::RT_Target)
                     {
                         const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
                         dist = effect->mData.mSpeed;
@@ -893,7 +906,7 @@ namespace MWMechanics
                     for (std::vector<ESM::ENAMstruct>::const_iterator effectIt =
                          ench->mEffects.mList.begin(); effectIt != ench->mEffects.mList.end(); ++effectIt)
                     {
-                        if (effectIt->mArea == ESM::RT_Target)
+                        if (effectIt->mRange == ESM::RT_Target)
                         {
                             const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
                             dist = effect->mData.mSpeed;
@@ -1016,7 +1029,7 @@ namespace MWMechanics
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt =
              spell->mEffects.mList.begin(); effectIt != spell->mEffects.mList.end(); ++effectIt)
         {
-            if (effectIt->mArea == ESM::RT_Target)
+            if (effectIt->mRange == ESM::RT_Target)
             {
                 if (!MWBase::Environment::get().getWorld()->isSwimming(enemy))
                     mult = fAIRangeMagicSpellMult;

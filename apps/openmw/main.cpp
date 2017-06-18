@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstdio>
 
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
@@ -7,11 +6,8 @@
 #include <components/fallback/validate.hpp>
 
 #include <SDL_messagebox.h>
-#include <SDL_main.h>
 #include "engine.hpp"
 
-#include <boost/iostreams/concepts.hpp>
-#include <boost/iostreams/stream_buffer.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include "mwmp/Main.hpp"
 
@@ -38,8 +34,8 @@ extern int cc_install_handlers(int argc, char **argv, int num_signals, int *sigs
 extern int is_debugger_attached(void);
 #endif
 
-#include <boost/version.hpp>
 #include <components/openmw-mp/Log.hpp>
+
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */
@@ -316,7 +312,7 @@ int main(int argc, char**argv)
 
     boost::filesystem::ofstream logfile;
 
-    std::auto_ptr<OMW::Engine> engine;
+    std::unique_ptr<OMW::Engine> engine;
 
     int ret = 0;
     try

@@ -3,17 +3,15 @@
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Window.h>
 #include <MyGUI_ComboBox.h>
-#include <MyGUI_ListBox.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_TabControl.h>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/math/common_factor_rt.hpp>
+#include <boost/math/common_factor.hpp>
 
 #include <SDL_video.h>
 
-#include <components/misc/stringops.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 #include <components/settings/settings.hpp>
 

@@ -100,8 +100,8 @@ namespace Terrain
 
         Resource::ResourceSystem* mResourceSystem;
 
-        std::auto_ptr<TextureManager> mTextureManager;
-        std::auto_ptr<ChunkManager> mChunkManager;
+        std::unique_ptr<TextureManager> mTextureManager;
+        std::unique_ptr<ChunkManager> mChunkManager;
     };
 
 }

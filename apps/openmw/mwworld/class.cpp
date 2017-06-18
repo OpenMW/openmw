@@ -24,7 +24,7 @@
 
 namespace MWWorld
 {
-    std::map<std::string, boost::shared_ptr<Class> > Class::sClasses;
+    std::map<std::string, std::shared_ptr<Class> > Class::sClasses;
 
     Class::Class() {}
 
@@ -108,14 +108,14 @@ namespace MWWorld
         throw std::runtime_error("class cannot be hit");
     }
 
-    boost::shared_ptr<Action> Class::activate (const Ptr& ptr, const Ptr& actor) const
+    std::shared_ptr<Action> Class::activate (const Ptr& ptr, const Ptr& actor) const
     {
-        return boost::shared_ptr<Action> (new NullAction);
+        return std::shared_ptr<Action> (new NullAction);
     }
 
-    boost::shared_ptr<Action> Class::use (const Ptr& ptr) const
+    std::shared_ptr<Action> Class::use (const Ptr& ptr) const
     {
-        return boost::shared_ptr<Action> (new NullAction);
+        return std::shared_ptr<Action> (new NullAction);
     }
 
     ContainerStore& Class::getContainerStore (const Ptr& ptr) const
@@ -233,7 +233,7 @@ namespace MWWorld
         if (key.empty())
             throw std::logic_error ("Class::get(): attempting to get an empty key");
 
-        std::map<std::string, boost::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);
+        std::map<std::string, std::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);
 
         if (iter==sClasses.end())
             throw std::logic_error ("Class::get(): unknown class key: " + key);
@@ -246,7 +246,7 @@ namespace MWWorld
         throw std::runtime_error ("class does not support persistence");
     }
 
-    void Class::registerClass(const std::string& key,  boost::shared_ptr<Class> instance)
+    void Class::registerClass(const std::string& key,  std::shared_ptr<Class> instance)
     {
         instance->mTypeName = key;
         sClasses.insert(std::make_pair(key, instance));
@@ -330,23 +330,23 @@ namespace MWWorld
     {
     }
 
-    boost::shared_ptr<Action> Class::defaultItemActivate(const Ptr &ptr, const Ptr &actor) const
+    std::shared_ptr<Action> Class::defaultItemActivate(const Ptr &ptr, const Ptr &actor) const
     {
         if(!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-            return boost::shared_ptr<Action>(new NullAction());
+            return std::shared_ptr<Action>(new NullAction());
 
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfItem");
 
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
 
             return action;
         }
 
-        boost::shared_ptr<MWWorld::Action> action(new ActionTake(ptr));
+        std::shared_ptr<MWWorld::Action> action(new ActionTake(ptr));
         action->setSound(getUpSoundId(ptr));
 
         return action;

@@ -1,14 +1,9 @@
 #include "cellmarker.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 #include <osg/AutoTransform>
 #include <osg/Material>
 #include <osg/Geode>
-#include <osg/Group>
 #include <osgText/Text>
-
-#include "mask.hpp"
 
 CSVRender::CellMarkerTag::CellMarkerTag(CellMarker *marker)
 : TagBase(Mask_CellMarker), mMarker(marker)
@@ -42,8 +37,8 @@ void CSVRender::CellMarker::buildMarker()
 
     // Add text containing cell's coordinates.
     std::string coordinatesText =
-        boost::lexical_cast<std::string>(mCoordinates.getX()) + "," +
-        boost::lexical_cast<std::string>(mCoordinates.getY());
+        std::to_string(mCoordinates.getX()) + "," +
+        std::to_string(mCoordinates.getY());
     markerText->setText(coordinatesText);
 
     // Add text to marker node.
