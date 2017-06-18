@@ -26,7 +26,7 @@ namespace mwmp
         static bool Process(RakNet::Packet &packet, WorldEvent &event);
         static void AddProcessor(WorldProcessor *processor);
 
-        typedef boost::unordered_map<unsigned char, boost::shared_ptr<WorldProcessor> > processors_t;
+        typedef boost::unordered_map<unsigned char, std::shared_ptr<WorldProcessor> > processors_t;
 
     private:
         static processors_t processors;

@@ -194,7 +194,7 @@ void DedicatedPlayer::setEquipment()
         {
             if (::Misc::StringUtils::ciEqual(it2->getCellRef().getRefId(), dedicItem)) // equip item
             {
-                boost::shared_ptr<MWWorld::Action> action = it2->getClass().use(*it2);
+                std::shared_ptr<MWWorld::Action> action = it2->getClass().use(*it2);
                 action->execute(ptr);
                 break;
             }

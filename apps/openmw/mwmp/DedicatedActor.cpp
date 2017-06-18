@@ -248,7 +248,7 @@ void DedicatedActor::equipItem(std::string refId, int charge)
     {
         if (::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), refId) && it->getCellRef().getCharge() == charge)
         {
-            boost::shared_ptr<MWWorld::Action> action = it->getClass().use(*it);
+            std::shared_ptr<MWWorld::Action> action = it->getClass().use(*it);
             action->execute(ptr);
             break;
         }

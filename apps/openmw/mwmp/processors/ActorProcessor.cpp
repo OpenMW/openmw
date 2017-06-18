@@ -54,5 +54,5 @@ void ActorProcessor::AddProcessor(mwmp::ActorProcessor *processor)
             throw std::logic_error("processor " + p.second->strPacketID + " already registered. Check " +
                                    processor->className + " and " + p.second->className);
     }
-    processors.insert(processors_t::value_type(processor->GetPacketID(), boost::shared_ptr<ActorProcessor>(processor)));
+    processors.insert(processors_t::value_type(processor->GetPacketID(), std::shared_ptr<ActorProcessor>(processor)));
 }
