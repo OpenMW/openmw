@@ -77,9 +77,9 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ -z $APPVEYOR ]; then
-	msbuild OpenMW.sln //t:Build //m:8
+	msbuild OpenMW.sln //t:Build //p:Configuration=${CONFIGURATION} //m:8
 else
-	msbuild OpenMW.sln //t:Build //m:8 //logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+	msbuild OpenMW.sln //t:Build //p:Configuration=${CONFIGURATION} //m:8 //logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 fi
 
 RET=$?
