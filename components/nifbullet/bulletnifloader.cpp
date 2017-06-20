@@ -203,8 +203,7 @@ void BulletNifLoader::handleNode(const Nif::Node *node, int flags,
             // affecting the entire subtree of this node
             Nif::NiStringExtraData *sd = (Nif::NiStringExtraData*)e;
 
-            // not sure what the difference between NCO and NCC is, or if there even is one
-            if (sd->string == "NCO" || sd->string == "NCC")
+            if (Misc::StringUtils::ciCompareLen(sd->string, "NC", 2) == 0)
             {
                 // No collision. Use an internal flag setting to mark this.
                 flags |= 0x800;

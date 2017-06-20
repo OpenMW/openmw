@@ -295,21 +295,6 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
     if (actor == getPlayer())
         throw std::runtime_error("Can't add AI packages to player");
 
-    if (package.getTypeId() == AiPackage::TypeIdCombat || package.getTypeId() == AiPackage::TypeIdPursue)
-    {
-        // Notify AiWander of our current position so we can return to it after combat finished
-        for (std::list<AiPackage *>::const_iterator iter (mPackages.begin()); iter!=mPackages.end(); ++iter)
-        {
-            if((*iter)->getTypeId() == AiPackage::TypeIdCombat && package.getTypeId() == AiPackage::TypeIdCombat
-                && (*iter)->getTarget() == (&package)->getTarget())
-            {
-                return; // already in combat with this actor
-            }
-            else if ((*iter)->getTypeId() == AiPackage::TypeIdWander)
-                static_cast<AiWander*>(*iter)->setReturnPosition(actor.getRefData().getPosition().asVec3());
-        }
-    }
-
     // Stop combat when a non-combat AI package is added
     if (isActualAiPackage(package.getTypeId()))
         stopCombat();
