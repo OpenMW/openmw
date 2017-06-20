@@ -10,7 +10,7 @@
 #include "player/ProcessorGUIMessageBox.hpp"
 #include "player/ProcessorHandshake.hpp"
 #include "player/ProcessorUserDisconnected.hpp"
-#include "player/ProcessorGameConsole.hpp"
+#include "player/ProcessorGameSettings.hpp"
 #include "player/ProcessorGameTime.hpp"
 #include "player/ProcessorGameWeather.hpp"
 #include "player/ProcessorPlayerBaseInfo.hpp"
@@ -84,7 +84,7 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorGUIMessageBox());
     PlayerProcessor::AddProcessor(new ProcessorHandshake());
     PlayerProcessor::AddProcessor(new ProcessorUserDisconnected());
-    PlayerProcessor::AddProcessor(new ProcessorGameConsole());
+    PlayerProcessor::AddProcessor(new ProcessorGameSettings());
     PlayerProcessor::AddProcessor(new ProcessorGameTime());
     PlayerProcessor::AddProcessor(new ProcessorGameWeather());
     PlayerProcessor::AddProcessor(new ProcessorPlayerBaseInfo());

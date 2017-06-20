@@ -189,6 +189,8 @@ namespace mwmp
         CurrentContainer currentContainer;
 
         bool consoleAllowed;
+        int difficulty;
+
         bool ignorePosPacket;
 
         unsigned int movementFlags;

@@ -93,6 +93,6 @@ void GUIFunctions::SetConsoleAllow(unsigned short pid, bool state)
 
     player->consoleAllowed = state;
 
-    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GAME_CONSOLE)->setPlayer(player);
-    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GAME_CONSOLE)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GAME_SETTINGS)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GAME_SETTINGS)->Send(false);
 }

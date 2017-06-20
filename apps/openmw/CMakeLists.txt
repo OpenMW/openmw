@@ -112,7 +112,7 @@ add_openmw_dir (mwmp/processors/actor ProcessorActorAI ProcessorActorAnimFlags P
     )
 
 add_openmw_dir (mwmp/processors/player ProcessorChatMessage ProcessorGUIMessageBox ProcessorHandshake ProcessorUserDisconnected
-    ProcessorUserMyID  ProcessorGameConsole ProcessorGameTime ProcessorGameWeather ProcessorPlayerBaseInfo
+    ProcessorUserMyID  ProcessorGameSettings ProcessorGameTime ProcessorGameWeather ProcessorPlayerBaseInfo
     ProcessorPlayerAnimFlags ProcessorPlayerAnimPlay ProcessorPlayerAttack ProcessorPlayerAttribute ProcessorPlayerBook
     ProcessorPlayerBounty ProcessorPlayerCellChange ProcessorPlayerCellState ProcessorPlayerCharClass ProcessorPlayerCharGen
     ProcessorPlayerDeath ProcessorPlayerDisposition ProcessorPlayerEquipment ProcessorPlayerFaction ProcessorPlayerInventory

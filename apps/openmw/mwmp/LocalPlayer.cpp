@@ -46,7 +46,10 @@ LocalPlayer::LocalPlayer()
 {
     charGenStage.current = 0;
     charGenStage.end = 1;
+
     consoleAllowed = true;
+    difficulty = 0;
+
     ignorePosPacket = false;
     
     attack.shouldSend = false;

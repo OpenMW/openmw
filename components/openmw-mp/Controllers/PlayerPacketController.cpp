@@ -8,7 +8,7 @@
 #include "../Packets/Player/PacketHandshake.hpp"
 #include "../Packets/Player/PacketGUIBoxes.hpp"
 #include "../Packets/Player/PacketLoaded.hpp"
-#include "../Packets/Player/PacketConsole.hpp"
+#include "../Packets/Player/PacketGameSettings.hpp"
 #include "../Packets/Player/PacketGameTime.hpp"
 #include "../Packets/Player/PacketGameWeather.hpp"
 #include "../Packets/Player/PacketPlayerActiveSkills.hpp"
@@ -57,7 +57,7 @@ mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *p
     AddPacket<PacketHandshake>(&packets, peer);
     AddPacket<PacketGUIBoxes>(&packets, peer);
     AddPacket<PacketLoaded>(&packets, peer);
-    AddPacket<PacketConsole>(&packets, peer);
+    AddPacket<PacketGameSettings>(&packets, peer);
     AddPacket<PacketGameTime>(&packets, peer);
     AddPacket<PacketGameWeather>(&packets, peer);
     AddPacket<PacketPlayerActiveSkills>(&packets, peer);

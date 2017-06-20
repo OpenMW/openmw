@@ -2,6 +2,17 @@
 
 #include <components/settings/settings.hpp>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -18,9 +29,9 @@ float scaleDamage(float damage, const MWWorld::Ptr& attacker, const MWWorld::Ptr
     /*
         Start of tes3mp change (major)
 
-        Don't set difficulty based on client settings
+        Use difficulty setting received from server instead of basing it on client settings
     */
-    difficultySetting = 0;
+    difficultySetting = mwmp::Main::get().getLocalPlayer()->difficulty;
     /*
         End of tes3mp change (major)
     */
