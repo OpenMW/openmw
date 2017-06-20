@@ -12,8 +12,7 @@
     {"PasswordDialog",      GUIFunctions::PasswordDialog},\
     {"ListBox",             GUIFunctions::ListBox},\
     {"SetMapVisibility",    GUIFunctions::SetMapVisibility},\
-    {"SetMapVisibilityAll", GUIFunctions::SetMapVisibilityAll},\
-    {"SetConsoleAllow",     GUIFunctions::SetConsoleAllow}\
+    {"SetMapVisibilityAll", GUIFunctions::SetMapVisibilityAll}
 
 class GUIFunctions
 {
@@ -30,8 +29,6 @@ public:
     //state 0 - disallow, 1 - allow
     static void SetMapVisibility(unsigned short targetPID, unsigned short affectedPID, unsigned short state) noexcept;
     static void SetMapVisibilityAll(unsigned short targetPID, unsigned short state) noexcept;
-
-    static void SetConsoleAllow(unsigned short pid, bool state);
 };
 
 #endif //OPENMW_GUIAPI_HPP

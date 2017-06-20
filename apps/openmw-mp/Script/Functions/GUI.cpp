@@ -7,8 +7,6 @@
 #include <apps/openmw-mp/Networking.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 
-
-
 void GUIFunctions::_MessageBox(unsigned short pid, int id, const char *label) noexcept
 {
     Player *player;
@@ -84,15 +82,4 @@ void GUIFunctions::SetMapVisibility(unsigned short targetPID, unsigned short aff
 void GUIFunctions::SetMapVisibilityAll(unsigned short targetPID, unsigned short state) noexcept
 {
     LOG_MESSAGE(Log::LOG_WARN, "stub");
-}
-
-void GUIFunctions::SetConsoleAllow(unsigned short pid, bool state)
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    player->consoleAllowed = state;
-
-    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GAME_SETTINGS)->setPlayer(player);
-    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GAME_SETTINGS)->Send(false);
 }

@@ -15,6 +15,7 @@
 #include <Script/Functions/Miscellaneous.hpp>
 #include <Script/Functions/Positions.hpp>
 #include <Script/Functions/Quests.hpp>
+#include <Script/Functions/Settings.hpp>
 #include <Script/Functions/Spells.hpp>
 #include <Script/Functions/Stats.hpp>
 #include <Script/Functions/World.hpp>
@@ -115,6 +116,7 @@ public:
             CHARCLASSAPI,
             WORLDAPI,
             ACTORAPI,
+            SETTINGSAPI,
             MISCELLANEOUSAPI
     };
 
