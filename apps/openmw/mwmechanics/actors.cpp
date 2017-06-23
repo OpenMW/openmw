@@ -1482,7 +1482,20 @@ namespace MWMechanics
             {
                 iter->first.getClass().getCreatureStats(iter->first).notifyDied();
 
-                ++mDeathCount[Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId())];
+                /*
+                    Start of tes3mp change (major)
+
+                    Only increment death count for an actor if we are its authority, to avoid
+                    situations where we increment it locally after having already received an
+                    ID_PLAYER_KILL_COUNT packet about it
+                */
+                bool isLocalActor = mwmp::Main::get().getCellController()->isLocalActor(iter->first);
+
+                if (isLocalActor)
+                    ++mDeathCount[Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId())];
+                /*
+                    End of tes3mp change (major)
+                */
 
                 /*
                     Start of tes3mp addition
@@ -1490,7 +1503,7 @@ namespace MWMechanics
                     Send an ID_PLAYER_KILL_COUNT packet every time the kill count changes,
                     as long as we are the authority over the actor's cell
                 */
-                if (mwmp::Main::get().getCellController()->isLocalActor(iter->first))
+                if (isLocalActor)
                 {
                     std::string refId = Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId());
                     int number = mDeathCount[refId];
