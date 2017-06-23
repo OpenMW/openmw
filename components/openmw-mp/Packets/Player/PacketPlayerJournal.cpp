@@ -34,10 +34,6 @@ void PacketPlayerJournal::Packet(RakNet::BitStream *bs, bool send)
         if (journalItem.type == JournalItem::ENTRY)
         {
             RW(journalItem.actorRefId, send, 1);
-            RW(journalItem.actorRefNumIndex, send);
-            RW(journalItem.actorMpNum, send);
-            RW(journalItem.actorCell.mData, send, 1);
-            RW(journalItem.actorCell.mName, send, 1);
         }
 
         if (!send)

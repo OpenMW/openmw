@@ -36,10 +36,7 @@ namespace mwmp
             INDEX = 1
         };
 
-        ESM::Cell actorCell;
         std::string actorRefId;
-        int actorRefNumIndex;
-        int actorMpNum;
 
         int type; // 0 - An entire entry, 1 - An index
     };

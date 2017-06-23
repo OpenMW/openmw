@@ -670,11 +670,7 @@ void LocalPlayer::addJournalItems()
         
         if (journalItem.type == JournalItem::ENTRY)
         {
-            MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(journalItem.actorCell);
-
-            if (!ptrCellStore) continue;
-
-            MWWorld::Ptr ptrFound = ptrCellStore->searchExact(journalItem.actorRefNumIndex, journalItem.actorMpNum);
+            MWWorld::Ptr ptrFound = MWBase::Environment::get().getWorld()->searchPtr(journalItem.actorRefId, false);
 
             if (!ptrFound)
             {
@@ -1155,13 +1151,7 @@ void LocalPlayer::sendJournalEntry(const std::string& quest, int index, const MW
     journalItem.type = JournalItem::ENTRY;
     journalItem.quest = quest;
     journalItem.index = index;
-
-    if (actor.mCell != nullptr)
-        journalItem.actorCell = *actor.mCell->getCell();
-
     journalItem.actorRefId = actor.getCellRef().getRefId();
-    journalItem.actorRefNumIndex = actor.getCellRef().getRefNum().mIndex;
-    journalItem.actorMpNum = actor.getCellRef().getMpNum();
 
     journalChanges.journalItems.push_back(journalItem);
 
