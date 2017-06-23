@@ -8,6 +8,8 @@
 #include <iostream>
 using namespace std;
 
+static std::string tempCellDescription;
+
 unsigned int CellFunctions::GetCellStateChangesSize(unsigned short pid) noexcept
 {
     Player *player;
@@ -32,13 +34,8 @@ const char *CellFunctions::GetCellStateDescription(unsigned short pid, unsigned 
     if (i >= player->cellStateChanges.count)
         return "invalid";
 
-    string cellDescription = player->cellStateChanges.cellStates.at(i).cell.getDescription();
-
-    static vector<char> cstrDescription;
-    cstrDescription.reserve(cellDescription.size() + 1);
-    strncpy(&cstrDescription[0], cellDescription.c_str(), cstrDescription.capacity());
-
-    return &cstrDescription[0];
+    tempCellDescription = player->cellStateChanges.cellStates.at(i).cell.getDescription();
+    return tempCellDescription.c_str();
 }
 
 const char *CellFunctions::GetCell(unsigned short pid) noexcept
@@ -46,13 +43,8 @@ const char *CellFunctions::GetCell(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player, 0);
 
-    string cellDescription = player->cell.getDescription().c_str();
-
-    static vector<char> cstrDescription;
-    cstrDescription.reserve(cellDescription.size() + 1);
-    strncpy(&cstrDescription[0], cellDescription.c_str(), cstrDescription.capacity());
-
-    return &cstrDescription[0];
+    tempCellDescription = player->cell.getDescription().c_str();
+    return tempCellDescription.c_str();
 }
 
 void CellFunctions::SetCell(unsigned short pid, const char *cellDescription) noexcept
