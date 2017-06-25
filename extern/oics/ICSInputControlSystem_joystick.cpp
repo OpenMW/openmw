@@ -78,6 +78,9 @@ namespace ICS
 	// add bindings
 	void InputControlSystem::addJoystickAxisBinding(Control* control, int deviceID, int axis, Control::ControlChangingDirection direction)
 	{
+		if (std::find(mJoystickIDList.begin(), mJoystickIDList.end(), deviceID) == mJoystickIDList.end())
+			mJoystickIDList.push_back(deviceID);
+
 		ICS_LOG("\tAdding AxisBinder [axis="
 			+ ToString<int>(axis)       + ", deviceID="
 			+ ToString<int>(deviceID)   + ", direction="
@@ -93,6 +96,9 @@ namespace ICS
 
 	void InputControlSystem::addJoystickButtonBinding(Control* control, int deviceID, unsigned int button, Control::ControlChangingDirection direction)
 	{
+		if (std::find(mJoystickIDList.begin(), mJoystickIDList.end(), deviceID) == mJoystickIDList.end())
+			mJoystickIDList.push_back(deviceID); // Hack: add the device to the list so bindings are saved in save() even when joystick is not connected
+
 		ICS_LOG("\tAdding JoystickButtonBinder [button="
 			+ ToString<int>(button)     + ", deviceID="
 			+ ToString<int>(deviceID)   + ", direction="
