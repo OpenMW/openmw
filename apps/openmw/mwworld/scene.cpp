@@ -461,6 +461,8 @@ namespace MWWorld
         mechMgr->updateCell(old, player);
         mechMgr->watchActor(player);
 
+        mPhysics->updatePtr(old, player);
+
         MWBase::Environment::get().getWorld()->adjustSky();
 
         mLastPlayerPos = pos.asVec3();
