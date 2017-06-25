@@ -110,6 +110,24 @@ namespace ICS
 		mControlsJoystickButtonBinderMap[deviceID][button] = controlJoystickButtonBinderItem;
 	}
 
+	bool InputControlSystem::isJoystickButtonBound(int deviceID, unsigned int button) const
+	{
+		JoystickButtonBinderMapType::const_iterator found = mControlsJoystickButtonBinderMap.find(deviceID);
+		if (found == mControlsJoystickButtonBinderMap.end())
+			return false;
+
+		return (found->second.find(button) != found->second.end());
+	}
+
+	bool InputControlSystem::isJoystickAxisBound(int deviceID, unsigned int axis) const
+	{
+		JoystickAxisBinderMapType::const_iterator found = mControlsJoystickAxisBinderMap.find(deviceID);
+		if (found == mControlsJoystickAxisBinderMap.end())
+			return false;
+
+		return (found->second.find(axis) != found->second.end());
+	}
+
 	// get bindings
 	int InputControlSystem::getJoystickAxisBinding(Control* control, int deviceID, ICS::Control::ControlChangingDirection direction)
 	{

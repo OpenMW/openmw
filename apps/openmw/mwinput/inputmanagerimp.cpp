@@ -1243,7 +1243,7 @@ namespace MWInput
             if (!controlExists)
             {
                 float initial;
-                if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
+                if (defaultAxisBindings.find(i) == defaultAxisBindings.end())
                     initial = 0.0f;
                 else initial = 0.5f;
                 control = new ICS::Control(std::to_string(i), false, true, initial, ICS::ICS_MAX, ICS::ICS_MAX);
@@ -1259,12 +1259,13 @@ namespace MWInput
             {
                 clearAllControllerBindings(control);
 
-                if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
+                if (defaultButtonBindings.find(i) != defaultButtonBindings.end()
+                        && !mInputBinder->isJoystickButtonBound(mFakeDeviceID, defaultButtonBindings[i]))
                 {
                     control->setInitialValue(0.0f);
                     mInputBinder->addJoystickButtonBinding(control, mFakeDeviceID, defaultButtonBindings[i], ICS::Control::INCREASE);
                 }
-                else if (defaultAxisBindings.find(i) != defaultAxisBindings.end())
+                else if (defaultAxisBindings.find(i) != defaultAxisBindings.end() && !mInputBinder->isJoystickAxisBound(mFakeDeviceID, defaultAxisBindings[i]))
                 {
                     control->setValue(0.5f);
                     control->setInitialValue(0.5f);
