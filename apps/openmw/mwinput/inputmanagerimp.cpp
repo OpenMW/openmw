@@ -417,18 +417,21 @@ namespace MWInput
         {
             float xAxis = mInputBinder->getChannel(A_LookLeftRight)->getValue()*2.0f-1.0f;
             float yAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
-            resetIdleTime();
-
-            float rot[3];
-            rot[0] = yAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
-            rot[1] = 0.0f;
-            rot[2] = xAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f);
-
-            // Only actually turn player when we're not in vanity mode
-            if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
+            if (xAxis != 0 || yAxis != 0)
             {
-                mPlayer->yaw(rot[2]);
-                mPlayer->pitch(rot[0]);
+                resetIdleTime();
+
+                float rot[3];
+                rot[0] = yAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
+                rot[1] = 0.0f;
+                rot[2] = xAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f);
+
+                // Only actually turn player when we're not in vanity mode
+                if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
+                {
+                    mPlayer->yaw(rot[2]);
+                    mPlayer->pitch(rot[0]);
+                }
             }
         }
 
