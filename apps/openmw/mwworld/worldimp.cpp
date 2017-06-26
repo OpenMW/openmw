@@ -1660,17 +1660,6 @@ namespace MWWorld
                      !Misc::StringUtils::ciEqual(record.mRace, player->mRace) ||
                      !Misc::StringUtils::ciEqual(record.mHead, player->mHead) ||
                      !Misc::StringUtils::ciEqual(record.mHair, player->mHair);
-
-            /*
-                Start of tes3mp change (major)
-
-                Force rendering updates on player for as long as this bug is around:
-                https://bugs.openmw.org/issues/3917
-            */
-            update = true;
-            /*
-                End of tes3mp change (major)
-            */
         }
         const ESM::NPC *ret = mStore.insert(record);
         if (update) {
