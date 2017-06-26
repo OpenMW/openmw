@@ -8,6 +8,7 @@
 #include <Script/Functions/Actors.hpp>
 #include <Script/Functions/Cells.hpp>
 #include <Script/Functions/CharClass.hpp>
+#include <Script/Functions/Death.hpp>
 #include <Script/Functions/Dialogue.hpp>
 #include <Script/Functions/Factions.hpp>
 #include <Script/Functions/GUI.hpp>
@@ -110,6 +111,7 @@ public:
             ITEMAPI,
             QUESTAPI,
             FACTIONAPI,
+            DEATHAPI,
             DIALOGUEAPI,
             SPELLAPI,
             GUIAPI,

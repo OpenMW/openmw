@@ -128,6 +128,13 @@ namespace mwmp
         unsigned int count;
     };
 
+    enum RESURRECT_TYPE
+    {
+        REGULAR = 0,
+        IMPERIAL_SHRINE,
+        TRIBUNAL_TEMPLE
+    };
+
     class BasePlayer
     {
     public:
@@ -214,6 +221,8 @@ namespace mwmp
         bool isChangingRegion;
 
         std::string deathReason;
+
+        unsigned int resurrectType;
     };
 }
 

@@ -74,7 +74,6 @@
     {"SetBounty",               StatsFunctions::SetBounty},\
     {"SetCharGenStage",         StatsFunctions::SetCharGenStage},\
     \
-    {"Resurrect",               StatsFunctions::Resurrect},\
     {"SendBaseInfo",            StatsFunctions::SendBaseInfo},\
     \
     {"SendStatsDynamic",        StatsFunctions::SendStatsDynamic},\
@@ -152,7 +151,6 @@ public:
     static void SetBounty(unsigned short pid, int value) noexcept;
     static void SetCharGenStage(unsigned short pid, int start, int end) noexcept;
 
-    static void Resurrect(unsigned short pid);
     static void SendBaseInfo(unsigned short pid) noexcept;
 
     static void SendStatsDynamic(unsigned short pid) noexcept;

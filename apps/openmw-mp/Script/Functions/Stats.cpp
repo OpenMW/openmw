@@ -504,13 +504,6 @@ void StatsFunctions::SetCharGenStage(unsigned short pid, int start, int end) noe
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_CHARGEN)->Send(false);
 }
 
-void StatsFunctions::Resurrect(unsigned short pid)
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_RESURRECT)->RequestData(player->guid);
-}
-
 void StatsFunctions::SendBaseInfo(unsigned short pid) noexcept
 {
     Player *player;

@@ -18,7 +18,6 @@ namespace mwmp
         ProcessorPlayerResurrect()
         {
             BPP_INIT(ID_PLAYER_RESURRECT)
-            avoidReading = true;
         }
 
         virtual void Do(PlayerPacket &packet, BasePlayer *player)
@@ -27,9 +26,15 @@ namespace mwmp
             
             if (isLocal())
             {
-                LOG_APPEND(Log::LOG_INFO, "- Packet was about me");
-
+                LOG_APPEND(Log::LOG_INFO, "- Packet was about me with resurrectType of %i", player->resurrectType);
+                
                 MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+                if (player->resurrectType == mwmp::RESURRECT_TYPE::IMPERIAL_SHRINE)
+                    MWBase::Environment::get().getWorld()->teleportToClosestMarker(playerPtr, "divinemarker");
+                else if (player->resurrectType == mwmp::RESURRECT_TYPE::TRIBUNAL_TEMPLE)
+                    MWBase::Environment::get().getWorld()->teleportToClosestMarker(playerPtr, "templemarker");
+
                 playerPtr.getClass().getCreatureStats(playerPtr).resurrect();
 
                 // The player could have died from a hand-to-hand attack, so reset their fatigue
