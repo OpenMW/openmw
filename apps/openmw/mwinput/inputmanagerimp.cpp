@@ -416,18 +416,21 @@ namespace MWInput
         {
             float xAxis = mInputBinder->getChannel(A_LookLeftRight)->getValue()*2.0f-1.0f;
             float yAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
-            resetIdleTime();
-
-            float rot[3];
-            rot[0] = yAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
-            rot[1] = 0.0f;
-            rot[2] = xAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f);
-
-            // Only actually turn player when we're not in vanity mode
-            if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
+            if (xAxis != 0 || yAxis != 0)
             {
-                mPlayer->yaw(rot[2]);
-                mPlayer->pitch(rot[0]);
+                resetIdleTime();
+
+                float rot[3];
+                rot[0] = yAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
+                rot[1] = 0.0f;
+                rot[2] = xAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f);
+
+                // Only actually turn player when we're not in vanity mode
+                if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
+                {
+                    mPlayer->yaw(rot[2]);
+                    mPlayer->pitch(rot[0]);
+                }
             }
         }
 
@@ -714,7 +717,7 @@ namespace MWInput
             if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
             {
                 MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
-                if (b && b->getEnabled())
+                if (b && b->getEnabled() && id == SDL_BUTTON_LEFT)
                 {
                     MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
                 }
@@ -1268,7 +1271,7 @@ namespace MWInput
             if (!controlExists)
             {
                 float initial;
-                if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
+                if (defaultAxisBindings.find(i) == defaultAxisBindings.end())
                     initial = 0.0f;
                 else initial = 0.5f;
                 control = new ICS::Control(std::to_string(i), false, true, initial, ICS::ICS_MAX, ICS::ICS_MAX);
@@ -1284,12 +1287,13 @@ namespace MWInput
             {
                 clearAllControllerBindings(control);
 
-                if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
+                if (defaultButtonBindings.find(i) != defaultButtonBindings.end()
+                        && !mInputBinder->isJoystickButtonBound(mFakeDeviceID, defaultButtonBindings[i]))
                 {
                     control->setInitialValue(0.0f);
                     mInputBinder->addJoystickButtonBinding(control, mFakeDeviceID, defaultButtonBindings[i], ICS::Control::INCREASE);
                 }
-                else if (defaultAxisBindings.find(i) != defaultAxisBindings.end())
+                else if (defaultAxisBindings.find(i) != defaultAxisBindings.end() && !mInputBinder->isJoystickAxisBound(mFakeDeviceID, defaultAxisBindings[i]))
                 {
                     control->setValue(0.5f);
                     control->setInitialValue(0.5f);

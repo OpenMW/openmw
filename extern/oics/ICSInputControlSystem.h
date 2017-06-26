@@ -120,6 +120,8 @@ namespace ICS
         bool isMouseButtonBound(unsigned int button) const;
         void addJoystickAxisBinding(Control* control, int deviceID, int axis, Control::ControlChangingDirection direction);
 		void addJoystickButtonBinding(Control* control, int deviceID, unsigned int button, Control::ControlChangingDirection direction);
+		bool isJoystickButtonBound(int deviceID, unsigned int button) const;
+		bool isJoystickAxisBound(int deviceID, unsigned int axis) const;
         void removeKeyBinding(SDL_Scancode key);
 		void removeMouseAxisBinding(NamedAxis axis);
 		void removeMouseButtonBinding(unsigned int button);
