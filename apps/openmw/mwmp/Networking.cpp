@@ -332,7 +332,7 @@ void Networking::preInit(std::vector<std::string> &content, Files::Collections &
             hashList.push_back(crc32);
             checksums.push_back(make_pair(*it, hashList));
 
-            printf("idx: %d\tchecksum: %X\tfile: %s\n", idx, crc32, col.getPath(*it).string().c_str());
+            LOG_APPEND(Log::LOG_WARN, "idx: %d\tchecksum: %X\tfile: %s\n", idx, crc32, col.getPath(*it).string().c_str());
         }
         else
             throw std::runtime_error("Plugin doesn't exist.");
