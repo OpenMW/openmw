@@ -22,6 +22,7 @@ mwmp::CellController::CellController()
 {
 
 }
+
 void CellController::updateLocal(bool forceUpdate)
 {
     // Loop through Cells, deleting inactive ones and updating LocalActors in active ones
@@ -47,9 +48,9 @@ void CellController::updateLocal(bool forceUpdate)
     //
     // Note: This cannot be combined with the above loop because initializing LocalActors in a Cell before they are
     //       deleted from their previous one can make their records stay deleted
-    for (std::map<std::string, mwmp::Cell *>::iterator it = cellsInitialized.begin(); it != cellsInitialized.end(); ++it)
+    for(auto &cell : cellsInitialized)
     {
-        mwmp::Cell *mpCell = it->second;
+        mwmp::Cell *mpCell = cell.second;
         if (mpCell->shouldInitializeActors == true)
         {
             mpCell->shouldInitializeActors = false;
@@ -60,10 +61,8 @@ void CellController::updateLocal(bool forceUpdate)
 
 void CellController::updateDedicated(float dt)
 {
-    for (std::map<std::string, mwmp::Cell *>::iterator it = cellsInitialized.begin(); it != cellsInitialized.end(); ++it)
-    {
-        it->second->updateDedicated(dt);
-    }
+    for(const auto &cell : cellsInitialized)
+        cell.second->updateDedicated(dt);
 }
 
 void CellController::initializeCell(const ESM::Cell& cell)
@@ -92,9 +91,7 @@ void CellController::readPositions(ActorList& actorList)
 
     // If this now exists, send it the data
     if (cellsInitialized.count(mapIndex) > 0)
-    {
         cellsInitialized[mapIndex]->readPositions(actorList);
-    }
 }
 
 void CellController::readAnimFlags(ActorList& actorList)
@@ -105,9 +102,7 @@ void CellController::readAnimFlags(ActorList& actorList)
 
     // If this now exists, send it the data
     if (cellsInitialized.count(mapIndex) > 0)
-    {
         cellsInitialized[mapIndex]->readAnimFlags(actorList);
-    }
 }
 
 void CellController::readAnimPlay(ActorList& actorList)
@@ -118,9 +113,7 @@ void CellController::readAnimPlay(ActorList& actorList)
 
     // If this now exists, send it the data
     if (cellsInitialized.count(mapIndex) > 0)
-    {
         cellsInitialized[mapIndex]->readAnimPlay(actorList);
-    }
 }
 
 void CellController::readStatsDynamic(ActorList& actorList)
@@ -131,9 +124,7 @@ void CellController::readStatsDynamic(ActorList& actorList)
 
     // If this now exists, send it the data
     if (cellsInitialized.count(mapIndex) > 0)
-    {
         cellsInitialized[mapIndex]->readStatsDynamic(actorList);
-    }
 }
 
 void CellController::readEquipment(ActorList& actorList)
@@ -144,9 +135,7 @@ void CellController::readEquipment(ActorList& actorList)
 
     // If this now exists, send it the data
     if (cellsInitialized.count(mapIndex) > 0)
-    {
         cellsInitialized[mapIndex]->readEquipment(actorList);
-    }
 }
 
 void CellController::readSpeech(ActorList& actorList)
@@ -157,9 +146,7 @@ void CellController::readSpeech(ActorList& actorList)
 
     // If this now exists, send it the data
     if (cellsInitialized.count(mapIndex) > 0)
-    {
         cellsInitialized[mapIndex]->readSpeech(actorList);
-    }
 }
 
 void CellController::readAttack(ActorList& actorList)
@@ -170,9 +157,7 @@ void CellController::readAttack(ActorList& actorList)
 
     // If this now exists, send it the data
     if (cellsInitialized.count(mapIndex) > 0)
-    {
         cellsInitialized[mapIndex]->readAttack(actorList);
-    }
 }
 
 void CellController::readCellChange(ActorList& actorList)
@@ -183,9 +168,7 @@ void CellController::readCellChange(ActorList& actorList)
 
     // If this now exists, send it the data
     if (cellsInitialized.count(mapIndex) > 0)
-    {
         cellsInitialized[mapIndex]->readCellChange(actorList);
-    }
 }
 
 void CellController::setLocalActorRecord(std::string actorIndex, std::string cellIndex)
@@ -292,9 +275,7 @@ std::string CellController::generateMapIndex(BaseActor baseActor)
 bool CellController::hasLocalAuthority(const ESM::Cell& cell)
 {
     if (isInitializedCell(cell) && isActiveWorldCell(cell))
-    {
         return getCell(cell)->hasLocalAuthority();
-    }
 
     return false;
 }
@@ -357,15 +338,14 @@ void CellController::openContainer(const MWWorld::Ptr &container, bool loot)
     // Record this as the player's current open container
     Main::get().getLocalPlayer()->storeCurrentContainer(container, loot);
 
+    const auto &cellRef = container.getCellRef();
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Container \"%s\" (%d) is opened. Loot: %s",
-                       container.getCellRef().getRefId().c_str(), container.getCellRef().getRefNum().mIndex,
-                       loot ? "true" : "false");
+                       cellRef.getRefId().c_str(), cellRef.getRefNum().mIndex, loot ? "true" : "false");
 
-    MWWorld::ContainerStore &cont = container.getClass().getContainerStore(container);
-    for (MWWorld::ContainerStoreIterator iter = cont.begin(); iter != cont.end(); iter++)
+    for(const auto &ptr : container.getClass().getContainerStore(container))
     {
-        int count = iter->getRefData().getCount();
-        const std::string &name = iter->getCellRef().getRefId();
+        int count = ptr.getRefData().getCount();
+        const std::string &name = ptr.getCellRef().getRefId();
 
         LOG_APPEND(Log::LOG_VERBOSE, " - Item. Refid: \"%s\" Count: %d", name.c_str(), count);
 
@@ -386,10 +366,10 @@ void CellController::closeContainer(const MWWorld::Ptr &container)
                            container.getCellRef().getRefNum().mIndex);
 
         MWWorld::ContainerStore &cont = container.getClass().getContainerStore(container);
-        for (MWWorld::ContainerStoreIterator iter = cont.begin(); iter != cont.end(); iter++)
+        for(const auto &ptr : cont)
         {
-            LOG_APPEND(Log::LOG_VERBOSE, " - Item. Refid: \"%s\" Count: %d", iter->getCellRef().getRefId().c_str(),
-                       iter->getRefData().getCount());
+            LOG_APPEND(Log::LOG_VERBOSE, " - Item. Refid: \"%s\" Count: %d", ptr.getCellRef().getRefId().c_str(),
+                       ptr.getRefData().getCount());
         }
     }
 
