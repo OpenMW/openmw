@@ -196,14 +196,8 @@ void LocalPlayer::updateStatsDynamic(bool forceUpdate)
 
     // Update stats when they become 0 or they have changed enough
     bool shouldUpdateHealth = oldHealth != health && (health.getCurrent() == 0 || abs(oldHealth.getCurrent() - health.getCurrent()) > 3);
-    bool shouldUpdateMagicka = false;
-    bool shouldUpdateFatigue = false;
-
-    if (!shouldUpdateHealth)
-        shouldUpdateMagicka = oldMagicka != magicka && (magicka.getCurrent() == 0 || abs(oldMagicka.getCurrent() - magicka.getCurrent()) > 10);
-
-    if (!shouldUpdateMagicka)
-        shouldUpdateFatigue = oldFatigue != fatigue && (fatigue.getCurrent() == 0 || abs(oldFatigue.getCurrent() - fatigue.getCurrent()) > 10);
+    bool shouldUpdateMagicka = oldMagicka != magicka && (magicka.getCurrent() == 0 || abs(oldMagicka.getCurrent() - magicka.getCurrent()) > 10);
+    bool shouldUpdateFatigue = oldFatigue != fatigue && (fatigue.getCurrent() == 0 || abs(oldFatigue.getCurrent() - fatigue.getCurrent()) > 10);
 
     if (forceUpdate || shouldUpdateHealth || shouldUpdateMagicka || shouldUpdateFatigue)
     {
@@ -262,16 +256,13 @@ void LocalPlayer::updateSkills(bool forceUpdate)
         // If we only have skill progress, remember it for future packets,
         // but don't send a packet just because of this
         else if (ptrNpcStats.getSkill(i).getProgress() != npcStats.mSkills[i].mProgress)
-        {
             ptrNpcStats.getSkill(i).writeState(npcStats.mSkills[i]);
-        }
     }
 
     for (int i = 0; i < 8; i++)
     {
-        if (ptrNpcStats.getSkillIncrease(i) != npcStats.mSkillIncrease[i]) {
+        if (ptrNpcStats.getSkillIncrease(i) != npcStats.mSkillIncrease[i])
             npcStats.mSkillIncrease[i] = ptrNpcStats.getSkillIncrease(i);
-        }
     }
 
     if (skillsChanged || forceUpdate)
@@ -329,7 +320,6 @@ void LocalPlayer::updatePosition(bool forceUpdate)
 
     if (forceUpdate || posIsChanging || posWasChanged)
     {
-
         oldRot[0] = position.rot[0];
         oldRot[1] = position.rot[2];
 
@@ -365,7 +355,8 @@ void LocalPlayer::updateCell(bool forceUpdate)
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_CELL_CHANGE about LocalPlayer to server");
 
-        LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s", cell.getDescription().c_str(), ptrCell->getDescription().c_str());
+        LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s", cell.getDescription().c_str(),
+                   ptrCell->getDescription().c_str());
 
         if (!Misc::StringUtils::ciEqual(cell.mRegion, ptrCell->mRegion))
         {
@@ -397,15 +388,8 @@ void LocalPlayer::updateCell(bool forceUpdate)
 
 void LocalPlayer::updateChar()
 {
-    MWBase::Environment::get().getMechanicsManager()->setPlayerRace(
-        npc.mRace,
-        npc.isMale(),
-        npc.mHead,
-        npc.mHair
-    );
-
+    MWBase::Environment::get().getMechanicsManager()->setPlayerRace(npc.mRace, npc.isMale(), npc.mHead, npc.mHair);
     MWBase::Environment::get().getMechanicsManager()->setPlayerBirthsign(birthsign);
-
     MWBase::Environment::get().getWindowManager()->getInventoryWindow()->rebuildAvatar();
 }
 
@@ -466,21 +450,26 @@ void LocalPlayer::updateInventory(bool forceUpdate)
     MWWorld::InventoryStore &ptrInventory = ptrPlayer.getClass().getInventoryStore(ptrPlayer);
     mwmp::Item item;
 
+    auto setItem = [](Item &item, const MWWorld::Ptr &iter) {
+        item.refId = iter.getCellRef().getRefId();
+        if (item.refId.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
+            return true;
+        item.count = iter.getRefData().getCount();
+        item.charge = iter.getCellRef().getCharge();
+        return false;
+    };
+
     if (!invChanged)
     {
-        for (vector<Item>::iterator iter = inventoryChanges.items.begin(); iter != inventoryChanges.items.end(); ++iter)
+        for(const auto &itemOld : inventoryChanges.items)
         {
-            MWWorld::ContainerStoreIterator result(ptrInventory.begin());
+            auto result = ptrInventory.begin();
             for (; result != ptrInventory.end(); ++result)
             {
-                item.refId = result->getCellRef().getRefId();
-                if (item.refId.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
+                if(setItem(item, *result))
                     continue;
 
-                item.count = result->getRefData().getCount();
-                item.charge = result->getCellRef().getCharge();
-
-                if (item == (*iter))
+                if (item == itemOld)
                     break;
             }
             if (result == ptrInventory.end())
@@ -493,24 +482,14 @@ void LocalPlayer::updateInventory(bool forceUpdate)
 
     if (!invChanged)
     {
-        for (MWWorld::ContainerStoreIterator iter(ptrInventory.begin()); iter != ptrInventory.end(); ++iter)
+        for(const auto &iter : ptrInventory)
         {
-            item.refId = iter->getCellRef().getRefId();
-            if (item.refId.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
+            if(setItem(item, iter))
                 continue;
 
-            item.count = iter->getRefData().getCount();
-            item.charge = iter->getCellRef().getCharge();
+            auto items = inventoryChanges.items;
 
-            vector<Item>::iterator result = inventoryChanges.items.begin();
-
-            for (; result != inventoryChanges.items.end(); result++)
-            {
-                if ((*result) == item)
-                    break;
-            }
-
-            if (result == inventoryChanges.items.end())
+            if (find(items.begin(), items.end(), item) == items.end())
             {
                 invChanged = true;
                 break;
@@ -643,9 +622,8 @@ void LocalPlayer::addItems()
     MWWorld::Ptr ptrPlayer = getPlayerPtr();
     MWWorld::ContainerStore &ptrStore = ptrPlayer.getClass().getContainerStore(ptrPlayer);
 
-    for (unsigned int i = 0; i < inventoryChanges.count; i++)
+    for(const auto &item : inventoryChanges.items)
     {
-        mwmp::Item item = inventoryChanges.items.at(i);
         MWWorld::Ptr itemPtr = *ptrStore.add(item.refId, item.count, ptrPlayer);
         if (item.charge != -1)
             itemPtr.getCellRef().setCharge(item.charge);
@@ -657,50 +635,44 @@ void LocalPlayer::addSpells()
     MWWorld::Ptr ptrPlayer = getPlayerPtr();
     MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
 
-    for (vector<ESM::Spell>::const_iterator spell = spellbookChanges.spells.begin(); spell != spellbookChanges.spells.end(); spell++)
-        ptrSpells.add(spell->mId);
+    for(const auto &spell : spellbookChanges.spells)
+        ptrSpells.add(spell.mId);
         
 }
 
 void LocalPlayer::addJournalItems()
 {
-    for (unsigned int i = 0; i < journalChanges.count; i++)
+    for(const auto &journalItem : journalChanges.journalItems)
     {
-        mwmp::JournalItem journalItem = journalChanges.journalItems.at(i);
-        
         if (journalItem.type == JournalItem::ENTRY)
         {
             MWWorld::Ptr ptrFound = MWBase::Environment::get().getWorld()->searchPtr(journalItem.actorRefId, false);
 
             if (!ptrFound)
-            {
                 ptrFound = getPlayerPtr();
-            }
 
             MWBase::Environment::get().getJournal()->addEntry(journalItem.quest, journalItem.index, ptrFound);
         }
         else
-        {
             MWBase::Environment::get().getJournal()->setJournalIndex(journalItem.quest, journalItem.index);
-        }
     }
 }
 
 void LocalPlayer::addTopics()
 {
-    for (unsigned int i = 0; i < topicChanges.count; i++)
+    auto &env = MWBase::Environment::get();
+    for(const auto &topic : topicChanges.topics)
     {
-        mwmp::Topic topic = topicChanges.topics.at(i);
         std::string topicId = topic.topicId;
 
         // If we're using a translated version of Morrowind, translate this topic from English into our language
-        if (MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
-            topicId = MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().getLocalizedTopicId(topicId);
+        if (env.getWindowManager()->getTranslationDataStorage().hasTranslation())
+            topicId = env.getWindowManager()->getTranslationDataStorage().getLocalizedTopicId(topicId);
 
-        MWBase::Environment::get().getDialogueManager()->addTopic(topicId);
+        env.getDialogueManager()->addTopic(topicId);
 
-        if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Dialogue))
-            MWBase::Environment::get().getDialogueManager()->updateTopics();
+        if (env.getWindowManager()->containsMode(MWGui::GM_Dialogue))
+            env.getDialogueManager()->updateTopics();
     }
 }
 
@@ -709,11 +681,8 @@ void LocalPlayer::removeItems()
     MWWorld::Ptr ptrPlayer = getPlayerPtr();
     MWWorld::ContainerStore &ptrStore = ptrPlayer.getClass().getContainerStore(ptrPlayer);
 
-    for (unsigned int i = 0; i < inventoryChanges.count; i++)
-    {
-        mwmp::Item item = inventoryChanges.items.at(i);
+    for(const auto &item : inventoryChanges.items)
         ptrStore.remove(item.refId, item.count, ptrPlayer);
-    }
 }
 
 void LocalPlayer::removeSpells()
@@ -721,12 +690,11 @@ void LocalPlayer::removeSpells()
     MWWorld::Ptr ptrPlayer = getPlayerPtr();
     MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
 
-    for (vector<ESM::Spell>::const_iterator spell = spellbookChanges.spells.begin(); spell != spellbookChanges.spells.end(); spell++)
+    MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
+    for(const auto &spell : spellbookChanges.spells)
     {
-        ptrSpells.remove(spell->mId);
-
-        MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
-        if (spell->mId == wm->getSelectedSpell())
+        ptrSpells.remove(spell.mId);
+        if (spell.mId == wm->getSelectedSpell())
             wm->unsetSelectedSpell();
     }
 }
@@ -778,9 +746,7 @@ void LocalPlayer::setSkills()
     }
 
     for (int i = 0; i < 8; ++i)
-    {
         ptrNpcStats->setSkillIncrease(i, npcStats.mSkillIncrease[i]);
-    }
 
     ptrNpcStats->setLevelProgress(npcStats.mLevelProgress);
 }
@@ -811,9 +777,7 @@ void LocalPlayer::setPosition()
     // If we're ignoring this position packet because of an invalid cell change,
     // don't make the next one get ignored as well
     if (ignorePosPacket)
-    {
         ignorePosPacket = false;
-    }
     else
     {
         world->getPlayer().setTeleported(true);
@@ -906,31 +870,25 @@ void LocalPlayer::setEquipment()
 
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
     {
-        mwmp::Item *currentItem = &equipedItems[slot];
+        mwmp::Item &currentItem = equipedItems[slot];
 
-        if (!currentItem->refId.empty())
+        if (!currentItem.refId.empty())
         {
-            MWWorld::ContainerStoreIterator it = ptrInventory.begin();
-            for (; it != ptrInventory.end(); ++it) // find item in inventory
-            {
-                if (::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), currentItem->refId))
-                    break;
-            }
+            auto it = find_if(ptrInventory.begin(), ptrInventory.end(), [&currentItem](const MWWorld::Ptr &a) {
+                return Misc::StringUtils::ciEqual(a.getCellRef().getRefId(), currentItem.refId);
+            });
+
             if (it == ptrInventory.end()) // if not exists add item
-                ptrInventory.equip(
-                    slot,
-                    ptrInventory.ContainerStore::add(
-                        equipedItems[slot].refId.c_str(),
-                        equipedItems[slot].count,
-                        ptrPlayer),
-                    ptrPlayer);
+            {
+                auto equipped = equipedItems[slot];
+                auto addIter = ptrInventory.ContainerStore::add(equipped.refId.c_str(), equipped.count, ptrPlayer);
+                ptrInventory.equip(slot, addIter, ptrPlayer);
+            }
             else
                 ptrInventory.equip(slot, it, ptrPlayer);
         }
         else
-        {
             ptrInventory.unequipSlot(slot, ptrPlayer);
-        }
     }
 }
 
@@ -983,10 +941,8 @@ void LocalPlayer::setFactions()
     MWWorld::Ptr player = getPlayerPtr();
     MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
 
-    for (unsigned int i = 0; i < factionChanges.count; i++)
+    for(const auto &faction : factionChanges.factions)
     {
-        mwmp::Faction faction = factionChanges.factions.at(i);
-
         // If the player isn't in this faction, make them join it
         if (!ptrNpcStats.isInFaction(faction.factionId))
             ptrNpcStats.joinFaction(faction.factionId);
@@ -1015,14 +971,8 @@ void LocalPlayer::setFactions()
 
 void LocalPlayer::setKills()
 {
-    for (unsigned int i = 0; i < killChanges.count; i++)
-    {
-        mwmp::Kill kill = killChanges.kills.at(i);
-        std::string refId = kill.refId;
-        int number = kill.number;
-
-        MWBase::Environment::get().getMechanicsManager()->setDeaths(refId, number);
-    }
+    for(const auto &kill : killChanges.kills)
+        MWBase::Environment::get().getMechanicsManager()->setDeaths(kill.refId, kill.number);
 }
 
 void LocalPlayer::setBooks()
@@ -1030,13 +980,8 @@ void LocalPlayer::setBooks()
     MWWorld::Ptr player = getPlayerPtr();
     MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
 
-    for (unsigned int i = 0; i < bookChanges.count; i++)
-    {
-        mwmp::Book book = bookChanges.books.at(i);
-        std::string bookId = book.bookId;
-
-        ptrNpcStats.flagAsUsed(bookId);
-    }
+    for(const auto &book : bookChanges.books)
+        ptrNpcStats.flagAsUsed(book.bookId);
 }
 
 void LocalPlayer::sendClass()
@@ -1067,14 +1012,14 @@ void LocalPlayer::sendInventory()
 
     inventoryChanges.items.clear();
 
-    for (MWWorld::ContainerStoreIterator iter(ptrInventory.begin()); iter != ptrInventory.end(); ++iter)
+    for(const auto &iter : ptrInventory)
     {
-        item.refId = iter->getCellRef().getRefId();
+        item.refId = iter.getCellRef().getRefId();
         if (item.refId.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
             continue;
 
-        item.count = iter->getRefData().getCount();
-        item.charge = iter->getCellRef().getCharge();
+        item.count = iter.getRefData().getCount();
+        item.charge = iter.getCellRef().getCharge();
 
         inventoryChanges.items.push_back(item);
     }
@@ -1093,14 +1038,10 @@ void LocalPlayer::sendSpellbook()
     spellbookChanges.spells.clear();
 
     // Send spells in spellbook, while ignoring abilities, powers, etc.
-    for (MWMechanics::Spells::TIterator iter = ptrSpells.begin(); iter != ptrSpells.end(); ++iter)
+    for(const auto &spell : ptrSpells)
     {
-        const ESM::Spell *spell = iter->first;
-
-        if (spell->mData.mType == ESM::Spell::ST_Spell)
-        {
-            spellbookChanges.spells.push_back(*spell);
-        }
+        if (spell.first->mData.mType == ESM::Spell::ST_Spell)
+            spellbookChanges.spells.push_back(*spell.first);
     }
 
     spellbookChanges.action = SpellbookChanges::SET;
@@ -1275,9 +1216,7 @@ void LocalPlayer::storeCellState(ESM::Cell cell, int stateType)
         // If there's already a cell state recorded for this particular cell,
         // remove it
         if (cell.getDescription() == (*iter).cell.getDescription())
-        {
             iter = cellStateChanges.cellStates.erase(iter);
-        }
         else
             ++iter;
     }
