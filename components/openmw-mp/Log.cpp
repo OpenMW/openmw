@@ -14,7 +14,7 @@
 
 using namespace std;
 
-Log *Log::sLog = NULL;
+Log *Log::sLog = nullptr;
 
 Log::Log(int logLevel) : logLevel(logLevel)
 {
@@ -23,17 +23,17 @@ Log::Log(int logLevel) : logLevel(logLevel)
 
 void Log::Create(int logLevel)
 {
-    if (sLog != NULL)
+    if (sLog != nullptr)
         return;
     sLog = new Log(logLevel);
 }
 
 void Log::Delete()
 {
-    if (sLog == NULL)
+    if (sLog == nullptr)
         return;
     delete sLog;
-    sLog = NULL;
+    sLog = nullptr;
 }
 
 const Log &Log::Get()
@@ -98,7 +98,7 @@ void Log::print(int level, bool hasPrefix, const char *file, int line, const cha
         sstr << '\n';
     va_list args;
     va_start(args, message);
-    vector<char> buf((unsigned long) (vsnprintf(NULL, 0, sstr.str().c_str(), args) + 1));
+    vector<char> buf((unsigned long) (vsnprintf(nullptr, 0, sstr.str().c_str(), args) + 1));
     va_end(args);
     va_start(args, message);
     vsnprintf(buf.data(), buf.size(), sstr.str().c_str(), args);

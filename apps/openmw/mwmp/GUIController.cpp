@@ -92,7 +92,7 @@ void mwmp::GUIController::showDialogList(const mwmp::BasePlayer::GUIMessageBox &
 {
     MWBase::WindowManager *windowManager = MWBase::Environment::get().getWindowManager();
     windowManager->removeDialog(mListBox);
-    mListBox = NULL;
+    mListBox = nullptr;
 
     std::vector<std::string> list;
 
@@ -360,7 +360,7 @@ void mwmp::GUIController::setGlobalMapMarkerTooltip(MWGui::MapWindow *mapWindow,
 
     if (!destNotes.empty())
     {
-        MWGui::LocalMapBase::MarkerUserData data (NULL);
+        MWGui::LocalMapBase::MarkerUserData data (nullptr);
         data.notes = destNotes;
         data.caption = markerWidget->getUserString("Caption_TextOneLine");
 

@@ -91,7 +91,7 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
                 dedicPlayer->state = 0;
                 world->deleteObject(dedicPlayer->ptr);
                 delete dedicPlayer->reference;
-                dedicPlayer->reference = NULL;
+                dedicPlayer->reference = nullptr;
                 reset = true;
             }
         }
@@ -255,7 +255,7 @@ DedicatedPlayer *PlayerList::getPlayer(const MWWorld::Ptr &ptr)
 
 bool PlayerList::isDedicatedPlayer(const MWWorld::Ptr &ptr)
 {
-    if (ptr.mRef == NULL)
+    if (ptr.mRef == nullptr)
         return false;
 
     return (getPlayer(ptr) != 0);

@@ -183,7 +183,7 @@ void CellController::removeLocalActorRecord(std::string actorIndex)
 
 bool CellController::isLocalActor(MWWorld::Ptr ptr)
 {
-    if (ptr.mRef == NULL)
+    if (ptr.mRef == nullptr)
         return false;
 
     std::string mapIndex = generateMapIndex(ptr);
@@ -231,7 +231,7 @@ bool CellController::isDedicatedActor(int refNumIndex, int mpNum)
 
 bool CellController::isDedicatedActor(MWWorld::Ptr ptr)
 {
-    if (ptr.mRef == NULL)
+    if (ptr.mRef == nullptr)
         return false;
 
     std::string mapIndex = generateMapIndex(ptr);
@@ -313,7 +313,7 @@ MWWorld::CellStore *CellController::getCellStore(const ESM::Cell& cell)
         }
         catch (std::exception&)
         {
-            cellStore = NULL;
+            cellStore = nullptr;
         }
     }
 

@@ -71,7 +71,7 @@ Attack *MechanicsHelper::getLocalAttack(const MWWorld::Ptr& ptr)
     else if (mwmp::Main::get().getCellController()->isLocalActor(ptr))
         return &mwmp::Main::get().getCellController()->getLocalActor(ptr)->attack;
 
-    return NULL;
+    return nullptr;
 }
 
 Attack *MechanicsHelper::getDedicatedAttack(const MWWorld::Ptr& ptr)
@@ -81,7 +81,7 @@ Attack *MechanicsHelper::getDedicatedAttack(const MWWorld::Ptr& ptr)
     else if (mwmp::Main::get().getCellController()->isDedicatedActor(ptr))
         return &mwmp::Main::get().getCellController()->getDedicatedActor(ptr)->attack;
 
-    return NULL;
+    return nullptr;
 }
 
 MWWorld::Ptr MechanicsHelper::getPlayerPtr(const Target& target)
@@ -90,11 +90,11 @@ MWWorld::Ptr MechanicsHelper::getPlayerPtr(const Target& target)
     {
         if (target.guid == mwmp::Main::get().getLocalPlayer()->guid)
             return MWBase::Environment::get().getWorld()->getPlayerPtr();
-        else if (PlayerList::getPlayer(target.guid) != NULL)
+        else if (PlayerList::getPlayer(target.guid) != nullptr)
             return PlayerList::getPlayer(target.guid)->getPtr();
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void MechanicsHelper::assignAttackTarget(Attack* attack, const MWWorld::Ptr& target)
@@ -154,7 +154,7 @@ void MechanicsHelper::processAttack(Attack attack, const MWWorld::Ptr& attacker)
     {
         if (attack.target.guid == mwmp::Main::get().getLocalPlayer()->guid)
             victim = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        else if (PlayerList::getPlayer(attack.target.guid) != NULL)
+        else if (PlayerList::getPlayer(attack.target.guid) != nullptr)
             victim = PlayerList::getPlayer(attack.target.guid)->getPtr();
     }
     else
@@ -182,7 +182,7 @@ void MechanicsHelper::processAttack(Attack attack, const MWWorld::Ptr& attacker)
                 weapon = MWWorld::Ptr();
         }
 
-        if (victim.mRef != NULL)
+        if (victim.mRef != nullptr)
         {
             bool healthdmg = true;
 
