@@ -178,9 +178,7 @@ void DedicatedActor::setEquipment()
             storeRefId = it->getCellRef().getRefId();
 
             if (!Misc::StringUtils::ciEqual(storeRefId, packetRefId)) // if other item equiped
-            {
                 invStore.unequipSlot(slot, ptr);
-            }
             else
                 equal = true;
         }
@@ -227,14 +225,10 @@ void DedicatedActor::playSound()
 
 bool DedicatedActor::hasItem(std::string refId, int charge)
 {
-    MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
-
-    for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
+    for (const auto &ptr : ptr.getClass().getInventoryStore(ptr))
     {
-        if (::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), refId) && it->getCellRef().getCharge() == charge)
-        {
+        if (::Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), refId) && ptr.getCellRef().getCharge() == charge)
             return true;
-        }
     }
 
     return false;
@@ -242,14 +236,12 @@ bool DedicatedActor::hasItem(std::string refId, int charge)
 
 void DedicatedActor::equipItem(std::string refId, int charge)
 {
-    MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
-
-    for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
+    for (const auto &ptr : ptr.getClass().getInventoryStore(ptr))
     {
-        if (::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), refId) && it->getCellRef().getCharge() == charge)
+        if (::Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), refId) && ptr.getCellRef().getCharge() == charge)
         {
-            std::shared_ptr<MWWorld::Action> action = it->getClass().use(*it);
-            action->execute(ptr);
+            std::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr);
+            action->execute(this->ptr);
             break;
         }
     }
