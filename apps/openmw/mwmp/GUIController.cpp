@@ -98,15 +98,15 @@ void mwmp::GUIController::showDialogList(const mwmp::BasePlayer::GUIMessageBox &
 
     std::string buf;
 
-    for (size_t i = 0; i < guiMessageBox.data.size(); i++)
+    for(const auto &data : guiMessageBox.data)
     {
-        if (guiMessageBox.data[i] == '\n')
+        if (data == '\n')
         {
             list.push_back(buf);
             buf.erase();
             continue;
         }
-        buf += guiMessageBox.data[i];
+        buf += data;
     }
 
     list.push_back(buf);
@@ -373,13 +373,11 @@ void mwmp::GUIController::setGlobalMapMarkerTooltip(MWGui::MapWindow *mapWindow,
 
 void mwmp::GUIController::updateGlobalMapMarkerTooltips(MWGui::MapWindow *mapWindow)
 {
-    std::map<std::pair<int, int>, MyGUI::Widget*>::iterator widgetIt = mapWindow->mGlobalMapMarkers.begin();
-    for (; widgetIt != mapWindow->mGlobalMapMarkers.end(); ++widgetIt)
+    for(const auto &widget : mapWindow->mGlobalMapMarkers)
     {
-        int x = widgetIt->first.first;
-        int y = widgetIt->first.second;
-        MyGUI::Widget* markerWidget = widgetIt->second;
-        setGlobalMapMarkerTooltip(mapWindow, markerWidget, x, y);
+        const int x = widget.first.first;
+        const int y = widget.first.second;
+        setGlobalMapMarkerTooltip(mapWindow, widget.second, x, y);
     }
 }
 
