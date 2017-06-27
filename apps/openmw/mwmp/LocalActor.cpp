@@ -60,7 +60,7 @@ void LocalActor::update(bool forceUpdate)
 void LocalActor::updateCell()
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_ACTOR_CELL_CHANGE about %s-%i-%i to server",
-        refId.c_str(), refNumIndex, mpNum);
+                       refId.c_str(), refNumIndex, mpNum);
 
     LOG_APPEND(Log::LOG_INFO, "- Moved from %s to %s", cell.getDescription().c_str(), ptr.getCell()->getCell()->getDescription().c_str());
 
@@ -78,9 +78,7 @@ void LocalActor::updatePosition(bool forceUpdate)
     if (forceUpdate || posIsChanging || posWasChanged)
     {
         posWasChanged = posIsChanging;
-
         position = ptr.getRefData().getPosition();
-
         mwmp::Main::get().getNetworking()->getActorList()->addPositionActor(*this);
     }
 }
@@ -160,17 +158,14 @@ void LocalActor::updateStatsDynamic(bool forceUpdate)
     // Update stats when they become 0 or they have changed enough
     //
     // Also check for an oldHealth of 0 changing to something else for resurrected NPCs
-    bool shouldUpdateHealth = oldHealth != health && (health.getCurrent() == 0 || oldHealth.getCurrent() == 0 || abs(oldHealth.getCurrent() - health.getCurrent()) > 5);
-    bool shouldUpdateMagicka = false;
-    bool shouldUpdateFatigue = false;
 
-    if (!shouldUpdateHealth)
-        shouldUpdateMagicka = oldMagicka != magicka && (magicka.getCurrent() == 0 || abs(oldMagicka.getCurrent() - magicka.getCurrent()) > 10);
+    auto needUpdate = [](MWMechanics::DynamicStat<float> &oldVal, MWMechanics::DynamicStat<float> &newVal, int limit) {
+        return oldVal != newVal && (newVal.getCurrent() == 0 || oldVal.getCurrent() == 0
+                                     || abs(oldVal.getCurrent() - newVal.getCurrent()) > limit);
+    };
 
-    if (!shouldUpdateMagicka)
-        shouldUpdateFatigue = oldFatigue != fatigue && (fatigue.getCurrent() == 0 || abs(oldFatigue.getCurrent() - fatigue.getCurrent()) > 10);
-        
-    if (forceUpdate || shouldUpdateHealth || shouldUpdateMagicka || shouldUpdateFatigue)
+    if (forceUpdate || needUpdate(oldHealth, health, 5) || needUpdate(oldMagicka, magicka, 10) ||
+        needUpdate(oldFatigue, fatigue, 10))
     {
         oldHealth = health;
         oldMagicka = magicka;
@@ -198,28 +193,32 @@ void LocalActor::updateEquipment(bool forceUpdate)
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
     {
         MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
-        if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), equipedItems[slot].refId))
+        auto &item = equipedItems[slot];
+
+        auto &cellRef = it->getCellRef();
+        if (it != invStore.end() && !::Misc::StringUtils::ciEqual(cellRef.getRefId(), item.refId))
         {
             equipmentChanged = true;
 
-            equipedItems[slot].refId = it->getCellRef().getRefId();
-            equipedItems[slot].charge = it->getCellRef().getCharge();
+            item.refId = cellRef.getRefId();
+            item.charge = cellRef.getCharge();
             if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
             {
                 MWMechanics::WeaponType weaptype;
-                MWMechanics::getActiveWeapon(ptr.getClass().getCreatureStats(ptr), ptr.getClass().getInventoryStore(ptr), &weaptype);
+                auto &_class = ptr.getClass();
+                MWMechanics::getActiveWeapon(_class.getCreatureStats(ptr), _class.getInventoryStore(ptr), &weaptype);
                 if (weaptype != MWMechanics::WeapType_Thrown)
-                    equipedItems[slot].count = 1;
+                    item.count = 1;
             }
             else
-                equipedItems[slot].count = invStore.count(it->getCellRef().getRefId());
+                item.count = invStore.count(cellRef.getRefId());
         }
-        else if (it == invStore.end() && !equipedItems[slot].refId.empty())
+        else if (it == invStore.end() && !item.refId.empty())
         {
             equipmentChanged = true;
-            equipedItems[slot].refId = "";
-            equipedItems[slot].count = 0;
-            equipedItems[slot].charge = 0;
+            item.refId = "";
+            item.count = 0;
+            item.charge = 0;
         }
     }
 
