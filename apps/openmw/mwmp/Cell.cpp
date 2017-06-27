@@ -45,7 +45,7 @@ void Cell::updateLocal(bool forceUpdate)
 
     actorList->cell = *store->getCell();
 
-    for (std::map<std::string, LocalActor *>::iterator it = localActors.begin(); it != localActors.end();)
+    for (auto it = localActors.begin(); it != localActors.end();)
     {
         LocalActor *actor = it->second;
 
@@ -95,13 +95,9 @@ void Cell::updateLocal(bool forceUpdate)
 void Cell::updateDedicated(float dt)
 {
     if (dedicatedActors.empty()) return;
-
-    for (std::map<std::string, DedicatedActor *>::iterator it = dedicatedActors.begin(); it != dedicatedActors.end(); ++it)
-    {
-        DedicatedActor *actor = it->second;
-
-        actor->update(dt);
-    }
+    
+    for(auto &actor : dedicatedActors)
+        actor.second->update(dt);
 
     // Are we the authority over this cell? If so, uninitialize DedicatedActors
     // after the above update
@@ -113,11 +109,8 @@ void Cell::readPositions(ActorList& actorList)
 {
     initializeDedicatedActors(actorList);
     
-    BaseActor baseActor;
-
-    for (unsigned int i = 0; i < actorList.count; i++)
+    for(const auto &baseActor : actorList.baseActors)
     {
-        baseActor = actorList.baseActors.at(i);
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
         if (dedicatedActors.count(mapIndex) > 0)
@@ -143,11 +136,8 @@ void Cell::readPositions(ActorList& actorList)
 
 void Cell::readAnimFlags(ActorList& actorList)
 {
-    BaseActor baseActor;
-
-    for (unsigned int i = 0; i < actorList.count; i++)
+    for(const auto &baseActor : actorList.baseActors)
     {
-        baseActor = actorList.baseActors.at(i);
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
         if (dedicatedActors.count(mapIndex) > 0)
@@ -162,11 +152,8 @@ void Cell::readAnimFlags(ActorList& actorList)
 
 void Cell::readAnimPlay(ActorList& actorList)
 {
-    BaseActor baseActor;
-
-    for (unsigned int i = 0; i < actorList.count; i++)
+    for(const auto &baseActor : actorList.baseActors)
     {
-        baseActor = actorList.baseActors.at(i);
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
         if (dedicatedActors.count(mapIndex) > 0)
@@ -184,11 +171,8 @@ void Cell::readStatsDynamic(ActorList& actorList)
 {
     initializeDedicatedActors(actorList);
 
-    BaseActor baseActor;
-
-    for (unsigned int i = 0; i < actorList.count; i++)
+    for(const auto &baseActor : actorList.baseActors)
     {
-        baseActor = actorList.baseActors.at(i);
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
         if (dedicatedActors.count(mapIndex) > 0)
@@ -223,11 +207,8 @@ void Cell::readEquipment(ActorList& actorList)
 {
     initializeDedicatedActors(actorList);
 
-    BaseActor baseActor;
-
-    for (unsigned int i = 0; i < actorList.count; i++)
+    for(const auto &baseActor : actorList.baseActors)
     {
-        baseActor = actorList.baseActors.at(i);
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
         if (dedicatedActors.count(mapIndex) > 0)
@@ -244,11 +225,8 @@ void Cell::readEquipment(ActorList& actorList)
 
 void Cell::readSpeech(ActorList& actorList)
 {
-    BaseActor baseActor;
-
-    for (unsigned int i = 0; i < actorList.count; i++)
+    for(const auto &baseActor : actorList.baseActors)
     {
-        baseActor = actorList.baseActors.at(i);
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
         if (dedicatedActors.count(mapIndex) > 0)
@@ -262,11 +240,8 @@ void Cell::readSpeech(ActorList& actorList)
 
 void Cell::readAttack(ActorList& actorList)
 {
-    BaseActor baseActor;
-
-    for (unsigned int i = 0; i < actorList.count; i++)
+    for(const auto &baseActor : actorList.baseActors)
     {
-        baseActor = actorList.baseActors.at(i);
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
         if (dedicatedActors.count(mapIndex) > 0)
@@ -296,12 +271,10 @@ void Cell::readCellChange(ActorList& actorList)
 {
     initializeDedicatedActors(actorList);
 
-    BaseActor baseActor;
     CellController *cellController = Main::get().getCellController();
 
-    for (unsigned int i = 0; i < actorList.count; i++)
+    for(const auto &baseActor : actorList.baseActors)
     {
-        baseActor = actorList.baseActors.at(i);
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
         if (dedicatedActors.count(mapIndex) > 0)
@@ -371,13 +344,11 @@ void Cell::initializeLocalActor(const MWWorld::Ptr& ptr)
 
 void Cell::initializeLocalActors()
 {
-    std::vector<MWWorld::LiveCellRefBase*> *mergedRefs = store->getMergedRefs();
-
-    for (std::vector<MWWorld::LiveCellRefBase*>::iterator it = mergedRefs->begin(); it != mergedRefs->end(); ++it)
+    for (const auto &mergedRef : store->getMergedRefs())
     {
-        if ((*it)->mClass->isActor())
+        if (mergedRef->mClass->isActor())
         {
-            MWWorld::Ptr ptr(*it, store);
+            MWWorld::Ptr ptr(mergedRef, store);
 
             // If this Ptr is lacking a unique index, ignore it
             if (ptr.getCellRef().getRefNum().mIndex == 0 && ptr.getCellRef().getMpNum() == 0) continue;
@@ -407,11 +378,8 @@ void Cell::initializeDedicatedActor(const MWWorld::Ptr& ptr)
 
 void Cell::initializeDedicatedActors(ActorList& actorList)
 {
-    BaseActor baseActor;
-
-    for (unsigned int i = 0; i < actorList.count; i++)
+    for(const auto &baseActor : actorList.baseActors)
     {
-        baseActor = actorList.baseActors.at(i);
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
         // If this key doesn't exist, create it
@@ -428,10 +396,10 @@ void Cell::initializeDedicatedActors(ActorList& actorList)
 
 void Cell::uninitializeLocalActors()
 {
-    for (std::map<std::string, LocalActor *>::iterator it = localActors.begin(); it != localActors.end(); ++it)
+    for(const auto &actor : localActors)
     {
-        Main::get().getCellController()->removeLocalActorRecord(it->first);
-        delete it->second;
+        Main::get().getCellController()->removeLocalActorRecord(actor.first);
+        delete actor.second;
     }
 
     localActors.clear();
@@ -439,10 +407,10 @@ void Cell::uninitializeLocalActors()
 
 void Cell::uninitializeDedicatedActors()
 {
-    for (std::map<std::string, DedicatedActor *>::iterator it = dedicatedActors.begin(); it != dedicatedActors.end(); ++it)
+    for(const auto &actor : dedicatedActors)
     {
-        Main::get().getCellController()->removeDedicatedActorRecord(it->first);
-        delete it->second;
+        Main::get().getCellController()->removeDedicatedActorRecord(actor.first);
+        delete actor.second;
     }
 
     dedicatedActors.clear();
