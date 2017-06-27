@@ -101,22 +101,20 @@ void DedicatedPlayer::move(float dt)
     const int maxInterpolationDistance = 40;
 
     // Apply interpolation only if the position hasn't changed too much from last time
-    bool shouldInterpolate = abs(position.pos[0] - refPos.pos[0]) < maxInterpolationDistance && abs(position.pos[1] - refPos.pos[1]) < maxInterpolationDistance && abs(position.pos[2] - refPos.pos[2]) < maxInterpolationDistance;
+    bool shouldInterpolate =
+            abs(position.pos[0] - refPos.pos[0]) < maxInterpolationDistance &&
+            abs(position.pos[1] - refPos.pos[1]) < maxInterpolationDistance &&
+            abs(position.pos[2] - refPos.pos[2]) < maxInterpolationDistance;
 
     if (shouldInterpolate)
     {
         static const int timeMultiplier = 15;
         osg::Vec3f lerp = MechanicsHelper::getLinearInterpolation(refPos.asVec3(), position.asVec3(), dt * timeMultiplier);
-        refPos.pos[0] = lerp.x();
-        refPos.pos[1] = lerp.y();
-        refPos.pos[2] = lerp.z();
 
-        world->moveObject(ptr, refPos.pos[0], refPos.pos[1], refPos.pos[2]);
+        world->moveObject(ptr, lerp.x(), lerp.y(), lerp.z());
     }
     else
-    {
         world->moveObject(ptr, position.pos[0], position.pos[1], position.pos[2]);
-    }
 
     float oldZ = ptr.getRefData().getPosition().rot[2];
     world->rotateObject(ptr, position.rot[0], 0, oldZ);
@@ -137,9 +135,7 @@ void DedicatedPlayer::setAnimFlags()
     // Until we figure out a better workaround for disabling player gravity,
     // simply cast Levitate over and over on a player that's supposed to be flying
     if (!isFlying)
-    {
         ptr.getClass().getCreatureStats(ptr).getActiveSpells().purgeEffect(ESM::MagicEffect::Levitate);
-    }
     else if (isFlying && !world->isFlying(ptr))
     {
         MWMechanics::CastSpell cast(ptr, ptr);
@@ -190,12 +186,12 @@ void DedicatedPlayer::setEquipment()
         const int count = equipedItems[slot].count;
         ptr.getClass().getContainerStore(ptr).add(dedicItem, count, ptr);
 
-        for (MWWorld::ContainerStoreIterator it2 = invStore.begin(); it2 != invStore.end(); ++it2)
+        for (const auto &ptr : invStore)
         {
-            if (::Misc::StringUtils::ciEqual(it2->getCellRef().getRefId(), dedicItem)) // equip item
+            if (::Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), dedicItem)) // equip item
             {
-                std::shared_ptr<MWWorld::Action> action = it2->getClass().use(*it2);
-                action->execute(ptr);
+                std::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr);
+                action->execute(this->ptr);
                 break;
             }
         }
