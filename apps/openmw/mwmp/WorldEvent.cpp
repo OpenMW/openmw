@@ -80,11 +80,9 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
             if (action == BaseEvent::SET)
                 containerStore.clear();
 
-            for (unsigned int i = 0; i < worldObject.containerItemCount; i++)
+            MWWorld::Ptr ownerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            for (const auto &containerItem : worldObject.containerItems)
             {
-                ContainerItem containerItem = worldObject.containerItems.at(i);
-                MWWorld::Ptr ownerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-
                 if (action == BaseEvent::ADD || action == BaseEvent::SET)
                 {
                     // Create a ManualRef to be able to set item charge
@@ -103,23 +101,23 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
                 {
                     // We have to find the right item ourselves because ContainerStore has no method
                     // accounting for charge
-                    for (MWWorld::ContainerStoreIterator iter(containerStore.begin()); iter != containerStore.end(); ++iter)
+                    for (const auto ptr : containerStore)
                     {
-                        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), containerItem.refId))
+                        if (Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), containerItem.refId))
                         {
-                            if (iter->getCellRef().getCharge() == containerItem.charge &&
-                                iter->getRefData().getCount() == containerItem.count)
+                            if (ptr.getCellRef().getCharge() == containerItem.charge &&
+                                    ptr.getRefData().getCount() == containerItem.count)
                             {
                                 // Is this an actor's container? If so, unequip this item if it was equipped
                                 if (ptrFound.getClass().isActor())
                                 {
                                     MWWorld::InventoryStore& invStore = ptrFound.getClass().getInventoryStore(ptrFound);
 
-                                    if (invStore.isEquipped(*iter))
-                                        invStore.unequipItemQuantity(*iter, ptrFound, containerItem.count);
+                                    if (invStore.isEquipped(ptr))
+                                        invStore.unequipItemQuantity(ptr, ptrFound, containerItem.count);
                                 }
 
-                                containerStore.remove(*iter, containerItem.actionCount, ownerPtr);
+                                containerStore.remove(ptr, containerItem.actionCount, ownerPtr);
                             }
                         }
                     }
@@ -153,12 +151,8 @@ void WorldEvent::editContainers(MWWorld::CellStore* cellStore)
 
 void WorldEvent::placeObjects(MWWorld::CellStore* cellStore)
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i, charge: %i, count: %i", worldObject.refId.c_str(),
                    worldObject.refNumIndex, worldObject.mpNum, worldObject.charge, worldObject.count);
 
@@ -183,20 +177,14 @@ void WorldEvent::placeObjects(MWWorld::CellStore* cellStore)
             newPtr.getCellRef().setMpNum(worldObject.mpNum);
         }
         else
-        {
             LOG_APPEND(Log::LOG_VERBOSE, "-- Object already existed!");
-        }
     }
 }
 
 void WorldEvent::spawnObjects(MWWorld::CellStore* cellStore)
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(),
             worldObject.refNumIndex, worldObject.mpNum);
 
@@ -245,20 +233,14 @@ void WorldEvent::spawnObjects(MWWorld::CellStore* cellStore)
             }
         }
         else
-        {
             LOG_APPEND(Log::LOG_VERBOSE, "-- Actor already existed!");
-        }
     }
 }
 
 void WorldEvent::deleteObjects(MWWorld::CellStore* cellStore)
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refNumIndex, worldObject.mpNum);
@@ -288,12 +270,8 @@ void WorldEvent::deleteObjects(MWWorld::CellStore* cellStore)
 
 void WorldEvent::lockObjects(MWWorld::CellStore* cellStore)
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refNumIndex, worldObject.mpNum);
@@ -313,12 +291,8 @@ void WorldEvent::lockObjects(MWWorld::CellStore* cellStore)
 
 void WorldEvent::triggerTrapObjects(MWWorld::CellStore* cellStore)
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refNumIndex, worldObject.mpNum);
@@ -342,12 +316,8 @@ void WorldEvent::triggerTrapObjects(MWWorld::CellStore* cellStore)
 
 void WorldEvent::scaleObjects(MWWorld::CellStore* cellStore)
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i, scale: %f", worldObject.refId.c_str(), worldObject.refNumIndex,
             worldObject.mpNum, worldObject.scale);
 
@@ -365,12 +335,8 @@ void WorldEvent::scaleObjects(MWWorld::CellStore* cellStore)
 
 void WorldEvent::moveObjects(MWWorld::CellStore* cellStore)
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refNumIndex, worldObject.mpNum);
@@ -388,12 +354,8 @@ void WorldEvent::moveObjects(MWWorld::CellStore* cellStore)
 
 void WorldEvent::rotateObjects(MWWorld::CellStore* cellStore)
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refNumIndex, worldObject.mpNum);
@@ -411,12 +373,8 @@ void WorldEvent::rotateObjects(MWWorld::CellStore* cellStore)
 
 void WorldEvent::animateObjects(MWWorld::CellStore* cellStore)
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refNumIndex, worldObject.mpNum);
@@ -435,12 +393,8 @@ void WorldEvent::animateObjects(MWWorld::CellStore* cellStore)
 
 void WorldEvent::activateDoors(MWWorld::CellStore* cellStore)
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i", worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.mpNum);
 
         MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refNumIndex, worldObject.mpNum);
@@ -458,12 +412,8 @@ void WorldEvent::activateDoors(MWWorld::CellStore* cellStore)
 
 void WorldEvent::setLocalShorts(MWWorld::CellStore* cellStore)
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i, index: %i, shortVal: %i", worldObject.refId.c_str(),
                    worldObject.refNumIndex, worldObject.mpNum, worldObject.index, worldObject.shortVal);
 
@@ -481,12 +431,8 @@ void WorldEvent::setLocalShorts(MWWorld::CellStore* cellStore)
 
 void WorldEvent::setLocalFloats(MWWorld::CellStore* cellStore)
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i, index: %i, floatVal: %f", worldObject.refId.c_str(),
                    worldObject.refNumIndex, worldObject.mpNum, worldObject.index, worldObject.floatVal);
 
@@ -504,12 +450,8 @@ void WorldEvent::setLocalFloats(MWWorld::CellStore* cellStore)
 
 void WorldEvent::setMemberShorts()
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, index: %i, shortVal: %i", worldObject.refId.c_str(),
                    worldObject.index, worldObject.shortVal);
 
@@ -533,12 +475,8 @@ void WorldEvent::setMemberShorts()
 
 void WorldEvent::setGlobalShorts()
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- varName: %s, shortVal: %i", worldObject.varName.c_str(), worldObject.shortVal);
 
         MWBase::Environment::get().getWorld()->setGlobalInt(worldObject.varName, worldObject.shortVal);
@@ -547,12 +485,8 @@ void WorldEvent::setGlobalShorts()
 
 void WorldEvent::playMusic()
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- filename: %s", worldObject.filename.c_str());
 
         MWBase::Environment::get().getSoundManager()->streamMusic(worldObject.filename);
@@ -561,12 +495,8 @@ void WorldEvent::playMusic()
 
 void WorldEvent::playVideo()
 {
-    WorldObject worldObject;
-
-    for (unsigned int i = 0; i < worldObjectCount; i++)
+    for (const auto &worldObject : worldObjects)
     {
-        worldObject = worldObjects.at(i);
-
         LOG_APPEND(Log::LOG_VERBOSE, "- filename: %s, allowSkipping: %s", worldObject.filename.c_str(),
             worldObject.allowSkipping ? "true" : "false");
 
@@ -787,13 +717,8 @@ void WorldEvent::sendObjectPlace()
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_PLACE about %s", cell.getDescription().c_str());
 
-    for (std::vector<mwmp::WorldObject>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
-    {
-        mwmp::WorldObject worldObject = (*it);
-
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, count: %i",
-            worldObject.refId.c_str(), worldObject.count);
-    }
+    for (const auto &worldObject : worldObjects)
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, count: %i", worldObject.refId.c_str(), worldObject.count);
 
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->setEvent(this);
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_PLACE)->Send();
@@ -803,13 +728,8 @@ void WorldEvent::sendObjectSpawn()
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_OBJECT_SPAWN about %s", cell.getDescription().c_str());
 
-    for (std::vector<mwmp::WorldObject>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
-    {
-        mwmp::WorldObject worldObject = (*it);
-
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s-%i",
-            worldObject.refId.c_str(), worldObject.refNumIndex);
-    }
+    for (const auto &worldObject : worldObjects)
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s-%i", worldObject.refId.c_str(), worldObject.refNumIndex);
 
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SPAWN)->setEvent(this);
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SPAWN)->Send();
@@ -849,13 +769,9 @@ void WorldEvent::sendDoorState()
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_DOOR_STATE about %s", cell.getDescription().c_str());
 
-    for (std::vector<mwmp::WorldObject>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
-    {
-        mwmp::WorldObject worldObject = (*it);
-
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s-%i, state: %s",
-            worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.doorState ? "true" : "false");
-    }
+    for (const auto &worldObject : worldObjects)
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s-%i, state: %s", worldObject.refId.c_str(), worldObject.refNumIndex,
+                   worldObject.doorState ? "true" : "false");
 
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->setEvent(this);
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_DOOR_STATE)->Send();
@@ -877,13 +793,9 @@ void WorldEvent::sendScriptLocalShort()
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_SHORT about %s", cell.getDescription().c_str());
 
-    for (std::vector<mwmp::WorldObject>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
-    {
-        mwmp::WorldObject worldObject = (*it);
-
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s-%i, index: %i, shortVal: %i",
-            worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.index, worldObject.shortVal);
-    }
+    for (const auto &worldObject : worldObjects)
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s-%i, index: %i, shortVal: %i", worldObject.refId.c_str(),
+                   worldObject.refNumIndex, worldObject.index, worldObject.shortVal);
 
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_SHORT)->setEvent(this);
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_SHORT)->Send();
@@ -893,13 +805,9 @@ void WorldEvent::sendScriptLocalFloat()
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_LOCAL_FLOAT about %s", cell.getDescription().c_str());
 
-    for (std::vector<mwmp::WorldObject>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
-    {
-        mwmp::WorldObject worldObject = (*it);
-
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s-%i, index: %i, floatVal: %f",
-            worldObject.refId.c_str(), worldObject.refNumIndex, worldObject.index, worldObject.floatVal);
-    }
+    for (const auto &worldObject : worldObjects)
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s-%i, index: %i, floatVal: %f", worldObject.refId.c_str(), 
+                   worldObject.refNumIndex, worldObject.index, worldObject.floatVal);
 
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->setEvent(this);
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_LOCAL_FLOAT)->Send();
@@ -909,13 +817,9 @@ void WorldEvent::sendScriptMemberShort()
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_MEMBER_SHORT");
 
-    for (std::vector<mwmp::WorldObject>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
-    {
-        mwmp::WorldObject worldObject = (*it);
-
-        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, index: %i, shortVal: %i",
-            worldObject.refId.c_str(), worldObject.index, worldObject.shortVal);
-    }
+    for (const auto &worldObject : worldObjects)
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, index: %i, shortVal: %i", worldObject.refId.c_str(),
+                   worldObject.index, worldObject.shortVal);
 
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_MEMBER_SHORT)->setEvent(this);
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_MEMBER_SHORT)->Send();
@@ -925,13 +829,8 @@ void WorldEvent::sendScriptGlobalShort()
 {
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Sending ID_SCRIPT_GLOBAL_SHORT");
 
-    for (std::vector<mwmp::WorldObject>::iterator it = worldObjects.begin(); it != worldObjects.end(); ++it)
-    {
-        mwmp::WorldObject worldObject = (*it);
-
-        LOG_APPEND(Log::LOG_VERBOSE, "- varName: %s, shortVal: %i",
-            worldObject.varName.c_str(), worldObject.shortVal);
-    }
+    for (const auto &worldObject : worldObjects)
+        LOG_APPEND(Log::LOG_VERBOSE, "- varName: %s, shortVal: %i", worldObject.varName.c_str(), worldObject.shortVal);
 
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->setEvent(this);
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_SCRIPT_GLOBAL_SHORT)->Send();
@@ -945,22 +844,17 @@ void WorldEvent::sendContainers(MWWorld::CellStore* cellStore)
 
     MWWorld::CellRefList<ESM::Container> *containerList = cellStore->getContainers();
 
-    for (typename MWWorld::CellRefList<ESM::Container>::List::iterator listIter(containerList->mList.begin());
-        listIter != containerList->mList.end(); ++listIter)
+    for (auto &container : containerList->mList)
     {
-        MWWorld::Ptr container(&*listIter, 0);
-
         mwmp::WorldObject worldObject;
-        worldObject.refId = container.getCellRef().getRefId();
-        worldObject.refNumIndex = container.getCellRef().getRefNum().mIndex;
-        worldObject.mpNum = container.getCellRef().getMpNum();
+        worldObject.refId = container.mRef.getRefId();
+        worldObject.refNumIndex = container.mRef.getRefNum().mIndex;
+        worldObject.mpNum = container.mRef.getMpNum();
 
-        MWWorld::ContainerStore& containerStore = container.getClass().getContainerStore(container);
+        MWWorld::ContainerStore& containerStore = container.mClass->getContainerStore(MWWorld::Ptr(&container, 0));
 
-        for (MWWorld::ContainerStoreIterator storeIter = containerStore.begin(); storeIter != containerStore.end(); ++storeIter)
+        for (const auto itemPtr : containerStore)
         {
-            MWWorld::Ptr itemPtr = *storeIter;
-
             mwmp::ContainerItem containerItem;
             containerItem.refId = itemPtr.getCellRef().getRefId();
             containerItem.count = itemPtr.getRefData().getCount();
