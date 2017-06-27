@@ -13,6 +13,5 @@ void PacketPlayerResurrect::Packet(RakNet::BitStream *bs, bool send)
 {
     PlayerPacket::Packet(bs, send);
 
-    RW(player->creatureStats.mDead, send);
     RW(player->resurrectType, send);
 }

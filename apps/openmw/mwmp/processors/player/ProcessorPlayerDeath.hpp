@@ -26,6 +26,8 @@ namespace mwmp
             {
                 LOG_APPEND(Log::LOG_INFO, "- Packet was about me");
 
+                player->creatureStats.mDead = true;
+
                 MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
                 MWMechanics::DynamicStat<float> health = playerPtr.getClass().getCreatureStats(playerPtr).getHealth();
                 health.setCurrent(0);

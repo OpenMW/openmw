@@ -21,7 +21,6 @@ namespace mwmp
         void Packet(RakNet::BitStream *bs, bool send)
         {
             PlayerPacket::Packet(bs, send);
-            RW(player->creatureStats.mDead, send);
 
             RW(player->deathReason, send, 1);
         }

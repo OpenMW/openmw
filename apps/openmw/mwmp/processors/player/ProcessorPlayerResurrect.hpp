@@ -27,6 +27,8 @@ namespace mwmp
             if (isLocal())
             {
                 LOG_APPEND(Log::LOG_INFO, "- Packet was about me with resurrectType of %i", player->resurrectType);
+
+                player->creatureStats.mDead = false;
                 
                 MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
