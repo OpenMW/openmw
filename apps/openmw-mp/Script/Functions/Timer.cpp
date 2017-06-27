@@ -13,12 +13,26 @@ using namespace mwmp;
 
 int ScriptFunctions::CreateTimer(ScriptFunc callback, int msec) noexcept
 {
-    return -1;
+    return mwmp::TimerAPI::CreateTimer(callback, msec, "", vector<boost::any>());
 }
 
 int ScriptFunctions::CreateTimerEx(ScriptFunc callback, int msec, const char *types, ...) noexcept
 {
-    return -1;
+    try
+    {
+        vector<boost::any> params;
+        va_list args;
+        va_start(args, types);
+        GetArguments(params, args, types);
+        va_end(args);
+
+        return mwmp::TimerAPI::CreateTimer(callback, msec, types, params);
+    }
+    catch (...)
+    {
+        return -1;
+    }
+
 }
 
 void ScriptFunctions::StartTimer(int timerId) noexcept
