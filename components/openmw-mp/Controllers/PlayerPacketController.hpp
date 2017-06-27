@@ -4,8 +4,8 @@
 
 #include <RakPeerInterface.h>
 #include "../Packets/Player/PlayerPacket.hpp"
-#include <map>
-#include <boost/shared_ptr.hpp>
+#include <unordered_map>
+#include <memory>
 
 namespace mwmp
 {
@@ -18,7 +18,7 @@ namespace mwmp
 
         bool ContainsPacket(RakNet::MessageID id);
 
-        typedef std::map<unsigned char, boost::shared_ptr<PlayerPacket> > packets_t;
+        typedef std::unordered_map<unsigned char, std::unique_ptr<PlayerPacket> > packets_t;
     private:
         packets_t packets;
     };

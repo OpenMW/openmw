@@ -1,7 +1,3 @@
-#include <boost/shared_ptr.hpp>
-#include <boost/foreach.hpp>
-#include <boost/make_shared.hpp>
-
 #include "../Packets/World/PacketObjectAnimPlay.hpp"
 #include "../Packets/World/PacketObjectDelete.hpp"
 #include "../Packets/World/PacketObjectLock.hpp"
@@ -63,13 +59,14 @@ mwmp::WorldPacket *mwmp::WorldPacketController::GetPacket(RakNet::MessageID id)
 
 void mwmp::WorldPacketController::SetStream(RakNet::BitStream *inStream, RakNet::BitStream *outStream)
 {
-    BOOST_FOREACH( packets_t::value_type &packet, packets )
+    for(const auto &packet : packets)
         packet.second->SetStreams(inStream, outStream);
 }
 
 bool mwmp::WorldPacketController::ContainsPacket(RakNet::MessageID id)
 {
-    BOOST_FOREACH(packets_t::value_type &packet, packets) {
+    for(const auto &packet : packets)
+    {
         if (packet.first == id)
             return true;
     }

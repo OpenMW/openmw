@@ -1,7 +1,3 @@
-#include <boost/shared_ptr.hpp>
-#include <boost/foreach.hpp>
-#include <boost/make_shared.hpp>
-
 #include "../Packets/Actor/PacketActorList.hpp"
 #include "../Packets/Actor/PacketActorAuthority.hpp"
 #include "../Packets/Actor/PacketActorTest.hpp"
@@ -52,13 +48,14 @@ mwmp::ActorPacket *mwmp::ActorPacketController::GetPacket(RakNet::MessageID id)
 
 void mwmp::ActorPacketController::SetStream(RakNet::BitStream *inStream, RakNet::BitStream *outStream)
 {
-    BOOST_FOREACH( packets_t::value_type &packet, packets )
+    for(const auto &packet : packets)
         packet.second->SetStreams(inStream, outStream);
 }
 
 bool mwmp::ActorPacketController::ContainsPacket(RakNet::MessageID id)
 {
-    BOOST_FOREACH(packets_t::value_type &packet, packets) {
+    for(const auto &packet : packets)
+    {
         if (packet.first == id)
             return true;
     }

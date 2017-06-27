@@ -1,7 +1,3 @@
-#include <boost/shared_ptr.hpp>
-#include <boost/foreach.hpp>
-#include <boost/make_shared.hpp>
-
 #include "../Packets/Player/PacketDisconnect.hpp"
 #include "../Packets/Player/PacketChatMessage.hpp"
 #include "../Packets/Player/PacketPlayerCharGen.hpp"
@@ -100,13 +96,14 @@ mwmp::PlayerPacket *mwmp::PlayerPacketController::GetPacket(RakNet::MessageID id
 
 void mwmp::PlayerPacketController::SetStream(RakNet::BitStream *inStream, RakNet::BitStream *outStream)
 {
-    BOOST_FOREACH( packets_t::value_type &packet, packets )
+    for(const auto &packet : packets)
         packet.second->SetStreams(inStream, outStream);
 }
 
 bool mwmp::PlayerPacketController::ContainsPacket(RakNet::MessageID id)
 {
-    BOOST_FOREACH(packets_t::value_type &packet, packets) {
+    for(const auto &packet : packets)
+    {
         if (packet.first == id)
             return true;
     }
