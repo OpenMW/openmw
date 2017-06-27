@@ -51,9 +51,9 @@ public:
 private:
     Log(int logLevel);
     /// Not implemented
-    Log(const Log &);
+    Log(const Log &) = delete;
     /// Not implemented
-    Log &operator=(Log &);
+    Log &operator=(Log &) = delete;
     static Log *sLog;
     int logLevel;
 };
