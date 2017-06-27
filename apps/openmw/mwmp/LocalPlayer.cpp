@@ -1025,6 +1025,20 @@ void LocalPlayer::setKills()
     }
 }
 
+void LocalPlayer::setBooks()
+{
+    MWWorld::Ptr player = getPlayerPtr();
+    MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+
+    for (unsigned int i = 0; i < bookChanges.count; i++)
+    {
+        mwmp::Book book = bookChanges.books.at(i);
+        std::string bookId = book.bookId;
+
+        ptrNpcStats.flagAsUsed(bookId);
+    }
+}
+
 void LocalPlayer::sendClass()
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -1223,6 +1237,21 @@ void LocalPlayer::sendKill(const std::string& refId, int number)
 
     getNetworking()->getPlayerPacket(ID_PLAYER_KILL_COUNT)->setPlayer(this);
     getNetworking()->getPlayerPacket(ID_PLAYER_KILL_COUNT)->Send();
+}
+
+void LocalPlayer::sendBook(const std::string& bookId)
+{
+    bookChanges.books.clear();
+
+    mwmp::Book book;
+    book.bookId = bookId;
+
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_BOOK with book %s", book.bookId.c_str());
+
+    bookChanges.books.push_back(book);
+
+    getNetworking()->getPlayerPacket(ID_PLAYER_BOOK)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_BOOK)->Send();
 }
 
 void LocalPlayer::clearCellStates()

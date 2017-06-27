@@ -2,7 +2,6 @@
 #include <apps/openmw-mp/Script/ScriptFunctions.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <apps/openmw-mp/Networking.hpp>
-#include <components/misc/stringops.hpp>
 
 using namespace mwmp;
 

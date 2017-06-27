@@ -59,6 +59,11 @@ namespace mwmp
         int number;
     };
 
+    struct Book
+    {
+        std::string bookId;
+    };
+
     struct CellState
     {
         ESM::Cell cell;
@@ -93,6 +98,12 @@ namespace mwmp
     struct KillChanges
     {
         std::vector<Kill> kills;
+        unsigned int count;
+    };
+
+    struct BookChanges
+    {
+        std::vector<Book> books;
         unsigned int count;
     };
 
@@ -188,7 +199,9 @@ namespace mwmp
         FactionChanges factionChanges;
         TopicChanges topicChanges;
         KillChanges killChanges;
+        BookChanges bookChanges;
         CellStateChanges cellStateChanges;
+
         ESM::ActiveSpells activeSpells;
         CurrentContainer currentContainer;
 

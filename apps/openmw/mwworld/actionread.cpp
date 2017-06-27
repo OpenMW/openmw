@@ -1,5 +1,16 @@
 #include "actionread.hpp"
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -57,6 +68,16 @@ namespace MWWorld
             npcStats.increaseSkill (ref->mBase->mData.mSkillId, *class_, true);
 
             npcStats.flagAsUsed (ref->mBase->mId);
+
+            /*
+                Start of tes3mp addition
+
+                Send an ID_PLAYER_BOOK packet every time a player reads a skill book
+            */
+            mwmp::Main::get().getLocalPlayer()->sendBook(ref->mBase->mId);
+            /*
+                End of tes3mp addition
+            */
         }
 
     }

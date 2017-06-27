@@ -6,6 +6,7 @@
 #define SCRIPTFUNCTIONS_HPP
 
 #include <Script/Functions/Actors.hpp>
+#include <Script/Functions/Books.hpp>
 #include <Script/Functions/Cells.hpp>
 #include <Script/Functions/CharClass.hpp>
 #include <Script/Functions/Death.hpp>
@@ -105,21 +106,22 @@ public:
             {"CleanChatByPid",      ScriptFunctions::CleanChatByPid},
             {"CleanChat",           ScriptFunctions::CleanChat},
 
-            POSITIONAPI,
+            ACTORAPI,
+            BOOKAPI,
             CELLAPI,
-            STATAPI,
-            ITEMAPI,
-            QUESTAPI,
-            FACTIONAPI,
+            CHARCLASSAPI,
             DEATHAPI,
             DIALOGUEAPI,
-            SPELLAPI,
+            FACTIONAPI,
             GUIAPI,
-            CHARCLASSAPI,
-            WORLDAPI,
-            ACTORAPI,
+            ITEMAPI,
+            MISCELLANEOUSAPI,
+            POSITIONAPI,
+            QUESTAPI,
             SETTINGSAPI,
-            MISCELLANEOUSAPI
+            SPELLAPI,
+            STATAPI,
+            WORLDAPI
     };
 
     static constexpr ScriptCallbackData callbacks[]{
