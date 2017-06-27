@@ -9,7 +9,7 @@
 class DeathFunctions
 {
 public:
-    static void Resurrect(unsigned short pid) noexcept;
+    static void Resurrect(unsigned short pid, unsigned int type) noexcept;
 };
 
 #endif //OPENMW_DEATHAPI_HPP
