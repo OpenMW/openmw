@@ -195,11 +195,13 @@ void LocalPlayer::updateStatsDynamic(bool forceUpdate)
 
 
     // Update stats when they become 0 or they have changed enough
-    bool shouldUpdateHealth = oldHealth != health && (health.getCurrent() == 0 || abs(oldHealth.getCurrent() - health.getCurrent()) > 3);
-    bool shouldUpdateMagicka = oldMagicka != magicka && (magicka.getCurrent() == 0 || abs(oldMagicka.getCurrent() - magicka.getCurrent()) > 10);
-    bool shouldUpdateFatigue = oldFatigue != fatigue && (fatigue.getCurrent() == 0 || abs(oldFatigue.getCurrent() - fatigue.getCurrent()) > 10);
+    auto needUpdate = [](MWMechanics::DynamicStat<float> &oldVal, MWMechanics::DynamicStat<float> &newVal, int limit) {
+        return oldVal != newVal && (newVal.getCurrent() == 0 || oldVal.getCurrent() == 0
+                                    || abs(oldVal.getCurrent() - newVal.getCurrent()) > limit);
+    };
 
-    if (forceUpdate || shouldUpdateHealth || shouldUpdateMagicka || shouldUpdateFatigue)
+    if (forceUpdate || needUpdate(oldHealth, health, 5) || needUpdate(oldMagicka, magicka, 10) ||
+        needUpdate(oldFatigue, fatigue, 10))
     {
         oldHealth = health;
         oldMagicka = magicka;
