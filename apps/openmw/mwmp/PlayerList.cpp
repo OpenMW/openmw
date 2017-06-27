@@ -25,9 +25,9 @@ std::map <RakNet::RakNetGUID, DedicatedPlayer *> PlayerList::players;
 
 void PlayerList::update(float dt)
 {
-    for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
+    for (auto &p : players)
     {
-        DedicatedPlayer *player = it->second;
+        DedicatedPlayer *player = p.second;
         if (player == 0) continue;
 
         player->update(dt);
@@ -165,8 +165,6 @@ void PlayerList::createPlayer(RakNet::RakNetGUID guid)
                 LOG_APPEND(Log::LOG_INFO, "- Deleting NPC record");
                 npc_store->erase(npc.mId);
                 npc.mId.clear();
-
-
             }
             creature.mId = players[guid]->ptr.get<ESM::Creature>()->mBase->mId;
             creature_store->insert(creature);
@@ -233,8 +231,8 @@ void PlayerList::disconnectPlayer(RakNet::RakNetGUID guid)
 
 void PlayerList::cleanUp()
 {
-    for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
-        delete it->second;
+    for (auto &p : players)
+        delete p.second;
 }
 
 DedicatedPlayer *PlayerList::getPlayer(RakNet::RakNetGUID guid)
@@ -244,15 +242,13 @@ DedicatedPlayer *PlayerList::getPlayer(RakNet::RakNetGUID guid)
 
 DedicatedPlayer *PlayerList::getPlayer(const MWWorld::Ptr &ptr)
 {
-    std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin();
-
-    for (; it != players.end(); it++)
+    for (auto &p : players)
     {
-        if (it->second == 0 || it->second->getPtr().mRef == 0)
+        if (p.second == 0 || p.second->getPtr().mRef == 0)
             continue;
         string refid = ptr.getCellRef().getRefId();
-        if (it->second->getPtr().getCellRef().getRefId() == refid)
-            return it->second;
+        if (p.second->getPtr().getCellRef().getRefId() == refid)
+            return p.second;
     }
     return 0;
 }
@@ -273,14 +269,14 @@ bool PlayerList::isDedicatedPlayer(const MWWorld::Ptr &ptr)
 */
 void PlayerList::clearHitAttemptActorId(int actorId)
 {
-    for (std::map <RakNet::RakNetGUID, DedicatedPlayer *>::iterator it = players.begin(); it != players.end(); it++)
+    for (auto &p : players)
     {
-        if (it->second == 0 || it->second->getPtr().mRef == 0)
+        if (p.second == 0 || p.second->getPtr().mRef == 0)
             continue;
 
-        MWMechanics::CreatureStats *playerCreatureStats = &it->second->getPtr().getClass().getCreatureStats(it->second->getPtr());
+        MWMechanics::CreatureStats &playerCreatureStats = p.second->getPtr().getClass().getCreatureStats(p.second->getPtr());
 
-        if (playerCreatureStats->getHitAttemptActorId() == actorId)
-            playerCreatureStats->setHitAttemptActorId(-1);
+        if (playerCreatureStats.getHitAttemptActorId() == actorId)
+            playerCreatureStats.setHitAttemptActorId(-1);
     }
 }
