@@ -174,12 +174,9 @@ void ActorList::sendActorsInCell(MWWorld::CellStore* cellStore)
     cell = *cellStore->getCell();
     action = BaseActorList::SET;
 
-    MWWorld::CellRefList<ESM::NPC> *npcList = cellStore->getNpcs();
-
-    for (typename MWWorld::CellRefList<ESM::NPC>::List::iterator listIter(npcList->mList.begin());
-        listIter != npcList->mList.end(); ++listIter)
+    for(auto &ref : cellStore->getNpcs()->mList)
     {
-        MWWorld::Ptr ptr(&*listIter, 0);
+        MWWorld::Ptr ptr(&ref, 0);
 
         // If this Ptr is lacking a unique index, ignore it
         if (ptr.getCellRef().getRefNum().mIndex == 0 && ptr.getCellRef().getMpNum() == 0) continue;
@@ -192,12 +189,9 @@ void ActorList::sendActorsInCell(MWWorld::CellStore* cellStore)
         addActor(actor);
     }
 
-    MWWorld::CellRefList<ESM::Creature> *creatureList = cellStore->getCreatures();
-
-    for (typename MWWorld::CellRefList<ESM::Creature>::List::iterator listIter(creatureList->mList.begin());
-        listIter != creatureList->mList.end(); ++listIter)
+    for(auto &ref : cellStore->getCreatures()->mList)
     {
-        MWWorld::Ptr ptr(&*listIter, 0);
+        MWWorld::Ptr ptr(&ref, 0);
 
         // If this Ptr is lacking a unique index, ignore it
         if (ptr.getCellRef().getRefNum().mIndex == 0 && ptr.getCellRef().getMpNum() == 0) continue;
