@@ -5,31 +5,25 @@
 
 #include <osg/Vec3f>
 
-namespace mwmp
+
+namespace MechanicsHelper
 {
-    class MechanicsHelper
-    {
-    public:
+    osg::Vec3f getLinearInterpolation(osg::Vec3f start, osg::Vec3f end, float percent);
 
-        MechanicsHelper();
-        ~MechanicsHelper();
+    void spawnLeveledCreatures(MWWorld::CellStore* cellStore);
 
-        osg::Vec3f getLinearInterpolation(osg::Vec3f start, osg::Vec3f end, float percent);
+    mwmp::Attack *getLocalAttack(const MWWorld::Ptr& ptr);
+    mwmp::Attack *getDedicatedAttack(const MWWorld::Ptr& ptr);
 
-        void spawnLeveledCreatures(MWWorld::CellStore* cellStore);
+    MWWorld::Ptr getPlayerPtr(const mwmp::Target& target);
 
-        Attack *getLocalAttack(const MWWorld::Ptr& ptr);
-        Attack *getDedicatedAttack(const MWWorld::Ptr& ptr);
+    void assignAttackTarget(mwmp::Attack* attack, const MWWorld::Ptr& target);
+    void resetAttack(mwmp::Attack* attack);
 
-        MWWorld::Ptr getPlayerPtr(const Target& target);
+    bool getSpellSuccess(std::string spellId, const MWWorld::Ptr& caster);
 
-        void assignAttackTarget(Attack* attack, const MWWorld::Ptr& target);
-        void resetAttack(Attack* attack);
-
-        bool getSpellSuccess(std::string spellId, const MWWorld::Ptr& caster);
-
-        void processAttack(Attack attack, const MWWorld::Ptr& attacker);
-    };
+    void processAttack(mwmp::Attack attack, const MWWorld::Ptr& attacker);
 }
+
 
 #endif //OPENMW_MECHANICSHELPER_HPP

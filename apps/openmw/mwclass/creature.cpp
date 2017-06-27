@@ -301,12 +301,12 @@ namespace MWClass
             If the attacker is a LocalPlayer or LocalActor, get their Attack and
             assign data for its target
         */
-        mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(ptr);
+        mwmp::Attack *localAttack = MechanicsHelper::getLocalAttack(ptr);
 
         if (localAttack)
         {
             localAttack->success = true;
-            mwmp::Main::get().getMechanicsHelper()->assignAttackTarget(localAttack, victim);
+            MechanicsHelper::assignAttackTarget(localAttack, victim);
         }
         /*
             End of tes3mp addition
@@ -485,7 +485,7 @@ namespace MWClass
                     If the attacker is a DedicatedPlayer or DedicatedActor with a successful knockdown, apply the knockdown;
                     otherwise, use default probability roll
                 */
-                mwmp::Attack *dedicatedAttack = mwmp::Main::get().getMechanicsHelper()->getDedicatedAttack(attacker);
+                mwmp::Attack *dedicatedAttack = MechanicsHelper::getDedicatedAttack(attacker);
 
                 if (dedicatedAttack && dedicatedAttack->knockdown)
                     stats.setKnockedDown(true);
@@ -527,7 +527,7 @@ namespace MWClass
 
             If the attacker was the LocalPlayer or LocalActor, record their target and send a packet with it
         */
-        mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(attacker);
+        mwmp::Attack *localAttack = MechanicsHelper::getLocalAttack(attacker);
 
         if (localAttack)
         {
@@ -535,7 +535,7 @@ namespace MWClass
             localAttack->damage = damage;
             localAttack->knockdown = getCreatureStats(ptr).getKnockedDown();
 
-            mwmp::Main::get().getMechanicsHelper()->assignAttackTarget(localAttack, ptr);
+            MechanicsHelper::assignAttackTarget(localAttack, ptr);
 
             localAttack->shouldSend = true;
         }

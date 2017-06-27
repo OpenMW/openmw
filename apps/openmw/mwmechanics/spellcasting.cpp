@@ -874,12 +874,12 @@ namespace MWMechanics
                     can be accounted for like it is in OpenMW's corresponding code
                 */
                 mwmp::Attack *localAttack = NULL;
-                mwmp::Attack *dedicatedAttack = mwmp::Main::get().getMechanicsHelper()->getDedicatedAttack(mCaster);
+                mwmp::Attack *dedicatedAttack = MechanicsHelper::getDedicatedAttack(mCaster);
 
                 if (dedicatedAttack)
                     dedicatedAttack->pressed = false;
                 else
-                    localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(mCaster);
+                    localAttack = MechanicsHelper::getLocalAttack(mCaster);
 
                 // Check success
                 if ((localAttack && localAttack->success == false) ||

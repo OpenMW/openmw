@@ -90,7 +90,6 @@ Main::Main()
     mLocalPlayer = new LocalPlayer();
     mGUIController = new GUIController();
     mCellController = new CellController();
-    mMechanicsHelper = new MechanicsHelper();
     //mLocalPlayer->CharGen(0, 4);
 
     server = "mp.tes3mp.com";
@@ -104,7 +103,6 @@ Main::~Main()
     delete mLocalPlayer;
     delete mCellController;
     delete mGUIController;
-    delete mMechanicsHelper;
     PlayerList::cleanUp();
 }
 
@@ -262,11 +260,6 @@ GUIController *Main::getGUIController() const
 CellController *Main::getCellController() const
 {
     return mCellController;
-}
-
-MechanicsHelper *Main::getMechanicsHelper() const
-{
-    return mMechanicsHelper;
 }
 
 void Main::pressedKey(int key)

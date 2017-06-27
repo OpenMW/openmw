@@ -1163,11 +1163,11 @@ namespace MWMechanics
 
                     if (dstate == DrawState_Weapon)
                     {
-                        mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(iter->first);
+                        mwmp::Attack *localAttack = MechanicsHelper::getLocalAttack(iter->first);
 
                         if (localAttack->pressed != state)
                         {
-                            mwmp::Main::get().getMechanicsHelper()->resetAttack(localAttack);
+                            MechanicsHelper::resetAttack(localAttack);
                             localAttack->type = mwmp::Attack::MELEE;
                             localAttack->pressed = state;
                             localAttack->shouldSend = true;
@@ -1183,7 +1183,7 @@ namespace MWMechanics
 
                     If this actor is a DedicatedPlayer or DedicatedActor, update their mAttackingOrSpell
                 */
-                mwmp::Attack *dedicatedAttack = mwmp::Main::get().getMechanicsHelper()->getDedicatedAttack(iter->first);
+                mwmp::Attack *dedicatedAttack = MechanicsHelper::getDedicatedAttack(iter->first);
 
                 if (dedicatedAttack)
                     iter->second->getCharacterController()->setAttackingOrSpell(dedicatedAttack->pressed);

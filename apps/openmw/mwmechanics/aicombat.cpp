@@ -216,11 +216,11 @@ namespace MWMechanics
 
                 Record that this actor is updating an attack so that a packet will be sent about it
             */
-            mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(actor);
+            mwmp::Attack *localAttack = MechanicsHelper::getLocalAttack(actor);
 
             if (localAttack && localAttack->pressed != storage.mAttack)
             {
-                mwmp::Main::get().getMechanicsHelper()->resetAttack(localAttack);
+                MechanicsHelper::resetAttack(localAttack);
                 localAttack->type = mwmp::Attack::MELEE;
                 localAttack->pressed = storage.mAttack;
                 localAttack->shouldSend = true;
@@ -288,11 +288,11 @@ namespace MWMechanics
 
                 Record that this actor is stopping an attack so that a packet will be sent about it
             */
-            mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(actor);
+            mwmp::Attack *localAttack = MechanicsHelper::getLocalAttack(actor);
 
             if (localAttack && localAttack->pressed != false)
             {
-                mwmp::Main::get().getMechanicsHelper()->resetAttack(localAttack);
+                MechanicsHelper::resetAttack(localAttack);
                 localAttack->type = mwmp::Attack::MELEE;
                 localAttack->pressed = false;
                 localAttack->shouldSend = true;
@@ -641,11 +641,11 @@ namespace MWMechanics
 
                     Record that this actor is starting an attack so that a packet will be sent about it
                 */
-                mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(actor);
+                mwmp::Attack *localAttack = MechanicsHelper::getLocalAttack(actor);
 
                 if (localAttack && localAttack->pressed != true)
                 {
-                    mwmp::Main::get().getMechanicsHelper()->resetAttack(localAttack);
+                    MechanicsHelper::resetAttack(localAttack);
                     localAttack->type = mwmp::Attack::MELEE;
                     localAttack->pressed = true;
                     localAttack->shouldSend = true;

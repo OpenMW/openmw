@@ -106,7 +106,7 @@ void DedicatedPlayer::move(float dt)
     if (shouldInterpolate)
     {
         static const int timeMultiplier = 15;
-        osg::Vec3f lerp = Main::get().getMechanicsHelper()->getLinearInterpolation(refPos.asVec3(), position.asVec3(), dt * timeMultiplier);
+        osg::Vec3f lerp = MechanicsHelper::getLinearInterpolation(refPos.asVec3(), position.asVec3(), dt * timeMultiplier);
         refPos.pos[0] = lerp.x();
         refPos.pos[1] = lerp.y();
         refPos.pos[2] = lerp.z();

@@ -28,7 +28,7 @@ namespace mwmp
             // If we've received a request for information, comply with it
             if (actorList.action == mwmp::BaseActorList::REQUEST)
             {
-                mwmp::Main::get().getMechanicsHelper()->spawnLeveledCreatures(ptrCellStore);
+                MechanicsHelper::spawnLeveledCreatures(ptrCellStore);
                 actorList.sendActorsInCell(ptrCellStore);
             }
         }

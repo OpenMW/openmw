@@ -533,7 +533,7 @@ void LocalPlayer::updateAttack()
         if (attack.type == Attack::MAGIC)
         {
             attack.spellId = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
-            attack.success = mwmp::Main::get().getMechanicsHelper()->getSpellSuccess(attack.spellId, getPlayerPtr());
+            attack.success = MechanicsHelper::getSpellSuccess(attack.spellId, getPlayerPtr());
         }
 
         getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->setPlayer(this);

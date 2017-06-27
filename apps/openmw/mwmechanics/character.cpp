@@ -1276,11 +1276,11 @@ bool CharacterController::updateWeaponState()
                         If this mPtr belongs to a LocalPlayer or LocalActor, get their Attack and prepare
                         it for sending
                     */
-                    mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(mPtr);
+                    mwmp::Attack *localAttack = MechanicsHelper::getLocalAttack(mPtr);
 
                     if (localAttack)
                     {
-                        mwmp::Main::get().getMechanicsHelper()->resetAttack(localAttack);
+                        MechanicsHelper::resetAttack(localAttack);
                         localAttack->type = mwmp::Attack::MAGIC;
                         localAttack->pressed = true;
                         localAttack->shouldSend = true;

@@ -24,16 +24,6 @@
 
 using namespace mwmp;
 
-mwmp::MechanicsHelper::MechanicsHelper()
-{
-
-}
-
-mwmp::MechanicsHelper::~MechanicsHelper()
-{
-
-}
-
 osg::Vec3f MechanicsHelper::getLinearInterpolation(osg::Vec3f start, osg::Vec3f end, float percent)
 {
     osg::Vec3f position(percent, percent, percent);
@@ -50,21 +40,19 @@ void MechanicsHelper::spawnLeveledCreatures(MWWorld::CellStore* cellStore)
 
     int spawnCount = 0;
 
-    for (typename MWWorld::CellRefList<ESM::CreatureLevList>::List::iterator listIter(creatureLevList->mList.begin());
-        listIter != creatureLevList->mList.end(); ++listIter)
+    for(auto &lref : creatureLevList->mList)
     {
-        MWWorld::Ptr ptr(&*listIter, cellStore);
+        MWWorld::Ptr ptr(&lref, cellStore);
 
-        MWWorld::LiveCellRef<ESM::CreatureLevList> *ref = ptr.get<ESM::CreatureLevList>();
-
-        std::string id = MWMechanics::getLevelledItem(ref->mBase, true);
+        std::string id = MWMechanics::getLevelledItem(ptr.get<ESM::CreatureLevList>()->mBase, true);
 
         if (!id.empty())
         {
             const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
             MWWorld::ManualRef manualRef(store, id);
             manualRef.getPtr().getCellRef().setPosition(ptr.getCellRef().getPosition());
-            MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(manualRef.getPtr(), ptr.getCell(), ptr.getCellRef().getPosition());
+            MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(manualRef.getPtr(), ptr.getCell(),
+                                                                                     ptr.getCellRef().getPosition());
             worldEvent->addObjectSpawn(placed);
             MWBase::Environment::get().getWorld()->deleteObject(placed);
 
@@ -147,16 +135,14 @@ bool MechanicsHelper::getSpellSuccess(std::string spellId, const MWWorld::Ptr& c
 
 void MechanicsHelper::processAttack(Attack attack, const MWWorld::Ptr& attacker)
 {
-    if (attack.pressed == false)
+    if (!attack.pressed)
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Processing attack from %s",
             attacker.getCellRef().getRefId().c_str());
         LOG_APPEND(Log::LOG_VERBOSE, "- success: %s", attack.success ? "true" : "false");
 
-        if (attack.success == true)
-        {
+        if (attack.success)
             LOG_APPEND(Log::LOG_VERBOSE, "- damage: %f", attack.damage);
-        }
     }
 
     MWMechanics::CreatureStats &attackerStats = attacker.getClass().getCreatureStats(attacker);
@@ -167,24 +153,17 @@ void MechanicsHelper::processAttack(Attack attack, const MWWorld::Ptr& attacker)
     if (attack.target.refId.empty())
     {
         if (attack.target.guid == mwmp::Main::get().getLocalPlayer()->guid)
-        {
             victim = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        }
         else if (PlayerList::getPlayer(attack.target.guid) != NULL)
-        {
             victim = PlayerList::getPlayer(attack.target.guid)->getPtr();
-        }
     }
     else
     {
-        if (mwmp::Main::get().getCellController()->isLocalActor(attack.target.refNumIndex, attack.target.mpNum))
-        {
-            victim = mwmp::Main::get().getCellController()->getLocalActor(attack.target.refNumIndex, attack.target.mpNum)->getPtr();
-        }
-        else if (mwmp::Main::get().getCellController()->isDedicatedActor(attack.target.refNumIndex, attack.target.mpNum))
-        {
-            victim = mwmp::Main::get().getCellController()->getDedicatedActor(attack.target.refNumIndex, attack.target.mpNum)->getPtr();
-        }
+        auto controller = mwmp::Main::get().getCellController();
+        if (controller->isLocalActor(attack.target.refNumIndex, attack.target.mpNum))
+            victim = controller->getLocalActor(attack.target.refNumIndex, attack.target.mpNum)->getPtr();
+        else if (controller->isDedicatedActor(attack.target.refNumIndex, attack.target.mpNum))
+            victim = controller->getDedicatedActor(attack.target.refNumIndex, attack.target.mpNum)->getPtr();
     }
 
     // Get the weapon used (if hand-to-hand, weapon = inv.end())

@@ -205,7 +205,7 @@ void WorldEvent::spawnObjects(MWWorld::CellStore* cellStore)
                 MWWorld::Ptr masterPtr;
 
                 if (worldObject.master.refId.empty())
-                    masterPtr = mwmp::Main::get().getMechanicsHelper()->getPlayerPtr(worldObject.master);
+                    masterPtr = MechanicsHelper::getPlayerPtr(worldObject.master);
                 else
                     masterPtr = cellStore->searchExact(worldObject.master.refNumIndex, worldObject.master.mpNum);
 

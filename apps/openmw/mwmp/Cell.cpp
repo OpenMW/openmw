@@ -287,7 +287,7 @@ void Cell::readAttack(ActorList& actorList)
                 actor->setAnimFlags();
             }
 
-            mwmp::Main::get().getMechanicsHelper()->processAttack(actor->attack, actor->getPtr());
+            MechanicsHelper::processAttack(actor->attack, actor->getPtr());
         }
     }
 }

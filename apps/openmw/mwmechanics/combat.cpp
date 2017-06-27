@@ -133,14 +133,14 @@ namespace MWMechanics
             Only calculate block chance for LocalPlayers and LocalActors; otherwise,
             get the block state from the relevant DedicatedPlayer or DedicatedActor
         */
-        mwmp::Attack *localAttack = mwmp::Main::get().getMechanicsHelper()->getLocalAttack(attacker);
+        mwmp::Attack *localAttack = MechanicsHelper::getLocalAttack(attacker);
 
         if (localAttack)
         {
             localAttack->block = false;
         }
 
-        mwmp::Attack *dedicatedAttack = mwmp::Main::get().getMechanicsHelper()->getDedicatedAttack(blocker);
+        mwmp::Attack *dedicatedAttack = MechanicsHelper::getDedicatedAttack(blocker);
 
         if ((dedicatedAttack && dedicatedAttack->block == true) ||
             Misc::Rng::roll0to99() < x)
