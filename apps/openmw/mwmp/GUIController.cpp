@@ -98,7 +98,7 @@ void mwmp::GUIController::showDialogList(const mwmp::BasePlayer::GUIMessageBox &
 
     std::string buf;
 
-    for(const auto &data : guiMessageBox.data)
+    for (const auto &data : guiMessageBox.data)
     {
         if (data == '\n')
         {
@@ -373,7 +373,7 @@ void mwmp::GUIController::setGlobalMapMarkerTooltip(MWGui::MapWindow *mapWindow,
 
 void mwmp::GUIController::updateGlobalMapMarkerTooltips(MWGui::MapWindow *mapWindow)
 {
-    for(const auto &widget : mapWindow->mGlobalMapMarkers)
+    for (const auto &widget : mapWindow->mGlobalMapMarkers)
     {
         const int x = widget.first.first;
         const int y = widget.first.second;

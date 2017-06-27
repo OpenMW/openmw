@@ -40,7 +40,7 @@ void MechanicsHelper::spawnLeveledCreatures(MWWorld::CellStore* cellStore)
 
     int spawnCount = 0;
 
-    for(auto &lref : creatureLevList->mList)
+    for (auto &lref : creatureLevList->mList)
     {
         MWWorld::Ptr ptr(&lref, cellStore);
 

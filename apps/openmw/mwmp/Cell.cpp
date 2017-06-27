@@ -96,7 +96,7 @@ void Cell::updateDedicated(float dt)
 {
     if (dedicatedActors.empty()) return;
     
-    for(auto &actor : dedicatedActors)
+    for (auto &actor : dedicatedActors)
         actor.second->update(dt);
 
     // Are we the authority over this cell? If so, uninitialize DedicatedActors
@@ -109,7 +109,7 @@ void Cell::readPositions(ActorList& actorList)
 {
     initializeDedicatedActors(actorList);
     
-    for(const auto &baseActor : actorList.baseActors)
+    for (const auto &baseActor : actorList.baseActors)
     {
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
@@ -136,7 +136,7 @@ void Cell::readPositions(ActorList& actorList)
 
 void Cell::readAnimFlags(ActorList& actorList)
 {
-    for(const auto &baseActor : actorList.baseActors)
+    for (const auto &baseActor : actorList.baseActors)
     {
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
@@ -152,7 +152,7 @@ void Cell::readAnimFlags(ActorList& actorList)
 
 void Cell::readAnimPlay(ActorList& actorList)
 {
-    for(const auto &baseActor : actorList.baseActors)
+    for (const auto &baseActor : actorList.baseActors)
     {
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
@@ -171,7 +171,7 @@ void Cell::readStatsDynamic(ActorList& actorList)
 {
     initializeDedicatedActors(actorList);
 
-    for(const auto &baseActor : actorList.baseActors)
+    for (const auto &baseActor : actorList.baseActors)
     {
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
@@ -207,7 +207,7 @@ void Cell::readEquipment(ActorList& actorList)
 {
     initializeDedicatedActors(actorList);
 
-    for(const auto &baseActor : actorList.baseActors)
+    for (const auto &baseActor : actorList.baseActors)
     {
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
@@ -225,7 +225,7 @@ void Cell::readEquipment(ActorList& actorList)
 
 void Cell::readSpeech(ActorList& actorList)
 {
-    for(const auto &baseActor : actorList.baseActors)
+    for (const auto &baseActor : actorList.baseActors)
     {
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
@@ -240,7 +240,7 @@ void Cell::readSpeech(ActorList& actorList)
 
 void Cell::readAttack(ActorList& actorList)
 {
-    for(const auto &baseActor : actorList.baseActors)
+    for (const auto &baseActor : actorList.baseActors)
     {
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
@@ -273,7 +273,7 @@ void Cell::readCellChange(ActorList& actorList)
 
     CellController *cellController = Main::get().getCellController();
 
-    for(const auto &baseActor : actorList.baseActors)
+    for (const auto &baseActor : actorList.baseActors)
     {
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
@@ -378,7 +378,7 @@ void Cell::initializeDedicatedActor(const MWWorld::Ptr& ptr)
 
 void Cell::initializeDedicatedActors(ActorList& actorList)
 {
-    for(const auto &baseActor : actorList.baseActors)
+    for (const auto &baseActor : actorList.baseActors)
     {
         std::string mapIndex = Main::get().getCellController()->generateMapIndex(baseActor);
 
@@ -396,7 +396,7 @@ void Cell::initializeDedicatedActors(ActorList& actorList)
 
 void Cell::uninitializeLocalActors()
 {
-    for(const auto &actor : localActors)
+    for (const auto &actor : localActors)
     {
         Main::get().getCellController()->removeLocalActorRecord(actor.first);
         delete actor.second;
@@ -407,7 +407,7 @@ void Cell::uninitializeLocalActors()
 
 void Cell::uninitializeDedicatedActors()
 {
-    for(const auto &actor : dedicatedActors)
+    for (const auto &actor : dedicatedActors)
     {
         Main::get().getCellController()->removeDedicatedActorRecord(actor.first);
         delete actor.second;

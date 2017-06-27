@@ -463,7 +463,7 @@ void LocalPlayer::updateInventory(bool forceUpdate)
 
     if (!invChanged)
     {
-        for(const auto &itemOld : inventoryChanges.items)
+        for (const auto &itemOld : inventoryChanges.items)
         {
             auto result = ptrInventory.begin();
             for (; result != ptrInventory.end(); ++result)
@@ -484,7 +484,7 @@ void LocalPlayer::updateInventory(bool forceUpdate)
 
     if (!invChanged)
     {
-        for(const auto &iter : ptrInventory)
+        for (const auto &iter : ptrInventory)
         {
             if(setItem(item, iter))
                 continue;
@@ -624,7 +624,7 @@ void LocalPlayer::addItems()
     MWWorld::Ptr ptrPlayer = getPlayerPtr();
     MWWorld::ContainerStore &ptrStore = ptrPlayer.getClass().getContainerStore(ptrPlayer);
 
-    for(const auto &item : inventoryChanges.items)
+    for (const auto &item : inventoryChanges.items)
     {
         MWWorld::Ptr itemPtr = *ptrStore.add(item.refId, item.count, ptrPlayer);
         if (item.charge != -1)
@@ -637,14 +637,14 @@ void LocalPlayer::addSpells()
     MWWorld::Ptr ptrPlayer = getPlayerPtr();
     MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
 
-    for(const auto &spell : spellbookChanges.spells)
+    for (const auto &spell : spellbookChanges.spells)
         ptrSpells.add(spell.mId);
         
 }
 
 void LocalPlayer::addJournalItems()
 {
-    for(const auto &journalItem : journalChanges.journalItems)
+    for (const auto &journalItem : journalChanges.journalItems)
     {
         if (journalItem.type == JournalItem::ENTRY)
         {
@@ -663,7 +663,7 @@ void LocalPlayer::addJournalItems()
 void LocalPlayer::addTopics()
 {
     auto &env = MWBase::Environment::get();
-    for(const auto &topic : topicChanges.topics)
+    for (const auto &topic : topicChanges.topics)
     {
         std::string topicId = topic.topicId;
 
@@ -683,7 +683,7 @@ void LocalPlayer::removeItems()
     MWWorld::Ptr ptrPlayer = getPlayerPtr();
     MWWorld::ContainerStore &ptrStore = ptrPlayer.getClass().getContainerStore(ptrPlayer);
 
-    for(const auto &item : inventoryChanges.items)
+    for (const auto &item : inventoryChanges.items)
         ptrStore.remove(item.refId, item.count, ptrPlayer);
 }
 
@@ -693,7 +693,7 @@ void LocalPlayer::removeSpells()
     MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
 
     MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
-    for(const auto &spell : spellbookChanges.spells)
+    for (const auto &spell : spellbookChanges.spells)
     {
         ptrSpells.remove(spell.mId);
         if (spell.mId == wm->getSelectedSpell())
@@ -943,7 +943,7 @@ void LocalPlayer::setFactions()
     MWWorld::Ptr player = getPlayerPtr();
     MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
 
-    for(const auto &faction : factionChanges.factions)
+    for (const auto &faction : factionChanges.factions)
     {
         // If the player isn't in this faction, make them join it
         if (!ptrNpcStats.isInFaction(faction.factionId))
@@ -973,7 +973,7 @@ void LocalPlayer::setFactions()
 
 void LocalPlayer::setKills()
 {
-    for(const auto &kill : killChanges.kills)
+    for (const auto &kill : killChanges.kills)
         MWBase::Environment::get().getMechanicsManager()->setDeaths(kill.refId, kill.number);
 }
 
@@ -982,7 +982,7 @@ void LocalPlayer::setBooks()
     MWWorld::Ptr player = getPlayerPtr();
     MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
 
-    for(const auto &book : bookChanges.books)
+    for (const auto &book : bookChanges.books)
         ptrNpcStats.flagAsUsed(book.bookId);
 }
 
@@ -1014,7 +1014,7 @@ void LocalPlayer::sendInventory()
 
     inventoryChanges.items.clear();
 
-    for(const auto &iter : ptrInventory)
+    for (const auto &iter : ptrInventory)
     {
         item.refId = iter.getCellRef().getRefId();
         if (item.refId.find("$dynamic") != string::npos) // skip generated items (self enchanted for e.g.)
@@ -1040,7 +1040,7 @@ void LocalPlayer::sendSpellbook()
     spellbookChanges.spells.clear();
 
     // Send spells in spellbook, while ignoring abilities, powers, etc.
-    for(const auto &spell : ptrSpells)
+    for (const auto &spell : ptrSpells)
     {
         if (spell.first->mData.mType == ESM::Spell::ST_Spell)
             spellbookChanges.spells.push_back(*spell.first);

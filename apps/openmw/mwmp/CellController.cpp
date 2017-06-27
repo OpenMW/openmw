@@ -48,7 +48,7 @@ void CellController::updateLocal(bool forceUpdate)
     //
     // Note: This cannot be combined with the above loop because initializing LocalActors in a Cell before they are
     //       deleted from their previous one can make their records stay deleted
-    for(auto &cell : cellsInitialized)
+    for (auto &cell : cellsInitialized)
     {
         mwmp::Cell *mpCell = cell.second;
         if (mpCell->shouldInitializeActors == true)
@@ -61,7 +61,7 @@ void CellController::updateLocal(bool forceUpdate)
 
 void CellController::updateDedicated(float dt)
 {
-    for(const auto &cell : cellsInitialized)
+    for (const auto &cell : cellsInitialized)
         cell.second->updateDedicated(dt);
 }
 
@@ -342,7 +342,7 @@ void CellController::openContainer(const MWWorld::Ptr &container, bool loot)
     LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Container \"%s\" (%d) is opened. Loot: %s",
                        cellRef.getRefId().c_str(), cellRef.getRefNum().mIndex, loot ? "true" : "false");
 
-    for(const auto &ptr : container.getClass().getContainerStore(container))
+    for (const auto &ptr : container.getClass().getContainerStore(container))
     {
         int count = ptr.getRefData().getCount();
         const std::string &name = ptr.getCellRef().getRefId();
@@ -366,7 +366,7 @@ void CellController::closeContainer(const MWWorld::Ptr &container)
                            container.getCellRef().getRefNum().mIndex);
 
         MWWorld::ContainerStore &cont = container.getClass().getContainerStore(container);
-        for(const auto &ptr : cont)
+        for (const auto &ptr : cont)
         {
             LOG_APPEND(Log::LOG_VERBOSE, " - Item. Refid: \"%s\" Count: %d", ptr.getCellRef().getRefId().c_str(),
                        ptr.getRefData().getCount());

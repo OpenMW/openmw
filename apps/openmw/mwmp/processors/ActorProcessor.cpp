@@ -20,7 +20,7 @@ bool ActorProcessor::Process(RakNet::Packet &packet, ActorList &actorList)
     myPacket->setActorList(&actorList);
     myPacket->SetReadStream(&bsIn);
 
-    for(auto &processor : processors)
+    for (auto &processor : processors)
     {
         if (processor.first == packet.data[0])
         {
@@ -47,7 +47,7 @@ bool ActorProcessor::Process(RakNet::Packet &packet, ActorList &actorList)
 
 void ActorProcessor::AddProcessor(mwmp::ActorProcessor *processor)
 {
-    for(auto &p : processors)
+    for (auto &p : processors)
     {
         if (processor->packetID == p.first)
             throw std::logic_error("processor " + p.second->strPacketID + " already registered. Check " +

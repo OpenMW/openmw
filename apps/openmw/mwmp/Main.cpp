@@ -327,7 +327,7 @@ bool Main::isValidPacketScript(std::string script)
         "ouch_wraithguard"
     };
 
-    for(const auto &validPacketScript : validPacketScripts)
+    for (const auto &validPacketScript : validPacketScripts)
     {
         if (Misc::StringUtils::ciEqual(script, validPacketScript))
             return true;

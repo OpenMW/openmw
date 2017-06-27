@@ -12,7 +12,7 @@ PlayerProcessor::processors_t PlayerProcessor::processors;
 
 void PlayerProcessor::AddProcessor(PlayerProcessor *processor)
 {
-    for(auto &p : processors)
+    for (auto &p : processors)
     {
         if (processor->packetID == p.first)
             throw std::logic_error("processor " + p.second->strPacketID + " already registered. Check " +
@@ -34,7 +34,7 @@ bool PlayerProcessor::Process(RakNet::Packet &packet)
         // error: packet not found
     }*/
 
-    for(auto &processor : processors)
+    for (auto &processor : processors)
     {
         if (processor.first == packet.data[0])
         {

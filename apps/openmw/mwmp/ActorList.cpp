@@ -174,7 +174,7 @@ void ActorList::sendActorsInCell(MWWorld::CellStore* cellStore)
     cell = *cellStore->getCell();
     action = BaseActorList::SET;
 
-    for(auto &ref : cellStore->getNpcs()->mList)
+    for (auto &ref : cellStore->getNpcs()->mList)
     {
         MWWorld::Ptr ptr(&ref, 0);
 
@@ -189,7 +189,7 @@ void ActorList::sendActorsInCell(MWWorld::CellStore* cellStore)
         addActor(actor);
     }
 
-    for(auto &ref : cellStore->getCreatures()->mList)
+    for (auto &ref : cellStore->getCreatures()->mList)
     {
         MWWorld::Ptr ptr(&ref, 0);
 
