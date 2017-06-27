@@ -541,9 +541,9 @@ namespace MWWorld
 
         Make it possible to get the mMergedRefs in the CellStore from elsewhere in the code
     */
-    std::vector<LiveCellRefBase*> *CellStore::getMergedRefs()
+    std::vector<LiveCellRefBase*> &CellStore::getMergedRefs()
     {
-        return &mMergedRefs;
+        return mMergedRefs;
     }
     /*
         End of tes3mp addition
