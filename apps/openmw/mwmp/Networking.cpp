@@ -116,13 +116,13 @@ string comparePluginsMonospaced(PacketPreInit::PluginContainer checksums, Packet
     std::ostringstream sstr;
     size_t pluginNameLen1 = 0;
     size_t pluginNameLen2 = 0;
-    for (size_t i = 0; i < checksums.size(); i++)
-        if (pluginNameLen1 < checksums[i].first.size())
-            pluginNameLen1 = checksums[i].first.size();
+    for (const auto &checksum : checksums)
+        if (pluginNameLen1 < checksum.first.size())
+            pluginNameLen1 = checksum.first.size();
 
-    for (size_t i = 0; i < checksumsResponse.size(); i++)
-        if (pluginNameLen2 < checksumsResponse[i].first.size())
-            pluginNameLen2 = checksumsResponse[i].first.size();
+    for (const auto &checksum : checksums)
+        if (pluginNameLen2 < checksum.first.size())
+            pluginNameLen2 = checksum.first.size();
 
     sstr << "Your plugins or their load order don't match the server's.\n\n";
     Utils::printWithWidth(sstr, "Your current plugins are:", pluginNameLen1 + 16);
@@ -259,8 +259,7 @@ void Networking::connect(const std::string &ip, unsigned short port, std::vector
     bool queue = true;
     while (queue)
     {
-        for (RakNet::Packet *packet = peer->Receive(); packet; peer->DeallocatePacket(
-                packet), packet = peer->Receive())
+        for (RakNet::Packet *packet = peer->Receive(); packet; peer->DeallocatePacket(packet), packet = peer->Receive())
         {
             switch (packet->data[0])
             {
