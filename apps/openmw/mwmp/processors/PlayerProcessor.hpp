@@ -5,12 +5,10 @@
 #ifndef OPENMW_PLAYERPROCESSOR_HPP
 #define OPENMW_PLAYERPROCESSOR_HPP
 
-#include <boost/unordered_map.hpp>
-#include <boost/shared_ptr.hpp>
-
 #include <components/openmw-mp/Log.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
+#include <unordered_map>
 #include "../LocalPlayer.hpp"
 #include "../DedicatedPlayer.hpp"
 #include "../PlayerList.hpp"
@@ -26,8 +24,7 @@ namespace mwmp
         static bool Process(RakNet::Packet &packet);
         static void AddProcessor(PlayerProcessor *processor);
 
-        typedef boost::unordered_map<unsigned char, std::shared_ptr<PlayerProcessor> > processors_t;
-        //typedef std::unordered_map<unsigned char, std::unique_ptr<PlayerProcessor> > processors_t;
+        typedef std::unordered_map<unsigned char, std::unique_ptr<PlayerProcessor> > processors_t;
     private:
         static processors_t processors;
     };

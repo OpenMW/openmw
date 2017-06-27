@@ -5,12 +5,10 @@
 #ifndef OPENMW_ACTORPROCESSOR_HPP
 #define OPENMW_ACTORPROCESSOR_HPP
 
-#include <boost/unordered_map.hpp>
-#include <boost/shared_ptr.hpp>
-
 #include <components/openmw-mp/Log.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Packets/Actor/ActorPacket.hpp>
+#include <unordered_map>
 #include "../WorldEvent.hpp"
 #include "../ActorList.hpp"
 #include "BaseClientPacketProcessor.hpp"
@@ -25,7 +23,7 @@ namespace mwmp
         static bool Process(RakNet::Packet &packet, ActorList &actorList);
         static void AddProcessor(ActorProcessor *processor);
 
-        typedef boost::unordered_map<unsigned char, std::shared_ptr<ActorProcessor> > processors_t;
+        typedef std::unordered_map<unsigned char, std::unique_ptr<ActorProcessor> > processors_t;
 
     private:
         static processors_t processors;

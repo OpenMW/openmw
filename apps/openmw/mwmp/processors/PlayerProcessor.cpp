@@ -2,7 +2,6 @@
 // Created by koncord on 04.04.17.
 //
 
-#include <boost/foreach.hpp>
 #include "../Networking.hpp"
 #include "PlayerProcessor.hpp"
 #include "../Main.hpp"
@@ -13,13 +12,13 @@ PlayerProcessor::processors_t PlayerProcessor::processors;
 
 void PlayerProcessor::AddProcessor(PlayerProcessor *processor)
 {
-    BOOST_FOREACH(processors_t::value_type &p, processors)
+    for(auto &p : processors)
     {
         if (processor->packetID == p.first)
             throw std::logic_error("processor " + p.second->strPacketID + " already registered. Check " +
                                    processor->className + " and " + p.second->className);
     }
-    processors.insert(processors_t::value_type(processor->GetPacketID(), std::shared_ptr<PlayerProcessor>(processor)));
+    processors.insert(processors_t::value_type(processor->GetPacketID(), processor));
 }
 
 bool PlayerProcessor::Process(RakNet::Packet &packet)
@@ -35,7 +34,7 @@ bool PlayerProcessor::Process(RakNet::Packet &packet)
         // error: packet not found
     }*/
 
-    BOOST_FOREACH(processors_t::value_type &processor, processors)
+    for(auto &processor : processors)
     {
         if (processor.first == packet.data[0])
         {

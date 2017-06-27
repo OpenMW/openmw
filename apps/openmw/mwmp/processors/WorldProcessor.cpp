@@ -2,7 +2,6 @@
 // Created by koncord on 16.04.17.
 //
 
-#include <boost/foreach.hpp>
 #include "WorldProcessor.hpp"
 #include "../Main.hpp"
 #include "../Networking.hpp"
@@ -21,7 +20,7 @@ bool WorldProcessor::Process(RakNet::Packet &packet, WorldEvent &event)
     myPacket->setEvent(&event);
     myPacket->SetReadStream(&bsIn);
 
-    BOOST_FOREACH(processors_t::value_type &processor, processors)
+    for(auto &processor: processors)
     {
         if (processor.first == packet.data[0])
         {
@@ -31,9 +30,7 @@ bool WorldProcessor::Process(RakNet::Packet &packet, WorldEvent &event)
             event.isValid = true;
 
             if (!request && !processor.second->avoidReading)
-            {
                 myPacket->Read();
-            }
 
             if (event.isValid)
                 processor.second->Do(*myPacket, event);
@@ -48,11 +45,11 @@ bool WorldProcessor::Process(RakNet::Packet &packet, WorldEvent &event)
 
 void WorldProcessor::AddProcessor(mwmp::WorldProcessor *processor)
 {
-    BOOST_FOREACH(processors_t::value_type &p, processors)
+    for(auto &p : processors)
     {
         if (processor->packetID == p.first)
             throw std::logic_error("processor " + p.second->strPacketID + " already registered. Check " +
                                    processor->className + " and " + p.second->className);
     }
-    processors.insert(processors_t::value_type(processor->GetPacketID(), std::shared_ptr<WorldProcessor>(processor)));
+    processors.insert(processors_t::value_type(processor->GetPacketID(), processor));
 }
