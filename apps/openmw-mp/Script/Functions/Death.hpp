@@ -4,16 +4,12 @@
 #include "../Types.hpp"
 
 #define DEATHAPI \
-    {"SetResurrectType",  DeathFunctions::SetResurrectType},\
-    \
-    {"SendResurrect",     DeathFunctions::SendResurrect}
+    {"Resurrect",     DeathFunctions::Resurrect}
 
 class DeathFunctions
 {
 public:
-    static void SetResurrectType(unsigned short pid, unsigned int type);
-
-    static void SendResurrect(unsigned short pid) noexcept;
+    static void Resurrect(unsigned short pid) noexcept;
 };
 
 #endif //OPENMW_DEATHAPI_HPP

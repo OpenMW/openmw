@@ -7,19 +7,12 @@
 #include <iostream>
 using namespace std;
 
-void DeathFunctions::SetResurrectType(unsigned short pid, unsigned int type)
-{
-    Player *player;
-    GET_PLAYER(pid, player,);
-
-    player->resurrectType = type;
-}
-
-void DeathFunctions::SendResurrect(unsigned short pid) noexcept
+void DeathFunctions::Resurrect(unsigned short pid, unsigned int type) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
 
+    player->resurrectType = type;
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_RESURRECT)->setPlayer(player);
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_RESURRECT)->Send(false);
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_RESURRECT)->Send(true);
