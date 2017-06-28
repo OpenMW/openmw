@@ -558,8 +558,6 @@ namespace MWMechanics
                 return 0.f;
         }
 
-        rating *= magicEffect->mData.mBaseCost;
-
         if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
         {
             rating *= -1.f;
@@ -594,13 +592,17 @@ namespace MWMechanics
                     return 0.f;
             }
         }
-        else
-        {
-            rating *= (effect.mMagnMin + effect.mMagnMax)/2.f;
-        }
 
-        if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
-            rating *= effect.mDuration;
+        rating *= ((effect.mMagnMin + effect.mMagnMax) * (effect.mDuration > 0 ? effect.mDuration : 1) + effect.mArea);
+        rating *= magicEffect->mData.mBaseCost;
+
+        if (effect.mRange == ESM::RT_Target)
+            rating *= 1.5f;
+
+        static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                    "fEffectCostMult")->getFloat();
+
+        rating *= fEffectCostMult * 0.05;
 
         // Currently treating all "on target" or "on touch" effects to target the enemy actor.
         // Combat AI is egoistic, so doesn't consider applying positive effects to friendly actors.
