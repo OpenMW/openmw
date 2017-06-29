@@ -379,8 +379,11 @@ namespace MWWorld
                 return;
             case ESM::REC_PLAY:
                 mPlayer->readRecord(reader, type);
-                mWorldScene->preloadCell(getPlayerPtr().getCell(), true);
-                mWorldScene->preloadTerrain(getPlayerPtr().getRefData().getPosition().asVec3());
+                if (getPlayerPtr().isInCell())
+                {
+                    mWorldScene->preloadCell(getPlayerPtr().getCell(), true);
+                    mWorldScene->preloadTerrain(getPlayerPtr().getRefData().getPosition().asVec3());
+                }
                 break;
             default:
                 if (!mStore.readRecord (reader, type) &&
