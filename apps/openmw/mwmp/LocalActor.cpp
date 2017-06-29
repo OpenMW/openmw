@@ -195,24 +195,28 @@ void LocalActor::updateEquipment(bool forceUpdate)
         MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
         auto &item = equipedItems[slot];
 
-        if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item.refId))
+        if (it != invStore.end())
         {
-            equipmentChanged = true;
-
-            item.refId = it->getCellRef().getRefId();
-            item.charge = it->getCellRef().getCharge();
-            if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
+            auto &cellRef = it->getCellRef();
+            if (!::Misc::StringUtils::ciEqual(cellRef.getRefId(), item.refId))
             {
-                MWMechanics::WeaponType weaptype;
-                auto &_class = ptr.getClass();
-                MWMechanics::getActiveWeapon(_class.getCreatureStats(ptr), _class.getInventoryStore(ptr), &weaptype);
-                if (weaptype != MWMechanics::WeapType_Thrown)
-                    item.count = 1;
+                equipmentChanged = true;
+
+                item.refId = cellRef.getRefId();
+                item.charge = cellRef.getCharge();
+                if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
+                {
+                    MWMechanics::WeaponType weaptype;
+                    auto &_class = ptr.getClass();
+                    MWMechanics::getActiveWeapon(_class.getCreatureStats(ptr), _class.getInventoryStore(ptr), &weaptype);
+                    if (weaptype != MWMechanics::WeapType_Thrown)
+                        item.count = 1;
+                }
+                else
+                    item.count = invStore.count(cellRef.getRefId());
             }
-            else
-                item.count = invStore.count(it->getCellRef().getRefId());
         }
-        else if (it == invStore.end() && !item.refId.empty())
+        else if (!item.refId.empty())
         {
             equipmentChanged = true;
             item.refId = "";

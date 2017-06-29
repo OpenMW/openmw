@@ -407,29 +407,34 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
     MWWorld::InventoryStore &invStore = player.getClass().getInventoryStore(player);
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
     {
+        auto &item = equipedItems[slot];
         MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
-        if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), equipedItems[slot].refId))
+        if (it != invStore.end())
         {
-            equipmentChanged = true;
-
-            equipedItems[slot].refId = it->getCellRef().getRefId();
-            equipedItems[slot].charge = it->getCellRef().getCharge();
-            if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
+            if (!::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), equipedItems[slot].refId))
             {
-                MWMechanics::WeaponType weaptype;
-                MWMechanics::getActiveWeapon(player.getClass().getCreatureStats(player), player.getClass().getInventoryStore(player), &weaptype);
-                if (weaptype != MWMechanics::WeapType_Thrown)
-                    equipedItems[slot].count = 1;
+                equipmentChanged = true;
+
+                item.refId = it->getCellRef().getRefId();
+                item.charge = it->getCellRef().getCharge();
+                if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
+                {
+                    MWMechanics::WeaponType weaptype;
+                    MWMechanics::getActiveWeapon(player.getClass().getCreatureStats(player),
+                                                 player.getClass().getInventoryStore(player), &weaptype);
+                    if (weaptype != MWMechanics::WeapType_Thrown)
+                        item.count = 1;
+                }
+                else
+                    item.count = invStore.count(it->getCellRef().getRefId());
             }
-            else
-                equipedItems[slot].count = invStore.count(it->getCellRef().getRefId());
         }
-        else if (it == invStore.end() && !equipedItems[slot].refId.empty())
+        else if (!item.refId.empty())
         {
             equipmentChanged = true;
-            equipedItems[slot].refId = "";
-            equipedItems[slot].count = 0;
-            equipedItems[slot].charge = 0;
+            item.refId = "";
+            item.count = 0;
+            item.charge = 0;
         }
     }
 
