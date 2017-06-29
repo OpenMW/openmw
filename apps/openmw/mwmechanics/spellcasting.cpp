@@ -620,6 +620,19 @@ namespace MWMechanics
                     if (caster == getPlayer())
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicLockSuccess}");
                     target.getClass().lock(target, static_cast<int>(magnitude));
+
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_OBJECT_LOCK packet every time an object is locked here
+                    */
+                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+                    worldEvent->reset();
+                    worldEvent->addObjectLock(target, static_cast<int>(magnitude));
+                    worldEvent->sendObjectLock();
+                    /*
+                        End of tes3mp addition
+                    */
                 }
                 return true;
             }
