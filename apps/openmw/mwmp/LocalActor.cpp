@@ -195,13 +195,12 @@ void LocalActor::updateEquipment(bool forceUpdate)
         MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
         auto &item = equipedItems[slot];
 
-        auto &cellRef = it->getCellRef();
-        if (it != invStore.end() && !::Misc::StringUtils::ciEqual(cellRef.getRefId(), item.refId))
+        if (it != invStore.end() && !::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item.refId))
         {
             equipmentChanged = true;
 
-            item.refId = cellRef.getRefId();
-            item.charge = cellRef.getCharge();
+            item.refId = it->getCellRef().getRefId();
+            item.charge = it->getCellRef().getCharge();
             if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
             {
                 MWMechanics::WeaponType weaptype;
@@ -211,7 +210,7 @@ void LocalActor::updateEquipment(bool forceUpdate)
                     item.count = 1;
             }
             else
-                item.count = invStore.count(cellRef.getRefId());
+                item.count = invStore.count(it->getCellRef().getRefId());
         }
         else if (it == invStore.end() && !item.refId.empty())
         {
