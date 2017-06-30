@@ -80,18 +80,14 @@ void ScriptFunctions::MakePublic(ScriptFunc _public, const char *name, char ret_
     Public::MakePublic(_public, name, ret_type, def);
 }
 
-boost::any ScriptFunctions::CallPublic(const char *name, ...) noexcept
+boost::any ScriptFunctions::CallPublic(const char *name, va_list args) noexcept
 {
     vector<boost::any> params;
 
     try
     {
         string def = Public::GetDefinition(name);
-
-        va_list args;
-        va_start(args, name);
         GetArguments(params, args, def);
-        va_end(args);
 
         return Public::Call(name, params);
     }

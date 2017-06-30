@@ -48,7 +48,7 @@ public:
     static void StopServer(int code) noexcept;
 
     static void MakePublic(ScriptFunc _public, const char *name, char ret_type, const char *def) noexcept;
-    static boost::any CallPublic(const char *name, ...) noexcept;
+    static boost::any CallPublic(const char *name, va_list args) noexcept;
 
     static void SendMessage(unsigned short pid, const char *message, bool broadcast) noexcept;
     static void CleanChatByPid(unsigned short pid);
@@ -61,7 +61,7 @@ public:
      * \return return timer id
      */
     static int CreateTimer(ScriptFunc callback, int msec) noexcept;
-    static int CreateTimerEx(ScriptFunc callback, int msec, const char *types, ...) noexcept;
+    static int CreateTimerEx(ScriptFunc callback, int msec, const char *types, va_list args) noexcept;
 
     static void StartTimer(int timerId) noexcept;
     static void StopTimer(int timerId) noexcept;

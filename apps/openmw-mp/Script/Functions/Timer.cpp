@@ -16,15 +16,12 @@ int ScriptFunctions::CreateTimer(ScriptFunc callback, int msec) noexcept
     return mwmp::TimerAPI::CreateTimer(callback, msec, "", vector<boost::any>());
 }
 
-int ScriptFunctions::CreateTimerEx(ScriptFunc callback, int msec, const char *types, ...) noexcept
+int ScriptFunctions::CreateTimerEx(ScriptFunc callback, int msec, const char *types, va_list args) noexcept
 {
     try
     {
         vector<boost::any> params;
-        va_list args;
-        va_start(args, types);
         GetArguments(params, args, types);
-        va_end(args);
 
         return mwmp::TimerAPI::CreateTimer(callback, msec, types, params);
     }
