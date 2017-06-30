@@ -14,8 +14,6 @@
 #include <memory>
 #include "Script/Script.hpp"
 #include "Player.hpp"
-//#include <boost/unordered_map.hpp>
-//#include <boost/shared_ptr.hpp>
 
 namespace mwmp
 {
@@ -28,7 +26,6 @@ namespace mwmp
         static bool Process(RakNet::Packet &packet, BaseEvent &event) noexcept;
         static void AddProcessor(WorldProcessor *processor) noexcept;
 
-        //typedef boost::unordered_map<unsigned char, boost::shared_ptr<WorldProcessor> > processors_t;
         typedef std::unordered_map<unsigned char, std::unique_ptr<WorldProcessor> > processors_t;
     private:
         static processors_t processors;

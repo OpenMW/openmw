@@ -10,8 +10,6 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <unordered_map>
 #include <memory>
-//#include <boost/unordered_map.hpp>
-//#include <boost/shared_ptr.hpp>
 #include "Player.hpp"
 
 namespace mwmp
@@ -25,7 +23,6 @@ namespace mwmp
         static bool Process(RakNet::Packet &packet) noexcept;
         static void AddProcessor(PlayerProcessor *processor) noexcept;
 
-        //typedef boost::unordered_map<unsigned char, boost::shared_ptr<PlayerProcessor> > processors_t;
         typedef std::unordered_map<unsigned char, std::unique_ptr<PlayerProcessor> > processors_t;
     private:
         static processors_t processors;
