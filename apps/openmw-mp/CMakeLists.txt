@@ -1,8 +1,10 @@
 project(tes3mp-server)
 
-if(UNIX) #temporarly disabled for non-unix
-find_package(CallFF REQUIRED)
-include_directories(${CallFF_INCLUDES})
+if(UNIX) #temporarily disabled for non-unix
+    if(NOT (${CMAKE_CXX_COMPILER} MATCHES "aarch64" OR ${CMAKE_CXX_COMPILER} MATCHES "arm"))  #temporarily disabled for arm
+    find_package(CallFF REQUIRED)
+    include_directories(${CallFF_INCLUDES})
+    endif(NOT (${CMAKE_CXX_COMPILER} MATCHES "aarch64" OR ${CMAKE_CXX_COMPILER} MATCHES "arm"))
 endif(UNIX)
 
 option(BUILD_WITH_PAWN "Enable Pawn language" OFF)

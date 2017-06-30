@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include "ScriptFunction.hpp"
 
-#ifndef _WIN32 // temporarily disabled
+#if !defined(_WIN32) && !defined(__arm__) // temporarily disabled
 #include <call.hpp>
 #endif
 
@@ -155,11 +155,11 @@ boost::any ScriptFunction::Call(const vector<boost::any> &args)
                     throw runtime_error("C++ call: Unknown argument identifier " + *it);
             }
         }
-#ifndef _WIN32 // temporarily disabled
+#if !defined(_WIN32) && !defined(__arm__) // temporarily disabled
         Func f = reinterpret_cast<Func>(fCpp);
         result = ::Call(f, callArgs);
 #else
-        throw runtime_error("C++ call: Windows not supported yet.")
+        throw runtime_error("C++ call: Windows and ARM not supported yet.")
 #endif
     }
 
