@@ -8,18 +8,8 @@
 
 using namespace mwmp;
 
-PlayerProcessor::processors_t PlayerProcessor::processors;
-
-void PlayerProcessor::AddProcessor(PlayerProcessor *processor)
-{
-    for (auto &p : processors)
-    {
-        if (processor->packetID == p.first)
-            throw std::logic_error("processor " + p.second->strPacketID + " already registered. Check " +
-                                   processor->className + " and " + p.second->className);
-    }
-    processors.insert(processors_t::value_type(processor->GetPacketID(), processor));
-}
+template<class T>
+typename BasePacketProcessor<T>::processors_t BasePacketProcessor<T>::processors;
 
 bool PlayerProcessor::Process(RakNet::Packet &packet)
 {

@@ -8,7 +8,6 @@
 #include <components/openmw-mp/Log.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Packets/Player/PlayerPacket.hpp>
-#include <unordered_map>
 #include "../LocalPlayer.hpp"
 #include "../DedicatedPlayer.hpp"
 #include "../PlayerList.hpp"
@@ -16,17 +15,12 @@
 
 namespace mwmp
 {
-    class PlayerProcessor : public BaseClientPacketProcessor
+    class PlayerProcessor : public BasePacketProcessor<PlayerProcessor>, public BaseClientPacketProcessor
     {
     public:
         virtual void Do(PlayerPacket &packet, BasePlayer *player) = 0;
 
         static bool Process(RakNet::Packet &packet);
-        static void AddProcessor(PlayerProcessor *processor);
-
-        typedef std::unordered_map<unsigned char, std::unique_ptr<PlayerProcessor> > processors_t;
-    private:
-        static processors_t processors;
     };
 }
 

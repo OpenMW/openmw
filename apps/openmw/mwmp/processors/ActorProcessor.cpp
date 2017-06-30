@@ -8,7 +8,8 @@
 
 using namespace mwmp;
 
-ActorProcessor::processors_t ActorProcessor::processors;
+template<class T>
+typename BasePacketProcessor<T>::processors_t BasePacketProcessor<T>::processors;
 
 bool ActorProcessor::Process(RakNet::Packet &packet, ActorList &actorList)
 {
@@ -43,15 +44,4 @@ bool ActorProcessor::Process(RakNet::Packet &packet, ActorList &actorList)
         }
     }
     return false;
-}
-
-void ActorProcessor::AddProcessor(mwmp::ActorProcessor *processor)
-{
-    for (auto &p : processors)
-    {
-        if (processor->packetID == p.first)
-            throw std::logic_error("processor " + p.second->strPacketID + " already registered. Check " +
-                                   processor->className + " and " + p.second->className);
-    }
-    processors.insert(processors_t::value_type(processor->GetPacketID(), processor));
 }

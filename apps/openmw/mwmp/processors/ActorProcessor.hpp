@@ -8,25 +8,18 @@
 #include <components/openmw-mp/Log.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Packets/Actor/ActorPacket.hpp>
-#include <unordered_map>
 #include "../WorldEvent.hpp"
 #include "../ActorList.hpp"
 #include "BaseClientPacketProcessor.hpp"
 
 namespace mwmp
 {
-    class ActorProcessor : public BaseClientPacketProcessor
+    class ActorProcessor : public BasePacketProcessor<ActorProcessor>, public BaseClientPacketProcessor
     {
     public:
         virtual void Do(ActorPacket &packet, ActorList &actorList) = 0;
 
         static bool Process(RakNet::Packet &packet, ActorList &actorList);
-        static void AddProcessor(ActorProcessor *processor);
-
-        typedef std::unordered_map<unsigned char, std::unique_ptr<ActorProcessor> > processors_t;
-
-    private:
-        static processors_t processors;
     };
 }
 

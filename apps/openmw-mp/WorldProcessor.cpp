@@ -7,22 +7,12 @@
 
 using namespace mwmp;
 
-WorldProcessor::processors_t WorldProcessor::processors;
+template<class T>
+typename BasePacketProcessor<T>::processors_t BasePacketProcessor<T>::processors;
 
 void WorldProcessor::Do(WorldPacket &packet, Player &player, BaseEvent &event)
 {
     packet.Send(true);
-}
-
-void WorldProcessor::AddProcessor(mwmp::WorldProcessor *processor) noexcept
-{
-    for (auto &p : processors)
-    {
-        if (processor->packetID == p.first)
-            throw std::logic_error("processor " + p.second->strPacketID + " already registered. Check " +
-                                   processor->className + " and " + p.second->className);
-    }
-    processors.insert(processors_t::value_type(processor->GetPacketID(), processor));
 }
 
 bool WorldProcessor::Process(RakNet::Packet &packet, BaseEvent &event) noexcept

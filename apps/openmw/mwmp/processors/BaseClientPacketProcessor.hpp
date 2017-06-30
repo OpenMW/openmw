@@ -11,7 +11,7 @@
 
 namespace mwmp
 {
-    class BaseClientPacketProcessor : public BasePacketProcessor
+    class BaseClientPacketProcessor
     {
     public:
         static void SetServerAddr(RakNet::SystemAddress addr)

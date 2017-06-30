@@ -3,22 +3,12 @@
 
 using namespace mwmp;
 
-ActorProcessor::processors_t ActorProcessor::processors;
+template<class T>
+typename BasePacketProcessor<T>::processors_t BasePacketProcessor<T>::processors;
 
 void ActorProcessor::Do(ActorPacket &packet, Player &player, BaseActorList &actorList)
 {
     packet.Send(true);
-}
-
-void ActorProcessor::AddProcessor(mwmp::ActorProcessor *processor) noexcept
-{
-    for (auto &p : processors)
-    {
-        if (processor->packetID == p.first)
-            throw std::logic_error("processor " + p.second->strPacketID + " already registered. Check " +
-                                   processor->className + " and " + p.second->className);
-    }
-    processors.insert(processors_t::value_type(processor->GetPacketID(), processor));
 }
 
 bool ActorProcessor::Process(RakNet::Packet &packet, BaseActorList &actorList) noexcept
