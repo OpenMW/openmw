@@ -124,6 +124,7 @@ boost::any ScriptFunction::Call(const vector<boost::any> &args)
 #endif
     else
     {
+#if !defined(_WIN32) && !defined(__ARM_ARCH) // temporarily disabled
         string::iterator it;
         vector<boost::any>::const_iterator it2;
         vector<intptr_t> data;
@@ -155,7 +156,6 @@ boost::any ScriptFunction::Call(const vector<boost::any> &args)
                     throw runtime_error("C++ call: Unknown argument identifier " + *it);
             }
         }
-#if !defined(_WIN32) && !defined(__ARM_ARCH) // temporarily disabled
         Func f = reinterpret_cast<Func>(fCpp);
         result = ::Call(f, callArgs);
 #else
