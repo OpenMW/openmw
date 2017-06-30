@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include "ScriptFunction.hpp"
 
-#ifndef _WIN32 // temporally disabled
+#ifndef _WIN32 // temporarily disabled
 #include <call.hpp>
 #endif
 
@@ -155,7 +155,7 @@ boost::any ScriptFunction::Call(const vector<boost::any> &args)
                     throw runtime_error("C++ call: Unknown argument identifier " + *it);
             }
         }
-#ifndef _WIN32 // temporally disabled
+#ifndef _WIN32 // temporarily disabled
         Func f = reinterpret_cast<Func>(fCpp);
         result = ::Call(f, callArgs);
 #else
