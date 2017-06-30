@@ -593,16 +593,7 @@ namespace MWMechanics
             }
         }
 
-        rating *= ((effect.mMagnMin + effect.mMagnMax) * (effect.mDuration > 0 ? effect.mDuration : 1) + effect.mArea);
-        rating *= magicEffect->mData.mBaseCost;
-
-        if (effect.mRange == ESM::RT_Target)
-            rating *= 1.5f;
-
-        static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                    "fEffectCostMult")->getFloat();
-
-        rating *= fEffectCostMult * 0.05;
+        rating *= calcEffectCost(effect);
 
         // Currently treating all "on target" or "on touch" effects to target the enemy actor.
         // Combat AI is egoistic, so doesn't consider applying positive effects to friendly actors.
@@ -619,6 +610,9 @@ namespace MWMechanics
         for (std::vector<ESM::ENAMstruct>::const_iterator it = list.mList.begin(); it != list.mList.end(); ++it)
         {
             rating += rateEffect(*it, actor, enemy);
+
+            if (it->mRange == ESM::RT_Target)
+                rating *= 1.5f;
         }
         return rating;
     }
