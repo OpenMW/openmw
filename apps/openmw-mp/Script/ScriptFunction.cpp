@@ -159,7 +159,7 @@ boost::any ScriptFunction::Call(const vector<boost::any> &args)
         Func f = reinterpret_cast<Func>(fCpp);
         result = ::Call(f, callArgs);
 #else
-        throw runtime_error("C++ call: Windows and ARM not supported yet.")
+        throw runtime_error("C++ call: Windows and ARM not supported yet.");
 #endif
     }
 
