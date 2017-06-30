@@ -6,6 +6,10 @@
 #include <stdexcept>
 #include "ScriptFunction.hpp"
 
+#ifndef _WIN32 // temporally disabled
+#include <call.hpp>
+#endif
+
 #if defined (ENABLE_LUA)
 #include "LangLua/LangLua.hpp"
 #endif
@@ -120,105 +124,42 @@ boost::any ScriptFunction::Call(const vector<boost::any> &args)
 #endif
     else
     {
-        throw runtime_error("Native Call: native calls does not supported yet");
-#if 0
-#ifdef ARCH_X86
-        // cdecl convention
         string::iterator it;
         vector<boost::any>::const_iterator it2;
-        vector<unsigned int> data;
+        vector<intptr_t> data;
+        CallArgs callArgs;
 
         for (it = def.begin(), it2 = args.begin(); it != def.end(); ++it, ++it2)
         {
             switch (*it)
             {
                 case 'i':
-                {
-                    unsigned int value = boost::any_cast<unsigned int>(*it2);
-                    data.push_back(value);
+                    callArgs.push_integer(boost::any_cast<unsigned int>(*it2));
                     break;
-                }
-
                 case 'q':
-                {
-                    unsigned int value = boost::any_cast<signed int>(*it2);
-                    data.push_back(value);
+                    callArgs.push_integer(boost::any_cast<signed int>(*it2));
                     break;
-                }
-
-                case 'l':
-                {
-                    unsigned long long value = boost::any_cast<unsigned long long>(*it2);
-                    data.push_back(*reinterpret_cast<unsigned int *>(&value));
-                    data.push_back(*reinterpret_cast<unsigned int *>((unsigned) &value + 4));
-                    break;
-                }
-
-                case 'w':
-                {
-                    signed long long value = boost::any_cast<signed long long>(*it2);
-                    data.push_back(*reinterpret_cast<unsigned int *>(&value));
-                    data.push_back(*reinterpret_cast<unsigned int *>((unsigned) &value + 4));
-                    break;
-                }
-
                 case 'f':
-                {
-                    double value = boost::any_cast<double>(*it2);
-                    data.push_back(*reinterpret_cast<unsigned int *>(&value));
-                    data.push_back(*reinterpret_cast<unsigned int *>((unsigned) &value + 4));
+                    callArgs.push_double(boost::any_cast<double>(*it2));
                     break;
-                }
-
-                case 'p':
-                {
-                    void *value = boost::any_cast<void *>(*it2);
-                    data.push_back(reinterpret_cast<unsigned int>(value));
+                case 'd':
+                    callArgs.push_double(boost::any_cast<double*>(*it2));
                     break;
-                }
-
                 case 's':
-                {
-                    const string *value = boost::any_cast<string>(&*it2);
-                    data.push_back(reinterpret_cast<unsigned int>(value->c_str()));
+                    callArgs.push_stringPtr(boost::any_cast<const char *>(*it2));
                     break;
-                }
-
+                case 'v':
+                    result = boost::any();
+                    break;
                 default:
                     throw runtime_error("C++ call: Unknown argument identifier " + *it);
             }
         }
-
-        unsigned int result_low;
-        unsigned int result_high;
-        unsigned int *source = &data[0];
-        unsigned int size = data.size() * 4;
-
-        asm(
-            "MOV EDI,ESP\n"
-            "SUB EDI,%3\n"  // allocate memory in stack.
-            "MOV ESI,%4\n"  // move ptr of source to ESI.
-            "MOV ECX,%3\n"  // length of data.
-            "PUSH DS\n"     // move DS
-            "POP ES\n"      //         to ES.
-            "CLD\n"         // clear direction flag.
-            "REP MOVSB\n"   // Move bytes at address DS:ESI to address ES:EDI (move to stack).
-            "MOV ESI,ESP\n" // stack pointer.
-            "SUB ESP,%3\n"
-            "CALL %2\n"
-            "MOV ESP,ESI\n"
-            "MOV %0,EAX\n"  // move low result from eax
-            "MOV %1,EDX\n"  // move high result from edx
-        : "=m"(result_low), "=m"(result_high)
-        : "m"(fCpp) //2, "m"(size) //3, "m"(source) //4
-        : "eax", "edx", "ecx", "esi", "edi", "cc"
-        );
-
-        *reinterpret_cast<unsigned int *>(&result) = result_low;
-        *reinterpret_cast<unsigned int *>(((unsigned) &result) + 4) = result_high;
+#ifndef _WIN32 // temporally disabled
+        Func f = reinterpret_cast<Func>(fCpp);
+        result = ::Call(f, callArgs);
 #else
-        throw runtime_error("x64 Not supported yet (builtin timers and [Call/Make]Public");
-#endif
+        throw runtime_error("C++ call: Windows not supported yet.")
 #endif
     }
 

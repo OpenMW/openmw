@@ -1,5 +1,10 @@
 project(tes3mp-server)
 
+if(UNIX) #temporarly disabled for non-unix
+find_package(CallFF REQUIRED)
+include_directories(${CallFF_INCLUDES})
+endif(UNIX)
+
 option(BUILD_WITH_PAWN "Enable Pawn language" OFF)
 option(ENABLE_BREAKPAD "Enable Google Breakpad for Crash reporting" OFF)
 
@@ -99,6 +104,7 @@ set(SERVER_HEADER
         ${PawnScript_Headers}
         ${LuaScript_Headers}
         ${NativeScript_Headers}
+        ${CallFF_INCLUDES}
 )
 source_group(tes3mp-server FILES ${SERVER} ${SERVER_HEADER})
 
@@ -168,6 +174,7 @@ target_link_libraries(tes3mp-server
     ${LUA_LIBRARIES}
     ${Pawn_LIBRARY}
     ${Breakpad_Library}
+    ${CallFF_LIBRARY}
 )
 
 if (UNIX)
