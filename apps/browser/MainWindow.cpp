@@ -31,6 +31,9 @@ MainWindow::MainWindow(QWidget *parent)
     tblServerBrowser->setModel(proxyModel);
     tblFavorites->setModel(proxyModel);
 
+    // Remove Favorites tab while it remains broken
+    tabWidget->removeTab(1);
+
     tblServerBrowser->hideColumn(ServerData::ADDR);
     tblFavorites->hideColumn(ServerData::ADDR);
 
