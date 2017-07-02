@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
 
     auto version = Version::getOpenmwVersion(variables["resources"].as<Files::EscapeHashString>().toStdString());
 
-    int logLevel = mgr.getInt("loglevel", "General");
+    int logLevel = mgr.getInt("logLevel", "General");
     if (logLevel < Log::LOG_VERBOSE || logLevel > Log::LOG_FATAL)
         logLevel = Log::LOG_VERBOSE;
 
@@ -219,8 +219,8 @@ int main(int argc, char *argv[])
 
     LOG_INIT(logLevel);
 
-    int players = mgr.getInt("players", "General");
-    string addr = mgr.getString("address", "General");
+    int players = mgr.getInt("maximumPlayers", "General");
+    string addr = mgr.getString("localAddress", "General");
     int port = mgr.getInt("port", "General");
 
     string passw = mgr.getString("password", "General");

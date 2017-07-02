@@ -153,11 +153,11 @@ bool Main::init(std::vector<std::string> &content, Files::Collections &collectio
     Settings::Manager mgr;
     InitMgr(mgr);
 
-    int logLevel = mgr.getInt("loglevel", "General");
+    int logLevel = mgr.getInt("logLevel", "General");
     Log::SetLevel(logLevel);
     if (addr.empty())
     {
-        pMain->server = mgr.getString("server", "General");
+        pMain->server = mgr.getString("destinationAddress", "General");
         pMain->port = (unsigned short) mgr.getInt("port", "General");
 
         passw = mgr.getString("password", "General");
