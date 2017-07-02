@@ -168,6 +168,7 @@ namespace mwmp
                 ListBox
             };
             std::string label;
+            std::string note;
             std::string buttons;
 
             std::string data;

@@ -47,13 +47,14 @@ void GUIFunctions::InputDialog(unsigned short pid, int id, const char *label) no
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GUI_MESSAGEBOX)->Send(false);
 }
 
-void GUIFunctions::PasswordDialog(unsigned short pid, int id, const char *label) noexcept
+void GUIFunctions::PasswordDialog(unsigned short pid, int id, const char *label, const char *note) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player,);
 
     player->guiMessageBox.id = id;
     player->guiMessageBox.label = label;
+    player->guiMessageBox.note = note;
     player->guiMessageBox.type = Player::GUIMessageBox::PasswordDialog;
 
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_GUI_MESSAGEBOX)->setPlayer(player);

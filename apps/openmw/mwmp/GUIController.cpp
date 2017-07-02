@@ -154,6 +154,8 @@ void mwmp::GUIController::showInputBox(const BasePlayer::GUIMessageBox &guiMessa
     mInputBox->setEditPassword(guiMessageBox.type == BasePlayer::GUIMessageBox::PasswordDialog);
 
     mInputBox->setTextLabel(guiMessageBox.label);
+    mInputBox->setTextNote(guiMessageBox.note);
+
     mInputBox->eventDone += MyGUI::newDelegate(this, &GUIController::onInputBoxDone);
 
 }

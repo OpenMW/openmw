@@ -22,7 +22,7 @@ public:
 
     static void CustomMessageBox(unsigned short pid, int id, const char *label, const char *buttons) noexcept;
     static void InputDialog(unsigned short pid, int id, const char *label) noexcept;
-    static void PasswordDialog(unsigned short pid, int id, const char *label) noexcept;
+    static void PasswordDialog(unsigned short pid, int id, const char *label, const char *note) noexcept;
 
     static void ListBox(unsigned short pid, int id, const char *label, const char *items);
 

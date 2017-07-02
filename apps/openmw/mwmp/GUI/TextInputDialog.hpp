@@ -25,6 +25,7 @@ namespace mwmp
 
         void setNextButtonShow(bool shown);
         void setTextLabel(const std::string &label);
+        void setTextNote(const std::string &note);
 
         void setEditPassword(bool value);
 

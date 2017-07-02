@@ -13,7 +13,7 @@
 namespace mwmp
 {
     TextInputDialog::TextInputDialog()
-            : MWGui::WindowModal("openmw_text_input.layout")
+            : MWGui::WindowModal("tes3mp_text_input.layout")
     {
         // Centre dialog
         center();
@@ -48,6 +48,11 @@ namespace mwmp
     void TextInputDialog::setTextLabel(const std::string &label)
     {
         setText("LabelT", label);
+    }
+
+    void TextInputDialog::setTextNote(const std::string &note)
+    {
+        setText("TextNote", note);
     }
 
     void TextInputDialog::open()

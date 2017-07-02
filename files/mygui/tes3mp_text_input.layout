@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="VBox" skin="MW_Dialog" layer="Windows" align="Center" name="_Main">
+        <Property key="AutoResize" value="true"/>
+        <Property key="Padding" value="10"/>
+        <Property key="Spacing" value="12"/>
+
+        <!-- Appearance -->
+        <Widget type="TextBox" skin="ProgressText" position="6 6 300 18" name="LabelT" align="Left Top">
+            <Property key="TextAlign" value="Left Top"/>
+        </Widget>
+        <Widget type="EditBox" skin="MW_TextEdit" position="6 28 300 30" name="TextEdit" align="Left Top"/>
+
+        <!-- Dialog buttons -->
+        <Widget type="HBox" skin="">
+            <UserString key="HStretch" value="true"/>
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+
+            <Widget type="AutoSizedButton" skin="MW_Button" name="OKButton">
+                <Property key="Caption" value="OK"/>
+            </Widget>
+        </Widget>
+
+        <Widget type="AutoSizedEditBox" skin="HeaderText" position="6 96 300 0" name="TextNote" align="Left Top">
+            <Property key="TextAlign" value="Center"/>
+            <Property key="MultiLine" value="true"/>
+            <Property key="WordWrap" value="true"/>
+        </Widget>
+
+    </Widget>
+</MyGUI>
