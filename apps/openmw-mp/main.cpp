@@ -255,7 +255,6 @@ int main(int argc, char *argv[])
     sstr << TES3MP_VERSION;
     sstr << TES3MP_PROTO_VERSION;
     sstr << version.mCommitHash;
-    cout << sstr.str() << endl;
 
     peer->SetIncomingPassword(sstr.str().c_str(), (int) sstr.str().size());
 
