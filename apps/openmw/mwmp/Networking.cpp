@@ -249,7 +249,8 @@ void Networking::connect(const std::string &ip, unsigned short port, std::vector
     master.SetPortHostOrder(port);
     std::string errmsg = "";
 
-    stringstream sstr(TES3MP_VERSION);
+    stringstream sstr;
+    sstr << TES3MP_VERSION;
     sstr << TES3MP_PROTO_VERSION;
     sstr << Version::getOpenmwVersion(Main::getResDir()).mCommitHash;
 
