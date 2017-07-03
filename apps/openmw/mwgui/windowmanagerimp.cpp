@@ -20,6 +20,17 @@
 #include <SDL_keyboard.h>
 #include <SDL_clipboard.h>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include "../mwmp/Main.hpp"
+#include "../mwmp/GUIController.hpp"
+/*
+    End of tes3mp addition
+*/
+
 #include <components/sdlutil/sdlcursormanager.hpp>
 
 #include <components/esm/esmreader.hpp>
@@ -47,9 +58,6 @@
 #include <components/sdlutil/sdlcursormanager.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
-
-#include "../mwmp/Main.hpp"
-#include "../mwmp/GUIController.hpp"
 
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"

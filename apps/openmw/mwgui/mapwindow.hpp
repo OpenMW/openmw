@@ -9,10 +9,18 @@
 
 #include <components/esm/custommarkerstate.hpp>
 
+/*
+    Start of tes3mp addition
+
+    Declare GUIController here so we can use it for delegates
+*/
 namespace mwmp
 {
     class GUIController;
 }
+/*
+    End of tes3mp addition
+*/
 
 namespace MWRender
 {
@@ -73,7 +81,15 @@ namespace MWGui
 
     class LocalMapBase
     {
+        /*
+            Start of tes3mp addition
+
+            Allow the use of GUIController by declaring it as a friend class
+        */
         friend class mwmp::GUIController;
+        /*
+            End of tes3mp addition
+        */
     public:
         LocalMapBase(CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender, bool fogOfWarEnabled = true);
         virtual ~LocalMapBase();
@@ -142,10 +158,28 @@ namespace MWGui
         std::vector<MyGUI::Widget*> mDoorMarkerWidgets;
         std::vector<MyGUI::Widget*> mMagicMarkerWidgets;
         std::vector<MyGUI::Widget*> mCustomMarkerWidgets;
+
+        /*
+            Start of tes3mp addition
+
+            Add a new group of Widgets for player markers
+        */
         std::vector<MyGUI::Widget*> mPlayerMarkerWidgets;
+        /*
+            End of tes3mp addition
+        */
 
         virtual void updateCustomMarkers();
+
+        /*
+            Start of tes3mp addition
+
+            Send the LocalMapBase to our GUIController when updating player markers
+        */
         virtual void updatePlayerMarkers();
+        /*
+            End of tes3mp addition
+        */
 
         void applyFogOfWar();
 
@@ -203,7 +237,15 @@ namespace MWGui
 
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase, public NoDrop
     {
+        /*
+            Start of tes3mp addition
+
+            Allow the use of GUIController by declaring it as a friend class
+        */
         friend class mwmp::GUIController;
+        /*
+            End of tes3mp addition
+        */
     public:
         MapWindow(CustomMarkerCollection& customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender, SceneUtil::WorkQueue* workQueue);
         virtual ~MapWindow();
@@ -232,7 +274,16 @@ namespace MWGui
         void onFrame(float dt);
 
         virtual void updateCustomMarkers();
+
+        /*
+            Start of tes3mp addition
+
+            Send the MapWindow to our GUIController when updating player markers
+        */
         virtual void updatePlayerMarkers();
+        /*
+            End of tes3mp addition
+        */
 
         /// Clear all savegame-specific data
         void clear();
