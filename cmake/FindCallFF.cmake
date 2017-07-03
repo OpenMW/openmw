@@ -1,6 +1,5 @@
 FIND_PATH(CallFF_INCLUDES call.hpp
         ENV CPATH
-        PATH_SUFFIXES include/CallFF include
         /usr/include
         /usr/local/include
         /opt/local/include
@@ -16,7 +15,7 @@ FIND_LIBRARY(CallFF_LIBRARY NAMES callff
         /usr/local/lib64
         /usr/local/lib
         /opt/local/lib
-        $ENV{CallFF_ROOT}/lib/*
+        $ENV{CallFF_ROOT}/lib
         )
 
 if(CallFF_LIBRARY)
