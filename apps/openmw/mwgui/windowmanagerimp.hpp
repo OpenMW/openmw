@@ -214,6 +214,16 @@ namespace MWGui
 
     virtual void changeCell(const MWWorld::CellStore* cell); ///< change the active cell
 
+    /*
+        Start of tes3mp addition
+
+        Allow setting a cell as explored from elsewhere in the code
+    */
+    virtual void setCellExplored(const MWWorld::CellStore* cell);
+    /*
+        End of tes3mp addition
+    */
+
     virtual void setFocusObject(const MWWorld::Ptr& focus);
     virtual void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
 

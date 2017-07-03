@@ -15,7 +15,10 @@ namespace mwmp
 
         virtual void Do(PlayerPacket &packet, BasePlayer *player)
         {
-            // Placeholder to be filled in later
+            if (isLocal())
+            {
+                static_cast<LocalPlayer*>(player)->setMapExplored();
+            }
         }
     };
 }

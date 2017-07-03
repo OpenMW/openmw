@@ -19,7 +19,10 @@
     {"GetRegion",               CellFunctions::GetRegion},\
     {"IsChangingRegion",        CellFunctions::IsChangingRegion},\
     \
-    {"SendCell",                CellFunctions::SendCell}
+    {"AddCellExplored",         CellFunctions::AddCellExplored},\
+    \
+    {"SendCell",                CellFunctions::SendCell},\
+    {"SendMapChanges",          CellFunctions::SendMapChanges}
 
 
 class CellFunctions
@@ -40,7 +43,10 @@ public:
     static const char *GetRegion(unsigned short pid) noexcept;
     static bool IsChangingRegion(unsigned short pid) noexcept;
 
+    static void AddCellExplored(unsigned short pid, const char* cellDescription) noexcept;
+
     static void SendCell(unsigned short pid) noexcept;
+    static void SendMapChanges(unsigned short pid) noexcept;
 };
 
 #endif //OPENMW_CELLAPI_HPP

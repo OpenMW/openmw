@@ -1058,6 +1058,19 @@ namespace MWGui
         }
     }
 
+    /*
+        Start of tes3mp addition
+
+        Allow setting a cell as explored from elsewhere in the code
+    */
+    void WindowManager::setCellExplored(const MWWorld::CellStore* cell)
+    {
+        mMap->cellExplored(cell->getCell()->getGridX(), cell->getCell()->getGridY());
+    }
+    /*
+        End of tes3mp addition
+    */
+
     void WindowManager::setActiveMap(int x, int y, bool interior)
     {
         mMap->setActiveCell(x,y, interior);

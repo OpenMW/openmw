@@ -991,6 +991,21 @@ void LocalPlayer::setBooks()
         ptrNpcStats.flagAsUsed(book.bookId);
 }
 
+void LocalPlayer::setMapExplored()
+{
+    MWWorld::Ptr player = getPlayerPtr();
+    MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+
+    for (const auto &cellExplored : mapChanges.cellsExplored)
+    {
+        MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(cellExplored);
+
+        if (!ptrCellStore) continue;
+
+        MWBase::Environment::get().getWindowManager()->setCellExplored(ptrCellStore);
+    }
+}
+
 void LocalPlayer::sendClass()
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();

@@ -113,6 +113,15 @@ bool CellFunctions::IsChangingRegion(unsigned short pid) noexcept
     return player->isChangingRegion;
 }
 
+void CellFunctions::AddCellExplored(unsigned short pid, const char* cellDescription) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    ESM::Cell cellExplored = Utils::getCellFromDescription(cellDescription);
+    player->mapChangesBuffer.cellsExplored.push_back(cellExplored);
+}
+
 void CellFunctions::SendCell(unsigned short pid) noexcept
 {
     Player *player;
@@ -120,4 +129,16 @@ void CellFunctions::SendCell(unsigned short pid) noexcept
 
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_CELL_CHANGE)->setPlayer(player);
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_CELL_CHANGE)->Send(false);
+}
+
+void CellFunctions::SendMapChanges(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    std::swap(player->mapChanges, player->mapChangesBuffer);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_MAP)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_MAP)->Send(false);
+    player->mapChanges = std::move(player->mapChangesBuffer);
+    player->mapChangesBuffer.cellsExplored.clear();
 }

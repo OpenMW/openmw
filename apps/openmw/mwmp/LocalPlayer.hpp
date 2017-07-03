@@ -61,6 +61,7 @@ namespace mwmp
         void setFactions();
         void setKills();
         void setBooks();
+        void setMapExplored();
 
         void sendClass();
         void sendInventory();

@@ -78,6 +78,7 @@ public:
     mwmp::TopicChanges topicChangesBuffer;
     mwmp::KillChanges killChangesBuffer;
     mwmp::BookChanges bookChangesBuffer;
+    mwmp::MapChanges mapChangesBuffer;
 
 private:
     CellController::TContainer cells;

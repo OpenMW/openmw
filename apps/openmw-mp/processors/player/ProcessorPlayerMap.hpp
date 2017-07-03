@@ -17,9 +17,9 @@ namespace mwmp
         {
             DEBUG_PRINTF(strPacketID.c_str());
 
-            packet.Send(true);
-
-            Script::Call<Script::CallbackIdentity("OnPlayerMap")>(player.getId());
+            // Not currently implemented
+            //
+            // To be dealt with later to save explored areas on local maps
         }
     };
 }

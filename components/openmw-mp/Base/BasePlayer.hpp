@@ -107,6 +107,12 @@ namespace mwmp
         unsigned int count;
     };
 
+    struct MapChanges
+    {
+        std::vector<ESM::Cell> cellsExplored;
+        unsigned int count;
+    };
+
     struct InventoryChanges
     {
         std::vector<Item> items;
@@ -201,6 +207,7 @@ namespace mwmp
         TopicChanges topicChanges;
         KillChanges killChanges;
         BookChanges bookChanges;
+        MapChanges mapChanges;
         CellStateChanges cellStateChanges;
 
         ESM::ActiveSpells activeSpells;
