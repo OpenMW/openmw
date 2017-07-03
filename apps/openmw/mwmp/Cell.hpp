@@ -13,6 +13,7 @@ namespace mwmp
     public:
 
         Cell(MWWorld::CellStore* cellStore);
+        virtual ~Cell();
 
         void updateLocal(bool forceUpdate);
         void updateDedicated(float dt);

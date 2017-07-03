@@ -23,10 +23,15 @@ mwmp::CellController::CellController()
 
 }
 
+CellController::~CellController()
+{
+
+}
+
 void CellController::updateLocal(bool forceUpdate)
 {
     // Loop through Cells, deleting inactive ones and updating LocalActors in active ones
-    for (std::map<std::string, mwmp::Cell *>::iterator it = cellsInitialized.begin(); it != cellsInitialized.end();)
+    for (auto it = cellsInitialized.begin(); it != cellsInitialized.end();)
     {
         mwmp::Cell *mpCell = it->second;
 
