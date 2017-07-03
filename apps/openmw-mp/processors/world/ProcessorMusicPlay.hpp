@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORMUSICPLAY_HPP
 #define OPENMW_PROCESSORMUSICPLAY_HPP
 
-#include "apps/openmw-mp/WorldProcessor.hpp"
+#include "../WorldProcessor.hpp"
 
 namespace mwmp
 {

@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSOROBJECTTRAP_HPP
 #define OPENMW_PROCESSOROBJECTTRAP_HPP
 
-#include "apps/openmw-mp/WorldProcessor.hpp"
+#include "../WorldProcessor.hpp"
 
 namespace mwmp
 {

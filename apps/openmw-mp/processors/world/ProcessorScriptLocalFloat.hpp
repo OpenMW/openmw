@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORSCRIPTLOCALFLOAT_HPP
 #define OPENMW_PROCESSORSCRIPTLOCALFLOAT_HPP
 
-#include "apps/openmw-mp/WorldProcessor.hpp"
+#include "../WorldProcessor.hpp"
 
 namespace mwmp
 {

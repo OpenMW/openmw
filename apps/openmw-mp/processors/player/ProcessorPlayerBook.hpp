@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORPLAYERBOOK_HPP
 #define OPENMW_PROCESSORPLAYERBOOK_HPP
 
-#include "apps/openmw-mp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 
 namespace mwmp
 {

@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORPLAYERKILLCOUNT_HPP
 #define OPENMW_PROCESSORPLAYERKILLCOUNT_HPP
 
-#include "apps/openmw-mp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 
 namespace mwmp
 {

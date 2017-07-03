@@ -5,7 +5,7 @@
 #ifndef OPENMW_PROCESSORPLAYERANIMFLAGS_HPP
 #define OPENMW_PROCESSORPLAYERANIMFLAGS_HPP
 
-#include "apps/openmw-mp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 
 namespace mwmp
 {

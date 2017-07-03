@@ -3,7 +3,7 @@
 //
 
 #include "Player.hpp"
-#include "ProcessorInitializer.hpp"
+#include "processors/ProcessorInitializer.hpp"
 #include <RakPeer.h>
 #include <Kbhit.h>
 #include <components/openmw-mp/NetworkMessages.hpp>
@@ -18,9 +18,9 @@
 #include "MasterClient.hpp"
 #include "Cell.hpp"
 #include "CellController.hpp"
-#include "PlayerProcessor.hpp"
-#include "ActorProcessor.hpp"
-#include "WorldProcessor.hpp"
+#include "apps/openmw-mp/processors/PlayerProcessor.hpp"
+#include "apps/openmw-mp/processors/ActorProcessor.hpp"
+#include "apps/openmw-mp/processors/WorldProcessor.hpp"
 #include <components/openmw-mp/Version.hpp>
 #include <components/openmw-mp/Packets/PacketPreInit.hpp>
 

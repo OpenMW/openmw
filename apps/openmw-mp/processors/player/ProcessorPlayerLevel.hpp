@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORPLAYERLEVEL_HPP
 #define OPENMW_PROCESSORPLAYERLEVEL_HPP
 
-#include "apps/openmw-mp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 
 namespace mwmp
 {

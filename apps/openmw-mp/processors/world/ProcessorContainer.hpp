@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORCONTAINER_HPP
 #define OPENMW_PROCESSORCONTAINER_HPP
 
-#include "apps/openmw-mp/WorldProcessor.hpp"
+#include "../WorldProcessor.hpp"
 
 namespace mwmp
 {

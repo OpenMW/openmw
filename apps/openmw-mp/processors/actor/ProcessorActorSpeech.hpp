@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORACTORSPEECH_HPP
 #define OPENMW_PROCESSORACTORSPEECH_HPP
 
-#include "apps/openmw-mp/ActorProcessor.hpp"
+#include "../ActorProcessor.hpp"
 
 namespace mwmp
 {

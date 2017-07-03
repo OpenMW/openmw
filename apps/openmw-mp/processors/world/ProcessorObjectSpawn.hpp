@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSOROBJECTSPAWN_HPP
 #define OPENMW_PROCESSOROBJECTSPAWN_HPP
 
-#include "apps/openmw-mp/WorldProcessor.hpp"
+#include "../WorldProcessor.hpp"
 #include <apps/openmw-mp/Networking.hpp>
 
 namespace mwmp

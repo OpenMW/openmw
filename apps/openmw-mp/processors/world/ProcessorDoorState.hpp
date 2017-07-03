@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORDOORSTATE_HPP
 #define OPENMW_PROCESSORDOORSTATE_HPP
 
-#include "apps/openmw-mp/WorldProcessor.hpp"
+#include "../WorldProcessor.hpp"
 
 namespace mwmp
 {

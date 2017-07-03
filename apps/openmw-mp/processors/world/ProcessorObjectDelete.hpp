@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSOROBJECTDELETE_HPP
 #define OPENMW_PROCESSOROBJECTDELETE_HPP
 
-#include "apps/openmw-mp/WorldProcessor.hpp"
+#include "../WorldProcessor.hpp"
 
 namespace mwmp
 {

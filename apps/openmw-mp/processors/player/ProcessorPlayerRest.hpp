@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORPLAYERREST_HPP
 #define OPENMW_PROCESSORPLAYERREST_HPP
 
-#include "apps/openmw-mp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 
 namespace mwmp
 {

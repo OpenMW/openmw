@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORACTORTEST_HPP
 #define OPENMW_PROCESSORACTORTEST_HPP
 
-#include "apps/openmw-mp/ActorProcessor.hpp"
+#include "../ActorProcessor.hpp"
 
 namespace mwmp
 {

@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSOROBJECTPLACE_HPP
 #define OPENMW_PROCESSOROBJECTPLACE_HPP
 
-#include "apps/openmw-mp/WorldProcessor.hpp"
+#include "../WorldProcessor.hpp"
 #include <apps/openmw-mp/Networking.hpp>
 
 namespace mwmp

@@ -5,7 +5,7 @@
 #ifndef OPENMW_PROCESSORPLAYERRESURRECT_HPP
 #define OPENMW_PROCESSORPLAYERRESURRECT_HPP
 
-#include "apps/openmw-mp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 
 namespace mwmp
 {

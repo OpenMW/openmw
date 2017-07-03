@@ -5,7 +5,7 @@
 #ifndef OPENMW_PROCESSORPLAYERPOSITION_HPP
 #define OPENMW_PROCESSORPLAYERPOSITION_HPP
 
-#include "apps/openmw-mp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 
 namespace mwmp
 {

@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORACTORSTATSDYNAMIC_HPP
 #define OPENMW_PROCESSORACTORSTATSDYNAMIC_HPP
 
-#include "apps/openmw-mp/ActorProcessor.hpp"
+#include "../ActorProcessor.hpp"
 
 namespace mwmp
 {

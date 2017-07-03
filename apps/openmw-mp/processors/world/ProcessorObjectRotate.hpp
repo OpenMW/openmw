@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSOROBJECTROTATE_HPP
 #define OPENMW_PROCESSOROBJECTROTATE_HPP
 
-#include "apps/openmw-mp/WorldProcessor.hpp"
+#include "../WorldProcessor.hpp"
 
 namespace mwmp
 {

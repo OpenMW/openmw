@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORPLAYERCELLSTATE_HPP
 #define OPENMW_PROCESSORPLAYERCELLSTATE_HPP
 
-#include "apps/openmw-mp/PlayerProcessor.hpp"
+#include "../PlayerProcessor.hpp"
 #include "apps/openmw-mp/Networking.hpp"
 #include "apps/openmw-mp/Script/Script.hpp"
 #include <components/openmw-mp/Controllers/PlayerPacketController.hpp>

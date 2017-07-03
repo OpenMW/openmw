@@ -90,8 +90,6 @@ set(SERVER
     Script/Functions/Positions.cpp Script/Functions/Quests.cpp Script/Functions/Settings.cpp
     Script/Functions/Spells.cpp Script/Functions/Stats.cpp Script/Functions/Timer.cpp
 
-    ProcessorInitializer.cpp PlayerProcessor.cpp ActorProcessor.cpp WorldProcessor.cpp
-
     Script/API/TimerAPI.cpp Script/API/PublicFnAPI.cpp
         ${PawnScript_Sources}
         ${LuaScript_Sources}
@@ -154,13 +152,22 @@ set(PROCESSORS_WORLD
 
 source_group(tes3mp-server\\processors\\world FILES ${PROCESSORS_WORLD})
 
+set(PROCESSORS
+        processors/ProcessorInitializer.cpp
+        processors/PlayerProcessor.cpp
+        processors/ActorProcessor.cpp
+        processors/WorldProcessor.cpp
+        )
+
+source_group(tes3mp-server\\processors FILES ${PROCESSORS})
+
 include_directories("./")
 
 # Main executable
 
 add_executable(tes3mp-server
         ${SERVER} ${SERVER_HEADER}
-        ${PROCESSORS_ACTOR} ${PROCESSORS_PLAYER} ${PROCESSORS_WORLD}
+        ${PROCESSORS_ACTOR} ${PROCESSORS_PLAYER} ${PROCESSORS_WORLD} ${PROCESSORS}
         ${APPLE_BUNDLE_RESOURCES}
         )
 add_definitions(-std=gnu++14 -Wno-ignored-qualifiers)

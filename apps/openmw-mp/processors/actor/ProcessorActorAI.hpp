@@ -1,7 +1,7 @@
 #ifndef OPENMW_PROCESSORACTORAI_HPP
 #define OPENMW_PROCESSORACTORAI_HPP
 
-#include "apps/openmw-mp/ActorProcessor.hpp"
+#include "../ActorProcessor.hpp"
 
 namespace mwmp
 {
