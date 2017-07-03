@@ -12,7 +12,6 @@ typename BasePacketProcessor<T>::processors_t BasePacketProcessor<T>::processors
 
 bool PlayerProcessor::Process(RakNet::Packet &packet) noexcept
 {
-    //BOOST_FOREACH(processors_t::value_type &processor, processors)
     for (auto &processor : processors)
     {
         if (processor.first == packet.data[0])
