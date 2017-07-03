@@ -14,4 +14,5 @@ void PacketPlayerResurrect::Packet(RakNet::BitStream *bs, bool send)
     PlayerPacket::Packet(bs, send);
 
     RW(player->resurrectType, send);
+    RW(player->deathPenaltyJailDays, send);
 }

@@ -242,6 +242,8 @@ namespace mwmp
         bool isChangingRegion;
 
         std::string deathReason;
+        int deathPenaltyJailDays;
+        bool ignoreJailTeleportation;
 
         unsigned int resurrectType;
     };

@@ -1,5 +1,17 @@
 #include <MyGUI_ScrollBar.h>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
+#include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
+#include <regex>
+/*
+    End of tes3mp addition
+*/
+
 #include <components/misc/rng.hpp>
 
 #include "../mwbase/windowmanager.hpp"
@@ -59,7 +71,18 @@ namespace MWGui
         if (mFadeTimeRemaining <= 0)
         {
             MWWorld::Ptr player = MWMechanics::getPlayer();
-            MWBase::Environment::get().getWorld()->teleportToClosestMarker(player, "prisonmarker");
+
+            /*
+                Start of tes3mp change (minor)
+
+                If the jail code is being used from elsewhere to lower skills, don't
+                teleport the player to the nearest prison
+            */
+            if (!mwmp::Main::get().getLocalPlayer()->ignoreJailTeleportation)
+                MWBase::Environment::get().getWorld()->teleportToClosestMarker(player, "prisonmarker");
+            /*
+                End of tes3mp change (minor)
+            */
 
             setVisible(true);
             mTimeAdvancer.run(100);
@@ -103,6 +126,29 @@ namespace MWGui
             message = gmst.find("sNotifyMessage42")->getString();
         else
             message = gmst.find("sNotifyMessage43")->getString();
+
+        /*
+            Start of tes3mp addition
+
+            If the jail code is being used from elsewhere to lower skills, reset the
+            corresponding boolean and use more ambiguous wording for the message displayed
+        */
+        if (mwmp::Main::get().getLocalPlayer()->ignoreJailTeleportation)
+        {
+            mwmp::Main::get().getLocalPlayer()->ignoreJailTeleportation = false;
+
+            const std::string stringToReplace = "been released";
+            const std::string stringToReplace2 = "in prison";
+
+            if (message.find(stringToReplace) != std::string::npos)
+                message.replace(message.find(stringToReplace), stringToReplace.size(), "recovered");
+
+            if (message.find(stringToReplace2) != std::string::npos)
+                message.replace(message.find(stringToReplace2), stringToReplace2.size(), "incapacitated");
+        }
+        /*
+            End of tes3mp addition
+        */
 
         std::stringstream dayStr;
         dayStr << mDays;

@@ -7,6 +7,14 @@
 #include <iostream>
 using namespace std;
 
+void DeathFunctions::SetDeathPenaltyJailDays(unsigned short pid, int days) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->deathPenaltyJailDays = days;
+}
+
 void DeathFunctions::Resurrect(unsigned short pid, unsigned int type) noexcept
 {
     Player *player;

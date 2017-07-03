@@ -51,6 +51,7 @@ LocalPlayer::LocalPlayer()
     difficulty = 0;
 
     ignorePosPacket = false;
+    ignoreJailTeleportation = false;
     
     attack.shouldSend = false;
 
