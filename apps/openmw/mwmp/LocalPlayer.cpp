@@ -1001,9 +1001,8 @@ void LocalPlayer::setMapExplored()
     {
         MWWorld::CellStore *ptrCellStore = Main::get().getCellController()->getCellStore(cellExplored);
 
-        if (!ptrCellStore) continue;
-
-        MWBase::Environment::get().getWindowManager()->setCellExplored(ptrCellStore);
+        if (ptrCellStore)
+            MWBase::Environment::get().getWindowManager()->setCellExplored(ptrCellStore);
     }
 }
 
