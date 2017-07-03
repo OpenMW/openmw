@@ -176,8 +176,8 @@ Networking::Networking(): peer(RakNet::RakPeerInterface::GetInstance()), playerP
 
     RakNet::SocketDescriptor sd;
     sd.port=0;
-    peer->Startup(1, &sd, 1);
-    RakAssert(b==RAKNET_STARTED);
+    auto b = peer->Startup(1, &sd, 1);
+    RakAssert(b==RakNet::RAKNET_STARTED);
 
     playerPacketController.SetStream(0, &bsOut);
     actorPacketController.SetStream(0, &bsOut);
