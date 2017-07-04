@@ -154,3 +154,11 @@ void ScriptFunctions::SetRuleValue(const char *key, double value) noexcept
     if (mc)
         mc->SetRuleValue(key, value);
 }
+
+const char *ScriptFunctions::GetIP(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, "");
+    RakNet::SystemAddress addr = mwmp::Networking::getPtr()->getSystemAddress(player->guid);
+    return addr.ToString(false);
+}

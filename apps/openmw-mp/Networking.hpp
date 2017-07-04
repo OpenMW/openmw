@@ -23,6 +23,7 @@ namespace  mwmp
         void newPlayer(RakNet::RakNetGUID guid);
         void disconnectPlayer(RakNet::RakNetGUID guid);
         void kickPlayer(RakNet::RakNetGUID guid);
+        RakNet::SystemAddress getSystemAddress(RakNet::RakNetGUID guid);
 
         void processPlayerPacket(RakNet::Packet *packet);
         void processActorPacket(RakNet::Packet *packet);

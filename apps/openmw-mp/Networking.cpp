@@ -376,6 +376,11 @@ Networking *Networking::getPtr()
     return sThis;
 }
 
+RakNet::SystemAddress Networking::getSystemAddress(RakNet::RakNetGUID guid)
+{
+    return peer->GetSystemAddressFromGuid(guid);
+}
+
 PacketPreInit::PluginContainer Networking::getPluginListSample()
 {
     PacketPreInit::PluginContainer pls;

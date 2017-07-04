@@ -69,6 +69,7 @@ public:
     static void FreeTimer(int timerId) noexcept;
     static bool IsTimerElapsed(int timerId) noexcept;
 
+    static const char* GetIP(unsigned short pid) noexcept;
     static void Kick(unsigned short pid) noexcept;
     static const char *GetServerVersion() noexcept;
     static const char *GetProtocolVersion() noexcept;
@@ -105,6 +106,7 @@ public:
             {"SetRuleValue",        ScriptFunctions::SetRuleValue},
             {"CleanChatByPid",      ScriptFunctions::CleanChatByPid},
             {"CleanChat",           ScriptFunctions::CleanChat},
+            {"GetIP",                ScriptFunctions::GetIP},
 
             ACTORAPI,
             BOOKAPI,
