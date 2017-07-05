@@ -955,24 +955,30 @@ void LocalPlayer::setFactions()
         if (!ptrNpcStats.isInFaction(faction.factionId))
             ptrNpcStats.joinFaction(faction.factionId);
 
-        // While the faction rank is different in the packet than in the NpcStats,
-        // adjust the NpcStats accordingly
-        while (faction.rank != ptrNpcStats.getFactionRanks().at(faction.factionId))
+        if (factionChanges.action == mwmp::FactionChanges::RANK || factionChanges.action == mwmp::FactionChanges::BOTH)
         {
-            if (faction.rank > ptrNpcStats.getFactionRanks().at(faction.factionId))
-                ptrNpcStats.raiseRank(faction.factionId);
-            else
-                ptrNpcStats.lowerRank(faction.factionId);
+            // While the faction rank is different in the packet than in the NpcStats,
+            // adjust the NpcStats accordingly
+            while (faction.rank != ptrNpcStats.getFactionRanks().at(faction.factionId))
+            {
+                if (faction.rank > ptrNpcStats.getFactionRanks().at(faction.factionId))
+                    ptrNpcStats.raiseRank(faction.factionId);
+                else
+                    ptrNpcStats.lowerRank(faction.factionId);
+            }
         }
 
-        // If the expelled state is different in the packet than in the NpcStats,
-        // adjust the NpcStats accordingly
-        if (faction.isExpelled != ptrNpcStats.getExpelled(faction.factionId))
+        if (factionChanges.action == mwmp::FactionChanges::EXPULSION || factionChanges.action == mwmp::FactionChanges::BOTH)
         {
-            if (faction.isExpelled)
-                ptrNpcStats.expell(faction.factionId);
-            else
-                ptrNpcStats.clearExpelled(faction.factionId);
+            // If the expelled state is different in the packet than in the NpcStats,
+            // adjust the NpcStats accordingly
+            if (faction.isExpelled != ptrNpcStats.getExpelled(faction.factionId))
+            {
+                if (faction.isExpelled)
+                    ptrNpcStats.expell(faction.factionId);
+                else
+                    ptrNpcStats.clearExpelled(faction.factionId);
+            }
         }
     }
 }
@@ -1151,13 +1157,28 @@ void LocalPlayer::sendJournalIndex(const std::string& quest, int index)
     getNetworking()->getPlayerPacket(ID_PLAYER_JOURNAL)->Send();
 }
 
-void LocalPlayer::sendFaction(const std::string& factionId, int rank, bool isExpelled)
+void LocalPlayer::sendFactionRank(const std::string& factionId, int rank)
 {
     factionChanges.factions.clear();
+    factionChanges.action = FactionChanges::RANK;
 
     mwmp::Faction faction;
     faction.factionId = factionId;
     faction.rank = rank;
+
+    factionChanges.factions.push_back(faction);
+
+    getNetworking()->getPlayerPacket(ID_PLAYER_FACTION)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_FACTION)->Send();
+}
+
+void LocalPlayer::sendFactionExpulsionState(const std::string& factionId, bool isExpelled)
+{
+    factionChanges.factions.clear();
+    factionChanges.action = FactionChanges::EXPULSION;
+
+    mwmp::Faction faction;
+    faction.factionId = factionId;
     faction.isExpelled = isExpelled;
 
     factionChanges.factions.push_back(faction);

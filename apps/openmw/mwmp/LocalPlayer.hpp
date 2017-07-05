@@ -73,7 +73,8 @@ namespace mwmp
         void sendSpellRemoval(const ESM::Spell &spell);
         void sendJournalEntry(const std::string& quest, int index, const MWWorld::Ptr& actor);
         void sendJournalIndex(const std::string& quest, int index);
-        void sendFaction(const std::string& factionId, int rank, bool isExpelled);
+        void sendFactionRank(const std::string& factionId, int rank);
+        void sendFactionExpulsionState(const std::string& factionId, bool isExpelled);
         void sendTopic(const std::string& topic);
         void sendKill(const std::string& refId, int number);
         void sendBook(const std::string& bookId);

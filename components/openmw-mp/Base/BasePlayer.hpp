@@ -87,6 +87,15 @@ namespace mwmp
     {
         std::vector<Faction> factions;
         unsigned int count;
+
+        enum FACTION_ACTION
+        {
+            RANK = 0,
+            EXPULSION = 1,
+            BOTH = 2
+        };
+
+        int action; // 0 - Rank, 1 - Expulsion state, 2 - Both
     };
 
     struct TopicChanges

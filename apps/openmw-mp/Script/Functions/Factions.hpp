@@ -3,6 +3,7 @@
 
 #define FACTIONAPI \
     {"GetFactionChangesSize",   FactionFunctions::GetFactionChangesSize},\
+    {"GetFactionChangesAction", FactionFunctions::GetFactionChangesAction},\
     \
     {"AddFaction",              FactionFunctions::AddFaction},\
     \
@@ -17,6 +18,7 @@ class FactionFunctions
 public:
 
     static unsigned int GetFactionChangesSize(unsigned short pid) noexcept;
+    static unsigned char GetFactionChangesAction(unsigned short pid) noexcept;
 
     static void AddFaction(unsigned short pid, const char* factionId, unsigned int rank, bool isExpelled) noexcept;
 

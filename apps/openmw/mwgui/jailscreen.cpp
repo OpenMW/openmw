@@ -7,7 +7,6 @@
 */
 #include "../mwmp/Main.hpp"
 #include "../mwmp/LocalPlayer.hpp"
-#include <regex>
 /*
     End of tes3mp addition
 */

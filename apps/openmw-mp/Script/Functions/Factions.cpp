@@ -14,6 +14,14 @@ unsigned int FactionFunctions::GetFactionChangesSize(unsigned short pid) noexcep
     return player->factionChanges.count;
 }
 
+unsigned char FactionFunctions::GetFactionChangesAction(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->factionChanges.action;
+}
+
 void FactionFunctions::AddFaction(unsigned short pid, const char* factionId, unsigned int rank, bool isExpelled) noexcept
 {
     Player *player;
@@ -58,6 +66,8 @@ void FactionFunctions::SendFactionChanges(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
+
+    player->factionChangesBuffer.action = mwmp::FactionChanges::BOTH;
 
     std::swap(player->factionChanges, player->factionChangesBuffer);
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_FACTION)->setPlayer(player);
