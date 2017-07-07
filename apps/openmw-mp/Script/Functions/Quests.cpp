@@ -6,6 +6,14 @@
 
 using namespace mwmp;
 
+void QuestFunctions::InitializeJournalChanges(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->journalChanges.journalItems.clear();
+}
+
 unsigned int QuestFunctions::GetJournalChangesSize(unsigned short pid) noexcept
 {
     Player *player;
@@ -25,7 +33,7 @@ void QuestFunctions::AddJournalEntry(unsigned short pid, const char* quest, unsi
     journalItem.index = index;
     journalItem.actorRefId = actorRefId;
 
-    player->journalChangesBuffer.journalItems.push_back(journalItem);
+    player->journalChanges.journalItems.push_back(journalItem);
 }
 
 void QuestFunctions::AddJournalIndex(unsigned short pid, const char* quest, unsigned int index) noexcept
@@ -38,7 +46,7 @@ void QuestFunctions::AddJournalIndex(unsigned short pid, const char* quest, unsi
     journalItem.quest = quest;
     journalItem.index = index;
 
-    player->journalChangesBuffer.journalItems.push_back(journalItem);
+    player->journalChanges.journalItems.push_back(journalItem);
 }
 
 const char *QuestFunctions::GetJournalItemQuest(unsigned short pid, unsigned int i) noexcept
@@ -76,14 +84,11 @@ const char *QuestFunctions::GetJournalItemActorRefId(unsigned short pid, unsigne
     return player->journalChanges.journalItems.at(i).actorRefId.c_str();
 }
 
-void QuestFunctions::SendJournalChanges(unsigned short pid) noexcept
+void QuestFunctions::SendJournalChanges(unsigned short pid, bool toOthers) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
 
-    std::swap(player->journalChanges, player->journalChangesBuffer);
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_JOURNAL)->setPlayer(player);
-    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_JOURNAL)->Send(false);
-    player->journalChanges = std::move(player->journalChangesBuffer);
-    player->journalChangesBuffer.journalItems.clear();
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_JOURNAL)->Send(toOthers);
 }

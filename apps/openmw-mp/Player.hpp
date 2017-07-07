@@ -70,16 +70,6 @@ public:
 
     void forEachLoaded(std::function<void(Player *pl, Player *other)> func);
 
-public:
-    mwmp::InventoryChanges inventoryChangesBuffer;
-    mwmp::SpellbookChanges spellbookChangesBuffer;
-    mwmp::JournalChanges journalChangesBuffer;
-    mwmp::FactionChanges factionChangesBuffer;
-    mwmp::TopicChanges topicChangesBuffer;
-    mwmp::KillChanges killChangesBuffer;
-    mwmp::BookChanges bookChangesBuffer;
-    mwmp::MapChanges mapChangesBuffer;
-
 private:
     CellController::TContainer cells;
     bool handshakeState;

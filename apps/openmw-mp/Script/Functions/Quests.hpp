@@ -2,6 +2,8 @@
 #define OPENMW_QUESTAPI_HPP
 
 #define QUESTAPI \
+    {"InitializeJournalChanges",  QuestFunctions::InitializeJournalChanges},\
+    \
     {"GetJournalChangesSize",     QuestFunctions::GetJournalChangesSize},\
     \
     {"AddJournalEntry",           QuestFunctions::AddJournalEntry},\
@@ -17,6 +19,7 @@
 class QuestFunctions
 {
 public:
+    static void InitializeJournalChanges(unsigned short pid) noexcept;
 
     static unsigned int GetJournalChangesSize(unsigned short pid) noexcept;
 
@@ -28,7 +31,7 @@ public:
     static int GetJournalItemType(unsigned short pid, unsigned int i) noexcept;
     static const char *GetJournalItemActorRefId(unsigned short pid, unsigned int i) noexcept;
 
-    static void SendJournalChanges(unsigned short pid) noexcept;
+    static void SendJournalChanges(unsigned short pid, bool toOthers = false) noexcept;
 private:
 
 };

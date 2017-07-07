@@ -10,6 +10,14 @@ using namespace std;
 
 static std::string tempCellDescription;
 
+void CellFunctions::InitializeMapChanges(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->mapChanges.cellsExplored.clear();
+}
+
 unsigned int CellFunctions::GetCellStateChangesSize(unsigned short pid) noexcept
 {
     Player *player;
@@ -119,7 +127,7 @@ void CellFunctions::AddCellExplored(unsigned short pid, const char* cellDescript
     GET_PLAYER(pid, player, );
 
     ESM::Cell cellExplored = Utils::getCellFromDescription(cellDescription);
-    player->mapChangesBuffer.cellsExplored.push_back(cellExplored);
+    player->mapChanges.cellsExplored.push_back(cellExplored);
 }
 
 void CellFunctions::SendCell(unsigned short pid) noexcept
@@ -131,14 +139,11 @@ void CellFunctions::SendCell(unsigned short pid) noexcept
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_CELL_CHANGE)->Send(false);
 }
 
-void CellFunctions::SendMapChanges(unsigned short pid) noexcept
+void CellFunctions::SendMapChanges(unsigned short pid, bool toOthers) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
 
-    std::swap(player->mapChanges, player->mapChangesBuffer);
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_MAP)->setPlayer(player);
-    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_MAP)->Send(false);
-    player->mapChanges = std::move(player->mapChangesBuffer);
-    player->mapChangesBuffer.cellsExplored.clear();
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_MAP)->Send(toOthers);
 }

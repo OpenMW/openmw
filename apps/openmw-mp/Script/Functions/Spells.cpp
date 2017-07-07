@@ -6,6 +6,15 @@
 
 using namespace mwmp;
 
+void SpellFunctions::InitializeSpellbookChanges(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->spellbookChanges.spells.clear();
+    player->spellbookChanges.action = SpellbookChanges::SET;
+}
+
 unsigned int SpellFunctions::GetSpellbookChangesSize(unsigned short pid) noexcept
 {
     Player *player;
@@ -30,8 +39,8 @@ void SpellFunctions::AddSpell(unsigned short pid, const char* spellId) noexcept
     ESM::Spell spell;
     spell.mId = spellId;
 
-    player->spellbookChangesBuffer.spells.push_back(spell);
-    player->spellbookChangesBuffer.action = SpellbookChanges::ADD;
+    player->spellbookChanges.spells.push_back(spell);
+    player->spellbookChanges.action = SpellbookChanges::ADD;
 }
 
 void SpellFunctions::RemoveSpell(unsigned short pid, const char* spellId) noexcept
@@ -42,17 +51,8 @@ void SpellFunctions::RemoveSpell(unsigned short pid, const char* spellId) noexce
     ESM::Spell spell;
     spell.mId = spellId;
 
-    player->spellbookChangesBuffer.spells.push_back(spell);
-    player->spellbookChangesBuffer.action = SpellbookChanges::REMOVE;
-}
-
-void SpellFunctions::ClearSpellbook(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    player->spellbookChangesBuffer.spells.clear();
-    player->spellbookChangesBuffer.action = SpellbookChanges::SET;
+    player->spellbookChanges.spells.push_back(spell);
+    player->spellbookChanges.action = SpellbookChanges::REMOVE;
 }
 
 const char *SpellFunctions::GetSpellId(unsigned short pid, unsigned int i) noexcept
@@ -66,14 +66,11 @@ const char *SpellFunctions::GetSpellId(unsigned short pid, unsigned int i) noexc
     return player->spellbookChanges.spells.at(i).mId.c_str();
 }
 
-void SpellFunctions::SendSpellbookChanges(unsigned short pid) noexcept
+void SpellFunctions::SendSpellbookChanges(unsigned short pid, bool toOthers) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
 
-    std::swap(player->spellbookChanges, player->spellbookChangesBuffer);
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_SPELLBOOK)->setPlayer(player);
-    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_SPELLBOOK)->Send(false);
-    player->spellbookChanges = std::move(player->spellbookChangesBuffer);
-    player->spellbookChangesBuffer.spells.clear();
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_SPELLBOOK)->Send(toOthers);
 }

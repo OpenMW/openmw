@@ -6,6 +6,14 @@
 
 using namespace mwmp;
 
+void FactionFunctions::InitializeFactionChanges(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->factionChanges.factions.clear();
+}
+
 unsigned int FactionFunctions::GetFactionChangesSize(unsigned short pid) noexcept
 {
     Player *player;
@@ -20,19 +28,6 @@ unsigned char FactionFunctions::GetFactionChangesAction(unsigned short pid) noex
     GET_PLAYER(pid, player, 0);
 
     return player->factionChanges.action;
-}
-
-void FactionFunctions::AddFaction(unsigned short pid, const char* factionId, unsigned int rank, bool isExpelled) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    mwmp::Faction faction;
-    faction.factionId = factionId;
-    faction.rank = rank;
-    faction.isExpelled = isExpelled;
-
-    player->factionChangesBuffer.factions.push_back(faction);
 }
 
 const char *FactionFunctions::GetFactionId(unsigned short pid, unsigned int i) noexcept
@@ -62,16 +57,32 @@ bool FactionFunctions::GetFactionExpelledState(unsigned short pid, unsigned int 
     return player->factionChanges.factions.at(i).isExpelled;
 }
 
-void FactionFunctions::SendFactionChanges(unsigned short pid) noexcept
+void FactionFunctions::SetFactionChangesAction(unsigned short pid, unsigned char action) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
 
-    player->factionChangesBuffer.action = mwmp::FactionChanges::BOTH;
+    player->factionChanges.action = action;
+}
 
-    std::swap(player->factionChanges, player->factionChangesBuffer);
+void FactionFunctions::AddFaction(unsigned short pid, const char* factionId, unsigned int rank, bool isExpelled) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    mwmp::Faction faction;
+    faction.factionId = factionId;
+    faction.rank = rank;
+    faction.isExpelled = isExpelled;
+
+    player->factionChanges.factions.push_back(faction);
+}
+
+void FactionFunctions::SendFactionChanges(unsigned short pid, bool toOthers) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_FACTION)->setPlayer(player);
-    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_FACTION)->Send(false);
-    player->factionChanges = std::move(player->factionChangesBuffer);
-    player->factionChangesBuffer.factions.clear();
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_FACTION)->Send(toOthers);
 }

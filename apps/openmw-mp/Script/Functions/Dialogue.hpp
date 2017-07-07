@@ -2,6 +2,9 @@
 #define OPENMW_DIALOGUEAPI_HPP
 
 #define DIALOGUEAPI \
+    {"InitializeTopicChanges",  DialogueFunctions::InitializeTopicChanges},\
+    {"InitializeKillChanges",   DialogueFunctions::InitializeKillChanges},\
+    \
     {"GetTopicChangesSize",     DialogueFunctions::GetTopicChangesSize},\
     {"GetKillChangesSize",      DialogueFunctions::GetKillChangesSize},\
     \
@@ -19,6 +22,9 @@ class DialogueFunctions
 {
 public:
 
+    static void InitializeTopicChanges(unsigned short pid) noexcept;
+    static void InitializeKillChanges(unsigned short pid) noexcept;
+
     static unsigned int GetTopicChangesSize(unsigned short pid) noexcept;
     static unsigned int GetKillChangesSize(unsigned short pid) noexcept;
 
@@ -29,8 +35,8 @@ public:
     static const char *GetKillRefId(unsigned short pid, unsigned int i) noexcept;
     static int GetKillNumber(unsigned short pid, unsigned int i) noexcept;
 
-    static void SendTopicChanges(unsigned short pid) noexcept;
-    static void SendKillChanges(unsigned short pid) noexcept;
+    static void SendTopicChanges(unsigned short pid, bool toOthers = false) noexcept;
+    static void SendKillChanges(unsigned short pid, bool toOthers = false) noexcept;
 private:
 
 };

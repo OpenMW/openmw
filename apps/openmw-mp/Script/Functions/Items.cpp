@@ -11,6 +11,15 @@
 
 using namespace mwmp;
 
+void ItemFunctions::InitializeInventoryChanges(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->inventoryChanges.items.clear();
+    player->inventoryChanges.action = InventoryChanges::SET;
+}
+
 int ItemFunctions::GetEquipmentSize() noexcept
 {
     return MWWorld::InventoryStore::Slots;
@@ -52,8 +61,8 @@ void ItemFunctions::AddItem(unsigned short pid, const char* refId, unsigned int 
     item.count = count;
     item.charge = charge;
 
-    player->inventoryChangesBuffer.items.push_back(item);
-    player->inventoryChangesBuffer.action = InventoryChanges::ADD;
+    player->inventoryChanges.items.push_back(item);
+    player->inventoryChanges.action = InventoryChanges::ADD;
 }
 
 void ItemFunctions::RemoveItem(unsigned short pid, const char* refId, unsigned short count) noexcept
@@ -65,17 +74,8 @@ void ItemFunctions::RemoveItem(unsigned short pid, const char* refId, unsigned s
     item.refId = refId;
     item.count = count;
 
-    player->inventoryChangesBuffer.items.push_back(item);
-    player->inventoryChangesBuffer.action = InventoryChanges::REMOVE;
-}
-
-void ItemFunctions::ClearInventory(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    player->inventoryChangesBuffer.items.clear();
-    player->inventoryChangesBuffer.action = InventoryChanges::SET;
+    player->inventoryChanges.items.push_back(item);
+    player->inventoryChanges.action = InventoryChanges::REMOVE;
 }
 
 bool ItemFunctions::HasItemEquipped(unsigned short pid, const char* refId)
@@ -150,14 +150,11 @@ void ItemFunctions::SendEquipment(unsigned short pid) noexcept
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_EQUIPMENT)->Send(true);
 }
 
-void ItemFunctions::SendInventoryChanges(unsigned short pid) noexcept
+void ItemFunctions::SendInventoryChanges(unsigned short pid, bool toOthers) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
 
-    std::swap(player->inventoryChanges, player->inventoryChangesBuffer);
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_INVENTORY)->setPlayer(player);
-    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_INVENTORY)->Send(false);
-    player->inventoryChanges = std::move(player->inventoryChangesBuffer);
-    player->inventoryChangesBuffer.items.clear();
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_INVENTORY)->Send(toOthers);
 }

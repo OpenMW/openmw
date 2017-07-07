@@ -4,6 +4,8 @@
 #include "../Types.hpp"
 
 #define CELLAPI \
+    {"InitializeMapChanges",    CellFunctions::InitializeMapChanges},\
+    \
     {"GetCellStateChangesSize", CellFunctions::GetCellStateChangesSize},\
     \
     {"GetCellStateType",        CellFunctions::GetCellStateType},\
@@ -28,6 +30,9 @@
 class CellFunctions
 {
 public:
+
+    static void InitializeMapChanges(unsigned short pid) noexcept;
+
     static unsigned int GetCellStateChangesSize(unsigned short pid) noexcept;
 
     static unsigned int GetCellStateType(unsigned short pid, unsigned int i) noexcept;
@@ -46,7 +51,7 @@ public:
     static void AddCellExplored(unsigned short pid, const char* cellDescription) noexcept;
 
     static void SendCell(unsigned short pid) noexcept;
-    static void SendMapChanges(unsigned short pid) noexcept;
+    static void SendMapChanges(unsigned short pid, bool toOthers = false) noexcept;
 };
 
 #endif //OPENMW_CELLAPI_HPP
