@@ -24,7 +24,7 @@ void WorldFunctions::ReadLastEvent() noexcept
     readEvent = mwmp::Networking::getPtr()->getLastEvent();
 }
 
-void WorldFunctions::InitiateEvent(unsigned short pid) noexcept
+void WorldFunctions::InitializeEvent(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );

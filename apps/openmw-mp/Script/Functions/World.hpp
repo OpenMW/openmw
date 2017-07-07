@@ -3,7 +3,7 @@
 
 #define WORLDAPI \
     {"ReadLastEvent",               WorldFunctions::ReadLastEvent},\
-    {"InitiateEvent",               WorldFunctions::InitiateEvent},\
+    {"InitializeEvent",             WorldFunctions::InitializeEvent},\
     \
     {"GetObjectChangesSize",        WorldFunctions::GetObjectChangesSize},\
     {"GetEventAction",              WorldFunctions::GetEventAction},\
@@ -72,7 +72,7 @@ class WorldFunctions
 public:
 
     static void ReadLastEvent() noexcept;
-    static void InitiateEvent(unsigned short pid) noexcept;
+    static void InitializeEvent(unsigned short pid) noexcept;
 
     static unsigned int GetObjectChangesSize() noexcept;
     static unsigned char GetEventAction() noexcept;
