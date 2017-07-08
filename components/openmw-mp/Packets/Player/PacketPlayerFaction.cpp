@@ -31,10 +31,10 @@ void PacketPlayerFaction::Packet(RakNet::BitStream *bs, bool send)
 
         RW(faction.factionId, send, 1);
 
-        if (player->factionChanges.action == FactionChanges::BOTH || player->factionChanges.action == FactionChanges::RANK)
+        if (player->factionChanges.action == FactionChanges::RANK)
             RW(faction.rank, send);
 
-        if (player->factionChanges.action == FactionChanges::BOTH || player->factionChanges.action == FactionChanges::EXPULSION)
+        if (player->factionChanges.action == FactionChanges::EXPULSION)
             RW(faction.isExpelled, send);
 
         if (!send)

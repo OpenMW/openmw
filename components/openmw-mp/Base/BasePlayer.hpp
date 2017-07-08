@@ -91,8 +91,7 @@ namespace mwmp
         enum FACTION_ACTION
         {
             RANK = 0,
-            EXPULSION = 1,
-            BOTH = 2
+            EXPULSION = 1
         };
 
         int action; // 0 - Rank, 1 - Expulsion state, 2 - Both

@@ -955,7 +955,7 @@ void LocalPlayer::setFactions()
         if (!ptrNpcStats.isInFaction(faction.factionId))
             ptrNpcStats.joinFaction(faction.factionId);
 
-        if (factionChanges.action == mwmp::FactionChanges::RANK || factionChanges.action == mwmp::FactionChanges::BOTH)
+        if (factionChanges.action == mwmp::FactionChanges::RANK)
         {
             // While the faction rank is different in the packet than in the NpcStats,
             // adjust the NpcStats accordingly
@@ -967,8 +967,7 @@ void LocalPlayer::setFactions()
                     ptrNpcStats.lowerRank(faction.factionId);
             }
         }
-
-        if (factionChanges.action == mwmp::FactionChanges::EXPULSION || factionChanges.action == mwmp::FactionChanges::BOTH)
+        else if (factionChanges.action == mwmp::FactionChanges::EXPULSION)
         {
             // If the expelled state is different in the packet than in the NpcStats,
             // adjust the NpcStats accordingly
