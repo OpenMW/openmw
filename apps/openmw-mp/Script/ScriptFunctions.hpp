@@ -157,6 +157,7 @@ public:
             {"OnContainer",              Function<void, unsigned short, const char*>()},
             {"OnDoorState",              Function<void, unsigned short, const char*>()},
             {"OnObjectPlace",            Function<void, unsigned short, const char*>()},
+            {"OnObjectState",            Function<void, unsigned short, const char*>()},
             {"OnObjectSpawn",            Function<void, unsigned short, const char*>()},
             {"OnObjectDelete",           Function<void, unsigned short, const char*>()},
             {"OnObjectLock",             Function<void, unsigned short, const char*>()},
