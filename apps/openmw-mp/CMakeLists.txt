@@ -144,10 +144,10 @@ set(PROCESSORS_WORLD
         processors/world/ProcessorObjectDelete.hpp processors/world/ProcessorObjectLock.hpp
         processors/world/ProcessorObjectMove.hpp processors/world/ProcessorObjectPlace.hpp
         processors/world/ProcessorObjectRotate.hpp processors/world/ProcessorObjectScale.hpp
-        processors/world/ProcessorObjectSpawn.hpp processors/world/ProcessorObjectTrap.hpp
-        processors/world/ProcessorScriptLocalShort.hpp processors/world/ProcessorScriptLocalFloat.hpp
-        processors/world/ProcessorScriptMemberShort.hpp processors/world/ProcessorScriptGlobalShort.hpp
-        processors/world/ProcessorVideoPlay.hpp
+        processors/world/ProcessorObjectSpawn.hpp processors/world/ProcessorObjectState.hpp
+        processors/world/ProcessorObjectTrap.hpp processors/world/ProcessorScriptLocalShort.hpp
+        processors/world/ProcessorScriptLocalFloat.hpp processors/world/ProcessorScriptMemberShort.hpp
+        processors/world/ProcessorScriptGlobalShort.hpp processors/world/ProcessorVideoPlay.hpp
         )
 
 source_group(tes3mp-server\\processors\\world FILES ${PROCESSORS_WORLD})

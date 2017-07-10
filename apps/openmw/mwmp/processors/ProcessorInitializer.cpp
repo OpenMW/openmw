@@ -29,6 +29,7 @@
 #include "player/ProcessorPlayerEquipment.hpp"
 #include "player/ProcessorPlayerFaction.hpp"
 #include "player/ProcessorPlayerInventory.hpp"
+#include "player/ProcessorPlayerJail.hpp"
 #include "player/ProcessorPlayerJournal.hpp"
 #include "player/ProcessorPlayerKillCount.hpp"
 #include "player/ProcessorPlayerLevel.hpp"
@@ -44,6 +45,7 @@
 #include "player/ProcessorPlayerTopic.hpp"
 
 #include "WorldProcessor.hpp"
+#include "world/ProcessorConsoleCommand.hpp"
 #include "world/ProcessorContainer.hpp"
 #include "world/ProcessorDoorState.hpp"
 #include "world/ProcessorMusicPlay.hpp"
@@ -55,6 +57,7 @@
 #include "world/ProcessorObjectRotate.hpp"
 #include "world/ProcessorObjectScale.hpp"
 #include "world/ProcessorObjectSpawn.hpp"
+#include "world/ProcessorObjectState.hpp"
 #include "world/ProcessorObjectTrap.hpp"
 #include "world/ProcessorScriptLocalShort.hpp"
 #include "world/ProcessorScriptLocalFloat.hpp"

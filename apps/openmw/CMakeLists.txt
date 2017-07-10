@@ -111,20 +111,21 @@ add_openmw_dir (mwmp/processors/actor ProcessorActorAI ProcessorActorAnimFlags P
     ProcessorActorPosition ProcessorActorSpeech ProcessorActorStatsDynamic ProcessorActorTest
     )
 
-add_openmw_dir (mwmp/processors/player ProcessorChatMessage ProcessorGUIMessageBox ProcessorHandshake ProcessorUserDisconnected
-    ProcessorUserMyID ProcessorGameSettings ProcessorGameTime ProcessorGameWeather ProcessorPlayerBaseInfo
-    ProcessorPlayerAnimFlags ProcessorPlayerAnimPlay ProcessorPlayerAttack ProcessorPlayerAttribute ProcessorPlayerBook
-    ProcessorPlayerBounty ProcessorPlayerCellChange ProcessorPlayerCellState ProcessorPlayerCharClass ProcessorPlayerCharGen
-    ProcessorPlayerDeath ProcessorPlayerDisposition ProcessorPlayerEquipment ProcessorPlayerFaction ProcessorPlayerInventory
-    ProcessorPlayerJournal ProcessorPlayerKillCount ProcessorPlayerLevel ProcessorPlayerMap ProcessorPlayerPosition
-    ProcessorPlayerResurrect ProcessorPlayerSkill ProcessorPlayerSpeech ProcessorPlayerSpellbook ProcessorPlayerStatsDynamic
-    ProcessorPlayerTopic
+add_openmw_dir (mwmp/processors/player ProcessorChatMessage ProcessorGUIMessageBox ProcessorHandshake
+    ProcessorUserDisconnected ProcessorUserMyID ProcessorGameSettings ProcessorGameTime ProcessorGameWeather
+    ProcessorPlayerBaseInfo ProcessorPlayerAnimFlags ProcessorPlayerAnimPlay ProcessorPlayerAttack ProcessorPlayerAttribute
+    ProcessorPlayerBook ProcessorPlayerBounty ProcessorPlayerCellChange ProcessorPlayerCellState ProcessorPlayerCharClass
+    ProcessorPlayerCharGen ProcessorPlayerDeath ProcessorPlayerDisposition ProcessorPlayerEquipment ProcessorPlayerFaction
+    ProcessorPlayerInventory ProcessorPlayerJail ProcessorPlayerJournal ProcessorPlayerKillCount ProcessorPlayerLevel
+    ProcessorPlayerMap ProcessorPlayerPosition ProcessorPlayerResurrect ProcessorPlayerSkill ProcessorPlayerSpeech
+    ProcessorPlayerSpellbook ProcessorPlayerStatsDynamic ProcessorPlayerTopic
     )
 
-add_openmw_dir (mwmp/processors/world BaseObjectProcessor ProcessorContainer ProcessorDoorState ProcessorMusicPlay
-    ProcessorVideoPlay ProcessorObjectAnimPlay ProcessorObjectDelete ProcessorObjectLock ProcessorObjectMove
-    ProcessorObjectPlace ProcessorObjectRotate ProcessorObjectScale ProcessorObjectSpawn ProcessorObjectTrap
-    ProcessorScriptLocalShort ProcessorScriptLocalFloat ProcessorScriptMemberShort ProcessorScriptGlobalShort
+add_openmw_dir (mwmp/processors/world BaseObjectProcessor ProcessorConsoleCommand ProcessorContainer ProcessorDoorState
+    ProcessorMusicPlay ProcessorVideoPlay ProcessorObjectAnimPlay ProcessorObjectDelete ProcessorObjectLock
+    ProcessorObjectMove ProcessorObjectPlace ProcessorObjectRotate ProcessorObjectScale ProcessorObjectSpawn
+    ProcessorObjectState ProcessorObjectTrap ProcessorScriptLocalShort ProcessorScriptLocalFloat ProcessorScriptMemberShort
+    ProcessorScriptGlobalShort
     )
 
 # Main executable

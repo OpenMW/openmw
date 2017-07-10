@@ -180,16 +180,17 @@ add_component_dir (openmw-mp/Packets/Player
         PacketPlayerBaseInfo PacketPlayerCharGen PacketPlayerActiveSkills PacketPlayerAnimFlags PacketPlayerAnimPlay
         PacketPlayerAttack PacketPlayerAttribute PacketPlayerBook PacketPlayerBounty PacketPlayerCellChange
         PacketPlayerCellState PacketPlayerClass PacketPlayerDeath PacketPlayerEquipment PacketPlayerFaction
-        PacketPlayerInventory PacketPlayerJournal PacketPlayerKillCount PacketPlayerLevel PacketPlayerMap
-        PacketPlayerPosition PacketPlayerRegionAuthority PacketPlayerRest PacketPlayerResurrect PacketPlayerSkill
-        PacketPlayerSpeech PacketPlayerSpellbook PacketPlayerStatsDynamic PacketPlayerTopic
+        PacketPlayerInventory PacketPlayerJail PacketPlayerJournal PacketPlayerKillCount PacketPlayerLevel
+        PacketPlayerMap PacketPlayerPosition PacketPlayerRegionAuthority PacketPlayerRest PacketPlayerResurrect
+        PacketPlayerSkill PacketPlayerSpeech PacketPlayerSpellbook PacketPlayerStatsDynamic PacketPlayerTopic
         )
 
 add_component_dir (openmw-mp/Packets/World
         WorldPacket
-        PacketContainer PacketObjectAnimPlay PacketObjectDelete PacketDoorState PacketObjectLock PacketObjectMove PacketObjectPlace
-        PacketObjectRotate PacketObjectScale PacketObjectSpawn PacketObjectTrap PacketMusicPlay PacketVideoPlay
-        PacketScriptLocalShort PacketScriptLocalFloat PacketScriptMemberShort PacketScriptGlobalShort
+        PacketConsoleCommand PacketContainer PacketObjectAnimPlay PacketObjectDelete PacketDoorState PacketObjectLock
+        PacketObjectMove PacketObjectPlace PacketObjectRotate PacketObjectScale PacketObjectSpawn PacketObjectState
+        PacketObjectTrap PacketMusicPlay PacketVideoPlay PacketScriptLocalShort PacketScriptLocalFloat
+        PacketScriptMemberShort PacketScriptGlobalShort
         )
 
 add_component_dir (fallback

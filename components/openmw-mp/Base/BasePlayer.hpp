@@ -253,6 +253,8 @@ namespace mwmp
         int deathPenaltyJailDays;
         bool ignoreJailTeleportation;
 
+        int jailDays;
+
         unsigned int resurrectType;
     };
 }

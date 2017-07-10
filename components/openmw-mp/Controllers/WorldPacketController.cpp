@@ -6,6 +6,7 @@
 #include "../Packets/World/PacketObjectRotate.hpp"
 #include "../Packets/World/PacketObjectScale.hpp"
 #include "../Packets/World/PacketObjectSpawn.hpp"
+#include "../Packets/World/PacketObjectState.hpp"
 #include "../Packets/World/PacketObjectTrap.hpp"
 
 #include "../Packets/World/PacketContainer.hpp"
@@ -13,6 +14,7 @@
 #include "../Packets/World/PacketMusicPlay.hpp"
 #include "../Packets/World/PacketVideoPlay.hpp"
 
+#include "../Packets/World/PacketConsoleCommand.hpp"
 #include "../Packets/World/PacketScriptLocalShort.hpp"
 #include "../Packets/World/PacketScriptLocalFloat.hpp"
 #include "../Packets/World/PacketScriptMemberShort.hpp"
@@ -38,6 +40,7 @@ mwmp::WorldPacketController::WorldPacketController(RakNet::RakPeerInterface *pee
     AddPacket<PacketObjectRotate>(&packets, peer);
     AddPacket<PacketObjectScale>(&packets, peer);
     AddPacket<PacketObjectSpawn>(&packets, peer);
+    AddPacket<PacketObjectState>(&packets, peer);
     AddPacket<PacketObjectTrap>(&packets, peer);
     
     AddPacket<PacketContainer>(&packets, peer);
@@ -45,6 +48,7 @@ mwmp::WorldPacketController::WorldPacketController(RakNet::RakPeerInterface *pee
     AddPacket<PacketMusicPlay>(&packets, peer);
     AddPacket<PacketVideoPlay>(&packets, peer);
 
+    AddPacket<PacketConsoleCommand>(&packets, peer);
     AddPacket<PacketScriptLocalShort>(&packets, peer);
     AddPacket<PacketScriptLocalFloat>(&packets, peer);
     AddPacket<PacketScriptMemberShort>(&packets, peer);

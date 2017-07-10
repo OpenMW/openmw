@@ -63,6 +63,7 @@
 #include "world/ProcessorObjectRotate.hpp"
 #include "world/ProcessorObjectScale.hpp"
 #include "world/ProcessorObjectSpawn.hpp"
+#include "world/ProcessorObjectState.hpp"
 #include "world/ProcessorObjectTrap.hpp"
 #include "world/ProcessorScriptLocalShort.hpp"
 #include "world/ProcessorScriptLocalFloat.hpp"
@@ -130,6 +131,7 @@ void ProcessorInitializer()
     WorldProcessor::AddProcessor(new ProcessorObjectRotate());
     WorldProcessor::AddProcessor(new ProcessorObjectScale());
     WorldProcessor::AddProcessor(new ProcessorObjectSpawn());
+    WorldProcessor::AddProcessor(new ProcessorObjectState());
     WorldProcessor::AddProcessor(new ProcessorObjectTrap());
     WorldProcessor::AddProcessor(new ProcessorScriptLocalShort());
     WorldProcessor::AddProcessor(new ProcessorScriptLocalFloat());
