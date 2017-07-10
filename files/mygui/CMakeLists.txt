@@ -99,6 +99,7 @@ set(MYGUI_FILES
     tes3mp_dialog_list.layout
     tes3mp_chat.layout
     tes3mp_chat.skin.xml
+    tes3mp_text_input.layout
     RussoOne-Regular.ttf
 )
 
