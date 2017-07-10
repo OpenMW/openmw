@@ -15,7 +15,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 
 MWMechanics::NpcStats::NpcStats()
     : mDisposition (0)
@@ -254,7 +253,7 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
 
     // Play sound & skill progress notification
     /// \todo check if character is the player, if levelling is ever implemented for NPCs
-    MWBase::Environment::get().getSoundManager ()->playSound ("skillraise", 1, 1);
+    MWBase::Environment::get().getWindowManager()->playSound("skillraise");
 
     std::stringstream message;
     message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))

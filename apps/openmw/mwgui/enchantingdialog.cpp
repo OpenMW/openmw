@@ -8,7 +8,6 @@
 #include <components/widgets/list.hpp>
 #include <components/settings/settings.hpp>
 
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwworld/class.hpp"
@@ -237,7 +236,7 @@ namespace MWGui
         mItemSelectionDialog->setVisible(false);
 
         setItem(item);
-        MWBase::Environment::get().getSoundManager()->playSound(item.getClass().getDownSoundId(item), 1, 1);
+        MWBase::Environment::get().getWindowManager()->playSound(item.getClass().getDownSoundId(item));
         mEnchanting.nextCastStyle();
         updateLabels();
     }
@@ -259,7 +258,7 @@ namespace MWGui
         }
 
         setSoulGem(item);
-        MWBase::Environment::get().getSoundManager()->playSound(item.getClass().getDownSoundId(item), 1, 1);
+        MWBase::Environment::get().getWindowManager()->playSound(item.getClass().getDownSoundId(item));
         updateLabels();
     }
 
@@ -374,12 +373,12 @@ namespace MWGui
 
         if(result==1)
         {
-            MWBase::Environment::get().getSoundManager()->playSound("enchant success", 1.f, 1.f);
+            MWBase::Environment::get().getWindowManager()->playSound("enchant success");
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu12}");
         }
         else
         {
-            MWBase::Environment::get().getSoundManager()->playSound("enchant fail", 1.f, 1.f);
+            MWBase::Environment::get().getWindowManager()->playSound("enchant fail");
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage34}");
         }
 
