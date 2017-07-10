@@ -452,7 +452,7 @@ namespace Resource
         {
             std::string str(env);
 
-            if(str.find("OFF")!=std::string::npos) options = 0;
+            if(str.find("OFF")!=std::string::npos || str.find("0")!= std::string::npos) options = 0;
 
             if(str.find("~FLATTEN_STATIC_TRANSFORMS")!=std::string::npos) options ^= Optimizer::FLATTEN_STATIC_TRANSFORMS;
             else if(str.find("FLATTEN_STATIC_TRANSFORMS")!=std::string::npos) options |= Optimizer::FLATTEN_STATIC_TRANSFORMS;
