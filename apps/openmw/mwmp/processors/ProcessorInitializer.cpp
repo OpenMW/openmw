@@ -106,6 +106,7 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorPlayerEquipment());
     PlayerProcessor::AddProcessor(new ProcessorPlayerFaction());
     PlayerProcessor::AddProcessor(new ProcessorPlayerInventory());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerJail());
     PlayerProcessor::AddProcessor(new ProcessorPlayerJournal());
     PlayerProcessor::AddProcessor(new ProcessorPlayerKillCount());
     PlayerProcessor::AddProcessor(new ProcessorPlayerLevel());
