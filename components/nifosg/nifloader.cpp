@@ -623,11 +623,6 @@ namespace NifOsg
                 node->setNodeMask(0x1);
             }
 
-            if (skipMeshes && isAnimated) // make sure the empty node is not optimized away so the physicssystem can find it.
-            {
-                node->setDataVariance(osg::Object::DYNAMIC);
-            }
-
             // We can skip creating meshes for hidden nodes if they don't have a VisController that
             // might make them visible later
             if (nifNode->flags & Nif::NiNode::Flag_Hidden)
@@ -641,6 +636,11 @@ namespace NifOsg
 
                 // now hide this node, but leave the mask for UpdateVisitor enabled so that KeyframeController works
                 node->setNodeMask(0x1);
+            }
+
+            if (skipMeshes && isAnimated) // make sure the empty node is not optimized away so the physicssystem can find it.
+            {
+                node->setDataVariance(osg::Object::DYNAMIC);
             }
 
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
