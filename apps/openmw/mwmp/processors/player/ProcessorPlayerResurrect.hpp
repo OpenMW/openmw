@@ -5,9 +5,6 @@
 #ifndef OPENMW_PROCESSORPLAYERRESURRECT_HPP
 #define OPENMW_PROCESSORPLAYERRESURRECT_HPP
 
-#include "apps/openmw/mwbase/environment.hpp"
-#include "apps/openmw/mwgui/windowmanagerimp.hpp"
-
 #include "../PlayerProcessor.hpp"
 #include "apps/openmw/mwmp/Main.hpp"
 #include "apps/openmw/mwmp/Networking.hpp"
@@ -61,13 +58,6 @@ namespace mwmp
                 static_cast<LocalPlayer*>(player)->updateStatsDynamic(true);
                 Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_STATS_DYNAMIC)->setPlayer(player);
                 Main::get().getNetworking()->getPlayerPacket(ID_PLAYER_STATS_DYNAMIC)->Send(serverAddr);
-
-                // Apply death penalties
-                if (player->deathPenaltyJailDays > 0)
-                {
-                    player->ignoreJailTeleportation = true;
-                    MWBase::Environment::get().getWindowManager()->goToJail(player->deathPenaltyJailDays);
-                }
             }
             else if (player != 0)
             {

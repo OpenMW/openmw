@@ -9,11 +9,11 @@
 #include <Script/Functions/Books.hpp>
 #include <Script/Functions/Cells.hpp>
 #include <Script/Functions/CharClass.hpp>
-#include <Script/Functions/Death.hpp>
 #include <Script/Functions/Dialogue.hpp>
 #include <Script/Functions/Factions.hpp>
 #include <Script/Functions/GUI.hpp>
 #include <Script/Functions/Items.hpp>
+#include <Script/Functions/Mechanics.hpp>
 #include <Script/Functions/Miscellaneous.hpp>
 #include <Script/Functions/Positions.hpp>
 #include <Script/Functions/Quests.hpp>
@@ -112,11 +112,11 @@ public:
             BOOKAPI,
             CELLAPI,
             CHARCLASSAPI,
-            DEATHAPI,
             DIALOGUEAPI,
             FACTIONAPI,
             GUIAPI,
             ITEMAPI,
+            MECHANICSAPI,
             MISCELLANEOUSAPI,
             POSITIONAPI,
             QUESTAPI,

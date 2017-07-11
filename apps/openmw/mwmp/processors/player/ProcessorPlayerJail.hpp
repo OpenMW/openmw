@@ -1,6 +1,9 @@
 #ifndef OPENMW_PROCESSORPLAYERJAIL_HPP
 #define OPENMW_PROCESSORPLAYERJAIL_HPP
 
+#include "apps/openmw/mwbase/environment.hpp"
+#include "apps/openmw/mwgui/windowmanagerimp.hpp"
+
 #include "../PlayerProcessor.hpp"
 #include "apps/openmw/mwmp/Main.hpp"
 #include "apps/openmw/mwmp/Networking.hpp"
@@ -21,7 +24,11 @@ namespace mwmp
             
             if (isLocal())
             {
-                // To be filled in
+                // Apply death penalties
+                if (player->jailDays > 0)
+                {
+                    MWBase::Environment::get().getWindowManager()->goToJail(player->jailDays);
+                }
             }
         }
     };

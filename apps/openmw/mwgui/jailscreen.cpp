@@ -74,8 +74,7 @@ namespace MWGui
             /*
                 Start of tes3mp change (minor)
 
-                If the jail code is being used from elsewhere to lower skills, don't
-                teleport the player to the nearest prison
+                Prevent teleportation to jail if specified
             */
             if (!mwmp::Main::get().getLocalPlayer()->ignoreJailTeleportation)
                 MWBase::Environment::get().getWorld()->teleportToClosestMarker(player, "prisonmarker");
@@ -129,21 +128,11 @@ namespace MWGui
         /*
             Start of tes3mp addition
 
-            If the jail code is being used from elsewhere to lower skills, reset the
-            corresponding boolean and use more ambiguous wording for the message displayed
+            If jail teleportation was ignored, reset its boolean here
         */
         if (mwmp::Main::get().getLocalPlayer()->ignoreJailTeleportation)
         {
             mwmp::Main::get().getLocalPlayer()->ignoreJailTeleportation = false;
-
-            const std::string stringToReplace = "been released";
-            const std::string stringToReplace2 = "in prison";
-
-            if (message.find(stringToReplace) != std::string::npos)
-                message.replace(message.find(stringToReplace), stringToReplace.size(), "recovered");
-
-            if (message.find(stringToReplace2) != std::string::npos)
-                message.replace(message.find(stringToReplace2), stringToReplace2.size(), "incapacitated");
         }
         /*
             End of tes3mp addition
