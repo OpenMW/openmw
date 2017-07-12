@@ -253,6 +253,7 @@ namespace mwmp
 
         int jailDays;
         bool ignoreJailTeleportation;
+        bool ignoreJailSkillIncreases;
         std::string jailText;
 
         unsigned int resurrectType;

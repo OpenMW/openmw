@@ -52,6 +52,7 @@ LocalPlayer::LocalPlayer()
 
     ignorePosPacket = false;
     ignoreJailTeleportation = false;
+    ignoreJailSkillIncreases = false;
     
     attack.shouldSend = false;
 

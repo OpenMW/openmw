@@ -111,7 +111,18 @@ namespace MWGui
             skills.insert(skill);
 
             MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill);
-            if (skill == ESM::Skill::Security || skill == ESM::Skill::Sneak)
+
+            /*
+                Start of tes3mp change (minor)
+
+                Disable increases for Security and Sneak when using ignoreJailSkillIncreases
+            */
+            if (mwmp::Main::get().getLocalPlayer()->ignoreJailSkillIncreases)
+                value.setBase(value.getBase() - 1);
+            else if (skill == ESM::Skill::Security || skill == ESM::Skill::Sneak)
+            /*
+                End of tes3mp change (minor)
+            */
                 value.setBase(std::min(100, value.getBase()+1));
             else
                 value.setBase(value.getBase()-1);
@@ -128,25 +139,11 @@ namespace MWGui
         /*
             Start of tes3mp addition
 
-            If jail teleportation was ignored, reset its boolean here
-        */
-        if (mwmp::Main::get().getLocalPlayer()->ignoreJailTeleportation)
-        {
-            mwmp::Main::get().getLocalPlayer()->ignoreJailTeleportation = false;
-        }
-        /*
-            End of tes3mp addition
-        */
-
-        /*
-            Start of tes3mp addition
-
             If we've received a packet overriding the default jail text, use the new text
         */
         if (!mwmp::Main::get().getLocalPlayer()->jailText.empty())
         {
             message = mwmp::Main::get().getLocalPlayer()->jailText;
-            mwmp::Main::get().getLocalPlayer()->jailText = "";
         }
         /*
             End of tes3mp addition
@@ -163,7 +160,17 @@ namespace MWGui
             std::stringstream skillValue;
             skillValue << player.getClass().getNpcStats(player).getSkill(*it).getBase();
             std::string skillMsg = gmst.find("sNotifyMessage44")->getString();
-            if (*it == ESM::Skill::Sneak || *it == ESM::Skill::Security)
+
+            /*
+                Start of tes3mp change (minor)
+
+                Account for usage of ignoreJailSkillIncreases
+            */
+            if (!mwmp::Main::get().getLocalPlayer()->ignoreJailSkillIncreases &&
+                (*it == ESM::Skill::Sneak || *it == ESM::Skill::Security))
+            /*
+                End of tes3mp change (minor)
+            */
                 skillMsg = gmst.find("sNotifyMessage39")->getString();
 
             if (skillMsg.find("%s") != std::string::npos)
@@ -172,6 +179,18 @@ namespace MWGui
                 skillMsg.replace(skillMsg.find("%d"), 2, skillValue.str());
             message += "\n" + skillMsg;
         }
+
+        /*
+            Start of tes3mp addition
+
+            Reset all PlayerJail-related overrides
+        */
+        mwmp::Main::get().getLocalPlayer()->ignoreJailTeleportation = false;
+        mwmp::Main::get().getLocalPlayer()->ignoreJailSkillIncreases = false;
+        mwmp::Main::get().getLocalPlayer()->jailText = "";
+        /*
+            End of tes3mp addition
+        */
 
         std::vector<std::string> buttons;
         buttons.push_back("#{sOk}");
