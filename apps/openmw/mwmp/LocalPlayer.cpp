@@ -57,6 +57,8 @@ LocalPlayer::LocalPlayer()
 
     deathReason = "suicide";
     isChangingRegion = false;
+
+    jailText = "";
 }
 
 LocalPlayer::~LocalPlayer()

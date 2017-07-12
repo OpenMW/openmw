@@ -138,6 +138,20 @@ namespace MWGui
             End of tes3mp addition
         */
 
+        /*
+            Start of tes3mp addition
+
+            If we've received a packet overriding the default jail text, use the new text
+        */
+        if (!mwmp::Main::get().getLocalPlayer()->jailText.empty())
+        {
+            message = mwmp::Main::get().getLocalPlayer()->jailText;
+            mwmp::Main::get().getLocalPlayer()->jailText = "";
+        }
+        /*
+            End of tes3mp addition
+        */
+
         std::stringstream dayStr;
         dayStr << mDays;
         if (message.find("%d") != std::string::npos)

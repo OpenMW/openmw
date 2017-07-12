@@ -11,7 +11,7 @@
 class MechanicsFunctions
 {
 public:
-    static void Jail(unsigned short pid, int jailDays, bool ignoreJailTeleportation) noexcept;
+    static void Jail(unsigned short pid, int jailDays, bool ignoreJailTeleportation = false, const char* jailText = "") noexcept;
 
     static void Resurrect(unsigned short pid, unsigned int type) noexcept;
 };
