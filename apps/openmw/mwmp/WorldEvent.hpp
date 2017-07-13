@@ -26,6 +26,7 @@ namespace mwmp
         void lockObjects(MWWorld::CellStore* cellStore);
         void triggerTrapObjects(MWWorld::CellStore* cellStore);
         void scaleObjects(MWWorld::CellStore* cellStore);
+        void setObjectStates(MWWorld::CellStore* cellStore);
         void moveObjects(MWWorld::CellStore* cellStore);
         void rotateObjects(MWWorld::CellStore* cellStore);
         void animateObjects(MWWorld::CellStore* cellStore);
@@ -46,6 +47,7 @@ namespace mwmp
         void addObjectLock(const MWWorld::Ptr& ptr, int lockLevel);
         void addObjectTrap(const MWWorld::Ptr& ptr, const ESM::Position& pos, bool isDisarmed);
         void addObjectScale(const MWWorld::Ptr& ptr, float scale);
+        void addObjectState(const MWWorld::Ptr& ptr, bool objectState);
         void addObjectAnimPlay(const MWWorld::Ptr& ptr, std::string group, int mode);
         void addDoorState(const MWWorld::Ptr& ptr, int state);
         void addMusicPlay(std::string filename);
@@ -61,6 +63,7 @@ namespace mwmp
         void sendObjectLock();
         void sendObjectTrap();
         void sendObjectScale();
+        void sendObjectState();
         void sendObjectAnimPlay();
         void sendDoorState();
         void sendMusicPlay();

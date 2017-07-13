@@ -333,6 +333,28 @@ void WorldEvent::scaleObjects(MWWorld::CellStore* cellStore)
     }
 }
 
+void WorldEvent::setObjectStates(MWWorld::CellStore* cellStore)
+{
+    for (const auto &worldObject : worldObjects)
+    {
+        LOG_APPEND(Log::LOG_VERBOSE, "- cellRef: %s, %i, %i, state: %s", worldObject.refId.c_str(), worldObject.refNumIndex,
+            worldObject.mpNum, worldObject.objectState ? "true" : "false");
+
+        MWWorld::Ptr ptrFound = cellStore->searchExact(worldObject.refNumIndex, worldObject.mpNum);
+
+        if (ptrFound)
+        {
+            LOG_APPEND(Log::LOG_VERBOSE, "-- Found %s, %i, %i", ptrFound.getCellRef().getRefId().c_str(),
+                ptrFound.getCellRef().getRefNum(), ptrFound.getCellRef().getMpNum());
+
+            if (worldObject.objectState)
+                MWBase::Environment::get().getWorld()->enable(ptrFound);
+            else
+                MWBase::Environment::get().getWorld()->disable(ptrFound);
+        }
+    }
+}
+
 void WorldEvent::moveObjects(MWWorld::CellStore* cellStore)
 {
     for (const auto &worldObject : worldObjects)
@@ -630,6 +652,18 @@ void WorldEvent::addObjectScale(const MWWorld::Ptr& ptr, float scale)
     addObject(worldObject);
 }
 
+void WorldEvent::addObjectState(const MWWorld::Ptr& ptr, bool objectState)
+{
+    cell = *ptr.getCell()->getCell();
+
+    mwmp::WorldObject worldObject;
+    worldObject.refId = ptr.getCellRef().getRefId();
+    worldObject.refNumIndex = ptr.getCellRef().getRefNum().mIndex;
+    worldObject.mpNum = ptr.getCellRef().getMpNum();
+    worldObject.objectState = objectState;
+    addObject(worldObject);
+}
+
 void WorldEvent::addObjectAnimPlay(const MWWorld::Ptr& ptr, std::string group, int mode)
 {
     cell = *ptr.getCell()->getCell();
@@ -757,6 +791,12 @@ void WorldEvent::sendObjectScale()
 {
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->setEvent(this);
     mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_SCALE)->Send();
+}
+
+void WorldEvent::sendObjectState()
+{
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_STATE)->setEvent(this);
+    mwmp::Main::get().getNetworking()->getWorldPacket(ID_OBJECT_STATE)->Send();
 }
 
 void WorldEvent::sendObjectAnimPlay()

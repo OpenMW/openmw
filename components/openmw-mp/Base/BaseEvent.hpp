@@ -32,6 +32,7 @@ namespace mwmp
 
         ESM::Position position;
 
+        bool objectState;
         int doorState;
         int lockLevel;
         float scale;

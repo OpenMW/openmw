@@ -79,6 +79,11 @@ double WorldFunctions::GetObjectScale(unsigned int i) noexcept
     return readEvent->worldObjects.at(i).scale;
 }
 
+bool WorldFunctions::GetObjectState(unsigned int i) noexcept
+{
+    return readEvent->worldObjects.at(i).objectState;
+}
+
 int WorldFunctions::GetObjectDoorState(unsigned int i) noexcept
 {
     return readEvent->worldObjects.at(i).doorState;
@@ -193,6 +198,11 @@ void WorldFunctions::SetObjectScale(double scale) noexcept
     tempWorldObject.scale = scale;
 }
 
+void WorldFunctions::SetObjectState(bool objectState) noexcept
+{
+    tempWorldObject.objectState = objectState;
+}
+
 void WorldFunctions::SetObjectDoorState(int doorState) noexcept
 {
     tempWorldObject.doorState = doorState;
@@ -290,6 +300,12 @@ void WorldFunctions::SendObjectScale() noexcept
 {
     mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_SCALE)->setEvent(&writeEvent);
     mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_SCALE)->Send(writeEvent.guid);
+}
+
+void WorldFunctions::SendObjectState() noexcept
+{
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_STATE)->setEvent(&writeEvent);
+    mwmp::Networking::get().getWorldPacketController()->GetPacket(ID_OBJECT_STATE)->Send(writeEvent.guid);
 }
 
 void WorldFunctions::SendDoorState() noexcept

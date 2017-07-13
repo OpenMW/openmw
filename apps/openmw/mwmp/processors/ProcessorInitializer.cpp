@@ -132,6 +132,7 @@ void ProcessorInitializer()
     WorldProcessor::AddProcessor(new ProcessorObjectRotate());
     WorldProcessor::AddProcessor(new ProcessorObjectScale());
     WorldProcessor::AddProcessor(new ProcessorObjectSpawn());
+    WorldProcessor::AddProcessor(new ProcessorObjectState());
     WorldProcessor::AddProcessor(new ProcessorObjectTrap());
     WorldProcessor::AddProcessor(new ProcessorScriptLocalShort());
     WorldProcessor::AddProcessor(new ProcessorScriptLocalFloat());

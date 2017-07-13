@@ -15,6 +15,7 @@
     {"GetObjectCharge",             WorldFunctions::GetObjectCharge},\
     {"GetObjectGoldValue",          WorldFunctions::GetObjectGoldValue},\
     {"GetObjectScale",              WorldFunctions::GetObjectScale},\
+    {"GetObjectState",              WorldFunctions::GetObjectState},\
     {"GetObjectDoorState",          WorldFunctions::GetObjectDoorState},\
     {"GetObjectLockLevel",          WorldFunctions::GetObjectLockLevel},\
     {"GetObjectPosX",               WorldFunctions::GetObjectPosX},\
@@ -40,6 +41,7 @@
     {"SetObjectCharge",             WorldFunctions::SetObjectCharge},\
     {"SetObjectGoldValue",          WorldFunctions::SetObjectGoldValue},\
     {"SetObjectScale",              WorldFunctions::SetObjectScale},\
+    {"SetObjectState",              WorldFunctions::SetObjectState},\
     {"SetObjectDoorState",          WorldFunctions::SetObjectDoorState},\
     {"SetObjectLockLevel",          WorldFunctions::SetObjectLockLevel},\
     {"SetObjectDisarmState",        WorldFunctions::SetObjectDisarmState},\
@@ -60,6 +62,7 @@
     {"SendObjectLock",              WorldFunctions::SendObjectLock},\
     {"SendObjectTrap",              WorldFunctions::SendObjectTrap},\
     {"SendObjectScale",             WorldFunctions::SendObjectScale},\
+    {"SendObjectState",             WorldFunctions::SendObjectState},\
     {"SendDoorState",               WorldFunctions::SendDoorState},\
     {"SendContainer",               WorldFunctions::SendContainer},\
     \
@@ -84,6 +87,7 @@ public:
     static int GetObjectCharge(unsigned int i) noexcept;
     static int GetObjectGoldValue(unsigned int i) noexcept;
     static double GetObjectScale(unsigned int i) noexcept;
+    static bool GetObjectState(unsigned int i) noexcept;
     static int GetObjectDoorState(unsigned int i) noexcept;
     static int GetObjectLockLevel(unsigned int i) noexcept;
     static double GetObjectPosX(unsigned int i) noexcept;
@@ -109,6 +113,7 @@ public:
     static void SetObjectCharge(int charge) noexcept;
     static void SetObjectGoldValue(int goldValue) noexcept;
     static void SetObjectScale(double scale) noexcept;
+    static void SetObjectState(bool objectState) noexcept;
     static void SetObjectDoorState(int doorState) noexcept;
     static void SetObjectLockLevel(int lockLevel) noexcept;
     static void SetObjectDisarmState(bool disarmState) noexcept;
@@ -129,6 +134,7 @@ public:
     static void SendObjectLock() noexcept;
     static void SendObjectTrap() noexcept;
     static void SendObjectScale() noexcept;
+    static void SendObjectState() noexcept;
     static void SendDoorState() noexcept;
     static void SendContainer() noexcept;
 

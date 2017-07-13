@@ -8,3 +8,9 @@ PacketObjectState::PacketObjectState(RakNet::RakPeerInterface *peer) : WorldPack
     packetID = ID_OBJECT_STATE;
     hasCellData = true;
 }
+
+void PacketObjectState::Object(WorldObject &worldObject, bool send)
+{
+    WorldPacket::Object(worldObject, send);
+    RW(worldObject.objectState, send);
+}

@@ -9,6 +9,8 @@ namespace mwmp
     {
     public:
         PacketObjectState(RakNet::RakPeerInterface *peer);
+
+        virtual void Object(WorldObject &worldObject, bool send);
     };
 }
 

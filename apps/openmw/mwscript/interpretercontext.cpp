@@ -18,6 +18,7 @@
 #include <components/openmw-mp/Log.hpp>
 #include "../mwmp/Main.hpp"
 #include "../mwmp/Networking.hpp"
+#include "../mwmp/LocalPlayer.hpp"
 #include "../mwmp/WorldEvent.hpp"
 /*
     End of tes3mp addition
@@ -582,12 +583,46 @@ namespace MWScript
     {
         MWWorld::Ptr ref = getReferenceImp (id, false);
         MWBase::Environment::get().getWorld()->enable (ref);
+
+        /*
+            Start of tes3mp addition
+
+            Send an ID_OBJECT_STATE packet whenever an object is enabled, as long as
+            the player has finished character generation
+        */
+        if (mwmp::Main::get().getLocalPlayer()->hasFinishedCharGen())
+        {
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+            worldEvent->reset();
+            worldEvent->addObjectState(ref, true);
+            worldEvent->sendObjectState();
+        }
+        /*
+            End of tes3mp addition
+        */
     }
 
     void InterpreterContext::disable (const std::string& id)
     {
         MWWorld::Ptr ref = getReferenceImp (id, false);
         MWBase::Environment::get().getWorld()->disable (ref);
+
+        /*
+            Start of tes3mp addition
+
+            Send an ID_OBJECT_STATE packet whenever an object is disabled, as long as
+            the player has finished character generation
+        */
+        if (mwmp::Main::get().getLocalPlayer()->hasFinishedCharGen())
+        {
+            mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+            worldEvent->reset();
+            worldEvent->addObjectState(ref, false);
+            worldEvent->sendObjectState();
+        }
+        /*
+            End of tes3mp addition
+        */
     }
 
     int InterpreterContext::getMemberShort (const std::string& id, const std::string& name,
