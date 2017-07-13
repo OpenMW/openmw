@@ -287,6 +287,16 @@ namespace MWGui
 
     virtual int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
+    /*
+        Start of tes3mp addition
+
+        Allow the reading of a pressed button without resetting it
+    */
+    virtual int readPressedButton(bool reset);
+    /*
+        End of tes3mp addition
+    */
+
     virtual void onFrame (float frameDuration);
 
     /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.

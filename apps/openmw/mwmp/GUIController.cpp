@@ -197,13 +197,15 @@ bool mwmp::GUIController::hasFocusedElement()
     return false;
 }
 
-
 void mwmp::GUIController::update(float dt)
 {
     if (mChat != nullptr)
         mChat->Update(dt);
 
-    int pressedButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
+    // Make sure we read the pressed button without resetting it, because it may also get
+    // checked somewhere else
+    int pressedButton = MWBase::Environment::get().getWindowManager()->readPressedButton(false);
+
     if (pressedButton != -1 && calledMessageBox)
     {
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "Pressed: %d", pressedButton);
@@ -214,7 +216,6 @@ void mwmp::GUIController::update(float dt)
     }
 
     blockConsole();
-
 }
 
 void mwmp::GUIController::WM_UpdateVisible(MWGui::GuiMode mode)

@@ -29,7 +29,18 @@
 #include <components/files/configurationmanager.hpp>
 
 #include <components/version/version.hpp>
+
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
 #include <components/openmw-mp/Log.hpp>
+#include "mwmp/Main.hpp"
+#include "mwmp/GUIController.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include "mwinput/inputmanagerimp.hpp"
 
@@ -56,9 +67,6 @@
 #include "mwmechanics/mechanicsmanagerimp.hpp"
 
 #include "mwstate/statemanagerimp.hpp"
-
-#include "mwmp/Main.hpp"
-#include "mwmp/GUIController.hpp"
 
 namespace
 {

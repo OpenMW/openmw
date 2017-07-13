@@ -926,6 +926,19 @@ namespace MWGui
         return mMessageBoxManager->readPressedButton();
     }
 
+    /*
+        Start of tes3mp addition
+
+        Allow the reading of a pressed button without resetting it
+    */
+    int WindowManager::readPressedButton(bool reset)
+    {
+        return mMessageBoxManager->readPressedButton(reset);
+    }
+    /*
+        End of tes3mp addition
+    */
+
     std::string WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
     {
         const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().search(id);
