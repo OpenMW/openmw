@@ -37,6 +37,9 @@ void PacketPlayerFaction::Packet(RakNet::BitStream *bs, bool send)
         if (player->factionChanges.action == FactionChanges::EXPULSION)
             RW(faction.isExpelled, send);
 
+        if (player->factionChanges.action == FactionChanges::REPUTATION)
+            RW(faction.reputation, send);
+
         if (!send)
             player->factionChanges.factions.push_back(faction);
     }

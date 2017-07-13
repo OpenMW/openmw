@@ -982,6 +982,9 @@ void LocalPlayer::setFactions()
                     ptrNpcStats.clearExpelled(faction.factionId);
             }
         }
+
+        else if (factionChanges.action == mwmp::FactionChanges::REPUTATION)
+            ptrNpcStats.setFactionReputation(faction.factionId, faction.reputation);
     }
 }
 
@@ -1182,6 +1185,21 @@ void LocalPlayer::sendFactionExpulsionState(const std::string& factionId, bool i
     mwmp::Faction faction;
     faction.factionId = factionId;
     faction.isExpelled = isExpelled;
+
+    factionChanges.factions.push_back(faction);
+
+    getNetworking()->getPlayerPacket(ID_PLAYER_FACTION)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_FACTION)->Send();
+}
+
+void LocalPlayer::sendFactionReputation(const std::string& factionId, int reputation)
+{
+    factionChanges.factions.clear();
+    factionChanges.action = FactionChanges::REPUTATION;
+
+    mwmp::Faction faction;
+    faction.factionId = factionId;
+    faction.reputation = reputation;
 
     factionChanges.factions.push_back(faction);
 

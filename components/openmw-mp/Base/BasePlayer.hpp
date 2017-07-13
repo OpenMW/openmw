@@ -45,6 +45,7 @@ namespace mwmp
     {
         std::string factionId;
         int rank;
+        int reputation;
         bool isExpelled;
     };
 
@@ -91,7 +92,8 @@ namespace mwmp
         enum FACTION_ACTION
         {
             RANK = 0,
-            EXPULSION = 1
+            EXPULSION = 1,
+            REPUTATION = 2
         };
 
         int action; // 0 - Rank, 1 - Expulsion state, 2 - Both

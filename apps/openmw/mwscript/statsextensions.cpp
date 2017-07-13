@@ -609,7 +609,8 @@ namespace MWScript
 
                             Send an ID_PLAYER_FACTION packet every time a player joins a faction
                         */
-                        mwmp::Main::get().getLocalPlayer()->sendFactionRank(factionID, player.getClass().getNpcStats(player).getFactionRanks().at(factionID));
+                        int newRank = player.getClass().getNpcStats(player).getFactionRanks().at(factionID);
+                        mwmp::Main::get().getLocalPlayer()->sendFactionRank(factionID, newRank);
                         /*
                             End of tes3mp addition
                         */
@@ -658,7 +659,8 @@ namespace MWScript
 
                             Send an ID_PLAYER_FACTION packet every time a player rises in a faction
                         */
-                        mwmp::Main::get().getLocalPlayer()->sendFactionRank(factionID, player.getClass().getNpcStats(player).getFactionRanks().at(factionID));
+                        int newRank = player.getClass().getNpcStats(player).getFactionRanks().at(factionID);
+                        mwmp::Main::get().getLocalPlayer()->sendFactionRank(factionID, newRank);
                         /*
                             End of tes3mp addition
                         */
@@ -700,7 +702,8 @@ namespace MWScript
 
                             Send an ID_PLAYER_FACTION packet every time a player falls in a faction
                         */
-                        mwmp::Main::get().getLocalPlayer()->sendFactionRank(factionID, player.getClass().getNpcStats(player).getFactionRanks().at(factionID));
+                        int newRank = player.getClass().getNpcStats(player).getFactionRanks().at(factionID);
+                        mwmp::Main::get().getLocalPlayer()->sendFactionRank(factionID, newRank);
                         /*
                             End of tes3mp addition
                         */
@@ -877,6 +880,16 @@ namespace MWScript
 
                     MWWorld::Ptr player = MWMechanics::getPlayer();
                     player.getClass().getNpcStats (player).setFactionReputation (factionId, value);
+
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_PLAYER_FACTION packet every time a player's faction reputation changes
+                    */
+                    mwmp::Main::get().getLocalPlayer()->sendFactionReputation(Misc::StringUtils::lowerCase(factionId), value);
+                    /*
+                        End of tes3mp addition
+                    */
                 }
         };
 
@@ -913,6 +926,17 @@ namespace MWScript
                     player.getClass().getNpcStats (player).setFactionReputation (factionId,
                         player.getClass().getNpcStats (player).getFactionReputation (factionId)+
                         value);
+
+                    /*
+                        Start of tes3mp addition
+
+                        Send an ID_PLAYER_FACTION packet every time a player's faction reputation changes
+                    */
+                    int newReputation = player.getClass().getNpcStats(player).getFactionReputation(factionId);
+                    mwmp::Main::get().getLocalPlayer()->sendFactionReputation(Misc::StringUtils::lowerCase(factionId), newReputation);
+                    /*
+                        End of tes3mp addition
+                    */
                 }
         };
 

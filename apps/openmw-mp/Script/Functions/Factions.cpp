@@ -6,6 +6,9 @@
 
 using namespace mwmp;
 
+Faction tempFaction;
+const Faction emptyFaction = {};
+
 void FactionFunctions::InitializeFactionChanges(unsigned short pid) noexcept
 {
     Player *player;
@@ -57,6 +60,14 @@ bool FactionFunctions::GetFactionExpelledState(unsigned short pid, unsigned int 
     return player->factionChanges.factions.at(i).isExpelled;
 }
 
+int FactionFunctions::GetFactionReputation(unsigned short pid, unsigned int i) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->factionChanges.factions.at(i).reputation;
+}
+
 void FactionFunctions::SetFactionChangesAction(unsigned short pid, unsigned char action) noexcept
 {
     Player *player;
@@ -65,17 +76,34 @@ void FactionFunctions::SetFactionChangesAction(unsigned short pid, unsigned char
     player->factionChanges.action = action;
 }
 
-void FactionFunctions::AddFaction(unsigned short pid, const char* factionId, unsigned int rank, bool isExpelled) noexcept
+void FactionFunctions::SetFactionId(const char* factionId) noexcept
+{
+    tempFaction.factionId = factionId;
+}
+
+void FactionFunctions::SetFactionRank(unsigned int rank) noexcept
+{
+    tempFaction.rank = rank;
+}
+
+void FactionFunctions::SetFactionExpulsionState(bool isExpelled) noexcept
+{
+    tempFaction.isExpelled = isExpelled;
+}
+
+void FactionFunctions::SetFactionReputation(int reputation) noexcept
+{
+    tempFaction.reputation = reputation;
+}
+
+void FactionFunctions::AddFaction(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
 
-    mwmp::Faction faction;
-    faction.factionId = factionId;
-    faction.rank = rank;
-    faction.isExpelled = isExpelled;
+    player->factionChanges.factions.push_back(tempFaction);
 
-    player->factionChanges.factions.push_back(faction);
+    tempFaction = emptyFaction;
 }
 
 void FactionFunctions::SendFactionChanges(unsigned short pid, bool toOthers) noexcept

@@ -75,6 +75,7 @@ namespace mwmp
         void sendJournalIndex(const std::string& quest, int index);
         void sendFactionRank(const std::string& factionId, int rank);
         void sendFactionExpulsionState(const std::string& factionId, bool isExpelled);
+        void sendFactionReputation(const std::string& factionId, int reputation);
         void sendTopic(const std::string& topic);
         void sendKill(const std::string& refId, int number);
         void sendBook(const std::string& bookId);
