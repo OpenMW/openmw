@@ -7,7 +7,8 @@
 #include <iostream>
 using namespace std;
 
-void MechanicsFunctions::Jail(unsigned short pid, int jailDays, bool ignoreJailTeleportation, bool ignoreJailSkillIncreases, const char* jailText) noexcept
+void MechanicsFunctions::Jail(unsigned short pid, int jailDays, bool ignoreJailTeleportation, bool ignoreJailSkillIncreases,
+                              const char* jailProgressText, const char* jailEndText) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, );
@@ -15,7 +16,8 @@ void MechanicsFunctions::Jail(unsigned short pid, int jailDays, bool ignoreJailT
     player->jailDays = jailDays;
     player->ignoreJailTeleportation = ignoreJailTeleportation;
     player->ignoreJailSkillIncreases = ignoreJailSkillIncreases;
-    player->jailText = jailText;
+    player->jailProgressText = jailProgressText;
+    player->jailEndText = jailEndText;
 
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_JAIL)->setPlayer(player);
     mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_JAIL)->Send(false);

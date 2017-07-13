@@ -56,6 +56,17 @@ namespace MWGui
         mProgressBar->setScrollRange(100+1);
         mProgressBar->setScrollPosition(0);
         mProgressBar->setTrackSize(0);
+
+        /*
+            Start of tes3mp addition
+
+            If we've received a packet overriding the default jail progress text, use the new text
+        */
+        if (!mwmp::Main::get().getLocalPlayer()->jailProgressText.empty())
+            setText("LoadingText", mwmp::Main::get().getLocalPlayer()->jailProgressText);
+        /*
+            End of tes3mp addition
+        */
     }
 
     void JailScreen::onFrame(float dt)
@@ -139,12 +150,10 @@ namespace MWGui
         /*
             Start of tes3mp addition
 
-            If we've received a packet overriding the default jail text, use the new text
+            If we've received a packet overriding the default jail end text, use the new text
         */
-        if (!mwmp::Main::get().getLocalPlayer()->jailText.empty())
-        {
-            message = mwmp::Main::get().getLocalPlayer()->jailText;
-        }
+        if (!mwmp::Main::get().getLocalPlayer()->jailEndText.empty())
+            message = mwmp::Main::get().getLocalPlayer()->jailEndText;
         /*
             End of tes3mp addition
         */
@@ -187,7 +196,8 @@ namespace MWGui
         */
         mwmp::Main::get().getLocalPlayer()->ignoreJailTeleportation = false;
         mwmp::Main::get().getLocalPlayer()->ignoreJailSkillIncreases = false;
-        mwmp::Main::get().getLocalPlayer()->jailText = "";
+        mwmp::Main::get().getLocalPlayer()->jailProgressText = "";
+        mwmp::Main::get().getLocalPlayer()->jailEndText = "";
         /*
             End of tes3mp addition
         */
