@@ -1,3 +1,25 @@
+0.6.0
+-----
+
+* Synchronization of NPC & creature positions, stats, equipment, speech, attacks, spells & animations
+* Reworked server browser with major stability fixes and additional information about servers
+* Synchronization of client & server plugins (non-automated)
+* Synchronization of leveled & summoned creature spawns
+* Synchronization of journal entries
+* Synchronization of faction ranks, reputation and expulsion states
+* Synchronization of dialogue topics
+* Synchronization of kill counts checked in quest progression
+* Synchronization of trap states
+* Synchronization of object states (i.e. whether they are enabled or disabled)
+* Synchronization of time of day
+* Saving & loading of read skill books
+* Fix to messagebox buttons for client scripts
+* Fix to synchronization of object locking/unlocking
+* Packet for jailing players
+* Packet for setting the difficulty for each player
+* Bandwidth optimization for all packet types
+* Various fixes to client & server crashes
+
 0.5.2
 -----
 

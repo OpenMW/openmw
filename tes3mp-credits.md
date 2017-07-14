@@ -1,33 +1,26 @@
 tes3mp Credits
 ==============
 
-Lead programmers
+Programmers
 ----------------
 
     Stanislav Zhukov (Koncord) - Overall architecture, networking & scripting systems, player sync, server browser
-    David Cernat - World sync, NPC sync, state saving and loading, general bug fixes
+    David Cernat - World, NPC & quest sync, state saving & loading, general bug fixes
 
 
 Additional programming
 ----------------------
 
     Grim Kriegor - Lua teleportation commands, early script fixes
-    Battlerax - Various fixes
+    Battlerax - Various small fixes
 
 
-Testers
--------
+Community administrators
+------------------------
 
-    Volk Milit (Ja'Virr-Dar) - Team manager, Debian Linux
-    Shnatsel - Debian Linux
-    Goodevil - Mint and Xubuntu Linux
-
-
-Public relations and translations
----------------------------------
-
-    Volk Milit (Ja'Virr-Dar) - Public relations & news writer
-    Shnatsel - Translator & news writer
+    Volk Milit (Ja'Virr-Dar)
+    Texafornian
+    Testman
 
 
 Art
@@ -36,13 +29,29 @@ Art
     Texafornian - tes3mp logo
 
 
-Special thanks
---------------
+Special thanks (in alphabetical order)
+--------------------------------------
 
     Camul
+    Capostrophic
+    Dave
+    DestinedToDie
+    Gluka
+    Goodevil
+    greetasdf
+    Ignatious
     iGrebla
+    James Wards of Gore Corps LAN Club (www.gorecorps.co.nz)
+    Jeremiah
+    Lewis Sadlier
     Luc Keating
-    Norc
+    Michael Zagar (Zoops)
+    Olaxan
+    psi29a
     Rhiyo
-    Texafornian
-    All the developers of OpenMW
+    Scorcio
+    Shnatsel
+    Zaphida
+    Zaric Zhakaron
+    All the developers of OpenMW for creating an amazing open source project
+
