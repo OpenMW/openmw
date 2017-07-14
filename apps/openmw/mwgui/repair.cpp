@@ -11,7 +11,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
@@ -66,7 +65,7 @@ void Repair::exit()
 
 void Repair::startRepairItem(const MWWorld::Ptr &item)
 {
-    MWBase::Environment::get().getSoundManager()->playSound("Item Repair Up",1,1);
+    MWBase::Environment::get().getWindowManager()->playSound("Item Repair Up");
 
     mRepair.setTool(item);
 
@@ -135,7 +134,7 @@ void Repair::onItemSelected(MWWorld::Ptr item)
 
     mRepair.setTool(item);
 
-    MWBase::Environment::get().getSoundManager()->playSound(item.getClass().getDownSoundId(item), 1, 1);
+    MWBase::Environment::get().getWindowManager()->playSound(item.getClass().getDownSoundId(item));
     updateRepairView();
 }
 

@@ -8,7 +8,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
@@ -158,7 +157,7 @@ namespace MWGui
 
         if (!mPtr.getCell()->isExterior())
             // Interior cell -> mages guild transport
-            MWBase::Environment::get().getSoundManager()->playSound("mysticism cast", 1, 1);
+            MWBase::Environment::get().getWindowManager()->playSound("mysticism cast");
 
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 

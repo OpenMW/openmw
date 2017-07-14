@@ -18,7 +18,6 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
@@ -239,7 +238,7 @@ namespace MWGui
             // Can't give conjured items to a merchant
             if (item.mFlags & ItemStack::Flag_Bound)
             {
-                MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+                MWBase::Environment::get().getWindowManager()->playSound(sound);
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog9}");
                 return;
             }
@@ -248,7 +247,7 @@ namespace MWGui
             int services = MWBase::Environment::get().getWindowManager()->getTradeWindow()->getMerchantServices();
             if (!object.getClass().canSell(object, services))
             {
-                MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+                MWBase::Environment::get().getWindowManager()->playSound(sound);
                 MWBase::Environment::get().getWindowManager()->
                         messageBox("#{sBarterDialog4}");
                 return;
@@ -322,7 +321,7 @@ namespace MWGui
         ensureSelectedItemUnequipped(count);
         const ItemStack& item = mTradeModel->getItem(mSelectedItem);
         std::string sound = item.mBase.getClass().getDownSoundId(item.mBase);
-        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+        MWBase::Environment::get().getWindowManager()->playSound(sound);
 
         if (item.mType == ItemStack::Type_Barter)
         {

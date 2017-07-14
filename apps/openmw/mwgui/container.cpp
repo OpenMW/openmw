@@ -5,7 +5,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -224,7 +223,7 @@ namespace MWGui
                     // play the sound of the first object
                     MWWorld::Ptr item = mModel->getItem(i).mBase;
                     std::string sound = item.getClass().getUpSoundId(item);
-                    MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+                    MWBase::Environment::get().getWindowManager()->playSound(sound);
                 }
 
                 const ItemStack& item = mModel->getItem(i);

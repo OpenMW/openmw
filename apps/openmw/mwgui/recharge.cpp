@@ -12,7 +12,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
@@ -130,7 +129,7 @@ void Recharge::onItemSelected(MWWorld::Ptr item)
     mGemIcon->setUserString ("ToolTipType", "ItemPtr");
     mGemIcon->setUserData(item);
 
-    MWBase::Environment::get().getSoundManager()->playSound(item.getClass().getDownSoundId(item), 1, 1);
+    MWBase::Environment::get().getWindowManager()->playSound(item.getClass().getDownSoundId(item));
     updateView();
 }
 
@@ -175,7 +174,7 @@ void Recharge::onItemClicked(MyGUI::Widget *sender, const MWWorld::Ptr& item)
         item.getCellRef().setEnchantmentCharge(
             std::min(item.getCellRef().getEnchantmentCharge() + restored, static_cast<float>(enchantment->mData.mCharge)));
 
-        MWBase::Environment::get().getSoundManager()->playSound("Enchant Success",1,1);
+        MWBase::Environment::get().getWindowManager()->playSound("Enchant Success");
 
         player.getClass().getContainerStore(player).restack(item);
 
@@ -183,7 +182,7 @@ void Recharge::onItemClicked(MyGUI::Widget *sender, const MWWorld::Ptr& item)
     }
     else
     {
-        MWBase::Environment::get().getSoundManager()->playSound("Enchant Fail",1,1);
+        MWBase::Environment::get().getWindowManager()->playSound("Enchant Fail");
     }
 
     gem.getContainerStore()->remove(gem, 1, player);

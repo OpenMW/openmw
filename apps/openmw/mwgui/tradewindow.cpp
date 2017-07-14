@@ -10,7 +10,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
@@ -211,7 +210,7 @@ namespace MWGui
     {
         const ItemStack& item = mTradeModel->getItem(mItemToSell);
         std::string sound = item.mBase.getClass().getDownSoundId(item.mBase);
-        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+        MWBase::Environment::get().getWindowManager()->playSound(sound);
 
         TradeItemModel* playerTradeModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel();
 
@@ -356,9 +355,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addResponse(
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sBarterDialog5")->getString());
 
-        std::string sound = "Item Gold Up";
-        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
-
+        MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
     }
 

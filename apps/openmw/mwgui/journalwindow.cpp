@@ -14,7 +14,6 @@
 #include <components/widgets/list.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/journal.hpp"
 
@@ -516,8 +515,9 @@ namespace
 
         void notifyClose(MyGUI::Widget* _sender)
         {
-            MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
-            MWBase::Environment::get().getWindowManager ()->popGuiMode ();
+            MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
+            winMgr->playSound("book close");
+            winMgr->popGuiMode();
         }
 
         void notifyMouseWheel(MyGUI::Widget* sender, int rel)
