@@ -55,7 +55,7 @@ int FactionFunctions::GetFactionRank(unsigned short pid, unsigned int i) noexcep
 bool FactionFunctions::GetFactionExpelledState(unsigned short pid, unsigned int i) noexcept
 {
     Player *player;
-    GET_PLAYER(pid, player, 0);
+    GET_PLAYER(pid, player, false);
 
     return player->factionChanges.factions.at(i).isExpelled;
 }

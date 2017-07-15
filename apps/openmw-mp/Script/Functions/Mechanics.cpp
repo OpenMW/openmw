@@ -7,6 +7,32 @@
 #include <iostream>
 using namespace std;
 
+bool MechanicsFunctions::IsWerewolf(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->isWerewolf;
+}
+
+void MechanicsFunctions::SetWerewolfState(unsigned short pid, bool isWerewolf)
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->isWerewolf = isWerewolf;
+}
+
+void MechanicsFunctions::SendShapeshift(unsigned short pid)
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_SHAPESHIFT)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_SHAPESHIFT)->Send(false);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_SHAPESHIFT)->Send(true);
+}
+
 void MechanicsFunctions::Jail(unsigned short pid, int jailDays, bool ignoreJailTeleportation, bool ignoreJailSkillIncreases,
                               const char* jailProgressText, const char* jailEndText) noexcept
 {
