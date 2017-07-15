@@ -37,6 +37,7 @@ namespace mwmp
         void setAnimFlags();
         void setEquipment();
         void setCell();
+        void setShapeshift();
 
         void updateMarker();
         void removeMarker();

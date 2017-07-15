@@ -1224,6 +1224,17 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
                     MWBase::Environment::get().getMechanicsManager()->setWerewolf(ptr, set);
+
+                    /*
+                        Start of tes3mp addition
+
+                        When the player's werewolf state changes, send an ID_PLAYER_SHAPESHIFT packet
+                    */
+                    if (ptr == MWMechanics::getPlayer())
+                        mwmp::Main::get().getLocalPlayer()->sendShapeshift(set);
+                    /*
+                        End of tes3mp addition
+                    */
                 }
         };
 

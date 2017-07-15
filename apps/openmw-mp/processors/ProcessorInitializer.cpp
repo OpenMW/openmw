@@ -33,6 +33,7 @@
 #include "player/ProcessorPlayerPosition.hpp"
 #include "player/ProcessorPlayerRest.hpp"
 #include "player/ProcessorPlayerResurrect.hpp"
+#include "player/ProcessorPlayerShapeshift.hpp"
 #include "player/ProcessorPlayerSkill.hpp"
 #include "player/ProcessorPlayerSpeech.hpp"
 #include "player/ProcessorPlayerSpellbook.hpp"
@@ -101,6 +102,7 @@ void ProcessorInitializer()
     PlayerProcessor::AddProcessor(new ProcessorPlayerPosition());
     PlayerProcessor::AddProcessor(new ProcessorPlayerRest());
     PlayerProcessor::AddProcessor(new ProcessorPlayerResurrect());
+    PlayerProcessor::AddProcessor(new ProcessorPlayerShapeshift());
     PlayerProcessor::AddProcessor(new ProcessorPlayerSkill());
     PlayerProcessor::AddProcessor(new ProcessorPlayerSpeech());
     PlayerProcessor::AddProcessor(new ProcessorPlayerSpellbook());

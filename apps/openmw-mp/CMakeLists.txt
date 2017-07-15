@@ -131,9 +131,10 @@ set(PROCESSORS_PLAYER
         processors/player/ProcessorPlayerJournal.hpp processors/player/ProcessorPlayerKillCount.hpp
         processors/player/ProcessorPlayerLevel.hpp processors/player/ProcessorPlayerMap.hpp
         processors/player/ProcessorPlayerPosition.hpp processors/player/ProcessorPlayerRest.hpp
-        processors/player/ProcessorPlayerResurrect.hpp processors/player/ProcessorPlayerSkill.hpp
-        processors/player/ProcessorPlayerSpeech.hpp processors/player/ProcessorPlayerSpellbook.hpp
-        processors/player/ProcessorPlayerStatsDynamic.hpp processors/player/ProcessorPlayerTopic.hpp
+        processors/player/ProcessorPlayerResurrect.hpp processors/player/ProcessorPlayerShapeshift.hpp
+        processors/player/ProcessorPlayerSkill.hpp processors/player/ProcessorPlayerSpeech.hpp
+        processors/player/ProcessorPlayerSpellbook.hpp processors/player/ProcessorPlayerStatsDynamic.hpp
+        processors/player/ProcessorPlayerTopic.hpp
         )
 
 source_group(tes3mp-server\\processors\\player FILES ${PROCESSORS_PLAYER})

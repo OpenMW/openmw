@@ -145,6 +145,7 @@ public:
             {"OnPlayerInventory",        Function<void, unsigned short>()},
             {"OnPlayerJournal",          Function<void, unsigned short>()},
             {"OnPlayerFaction",          Function<void, unsigned short>()},
+            {"OnPlayerShapeshift",       Function<void, unsigned short>()},
             {"OnPlayerSpellbook",        Function<void, unsigned short>()},
             {"OnPlayerTopic",            Function<void, unsigned short>()},
             {"OnPlayerDisposition",      Function<void, unsigned short>()},

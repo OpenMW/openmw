@@ -149,8 +149,8 @@ bool LocalPlayer::charGenThread()
     else if (charGenStage.end != 0)
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        MWWorld::Ptr player = world->getPlayerPtr();
-        npc = *player.get<ESM::NPC>()->mBase;
+        MWWorld::Ptr ptrPlayer = world->getPlayerPtr();
+        npc = *ptrPlayer.get<ESM::NPC>()->mBase;
         birthsign = world->getPlayer().getBirthSign();
 
         LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_BASEINFO to server with my CharGen info");
@@ -187,9 +187,9 @@ bool LocalPlayer::hasFinishedCharGen()
 
 void LocalPlayer::updateStatsDynamic(bool forceUpdate)
 {
-    MWWorld::Ptr player = getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
 
-    MWMechanics::CreatureStats *ptrCreatureStats = &player.getClass().getCreatureStats(player);
+    MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
     MWMechanics::DynamicStat<float> health(ptrCreatureStats->getHealth());
     MWMechanics::DynamicStat<float> magicka(ptrCreatureStats->getMagicka());
     MWMechanics::DynamicStat<float> fatigue(ptrCreatureStats->getFatigue());
@@ -223,8 +223,8 @@ void LocalPlayer::updateStatsDynamic(bool forceUpdate)
 
 void LocalPlayer::updateAttributes(bool forceUpdate)
 {
-    MWWorld::Ptr player = getPlayerPtr();
-    const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
+    const MWMechanics::NpcStats &ptrNpcStats = ptrPlayer.getClass().getNpcStats(ptrPlayer);
     bool attributesChanged = false;
 
     for (int i = 0; i < 8; ++i)
@@ -245,8 +245,8 @@ void LocalPlayer::updateAttributes(bool forceUpdate)
 
 void LocalPlayer::updateSkills(bool forceUpdate)
 {
-    MWWorld::Ptr player = getPlayerPtr();
-    const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
+    const MWMechanics::NpcStats &ptrNpcStats = ptrPlayer.getClass().getNpcStats(ptrPlayer);
 
     // Track whether skills have changed their values, but not whether
     // progress towards skill increases has changed (to not spam server
@@ -282,8 +282,8 @@ void LocalPlayer::updateSkills(bool forceUpdate)
 
 void LocalPlayer::updateLevel(bool forceUpdate)
 {
-    MWWorld::Ptr player = getPlayerPtr();
-    const MWMechanics::CreatureStats &ptrCreatureStats = player.getClass().getCreatureStats(player);
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
+    const MWMechanics::CreatureStats &ptrCreatureStats = ptrPlayer.getClass().getCreatureStats(ptrPlayer);
 
     if (ptrCreatureStats.getLevel() != creatureStats.mLevel || forceUpdate)
     {
@@ -299,8 +299,8 @@ void LocalPlayer::updateLevel(bool forceUpdate)
 
 void LocalPlayer::updateBounty(bool forceUpdate)
 {
-    MWWorld::Ptr player = getPlayerPtr();
-    const MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
+    const MWMechanics::NpcStats &ptrNpcStats = ptrPlayer.getClass().getNpcStats(ptrPlayer);
 
     if (ptrNpcStats.getBounty() != npcStats.mBounty || forceUpdate)
     {
@@ -313,14 +313,14 @@ void LocalPlayer::updateBounty(bool forceUpdate)
 void LocalPlayer::updatePosition(bool forceUpdate)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = world->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = world->getPlayerPtr();
 
     static bool posWasChanged = false;
     static bool isJumping = false;
     static bool sentJumpEnd = true;
     static float oldRot[2] = {0};
 
-    position = player.getRefData().getPosition();
+    position = ptrPlayer.getRefData().getPosition();
 
     bool posIsChanging = (direction.pos[0] != 0 || direction.pos[1] != 0 ||
             position.rot[0] != oldRot[0] || position.rot[2] != oldRot[1]);
@@ -332,13 +332,13 @@ void LocalPlayer::updatePosition(bool forceUpdate)
 
         posWasChanged = posIsChanging;
 
-        if (!isJumping && !world->isOnGround(player) && !world->isFlying(player))
+        if (!isJumping && !world->isOnGround(ptrPlayer) && !world->isFlying(ptrPlayer))
             isJumping = true;
 
         getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->setPlayer(this);
         getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->Send();
     }
-    else if (isJumping && world->isOnGround(player))
+    else if (isJumping && world->isOnGround(ptrPlayer))
     {
         isJumping = false;
         sentJumpEnd = false;
@@ -347,7 +347,7 @@ void LocalPlayer::updatePosition(bool forceUpdate)
     else if (!sentJumpEnd)
     {
         sentJumpEnd = true;
-        position = player.getRefData().getPosition();
+        position = ptrPlayer.getRefData().getPosition();
         getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->setPlayer(this);
         getNetworking()->getPlayerPacket(ID_PLAYER_POSITION)->Send();
     }
@@ -402,14 +402,14 @@ void LocalPlayer::updateChar()
 
 void LocalPlayer::updateEquipment(bool forceUpdate)
 {
-    MWWorld::Ptr player = getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
 
     static bool equipmentChanged = false;
 
     if (forceUpdate)
         equipmentChanged = true;
 
-    MWWorld::InventoryStore &invStore = player.getClass().getInventoryStore(player);
+    MWWorld::InventoryStore &invStore = ptrPlayer.getClass().getInventoryStore(ptrPlayer);
     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; slot++)
     {
         auto &item = equipedItems[slot];
@@ -425,8 +425,8 @@ void LocalPlayer::updateEquipment(bool forceUpdate)
                 if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
                 {
                     MWMechanics::WeaponType weaptype;
-                    MWMechanics::getActiveWeapon(player.getClass().getCreatureStats(player),
-                                                 player.getClass().getInventoryStore(player), &weaptype);
+                    MWMechanics::getActiveWeapon(ptrPlayer.getClass().getCreatureStats(ptrPlayer),
+                                                 ptrPlayer.getClass().getInventoryStore(ptrPlayer), &weaptype);
                     if (weaptype != MWMechanics::WeapType_Thrown)
                         item.count = 1;
                 }
@@ -536,9 +536,9 @@ void LocalPlayer::updateAttack()
 
 void LocalPlayer::updateDeadState(bool forceUpdate)
 {
-    MWWorld::Ptr player = getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
 
-    MWMechanics::NpcStats *ptrNpcStats = &player.getClass().getNpcStats(player);
+    MWMechanics::NpcStats *ptrNpcStats = &ptrPlayer.getClass().getNpcStats(ptrPlayer);
     static bool isDead = false;
 
     if (ptrNpcStats->isDead() && !isDead)
@@ -561,9 +561,9 @@ void LocalPlayer::updateDeadState(bool forceUpdate)
 void LocalPlayer::updateAnimFlags(bool forceUpdate)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = world->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = world->getPlayerPtr();
 
-    MWMechanics::NpcStats ptrNpcStats = player.getClass().getNpcStats(player);
+    MWMechanics::NpcStats ptrNpcStats = ptrPlayer.getClass().getNpcStats(ptrPlayer);
     using namespace MWMechanics;
 
     static bool wasRunning = ptrNpcStats.getMovementFlag(CreatureStats::Flag_Run);
@@ -576,16 +576,16 @@ void LocalPlayer::updateAnimFlags(bool forceUpdate)
     bool isForceJumping = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceJump);
     bool isForceMoveJumping = ptrNpcStats.getMovementFlag(CreatureStats::Flag_ForceMoveJump);
     
-    isFlying = world->isFlying(player);
-    bool isJumping = !world->isOnGround(player) && !isFlying;
+    isFlying = world->isFlying(ptrPlayer);
+    bool isJumping = !world->isOnGround(ptrPlayer) && !isFlying;
 
     // We need to send a new packet at the end of jumping and flying too,
     // so keep track of what we were doing last frame
     static bool wasJumping = false;
     static bool wasFlying = false;
 
-    MWMechanics::DrawState_ currentDrawState = player.getClass().getNpcStats(player).getDrawState();
-    static MWMechanics::DrawState_ lastDrawState = player.getClass().getNpcStats(player).getDrawState();
+    MWMechanics::DrawState_ currentDrawState = ptrPlayer.getClass().getNpcStats(ptrPlayer).getDrawState();
+    static MWMechanics::DrawState_ lastDrawState = ptrPlayer.getClass().getNpcStats(ptrPlayer).getDrawState();
 
     if (wasRunning != isRunning ||
         wasSneaking != isSneaking || wasForceJumping != isForceJumping ||
@@ -649,7 +649,7 @@ void LocalPlayer::addSpells()
 
     for (const auto &spell : spellbookChanges.spells)
         ptrSpells.add(spell.mId);
-        
+
 }
 
 void LocalPlayer::addJournalItems()
@@ -714,9 +714,9 @@ void LocalPlayer::removeSpells()
 void LocalPlayer::setDynamicStats()
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = world->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = world->getPlayerPtr();
 
-    MWMechanics::CreatureStats *ptrCreatureStats = &player.getClass().getCreatureStats(player);
+    MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
     MWMechanics::DynamicStat<float> dynamicStat;
 
     for (int i = 0; i < 3; ++i)
@@ -731,9 +731,9 @@ void LocalPlayer::setDynamicStats()
 void LocalPlayer::setAttributes()
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = world->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = world->getPlayerPtr();
 
-    MWMechanics::CreatureStats *ptrCreatureStats = &player.getClass().getCreatureStats(player);
+    MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
     MWMechanics::AttributeValue attributeValue;
 
     for (int i = 0; i < 8; ++i)
@@ -746,9 +746,9 @@ void LocalPlayer::setAttributes()
 void LocalPlayer::setSkills()
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = world->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = world->getPlayerPtr();
 
-    MWMechanics::NpcStats *ptrNpcStats = &player.getClass().getNpcStats(player);
+    MWMechanics::NpcStats *ptrNpcStats = &ptrPlayer.getClass().getNpcStats(ptrPlayer);
     MWMechanics::SkillValue skillValue;
 
     for (int i = 0; i < 27; ++i)
@@ -766,25 +766,25 @@ void LocalPlayer::setSkills()
 void LocalPlayer::setLevel()
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = world->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = world->getPlayerPtr();
 
-    MWMechanics::CreatureStats *ptrCreatureStats = &player.getClass().getCreatureStats(player);
+    MWMechanics::CreatureStats *ptrCreatureStats = &ptrPlayer.getClass().getCreatureStats(ptrPlayer);
     ptrCreatureStats->setLevel(creatureStats.mLevel);
 }
 
 void LocalPlayer::setBounty()
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = world->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = world->getPlayerPtr();
 
-    MWMechanics::NpcStats *ptrNpcStats = &player.getClass().getNpcStats(player);
+    MWMechanics::NpcStats *ptrNpcStats = &ptrPlayer.getClass().getNpcStats(ptrPlayer);
     ptrNpcStats->setBounty(npcStats.mBounty);
 }
 
 void LocalPlayer::setPosition()
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = world->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = world->getPlayerPtr();
 
     // If we're ignoring this position packet because of an invalid cell change,
     // don't make the next one get ignored as well
@@ -793,8 +793,8 @@ void LocalPlayer::setPosition()
     else
     {
         world->getPlayer().setTeleported(true);
-        world->moveObject(player, position.pos[0], position.pos[1], position.pos[2]);
-        world->rotateObject(player, position.rot[0], position.rot[1], position.rot[2]);
+        world->moveObject(ptrPlayer, position.pos[0], position.pos[1], position.pos[2]);
+        world->rotateObject(ptrPlayer, position.rot[0], position.rot[1], position.rot[2]);
     }
 
     updatePosition(true);
@@ -806,7 +806,7 @@ void LocalPlayer::setPosition()
 void LocalPlayer::setCell()
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    MWWorld::Ptr player = world->getPlayerPtr();
+    MWWorld::Ptr ptrPlayer = world->getPlayerPtr();
     ESM::Position pos;
 
     // To avoid crashes, close any container menus this player may be in
@@ -829,12 +829,12 @@ void LocalPlayer::setCell()
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
         world->changeToExteriorCell(pos, true);
-        world->fixPosition(player);
+        world->fixPosition(ptrPlayer);
     }
     else if (world->findExteriorPosition(cell.mName, pos))
     {
         world->changeToExteriorCell(pos, true);
-        world->fixPosition(player);
+        world->fixPosition(ptrPlayer);
     }
     else
     {
@@ -950,8 +950,8 @@ void LocalPlayer::setSpellbook()
 
 void LocalPlayer::setFactions()
 {
-    MWWorld::Ptr player = getPlayerPtr();
-    MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
+    MWMechanics::NpcStats &ptrNpcStats = ptrPlayer.getClass().getNpcStats(ptrPlayer);
 
     for (const auto &faction : factionChanges.factions)
     {
@@ -997,8 +997,8 @@ void LocalPlayer::setKills()
 
 void LocalPlayer::setBooks()
 {
-    MWWorld::Ptr player = getPlayerPtr();
-    MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
+    MWMechanics::NpcStats &ptrNpcStats = ptrPlayer.getClass().getNpcStats(ptrPlayer);
 
     for (const auto &book : bookChanges.books)
         ptrNpcStats.flagAsUsed(book.bookId);
@@ -1006,8 +1006,8 @@ void LocalPlayer::setBooks()
 
 void LocalPlayer::setMapExplored()
 {
-    MWWorld::Ptr player = getPlayerPtr();
-    MWMechanics::NpcStats &ptrNpcStats = player.getClass().getNpcStats(player);
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
+    MWMechanics::NpcStats &ptrNpcStats = ptrPlayer.getClass().getNpcStats(ptrPlayer);
 
     for (const auto &cellExplored : mapChanges.cellsExplored)
     {
@@ -1016,6 +1016,12 @@ void LocalPlayer::setMapExplored()
         if (ptrCellStore)
             MWBase::Environment::get().getWindowManager()->setCellExplored(ptrCellStore);
     }
+}
+
+void LocalPlayer::setShapeshift()
+{
+    MWWorld::Ptr ptrPlayer = getPlayerPtr();
+    MWBase::Environment::get().getMechanicsManager()->setWerewolf(ptrPlayer, isWerewolf);
 }
 
 void LocalPlayer::sendClass()
@@ -1257,6 +1263,16 @@ void LocalPlayer::sendBook(const std::string& bookId)
 
     getNetworking()->getPlayerPacket(ID_PLAYER_BOOK)->setPlayer(this);
     getNetworking()->getPlayerPacket(ID_PLAYER_BOOK)->Send();
+}
+
+void LocalPlayer::sendShapeshift(bool werewolfState)
+{
+    isWerewolf = werewolfState;
+
+    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Sending ID_PLAYER_SHAPESHIFT with isWerewolf of %s", isWerewolf ? "true" : "false");
+
+    getNetworking()->getPlayerPacket(ID_PLAYER_SHAPESHIFT)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_SHAPESHIFT)->Send();
 }
 
 void LocalPlayer::clearCellStates()

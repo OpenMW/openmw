@@ -246,6 +246,8 @@ namespace mwmp
         std::string chatMessage;
         CGStage charGenStage;
         std::string passw;
+
+        bool isWerewolf;
         std::string creatureModel;
         bool useCreatureName;
 

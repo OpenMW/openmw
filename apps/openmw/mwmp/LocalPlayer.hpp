@@ -62,6 +62,7 @@ namespace mwmp
         void setKills();
         void setBooks();
         void setMapExplored();
+        void setShapeshift();
 
         void sendClass();
         void sendInventory();
@@ -79,6 +80,7 @@ namespace mwmp
         void sendTopic(const std::string& topic);
         void sendKill(const std::string& refId, int number);
         void sendBook(const std::string& bookId);
+        void sendShapeshift(bool isWerewolf);
 
         void clearCellStates();
         void clearCurrentContainer();

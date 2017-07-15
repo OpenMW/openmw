@@ -31,6 +31,7 @@
 #include "../Packets/Player/PacketPlayerRegionAuthority.hpp"
 #include "../Packets/Player/PacketPlayerRest.hpp"
 #include "../Packets/Player/PacketPlayerResurrect.hpp"
+#include "../Packets/Player/PacketPlayerShapeshift.hpp"
 #include "../Packets/Player/PacketPlayerSkill.hpp"
 #include "../Packets/Player/PacketPlayerSpeech.hpp"
 #include "../Packets/Player/PacketPlayerSpellbook.hpp"
@@ -83,6 +84,7 @@ mwmp::PlayerPacketController::PlayerPacketController(RakNet::RakPeerInterface *p
     AddPacket<PacketPlayerRegionAuthority>(&packets, peer);
     AddPacket<PacketPlayerRest>(&packets, peer);
     AddPacket<PacketPlayerResurrect>(&packets, peer);
+    AddPacket<PacketPlayerShapeshift>(&packets, peer);
     AddPacket<PacketPlayerSkill>(&packets, peer);
     AddPacket<PacketPlayerSpeech>(&packets, peer);
     AddPacket<PacketPlayerSpellbook>(&packets, peer);

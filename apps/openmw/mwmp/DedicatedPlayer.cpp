@@ -237,6 +237,11 @@ void DedicatedPlayer::setCell()
         Main::get().getCellController()->getCell(cell)->updateLocal(true);
 }
 
+void DedicatedPlayer::setShapeshift()
+{
+    MWBase::Environment::get().getMechanicsManager()->setWerewolf(ptr, isWerewolf);
+}
+
 void DedicatedPlayer::updateMarker()
 {
     if (!markerEnabled)
