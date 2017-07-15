@@ -10,7 +10,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/statemanager.hpp"
 
@@ -76,23 +75,25 @@ namespace MWGui
 
     void MainMenu::onButtonClicked(MyGUI::Widget *sender)
     {
+        MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
+
         std::string name = *sender->getUserData<std::string>();
-        MWBase::Environment::get().getSoundManager()->playSound("Menu Click", 1.f, 1.f);
+        winMgr->playSound("Menu Click");
         if (name == "return")
         {
-            MWBase::Environment::get().getWindowManager ()->removeGuiMode (GM_MainMenu);
+            winMgr->removeGuiMode (GM_MainMenu);
         }
         else if (name == "options")
-            MWBase::Environment::get().getWindowManager ()->pushGuiMode (GM_Settings);
+            winMgr->pushGuiMode (GM_Settings);
         else if (name == "credits")
-            MWBase::Environment::get().getWindowManager()->playVideo("mw_credits.bik", true);
+            winMgr->playVideo("mw_credits.bik", true);
         else if (name == "exitgame")
         {
             if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame)
                 onExitConfirmed();
             else
             {
-                ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
+                ConfirmationDialog* dialog = winMgr->getConfirmationDialog();
                 dialog->askForConfirmation("#{sMessage2}");
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &MainMenu::onExitConfirmed);
@@ -105,7 +106,7 @@ namespace MWGui
                 onNewGameConfirmed();
             else
             {
-                ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
+                ConfirmationDialog* dialog = winMgr->getConfirmationDialog();
                 dialog->askForConfirmation("#{sNotifyMessage54}");
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &MainMenu::onNewGameConfirmed);

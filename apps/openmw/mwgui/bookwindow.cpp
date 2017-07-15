@@ -6,7 +6,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
@@ -82,7 +81,7 @@ namespace MWGui
         clearPages();
         mCurrentPage = 0;
 
-        MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
+        MWBase::Environment::get().getWindowManager()->playSound("book open");
 
         MWWorld::LiveCellRef<ESM::Book> *ref = mBook.get<ESM::Book>();
 
@@ -98,7 +97,7 @@ namespace MWGui
     void BookWindow::exit()
     {
         // no 3d sounds because the object could be in a container.
-        MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
+        MWBase::Environment::get().getWindowManager()->playSound("book close");
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Book);
     }
@@ -122,7 +121,7 @@ namespace MWGui
 
     void BookWindow::onTakeButtonClicked (MyGUI::Widget* sender)
     {
-        MWBase::Environment::get().getSoundManager()->playSound("Item Book Up", 1.0, 1.0);
+        MWBase::Environment::get().getWindowManager()->playSound("Item Book Up");
 
         MWWorld::ActionTake take(mBook);
         take.execute (MWMechanics::getPlayer());
@@ -195,7 +194,7 @@ namespace MWGui
     {
         if ((mCurrentPage+1)*2 < mPages.size())
         {
-            MWBase::Environment::get().getSoundManager()->playSound ("book page2", 1.0, 1.0);
+            MWBase::Environment::get().getWindowManager()->playSound("book page2");
 
             ++mCurrentPage;
 
@@ -206,7 +205,7 @@ namespace MWGui
     {
         if (mCurrentPage > 0)
         {
-            MWBase::Environment::get().getSoundManager()->playSound ("book page", 1.0, 1.0);
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
 
             --mCurrentPage;
 

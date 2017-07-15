@@ -11,7 +11,6 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/class.hpp"
@@ -228,21 +227,21 @@ namespace MWGui
     void Choice::activated()
     {
 
-        MWBase::Environment::get().getSoundManager()->playSound("Menu Click", 1.0, 1.0);
+        MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
         MWBase::Environment::get().getDialogueManager()->questionAnswered(mChoiceId);
     }
 
     void Topic::activated()
     {
 
-        MWBase::Environment::get().getSoundManager()->playSound("Menu Click", 1.f, 1.f);
+        MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
         MWBase::Environment::get().getDialogueManager()->keywordSelected(Misc::StringUtils::lowerCase(mTopicId));
     }
 
     void Goodbye::activated()
     {
 
-        MWBase::Environment::get().getSoundManager()->playSound("Menu Click", 1.f, 1.f);
+        MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
         MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
     }
 

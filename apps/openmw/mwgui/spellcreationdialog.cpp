@@ -18,7 +18,6 @@
 */
 
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -407,7 +406,7 @@ namespace MWGui
         MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
-        MWBase::Environment::get().getSoundManager()->playSound ("Mysticism Hit", 1.0, 1.0);
+        MWBase::Environment::get().getWindowManager()->playSound ("Mysticism Hit");
 
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->createRecord(mSpell);
 

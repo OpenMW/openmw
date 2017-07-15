@@ -17,7 +17,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
@@ -168,7 +167,7 @@ namespace MWGui
 
         startSpellBuying(mPtr);
 
-        MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
+        MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
     }
 
     void SpellBuyingWindow::onCancelButtonClicked(MyGUI::Widget* _sender)

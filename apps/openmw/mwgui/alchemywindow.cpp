@@ -4,7 +4,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/magiceffects.hpp"
@@ -66,26 +65,27 @@ namespace MWGui
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
     {
         MWMechanics::Alchemy::Result result = mAlchemy->create (mNameEdit->getCaption ());
+        MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
 
         switch (result)
         {
         case MWMechanics::Alchemy::Result_NoName:
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage37}");
+            winMgr->messageBox("#{sNotifyMessage37}");
             break;
         case MWMechanics::Alchemy::Result_NoMortarAndPestle:
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage45}");
+            winMgr->messageBox("#{sNotifyMessage45}");
             break;
         case MWMechanics::Alchemy::Result_LessThanTwoIngredients:
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage6a}");
+            winMgr->messageBox("#{sNotifyMessage6a}");
             break;
         case MWMechanics::Alchemy::Result_Success:
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sPotionSuccess}");
-            MWBase::Environment::get().getSoundManager()->playSound("potion success", 1.f, 1.f);
+            winMgr->messageBox("#{sPotionSuccess}");
+            winMgr->playSound("potion success");
             break;
         case MWMechanics::Alchemy::Result_NoEffects:
         case MWMechanics::Alchemy::Result_RandomFailure:
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage8}");
-            MWBase::Environment::get().getSoundManager()->playSound("potion fail", 1.f, 1.f);
+            winMgr->messageBox("#{sNotifyMessage8}");
+            winMgr->playSound("potion fail");
             break;
         }
 
@@ -151,7 +151,7 @@ namespace MWGui
             update();
 
             std::string sound = item.getClass().getUpSoundId(item);
-            MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+            MWBase::Environment::get().getWindowManager()->playSound(sound);
         }
     }
 

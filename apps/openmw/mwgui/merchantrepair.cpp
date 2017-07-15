@@ -10,7 +10,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
@@ -138,8 +137,7 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 
     player.getClass().getContainerStore(player).restack(item);
 
-    MWBase::Environment::get().getSoundManager()->playSound("Repair",1,1);
-
+    MWBase::Environment::get().getWindowManager()->playSound("Repair");
 
     player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 

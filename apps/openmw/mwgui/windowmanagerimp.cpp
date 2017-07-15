@@ -868,7 +868,7 @@ namespace MWGui
                 mRepair->exit();
                 break;
             case GM_Journal:
-                MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
+                playSound("book close");
                 removeGuiMode(GM_Journal); //Simple way to remove it
                 break;
             default:
@@ -2012,6 +2012,11 @@ namespace MWGui
     {
         if (!isGuiMode())
             mInventoryWindow->cycle(next);
+    }
+
+    void WindowManager::playSound(const std::string& soundId, float volume, float pitch)
+    {
+        MWBase::Environment::get().getSoundManager()->playSound(soundId, volume, pitch, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoEnv);
     }
 
     void WindowManager::setConsoleSelectedObject(const MWWorld::Ptr &object)

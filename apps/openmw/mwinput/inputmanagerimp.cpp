@@ -21,7 +21,6 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/environment.hpp"
 
@@ -719,7 +718,7 @@ namespace MWInput
                 MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
                 if (b && b->getEnabled() && id == SDL_BUTTON_LEFT)
                 {
-                    MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
+                    MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
                 }
             }
         }
@@ -814,7 +813,7 @@ namespace MWInput
                     MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
                     if (b && b->getEnabled())
                     {
-                        MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
+                        MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
                     }
                 }
             }
@@ -1053,12 +1052,12 @@ namespace MWInput
         if(MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Journal
                 && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
         {
-            MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
+            MWBase::Environment::get().getWindowManager()->playSound ("book open");
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Journal);
         }
         else if(MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Journal))
         {
-            MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
+            MWBase::Environment::get().getWindowManager()->playSound ("book close");
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Journal);
         }
     }
