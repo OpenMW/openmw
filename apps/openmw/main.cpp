@@ -9,7 +9,16 @@
 #include "engine.hpp"
 
 #include <boost/filesystem/fstream.hpp>
+
+/*
+    Start of tes3mp addition
+
+    Include the header of the multiplayer's Main class
+*/
 #include "mwmp/Main.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #if defined(_WIN32)
 // For OutputDebugString
@@ -34,7 +43,15 @@ extern int cc_install_handlers(int argc, char **argv, int num_signals, int *sigs
 extern int is_debugger_attached(void);
 #endif
 
+/*
+    Start of tes3mp addition
+
+    Include the header of the logger added for multiplayer
+*/
 #include <components/openmw-mp/Log.hpp>
+/*
+    End of tes3mp addition
+*/
 
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
@@ -150,7 +167,15 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
         ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override");
 
+    /*
+        Start of tes3mp addition
+
+        Parse options added by multiplayer
+    */
     mwmp::Main::optionsDesc(&desc);
+    /*
+        End of tes3mp addition
+    */
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
         .options(desc).allow_unregistered().run();
@@ -248,7 +273,15 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
     engine.enableFontExport(variables["export-fonts"].as<bool>());
 
+    /*
+        Start of tes3mp addition
+
+        Configure multiplayer using parsed variables
+    */
     mwmp::Main::configure(&variables);
+    /*
+        End of tes3mp addition
+    */
 
     return true;
 }
@@ -326,8 +359,17 @@ int main(int argc, char**argv)
         std::cout.rdbuf (&sb);
         std::cerr.rdbuf (&sb);
 #else
+        /*
+            Start of tes3mp change (major)
+
+            Instead of logging information in openmw.log, use a more descriptive filename
+            that includes a timestamp
+        */
         // Redirect cout and cerr to tes3mp client log
         logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / "/tes3mp-client-" += Log::getFilenameTimestamp() += ".log"));
+        /*
+            End of tes3mp change (major)
+        */
 
         coutsb.open (Tee(logfile, oldcout));
         cerrsb.open (Tee(logfile, oldcerr));
@@ -335,7 +377,16 @@ int main(int argc, char**argv)
         std::cout.rdbuf (&coutsb);
         std::cerr.rdbuf (&cerrsb);
 #endif
+
+        /*
+            Start of tes3mp addition
+
+            Initialize the logger added for multiplayer
+        */
         LOG_INIT(Log::LOG_INFO);
+        /*
+            End of tes3mp addition
+        */
 
 
 #if USE_CRASH_CATCHER
@@ -377,7 +428,6 @@ int main(int argc, char**argv)
     // Restore cout and cerr
     std::cout.rdbuf(cout_rdbuf);
     std::cerr.rdbuf(cerr_rdbuf);
-
 
     return ret;
 }
