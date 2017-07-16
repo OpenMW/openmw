@@ -4,6 +4,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
@@ -26,9 +27,18 @@ void MWWorld::Action::execute (const Ptr& actor, bool noSound)
 {
     if(!mSoundId.empty() && !noSound)
     {
+        MWBase::SoundManager::PlayMode envType = MWBase::SoundManager::Play_Normal;
+
+        // Action sounds should not have a distortion in GUI mode
+        // example: take an item or drink a potion underwater
+        if (actor == MWMechanics::getPlayer() && MWBase::Environment::get().getWindowManager()->isGuiMode())
+        {
+            envType = MWBase::SoundManager::Play_NoEnv;
+        }
+
         if(mKeepSound && actor == MWMechanics::getPlayer())
             MWBase::Environment::get().getSoundManager()->playSound(mSoundId, 1.0, 1.0,
-                MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Normal, mSoundOffset
+                MWBase::SoundManager::Play_TypeSfx, envType, mSoundOffset
             );
         else
         {
@@ -37,12 +47,12 @@ void MWWorld::Action::execute (const Ptr& actor, bool noSound)
                 MWBase::Environment::get().getSoundManager()->playSound3D(
                     (local ? actor : mTarget).getRefData().getPosition().asVec3(),
                     mSoundId, 1.0, 1.0, MWBase::SoundManager::Play_TypeSfx,
-                    MWBase::SoundManager::Play_Normal, mSoundOffset
+                    envType, mSoundOffset
                 );
             else
                 MWBase::Environment::get().getSoundManager()->playSound3D(local ? actor : mTarget,
                     mSoundId, 1.0, 1.0, MWBase::SoundManager::Play_TypeSfx,
-                    MWBase::SoundManager::Play_Normal, mSoundOffset
+                    envType, mSoundOffset
                 );
         }
     }
