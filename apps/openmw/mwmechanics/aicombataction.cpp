@@ -45,20 +45,18 @@ int getRangeTypes (const ESM::EffectList& effects)
 
 float suggestCombatRange(int rangeTypes)
 {
+    static const float fCombatDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
+    static float fHandToHandReach = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
+
+    // This distance is a possible distance of melee attack
+    static float distance = fCombatDistance * std::max(2.f, fHandToHandReach);
+
     if (rangeTypes & Touch)
     {
-        static const float fCombatDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
         return fCombatDistance;
     }
-    else if (rangeTypes & Target)
-    {
-        return 1000.f;
-    }
-    else
-    {
-        // For Self spells, distance doesn't matter, so back away slightly to avoid enemy hits
-        return 600.f;
-    }
+
+    return distance * 4;
 }
 
 int numEffectsToDispel (const MWWorld::Ptr& actor, int effectFilter=-1, bool negative = true)
@@ -640,7 +638,7 @@ namespace MWMechanics
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(mSpellId);
         int types = getRangeTypes(spell->mEffects);
 
-        isRanged = (types & Target);
+        isRanged = (types & Target) | (types & Self);
         return suggestCombatRange(types);
     }
 
@@ -660,7 +658,8 @@ namespace MWMechanics
 
     float ActionPotion::getCombatRange(bool& isRanged) const
     {
-        // distance doesn't matter, so back away slightly to avoid enemy hits
+        // Distance doesn't matter since this action has no animation
+        // If we want to back away slightly to avoid enemy hits, we should set isRanged to "true"
         return 600.f;
     }
 
