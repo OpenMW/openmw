@@ -96,9 +96,9 @@ namespace MWGui
                 if (spell.mType == Spell::Type_Power)
                     addGroup("#{sPowers}", "");
                 else if (spell.mType == Spell::Type_Spell)
-                    addGroup("#{sSpells}", "#{sCostChance}");
+                    addGroup("#{sSpells}", mShowCostColumn ? "#{sCostChance}" : "");
                 else
-                    addGroup("#{sMagicItem}", "#{sCostCharge}");
+                    addGroup("#{sMagicItem}", mShowCostColumn ? "#{sCostCharge}" : "");
                 curType = spell.mType;
             }
 
