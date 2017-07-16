@@ -370,7 +370,8 @@ namespace MWGui
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(mParent, &QuickKeysMenu::onCancelButtonClicked);
 
 
-        int maxWidth = mItemButton->getTextSize ().width + 24;
+        int maxWidth = mLabel->getTextSize ().width + 24;
+        maxWidth = std::max(maxWidth, mItemButton->getTextSize ().width + 24);
         maxWidth = std::max(maxWidth, mMagicButton->getTextSize ().width + 24);
         maxWidth = std::max(maxWidth, mUnassignButton->getTextSize ().width + 24);
         maxWidth = std::max(maxWidth, mCancelButton->getTextSize ().width + 24);
