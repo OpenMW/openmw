@@ -181,11 +181,20 @@ namespace MWGui
         mAreaSlider->setScrollPosition (effect.mArea);
         mDurationSlider->setScrollPosition (effect.mDuration-1);
 
+        if (mEffect.mRange == ESM::RT_Self)
+            mRangeButton->setCaptionWithReplacing ("#{sRangeSelf}");
+        else if (mEffect.mRange == ESM::RT_Target)
+            mRangeButton->setCaptionWithReplacing ("#{sRangeTarget}");
+        else if (mEffect.mRange == ESM::RT_Touch)
+            mRangeButton->setCaptionWithReplacing ("#{sRangeTouch}");
+
         onMagnitudeMinChanged (mMagnitudeMinSlider, effect.mMagnMin-1);
         onMagnitudeMaxChanged (mMagnitudeMinSlider, effect.mMagnMax-1);
         onAreaChanged (mAreaSlider, effect.mArea);
         onDurationChanged (mDurationSlider, effect.mDuration-1);
         eventEffectModified(mEffect);
+
+        updateBoxes();
     }
 
     void EditEffectDialog::setMagicEffect (const ESM::MagicEffect *effect)
